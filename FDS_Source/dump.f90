@@ -2406,7 +2406,7 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_KRYLOV, SCARC_MULTIGRID, SCARC_SMOOTH, SCARC
 
 
 INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP
-CHARACTER(30) :: QUANTITY,DATE,ODE_SOLVER
+CHARACTER(30) :: QUANTITY,DATE,ODE_SOLVER,EXTINCTION_MODEL
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
  
 ! Write out preliminary stuff to error file (unit 0)
@@ -2509,7 +2509,11 @@ SPEC_LOOP: DO N=1,N_SPECIES
    IF (SS%SMIX_COMPONENT_ONLY) WRITE(LU_OUTPUT,'( 3X,A)') 'Lumped species component only'
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SS%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SS%MW*P_INF/(TMPA*R0)
-   WRITE(LU_OUTPUT,'(A,ES13.6)')  '   Enthalpy of Formation (J/kmol)    ',SS%H_F
+   IF (SS%H_F == -1._EB) THEN
+      WRITE(LU_OUTPUT,'(A,A)')    '   Enthalpy of Formation (J/kg)     ','not specified'
+   ELSE
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'   Enthalpy of Formation (J/kg)       ',SS%H_F/SPECIES(N)%MW
+   ENDIF
 ENDDO SPEC_LOOP
 
 ! Write lumped species summary
@@ -2523,7 +2527,7 @@ DO N=0,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
-   WRITE(LU_OUTPUT,'(A,ES13.6)')  '   Enthalpy of Formation (J/kmol)   ',SM%H_F
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Enthalpy of Formation (J/kg)       ',SM%H_F
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
@@ -2644,12 +2648,21 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          CASE (EDCM_RK2)
                ODE_SOLVER = 'EDCM RK2'
       END SELECT
-   
+      SELECT CASE (EXTINCT_MOD)     
+         CASE (EXTINCTION_1)
+            EXTINCTION_MODEL = 'EXTINCTION 1'
+         CASE (EXTINCTION_2)
+            EXTINCTION_MODEL = 'EXTINCTION 2'
+      END SELECT    
+      
       IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
       IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID   
    
       WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Concept Reaction'
       WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
+      IF (SUPPRESSION) THEN
+         WRITE(LU_OUTPUT,'(3X,A,A)')  'Extinction Model:  ', EXTINCTION_MODEL
+      ENDIF
       WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
       WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
       DO NN=0,N_TRACKED_SPECIES
@@ -2667,9 +2680,10 @@ REACTION_LOOP: DO N=1,N_REACTIONS
         WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
       ENDDO
       WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
-      WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A
-      WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E
-
+      WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
+      WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
+      WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Reaction (kJ/kg)'            
+      WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
    ENDIF EDC_IF    
 ENDDO REACTION_LOOP
 
