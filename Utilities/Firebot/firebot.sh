@@ -115,7 +115,7 @@ check_compile_fds_db()
       email_error_message
    fi
 
-   # Check for compiler warnings
+   # Check for compiler warnings/remarks
    if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a` == "" ]]
    then
       # Continue along
@@ -154,7 +154,7 @@ check_compile_fds_mpi_db()
       email_error_message
    fi
 
-   # Check for compiler warnings
+   # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
    if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
    then
@@ -322,14 +322,15 @@ check_compile_fds()
       email_error_message
    fi
 
-   # Check for compiler warnings
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a` == "" ]]
+   # Check for compiler warnings/remarks
+   # 'optimizations' and 'generating object' are part of a normal compile
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v optimizations | grep -v 'generating object'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 4a warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a >> $FIREBOT_DIR/output/warnings
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v optimizations | grep -v 'generating object' >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -361,15 +362,16 @@ check_compile_fds_mpi()
       email_error_message
    fi
 
-   # Check for compiler warnings
+   # Check for compiler warnings/remarks
+   # 'optimizations' and 'generating object' are part of a normal compile
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v optimizations | grep -v 'generating object'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 4b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v optimizations | grep -v 'generating object' >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -500,7 +502,7 @@ check_compile_smv_test_db()
       email_error_message
    fi
 
-   # Check for compiler warnings
+   # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
    if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
@@ -568,7 +570,7 @@ check_compile_smv_test()
       email_error_message
    fi
 
-   # Check for compiler warnings
+   # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
    if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
@@ -636,7 +638,7 @@ check_compile_smv()
       email_error_message
    fi
 
-   # Check for compiler warnings
+   # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
    if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
