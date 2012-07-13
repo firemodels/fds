@@ -258,6 +258,7 @@ The following individuals contributed to the verification process of FDS.
 the process of compiling this Guide.
 \item Bryan Klein of NIST developed the source code version control system that is an essential part of the verification process.
 \item Joonas Ryyn\"{a}nen of VTT, Finland, designed and documented the FED/FIC test cases.
+\item Max Gould of Reed College helped develop and produce the ``2D Vortex" test case.
 \end{itemize}
 
 
@@ -779,7 +780,7 @@ In this section we present another case that demonstrates the second-order accur
          \scalebox{.498}{\includegraphics{FIGURES/vort2d_diagram}}
       }
    \end{picture}
-   \caption{Representative vector field of a two dimensional vortex in a constant flow field.}
+   \caption{Vector field of a two-dimensional vortex in a constant flow field.}
    \label{fig_vort2d_diagram}
 \end{figure}
 
@@ -816,7 +817,7 @@ To ensure that the numerical solution converges to the analytical solution, we s
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_uzgraph} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_uzgraph}
    \end{tabular*}
-   \caption{$u$-velocity along the $z$-axis at $x=0$ plotted for each of the vortex's first four loops through the computational domain. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
+   \caption[Time history of a velocity profile showing qualitative convergence]{$u$-velocity along the $z$-axis at $x=0$ plotted for each of the vortex's first four loops through the computational domain. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
    \label{fig_vort2d_axisvelocity}
 \end{figure}
 
@@ -825,7 +826,7 @@ A plot of $u$-velocity values just along the $z$-axis provides a simple characte
    \begin{figure}[h!]
          \centering
          \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/vort2d_error}}
-      \caption{Rms error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
+      \caption[Two-dimensional vortex convergence study]{Rms error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
       \label{fig_vort2d_error}
    \end{figure}
 
@@ -847,7 +848,7 @@ Figure \ref{fig_vort2d_pointvelocity} shows the $u$-velocity at a single point, 
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_upgraph} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_upgraph}
    \end{tabular*}
-   \caption{Simulated and analytical values of $u$-velocity at a point plotted as a function of time over a time period equal to four times the flow-through time. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
+   \caption[Time history of velocity at a point showing qualitative convergence]{Simulated and analytical values of $u$-velocity at a point plotted as a function of time over a time period equal to four times the flow-through time. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
    \label{fig_vort2d_pointvelocity}
 \end{figure}
 
