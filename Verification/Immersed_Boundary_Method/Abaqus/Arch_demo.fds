@@ -12,8 +12,7 @@
 &SURF ID='cold', COLOR='BLUE', TMP_FRONT=50./
   
 &GEOM ID='arch', SHAPE='COMPLEX', SURF_ID='cold'
-      DT_GEOC=1., DT_BNDC=1.
-      GEOC_FILENAME='Arch_demo_01.gc' /
+      DT_GEOC=1., GEOC_FILENAME='Arch_demo_bending_01.gc' /
 
 &VENT MB='XMIN', SURF_ID='OPEN'/
 &VENT MB='XMAX', SURF_ID='OPEN'/
