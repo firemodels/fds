@@ -3,6 +3,7 @@ MODULE MASS
 ! Compute the mass equation differences 
  
 USE PRECISION_PARAMETERS
+USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 
 IMPLICIT NONE
@@ -25,15 +26,18 @@ SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
 ! Compute spatial differences for density equation
 
 USE COMP_FUNCTIONS, ONLY: SECOND
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,SOLID_BOUNDARY, &
                             NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY,FLUX_LIMITER, &
                             SPECIFIED_MASS_FRACTION
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW,ZZZ(4),UN
+REAL(EB) :: KN,MUGAS,MASS_P,TGAS,TNOW,TMP_FILM,TWALL,ZZZ(4),UN,WW_GRAV,ZZ_GET(0:N_TRACKED_SPECIES)
+REAL(EB), PARAMETER :: CHI_D=1._EB,MFP25=0.065E-6_EB
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,SURF_INDEX
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
+TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
@@ -222,6 +226,8 @@ ENDDO
  
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
+      SM=>SPECIES_MIXTURE(N)
+
       FX=0._EB
       FY=0._EB
       FZ=0._EB
@@ -254,17 +260,43 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
       !$OMP END DO NOWAIT
-      
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
-      DO K=1,KBM1
-         DO J=1,JBAR
-            DO I=1,IBAR
-               ZZZ(1:4) = RHOP(I,J,K-1:K+2)*ZZP(I,J,K-1:K+2,N)
-               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+
+      IF (.NOT. SM%DEPOSITING .OR. .NOT. GRAVITATIONAL_DEPOSITION) THEN
+         !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
+         DO K=1,KBM1
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  ZZZ(1:4) = RHOP(I,J,K-1:K+2)*ZZP(I,J,K-1:K+2,N)
+                  FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      !$OMP END DO
+         !$OMP END DO
+      ELSE
+         ! Experimental routine related to gravitational sedimentation in gas phase
+         ! If gravitation deposition is enabled, transport depositing aerosol via WW minus settling velocity
+         ! K. Overholt
+         DO K=1,KBM1
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  ! Calculate WW_GRAV (terminal settling velocity)
+                  ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+                  ZZ_GET(0) = 1 - SUM(ZZ_GET(1:N_TRACKED_SPECIES))
+                  TGAS = TMP(IIG,JJG,KKG)
+                  TWALL = WC%ONE_D%TMP_F
+                  TMP_FILM = 0.5_EB*(TGAS+TWALL)
+                  CALL GET_VISCOSITY(ZZ_GET,MUGAS,TMP_FILM)
+                  MASS_P = 0.125_EB*FOTHPI*SM%MEAN_DIAMETER**3*SM%DENSITY_SOLID
+                  KN = 2._EB*MFP25/SM%MEAN_DIAMETER*TGAS/298.15_EB
+                  WW_GRAV = GVEC(ABS(IOR))*SIGN(1,IOR)*MASS_P*(1._EB+1.25_EB*KN+0.41_EB*KN*EXP(-0.88_EB/KN))/ &
+                                                     (3._EB*CHI_D*MUGAS*SM%MEAN_DIAMETER)
+                  ! Calculate FZ including WW_GRAV effects
+                  ZZZ(1:4) = RHOP(I,J,K-1:K+2)*ZZP(I,J,K-1:K+2,N)
+                  FZ(I,J,K) = (WW(I,J,K) - WW_GRAV)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
 
       !$OMP DO SCHEDULE(STATIC) &
       !$OMP PRIVATE(IW,WC,II,JJ,KK,IOR,SURF_INDEX,IIG,JJG,KKG,ZZZ,UN,RHO_D_DZDN)
