@@ -69,8 +69,8 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 <b>Stage 4b:</b> Compile FDS MPI release <br>
 <b>Stage 5: </b> Run verification cases (long run) <br>
 <b>Stage 6a:</b> Compile SMV utilities <br>
-<b>Stage 6b:</b> Compile SMV DB <br>
-<b>Stage 6c:</b> Make SMV pictures (debug mode) <br>
+<b>Stage 6b:</b> Compile SMV test DB <br>
+<b>Stage 6c:</b> Make SMV pictures (test debug mode) <br>
 <b>Stage 6d:</b> Compile SMV test <br>
 <b>Stage 6e:</b> Make SMV pictures (test mode) <br>
 <b>Stage 6f:</b> Compile SMV release <br>
