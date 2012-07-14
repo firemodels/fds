@@ -57,7 +57,7 @@ end
 
 % Create the PDF files
  
-PDF_Paper_Width = 1.5*Paper_Width;
+PDF_Paper_Width = 1.55*Paper_Width;
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
