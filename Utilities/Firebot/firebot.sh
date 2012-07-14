@@ -41,6 +41,47 @@ if [[ `whoami` == "firebot" ]];
       exit
 fi
 
+#  =============================================
+#  = Firebot timing and notification mechanism =
+#  =============================================
+
+# This routine checks the elapsed time of Firebot.
+# If Firebot runs more than 12 hours, an email notification is sent.
+# This is a notification only and does not terminate Firebot.
+# This check runs during Stages 3 and 5.
+
+# Start firebot timer
+START_TIME=$(date +%s)
+
+# Set time limit (43,200 seconds = 12 hours)
+TIME_LIMIT=43200
+TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
+
+check_time_limit()
+{
+   if [ "$TIME_LIMIT_EMAIL_NOTIFICATION" == "sent" ]
+   then
+      # Continue along
+      :
+   else
+      CURRENT_TIME=$(date +%s)
+      ELAPSED_TIME=$(echo "$CURRENT_TIME-$START_TIME"|bc)
+
+      if [ $ELAPSED_TIME -gt $TIME_LIMIT ]
+      then
+         echo 'Sending email'
+         echo -e "Firebot has been running for more than 12 hours in Stage ${TIME_LIMIT_STAGE}. \n\nPlease ensure that there are no problems. \n\nThis is a notification only and does not terminate Firebot." | mail -s "[Firebot] Notice: Firebot has been running for more than 12 hours." $mailTo > /dev/null
+         TIME_LIMIT_EMAIL_NOTIFICATION="sent"
+      fi
+   fi
+}
+
+#  ========================
+#  ========================
+#  = Firebot Build Stages =
+#  ========================
+#  ========================
+
 #  ============================
 #  = Stage 1 - SVN operations =
 #  ============================
@@ -177,6 +218,8 @@ wait_verification_cases_short_start()
    while [[ `qstat | grep $(whoami) | grep Q` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | grep Q | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
+      TIME_LIMIT_STAGE="3"
+      check_time_limit
       sleep 30
    done
 }
@@ -187,6 +230,8 @@ wait_verification_cases_short_end()
    while [[ `qstat | grep $(whoami)` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
+      TIME_LIMIT_STAGE="3"
+      check_time_limit
       sleep 30
    done
 }
@@ -386,6 +431,8 @@ wait_verification_cases_long_end()
    while [[ `qstat | grep $(whoami)` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
+      TIME_LIMIT_STAGE="5"
+      check_time_limit
       sleep 60
    done
 }
