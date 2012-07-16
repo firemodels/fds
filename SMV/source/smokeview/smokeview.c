@@ -312,7 +312,8 @@ void parse_commandline(int argc, char **argv){
 #ifdef pp_LANG        
         strncmp(argv[1],"-lang",5)==0||
 #endif        
-        strncmp(argv[1],"-script",7)==0
+        strncmp(argv[1],"-script",7)==0||
+        strncmp(argv[1],"-bindir",7)==0
         ){
         iarg++;
       }
@@ -532,8 +533,19 @@ void parse_commandline(int argc, char **argv){
         runscript=1;
       }
     }
-    else if(strncmp(argv[i],"-noexit",6)==0){
+    else if(strncmp(argv[i],"-noexit",7)==0){
       noexit=1;
+    }
+    else if(strncmp(argv[i],"-bindir",7)==0){
+      ++i;
+      if(i<argc){
+        int len;
+
+        len = strlen(argv[i]);
+        NewMemory((void **)&smokeview_bindir,len+2);
+        strcpy(smokeview_bindir,argv[i]);
+        if(smokeview_bindir[len-1]!=dirseparator[0])strcat(smokeview_bindir,dirseparator);
+      }
     }
     else if(strncmp(argv[i],"-build",6)==0){
       showbuild=1;
@@ -614,6 +626,7 @@ void usage(char **argv){
   printf("Usage: %s [options] casename",argv[0]);
   printf("%s\n\n",_("where "));
   printf("%s\n",_(" casename       - project id (file names without the extension)"));
+  printf("%s\n",_(" -bindir dir    - specify location of smokeview bin directory"));
   printf("%s\n",_(" -build         - show directives used in this build of Smokeview"));
   printf("%s\n",_(" -demo          - use demonstrator mode of Smokeview"));
   printf("%s\n",_(" -help          - display this message"));

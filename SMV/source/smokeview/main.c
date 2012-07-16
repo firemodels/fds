@@ -37,10 +37,12 @@ int main(int argc, char **argv){
   if(argc==0||argc==1)return 0;
 
   progname=argv_sv[0];
-  smokeview_bindir=getprogdir(progname,&smokeviewpath);
+  parse_commandline(argc, argv_sv);
+  if(smokeview_bindir==NULL){
+    smokeview_bindir=getprogdir(progname,&smokeviewpath);
+  }
   init_texturedir();
   smokezippath=get_smokezippath(smokeview_bindir);
-  parse_commandline(argc, argv_sv);
   display_version_info();
   setup_glut(argc,argv_sv);
   return_code=setup_case(argc,argv_sv);
