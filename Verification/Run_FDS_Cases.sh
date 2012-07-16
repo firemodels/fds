@@ -4,8 +4,22 @@
 # a batch queuing system
 
 export SVNROOT=`pwd`/..
+
+# Set paths to FDS and FDS MPI executables
+# If no argument is specfied, then run FDS release version.
 export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
+
+# Otherwise, if -d (debug) option is specified, then run FDS DB version.
+while getopts 'd' OPTION
+do
+case $OPTION in
+  d)
+   export FDS=$SVNROOT/FDS_Compilation/intel_linux_64_db/fds_intel_linux_64_db
+   export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64_db/fds_mpi_intel_linux_64_db
+   ;;
+esac
+done
 
 # VVVVVVVVVVVVVVVVV select which group of nodes to run on VVVVVVVV
 

@@ -14,9 +14,21 @@ export SVNROOT=`pwd`/..
 #export RUNFDS=$SVNROOT/Utilities/Scripts/runfds_noq.sh
 
 # for Linux (with queing)
+# Set paths to FDS executable
+# If no argument is specfied, then run FDS release version.
 export FDSEXE=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
 export FDS=$FDSEXE
-export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
+
+# Otherwise, if -d (debug) option is specified, then run FDS DB version.
+while getopts 'd' OPTION
+do
+case $OPTION in
+  d)
+   export FDSEXE=$SVNROOT/FDS_Compilation/intel_linux_64_db/fds_intel_linux_64_db
+   export FDS=$FDSEXE
+   ;;
+esac
+done
 
 # blaze queue (default)
 export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast.sh
