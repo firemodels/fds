@@ -30,13 +30,15 @@ Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 set FDS=%background% %FDSEXE%
 set CFAST=%background% %CFASTEXE%
+set SH2BAT=..\..\Utilities\Data_Processing\sh2bat
 
 echo You are about to run the Smokeview Verification Test Suite.
 echo Press any key to proceed, CTRL c to abort
 pause > Nul
 
 echo creating FDS case list from SMV_Cases.sh
-sh2bat SMV_Cases.sh SMV_Cases.bat
+%SH2BAT% SMV_Cases.sh SMV_Cases.bat
+pause
 
 cd %BASEDIR%
 
