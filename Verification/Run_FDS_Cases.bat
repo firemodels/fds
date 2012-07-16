@@ -28,8 +28,8 @@ pause > Nul
 Rem -------------------------
 Rem run FDS veriication cases
 Rem -------------------------
-echo creating FDS case list from FDS_Cases.csh
-sh2bat FDS_Cases.sh FDS_Cases.bat
+echo creating FDS case list from FDS_Cases.sh
+..\Utilities\Data_processing\sh2bat FDS_Cases.sh FDS_Cases.bat
 
 echo running FDS cases
 
