@@ -1129,23 +1129,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       END SELECT
    ENDDO WALL_LOOP
 
-   ! Store RHODW for unstructured geometry
-
-   DO NF=1,N_FACE
-      FACE=>FACET(NF)
-      CL=>FACE%CUTCELL_LIST
-      FACE%RHODW(N)=0._EB
-      CUTCELL_LOOP_1: DO
-         IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_1 ! if the next index does not exist, exit the loop
-         IC = CL%INDEX
-         IIG = I_CUTCELL(IC)
-         JJG = J_CUTCELL(IC)
-         KKG = K_CUTCELL(IC)
-         FACE%RHODW(N)  = FACE%RHODW(N) + CL%AREA*RHO_D(IIG,KKG,JJG)
-         CL=>CL%NEXT ! point to the next index in the linked list
-      ENDDO CUTCELL_LOOP_1
-   ENDDO
-
    ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
 
    H_RHO_D_DZDX => WORK5
