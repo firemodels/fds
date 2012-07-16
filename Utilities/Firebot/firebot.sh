@@ -238,23 +238,15 @@ wait_verification_cases_short_end()
 
 run_verification_cases_short()
 {
-   # Set variables for launching FDS cases on cluster
-   cd $SVNROOT/Verification
-   export SVNROOT=$SVNROOT
-   export FDS=$SVNROOT/FDS_Compilation/intel_linux_64_db/fds_intel_linux_64_db
-   export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
-   export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64_db/fds_mpi_intel_linux_64_db
-   export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast.sh
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
-   export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
-   export BASEDIR=$SVNROOT/Verification
 
    #  ========================
-   #  = Run all serial cases =
+   #  = Run all FDS cases =
    #  ========================
+
+   cd $SVNROOT/Verification
 
    # Wait for serial verification cases to start
-   ./FDS_Cases.sh &> $FIREBOT_DIR/output/stage3
+   ./Run_FDS_Cases.sh -d &> $FIREBOT_DIR/output/stage3
    wait_verification_cases_short_start
 
    # Wait some additional time for cases to start
@@ -262,37 +254,20 @@ run_verification_cases_short()
 
    # Stop all cases
    export STOPFDS=1
-   ./FDS_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
    unset STOPFDS
 
    # Wait for serial verification cases to end
    wait_verification_cases_short_end
 
    #  =====================
-   #  = Run all MPI cases =
-   #  =====================
-
-   # Wait for MPI verification cases to start
-   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
-   wait_verification_cases_short_start
-
-   # Wait some additional time for cases to start
-   sleep 30
-
-   # Stop all cases
-   export STOPFDS=1
-   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
-   unset STOPFDS
-
-   # Wait for MPI verification cases to end
-   wait_verification_cases_short_end
-
-   #  =====================
    #  = Run all SMV cases =
    #  =====================
 
+   # cd $SVNROOT/Verification/scripts
+
    # # Wait for SMV verification cases to start
-   # ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
+   # ./scripts/Run_SMV_Cases.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
    # wait_verification_cases_short_start
 
    # # Wait some additional time for cases to start
@@ -300,10 +275,10 @@ run_verification_cases_short()
 
    # # Stop all cases
    # export STOPFDS=1
-   # ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
+   # ./scripts/Run_SMV_Cases.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
    # unset STOPFDS
 
-   # # Wait for MPI verification cases to end
+   # # Wait for SMV verification cases to end
    # wait_verification_cases_short_end
 
    #  ======================
