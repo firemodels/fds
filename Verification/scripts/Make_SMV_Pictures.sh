@@ -50,13 +50,14 @@ cd ..
 export SVNROOT=`pwd`/..
 
 export SMV=$SVNROOT/SMV/Build/intel_$VERSION/smokeview_$VERSION
+export SMVBINDIR="-bindir ../../SMV/for_bundle"
 
 export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
 export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM\_32/background
 
 echo Program locations:
-echo smokeview : $SMV
+echo smokeview : $SMV $SMVBINDIR
 echo smokezip  : $SMOKEZIP
 echo smokediff : $SMOKEDIFF
 echo background: $BACKGROUND
@@ -85,7 +86,6 @@ if ! [ -e $BACKGROUND ]; then
   echo "The file $BACKGROUND does not exist. Run aborted."
   exit
 fi
-
 
 cd $SMVUG/SCRIPT_FIGURES
 rm -f *.png

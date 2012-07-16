@@ -27,7 +27,7 @@ sleep 8
 export DISPLAY=:$disp
 source ~/.bashrc_fds intel64
 cd $fulldir
-$SMV -runscript $in
+$SMV $SMVBINDIR -runscript $in
 echo pausing for 8 seconds
 sleep 8
 
