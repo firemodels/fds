@@ -123,7 +123,7 @@ ENDIF
 
 CALL SET_OFTEN_USED
 
-! Read input from CHID.data file (All Nodes)
+! Read input from CHID.fds file (All Nodes)
  
 CALL READ_DATA
  
