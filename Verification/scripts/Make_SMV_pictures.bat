@@ -16,9 +16,10 @@ set vis="%BASEDIR%\Visualization"
 set wui="%BASEDIR%\Wui"
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide"
 set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
+
 set RUNFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNCFAST=call "%SCRIPT_DIR%\runsmv.bat"
-set SH2BAT="sh2bat"
+set SH2BAT=..\..\Utilities\Data_Processing\sh2bat
 
 cd %smvug%
 
