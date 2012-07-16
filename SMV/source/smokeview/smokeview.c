@@ -307,13 +307,13 @@ void parse_commandline(int argc, char **argv){
     argi=argv[iarg];
     if(strncmp(argi,"-",1)==0){
       if(
-        strncmp(argv[1],"-points",7)==0||
-        strncmp(argv[1],"-frames",7)==0||
+        strncmp(argi,"-points",7)==0||
+        strncmp(argi,"-frames",7)==0||
 #ifdef pp_LANG        
-        strncmp(argv[1],"-lang",5)==0||
+        strncmp(argi,"-lang",5)==0||
 #endif        
-        strncmp(argv[1],"-script",7)==0||
-        strncmp(argv[1],"-bindir",7)==0
+        strncmp(argi,"-script",7)==0||
+        strncmp(argi,"-bindir",7)==0
         ){
         iarg++;
       }
