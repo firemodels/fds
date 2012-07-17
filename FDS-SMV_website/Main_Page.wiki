@@ -1,0 +1,67 @@
+http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_fds.png
+
+*Fire Dynamics Simulator (FDS)* is a computational fluid dynamics (CFD) model of fire-driven fluid flow. The software solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow, with an emphasis on smoke and heat transport from fires.
+
+*Smokeview (SMV)* is a visualization program that is used to display the output of FDS and CFAST simulations.
+
+*FDS+Evac* is the evacuation simulation module for Fire Dynamics Simulator (FDS). The software is used to simulate the movement of people in evacuation situations. The evacuation simulations can be fully coupled with the fire simulations.
+
+<br>
+
+http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_download_fds_and_smokeview.png
+
+  The [http://code.google.com/p/fds-smv/downloads/list FDS and Smokeview download page] contains the latest releases for Windows, Linux, and Mac OS X platforms.
+
+  [http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download_fds_smv.png]
+
+  The Windows file is a package that will install FDS, Smokeview and all associated files in the Program Files\NIST directory.
+
+  The Linux/Unix file is a compressed tar file containing a NIST folder with all the binaries and documentation.
+
+  The OS X file is a zip file that contains a NIST folder, and a Read Me file that explains what to do with the folder.
+
+<br>
+
+http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_official_documentation.png
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_User_Guide.pdf FDS User Guide]
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Technical_Reference_Guide.pdf FDS Technical Reference Guide Volume 1: Mathematical Model]
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Verification_Guide.pdf FDS Technical Reference Guide Volume 2: Verification Guide]
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Validation_Guide.pdf FDS Technical Reference Guide Volume 3: Validation Guide]
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Configuration_Management_Plan.pdf FDS Technical Reference Guide Volume 4: Configuration Management Plan]
+
+==Smokeview==
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/SMV_User_Guide.pdf Smokeview User Guide]
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/SMV_Technical_Reference_Guide.pdf Smokeview Technical Reference Guide]
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/SMV_Verification_Guide.pdf Smokeview Verification Guide]
+
+==FDS Validation Test Reports==
+
+  View the [https://docs.google.com/folder/d/0ByEue9bc54pORGZoQ3JQcjRtcEE/edit collection of publicly available reports] for the experimental data sets that are used in the FDS Validation Guide.
+
+==FDS+Evac==
+
+  Visit the [https://cspot-run2.nist.gov/nist-exit-script.cfm?url=http://www.vtt.fi/proj/fdsevac/?lang=en FDS+Evac website] for documentation, examples, verification, and validation of FDS+Evac.
+
+<br>
+
+http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_support.png
+
+  [https://groups.google.com/forum/?fromgroups#!forum/fds-smv Discussion Group] - for discussion of general questions and/or to provide feedback.
+
+  [http://code.google.com/p/fds-smv/issues/list Issue Tracker] - for reporting specific bugs or other problems.
+
+  [http://code.google.com/p/fds-smv/w/list Wiki pages] - Supplemental information for FDS-SMV related to development, additional resources, etc.
+
+<br>
+
+<font size=1>Disclaimer: FDS and Smokeview are developed by the National Institute of Standards and Technology (NIST) of the United States Department of Commerce. FDS and Smokeview are free software developed through the National Institute of Standards and Technology (NIST) by employees of the Federal Government in the course of their official duties. Pursuant to Title 17, Section 105 of the United States Code, this work is not subject to copyright protection and is in the Public Domain.
+
+NIST assumes no responsibility whatsoever for use by other parties of its source code, documentation or compiled executables, and makes no guarantees, expressed or implied, about its quality, reliability, or any other characteristic. See the Disclaimer page for additional information.</font>
