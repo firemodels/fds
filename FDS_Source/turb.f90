@@ -1431,6 +1431,8 @@ END FUNCTION SHAPE_FUNCTION
 
 SUBROUTINE TENSOR_DIFFUSIVITY_MODEL(NM,N)
 
+USE PHYSICAL_FUNCTIONS, ONLY: LES_FILTER_WIDTH
+
 INTEGER, INTENT(IN) :: NM,N
 INTEGER :: I,J,K
 REAL(EB) :: DELTA,DRHOZDX,DRHOZDY,DRHOZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ
@@ -1465,7 +1467,7 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
 
-         DELTA = MAX(DXN(I),DY(J),DZ(K))
+         DELTA = LES_FILTER_WIDTH(DXN(I),DY(J),DZ(K))
                
          DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
          DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J-1)+DYN(J))
@@ -1489,7 +1491,7 @@ DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
 
-         DELTA = MAX(DX(I),DYN(J),DZ(K))
+         DELTA = LES_FILTER_WIDTH(DX(I),DYN(J),DZ(K))
                
          DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
          DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
@@ -1513,7 +1515,7 @@ DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
 
-         DELTA = MAX(DX(I),DY(J),DZN(K))
+         DELTA = LES_FILTER_WIDTH(DX(I),DY(J),DZN(K))
                
          DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I-1)+DXN(I))
          DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J-1)+DYN(J))
