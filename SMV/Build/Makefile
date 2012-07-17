@@ -350,10 +350,10 @@ OSX_SMV_LIBS_32 = -lz $(OSX_INTEL_LIBDIR_32)/libpng.a $(OSX_INTEL_LIBDIR_32)/lib
 OSX_INTEL_LIBDIR_64 = $(LIB_DIR)/lib_osx_intel_64
 OSX_SMV_LIBS_64 = -lz $(OSX_INTEL_LIBDIR_64)/libpng.a $(OSX_INTEL_LIBDIR_64)/libgd.a $(OSX_INTEL_LIBDIR_64)/libglui.a
 
-OSX_FORT_LIBDIR_32  = $(IFORT_COMPILER2)/lib
+OSX_FORT_LIBDIR_32  = $(IFORT_COMPILER)/lib
 OSX_INTEL_LIBS_32 = $(OSX_FORT_LIBDIR_32)/libifcoremt.a $(OSX_FORT_LIBDIR_32)/libimf.a $(OSX_FORT_LIBDIR_32)/libirc.a $(OSX_FORT_LIBDIR_32)/libsvml.a
 
-OSX_FORT_LIBDIR_64  = $(IFORT_COMPILER2)/lib
+OSX_FORT_LIBDIR_64  = $(IFORT_COMPILER)/lib
 OSX_INTEL_LIBS_64 = $(OSX_FORT_LIBDIR_64)/libifcoremt.a $(OSX_FORT_LIBDIR_64)/libimf.a $(OSX_FORT_LIBDIR_64)/libirc.a $(OSX_FORT_LIBDIR_64)/libsvml.a
 
 # ------------- intel_osx_32 ----------------
