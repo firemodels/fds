@@ -4,7 +4,7 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_
 
 *Smokeview (SMV)* is a visualization program that is used to display the output of FDS and CFAST simulations.
 
-*FDS+Evac* is the evacuation simulation module for Fire Dynamics Simulator (FDS). The software is used to simulate the movement of people in evacuation situations. The evacuation simulations can be fully coupled with the fire simulations.
+*FDS+Evac* is the evacuation simulation module for FDS. The software is used to simulate the movement of people in evacuation situations. The evacuation simulations can be fully coupled with the fire simulations.
 
 <br>
 
@@ -14,17 +14,19 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_
 
   [http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download_fds_smv.png]
 
-  The Windows file is a package that will install FDS, Smokeview and all associated files in the Program Files\NIST directory.
+  The Windows download is a package that will install FDS, Smokeview, and all associated files in the Program Files\NIST directory.
 
-  The Linux/Unix file is a compressed tar file containing a NIST folder with all the binaries and documentation.
+  The Linux/Unix download is a compressed tar file that contains an FDS folder with all of the binaries and documentation.
 
-  The OS X file is a zip file that contains a NIST folder, and a Read Me file that explains what to do with the folder.
+  The Mac OS X download is a compressed tar file that contains an FDS folder that can be installed in /Applications.
 
 <br>
 
 http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_official_documentation.png
 
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_User_Guide.pdf FDS User Guide]
+==Fire Dynamics Simulator==
+
+  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_User_Guide.pdf Fire Dynamics Simulator User Guide]
 
   [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Technical_Reference_Guide.pdf FDS Technical Reference Guide Volume 1: Mathematical Model]
 
@@ -54,11 +56,11 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading
 
 http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_support.png
 
-  [https://groups.google.com/forum/?fromgroups#!forum/fds-smv Discussion Group] - for discussion of general questions and/or to provide feedback.
+  Participate in the [https://groups.google.com/forum/?fromgroups#!forum/fds-smv Discussion Group] for discussion of general questions and/or to provide feedback.
 
-  [http://code.google.com/p/fds-smv/issues/list Issue Tracker] - for reporting specific bugs or other problems.
+  Submit cases to the [http://code.google.com/p/fds-smv/issues/list Issue Tracker] to report specific bugs or problems.
 
-  [http://code.google.com/p/fds-smv/w/list Wiki pages] - Supplemental information for FDS-SMV related to development, additional resources, etc.
+  Read the [http://code.google.com/p/fds-smv/w/list Wiki Pages] for supplemental information related to FDS-SMV development, third-party tools, and many other resources.
 
 <br>
 
