@@ -18,6 +18,7 @@ export SVNROOT=`pwd`/..
 # If no argument is specfied, then run FDS release version.
 export FDSEXE=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
 export FDS=$FDSEXE
+export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
 
 # Otherwise, if -d (debug) option is specified, then run FDS DB version.
 while getopts 'd' OPTION
