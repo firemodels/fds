@@ -2122,7 +2122,7 @@ FIC_CONCENTRATION           =  0._EB
 FLD_LETHAL_DOSE             =  0._EB
 FORMULA                     = 'null'
 FYI                         = 'null'
-H_F                         = -1._EB  ! J/mol
+H_F                         = -2.E23_EB  ! J/mol
 HUMIDITY                    = -1._EB
 ID                          = 'null'
 SMIX_COMPONENT_ONLY         = .FALSE.
@@ -2344,9 +2344,12 @@ READ_SMIX_LOOP: DO N=0,N_TRACKED_SPECIES
       IF (SPECIES(NS)%FORMULA(1:5)=='SPEC_') SM%VALID_ATOMS = .FALSE.
       SM%ATOMS = SM%ATOMS + SM%VOLUME_FRACTION(NS)*SPECIES(NS)%ATOMS !! *SM%ADJUST_NU ::term for potential non-normalized inputs
    ENDDO
-   SM%H_F = SM%H_F/SM%MW  
+   IF(SM%H_F <= -1.E21) THEN ! Checking if H_F is defined for all species in mixture
+      SM%H_F = SM%H_F
+   ELSE
+      SM%H_F = SM%H_F/SM%MW
+   ENDIF
    SM%RCON = R0/SM%MW
-
 ENDDO READ_SMIX_LOOP
 
 IF (SPECIES_MIXTURE(0)%DEPOSITING) THEN
@@ -3043,7 +3046,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ! Heat of Combustion calculation for SIMPLE_CHEMISTRY
 
-   IF (SIMPLE_CHEMISTRY) THEN
+   IF (SIMPLE_CHEMISTRY .AND. .NOT. EDC) THEN
       IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
          RN%HEAT_OF_COMBUSTION = -RN%EPUMO2*RN%NU_SPECIES(O2_INDEX)*SPECIES(O2_INDEX)%MW/SPECIES(FUEL_INDEX)%MW
       ELSE
@@ -3059,18 +3062,18 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       
    ! Heat of Combustion calculation for EDC
    IF (EDC) THEN
-      IF (RN%HEAT_OF_COMBUSTION == -2.E+023) THEN !No Heat of Combustion Defined
+      IF (RN%HEAT_OF_COMBUSTION <= -1.E21) THEN !No Heat of Combustion Defined
          DO NS = 0,N_TRACKED_SPECIES
             IF (RN%NU(NS) /= 0._EB) THEN
-               IF (SPECIES_MIXTURE(NS)%H_F*SPECIES_MIXTURE(NS)%MW == -2.E+023) THEN ! And missing Heat of Formation
+               IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) THEN ! And missing Heat of Formation
                   WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing either heat of formation or combustion.'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
          ENDDO
-      ENDIF      
-      IF (RN%HEAT_OF_COMBUSTION /= -2.E+023) THEN
-         IF (SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW == -2.E+023) THEN
+      ENDIF   
+      IF (RN%HEAT_OF_COMBUSTION /= -2.E23) THEN
+         IF (SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F <= -1.E21) THEN
             SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = 0._EB
             SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
                                                       + RN%HEAT_OF_COMBUSTION*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
