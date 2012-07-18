@@ -245,16 +245,16 @@ run_verification_cases_short()
 
    cd $SVNROOT/Verification
 
-   # Wait for serial verification cases to start
-   ./Run_FDS_Cases.sh -d &> $FIREBOT_DIR/output/stage3
+   # Submit FDS verification cases and wait for them to start (run in debug mode on fire70s queue)
+   ./Run_FDS_Cases.sh -d -q fire70s &> $FIREBOT_DIR/output/stage3
    wait_verification_cases_short_start
 
-   # Wait some additional time for cases to start
+   # Wait some additional time for all cases to start
    sleep 30
 
    # Stop all cases
    export STOPFDS=1
-   ./Run_FDS_Cases.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
    unset STOPFDS
 
    # Wait for serial verification cases to end
@@ -266,16 +266,16 @@ run_verification_cases_short()
 
    # cd $SVNROOT/Verification/scripts
 
-   # # Wait for SMV verification cases to start
-   # ./scripts/Run_SMV_Cases.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
+   # # Submit SMV verification cases and wait for them to start (run in debug mode on fire70s queue)
+   # ./scripts/Run_SMV_Cases.sh -d -q fire70s >> $FIREBOT_DIR/output/stage3 2>&1
    # wait_verification_cases_short_start
 
-   # # Wait some additional time for cases to start
+   # # Wait some additional time for all cases to start
    # sleep 30
 
    # # Stop all cases
    # export STOPFDS=1
-   # ./scripts/Run_SMV_Cases.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
+   # ./scripts/Run_SMV_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
    # unset STOPFDS
 
    # # Wait for SMV verification cases to end
@@ -414,16 +414,16 @@ wait_verification_cases_long_end()
 
 run_verification_cases_long()
 {
-   # Start running all FDS verification cases
+   # Start running all FDS verification cases (run on fire70s queue)
    cd $SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_FDS_Cases.sh -q fire70s >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
-   # Start running all SMV verification cases
+   # Start running all SMV verification cases (run on fire70s queue)
    cd $SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh -q fire70s >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_long_end
