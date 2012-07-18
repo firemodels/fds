@@ -10,7 +10,7 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_
 
 [http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_downloads.png]
 
-  The [http://code.google.com/p/fds-smv/downloads/list FDS and Smokeview download page] contains the latest releases for Windows, Linux, and Mac OS X platforms.
+  The [http://code.google.com/p/fds-smv/downloads/list FDS and Smokeview download page] contains the latest releases for the Windows, Linux, and Mac OS X platforms.
 
   [http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download_fds_and_smokeview.png]
 
