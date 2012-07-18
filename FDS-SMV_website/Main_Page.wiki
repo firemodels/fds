@@ -8,11 +8,11 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_
 
 <br>
 
-[http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_download_fds_and_smokeview.png]
+[http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_downloads.png]
 
   The [http://code.google.com/p/fds-smv/downloads/list FDS and Smokeview download page] contains the latest releases for Windows, Linux, and Mac OS X platforms.
 
-  [http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download_fds_smv.png]
+  [http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download_fds_and_smokeview.png]
 
   The Windows download is a package that will install FDS, Smokeview, and all associated files in the Program Files\NIST directory.
 
@@ -22,7 +22,7 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_
 
 <br>
 
-http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_official_documentation.png
+http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_documentation.png
 
 ==Fire Dynamics Simulator==
 
