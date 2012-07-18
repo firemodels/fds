@@ -36,7 +36,8 @@ done
 
 # Set queue to submit cases to
 # If no argument is specfied, then run cases on the default queue (batch).
-# blaze queue (default)
+   
+   # blaze queue (default)
    export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast.sh
    export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
    export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds.sh
