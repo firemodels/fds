@@ -2180,7 +2180,8 @@ By default FDS uses the Deardorff \cite{Deardorff:1980,Pope:2000} turbulent visc
 \begin{equation}
 (\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{sgs}}
 \end{equation}
-where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}).
+where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the maximum cell dimension, $\Delta = \max(\delta x,\delta y,\delta z)$.  This selection is intended to promote the use of cubic grid cells, which are optimal for isotropic turbulent flows typical of thermally-driven fire plumes.  Alternatively, the user may invoke the geometric mean definition of the filter width, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$, by setting {\ct MAX\_FILTER\_WIDTH=.FALSE.} on {\ct MISC}.
+
 Options for the turbulent viscosity model are (set {\ct TURBULENCE\_MODEL} on {\ct MISC}):
 \begin{center}
 \begin{tabular}{|lll|}
@@ -2192,10 +2193,10 @@ Options for the turbulent viscosity model are (set {\ct TURBULENCE\_MODEL} on {\
 {\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\ \hline
 \end{tabular}
 \end{center}
+
 The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
 \be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
-\quad ; \quad
- (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
+\quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
 The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \begin{warning}
@@ -10925,24 +10926,23 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
 {\ct FREEZE\_VELOCITY}                          & Logical       & Constant velocity                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
-{\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                       &               & {\ct .TRUE.}    \\ \hline
+{\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
-{\ct INITIAL\_UNMIXED\_FRACTION}                & Real           & Section~\ref{info:REAC}                        &                   & 1.0               \\ \hline
+{\ct INITIAL\_UNMIXED\_FRACTION}                & Real           & Section~\ref{info:REAC}                              &               & 1.0               \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
-{\ct LES}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
-%{\ct MAX\_FILTER\_WIDTH}                        & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+{\ct MAX\_FILTER\_WIDTH}                        & Logical       & Section~\ref{info:LES}                                &               & {\ct .TRUE.}      \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
-%{\ct MIXING\_LAYER\_H0}                         & Real          & See FDS Verification Guide                                &  m            &                   \\ \hline
-%{\ct MIXING\_LAYER\_THETA0}                     & Real          & See FDS Verification Guide                                &               &                   \\ \hline
-%{\ct MIXING\_LAYER\_U0}                         & Real          & See FDS Verification Guide                                &  m/s          &                   \\ \hline
+%{\ct MIXING\_LAYER\_H0}                         & Real          & See FDS Verification Guide                            &  m            &                   \\ \hline
+%{\ct MIXING\_LAYER\_THETA0}                     & Real          & See FDS Verification Guide                            &               &                   \\ \hline
+%{\ct MIXING\_LAYER\_U0}                         & Real          & See FDS Verification Guide                            &  m/s          &                   \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
-%{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test                    &               & 0                 \\ \hline
+%{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test               &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}                             & Logical       & Section~\ref{info:sprinklers}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 %{\ct PROJECTION}                                & Logical       & Use formal projection method                          &               & {\ct .FALSE.}     \\ \hline
@@ -10959,19 +10959,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
-%{\ct TERRAIN\_CASE}                             & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
+%{\ct TERRAIN\_CASE}                             & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}                        & Char.~Triplet & Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
-{\ct THERMOPHORETIC\_DEPOSITION}                & Logical       & Section~\ref{info:deposition}                       &               & {\ct .TRUE.}    \\ \hline
+{\ct THERMOPHORETIC\_DEPOSITION}                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}    \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}                     & Logical       & Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
-{\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                       &               & {\ct .TRUE.}    \\ \hline
+{\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}    \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
-%{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                                &               &                   \\ \hline
+%{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
 {\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
-%{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
+%{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
 %Undocumented: HRRPUVCUT_MAX, HRRPUV_MAX_SMV, NEW_EVAP, TENSOR_DIFFUSIVIRY,  TERRAIN_IMAGE, VEG_LEVEL_SET, WFDS
