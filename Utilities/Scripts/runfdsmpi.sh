@@ -1,8 +1,6 @@
 #!/bin/bash
-EXPECTED_ARGS=3
 
-if [ $# -ne $EXPECTED_ARGS ]
-then
+function usage(
   echo "Usage: runfdsmpi.sh nthreads dir casename"
   echo ""
   echo "Runs a parallel FDS case on a Linux cluster using the "
@@ -13,7 +11,21 @@ then
   echo "casename - fds case (without .fds extension)"
   echo
   exit
-fi
+)
+
+queue=batch
+while getopts 'hq:' OPTION
+do
+case $OPTION in
+  h)
+  usage;
+  ;;
+  q)
+   queue="$OPTARG"
+   ;;
+esac
+done
+shift $(($OPTIND-1))
 
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 nthreads=$1
@@ -83,5 +95,5 @@ $MPIDIST/bin/mpirun -np $nthreads $FDSMPI $in
 EOF
 chmod +x $scriptfile
 echo Running $in 
-qsub $scriptfile
+qsub -q $queue $scriptfile
 rm $scriptfile

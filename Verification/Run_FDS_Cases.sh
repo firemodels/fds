@@ -3,6 +3,21 @@
 # This script runs the FDS Verification Cases on a linux machine with
 # a batch queuing system
 
+queue=batch
+
+function usage {
+echo "Run_FDS_Cases.sh [-d -h -q queue_name ]"
+echo "Runs FDS verification suite"
+echo ""
+echo "Options"
+echo "-d - use debug version of FDS"
+echo "-h - display this message"
+echo "-q queue_name - run cases using the queue queue_name"
+echo "     default: $queue"
+echo "     other options: fire60s, fire70s, vis"
+exit
+}
+
 export SVNROOT=`pwd`/..
 
 # Set paths to FDS and FDS MPI executables
@@ -11,51 +26,24 @@ export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
 
 # Otherwise, if -d (debug) option is specified, then run FDS DB version.
-while getopts 'dq:' OPTION
+while getopts 'dhq:' OPTION
 do
 case $OPTION in
   d)
    export FDS=$SVNROOT/FDS_Compilation/intel_linux_64_db/fds_intel_linux_64_db
    export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64_db/fds_mpi_intel_linux_64_db
    ;;
+  h)
+  usage;
+  ;;
   q)
    queue="$OPTARG"
    ;;
 esac
 done
 
-# VVVVVVVVVVVVVVVVV select which group of nodes to run on VVVVVVVV
-
-# Set queue to submit cases to
-# If no argument is specfied, then run cases on the default queue (batch).
-
-   # blaze queue (default)
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
-   export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
-
-# Otherwise, if -q (queue) option is specified, then run cases on the specified queue.
-if [ "$queue" == "fire60s" ]
-then
-   # fire60s queue
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfds6.sh
-   export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi6.sh
-fi
-
-if [ "$queue" == "fire70s" ]
-then
-   # fire70s queue
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfds7.sh
-   export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi7.sh
-fi
-
-if [ "$queue" == "vis" ]
-then
-   # firevis/smokevis queue
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfdsv.sh
-   export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpiv.sh
-fi
-
-# ^^^^^^^^^^^^^^^^^ select nodes to run on ^^^^^^^^^^^^^^^^^^^^^^
+export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh -q $queue" 
+export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh -q $queue"
 
 export BASEDIR=`pwd`
 

@@ -1,4 +1,16 @@
 #!/bin/bash -f
+
+queue=batch
+while getopts 'q:' OPTION
+do
+case $OPTION in
+  q)
+   queue="$OPTARG"
+   ;;
+esac
+done
+shift $(($OPTIND-1))
+
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 dir=$1
 infile=$2
@@ -48,5 +60,5 @@ $FDS $in
 EOF
 chmod +x $scriptfile
 echo Running $in 
-qsub $scriptfile
+qsub -q $queue $scriptfile
 rm $scriptfile

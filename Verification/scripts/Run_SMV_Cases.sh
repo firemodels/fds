@@ -1,71 +1,58 @@
 #/bin/bash -f
 
-# This script runs the FDS Verification Cases on a linux machine with
-# a batch queuing system
+# This script runs the Smokeview Verification Cases on a 
+# Linux machine with a batch queuing system
+
+queue=batch
+
+function usage {
+echo "Run_SMV_Cases.sh [-d -h -q queue_name ]"
+echo "Runs Smokeview verification suite"
+echo ""
+echo "Options"
+echo "-d - use debug version of FDS"
+echo "-h - display this message"
+echo "-q queue_name - run cases using the queue queue_name"
+echo "     default: $queue"
+echo "     other options: fire60s, fire70s, vis"
+exit
+}
 
 CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
 
-# for OSX (without queuing)
-#export BACKGROUND=$SVNROOT/Utilities/background/intel_osx_32/background
-#export FDSEXE=$SVNROOT/FDS_Compilation/intel_osx_64/fds_intel_osx_64
-#export FDS=$FDSEXE
-#export RUNFDS=$SVNROOT/Utilities/Scripts/runfds_noq.sh
-
 # for Linux (with queing)
 # Set paths to FDS executable
 # If no argument is specfied, then run FDS release version.
+
 export FDSEXE=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
 export FDS=$FDSEXE
 export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
 
 # Otherwise, if -d (debug) option is specified, then run FDS DB version.
-while getopts 'dq:' OPTION
+while getopts 'dhq:' OPTION
 do
 case $OPTION in
   d)
    export FDSEXE=$SVNROOT/FDS_Compilation/intel_linux_64_db/fds_intel_linux_64_db
    export FDS=$FDSEXE
    ;;
+  h)
+  usage;
+  ;;
   q)
    queue="$OPTARG"
    ;;
 esac
+shift
 done
 
 # Set queue to submit cases to
-# If no argument is specfied, then run cases on the default queue (batch).
    
-   # blaze queue (default)
-   export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast.sh
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
-   export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds.sh
-
-# Otherwise, if -q (queue) option is specified, then run cases on the specified queue.
-if [ "$queue" == "fire60s" ]
-then
-   # fire60s queue
-   export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast6.sh
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfds6.sh
-   export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds6.sh
-fi
-
-if [ "$queue" == "fire70s" ]
-then
-   # fire70s queue
-   export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast7.sh
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfds7.sh
-   export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds7.sh
-fi
-
-if [ "$queue" == "vis" ]
-then
-   # vis queue
-   export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfastv.sh
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfdsv.sh
-   export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfdsv.sh
-fi
+export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh -q $queue"
+export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh -q $queue"
+export RUNFDSFG="$SVNROOT/Utilities/Scripts/runfds.sh -q $queue"
 
 export BASEDIR=`pwd`
 # uncomment following line to stop all cases
