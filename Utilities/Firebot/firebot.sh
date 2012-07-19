@@ -809,6 +809,16 @@ make_fds_validation_guide()
    pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
 }
 
+make_fds_configuration_management_plan()
+{
+   # Build FDS Configuration Management Plan
+   cd $SVNROOT/Manuals/FDS_Configuration_Management_Plan
+   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
+   bibtex FDS_Configuration_Management_Plan >> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
+   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan >> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
+   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan >> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
+}
+
 make_smv_user_guide()
 {
    # Build SMV User Guide
@@ -865,6 +875,7 @@ copy_all_guides_to_website()
    FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf \
    FDS_Verification_Guide/FDS_Verification_Guide.pdf \
    FDS_Validation_Guide/FDS_Validation_Guide.pdf \
+   FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf \
    SMV_User_Guide/SMV_User_Guide.pdf \
    SMV_Verification_Guide/SMV_Verification_Guide.pdf \
    /var/www/html/firebot/manuals/
@@ -998,6 +1009,7 @@ make_fds_user_guide
 make_fds_technical_guide
 make_fds_verification_guide
 make_fds_validation_guide
+make_fds_configuration_management_plan
 make_smv_user_guide
 make_smv_verification_guide
 check_all_guides
