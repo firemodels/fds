@@ -265,7 +265,7 @@ run_verification_cases_short()
    cd $SVNROOT/Verification
 
    # Submit FDS verification cases and wait for them to start (run MPI cases in debug mode on fire70s queue)
-   ./Run_FDS_Cases.sh -c mpi -d -q fire70s &> $FIREBOT_DIR/output/stage3
+   ./Run_FDS_Cases.sh -c mpi -d -q fire70s >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_short_start
 
    # Wait some additional time for all cases to start
