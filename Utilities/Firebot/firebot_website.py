@@ -40,7 +40,7 @@ font: 16px Arial, sans-serif;
 }
 
 hr {
-  width: 60%;
+  width: 65%;
   height: 2px;
   color: #000;
   background-color: #000;
@@ -80,12 +80,12 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 <b>Stage 8: </b> Build FDS-SMV Guides <br>
 </span></span>"""
 
-current_time = time.ctime()
-print "<br>"
-print "<i>Status last updated: %s</i>" % (current_time)
-print "<br><br><hr align='left'><br>"
-print """Latest FDS Manuals: <a href="manuals/FDS_User_Guide.pdf">User Guide</a>, <a href="manuals/FDS_Technical_Reference_Guide.pdf">Technical Reference Guide</a>, <a href="manuals/FDS_Verification_Guide.pdf">Verification Guide</a>, <a href="manuals/FDS_Validation_Guide.pdf">Validation Guide</a><br><br>"""
-print """Latest SMV Manuals: <a href="manuals/SMV_User_Guide.pdf">User Guide</a>, <a href="manuals/SMV_Verification_Guide.pdf">Verification Guide</a>"""
+print "<br><hr align='left'><br>"
+
+print "FDS-SMV Manuals: <i>(last updated on " + time.ctime(os.path.getmtime("/var/www/html/firebot/manuals/FDS_User_Guide.pdf")) + ")</i><br><br>"
+
+print """FDS: <a href="manuals/FDS_User_Guide.pdf">User Guide</a>, <a href="manuals/FDS_Technical_Reference_Guide.pdf">Technical Reference Guide</a>, <a href="manuals/FDS_Verification_Guide.pdf">Verification Guide</a>, <a href="manuals/FDS_Validation_Guide.pdf">Validation Guide</a>, <a href="manuals/FDS_Configuration_Management_Plan.pdf">Configuration Management Plan</a><br><br>"""
+print """SMV: <a href="manuals/SMV_User_Guide.pdf">User Guide</a>, <a href="manuals/SMV_Verification_Guide.pdf">Verification Guide</a>"""
 print "<br><br><hr align='left'><br>"
 
 # Initialize list of history files
@@ -158,6 +158,11 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     # Print time associated with history file
     print "<font color='#B0B0B0'><i>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt"))  + "</i></font>"
     print "<br><br>"
+
+print "<hr align='left'><br>"
+
+current_time = time.ctime()
+print "<i>Status last updated: %s</i><br><br><br>" % (current_time)
 
 print """
 </body>
