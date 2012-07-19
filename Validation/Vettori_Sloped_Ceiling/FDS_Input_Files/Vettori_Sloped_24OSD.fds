@@ -1,17 +1,14 @@
 &HEAD CHID='Vettori_Sloped_24OSD', TITLE='Sloped 24 Degrees Obstructed Slow Detached' /
 
-&MESH IJK = 73,55,50, XB = 0.0,7.3,0.0,5.5,0.0,4.95
+&MESH IJK = 73,55,50, XB = 0.0,7.3,0.0,5.5,0.0,4.95 /
 
 &TIME T_END=300/
-
-
 
 &MISC TMPA=27./
 
 %%Burner Detached
 &OBST XB=3.3, 4, 2.25, 3.25, 0.00, 0.30 /
 &VENT XB=3.4, 4, 2.65, 3.25, 0.30, 0.30, SURF_ID='BURNER' /
-
 
 %%Burner Surface ID
 &SURF ID='BURNER'
@@ -21,9 +18,8 @@
 %%Radiative Fraction as established by report
 &RADI RADIATIVE_FRACTION=0.15/
 
-%%Reactant: Methane
 &REAC FUEL='METHANE'
-      SOOT_YIELD=0.01 
+    SOOT_YIELD=0.01 
 	C = 1
 	H = 4 /
 
@@ -36,28 +32,25 @@
 &OBST XB=4.8,5.0,5.4,5.5,2.2,2.5, , MULT_ID = 'BEAM' SURF_ID= 'WOOD BEAM'/
 &MULT ID ='BEAM', DXB=0.0, 0.0, -.1, -.1, .04545, .04545, N_UPPER=55 /
 
-
-
 &MATL ID            = 'WOOD'
 	CONDUCTIVITY  = .14
-      SPECIFIC_HEAT = 2.850
+    SPECIFIC_HEAT = 2.850
  	DENSITY       = 640. /
+
 &SURF ID            = 'WOOD BEAM'
 	MATL_ID       = 'WOOD'
 	COLOR         = 'BURLY WOOD 4'
 	THICKNESS     = .25 /
 
-
 &MATL ID            = 'GYPSUM_BOARD'
 	CONDUCTIVITY  = 0.48
 	SPECIFIC_HEAT = 0.840
 	DENSITY       = 1440 /
+
 &SURF ID            = 'GYPSUM_BOARD'
 	MATL_ID       = 'GYPSUM_BOARD'
 	RGB           = 166,41,41
 	THICKNESS     = .0127 /
-
-
 
 %%Fast fire growth rate ramp
 &RAMP ID='FAST',T=   0.0, F=0.000 /		
@@ -162,7 +155,6 @@
 %%Door
 &VENT XB=3.15, 4.15, 0.00, 0.00, 0.00, 2.20, SURF_ID='OPEN' /
 
-
 &SLCF PBX=1.85,QUANTITY='TEMPERATURE' /
 &SLCF PBX=5.5,QUANTITY='TEMPERATURE' /
 
@@ -189,14 +181,12 @@
 &DEVC XYZ=5.5, 1.25, 3.75,     ID='TC_2_4',   QUANTITY='TEMPERATURE' /
 &DEVC XYZ=5.5, 1.25, 1.5,      ID='TC_2_5',   QUANTITY='TEMPERATURE' /
 
-
 &DEVC XYZ=5.5, 4.25, 2.975,    PROP_ID = 'RESIDENTIAL QUICK RESPONSE',  ID= 'SPK_3'/
 &DEVC XYZ=5.5, 4.25, 2.975,    ID='TC_3_1',   QUANTITY='TEMPERATURE' /
 &DEVC XYZ=5.5, 4.25, 2.85,     ID='TC_3_2',   QUANTITY='TEMPERATURE' /
 &DEVC XYZ=5.5, 4.25, 2.70,     ID='TC_3_3',   QUANTITY='TEMPERATURE' /
 &DEVC XYZ=5.5, 4.25, 2.40,     ID='TC_3_4',   QUANTITY='TEMPERATURE' /
 &DEVC XYZ=5.5, 4.25, 1.5,      ID='TC_3_5',   QUANTITY='TEMPERATURE' /
-
 
 &DEVC XYZ=1.85, 4.25, 2.975,   PROP_ID = 'RESIDENTIAL QUICK RESPONSE',  ID= 'SPK_4'/
 &DEVC XYZ=1.85, 4.25, 2.975,   ID='TC_4_1',   QUANTITY='TEMPERATURE' /
