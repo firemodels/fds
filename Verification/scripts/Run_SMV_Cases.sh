@@ -6,7 +6,7 @@
 queue=batch
 
 function usage {
-echo "Run_SMV_Cases.sh [-d -h -q queue_name ]"
+echo "Run_SMV_Cases.sh [-d -h -q queue_name -s ]"
 echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
@@ -15,6 +15,7 @@ echo "-h - display this message"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: $queue"
 echo "     other options: fire60s, fire70s, vis"
+echo "-s - stop FDS runs"
 exit
 }
 
@@ -31,7 +32,7 @@ export FDS=$FDSEXE
 export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
 
 # Otherwise, if -d (debug) option is specified, then run FDS DB version.
-while getopts 'dhq:' OPTION
+while getopts 'dhq:s' OPTION
 do
 case $OPTION in
   d)
@@ -44,6 +45,9 @@ case $OPTION in
   q)
    queue="$OPTARG"
    ;;
+  s)
+   export STOPFDS=1
+   ;;
 esac
 shift
 done
@@ -55,8 +59,6 @@ export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh -q $queue"
 export RUNFDSFG="$SVNROOT/Utilities/Scripts/runfds.sh -q $queue"
 
 export BASEDIR=`pwd`
-# uncomment following line to stop all cases
-#export STOPFDS=1
 
 scripts/SMV_Cases.sh
 
