@@ -253,7 +253,7 @@ run_verification_cases_short()
    sleep 30
 
    # Stop all cases
-   ./Run_FDS_Cases.sh -c serial -s >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -c serial -d -s >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for serial verification cases to end
    wait_verification_cases_short_end
@@ -272,7 +272,7 @@ run_verification_cases_short()
    sleep 30
 
    # Stop all cases
-   ./Run_FDS_Cases.sh -c mpi -s >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -c mpi -d -s >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for serial verification cases to end
    wait_verification_cases_short_end
@@ -291,7 +291,7 @@ run_verification_cases_short()
    # sleep 30
 
    # # Stop all cases
-   # ./scripts/Run_SMV_Cases.sh -s >> $FIREBOT_DIR/output/stage3 2>&1
+   # ./scripts/Run_SMV_Cases.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
 
    # # Wait for SMV verification cases to end
    # wait_verification_cases_short_end
