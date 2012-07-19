@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function usage(
+function usage {
   echo "Usage: runfdsmpi.sh nthreads dir casename"
   echo ""
   echo "Runs a parallel FDS case on a Linux cluster using the "
@@ -11,7 +11,7 @@ function usage(
   echo "casename - fds case (without .fds extension)"
   echo
   exit
-)
+}
 
 queue=batch
 while getopts 'hq:' OPTION
