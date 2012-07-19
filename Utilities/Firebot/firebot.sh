@@ -239,23 +239,40 @@ wait_verification_cases_short_end()
 run_verification_cases_short()
 {
 
-   #  ========================
-   #  = Run all FDS cases =
-   #  ========================
+   #  ============================
+   #  = Run all FDS serial cases =
+   #  ============================
 
    cd $SVNROOT/Verification
 
-   # Submit FDS verification cases and wait for them to start (run in debug mode on fire70s queue)
-   ./Run_FDS_Cases.sh -d -q fire70s &> $FIREBOT_DIR/output/stage3
+   # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on fire70s queue)
+   ./Run_FDS_Cases.sh -c serial -d -q fire70s &> $FIREBOT_DIR/output/stage3
    wait_verification_cases_short_start
 
    # Wait some additional time for all cases to start
    sleep 30
 
    # Stop all cases
-   export STOPFDS=1
-   ./Run_FDS_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
-   unset STOPFDS
+   ./Run_FDS_Cases.sh -c serial -s >> $FIREBOT_DIR/output/stage3 2>&1
+
+   # Wait for serial verification cases to end
+   wait_verification_cases_short_end
+
+   #  =========================
+   #  = Run all FDS MPI cases =
+   #  =========================
+
+   cd $SVNROOT/Verification
+
+   # Submit FDS verification cases and wait for them to start (run MPI cases in debug mode on fire70s queue)
+   ./Run_FDS_Cases.sh -c mpi -d -q fire70s &> $FIREBOT_DIR/output/stage3
+   wait_verification_cases_short_start
+
+   # Wait some additional time for all cases to start
+   sleep 30
+
+   # Stop all cases
+   ./Run_FDS_Cases.sh -c mpi -s >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for serial verification cases to end
    wait_verification_cases_short_end
@@ -266,7 +283,7 @@ run_verification_cases_short()
 
    # cd $SVNROOT/Verification/scripts
 
-   # # Submit SMV verification cases and wait for them to start (run in debug mode on fire70s queue)
+   # # Submit SMV verification cases and wait for them to start (run all cases in debug mode on fire70s queue)
    # ./scripts/Run_SMV_Cases.sh -d -q fire70s >> $FIREBOT_DIR/output/stage3 2>&1
    # wait_verification_cases_short_start
 
@@ -274,9 +291,7 @@ run_verification_cases_short()
    # sleep 30
 
    # # Stop all cases
-   # export STOPFDS=1
-   # ./scripts/Run_SMV_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
-   # unset STOPFDS
+   # ./scripts/Run_SMV_Cases.sh -s >> $FIREBOT_DIR/output/stage3 2>&1
 
    # # Wait for SMV verification cases to end
    # wait_verification_cases_short_end
@@ -286,6 +301,7 @@ run_verification_cases_short()
    #  ======================
 
    # Remove all .stop files from Verification directories (recursively)
+   cd $SVNROOT/Verification
    find . -name '*.stop' -exec rm -f {} \;
 }
 
@@ -414,13 +430,13 @@ wait_verification_cases_long_end()
 
 run_verification_cases_long()
 {
-   # Start running all FDS verification cases (run on fire70s queue)
+   # Start running all FDS verification cases (run all cases on fire70s queue)
    cd $SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh -q fire70s >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
-   # Start running all SMV verification cases (run on fire70s queue)
+   # Start running all SMV verification cases (run all cases on fire70s queue)
    cd $SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
    ./Run_SMV_Cases.sh -q fire70s >> $FIREBOT_DIR/output/stage5 2>&1
@@ -869,7 +885,7 @@ check_all_guides()
 
 copy_all_guides_to_website()
 {
-   # Copy all guides to Blaze status website for inspection
+   # Copy all guides to Blaze status website
    cd $SVNROOT/Manuals
    cp FDS_User_Guide/FDS_User_Guide.pdf \
    FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf \
