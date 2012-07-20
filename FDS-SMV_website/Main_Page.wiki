@@ -8,11 +8,7 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_
 
 <br>
 
-[http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_downloads.png]
-
-  The [http://code.google.com/p/fds-smv/downloads/list FDS and Smokeview download page] contains the latest releases for the Windows, Linux, and Mac OS X platforms.
-
-  [http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download_fds_and_smokeview.png]
+[http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download.png]
 
   The Windows download is a package that will install FDS, Smokeview, and all associated files in the Program Files\NIST directory.
 
@@ -22,39 +18,23 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_
 
 <br>
 
-http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_documentation.png
+=Documentation=
 
-==Fire Dynamics Simulator==
+===FDS and Smokeview Manuals===
 
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_User_Guide.pdf Fire Dynamics Simulator User Guide]
+  View the [https://docs.google.com/folder/d/0ByEue9bc54pOSDgtbVBDZkcwdEk/edit FDS and Smokeview User, Technical, Verification, and Validation Guides].
 
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Technical_Reference_Guide.pdf FDS Technical Reference Guide Volume 1: Mathematical Model]
-
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Verification_Guide.pdf FDS Technical Reference Guide Volume 2: Verification Guide]
-
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Validation_Guide.pdf FDS Technical Reference Guide Volume 3: Validation Guide]
-
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/FDS_Configuration_Management_Plan.pdf FDS Technical Reference Guide Volume 4: Configuration Management Plan]
-
-==Smokeview==
-
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/SMV_User_Guide.pdf Smokeview User Guide]
-
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/SMV_Technical_Reference_Guide.pdf Smokeview Technical Reference Guide]
-
-  [http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Manuals/All_PDF_Files/SMV_Verification_Guide.pdf Smokeview Verification Guide]
-
-==FDS Validation Test Reports==
+===FDS Validation Test Reports===
 
   View the [https://docs.google.com/folder/d/0ByEue9bc54pORGZoQ3JQcjRtcEE/edit collection of publicly available reports] for the experimental data sets that are used in the FDS Validation Guide.
 
-==FDS+Evac==
+===FDS+Evac===
 
   Visit the [https://cspot-run2.nist.gov/nist-exit-script.cfm?url=http://www.vtt.fi/proj/fdsevac/?lang=en FDS+Evac website] for documentation, examples, verification, and validation of FDS+Evac.
 
 <br>
 
-http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/heading_support.png
+=Support=
 
   Participate in the [https://groups.google.com/forum/?fromgroups#!forum/fds-smv Discussion Group] for discussion of general questions and/or to provide feedback.
 
