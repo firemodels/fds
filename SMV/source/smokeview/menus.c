@@ -2274,6 +2274,12 @@ void ScriptMenu(int value){
           readini(1);
           start_script();
         }
+        else{
+          printf("*** fatal error: unable to open script file");
+          if(file!=NULL)printf(": %s",file);
+          printf("\n");
+          if(from_commandline==1)exit(1);
+        }
         break;
       }
       break;

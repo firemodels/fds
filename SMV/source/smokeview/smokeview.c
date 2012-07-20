@@ -519,9 +519,11 @@ void parse_commandline(int argc, char **argv){
       exit(0);
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
+      from_commandline=1;
       runscript=1;
     }
     else if(strncmp(argv[i],"-script",7)==0){
+      from_commandline=1;
       ++i;
       if(i<argc){
         char scriptbuffer[256];
