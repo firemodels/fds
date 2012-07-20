@@ -2115,6 +2115,7 @@ void update_fedinfo(void){
   int nfediso=0,ifediso=0;
 
   nfedinfo=0;
+  if(smokediff==1)return;
   for(i=0;i<nsliceinfo;i++){
     slicedata *slicei;
     feddata *fedi;

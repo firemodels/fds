@@ -8741,7 +8741,7 @@ updatemenu=0;
         }
         glutAddSubMenu(loadmenulabel,loadsmoke3dmenu);
       }
-      if(nvolrenderinfo>0){
+      if(nvolrenderinfo>0&&smokediff==0){
         char vlabel[256];
 
         strcpy(vlabel,_("3D smoke (volume rendered)"));
