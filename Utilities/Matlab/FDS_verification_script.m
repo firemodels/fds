@@ -34,6 +34,7 @@ flame_species;            display('flame_species complete...')
 EDM_species;              display('EDM_species complete...')
 cutcell_area;             display('cutcell_area complete...')
 cat_propane_depo;         display('cat_propane_depo complete...')
+sawtooth;                 display('sawtooth complete...')
 
 % The main plotting routine is dataplot
 
