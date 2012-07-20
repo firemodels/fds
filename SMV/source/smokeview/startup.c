@@ -90,8 +90,6 @@ void Init(void){
     strcpy(name_external,"external");
     init_camera(camera_external,name_external);
     camera_external->view_id=1;
-
-    copy_camera(camera_external_save,camera_external);
   }
   if(camera_ini->defined==1){
     copy_camera(camera_current,camera_ini);
@@ -116,6 +114,7 @@ void Init(void){
 
   init_camera_list();
   add_default_views();
+  copy_camera(camera_external_save,camera_external);
   update_view_gluilist();
 
   //reset_glui_view(i_view_list);
