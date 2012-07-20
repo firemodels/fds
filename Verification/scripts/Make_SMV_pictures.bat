@@ -47,12 +47,18 @@ echo Creating Smokeview Verification guide info file
 echo converting SMV_Cases.sh case list to SMV_Pictures_Cases.bat
 cd %SCRIPT_DIR%
 %SH2BAT% SMV_Cases.sh SMV_Pictures_Cases.bat
+%SH2BAT% SMV_DIFF_Cases.sh SMV_DIFF_Pictures_Cases.bat
 
 cd %SVNROOT%\Verification\Visualization
 %SMOKEZIP% -f -part2iso plumeiso
 
+%SMOKEDIFF% thouse5 thouse5delta
+
 echo Generating images
 cd %BASEDIR%
 call %SCRIPT_DIR%\SMV_Pictures_Cases.bat
+
+cd %BASEDIR%
+call %SCRIPT_DIR%\SMV_DIFF_Pictures_Cases.bat
 
 cd %SCRIPT_DIR%
