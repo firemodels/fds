@@ -1,0 +1,8 @@
+RENDERDIR
+ ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
+LOADFILE
+ sawtooth_false_01.sf
+SETTIMEVAL
+ 5.0
+RENDERONCE
+ sawtooth_false
