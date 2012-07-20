@@ -110,4 +110,7 @@ $SMOKEZIP -part2iso plumeiso
 
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
+
+cd $SVNROOT/Verification
+scripts/SMV_DIFF_Cases.sh
 cd $CURDIDR
