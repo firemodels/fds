@@ -3953,26 +3953,55 @@ Smokeview.  The algorithms for determining
 the data mappings used by Smokeview and Smokezip are identical so it
 should result in the same views.
 
-Particle files may be converted to isosurface files using the
-{\tt -part2iso}\ option as in {\tt smokezip -part2iso casename}.  The resulting isosurface file hilights
-particle boundaries (where particle density is 0.5 particles per grid cell).
-These isosurface files are accessible in the .smv file named {\tt casename\_smvzip.smv}.
+Particle files may be converted to isosurface files using the {\tt
+-part2iso}\ option as in {\tt smokezip -part2iso casename}.  The
+resulting isosurface file hilights particle boundaries (where
+particle density is 0.5 particles per grid cell). These isosurface
+files are accessible in the .smv file named {\tt
+casename\_smvzip.smv}.
 
 \section{Differencing - Using Smokediff to compare two FDS cases}
 
-Two FDS cases with the same geometry may be compared using the stand-alone
-program smokediff.  Smokediff examines two .smv files files looking for boundary, slice and plot3d files containing the same type of data and located in the same region in space and/or time.  Smokediff then subtracts the data in one file from the corresponding data in the other generating a new .smv file and new differenced boundary, slice and Plot3d data files.  To compare the two .smv files, {\tt casename1.smv}\ and {\tt casename2.smv}\ one would use the command
+The utility smokediff compares two FDS cases with the same
+geometry.  Smokediff examines two .smv files files looking for
+boundary, slice and plot3d files containing the same type of data
+and located in the same region in space and/or time. Smokediff
+then subtracts data in one file from corresponding data in the
+other generating a new .smv file and new differenced boundary,
+slice and Plot3d data files. To compare the two .smv files, {\tt
+casename1.smv}\ and {\tt casename2.smv}\ one would use the command
 
 \begin{verbatim}
 smokediff -smv casename1 casename2
 \end{verbatim}
 
-\noindent which opens smokeview to examine the differenced data after smokediff completes.  Smokediff subtracts the data referenced in casename1 from the data referenced in casename2.   For slice files, smokediff allows the grid in casename2 to be refined by a factor of 2.  Other usage options for smokediff are detailed below
+\noindent which opens smokeview to examine the differenced data
+after smokediff completes.  Smokediff subtracts the data
+referenced in casename1 from the data referenced in casename2.
+For slice files, smokediff allows the grid in casename2 to be
+refined by a factor of 2.  Other usage options for smokediff are
+detailed below
 
 {
 \scriptsize
 \verbatiminput{SCRIPT_FIGURES/smokediff.help}
 }
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_diff_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_diff_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_diff_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_diff_060}\\
+30.0 s&60.0 s
+\end{tabular}
+\end{center}
+\caption [Slice file snapshots of differenced temperature data.]
+{Slice file snapshots of differenced temperature data.}
+\label{figdiffslice}%
+\end{figure}
 
 \section{Background - A utility to run multiple Windows programs simultaneously}
 
