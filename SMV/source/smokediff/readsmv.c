@@ -464,7 +464,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       if(strlen(buffer)==0)break;
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
-        int is1, is2, js1, js2, ks1, ks2;
+        int is1=-1, is2=-1, js1=-1, js2=-1, ks1=-1, ks2=-1;
         int ni, nj, nk;
         int error, lenfile;
         int endian;
