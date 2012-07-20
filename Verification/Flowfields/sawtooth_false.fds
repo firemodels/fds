@@ -8,7 +8,7 @@ boundary conditions will be applied in such a way as to minimize the impact of
 
 &MISC DNS=.TRUE. /
 
-&TIME T_END=5.2 / 
+&TIME T_END=2.2 / 
 
 &SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
 &SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
