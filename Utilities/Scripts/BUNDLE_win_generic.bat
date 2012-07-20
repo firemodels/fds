@@ -55,16 +55,16 @@ echo copying fds_mpi_win_%platform%.exe to fds_mpi.exe
 copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
 
 echo copying smokeview_win_%platform%.exe to smokeview%release_version%.exe
-copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview%release_version%.exe
+copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
 
-echo copying smokediff_win_%platform%.exe to smokediff%release_version%.exe
-copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff%release_version%.exe
+echo copying smokediff_win_%platform%.exe to smokediff.exe
+copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff.exe
 
 echo copying smokezip_win_%platform%.exe to smokezip%release_version%.exe
-copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip%release_version%.exe 
+copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip.exe 
 
 echo copying fds2ascii_win_%platform%.exe to fds2ascii%release_version%.exe
-copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii%release_version%.exe
+copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
 
 echo copying background.exe
 copy %in_background%\intel_win_32\background.exe %out_bin%\background.exe

@@ -35,18 +35,16 @@ IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
 echo copying smokeview_win_test_%platform%.exe
-Rem copy ..\Build\intel_win_test_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
-Rem Use following line (and delete above line) after FDS6 is released
-copy ..\Build\intel_win_test_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview_win_%platform%.exe
+copy ..\Build\intel_win_test_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
 
 echo copying .po files
 copy *.po %smvdir%\.
 
 echo copying smokediff_win_%platform%.exe
-copy ..\..\Utilities\smokediff\intel_win_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff_win_%platform%.exe
+copy ..\..\Utilities\smokediff\intel_win_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
 
 echo copying smokezip_win_%platform%.exe
-copy ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip_win_%platform%.exe
+copy ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
 
 echo copying background.exe
 copy ..\..\Utilities\background\intel_win_32\background.exe %smvdir%\background.exe
