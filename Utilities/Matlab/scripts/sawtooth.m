@@ -17,9 +17,8 @@ input_dir = '../../Verification/Flowfields/';
 % Define Parameters and Variables
 %-------------------------------------------------------------------------%
 
-% Simulation time
-TIME = 5.0;
-ROW = 100*TIME+2;
+% Select row with appropriate time index (t=2.1s) for data measurement
+ROW = 958;
 
 % Plot range
 Index = 0:31;
