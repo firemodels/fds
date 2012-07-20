@@ -624,9 +624,13 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
     // skip over the following keywords
 
-    if(match(buffer,"ISOF") == 1||
+    if(
+       match(buffer,"ISOF") == 1||
+       match(buffer,"ISOG") == 1||
        match(buffer,"TISOF")==1||
        match(buffer,"SMOKE3D")==1||
+       match(buffer,"SMOKF3D")==1||
+       match(buffer,"VSMOKF3D")==1||
        match(buffer,"PART")==1||
        match(buffer,"EVAC")==1||
        match(buffer,"PRT5")==1||
