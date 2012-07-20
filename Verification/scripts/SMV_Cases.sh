@@ -19,6 +19,7 @@ $RUNFDS Visualization smoke_test
 $RUNFDS Visualization smoke_test2
 $RUNFDS Visualization sprinkler_many
 $RUNFDS Visualization thouse5
+$RUNFDS Visualization thouse5delta
 $RUNFDS Visualization transparency
 
 $RUNFDS WUI fire_line
