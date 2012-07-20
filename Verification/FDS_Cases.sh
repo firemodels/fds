@@ -38,7 +38,8 @@ $RUNFDS Flowfields gas_filling
 $RUNFDS Flowfields helium_2d
 $RUNFDS Flowfields jet_fan
 $RUNFDS Flowfields low_flux_hot_gas_filling
-$RUNFDS Flowfields sawtooth
+$RUNFDS Flowfields sawtooth_false
+$RUNFDS Flowfields sawtooth_true
 $RUNFDS Flowfields symmetry_test
 $RUNFDS Flowfields tangential_velocity
 
