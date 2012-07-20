@@ -108,6 +108,9 @@ $SMV -version > smokeview.version
 cd $SVNROOT/Verification/Visualization
 $SMOKEZIP -part2iso plumeiso
 
+cd $SVNROOT/Verification/Visualization
+$SMOKEDIFF thouse5 thouse5delta
+
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
 
