@@ -2685,31 +2685,37 @@ attribute {\ct BURN\_AWAY=.TRUE.}
 
 \subsubsection{Example Case: {\bf sawtooth}}
 
-In this example, we look at the flow field past a diagonally oriented obstruction. If {\ct SAWTOOTH=.FALSE.}, then the velocity boundary conditions will be applied in
-such a way as to minimize the impact of the boundaries due to vortices at sharp corners, as shown in the following example:
+In this example, we look at the flow field through a two-dimensional curved pipe. The curve is created using a series of obstructions that approximate the curve through ``stair-stepping" as in the following example:
 
 \scriptsize
 \begin{verbatim}
-&OBST XB= 0.00, 0.05,-0.01, 0.01, 0.00, 0.05, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
-&OBST XB= 0.05, 0.10,-0.01, 0.01, 0.00, 0.10, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
-&OBST XB= 0.10, 0.15,-0.01, 0.01, 0.05, 0.15, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
-&OBST XB= 0.15, 0.20,-0.01, 0.01, 0.10, 0.20, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.0000, 0.0240,-0.0005, 0.0005, 0.0640, 0.0710, SAWTOOTH=.FALSE., COLOR='GREY' /
+&OBST XB= 0.0000, 0.0250,-0.0005, 0.0005, 0.0710, 0.0750, SAWTOOTH=.FALSE., COLOR='GREY' /
+&OBST XB= 0.0000, 0.0260,-0.0005, 0.0005, 0.0750, 0.0780, SAWTOOTH=.FALSE., COLOR='GREY' /
+&OBST XB= 0.0000, 0.0270,-0.0005, 0.0005, 0.0780, 0.0810, SAWTOOTH=.FALSE., COLOR='GREY' /
+&OBST XB= 0.0000, 0.0280,-0.0005, 0.0005, 0.0810, 0.0830, SAWTOOTH=.FALSE., COLOR='GREY' /
 \end{verbatim}\normalsize
 
 \noindent
-In Figure~\ref{sawtooth}, the top set of obstructions are using the default {\ct SAWTOOTH=.TRUE.} and the bottom set of
-obstructions are using {\ct SAWTOOTH=.FALSE.} The adjacent obstructions that have {\ct SAWTOOTH=.FALSE.} are displayed
-in Smokeview as one smooth obstruction, shown in green. Notice that as the air moves across the different sets of obstructions,
-the air velocity on the bottom set of obstructions is not affected as much by the vortices.
+Setting {\ct SAWTOOTH=.FALSE.} applies the velocity boundary conditions in such a way as to minimize the impact of the boundaries due to vortices at sharp corners. Figure~\ref{sawtooth} portrays the flow field in the pipe after five seconds. On the left the boundary of the pipe is defined with {\ct SAWTOOTH=.TRUE.}, while on the right the boundary is defined with {\ct SAWTOOTH=.FALSE.}. On the right the curve has been rendered as a single smooth surface because Smokeview renders adjacent surfaces with {\ct SAWTOOTH=.FALSE.} as a single smooth surface. While the flow field on the left is characterized by significant turbulence, {\ct SAWTOOTH=.FALSE.} reduces the turbulence in the flow field on the right so that the air moves smoothly through the pipe from one end to the other.
 
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=5in]{SCRIPT_FIGURES/sawtooth}
-\end{center}
-\caption[Simple example of {\ct SAWTOOTH=.FALSE.}]{Simple example of {\ct SAWTOOTH=.FALSE.}}
-\label{sawtooth}
+\begin{figure}[h!]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/sawtooth_true} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/sawtooth_false}
+   \end{tabular*}
+   \caption[Example of {\ct SAWTOOTH=.FALSE.}]{Flow field through a two-dimensional curved pipe at $t=5.0$ s. (Left) {\ct SAWTOOTH=.TRUE.} (Right) {\ct SAWTOOTH=.FALSE.}}
+   \label{sawtooth}
 \end{figure}
 
+Without {\ct SAWTOOTH=.FALSE.}, the vorticities at the sharp corners of the boundary create a sizeable boundary layer. Figure~\ref{sawtooth_ugraph} plots the velocity through the apex of the pipe for both cases. The blue line represents the {\ct SAWTOOTH=.TRUE.} case while the orange line represents the {\ct SAWTOOTH=.FALSE.} case. Notice the broader range of the orange line. {\ct SAWTOOTH=.FALSE.} reduces the size of the boundary layer on both sides of the pipe by minimizing the impact of vortices forming at the boundary as a result of the sharp corners of the ``stair-stepping".
+
+\begin{figure}[h!]
+   \centering
+      \includegraphics[width=5in]{SCRIPT_FIGURES/sawtooth_ugraph}
+   \caption[Boundary layer analysis of {\ct SAWTOOTH=.FALSE.}]{$z$-axis $u$-velocity profile at apex of turn in two-dimensional curved pipe portraying the effects of a boundary defined by {\ct SAWTOOTH=.FALSE.} (Orange).}
+   \label{sawtooth_ugraph}
+\end{figure}
 
 \newpage
 
