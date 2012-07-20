@@ -1,8 +1,0 @@
-RENDERDIR
- ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
-LOADVFILE
- sawtooth_01.sf
-SETTIMEVAL
- 18.090403
-RENDERONCE
- sawtooth
