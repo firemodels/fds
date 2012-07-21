@@ -74,7 +74,7 @@ Submit cases to the Issue Tracker to report specific bugs or problems.
 </font>
 </td></tr>
 <tr><td align="right">
-[http://code.google.com/p/fds-smv/w/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_wiki.png]
+[http://code.google.com/p/fds-smv/wiki/Wiki_Overview http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_wiki.png]
 </td><td>
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 Information on FDS-SMV development, third-party tools, and other resources.
