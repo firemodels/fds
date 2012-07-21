@@ -1,20 +1,28 @@
 http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_fds.png
 
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+
 *Fire Dynamics Simulator (FDS)* is a computational fluid dynamics (CFD) model of fire-driven fluid flow. The software solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow, with an emphasis on smoke and heat transport from fires.
 
 *Smokeview (SMV)* is a visualization program that is used to display the output of FDS and CFAST simulations.
 
 *FDS+Evac* is the evacuation simulation module for FDS. The software is used to simulate the movement of people in evacuation situations. The evacuation simulations can be fully coupled with the fire simulations.
 
+</font>
+
 <br>
 
 [http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download.png]
 
-  The Windows download is a package that will install FDS, Smokeview, and all associated files in the Program Files\NIST directory.
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+
+  The Windows download is a package that will install FDS and Smokeview in the Program Files\NIST directory.
 
   The Linux/Unix download is a compressed tar file that contains an FDS folder with all of the binaries and documentation.
 
   The Mac OS X download is a compressed tar file that contains an FDS folder that can be installed in /Applications.
+
+</font>
 
 <br>
 
@@ -22,25 +30,55 @@ http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/header_
 
 ===FDS and Smokeview Manuals===
 
-  View the [https://docs.google.com/folder/d/0ByEue9bc54pOSDgtbVBDZkcwdEk/edit FDS and Smokeview User, Technical, Verification, and Validation Guides].
+<table cellpadding="5">
+<tr><td align="right">
+[https://docs.google.com/folder/d/0ByEue9bc54pOSDgtbVBDZkcwdEk/edit http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_manuals.png]
+</td><td>
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+FDS and Smokeview User, Technical, Verification, and Validation Guides
+</font>
+</td></tr>
+</table>
 
 ===FDS Validation Test Reports===
 
+<font face="calibri,helvetica,arial,sans-serif" size="3">
   View the [https://docs.google.com/folder/d/0ByEue9bc54pORGZoQ3JQcjRtcEE/edit collection of publicly available reports] for the experimental data sets that are used in the FDS Validation Guide.
+</font>
 
 ===FDS+Evac===
 
-  Visit the [https://cspot-run2.nist.gov/nist-exit-script.cfm?url=http://www.vtt.fi/proj/fdsevac/?lang=en FDS+Evac website] for documentation, examples, verification, and validation of FDS+Evac.
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+  Visit the [http://www.vtt.fi/proj/fdsevac/?lang=en FDS+Evac website] for documentation, examples, verification, and validation of FDS+Evac.
+</font>
 
 <br>
 
 =Support=
 
-  Participate in the [https://groups.google.com/forum/?fromgroups#!forum/fds-smv Discussion Group] for discussion of general questions and/or to provide feedback.
-
-  Submit cases to the [http://code.google.com/p/fds-smv/issues/list Issue Tracker] to report specific bugs or problems.
-
-  Read the [http://code.google.com/p/fds-smv/w/list Wiki Pages] for supplemental information related to FDS-SMV development, third-party tools, and many other resources.
+<table cellpadding="5">
+<tr><td align="right">
+[https://groups.google.com/forum/?fromgroups#!forum/fds-smv http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_discussion.png]
+</td><td>
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+Mailing list for general discussion, questions, or to provide feedback.
+</font>
+</td></tr>
+<tr><td align="right">
+[http://code.google.com/p/fds-smv/issues/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_issue.png]
+</td><td>
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+Submit cases to the Issue Tracker to report specific bugs or problems.
+</font>
+</td></tr>
+<tr><td align="right">
+[http://code.google.com/p/fds-smv/w/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_wiki.png]
+</td><td>
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+Information on FDS-SMV development, third-party tools, and other resources.
+</font>
+</td></tr>
+</table>
 
 <br>
 
