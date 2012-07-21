@@ -35,7 +35,19 @@ span.dropt span {position: absolute; left: -9999px;
   border-style:solid; border-color:black; border-width:1px;}
 span.dropt:hover span {margin: 5px 0 0 170px; background: #ebf7f8; z-index:6;}
 
+/* Keep link color as unvisited */
+a {
+  color:#0000FF;
+}
+
+/* Set spacing between list items */
+li {
+   line-height: 1.5em;
+}
+
+/* Set primary font */
 body{
+margin-left: 50px;
 font: 16px Arial, sans-serif;
 }
 
@@ -82,11 +94,17 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 
 print "<br><hr align='left'><br>"
 
-print "FDS-SMV Manuals: <i>(last updated on " + time.ctime(os.path.getmtime("/var/www/html/firebot/manuals/FDS_User_Guide.pdf")) + ")</i><br><br>"
+print "FDS-SMV Manuals: <i>(last updated " + time.ctime(os.path.getmtime("/var/www/html/firebot/manuals/FDS_User_Guide.pdf")) + ")</i><br><br>"
 
-print """FDS: <a href="manuals/FDS_User_Guide.pdf">User Guide</a>, <a href="manuals/FDS_Technical_Reference_Guide.pdf">Technical Reference Guide</a>, <a href="manuals/FDS_Verification_Guide.pdf">Verification Guide</a>, <a href="manuals/FDS_Validation_Guide.pdf">Validation Guide</a>, <a href="manuals/FDS_Configuration_Management_Plan.pdf">Configuration Management Plan</a><br><br>"""
-print """SMV: <a href="manuals/SMV_User_Guide.pdf">User Guide</a>, <a href="manuals/SMV_Verification_Guide.pdf">Verification Guide</a>"""
-print "<br><br><hr align='left'><br>"
+print """<li><a href="manuals/FDS_User_Guide.pdf">FDS User Guide</a></li>
+         <li><a href="manuals/FDS_Technical_Reference_Guide.pdf">FDS Technical Reference Guide</a></li>
+         <li><a href="manuals/FDS_Verification_Guide.pdf">FDS Verification Guide</a></li>
+         <li><a href="manuals/FDS_Validation_Guide.pdf">FDS Validation Guide</a></li>
+         <li><a href="manuals/FDS_Configuration_Management_Plan.pdf">FDS Configuration Management Plan</a></li>
+         <br>
+         <li><a href="manuals/SMV_User_Guide.pdf">SMV User Guide</a></li>
+         <li><a href="manuals/SMV_Verification_Guide.pdf">SMV Verification Guide</a></li>"""
+print "<br><hr align='left'><br>"
 
 # Initialize list of history files
 revision_files = os.listdir(firebot_history_dir)
@@ -162,7 +180,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
 print "<hr align='left'><br>"
 
 current_time = time.ctime()
-print "<i>Status last updated: %s</i><br><br><br>" % (current_time)
+print "<i>Status last updated %s</i><br><br><br>" % (current_time)
 
 print """
 </body>
