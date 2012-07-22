@@ -93,10 +93,10 @@ clean_svn_repo()
    cd $FIREBOT_DIR
    rm output/*
 
-   # Clean up temporary unversioned and modified versioned repository files
+   # Revert and clean up temporary unversioned and modified versioned repository files
    cd $SVNROOT
    svn revert -Rq *
-   svn status --no-ignore | grep '^\?' | sed 's/^\?      //'  | xargs -Ixx rm -rf xx
+   svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
 }
 
 do_svn_checkout()
