@@ -11,9 +11,9 @@ echo Wrapping up 64 bit Smokeview update
 echo.
 
 echo.
-echo Associating the .smv file extension with smokeview_win_64.exe
+echo Associating the .smv file extension with smokeview.exe
 
-ftype smvDoc="%CD%\smokeview%fdssmv_major_version%_win_64.exe" "%%1" >Nul
+ftype smvDoc="%CD%\smokeview.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
 echo Press any key to complete update.

@@ -42,17 +42,17 @@ echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
-echo copying smokeview_win_%platform%.exe to smokeview%fdssmv_major_version%_win_%platform%.exe
-copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\smokeview%fdssmv_major_version%_win_%platform%.exe
+echo copying smokeview_win_%platform%.exe to smokeview.exe
+copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\smokeview.exe
 
 echo copying .po files
 copy *.po %smvdir%\.
 
-echo copying smokezip_win_%platform%.exe to smokezip%fdssmv_major_version%_win_%platform%.exe
-copy %svzipbuild%\smokezip_win_%platform%.exe %smvdir%\smokezip%fdssmv_major_version%_win_%platform%.exe
+echo copying smokezip_win_%platform%.exe to smokezip.exe
+copy %svzipbuild%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
 
-echo copying smokediff_win_%platform%.exe smokediff%fdssmv_major_version%_win_%platform%.exe
-copy %svdiffbuild%\smokediff_win_%platform%.exe %smvdir%\smokediff%fdssmv_major_version%_win_%platform%.exe
+echo copying smokediff_win_%platform%.exe smokediff.exe
+copy %svdiffbuild%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
 
 echo copying background.exe
 copy %bgbuild%\background.exe %smvdir%\.
