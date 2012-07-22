@@ -1359,7 +1359,12 @@ void script_loadfile(scriptdata *scripti){
 
     sd = sliceinfo + i;
     if(strcmp(sd->file,scripti->cval)==0){
-      readslice(sd->file,i,LOAD,&errorcode);
+      if(i<nsliceinfo-nfedinfo){
+        readslice(sd->file,i,LOAD,&errorcode);
+      }
+      else{
+        readfed(i,LOAD,FED_SLICE,&errorcode);
+      }
       return;
     }
 
