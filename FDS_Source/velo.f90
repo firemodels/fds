@@ -223,7 +223,7 @@ SELECT_TURB: SELECT CASE (TURB_MODEL_TMP)
                   + B_IJ(1,1)*B_IJ(3,3) - B_IJ(1,3)**2 &
                   + B_IJ(2,2)*B_IJ(3,3) - B_IJ(2,3)**2    ! Vreman, Eq. (8)
  
-               IF (ABS(AA)>ZERO_P) THEN
+               IF (ABS(AA)>ZERO_P .AND. BB>ZERO_P) THEN
                   NU_EDDY = C_VREMAN*SQRT(BB/AA)  ! Vreman, Eq. (5)
                ELSE
                   NU_EDDY=0._EB
