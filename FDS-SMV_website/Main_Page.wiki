@@ -27,28 +27,28 @@
 ==Documentation and Support==
 
 <table cellpadding="5">
-<tr><td align="right">
+<tr><td align="center">
 [https://docs.google.com/folder/d/0ByEue9bc54pOSDgtbVBDZkcwdEk/edit http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_manuals.png]
 </td><td>
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 FDS and Smokeview User, Technical, Verification, and Validation Guides
 </font>
 </td></tr>
-<tr><td align="right">
+<tr><td align="center">
 [https://groups.google.com/forum/?fromgroups#!forum/fds-smv http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_discussion.png]
 </td><td>
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 Mailing list for general discussion, questions, or to provide feedback.
 </font>
 </td></tr>
-<tr><td align="right">
+<tr><td align="center">
 [http://code.google.com/p/fds-smv/issues/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_issue.png]
 </td><td>
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 Submit cases to the Issue Tracker to report specific bugs or problems.
 </font>
 </td></tr>
-<tr><td align="right">
+<tr><td align="center">
 [http://code.google.com/p/fds-smv/wiki/Wiki_Overview?tm=6 http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_wiki.png]
 </td><td>
 <font face="calibri,helvetica,arial,sans-serif" size="3">
