@@ -1,16 +1,16 @@
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 
-<p align="justify">*Fire Dynamics Simulator (FDS)* is a computational fluid dynamics (CFD) model of fire-driven fluid flow. The software solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow, with an emphasis on smoke and heat transport from fires.
+<p align="justify">The *Fire Dynamics Simulator (FDS)* is a large-eddy simulation (LES) code for low-speed flows, with an emphasis on smoke and heat transport from fires.
 
 *Smokeview (SMV)* is a visualization program that is used to display the output of FDS and CFAST simulations.
 
-*FDS+Evac* is the evacuation simulation module for FDS. The software is used to simulate the movement of people in evacuation situations. The evacuation simulations can be fully coupled with the fire simulations.</p>
+*FDS+Evac* is the evacuation simulation module for FDS.</p>
 
 </font>
 
 <br>
 
-[http://code.google.com/p/fds-smv/downloads/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download.png]
+[http://code.google.com/p/fds-smv/wiki/Downloads_Overview?tm=2 http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download.png]
 
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 
@@ -49,13 +49,21 @@ Submit cases to the Issue Tracker to report specific bugs or problems.
 </font>
 </td></tr>
 <tr><td align="right">
-[http://code.google.com/p/fds-smv/wiki/Wiki_Overview http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_wiki.png]
+[http://code.google.com/p/fds-smv/wiki/Wiki_Overview?tm=6 http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_wiki.png]
 </td><td>
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 Information on FDS-SMV development, third-party tools, and other resources.
 </font>
 </td></tr>
 </table>
+
+<br>
+
+==Third-party Tools==
+
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+  View a list of [Third_party_Tools third-party tools] provided by the FDS-SMV community, including graphical user interfaces and various pre- and post-processing tools.
+</font>
 
 <br>
 
