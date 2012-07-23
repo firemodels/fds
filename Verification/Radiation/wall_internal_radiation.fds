@@ -5,7 +5,7 @@ The radiative flux inside the wall is solved using a two-flux model.
 The accuracy of the model is tested in a case similar to the emission
 from a plane layer verification test. The net radiative flux is
 computed for a wall having internal temperature of 1273.15 K and
-ambient temperature of 10 K. The wall thickness is 0.1 m and
+ambient temperature of 1 K. The wall thickness is 0.1 m and
 the absorption coefficient is varied to cover a range [0.01 10] of optical
 depths.
 
@@ -19,16 +19,16 @@ the third-order exponential integral function of optical depth tau.
 
 tau = kappa * L
 
-tau   kappa (1/m) Exact 	FDS 	Error (%)
-0.01  0.1	  2.8970	2.9495	1.8
-0.1   1.0	  24.9403	26.980	8.2
-0.5   5.0	  82.9457   	93.897	13.
-1.0   10.0	  116.2891	128.41	10.
-10.   100.0	  148.9698  	148.97	0.0001
+tau   kappa (1/m) Exact     FDS      Error (%)
+0.01  0.1         2.8970    2.9495   1.8
+0.1   1.0         24.9403   26.980   8.2
+0.5   5.0         82.9457   93.897   13.
+1.0   10.0        116.2891  128.41   10.
+10.   100.0       148.9698  148.97   0.0001
 
 References
 
-[1]	Zel'dovich, Y.B. & Raizer, Y.P. Physics of shock waves and
+[1] Zel'dovich, Y.B. & Raizer, Y.P. Physics of shock waves and
 high-temperature hydrodynamic phenomena. (translated from the Russian
 and then edited by W.D.Hayes and R.F. Probstein); Dover Publications,
 New York, 2002, 944 pp.
