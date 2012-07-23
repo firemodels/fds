@@ -52,6 +52,7 @@ cd %SCRIPT_DIR%
 cd %SVNROOT%\Verification\Visualization
 %SMOKEZIP% -f -part2iso plumeiso
 
+%SMOKEDIFF% plume5c plume5cdelta
 %SMOKEDIFF% thouse5 thouse5delta
 
 echo Generating images
