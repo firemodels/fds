@@ -23,16 +23,21 @@ set CFASTEXE=%SVNROOT%\..\cfast\CFAST\intel_win_64\cfast6_win_64
 
 Rem Run jobs in background (or not)
 
-set "background=background -u 85 -d 5 "
+set "bg=background -u 85 -d 5 "
 Rem set background=
 
 Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-set FDS=%background%%FDSEXE%
-set CFAST=%background%%CFASTEXE%
+
+set FDS=%bg%%FDSEXE%
+set CFAST=%bg%%CFASTEXE%
 set SH2BAT=..\..\Utilities\Data_Processing\sh2bat
 
 echo You are about to run the Smokeview Verification Test Suite.
+echo.
+echo FDS=%FDS%
+echo CFAST=%CFAST%
+echo.
 echo Press any key to proceed, CTRL c to abort
 pause > Nul
 
