@@ -109,6 +109,7 @@ cd $SVNROOT/Verification/Visualization
 $SMOKEZIP -part2iso plumeiso
 
 cd $SVNROOT/Verification/Visualization
+$SMOKEDIFF plume5c plume5cdelta
 $SMOKEDIFF thouse5 thouse5delta
 
 cd $SVNROOT/Verification
