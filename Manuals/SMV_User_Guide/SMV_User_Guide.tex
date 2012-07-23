@@ -576,7 +576,7 @@ features since vectors accentuate the direction that flow is occuring.
 
 A 3D region of
 data may be visualized using slice files.  Slices may be moved from one plane to
-the next just as with PLOT3D files (using up/down cursor keys or
+the next just as with Plot3D files (using up/down cursor keys or
 page up/page down keys).
 3D slices may also be rotated and/or translated by double clicking and moving the mouse. If the {\tt ALT}\ key
 is also pressed, the slice moves up and down.  If the {\tt CTRL}\ key is pressed the slice moves side to side.
@@ -1203,7 +1203,7 @@ to obtain:
 \end{verbatim}
 
 \paragraph{Data coloring}Smokeview uses a 1D texture map for coloring data occurring in
-slice, boundary and PLOT3D files. This is illustrated in Figure
+slice, boundary and Plot3D files. This is illustrated in Figure
 \ref{fignewslice}.  The colors are now crisper and sharper, more
 accurately representing the underlying data. This is most
 noticeable when selecting the colorbar with the mouse. As before
@@ -1238,7 +1238,7 @@ of the X, Y and Z directions in FDS , use the line:
 \end{verbatim}
 
 A slice from the resulting slice file
-may be moved from one plane to the next just as with PLOT3D
+may be moved from one plane to the next just as with Plot3D
 files (using left/right, up/down cursor keys or page up/page down
 keys).  3D slices may also be oriented arbitrarily (not aligned with a coordinate
 axis) as illustrated in Figure \ref{figgslice}.
@@ -1695,8 +1695,8 @@ when displaying several data files simultaneously.
 \begin{figure}[\figoptions]
 \centerline{
 \includegraphics[width=2.6041666in]{figures/figBOUNDSplot3d}
-} \caption[{\em File/Bounds}\ dialog box showing PLOT3D file
-options.] {{\em File/Bounds}\ dialog box showing PLOT3D file
+} \caption[{\em File/Bounds}\ dialog box showing Plot3D file
+options.] {{\em File/Bounds}\ dialog box showing Plot3D file
 options. Select a variable and a bounds type {\em check box/radio
 button}, then enter a lower and/or upper bound. Data may be
 excluded from the plot by selecting a {\em Truncate}\ bound.
@@ -1767,7 +1767,7 @@ box has an {\bf Ignition} checkbox which allows one to visualize
 when and where the blockage temperature exceeds its ignition
 temperature.
 
-The bounds dialog for PLOT3D display allows one to select between
+The bounds dialog for Plot3D display allows one to select between
 three different types of contour plots:  shaded, stepped and line
 contours.
 \section{3D Smoke Options}
@@ -3267,28 +3267,28 @@ PARTCLASSTYPE
    type (char)
 \end{verbatim}
 
-\hitem{LOADPLOT3D}Load a plot3D file for a given mesh at a specified time.
+\hitem{LOADPLOT3D}Load a Plot3D file for a given mesh at a specified time.
 Usaage:
 \begin{verbatim}
 LOADPLOT3D
   mesh number (an integer form 1 to the number of meshes) time (float)
 \end{verbatim}
 
-\hitem{PLOT3DPROPS}Specifies PLOT3D plot properties that apply to all PLOT3D plots currently being displayed.
+\hitem{PLOT3DPROPS}Specifies Plot3D plot properties that apply to all Plot3D plots currently being displayed.
 Usage:
 \begin{verbatim}
 PLOT3DPROPS
-  plot3d type (int) showvector (0/1) (int) vector length index (int) plot3d display type (int)
+  Plot3D type (int) showvector (0/1) (int) vector length index (int) Plot3D display type (int)
 \end{verbatim}
 where
 \begin{itemize}
-\item plot3d type - is an integer from 1 to the number of PLOT3D file components (usually 5),
+\item Plot3D type - is an integer from 1 to the number of Plot3D file components (usually 5),
 \item showvector - is 1 to draw vectors, 0 otherwise
 \item vector length index, is an integer index from 0 to 6 pointing to an internal Smokeview array used to determine vector size.
-\item plot3d display type - is 0 for stepped contours, 1 for line contours and 2 for continuous contours
+\item Plot3D display type - is 0 for stepped contours, 1 for line contours and 2 for continuous contours
 \end{itemize}
 
-\hitem{SHOWPLOT3DDATA}Specifies a particular PLOT3D plot to be displayed (mesh number, whether visible or not, orientation and position)
+\hitem{SHOWPLOT3DDATA}Specifies a particular Plot3D plot to be displayed (mesh number, whether visible or not, orientation and position)
 Usage:
 \begin{verbatim}
 SHOWPLOT3DDATA
@@ -3298,8 +3298,8 @@ where
 \begin{itemize}
 \item mesh number - the mesh number (ranges from 1 to the number of meshes),
 \item orientation - direction or orientation of the plane being plotted, 1 for YZ planes, 2 for XZ planes and 3 for XY planes
-\item display - 0 if PLOT3D plane is hidden, 1 if it is displayed
-\item position - position of PLOT3D plane
+\item display - 0 if Plot3D plane is hidden, 1 if it is displayed
+\item position - position of Plot3D plane
 \end{itemize}
 
 \hitem{LOADISO}Load an iso-surface file of a given type.  The type is the same as what Smokeview displays in the Load menus for iso-surface files.
@@ -3964,11 +3964,11 @@ casename\_smvzip.smv}.
 
 The utility smokediff compares two FDS cases with the same
 geometry.  Smokediff examines two .smv files files looking for
-boundary, slice and plot3d files containing the same type of data
+boundary, slice and Plot3D files containing the same type of data
 and located in the same region in space and/or time. Smokediff
 then subtracts data in one file from corresponding data in the
 other generating a new .smv file and new differenced boundary,
-slice and Plot3d data files. To compare the two .smv files, {\tt
+slice and Plot3D data files. To compare the two .smv files, {\tt
 casename1.smv}\ and {\tt casename2.smv}\ one would use the command
 
 \begin{verbatim}
@@ -4761,7 +4761,7 @@ capturing.
 
 \kitem{H}Toggle the visibility of slice and vector slice files.
 
-\kitem{i,I}Toggle PLOT3D iso-contour visibility.
+\kitem{i,I}Toggle Plot3D iso-contour visibility.
 
 \kitem{k,K}Toggle time bar visibility.
 
@@ -4938,7 +4938,7 @@ levels or time step displayed.
 
 \hitem{.prt5} File containing particle file data using FDS 5 and later.
 
-\hitem{.q} File containing PLOT3D data.
+\hitem{.q} File containing Plot3D data.
 
 \hitem{.sf} File containing slice file data.
 
@@ -5264,11 +5264,11 @@ of smoke or tracer particles.
 (default: $1.0$)
 
 \hitem{PLOT3DLINEWIDTH}Defines the width in pixels
-of lines used to draw PLOT3D iso-surfaces in outline mode.
+of lines used to draw Plot3D iso-surfaces in outline mode.
 (default: $2.0$)
 
 \hitem{PLOT3DPOINTSIZE}Defines the size in pixels
-of PLOT3D iso-surface particles.
+of Plot3D iso-surface particles.
 (default: $4.0$)
 
 \hitem{SENSORABSSIZE}Defines the sensor size drawn
@@ -5349,7 +5349,7 @@ C_PARTICLES 1 70. 1 200.
 
 \hitem{C\_PLOT3D} Defines the minimum and maximum data values used
 to drop or chop Plot3D.  To cause \smokeview\ to set the minimum
-and maximum chop values for the first PLOT3D quantity (usually
+and maximum chop values for the first Plot3D quantity (usually
 temperature) to 100 and 300 use:
 
 \begin{verbatim}
