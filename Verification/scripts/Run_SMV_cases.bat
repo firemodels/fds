@@ -18,18 +18,18 @@ Rem set FDSEXE=fds
 
 Rem Choose CFAST version (repository or release)
 
-set CFASTEXE=cfast6
-Rem set CFASTEXE=%SVNROOT%\..\cfast\CFAST\intel_win_64\cfast6_win_64
+Rem set CFASTEXE=cfast6
+set CFASTEXE=%SVNROOT%\..\cfast\CFAST\intel_win_64\cfast6_win_64
 
 Rem Run jobs in background (or not)
 
-set background=background -u 85 -d 5
+set "background=background -u 85 -d 5 "
 Rem set background=
 
 Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-set FDS=%background% %FDSEXE%
-set CFAST=%background% %CFASTEXE%
+set FDS=%background%%FDSEXE%
+set CFAST=%background%%CFASTEXE%
 set SH2BAT=..\..\Utilities\Data_Processing\sh2bat
 
 echo You are about to run the Smokeview Verification Test Suite.
@@ -38,7 +38,6 @@ pause > Nul
 
 echo creating FDS case list from SMV_Cases.sh
 %SH2BAT% SMV_Cases.sh SMV_Cases.bat
-pause
 
 cd %BASEDIR%
 
