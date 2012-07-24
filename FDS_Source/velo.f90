@@ -1589,14 +1589,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                    (BOUNDARY_TYPE_M/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE_P/=INTERPOLATED_BOUNDARY)) THEN
 
             ! Determine appropriate velocity BC by assessing each adjacent wall cell. If the BCs are different on each
-            ! side of the edge, choose the one with the specified velocity, if there is one. If not, choose the max value of
-            ! boundary condition index, simply for consistency.
+            ! side of the edge, choose the one with the specified velocity or velocity gradient, if there is one. 
+            ! If not, choose the max value of boundary condition index, simply for consistency.
 
             SURF_INDEXM = WCM%SURF_INDEX
             SURF_INDEXP = WCP%SURF_INDEX
-            IF (SURFACE(SURF_INDEXM)%SPECIFIED_NORMAL_VELOCITY) THEN
+            IF (SURFACE(SURF_INDEXM)%SPECIFIED_NORMAL_VELOCITY .OR. SURFACE(SURF_INDEXM)%SPECIFIED_NORMAL_GRADIENT) THEN
                SF=>SURFACE(SURF_INDEXM)
-            ELSEIF (SURFACE(SURF_INDEXP)%SPECIFIED_NORMAL_VELOCITY) THEN
+            ELSEIF (SURFACE(SURF_INDEXP)%SPECIFIED_NORMAL_VELOCITY .OR. SURFACE(SURF_INDEXP)%SPECIFIED_NORMAL_GRADIENT) THEN
                SF=>SURFACE(SURF_INDEXP)
             ELSE
                SF=>SURFACE(MAX(SURF_INDEXM,SURF_INDEXP))
