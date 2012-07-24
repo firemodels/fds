@@ -12,16 +12,6 @@
 
 [http://code.google.com/p/fds-smv/wiki/Downloads_Overview?tm=2 http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_download.png]
 
-<font face="calibri,helvetica,arial,sans-serif" size="3">
-
-  The Windows download is a package that will install FDS and Smokeview in the Program Files\FDS directory.
-
-  The Linux/Unix download is a compressed tar file that contains an FDS folder with all of the binaries and documentation.
-
-  The Mac OS X download is a compressed tar file that contains an FDS folder that can be installed in /Applications.
-
-</font>
-
 <br>
 
 ==Documentation and Support==
