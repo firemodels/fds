@@ -563,6 +563,25 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
             END SELECT          
             ! Special Cases
+            NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
+               IIG = WC%ONE_D%IIG
+               JJG = WC%ONE_D%JJG
+               KKG = WC%ONE_D%KKG
+               SELECT CASE(IOR) 
+                  CASE( 1)
+                     WC%ONE_D%UWS =-(U(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
+                  CASE(-1)
+                     WC%ONE_D%UWS = (U(IIG-1,JJG,KKG) + SF%VEL_GRAD*WC%RDN)
+                  CASE( 2)
+                     WC%ONE_D%UWS =-(V(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
+                  CASE(-2)
+                     WC%ONE_D%UWS = (V(IIG,JJG-1,KKG) + SF%VEL_GRAD*WC%RDN)
+                  CASE( 3)
+                     WC%ONE_D%UWS =-(W(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
+                  CASE(-3)
+                     WC%ONE_D%UWS = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%RDN)
+               END SELECT
+            ENDIF NEUMANN_IF
             IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=ZERO_P) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
             IF (WC%VENT_INDEX>0) THEN 
@@ -1567,8 +1586,27 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*(WC%UW0+W0)
                CASE(-3)
                   WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
-            END SELECT          
+            END SELECT
             ! Special Cases
+            NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
+               IIG = WC%ONE_D%IIG
+               JJG = WC%ONE_D%JJG
+               KKG = WC%ONE_D%KKG
+               SELECT CASE(IOR) 
+                  CASE( 1)
+                     WC%ONE_D%UWS =-(U(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
+                  CASE(-1)
+                     WC%ONE_D%UWS = (U(IIG-1,JJG,KKG) + SF%VEL_GRAD*WC%RDN)
+                  CASE( 2)
+                     WC%ONE_D%UWS =-(V(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
+                  CASE(-2)
+                     WC%ONE_D%UWS = (V(IIG,JJG-1,KKG) + SF%VEL_GRAD*WC%RDN)
+                  CASE( 3)
+                     WC%ONE_D%UWS =-(W(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
+                  CASE(-3)
+                     WC%ONE_D%UWS = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%RDN)
+               END SELECT
+            ENDIF NEUMANN_IF
             IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=ZERO_P) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
             IF (WC%VENT_INDEX>0) THEN 
