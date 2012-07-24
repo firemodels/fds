@@ -14,7 +14,9 @@ esac
 done
 shift $(($OPTIND-1))
 
-[ "$queue" != "" ] ; queue="-q $queue"
+if [ "$queue" != "" ]; then
+   queue="-q $queue"
+fi
 
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 dir=$1
