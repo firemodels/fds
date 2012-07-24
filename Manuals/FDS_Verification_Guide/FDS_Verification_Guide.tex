@@ -2110,7 +2110,7 @@ Note: the values of $E$ and $A$ used in these examples are necessarily represent
 \label{fig:Arrhenius_175Order_23step}
 \end{figure}
 \vskip8pt
-To couple verification of species mass fraction, compartment temperature, and compartment pressure an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Equation (\ref{eq:2step_propane_rev}), is used to drive the FDS simulation. The initial temperature is set to 350 $^\circ$C to ensure the reaction occurs in timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}. The heat of combustion for reaction \ref{eq:2step_propane_rev} a and \ref{eq:2step_propane_rev} b were found using data from the NIST JANAF tables \cite{NIST_JANAF}. The heat of combustion for the reversible reaction, \ref{eq:2step_propane_rev} c, was calculated by FDS by setting REVERSIBLE=.TRUE. on the {\ct REAC} line and identifying the appropriate forward reaction ID.
+To couple verification of species mass fraction, compartment temperature, and compartment pressure an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Equation (\ref{eq:2step_propane_rev}), is used to drive the FDS simulation. The initial temperature is set to 350 $^\circ$C to ensure the reaction occurs in timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}. The heat of combustion for reaction \ref{eq:2step_propane_rev} a and \ref{eq:2step_propane_rev} b were found using data from the NIST JANAF tables \cite{NIST_JANAF}. The heat of combustion for the reversible reaction, \ref{eq:2step_propane_rev} c, was calculated by FDS by setting {\ct REVERSIBLE=.TRUE.} on the {\ct REAC} line and identifying the appropriate forward reaction ID.
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
@@ -2139,10 +2139,8 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \caption[Temperature and Pressure equilibrium comparison]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
+
 \subsection{Mixed mode reactions (ReactionRate\_Mixed\_)}
-
-
-
 
 \clearpage
 
@@ -2280,22 +2278,59 @@ Figure~\ref{FED_FIC_SMIX_plot}.
 
 \newpage
 
-\section{Aerosol Deposition (Propane\_flame\_deposition)}
+\section{Aerosol Deposition}
 
-The calculations described in this section check the conservation of mass for the aerosol deposition algorithms. The example involves a reaction that invokes an aerosol deposition model in FDS (e.g., soot deposition). For this example, the fuel will be propane with a peak heat release rate of 100~kW and a 5~\% soot yield. For a 100~kW propane fire ({\ct HEAT\_OF\_COMBUSTION} of 44,715~kJ/kg), the associated burning rate is 2.236~g/s. A {\ct RAMP} is used to specify a burning rate from a propane burner that ramps up linearly to 2.236~g/s from 0~s to 1~s, remains steady at 2.236~g/s from 1~s to 4~s, then linearly decreases to 0~g/s from 4~s to 5~s. The total fuel mass released is 8.944~g of propane. Therefore, the resulting soot mass should be equal to 0.447~g, or 5~\% of the total amount of fuel. For a case with no aerosol deposition, we would expect the gas phase soot mass to be equal to 0.447~g. For a case with aerosol deposition, we would expect some fraction of the soot to exist in the gas phase and the remainder of the soot in the condensed phase (deposited to the wall). The sum of the soot mass in the gas phase and condensed phase should be equal to 0.447~g.
+\subsection{Surface Deposition of Aerosols (Propane\_flame\_deposition)}
 
-Figure~\ref{fig:deposition_mass} shows the time evolution of the gas phase soot mass, condensed phase soot mass, and total soot mass (sum of the gas phase soot mass and condensed phase soot mass) for five cases. The five cases are (1) all aerosol deposition mechanisms active, (2) no aerosol deposition mechanisms active, (3) gravitational deposition only, (4) thermophoretic deposition only, and (5) turbulent deposition only.
+The calculations described in this section check the conservation of mass for the aerosol deposition algorithms. The example involves a reaction that invokes an aerosol deposition model in FDS (e.g., soot deposition). For this example, the fuel will be propane with a peak heat release rate of 100~kW and a 5~\% soot yield. For a 100~kW propane fire ({\ct HEAT\_OF\_COMBUSTION} of 44,715~kJ/kg), the associated burning rate is 2.236~g/s. A {\ct RAMP} is used to specify a burning rate from a propane burner that ramps up linearly to 2.236~g/s from 0~s to 1~s, remains steady at 2.236~g/s from 1~s to 4~s, then linearly decreases to 0~g/s from 4~s to 5~s. The total fuel mass released is 8.944~g of propane. Therefore, the resulting soot mass should be equal to 0.447~g, or 5~\% of the total amount of fuel. For a case with no aerosol deposition, we would expect the gas-phase soot mass to be equal to 0.447~g. For a case with aerosol deposition, we would expect some fraction of the soot to exist in the gas phase and the remainder of the soot in the condensed phase (deposited to the wall). The sum of the soot mass in the gas phase and condensed phase should be equal to 0.447~g.
+
+Figure~\ref{fig:deposition_mass} shows the time evolution of the gas-phase soot mass, condensed phase soot mass, and total soot mass (sum of the gas-phase soot mass and condensed phase soot mass) for five cases. The five cases are (1) all aerosol deposition mechanisms active, (2) no aerosol deposition mechanisms active, (3) gravitational deposition only, (4) thermophoretic deposition only, and (5) turbulent deposition only.
 
 \begin{figure}[ht]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_gas}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_wall} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_total}
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/Propane_flame_deposition_gas}
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/Propane_flame_deposition_wall} \\
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/Propane_flame_deposition_total}
 \end{tabular}
 \end{center}
 \caption[Soot mass conservation for Propane\_flame\_deposition case]{Time evolution of soot mass components for deposition cases. (Left) Mass of soot in gas phase. (Right) Mass of soot deposited on condensed phase walls. (Bottom) Total mass of soot in gas phase and condensed phase.}
 \label{fig:deposition_mass}
+\end{figure}
+
+\clearpage
+
+\subsection{Gravitational Sedimentation of Aerosols (soot\_gravitational\_sedimentation)}
+
+The calculations described in this section check the conservation of mass for the gravitational sedimentation algorithms. The gravitational settling algorithm involves both the settling of soot particles in the gas phase and the accumulation of soot on the condensed phase. This example involves an initial mass concentration of soot in the gas phase and the aerosol deposition model in FDS. For this example, the initial soot concentration in a 1 m$^3$ box is set as 100~mg/m$^3$ via the {\ct INIT} line, and the soot is allowed to deposit to the bottom of the box via gravitational settling only. By default, if a species is defined as an aerosol by setting {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, gravitational deposition is enabled and the other deposition mechanisms are disabled by using the follows inputs on the {\ct MISC} line:
+
+\scriptsize
+\begin{verbatim}
+&MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
+      THERMOPHORETIC_DEPOSITION = .FALSE.
+      TURBULENT_DEPOSITION      = .FALSE. /
+\end{verbatim} \normalsize
+
+In this example, the initial gas-phase soot concentration is specifies, and the only removal term (i.e., active deposition mechanism) is gravitational deposition. The dynamic gas-phase soot concentration can then be represented as
+\be
+\frac{dC}{dt} = -\frac{A}{V} (V_d C)
+\label{eq:gravitational_settling}
+\ee
+where C is the soot concentration (mg/$m^3$), A/V is the surface area to volume ratio (m${^-1}$), and $V_d$ is the gravitational settling velocity (m/s). Equation~\ref{eq:gravitational_settling} has an analytical solution for the dynamic gas-phase soot concentration of the form
+\be
+C(t) = C_0 \exp \left(-\frac{A}{V}(V_d t)\right)
+\ee
+
+In this example, the relevant surface area is the area of the lower surface where the soot deposits, and thus the surface area to volume ratio (A/V) is equal to 1~m$^{-1}$. For a soot particle with a diameter of 1 $\mu$m, the terminal settling velocity is equal to 1.9747$\times 10^{-4}$~m/s. The governing equations for the gravitational settling algorithms and settling velocities are discussed in more detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. Figure~\ref{fig:deposition_mass} shows a comparison of the analytical and simulated results for the time evolution of the gas-phase soot concentration.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/soot_gravitational_sedimentation}
+\end{tabular}
+\end{center}
+\caption[Soot mass concentration for soot\_gravitational\_sedimentation case]{Time evolution of soot mass concentration for the soot gravitational sedimentation case.}
+\label{fig:soot_gravitational_sedimentation}
 \end{figure}
 
 
