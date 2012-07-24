@@ -115,8 +115,17 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
      val0 = MIX(dy, val10, val00);
      val1 = MIX(dy, val11, val01);
     temperature = MIX(dz,val1,val0);
-    dtemp=(1200.0-20.0)/256;
-    GETINDEX(index,temperature,20.0,dtemp,256);
+    if(temperature<temperature_cutoff){
+      dtemp=(temperature_cutoff-temperature_min)/128;
+      GETINDEX(index,temperature,temperature_min,dtemp,128);
+    }
+    else{
+      dtemp=(temperature_max-temperature_cutoff)/128.0;
+      GETINDEX(index,temperature,temperature_cutoff,dtemp,128);
+      index+=128;
+    }
+//    dtemp=(1200.0-20.0)/256;
+//    GETINDEX(index,temperature,20.0,dtemp,256);
     *smoke_color=rgb_smokecolormap+4*index;
   }
   else{
