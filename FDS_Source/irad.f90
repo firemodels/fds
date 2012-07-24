@@ -86,7 +86,6 @@ LOGICAL :: WIDE_BAND_MODEL, CH4_BANDS
 END MODULE RADCONS
 
 
-
 MODULE RADCALV
 
 !------------------------------------------------------------------------------
