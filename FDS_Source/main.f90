@@ -514,7 +514,7 @@ ENDDO
 WALL_CLOCK_START_ITERATIONS = WALL_CLOCK_TIME()
 
 !***********************************************************************************************************************************
-!                                                           MAIN TIMESTEPPING LOOP
+!                                                   MAIN TIMESTEPPING LOOP
 !***********************************************************************************************************************************
 
 ! Level Set model for firespread in vegetation (currently uses constant wind: does not need CFD computations).
@@ -692,7 +692,7 @@ MAIN_LOOP: DO
       ENDDO COMPUTE_DIVERGENCE_LOOP
 
       IF (HVAC_SOLVE) THEN
-         IF (FIRST_PASS  .AND. USE_MPI) CALL EXCHANGE_HVAC_BC
+         IF (FIRST_PASS .AND. USE_MPI) CALL EXCHANGE_HVAC_BC
          IF (PROCESS(1)==MYID ) CALL HVAC_CALC(T(1))
          IF (USE_MPI) CALL EXCHANGE_HVAC_SOLUTION
       ENDIF
@@ -931,6 +931,7 @@ MAIN_LOOP: DO
    ENDDO VELOCITY_BC_LOOP_2
 
    ! Check for dumping end of timestep outputs
+
    CALL_UPDATE_CONTROLS = .FALSE.
 
    DO NM=1,NMESHES
