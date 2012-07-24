@@ -1,6 +1,9 @@
 #!/bin/bash -f
 
-queue=batch
+# if a queue is not specified with the -q option then
+# use the system's default queue
+
+queue=
 while getopts 'q:' OPTION
 do
 case $OPTION in
@@ -10,6 +13,8 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+[ "$queue" != "" ] ; queue="-q $queue"
 
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 dir=$1
@@ -60,5 +65,5 @@ $FDS $in
 EOF
 chmod +x $scriptfile
 echo Running $in 
-qsub -q $queue $scriptfile
+qsub $queue $scriptfile
 rm $scriptfile
