@@ -2300,9 +2300,9 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of the gas-phase soot 
 
 \clearpage
 
-\subsection{Gravitational Sedimentation of Aerosols (soot\_gravitational\_sedimentation)}
+\subsection{Gravitational Settling of Aerosols (soot\_gravitational\_settling)}
 
-The calculations described in this section check the conservation of mass for the gravitational sedimentation algorithms. The gravitational settling algorithm involves both the settling of soot particles in the gas phase and the accumulation of soot on the condensed phase. This example involves an initial mass concentration of soot in the gas phase and the aerosol deposition model in FDS. For this example, the initial soot concentration in a 1 m$^3$ box is set as 100~mg/m$^3$ via the {\ct INIT} line, and the soot is allowed to deposit to the bottom of the box via gravitational settling only. By default, if a species is defined as an aerosol by setting {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, gravitational deposition is enabled and the other deposition mechanisms are disabled by using the follows inputs on the {\ct MISC} line:
+The calculations described in this section check the conservation of mass for the gravitational settling algorithms. The gravitational settling algorithm involves both the settling of soot particles in the gas phase and the accumulation of soot on the condensed phase. This example involves an initial mass concentration of soot in the gas phase and the aerosol deposition model in FDS. For this example, the initial soot concentration in a 1 m$^3$ box is set as 100~mg/m$^3$ via the {\ct INIT} line, and the soot is allowed to deposit to the bottom of the box via gravitational settling only. By default, if a species is defined as an aerosol by setting {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, gravitational deposition is enabled and the other deposition mechanisms are disabled by using the follows inputs on the {\ct MISC} line:
 
 \scriptsize
 \begin{verbatim}
@@ -2326,11 +2326,11 @@ In this example, the relevant surface area is the area of the lower surface wher
 \begin{figure}[ht]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/soot_gravitational_sedimentation}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/soot_gravitational_settling}
 \end{tabular}
 \end{center}
-\caption[Soot mass concentration for soot\_gravitational\_sedimentation case]{Time evolution of soot mass concentration for the soot gravitational sedimentation case.}
-\label{fig:soot_gravitational_sedimentation}
+\caption[Soot mass concentration for soot\_gravitational\_settling case]{Time evolution of soot mass concentration for the soot gravitational settling case.}
+\label{fig:soot_gravitational_settling}
 \end{figure}
 
 
