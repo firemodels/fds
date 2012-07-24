@@ -247,7 +247,7 @@ $RUNFDS Species ReactionRate_EDM_Flim_2Step
 $RUNFDS Species ReactionRate_EDM_O2lim_1Step
 $RUNFDS Species ReactionRate_EDM_O2lim_2Step
 $RUNFDS Species PVC_Combustion
-$RUNFDS Species soot_gravitational_set
+$RUNFDS Species soot_gravitational_settling
 
 $RUNFDS Sprinklers_and_Sprays activate_sprinklers
 $RUNFDS Sprinklers_and_Sprays bucket_test_2
