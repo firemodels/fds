@@ -4390,7 +4390,6 @@ END SUBROUTINE SET_MATL_DEFAULTS
 END SUBROUTINE READ_MATL
 
 
-
 SUBROUTINE PROC_MATL
 
 ! Process Materials -- do some additional set-up work with materials
@@ -4973,23 +4972,23 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%THERMALLY_THICK = .FALSE.
    IF (SF%N_LAYERS > 0) THEN    
       SF%THERMALLY_THICK = .TRUE.
-      SF%TMP_INNER                             = TMP_INNER + TMPM
+      SF%TMP_INNER = TMP_INNER + TMPM
       IF (SF%TMP_INNER(1)>=0._EB) THEN
          SF%TMP_FRONT = SF%TMP_INNER(1)
       ELSE
          SF%TMP_FRONT = TMP_FRONT + TMPM
       ENDIF
       IF (TMP_BACK < 0._EB) TMP_BACK = TMPA - TMPM
-      SF%TMP_BACK                              = TMP_BACK + TMPM
+      SF%TMP_BACK = TMP_BACK + TMPM
       ALLOCATE(SF%N_LAYER_CELLS(SF%N_LAYERS))            ! The number of cells in each layer
       ALLOCATE(SF%MIN_DIFFUSIVITY(SF%N_LAYERS))          ! The smallest diffusivity of materials in each layer
       ALLOCATE(SF%MATL_NAME(SF%N_MATL))                  ! The list of all material names associated with the surface
       ALLOCATE(SF%MATL_INDEX(SF%N_MATL))                 ! The list of all material indices associated with the surface
       ALLOCATE(SF%RESIDUE_INDEX(SF%N_MATL,MAX_MATERIALS,MAX_REACTIONS))! Each material associated with the surface has a RESIDUE
    ELSE
-      SF%TMP_FRONT                  = TMP_FRONT + TMPM
-      SF%TMP_INNER                  = SF%TMP_FRONT
-      SF%TMP_BACK                   = SF%TMP_FRONT
+      SF%TMP_FRONT = TMP_FRONT + TMPM
+      SF%TMP_INNER = SF%TMP_FRONT
+      SF%TMP_BACK  = SF%TMP_FRONT
    ENDIF
    DO NN = 1,SF%N_LAYERS
       IF (TMP_INNER(NN)>= -TMPM) TMPMIN = MIN(TMPMIN,TMP_INNER(NN)+TMPM)
@@ -5250,7 +5249,6 @@ END SUBROUTINE SET_SURF_DEFAULTS
 END SUBROUTINE READ_SURF
 
 
- 
 SUBROUTINE PROC_SURF_1
 
 ! Go through the SURF types and process

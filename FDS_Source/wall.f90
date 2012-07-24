@@ -223,93 +223,117 @@ ENDIF
 
 METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
-CASE (NO_CONVECTION) METHOD_OF_HEAT_TRANSFER
+   CASE (NO_CONVECTION) METHOD_OF_HEAT_TRANSFER
 
-   TMP_F  = TMP(IIG,JJG,KKG)
+      TMP_F  = TMP(IIG,JJG,KKG)
 
-CASE (INFLOW_OUTFLOW) METHOD_OF_HEAT_TRANSFER ! Only for wall cells
+   CASE (INFLOW_OUTFLOW) METHOD_OF_HEAT_TRANSFER ! Only for wall cells
 
-   ! Base inflow/outflow decision on velocity component with same predictor/corrector attribute
- 
-   INFLOW = .FALSE.
-   SELECT CASE(IOR)
-      CASE( 1) 
-         UN = UU(II,JJ,KK) 
-      CASE(-1)
-         UN = -UU(II-1,JJ,KK) 
-      CASE( 2) 
-         UN = VV(II,JJ,KK)
-      CASE(-2) 
-         UN = -VV(II,JJ-1,KK)
-      CASE( 3) 
-         UN = WW(II,JJ,KK)
-      CASE(-3) 
-         UN = -WW(II,JJ,KK-1)
-   END SELECT
-   IF (UN>ZERO_P) INFLOW = .TRUE.
+      ! Base inflow/outflow decision on velocity component with same predictor/corrector attribute
+    
+      INFLOW = .FALSE.
+      SELECT CASE(IOR)
+         CASE( 1) 
+            UN = UU(II,JJ,KK) 
+         CASE(-1)
+            UN = -UU(II-1,JJ,KK) 
+         CASE( 2) 
+            UN = VV(II,JJ,KK)
+         CASE(-2) 
+            UN = -VV(II,JJ-1,KK)
+         CASE( 3) 
+            UN = WW(II,JJ,KK)
+         CASE(-3) 
+            UN = -WW(II,JJ,KK-1)
+      END SELECT
+      IF (UN>ZERO_P) INFLOW = .TRUE.
 
-   IF (INFLOW) THEN
-      TMP_F = TMP_0(KK)
-      IF (WC%VENT_INDEX>0) THEN
-         VT => VENTS(WC%VENT_INDEX)
-         IF (VT%TMP_EXTERIOR>0._EB) &
-            TMP_F = TMP_0(KK) + EVALUATE_RAMP(TSI,DUMMY,VT%TMP_EXTERIOR_RAMP_INDEX)*(VT%TMP_EXTERIOR-TMP_0(KK))
-      ENDIF
-      IF (N_TRACKED_SPECIES>0) WC%ZZ_F(1:N_TRACKED_SPECIES)=SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-   ELSE
-      TMP_F = TMP(IIG,JJG,KKG)
-      IF (N_TRACKED_SPECIES>0) WC%ZZ_F(1:N_TRACKED_SPECIES)=ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
-   ENDIF
-
-   TMP(II,JJ,KK) = TMP_F
-   IF (N_TRACKED_SPECIES>0) ZZP(II,JJ,KK,1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
-
-   ONE_D%QCONF = 2._EB*WC%KW*(TMP(IIG,JJG,KKG)-TMP_F)*WC%RDN
- 
-CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
-
-   TMP_G = TMP(IIG,JJG,KKG)
-
-   IF (ABS(TW-T_BEGIN) <= SPACING(TW) .AND. SF%RAMP_INDEX(TIME_TEMP)>=1) THEN
-      TSI = T
-   ELSE
-      TSI = T - TW
-   ENDIF
-
-   IF (ONE_D%UW<=0._EB) THEN
-      IF (SF%TMP_FRONT>0._EB) THEN
-         TMP_F = TMP_0(KK) + EVALUATE_RAMP(TSI,SF%TAU(TIME_TEMP),SF%RAMP_INDEX(TIME_TEMP))*(SF%TMP_FRONT-TMP_0(KK))
+      IF (INFLOW) THEN
+         TMP_F = TMP_0(KK)
+         IF (WC%VENT_INDEX>0) THEN
+            VT => VENTS(WC%VENT_INDEX)
+            IF (VT%TMP_EXTERIOR>0._EB) &
+               TMP_F = TMP_0(KK) + EVALUATE_RAMP(TSI,DUMMY,VT%TMP_EXTERIOR_RAMP_INDEX)*(VT%TMP_EXTERIOR-TMP_0(KK))
+         ENDIF
+         IF (N_TRACKED_SPECIES>0) WC%ZZ_F(1:N_TRACKED_SPECIES)=SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
       ELSE
-         TMP_F = TMP_0(KK) 
+         TMP_F = TMP(IIG,JJG,KKG)
+         IF (N_TRACKED_SPECIES>0) WC%ZZ_F(1:N_TRACKED_SPECIES)=ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
       ENDIF
-   ELSE
-      TMP_F = TMP_G ! If gas is being drawn from the domain, set the boundary temperature to the gas temperature
-   ENDIF
 
-   DTMP = TMP_G - TMP_F
-   IF (PRESENT(WALL_INDEX)) THEN
-      ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
-                                                        WALL_INDEX=WALL_INDEX)
-   ELSE
-      ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
-                                                        PARTICLE_INDEX=PARTICLE_INDEX)
-   ENDIF
-   ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF*DTMP
-         
-CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
-         
-   IF (ABS(TW-T_BEGIN)<= SPACING(TW ) .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
-      TSI = T
-   ELSE
-      TSI = T - TW
-   ENDIF
-   TMP_G = TMP(IIG,JJG,KKG)
-   TMP_OTHER = TMP_F
-   RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_HEAT),SF%RAMP_INDEX(TIME_HEAT))
-   QNET = -RAMP_FACTOR*SF%NET_HEAT_FLUX*AREA_ADJUST
-   ADLOOP: DO
-      DTMP = TMP_G - TMP_OTHER
-      IF (ABS(QNET) > 0._EB .AND. ABS(DTMP) <ZERO_P) DTMP=1._EB        
+      TMP(II,JJ,KK) = TMP_F
+      IF (N_TRACKED_SPECIES>0) ZZP(II,JJ,KK,1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
+
+      ONE_D%QCONF = 2._EB*WC%KW*(TMP(IIG,JJG,KKG)-TMP_F)*WC%RDN
+    
+   CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
+
+      TMP_G = TMP(IIG,JJG,KKG)
+
+      IF (ABS(TW-T_BEGIN) <= SPACING(TW) .AND. SF%RAMP_INDEX(TIME_TEMP)>=1) THEN
+         TSI = T
+      ELSE
+         TSI = T - TW
+      ENDIF
+
+      IF (ONE_D%UW<=0._EB) THEN
+         IF (SF%TMP_FRONT>0._EB) THEN
+            TMP_F = TMP_0(KK) + EVALUATE_RAMP(TSI,SF%TAU(TIME_TEMP),SF%RAMP_INDEX(TIME_TEMP))*(SF%TMP_FRONT-TMP_0(KK))
+         ELSE
+            TMP_F = TMP_0(KK) 
+         ENDIF
+      ELSE
+         TMP_F = TMP_G ! If gas is being drawn from the domain, set the boundary temperature to the gas temperature
+      ENDIF
+
+      DTMP = TMP_G - TMP_F
+      IF (PRESENT(WALL_INDEX)) THEN
+         ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
+                                                           WALL_INDEX=WALL_INDEX)
+      ELSE
+         ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
+                                                           PARTICLE_INDEX=PARTICLE_INDEX)
+      ENDIF
+      ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF*DTMP
+            
+   CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
+            
+      IF (ABS(TW-T_BEGIN)<= SPACING(TW ) .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
+         TSI = T
+      ELSE
+         TSI = T - TW
+      ENDIF
+      TMP_G = TMP(IIG,JJG,KKG)
+      TMP_OTHER = TMP_F
+      RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_HEAT),SF%RAMP_INDEX(TIME_HEAT))
+      QNET = -RAMP_FACTOR*SF%NET_HEAT_FLUX*AREA_ADJUST
+      ADLOOP: DO
+         DTMP = TMP_G - TMP_OTHER
+         IF (ABS(QNET) > 0._EB .AND. ABS(DTMP) <ZERO_P) DTMP=1._EB        
+         IF (PRESENT(WALL_INDEX)) THEN
+            ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
+                                                              WALL_INDEX=WALL_INDEX)
+         ELSE
+            ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
+                                                              PARTICLE_INDEX=PARTICLE_INDEX)      
+         ENDIF      
+         IF (RADIATION) THEN
+            QEXTRA = ONE_D%HEAT_TRANS_COEF*DTMP + ONE_D%QRADIN - ONE_D%EMISSIVITY * SIGMA * TMP_OTHER ** 4 - QNET
+            FDERIV = -ONE_D%HEAT_TRANS_COEF -  4._EB * ONE_D%EMISSIVITY * SIGMA * TMP_OTHER ** 3
+         ELSE
+            QEXTRA = ONE_D%HEAT_TRANS_COEF*DTMP  - QNET
+            FDERIV = -ONE_D%HEAT_TRANS_COEF
+         ENDIF
+         IF (ABS(FDERIV) > ZERO_P) TMP_OTHER = TMP_OTHER - QEXTRA / FDERIV
+         IF (ABS(TMP_OTHER - TMP_F) / TMP_F < 0.0001) THEN
+            TMP_F = TMP_OTHER
+            EXIT ADLOOP
+         ELSE
+            TMP_F = TMP_OTHER 
+            CYCLE ADLOOP
+         ENDIF           
+      ENDDO ADLOOP
+      DTMP = TMP_G - WC%ONE_D%TMP_F
       IF (PRESENT(WALL_INDEX)) THEN
          ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
                                                            WALL_INDEX=WALL_INDEX)
@@ -317,164 +341,140 @@ CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
          ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
                                                            PARTICLE_INDEX=PARTICLE_INDEX)      
       ENDIF      
-      IF (RADIATION) THEN
-         QEXTRA = ONE_D%HEAT_TRANS_COEF*DTMP + ONE_D%QRADIN - ONE_D%EMISSIVITY * SIGMA * TMP_OTHER ** 4 - QNET
-         FDERIV = -ONE_D%HEAT_TRANS_COEF -  4._EB * ONE_D%EMISSIVITY * SIGMA * TMP_OTHER ** 3
+      ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF*DTMP
+
+   CASE (CONVECTIVE_FLUX_BC) METHOD_OF_HEAT_TRANSFER
+         
+      IF (ABS(TW-T_BEGIN) <= SPACING(TW) .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
+         TSI = T
       ELSE
-         QEXTRA = ONE_D%HEAT_TRANS_COEF*DTMP  - QNET
-         FDERIV = -ONE_D%HEAT_TRANS_COEF
+         TSI = T - TW
       ENDIF
-      IF (ABS(FDERIV) > ZERO_P) TMP_OTHER = TMP_OTHER - QEXTRA / FDERIV
-      IF (ABS(TMP_OTHER - TMP_F) / TMP_F < 0.0001) THEN
-         TMP_F = TMP_OTHER
-         EXIT ADLOOP
+      RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_HEAT),SF%RAMP_INDEX(TIME_HEAT))
+      IF (SF%TMP_FRONT>0._EB) THEN
+         TMP_F =  TMPA + RAMP_FACTOR*(SF%TMP_FRONT-TMPA)
       ELSE
-         TMP_F = TMP_OTHER 
-         CYCLE ADLOOP
-      ENDIF           
-   ENDDO ADLOOP
-   DTMP = TMP_G - WC%ONE_D%TMP_F
-   IF (PRESENT(WALL_INDEX)) THEN
-      ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
-                                                        WALL_INDEX=WALL_INDEX)
-   ELSE
-      ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
-                                                        PARTICLE_INDEX=PARTICLE_INDEX)      
-   ENDIF      
-   ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF*DTMP
+         TMP_F =  TMP_0(KK)
+      ENDIF
+      ONE_D%QCONF = -RAMP_FACTOR*SF%CONVECTIVE_HEAT_FLUX*AREA_ADJUST
+    
+   CASE (INTERPOLATED_BC) METHOD_OF_HEAT_TRANSFER
+    
+      OM   => OMESH(WC%NOM)
+      IF (PREDICTOR) THEN
+         OM_RHOP => OM%RHOS
+         IF (N_TRACKED_SPECIES>0) OM_ZZP => OM%ZZS
+      ELSE
+         OM_RHOP => OM%RHO
+         IF (N_TRACKED_SPECIES>0) OM_ZZP => OM%ZZ
+      ENDIF
+      MM    => MESHES(WC%NOM)
 
-CASE (CONVECTIVE_FLUX_BC) METHOD_OF_HEAT_TRANSFER
-      
-   IF (ABS(TW-T_BEGIN) <= SPACING(TW) .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
-      TSI = T
-   ELSE
-      TSI = T - TW
-   ENDIF
-   RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_HEAT),SF%RAMP_INDEX(TIME_HEAT))
-   IF (SF%TMP_FRONT>0._EB) THEN
-      TMP_F =  TMPA + RAMP_FACTOR*(SF%TMP_FRONT-TMPA)
-   ELSE
-      TMP_F =  TMP_0(KK)
-   ENDIF
-   ONE_D%QCONF = -RAMP_FACTOR*SF%CONVECTIVE_HEAT_FLUX*AREA_ADJUST
- 
-CASE (INTERPOLATED_BC) METHOD_OF_HEAT_TRANSFER
- 
-   OM   => OMESH(WC%NOM)
-   IF (PREDICTOR) THEN
-      OM_RHOP => OM%RHOS
-      IF (N_TRACKED_SPECIES>0) OM_ZZP => OM%ZZS
-   ELSE
-      OM_RHOP => OM%RHO
-      IF (N_TRACKED_SPECIES>0) OM_ZZP => OM%ZZ
-   ENDIF
-   MM    => MESHES(WC%NOM)
+      ! Gather data from other mesh
 
-   ! Gather data from other mesh
+      RHO_OTHER=0._EB
+      RHO_ZZ_OTHER=0._EB
 
-   RHO_OTHER=0._EB
-   RHO_ZZ_OTHER=0._EB
-
-   DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
-      DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
-         DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
-            SELECT CASE(IOR)
-               CASE( 1)
-                  ARO = MIN(1._EB , (MM%DY(JJO)*MM%DZ(KKO))/(DY(JJ)*DZ(KK)) )
-               CASE(-1)
-                  ARO = MIN(1._EB , (MM%DY(JJO)*MM%DZ(KKO))/(DY(JJ)*DZ(KK)) )
-               CASE( 2)
-                  ARO = MIN(1._EB , (MM%DX(IIO)*MM%DZ(KKO))/(DX(II)*DZ(KK)) )
-               CASE(-2)
-                  ARO = MIN(1._EB , (MM%DX(IIO)*MM%DZ(KKO))/(DX(II)*DZ(KK)) )
-               CASE( 3)
-                  ARO = MIN(1._EB , (MM%DX(IIO)*MM%DY(JJO))/(DX(II)*DY(JJ)) )
-               CASE(-3)
-                  ARO = MIN(1._EB , (MM%DX(IIO)*MM%DY(JJO))/(DX(II)*DY(JJ)) )
-            END SELECT
-            RHO_OTHER = RHO_OTHER + ARO*OM_RHOP(IIO,JJO,KKO)
-            IF (N_TRACKED_SPECIES>0) RHO_ZZ_OTHER(1:N_TRACKED_SPECIES) = RHO_ZZ_OTHER(1:N_TRACKED_SPECIES) &
-               + ARO*OM_RHOP(IIO,JJO,KKO)*OM_ZZP(IIO,JJO,KKO,1:N_TRACKED_SPECIES)
+      DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+         DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+            DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+               SELECT CASE(IOR)
+                  CASE( 1)
+                     ARO = MIN(1._EB , (MM%DY(JJO)*MM%DZ(KKO))/(DY(JJ)*DZ(KK)) )
+                  CASE(-1)
+                     ARO = MIN(1._EB , (MM%DY(JJO)*MM%DZ(KKO))/(DY(JJ)*DZ(KK)) )
+                  CASE( 2)
+                     ARO = MIN(1._EB , (MM%DX(IIO)*MM%DZ(KKO))/(DX(II)*DZ(KK)) )
+                  CASE(-2)
+                     ARO = MIN(1._EB , (MM%DX(IIO)*MM%DZ(KKO))/(DX(II)*DZ(KK)) )
+                  CASE( 3)
+                     ARO = MIN(1._EB , (MM%DX(IIO)*MM%DY(JJO))/(DX(II)*DY(JJ)) )
+                  CASE(-3)
+                     ARO = MIN(1._EB , (MM%DX(IIO)*MM%DY(JJO))/(DX(II)*DY(JJ)) )
+               END SELECT
+               RHO_OTHER = RHO_OTHER + ARO*OM_RHOP(IIO,JJO,KKO)
+               IF (N_TRACKED_SPECIES>0) RHO_ZZ_OTHER(1:N_TRACKED_SPECIES) = RHO_ZZ_OTHER(1:N_TRACKED_SPECIES) &
+                  + ARO*OM_RHOP(IIO,JJO,KKO)*OM_ZZP(IIO,JJO,KKO,1:N_TRACKED_SPECIES)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
 
-   ! Density
+      ! Density
 
-   RHO_G = RHOP(IIG,JJG,KKG)
-   RHO_G_2 = RHO_G   
-   RHO_OTHER_2 = RHO_OTHER ! first order extrapolation of scalar data
-   RHOP(II,JJ,KK) = RHO_OTHER   
-   SELECT CASE(IOR)
-      CASE( 1) 
-         ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
-         WC%RHO_F = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
-      CASE(-1)
-         ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
-         WC%RHO_F = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
-      CASE( 2) 
-         ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
-         WC%RHO_F = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
-      CASE(-2) 
-         ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
-         WC%RHO_F = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
-      CASE( 3) 
-         ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
-         WC%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
-      CASE(-3) 
-         ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
-         WC%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
-   END SELECT
-   
-   ! Species
+      RHO_G = RHOP(IIG,JJG,KKG)
+      RHO_G_2 = RHO_G   
+      RHO_OTHER_2 = RHO_OTHER ! first order extrapolation of scalar data
+      RHOP(II,JJ,KK) = RHO_OTHER   
+      SELECT CASE(IOR)
+         CASE( 1) 
+            ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
+            WC%RHO_F = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
+         CASE(-1)
+            ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
+            WC%RHO_F = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
+         CASE( 2) 
+            ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
+            WC%RHO_F = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
+         CASE(-2) 
+            ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
+            WC%RHO_F = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
+         CASE( 3) 
+            ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
+            WC%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
+         CASE(-3) 
+            ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
+            WC%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
+      END SELECT
+      
+      ! Species
 
-   IF (N_TRACKED_SPECIES==0) THEN
-      TMP(II,JJ,KK) = PBAR_P(KK,WC%PRESSURE_ZONE)/(SPECIES_MIXTURE(0)%RCON*RHOP(II,JJ,KK))
-      TMP_F = PBAR_P(KK,WC%PRESSURE_ZONE)/(SPECIES_MIXTURE(0)%RCON*WC%RHO_F)
-   ELSE
+      IF (N_TRACKED_SPECIES==0) THEN
+         TMP(II,JJ,KK) = PBAR_P(KK,WC%PRESSURE_ZONE)/(SPECIES_MIXTURE(0)%RCON*RHOP(II,JJ,KK))
+         TMP_F = PBAR_P(KK,WC%PRESSURE_ZONE)/(SPECIES_MIXTURE(0)%RCON*WC%RHO_F)
+      ELSE
 
-      SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+         SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-         RHO_ZZ_G = RHO_G*ZZP(IIG,JJG,KKG,N)
-         RHO_ZZ_G_2 = RHO_ZZ_G         
-         RHO_ZZ_OTHER_2 = RHO_ZZ_OTHER(N)
-         SELECT CASE(IOR)
-            CASE( 1) 
-               ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
-               RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
-            CASE(-1)
-               ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
-               RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
-            CASE( 2) 
-               ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
-               RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
-            CASE(-2) 
-               ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
-               RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
-            CASE( 3) 
-               ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
-               RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
-            CASE(-3) 
-               ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
-               RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
-         END SELECT
-      ENDDO SPECIES_LOOP
+            RHO_ZZ_G = RHO_G*ZZP(IIG,JJG,KKG,N)
+            RHO_ZZ_G_2 = RHO_ZZ_G         
+            RHO_ZZ_OTHER_2 = RHO_ZZ_OTHER(N)
+            SELECT CASE(IOR)
+               CASE( 1) 
+                  ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
+                  RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
+               CASE(-1)
+                  ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
+                  RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
+               CASE( 2) 
+                  ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
+                  RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
+               CASE(-2) 
+                  ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
+                  RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
+               CASE( 3) 
+                  ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
+                  RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
+               CASE(-3) 
+                  ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
+                  RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
+            END SELECT
+         ENDDO SPECIES_LOOP
 
-      ! face value of temperature
-      WC%ZZ_F(1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,RHO_ZZ_F(1:N_TRACKED_SPECIES)/WC%RHO_F))
-      ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
-      CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_W)
-      TMP_F = PBAR_P(KK,WC%PRESSURE_ZONE)/(RSUM_W*WC%RHO_F)
+         ! face value of temperature
+         WC%ZZ_F(1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,RHO_ZZ_F(1:N_TRACKED_SPECIES)/WC%RHO_F))
+         ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
+         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_W)
+         TMP_F = PBAR_P(KK,WC%PRESSURE_ZONE)/(RSUM_W*WC%RHO_F)
 
-      ! ghost cell value of temperature
-      ZZP(II,JJ,KK,1:N_TRACKED_SPECIES) = RHO_ZZ_OTHER(1:N_TRACKED_SPECIES)/RHO_OTHER
-      ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZP(II,JJ,KK,1:N_TRACKED_SPECIES))
-      CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_W)
-      TMP(II,JJ,KK) = PBAR_P(KK,WC%PRESSURE_ZONE)/(RSUM_W*RHOP(II,JJ,KK))
+         ! ghost cell value of temperature
+         ZZP(II,JJ,KK,1:N_TRACKED_SPECIES) = RHO_ZZ_OTHER(1:N_TRACKED_SPECIES)/RHO_OTHER
+         ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZP(II,JJ,KK,1:N_TRACKED_SPECIES))
+         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_W)
+         TMP(II,JJ,KK) = PBAR_P(KK,WC%PRESSURE_ZONE)/(RSUM_W*RHOP(II,JJ,KK))
 
-   ENDIF
+      ENDIF
 
-   ONE_D%QCONF = 0._EB ! no convective heat transfer at interoplated boundary
+      ONE_D%QCONF = 0._EB ! no convective heat transfer at interoplated boundary
 
 END SELECT METHOD_OF_HEAT_TRANSFER
       
@@ -861,7 +861,6 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (WALL_TYPE),POINTER :: WC=>NULL()
 
-
 IF (PREDICTOR) THEN 
    RHOP => RHOS
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
@@ -932,6 +931,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC%RHO_F = PBAR_P(KK,WC%PRESSURE_ZONE)/(RSUM_F*WC%ONE_D%TMP_F)  
    WC%RHO_F = NODE_RHO(DN,1)
    UN =  -MFT/WC%RHO_F
+
    ! Iterate to get the appropriate normal velocity and density
 
    SPECIES_IF_1: IF (N_TRACKED_SPECIES==0) THEN
@@ -996,12 +996,13 @@ USE OUTPUT_DATA, ONLY: Q_DOT
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT
 INTEGER, INTENT(IN) :: NM
 INTEGER :: IIG,JJG,KKG,IC,N,NS,ITMP
-REAL(EB) :: VC,Q_DOT_GEOM,HTC,ZZ_GET(0:N_TRACKED_SPECIES),CP,DTMP,TMP_G,AREA_RATIO
+REAL(EB) :: VC,Q_DOT_GEOM,HTC,ZZ_GET(0:N_TRACKED_SPECIES),CP,DTMP,TMP_G,TMP_F,AREA_RATIO,TMP_OTHER,QNET,QEXTRA,FDERIV,TMP_F_0
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(FACET_TYPE), POINTER :: FC=>NULL()
 TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 
 IF (PREDICTOR) THEN
    RHOP => RHOS
@@ -1024,10 +1025,12 @@ FACE_LOOP: DO N=1,N_FACE
    FC%QCONF = 0._EB
    FC%HEAT_TRANS_COEF = 0._EB
    FC%TMP_G = 0._EB
+   TMP_F_0 = FC%TMP_F; FC%TMP_F = 0._EB
    IF (N_TRACKED_SPECIES>0) THEN
       FC%RHODW = 0._EB
       FC%ZZ_F = 0._EB
    ENDIF
+   Q_DOT_GEOM = 0._EB
 
    CUTCELL_LOOP: DO
 
@@ -1054,33 +1057,89 @@ FACE_LOOP: DO N=1,N_FACE
 
       ! Thermal boundary conditions
 
-      SELECT CASE(SF%THERMAL_BC_INDEX)
-         CASE(SPECIFIED_TEMPERATURE_FROM_FILE)
-            DTMP = FC%TMP_F - TMP_G
-            HTC = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
-                                            FACE_INDEX=N,CUTCELL_INDEX=IC)
-            Q_DOT_GEOM = CL%AREA*HTC*DTMP
+      METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
+
+         CASE(NO_CONVECTION)
+            TMP_F = TMP_G
+            HTC = 0._EB
+            Q_DOT_GEOM = 0._EB
+
          CASE(SPECIFIED_TEMPERATURE)
             IF (SF%TMP_FRONT<0._EB) THEN
-               DTMP = TMP_0(KKG) - TMP_G
+               TMP_F = TMP_0(KKG)
             ELSE
-               DTMP = SF%TMP_FRONT - TMP_G
+               TMP_F = SF%TMP_FRONT
             ENDIF
+            DTMP = TMP_G - TMP_F
             HTC = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
                                             FACE_INDEX=N,CUTCELL_INDEX=IC)
-            Q_DOT_GEOM = CL%AREA*HTC*DTMP
+            Q_DOT_GEOM = -CL%AREA*HTC*DTMP
+
+         CASE(NET_FLUX_BC)
+
+            TMP_OTHER = TMP_G
+            TMP_F     = TMP_G
+            QNET = -SF%NET_HEAT_FLUX
+            ADLOOP: DO
+               DTMP = TMP_G - TMP_OTHER
+               IF (ABS(QNET) > 0._EB .AND. ABS(DTMP) < ZERO_P) DTMP=1._EB        
+               HTC = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
+                                               FACE_INDEX=N,CUTCELL_INDEX=IC) 
+               IF (RADIATION) THEN
+                  QEXTRA = HTC*DTMP + FC%QRADIN - SF%EMISSIVITY * SIGMA * TMP_OTHER ** 4 - QNET
+                  FDERIV = -HTC - 4._EB * SF%EMISSIVITY * SIGMA * TMP_OTHER ** 3
+               ELSE
+                  QEXTRA = HTC*DTMP - QNET
+                  FDERIV = -HTC
+               ENDIF
+               IF (ABS(FDERIV) > ZERO_P) TMP_OTHER = TMP_OTHER - QEXTRA / FDERIV
+               IF (ABS(TMP_OTHER - TMP_F) / TMP_F < 0.0001) THEN
+                  TMP_F = TMP_OTHER
+                  EXIT ADLOOP
+               ELSE
+                  TMP_F = TMP_OTHER 
+                  CYCLE ADLOOP
+               ENDIF           
+            ENDDO ADLOOP
+            DTMP = TMP_G - TMP_F
+            HTC = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
+                                            FACE_INDEX=N,CUTCELL_INDEX=IC)
+            Q_DOT_GEOM = -CL%AREA*HTC*DTMP
+
          CASE(CONVECTIVE_FLUX_BC)
-            DTMP = FC%TMP_F - TMP_G
+
+            IF (SF%TMP_FRONT<0._EB) THEN
+               TMP_F = TMP_0(KKG)
+            ELSE
+               TMP_F = SF%TMP_FRONT
+            ENDIF
+            Q_DOT_GEOM = CL%AREA*SF%CONVECTIVE_HEAT_FLUX
+            DTMP = TMP_F - TMP_G
+            IF (DTMP>ZERO_P) THEN
+               HTC = SF%CONVECTIVE_HEAT_FLUX/DTMP
+            ELSE
+               HTC = 0._EB
+            ENDIF
+
+         CASE(THERMALLY_THICK) ! under construction
+
+            DTMP = TMP_G - TMP_F_0
             HTC = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&
                                             FACE_INDEX=N,CUTCELL_INDEX=IC)
-            Q_DOT_GEOM = CL%AREA*SF%CONVECTIVE_HEAT_FLUX
-      END SELECT
+            Q_DOT_GEOM = -CL%AREA*HTC*DTMP
+            ML => MATERIAL(SF%MATL_INDEX(1))
+            QNET = FC%QRADOUT - FC%QRADIN - HTC*DTMP
+            TMP_F = TMP_F_0 - DT*QNET/(ML%RHO_S*ML%C_S)
+            TMP_F = MAX(TMPMIN,MIN(TMPMAX,TMP_F))
+
+      END SELECT METHOD_OF_HEAT_TRANSFER
 
       ! Heat transfer
 
-      FC%QCONF = FC%QCONF + Q_DOT_GEOM/FC%AW
+      FC%QCONF = FC%QCONF - Q_DOT_GEOM/FC%AW
       FC%HEAT_TRANS_COEF = FC%HEAT_TRANS_COEF + AREA_RATIO*HTC
       FC%TMP_G = FC%TMP_G + AREA_RATIO*TMP_G
+      FC%TMP_F = FC%TMP_F + AREA_RATIO*TMP_F
 
       ! Species
 
@@ -1743,7 +1802,6 @@ ENDDO
 ! Calculate internal radiation
    
 IF (SF%INTERNAL_RADIATION) THEN
-
    KAPPA_S = 0._EB
    DO I=1,NWP
       VOLSUM = 0._EB
