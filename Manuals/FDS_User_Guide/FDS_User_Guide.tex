@@ -6189,10 +6189,12 @@ Section~\ref{info:heat_of_combustion} for more details on the heat of combustion
 The {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) is the amount of
 energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
 specified, it is assumed to be
-\be \Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
+\be \Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { \nu_{f} W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
-Its default is 13,100~kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
-specified that FDS will ignore the value for {\ct EPUMO2}.
+Its default is 13,100~kJ/kg. Typically, a chemical reaction is balanced by setting
+the stoichiometric coefficient of the fuel $\nu_{f}$ to 1, which is the convention used by FDS.
+Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are specified that FDS will ignore
+the value for {\ct EPUMO2}.
 
 If heats of reaction have been specified on the
 {\ct MATL} lines and
