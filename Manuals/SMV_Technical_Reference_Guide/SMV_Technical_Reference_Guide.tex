@@ -1511,30 +1511,36 @@ due to combustion gases.  FED values of 0.3, 1.0 and 3.0 have been
 found to result in incapacities of 11~\%, 50~\% and 89~\% for
 humans\cite{}. FED index data is computed by Smokeview using CO,
 $\mathrm{CO_2}$ and $\mathrm{O_2}$ gas concentration data computed
-by FDS. This data is made available to Smokeview in the form of
-slice files.
+by FDS. Smokeview obtains this data from FDS using slice files.
 
-The total FED is computed here in terms of FED components for CO and $\mathrm{O_2}$.  A hyper-ventilating factor due to $\mathrm{CO_2}$ is applied to
-the FED for CO. The total FED is given by
+The total FED is computed here in terms of FED components for CO and $\mathrm{O_2}$.  A hyper-ventilating factor due to
+$\mathrm{CO_2}$ is applied to
+the FED for CO. The total FED is then given by
 \be
 \mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
 \ee
 Other terms involving CN, NOx and irritants are neglected.
-The fraction of an incapacitating dose due to CO is calculated using
+The fraction of an incapacitating dose due to CO, $\mathrm{FED}_\mathrm{CO}$, is calculated using
 \be
 \mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, dt
+\label{eq:fedCO}
 \ee
 where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm).
-The fraction of an incapacitating dose due to low O${}_2$ hypoxia is calculated using
+The fraction of an incapacitating dose due to low O${}_2$ hypoxia , $\mathrm{FED}_\mathrm{O_2}$, is calculated using
 \be
-\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{60 \exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
+\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{\exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
+\label{eq:fedO2}
 \ee
 where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).
-The hyperventilation factor induced by carbon dioxide is calculated as
+The hyperventilation factor induced by carbon dioxide, $\mathrm{HV}_\mathrm{CO_2}$, is calculated using
 \be
 \mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1903 \, C_\mathrm{CO_2}(t) +  2.0004 ) }{7.1} \label{co2hyp}
+\label{eq:fedCO2}
 \ee
-where $t$ is time in minutes and $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
+where $t$ is time in minutes and $C_\mathrm{CO_2}$ is the $\mathrm{CO_2}$ concentration (percent).
+
+%Assuming that $C_\mathrm{CO}$, $C_\mathrm{CO_2}$ and $C_\mathrm{O_2}$ are constant, equations \ref{eq:fedCO}
+
 
 %Figure \ref{} presents an FED computation where CO, $\mathrm{CO_2}$ and $\mathrm{O_2}$ are constant.
 
