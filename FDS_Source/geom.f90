@@ -710,12 +710,12 @@ DO N=1,N_FACE
    ENDDO CUTCELL_LOOP
 
    IF (ABS(FC%AW-AREA_CHECK)>CUTCELL_TOLERANCE) THEN
-      WRITE(MESSAGE,'(A,1I4)') 'ERROR: Cutcell area checksum failed for facet ',N
+      WRITE(MESSAGE,'(A,1I4)') 'ERROR: cutcell area checksum failed for facet ',N
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
    IF (FC%DN>CUTCELL_TOLERANCE) THEN
-      FC%DN = FC%RDN**ONTH ! wall normal length scale
+      FC%DN = FC%DN**ONTH ! wall normal length scale
       FC%RDN = 1._EB/FC%DN
    ENDIF
 
@@ -1865,7 +1865,7 @@ TRIANGLE_LOOP: DO I=1,3
             XC = S1P0+SC*U
             DO K=1,3
                XPC((NXP-1)*3+K) = XC(K)
-               ENDDO
+            ENDDO
          ENDIF
       ENDIF
                 
