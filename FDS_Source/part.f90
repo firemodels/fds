@@ -1744,9 +1744,8 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
 
-
-REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q_CON_GAS_TOT, Q_EVAP_TOT, MVAP_DELTAHG, MVAP_HSB
-
+REAL(EB), POINTER, DIMENSION(:,:,:) :: MVAP_HSB=>NULL(), Q_CON_GAS_TOT=>NULL(),Q_EVAP_TOT=>NULL(), MVAP_DELTAHG=>NULL() 
+REAL(EB) :: H_G_OLD_2
 
 CALL POINT_TO_MESH(NM)
 
@@ -1755,18 +1754,6 @@ CALL POINT_TO_MESH(NM)
 OMRAF  = 1._EB - RUN_AVG_FAC
 M_DOT(2,NM) = 0._EB ! Mass loss rate of fuel particles
 Q_DOT(7,NM) = 0._EB ! Contribution of particle mass/energy transfer to enthalpy equation
-
-! Initialization of temporary variables
-
-ALLOCATE(Q_CON_GAS_TOT(1:IBAR,1:JBAR,1:KBAR))
-ALLOCATE(Q_EVAP_TOT(1:IBAR,1:JBAR,1:KBAR))
-ALLOCATE(MVAP_DELTAHG(1:IBAR,1:JBAR,1:KBAR))
-ALLOCATE(MVAP_HSB(1:IBAR,1:JBAR,1:KBAR))
-
-Q_CON_GAS_TOT(1:IBAR,1:JBAR,1:KBAR) = 0._EB
-Q_EVAP_TOT(1:IBAR,1:JBAR,1:KBAR) = 0._EB
-MVAP_DELTAHG(1:IBAR,1:JBAR,1:KBAR) = 0._EB
-MVAP_HSB(1:IBAR,1:JBAR,1:KBAR) = 0._EB
 
 ! Rough estimates
 
@@ -2160,6 +2147,18 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
    ELSE NEW_EVAP_DROP_IF
 
+      ! Initialization of temporary variables
+
+      Q_CON_GAS_TOT => WORK1
+      Q_EVAP_TOT => WORK4
+      MVAP_DELTAHG => WORK5
+      MVAP_HSB => WORK8
+
+      Q_CON_GAS_TOT = 0._EB
+      Q_EVAP_TOT = 0._EB
+      MVAP_DELTAHG = 0._EB
+      MVAP_HSB = 0._EB
+
       ! Loop through all PARTICLEs within the class and determine mass/energy transfer
 
       PARTICLE_LOOP_3: DO I=1,NLP
@@ -2370,8 +2369,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          MVAP_DELTAHG(II,JJ,KK)=MVAP_DELTAHG(II,JJ,KK)+WGT*M_VAP*DELTA_H_G
          MVAP_HSB(II,JJ,KK)=MVAP_HSB(II,JJ,KK)+WGT*M_VAP*H_S_B
 
-
-
          ! Keep track of total mass evaporated in cell
 
          MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
@@ -2436,18 +2433,53 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   M_GAS_NEW = M_GAS + MVAP_TOT(II,JJ,KK)
                   TMP_G_NEW = TMP_G
 
-                  ITMP     = INT(TMP_DROP_NEW)
-                  TMP_WGT  = TMP_DROP_NEW - AINT(TMP_DROP_NEW)
+                  ZZ_GET2 = ZZ_GET * M_GAS/M_GAS_NEW               
+                  ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + MVAP_TOT(II,JJ,KK)/M_GAS_NEW
+                  TMP_G_I = TMP_G
 
-                  IF (H_NEW > 0._EB) THEN
-                     ZZ_GET2 = ZZ_GET * M_GAS/M_GAS_NEW               
-                     ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + MVAP_TOT(II,JJ,KK)/M_GAS_NEW
-                     TMP_G_I = TMP_G
-                     TEMPITER = .TRUE.
-                     ITCOUNT = 0
+                  TEMPITER = .TRUE.
+                  ITCOUNT = 0
+
+
+                  IF (NEW_CP_WHILE) THEN
+
                      ITERATE_TEMP_2: DO WHILE (TEMPITER)
+
                         TEMPITER=.FALSE.
-                        CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP2,TMP_G_I)
+                        CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP2,TMP_G_I)   
+                        H_G_OLD_2=M_GAS_NEW*CP2*TMP_G_I
+
+                        IF (H_G_OLD_2 >= H_NEW) THEN
+                           CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I-1._EB)
+                           DCPDT = CP2*TMP_G_I - CP*(TMP_G_I-1._EB)
+                        ELSE
+                           CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I+1._EB)
+                           DCPDT = CP*(TMP_G_I+1._EB) - CP2*TMP_G_I
+                        ENDIF
+
+                        ! Compute approximation of d(cpT)/dT                  
+                        TMP_G_I = TMP_G_I + (H_NEW-M_GAS_NEW*CP*TMP_G_I)/(M_GAS_NEW*DCPDT)
+                        TMP_G_I = MAX(TMPMIN,TMP_G_I)
+
+                        ITCOUNT = ITCOUNT + 1
+                        IF (ABS(TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
+
+                        IF (ITCOUNT > 10) THEN
+                           TMP_G_NEW = 0.5_EB*(TMP_G_I + TMP_G_NEW)
+                           EXIT ITERATE_TEMP_2
+                        ENDIF               
+                        TMP_G_NEW = TMP_G_I
+
+                        ENDDO ITERATE_TEMP_2
+
+                  ELSE
+
+                     ITERATE_TEMP_3: DO WHILE (TEMPITER)
+
+                        TEMPITER=.FALSE.
+                        CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP2,TMP_G_I)                   
+
+                        ! Compute approximation of d(cp)/dT      
                         IF (TMP_G_I > 1._EB) THEN
                            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I-1._EB)
                            DCPDT = CP2-CP
@@ -2455,23 +2487,22 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I+1._EB)
                            DCPDT = CP-CP2
                         ENDIF
-
-                        ! Compute approximation of d(cp)/dT                  
-
+            
+                         ! Compute gas temperature corresponding to internal energy variation
                         TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
                         TMP_G_I = MAX(TMPMIN,TMP_G_I)
+
                         ITCOUNT = ITCOUNT + 1
                         IF (ABS(TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
+
                         IF (ITCOUNT > 10) THEN
                            TMP_G_NEW = 0.5_EB*(TMP_G_I + TMP_G_NEW)
-                           EXIT ITERATE_TEMP_2
+                           EXIT ITERATE_TEMP_3
                         ENDIF               
                         TMP_G_NEW = TMP_G_I
-                     ENDDO ITERATE_TEMP_2
-                  ELSE
-                     DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                     N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
-                     !CYCLE TIME_ITERATION_LOOP
+
+                     ENDDO ITERATE_TEMP_3
+
                   ENDIF
 
                   !ITMP     = INT(TMP_DROP_NEW)
@@ -2637,11 +2668,6 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
    AVG_DROP_DEN_ALL(:,:,:) = RUN_AVG_FAC*AVG_DROP_DEN_ALL(:,:,:) + OMRAF*DROP_DEN_ALL
    
 ENDIF SUM_PART_QUANTITIES
-
-DEALLOCATE(Q_CON_GAS_TOT)
-DEALLOCATE(Q_EVAP_TOT)
-DEALLOCATE(MVAP_DELTAHG)
-DEALLOCATE(MVAP_HSB)
 
 ! Remove PARTICLEs that have completely evaporated
 
