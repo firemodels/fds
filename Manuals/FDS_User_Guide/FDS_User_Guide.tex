@@ -2311,49 +2311,87 @@ numerical instabilities if the initial time step is set too high.
 \clearpage
 
 
-\section{Special Topic: Unusual Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
+\section{Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
 \label{info:INIT}
 
 Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is
 assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This
 decrease is not noticed in most building scale calculations, but it is important in large outdoor
 simulations. There are some scenarios for which it is convenient to change the ambient conditions within some
-rectangular region of the domain. If so, add lines of the form
+rectangular region of the domain. 
+\subsection*{Species}
+Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file.
+Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
 
 \footnotesize
 \begin{verbatim}
-&INIT XB=0.5,0.8,2.1,3.4,2.5,3.6, TEMPERATURE=30. /
+&SPEC ID='NITROGEN', BACKGROUND=.TRUE. /
+&SPEC ID='PROPANE' /
+&SPEC ID='OXYGEN' /
+&SPEC ID='WATER VAPOR' /
+&SPEC ID='CARBON DIOXIDE' /
+&SPEC ID='CARBON MONOXIDE' /
+
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, 
+      MASS_FRACTION(1)=0.218851, SPEC_ID(1)='OXYGEN',
+      MASS_FRACTION(2)=0.060321,SPEC_ID(2)='PROPANE' /
+\end{verbatim}
+\normalsize
+\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.219 and 0.060 respectively.
+
+\subsection*{Temperature}
+To modify the local initial temperature, add lines of the form,
+
+\footnotesize
+\begin{verbatim}
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,, TEMPERATURE=60. /
 \end{verbatim}
 
 \normalsize
-\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial temperature shall be 30~$^\circ$C instead of the ambient.
-This construct can also be used for {\ct DENSITY} or pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that
-{\ct N} is not necessarily indicative of the order in which the species are listed in the input file.
-Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line.
+\noindent Temperature shall be 60~$^\circ$C instead of the ambient. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and out. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
 
-The {\ct INIT} construct may be useful in examining the influence of
-stack effect in a building, where the temperature
-is different inside and out.
+\footnotesize
+\begin{verbatim}
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, 
+      MASS_FRACTION(1)=0.218851, SPEC_ID(1)='OXYGEN',
+      MASS_FRACTION(2)=0.060321,SPEC_ID(2)='PROPANE',
+      TEMPERATURE=60. /
+\end{verbatim}
+\normalsize
 
+\subsection*{Density}
+This construct can also be used for {\ct DENSITY}. When specifying an initial density it is important for the user to recognize the order of which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
+
+\footnotesize
+\begin{verbatim}
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, 
+      MASS_FRACTION(1)=0.218851, SPEC_ID(1)='OXYGEN',
+      MASS_FRACTION(2)=0.060321,SPEC_ID(2)='PROPANE',
+      TEMPERATURE=60. 
+      DENSITY = 1.130 /
+\end{verbatim}
+\normalsize
+
+\noindent This example is a case where we have over-defined the problem. FDS solves for the density first, which was set on the {\ct INIT} to be 1.130 (kg/m$^3$). Since temperature is found from the equation of state (for an ideal gas) after the density, if the user defined initial temperature does not satisfy the equation of state, FDS overwrites the specified temperature. In the example initialization above, the temperature which satisfies the governing equations is 45.8~$^\circ$C, not 60~$^\circ$C.
+
+\subsection*{HRRPUV}
 The {\ct INIT} line may also be used to specify a volumetric heat source term. For example,
 
 \footnotesize
 \begin{verbatim}
-&INIT XB=0.5,0.8,2.1,3.4,2.5,3.6, HRRPUV=1000. /
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000. /
 \end{verbatim}
 
 \normalsize
 \noindent indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
 
-Note that a solid obstruction can be given an initial temperature via the
-parameter {\ct TMP\_INNER} on the {\ct SURF} line. An initial velocity
-can be prescribed via {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct MISC} line.
+Note that a solid obstruction can be given an initial temperature via the parameter {\ct TMP\_INNER} on the {\ct SURF} line. An initial velocity can be prescribed via {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct MISC} line.
 
 
 
 \clearpage
 
-\section{Special Topic: The Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
+\section{The Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
 \label{info:PRES}
 
 FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is
@@ -2425,7 +2463,7 @@ of {\ct VELOCITY\_TOLERANCE}. (Bottom) A contour plot of the pressure after 120~
 
 \clearpage
 
-\section{Special Topic: Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
+\section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
 \label{info:CLIP}
 
 The algorithms in FDS are designed to work within a certain range of values for the thermodynamic quantities density, temperature and mass fraction. To prevent unphysical results,
@@ -2685,37 +2723,31 @@ attribute {\ct BURN\_AWAY=.TRUE.}
 
 \subsubsection{Example Case: {\bf sawtooth}}
 
-In this example, we look at the flow field through a two-dimensional curved pipe. The curve is created using a series of obstructions that approximate the curve through ``stair-stepping" as in the following example:
+In this example, we look at the flow field past a diagonally oriented obstruction. If {\ct SAWTOOTH=.FALSE.}, then the velocity boundary conditions will be applied in
+such a way as to minimize the impact of the boundaries due to vortices at sharp corners, as shown in the following example:
 
 \scriptsize
 \begin{verbatim}
-&OBST XB= 0.0000, 0.0240,-0.0005, 0.0005, 0.0640, 0.0710, SAWTOOTH=.FALSE., COLOR='GREY' /
-&OBST XB= 0.0000, 0.0250,-0.0005, 0.0005, 0.0710, 0.0750, SAWTOOTH=.FALSE., COLOR='GREY' /
-&OBST XB= 0.0000, 0.0260,-0.0005, 0.0005, 0.0750, 0.0780, SAWTOOTH=.FALSE., COLOR='GREY' /
-&OBST XB= 0.0000, 0.0270,-0.0005, 0.0005, 0.0780, 0.0810, SAWTOOTH=.FALSE., COLOR='GREY' /
-&OBST XB= 0.0000, 0.0280,-0.0005, 0.0005, 0.0810, 0.0830, SAWTOOTH=.FALSE., COLOR='GREY' /
+&OBST XB= 0.00, 0.05,-0.01, 0.01, 0.00, 0.05, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.05, 0.10,-0.01, 0.01, 0.00, 0.10, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.10, 0.15,-0.01, 0.01, 0.05, 0.15, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
+&OBST XB= 0.15, 0.20,-0.01, 0.01, 0.10, 0.20, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
 \end{verbatim}\normalsize
 
 \noindent
-Setting {\ct SAWTOOTH=.FALSE.} applies the velocity boundary conditions in such a way as to minimize the impact of the boundaries due to vortices at sharp corners. Figure~\ref{sawtooth} portrays the flow field in the pipe after five seconds. On the left the boundary of the pipe is defined with {\ct SAWTOOTH=.TRUE.}, while on the right the boundary is defined with {\ct SAWTOOTH=.FALSE.}. On the right the curve has been rendered as a single smooth surface because Smokeview renders adjacent surfaces with {\ct SAWTOOTH=.FALSE.} as a single smooth surface. While the flow field on the left is characterized by significant turbulence, {\ct SAWTOOTH=.FALSE.} reduces the turbulence in the flow field on the right so that the air moves smoothly through the pipe from one end to the other.
+In Figure~\ref{sawtooth}, the top set of obstructions are using the default {\ct SAWTOOTH=.TRUE.} and the bottom set of
+obstructions are using {\ct SAWTOOTH=.FALSE.} The adjacent obstructions that have {\ct SAWTOOTH=.FALSE.} are displayed
+in Smokeview as one smooth obstruction, shown in green. Notice that as the air moves across the different sets of obstructions,
+the air velocity on the bottom set of obstructions is not affected as much by the vortices.
 
-\begin{figure}[h!]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/sawtooth_true} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/sawtooth_false}
-   \end{tabular*}
-   \caption[Example of {\ct SAWTOOTH=.FALSE.}]{Velocity field through a two-dimensional curved pipe at $t=5.0$ s. (Left) {\ct SAWTOOTH=.TRUE.} (Right) {\ct SAWTOOTH=.FALSE.}}
-   \label{sawtooth}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=5in]{SCRIPT_FIGURES/sawtooth}
+\end{center}
+\caption[Simple example of {\ct SAWTOOTH=.FALSE.}]{Simple example of {\ct SAWTOOTH=.FALSE.}}
+\label{sawtooth}
 \end{figure}
 
-Without {\ct SAWTOOTH=.FALSE.}, the vorticities at the sharp corners of the boundary create a sizeable boundary layer. Figure~\ref{sawtooth_ugraph} plots the velocity through the apex of the pipe for both cases. The blue line represents the {\ct SAWTOOTH=.TRUE.} case while the orange line represents the {\ct SAWTOOTH=.FALSE.} case. Notice the broader range of the orange line. {\ct SAWTOOTH=.FALSE.} reduces the size of the boundary layer on both sides of the pipe by minimizing the impact of vortices forming at the boundary as a result of the sharp corners of the ``stair-stepping".
-
-\begin{figure}[h!]
-   \centering
-      \includegraphics[width=5in]{SCRIPT_FIGURES/sawtooth_ugraph}
-   \caption[Boundary layer analysis of {\ct SAWTOOTH=.FALSE.}]{$z$-axis $u$-velocity profile at apex of turn in two-dimensional curved pipe portraying the effects of a boundary defined by {\ct SAWTOOTH=.FALSE.} (Orange).}
-   \label{sawtooth_ugraph}
-\end{figure}
 
 \newpage
 
@@ -4836,6 +4868,25 @@ The inputs {\ct MASS\_FLUX(:)} (and typically {\ct MASS\_FRACTION(:)}) should on
 for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with
 units of kg/m$^2$/s.
 
+\subsection*{Mass Flux Example}
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID='METHANE' /
+&SURF ID='METHANE_FLOW', SPEC_ID(1)='METHANE', MASS_FLUX(1)=0.025 /
+&OBST XB=0.4,0.6,0.4,0.6,0.00,0.2,SURF_IDS='METHANE_FLOW','INERT','INERT' /
+\end{verbatim}\normalsize
+
+
+\subsection*{Velocity Example}
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID='METHANE' / 
+&SURF ID   = 'INFLOW', MASS_FRACTION(1)=1.0, SPEC_ID(1)='METHANE', VEL  = -.1 /
+&VENT XB = 0.0,0.4,0.0,0.1,0.15,0.15, SURF_ID = 'INFLOW' /
+\end{verbatim}\normalsize
+
 \begin{warning}
 \noindent
 Note that specifying {\ct MASS\_FRACTION(:)}, sets the ``ghost'' cell values for the species
@@ -4843,6 +4894,7 @@ mass fractions.  Since the mass conservation equation is an advection-diffusion 
 if the specified velocity is small, then the diffusion term can dominate resulting in an unintended
 mass flux of species.  To obtain a guaranteed mass flux of a species, you should use {\ct MASS\_FLUX(:)}
 \end{warning}
+
 
 
 
@@ -5963,7 +6015,7 @@ The following inputs:
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID='NITROGEN', BACKGROUND=.TRUE./
+&SPEC ID='NITROGEN', BACKGROUND=.TRUE./ Note: The background species must be defined first.
 &SPEC ID='OXYGEN', MASS_FRACTION_0 = 0.23054 /
 &SPEC ID='WATER VAPOR', MASS_FRACTION_0 = 0.00626 /
 &SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0 = 0.00046 /
@@ -6294,8 +6346,8 @@ Define the governing chemical reaction in terms of the primitive (or individual)
 \end{equation}
 Since it is assumed that all of the Cl goes to HCL, the remainder of the stoichiometric coefficients come from an atom balance. An equation can now be written to include the appropriate numerical values for the stoichiometric coefficients.
 \begin{eqnarray}\label{eq:PVC_reac2}
-1\,\underbrace{\mathrm{(C_2H_3Cl)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(1.53 \, O_2+1.53 \,(^{.79}/_{.21}) \, N_2})}_\text{Air} \rightarrow \\
-\nonumber 1\,\underbrace{\mathrm{(HCl +  H_2O + 0.14\, CO + 0.96\, CO_2 + 0.90\, C + 1.53\,(^{.79}/_{.21}) \, N_2)}}_\text{Products}
+1\,\underbrace{\mathrm{(C_2H_3Cl)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(1.53 \, O_2+1.53 \,(3.76) \, N_2})}_\text{Air} \rightarrow \\
+\nonumber 1\,\underbrace{\mathrm{(HCl +  H_2O + 0.14\, CO + 0.96\, CO_2 + 0.90\, C + 1.53\,(3.76) \, N_2)}}_\text{Products}
 \end{eqnarray}
 The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspecies}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the species' chemical formula. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.
 
@@ -6579,7 +6631,7 @@ At certain critical points in a calculation, like the moment of ignition, the lo
 steps, or both. To prevent fictitiously high values of the reaction rate that can lead to numerical instabilities, a limiting value of the heat release rate
 per unit volume is used:
 \be \dq'''_{\hbox{\tiny max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE} \ee
-where {\ct HRRPUA\_SHEET} is given in units of kW/m$^2$ and {\ct HRRPUV\_AVERAGE} is given in units of kW/m$^3$.
+where the default values of {\ct HRRPUA\_SHEET} and {\ct HRRPUV\_AVERAGE} are 200 kW/m$^2$~\cite{?} and 2500 kW/m$^3$~\cite{?}, respectively.
 
 
 \subsection{Special Topic: Diagnostic Parameters}
@@ -6588,8 +6640,8 @@ where {\ct HRRPUA\_SHEET} is given in units of kW/m$^2$ and {\ct HRRPUV\_AVERAGE
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will
 check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (Default {\ct .TRUE.})
-\item{\ct REAC\_ATOM\_ERROR} Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-5)
-\item{\ct REAC\_MASS\_ERROR} Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products)
+\item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-5)
+\item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products)
 for the reaction stoichiometry mass balance check.  (Default 1.E-4)
 \end{description}
 
@@ -9871,6 +9923,25 @@ the actual volume fraction of CO, and the second line reports the output of a ga
 \end{verbatim}
 \normalsize
 
+\subsection{Soot Concentration}
+\label{info:soot}
+
+Currently there are three different device options for outputting soot concentration from FDS. It is important to recognize what each device is outputting so that the proper selection can be made. 
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='MF_SOOT', XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='SOOT'/
+&DEVC ID='VF_SOOT', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='SOOT' /
+&DEVC ID='SOOT_VF', XYZ=..., QUANTITY='SOOT VOLUME FRACTION' /
+\end{verbatim}
+\normalsize
+
+\noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} of soot will output the mass fraction of soot in the gas phase based on the molecular weight of soot of 10.91042 (g/mol). The quantity {\ct 'VOLUME FRACTION'} of soot will output the volume fraction of soot in the gas phase treating soot as if it were an ideal gas. The quantity {\ct 'SOOT VOLUME FRACTION'} will output the volume fraction of soot as if it was a solid particle in computational cell based on the following equation,
+
+\begin{equation}\label{eq:soot_volume_fraction}
+\mbox{Soot Volume Fraction} = \rho Y_{s} / \rho_{s}
+\end{equation}
+\noindent where $\rho$ is the local density, $Y_{s}$ is the local mass fraction of soot, and $\rho_{s}$ is density of soot defined to be 1850 (kg/m$^3$).
 
 \subsection{Gas Velocity}
 \label{info:velocity}
@@ -10169,7 +10240,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
 {\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      &                & B,D          \\ \hline
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct H}                                         & $H=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
+{\ct H}                                         & ${\cal H}=|\bu|^2/2 + \tp/\rho_0$             & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT FLOW}                                 & Section~\ref{info:flows}                      & kW             & D            \\ \hline
 {\ct NET HEAT FLUX}                             & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HRR}                                       & $\int \dq''' \; dV$                           & kW             & D            \\ \hline
@@ -10211,7 +10282,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
 {\ct SCALAR RESOLUTION}$^{*****}$               &  Section~\ref{info:meshquality}               &                & S            \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
-{\ct SOOT VOLUME FRACTION}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
+{\ct SOOT VOLUME FRACTION}                      & $\rho Y_s/\rho_s$ (Section~\ref{info:soot})   & mol/mol        & D,I,P,S      \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
