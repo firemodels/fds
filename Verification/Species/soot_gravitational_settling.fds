@@ -1,5 +1,3 @@
-Test case to check soot deposition via gravitational settling
-
 &HEAD CHID='soot_gravitational_settling', TITLE='Verification of soot deposition via gravitational settling, SVN $Rev$'/
 
 &MESH IJK=5,5,5, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
@@ -8,7 +6,7 @@ Test case to check soot deposition via gravitational settling
 
 &DUMP MASS_FILE=.TRUE., DT_MASS=100, DT_DEVC=10 /
 
-&MISC GRAVITATIONAL_DEPOSITION = .TRUE.
+&MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
       THERMOPHORETIC_DEPOSITION = .FALSE.
       TURBULENT_DEPOSITION      = .FALSE. /
 
