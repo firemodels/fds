@@ -6192,7 +6192,7 @@ specified, it is assumed to be
 \be \Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { \nu_{f} W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
 Its default is 13,100~kJ/kg. Typically, a chemical reaction is balanced by setting
-the stoichiometric coefficient of the fuel $\nu_{f}$ to 1, which is the convention used by FDS.
+the stoichiometric coefficient of the fuel $\nu_{f}$ to 1. In FDS, the stoichiometric coefficients of the chemical reaction are normalized by the stoichiometric coefficient of the fuel, effectively setting $\nu_{f}$ to 1.
 Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are specified that FDS will ignore
 the value for {\ct EPUMO2}.
 
