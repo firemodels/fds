@@ -2790,6 +2790,7 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   int i,j,k,nn;
   int nx, ny, nxy, ibar, jbar;
   int ntimes;
+  int iimin, iimax, jjmin, jjmax, kkmin, kkmax;
   char *iblank_node, *iblank_cell;
   mesh *meshi;
 
@@ -2810,8 +2811,17 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   ntimes = ndata/sd->nsliceii;
   for(nn=0;nn<ntimes;nn++){
     for(i=0;i<sd->nslicei;i++){
+      int ii;
+
+      ii = sd->is1+i;
       for(j=0;j<sd->nslicej;j++){
+        int jj;
+
+        jj = sd->js1+j;
         for(k=0;k<sd->nslicek;k++){
+          int kk;
+
+          kk = sd->ks1+k;
           n++;
           if(sd->slicetype==SLICE_CENTER&&((k==0&&sd->nslicek!=1)||(j==0&&sd->nslicej!=1)||(i==0&&sd->nslicei!=1)))continue;
         // 0 blocked
@@ -2830,11 +2840,27 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
           if(first==1){
             *pmin=pdata[n];
             *pmax=pdata[n];
+            iimin=ii;
+            jjmin=jj;
+            kkmin=kk;
+            iimax=ii;
+            jjmax=jj;
+            kkmax=kk;
             first=0;
           }
           else{
-            if(pdata[n]<*pmin)*pmin=pdata[n];
-            if(pdata[n]>*pmax)*pmax=pdata[n];
+            if(pdata[n]<*pmin){
+              *pmin=pdata[n];
+              iimin=ii;
+              jjmin=jj;
+              kkmin=kk;
+            }
+            if(pdata[n]>*pmax){
+              *pmax=pdata[n];
+              iimax=ii;
+              jjmax=jj;
+              kkmax=kk;
+            }
           }
         }
       }
@@ -2842,10 +2868,16 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
     if(first==1){
       *pmin=0.0;
       *pmax=1.0;
+      iimin=0;
+      jjmin=0;
+      kkmin=0;
+      iimax=0;
+      jjmax=0;
+      kkmax=0;
     }
   }
-  printf(" global min (slice file): %f\n",*pmin);
-  printf(" global max (slice file): %f\n",*pmax);
+  printf(" global min (slice file): %f index=(%i,%i,%i)\n",*pmin,iimin,jjmin,kkmin);
+  printf(" global max (slice file): %f index=(%i,%i,%i)\n",*pmax,iimax,jjmax,kkmax);
 }
 
 /* ------------------ adjustslicebounds ------------------------ */
