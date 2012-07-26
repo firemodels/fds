@@ -3,7 +3,7 @@
 # This script runs the Smokeview Verification Cases on a 
 # Linux machine with a batch queuing system
 
-queue=batch
+queue=
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -q queue_name -s ]"
@@ -13,7 +13,7 @@ echo "Options"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
 echo "-q queue_name - run cases using the queue queue_name"
-echo "     default: $queue"
+echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
 exit
@@ -53,10 +53,14 @@ shift
 done
 
 # Set queue to submit cases to
+
+if [ "$queue" != "" ]; then
+   queue="-q $queue"
+fi
    
-export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh -q $queue"
-export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh -q $queue"
-export RUNFDSFG="$SVNROOT/Utilities/Scripts/runfds.sh -q $queue"
+export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
+export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
+export RUNFDSFG="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 
 export BASEDIR=`pwd`
 
