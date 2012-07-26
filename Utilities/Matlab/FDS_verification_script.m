@@ -41,8 +41,10 @@ sawtooth;                 display('sawtooth complete...')
 cfil = [pwd,'/FDS_verification_dataplot_inputs.csv'];
 vdir = [pwd,'/../../Verification/'];
 plotdir = [pwd,'/../../Manuals/'];
+qfil = [pwd,'/FDS_verification_scatterplot_inputs.csv'];
 
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
+scatplot(saved_data,drange,qfil)
 
 % Special cases
  
