@@ -2346,7 +2346,7 @@ INTEGER  :: N
 REAL(EB) :: Y_MF_INT, TMP_1
 
 ! All equations from D.A. Purser, SFPE Handbook, 4th Ed.
-! Note: Purser uses minutes, here dt is in seconds.
+! Note: Purser uses minutes, here dt is in seconds. Conversion at the end of the function.
 ! Total FED dose:
 ! FED_dose = (FED_LCO + FED_LCN + FED_LNOx + FLD_irr)*FED_VCO2 + FED_LO2;
 
@@ -2356,8 +2356,9 @@ REAL(EB) :: Y_MF_INT, TMP_1
 !   with RMV=25 [l/min], D=30 [%] COHb concentration at incapacitation and C_CO in ppm
 IF (CO_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
+
    TMP_1 = SPECIES(CO_INDEX)%RCON*Y_MF_INT*1.E6_EB/RSUM
-   FED   = 3.317E-5_EB*25.0_EB* TMP_1**(1.036_EB)/(30.0_EB*60.0_EB)
+   FED   = 2.764E-5_EB*TMP_1**(1.036_EB)
 ENDIF
 
 ! Nitrogen oxides (NOx, here NO + NO2)
@@ -2372,7 +2373,7 @@ IF (NO2_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,NO2_INDEX,Y_MF_INT)
    TMP_1 = TMP_1 + SPECIES(NO2_INDEX)%RCON*Y_MF_INT/RSUM
 ENDIF
-IF (TMP_1 > 0) FED = FED + TMP_1/(0.001500_EB*60.0_EB)
+IF (TMP_1 > 0) FED = FED + TMP_1/0.001500_EB
 
 ! Cyanide
 ! FED_LCN = (exp(C_CN/43)/220 - 0.0045) * (dt/60);
@@ -2380,7 +2381,7 @@ IF (TMP_1 > 0) FED = FED + TMP_1/(0.001500_EB*60.0_EB)
 IF (HCN_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,HCN_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(HCN_INDEX)%RCON*Y_MF_INT/RSUM - TMP_1
-   IF (TMP_1 > 0) FED = FED + (Exp(TMP_1/0.000043_EB)/220.0_EB-0.00454545_EB)/60.0_EB
+   IF (TMP_1 > 0) FED = FED + (Exp(TMP_1/0.000043_EB)/220.0_EB-0.00454545_EB)
 ENDIF
 
 ! Irritants
@@ -2393,7 +2394,7 @@ DO N=1,N_SPECIES
       TMP_1 = TMP_1 + SPECIES(N)%RCON*Y_MF_INT/RSUM / SPECIES(N)%FLD_LETHAL_DOSE
    ENDIF
 ENDDO
-FED = FED + TMP_1/60.0_EB
+FED = FED + TMP_1
 
 ! Carbon dioxide (CO2) induced hyperventilation:
 ! FED_VCO2 = exp(0.1903*C_CO2/1E4 + 2.0004)/7.1;
@@ -2410,8 +2411,11 @@ ENDIF
 IF (O2_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,O2_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(O2_INDEX)%RCON*Y_MF_INT/RSUM
-   If ( TMP_1 < 0.20_EB ) FED = FED + 1.0_EB  / (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*TMP_1)) )
+   If ( TMP_1 < 0.20_EB ) FED = FED + 1.0_EB  / Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*TMP_1))
 ENDIF
+
+! Convert the FED integrand for minutes.
+FED = FED / 60._EB
 
 END FUNCTION FED
 
