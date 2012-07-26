@@ -2126,13 +2126,15 @@ void update_fedinfo(void){
     fedi->fed_index=-1;
     fedi->loaded=0;
     fedi->display=0;
-    if(strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION")!=0)continue;
+    if(slicei->slicetype!=SLICE_CENTER&&strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION")!=0)continue;
+    if(slicei->slicetype==SLICE_CENTER&&strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION(cell centered)")!=0)continue;
     fedi->co2_index=i;
     for(j=0;j<nsliceinfo;j++){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
-      if(strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION")!=0)continue;
+      if(slicei->slicetype!=SLICE_CENTER&&strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION")!=0)continue;
+      if(slicei->slicetype==SLICE_CENTER&&strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION(cell centered)")!=0)continue;
       if(slicei->blocknumber!=slicej->blocknumber)continue;
       if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
       if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
@@ -2145,7 +2147,8 @@ void update_fedinfo(void){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
-      if(strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION")!=0)continue;
+      if(slicei->slicetype!=SLICE_CENTER&&strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION")!=0)continue;
+      if(slicei->slicetype==SLICE_CENTER&&strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION(cell centered)")!=0)continue;
       if(slicei->blocknumber!=slicej->blocknumber)continue;
       if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
       if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
