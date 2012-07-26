@@ -380,6 +380,45 @@ Combustion Efficiency   &               &          1                        & As
 \label{HRR_PBTGF}
 \end{figure}
 
+\clearpage
+\section{Liquid Pool Fires}
+
+In this section, a series of liquid pool fires of different liquids is conciderd. The pool fires are assumed to burn in 1~m by 1~m pool and the fuel layer is 10~cm thick. Burning rates of liquid hydrocarbon fuels have been found to correlate well with \cite{SFPE}
+\begin{equation}
+\dot{m}^{\prime\prime}=1\times10^{-3}\frac{\Delta~h_c}{\Delta~h_{v,sen}} ; \quad h_{v,sen} = \Delta~h_v + \int_{T_0}^{T_b} c_p dT.
+\end{equation} 
+Here $T_0$ is the initieal temperature, $T_b$ is the boiling temperature of the liquid, $c_p$ is  the constant pressure specific, $h_v$ is the heat of evaporation and finally $h_c$ is the heat of combustion. The term $h_{v,sen}$ represents the energy needed to raise the fuel from initial temperature to boiling and evaporate it. Figure \ref{POOL_MLR} shows comparisons of predicted burning rates with data taken from \cite{SFPE}. 
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|} \hline
+Fuel & $\rho$ & $c_p$  & $h_c$ & $h_v$ & $\chi_r$ \\ \hline
+Acetone &  792.5   &  1.6529    &   30509.64  &  501.03 & 0.27\\ \hline
+Benzene &  876.5   &  1.7372    &   39900 &   393.29 & 0.32\\ \hline
+Butane  &  584.0   &  2.2784    &   45700.  &   385.22 & 0.20\\ \hline
+Ethanol &  789.0   &  2.4398    &   26780.  &    836.98  & 0.18\\ \hline
+Heptane &  684.0   &  2.2464    &   44400. &    364.9 & 0.35\\ \hline
+Methanol & 791.8   &  2.4813    &   19800.  &  1098.94 & 0.18 \\ \hline
+
+\end{tabular}
+\caption{Properties of liquid fuels}
+\end{center}
+\end{table}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+
+\includegraphics[height=2.2in]{FIGURES/Pool_Fires/acetone_1_m} &
+\includegraphics[height=2.2in]{FIGURES/Pool_Fires/benzene_1_m} \\ 
+\includegraphics[height=2.2in]{FIGURES/Pool_Fires/butane_1_m} &
+\includegraphics[height=2.2in]{FIGURES/Pool_Fires/ethanol_1_m} \\
+\includegraphics[height=2.2in]{FIGURES/Pool_Fires/heptane_1_m} &
+\includegraphics[height=2.2in]{FIGURES/Pool_Fires/methanol_1_m} \\
+\end{tabular*}
+\caption[Mass loss rate of poly(butylene terephtalate) (PBT).]{Comparison of predicted and measured mass loss rates for poly(butylene terephtalate) (PBT)
+in both the Gasification Apparatus and Cone Calorimeter.}
+\label{POOL_MLR}
+\end{figure}
 
 
 \clearpage
