@@ -1,8 +1,9 @@
 &HEAD CHID='fed_test', TITLE='Check FED computation in smokeview, SVN $Revision$'/
 
-&MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=5,5,5 /
+&MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=3,3,3 /
 
 &TIME T_END=360.0, DT=0.1 /
+&DUMP NFRAMES=2880 /
 
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE. /
 &SPEC ID='OXYGEN' /
