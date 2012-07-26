@@ -3,7 +3,7 @@
 # This script runs the FDS Verification Cases on a linux machine with
 # a batch queuing system
 
-queue=batch
+queue=
 cases=all
 
 function usage {
@@ -17,7 +17,7 @@ echo "     other options: serial, mpi"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
 echo "-q queue_name - run cases using the queue queue_name"
-echo "     default: $queue"
+echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
 exit
@@ -53,8 +53,12 @@ case $OPTION in
 esac
 done
 
-export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh -q $queue" 
-export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh -q $queue"
+if [ "$queue" != "" ]; then
+   queue="-q $queue"
+fi
+
+export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue" 
+export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 
 export BASEDIR=`pwd`
 
