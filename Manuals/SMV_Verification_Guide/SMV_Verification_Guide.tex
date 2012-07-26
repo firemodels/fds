@@ -616,10 +616,14 @@ vector slices. Again, vector slice file images are drawn at 5.0~s,
 10.0~s and 30.0~s. The first column draws all vectors while the
 second column discards or chops vectors below 140~\degC.
 
-Figure \ref{figfedslicetest} presents images verifying the display
-of FED or fractional effective dose slices. Images are drawn at
-0.0~s, 10.0~s and 30.0~s and are computed using $\mathrm{CO}$,
-$\mathrm{CO_2}$ and $\mathrm{O_2}$ data slices.
+Figure \ref{figfedslicetest} presents slice file images verifying
+the computation of FED or fractional effective dose slices. Images
+are drawn at 30.0~s, 60.0~s and 120.0~s and 240~s.  The FED is
+computed using $\mathrm{CO}$, $\mathrm{CO_2}$ and $\mathrm{O_2}$
+data slices.  Concentration values are chosen (
+$\mathrm{CO}=2000 \mathrm{ppm}$,
+$\mathrm{CO_2}=4 $,
+$\mathrm{O_2}=7.0875 $) resulting in FED values of 1.5 at 30~s, 3.0 at 60~s, 6.0 at 120~s and 12.0 at 240~s.
 
 Figure \ref{figgslicetest} presents images of 3D slices oriented
 in two different ways. Images are drawn at 0.0~s, 10.0~s and
@@ -714,16 +718,19 @@ script, {\tt plume5c.ssf}.
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cp{1.0in}}
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume_fed_slice_00}\\
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume_fed_slice_10}\\
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume_fed_slice_30}\\
-&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{../SMV_User_Guide/figures/colorbar_fed}}
+\begin{tabular}{ccp{1.0in}}
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_030}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_060}\\
+30.0~s, FED=0.27&60.0~s, FED=0.55\\
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_120}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_360}\\
+120~s, FED=1.1&360~s, FED=3.3\\
+&&\raisebox{0.25in}[0pt]{\includegraphics[height=5.5in]{../SMV_User_Guide/figures/colorbar_fed}}
  \end{tabular}
 \end{center}
- \caption[Node centered FED slice file test.]{Node centered FED slice file test.
+ \caption[Cell centered FED slice file test.]{Cell centered FED slice file test.
  These contours were generated using $\mathrm{CO}$,
-$\mathrm{CO_2}$ and $\mathrm{O_2}$ data slices.}
+$\mathrm{CO_2}$ and $\mathrm{O_2}$ data slices. }
 \label{figfedslicetest}%
 \end{figure}
 
