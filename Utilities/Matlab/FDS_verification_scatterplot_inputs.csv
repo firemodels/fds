@@ -1,2 +1,2 @@
 Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Plot_Width,Sigma_2_E,Model_Error,Plot_Filename
-Temperature,Expected Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,0,no,FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/Temperature
+Temperature,Expected Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,800,0.03 0.95,SouthEast,4,0,no,FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/Temperature
