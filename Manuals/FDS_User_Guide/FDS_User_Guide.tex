@@ -5856,11 +5856,11 @@ Gases and liquids whose properties are tabulated within FDS are listed in Table~
 
 \subsubsection{Option 2: Lennard-Jones Potential Parameters}
 
-If the gas species is not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, must be specified on the {\ct SPEC} line in units of g/mol. The enthalpy of formation ({\ct H\_F}) in units of J/kmol must also be specified, either explicitly or implicitly. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}. In addition, if known, the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}) should be specified.
+If the gas species is not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, must be specified on the {\ct SPEC} line in units of g/mol. The {\ct ENTHALPY\_OF\_FORMATION} in units of J/kmol must also be specified, either explicitly or implicitly. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}. In addition, if known, the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}) should be specified.
 
 \subsubsection{Option 3: User-Specified Properties}
 
-If the gas species is not included in Table~\ref{tab:gasspecies}, and the Lennard-Jones potential parameters are not known, you must specify its molecular weight, {\ct MW} (g/mol), its {\ct VISCOSITY} (kg/m/s), its (thermal) {\ct CONDUCTIVITY} (W/m/K), its enthalpy of formation ({\ct H\_F}) (J/kmol), and its {\ct DIFFUSIVITY} (m$^2$/s). The diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. If any of these properties are omitted, FDS will assume the properties of air. The specific heat of the gas will be calculated from its molecular weight using the relation:
+If the gas species is not included in Table~\ref{tab:gasspecies}, and the Lennard-Jones potential parameters are not known, you must specify its molecular weight, {\ct MW} (g/mol), its {\ct VISCOSITY} (kg/m/s), its (thermal) {\ct CONDUCTIVITY} (W/m/K), its {\ct ENTHALPY\_OF\_FORMATION} (J/kmol), and its {\ct DIFFUSIVITY} (m$^2$/s). The diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. If any of these properties are omitted, FDS will assume the properties of air. The specific heat of the gas will be calculated from its molecular weight using the relation:
 \be 
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha} 
 \ee 
