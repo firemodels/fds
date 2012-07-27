@@ -8673,10 +8673,10 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 \end{verbatim}
 \normalsize
 
-\subsection{Freezing the Output Value, Example Case: freeze\_hrr}
+\subsection{Freezing the Output Value, Example Case: hrr\_freeze}
 \label{info:freeze_device}
 
-There are occasions where you may want the value of a {\ct RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the {\ct RAMP} to a {\ct DEVC}, see the previous section, and then giving that {\ct DEVC} either a {\ct NO\_UPDATE\_DEVC\_ID} or a {\ct NO\_UPDATE\_CTRL\_ID}.  When the specified controller changes its state to {\ct .TRUE.} it will cause the {\ct DEVC} to sop updating its value.  Since the {\ct DEVC} is being used as the independent variable to a {\ct RAMP}, the {\ct RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear {\ct RAMP} from 0 to 1000 kW/m$^2$ over 50 s. Rather than using the simulation time, the {\ct RAMP} uses a {\ct DEVC} for the time.  The timer is set to freeze when another {\ct DEVC} measuring time reaches 200~$^\circ$C.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case {\bf freeze\_device} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~$^\circ$C.
+There are occasions where you may want the value of a {\ct RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the {\ct RAMP} to a {\ct DEVC}, see the previous section, and then giving that {\ct DEVC} either a {\ct NO\_UPDATE\_DEVC\_ID} or a {\ct NO\_UPDATE\_CTRL\_ID}.  When the specified controller changes its state to {\ct .TRUE.} it will cause the {\ct DEVC} to sop updating its value.  Since the {\ct DEVC} is being used as the independent variable to a {\ct RAMP}, the {\ct RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear {\ct RAMP} from 0 to 1000~kW/m$^2$ over 50~s. Rather than using the simulation time, the {\ct RAMP} uses a {\ct DEVC} for the time.  The timer is set to freeze when another {\ct DEVC} measuring time reaches 200~$^\circ$C.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case {\bf hrr\_freeze} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~$^\circ$C.
 
 \footnotesize
 \begin{verbatim}
@@ -8695,7 +8695,7 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 \includegraphics[width=3.0in]{SCRIPT_FIGURES/hrr_freeze_T} &
 \includegraphics[width=3.0in]{SCRIPT_FIGURES/hrr_freeze_B} &
 \end{tabular*}
-\caption[Example of freezing the output of a {\ct RAMP}]{Temperature (left) and burning rate (right) outputs of the {\bf freeze\_hrr} test case}
+\caption[Example of freezing the output of a {\ct RAMP}]{Temperature (left) and burning rate (right) outputs of the {\bf hrr\_freeze} test case}
 \label{freeze_hrr}
 \end{figure}
 
