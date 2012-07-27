@@ -563,7 +563,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
    IF (PREDICTOR) CYCLE PARTICLE_LOOP
 
-   IF (SF%SHRINK) THEN
+   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
       RADIUS = SUM(ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))
    ELSEIF (SF%THERMALLY_THICK) THEN
       RADIUS = SF%THICKNESS
@@ -1316,7 +1316,7 @@ E_WALLB = SF%EMISSIVITY_BACK
 IF (E_WALLB < 0._EB .AND. SF%BACKING /= INSULATED) THEN
    E_WALLB = 0._EB
    VOLSUM = 0._EB
-   IF (SF%SHRINK) THEN
+   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
       NWP = SUM(ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS))
    ELSE
       NWP = SF%N_CELLS
@@ -1378,9 +1378,9 @@ SELECT CASE(SF%BACKING)
       ENDIF
 END SELECT
 
-! Compute grid for shrinking wall nodes
+! Compute grid for reacting nodes
 
-COMPUTE_GRID: IF (SF%SHRINK) THEN
+COMPUTE_GRID: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
    NWP = SUM(ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS))
    CALL GET_WALL_NODE_WEIGHTS(NWP,SF%N_LAYERS,ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS),ONE_D%LAYER_THICKNESS,SF%GEOMETRY, &
       ONE_D%X(0:NWP),SF%LAYER_DIVIDE,DX_S(1:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB,&
@@ -1480,17 +1480,17 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
 
       ENDDO MATERIAL_LOOP1b
 
-      IF (SF%SHRINK) THEN
-         POINT_SHRINK = .TRUE.
-         MATERIAL_LOOP1a: DO N=1,SF%N_MATL
-            IF (ONE_D%RHO(I,N)<=ZERO_P) CYCLE MATERIAL_LOOP1a
-            ML  => MATERIAL(SF%MATL_INDEX(N))
-            IF (ML%N_REACTIONS==0) THEN
-               POINT_SHRINK = .FALSE.
-               EXIT MATERIAL_LOOP1a
-            ENDIF
-         ENDDO MATERIAL_LOOP1a
-      ENDIF
+      ! If there is any non-reacting material, the material matrix will remain, and no shrinking is allowed
+
+      POINT_SHRINK = .TRUE.
+      MATERIAL_LOOP1a: DO N=1,SF%N_MATL
+         IF (ONE_D%RHO(I,N)<=ZERO_P) CYCLE MATERIAL_LOOP1a
+         ML  => MATERIAL(SF%MATL_INDEX(N))
+         IF (ML%PYROLYSIS_MODEL==PYROLYSIS_NONE) THEN
+            POINT_SHRINK = .FALSE.
+            EXIT MATERIAL_LOOP1a
+         ENDIF
+      ENDDO MATERIAL_LOOP1a
 
       ! In points that actually shrink, increase the density to account for filled material
 
@@ -1512,18 +1512,14 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
 
    ! Compute new coordinates if the solid shrinks. Save new coordinates in X_S_NEW.
 
-   IF (SF%SHRINK) THEN
+   R_S_NEW(NWP) = 0._EB
+   DO I=NWP-1,0,-1
+      R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*SHRINK_FACTOR(I+1) )**(1./REAL(I_GRAD))
+   ENDDO
 
-      R_S_NEW(NWP) = 0._EB
-      DO I=NWP-1,0,-1
-         R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*SHRINK_FACTOR(I+1) )**(1./REAL(I_GRAD))
-      ENDDO
-
-      DO I=0,NWP
-         X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
-      ENDDO
-
-   ENDIF
+   DO I=0,NWP
+      X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
+   ENDDO
 
    ! If the fuel or water massflux is non-zero, set the ignition time
 
@@ -1534,14 +1530,11 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
    ! Special reactions: LIQUID
    ! Liquid evaporation can only take place on the surface (1st cell)
 
-   POINT_SHRINK = .FALSE.
-   IF (SF%SHRINK) THEN
-      POINT_SHRINK = .TRUE.
-      MATERIAL_LOOP2a: DO N=1,SF%N_MATL
-         ML  => MATERIAL(SF%MATL_INDEX(N))
-         IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID .AND. ONE_D%RHO(1,N)>0._EB) POINT_SHRINK = .FALSE.
-      ENDDO MATERIAL_LOOP2a
-   ENDIF
+   POINT_SHRINK = .TRUE.
+   MATERIAL_LOOP2a: DO N=1,SF%N_MATL
+      ML  => MATERIAL(SF%MATL_INDEX(N))
+      IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID .AND. ONE_D%RHO(1,N)>0._EB) POINT_SHRINK = .FALSE.
+   ENDDO MATERIAL_LOOP2a
 
    ! Estimate the previous value of liquid mass fluxes. The possibility of multiple liquids not taken into account.
 
@@ -1720,7 +1713,7 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
          ! Interpolate densities and temperature from old grid to new grid
          ALLOCATE(INT_WGT(NWP_NEW,NWP),STAT=IZERO)
          CALL GET_INTERPOLATION_WEIGHTS(SF%N_LAYERS,NWP,NWP_NEW,ONE_D%N_LAYER_CELLS,N_LAYER_CELLS_NEW, &
-                                    ONE_D%X(0:NWP),X_S_NEW(0:NWP_NEW),INT_WGT)      
+                                    ONE_D%X(0:NWP),X_S_NEW(0:NWP_NEW),INT_WGT)
          CALL INTERPOLATE_WALL_ARRAY(NWP,NWP_NEW,INT_WGT,ONE_D%TMP(1:NWP))
          ONE_D%TMP(NWP_NEW+1) = ONE_D%TMP(NWP+1)
          CALL INTERPOLATE_WALL_ARRAY(NWP,NWP_NEW,INT_WGT,Q_S(1:NWP))
