@@ -5,8 +5,8 @@
 &MISC NEW_EVAP=.TRUE. /
 
 &TIME T_END=300. / 
-
-&REAC FUEL               = 'ACETONE VAPOR'
+&RADI RADIATIVE_FRACTION=0.27/
+&REAC FUEL               = 'ACETONE'
       FYI                = 'Acetone, C_3 H_6 O_1'
       HEAT_OF_COMBUSTION = 30509.64
       O                  = 1.
@@ -17,12 +17,12 @@
 &MATL ID                     = 'ACETONE LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
-      SPEC_ID                = 'ACETONE VAPOR'
+      SPEC_ID                = 'ACETONE'
       HEAT_OF_REACTION       = 501.03
       CONDUCTIVITY           = 0.18
       SPECIFIC_HEAT          = 1.6529
       DENSITY                = 792.5
-      ABSORPTION_COEFFICIENT = 40.
+      ABSORPTION_COEFFICIENT = 100.
       BOILING_TEMPERATURE    = 56.3 /
 	  
 &MATL ID            = 'STEEL'
@@ -66,3 +66,4 @@
 &TAIL /
 
 
+&DEVC XB=-0.50,0.50,-0.50,0.50,0.05,0.05,QUANTITY='GAUGE HEAT FLUX',STATISTICS='SURFACE INTEGRAL',ID='qdot'/

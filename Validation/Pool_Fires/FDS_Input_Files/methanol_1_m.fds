@@ -5,8 +5,8 @@
 &MISC NEW_EVAP=.TRUE. /
 
 &TIME T_END=600. / 
-
-&REAC FUEL               = 'METHANOL VAPOR'
+&RADI RADIATIVE_FRACTION =0.18/
+&REAC FUEL               = 'METHANOL'
       FYI                = 'Methanol, C_1 H_4 O_1'
       HEAT_OF_COMBUSTION = 19800.
       O                  = 1.
@@ -17,13 +17,13 @@
 &MATL ID                     = 'METHANOL LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
-      SPEC_ID                = 'METHANOL VAPOR'
+      SPEC_ID                = 'METHANOL'
       HEAT_OF_REACTION       = 1098.94
       CONDUCTIVITY           = 0.21
       SPECIFIC_HEAT          = 2.4813
       BOILING_TEMPERATURE    = 64.8       
       DENSITY                = 791.8
-      ABSORPTION_COEFFICIENT = 52. /
+      ABSORPTION_COEFFICIENT = 1520. /
 	  
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
@@ -66,3 +66,4 @@
 &TAIL /
 
 
+&DEVC XB=-0.50,0.50,-0.50,0.50,0.05,0.05,QUANTITY='GAUGE HEAT FLUX',STATISTICS='SURFACE INTEGRAL',ID='qdot'/
