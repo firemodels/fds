@@ -5,8 +5,8 @@
 &MISC NEW_EVAP=.TRUE. TMPA=-100 /
 
 &TIME T_END=300. / 
-
-&REAC FUEL               = 'BUTANE VAPOR'
+&RADI RADIATIVE FRACTION=0.20/
+&REAC FUEL               = 'BUTANE'
       FYI                = 'Butane, C_4 H_10'
       HEAT_OF_COMBUSTION = 45700.
       O                  = 0.
@@ -17,12 +17,12 @@
 &MATL ID                     = 'BUTANE LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
-      SPEC_ID                = 'BUTANE VAPOR'
+      SPEC_ID                = 'BUTANE'
       HEAT_OF_REACTION       = 385.22
       CONDUCTIVITY           = 0.124
       SPECIFIC_HEAT          = 2.2784
       DENSITY                = 584.
-      ABSORPTION_COEFFICIENT = 40.
+      ABSORPTION_COEFFICIENT = 100.
       BOILING_TEMPERATURE    = 0. /
 	  
 &MATL ID            = 'STEEL'
@@ -58,7 +58,7 @@
 
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 &SLCF PBY=0.0, QUANTITY='HRRPUV' /
-&SLCF PBY=0.0, QUANTITY='MASS FRACTION', SPEC_ID='BUTANE VAPOR'/
+&SLCF PBY=0.0, QUANTITY='MASS FRACTION', SPEC_ID='BUTANE'/
 
 &BNDF QUANTITY='BURNING RATE' /
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
@@ -67,3 +67,4 @@
 &TAIL /
 
 
+&DEVC XB=-0.50,0.50,-0.50,0.50,0.05,0.05,QUANTITY='GAUGE HEAT FLUX',STATISTICS='SURFACE INTEGRAL',ID='qdot'/
