@@ -1507,9 +1507,7 @@ a) Particles&b) Partical streaks\\
 \section{Computing and Visualizing Fractional Effective Dose data}
 The fractional effective dose (FED), developed by
 Purser~\cite{SFPE:Purser}, is a measure of human incapacitation
-due to combustion gases.  FED values of 0.3, 1.0 and 3.0 have been
-found to result in incapacities of 11~\%, 50~\% and 89~\% for
-humans\cite{}. FED index data is computed by Smokeview using CO,
+due to combustion gases.  FED index data is computed by Smokeview using CO,
 $\mathrm{CO_2}$ and $\mathrm{O_2}$ gas concentration data computed
 by FDS. Smokeview obtains this data from FDS using slice files.
 
@@ -1522,25 +1520,51 @@ the FED for CO. The total FED is then given by
 Other terms involving CN, NOx and irritants are neglected.
 The fraction of an incapacitating dose due to CO, $\mathrm{FED}_\mathrm{CO}$, is calculated using
 \be
-\mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, dt
+\mathrm{FED}_\mathrm{CO}(t) = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, dt
 \label{eq:fedCO}
 \ee
 where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm).
 The fraction of an incapacitating dose due to low O${}_2$ hypoxia , $\mathrm{FED}_\mathrm{O_2}$, is calculated using
 \be
-\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{\exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
+\mathrm{FED}_\mathrm{O_2}(t) =  \int_0^t \frac{dt}{\exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
 \label{eq:fedO2}
 \ee
 where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).
 The hyperventilation factor induced by carbon dioxide, $\mathrm{HV}_\mathrm{CO_2}$, is calculated using
 \be
-\mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1903 \, C_\mathrm{CO_2}(t) +  2.0004 ) }{7.1} \label{co2hyp}
+\mathrm{HV}_\mathrm{CO_2}(t) = \frac{ \exp( 0.1903 \, C_\mathrm{CO_2}(t) +  2.0004 ) }{7.1} \label{co2hyp}
 \label{eq:fedCO2}
 \ee
 where $t$ is time in minutes and $C_\mathrm{CO_2}$ is the $\mathrm{CO_2}$ concentration (percent).
 
-%Assuming that $C_\mathrm{CO}$, $C_\mathrm{CO_2}$ and $C_\mathrm{O_2}$ are constant, equations \ref{eq:fedCO}
+\subsection{FED example}
+Assuming that $C_\mathrm{CO}(t)=\mathrm{CO}$, $C_\mathrm{CO_2}(t)=\mathrm{CO_2}$ and $C_\mathrm{O_2}(t)=\mathrm{O_2}$ are constant,
+equations \ref{eq:fedCO}, \ref{eq:fedO2} and \ref{eq:fedCO2} reduce to
 
+\be
+\mathrm{FED}_\mathrm{CO}(t) = 2.764 \times 10^{-5} \, \mathrm{CO}^{1.036} \, t
+\label{eq:fedCOcons}
+\ee
+\be
+\mathrm{FED}_\mathrm{O_2}(t) =   \exp( -8.13 + 0.54 \, (20.9 - \mathrm{O_2}) )t
+\label{eq:fedO2cons}
+\ee
+
+\be
+\mathrm{HV}_\mathrm{CO_2}(t) = \frac{ \exp( 0.1903 \, \mathrm{CO_2} +  2.0004 ) }{7.1}
+\label{eq:fedCO2cons}
+\ee
+
+so that the total FED is given by
+
+\be
+\mathrm{FED}_\mathrm{tot} = \left(2.764 \times 10^{-5} \, \mathrm{CO}^{1.036}
+\times
+\frac{ \exp( 0.1903 \, \mathrm{CO_2} +  2.0004 ) }{7.1}
++
+   \exp( -8.13 + 0.54 \, (20.9 - \mathrm{O_2}) )
+   \right) t
+   \ee
 
 %Figure \ref{} presents an FED computation where CO, $\mathrm{CO_2}$ and $\mathrm{O_2}$ are constant.
 
