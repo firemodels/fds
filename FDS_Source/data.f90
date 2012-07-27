@@ -1561,7 +1561,14 @@ FUEL = .FALSE.
 SELECT CASE (SPEC_ID_USE)
    CASE DEFAULT
       CP = RCON*GAMMA/(GAMMA-1._EB) !J/kg/K
-      H = 0._EB !J/kg     
+      H = 0._EB !J/kg
+   CASE('ACETONE') ! NIST webbook
+      TE=MIN(1500._EB,MAX(TE,100._EB))
+      CP=-5.318542E-01_EB+2.981573E+03_EB/TE**2+3.371506E-02_EB*TE**0.25_EB+9.810648E-02_EB*SQRT(TE)&
+         -1.542736E-25_EB*TE**7-8.931792e-27*TE**8
+      CP=CP*1000._EB
+      H=0._EB    
+      FUEL = .TRUE.
    CASE('ACETYLENE')
       IF (TE < 100._EB) THEN
          CP = 1108.3994_EB+TE*0.0053834_EB
@@ -1598,7 +1605,13 @@ SELECT CASE (SPEC_ID_USE)
       CP = (1._EB-Y_O2_INFTY)*CP+Y_O2_INFTY*CP2 !J/kg/K
    CASE('ARGON')
       CP = 20.786_EB / 0.040_EB !J/kg/K
-      H = 120683.65150_EB !J/kg  
+      H = 120683.65150_EB !J/kg
+   CASE('BENZENE') !NIST webbook
+      TE=MIN(3000._EB,MAX(TE,50._EB))
+      CP = -3.590164_EB+1.760310E+03_EB/TE**2+5.455726E-01_EB*TE**0.25-1.962178e-18_EB*TE**5+4.397234E-01_EB*LOG(TE)
+      CP = CP*1000._EB !J/kg-K
+      H = 0._EB  
+      FUEL = .TRUE.
    CASE('BUTANE') !NIST webbook
       TE = MIN(1500._EB,MAX(50._EB,TE))
       CP = 8.86084E-10_EB*TE**4 - 2.73703E-06_EB*TE**3 + 1.22469E-03_EB*TE**2 + 4.07041E+00_EB*TE + 4.91048E+02_EB !J/kg/K
@@ -1609,7 +1622,6 @@ SELECT CASE (SPEC_ID_USE)
       CP = -0.013103_EB/(TE/1000._EB)**2-0.043256_EB*(TE/1000._EB)**3+0.448537_EB*(TE/1000._EB)**2-0.812428_EB*(TE/1000._EB) &
            +21.17510_EB
       CP = CP /  12.0107!J/kg/K
-      
    CASE('CARBON DIOXIDE')
       IF (TE<100._EB) THEN
          CP = 658._EB + TE * 0.06981_EB !J/kg/K
@@ -1628,6 +1640,15 @@ SELECT CASE (SPEC_ID_USE)
          CP = CP /  28.0101*1000_EB!J/kg/K
       ENDIF
       H = 303895.99177_EB !J/kg
+   CASE('DODECANE')
+      ! Vargaftik, N. B.    MOSKVA: IZDATELSTVO NAUKA 1972 , p. 284 (1972)
+      ! DICTIONARY OF THERMOPHYSICAL PROPERTIES OF GASES AND LIQUIDS
+      ! from InfoTherm, Fitz Chemie Berlin www.fitz-chemie.de/infotherm
+      TE=MIN(1500._EB,MAX(TE,100._EB)) 
+      CP=-7.859196_EB+6.714808E-02_EB*TE**0.25_EB-7.954283e-28_EB*TE**8+1.622011_EB*LOG(TE)
+      CP=CP*1000._EB
+      H=-0._EB
+      FUEL = .TRUE.
    CASE('ETHANE') !NIST webbook
       TE = MIN(3000._EB,MAX(100._EB,TE))
       CP = 1.37631E-16_EB*TE**6 - 1.40898E-12_EB*TE**5 + 5.58268E-09_EB*TE**4 - 1.04586E-05_EB*TE**3 + 8.17688E-03_EB*TE**2 + &
@@ -2212,6 +2233,12 @@ LISTED  = .TRUE.
 ATOM_COUNTS = 0._EB
 
 SELECT CASE(GAS_NAME)
+   CASE('ACETONE') ! THE PROPERTIES OF GASES AND LIQUIDS 5th ed.
+      SIGMA = 4.6_EB
+      EPSOK = 560.2
+      FORMULA = "C3H6O"
+      H_F= -218.5 ! NIST webbook
+      ABSORBING = .TRUE.
    CASE('ACETYLENE')
       SIGMA = 4.033_EB
       EPSOK = 231.8_EB 
@@ -2235,7 +2262,12 @@ SELECT CASE(GAS_NAME)
       EPSOK = 124.0_EB
       FORMULA = 'Ar'
       H_F = 0._EB
-   CASE('BUTANE')
+   CASE('BENZENE') !THE PROPERTIES OF GASES AND LIQUIDS 5th ed.
+      SIGMA = 5.349_EB
+      EPSOK = 412.3
+      FORMULA = 'C6H6'
+      H_F = 82.9 ! NIST webbook
+   CASE('BUTANE') 
       SIGMA = 4.687_EB
       EPSOK = 531.4_EB 
       ABSORBING = .TRUE.
@@ -2253,6 +2285,12 @@ SELECT CASE(GAS_NAME)
       ABSORBING = .TRUE.
       FORMULA = 'CO'
       H_F = -110.523E6_EB
+   CASE('DODECANE') ! N-Heptane as surrogate
+      SIGMA = 4.701_EB
+      EPSOK = 205.78_EB
+      FORMULA = 'C7H16'
+      H_F = -187.8E6_EB
+      ABSORBING=.TRUE.
    CASE('ETHANE')
       SIGMA = 4.443_EB
       EPSOK = 215.7_EB 
