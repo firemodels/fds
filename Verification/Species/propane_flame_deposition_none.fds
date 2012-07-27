@@ -1,13 +1,13 @@
 Propane burner test case to check basic chemistry model and soot deposition
 
-&HEAD CHID='Propane_flame_deposition_gravitational', TITLE='Verification of simple chemistry flame with soot deposition, SVN $Revision: 3324 $'/
+&HEAD CHID='propane_flame_deposition_none', TITLE='Verification of simple chemistry flame with soot deposition, SVN $Revision: 3324 $'/
 
 &MESH IJK=10,10,20, XB=0.0,1.0,0.0,1.0,0.0,2.0 /
 
 &TIME T_END=10.0, DT=0.01 /
 &DUMP MASS_FILE=.TRUE., DT_DEVC=0.5/
 
-&MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
+&MISC GRAVITATIONAL_DEPOSITION  = .FALSE.
       THERMOPHORETIC_DEPOSITION = .FALSE.
       TURBULENT_DEPOSITION      = .FALSE. /
 
