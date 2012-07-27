@@ -57,15 +57,14 @@ $RUNFDS HVAC ashrae7_table
 $RUNFDS HVAC door_crack
 $RUNFDS HVAC fan_test
 $RUNFDS HVAC HVAC_aircoil
+$RUNFDS HVAC HVAC_filter
 $RUNFDS HVAC HVAC_flow_loss
 $RUNFDS HVAC HVAC_mass_conservation
 $RUNFDS HVAC HVAC_energy_pressure
-$RUNFDS HVAC leak_test_2
-$RUNFDS HVAC leak_test
 $RUNFDS HVAC HVAC_tee_loss_1
 $RUNFDS HVAC HVAC_tee_loss_2
-$RUNFDS HVAC HVAC_aircoil
-$RUNFDS HVAC HVAC_filter
+$RUNFDS HVAC leak_test_2
+$RUNFDS HVAC leak_test
 
 $RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_01
 $RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_02
