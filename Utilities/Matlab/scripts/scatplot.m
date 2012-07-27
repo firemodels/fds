@@ -57,7 +57,7 @@ if stats_output == 1
     % Header information for output_stats
     output_stats = {};
     output_stats{1,1} = 'Dataplot Line Number';
-    output_stats{1,2} = 'Quantity';
+    output_stats{1,2} = 'Verification Group';
     output_stats{1,3} = 'Case name';
     output_stats{1,4} = 'Expected Metric';
     output_stats{1,5} = 'Predicted Metric';
@@ -94,7 +94,7 @@ for j=qrange
                 for m=1:length(single_measured_metric)
                     relative_error = (single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m);
                     output_stats{stat_line,1} = i;
-                    output_stats{stat_line,2} = Save_Quantity{i,1};
+                    output_stats{stat_line,2} = Save_Group_Key_Label{i,1};
                     output_stats{stat_line,3} = Save_Dataname{i,1};
                     output_stats{stat_line,4} = single_measured_metric(m);
                     output_stats{stat_line,5} = single_predicted_metric(m);
