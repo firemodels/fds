@@ -10,11 +10,11 @@ clear all
 
 FDS_Output_Files = '../../Verification/Species/';
 
-M1 = importdata([FDS_Output_Files,'Propane_flame_deposition_all_devc.csv'],',',2);
-M2 = importdata([FDS_Output_Files,'Propane_flame_deposition_none_devc.csv'],',',2);
-M3 = importdata([FDS_Output_Files,'Propane_flame_deposition_gravitational_devc.csv'],',',2);
-M4 = importdata([FDS_Output_Files,'Propane_flame_deposition_thermophoretic_devc.csv'],',',2);
-M5 = importdata([FDS_Output_Files,'Propane_flame_deposition_turbulent_devc.csv'],',',2);
+M1 = importdata([FDS_Output_Files,'propane_flame_deposition_all_devc.csv'],',',2);
+M2 = importdata([FDS_Output_Files,'propane_flame_deposition_none_devc.csv'],',',2);
+M3 = importdata([FDS_Output_Files,'propane_flame_deposition_gravitational_devc.csv'],',',2);
+M4 = importdata([FDS_Output_Files,'propane_flame_deposition_thermophoretic_devc.csv'],',',2);
+M5 = importdata([FDS_Output_Files,'propane_flame_deposition_turbulent_devc.csv'],',',2);
 
 H1 = cell(2,6);
 H1(1,:) = {'s' 'kg' 'kg' 'kg' 'kg' 'kg'};
@@ -22,7 +22,7 @@ H1(2,:) = {'Time' 'depo_all' 'depo_none' 'depo_gravitational' 'depo_thermophoret
 
 D1 = [M1.data(:,:), M2.data(:,2), M3.data(:,2), M4.data(:,2), M5.data(:,2)];
 
-fid = fopen([FDS_Output_Files,'Propane_flame_deposition_cat_wall.csv'],'wt','n');
+fid = fopen([FDS_Output_Files,'propane_flame_deposition_cat_wall.csv'],'wt','n');
 
 fprintf(fid,'%s, %s, %s, %s, %s, %s\n',H1{1,:});
 fprintf(fid,'%s, %s, %s, %s, %s, %s\n',H1{2,:});
@@ -33,11 +33,11 @@ fclose(fid);
 
 % Gas phase aerosol
 
-N1 = importdata([FDS_Output_Files,'Propane_flame_deposition_all_mass.csv'],',',2);
-N2 = importdata([FDS_Output_Files,'Propane_flame_deposition_none_mass.csv'],',',2);
-N3 = importdata([FDS_Output_Files,'Propane_flame_deposition_gravitational_mass.csv'],',',2);
-N4 = importdata([FDS_Output_Files,'Propane_flame_deposition_thermophoretic_mass.csv'],',',2);
-N5 = importdata([FDS_Output_Files,'Propane_flame_deposition_turbulent_mass.csv'],',',2);
+N1 = importdata([FDS_Output_Files,'propane_flame_deposition_all_mass.csv'],',',2);
+N2 = importdata([FDS_Output_Files,'propane_flame_deposition_none_mass.csv'],',',2);
+N3 = importdata([FDS_Output_Files,'propane_flame_deposition_gravitational_mass.csv'],',',2);
+N4 = importdata([FDS_Output_Files,'propane_flame_deposition_thermophoretic_mass.csv'],',',2);
+N5 = importdata([FDS_Output_Files,'propane_flame_deposition_turbulent_mass.csv'],',',2);
 
 H2 = cell(2,6);
 H2(1,:) = {'s' 'kg' 'kg' 'kg' 'kg' 'kg'};
@@ -45,7 +45,7 @@ H2(2,:) = {'Time' 'depo_all' 'depo_none' 'depo_gravitational' 'depo_thermophoret
 
 D2 = [N1.data(:,1), N1.data(:,8), N2.data(:,8), N3.data(:,8), N4.data(:,8), N5.data(:,8)];
 
-fid = fopen([FDS_Output_Files,'Propane_flame_deposition_cat_gas.csv'],'wt','n');
+fid = fopen([FDS_Output_Files,'propane_flame_deposition_cat_gas.csv'],'wt','n');
 
 fprintf(fid,'%s, %s, %s, %s, %s, %s\n',H2{1,:});
 fprintf(fid,'%s, %s, %s, %s, %s, %s\n',H2{2,:});
@@ -68,7 +68,7 @@ H3(2,:) = {'Time' 'depo_all' 'depo_none' 'depo_gravitational' 'depo_thermophoret
 
 D3 = [N1.data(:,1), S1, S2, S3, S4, S5];
 
-fid = fopen([FDS_Output_Files,'Propane_flame_deposition_cat_total.csv'],'wt','n');
+fid = fopen([FDS_Output_Files,'propane_flame_deposition_cat_total.csv'],'wt','n');
 
 fprintf(fid,'%s, %s, %s, %s, %s, %s\n',H3{1,:});
 fprintf(fid,'%s, %s, %s, %s, %s, %s\n',H3{2,:});
