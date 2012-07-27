@@ -37,7 +37,13 @@ Save_Plot_Filename    = saved_data{:,8};
 Save_Dep_Title        = saved_data{:,9};
 
 qfil = varargin{1};
-output_file = varargin{2};
+
+if length(varargin) >= 2
+    output_file = varargin{2};
+    stats_output = 1;
+else
+    stats_output = 0;
+end
 
 qrange = [2:100];
 
@@ -47,17 +53,19 @@ Q = importdata(qfil);
 H = textscan(Q{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
-% Header information for output_stats
-output_stats = {};
-output_stats{1,1} = 'Dataplot Line Number';
-output_stats{1,2} = 'Quantity';
-output_stats{1,3} = 'Case name';
-output_stats{1,4} = 'Expected Metric';
-output_stats{1,5} = 'Predicted Metric';
-output_stats{1,6} = 'Relative Error (%)';
-output_stats{1,7} = 'Dependent Variable';
-output_stats{1,8} = 'Plot Filename';
-stat_line = 2;
+if stats_output == 1
+    % Header information for output_stats
+    output_stats = {};
+    output_stats{1,1} = 'Dataplot Line Number';
+    output_stats{1,2} = 'Quantity';
+    output_stats{1,3} = 'Case name';
+    output_stats{1,4} = 'Expected Metric';
+    output_stats{1,5} = 'Predicted Metric';
+    output_stats{1,6} = 'Relative Error (%)';
+    output_stats{1,7} = 'Dependent Variable';
+    output_stats{1,8} = 'Plot Filename';
+    stat_line = 2;
+end
 
 for j=qrange
     if j>length(Q); break; end
@@ -78,21 +86,23 @@ for j=qrange
             K(k) = plot(nonzeros(Measured_Metric(k,:,:)),nonzeros(Predicted_Metric(k,:,:)),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             
-            % Write descriptive statistics to output_stats cell
-            single_measured_metric = nonzeros(Measured_Metric(k,:,:));
-            single_predicted_metric = nonzeros(Predicted_Metric(k,:,:));
-            % Loop over multiple line comparisons and build output_stats cell
-            for m=1:length(single_measured_metric)
-                relative_error = (single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m);
-                output_stats{stat_line,1} = i;
-                output_stats{stat_line,2} = Save_Quantity{i,1};
-                output_stats{stat_line,3} = Save_Dataname{i,1};
-                output_stats{stat_line,4} = single_measured_metric(m);
-                output_stats{stat_line,5} = single_predicted_metric(m);
-                output_stats{stat_line,6} = sprintf('%1.8f', relative_error);
-                output_stats{stat_line,7} = Save_Dep_Title{i,1};
-                output_stats{stat_line,8} = Save_Plot_Filename{i,1};
-                stat_line = stat_line + 1;
+            if stats_output == 1
+                % Write descriptive statistics to output_stats cell
+                single_measured_metric = nonzeros(Measured_Metric(k,:,:));
+                single_predicted_metric = nonzeros(Predicted_Metric(k,:,:));
+                % Loop over multiple line comparisons and build output_stats cell
+                for m=1:length(single_measured_metric)
+                    relative_error = (single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m);
+                    output_stats{stat_line,1} = i;
+                    output_stats{stat_line,2} = Save_Quantity{i,1};
+                    output_stats{stat_line,3} = Save_Dataname{i,1};
+                    output_stats{stat_line,4} = single_measured_metric(m);
+                    output_stats{stat_line,5} = single_predicted_metric(m);
+                    output_stats{stat_line,6} = sprintf('%1.8f', relative_error);
+                    output_stats{stat_line,7} = Save_Dep_Title{i,1};
+                    output_stats{stat_line,8} = Save_Plot_Filename{i,1};
+                    stat_line = stat_line + 1;
+                end
             end
         end
     end
@@ -172,26 +182,28 @@ for j=qrange
 end
 
 % Write all statistics from output_stats to csv output_file
-[rows, cols] = size(output_stats);
-fid = fopen(output_file, 'w');
-for i_row = 1:rows
-    file_line = '';
-    for i_col = 1:cols
-        contents = output_stats{i_row, i_col};
-        if isnumeric(contents)
-            contents = num2str(contents);
-        elseif isempty(contents)
-            contents = '';
+if stats_output == 1
+    [rows, cols] = size(output_stats);
+    fid = fopen(output_file, 'w');
+    for i_row = 1:rows
+        file_line = '';
+        for i_col = 1:cols
+            contents = output_stats{i_row, i_col};
+            if isnumeric(contents)
+                contents = num2str(contents);
+            elseif isempty(contents)
+                contents = '';
+            end
+            if i_col < cols
+                file_line = [file_line, contents, ','];
+            else
+                file_line = [file_line, contents];
+            end
         end
-        if i_col < cols
-            file_line = [file_line, contents, ','];
-        else
-            file_line = [file_line, contents];
-        end
+        count = fprintf(fid, '%s\n', file_line);
     end
-    count = fprintf(fid, '%s\n', file_line);
-end
-st = fclose(fid);
+    st = fclose(fid);
+end    
 
 display('scatplot completed successfully!')
 
