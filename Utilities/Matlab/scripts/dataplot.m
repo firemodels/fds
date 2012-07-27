@@ -138,11 +138,14 @@ for i=2:2000
         define_drow_variables
         
         % save for scatter plots
-        
+
         Save_Quantity(i)        = Quantity;
         Save_Group_Style(i)     = Group_Style;
         Save_Fill_Color(i)      = Fill_Color;
         Save_Group_Key_Label(i) = Group_Key_Label;
+        Save_Dataname(i)        = Stat_Dataname;
+        Save_Plot_Filename(i)   = Stat_Plot_Filename;
+        Save_Dep_Title(i)       = Stat_Dep_Title;
                 
         % plot the experimental data or analytical solution (d1)
         
@@ -327,9 +330,11 @@ saved_data = [{Save_Quantity'},...
               {Save_Fill_Color'},...
               {Save_Group_Key_Label'},...
               {Save_Measured_Metric},...
-              {Save_Predicted_Metric}];
+              {Save_Predicted_Metric},...
+              {Save_Dataname'},...
+              {Save_Plot_Filename'},...
+              {Save_Dep_Title'}];
 
-              
 display('dataplot completed successfully!')
 
 

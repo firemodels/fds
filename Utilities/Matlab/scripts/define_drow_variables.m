@@ -57,4 +57,6 @@ Legend_XYWidthHeight = str2num(char(parameters(find(strcmp(headers,'Legend_XYWid
 Paper_Width_Factor   = str2num(char(parameters(find(strcmp(headers,'Paper_Width_Factor')))));
 Plot_Type         = char(parameters(find(strcmp(headers,'Plot_Type'))));
 Plot_Filename     = char(parameters(find(strcmp(headers,'Plot_Filename'))));
-
+Stat_Dataname      = parameters(find(strcmp(headers,'Dataname')));
+Stat_Plot_Filename = parameters(find(strcmp(headers,'Plot_Filename')));
+Stat_Dep_Title     = parameters(find(strcmp(headers,'Dep_Title')));
