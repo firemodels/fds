@@ -617,13 +617,12 @@ vector slices. Again, vector slice file images are drawn at 5.0~s,
 second column discards or chops vectors below 140~\degC.
 
 Figure \ref{figfedslicetest} presents slice file images verifying
-the computation of FED or fractional effective dose slices. Images
-are drawn at 30.0~s, 60.0~s and 120.0~s and 240~s.  The FED is
-computed using $\mathrm{CO}$, $\mathrm{CO_2}$ and $\mathrm{O_2}$
-data slices.  Concentration values are chosen (
-$\mathrm{CO}=2000 \mathrm{ppm}$,
-$\mathrm{CO_2}=4 $,
-$\mathrm{O_2}=7.0875 $) resulting in FED values of 1.5 at 30~s, 3.0 at 60~s, 6.0 at 120~s and 12.0 at 240~s.
+the computation of fractional effective dose (FED). Images
+are drawn at 30.0~s, 60.0~s and 120.0~s and 240~s.
+The FED is computed using three data slices with concentration of
+$1000~\mathrm{ppm}$ for $\mathrm{CO}$ and volume fractions of 0.02 and 0.07 for
+$\mathrm{CO_2}$ and $\mathrm{O_2}$ respectively.
+These values result in FED's of 1.5 at 30~s, 3.0 at 60~s, 6.0 at 120~s and 12.0 at 240~s.
 
 Figure \ref{figgslicetest} presents images of 3D slices oriented
 in two different ways. Images are drawn at 0.0~s, 10.0~s and
@@ -721,10 +720,10 @@ script, {\tt plume5c.ssf}.
 \begin{tabular}{ccp{1.0in}}
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_030}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_060}\\
-30.0~s, FED=0.27&60.0~s, FED=0.55\\
+30.0~s, FED=0.29&60.0~s, FED=0.59\\
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_120}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_360}\\
-120~s, FED=1.1&360~s, FED=3.3\\
+120~s, FED=1.2&360~s, FED=3.5\\
 &&\raisebox{0.25in}[0pt]{\includegraphics[height=5.5in]{../SMV_User_Guide/figures/colorbar_fed}}
  \end{tabular}
 \end{center}
