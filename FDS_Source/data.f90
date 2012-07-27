@@ -1608,7 +1608,7 @@ SELECT CASE (SPEC_ID_USE)
       H = 120683.65150_EB !J/kg
    CASE('BENZENE') !NIST webbook
       TE=MIN(3000._EB,MAX(TE,50._EB))
-      CP = -3.590164_EB+1.760310E+03_EB/TE**2+5.455726E-01_EB*TE**0.25-1.962178e-18_EB*TE**5+4.397234E-01_EB*LOG(TE)
+      CP = -2.112E-02_EB + 4.491E-03_EB*TE  -2.193E-06_EB*TE**2 + 4.422e-10_EB*TE**3-2.678E-14_EB*TE**4
       CP = CP*1000._EB !J/kg-K
       H = 0._EB  
       FUEL = .TRUE.
@@ -1644,7 +1644,7 @@ SELECT CASE (SPEC_ID_USE)
       ! Vargaftik, N. B.    MOSKVA: IZDATELSTVO NAUKA 1972 , p. 284 (1972)
       ! DICTIONARY OF THERMOPHYSICAL PROPERTIES OF GASES AND LIQUIDS
       ! from InfoTherm, Fitz Chemie Berlin www.fitz-chemie.de/infotherm
-      TE=MIN(1500._EB,MAX(TE,100._EB)) 
+      TE=MIN(1500._EB,MAX(TE,288._EB)) 
       CP=-7.859196_EB+6.714808E-02_EB*TE**0.25_EB-7.954283e-28_EB*TE**8+1.622011_EB*LOG(TE)
       CP=CP*1000._EB
       H=-0._EB
@@ -2237,7 +2237,7 @@ SELECT CASE(GAS_NAME)
       SIGMA = 4.6_EB
       EPSOK = 560.2
       FORMULA = "C3H6O"
-      H_F= -218.5 ! NIST webbook
+      H_F= -218.5E6 ! NIST webbook
       ABSORBING = .TRUE.
    CASE('ACETYLENE')
       SIGMA = 4.033_EB
@@ -2266,7 +2266,7 @@ SELECT CASE(GAS_NAME)
       SIGMA = 5.349_EB
       EPSOK = 412.3
       FORMULA = 'C6H6'
-      H_F = 82.9 ! NIST webbook
+      H_F = 82.9E6 ! NIST webbook
    CASE('BUTANE') 
       SIGMA = 4.687_EB
       EPSOK = 531.4_EB 
