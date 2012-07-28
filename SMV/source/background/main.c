@@ -16,6 +16,14 @@
 #include "background.h"
 #include "datadefs.h"
 
+#ifdef pp_LINUX
+#define pp_LINUXOSX
+#endif
+
+#ifdef pp_OSX
+#define pp_LINUXOSX
+#endif
+
 //dummy change to bump version number to 0.9
 
 // svn revision character string
@@ -31,6 +39,9 @@ unsigned char cpuusage(void);
 int get_ncores(void);
 float get_load(void);
 float get_host_load(char *host);
+unsigned char cpuusage_host(char *host,int ncores);
+#endif
+#ifdef pp_OSX
 unsigned char cpuusage_host(char *host,int ncores);
 #endif
 
@@ -65,6 +76,10 @@ int main(int argc, char **argv){
   char user_path[1024];
   FILE *stream=NULL;
 #endif  
+#ifdef pp_OSX
+  char command_buffer[1024];
+  char user_path[1024];
+#endif
 
   int itime;
   char *arg;
@@ -218,7 +233,7 @@ int main(int argc, char **argv){
   command=argv[argstart];
   _spawnvp(_P_NOWAIT,command, argv+argstart);
 #endif
-#ifdef pp_LINUX
+#ifdef pp_LINUXOSX
   strcpy(command_buffer,"");
   if(hostinfo==NULL){
     cpu_usage=cpuusage();
@@ -269,7 +284,6 @@ int main(int argc, char **argv){
   }
   if(nhostinfo>0)strcat(command_buffer,")\"");
   strcat(command_buffer,"&");
-  printf("submitting command: %s\n",command_buffer);
   system(command_buffer);
 #endif
   return 0;
@@ -412,7 +426,7 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
     strcat(command,host);
     strcat(command," ");
   }
-  strcat(command,"sysctl -n");
+  strcat(command,"sysctl -n ");
   strcat(command,var);
   strcat(command," >");
   strcat(command,sysctl_file);
@@ -573,6 +587,9 @@ float get_load(void){
   fclose(stream);
   return load1;
 }
+#endif
+
+#ifdef pp_LINUXOSX
 
 /* ------------------ cpuusage ------------------------ */
 
