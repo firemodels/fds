@@ -76,6 +76,9 @@ int main(int argc, char **argv){
   strcpy(user_path,"");
   sprintf(pid,"%i",getpid());
 #endif
+#ifdef pp_OSX
+  sprintf(pid,"%i",getpid());
+#endif
 
   debug=0;
   prog=argv[0];
@@ -398,10 +401,10 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
   if(ivar!=NULL)*ivar=1;
   if(fvar!=NULL)*fvar=0.0;
 
-  strcpy(systl_file,"/tmp/");
-  strcat(systl_file,var);
-  strcat(systcl_file,"_");
-  strcat(systcl_file,pid);
+  strcpy(sysctl_file,"/tmp/");
+  strcat(sysctl_file,var);
+  strcat(sysctl_file,"_");
+  strcat(sysctl_file,pid);
   
   strcpy(command,"");
   if(host!=NULL){
@@ -409,20 +412,22 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
     strcat(command,host);
     strcat(command," ");
   }
-  strcpy(command,"sysctl -n);
+  strcat(command,"sysctl -n");
   strcat(command,var);
-  strcat(command," >")
+  strcat(command," >");
   strcat(command,sysctl_file);
   system(command);
 
   stream=fopen(sysctl_file,"r");
   if(stream!=NULL){
+    char buffer[255];
+
     fgets(buffer,255,stream);
     if(ivar!=NULL)sscanf(buffer,"%i",ivar);
     if(fvar!=NULL)sscanf(buffer,"%f",fvar);
     fclose(stream);
   }
-  unlink(systcl_file);
+  unlink(sysctl_file);
 }
 
 /* ------------------ get_ncores ------------------------ */

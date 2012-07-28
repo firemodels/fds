@@ -15,6 +15,9 @@ char *host;
 #ifdef pp_LINUX
 char  pid[20];
 #endif
+#ifdef pp_OSX
+char  pid[20];
+#endif
 int nhostinfo;
 
 typedef struct {
