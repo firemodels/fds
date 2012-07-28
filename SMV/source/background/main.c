@@ -385,6 +385,82 @@ unsigned char cpuusage()
 	return usage_local;
 }
 #endif
+#ifdef pp_OSX
+
+/* ------------------ get_sysctl ------------------------ */
+
+void get_sysctl(char *host, char *var, int *ivar, float *fvar){
+  char command[256];
+  FILE *stream;
+  char sysctl_file[256];
+
+
+  if(ivar!=NULL)*ivar=1;
+  if(fvar!=NULL)*fvar=0.0;
+
+  strcpy(systl_file,"/tmp/");
+  strcat(systl_file,var);
+  strcat(systcl_file,"_");
+  strcat(systcl_file,pid);
+  
+  strcpy(command,"");
+  if(host!=NULL){
+    strcat(command,"ssh ");
+    strcat(command,host);
+    strcat(command," ");
+  }
+  strcpy(command,"sysctl -n);
+  strcat(command,var);
+  strcat(command," >")
+  strcat(command,sysctl_file);
+  system(command);
+
+  stream=fopen(sysctl_file,"r");
+  if(stream!=NULL){
+    fgets(buffer,255,stream);
+    if(ivar!=NULL)sscanf(buffer,"%i",ivar);
+    if(fvar!=NULL)sscanf(buffer,"%f",fvar);
+    fclose(stream);
+  }
+  unlink(systcl_file);
+}
+
+/* ------------------ get_ncores ------------------------ */
+
+int get_ncores(void){
+  int ncores=1;
+  
+  get_sysctl(NULL,"hw.ncpu",&ncores,NULL);
+  return ncores;
+}
+
+/* ------------------ get_host_ncores ------------------------ */
+
+int get_host_ncores(char *host){
+  int ncores=1;
+
+  get_sysctl(host,"hw.ncpu",&ncores,NULL);
+  return ncores;
+}
+
+/* ------------------ get_load ------------------------ */
+
+float get_load(void){
+  float load;
+
+  get_sysctl(NULL,"vm.loadavg",NULL,&load);
+  return load;
+}
+
+/* ------------------ get_host_load ------------------------ */
+
+float get_host_load(char *host){
+  float load;
+
+  get_sysctl(host,"vm.loadavg",NULL,&load);
+  return load;
+}
+#endif
 #ifdef pp_LINUX
 
 /* ------------------ get_ncores ------------------------ */
