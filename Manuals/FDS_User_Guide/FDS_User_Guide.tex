@@ -6483,7 +6483,7 @@ In a typical simulation, flame temperatures are not likely to be resolved well e
 However, the temperatures in a layer environment are likely to support a finite rate reaction for slow reactions ({\em e.g.} carbon monoxide oxidation in a hot layer).
 A mixed-mode combustion model can be used for this situation.  To enable this model, specify the finite-rate reaction inputs described in the previous section
 as well as the input parameter {\ct THRESHOLD\_TEMPERATURE}.  During a simulation, if there is heat release from other reactions,
-then a mixed-mode reaction will be evaluated as a mixing-controlled reaction.  If there is no heat release from other reactions and the local
+then a mixed-mode reaction will be evaluated as a mixing-controlled reactionn.  If there is no heat release from other reactions and the local
 temperature exceeds the {\ct THRESHOLD\_TEMPERATURE}, then the mixed-mode reaction will be evaluated as a finite-rate reaction.
 
 \newpage
@@ -6491,15 +6491,17 @@ temperature exceeds the {\ct THRESHOLD\_TEMPERATURE}, then the mixed-mode reacti
 \section{Aerosol Deposition}
 \label{info:deposition}
 
-By default FDS will compute all of the soot deposition phenomena discussed in the Technical Reference Guide, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.   The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} (Note; this model should be considered an experimental feature.).  The properties of the aerosol can be defined on the species input using  {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}.
+The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} (Note: This model should be considered an experimental feature.). The properties of an aerosol can be defined via the {\ct SPEC} namelist group using the {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER} parameters. By default, for a tracked aerosol species that uses {\ct AEROSOL=.TRUE.}, FDS will compute all of the soot deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.
 
-This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g., soot deposition).    For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
+\subsection{Example Case: propane\_flame\_deposition}
+
+The {\bf propane\_flame\_deposition} example shows how to define a reaction that invokes the aerosol deposition model in FDS. For this example, the fuel is propane with a specified soot yield of 5 \%. The stoichiometric equation is shown below.
 \begin{eqnarray}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8164 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \rightarrow \\
 \nonumber 1 \; \underbrace{\mathrm{(18.1182 \; N_2 \, + \, 2.8164 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
 \underbrace{0.1836 \; \mathrm{C}}_\text{Soot}
 \end{eqnarray}
-The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be tracked separately and it must be given {\ct AEROSOL = .TRUE.}.
+This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL = .TRUE.} on the {\ct SPEC} line.
 
 \footnotesize
 \begin{verbatim}
@@ -6523,9 +6525,9 @@ For the oxidizer and products, which are both composed of multiple primitive spe
 \end{verbatim} \normalsize
 
 \noindent
-Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions.
+Note: The order in which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions.
 
-In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PROPANE was found from the SFPE Handbook~\cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX} lines are the coefficients of the lumped species themselves.
+In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for propane was found from the SFPE Handbook~\cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX} lines are the coefficients of the lumped species themselves.
 
 \footnotesize
 \begin{verbatim}
@@ -6545,7 +6547,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/propane_flame_deposition}
-\caption{Wall soot deposition for propane flame with deposition example.}
+\caption{Wall soot deposition for {\bf propane\_flame\_deposition} example.}
 \label{soot_deposition}
 \end{figure}
 

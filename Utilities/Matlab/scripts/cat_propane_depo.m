@@ -10,7 +10,7 @@ clear all
 
 FDS_Output_Files = '../../Verification/Species/';
 
-M1 = importdata([FDS_Output_Files,'propane_flame_deposition_all_devc.csv'],',',2);
+M1 = importdata([FDS_Output_Files,'propane_flame_deposition_devc.csv'],',',2);
 M2 = importdata([FDS_Output_Files,'propane_flame_deposition_none_devc.csv'],',',2);
 M3 = importdata([FDS_Output_Files,'propane_flame_deposition_gravitational_devc.csv'],',',2);
 M4 = importdata([FDS_Output_Files,'propane_flame_deposition_thermophoretic_devc.csv'],',',2);
@@ -33,7 +33,7 @@ fclose(fid);
 
 % Gas phase aerosol
 
-N1 = importdata([FDS_Output_Files,'propane_flame_deposition_all_mass.csv'],',',2);
+N1 = importdata([FDS_Output_Files,'propane_flame_deposition_mass.csv'],',',2);
 N2 = importdata([FDS_Output_Files,'propane_flame_deposition_none_mass.csv'],',',2);
 N3 = importdata([FDS_Output_Files,'propane_flame_deposition_gravitational_mass.csv'],',',2);
 N4 = importdata([FDS_Output_Files,'propane_flame_deposition_thermophoretic_mass.csv'],',',2);

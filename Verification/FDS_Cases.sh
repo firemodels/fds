@@ -229,7 +229,7 @@ $RUNFDS Species FED_FIC_SMIX
 $RUNFDS Species Methane_flame_simple
 $RUNFDS Species Methane_flame_primitive
 $RUNFDS Species Methane_flame_lumped
-$RUNFDS Species propane_flame_deposition_all
+$RUNFDS Species propane_flame_deposition
 $RUNFDS Species propane_flame_deposition_none
 $RUNFDS Species propane_flame_deposition_gravitational
 $RUNFDS Species propane_flame_deposition_thermophoretic
