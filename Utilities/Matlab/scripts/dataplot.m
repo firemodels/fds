@@ -171,8 +171,14 @@ for i=2:2000
                 Save_Measured_Metric(i,j,:) = M(indices,d1_Dep_Col);
             elseif strcmp(Metric,'threshold')
                 Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
+            elseif strcmp(Metric,'end')
+                Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col);
             else
                 Save_Measured_Metric(i,j,1) = 0;
+            end
+            % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
+            if Save_Measured_Metric(i,j,1) == 0
+                Save_Measured_Metric(i,j,1) = 1E-12;
             end
             clear indices
             indices = find(d1_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_End);
@@ -214,8 +220,14 @@ for i=2:2000
                 Save_Predicted_Metric(i,j,:) = M(indices,d2_Dep_Col);
             elseif strcmp(Metric,'threshold')
                 Save_Predicted_Metric(i,j,1) = min(M(indices,d2_Dep_Col));
+            elseif strcmp(Metric,'end')
+                Save_Predicted_Metric(i,j,1) = M(indices(end),d2_Dep_Col);
             else
                 Save_Predicted_Metric(i,j,1) = 0;
+            end
+            % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
+            if Save_Predicted_Metric(i,j,1) == 0
+                Save_Predicted_Metric(i,j,1) = 1E-12;
             end
             clear indices
             indices = find(d2_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_End);
