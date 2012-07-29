@@ -790,9 +790,9 @@ make_fds_user_guide()
    # Build FDS User Guide
    cd $SVNROOT/Manuals/FDS_User_Guide
    pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
-   bibtex FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
+   bibtex FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
+   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
+   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
 }
 
 make_fds_technical_guide()
@@ -800,9 +800,9 @@ make_fds_technical_guide()
    # Build FDS Technical Guide
    cd $SVNROOT/Manuals/FDS_Technical_Reference_Guide
    pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
-   bibtex FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
+   bibtex FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
 }
 
 make_fds_verification_guide()
@@ -810,9 +810,9 @@ make_fds_verification_guide()
    # Build FDS Verification Guide
    cd $SVNROOT/Manuals/FDS_Verification_Guide
    pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
-   bibtex FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
+   bibtex FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
+   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
+   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
 }
 
 make_fds_validation_guide()
@@ -820,9 +820,9 @@ make_fds_validation_guide()
    # Build FDS Validation Guide
    cd $SVNROOT/Manuals/FDS_Validation_Guide
    pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
-   bibtex FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
+   bibtex FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
+   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
+   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
 }
 
 make_fds_configuration_management_plan()
@@ -830,9 +830,9 @@ make_fds_configuration_management_plan()
    # Build FDS Configuration Management Plan
    cd $SVNROOT/Manuals/FDS_Configuration_Management_Plan
    pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
-   bibtex FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
-   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
-   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
+   bibtex FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
+   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
+   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
 }
 
 make_smv_user_guide()
@@ -840,9 +840,9 @@ make_smv_user_guide()
    # Build SMV User Guide
    cd $SVNROOT/Manuals/SMV_User_Guide
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
-   bibtex SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
+   bibtex SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
 }
 
 make_smv_technical_guide()
@@ -850,9 +850,9 @@ make_smv_technical_guide()
    # Build SMV Technical Guide
    cd $SVNROOT/Manuals/SMV_Technical_Reference_Guide
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
-   bibtex SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
+   bibtex SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
 }
 
 make_smv_verification_guide()
@@ -860,9 +860,9 @@ make_smv_verification_guide()
    # Build SMV Verification Guide
    cd $SVNROOT/Manuals/SMV_Verification_Guide
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-   bibtex SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
+   bibtex SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
 }
 
 check_all_guides()
