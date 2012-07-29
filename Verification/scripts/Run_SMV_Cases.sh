@@ -4,14 +4,18 @@
 # Linux machine with a batch queuing system
 
 queue=
+size=64
 
 function usage {
-echo "Run_SMV_Cases.sh [-d -h -q queue_name -s ]"
+echo "Run_SMV_Cases.sh [-d -h -p -q queue_name -s ]"
 echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
+echo "-p size - platform size"
+echo "     default: 64"
+echo "     other options: 32"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
@@ -23,25 +27,20 @@ CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
 
-# for Linux (with queing)
-# Set paths to FDS executable
-# If no argument is specfied, then run FDS release version.
+DEBUG=
 
-export FDSEXE=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export FDS=$FDSEXE
-export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
-
-# Otherwise, if -d (debug) option is specified, then run FDS DB version.
-while getopts 'dhq:s' OPTION
+while getopts 'dhp:q:s' OPTION
 do
 case $OPTION in
   d)
-   export FDSEXE=$SVNROOT/FDS_Compilation/intel_linux_64_db/fds_intel_linux_64_db
-   export FDS=$FDSEXE
+   DEBUG=_db
    ;;
   h)
   usage;
   ;;
+  p)
+   platformsize="$OPTARG"
+   ;;
   q)
    queue="$OPTARG"
    ;;
@@ -52,6 +51,26 @@ esac
 shift
 done
 
+if [ "$size" != "32" ]; then
+  size=64
+fi
+size=_$size
+
+OS=`uname`
+if [ "$OS" == "Darwin" ]; then
+  PLATFORM=osx$size
+  PLATFORM2=osx_32
+else
+  PLATFORM=linux$size
+  PLATFORM2=linux_32
+fi
+
+
+export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
+export FDSEXE=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
+export FDS=$FDSEXE
+export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
+
 # Set queue to submit cases to
 
 if [ "$queue" != "" ]; then
@@ -60,7 +79,6 @@ fi
    
 export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
 export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
-export RUNFDSFG="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 
 export BASEDIR=`pwd`
 
