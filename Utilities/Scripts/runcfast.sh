@@ -1,6 +1,11 @@
 #!/bin/bash -f
 
-queue=batch
+# defaults
+
+queue=
+background=no
+QSUB=qsub
+
 while getopts 'q:' OPTION
 do
 case $OPTION in
@@ -10,6 +15,24 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+# If queue is null then use "background" to submit jobs
+# on the local computer.
+
+if [ "$queue" == "null" ]; then
+  queue=
+  QSUB="$BACKGROUND -u 75 -d 10 "
+  background=yes;
+  if ! [ -e $BACKGROUND ];  then
+    echo "The file $BACKGROUND does not exist. Run aborted"
+    exit
+  fi
+fi
+if [ "$queue" != "" ]; then
+   queue="-q $queue"
+fi
+
+# setup parameters
 
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 dir=$1
@@ -21,6 +44,9 @@ outerr=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 
 scriptfile=$scratchdir/script.$$
+
+# ensure that various files and directories exist
+
 if ! [ -e $CFAST ];  then
   echo "The file $CFAST does not exist. Run aborted"
   exit
@@ -36,6 +62,9 @@ fi
 if [ -e $outlog ]; then
  rm $outlog
 fi
+
+# create run script
+
 cat << EOF > $scriptfile
 #!/bin/bash -f
 #\$ -S /bin/bash
@@ -49,7 +78,14 @@ echo Directory: \`pwd\`
 
 $CFAST $in 
 EOF
-chmod +x $scriptfile
+
 echo Running $in 
-qsub -q $queue $scriptfile
+if [ "$background" != "yes" ]; then
+  chmod +x $scriptfile
+  $QSUB $queue $scriptfile
+else
+  cd $fulldir
+  $QSUB $CFAST $in
+fi
+
 rm $scriptfile
