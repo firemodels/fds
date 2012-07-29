@@ -790,9 +790,9 @@ make_fds_user_guide()
    # Build FDS User Guide
    cd $SVNROOT/Manuals/FDS_User_Guide
    pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
-   bibtex FDS_User_Guide >> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_User_Guide >> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_User_Guide >> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
+   bibtex FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
 }
 
 make_fds_technical_guide()
@@ -800,9 +800,9 @@ make_fds_technical_guide()
    # Build FDS Technical Guide
    cd $SVNROOT/Manuals/FDS_Technical_Reference_Guide
    pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
-   bibtex FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
+   bibtex FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
 }
 
 make_fds_verification_guide()
@@ -810,9 +810,9 @@ make_fds_verification_guide()
    # Build FDS Verification Guide
    cd $SVNROOT/Manuals/FDS_Verification_Guide
    pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
-   bibtex FDS_Verification_Guide >> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
+   bibtex FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
 }
 
 make_fds_validation_guide()
@@ -820,9 +820,9 @@ make_fds_validation_guide()
    # Build FDS Validation Guide
    cd $SVNROOT/Manuals/FDS_Validation_Guide
    pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
-   bibtex FDS_Validation_Guide >> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
+   bibtex FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
 }
 
 make_fds_configuration_management_plan()
@@ -830,9 +830,9 @@ make_fds_configuration_management_plan()
    # Build FDS Configuration Management Plan
    cd $SVNROOT/Manuals/FDS_Configuration_Management_Plan
    pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
-   bibtex FDS_Configuration_Management_Plan >> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
-   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan >> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
-   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan >> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
+   bibtex FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
+   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
+   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan 2>&1
 }
 
 make_smv_user_guide()
@@ -840,9 +840,9 @@ make_smv_user_guide()
    # Build SMV User Guide
    cd $SVNROOT/Manuals/SMV_User_Guide
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
-   bibtex SMV_User_Guide >> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
+   bibtex SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
 }
 
 make_smv_technical_guide()
@@ -850,9 +850,9 @@ make_smv_technical_guide()
    # Build SMV Technical Guide
    cd $SVNROOT/Manuals/SMV_Technical_Reference_Guide
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
-   bibtex SMV_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
+   bibtex SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
 }
 
 make_smv_verification_guide()
@@ -860,9 +860,9 @@ make_smv_verification_guide()
    # Build SMV Verification Guide
    cd $SVNROOT/Manuals/SMV_Verification_Guide
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-   bibtex SMV_Verification_Guide >> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Verification_Guide >> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Verification_Guide >> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
+   bibtex SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
 }
 
 check_all_guides()
@@ -915,11 +915,11 @@ copy_all_guides_to_website()
 email_success_message()
 {
    cd $FIREBOT_DIR
-   # Check for compiler warnings
+   # Check for warnings
    if [ -e "output/warnings" ]
    then
-      # Send email with success message, include compiler warnings
-      mail -s "[Firebot] Build success, with compiler warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output/warnings > /dev/null
+      # Send email with success message, include warnings
+      mail -s "[Firebot] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output/warnings > /dev/null
    else
       # Send empty email with success message
       mail -s "[Firebot] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
@@ -929,13 +929,13 @@ email_success_message()
 email_error_message()
 {
    cd $FIREBOT_DIR
-   # Check for compiler warnings
+   # Check for warnings
    if [ -e "output/warnings" ]
    then
       cat output/warnings >> $ERROR_LOG
 
       # Send email with failure message and warnings, body of email contains appropriate log file
-      mail -s "[Firebot] Build failure, with compiler warnings! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
+      mail -s "[Firebot] Build failure, with warnings! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
    else
       # Send email with failure message, body of email contains appropriate log file
       mail -s "[Firebot] Build failure! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
@@ -954,7 +954,7 @@ save_build_status()
    else
       if [ -e "output/warnings" ]
          then 
-         echo "Revision ${SVN_REVISION} has compiler warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+         echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
          cat $FIREBOT_DIR/output/warnings > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
       else
          echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
