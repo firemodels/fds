@@ -845,6 +845,16 @@ make_smv_user_guide()
    pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
 }
 
+make_smv_technical_guide()
+{
+   # Build SMV Technical Guide
+   cd $SVNROOT/Manuals/SMV_Technical_Reference_Guide
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
+   bibtex SMV_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_smv_technical_guide 2>&1
+}
+
 make_smv_verification_guide()
 {
    # Build SMV Verification Guide
@@ -872,13 +882,13 @@ check_all_guides()
    fi
 
    # Check for LaTeX warnings (undefined references or duplicate labels)
-   if [[ `grep "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8*` == "" ]]
+   if [[ `grep -E "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8*` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 8 warnings:" >> $FIREBOT_DIR/output/warnings
-      grep "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8* >> $FIREBOT_DIR/output/warnings
+      grep -E "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8* >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -893,6 +903,7 @@ copy_all_guides_to_website()
    FDS_Validation_Guide/FDS_Validation_Guide.pdf \
    FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf \
    SMV_User_Guide/SMV_User_Guide.pdf \
+   SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf \
    SMV_Verification_Guide/SMV_Verification_Guide.pdf \
    /var/www/html/firebot/manuals/
 }
@@ -1027,6 +1038,7 @@ make_fds_verification_guide
 make_fds_validation_guide
 make_fds_configuration_management_plan
 make_smv_user_guide
+make_smv_technical_guide
 make_smv_verification_guide
 check_all_guides
 copy_all_guides_to_website
