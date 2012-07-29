@@ -19,7 +19,7 @@ shift $(($OPTIND-1))
 # If queue is null then use "background" to submit jobs
 # on the local computer.
 
-if [ "$queue" == "null" ]; then
+if [ -z "$queue" ]; then
   queue=
   QSUB="$BACKGROUND -u 75 -d 10 "
   background=yes;
