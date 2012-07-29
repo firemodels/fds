@@ -103,6 +103,7 @@ print """<li><a href="manuals/FDS_User_Guide.pdf">FDS User Guide</a></li>
          <li><a href="manuals/FDS_Configuration_Management_Plan.pdf">FDS Configuration Management Plan</a></li>
          <br>
          <li><a href="manuals/SMV_User_Guide.pdf">SMV User Guide</a></li>
+         <li><a href="manuals/SMV_Technical_Reference_Guide.pdf">SMV Technical Reference Guide</a></li>
          <li><a href="manuals/SMV_Verification_Guide.pdf">SMV Verification Guide</a></li>"""
 print "<br><hr align='left'><br>"
 
