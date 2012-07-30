@@ -1,8 +1,8 @@
 To modify the plots Suo_anttila_effective_FDS1.pdf and Suo_anttila_effective_FDS2.pdf in Manuals/FDS_Technical_Reference_Guide/FIGURES, 
-use the Matlab script effmean_Suo_Anttila.m
+use the Matlab script effmean_abscoeffs.m
 
 To modify the plots KAPPA_TEMP.pdf and KAPPA_PATH_LENGTH.pdf in Manuals/FDS_Technical_Reference_Guide/FIGURES, 
-use the Matlab script effmeans.m
+use the Matlab script sensitivity.m
 
 To modify the plot Absorption_spectra.pdf in Manuals/FDS_Technical_Reference_Guide/FIGURES, 
 use the Matlab script plotspectra.m
