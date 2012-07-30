@@ -438,7 +438,14 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
 
     fgets(buffer,255,stream);
     if(ivar!=NULL)sscanf(buffer,"%i",ivar);
-    if(fvar!=NULL)sscanf(buffer,"%f",fvar);
+    if(fvar!=NULL){
+      if(buffer[0]=='{'){
+        sscanf(buffer+1,"%f",fvar);
+      }
+      else{
+        sscanf(buffer,"%f",fvar);
+      }
+    }
     fclose(stream);
   }
   unlink(sysctl_file);
@@ -609,11 +616,14 @@ unsigned char cpuusage(){
   unsigned char usage;
   float load;
   int ncores;
+  int i_usage;
 
   ncores = get_ncores();
   load = get_load();
   if(load>ncores)load=ncores;
   usage = 100*(load/(float)ncores);
+  i_usage=usage;
+  printf("******* load=%f usage=%i *******\n",load,i_usage);
   return usage;
 }
 #endif
@@ -641,3 +651,4 @@ int getmaxrevision(void){
   MAXREV(main_revision);
   return max_revision;
 }
+\c
