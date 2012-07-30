@@ -146,7 +146,7 @@ for i=2:2000
         Save_Dataname(i)        = Stat_Dataname;
         Save_Plot_Filename(i)   = Stat_Plot_Filename;
         Save_Dep_Title(i)       = Stat_Dep_Title;
-        Save_Error_Threshold(i) = Error_Threshold;
+        Save_Error_Tolerance(i) = Error_Tolerance;
                 
         % plot the experimental data or analytical solution (d1)
         
@@ -347,7 +347,7 @@ saved_data = [{Save_Quantity'},...
               {Save_Dataname'},...
               {Save_Plot_Filename'},...
               {Save_Dep_Title'},...
-              {Save_Error_Threshold'}];
+              {Save_Error_Tolerance'}];
 
 display('dataplot completed successfully!')
 
