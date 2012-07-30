@@ -274,13 +274,13 @@ $RUNFDS Sprinklers_and_Sprays flat_fire
 $RUNFDS Sprinklers_and_Sprays fluid_part_mom_x
 $RUNFDS Sprinklers_and_Sprays fluid_part_mom_y
 $RUNFDS Sprinklers_and_Sprays fluid_part_mom_z
-$RUNFDS Sprinklers_and_Sprays water_cooling
 $RUNFDS Sprinklers_and_Sprays water_evaporation_1
 $RUNFDS Sprinklers_and_Sprays water_evaporation_2
 $RUNFDS Sprinklers_and_Sprays water_evaporation_3
 $RUNFDS Sprinklers_and_Sprays water_evaporation_4
 $RUNFDS Sprinklers_and_Sprays water_evaporation_5
 $RUNFDS Sprinklers_and_Sprays water_evaporation_6
+$RUNFDS Sprinklers_and_Sprays water_evaporation_7
 $RUNFDS Sprinklers_and_Sprays water_fuel_sprays
 $RUNFDS Sprinklers_and_Sprays screen_drag_1
 $RUNFDS Sprinklers_and_Sprays screen_drag_2
