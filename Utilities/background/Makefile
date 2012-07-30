@@ -29,13 +29,6 @@ no_target:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-ms_win_32 : CFLAGS    = -O1 /Qvec_report0 /nologo -D WIN32 -I $(SOURCE_DIR)/shared
-ms_win_32 : CC        = cl
-ms_win_32 : exe       = background.exe
-
-ms_win_32 : $(objwin)
-	$(CC) -o $(bin)/$(exe) $(objwin) 
-
 intel_win_32 : CFLAGS    = -O1 /Qvec_report0 /nologo -D WIN32 -I $(SOURCE_DIR)/shared
 intel_win_32 : CC        = icl
 intel_win_32 : exe       = background.exe
