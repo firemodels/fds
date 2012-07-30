@@ -2881,7 +2881,7 @@ END SUBROUTINE READ_REAC
 SUBROUTINE PROC_REAC
 USE PROPERTY_DATA, ONLY : PARSE_EQUATION, SHUTDOWN_ATOM
 REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118)
-INTEGER :: NS,NS2,NR,NSPEC,NRR,NFR,R_COUNT,F_COUNT
+INTEGER :: NS,NS2,NR,NSPEC,NRR,NFR,R_COUNT,F_COUNT,HF_COUNT
 LOGICAL :: NAME_FOUND,SKIP_ATOM_BALANCE
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
 TYPE(REACTION_TYPE), POINTER :: RR=>NULL(),FR=>NULL()
@@ -3068,7 +3068,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ! Heat of Combustion calculation for SIMPLE_CHEMISTRY
 
-   IF (SIMPLE_CHEMISTRY) THEN
+   IF (SIMPLE_CHEMISTRY .AND. .NOT. EDC) THEN
       IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
          RN%HEAT_OF_COMBUSTION = -RN%EPUMO2*RN%NU_SPECIES(O2_INDEX)*SPECIES(O2_INDEX)%MW/SPECIES(FUEL_INDEX)%MW
       ELSE
@@ -3083,38 +3083,74 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDIF
       
    ! Heat of Combustion calculation for EDC
+   
    IF (EDC) THEN
-      IF (RN%HEAT_OF_COMBUSTION <= -1.E21) THEN !No Heat of Combustion Defined
+      IF (RN%HEAT_OF_COMBUSTION > -1.E21) THEN ! User specified heat of combustion
          DO NS = 0,N_TRACKED_SPECIES
+            HF_COUNT = 0
             IF (RN%NU(NS) /= 0._EB) THEN
-               IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) THEN ! And missing Heat of Formation
-                  WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing either heat of formation or combustion.'
+               IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) HF_COUNT = HF_COUNT +1
+               IF (HF_COUNT > 1) THEN
+                  WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing more than 1 heat of formation or combustion.'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
          ENDDO
-      ENDIF   
-      IF (RN%HEAT_OF_COMBUSTION /= -2.E23) THEN
-         IF (SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F <= -1.E21) THEN
-            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = 0._EB
-            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
-                                                      + RN%HEAT_OF_COMBUSTION*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-            DO NS = 0,N_TRACKED_SPECIES
-               IF  (NS == RN%FUEL_SMIX_INDEX) CYCLE
+         ! Find heat of formation of lumped fuel to satisfy specified heat of combustion       
+         SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = 0._EB
+         SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
+                                                   + RN%HEAT_OF_COMBUSTION*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+         DO NS = 0,N_TRACKED_SPECIES
+            IF  (NS == RN%FUEL_SMIX_INDEX) CYCLE
                SM=>SPECIES_MIXTURE(NS)
                SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
                                                          + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
             ENDDO
             SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
                                                       (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
+      ELSE ! Heat of combustion not specified
+         IF (SIMPLE_CHEMISTRY) THEN ! Calculate heat of combustion based oxygen consumption
+            IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
+               RN%HEAT_OF_COMBUSTION = -RN%EPUMO2*RN%NU_SPECIES(O2_INDEX)*SPECIES(O2_INDEX)%MW/SPECIES(FUEL_INDEX)%MW
+            ELSE
+               IF (IDEAL) THEN
+                  RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION*SPECIES(FUEL_INDEX)%MW*0.001 !J/kg -> J/mol
+                  RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU_CO*(CO2_HEAT_OF_FORMATION - CO_HEAT_OF_FORMATION) &
+                                                                - RN%NU_SOOT*CO2_HEAT_OF_FORMATION*(1._EB-RN%SOOT_H_FRACTION) &
+                                                                - RN%NU_SOOT*H2O_HEAT_OF_FORMATION*RN%SOOT_H_FRACTION*0.5_EB
+                  RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES(FUEL_INDEX)%MW*1000._EB !J/mol->J/kg
+               ENDIF
+            ENDIF   
+         ELSE
+            DO NS = 0,N_TRACKED_SPECIES
+               IF (RN%NU(NS) /= 0._EB) THEN
+                  IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) THEN ! Missing Heat of Formation
+                     WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing either heat of formation or combustion.'
+                     CALL SHUTDOWN(MESSAGE)
+                  ENDIF
+               ENDIF
+            ENDDO
+         ENDIF   
+         IF (SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F <= -1.E21) THEN
+            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = 0._EB
+            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
+                                                      + RN%HEAT_OF_COMBUSTION*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+            DO NS = 0,N_TRACKED_SPECIES
+               IF  (NS == RN%FUEL_SMIX_INDEX) CYCLE
+                  SM=>SPECIES_MIXTURE(NS)
+                  SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
+                                                            + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
+            ENDDO
+            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
+                                                      (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
          ENDIF
+         RN%HEAT_OF_COMBUSTION = 0._EB
+         DO NS = 0,N_TRACKED_SPECIES
+            SM=>SPECIES_MIXTURE(NS)
+            RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
+         ENDDO
+         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
       ENDIF
-      RN%HEAT_OF_COMBUSTION = 0._EB
-      DO NS = 0,N_TRACKED_SPECIES
-         SM=>SPECIES_MIXTURE(NS)
-         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
-      ENDDO
-      RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    ENDIF
    IF (NR==1) REACTION%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION 
       
