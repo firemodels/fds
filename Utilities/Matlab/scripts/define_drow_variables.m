@@ -60,4 +60,4 @@ Plot_Filename      = char(parameters(find(strcmp(headers,'Plot_Filename'))));
 Stat_Dataname      = parameters(find(strcmp(headers,'Dataname')));
 Stat_Plot_Filename = parameters(find(strcmp(headers,'Plot_Filename')));
 Stat_Dep_Title     = parameters(find(strcmp(headers,'Dep_Title')));
-Error_Threshold    = parameters(find(strcmp(headers,'Error_Threshold')));
+Error_Tolerance    = parameters(find(strcmp(headers,'Error_Tolerance')));
