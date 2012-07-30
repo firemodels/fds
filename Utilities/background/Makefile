@@ -23,16 +23,6 @@ no_target:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .c.o:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
-.F90.o:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
-.F90.obj:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
-.f90.obj:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
-.f90.o:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
-
-
 
 # ********  rules for each platform supported *************
 
@@ -40,63 +30,58 @@ no_target:
 #  32 bit windows
 
 ms_win_32 : CFLAGS    = -O1 /Qvec_report0 /nologo -D WIN32 -I $(SOURCE_DIR)/shared
-ms_win_32 : FFLAGS    = 
 ms_win_32 : CC        = cl
-ms_win_32 : CPP       = cl
-ms_win_32 : FC        = ifort
 ms_win_32 : exe       = background.exe
 
 ms_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) 
+	$(CC) -o $(bin)/$(exe) $(objwin) 
 
 intel_win_32 : CFLAGS    = -O1 /Qvec_report0 /nologo -D WIN32 -I $(SOURCE_DIR)/shared
-intel_win_32 : FFLAGS    = 
 intel_win_32 : CC        = icl
-intel_win_32 : CPP       = icl
-intel_win_32 : FC        = ifort
 intel_win_32 : exe       = background.exe
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) 
+	$(CC) -o $(bin)/$(exe) $(objwin) 
 
-# ------------- Win 64 ----------------
-#  64 bit windows
+# ------------- gnu Linux 32 ----------------
+#  32 bit gnu linux
 
-intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
-intel_win_64 : FFLAGS    = 
-intel_win_64 : CC        = icl
-intel_win_64 : CPP       = icl
-intel_win_64 : FC        = ifort
-intel_win_64 : exe       = background.exe
+gnu_linux_32 : CFLAGS    = -D pp_LINUX
+gnu_linux_32 : CC        = gcc
+gnu_linux_32 : exe       = background
 
-intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) 
+gnu_linux_32 : $(obj)
+	$(CC) -o $(bin)/$(exe) -lm $(obj) 
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
 
-intel_linux_32 : FFLAGS    = 
 intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
 intel_linux_32 : CC        = icc
-intel_linux_32 : CPP       = icc
-intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = background
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) 
+	$(CC) -o $(bin)/$(exe) $(obj) 
 
 # ------------- OSX 32 ----------------
 #  32 bit osx
 
-intel_osx_32 : FFLAGS    = 
 intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
 intel_osx_32 : CC        = icc
-intel_osx_32 : CPP       = icc
-intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = background
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 $(obj) 
+	$(CC) -o $(bin)/$(exe) -m32 $(obj) 
+
+# ------------- gnu OSX 32 ----------------
+#  32 bit gnu osx
+
+gnu_osx_32 : CFLAGS    = -D pp_OSX
+gnu_osx_32 : CC        = gcc
+gnu_osx_32 : exe       = background
+
+gnu_osx_32 : $(obj)
+	$(CC) -o $(bin)/$(exe) -lm $(obj) 
 
 #-------------- Clean Target to remove Object and Module files -----------
 
