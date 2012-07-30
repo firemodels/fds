@@ -870,11 +870,11 @@ The theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$ appears
 %\subsubsection{Topi Sikanen, entered by Michael Van Order}
 \label{app_abscoeff}
 
-Pool fires depend on radiation feedback from the flames to the fuel surface. The feedback comes through convection, conduction and radiation. For large pool fires radiation heat transfer dominates. Radiation transport in pool fires has received a lot of attention. Studies have been made to determine the spectra of emitted radiation \cite{Suo-Anttila:PCT2009} as well as to characterize the radiation absorption by the gasses within the flame \cite{Wakatsuki:CST2008}. The transport and absorption of thermal radiation within the liquid fuel has received considerably less attention.
+Pool fires depend on radiation feedback from the flames to the fuel surface. The feedback comes through convection, conduction and radiation. For large pool fires radiation heat transfer dominates. consequently, radiation transport in pool fires has received a lot of attention. Studies have been made to determine the spectra of emitted radiation \cite{Suo-Anttila:PCT2009} as well as to characterize the radiation absorption by the gasses within the flame \cite{Wakatsuki:CST2008}. The transport and absorption of thermal radiation within the liquid fuel has received considerably less attention.
 
-In order to model the response of the fuel to the incident radiation it is necessary to model the absorption of this radiation. For fuels such as wood, most of the incident radiation is absorbed at a thin region near the surface. For semitransparent materials such as plastics or liquid fuels thermal radiation may penetrate a finite depth in to the fuel.  The in-depth radiation absorption by semitransparent fuels has been to best of our knowledge been studied only in the case of PMMA ~\cite{Stoliarov:CF2009}, polymer films ~\cite{Tsilingiris:ECM2003} and in liquid pool fires ~\cite{Suo-Anttila:PCT2009}.  In the latter study, the effect of radiation absorption on the burning rates was not investigated.  Most of the research considering the in-depth radiation absorption in liquids concerns boil-over of liquid pool fires on water \cite{Broeckmann:JLPPI1995}. The effect of in-depth radiation absorption on evaporation of fuel droplets has also received some attention \cite{Sazhin:IJHMT2004b}.
+In order to model the response of the fuel to the incident radiation it is necessary to model the absorption of this radiation. For fuels such as wood, most of the incident radiation is absorbed at a thin region near the surface. For semitransparent materials such as plastics or liquid fuels thermal radiation may penetrate a finite depth in to the fuel.  The in-depth radiation absorption by semitransparent fuels has been studied the case of PMMA ~\cite{Stoliarov:CF2009}, polymer films ~\cite{Tsilingiris:ECM2003} and in liquid pool fires ~\cite{Suo-Anttila:PCT2009}.  In the latter study, the effect of radiation absorption on the burning rates was not investigated.  Most of the research considering the in-depth radiation absorption in liquids concerns boil-over of liquid pool fires on water \cite{Broeckmann:JLPPI1995}. The effect of in-depth radiation absorption on evaporation of fuel droplets has also received some attention \cite{Sazhin:IJHMT2004b}.
 
-Most liquids are highly selective absorbers, absorbing intensively in some wavelength regions while being transparent in other regions.  This leads to models of radiation transport that are both computationally intensive and for which experimental data is scarce. In this paper we attempt to characterize the absorption of radiation by liquid fuels using effective absorption coefficients similar to those used by \cite{Madhav:IJMP1995} and \cite{Manohar:JHT1995} in modeling effect of radiation absorption on PMMA pyrolysis.
+Most liquids are highly selective absorbers, absorbing intensively in some wavelength regions while being transparent in other regions.  This leads to models of radiation transport that are both computationally intensive and for which experimental data is scarce. In this appendix we attempt to characterize the absorption of radiation by liquid fuels using effective absorption coefficients similar to those used by \cite{Madhav:IJMP1995} and \cite{Manohar:JHT1995} in modeling effect of radiation absorption on PMMA pyrolysis.
 
 \subsubsection{Determining Absorption Coefficients}
 
@@ -891,8 +891,6 @@ where $\kappa_{\lambda}$ (m$^{-1}$) is the absorption coefficient for wavelength
 \ \kappa_\lambda = -\frac{1}{S} \log [\tau_S] \mbox{.}
 \end{equation}
 
-Absorption coefficient data for liquid fuels is rather scarce and data has to be collected from various sources of sometimes-questionable accuracy. The size and scaling of graphics depicting absorption coefficients, pose further difficulties in collecting data on absorption coefficients.
-
 Where data on absorption coefficients of liquids exists in the open literature, such as Coblentz Society data found on the NIST Chemistry WebBook \cite{Coblentz:1}, it usually  only contains data for wavelengths from approximately 2.5 $\mu$m upwards. A large part of the total energy in emission spectrum of flames may easily be contained in wavelengths shorter than 2.5 $\mu$m thus rendering these data useless for our purposes.
 
 However absorption spectra that begin from 1 $\mu$m exists for a few liquids of which toluene (\cite{Bertie:JMS2005}, \cite{Bertie:AS1994b}, \cite{Bertie:AS1994a}), methanol \cite{Bertie:AS1993a}, benzene \cite{Bertie:AS1993b} and water \cite{Bertie:AS1996} are of interest for our current purposes. Furthermore, \cite{Suo-Anttila:PCT2009} included in their work on pool fires spectrally resolved transmission spectra of ethanol, heptane, JP-8 and an ethanol-toluene blend and calculations. Complex refractive index spectra for few diesel fuels were reported in \cite{Sazhin:IJHMT2004b}. Different diesel fuels have slightly different absorption spectra, due to differing additives. However the data reported in \cite{Sazhin:IJHMT2004b} can perhaps be used to obtain a order of magnitude estimate for the absorption coefficient of diesel fuel.
@@ -901,14 +899,14 @@ However absorption spectra that begin from 1 $\mu$m exists for a few liquids of 
     \label{fig_absspec}
     \centering
     \includegraphics{FIGURES/Absorption_spectra.pdf}
-    \caption{Absorption spectra of liquids considered in this study.}
+    \caption{Absorption spectra of liquids considered in this appendix.}
 \end{figure}
 
 \subsubsection{Effective Absorption Coefficients}
 
 Often we are not interested in resolving the spectra of the transmitted radiation, but rather we are interested in modelling the total transmitted radiation.  In these cases it is convenient to write the radiation transport equations in terms of mean absorption coefficients. This is done in order to avoid the time-consuming integrations over all wavelengths. For this end a number of mean absorption coefficients have been introduced, such as the Rosselland-mean absorption coefficient and the Planck-mean absorption coefficient. These correspond to the optically thin approximation and the Rosselland diffusion approximation of radiation transport.
 
-The absorption coefficients of liquids are highly wavelength dependent being transparent in some areas. In this case, the Planck-mean absorption coefficients lead to mean absorption coefficients that are too large by several orders of magnitude. Tsiliringis et al. \cite{Tsilingiris:ECM2003} proposed the use of absorption coefficient defined as, "in conjuction with Beer's law model of radiation transport."
+The absorption coefficients of liquids are highly wavelength dependent being transparent in some areas. In this case, the Planck-mean absorption coefficients lead to mean absorption coefficients that are too large by several orders of magnitude. 
 
 It is preferable to determine an effective absorption coefficient that attempts to replicate the absorption of radiation over a certain path length $S$. Here the path length is not a physical measure of the system but some characteristic length over which the majority of the radiation is assumed absorbed.
 
@@ -934,29 +932,33 @@ It can be easily seen that increasing the path-length leads to lower effective a
 
 \subsubsection{Absorption Coefficients of Selected Fuels}
 
-Absorption coefficients are determined from Eq.~\ref{eqn_effcoeff}. The data used in determining the coefficients is listed in Table~\ref{tbl_abscoeff}. When available, spectrally resolved absorption coefficients are used for determining the total transmitted fraction of radiation according to Eqns. \ref{eqn_beerslaw} and \ref{eqn_totintens}.  The transmission data in Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} was used for JP-8, ethanol and toluene. The spectrally resolved absorption coefficients from Keefe et al. were used to calculate the total transmission for toluene, benzene, water and methanol. Complex refractive index spectra of diesel reported by Sazhin et al. 2004a \cite{Sazhin:JHT2004a} was used to calculate the transmission.
+Absorption coefficients are determined from Eq.~\ref{eqn_effcoeff}. When available, spectrally resolved absorption coefficients are used for determining the total transmitted fraction of radiation according to Eqns. \ref{eqn_beerslaw} and \ref{eqn_totintens}.  The transmission data in Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} was used for JP-8, ethanol and toluene. The spectrally resolved absorption coefficients from Keefe et al. were used to calculate the total transmission for toluene, benzene, water and methanol. Complex refractive index spectra reported by Sazhin et al. 2004a \cite{Sazhin:JHT2004a} was used to calculate the transmission of diesel fuel. 
 
-Figure \ref{fig_trans2} and Figure \ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}.
+Table \ref{tbl_abscoeff} lists absorption coefficients for some liquid fuels. The value of the absrption coefficient is very sensitive to the spectrum of the incoming radiation as Figure \ref{fig_kapvtemp} demonstrates. The table \ref{tbl_abscoeff} contains two types of absorption coefficients. One type is determined by assuming the incoming radiation is blackbody radiation at temperature 1450K. The other set of absorption coefficients is based on actual flame radiation spectra.  When wavenumber range is listed , a blackbody temperature 1450 K is assumed in calculating the transmission. When wavenumber range is not listed, transmission data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} is used. Path length is 3 mm in all cases. 
 
-The two-flux model of radiation transport predicts the attenuation of radiation well for toluene and methanol, both of which have rather low absorption coefficients. In the other extreme, the attenuation of radiation by water and ethanol is poorly replicated. Here only the exponential attenuation near the surface is reasonably replicated.
+The assumption of black body radiation is adequate for sooty flames where the radiation from soot dominates the flame radiation spectra. This can be seen from similar values of absorption coefficient that were determine dfor toluene using the data from Suo-anttila et al. and  by using the blackbody radiation assumption. However for fuels, with low sooting flames, the incoming radiation spectrum differs considerably from blackbody spectrum. This explains the large difference in listed absorption coefficients for ethanol and methanol. The ethanol absorption coefficient is based on actual emission spectra of an ethanol flame,  while the methanol absorption coefficient is calculated based on blackbody spectrum. The correct value to use for methanol is likely to be closer to the absorption coefficient of ethanol. 
+
+Figure \ref{fig_trans2} and Figure \ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS solid phase radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}. The predictions are better for fuels with relatively low absorption coefficients. 
 
 \begin{table}[ht]
-\caption{Characterization of data sources used for determining absorption coefficients and effective absorption coefficients for selected liquids. Blackbody temperature 1450 K and path length 3 mm. Data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009}.}
+\caption{Characterization of data sources used for determining absorption coefficients and effective absorption coefficients for selected liquids. When wavenumber range is listed , a blackbody temperature 1450 K is assumed in calculating the transmission. When wavenumber range is not listed, transmission data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} is used. Path length is 3 mm in all cases. }
+
 \centering
 \begin{tabular}{l r r}
 \hline\hline
-Liquid & Wavenumber Range (cm$^{-1}$) & Effective Absorption Coefficient,$\kappa$ \\ [0.5ex]
+Liquid & Wavenumber Range (cm$^{-1}$) & Effective Absorption Coefficient,$\kappa$  \\ [0.5ex]
 \hline
-JP-8                                 &  -          & 301.4   \\
-Ethanol-Toluene blend                &  -          & 680.1   \\
-Ethanol                              &  -          & 1534.3  \\
+JP-8 \cite{Suo-Anttila:PCT2009}     &  -          & 301.4   \\
+Ethanol-Toluene blend \cite{Suo-Anttila:PCT2009}                &  -          & 680.1   \\
+Ethanol \cite{Suo-Anttila:PCT2009}   &  -          & 1534.3  \\
 Toluene \cite{Suo-Anttila:PCT2009}   &  -          & 187.5   \\
 Toluene \cite{Bertie:AS1994a}        &  436-6500   & 160.8   \\
-Methanol                             &  2-8000     & 52      \\
-Water                                &  xxxx-xxxx  & 1578    \\
-Benzene                              &  xxxx-xxxx  & 123     \\
+Methanol\cite{Bertie:AS1993a}                           &  2-8000     & 52\footnotemark     \\
+Water   \cite{Bertie:AS1996}                             &  1-15000  & 1578    \\
+Benzene \cite{Bertie:AS1993b}                             &  11.5-6200  & 123     \\
 \hline
 \end{tabular}
+\footnotetext{The absorption coefficient for methanol is calculated assuming that the incoming radiation is blackbody radiation at temperature 1450K. Since methanol flames are usually non-sooty, this assumption does not hold. The correct absorption coefficient to use in pool fire calculations is likely to be closer tot the absorption coefficient of ethanol. }
 \label{tbl_abscoeff}
 \end{table}
 

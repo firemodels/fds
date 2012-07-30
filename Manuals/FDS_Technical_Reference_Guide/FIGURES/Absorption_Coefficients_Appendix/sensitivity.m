@@ -1,7 +1,9 @@
-function effmeans
+%Sensitivity analysis of absorption coefficient
+%Path-length and radiation temperature
+
+function sensitivity
 
 addpath Two_flux
-addpath Data
 
 % BEGIN PLOT_STYLE
 % font properties
@@ -75,7 +77,7 @@ legend({'Water','Diesel'},'FontSize',14,'FontName',Font_Name);
         display(['Printing plot ',num2str(j),'...'])
 %        print(gcf,'-dpdf','../KAPPA_PATH_LENGTH')
 
-exportfig(gcf,'../KAPPA_VS_PATH_LENGTH_WD.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
+exportfig(gcf,'../KAPPA_VS_PATH_LENGTH_WD.pdf','Renderer','painters', 'width',6.5,'height',4.5 ,'fontsize',1.2,...
             'Color','CMYK','Format','pdf','Resolution',900);
 figure;
 plot(x*1e3,Kappa(:,[1:2 4]),'LineWidth',2,'LineSmoothing','on');
@@ -93,7 +95,7 @@ axis([0 5 0 600]);
         display(['Printing plot ',num2str(j),'...'])
 %        print(gcf,'-dpdf','../KAPPA_PATH_LENGTH')
 
-exportfig(gcf,'../KAPPA_VS_PATH_LENGTH_TMB.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
+exportfig(gcf,'../KAPPA_VS_PATH_LENGTH_TMB.pdf','Renderer','painters', 'width',6.5,'height',4.5 ,'fontsize',1.2,...
             'Color','CMYK','Format','pdf','Resolution',900);
         
 clear i
@@ -115,13 +117,13 @@ ylabel('Absorption coefficient (1/m)','FontSize',14,'FontName',Font_Name);
 legend({'Water','Diesel'},'FontSize',14,'FontName',Font_Name);
 %set(gca,'FontSize',14);
 % print to pdf
-        set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
-        set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-        display(['Printing plot ',num2str(i),'...'])
-        %print(gcf,'-dpdf','../KAPPA_TEMP')
-exportfig(gcf,'../KAPPA_VS_TEMP_WD.pdf','Renderer','painters', 'width',6.5,'height',4.8 ,'fontsize',1.2,...
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+display(['Printing plot ',num2str(i),'...'])
+%print(gcf,'-dpdf','../KAPPA_TEMP')
+exportfig(gcf,'../KAPPA_VS_TEMP_WD.pdf','Renderer','painters', 'width',6.5,'height',4.5 ,'fontsize',1.2,...
             'Color','CMYK','Format','pdf','Resolution',900);
 
 figure;
@@ -132,12 +134,12 @@ ylabel('Absorption coefficient (1/m)','FontSize',14,'FontName',Font_Name);
 legend({'Toluene','Methanol','Benzene'},'FontSize',14,'FontName',Font_Name);
 %set(gca,'FontSize',14);
 % print to pdf
-        set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
-        set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-        display(['Printing plot ',num2str(i),'...'])
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+display(['Printing plot ',num2str(i),'...'])
         %print(gcf,'-dpdf','../KAPPA_TEMP')
-exportfig(gcf,'../KAPPA_VS_TEMP_TMB.pdf','Renderer','painters', 'width',6.5,'height',4.8 ,'fontsize',1.2,...
+exportfig(gcf,'../KAPPA_VS_TEMP_TMB.pdf','Renderer','painters', 'width',6.5,'height',4.5 ,'fontsize',1.2,...
             'Color','CMYK','Format','pdf','Resolution',900);
 end

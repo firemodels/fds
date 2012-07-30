@@ -1,5 +1,5 @@
-
-function kappa=effmean_Suo_Anttila
+% Determine effective means for selected liquid fuels.
+function kappa=effective_abscoeffs
 
 addpath Two_flux
 
@@ -99,7 +99,8 @@ legend({'Jp-8','EthTol','Ethanol','Toluene(Suo-Anttila et al.)','Toluene (Keefe 
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(i),'...'])
         %print(gcf,'-dpdf','../Suo_anttila_effective_FDS1')
-
+xlabel('Depth (mm)','FontSize',14,'FontName',Font_Name);
+ylabel('Transmission','FontSize',14,'FontName',Font_Name);
 exportfig(gcf,'../Suo_anttila_effective_FDS1.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
             'Color','CMYK','Format','pdf','Resolution',900);
         figure;
@@ -120,7 +121,8 @@ legend('SouthEast',{'Methanol','Water','Benzene','Diesel'},'FontName',Font_Name)
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(i),'...'])
         %print(gcf,'-dpdf','../Suo_anttila_effective_FDS2','Resolution',900)
-
+xlabel('Depth (mm)','FontSize',14,'FontName',Font_Name);
+ylabel('Transmission','FontSize',14,'FontName',Font_Name);
 exportfig(gcf,'../Suo_anttila_effective_FDS2.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
             'Color','CMYK','Format','pdf','Resolution',900);
 
