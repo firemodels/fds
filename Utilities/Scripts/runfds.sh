@@ -16,10 +16,10 @@ esac
 done
 shift $(($OPTIND-1))
 
-# If queue is null then use "background" to submit jobs
-# on the local computer.
+# If queue is "none" then use "background" to submit jobs
+# instead of qsub (ie a queing system).
 
-if [ -z "$queue" ]; then
+if [ "$queue" == "none" ]; then
   queue=
   QSUB="$BACKGROUND -u 75 -d 10 "
   background=yes;
