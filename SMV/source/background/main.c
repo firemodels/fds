@@ -616,14 +616,11 @@ unsigned char cpuusage(){
   unsigned char usage;
   float load;
   int ncores;
-  int i_usage;
 
   ncores = get_ncores();
   load = get_load();
   if(load>ncores)load=ncores;
   usage = 100*(load/(float)ncores);
-  i_usage=usage;
-  printf("******* load=%f usage=%i *******\n",load,i_usage);
   return usage;
 }
 #endif
@@ -651,4 +648,3 @@ int getmaxrevision(void){
   MAXREV(main_revision);
   return max_revision;
 }
-\c
