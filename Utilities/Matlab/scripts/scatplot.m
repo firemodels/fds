@@ -35,6 +35,7 @@ Save_Predicted_Metric = saved_data{:,6};
 Save_Dataname         = saved_data{:,7};
 Save_Plot_Filename    = saved_data{:,8};
 Save_Dep_Title        = saved_data{:,9};
+Save_Error_Threshold  = saved_data{:,10};
 
 qfil = varargin{1};
 
@@ -62,8 +63,10 @@ if stats_output == 1
     output_stats{1,4} = 'Expected Metric';
     output_stats{1,5} = 'Predicted Metric';
     output_stats{1,6} = 'Relative Error (%)';
-    output_stats{1,7} = 'Dependent Variable';
-    output_stats{1,8} = 'Plot Filename';
+    output_stats{1,7} = 'Error Threshold (%)';
+    output_stats{1,8} = 'Within Specified Error Tolerance';
+    output_stats{1,9} = 'Dependent Variable';
+    output_stats{1,10} = 'Plot Filename';
     stat_line = 2;
 end
 
@@ -92,15 +95,26 @@ for j=qrange
                 single_predicted_metric = nonzeros(Predicted_Metric(k,:,:));
                 % Loop over multiple line comparisons and build output_stats cell
                 for m=1:length(single_measured_metric)
+                    % Calculate the relative error to be saved in the csv file
                     relative_error = (single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m);
+                    % Compare the error to the specified error threshold,
+                    % which is in the dataplot_inputs column called 'Error_Threshold'
+                    error_threshold = str2num(Save_Error_Threshold{i,1});
+                    if abs(relative_error) <= error_threshold
+                        within_threshold = 'Yes';
+                    else
+                        within_threshold = 'No';
+                    end
                     output_stats{stat_line,1} = i;
                     output_stats{stat_line,2} = Save_Group_Key_Label{i,1};
                     output_stats{stat_line,3} = Save_Dataname{i,1};
                     output_stats{stat_line,4} = single_measured_metric(m);
                     output_stats{stat_line,5} = single_predicted_metric(m);
                     output_stats{stat_line,6} = sprintf('%1.8f', relative_error);
-                    output_stats{stat_line,7} = Save_Dep_Title{i,1};
-                    output_stats{stat_line,8} = Save_Plot_Filename{i,1};
+                    output_stats{stat_line,7} = sprintf('%1.8f', error_threshold);
+                    output_stats{stat_line,8} = within_threshold;
+                    output_stats{stat_line,9} = Save_Dep_Title{i,1};
+                    output_stats{stat_line,10} = Save_Plot_Filename{i,1};
                     stat_line = stat_line + 1;
                 end
             end
