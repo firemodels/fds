@@ -45,19 +45,14 @@ unsigned char cpuusage_host(char *host,int ncores);
 unsigned char cpuusage_host(char *host,int ncores);
 #endif
 
-#ifdef pp_LINUX
-void Sleep(int ticks){
-  float time;
+#ifdef pp_LINUXOSX
 
-  time = ticks/1000.0;
-  sleep(time);
-}
-#endif
-#ifdef pp_OSX
-void Sleep(int ticks){
-  float time;
+/* ------------------ Sleep ------------------------ */
 
-  time = ticks/1000.0;
+void Sleep(int ticks){
+  unsigned int time;
+
+  time = ticks/1000.0 + 0.5;
   sleep(time);
 }
 #endif
