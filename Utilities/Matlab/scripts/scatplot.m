@@ -39,6 +39,7 @@ Save_Error_Tolerance  = saved_data{:,10};
 
 qfil = varargin{1};
 
+% If a statistics output file is specified, then enable statistics throughout
 if length(varargin) >= 2
     output_file = varargin{2};
     stats_output = 1;
@@ -54,8 +55,8 @@ Q = importdata(qfil);
 H = textscan(Q{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
+% Generate header information for output_stats
 if stats_output == 1
-    % Header information for output_stats
     output_stats = {};
     output_stats{1,1} = 'Dataplot Line Number';
     output_stats{1,2} = 'Verification Group';
@@ -91,16 +92,18 @@ for j=qrange
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
 
             if stats_output == 1
-                % Write descriptive statistics to output_stats cell
                 single_measured_metric = nonzeros(Measured_Metric(k,:,:));
                 single_predicted_metric = nonzeros(Predicted_Metric(k,:,:));
                 % Loop over multiple line comparisons and build output_stats cell
                 for m=1:length(single_measured_metric)
                     
+                    % Get type of statistics to compute
                     error_type = Save_Quantity{i,1};
                     
+                    % Compute the appropriate type of statistics, depending
+                    % on the 'Quantity' specification in dataplot_inputs
                     if strcmp(error_type, 'Relative Error')
-                        error = ((single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m))*100;
+                        error = ((single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m));
                     elseif strcmp(error_type, 'Absolute Error')
                         error = (single_predicted_metric(m)-single_measured_metric(m));
                     end
@@ -114,6 +117,7 @@ for j=qrange
                         within_tolerance = 'No';
                     end
                     
+                    % Write descriptive statistics to output_stats cell
                     output_stats{stat_line,1} = i;
                     output_stats{stat_line,2} = Save_Group_Key_Label{i,1};
                     output_stats{stat_line,3} = Save_Dataname{i,1};
