@@ -62,11 +62,12 @@ if stats_output == 1
     output_stats{1,3} = 'Case name';
     output_stats{1,4} = 'Expected Metric';
     output_stats{1,5} = 'Predicted Metric';
-    output_stats{1,6} = 'Relative Error (%)';
-    output_stats{1,7} = 'Error Tolerance (%)';
-    output_stats{1,8} = 'Within Specified Error Tolerance';
-    output_stats{1,9} = 'Dependent Variable';
-    output_stats{1,10} = 'Plot Filename';
+    output_stats{1,6} = 'Dependent Variable';
+    output_stats{1,7} = 'Type of Error';
+    output_stats{1,8} = 'Error';
+    output_stats{1,9} = 'Error Tolerance';
+    output_stats{1,10} = 'Within Specified Error Tolerance';
+    output_stats{1,11} = 'Plot Filename';
     stat_line = 2;
 end
 
@@ -95,26 +96,35 @@ for j=qrange
                 single_predicted_metric = nonzeros(Predicted_Metric(k,:,:));
                 % Loop over multiple line comparisons and build output_stats cell
                 for m=1:length(single_measured_metric)
-                    % Calculate the relative error (%) to be saved in the csv file
-                    relative_error = ((single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m))*100;
+                    
+                    error_type = Save_Quantity{i,1};
+                    
+                    if strcmp(error_type, 'Relative Error')
+                        error = ((single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m))*100;
+                    elseif strcmp(error_type, 'Absolute Error')
+                        error = (single_predicted_metric(m)-single_measured_metric(m));
+                    end
+                    
                     % Compare the error to the specified error tolerance,
                     % which is in the dataplot_inputs column called 'Error_Tolerance'
                     error_tolerance = str2num(Save_Error_Tolerance{i,1});
-                    if abs(relative_error) <= error_tolerance
+                    if abs(error) <= error_tolerance
                         within_tolerance = 'Yes';
                     else
                         within_tolerance = 'No';
                     end
+                    
                     output_stats{stat_line,1} = i;
                     output_stats{stat_line,2} = Save_Group_Key_Label{i,1};
                     output_stats{stat_line,3} = Save_Dataname{i,1};
                     output_stats{stat_line,4} = single_measured_metric(m);
                     output_stats{stat_line,5} = single_predicted_metric(m);
-                    output_stats{stat_line,6} = sprintf('%1.8f', relative_error);
-                    output_stats{stat_line,7} = sprintf('%1.8f', error_tolerance);
-                    output_stats{stat_line,8} = within_tolerance;
-                    output_stats{stat_line,9} = Save_Dep_Title{i,1};
-                    output_stats{stat_line,10} = Save_Plot_Filename{i,1};
+                    output_stats{stat_line,6} = Save_Dep_Title{i,1};
+                    output_stats{stat_line,7} = error_type;
+                    output_stats{stat_line,8} = sprintf('%1.8f', error);
+                    output_stats{stat_line,9} = sprintf('%1.8f', error_tolerance);
+                    output_stats{stat_line,10} = within_tolerance;
+                    output_stats{stat_line,11} = Save_Plot_Filename{i,1};
                     stat_line = stat_line + 1;
                 end
             end
