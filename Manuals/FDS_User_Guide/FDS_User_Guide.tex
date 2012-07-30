@@ -699,7 +699,7 @@ Screen output can be redirected to a file via the alternative command
 \begin{verbatim}
 fds_win_32 job_name.fds > job_name.err
 \end{verbatim}
-Note that it is also possible to associate the extention ``fds'' with the FDS executable directly, thereby making FDS run by
+Note that it is also possible to associate the ``.fds'' extension with the FDS executable directly, thereby making FDS run by
 double-clicking on the input file. If you do this, note that error messages will be written to the file called {\ct job\_name.out}. Also, if you
 associate the input file with the FDS executable, be careful not to accidently double-click on the input file when trying to edit it.
 This action will cause previously generated output files to be over-written.
@@ -991,7 +991,7 @@ somewhat on the size of the calculation so that the computer can comfortably run
 case. Trying to run with 90~\% to 100~\% of computer resources is risky.
 In fact, for a typical 32~bit Windows PC with 4 GB RAM, only 2 GB will be available to FDS, based on user feedback.
 If you want to run bigger cases, consider buying a computer with a 64~bit operating system or break up the
-calculation into multiple meshes and use parallel processing. If you are using a Linix/Unix machine, make sure that
+calculation into multiple meshes and use parallel processing. If you are using a Linux/Unix machine, make sure that
 the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize
 limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your
 stacksize is unlimited.
@@ -4984,7 +4984,7 @@ where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct o
 \subsection{HVAC Node Parameters}
 \label{info:HVACnode}
 
-Below are three example duct node inputs representing a typical tee-type connection (mutiple ducts being joined), a connection to the FDS domain, and a connection to the ambeint outside the FDS domain.
+Below are three example duct node inputs representing a typical tee-type connection (mutiple ducts being joined), a connection to the FDS domain, and a connection to the ambient outside the FDS domain.
 \footnotesize
 
 \begin{verbatim}
@@ -5188,7 +5188,7 @@ All possible filter inputs are discussed below.
 \noindent
 Note that a filter input refers to a class of filters and that multiple ducts can reference the same filter definition.
 
-The sample case {\bf HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~/kg (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximimum pressure of 20~Pa and a maximum flow of 0.2~m$^3$/s takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Figure~\ref{fig_filter}.
+The sample case {\bf HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~/kg (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~m$^3$/s takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Figure~\ref{fig_filter}.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -5220,7 +5220,7 @@ All possible aircoil inputs are shown below.
 \item[{\ct COOLANT\_TEMPERATURE}] The inlet temperature of the working fluid ($^\circ$C).
 \item[{\ct CTRL\_ID}] Name of a control function controlling the operation of the aircoil.
 \item[{\ct DEVC\_ID}] Name of a device controlling the operation of the aircoil.
-\item[{\ct EFFICIENCY}] The heat exchagner efficiency, $\eta$, from 0 to 1.  1 indicates the exit temperatures on both sides of the heat exchanger will be equal.
+\item[{\ct EFFICIENCY}] The heat exchanger efficiency, $\eta$, from 0 to 1.  1 indicates the exit temperatures on both sides of the heat exchanger will be equal.
 \item[{\ct FIXED\_Q}] Constant heat exchange rate.  Negative is heat removal from the duct.
 \end{description}
 
@@ -5236,7 +5236,7 @@ Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_CP}, {\ct COOLANT\_MDOT
 \noindent
 Note that an aircoil input refers to a class of aircoils and that multiple ducts can reference the same aircoil definition.
 
-The sample case {\bf HVAC\_aircoil} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28 g/mol with a specific heat of 1 kJ/kg/K) from the floor and injects in through the ceiling at a volume flow rate of 1~$m^3/s$.  An aircoil is defined with a working fluid flowsing at 10~kg/s and 100~\textcelsius with a specific heat of 4 kJ/kg/K.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2 kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Figure~\ref{fig_aircoil}.
+The sample case {\bf HVAC\_aircoil} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28 g/mol with a specific heat of 1 kJ/kg/K) from the floor and injects in through the ceiling at a volume flow rate of 1~$m^3/s$.  An aircoil is defined with a working fluid flowing at 10~kg/s and 100~\textcelsius with a specific heat of 4 kJ/kg/K.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2 kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Figure~\ref{fig_aircoil}.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -5356,7 +5356,7 @@ a finite amount of time to fully open them, and the slowing of the pressure incr
 Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
 use a low Mach number approximation. To maintain numerical stability, FDS gradually brings the pressures into equilibrium. This second point ought to be seen as a warning:
 
-Since pressure zones are defined using {\ct XB}, it might not be possible to define a complexly shaped set of pressure zones using just the {\ct ZONE} inputs.  A work around for this is to define the complex zone as a series of zones in the same manner you would divide a domain into multiple meshes.  The check for merged pressure zones only works if two zones were initially isolated at the start of the calculation (there must have been a wall that was removed). Therefore, define an obstruction at the boundary of the zones that is removed after the first timestep.
+Since pressure zones are defined using {\ct XB}, it might not be possible to define a complexly shaped set of pressure zones using just the {\ct ZONE} inputs.  A work around for this is to define the complex zone as a series of zones in the same manner you would divide a domain into multiple meshes.  The check for merged pressure zones only works if two zones were initially isolated at the start of the calculation (there must have been a wall that was removed). Therefore, define an obstruction at the boundary of the zones that is removed after the first time step.
 
 \begin{warning}
 \noindent Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
@@ -5424,7 +5424,7 @@ The HVAC output quantities can be used to determine the leakage flows.  FDS give
 \label{info:stackeffect}
 
 Tall buildings often experience buoyancy-induced air movement due to temperature differences
-between inside and outside, known as {\em stack effect}. The different temperatures result in different densities and hence different pressure gradients inside the building comparted to outside the building.  This can result in inducing flow in vertical shafts (stairwells, atriums, elevator shafts, etc.) through leakage paths or openings at the top and bottom of the building.  To simulate this phenomenon in FDS, you must
+between inside and outside, known as {\em stack effect}. The different temperatures result in different densities and hence different pressure gradients inside the building compared to the outside of the building.  This can result in inducing flow in vertical shafts (stairwells, atriums, elevator shafts, etc.) through leakage paths or openings at the top and bottom of the building.  To simulate this phenomenon in FDS, you must
 include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
 is important to capture the pressure and density decrease in the atmosphere based on the specified
 temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line.
@@ -7286,7 +7286,7 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 \end{verbatim}
 \normalsize
 
-\noindent In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyses at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
+\noindent In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
 
 \begin{figure}[ht]
 \begin{center}
@@ -7423,7 +7423,7 @@ subsequent actions, like a vent opening, had become too complicated and prone to
 Starting in FDS~5, all devices, in the broadest sense of the word,
 are designated via the namelist group {\ct DEVC}.
 In addition, advanced functionality and properties are accommodated
-via additional namelists groups called {\ct CTRL} (Control) and
+via additional namelist groups called {\ct CTRL} (Control) and
 {\ct PROP} (Properties).
 
 
@@ -7618,7 +7618,7 @@ Technical Reference Guide~\cite{FDS_Math_Guide}.
 If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct PARTICLE\_VELOCITY},
 and {\ct FLOW\_RATE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL})
 namelist group.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE} of the {\ct PROP} line, the name of the spray pattern using
-{\ct SPRAY\_PARTTERN\_TABLE} and then one or more {\ct TABL} lines of the format:
+{\ct SPRAY\_PATTERN\_TABLE} and then one or more {\ct TABL} lines of the format:
 
 \footnotesize
 \begin{verbatim}
@@ -7714,7 +7714,7 @@ For some simulations there may be groups of independent sprinklers or nozzles.  
 
 \noindent
 
-These lines indicate that the fuel spray nozzles are a seperate pipe network from the water sprinklers.  With these inputs, the {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.
+These lines indicate that the fuel spray nozzles are a separate pipe network from the water sprinklers.  With these inputs, the {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.
 
 \subsection{Nozzles}
 \label{info:nozzles}
@@ -7787,7 +7787,7 @@ The accumulated water is tracked using a device measuring the accumulated mass p
 \subsection{Specified Entrainment (Velocity Patch)}
 \label{info:velocity_patch}
 
-The details of the sprinkler head geometry and spray atomization are practically impossible to resolve in a fire calculation.  As a result, the local gas phase entrainment by the sprinkler is difficult to predict.  As an alternative, it is possible to specify the local gas velocity in the vicinity of the sprinkler nozzle.  The {\ct PROP} line may be used to specify a polynomial function for a specific velocity component and this function may be ``patched'' into the flow field using a device.  This device is given the quantity {\ct 'VELOCITY PATCH'} and is initially inactive.  The velocity patch must be actived with a separate control device, as discussed in Section \ref{info:basic_control}.  The user specifies the local region for the velocity patch using {\ct XB} for the device.  The polynomial is defined as a second-order Taylor expansion about the point {\ct XYZ} (the default value of {\ct XYZ} is the center of {\ct XB}).  FDS then uses an immersed boundary method to force the local velocity component to satisfy the polynomial.  The polynomial is specified by the coefficients {\ct P0}, {\ct PX(1\!:\!3)}, and {\ct PXX(1\!:\!3,1\!:\!3)}, which represent, respectively, the value of the $k$th velocity component, the first derivatives, and the second derivatives at point {\ct XYZ}.  Note that the first derivatives are represented by a three component array and the second derivatives are represented by a symmetric $3 \times 3$ array---only the upper triangular part needs to be specified.  The polynomial is given by (note that summation of repeated indices is implied):
+The details of the sprinkler head geometry and spray atomization are practically impossible to resolve in a fire calculation.  As a result, the local gas phase entrainment by the sprinkler is difficult to predict.  As an alternative, it is possible to specify the local gas velocity in the vicinity of the sprinkler nozzle.  The {\ct PROP} line may be used to specify a polynomial function for a specific velocity component and this function may be ``patched'' into the flow field using a device.  This device is given the quantity {\ct 'VELOCITY PATCH'} and is initially inactive.  The velocity patch must be activated with a separate control device, as discussed in Section \ref{info:basic_control}.  The user specifies the local region for the velocity patch using {\ct XB} for the device.  The polynomial is defined as a second-order Taylor expansion about the point {\ct XYZ} (the default value of {\ct XYZ} is the center of {\ct XB}).  FDS then uses an immersed boundary method to force the local velocity component to satisfy the polynomial.  The polynomial is specified by the coefficients {\ct P0}, {\ct PX(1\!:\!3)}, and {\ct PXX(1\!:\!3,1\!:\!3)}, which represent, respectively, the value of the $k$th velocity component, the first derivatives, and the second derivatives at point {\ct XYZ}.  Note that the first derivatives are represented by a three component array and the second derivatives are represented by a symmetric $3 \times 3$ array---only the upper triangular part needs to be specified.  The polynomial is given by (note that summation of repeated indices is implied):
 \begin{equation}
 u_k(\mathbf{r}) = \underbrace{(u_k)_0}_{\mbox{\ct P0}} \,\,+\,\, r_i \underbrace{\left( \frac{\partial u_k}{\partial x_i} \right)_{\!\!\!0}}_{\mbox{\ct PX(1\!:\!3)}} \,\,+\,\,\frac{ r_i r_j}{2} \underbrace{\left(\frac{\partial^2 u_k}{\partial x_i \partial x_j}\right)_{\!\!\!0}}_{\mbox{\ct PXX(1\!:\!3,1\!:\!3)}}
 \end{equation}
@@ -7887,15 +7887,15 @@ of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation
 ``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the combustion products lumped species.
 
 Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of
-the HRR (or even in lieu of an actual fire, like a smouldering source). You might also want to define a mass extinction coefficient for the
+the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the
 smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using
 the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
 
 \footnotesize
 \begin{verbatim}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
-&SURF ID='SMOULDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
-&VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='SMOULDER' /
+&SURF ID='SMOLDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
+&VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='SMOLDER' /
 
 &PROP ID='Acme Smoke', QUANTITY='CHAMBER OBSCURATION', SPEC_ID='MY SMOKE' /
 &DEVC XYZ=1.00,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_1' /
@@ -8149,14 +8149,14 @@ Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}
 if the text were added to an {\ct OBST} line, that obstruction would change from its {\ct INITIAL\_STATE} of {\ct .FALSE.} to {\ct .TRUE.} after
 30~s. In other words, it would be created at 30~s instead of at the start of the simulation. This is a simple way to open a door or window.
 
-When using a {\ct DEVC} output to control FDS, the instanteneous value of the the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
+When using a {\ct DEVC} output to control FDS, the instantaneous value of the the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
 
 \be
 \bar{x}^n=\bar{x}^{n-1} \, \mbox{\ct SMOOTHING\_FACTOR} + x \,(1-\mbox{\ct SMOOTHING\_FACTOR})
 \ee
 
 \noindent
-where n is the timestep, $x$ is the instanteneous device output and $\bar{x}$ is the smoothed output.  The {\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is being performed.
+where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The {\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is being performed.
 
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
@@ -8401,7 +8401,7 @@ before water can flow out of the head.
 \subsection{Control Function: \texorpdfstring{{\tt DEADBAND}}{DEADBAND}}
 \label{info:DEADBAND}
 
-This control function behaves like an HVAC thermostat.  It can operate in one of two modes analagous to heating or cooling.
+This control function behaves like an HVAC thermostat.  It can operate in one of two modes analogous to heating or cooling.
 The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function,
 a {\ct DEADBAND}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'},
 the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops
@@ -8508,7 +8508,7 @@ on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 \noindent
 In the above example the fan will be off initially, turn on at 60~s and then turn off at 120~s.
 
-You can make an obstruction appear and disappear multiple times by using lines like
+You can make an obstruction appear and disappear multiple times by using the following lines
 
 \footnotesize
 \begin{verbatim}
@@ -8548,7 +8548,7 @@ The control functions that perform simple math operations ({\ct SUM},  {\ct SUBT
 A PID (Proportional Integral Derivative) control function is a commonly used feedback controller for controlling electrical and mechanical systems.  The function computes an error between a process variable and a desired setpoint.  The goal of the PID function is to minimize the error.  A PID control function is computed as
 \be u(t) \; = \; K_p e(t) \; + \; \; K_i \int_0^t \! e(t) \, dt   \; + \; K_d \frac{de(t)}{dt}\ee
 where $K_p$, $K_i$, and $K_d$ are respectively the {\ct PROPORTIONAL\_GAIN}, the {\ct INTEGRAL\_GAIN}, and the
-{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.
+{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subtracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
 
@@ -9380,7 +9380,7 @@ It is possible to record various properties of droplets and particles. Some of t
 {\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named {\ct PART\_ID}.
 Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea.
 Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area,
-and the accumulated total, respectively.  It should be noted that these quantities are not indentical measures.  AMPUA is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period.  In this case case each grid cell on the floor is considered its own bucket.  AMPUA will only count each particle or droplet once and only count the particle or droplet when it reaches the floor.  \footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
+and the accumulated total, respectively.  It should be noted that these quantities are not identical measures.  AMPUA is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period.  In this case case each grid cell on the floor is considered its own bucket.  AMPUA will only count each particle or droplet once and only count the particle or droplet when it reaches the floor.  \footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
 is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line).
 In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from
 the simulation for the purpose of saving CPU time.} MPUA counts a particle whenever it is on any solid surface, including the walls.  If the particle or droplet moves from one solid wall
@@ -9480,7 +9480,7 @@ ${}^*$ $T_m$ is the melting temperature of the associated species.
 
 It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} normalized histogram bin counts  are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $d_i^m x$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins.
 
-The output file contains two-columns for each device giving an histogram output. The first column gives the bin centers and the sceond column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram is thought consist of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line  to {\ct 3} and {\ct 2} respectively.
+The output file contains two-columns for each device giving an histogram output. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram is thought consist of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line  to {\ct 3} and {\ct 2} respectively.
 
 The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
@@ -9542,7 +9542,7 @@ heat conduction equation is adequate, but in situations where it is
 not, another approach can be followed. FDS includes a calculation of
 the Adiabatic Surface Temperature (AST), a quantity that is
 representative of the heat flux to a solid surface. Following the idea
-proposed by Ulf Wickstrom~\cite{Wickstrom:Interflam2007}, the
+proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, the
 following equation can be solved via a simple iterative technique to
 determine an effective gas temperature, $T_{\hbox{\tiny AST}}$:
 \be \dot{q}_r'' + \dot{q}_c'' = \epsilon \sigma \, \left(
@@ -9635,7 +9635,7 @@ The Fractional Lethal Dose (FLD) of irritants is calculated as
 \ee
 where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and
 the denominators the exposure doses of respective irritants predicted to be lethal to half the population.
-The lethal exposure doses~\cite{SFPE:Purser} are given in the table~\ref{tbl:FIC}. To include the effect of an irritant gas not listed in the table,
+The lethal exposure doses~\cite{SFPE:Purser} are given in Table~\ref{tbl:FIC}. To include the effect of an irritant gas not listed in the table,
 the user should specify $\mathrm{F_{FLD}}$ in ppm$\times$min using the {\ct FLD\_LETHAL\_DOSE} property of the corresponding {\ct SPEC} line.
 \begin{table}[ht]
 \caption{Coefficients used for the computation of irritant effects of gases.}
@@ -9673,7 +9673,7 @@ depends upon the immediate concentrations of irritants. The overall irritant con
     \frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FIC,CH_2O}}
 \ee
 where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants
-expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in the table~\ref{tbl:FIC}.
+expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in Table~\ref{tbl:FIC}.
 To include the irritant effect of a gas not listed in the table, the user should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION}
 property on the corresponding {\ct SPEC} line.
 
@@ -11855,7 +11855,7 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MISC}    & {\ct SUPPRESSION}                   &  {\ct REAC}  & {\ct SUPPRESSION}                           & Section~\ref{info:extinction}            \\ \hline
 {\ct MISC}    & {\ct VISCOSITY}                     &  {\ct SPEC}  &  {\ct VISCOSITY}                            & Section~\ref{info:SPEC}                  \\ \hline
 {\ct PART}    & {\ct PARTICLES\_PER\_SECOND}        &  {\ct PROP}  & {\ct PARTICLES\_PER\_SECOND}                & Section~\ref{info:sprinkler_droplets}    \\ \hline
-{\ct PART}    & {\ct HEAT\_OF\_VAPORIZARTION}       &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZARTION}              & Section~\ref{thermal_part_props}         \\ \hline
+{\ct PART}    & {\ct HEAT\_OF\_VAPORIZATION}       &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZATION}              & Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE}  &  {\ct SPEC}  &   {\ct H\_V\_REFERENCE\_TEMPERATURE}        & Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct MELTING\_TEMPERATURE}          &  {\ct SPEC}  & {\ct MELTING\_TEMPERATURE}                  & Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct NUMBER\_INITIAL\_PARTICLES}    &  {\ct INIT}  & {\ct N\_PARTICLES}                          & Section~\ref{info:initial_droplets}      \\ \hline
@@ -11900,16 +11900,16 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform,
 it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.''
 All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered
-by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.
+by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.apache.org/}{{Subversion}} (SVN) revision management system.
 Under this system a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that
 identifies the version of the entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are incremented in version number).
-A record of version number when a specific file was last changed is maintained.
+A record of the version number is maintained that indicates when a specific file was changed, which is referred to as a revision number.
 
-As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
+As an open source program, any individual can obtain a copy of the repository or retrieve a specific revision of the
 repository.  Only the FDS and Smokeview developers can commit changes to the repository.
 
 The current location of the FDS repository is \href{http://code.google.com/p/fds-smv/source/checkout}
-{{\ct http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
+{{\ct http://fds-smv.googlecode.com/svn/trunk/FDS/trunk}}. The repository contains the following files:
 \begin{enumerate}
 \item FDS and Smokeview source code files
 \item FDS and Smokeview documentation
@@ -11943,8 +11943,8 @@ compile the code. Fortran 90/95 compilers are needed for compilation.
 \section{FDS Source Code}
 
 Table~\ref{tab:sourcefiles} lists the files that make up the source code.
-The files with suffix ``.f90'' contain free form Fortran 90 instructions
-conforming to the ANSI and ISO standards, with a few exceptions that are discussed below.
+Files with the ``.f90'' suffix contain free form Fortran 90 instructions
+conforming to the ANSI and ISO standards.
 The source files should be compiled in the order in which they are listed
 in Table~\ref{tab:sourcefiles} because some routines are dependent on others.
 For Unix/Linux users, {\bf Makefiles} for various platforms are available
@@ -11953,17 +11953,13 @@ Note the following:
 \begin{itemize}
 \item The source code consists entirely of Fortran 90
 statements organized into about 25 files.
-\item There is only one non-standard call in the Fortran code. The non-standard call is {\ct GETARG},
-in {\bf func.f90}. This routine reads the name of the input file off of the command line. This call cannot
-be simply commented out; a suitable alternative must be found.
-The only compiler option necessary, in addition to any needed to
-address the above issues, is for full optimization (usually -O or some variant). Some
+The only compiler option necessary is for full optimization (usually -O or some variant). Some
 compilers have a standard optimization level, plus various degrees of
 ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
 \item For the single processor version of FDS, compile with {\bf mpis.f90}
 \item The parallel version of FDS uses {\bf mpip.f90} instead of
 {\bf mpis.f90}, plus additional MPI libraries need to be installed. More
-details on MPI can be found at the web site, along with links to the
+details on MPI can be found at the FDS-SMV website, along with links to the
 necessary organizations who have developed free MPI libraries.
 \end{itemize}
 
