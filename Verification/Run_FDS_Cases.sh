@@ -68,7 +68,7 @@ else
   PLATFORM2=linux_32
 fi
 
-export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
+export BACKGROUND=$SVNROOT/Utilities/background/gnu_$PLATFORM2/background
 export FDS=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$DEBUG/fds_mpi_intel_$PLATFORM$DEBUG
 
