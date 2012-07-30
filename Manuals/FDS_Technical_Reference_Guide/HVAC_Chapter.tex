@@ -40,6 +40,7 @@ nodes coupled to that duct either directly (part of the same duct network) or in
 Solving the momentum equation, requires accounting for both of these.  This is done with the following discretization:
 \be u^{n+1}_j=u^{n}_j + \frac{\Delta t^n}{\rho_j L_j} \left[ \left(\tilde{P}^n_i - \tilde{P}^n_k\right)+\left(\rho g \Delta z\right)^{n-1}_j+\Delta P^{n-1}_j -
    \frac{1}{2}K_j \left(\left|u^{n-}_j+u^{n+}_j\right|u^n-\left|u^{n+}_j \right|u^{n-}_j \right) \right] \label{HVACdiscretemomentum} \ee
+
 The superscripts $n+$ and $n-$ on the velocity are used to linearize the flow loss in a duct to avoid a non-linear differential equation for velocity.
 The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred.
 This approach is used to speed convergence when duct flows are near zero to avoid large changes in $K$ if the forward and reverse losses are markedly different.
@@ -63,6 +64,7 @@ The extrapolated pressure for a compartment can be determined by using Eq.~(\ref
 all interdependent HVAC flows into or out of an FDS pressure zone:
 \be \tilde{P}^n_i=P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, dV}\right)\Delta t^n
    \label{HVACextrapolatedpressure} \ee
+
 If we separate the HVAC solved velocities into a pressure zone from the FDS solved velocities into a pressure zone and then substitute Eq.~\ref{HVACextrapolatedpressure} into
 Eq.~(\ref{HVACdiscretemomentum}) we obtain the following:
 \begin{eqnarray}
@@ -72,6 +74,7 @@ Eq.~(\ref{HVACdiscretemomentum}) we obtain the following:
   \left(\tilde{P}^n_i-\tilde{P}^n_k +  (\rho g \Delta z)_j + \Delta P_j \right) +
   \frac{K_j}{2 L_j}\left|u^{n+}_j\right| \left|u^{n-}_j\right| \label{HVACfullexpansion}
 \end{eqnarray}
+
 If node $i$ or node $k$ for duct $j$ in Eq.~(\ref{HVACfullexpansion}) is an internal duct node, then extrapolated pressures are not computed and the actual node pressure is solved for.
 Applying Eq.~(\ref{HVACfullexpansion}) to each duct results in a linear set of equations.
 Adding additional equations to the set for the mass conservation at internal duct nodes, results in complete set of equations.
@@ -91,7 +94,6 @@ Filter losses are evaluated using the begining of time step flter loading.  This
 The filter is assumed to remove a fixed fraction (the filter's efficiency) of the species being trapped by the filter.  Each species can be given its own removal efficiency.   Eq.~(\ref{HVACmass}) for a filter is therefore given as:
 
 \be u_{out} \rho_{out} A_{out} = u_{in} \rho_{in} A_{in} - \sum_j u_{in} \rho_{in} A_{in} Y_{j,in} E_j = u_{in} \rho_{in} A_{in}  \left(1 - \sum_j Y_{j,in} E_j \right) \ee
-
 where $j$ is a species being filtered and $E_j$ is its removal efficiency.  
 
 \subsection{Node Losses}
@@ -129,20 +131,17 @@ Prior to updating the HVAC solution, the inlet conditions ate each ductnode are 
 \be \bar{P}_i = \frac{\sum\limits_{j} P_j \, A_j}{\sum\limits_{j} A_j}  \ee
 \be \bar{h}_i =  \frac{\sum\limits_{j} \rho_j \, A_j, c_p(T_j,Y_j)}{\sum\limits_{j}  \rho_j, A_j} \ee
 \be \bar{T}_i = \frac{\bar{h}_i}{ c_p (\bar{T}_i,\bar{Y}_i)} \ee
-
-
 where $i$ is a ductnode and $j$ are the gas cells adjacent to the node.
 
 \subsection{Boundary Conditions for the FDS Hydrodynamic Solver}
 
 For wall cells containing inflow from an HVAC duct that is not leakage flow, $T_w$ is set to the value in the connected duct.  If the flow is a leakage flow, then $T_w$ is computed based on the thermal properties assigned to the surface (see Chapter ~\ref{SolidPhase}) .  The remaining wall boundary conditions are computed as follows:
 
-\be \dot{m}''' = \frac{u_d \, \rho_d \, A_d}/{A_v} \ee
+\be \dot{m}''' = \frac{u_d \, \rho_d \, A_d}{A_v} \ee
 \be \dot{m}'''_{\alpha} = Y_{\alpha,d} \, \dot{m}''' \ee
-
 where $d$ is the attached duct and $A_v$ is the total area of the vent (which in the case of leakage flow is the total area of all surfaces for that leak path).
 
-\be u_w = \frac{\dot{m}'''}/{\rho_w} \ee
+\be u_w = \frac{\dot{m}'''}{\rho_w} \ee
 \be \rho_w = \frac {p \, \bar{W}}{R \, T_w} \ee
 \be Y_{\alpha,w} = \frac{\dot{m}'''_{\alpha} + \frac{2 \, \rho_w \, D \, Y_{\alpha,gas}}{\delta n}}{ \frac{2 \, \rho_w \, D}{\delta n}+u_w \, \rho_w} \ee
 
