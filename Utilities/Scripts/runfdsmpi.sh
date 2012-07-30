@@ -1,5 +1,9 @@
 #!/bin/bash
 
+queue=
+background=no
+QSUB=qsub
+
 function usage {
   echo "Usage: runfdsmpi.sh nthreads dir casename"
   echo ""
@@ -13,7 +17,6 @@ function usage {
   exit
 }
 
-queue=batch
 while getopts 'hq:' OPTION
 do
 case $OPTION in
@@ -26,6 +29,22 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+# If queue is "none" then use "background" to submit jobs
+# instead of qsub (ie a queing system).
+
+if [ "$queue" == "none" ]; then
+  queue=
+  QSUB="$BACKGROUND -u 75 -d 10 "
+  background=yes;
+  if ! [ -e $BACKGROUND ];  then
+    echo "The file $BACKGROUND does not exist. Run aborted"
+    exit
+  fi
+fi
+if [ "$queue" != "" ]; then
+   queue="-q $queue"
+fi
 
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 nthreads=$1
@@ -94,6 +113,14 @@ export LD_LIBRARY_PATH=$MPIDIST/lib:$FORTLIB:$LD_LIBRARY_PATH
 $MPIDIST/bin/mpirun -np $nthreads $FDSMPI $in 
 EOF
 chmod +x $scriptfile
-echo Running $in 
-qsub -q $queue $scriptfile
+if [ "$background" != "yes" ]; then
+  echo Running `basename $FDSMPI` $in 
+  chmod +x $scriptfile
+  $QSUB $queue $scriptfile
+else
+  echo Running `basename $FDS` $in 
+  cd $fulldir
+  $QSUB $FDS $in
+fi
+
 rm $scriptfile

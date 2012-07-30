@@ -88,7 +88,7 @@ echo Directory: \`pwd\`
 $FDS $in 
 EOF
 
-echo Running $in 
+echo Running `basename $FDS` $in 
 if [ "$background" != "yes" ]; then
   chmod +x $scriptfile
   $QSUB $queue $scriptfile

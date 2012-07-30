@@ -79,7 +79,7 @@ echo Directory: \`pwd\`
 $CFAST $in 
 EOF
 
-echo Running $in 
+echo Running `basename $CFAST` $in 
 if [ "$background" != "yes" ]; then
   chmod +x $scriptfile
   $QSUB $queue $scriptfile

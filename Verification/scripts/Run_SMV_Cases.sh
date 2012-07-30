@@ -5,6 +5,7 @@
 
 queue=
 size=64
+DEBUG=
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -p -q queue_name -s ]"
@@ -27,8 +28,6 @@ CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
 
-DEBUG=
-
 while getopts 'dhp:q:s' OPTION
 do
 case $OPTION in
@@ -39,7 +38,7 @@ case $OPTION in
   usage;
   ;;
   p)
-   platformsize="$OPTARG"
+   size="$OPTARG"
    ;;
   q)
    queue="$OPTARG"

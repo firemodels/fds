@@ -5,6 +5,8 @@
 
 queue=
 cases=all
+size=64
+DEBUG=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -c cases -d -h -q queue_name -s ]"
@@ -16,6 +18,9 @@ echo "     default: $cases"
 echo "     other options: serial, mpi"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
+echo "-p size - platform size"
+echo "     default: 64"
+echo "     other options: 32"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
@@ -25,24 +30,20 @@ exit
 
 export SVNROOT=`pwd`/..
 
-# Set paths to FDS and FDS MPI executables
-# If no argument is specfied, then run FDS release version.
-export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
-
-# Otherwise, if -d (debug) option is specified, then run FDS DB version.
-while getopts 'c:dhq:s' OPTION
+while getopts 'c:dhp:q:s' OPTION
 do
 case $OPTION in
   c)
    cases="$OPTARG"
    ;;
   d)
-   export FDS=$SVNROOT/FDS_Compilation/intel_linux_64_db/fds_intel_linux_64_db
-   export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64_db/fds_mpi_intel_linux_64_db
+   DEBUG=_db
    ;;
   h)
   usage;
+  ;;
+  p)
+  size="$OPTARG"
   ;;
   q)
    queue="$OPTARG"
@@ -52,6 +53,25 @@ case $OPTION in
    ;;   
 esac
 done
+
+if [ "$size" != "32" ]; then
+  size=64
+fi
+size=_$size
+
+OS=`uname`
+if [ "$OS" == "Darwin" ]; then
+  PLATFORM=osx$size
+  PLATFORM2=osx_32
+else
+  PLATFORM=linux$size
+  PLATFORM2=linux_32
+fi
+
+export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
+export FDS=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
+export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$DEBUG/fds_mpi_intel_$PLATFORM$DEBUG
+
 
 if [ "$queue" != "" ]; then
    queue="-q $queue"
