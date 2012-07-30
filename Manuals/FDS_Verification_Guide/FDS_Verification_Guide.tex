@@ -1070,12 +1070,12 @@ $\mbox{d}p/\mbox{d}x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$
 \end{center}
 \end{table}
 
-%\begin{figure}
-%   \begin{center}
-%      \scalebox{0.6}{\includegraphics{FIGURES/channel_flow_setup.pdf}}
-%      \caption[LES of square duct flow]{\label{fig_channel_flow_setup} LES of square duct flow with smooth walls and periodic streamwise boundaries using dynamic Smagorinsky and the Werner Wengle wall model.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
-%   \end{center}
-%\end{figure}
+\begin{figure}
+   \begin{center}
+      \scalebox{0.6}{\includegraphics{FIGURES/channel_flow_setup.pdf}}
+      \caption[LES of square duct flow]{\label{fig_channel_flow_setup} LES of square duct flow with smooth walls and periodic streamwise boundaries using dynamic Smagorinsky and the Werner-Wengle wall model.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
+   \end{center}
+\end{figure}
 
 \paragraph{Rough Walls}
 
@@ -1084,7 +1084,7 @@ With the same grid set up as described above the smooth walls, a series of cases
 \begin{figure}[h!]
    \begin{center}
       \includegraphics[width=5.5in]{SCRIPT_FIGURES/fds_moody_chart.pdf}
-      \caption[FDS Moody chart]{\label{fig_fds_moody_chart} The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $z_0/H$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$). Symbols are FDS results for 3D LES with dynamic Smagorinsky.  Black symbols show results for the Werner Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).  Colored symbols are FDS results for the rough wall cases at different grid resolutions and relative roughnesses as differentiated by the symbol shapes.}
+      \caption[FDS Moody chart]{\label{fig_fds_moody_chart} The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $z_0/H$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$). Symbols are FDS results for 3D LES with dynamic Smagorinsky.  Black symbols show results for the Werner-Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).  Colored symbols are FDS results for the rough wall cases at different grid resolutions and relative roughnesses as differentiated by the symbol shapes.}
    \end{center}
 \end{figure}
 
