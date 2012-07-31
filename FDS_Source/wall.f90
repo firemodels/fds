@@ -971,6 +971,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          IF (ZZ_ERR > 1.E-6_EB) ITER = .TRUE.
       ENDIF SPECIES_IF
       WC%RHO_F = PBAR_P(KK,WC%PRESSURE_ZONE)/(RSUM_F*WC%ONE_D%TMP_F)      
+
       ! Decide to continue iterating
 
       IF (ABS(RHO_0 - WC%RHO_F)/RHO_0 > 1.E-6_EB ) ITER = .TRUE.
@@ -1013,7 +1014,6 @@ ELSE
 ENDIF
 
 D_GEOMETRY  = 0._EB
-Q_DOT(8,NM) = 0._EB ! Contribution of unstructured geometry mass/energy transfer to enthalpy equation
 
 FACE_LOOP: DO N=1,N_FACE
 
