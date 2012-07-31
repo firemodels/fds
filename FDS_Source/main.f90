@@ -635,12 +635,12 @@ MAIN_LOOP: DO
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
 
-   ! Diagnostic calls
+   ! Diagnostic timing calls and initialize energy budget array, Q_DOT
 
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
+      Q_DOT(:,NM) = 0._EB
       IF (DEBUG) WRITE(LU_ERR,'(A,I8,A,I3,A,L2)') 'Cycle ',ICYC,', Mesh ',NM, ' status=',ACTIVE_MESH(NM)
-
       IF (MOD(ICYC,3)==0 .AND. TIMING .AND. ACTIVE_MESH(NM)) THEN
          MPI_WALL_TIME = MPI_WTIME() - MPI_WALL_TIME_START
          WRITE(LU_ERR,'(A,I3,A,F12.4)')  ' Mesh ',NM,' is active at ', MPI_WALL_TIME

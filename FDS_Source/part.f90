@@ -1753,7 +1753,6 @@ CALL POINT_TO_MESH(NM)
 
 OMRAF  = 1._EB - RUN_AVG_FAC
 M_DOT(2,NM) = 0._EB ! Mass loss rate of fuel particles
-Q_DOT(7,NM) = 0._EB ! Contribution of particle mass/energy transfer to enthalpy equation
 
 ! Rough estimates
 
@@ -1818,10 +1817,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       IF (LP%WALL_INDEX==0)           CYCLE FILM_SUMMING_LOOP
       IF (LP%ONE_D%X(1)<=0._EB)       CYCLE FILM_SUMMING_LOOP
       IW = LP%WALL_INDEX
-      FILM_THICKNESS(IW) = FILM_THICKNESS(IW) + LP%PWT*LP%ONE_D%X(1)**3/WALL(IW)%AW
+      FILM_THICKNESS(IW) = FILM_THICKNESS(IW) + LPC%FTPR*LP%PWT*LP%ONE_D%X(1)**3/(LPC%DENSITY*WALL(IW)%AW)
    ENDDO FILM_SUMMING_LOOP
 
-   FILM_THICKNESS = FILM_THICKNESS*LPC%FTPR/LPC%DENSITY
    FILM_THICKNESS = MAX(MINIMUM_FILM_THICKNESS,FILM_THICKNESS) 
 
    NEW_EVAP_DROP_IF: IF (.NOT. NEW_EVAP_DROP) THEN
@@ -2117,7 +2115,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) &
                                 + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
 
-            Q_DOT(7,NM) = Q_DOT(7,NM) + (M_VAP*H_S_B - Q_CON_GAS)*WGT/DT_SUBSTEP
+            ! Add energy losses and gains to overall energy budget array
+
+            Q_DOT(7,NM) = Q_DOT(7,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT_SUBSTEP  ! Q_PART
+            Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B*WGT/DT_SUBSTEP                       ! Q_CONV
+            Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT_SUBSTEP                             ! Q_RADI
+            Q_DOT(4,NM) = Q_DOT(4,NM) + Q_CON_WALL*WGT/DT_SUBSTEP                        ! Q_COND
 
             ! Keep track of total mass evaporated in cell
 
@@ -2555,7 +2558,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                                 Q_CON_GAS_TOT(II,JJ,KK)/H_G_OLD)/DT_SUBSTEP
 
                   Q_DOT(7,NM) = Q_DOT(7,NM) + (MVAP_HSB(II,JJ,KK) - Q_CON_GAS_TOT(II,JJ,KK))/DT_SUBSTEP
-
                ENDIF
             ENDDO
          ENDDO
