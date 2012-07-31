@@ -60,7 +60,7 @@ if stats_output == 1
     output_stats = {};
     output_stats{1,1} = 'Dataplot Line Number';
     output_stats{1,2} = 'Verification Group';
-    output_stats{1,3} = 'Case name';
+    output_stats{1,3} = 'Case Name';
     output_stats{1,4} = 'Expected Metric';
     output_stats{1,5} = 'Predicted Metric';
     output_stats{1,6} = 'Dependent Variable';
@@ -234,28 +234,53 @@ if stats_output == 1
 end    
 
 % Write statistics information to a LaTeX table for inclusion in the
-% FDS Technical Reference Guide (verification_statistics.tex)
+% FDS Verification Guide (SCRIPT_FIGURES/verification_statistics.tex)
 if stats_output == 1
     filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/verification_statistics.tex';
     fid = fopen(filename, 'wt');
+    % Generate table header information in .tex file
     fprintf(fid,'%s\n','\begin{center}');
     fprintf(fid,'%s\n','\tiny');
-    fprintf(fid,'%s\n','\begin{longtable}{|c|c|c|c|c|c|c|c|} \hline');
-    fprintf(fid, '%s\n', 'Case name & Expected Metric & Predicted Metric & Dependent Variable & Type of Error & Error & Error Tolerance & Within Tolerance \\ \hline');
+    fprintf(fid,'%s\n','\begin{longtable}{|c|c|c|c|c|c|c|c|}');
+    fprintf(fid,'%s\n','\hline');
+    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within   \\');
+    fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline');
+    fprintf(fid, '%s\n', '\endfirsthead');
+    fprintf(fid, '%s\n', '\hline');
+    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within   \\');
+    fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline');
+    fprintf(fid, '%s\n', '\endhead');
+    fprintf(fid, '%s\n',  '\hline');
+    fprintf(fid, '%s\n', '\endfoot');
+    fprintf(fid, '%s\n',  '\hline');
+    fprintf(fid, '%s\n', '\endlastfoot');
     [rows, cols] = size(output_stats);
     for i_row = 2:rows
+        % Format strings for various columns in table (and add short names)
         m = output_stats;
+        % Escape underscores for LaTeX
+        case_name = strrep(m{i_row, 3}, '_', '\_');
+        % Additional columns
+        expected_value = m{i_row, 4};
+        predicted_value = m{i_row, 5};
+        dependent_variable = m{i_row, 6};
+        % Remove " Error" from string to save horizontal space
+        error_type = strrep(m{i_row, 7}, ' Error', '');
+        % Convert strings to numbers for later formatting
         error = str2num(m{i_row, 8});
         tol = str2num(m{i_row, 9});
-        fprintf(fid, '%s',    strrep(m{i_row, 3}, '_', '\_'), ' & ');
-        fprintf(fid, '%s',    num2str(m{i_row, 4}), ' & ');
-        fprintf(fid, '%s',    num2str(m{i_row, 5}), ' & ');
-        fprintf(fid, '%s',    strrep(m{i_row, 6}, '%/', '%') , ' & ');
-        fprintf(fid, '%s',    m{i_row, 7}, ' & ');
-        fprintf(fid, '%s',    num2str(error, '%1.3f'), ' & ');
-        fprintf(fid, '%s',    num2str(tol, '%1.3f'), ' & ');
-        fprintf(fid, '%s\n',  m{i_row, 10}, ' \\');
-        fprintf(fid, '%s\n',  '\hline');
+        % Additional columns
+        within_tolerance = m{i_row, 10};
+        
+        % Write out all columns to .tex file
+        fprintf(fid, '%s',   case_name, ' & ');
+        fprintf(fid, '%s',   num2str(expected_value, '%1.2e'), ' & ');
+        fprintf(fid, '%s',   num2str(predicted_value, '%1.2e'), ' & ');
+        fprintf(fid, '%s',   dependent_variable, ' & ');
+        fprintf(fid, '%s',   error_type, ' & ');
+        fprintf(fid, '%s',   num2str(error, '%1.2e'), ' & ');
+        fprintf(fid, '%s',   num2str(tol, '%1.2e'), ' & ');
+        fprintf(fid, '%s%s\n', within_tolerance, ' \\');
     end
     fprintf(fid,'%s\n','\end{longtable}');
     fprintf(fid,'%s\n','\end{center}');
