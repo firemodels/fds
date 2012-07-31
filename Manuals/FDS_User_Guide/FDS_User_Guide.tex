@@ -4914,8 +4914,7 @@ mass flux of species.  To obtain a guaranteed mass flux of a species, you should
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
 
-There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation,
-Air Conditioning) system.
+There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation, and Air Conditioning) system.
 If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
 duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
@@ -4970,9 +4969,9 @@ specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$
 \noindent
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER\_ID}, or {\ct FAN\_ID} should be specified for a duct.
 
-To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments and, thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, a representative area or diameter.  The pressure losses associated with all the segments of the duct can be collapsed in to in single loss by summing all of the fitting, $K$, losses through the duct as follows:
+To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments and, thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, a representative area ($A_{eff}$) or diameter.  The pressure losses associated with all the segments of the duct can be collapsed in to in single effective loss ($K_{eff}$) by summing all of the fitting, $K$, losses through the duct as follows:
 \be K_{eff} = \sum_i {K_i \frac {A_{eff}}{A_i}} \ee
-where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct or fitting.
+where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 
 \begin{figure}[ht]
 \includegraphics[width=5in]{FIGURES/hvac-simplify.png}
@@ -5209,14 +5208,14 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 
 \begin{verbatim}
 &HVAC TYPE='AIRCOIL', ID='aircoil 1', DEVC_ID='device 1', EFFICIENCY=0.5,
-      COOLANT_CP=4.186, COOLANT_TEMPERATURE= 10., COOLANT_MDOT= 1./
+      COOLANT_SPECIFIC_HEAT=4.186, COOLANT_TEMPERATURE= 10., COOLANT_MASS_FLOW= 1./
 \end{verbatim}\normalsize
 
 All possible aircoil inputs are shown below.
 
 \begin{description}
-\item[{\ct COOLANT\_CP}] The specific heat (kJ/kg/K) of the working fluid.
-\item[{\ct COOLANT\_MDOT}] The flow rate of the working fluid (kg/s).
+\item[{\ct COOLANT\_MASS\_FLOW}] The flow rate of the working fluid (kg/s).
+\item[{\ct COOLANT\_SPECIFIC\_HEAT}] The specific heat (kJ/kg/K) of the working fluid.
 \item[{\ct COOLANT\_TEMPERATURE}] The inlet temperature of the working fluid ($^\circ$C).
 \item[{\ct CTRL\_ID}] Name of a control function controlling the operation of the aircoil.
 \item[{\ct DEVC\_ID}] Name of a device controlling the operation of the aircoil.
@@ -5225,7 +5224,7 @@ All possible aircoil inputs are shown below.
 \end{description}
 
 \noindent
-Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_CP}, {\ct COOLANT\_MDOT}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the later case the heat exchange is computed as:
+Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the later case the heat exchange is computed as:
 
 \be T_{fluid,out}=\frac{c_{p,gas} u_{duct} A_{duct} \rho_{duct} T_{duct,in} + c_{p,fluid} \dm_{fluid} T_{fluid,in}}{c_{p,gas} u_{duct} A_{duct} \rho_{duct} + c_{p,fluid} \dm_{fluid}}
 \ee
@@ -10709,8 +10708,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct AMBIENT}                   & Logical           & Section~\ref{info:HVACnode}                                                   &               & {\ct .FALSE.}  \\ \hline
 {\ct AREA}                      & Real              & Section~\ref{info:HVACduct}                                                   & m$^2$         &                \\ \hline
 {\ct CLEAN\_LOSS}               & Real              & Section~\ref{info:HVACfilter}                                                 &               &                \\ \hline
-{\ct COOLANT\_CP}               & Real              & Section~\ref{info:HVACaircoil}                                                & kJ/kg/K       &                \\ \hline
-{\ct COOLANT\_MDOT}             & Real              & Section~\ref{info:HVACaircoil}                                                & kg/s          &                \\ \hline
+{\ct COOLANT\_MASS\_FLOW}       & Real              & Section~\ref{info:HVACaircoil}                                                & kg/s          &                \\ \hline
+{\ct COOLANT\_SPECIFIC\_HEAT}   & Real              & Section~\ref{info:HVACaircoil}                                                & kJ/kg/K       &                \\ \hline
 {\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C     &                \\ \hline
 {\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, and \ref{info:HVACfilter}   &               &                \\ \hline
 {\ct DAMPER}                    & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
