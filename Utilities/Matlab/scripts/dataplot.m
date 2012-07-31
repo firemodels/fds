@@ -283,6 +283,10 @@ for i=2:2000
                pos = get(legend_handle,'position');
                set(legend_handle,'position',[6.5 pos(2:4)])
             end
+            if isequal(Key_Position,'SouthEastOutside')
+               pos = get(legend_handle,'position');
+               set(legend_handle,'position',[6.5 0.5 pos(3:4)])
+            end
             set(legend_handle,'Interpreter',Font_Interpreter);
             set(legend_handle,'Fontsize',Key_Font_Size);
             set(legend_handle,'Box','on');
