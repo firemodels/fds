@@ -233,6 +233,35 @@ if stats_output == 1
     st = fclose(fid);
 end    
 
+% Write statistics information to a LaTeX table for inclusion in the
+% FDS Technical Reference Guide (verification_statistics.tex)
+if stats_output == 1
+    filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/verification_statistics.tex';
+    fid = fopen(filename, 'wt');
+    fprintf(fid,'%s\n','\begin{center}');
+    fprintf(fid,'%s\n','\tiny');
+    fprintf(fid,'%s\n','\begin{longtable}{|c|c|c|c|c|c|c|c|} \hline');
+    fprintf(fid, '%s\n', 'Case name & Expected Metric & Predicted Metric & Dependent Variable & Type of Error & Error & Error Tolerance & Within Tolerance \\ \hline');
+    [rows, cols] = size(output_stats);
+    for i_row = 2:rows
+        m = output_stats;
+        error = str2num(m{i_row, 8});
+        tol = str2num(m{i_row, 9});
+        fprintf(fid, '%s',    strrep(m{i_row, 3}, '_', '\_'), ' & ');
+        fprintf(fid, '%s',    num2str(m{i_row, 4}), ' & ');
+        fprintf(fid, '%s',    num2str(m{i_row, 5}), ' & ');
+        fprintf(fid, '%s',    strrep(m{i_row, 6}, '%/', '%') , ' & ');
+        fprintf(fid, '%s',    m{i_row, 7}, ' & ');
+        fprintf(fid, '%s',    num2str(error, '%1.3f'), ' & ');
+        fprintf(fid, '%s',    num2str(tol, '%1.3f'), ' & ');
+        fprintf(fid, '%s\n',  m{i_row, 10}, ' \\');
+        fprintf(fid, '%s\n',  '\hline');
+    end
+    fprintf(fid,'%s\n','\end{longtable}');
+    fprintf(fid,'%s\n','\end{center}');
+end
+
+
 display('scatplot completed successfully!')
 
 
