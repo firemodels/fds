@@ -794,7 +794,7 @@ where $\Gamma$ determines its intensity and $R_c$ its characteristic size. The v
 \label{eqn_uvel}
 u (x,z) &\equiv& U_{0} + \frac{\partial}{\partial z} \Psi_{0} = U_{0} - \frac{\Gamma \ z}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right], \\
 w (x,z) &\equiv& - \frac{\partial}{\partial x} \Psi_{0} = \frac{\Gamma \ x}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
-\end{eqnarray} 
+\end{eqnarray}
 where $u$ and $w$ refer to velocity in the $x$ and $z$-directions, respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the $u$-component of velocity.
 
 We define the computational domain as a two-dimensional square region, $L=0.3112$~m on a side, with periodic boundary conditions. The domain is discretized for a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. For the purposes of this test, we set the flow parameters as
@@ -898,7 +898,7 @@ Overall, the agreement between the FDS simulations and the CBC data is satisfact
 
 
 
- 
+
 \clearpage
 
 \subsection{Dynamic Smagorinsky (\texorpdfstring{{\bf dsmag}}{dsmag})}
@@ -3348,10 +3348,30 @@ This case tests the conservation of energy between drops, surfaces, and  the gas
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_6_T} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_6_P}
 \end{tabular*}
-\caption[Sample case {\bf water\_evaporation\_6}]{Output of {\bf water\_evaporation} cases 6.}
+\caption[Sample case {\bf water\_evaporation\_6}]{Output of {\bf water\_evaporation} case 6.}
 \label{water_evaporation_6_plots}
 \end{figure}
 
+\subsection{Case 7}
+
+In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with of diameter 2000~$\mu$m are
+introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~$^\circ$C, and the spray is directed at the walls with an initial velocity of 5~m/s.
+The water completely evaporates before it drips down to the bottom of the channel.
+Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, {\ct HRR}, of the fire is \underline{expected} to be 320~kW. The rate at which the water droplets extract energy from the system, {\ct Q\_PART}, is \underline{expected} to be
+\be - \left( 4.184 \; \hbox{kJ/kg/K} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.2 \; \hbox{kW} \ee
+The sum of all the terms, {\ct Q\_TOTAL}, is \underline{expected} to be zero. The three other quantities, {\ct Q\_COND}, {\ct Q\_RADI}, {\ct Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_7}
+\end{center}
+\caption[Sample case {\bf water\_evaporation\_7}]{Output of {\bf water\_evaporation} case 7.}
+\label{water_evaporation_7_plot}
+\end{figure}
+
+
+
+\clearpage
 
 \section{Flow Rate and Pipe Networks (\texorpdfstring{{\textbf{flow\_rate\_2}}}{flow\_rate\_2}) }
 
@@ -3366,6 +3386,9 @@ In this test case four sprinklers are placed in a room.  The first three sprinkl
 \caption[Output of the flow rate test case.]{Output of the {\bf flow\_rate\_2} test case.}
 \label{flow_rate_2_figure}
 \end{figure}
+
+
+\clearpage
 
 \section{Turbulent Dispersion (\texorpdfstring{{\textbf{random\_walk}}}{random\_walk}) }
 \label{turbulent_dispersion}
