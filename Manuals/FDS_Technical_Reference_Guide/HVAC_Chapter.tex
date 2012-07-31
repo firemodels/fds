@@ -1,7 +1,7 @@
 \chapter{Heating, Ventilation, and Air Conditioning (HVAC)}
 
 HVAC systems are found throughout the built environment.  During a fire, HVAC ducts can serve
-as a path for heat and combustion products to be moved through a building.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts.
+as a path for heat and combustion products to be moved through a building and the ducts can serve as a supply of fresh air.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts.
 HVAC systems may also serve as part of the fire protection system for a building when used to exhaust smoke or maintain stairwell pressurization.
 
 Previous versions of FDS, have only had the ability to specify either fixed flow boundary conditions (velocity or mass flux) or a simple pressure boundary condition.
@@ -17,7 +17,7 @@ The Fire and Smoke Simulator (FSSIM)~\cite{FSSIM}, a network fire model, has sho
 in the presence of complex ventilation systems.
 
 The MELCOR solver uses an explicit conservation of mass and energy combined with an implicit solver for the conservation of momentum.
-An HVAC system is represented as network of nodes and ducts where a node represents where a duct joins with the FDS computational domain or where multiple ducts are joined such as a tee.
+An HVAC system is represented as network of nodes and ducts.  A node represents where a duct joins with the FDS computational domain or where multiple ducts are joined such as a tee.
 A duct segment in the network represents any continuous flow path not interrupted by a node and as such may include multiple fittings (elbows, expansions, or contractions, etc.)
 and may have varying area over its length.  The current implementation of the model does not account for mass storage with an HVAC network. The nodal conservation equations of
 mass, energy, and momentum (in that order) are:
@@ -42,7 +42,7 @@ Solving the momentum equation, requires accounting for both of these.  This is d
    \frac{1}{2}K_j \left(\left|u^{n-}_j+u^{n+}_j\right|u^n-\left|u^{n+}_j \right|u^{n-}_j \right) \right] \label{HVACdiscretemomentum} \ee
 
 The superscripts $n+$ and $n-$ on the velocity are used to linearize the flow loss in a duct to avoid a non-linear differential equation for velocity.
-The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred.
+The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred between iterations.
 This approach is used to speed convergence when duct flows are near zero to avoid large changes in $K$ if the forward and reverse losses are markedly different.
 
 Note that the node pressures are not expressed as $P^n_i$, but rather as $\tilde{P}^n_i$.  This indicates an extrapolated pressure at the end of the current time step
@@ -79,11 +79,14 @@ If node $i$ or node $k$ for duct $j$ in Eq.~(\ref{HVACfullexpansion}) is an inte
 Applying Eq.~(\ref{HVACfullexpansion}) to each duct results in a linear set of equations.
 Adding additional equations to the set for the mass conservation at internal duct nodes, results in complete set of equations.
 
-The solution scheme is as follows.  Determine the boundary conditions at all points where the HVAC network joins the FDS computational domain using the previous time step values.
-Compute the extrapolated pressures for each pressure zone using the previous iteration (previous time step if the first iteration).
-Assemble the linear set of equations for conservation of momentum and conservation of mass.
-Solve the equation and check the solution for errors in mass conservation, flow reversal over the time step, and the magnitude of change in the velocity solution for each duct.
-If any convergence check fails, the solution is re-iterated with new extrapolated pressures.  Density and enthalpy values are taken as the upwind values in each iteration.  After each iteration, the temperature and density of each node are update using the velocity and pressure soultion.  The node temperature is computed by summing the enthalpy flows into the node and computing the average temperature that represents the total enthalpy.  Density is then updated using the equation of state and the new temperature.
+The solution scheme is as follows:
+
+\begin{enumerate}
+\item Determine the boundary conditions at all points where the HVAC network joins the FDS computational domain using the previous time step values.
+\item Compute the extrapolated pressures for each pressure zone using the previous iteration (previous time step if the first iteration).
+\item Assemble the linear set of equations for conservation of momentum and conservation of mass.
+\item Solve the equation and check the solution for errors in mass conservation, flow reversal over the time step, and the magnitude of change in the velocity solution for each duct.  If any convergence check fails, the solution is re-iterated with new extrapolated pressures.  Density and enthalpy values are taken as the upwind values in each iteration.  After each iteration, the temperature and density of each node are update using the velocity and pressure soultion.  The node temperature is computed by summing the enthalpy flows into the node and computing the average temperature that represents the total enthalpy.  Density is then updated using the equation of state and the new temperature.
+\end{enumerate}
 
 \subsection{Filtration}
 
