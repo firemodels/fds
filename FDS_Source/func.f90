@@ -147,7 +147,7 @@ END FUNCTION GET_FILE_NUMBER
 SUBROUTINE CHECKREAD(NAME,LU,IOS)
 
 ! Look for the namelist variable NAME and then stop at that line.
- 
+
 INTEGER :: II
 INTEGER, INTENT(OUT) :: IOS
 INTEGER, INTENT(IN) :: LU
@@ -175,6 +175,7 @@ ENDDO READLOOP
 END SUBROUTINE CHECKREAD
 
 
+
 SUBROUTINE CHECK_XB(XB)
 ! Reorder an input sextuple XB if needed
 REAL(EB) :: DUMMY,XB(6)
@@ -190,7 +191,6 @@ END SUBROUTINE CHECK_XB
 
 
 SUBROUTINE CHANGE_UNITS(QUANTITY,UNITS,STATISTICS,MYID,LU_ERR)
-
 ! Change the units of the DEVC output if it is an integrated quantity
 
 CHARACTER(30), INTENT(IN) :: QUANTITY,STATISTICS
@@ -2356,7 +2356,6 @@ REAL(EB) :: Y_MF_INT, TMP_1
 !   with RMV=25 [l/min], D=30 [%] COHb concentration at incapacitation and C_CO in ppm
 IF (CO_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
-
    TMP_1 = SPECIES(CO_INDEX)%RCON*Y_MF_INT*1.E6_EB/RSUM
    FED   = 2.764E-5_EB*TMP_1**(1.036_EB)
 ENDIF
@@ -2411,7 +2410,7 @@ ENDIF
 IF (O2_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,O2_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(O2_INDEX)%RCON*Y_MF_INT/RSUM
-   If ( TMP_1 < 0.20_EB ) FED = FED + 1.0_EB  / Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*TMP_1))
+   IF ( TMP_1 < 0.20_EB ) FED = FED + 1.0_EB  / Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*TMP_1))
 ENDIF
 
 ! Convert the FED integrand for minutes.
