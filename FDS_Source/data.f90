@@ -1924,7 +1924,7 @@ SELECT CASE (SPEC_ID)
       H_V = 501040.8_EB !J/kg
       T_REF = 178.7_EB !K
       T_MELT = 178.7_EB !K
-      T_BOIL = 329.3._EB !K   
+      T_BOIL = 329.3_EB !K   
       DENSITY = 791._EB !kg/m^3      
    CASE('ACROLEIN')
       T = MIN(340._EB,MAX(290._EB,REAL(I_TMP,EB)))
@@ -1944,7 +1944,7 @@ SELECT CASE (SPEC_ID)
       T_BOIL = 87.29_EB !K  
       DENSITY = 1430._EB !kg/m^3   
    CASE('BENZENE')
-      T = MIN(353.3_EB,MAX(290._EB,REAL(I_TMP,EB))
+      T = MIN(353.3_EB,MAX(290._EB,REAL(I_TMP,EB)))
       CP = 3.13452_EB*T+804.655_EB
       H_L = -496963.082_EB !J/kg
       H_V = 393282.4_EB !J/kg
