@@ -701,7 +701,7 @@ fds_win_32 job_name.fds > job_name.err
 \end{verbatim}
 Note that it is also possible to associate the ``.fds'' extension with the FDS executable directly, thereby making FDS run by
 double-clicking on the input file. If you do this, note that error messages will be written to the file called {\ct job\_name.out}. Also, if you
-associate the input file with the FDS executable, be careful not to accidental double-click on the input file when trying to edit it.
+associate the input file with the FDS executable, be careful not to accidentally double-click on the input file when trying to edit it.
 This action will cause previously generated output files to be over-written.
 
 
@@ -1146,7 +1146,7 @@ before the {\ct \&} except a space and nothing comes between the ampersand
 {\ct \&} and the slash {\ct /} except appropriate parameters corresponding
 to that particular namelist group.
 
-fThe parameters in the input file can be integers ({\ct T\_END=5400}),
+The parameters in the input file can be integers ({\ct T\_END=5400}),
 real numbers ({\ct CO\_YIELD=0.008}), groups of real numbers or integers
 ({\ct XYZ=6.04,0.28,3.65}) or ({\ct IJK=90,36,38}),
 character strings:
@@ -1951,7 +1951,7 @@ In FDS, the user may invoke the most rudimentary of data assimilation techniques
 \subsection{Special Topic: Specified Force Field}
 \label{info:force_vector}
 
-Similar to the {\ct MEAN\_FORCING} feature, the user may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the abscense of other forces, the force vector $F_i$ affects the momentum equation by
+Similar to the {\ct MEAN\_FORCING} feature, the user may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
 
 \begin{equation}
 \frac{\partial u_i}{\partial t} = F_i/\rho
@@ -2617,7 +2617,7 @@ FDS from removing the obstruction if it is embedded within another, like a door 
 {\ct ALLOW\_VENT=.FALSE.}
 \item Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on the {\ct OBST} line. This real parameter ranges from
 0 to 1, with 0 being fully transparent. The parameter should always be set along with either {\ct COLOR} or an {\ct RGB} triplet. It can
-also be specified on the appropriate {\ct SURF} line, along with a color indicator. If you want the obstruction to be invisible, set {\ct COLOR='INVISBLE'}.
+also be specified on the appropriate {\ct SURF} line, along with a color indicator. If you want the obstruction to be invisible, set {\ct COLOR='INVISIBLE'}.
 \item Obstructions are drawn solid in Smokeview. To draw an outline representation, set {\ct OUTLINE=.TRUE.}
 \end{itemize}
 
@@ -2746,7 +2746,7 @@ Setting {\ct SAWTOOTH=.FALSE.} applies the velocity boundary conditions in such 
    \label{sawtooth}
 \end{figure}
 
-Without {\ct SAWTOOTH=.FALSE.}, the vorticities at the sharp corners of the boundary create a sizeable boundary layer. Figure~\ref{sawtooth_ugraph} plots the velocity through the apex of the pipe for both cases. The blue line represents the {\ct SAWTOOTH=.TRUE.} case while the orange line represents the {\ct SAWTOOTH=.FALSE.} case. Notice the broader range of the orange line. {\ct SAWTOOTH=.FALSE.} reduces the size of the boundary layer on both sides of the pipe by minimizing the impact of vortices forming at the boundary as a result of the sharp corners of the ``stair-stepping".
+Without {\ct SAWTOOTH=.FALSE.}, the vorticities at the sharp corners of the boundary create a sizable boundary layer. Figure~\ref{sawtooth_ugraph} plots the velocity through the apex of the pipe for both cases. The blue line represents the {\ct SAWTOOTH=.TRUE.} case while the orange line represents the {\ct SAWTOOTH=.FALSE.} case. Notice the broader range of the orange line. {\ct SAWTOOTH=.FALSE.} reduces the size of the boundary layer on both sides of the pipe by minimizing the impact of vortices forming at the boundary as a result of the sharp corners of the ``stair-stepping".
 
 \begin{figure}[h!]
    \centering
@@ -2803,7 +2803,7 @@ parameter respectively, to the {\ct HOLE} line.
 
 If you want the obstruction that is to be cut out to have a different color
 than the original obstruction, set the {\ct COLOR} or integer triplet
-{\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction to be invisible, set {\ct COLOR='INVISBLE'}.
+{\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction to be invisible, set {\ct COLOR='INVISIBLE'}.
 
 When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole.
 To make this obstruction transparent, the {\ct TRANSPARENCY} parameter should be specified by
@@ -3020,7 +3020,7 @@ For example,
 &VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.5, VEL_RMS=1. /
 \end{verbatim} \normalsize
 
-\noindent Note that if {\ct VEL\_RMS} is specified, this is equivelant to
+\noindent Note that if {\ct VEL\_RMS} is specified, this is equivalent to
 
 \footnotesize
 \begin{verbatim}
@@ -4105,7 +4105,7 @@ value of heat of combustion can be specified for each reaction, $j$, via the par
 
 \subsubsection{Multiple Solid Phase Reactions}
 
-The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple -- a single, homogenous material is
+The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple -- a single, homogeneous material is
 heated and gasified completely.
 In general, real materials are not so simple. First, they consist of more than one material component, each of which can
 react over a particular
@@ -4552,7 +4552,7 @@ other time step), and set {\ct DT} to whatever value appropriate for
 the solid phase calculation. Since there is no gas phase calculation
 that will limit the time step, it is best to control this yourself.
 \item Put {\ct H\_FIXED=0.} on the {\ct SURF} line. This turns off the
-convective heat flux from gas to surface and vis verse. The heat flux
+convective heat flux from gas to surface and vice versa. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using
 either {\ct TAU\_EF} or {\ct RAMP\_EF}. See Section~\ref{info:RAMP} for more details.} (kW/m$^2$) on the
 {\ct SURF} line that is assigned to the solid surface. If you want to specify a particular
@@ -4983,7 +4983,7 @@ where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 \subsection{HVAC Node Parameters}
 \label{info:HVACnode}
 
-Below are three example duct node inputs representing a typical tee-type connection (mutiple ducts being joined), a connection to the FDS domain, and a connection to the ambient outside the FDS domain.
+Below are three example duct node inputs representing a typical tee-type connection (multiple ducts being joined), a connection to the FDS domain, and a connection to the ambient outside the FDS domain.
 \footnotesize
 
 \begin{verbatim}
@@ -5391,7 +5391,7 @@ Zone 0 is by default the ambient pressure exterior.
 
 
 In this example, a leak exists between Zone 1 and the exterior Zone 0, and the area of the leak
-is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone 2 leaks to Zone 1 (and vis verse)
+is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone 2 leaks to Zone 1 (and vice versa)
 with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur.
 
 The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
@@ -7524,7 +7524,7 @@ Each device has a {\ct QUANTITY} associated with it.
 The time history of each {\ct DEVC} quantity is output to a comma-delimited
 ASCII file called {\bf CHID\_devc.csv}
 (See Section~\ref{out:DEVC} for output file format).
-This file can be imported into most spread sheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a csv file.  If your spreadsheet applicate allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then specify {\ct COLUMN\_DUMP\_LIMIT=.TRUE.} on the {\ct DUMP} line.
+This file can be imported into most spread sheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a csv file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then specify {\ct COLUMN\_DUMP\_LIMIT=.TRUE.} on the {\ct DUMP} line.
 Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the
 device and control output files. Their default values are 254.
 
@@ -8069,18 +8069,18 @@ in Fig.~\ref{aspiration_detector}.
 Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute
 (SP) have proposed that the thermally-induced electrical failure (THIEF) of a cable can be predicted
 via a simple one-dimensional heat transfer calculation, under the assumption that the cable can
-be treated as a homogenous cylinder~\cite{Andersson:2005}. Their results for PVC
+be treated as a homogeneous cylinder~\cite{Andersson:2005}. Their results for PVC
 cables were encouraging and suggested that the simplification of the analysis is reasonable and
 that it should extend to other types of cables. The assumptions underlying the THIEF model are as follows:
 \begin{enumerate}
 \item The heat penetration into a cable of circular cross section is largely in the radial direction.
 This greatly simplifies the analysis, and it is also conservative because it is assumed that
 the cable is completely surrounded by the heat source.
-\item The cable is homogenous in composition. In reality, a cable is constructed of several
+\item The cable is homogeneous in composition. In reality, a cable is constructed of several
 different types of polymeric materials, cellulosic fillers, and a conducting metal, most
 often copper.
 \item The thermal properties -- conductivity, specific heat, and density -- of the assumed
-homogenous cable are independent of temperature. In reality, both the thermal
+homogeneous cable are independent of temperature. In reality, both the thermal
 conductivity and specific heat of polymers are temperature-dependent, but this
 information is very difficult to obtain from manufacturers.
 \item It is assumed that no decomposition reactions occur within the cable during its heating,
@@ -9026,7 +9026,7 @@ feature should only be used for scalar quantities that are computed at cell cent
 
 Slice file information is recorded in files (See Section~\ref{out:SLCF})
 labeled {\bf CHID\_$n$.sf}, where $n$ is the index of the slice file.
-A short fortran program {\bf fds2ascii.f} produces a text file from a line,
+A short Fortran program {\bf fds2ascii.f} produces a text file from a line,
 plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 
 
