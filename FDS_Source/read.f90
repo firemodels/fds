@@ -3120,7 +3120,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                                                          + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
             ENDDO
             SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
-                                                      (RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
+                                                      (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
       ELSE ! Heat of combustion not specified
          IF (SIMPLE_CHEMISTRY) THEN ! Calculate heat of combustion based oxygen consumption
             IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
@@ -3155,7 +3155,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                                                          + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
             ENDDO
             SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
-                                                       (RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
+                                                       (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
          ENDIF
          RN%HEAT_OF_COMBUSTION = 0._EB
          DO NS = 0,N_TRACKED_SPECIES
