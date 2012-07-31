@@ -701,7 +701,7 @@ fds_win_32 job_name.fds > job_name.err
 \end{verbatim}
 Note that it is also possible to associate the ``.fds'' extension with the FDS executable directly, thereby making FDS run by
 double-clicking on the input file. If you do this, note that error messages will be written to the file called {\ct job\_name.out}. Also, if you
-associate the input file with the FDS executable, be careful not to accidently double-click on the input file when trying to edit it.
+associate the input file with the FDS executable, be careful not to accidental double-click on the input file when trying to edit it.
 This action will cause previously generated output files to be over-written.
 
 
@@ -1938,7 +1938,7 @@ convenient to start the flow immediately, like in an outdoor simulation involvin
 
 A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Usually, one knows only that the mean wind is 10 m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
 
-In FDS, the user may invoke the most rudimentary of data assilimation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to set a northeast wind at 10 m/s use
+In FDS, the user may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to set a northeast wind at 10 m/s use
 
 \footnotesize
 \begin{verbatim}
