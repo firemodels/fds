@@ -5971,11 +5971,6 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K,IW,IIG,JJG,KKG,N
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
-! Zero out enthalpy equation right hand terms, except Q_DOT(7,NM), which has been updated in part.f90.
-
-Q_DOT(1:6,NM) = 0._EB
-Q_DOT(  9,NM) = 0._EB
-
 IF (EVACUATION_ONLY(NM)) RETURN
 
 CALL POINT_TO_MESH(NM)
