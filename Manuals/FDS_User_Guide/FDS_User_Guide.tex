@@ -2318,7 +2318,7 @@ Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air
 assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This
 decrease is not noticed in most building scale calculations, but it is important in large outdoor
 simulations. There are some scenarios for which it is convenient to change the ambient conditions within some
-rectangular region of the domain. 
+rectangular region of the domain.
 \subsection*{Species}
 Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
@@ -2332,7 +2332,7 @@ Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) o
 &SPEC ID='CARBON DIOXIDE' /
 &SPEC ID='CARBON MONOXIDE' /
 
-&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, 
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.218851, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.060321,SPEC_ID(2)='PROPANE' /
 \end{verbatim}
@@ -2352,7 +2352,7 @@ To modify the local initial temperature, add lines of the form,
 
 \footnotesize
 \begin{verbatim}
-&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, 
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.218851, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.060321,SPEC_ID(2)='PROPANE',
       TEMPERATURE=60. /
@@ -2364,10 +2364,10 @@ This construct can also be used for {\ct DENSITY}. When specifying an initial de
 
 \footnotesize
 \begin{verbatim}
-&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, 
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.218851, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.060321,SPEC_ID(2)='PROPANE',
-      TEMPERATURE=60. 
+      TEMPERATURE=60.
       DENSITY = 1.130 /
 \end{verbatim}
 \normalsize
@@ -4888,7 +4888,7 @@ units of kg/m$^2$/s.
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID='METHANE' / 
+&SPEC ID='METHANE' /
 &SURF ID   = 'INFLOW', MASS_FRACTION(1)=1.0, SPEC_ID(1)='METHANE', VEL  = -.1 /
 &VENT XB = 0.0,0.4,0.0,0.1,0.15,0.15, SURF_ID = 'INFLOW' /
 \end{verbatim}\normalsize
@@ -5860,9 +5860,9 @@ If the gas species is not included in Table~\ref{tab:gasspecies}, its molecular 
 \subsubsection{Option 3: User-Specified Properties}
 
 If the gas species is not included in Table~\ref{tab:gasspecies}, and the Lennard-Jones potential parameters are not known, you must specify its molecular weight, {\ct MW} (g/mol), its {\ct VISCOSITY} (kg/m/s), its (thermal) {\ct CONDUCTIVITY} (W/m/K), its {\ct ENTHALPY\_OF\_FORMATION} (J/kmol), and its {\ct DIFFUSIVITY} (m$^2$/s). The diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. If any of these properties are omitted, FDS will assume the properties of air. The specific heat of the gas will be calculated from its molecular weight using the relation:
-\be 
-   c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha} 
-\ee 
+\be
+   c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha}
+\ee
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to
 follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.} on the {\ct MISC} line.
 
@@ -9188,17 +9188,17 @@ The columns are defined as follows:
 \begin{eqnarray}
 \label{eqn_enthalpytransport}
 \underbrace{\frac{\partial}{\partial t} \int \rho h_s \, dV }_{\hbox{\ct Q\_ENTH}} &=&
-\underbrace{- \int \rho \bu h_s \cdot \dS}_{\hbox{\ct Q\_CONV}}
-+\underbrace{\int k \nabla T \cdot \dS}_{\hbox{\ct Q\_COND}}
-+\underbrace{\sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \dS}_{\hbox{\ct Q\_DIFF}}  \nonumber \\
+\underbrace{\dm_b h_{s,b} - \int \rho \bu h_s \cdot \dS}_{\hbox{\ct Q\_CONV}}
+\; + \; \underbrace{\dq_{b,w} + \int k \nabla T \cdot \dS}_{\hbox{\ct Q\_COND}}
+\; + \; \underbrace{\sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \dS}_{\hbox{\ct Q\_DIFF}}  \nonumber \\
 &&
--\underbrace{\int \dot{\mathbf{q}}^{\prime\prime}_{r} \cdot \dS}_{\hbox{\ct Q\_RADI}}
-+\underbrace{\int \dot{q}''' dV}_{\hbox{\ct HRR}}
-+\underbrace{\int \frac{d \overline{p} }{dt} dV}_{\hbox{\ct Q\_PRES}}
-+\underbrace{\int \left( -\dq_b''' + \dm_b'''(h_{s,b}-h_s)  \right) \, dV}_{\hbox{\ct Q\_PART}}
++\underbrace{\dq_{b,r} - \int \dot{\mathbf{q}}^{\prime\prime}_{r} \cdot \dS}_{\hbox{\ct Q\_RADI}}
+\; + \; \underbrace{\int \dot{q}''' \, dV}_{\hbox{\ct HRR}}
+\; + \; \underbrace{\int \frac{d \overline{p} }{dt} \, dV}_{\hbox{\ct Q\_PRES}}
+\; + \; \underbrace{\left( -\dq_{b,c} - \dq_{b,r} - \dq_{b,w} \right) }_{\hbox{\ct Q\_PART}}
 \end{eqnarray}
-An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right hand side of the equation. Ideally, this sum should equal {\ct Q\_ENTH}. All terms
-are reported in units of kW.
+An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right hand side of the equation. Ideally, this sum should equal the term on the left, {\ct Q\_ENTH}. All terms
+are reported in units of kW. Note that the terms that make up {\ct Q\_PART} are summed over the lagrangian particles. They represent the heat absorbed by the particles via \underline{c}onvection, \underline{r}adiation, and conduction from the \underline{w}all.
 
 The other columns in the file contain the total burning rate of
 fuel, in units of kg/s, and the zone pressures. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual
@@ -9913,7 +9913,7 @@ the actual volume fraction of CO, and the second line reports the output of a ga
 \subsection{Soot Concentration}
 \label{info:soot}
 
-Currently there are three different device options for outputting soot concentration from FDS. It is important to recognize what each device is outputting so that the proper selection can be made. 
+Currently there are three different device options for outputting soot concentration from FDS. It is important to recognize what each device is outputting so that the proper selection can be made.
 
 \footnotesize
 \begin{verbatim}
