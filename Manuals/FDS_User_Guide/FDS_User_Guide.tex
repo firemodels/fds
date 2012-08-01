@@ -6755,7 +6755,7 @@ additional fuel bands, set {\ct CH4\_BANDS=.TRUE.} on the {\ct RADI} line. Read 
 Reference Guide~\cite{FDS_Tech_Guide} for more details. Note also that when
 {\ct WIDE\_BAND\_MODEL=.TRUE.}, the {\ct ABSORPTION\_COEFFICIENT}
 output quantity becomes practically useless, because it then
-corresponds to one individual band of the spectrum.
+corresponds to one individual band of the spectrum. It is also possible to set the band limits used in the wide band model by specifying WL_BAND_LIMITS on RADI line.
 
 
 
@@ -11366,6 +11366,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RADTMP                   }     & Real      & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900               \\ \hline
 {\ct TIME\_STEP\_INCREMENT}         & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
 {\ct WIDE\_BAND\_MODEL    }         & Logical   & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
+{\ct WL\_BAND\_LIMITS    }         &  Real      & Section~\ref{info:RADI_Wide_Band}         &  $\mu~m$                & -     \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
