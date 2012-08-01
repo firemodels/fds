@@ -147,6 +147,7 @@ for i=2:2000
         Save_Plot_Filename(i)   = Stat_Plot_Filename;
         Save_Dep_Title(i)       = Stat_Dep_Title;
         Save_Error_Tolerance(i) = Error_Tolerance;
+        Save_Metric_Type(i)     = {Metric};
                 
         % plot the experimental data or analytical solution (d1)
         
@@ -355,7 +356,8 @@ saved_data = [{Save_Quantity'},...
               {Save_Dataname'},...
               {Save_Plot_Filename'},...
               {Save_Dep_Title'},...
-              {Save_Error_Tolerance'}];
+              {Save_Error_Tolerance'},...
+              {Save_Metric_Type'}];
 
 display('dataplot completed successfully!')
 
