@@ -6,7 +6,7 @@ set SVNROOT=FDS-SMV
 set HOST=$4
 
 set platformsize=$platform\_$size
-set BACKGROUNDDIR=$SVNROOT/Utilities/background/gcc_$platform_32
+set BACKGROUNDDIR=$SVNROOT/Utilities/background/gnu_$platform_32
 set SMOKEVIEWDIR=$SVNROOT/SMV/Build/intel_$platformsize
 set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/intel_$platformsize
 set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_$platformsize
