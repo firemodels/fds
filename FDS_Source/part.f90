@@ -1744,7 +1744,7 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
 
-REAL(EB), POINTER, DIMENSION(:,:,:) :: MVAP_HSB=>NULL(), Q_CON_GAS_TOT=>NULL(),Q_EVAP_TOT=>NULL(), MVAP_DELTAHG=>NULL() 
+REAL(EB), POINTER, DIMENSION(:,:,:) :: Q_CON_GAS_TOT=>NULL(),Q_EVAP_TOT=>NULL(), MVAP_DELTAHG=>NULL() 
 REAL(EB) :: H_G_OLD_2
 
 CALL POINT_TO_MESH(NM)
@@ -2156,12 +2156,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       Q_CON_GAS_TOT => WORK1
       Q_EVAP_TOT => WORK4
       MVAP_DELTAHG => WORK5
-      MVAP_HSB => WORK8
 
       Q_CON_GAS_TOT = 0._EB
       Q_EVAP_TOT = 0._EB
       MVAP_DELTAHG = 0._EB
-      MVAP_HSB = 0._EB
 
       ! Loop through all PARTICLEs within the class and determine mass/energy transfer
 
@@ -2257,7 +2255,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             H_HEAT   = NUSSELT*K_AIR/LENGTH
             H_MASS   = SHERWOOD*D_AIR/LENGTH
             H_WALL    = H_SOLID
-            Q_DOT_RAD = A_DROP*WALL(IW)%ONE_D%QRADIN
+            Q_DOT_RAD = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADIN
+            WALL(IW)%ONE_D%QRADIN = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT_SUBSTEP*Q_DOT_RAD)/(WALL(IW)%AW*DT)
 
          ELSE SOLID_OR_GAS_PHASE_2
 
@@ -2371,7 +2370,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
          DELTA_H_G = H_S_B - H_S
          MVAP_DELTAHG(II,JJ,KK)=MVAP_DELTAHG(II,JJ,KK)+WGT*M_VAP*DELTA_H_G
-         MVAP_HSB(II,JJ,KK)=MVAP_HSB(II,JJ,KK)+WGT*M_VAP*H_S_B
+
+         ! Add energy losses and gains to overall energy budget array
+
+         Q_DOT(7,NM) = Q_DOT(7,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT_SUBSTEP  ! Q_PART
+         Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B*WGT/DT_SUBSTEP                       ! Q_CONV
+         Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT_SUBSTEP                             ! Q_RADI
+         Q_DOT(4,NM) = Q_DOT(4,NM) + Q_CON_WALL*WGT/DT_SUBSTEP                        ! Q_COND
 
          ! Keep track of total mass evaporated in cell
 
@@ -2557,7 +2562,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                                 MVAP_DELTAHG(II,JJ,KK)/H_G_OLD - &
                                 Q_CON_GAS_TOT(II,JJ,KK)/H_G_OLD)/DT_SUBSTEP
 
-                  Q_DOT(7,NM) = Q_DOT(7,NM) + (MVAP_HSB(II,JJ,KK) - Q_CON_GAS_TOT(II,JJ,KK))/DT_SUBSTEP
                ENDIF
             ENDDO
          ENDDO
