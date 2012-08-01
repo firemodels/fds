@@ -22,4 +22,5 @@ call %envfile%
 
 call %svn_root%\SMV\scripts\MAKEsmdosx.bat
 call %svn_root%\SMV\scripts\MAKEsmzosx.bat
+call %svn_root%\SMV\scripts\MAKEbgosx.bat
 call %svn_root%\SMV\scripts\MAKEf2aosx.bat
