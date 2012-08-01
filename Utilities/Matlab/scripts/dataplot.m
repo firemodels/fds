@@ -172,6 +172,8 @@ for i=2:2000
                 Save_Measured_Metric(i,j,:) = M(indices,d1_Dep_Col);
             elseif strcmp(Metric,'threshold')
                 Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
+            elseif strcmp(Metric,'area')
+                Save_Measured_Metric(i,j,1) = trapz(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col));
             elseif strcmp(Metric,'end')
                 Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col);
             else
@@ -221,6 +223,8 @@ for i=2:2000
                 Save_Predicted_Metric(i,j,:) = M(indices,d2_Dep_Col);
             elseif strcmp(Metric,'threshold')
                 Save_Predicted_Metric(i,j,1) = min(M(indices,d2_Dep_Col));
+            elseif strcmp(Metric,'area')
+                Save_Predicted_Metric(i,j,1) = trapz(M(indices,d2_Ind_Col), M(indices,d2_Dep_Col));
             elseif strcmp(Metric,'end')
                 Save_Predicted_Metric(i,j,1) = M(indices(end),d2_Dep_Col);
             else
