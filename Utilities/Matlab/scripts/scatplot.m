@@ -36,6 +36,7 @@ Save_Dataname         = saved_data{:,7};
 Save_Plot_Filename    = saved_data{:,8};
 Save_Dep_Title        = saved_data{:,9};
 Save_Error_Tolerance  = saved_data{:,10};
+Save_Metric_Type      = saved_data{:,11};
 
 qfil = varargin{1};
 
@@ -61,14 +62,15 @@ if stats_output == 1
     output_stats{1,1} = 'Dataplot Line Number';
     output_stats{1,2} = 'Verification Group';
     output_stats{1,3} = 'Case Name';
-    output_stats{1,4} = 'Expected Metric';
-    output_stats{1,5} = 'Predicted Metric';
-    output_stats{1,6} = 'Dependent Variable';
-    output_stats{1,7} = 'Type of Error';
-    output_stats{1,8} = 'Error';
-    output_stats{1,9} = 'Error Tolerance';
-    output_stats{1,10} = 'Within Specified Error Tolerance';
-    output_stats{1,11} = 'Plot Filename';
+    output_stats{1,4} = 'Type of Metric';
+    output_stats{1,5} = 'Expected Metric';
+    output_stats{1,6} = 'Predicted Metric';
+    output_stats{1,7} = 'Dependent Variable';
+    output_stats{1,8} = 'Type of Error';
+    output_stats{1,9} = 'Error';
+    output_stats{1,10} = 'Error Tolerance';
+    output_stats{1,11} = 'Within Specified Error Tolerance';
+    output_stats{1,12} = 'Plot Filename';
     stat_line = 2;
 end
 
@@ -121,14 +123,15 @@ for j=qrange
                     output_stats{stat_line,1} = i;
                     output_stats{stat_line,2} = Save_Group_Key_Label{i,1};
                     output_stats{stat_line,3} = Save_Dataname{i,1};
-                    output_stats{stat_line,4} = single_measured_metric(m);
-                    output_stats{stat_line,5} = single_predicted_metric(m);
-                    output_stats{stat_line,6} = Save_Dep_Title{i,1};
-                    output_stats{stat_line,7} = error_type;
-                    output_stats{stat_line,8} = sprintf('%1.8f', error);
-                    output_stats{stat_line,9} = sprintf('%1.8f', error_tolerance);
-                    output_stats{stat_line,10} = within_tolerance;
-                    output_stats{stat_line,11} = Save_Plot_Filename{i,1};
+                    output_stats{stat_line,4} = Save_Metric_Type{i,1};
+                    output_stats{stat_line,5} = single_measured_metric(m);
+                    output_stats{stat_line,6} = single_predicted_metric(m);
+                    output_stats{stat_line,7} = Save_Dep_Title{i,1};
+                    output_stats{stat_line,8} = error_type;
+                    output_stats{stat_line,9} = sprintf('%1.8f', error);
+                    output_stats{stat_line,10} = sprintf('%1.8f', error_tolerance);
+                    output_stats{stat_line,11} = within_tolerance;
+                    output_stats{stat_line,12} = Save_Plot_Filename{i,1};
                     stat_line = stat_line + 1;
                 end
             end
@@ -261,16 +264,16 @@ if stats_output == 1
         % Escape underscores for LaTeX
         case_name = strrep(m{i_row, 3}, '_', '\_');
         % Additional columns
-        expected_value = m{i_row, 4};
-        predicted_value = m{i_row, 5};
-        dependent_variable = m{i_row, 6};
+        expected_value = m{i_row, 5};
+        predicted_value = m{i_row, 6};
+        dependent_variable = m{i_row, 7};
         % Remove " Error" from string to save horizontal space
-        error_type = strrep(m{i_row, 7}, ' Error', '');
+        error_type = strrep(m{i_row, 8}, ' Error', '');
         % Convert strings to numbers for later formatting
-        error = str2num(m{i_row, 8});
-        tol = str2num(m{i_row, 9});
+        error = str2num(m{i_row, 9});
+        tol = str2num(m{i_row, 10});
         % Additional columns
-        within_tolerance = m{i_row, 10};
+        within_tolerance = m{i_row, 11};
         
         % Write out all columns to .tex file
         fprintf(fid, '%s',   case_name, ' & ');
