@@ -1538,118 +1538,67 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
 
    ! Estimate the previous value of liquid mass fluxes. The possibility of multiple liquids not taken into account.
 
-   NEW_EVAP_IF: IF (NEW_EVAP) THEN
-
-      MATERIAL_LOOP2B: DO N=1,SF%N_MATL
-         ML  => MATERIAL(SF%MATL_INDEX(N))
-         IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID) CYCLE MATERIAL_LOOP2B
-         IF (ONE_D%RHO(1,N)<=ZERO_P) CYCLE MATERIAL_LOOP2B
-         SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
-         ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
-         CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
-         X_G = ZZ_GET(SMIX_PTR)/SPECIES_MIXTURE(SMIX_PTR)%MW*MW_G
-         X_W = MIN(0.9999_EB,EXP(ML%H_R(1)*SPECIES_MIXTURE(SMIX_PTR)%MW/R0*(1./ML%TMP_BOIL-1./ONE_D%TMP(1))))
-         IF (DNS) THEN
-            ITMP = MIN(4999,INT(TMP(IIG,JJG,KKG)))
-            TMP_WGT = TMP(IIG,JJG,KKG) - ITMP
-            D_AIR = D_Z(ITMP,SMIX_PTR)+TMP_WGT*(D_Z(ITMP+1,SMIX_PTR)-D_Z(ITMP+1,SMIX_PTR))
-            H_MASS = 2._EB*D_AIR*RDN
-         ELSE
-            MU_AIR = MU_Z(MIN(5000,NINT(TMP_G)),0)*SPECIES_MIXTURE(0)%MW
-            ! Calculate tangential velocity near the surface
-            RHO_G = RHOG(IIG,JJG,KKG)
-            U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
-            V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
-            W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
-            SELECT CASE(ABS(IOR))
-               CASE(1)
-                  U2 = 0._EB
-               CASE(2)
-                  V2 = 0._EB
-               CASE(3)
-                  W2 = 0._EB
-            END SELECT 
-            VELCON = SQRT(U2+V2+W2)
-            RE_L     = MAX(5.E5_EB,RHO_G*VELCON/(SF%CONV_LENGTH*MU_AIR))
-            SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
-            H_MASS = SHERWOOD*MU_AIR/(SC*SF%CONV_LENGTH)
-         ENDIF
-         IF (ABS(X_W-1._EB) < ZERO_P) THEN
-            MFLUX = THICKNESS*ML%RHO_S/DT_BC
-         ELSE
-            MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_PTR)%MW/R0/ONE_D%TMP(1)*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
-            MFLUX = MFLUX * PBARP(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
-            MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
-         ENDIF
- 
-         !QNETF = Q_WATER_F + ONE_D%QRADIN - ONE_D%QRADOUT + ONE_D%QCONF
-         !MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_BOIL-ONE_D%TMP(1))/DXF/K_S(1))/ML%H_R(1))
-         
-         IF (MFLUX > 0._EB .AND. TW>T) TW = T
-         ! CYLINDRICAL and SPHERICAL scaling not implemented
-         DO NS = 1,N_TRACKED_SPECIES
-            ONE_D%MASSFLUX(NS)        = ONE_D%MASSFLUX(NS)        + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX
-            ONE_D%MASSFLUX_ACTUAL(NS) = ONE_D%MASSFLUX_ACTUAL(NS) +                           ML%NU_GAS(NS,1)*MFLUX
-         ENDDO
-         Q_S(1) = Q_S(1) - MFLUX*ML%H_R(1)/DX_S(1)  ! no improvement (in cone test) if used updated RDX 
-
-         DX_GRID = DT_BC*MFLUX/ML%RHO_S
-         IF (POINT_SHRINK) THEN
-            X_S_NEW(1:NWP) = MAX(0._EB,X_S_NEW(1:NWP)-DX_GRID)
-            IF (DX_GRID > 0._EB) ONE_D%SHRINKING = .TRUE.
-         ENDIF
-
-         EXIT MATERIAL_LOOP2B   ! Can handle only one LIQUID fuel at the time
-      ENDDO MATERIAL_LOOP2B
-
-   ELSE NEW_EVAP_IF !Old routine      
-
-      MATERIAL_LOOP2: DO N=1,SF%N_MATL
-         ML  => MATERIAL(SF%MATL_INDEX(N))
-         IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID) CYCLE MATERIAL_LOOP2
-         IF (ONE_D%RHO(1,N)<=ZERO_P) CYCLE MATERIAL_LOOP2
-         SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
-         MFLUX = MAX(0._EB,MFLUX - ONE_D%MASSFLUX_ACTUAL(SMIX_PTR)) ! Decrease 
-         IF (ML%NU_GAS(SMIX_PTR,1)>0._EB) MFLUX = MFLUX/ML%NU_GAS(SMIX_PTR,1)
-         ! gas phase 
-         Z_MF_G = MAX(0._EB,ZZ(IIG,JJG,KKG,SMIX_PTR))
-         RSUM_G = RSUM(IIG,JJG,KKG)                    
-         ZPRSUM  = Z_MF_G/RSUM_G
-         HVRG    = SPECIES_MIXTURE(SMIX_PTR)%MW*ML%H_R(1)/R0
-         PPSURF  = MIN(1._EB,(R0/SPECIES_MIXTURE(SMIX_PTR)%MW)*ZPRSUM)
-         PPCLAUS = MIN(1._EB,EXP(HVRG*(1./ML%TMP_BOIL-1./ONE_D%TMP(1))))
-         ! Make initial guess
-         IF ((ABS(MFLUX)<=ZERO_P) .AND. (PPSURF<PPCLAUS)) THEN         
-            MFLUX = (ML%INIT_VAPOR_FLUX/(R0*TMPA/P_INF))*SPECIES_MIXTURE(SMIX_PTR)%MW/ML%ADJUST_BURN_RATE(SMIX_PTR,1)
-         ENDIF
-         ! Adjust MFLUX to reach equilibrium vapor pressure
-         IF (ABS(PPSURF-PPCLAUS)>ZERO_P .AND. PPSURF>0._EB) THEN
-            MFLUX = MFLUX*MIN(1.02_EB,MAX(0.98_EB,PPCLAUS/PPSURF))
-         ENDIF
-         IF (MFLUX > 0._EB .AND. TW>T) TW = T
-         IF (ONE_D%TMP(1)>ML%TMP_BOIL) THEN
-            ! Net flux guess for liquid evap
-            QNETF = Q_WATER_F + ONE_D%QRADIN - ONE_D%QRADOUT + ONE_D%QCONF
-            MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_BOIL-ONE_D%TMP(1))/DXF/K_S(1))/ML%H_R(1))
-         ENDIF
+   MATERIAL_LOOP2B: DO N=1,SF%N_MATL
+      ML  => MATERIAL(SF%MATL_INDEX(N))
+      IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID) CYCLE MATERIAL_LOOP2B
+      IF (ONE_D%RHO(1,N)<=ZERO_P) CYCLE MATERIAL_LOOP2B
+      SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
+      ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+      CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
+      X_G = ZZ_GET(SMIX_PTR)/SPECIES_MIXTURE(SMIX_PTR)%MW*MW_G
+      X_W = MIN(0.9999_EB,EXP(ML%H_R(1)*SPECIES_MIXTURE(SMIX_PTR)%MW/R0*(1./ML%TMP_BOIL-1./ONE_D%TMP(1))))
+      IF (DNS) THEN
+         ITMP = MIN(4999,INT(TMP(IIG,JJG,KKG)))
+         TMP_WGT = TMP(IIG,JJG,KKG) - ITMP
+         D_AIR = D_Z(ITMP,SMIX_PTR)+TMP_WGT*(D_Z(ITMP+1,SMIX_PTR)-D_Z(ITMP+1,SMIX_PTR))
+         H_MASS = 2._EB*D_AIR*RDN
+      ELSE
+         MU_AIR = MU_Z(MIN(5000,NINT(TMP_G)),0)*SPECIES_MIXTURE(0)%MW
+         ! Calculate tangential velocity near the surface
+         RHO_G = RHOG(IIG,JJG,KKG)
+         U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
+         V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
+         W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
+         SELECT CASE(ABS(IOR))
+            CASE(1)
+               U2 = 0._EB
+            CASE(2)
+               V2 = 0._EB
+            CASE(3)
+               W2 = 0._EB
+         END SELECT 
+         VELCON = SQRT(U2+V2+W2)
+         RE_L     = MAX(5.E5_EB,RHO_G*VELCON/(SF%CONV_LENGTH*MU_AIR))
+         SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
+         H_MASS = SHERWOOD*MU_AIR/(SC*SF%CONV_LENGTH)
+      ENDIF
+      IF (ABS(X_W-1._EB) < ZERO_P) THEN
+         MFLUX = THICKNESS*ML%RHO_S/DT_BC
+      ELSE
+         MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_PTR)%MW/R0/ONE_D%TMP(1)*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
+         MFLUX = MFLUX * PBARP(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
          MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
-         ! CYLINDRICAL and SPHERICAL scaling not implemented
-         DO NS = 1,N_TRACKED_SPECIES
-            ONE_D%MASSFLUX(NS)        = ONE_D%MASSFLUX(NS)        + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX
-            ONE_D%MASSFLUX_ACTUAL(NS) = ONE_D%MASSFLUX_ACTUAL(NS) +                           ML%NU_GAS(NS,1)*MFLUX
-         ENDDO
-         Q_S(1) = Q_S(1) - MFLUX*ML%H_R(1)/DX_S(1)  ! no improvement (in cone test) if used updated RDX 
+      ENDIF
 
-         DX_GRID = DT_BC*MFLUX/ML%RHO_S
-         IF (POINT_SHRINK) THEN
-            X_S_NEW(1:NWP) = MAX(0._EB,X_S_NEW(1:NWP)-DX_GRID)
-            IF (DX_GRID > 0._EB) ONE_D%SHRINKING = .TRUE.
-         ENDIF
-         
-         EXIT MATERIAL_LOOP2     ! Can handle only one LIQUID fuel at the time
+      !QNETF = Q_WATER_F + ONE_D%QRADIN - ONE_D%QRADOUT + ONE_D%QCONF
+      !MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_BOIL-ONE_D%TMP(1))/DXF/K_S(1))/ML%H_R(1))
+      
+      IF (MFLUX > 0._EB .AND. TW>T) TW = T
+      ! CYLINDRICAL and SPHERICAL scaling not implemented
+      DO NS = 1,N_TRACKED_SPECIES
+         ONE_D%MASSFLUX(NS)        = ONE_D%MASSFLUX(NS)        + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX
+         ONE_D%MASSFLUX_ACTUAL(NS) = ONE_D%MASSFLUX_ACTUAL(NS) +                           ML%NU_GAS(NS,1)*MFLUX
+      ENDDO
+      Q_S(1) = Q_S(1) - MFLUX*ML%H_R(1)/DX_S(1)  ! no improvement (in cone test) if used updated RDX 
 
-      ENDDO MATERIAL_LOOP2
-   ENDIF NEW_EVAP_IF
+      DX_GRID = DT_BC*MFLUX/ML%RHO_S
+      IF (POINT_SHRINK) THEN
+         X_S_NEW(1:NWP) = MAX(0._EB,X_S_NEW(1:NWP)-DX_GRID)
+         IF (DX_GRID > 0._EB) ONE_D%SHRINKING = .TRUE.
+      ENDIF
+      EXIT MATERIAL_LOOP2B   ! Can handle only one LIQUID fuel at the time
+   ENDDO MATERIAL_LOOP2B
+   
 
    ! Re-generate grid for shrinking wall
 
