@@ -201,19 +201,19 @@ INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
    BBFRAC =  BBFRAC * 15._EB/PI**4
  
 ! Define band limit wave lengths in micrometers
- 
-   ALLOCATE(WL_LOW(1:NSB),STAT=IZERO)
-   CALL ChkMemErr('INIT','WL_LOW',IZERO)
-   ALLOCATE(WL_HIGH(1:NSB),STAT=IZERO)
-   CALL ChkMemErr('INIT','WL_HIGH',IZERO)
-   IF (CH4_BANDS) THEN
-      WL_LOW(1:NSB) =(/1.00_EB, 2.63_EB, 2.94_EB, 3.57_EB, 4.17_EB, 4.6_EB, 7.00_EB, 8.62_EB, 10.0_EB /)
-      WL_HIGH(1:NSB)=(/2.63_EB, 2.94_EB, 3.57_EB, 4.17_EB, 4.60_EB, 7.0_EB, 8.62_EB, 10.0_EB, 200._EB /) 
-   ELSE
-      WL_LOW(1:NSB) =(/1.00_EB, 2.63_EB, 2.94_EB, 4.17_EB, 4.6_EB, 10.0_EB /)
-      WL_HIGH(1:NSB)=(/2.63_EB, 2.94_EB, 4.17_EB, 4.6_EB, 10.0_EB, 200.0_EB /)
-   ENDIF
- 
+   IF(.NOT.ALLOCATED(WL_LOW).OR. .NOT.ALLOCATED(WL_HIGH)) THEN
+      ALLOCATE(WL_LOW(1:NSB),STAT=IZERO)
+      CALL ChkMemErr('INIT','WL_LOW',IZERO)
+      ALLOCATE(WL_HIGH(1:NSB),STAT=IZERO)
+      CALL ChkMemErr('INIT','WL_HIGH',IZERO)
+      IF (CH4_BANDS) THEN
+         WL_LOW(1:NSB) =(/1.00_EB, 2.63_EB, 2.94_EB, 3.57_EB, 4.17_EB, 4.6_EB, 7.00_EB, 8.62_EB, 10.0_EB /)
+         WL_HIGH(1:NSB)=(/2.63_EB, 2.94_EB, 3.57_EB, 4.17_EB, 4.60_EB, 7.0_EB, 8.62_EB, 10.0_EB, 200._EB /) 
+      ELSE
+         WL_LOW(1:NSB) =(/1.00_EB, 2.63_EB, 2.94_EB, 4.17_EB, 4.6_EB, 10.0_EB /)
+         WL_HIGH(1:NSB)=(/2.63_EB, 2.94_EB, 4.17_EB, 4.6_EB, 10.0_EB, 200.0_EB /)
+      ENDIF
+ ENDIF
 ENDIF INIT_WIDE_BAND
  
 !----------------------------------------------------------------------------
