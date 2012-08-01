@@ -252,7 +252,7 @@ This volume provides a survey of verification work conducted to date to evaluate
 
 The following individuals contributed to the verification process of FDS.
 \begin{itemize}
-\item Chris Lautenburger and Carlos Fernandez-Pello contributed the ``two-reaction'' test case.
+\item Chris Lautenberger and Carlos Fernandez-Pello contributed the ``two-reaction'' test case.
 \item Matthias M\"{u}nch of the Freie Universit\"{a}t Berlin provided useful test cases for the basic flow solver.
 \item Clara Cruz, a student at the University of Puerto Rico and Summer Undergraduate Fellow at NIST, helped develop useful Matlab scripts to automate
 the process of compiling this guide.
@@ -587,7 +587,7 @@ inconsistencies~\cite{ASTM:E1355}.
 
 At NIST, VTT, and elsewhere, FDS has been compiled and run on computers manufactured by IBM, Hewlett-Packard, Sun Microsystems, Digital Equipment
 Corporation, Apple, Silicon Graphics, Dell, Compaq, and various other personal computer vendors. The operating systems on these platforms include
-Unix, Linux, Microsoft Windows, and Mac OSX. Compilers used include Lahey Fortran, Digital Visual Fortran, Intel Fortran, IBM XL Fortran, HPUX
+Unix, Linux, Microsoft Windows, and Mac OS X. Compilers used include Lahey Fortran, Digital Visual Fortran, Intel Fortran, IBM XL Fortran, HPUX
 Fortran, Forte Fortran for SunOS, the Portland Group Fortran, and several others. Each combination of hardware, operating system and compiler
 involves a slightly different set of compiler and run-time options and a rigorous evaluation of the source code to test its compliance with the
 Fortran 90 ISO/ANSI standard~\cite{F90}. FDS is now compliant with the Fortran~2003 standard. Through this process, out-dated and potentially harmful code is updated or eliminated, and often the code is
@@ -969,7 +969,7 @@ The Vreman eddy viscosity model \cite{Vreman:2004} is an efficient alternative t
 
 \noindent The {\bf jet\_} series in the Validation/Turbulent\_Jet directory tests the ability of subgrid stress closure (turbulence model) to correctly capture the transition from laminar to turbulent flow and subsequent momentum decay for an incompressible jet.
 
-The FDS solution is compared with expermimental observations from K\"ummel \cite{Kummel:2007}. In the initial region of the jet, $x<x_0$, the velocity $u$ is constant near the axis and is equal to the velocity at the nozzle orifice ($u_0$). For a rectangular nozzle orifice of height $h = 0.8$ and width $b = 0.8$, the initial length is calculate by
+The FDS solution is compared with experimental observations from K\"ummel \cite{Kummel:2007}. In the initial region of the jet, $x<x_0$, the velocity $u$ is constant near the axis and is equal to the velocity at the nozzle orifice ($u_0$). For a rectangular nozzle orifice of height $h = 0.8$ and width $b = 0.8$, the initial length is calculate by
 \begin{equation}
 x_0 = \frac{h}{m}
 \end{equation}
@@ -984,7 +984,7 @@ Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic
 \begin{center}
 \begin{figure}[h]
   \includegraphics[width=\textwidth]{SCRIPT_FIGURES/jet_decay.pdf}
-  \caption[Jet Centerline Velocity Decay]{Centerline velocity decay for a high Reynods number jet (Re$_h = 1 \times 10^5$) with a square orifice of side $h$.  FDS results (colored lines) are shown for various turbulence models at two grid resolutions.  For comparison, analytical results (black lines) are shown for two values of the mixing number $m$.}
+  \caption[Jet Centerline Velocity Decay]{Centerline velocity decay for a high Reynolds number jet (Re$_h = 1 \times 10^5$) with a square orifice of side $h$.  FDS results (colored lines) are shown for various turbulence models at two grid resolutions.  For comparison, analytical results (black lines) are shown for two values of the mixing number $m$.}
   \label{fig_jet_decay}
 \end{figure}
 \end{center}
@@ -1012,7 +1012,7 @@ Details of the FDS formulation are given in the Technical Guide \cite{FDS_Math_G
 \label{eqn_mom1}
 \frac{\partial \bar{u}_i}{\partial t} + \frac{\partial \bar{u}_i \bar{u}_j}{\partial x_j} = -\frac{1}{\rho} \left[ \frac{\mbox{d}p}{\mbox{d}x_i} + \frac{\partial \tilde{p}}{\partial x_i} + \frac{\partial \bar{\tau}_{ij}}{\partial x_j} + \frac{\partial \tau_{ij}^{r}}{\partial x_j} \right]\,\mbox{,}
 \end{equation}
-where $\tau_{ij}^{r}$ is the deviatoric part of the residual stress tensor, here modeled by gradient diffusion with dynamic Smagorinsky \cite{Germano:1991} used for the eddy viscosity.  In this work we specify a constant pressure drop $\mbox{d}p/\mbox{d}x$ in the streamwise direction to drive the flow.  The hyrdrodynamic pressure $\tilde{p}$ is obtained from a Poisson equation which enforces (\ref{eqn_cont}).
+where $\tau_{ij}^{r}$ is the deviatoric part of the residual stress tensor, here modeled by gradient diffusion with dynamic Smagorinsky \cite{Germano:1991} used for the eddy viscosity.  In this work we specify a constant pressure drop $\mbox{d}p/\mbox{d}x$ in the streamwise direction to drive the flow.  The hydrodynamic pressure $\tilde{p}$ is obtained from a Poisson equation which enforces (\ref{eqn_cont}).
 
 When (\ref{eqn_mom1}) is integrated over a cell adjacent to a smooth wall in an LES it turns out that the most difficult term to handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.  Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the sgs stress is of critical importance.  The quality of the sgs model still influences the wall stress, however, since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model.  In particular, it is important that the sgs model is \emph{convergent} (in the sense that the LES formulation reduces to a DNS as the filter width becomes small) so that as the grid is refined we can expect more accurate results from the simulation.  For smooth walls the model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in this work is the Werner and Wengle model \cite{Werner:1991} which is described in detail in the FDS Tech Guide.
 
@@ -1513,7 +1513,7 @@ The enthalpy of the mixture at the outlet is $2 \times 1 \times (900+273.15) + 2
 
 \subsection{Solid phase energy conservation (\texorpdfstring{\bf energy\_budget\_solid}{energy\_budget\_solid})}
 
-This case tests the ability of FDS to properly conserve the total of the solid phase and the gas phase energy.  A 1 m$^3$ box iis filled with 1 kg of a gas with a specific heat of =1 kJ/(kg K), a molecular weight of 28 g/mol, and an initial temperature of 20 $^\circ$C.  All the walls, except the floor, are adiabatic.  The floor is defined as a 1 mm thick layer of a material with a conductivity of 100 W/(m K),  a specific heat of 1 kJ/(kg K), an initial temperature of 150 $^\circ$C, and a density of 1000 kg/m$^3$.  The initial enthalpy is $1 \times 1 \times (20+273.15) + 1 \times 1 \times (150+273.15)  =  716.3$ kJ.  At the end state the gas will have risen in temperature, the solid will have decreased in temperature, and the pressure will have risen.  Since energy is conserved this occurs at a temperature of 96.3 $^\circ$C.  The final enthalpy is $1 \times 1 \times (96.3+273.15) + 1 \times 1 \times (96.3+273.15) + 22670 / 1000  =  716.3$ kJ.
+This case tests the ability of FDS to properly conserve the total of the solid phase and the gas phase energy.  A 1 m$^3$ box is filled with 1 kg of a gas with a specific heat of =1 kJ/(kg K), a molecular weight of 28 g/mol, and an initial temperature of 20 $^\circ$C.  All the walls, except the floor, are adiabatic.  The floor is defined as a 1 mm thick layer of a material with a conductivity of 100 W/(m K),  a specific heat of 1 kJ/(kg K), an initial temperature of 150 $^\circ$C, and a density of 1000 kg/m$^3$.  The initial enthalpy is $1 \times 1 \times (20+273.15) + 1 \times 1 \times (150+273.15)  =  716.3$ kJ.  At the end state the gas will have risen in temperature, the solid will have decreased in temperature, and the pressure will have risen.  Since energy is conserved this occurs at a temperature of 96.3 $^\circ$C.  The final enthalpy is $1 \times 1 \times (96.3+273.15) + 1 \times 1 \times (96.3+273.15) + 22670 / 1000  =  716.3$ kJ.
 
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_T}
@@ -1594,17 +1594,17 @@ transport equation.
 
 This verification case tests the computation of radiative heat flux from hot surface to a differential, parallel surface at 1 m distance
 in different co-ordinate systems. The radiating surface is at 1000~$^\circ$C temperature and has emissivity of 1.0.  The exact values are
-calculated using the analycal expressions for the view factors.
+calculated using the analytical expressions for the view factors.
 \begin{center}
 \begin{tabular}{|l|l|c|}
 \hline Co-ordinates & Radiation source & Heat flux (kW/m$^2$)  \\ \hline \hline
-2D cartesian   & Infinite plate of width 2 m   & 105.3 \\
-3D cartesian   & Square plate of width 2 m     & 81.8 \\
+2D Cartesian   & Infinite plate of width 2 m   & 105.3 \\
+3D Cartesian   & Square plate of width 2 m     & 81.8 \\
 2D cylindrical & Circular disk of diameter 2 m & 74.1 \\ \hline
 \end{tabular}
 \end{center}
 
-A comparison of exact values and FDS predictions at three diffferent angular resolutions is shown below.
+A comparison of exact values and FDS predictions at three different angular resolutions is shown below.
 \begin{center}
 \includegraphics[width=4.0in]{SCRIPT_FIGURES/plate_view_factor.pdf}
 \end{center}
@@ -1654,7 +1654,7 @@ plane element $dA$ to parallel rectangle $H$ are calculated using the analytical
 \section{Radiation from a plane layer (\texorpdfstring{{\bf radiation\_plane\_layer}}{radiation\_plane\_layer})}
 \label{radiation_plane_layer}
 
-This case tests the computation of three-dimensional radiation from a homogenous, infinitely wide layer of hot gases.  The temperature of
+This case tests the computation of three-dimensional radiation from a homogeneous, infinitely wide layer of hot gases.  The temperature of
 the layer is 1273.15~K and the absorption coefficient, $\kappa$, is varied. The thickness of the layer is fixed at 1~m, and the optical depth is $\tau = (1 \, \kappa)$.
 Wall temperatures are set to 0~K. The results are compared against the exact solution $S(\tau)$ presented in~\cite{Zeldovich:1}
 \be S(\tau) = S_b\left[1-2E_3(\tau)\right] \ee
@@ -1675,7 +1675,7 @@ the wall heat fluxes are given in the table below.
 
 
 In-depth absorption of thermal radiation in a solid is computed using a two-flux model.  In this example, the accuracy of the two-flux model
-is tested in the computation of the emissive flux from a homogenous layer of material (thickness $L=$~0.1~m) at 1273.15~K temperature,
+is tested in the computation of the emissive flux from a homogeneous layer of material (thickness $L=$~0.1~m) at 1273.15~K temperature,
 surrounded by an ambient temperature of 1~K. The absorption coefficient $\kappa$ is varied to cover a range [0.01, 10] of optical depth
 $\tau = \kappa L$.
 
@@ -1739,7 +1739,7 @@ If the radiative intensity remains constant during the time step, the average dr
 \overline{T_d} = T_0 + \frac{\Delta t \, \dot{Q}_r }{m \, c_p}
 \ee
 By setting $T_0=0$~$^\circ$C, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/kg, the final value of $\overline{T_d}$ should equal
-$\dot{Q}_r$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in cartesian and cylindrical
+$\dot{Q}_r$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in Cartesian and cylindrical
 coordinate systems.
 
 \begin{figure}[h]
@@ -1752,7 +1752,7 @@ coordinate systems.
 \label{droplet_absorption_figures}
 \end{figure}
 
-%Similar test for droplets with surface in different geometries is tested. All the previously used values are the same, except the mass ($m_{cartesian} = 6.26\cdot 10^{-4}$~kg, $m_{cylindrical} = 1.96\cdot 10^{-3}$~kg, $m_{spherical} = 6.54\cdot 10^{-4}$~kg). It is also necessary to define a high thermal conductivity $k = 1\cdot 10^{9}$~W/m/K for the surface. Figure~\ref{droplet_absorption_surface_figures} shows comparisons of the predicted average droplet temperature and the expected value in cartesian coordinate system. The droplets have surface either in cartesian, cylindrical or spherical geometries. Splitting the radiation angles has been tested in x-, y- and z- directions (except for cartesian particles only in z-direction).
+%Similar test for droplets with surface in different geometries is tested. All the previously used values are the same, except the mass ($m_{cartesian} = 6.26\cdot 10^{-4}$~kg, $m_{cylindrical} = 1.96\cdot 10^{-3}$~kg, $m_{spherical} = 6.54\cdot 10^{-4}$~kg). It is also necessary to define a high thermal conductivity $k = 1\cdot 10^{9}$~W/m/K for the surface. Figure~\ref{droplet_absorption_surface_figures} shows comparisons of the predicted average droplet temperature and the expected value in Cartesian coordinate system. The droplets have surface either in Cartesian, cylindrical or spherical geometries. Splitting the radiation angles has been tested in x-, y- and z- directions (except for Cartesian particles only in z-direction).
 %
 %\begin{figure}[h]
 %\noindent
@@ -2009,7 +2009,7 @@ The solution process for species evolution in finite rate reactions is similar t
 \begin{equation}\label{eq:FR_Arr}
 {k}_{i}=-AT^{n_{\alpha}}\exp(-E/RT)
 \end{equation}
-where $A$ is the pre-exponential, $E$ is the activation energy, and $n_{\alpha}$ determines the temperature dependence of the reaction. $A$, $E$, and $n_{\alpha}$ are user defined inputs based on a specificly defined reaction. The species mass flux for each reaction is defined by:
+where $A$ is the pre-exponential, $E$ is the activation energy, and $n_{\alpha}$ determines the temperature dependence of the reaction. $A$, $E$, and $n_{\alpha}$ are user defined inputs based on a specifically defined reaction. The species mass flux for each reaction is defined by:
 \begin{equation}\label{eq:FR_mdot}
 \dot{m}^{\prime\prime\prime}_{\alpha,i}=k_{i}\,\displaystyle\prod Y_{\alpha}^{a_{\alpha,i}}
 \end{equation}
@@ -2397,14 +2397,14 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 
 \section{Temperature-Dependent Thermal Properties (\texorpdfstring{{\bf heat\_conduction\_kc}}{heat\_conduction\_kc})}
 
-This example demonstrates the 1-D heat conduction in cartesian, cylindrical and spherical geometries with temperature-dependent thermal properties.
-The cartesian solution was computed using HEATING (version~7.3), a multi-dimensional, finite-difference, general purpose heat transfer
+This example demonstrates the 1-D heat conduction in Cartesian, cylindrical, and spherical geometries with temperature-dependent thermal properties.
+The Cartesian solution was computed using HEATING (version~7.3), a multi-dimensional, finite-difference, general purpose heat transfer
 model~\cite{Childs}. The cylindrical and spherical solutions were computed using a commercial finite-element solver, ABAQUS.
 
-The sample of homogenous material is initially at 0~$^\circ$C and at $t>0$ exposed to a gas at 700~$^\circ$C. A fixed heat transfer coefficient of
+The sample of homogeneous material is initially at 0~$^\circ$C and at $t>0$ exposed to a gas at 700~$^\circ$C. A fixed heat transfer coefficient of
 10~W/m$^2$/K is assumed. The density of the material is 10000~kg/m$^3$. The conductivity and specific heat are functions of temperature with the
 following values: $k(0)=0.10$~W/m/K, $k(200)=0.20$~W/m/K, $c(0)=1.0$~kJ/kg/K, $c(100)=1.2$~kJ/kg/K, $c(200)=1.0$~kJ/kg/K. The thickness (radius) of
-the sample is 0.01~m. In the cartesian case, the back surface of the material is exposed to a gas at 0~$^\circ$C. In the figure below, the light colored solid
+the sample is 0.01~m. In the Cartesian case, the back surface of the material is exposed to a gas at 0~$^\circ$C. In the figure below, the light colored solid
 lines are FDS results and the dark lines are the HEATING results. An example input with cylindrical geometry looks like:
 
 \scriptsize
@@ -2472,7 +2472,7 @@ each of these reactions may produce some other solid component
 (residue), gaseous fuel, and/or water vapor.
 
 
-\section{Mass conservation of pyrolyzed mass (\texorpdfstring{{\bf surf\_mass\_conservation}}{surf\_mass\_concervation})}
+\section{Mass conservation of pyrolyzed mass (\texorpdfstring{{\bf surf\_mass\_conservation}}{surf\_mass\_conservation})}
 
 The calculations described in this section check the conservation of
 mass produced by the pyrolysis algorithm. Parameters describing the geometric configuration of the solid are input via a {\ct SURF} line,  and
@@ -2486,7 +2486,7 @@ described by a {\ct PART} line.
 mixture fraction model, or an additional gas species, defined by a {\ct SPEC} line.
 \end{enumerate}
 In all cases, the wall thickness (or radius for cylindrical and spherical geometries) is 0.01~m. The material density is 360~kg/m$^3$ and the yield of gaseous
-products for the charring cases is 0.5, {\em i.e.} half of the original mass. For cartesian surfaces, the mass loss per unit area is
+products for the charring cases is 0.5, {\em i.e.} half of the original mass. For Cartesian surfaces, the mass loss per unit area is
 1.8~kg/m$^2$ for charring, and 3.6~kg/m$^2$ for non-charring materials.
 For cylindrical surfaces, the volume per unit surface area is $r/2$, and thus the mass loss per unit area
 is $360(1-0.5) \times r/2$=0.9~kg/m$^2$ for charring, and 1.8~kg/m$^2$ for non-charring materials.
@@ -2543,8 +2543,8 @@ The expected and computed results for non-charring material are compared in Fig.
 \subsection{Pyrolysis of Discrete Particles}
 
 For lagrangian particles, the expected values of the mass are obtained by multiplying the material density by the particle volume by the residue fraction.
-For cartesian surfaces, the particle area is two times the product of the parameters {\ct LENGTH} and {\ct WIDTH} on the {\ct SURF} line, both of
-which are given a value 0.05~m. As a result, the expected masses for particles with cartesian surfaces are
+For Cartesian surfaces, the particle area is two times the product of the parameters {\ct LENGTH} and {\ct WIDTH} on the {\ct SURF} line, both of
+which are given a value 0.05~m. As a result, the expected masses for particles with Cartesian surfaces are
 $360 (1-0.5) \times 2\delta L W=0.009$~kg for charring, and 0.018~kg for non-charring materials. Note that the half-thickness, $\delta=0.01$~m, is
 specified on the {\ct SURF} line as {\ct THICKNESS}.
 For cylindrical particles, the {\ct LENGTH} is 0.1~m, and the radius, $r$
@@ -2845,7 +2845,7 @@ This section describes a method for interpreting micro-combustion calorimeter (M
 The pyrolysis combustion flow calorimeter (PCFC), developed
 by Lyon and Walters~\cite{Lyon:JAAP2004} at the U.S. Federal Aviation Administration (FAA), is a device
 used to measure the heat generated from the combustion of small (4~mg to 6~mg) material samples by oxygen depletion calorimetry.
-Samples are pyrolyzed at a specified heating rate in an anerobic atmosphere (typically N$_2$) and the resulting gases are mixed with
+Samples are pyrolyzed at a specified heating rate in an anaerobic atmosphere (typically N$_2$) and the resulting gases are mixed with
 excess oxygen and combusted in a separate chamber. The heat release rate from the specimen is obtained from measurements of the
 concentration of oxygen in the effluent exiting the combustor as a function of time. The methodology is the basis for
 the standard test ASTM~D~7309~\cite{ASTM:D7309}.
@@ -2976,7 +2976,7 @@ The {\bf fluid\_part\_mom} cases test accuracy, stability, and momentum conserva
 
 We set up three separate tests, one for each coordinate direction.  These are labeled \_x, \_y, and \_z in the verification directory.  We consider a duct 1 m $\times$ 1 m in the vertical and spanwise directions and 10 m in the streamwise direction.  The boundary conditions are periodic in the streamwise direction and free slip walls along the inside of the duct. The fluid grid is 40 $\times$ 4 $\times$ 4 for the x case; the y and z cases use analogous grids.  The fluid velocity is initialized to be 10 m/s in the streamwise direction.  A monodisperse distribution of 1000 particles is initialized with zero velocity and random positions in the first cubic meter of the duct.  Gravity is set to zero.
 
-As the case proceeds momentum is exchanged between the fluid and the particles.  The momenta relax toward equilibrium.  The results for all three tests are shown in Figure \ref{fig_fluid_part_mom}.  On the left, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the right shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (greeen dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
+As the case proceeds momentum is exchanged between the fluid and the particles.  The momenta relax toward equilibrium.  The results for all three tests are shown in Figure \ref{fig_fluid_part_mom}.  On the left, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the right shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (green dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
 
 \begin{figure}[h]
 \begin{center}
@@ -3059,7 +3059,7 @@ F & 150 & 1600 \tabularnewline
 
 The pressure drop test cases consider a 1 m wide by 1 m tall by 2 m long channel with a 2 m/s fixed velocity boundary condition on one end, an {\ct OPEN} boundary condition on the other end, and {\ct FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own {\ct MESH}, and a plane of particles is placed across each channel at 1 m.  The particles are 0.01 m in diameter and 10 particles are placed per cell.  A {\ct USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
 \be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{D} \, \pi \, r_{d}^{2}} {A} \ee
-where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel is 3.77, 7.54, and 15.1 Pa.  Comparisons of computed and analytical results are shown in Figure~\ref{particle_drag_plots}. It is seen that the pressure drop converges to the analytic solution as the timestep decreases.
+where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel is 3.77, 7.54, and 15.1 Pa.  Comparisons of computed and analytical results are shown in Figure~\ref{particle_drag_plots}. It is seen that the pressure drop converges to the analytic solution as the time step decreases.
 
 \begin{figure}[ht]
 \noindent
@@ -3174,7 +3174,7 @@ FDS demonstrated second-order convergence in the terminal velocity case for both
 
 \section{2D Flat Fire Trajectory (\texorpdfstring{\bf flat\_fire}{flat\_fire})}
 
-There are no known solutions of the drag equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is never very significant compared to the horizonal velocity, then throughout the entire trajectory the horizontal velocity component, $u$, is a good approximation for the velocity magnitude, $|\mathbf{u}|$.
+There are no known solutions of the drag equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is never very significant compared to the horizontal velocity, then throughout the entire trajectory the horizontal velocity component, $u$, is a good approximation for the velocity magnitude, $|\mathbf{u}|$.
 
 %In 2D, this approximation decouples the $x$ equation of motion from the $y$ equation of motion and reduces the $y$ equation of motion to a linear ODE.
 %\begin{align*}
@@ -3354,7 +3354,7 @@ This case tests the conservation of energy between drops, surfaces, and  the gas
 
 \subsection{Case 7}
 
-In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with of diameter 2000~$\mu$m are
+In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of 2000~$\mu$m are
 introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~$^\circ$C, and the spray is directed at the walls with an initial velocity of 5~m/s.
 The water completely evaporates before it drips down to the bottom of the channel.
 Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, {\ct HRR}, of the fire is \underline{expected} to be 320~kW. The rate at which the water droplets extract energy from the system, {\ct Q\_PART}, is \underline{expected} to be
@@ -3434,7 +3434,7 @@ where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop
 
 \section{Node Flow Losses (\texorpdfstring{\bf HVAC\_tee\_loss\_1}{HVAC\_tee\_loss\_1} and \texorpdfstring{\bf HVAC\_tee\_loss\_2}{HVAC\_tee\_loss\_2})}
 
-Node flow losses are implemented by partitioning the node loss to upstream and downstream ducts connected to a node as a function of the combination of flow directions present.  These two cases replicate the duct flow loss geometry and HVAC system ((HVAC\_flow\_loss.fds)) . However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first test case, HVAC\_tee\_loss\_1.fds, flow is into the main leg of the tee and out the two secondary legs.  The secondary branches of the tee are given losses of 15 and 3 and the nodes discharing to the FDS domain are assigned losses of 1.  This gives total losses of 16 and 4, the same as in the duct loss example.  In the second case, HVAC\_tee\_loss\_2.fds, flow is out the main leg of the tee and in the two secondary legs of the tee.  Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned.  It is expected that the duct velocities in both cases should be 3~m/s, 2~m/s, and 1~m/s.
+Node flow losses are implemented by partitioning the node loss to upstream and downstream ducts connected to a node as a function of the combination of flow directions present.  These two cases replicate the duct flow loss geometry and HVAC system ((HVAC\_flow\_loss.fds)) . However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first test case, HVAC\_tee\_loss\_1.fds, flow is into the main leg of the tee and out the two secondary legs.  The secondary branches of the tee are given losses of 15 and 3 and the nodes discharging to the FDS domain are assigned losses of 1.  This gives total losses of 16 and 4, the same as in the duct loss example.  In the second case, HVAC\_tee\_loss\_2.fds, flow is out the main leg of the tee and in the two secondary legs of the tee.  Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned.  It is expected that the duct velocities in both cases should be 3~m/s, 2~m/s, and 1~m/s.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -3530,7 +3530,7 @@ two compartments is the same as the pressure difference from leak\_test (190.7~P
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{{\bf ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{{\bf ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, and \texorpdfstring{{\bf ashrae\_7\_table}}{ashrae\_7\_table})}
 
-ASRHAE sample problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Figure~\ref{ASHRAE7} consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components were defined as well as the fan flow rate.  Pressure drops and flow rates in the remaining components can be computed by hand.  Also shown in Figure~\ref{ASHRAE7} are the predict pressure drops using a fixed flow fan, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e. the flow rate of 1.45 m$^3$/s and pressure drop of 1913.5 Pa from the fixed flow simulation sits on the quadratic curve), and a fan using a {\ct RAMP} to define the same quadratic fan curve at 500 Pa intervals.  The hand calculations assume a constant density, whereas, the FDS computation will have slightly non uniform density in HVAC network due to presure drops and the equation of state.  It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since inputting a fan curve as a table results in a piecewise linear approximation, it is expected that the user defined fan curve results will vary slightly from the quadratic and fixed flow results.
+ASHRAE sample problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Figure~\ref{ASHRAE7} consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components were defined as well as the fan flow rate.  Pressure drops and flow rates in the remaining components can be computed by hand.  Also shown in Figure~\ref{ASHRAE7} are the predict pressure drops using a fixed flow fan, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e. the flow rate of 1.45 m$^3$/s and pressure drop of 1913.5 Pa from the fixed flow simulation sits on the quadratic curve), and a fan using a {\ct RAMP} to define the same quadratic fan curve at 500 Pa intervals.  The hand calculations assume a constant density, whereas, the FDS computation will have slightly non uniform density in HVAC network due to pressure drops and the equation of state.  It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since inputting a fan curve as a table results in a piecewise linear approximation, it is expected that the user defined fan curve results will vary slightly from the quadratic and fixed flow results.
 
 
 \begin{figure}[ht]
