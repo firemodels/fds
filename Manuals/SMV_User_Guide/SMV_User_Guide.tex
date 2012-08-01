@@ -184,7 +184,7 @@ Volume I: User's Guide
 \flushright{Glenn P. Forney\\
 %\includegraphics[width=1in]{figures/bfrl}  \\
 {\em Fire Research Division} \\
-{\em Enginnering Laboratory}  \\
+{\em Engineering Laboratory}  \\
 }
 
 \vspace{.25in}
@@ -266,7 +266,7 @@ particular times again using 2D or 3D contours of data such as
 temperature and flow vectors showing flow direction and magnitude.
 
 \Smokeview\ and associated
-documentation for Windows, Linux and Mac/OSX may be downloaded from the web site {\bf
+documentation for Windows, Linux and Mac OS X may be downloaded from the web site {\bf
 \hhref{http://fire.nist.gov/fds}} at no cost.
 
 %---------------------------------------------------------------------------------
@@ -513,7 +513,7 @@ libraries to implement image capture (GD~\cite{BOUTELL,GDLIB},
 PNG~\cite{PNGLIB}, JPEG~\cite{JPEGLIB}), image and general file
 compression (ZLIB~\cite{ZLIB}) and dialog creation
 (GLUI~\cite{GLUILIB}). Each of these libraries is portable running
-under UNIX, LINUX, OSX and Windows 9x/2000/XP/Vista allowing Smokeview to run
+under UNIX, LINUX, OS X and Windows 9x/2000/XP/Vista allowing Smokeview to run
 on these platforms as well.
 
 \section{Features}
@@ -572,7 +572,7 @@ Though
 similar to solidly shaded contour animations (the vector colors are
 the same as the corresponding contour colors), vector animations are better
 than solid contour animations for highlighting flow
-features since vectors accentuate the direction that flow is occuring.
+features since vectors accentuate the direction that flow is occurring.
 
 A 3D region of
 data may be visualized using slice files.  Slices may be moved from one plane to
@@ -805,7 +805,7 @@ Normally \smokeview\ is run during an \fds\ run, after the
 run has completed and as an aid in setting up \fds\ cases
 by visualizing geometric components such as blockages,
 vents, sensors, \etc.\ One can then verify that these
-modelling elements have been defined and located as
+modeling elements have been defined and located as
 intended. One may select the color of these elements using
 color parameters in the \svini\ to help
 distinguish one element from another. \svini\ file
@@ -1983,7 +1983,7 @@ clipping only the geometry (blockages), the third view shows the
 scene slipping both the geometry and the data.} \label{figCLIPPED}
 \end{figure}
 
-It is difficult to view the interior of a scene when modelling
+It is difficult to view the interior of a scene when modeling
 complicated geometries.  To alleviate this problem, portions of
 the scene may be hidden or clipped by setting up to six clipping
 planes. OpenGL draws the scene on one side of a clipping plane but
@@ -2453,7 +2453,7 @@ that support texture mapping (presently drawtsphere).
 \hitem{GTRANSLATE} The command, {\tt x y z gtranslate}, translates
 objects in a global reference frame, the same reference frame used
 to define FDS geometry.  Objects drawn after the gtranslate command
-are moved by x, y and z along the x, y and z cartesian axes
+are moved by x, y and z along the x, y and z Cartesian axes
 respectively.  Equivalently, one can think of think of {\tt x y z
 gtranslate}\ as translating the origin by (-x,-y,-z).
 
@@ -2836,10 +2836,10 @@ in the {\em Edit Tours} dialog box.
 A view direction may be defined at each keyframe by either setting
 direction angles relative to the path (an azimuth and an elevation
 angle) or by setting a direction relative to the scene geometry (a
-cartesian (X,Y,Z) view direction).
+Cartesian (X,Y,Z) view direction).
 
 Path relative view directions are enabled by default.  To define a
-cartesian view direction, select the {\bf X,Y,Z View}\ check box
+Cartesian view direction, select the {\bf X,Y,Z View}\ check box
 and edit the X, Y and Z View edit boxes to change the view
 location. To define an path relative view direction, uncheck the
 {\bf X,Y,Z View}\ check box and edit the Azimuth and Elevation
@@ -3268,7 +3268,7 @@ PARTCLASSTYPE
 \end{verbatim}
 
 \hitem{LOADPLOT3D}Load a Plot3D file for a given mesh at a specified time.
-Usaage:
+Usage:
 \begin{verbatim}
 LOADPLOT3D
   mesh number (an integer form 1 to the number of meshes) time (float)
@@ -3845,7 +3845,7 @@ x y z r g b tstart tstop
 label
 \end{verbatim}
 
-\noindent where ({\tt x, y, z}) is the label location in cartesian
+\noindent where ({\tt x, y, z}) is the label location in Cartesian
 coordinates and {\tt r, g, b} are the red, green and blue color
 components ranging from 0.0 to 1.0.  Again, if a negative value is
 specified then the foreground color will be used instead (white is
@@ -3955,7 +3955,7 @@ should result in the same views.
 
 Particle files may be converted to isosurface files using the {\tt
 -part2iso}\ option as in {\tt smokezip -part2iso casename}.  The
-resulting isosurface file hilights particle boundaries (where
+resulting isosurface file highlights particle boundaries (where
 particle density is 0.5 particles per grid cell). These isosurface
 files are accessible in the .smv file named {\tt
 casename\_smvzip.smv}.
@@ -4024,7 +4024,7 @@ would create a windows batch file (.bat) containing a list of commands like
 \begin{verbatim}
 fds5 casename_1.fds
 ....
-fds5 casername_n.fds
+fds5 casename_n.fds
 \end{verbatim}
 
 On a Windows system, each entry in the above list will not start until the previous entry
@@ -4239,11 +4239,11 @@ corresponding to the  file type to be hidden.
 
 The \smokeview\ {\tt .smv} file contains information about
 all data files appearing in the \loadmenu\  menu item. The
-\fds\ field modelling software creates this file. (See
+\fds\ field modeling software creates this file. (See
 Appendix \ref{sectionsmv} for documentation on the format
 of this file).
 
-The character ``{\tt *}'' occurring before a file nameindicates
+The character ``{\tt *}'' occurring before a file name indicates
 that the file has already been loaded. If the file below is loaded
 but not visible, then use the appropriate \showmenu\ option to
 make it visible.
@@ -4738,7 +4738,7 @@ shaded and line contours.
 
 \kitem{C}Toggle 3D smoke culling.
 
-\kitem{c}Advance hilghted zone fire modeling compartment.
+\kitem{c}Advance highlighted zone fire modeling compartment.
 
 \kitem{C}Toggle zone fire modeling compartment highlighting.
 
@@ -4856,7 +4856,7 @@ displaying it.)
 \kitem{ALT t}Open the Edit Tours dialog box.
 
 \kitem{ALT u} Toggle the option to draw a coarse portion of a 2D
-slice file within an imbedded mesh.
+slice file within an embedded mesh.
 
 \kitem{ALT v}Toggle the projection method used to visualize a
 scene. The two projection methods are size preserving and
@@ -5969,7 +5969,7 @@ nkeyframes for 2nd tour
 ...
 ...
 \end{verbatim}
-If a cartesian view direction is specified then instead of {\tt 1 az elev} above
+If a Cartesian view direction is specified then instead of {\tt 1 az elev} above
 use {0 xview yview zview} where xview, yview, zview are the coordinates of the view
 direction.
 The {\em Circle}\ tour is not stored in the .ini file unless it has been changed
@@ -6019,7 +6019,7 @@ number of points to specify a tour. (default: 0.0 100.0 1000)
 
 \blist
 
-\hitem{ADJUSTALPHA}The ALPHA paramter in OpenGL/Smokeview is used
+\hitem{ADJUSTALPHA}The ALPHA parameter in OpenGL/Smokeview is used
 to specify the transparency of an object.  The ALPHA's are
 computed in FDS and adjusted in SMOKEVIEW according to value of
 the ADJUSTALPHA keyword.  If ADJUSTALPHA is zero, then no
@@ -6098,7 +6098,7 @@ xmin, ymin, zmin
 Note that the xmin, ymin and zmin values must be identical to the corresponding values given in
 the {\tt PDIM} keyword. The {\tt OFFSET}\ keyword cannot be eliminated from the .smv file
 (it may seem logical to do this due
-to the presence of redundant data) because of its role in signalling new meshes.
+to the presence of redundant data) because of its role in signaling new meshes.
 
 \hitem{PDIM}This keyword specifies the region where a mesh is located
 using the same convention as is used in an FDS input file to specify a blockage location.
@@ -6550,7 +6550,7 @@ second line of descriptive text
 
 A program called DXF2FDS, written by David Sheppard of the US Bureau of Alcohol, Tobacco and Firearms (ATF), creates an FDS
 input file and a Smokeview geometric description file (.GE1) given
-a CAD description of the building being modelled.  The CAD
+a CAD description of the building being modeled.  The CAD
 description must be in a {\em dxf}\ format and created using {\em 3DFACE}\ commands.  The .GE1 file has a simple text format and is
 described below. DXF2FDS specifies that .GE1 filename on the {\tt \&DUMP }\ line in an FDS input file using the {\tt RENDER\_FILE}\
 keyword,  as in
