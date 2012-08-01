@@ -31,9 +31,12 @@ The drag coefficient (default based on a sphere) is a function of the local Reyn
      24/\RE_d                                       & \RE_d < 1    \\
      24\left(0.85+0.15 \, \RE_d^{0.687} \right)/\RE_d  & 1 < \RE_d < 1000 \\
      0.44                                           & 1000 < \RE_d
-     \end{array} \right.  \\
+     \end{array} \right.  \\ [0.1in]
 \RE_d &=& \frac{\rho \, |\bu_d-\bu| \, 2 r_d}{\mu(T)} \end{eqnarray}
 where $\mu(T)$ is the dynamic viscosity of air at temperature $T$.
+
+
+\clearpage
 
 \section{Droplet Size Distribution}
 
@@ -45,7 +48,7 @@ suggested that the CVF for a sprinkler may be represented by a combination of lo
 Rosin-Rammler distributions~\cite{Chan:1}
 \be F(d) = \left\{ \begin{array}{ll}
    \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^d} \, \frac{1}{\sigma\, d'} \,
-   e^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}} \; \mbox{d}d'       & (d \le d_m) \\
+   e^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}} \; \mbox{d}d'       & (d \le d_m) \\ [0.2in]
    1 - e^{-0.693 \left(\frac{d}{d_m}\right)^\gamma }  & (d_m < d)
    \end{array} \right.  \ee
 where $d_m$ is the median droplet diameter ({\em i.e.} half the mass
@@ -101,11 +104,13 @@ distributed random variable $U$
 Figure~\ref{rosin} displays typical Cumulative Volume Fraction and
 Cumulative Number Fraction functions.
 \begin{figure}[t]
+\begin{center}
 \includegraphics[width=4.5in]{FIGURES/rosin}
-\caption{Cumulative Volume Fraction and Cumulative Number
+\caption[Liquid droplet size distribution]{Cumulative Volume Fraction and Cumulative Number
 Fraction functions of the droplet size distribution from
 a typical industrial-scale sprinkler. The median diameter $d_m$ is
 1~mm, $\sigma=0.6$ and $\gamma=2.4$.}
+\end{center}
 \label{rosin}
 \end{figure}
 
@@ -126,7 +131,7 @@ the weighting factor $C$.
 
 
 
-
+\clearpage
 
 \section{Heating and Evaporation of Liquid Droplets}
 
@@ -144,7 +149,7 @@ and the local gas temperature, $T_g$. If the droplet is attached to a surface, $
 The mass and energy transfer between the gas and the liquid can be described by the
 following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
-\frac{dm_l}{dt}               & =  - A \; h_m \, \rho \, (Y_l - Y_g) \\
+\frac{dm_l}{dt}               & =  - A \; h_m \, \rho \, (Y_l - Y_g) \\ [0.1in]
 m_l \; c_l \; \frac{dT_l}{dt} & =    A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \label{droplet_temp}   \end{align}
 Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the
 film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
@@ -214,16 +219,15 @@ The amount of heat extracted from the gas is
 
 
 
-
+\clearpage
 
 
 \section{Fire Suppression by Water}
 
-The previous two sections describe heat transfer from a droplet of
-water to a hot gas, a hot solid, or both. Although there is some
+The previous sections describe heat transfer from a liquid droplet to a gas, a solid, or both. Although there is some
 uncertainty in the values of the respective heat transfer coefficients,
 the fundamental physics are fairly well understood. However, when
-the water droplets encounter burning surfaces,
+the droplets encounter burning surfaces,
 simple heat transfer correlations become more difficult to apply.
 The reason for this is that the water is not only cooling the surface
 and the surrounding gas, but it is also changing the pyrolysis rate
@@ -242,7 +246,12 @@ fixed velocity. This ``dripping'' velocity has been measured for water to be on
 the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}.
 While attached to a surface, the ``droplet'' is assumed to form a thin film of liquid that
 transfers heat to the solid, and heat and mass to
-the gas.
+the gas. The film thickness, $\delta$, is given by
+\be
+   \delta = \max \left( \delta_{\text min} , \sum \frac{4}{3} \pi r_d^3 / A \right)
+\ee
+where $A$ is the area of the wall cell to which the droplet is attached. 
+It is assumed that the minimum film thickness, $\delta_{\text min}$, is $1 \times 10^{-5}$~m. This prevents a very small amount of liquid from spreading across the entire cell width. It is also assumed that the liquid is opaque with regard to thermal radiation.
 
 \subsection{Reduction of Pyrolysis Rate due to Water}
 
@@ -284,6 +293,9 @@ mass per unit area, $m_w''$, expressed in units of kg/m$^2$,
 Note that $a$ is an empirical constant.
 
 
+
+\clearpage
+
 \section{Using Lagrangian Particles to Model Complex Objects}
 
 There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform
@@ -304,6 +316,8 @@ where $A$ is the surface area of the particle and $\dx \dy \dz$ is the volume of
 The net radiative heat flux onto the surface of the particle is
 \be \dq_{r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_p^4 \right) \ee
 
+
+\clearpage
 
 \section{Turbulent Dispersion}
 
