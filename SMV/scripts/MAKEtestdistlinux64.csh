@@ -2,6 +2,7 @@
 set revision=$1
 set SVNROOT=~/FDS-SMV
 
+set BACKGROUNDDIR=$SVNROOT/Utilities/background/gcc_linux_32
 set SMVDIR=$SVNROOT/SMV/Build/intel_linux_test_64
 set SMZDIR=$SVNROOT/Utilities/smokezip/intel_linux_64
 set SMDDIR=$SVNROOT/Utilities/smokediff/intel_linux_64
@@ -16,6 +17,7 @@ mkdir -p $LINUXDIR/Documentation
 cp note.txt $LINUXDIR/Documentation/.
 cp $FORBUNDLE/objects.svo $LINUXDIR/.
 cp $FORBUNDLE/*.po $LINUXDIR/.
+cp $BACKGROUNDDIR/background $LINUXDIR/.
 cp $SMVDIR/smokeview_linux_test_64 $LINUXDIR/.
 cp $SMZDIR/smokezip_linux_64 $LINUXDIR/.
 cp $SMDDIR/smokediff_linux_64 $LINUXDIR/.

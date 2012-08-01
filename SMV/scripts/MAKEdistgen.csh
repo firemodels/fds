@@ -6,6 +6,7 @@ set SVNROOT=FDS-SMV
 set HOST=$4
 
 set platformsize=$platform\_$size
+set BACKGROUNDDIR=$SVNROOT/Utilities/background/gcc_$platform_32
 set SMOKEVIEWDIR=$SVNROOT/SMV/Build/intel_$platformsize
 set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/intel_$platformsize
 set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_$platformsize
@@ -20,6 +21,7 @@ mkdir -p $DIR/Documentation
 cp readme.html $DIR/Documentation/release_notes.html
 
 cp $FORBUNDLE/objects.svo $DIR/.
+scp $HOST\:$BACKGROUNDDIR/background $DIR/.
 scp $HOST\:$SMOKEDIFFDIR/smokediff_$platformsize $DIR/.
 scp $HOST\:$SMOKEVIEWDIR/smokeview_$platformsize $DIR/.
 scp $HOST\:$SMOKEZIPDIR/smokezip_$platformsize $DIR/.
