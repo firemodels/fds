@@ -5959,7 +5959,7 @@ The following are all equivalent:
 \end{verbatim} \normalsize
 
 \subsection{Advanced} 
-\label{info:SPEC advanced}
+\label{info:SPEC_advanced}
 
 \subsubsection{\texorpdfstring{{\tt ALIAS}}{ALIAS}}
 In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by using {\ct ALIAS}.  {\ct ALIAS} will change the name used to refer to a {\ct SPEC} when providing a {\ct SPEC\_ID} input elsewhere.  For example:
@@ -6755,7 +6755,7 @@ additional fuel bands, set {\ct CH4\_BANDS=.TRUE.} on the {\ct RADI} line. Read 
 Reference Guide~\cite{FDS_Tech_Guide} for more details. Note also that when
 {\ct WIDE\_BAND\_MODEL=.TRUE.}, the {\ct ABSORPTION\_COEFFICIENT}
 output quantity becomes practically useless, because it then
-corresponds to one individual band of the spectrum. It is also possible to set the band limits used in the wide band model by specifying WL_BAND_LIMITS on RADI line.
+corresponds to one individual band of the spectrum. It is also possible to set the band limits used in the wide band model by specifying WL\_BAND\_LIMITS on RADI line.
 
 
 
@@ -11554,7 +11554,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ABSORBING}                     & Logical     & Section~\ref{gas_species_props}         &                   & {\ct .FALSE.} \\ \hline
 {\ct AEROSOL}                       & Logical     & Section~\ref{info:deposition}           &                   & {\ct .FALSE.} \\ \hline
-{\ct ALIAS}                         & Character   & Section~\ref{info:SPEC_props}           &                   &               \\ \hline
+{\ct ALIAS}                         & Character   & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
 {\ct BACKGROUND}                    & Logical     & Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Section~\ref{gas_species_props}         & W/m/K             &               \\ \hline
 {\ct CONDUCTIVITY\_SOLID}           & Real        & Section~\ref{info:deposition}         & W/m/K             &  0.26         \\ \hline
@@ -11575,7 +11575,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MEAN\_DIAMETER}                & Real        & Section~\ref{info:deposition}         & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct MW}                            & Real        & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RADCAL\_ID}                    & Character   & Section~\ref{info:SPEC_props}           &                   &               \\ \hline
+{\ct RADCAL\_ID}                    & Character   & Section~\ref{info:SPEC_advanced}           &                   &               \\ \hline
 {\ct RAMP\_CP}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_CP\_L}                   & Character   & Section~\ref{thermal_part_props}        &                   &               \\ \hline
 {\ct RAMP\_D}                       & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
