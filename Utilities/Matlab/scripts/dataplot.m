@@ -162,8 +162,8 @@ for i=2:2000
             d1_Ind_Col = find(strcmp(H,R1(min(j,length(R1)))));
             d1_Dep_Col = find(strcmp(H,S1(j)));
             clear indices
-            % Clear flag for end(x,y) metric
-            using_end_1to1 = 0;
+            % Clear flag for end_x_y metric
+            using_end_x_y = 0;
             indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
             if strcmp(Metric,'max')
                 Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
@@ -179,11 +179,11 @@ for i=2:2000
                 Save_Measured_Metric(i,j,1) = trapz(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col));
             elseif strcmp(Metric,'end')
                 Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col);
-            % If end(x,y) is specified for a plot with multiple curves,
+            % If end_x_y is specified for a plot with multiple curves,
             % then get the results from curve x only
-            elseif strfind(Metric,'end(')
-                using_end_1to1 = 1;
-                compare_indices = sscanf(Metric, ['end(' '%f' ',' '%f']);
+            elseif strfind(Metric,'end_')
+                using_end_x_y = 1;
+                compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
                 if compare_indices(1) == j
                     Save_Measured_Metric(i,1,1) = M(indices(end),d1_Dep_Col);
                 end
@@ -191,8 +191,8 @@ for i=2:2000
                 Save_Measured_Metric(i,j,1) = 0;
             end
             % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
-            % Unless the end(x,y) metric is specified, then skip this block to avoid extra rows
-            if (Save_Measured_Metric(i,j,1) == 0) & (~using_end_1to1)
+            % Unless the end_x_y metric is specified, then skip this block to avoid extra rows
+            if (Save_Measured_Metric(i,j,1) == 0) & (~using_end_x_y)
                 Save_Measured_Metric(i,j,1) = 1E-12;
             end
             clear indices
@@ -224,8 +224,8 @@ for i=2:2000
             d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
             d2_Dep_Col = find(strcmp(H,S2(j)));
             clear indices
-            % Clear flag for end(x,y) metric
-            using_end_1to1 = 0;
+            % Clear flag for end_x_y metric
+            using_end_x_y = 0;
             indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
             if strcmp(Metric,'max')
                 Save_Predicted_Metric(i,j,1) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
@@ -241,11 +241,11 @@ for i=2:2000
                 Save_Predicted_Metric(i,j,1) = trapz(M(indices,d2_Ind_Col), M(indices,d2_Dep_Col));
             elseif strcmp(Metric,'end')
                 Save_Predicted_Metric(i,j,1) = M(indices(end),d2_Dep_Col);
-            % If end(x,y) is specified for a plot with multiple curves,
+            % If end_x_y is specified for a plot with multiple curves,
             % then get the results from curve y only
-            elseif strfind(Metric,'end(')
-                using_end_1to1 = 1;
-                compare_indices = sscanf(Metric, ['end(' '%f' ',' '%f']);
+            elseif strfind(Metric,'end_')
+                using_end_x_y = 1;
+                compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
                 if compare_indices(2) == j
                     Save_Predicted_Metric(i,1,1) = M(indices(end),d2_Dep_Col);
                 end
@@ -253,8 +253,8 @@ for i=2:2000
                 Save_Predicted_Metric(i,j,1) = 0;
             end
             % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
-            % Unless the end(x,y) metric is specified, then skip this block to avoid extra rows
-            if (Save_Predicted_Metric(i,j,1) == 0) & (~using_end_1to1)
+            % Unless the end_x_y metric is specified, then skip this block to avoid extra rows
+            if (Save_Predicted_Metric(i,j,1) == 0) & (~using_end_x_y)
                 Save_Predicted_Metric(i,j,1) = 1E-12;
             end
             clear indices
