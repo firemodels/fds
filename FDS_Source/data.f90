@@ -293,15 +293,15 @@ OUTPUT_QUANTITY(52)%ISOF_APPROPRIATE = .FALSE.
 
 ! Cell-centered velocity components
 
-OUTPUT_QUANTITY(53)%NAME  = 'U CELL'              
+OUTPUT_QUANTITY(53)%NAME  = 'CELL U'              
 OUTPUT_QUANTITY(53)%UNITS  = 'm/s'                    
 OUTPUT_QUANTITY(53)%SHORT_NAME  = 'u_p'
 
-OUTPUT_QUANTITY(54)%NAME  = 'V CELL'              
+OUTPUT_QUANTITY(54)%NAME  = 'CELL V'              
 OUTPUT_QUANTITY(54)%UNITS  = 'm/s'                    
 OUTPUT_QUANTITY(54)%SHORT_NAME  = 'v_p'
 
-OUTPUT_QUANTITY(55)%NAME  = 'W CELL'              
+OUTPUT_QUANTITY(55)%NAME  = 'CELL W'              
 OUTPUT_QUANTITY(55)%UNITS  = 'm/s'                    
 OUTPUT_QUANTITY(55)%SHORT_NAME  = 'w_p'
 
