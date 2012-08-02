@@ -191,6 +191,7 @@ END SUBROUTINE CHECK_XB
 
 
 SUBROUTINE CHANGE_UNITS(QUANTITY,UNITS,STATISTICS,MYID,LU_ERR)
+
 ! Change the units of the DEVC output if it is an integrated quantity
 
 CHARACTER(30), INTENT(IN) :: QUANTITY,STATISTICS
@@ -205,6 +206,14 @@ SELECT CASE (STATISTICS)
    CASE('VOLUME INTEGRAL')
       I = INDEX(UNITS,'/m3')
       IF (I/=0) WRITE(UNITS,'(A,A)') UNITS(1:I-1),UNITS(I+3:UNIT_L)
+      IF (TRIM(UNITS)=='1/s') THEN
+         UNITS = 'm3/s'
+         I = 1
+      ENDIF
+      IF (TRIM(UNITS)=='Pa') THEN
+         UNITS = 'J'
+         I = 1
+      ENDIF
    CASE('AREA INTEGRAL')
       I = INDEX(UNITS,'/m2')
       IF (I/=0) WRITE(UNITS,'(A,A)') UNITS(1:I-1),UNITS(I+3:UNIT_L)
