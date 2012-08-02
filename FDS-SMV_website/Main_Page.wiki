@@ -1,6 +1,6 @@
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 
-<p align="justify">The *Fire Dynamics Simulator (FDS)* is a large-eddy simulation (LES) code for low-speed flows, with an emphasis on smoke and heat transport from fires.
+<p align="justify">*Fire Dynamics Simulator (FDS)* is a large-eddy simulation (LES) code for low-speed flows, with an emphasis on smoke and heat transport from fires.
 
 *Smokeview (SMV)* is a visualization program that is used to display the output of FDS and [http://cfast.nist.gov CFAST] simulations.
 
@@ -63,6 +63,14 @@ Information on FDS-SMV development, third-party tools, and other resources.
 
 <font face="calibri,helvetica,arial,sans-serif" size="3">
   View the [https://docs.google.com/folder/d/0ByEue9bc54pORGZoQ3JQcjRtcEE/edit collection of publicly available reports] for the experimental data sets that are used in the FDS Validation Guide.
+</font>
+
+<br>
+
+== FDS-SMV Research Road Map ==
+
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+  Read the [http://code.google.com/p/fds-smv/wiki/FDS_Road_Map?tm=6 FDS Road Map] and the [http://code.google.com/p/fds-smv/wiki/Smokeview_Road_Map?tm=6 Smokeview Road Map] to learn about the ongoing research plan to advance the capabilities of FDS and Smokeview.
 </font>
 
 <br>
