@@ -80,8 +80,8 @@ else
     dstring = 'null';
 end
 
-Save_Measured_Metric = zeros(2000,5,5);
-Save_Predicted_Metric = zeros(2000,5,5);
+Save_Measured_Metric = zeros(2000,10,10);
+Save_Predicted_Metric = zeros(2000,10,10);
 
 % search for "o" lines, to process Only those lines.
 
