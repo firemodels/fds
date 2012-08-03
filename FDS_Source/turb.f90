@@ -917,7 +917,7 @@ REAL(EB) FUNCTION VELTAN2D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,M
 REAL(EB), INTENT(IN) :: U_VELO(2),U_SURF(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
 INTEGER, INTENT(IN) :: I_VEL
 REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY, &
-            U_STRM,U_NORM,U_STRM_WALL,U_NORM_WALL,DPDS,DUSDS,DUSDN,TSN
+            U_STRM,U_NORM,U_STRM_WALL,U_NORM_WALL,DPDS,DUSDS,DUSDN,TSN,RDN
 INTEGER :: SUBIT
 
 ! Cartesian grid coordinate system orthonormal basis vectors
@@ -960,11 +960,13 @@ TSN = C(1,1)*C(1,2)*TAU_IJ(1,1) + C(1,1)*C(2,2)*TAU_IJ(1,2) &
 ! update wall-normal velocity
 U_NORM = U_NORM_WALL + DN*(DIVU-0.5_EB*DUSDS)
 
+RDN = 1._EB/DN
+
 ! ODE solution
 IF (DNS) THEN
-   ETA = U_NORM + RRHO*MU/DN
-   AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
-   BB  = (TWTH*U_STRM_WALL/DN + ONSI*DUSDN)*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+   ETA = U_NORM + RRHO*MU*RDN
+   AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
+   BB  = (TWTH*U_STRM_WALL*RDN + ONSI*DUSDN)*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
    !AA  = -0.5_EB*(DUSDS + ETA/DN)
    !BB  = 0.5_EB*US_WALL/DN*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
    U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
@@ -975,9 +977,9 @@ ELSE
       !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
-      ETA = RRHO*(1-SLIP_COEF)*MU/(2._EB*DN**2)
-      AA  = -(0.5_EB*DUSDS + TWTH*U_NORM/DN + ETA)
-      BB  = ETA*U_STRM_WALL - (U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+      ETA = RRHO*(1-SLIP_COEF)*MU*0.5_EB*RDN**2
+      AA  = -(0.5_EB*DUSDS + TWTH*U_NORM*RDN + ETA)
+      BB  = ETA*U_STRM_WALL - (U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
       U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
    ENDDO
 ENDIF
@@ -994,7 +996,7 @@ USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT, NORM2
 REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS,U_INT
 INTEGER, INTENT(IN) :: I_VEL
 REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY,U_RELA(3), &
-            U_STRM,U_ORTH,U_NORM,DPDS,DUSDS,DUSDN,TSN,DUPDP,DUNDN
+            U_STRM,U_ORTH,U_NORM,DPDS,DUSDS,DUSDN,TSN,DUPDP,DUNDN,RDN
 INTEGER :: SUBIT,I,J
 
 ! Cartesian grid coordinate system orthonormal basis vectors
@@ -1068,12 +1070,12 @@ ENDDO
 
 ! update wall-normal velocity
 U_NORM = DN*(DIVU-0.5_EB*DUSDS)
-
+RDN = 1._EB/DN
 ! ODE solution
 IF (DNS) THEN
-   ETA = U_NORM + RRHO*MU/DN
-   AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
-   BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+   ETA = U_NORM + RRHO*MU*RDN
+   AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
+   BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
    IF (ABS(AA)>=ZERO_P) THEN
       U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
    ELSE
@@ -1087,9 +1089,9 @@ ELSE
       !IF (SLIP_COEF<-100._EB .OR. SLIP_COEF>100._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
-      ETA = RRHO*(1-SLIP_COEF)*MU/(2._EB*DN**2)
-      AA  = -(0.5_EB*DUSDS + TWTH*U_NORM/DN + ETA)
-      BB  = -(U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+      ETA = RRHO*(1-SLIP_COEF)*MU*0.5_EB*RDN**2
+      AA  = -(0.5_EB*DUSDS + TWTH*U_NORM*RDN + ETA)
+      BB  = -(U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN))
       !print *,MU*RRHO*DT/(DN**2)
       IF (ABS(AA)>=ZERO_P) THEN
          U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
@@ -1435,7 +1437,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: LES_FILTER_WIDTH
 
 INTEGER, INTENT(IN) :: NM,N
 INTEGER :: I,J,K
-REAL(EB) :: DELTA,DRHOZDX,DRHOZDY,DRHOZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ
+REAL(EB) :: DELTA,DRHOZDX,DRHOZDY,DRHOZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,DYN1,DZN1,OO12=1._EB/12._EB
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),RHO_D_DZDX=>NULL(),RHO_D_DZDY=>NULL(),RHO_D_DZDZ=>NULL(),&
                                        UU=>NULL(),VV=>NULL(),WW=>NULL()
@@ -1464,14 +1466,16 @@ ELSE
 ENDIF
 
 DO K=1,KBAR
+   DZN1 = 1._EB/(DZN(K-1)+DZN(K))
    DO J=1,JBAR
+      DYN1 = 1._EB/(DYN(J-1)+DYN(J))
       DO I=0,IBAR
 
          DELTA = LES_FILTER_WIDTH(DXN(I),DY(J),DZ(K))
                
          DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
-         DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J-1)+DYN(J))
-         DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K-1)+DZN(K))
+         DUDY = (UU(I,J+1,K)-UU(I,J-1,K))*DYN1
+         DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))*DZN1
 
          DRHOZDX = RDXN(I)*(RHOP(I+1,J,K)*ZZP(I+1,J,K,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
 
@@ -1481,21 +1485,23 @@ DO K=1,KBAR
          DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
                                   - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I+1,J,K-1)*ZZP(I+1,J,K-1,N) )
                
-         RHO_D_DZDX(I,J,K) = RHO_D_DZDX(I,J,K) - DELTA**2/12._EB*(DUDX*DRHOZDX + DUDY*DRHOZDY + DUDZ*DRHOZDZ)
+         RHO_D_DZDX(I,J,K) = RHO_D_DZDX(I,J,K) - DELTA**2*OO12*(DUDX*DRHOZDX + DUDY*DRHOZDY + DUDZ*DRHOZDZ)
               
       ENDDO
    ENDDO
 ENDDO
 
 DO K=1,KBAR
+   DZN1 = 1._EB/(DZN(K-1)+DZN(K))
    DO J=0,JBAR
+      DYN1 = 1._EB/(DY(J)+DY(J+1))
       DO I=1,IBAR
 
          DELTA = LES_FILTER_WIDTH(DX(I),DYN(J),DZ(K))
                
          DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
-         DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
-         DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K-1)+DZN(K))
+         DVDY = (VV(I,J+1,K)-VV(I,J-1,K))*DYN1
+         DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))*DZN1
 
          DRHOZDX = 0.25_EB*RDX(I)*( RHOP(I+1,J,K)*ZZP(I+1,J,K,N) + RHOP(I+1,J+1,K)*ZZP(I+1,J+1,K,N) &
                                   - RHOP(I-1,J,K)*ZZP(I-1,J,K,N) - RHOP(I-1,J+1,K)*ZZP(I-1,J+1,K,N) )
@@ -1505,21 +1511,23 @@ DO K=1,KBAR
          DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I,J+1,K+1)*ZZP(I,J+1,K+1,N) &
                                   - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I,J+1,K-1)*ZZP(I,J+1,K-1,N) )
             
-         RHO_D_DZDY(I,J,K) = RHO_D_DZDY(I,J,K) - DELTA**2/12._EB*(DVDX*DRHOZDX + DVDY*DRHOZDY + DVDZ*DRHOZDZ)
+         RHO_D_DZDY(I,J,K) = RHO_D_DZDY(I,J,K) - DELTA**2*OO12*(DVDX*DRHOZDX + DVDY*DRHOZDY + DVDZ*DRHOZDZ)
                
       ENDDO
    ENDDO
 ENDDO
 
 DO K=0,KBAR
+   DZN1 = 1._EB/(DZ(K)+DZ(K+1))
    DO J=1,JBAR
+      DYN1 = 1._EB/(DYN(J-1)+DYN(J))
       DO I=1,IBAR
 
          DELTA = LES_FILTER_WIDTH(DX(I),DY(J),DZN(K))
                
          DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I-1)+DXN(I))
-         DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J-1)+DYN(J))
-         DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))/(DZ(K)+DZ(K+1))
+         DWDY = (WW(I,J+1,K)-WW(I,J-1,K))*DYN1
+         DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))*DZN1
 
          DRHOZDX = 0.25_EB*RDX(I)*( RHOP(I+1,J,K)*ZZP(I+1,J,K,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
                                   - RHOP(I-1,J,K)*ZZP(I-1,J,K,N) - RHOP(I-1,J,K+1)*ZZP(I-1,J,K+1,N) )
@@ -1529,7 +1537,7 @@ DO K=0,KBAR
 
          DRHOZDZ = RDZN(K)*(RHOP(I,J,K+1)*ZZP(I,J,K+1,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
                
-         RHO_D_DZDZ(I,J,K) = RHO_D_DZDZ(I,J,K) - DELTA**2/12._EB*(DWDX*DRHOZDX + DWDY*DRHOZDY + DWDZ*DRHOZDZ)
+         RHO_D_DZDZ(I,J,K) = RHO_D_DZDZ(I,J,K) - DELTA**2*OO12*(DWDX*DRHOZDX + DWDY*DRHOZDY + DWDZ*DRHOZDZ)
                
       ENDDO
    ENDDO
