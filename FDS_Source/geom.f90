@@ -391,36 +391,311 @@ END SUBROUTINE READ_VOLU
 
 SUBROUTINE INIT_IBM(T,NM)
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
+USE PHYSICAL_FUNCTIONS, ONLY: LES_FILTER_WIDTH
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,IOR,IIG,JJG,KKG
 INTEGER :: NP,NXP,DUMMY_INTEGER,DUMMY_INTEGER2,DUMMY_INTEGER3,IZERO,LU,CUTCELL_COUNT
 TYPE (MESH_TYPE), POINTER :: M
-REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(27),V_POLYGON_CENTROID(3),VC,AREA_CHECK
+REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(27),V_POLYGON_CENTROID(3),VC,AREA_CHECK,DELTA,&
+            X_MIN,X_MAX,Y_MIN,Y_MAX,Z_MIN,Z_MAX,PP(3),RP,XU(3),DP
 LOGICAL :: EX,OP
 CHARACTER(60) :: FN
 CHARACTER(100) :: MESSAGE
 REAL(FB) :: DUMMY_FB_REAL,DUMMY_FB_REAL2
-REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E-10_EB
+REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E-10_EB,TOL=1.E-9_EB
 !LOGICAL :: END_OF_LIST
+TYPE (GEOMETRY_TYPE), POINTER :: G
 TYPE (FACET_TYPE), POINTER :: FC=>NULL()
 TYPE (CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
 
-IF (T<GEOC_CLOCK) RETURN
-GEOC_CLOCK = GEOC_CLOCK + DT_GEOC
-
 M => MESHES(NM)
 
-IF (ABS(T-T_BEGIN)<ZERO_P) THEN
-   ALLOCATE(M%CUTCELL_INDEX(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO) 
-   CALL ChkMemErr('READ','CUTCELL_INDEX',IZERO) 
+! primitive geometry loop
+
+IF ( N_GEOM>0 .AND. (ABS(T-T_BEGIN)<ZERO_P .OR. ANY(GEOMETRY%TRANSLATE) .OR. ANY(GEOMETRY%ROTATE)) ) THEN
+   M%U_MASK=1
+   M%V_MASK=1
+   M%W_MASK=1
+   M%P_MASK=1
 ENDIF
 
-M%CUTCELL_INDEX = 0
+GEOM_LOOP: DO N=1,N_GEOM
+
+   G => GEOMETRY(N)
+
+   IF ( ABS(T-T_BEGIN)>ZERO_P .AND. (.NOT. G%TRANSLATE) .AND. (.NOT. G%ROTATE) ) CYCLE GEOM_LOOP
+   
+   ! acceleration (not implemented yet)
+   
+   G%U = G%U0
+   G%V = G%V0
+   G%W = G%W0
+   
+   ! translation (linear for now)
+   
+   G%X = G%X0 + G%U*T
+   G%Y = G%Y0 + G%V*T
+   G%Z = G%Z0 + G%W*T
+        
+   DELTA = 2._EB*LES_FILTER_WIDTH(M%DX(1),M%DY(1),M%DZ(1))
+   
+   IBM_UVWMAX = MAXVAL((/ABS(G%U),ABS(G%V),ABS(G%W)/))/DELTA
+
+   ! find bounding box
+
+   SELECT_SHAPE: SELECT CASE(G%ISHAPE)
+      CASE(IBOX)
+         G%X1 = G%X1 + G%U*DT
+         G%X2 = G%X2 + G%U*DT
+         G%Y1 = G%Y1 + G%V*DT
+         G%Y2 = G%Y2 + G%V*DT
+         G%Z1 = G%Z1 + G%W*DT
+         G%Z2 = G%Z2 + G%W*DT
+         X_MIN = G%X1
+         X_MAX = G%X2
+         Y_MIN = G%Y1
+         Y_MAX = G%Y2
+         Z_MIN = G%Z1
+         Z_MAX = G%Z2
+         G%HL(1) = 0.5_EB*(X_MAX-X_MIN) + TOL
+         G%HL(2) = 0.5_EB*(X_MAX-X_MIN) + TOL
+         G%HL(3) = 0.5_EB*(X_MAX-X_MIN) + TOL
+      CASE(ISPHERE)
+         X_MIN = G%X-G%RADIUS
+         Y_MIN = G%Y-G%RADIUS
+         Z_MIN = G%Z-G%RADIUS
+         X_MAX = G%X+G%RADIUS
+         Y_MAX = G%Y+G%RADIUS
+         Z_MAX = G%Z+G%RADIUS
+         IBM_UVWMAX = IBM_UVWMAX + G%RADIUS*MAXVAL((/ABS(G%OMEGA_X),ABS(G%OMEGA_Y),ABS(G%OMEGA_Z)/))*RDX(1)
+      CASE(ICYLINDER)
+         G%HL(1) = 0.5_EB*(G%X2-G%X1)
+         G%HL(2) = 0.5_EB*(G%Y2-G%Y1)
+         G%HL(3) = 0.5_EB*(G%Z2-G%Z1)
+         IF (ABS(G%XOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with x axis
+            X_MIN = G%X-G%HL(1)
+            Y_MIN = G%Y-G%RADIUS
+            Z_MIN = G%Z-G%RADIUS
+            X_MAX = G%X+G%HL(1)
+            Y_MAX = G%Y+G%RADIUS
+            Z_MAX = G%Z+G%RADIUS
+         ENDIF
+         IF (ABS(G%YOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with y axis
+            X_MIN = G%X-G%RADIUS
+            Y_MIN = G%Y-G%HL(2)
+            Z_MIN = G%Z-G%RADIUS
+            X_MAX = G%X+G%RADIUS
+            Y_MAX = G%Y+G%HL(2)
+            Z_MAX = G%Z+G%RADIUS
+         ENDIF
+         IF (ABS(G%ZOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with z axis
+            X_MIN = G%X-G%RADIUS
+            Y_MIN = G%Y-G%RADIUS
+            Z_MIN = G%Z-G%HL(3)
+            X_MAX = G%X+G%RADIUS
+            Y_MAX = G%Y+G%RADIUS
+            Z_MAX = G%Z+G%HL(3)
+         ENDIF
+      CASE(IPLANE)
+         X_MIN = M%XS
+         Y_MIN = M%YS
+         Z_MIN = M%ZS
+         X_MAX = M%XF
+         Y_MAX = M%YF
+         Z_MAX = M%ZF
+         PP   = (/G%X,G%Y,G%Z/)
+         G%NN = (/G%XOR,G%YOR,G%ZOR/) - PP          ! normal vector to plane
+         G%NN = G%NN/SQRT(DOT_PRODUCT(G%NN,G%NN))   ! unit normal
+   END SELECT SELECT_SHAPE
+
+   G%MIN_I(NM) = M%IBAR
+   G%MIN_J(NM) = M%JBAR
+   G%MIN_K(NM) = M%KBAR
+
+   IF (X_MIN>=M%XS .AND. X_MIN<=M%XF) G%MIN_I(NM) = MAX(0,FLOOR((X_MIN-DELTA-M%XS)/M%DX(1))-1)
+   IF (Y_MIN>=M%YS .AND. Y_MIN<=M%YF) G%MIN_J(NM) = MAX(0,FLOOR((Y_MIN-DELTA-M%YS)/M%DY(1))-1)
+   IF (Z_MIN>=M%ZS .AND. Z_MIN<=M%ZF) G%MIN_K(NM) = MAX(0,FLOOR((Z_MIN-DELTA-M%ZS)/M%DZ(1))-1)
+   
+   G%MAX_I(NM) = 0
+   G%MAX_J(NM) = 0
+   G%MAX_K(NM) = 0
+
+   IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) G%MAX_I(NM) = MIN(M%IBAR,CEILING((X_MAX+DELTA-M%XS)/M%DX(1))+1)
+   IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) G%MAX_J(NM) = MIN(M%JBAR,CEILING((Y_MAX+DELTA-M%YS)/M%DY(1))+1)
+   IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) G%MAX_K(NM) = MIN(M%KBAR,CEILING((Z_MAX+DELTA-M%ZS)/M%DZ(1))+1)
+   
+   IF (TWO_D) THEN
+      G%MIN_J(NM)=1
+      G%MAX_J(NM)=1
+   ENDIF
+   
+   IF ( G%MAX_I(NM)<G%MIN_I(NM) .OR. &
+        G%MAX_J(NM)<G%MIN_J(NM) .OR. &
+        G%MAX_K(NM)<G%MIN_K(NM) ) CYCLE GEOM_LOOP
+   
+   ! mask cells
+
+   DO K=G%MIN_K(NM),G%MAX_K(NM)
+      DO J=G%MIN_J(NM),G%MAX_J(NM)
+         DO I=G%MIN_I(NM),G%MAX_I(NM)
+         
+            MASK_SHAPE: SELECT CASE(G%ISHAPE)
+            
+               CASE(IBOX) MASK_SHAPE
+               
+                  ! this will not work for overlapping geometry, but use for now
+                  !M%U_MASK(I,J,K)=1
+                  !M%V_MASK(I,J,K)=1
+                  !M%W_MASK(I,J,K)=1
+                  !M%P_MASK(I,J,K)=1
+                  
+                  ! see if the point is inside geometry
+                  IF (ABS( M%X(I)-G%X)<G%HL(1) .AND. &
+                      ABS(M%YC(J)-G%Y)<G%HL(2) .AND. &
+                      ABS(M%ZC(K)-G%Z)<G%HL(3)) M%U_MASK(I,J,K) = -1
+                  
+                  IF (ABS(M%XC(I)-G%X)<G%HL(1) .AND. &
+                      ABS( M%Y(J)-G%Y)<G%HL(2) .AND. &
+                      ABS(M%ZC(K)-G%Z)<G%HL(3)) M%V_MASK(I,J,K) = -1
+                  
+                  IF (ABS(M%XC(I)-G%X)<G%HL(1) .AND. &
+                      ABS(M%YC(J)-G%Y)<G%HL(2) .AND. &
+                      ABS( M%Z(K)-G%Z)<G%HL(3)) M%W_MASK(I,J,K) = -1
+                  
+                  ! see if the point is in surface layer
+                  IF (X_MAX<M%X(I) .AND. M%X(I)<X_MAX+DELTA) M%U_MASK(I,J,K) = 0
+                  IF (Y_MAX<M%Y(J) .AND. M%Y(J)<Y_MAX+DELTA) M%V_MASK(I,J,K) = 0
+                  IF (Z_MAX<M%Z(K) .AND. M%Z(K)<Z_MAX+DELTA) M%W_MASK(I,J,K) = 0
+                  
+                  IF (X_MIN-DELTA<M%X(I) .AND. M%X(I)<X_MIN) M%U_MASK(I,J,K) = 0
+                  IF (Y_MIN-DELTA<M%Y(J) .AND. M%Y(J)<Y_MIN) M%V_MASK(I,J,K) = 0
+                  IF (Z_MIN-DELTA<M%Z(K) .AND. M%Z(K)<Z_MIN) M%W_MASK(I,J,K) = 0
+                  
+               CASE(ISPHERE) MASK_SHAPE
+               
+                  !M%U_MASK(I,J,K)=1
+                  !M%V_MASK(I,J,K)=1
+                  !M%W_MASK(I,J,K)=1
+                  !M%P_MASK(I,J,K)=1
+               
+                  RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
+                  IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
+                  
+                  RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
+                  IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
+                  
+                  RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%Z(K)-G%Z)**2 )
+                  IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
+                  
+                  RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
+                  IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
+                  
+               CASE(ICYLINDER) MASK_SHAPE
+               
+                  !M%U_MASK(I,J,K)=1
+                  !M%V_MASK(I,J,K)=1
+                  !M%W_MASK(I,J,K)=1
+                  !M%P_MASK(I,J,K)=1
+               
+                  CYLINDER_Y: IF (ABS(G%YOR-1._EB)<EPSILON_EB) THEN
+                     RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
+                  ENDIF CYLINDER_Y
+                  
+                  CYLINDER_Z: IF (ABS(G%ZOR-1._EB)<EPSILON_EB) THEN
+                     RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
+                     
+                  ENDIF CYLINDER_Z
+
+               CASE(IPLANE) MASK_SHAPE
+               
+                  !M%U_MASK(I,J,K)=1
+                  !M%V_MASK(I,J,K)=1
+                  !M%W_MASK(I,J,K)=1
+                  !M%P_MASK(I,J,K)=1
+               
+                  ! see Section 10.3 Schneider and Eberly
+                  
+                  XU = (/M%X(I),M%YC(J),M%ZC(K)/)        ! point of interest
+                  IF (G%TWO_SIDED) THEN
+                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))   ! distance to plane
+                  ELSE
+                     DP = DOT_PRODUCT(G%NN,XU-PP)        ! signed distance to plane
+                  ENDIF
+                  IF (DP<DELTA) M%U_MASK(I,J,K) = 0
+                  IF (DP<0._EB) M%U_MASK(I,J,K) = -1
+                  
+                  XU = (/M%XC(I),M%Y(J),M%ZC(K)/)
+                  IF (G%TWO_SIDED) THEN
+                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))
+                  ELSE
+                     DP = DOT_PRODUCT(G%NN,XU-PP)
+                  ENDIF
+                  IF (DP<DELTA) M%V_MASK(I,J,K) = 0
+                  IF (DP<0._EB) M%V_MASK(I,J,K) = -1
+                  
+                  XU = (/M%XC(I),M%YC(J),M%Z(K)/)
+                  IF (G%TWO_SIDED) THEN
+                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))
+                  ELSE
+                     DP = DOT_PRODUCT(G%NN,XU-PP)
+                  ENDIF
+                  IF (DP<DELTA) M%W_MASK(I,J,K) = 0
+                  IF (DP<0._EB) M%W_MASK(I,J,K) = -1
+                  
+            END SELECT MASK_SHAPE
+      
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO GEOM_LOOP
+
+! reinitialize complex geometry from geometry coordinate (.gc) file based on DT_GEOC frequency
+
+IF (T<GEOC_CLOCK) RETURN
+GEOC_CLOCK = GEOC_CLOCK + DT_GEOC
+IF (ABS(T-T_BEGIN)<ZERO_P) THEN
+   ALLOCATE(M%CUTCELL_INDEX(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO) 
+   CALL ChkMemErr('INIT_GEOM','CUTCELL_INDEX',IZERO) 
+ENDIF
+
 CUTCELL_COUNT = 0
 
-GEOM_LOOP: DO N=1,N_GEOM
+GEOC_LOOP: DO N=1,N_GEOM
    IF (TRIM(GEOMETRY(N)%GEOC_FILENAME)=='null') CYCLE
    
    IF (ABS(T-T_BEGIN)<ZERO_P .AND. LU_GEOC<0) THEN
@@ -485,7 +760,7 @@ GEOM_LOOP: DO N=1,N_GEOM
    ELSE
       BACKSPACE LU_GEOC
    ENDIF
-ENDDO GEOM_LOOP
+ENDDO GEOC_LOOP
 
 FACE_LOOP: DO N=1,N_FACE
 
