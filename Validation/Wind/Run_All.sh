@@ -15,6 +15,9 @@ source ~/.bashrc_fds intel64
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDSMPI 27 $INDIR wind_cube
+$RUNFDSMPI 8 $INDIR UWO_test7_case1_180_32
+$RUNFDSMPI 8 $INDIR UWO_test7_case1_180_64
+$RUNFDSMPI 8 $INDIR UWO_test7_case1_270_32
+$RUNFDSMPI 8 $INDIR UWO_test7_case1_270_64
 
 echo FDS cases submitted
