@@ -51,7 +51,7 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_EDDY,DELTA,KSGS,U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,MU_DNS,ZPLUS,VDF,DUMMY
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,TURB_MODEL_TMP,IOR
-REAL(EB), PARAMETER :: APLUS = 26._EB
+REAL(EB), PARAMETER :: APLUS = 1._EB/26._EB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
                                        UP_HAT=>NULL(),VP_HAT=>NULL(),WP_HAT=>NULL(), &
                                        UU=>NULL(),VV=>NULL(),WW=>NULL()
@@ -274,9 +274,9 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          CALL WERNER_WENGLE_WALL_MODEL(DUMMY,WC%U_TAU,SQRT(2._EB*KRES(IIG,JJG,KKG)),&
                                        MU_DNS/RHO(IIG,JJG,KKG),1._EB/WC%RDN,SURFACE(WC%SURF_INDEX)%ROUGHNESS)
          IF (LES) THEN
-            ZPLUS = RHO(IIG,JJG,KKG)*WC%U_TAU*0.5/WC%RDN/MU_DNS
+            ZPLUS = RHO(IIG,JJG,KKG)*WC%U_TAU*0.5_EB/(WC%RDN*MU_DNS)
             ! Van Driest damping function (see Wilcox, Turbulence Modeling for CFD, 2nd Ed., Eq. (3.104))
-            VDF = 1._EB - EXP(-ZPLUS/APLUS)
+            VDF = 1._EB - EXP(-ZPLUS*APLUS)
             SELECT CASE (IOR)
                CASE ( 1); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG+1,JJG,KKG))
                CASE (-1); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG-1,JJG,KKG))
@@ -597,18 +597,18 @@ DO K=1,KBAR
          TXYP  = TXY(I,J,K)
          TXYM  = TXY(I,J-1,K)
          IC    = CELL_INDEX(I,J,K)
-         IEYP  = EDGE_INDEX(IC,8)
-         IEYM  = EDGE_INDEX(IC,6)
-         IEZP  = EDGE_INDEX(IC,12)
-         IEZM  = EDGE_INDEX(IC,10)
-         IF (OME_E(IEYP,-1)>-1.E5_EB) OMYP = OME_E(IEYP,-1)
-         IF (OME_E(IEYM, 1)>-1.E5_EB) OMYM = OME_E(IEYM, 1)
-         IF (OME_E(IEZP,-2)>-1.E5_EB) OMZP = OME_E(IEZP,-2)
-         IF (OME_E(IEZM, 2)>-1.E5_EB) OMZM = OME_E(IEZM, 2)
-         IF (TAU_E(IEYP,-1)>-1.E5_EB) TXZP = TAU_E(IEYP,-1)
-         IF (TAU_E(IEYM, 1)>-1.E5_EB) TXZM = TAU_E(IEYM, 1)
-         IF (TAU_E(IEZP,-2)>-1.E5_EB) TXYP = TAU_E(IEZP,-2)
-         IF (TAU_E(IEZM, 2)>-1.E5_EB) TXYM = TAU_E(IEZM, 2)
+         IEYP  = EDGE_INDEX(8,IC)
+         IEYM  = EDGE_INDEX(6,IC)
+         IEZP  = EDGE_INDEX(12,IC)
+         IEZM  = EDGE_INDEX(10,IC)
+         IF (OME_E(-1,IEYP)>-1.E5_EB) OMYP = OME_E(-1,IEYP)
+         IF (OME_E( 1,IEYM)>-1.E5_EB) OMYM = OME_E( 1,IEYM)
+         IF (OME_E(-2,IEZP)>-1.E5_EB) OMZP = OME_E(-2,IEZP)
+         IF (OME_E( 2,IEZM)>-1.E5_EB) OMZM = OME_E( 2,IEZM)
+         IF (TAU_E(-1,IEYP)>-1.E5_EB) TXZP = TAU_E(-1,IEYP)
+         IF (TAU_E( 1,IEYM)>-1.E5_EB) TXZM = TAU_E( 1,IEYM)
+         IF (TAU_E(-2,IEZP)>-1.E5_EB) TXYP = TAU_E(-2,IEZP)
+         IF (TAU_E( 2,IEZM)>-1.E5_EB) TXYM = TAU_E( 2,IEZM)
          WOMY  = WP*OMYP + WM*OMYM
          VOMZ  = VP*OMZP + VM*OMZM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
@@ -650,18 +650,18 @@ DO K=1,KBAR
          TXYP  = TXY(I,J,K)
          TXYM  = TXY(I-1,J,K)
          IC    = CELL_INDEX(I,J,K)
-         IEXP  = EDGE_INDEX(IC,4)
-         IEXM  = EDGE_INDEX(IC,2)
-         IEZP  = EDGE_INDEX(IC,12)
-         IEZM  = EDGE_INDEX(IC,11)
-         IF (OME_E(IEXP,-2)>-1.E5_EB) OMXP = OME_E(IEXP,-2)
-         IF (OME_E(IEXM, 2)>-1.E5_EB) OMXM = OME_E(IEXM, 2)
-         IF (OME_E(IEZP,-1)>-1.E5_EB) OMZP = OME_E(IEZP,-1)
-         IF (OME_E(IEZM, 1)>-1.E5_EB) OMZM = OME_E(IEZM, 1)
-         IF (TAU_E(IEXP,-2)>-1.E5_EB) TYZP = TAU_E(IEXP,-2)
-         IF (TAU_E(IEXM, 2)>-1.E5_EB) TYZM = TAU_E(IEXM, 2)
-         IF (TAU_E(IEZP,-1)>-1.E5_EB) TXYP = TAU_E(IEZP,-1)
-         IF (TAU_E(IEZM, 1)>-1.E5_EB) TXYM = TAU_E(IEZM, 1)
+         IEXP  = EDGE_INDEX(4,IC)
+         IEXM  = EDGE_INDEX(2,IC)
+         IEZP  = EDGE_INDEX(12,IC)
+         IEZM  = EDGE_INDEX(11,IC)
+         IF (OME_E(-2,IEXP)>-1.E5_EB) OMXP = OME_E(-2,IEXP)
+         IF (OME_E( 2,IEXM)>-1.E5_EB) OMXM = OME_E( 2,IEXM)
+         IF (OME_E(-1,IEZP)>-1.E5_EB) OMZP = OME_E(-1,IEZP)
+         IF (OME_E( 1,IEZM)>-1.E5_EB) OMZM = OME_E( 1,IEZM)
+         IF (TAU_E(-2,IEXP)>-1.E5_EB) TYZP = TAU_E(-2,IEXP)
+         IF (TAU_E( 2,IEXM)>-1.E5_EB) TYZM = TAU_E( 2,IEXM)
+         IF (TAU_E(-1,IEZP)>-1.E5_EB) TXYP = TAU_E(-1,IEZP)
+         IF (TAU_E( 1,IEZM)>-1.E5_EB) TXYM = TAU_E( 1,IEZM)
          WOMX  = WP*OMXP + WM*OMXM
          UOMZ  = UP*OMZP + UM*OMZM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J+1,K))
@@ -703,18 +703,18 @@ DO K=0,KBAR
          TYZP  = TYZ(I,J,K)
          TYZM  = TYZ(I,J-1,K)
          IC    = CELL_INDEX(I,J,K)
-         IEXP  = EDGE_INDEX(IC,4)
-         IEXM  = EDGE_INDEX(IC,3)
-         IEYP  = EDGE_INDEX(IC,8)
-         IEYM  = EDGE_INDEX(IC,7)
-         IF (OME_E(IEXP,-1)>-1.E5_EB) OMXP = OME_E(IEXP,-1)
-         IF (OME_E(IEXM, 1)>-1.E5_EB) OMXM = OME_E(IEXM, 1)
-         IF (OME_E(IEYP,-2)>-1.E5_EB) OMYP = OME_E(IEYP,-2)
-         IF (OME_E(IEYM, 2)>-1.E5_EB) OMYM = OME_E(IEYM, 2)
-         IF (TAU_E(IEXP,-1)>-1.E5_EB) TYZP = TAU_E(IEXP,-1)
-         IF (TAU_E(IEXM, 1)>-1.E5_EB) TYZM = TAU_E(IEXM, 1)
-         IF (TAU_E(IEYP,-2)>-1.E5_EB) TXZP = TAU_E(IEYP,-2)
-         IF (TAU_E(IEYM, 2)>-1.E5_EB) TXZM = TAU_E(IEYM, 2)
+         IEXP  = EDGE_INDEX(4,IC)
+         IEXM  = EDGE_INDEX(3,IC)
+         IEYP  = EDGE_INDEX(8,IC)
+         IEYM  = EDGE_INDEX(7,IC)
+         IF (OME_E(-1,IEXP)>-1.E5_EB) OMXP = OME_E(-1,IEXP)
+         IF (OME_E( 1,IEXM)>-1.E5_EB) OMXM = OME_E( 1,IEXM)
+         IF (OME_E(-2,IEYP)>-1.E5_EB) OMYP = OME_E(-2,IEYP)
+         IF (OME_E( 2,IEYM)>-1.E5_EB) OMYM = OME_E( 2,IEYM)
+         IF (TAU_E(-1,IEXP)>-1.E5_EB) TYZP = TAU_E(-1,IEXP)
+         IF (TAU_E( 1,IEXM)>-1.E5_EB) TYZM = TAU_E( 1,IEXM)
+         IF (TAU_E(-2,IEYP)>-1.E5_EB) TXZP = TAU_E(-2,IEYP)
+         IF (TAU_E( 2,IEYM)>-1.E5_EB) TXZM = TAU_E( 2,IEYM)
          UOMY  = UP*OMYP + UM*OMYM
          VOMX  = VP*OMXP + VM*OMXM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
@@ -955,12 +955,12 @@ DO K= 1,KBAR
       TXZP  = TXZ(I,J,K)
       TXZM  = TXZ(I,J,K-1)
       IC    = CELL_INDEX(I,J,K)
-      IEYP  = EDGE_INDEX(IC,8)
-      IEYM  = EDGE_INDEX(IC,6)
-      IF (OME_E(IEYP,-1)>-1.E5_EB) OMYP = OME_E(IEYP,-1)
-      IF (OME_E(IEYM, 1)>-1.E5_EB) OMYM = OME_E(IEYM, 1)
-      IF (TAU_E(IEYP,-1)>-1.E5_EB) TXZP = TAU_E(IEYP,-1)
-      IF (TAU_E(IEYM, 1)>-1.E5_EB) TXZM = TAU_E(IEYM, 1)
+      IEYP  = EDGE_INDEX(8,IC)
+      IEYM  = EDGE_INDEX(6,IC)
+      IF (OME_E(-1,IEYP)>-1.E5_EB) OMYP = OME_E(-1,IEYP)
+      IF (OME_E( 1,IEYM)>-1.E5_EB) OMYM = OME_E( 1,IEYM)
+      IF (TAU_E(-1,IEYP)>-1.E5_EB) TXZP = TAU_E(-1,IEYP)
+      IF (TAU_E( 1,IEYM)>-1.E5_EB) TXZM = TAU_E( 1,IEYM)
       WOMY  = WP*OMYP + WM*OMYM
       RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
       AH    = RHO_0(K)*RRHO - 1._EB   
@@ -990,12 +990,12 @@ DO K=0,KBAR
       TXZP  = TXZ(I,J,K)
       TXZM  = TXZ(I-1,J,K)
       IC    = CELL_INDEX(I,J,K)
-      IEYP  = EDGE_INDEX(IC,8)
-      IEYM  = EDGE_INDEX(IC,7)
-      IF (OME_E(IEYP,-2)>-1.E5_EB) OMYP = OME_E(IEYP,-2)
-      IF (OME_E(IEYM, 2)>-1.E5_EB) OMYM = OME_E(IEYM, 2)
-      IF (TAU_E(IEYP,-2)>-1.E5_EB) TXZP = TAU_E(IEYP,-2)
-      IF (TAU_E(IEYM, 2)>-1.E5_EB) TXZM = TAU_E(IEYM, 2)
+      IEYP  = EDGE_INDEX(8,IC)
+      IEYM  = EDGE_INDEX(7,IC)
+      IF (OME_E(-2,IEYP)>-1.E5_EB) OMYP = OME_E(-2,IEYP)
+      IF (OME_E( 2,IEYM)>-1.E5_EB) OMYM = OME_E( 2,IEYM)
+      IF (TAU_E(-2,IEYP)>-1.E5_EB) TXZP = TAU_E(-2,IEYP)
+      IF (TAU_E( 2,IEYM)>-1.E5_EB) TXZM = TAU_E( 2,IEYM)
       UOMY  = UP*OMYP + UM*OMYM
       RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
       AH    = 0.5_EB*(RHO_0(K)+RHO_0(K+1))*RRHO - 1._EB
@@ -1551,9 +1551,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
    ! If the edge is to be "smoothed," set tau and omega to zero and cycle
 
-   IF (EDGE_TYPE(IE,1)==SMOOTH_EDGE) THEN
-      OME_E(IE,:) = 0._EB
-      TAU_E(IE,:) = 0._EB
+   IF (EDGE_TYPE(1,IE)==SMOOTH_EDGE) THEN
+      OME_E(:,IE) = 0._EB
+      TAU_E(:,IE) = 0._EB
       CYCLE EDGE_LOOP
    ENDIF
 
@@ -1655,74 +1655,74 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
             END SELECT
             CYCLE EDGE_LOOP
-         ENDIF
-
-         ! Get the velocity components at the appropriate cell faces     
+         ENDIF   
+   
+   ! Get the velocity components at the appropriate cell faces     
  
-         COMPONENT: SELECT CASE(IEC)
-            CASE(1) COMPONENT    
-               UUP(1)  = VV(II,JJ,KK+1)
-               UUM(1)  = VV(II,JJ,KK)
-               UUP(2)  = WW(II,JJ+1,KK)
-               UUM(2)  = WW(II,JJ,KK)
-               DXX(1)  = DY(JJ)
-               DXX(2)  = DZ(KK)
-               MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
-            CASE(2) COMPONENT  
-               UUP(1)  = WW(II+1,JJ,KK)
-               UUM(1)  = WW(II,JJ,KK)
-               UUP(2)  = UU(II,JJ,KK+1)
-               UUM(2)  = UU(II,JJ,KK)
-               DXX(1)  = DZ(KK)
-               DXX(2)  = DX(II)
-               MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
-            CASE(3) COMPONENT 
-               UUP(1)  = UU(II,JJ+1,KK)
-               UUM(1)  = UU(II,JJ,KK)
-               UUP(2)  = VV(II+1,JJ,KK)
-               UUM(2)  = VV(II,JJ,KK)
-               DXX(1)  = DX(II)
-               DXX(2)  = DY(JJ)
-               MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
-         END SELECT COMPONENT
+   COMPONENT: SELECT CASE(IEC)
+      CASE(1) COMPONENT    
+         UUP(1)  = VV(II,JJ,KK+1)
+         UUM(1)  = VV(II,JJ,KK)
+         UUP(2)  = WW(II,JJ+1,KK)
+         UUM(2)  = WW(II,JJ,KK)
+         DXX(1)  = DY(JJ)
+         DXX(2)  = DZ(KK)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
+      CASE(2) COMPONENT  
+         UUP(1)  = WW(II+1,JJ,KK)
+         UUM(1)  = WW(II,JJ,KK)
+         UUP(2)  = UU(II,JJ,KK+1)
+         UUM(2)  = UU(II,JJ,KK)
+         DXX(1)  = DZ(KK)
+         DXX(2)  = DX(II)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
+      CASE(3) COMPONENT 
+         UUP(1)  = UU(II,JJ+1,KK)
+         UUM(1)  = UU(II,JJ,KK)
+         UUP(2)  = VV(II+1,JJ,KK)
+         UUM(2)  = VV(II,JJ,KK)
+         DXX(1)  = DX(II)
+         DXX(2)  = DY(JJ)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
+   END SELECT COMPONENT
 
-         IF (ICD==1) THEN ! Used to pick the appropriate velocity component
-            IVL=2
-         ELSE !ICD==2
-            IVL=1
-         ENDIF
+   IF (ICD==1) THEN ! Used to pick the appropriate velocity component
+      IVL=2
+   ELSE !ICD==2
+      IVL=1
+   ENDIF
 
-         IF (IOR<0) THEN
-            VEL_GAS   = UUM(IVL)
-            VEL_GHOST = UUP(IVL)
-            IIGM = I_CELL(ICMM)
-            JJGM = J_CELL(ICMM)
-            KKGM = K_CELL(ICMM)
-            IF (ICD==1) THEN
-               IIGP = I_CELL(ICMP)
-               JJGP = J_CELL(ICMP)
-               KKGP = K_CELL(ICMP)
-            ELSE ! ICD==2
-               IIGP = I_CELL(ICPM)
-               JJGP = J_CELL(ICPM)
-               KKGP = K_CELL(ICPM)
-            ENDIF
-         ELSE
-            VEL_GAS   = UUP(IVL)
-            VEL_GHOST = UUM(IVL)
-            IF (ICD==1) THEN
-               IIGM = I_CELL(ICPM)
-               JJGM = J_CELL(ICPM)
-               KKGM = K_CELL(ICPM)
-            ELSE ! ICD==2
-               IIGM = I_CELL(ICMP)
-               JJGM = J_CELL(ICMP)
-               KKGM = K_CELL(ICMP)
-            ENDIF
-            IIGP = I_CELL(ICPP)
-            JJGP = J_CELL(ICPP)
-            KKGP = K_CELL(ICPP)
-         ENDIF
+   IF (IOR<0) THEN
+      VEL_GAS   = UUM(IVL)
+      VEL_GHOST = UUP(IVL)
+      IIGM = I_CELL(ICMM)
+      JJGM = J_CELL(ICMM)
+      KKGM = K_CELL(ICMM)
+      IF (ICD==1) THEN
+         IIGP = I_CELL(ICMP)
+         JJGP = J_CELL(ICMP)
+         KKGP = K_CELL(ICMP)
+      ELSE ! ICD==2
+         IIGP = I_CELL(ICPM)
+         JJGP = J_CELL(ICPM)
+         KKGP = K_CELL(ICPM)
+      ENDIF
+   ELSE
+      VEL_GAS   = UUP(IVL)
+      VEL_GHOST = UUM(IVL)
+      IF (ICD==1) THEN
+         IIGM = I_CELL(ICPM)
+         JJGM = J_CELL(ICPM)
+         KKGM = K_CELL(ICPM)
+      ELSE ! ICD==2
+         IIGM = I_CELL(ICMP)
+         JJGM = J_CELL(ICMP)
+         KKGM = K_CELL(ICMP)
+      ENDIF
+      IIGP = I_CELL(ICPP)
+      JJGP = J_CELL(ICPP)
+      KKGP = K_CELL(ICPP)
+   ENDIF
 
          ! Decide whether or not to process edge using data interpolated from another mesh
    
@@ -2000,14 +2000,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                  ENDIF
                ENDIF
          END SELECT
-
-      ENDDO ORIENTATION_LOOP
-   
+            
+      ENDDO ORIENTATION_LOOP  
+      
    ENDDO SIGN_LOOP
 
    ! If the edge is on an interpolated boundary, cycle
 
-   IF (EDGE_TYPE(IE,1)==INTERPOLATED_EDGE .OR. EDGE_TYPE(IE,2)==INTERPOLATED_EDGE) THEN
+   IF (EDGE_TYPE(1,IE)==INTERPOLATED_EDGE .OR. EDGE_TYPE(2,IE)==INTERPOLATED_EDGE) THEN
       PROCESS_EDGE = .FALSE.
       DO IS=5,8
          IF (SOLID(IJKE(IS,IE))) PROCESS_EDGE = .TRUE.
@@ -2053,8 +2053,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
                DUIDXJ_USE(ICDO) =    DUIDXJ_0(ICDO)
             MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ_0(ICDO)
          ENDIF
-         OME_E(IE,ICD_SGN) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
-         TAU_E(IE,ICD_SGN) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)    
+         OME_E(ICD_SGN,IE) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
+         TAU_E(ICD_SGN,IE) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)    
       ENDDO ORIENTATION_LOOP_2
    ENDDO SIGN_LOOP_2
 
@@ -3020,13 +3020,13 @@ ENDIF
 GEOM_LOOP: DO NG=1,N_GEOM
 
    G => GEOMETRY(NG)
-
+   
    IF ( G%MAX_I(NM)<G%MIN_I(NM) .OR. &
         G%MAX_J(NM)<G%MIN_J(NM) .OR. &
         G%MAX_K(NM)<G%MIN_K(NM) ) CYCLE GEOM_LOOP
-
+   
    XGEOM = (/G%X,G%Y,G%Z/)
-
+   
    DO K=G%MIN_K(NM),G%MAX_K(NM)
       DO J=G%MIN_J(NM),G%MAX_J(NM)
          DO I=G%MIN_I(NM),G%MAX_I(NM)
