@@ -7,9 +7,9 @@
 
 &SPEC ID='WATER VAPOR' /
 
-&PART ID='water drops', SPEC_ID='WATER VAPOR', DIAMETER=1000., SAMPLING_FACTOR=5 /
+&PART ID='water drops', SPEC_ID='WATER VAPOR', DIAMETER=1000., SAMPLING_FACTOR=10 /
 
-&PROP ID='nozzle', PART_ID='water drops', FLOW_RATE=5.9, PARTICLE_VELOCITY=10., SPRAY_ANGLE=0.,35., SMOKEVIEW_ID='nozzle'  /
+&PROP ID='nozzle', PART_ID='water drops', FLOW_RATE=5.9, PARTICLES_PER_SECOND=500, PARTICLE_VELOCITY=1., SPRAY_ANGLE=0.,35., SMOKEVIEW_ID='nozzle'  /
 
 &DEVC XYZ=0.225,0.225,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=73.0, ID='noz_1' /
 &DEVC XYZ=0.825,0.225,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=73.0, ID='noz_1' /
@@ -88,16 +88,16 @@
 
 &MULT ID='pallet spacing', DX=1.20, DY=1.20, DZ0=0.45, DZ=1.50, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
-&OBST XB= 0.00, 1.05, 0.00, 1.05,  .15, 1.20, SURF_ID='PLASTIC A', BULK_DENSITY=43.7, MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.00, 1.05,  .15, 1.20, SURF_ID='PLASTIC A', OVERLAY=.FALSE., BULK_DENSITY=43.7, MULT_ID='pallet spacing'  /
 
 &OBST XB= 0.00, 1.05, 0.00, 0.15, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 0.00, 1.05, 0.30, 0.45, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 0.00, 1.05, 0.60, 0.75, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 0.00, 1.05, 0.90, 1.05, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
-&OBST XB= 0.00, 1.05, 0.00, 0.15, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
-&OBST XB= 0.00, 1.05, 0.30, 0.45, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
-&OBST XB= 0.00, 1.05, 0.60, 0.75, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
-&OBST XB= 0.00, 1.05, 0.90, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.00, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.30, 0.45, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.60, 0.75, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.90, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 0.00, 0.02, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 1.03, 1.05, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 

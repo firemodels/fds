@@ -65,16 +65,16 @@
 
 &MULT ID='pallet spacing', DX=1.20, DY=1.20, DZ=1.50, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
-&OBST XB= 0.00, 1.05, 0.00, 1.05,  .15, 1.20, SURF_ID='PLASTIC A', BULK_DENSITY=43.7, MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.00, 1.05,  .15, 1.20, SURF_ID='PLASTIC A', OVERLAY=.FALSE., BULK_DENSITY=43.7, MULT_ID='pallet spacing'  /
 
 &OBST XB= 0.00, 1.05, 0.00, 0.15, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 0.00, 1.05, 0.30, 0.45, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 0.00, 1.05, 0.60, 0.75, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 0.00, 1.05, 0.90, 1.05, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
-&OBST XB= 0.00, 1.05, 0.00, 0.15, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
-&OBST XB= 0.00, 1.05, 0.30, 0.45, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
-&OBST XB= 0.00, 1.05, 0.60, 0.75, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
-&OBST XB= 0.00, 1.05, 0.90, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.00, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.30, 0.45, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.60, 0.75, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.90, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 0.00, 0.02, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 &OBST XB= 1.03, 1.05, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
 
