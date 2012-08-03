@@ -8,6 +8,17 @@ USE MESH_POINTERS
 
 IMPLICIT NONE
 PRIVATE
+
+ABSTRACT INTERFACE
+   FUNCTION FLUX_LIMITER_TYPE(A,U)
+      USE GLOBAL_CONSTANTS, ONLY: EB   
+      REAL(EB), INTENT(IN):: A,U(4)
+      REAL(EB):: FLUX_LIMITER_TYPE
+   END FUNCTION FLUX_LIMITER_TYPE
+END INTERFACE
+
+PROCEDURE (FLUX_LIMITER_TYPE), POINTER :: SCALAR_FACE_VALUE
+
 CHARACTER(255), PARAMETER :: massid='$Id$'
 CHARACTER(255), PARAMETER :: massrev='$Revision$'
 CHARACTER(255), PARAMETER :: massdate='$Date$'
@@ -15,12 +26,11 @@ CHARACTER(255), PARAMETER :: massdate='$Date$'
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,DP
 
-PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,SCALAR_FACE_VALUE,GET_REV_mass
- 
- 
+PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,GET_REV_mass, SCALAR_FACE_VALUE, SCALAR_FACE_CENTRAL,SCALAR_FACE_1ST_ORDER, &
+       SCALAR_FACE_SUPERBEE, SCALAR_FACE_MINMOD, SCALAR_FACE_CHARM, SCALAR_FACE_MP5
+
 CONTAINS
  
-
 SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
 
 ! Compute spatial differences for density equation
@@ -77,7 +87,7 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBM1
          ZZZ(1:4) = RHOP(I-1:I+2,J,K)
-         FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)*R(I)
+         FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)*R(I)
       ENDDO
    ENDDO
 ENDDO
@@ -88,7 +98,7 @@ DO K=1,KBAR
    DO J=1,JBM1
       DO I=1,IBAR
          ZZZ(1:4) = RHOP(I,J-1:J+2,K)
-         FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+         FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
       ENDDO
    ENDDO
 ENDDO
@@ -99,7 +109,7 @@ DO K=1,KBM1
    DO J=1,JBAR
       DO I=1,IBAR
          ZZZ(1:4) = RHOP(I,J,K-1:K+2)
-         FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+         FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
       ENDDO
    ENDDO
 ENDDO
@@ -130,7 +140,7 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !                       ^ WALL_INDEX(II+1,+1)
             IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F,RHOP(II+1:II+2,JJ,KK)/)
-               FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)*R(II+1)
+               FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ)*R(II+1)
             ENDIF
          CASE(-1) OFF_WALL_SELECT_1
             !            FX/UU(II-2)     ghost
@@ -138,27 +148,27 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !              ^ WALL_INDEX(II-1,-1)
             IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
                ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),WC%RHO_F/)
-               FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)*R(II-2)
+               FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ)*R(II-2)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ+1:JJ+2,KK)/)
-               FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+               FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
                ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),WC%RHO_F/)
-               FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+               FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ,KK+1:KK+2)/)
-               FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+               FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
                ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),WC%RHO_F/)
-               FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+               FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ)
             ENDIF
       END SELECT OFF_WALL_SELECT_1
    
@@ -244,7 +254,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO J=1,JBAR
             DO I=1,IBM1
                ZZZ(1:4) = RHOP(I-1:I+2,J,K)*ZZP(I-1:I+2,J,K,N)
-               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)*R(I)
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)*R(I)
             ENDDO
          ENDDO
       ENDDO
@@ -255,7 +265,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO J=1,JBM1
             DO I=1,IBAR
                ZZZ(1:4) = RHOP(I,J-1:J+2,K)*ZZP(I,J-1:J+2,K,N)
-               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
             ENDDO
          ENDDO
       ENDDO
@@ -267,7 +277,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             DO J=1,JBAR
                DO I=1,IBAR
                   ZZZ(1:4) = RHOP(I,J,K-1:K+2)*ZZP(I,J,K-1:K+2,N)
-                  FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+                  FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
                ENDDO
             ENDDO
          ENDDO
@@ -292,7 +302,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                                                      (3._EB*CHI_D*MUGAS*SM%MEAN_DIAMETER)
                   ! Calculate FZ including WW_GRAV effects
                   ZZZ(1:4) = RHOP(I,J,K-1:K+2)*ZZP(I,J,K-1:K+2,N)
-                  FZ(I,J,K) = (WW(I,J,K) - WW_GRAV)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+                  FZ(I,J,K) = (WW(I,J,K) - WW_GRAV)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
                ENDDO
             ENDDO
          ENDDO
@@ -324,7 +334,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                   !                       ^ WALL_INDEX(II+1,+1)
                   IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
                      ZZZ(1:3) = (/WC%RHO_F,RHOP(II+1:II+2,JJ,KK)/)*(/WC%ZZ_F(N),ZZP(II+1:II+2,JJ,KK,N)/)
-                     FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)*R(II+1)
+                     FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ)*R(II+1)
                   ENDIF
                CASE(-1) OFF_WALL_SELECT_2
                   !            FX/UU(II-2)     ghost
@@ -332,27 +342,27 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                   !              ^ WALL_INDEX(II-1,-1)
                   IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
                      ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),WC%RHO_F/)*(/ZZP(II-2:II-1,JJ,KK,N),WC%ZZ_F(N)/)
-                     FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)*R(II-2)
+                     FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ)*R(II-2)
                   ENDIF
                CASE( 2) OFF_WALL_SELECT_2
                   IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
                      ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ+1:JJ+2,KK)/)*(/WC%ZZ_F(N),ZZP(II,JJ+1:JJ+2,KK,N)/)
-                     FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+                     FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ)
                   ENDIF
                CASE(-2) OFF_WALL_SELECT_2
                   IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
                      ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),WC%RHO_F/)*(/ZZP(II,JJ-2:JJ-1,KK,N),WC%ZZ_F(N)/)
-                     FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+                     FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ)
                   ENDIF
                CASE( 3) OFF_WALL_SELECT_2
                   IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
                      ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ,KK+1:KK+2)/)*(/WC%ZZ_F(N),ZZP(II,JJ,KK+1:KK+2,N)/)
-                     FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+                     FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ)
                   ENDIF
                CASE(-3) OFF_WALL_SELECT_2
                   IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
                      ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),WC%RHO_F/)*(/ZZP(II,JJ,KK-2:KK-1,N),WC%ZZ_F(N)/)
-                     FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+                     FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ)
                   ENDIF
             END SELECT OFF_WALL_SELECT_2
 
@@ -841,11 +851,9 @@ END SUBROUTINE CHECK_MASS_FRACTION
 
 
 
-REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
+REAL(EB) FUNCTION SCALAR_FACE_CENTRAL(A,U)
 
 REAL(EB), INTENT(IN) :: A,U(4)
-INTEGER, INTENT(IN) :: LIMITER
-REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
 
 ! This function computes the scalar value on a face.
 ! The scalar is denoted U, and the velocity is denoted A.
@@ -853,11 +861,77 @@ REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
 ! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
 ! 
 ! LIMITER = 0 implements central differencing
+
+!
+!                    location of face
+!                            
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A>0._EB) THEN
+    
+   ! the flow is left to right
+    SCALAR_FACE_CENTRAL = 0.5_EB*(U(2)+U(3))
+
+    
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left  
+   SCALAR_FACE_CENTRAL = 0.5_EB*(U(2)+U(3))
+    
+ENDIF WIND_DIRECTION_IF
+
+END FUNCTION SCALAR_FACE_CENTRAL
+
+
+
+REAL(EB) FUNCTION SCALAR_FACE_1ST_ORDER(A,U)
+
+REAL(EB), INTENT(IN) :: A,U(4)
+
+! This function computes the scalar value on a face.
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across 
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+! 
 ! LIMITER = 1 implements first-order upwinding (monotone)
+!
+!                    location of face
+!                            
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A>0._EB) THEN
+    
+   ! the flow is left to right
+   SCALAR_FACE_1ST_ORDER = U(2)
+    
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left
+   SCALAR_FACE_1ST_ORDER = U(3)
+    
+ENDIF WIND_DIRECTION_IF
+
+END FUNCTION SCALAR_FACE_1ST_ORDER
+
+
+
+REAL(EB) FUNCTION SCALAR_FACE_SUPERBEE(A,U)
+
+REAL(EB), INTENT(IN) :: A,U(4)
+REAL(EB) :: R,B,DU_UP,DU_LOC
+
+! This function computes the scalar value on a face.
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across 
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+! 
 ! LIMITER = 2 implements the SUPERBEE (SB) LIMITER of Roe
-! LIMITER = 3 implements the MINMOD LIMITER
-! LIMITER = 4 implements the CHARM LIMITER
-! LIMITER = 5 implements the MP5 scheme of Suresh and Huynh
 !
 !                    location of face
 !                            
@@ -874,28 +948,58 @@ WIND_DIRECTION_IF: IF (A>0._EB) THEN
 
    R = 0._EB
    B = 0._EB
+   IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
+   B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+   SCALAR_FACE_SUPERBEE = U(2) + 0.5_EB*B*DU_LOC
 
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE = U(2)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>ZERO_P) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(1)-U(2),U(1:4)/)
-         SCALAR_FACE_VALUE = MP5(V)
-   END SELECT
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left
+   DU_UP  = U(4)-U(3)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+   IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
+   B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+   SCALAR_FACE_SUPERBEE = U(3) - 0.5_EB*B*DU_LOC
+
+ENDIF WIND_DIRECTION_IF
+
+END FUNCTION SCALAR_FACE_SUPERBEE
+
+
+
+REAL(EB) FUNCTION SCALAR_FACE_MINMOD(A,U)
+
+REAL(EB), INTENT(IN) :: A,U(4)
+REAL(EB) :: R,B,DU_UP,DU_LOC
+
+! This function computes the scalar value on a face.
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across 
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+! 
+! LIMITER = 3 implements the MINMOD LIMITER
+!
+!                    location of face
+!                            
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A>0._EB) THEN
+    
+   ! the flow is left to right
+   DU_UP  = U(2)-U(1)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+   IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
+   B = MAX(0._EB,MIN(1._EB,R))
+   SCALAR_FACE_MINMOD = U(2) + 0.5_EB*B*DU_LOC
     
 ELSE WIND_DIRECTION_IF
 
@@ -905,32 +1009,100 @@ ELSE WIND_DIRECTION_IF
 
    R = 0._EB
    B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE = U(3)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>ZERO_P) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
-         SCALAR_FACE_VALUE = MP5(V)
-    END SELECT
+   IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
+   B = MAX(0._EB,MIN(1._EB,R))
+   SCALAR_FACE_MINMOD = U(3) - 0.5_EB*B*DU_LOC
     
 ENDIF WIND_DIRECTION_IF
 
-END FUNCTION SCALAR_FACE_VALUE
+END FUNCTION SCALAR_FACE_MINMOD
+
+
+
+REAL(EB) FUNCTION SCALAR_FACE_CHARM(A,U)
+
+REAL(EB), INTENT(IN) :: A,U(4)
+REAL(EB) :: R,B,DU_UP,DU_LOC
+
+! This function computes the scalar value on a face.
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across 
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+! 
+! LIMITER = 4 implements the CHARM LIMITER
+!
+!                    location of face
+!                            
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A>0._EB) THEN
+    
+   ! the flow is left to right
+   DU_UP  = U(2)-U(1)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+   IF (ABS(DU_UP)>ZERO_P) R = DU_LOC/DU_UP
+   IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+   SCALAR_FACE_CHARM = U(2) + 0.5_EB*B*DU_UP
+   
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left
+   DU_UP  = U(4)-U(3)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+   IF (ABS(DU_UP)>ZERO_P) R = DU_LOC/DU_UP
+   IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+   SCALAR_FACE_CHARM = U(3) - 0.5_EB*B*DU_UP
+
+ENDIF WIND_DIRECTION_IF
+
+END FUNCTION SCALAR_FACE_CHARM
+
+
+
+REAL(EB) FUNCTION SCALAR_FACE_MP5(A,U)
+
+REAL(EB), INTENT(IN) :: A,U(4)
+REAL(EB) :: V(5)
+
+! This function computes the scalar value on a face.
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across 
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+! 
+! LIMITER = 5 implements the MP5 scheme of Suresh and Huynh
+!
+!                    location of face
+!                            
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A>0._EB) THEN
+    
+   ! the flow is left to right
+   V = (/2._EB*U(1)-U(2),U(1:4)/)
+   SCALAR_FACE_MP5 = MP5(V)
+    
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left
+    V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
+    SCALAR_FACE_MP5 = MP5(V)
+    
+ENDIF WIND_DIRECTION_IF
+
+END FUNCTION SCALAR_FACE_MP5
+
 
 
 REAL(EB) FUNCTION MP5(V)
