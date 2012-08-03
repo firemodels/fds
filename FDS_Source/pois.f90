@@ -3227,43 +3227,43 @@ REAL(EB)   WA2(IDO)
 ARG=2._EB*PI/3._EB 
 TAUR=COS(ARG)
 TAUI=SIN(ARG)
-DO  K=1,L1
-  DO  M=1,MP
-    CH(M,1,1,K) = CC(M,1,K,1)+(CC(M,1,K,2)+CC(M,1,K,3))
-    CH(M,1,3,K) = TAUI*(CC(M,1,K,3)-CC(M,1,K,2))
-    CH(M,IDO,2,K) = CC(M,1,K,1)+TAUR* (CC(M,1,K,2)+CC(M,1,K,3))
-  END DO
+DO  M=1,MP
+   DO  K=1,L1
+       CH(M,1,1,K) = CC(M,1,K,1)+(CC(M,1,K,2)+CC(M,1,K,3))
+       CH(M,1,3,K) = TAUI*(CC(M,1,K,3)-CC(M,1,K,2))
+       CH(M,IDO,2,K) = CC(M,1,K,1)+TAUR* (CC(M,1,K,2)+CC(M,1,K,3))
+   END DO
 END DO
 IF (IDO == 1) RETURN
 IDP2 = IDO+2
-DO  K=1,L1
-  DO  I=3,IDO,2
-    IC = IDP2-I
-    DO  M=1,MP
-      CH(M,I-1,1,K) = CC(M,I-1,K,1)+((WA1(I-2)*CC(M,I-1,K,2)+  &
-          WA1(I-1)*CC(M,I,K,2))+(WA2(I-2)*CC(M,I-1,K,3)+WA2(I-1)* CC(M,I,K,3)))
-      CH(M,I,1,K) = CC(M,I,K,1)+((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
-          CC(M,I-1,K,2))+(WA2(I-2)*CC(M,I,K,3)-WA2(I-1)* CC(M,I-1,K,3)))
-      CH(M,I-1,3,K) = (CC(M,I-1,K,1)+TAUR*((WA1(I-2)*  &
-          CC(M,I-1,K,2)+WA1(I-1)*CC(M,I,K,2))+(WA2(I-2)*  &
-          CC(M,I-1,K,3)+WA2(I-1)*CC(M,I,K,3))))+(TAUI*((WA1(I-2)*  &
-          CC(M,I,K,2)-WA1(I-1)*CC(M,I-1,K,2))-(WA2(I-2)*  &
-          CC(M,I,K,3)-WA2(I-1)*CC(M,I-1,K,3))))
-      CH(M,IC-1,2,K) = (CC(M,I-1,K,1)+TAUR*((WA1(I-2)*  &
-          CC(M,I-1,K,2)+WA1(I-1)*CC(M,I,K,2))+(WA2(I-2)*  &
-          CC(M,I-1,K,3)+WA2(I-1)*CC(M,I,K,3))))-(TAUI*((WA1(I-2)*  &
-          CC(M,I,K,2)-WA1(I-1)*CC(M,I-1,K,2))-(WA2(I-2)*  &
-          CC(M,I,K,3)-WA2(I-1)*CC(M,I-1,K,3))))
-      CH(M,I,3,K) = (CC(M,I,K,1)+TAUR*((WA1(I-2)*CC(M,I,K,2)-  &
-          WA1(I-1)*CC(M,I-1,K,2))+(WA2(I-2)*CC(M,I,K,3)-WA2(I-1)*  &
-          CC(M,I-1,K,3))))+(TAUI*((WA2(I-2)*CC(M,I-1,K,3)+WA2(I-1)*  &
-          CC(M,I,K,3))-(WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)* CC(M,I,K,2))))
-      CH(M,IC,2,K) = (TAUI*((WA2(I-2)*CC(M,I-1,K,3)+WA2(I-1)*  &
-          CC(M,I,K,3))-(WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
-          CC(M,I,K,2))))-(CC(M,I,K,1)+TAUR*((WA1(I-2)*CC(M,I,K,2)-  &
-          WA1(I-1)*CC(M,I-1,K,2))+(WA2(I-2)*CC(M,I,K,3)-WA2(I-1)* CC(M,I-1,K,3))))
-    END DO
-  END DO
+DO  M=1,MP
+   DO  I=3,IDO,2
+      IC = IDP2-I
+      DO  K=1,L1
+         CH(M,I-1,1,K) = CC(M,I-1,K,1)+((WA1(I-2)*CC(M,I-1,K,2)+  &
+               WA1(I-1)*CC(M,I,K,2))+(WA2(I-2)*CC(M,I-1,K,3)+WA2(I-1)* CC(M,I,K,3)))
+         CH(M,I,1,K) = CC(M,I,K,1)+((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
+               CC(M,I-1,K,2))+(WA2(I-2)*CC(M,I,K,3)-WA2(I-1)* CC(M,I-1,K,3)))
+         CH(M,I-1,3,K) = (CC(M,I-1,K,1)+TAUR*((WA1(I-2)*  &
+               CC(M,I-1,K,2)+WA1(I-1)*CC(M,I,K,2))+(WA2(I-2)*  &
+               CC(M,I-1,K,3)+WA2(I-1)*CC(M,I,K,3))))+(TAUI*((WA1(I-2)*  &
+               CC(M,I,K,2)-WA1(I-1)*CC(M,I-1,K,2))-(WA2(I-2)*  &
+               CC(M,I,K,3)-WA2(I-1)*CC(M,I-1,K,3))))
+         CH(M,IC-1,2,K) = (CC(M,I-1,K,1)+TAUR*((WA1(I-2)*  &
+               CC(M,I-1,K,2)+WA1(I-1)*CC(M,I,K,2))+(WA2(I-2)*  &
+               CC(M,I-1,K,3)+WA2(I-1)*CC(M,I,K,3))))-(TAUI*((WA1(I-2)*  &
+               CC(M,I,K,2)-WA1(I-1)*CC(M,I-1,K,2))-(WA2(I-2)*  &
+               CC(M,I,K,3)-WA2(I-1)*CC(M,I-1,K,3))))
+         CH(M,I,3,K) = (CC(M,I,K,1)+TAUR*((WA1(I-2)*CC(M,I,K,2)-  &
+               WA1(I-1)*CC(M,I-1,K,2))+(WA2(I-2)*CC(M,I,K,3)-WA2(I-1)*  &
+               CC(M,I-1,K,3))))+(TAUI*((WA2(I-2)*CC(M,I-1,K,3)+WA2(I-1)*  &
+               CC(M,I,K,3))-(WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)* CC(M,I,K,2))))
+         CH(M,IC,2,K) = (TAUI*((WA2(I-2)*CC(M,I-1,K,3)+WA2(I-1)*  &
+               CC(M,I,K,3))-(WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
+               CC(M,I,K,2))))-(CC(M,I,K,1)+TAUR*((WA1(I-2)*CC(M,I,K,2)-  &
+               WA1(I-1)*CC(M,I-1,K,2))+(WA2(I-2)*CC(M,I,K,3)-WA2(I-1)* CC(M,I-1,K,3))))
+      END DO
+   END DO
 END DO
 RETURN
 END SUBROUTINE VRADF3
@@ -3290,67 +3290,68 @@ REAL(EB)    WA1(IDO)
 REAL(EB)   WA2(IDO)
 REAL(EB)   WA3(IDO)
 
-HSQT2=SQRT(2.0_EB)/2.
-DO  K=1,L1
-  DO  M=1,MP
-    CH(M,1,1,K) = (CC(M,1,K,2)+CC(M,1,K,4)) +(CC(M,1,K,1)+CC(M,1,K,3))
-    CH(M,IDO,4,K) = (CC(M,1,K,1)+CC(M,1,K,3)) -(CC(M,1,K,2)+CC(M,1,K,4))
-    CH(M,IDO,2,K) = CC(M,1,K,1)-CC(M,1,K,3)
-    CH(M,1,3,K) = CC(M,1,K,4)-CC(M,1,K,2)
-  END DO
+HSQT2=SQRT(2.0_EB)*0.5_EB
+DO  M=1,MP
+   DO  K=1,L1
+      CH(M,1,1,K) = (CC(M,1,K,2)+CC(M,1,K,4)) +(CC(M,1,K,1)+CC(M,1,K,3))
+      CH(M,IDO,4,K) = (CC(M,1,K,1)+CC(M,1,K,3)) -(CC(M,1,K,2)+CC(M,1,K,4))
+      CH(M,IDO,2,K) = CC(M,1,K,1)-CC(M,1,K,3)
+      CH(M,1,3,K) = CC(M,1,K,4)-CC(M,1,K,2)
+   END DO
 END DO
-IF (IDO-2<0) GO TO 107
-IF (IDO-2==0) GO TO 105
-IF (IDO-2>0) GO TO 102
-102 IDP2 = IDO+2
-DO  K=1,L1
-  DO  I=3,IDO,2
-    IC = IDP2-I
-    DO  M=1,MP
-      CH(M,I-1,1,K) = ((WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
-          CC(M,I,K,2))+(WA3(I-2)*CC(M,I-1,K,4)+WA3(I-1)*  &
-          CC(M,I,K,4)))+(CC(M,I-1,K,1)+(WA2(I-2)*CC(M,I-1,K,3)+  &
-          WA2(I-1)*CC(M,I,K,3)))
-      CH(M,IC-1,4,K) = (CC(M,I-1,K,1)+(WA2(I-2)*CC(M,I-1,K,3)+  &
-          WA2(I-1)*CC(M,I,K,3)))-((WA1(I-2)*CC(M,I-1,K,2)+  &
-          WA1(I-1)*CC(M,I,K,2))+(WA3(I-2)*CC(M,I-1,K,4)+ WA3(I-1)*CC(M,I,K,4)))
-      CH(M,I,1,K) = ((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
-          CC(M,I-1,K,2))+(WA3(I-2)*CC(M,I,K,4)-WA3(I-1)*  &
-          CC(M,I-1,K,4)))+(CC(M,I,K,1)+(WA2(I-2)*CC(M,I,K,3)-  &
-          WA2(I-1)*CC(M,I-1,K,3)))
-      CH(M,IC,4,K) = ((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
-          CC(M,I-1,K,2))+(WA3(I-2)*CC(M,I,K,4)-WA3(I-1)*  &
-          CC(M,I-1,K,4)))-(CC(M,I,K,1)+(WA2(I-2)*CC(M,I,K,3)-  &
-          WA2(I-1)*CC(M,I-1,K,3)))
-      CH(M,I-1,3,K) = ((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
-          CC(M,I-1,K,2))-(WA3(I-2)*CC(M,I,K,4)-WA3(I-1)*  &
-          CC(M,I-1,K,4)))+(CC(M,I-1,K,1)-(WA2(I-2)*CC(M,I-1,K,3)+  &
-          WA2(I-1)*CC(M,I,K,3)))
-      CH(M,IC-1,2,K) = (CC(M,I-1,K,1)-(WA2(I-2)*CC(M,I-1,K,3)+  &
-          WA2(I-1)*CC(M,I,K,3)))-((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
-          CC(M,I-1,K,2))-(WA3(I-2)*CC(M,I,K,4)-WA3(I-1)* CC(M,I-1,K,4)))
-      CH(M,I,3,K) = ((WA3(I-2)*CC(M,I-1,K,4)+WA3(I-1)*  &
-          CC(M,I,K,4))-(WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
-          CC(M,I,K,2)))+(CC(M,I,K,1)-(WA2(I-2)*CC(M,I,K,3)-  &
-          WA2(I-1)*CC(M,I-1,K,3)))
-      CH(M,IC,2,K) = ((WA3(I-2)*CC(M,I-1,K,4)+WA3(I-1)*  &
-          CC(M,I,K,4))-(WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
-          CC(M,I,K,2)))-(CC(M,I,K,1)-(WA2(I-2)*CC(M,I,K,3)-WA2(I-1)*  &
-          CC(M,I-1,K,3)))
-    END DO
-  END DO
+
+IF (IDO < 2) RETURN
+IF (IDO > 2) THEN
+   IDP2 = IDO+2
+   DO  M=1,MP
+      DO  I=3,IDO,2
+         IC = IDP2-I
+         DO  K=1,L1    
+            CH(M,I-1,1,K) = ((WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
+                CC(M,I,K,2))+(WA3(I-2)*CC(M,I-1,K,4)+WA3(I-1)*  &
+                CC(M,I,K,4)))+(CC(M,I-1,K,1)+(WA2(I-2)*CC(M,I-1,K,3)+  &
+                WA2(I-1)*CC(M,I,K,3)))
+            CH(M,IC-1,4,K) = (CC(M,I-1,K,1)+(WA2(I-2)*CC(M,I-1,K,3)+  &
+                WA2(I-1)*CC(M,I,K,3)))-((WA1(I-2)*CC(M,I-1,K,2)+  &
+                WA1(I-1)*CC(M,I,K,2))+(WA3(I-2)*CC(M,I-1,K,4)+ WA3(I-1)*CC(M,I,K,4)))
+            CH(M,I,1,K) = ((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
+                CC(M,I-1,K,2))+(WA3(I-2)*CC(M,I,K,4)-WA3(I-1)*  &
+                CC(M,I-1,K,4)))+(CC(M,I,K,1)+(WA2(I-2)*CC(M,I,K,3)-  &
+                WA2(I-1)*CC(M,I-1,K,3)))
+            CH(M,IC,4,K) = ((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
+                CC(M,I-1,K,2))+(WA3(I-2)*CC(M,I,K,4)-WA3(I-1)*  &
+                CC(M,I-1,K,4)))-(CC(M,I,K,1)+(WA2(I-2)*CC(M,I,K,3)-  &
+                WA2(I-1)*CC(M,I-1,K,3)))
+            CH(M,I-1,3,K) = ((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
+                CC(M,I-1,K,2))-(WA3(I-2)*CC(M,I,K,4)-WA3(I-1)*  &
+                CC(M,I-1,K,4)))+(CC(M,I-1,K,1)-(WA2(I-2)*CC(M,I-1,K,3)+  &
+                WA2(I-1)*CC(M,I,K,3)))
+            CH(M,IC-1,2,K) = (CC(M,I-1,K,1)-(WA2(I-2)*CC(M,I-1,K,3)+  &
+                WA2(I-1)*CC(M,I,K,3)))-((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
+                CC(M,I-1,K,2))-(WA3(I-2)*CC(M,I,K,4)-WA3(I-1)* CC(M,I-1,K,4)))
+            CH(M,I,3,K) = ((WA3(I-2)*CC(M,I-1,K,4)+WA3(I-1)*  &
+                CC(M,I,K,4))-(WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
+                CC(M,I,K,2)))+(CC(M,I,K,1)-(WA2(I-2)*CC(M,I,K,3)-  &
+                WA2(I-1)*CC(M,I-1,K,3)))
+            CH(M,IC,2,K) = ((WA3(I-2)*CC(M,I-1,K,4)+WA3(I-1)*  &
+                CC(M,I,K,4))-(WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
+                CC(M,I,K,2)))-(CC(M,I,K,1)-(WA2(I-2)*CC(M,I,K,3)-WA2(I-1)*  &
+                CC(M,I-1,K,3)))
+         END DO
+      END DO
+   END DO
+   IF (MOD(IDO,2) == 1) RETURN
+ENDIF
+
+DO  M=1,MP
+   DO  K=1,L1
+      CH(M,IDO,1,K) = (HSQT2*(CC(M,IDO,K,2)-CC(M,IDO,K,4)))+ CC(M,IDO,K,1)
+      CH(M,IDO,3,K) = CC(M,IDO,K,1)-(HSQT2*(CC(M,IDO,K,2)- CC(M,IDO,K,4)))
+      CH(M,1,2,K) = (-HSQT2*(CC(M,IDO,K,2)+CC(M,IDO,K,4)))- CC(M,IDO,K,3)
+      CH(M,1,4,K) = (-HSQT2*(CC(M,IDO,K,2)+CC(M,IDO,K,4)))+ CC(M,IDO,K,3)
+   END DO
 END DO
-IF (MOD(IDO,2) == 1) RETURN
-105 CONTINUE
-DO  K=1,L1
-  DO  M=1,MP
-    CH(M,IDO,1,K) = (HSQT2*(CC(M,IDO,K,2)-CC(M,IDO,K,4)))+ CC(M,IDO,K,1)
-    CH(M,IDO,3,K) = CC(M,IDO,K,1)-(HSQT2*(CC(M,IDO,K,2)- CC(M,IDO,K,4)))
-    CH(M,1,2,K) = (-HSQT2*(CC(M,IDO,K,2)+CC(M,IDO,K,4)))- CC(M,IDO,K,3)
-    CH(M,1,4,K) = (-HSQT2*(CC(M,IDO,K,2)+CC(M,IDO,K,4)))+ CC(M,IDO,K,3)
-  END DO
-END DO
-107 RETURN
+
 END SUBROUTINE VRADF4
 
 
@@ -3910,43 +3911,43 @@ REAL(EB)    CC(MDIMC,IDO,3,L1)
 ARG=2._EB*PI/3._EB 
 TAUR=COS(ARG)
 TAUI=SIN(ARG)
-DO  K=1,L1
-  DO  M=1,MP
-    CH(M,1,K,1) = CC(M,1,1,K)+2._EB*CC(M,IDO,2,K)
-    CH(M,1,K,2) = CC(M,1,1,K)+(2._EB*TAUR)*CC(M,IDO,2,K) -(2._EB*TAUI)*CC(M,1,3,K)
-    CH(M,1,K,3) = CC(M,1,1,K)+(2._EB*TAUR)*CC(M,IDO,2,K) +2._EB*TAUI*CC(M,1,3,K)
-  END DO
+DO  M=1,MP
+   DO  K=1,L1
+      CH(M,1,K,1) = CC(M,1,1,K)+2._EB*CC(M,IDO,2,K)
+      CH(M,1,K,2) = CC(M,1,1,K)+(2._EB*TAUR)*CC(M,IDO,2,K) -(2._EB*TAUI)*CC(M,1,3,K)
+      CH(M,1,K,3) = CC(M,1,1,K)+(2._EB*TAUR)*CC(M,IDO,2,K) +2._EB*TAUI*CC(M,1,3,K)
+   END DO
 END DO
 IF (IDO == 1) RETURN
 IDP2 = IDO+2
-DO  K=1,L1
-  DO  I=3,IDO,2
-    IC = IDP2-I
-    DO  M=1,MP
-      CH(M,I-1,K,1) = CC(M,I-1,1,K)+(CC(M,I-1,3,K)+CC(M,IC-1,2,K))
-      CH(M,I,K,1) = CC(M,I,1,K)+(CC(M,I,3,K)-CC(M,IC,2,K))
-      CH(M,I-1,K,2) = WA1(I-2)*  &
-          ((CC(M,I-1,1,K)+TAUR*(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))-  &
-          (TAUI*(CC(M,I,3,K)+CC(M,IC,2,K)))) -WA1(I-1)*  &
-          ((CC(M,I,1,K)+TAUR*(CC(M,I,3,K)-CC(M,IC,2,K)))+  &
-          (TAUI*(CC(M,I-1,3,K)-CC(M,IC-1,2,K))))
-      CH(M,I,K,2) = WA1(I-2)*  &
-          ((CC(M,I,1,K)+TAUR*(CC(M,I,3,K)-CC(M,IC,2,K)))+  &
-          (TAUI*(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))) +WA1(I-1)*  &
-          ((CC(M,I-1,1,K)+TAUR*(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))-  &
-          (TAUI*(CC(M,I,3,K)+CC(M,IC,2,K))))
-      CH(M,I-1,K,3) = WA2(I-2)*  &
-          ((CC(M,I-1,1,K)+TAUR*(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))+  &
-          (TAUI*(CC(M,I,3,K)+CC(M,IC,2,K)))) -WA2(I-1)*  &
-          ((CC(M,I,1,K)+TAUR*(CC(M,I,3,K)-CC(M,IC,2,K)))-  &
-          (TAUI*(CC(M,I-1,3,K)-CC(M,IC-1,2,K))))
-      CH(M,I,K,3) = WA2(I-2)*  &
-          ((CC(M,I,1,K)+TAUR*(CC(M,I,3,K)-CC(M,IC,2,K)))-  &
-          (TAUI*(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))) +WA2(I-1)*  &
-          ((CC(M,I-1,1,K)+TAUR*(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))+  &
-          (TAUI*(CC(M,I,3,K)+CC(M,IC,2,K))))
-    END DO
-  END DO
+DO  M=1,MP
+   DO  I=3,IDO,2
+      IC = IDP2-I
+      DO  K=1,L1
+         CH(M,I-1,K,1) = CC(M,I-1,1,K)+(CC(M,I-1,3,K)+CC(M,IC-1,2,K))
+         CH(M,I,K,1) = CC(M,I,1,K)+(CC(M,I,3,K)-CC(M,IC,2,K))
+         CH(M,I-1,K,2) = WA1(I-2)*  &
+               ((CC(M,I-1,1,K)+TAUR*(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))-  &
+               (TAUI*(CC(M,I,3,K)+CC(M,IC,2,K)))) -WA1(I-1)*  &
+               ((CC(M,I,1,K)+TAUR*(CC(M,I,3,K)-CC(M,IC,2,K)))+  &
+               (TAUI*(CC(M,I-1,3,K)-CC(M,IC-1,2,K))))
+         CH(M,I,K,2) = WA1(I-2)*  &
+               ((CC(M,I,1,K)+TAUR*(CC(M,I,3,K)-CC(M,IC,2,K)))+  &
+               (TAUI*(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))) +WA1(I-1)*  &
+               ((CC(M,I-1,1,K)+TAUR*(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))-  &
+               (TAUI*(CC(M,I,3,K)+CC(M,IC,2,K))))
+         CH(M,I-1,K,3) = WA2(I-2)*  &
+               ((CC(M,I-1,1,K)+TAUR*(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))+  &
+               (TAUI*(CC(M,I,3,K)+CC(M,IC,2,K)))) -WA2(I-1)*  &
+               ((CC(M,I,1,K)+TAUR*(CC(M,I,3,K)-CC(M,IC,2,K)))-  &
+               (TAUI*(CC(M,I-1,3,K)-CC(M,IC-1,2,K))))
+         CH(M,I,K,3) = WA2(I-2)*  &
+               ((CC(M,I,1,K)+TAUR*(CC(M,I,3,K)-CC(M,IC,2,K)))-  &
+               (TAUI*(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))) +WA2(I-1)*  &
+               ((CC(M,I-1,1,K)+TAUR*(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))+  &
+               (TAUI*(CC(M,I,3,K)+CC(M,IC,2,K))))
+      END DO
+   END DO
 END DO
 RETURN
 END SUBROUTINE VRADB3
@@ -3977,60 +3978,60 @@ REAL(EB)   WA3(IDO)
 REAL(EB)    CC(MDIMC,IDO,4,L1) 
 
 SQRT2=SQRT(2.0_EB)
-DO  K=1,L1
-  DO  M=1,MP
-    CH(M,1,K,3) = (CC(M,1,1,K)+CC(M,IDO,4,K)) -(CC(M,IDO,2,K)+CC(M,IDO,2,K))
-    CH(M,1,K,1) = (CC(M,1,1,K)+CC(M,IDO,4,K)) +(CC(M,IDO,2,K)+CC(M,IDO,2,K))
-    CH(M,1,K,4) = (CC(M,1,1,K)-CC(M,IDO,4,K)) +(CC(M,1,3,K)+CC(M,1,3,K))
-    CH(M,1,K,2) = (CC(M,1,1,K)-CC(M,IDO,4,K)) -(CC(M,1,3,K)+CC(M,1,3,K))
-  END DO
+DO  M=1,MP
+   DO  K=1,L1
+      CH(M,1,K,3) = (CC(M,1,1,K)+CC(M,IDO,4,K)) -(CC(M,IDO,2,K)+CC(M,IDO,2,K))
+      CH(M,1,K,1) = (CC(M,1,1,K)+CC(M,IDO,4,K)) +(CC(M,IDO,2,K)+CC(M,IDO,2,K))
+      CH(M,1,K,4) = (CC(M,1,1,K)-CC(M,IDO,4,K)) +(CC(M,1,3,K)+CC(M,1,3,K))
+      CH(M,1,K,2) = (CC(M,1,1,K)-CC(M,IDO,4,K)) -(CC(M,1,3,K)+CC(M,1,3,K))
+   END DO
 END DO
-IF (IDO-2<0) GO TO 107
-IF (IDO-2==0) GO TO 105
-IF (IDO-2>0) GO TO 102
-102 IDP2 = IDO+2
-DO  K=1,L1
-  DO  I=3,IDO,2
-    IC = IDP2-I
-    DO  M=1,MP
-      CH(M,I-1,K,1) = (CC(M,I-1,1,K)+CC(M,IC-1,4,K))  &
-          +(CC(M,I-1,3,K)+CC(M,IC-1,2,K))
-      CH(M,I,K,1) = (CC(M,I,1,K)-CC(M,IC,4,K)) +(CC(M,I,3,K)-CC(M,IC,2,K))
-      CH(M,I-1,K,2)=WA1(I-2)*((CC(M,I-1,1,K)-CC(M,IC-1,4,K))  &
-          -(CC(M,I,3,K)+CC(M,IC,2,K)))-WA1(I-1)  &
-          *((CC(M,I,1,K)+CC(M,IC,4,K))+(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))
-      CH(M,I,K,2)=WA1(I-2)*((CC(M,I,1,K)+CC(M,IC,4,K))  &
-          +(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))+WA1(I-1)  &
-          *((CC(M,I-1,1,K)-CC(M,IC-1,4,K))-(CC(M,I,3,K)+CC(M,IC,2,K)))
-      CH(M,I-1,K,3)=WA2(I-2)*((CC(M,I-1,1,K)+CC(M,IC-1,4,K))  &
-          -(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))-WA2(I-1)  &
-          *((CC(M,I,1,K)-CC(M,IC,4,K))-(CC(M,I,3,K)-CC(M,IC,2,K)))
-      CH(M,I,K,3)=WA2(I-2)*((CC(M,I,1,K)-CC(M,IC,4,K))  &
-          -(CC(M,I,3,K)-CC(M,IC,2,K)))+WA2(I-1)  &
-          *((CC(M,I-1,1,K)+CC(M,IC-1,4,K))-(CC(M,I-1,3,K) +CC(M,IC-1,2,K)))
-      CH(M,I-1,K,4)=WA3(I-2)*((CC(M,I-1,1,K)-CC(M,IC-1,4,K))  &
-          +(CC(M,I,3,K)+CC(M,IC,2,K)))-WA3(I-1)  &
-          *((CC(M,I,1,K)+CC(M,IC,4,K))-(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))
-      CH(M,I,K,4)=WA3(I-2)*((CC(M,I,1,K)+CC(M,IC,4,K))  &
-          -(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))+WA3(I-1)  &
-          *((CC(M,I-1,1,K)-CC(M,IC-1,4,K))+(CC(M,I,3,K)+CC(M,IC,2,K)))
-    END DO
-  END DO
+IF (IDO<2) RETURN
+IF (IDO>2) THEN
+   IDP2 = IDO+2
+   DO  M=1,MP
+      DO  I=3,IDO,2
+         IC = IDP2-I
+         DO  K=1,L1
+            CH(M,I-1,K,1) = (CC(M,I-1,1,K)+CC(M,IC-1,4,K))  &
+                +(CC(M,I-1,3,K)+CC(M,IC-1,2,K))
+            CH(M,I,K,1) = (CC(M,I,1,K)-CC(M,IC,4,K)) +(CC(M,I,3,K)-CC(M,IC,2,K))
+            CH(M,I-1,K,2)=WA1(I-2)*((CC(M,I-1,1,K)-CC(M,IC-1,4,K))  &
+                -(CC(M,I,3,K)+CC(M,IC,2,K)))-WA1(I-1)  &
+                *((CC(M,I,1,K)+CC(M,IC,4,K))+(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))
+            CH(M,I,K,2)=WA1(I-2)*((CC(M,I,1,K)+CC(M,IC,4,K))  &
+                +(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))+WA1(I-1)  &
+                *((CC(M,I-1,1,K)-CC(M,IC-1,4,K))-(CC(M,I,3,K)+CC(M,IC,2,K)))
+            CH(M,I-1,K,3)=WA2(I-2)*((CC(M,I-1,1,K)+CC(M,IC-1,4,K))  &
+                -(CC(M,I-1,3,K)+CC(M,IC-1,2,K)))-WA2(I-1)  &
+                *((CC(M,I,1,K)-CC(M,IC,4,K))-(CC(M,I,3,K)-CC(M,IC,2,K)))
+            CH(M,I,K,3)=WA2(I-2)*((CC(M,I,1,K)-CC(M,IC,4,K))  &
+                -(CC(M,I,3,K)-CC(M,IC,2,K)))+WA2(I-1)  &
+                *((CC(M,I-1,1,K)+CC(M,IC-1,4,K))-(CC(M,I-1,3,K) +CC(M,IC-1,2,K)))
+            CH(M,I-1,K,4)=WA3(I-2)*((CC(M,I-1,1,K)-CC(M,IC-1,4,K))  &
+                +(CC(M,I,3,K)+CC(M,IC,2,K)))-WA3(I-1)  &
+                *((CC(M,I,1,K)+CC(M,IC,4,K))-(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))
+            CH(M,I,K,4)=WA3(I-2)*((CC(M,I,1,K)+CC(M,IC,4,K))  &
+                -(CC(M,I-1,3,K)-CC(M,IC-1,2,K)))+WA3(I-1)  &
+                *((CC(M,I-1,1,K)-CC(M,IC-1,4,K))+(CC(M,I,3,K)+CC(M,IC,2,K)))
+         END DO
+      END DO
+   END DO
+   IF (MOD(IDO,2) == 1) RETURN
+ENDIF
+
+DO  M=1,MP
+   DO  K=1,L1
+      CH(M,IDO,K,1) = (CC(M,IDO,1,K)+CC(M,IDO,3,K))  &
+         +(CC(M,IDO,1,K)+CC(M,IDO,3,K))
+      CH(M,IDO,K,2) = SQRT2*((CC(M,IDO,1,K)-CC(M,IDO,3,K))  &
+         -(CC(M,1,2,K)+CC(M,1,4,K)))
+      CH(M,IDO,K,3) = (CC(M,1,4,K)-CC(M,1,2,K)) +(CC(M,1,4,K)-CC(M,1,2,K))
+      CH(M,IDO,K,4) = -SQRT2*((CC(M,IDO,1,K)-CC(M,IDO,3,K))  &
+         +(CC(M,1,2,K)+CC(M,1,4,K)))
+   END DO
 END DO
-IF (MOD(IDO,2) == 1) RETURN
-105 CONTINUE
-DO  K=1,L1
-  DO  M=1,MP
-    CH(M,IDO,K,1) = (CC(M,IDO,1,K)+CC(M,IDO,3,K))  &
-        +(CC(M,IDO,1,K)+CC(M,IDO,3,K))
-    CH(M,IDO,K,2) = SQRT2*((CC(M,IDO,1,K)-CC(M,IDO,3,K))  &
-        -(CC(M,1,2,K)+CC(M,1,4,K)))
-    CH(M,IDO,K,3) = (CC(M,1,4,K)-CC(M,1,2,K)) +(CC(M,1,4,K)-CC(M,1,2,K))
-    CH(M,IDO,K,4) = -SQRT2*((CC(M,IDO,1,K)-CC(M,IDO,3,K))  &
-        +(CC(M,1,2,K)+CC(M,1,4,K)))
-  END DO
-END DO
-107 RETURN
+
 END SUBROUTINE VRADB4
 
 

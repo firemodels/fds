@@ -750,7 +750,8 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
          DO I=0,IBAR
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I+1,J,K)
-            IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+            IF (SOLID(IC1)) CYCLE
+            IF (SOLID(IC2)) CYCLE
             DVOLUME = DXN(I)*DY(J)*DZ(K)
             INTEGRAL = INTEGRAL + UU(I,J,K)*DVOLUME
             SUM_VOLUME = SUM_VOLUME + DVOLUME
@@ -779,7 +780,8 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
          DO I=1,IBAR
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I,J+1,K)
-            IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+            IF (SOLID(IC1)) CYCLE
+            IF (SOLID(IC2)) CYCLE
             DVOLUME = DX(I)*DYN(J)*DZ(K)
             INTEGRAL = INTEGRAL + VV(I,J,K)*DVOLUME
             SUM_VOLUME = SUM_VOLUME + DVOLUME
@@ -808,7 +810,8 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
          DO I=1,IBAR
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I,J,K+1)
-            IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+            IF (SOLID(IC1)) CYCLE
+            IF (SOLID(IC2)) CYCLE
             DVOLUME = DX(I)*DY(J)*DZN(K)
             INTEGRAL = INTEGRAL + WW(I,J,K)*DVOLUME
             SUM_VOLUME = SUM_VOLUME + DVOLUME
@@ -1049,137 +1052,244 @@ IF (CORRECTOR) HP => HS
 
 NO_SCARC_IF: IF (PRES_METHOD /= 'SCARC') THEN
    !$OMP DO SCHEDULE(STATIC) PRIVATE(IW,NOM,II,JJ,KK,H_OTHER,KKO,JJO,IIO,N_INT_CELLS)
-   DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      NOM =WC%NOM
-      IF (NOM==0) CYCLE
-      II = WC%ONE_D%II
-      JJ = WC%ONE_D%JJ
-      KK = WC%ONE_D%KK
-      H_OTHER = 0._EB
-      DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
-         DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
-            DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
-               IF (PREDICTOR) H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
-               IF (CORRECTOR) H_OTHER = H_OTHER + OMESH(NOM)%HS(IIO,JJO,KKO)
+   IF (PREDICTOR) THEN
+      DO IW=1,N_EXTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         NOM =WC%NOM
+         IF (NOM==0) CYCLE
+         II = WC%ONE_D%II
+         JJ = WC%ONE_D%JJ
+         KK = WC%ONE_D%KK
+         H_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
+               ENDDO
             ENDDO
          ENDDO
+         N_INT_CELLS = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
+         H(II,JJ,KK)  = H_OTHER/REAL(N_INT_CELLS,EB)
       ENDDO
-      N_INT_CELLS = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
-      IF (PREDICTOR) H(II,JJ,KK)  = H_OTHER/REAL(N_INT_CELLS,EB)
-      IF (CORRECTOR) HS(II,JJ,KK) = H_OTHER/REAL(N_INT_CELLS,EB)
-   ENDDO
+   ELSE !CORRECTOR
+      DO IW=1,N_EXTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         NOM =WC%NOM
+         IF (NOM==0) CYCLE
+         II = WC%ONE_D%II
+         JJ = WC%ONE_D%JJ
+         KK = WC%ONE_D%KK
+         H_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  H_OTHER = H_OTHER + OMESH(NOM)%HS(IIO,JJO,KKO)
+               ENDDO
+            ENDDO
+         ENDDO
+         N_INT_CELLS = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
+         HS(II,JJ,KK) = H_OTHER/REAL(N_INT_CELLS,EB)
+      ENDDO      
+   ENDIF
    !$OMP END DO NOWAIT
 ENDIF NO_SCARC_IF
 
 ! Set FVX, FVY and FVZ to drive velocity components at solid boundaries towards zero
 
 !$OMP DO SCHEDULE(STATIC) PRIVATE(N,OB,K,J,I,IC1,IC2,DUUDT,DVVDT,DWWDT) 
-OBST_LOOP: DO N=1,N_OBST
-   OB=>OBSTRUCTION(N)
-   DO K=OB%K1+1,OB%K2
-      DO J=OB%J1+1,OB%J2
-         LOOP1: DO I=OB%I1  ,OB%I2
-            IC1 = CELL_INDEX(I,J,K)
-            IC2 = CELL_INDEX(I+1,J,K)
-            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
-               IF (PREDICTOR) DUUDT = -RFODT*U(I,J,K)
-               IF (CORRECTOR) DUUDT = -RFODT*(U(I,J,K)+US(I,J,K))
-               FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
-            ENDIF
-         ENDDO LOOP1
+OBST_FV: IF (PREDICTOR) THEN
+   OBST_LOOP_P: DO N=1,N_OBST
+      OB=>OBSTRUCTION(N)
+      DO K=OB%K1+1,OB%K2
+         DO J=OB%J1+1,OB%J2
+            LOOP1_P: DO I=OB%I1  ,OB%I2
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I+1,J,K)
+               IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+                  DUUDT = -RFODT*U(I,J,K)
+                  FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+               ENDIF
+            ENDDO LOOP1_P
+         ENDDO 
       ENDDO 
-   ENDDO 
-   DO K=OB%K1+1,OB%K2
-      DO J=OB%J1  ,OB%J2
-         LOOP2: DO I=OB%I1+1,OB%I2
-            IC1 = CELL_INDEX(I,J,K)
-            IC2 = CELL_INDEX(I,J+1,K)
-            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
-               IF (PREDICTOR) DVVDT = -RFODT*V(I,J,K)
-               IF (CORRECTOR) DVVDT = -RFODT*(V(I,J,K)+VS(I,J,K))
-               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
-            ENDIF
-         ENDDO LOOP2
+      DO K=OB%K1+1,OB%K2
+         DO J=OB%J1  ,OB%J2
+            LOOP2_P: DO I=OB%I1+1,OB%I2
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I,J+1,K)
+               IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+                  DVVDT = -RFODT*V(I,J,K)
+                  FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+               ENDIF
+            ENDDO LOOP2_P
+         ENDDO 
       ENDDO 
-   ENDDO 
-   DO K=OB%K1  ,OB%K2
-      DO J=OB%J1+1,OB%J2
-         LOOP3: DO I=OB%I1+1,OB%I2
-            IC1 = CELL_INDEX(I,J,K)
-            IC2 = CELL_INDEX(I,J,K+1)
-            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
-               IF (PREDICTOR) DWWDT = -RFODT*W(I,J,K)
-               IF (CORRECTOR) DWWDT = -RFODT*(W(I,J,K)+WS(I,J,K))
-               FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-            ENDIF
-         ENDDO LOOP3
+      DO K=OB%K1  ,OB%K2
+         DO J=OB%J1+1,OB%J2
+            LOOP3_P: DO I=OB%I1+1,OB%I2
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I,J,K+1)
+               IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+                 DWWDT = -RFODT*W(I,J,K)
+                  FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+               ENDIF
+            ENDDO LOOP3_P
+         ENDDO 
       ENDDO 
-   ENDDO 
-ENDDO OBST_LOOP
+   ENDDO OBST_LOOP_P   
+ELSE OBST_FV !CORRECTOR
+   OBST_LOOP_C: DO N=1,N_OBST
+      OB=>OBSTRUCTION(N)
+      DO K=OB%K1+1,OB%K2
+         DO J=OB%J1+1,OB%J2
+            LOOP1_C: DO I=OB%I1  ,OB%I2
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I+1,J,K)
+               IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+                  DUUDT = -RFODT*(U(I,J,K)+US(I,J,K))
+                  FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+               ENDIF
+            ENDDO LOOP1_C
+         ENDDO 
+      ENDDO 
+      DO K=OB%K1+1,OB%K2
+         DO J=OB%J1  ,OB%J2
+            LOOP2_C: DO I=OB%I1+1,OB%I2
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I,J+1,K)
+               IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+                  DVVDT = -RFODT*(V(I,J,K)+VS(I,J,K))
+                  FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+               ENDIF
+            ENDDO LOOP2_C
+         ENDDO 
+      ENDDO 
+      DO K=OB%K1  ,OB%K2
+         DO J=OB%J1+1,OB%J2
+            LOOP3_C: DO I=OB%I1+1,OB%I2
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I,J,K+1)
+               IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+                 DWWDT = -RFODT*(W(I,J,K)+WS(I,J,K))
+                  FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+               ENDIF
+            ENDDO LOOP3_C
+         ENDDO 
+      ENDDO 
+   ENDDO OBST_LOOP_C    
+ENDIF OBST_FV
+
 !$OMP END DO
 
 ! Add normal velocity to FVX, etc. for surface cells
 
 !$OMP DO SCHEDULE(STATIC) PRIVATE(IW,NOM,II,JJ,KK,IOR,DUUDT,DVVDT,DWWDT) 
-WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
-   NOM = WC%NOM
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. NOM==0) CYCLE WALL_LOOP
+WALL_FV: IF (PREDICTOR) THEN
+   WALL_LOOP_P: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_P
+      NOM = WC%NOM
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. NOM==0) CYCLE WALL_LOOP_P
 
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IOR = WC%ONE_D%IOR
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IOR = WC%ONE_D%IOR
    
-   IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-      SELECT CASE(IOR)
-         CASE( 1) 
-            IF (PREDICTOR) DUUDT =       RFODT*(-WC%ONE_D%UWS-U(II,JJ,KK))
-            IF (CORRECTOR) DUUDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)))
-            FVX(II,JJ,KK)   = -RDXN(II)  *(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
-         CASE(-1) 
-            IF (PREDICTOR) DUUDT =       RFODT*( WC%ONE_D%UWS-U(II-1,JJ,KK))
-            IF (CORRECTOR) DUUDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)))
-            FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
-         CASE( 2) 
-            IF (PREDICTOR) DVVDT =       RFODT*(-WC%ONE_D%UWS-V(II,JJ,KK))
-            IF (CORRECTOR) DVVDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)))
-            FVY(II,JJ,KK)   = -RDYN(JJ)  *(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
-         CASE(-2)
-            IF (PREDICTOR) DVVDT =       RFODT*( WC%ONE_D%UWS-V(II,JJ-1,KK))
-            IF (CORRECTOR) DVVDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)))
-            FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
-         CASE( 3) 
-            IF (PREDICTOR) DWWDT =       RFODT*(-WC%ONE_D%UWS-W(II,JJ,KK))
-            IF (CORRECTOR) DWWDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)))
-            FVZ(II,JJ,KK)   = -RDZN(KK)  *(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
-         CASE(-3) 
-            IF (PREDICTOR) DWWDT =       RFODT*( WC%ONE_D%UWS-W(II,JJ,KK-1))
-            IF (CORRECTOR) DWWDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)))
-            FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
-      END SELECT
-   ENDIF
+      IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         SELECT CASE(IOR)
+            CASE( 1) 
+               DUUDT =       RFODT*(-WC%ONE_D%UWS-U(II,JJ,KK))
+               FVX(II,JJ,KK)   = -RDXN(II)  *(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
+            CASE(-1) 
+               DUUDT =       RFODT*( WC%ONE_D%UWS-U(II-1,JJ,KK))
+               FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
+            CASE( 2) 
+               DVVDT =       RFODT*(-WC%ONE_D%UWS-V(II,JJ,KK))
+               FVY(II,JJ,KK)   = -RDYN(JJ)  *(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
+            CASE(-2)
+               DVVDT =       RFODT*( WC%ONE_D%UWS-V(II,JJ-1,KK))
+               FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
+            CASE( 3) 
+               DWWDT =       RFODT*(-WC%ONE_D%UWS-W(II,JJ,KK))
+               FVZ(II,JJ,KK)   = -RDZN(KK)  *(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
+            CASE(-3) 
+               DWWDT =       RFODT*( WC%ONE_D%UWS-W(II,JJ,KK-1))
+               FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
+         END SELECT
+      ENDIF
 
-   IF (WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
-      SELECT CASE(IOR)
-         CASE( 1)
-            FVX(II  ,JJ,KK) = 0._EB
-         CASE(-1)
-            FVX(II-1,JJ,KK) = 0._EB
-         CASE( 2)
-            FVY(II  ,JJ,KK) = 0._EB
-         CASE(-2)
-            FVY(II,JJ-1,KK) = 0._EB
-         CASE( 3)
-            FVZ(II  ,JJ,KK) = 0._EB
-         CASE(-3)
-            FVZ(II,JJ,KK-1) = 0._EB
-      END SELECT
-   ENDIF
+      IF (WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
+         SELECT CASE(IOR)
+            CASE( 1)
+               FVX(II  ,JJ,KK) = 0._EB
+            CASE(-1)
+               FVX(II-1,JJ,KK) = 0._EB
+            CASE( 2)
+               FVY(II  ,JJ,KK) = 0._EB
+            CASE(-2)
+               FVY(II,JJ-1,KK) = 0._EB
+            CASE( 3)
+               FVZ(II  ,JJ,KK) = 0._EB
+            CASE(-3)
+               FVZ(II,JJ,KK-1) = 0._EB
+         END SELECT
+      ENDIF
    
-ENDDO WALL_LOOP
+   ENDDO WALL_LOOP_P
+ELSE WALL_FV !CORRECTOR
+   WALL_LOOP_C: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_C
+      NOM = WC%NOM
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. NOM==0) CYCLE WALL_LOOP_C
+
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IOR = WC%ONE_D%IOR
+   
+      IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         SELECT CASE(IOR)
+            CASE( 1) 
+               DUUDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)))
+               FVX(II,JJ,KK)   = -RDXN(II)  *(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
+            CASE(-1) 
+               DUUDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)))
+               FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
+            CASE( 2) 
+               DVVDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)))
+               FVY(II,JJ,KK)   = -RDYN(JJ)  *(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
+            CASE(-2)
+               DVVDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)))
+               FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
+            CASE( 3) 
+               DWWDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)))
+               FVZ(II,JJ,KK)   = -RDZN(KK)  *(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
+            CASE(-3) 
+               DWWDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)))
+               FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
+         END SELECT
+      ENDIF
+
+      IF (WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
+         SELECT CASE(IOR)
+            CASE( 1)
+               FVX(II  ,JJ,KK) = 0._EB
+            CASE(-1)
+               FVX(II-1,JJ,KK) = 0._EB
+            CASE( 2)
+               FVY(II  ,JJ,KK) = 0._EB
+            CASE(-2)
+               FVY(II,JJ-1,KK) = 0._EB
+            CASE( 3)
+               FVZ(II  ,JJ,KK) = 0._EB
+            CASE(-3)
+               FVZ(II,JJ,KK-1) = 0._EB
+         END SELECT
+      ENDIF
+   ENDDO WALL_LOOP_C
+ENDIF WALL_FV
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
