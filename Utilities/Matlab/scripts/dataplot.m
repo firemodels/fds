@@ -164,6 +164,7 @@ for i=2:2000
             clear indices
             % Clear flag for end_x_y metric
             using_end_x_y = 0;
+            using_end_x_y_check_zero = 0;
             indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
             if strcmp(Metric,'max')
                 Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
@@ -172,7 +173,7 @@ for i=2:2000
             elseif strcmp(Metric,'mean')
                 Save_Measured_Metric(i,j,1) = mean(M(indices,d1_Dep_Col));
             elseif strcmp(Metric,'all')
-                Save_Measured_Metric(i,j,:) = M(indices,d1_Dep_Col);
+                Save_Measured_Metric(i,j,1:length(indices)) = M(indices,d1_Dep_Col);
             elseif strcmp(Metric,'threshold')
                 Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
             elseif strcmp(Metric,'area')
@@ -186,14 +187,18 @@ for i=2:2000
                 compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
                 if compare_indices(1) == j
                     Save_Measured_Metric(i,1,1) = M(indices(end),d1_Dep_Col);
+                    using_end_x_y_check_zero = 1;
                 end
             else
                 Save_Measured_Metric(i,j,1) = 0;
             end
             % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
-            % Unless the end_x_y metric is specified, then skip this block to avoid extra rows
             if (Save_Measured_Metric(i,j,1) == 0) & (~using_end_x_y)
                 Save_Measured_Metric(i,j,1) = 1E-12;
+            end
+            % Special case to pass a zero if using end_x_y
+            if (Save_Measured_Metric(i,1,1) == 0) & (using_end_x_y_check_zero)
+                Save_Measured_Metric(i,1,1) = 1E-12;
             end
             clear indices
             indices = find(d1_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_End);
@@ -226,6 +231,7 @@ for i=2:2000
             clear indices
             % Clear flag for end_x_y metric
             using_end_x_y = 0;
+            using_end_x_y_check_zero = 0;
             indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
             if strcmp(Metric,'max')
                 Save_Predicted_Metric(i,j,1) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
@@ -234,7 +240,7 @@ for i=2:2000
             elseif strcmp(Metric,'mean')
                 Save_Predicted_Metric(i,j,1) = mean(M(indices,d2_Dep_Col));
             elseif strcmp(Metric,'all')
-                Save_Predicted_Metric(i,j,:) = M(indices,d2_Dep_Col);
+                Save_Predicted_Metric(i,j,1:length(indices)) = M(indices,d2_Dep_Col);
             elseif strcmp(Metric,'threshold')
                 Save_Predicted_Metric(i,j,1) = min(M(indices,d2_Dep_Col));
             elseif strcmp(Metric,'area')
@@ -248,14 +254,18 @@ for i=2:2000
                 compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
                 if compare_indices(2) == j
                     Save_Predicted_Metric(i,1,1) = M(indices(end),d2_Dep_Col);
+                    using_end_x_y_check_zero = 1;
                 end
             else
                 Save_Predicted_Metric(i,j,1) = 0;
             end
             % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
-            % Unless the end_x_y metric is specified, then skip this block to avoid extra rows
             if (Save_Predicted_Metric(i,j,1) == 0) & (~using_end_x_y)
                 Save_Predicted_Metric(i,j,1) = 1E-12;
+            end
+            % Special case to pass a zero if using end_x_y
+            if (Save_Predicted_Metric(i,1,1) == 0) & (using_end_x_y_check_zero)
+                Save_Predicted_Metric(i,1,1) = 1E-12;
             end
             clear indices
             indices = find(d2_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_End);
