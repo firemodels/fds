@@ -19,7 +19,7 @@ $RUNFDSMPI 8 $INDIR UWO_test7_case1_180_32
 $RUNFDSMPI 8 $INDIR UWO_test7_case1_180_64
 $RUNFDSMPI 8 $INDIR UWO_test7_case1_270_32
 $RUNFDSMPI 8 $INDIR UWO_test7_case1_270_64
-$RUNFDSMPI 8 $INDIR UWO_test7_case1_32_spectral
-$RUNFDSMPI 8 $INDIR UWO_test7_case1_64_spectral
+#$RUNFDSMPI 8 $INDIR UWO_test7_case1_32_spectral
+#$RUNFDSMPI 8 $INDIR UWO_test7_case1_64_spectral
 
 echo FDS cases submitted
