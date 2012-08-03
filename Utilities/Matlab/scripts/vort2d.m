@@ -1,7 +1,7 @@
 %-------------------------------------------------------------------------%
 % FILE: vort2d.m
 % AUTHOR: Max Gould
-% LAST DATE EDITED: 27 June 2012
+% LAST DATE EDITED: 03 August 2012
 %-------------------------------------------------------------------------%
 
 %-------------------------------------------------------------------------%
@@ -183,7 +183,7 @@ for m = 1:4
     set(AxisPlotLeg,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
 
     % Save plot to file
-    print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname,'_uzgraph']);
+    print(gcf,'-dmeta',[plot_dir,'vort2d_',meshname,'_uzgraph']);
 
     %-----------------------------------------------------------------%
     % Plot U-Velocity at a Point as a Function of Time
@@ -255,7 +255,7 @@ for m = 1:4
     set(PointPlotLeg,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
 
     % Save plot to file
-    print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname,'_upgraph']);
+    print(gcf,'-dmeta',[plot_dir,'vort2d_',meshname,'_upgraph']);
 end
 
 %-------------------------------------------------------------------------%

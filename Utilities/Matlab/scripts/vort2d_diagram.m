@@ -1,7 +1,7 @@
 %-------------------------------------------------------------------------%
 % FILE: vort2d_diagram.m
 % AUTHOR: Max Gould
-% LAST DATE EDITED: 27 June 2012
+% LAST DATE EDITED: 03 August 2012
 %-------------------------------------------------------------------------%
 
 %-------------------------------------------------------------------------%
@@ -100,7 +100,7 @@ hold off
 %-------------------------------------------------------------------------%
 
 % Define output location
-plot_dir = '../../Manuals/FDS_Verification_Guide/FIGURES/';
+plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 % Define plot range
 axis([-0.05,0.05,-0.05,0.05]);
@@ -117,7 +117,7 @@ set(gcf,'PaperSize',[Paper_Width Paper_Width]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Width]);
 
 % Save plot to file
-print(gcf,'-dpdf',[plot_dir,'vort2d_diagram']);
+print(gcf,'-dmeta',[plot_dir,'vort2d_diagram']);
 
 %-------------------------------------------------------------------------%
 %-------------------------------------------------------------------------%
