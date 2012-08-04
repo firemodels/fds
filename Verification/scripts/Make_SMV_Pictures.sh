@@ -12,7 +12,13 @@ echo "-s size - use 32 or 64 bit (default) version of smokeview"
 exit
 }
 
-PLATFORM=linux
+OS=`uname`
+if [ "$OS" == "Darwin" ]; then
+  PLATFORM=osx
+else
+  PLATFORM=linux
+fi
+
 SIZE=_64
 DEBUG=
 TEST=_test
