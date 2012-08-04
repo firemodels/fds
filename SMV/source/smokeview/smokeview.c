@@ -618,6 +618,9 @@ void display_version_info(void){
     if(smokezippath!=NULL){
       printf("Smokezip path: %s\n",smokezippath);
     }
+    if(texturedir!=NULL){
+      printf("Texture directory path: %s\n",texturedir);
+    }
 }
 
 /* ------------------ usage ------------------------ */
