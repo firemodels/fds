@@ -4215,18 +4215,25 @@ PROP_LOOP: DO N=0,N_PROP
    ! Assign PART_INDEX to Device PROPERTY array
 
    IF (PY%PART_ID/='null') THEN
+
       DO ILPC=1,N_LAGRANGIAN_CLASSES
          LPC => LAGRANGIAN_PARTICLE_CLASS(ILPC)
-         IF (LPC%ID==PY%PART_ID) PY%PART_INDEX = ILPC
-         IF (LPC%ID==PY%PART_ID .AND. LPC%MASSLESS) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ' ,N,' cannot refer to MASSLESS particles'
-            CALL SHUTDOWN(MESSAGE)
+         IF (LPC%ID==PY%PART_ID) THEN
+            PY%PART_INDEX = ILPC
+            EXIT
          ENDIF
       ENDDO
+
       IF (PY%PART_INDEX<0) THEN
          WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ' ,N,' not found'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
+
+      IF (LPC%ID==PY%PART_ID .AND. LPC%MASSLESS) THEN
+         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ' ,N,' cannot refer to MASSLESS particles'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+
       PARTICLE_FILE=.TRUE.
       IF (PY%FLOW_RATE > 0._EB .AND. LPC%DENSITY < 0._EB) THEN
          WRITE(MESSAGE,'(A,A,A)') 'PROP ERROR: PARTicle class ',TRIM(LPC%ID),' requires a density'
