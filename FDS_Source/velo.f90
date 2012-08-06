@@ -1634,9 +1634,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
-         ! At OPEN boundaries, set the external velocity component equal to the internal and exit the EDGE loop
+         ! At OPEN boundaries, set the external velocity component equal to the internal and exit the EDGE loop.
+         ! Note that this is done only for edges with OPEN boundaries on each side.
 
-         IF (BOUNDARY_TYPE_M==OPEN_BOUNDARY .AND. BOUNDARY_TYPE_P==OPEN_BOUNDARY) THEN
+         IF (WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY .AND. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
             SELECT CASE(IEC)
                CASE(1)
                   IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WW(II,1,KK)
@@ -1654,7 +1655,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UU(II,1,KK)
                   IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
             END SELECT
-            CYCLE ORIENTATION_LOOP
+            CYCLE EDGE_LOOP
          ENDIF   
    
    ! Get the velocity components at the appropriate cell faces     
