@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#$RUNFDS Atmospheric_Effects lee_waves
+$RUNFDS Atmospheric_Effects lee_waves
 $RUNFDS Atmospheric_Effects stack_effect
 $RUNFDS Atmospheric_Effects stratified_mixing_layer_2d
 $RUNFDS Atmospheric_Effects stratified_mixing_layer
