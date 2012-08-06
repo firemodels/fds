@@ -8924,14 +8924,37 @@ A single ``line'' file can hold more than a single line of data. By default, the
 either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add
 {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates.
 
-Typically, a {\em line} of devices records a mean profile of a particular quantity, $\overline{\phi}$. For example, the velocity profile in a doorway or the average concentration of a particular scalar quantity spanning the width of a buoyant plume are convenient means to compare model and experiment. In addition, if you set {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be the {\em root mean square} value of the quantity:
+\paragraph{Single-Point Statistics}
+
+\begin{description}
+\item[Mean] By default, a {\em line} of devices records a mean profile of a particular quantity,
 \be
-   \phi_{\hbox{rms}} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n} }
+   \overline{\phi} = \frac{ \sum_{i=1}^n \phi_i }{n}
+\ee
+where $n$ is the number of uniform output samples.  For example, the velocity profile in a doorway or the average concentration of a particular scalar quantity spanning the width of a buoyant plume are convenient means to compare model and experiment.
+\item[Root Mean Square] If the user sets {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
+\be
+   \phi_{rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
 \ee
 Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. It is not meant to be used with single devices that record a time history of a given quantity. The {\em root mean square} is only meaningful in terms of a steady-state output quantity.
-
-For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
-
+\item[Covariance] If $u = U - \overline{U}$ is the deviation from the mean for the random variable $U$, then an unbiased estimate of the \emph{covariance} of two random variables is given by
+\be
+   \overline{u_1 u_2} = \frac{ \sum_{i=1}^n (U_1 - \overline{U}_1) (U_2 - \overline{U}_2) }{n-1}
+\ee
+To output this statistic the user must add a second quantity to the device line and set {\ct STATISTICS='COV'}:
+\footnotesize
+\begin{verbatim}
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE', 
+      STATISTICS='COV', ID='wT-cov', POINTS=20 /
+\end{verbatim}
+\normalsize
+\item[Correlation Coefficient] Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} given by
+\be
+   \rho_{12} = \frac{ \overline{u_1 u_2} }{ u_{1,rms} \,u_{2,rms} }
+\ee
+Here again the user must add a {\ct QUANTITY2} to the device line.
+\item[Min, Max] For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
+\end{description}
 
 \subsection{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
@@ -10581,6 +10604,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct POINTS}                & Integer         & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
 {\ct PROP\_ID}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct QUANTITY}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
+{\ct QUANTITY2}             & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .FALSE.} \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
