@@ -1654,7 +1654,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UU(II,1,KK)
                   IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
             END SELECT
-            CYCLE EDGE_LOOP
+            CYCLE ORIENTATION_LOOP
          ENDIF   
    
    ! Get the velocity components at the appropriate cell faces     
