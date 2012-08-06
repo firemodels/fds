@@ -245,8 +245,9 @@ run_verification_cases_short()
 
    cd $SVNROOT/Verification
 
-   # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on fire70s queue)
-   ./Run_FDS_Cases.sh -c serial -d -q firebot &> $FIREBOT_DIR/output/stage3
+   # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on firebot queue)
+   echo 'Running FDS verification cases (serial):' > $FIREBOT_DIR/output/stage3
+   ./Run_FDS_Cases.sh -c serial -d -q firebot >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_short_start
 
    # Wait some additional time for all cases to start
@@ -254,6 +255,7 @@ run_verification_cases_short()
 
    # Stop all cases
    ./Run_FDS_Cases.sh -c serial -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for serial verification cases to end
    wait_verification_cases_short_end
@@ -264,7 +266,8 @@ run_verification_cases_short()
 
    cd $SVNROOT/Verification
 
-   # Submit FDS verification cases and wait for them to start (run MPI cases in debug mode on fire70s queue)
+   # Submit FDS verification cases and wait for them to start (run MPI cases in debug mode on firebot queue)
+   echo 'Running FDS verification cases (MPI):' >> $FIREBOT_DIR/output/stage3 2>&1
    ./Run_FDS_Cases.sh -c mpi -d -q firebot >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_short_start
 
@@ -273,28 +276,31 @@ run_verification_cases_short()
 
    # Stop all cases
    ./Run_FDS_Cases.sh -c mpi -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
-   # Wait for serial verification cases to end
+   # Wait for MPI verification cases to end
    wait_verification_cases_short_end
 
    #  =====================
    #  = Run all SMV cases =
    #  =====================
 
-   # cd $SVNROOT/Verification/scripts
+   cd $SVNROOT/Verification/scripts
 
-   # # Submit SMV verification cases and wait for them to start (run all cases in debug mode on fire70s queue)
-   # ./scripts/Run_SMV_Cases.sh -d -q firebot >> $FIREBOT_DIR/output/stage3 2>&1
-   # wait_verification_cases_short_start
+   # Submit SMV verification cases and wait for them to start (run SMV cases in debug mode on firebot queue)
+   echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh -d -q firebot >> $FIREBOT_DIR/output/stage3 2>&1
+   wait_verification_cases_short_start
 
-   # # Wait some additional time for all cases to start
-   # sleep 30
+   # Wait some additional time for all cases to start
+   sleep 30
 
-   # # Stop all cases
-   # ./scripts/Run_SMV_Cases.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+   # Stop all cases
+   ./Run_SMV_Cases.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
-   # # Wait for SMV verification cases to end
-   # wait_verification_cases_short_end
+   # Wait for SMV verification cases to end
+   wait_verification_cases_short_end
 
    #  ======================
    #  = Remove .stop files =
@@ -430,13 +436,13 @@ wait_verification_cases_long_end()
 
 run_verification_cases_long()
 {
-   # Start running all FDS verification cases (run all cases on fire70s queue)
+   # Start running all FDS verification cases (run all cases on firebot queue)
    cd $SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh -q firebot >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
-   # Start running all SMV verification cases (run all cases on fire70s queue)
+   # Start running all SMV verification cases (run all cases on firebot queue)
    cd $SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
    ./Run_SMV_Cases.sh -q firebot >> $FIREBOT_DIR/output/stage5 2>&1
@@ -867,7 +873,7 @@ make_smv_verification_guide()
 
 check_all_guides()
 {
-   # Scan and report any errors in FDS Verification Guide build process
+   # Scan and report any errors in build process for guides
    cd $FIREBOT_DIR
    if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output/stage8*` == "" ]]
    then
