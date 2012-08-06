@@ -1,7 +1,7 @@
 %-------------------------------------------------------------------------%
 % FILE: vort2d_diagram.m
 % AUTHOR: Max Gould
-% LAST DATE EDITED: 03 August 2012
+% LAST DATE EDITED: 06 August 2012
 %-------------------------------------------------------------------------%
 
 %-------------------------------------------------------------------------%
@@ -117,7 +117,7 @@ set(gcf,'PaperSize',[Paper_Width Paper_Width]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Width]);
 
 % Save plot to file
-print(gcf,'-dmeta',[plot_dir,'vort2d_diagram']);
+print(gcf,'-dpdf',[plot_dir,'vort2d_diagram']);
 
 %-------------------------------------------------------------------------%
 %-------------------------------------------------------------------------%
