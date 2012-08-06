@@ -9,8 +9,8 @@ bin = .
 #LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
 LINUX32FORTLIBDIR = /opt/intel/11/lib/ia32
 LINUX64FORTLIBDIR = /opt/intel/11/lib/intel64
-OSX32FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
-OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
+OSX32FORTLIBDIR = /opt/intel/composerxe/lib/
+OSX64FORTLIBDIR = /opt/intel/composerxe/lib/
 
 # Definition of the object variables
 
