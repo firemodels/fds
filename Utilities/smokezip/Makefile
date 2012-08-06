@@ -10,8 +10,8 @@ VPATH = $(SOURCE_DIR)/smokezip $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview
 bin = .
 
 #LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
-LINUX32FORTLIBDIR = /opt/intel/11/lib/ia32
-LINUX64FORTLIBDIR = /opt/intel/11/lib/intel64
+LINUX32FORTLIBDIR = /opt/intel/composerxe/lib/ia32
+LINUX64FORTLIBDIR = /opt/intel/composerxe/lib/intel64
 OSX32FORTLIBDIR = /opt/intel/composerxe/lib
 OSX64FORTLIBDIR = /opt/intel/composerxe/lib
 
