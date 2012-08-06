@@ -326,7 +326,7 @@ check_verification_cases_short()
    else
       BUILD_STAGE_FAILURE="Stage 3: FDS Verification Cases"
       
-      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 >> $FIREBOT_DIR/output/stage3_errors
+      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage3_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage3_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
@@ -466,7 +466,7 @@ check_verification_cases_long()
    else
       BUILD_STAGE_FAILURE="Stage 5: FDS-SMV Verification Cases"
       
-      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 >> $FIREBOT_DIR/output/stage5_errors
+      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
@@ -787,6 +787,36 @@ check_matlab_plotting()
    fi
 }
 
+check_verification_stats()
+{
+   # Check for existence of verification statistics output file
+   cd $SVNROOT/Utilities/Matlab
+   if [ -e "FDS_verification_scatterplot_output.csv" ]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 7: Matlab plotting and statistics"
+      echo "Firebot Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7_errors
+      echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $FIREBOT_DIR/output/stage7_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage7_errors
+      save_build_status
+      email_error_message
+   fi
+
+   # Scan and report warnings for any verification cases that are outside of their specified error tolerance
+   if [[ `grep ",No," FDS_verification_scatterplot_output.csv` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Stage 7 warnings:" >> $FIREBOT_DIR/output/warnings
+      echo "The following cases are outside of their specified error tolerance:" >> $FIREBOT_DIR/output/warnings
+      grep ",No," FDS_verification_scatterplot_output.csv >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
+   fi
+}
+
 #  ==================================
 #  = Stage 8 - Build FDS-SMV Guides =
 #  ==================================
@@ -1036,6 +1066,7 @@ check_fds_pictures
 ### Stage 7 ###
 run_matlab_plotting
 check_matlab_plotting
+# check_verification_stats (intentionally disabled until verification statistics undergo initial review)
 
 ### Stage 8 ###
 make_fds_user_guide
