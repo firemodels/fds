@@ -47,7 +47,7 @@ case $OPTION in
    export STOPFDS=1
    ;;
 esac
-shift
+#shift
 done
 
 if [ "$size" != "32" ]; then
