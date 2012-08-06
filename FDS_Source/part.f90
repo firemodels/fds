@@ -1727,7 +1727,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TM
                                        DROP_DEN_ALL=>NULL()
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS=>NULL()
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
-            RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
+            RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,Q_RAD_OUT,Q_DOT_RAD_IN, Q_DOT_RAD_OUT,&
+            H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
             PR_AIR,M_VAP,M_VAP_MAX,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD,AREA_ADD, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DZ_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
@@ -1918,8 +1919,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                H_HEAT   = NUSSELT*K_AIR/LENGTH
                H_MASS   = SHERWOOD*D_AIR/LENGTH
                H_WALL    = H_SOLID
-               Q_DOT_RAD = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADIN
-               WALL(IW)%ONE_D%QRADIN = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT_SUBSTEP*Q_DOT_RAD)/(WALL(IW)%AW*DT)
+               Q_DOT_RAD_IN = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADIN
+               WALL(IW)%ONE_D%QRADIN = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT_SUBSTEP*Q_DOT_RAD_IN)/&
+                              (WALL(IW)%AW*DT_SUBSTEP)
+               Q_DOT_RAD_OUT = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADOUT      
+               WALL(IW)%ONE_D%QRADOUT = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADOUT - WGT*DT_SUBSTEP*Q_DOT_RAD_OUT)/&
+                              (WALL(IW)%AW*DT_SUBSTEP)
+               Q_DOT_RAD = Q_DOT_RAD_IN + Q_DOT_RAD_OUT
 
             ELSE SOLID_OR_GAS_PHASE
 
@@ -1959,6 +1965,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
             Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
+            Q_RAD_OUT  = DT_SUBSTEP*Q_DOT_RAD_OUT
             Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
             Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))
             Q_TOT      = Q_RAD+Q_CON_GAS+Q_CON_WALL
@@ -1977,6 +1984,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   Q_CON_GAS  = Q_CON_GAS*Q_FRAC
                   Q_CON_WALL = Q_CON_WALL*Q_FRAC
                   Q_RAD      = Q_RAD*Q_FRAC
+                  Q_RAD_OUT  = Q_RAD_OUT*Q_FRAC
                   Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
                ENDIF
             ENDIF
@@ -2003,6 +2011,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   Q_CON_GAS  = Q_CON_GAS*Q_FRAC
                   Q_CON_WALL = Q_CON_WALL*Q_FRAC
                   Q_RAD      = Q_RAD*Q_FRAC
+                  Q_RAD_OUT  = Q_RAD_OUT*Q_FRAC
                   Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
                ENDIF
             ENDIF
@@ -2137,7 +2146,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             IF (LP%ONE_D%IOR/=0 .AND. LP%WALL_INDEX>0) &
             WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) + &
-                                                OMRAF*WGT*(Q_RAD+Q_CON_WALL)*WALL(IW)%RAW/DT_SUBSTEP
+                                                OMRAF*WGT*(Q_RAD_OUT+Q_CON_WALL)*WALL(IW)%RAW/DT_SUBSTEP
 
             ! Get out of the loop if the PARTICLE has evaporated completely
 
@@ -2147,7 +2156,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          
          END DO TIME_ITERATION_LOOP
       ENDDO PARTICLE_LOOP
-
 
    ELSE NEW_EVAP_DROP_IF
 
@@ -2255,8 +2263,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             H_HEAT   = NUSSELT*K_AIR/LENGTH
             H_MASS   = SHERWOOD*D_AIR/LENGTH
             H_WALL    = H_SOLID
-            Q_DOT_RAD = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADIN
-            WALL(IW)%ONE_D%QRADIN = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT_SUBSTEP*Q_DOT_RAD)/(WALL(IW)%AW*DT)
+            Q_DOT_RAD_IN = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADIN
+            WALL(IW)%ONE_D%QRADIN = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT_SUBSTEP*Q_DOT_RAD_IN)/(WALL(IW)%AW*DT_SUBSTEP)
+            Q_DOT_RAD_OUT = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADOUT      
+            WALL(IW)%ONE_D%QRADOUT = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADOUT - WGT*DT_SUBSTEP*Q_DOT_RAD_OUT)/(WALL(IW)%AW*DT_SUBSTEP)
+            Q_DOT_RAD = Q_DOT_RAD_IN + Q_DOT_RAD_OUT
 
          ELSE SOLID_OR_GAS_PHASE_2
 
@@ -2296,6 +2307,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
          Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
+         Q_RAD_OUT  = DT_SUBSTEP*Q_DOT_RAD_OUT
          Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
          Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))
          Q_TOT      = Q_RAD+Q_CON_GAS+Q_CON_WALL
@@ -2314,6 +2326,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                Q_CON_GAS  = Q_CON_GAS*Q_FRAC
                Q_CON_WALL = Q_CON_WALL*Q_FRAC
                Q_RAD      = Q_RAD*Q_FRAC
+               Q_RAD_OUT  = Q_RAD_OUT*Q_FRAC
                Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
             ENDIF
          ENDIF
@@ -2340,6 +2353,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                Q_CON_GAS  = Q_CON_GAS*Q_FRAC
                Q_CON_WALL = Q_CON_WALL*Q_FRAC
                Q_RAD      = Q_RAD*Q_FRAC
+               Q_RAD_OUT  = Q_RAD_OUT*Q_FRAC
                Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
             ENDIF
          ENDIF
@@ -2393,7 +2407,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
          IF (LP%ONE_D%IOR/=0 .AND. LP%WALL_INDEX>0) &
             WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) + &
-                                                OMRAF*WGT*(Q_RAD+Q_CON_WALL)*WALL(IW)%RAW/DT_SUBSTEP
+                                                OMRAF*WGT*(Q_RAD_OUT+Q_CON_WALL)*WALL(IW)%RAW/DT_SUBSTEP
 
          ! Get out of the loop if the PARTICLE has evaporated completely
 
