@@ -321,7 +321,9 @@ void LabelMenu(int value){
 #ifdef pp_MEMDEBUG
    case 19:
      visUsagememory = 1 - visUsagememory;
+#ifdef pp_memstatus
      if(visUsagememory==1)visAvailmemory=0;
+#endif
      break;
 #endif
    case 12:
