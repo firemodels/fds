@@ -204,94 +204,10 @@ void get_blockvals(  float *xmin, float *xmax,
   *kmin = bc->ijk[KMIN];
 
 }
+
 #define ijkcell(i,j,k) ((i)+(j)*nx+(k)*nxy)
 
-/*  
-      if(iv1==iv2){
-          vi->dir2=1;
-          ventdir=DOWN_X;
-          offset=ventoffset_factor*(xplttemp[1]-xplttemp[0]);
-          voffset=-offset;
-          if(inblockage(meshi,xmid-offset,ymid,zmid)==1){
-            voffset=offset;
-            ventdir=UP_X;
-          }
-          if(inblockage(meshi,xmid+offset,ymid,zmid)==1){
-            voffset=-offset;
-            ventdir=DOWN_X;
-          }
-          if(iv1==0){
-            ventdir=UP_X;
-            voffset=offset;
-          }
-          if(iv1==ibartemp){
-            ventdir=DOWN_X;
-            voffset=-offset;
-          }
-          if(nn<nvents)vi->dir=ventdir;
-          if(vi->dummy==0){
-            vi->xvent1 += voffset;
-            vi->xvent2 += voffset;
-          }
-        }
-        if(jv1==jv2){
-          vi->dir2=2;
-          ventdir=DOWN_Y;
-          offset=ventoffset_factor*(yplttemp[1]-yplttemp[0]);
-          voffset=0.0;
-          if(inblockage(meshi,xmid,ymid-offset,zmid)==1){
-            ventdir = UP_Y;
-            voffset=offset;
-          }
-          if(inblockage(meshi,xmid,ymid+offset,zmid)==1){
-            ventdir=DOWN_Y;
-            voffset=-offset;
-          }
-          if(jv1==0){
-            ventdir=UP_Y;
-            voffset=offset;
-          }
-          if(jv1==jbartemp){
-            ventdir=DOWN_Y;
-            voffset=-offset;
-          }
-          if(vi->dummy==0){
-            vi->yvent1 += voffset;
-            vi->yvent2 += voffset;
-          }
-          if(nn<nvents)vi->dir=ventdir;
-        }
-        if(kv1==kv2){
-          vi->dir2=3;
-          offset=ventoffset_factor*(zplttemp[1]-zplttemp[0]);
-          ventdir = DOWN_Z;
-          voffset=0.0;
-          if(inblockage(meshi,xmid,ymid,zmid-offset)==1){
-            ventdir = UP_Z;
-            voffset=offset;
-          }
-          if(inblockage(meshi,xmid,ymid,zmid+offset)==1){
-            ventdir = DOWN_Z;
-            voffset=-offset;
-          }
-          if(kv1==0){
-            ventdir = UP_Z;
-            voffset=offset;
-          }
-          if(kv1==kbartemp){
-            ventdir = DOWN_Z;
-            voffset=-offset;
-          }
-          if(vi->dummy==0){
-            vi->zvent1 += voffset;
-            vi->zvent2 += voffset;
-          }
-          if(nn<nvents)vi->dir=ventdir;
-        }
-*/
 void setventdirs(void){
-  mesh *meshi;
-  ventdata *vi;
   int orien;
   int ii;
   int iv;
@@ -309,6 +225,8 @@ void setventdirs(void){
   float *zplttemp;
 
   for(ii=0;ii<nmeshes;ii++){
+    mesh *meshi;
+ 
     meshi=meshinfo+ii;
 
     nx = meshi->ibar+1;
@@ -323,6 +241,8 @@ void setventdirs(void){
 
 
     for(iv=0;iv<meshi->nvents+12;iv++){
+      ventdata *vi;
+    
       vi=meshi->ventinfo+iv;
 
       dir=0;
@@ -349,7 +269,7 @@ void setventdirs(void){
             for(k=vi->kmin;k<=vi->kmax;k++){
               index1=ijkcell(i-1,j,k);
               index2=ijkcell(i,j,k);
-              index3=ijkcell(i+1,j,k);
+              index3=ijkcell(i,j,k);
               if(use_iblank==1){
                 state1=iblank_x[index1];
                 state2=iblank_x[index2];
@@ -407,7 +327,7 @@ void setventdirs(void){
             for(k=vi->kmin;k<=vi->kmax;k++){
               index1=ijkcell(i,j-1,k);
               index2=ijkcell(i,j,k);
-              index3=ijkcell(i,j+1,k);
+              index3=ijkcell(i,j,k);
               if(use_iblank==1){
                 state1=iblank_y[index1];
                 state2=iblank_y[index2];
@@ -465,7 +385,7 @@ void setventdirs(void){
             for(j=vi->jmin;j<=vi->jmax;j++){
               index1=ijkcell(i,j,k-1);
               index2=ijkcell(i,j,k);
-              index3=ijkcell(i,j,k+1);
+              index3=ijkcell(i,j,k);
               if(use_iblank==1){
                 state1=iblank_z[index1];
                 state2=iblank_z[index2];
