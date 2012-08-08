@@ -162,9 +162,9 @@ for i=2:2000
             d1_Ind_Col = find(strcmp(H,R1(min(j,length(R1)))));
             d1_Dep_Col = find(strcmp(H,S1(j)));
             clear indices
-            % Clear flag for end_x_y metric
-            using_end_x_y = 0;
-            using_end_x_y_check_zero = 0;
+            % Clear flag for stat_x_y metric
+            using_stat_x_y = 0;
+            using_stat_x_y_check_zero = 0;
             indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
             if strcmp(Metric,'max')
                 Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
@@ -172,6 +172,15 @@ for i=2:2000
                 Save_Measured_Metric(i,j,1) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
             elseif strcmp(Metric,'mean')
                 Save_Measured_Metric(i,j,1) = mean(M(indices,d1_Dep_Col));
+            % If mean_x_y is specified for a plot with multiple curves,
+            % then get the results from curve x only
+            elseif strfind(Metric,'mean_')
+                using_stat_x_y = 1;
+                compare_indices = sscanf(Metric, ['mean_' '%f' '_' '%f']);
+                if compare_indices(1) == j
+                    Save_Measured_Metric(i,1,1) = mean(M(indices,d1_Dep_Col));
+                    using_stat_x_y_check_zero = 1;
+                end
             elseif strcmp(Metric,'all')
                 Save_Measured_Metric(i,j,1:length(indices)) = M(indices,d1_Dep_Col);
             elseif strcmp(Metric,'threshold')
@@ -183,21 +192,21 @@ for i=2:2000
             % If end_x_y is specified for a plot with multiple curves,
             % then get the results from curve x only
             elseif strfind(Metric,'end_')
-                using_end_x_y = 1;
+                using_stat_x_y = 1;
                 compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
                 if compare_indices(1) == j
                     Save_Measured_Metric(i,1,1) = M(indices(end),d1_Dep_Col);
-                    using_end_x_y_check_zero = 1;
+                    using_stat_x_y_check_zero = 1;
                 end
             else
                 Save_Measured_Metric(i,j,1) = 0;
             end
             % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
-            if (Save_Measured_Metric(i,j,1) == 0) & (~using_end_x_y)
+            if (Save_Measured_Metric(i,j,1) == 0) & (~using_stat_x_y)
                 Save_Measured_Metric(i,j,1) = 1E-12;
             end
-            % Special case to pass a zero if using end_x_y
-            if (Save_Measured_Metric(i,1,1) == 0) & (using_end_x_y_check_zero)
+            % Special case to pass a zero if using stat_x_y
+            if (Save_Measured_Metric(i,1,1) == 0) & (using_stat_x_y_check_zero)
                 Save_Measured_Metric(i,1,1) = 1E-12;
             end
             clear indices
@@ -229,9 +238,9 @@ for i=2:2000
             d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
             d2_Dep_Col = find(strcmp(H,S2(j)));
             clear indices
-            % Clear flag for end_x_y metric
-            using_end_x_y = 0;
-            using_end_x_y_check_zero = 0;
+            % Clear flag for stat_x_y metric
+            using_stat_x_y = 0;
+            using_stat_x_y_check_zero = 0;
             indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
             if strcmp(Metric,'max')
                 Save_Predicted_Metric(i,j,1) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
@@ -239,6 +248,15 @@ for i=2:2000
                 Save_Predicted_Metric(i,j,1) = d2_Initial_Value-min(M(indices,d2_Dep_Col));
             elseif strcmp(Metric,'mean')
                 Save_Predicted_Metric(i,j,1) = mean(M(indices,d2_Dep_Col));
+            % If mean_x_y is specified for a plot with multiple curves,
+            % then get the results from curve y only
+            elseif strfind(Metric,'mean_')
+                using_stat_x_y = 1;
+                compare_indices = sscanf(Metric, ['mean_' '%f' '_' '%f']);
+                if compare_indices(2) == j
+                    Save_Predicted_Metric(i,1,1) = mean(M(indices,d2_Dep_Col));
+                    using_stat_x_y_check_zero = 1;
+                end
             elseif strcmp(Metric,'all')
                 Save_Predicted_Metric(i,j,1:length(indices)) = M(indices,d2_Dep_Col);
             elseif strcmp(Metric,'threshold')
@@ -250,21 +268,21 @@ for i=2:2000
             % If end_x_y is specified for a plot with multiple curves,
             % then get the results from curve y only
             elseif strfind(Metric,'end_')
-                using_end_x_y = 1;
+                using_stat_x_y = 1;
                 compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
                 if compare_indices(2) == j
                     Save_Predicted_Metric(i,1,1) = M(indices(end),d2_Dep_Col);
-                    using_end_x_y_check_zero = 1;
+                    using_stat_x_y_check_zero = 1;
                 end
             else
                 Save_Predicted_Metric(i,j,1) = 0;
             end
             % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
-            if (Save_Predicted_Metric(i,j,1) == 0) & (~using_end_x_y)
+            if (Save_Predicted_Metric(i,j,1) == 0) & (~using_stat_x_y)
                 Save_Predicted_Metric(i,j,1) = 1E-12;
             end
-            % Special case to pass a zero if using end_x_y
-            if (Save_Predicted_Metric(i,1,1) == 0) & (using_end_x_y_check_zero)
+            % Special case to pass a zero if using stat_x_y
+            if (Save_Predicted_Metric(i,1,1) == 0) & (using_stat_x_y_check_zero)
                 Save_Predicted_Metric(i,1,1) = 1E-12;
             end
             clear indices
