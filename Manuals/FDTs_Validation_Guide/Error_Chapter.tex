@@ -1,0 +1,468 @@
+
+\chapter{Quantifying Model Uncertainty}
+
+This chapter describes a method to estimate model uncertainty using comparisons of model predictions with experimental
+measurements whose uncertainty has been quantified. The method is ideal for complex numerical models like FDS for which
+a systematic analysis of sub-components is impractical, but
+for which there exists a relatively large amount of experimental data with which to evaluate the accuracy of the model predictions.
+If the uncertainty in the experiments can be quantified, the uncertainty in the model can then be expressed in the form
+of a normal distribution whose mean
+and standard deviation are estimated from the relative difference between the predicted and measured values.
+
+This method only addresses model uncertainty. It does not account for the uncertainty associated with the model input parameters.
+How the {\em parameter uncertainty} is treated depends greatly on the type of application.
+Regardless of how the parameter uncertainty is calculated, the model
+uncertainty needs to be addressed independently. In fact, it is incumbent on the model developers to express
+the uncertainty of the model in as simple a form as possible to enable the end user to assess the impact of
+parameter uncertainty and then combine the two forms of uncertainty into a final result.
+
+
+\section{Introduction}
+
+The most effective way of introducing the subject of uncertainty in fire modeling is by way of an example.
+Suppose that a fire model is used to estimate the likelihood that an electrical control cable could be damaged by
+a fire. It is assumed that the cable loses functionality when its surface temperature reaches 200~$^\circ$C,
+and the model predicts that the cable temperature could reach as high as 175~$^\circ$C.
+Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of
+the fire, and the model assumptions, like the way the cables are modeled, are uncertain. The combination of the
+two -- the {\em parameter uncertainty} and the {\em model uncertainty} -- leave open the possibility that the cable temperature could exceed
+200~$^\circ$C.
+
+This chapter addresses {\em model uncertainty} only and suggests a simple method to quantify it. While parameter uncertainty is certainly an
+important consideration in fire modeling, its treatment varies considerably depending on the particular application. For example, in what is often
+referred to as a ``bounding analysis,'' the model input parameters are chosen so as to simulate a ``maximum credible'' or ``worst case'' fire. In
+other cases, mean values of the input parameters constitute a ``50th percentile'' design scenario. Sometimes entire statistical distributions, rather
+than individual values, of the input parameters are ``propagated'' through the model in a variety of ways, leading to a statistical distribution of
+the model output. Notarianni and Parry survey these techniques in the SFPE Handbook~\cite{Notarianni:SFPE}. Regardless of the method that is chosen
+for assessing the impact of the input parameters on the model prediction, there needs to be a way of quantifying the uncertainty of the model itself.
+In other words, how good is the prediction for a given set of input parameters?
+
+The issue of model uncertainty has been around as long as the models themselves. The scenario above,
+for example, was considered by Siu and Apostolakis in the early 1980s~\cite{Siu:RE1982} as part of their development of risk models for
+nuclear power plants. The fire models at the
+time were relatively simple. In fact, many were engineering correlations in the form of simple formulae. This made the methods for
+quantifying their uncertainty reasonably tractable because each formula consisted of only a handful of physical parameters. Over the past
+thirty years, however, both fire modeling and the corresponding methods of uncertainty analysis have become far more complex. The current
+generation of computational fluid dynamics fire models require such a large number of physical and numerical parameters that it is considered
+too cumbersome to estimate model uncertainty by systematically assessing their combined effect on the final prediction. The more
+practical approach is to compare model predictions with actual fire experiments in a validation study, the conclusions of which typically come in the form of statements like:
+``The model generally over-predicts the measured temperatures
+by about 10~\%,'' or ``The model predictions are within about 20~\% of the measured heat fluxes.'' This information is helpful,
+at the very least to demonstrate that the model is appropriate for the given application.
+However, even the statement that the model over-predicts measured temperatures by 10~\% is useful not only to gain acceptance of the model but also
+to provide a better sense of the model's accuracy, and a greater level of assurance in answering the question posed above. Knowing that the model
+not only predicted a temperature of 175~$^\circ$C, but also that the model tends to over-predict temperatures by a certain amount, increases the confidence that
+the postulated fire would not cause the cable to fail. The probability of cable failure could be quantified further via a statistical distribution
+like the one shown in Fig.~\ref{bell_curve}. The area indicated by the shaded region is the probability that the temperature will exceed 200~$^\circ$C,
+even though the model has predicted a peak temperature of only 175~$^\circ$C.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=5.in]{FIGURES/bell_curve}
+\end{center}
+\caption[Demonstration of model uncertainty.]{Plot showing a possible way of expressing the uncertainty of the model prediction.}
+\label{bell_curve}
+\end{figure}
+
+This chapter suggests a method for expressing {\em model uncertainty} by way of a distribution like the one shown in Fig.~\ref{bell_curve}. The
+procedure is not a dramatic departure from the current practice of fire model validation in that it relies entirely on comparisons of model
+predictions and experimental measurements. The advantage of the approach is that it does not demand advanced knowledge of statistics or details of
+the numerical model. The parameters of the distribution shown in Fig.~\ref{bell_curve}, namely the mean and standard deviation, are not generated by
+the model user. Rather, they are reported as the results of the validation study. The calculation of the probability of exceeding some critical
+threshold ({\em i.e.} the area under the curve) is a simple table look-up or function call in data analysis software like Microsoft
+Excel\textregistered.
+
+
+
+\section{Sources of Model Uncertainty}
+
+A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy,
+applied either to entire compartments or smaller control
+volumes that make up the compartments. A CFD model may use millions of control volumes to compute the
+solution of the Navier-Stokes equations.
+However, it does not actually solve the Navier-Stokes equations, but rather an approximate form of these equations.
+The approximation involves simplifying
+physical assumptions, like the various techniques for treating subgrid-scale turbulence.
+One critical approximation is the discretization of the governing equations. For example,
+the partial derivative of the density, $\rho$,
+with respect to the spatial coordinate, $x$, can be written in approximate form as:
+\be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
+where $\rho_i$ is the average value of the density in the $i$th grid cell and $\dx$ is the spacing between cells.
+The second term on the right represents all of the terms of order $\dx^2$ and higher in the Taylor
+series expansion and are known collectively as the
+{\em discretization error}. These extra terms are simply dropped from
+the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$.
+The effect of these neglected terms is captured, to
+some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the true physics.
+What effect do these approximations have on
+the predicted results? It is very difficult to determine based on an analysis of the discretized equations.
+One possibility for estimating
+the magnitude of the discretization error is to perform a detailed
+convergence analysis, but this still does not answer a
+question like, ``What is the uncertainty of the model prediction of the gas
+temperature at a particular location in the room at a particular point in time?''
+
+To make matters worse, there are literally dozens of subroutines that make up a CFD fire model,
+from its transport equations, radiation solver, solid phase heat transfer routines, pyrolysis model,
+empirical mass, momentum and energy transfer routines at the wall, and so on.
+It has been suggested by some that
+a means to quantify the model uncertainty is to combine the uncertainties of all the model
+components.
+However, such an exercise is very difficult, especially for a computational fluid dynamics (CFD) model,
+for a number of reasons. First, fire involves
+a complicated interaction of gas and solid phase phenomena that are closely coupled.
+Second, grid sensitivity in a CFD model or the error associated with
+a two-layer assumption in a zone model are dependent on the particular fire scenario.
+Third, fire is an inherently transient phenomenon in which relatively small
+changes in events, like a door opening or sprinkler actuation, can lead to significant changes in outcome.
+
+Rather than attempt to decompose the model into its constituent parts and assess the uncertainty of
+each, the strategy adopted here is to compare model predictions to as many
+experiments as possible. This has been the traditional approach for quantifying model uncertainty in fire
+protection engineering because of the relative abundance of test data. Consider, for example, the
+plot shown in Fig.~\ref{scatterplot}. This is the typical outcome of a validation study, where in this case a series of
+heat flux measurements are compared with model predictions.
+The diagonal line indicates where the prediction and measurement agree.
+But because there is uncertainty associated with each, it cannot be said that the model is perfect if its predictions
+agree exactly with measurements.
+There needs to be a way of quantifying the uncertainties of each before any conclusions can be drawn.
+Such an exercise would result in the uncertainty
+bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824}.
+The uncertainty bars are for demonstration only.}
+shown in the figure. The
+horizontal bar associated with each point represents the uncertainty in the measurement itself.
+For example, the heat flux gauge is subject to uncertainty due to its design and fabrication.
+Because the horizontal bar represents the experimental uncertainty, it is assumed that the vertical
+bar represents the model uncertainty. This is only partially true. In fact the vertical bar represents the total
+uncertainty of the prediction, which is a combination of the {\em model} and {\em parameter} uncertainties. The physical
+input parameters, like the heat release rate and material properties, are based on measurements that are reported
+in the documentation of the experiment.
+The total {\em experimental uncertainty} is represented by all of the horizontal bar and part of the vertical.
+If the {\em experimental uncertainty} can be quantified, then the {\em model uncertainty} can be obtained as a result.
+
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=3.in]{FIGURES/scatterplot}
+\end{center}
+\caption[Sample scatter plot.]{Example of a typical scatter plot of model predictions and experimental measurements.}
+\label{scatterplot}
+\end{figure}
+
+
+\section{Quantifying the Experimental Uncertainty}
+
+As discussed in the previous section, the {\em experimental uncertainty} is a combination of the uncertainty
+in the measurement of the quantity of interest, like the gas temperature or heat flux, along with the propagated
+uncertainty of the measured test parameters, like the heat release rate or material properties.
+``Propagated uncertainty'' is, in this case, what has been referred to above as the parameter uncertainty.
+It is not the uncertainty of the parameter itself, but rather the uncertainty in the predicted quantity
+resulting from the uncertainty of the parameter.
+
+In a recent fire model validation study conducted by the U.S.~Nuclear Regulatory Commission~\cite{NUREG_1824},
+Hamins estimated the experimental uncertainty for several full-scale fire experiments. There were
+two uncertainty estimates needed for each quantity of interest. The first was an estimate, expressed in the
+form of a 95~\% confidence interval, of the
+uncertainty in the measurement of the quantity itself. For example, reported gas and surface temperatures
+were made with thermocouples of various designs (bare-bead,
+shielded, aspirated) with different size beads, metals, and so on. For each, one can estimate the
+uncertainty in the reported measurement.
+
+Next, the
+uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate,
+leakage area, ventilation rate, material
+properties, and so on. It was then necessary to calculate how the uncertainty in these parameters contributed to
+the uncertainty of the reported measurement. To do this, Hamins
+examined a number of empirical formulae that are widely used in fire protection engineering to determine the
+most important test parameters and their effect on the measured results. These formulae provided the means of propagating
+the parameter uncertainties through the experiment.
+For example, it has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise, $T-T_0$, due to
+a compartment fire is proportional to the heat release rate, $\dot{Q}$, raised to the two-thirds power:
+\be T-T_0 = C \, \dot{Q}^{\frac{2}{3}} \ee
+The constant, $C$, involves a number of geometric and thermo-physical parameters that are unique to the given
+fire scenario. By way of differentials, this empirical relationship can be expressed in the form:
+\be \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dot{Q}}{\dot{Q}}  \ee
+In words, the relative change in the temperature rise is approximately two-thirds the relative change
+in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment
+temperature and the heat release rate, there is now a way to express the uncertainty of the model prediction as a function
+of the uncertainty of this most
+important input parameter. Often, the uncertainty of a measurement is expressed in the form of a 95~\% confidence interval,
+(two standard deviations or 2$\sigma$).
+Thus, if the heat release rate of a fire is assumed with 95~\% confidence to be
+within 15~\% of the reported measurement, then the temperature
+predicted by the model has an uncertainty\footnote{An uncertainty that is expressed in the form of a
+percentage typically means one or two {\em relative} standard deviations, often denoted with a tilde,
+$\widetilde{\sigma}=\sigma/\mu$.} of at least 10~\%.
+
+
+
+\begin{table}[ht]
+\caption{Sensitivity of model outputs from Volume 2 of NUREG-1824~\cite{NUREG_1824}. }
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+Output Quantity                                 & Input Parameter(s)    & Power Dependence \\ \hline \hline
+HGL Temperature                                 & HRR                   & 2/3    \\ \hline
+HGL Depth                                       & Door Height           & 1      \\ \hline
+Gas Concentration                               & HRR                   & 1/2    \\ \hline
+                                                & HRR                   & 1      \\ \cline{2-3}
+\raisebox{1.5ex}[0pt]{Smoke Concentration}      & Soot Yield            & 1      \\ \hline
+                                                & HRR                   & 2      \\ \cline{2-3}
+Compartment Pressure                            & Leakage Rate          & 2      \\ \cline{2-3}
+                                                & Ventilation Rate      & 2      \\ \hline
+Heat Flux                                       & Heat Flux             & 4/3    \\ \hline
+Surface Temperature                             & HRR                   & 2/3    \\ \hline
+\end{tabular}
+\end{center}
+\label{Parameter_Uncertainty}
+\end{table}
+
+The uncertainty of each measurement is expressed as a relative standard deviation. The uncertainty of the measured
+\underline{o}utput quantity is denoted $\widetilde{\sigma}_o$, and the uncertainty of each
+significant \underline{i}nput parameter is denoted $\widetilde{\sigma}_i$.
+Assuming that all the uncertainties are uncorrelated, they are combined via the expression:
+\be
+   \widetilde{\sigma}_E^2 = \widetilde{\sigma}_o^2 + \sum_i p_i^2 \, \widetilde{\sigma}_i^2  \label{comb_unc}
+\ee
+The factors, $p_i$, represent the power dependencies of the individual input parameters.
+Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various
+measured quantities in the experiments and their power dependence.
+
+
+Hamins estimated the combined experimental uncertainties for ten quantities of interest in the U.S.~NRC validation study.
+The results are summarized in Table~\ref{Uncertainty}, with
+each combined uncertainty reported in the form of a 95~\% confidence interval ({\em i.e.} $2 \, \widetilde{\sigma}_E$).
+It is assumed throughout that both experiment and model uncertainties can be expressed in relative terms.
+The assumption is based on a
+qualitative assessment of dozens of scatter plots similar to that shown in Fig.~\ref{scatterplot} that show
+the scattered points to form an expanding ``wedge''
+about the diagonal line, or some other off-diagonal line due to an assumed bias in the model predictions.
+This assessment is a critical component of the
+analysis described in the next section.
+\begin{table}[ht]
+\caption{Summary of Hamins' uncertainty estimates~\cite{NUREG_1824}. }
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Measured Quantity               & Combined Relative       \\
+                                & Uncertainty, $2 \, \widetilde{\sigma}_E$       \\ \hline \hline
+HGL Temperature                 & 0.14    \\ \hline
+HGL Depth                       & 0.13    \\ \hline
+Ceiling Jet Temperature         & 0.16    \\ \hline
+Plume Temperature               & 0.14    \\ \hline
+Gas Concentrations              & 0.09    \\ \hline
+Smoke Concentration             & 0.33    \\ \hline
+Pressure with Ventilation       & 0.80    \\ \hline
+Pressure without Ventilation    & 0.40    \\ \hline
+Heat Flux                       & 0.20    \\ \hline
+Surface Temperature             & 0.14    \\ \hline
+\end{tabular}
+\end{center}
+\label{Uncertainty}
+\end{table}
+
+
+
+\section{Calculating Model Uncertainty}
+
+This section describes a method for calculating the {\em model uncertainty}~\cite{McGrattan:Metrologia}. Specifically, this entails developing formulae for
+the mean and standard deviation of a statistical distribution like the one shown in Fig.~\ref{bell_curve}. These formulae are functions
+solely of the model predictions and the experimental measurements against which the model is compared. The objective is to
+characterize the performance of the model in predicting a given quantity of interest ({\em e.g.} the hot gas layer temperature) with two
+parameters; one that expresses the tendency for the model to under or over-predict the true value of the quantity and one that expresses the degree of scatter
+about the true value.
+
+The predicted and measured values of the quantity of interest are obtained from one or more validation studies.
+Figure~\ref{temp_history} is a typical example of a comparison of model and measurement. Given that usually
+dozens of such measurements are made during each experiment,
+and potentially dozens of experiments are conducted as part of a test series, hundreds of such plots can be
+produced for any given quantity of interest.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.5in]{FIGURES/sample_time_history}
+\end{center}
+\caption[Sample time history plots.]{Example of a typical time history comparison of model prediction and experimental measurement.}
+\label{temp_history}
+\end{figure}
+Usually, the data is condensed into a more tractable form by way of a single metric with which to
+compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999}
+discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values.
+If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
+this exercise is a pair of numbers for each time history, $(E_i,M_i)$, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
+expressing the increase in the value of a quantity above its ambient.
+As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is
+reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely
+a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly.
+For this reason, assume that a given experimental measurement, $E_i$, is normally
+distributed about the ``true'' value, $\theta_i$, and there is no systematic bias:
+\be
+   E \; | \; \theta \sim N(\theta \; , \; \sigma_E^2) \label{expunc}
+\ee
+The notation\footnote{Note that the subscript, $i$, has been dropped merely to reduce the notational clutter.}
+$E \; | \; \theta$ means that $E$ is conditional on a particular value of $\theta$.
+This is the usual way of defining a likelihood function.
+It is convenient to use the so-called delta method\footnote{Given the random variable $X \sim N(\mu,\sigma^2)$, the
+delta method~\cite{Oehlert:1992} provides a way to estimate the distribution of a function of $X$:
+$$g(X) \sim N \left( g(\mu) + g''(\mu) \, \sigma^2/2 \, , \, (g'(\mu) \, \sigma)^2\right)$$} to obtain the approximate distribution
+\be
+   \ln E \; | \; \theta \sim N \left( \ln \theta - \frac{\widetilde{\sigma}_E^2}{2} \, , \,\widetilde{\sigma}_E^2 \right) \label{eeq}
+\ee
+The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the
+relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is the way that experimental uncertainties are reported. In addition,
+the results of past validation exercises, when plotted as shown in Fig.~\ref{scatterplot}, form a wedge-shaped pattern that suggests
+that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
+
+It cannot be assumed, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead,
+it is assumed that the model predictions are normally distributed about the true values
+multiplied by a bias factor, $\delta$:
+\be
+   M \; | \; \theta \sim N \left(\delta \, \theta \, , \, \sigma_M^2 \right) \label{mdist}
+\ee
+The standard deviation, $\sigma_M$, and the bias factor, $\delta$, represent the model uncertainty.
+Again, the delta method renders a distribution for $\ln M$ whose parameters can be expressed in terms of a
+relative standard deviation:
+\be
+   \ln M \; | \; \theta \sim N \left(\ln \delta +\ln \theta - \frac{\widetilde{\sigma}_M^2}{2} \; , \;
+   \widetilde{\sigma}_M^2 \right) \quad ; \quad \widetilde{\sigma}_M=\frac{\sigma_M}{\delta \, \theta} \label{meq}
+\ee
+Combining Eq.~(\ref{eeq}) with Eq.~(\ref{meq}) yields:
+\be
+   \ln M  - \ln E = \ln(M/E) \sim N \left( \ln \delta - \frac{\widetilde{\sigma}_M^2}{2}+\frac{\widetilde{\sigma}_E^2}{2} \; ,
+   \; \widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2 \right) \label{lnMeq}
+\ee
+Equation~(\ref{lnMeq}) is important because it does not involve the unknown $\theta$, but rather the known predicted and measured values of the quantity
+of interest plus an estimate of the experimental uncertainty. Until now, it has been assumed that all of the relevant uncertainties can be characterized
+by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot.
+An examination of the results of the validation study discussed above~\cite{NUREG_1824}
+indicates that in cases where the number of pairs of $M$ and $E$ is greater than about 20, the values of $\ln (M/E)$ pass a test for
+normality\footnote{The Kolmogorov-Smirnov test for
+normality was used with a $p$-value of 0.05. The $p$-value determines the probability of being incorrect in concluding that the data is not normally distributed.}, whereas when
+there are less values, normality cannot be assumed. Figure~\ref{Normality} contains a set of data from the validation study.
+There were 124 point comparisons of measured and predicted Wall Temperatures, for which $\ln (M/E)$ conforms quite well to a normal distribution.
+If normality cannot be assumed, alternative techniques for assessing model uncertainty with limited
+experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
+\begin{figure}[ht!]
+\begin{tabular}{ll}
+\includegraphics[width=3.2in]{FIGURES/Wall_Temperature_Scatter} &
+\includegraphics[width=3.2in]{FIGURES/Wall_Temperature_Normality}
+\end{tabular}
+\caption[Testing the normality of validation data.]{The results of normality testing for a set of data taken from Reference~\cite{NUREG_1824}. On the
+left is a comparison of measured vs predicted wall temperatures, and on the right is the distribution of $\ln(M/E)$. Note that the off-diagonal lines in the scatter plot
+indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
+\label{Normality}
+\end{figure}
+
+Returning to Eq.~(\ref{lnMeq}), what is now needed is a way to estimate the mean and standard deviation of the distribution. First, define:
+\be
+   \overline{\ln (M/E)} = \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i)
+\ee
+The least squares estimate of the standard deviation of the combined distribution is defined as:
+\be
+   \widetilde{\sigma}_M^2 + \widetilde{\sigma}_E^2 \approx \frac{1}{n-1} \sum_{i=1}^n \,
+   \left[ \ln (M_i/E_i) - \overline{\ln (M/E)}  \right]^2 \label{stdev}
+\ee
+Recall that $\widetilde{\sigma}_E$ is known and the expression on the right can be evaluated using the pairs of measured and
+predicted values. Keep in mind that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, will necessarily result in an under-estimate of the
+model uncertainty, $\widetilde{\sigma}_M$. In particular, note that $\widetilde{\sigma}_M$ cannot be less than
+$\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. This is not to say that the model
+cannot be more accurate than the measurements; rather, that the model cannot be shown to be more accurate than the measurements. This rule is demonstrated
+mathematically by Eq.~(\ref{stdev}) where it is observed that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, can result in
+the square root of a negative number, an imaginary number. In the case that the computed model uncertainty is less than the estimated experimental uncertainty, there are
+two courses of action. First, it may be that the number of data points in the validation study is too small. If only a few model predictions are compared to corresponding
+measurements, and the difference between the two is so small that the calculated model uncertainty is imaginary, then more data points should be collected
+to determine if this remains the case. If it does, then
+the calculation of the experimental uncertainty, $\widetilde{\sigma}_E$, should be re-evaluated. The experimental uncertainties listed in
+Table~\ref{Uncertainty} are based on the analysis of 26 experiments that were used in a particular validation study. If other experiments are used to evaluate the
+model, these values need to be recalculated following the procedure presented by Hamins~\cite{NUREG_1824}.
+
+An estimate of $\delta$ can be found using the mean of the distribution:
+\be
+   \delta \approx \exp \left( \overline{\ln (M/E)} + \frac{ \widetilde{\sigma}_M^2}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \label{delta}
+\ee
+Taking the assumed normal distribution of the model prediction, $M$, in Eq.~(\ref{mdist}) and using
+a Bayesian argument\footnote{The form of Bayes theorem used here states that the posterior distribution is the product of
+the prior distribution and the likelihood function, normalized by their integral:
+$f(\theta|M)= p(\theta) \, f(M|\theta)/\int p(\theta) \, f(M|\theta) \, d\theta$.
+A constant prior is also known as a Jeffreys prior~\cite{Gelman:Stats}.}
+with a non-informative prior for $\theta$, the posterior distribution can be expressed:
+\be
+   \delta \, \theta \; | \; M \sim N \left( M \; , \; \sigma_M^2 \right) \label{thetaeq}
+\ee
+The assumption of a non-informative prior implies that there is not sufficient information about the
+prior distribution ({\em i.e.} the true value) of
+$\theta$ to assume anything other than a uniform\footnote{A uniform distribution means that for any two equally sized intervals of the real line,
+there is an equal likelihood that the random variable takes a value in one of them.} distribution.
+This is equivalent to saying that the modeler has not biased the model input parameters to compensate for a known
+bias in the model output. For example, if a particular model has been shown to over-predict compartment temperature, and the modeler has reduced the specified heat release
+rate to better estimate the true temperature, then it can no longer be assumed that the prior distribution of the true temperature is uniform.
+Still another way to look at this is by analogy to target shooting. Suppose a particular rifle
+has a manufacturers defect such that, on average, it shoots 10~cm to the left of the target. It must be assumed that any given shot by a marksman without this knowledge is
+going to strike 10~cm to the left of the intended target. However, if the marksman knows of the defect, he or she will probably aim 10~cm to the right of the
+intended target to compensate for the defect. If that is the case, it can no longer be assumed that the intended target was 10~cm to the right of the bullet hole.
+
+The final step in the derivation is to rewrite Eq.~(\ref{thetaeq}) as:
+\be
+   \theta \; | \; M \sim N \left( \frac{M}{\delta} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\delta} \right)^2 \right) \label{truth}
+\ee
+This formula has been obtained\footnote{Note that if $X \sim N(\mu,\sigma^2)$, then
+$cX \sim N ( c \mu , (c \sigma)^2)$.} by dividing by the bias factor, $\delta$, in Eq.~(\ref{thetaeq}). To summarize, given a model prediction, $M$,
+of a particular quantity of interest ({\em e.g.} a cable temperature), the true (but unknown) value of this quantity is normally distributed. The mean value
+and variance of this normal distribution are based solely on comparisons of model predictions with past experiments that are similar to the particular fire
+scenario being analyzed. The performance of the model is quantified by the estimators of the parameters, $\delta$ and $\widetilde{\sigma}_M$, which
+have been corrected to account for uncertainties associated with the experimental measurements.
+If $\delta \approx 1$ and $\widetilde{\sigma}_M \approx \widetilde{\sigma}_E$, then the
+model can be considered of comparable accuracy to the measurements.
+
+
+\section{Example}
+
+This section describes how to make use of Eq.~(\ref{truth}). Referring to the sample problem given above, suppose a fire model is being used to estimate the likelihood that
+electrical control cables could be damaged due to a fire in a compartment.
+Damage is assumed to occur when the surface temperature of any cable reaches 200~$^\circ$C.
+What is the likelihood that the cables would be damaged if the
+model predicts that the maximum surface temperature of the cables is 175~$^\circ$C. Assuming that the input parameters are not in question, the following
+procedure is suggested:
+\begin{enumerate}
+\item Assemble a collection of model predictions, $M_i$, and experimental measurements, $E_i$, from
+past experiments involving objects with similar thermal characteristics as the cables in question.
+How ``similar'' the experiment is to the hypothetical scenario under study can be quantified by way of
+various parameters, like the thermal inertia of the object, the size of the fire, the size of the compartment, and so on. Obtain estimates of the
+experimental uncertainty from those who conducted the experiments or follow the procedure outlined by Hamins~\cite{NUREG_1824}. Express the
+experimental uncertainty in relative terms, $\widetilde{\sigma}_E$.
+\item Calculate the bias factor, $\delta$, and relative standard deviation, $\tilde{\sigma}_M$, from Eqs.~(\ref{delta}) and (\ref{stdev}), respectively.
+For the data shown in Fig.~\ref{Normality}, $\delta=1.13$ and that $\widetilde{\sigma}_M=0.20$.
+\end{enumerate}
+Consider the distribution, Eq.~(\ref{truth}), of the ``true'' temperature, $\theta$, shown graphically in Fig.~\ref{bell_curve}.
+The vertical lines indicate the ``critical'' temperature at which damage is assumed to occur ($T_c=200$~$^\circ$C), and the temperature predicted by the
+model (175~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 155~$^\circ$C.
+The mean and standard deviation in Eq.~(\ref{truth}) are calculated:
+\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{155}{1.13} = 157 \; ^\circ \hbox{C}  \quad ; \quad
+   \sigma = \widetilde{\sigma}_M \, \frac{M}{\delta} = 0.20 \times \frac{155}{1.13} = 27 \; ^\circ \hbox{C}  \ee
+respectively. The shaded area beneath the bell curve is the probability that the ``true'' temperature can exceed the
+critical value, $T_c=200$~$^\circ$C, which can be expressed via the {\em complimentary error function}:
+\be P(T>T_c) = \frac{1}{2} \hbox{erfc} \left( \frac{T_c - \mu}{\sigma \sqrt{2}} \right) = \frac{1}{2} \hbox{erfc} \left( \frac{200 - 157}{27 \sqrt{2}} \right) \approx 0.06  \ee
+This means that there is a 6~\% chance that the cables could become damaged, assuming that the model's input parameters are not
+subject to uncertainty.
+
+
+
+\section{Additional Considerations}
+
+
+Keep in mind that for any fire experiment, FDS might predict a particular quantity accurately (within the experimental uncertainty bounds, for
+example), but another quantity less accurately. For example, in the a series of 15 full-scale fire experiments conducted at NIST in 2003, sponsored
+by the U.S.~Nuclear Regulatory Commission, the average hot gas layer (HGL) temperature predictions were nearly within the accuracy of the measurements
+themselves, yet the smoke concentration predictions differed from the measurements by as much as a factor of 3. Why? Consider the following issues
+associated with various types of measurements:
+\begin{itemize}
+\item Is the measurement taken at a single point, or averaged over many points? In the example above, the HGL temperature is an average of many
+thermocouple measurements, whereas the smoke concentration is based on the extinction of laser light over a short length span. Model error tends to
+be reduced by the averaging process, plus most fire models, including FDS, are based on global mass and energy conservation laws that are expressed
+as spatial averages.
+\item Is the measured quantity time-averaged or instantaneous? For example, a surface temperature prediction is less prone to error in comparison to a
+heat flux prediction because the former is, in some sense, a time-integral of the latter.
+\item In the case of a point measurement, how close to the fire is it? The terms ``near-field'' and ``far-field'' are used throughout this Guide to describe
+the relative distance from the fire. In general, predictions of near-field phenomena are more prone to error than far-field. There are exceptions,
+however. For example, a prediction of the temperature directly within the flaming region may be more accurate than that made just a fire diameter
+away because of the fact that temperatures tend to stabilize at about 1000~$^\circ$C within the fire itself, but then rapidly decrease away from the
+flames. Less accurate predictions typically occur in regions of steep gradients (rapid changes, both in space and time).
+\end{itemize}
