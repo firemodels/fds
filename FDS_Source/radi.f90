@@ -495,7 +495,7 @@ USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
 USE TRAN, ONLY : GET_IJK
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,COSINE,EFLUX,TYY_FAC, &
-            AIU_SUM,A_SUM,KFST4_SUM,RAD_Q_SUM,RTE_SOURCE_CORRECTION_FACTOR,VOL
+            AIU_SUM,A_SUM,KFST4_SUM,RAD_Q_SUM,RTE_SOURCE_CORRECTION_FACTOR,VOL, VC1,AY1,AZ1
 REAL(EB), PARAMETER :: Q_MINIMUM=100._EB
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
@@ -910,17 +910,20 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ELSE GEOMETRY  ! Sweep in 3D cartesian geometry
 
                KLOOP: DO K=KSTART,KEND,KSTEP
+                  AY1 = DZ(K) * ABS(DLY(N))
                   JLOOP: DO J=JSTART,JEND,JSTEP
+                     AX  = DY(J) * DZ(K) * ABS(DLX(N))
+                     VC1 = DY(J) * DZ(K)
+                     AZ1 = DY(J) * ABS(DLZ(N))
                      ILOOP: DO I=ISTART,IEND,ISTEP
                         IC = CELL_INDEX(I,J,K)
                         IF (SOLID(IC)) CYCLE ILOOP
                         ILXU  = IL(I-ISTEP,J,K)
                         ILYU  = IL(I,J-JSTEP,K)
                         ILZU  = IL(I,J,K-KSTEP)
-                        VC  = DX(I) * DY(J) * DZ(K)
-                        AX  =         DY(J) * DZ(K) * ABS(DLX(N))
-                        AY  = DX(I)         * DZ(K) * ABS(DLY(N))
-                        AZ  = DX(I) * DY(J)         * ABS(DLZ(N))
+                        VC  = DX(I) * VC1                        
+                        AY  = DX(I) * AY1
+                        AZ  = DX(I) * AZ1
                         IF (IC/=0) THEN
                            IW = WALL_INDEX(IC,-ISTEP)
                            IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ONE_D%ILW(N,IBND)
@@ -931,10 +934,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         ENDIF
                         A_SUM = AX + AY + AZ
                         AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU 
+                        IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                         RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                         IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
                                        ( KFST4(I,J,K)+KFST4W(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
-                        IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                      ENDDO ILOOP
                   ENDDO JLOOP
                ENDDO KLOOP
@@ -1124,9 +1127,10 @@ ENDIF
 
 END SUBROUTINE RADIATION_FVM
 
-END SUBROUTINE COMPUTE_RADIATION
 
+END SUBROUTINE COMPUTE_RADIATION
  
+
 REAL(EB) FUNCTION BLACKBODY_FRACTION(L1,L2,TEMP)
  
 ! Calculates the fraction of black body radiation between wavelengths L1 and L2 (micron) in Temperature TEMP

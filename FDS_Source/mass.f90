@@ -44,7 +44,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,OPEN_BOUNDARY,INTERP
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: KN,MUGAS,MASS_P,TGAS,TNOW,TMP_FILM,TWALL,ZZZ(4),UN,WW_GRAV,ZZ_GET(0:N_TRACKED_SPECIES)
 REAL(EB), PARAMETER :: CHI_D=1._EB,MFP25=0.065E-6_EB
-INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,SURF_INDEX
+INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,SURF_INDEX,JM1,JP2,KM1,KP2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
@@ -96,8 +96,10 @@ ENDDO
 !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
 DO K=1,KBAR
    DO J=1,JBM1
+      JM1 = J-1
+      JP2 = J+2
       DO I=1,IBAR
-         ZZZ(1:4) = RHOP(I,J-1:J+2,K)
+         ZZZ(1:4) = RHOP(I,JM1:JP2,K)
          FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
       ENDDO
    ENDDO
@@ -106,9 +108,11 @@ ENDDO
 
 !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
 DO K=1,KBM1
+   KM1 = K-1
+   KP2 = K+2
    DO J=1,JBAR
       DO I=1,IBAR
-         ZZZ(1:4) = RHOP(I,J,K-1:K+2)
+         ZZZ(1:4) = RHOP(I,J,KM1:KP2)
          FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
       ENDDO
    ENDDO
@@ -263,8 +267,10 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
       DO K=1,KBAR
          DO J=1,JBM1
+            JM1 = J-1
+            JP2 = J+2
             DO I=1,IBAR
-               ZZZ(1:4) = RHOP(I,J-1:J+2,K)*ZZP(I,J-1:J+2,K,N)
+               ZZZ(1:4) = RHOP(I,JM1:JP2,K)*ZZP(I,JM1:JP2,K,N)
                FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
             ENDDO
          ENDDO
@@ -274,9 +280,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       IF (.NOT. SM%DEPOSITING .OR. .NOT. GRAVITATIONAL_DEPOSITION) THEN
          !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
          DO K=1,KBM1
+            KM1 = K-1
+            KP2 = K+2
             DO J=1,JBAR
                DO I=1,IBAR
-                  ZZZ(1:4) = RHOP(I,J,K-1:K+2)*ZZP(I,J,K-1:K+2,N)
+                  ZZZ(1:4) = RHOP(I,J,KM1:KP2)*ZZP(I,J,KM1:KP2,N)
                   FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
                ENDDO
             ENDDO
@@ -287,6 +295,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ! If gravitation deposition is enabled, transport depositing aerosol via WW minus settling velocity
          ! K. Overholt
          DO K=1,KBM1
+            KM1 = K-1
+            KP2 = K+2
             DO J=1,JBAR
                DO I=1,IBAR
                   ! Calculate WW_GRAV (terminal settling velocity)
@@ -301,7 +311,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                   WW_GRAV = GVEC(ABS(IOR))*SIGN(1,IOR)*MASS_P*(1._EB+1.25_EB*KN+0.41_EB*KN*EXP(-0.88_EB/KN))/ &
                                                      (3._EB*CHI_D*MUGAS*SM%MEAN_DIAMETER)
                   ! Calculate FZ including WW_GRAV effects
-                  ZZZ(1:4) = RHOP(I,J,K-1:K+2)*ZZP(I,J,K-1:K+2,N)
+                  ZZZ(1:4) = RHOP(I,J,KM1:KP2)*ZZP(I,J,KM1:KP2,N)
                   FZ(I,J,K) = (WW(I,J,K) - WW_GRAV)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
                ENDDO
             ENDDO
@@ -712,7 +722,7 @@ SUBROUTINE CHECK_DENSITY
 ! Do not apply OpenMP to this routine
 
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR,RHOMIN,RHOMAX
-REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N
+REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3)
 INTEGER  :: IC,I,J,K
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL()
 
@@ -727,6 +737,13 @@ ENDIF
 
 DO K=1,KBAR
    DO J=1,JBAR
+      VC1( 0)  = DY(J)  *DZ(K)
+      VC1(-1)  = VC1( 0)
+      VC1( 1)  = VC1( 0)
+      VC1(-2)  = DY(J-1)*DZ(K)
+      VC1( 2)  = DY(J+1)*DZ(K)
+      VC1(-3)  = DY(J)  *DZ(K-1)
+      VC1( 3)  = DY(J)  *DZ(K+1)
       DO I=1,IBAR
 
          IF (RHOP(I,J,K)>=RHOMIN .AND. RHOP(I,J,K)<=RHOMAX) CYCLE
@@ -740,13 +757,13 @@ DO K=1,KBAR
             SIGN_FACTOR = -1._EB
          ENDIF
          MASS_N = 0._EB
-         VC( 0)  = DX(I)  *DY(J)  *DZ(K)
-         VC(-1)  = DX(I-1)*DY(J)  *DZ(K)
-         VC( 1)  = DX(I+1)*DY(J)  *DZ(K)
-         VC(-2)  = DX(I)  *DY(J-1)*DZ(K)
-         VC( 2)  = DX(I)  *DY(J+1)*DZ(K)
-         VC(-3)  = DX(I)  *DY(J)  *DZ(K-1)
-         VC( 3)  = DX(I)  *DY(J)  *DZ(K+1)
+         VC( 0)  = DX(I)  * VC1( 0)
+         VC(-1)  = DX(I-1)* VC1(-1)
+         VC( 1)  = DX(I+1)* VC1( 1)
+         VC(-2)  = DX(I)  * VC1(-2)
+         VC( 2)  = DX(I)  * VC1( 2)
+         VC(-3)  = DX(I)  * VC1(-3)
+         VC( 3)  = DX(I)  * VC1( 3)
 
          MASS_C = ABS(RHO_CUT-RHOP(I,J,K))*VC(0)
          IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I-1,J,K)))-RHO_CUT)*VC(-1)
@@ -780,7 +797,7 @@ SUBROUTINE CHECK_MASS_FRACTION
 ! Do not apply OpenMP to this routine
 
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR,N_TRACKED_SPECIES
-REAL(EB) :: SUM,CONST,MASS_C,MASS_N(-3:3),ZZ_CUT,SIGN_FACTOR,SUM_MASS_N,VC(-3:3)
+REAL(EB) :: SUM,CONST,MASS_C,MASS_N(-3:3),ZZ_CUT,SIGN_FACTOR,SUM_MASS_N,VC(-3:3),VC1(-3:3)
 INTEGER  :: IC,N,I,J,K
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_ZZ=>NULL()
 
@@ -800,6 +817,13 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    DO K=1,KBAR
       DO J=1,JBAR
+         VC1( 0)  = DY(J)  *DZ(K)
+         VC1(-1)  = VC1( 0)
+         VC1( 1)  = VC1( 0)
+         VC1(-2)  = DY(J-1)*DZ(K)
+         VC1( 2)  = DY(J+1)*DZ(K)
+         VC1(-3)  = DY(J)  *DZ(K-1)
+         VC1( 3)  = DY(J)  *DZ(K+1)         
          DO I=1,IBAR
 
             IF (ZZP(I,J,K,N)>=0._EB .AND. ZZP(I,J,K,N)<=1._EB) CYCLE
@@ -813,13 +837,13 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                SIGN_FACTOR = -1._EB
             ENDIF
             MASS_N = 0._EB
-            VC( 0) = DX(I)  *DY(J)  *DZ(K)
-            VC(-1) = DX(I-1)*DY(J)  *DZ(K)
-            VC( 1) = DX(I+1)*DY(J)  *DZ(K)
-            VC(-2) = DX(I)  *DY(J-1)*DZ(K)
-            VC( 2) = DX(I)  *DY(J+1)*DZ(K)
-            VC(-3) = DX(I)  *DY(J)  *DZ(K-1)
-            VC( 3) = DX(I)  *DY(J)  *DZ(K+1)
+            VC( 0)  = DX(I)  * VC1( 0)
+            VC(-1)  = DX(I-1)* VC1(-1)
+            VC( 1)  = DX(I+1)* VC1( 1)
+            VC(-2)  = DX(I)  * VC1(-2)
+            VC( 2)  = DX(I)  * VC1( 2)
+            VC(-3)  = DX(I)  * VC1(-3)
+            VC( 3)  = DX(I)  * VC1( 3)
 
             IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = RHOP(I-1,J,K)*ABS(MIN(1._EB,MAX(0._EB,ZZP(I-1,J,K,N)))-ZZ_CUT)*VC(-1)
             IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = RHOP(I+1,J,K)*ABS(MIN(1._EB,MAX(0._EB,ZZP(I+1,J,K,N)))-ZZ_CUT)*VC( 1)
@@ -943,9 +967,7 @@ WIND_DIRECTION_IF: IF (A>0._EB) THEN
    DU_UP  = U(2)-U(1)
    DU_LOC = U(3)-U(2)
 
-   R = 0._EB
-   B = 0._EB
-   IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
+   R = DU_UP/(DU_LOC+ZERO_P)
    B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
    SCALAR_FACE_SUPERBEE = U(2) + 0.5_EB*B*DU_LOC
 
@@ -955,9 +977,7 @@ ELSE WIND_DIRECTION_IF
    DU_UP  = U(4)-U(3)
    DU_LOC = U(3)-U(2)
 
-   R = 0._EB
-   B = 0._EB
-   IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
+   R = DU_UP/(DU_LOC+ZERO_P)
    B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
    SCALAR_FACE_SUPERBEE = U(3) - 0.5_EB*B*DU_LOC
 
@@ -991,9 +1011,7 @@ WIND_DIRECTION_IF: IF (A>0._EB) THEN
    DU_UP  = U(2)-U(1)
    DU_LOC = U(3)-U(2)
 
-   R = 0._EB
-   B = 0._EB
-   IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
+   R = DU_UP/(DU_LOC+ZERO_P)
    B = MAX(0._EB,MIN(1._EB,R))
    SCALAR_FACE_MINMOD = U(2) + 0.5_EB*B*DU_LOC
     
@@ -1003,9 +1021,8 @@ ELSE WIND_DIRECTION_IF
    DU_UP  = U(4)-U(3)
    DU_LOC = U(3)-U(2)
 
-   R = 0._EB
-   B = 0._EB
-   IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
+
+   R = DU_UP/(DU_LOC+ZERO_P)
    B = MAX(0._EB,MIN(1._EB,R))
    SCALAR_FACE_MINMOD = U(3) - 0.5_EB*B*DU_LOC
     
@@ -1126,6 +1143,7 @@ ELSE
 ENDIF
 
 END FUNCTION MP5
+
 
 
 SUBROUTINE GET_REV_mass(MODULE_REV,MODULE_DATE)
