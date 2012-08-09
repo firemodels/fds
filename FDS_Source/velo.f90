@@ -1856,7 +1856,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                  CASE (WALL_MODEL) BOUNDARY_CONDITION
+                  CASE (WALL_MODEL_BC) BOUNDARY_CONDITION
 
                      IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .OR. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
                         MU_WALL = MUA
