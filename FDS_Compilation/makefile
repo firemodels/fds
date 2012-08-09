@@ -23,7 +23,7 @@ objwin_serial = $(obj_serial:.o=.obj)
 
 obj_mpi = prec.o mpip.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
           ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o mass.o \
-	  read.o mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
+	  read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
 
