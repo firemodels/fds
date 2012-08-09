@@ -815,7 +815,7 @@ REAL(EB), PARAMETER :: B_LOGLAW=5.2_EB, B2=8.5_EB, BTILDE_MAX = 9.5_EB ! see Pop
 REAL(EB), PARAMETER :: R_PLUS_SMOOTH=5.83_EB, R_PLUS_ROUGH=30._EB ! approx piece-wise function for Fig. 7.24, Pope (2000) p. 297
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
-REAL(EB) :: TAU_W,NUODZ,Z_PLUS,TAU_ROUGH,BTILDE,D_NU,R_PLUS,TAU_SMOOTH
+REAL(EB) :: TAU_W,NUODZ,Z_PLUS,TAU_ROUGH,BTILDE,RD_NU,R_PLUS,TAU_SMOOTH
 INTEGER :: ITER
 
 ! References (for smooth walls):
@@ -863,13 +863,13 @@ INTEGER :: ITER
 NUODZ = NU/DZ
 TAU_W = (ALPHA*(NUODZ**BETA) + ETA*(NUODZ**B)*ABS(U1))**GAMMA ! actually tau_w/rho
 U_TAU = SQRT(TAU_W)
-D_NU  = NU/(U_TAU+EPS) ! viscous length scale
+RD_NU  = U_TAU/NU ! viscous length scale
 
 ! Pope (2000)
 IF (ROUGHNESS>0._EB) THEN
    TAU_SMOOTH=TAU_W
    DO ITER=1,2
-      R_PLUS = ROUGHNESS/D_NU ! roughness in viscous units
+      R_PLUS = ROUGHNESS*RD_NU ! roughness in viscous units
       IF (R_PLUS < R_PLUS_SMOOTH) THEN
          BTILDE = B_LOGLAW + RKAPPA*LOG(R_PLUS) ! Pope (2000) p. 297, Eq. (7.122)
       ELSEIF (R_PLUS < R_PLUS_ROUGH) THEN
@@ -880,11 +880,11 @@ IF (ROUGHNESS>0._EB) THEN
       TAU_ROUGH = ( U1/(RKAPPA*LOG(0.5_EB*DZ/ROUGHNESS)+BTILDE) )**2 ! actually tau_w/rho
       TAU_W = MAX(TAU_SMOOTH,TAU_ROUGH)
       U_TAU = SQRT(TAU_W)
-      D_NU  = NU/(U_TAU+EPS)
+      RD_NU  = U_TAU/NU
    ENDDO
 ENDIF
 
-Z_PLUS = DZ/(D_NU+EPS)
+Z_PLUS = DZ*RD_NU
 IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
    SF = 1._EB-TAU_W/(NUODZ*ABS(U1)+EPS) ! log layer
 ELSE
