@@ -375,7 +375,7 @@ L1000: DO KK=1, NOM
 
             YC=1._EB-(XC/XSTAR)**2
             Y=MAX(1._EB/YC**2+1._EB/YD**2-1._EB,1._EB)
-            X(I)=XSTAR*((1._EB-(Y**(-.5_EB)))**.5_EB)
+            X(I)=XSTAR*(SQRT(1._EB-(Y**(-.5_EB))))
          ELSE
             X(I)=XSTAR
          ENDIF
@@ -620,7 +620,7 @@ ELSE
                OMVV3=OM3+.5_EB*X13+X23+2._EB*X33+XBAR*V+2._EB*X33*V3
                DELTA=A*(OMEGA-OMVV3)
                IF(GAM*GAM<=DELTA) CYCLE L202
-               D=2._EB*(GAM*GAM-DELTA)**.5_EB
+               D=2._EB*SQRT(GAM*GAM-DELTA)
                OMVBAR=OMVV3*(1._EB-EXP(-OMVV3*Q2OT))
                F1=GAM-D/2
                F2=GAM+D/2._EB
@@ -641,7 +641,7 @@ ELSE
                SDWEAK=(SMINUS+SPLUS)/D+SDWEAK
                TEST=(SDWEAK-GG)/SDWEAK
                IF(TEST<.0001) CYCLE L202
-               SDSTRG=(.5_EB*G)**.5_EB*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
+               SDSTRG=SQRT(.5_EB*G)*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
             ENDDO L201
          ENDDO L202
          IF(SDWEAK<=ZERO_P) THEN
@@ -685,7 +685,7 @@ ELSE
          ENDIF
          DELTA=A*(OMEGA-OMVV3)
          IF(GAM*GAM<=DELTA) CYCLE L102
-         D=2._EB*(GAM*GAM-DELTA)**.5_EB
+         D=2._EB*SQRT(GAM*GAM-DELTA)
          OMVBAR=OMVV3*(1._EB-EXP(OMVV3*Q2OT))
          F1=GAM-D/2._EB
          F2=GAM+D/2._EB
@@ -765,7 +765,7 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
                OMVV3=OM3+.5_EB*X13+X23+2._EB*X33+XBAR*V+2._EB*X33*V3
                DELTA=A*(OMEGA-OMVV3)
                IF(GAM*GAM<=DELTA) CYCLE L202A
-               D=2._EB*(GAM*GAM-DELTA)**.5_EB
+               D=2._EB*SQRT(GAM*GAM-DELTA)
                OMVBAR=OMVV3*(1._EB-EXP(-OMVV3*Q2/TEMP))
                F1=GAM-D/2._EB
                F2=GAM+D/2._EB
@@ -786,7 +786,7 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
                SDWEAK=(SMINUS+SPLUS)/D+SDWEAK
                TEST=(SDWEAK-GG)/SDWEAK
                IF(TEST<.0001_EB) CYCLE L202A
-               SDSTRG=(.5_EB*G)**.5_EB*(SMINUS**.5+SPLUS**.5)/D+SDSTRG
+               SDSTRG=SQRT(0.5_EB*G)*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
             ENDDO L201A
          ENDDO L202A
          IF(SDWEAK<=ZERO_P) THEN
@@ -830,7 +830,7 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
                ENDIF
                DELTA=A*(OMEGA-OMVV3)
                IF(GAM*GAM<=DELTA) CYCLE L102A
-               D=2._EB*(GAM*GAM-DELTA)**.5_EB
+               D=2._EB*SQRT(GAM*GAM-DELTA)
                OMVBAR=OMVV3*(1._EB-EXP(-OMVV3*Q2/TEMP))
                F1=GAM-D/2._EB
                F2=GAM+D/2._EB
@@ -851,7 +851,7 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
                SDWEAK=(SMINUS+SPLUS)/D+SDWEAK
                TEST=(SDWEAK-GG)/SDWEAK
                IF(TEST<.0001) CYCLE L102A
-               SDSTRG=(.5_EB*G)**.5_EB*(SMINUS**.5+SPLUS**.5)/D+SDSTRG
+               SDSTRG=SQRT(.5_EB*G)*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
             ENDDO L101A
          ENDDO L102A
          IF(L==2) EXIT L120A
@@ -967,7 +967,7 @@ IF (OMEGA>=9300..OR.OMEGA<50._EB) THEN
    GDDINV=1._EB
 ELSE
    WM   = 18._EB
-   GD   = 5.94E-6_EB*OMEGA*(TEMP/(273._EB*WM))**.5_EB
+   GD   = 5.94E-6_EB*OMEGA*SQRT(TEMP/(273._EB*WM))
    J    = (OMEGA-25._EB)/25._EB
    TTEMP= TEMP
 
@@ -1167,7 +1167,7 @@ ELSE
       SDWEAK=0.0_EB
 
       DO I=1,4
-         SDWEAK=SDWEAK+2._EB*(OMEGA-BCNT(I))**2*(-Q2OT*BE)**1.5_EB  *ATOT(I)/SQRTPI*DINV**3*EXP(Q2OT*BE*DINV**2 &
+         SDWEAK=SDWEAK+2._EB*(OMEGA-BCNT(I))**2*(-Q2OT*BE)*SQRT(-Q2OT*BE)*ATOT(I)/SQRTPI*DINV**3*EXP(Q2OT*BE*DINV**2 &
          *(OMEGA-BCNT(I))**2)
       ENDDO
       SDWEAK=SDWEAK*TOAZ
@@ -1319,7 +1319,7 @@ IF((OM_BND_CH4(N_BAND_CH4,1)<=OMEGA).AND.(OMEGA<=OM_BND_CH4(N_BAND_CH4,2))) THEN
    ENDDO
 
 ! EQ 6 IN GRAY AND PENNER JQSRT, VOL 5, PAGE 611-620, 1965
-   SDWEAK=SDWEAK*2._EB*(-Q2OT*BE_CH4)**1.5_EB/SQRTPI*DINV_CH4**3
+   SDWEAK=SDWEAK*2._EB*(-Q2OT*BE_CH4)*SQRT(-Q2OT*BE_CH4)/SQRTPI*DINV_CH4**3
 
 !***EXPRESS S/D AT STANDARD TEMPERATURE AND PRESSURE, AS IS IN NASA SP-3080
    SDWEAK = SDWEAK*TOAZ
