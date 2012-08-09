@@ -1351,6 +1351,7 @@ DO NS=0,1
    TOTAL_MIX_MASS(NS) = (1-ZETA_0)*CELL_MASS
    SPEC_MIX_MASS(:,NS) = ZZ_GET*TOTAL_MIX_MASS(NS)
 ENDDO
+
 INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
    IF (COMBUSTION_ODE /= EDCM_RK2) THEN ! Explicit Euler
       ZETA1 = ZETA_0*EXP(-DT_SUB/MIX_TIME(I,J,K))
@@ -1436,7 +1437,7 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
             ENDDO REACTION_LOOP1_2    
             A1 = A1 + DZZDT1_2*DT_SUB 
             A1 = 0.5_EB*(ZZ_0 + A1)
-            IF (ABS(SUM(A1)-1._EB) < -ZERO_P) CALL SHUTDOWN('ERROR: Error in Reaction Species')                               
+            IF (SUM(A1)-1._EB > ZERO_P) CALL SHUTDOWN('ERROR: Error in Reaction Species')                               
          ENDDO ODE_LOOP1     
          !--------------------
          ! Calculate A2 term
@@ -1452,37 +1453,37 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
                RN => REACTION(NR)
                CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT(NR),ZZ_0,I,J,K,DT_SUB,ITER)
                DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
-               IF (ANY(ZZ_0 + (DZZDT2_1+DZZDT)*(DT_SUB/2._EB) < 0._EB)) THEN
+               IF (ANY(ZZ_0 + (DZZDT2_1+DZZDT)*(DT_SUB*0.5_EB) < 0._EB)) THEN
                   DO NSS=0,N_TRACKED_SPECIES
-                     IF (ZZ_0(NSS) + (DZZDT(NSS)+DZZDT2_1(NSS))*(DT_SUB/2._EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     IF (ZZ_0(NSS) + (DZZDT(NSS)+DZZDT2_1(NSS))*(DT_SUB*0.5_EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
                         RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/&
-                        ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB/2._EB)))
+                        ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB*0.5_EB)))
                      ENDIF
                   ENDDO
                   DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
                ENDIF
                DZZDT2_1 = DZZDT2_1+DZZDT
             ENDDO REACTION_LOOP2_1   
-            A2 = ZZ_0 + DZZDT2_1*(DT_SUB/2._EB)
+            A2 = ZZ_0 + DZZDT2_1*(DT_SUB*0.5_EB)
                   
             REACTION_LOOP2_2: DO NR = 1, N_REACTIONS   
                RN => REACTION(NR)
                CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT2(NR),A2,I,J,K,DT_SUB,ITER)
                DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
-               IF (ANY(A2 + (DZZDT2_2+DZZDT)*(DT_SUB/2._EB) < 0._EB)) THEN
+               IF (ANY(A2 + (DZZDT2_2+DZZDT)*(DT_SUB*0.5_EB) < 0._EB)) THEN
                   DO NSS=0,N_TRACKED_SPECIES
-                     IF (A2(NSS) + (DZZDT(NSS)+DZZDT2_2(NSS))*(DT_SUB/2._EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     IF (A2(NSS) + (DZZDT(NSS)+DZZDT2_2(NSS))*(DT_SUB*0.5_EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
                         RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A2(NSS)/&
-                        ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB/2._EB)))
+                        ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB*0.5_EB)))
                      ENDIF
                   ENDDO
                   DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
                ENDIF
                DZZDT2_2 = DZZDT2_2+DZZDT
             ENDDO REACTION_LOOP2_2    
-            A2 = A2 + DZZDT2_2*(DT_SUB/2._EB)
+            A2 = A2 + DZZDT2_2*(DT_SUB*0.5_EB)
             A2 = 0.5_EB*(ZZ_0 + A2) 
-            IF (ABS(SUM(A2)-1._EB) < -ZERO_P) CALL SHUTDOWN('ERROR: Error in Reaction Species')               
+            IF (SUM(A2)-1._EB > ZERO_P) CALL SHUTDOWN('ERROR: Error in Reaction Species')               
             ZZ_0 = A2
          ENDDO ODE_LOOP2
      
@@ -1500,37 +1501,37 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
                RN => REACTION(NR)
                CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT(NR),ZZ_0,I,J,K,DT_SUB,ITER)
                DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
-               IF (ANY(ZZ_0 + (DZZDT4_1+DZZDT)*(DT_SUB/4._EB) < 0._EB)) THEN
+               IF (ANY(ZZ_0 + (DZZDT4_1+DZZDT)*(DT_SUB*0.25_EB) < 0._EB)) THEN
                   DO NSS=0,N_TRACKED_SPECIES
-                     IF (ZZ_0(NSS) + (DZZDT(NSS)+DZZDT4_1(NSS))*(DT_SUB/4._EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     IF (ZZ_0(NSS) + (DZZDT(NSS)+DZZDT4_1(NSS))*(DT_SUB*0.25_EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
                         RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/&
-                        ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB/4._EB)))
+                        ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB*0.25_EB)))
                      ENDIF
                   ENDDO
                   DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
                ENDIF
                DZZDT4_1 = DZZDT4_1+DZZDT
             END DO REACTION_LOOP4_1   
-            A4 = ZZ_0 + DZZDT4_1*(DT_SUB/4._EB)
+            A4 = ZZ_0 + DZZDT4_1*(DT_SUB*0.25_EB)
 
             REACTION_LOOP4_2: DO NR = 1, N_REACTIONS   
                RN => REACTION(NR)
                CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT2(NR),A4,I,J,K,DT_SUB,ITER)
                DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
-               IF (ANY(A4 + (DZZDT4_2+DZZDT)*(DT_SUB/4._EB) < 0._EB)) THEN
+               IF (ANY(A4 + (DZZDT4_2+DZZDT)*(DT_SUB*0.25_EB) < 0._EB)) THEN
                   DO NSS=0,N_TRACKED_SPECIES
-                     IF (A4(NSS) + (DZZDT(NSS)+DZZDT4_2(NSS))*(DT_SUB/4._EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     IF (A4(NSS) + (DZZDT(NSS)+DZZDT4_2(NSS))*(DT_SUB*0.25_EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
                         RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A4(NSS)/&
-                        ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB/4._EB)))
+                        ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB*0.25_EB)))
                      ENDIF
                   ENDDO
                   DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
                ENDIF
                DZZDT4_2 = DZZDT4_2+DZZDT
             ENDDO REACTION_LOOP4_2    
-            A4 = A4 + DZZDT4_2*(DT_SUB/4._EB)
+            A4 = A4 + DZZDT4_2*(DT_SUB*0.25_EB)
             A4 = 0.5_EB*(ZZ_0 + A4) 
-            IF (ABS(SUM(A4)-1._EB) < -ZERO_P) CALL SHUTDOWN('ERROR: Error A4 in Reaction Species')            
+            IF (SUM(A4)-1._EB > ZERO_P) CALL SHUTDOWN('ERROR: Error A4 in Reaction Species')            
             ZZ_0 = A4
          ENDDO ODE_LOOP4
 

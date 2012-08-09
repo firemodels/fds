@@ -2579,6 +2579,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
       WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
       IF (SUPPRESSION) THEN
          WRITE(LU_OUTPUT,'(3X,A,A)')  'Extinction Model:  ', EXTINCTION_MODEL
+         WRITE(LU_OUTPUT,'(3X,A,F8.1)')  'Critical Flame Temperature (K):  ', RN%CRIT_FLAME_TMP
       ENDIF
       WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
       WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
