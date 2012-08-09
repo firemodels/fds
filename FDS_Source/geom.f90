@@ -696,6 +696,7 @@ IF (ABS(T-T_BEGIN)<ZERO_P) THEN
    CALL ChkMemErr('INIT_GEOM','CUTCELL_INDEX',IZERO) 
 ENDIF
 
+M%CUTCELL_INDEX = 0
 CUTCELL_COUNT = 0
 
 GEOC_LOOP: DO N=1,N_GEOM
@@ -801,8 +802,8 @@ FACE_LOOP: DO N=1,N_FACE
             BB(6) = M%Z(K)
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
             
-            IF (IERR==1) THEN      
-               CALL TRIANGLE_ON_CELL_SURF(IERR1,FACET(N)%NVEC,V1,M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))
+            IF (IERR==1) THEN
+               CALL TRIANGLE_ON_CELL_SURF(IERR1,FACET(N)%NVEC,V1,M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))  
                IF (IERR1==-1) CYCLE ! remove the possibility of double counting
                               
                CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
@@ -815,7 +816,7 @@ FACE_LOOP: DO N=1,N_FACE
                      V_POLYGON_CENTROID = POLYGON_CENTROID(NXP,XPC)
                      CALL POLYGON_CLOSE_TO_EDGE(IOR,FACET(N)%NVEC,V_POLYGON_CENTROID,&
                                                 M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))
-                     IF (IOR==1) THEN ! assign the cutcell area to a neighbor cell
+                     IF (IOR/=0) THEN ! assign the cutcell area to a neighbor cell
                         SELECT CASE(IOR)
                            CASE(1)
                               IF (I==M%IBAR) THEN 
@@ -2271,7 +2272,7 @@ INTEGER, INTENT(OUT) :: IERR
 REAL(EB), INTENT(OUT) :: Q(3)
 REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),P0(3),P1(3)
 REAL(EB) :: E1(3),E2(3),S(3),U,V,TMP,T,D(3),P(3)
-REAL(EB), PARAMETER :: EPS=1.E-10_EB
+REAL(EB), PARAMETER :: EPS=1.E-10_EB,TOL=1.E-15
 INTEGER :: IERR2
 
 IERR  = 0
@@ -2304,8 +2305,9 @@ IF (V<0._EB .OR. (U+V)>1._EB) IERR2=0
 T = TMP*DOT_PRODUCT(E2,Q)
 Q = P0 + T*D ! the intersection point
 
-IF (T>=0._EB .AND. T<=1._EB) IERR=1
+IF (T>=0._EB-TOL .AND. T<=1._EB+TOL) IERR=1
 
+RETURN
 END SUBROUTINE LINE_SEG_TRI_PLANE_INTERSECT
 
 
@@ -2366,7 +2368,7 @@ IMPLICIT NONE
 
 INTEGER, INTENT(OUT) :: IERR1
 REAL(EB), INTENT(IN) :: N_VEC(3),V(3),XC,YC,ZC,DX,DY,DZ
-REAL(EB) :: DIST(3)
+REAL(EB) :: DIST(3),TOL=1.E-15_EB
 
 IERR1 = 1
 DIST = 0._EB
@@ -2374,7 +2376,7 @@ DIST = 0._EB
 
 IF (N_VEC(1)==1._EB .OR. N_VEC(1)==-1._EB) THEN
    DIST(1) = XC-V(1)
-   IF (ABS(DIST(1))==DX*0.5_EB .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+   IF ( ABS(ABS(DIST(1))-DX*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
       IERR1 = -1
    ENDIF
    RETURN
@@ -2382,7 +2384,7 @@ ENDIF
 
 IF (N_VEC(2)==1._EB .OR. N_VEC(2)==-1._EB) THEN
    DIST(2) = YC-V(2)
-   IF (ABS(DIST(2))==DY*0.5_EB .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+   IF ( ABS(ABS(DIST(2))-DY*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
       IERR1 = -1
    ENDIF
    RETURN
@@ -2390,7 +2392,7 @@ ENDIF
 
 IF (N_VEC(3)==1._EB .OR. N_VEC(3)==-1._EB) THEN
    DIST(3) = ZC-V(3)
-   IF (ABS(DIST(3))==DZ*0.5_EB .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+   IF ( ABS(ABS(DIST(3))-DZ*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
       IERR1 = -1
    ENDIF
    RETURN
