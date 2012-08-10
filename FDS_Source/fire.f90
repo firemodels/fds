@@ -1437,7 +1437,7 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
             ENDDO REACTION_LOOP1_2    
             A1 = A1 + DZZDT1_2*DT_SUB 
             A1 = 0.5_EB*(ZZ_0 + A1)
-            IF (SUM(A1)-1._EB > ZERO_P) CALL SHUTDOWN('ERROR: Error in Reaction Species')                               
+            IF (SUM(A1)-1._EB > ZZ_MIN) CALL SHUTDOWN('ERROR: Error in Reaction Species')                               
          ENDDO ODE_LOOP1     
          !--------------------
          ! Calculate A2 term
@@ -1483,7 +1483,7 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
             ENDDO REACTION_LOOP2_2    
             A2 = A2 + DZZDT2_2*(DT_SUB*0.5_EB)
             A2 = 0.5_EB*(ZZ_0 + A2) 
-            IF (SUM(A2)-1._EB > ZERO_P) CALL SHUTDOWN('ERROR: Error in Reaction Species')               
+            IF (SUM(A2)-1._EB > ZZ_MIN) CALL SHUTDOWN('ERROR: Error in Reaction Species')               
             ZZ_0 = A2
          ENDDO ODE_LOOP2
      
@@ -1531,7 +1531,7 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
             ENDDO REACTION_LOOP4_2    
             A4 = A4 + DZZDT4_2*(DT_SUB*0.25_EB)
             A4 = 0.5_EB*(ZZ_0 + A4) 
-            IF (SUM(A4)-1._EB > ZERO_P) CALL SHUTDOWN('ERROR: Error A4 in Reaction Species')            
+            IF (SUM(A4)-1._EB > ZZ_MIN) CALL SHUTDOWN('ERROR: Error A4 in Reaction Species')            
             ZZ_0 = A4
          ENDDO ODE_LOOP4
 
