@@ -1099,6 +1099,7 @@ MESH_LOOP: DO NM=1,NMESHES
             END SELECT
 
             DO N=1,T%NOC(IC)+1
+               IF (T%C1(N,IC)-T%C1(N-1,IC)<ZERO_P) CALL SHUTDOWN('ERROR: Do not specify endpoints in linear grid transformation')
                T%C3(N,IC) = (T%C2(N,IC)-T%C2(N-1,IC))/(T%C1(N,IC)-T%C1(N-1,IC))
             ENDDO
       END SELECT
