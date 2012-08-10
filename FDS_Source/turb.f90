@@ -863,7 +863,7 @@ INTEGER :: ITER
 NUODZ = NU/DZ
 TAU_W = (ALPHA*(NUODZ**BETA) + ETA*(NUODZ**B)*ABS(U1))**GAMMA ! actually tau_w/rho
 U_TAU = SQRT(TAU_W)
-RD_NU  = U_TAU/NU ! viscous length scale
+RD_NU  = U_TAU/(NU+EPS) ! viscous length scale
 
 ! Pope (2000)
 IF (ROUGHNESS>0._EB) THEN
@@ -880,7 +880,7 @@ IF (ROUGHNESS>0._EB) THEN
       TAU_ROUGH = ( U1/(RKAPPA*LOG(0.5_EB*DZ/ROUGHNESS)+BTILDE) )**2 ! actually tau_w/rho
       TAU_W = MAX(TAU_SMOOTH,TAU_ROUGH)
       U_TAU = SQRT(TAU_W)
-      RD_NU  = U_TAU/NU
+      RD_NU  = U_TAU/(NU+EPS)
    ENDDO
 ENDIF
 
