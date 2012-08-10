@@ -23,7 +23,7 @@
 	RGB =200,100,0
 	BACKING = 'INSULATED' 
 	THICKNESS = 0.00001
-        H_FIXED = 0.
+        HEAT_TRANSFER_COEFFICIENT = 0.
 	MATL_ID(1,1) = 'BIRCH',
 	MATL_ID(1,2) = 'MOISTURE'
 	MATL_MASS_FRACTION(1,:) = 0.9725,0.0275 /  
@@ -67,7 +67,7 @@
 	EMISSIVITY = 1.0
 	RGB        = 250,0,0
 	TMP_FRONT  = 820.
-        H_FIXED    = 0.
+        HEAT_TRANSFER_COEFFICIENT    = 0.
 	RAMP_T 	   = 'T_RAMP' /
 
 &RAMP ID = 'T_RAMP' T = 0.,    F = 0. /

@@ -17,7 +17,7 @@ The emissivity is measured using EMISSIVITY output quantity.
 &SURF ID='TEST'
       COLOR='TEAL'
       MATL_ID(1,:) = 'MAT_A'
-      H_FIXED=0.
+      HEAT_TRANSFER_COEFFICIENT=0.
       THICKNESS=0.001/
 
 &MATL ID = 'MAT_A'

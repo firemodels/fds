@@ -10,7 +10,7 @@
       MATL_ID   = 'SLAB_C'
       THICKNESS = 0.1
       STRETCH_FACTOR = 1.
-      H_FIXED   = 10.
+      HEAT_TRANSFER_COEFFICIENT   = 10.
       BACKING   = 'INSULATED' /  
 
 &MATL ID            = 'SLAB_C'

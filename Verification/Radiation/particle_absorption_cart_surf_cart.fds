@@ -65,7 +65,7 @@ Particle volume is 0.2 x 0.2 x 0.0025 m3 = 1E-4 m3.
 
 &SURF ID 		= 'part_surf'
 	MATL_ID 	= 'part_matl'
-        H_FIXED         = 0.
+        HEAT_TRANSFER_COEFFICIENT         = 0.
 	GEOMETRY 	= 'CARTESIAN'
         BACKING         = 'INSULATED'
 	THICKNESS 	= 0.0025
