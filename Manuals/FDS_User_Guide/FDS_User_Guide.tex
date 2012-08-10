@@ -6176,13 +6176,31 @@ Section~\ref{info:heat_of_combustion} for more details on the heat of combustion
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
 
-The {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) is the amount of
-energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
-specified, it is assumed to be
-\be \Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
+The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpy of formations are known. For reactions that have species not included in Table~\ref{tab:gasspecies}, there are several options to ensure all of the enthalpies of formation are known. 
+
+\subsubsection{Option 1: Specify Enthalpy of Formation}
+You can specify unknown enthalpies on the {\ct SPEC} line in units of J/kmol:
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'GLUCOSE', FORMULA = 'C62H12O6', ENTHALPY_OF_FORMATION=-1.297E-9 /
+\end{verbatim}
+\normalsize
+
+\subsubsection{Option 2: Specify Heat of Combustion}
+For a given reaction, if the only species missing an enthalpy of formation is the fuel, the missing value can be found if the heat of combustion is specified on {\ct REAC}. Section~\ref{info:Complex_Fuel} provides an example for which the fuel, polyvinyl chloride, has an unspecified enthalpy of formation but a specified heat of combustion on the {\ct REAC} line.
+
+\subsubsection{Option 3: Use of EPUMO2 (Simple Chemistry)}
+If the enthalpy of formation of the fuel and heat of combustion are not specified, for simple chemistry cases ONLY, the heat of combustion is assumed to be
+
+\begin{equation}
+\Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  
+\label{EPUMO2} 
+\end{equation}
+
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
 Its default is 13,100~kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
-specified that FDS will ignore the value for {\ct EPUMO2}.
+specified that FDS will ignore the value for {\ct EPUMO2}. From the {\ct HEAT\_OF\_COMBUSTION}, FDS solves for the enthalpy of formation of the fuel.
 
 If heats of reaction have been specified on the
 {\ct MATL} lines and
@@ -6210,6 +6228,10 @@ The second approach to determining the heat of combustion is to burn a known mas
 rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=.FALSE.},
 the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct IDEAL=.FALSE.}
 
+Note: If you specify a heat of combustion on the {\ct REAC} line, FDS will calculate the enthalpy of formation of the fuel such that the user specified heat of combustion is maintained. This is important to recognize for for cases when a heat of combustion is measured experimentally or if the user wishes to model impurities in the fuel that would not be realized using the standard heat of formation of the fuel.
+
+
+
 \subsection{Special Topic: Turbulent Combustion}
 
 \label{info:turbulent_combustion}
@@ -6218,15 +6240,16 @@ Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate
 fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within
 a given mesh cell at a given time step. This section provides a brief explanation of these rules and the parameters that control them.
 
-In an LES simulation, the consumption rate of gaseous fuel is given by the expression:
-\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
-   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
-Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter. You can change the value of $\beta$ by specifying {\ct BETA\_EDC}. Its default value
-is 2. There is a minimum value of $Y_{\hbox{\tiny P}}$ required to allow for a reaction to occur before any products have accumulated. It is specified with
-{\ct Y\_P\_MIN\_EDC}, and its default value is 0.01.
+In an LES simulation, each computational cell can be thought of as a batch reactor where only the mixed composition can react and the proportion of mixing is described by $\zeta(t;\tau_{mix})$:
 
+\begin{equation}
+\frac{\mbox{d}\zeta}{\mbox{d}t}=\frac{-\zeta}{\tau_{mix}}
+\label{eq:edc_mix}
+\end{equation} 
 
+\noindent In Equation \ref{eq:edc_mix}, $\zeta$ is the unmixed fraction and $\tau_{mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta=1$ (default), combustion would resemble that of a diffusion flame. If the cell is initially mixed, $\zeta=0$, combustion would resemble that of a pre-mixed flame. The user has the ability to set the amount of mixing in each cell at the beginning of every time step using the parameter {\ct INITIAL\_UNMIXED\_FRACTION} on the {\ct MISC} line.
 
+The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed information about the turbulent combustion model.
 
 \subsection{Special Topic: Flame Extinction}
 
@@ -6242,12 +6265,12 @@ suppression algorithm has been implemented in FDS that attempts to
 gauge whether or not combustion is viable. The Technical Reference Guide~\cite{FDS_Math_Guide}
 contains more details about how the mechanism works. The only
 parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} set on the {\ct REAC} line.
-The default value is 1427~$^\circ$C.
+The default value is 1327~$^\circ$C.
 To eliminate any gas phase suppression, set  {\ct CRITICAL\_FLAME\_TEMPERATURE} to -273.15 ~$^\circ$C, or turn off suppression completely
 by setting {\ct SUPPRESSION=.FALSE.} on the {\ct REAC} line. This latter approach saves on computing time because it
 prevents FDS from entering the suppression algorithm altogether.
 
-If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas will re-ignite when it mixes with oxygen somewhere
+If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere
 else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} ($^\circ$C) below which combustion will not occur.
 Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
 
@@ -6326,6 +6349,8 @@ must resort to the second formulation.
 
 \subsection{Complex Fuel Molecules}
 
+\label{info:Complex_Fuel}
+
 Fires often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
 of its propensity to form the acid gas HCl, we may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless
 of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. To use PVC as the fuel molecule on the {\ct REAC} line, and assuming
@@ -6372,14 +6397,13 @@ Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order 
 &INIT MASS_FRACTION(1)=0.229,SPEC_ID(1)='PVC' /
 \end{verbatim} \normalsize
 
-In this mixing-controlled example, you must define the fuel, heat of combustion, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PVC was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s are the coefficients of the lumped species themselves.
+In this mixing-controlled example, you must define the fuel, species participating in the reaction, and the stoichiometric coefficients that describe the reaction. Since this is not a simple chemistry problem, either the enthalpy of formation of PVC or the heat of combustion of the reaction can be specified. In this case, the heat of combustion for PVC was chosen and was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s are the coefficients of the lumped species themselves.
 
 \footnotesize
 \begin{verbatim}
 &REAC FUEL = 'PVC', HEAT_OF_COMBUSTION=16400,
       SMIX_ID = 'PVC','AIR','PRODUCTS', NU=-1,-1,1
-      FIXED_MIX_TIME=0.1,
-      ODE_SOLVER= 'SINGLE EXACT' /
+      FIXED_MIX_TIME=0.1 /
 \end{verbatim} \normalsize
 
 \noindent
@@ -6387,7 +6411,7 @@ Note: The sign on NU corresponds to whether that species is consumed (-) or prod
 
 
 \begin{figure}[ht]
-\centering \includegraphics[width=3.2in]{SCRIPT_FIGURES/PVC_Combustion_Spec}
+\centering \includegraphics[height=2.2in]{SCRIPT_FIGURES/PVC_Combustion_Spec}
 \caption{Product species mass fractions for model PVC example.}
 \label{pvc_combustion}
 \end{figure}
@@ -6422,52 +6446,21 @@ The initial mass fraction of oxygen is 0.23 with the remainder being the backgro
 &REAC ID='FWD_METHANE'
       FUEL='METHANE'
       SMIX_ID='METHANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      NU=-1,-1.5,1,2
-      HEAT_OF_COMBUSTION=32371.
-      ODE_SOLVER='RK2 RICHARDSON' /
+      NU=-1,-1.5,1,2 /
 
 &REAC ID='FWD_CO'
       FUEL='CARBON MONOXIDE'
       SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-      NU=-1,-0.5,1
-      HEAT_OF_COMBUSTION=10102.6
-      ODE_SOLVER='RK2 RICHARDSON' /
+      NU=-1,-0.5,1 /
 
 &REAC ID='REV_CO2'
       FUEL='CARBON DIOXIDE'
       SMIX_ID='CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-      NU=-1,0.5,1
-      HEAT_OF_COMBUSTION=0
-      FWD_ID='FWD_CO'
-      REVERSIBLE=.TRUE.
-      ODE_SOLVER='RK2 RICHARDSON' /
+      NU=-1,0.5,1 /
 \end{verbatim} \normalsize
 
 \noindent
-In this example, the {\ct SMIX\_ID}s refer directly to the {\ct SPEC} lines. The stoichiometric coefficients can be taken directly from Eq.~(\ref{eq:2step_methane_rev}). The heats of combustion are found by using the enthalpy of formation of each species\footnote{http://kinetics.nist.gov/janaf/}:
-
-\be
-\overline{\Delta h_c} = \overline{h}_{products} - \overline{h}_{reactants} = (\overline{h_f^{\circ}}+\overline{\Delta h})_{products} -
-   (\overline{h_f^{\circ}}+\overline{\Delta h})_{reactants}
-\ee
-If the reference temperature is set as the ambient temperature, $\overline{\Delta h}$ drops out of the equation. As an example, the heat of combustion for the {\ct FWD\_METHANE} reaction can be calculated by:
-
-\begin{eqnarray}
-\overline{\Delta h_c} &=& \nu_\text{CO} \; \overline{h_f^{\circ}}_\text{CO}+\nu_\mathrm{H_2O} \; \overline{h_f^{\circ}}_\mathrm{H_2O} - \nu_\mathrm{CH_4} \; \overline{h_f^{\circ}}_\mathrm{CH_4}-\nu_\mathrm{O_2} \; \overline{h_f^{\circ}}_\mathrm{O_2} \\
-\nonumber &=& 1 \, (-110.527) + 2 \, (-241.826) - 1\, (-74.873)- 1 \, (0.0) \\
-\nonumber &=& -519.3 \; \mathrm{kJ/mol}
-\end{eqnarray}
-Change the units to kJ/kg by dividing by the molecular weight of the fuel. The heat of combustion becomes 32,371~kJ/kg. Note that in the third (reversible) reaction, the {\ct HEAT\_OF\_COMBUSTION} is set to 0. The actual value is not 0, but it is set to 0 for purposes of this example. Below {\ct HEAT\_OF\_COMBUSTION}, you will notice two inputs unique to reversible reactions: {\ct FWD\_ID} and {\ct REVERSIBLE=.TRUE.} These parameters indicate that the reaction is reversible and what its forward counterpart is. FDS then calculates the heat of combustion for the reverse reaction (determined from the product of the ratio of the molecular weights of the fuels and the heat of combustion of the forward reaction), applies the appropriate sign, and overwrites the value from the input file. Alternatively, you can specify directly the heat of combustion, in which case the third {\ct REAC} line will look like this:
-
-\footnotesize
-\begin{verbatim}
-&REAC ID='REV_CO2'
-      FUEL='CARBON DIOXIDE'
-      SMIX_ID='CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-      NU=-1,0.5,1
-      HEAT_OF_COMBUSTION=-6430.
-      ODE_SOLVER='RK2 RICHARDSON' /
-\end{verbatim} \normalsize
+In this example, the {\ct SMIX\_ID}s refer directly to the {\ct SPEC} lines, since all of the species have been defined as primitive. The stoichiometric coefficients can be taken directly from Eq.~(\ref{eq:2step_methane_rev}). As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species at a time step and the enthalpy of formation of the species. This approach makes specifying an endothermic reaction such as the reversible CO$_2$ reaction, no different than typical FDS exothermic combustion reactions.
 
 
 \newpage
@@ -6504,20 +6497,10 @@ parameters.  For a finite-rate reaction you can specify multiple {\ct REAC} line
 \item[{\ct SPEC\_ID}] Array containing the names of the species in the rate equation for the reaction. Note that it is possible that a given {\ct SPEC} can
 contribute to the rate but not be a reactant or product. In other words,
 the rate equation can be dependent on a species that does not participate directly in the reaction. These entries correspond to the inputs on {\ct N\_S}.
-\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
+\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. Not required if all enthalpy of formations are known. (No default)
 \end{description}
 
 
-
-\subsection{Special Topic: Mixed-Mode Combustion}
-\label{info:mixedmode}
-
-In a typical simulation, flame temperatures are not likely to be resolved well enough to allow for a finite rate reaction to be computed.
-However, the temperatures in a layer environment are likely to support a finite rate reaction for slow reactions ({\em e.g.} carbon monoxide oxidation in a hot layer).
-A mixed-mode combustion model can be used for this situation.  To enable this model, specify the finite-rate reaction inputs described in the previous section
-as well as the input parameter {\ct THRESHOLD\_TEMPERATURE}.  During a simulation, if there is heat release from other reactions,
-then a mixed-mode reaction will be evaluated as a mixing-controlled reaction.  If there is no heat release from other reactions and the local
-temperature exceeds the {\ct THRESHOLD\_TEMPERATURE}, then the mixed-mode reaction will be evaluated as a finite-rate reaction.
 
 \newpage
 
@@ -11034,7 +11017,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
-{\ct INITIAL\_UNMIXED\_FRACTION}                & Real           & Section~\ref{info:REAC}                              &               & 1.0               \\ \hline
+{\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}              & 1.0               \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
 {\ct MAX\_FILTER\_WIDTH}                        & Logical       & Section~\ref{info:LES}                                &               & {\ct .TRUE.}      \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
@@ -11492,7 +11475,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct REVERSIBLE}                         & Logical     & Section~\ref??}                           &                   & {\ct .FALSE.}   \\ \hline
 {\ct SMIX\_ID(:)}                         & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline
-{\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.01    \\ \hline
+{\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0    \\ \hline
 {\ct SPEC\_ID(:)}                         & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
 {\ct SUPPRESSION}                         & Logical     & Section~\ref{info:extinction}             &                   & {\ct .TRUE.}      \\ \hline
 %{\ct TAU\_CHEM}                           & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
