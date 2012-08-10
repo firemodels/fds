@@ -75,7 +75,6 @@ Ymax = max(max(max(Exp_Y)),Ymax);
 Ymax = ceil(Ymax*10)/10;
 
 % plot X
-
 hf(1)=figure(1);
 n = 0;
 for f = 1:N_Fuels
@@ -110,6 +109,20 @@ xlabel('Measured MEC (volume fraction)','Interpreter',Font_Interpreter,'FontSize
 ylabel('Predicted MEC (volume fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 %legend(hX,XLegendStr,'Location',X_leg_pos)
 legend(hX,XLegendStr,'Location','NorthWest')
+
+% add SVN if file is available
+
+svn_file = '../../Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_svn.txt';
+
+if exist(svn_file,'file')
+    SVN = importdata(svn_file);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+end
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -155,6 +168,20 @@ xlabel('Measured MEC (mass fraction)','Interpreter',Font_Interpreter,'FontSize',
 ylabel('Predicted MEC (mass fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 %legend(hY,YLegendStr,'Location',Y_leg_pos)
 legend(hY,YLegendStr,'Location','NorthWest')
+
+% add SVN if file is available
+
+svn_file = '../../Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_svn.txt';
+
+if exist(svn_file,'file')
+    SVN = importdata(svn_file);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');                
+    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+end
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
