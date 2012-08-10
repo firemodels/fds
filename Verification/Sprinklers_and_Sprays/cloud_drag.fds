@@ -11,7 +11,7 @@
 
 &PART ID='ParticleCloud', 
       DIAMETER=1000.,
-      USER_DRAG_COEFFICIENT=1.27
+      DRAG_COEFFICIENT=1.27
       STATIC=.TRUE., 
       SPEC_ID='WATER VAPOR', 
       MONODISPERSE=.TRUE.,	

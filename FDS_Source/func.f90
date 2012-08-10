@@ -2122,7 +2122,7 @@ SELECT CASE(DRAG_LAW)
       ENDIF
       
    CASE(USER_DRAG)
-      DRAG = 1._EB ! PC%USER_DRAG_COEFFICIENT set elsewhere
+      DRAG = 1._EB ! PC%DRAG_COEFFICIENT set elsewhere
       
 END SELECT
  

@@ -7228,8 +7228,8 @@ specifies that half the particle is facing upwards and half is facing downwards.
 
 For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere.
 To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable,
-the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.
-The {\ct USER\_DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.  The {\ct USER\_DRAG\_COEFFICIENT} is a triplet indicating the drag along each coordinate axis.  If only the first value of the triplet is assigned, the drag is assumed to be isotropic.
+the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}.
+The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.  The {\ct DRAG\_COEFFICIENT} is a triplet indicating the drag along each coordinate axis.  If only the first value of the triplet is assigned, the drag is assumed to be isotropic.
 
 
 \subsection{Gas Generating Particles}
@@ -11236,7 +11236,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & 72.8$\cdot 10^3$  \\ \hline
 {\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 %{\ct TURBULENT\_DISPERSION}         & Logical         &                                         &           & {\ct .FALSE.} \\ \hline
-{\ct USER\_DRAG\_COEFFICIENT(3)}    & Real Array      & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
+{\ct DRAG\_COEFFICIENT(3)}          & Real Array      & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
 
