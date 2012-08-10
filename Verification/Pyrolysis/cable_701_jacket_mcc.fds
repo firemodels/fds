@@ -20,7 +20,7 @@
       RGB =200,100,0
       BACKING = 'INSULATED' 
       THICKNESS = 0.00001
-      H_FIXED = 0.
+      HEAT_TRANSFER_COEFFICIENT = 0.
       MATL_ID(1,1) = 'Cable 701 Jacket Component A',
       MATL_ID(1,2) = 'Cable 701 Jacket Component B'
       MATL_MASS_FRACTION(1,1:2) = 0.66,0.34 /  
@@ -67,7 +67,7 @@
 	EMISSIVITY = 1.0
 	RGB        = 250,0,0
 	TMP_FRONT  = 820.
-        H_FIXED    = 0.
+        HEAT_TRANSFER_COEFFICIENT    = 0.
 	RAMP_T 	   = 'T_RAMP' /
 
 &RAMP ID='T_RAMP', T=  0., F = 0.0 /

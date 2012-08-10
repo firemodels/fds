@@ -29,7 +29,7 @@
 
 &SURF ID        = 'FIRE'
       COLOR     = 'ORANGE'   
-      H_FIXED   = 0.
+      HEAT_TRANSFER_COEFFICIENT   = 0.
       HRRPUA    = 500. /
 
 &SURF ID        = 'WALL'

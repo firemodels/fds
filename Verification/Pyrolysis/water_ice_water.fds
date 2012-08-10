@@ -16,7 +16,7 @@
 &VENT XB = -0.5, 0.5,-0.5,0.5,0.0,0.0, SURF_ID = 'SAMPLE' /
 
 &SURF ID = 'SAMPLE'
-      H_FIXED = 50. 
+      HEAT_TRANSFER_COEFFICIENT = 50. 
       BACKING = 'INSULATED' 
       THICKNESS = 0.00001
       MATL_ID = 'LIQUID_WATER' /
@@ -63,7 +63,7 @@ http://www.its.caltech.edu/~atomic/snowcrystals/ice/ice.htm
 
 &SURF ID = 'HOT'
 	EMISSIVITY = 1.0
-        H_FIXED = 50. 
+        HEAT_TRANSFER_COEFFICIENT = 50. 
 	RGB        = 250,0,0
 	TMP_FRONT  = -10.
 	RAMP_T 	   = 'T_RAMP' /
