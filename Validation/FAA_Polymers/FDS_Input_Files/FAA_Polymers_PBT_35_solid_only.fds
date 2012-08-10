@@ -33,7 +33,7 @@
       THICKNESS=0.004,0.015
       CELL_SIZE_FACTOR=0.1
       REGRID_FACTOR=1.
-      H_FIXED=0.
+      HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX_RAMP='FluxRamp' 
       EXTERNAL_FLUX=35. / 
 &RAMP ID='FluxRamp', T=  0., F=1.00 /
