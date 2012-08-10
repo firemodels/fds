@@ -65,7 +65,7 @@ surface and center.
       COLOR='RED'
       STRETCH_FACTOR = 1.0
       MATL_ID='MAT_1'
-      H_FIXED=10.
+      HEAT_TRANSFER_COEFFICIENT=10.
       THICKNESS=0.01 / 
 
 &SURF ID='CYL SLAB'
@@ -73,7 +73,7 @@ surface and center.
       STRETCH_FACTOR = 1.0
       GEOMETRY = 'CYLINDRICAL'
       MATL_ID='MAT_1'
-      H_FIXED=10.
+      HEAT_TRANSFER_COEFFICIENT=10.
       THICKNESS=0.01 / 
 
 &SURF ID='SPH SLAB'
@@ -81,7 +81,7 @@ surface and center.
       STRETCH_FACTOR = 1.0
       GEOMETRY = 'SPHERICAL'
       MATL_ID='MAT_1'
-      H_FIXED=10.
+      HEAT_TRANSFER_COEFFICIENT=10.
       THICKNESS=0.01 / 
 
 &VENT XB=-0.15,-0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'CART SLAB' /

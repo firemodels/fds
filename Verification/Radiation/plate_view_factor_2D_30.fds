@@ -13,13 +13,13 @@ The RADIATIVE HEAT FLUX should be 105.34 kW/m2
 &RADI NUMBER_RADIATION_ANGLES = 30 /
 
 &SURF ID='HOT'
-      H_FIXED = 0.
+      HEAT_TRANSFER_COEFFICIENT = 0.
       EMISSIVITY = 1.
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
 
 &SURF ID='COLD'
-      H_FIXED = 0.
+      HEAT_TRANSFER_COEFFICIENT = 0.
       EMISSIVITY = 1.
       TMP_FRONT = -273.
       TAU_T = 0.0 /

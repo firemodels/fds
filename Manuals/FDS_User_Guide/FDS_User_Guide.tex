@@ -3369,7 +3369,8 @@ To set this heat transfer model for a particular surface use:
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using {\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K.
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\ 
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of W/m$^2$/K.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
@@ -4279,7 +4280,7 @@ the blue line and heating phase by the red line.
 \begin{verbatim}
 
 &SURF ID = 'SAMPLE'
-      H_FIXED = 50.
+      HEAT_TRANSFER_COEFFICIENT = 50.
       BACKING = 'INSULATED'
       THICKNESS = 0.00001
       MATL_ID = 'LIQUID_WATER' /
@@ -4556,13 +4557,13 @@ to update the solid phase every time step (normally it does this every
 other time step), and set {\ct DT} to whatever value appropriate for
 the solid phase calculation. Since there is no gas phase calculation
 that will limit the time step, it is best to control this yourself.
-\item Put {\ct H\_FIXED=0.} on the {\ct SURF} line. This turns off the
+\item Put {\ct HEAT\_TRANSFER\_COEFFICIENT=0.} on the {\ct SURF} line. This turns off the
 convective heat flux from gas to surface and vice versa. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using
 either {\ct TAU\_EF} or {\ct RAMP\_EF}. See Section~\ref{info:RAMP} for more details.} (kW/m$^2$) on the
 {\ct SURF} line that is assigned to the solid surface. If you want to specify a particular
 convective heat flux to the solid surface, you can set {\ct ASSUMED\_GAS\_TEMPERATURE} on the
-{\ct MISC} line, along with a non-zero value of {\ct H\_FIXED} on {\ct SURF} in units of W/m$^2$/K.
+{\ct MISC} line, along with a non-zero value of {\ct HEAT\_TRANSFER\_COEFFICIENT} on {\ct SURF} in units of W/m$^2$/K.
 \item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.}
 on the {\ct MISC} line. This will also speed
 up the computations significantly. If the gas phase computations are
@@ -4625,7 +4626,7 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
       BACKING='INSULATED'
       MATL_ID='BLACKPMMA'
       THICKNESS=0.0085
-      H_FIXED=0.
+      HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=52 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
@@ -9359,7 +9360,7 @@ where $\epsilon_{\hbox{\tiny TC}}$ is the emissivity of the thermocouple, $U$ is
 $h$ is the heat transfer coefficient to a small sphere,
 $h=k \, \NU / d_{\hbox{\tiny TC}}$.
 The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the
-calculated value of the heat transfer coefficient, set {\ct BEAD\_H\_FIXED} on the {\ct PROP} line (W/m$^2$/K).
+calculated value of the heat transfer coefficient, set {\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (W/m$^2$/K).
 The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and
 0.44~kJ/kg/K, respectively.
 See the discussion on heat transfer to a water
@@ -11327,7 +11328,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BEAD\_DENSITY}                     & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.     \\ \hline
 {\ct BEAD\_DIAMETER}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001     \\ \hline
 {\ct BEAD\_EMISSIVITY}                  & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85      \\ \hline
-{\ct BEAD\_H\_FIXED}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & W/m$^2$/K             &           \\ \hline
+{\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} & Real          & Section~\ref{info:THERMOCOUPLE}           & W/m$^2$/K             &           \\ \hline
 {\ct BEAD\_SPECIFIC\_HEAT}              & Real          & Section~\ref{info:THERMOCOUPLE}           & kJ/kg/K               & 0.44      \\ \hline
 {\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
@@ -11660,10 +11661,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FREE\_SLIP}                      & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}          & Real            & Section~\ref{info:specified_burning}      & kJ/kg               & 0.                      \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & W/m$^2$/K           &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}           & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & kW/m$^2$            & 0.                      \\ \hline
-{\ct H\_FIXED}                        & Real            & Section~\ref{info:convection}             & W/m$^2$/K           &                         \\ \hline
-{\ct HM\_FIXED}                       & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
 {\ct LAYER\_DIVIDE}                   & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
@@ -11672,6 +11672,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FLUX(:)}                   & Real Array      & Section~\ref{info:MASS_FLUX}              & kg/m$^2$ s          & 0.                      \\ \hline
 {\ct MASS\_FLUX\_TOTAL}               & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & kg/m$^2$ s          &                         \\ \hline
 {\ct MASS\_FRACTION(:)}               & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
+{\ct MASS\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct MATL\_ID(NL,NC)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION(NL,NC)}     & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}       & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline

@@ -98,7 +98,7 @@ Particle volume is 4/3 x pi x 0.0.0288 m3 = 1E-4 m3.
 
 &SURF ID 		= 'part_surf'
 	MATL_ID 	= 'part_matl'
-    	H_FIXED         = 0.
+    	HEAT_TRANSFER_COEFFICIENT         = 0.
 	GEOMETRY 	= 'SPHERICAL'
      	BACKING         = 'INSULATED'
 	THICKNESS 	= 0.0288

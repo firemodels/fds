@@ -10,7 +10,7 @@
       MATL_ID   = 'SLAB_A'
       THICKNESS = 0.1
       STRETCH_FACTOR = 1.
-      H_FIXED   = 100.
+      HEAT_TRANSFER_COEFFICIENT   = 100.
       BACKING   = 'INSULATED' /
 
 &MATL ID            = 'SLAB_A'
