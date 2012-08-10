@@ -37,7 +37,7 @@
       COLOR='BLACK'
       MATL_ID='PBTGF','FOAMGLAS'
       THICKNESS=0.004,0.01
-      H_FIXED=0.
+      HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=52 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PBTGF SLAB' /
