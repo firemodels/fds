@@ -212,6 +212,8 @@ void init_prop(propdata *propi, int nsmokeview_ids, char *label){
   propi->texturefiles=NULL;
   propi->rotate_axis=NULL;
   propi->rotate_angle=0.0;
+  propi->fvals=NULL;
+  propi->vars_indep_index=NULL;
 }
 
 /* ------------------ readsmv_dynamic ------------------------ */

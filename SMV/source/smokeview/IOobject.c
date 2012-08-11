@@ -800,6 +800,14 @@ void draw_devices(void){
     }
     if(devicei->nparams>0&&prop!=NULL){
       prop->nvars_indep=devicei->nparams;
+      if(prop->fvals==NULL){
+        prop->nvars_indep=devicei->nparams;
+        NewMemory((void **)&prop->fvals,prop->nvars_indep*sizeof(float));
+      }
+      if(prop->vars_indep_index==NULL){
+        prop->nvars_indep=devicei->nparams;
+        NewMemory((void **)&prop->vars_indep_index,prop->nvars_indep*sizeof(int));
+      }
       for(j=0;j<devicei->nparams;j++){
         prop->fvals[j]=devicei->params[j];
         prop->vars_indep_index[j]=j;
