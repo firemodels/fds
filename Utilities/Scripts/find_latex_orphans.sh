@@ -133,7 +133,7 @@ cd $SVNROOT/Manuals
 REFERENCED_FILES=`grep -h INPUT */*.fls | grep -E 'pdf|png|eps|jpg' | cut -f2 -d' ' | xargs -n1 basename | sed 's/\..\{3\}$//'`
 
 # Compile list of png and pdf images in Manuals directories
-GRAPHICS_FILES=`find . -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
+GRAPHICS_FILES=`find FDS_Configuration_Management_Plan FDS_Technical_Reference_Guide FDS_User_Guide FDS_Validation_Guide FDS_Verification_Guide SMV_Technical_Reference_Guide SMV_User_Guide SMV_Verification_Guide -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
 
 #  =================
 #  = Compare lists =
@@ -147,7 +147,8 @@ do
         then
             :
     else
-        if [[ $i == *Guide* ]];
+        if [[ $i == *Guide* ]] || \
+           [[ $i == *Plan* ]]
         then
             :
         else
