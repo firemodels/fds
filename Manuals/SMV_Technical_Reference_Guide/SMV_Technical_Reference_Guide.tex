@@ -128,7 +128,7 @@ Volume II: Technical Reference Guide
 
 \vfill
 
-\flushright{\includegraphics[width=2.in]{figures/nistident_flright_vec}}
+\flushright{\includegraphics[width=2.in]{FIGURES/nistident_flright_vec}}
 
 \end{minipage}
 
@@ -537,7 +537,7 @@ topics such as image rendering and data compression are detailed.
 All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=3.0in]{figures/righthandrule}
+\includegraphics[width=3.0in]{FIGURES/righthandrule}
 \end{center}
 \caption{Right hand rule used by Smokeview for specifying a 3D vertex locations.}
 \label{figrighthand}
@@ -570,7 +570,7 @@ in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\ above
 with {\tt GL\_POINTS}\ or {\tt GL\_LINES}\ respectively.
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=6.0in]{figures/shapes}
+\includegraphics[width=6.0in]{FIGURES/shapes}
 \end{center}
 \caption[Points, lines and a shaded triangle drawn using OpenGL.]
 {Points, lines and a shaded triangle drawn using OpenGL. Vertices
@@ -639,7 +639,7 @@ visualizations (hence the term clipping plane).  OpenGL allows one to define cli
 arbitrarily oriented planes.
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=4.0in]{figures/figviewport}
+\includegraphics[width=4.0in]{FIGURES/figviewport}
 \end{center}
 \caption{Example view frustum used to convert 3D scenes to 2D
 screen viewport.}
@@ -660,7 +660,7 @@ stereo projection.
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=3.0in]{figures/fig_stereo}
+\includegraphics[width=3.0in]{FIGURES/fig_stereo}
 \end{center}
 \caption{View frustums for stereo pairs.}
  \label{figstereo}
@@ -675,7 +675,7 @@ scene and the 2D screen giving several viewport examples used by
 Smokeview.
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=4.0in]{figures/figviewport2}
+\includegraphics[width=4.0in]{FIGURES/figviewport2}
 \end{center}
 \caption{Examples of several viewports in a typical Smokeview scene.}
  \label{figviewports}
@@ -746,9 +746,9 @@ Flat shading diminishes the three dimensionality of the scene.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[width=5.0in]{figures/th_unlit}\\
+\includegraphics[width=5.0in]{FIGURES/th_unlit}\\
 flat shading\\
-\includegraphics[width=5.0in]{figures/th_lit}\\
+\includegraphics[width=5.0in]{FIGURES/th_lit}\\
 smooth (Gouraud) shading\\
 \end{tabular}
 \end{center}
@@ -782,10 +782,10 @@ averaged normals.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[width=3.0in]{figures/triangle_normal}&
-\includegraphics[width=3.0in]{figures/triangle_normal2}\\
-\includegraphics[width=3.0in]{figures/sphere_facet}&
-\includegraphics[width=3.0in]{figures/sphere_lit}\\
+\includegraphics[width=3.0in]{FIGURES/triangle_normal}&
+\includegraphics[width=3.0in]{FIGURES/triangle_normal2}\\
+\includegraphics[width=3.0in]{FIGURES/sphere_facet}&
+\includegraphics[width=3.0in]{FIGURES/sphere_lit}\\
 separate normals $\rightarrow$ faceted drawing&averaged normals $\rightarrow$ smooth drawing\\
 \end{tabular}
 \end{center}
@@ -835,9 +835,9 @@ alpha value of 0.0 causing it to be completely transparent.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=5.0in]{figures/th_transparent}\\
+\includegraphics[width=5.0in]{FIGURES/th_transparent}\\
 partially transparent slice plane\\
-\includegraphics[width=5.0in]{figures/th_solid}\\
+\includegraphics[width=5.0in]{FIGURES/th_solid}\\
 opaque slice plane\\
 \end{tabular}
 \end{center}
@@ -960,7 +960,7 @@ so that the OpenGL call to perform the desired rotation would be {\tt glRotatef}
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=2.5in]{figures/rotate_uv}
+\includegraphics[width=2.5in]{FIGURES/rotate_uv}
 \end{tabular}
 \end{center}
 \caption{Diagram relating the vector $u\times v$ and the angle $\theta$
@@ -1125,7 +1125,7 @@ An index into a color table of size 256 is computed using
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[height=4.0in]{figures/rainbowcolor}&\includegraphics[height=4.0in]{figures/3dcolorcube}\\
+\includegraphics[height=4.0in]{FIGURES/rainbowcolor}&\includegraphics[height=4.0in]{FIGURES/3dcolorcube}\\
 a) colorbar&b) 3D color cube\\
 \end{tabular}
 \end{center}
@@ -1229,7 +1229,7 @@ Figure \ref{fignewslice} shows the old and new method for coloring.  Note that t
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[width=3.0in]{figures/plume_bad}&\includegraphics[width=3.0in]{figures/plume_good}\\
+\includegraphics[width=3.0in]{FIGURES/plume_bad}&\includegraphics[width=3.0in]{FIGURES/plume_good}\\
 interpolate colors within a 3D color cube&interpolate colors within 1D texture color bar\\
 \end{tabular}
 \caption [Slice file snapshots illustrating old and new method for
@@ -1244,9 +1244,9 @@ method for coloring data.}
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[height=4.0in]{figures/interpcolorrgb}\\
+\includegraphics[height=4.0in]{FIGURES/interpcolorrgb}\\
 a) colors interpolated within the color cube\\
-\includegraphics[height=4.0in]{figures/interpcolorindex}\\
+\includegraphics[height=4.0in]{FIGURES/interpcolorindex}\\
 b) colors interpolated within the colorbar\\
 \end{tabular}
 \end{center}
@@ -1266,7 +1266,7 @@ The {\em 2D contouring problem}\ may be stated as: find the region in a 2D plane
 \subsection{Line contours}
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=7.0in]{figures/2d_linecontours}
+\includegraphics[width=7.0in]{FIGURES/2d_linecontours}
 \end{center}
 \caption{2D line contour canonical forms.
   }
@@ -1287,7 +1287,7 @@ Figure \ref{fig2dline} shows these four cases.  Corners with blue dots indicate 
 \subsection{Banded contours}
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=7.0in]{figures/2d_bandcontours}
+\includegraphics[width=7.0in]{FIGURES/2d_bandcontours}
 \end{center}
 \caption{2D band contour canonical forms.
   }
@@ -1390,7 +1390,7 @@ where for the $n$'th triangle, $u_n$ and $v_n$ are two sides, $A_n=||u_n\times v
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[height=8.5in]{figures/plume5a_iso_full}\\
+\includegraphics[height=8.5in]{FIGURES/plume5a_iso_full}\\
 \end{center}
 \caption{Snapshot of an isosurface of temperature at 100 \degC\ (212 \degF).
   }
@@ -1400,9 +1400,9 @@ where for the $n$'th triangle, $u_n$ and $v_n$ are two sides, $A_n=||u_n\times v
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[height=4.0in]{figures/plume5a_iso_lines}\\
+\includegraphics[height=4.0in]{FIGURES/plume5a_iso_lines}\\
 outline view\\
-\includegraphics[height=4.0in]{figures/plume5a_iso_solid}\\
+\includegraphics[height=4.0in]{FIGURES/plume5a_iso_solid}\\
 solid view
 \end{tabular}
 \end{center}
@@ -1413,7 +1413,7 @@ solid view
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=7.0in]{figures/3d_contours}
+\includegraphics[width=7.0in]{FIGURES/3d_contours}
 \end{center}
 \caption[3D isosurface canonical forms.]{3D isosurface canonical forms.
 Dots occur at corners where the data value is greater than the isosurface value.  Other corners are below the isosurface value.  Red polygons intersect cube edges at the isosurface value.  The red polygon (isosurface) NEVER intersects an edge with two or zero dots on the ends.
@@ -1425,9 +1425,9 @@ Dots occur at corners where the data value is greater than the isosurface value.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[height=4.0in]{figures/decimate_before}\\
+\includegraphics[height=4.0in]{FIGURES/decimate_before}\\
 before decimation\\
-\includegraphics[height=4.0in]{figures/decimate_after}\\
+\includegraphics[height=4.0in]{FIGURES/decimate_after}\\
 after decimation
 \end{tabular}
 \end{center}
@@ -1441,7 +1441,7 @@ after decimation
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=5.0in]{figures/3point_line_smooth}
+\includegraphics[width=5.0in]{FIGURES/3point_line_smooth}
 \end{center}
 \caption{Setup for determining the slope of a smooth curve passing through three points.}
 \label{figlinesmooth}%
@@ -1776,7 +1776,7 @@ Figure \ref{smvlibstruct} illustrates how these libraries and
 Smokeview are organized.
 
 \begin{figure}
-\includegraphics[width=5.0in]{figures/smvlibstruct}
+\includegraphics[width=5.0in]{FIGURES/smvlibstruct}
 \caption{Smokeview external library usage}
 \label{smvlibstruct}
 \end{figure}
@@ -1825,7 +1825,7 @@ the actions performed by Smokeview will be different.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=5.0in]{figures/smvprogstruct}
+\includegraphics[width=5.0in]{FIGURES/smvprogstruct}
 \end{center}
 \caption{Smokeview program structure}
 \label{figprogstruct}

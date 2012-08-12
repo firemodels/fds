@@ -51,7 +51,7 @@ As illustrated in Figure \ref{figRadiance}, the right hand side of (\ref{eq:full
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=6.0in]{figures/rte_setup}
+\includegraphics[width=6.0in]{FIGURES/rte_setup}
 \end{center}
 \caption{Components of the radiation transport equation decreasing radiance along a ray are
 absorption and out-scattering while components increasing radiance are emission and in-scattering.}
@@ -127,7 +127,7 @@ The approximate RTE solution given in (\ref{eq:rte_simp}) is discretized by conv
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=3.5in]{figures/smoke_discrete_setup}
+\includegraphics[width=3.5in]{FIGURES/smoke_discrete_setup}
 \end{center}
 \caption[Setup for discretizing the equations used to model
 radiance within a column of 3D smoke data.]{Setup for discretizing the equations used to model
@@ -211,7 +211,7 @@ It is more practical to draw smoke one mesh at a time when visualizing multiple 
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=4.0in]{figures/smoke_setup3}
+\includegraphics[width=4.0in]{FIGURES/smoke_setup3}
 \end{center}
 \caption {Solutions to the RTE on two sub-intervals are combined to form a solution to the RTE
 for the merger of these intervals.}
@@ -280,7 +280,7 @@ Computing opacity at slice plane nodes is illustrated in Figure \ref{figsmokeset
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=4.0in]{figures/smoke_setup}
+\includegraphics[width=4.0in]{FIGURES/smoke_setup}
 \end{center}
 \caption[Light emitted from the background is obscured by intervening smoke.]
 {Light emitted from the background is obscured by intervening smoke.
@@ -297,7 +297,7 @@ The $\alpha$ parameter in (\ref{eq:alpha}) is used by OpenGL~\cite{OpenGLRed} to
 The absorption parameter, $\alpha$, needs to be adjusted for view directions not aligned with the axis orthogonal to the viewing planes (see Figure \ref{figray}).  The absorption coefficient also needs to be adjusted when the distance between adjacent smoke planes changes, or viewing planes are skipped.
 
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=3.5in]{figures/forney_figure4}}
+\centerline{\includegraphics[width=3.5in]{FIGURES/forney_figure4}}
 \caption [Diagram illustrating the adjustment required to the opaqueness parameter, $\alpha$,
 for non-axis aligned views.] 
 { Diagram illustrating the adjustment required to the opaqueness parameter, $\alpha$,
@@ -353,11 +353,11 @@ The video hardware uses $\alpha$ values contained in the smoke planes to obscure
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[height=4.0in]{figures/splume_20_27}&
-\includegraphics[height=4.0in]{figures/splume_17_27}\\
+\includegraphics[height=4.0in]{FIGURES/splume_20_27}&
+\includegraphics[height=4.0in]{FIGURES/splume_17_27}\\
 8 slices&11 slices\\
-\includegraphics[height=4.0in]{figures/splume_14_27}&
-\includegraphics[height=4.0in]{figures/splume_11_27}\\
+\includegraphics[height=4.0in]{FIGURES/splume_14_27}&
+\includegraphics[height=4.0in]{FIGURES/splume_11_27}\\
 14 slices&all slices
 \end{tabular}
 \end{center}
@@ -376,9 +376,9 @@ plane most perpendicular to the view direction.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{l}
-\includegraphics[height=3.75in]{figures/thouse5c_skip}\\
+\includegraphics[height=3.75in]{FIGURES/thouse5c_skip}\\
 a) slices skipped and oriented along `X' directions\\
-\includegraphics[height=3.75in]{figures/thouse5c_full}\\
+\includegraphics[height=3.75in]{FIGURES/thouse5c_full}\\
 b) all slices shown and oriented towards viewer \\
 \end{tabular}
 \end{center}
@@ -402,9 +402,9 @@ Figure \ref{figDIRA} illustrates this process showing three view directions and 
 
 \begin{figure}
 \begin{tabular}{ccc}
-\includegraphics[width=2.25in]{figures/figDIR1a}&
-\includegraphics[width=2.25in]{figures/figDIR1b}&
-\includegraphics[width=2.25in]{figures/figDIR1c}\\
+\includegraphics[width=2.25in]{FIGURES/figDIR1a}&
+\includegraphics[width=2.25in]{FIGURES/figDIR1b}&
+\includegraphics[width=2.25in]{FIGURES/figDIR1c}\\
 a) slice planes parallel to the $y$ axis& b) slice planes parallel to
 the $y=x$ axis&
 c) slice planes parallel to the $x$ axis\\
@@ -414,7 +414,7 @@ c) slice planes parallel to the $x$ axis\\
 \end{figure}
 
 \begin{figure}
-\centerline{\includegraphics[width=3.0in]{figures/figDIR2}}
+\centerline{\includegraphics[width=3.0in]{FIGURES/figDIR2}}
 \caption[Diagram illustrating the angle between the line of sight
 and the vector normal to the slice planes.]{Diagram illustrating the angle between the line of sight
 and the vector normal to the slice planes.  Slice plane orientation is chosen to minimize
@@ -471,7 +471,7 @@ Soot density is mapped to opacity.  The colors and opacities are then combined t
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=6.5in]{figures/smoke_setup2}
+\includegraphics[width=6.5in]{FIGURES/smoke_setup2}
 \end{center}
 \caption[Opacity and color is computed for each pixel on an image plane by solving a line integral
 representation of a simplified form of the radiation transport equation.]{Opacity and color is computed for each pixel on an image plane by solving a line integral
@@ -486,12 +486,12 @@ Figure \ref{fig:volplume_example} illustrates the effect of projecting an image 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.5in]{figures/vis_test2_nonfreeze}\\
+\includegraphics[width=3.5in]{FIGURES/vis_test2_nonfreeze}\\
 a) normal view as seen by the observer
 \end{tabular}
 \begin{tabular}{cc}
-\includegraphics[width=3.5in]{figures/vis_test2_freezeC}&
-\includegraphics[width=3.5in]{figures/vis_test2_freezeA}\\
+\includegraphics[width=3.5in]{FIGURES/vis_test2_freezeC}&
+\includegraphics[width=3.5in]{FIGURES/vis_test2_freezeA}\\
 b) same image as in a) but viewed from the left&c) same image as in a) but viewed from the right\\
 \end{tabular}
 \end{center}
@@ -510,11 +510,11 @@ The rainbow colormap in Figure \ref{fig:colormaps}c produces non-realistic image
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=5.0in]{figures/colorbar_black_orange}\\
+\includegraphics[width=5.0in]{FIGURES/colorbar_black_orange}\\
 a) black stepped to orange\\
-\includegraphics[width=5.0in]{figures/colorbar_black_white}\\
+\includegraphics[width=5.0in]{FIGURES/colorbar_black_white}\\
 b) black to white\\
-\includegraphics[width=5.0in]{figures/colorbar_rainbow}\\
+\includegraphics[width=5.0in]{FIGURES/colorbar_rainbow}\\
 c) rainbow
 \end{tabular}
 \end{center}
