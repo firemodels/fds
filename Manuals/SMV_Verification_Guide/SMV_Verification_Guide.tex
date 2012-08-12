@@ -143,8 +143,8 @@ Volume III: Verification Guide
 
 \vfill
 
-%\flushright{\includegraphics[width=4.0in]{figures/nistlogo_1line}}
-\flushright{\includegraphics[width=2.in]{figures/nistident_flright_vec}}
+%\flushright{\includegraphics[width=4.0in]{FIGURES/nistlogo_1line}}
+\flushright{\includegraphics[width=2.in]{FIGURES/nistident_flright_vec}}
 \end{minipage}
 
 \newpage
@@ -172,7 +172,7 @@ Volume III: Verification Guide
 
 \normalsize
 \flushright{Glenn P. Forney\\
-%\includegraphics[width=1in]{figures/bfrl}  \\
+%\includegraphics[width=1in]{FIGURES/bfrl}  \\
 {\em Fire Research Division} \\
 {\em Building and Fire Research Laboratory}  \\
 }
@@ -186,7 +186,7 @@ Smokeview Version 6 \\
 %
 \vfill
 
-\flushright{\includegraphics[width=1in]{figures/doc} }
+\flushright{\includegraphics[width=1in]{FIGURES/doc} }
 
 \titlesigs
 
@@ -313,7 +313,7 @@ intended purpose.
 % \addtocounter{picno}{-1}
 % \begin{picture}(0,0)
 %   \put(-15,0){
-%     \epsfig{height=1.125in,figure=figures/movies/tankfarm_\number\value{picno}.eps}
+%     \epsfig{height=1.125in,figure=FIGURES/movies/tankfarm_\number\value{picno}.eps}
 %   }
 % \end{picture}
 %}
@@ -366,7 +366,7 @@ The FDS version used to run the cases illustrated  in this document
 is
 {
 %\scriptsize
-\verbatiminput{../SMV_User_Guide/figures/fds5.version}
+\verbatiminput{../SMV_User_Guide/FIGURES/fds5.version}
 }
 
 The Smokeview version used to generate the verification figures in this document is
@@ -439,7 +439,7 @@ The images for this test were created automatically by running the smokeview scr
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_chop_30}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_cell_30}\\
 &cell averaged  data&chopped data&cell centered data\\
- &&&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
+ &&&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_20_620}}\\
   \end{tabular}
 \end{center}
  \caption[Boundary file test.]{Boundary file test. The upper obstacle is initialized to 600.0~\degC\ and should be red for the $t=0.0$~s images.
@@ -496,7 +496,7 @@ The images for this test were created automatically by running the smokeview scr
 \subsection{Sensitivity Analysis}
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[height=3.0in]{figures/linear_interpolationiso}
+\includegraphics[height=3.0in]{FIGURES/linear_interpolationiso}
 \end{center}
  \caption{A portion of an iso-surface defined by $f(x,y,z)=T_m$ (for some function $f$) crossing a line segment at $(x_m,y,z)$.
   }
@@ -508,7 +508,7 @@ Figure \ref{figisointerpiso} shows a portion of an iso-surface, $f(x,y,z)=T_m$, 
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[height=3.0in]{figures/linear_interpolation}
+\includegraphics[height=3.0in]{FIGURES/linear_interpolation}
 \end{center}
  \caption[Inverse linear interpolation setup.]{Inverse linear interpolation setup.
  The dependent data values $T_1$ and $T_2$ are known at locations $x_1$ and $x_2$.
@@ -643,7 +643,7 @@ script, {\tt plume5c.ssf}.
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_slice_chop_30}\\
 
  node centered data&node centered chopped data\\
-&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
+&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_20_620}}\\
  \end{tabular}
 \end{center}
  \caption[Node centered slice file test.]{Node centered slice file test.  A portion of the interior gas temperature is initialized to 600.0~\degC.  The slice file in this region should be red for the $t=0.0$~s images.  For the chopped contours, the color near the chop boundary should match the color near 140.0~\degC\ in the colorbar.}
@@ -663,7 +663,7 @@ script, {\tt plume5c.ssf}.
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_slice_cellchop_30}\\
 
  cell centered data&cell centered chopped data\\
- &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
+ &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_20_620}}\\
  \end{tabular}
 \end{center}
  \caption[Cell centered slice file test 1.]{Cell centered slice file test 1.  A portion of the interior gas temperature is initialized to 600.0~\degC.  The slice file in this region should be red for the $t=0.0$~s images.  For the chopped contours, the color near the chop boundary should match the color near 140.0~\degC\ in the colorbar.}
@@ -707,7 +707,7 @@ script, {\tt plume5c.ssf}.
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslice_30}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslicechop_30}\\
  &&data chopped below 140~\degC\\
- &&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
+ &&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_20_620}}\\
 
  \end{tabular}
 \end{center}
@@ -724,7 +724,7 @@ script, {\tt plume5c.ssf}.
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_120}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/fed_test_360}\\
 120~s, FED=1.2&360~s, FED=3.5\\
-&&\raisebox{0.25in}[0pt]{\includegraphics[height=5.5in]{../SMV_User_Guide/figures/colorbar_fed}}
+&&\raisebox{0.25in}[0pt]{\includegraphics[height=5.5in]{../SMV_User_Guide/FIGURES/colorbar_fed}}
  \end{tabular}
 \end{center}
  \caption[Cell centered FED slice file test.]{Cell centered FED slice file test.
@@ -746,7 +746,7 @@ $\mathrm{CO_2}$ and $\mathrm{O_2}$ data slices. }
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice2_30}\\
 
  general orientation&second orientation\\
- &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
+ &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_20_620}}\\
  \end{tabular}
 \end{center}
  \caption[General slice file test.]{General slice file test.  Two orientations are shown at three time steps. }
@@ -841,7 +841,7 @@ The images for this test were created automatically by running the smokeview scr
   \includegraphics[height=\figheightH]{SCRIPT_FIGURES/plume5c_plot3d_i3}&
  \includegraphics[height=\figheightH]{SCRIPT_FIGURES/plume5c_plot3d_i4}\\
  410~\degC&590~\degC\\
-&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_050_590_plot3d_iso}}\\
+&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_050_590_plot3d_iso}}\\
  \end{tabular}
 \end{center}
  \caption[PLOT3D file test]{PLOT3D file test showing iso-surface for 50~\degC, 230~\degC, 410~\degC\ and 590~\degC.}
@@ -910,8 +910,8 @@ near-white shades, the other shows black and near black shades.  This figure ill
 \begin{center}
  \centering
 \begin{tabular}{c}
-\includegraphics[width=6.0in]{figures/graysquares_black}\\
-\includegraphics[width=6.0in]{figures/graysquares_white}\\
+\includegraphics[width=6.0in]{FIGURES/graysquares_black}\\
+\includegraphics[width=6.0in]{FIGURES/graysquares_white}\\
  \end{tabular}
 \end{center}
  \caption[Shade of grey resolution test.]{Shade of grey resolution test.
@@ -981,7 +981,7 @@ Comparing the Smokeview generated smoke levels with theoretical values one finds
  \includegraphics[height=\figheightF]{SCRIPT_FIGURES/smoke_test_every3}&
   \includegraphics[height=\figheightF]{SCRIPT_FIGURES/smoke_test2_every3}\\
  theoretical&
- \multicolumn{2}{c}{\includegraphics[height=1.0in]{figures/graysquares}}\\
+ \multicolumn{2}{c}{\includegraphics[height=1.0in]{FIGURES/graysquares}}\\
  \end{tabular}
 \end{center}
  \caption[3D smoke file test 2.]{3D smoke file test 2.
@@ -1107,7 +1107,7 @@ The images for this test were created automatically by running the smokeview scr
  \includegraphics[width=\figheightG]{SCRIPT_FIGURES/colorconv_slice_00300}&
  \includegraphics[width=\figheightG]{SCRIPT_FIGURES/colorconv_slice_00325}&
  \includegraphics[width=\figheightG]{SCRIPT_FIGURES/colorconv_slice_02000}\\
-&&&\raisebox{0.0in}[0pt]{\includegraphics[height=8.0in]{figures/colorbar_20_100}}\\
+&&&\raisebox{0.0in}[0pt]{\includegraphics[height=8.0in]{FIGURES/colorbar_20_100}}\\
 \end{tabular}
 \end{center}
  \caption[Color conversion test 1.]{Color conversion test.  Temperature between 20~\degC\ and 100~\degC\ are
