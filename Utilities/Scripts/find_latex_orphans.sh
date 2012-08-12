@@ -13,9 +13,6 @@ cd $SVNROOT/Manuals
 
 cd FDS_Configuration_Management_Plan
 echo 'Building FDS Configuration Management Plan'
-pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> /dev/null
-bibtex FDS_Configuration_Management_Plan &> /dev/null
-pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> /dev/null
 pdflatex -interaction nonstopmode -recorder FDS_Configuration_Management_Plan &> /dev/null
 if [[ -e FDS_Configuration_Management_Plan.pdf ]];
 then
@@ -27,9 +24,6 @@ cd ..
 
 cd FDS_Technical_Reference_Guide
 echo 'Building FDS Technical Reference Guide'
-pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> /dev/null
-bibtex FDS_Technical_Reference_Guide &> /dev/null
-pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> /dev/null
 pdflatex -interaction nonstopmode -recorder FDS_Technical_Reference_Guide &> /dev/null
 if [[ -e FDS_Technical_Reference_Guide.pdf ]];
 then
@@ -41,9 +35,6 @@ cd ..
 
 cd FDS_User_Guide
 echo 'Building FDS User Guide'
-pdflatex -interaction nonstopmode FDS_User_Guide &> /dev/null
-bibtex FDS_User_Guide &> /dev/null
-pdflatex -interaction nonstopmode FDS_User_Guide &> /dev/null
 pdflatex -interaction nonstopmode -recorder FDS_User_Guide &> /dev/null
 if [[ -e FDS_User_Guide.pdf ]];
 then
@@ -55,9 +46,6 @@ cd ..
 
 cd FDS_Validation_Guide
 echo 'Building FDS Validation Guide'
-pdflatex -interaction nonstopmode FDS_Validation_Guide &> /dev/null
-bibtex FDS_Validation_Guide &> /dev/null
-pdflatex -interaction nonstopmode FDS_Validation_Guide &> /dev/null
 pdflatex -interaction nonstopmode -recorder FDS_Validation_Guide &> /dev/null
 if [[ -e FDS_Validation_Guide.pdf ]];
 then
@@ -69,9 +57,6 @@ cd ..
 
 cd FDS_Verification_Guide
 echo 'Building FDS Verification Guide'
-pdflatex -interaction nonstopmode FDS_Verification_Guide &> /dev/null
-bibtex FDS_Verification_Guide &> /dev/null
-pdflatex -interaction nonstopmode FDS_Verification_Guide &> /dev/null
 pdflatex -interaction nonstopmode -recorder FDS_Verification_Guide &> /dev/null
 if [[ -e FDS_Verification_Guide.pdf ]];
 then
@@ -83,9 +68,6 @@ cd ..
 
 cd SMV_Technical_Reference_Guide
 echo 'Building SMV Technical Reference Guide'
-pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> /dev/null
-bibtex SMV_Technical_Reference_Guide &> /dev/null
-pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> /dev/null
 pdflatex -interaction nonstopmode -recorder SMV_Technical_Reference_Guide &> /dev/null
 if [[ -e SMV_Technical_Reference_Guide.pdf ]];
 then
@@ -97,9 +79,6 @@ cd ..
 
 cd SMV_User_Guide
 echo 'Building SMV User Guide'
-pdflatex -interaction nonstopmode SMV_User_Guide &> /dev/null
-bibtex SMV_User_Guide &> /dev/null
-pdflatex -interaction nonstopmode SMV_User_Guide &> /dev/null
 pdflatex -interaction nonstopmode -recorder SMV_User_Guide &> /dev/null
 if [[ -e SMV_User_Guide.pdf ]];
 then
@@ -111,9 +90,6 @@ cd ..
 
 cd SMV_Verification_Guide
 echo 'Building SMV Verification Guide'
-pdflatex -interaction nonstopmode SMV_Verification_Guide &> /dev/null
-bibtex SMV_Verification_Guide &> /dev/null
-pdflatex -interaction nonstopmode SMV_Verification_Guide &> /dev/null
 pdflatex -interaction nonstopmode -recorder SMV_Verification_Guide &> /dev/null
 if [[ -e SMV_Verification_Guide.pdf ]];
 then
@@ -132,10 +108,6 @@ cd $SVNROOT/Manuals
 # Compile list of png and pdf images referenced in LaTeX documents
 REFERENCED_FILES=`grep -h INPUT */*.fls | grep -E 'pdf|png|eps|jpg' | cut -f2 -d' ' | xargs -n1 basename | sed 's/\..\{3\}$//'`
 
-FIGDIR=
-# Compile list of png and pdf images in Manuals directories
-GRAPHICS_FILES=`find FDS_Configuration_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
-
 FIGDIR=/FIGURES
 GRAPHICS_FILES_F=`find FDS_Configuration_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
 
@@ -150,7 +122,7 @@ GRAPHICS_FILES_SF=`find FDS_Configuration_Management_Plan$FIGDIR FDS_Technical_R
 
 # See if all graphics are referenced in a LaTeX document
 # If not, print "Unused graphics file (with filename)"
-for i in $GRAPHICS_FILES
+for i in $GRAPHICS_FILES_SF
 do
     if [[ $REFERENCED_FILES == *"$i"* ]];
         then
@@ -161,8 +133,23 @@ do
         then
             :
         else
-            echo "Ununsed graphics file: $i"
+            echo "Ununsed graphics file in SCRIPT_FIGURES: $i"
         fi
     fi
 done
 
+for i in $GRAPHICS_FILES_F
+do
+    if [[ $REFERENCED_FILES == *"$i"* ]];
+        then
+            :
+    else
+        if [[ $i == *Guide* ]] || \
+           [[ $i == *Plan* ]]
+        then
+            :
+        else
+            echo "Ununsed graphics file in FIGURES: $i"
+        fi
+    fi
+done
