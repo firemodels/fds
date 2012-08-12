@@ -133,7 +133,7 @@ do
         then
             :
         else
-            echo "Ununsed graphics file in SCRIPT_FIGURES: $i"
+            echo "Unused graphics file in SCRIPT_FIGURES: $i"
         fi
     fi
 done
@@ -149,7 +149,7 @@ do
         then
             :
         else
-            echo "Ununsed graphics file in FIGURES: $i"
+            echo "Unused graphics file in FIGURES: $i"
         fi
     fi
 done
