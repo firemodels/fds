@@ -132,8 +132,17 @@ cd $SVNROOT/Manuals
 # Compile list of png and pdf images referenced in LaTeX documents
 REFERENCED_FILES=`grep -h INPUT */*.fls | grep -E 'pdf|png|eps|jpg' | cut -f2 -d' ' | xargs -n1 basename | sed 's/\..\{3\}$//'`
 
+FIGDIR=
 # Compile list of png and pdf images in Manuals directories
-GRAPHICS_FILES=`find FDS_Configuration_Management_Plan FDS_Technical_Reference_Guide FDS_User_Guide FDS_Validation_Guide FDS_Verification_Guide SMV_Technical_Reference_Guide SMV_User_Guide SMV_Verification_Guide -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
+GRAPHICS_FILES=`find FDS_Configuration_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
+
+FIGDIR=/FIGURES
+GRAPHICS_FILES_F=`find FDS_Configuration_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
+
+FIGDIR=/SCRIPT_FIGURES
+GRAPHICS_FILES_SF=`find FDS_Configuration_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
+
+# gf: have a loop outputting orphans for each GRPHICS_FILESxxx variable above
 
 #  =================
 #  = Compare lists =
