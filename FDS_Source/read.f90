@@ -8104,49 +8104,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
       END SELECT
  
    ENDDO  VENT_LOOP_3
-   
-   ! Allocate arrays for turbulent inflow boundary conditions
- 
-   VENT_LOOP_4: DO N=1,N_VENT
-      VT => VENTS(N)    
-      EDDY_IF: IF (VT%N_EDDY>0) THEN
-         SELECT CASE(ABS(VT%IOR))
-            CASE(1)
-               ALLOCATE(VT%U_EDDY(VT%J1+1:VT%J2,VT%K1+1:VT%K2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','U_PRIME',IZERO)
-               ALLOCATE(VT%V_EDDY(VT%J1+1:VT%J2,VT%K1+1:VT%K2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','V_PRIME',IZERO)
-               ALLOCATE(VT%W_EDDY(VT%J1+1:VT%J2,VT%K1+1:VT%K2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','W_PRIME',IZERO)
-            CASE(2)
-               ALLOCATE(VT%U_EDDY(VT%I1+1:VT%I2,VT%K1+1:VT%K2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','U_PRIME',IZERO)
-               ALLOCATE(VT%V_EDDY(VT%I1+1:VT%I2,VT%K1+1:VT%K2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','V_PRIME',IZERO)
-               ALLOCATE(VT%W_EDDY(VT%I1+1:VT%I2,VT%K1+1:VT%K2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','W_PRIME',IZERO)
-            CASE(3)
-               ALLOCATE(VT%U_EDDY(VT%I1+1:VT%I2,VT%J1+1:VT%J2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','U_PRIME',IZERO)
-               ALLOCATE(VT%V_EDDY(VT%I1+1:VT%I2,VT%J1+1:VT%J2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','V_PRIME',IZERO)
-               ALLOCATE(VT%W_EDDY(VT%I1+1:VT%I2,VT%J1+1:VT%J2),STAT=IZERO)
-               CALL ChkMemErr('READ_VENT','W_PRIME',IZERO)
-         END SELECT
-         ALLOCATE(VT%X_EDDY(VT%N_EDDY),STAT=IZERO)
-         CALL ChkMemErr('READ_VENT','X_EDDY',IZERO)
-         ALLOCATE(VT%Y_EDDY(VT%N_EDDY),STAT=IZERO)
-         CALL ChkMemErr('READ_VENT','Y_EDDY',IZERO)
-         ALLOCATE(VT%Z_EDDY(VT%N_EDDY),STAT=IZERO)
-         CALL ChkMemErr('READ_VENT','Z_EDDY',IZERO)
-         ALLOCATE(VT%CU_EDDY(VT%N_EDDY),STAT=IZERO)
-         CALL ChkMemErr('READ_VENT','CU_EDDY',IZERO)
-         ALLOCATE(VT%CV_EDDY(VT%N_EDDY),STAT=IZERO)
-         CALL ChkMemErr('READ_VENT','CV_EDDY',IZERO)
-         ALLOCATE(VT%CW_EDDY(VT%N_EDDY),STAT=IZERO)
-         CALL ChkMemErr('READ_VENT','CW_EDDY',IZERO)
-      ENDIF EDDY_IF
-   ENDDO VENT_LOOP_4
  
 ENDDO MESH_LOOP_2
  
