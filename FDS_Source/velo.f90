@@ -1457,7 +1457,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2),DUMMY,VEL_EDDY
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
             VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN,&
-            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P
+            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
 LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
@@ -1573,6 +1573,35 @@ EDGE_LOOP: DO IE=1,N_EDGES
    JJO(2) = IJKE(15,IE)
    KKO(2) = IJKE(16,IE)
 
+   ! Get the velocity components at the appropriate cell faces     
+
+   COMPONENT: SELECT CASE(IEC)
+      CASE(1) COMPONENT    
+         UUP(1)  = VV(II,JJ,KK+1)
+         UUM(1)  = VV(II,JJ,KK)
+         UUP(2)  = WW(II,JJ+1,KK)
+         UUM(2)  = WW(II,JJ,KK)
+         DXX(1)  = DY(JJ)
+         DXX(2)  = DZ(KK)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
+      CASE(2) COMPONENT  
+         UUP(1)  = WW(II+1,JJ,KK)
+         UUM(1)  = WW(II,JJ,KK)
+         UUP(2)  = UU(II,JJ,KK+1)
+         UUM(2)  = UU(II,JJ,KK)
+         DXX(1)  = DZ(KK)
+         DXX(2)  = DX(II)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
+      CASE(3) COMPONENT 
+         UUP(1)  = UU(II,JJ+1,KK)
+         UUM(1)  = UU(II,JJ,KK)
+         UUP(2)  = VV(II+1,JJ,KK)
+         UUM(2)  = VV(II,JJ,KK)
+         DXX(1)  = DX(II)
+         DXX(2)  = DY(JJ)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
+   END SELECT COMPONENT
+
    ! Indicate that the velocity gradients in the two orthogonal directions have not been changed yet
 
    ALTERED_GRADIENT = .FALSE.
@@ -1581,9 +1610,26 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
    SIGN_LOOP: DO I_SGN=-1,1,2
       ORIENTATION_LOOP: DO IS=1,3
+
          IF (IS==IEC) CYCLE ORIENTATION_LOOP
 
+         ! IOR is the orientation of the wall cells adjacent to the edge
+
          IOR = I_SGN*IS
+
+         ! IS2 is the other coordinate direction besides IOR.
+
+         SELECT CASE(IEC)
+            CASE(1)
+               IF (IS==2) IS2 = 3
+               IF (IS==3) IS2 = 2
+            CASE(2)
+               IF (IS==1) IS2 = 3
+               IF (IS==3) IS2 = 1
+            CASE(3)
+               IF (IS==1) IS2 = 2
+               IF (IS==2) IS2 = 1
+            END SELECT
 
          ! Determine Index_Coordinate_Direction
          ! IEC=1, ICD=1 refers to DWDY; ICD=2 refers to DVDZ
@@ -1593,26 +1639,40 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (IS>IEC) ICD = IS-IEC
          IF (IS<IEC) ICD = IS-IEC+3
          ICD_SGN = I_SGN * ICD   
+
          ! IWM and IWP are the wall cell indices of the boundary on either side of the edge.
+
          IF (IOR<0) THEN
-            IWM  = WALL_INDEX(ICMM,IS)
+            IWM  = WALL_INDEX(ICMM,-IOR)
+            IWMI = WALL_INDEX(ICMM,IS2)
             IF (ICD==1) THEN
-               IWP  = WALL_INDEX(ICMP,IS)
+               IWP  = WALL_INDEX(ICMP,-IOR)
+               IWPI = WALL_INDEX(ICMP,-IS2)
             ELSE ! ICD==2
-               IWP  = WALL_INDEX(ICPM,IS)
+               IWP  = WALL_INDEX(ICPM,-IOR)
+               IWPI = WALL_INDEX(ICPM,-IS2)
             ENDIF
          ELSE
             IF (ICD==1) THEN
                IWM  = WALL_INDEX(ICPM,-IOR)
+               IWMI = WALL_INDEX(ICPM,IS2)
             ELSE ! ICD==2
                IWM  = WALL_INDEX(ICMP,-IOR)
+               IWMI = WALL_INDEX(ICMP,IS2)
             ENDIF
             IWP  = WALL_INDEX(ICPP,-IOR)
+            IWPI = WALL_INDEX(ICPP,-IS2)
          ENDIF
 
-         ! Throw out edge orientations that need not be processed
+         ! If both adjacent wall cells are undefined, cycle out of the loop.
 
          IF (IWM==0 .AND. IWP==0) CYCLE ORIENTATION_LOOP
+
+         ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
+
+         IF (WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IWPI)%BOUNDARY_TYPE==SOLID_BOUNDARY) CYCLE ORIENTATION_LOOP
+
+         ! If only one adjacent wall cell is defined, use its properties.
     
          IF (IWM>0) THEN
             WCM => WALL(IWM)
@@ -1625,6 +1685,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ELSE
             WCP => WALL(IWM)
          ENDIF
+
+         ! If both adjacent wall cells are NULL, cycle out.
 
          BOUNDARY_TYPE_M = WCM%BOUNDARY_TYPE
          BOUNDARY_TYPE_P = WCP%BOUNDARY_TYPE
@@ -1654,73 +1716,46 @@ EDGE_LOOP: DO IE=1,N_EDGES
             END SELECT
             CYCLE EDGE_LOOP
          ENDIF   
+
+         ! Define the appropriate gas and ghost velocity
    
-   ! Get the velocity components at the appropriate cell faces     
- 
-   COMPONENT: SELECT CASE(IEC)
-      CASE(1) COMPONENT    
-         UUP(1)  = VV(II,JJ,KK+1)
-         UUM(1)  = VV(II,JJ,KK)
-         UUP(2)  = WW(II,JJ+1,KK)
-         UUM(2)  = WW(II,JJ,KK)
-         DXX(1)  = DY(JJ)
-         DXX(2)  = DZ(KK)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
-      CASE(2) COMPONENT  
-         UUP(1)  = WW(II+1,JJ,KK)
-         UUM(1)  = WW(II,JJ,KK)
-         UUP(2)  = UU(II,JJ,KK+1)
-         UUM(2)  = UU(II,JJ,KK)
-         DXX(1)  = DZ(KK)
-         DXX(2)  = DX(II)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
-      CASE(3) COMPONENT 
-         UUP(1)  = UU(II,JJ+1,KK)
-         UUM(1)  = UU(II,JJ,KK)
-         UUP(2)  = VV(II+1,JJ,KK)
-         UUM(2)  = VV(II,JJ,KK)
-         DXX(1)  = DX(II)
-         DXX(2)  = DY(JJ)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
-   END SELECT COMPONENT
-
-   IF (ICD==1) THEN ! Used to pick the appropriate velocity component
-      IVL=2
-   ELSE !ICD==2
-      IVL=1
-   ENDIF
-
-   IF (IOR<0) THEN
-      VEL_GAS   = UUM(IVL)
-      VEL_GHOST = UUP(IVL)
-      IIGM = I_CELL(ICMM)
-      JJGM = J_CELL(ICMM)
-      KKGM = K_CELL(ICMM)
-      IF (ICD==1) THEN
-         IIGP = I_CELL(ICMP)
-         JJGP = J_CELL(ICMP)
-         KKGP = K_CELL(ICMP)
-      ELSE ! ICD==2
-         IIGP = I_CELL(ICPM)
-         JJGP = J_CELL(ICPM)
-         KKGP = K_CELL(ICPM)
-      ENDIF
-   ELSE
-      VEL_GAS   = UUP(IVL)
-      VEL_GHOST = UUM(IVL)
-      IF (ICD==1) THEN
-         IIGM = I_CELL(ICPM)
-         JJGM = J_CELL(ICPM)
-         KKGM = K_CELL(ICPM)
-      ELSE ! ICD==2
-         IIGM = I_CELL(ICMP)
-         JJGM = J_CELL(ICMP)
-         KKGM = K_CELL(ICMP)
-      ENDIF
-      IIGP = I_CELL(ICPP)
-      JJGP = J_CELL(ICPP)
-      KKGP = K_CELL(ICPP)
-   ENDIF
+         IF (ICD==1) THEN ! Used to pick the appropriate velocity component
+            IVL=2
+         ELSE !ICD==2
+            IVL=1
+         ENDIF
+      
+         IF (IOR<0) THEN
+            VEL_GAS   = UUM(IVL)
+            VEL_GHOST = UUP(IVL)
+            IIGM = I_CELL(ICMM)
+            JJGM = J_CELL(ICMM)
+            KKGM = K_CELL(ICMM)
+            IF (ICD==1) THEN
+               IIGP = I_CELL(ICMP)
+               JJGP = J_CELL(ICMP)
+               KKGP = K_CELL(ICMP)
+            ELSE ! ICD==2
+               IIGP = I_CELL(ICPM)
+               JJGP = J_CELL(ICPM)
+               KKGP = K_CELL(ICPM)
+            ENDIF
+         ELSE
+            VEL_GAS   = UUP(IVL)
+            VEL_GHOST = UUM(IVL)
+            IF (ICD==1) THEN
+               IIGM = I_CELL(ICPM)
+               JJGM = J_CELL(ICPM)
+               KKGM = K_CELL(ICPM)
+            ELSE ! ICD==2
+               IIGM = I_CELL(ICMP)
+               JJGM = J_CELL(ICMP)
+               KKGM = K_CELL(ICMP)
+            ENDIF
+            IIGP = I_CELL(ICPP)
+            JJGP = J_CELL(ICPP)
+            KKGP = K_CELL(ICPP)
+         ENDIF
 
          ! Decide whether or not to process edge using data interpolated from another mesh
    
@@ -2038,10 +2073,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             CYCLE
          ENDIF
          ICDO_SGN = I_SGN*ICDO
-         IF (ALTERED_GRADIENT(ICDO_SGN) .AND. ALTERED_GRADIENT(-ICDO_SGN)) THEN
-               DUIDXJ_USE(ICDO) =    0.5_EB*(DUIDXJ(ICDO_SGN)+   DUIDXJ(-ICDO_SGN))
-            MU_DUIDXJ_USE(ICDO) = 0.5_EB*(MU_DUIDXJ(ICDO_SGN)+MU_DUIDXJ(-ICDO_SGN))
-         ELSEIF (ALTERED_GRADIENT(ICDO_SGN)) THEN
+         IF (ALTERED_GRADIENT(ICDO_SGN)) THEN
                DUIDXJ_USE(ICDO) =    DUIDXJ(ICDO_SGN)
             MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ(ICDO_SGN)
          ELSEIF (ALTERED_GRADIENT(-ICDO_SGN)) THEN
