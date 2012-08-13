@@ -373,7 +373,100 @@ The term {\em proper use} is relative. There is currently no consensus standard 
 
 In addition to comparisons with simple fire scenarios, the user should obtain or produce experimental measurements for fire scenarios that are representative of the given application. Articles in the various fire journals often describe experiments for which the test data are available on request. If not, at the very least, the model user should reproduce results that can be found in the article itself. In making comparisons with test data, the modeler should evaluate separately the model's ability to (1) predict the burning rate of the fire, (2) predict the transport of hot gases throughout the enclosure, and (3) predict the response of a target, detector, sprinkler, and so on. If the evaluation combines two or three of these processes, it will be impossible to assess the source of the discrepancy between prediction and measurement. The exercise will merely indicate how well or poorly the model is working, but it will not provide any guidance for model improvement. If one is interested in predicting the burning rate or fire growth, then the validation exercise ought to focus on that part of it with the transport algorithm merely providing an estimate of the compartment conditions. To evaluate the transport algorithm, choose test data for which the burning rate has been measured accurately. To evaluate target response, choose test data for which the near-field environment has been characterized. For example, to evaluate a smoke detector activation algorithm, use measured, not predicted, values of velocity, temperature, and smoke concentration near the detector. Otherwise, errors in the CFD prediction will confound the assessment of the detector model.
 
-Finally, throughout the verification and validation process, the modeler should be skeptical of both the model and the experimental measurements. As discussed previously, all CFD models have limitations, and it is not uncommon to find programming errors, or ``bugs,'' in even the most popular software, especially for applications that are atypical. Similarly, full-scale fire experiments are difficult to perform, and instruments routinely fail under the harsh conditions. Often the failure is obvious, but sometimes the malfunction is less pronounced, as with an instrument that has not been properly calibrated or one that has ``drifted'' over the course of the test series. The experimentalist is hesitant to discount a measurement without some indication as to why it failed, or sometimes it is simply not apparent that there is anything wrong at all. The failure is not detected until years later when the model prediction and the measurement are plotted side by side, and even then, who is to say which is right and which is wrong? As a remedy, modelers should seek out test data from experiments that they have personally observed or that were conducted by people known to them who can relate the many details that often go unreported in the journal article or report of test.
+
+\subsection{Applicability of Validation Experiments}
+
+How can one determine if a particular application of the model has been validated? For example, suppose the problem at hand is a fire in a warehouse with a 10~m ceiling, sprinklers, roof vents, and HVAC system. There is probably no experimental data set that is exactly like it, and it would be too expensive to conduct new experiments. How does one determine if any validation work is appropriate for this scenario? The approach taken in a fire model validation study conducted by the U.S.~Nuclear Regulatory Commission (NRC) and the Electrical Power Research Institute (EPRI) was to characterize the experiments used in the study in terms of a handful of commonly used non-dimensional quantities from the fire literature~\cite{Hill:2007}. This essentially defines the ``parameter space'' for which the model was validated. The model users are warned that the models can only be applied within this parameter space. This prevents the tendency by users to simply declare that the model has been validated and can be used for any application. The non-dimensionalized parameters used in the NRC/EPRI study are:
+
+\paragraph{Fire Froude Number, $\dot{Q}^*$}
+
+A convenient way to express the heat release rate of the fire relative to its base area is by way of the non-dimensionalized quantity:
+\begin{equation}
+ Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} \; D^2}
+\end{equation}
+where $\dot{Q}$ is the peak heat release rate of the fire and $D$ is the equivalent diameter of the base of the fire.
+The Fire Froude Number is a useful quantity for plume correlations and flame height estimates. A large value of $\dot{Q}^*$ describes a fire for which the energy output is relatively large compared to its physical diameter, like an oil well blowout fire.  A low value describes a fire for which the energy output is relatively small compared to its diameter, like a brush fire.  Most common accidental fire scenarios have $\dot{Q}^*$ values on the order of 1.
+
+\paragraph{Flame Height relative to Ceiling Height, $L_{\hbox{\tiny f}}/H$}
+
+This ratio is a convenient way to express the physical size of the fire relative to the size of the room. A value greater than
+one indicates that there is flame impingement on the ceiling, an important consideration when evaluating devices such as sprinklers and smoke detectors.
+The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, based on Heskestad's correlation:
+\begin{equation}
+   L_{\hbox{\tiny f}} = D \, \left( 3.7 \, (\dot{Q}^*)^{2/5} - 1.02 \right)
+\end{equation}
+
+\paragraph{Global Equivalence Ratio, $\phi$}
+
+The equivalence ratio is the ratio of the mass flux of fuel from the fire to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio.
+\begin{equation}
+   \phi = \frac{\dot{m}_{\hbox{\tiny f}}}{r\, \dot{m}{\hbox{\tiny O$_2$}}} \equiv  \frac{\dot{Q} \, \hbox{(kW)}}{13,100 \, \hbox{(kJ/kg)} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
+   \begin{array}{r@{\quad \quad}l}
+      \frac{1}{2} \, 0.23 \, A_0 \sqrt{H_0} & \hbox{Natural Ventilation} \\ [0.1in]
+      0.23 \, \rho \, \dot{V}       & \hbox{Mechanical Ventilation} \end{array} \right.
+\end{equation}
+Here, $r$ is the stoichiometric ratio, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the
+volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
+In general, under-ventilated fire scenarios are more challenging for the models because the combustion physics are more complicated.
+
+\paragraph{Relative Distance along the Ceiling, $r_{\hbox{\tiny cj}}/H$}
+
+This ratio indicates the distance from the fire plume of a sprinkler, smoke detector, {\em etc.}, relative to the
+compartment height, $H$. The maximum ceiling jet temperature, important  in determining device activation, has been shown to be a function of this ratio.
+
+\paragraph{Relative Distance from the Fire, $r_{\hbox{\tiny rad}}/D$}
+
+This ratio indicates whether a ``target'' is near or far from the fire. In general, it is more challenging to predict the
+radiative heat flux to objects near the fire.
+
+\paragraph{Room Length and Width relative to the Ceiling Height, $L/H$ and $W/H$}
+
+These ratios are useful mainly when assessing an empirical or zone model because most of the correlations used
+by these models are limited in terms of compartment aspect ratio. For CFD, extreme values of these ratios might indicate unusual fire behavior.
+
+\paragraph{Ceiling Height relative to the Fire Diameter, $H/D^*$}
+
+This ratio is a non-dimensional measure of the height of the fire plume.
+$D^*$ is length scale that incorporates the heat release rate of the fire.
+\begin{equation}
+   D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5}
+\end{equation}
+The larger this ratio, the more important the plume becomes in the overall scenario. For empirical and zone models, it indicates whether or not the plume entrainment
+correlation is appropriate. For CFD, it indicates how ``high'' the plume actually is, in non-dimensional terms.
+
+
+\subsection{Quantifying Model Uncertainty}
+
+Having determined the appropriateness of the chosen experiments, it is now necessary to quantify the accuracy of the model in predicting the outcome of these experiments. For each quantity of interest, a summary plot of the results should be constructed like the one shown in Figure 1. If a particular prediction and measurement are the same, the resulting point falls on the solid diagonal line. The longer-dashed off-diagonal lines indicate the experimental uncertainty. The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements of a given quantity. For example, the bias factor for the data shown in Figure 1 is 1.02. This means that the model has been shown to slightly over-estimate target temperatures by 2~\%, on average, and this is shown graphically by the red dash-dot line just above the diagonal. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Figure 1, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence intervals. The second set of off-diagonal lines, shown as short-dashed red lines, indicates the model uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_M$. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
+
+The derivation of the relevant uncertainty statistics is described in Ref.~\cite{McGrattan:Metrologia}, and it is summarized here. The difference between the measured and predicted values is a function of the experimental and the model uncertainty. The purpose of the uncertainty calculation is to subtract off, in a statistical sense, the experimental uncertainty so that the model uncertainty can be estimated. Before describing the calculation, a few assumptions must be made:
+\begin{enumerate}
+\item The experimental measurements are assumed to be unbiased, and their uncertainty is assumed to be normally distributed with a constant relative standard deviation, $\widetilde{\sigma}_E$.
+\item The model uncertainty is assumed to be normally distributed about the predicted value divided by a bias factor, $\delta$. The relative standard deviation of the distribution is denoted as $\widetilde{\sigma}_M$.
+\end{enumerate}
+Given a set of experimental measurements, $E_i$, and a corresponding set of model predictions, $M_i$, compute the following:
+\begin{equation}
+   \overline{\ln (M/E)} = \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i)
+\end{equation}
+The relative standard deviation of the model, $\widetilde{\sigma}_M$, can be computed from the following equation:
+\begin{equation}
+   \widetilde{\sigma}_M^2 + \widetilde{\sigma}_E^2 = \frac{1}{n-1} \sum_{i=1}^n \,
+   \left[ \ln (M_i/E_i) - \overline{\ln (M/E)}  \right]^2 \label{stdev}
+\end{equation}
+The bias factor is:
+\begin{equation}
+   \delta = \exp \left( \overline{\ln (M/E)} + \frac{ \widetilde{\sigma}_M^2}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \label{delta}
+\end{equation}
+For a given model prediction, $M$, the ``true'' value of the quantity of interest is assumed to be a normally distributed random variable with a mean $\mu=M/\delta$ and a standard deviation of $\sigma=\widetilde{\sigma}_M (M/\delta)$.
+Using these values, the probability of exceeding a critical value, $x_c$, is:
+\begin{equation}
+   P(x>x_c) = \frac{1}{2} \hbox{erfc} \left( \frac{x_c-\mu}{\sigma \sqrt{2}} \right)
+\end{equation}
+Note that the complimentary error function is defined as follows:
+\begin{equation}
+   \hbox{erfc}(x) = \frac{2}{\sqrt{\pi}} \int_t^\infty e^{-t^2} dt
+\end{equation}
+It is a standard function in most mathematical or spread sheet programs.
 
 
 
@@ -387,15 +480,15 @@ A significant proportion of fire fatalities can be attributed to the inhalation 
 
 Many  of  the  earliest  examples  of  the  application of CFD to fire engineering were in smoke movement applications~\cite{Pericleous, Cox:1990}. Simulations were at that time restricted to a few tens of thousands of grid cells. Although this number has increased to hundreds of thousands or even millions of cells, many of the modeling issues remain the same and are discussed later~\cite{Kumar}.
 
-\paragraph{Fire source} 
+\paragraph{Fire source}
 
 The hazard posed by high temperatures and the loss of visibility may be compounded by exposure to toxic gases such as carbon monoxide or hydrogen cyanide. Although advanced combustion models may include the capability to predict some of these toxic gas species, it is generally necessary in fire engineering to prescribe the species yields. In other words, the production rate of smoke and other combustion products is usually specified by the user based on experimental measurements. It is still beyond the capability of practical fire models to predict reliably the growth, spread, and species yields of a fire that consumes realistic building contents.
 
-\paragraph{Open boundary conditions}   
+\paragraph{Open boundary conditions}
 
 The solution to a smoke movement analysis can be sensitive to the location of the ``free'' (ambient or open air) boundaries at the edge of the computational domain. These should be located at a sufficient distance from the fire source and regions of interest so that they do not incorrectly influence the solution. The setting of ambient values in relation to other boundary conditions may require special attention ({\em e.g.}, it can dictate whether smoke can be expected to vent naturally in an air-conditioned atrium). Heat losses to solid boundaries can also have a significant influence on smoke movement, particularly where the smoke has cooled down and the amount of heat transferred to walls and ceilings can determine the degree of buoyancy and stratification of the smoke gases.
 
-\paragraph{Visibility}  
+\paragraph{Visibility}
 
 Together with gas temperatures and heat fluxes, smoke movement applications often require an estimate of visibility, the distance through smoke that a person is expected to be able to see, say, an exit sign. Visibility distance may be derived from a CFD solution using the predicted concentration of soot particulates. The correspondence between smoke concentration and visibility is based on the work of Jin~\cite{Jin} and Mullholland~\cite{Mulholland} and is commonly implemented into CFD models using the following (or similar) expression for visibility distance:
 \begin{equation}
@@ -406,7 +499,7 @@ Here $K_1$ is a constant usually set to 3 for reflecting signs and 8 for illumin
 
 This section on smoke movement concludes with some examples of the application of CFD, taken from the ever-increasing number of cases.
 
-\paragraph{Smoke transport in a mechanically ventilated library} 
+\paragraph{Smoke transport in a mechanically ventilated library}
 
 In collaboration with Olof Granlund Oy, ANSYS Europe Ltd. conducted a CFD analysis of the movement of smoke generated by a fast-growing fire, with a peak heat release rate of 550~kW, inside a library for which the ventilation system was left running in its normal mode of operation. The building has a pitched, vented glass roof and diffusers at various elevations. ANSYS CFX is a general purpose, commercial CFD model that has a history in fire modeling dating back to the investigation of the 1987 Kings Cross fire in London~\cite{Simcox}. Because it is designed to handle virtually any type of geometry, a model like this one can employ a numerical mesh that conforms to the unusual shape of the building. In this case, an unstructured mesh with 3.2 million mesh elements was used. Figure~\ref{ANSYS} shows a contour map of visibility distance after
 3 minutes in a vertical slice through the building.
@@ -417,7 +510,7 @@ In collaboration with Olof Granlund Oy, ANSYS Europe Ltd. conducted a CFD analys
 \label{ANSYS}
 \end{figure}
 
-\paragraph{Smoke transport in a historic landmark}    
+\paragraph{Smoke transport in a historic landmark}
 
 CFD fire modeling is commonly used during the renovation of historic buildings. Often at issue is the inclusion or exclusion of a fire protection system (sprinklers, exhaust fans, etc.) that might require a variance from the local building code requirements. For example, as part of an overall effort in modernizing the Rhode Island Statehouse (the rotunda is the fourth largest self-supporting dome in the world), the LES model FDS was used to model a number of fire scenarios within the structure. The building supervisors wished to avoid having to disrupt the historical fabric of the rotunda while updating the building's fire protection systems. The model was used to examine a number of fire scenarios and how they might impact the ability of occupants to evacuate the building. Note in Figure~\ref{Dome} the use of rectangular obstructions to approximate the very complicated geometry of the building -- a simple alternative to the more CPU intensive body-fitted coordinate system.
 
@@ -519,7 +612,7 @@ $T$	                     \> temperature \\
 $\mathbf{u}=(u,v,w)$     \> velocity vector \\
 $\overline{W}$	         \> average molecular weight \\
 $\mathbf{x}=(x,y,z)$	 \> position vector \\
-$Y_\alpha$               \> mass fraction of species 
+$Y_\alpha$               \> mass fraction of species
 \end{tabbing}
 
 \subsection{Greek Letters}
@@ -548,8 +641,8 @@ Much of the difficulty in learning and applying computational fluid dynamics is 
 \end{equation}
 Thus, the convection term in the momentum conservation equation can be expanded as follows:
 \begin{eqnarray}
-\nabla \cdot (\rho \mathbf{u}\mathbf{u}) 
-&=& \left( \frac{\partial}{\partial x} \; \frac{\partial}{\partial y} \; \frac{\partial}{\partial z} \right) 
+\nabla \cdot (\rho \mathbf{u}\mathbf{u})
+&=& \left( \frac{\partial}{\partial x} \; \frac{\partial}{\partial y} \; \frac{\partial}{\partial z} \right)
     \left( \begin{array}{ccc} \rho u^2 & \rho uv & \rho uw \\ \rho vu & \rho v^2 & \rho vw \\ \rho wu & \rho wv & \rho w^2 \end{array} \right) \nonumber \\
 &=& \left( \begin{array}{c} (\rho u^2)_x + (\rho vu)_y + (\rho wu)_z \\ (\rho uv)_x + (\rho v^2)_y + (\rho wv)_z \\ (\rho uw)_x + (\rho vw)_y + (\rho w^2)_z \end{array} \right)^T
 \end{eqnarray}
@@ -561,7 +654,7 @@ The term for the viscosity in the momentum equation, $\nabla \cdot \tens{\tau}$,
 \end{equation}
 These expressions assert that the viscous stresses are linearly related to the strains, the very definition of a Newtonian fluid. The proportionality constant, $\mu$, is called the dynamic viscosity of the fluid. The viscous stress tensor can also be represented as a $3 \times 3$ matrix:
 \begin{equation}
-\tens{\tau} = \mu \left( \begin{array}{ccc} 2u_x & u_y+v_x & u_z+w_x \\ v_x+u_y & 2v_y & v_z+w_y \\ w_x+u_z & w_y+v_z & 2w_z \end{array} \right) - 
+\tens{\tau} = \mu \left( \begin{array}{ccc} 2u_x & u_y+v_x & u_z+w_x \\ v_x+u_y & 2v_y & v_z+w_y \\ w_x+u_z & w_y+v_z & 2w_z \end{array} \right) -
               \frac{2}{3} \left( \begin{array}{ccc} \nabla \cdot \mathbf{u} & 0 & 0 \\ 0 & \nabla \cdot \mathbf{u} & 0 \\ 0 & 0 & \nabla \cdot \mathbf{u} \end{array} \right)
 \end{equation}
 The dissipation function, $\epsilon$, is a scalar formed by the dot product of two $3 \times 3$ matrices:
