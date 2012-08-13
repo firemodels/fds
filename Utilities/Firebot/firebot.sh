@@ -1133,7 +1133,7 @@ check_fds_pictures
 ### Stage 7 ###
 run_matlab_plotting
 check_matlab_plotting
-# check_verification_stats (intentionally disabled until verification statistics undergo initial review)
+check_verification_stats
 
 ### Stage 8 ###
 make_fds_user_guide
