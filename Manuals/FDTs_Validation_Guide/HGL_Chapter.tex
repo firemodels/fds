@@ -103,7 +103,23 @@ A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_
 
 \section{Hot Gas Layer Temperature (Deal and Beyler)}
 
-A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_temperature_DB_summary}. 
+The approximate compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
+
+\be
+\Delta T_g = \left( \frac{\dot Q}{\dot m c_p + h_k A_T} \right)
+\ee
+
+\noindent where
+
+\be
+h_k = 0.4\ \mathrm{max} \left( \sqrt{\frac{k \rho c}{t}} , \frac{k}{\delta} \right)
+\ee
+
+This model is only valid for times up to 2000 seconds.
+
+\clearpage
+
+A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_temperature_DB_summary}.
 
 \begin{figure}[ht]
 \begin{center}
