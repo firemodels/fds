@@ -38,6 +38,18 @@ LOAD3DSMOKE
  soot mass fraction
 LOAD3DSMOKE
  HRRPUV
+SETTIMEVAL
+ 5.0
+RENDERONCE
+ thouse5_smoke_gpu_005 
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ thouse5_smoke_gpu_010 
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ thouse5_smoke_gpu_030 
 
 // render slice files
 
@@ -235,6 +247,18 @@ RENDERONCE
 LOADINIFILE
  thouse5_streak.ini
 SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_streak_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_streak_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_streak_030
+SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_streak_060
@@ -242,6 +266,72 @@ RENDERONCE
 // render OBSTs using solid view
 
 UNLOADALL
+RENDERONCE
+ thouse5_solid
+
+// render OBSTs using outline view
+
+LOADINIFILE
+ thouse5_outline.ini
+RENDERONCE
+ thouse5_outline
+
+// render geometry using hidden view (ie don't draw OBSTs)
+
+LOADINIFILE
+ thouse5_hidden.ini
+RENDERONCE
+ thouse5_hidden
+
+// render vents - don't show open vents
+
+LOADINIFILE
+ thouse5_noopen.ini
+RENDERONCE
+ thouse5_noopen
+
+// render vents - don't show any vents
+
+LOADINIFILE
+ thouse5_novents.ini
+RENDERONCE
+ thouse5_novents
+
+// render PLOT3D stepped contours
+
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d.ini
+LOADFILE
+ thouse5_0001_00000061_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_step
+
+// render PLOT3D line contours
+
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d2.ini
+LOADFILE
+ thouse5_0001_00000061_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_line
+
+// render PLOT3D continuous contours
+
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d3.ini
+LOADFILE
+ thouse5_0001_00000061_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_cont
 
 // render 3D smoke with no clipping
 
@@ -373,6 +463,14 @@ SETTIMEVAL
 RENDERONCE
  thouse5_iso_rb_stereo
 
+// render same view but not using stereo
+
+LOADINIFILE
+ thouse5_no_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_no_stereo
 UNLOADALL
  
 // render fed iso file

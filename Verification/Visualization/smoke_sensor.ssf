@@ -1,6 +1,10 @@
 RENDERDIR
  ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
 SETVIEWPOINT
+ external
+RENDERONCE
+ smoke_sensor_c
+SETVIEWPOINT
  view 1
 RENDERONCE
  smoke_sensor_l
