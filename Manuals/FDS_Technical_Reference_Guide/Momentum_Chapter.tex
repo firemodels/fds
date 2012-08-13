@@ -349,11 +349,11 @@ places a restriction on the time step due to the advection velocity. Physically,
 The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
-{\ct CFL\_VELOCITY\_NORM=0} (FDS 5 default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=0} (default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=1} (FDS 6 default, most restrictive, corresponds to $L_1$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=1} (most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
     \end{equation}
