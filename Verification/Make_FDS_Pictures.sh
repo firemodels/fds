@@ -58,6 +58,13 @@ export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle/"
 export BASEDIR=`pwd`
 
+echo "erasing SCRIPT_FIGURES png files"
+rm -f $SVNROOT/Manuals/FDS_Configuration_Management_Plan/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/Manuals/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/Manuals/FDS_User_Guide/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/Manuals/FDS_Verificaiton_Guide/SCRIPT_FIGURES/*.png
+
 ./FDS_Pictures.sh
 
 echo FDS cases submitted
