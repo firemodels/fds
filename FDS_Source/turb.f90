@@ -17,7 +17,7 @@ CHARACTER(255), PARAMETER :: turbdate='$Date$'
 
 PRIVATE
 PUBLIC :: NS_ANALYTICAL_SOLUTION, INIT_TURB_ARRAYS, VARDEN_DYNSMAG, &
-          GET_REV_turb, WERNER_WENGLE_WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D,STRATIFIED_MIXING_LAYER, &
+          GET_REV_turb, WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D,STRATIFIED_MIXING_LAYER, &
           SURFACE_HEAT_FLUX_MODEL, SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
           TWOD_VORTEX_CERFACS
  
@@ -799,117 +799,125 @@ UBAR(N_HI) = MIN(U_MAX,MAX(U_MIN,2._EB*UBAR(N_HI-1)-UBAR(N_HI-2)))
 END SUBROUTINE TOPHAT_FILTER_1D
 
 
-SUBROUTINE WERNER_WENGLE_WALL_MODEL(SF,U_TAU,U1,NU,DZ,ROUGHNESS)
+SUBROUTINE WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U,NU,DY,S)
 
-REAL(EB), INTENT(OUT) :: SF,U_TAU
-REAL(EB), INTENT(IN) :: U1,NU,DZ,ROUGHNESS
+REAL(EB), INTENT(OUT) :: SLIP_FACTOR,U_TAU,Y_PLUS
+REAL(EB), INTENT(IN) :: U,NU,DY,S ! S is the roughness length scale (Pope's notation)
 
-REAL(EB), PARAMETER :: A=8.3_EB,B=1._EB/7._EB
-REAL(EB), PARAMETER :: Z_PLUS_TURBULENT = 11.81_EB
-REAL(EB), PARAMETER :: ALPHA=7.202125273562269_EB !! ALPHA=(1._EB-B)/2._EB*A**((1._EB+B)/(1._EB-B))
-REAL(EB), PARAMETER :: BETA=1._EB+B
-REAL(EB), PARAMETER :: ETA=(1._EB+B)/A
-REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
-REAL(EB), PARAMETER :: RKAPPA=2.44_EB  ! 1./von Karman constant
-REAL(EB), PARAMETER :: B_LOGLAW=5.2_EB, B2=8.5_EB, BTILDE_MAX = 9.5_EB ! see Pope (2000) pp. 294,297,298
-REAL(EB), PARAMETER :: R_PLUS_SMOOTH=5.83_EB, R_PLUS_ROUGH=30._EB ! approx piece-wise function for Fig. 7.24, Pope (2000) p. 297
+REAL(EB), PARAMETER :: RKAPPA=1._EB/0.41_EB ! 1/von Karman constant
+REAL(EB), PARAMETER :: B=5.2_EB,BTILDE_ROUGH=8.5_EB,BTILDE_MAX=9.5_EB ! see Pope (2000) pp. 294,297,298
+REAL(EB), PARAMETER :: S0=1._EB,S1=5.83_EB,S2=30._EB ! approx piece-wise function for Fig. 7.24, Pope (2000) p. 297
+REAL(EB), PARAMETER :: Y1=5._EB,Y2=30._EB
+REAL(EB), PARAMETER :: U1=5._EB,U2=RKAPPA*LOG(Y2)+B
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
-REAL(EB) :: TAU_W,NUODZ,Z_PLUS,TAU_ROUGH,BTILDE,RD_NU,R_PLUS,TAU_SMOOTH
+REAL(EB) :: Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS
 INTEGER :: ITER
 
-! References (for smooth walls):
-!
-! Werner, H., Wengle, H. (1991) Large-eddy simulation of turbulent flow over
-! and around a cube in a plate channel. 8th Symposium on Turbulent Shear
-! Flows, Munich, Germany.
-!
-! Pierre Sagaut. Large Eddy Simulation for Incompressible Flows: An Introduction.
-! Springer, 2001.
-!
-! Temmerman, L., Leschziner, M.A., Mellen, C.P., and Frohlich, J. (2003)
-! Investigation of wall-function approximations and subgrid-scale models in
-! Large Eddy Simulation of separated flow in a channel with streamwise
-! periodic constrictions. International Journal of Heat and Fluid Flow,
-! Vol. 24, No. 2, pp. 157-180.
-!
-! Breuer, M., Kniazev, B., and Abel, M. (2007) Development of wall models
-! for LES of separated flows using statistical evaluations. Computers and
-! Fluids, Vol. 36, pp. 817-837.
-!
-! McDermott, R. (2009) FDS Wall Flows, Part I: Straight Channels, NIST Technical Note.
-!
-! References (for rough surfaces):
+! References:
 !
 ! S. B. Pope (2000) Turbulent Flows, Cambridge.
-!
-! Moeng, C.-H. (1984) A Large-Eddy Simulation Model for the Study of Planetary
-! Boundary-Layer Turbulence. Journal of the Atmospheric Sciences, Vol. 41, No. 13,
-! pp. 2052-2062.
-!
-! Stoll, R., Porte-Agel, F. (2008) Large-Eddy Simulation of the Stable Atmospheric
-! Boundary Layer using Dynamic Models with Different Averaging Schemes. Boundary-Layer
-! Meteorology, 126:1-28.
 !
 ! Comments:
 !
 ! The slip factor (SF) is based on the following approximation to the wall stress
 ! (note that u0 is the ghost cell value of the streamwise velocity component and
-! z is the wall-normal direction):
-! tau_w = mu*(u1-u0)/dz = mu*(u1-SF*u1)/dz = mu*u1/dz*(1-SF)
-! note that tau_w/rho = nu*u1/dz*(1-SF)
+! y is the wall-normal direction):
+! tau_w = mu*(u-u0)/dy = mu*(u-SF*u)/dy = mu*u/dy*(1-SF)
+! note that tau_w/rho = nu*u/dy*(1-SF)
 
-! Werner-Wengle
-NUODZ = NU/DZ
-TAU_W = (ALPHA*(NUODZ**BETA) + ETA*(NUODZ**B)*ABS(U1))**GAMMA ! actually tau_w/rho
-U_TAU = SQRT(TAU_W)
-RD_NU  = U_TAU/(NU+EPS) ! viscous length scale
+! New scheme
 
-! Pope (2000)
-IF (ROUGHNESS>0._EB) THEN
-   TAU_SMOOTH=TAU_W
-   DO ITER=1,2
-      R_PLUS = ROUGHNESS*RD_NU ! roughness in viscous units
-      IF (R_PLUS < R_PLUS_SMOOTH) THEN
-         BTILDE = B_LOGLAW + RKAPPA*LOG(R_PLUS) ! Pope (2000) p. 297, Eq. (7.122)
-      ELSEIF (R_PLUS < R_PLUS_ROUGH) THEN
-         BTILDE = BTILDE_MAX ! approximation from Fig. 7.24, Pope (2000) p. 297
+! Step 1: compute laminar (DNS) stress, and initial guess for LES stress
+
+Y_CELL_CENTER = 0.5_EB*DY
+TAU_W = NU*ABS(U)/Y_CELL_CENTER         ! actually tau_w/rho
+U_TAU = SQRT(TAU_W)                     ! friction velocity
+DELTA_NU = NU/(U_TAU+EPS)               ! viscous length scale
+Y_PLUS = Y_CELL_CENTER/(DELTA_NU+EPS)
+SLIP_FACTOR = -1._EB
+
+! Step 2: compute turbulent (LES) stress
+
+LES_IF: IF (LES) THEN
+
+   ! NOTE: 2 iterations converges TAU_W to roughly 5 % residual error
+   !       3 iterations converges TAU_W to roughly 1 % residual error
+
+   DO ITER=1,3
+
+      S_PLUS = S/(DELTA_NU+EPS) ! roughness in viscous units
+
+      IF (S_PLUS < S0) THEN
+         ! smooth wall
+         Y_PLUS = Y_CELL_CENTER/(DELTA_NU+EPS)
+         IF (Y_PLUS < Y1) THEN
+            ! viscous sublayer
+            TAU_W = ( U/Y_PLUS )**2
+         ELSE IF (Y_PLUS < Y2) THEN
+            ! buffer layer
+            TAU_W = ( U/U_PLUS_BUFFER_SEMILOG(Y_PLUS) )**2
+         ELSE
+            ! log layer
+            TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+B) )**2
+         ENDIF
       ELSE
-         BTILDE = B2 ! fully rough
+         ! rough wall
+         IF (S_PLUS < S1) THEN
+            BTILDE = B + RKAPPA*LOG(S_PLUS) ! Pope (2000) p. 297, Eq. (7.122)
+         ELSE IF (S_PLUS < S2) THEN
+            BTILDE = BTILDE_MAX ! approximation from Fig. 7.24, Pope (2000) p. 297
+         ELSE
+            BTILDE = BTILDE_ROUGH ! fully rough
+         ENDIF
+         Y_PLUS = Y_CELL_CENTER/S
+         TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+BTILDE) )**2  ! Pope (2000) p. 297, Eq. (7.121)
       ENDIF
-      TAU_ROUGH = ( U1/(RKAPPA*LOG(0.5_EB*DZ/ROUGHNESS)+BTILDE) )**2 ! actually tau_w/rho
-      TAU_W = MAX(TAU_SMOOTH,TAU_ROUGH)
+
       U_TAU = SQRT(TAU_W)
-      RD_NU  = U_TAU/(NU+EPS)
+      DELTA_NU = NU/(U_TAU+EPS)
+
    ENDDO
-ENDIF
 
-Z_PLUS = DZ*RD_NU
-IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
-   SF = 1._EB-TAU_W/(NUODZ*ABS(U1)+EPS) ! log layer
-ELSE
-   SF = -1._EB ! viscous sublayer
-   TAU_W = 2._EB*NUODZ*ABS(U1)
-   U_TAU = SQRT(TAU_W)
-ENDIF
+   SLIP_FACTOR = 1._EB-TAU_W/(NU*ABS(U)/DY+EPS)
 
-!! check values...
-!IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
-!   print *,'A = ',A
-!   print *,'B = ',B
-!   print *,'ALPHA = ',ALPHA
-!   print *,'BETA = ',BETA
-!   print *,'ETA = ',ETA
-!   print *,'GAMMA = ',GAMMA
-!   print *,'U1 = ',U1
-!   print *,'NU/DZ = ',NU_OVER_DZ
-!   print *,'TAU_W/RHO = ',TAU_W
-!   print *,'Z_PLUS = ',Z_PLUS
-!   print *,'SF = ',SF
-!   print *
-!ENDIF
+ENDIF LES_IF
 
-END SUBROUTINE WERNER_WENGLE_WALL_MODEL
+CONTAINS
+
+REAL(EB) FUNCTION U_PLUS_BUFFER_SEMILOG(YP)
+
+REAL(EB), INTENT(IN) :: YP
+REAL(EB), PARAMETER :: RKAPPA_BUFFER=(U2-U1)/(LOG(Y2)-LOG(Y1))
+REAL(EB), PARAMETER :: B_BUFFER=U1-RKAPPA_BUFFER*LOG(Y1)
+
+! semi-log fit connecting U1=Y1=5 to U2=RKAPPA*LOG(Y2)+B at Y2=30
+
+U_PLUS_BUFFER_SEMILOG = RKAPPA_BUFFER*LOG(YP)+B_BUFFER
+
+END FUNCTION U_PLUS_BUFFER_SEMILOG
+
+REAL(EB) FUNCTION U_PLUS_BUFFER_POLY4(YP)
+
+REAL(EB), INTENT(IN) :: YP
+REAL(EB) :: DYP
+REAL(EB), PARAMETER :: DYPLUS=25._EB
+REAL(EB), PARAMETER :: B1 = (U2-Y2)/DYPLUS**2
+REAL(EB), PARAMETER :: B2 = (RKAPPA/Y2-1._EB)/DYPLUS
+REAL(EB), PARAMETER :: B3 = (-RKAPPA/Y2**2)*0.5_EB
+REAL(EB), PARAMETER :: C3 = 6._EB*B1-3._EB*B2+B3
+REAL(EB), PARAMETER :: C2 = (4._EB*B1-B2 - 2._EB*C3)/DYPLUS
+REAL(EB), PARAMETER :: C1 = (B1-C3-DYPLUS*C2)/DYPLUS**2
+
+! Jung-il Choi, Yonsei University
+! 4th-order polynomial fit connecting U1=Y1=5 to U2=RKAPPA*LOG(Y2)+B at Y2=30
+
+DYP = YP-Y1
+U_PLUS_BUFFER_POLY4 = C1*DYP**4 + C2*DYP**3 + C3*DYP**2 + YP
+
+END FUNCTION U_PLUS_BUFFER_POLY4
+
+END SUBROUTINE WALL_MODEL
 
 
 REAL(EB) FUNCTION VELTAN2D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
@@ -973,7 +981,7 @@ IF (DNS) THEN
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,U_STRM-U_STRM_WALL,MU*RRHO,DN,0._EB)
+      CALL WALL_MODEL(SLIP_COEF,DUMMY,DUMMY,U_STRM-U_STRM_WALL,MU*RRHO,DN,0._EB)
       !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
@@ -1085,7 +1093,7 @@ IF (DNS) THEN
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,U_STRM,MU*RRHO,DN,ROUGHNESS)
+      CALL WALL_MODEL(SLIP_COEF,DUMMY,DUMMY,U_STRM,MU*RRHO,DN,ROUGHNESS)
       !IF (SLIP_COEF<-100._EB .OR. SLIP_COEF>100._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
