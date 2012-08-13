@@ -2,6 +2,32 @@
 
 \section{Point Source Radiation Heat Flux}
 
+The point source model assumes that radiant energy is released at a point located at the center of the fire. The radiant heat flux at any distance from the source fire is inversely related to the horizontal separation distance (r), by the following equation (Drysdale, 1998)
+
+\be
+\dot q'' = \frac{x}{r} \left( \frac{\chi_r \dot Q}{4 \pi r^2} \right)
+\ee
+
+\noindent where
+
+\be
+r = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
+\ee
+
+\be
+D = \sqrt{\frac{4 A}{\pi}}
+\ee
+
+\be
+Q^* = \frac{Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
+\ee
+
+\be
+L_f = D (3.7 Q^{*^{2/5}} - 1.02)
+\ee
+
+\clearpage
+
 A summary scatter plot of point source radiation heat flux predictions is given in Fig.~\ref{point_source_heat_flux_summary}. 
 
 \begin{figure}[ht]
