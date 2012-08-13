@@ -393,11 +393,11 @@ Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion
 
 \subsection{Heat Transfer Constraint}
 
-Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check may be skipped by setting {\ct CHECK\_HT=.FALSE.} on {\ct MISC}.
+Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check may be added by setting {\ct CHECK\_HT=.TRUE.} on {\ct MISC}.
 
 \subsection{Gravitational Constraint}
 
-A time scale restriction based on gravitational acceleration can be formed from $\delta t \le \sqrt{\delta z/g}$.  This check may be omitted by setting  {\ct CHECK\_GR=.FALSE.} on {\ct MISC}.
+A time scale restriction based on gravitational acceleration can be formed from $\delta t \le \sqrt{\delta z/g}$.  This check may be added by setting  {\ct CHECK\_GR=.TRUE.} on {\ct MISC}.
 
 \subsection{Adjusting the Time Step} In the call to {\ct CHECK\_STABILITY} both the CFL and VN numbers are compared with {\ct CFL\_MAX [1.0]}, {\ct CFL\_MIN [0.8]}, {\ct VN\_MAX [0.5]}, and {\ct VN\_MIN [0.4]}, respectively (default values shown in brackets).  To be clear, the CFL constraint is now given by
 \begin{equation}
