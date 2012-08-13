@@ -292,22 +292,22 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     case 1:
       xgrid = meshi->yplt;
       ygrid = meshi->zplt;
-      nx = meshi->jbar+1;
-      ny = meshi->kbar+1;
+      nx = co->js2 + 1 - co->js1;
+      ny = co->ks2 + 1 - co->ks1;
       nxy = nx*ny;
       break;
     case 2:
       xgrid = meshi->xplt;
       ygrid = meshi->zplt;
-      nx = meshi->ibar+1;
-      ny = meshi->kbar+1;
+      nx = co->is2 + 1 - co->is1;
+      ny = co->ks2 + 1 - co->ks1;
       nxy = nx*ny;
       break;
     case 3:
       xgrid = meshi->xplt;
       ygrid = meshi->yplt;
-      nx = meshi->ibar+1;
-      ny = meshi->jbar+1;
+      nx = co->is2 + 1 - co->is1;
+      ny = co->js2 + 1 - co->js1;
       nxy = nx*ny;
       break;
     default:
