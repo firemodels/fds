@@ -5,7 +5,7 @@
 The point source model assumes that radiant energy is released at a point located at the center of the fire. The radiant heat flux at any distance from the source fire is inversely related to the horizontal separation distance (r), by the following equation (Drysdale, 1998)
 
 \be
-\dot q'' = \frac{x}{r} \left( \frac{\chi_r \dot Q}{4 \pi r^2} \right)
+\dot q_r'' = \frac{x}{r} \left( \frac{\chi_r \dot Q}{4 \pi r^2} \right)
 \ee
 
 \noindent where
@@ -47,6 +47,16 @@ A summary scatter plot of point source radiation heat flux predictions is given 
 
 \section{Immersed HGL Radiation Heat Flux}
 
+The immersed HGL radiation heat flux can be calculated by
+
+\be
+\dot q_r'' = \sigma (T_g^4 - T_\infty^4)
+\ee
+
+\noindent where $\sigma$ is the Stefan-Boltzmann constant ($W/m^2/K^4$), $T_g$ is the hot gas layer temperature from the appropriate method described in Chapter~\ref{HGL:Chapter}, and $T_\infty$ is the ambient temperature (K).
+
+\clearpage
+
 A summary scatter plot of immersed HGL radiation heat flux predictions is given in Fig.~\ref{immersed_HGL_heat_flux_summary}.
 
 \begin{figure}[ht]
@@ -65,6 +75,52 @@ A summary scatter plot of immersed HGL radiation heat flux predictions is given 
 
 
 \section{Immersed Plume Radiation Heat Flux}
+
+The immersed plume radiation heat flux can be calculated by
+
+\be
+\dot q_r'' = \sigma (T_p^4)
+\ee
+
+\noindent where $\sigma$ is the Stefan-Boltzmann constant ($W/m^2/K^4$), and $T_p$ is the plume temperature (K) at a given height using the McCaffrey centerline plume temperature correlation
+
+\be
+T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{Z}{\dot Q^{2/5}} \right)^{2 \eta - 1} T_\infty \right] + T_\infty
+\label{eq:mccaffrey}
+\ee
+
+The constants in Eq.~\ref{eq:mccaffrey} are a function of the height (Z) within the plume and are listed in Table~\ref{tbl:mccaffrey_constants}.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{Constants used in McCaffrey plume correlation}
+\label{tbl:mccaffrey_constants}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Region & $z/\dot Q^{2/5}$      & $\kappa$ & $\eta$ \\
+\hline
+Continuous & < 0.08       & 1/2  & 6.8 \\
+Intermittent & < 0.08-0.2 & 0     & 1.9 \\
+Plume         & > 0.2         & -1/3 & 1.1 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+%         KAPPA = 6.8
+%         ETA = 0.5
+%         REGION = 1
+%      ELSEIF ((Z_Q_2_5 >= 0.08) .AND. (Z_Q_2_5 <= 0.20)) THEN
+%         KAPPA = 1.9
+%         ETA = 0
+%         REGION = 2
+%      ELSE
+%         KAPPA = 1.1
+%         ETA = -(1./3.)
+%         REGION = 3
+
+\clearpage
 
 A summary scatter plot of immersed plume radiation heat flux predictions is given in Fig.~\ref{immersed_plume_heat_flux_summary}.
 
