@@ -1,0 +1,576 @@
+\documentclass[graybox]{svmult}
+
+\usepackage{mathptmx}       % selects Times Roman as basic font
+\usepackage{helvet}         % selects Helvetica as sans-serif font
+\usepackage{courier}        % selects Courier as typewriter font
+\usepackage{type1cm}        % activate if the above 3 fonts are
+
+\usepackage{makeidx}         % allows index generation
+\usepackage{graphicx}        % standard LaTeX graphics tool
+                             % when including figure files
+\usepackage{multicol}        % used for the two-column index
+\usepackage[bottom]{footmisc}% places footnotes at page bottom
+
+\makeindex             % used for the subject index
+                       % please use the style svind.ist with
+                       % your makeindex program
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\bibliographystyle{unsrt}
+
+\title*{Modeling Fires Using Computational Fluid Dynamics (CFD)}
+
+\author{Kevin McGrattan and Stewart Miles}
+
+\institute{Kevin McGrattan is a mathematician in the Building and Fire Research Laboratory at the National Institute of Standards and Technology in Gaithersburg, Maryland. He is the principal developer of the Fire Dynamics Simulator (FDS). \\ [0.1in]
+Stewart Miles, qualified originally as a physicist, is currently a practicing fire engineer at International Fire Consultants Ltd. in the United Kingdom. Previously he worked in fire research and engineering at the UK Building Research Establishment, where he contributed to the development of the CFD fire model JASMINE.}
+
+\maketitle
+
+
+\section{Introduction}
+
+It was in the early 1920s that Lewis Richardson first demonstrated the feasibility of solving, using numerical methods, the governing equations of fluid flow\cite{Richardson}  for the purpose of weather prediction. It was not for another 50 years that what is now known as computational fluid dynamics (CFD) began to emerge as a general analysis tool for the full breadth of fluid flow problems including those associated with fire.
+
+In contrast to zone models, the techniques of CFD evolved outside the fire community and were subsequently imported into it. The same basic CFD technology is being developed, applied, verified, and validated for an extremely wide range of applications. Problems and successes demonstrated elsewhere can often be exploited in the fire context, although there are many issues that are unique to fire that can only be the responsibility of the fire community. The same tools that are used to study, for example, heat transfer in an internal combustion engine can also be used to evaluate indoor air movement, early detection of smoke, and the dispersion of combustion products within the atmospheric boundary layer.
+
+CFD provides the potential to study these complicated problems that are only partially amenable to reduced-scale physical modeling because of the large number of non-dimensional groups that need to be preserved to simulate full-scale behavior. Furthermore, CFD has emerged as an important tool because the assumptions employed in zone models limit their reliable application to relatively straight- forward fire scenarios that can be described in terms of a small number of idealized components ({\em e.g.}, unperturbed fire plume, unconfined ceiling jet, uniform hot gas layer).
+
+The starting point for CFD models is the set of partial differential equations that assert conservation of mass, momentum, and energy within the fire and throughout the space surrounding it. These equations are solved numerically to yield time-varying predictions of temperature,  gas  velocity,  gas species concentrations, and so forth on a three dimensional mesh of control volumes that spans the geometry being modeled. Unlike two zone models, CFD models enforce the conservation laws in each of the thousands or millions of relatively small control volumes. However, the exact solution of the govern- ing equations, resolving fully the length and time scales that occur in the turbulent flows associated with fire, is still beyond the capabilities of even the largest computers currently available. To capture the details of the chemical processes of a fire would require spatial resolution of less than 1 millimeter. As a consequence, it is necessary to modify the governing equations to model the unresolvable turbulence. Two main approaches are currently employed in CFD simulations of fire: large eddy simulation (LES) and Reynolds-averaged Navier-Stokes (RANS) equations, which are described later in this chapter.
+
+In addition to the uncertainties associated with the modeling of turbulent flow, others are introduced by the description of combustion chemistry, radiation, and mass, momentum, and heat transfer at solid boundaries. Further complexity is introduced in the numerical solution of the equation set in which the choice of numerical schemes and the resolution of the numerical mesh strongly influences the quality of the CFD solution. An appreciation of all these issues is important in the successful exploitation of CFD to solve fire problems.
+It should be recognized that this topic is rapidly evolving and that this chapter can only represent a ``snapshot'' in time. Whereas a thousand mesh points constituted a detailed CFD solution in the early 1980s, simulations using millions of mesh points are now routine. This number can be expected to increase further, especially as parallel processing becomes more widespread. However, although the modeling of smoke transport may be considered reasonably mature, there remains considerable research and development still to be done with some of the more complex issues related to the underlying combustion and fire science (e.g., flame spread, oxygen vitiation, soot formation, and water suppression). Here the challenges remain considerable and will not be satisfactorily solved for some time yet.
+
+This chapter does not provide a comprehensive description of CFD. There are already numerous introductory textbooks on the subject~\cite{Anderson, Ferziger, Patankar, Peyret, Versteeg}. Depending on the background of the author(s), these books tend to emphasize techniques developed for particular fields of science and engineering, such as aerospace, meteorology, or combustion. Discussion of issues related to the modeling of fire can be found in review articles by Cox~\cite{Cox:1995,Cox:1998}  and Novozhilov~\cite{Novozhilov}. Finally, a comprehensive description of the specific algorithms used by a particular CFD model can only be found within the manuals that accompany the software. A recent review by Olenick and Carpenter~\cite{Olenick} lists about a dozen CFD models developed specifically for fire. Some of these models were developed for specific fire scenarios or phenomena. Others were developed to handle a variety of fire scenarios, including JASMINE from the Fire Research Station (U.K.), the Fire Dynamics Simulator (FDS) from NIST (U.S.) and VTT (Finland), SMARTFIRE from the University of Greenwich (U.K.), and SOFIE, the product of a European consortium. There are also general-purpose CFD models that have been used for fire simulations, including CFX Flow3D, Fluent, and STAR-CD. These computer programs contain tens to hundreds of thousands of lines of instructions, along with manuals that contain hundreds of pages of documentation of the development, algorithms, and validation of the models.
+
+This chapter provides an introduction to the theory and practice of computational fluid dynamics as applied to the study of fire. Although the mathematical framework for the subject is more than 100 years old, it is only in the past 20 years that computers have become fast enough to make the models practical.
+
+
+\section{Governing Equations}
+
+This section presents the conservation equations of mass, momentum, and energy that constitute the core of any CFD model. The derivation of these equations can be found in any textbook on the subject and will not be included here. Instead, a discussion of the various techniques used to make these equations tractable for numerical solution will follow. The most important of these is the turbulence model, a subject of considerable study and debate.
+
+\subsection{Conservation Equations}
+
+The conservation equations for mass, momentum, and energy for a mixture of gases are briefly described here. A particularly useful reference for a more detailed description of the equations, the notation used, and the various approximations employed is Anderson, Tannehill, and Pletcher~\cite{Anderson}.
+
+\subsubsection{Conservation of mass}
+
+The conservation equation for mass is
+\begin{equation}
+\frac{\partial \rho}{\partial t} + \nabla \cdot \rho \mathbf{u} = 0
+\label{eq:masscon}
+\end{equation}
+This equation is nothing more than a statement that mass is neither created nor destroyed. In words, the change in the density, $\rho$, at a given point in the flow field is equal to the net mass flux, $\rho \mathbf{u}$, across the boundary of a small control volume surrounding the point. For fire simulations, it is usually necessary to account explicitly for various individual gaseous species, for example, fuel and oxygen. Thus, the mass conservation equation is often written as a set of transport equations for the mass fractions of the individual gaseous species, $Y_\alpha$:
+\begin{equation}
+\frac{\partial \rho Y_\alpha}{\partial t} + \nabla \cdot (\rho Y_\alpha \mathbf{u}) = \nabla \cdot \rho D_\alpha \nabla Y_\alpha + \dot{m}_\alpha'''
+\label{eq:speccon}
+\end{equation}
+When all of the species equations are added together, the mass diffusion and production terms on the right-hand side sum to zero, leaving the original mass conservation equation.
+
+\subsubsection{Conservation of Momentum}
+
+The conservation equation for momentum is
+\begin{equation}
+\frac{\partial (\rho \mathbf{u})}{\partial t} = \nabla \cdot (\rho \mathbf{u} \mathbf{u}) = -\nabla p + \mathbf{f} + \nabla \cdot \tens{\tau}
+\label{eq:momcon}
+\end{equation}
+The momentum equation is written in compact notation here to emphasize that it is essentially Newton's Second Law of Motion, or simply Force $=$ Mass $\times$ Acceleration. The forces that drive the fluid consist of the pressure gradient, $\nabla p$, friction (in the form of the viscous stress tensor, $\tens{\tau}$), and external force terms, $\mathbf{f}$, such as buoyancy. A complete expansion of the various terms can be found in the Appendix.
+
+\subsubsection{Conservation of Energy}
+
+The conservation equation for energy is
+\begin{equation}
+\frac{\partial (\rho h)}{\partial t} = \nabla \cdot (\rho h \mathbf{u}) = \frac{Dp}{Dt} + \dot{q}''' - \nabla \cdot \mathbf{q} + \epsilon
+\label{eq:encon}
+\end{equation}
+As in the mass conservation equation, the enthalpy, $h$, at a given point changes according to the net energy flux across the boundary of a small control volume surrounding the point. Now, however, there are additional source terms on the right-hand side of the equation related to the pressure, combustion heat release rate, radiation and conduction, and kinetic energy dissipation, respectively. For fire applications, the contributions from the pressure term and the dissipation term are negligible, except in situations where the compartment of interest is sealed and the pressure rises substantially.
+
+Equations~\ref{eq:masscon} through \ref{eq:encon} constitute a set of partial differential equations for the density (or component mass fractions), velocity, pressure, and enthalpy of the fluid. The momentum equation is actually three equations for the three components of velocity: $u$, $v$, and $w$ making five equations for six unknowns. To close the system, an {\em equation of state} is needed to relate the thermodynamic variables, $p$, and
+\begin{equation}
+h = \int_{T_0}^T c_p \, dT
+\label{eq:hdef}
+\end{equation}
+For most fire applications, it is sufficient to assume a {\em perfect gas}:
+\begin{equation}
+p = \frac{\rho {\cal R} T}{\overline{W}} \quad ; \quad \overline{W} = \frac{1}{\sum (Y_\alpha / W_\alpha)}
+\label{eq:pgas}
+\end{equation}
+where ${\cal R}$ is the universal gas constant and $\overline{W}$ is the average molecular weight of the gas mixture.
+
+
+\subsubsection{Additional Assumptions}
+
+The foregoing equations form the basis for a wide variety of engineering applications but not without the further application of simplifying assumptions unique to each field. The only assumptions made thus far are that the fluid is a perfect gas and that the viscous stress is linearly dependent on the strain. A further approximation can be made here, exploiting the fact that fire-driven flows are substantially slower than the speed of sound. By assuming that the pressure is constant (or at most a time-varying average) in the equation of state and the energy equation, the number of unknowns is reduced from six to five, as temperature can now be found from the density. More importantly, there is no longer a need to account for pressure fluctuations that propagate at the speed of sound, a fact that makes the numerical solution of the equations more tractable because the time step size is limited only by the flow speed, not the sound speed~\cite{Rehm}.
+
+In the sections to follow, additional assumptions will be imposed on the governing equations to apply them to fire and other low-speed thermal processes. Most important is the treatment of the diffusive and source terms that distinguishes one type of CFD model from another.
+
+
+\section{Turbulence Modeling}
+
+The governing conservation equations describe the transport of mass, momentum, and energy via convection and diffusion (material diffusivity, viscosity, thermal conductivity). In large-scale fire applications, convection is the primary mode of transport of heat and combustion products, but the diffusive processes play a significant role in the flames and in boundary layers near solid surfaces. Capturing the large-scale convective transport and the small-scale diffusive processes in the same simulation requires too much computation, even for current-generation computers. Consequently, most practical fire simulations employ models to describe subgrid-scale, or ``unresolvable,'' phenomena. The most important of these are the turbulence models.
+
+The most popular numerical techniques for approximating the governing equations are roughly categorized according to their spatial and temporal fidelity: direct numerical simulation (DNS), Reynolds-averaged Na- vier-Stokes (RANS), and large eddy simulation (LES). DNS is really nothing more than a direct numerical solution of the governing equations. RANS and LES employ models of the unresolved subgrid dissipative processes. RANS averages over relatively large spatial and temporal scales than those that are characteristic of the given numerical grid or the fundamental frequency of the fire, whereas LES attempts to compute as much of the ``resolvable'' length and time scales ({\em i.e.}, the ``large eddies'') as possible.
+
+\subsection{Direct Numerical Simulation (DNS)}
+
+Direct numerical simulation (DNS) means that the governing equations are solved numerically with no modifications to the form presented above, which implies that all of the relevant temporal and spatial scales are resolved directly without invoking any models to represent the diffusive terms, like the viscosity, thermal conductivity, and material diffusivity. Because this technique demands very fine spatial and temporal resolution (less than 1~mm and 1~ms, respectively), it is limited to small laminar flames and sometimes small turbulent jets. DNS is still not practical for large-scale fire simulations, and nothing more is included in this chapter on the subject.
+
+\subsection{Reynolds-Averaged Navier-Stokes (RANS)}
+
+The approach to modeling turbulence in many commercial and fire-specific CFD models is to solve a statistically time-averaged form of the conservation equations, often referred to as the Reynolds-averaged Navier-Stokes (RANS)\footnote{A density-weighted variant of Reynolds averaging (Favre averaging) is often necessary for the treatment of regions where density fluctuations have a significant effect. This variant is not usually necessary for smoke movement studies but can be important close to the fire source. This treatment is not presented here but can be found in, for example, Cox~\cite{Cox:1995}.} equations after Osborne Reynolds who introduced the idea over a century ago. The starting point in Reynolds averaging is to decompose the velocity components, enthalpy, and species mass fractions, into a time-averaged component (denoted by an overbar) and a fluctuating component (denoted by a prime):
+\begin{equation}
+\phi(\mathbf{x},t) = \overline{\phi}(\mathbf{x},t) + \phi'(\mathbf{x},t)
+\label{eq:phidef}
+\end{equation}
+Notice that for transient flows the time-averaged component is still a function of time, representing the evolution of the mean flow field. In typical fire simulations, the time scale associated with the time-averaged component is on the order of several seconds, whereas that of the fluctuating component is on the order of milliseconds. Substituting the decomposed primitive variables into the conservation equations (Equations~\ref{eq:masscon}, \ref{eq:momcon}, and \ref{eq:encon}) and then applying the same time-averaging process to the entire system of equations yields a set of equations that is similar in form to the original equations, with the mass conservation equation remaining unchanged:
+\begin{equation}
+\frac{\partial (\rho \overline{\mathbf{u}})}{\partial t} = \nabla \cdot (\rho \overline{\mathbf{u}} \overline{\mathbf{u}}) = -\nabla p + \mathbf{f} + \nabla \cdot \overline{\tens{\tau}}
+- \nabla \cdot \rho \overline{ \mathbf{u}' \mathbf{u}' }
+\label{eq:filmomcon}
+\end{equation}
+\begin{equation}
+\frac{\partial (\rho \overline{h})}{\partial t} = \nabla \cdot (\rho \overline{h} \overline{\mathbf{u}}) = \frac{Dp}{Dt} + \dot{q}''' - \nabla \cdot \overline{\mathbf{q}}
++ \overline{\epsilon} - \nabla \cdot \rho \overline{ \mathbf{u}' h' }
+\label{eq:filencon}
+\end{equation}
+Notice that the Reynolds-averaging process has introduced additional terms on the right-hand sides of the equations and increased the number of unknowns. Thus, the system of equations is no longer closed ({\em i.e.}, there are more unknowns than equations). The additional terms are referred to as the Reynolds stresses and the turbulent scalar flux, respectively. The scalar, $h$, is the enthalpy, and similar equations can be derived for the other scalars ({e.g.}, gas species mass fractions). Note that the pressure and density in the preceding equations refer to their time-averaged components.
+
+The majority of commercial and fire-specific CFD models that employ the RANS approach use an eddy viscosity turbulence model to close the set of equations. The basic idea is that the unresolved, turbulent fluctuations can be modeled with diffusive terms that effectively represent the dissipation of turbulent energy:
+\begin{equation}
+-\rho \overline{ u_i' u_j' } = \mu_t \left( \frac{\partial \overline{u}_i}{\partial x_j} + \frac{\partial \overline{u}_j}{\partial x_i} \right) - \frac{2}{3} \delta_{ij} \rho k \quad ; \quad \delta_{ij} = \left\{ \begin{array}{l} 1 \; \mathrm{if} \; i=j \\ 0 \; \mathrm{if} \; i\neq j \end{array} \right.
+\label{eq:rans}
+\end{equation}
+\begin{equation}
+-\rho \overline{ u_j' h' } = \Lambda_t \frac{\partial \overline{h}}{\partial x_j}
+\end{equation}
+Here  $\mu_t$ is the turbulent (eddy) viscosity, $k$ the turbulent kinetic energy, and $\Lambda_t$ the turbulent diffusivity, which is related to the eddy viscosity by the expression
+\begin{equation}
+\Lambda_t = \frac{\mu_t}{\sigma_t}
+\end{equation}
+where $\sigma_t$ is known as the turbulent Prandtl or Schmidt number, depending on whether the scalar quantity is an energy or species variable. It is usually assigned a constant value depending on the scalar variable in question.
+
+For fire simulations, a two-equation eddy viscosity model is commonly used. This model, in effect, allows the turbulence to be characterized by a velocity and a length scale that varies at each grid cell in the computational domain. The two equation model that is employed in the majority of RANS applications in fire engineering is the $k$-$\epsilon$  model. Here two additional transport equations are solved; one for the turbulent kinetic energy, $k$, and one for its rate of dissipation, $\epsilon$. These quantities form the turbulent viscosity in Equation~\ref{eq:rans}:
+\begin{equation}
+\mu_t = \rho C_\mu \frac{k^2}{\epsilon}
+\label{eq:mudef}
+\end{equation}
+The factor $C_\mu$ is an empirical constant. Details of these equations are provided in CFD textbooks. Note that a modification of the basic $k$-$\epsilon$ model is often made in fire applications, in which buoyancy source terms for the $k$ and $\epsilon$ equations are added. These terms ensure that the effects of stable stratification in hot gas layers and the destabilizing thermal gradients in rising plumes are adequately described. Details are discussed by Cox~\cite{Cox:1998}.
+
+The $k$-$\epsilon$  model has been used successfully for many engineering applications. Its limitation in treating, for example, swirling flows, flow separation, and so on is due partly to the inherent assumption that the modeled turbulence is isotropic, that is, that the unresolved flow field has no cohesive structure. There are a number of variants of the $k$-$\epsilon$  model, available in commercial CFD models, that claim to provide improved results for some flows ({\em e.g.}, the RNG $k$-$\epsilon$  model~\cite{Yakhot} and the $k$-$\omega$ model~\cite{Wilcox}). Research into nonlinear eddy viscosity turbulence models that attempt to incorporate  directional  effects  is  being  undertaken within the CFD community but, as far as the authors are aware, have not been applied to fire problems. Another approach, applied mainly  outside  of fire, is to solve individual differential equations for Reynolds stresses and turbulent scalar fluxes that appear in Equations~\ref{eq:filmomcon} and \ref{eq:filencon}. However, the standard $k$-$\epsilon$ model remains the most commonly used RANS technique in fire applications.
+
+
+\subsection{Large Eddy Simulation (LES)}
+
+The derivation of LES models is very similar to that of the RANS models, albeit with subtle differences in the interpretation of the decomposition of the primitive variables. RANS emphasizes temporal averaging, whereas LES emphasizes spatial averaging, or {\em filtering}. Regardless, the mechanics of the derivation are essentially the same, and the simplest of the LES models makes the same ``eddy viscosity'' argument in replacing the unresolved convection terms with diffusion terms. The key difference between the techniques lies in the magnitude of the diffusive coefficient, the ``eddy'' viscosity. With LES, one attempts to resolve the flow field as faithfully as possible on a given numerical grid. In other words, flow structures, like swirling eddies, can span just a few grid cells (Figure~\ref{30cm_collage}). To achieve this result, the eddy viscosity must be small enough to avoid smoothing out these small, but resolvable, eddies, but large enough to ensure numerical stability and account for the dissipation of energy at sub-grid scales.
+
+\begin{figure}[b]
+%\includegraphics[scale=.65]{30cm_collage}
+\caption{What is meant by ``resolvable.'' At right is an instantaneous map of the flow vectors for an LES simulation of a pool fire. the inset shows the smallest ``eddy'' that can be supported by the numerical grid, the spacing of which is indicated by the distance between the arrows.}
+\label{30cm_collage}
+\end{figure}
+
+To better understand the eddy viscosity model, the original Navier-Stokes equations are examined. An evolution equation for the kinetic energy of the gas is formed by taking the dot product of the momentum from Equation~\ref{eq:momcon} and the velocity vector $\mathbf{u}$:
+\begin{equation}
+\rho \frac{D \mathbf{u}}{Dt} \cdot \mathbf{u} \equiv \frac{D(|\mathbf{u}|^2/2)}{Dt} = \cdots - \epsilon
+\label{eq:momdotu}
+\end{equation}
+A term emerges on the right-hand side known as the dissipation rate (see Appendix for details):
+\begin{equation}
+\epsilon \equiv \tens{\tau} \cdot \nabla \mathbf{u} = \mu \left[ 2 \left( \frac{\partial u}{\partial x} \right)^2 + \cdots \right]
+\label{eq:epsilondef}
+\end{equation}
+which appears as a source term in the energy conservation Equation~\ref{eq:encon}:
+\begin{equation}
+\frac{D}{Dt} (\rho h) = \cdots + \epsilon
+\end{equation}
+Extra terms have been hidden to make the point more clearly, and no approximations have been introduced thus far to the Navier-Stokes equations. This exercise merely explains in mathematical terms how the kinetic energy of the flow is converted into thermal energy by the action of the viscosity, $\mu$. In the early 1960s, a meteorologist named Joseph Smagorinsky~\cite{Smagorinsky} suggested, based mainly on dimensional arguments, that the dissipative effect of the viscosity could be represented in a large-scale flow simulation by the expression
+\begin{equation}
+\mu_{\mathrm{LES}} = \rho (C_s \Delta)^2 \left[ 2 \left( \frac{\delta \overline{u}}{\delta x} \right)^2 + \cdots \right]^{\frac{1}{2}}
+\label{eq:muLES}
+\end{equation}
+where $C_s$ is an empirical constant, $Delta$ is the size of a grid cell, and the expression in brackets has the same functional form as the kinetic energy dissipation rate. The notation $\delta \overline{u}/\delta x$ emphasizes that the LES  eddy viscosity is calculated from finite difference approximations of the gradients of the computed velocity components. The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the eddy viscosity through the expressions
+\begin{equation}
+k_{\mathrm{LES}} = \frac{\mu_{\mathrm{LES}} \, c_p}{\mathrm{Pr}_t} \quad ; \quad D_{\mathrm{LES}} = \frac{\mu_{\mathrm{LES}}}{\rho \, \mathrm{Sc}_t}
+\end{equation}
+The ``turbulent'' Prandtl and Schmidt numbers are assumed to be constant and of order unity. The appeal of LES is that no additional equations need be solved, as in the RANS $k$-$\epsilon$  model, and that the dynamics of the fire are captured in the simulation, rendering a more realistic-looking flow field than the time-averaged RANS model. The drawback of LES is that it demands that the model user pay close attention to the choice of numerical grid because the accuracy of the technique can be degraded significantly if there are not enough grid cells to describe the flow field adequately. Various perspectives on LES in general can be found in Pope~\cite{Pope}.
+
+
+\section{Source Terms and Boundary Conditions}
+
+The governing conservation equations discussed previously do not pertain only to fire scenarios. What constitutes a ``fire model'' are the conservation equations plus a set of boundary conditions and source terms describing mass, momentum, and energy exchange between hot gases and compartment walls, the reaction of fuel and oxygen, the redistribution of energy by thermal radiation, the spray of water from a sprinkler, the activation of a smoke detector, and dozens of other phenomena that occur in a burning building. Describing these phenomena mathematically is what modeling is all about. In the sections to follow are brief discussions of the boundary conditions and source terms found in the governing equations.
+
+\subsection{Combustion}
+
+The reaction of fuel and oxygen and the associated entrainment of air into the fire plume is the driving source term in the model. The simplest approach to modeling combustion is to ignore the chemistry and assume that the heat is released within a prescribed volume. This may suffice for some applications (e.g., smoke movement associated with a well-ventilated fire), provided a reasonable volume is selected for the release of heat. However, for fire scenarios where the combustion region cannot be predefined or the chemistry becomes important, a combustion model should be employed. The calculation of chemical species is required, for example, where oxygen availability is an important factor or where the composition of the gas mixture is required for the radiation model.
+
+Most engineering models assume that the combustion process can be represented as a single, one-step reaction between fuel and oxygen forming a mixture of products including the major species CO$_2$ and H$_2$O and minor species like soot and CO:
+\begin{equation}
+\mathrm{F + s \, O_2 \rightarrow P}
+\label{eq:simplereac}
+\end{equation}
+This model is appropriate provided that the detailed kinetics are not important and that the product yields are known from experiment. If the prediction of minor product species such as CO is required, then the assumption of fast, single-step chemistry is no longer valid and a more sophisticated approach is required. An example of such an approach is given at the end of this section.
+
+Perhaps the most widely used combustion model for RANS is the eddy breakup model of Spalding~\cite{Spalding:1971}, further developed by Magnussen and Hjertager~\cite{Magnussen}. The model assumes that the consumption of fuel, $\dot{m}_f'''$, is controlled by the rate of molecular mixing of reactants, which in turn is proportional to the rate of dissipation of turbulent eddies:
+\begin{equation}
+\dot{m}_f''' = -C_R \, \rho \frac{\epsilon}{k} \min \left\{ Y_f, \frac{Y_{O_2}}{s} \right\}
+\label{eq:fuelconsump}
+\end{equation}
+$C_R$ is a dimensionless constant, generally taken as 4. The heat release rate is the integral of the fuel mass consumption rate times the heat of combustion over the volume where combustion occurs. Equation~\ref{eq:fuelconsump} may be augmented by an additional term involving the products of combustion and also by an Arrhenius expression to limit the rate of reaction in cold mixtures. The eddy breakup model has the merit of simplicity while permitting heat to be released over a distributed volume determined by the enclosure geometry and availability of air. Furthermore, the phenomenon of flame lengthening as a consequence of ventilation control is incorporated by this modeling approach. It has been applied with reasonable success by Miles, Kumar, and Cox~\cite{Miles} and Holen, Brostrom, and Magnussen~\cite{Holen} as it has been in other areas of combustion engineering.
+
+In an LES model, the turbulent quantities in Equation~\ref{eq:fuelconsump} are not readily available; thus, a slightly different combustion model is employed that has more or less the same physical assumptions. This model is based on the concept of the mixture fraction. The mixture fraction is a flow variable ranging between 0 and 1 indicating the mass fraction of gas species that originated in the fuel stream. Thus, pure fuel is designated with a mixture fraction value of 1; pure air is 0. The transport equation for the mixture fraction is a linear combination of the transport equations for the various gas species such that if fuel and oxygen are assumed to react instantaneously, the gas mixture at any point in the flow field can be represented by the single value of the mixture fraction. The number of species transport equations that need to be solved is thus reduced to one.
+
+Modeling the generation of species such as CO and soot requires finite rate chemistry to be included in the combustion model. An approach that has been exploited in a number of fire studies is to assume that the flame is a statistical ensemble of thin laminar flamelets that incorporates detailed chemistry from either experimental measurements or detailed kinetic calculations. Details of this approach may be found in Peters~\cite{Peters} and in the references of Cox~\cite{Cox:1998} and Novozhilov~\cite{Novozhilov}. Magnussen and Hjertager~\cite{Magnussen} extended the eddy breakup model to include soot formation and oxidation, using the mechanisms suggested by Tesner, Snegirova, and Knorre~\cite{Tesner}. This involved the solution of two further transport equations. Soot modeling is, however, difficult and not generally included within current CFD fire computations and remains a topic for research.
+
+
+\subsection{Radiation Heat Transfer}
+
+The governing conservation equations of mass, momentum, and energy describe the convection and diffusion of hot gases from a fire. However, the redistribution of energy via thermal radiation is very important and needs to be included in the energy transport Equation~\ref{eq:encon}. What makes radiation heat transfer particularly difficult from a numerical point of view is that radiant energy is propagated at the speed of light, as opposed to the speed of the gas flow or the speed of sound. Numerical flow solvers typically advance the solution of the governing
+equations using time steps that are constrained either by the flow speed (low Mach number LES) or time steps that are consistent with large-scale changes in the environment (RANS). In either case, the speed of light is essentially infinite; thus, radiant energy is assumed to redistribute itself instantaneously. The simplest model of radiation transport assumes that the gases are non-scattering (the gases only absorb or emit thermal radiation) and gray (the radiation has no spectral dependence). Under these assumptions, the governing equation can be written as
+\begin{equation}
+\mathbf{s} \cdot \nabla I(\mathbf{x},\mathbf{s}) = \kappa(\mathbf{x}) \, \left[ I_b(\mathbf{x}) - I(\mathbf{x},\mathbf{s}) \right]
+\label{eq:rte}
+\end{equation}
+Here, $I$ is the {\em radiant intensity}, a function of both position, $\mathbf{x}$, and direction, $\mathbf{s}$. The gray-gas assumption neglects the fact that $I$ is also a function of the wavelength, as are the absorption coefficient, $\kappa$, and the source term, $I_b$. To account for wavelength dependence, Equation~\ref{eq:rte} must be solved over discrete ``bands'' of the electromagnetic spectrum~\cite{Siegel}. However, in fires, soot is the principal emitter and absorber of thermal radiation. Because its radiation spectrum is continuous, it is often assumed that there is no spectral dependence; that is, the participating medium is gray.
+
+Even in its simplest form, the radiation transport equation poses two challenges to the modeler: (1) the prescription of the spatially dependent absorption coefficient, $\kappa(\mathbf{x})$; and (2) the numerical solution. As for  the latter, a number of methods have emerged that involve discretizing the equation into a finite number of solid angles and sweeping over the numerical grid  until the radiant energy is redistributed. The process is often done gradually over several time steps of the flow solver, depending on the level of temporal fidelity desired. Usually, equivalent or greater temporal resolution is demanded by the flow solver, easing the computational burden of the radiation solver~\cite{Hostikka}.
+
+The prescription of the absorption coefficient, $\kappa(\mathbf{x})$, is challenging because it combines the contributions of soot and gaseous exhaust products. Soot is the main emitter and absorber in practical fire scenarios; thus, any model for must account for it. This requirement has caused difficulties over the years because contributions from the combustion community often  emphasize the spectrally dependent properties of CO$_2$ and H$_2$O rather than the spectrally independent properties of soot. The dominance of soot in the  radiation calculation simplifies the prescription of $\kappa$, but at the same time it demands a better description of soot growth and oxidation than the current practical fire models are able to provide.
+
+Regardless of the choice of absorption coefficient and numerical method, the solution of the radiation transport equation is added to the overall solution via a source term in the energy Equation~\ref{eq:encon}:
+\begin{equation}
+-\nabla \cdot \mathbf{q}_r(\mathbf{x}) = \kappa(\mathbf{x}) \, \left[ U(\mathbf{x}) - 4 \pi I_b(\mathbf{x}) \right] \quad ; \quad U(\mathbf{x}) = \int_{4\pi} I(\mathbf{x},\mathbf{s}) \, d\Omega
+\label{eq:radterm}
+\end{equation}
+The integrated intensity, $U$, multiplied by $\kappa$ represents the rate of energy absorbed per unit volume, whereas $4 \pi \kappa I_b$ is the rate of energy emitted per unit volume. The source term is usually assumed to be a blackbody radiator: $I_b=\sigma T^4/\pi$. Within the fire itself, the emission term dominates, and there is a net loss of energy from the region, whereas within the relatively cool, smoke-laden upper layer, there is a net gain of energy due to absorption. Because of the uncertainty in the near flame temperature and soot concentration, it is still common practice to prescribe, rather than predict directly via the source term, the fraction of energy lost from the fire via thermal radiation. Typically, 30 to 40 percent is chosen, depending on the fuel type and fire size.
+
+
+\subsection{Mass Exchange at Boundaries}
+
+Rarely are fire simulations performed for compartments that are completely sealed off from the outside. In most cases, air and smoke pass through open doors or windows, fans blow and extract gases, and items burn and introduce fuel gases into the space. For the modeler, all these phenomena are known as boundary conditions that supplement the governing equations.
+
+Free (or open) boundaries are located where the modeled domain interfaces with the external world beyond. Generally the pressure is specified, typically to a reference or ambient value, and the velocity derivatives normal to the boundary are set to zero. Furthermore, where outflow occurs the normal derivatives of the scalar fields will be set to zero, and where inflow occurs their ambient (atmospheric) values will be assumed. To achieve realistic pre- dictions of air entrainment and smoke exhaust, it may be necessary to locate these boundaries well away from the compartment of fire origin.
+
+Mass inlet boundaries are located where a prescribed source of air enters the computational domain. One example is at mechanical ventilation supplies. Other examples include external wind boundaries and the fuel bed itself if pyrolysis is included in the model in DiBlasi~\cite{DiBlasi}. As for free boundaries where inflow occurs, it is critical that appropriate values are assigned to the enthalpy (temperature) and other scalar fields.
+
+\subsection{Momentum Exchange at Boundaries}
+
+Where the fluid comes into contact with solid objects (compartment walls, for example) boundary conditions are required for the momentum equations and, where appropriate, for the solved turbulence variables. For most applications  the  no-slip  velocity  condition  is  assumed at solid surfaces ({\em i.e.}, zero flow directly adjacent to the surface). However, the proper specification of boundary conditions is complicated by the fact that the inner region of the turbulent boundary layer adjacent to a solid surface has very sharp velocity gradients. A large number of grid points are required to resolve this region, making the simulation computationally expensive and impractical for realistic compartments. An alternative, widely used approach to resolving the boundary layer is to use a so-called {\em wall function}~\cite{Launder}, which assumes that the tangential velocity is a logarithmic function of the normal distance from the surface. An empirical relationship relates the wall shear-stress to the resolved variables at the first grid point, and appropriate source terms can be derived for each solved equation. Details are provided in standard textbooks~\cite{Wilcox}.
+
+Care is required in using the wall-function approach to ensure that the first grid point is positioned such that the empirical relationships are valid. Guidance should be taken from the model developer or the model documentation on the appropriate numerical grid to employ at surfaces. Commercial CFD models may offer advanced wall treatments that adapt automatically depending on the grid point and the flow regime, and these should generally be employed if available.
+
+\subsection{Energy Exchange at Boundaries}
+
+Conventional CFD models devote considerable attention to the velocity boundary conditions, but for fire, the energy exchange at solid surfaces is paramount, especially when the surfaces are burning. In fact, pyrolysis modeling is a subject unto itself and is touched on only briefly here. Suffice it to say that almost any treatment of a solid object can be incorporated in a CFD fire model because of the fairly loose coupling that exists between the gas and solid phases.
+
+Hot gases lose heat to the structure at a rate determined by both the thermal properties of the bounding solids and the evolution of conditions within the gas phase. Early in the fire, the walls are nearly at ambient temperature and the rate of heat transfer will, all other things being equal, be at its greatest. Later, as the walls and other surfaces heat up, the rate of heat transfer decreases. In some situations it may be appropriate to treat the solid surfaces as adiabatic ({\em i.e.}, no heat transfer). However, care must be taken when adopting this approach as heat loss to the surfaces is likely to be an important mechanism. For example, in large compartments or tunnels this heat loss may account for most of the heat losses from the fire, and ignoring it will generate erroneous predictions.
+
+Where there is heat transfer, it is necessary to provide boundary conditions for the enthalpy and radiation equations, which in turn requires the temperature of the solid surface ($T_w$) be defined at each location adjoining the CFD grid. The surface temperature, together with its emissivity, establishes the radiative heat transfer rate for the radiation transfer equation. For the enthalpy equation the source term is the rate of convective heat transfer ($\dot{q}_c''$) to the surface from the adjoining grid point
+\begin{equation}
+\dot{q}_c'' = h_c \, (T_w-T_g)
+\label{eq:convection}
+\end{equation}
+where $T_g$ is the gas temperature at the nearest grid point and $h_c$ is the convective heat transfer coefficient. This coefficient can be defined as a constant as in a zone model or, alternatively, a more realistic approach is to compute the coefficient as a function of the local flow regime making use of an empirical wall function akin to that done for the momentum equations and turbulence model.
+
+The definition of the surface temperature is trivial in the case of isothermal boundaries where the surface is maintained at a fixed temperature. In general, however, the conduction of heat into the walls needs to be modeled. If it is assumed that conduction occurs only in the normal direction, then it may be treated by solving a one-dimensional heat conduction equation at each location on the surface adjoining the gas phase grid. The net conduction heat flux into the solid is given by the sum of the net radiation and convection fluxes at the surface.
+
+A more sophisticated solution may be provided by coupling the CFD model with a separate solid phase calculation of the thermal conduction within the solid structure(s). This calculation could take the form of a fully coupled gas and solid-phase model, or a coupling of boundary conditions between a CFD model and a separate solid-phase model. In general, the required information to be passed from the solid-phase model to the CFD model is the surface temperature and pyrolysis rate and, in the other direction, the convective and radiative heat fluxes.
+
+
+
+\section{Numerical Solution}
+
+The  equations  described  in  the  previous  sections are all written in continuous form; that is, they are exact representations of the governing conservation laws. Unfortunately, they have no closed form solution except in very limited cases. Therefore, numerical techniques are required to obtain approximate solutions. Even on the fastest computers available, these techniques can be costly in terms of the time consumed by the computer's central processing unit (CPU) and the size of the computer's random-access memory (RAM). Calculation times can range from several hours to several weeks. Memory requirements can range from hundreds of megabytes to tens of gigabytes. In the end, the calculations will produce an enormous amount of data, the processing of which would be impossible if not for graphical tools that have been developed specifically to visualize the computed results in various ways.
+
+\subsection{Finite Difference Approximation}
+
+A commonly used technique for solving the governing conservation equations is known as finite-differencing. The three-dimensional volume of interest, say a room in a building, is subdivided with a mesh made up of many small grid cells, with each cell containing an average value of each flow variable. In general, more grid cells produce a more accurate approximation of the true solution but at increasing computational cost. The simplest meshes consist of cells that are box-shaped with the dimensions of the boxes either fixed or varying. Such a mesh is described as rectilinear. Meshes that conform to the boundaries of complicated objects are known as body-fitted. Fire models that are intended for building applications most often use rectilinear meshes, whereas special applications, like furnaces and combustors, often employ body-fitted coordinate systems.
+
+As an example of how finite-differencing works, consider the discretization of the mass conservation Equation~\ref{eq:masscon} on a three-dimensional rectilinear mesh. The cells are typically indexed by the integers $i$, $j$, and $k$. Each flow variable is represented as an average over the cell volume, $\delta x \, \delta y \, \delta z$, and over the time step, $\delta t$. At the start of the simulation, all the flow variables in each grid cell are assigned an initial value, and as the simulation progresses in time, these values are updated at each discrete time step. A common discretization  technique is to define scalar quantities at the center of each cell and vector components at their respective cell faces. For example, $\rho_{ijk}^n$ represents the average density in the cell with indices $ijk$ at the $n$th time step, whereas $u_{ijk}^n$  and $u_{i-1,jk}^n$ represent the averages of the velocity component $u$ over the faces of the cell that point in the positive and negative directions of $x$ in the standard Cartesian coordinate system. A simple way to advance the density of each cell in time is to write the mass conservation equation in an approximate form as follows:
+\begin{eqnarray}
+\rho_{ijk}^{n+1} = \rho_{ijk}^n  - \delta t \Big( && \frac{ \rho_{i+\frac{1}{2},jk}^n  u_{ijk}^n - \rho_{i-\frac{1}{2},jk}^n  u_{i-1,jk}^n }{\delta x} + \nonumber \\
+                                                  && \frac{ \rho_{i,j+\frac{1}{2},k}^n v_{ijk}^n - \rho_{i,j-\frac{1}{2},k}^n v_{i,j-1,k}^n }{\delta y} +  \\
+                                                  && \frac{ \rho_{ij,k+\frac{1}{2}}^n  w_{ijk}^n - \rho_{ij,k-\frac{1}{2}}^n  w_{ij,k-1}^n }{\delta z} \; \Big) \nonumber
+\label{eq:massdiff}
+\end{eqnarray}
+Notice that even the simplest of the conservation equations approximated with the simplest of differencing schemes on the simplest of meshes is still fairly difficult to express in a succinct way. In fact, to save space, the density at the respective cell faces, computed as an average of its values in the adjoining cells, is denoted by the $\pm \frac{1}{2}$ in the appropriate subscript. The momentum and energy conservation equations are far more complicated than this one, even though the basic ideas are the same. It is easy to understand why CFD software consists of tens of thousands of lines of computer instructions and that calculations can take hours to weeks to complete, depending on the number of grid cells in the mesh and the complexity of the differencing scheme.
+
+CFD models employ various types of differencing schemes, meshes, physical and numerical assumptions, and so on. No two models are exactly alike, but many have common traits. An informal classification system has evolved within the community of developers to distinguish one model from another. For example, the simple scheme for updating the previous density would be described as a three-dimensional, explicit, conservative, staggered finite-difference scheme that is first order accurate in time and second order accurate in space. Consider each descriptor in turn:
+
+\paragraph{Explicit versus implicit schemes}
+
+To say that a numerical scheme is explicit means that the flow variables may be advanced in time based solely on their values at the current time step. In Equation~\ref{eq:massdiff}, notice that all the values of the density and the velocity components on the right-hand side are taken at the $n$th time step; thus, advancing the solution in time is merely a matter of computing these terms. An implicit scheme uses values of the flow variables at both the current and next time steps, meaning that there is no direct way of updating the values. Rather, a linear system of equations must be solved. Although they require more computational effort per time step, implicit schemes typically are more numerically stable and permit larger time steps than explicit schemes. In fact, the most commonly used numerical scheme in commercial CFD packages is known as SIMPLE (Semi-Implicit Method for Pressure-Linked Equations). Details may be found in Patankar~\cite{Patankar}.
+
+\paragraph{Conservative versus nonconservative schemes}
+
+A numerical scheme that is described as conservative has the following property: If the right-hand side of Equation~\ref{eq:massdiff} were summed over all grid cells, the intermediate mass fluxes would cancel exactly, leaving only the mass fluxes at the boundary of the computational domain. Following is the discrete analogue of the Divergence Theorem:
+\begin{equation}
+\int_V \nabla \cdot \rho \mathbf{u} \, dV = \oint_{\partial V} \rho \mathbf{u} \cdot d\mathbf{S}
+\label{eq:divtheorem}
+\end{equation}
+This very desirable property in a numerical scheme ensures that mass is globally conserved, regardless of inaccuracies related to the grid cell size, differencing scheme, or other local effects.
+
+\paragraph{Staggered versus co-located variables}
+
+Assigning various flow variables to different locations within the grid cell is a strategy adopted by the developer based on the particular application of the model and the convenience of prescribing boundary conditions, obstructions, and other special features. Suffice it to say that the strategy adopted in Equation~\ref{eq:massdiff} is not unique. Other techniques are discussed in Anderson, Tannehill, and Pletcher~\cite{Anderson} and Ferziger and Peric~\cite{Ferziger}.
+
+\paragraph{Order of accuracy of the scheme}
+
+A common misconception about numerical schemes is that those with a high order of accuracy are better than those of lower order. A finite difference is an approximation of a partial derivative, and the order of accuracy relates the degree of approximation. For example, the scheme described in Equation~\ref{eq:massdiff} is first order accurate in time because the time derivative of the density at the $n$th time step is approximated as
+\begin{equation}
+\frac{\partial \rho}{\partial t} = \frac{\rho^{n+1}-\rho^n}{\delta t} + {\cal O}(\delta t)
+\label{eq:order}
+\end{equation}
+The symbol ${\cal O}(\delta t)$ represents the {\em discretization error} -- neglected terms from the Taylor series expansion of the density that are proportional to the first and higher powers of the time step size. Another way of characterizing this approximation is to say that it has a forward bias in time. The spatial derivatives in Equation~\ref{eq:massdiff} are known as central differences, having neither a  forward nor backward bias in the respective coordinate directions. Such differences that incorporate values from the nearest adjacent grid cells are typically second order accurate. Higher-order accuracy requires information beyond nearest neighbors, adding to the cost of computing the finite differences. The potential increases in accuracy are often offset by the decrease in computational efficiency and ease of implementation. A popular trade-off is to use more grid cells with a second-order accurate scheme rather than less grid cells with a higher-order scheme.
+
+\paragraph{Spatial dimension of the scheme}
+
+There are some fire scenarios where it may not be necessary to solve the fully three-dimensional form of the governing equations. Sometimes, flows through ducts or tunnels can be approximated in two spatial dimensions. Also, where there is a symmetry in the fire scenario ({\em e.g.}, a simple compartment with a fire in the middle of the room), the computational effort can be reduced by a factor of two by modeling one-half of the geometry. The plane of symmetry is then defined as a symmetry boundary condition at the corresponding edge of the modeled domain. Tunnels are another application in which a vertical symmetry plane is often used, running along the length of the tunnel. Care is required in using symmetry boundaries to ensure that the imposed condition of symmetry is physically realistic. For example, in an LES calculation, it is generally undesirable to use a symmetry boundary because the methodology does not assume the fire to be symmetric (in a time-averaged sense).
+
+
+
+\subsection{Finite Volume Method}
+
+A popular alternative to finite-differencing employed in both commercial and fire-specific CFD models is the finite volume method. This method has some of the characteristics of the finite  element method employed in structural and solid-phase thermal analysis programs and can be employed with either structured or unstructured meshes. Rather than working with the conservation equations in their differential form, as in Equations~\ref{eq:masscon} to \ref{eq:encon}, the finite volume method takes as its starting point the equations in their integral form. For example, integrating Equation~\ref{eq:speccon} over a control volume $V$  and applying the Divergence Theorem (Equation~\ref{eq:divtheorem}) yields an integral form of the equation:
+\begin{equation}
+\frac{\partial}{\partial t} \int_V \rho Y_\alpha \, dV + \oint_{\partial V} \mathbf{n} \cdot (\rho Y_\alpha \mathbf{u} ) \, d\mathbf{S} = \oint_{\partial V} \mathbf{n} \cdot (D_\alpha \nabla Y_\alpha) \, d\mathbf{S} + \int_V \dot{m}_\alpha''' \, dV
+\label{eq:finvol}
+\end{equation}
+The solution domain is subdivided into a finite number of control volumes (cells) in much the same way as in the finite difference method described previously. The crux of the finite volume method is in determining the surface and volume integrals in Equation~\ref{eq:finvol}, which in turn requires that the surface values of the solved variables be expressed in terms of the neighboring control volume (node) values, using an appropriate interpolation scheme. A system of algebraic equations is developed as in the finite difference method, the solution of which provides the mean value of the solved variable at each control volume (generally assigned to the node points). Although the finite volume method was originally employed with structured grids, the trend with modern commercial models has been toward unstructured grids consisting of hexahedral or tetrahedral elements.
+
+The finite volume method is intrinsically conservative (provided the surface fluxes are defined appropriately). It may be explicit or implicit and the mesh may be staggered or co-located. Depending on the numerical approximation of the integrals, the solution may be formally any order of accuracy. For the diffusion terms, a second order (central difference) approach is generally adopted. For the convection terms, matters are more complicated, and the use of central differencing can produce erroneous results in convection-dominated flows when a RANS turbulence formulation is used. First order, or ``up-wind,'' schemes remove the instabilities caused by central differencing, but they can be inaccurate if the grid is not sufficiently fine. A common approach has been to use the so-called ``hybrid'' scheme~\cite{Spalding:1972} in calculating the surface fluxes, which produces stable solutions that are generally more accurate than those provided by a pure first order, upwind approach but not formally as accurate as a second order approach.
+
+
+\subsection{Computer Hardware and Software}
+
+CFD solvers are written in a variety of computer languages, most notably Fortran or C. They will run, or execute, on any computer for which a compiler is available to translate the source code into the native machine language. Usually, CFD models consist of three basic parts: an interface that allows the user to input parameters, the flow solver, and a graphical program to display results. It is not unusual for the user interface, flow solver, and graphics utility to be three separate computer programs, sometimes written in different languages, and sometimes run on different computers. For example, the flow solver itself can be run on a remote machine because it does not require any interaction with the user. While a calculation runs somewhere else, the user is free to set up new calculations or process results from a previous one. What were once referred to as ``supercomputers'' are now simply clusters of conventional computers that are dedicated to running CFD calculations, either serially or in parallel.
+
+The input interface can be a graphical user interface (GUI), a simple text editor, or some combination of the two. Some of the more complex interfaces allow for input data to come from other sources, like a computer-aided design (CAD) program. This is an increasingly important consideration in CFD, as the most time-consuming part of a simulation (for the user, not the computer) is the description of the geometry. It is now possible to simulate the flow of fire-driven gases through entire buildings, but without some automated method of input, the setup process can be tedious.
+
+CFD is becoming more and more routine as computers get cheaper and faster. In addition to the availability of doubly fast CPUs every 18 months, an emerging trend in the industry is to use more than one CPU (and the associated memory) for a single simulation. The technique, known as parallel processing, has been made possible by the development of software that allows data to be transferred rapidly between two or more computers that are working on the same calculation. The most popular data-passing protocol is message passing interface (MPI). To the CFD developer, MPI is nothing more than a set of ``call'' statements that can be written into the source code, instructing computer A to send a packet of numbers to computer B and vice versa. The formats of the call statements have been standardized by a committee of interested industry experts, and several very good, and free, implementations of MPI have been released into the public domain. Although writing and running a good, efficient parallel CFD model is still a daunting task, parallel processing does not significantly increase the cost of hardware or software. It is possible to exploit the computers that a company already owns to run CFD models in parallel.
+
+\subsection{Visualization}
+
+As computers get faster and calculations get bigger, there is a tremendous need to render the output of the simulations in some useful form. Certainly, time histories of individual quantities at discrete locations can be saved and readily plotted, much like thermocouple data from a real experiment. But this only tells part of the story. To better understand the flow dynamics, it is necessary to render pictures or animations of the entire computational domain, either in the form of contour plots, flow vectors, streamlines, or tracer particles. This type of output is in- valuable to the numerical analyst but still only partially satisfying to the lay person. Perhaps spurred on by the current generation of computer-animated films, some want to see the results of the simulations rendered in a lifelike way, considerably different than conventional CFD output.
+
+This trend to realism is more than superficial. In both design and forensic applications, the realistic rendering of smoke is very valuable, but it requires graphical techniques that stretch the limits of even the best video cards available. Visibility is a key consideration in the design of any large structure, especially given the current trend of open architecture. Unlike temperature or species concentration, visibility is not defined at a point but rather integrated over a path connecting the virtual occupant and the virtual exit sign. The CFD model can produce a spatially and temporally varying smoke density field, but it is difficult or impossible to integrate {\em a priori} the density over every possible path between the sign and the moving occupant. Fortunately, graphical techniques are now available that can process the smoke density data and produce at any given time and any given place in any given direction a realistic view through the smoke, allowing the viewer to assess whether or not the sign (or whatever is of interest) would be visible in the event of a real fire.
+
+Along with design, CFD is increasingly used to reconstruct  actual  fires,  providing  fire  service  personnel and fire investigators with a better understanding of the events that led to injury, loss of life, or loss of the structure. In any reconstruction, the time line of events provided by the first responders and other eyewitnesses is as crucial as the model input, but it is also invaluable in assessing the results. Rendering the results of the simulation as realistically as possible facilitates the synthesis of model simulation with photographic and visual evidence. Most people at the fire scene are certainly not experts in CFD, but they are very experienced with fire. Examples of how CFD has been used in actual fire reconstructions are available~\cite{Grosshandler, McGrattan:2005, Madrzykowski:2000, Madrzykowski:2004, Christensen}.
+
+
+
+
+\section{Verification and Validation}
+
+The use of fire models currently extends beyond the fire research laboratories and into the engineering, fire service, and legal communities. Sufficient evaluation of the models is necessary to ensure that users can judge the adequacy of its technical basis, appropriateness of its use, and confidence level of its predictions. The model evaluation process consists of two main components: verification and validation~\cite{ASTM:E1355}. Verification is a process to check the correctness of the solution of the governing equations. Verification does not imply that the governing equations are appropriate, only that the equations are being solved correctly. Validation is a process to determine the appropriateness of the governing equations as a mathematical model of the physical phenomena of interest. Typically, validation involves comparing model results with experimental measurement. Differences that cannot be explained in terms of numerical errors in the model or uncertainty in the measurements are attributed to the assumptions and simplifications of the physical model.
+
+It is commonly assumed by model users, particularly those who have purchased expensive CFD software, that verification and validation is the responsibility of the model developers. Certainly, CFD developers do a considerable amount of this type of work, in particular verification, but it is impossible to ensure that the model is ``validated'' for every conceivable application. Indeed, the very point of numerical modeling is to predict the outcome of fire scenarios that have not, or cannot be, replicated in a controlled laboratory environment. Thus, the burden of verification and validation must be shared by the model developer and user. The benefit to the user is twofold: first, it confirms that the user can use the software properly, at least for the given application; and second, it assures the user that the model can address the given fire scenario, even providing the user with some estimate of its accuracy.
+
+The term {\em proper use} is relative. There is currently no consensus standard by which CFD model users can be evaluated. As CFD models become easier to use, with improved user interfaces and colorful graphics, there is a risk that users will rush through an analysis without comparing their results quantitatively to either empirical correlations or experimental test data. There exists in the fire literature, in particular this very handbook, a wealth of simple, empirical correlations that summarize decades of fire experiments. It is relatively easy to simulate with a CFD model fire plumes, ceiling jets, single-compartment fires, and so on and compare results. The accuracy of the model can be assessed for various selections of grid size, numerical parameters, and physical properties. Such an exercise is often called a sensitivity analysis, and it should be performed, to some extent, for every application. Indeed, in other fields of engineering, like aerospace, it is virtually impossible to publish results of a CFD analysis unless a grid sensitivity study, at the very least, is performed.
+
+In addition to comparisons with simple fire scenarios, the user should obtain or produce experimental measurements for fire scenarios that are representative of the given application. Articles in the various fire journals often describe experiments for which the test data are available on request. If not, at the very least, the model user should reproduce results that can be found in the article itself. In making comparisons with test data, the modeler should evaluate separately the model's ability to (1) predict the burning rate of the fire, (2) predict the transport of hot gases throughout the enclosure, and (3) predict the response of a target, detector, sprinkler, and so on. If the evaluation combines two or three of these processes, it will be impossible to assess the source of the discrepancy between prediction and measurement. The exercise will merely indicate how well or poorly the model is working, but it will not provide any guidance for model improvement. If one is interested in predicting the burning rate or fire growth, then the validation exercise ought to focus on that part of it with the transport algorithm merely providing an estimate of the compartment conditions. To evaluate the transport algorithm, choose test data for which the burning rate has been measured accurately. To evaluate target response, choose test data for which the near-field environment has been characterized. For example, to evaluate a smoke detector activation algorithm, use measured, not predicted, values of velocity, temperature, and smoke concentration near the detector. Otherwise, errors in the CFD prediction will confound the assessment of the detector model.
+
+Finally, throughout the verification and validation process, the modeler should be skeptical of both the model and the experimental measurements. As discussed previously, all CFD models have limitations, and it is not uncommon to find programming errors, or ``bugs,'' in even the most popular software, especially for applications that are atypical. Similarly, full-scale fire experiments are difficult to perform, and instruments routinely fail under the harsh conditions. Often the failure is obvious, but sometimes the malfunction is less pronounced, as with an instrument that has not been properly calibrated or one that has ``drifted'' over the course of the test series. The experimentalist is hesitant to discount a measurement without some indication as to why it failed, or sometimes it is simply not apparent that there is anything wrong at all. The failure is not detected until years later when the model prediction and the measurement are plotted side by side, and even then, who is to say which is right and which is wrong? As a remedy, modelers should seek out test data from experiments that they have personally observed or that were conducted by people known to them who can relate the many details that often go unreported in the journal article or report of test.
+
+
+
+\section{Applications}
+
+This section presents examples of how CFD fire models are used in practice. These applications can be divided into two general categories -- design and forensic. The former usually involves the prediction of the spread of smoke and heat from a hypothetical fire in a real or planned building; the latter involves the reconstruction of an actual fire. For a design application, the fire is usually specified; that is, the ignition, growth, and eventual decay of the fire are not predicted by the model but rather specified by the code enforcing authority. For a reconstruction, the model is usually used to explain how a small fire grew and spread to cause serious damage or injury. Rarely are fire models of the type described in this chapter used to show how a fire was actually ignited, as the physical mechanism of this event (electrical short, arcing fault, arson, etc.) is usually not included in the model.
+
+\subsection{Smoke Movement}
+
+A significant proportion of fire fatalities can be attributed to the inhalation of smoke particulates and toxic gases. Furthermore, the effects of reduced visibility, high temperature, radiative flux, and oxygen depletion may add to the hazard associated with the smoke generated by an enclosure fire. Means to control the movement of smoke include physical barriers, natural or mechanical smoke exhaust, and pressurization of protected spaces. In routine applications, the design of the smoke control measures may often be achieved by recourse to various guidance publications and empirical correlations~\cite{Klote, NFPA:92B}. Network airflow and zone fire models are also available to assist in the design process. However, where the building space is large or complex in shape, or where a novel ventilation system is proposed, CFD can be a useful tool. Covered shopping malls, atria in hotels and office buildings, leisure complexes, airport terminals, and large warehouses are just some examples of where CFD is being increasingly employed.
+
+Many  of  the  earliest  examples  of  the  application of CFD to fire engineering were in smoke movement applications~\cite{Pericleous, Cox:1990}. Simulations were at that time restricted to a few tens of thousands of grid cells. Although this number has increased to hundreds of thousands or even millions of cells, many of the modeling issues remain the same and are discussed later~\cite{Kumar}.
+
+\paragraph{Fire source} 
+
+The hazard posed by high temperatures and the loss of visibility may be compounded by exposure to toxic gases such as carbon monoxide or hydrogen cyanide. Although advanced combustion models may include the capability to predict some of these toxic gas species, it is generally necessary in fire engineering to prescribe the species yields. In other words, the production rate of smoke and other combustion products is usually specified by the user based on experimental measurements. It is still beyond the capability of practical fire models to predict reliably the growth, spread, and species yields of a fire that consumes realistic building contents.
+
+\paragraph{Open boundary conditions}   
+
+The solution to a smoke movement analysis can be sensitive to the location of the ``free'' (ambient or open air) boundaries at the edge of the computational domain. These should be located at a sufficient distance from the fire source and regions of interest so that they do not incorrectly influence the solution. The setting of ambient values in relation to other boundary conditions may require special attention ({\em e.g.}, it can dictate whether smoke can be expected to vent naturally in an air-conditioned atrium). Heat losses to solid boundaries can also have a significant influence on smoke movement, particularly where the smoke has cooled down and the amount of heat transferred to walls and ceilings can determine the degree of buoyancy and stratification of the smoke gases.
+
+\paragraph{Visibility}  
+
+Together with gas temperatures and heat fluxes, smoke movement applications often require an estimate of visibility, the distance through smoke that a person is expected to be able to see, say, an exit sign. Visibility distance may be derived from a CFD solution using the predicted concentration of soot particulates. The correspondence between smoke concentration and visibility is based on the work of Jin~\cite{Jin} and Mullholland~\cite{Mulholland} and is commonly implemented into CFD models using the following (or similar) expression for visibility distance:
+\begin{equation}
+S = \frac{K_1}{K_2 \, m_s}
+\label{eq:vis}
+\end{equation}
+Here $K_1$ is a constant usually set to 3 for reflecting signs and 8 for illuminated ones, $K_2$ is the specific extinction coefficient (often taken as 7.6 m$^2$/g for flaming combustion), and $m_s$ is the mass concentration of soot particles in units of g/m$^3$.  The fire model predicts this latter quantity. Visibility distance calculated in this way at a CFD grid cell represents the visibility corresponding to a homogenous smoke layer and assumes the smoke density at the cell applies everywhere in the domain. Using the CFD solution data, it is possible to perform a more realistic ``line of sight'' calculation using the computed data at each grid cell along this line~\cite{Husted}.
+
+This section on smoke movement concludes with some examples of the application of CFD, taken from the ever-increasing number of cases.
+
+\paragraph{Smoke transport in a mechanically ventilated library} 
+
+In collaboration with Olof Granlund Oy, ANSYS Europe Ltd. conducted a CFD analysis of the movement of smoke generated by a fast-growing fire, with a peak heat release rate of 550~kW, inside a library for which the ventilation system was left running in its normal mode of operation. The building has a pitched, vented glass roof and diffusers at various elevations. ANSYS CFX is a general purpose, commercial CFD model that has a history in fire modeling dating back to the investigation of the 1987 Kings Cross fire in London~\cite{Simcox}. Because it is designed to handle virtually any type of geometry, a model like this one can employ a numerical mesh that conforms to the unusual shape of the building. In this case, an unstructured mesh with 3.2 million mesh elements was used. Figure~\ref{ANSYS} shows a contour map of visibility distance after
+3 minutes in a vertical slice through the building.
+
+\begin{figure}[b]
+%\includegraphics[scale=.65]{ANSYS}
+\caption{Map of visibility in a vertical plane at time = 3 minutes for a fire in a library building. (Figure courtesy ANSYS Europe Ltd.)}
+\label{ANSYS}
+\end{figure}
+
+\paragraph{Smoke transport in a historic landmark}    
+
+CFD fire modeling is commonly used during the renovation of historic buildings. Often at issue is the inclusion or exclusion of a fire protection system (sprinklers, exhaust fans, etc.) that might require a variance from the local building code requirements. For example, as part of an overall effort in modernizing the Rhode Island Statehouse (the rotunda is the fourth largest self-supporting dome in the world), the LES model FDS was used to model a number of fire scenarios within the structure. The building supervisors wished to avoid having to disrupt the historical fabric of the rotunda while updating the building's fire protection systems. The model was used to examine a number of fire scenarios and how they might impact the ability of occupants to evacuate the building. Note in Figure~\ref{Dome} the use of rectangular obstructions to approximate the very complicated geometry of the building -- a simple alternative to the more CPU intensive body-fitted coordinate system.
+
+\begin{figure}[b]
+%\includegraphics[scale=.65]{Dome}
+\caption{Smoke filling analysis of the Rhode island State capitol. (Figure courtesy Hughes Associates.)}
+\label{Dome}
+\end{figure}
+
+
+\subsection{Fire Spread}
+
+The National Institute of Standards and Technology (NIST) undertook an investigation of a fire that occurred in a nightclub in West Warwick, Rhode Island, in 2003~\cite{Grosshandler}. During a band performance, pyrotechnics ignited polyurethane foam insulation lining the walls and ceiling behind the band. The fire spread quickly up the wall and along the ceiling over the dance floor. Smoke was visible in the exit doorways in a little more than 1 minute, and flames were observed breaking through a portion of the roof in less than 5 minutes.
+
+Real-scale mock-up experiments were conducted to characterize the fire growth and spread in the early stage of the fire. Approximately 20 percent of the nightclub was reconstructed in real scale including all of the stage and the surrounding area. By designing the experiments carefully, in terms of controlling factors such as fuel and ventilation, the mock-up tests provided a means to gain insight as to the conditions in the nightclub during the early stages of fire growth and spread. Results from the experiments, which included video records, measurements of heat release rate, temperature, heat flux, oxygen volume fraction, and gas velocity, were compared with the CFD model, Fire Dynamics Simulator (FDS).
+
+The principal fuels in the mock-up were the polyurethane foam wall covering and plywood paneling. The complexity of this arrangement limited the extent to which the burning composite fuel could be modeled {\em a priori}. Therefore, several simplifications and assumptions were made in order to generate model results that were representative of the experimental data including the variable-thickness foam, which was approximated as a uniform flat solid. A comparison of the experiment and the simulation at 20 seconds is shown in Figure~\ref{Station}.
+
+\begin{figure}[b]
+%\includegraphics[scale=.65]{Station}
+\caption{Comparison of nightclub experiment and simulation, 20 seconds after ignition. (Figure courtesy of NIST.)}
+\label{Station}
+\end{figure}
+
+The results from the mock-up experiments were compared with the FDS simulations of the experiments. The visual comparisons indicated a lag in fire development in the simulation relative to the experiments, but as the fire grew larger, the fire growth rate and smoke development were consistent with the experiments. The temperature, heat flux, and the oxygen concentration comparisons showed agreement between the experiments and the model in terms of both trends and range.
+
+The simulation of the early stage of the fire was very sensitive to the thermal properties of the foam. That is, small changes in parameters such as thermal conductivity or heat of pryrolysis led to significant changes in the predictions. This is a common characteristic of flame spread calculations. Consequently, the real-scale experiments served to partially calibrate the model for use in simulating the fire in the entire nightclub. To gauge the accuracy of the full nightclub simulation results, they were compared with a news video record of the incident. The FDS simulation predicted rapid fire growth due to the burning of the polyurethane foam. The simulation was consistent with the video record until flames spread throughout the structure.
+
+
+\subsection{Outdoor Applications and Wind}
+
+Buoyant windblown plumes have been studied since the early 1960s. A summary of the early work together with a useful bibliography is given by Turner~\cite{Turner}. Most of the models described in these works are integral models, where the profiles of physical quantities in cross-sectional planes perpendicular to the wind direction are assumed, together with simple laws relating entrainment into the plume to macroscopic features used to describe its evolution.
+
+The potential shortcomings of these types of models are that they were designed for typical industrial sources, like smokestacks, that are much smaller in terms of energy output than a large fire. The plume from an oil or forest fire will rise higher into the atmosphere, and it is difficult to predict the rise based on empirical correlations. If the plume rise is not calculated correctly, substantial errors in downwind concentration can result. In the case of smoke-stack emissions, the plume does not rise appreciably high, reducing the uncertainty of the results.
+Most of the assumptions required by integral models can be removed by taking advantage of the advances in CFD over the past few decades. For example, as part of the process of evaluating the feasibility of using in situ burning as a remediation tool for large oil spills, NIST developed a numerical model, ALOFT (A Large Out- door Fire plume Trajectory), to predict the concentration of smoke and other combustion products downwind of a large fire~\cite{Baum}. The model is simply a variant of the large eddy simulation model FDS, with a simplified plume rise model coupled with a coarsely gridded wind calculation spanning tens of kilometers (Figure~\ref{ALOFT}). This combination of models is not unusual for outdoor application, as the range of length scales spans at least three orders of magnitude.
+
+\begin{figure}[b]
+%\includegraphics[scale=.65]{ALOFT}
+\caption{Simulation of smoke from a large oil fire in the Valdez narrows, Alaska. (Figure courtesy of NIST.)}
+\label{ALOFT}
+\end{figure}
+
+
+\subsection{Tunnels}
+
+Historically, smoke control inside tunnels was often considered as an afterthought to design of ventilation for the provision of fresh air. Where natural ventilation was insufficient, mechanical ventilation was designed using network flow theory aided in recent years by network models. As a two-layer description is generally not valid within a tunnel environment, fire zone models have been applied to tunnels in only a limited number of cases. CFD, however, is now finding increasing application to fire hazard analysis for road tunnels in particular. In re- cent years a number of major tunnel fire incidents such as the tragedy in the Mont Blanc tunnel in 1999, resulting in 39 deaths, have highlighted the need to understand better the mechanism of fire development and spread inside tunnels. In particular, heat transfer to the tunnel walls is important to account for correctly as this has a strong influence on the distribution of heat along the tunnel, the degree of stratification that can be expected, and the threat to the integrity of the structure.
+
+One area where CFD has been applied successfully is in the analysis of the critical velocity required in a longitudinally ventilated tunnel to control the spread of heat and smoke so that it is forced in the downstream direction, providing safe conditions upstream~\cite{Hwang}. Another area currently receiving much attention is the choice of design fire for tunnel fire safety design. In the light of the recent tunnel fire incidents and full-scale fire tests~\cite{Ingason}, the size of the fire load that can be generated from what were previously considered as nonhazardous cargoes has been revised. Heat release rates well in excess of 100~MW have been measured for heavy-goods vehicles carrying commercial merchandise.
+
+CFD was used in the investigation into the Mont Blanc tunnel fire incident in 1999. One of the modeling studies involved the use of the JASMINE fire model to re-construct conditions inside the tunnel during the first 30~minutes, during which time most of the fatalities would have occurred. Using information available on the ventilation settings and the location of vehicles, the model predicted the transport of smoke and heat along the length of the tunnel. The data were then fed into a model for fractional effective dose to enable an assessment of when and how the fatalities occurred. Subsequent parametric simulations were performed to investigate whether alter- native tunnel ventilation measures would have helped on the day of the incident~\cite{Miles:2004}.
+
+
+\subsection{Sprinkler Activation}
+
+A common fire protection design issue that arises in both new and existing construction is sprinkler and smoke detector spacing for coffered ceilings. Coffered ceilings provide a unique challenge to system designers, as their configurations are not specifically addressed in design standards. Based on the language provided in these design standards, sprinklers and smoke detectors are often required in every coffer. Therefore, a sprinkler or detector may protect as little as 1.5~m$^2$ (16~ft$^2$), depending on the configuration of the coffer (Figure~\ref{coffer}).
+
+\begin{figure}[b]
+%\includegraphics[scale=.65]{coffer}
+\caption{Simulation of smoke filling under a coffered ceiling. (Figure courtesy Schirmer Engineering.)}
+\label{coffer}
+\end{figure}
+
+One design alternative is to use CFD modeling to compare the predicted activation times for the devices under several different design layouts. Using a specified design fire for the anticipated fuel load, the activation time for a code-compliant sprinkler layout can be compared to the activation time for an alternative design that may include far fewer devices covering the same area. At that point, a decision can be made to determine what effects the differing activation times would have on the building, allowing the designer to determine an appropriate design layout.	
+
+
+
+
+\section{Summary}
+
+Computational fluid dynamics modeling of fire has made tremendous progress over the past few decades as our understanding of fire improves and as computers get ever faster. However, although it appears to many that CFD is the cutting edge of fire protection engineering, many non-modelers are surprised to learn that our ability to reproduce fire phenomena via computer simulation lags our empirical understanding by about 10 years. Indeed, current-generation models address transport phenomena reasonably well, making them useful for many engineering applications. However, they have not yet reached the point of reliably predicting, for large-scale applications, such important phenomena as flame spread, extinction, suppression, and CO and smoke production, all of which demand more detailed chemistry and physics than are currently incorporated in the models.
+
+Moving forward will require a new generation of engineers who have expertise in fire physics, mathematics, and computer science to build on the knowledge possessed by the current generation of modelers. This chapter sets forth the basic elements to lay the foundation of further study for future modelers, and it also provides the current practitioner with a better understanding of the models being used.
+
+
+
+\section{Nomenclature}
+
+\begin{tabbing}
+$c_p$ 	\hspace{1in}     \= specific heat \\
+$D$	                     \> material diffusivity \\
+$\mathbf{f}$	         \> external body force \\
+$h$                      \>	enthalpy \\
+$h_c$ 	                 \> convective heat transfer coefficient \\
+$I$	                     \> radiant intensity \\
+$k$	                     \> thermal	conductivity; turbulent	kinetic energy \\
+$\dot{m}_\alpha'''$      \> mass production (destruction) rate of species $\alpha$ per unit volume \\
+$p$	                     \> pressure \\
+Pr	                     \> Prandtl number \\
+$\mathbf{q}$	         \> heat flux vector \\
+$\dot{q}''$              \> heat release rate per unit area \\
+$\dot{q}'''$             \> heat release rate per unit volume \\
+$\cal R$                 \> universal gas constant \\
+$\mathbf{s}$	         \> direction vector \\
+$s$	                     \> stoichiometric air requirement of the fuel \\
+$S_{ij}$ 	             \> strain tensor \\
+Sc	                     \> Schmidt number \\
+$t$	                     \> time \\
+$T$	                     \> temperature \\
+$\mathbf{u}=(u,v,w)$     \> velocity vector \\
+$\overline{W}$	         \> average molecular weight \\
+$\mathbf{x}=(x,y,z)$	 \> position vector \\
+$Y_\alpha$               \> mass fraction of species 
+\end{tabbing}
+
+\subsection{Greek Letters}
+
+\begin{tabbing}
+$\epsilon$ \hspace{1in}  \= rate of dissipation of turbulent kinetic energy \\
+$\kappa$                 \> radiation absorption coefficient \\
+$\mu$                    \> dynamic viscosity \\
+$\mu_t$                  \> turbulent viscosity (in eddy viscosity turbulence model) \\
+$\rho$                   \> density \\
+$\sigma$                 \> Stefan-Boltzmann constant \\
+$\tens{\tau}$	         \> stress tensor
+\end{tabbing}
+
+
+
+\bibliography{McGrattan_Miles_CFD}
+
+\section*{Appendix}
+\addcontentsline{toc}{section}{Appendix}
+
+Much of the difficulty in learning and applying computational fluid dynamics is the complexity of the governing equations. In this Appendix, some of the common terms found in the mass, momentum, and energy equations are expanded. Many of the variables and operators can be represented as $3 \times 3$, $1 \times 3$, or $3 \times 1$ matrices, and the expansions can be carried out following the rules of linear algebra. For example, the divergence of the flow vector, $\nabla \cdot \mathbf{u}$, is a scalar formed by multiplying the $1 \times 3$ gradient operator $\nabla$ and the $3 \times 1$ vector $\mathbf{u}$. On the other hand, the product of the velocity vectors, $\mathbf{u} \mathbf{u}$, is found by multiplying a $3 \times 1$ vector by a $1 \times 3$ vector:
+\begin{equation}
+\mathbf{u}\mathbf{u} = \left( \begin{array}{c} u \\ v \\ w \end{array} \right) (u,v,w) = \left( \begin{array}{ccc} u^2 & uv & uw \\ vu & v^2 & vw \\ wu & wv & w^2 \end{array} \right)
+\label{matmult}
+\end{equation}
+Thus, the convection term in the momentum conservation equation can be expanded as follows:
+\begin{eqnarray}
+\nabla \cdot (\rho \mathbf{u}\mathbf{u}) 
+&=& \left( \frac{\partial}{\partial x} \; \frac{\partial}{\partial y} \; \frac{\partial}{\partial z} \right) 
+    \left( \begin{array}{ccc} \rho u^2 & \rho uv & \rho uw \\ \rho vu & \rho v^2 & \rho vw \\ \rho wu & \rho wv & \rho w^2 \end{array} \right) \nonumber \\
+&=& \left( \begin{array}{c} (\rho u^2)_x + (\rho vu)_y + (\rho wu)_z \\ (\rho uv)_x + (\rho v^2)_y + (\rho wv)_z \\ (\rho uw)_x + (\rho vw)_y + (\rho w^2)_z \end{array} \right)^T
+\end{eqnarray}
+The result is a vector whose components form the convective terms of the three component momentum equation. Note that here the subscripts $x$, $y$, and $z$ denote partial derivatives with  respect to that particular coordinate direction.
+
+The term for the viscosity in the momentum equation, $\nabla \cdot \tens{\tau}$, is deceptively simple. In reality, it is not, and because it constitutes the heart of the debate over turbulence models, some attention must be paid to it. Using customary tensor notation, the viscous stress tensor is defined as
+\begin{equation}
+\tens{\tau}_{ij} = \mu \left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i} - \frac{2}{3} \delta_{ij} \nabla \cdot \mathbf{u} \right) \quad ; \quad \delta_{ij} = \left\{ \begin{array}{l} 1 \; \mathrm{if} \; i=j \\ 0 \; \mathrm{if} \; i\neq j \end{array} \right.
+\end{equation}
+These expressions assert that the viscous stresses are linearly related to the strains, the very definition of a Newtonian fluid. The proportionality constant, $\mu$, is called the dynamic viscosity of the fluid. The viscous stress tensor can also be represented as a $3 \times 3$ matrix:
+\begin{equation}
+\tens{\tau} = \mu \left( \begin{array}{ccc} 2u_x & u_y+v_x & u_z+w_x \\ v_x+u_y & 2v_y & v_z+w_y \\ w_x+u_z & w_y+v_z & 2w_z \end{array} \right) - 
+              \frac{2}{3} \left( \begin{array}{ccc} \nabla \cdot \mathbf{u} & 0 & 0 \\ 0 & \nabla \cdot \mathbf{u} & 0 \\ 0 & 0 & \nabla \cdot \mathbf{u} \end{array} \right)
+\end{equation}
+The dissipation function, $\epsilon$, is a scalar formed by the dot product of two $3 \times 3$ matrices:
+\begin{eqnarray}
+\epsilon &\equiv& \tens{\tau} \cdot \nabla \mathbf{u} \nonumber  \\
+         &=& \mu \left( 2u_x^2 + 2v_y^2 + 2w_z^2 + (v_x+u_y)^2 + (w_y+v_z)^2 + (u_z+w_x)^2 - \frac{2}{3} (\nabla \cdot \mathbf{u})^2 \right)
+\end{eqnarray}
+
+
+
+
+\end{document}
