@@ -2,24 +2,39 @@
 
 \label{combustionsection}
 
-FDS can model multiple, simultaneous chemical reactions.  FDS uses one of two approaches to computing the reaction rate for a chemical reaction.  The first approach is a mixing-controlled reaction rate.  In this approach, the reaction rate is computed based on the local mixing.  That is the reactants (e.g. fuel and air) react inifintely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to
-specified Arrhenius reaction parameters. This latter model is most often used in a
-direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be
-modeled directly.
-However, most often for large eddy simulations (LES), where the grid is not
-fine enough to resolve the diffusion of fuel and oxygen,
-the mixing-controlled combustion model is assumed.  A single FDS simulation can contain a mix of reaction rate types.
+FDS can model multiple, simultaneous, reversible chemical reactions.  In FDS only the species that have mixed have the potential to react. Once mixed, FDS uses one of two approaches to compute the reaction rate for a chemical reaction.  The first approach is an infinite fast chemical reaction rate. That is the reactants (e.g. fuel and air) react infinitely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to specified Arrhenius reaction parameters. The Arrhenius rate can still be limited by the amount of mixing within a computational cell. This latter model is most often used in a direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be modeled directly. However, most often for large eddy simulations (LES), where the grid is not fine enough to resolve the diffusion of fuel and oxygen,
+the mixing-controlled combustion model is assumed. A single FDS simulation can contain a mix of reaction rate types.
 
-\section{Mixing-Controlled Reaction-Rate Model}
+\section{Eddy Dissipation Concept}
+In the eddy dissipation concept model (EDC) each computational cell can be thought of as a batch reactor. The species contained within this reactor exist in one of two states: unmixed or mixed. The proportion of the cell in the mixed state is governed by $\zeta$, the unmixed fraction. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). In a combustion sense, $\zeta=1$  represents a diffusion flame and $\zeta=0$ represents a premixed flame. $\zeta(t;\tau_{mix})$, a function of time (t) and parameterized by the mixing time ($\tau_{mix}$), is governed by the following ordinary differential equation:
 
-For an infinitely-fast reaction, reactant species in a given grid cell are converted to product species at a rate determined by a
-characteristic mixing time.  It is assumed that the
-grid resolution is too coarse to resolve the flame sheet and compute directly the reaction rate.  Instead, if any grid cell contains all the reactants of the the chemical reaction and the temperature of the grid cell meets certain criteria, the consumption rate of fuel is given by~\cite{Poinsot:TNC}
-\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
-   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \label{EDC} \ee
-Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1.
+\begin{equation}\label{eq:zeta}
+\frac{\mbox{d}\zeta}{\mbox{d}t}=-\frac{\zeta}{\tau_{mix}}
+\end{equation}     
 
-\subsection{A Mixing-Controlled Reaction, but with Local Extinction}
+Only those species in the mixed state can react, therefore the proportion of the cell (reactor) composition in the mixed state must be known as function of time. 
+
+$\tau_{mix}$ discussion
+
+The following equations define the cell composition:
+\begin{eqnarray}\label{eq:mixunmix}
+\rho V = U(t) + M(t) \\
+U(t) = \zeta(t)\,\rho V \\
+M(t) = (1-\zeta(t))\,\rho V
+\end{eqnarray} 
+where $\rho V$ is the total mass in the reactor, $U(t)$ is unmixed portion of the mass, and $M(t)$ is the mixed portion of the mass. $\rho V$ is not a function of time as the total mass in a cell remains constant during a single FDS time interval. From the portion of mass that is mixed, $M(t)$, the local mixed composition ($\phi_{\alpha}(t)$) is found by:
+
+\begin{equation}\label{eq:phi}
+\phi_{\alpha}(t)=\frac{m_{\alpha}(t)}{M(t)}
+\end{equation}
+where $m_\alpha(t)$ is the mixed mass of each of the $\alpha$ species in the simulation. The mixed mass of each species as a function of time is:
+
+\begin{equation}\label{eq:mixmass}
+m_{\alpha}(t+\delta t) = m_{\alpha}(t) + Y_{\alpha,0}(M(t+\delta t) - M(t))
+\end{equation}
+where $Y_{\alpha,0}$ is the mass fraction of each $\alpha$ species in the unmixed portion of the cell. The mass fractions of each species in the unmixed portion remain constant over an integration time step therefore the proportion of species which mix remains constant.
+
+\subsection{A Mixing-Controlled Reaction, with Local Extinction}
 
 \label{extinction}
 
