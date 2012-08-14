@@ -2181,7 +2181,7 @@ By default FDS uses the Deardorff \cite{Deardorff:1980,Pope:2000} turbulent visc
 \begin{equation}
 (\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{sgs}}
 \end{equation}
-where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the maximum cell dimension, $\Delta = \max(\delta x,\delta y,\delta z)$.  This selection is intended to promote the use of cubic grid cells, which are optimal for isotropic turbulent flows typical of thermally-driven fire plumes.  Alternatively, the user may invoke the geometric mean definition of the filter width, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$, by setting {\ct MAX\_FILTER\_WIDTH=.FALSE.} on {\ct MISC}.
+where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the maximum cell dimension, $\Delta = \max(\delta x,\delta y,\delta z)$.  This selection is intended to promote the use of cubic grid cells, which are optimal for isotropic turbulent flows typical of thermally-driven fire plumes.  Alternatively, the user may invoke the geometric mean definition of the filter width, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$, by setting {\ct FILTER\_WIDTH\_FUNCTION='MEAN'} on {\ct MISC}.
 
 Options for the turbulent viscosity model are (set {\ct TURBULENCE\_MODEL} on {\ct MISC}):
 \begin{center}
@@ -8897,7 +8897,8 @@ sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devic
 \end{verbatim}
 \normalsize
 
-\noindent
+\noindent This feature is convenient for dumping single-point first and second-order statistics, such as the mean velocity profile in a doorway or the average concentration of a particular scalar quantity spanning the width of a buoyant plume.
+
 In a file called {\bf CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is
 different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and
 $z$ coordinates. The last column contains the 20 temperature points presented as a running average. The
@@ -8915,17 +8916,17 @@ either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID},
 \be
    \overline{\phi} = \frac{ \sum_{i=1}^n \phi_i }{n}
 \ee
-where $n$ is the number of uniform output samples.  For example, the velocity profile in a doorway or the average concentration of a particular scalar quantity spanning the width of a buoyant plume are convenient means to compare model and experiment.
+where $n$ is the number of uniform output samples.
 \item[Root Mean Square] If the user sets {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
 \be
    \phi_{rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
 \ee
 Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. It is not meant to be used with single devices that record a time history of a given quantity. The {\em root mean square} is only meaningful in terms of a steady-state output quantity.
-\item[Covariance] If $u = U - \overline{U}$ is the deviation from the mean for the random variable $U$, then an unbiased estimate of the \emph{covariance} of two random variables is given by
+\item[Covariance] If $u = U - \overline{U}$ and $v= V-\overline{V}$ are the deviations for two random variables, $U$ and $V$, then an unbiased estimate of the \emph{covariance} is given by
 \be
-   \overline{u_1 u_2} = \frac{ \sum_{i=1}^n (U_1 - \overline{U}_1) (U_2 - \overline{U}_2) }{n-1}
+   \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
 \ee
-To output this statistic the user must add a second quantity to the device line and set {\ct STATISTICS='COV'}:
+To output this statistic the user must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}:
 \footnotesize
 \begin{verbatim}
 &DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE', 
@@ -8934,7 +8935,7 @@ To output this statistic the user must add a second quantity to the device line 
 \normalsize
 \item[Correlation Coefficient] Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} given by
 \be
-   \rho_{12} = \frac{ \overline{u_1 u_2} }{ u_{1,rms} \,u_{2,rms} }
+   \rho_{uv} = \frac{ \overline{u\, v} }{ u_{rms} \,v_{rms} }
 \ee
 Here again the user must add a {\ct QUANTITY2} to the device line.
 \item[Min, Max] For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
@@ -11009,6 +11010,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 {\ct EVAC\_TIME\_ITERATIONS}                    & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
+{\ct FILTER\_WIDTH\_FUNCTION}                   & Character     & Section~\ref{info:LES}                                &               & {\ct 'MAX'}       \\ \hline
 {\ct FLUX\_LIMITER}                             & Integer       & Reference~\cite{FDS_Tech_Guide}                       &               & 4                 \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
 {\ct FREEZE\_VELOCITY}                          & Logical       & Constant velocity                                     &               & {\ct .FALSE.}     \\ \hline
@@ -11019,7 +11021,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}              & 1.0               \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
-{\ct MAX\_FILTER\_WIDTH}                        & Logical       & Section~\ref{info:LES}                                &               & {\ct .TRUE.}      \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct MIXING\_LAYER\_H0}                         & Real          & See FDS Verification Guide                            &  m            &                   \\ \hline
