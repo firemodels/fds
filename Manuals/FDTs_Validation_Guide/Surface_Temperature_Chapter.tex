@@ -21,6 +21,16 @@ A summary scatter plot of time to threshold cable temperature predictions is giv
 
 \section{Unprotected Steel Temperature}
 
+The following equation calculates the temperature development of an unprotected steel member, using a quasi-stationary approach, iterated for successive time steps of $\Delta t$ (sec)
+
+\be
+\Delta T_s = \frac{F}{V} \frac{1}{\rho_s c_s} \left[ h_c (T_g - T_s) + \sigma \epsilon (T_g^4 - T_s^4) \right] \Delta t
+\ee
+
+\noindent where $\sigma$ is the Stefan-Boltzmann constant ($W/m^2/K^4$), $T_g$ is the hot gas layer temperature from the appropriate method described in Chapter~\ref{HGL:Chapter}, and $T_s$ is the steel temperature.
+
+\clearpage
+
 A summary scatter plot of unprotected steel temperature predictions is given in Fig.~\ref{unprotected_steel_temperature_summary}.
 
 \begin{figure}[ht]
@@ -39,6 +49,41 @@ A summary scatter plot of unprotected steel temperature predictions is given in 
 
 
 \section{Protected Steel Temperature}
+\label{info:protected_steel_temperature}
+
+If the thermal capacity of the insulation layer is neglected, the temperature rise in the structural steel element can be calculated using the following equation
+
+\be
+\Delta T_s = k_i \left( \frac{T_g - T_s}{c_s h \frac{W}{D} + \frac{1}{2} c_i \rho_i h^2} \right) \Delta t
+\ee
+
+\noindent where $\sigma$ is the Stefan-Boltzmann constant ($W/m^2/K^4$), and $T_p$ is the plume temperature at a given height using the McCaffrey centerline plume temperature correlation
+
+\be
+T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{Z}{\dot Q^{2/5}} \right)^{2 \eta - 1} T_\infty \right] + T_\infty
+\label{eq:mccaffrey}
+\ee
+
+The constants in Eq.~\ref{eq:mccaffrey} are a function of the height (Z) within the plume and are listed in Table~\ref{tbl:mccaffrey_constants}.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{Constants used in McCaffrey plume correlation}
+\label{tbl:mccaffrey_constants}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Region & $z/\dot Q^{2/5}$      & $\eta$ & $\kappa$ \\
+\hline
+Continuous & < 0.08       & 1/2  & 6.8 \\
+Intermittent & < 0.08-0.2 & 0     & 1.9 \\
+Plume         & > 0.2         & -1/3 & 1.1 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\clearpage
 
 A summary scatter plot of protected steel temperature predictions is given in Fig.~\ref{protected_steel_temperature_summary}.
 

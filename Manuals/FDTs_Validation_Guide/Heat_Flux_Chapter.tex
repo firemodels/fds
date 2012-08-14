@@ -19,7 +19,7 @@ D = \sqrt{\frac{4 A}{\pi}}
 \ee
 
 \be
-Q^* = \frac{Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
+Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
 \ee
 
 \be
@@ -82,43 +82,7 @@ The immersed plume radiation heat flux can be calculated by
 \dot q_r'' = \sigma (T_p^4)
 \ee
 
-\noindent where $\sigma$ is the Stefan-Boltzmann constant ($W/m^2/K^4$), and $T_p$ is the plume temperature (K) at a given height using the McCaffrey centerline plume temperature correlation
-
-\be
-T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{Z}{\dot Q^{2/5}} \right)^{2 \eta - 1} T_\infty \right] + T_\infty
-\label{eq:mccaffrey}
-\ee
-
-The constants in Eq.~\ref{eq:mccaffrey} are a function of the height (Z) within the plume and are listed in Table~\ref{tbl:mccaffrey_constants}.
-
-\vspace{\baselineskip}
-\begin{table}[ht]
-\begin{center}
-\caption{Constants used in McCaffrey plume correlation}
-\label{tbl:mccaffrey_constants}
-\begin{tabular}{|c|c|c|c|}
-\hline
-Region & $z/\dot Q^{2/5}$      & $\kappa$ & $\eta$ \\
-\hline
-Continuous & < 0.08       & 1/2  & 6.8 \\
-Intermittent & < 0.08-0.2 & 0     & 1.9 \\
-Plume         & > 0.2         & -1/3 & 1.1 \\
-\hline
-\end{tabular}
-\end{center}
-\end{table}
-
-%         KAPPA = 6.8
-%         ETA = 0.5
-%         REGION = 1
-%      ELSEIF ((Z_Q_2_5 >= 0.08) .AND. (Z_Q_2_5 <= 0.20)) THEN
-%         KAPPA = 1.9
-%         ETA = 0
-%         REGION = 2
-%      ELSE
-%         KAPPA = 1.1
-%         ETA = -(1./3.)
-%         REGION = 3
+\noindent where $\sigma$ is the Stefan-Boltzmann constant ($W/m^2/K^4$), and $T_p$ is the plume temperature (K) at a given height using the McCaffrey centerline plume temperature correlation described in Eq.~\ref{eq:mccaffrey}.
 
 \clearpage
 
