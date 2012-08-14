@@ -1,4 +1,4 @@
-\chapter{Mass, Species and Enthalpy Transport}
+\chapter{Mass, Species, and Enthalpy Transport}
 
 This chapter describes in detail the equation of state in the low Mach number limit, the finite difference approximation of the mass and species conservation equations, and the role of the flow divergence as a surrogate for the enthalpy transport equation.
 Due to the use of the low Mach number approximation, the energy conservation equation is not solved explicitly but rather is defined implicitly via the divergence of the flow field, which contains the combustion and radiation source terms.
@@ -20,7 +20,7 @@ practical simulations difficult.
 Following the work of Rehm and Baum~\cite{Rehm:1}, an approximation to the equation of state is made by decomposing the pressure
 into a ``background'' component and a perturbation. It is assumed that
 the background component of pressure can differ from compartment to compartment. If
-a volume within the computational domain is isolated from other volumes, except via leak paths or ventilation ducts, it is referred to as a ``pressure zone'' and assigned its own background pressure. The pressure within the $m$th zone, for example, is a linear combination
+a volume within the computational domain is isolated from other volumes, except via leak paths or ventilation ducts, it is referred to as a ``pressure zone'' and assigned its own background pressure. The pressure field within the $m$th zone, for example, is a linear combination
 of its background component and the flow-induced perturbation:
 \be p(\bx,t) = \bp_m(z,t) + \tp(\bx,t) \ee
 Note that the background pressure is a function of $z$, the vertical spatial coordinate, and time. For most
@@ -30,15 +30,15 @@ account~\cite{Baum:5}. The ambient pressure field is denoted $\bp_0(z)$. Note th
 time 0. This is the assumed atmospheric pressure stratification that serves as both
 the initial and boundary condition for the governing equations.
 
-The purpose of decomposing the pressure is that for low-Mach number flows, it can be assumed that the temperature and density are inversely
+The purpose of decomposing the pressure is that for low Mach number flows, it can be assumed that the temperature and density are inversely
 proportional, and thus the equation of state (in the $m$th pressure zone) can be approximated
 \be \bp_m  =  \rho T \R \sum_\alpha \frac{Z_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state} \ee
 The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves
 that travel at speeds that are much faster
 than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves
 means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state
-equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is never
-explicitly solved, but its source terms are included in the expression for the flow divergence, to be discussed later in the chapter.
+equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is not
+explicitly solved; rather, its source terms are included in the expression for the flow divergence, to be discussed later in the chapter.  When the velocity field satisfies the specified thermodynamic divergence, the conservative form of the sensible enthalpy equation is satisfied by construction.
 
 The stratification of the atmosphere is derived from the relation
 \be \frac{d \bp_0}{dz} = - \rho_0(z) \, g  \ee

@@ -11,7 +11,7 @@ This chapter presents the governing equations of FDS and an outline of the gener
 \item Generalized ``lumped species'' method (simplified reaction progress variable approach)
 \item Deardorff eddy viscosity subgrid closure
 \item Constant turbulent Schmidt and Prandtl numbers
-\item Eddy dissipation model (fast chemistry) for single-step reaction between fuel and oxidizer
+\item Eddy dissipation concept (fast chemistry) for single-step reaction between fuel and oxidizer
 \item Gray gas radiation with finite volume solution to the radiation transport equation
 \end{itemize}
 
@@ -61,7 +61,7 @@ with this simplified approach to the chemistry, we still need to track at least 
 reaction, we do not need
 to solve explicitly seven transport equations. In fact, we only need to solve two -- one for the fuel and one for the products. The air is everything that is neither fuel nor
 products. Whereas the fuel is a single gas species, the air and products are what are often referred to as ``lumped species''.
-A lumped species represents a mixture of gas species that are transported together ({\em i.e.} the lumped species has a single set of transport properties), and from the point of
+A lumped species represents a mixture of gas species that transport together ({\em i.e.}, the lumped species has a single set of transport properties) and react together, and from the point of
 view of the numerical model it can be treated as a single species. In fact, the mass transport equations make no distinction between a single or lumped species. For example, air is a
 lumped species that consists of nitrogen, oxygen, and trace amounts of water vapor and carbon dioxide.
 We use the symbols $Z_A$, $Z_F$, and $Z_P$ to denote the mass fractions of air, fuel and products ($Z_A=1 - Z_F - Z_P$).  The lumped species mass fractions are linearly related
@@ -81,12 +81,13 @@ and the primitive species can be recovered from the lumped species via
 \left[ \begin{array} {c} Z_A \\ Z_F \\ Z_P \end{array} \right] =
 \left[ \begin{array} {c} Y_\NTWO \\ Y_\OTWO \\ Y_{\scriptscriptstyle \mathrm{CH_4}} \\ Y_\COTWO \\ Y_{\scriptscriptstyle \mathrm{H_2O}} \end{array} \right]
  \ee
+Notice that the columns of the matrix are the mass fractions of the primitive species within a given lumped species.
 
 The lumped species approach does not change the basic mass transport equations. The equation for total mass is written:
 \be \dod{\rho}{t} + \nabla\!\cdot (\rho \bu)  =  \dm_b'''  \label{mass} \ee
 Note that the source term on the right hand side represents the addition of mass from evaporating droplets or other subgrid-scale
 particles that represent sprinkler and fuel sprays, vegetation, and any other type of small, unresolvable object. These
-objects are assumed to occupy no volume; thus are seen by the governing equations as point sources of mass, momentum and energy. It is important to
+objects are assumed to occupy no volume; thus they are seen by the governing equations as point sources of mass, momentum, and energy. It is important to
 note, however, that the evaporated mass species must be one for which an explicit transport equation is solved. For example, water vapor is a product of
 combustion, but it is also formed by evaporating sprinkler droplets. In cases such as these, there needs to be an explicit transport equation for water
 vapor to distinguish between that which is formed by combustion and that which is evaporated from the droplets.
@@ -103,9 +104,9 @@ chosen so that the sum of all the diffusive fluxes is zero.
 
 \section{Low Mach Number Approximation}
 
-Rehm and Baum~\cite{Rehm:1} observed that for low speed applications like fire, the spatially and temporally resolved pressure, $p$, can be decomposed into a ``background'' pressure, $\bp(z,t)$, plus a perturbation, $\tp(x,y,z,t)$, with only the background pressure retained in the equation of state:
+Rehm and Baum~\cite{Rehm:1} observed that for low speed applications like fire, the spatially and temporally resolved pressure, $p$, can be decomposed into a ``background'' pressure, $\bp(z,t)$, plus a perturbation, $\tp(x,y,z,t)$, with only the background pressure retained in the equation of state (ideal gas law):
 \be \bp = \rho T {\cal R} \sum_\alpha  \frac{Z_\alpha}{W_\alpha} \equiv \frac{\rho \R T}{\bW}  \label{basicstate1} \ee
-Note that $z$ is the spatial coordinate in the direction of gravity; thus, the stratification of the atmosphere is included in the background pressure. The perturbation, $\tp$, drives the fluid motion. This approximation has a number of consequences. First, building compartments connected via a heating, ventilation, and air conditioning system can each maintain individual background pressures. The air flows between compartments can be
+Note that $z$ is the spatial coordinate in the direction of gravity; thus, the stratification of the atmosphere is included in the background pressure. The perturbation, $\tp$, drives the fluid motion. This approximation has a number of consequences. First, building compartments connected via a heating, ventilation, and air conditioning (HVAC) system can each maintain individual background pressures. The air flows between compartments can be
 described in terms of the differences in the background pressures, eliminating the need to solve detailed flow equations within the ventilation ducts.
 
 The second consequence of the low Mach number approximation is that it eliminates the need to solve the energy transport
@@ -121,7 +122,7 @@ Note that the material derivative of the thermodynamic pressure is simplified be
 The term
 $\dq'''$ is the heat release rate per unit volume from a chemical reaction.
 The term $\dq_b'''$ is the energy transferred to subgrid-scale droplets and particles.
-The term $\dbq''$ represents the conductive and radiative heat fluxes:
+The term $\dbq''$ represents the conductive, diffusive, and radiative heat fluxes:
 \be \dbq'' = -k \nabla T - \sum_\alpha h_{s,\alpha} \rho D_\alpha \nabla Z_\alpha + \dbq_r'' \ee
 where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of species $\alpha$.
 
@@ -145,7 +146,7 @@ the thermodynamic variables.
 Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written
 \be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg
 + \bof_b + \nabla\!\cdot \btau \Big]  \ee
-The term, $\bof_b$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Smagorinsky model (constant or dynamic coefficient) \cite{Germano:1991,Moin:1991,Smagorinsky:1}.
+The term, $\bof_b$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}.
 
 It is convenient to write this equation in the form:
 \be \dod{\bu}{t} + \bF + \nabla \cH = 0  \ee
@@ -160,7 +161,7 @@ turbulent combustion of gaseous fuel and oxygen, the transport of thermal radiat
 thermal decomposition of real materials, the activation of sprinklers and smoke detectors, the transport of water and liquid fuel
 droplets, and a variety of other features that describe fires inside and outside of buildings.
 
-Combustion and radiation are introduced into the governing equations via the source terms, $\dq'''$ and $\nabla \cdot \bq_r''$,
+Combustion and radiation are introduced into the governing equations via the source terms, $\dq'''$ and $\nabla \cdot \dbq_r''$,
 in the energy transport equation. Since the energy equation is not solved explicitly, these terms find their way into the
 expression for the divergence.
 
@@ -173,28 +174,13 @@ complete, and there are
 several optional schemes that are designed to predict the extent of combustion in under-ventilated spaces.
 
 For an infinitely-fast reaction, reactant species in a given grid cell are converted to product species at a rate determined by a
-characteristic mixing time. If any grid cell contains all the reactants of the the chemical reaction and the mass fractions of reactants and products meet certain criteria, the heat release rate per unit volume is given by the eddy dissipation model~\cite{Poinsot:TNC}
+characteristic mixing time, $\tau_{mix}$. The heat release rate per unit volume is defined by summing the lumped species mass production rates times their respective heats of formation
 \be
-   \dq''' \equiv -\dm_f''' \, \Delta H = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \;
-   \left( 1 - e^{-\dt/\tau_{mix}} \right)  \; \Delta H \quad ; \quad
-   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \label{EDC1}
+   \dq''' \equiv -\sum_\alpha \dm_\alpha''' \, \Delta H_{f,\alpha} \label{EDC1}
 \ee  %Y rather than Z is correct in this equation
-Here, $Y_\F$, $Y_\OTWO$, and $Y_{\hbox{\tiny P}}$ are the mass fractions of fuel, oxygen and products within a grid cell; $\beta$ is an empirical parameter.  The mixing time $\tau_{mix}$ is given by
-\begin{equation}
-\label{eqn_tau_mix}
-\tau_{mix} = \max(\tau_{chem},\min(\tau_d,\tau_u,\tau_g,\tau_{flame}))
-\end{equation}
-where
-\begin{equation}
-\tau_{d}= \frac{\mbox{Sc}_t\rho\Delta^2}{\mu} \,\mbox{;}\quad
-\tau_{u}= \frac{\Delta}{\sqrt{2k_{sgs}}} \,\mbox{;}\quad
-\tau_{g}= \sqrt{ 2\Delta/g }
-\end{equation}
-Note that $k_{sgs}$ is the subgrid kinetic energy per unit mass which is closed by integrating a model Kolmogorov spectrum . The acceleration time scale $\tau_{g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=9.81$ m/s$^2$.  The chemistry time scale $\tau_{chem}$ (usually very small) and the flame time scale $\tau_{flame}$ (usually very large) are physical limits on the mixing time which may be adjusted if necessary by the user.
-
+Details of $\tau_{mix}$ and $\dm_\alpha'''$ are discussed in Chapter \ref{combustionsection}.
 
 \subsection{Radiation}
-
 
 The net contribution from thermal radiation in the energy equation is defined by:
 \be
@@ -221,15 +207,14 @@ grid in the vicinity of flames. In large scale fire simulations, grid cells are 
 tens of centimeters. Relatively thin flame sheets cannot be resolved, in which case the resolved temperature field
 will not reflect the true temperatures one would expect to find in the reaction zone. Consequently, the
 source term is approximated in grid cells where fuel and oxygen react.
-Elsewhere, there is greater confidence in the resolved temperature field,
+Elsewhere, the subgrid temperature field is homogeneous
 and the source term can be computed directly.
-\be \kappa \; I_b = \left\{ \begin{array}{cl}
-    \kappa \, \sigma \, T^4/\pi                                           & \hbox{Outside flame zone} \\ [0.15in]
-    \max(\chi_r \, \dot{q}'''/4 \pi \; , \; \kappa \, \sigma \, T^4/\pi)  & \hbox{Inside flame zone}
-    \end{array} \right.  \label{radapprox1} \ee
-Here, $\chi_r$ is an empirical estimate of the {\em local} fraction of
-that energy emitted as thermal radiation. Typically, a sooty fire radiates approximately one-third of the total
-combustion energy.
+\be \kappa \; I_b = \left\{ \begin{array}{cll}
+    \kappa \, \sigma \, T^4/\pi                                           & \hbox{Outside flame zone}, & \dot{q}'''=0  \\ [0.15in]
+    C\, \kappa \, \sigma \, T^4/\pi  & \hbox{Inside flame zone}, & \dot{q}'''>0
+    \end{array} \right.  \label{radapprox1}
+\ee
+The constant $C$ is adjusted dynamically such that the integrated quantity $\chi_r \,\dot{q}'''$ is satisfied for each mesh. Here, $\chi_r$ is an empirical estimate of the {\em global} fraction of that energy emitted as thermal radiation. Typically, a sooty fire radiates approximately one-third of the total combustion energy.
 
 The radiation equation is solved using a technique similar to a finite
 volume method for convective transport, thus the name given to it is
@@ -247,7 +232,7 @@ the gaseous species and soot is not included in the model.
 \section{Solution Procedure}
 
 In given grid cell at the $n$th time step, we have the density, $\rho^n$, lumped species mass fractions, $Z_\alpha^n$, velocity
-vector, $\bu^n$, and perturbation pressure term, $\cH^n$.
+vector, $\bu^n$, and the fluctuating stagnation energy per unit mass\footnote{Throughout this document $\cH$ may also be referred to simply as the perturbation pressure.}, $\cH^n$.
 In addition, for each compartment in the computational domain, we have a background pressure, $\bp^n$. The temperature is
 found from the equation of state. These variables are advanced in time using an explicit second-order predictor/corrector scheme.
 The basic procedure is as follows:
@@ -273,7 +258,7 @@ Note that this procedure guarantees that the divergence of the estimated velocit
 equal to the divergence that is derived from the estimated thermodynamic quantities, $(\nabla\!\cdot \bu)^*$, in Step \ref{step_pred_div}.
 
 \item Check that the time step, $\dt$, satisfies the CFL and Von Neumann stability conditions:
-\be \dt \; \left( \frac{|u|}{\dx} + \frac{|v|}{\dy} + \frac{|w|}{\dz} \right) < 1 \quad ; \quad
+\be \dt \; \max\left( \frac{|u|}{\dx}, \frac{|v|}{\dy}, \frac{|w|}{\dz} \right) < 1 \quad ; \quad
     2 \; \dt \; \frac{\mu}{\rho} \; \left(\frac{1}{\dx^2} + \frac{1}{\dy^2} + \frac{1}{\dz^2} \right) < 1 \ee
 If the time step is too large, it is reduced so that it satisfies
 both constraints and the procedure returns to the beginning of the time step.
@@ -298,7 +283,7 @@ The lumped species mass fractions and background pressure are corrected in a sim
 
 \item \label{step_cor_div} Compute the divergence, $(\nabla\!\cdot \bu)^{n+1}$, from the corrected thermodynamic quantities.
 
-\item Compute the pressure term using the estimated quantities.
+\item Compute the pressure using the estimated quantities.
 \be
 \label{eqn_corrector_poisson2}
 \nabla^2{\cal H}^* = - \left[ \frac{ (\nabla\cdot\bu)^{n+1} - \ha \left( \nabla\cdot \bu^* + \nabla\cdot \bu^n \right) }{\dt/2} \right]
