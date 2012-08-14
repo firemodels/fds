@@ -14,16 +14,16 @@ VPATH = ../FDS_Source
 # Definition of the non-MPI or MPI object variables
 
 objf_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
-              ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o read.o \
-              mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
+              ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o mass.o read.o \
+              wall.o fire.o divg.o init.o velo.o pres.o main.o
 obj_serial = $(objf_serial)
 
 objwinf_serial = $(objf_serial:.o=.obj)
 objwin_serial = $(obj_serial:.o=.obj)
 
 objf_mpi = prec.o mpip.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
-           ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o read.o \
-           mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
+           ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o mass.o read.o \
+           wall.o fire.o divg.o init.o velo.o pres.o main.o
 obj_mpi = $(objf_mpi)
 
 objwinf_mpi = $(objf_mpi:.o=.obj)
@@ -239,7 +239,7 @@ radi.o : func.o prec.o cons.o type.o mesh.o irad.o
 pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o
 vege.o : func.o prec.o cons.o type.o mesh.o devc.o part.o
-read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o
+read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o mass.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o data.o evac.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o turb.o scrc.o data.o
 main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o
@@ -270,7 +270,7 @@ radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj irad.obj
 pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj 
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj part.obj
-read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj
+read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj mass.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj data.obj evac.obj
 dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj turb.obj scrc.obj data.obj 
 main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj
