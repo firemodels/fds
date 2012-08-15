@@ -3544,8 +3544,10 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(iblank_x[IJK(plotx,j,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+       if(show_slice_in_obst==0){
+         if(iblank_x[IJK(plotx,j,k)]!=2)continue;
+         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+       }
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[n+1]/255.0;
@@ -3597,8 +3599,10 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(iblank_y[IJK(i,ploty,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
+       if(show_slice_in_obst==0){
+         if(iblank_y[IJK(i,ploty,k)]!=2)continue;
+         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
+       }
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[n+1]/255.0;
@@ -3653,8 +3657,10 @@ void drawvolslice_texture(const slicedata *sd){
 
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
-       if(iblank_z[IJK(i,j,plotz)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+       if(show_slice_in_obst==0){
+         if(iblank_z[IJK(i,j,plotz)]!=2)continue;
+         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+       }
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[ n+sd->nslicek]/255.0;
@@ -4290,8 +4296,10 @@ void drawvolslice(const slicedata *sd){
      // val(i,j,k) = di*nj*nk + dj*nk + dk
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
-       if(iblank_x[IJK(plotx,j,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+       if(show_slice_in_obst==0){
+         if(iblank_x[IJK(plotx,j,k)]!=2)continue;
+         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+       }
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[n+1];
@@ -4336,8 +4344,10 @@ void drawvolslice(const slicedata *sd){
      x3 = xplt[i+1];
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
-       if(iblank_y[IJK(i,ploty,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
+       if(show_slice_in_obst==0){
+         if(iblank_y[IJK(i,ploty,k)]!=2)continue;
+         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
+       }
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[n+1];
@@ -4386,8 +4396,10 @@ void drawvolslice(const slicedata *sd){
      for(j=sd->js1; j<sd->js2; j++){
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
-       if(iblank_z[IJK(i,j,plotz)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+       if(show_slice_in_obst==0){
+         if(iblank_z[IJK(i,j,plotz)]!=2)continue;
+         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+       }
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[ n+sd->nslicek];
