@@ -331,6 +331,10 @@ $RUNFDS Turbulence vreman_64
 $RUNFDS Turbulence yplus_8
 $RUNFDS Turbulence yplus_16
 $RUNFDS Turbulence yplus_32
+$RUNFDS Turbulence heated_channel_Pr_0p10_32
+$RUNFDS Turbulence heated_channel_Pr_0p71_32
+$RUNFDS Turbulence heated_channel_Pr_1p00_32
+$RUNFDS Turbulence heated_channel_Pr_2p00_32
 
 $RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization objects_static
