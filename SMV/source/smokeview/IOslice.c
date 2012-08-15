@@ -4490,7 +4490,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5){
+        if(show_slice_in_obst==1||(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4521,7 +4521,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5){
+        if(show_slice_in_obst==1||(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4553,7 +4553,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5){
+        if(show_slice_in_obst==1||(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4583,7 +4583,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5){
+        if(show_slice_in_obst==1||(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4614,7 +4614,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(iblank[IJK(i,j,plotz)]==1&&rgb_ptr[3]>0.5){
+        if(show_slice_in_obst==1||(iblank[IJK(i,j,plotz)]==1&&rgb_ptr[3]>0.5)){
           yy1 = yplttemp[j];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4644,7 +4644,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(iblank[IJK(i,j,plotz)]==1&&rgb_ptr[3]>0.5){
+        if(show_slice_in_obst==1||(iblank[IJK(i,j,plotz)]==1&&rgb_ptr[3]>0.5)){
           yy1 = yplttemp[j];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
