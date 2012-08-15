@@ -61,6 +61,8 @@ export SMVBINDIR="-bindir ../../SMV/for_bundle"
 export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
 export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM\_32/background
+export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
+export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
 echo Program locations:
 echo smokeview : $SMV $SMVBINDIR
@@ -118,9 +120,11 @@ cd $SVNROOT/Verification/Visualization
 $SMOKEDIFF plume5c plume5cdelta
 $SMOKEDIFF thouse5 thouse5delta
 
+source $STARTX
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
 
 cd $SVNROOT/Verification
 scripts/SMV_DIFF_Cases.sh
 cd $CURDIDR
+source $STOPX

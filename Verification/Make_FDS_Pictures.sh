@@ -65,7 +65,9 @@ rm -f $SVNROOT/Manuals/FDS_User_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/Manuals/FDS_Verificaiton_Guide/SCRIPT_FIGURES/*.png
 
+source $SVNROOT/Utilities/Scripts/startXserver.sh
 ./FDS_Pictures.sh
+source $SVNROOT/Utilities/Scripts/stopXserver.sh
 
 echo FDS cases submitted
 
