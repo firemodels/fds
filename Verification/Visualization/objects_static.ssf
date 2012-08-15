@@ -59,14 +59,6 @@ SETVIEWPOINT
 RENDERONCE
  sprinkler_act
 SETVIEWPOINT
- sprinkler_pendent_0
-RENDERONCE
- pendent_inact
-SETVIEWPOINT
- sprinkler_pendent_1
-RENDERONCE
- pendent_act
-SETVIEWPOINT
  smoke_detector_0
 RENDERONCE
  smokedetector_inact
