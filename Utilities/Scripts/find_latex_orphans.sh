@@ -14,104 +14,88 @@ cd $SVNROOT/Manuals
 cd FDS_Configuration_Management_Plan
 echo 'Building FDS Configuration Management Plan'
 output=`./make_guide.sh`
-if [[ $output == *successfully* ]];
+pdflatex -interaction nonstopmode -recorder FDS_Configuration_Management_Plan &> /dev/null
+if [[ $output != *successfully* ]];
 then
-    pdflatex -interaction nonstopmode -recorder FDS_Configuration_Management_Plan &> /dev/null
-else
     echo 'Error: Problem compiling FDS Configuration Management Plan'
     echo $output
-    exit
 fi
 cd ..
 
 cd FDS_Technical_Reference_Guide
 echo 'Building FDS Technical Reference Guide'
 output=`./make_guide.sh`
-if [[ $output == *successfully* ]];
+pdflatex -interaction nonstopmode -recorder FDS_Technical_Reference_Guide &> /dev/null
+if [[ $output != *successfully* ]];
 then
-    pdflatex -interaction nonstopmode -recorder FDS_Technical_Reference_Guide &> /dev/null
-else
     echo 'Error: Problem compiling FDS Technical Reference Guide'
     echo $output
-    exit
 fi
 cd ..
 
 cd FDS_User_Guide
 echo 'Building FDS User Guide'
 output=`./make_guide.sh`
-if [[ $output == *successfully* ]];
+pdflatex -interaction nonstopmode -recorder FDS_User_Guide &> /dev/null
+if [[ $output != *successfully* ]];
 then
-    pdflatex -interaction nonstopmode -recorder FDS_User_Guide &> /dev/null
-else
     echo 'Error: Problem compiling FDS User Guide'
     echo $output
-    exit
 fi
 cd ..
 
 cd FDS_Validation_Guide
 echo 'Building FDS Validation Guide'
 output=`./make_guide.sh`
-if [[ $output == *successfully* ]];
+pdflatex -interaction nonstopmode -recorder FDS_Validation_Guide &> /dev/null
+if [[ $output != *successfully* ]];
 then
-    pdflatex -interaction nonstopmode -recorder FDS_Validation_Guide &> /dev/null
-else
     echo 'Error: Problem compiling FDS Validation Guide'
     echo $output
-    exit
 fi
 cd ..
 
 cd FDS_Verification_Guide
 echo 'Building FDS Verification Guide'
 output=`./make_guide.sh`
-if [[ $output == *successfully* ]];
+pdflatex -interaction nonstopmode -recorder FDS_Verification_Guide &> /dev/null
+if [[ $output != *successfully* ]];
 then
-    pdflatex -interaction nonstopmode -recorder FDS_Verification_Guide &> /dev/null
-else
     echo 'Error: Problem compiling FDS Verification Guide'
     echo $output
-    exit
 fi
 cd ..
 
 cd SMV_Technical_Reference_Guide
 echo 'Building SMV Technical Reference Guide'
 output=`./make_guide.sh`
-if [[ $output == *successfully* ]];
+pdflatex -interaction nonstopmode -recorder SMV_Technical_Reference_Guide &> /dev/null
+if [[ $output != *successfully* ]];
 then
-    pdflatex -interaction nonstopmode -recorder SMV_Technical_Reference_Guide &> /dev/null
-else
     echo 'Error: Problem compiling SMV Technical Reference Guide'
     echo $output
-    exit
 fi
 cd ..
 
 cd SMV_User_Guide
 echo 'Building SMV User Guide'
 output=`./make_guide.sh`
-if [[ $output == *successfully* ]];
+pdflatex -interaction nonstopmode -recorder SMV_User_Guide &> /dev/null
+if [[ $output != *successfully* ]];
 then
-    pdflatex -interaction nonstopmode -recorder SMV_User_Guide &> /dev/null
-else
     echo 'Error: Problem compiling SMV User Guide'
     echo $output
-    exit
 fi
 cd ..
 
 cd SMV_Verification_Guide
 echo 'Building SMV Verification Guide'
 output=`./make_guide.sh`
-if [[ $output == *successfully* ]];
+pdflatex -interaction nonstopmode -recorder SMV_Verification_Guide &> /dev/null
+if [[ $output != *successfully* ]];
 then
-    pdflatex -interaction nonstopmode -recorder SMV_Verification_Guide &> /dev/null
-else
     echo 'Error: Problem compiling SMV Verification Guide'
     echo $output
-    exit
 fi
 cd ..
 
