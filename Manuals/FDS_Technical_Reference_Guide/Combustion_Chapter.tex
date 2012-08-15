@@ -27,14 +27,45 @@ where $\rho V$ is the total mass in the reactor, $U(t)$ is unmixed portion of th
 \begin{equation}\label{eq:phi}
 \phi_{\alpha}(t)=\frac{m_{\alpha}(t)}{M(t)}
 \end{equation}
-where $m_\alpha(t)$ is the mixed mass of each of the $\alpha$ species in the simulation. The mixed mass of each species as a function of time is:
+where $m_\alpha(t)$ is the mixed mass of each of the $\alpha$ species in the simulation. The mixed mass of each species as a function of time is governed by:
 
 \begin{equation}\label{eq:mixmass}
-m_{\alpha}(t+\delta t) = m_{\alpha}(t) + Y_{\alpha,0}(M(t+\delta t) - M(t))
+\frac{\mbox{d}m_{\alpha}}{\mbox{d}t}=\frac{M(t) \, \nu_{\alpha} \, W_{\alpha}}{W_F}\displaystyle \sum_{i}^{\text{N\,Reactions}}r_{i}+Y_{\alpha,0}\frac{\mbox{d}M}{\mbox{d}t} 
 \end{equation}
-where $Y_{\alpha,0}$ is the mass fraction of each $\alpha$ species in the unmixed portion of the cell. The mass fractions of each species in the unmixed portion remain constant over an integration time step therefore the proportion of species which mix remains constant.
+where $Y_{\alpha,0}$ is the mass fraction of each $\alpha$ species in the unmixed portion of the cell. The mass fractions of each species in the unmixed portion remain constant over an integration time step therefore the proportion of species which mix remains constant. $r_{i}$, the reaction rate, is discussed in detail in Section \ref{Reaction_Rate_Model}. The complete composition of the computational cell is found by a combination of the unmixed and mixed portions:
 
-\subsection{A Mixing-Controlled Reaction, with Local Extinction}
+\begin{equation}\label{eq:final_comp}
+Y_{\alpha}(t)=\zeta(t)Y_{\alpha,0}+(1-\zeta(t))\phi_{\alpha}(t)
+\end{equation}
+Finally the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$, is found:
+\begin{equation}\label{mass_prod_rate}
+\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t}
+\end{equation}
+
+\section{Reaction Rate} 
+
+\label{Reaction_Rate_Model}
+
+The rate expression (on a fuel basis) for both infinitely fast chemistry and Arrhenius rate chemistry follow the same general form:
+\begin{equation}\label{eq:Arrheniusrateeqn}
+\frac{\mbox{d}[X_\F]}{\mbox{d}t} = -A \; \prod \left([X_{\alpha}]^{a_{\alpha}} \right) T^n \; e^{-E/RT} 
+\end{equation}
+Note that the rate expression can be dependent on temperature and that the rate can be dependent upon species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only "species" that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species could participate as a collision species.  Therefore, rather than $\frac{\mbox{d}[X_\F]}{\mbox{d}t}$,  FDS must solve for $\frac{\mbox{d}\phi_\F}{\mbox{d}t}$.  Additionally since it is quicker to determine $\phi_i$ rather than $X_i$, the relation $[X_i]=\frac{\phi_i \rho}{W_i}$ is used.  Combined, these result in a modified rate equation:
+
+\begin{equation}\label{eq:Arrheniusratemode}
+\frac{\mbox{d}\phi_\F}{\mbox{d}t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
+\end{equation}
+
+\subsection{Infinite Fast Reaction}
+For fast chemistry reactions, $E$ and $n$ in \ref{eq:Arrheniusratemode} are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\frac{\mbox{d}\phi_\F}{\mbox{d}t}$ becomes sufficiently large such that all of the fuel in a computational cell is consumed in a single time step, effectively making the rate infinite. However, the rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.   
+
+\subsection{Arrhenius Reaction}
+There are conditions under which the local temperature and species concentrations support the computation of the reaction rate.  One set of conditions is where the reacting regions of the flow can be considered a well-stirred reactor.  The other is during a DNS calculation.  In the first case rather than a reacting surface, there is a reacting volume.  In the second case, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
+oxygen, and combustion products).  This allows the flame to be resolved in a DNS calculation.  Under conditions where the local gas
+temperatures can be used to determine the reaction kinetics, Arrhenius rates can be used.
+
+
+\section{Reaction with Local Extinction}
 
 \label{extinction}
 
@@ -70,9 +101,11 @@ extinction based on the species and temperature present in the flame sheet.  The
 
 \end{enumerate}
 
-\subsection{Simplified Chemistry}
+\section{Simplified Chemistry}
 
 \label{simplechemistry}
+
+\subsection{Single-step Reaction}
 
 Most ordinary combustibles can be represented by the simple single-step reaction:
 
@@ -138,9 +171,7 @@ The stoichiometric coefficients in the $Z_2$ species yields are:
 Remember that x is the number of carbon atoms, y is the number of hydrogen atoms, z is the number of oxygen atoms, and a is the number of nitrogen atoms in the fuel molecule.
 It is important to note that the definitions of $Z_0$, $Z_1$, and $Z_2$ do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
 
-\subsection{CO Production (Two-Step Reaction with Extinction)}
-
-\label{co_production}
+\subsection{Two-Step Reaction}
 
 The previous section describes the ``complete'' reaction as the conversion of fuel to
 products such that the production rate of each product species is proportional to the fuel consumption rate.
@@ -230,65 +261,18 @@ The stoichiometric coefficients are defined:
 Although these formulae appear complicated, most are determined directly from the composition of the fuel molecule. The only information
 expected of the modeler are the fuel composition, the soot and CO yields, and the atomic fraction of hydrogen in the soot.
 
-
-\subsubsection{One-Step, Fast Reaction}
-
-
-
-
-
-\subsubsection{Two-Step, Fast-Slow Reaction}
-
-When the mixture fraction is divided into three components, $Z_1$, $Z_2$, and $Z_3$, there are two chemical
-reactions that convert $Z_1$ to $Z_2$ and $Z_2$ to $Z_3$.  Recall from Section~\ref{co_production}
-that this represents two-step combustion (fuel to CO and CO to CO$_2$).
-The first step occurs as it does for the two-parameter mixture fraction with a modified heat of combustion that
-accounts for the conversion of fuel to CO rather than CO$_2$.
-The second step is performed for all grid cells that contain CO and O$_2$.   If $\dq''' \neq 0$ in a grid
-cell after the first step, then additional heat is released according to
-\be \dq_{\CO}''' = \min \left[ \frac{ \max \left( \rho Z_2 , s \rho Y_\OTWO \right) }{\dt} \,
-  \Delta H_\CO \; , \; \dq_{\max}'''-\dq'''  \right]     \ee
-If $\dq'''=0$ after the first step, then it is presumed that the cell is out of the combustion region (say in the upper layer of
-smoke-filled compartment), and a finite-rate reaction computation is performed to convert CO to CO$_2$ (see the next section for
-a discussion of the algorithm for computing a finite-rate reaction).  The $\dq'''_{CO}$ computed using the finite-rate
-reaction is still limited by $\dq_{\max}'''$.  Once $\dq'''_{\CO}$ is computed the mixture fraction variables are updated:
-\be {Z_2}^{n+1} = {Z_2}^n - \frac {\dq'''_{\CO}{\Delta t}}{\rho \, \Delta H_{\CO}} \quad ; \quad
-{Z_3}^{n+1} = {Z_3}^n + \frac {\dq'''_{\CO}{\Delta t}}{\rho \, \Delta H_{\CO}} \ee
-
-
-
 \newpage
-\section{Arrhenius Reaction Rate Model}
 
-There are conditions under which the local temperature and species concentrations support the computation of reaction using these quantities.  One set of conditions is where the reacting regions of the flow can be considered a well-stirred reactor.  The other is during a DNS calculation.  In the first case rather than a reacting surface, there is a reacting volume.  In the second case, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
-oxygen, and combustion products).  This allows the flame to be resolved in a DNS calculation.  Under conditions where the local gas
-temperatures can be used to determine the reaction kinetics, Arrhenius rates can be used.  The general form of the rate expression is
-
-\be \frac{d[X_\F]}{dt}    = -A \; \prod \left([X_i]^{a_i} \right) T^n \; e^{-E/RT_{ijk}} \label{Arrheniusrateeqn} \ee
-
-note that the rate expression can be dependent on temperature and that the rate can be dependent upon species that do not directly participate in the reaction.  Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only "species" that can be consumed or created are the lumped speces.  However, any of the primitive species components of those lumped species could particpate as a collision species.  Therefore, rather than $\frac{d[X_\F]}{dt}$,  FDS must solve for $\frac{dZ_\F}{dt}$.  Additionally since it is quicker to determine $Y_i$ rather than $X_i$, the relation $[X_i]=\frac{Y_i \rho}{W_i}$ is used.  Combined these result in a modified rate equation:
-
-\be \frac{dZ_\F}{dt}    = -A_{mod} \rho^{\sum (a_i) -1} \; \prod \left(Y_i^{a_i} \right) T^n \; e^{-E/RT_{ijk}} \;\;\; A_{mod} = A \prod \left(W_i^{-a_i} \right) \label{Arrheniusratemode} \ee
 
 \section{Time Integration of Chemical Reactions}
 
 \subsection{Single Step, Mixing-Controlled Reaction Rates}
+For single-step chemical reactions with mixing-controlled reaction rates, an explicit Euler scheme is used to solve the system of ODEs that determine the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$.   
 
-When a single step chemistry model is being used with mixing-controlled reaction rates, an analytic integration over the timestep is possible. There are two solutions depending upon the reaction rate being fuel/oxidizer limited or product limited.  For the case where the reaction rate is given by the fuel or oxidizer mass fraction the integrated fuel mass loss is:
-
-\be Z^{n+1}_{\F} - Z^{n}_{\F} = \min \left(Z^{n}_{\F},Z^{n}_A \frac{W_F}{W_A \nu_A} \right) \left(1 - e^{\frac{-\Delta t^n}{\tau}} \right) \ee
-
-For the case where the reaction rate is given by the product mass fraction, the integrated fuel mass loss rate is in two parts as during the time integration the reaction rate will shift from being determined from the products to being determined from the fuel or oxidizer:
-
-\begin{eqnarray}
-Z^{n+}_{\F} - Z^{n}_{\F} & = & Z^n_P \frac{W_{\F}}{\nu_P W_P}  \left(e^{\frac{-\Delta t^n_2}{\tau}} -1 \right) \\*[.1in]
-Z^{n+1}_{\F} - Z^{n+}_{\F} & = &  \min \left(Z^{n}_{\F},Z^{n}_A \frac{W_{\F}}{W_A \nu_A} \right) \left(1 - e^{\frac{\Delta t^n_2-\Delta t^n}{\tau}} \right) \\*[.1in]
-\Delta t^n_2 & = & \tau \log \left( \frac{Z^n_P W_{\F}}{\nu_P W_P} +\min \left(Z^n_{\F},Z^n_A \frac{W_{\F}}{W_A \nu_A} \right) \right)
-\end{eqnarray}
 
 \subsection{Other Chemistry Models}
 
-For anything other than single step chemistry with mixing-controlled reaction rates an ODE solver is employed.  A variety of ODE solvers are inlcuded within FDS.  These include explicit Euler and second order Runge-Kutta methods.  Since chemical timescales are often fast with respect to the hydrodynamic timescales, these solvers all use subtimesteps during time integration of the chemical reactions.  Time integration is halted once no reactants are present of if the local heat release rate exceeds maximum allowable values.
+For anything other than single step chemistry with mixing-controlled reaction rates a more complex ODE solver is employed.  A fourth-order explicit integrator with error control is used.  Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance.  Time integration is halted once no reactants are present of if the local heat release rate exceeds maximum allowable values. More information on the numerical methods on the integrator can be found in Appendix~XX.
 
 
 \section{Heat Release Rate}
@@ -296,7 +280,7 @@ For anything other than single step chemistry with mixing-controlled reaction ra
 The discussion of the various reaction mechanisms above is essentially book-keeping, the accounting of the gas
 molecules formed in the combustion process. But what of the heat released?
 
-Each chemical reaction in FDS must be defined with a fuel and a heat of combustion.  "Fuel" in this case merely denotes which species the heat of combstion is based upon.  During time integration of the reactions, there is a time integration of the heat release rate.  While the mixing controlled reaction rate  in Eq.~(\ref{EDC}) is an easily computed and robust subgrid-scale model of and the Arrhenius rate is certainly a robust model when applicable, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
+Each chemical reaction in FDS must be defined with a fuel and a heat of combustion.  "Fuel" in this case merely denotes which species the heat of combustion is based upon.  During time integration of the reactions, there is a time integration of the heat release rate.  While the mixing controlled reaction rate is an easily computed and robust subgrid-scale model of and the Arrhenius rate is certainly a robust model when applicable, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
 this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
 is sometimes too coarse to expect the simple mixing time model to work effectively.
 A scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
