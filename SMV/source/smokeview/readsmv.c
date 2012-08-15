@@ -1722,6 +1722,19 @@ void update_mesh_coords(void){
     meshi=meshinfo;
     veclength = meshi->xplt[1]-meshi->xplt[0];
   }
+  min_gridcell_size=meshinfo->xplt[1]-meshinfo->xplt[0];
+  for(i=0;i<nmeshes;i++){
+    float dx, dy, dz;
+    mesh *meshi;
+
+    meshi=meshinfo+i;
+    dx = meshi->xplt[1] - meshi->xplt[0];
+    dy = meshi->yplt[1] - meshi->yplt[0];
+    dz = meshi->zplt[1] - meshi->zplt[0];
+    min_gridcell_size=MIN(dx,min_gridcell_size);
+    min_gridcell_size=MIN(dy,min_gridcell_size);
+    min_gridcell_size=MIN(dz,min_gridcell_size);
+  }
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 

@@ -577,6 +577,8 @@ SVEXTERN int slicefilenum;
 SVEXTERN int partfilenum,zonefilenum;
 SVEXTERN int targfilenum;
 
+SVEXTERN float min_gridcell_size;
+
 SVEXTERN volfacelistdata SVDECL(*volfacelistinfo,NULL),SVDECL(**volfacelistinfoptrs,NULL);
 SVEXTERN int SVDECL(nvolfacelistinfo,0);
 SVEXTERN int SVDECL(update_makeiblank_smoke3d,0), SVDECL(update_initcull,0);
