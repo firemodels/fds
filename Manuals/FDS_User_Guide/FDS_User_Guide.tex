@@ -3369,7 +3369,7 @@ To set this heat transfer model for a particular surface use:
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\ 
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
 {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of W/m$^2$/K.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
@@ -5428,44 +5428,32 @@ The HVAC output quantities can be used to determine the leakage flows.  FDS give
 \subsection{Special Topic: Stack Effect}
 \label{info:stackeffect}
 
-Tall buildings often experience buoyancy-induced air movement due to temperature differences
-between inside and outside, known as {\em stack effect}. The different temperatures result in different densities and hence different pressure gradients inside the building compared to the outside of the building.  This can result in inducing flow in vertical shafts (stairwells, atriums, elevator shafts, etc.) through leakage paths or openings at the top and bottom of the building.  To simulate this phenomenon in FDS, you must
-include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
-is important to capture the pressure and density decrease in the atmosphere based on the specified
-temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line.
+Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flow patterns within vertical shafts (stairwells, atriums, elevator shafts, {\em etc.}) due to leaks or openings at different levels.  To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
+is important to capture the pressure and density decrease in the atmosphere based on the specified temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line.
 
-For the case where the stack flow is through small leakage paths, it is recommended to define the building using a pressure {\ct ZONE}.  The leakage paths can then be defined as individual HVAC systems.  Note that the leakage model would aggregate all leaky surfaces over the entire height of the building and as a result average out the pressure gradients.  For doing stack effect calculations individual leakage paths should be defined. In the section that follows is a simple example.
+For the case where the stack flow is through small leakage paths, divide the building into one or more pressure {\ct ZONE}s.  The leakage paths can be defined in terms of HVAC components.  Note that the leakage model combines all leaky surfaces over the entire height of the building and as a result averages out the pressure gradients. For doing stack effect calculations individual leakage paths should be defined. A simple example is described next.
 
 \subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
 
-This subsection contains a simple example demonstrating the stack effect.  A detailed discussion of the stack effect can be found in \cite{Klote_Milke}.
-
-The {\bf stack\_effect} test case is a two-dimensional simulation of a building with an interior hotter than the exterior and two leakage paths at the top and the bottom of the building.  Since the inside is hotter, it will have a smaller pressure gradient than the outside resulting in higher pressure inside the top of the building than the outside.  This will cause flow out the upper leakage path and in the bottom leakage path.
-
-The building 100~m tall building with an interior temperature, $T_b$, initially set to 20~$^\circ$C, and an exterior temperature, $T_\infty$, set to
-10~$^\circ$C. The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g. an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
+The {\bf stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only.  Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
+The interior air temperature, $T_b$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
+10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 ({\em e.g.} an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
 
 The initial density stratification inside and outside the building can be calculated using the relation:
 \be
    \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{{\cal R} T_0} z \right)
 \ee
-
 where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature.
 Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and
 1.1858~kg/m$^3$, respectively.
 
-Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. By making some simple assumptions including using only the ground level ambient pressure for the equation of state and that the densities are constant with height, a hand calculation can be done to determine the flows through the leakage paths.  Note that in actuality both pressure and density will change with height; however, as seen in the above densities, this changes are small.
-
-The pressure difference across the building's wall can be computed as
+Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. The pressure difference across the building's wall is computed from
 \be
    \Delta p = \frac{\overline{W} \, p_0(z) \, g \, h} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right)
 \ee
-where $h$ is the distance from the neutral plane.  The pressure gradient will cause flow in and out of the leaks and the neutral plane is located where the mass flows in and out are balanced.  This can be computed using:
-
+where $h$ is the distance from the neutral plane.  The neutral plane is located where the mass flows in and out are balanced.  This can be computed from
 \be \frac{H}{H_n} = 1 + \frac{T_\infty}{T_b} \ee
-where $H_n$ is the neutral plane height above the bottom of the shaft and $H$ is the height between the vents.  This gives a neutral plane of 46.79~m and pressure differences of 44.3 Pa and 50.7 Pa at the top and bottom of the vent.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in an steady-state velocity of inflow velocity at the bottom is 3.85~m/s and an outflow velocity at the top is~4.21 m/s.
-
-Results for velocity and density are shown in Figure~\ref{fig_stack_effect}.
+where $H_n$ is the neutral plane height above the bottom of the shaft and $H=95$~m is the distance between the leak points.  This gives a neutral plane of 46.79~m and pressure differences of 44.3~Pa and 50.7~Pa at the top and bottom of the vent.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.85~m/s and an outflow velocity at the top of 4.21~m/s. Results for velocity and density are shown in Figure~\ref{fig_stack_effect}.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -5475,6 +5463,9 @@ Results for velocity and density are shown in Figure~\ref{fig_stack_effect}.
    \caption[Stack effect]{(Left) Velocity at the upper and lower vents for the stack\_effect case.  (Right) Upper and lower exterior and interior densities for the stack\_effect case.}
    \label{fig_stack_effect}
 \end{figure}
+
+
+
 
 \section{Special Topic: Pressure Boundary Conditions}
 \label{info:pressure_boundary}
@@ -6176,7 +6167,7 @@ Section~\ref{info:heat_of_combustion} for more details on the heat of combustion
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
 
-The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpy of formations are known. For reactions that have species not included in Table~\ref{tab:gasspecies}, there are several options to ensure all of the enthalpies of formation are known. 
+The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpy of formations are known. For reactions that have species not included in Table~\ref{tab:gasspecies}, there are several options to ensure all of the enthalpies of formation are known.
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
 You can specify unknown enthalpies on the {\ct SPEC} line in units of J/kmol:
@@ -6194,8 +6185,8 @@ For a given reaction, if the only species missing an enthalpy of formation is th
 If the enthalpy of formation of the fuel and heat of combustion are not specified, for simple chemistry cases ONLY, the heat of combustion is assumed to be
 
 \begin{equation}
-\Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  
-\label{EPUMO2} 
+\Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}
+\label{EPUMO2}
 \end{equation}
 
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
@@ -6245,7 +6236,7 @@ In an LES simulation, each computational cell can be thought of as a batch react
 \begin{equation}
 \frac{\mbox{d}\zeta}{\mbox{d}t}=\frac{-\zeta}{\tau_{mix}}
 \label{eq:edc_mix}
-\end{equation} 
+\end{equation}
 
 \noindent In Equation \ref{eq:edc_mix}, $\zeta$ is the unmixed fraction and $\tau_{mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta=1$ (default), combustion would resemble that of a diffusion flame. If the cell is initially mixed, $\zeta=0$, combustion would resemble that of a pre-mixed flame. The user has the ability to set the amount of mixing in each cell at the beginning of every time step using the parameter {\ct INITIAL\_UNMIXED\_FRACTION} on the {\ct MISC} line.
 
@@ -8929,7 +8920,7 @@ Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. I
 To output this statistic the user must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}:
 \footnotesize
 \begin{verbatim}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE', 
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
       STATISTICS='COV', ID='wT-cov', POINTS=20 /
 \end{verbatim}
 \normalsize
