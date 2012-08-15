@@ -595,7 +595,7 @@ WC%NOM_IB(1:) => OS%INTEGERS(I1:I2,STORAGE_INDEX) ; IF (NEW) WC%NOM_IB(1:6) = 0
 WC%AW                 => OS%REALS( 1,STORAGE_INDEX) 
 WC%DUWDT              => OS%REALS( 2,STORAGE_INDEX) ; IF (NEW) WC%DUWDT = 0._EB
 WC%EW                 => OS%REALS( 3,STORAGE_INDEX) ; IF (NEW) WC%EW = 0._EB
-WC%KW                 => OS%REALS( 4,STORAGE_INDEX) ; IF (NEW) WC%KW = 0.1_EB ! KW gets used in wall before it is set in divg
+WC%KW                 => OS%REALS( 4,STORAGE_INDEX) ; IF (NEW) WC%KW = 0._EB
 WC%RAW                => OS%REALS( 5,STORAGE_INDEX) ; IF (NEW) WC%RAW = 0._EB
 WC%RDN                => OS%REALS( 6,STORAGE_INDEX) ; IF (NEW) WC%RDN = 1._EB
 WC%RHO_F              => OS%REALS( 7,STORAGE_INDEX) ; IF (NEW) WC%RHO_F = 1._EB
