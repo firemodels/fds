@@ -42,6 +42,7 @@ $RUNFDS Flowfields sawtooth_false
 $RUNFDS Flowfields sawtooth_true
 $RUNFDS Flowfields symmetry_test
 $RUNFDS Flowfields tangential_velocity
+$RUNFDS Flowfields velocity_bc_test
 
 $RUNFDS Heat_Transfer adiabatic_net_flux
 $RUNFDS Heat_Transfer heat_conduction_a
