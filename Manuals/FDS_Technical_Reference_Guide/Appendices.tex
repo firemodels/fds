@@ -433,7 +433,70 @@ with combustion products. They found that flames self-extinguished at oxygen con
 are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen
 concentrations at extinction ranging from 12~\% to 15~\%. The default value in FDS is 15~\%.
 
+\chapter{Numerical Methods for Integration of Complex Chemistry}
 
+\label{chemistry_integration}
+
+To solve the system of ordinary equations for complex chemistry (multi-step reactions, reversible reactions) an integrator more robust than an explicit Euler scheme is needed. FDS uses a second-order Runge-Kutta (RK2) predictor-corrector scheme as the foundation for the numerical integrator. A common RK2 formulation is \cite{Moin:2001}:
+
+\begin{eqnarray}\label{RK2_moin}
+y^*_{n+1/2}=y_n+\frac{h}{2}\,f(y_{n},t_{n}) \\
+\nonumber y_{n+1}=y_{n}+h\,f(y^*_{n+1/2},t_{n+1/2})
+\end{eqnarray}
+The implementation of RK2 in FDS follows:
+
+\begin{eqnarray}\label{RK2}
+y^*_{n+1}           &=& y_n+h\,f(y_{n},t_{n}) \\
+\nonumber y^*_{n+2} &=& y^*_{n+1}+h\,f(y^*_{n+1},t_{n+1}) \\
+\nonumber y_{n+1} &=& (1/2)\,(y_{n}+y^*_{n+2})
+\end{eqnarray} 
+
+The second order scheme is an improvement over the first order explicit scheme used for simple chemistry. However, to maintain stability in stiff problems, this mechanism requires integration time steps so small compared to the global FDS timestep that the simulation can become intractable. To improve the capabilities of this integrator, Richardson Extrapolation is used. Richardson Extrapolation can increase the order of the error within a numerical scheme as well as provide the foundation for an error controller to be implemented. Consider a generic case where a function, $f(y,t)$ is integrated from $t^*$ to $t$ using two different time sub-intervals: $h$ and $\frac{h}{2}$. Taking a Taylor expansion at $h$ results in:
+\begin{equation}\label{eq:h1}
+A_1={A(h)} + \underbrace{a_{1}(h) + a_{2}(h)^2 + \mathcal{O}(h^3)}_{\mathcal{O}(h)}
+\end{equation}
+and an expansion at $\frac{h}{2}$:
+\begin{equation}\label{eq:h2}
+A_2=A(\frac{h}{2}) + \underbrace{a_{1}(\frac{h}{2}) + a_{2}(\frac{h}{2})^2 + \mathcal{O}(h^3)}_{\mathcal{O}(h)}
+\end{equation}
+Here the subscript on $A$ represents subdivisions of the timestep $h$. If the timestep is $h$, $A_1$ takes $h/1$ steps, $A_2$ takes $h/2$ steps, etc. The $a_{1}$ terms can be eliminated by subtracting Equation \ref{eq:h1} from two times Equation \ref{eq:h2}:
+\begin{equation}\label{eq:A2}
+A=2\,A_2-A_1 = 2\,A(\frac{h}{2}) - A(h) + \underbrace{a_{2}(\frac{h}{2})^2 + \mathcal{O}(h^3)}_{\mathcal{O}(h^2)}
+\end{equation}
+which results in a solution with a higher order of error. This same technique is applied to the second-order Runge-Kutta scheme with three sub-intervals: $h$, $\frac{h}{2}$, and $\frac{h}{4}$. Since the RK2 scheme is initially second-order, the three step Richardson Extrapolation results in a fourth-order solution \cite{Moin:2001}:
+\begin{equation}\label{eq:A4}
+A=\frac{4\,A_4-A_2}{3}  + \mathcal{O}(h^4)
+\end{equation}
+In addition to increasing the order of the error in the numerical scheme, Richardson Extrapolation also provides an estimate of the value of the error. The estimate is found a the Taylor expansion:
+\begin{equation}\label{eq:error}
+error \approx \frac{1}{15}(\frac{4\,A_4-A_2}{3} - \frac{4\,A_2-A_1}{3})
+\end{equation}  
+The time step ($\Delta t_{new}$) needed to maintain the specified/acceptable error ($err\_tol$), can be found by knowing the local error ($error$), the current time step ($\Delta t$), and the order of error within the numerical integration scheme ($\mathcal{O}$):
+\begin{equation}\label{eq:dt_new}
+\Delta t_{new}=\Delta t (\frac{err\_tol}{error})^{\mathcal{O}^{-1}}
+\end{equation}
+In this case the scheme is 4th order accurate so the exponent in \ref{eq:dt_new} becomes $(1/4)$. \ref{eq:dt_new} shows that when the error estimate is large relative to the tolerance the new time step shrinks and when the error is small the time step increases. This dynamic time stepping improves computationally efficiency as it will allow for the integrator to take largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps taken. Additionally, by setting an error tolerance the algorithm will select a new time step to satisfy that value, keeping the solution bounded.
+
+Though error control can keep the solution bounded, it does not eliminate numerical fluctuations such as in cases with reversible reactions. If the values are fluctuating around a fixed point while bounded by the error tolerance, the integrator is doing extra work by continuing to calculate every fluctuation within a time step as only the value at the end of the timestep is returned from the integrator. To minimize the computational expense, a total variation (TV) scheme was developed. The scheme examines the differences in species mass fractions at four consecutive sub-timesteps. Within this four point stencil there are three differences for each species mass fraction. The TV scheme compares the absolute value of the sum of the differences to the sum of the absolute values of the differences: 
+\begin{equation}\label{eq:TV}
+\displaystyle \sum_{i=1}^{4}|Y(i+1)-Y(i)| = 3.0|\displaystyle \sum_{i=1}^{4}(Y(i+1)-Y(i))|
+\end{equation}
+Figure \ref{fig:TV} shows an example of a quantity fluctuating between 0 and 1 about a fixed point.
+\begin{figure}[h!]
+\begin{center}
+\scalebox{0.65}{\includegraphics{FIGURES/total_variation.png}}
+\caption{\label{fig:TV} Illustration of quantity fluctuating between 0 and 1 about a fixed value.}
+\end{center}
+\end{figure}
+We can compare the sum of the absolute value of the differences between the 4 four points:
+\begin{equation}\label{eq:sum_abs_tv}
+\displaystyle \sum_{i=1}^{4}|Y(i+1)-Y(i)| = |1-0| + |0-1| + |1-0| = 3
+\end{equation}
+to the absolute value of the sum of the differences:
+\begin{equation}\label{eq:abs_sum_tv}
+|\displaystyle \sum_{i=1}^{4}(Y(i+1)-Y(i))| = |(1-0)+(0-1)+(1-0)| = 1
+\end{equation}
+The ratio between \ref{eq:sum_abs_tv} and \ref{eq:abs_sum_tv} is 3 which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use $>2.5$ because floating point division may not return exactly 3. If fluctuations have been identified, the values of the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-timesteps being taken by the integrator. Since the error controller is keeping the solution bounded, any one of the values within the stencil is within the error tolerance and is an acceptable answer.   
 
 %\chapter{Derivation of the Werner Wengle Wall Model}
 %%\subsubsection{R. McDermott, BFRL}
