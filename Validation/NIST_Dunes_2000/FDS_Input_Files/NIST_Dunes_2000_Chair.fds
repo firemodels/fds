@@ -14,7 +14,7 @@ cREAC ID='POLYURETHANE'
       NU_H2O     = 3.55
       NU_O2      = 7.025  
     MASS_EXTINCTION_COEFFICIENT = 7600.0
-    VISIBILITY_FACTOR   = 3.0 / All info is from ref and database above except soot yield and co yield are from tewarson avg and specific k is from mulholland for flaming
+    VISIBILITY_FACTOR   = 3.0 /
 
 &REAC FUEL       = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
@@ -24,20 +24,9 @@ cREAC ID='POLYURETHANE'
       H          = 7.1
       O          = 2.1  /
 
-&SURF ID='fire', HRRPUA=593.0, RAMP_Q='fireramp', RGB=1.0,0.0,0.0 /
-
-cSURF ID  = 'chair'
-      FYI = 'properties'
-      RGB=0.0,1.0,0.0
-      C_DELTA_RHO = 1.65
-      TMPIGN  = 278.0
-      DENSITY = 57.38 /
-
-cOBST XB=0.20,1.10,0.15,2.03,0.20,0.3778, SURF_ID='chair' /
-cVENT XB=0.78244,1.11778,1.67225,1.985,0.3778,0.3778, SURF_ID='fire'/
-
-cOBST XB=0.20,1.10,0.15,2.03,0.20,0.3778 /
-cVENT XB=0.78244,1.11778,1.67225,1.985,0.3778,0.3778, SURF_ID='fire'/
+&OBST XB=7.1,7.7,0.5,1.1,0.0,0.3 / Chair
+&SURF ID='fire', HRRPUA=1005.84, RAMP_Q='fireramp', RGB=1.0,0.0,0.0 /
+&VENT XB=7.1,7.7,0.5,1.1,0.3,0.3, SURF_ID='fire', COLOR='RED' /
 
 &RAMP ID='fireramp', T=0.0, F=0.0 /
 &RAMP ID='fireramp', T=10.0, F=0.01 /
@@ -139,13 +128,6 @@ cOBST XB=2.68267,2.79444,0.0,3.13175,0.0,1.96 /
 &OBST XB=2.68267,2.79444,3.76,3.8615,0.0,1.96 / 
 &OBST XB=16.5431,16.6549,1.6563,1.8808,0.0,1.96 /
 
-cSURF ID='WALL'
-      RGB   = 0.66,0.66,0.66
-      ALPHA = 5.7E-7
-      KS    = 1.0
-      DELTA = 0.2
-      BACKING='INSULATED'/
-
 &MATL ID            = 'GYPSUM PLASTER'
       FYI           = 'Quintiere, Fire Behavior'
       CONDUCTIVITY  = 0.48
@@ -158,41 +140,6 @@ cSURF ID='WALL'
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012
       DEFAULT        = .TRUE. /
-
-cSURF ID='FLOOR'
-      RGB   = 0.66,0.66,0.66
-      ALPHA = 5.7E-7
-      KS    = 1.0
-      DELTA = 0.2
-      BACKING='INSULATED'/
-
-cSURF ID='ceiling'
-      RGB   = 0.66,0.66,0.66
-      ALPHA = 5.7E-7
-      KS    = 1.0
-      DELTA = 0.2
-      BACKING='INSULATED'/
-
-cSURF ID='BEDROOM'
-	RGB   = 0.66,0.66,0.66
-      ALPHA = 5.7E-7
-      KS    = 1.0
-      DELTA = 0.2
-      BACKING='INSULATED'/
-
-cSURF ID='KITCHEN',
-	RGB   = 0.66,0.66,0.66
-      ALPHA = 5.7E-7
-      KS    = 1.0
-      DELTA = 0.2
-      BACKING='INSULATED'/
-
-cSURF ID='BATHROOM',
-	RGB   = 0.66,0.66,0.66
-      ALPHA = 5.7E-7
-      KS    = 1.0
-      DELTA = 0.2
-      BACKING='INSULATED'/
 
  ===================
  = Smoke detectors =
