@@ -72,7 +72,8 @@ for j = 1:4
     fprintf(fid11,'%8.3f, %8.3f, %8.4f\n', dx(j),dx(j)^2, rms(j,1));
     fprintf(fid12,'%8.3f, %8.3f, %8.4f\n', dx(j),dx(j)^2, rms(j,2));
 end
-
+fclose(fid11);
+fclose(fid12);
 
 
 
