@@ -2632,7 +2632,20 @@ associated with particles in three variations.}
 %\end{figure}
 
 
-%\clearpage
+\clearpage
+
+\subsection{Evaporation of liquid surface}
+
+A liquid evaporation model was tested in a mass conservation test similar to the surf\_mass\_vent\_nonchar\_fuel test above. A 1 cm layer of heptane 
+fuel was exposed to a 50 kW/m$^2$ heat flux and the evolution of gas phase fuel mass and surface density were tracked. Results are shown in the 
+figure below.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel}
+\end{center}
+\caption[The {\ct surf\_mass\_vent\_liquid\_fuel} test case.]{Comparison of analytical and predicted mass change for liquid surface.}
+\label{surf_mass_vent_liquid}
+\end{figure}
 
 \section{Development of surface emissivity (\texorpdfstring{{\bf emissivity}}{emissivity})}
 
@@ -2651,6 +2664,49 @@ result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s.
 \label{emissivity}
 \end{figure}
 
+\clearpage
+
+\section{Shrinking and swelling materials (\texorpdfstring{{\bf shring\_swell}}{shrink\_swell})}
+
+A single layer of material mixture contains reacting material (1) and inert matrix (2). 
+If the product material (3) of the reaction is of higher density than the 
+reactant ($\rho_3 > \rho_1$), the layer thickness $\Delta$ should shrink. 
+If the product density is lower than the reactant's density ($\rho_3 < \rho_1$) the layer should swell (increase) in thickness. If the inert material has
+a static matrix structure ({\ct ALLOW\_SHRINKING=.FALSE.} or {\ct ALLOW\_SWELLING=.FALSE.}) the layer thickness should not change. The parameters of the
+six test cases are shown in the following table. The figures below show the surface densities, which obviously should not change, and the surface 
+thicknesses over the time of the simulation.
+
+\begin{table}[ht]
+\begin{center}
+\caption{Parameters used to test the shrinking and swelling materials.}
+\label{shrink_swell}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Case     & \multicolumn{2}{|c|}{Reactant}  &  \multicolumn{3}{|c|}{Inert} & Product & \multicolumn{4}{|c|}{Layer} \\ \hline
+         & $\rho_1$  & $Y_1$ & $\rho_2$  & $Y_2$ & Allow        & $\rho_3$  & $\rho_s$(0) & $\rho_s$(end) & $\Delta$(0) & $\Delta$(end) \\  
+         & (kg/m$^3$)&       & (kg/m$^3$)&       & shrink/swell & (kg/m$^3$)& (kg/m$^3$)  & (kg/m$^3$)    & (m)         & (m) \\ \hline
+
+Shrink 1	& 500	& 1	& 0	& 0	& T	& 1000	& 500	& 1000	& 0.001	& 0.0005 \\
+Shrink 2	& 500	&0.9	&500	&0.1	&T	&1125	&500	&1000	&0.001	&0.0005 \\
+Shrink 3	& 500	&0.9	&500	&0.1	&F	&1125	&500	&500	&0.001	&0.001 \\
+Swell 1	        & 1000	&1	&90	&0	&T	&500	&1000	&500	&0.001	&0.002 \\
+Swell 2	        & 1000	&0.9	&1000	&0.1	&T	&450	&1000	&500	&0.001	&0.002 \\
+Swell 3	        & 1000	&0.9	&1000	&0.1	&F	&450	&1000	&1000	&0.001	&0.001 \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/shrink_mass_conservation} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/swell_mass_conservation} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/shrink_thickness} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/swell_thickness} \\
+\end{tabular*}
+\caption[The {\bf shrink\_swell} test case.]{Testing the shrinking and swelling surfaces.}
+\label{shrink_swell}
+\end{figure}
 
 \clearpage
 

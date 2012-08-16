@@ -10,6 +10,7 @@ echo ""
 echo "Options"
 echo "-d - use debug version of smokeview"
 echo "-h - display this message"
+echo "-p path - specify path of the smokeview executable"
 echo "-r - use release version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
 exit
@@ -25,8 +26,9 @@ fi
 SIZE=_64
 DEBUG=
 TEST=_test
+SMV_PATH=""
 
-while getopts 'dhrs:' OPTION
+while getopts 'dhp:rs:' OPTION
 do
 case $OPTION  in
   d)
@@ -34,6 +36,9 @@ case $OPTION  in
    ;;
   h)
    usage;
+   ;;
+  p)
+   SMV_PATH="$OPTARG"
    ;;
   r)
    TEST=
@@ -53,7 +58,10 @@ shift $(($OPTIND-1))
 VERSION=$PLATFORM$TEST$SIZE$DEBUG
 
 export SVNROOT=`pwd`/..
-export SMV=$SVNROOT/SMV/Build/intel_$VERSION/smokeview_$VERSION
+if [ "$SMV_PATH" == "" ]; then
+  SMV_PATH=$SVNROOT/SMV/Build/intel_$VERSION
+fi
+export SMV=$SMV_PATH/smokeview_$VERSION
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle/"
 export BASEDIR=`pwd`
