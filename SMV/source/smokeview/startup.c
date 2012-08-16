@@ -2030,6 +2030,12 @@ void initvars(void){
     strcat(TITLEBASE," (");
     strcat(TITLEBASE,svn_version);
     strcat(TITLEBASE,")");
+#else
+#ifdef pp_UNOFFICIAL_RELEASE
+    strcat(TITLEBASE," (");
+    strcat(TITLEBASE,svn_version);
+    strcat(TITLEBASE,")");
+#endif
 #endif
     strcat(TITLEBASE," - ");
   }
