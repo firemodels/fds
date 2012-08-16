@@ -272,7 +272,9 @@ For single-step chemical reactions with mixing-controlled reaction rates, an exp
 
 \subsection{Other Chemistry Models}
 
-For anything other than single step chemistry with mixing-controlled reaction rates a more complex ODE solver is employed.  A fourth-order explicit integrator with error control is used.  Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance.  Time integration is halted once no reactants are present of if the local heat release rate exceeds maximum allowable values. More information on the numerical methods on the integrator can be found in Appendix~XX.
+For anything other than single step chemistry with mixing-controlled reaction rates a more complex ODE solver is employed.  A fourth-order explicit integrator with error control is used.  Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance.  Time integration is halted once no reactants are present of if the local heat release rate exceeds maximum allowable values.
+
+More information on the numerical methods of the integrators can be found in Appendix~\ref{chemistry_integration}.
 
 
 \section{Heat Release Rate}
