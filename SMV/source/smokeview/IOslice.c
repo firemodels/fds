@@ -3479,7 +3479,6 @@ void drawvolslice_texture(const slicedata *sd){
   int i,j,k,n,n2;
   float r11, r31, r13, r33;
   float constval,x1,x3,yy1,y3,z1,z3;
-  int maxj;
 
   float *xplt, *yplt, *zplt;
   int ibar,jbar;
@@ -3523,6 +3522,8 @@ void drawvolslice_texture(const slicedata *sd){
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
 
   if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+    int maxj;
+
    constval = xplt[plotx]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
@@ -3546,8 +3547,8 @@ void drawvolslice_texture(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0){
          if(iblank_x[IJK(plotx,j,k)]!=2)continue;
-         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
        }
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[n+1]/255.0;
@@ -3582,9 +3583,15 @@ void drawvolslice_texture(const slicedata *sd){
    glEnd();
   }
   if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+   int maxi;
+   
    constval = yplt[ploty]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
-   for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+   maxi = sd->is1+sd->nslicei-1;
+   if(sd->is1+1>maxi){
+     maxi=sd->is1+1;
+   }
+   for(i=sd->is1; i<maxi; i++){
      float xmid;
 
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -1;
@@ -3601,8 +3608,8 @@ void drawvolslice_texture(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0){
          if(iblank_y[IJK(i,ploty,k)]!=2)continue;
-         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
        }
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[n+1]/255.0;
@@ -3639,9 +3646,15 @@ void drawvolslice_texture(const slicedata *sd){
    glEnd();
   }
   if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+   int maxi;
+   
    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
-   for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+   maxi = sd->is1+sd->nslicei-1;
+   if(sd->is1+1>maxi){
+     maxi=sd->is1+1;
+   }
+   for(i=sd->is1; i<maxi; i++){
      float xmid;
 
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -sd->nslicek;
@@ -3659,8 +3672,8 @@ void drawvolslice_texture(const slicedata *sd){
        n2+=sd->nslicek; 
        if(show_slice_in_obst==0){
          if(iblank_z[IJK(i,j,plotz)]!=2)continue;
-         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
        }
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[ n+sd->nslicek]/255.0;
@@ -3707,7 +3720,6 @@ void drawvolslice_terrain(const slicedata *sd){
   int i,j,k,n,n2;
   float r11, r31, r13, r33;
   float constval,x1,x3,yy1,y3,z1,z3;
-  int maxj;
 
   float *xplt, *yplt, *zplt;
   int plotx, ploty, plotz;
@@ -3758,6 +3770,8 @@ void drawvolslice_terrain(const slicedata *sd){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+    int maxj;
+
     constval = xplt[plotx]+offset_slice*sd->sliceoffset;
     glBegin(GL_TRIANGLES);
     maxj = sd->js2;
@@ -3815,9 +3829,15 @@ void drawvolslice_terrain(const slicedata *sd){
     glEnd();
   }
   if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+    int maxi;
+
     constval = yplt[ploty]+offset_slice*sd->sliceoffset;
     glBegin(GL_TRIANGLES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi){
+      maxi=sd->is1+1;
+    }
+    for(i=sd->is1; i<maxi; i++){
       float xmid;
 
       n = (i-sd->is1)*sd->nslicej*sd->nslicek -1;
@@ -3871,11 +3891,16 @@ void drawvolslice_terrain(const slicedata *sd){
   }
   if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
     float z11, z31, z13, z33, zmid, zmax;
+    int maxi;
 
     constval = zplt[plotz]+offset_slice*sd->sliceoffset-znode[0];
     zmax = zplt[meshi->kbar];
     glBegin(GL_TRIANGLES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi){
+      maxi=sd->is1+1;
+    }
+    for(i=sd->is1; i<maxi; i++){
       float xmid;
 
       if(plotz<sd->ks1)break;
@@ -4031,7 +4056,11 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float z1,z3;
 
-        if(sd->slicetype!=SLICE_CENTER&&iblank_x[IJK(plotx,j,k)]!=2)continue;
+        if(sd->slicetype!=SLICE_CENTER){
+          if(show_slice_in_obst==0){
+            if(iblank_x[IJK(plotx,j,k)]!=2)continue;
+          }
+        }
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
 
         index_cell = (plotx + 1 -incx-sd->is1)*sd->nslicej*sd->nslicek + (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
@@ -4068,7 +4097,11 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int index_cell;
           float z1, z3;
 
-          if(sd->slicetype!=SLICE_CENTER&&iblank_x[IJK(plotx,j,k)]!=2)continue;
+          if(sd->slicetype!=SLICE_CENTER){
+            if(show_slice_in_obst==0){
+              if(iblank_x[IJK(plotx,j,k)]!=2)continue;
+            }
+          }
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
           z1 = zplt[k];
           z3 = zplt[k+1];
@@ -4087,10 +4120,15 @@ void drawvolslice_cellcenter(const slicedata *sd){
   if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
     float constval;
     int i;
+    int maxi;
 
     constval = (yplt[ploty]+yplt[ploty-1])/2.0;
     glBegin(GL_TRIANGLES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi){
+      maxi=sd->is1+1;
+    }
+    for(i=sd->is1; i<maxi; i++){
       int index_cell;
       float x1, x3;
       int k;
@@ -4101,7 +4139,9 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float z1, z3;
 
-        if(iblank_y[IJK(i,ploty,k)]!=2)continue;
+        if(show_slice_in_obst==0){
+          if(iblank_y[IJK(i,ploty,k)]!=2)continue;
+        }
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
         index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
@@ -4125,7 +4165,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
     }
     glEnd();
     if(cell_center_text==1){
-      for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+      for(i=sd->is1; i<maxi; i++){
         float x1, x3;
         int k;
 
@@ -4137,7 +4177,9 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int i33;
           float z1, z3;
 
-          if(iblank_y[IJK(i,ploty,k)]!=2)continue;
+          if(show_slice_in_obst==0){
+            if(iblank_y[IJK(i,ploty,k)]!=2)continue;
+          }
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
           index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
           i33 = 4*sd->iqsliceframe[index_cell];
@@ -4158,10 +4200,15 @@ void drawvolslice_cellcenter(const slicedata *sd){
   if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
     float constval;
     int i;
+    int maxi;
 
     constval = (zplt[plotz]+zplt[plotz-1])/2.0;
     glBegin(GL_TRIANGLES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi){
+      maxi=sd->is1+1;
+    }
+    for(i=sd->is1; i<maxi; i++){
       float x1, x3;
       int j;
 
@@ -4172,7 +4219,9 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float yy1, y3;
 
-        if(iblank_z[IJK(i,j,plotz)]!=2)continue;
+        if(show_slice_in_obst==0){
+          if(iblank_z[IJK(i,j,plotz)]!=2)continue;
+        }
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
         index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
@@ -4196,7 +4245,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
     }
     glEnd();
     if(cell_center_text==1){
-      for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+      for(i=sd->is1; i<maxi; i++){
         float x1, x3;
         int j;
 
@@ -4209,7 +4258,9 @@ void drawvolslice_cellcenter(const slicedata *sd){
           float yy1, y3;
 
           index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
-          if(iblank_z[IJK(i,j,plotz)]!=2)continue;
+          if(show_slice_in_obst==0){
+            if(iblank_z[IJK(i,j,plotz)]!=2)continue;
+          }
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
           i33 = 4*sd->iqsliceframe[index_cell];
           yy1 = yplt[j];
@@ -4237,7 +4288,6 @@ void drawvolslice(const slicedata *sd){
   int i,j,k,n,n2;
   int i11, i31, i13, i33;
   float constval,x1,x3,yy1,y3,z1,z3;
-  int maxj;
 
   float *xplt, *yplt, *zplt;
   int plotx, ploty, plotz;
@@ -4281,6 +4331,8 @@ void drawvolslice(const slicedata *sd){
 
   if(use_transparency_data==1)transparenton();
   if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+   int maxj;
+
    constval = xplt[plotx]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
@@ -4298,8 +4350,8 @@ void drawvolslice(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0){
          if(iblank_x[IJK(plotx,j,k)]!=2)continue;
-         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
        }
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[n+1];
@@ -4333,9 +4385,15 @@ void drawvolslice(const slicedata *sd){
    glEnd();
   }
   if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+   int maxi;
+
    constval = yplt[ploty]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
-   for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+   maxi = sd->is1+sd->nslicei-1;
+   if(sd->is1+1>maxi){
+     maxi=sd->is1+1;
+   }
+   for(i=sd->is1; i<maxi; i++){
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -1;
      n += (ploty-sd->js1)*sd->nslicek;
      n2 = n + sd->nslicej*sd->nslicek;
@@ -4346,8 +4404,8 @@ void drawvolslice(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0){
          if(iblank_y[IJK(i,ploty,k)]!=2)continue;
-         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
        }
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[n+1];
@@ -4384,9 +4442,15 @@ void drawvolslice(const slicedata *sd){
   }
   // i*nj*nk + j*nk + k
   if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+   int maxi;
+
    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
-   for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+   maxi = sd->is1+sd->nslicei-1;
+   if(sd->is1+1>maxi){
+     maxi=sd->is1+1;
+   }
+   for(i=sd->is1; i<maxi; i++){
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -sd->nslicek;
      n += (plotz-sd->ks1);
      n2 = n + sd->nslicej*sd->nslicek;
@@ -4398,8 +4462,8 @@ void drawvolslice(const slicedata *sd){
        n2+=sd->nslicek; 
        if(show_slice_in_obst==0){
          if(iblank_z[IJK(i,j,plotz)]!=2)continue;
-         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
        }
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[ n+sd->nslicek];
@@ -4445,7 +4509,6 @@ void drawvvolslice(const vslicedata *vd){
   int i,j,k,n;
   int i11;
   float constval,x1,yy1,z1;
-  int maxj;
   slicedata *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
@@ -4484,6 +4547,8 @@ void drawvvolslice(const vslicedata *vd){
   v = vd->v;
   w = vd->w;
   if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
+    int maxj;
+
     constval = xplttemp[plotx]+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
     glBegin(GL_LINES);
@@ -4547,10 +4612,14 @@ void drawvvolslice(const vslicedata *vd){
    SNIFF_ERRORS("after drawvvolslice:points dir=1");
   }
   if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+    int maxi;
+
     constval = yplttemp[ploty]+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
     glBegin(GL_LINES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi)maxi=sd->is1+1;
+    for(i=sd->is1; i<maxi+1; i+=vectorskip){
       n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip;
       n += (ploty-sd->js1)*sd->nslicek;
 
@@ -4580,7 +4649,7 @@ void drawvvolslice(const vslicedata *vd){
     SNIFF_ERRORS("after drawvvolslice:lines dir=2");
     glPointSize(vectorpointsize);
     glBegin(GL_POINTS);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
+    for(i=sd->is1; i<maxi+1; i+=vectorskip){
       n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip;
       n += (ploty-sd->js1)*sd->nslicek;
 
@@ -4609,10 +4678,14 @@ void drawvvolslice(const vslicedata *vd){
    SNIFF_ERRORS("after drawvvolslice:points dir=2");
   }
   if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
+    int maxi;
+
     constval = zplttemp[plotz]+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
     glBegin(GL_LINES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi)maxi=sd->is1+1;
+    for(i=sd->is1; i<maxi+1; i+=vectorskip){
       n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip*sd->nslicek;
       n += (plotz-sd->ks1);
 
@@ -4676,7 +4749,6 @@ void drawvvolslice(const vslicedata *vd){
 void drawvvolslice_cellcenter(const vslicedata *vd){
   int i;
   float constval;
-  int maxj;
   slicedata *u, *v, *w,*sd;
   float vrange;
   mesh *meshi;
@@ -4706,7 +4778,6 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   ny = meshi->jbar+1;
   nxy = nx*ny;
 
-
   vrange = velocity_range;
   if(vrange<=0.0)vrange=1.0;
   u = vd->u;
@@ -4714,6 +4785,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   w = vd->w;
   if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
     int j;
+    int maxj;
 
     constval = xplttemp[plotx]+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
@@ -4841,10 +4913,14 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
     }
   }
   if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+    int maxi;
+
     constval = yplttemp[ploty]+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi)maxi=sd->is1+1;
     glBegin(GL_LINES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+    for(i=sd->is1; i<maxi+1; i++){
       float x1, xhalf;
       int k;
 
@@ -4890,7 +4966,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
     SNIFF_ERRORS("after drawvvolslice_cellcenter:lines dir=2");
     glPointSize(vectorpointsize);
     glBegin(GL_POINTS);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+    for(i=sd->is1; i<maxi+1; i++){
       float x1, xhalf;
       int k;
 
@@ -4934,7 +5010,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
     SNIFF_ERRORS("after drawvvolslice_cellcenter:points dir=2");
     
     if(cell_center_text==1){
-      for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+      for(i=sd->is1; i<maxi+1; i++){
         float x1, xhalf;
         int k;
 
@@ -4971,10 +5047,14 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
     }
   }
   if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
+    int maxi;
+
     constval = zplttemp[plotz]+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi)maxi=sd->is1+1;
     glBegin(GL_LINES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+    for(i=sd->is1; i<maxi+1; i++){
       float xhalf;
       float x1;
       int j;
@@ -5022,7 +5102,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
 
     glPointSize(vectorpointsize);
     glBegin(GL_POINTS);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+    for(i=sd->is1; i<maxi+1; i++){
       float xhalf;
       float x1;
       int j;
@@ -5067,7 +5147,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
     SNIFF_ERRORS("after drawvvolslice_cellcenter:points dir=3");
     
     if(cell_center_text==1){
-      for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
+      for(i=sd->is1; i<maxi+1; i++){
         float xhalf;
         float x1;
         int j;
@@ -5112,7 +5192,6 @@ void drawvvolslice_terrain(const vslicedata *vd){
   int i,j,k,n;
   int i11;
   float constval,x1,yy1,z1;
-  int maxj;
   slicedata *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
@@ -5157,6 +5236,8 @@ void drawvvolslice_terrain(const vslicedata *vd){
   v = vd->v;
   w = vd->w;
   if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
+    int maxj;
+
     constval = xplttemp[plotx]+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
     glBegin(GL_LINES);
@@ -5186,8 +5267,6 @@ void drawvvolslice_terrain(const vslicedata *vd){
 
     glPointSize(vectorpointsize);
     glBegin(GL_POINTS);
-    maxj = sd->js2;
-    if(sd->js1+1>maxj)maxj=sd->js1+1;
     for(j=sd->js1; j<maxj+1; j+=vectorskip){
       n = (j-sd->js1)*sd->nslicek - vectorskip;
       n += (plotx-sd->is1)*sd->nslicej*sd->nslicek;
@@ -5210,10 +5289,14 @@ void drawvvolslice_terrain(const vslicedata *vd){
     SNIFF_ERRORS("after drawvvolslice_terrain:points dir=1");
   }
   if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+    int maxi;
+
     constval = yplttemp[ploty]+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
     glBegin(GL_LINES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi)maxi=sd->is1+1;
+    for(i=sd->is1; i<maxi+1; i+=vectorskip){
       n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip;
       n += (ploty-sd->js1)*sd->nslicek;
 
@@ -5238,7 +5321,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
     SNIFF_ERRORS("after drawvvolslice_terrain:lines dir=2");
     glPointSize(vectorpointsize);
     glBegin(GL_POINTS);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
+    for(i=sd->is1; i<maxi+1; i+=vectorskip){
       n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip;
       n += (ploty-sd->js1)*sd->nslicek;
 
@@ -5263,12 +5346,15 @@ void drawvvolslice_terrain(const vslicedata *vd){
   }
   if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
     float zmax;
+    int maxi;
 
     zmax = zplttemp[meshi->kbar];
     constval = zplttemp[plotz]+offset_slice*sd->sliceoffset-znode[0];
     glLineWidth(vectorlinewidth);
     glBegin(GL_LINES);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
+    maxi = sd->is1+sd->nslicei-1;
+    if(sd->is1+1>maxi)maxi=sd->is1+1;
+    for(i=sd->is1; i<maxi+1; i+=vectorskip){
       x1 = xplttemp[i];
       n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip*sd->nslicek;
       n += (plotz-sd->ks1);
@@ -5307,7 +5393,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
 
     glPointSize(vectorpointsize);
     glBegin(GL_POINTS);
-    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
+    for(i=sd->is1; i<maxi+1; i+=vectorskip){
       n = (i-sd->is1)*sd->nslicej*sd->nslicek - vectorskip*sd->nslicek;
       n += (plotz-sd->ks1);
 
