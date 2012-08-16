@@ -24,6 +24,7 @@ call %svn_root%\SMV\scripts\MAKEsmdwin32.bat
 call %svn_root%\SMV\scripts\MAKEsmzwin32.bat
 call %svn_root%\SMV\scripts\MAKEbgwin32.bat
 call %svn_root%\SMV\scripts\MAKEf2awin32.bat
+call %svn_root%\SMV\scripts\MAKEsh2bat.bat
 
 cd %svn_root%\Utilities\Data_Processing
 make_sh2bat

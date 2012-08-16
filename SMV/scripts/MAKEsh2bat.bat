@@ -22,8 +22,8 @@ echo Building 32 Windows versions of sh2bat
 
 %svn_drive%
 cd %svn_root%\Utilities\Data_Processing
-make_sh2bat
+call make_sh2bat
 
 echo.
-echo compilation complete
+echo sh2bat compilation complete
 pause
