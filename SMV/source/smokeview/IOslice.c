@@ -2871,8 +2871,8 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
     }
   }
   if(sd->slicetype==SLICE_CENTER){
-    printf(" global min (slice file): %f cell=(%i,%i,%i)\n",*pmin,iimin-1,jjmin-1,kkmin-1);
-    printf(" global max (slice file): %f cell=(%i,%i,%i)\n",*pmax,iimax-1,jjmax-1,kkmax-1);
+    printf(" global min (slice file): %f cell=(%i,%i,%i)\n",*pmin,iimin,jjmin,kkmin);
+    printf(" global max (slice file): %f cell=(%i,%i,%i)\n",*pmax,iimax,jjmax,kkmax);
   }
   else{
     printf(" global min (slice file): %f node=(%i,%i,%i)\n",*pmin,iimin,jjmin,kkmin);
