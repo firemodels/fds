@@ -802,9 +802,8 @@ It is common practice to ``clip'' the eddy viscosity.  In theory, a negative val
 
 
 \chapter{Fluid-Particle Momentum Transfer}
-\subsubsection{Ben Trettel}
 
-The trajectories of Lagrangian particles in FDS could be calculated with foward-Euler integration. However, forward-Euler integration extracts momentum from the cell each particle started in. This can cause large changes in the flow field unless the time step is extremely small. An extremely small time step would be necessary for stability. This time step would greatly slow down the calculation. Consequently, a stable, single-step approximate solution is developed and is implemented in FDS.
+The trajectories of Lagrangian particles in FDS could be calculated with forward-Euler integration. However, forward-Euler integration extracts momentum from the cell each particle started in. This can cause large changes in the flow field unless the time step is extremely small. An extremely small time step would be necessary for stability. This time step would greatly slow down the calculation. Consequently, a stable, single-step approximate solution is developed and is implemented in FDS.
 
 Two effects are neglected in this formulation. The first is the effect of the change in droplet mass between  time steps. The droplet's evaporation is not coupled to this model. This is justified because the change in droplet mass per time step is small. The second neglected effect is the change in drag coefficient between time steps. This is justified because of the large uncertainties in the drag coefficients. Modeling the time derivative of the drag coefficient will not improve accuracy beyond these uncertainties, but it will slow down the simulation.
 
@@ -927,7 +926,7 @@ The particle positions are computed in {\ct part.f90} in {\ct DROPLET\_LOOP}. Th
     \mathbf{u}_p^{n+1} &= \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_\text{r}^n \left(\frac{\mathbf{u}_\text{r}^n \cdot \mathbf{g}}{|\mathbf{u}_\text{r}^n|^2}\right) + \mathbf{g}\right] \\[1cm]
     \mathbf{x}_p^{n+1} &= \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2}
 \end{align}
-The theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$ appears to be $\mathcal{O}(\Delta t^3)$ at first glance, but actual computation reveals it is $\mathcal{O}(\Delta t^2)$. This is due to the error in the velocity reducing the overall order of accuracy. The $\Delta t^3$ term can be dropped and was dropped above without a loss in accuracy for this reason. More details about this are available in the verification guide's Lagrangian particles chapter.
+The theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$ appears to be $\mathcal{O}(\Delta t^3)$ at first glance, but actual computation reveals it is $\mathcal{O}(\Delta t^2)$. This is due to the error in the velocity reducing the overall order of accuracy. The $\Delta t^3$ term can be dropped and was dropped above without a loss in accuracy for this reason. More details about this are available in the Lagrangian particles chapter in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
 \chapter{Finding Absorption Coefficients of Liquid Fuels}
 %\subsubsection{Topi Sikanen, entered by Michael Van Order}
@@ -941,7 +940,7 @@ Most liquids are highly selective absorbers, absorbing intensively in some wavel
 
 \subsubsection{Determining Absorption Coefficients}
 
-Absorption coefficient measures attenuation of radiation in matter.  The intensity of radiation for pathlength $S$ (m) can be calculated from Beer's law
+Absorption coefficient measures attenuation of radiation in matter.  The intensity of radiation for path length $S$ (m) can be calculated from Beer's law
 
 \begin{equation}
 \label{eqn_beerslaw}
@@ -999,7 +998,7 @@ Absorption coefficients are determined from Eq.~\ref{eqn_effcoeff}. When availab
 
 Table \ref{tbl_abscoeff} lists absorption coefficients for some liquid fuels. The absorption coefficient is very sensitive to the spectrum of the incoming radiation, as shown in Figure \ref{fig_kapvtemp}. Table \ref{tbl_abscoeff} contains two types of absorption coefficients. One type is determined by assuming the incoming radiation is blackbody radiation at a temperature of 1450~K. The other set of absorption coefficients is based on actual flame radiation spectra. If the wavenumber range is listed, then a blackbody temperature 1450~K is assumed in calculating the transmission. If the wavenumber range is not listed, then transmission data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} is used. The path length is 3~mm in all cases. 
 
-The assumption of black body radiation is adequate for sooty flames in which radiation from soot dominates the flame radiation spectra. This can be seen from similar values of absorption coefficient that were determined for toluene using the data from Suo-anttila et al. and by using the blackbody radiation assumption. However, for fuels with low sooting flames, the incoming radiation spectrum differs considerably from blackbody spectrum. This explains the large difference in listed absorption coefficients for ethanol and methanol. The ethanol absorption coefficient is based on actual emission spectra of an ethanol flame, whereas the methanol absorption coefficient is calculated based on the blackbody spectrum. The correct value for methanol is likely to be closer to the absorption coefficient of ethanol. 
+The assumption of black body radiation is adequate for sooty flames in which radiation from soot dominates the flame radiation spectra. This can be seen from similar values of absorption coefficient that were determined for toluene using the data from Suo-Anttila et al. and by using the blackbody radiation assumption. However, for fuels with low sooting flames, the incoming radiation spectrum differs considerably from blackbody spectrum. This explains the large difference in listed absorption coefficients for ethanol and methanol. The ethanol absorption coefficient is based on actual emission spectra of an ethanol flame, whereas the methanol absorption coefficient is calculated based on the blackbody spectrum. The correct value for methanol is likely to be closer to the absorption coefficient of ethanol. 
 
 Figure~\ref{fig_trans2} and Figure~\ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS solid phase radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}. The predictions are better for fuels with relatively low absorption coefficients. 
 
@@ -1060,7 +1059,7 @@ Benzene \cite{Bertie:AS1993b}                             &  11.5-6200  & 123   
 \chapter{Solving the 1D heat conduction equation}\label{discretization}
 
 \section{Discretization}
-The 1D heat conduction equation is in cartesian coordinates
+The 1D heat conduction equation is in Cartesian coordinates
 
 \begin{equation}
 \label{heat_cond_cart}
@@ -1088,7 +1087,7 @@ The general form is
      \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} (r^I k_s \frac{\partial T_s}{\partial r}) + \dot{q}^{'''}_s, 
 \end{equation}
 
-where I is 0 for cartesian, 1 for cylindrical and 2 for spherical geometries. The indexes and nodes are shown in Figure~\ref{fig_solid_nodes}.
+where I is 0 for Cartesian, 1 for cylindrical and 2 for spherical geometries. The indexes and nodes are shown in Figure~\ref{fig_solid_nodes}.
 
 \begin{figure}[ht]
     \centering
@@ -1097,7 +1096,7 @@ where I is 0 for cartesian, 1 for cylindrical and 2 for spherical geometries. Th
     \label{fig_solid_nodes}
 \end{figure}
 
-The right side term using the central difference in cartesian coordinates is
+The right side term using the central difference in Cartesian coordinates is
 
 \begin{equation}
 \label{T_cart}
@@ -1224,7 +1223,7 @@ The temperature at node 0 becomes then
  \underbrace{\frac{h_F(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n)+\dot{q}_{r,F}^{'''}+4\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^4}}{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}+(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{QDXKF}.
 \end{equation}
 
-In case of non-insulated backing in cartesian geometry, the temperature of virtual node \textit{N+1} is calculated similarly as
+In case of non-insulated backing in Cartesian geometry, the temperature of virtual node \textit{N+1} is calculated similarly as
 
 \begin{equation}
 \label{TN+1}
