@@ -2696,6 +2696,7 @@ void EvacMenu(int value){
   }
   if(value>=0){
     ReadEvacFile=1;
+    npartframes_max=get_min_partframes();
     readpart(partinfo[value].file,value,LOAD,&errorcode);
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
