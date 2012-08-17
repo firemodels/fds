@@ -1,8 +1,0 @@
-RENDERDIR
- ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
-LOADFILE
- sawtooth_false_01.sf
-SETTIMEVAL
- 2.1 
-RENDERONCE
- sawtooth_false
