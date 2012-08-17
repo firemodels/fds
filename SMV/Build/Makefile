@@ -82,20 +82,6 @@ WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
 SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreadVC2_x64.lib
 
 
-# ------------- ms_win_32 ----------------
-
-ms_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref
-ms_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE  -D GLEW_STATIC
-ms_win_32 : LFLAGS    = /F32768000 
-ms_win_32 : CC        = cl
-ms_win_32 : CPP       = cl
-ms_win_32 : FC        = ifort
-ms_win_32 : exe       = smokeview_win_32
-
-ms_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
-
 # ------------- gcc_win_32 ----------------
 
 gcc_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
@@ -163,34 +149,6 @@ intel_win_test_64 : FC        = ifort
 intel_win_test_64 : exe       = smokeview_win_test_64
 
 intel_win_test_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
-
-# ------------- ms_win_64 ----------------
-
-ms_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-ms_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
-ms_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC
-ms_win_64 : LFLAGS    = /F32768000 
-ms_win_64 : CC        = cl
-ms_win_64 : CPP       = cl
-ms_win_64 : FC        = ifort
-ms_win_64 : exe       = smokeview_win_64
-
-ms_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
-
-# ------------- ms_win_test_64 ----------------
-
-ms_win_test_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-ms_win_test_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 -D pp_BETA /iface:stdref
-ms_win_test_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64 -D pp_BETA -D GLEW_STATIC
-ms_win_test_64 : LFLAGS    = /F32768000 
-ms_win_test_64 : CC        = cl
-ms_win_test_64 : CPP       = cl
-ms_win_test_64 : FC        = ifort
-ms_win_test_64 : exe       = smokeview_win_64
-
-ms_win_test_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
