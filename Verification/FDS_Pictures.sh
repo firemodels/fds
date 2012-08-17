@@ -6,6 +6,7 @@ $RUNSMV Flowfields sawtooth_false
 $RUNSMV Flowfields sawtooth_true
 $RUNSMV Flowfields symmetry_test
 $RUNSMV Flowfields jet_fan
+$RUNSMV Flowfields velocity_bc_test
 $RUNSMV HVAC HVAC_mass_conservation
 $RUNSMV HVAC HVAC_energy_pressure
 $RUNSMV HVAC leak_test_2
