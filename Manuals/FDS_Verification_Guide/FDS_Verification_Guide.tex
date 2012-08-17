@@ -1541,9 +1541,7 @@ Air is pumped into the box at a rate of 0.5~m/s. Anything that might lead to an 
 natural convection, and random noise. The resulting flow field is shown at the left in Fig.~\ref{symmetry_test}. On the right are plots of the three components of velocity
 at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw
 this off almost immediately.
-
-
-\begin{figure}[ht]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.png} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.pdf}
@@ -1553,12 +1551,18 @@ this off almost immediately.
 \end{figure}
 
 
-\clearpage
 
 \subsection{Velocity boundary condition implementation (\texorpdfstring{{\bf velocity\_bc\_test}}{velocity\_bc\_test})}
 
-In this example, a simple jet is created by pushing air through a square duct. The obstructions forming the duct are built three different ways. The first way is to build the duct with thin (zero cell thick) plates. The second is to carve the duct out of a solid block. The third way is to build the duct out of one cell thick plates. Ideally, the three jets ought to be exactly the same, but subtle differences in the pressure solution and the random generation of noise lead to three unique flow patterns that are only the same in a time-averaged sense. To test this, the centerline pressure and velocity are recorded for a 2~m/s jet emanating from a 0.8~m square duct that is 5~m long. The grid resolution is fairly crude (0.2~m) because the purpose of this exercise is to show that the steady-state velocity and pressure profiles are essentially the same. Figure~\ref{velocity_bc_test} displays the profiles. The curves ought to overlap each other. Errors in the implementation of the velocity boundary conditions are likely to throw the three cases out of alignment.
-\begin{figure}[ht]
+In this example, a simple jet is created by pushing air through a square duct. The obstructions forming the duct are built three different ways. The first way is to build the duct with thin (zero cell thick) plates (bottom of Fig.~\ref{velocity_bc_test_image}). The second is to carve the duct out of a solid block (middle of Fig.~\ref{velocity_bc_test_image}). The third way is to build the duct out of one cell thick plates (top of Fig.~\ref{velocity_bc_test_image}). Ideally, the three jets ought to be exactly the same, but subtle differences in the pressure solution and the random generation of noise lead to three unique flow patterns that are only the same in a time-averaged sense. To test this, the centerline pressure and velocity are recorded for a 2~m/s jet emanating from a 0.8~m square duct that is 5~m long. The grid resolution is fairly crude (0.2~m) because the purpose of this exercise is to show that the steady-state velocity and pressure profiles are essentially the same. Figure~\ref{velocity_bc_test} displays the profiles. The curves ought to overlap each other. Errors in the implementation of the velocity boundary conditions are likely to throw the three cases out of alignment.
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{SCRIPT_FIGURES/velocity_bc_test}
+\end{center}
+\caption[Images of {\bf velocity\_bc\_test} case.]{Time-averaged contours of velocity for the {\bf velocity\_bc\_test} case.}
+\label{velocity_bc_test_image}
+\end{figure}
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_pres} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_vel}
