@@ -3,7 +3,7 @@ set revision=$1
 set SVNROOT=~/FDS-SMV
 
 set BACKGROUNDDIR=$SVNROOT/Utilities/background/gnu_linux_32
-set SMVDIR=$SVNROOT/SMV/Build/intel_linux_test_64
+set SMVDIR=$SVNROOT/SMV/Build/intel_linux_64
 set SMZDIR=$SVNROOT/Utilities/smokezip/intel_linux_64
 set SMDDIR=$SVNROOT/Utilities/smokediff/intel_linux_64
 set FORBUNDLE=$SVNROOT/SMV/for_bundle

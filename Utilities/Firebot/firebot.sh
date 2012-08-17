@@ -585,27 +585,26 @@ check_smv_utilities()
 }
 
 #  ==================================
-#  = Stage 6b - Compile SMV test DB =
+#  = Stage 6b - Compile SMV DB =
 #  ==================================
 
-compile_smv_test_db()
+compile_smv_db()
 {
-   # Clean and compile SMV test DB
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_test_64_dbg
-   make --makefile ../Makefile clean &> /dev/null
+   # Clean and compile SMV DB
+   cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6b
 }
 
-check_compile_smv_test_db()
+check_compile_smv_db()
 {
    # Check for errors in SMV test DB compilation
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_test_64_dbg
-   if [ -e "smokeview_linux_test_64_dbg" ]
+   cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
+   if [ -e "smokeview_linux_64_db" ]
    then
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6b: SMV Test DB Compilation"
+      BUILD_STAGE_FAILURE="Stage 6b: SMV Debug Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage6b
       save_build_status
       email_error_message
@@ -625,12 +624,12 @@ check_compile_smv_test_db()
 }
 
 #  ==================================================
-#  = Stage 6c - Make SMV pictures (test debug mode) =
+#  = Stage 6c - Make SMV pictures (debug mode) =
 #  ==================================================
 
 make_smv_pictures_db()
 {
-   # Run Make SMV Pictures script (test debug mode)
+   # Run Make SMV Pictures script (debug mode)
    cd $FDS_SVNROOT/Verification/scripts
    ./Make_SMV_Pictures.sh -d &> $FIREBOT_DIR/output/stage6c
 }
@@ -644,77 +643,9 @@ check_smv_pictures_db()
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures (Test Debug Mode)"
+      BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures (Debug Mode)"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c > $FIREBOT_DIR/output/stage6c_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage6c_errors
-      save_build_status
-      email_error_message
-   fi
-}
-
-#  ===============================
-#  = Stage 6d - Compile SMV test =
-#  ===============================
-
-compile_smv_test()
-{
-   # Clean and compile SMV DB
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_test_64
-   make --makefile ../Makefile clean &> /dev/null
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage6d
-}
-
-check_compile_smv_test()
-{
-   # Check for errors in SMV test compilation
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_test_64
-   if [ -e "smokeview_linux_test_64" ]
-   then
-      # Continue along
-      :
-   else
-      BUILD_STAGE_FAILURE="Stage 6d: SMV Test Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage6d
-      save_build_status
-      email_error_message
-   fi
-
-   # Check for compiler warnings/remarks
-   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Stage 6d warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
-   fi
-}
-
-#  ============================================
-#  = Stage 6e - Make SMV pictures (test mode) =
-#  ============================================
-
-make_smv_pictures_test()
-{
-   # Run Make SMV Pictures script (test mode)
-   cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6e
-}
-
-check_smv_pictures_test()
-{
-   # Scan and report any errors in make SMV pictures process
-   cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      BUILD_STAGE_FAILURE="Stage 6e: Make SMV Pictures (Test Mode)"
-      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e > $FIREBOT_DIR/output/stage6e_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage6e_errors
       save_build_status
       email_error_message
    fi
@@ -728,7 +659,6 @@ compile_smv()
 {
    # Clean and compile SMV
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64
-   make --makefile ../Makefile clean &> /dev/null
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6f
 }
 
@@ -768,7 +698,7 @@ make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh -r &> $FIREBOT_DIR/output/stage6g
+   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6g
 }
 
 check_smv_pictures()
@@ -1103,20 +1033,12 @@ compile_smv_utilities
 check_smv_utilities
 
 ### Stage 6b ###
-compile_smv_test_db
-check_compile_smv_test_db
+compile_smv_db
+check_compile_smv_db
 
 ### Stage 6c ###
 make_smv_pictures_db
 check_smv_pictures_db
-
-### Stage 6d ###
-compile_smv_test
-check_compile_smv_test
-
-### Stage 6e ###
-make_smv_pictures_test
-check_smv_pictures_test
 
 ### Stage 6f ###
 compile_smv

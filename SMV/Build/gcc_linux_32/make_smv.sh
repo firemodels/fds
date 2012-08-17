@@ -1,2 +1,2 @@
-#!/bin/csh -f
+#!/bin/bash
 make -f ../Makefile gcc_linux_32

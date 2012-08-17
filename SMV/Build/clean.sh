@@ -1,16 +1,14 @@
 #!/bin/bash
-clean=1
-while getopts 'n' OPTION
+SMV_TESTFLAG=
+SMV_TESTSTRING=
+while getopts 't' OPTION
 do
 case $OPTION in
-  n)
-   clean=0
-   ;;
+  t)
+   SMV_TESTFLAG="-D pp_beta"
+   SMV_TESTSTRING="test_"
+  ;;
 esac
 done
-if [ "$clean" == "1" ]; then
-  echo cleaning files
-  rm -f *.o
-else
-  echo not cleaning files
-fi
+export SMV_TESTFLAG
+export SMV_TESTSTRING

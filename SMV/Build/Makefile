@@ -12,6 +12,8 @@
 # use the following line if building Smokeview in a directory 'below' Makefile
 
 SOURCE_DIR = ../../source/
+SMV_TESTFLAG = 
+SMV_TESTSTRING =
 
 # use FILTERC and FILTERF to customize smokeview builds (ie -D pp_BETA)
 
@@ -180,44 +182,32 @@ intel_linux_32 : exe       = smokeview_linux_32
 intel_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
 
-# ------------- intel_linux_test_32 ----------------
-
-intel_linux_test_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_test_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_BETA -D pp_LINUX -D pp_INTEL 
-intel_linux_test_32 : LFLAGS    = -m32 -static-intel
-intel_linux_test_32 : CC        = icc 
-intel_linux_test_32 : CPP       = icpc
-intel_linux_test_32 : FC        = ifort
-intel_linux_test_32 : exe       = smokeview_linux_test_32
-
-intel_linux_test_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
-
 # ------------- intel_linux_64 ----------------
 
 intel_linux_64 : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL 
+intel_linux_64 : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL $(SMV_TESTFLAG)
 intel_linux_64 : LFLAGS    = -m64 -static-intel
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
-intel_linux_64 : exe       = smokeview_linux_64
+intel_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
 intel_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
 
-# ------------- intel_linux_test_64 ----------------
+# ------------- intel_linux_64_db ----------------
 
-intel_linux_test_64 : FFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -fpp -D pp_noappend
-intel_linux_test_64 : CFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -D pp_LINUX64 -D pp_BETA -D pp_INTEL 
-intel_linux_test_64 : LFLAGS    = -m64 -static-intel -traceback
-intel_linux_test_64 : CC        = icc 
-intel_linux_test_64 : CPP       = icpc
-intel_linux_test_64 : FC        = ifort
-intel_linux_test_64 : exe       = smokeview_linux_test_64
+intel_linux_64_db : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
+intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL
+intel_linux_64_db : LFLAGS    = -m64 -static-intel
+intel_linux_64_db : CC        = icc
+intel_linux_64_db : CPP       = icpc
+intel_linux_64_db : FC        = ifort
+intel_linux_64_db : exe       = smokeview_linux_64_db
 
-intel_linux_test_64 : $(obj)
+intel_linux_64_db : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
+
 
 # ------------- intel_linux_64_profile ----------------
 
@@ -274,19 +264,6 @@ intel_osx_32 : exe       = smokeview_osx_32
 intel_osx_32 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_32) $(OSX_INTEL_LIBS_32)
 
-# ------------- intel_osx_test_32 ----------------
-
-intel_osx_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX -D pp_BETA
-intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_BETA -D pp_INTEL 
-intel_osx_test_32 : LFLAGS    = -m32 -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
-intel_osx_test_32 : CC        = icc 
-intel_osx_test_32 : CPP       = icpc
-intel_osx_test_32 : FC        = ifort
-intel_osx_test_32 : exe       = smokeview_osx_test_32
-
-intel_osx_test_32 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) $(OSX_SMV_LIBS_32) $(OSX_INTEL_LIBS_32)
-
 # ------------- intel_osx_64 ----------------
 
 intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -mmaccox-version-min=10.4
@@ -299,19 +276,6 @@ intel_osx_64 : exe       = smokeview_osx_64
 
 intel_osx_64 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)
-
-# ------------- intel_osx_test_64 ----------------
-
-intel_osx_test_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -D pp_BETA
-intel_osx_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -D pp_BETA -D pp_INTEL 
-intel_osx_test_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
-intel_osx_test_64 : CC        = icc 
-intel_osx_test_64 : CPP       = icpc
-intel_osx_test_64 : FC        = ifort
-intel_osx_test_64 : exe       = smokeview_osx_test_64
-
-intel_osx_test_64 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)
 
 # ------------- make depend ----------------
 # ------------- make depend ----------------

@@ -1,3 +1,4 @@
 #!/bin/bash
-../clean.sh $*
-make -f ../Makefile intel_osx_32
+source ../clean.sh $*
+make -f ../Makefile clean
+make SMV_TESTFLAG="$SMV_TESTFLAG" SMV_TESTSTRING="$SMV_TESTSTRING" -f ../Makefile intel_osx_32
