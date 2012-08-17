@@ -7,7 +7,7 @@ echo ""
 echo "Options"
 echo "-d - use debug version of smokeview"
 echo "-h - display this message"
-echo "-r - use release version of smokeview"
+echo "-t - use test version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
 exit
 }
@@ -21,19 +21,19 @@ fi
 
 SIZE=_64
 DEBUG=
-TEST=_test
+TEST=
 
-while getopts 'dhrs:' OPTION
+while getopts 'dhts:' OPTION
 do
 case $OPTION  in
   d)
-   DEBUG=_dbg
+   DEBUG=_db
    ;;
   h)
    usage;
    ;;
-  r)
-   TEST=
+  t)
+   TEST=_test
   ;;
   s)
    SIZE="$OPTARG"

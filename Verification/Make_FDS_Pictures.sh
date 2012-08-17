@@ -55,13 +55,11 @@ esac
 done
 shift $(($OPTIND-1))
 
-VERSION=$PLATFORM$TEST$SIZE$DEBUG
-
 export SVNROOT=`pwd`/..
 if [ "$SMV_PATH" == "" ]; then
-  SMV_PATH=$SVNROOT/SMV/Build/intel_$VERSION
+  SMV_PATH=$SVNROOT/SMV/Build/intel_$PLATFORM$SIZE
 fi
-export SMV=$SMV_PATH/smokeview_$VERSION
+export SMV=$SMV_PATH/smokeview_$PLATFORM$TEST$SIZE
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle/"
 export BASEDIR=`pwd`
