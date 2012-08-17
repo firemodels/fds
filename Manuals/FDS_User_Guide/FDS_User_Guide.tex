@@ -2701,66 +2701,7 @@ bounds ({\ct XB}) of the mesh, not the number of cells.
 
 
 
-
-\subsection{Non-rectangular Geometry and Sloped Ceilings}
-\label{info:SAWTOOTH}
-
-The efficiency of FDS is due to the simplicity of its numerical mesh.
-However, there are situations in which certain geometric features do
-not conform to the rectangular mesh, such as a sloped ceiling or roof. In these cases,
-construct the curved geometry using rectangular obstructions, a process
-sometimes called ``stair-stepping''. A concern is that
-the stair-stepping changes the flow pattern near the wall. To lessen
-the impact of stair-stepping on the flow field near the wall,
-prescribe the parameter {\ct SAWTOOTH=.FALSE.}
-on each {\ct OBST} line that makes up the stair-stepped obstruction.
-The effect of this parameter is to prevent vorticity from being generated
-at sharp corners, in effect smoothing out the jagged steps that make up
-the obstruction. This is not a complete solution of the problem, but it
-does provide a simple way of ensuring that the flow field around a
-non-rectangular obstruction is not inhibited by extra drag created at
-sharp corners.
-
-\begin{warning}
-Do not apply {\ct SAWTOOTH=.FALSE.} to obstructions that have any {\ct SURF\_ID}s with the
-attribute {\ct BURN\_AWAY=.TRUE.}
-\end{warning}
-
-\subsubsection{Example Case: {\bf sawtooth}}
-
-In this example, we look at the flow field through a two-dimensional curved pipe. The curve is created using a series of obstructions that approximate the curve through ``stair-stepping" as in the following example:
-
-\scriptsize
-\begin{verbatim}
-&OBST XB= 0.0000, 0.0240,-0.0005, 0.0005, 0.0640, 0.0710, SAWTOOTH=.FALSE., COLOR='GREY' /
-&OBST XB= 0.0000, 0.0250,-0.0005, 0.0005, 0.0710, 0.0750, SAWTOOTH=.FALSE., COLOR='GREY' /
-&OBST XB= 0.0000, 0.0260,-0.0005, 0.0005, 0.0750, 0.0780, SAWTOOTH=.FALSE., COLOR='GREY' /
-&OBST XB= 0.0000, 0.0270,-0.0005, 0.0005, 0.0780, 0.0810, SAWTOOTH=.FALSE., COLOR='GREY' /
-&OBST XB= 0.0000, 0.0280,-0.0005, 0.0005, 0.0810, 0.0830, SAWTOOTH=.FALSE., COLOR='GREY' /
-\end{verbatim}\normalsize
-
-\noindent
-Setting {\ct SAWTOOTH=.FALSE.} applies the velocity boundary conditions in such a way as to minimize the impact of the boundaries due to vortices at sharp corners. Figure~\ref{sawtooth} portrays the flow field in the pipe after five seconds. On the left the boundary of the pipe is defined with {\ct SAWTOOTH=.TRUE.}, while on the right the boundary is defined with {\ct SAWTOOTH=.FALSE.}. On the right the curve has been rendered as a single smooth surface because Smokeview renders adjacent surfaces with {\ct SAWTOOTH=.FALSE.} as a single smooth surface. While the flow field on the left is characterized by significant turbulence, {\ct SAWTOOTH=.FALSE.} reduces the turbulence in the flow field on the right so that the air moves smoothly through the pipe from one end to the other.
-
-\begin{figure}[h!]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/sawtooth_true} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/sawtooth_false}
-   \end{tabular*}
-   \caption[Example of {\ct SAWTOOTH=.FALSE.}]{Velocity field through a two-dimensional curved pipe at $t=5.0$ s. (Left) {\ct SAWTOOTH=.TRUE.} (Right) {\ct SAWTOOTH=.FALSE.}}
-   \label{sawtooth}
-\end{figure}
-
-Without {\ct SAWTOOTH=.FALSE.}, the vorticities at the sharp corners of the boundary create a sizable boundary layer. Figure~\ref{sawtooth_ugraph} plots the velocity through the apex of the pipe for both cases. The blue line represents the {\ct SAWTOOTH=.TRUE.} case while the orange line represents the {\ct SAWTOOTH=.FALSE.} case. Notice the broader range of the orange line. {\ct SAWTOOTH=.FALSE.} reduces the size of the boundary layer on both sides of the pipe by minimizing the impact of vortices forming at the boundary as a result of the sharp corners of the ``stair-stepping".
-
-\begin{figure}[h!]
-   \centering
-      \includegraphics[width=5in]{SCRIPT_FIGURES/sawtooth_ugraph}
-   \caption[Boundary layer analysis of {\ct SAWTOOTH=.FALSE.}]{$z$-axis $u$-velocity profile at apex of turn in two-dimensional curved pipe portraying the effects of a boundary defined by {\ct SAWTOOTH=.FALSE.} (Orange).}
-   \label{sawtooth_ugraph}
-\end{figure}
-
-\newpage
+\clearpage
 
 \section{Creating Voids: The \texorpdfstring{{\tt HOLE}}{HOLE} Namelist Group (Table \ref{tbl:HOLE})}
 \label{info:HOLE}
@@ -4857,6 +4798,10 @@ For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied for 
 The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details.
 To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line.
 In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
+
+\begin{warning}
+Prior to version 6 of FDS, a logical parameter called {\ct SAWTOOTH} was used to ``smooth out'' the stair-stepped rendering of curved geometries. This functionality is replicated by setting {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line that defines the properties of the obstructions. This parameter removes friction at the surface.
+\end{warning}
 
 
 \subsection{Species and Species Mass Flux Boundary Conditions}
@@ -11139,7 +11084,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PROP\_ID}            & Character           & Reference~\cite{Smokeview_Users_Guide}    &           &               \\ \hline
 {\ct REMOVABLE}           & Logical             & Section~\ref{info:HOLE}                   &           & {\ct .TRUE.}  \\ \hline
 {\ct RGB(3)}              & Integer Triplet     & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
-{\ct SAWTOOTH}            & Logical             & Section~\ref{info:SAWTOOTH}               &           & {\ct .TRUE.}  \\ \hline
 {\ct SURF\_ID}            & Character           & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct SURF\_ID6(6)}        & Character Sextuplet & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct SURF\_IDS(3)}        & Character Triplet   & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
@@ -11902,18 +11846,20 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MISC}    & {\ct BACKGROUND\_SPECIES}           &  {\ct SPEC}  & {\ct BACKGROUND=.TRUE.}                     & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct CONDUCTIVITY}                  &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct CO\_PRODUCTION}                &              & Eliminated                                  &                                          \\ \hline
-{\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Same functionality                           \\ \hline
+{\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Same functionality                       \\ \hline
 {\ct MISC}    & {\ct HUMIDITY}                      &  {\ct SPEC}  & {\ct HUMIDITY}                              & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct ISOTHERMAL}                    &              & Eliminated                                  &                                              \\ \hline
+{\ct MISC}    & {\ct ISOTHERMAL}                    &              & Eliminated                                  &                                          \\ \hline
 {\ct MISC}    & {\ct MW}                            &  {\ct SPEC}  & {\ct MW}                                    & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct PRESSURE\_CORRECTION}          &              &  Eliminated                                 &                                              \\ \hline
-{\ct MISC}    & {\ct RADIATION}                     &  {\ct RADI}  & {\ct RADIATION}                             & Same functionality                           \\ \hline
+{\ct MISC}    & {\ct PRESSURE\_CORRECTION}          &              &  Eliminated                                 &                                          \\ \hline
+{\ct MISC}    & {\ct RADIATION}                     &  {\ct RADI}  & {\ct RADIATION}                             & Same functionality                       \\ \hline
 {\ct MISC}    & {\ct EVAC\_SURF\_DEFAULT}           &  {\ct SURF}  & {\ct EVAC\_DEFAULT}                         & Section~\ref{info:SURF}                  \\ \hline
 {\ct MISC}    & {\ct SURF\_DEFAULT}                 &  {\ct SURF}  & {\ct DEFAULT}                               & Section~\ref{info:SURF}                  \\ \hline
 {\ct MISC}    & {\ct SUPPRESSION}                   &  {\ct REAC}  & {\ct SUPPRESSION}                           & Section~\ref{info:extinction}            \\ \hline
 {\ct MISC}    & {\ct VISCOSITY}                     &  {\ct SPEC}  &  {\ct VISCOSITY}                            & Section~\ref{info:SPEC}                  \\ \hline
-{\ct PART}    & {\ct EVAPORATE}                     &              &  Eliminated                                 &                                              \\ \hline
-{\ct PART}    & {\ct FUEL}                          &              &  Eliminated                                 &                                              \\ \hline{\ct PART}    & {\ct HEAT\_OF\_VAPORIZATION}       &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZATION}              & Section~\ref{thermal_part_props}         \\ \hline
+{\ct OBST}    & {\ct SAWTOOTH}                      &              & Eliminated                                  & Use {\ct FREE\_SLIP}                     \\ \hline
+{\ct PART}    & {\ct EVAPORATE}                     &              &  Eliminated                                 &                                          \\ \hline
+{\ct PART}    & {\ct FUEL}                          &              &  Eliminated                                 &                                         \\ \hline
+{\ct PART}    & {\ct HEAT\_OF\_VAPORIZATION}       &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZATION}              & Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE}  &  {\ct SPEC}  &   {\ct H\_V\_REFERENCE\_TEMPERATURE}        & Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct MELTING\_TEMPERATURE}          &  {\ct SPEC}  & {\ct MELTING\_TEMPERATURE}                  & Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS}     &  {\ct INIT}  & {\ct N\_PARTICLES}                          & Section~\ref{info:initial_droplets}      \\ \hline
