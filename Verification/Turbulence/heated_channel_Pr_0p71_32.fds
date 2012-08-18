@@ -1,6 +1,6 @@
 &HEAD CHID='heated_channel_Pr_0p71_32', TITLE='LES of turbulent channel with heat source with wall model, Pr=0.71' /
 
-&MESH IJK=32,32,32, XB=0,12,0,6,0,2/
+&MESH IJK=64,32,32, XB=0,12,0,6,0,2/
 &INIT XB=0,12,0,6,0,2, TEMPERATURE=21.5, HRRPUV=0.0005 /
 
 &TIME T_END=15000.0, DT=2./
