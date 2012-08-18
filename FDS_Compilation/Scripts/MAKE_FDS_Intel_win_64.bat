@@ -20,6 +20,8 @@ call %envfile%
 %svn_drive%
 
 cd %svn_root%\FDS_Compilation\intel_win_64
+erase *.obj 
+erase *.mod
 .\make_fds
 
 pause
