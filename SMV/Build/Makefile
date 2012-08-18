@@ -2,14 +2,10 @@
 # $Revision$
 # $Author$
 
-#*** Smokeview, Version 5, Makefile ***
+#*** Smokeview, VMakefile ***
 
-#To use this Makefile, you will need to provide a make target at the command line.
-#For example, to make the 32 bit version in the current directory with the Intel
-#compiler, you would need to type 'make intel_linux_32' at the prompt.
-#To make it in a sub-directory type 'make -f ../Makefile intel_linux_32'
-
-# use the following line if building Smokeview in a directory 'below' Makefile
+#To use this Makefile cd to a sub-directory and type make_smv.sh or make_smv.bat
+# depending on what platform you are using
 
 SOURCE_DIR = ../../source/
 SMV_TESTFLAG = 
@@ -71,7 +67,6 @@ no_target:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
 # ********  rules for each platform supported *************
-
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Windows VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
