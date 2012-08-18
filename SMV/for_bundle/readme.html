@@ -21,17 +21,23 @@
 
 <ul>
 
-<li>6.0.3 (build xxxx) - August xx, 2012
-
+<li>6.0.3 (build 12094) - August 18, 2012
 <ol>
 <li>enhancement: implement temperature->color mapping for non-gpu volume rendering
+<li>usability: scale the sensor to be 1/4th the smallest grid dimension - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1658&can=1&sort=-id">Issue 1658</a>)
 <li>usability: output texture directory path at startup
 <li>usability: calculate fed's for cell centered slices,
 corrections to fed calculation, save fed regenerate flag to .ini file
-<li>usability: output cell indices for min and max slice valies, addresses issue 1686
+<li>usability: output cell indices for min and max slice valies - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1688&can=1&sort=-id">Issue 1688</a>)
+<li>fix: fix option to display slice files and vector slices within blockages - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1708&can=1&sort=-id">Issue 1708</a>)
+<li>fix: fix problems when loading people positions before particles - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1703&can=1&sort=-id">Issue 1703</a>)
 <li>fix: correct vent orientation algorithm - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1699&can=1&sort=-id">Issue 1699</a>)
-<li>fix: fix compile error in debug mode on mac
+<li>fix: add missing preprocessing directive to eliminate compile error in debug mode on mac
 </ol>
 
 <li>6.0.2 (build 11547) - July 23, 2012
