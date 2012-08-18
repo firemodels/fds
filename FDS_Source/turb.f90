@@ -958,13 +958,12 @@ H = RHO*U_TAU*CP/TPLUS
 END SUBROUTINE HEAT_FLUX_MODEL
 
 
-SUBROUTINE ABL_HEAT_FLUX_MODEL(H,U_TAU,DZ,ROUGHNESS,IOR,RHO,CP)
+SUBROUTINE ABL_HEAT_FLUX_MODEL(H,U_TAU,DZ,Z0,TMP_G,TMP_S,RHO,CP)
 
 REAL(EB), INTENT(OUT) :: H ! heat transfer coefficient
-REAL(EB), INTENT(IN) :: U_TAU,DZ,ROUGHNESS,RHO,CP
-INTEGER, INTENT(IN) :: IOR
+REAL(EB), INTENT(IN) :: U_TAU,DZ,Z0,TMP_G,TMP_S,RHO,CP
 REAL(EB), PARAMETER :: KAPPA=0.41_EB ! von Karman constant
-REAL(EB) :: PSI,MOL,Z0
+REAL(EB) :: PSI_H,L,ZP,Q3S,A,B,C,DET
 
 ! References:
 !
@@ -972,17 +971,30 @@ REAL(EB) :: PSI,MOL,Z0
 ! Boundary Layer using Dynamic Models with Different Averaging Schemes. Boundary-Layer
 ! Meteorology, 126:1-28.
 
-PSI = 0._EB
-MOL = 0._EB
-Z0 = MAX(ROUGHNESS,1.E-6_EB)
+ZP = 0.5_EB*DZ/Z0
+PSI_H = 0._EB
 
-! atmospheric stability correction (use later)
-IF (IOR==3) THEN
-   MOL = 0._EB !! -U_TAU**3*THETA/(KAPPA*GRAV*HEAT_FLUX)
-   PSI = 0._EB !! -7.8_EB*0.5*DZ/MOL
+IF (TMP_S<TMP_G) THEN ! stability correction needed
+
+   ! Stoll and Porte-Agel Eq. (27) may be rewritten in quadratic form as follows:
+   ! A*Q3S**2 + B*Q3S + C = 0
+
+   A = 7.8_EB*KAPPA*GRAV
+   B = -U_TAU**3*TMP_G*LOG(ZP)
+   C = (TMP_S-TMP_G)*U_TAU**4*KAPPA*GRAV   ! negative, so DET should be positive
+   DET = B**2-4._EB*A*C
+   IF (DET>ZERO_P) THEN
+      Q3S = (-B-SQRT(DET))/(2._EB*A)       ! take negative root, else Q3S>0, which we know is not correct here
+      L = -U_TAU**3*TMP_G/(KAPPA*GRAV*Q3S) ! Eq. (28), Obukhov length
+      PSI_H = -3.9_EB*DZ/MAX(L,MICRON)     ! Eq. (30), 3.9 = 7.8*0.5
+   ELSE
+      Q3S = 0._EB
+      L = 0._EB
+   ENDIF
+
 ENDIF
 
-H = RHO*CP*U_TAU*KAPPA/(LOG(0.5_EB*DZ/Z0)-PSI)
+H = RHO*CP*U_TAU*KAPPA/(LOG(ZP)-PSI_H)
 
 END SUBROUTINE ABL_HEAT_FLUX_MODEL
 
