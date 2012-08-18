@@ -81,13 +81,11 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 <b>Stage 4b:</b> Compile FDS MPI release <br>
 <b>Stage 5: </b> Run verification cases (long run) <br>
 <b>Stage 6a:</b> Compile SMV utilities <br>
-<b>Stage 6b:</b> Compile SMV test DB <br>
-<b>Stage 6c:</b> Make SMV pictures (test debug mode) <br>
-<b>Stage 6d:</b> Compile SMV test <br>
-<b>Stage 6e:</b> Make SMV pictures (test mode) <br>
-<b>Stage 6f:</b> Compile SMV release <br>
-<b>Stage 6g:</b> Make SMV pictures (release mode) <br>
-<b>Stage 6h:</b> Make FDS pictures <br>
+<b>Stage 6b:</b> Compile SMV DB <br>
+<b>Stage 6c:</b> Make SMV pictures (debug mode) <br>
+<b>Stage 6d:</b> Compile SMV release <br>
+<b>Stage 6e:</b> Make SMV pictures (release mode) <br>
+<b>Stage 6f:</b> Make FDS pictures <br>
 <b>Stage 7: </b> Matlab plotting and statistics <br>
 <b>Stage 8: </b> Build FDS-SMV Guides <br>
 </span></span>"""

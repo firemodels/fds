@@ -597,7 +597,7 @@ compile_smv_db()
 
 check_compile_smv_db()
 {
-   # Check for errors in SMV test DB compilation
+   # Check for errors in SMV DB compilation
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    if [ -e "smokeview_linux_64_db" ]
    then
@@ -652,14 +652,14 @@ check_smv_pictures_db()
 }
 
 #  ==================================
-#  = Stage 6f - Compile SMV release =
+#  = Stage 6d - Compile SMV release =
 #  ==================================
 
 compile_smv()
 {
    # Clean and compile SMV
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage6f
+   ./make_smv.sh &> $FIREBOT_DIR/output/stage6d
 }
 
 check_compile_smv()
@@ -671,76 +671,76 @@ check_compile_smv()
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6f: SMV Release Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage6f
+      BUILD_STAGE_FAILURE="Stage 6d: SMV Release Compilation"
+      ERROR_LOG=$FIREBOT_DIR/output/stage6d
       save_build_status
       email_error_message
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Stage 6f warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+      echo "Stage 6d warnings:" >> $FIREBOT_DIR/output/warnings
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
 #  ===============================================
-#  = Stage 6g - Make SMV pictures (release mode) =
+#  = Stage 6e - Make SMV pictures (release mode) =
 #  ===============================================
 
 make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6g
+   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6e
 }
 
 check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6g` == "" ]]
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e` == "" ]]
    then
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6g: Make SMV Pictures (Release Mode)"
-      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6g > $FIREBOT_DIR/output/stage6g_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage6g_errors
+      BUILD_STAGE_FAILURE="Stage 6e: Make SMV Pictures (Release Mode)"
+      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e > $FIREBOT_DIR/output/stage6e_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage6e_errors
       save_build_status
       email_error_message
    fi
 }
 
 #  ================================
-#  = Stage 6h - Make FDS pictures =
+#  = Stage 6f - Make FDS pictures =
 #  ================================
 
 make_fds_pictures()
 {
    # Run Make FDS Pictures script
    cd $FDS_SVNROOT/Verification
-   ./Make_FDS_Pictures.sh &> $FIREBOT_DIR/output/stage6h
+   ./Make_FDS_Pictures.sh &> $FIREBOT_DIR/output/stage6f
 }
 
 check_fds_pictures()
 {
    # Scan and report any errors in make FDS pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6h` == "" ]]
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f` == "" ]]
    then
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6h: Make FDS Pictures"
-      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6h > $FIREBOT_DIR/output/stage6h_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage6h_errors
+      BUILD_STAGE_FAILURE="Stage 6f: Make FDS Pictures"
+      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f > $FIREBOT_DIR/output/stage6f_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage6f_errors
       save_build_status
       email_error_message
    fi
@@ -1040,15 +1040,15 @@ check_compile_smv_db
 make_smv_pictures_db
 check_smv_pictures_db
 
-### Stage 6f ###
+### Stage 6d ###
 compile_smv
 check_compile_smv
 
-### Stage 6g ###
+### Stage 6e ###
 make_smv_pictures
 check_smv_pictures
 
-### Stage 6h ###
+### Stage 6f ###
 make_fds_pictures
 check_fds_pictures
 
