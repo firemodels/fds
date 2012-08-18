@@ -7,7 +7,8 @@
 // build Smokeview as a standard release unless the pp_BETA directive is defined
 
 #define pp_release
-#define pp_UNOFFICIAL_RELEASE
+// comment following line when building an official release
+//#define pp_UNOFFICIAL_RELEASE
 
 //*** uncomment the following two lines to force all versions to be beta
 //#undef pp_BETA
@@ -22,7 +23,7 @@
 #ifdef pp_UNOFFICIAL_RELEASE
 #define PROGVERSION "Unofficial release"
 #else
-#define PROGVERSION "6.0.2"
+#define PROGVERSION "6.0.3"
 #endif
 #endif
 
