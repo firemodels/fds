@@ -101,56 +101,28 @@ gcc_win_32 : $(obj)
 
 intel_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref /arch:IA32
-intel_win_32 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE  -D GLEW_STATIC /arch:IA32
+intel_win_32 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE  -D GLEW_STATIC $(SMV_TESTFLAG) /arch:IA32
 intel_win_32 : LFLAGS    = /F32768000 
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
-intel_win_32 : exe       = smokeview_win_32
+intel_win_32 : exe       = smokeview_win_$(SMV_TESTSTRING)32
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
-
-# ------------- intel_win_test_32 ----------------
-
-intel_win_test_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_test_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_BETA   /iface:stdref /arch:IA32
-intel_win_test_32 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE -D pp_BETA -D GLEW_STATIC /arch:IA32
-intel_win_test_32 : LFLAGS    = /F32768000 
-intel_win_test_32 : CC        = icl
-intel_win_test_32 : CPP       = icl
-intel_win_test_32 : FC        = ifort
-intel_win_test_32 : exe       = smokeview_win_test_32
-
-intel_win_test_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
 
 # ------------- intel_win_64 ----------------
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
-intel_win_64 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC
+intel_win_64 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC $(SMV_TESTFLAG)
 intel_win_64 : LFLAGS    = /F32768000 
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
-intel_win_64 : exe       = smokeview_win_64
+intel_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
-
-# ------------- intel_win_test_64 ----------------
-
-intel_win_test_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_test_64 : FFLAGS    = -O2 -traceback -fpp -D pp_cvf -D pp_BETA -D X64 /iface:stdref
-intel_win_test_64 : CFLAGS    = -O2 -traceback -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D pp_BETA -D GLEW_STATIC
-intel_win_test_64 : LFLAGS    = /F32768000
-intel_win_test_64 : CC        = icl
-intel_win_test_64 : CPP       = icl
-intel_win_test_64 : FC        = ifort
-intel_win_test_64 : exe       = smokeview_win_test_64
-
-intel_win_test_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -172,12 +144,12 @@ LINUX_INTEL_LIBS = -lifcore  -lintlc
 # ------------- intel_linux_32 ----------------
 
 intel_linux_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_LINUX -D pp_INTEL 
+intel_linux_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG)
 intel_linux_32 : LFLAGS    = -m32 -static-intel
 intel_linux_32 : CC        = icc 
 intel_linux_32 : CPP       = icpc
 intel_linux_32 : FC        = ifort
-intel_linux_32 : exe       = smokeview_linux_32
+intel_linux_32 : exe       = smokeview_linux_$(SMV_TESTSTRING)32
 
 intel_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
@@ -230,7 +202,7 @@ gcc_linux_32 : LFLAGS    = -m32
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : CPP       = g++
 gcc_linux_32 : FC        = gfortran
-gcc_linux_32 : exe       = smokeview_linux_32
+gcc_linux_32 : exe       = smokeview_linux_$(SMV_TESTSTRING)32
 
 gcc_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(IMAGELIBDIR) -L $(LIB_DIR)/lib_linux_gcc_32 $(LINUX_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
@@ -254,12 +226,12 @@ OSX_INTEL_LIBS_64 = $(OSX_FORT_LIBDIR_64)/libifcoremt.a $(OSX_FORT_LIBDIR_64)/li
 # ------------- intel_osx_32 ----------------
 
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_INTEL 
+intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_INTEL $(SMV_TESTFLAG) 
 intel_osx_32 : LFLAGS    = -m32 -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
 intel_osx_32 : CC        = icc 
 intel_osx_32 : CPP       = icpc
 intel_osx_32 : FC        = ifort
-intel_osx_32 : exe       = smokeview_osx_32
+intel_osx_32 : exe       = smokeview_osx_$(SMV_TESTSTRING)32
 
 intel_osx_32 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_32) $(OSX_INTEL_LIBS_32)
@@ -267,12 +239,12 @@ intel_osx_32 : $(obj)
 # ------------- intel_osx_64 ----------------
 
 intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -mmaccox-version-min=10.4
-intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4
+intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG)
 intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
 intel_osx_64 : FC        = ifort
-intel_osx_64 : exe       = smokeview_osx_64
+intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64
 
 intel_osx_64 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)

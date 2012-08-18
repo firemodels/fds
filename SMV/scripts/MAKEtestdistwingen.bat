@@ -35,7 +35,7 @@ IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
 echo copying smokeview_win_test_%platform%.exe
-copy ..\Build\intel_win_test_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
+copy ..\Build\intel_win_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
 
 echo copying .po files
 copy *.po %smvdir%\.

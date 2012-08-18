@@ -12,5 +12,17 @@ call "%IFORT_COMPILER12%\bin\iclvars" intel64 vs2008
 call "%IFORT_COMPILER12%\bin\ifortvars" ia32 vs2008
 call "%IFORT_COMPILER12%\bin\iclvars" ia32 vs2008
 :envexist
-make -f ..\Makefile intel_win_32
+
+set SMV_TESTFLAG=
+set SMV_TESTSTRING=
+
+if "%1" NEQ "-t" goto endif
+  set SMV_TESTFLAG=-D pp_BETA
+  set SMV_TESTSTRING=test_
+:endif
+echo %SMV_TESTFLAG%
+echo %SMV_TESTSTRING%
+
+erase *.obj
+make -j4 SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_32
 pause
