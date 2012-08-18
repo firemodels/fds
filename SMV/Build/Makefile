@@ -249,18 +249,6 @@ intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64
 intel_osx_64 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)
 
-# ------------- make depend ----------------
-# ------------- make depend ----------------
-
-depend : FFLAGS    = -MM 
-depend : CFLAGS    = -MM
-depend : CC        = gcc
-depend : CPP       = g++
-depend : FC        = gfortran
-depend : exe       = smokeview_linux_32
-
-depend : $(obj)
-
 #-------------- Clean Target to remove Object and Module files -----------
 
 .PHONY : clean
