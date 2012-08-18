@@ -5,7 +5,7 @@ while getopts 't' OPTION
 do
 case $OPTION in
   t)
-   SMV_TESTFLAG="-D pp_beta"
+   SMV_TESTFLAG="-D pp_BETA"
    SMV_TESTSTRING="test_"
   ;;
 esac
