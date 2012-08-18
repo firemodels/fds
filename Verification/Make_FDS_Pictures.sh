@@ -25,7 +25,7 @@ fi
 
 SIZE=_64
 DEBUG=
-TEST=_test
+TEST=
 SMV_PATH=""
 
 while getopts 'dhp:rs:' OPTION
