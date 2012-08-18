@@ -1117,12 +1117,36 @@ In FDS, $\tau_w$ is obtained only from a wall model such as Werner-Wengle. The r
 
 \subsection{Heated Channel Flow (\texorpdfstring{{\bf heated\_channel}}{heated\_channel})}
 
+{\bf Kiyoung Moon, Yonsei University, Seoul, South Korea}\\
+
+\noindent The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empiric equation \cite{Kader:1981}. These cases live in the Verification/Turbulence subdirectory.
+
+The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' ({\ct RESEARCH\_MODE=.TRUE.} on {\ct MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for energy equation is constant temperature ($T_w = 20 \,\mbox{$^\circ$C} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ kJ/kg) and viscosity ($\mu = 1.8216 \times 10^{-5}$ kg/(m s)) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
+\begin{center}
+\begin{tabular}{ll}
+Pr & $k$ (W/(m K)) \\
+\hline
+0.10 & $1.82 \times 10^{-1}$ \\
+0.71 & $2.59 \times 10^{-2}$ \\
+1.00 & $1.82 \times 10^{-2}$ \\
+2.00 & $9.11 \times 10^{-3}$
+\end{tabular}
+\end{center}
+
+In Figure \ref{fig_heated_channel}, FDS results are compared to DNS data for mean streamwise velocity, $u^+ = \langle u \rangle/u_\tau$, and mean temperature, $T^+ = (\langle T \rangle - T_w)/T_\tau$. The temperature scale is given by
+\begin{equation}
+\label{eqn_friction_temperature}
+T_{\tau} \equiv \frac{\langle \dot{q}_w^{''} \rangle}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
+\end{equation}
+where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times. 
+
+As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the SGS scalar transport model.
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus.pdf} }
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus.pdf} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus.pdf}
    \end{tabular*}
-   \caption[Mean velocity and temperature profiles for heated channel flow.]{\label{fig_heated_channel} Comparison of $32^3$ FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser \emph{et al.} \cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin \cite{Kim:1987}.}
+   \caption[Mean velocity and temperature profiles for heated channel flow.]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser \emph{et al.} \cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin \cite{Kim:1987}.}
 \end{figure}
 
 \clearpage
