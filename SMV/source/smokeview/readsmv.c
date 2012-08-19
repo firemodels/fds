@@ -6022,14 +6022,14 @@ typedef struct {
       slicedata *sd;
       char *slicelabelptr, slicelabel[256];
       int has_reg, has_comp;
-      int i1=-1, i2=-1, j1=-1, j2=-1, k1=-1, k2=-1;
+      int i1=-1, i2=-1, jj1=-1, j2=-1, k1=-1, k2=-1;
       char *sliceparms;
 
       sliceparms=strchr(buffer,'&');
       if(1==0&&sliceparms!=NULL){//xxx fix
         sliceparms++;
         sliceparms[-1]=0;
-        sscanf(sliceparms,"%i %i %i %i %i %i",&i1,&i2,&j1,&j2,&k1,&k2);
+        sscanf(sliceparms,"%i %i %i %i %i %i",&i1,&i2,&jj1,&j2,&k1,&k2);
       }
 
       nn_slice++;
@@ -6166,7 +6166,7 @@ typedef struct {
       }
       sd->is1=i1;
       sd->is2=i2;
-      sd->js1=j1;
+      sd->js1=jj1;
       sd->js2=j2;
       sd->ks1=k1;
       sd->ks2=k2;

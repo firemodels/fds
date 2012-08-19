@@ -541,12 +541,12 @@ void parse_commandline(int argc, char **argv){
     else if(strncmp(argv[i],"-bindir",7)==0){
       ++i;
       if(i<argc){
-        int len;
+        int len2;
 
-        len = strlen(argv[i]);
-        NewMemory((void **)&smokeview_bindir,len+2);
+        len2 = strlen(argv[i]);
+        NewMemory((void **)&smokeview_bindir,len2+2);
         strcpy(smokeview_bindir,argv[i]);
-        if(smokeview_bindir[len-1]!=dirseparator[0])strcat(smokeview_bindir,dirseparator);
+        if(smokeview_bindir[len2-1]!=dirseparator[0])strcat(smokeview_bindir,dirseparator);
       }
     }
     else if(strncmp(argv[i],"-build",6)==0){

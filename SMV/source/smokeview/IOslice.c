@@ -5666,7 +5666,7 @@ int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_
 
 /* ------------------ getsliceheader ------------------------ */
 
-int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *slice3d){
+int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *jj1, int *j2, int *k1, int *k2, int *slice3d){
   FILE *stream;
   char buffer[255];
 
@@ -5681,8 +5681,8 @@ int getsliceheader0(char *comp_file, char *size_file, int compression_type, int 
     fclose(stream);
     return 0;
   }
-  sscanf(buffer,"%i %i %i %i %i %i",i1,i2,j1,j2,k1,k2);
-  if(*i1==*i2||*j1==*j2||*k1==*k2){
+  sscanf(buffer,"%i %i %i %i %i %i",i1,i2,jj1,j2,k1,k2);
+  if(*i1==*i2||*jj1==*j2||*k1==*k2){
     *slice3d=0;
   }
   else{
@@ -5697,7 +5697,7 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
                    int framestep, int set_tmin, int set_tmax, float tmin_local, float tmax_local,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax){
   FILE *stream;
-  int i1, i2, j1, j2, k1, k2;
+  int i1, i2, jj1, j2, k1, k2;
   float time_local;
   int ncompressed;
   int count;
@@ -5715,9 +5715,9 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
     fclose(stream);
     return 0;
   }
-  sscanf(buffer,"%i %i %i %i %i %i",&i1,&i2,&j1,&j2,&k1,&k2);
+  sscanf(buffer,"%i %i %i %i %i %i",&i1,&i2,&jj1,&j2,&k1,&k2);
   *nx = i2 + 1 - i1;
-  *ny = j2 + 1 - j1;
+  *ny = j2 + 1 - jj1;
   *nz = k2 + 1 - k1;
   if(fgets(buffer,255,stream)==NULL){
     fclose(stream);

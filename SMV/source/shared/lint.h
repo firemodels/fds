@@ -18,6 +18,7 @@
 /*lint -e613 */
 /*lint -e644 */
 /*lint -e645 */
+/*lint -e647 */
 /*lint -e713 */
 /*lint -e715 */
 /*lint -e725 */
