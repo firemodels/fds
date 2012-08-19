@@ -13,7 +13,7 @@ ABSTRACT INTERFACE
    FUNCTION FLUX_LIMITER_TYPE(A,U)
       USE GLOBAL_CONSTANTS, ONLY: EB   
       REAL(EB), INTENT(IN):: A,U(4)
-      REAL(EB):: FLUX_LIMITER_TYPE
+      REAL(EB) :: FLUX_LIMITER_TYPE
    END FUNCTION FLUX_LIMITER_TYPE
 END INTERFACE
 
@@ -36,18 +36,15 @@ SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
 ! Compute spatial differences for density equation
 
 USE COMP_FUNCTIONS, ONLY: SECOND
-USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,SOLID_BOUNDARY, &
                             NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY,FLUX_LIMITER, &
                             SPECIFIED_MASS_FRACTION
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: KN,MUGAS,MASS_P,TGAS,TNOW,TMP_FILM,TWALL,ZZZ(4),UN,WW_GRAV,ZZ_GET(0:N_TRACKED_SPECIES)
-REAL(EB), PARAMETER :: CHI_D=1._EB,MFP25=0.065E-6_EB
+REAL(EB) :: TNOW,ZZZ(4),UN
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,SURF_INDEX,JM1,JP2,KM1,KP2
-REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: FFX=>NULL(),FFY=>NULL(),FFZ=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
-TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
@@ -69,12 +66,12 @@ ELSE
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
 ENDIF
 
-FX=>WORK4
-FY=>WORK5
-FZ=>WORK6
-FX=0._EB
-FY=0._EB
-FZ=0._EB
+FFX=>WORK4
+FFY=>WORK5
+FFZ=>WORK6
+FFX=0._EB
+FFY=0._EB
+FFZ=0._EB
 
 !$OMP PARALLEL DEFAULT(NONE) &
 !$OMP SHARED(KBAR,JBAR,IBAR,KBM1,JBM1,IBM1,RHOP,FX,FY,FZ,UU,VV,WW,FLUX_LIMITER,R, &
@@ -87,7 +84,7 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBM1
          ZZZ(1:4) = RHOP(I-1:I+2,J,K)
-         FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)*R(I)
+         FFX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)*R(I)
       ENDDO
    ENDDO
 ENDDO
@@ -100,7 +97,7 @@ DO K=1,KBAR
       JP2 = J+2
       DO I=1,IBAR
          ZZZ(1:4) = RHOP(I,JM1:JP2,K)
-         FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
+         FFY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
       ENDDO
    ENDDO
 ENDDO
@@ -113,7 +110,7 @@ DO K=1,KBM1
    DO J=1,JBAR
       DO I=1,IBAR
          ZZZ(1:4) = RHOP(I,J,KM1:KP2)
-         FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
+         FFZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
       ENDDO
    ENDDO
 ENDDO
@@ -144,7 +141,7 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !                       ^ WALL_INDEX(II+1,+1)
             IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F,RHOP(II+1:II+2,JJ,KK)/)
-               FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ)*R(II+1)
+               FFX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ)*R(II+1)
             ENDIF
          CASE(-1) OFF_WALL_SELECT_1
             !            FX/UU(II-2)     ghost
@@ -152,27 +149,27 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !              ^ WALL_INDEX(II-1,-1)
             IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
                ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),WC%RHO_F/)
-               FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ)*R(II-2)
+               FFX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ)*R(II-2)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ+1:JJ+2,KK)/)
-               FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ)
+               FFY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
                ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),WC%RHO_F/)
-               FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ)
+               FFY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ,KK+1:KK+2)/)
-               FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ)
+               FFZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
                ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),WC%RHO_F/)
-               FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ)
+               FFZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ)
             ENDIF
       END SELECT OFF_WALL_SELECT_1
    
@@ -201,17 +198,17 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    SELECT CASE(IOR)
       CASE( 1)
-         FX(II,JJ,KK)   = UN*WC%RHO_F*R(II)
+         FFX(II,JJ,KK)   = UN*WC%RHO_F*R(II)
       CASE(-1)
-         FX(II-1,JJ,KK) = UN*WC%RHO_F*R(II-1)
+         FFX(II-1,JJ,KK) = UN*WC%RHO_F*R(II-1)
       CASE( 2)
-         FY(II,JJ,KK)   = UN*WC%RHO_F
+         FFY(II,JJ,KK)   = UN*WC%RHO_F
       CASE(-2)
-         FY(II,JJ-1,KK) = UN*WC%RHO_F
+         FFY(II,JJ-1,KK) = UN*WC%RHO_F
       CASE( 3)
-         FZ(II,JJ,KK)   = UN*WC%RHO_F
+         FFZ(II,JJ,KK)   = UN*WC%RHO_F
       CASE(-3)
-         FZ(II,JJ,KK-1) = UN*WC%RHO_F
+         FFZ(II,JJ,KK-1) = UN*WC%RHO_F
    END SELECT
       
 ENDDO WLOOP_FL
@@ -226,9 +223,9 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         FRHO(I,J,K) = (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
-                     + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
-                     + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K) 
+         FRHO(I,J,K) = (FFX(I,J,K)-FFX(I-1,J,K))*RDX(I)*RRN(I) &
+                     + (FFY(I,J,K)-FFY(I,J-1,K))*RDY(J)        &
+                     + (FFZ(I,J,K)-FFZ(I,J,K-1))*RDZ(K) 
       ENDDO
    ENDDO
 ENDDO
@@ -240,11 +237,9 @@ ENDDO
  
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-      SM=>SPECIES_MIXTURE(N)
-
-      FX=0._EB
-      FY=0._EB
-      FZ=0._EB
+      FFX=0._EB
+      FFY=0._EB
+      FFZ=0._EB
         
       !$OMP PARALLEL DEFAULT(NONE) &
       !$OMP SHARED(N,KBAR,JBAR,IBAR,KBM1,JBM1,IBM1,RHOP,ZZP,FX,FY,FZ,UU,VV,WW,FLUX_LIMITER,R, &
@@ -258,7 +253,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO J=1,JBAR
             DO I=1,IBM1
                ZZZ(1:4) = RHOP(I-1:I+2,J,K)*ZZP(I-1:I+2,J,K,N)
-               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)*R(I)
+               FFX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)*R(I)
             ENDDO
          ENDDO
       ENDDO
@@ -271,52 +266,24 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             JP2 = J+2
             DO I=1,IBAR
                ZZZ(1:4) = RHOP(I,JM1:JP2,K)*ZZP(I,JM1:JP2,K,N)
-               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
+               FFY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
             ENDDO
          ENDDO
       ENDDO
       !$OMP END DO NOWAIT
 
-      IF (.NOT. SM%DEPOSITING .OR. .NOT. GRAVITATIONAL_DEPOSITION) THEN
-         !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
-         DO K=1,KBM1
-            KM1 = K-1
-            KP2 = K+2
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ZZZ(1:4) = RHOP(I,J,KM1:KP2)*ZZP(I,J,KM1:KP2,N)
-                  FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
-               ENDDO
+      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
+      DO K=1,KBM1
+         KM1 = K-1
+         KP2 = K+2
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZZ(1:4) = RHOP(I,J,KM1:KP2)*ZZP(I,J,KM1:KP2,N)
+               FFZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
             ENDDO
          ENDDO
-         !$OMP END DO
-      ELSE
-         ! Experimental routine related to gravitational sedimentation in gas phase
-         ! If gravitation deposition is enabled, transport depositing aerosol via WW minus settling velocity
-         ! K. Overholt
-         DO K=1,KBM1
-            KM1 = K-1
-            KP2 = K+2
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ! Calculate WW_GRAV (terminal settling velocity)
-                  ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
-                  ZZ_GET(0) = 1 - SUM(ZZ_GET(1:N_TRACKED_SPECIES))
-                  TGAS = TMP(IIG,JJG,KKG)
-                  TWALL = WC%ONE_D%TMP_F
-                  TMP_FILM = 0.5_EB*(TGAS+TWALL)
-                  CALL GET_VISCOSITY(ZZ_GET,MUGAS,TMP_FILM)
-                  MASS_P = 0.125_EB*FOTHPI*SM%MEAN_DIAMETER**3*SM%DENSITY_SOLID
-                  KN = 2._EB*MFP25/SM%MEAN_DIAMETER*TGAS/298.15_EB
-                  WW_GRAV = GVEC(ABS(IOR))*SIGN(1,IOR)*MASS_P*(1._EB+1.25_EB*KN+0.41_EB*KN*EXP(-0.88_EB/KN))/ &
-                                                     (3._EB*CHI_D*MUGAS*SM%MEAN_DIAMETER)
-                  ! Calculate FZ including WW_GRAV effects
-                  ZZZ(1:4) = RHOP(I,J,KM1:KP2)*ZZP(I,J,KM1:KP2,N)
-                  FZ(I,J,K) = (WW(I,J,K) - WW_GRAV)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
+      ENDDO
+      !$OMP END DO
 
       !$OMP DO SCHEDULE(STATIC) &
       !$OMP PRIVATE(IW,WC,II,JJ,KK,IOR,SURF_INDEX,IIG,JJG,KKG,ZZZ,UN,RHO_D_DZDN)
@@ -344,7 +311,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                   !                       ^ WALL_INDEX(II+1,+1)
                   IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
                      ZZZ(1:3) = (/WC%RHO_F,RHOP(II+1:II+2,JJ,KK)/)*(/WC%ZZ_F(N),ZZP(II+1:II+2,JJ,KK,N)/)
-                     FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ)*R(II+1)
+                     FFX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ)*R(II+1)
                   ENDIF
                CASE(-1) OFF_WALL_SELECT_2
                   !            FX/UU(II-2)     ghost
@@ -352,27 +319,27 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                   !              ^ WALL_INDEX(II-1,-1)
                   IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
                      ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),WC%RHO_F/)*(/ZZP(II-2:II-1,JJ,KK,N),WC%ZZ_F(N)/)
-                     FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ)*R(II-2)
+                     FFX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ)*R(II-2)
                   ENDIF
                CASE( 2) OFF_WALL_SELECT_2
                   IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
                      ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ+1:JJ+2,KK)/)*(/WC%ZZ_F(N),ZZP(II,JJ+1:JJ+2,KK,N)/)
-                     FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ)
+                     FFY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ)
                   ENDIF
                CASE(-2) OFF_WALL_SELECT_2
                   IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
                      ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),WC%RHO_F/)*(/ZZP(II,JJ-2:JJ-1,KK,N),WC%ZZ_F(N)/)
-                     FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ)
+                     FFY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ)
                   ENDIF
                CASE( 3) OFF_WALL_SELECT_2
                   IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
                      ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ,KK+1:KK+2)/)*(/WC%ZZ_F(N),ZZP(II,JJ,KK+1:KK+2,N)/)
-                     FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ)
+                     FFZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ)
                   ENDIF
                CASE(-3) OFF_WALL_SELECT_2
                   IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
                      ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),WC%RHO_F/)*(/ZZP(II,JJ,KK-2:KK-1,N),WC%ZZ_F(N)/)
-                     FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ)
+                     FFZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ)
                   ENDIF
             END SELECT OFF_WALL_SELECT_2
 
@@ -404,17 +371,17 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
          SELECT CASE(IOR)
             CASE( 1)
-               FX(II,JJ,KK)   = UN*WC%RHO_F*WC%ZZ_F(N)*R(II)
+               FFX(II,JJ,KK)   = UN*WC%RHO_F*WC%ZZ_F(N)*R(II)
             CASE(-1)
-               FX(II-1,JJ,KK) = UN*WC%RHO_F*WC%ZZ_F(N)*R(II-1)
+               FFX(II-1,JJ,KK) = UN*WC%RHO_F*WC%ZZ_F(N)*R(II-1)
             CASE( 2)
-               FY(II,JJ,KK)   = UN*WC%RHO_F*WC%ZZ_F(N)
+               FFY(II,JJ,KK)   = UN*WC%RHO_F*WC%ZZ_F(N)
             CASE(-2)
-               FY(II,JJ-1,KK) = UN*WC%RHO_F*WC%ZZ_F(N)
+               FFY(II,JJ-1,KK) = UN*WC%RHO_F*WC%ZZ_F(N)
             CASE( 3) 
-               FZ(II,JJ,KK)   = UN*WC%RHO_F*WC%ZZ_F(N)
+               FFZ(II,JJ,KK)   = UN*WC%RHO_F*WC%ZZ_F(N)
             CASE(-3) 
-               FZ(II,JJ,KK-1) = UN*WC%RHO_F*WC%ZZ_F(N)
+               FFZ(II,JJ,KK-1) = UN*WC%RHO_F*WC%ZZ_F(N)
          END SELECT
 
       ENDDO WLOOP2_FL
@@ -426,9 +393,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                DEL_RHO_D_DEL_Z(I,J,K,N) = -DEL_RHO_D_DEL_Z(I,J,K,N)             &
-                                        + (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
-                                        + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
-                                        + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)
+                                        + (FFX(I,J,K)-FFX(I-1,J,K))*RDX(I)*RRN(I) &
+                                        + (FFY(I,J,K)-FFY(I,J-1,K))*RDY(J)        &
+                                        + (FFZ(I,J,K)-FFZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
       ENDDO
@@ -448,10 +415,11 @@ SUBROUTINE MASS_FINITE_DIFFERENCES_ET(NM)
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW
-INTEGER  :: I,J,K,N
+REAL(EB) :: TNOW,UN
+INTEGER  :: I,J,K,N,IOR,IW,II,JJ,KK
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
-TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
+!TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
 
@@ -472,6 +440,51 @@ ELSE
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
 ENDIF
 
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
+       
+   II  = WC%ONE_D%II 
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IOR = WC%ONE_D%IOR
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         UN = UU(II,JJ,KK)
+      CASE(-1)
+         UN = UU(II-1,JJ,KK)
+      CASE( 2)
+         UN = VV(II,JJ,KK)
+      CASE(-2)
+         UN = VV(II,JJ-1,KK)
+      CASE( 3)
+         UN = WW(II,JJ,KK)
+      CASE(-3)
+         UN = WW(II,JJ,KK-1)
+   END SELECT
+
+   ! In case of interpolated boundary, use the original velocity, not the averaged value
+
+   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,0)   = WC%RHO_F*UN/UU(II,JJ,KK)  *R(II)
+      CASE(-1)
+         IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,0) = WC%RHO_F*UN/UU(II-1,JJ,KK)*R(II-1)
+      CASE( 2)
+         IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,0)   = WC%RHO_F*UN/VV(II,JJ,KK)
+      CASE(-2)
+         IF (ABS(VV(II,JJ-1,KK))>TWO_EPSILON_EB) FY(II,JJ-1,KK,0) = WC%RHO_F*UN/VV(II,JJ-1,KK)
+      CASE( 3)
+         IF (ABS(WW(II,JJ,KK))  >TWO_EPSILON_EB) FZ(II,JJ,KK,0)   = WC%RHO_F*UN/WW(II,JJ,KK)
+      CASE(-3)
+         IF (ABS(WW(II,JJ,KK-1))>TWO_EPSILON_EB) FZ(II,JJ,KK-1,0) = WC%RHO_F*UN/WW(II,JJ,KK-1)
+   END SELECT
+
+ENDDO WALL_LOOP
+
 !$OMP WORKSHARE
 FRHO = 0._EB
 !$OMP END WORKSHARE
@@ -488,14 +501,42 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 !$OMP END DO NOWAIT
-!$OMP END PARALLEL 
-
-! Compute the species equation differences
+!$OMP END PARALLEL
  
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-   SM=>SPECIES_MIXTURE(N)
+   !$OMP DO SCHEDULE(STATIC) &
+   !$OMP PRIVATE(IW,WC,II,JJ,KK,IOR)
+   WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC=>WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
+          
+      II  = WC%ONE_D%II 
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IOR = WC%ONE_D%IOR
+     
+      ! Compute species mass flux on the face of the wall cell
 
+      SELECT CASE(IOR)
+         CASE( 1)
+            FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*R(II)
+         CASE(-1)
+            FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)*R(II-1)
+         CASE( 2)
+            FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+         CASE(-2)
+            FY(II,JJ-1,KK,N) = WC%RHO_F*WC%ZZ_F(N)
+         CASE( 3) 
+            FZ(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+         CASE(-3) 
+            FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)
+      END SELECT
+
+   ENDDO WALL_LOOP_2
+   !$OMP END DO
+
+!    SM=>SPECIES_MIXTURE(N)
 !    IF (SM%DEPOSITING .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY
    
    !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
