@@ -149,7 +149,7 @@ Central differencing, Godunov's scheme, and MINMOD are essentially included for 
 \label{sec_time_splitting}
 
 Following the corrector step of the transport scheme, source terms are applied to the scalars.  The source terms are typically related to particle evaporation or combustion, and these processes are computed at the end of the time step. In the case of combustion, the total mass of a grid cell is not changed; rather the species mass fractions change. For particle evaporation, mass is simply added to the cell, particle by particle, and the species mass fractions are adjusted accordingly.
-\be
+\be \label{eq:mass_source_terms}
    (\rho Z_\alpha)_{ijk}^{n+1} = (\rho Z_\alpha)_{ijk}^{n+1} + \dt \, \left( \dm_{\alpha}''' + \dm_{b,\alpha}''' \right)_{ijk}
 \ee
 
