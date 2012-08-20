@@ -392,7 +392,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               DEL_RHO_D_DEL_Z(I,J,K,N) = -DEL_RHO_D_DEL_Z(I,J,K,N)             &
+               DEL_RHO_D_DEL_Z(I,J,K,N) = -DEL_RHO_D_DEL_Z(I,J,K,N)               &
                                         + (FFX(I,J,K)-FFX(I-1,J,K))*RDX(I)*RRN(I) &
                                         + (FFY(I,J,K)-FFY(I,J-1,K))*RDY(J)        &
                                         + (FFZ(I,J,K)-FFZ(I,J,K-1))*RDZ(K)
@@ -494,9 +494,9 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         FRHO(I,J,K) = (FX(I,J,K,0)*UU(I,J,K)-FX(I-1,J,K,0)*UU(I-1,J,K))*RDX(I)*RRN(I) &
-                     + (FY(I,J,K,0)*VV(I,J,K)-FY(I,J-1,K,0)*VV(I,J-1,K))*RDY(J)        &
-                     + (FZ(I,J,K,0)*WW(I,J,K)-FZ(I,J,K-1,0)*WW(I,J,K-1))*RDZ(K) 
+         FRHO(I,J,K) = (FX(I,J,K,0)*UU(I,J,K)*R(I)-FX(I-1,J,K,0)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+                     + (FY(I,J,K,0)*VV(I,J,K)     -FY(I,J-1,K,0)*VV(I,J-1,K)       )*RDY(J)        &
+                     + (FZ(I,J,K,0)*WW(I,J,K)     -FZ(I,J,K-1,0)*WW(I,J,K-1)       )*RDZ(K) 
       ENDDO
    ENDDO
 ENDDO
@@ -544,10 +544,10 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DEL_RHO_D_DEL_Z(I,J,K,N) = -DEL_RHO_D_DEL_Z(I,J,K,N)                                       &
-                                     + (FX(I,J,K,N)*UU(I,J,K)-FX(I-1,J,K,N)*UU(I-1,J,K))*RDX(I)*RRN(I) &
-                                     + (FY(I,J,K,N)*VV(I,J,K)-FY(I,J-1,K,N)*VV(I,J-1,K))*RDY(J)        &
-                                     + (FZ(I,J,K,N)*WW(I,J,K)-FZ(I,J,K-1,N)*WW(I,J,K-1))*RDZ(K)
+            DEL_RHO_D_DEL_Z(I,J,K,N) = -DEL_RHO_D_DEL_Z(I,J,K,N)                                                   &
+                                     + (FX(I,J,K,N)*UU(I,J,K)*R(I)-FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+                                     + (FY(I,J,K,N)*VV(I,J,K)     -FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
+                                     + (FZ(I,J,K,N)*WW(I,J,K)     -FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
          ENDDO
       ENDDO
    ENDDO
