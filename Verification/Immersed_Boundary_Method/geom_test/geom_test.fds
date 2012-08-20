@@ -1,4 +1,4 @@
-&HEAD CHID='geom_test',TITLE='geometry test case SVN $Revision: 9488 $' /
+&HEAD CHID='geom_test',TITLE='geometry test case SVN $Revision$' /
 
 &MESH IJK=32,32,32, XB=0.0,16,0.0,16,0.0,16 /
 

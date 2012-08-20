@@ -1,4 +1,4 @@
-&HEAD CHID='bound_test',TITLE='slice bound test $Revision: 10453 $' /
+&HEAD CHID='bound_test',TITLE='slice bound test $Revision$' /
 
 &MESH IJK=4,5,5, XB=0.0,4.0,0.0,3.0,0.0,5.0 /
 

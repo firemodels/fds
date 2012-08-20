@@ -1,4 +1,4 @@
-&HEAD CHID='thermocouples', TITLE='Test of time-dependent TC model, SVN $Revision: 6005 $'/
+&HEAD CHID='thermocouples', TITLE='Test of time-dependent TC model, SVN $Revision$'/
 
 &MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=20,20,20 /
 

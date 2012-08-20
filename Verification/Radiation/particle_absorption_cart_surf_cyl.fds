@@ -13,7 +13,7 @@ By setting dt = 0.01 s, m = 0.01 kg and c_p = 1.0 kJ/kg, the numerical
 value of dT should be equal to the time averaged Q_abs.
 
 --------------------FDS Data-----------------------------
-&HEAD CHID='particle_absorption_cart_surf_cyl',TITLE='Cartesian particle absorption test case $Revision: $' /
+&HEAD CHID='particle_absorption_cart_surf_cyl',TITLE='Cartesian particle absorption test case $Revision$' /
 
 MESH 1 has particles with cartesian surf.
 MESH 2 has particles with cartesian surf and split = 2 (x)

@@ -10,7 +10,7 @@ where lambda = x_f /2 sqrt(alpha t) is the root of the (very complicated)
 trancendential equation. With the given material properties, 
 lambda = 0.189.
 
-&HEAD	CHID = 	 'pcm_slab',	TITLE = 'Phace change test case SVN $Revision: 3324 $'/
+&HEAD	CHID = 	 'pcm_slab',	TITLE = 'Phace change test case SVN $Revision$'/
 
 &TIME	T_END =	36000. DT = 1.0 WALL_INCREMENT = 1	/
 

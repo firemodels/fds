@@ -1,4 +1,4 @@
-&HEAD CHID='brand2', TITLE='brand test, SVN $Revision: 4615 $' /
+&HEAD CHID='brand2', TITLE='brand test, SVN $Revision$' /
 
 &INIT DT_INSERT=2.0 /
 
