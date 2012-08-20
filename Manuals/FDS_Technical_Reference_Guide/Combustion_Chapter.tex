@@ -1,9 +1,92 @@
 \chapter{Combustion (Chemically Reacting Flows)}
 
 \label{combustionsection}
+In FDS, the combustion routine is primarily responsible for the chemical mass production rate of species $\alpha$ per using volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ which appears in the species transport equation, \ref{species}. The heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, is also found by the combustion routine found by multiplying the sum of the lumped species mass production rates by their respective heat of formation, \ref{EDC1}.
 
 FDS can model multiple, simultaneous, reversible chemical reactions.  In FDS only the species that have mixed have the potential to react. Once mixed, FDS uses one of two approaches to compute the reaction rate for a chemical reaction.  The first approach is an infinite fast chemical reaction rate. That is the reactants (e.g. fuel and air) react infinitely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to specified Arrhenius reaction parameters. The Arrhenius rate can still be limited by the amount of mixing within a computational cell. This latter model is most often used in a direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be modeled directly. However, most often for large eddy simulations (LES), where the grid is not fine enough to resolve the diffusion of fuel and oxygen,
 the mixing-controlled combustion model is assumed. A single FDS simulation can contain a mix of reaction rate types.
+
+\section{Lumped Species Approach}
+In the typical FDS problem we consider three lumped species: fuel, air, and products:
+\begin{equation}\label{eq:simple}
+\mathrm{Fuel + Air \rightarrow Products}
+\end{equation}
+The key assumption made in lumping the primitive species is that the new species groups transport together (implying equal diffusivities). Lumped species are also produced and consumed together. We can expand \ref{eq:simple}, to show the components of the lumped species for a simple, one-step methane reaction. Here air is assumed to be 21\% O$_2$ and 79\% N$_2$ by volume.
+\begin{equation}\label{eq:lumped_expand}
+\mathrm{2\underbrace{(\mbox{O}_2+(.79/.21)\mbox{N}_2)}_\text{Background(Oxidant),~Z$_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~Z$_1$} \rightarrow 1\underbrace{(\mbox{CO}_2+2\mbox{H}_2\mbox{O}+2(.79/.21)\mbox{N}_2)}_\text{Products,~Z$_2$}}
+\end{equation}
+As described by \ref{eq:lumped_expand}, two moles of the lumped species `Background' react with one mole of lumped species `Fuel', to produce one mole of lumped species `Products'. To convert from lumped species to primitive species, we need to find the mass fractions of the primitive species within a particular lumped species if the lumped species mass fraction were one. Consider, Z$_0$, the background species:
+
+\begin{alignat}{4}\label{eq:backgroud}
+Y_\mathrm{O_{2}} &= \frac{W_\mathrm{O_{2}}}{W_\mathrm{O_{2}}+(.79/.21)W_\mathrm{N_{2}}} &=& \frac{W_\mathrm{O_{2}}}{W_{\mathrm{Z_0}}} &= 0.2330 \\
+\nonumber Y_\mathrm{N_{2}} &= \frac{(.79/.21)W_\mathrm{N_{2}}}{W_\mathrm{O_{2}}+(.79/.21)W_\mathrm{N_{2}}} &=& \frac{(.79/.21)W_\mathrm{N_{2}}}{W_{\mathrm{Z_0}}} &= 0.7670
+\end{alignat}
+Lumped species are defined by the vector $\textbf{Z}$ which is indexed from $0:N_{z}$, since the background species will not be transported. This means that $N_{z}$ transport equations are solved. Each lumped species is a combination of primitive species which we can define by the vector $\textbf{Y}$ which is indexed from $1:N_{y}$. Therefore, the transformation matrix, $A$ is $N_{y} \times (N_{z}+1)$ (rows $\times$ columns) since it includes the background species. Transformation from lumped species to primitive species is defined by: 
+\begin{equation}\label{eq:transform}
+\textbf{Y}=A\textbf{Z} 
+\end{equation}
+The elements are $A$ are the mass fractions for each primitive species in a given lumped species:
+\begin{equation}\label{eq:A_def}
+A_{\alpha i} = \frac{\upsilon_{\alpha i}W_{\alpha}}{\displaystyle \sum_{\alpha}\upsilon_{\alpha i}W_{\alpha}}
+\end{equation}
+where $\upsilon_{\alpha i}$ are the volume ratios of primitive species $\alpha$ in lumped species {i}.
+
+If we look at the primitive species in \ref{eq:lumped_expand} and assume that $\mathbf{Z} = [0.3\, \, 0.2\, \, 0.5]^\mathrm{T}$, we can transform from lumped species to primitive species:
+
+\begin{displaymath}
+\mathbf{Y}=\left[\begin{array}{c}
+       Y_{O_2} \\
+       Y_{N_2} \\
+       Y_{CH_4} \\
+       Y_{CO_2} \\
+       Y_{H_2O} \\
+     \end{array}\right]
+     =\left[\begin{array}{ccc}
+     0.2330 & 0 & 0 \\
+     0.7670 & 0 & 0.7248 \\
+     0 & 1 & 0 \\
+     0 & 0 & 0.1514 \\
+     0 & 0 & 0.1238 \\
+     \end{array}\right]
+     \left[\begin{array}{c}
+     0.3 \\
+     0.2 \\
+     0.5 \\
+     \end{array}\right]
+     =\left[\begin{array}{c}
+     0.0699\\
+     0.5925\\
+     0.2000\\
+     0.0757\\
+     0.0619\\
+     \end{array}\right]
+\end{displaymath}
+To convert back to lumped species from primitive species we can perform linear algebra operations to get:
+\begin{equation}\label{eq:transform_back}
+\textbf{Z}=B\textbf{Y} \, \, \, \text{where} \, \, \, \, B=(A^TA)^{-1}A^T
+\end{equation}
+If we revisit \ref{eq:lumped_expand} but decompose the reaction into all primitive species, we get:
+\begin{equation}\label{eq:prim}
+\underbrace{\mbox{CH}_4}_\text{Fuel}+\underbrace{2\mbox{O}_2}_\text{Oxidizer}+\underbrace{7.52\mbox{N}_2}_\text	{Background}\rightarrow \underbrace{\mbox{CO}_2}_\text{P1}+\underbrace{2\mbox{H}_2\mbox{O}}_\text{P2}+\underbrace{7.52\mbox{N}_2}_\text{Background}
+\end{equation}
+In this formulation, we would have to solve transport equations for four species compared to two when the species were lumped. Note that in cases with all primitive species, $A$ becomes an identity matrix. With complex reactions, tracking all of the primitive species could lead to solving 10-20 equations, each with an additional 5~\% computational cost.
+
+\subsection{Specified CO and Soot Yield}
+The default reaction system in FDS is that fuel plus oxidizer goes to products, where the products are carbon dioxide, water vapor, nitrogen, carbon monoxide, and soot. The carbon monoxide and soot yields are by default zero and can be specified by the user on the {\ct REAC} line. For a typical hydrocarbon fuel, the reaction in FDS follows:
+
+\begin{eqnarray}
+\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2)}_\text{Background(Oxidant),~Z$_0$}+\nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~Z$_1$} \rightarrow \\
+\nonumber \nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~Z$_2$}
+\end{eqnarray}
+Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha i}$ and the stoichiometric coefficients for the lumped $i$ are denoted by $\nu_{i}$. CO and soot yields ($y_{CO}$ and $y_{S}$ respectively) specified by the user determine the stoichiometric coefficients on the product side of the reaction by:
+\begin{equation}\label{eq:co_yield}
+\nu_{2}\upsilon_{\mathrm{CO},2}=-\nu_{1}\frac{W_1}{W_{\mathrm{CO}}}y_{\mathrm{CO}}
+\end{equation}
+\begin{equation}\label{eq:soot_yield}
+\nu_{2}\upsilon_{\mathrm{S},2}=-\nu_{1}\frac{W_1}{W_{\mathrm{S}}}y_{\mathrm{S}}
+\end{equation}
+Here, $W_{1}$ is the molecular weight of lumped species 1. The remaining coefficients come from an atom balance.
+
 
 \section{Eddy Dissipation Concept}
 In the eddy dissipation concept model (EDC) each computational cell can be thought of as a batch reactor. The species contained within this reactor exist in one of two states: unmixed or mixed. The proportion of the cell in the mixed state is governed by $\zeta$, the unmixed fraction. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). In a combustion sense, $\zeta=1$  represents a diffusion flame and $\zeta=0$ represents a premixed flame. $\zeta(t;\tau_{mix})$, a function of time (t) and parameterized by the mixing time ($\tau_{mix}$), is governed by the following ordinary differential equation:
@@ -11,10 +94,30 @@ In the eddy dissipation concept model (EDC) each computational cell can be thoug
 \begin{equation}\label{eq:zeta}
 \frac{\mbox{d}\zeta}{\mbox{d}t}=-\frac{\zeta}{\tau_{mix}}
 \end{equation}     
-
 Only those species in the mixed state can react, therefore the proportion of the cell (reactor) composition in the mixed state must be known as function of time. 
 
-$\tau_{mix}$ discussion
+The mixing time, $\tau_{mix}$, is found by examining characteristics of the local state of the flow field by \cite{McDermott:2011}:
+\begin{equation}\label{eq:tau_mix}
+\tau_{mix}=\mbox{max}(\tau_{chem},\mbox{min}(\tau_{d},\tau_{u},\tau_{g},\tau_{flame}))
+\end{equation}
+where $\tau_{chem}$ is the chemical time scale, $\tau_{d}$ is associated with molecular diffusion, $\tau_{g}$ is the gravitational time school, $\tau_{u}$ is the time scale associated with turbulent advection, and $\tau_{flame}$ is upper limit of the time scale since all fuel must be consumed within a computational cell. The mathematical description of the sub models are:
+\begin{equation}\label{eq:tau_d}
+\tau_{d}=\frac{\mbox{Sc}_{t}\bar{\rho}\Delta^2}{\mu+\mu_{t}}
+\end{equation}
+\begin{equation}\label{eq:tau_u}
+\tau_{u}=\frac{\Delta}{\sqrt{2k_{sgs}}}
+\end{equation}
+\begin{equation}\label{eq:tau_g}
+\tau_{g}=\sqrt{2\Delta/g}
+\end{equation}
+In FDS, $\Delta$ is the filter width and is equivalent to the local cell size $\delta x$. Figure \ref{fig:reac_time_scale} shows the impact of the components of \ref{eq:tau_mix} on the value of $\tau_{mix}$. $\tau_{mix}$ is represented by the bold solid line.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{FIGURES/reaction_time_scale}
+\caption{\label{fig:reac_time_scale} Reaction time scale model.}
+\end{center}
+\end{figure}
 
 The following equations define the cell composition:
 \begin{eqnarray}\label{eq:mixunmix}
@@ -56,7 +159,7 @@ Note that the rate expression can be dependent on temperature and that the rate 
 \frac{\mbox{d}\phi_\F}{\mbox{d}t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
 \end{equation}
 
-\subsection{Infinite Fast Reaction}
+\subsection{Infinitely Fast Reaction}
 For fast chemistry reactions, $E$ and $n$ in \ref{eq:Arrheniusratemode} are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\frac{\mbox{d}\phi_\F}{\mbox{d}t}$ becomes sufficiently large such that all of the fuel in a computational cell is consumed in a single time step, effectively making the rate infinite. However, the rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.   
 
 \subsection{Arrhenius Reaction}
@@ -65,7 +168,7 @@ oxygen, and combustion products).  This allows the flame to be resolved in a DNS
 temperatures can be used to determine the reaction kinetics, Arrhenius rates can be used.
 
 
-\section{Reaction with Local Extinction}
+\subsection{Local Extinction}
 
 \label{extinction}
 
@@ -101,169 +204,6 @@ extinction based on the species and temperature present in the flame sheet.  The
 
 \end{enumerate}
 
-\section{Simplified Chemistry}
-
-\label{simplechemistry}
-
-\subsection{Single-step Reaction}
-
-Most ordinary combustibles can be represented by the simple single-step reaction:
-
-\be  \mathrm{C_xH_yO_zN_a} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
-     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2}  \label{stoich}
-\ee
-Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. Soot is assumed to be a mixture of carbon and hydrogen with the hydrogen atomic
-fraction given by $X_\Hy$. The stoichiometric coefficient, $\nu_\So$, represents the amount of fuel that is converted to soot. It is related to the
-{\em soot yield}, $y_\So$, via the relation:
-\be
-   \nu_\So = \frac{W_\F}{W_\So} \; y_\So  \quad ; \quad  W_\So = X_\Hy W_\Hy + (1 - X_\Hy) W_\C  \label{soot_yield}
-\ee
-Likewise, the stoichiometric coefficient of CO, $\nu_\CO$, is related to the CO {\em yield}, $y_\CO$, via:
-\be
-   \nu_\CO = \frac{W_\F}{W_\CO} \; y_\CO  \label{CO_yield}
-\ee
-The yields of soot and CO are based on ``well-ventilated'' or ``post-flame'' measurements. The increased production of CO and soot in an under-ventilated
-compartment will be addressed in the following sections.
-
-This reaction can also be represented as:
-
-\be  \mathrm{Fuel} +  \nu_\mathrm{Air} \, \mathrm{Air}  \rightarrow  \mathrm{Products}\label{stoichair}
-\ee
-
-Air is a lumped species consisting of a mixture of nitrogen, oxygen, water vapor, and carbon dioxide (carbon dioxide is included to attenuate radiation over large distances and water vapor is included for attenuation and to support simulations with sprinklers).  Products is a lumped species consisting of all the products listed in \ref{stoich} plus the nitrogen, water vapor, and carbon dioxide from the Air that reacted with the fuel.  If we allow for the presence of a diluent gas in the fuel stream, then the Fuel becomes a lumped species consisting of fuel and diluent.  We name these species $Z_0$ for Air, $Z_1$ for Fuel, and $Z_2$ for Products.  When using simple chemistry, $Z_1$ and $Z_2$ are tracked explicitly and $Z_0$ is tracked implicitly as the background species.  The mass fractions of the component gases in these species are given as:
-
-\noindent
-$Z_0$: Air
-\begin{eqnarray}
-Y_{\NTWO}(Z_0) & = & Y_\NTWO^\infty\\*[.1in]
-Y_{\OTWO}(Z_0) & = & Y_\OTWO^\infty\\*[.1in]
-Y_{\COTWO}(Z_0) & = & Y_\COTWO^\infty\\*[.1in]
-Y_{\HTWOO}(Z_0) & = & Y_\HTWOO^\infty
-\end{eqnarray}
-$Z_1$: Fuel
-\begin{eqnarray}
-Y_{\F}(Z_1) & = & Y_\F
-\end{eqnarray}
-$Z_2$: Products
-\begin{eqnarray}
-Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\COTWO^\infty +\nu_{\COTWO} W_{\COTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\HTWOO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\CO}(Z_2) & = & \frac{\nu_{\CO} W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
-\end{eqnarray}
-Species yields of combinations of $Z_0$, $Z_1$, and $Z_2$ are given as:
-\be
-Y_\alpha(Z_0,Z_1,Z_2)=Y_\alpha(Z_0) \, (1 - Z_1 - Z_2) + Y_\alpha(Z_1) \, Z_1 + Y_\alpha(Z_2) \, Z_2
-\ee
-The stoichiometric coefficients in the $Z_2$ species yields are:
-
-\parbox{2.5in}{
-\begin{eqnarray*}  \nu_\NTWO  &=& \frac{\hbox{a}}{2}\\*[.1in]
-                  \nu_\OTWO  &=& \nu_\COTWO + \frac{\nu_\CO+\nu_\HTWOO-\hbox{z}}{2}\\*[.1in]
-                  \nu_\COTWO &=& \hbox{x} - \nu_\CO - (1-X_\Hy) \nu_\So  \\*[.1in]
-\end{eqnarray*} }
-\hfill \parbox{3.5in}{\begin{eqnarray}
-                  \nu_\HTWOO &=& \frac{\hbox{y}}{2}- X_\Hy \nu_\So\\*[.1in]
-                  \nu_\CO    &=& \frac{W_\F}{W_\CO} \; y_\CO \\*[.1in]
-                  \nu_\So    &=& \frac{W_\F}{W_\So} \; y_\So
-\end{eqnarray} }
-Remember that x is the number of carbon atoms, y is the number of hydrogen atoms, z is the number of oxygen atoms, and a is the number of nitrogen atoms in the fuel molecule.
-It is important to note that the definitions of $Z_0$, $Z_1$, and $Z_2$ do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
-
-\subsection{Two-Step Reaction}
-
-The previous section describes the ``complete'' reaction as the conversion of fuel to
-products such that the production rate of each product species is proportional to the fuel consumption rate.
-This means that for each fuel molecule, fixed amounts of CO$_2$, H$_2$O, CO, and soot are formed and these products
-persist in the plume indefinitely with no further reaction. This is not an unreasonable assumption if
-the purpose of the fire simulation is to assess the impact of the fire on the larger space.
-However, in under-ventilated fires, soot and CO are produced at higher rates,
-and exist within the fuel-rich flame envelope at higher concentrations,
-than would otherwise be predicted with a single set of fixed yields that are based on post-flame measurements. To account for the
-production of CO and its eventual oxidation at the flame envelope or within a hot upper layer,
-an additional reaction is now needed:
-\begin{eqnarray}
-\mathrm{C_xH_yO_zN_a} +  \nu_\OTWO' \mathrm{O_2}  &\rightarrow&  \nu_\HTWOO \mathrm{H_2O} + (\nu_\CO'+ \nu_\CO) \, \mathrm{CO} +
-     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2}   \\*[.1in]
-\nu_\CO' \; \Big[ \mathrm{CO} + \ha \mathrm{O_2}  &\rightarrow&  \mathrm{CO_2}  \Big]
-\label{3reac} \end{eqnarray}
-The brackets around the second reaction are there merely to emphasize that the sum of the two reactions equal Eq.~(\ref{stoich}).
-There are two stoichiometric coefficients for CO -- the first, $\nu_\CO'=\hbox{x}-(1-X_\Hy) \nu_\So-\nu_\CO$,
-represents CO that is produced in the first
-step of the reaction that can potentially be converted to CO$_2$ assuming the conditions are favorable. $\nu_\CO'$ is equivalent to $\nu_\COTWO$ in
-Eq.~(\ref{stoich}). The second coefficient, $\nu_\CO$,
-is the so-called ``well-ventilated,'' or ``post-flame,'' value that was introduced in the previous section. The proposed model of CO production
-still does not contain the necessary kinetic mechanism to predict the ``post-flame'' concentration of CO without the prescription of the
-measured value of the post-flame CO yield. Rather, the proposed model includes the production of large amounts of CO in the first step of a two-step
-reaction, followed by a partial conversion to CO$_2$ if there is a sufficient amount of oxygen present.
-
-To describe the composition of the gas species, an additional lumped species is required bringing the total to four lumped species.  We can rewrite the above two step reaction as:
-
-\begin{eqnarray}
-Fuel + \nu_{Air,1} Air &\rightarrow&  Incomplete \; Products\\*[.1in]
-Incomplete \; Products + \nu_{Air,2} Air &\rightarrow&  Complete \; Products
-\label{4lumped}
-\end{eqnarray}
-
-It can be seen from this that the four lumped species are: $Z_0$ for Air, $Z_1$ for Fuel, $Z_2$ for the products of incomplete combustion, and $Z_3$ for the products of complete combustion.  The species yields are:
-
-$Z_0$: Air
-
-\begin{eqnarray}
-Y_{\NTWO}(Z_0) & = & Y_\NTWO^\infty\\*[.1in]
-Y_{\OTWO}(Z_0) & = & Y_\OTWO^\infty\\*[.1in]
-Y_{\COTWO}(Z_0) & = & Y_\COTWO^\infty\\*[.1in]
-Y_{\HTWOO}(Z_0) & = & Y_\HTWOO^\infty
-\end{eqnarray}
-
-$Z_1$: Fuel
-
-\begin{eqnarray}
-Y_{\F}(Z_1) & = & Y_\F
-\end{eqnarray}
-
-$Z_2$: Products of Incomplete Combustion
-
-\begin{eqnarray}
-Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air,1} W_{Air} Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air} Y_\COTWO^\infty}{W_F + \nu_{Air} W_{Air}} \\*[.1in]
-Y_{\HTWOO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\CO}(Z_2) & = & \frac{\nu_{\CO'} W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
-\end{eqnarray}
-
-$Z_3$: Products of Complete Combustion
-
-\begin{eqnarray}
-Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air,2} W_{Air}  Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\COTWO^\infty +\nu_{\COTWO} W_{\COTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\HTWOO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\CO}(Z_2) & = & \frac{\nu_\CO W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
-\end{eqnarray}
-
-
-The stoichiometric coefficients are defined:
-
-\parbox{2.5in}{
-\begin{eqnarray*} \nu_\NTWO  &=& \frac{\hbox{a}}{2}\\*[.1in]
-                  \nu_\OTWO' &=& \frac{\nu_\CO'+\nu_\HTWOO-z}{2}\\*[.1in]
-                  \nu_\OTWO  &=& \nu_\COTWO + \frac{\nu_\CO+\nu_\HTWOO-z}{2}\\*[.1in]
-                  \nu_\COTWO &=& \hbox{x} - (1-X_\Hy) \nu_\So \\*[.1in]
-                  \nu_\M     &=& \hbox{b} \end{eqnarray*} }
-\hfill \parbox{3.5in}{\begin{eqnarray}
-                  \nu_\HTWOO &=& \frac{\hbox{y}}{2}- X_\Hy \nu_\So\\*[.1in]
-                  \nu_\CO'   &=& x - \nu_\CO - (1-X_\Hy) \nu_\So \\*[.1in]
-                  \nu_\CO    &=& \frac{W_\F}{W_\CO} \; y_\CO \\*[.1in]
-                  \nu_\So    &=& \frac{W_\F}{W_\So} \; y_\So
-\end{eqnarray} }
-Although these formulae appear complicated, most are determined directly from the composition of the fuel molecule. The only information
-expected of the modeler are the fuel composition, the soot and CO yields, and the atomic fraction of hydrogen in the soot.
-
-\newpage
-
-
 \section{Time Integration of Chemical Reactions}
 
 \subsection{Single Step, Mixing-Controlled Reaction Rates}
@@ -272,17 +212,18 @@ For single-step chemical reactions with mixing-controlled reaction rates, an exp
 
 \subsection{Other Chemistry Models}
 
-For anything other than single step chemistry with mixing-controlled reaction rates a more complex ODE solver is employed.  A fourth-order explicit integrator with error control is used.  Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance.  Time integration is halted once no reactants are present of if the local heat release rate exceeds maximum allowable values.
+For anything other than single step chemistry with mixing-controlled reaction rates a more complex ODE solver is employed.  A fourth-order explicit integrator with error control is used.  Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance.  Time integration is halted once no reactants are present or if the local heat release rate exceeds maximum allowable values.
 
 More information on the numerical methods of the integrators can be found in Appendix~\ref{chemistry_integration}.
 
 
 \section{Heat Release Rate}
 
-The discussion of the various reaction mechanisms above is essentially book-keeping, the accounting of the gas
-molecules formed in the combustion process. But what of the heat released?
-
-Each chemical reaction in FDS must be defined with a fuel and a heat of combustion.  "Fuel" in this case merely denotes which species the heat of combustion is based upon.  During time integration of the reactions, there is a time integration of the heat release rate.  While the mixing controlled reaction rate is an easily computed and robust subgrid-scale model of and the Arrhenius rate is certainly a robust model when applicable, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
+Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
+\begin{equation}\label{eq:vol_heat_gen}
+\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime} \Delta H_{f,\alpha}
+\end{equation}
+While the mixing controlled reaction rate is an easily computed and robust subgrid-scale model of and the Arrhenius rate is certainly a robust model when applicable, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
 this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
 is sometimes too coarse to expect the simple mixing time model to work effectively.
 A scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
