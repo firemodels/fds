@@ -96,7 +96,7 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokezip_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -p -lifcore -L $(FORTLIBDIR) $(LIB_DIR)/lib_linux_intel_32/libz.a -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) $(LIB_DIR)/lib_linux_intel_32/libz.a -lpthread
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
