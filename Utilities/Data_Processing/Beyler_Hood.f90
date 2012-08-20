@@ -1,5 +1,5 @@
 !This program processes the fds devc_csv files for the Beyler_Hood validation cases
-!$Id: init.f90 4308 2009-07-01 18:44:04Z mcgratta $
+!$Id$
 PROGRAM BEYLER_HOOD
 IMPLICIT NONE
 INTEGER :: i,k
