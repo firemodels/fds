@@ -1,6 +1,6 @@
-// $Date: 2011-05-09 00:50:26 -0400 (Mon, 09 May 2011) $ 
-// $Revision: 8273 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #define PROGVERSION "1.0"
 

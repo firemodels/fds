@@ -5,9 +5,9 @@ MODULE GLOBAL_CONSTANTS
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
-CHARACTER(255), PARAMETER :: consid='$Id: cons.f90 10043 2012-02-10 18:46:10Z drjfloyd $'
-CHARACTER(255), PARAMETER :: consrev='$Revision: 10043 $'
-CHARACTER(255), PARAMETER :: consdate='$Date: 2012-02-10 13:46:10 -0500 (Fri, 10 Feb 2012) $'
+CHARACTER(255), PARAMETER :: consid='$Id$'
+CHARACTER(255), PARAMETER :: consrev='$Revision$'
+CHARACTER(255), PARAMETER :: consdate='$Date$'
 
 ! Indices for various modes of operation
 

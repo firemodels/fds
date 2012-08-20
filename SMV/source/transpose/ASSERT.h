@@ -1,6 +1,6 @@
-// $Date: 2007-10-09 15:35:36 -0400 (Tue, 09 Oct 2007) $ 
-// $Revision: 824 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 /* ------------------ ASSERT ------------------------ */
 #ifndef ASSERT_DEFINED

@@ -1,6 +1,6 @@
-// $Date: 2008-10-30 14:05:58 -0400 (Thu, 30 Oct 2008) $ 
-// $Revision: 2575 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 #ifdef INMAIN
 #define EXTERN
 #else
