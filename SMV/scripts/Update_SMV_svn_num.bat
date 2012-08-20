@@ -23,14 +23,14 @@ set win_dir=%svn_root%\SMV\source\
 cd %win_dir%
 
 set scriptdir=%linux_svn_root%/SMV/scripts/
-set linux_smvdir=%linux_svn_root%/SMV/source
+set smv_sourcedir=%linux_svn_root%/SMV/source
 
 echo.
-echo Updating the directory %linux_smvdir% in the Linux repository to the SVN revision: %smv_revision%
-plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.sh  %linux_smvdir% %smv_revision% %LINUXHOST%
+echo Updating the directory %smv_sourcedir% in the Linux repository to the SVN revision: %smv_revision%
+plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.sh  %smv_sourcedir% %smv_revision% %linux_hostname%
 
 echo.
 echo Updating the directory %linux_smvdir% in the the OSX repository on %osx_hostname% to the SVN revision: %smv_revision%
-plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.sh  %linux_smvdir% %smv_revision% %osx_hostname%
+plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.sh  %smv_sourcedir% %smv_revision% %osx_hostname%
 
 pause
