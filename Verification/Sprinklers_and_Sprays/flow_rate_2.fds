@@ -1,4 +1,4 @@
-&HEAD CHID='flow_rate_2', TITLE='Sprinkler Flow Rate Test Case, SVN $Revision: 5360 $' /
+&HEAD CHID='flow_rate_2', TITLE='Sprinkler Flow Rate Test Case, SVN $Revision$' /
 
 &MESH IJK=40,40,16, XB=-5.0,5.0,-5.0,5.0,0.0,4.0 /
 

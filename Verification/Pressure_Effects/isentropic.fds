@@ -1,4 +1,4 @@
-&HEAD CHID='isentropic', TITLE='Test isentropic pressure rise, SVN $Revision: 5435 $'/
+&HEAD CHID='isentropic', TITLE='Test isentropic pressure rise, SVN $Revision$'/
 
 &MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=20,20,20 /
 &MESH XB=1.1,2.1,0.0,1.0,0.0,1.0, IJK=20,20,20 /
