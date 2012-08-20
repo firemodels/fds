@@ -1,1 +1,0 @@
-smokediff build: add pp_LINUX64 and pp_OSX64 directives to 64 bit smokediff builds
