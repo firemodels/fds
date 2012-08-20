@@ -1,7 +1,7 @@
 Water fog evaporate in a box until saturation
 This case tests conservation of mass and energy.
 
-&HEAD CHID='water_evaporation_3', TITLE='Water Evaporation Test, SVN $Revision: 7540 $' / 
+&HEAD CHID='water_evaporation_3', TITLE='Water Evaporation Test, SVN $Revision$' / 
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 / 
 

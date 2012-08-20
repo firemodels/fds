@@ -1,4 +1,4 @@
-&HEAD CHID='smoke_test2', TITLE='Verify Smokeview Smoke3D Feature, SVN $Revision: 2155 $' /
+&HEAD CHID='smoke_test2', TITLE='Verify Smokeview Smoke3D Feature, SVN $Revision$' /
 
 &MESH IJK=40,40,40, XB=0.0,10.0,0.0,10.0,0.0,4.0 /
 

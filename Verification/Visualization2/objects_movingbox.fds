@@ -1,4 +1,4 @@
-&HEAD CHID='objects_movingbox',TITLE='Smokeview device drawing test SVN $Revision: 5347 $' /
+&HEAD CHID='objects_movingbox',TITLE='Smokeview device drawing test SVN $Revision$' /
 
 test device that uses IF, GE and AND operators
 

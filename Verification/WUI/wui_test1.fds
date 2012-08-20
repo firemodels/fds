@@ -1,4 +1,4 @@
-&HEAD CHID='wui_test1',TITLE='WUI object test SVN $Revision: 7448 $' /
+&HEAD CHID='wui_test1',TITLE='WUI object test SVN $Revision$' /
 
   Test mcanopy and mhouse smokeview objects used in WUI simulations
 

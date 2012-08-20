@@ -1,7 +1,7 @@
 This example case demonstrates how to create pressure ZONEs that can be opened. 
 Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equilibriates.
 
-&HEAD CHID='zone_shape', TITLE='Test of opening pressure ZONEs, SVN $Revision: 2066 $' /
+&HEAD CHID='zone_shape', TITLE='Test of opening pressure ZONEs, SVN $Revision$' /
 
 &MESH IJK=25,50,12, XB=0.0, 5.0,0.0,10.0,0.0,2.4 /
 &MESH IJK=25,50,12, XB=5.0,10.0,0.0,10.0,0.0,2.4 /

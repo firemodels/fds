@@ -1,4 +1,4 @@
-&HEAD CHID='leak_test', TITLE='Test of Leakage and Fans, SVN $Revision: 7172 $' /
+&HEAD CHID='leak_test', TITLE='Test of Leakage and Fans, SVN $Revision$' /
 
 &MESH IJK=20,10,10, XB=-1.0, 1.0, 0.0, 1.0, 0.0, 1.0 /
 

@@ -1,4 +1,4 @@
-&HEAD CHID='scale1', TITLE='General purpose input file to test FDS timings, SVN $Revision: 5015 $' /
+&HEAD CHID='scale1', TITLE='General purpose input file to test FDS timings, SVN $Revision$' /
 
 &MULT ID='mesh multiplier', DX=1.0, DY=1.0, DZ=1.0, I_LOWER=-1, I_UPPER=0, J_LOWER=-1, J_UPPER=0, K_LOWER=0, K_UPPER=1 /
 

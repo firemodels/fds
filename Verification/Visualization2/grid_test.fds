@@ -1,4 +1,4 @@
-&HEAD CHID='grid_test',TITLE='Plume whirl case SVN $Revision: 9488 $' /
+&HEAD CHID='grid_test',TITLE='Plume whirl case SVN $Revision$' /
 
 &MESH IJK=16,4,4, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &MESH IJK=8,4,4, XB=1.0,2.0,0.0,1.0,0.0,1.0 /
