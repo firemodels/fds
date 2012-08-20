@@ -23,6 +23,6 @@ set target=intel_linux_64
 set fdsdir=%linux_svn_root%/FDS_Compilation/intel_linux_64
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% %linux_hostname%
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.sh %target% %fdsdir% %linux_hostname%
 
 pause
