@@ -1,8 +1,8 @@
-#!/bin/csh -f
+#!/bin/sh
 
-set directory=$1
-set  revision=$2
-set      host=$3
+directory=$1
+revision=$2
+host=$3
 
 echo Updating directory using
 echo directory: $directory
