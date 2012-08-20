@@ -36,16 +36,6 @@ intel_win_32 : exe       = background.exe
 intel_win_32 : $(objwin)
 	$(CC) -o $(bin)/$(exe) $(objwin) 
 
-# ------------- gnu Linux 32 ----------------
-#  32 bit gnu linux
-
-gnu_linux_32 : CFLAGS    = -D pp_LINUX
-gnu_linux_32 : CC        = gcc
-gnu_linux_32 : exe       = background
-
-gnu_linux_32 : $(obj)
-	$(CC) -o $(bin)/$(exe) -lm $(obj) 
-
 # ------------- Linux 32 ----------------
 #  32 bit linux
 
@@ -66,15 +56,6 @@ intel_osx_32 : exe       = background
 intel_osx_32 : $(obj)
 	$(CC) -o $(bin)/$(exe) -m32 $(obj) 
 
-# ------------- gnu OSX 32 ----------------
-#  32 bit gnu osx
-
-gnu_osx_32 : CFLAGS    = -D pp_OSX
-gnu_osx_32 : CC        = gcc
-gnu_osx_32 : exe       = background
-
-gnu_osx_32 : $(obj)
-	$(CC) -o $(bin)/$(exe) -lm $(obj) 
 
 #-------------- Clean Target to remove Object and Module files -----------
 

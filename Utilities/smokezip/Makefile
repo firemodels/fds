@@ -46,18 +46,6 @@ no_target:
 
 # ********  rules for each platform supported *************
 
-# ------------- MS Win 32 ----------------
-#  32 bit windows (ms visual studio C compiler)
-
-ms_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE
-ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref
-ms_win_32 : CC        = cl
-ms_win_32 : CPP       = cl
-ms_win_32 : FC        = ifort
-ms_win_32 : exe       = smokezip_win_32.exe
-ms_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib  $(LIB_DIR)/lib_win_intel_32/pthreadVC.lib
-
 # ------------- Win 32 ----------------
 #  32 bit windows
 
@@ -71,18 +59,6 @@ intel_win_32 : exe       = smokezip_win_32.exe
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib $(LIB_DIR)/lib_win_intel_32/pthreadVC.lib
 
-# ------------- Win 64 ----------------
-#  64 bit windows
-
-ms_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64
-ms_win_64 : FFLAGS    =  -O2 -fpp -D pp_cvf -D X64 /iface:stdref
-ms_win_64 : CC        = cl
-ms_win_64 : CPP       = cl
-ms_win_64 : FC        = ifort
-ms_win_64 : exe       = smokezip_win_64.exe
-
-ms_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/zlib.lib  $(LIB_DIR)/lib_win_intel_64/pthreadVC2_x64.lib
 
 intel_win_64 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D X64 -D pp_WIN_INTEL
 intel_win_64 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
