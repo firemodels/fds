@@ -19,6 +19,10 @@ setenv smokediffdir intel$FDSOS
 setenv smokediff smokediff$FDSOS
 setenv smokediffout smokediff$OUT
 
+setenv backgrounddir intel$FDSOS
+setenv background background
+setenv backgroundout background
+
 setenv fdsdir intel$FDSOS
 setenv fds fds_intel$FDSOS
 setenv fdsout fds$OUT
@@ -36,6 +40,7 @@ setenv fds2asciiout fds2ascii$OUT
 set scp_fds_smvroot=$fds_smvroot
 set fds_smvroot=~/$fds_smvroot
 set fdsroot=$scp_fds_smvroot/FDS_Compilation
+set backgroundroot=$scp_fds_smvroot/Utilities/background
 set smokediffroot=$scp_fds_smvroot/Utilities/smokediff
 set smokeziproot=$scp_fds_smvroot/Utilities/smokezip
 set googledir=$fds_smvroot/Utilities/to_google
@@ -68,6 +73,11 @@ set SETLDPATH="LD_LIBRARY_PATH=$INTELLIB;"
 else
 set SETLDPATH=
 endif
+
+# background
+
+echo copying $background from $backgrounddir on $fdshost
+scp -q $fdshost\:$backgroundroot/$backgrounddir/$background $bundledir/bin/$backgroundout
 
 # smokeview
 
