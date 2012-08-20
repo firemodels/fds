@@ -470,9 +470,9 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    SELECT CASE(IOR)
       CASE( 1)
-         IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,0)   = WC%RHO_F*UN/UU(II,JJ,KK)  *R(II)
+         IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,0)   = WC%RHO_F*UN/UU(II,JJ,KK)
       CASE(-1)
-         IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,0) = WC%RHO_F*UN/UU(II-1,JJ,KK)*R(II-1)
+         IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,0) = WC%RHO_F*UN/UU(II-1,JJ,KK)
       CASE( 2)
          IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,0)   = WC%RHO_F*UN/VV(II,JJ,KK)
       CASE(-2)
@@ -520,9 +520,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
       SELECT CASE(IOR)
          CASE( 1)
-            FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*R(II)
+            FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
          CASE(-1)
-            FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)*R(II-1)
+            FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)
          CASE( 2)
             FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
          CASE(-2)
