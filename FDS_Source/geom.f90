@@ -509,6 +509,8 @@ GEOM_LOOP: DO N=1,N_GEOM
          PP   = (/G%X,G%Y,G%Z/)
          G%NN = (/G%XOR,G%YOR,G%ZOR/) - PP          ! normal vector to plane
          G%NN = G%NN/SQRT(DOT_PRODUCT(G%NN,G%NN))   ! unit normal
+      CASE(ICOMPLEX)
+         CYCLE GEOM_LOOP
    END SELECT SELECT_SHAPE
 
    G%MIN_I(NM) = M%IBAR
