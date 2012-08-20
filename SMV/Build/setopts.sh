@@ -19,5 +19,4 @@ case $OPTION in
   ;;
 esac
 done
-echo SMV_MAKE_OPTS=$SMV_MAKE_OPTS
 export SMV_MAKE_OPTS
