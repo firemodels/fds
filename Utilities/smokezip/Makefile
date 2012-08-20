@@ -1,6 +1,6 @@
 SOURCE_DIR = ../../../SMV/source/
-BUILD_DIR = $(SOURCE_DIR)/../Build
-LIB_DIR = $(BUILD_DIR)/LIBS
+BUILD_DIR = ../../../SMV/Build
+LIB_DIR = ../../../SMV/Build/LIBS
 INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 FILTERC =
@@ -82,7 +82,7 @@ intel_linux_32p : FC        = ifort
 intel_linux_32p : exe       = smokezip_linux_32p
 
 intel_linux_32p : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -p -lifcore -L $(FORTLIBDIR) ../linux_lib32/libz.a
+	$(CPP) -o $(bin)/$(exe) $(obj) -p -lifcore -L $(FORTLIBDIR) $(LIB_DIR)/lib_linux_intel_32/libz.a
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
@@ -96,7 +96,7 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokezip_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -p -lifcore -L $(FORTLIBDIR) ../linux_lib32/libz.a -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) -p -lifcore -L $(FORTLIBDIR) $(LIB_DIR)/lib_linux_intel_32/libz.a -lpthread
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
@@ -110,7 +110,7 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokezip_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) ../linux_lib64/libz.a -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) $(LIB_DIR)/lib_linux_intel_64/libz.a -lpthread
 
 # ------------- OSX 32 ----------------
 #  32 bit OSX
@@ -124,7 +124,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokezip_osx_32
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 $(obj)  -mmacosx-version-min=10.4 $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a ../osx_lib32/libz.a -lpthread
+	$(CPP) -o $(bin)/$(exe) -m32 $(obj)  -mmacosx-version-min=10.4 $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a $(LIB_DIR)/lib_linux_osx_32/libz.a -lpthread
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
@@ -138,7 +138,7 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokezip_osx_64
 
 intel_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m64 $(obj)  -mmacosx-version-min=10.4 $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a ../osx_lib64/libz.a -lpthread
+	$(CPP) -o $(bin)/$(exe) -m64 $(obj)  -mmacosx-version-min=10.4 $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a $(LIB_DIR)/lib_linux_osx_64/libz.a -lpthread
 
 #-------------- Clean Target to remove Object and Module files -----------
 
