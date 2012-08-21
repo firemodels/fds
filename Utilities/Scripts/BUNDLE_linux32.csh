@@ -7,7 +7,7 @@ setenv bundlebase $2
 setenv runhost $3
 setenv fdshost blaze.nist.gov
 setenv smvhost blaze.nist.gov
-setenv PLATFORM LINUX64
+setenv PLATFORM LINUX32
 setenv FDSEDITION $4
 setenv FDSVERSION $5
 setenv SMVVERSION $6
