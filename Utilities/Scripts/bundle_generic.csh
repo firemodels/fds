@@ -189,8 +189,7 @@ cp $forbundle/readme.html $bundledir/Documentation/SMV_Release_Notes.html
 echo Obtaining example files from the repository
 cp $bundle_setup/readme_examples.html $bundledir/Examples/.
 svn export -q --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification $bundledir/Examples/.
-rm -rf $bundledir/Examples/Visualization2
-rm -rf $bundledir/Examples/WUI2
+rm -rf $bundledir/Examples/Immersed_Boundary_Method
 
 echo >> $fullmanifest
 echo ------file listing---------------------------------- >> $fullmanifest
