@@ -130,6 +130,7 @@ enable-auto-props = yes
 ### must be enabled, which is typically done by setting the
 ### 'enable-auto-props' option.
 *.bat  = svn:mime-type=text/plain;svn:eol-style=native;svn:executable
+*.bib  = svn:mime-type=text/plain;svn:eol-style=native
 *.c    = svn:mime-type=text/plain;svn:eol-style=native
 config = svn:mime-type=text/plain;svn:eol-style=native
 *.cpp  = svn:mime-type=text/plain;svn:eol-style=native
