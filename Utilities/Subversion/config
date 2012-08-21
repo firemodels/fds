@@ -132,6 +132,7 @@ enable-auto-props = yes
 *.bat  = svn:mime-type=text/plain;svn:eol-style=native;svn:executable
 *.bib  = svn:mime-type=text/plain;svn:eol-style=native
 *.c    = svn:mime-type=text/plain;svn:eol-style=native
+*.cls  = svn:mime-type=text/plain;svn:eol-style=native
 config = svn:mime-type=text/plain;svn:eol-style=native
 *.cpp  = svn:mime-type=text/plain;svn:eol-style=native
 *.csh  = svn:mime-type=text/plain;svn:eol-style=native;svn:executable
@@ -145,10 +146,13 @@ config = svn:mime-type=text/plain;svn:eol-style=native
 *.html = svn:mime-type=text/html;svn:eol-style=native
 *.ini  = svn:mime-type=text/plain;svn:eol-style=native
 *.jpg  = svn:mime-type=image/jpeg
+*.JPG  = svn:mime-type=image/jpeg
 *.m    = svn:mime-type=text/plain;svn:keywords=Author Date Id Rev URL;svn:eol-style=native
 makefile* = svn:mime-type=text/plain;svn:eol-style=native
+Makefile* = svn:mime-type=text/plain;svn:eol-style=native
 *.out  = svn:mime-type=text/plain;svn:eol-style=native
 *.pdf  = svn:mime-type=application/pdf
+*.PDF  = svn:mime-type=application/pdf
 *.pl   = svn:mime-type=text/plain;svn:eol-style=native;svn:executable
 *.png  = svn:mime-type=image/png
 *.py   = svn:mime-type=text/plain;svn:eol-style=native;svn:executable
@@ -157,5 +161,6 @@ makefile* = svn:mime-type=text/plain;svn:eol-style=native
 *.svo  = svn:mime-type=text/plain;svn:eol-style=native
 *.tex  = svn:mime-type=text/plain;svn:eol-style=native
 *.txt  = svn:mime-type=text/plain;svn:eol-style=native
+*.url  = svn:mime-type=text/html;svn:eol-style=native
 
 
