@@ -1001,6 +1001,7 @@ TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(FACET_TYPE), POINTER :: FACE=>NULL()
 TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
+REAL(EB), PARAMETER :: ADVECTION_EPS=1.E-6_EB
  
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -1751,44 +1752,151 @@ TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 CONTAINS
 
 SUBROUTINE ENTHALPY_ADVECTION
-INTEGER :: JM1,JP2,KM1,KP2
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HX=>NULL(),HY=>NULL(),HZ=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HX=>NULL(),HY=>NULL(),HZ=>NULL(),DV=>NULL()
+REAL(EB) :: DR,B
 
 HX=>WORK2; HX=0._EB
 HY=>WORK3; HY=0._EB
 HZ=>WORK4; HZ=0._EB
 U_DOT_DEL_RHO_H_S=>WORK6; U_DOT_DEL_RHO_H_S=0._EB
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBM1
-         ZZZ(1:4) = RHO_H_S_P(I-1:I+2,J,K)
-         HX(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)
-      ENDDO
-   ENDDO
-ENDDO
+LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
-DO K=1,KBAR
-   DO J=1,JBM1
-      JM1 = J-1
-      JP2 = J+2
-      DO I=1,IBAR
-         ZZZ(1:4) = RHO_H_S_P(I,JM1:JP2,K)
-         HY(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
-      ENDDO
-   ENDDO
-ENDDO
+   CASE (SUPERBEE_LIMITER) LIMITER_SELECT
 
-DO K=1,KBM1
-   KM1 = K-1
-   KP2 = K+2   
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZZ(1:4) = RHO_H_S_P(I,J,KM1:KP2)
-         HZ(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
+      DV=>WORK7
+
+      ! compute data variation and face value x
+
+      DV = 0._EB
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               DV(I,J,K) = RHO_H_S_P(I+1,J,K) - RHO_H_S_P(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
-   ENDDO
-ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (UU(I,J,K)>0._EB) THEN
+                     DR = DV(I-1,J,K)/DV(I,J,K)
+                     !B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                     !HX(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     HX(I,J,K) = RHO_H_S_P(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I+1,J,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     HX(I,J,K) = RHO_H_S_P(I+1,J,K) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  HX(I,J,K) = RHO_H_S_P(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! compute data variation and face value in y
+
+      DV = 0._EB
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               DV(I,J,K) = RHO_H_S_P(I,J+1,K) - RHO_H_S_P(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (VV(I,J,K)>0._EB) THEN
+                     DR = DV(I,J-1,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     HY(I,J,K) = RHO_H_S_P(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I,J+1,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     HY(I,J,K) = RHO_H_S_P(I,J+1,K) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  HY(I,J,K) = RHO_H_S_P(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! compute data variation and face value in z
+
+      DV = 0._EB
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DV(I,J,K) = RHO_H_S_P(I,J,K+1) - RHO_H_S_P(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1   
+         DO J=1,JBAR
+            DO I=1,IBAR
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (WW(I,J,K)>0._EB) THEN
+                     DR = DV(I,J,K-1)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     HZ(I,J,K) = RHO_H_S_P(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I,J,K+1)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     HZ(I,J,K) = RHO_H_S_P(I,J,K+1) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  HZ(I,J,K) = RHO_H_S_P(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+   CASE DEFAULT LIMITER_SELECT
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+               ZZZ(1:4) = RHO_H_S_P(I-1:I+2,J,K)
+               HX(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+               ZZZ(1:4) = RHO_H_S_P(I,J-1:J+2,K)
+               HY(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1 
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZZ(1:4) = RHO_H_S_P(I,J,K-1:K+2)
+               HZ(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+END SELECT LIMITER_SELECT
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
@@ -1921,43 +2029,149 @@ ENDDO
 END SUBROUTINE ENTHALPY_ADVECTION
 
 SUBROUTINE DENSITY_ADVECTION
-INTEGER :: JM1,JP2,KM1,KP2
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DV=>NULL()
+REAL(EB) :: DR,B
 
 FX(:,:,:,0)=0._EB
 FY(:,:,:,0)=0._EB
 FZ(:,:,:,0)=0._EB
 U_DOT_DEL_RHO=>WORK8; U_DOT_DEL_RHO=0._EB
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBM1
-         ZZZ(1:4) = RHOP(I-1:I+2,J,K)
-         FX(I,J,K,0) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)
-      ENDDO
-   ENDDO
-ENDDO
+LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
-DO K=1,KBAR
-   DO J=1,JBM1
-      JM1 = J-1
-      JP2 = J+2
-      DO I=1,IBAR
-         ZZZ(1:4) = RHOP(I,JM1:JP2,K)
-         FY(I,J,K,0) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
-      ENDDO
-   ENDDO
-ENDDO
+   CASE (SUPERBEE_LIMITER) LIMITER_SELECT
 
-DO K=1,KBM1
-   KM1 = K-1
-   KP2 = K+2   
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZZ(1:4) = RHOP(I,J,KM1:KP2)
-         FZ(I,J,K,0) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
+      DV=>WORK2
+
+      ! compute data variation and face value x
+
+      DV = 0._EB
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               DV(I,J,K) = RHOP(I+1,J,K) - RHOP(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
-   ENDDO
-ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (UU(I,J,K)>0._EB) THEN
+                     DR = DV(I-1,J,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FX(I,J,K,0) = RHOP(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I+1,J,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FX(I,J,K,0) = RHOP(I+1,J,K) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  FX(I,J,K,0) = RHOP(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! compute data variation and face value y
+
+      DV = 0._EB
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               DV(I,J,K) = RHOP(I,J+1,K) - RHOP(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (VV(I,J,K)>0._EB) THEN
+                     DR = DV(I,J-1,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FY(I,J,K,0) = RHOP(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I,J+1,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FY(I,J,K,0) = RHOP(I,J+1,K) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  FY(I,J,K,0) = RHOP(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! compute data variation and face value z
+
+      DV = 0._EB
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DV(I,J,K) = RHOP(I,J,K+1) - RHOP(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1   
+         DO J=1,JBAR
+            DO I=1,IBAR
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (WW(I,J,K)>0._EB) THEN
+                     DR = DV(I,J,K-1)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FZ(I,J,K,0) = RHOP(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I,J,K+1)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FZ(I,J,K,0) = RHOP(I,J,K+1) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  FZ(I,J,K,0) = RHOP(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+   CASE DEFAULT LIMITER_SELECT
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+               ZZZ(1:4) = RHOP(I-1:I+2,J,K)
+               FX(I,J,K,0) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+               ZZZ(1:4) = RHOP(I,J-1:J+2,K)
+               FY(I,J,K,0) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZZ(1:4) = RHOP(I,J,K-1:K+2)
+               FZ(I,J,K,0) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+END SELECT LIMITER_SELECT
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
@@ -2088,7 +2302,8 @@ ENDDO
 END SUBROUTINE DENSITY_ADVECTION
 
 SUBROUTINE SPECIES_ADVECTION
-INTEGER :: JM1,JP2,KM1,KP2
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DV=>NULL()
+REAL(EB) :: DR,B
 
 RHO_Z_P=>WORK6
 RHO_Z_P=0._EB
@@ -2106,36 +2321,141 @@ FY(:,:,:,N)=0._EB
 FZ(:,:,:,N)=0._EB
 U_DOT_DEL_RHO_Z=>WORK7; U_DOT_DEL_RHO_Z=0._EB
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBM1
-         ZZZ(1:4) = RHO_Z_P(I-1:I+2,J,K)
-         FX(I,J,K,N) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)
-      ENDDO
-   ENDDO
-ENDDO
+LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
-DO K=1,KBAR
-   DO J=1,JBM1
-      JM1 = J-1
-      JP2 = J+2
-      DO I=1,IBAR
-         ZZZ(1:4) = RHO_Z_P(I,JM1:JP2,K)
-         FY(I,J,K,N) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
-      ENDDO
-   ENDDO
-ENDDO
+   CASE (SUPERBEE_LIMITER) LIMITER_SELECT
 
-DO K=1,KBM1
-   KM1 = K-1
-   KP2 = K+2   
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZZ(1:4) = RHO_Z_P(I,J,KM1:KP2)
-         FZ(I,J,K,N) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
+      DV=>WORK2
+
+      ! compute data variation and face value x
+
+      DV = 0._EB
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               DV(I,J,K) = RHO_Z_P(I+1,J,K) - RHO_Z_P(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
-   ENDDO
-ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (UU(I,J,K)>0._EB) THEN
+                     DR = DV(I-1,J,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FX(I,J,K,N) = RHO_Z_P(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I+1,J,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FX(I,J,K,N) = RHO_Z_P(I+1,J,K) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  FX(I,J,K,N) = RHO_Z_P(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! compute data variation and face value y
+
+      DV = 0._EB
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               DV(I,J,K) = RHO_Z_P(I,J+1,K) - RHO_Z_P(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (VV(I,J,K)>0._EB) THEN
+                     DR = DV(I,J-1,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FY(I,J,K,N) = RHO_Z_P(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I,J+1,K)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FY(I,J,K,N) = RHO_Z_P(I,J+1,K) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  FY(I,J,K,N) = RHO_Z_P(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! compute data variation and face value z
+
+      DV = 0._EB
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DV(I,J,K) = RHO_Z_P(I,J,K+1) - RHO_Z_P(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1   
+         DO J=1,JBAR
+            DO I=1,IBAR
+
+               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
+                  IF (WW(I,J,K)>0._EB) THEN
+                     DR = DV(I,J,K-1)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FZ(I,J,K,N) = RHO_Z_P(I,J,K)   + B*DV(I,J,K)
+                  ELSE
+                     DR = DV(I,J,K+1)/DV(I,J,K)
+                     B = MAX(0._EB,MIN(DR,0.5_EB),MIN(0.5_EB*DR,1._EB))
+                     FZ(I,J,K,N) = RHO_Z_P(I,J,K+1) - B*DV(I,J,K)
+                  ENDIF
+               ELSE
+                  FZ(I,J,K,N) = RHO_Z_P(I,J,K)
+               ENDIF
+
+            ENDDO
+         ENDDO
+      ENDDO
+
+   CASE DEFAULT LIMITER_SELECT
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+               ZZZ(1:4) = RHO_Z_P(I-1:I+2,J,K)
+               FX(I,J,K,N) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+               ZZZ(1:4) = RHO_Z_P(I,J-1:J+2,K)
+               FY(I,J,K,N) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZZ(1:4) = RHO_Z_P(I,J,K-1:K+2)
+               FZ(I,J,K,N) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ)
+            ENDDO
+         ENDDO
+      ENDDO
+
+END SELECT LIMITER_SELECT
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
