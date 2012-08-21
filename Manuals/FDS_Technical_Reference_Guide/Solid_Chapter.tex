@@ -218,7 +218,10 @@ calculations.
 \subsection{Near-Wall Model for Heat Transfer}
 \label{conflux_wall_model}
 
-This section describes an optional model for the heat transfer coefficient which may be more appropriate for well-resolved LES calculations.  This model is invoked by setting {\ct HEAT\_TRANSFER\_MODEL = 'LOGLAW'} on {\ct MISC}.
+{\bf Kiyoung Moon, Yonsei University, Seoul, South Korea}\\
+{\bf Ezgi S. Oztekin, Fire Research Program, William J. Hughes Technical Center, NJ, 08405}\\
+
+This section describes an optional model for the heat transfer coefficient which may be more appropriate for well-resolved LES calculations.
 
 Wall models aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without resolving the smallest length scales. The theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, non-dimensional velocity can be defined as a function of non-dimensional length scale. In FDS, the wall model for velocity is implemented based on law of wall with semi-log fit connecting the limits of the viscous and log regions (see Section \ref{info:velocity_bc}).
 
