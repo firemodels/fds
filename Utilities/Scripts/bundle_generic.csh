@@ -19,7 +19,7 @@ setenv smokediffdir intel$FDSOS
 setenv smokediff smokediff$FDSOS
 setenv smokediffout smokediff$OUT
 
-setenv backgrounddir intel$FDSOS
+setenv backgrounddir intel$FDSOS2
 setenv background background
 setenv backgroundout background
 
