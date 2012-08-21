@@ -1,0 +1,103 @@
+&HEAD CHID='lava_lamp',TITLE='Plume whirl case SVN $Revision$' /
+
+  same as plume5a except there is a blockage in the middle of the scene to block the flow
+  The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
+
+&MESH IJK=16,16,32, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
+
+&DUMP NFRAMES=400 /
+
+&INIT XB=0.2,1.4,0.2,1.4,0.5,2.2  TEMPERATURE=600.0 /
+
+&TIME T_END=40. /  Total simulation time
+
+&MATL ID                    = 'FABRIC'
+      FYI                   = 'Properties completely fabricated'
+      SPECIFIC_HEAT         = 1.0
+      CONDUCTIVITY          = 0.1
+      DENSITY               = 100.0
+      N_REACTIONS           = 1
+      NU_SPEC=1., SPEC_ID='PROPANE'
+      REFERENCE_TEMPERATURE = 350.
+      HEAT_OF_REACTION      = 3000.
+      HEAT_OF_COMBUSTION    = 15000. /
+
+&MATL ID                    = 'FOAM'
+      FYI                   = 'Properties completely fabricated'
+      SPECIFIC_HEAT         = 1.0
+      CONDUCTIVITY          = 0.05
+      DENSITY               = 40.0
+      N_REACTIONS           = 1
+      NU_SPEC=1., SPEC_ID='PROPANE'
+      REFERENCE_TEMPERATURE = 350.
+      HEAT_OF_REACTION      = 1500.
+      HEAT_OF_COMBUSTION    = 30000. /
+
+&SURF ID             = 'UPHOLSTERY_LOWER'
+      FYI            = 'Properties completely fabricated'
+      RGB            = 151,96,88
+      BURN_AWAY      = .FALSE.
+      MATL_ID(1:2,1) = 'FABRIC','FOAM'
+      THICKNESS(1:2) = 0.002,0.1 
+/
+
+&SURF ID             = 'UPHOLSTERY_UPPER'
+      FYI            = 'Properties completely fabricated'
+      RGB            = 151,96,88
+      BURN_AWAY      = .FALSE.
+      MATL_ID(1:2,1) = 'FABRIC','FOAM'
+      THICKNESS(1:2) = 0.002,0.1 
+      TMP_INNER      = 600.0
+/
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
+&SURF ID='BURNER1',HRRPUA=600.0,PART_ID='lava' /  Ignition source
+&SURF ID='BURNER2',HRRPUA=600.0,PART_ID='bubbles' /  Ignition source
+
+&VENT XB=0.5,0.8,0.5,1.1,0.1,0.1,SURF_ID='BURNER1' /  fire source on kitchen stove
+&VENT XB=0.8,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER2' /  fire source on kitchen stove
+
+&OBST XB=0.5,1.1,0.5,1.1,0.0,0.1 /
+&OBST XB=0.3,1.3,0.3,1.3,0.4,0.8 SURF_ID='UPHOLSTERY_LOWER'/
+&HOLE XB=0.6,1.0,0.2,0.8,0.3,0.9 /
+&OBST XB=0.3,1.3,0.3,1.3,1.2,1.6 SURF_ID='UPHOLSTERY_UPPER' /
+
+&VENT XB=0.0,1.6,0.0,0.0,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=1.6,1.6,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,1.6,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,0.0,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,0.0,1.6,3.2,3.2,SURF_ID='OPEN'/
+
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
+
+&PROP ID='lava_props'   SMOKEVIEW_PARAMETERS(1:5)='D=0.2','L=0.3','VELMAX=4.5','W=.1','H=.1' SMOKEVIEW_ID(1:4)='sphere','veltube','velegg','face_eye' /
+&PROP ID='bubble_props' SMOKEVIEW_PARAMETERS(1:5)='D=0.2','L=0.3','VELMAX=4.5','W=.1','H=.1' SMOKEVIEW_ID(1:4)='sphere','veltube','velegg','face_eye' /
+
+&PART ID='lava',MASSLESS=.TRUE.,
+   QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY','PARTICLE TEMPERATURE'
+   SAMPLING_FACTOR=10 PROP_ID='lava_props' /  Description of massless tracer particles. Apply at a
+                                                             solid surface with the PART_ID='tracers'
+
+&PART ID='bubbles',MASSLESS=.TRUE.,
+   QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY','PARTICLE TEMPERATURE'
+   SAMPLING_FACTOR=10 PROP_ID='bubble_props' /  Description of massless tracer particles. Apply at a
+                                                             solid surface with the PART_ID='tracers'
+
+&SLCF PBX=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /  Add vector slices colored by temperature
+&SLCF PBY=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBZ=0.4,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBZ=1.6,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBZ=3.2,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 3D slice
+
+&SLCF PBX=0.8,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE. / 
+&SLCF PBY=0.8,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE. /
+&SLCF PBZ=0.4,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE. /
+&SLCF PBZ=1.6,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE. /
+&SLCF PBZ=3.2,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE. /
+
+&BNDF QUANTITY='GAUGE HEAT FLUX' /   Common surface quantities. Good for monitoring fire spread.
+&BNDF QUANTITY='BURNING RATE' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='WALL TEMPERATURE' CELL_CENTERED=.TRUE. /
