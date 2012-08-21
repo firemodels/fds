@@ -1,0 +1,91 @@
+&HEAD CHID='onetree_surf_1mesh'
+      TITLE='Single processor One tree over surface fuel, uses fuel element model' /
+
+- Specify number of grid cells (IJK) and domain size (XB, meters) in x,y,z directons
+&MESH IJK=80,15,30, XB=-4,12,-3,0,0,6 /
+
+- Stretch computation grid in the z direction
+&TRNZ IDERIV=1,CC=0,PC=0.5 /
+&TRNZ IDERIV=2,CC=0,PC=0.0 /
+
+- Duration of simulation in seconds
+&TIME T_END=60 / 
+
+- Gaseous combustion parameters
+&REAC FUEL='WOOD'
+      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5, dHc = 15MW/kg'
+      SOOT_YIELD = 0.02
+      O          = 2.5
+      C          = 3.4
+      H          = 6.2
+      HEAT_OF_COMBUSTION = 17700. /
+
+- Account for water vapor released during drying
+&SPEC ID='WATER VAPOR' /
+
+-Tree crown vegetation based on NIST Douglas fir tree burn experiments. 
+ The bulk density is higher than normally found in most trees in the field
+
+&PART ID='TREE VEG',TREE=.TRUE.,QUANTITIES='PARTICLE TEMPERATURE',
+          VEG_INITIAL_TEMPERATURE=20.,
+          VEG_SV=3900.,VEG_MOISTURE=1.00,VEG_CHAR_FRACTION=0.25,
+          VEG_DRAG_COEFFICIENT=0.375,VEG_DENSITY=514.,VEG_BULK_DENSITY=2.76,
+          VEG_BURNING_RATE_MAX=0.4,VEG_DEHYDRATION_RATE_MAX=0.4,
+          VEG_REMOVE_CHARRED=.TRUE. /
+&TREE PART_ID='TREE VEG',XYZ=4,0,0,FUEL_GEOM='CONE',
+          CROWN_WIDTH=3,CROWN_BASE_HEIGHT=1,TREE_HEIGHT=6,
+          OUTPUT_TREE=.TRUE.,LABEL='tree_veg' /
+
+-Surface vegetation. Pinus Ponderosa pine needles. 
+ Uses Catchepole CST, 131, pp. 1-37, 1998 values of case PPMC59
+
+&PART ID='GROUND VEG',TREE=.TRUE.,QUANTITIES='PARTICLE TEMPERATURE',
+          VEG_INITIAL_TEMPERATURE=20.,
+          VEG_SV=5710.,VEG_MOISTURE=0.07,VEG_CHAR_FRACTION=0.25,
+          VEG_DRAG_COEFFICIENT=0.375,VEG_DENSITY=510.,VEG_BULK_DENSITY=10,
+          VEG_BURNING_RATE_MAX=0.4,VEG_DEHYDRATION_RATE_MAX=0.4,
+          VEG_REMOVE_CHARRED=.TRUE. /
+&TREE PART_ID='GROUND VEG',FUEL_GEOM='RECTANGLE',
+          XB = 0,8,-2,0,0,0.051,OUTPUT_TREE=.TRUE.,LABEL='ground-veg' /
+
+- Ignitor fire location and heat release rate magnitude and history
+  260 kW/m^2 fire on bottom of domain and at 
+  0 <= x <= 0.2 meters; -2 <= y <= 0 meters
+&SURF ID='IGN FIRE',HRRPUA=260,RAMP_Q='RAMPFIRE' /
+&RAMP ID='RAMPFIRE',T= 0.0,F=0.0 /
+&RAMP ID='RAMPFIRE',T= 1.0,F=0.0 /
+&RAMP ID='RAMPFIRE',T= 1.5,F=1.0 /
+&RAMP ID='RAMPFIRE',T=12.5,F=1.0 /
+&RAMP ID='RAMPFIRE',T=13.0,F=0.0 /
+&VENT XB=0,0.2,-2,0,0,0,SURF_ID='IGN FIRE' /
+
+- Set inflow velocity characteristics, 2 m/s wind into domain
+&SURF ID='INFLOW',VEL=-2,RAMP_V='RAMPVEL' /
+&RAMP ID='RAMPVEL',T=0.0,F=0.0 /
+&RAMP ID='RAMPVEL',T=0.5,F=1.0 /
+
+- Boundary conditions on computational domain
+- Domain-Boundary conditions
+&VENT XB=-4,-4,-3, 0,0,6,SURF_ID='INFLOW' / inflow through x=-4 (left side)
+&VENT XB=12,12,-3, 0,0,6,SURF_ID='OPEN' /
+&VENT XB=-4,12,-3,-3,0,6,SURF_ID='OPEN' /
+&VENT XB=-4,12, 0, 0,0,6,SURF_ID='MIRROR' / symmetry along y=0 plane
+&VENT XB=-4,12,-3, 0,6,6,SURF_ID='OPEN' /
+
+- Output data to be viewed using Smokeview
+
+-- time intervals, in seconds, at which various quantities are written
+&DUMP DT_SLCF=0.1,DT_PART=0.1,DT_BNDF=0.1,DT_PL3D=20. /
+
+-- two-dimensional slice files
+&SLCF PBY= 0, QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 
+&SLCF PBY= 0, QUANTITY='DENSITY',SPEC_ID='SOOT' / 
+&SLCF PBY= 0, QUANTITY='MASS FRACTION',SPEC_ID='WATER VAPOR' / H2O from veg drying
+
+-- boundary files
+&BNDF QUANTITY='NET HEAT FLUX'/
+&BNDF QUANTITY='RADIATIVE HEAT FLUX'/
+&BNDF QUANTITY='CONVECTIVE HEAT FLUX'/
+
+- Declare end of input file 
+&TAIL /
