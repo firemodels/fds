@@ -148,7 +148,6 @@ config = svn:mime-type=text/plain;svn:eol-style=native
 makefile* = svn:mime-type=text/plain;svn:eol-style=native
 *.out  = svn:mime-type=text/plain;svn:eol-style=native
 *.pdf  = svn:mime-type=application/pdf
-*.png  = svn:mime-type=image/png
 *.pl   = svn:mime-type=text/plain;svn:eol-style=native;svn:executable
 *.png  = svn:mime-type=image/png
 *.py   = svn:mime-type=text/plain;svn:eol-style=native;svn:executable
