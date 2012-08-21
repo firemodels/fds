@@ -5,7 +5,7 @@
 &MISC  TMPA=-100 /
 
 &TIME T_END=300. / 
-&RADI RADIATIVE FRACTION=0.20/
+&RADI RADIATIVE_FRACTION=0.20/
 &REAC FUEL               = 'BUTANE'
       FYI                = 'Butane, C_4 H_10'
       HEAT_OF_COMBUSTION = 45700.
