@@ -215,6 +215,54 @@ related to $L$. For this reason, $L$ is taken to be 1~m for most
 calculations.
 
 
+\subsection{Near-Wall Model for Heat Transfer}
+\label{conflux_wall_model}
+
+This section describes an optional model for the heat transfer coefficient which may be more appropriate for well-resolved LES calculations.  This model is invoked by setting {\ct HEAT\_TRANSFER\_MODEL = 'LOGLAW'} on {\ct MISC}.
+
+Wall models aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without resolving the smallest length scales. The theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, non-dimensional velocity can be defined as a function of non-dimensional length scale. In FDS, the wall model for velocity is implemented based on law of wall with semi-log fit connecting the limits of the viscous and log regions (see Section \ref{info:velocity_bc}).
+
+By analogy to the near-wall model for velocity, the non-dimensional temperature is defined as
+\begin{equation}
+T^+ = \frac{T_g - T_w}{T_\tau}
+\end{equation}
+where $T_g$ is the first off-wall gas-phase cell temperature.  The model profile is given by
+\begin{align}
+\label{eqn_t_visclayer} T^+ &= \mbox{Pr}\,y^+                            && \mbox{for} \quad y^+ \le 5 \\
+\label{eqn_t_loglaw}    T^+ &= \frac{\mbox{Pr}_t}{\kappa} \ln y^+ + B_T  && \mbox{for} \quad y^+ \ge 30
+\end{align}
+where Pr and Pr$_t$ are a molecular and turbulent Prandtl numbers  (Pr$_t=0.5$ by default in FDS), and $\kappa = 0.41$ is the von K\'arm\'an constant.  The temperature scale, $T_{\tau}$, is defined by
+\begin{equation}
+\label{eqn_friction_temperature}
+T_{\tau} \equiv \frac{\dot{q}_w^{''}}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
+\end{equation}
+where $\dot{q}_w^{''}$, $\rho$, and $c_p$ are the heat flux at the wall, the density, and the specific heat, respectively.
+
+The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a function of the molecular Prandtl number and can be determined from experimentally. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall. FDS uses the experimental correlation proposed by Kader \cite{Kader:1981}
+\begin{align}
+\label{eqn_t_bt}
+B_T =(3.85 \,\mbox{Pr}^{1/3}-1.3)^2 + 2.12 \,\ln\mbox{Pr}.
+\end{align}
+
+The region $5 < y^+ < 30$ is referred to as the buffer layer.  In FDS, the buffer layer is approximated with a semi-log fit connecting the limits of the viscous and log regions.
+\begin{align}
+\label{eqn_t_buffer_layer}
+T^+ &= (\mbox{Pr}_t /\kappa)_{\mbox{\tiny\emph{buffer}}} \,\ln y^+ + B_{\mbox{\tiny\emph{T,\,buffer}}}  && \mbox{for} \quad 5 < y^+ < 30
+\end{align}
+where
+\begin{align}
+(\mbox{Pr}_T /\kappa)_{\mbox{\tiny\emph{buffer}}} &= 1.79\,(B_T + 3.40 \,\mbox{Pr}_T - 5 \,\mbox{Pr}) \\
+B_{\mbox{\tiny\emph{T,buffer}}} &= 5 \,\mbox{Pr} - 1.61 \,(\mbox{Pr}_T /\kappa)_{\mbox{\tiny\emph{buffer}}}
+\end{align}
+To obtain a consistent convective heat transfer coefficient in all regions, $T^+$ is adjusted to $\max(T^+,T^+ (y^+ = 5))$ for the buffer and log layer ($y^+ \ge 5$).
+
+The convective heat transfer coefficient($h$) is obtained from the definition of $h$ and $T^+$:
+\begin{align}
+\label{eqn_h_model}
+h = \frac{\dot{q}_w^{''}}{(T_g - T_w)}= \frac{{\rho}{c_p}{u_{\tau}}}{T^+}.
+\end{align}
+
+
 
 \subsection{Component-Averaged Thermal Properties}
 \label{matcoefs}
