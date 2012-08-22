@@ -402,6 +402,12 @@ gnu_linux_32 : obj     = fds_gnu_linux_32
 gnu_linux_32 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
+gnu_osx_32 : FFLAGS  = -O1 -ffree-line-length-none -ffree-form
+gnu_osx_32 : FCOMPL  = gfortran
+gnu_osx_32 : obj     = fds_gnu_osx_32
+gnu_osx_32 : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
 gnu_mpi_32 : FFLAGS  = -O1
 gnu_mpi_32 : FCOMPL  = mpif90
 gnu_mpi_32 : obj = fds_gnu_mpi_32
