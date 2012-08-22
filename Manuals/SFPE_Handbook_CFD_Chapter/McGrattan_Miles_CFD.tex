@@ -514,8 +514,8 @@ In collaboration with Olof Granlund Oy, ANSYS Europe Ltd. conducted a CFD analys
 
 CFD fire modeling is commonly used during the renovation of historic buildings. Often at issue is the inclusion or exclusion of a fire protection system (sprinklers, exhaust fans, etc.) that might require a variance from the local building code requirements. For example, as part of an overall effort in modernizing the Rhode Island Statehouse (the rotunda is the fourth largest self-supporting dome in the world), the LES model FDS was used to model a number of fire scenarios within the structure. The building supervisors wished to avoid having to disrupt the historical fabric of the rotunda while updating the building's fire protection systems. The model was used to examine a number of fire scenarios and how they might impact the ability of occupants to evacuate the building. Note in Figure~\ref{Dome} the use of rectangular obstructions to approximate the very complicated geometry of the building -- a simple alternative to the more CPU intensive body-fitted coordinate system.
 
-\begin{figure}[b]
-%\includegraphics[scale=.65]{Dome}
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{state_house}
 \caption{Smoke filling analysis of the Rhode island State capitol. (Figure courtesy Hughes Associates.)}
 \label{Dome}
 \end{figure}
@@ -537,7 +537,7 @@ The principal fuels in the mock-up were the polyurethane foam wall covering and 
 
 The results from the mock-up experiments were compared with the FDS simulations of the experiments. The visual comparisons indicated a lag in fire development in the simulation relative to the experiments, but as the fire grew larger, the fire growth rate and smoke development were consistent with the experiments. The temperature, heat flux, and the oxygen concentration comparisons showed agreement between the experiments and the model in terms of both trends and range.
 
-The simulation of the early stage of the fire was very sensitive to the thermal properties of the foam. That is, small changes in parameters such as thermal conductivity or heat of pryrolysis led to significant changes in the predictions. This is a common characteristic of flame spread calculations. Consequently, the real-scale experiments served to partially calibrate the model for use in simulating the fire in the entire nightclub. To gauge the accuracy of the full nightclub simulation results, they were compared with a news video record of the incident. The FDS simulation predicted rapid fire growth due to the burning of the polyurethane foam. The simulation was consistent with the video record until flames spread throughout the structure.
+The simulation of the early stage of the fire was very sensitive to the thermal properties of the foam. That is, small changes in parameters such as thermal conductivity or heat of pyrolysis led to significant changes in the predictions. This is a common characteristic of flame spread calculations. Consequently, the real-scale experiments served to partially calibrate the model for use in simulating the fire in the entire nightclub. To gauge the accuracy of the full nightclub simulation results, they were compared with a news video record of the incident. The FDS simulation predicted rapid fire growth due to the burning of the polyurethane foam. The simulation was consistent with the video record until flames spread throughout the structure.
 
 
 \subsection{Outdoor Applications and Wind}
@@ -548,7 +548,7 @@ The potential shortcomings of these types of models are that they were designed 
 Most of the assumptions required by integral models can be removed by taking advantage of the advances in CFD over the past few decades. For example, as part of the process of evaluating the feasibility of using in situ burning as a remediation tool for large oil spills, NIST developed a numerical model, ALOFT (A Large Out- door Fire plume Trajectory), to predict the concentration of smoke and other combustion products downwind of a large fire~\cite{Baum}. The model is simply a variant of the large eddy simulation model FDS, with a simplified plume rise model coupled with a coarsely gridded wind calculation spanning tens of kilometers (Figure~\ref{ALOFT}). This combination of models is not unusual for outdoor application, as the range of length scales spans at least three orders of magnitude.
 
 \begin{figure}[b]
-%\includegraphics[scale=.65]{ALOFT}
+\includegraphics[width=\textwidth]{narrows}
 \caption{Simulation of smoke from a large oil fire in the Valdez narrows, Alaska. (Figure courtesy of NIST.)}
 \label{ALOFT}
 \end{figure}
@@ -563,17 +563,18 @@ One area where CFD has been applied successfully is in the analysis of the criti
 CFD was used in the investigation into the Mont Blanc tunnel fire incident in 1999. One of the modeling studies involved the use of the JASMINE fire model to re-construct conditions inside the tunnel during the first 30~minutes, during which time most of the fatalities would have occurred. Using information available on the ventilation settings and the location of vehicles, the model predicted the transport of smoke and heat along the length of the tunnel. The data were then fed into a model for fractional effective dose to enable an assessment of when and how the fatalities occurred. Subsequent parametric simulations were performed to investigate whether alter- native tunnel ventilation measures would have helped on the day of the incident~\cite{Miles:2004}.
 
 
-\subsection{Sprinkler Activation}
+\subsection{Smoke Detector Spacing}
 
-A common fire protection design issue that arises in both new and existing construction is sprinkler and smoke detector spacing for coffered ceilings. Coffered ceilings provide a unique challenge to system designers, as their configurations are not specifically addressed in design standards. Based on the language provided in these design standards, sprinklers and smoke detectors are often required in every coffer. Therefore, a sprinkler or detector may protect as little as 1.5~m$^2$ (16~ft$^2$), depending on the configuration of the coffer (Figure~\ref{coffer}).
-
-\begin{figure}[b]
-%\includegraphics[scale=.65]{coffer}
-\caption{Simulation of smoke filling under a coffered ceiling. (Figure courtesy Schirmer Engineering.)}
-\label{coffer}
+Spacing guidelines for spot-type smoke detectors are typically based on the assumption of a smooth, level ceiling surface, with prescriptive rules provided to account for non-uniformity in the ceiling geometry, surface roughness, and height. For example, a smooth level ceiling of a 30~m by 30~m room could be protected by a grid of nine smoke detectors, but a ceiling of waffle concrete construction (Fig.~\ref{waffle_ceiling}) with structural deep beams 1~m on center, could, under a strict interpretation of the guidelines, require 900 detectors, one in each beam pocket.
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{waffle_ceiling}
+\caption{Simulation of smoke filling under a coffered ceiling. (Figure courtesy Aon Fire Protection Engineering Corp.)}
+\label{waffle_ceiling}
 \end{figure}
+To address this issue, CFD modeling has been applied in several studies~\cite{O'Connor:NFPRF,Mealy:NFPRF} to assess the performance of spot smoke detectors on smooth, sloped, and beamed ceilings. The studies evaluated the appropriateness of the prescriptive provisions and identified ceiling structure parameters, which if altered, would cause significant differences in smoke detection performance as compared to a smooth level ceiling. It had been believed that such beam projections would significantly delay the activation time. The use of CFD modeling showed this expectation to be incorrect and a subsequent full-scale experimental study proved the general findings of the CFD analysis~\cite{Mealy:NFPRF}.
 
-One design alternative is to use CFD modeling to compare the predicted activation times for the devices under several different design layouts. Using a specified design fire for the anticipated fuel load, the activation time for a code-compliant sprinkler layout can be compared to the activation time for an alternative design that may include far fewer devices covering the same area. At that point, a decision can be made to determine what effects the differing activation times would have on the building, allowing the designer to determine an appropriate design layout.	
+
+
 
 
 
