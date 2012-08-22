@@ -1,17 +1,26 @@
 \chapter{Combustion (Chemically Reacting Flows)}
 
 \label{combustionsection}
-In FDS, the combustion routine is primarily responsible for the chemical mass production rate of species $\alpha$ per using volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$, which appears in the species transport equation, Eq.~(\ref{species}). The heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, is also found by the combustion routine found by multiplying the sum of the lumped species mass production rates by their respective heat of formation, Eq.~(\ref{EDC1}).
+In FDS, the combustion routine is responsible for the chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ Eq.~(\ref{eq:m_tprime_alpha}), and appears in the species transport equation, Eq.~(\ref{species}). The heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, is also obtained from the combustion routine, found by multiplying the sum of the lumped species mass production rates by their respective heat of formation, Eq.~(\ref{eq:q_tprime}).
 
-FDS can model multiple, simultaneous, reversible chemical reactions.  In FDS only the species that have mixed have the potential to react. Once mixed, FDS uses one of two approaches to compute the reaction rate for a chemical reaction.  The first approach is an infinite fast chemical reaction rate. That is the reactants (e.g. fuel and air) react infinitely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to specified Arrhenius reaction parameters. The Arrhenius rate can still be limited by the amount of mixing within a computational cell. This latter model is most often used in a direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be modeled directly. However, most often for large eddy simulations (LES), where the grid is not fine enough to resolve the diffusion of fuel and oxygen,
-the mixing-controlled combustion model is assumed. A single FDS simulation can contain a mix of reaction rate types.
+\begin{equation}\label{eq:m_tprime_alpha}
+\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t}
+\end{equation}
+
+\begin{equation}\label{eq:q_tprime}
+\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime} \Delta H_{f,\alpha}
+\end{equation}
+
 
 \section{Lumped Species Approach}
-In the typical FDS problem we consider three lumped species: fuel, air, and products:
+In the typical FDS problem we consider the simple reaction:
 \begin{equation}\label{eq:simple}
 \mathrm{Fuel + Air \rightarrow Products}
 \end{equation}
-The key assumption made in lumping the primitive species is that the new species groups transport together (implying equal diffusivities). Lumped species are also produced and consumed together. We can expand Eq.~(\ref{eq:simple}), to show the components of the lumped species for a simple, one-step methane reaction. Here air is assumed to be 21\% O$_2$ and 79\% N$_2$ by volume.
+Here fuel, air, and products are lumped species. The traditional approach for tracking species is to use a mixture fraction and progress variable \cite{fox2003}. A limitation in the progress variable approach is that the variable is not physically bounded and initial and boundary conditions can be ill-defined. The lumped species approach, which evolved out a need to track additional species, is similar to the progress variable approach for reactions in the form of Eq:~(\ref{eq:simple}). An advantage of the lumped species approach is that the variables are mass fractions and are therefore physically bounded between 0 and 1. 
+
+In a simple hydrocarbon reaction, the typical reactants are fuel, oxygen, and nitrogen with products being carbon dioxide, water vapor, and nitrogen. In FDS, each of these individual $\alpha$ species are known as primitive species and their mass fractions are represented by $Y_{\alpha}$.
+The key assumption made in lumping the primitive species is that the new species groups transport (implying equal diffusivities) and react together. We can expand Eq.~(\ref{eq:simple}), to show the components of the lumped species for a simple, one-step methane reaction. Here air is assumed to be 21\% O$_2$ and 79\% N$_2$ by volume.
 \begin{equation}\label{eq:lumped_expand}
 \mathrm{2\underbrace{(\mbox{O}_2+(.79/.21)\mbox{N}_2)}_\text{Background(Oxidant),~Z$_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~Z$_1$} \rightarrow 1\underbrace{(\mbox{CO}_2+2\mbox{H}_2\mbox{O}+2(.79/.21)\mbox{N}_2)}_\text{Products,~Z$_2$}}
 \end{equation}
@@ -89,6 +98,9 @@ Here, $W_{1}$ is the molecular weight of lumped species 1. The remaining coeffic
 
 
 \section{Eddy Dissipation Concept}
+FDS can model multiple, simultaneous, reversible chemical reactions.  In FDS only the species that have mixed have the potential to react. Once mixed, FDS uses one of two approaches to compute the reaction rate for a chemical reaction.  The first approach is an infinite fast chemical reaction rate. That is the reactants (e.g. fuel and air) react infinitely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to specified Arrhenius reaction parameters. The Arrhenius rate can still be limited by the amount of mixing within a computational cell. This latter model is most often used in a direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be modeled directly. However, most often for large eddy simulations (LES), where the grid is not fine enough to resolve the diffusion of fuel and oxygen,
+the mixing-controlled combustion model is assumed. A single FDS simulation can contain a mix of reaction rate types.
+
 In the eddy dissipation concept model (EDC) each computational cell can be thought of as a batch reactor. The species contained within this reactor exist in one of two states: unmixed or mixed. The proportion of the cell in the mixed state is governed by $\zeta$, the unmixed fraction. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). In a combustion sense, $\zeta=1$  represents a diffusion flame and $\zeta=0$ represents a premixed flame. $\zeta(t;\tau_{mix})$, a function of time (t) and parameterized by the mixing time ($\tau_{mix}$), is governed by the following ordinary differential equation:
 
 \begin{equation}\label{eq:zeta}
@@ -121,9 +133,9 @@ In FDS, $\Delta$ is the filter width and is equivalent to the local cell size $\
 
 The following equations define the cell composition:
 \begin{eqnarray}\label{eq:mixunmix}
-\rho V = U(t) + M(t) \\
-U(t) = \zeta(t)\,\rho V \\
-M(t) = (1-\zeta(t))\,\rho V
+\rho V &= U(t) + M(t) \\
+U(t) &= \zeta(t)\,\rho V \\
+M(t) &= (1-\zeta(t))\,\rho V
 \end{eqnarray} 
 where $\rho V$ is the total mass in the reactor, $U(t)$ is unmixed portion of the mass, and $M(t)$ is the mixed portion of the mass. $\rho V$ is not a function of time as the total mass in a cell remains constant during a single FDS time interval. From the portion of mass that is mixed, $M(t)$, the local mixed composition ($\phi_{\alpha}(t)$) is found by:
 
