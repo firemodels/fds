@@ -6,7 +6,7 @@ set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%_SMV_%smv_version%_win_%platform%
 
-set in_pdf=%svn_root%\Manuals\All_PDF_Files
+set in_pdf=%svn_root%\..\FIRE-LOCAL\reports\fds_manuals\
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
 set in_smokezip=%svn_root%\Utilities\smokezip
@@ -25,6 +25,18 @@ set out_doc=%out_bundle%\%fdsversion%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
 set out_examples=%out_bundle%\%fdsversion%\Examples
+set out_examples2=%temp%\Examples2
+
+set fds_casessh=%svn_root%\Verification\FDS_Cases.sh
+set fds_casesbat=%svn_root%\Verification\FDS_Cases.bat
+set fdsmpi_casessh=%svn_root%\Verification\FDS_MPI_Cases.sh
+set fdsmpi_casesbat=%svn_root%\Verification\FDS_MPI_Cases.bat
+set smv_casessh=%svn_root%\Verification\scripts\SMV_Cases.sh
+set smv_casesbat=%svn_root%\Verification\scripts\SMV_Cases.bat
+
+set copycases=%svn_root%\Utilities\Scripts\copycases.bat
+set copycases2=%svn_root%\Utilities\Scripts\copycases2.bat
+set copycases3=%svn_root%\Utilities\Scripts\copycases3.bat
 
 set manifest=%out_bin%\manifest.html
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
@@ -203,7 +215,26 @@ copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
 
 echo.
 echo Getting the Verification cases from the repository
-svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
+svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples2%
+
+set outdir=%out_examples%
+set RUNFDS=call %copycases%
+set RUNFDSMPI=call %copycases2%
+set RUNCFAST=call %copycases3%
+
+cd %out_examples2%
+%svn_root%\Utilities\Data_processing\sh2bat %fds_casessh% %fds_casesbat%
+call %fds_casesbat%
+
+echo.
+cd %out_examples2%
+%svn_root%\Utilities\Data_processing\sh2bat %fdsmpi_casessh% %fdsmpi_casesbat%
+call %fdsmpi_casesbat%
+
+echo.
+cd %out_examples2%
+%svn_root%\Utilities\Data_processing\sh2bat %smv_casessh% %smv_casesbat%
+call %smv_casesbat%
 
 echo.
 echo Copying wrapup scripts for use in final installation
@@ -234,6 +265,8 @@ echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\FDS\%fdsversion%" -c wrapup_fds_install.bat
+
+rmdir %out_examples2%
 
 start explorer %manifest%
 type %manifest%
