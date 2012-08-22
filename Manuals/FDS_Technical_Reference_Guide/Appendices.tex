@@ -459,7 +459,7 @@ and an expansion at $\frac{h}{2}$:
 \begin{equation}\label{eq:h2}
 A_2=A(\frac{h}{2}) + \underbrace{a_{1}(\frac{h}{2}) + a_{2}(\frac{h}{2})^2 + \mathcal{O}(h^3)}_{\mathcal{O}(h)}
 \end{equation}
-Here the subscript on $A$ represents subdivisions of the time step $h$, where $A_1$ takes $h/1$ steps, $A_2$ takes $h/2$ steps, and so on. The $a_{1}$ terms can be eliminated by subtracting Equation \ref{eq:h1} from two times Equation~\ref{eq:h2}:
+Here the subscript on $A$ represents subdivisions of the time step $h$, where $A_1$ takes $h/1$ steps, $A_2$ takes $h/2$ steps, and so on. The $a_{1}$ terms can be eliminated by subtracting Eq.~(\ref{eq:h1}) from two times Eq.~(\ref{eq:h2}):
 \begin{equation}\label{eq:A2}
 A=2\,A_2-A_1 = 2\,A(\frac{h}{2}) - A(h) + \underbrace{a_{2}(\frac{h}{2})^2 + \mathcal{O}(h^3)}_{\mathcal{O}(h^2)}
 \end{equation}
@@ -475,13 +475,13 @@ The time step ($\Delta t_{new}$) required to maintain the specified/acceptable e
 \begin{equation}\label{eq:dt_new}
 \Delta t_{new}=\Delta t (\frac{err\_tol}{error})^{\mathcal{O}^{-1}}
 \end{equation}
-In this case, the scheme is fourth-order accurate, and thus the exponent in \ref{eq:dt_new} becomes $(1/4)$. Equation~\ref{eq:dt_new} indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required. Additionally, by setting an error tolerance, the algorithm will select a new time step to satisfy that value, which bounds the solution.
+In this case, the scheme is fourth-order accurate, and thus the exponent in Eq.~(\ref{eq:dt_new}) becomes $(1/4)$. Eq.~(\ref{eq:dt_new}) indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required. Additionally, by setting an error tolerance, the algorithm will select a new time step to satisfy that value, which bounds the solution.
 
 Although error control can bound the solution, it does not eliminate numerical fluctuations, which can occur in some cases such as those with reversible reactions. Only the value at the end of a time step is returned by the integrator. Therefore, if the values are fluctuating around a fixed point while also being bounded by the error tolerance, the integrator is doing extra work by continuing to calculate every fluctuation within a time step. To minimize the computational expense, a total variation (TV) scheme was implemented. This scheme examines the differences in species mass fractions at four consecutive sub-time steps. Within this four point stencil there are three differences for each species mass fraction. The TV scheme compares the absolute value of the sum of the differences to the sum of the absolute values of the differences: 
 \begin{equation}\label{eq:TV}
 \displaystyle \sum_{i=1}^{4}|Y(i+1)-Y(i)| = 3.0|\displaystyle \sum_{i=1}^{4}(Y(i+1)-Y(i))|
 \end{equation}
-Figure \ref{fig:TV} shows an example of a quantity fluctuating between 0 and 1 about a fixed point.
+Fig.~\ref{fig:TV} shows an example of a quantity fluctuating between 0 and 1 about a fixed point.
 \begin{figure}[h!]
 \begin{center}
 \scalebox{0.45}{\includegraphics{FIGURES/total_variation}}
@@ -496,7 +496,7 @@ to the absolute value of the sum of the differences:
 \begin{equation}\label{eq:abs_sum_tv}
 |\displaystyle \sum_{i=1}^{4}(Y(i+1)-Y(i))| = |(1-0)+(0-1)+(1-0)| = 1
 \end{equation}
-The ratio of \ref{eq:sum_abs_tv} and \ref{eq:abs_sum_tv} is 3, which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use 2.5 because floating point division might not return a value of exactly 3. If fluctuations have been identified, then the values at the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-time steps being taken by the integrator. Because the error controller is bounding the solution, any one of the values within the stencil is within the error tolerance and is a sufficiently accurate answer.   
+The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use 2.5 because floating point division might not return a value of exactly 3. If fluctuations have been identified, then the values at the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-time steps being taken by the integrator. Because the error controller is bounding the solution, any one of the values within the stencil is within the error tolerance and is a sufficiently accurate answer.   
 
 %\chapter{Derivation of the Werner Wengle Wall Model}
 %%\subsubsection{R. McDermott, BFRL}
