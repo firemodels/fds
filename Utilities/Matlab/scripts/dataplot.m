@@ -152,7 +152,7 @@ for i=2:2000
         % plot the experimental data or analytical solution (d1)
         
         if ~exist(d1_Filename,'file')
-           error(['Error: File ' d1_Filename ' does not exist. Terminating script.'])
+           error(['Matlab error: File ' d1_Filename ' does not exist. Terminating script.'])
         end
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
         R1 = parse(d1_Ind_Col_Name);
