@@ -90,6 +90,12 @@ for j=qrange
             Measured_Metric(k,:,:)  = Save_Measured_Metric(i,:,:);
             Predicted_Metric(k,:,:) = Save_Predicted_Metric(i,:,:);
             Group_Key_Label(k)  = Save_Group_Key_Label(i);
+            size_measured = size(nonzeros(Measured_Metric(k,:,:)));
+            size_predicted = size(nonzeros(Predicted_Metric(k,:,:)));
+            % Check to see if measured and predicted arrays are the same size
+            if size_measured(1) ~= size_predicted(1)
+                error('Matlab error: Mismatched measured and predicted arrays in scatter plot. Verify that the statistical metrics are being used properly for all cases.')
+            end
             K(k) = plot(nonzeros(Measured_Metric(k,:,:)),nonzeros(Predicted_Metric(k,:,:)),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
 
@@ -105,15 +111,15 @@ for j=qrange
                     % Compute the appropriate type of statistics, depending
                     % on the 'Quantity' specification in dataplot_inputs
                     if strcmp(error_type, 'Relative Error')
-                        error = ((single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m));
+                        error_val = ((single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m));
                     elseif strcmp(error_type, 'Absolute Error')
-                        error = (single_predicted_metric(m)-single_measured_metric(m));
+                        error_val = (single_predicted_metric(m)-single_measured_metric(m));
                     end
                     
                     % Compare the error to the specified error tolerance,
                     % which is in the dataplot_inputs column called 'Error_Tolerance'
                     error_tolerance = str2num(Save_Error_Tolerance{i,1});
-                    if abs(error) <= error_tolerance
+                    if abs(error_val) <= error_tolerance
                         within_tolerance = 'Yes';
                     else
                         within_tolerance = 'No';
@@ -128,7 +134,7 @@ for j=qrange
                     output_stats{stat_line,6} = single_predicted_metric(m);
                     output_stats{stat_line,7} = Save_Dep_Title{i,1};
                     output_stats{stat_line,8} = error_type;
-                    output_stats{stat_line,9} = sprintf('%1.8f', error);
+                    output_stats{stat_line,9} = sprintf('%1.8f', error_val);
                     output_stats{stat_line,10} = sprintf('%1.8f', error_tolerance);
                     output_stats{stat_line,11} = within_tolerance;
                     output_stats{stat_line,12} = Save_Plot_Filename{i,1};
@@ -270,7 +276,7 @@ if stats_output == 1
         % Remove " Error" from string to save horizontal space
         error_type = strrep(m{i_row, 8}, ' Error', '');
         % Convert strings to numbers for later formatting
-        error = str2num(m{i_row, 9});
+        error_val = str2num(m{i_row, 9});
         tol = str2num(m{i_row, 10});
         % Additional columns
         within_tolerance = m{i_row, 11};
@@ -281,7 +287,7 @@ if stats_output == 1
         fprintf(fid, '%s',   num2str(predicted_value, '%1.2e'), ' & ');
         fprintf(fid, '%s',   dependent_variable, ' & ');
         fprintf(fid, '%s',   error_type, ' & ');
-        fprintf(fid, '%s',   num2str(error, '%1.2e'), ' & ');
+        fprintf(fid, '%s',   num2str(error_val, '%1.2e'), ' & ');
         fprintf(fid, '%s',   num2str(tol, '%1.2e'), ' & ');
         fprintf(fid, '%s%s\n', within_tolerance, ' \\');
     end
