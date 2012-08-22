@@ -103,7 +103,7 @@ $RUNFDS Pressure_Effects zone_shape
 
 $RUNFDS Pressure_Solver dancing_eddies
 $RUNFDS Pressure_Solver dancing_eddies_1mesh
-$RUNFDS Pressure_Solver dancing_eddies_tol=p1
+$RUNFDS Pressure_Solver dancing_eddies_tol_p1
 $RUNFDS Pressure_Solver scarc2d_fft_1mesh
 $RUNFDS Pressure_Solver scarc2d_fft_8mesh
 $RUNFDS Pressure_Solver scarc2d_cg_8mesh
@@ -266,11 +266,11 @@ $RUNFDS Sprinklers_and_Sprays drag_dtp1
 $RUNFDS Sprinklers_and_Sprays drag_dtp01
 $RUNFDS Sprinklers_and_Sprays drag_dtp001
 $RUNFDS Sprinklers_and_Sprays particle_flux
-$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=1_0
-$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=0_1
-$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=0_01
-$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=0_001
-$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=0_0001
+$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt_1_0
+$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt_0_1
+$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt_0_01
+$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt_0_001
+$RUNFDS Sprinklers_and_Sprays terminal_velocity_dt_0_0001
 $RUNFDS Sprinklers_and_Sprays flat_fire
 $RUNFDS Sprinklers_and_Sprays fluid_part_mom_x
 $RUNFDS Sprinklers_and_Sprays fluid_part_mom_y

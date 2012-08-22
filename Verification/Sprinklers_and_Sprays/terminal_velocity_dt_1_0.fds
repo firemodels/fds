@@ -1,4 +1,4 @@
-&HEAD CHID='terminal_velocity_dt=1_0', TITLE='Water droplet terminal velocity test' /
+&HEAD CHID='terminal_velocity_dt_1_0', TITLE='Water droplet terminal velocity test' /
 
 &MESH IJK=4,4,10, XB=-1.0,1.0,-1.0,1.0,1,-400 /
 
