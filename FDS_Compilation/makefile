@@ -57,7 +57,7 @@ intel_win_32_db : obj = fds_win_32_db
 intel_win_32_db : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
 
-intel_win_32 : FFLAGS = -O2 /Qvec_report0 /Qipo
+intel_win_32 : FFLAGS = -O3 /Qvec_report0 /Qipo
 intel_win_32 : FCOMPL = ifort
 intel_win_32 : obj = fds_win_32
 intel_win_32 : setup_win $(objwin_serial)
@@ -65,7 +65,7 @@ intel_win_32 : setup_win $(objwin_serial)
 
 mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_32 : FFLAGS = -O2 /Qipo /I $(MPIINCLUDE)
+mpi_intel_win_32 : FFLAGS = -O3 /Qipo /I $(MPIINCLUDE)
 mpi_intel_win_32 : FCOMPL = ifort
 mpi_intel_win_32 : obj = fds_mpi_win_32
 mpi_intel_win_32 : setup_win $(objwin_mpi)
@@ -82,7 +82,7 @@ mpi_intel_win_32_db : setup_win $(objwin_mpi)
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
  #    ..\Scripts\ifortvars intel64
 
-intel_win_64 : FFLAGS = -O2 /Qvec_report0 /Qipo
+intel_win_64 : FFLAGS = -O3 /Qvec_report0 /Qipo
 intel_win_64 : FCOMPL = ifort
 intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwin_serial)
@@ -102,7 +102,7 @@ intel_win_64_db : setup_win $(objwin_serial)
 
 mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_64 : FFLAGS = -O2 /Qipo /Qvec_report0 /I $(MPIINCLUDE)
+mpi_intel_win_64 : FFLAGS = -O3 /Qipo /Qvec_report0 /I $(MPIINCLUDE)
 mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
@@ -118,7 +118,7 @@ mpi_intel_win_64_db : setup_win $(objwin_mpi)
 
 # Intel Compiler for Linux, version 11
 
-intel_linux_32 : FFLAGS = -m32 -O2 -vec_report0 -ipo
+intel_linux_32 : FFLAGS = -m32 -O3 -vec_report0 -ipo
 intel_linux_32 : LFLAGS = -static-intel
 intel_linux_32 : FCOMPL = ifort
 intel_linux_32 : obj = fds_intel_linux_32
@@ -131,21 +131,21 @@ intel_linux_32 : setup $(obj_serial)
 # 2.  run case as usual
 # 3.  type: gprof fds_linux_32_profile > results.out
 
-intel_linux_32_profile : FFLAGS = -m32 -O2 -vec_report0 -p
+intel_linux_32_profile : FFLAGS = -m32 -O3 -vec_report0 -p
 intel_linux_32_profile : LFLAGS = -static-intel
 intel_linux_32_profile : FCOMPL = ifort
 intel_linux_32_profile : obj = fds_intel_linux_32_profile
 intel_linux_32_profile : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64_profile : FFLAGS = -m64 -O2 -vec_report0 -p
+intel_linux_64_profile : FFLAGS = -m64 -O3 -vec_report0 -p
 intel_linux_64_profile : LFLAGS = -static-intel
 intel_linux_64_profile : FCOMPL = ifort
 intel_linux_64_profile : obj = fds_intel_linux_64_profile
 intel_linux_64_profile : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
+intel_linux_64 : FFLAGS = -m64 -O3 -vec_report0 -ipo
 intel_linux_64 : LFLAGS = -static-intel
 intel_linux_64 : FCOMPL = ifort
 intel_linux_64 : obj = fds_intel_linux_64
@@ -159,14 +159,14 @@ intel_linux_64_dv : obj = fds_intel_linux_64_dv
 intel_linux_64_dv : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_linux_32 : FFLAGS = -m32 -O2 -vec_report0 -ipo
+mpi_intel_linux_32 : FFLAGS = -m32 -O3 -vec_report0 -ipo
 mpi_intel_linux_32 : LFLAGS = -static-intel
 mpi_intel_linux_32 : FCOMPL = mpif77
 mpi_intel_linux_32 : obj = fds_mpi_intel_linux_32
 mpi_intel_linux_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
+mpi_intel_linux_64 : FFLAGS = -m64 -O3 -vec_report0 -ipo
 mpi_intel_linux_64 : LFLAGS = -static-intel
 mpi_intel_linux_64 : FCOMPL = mpif77
 mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
@@ -203,14 +203,14 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 
 # 32 bit
 
-intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -vec_report0 -ipo
+intel_osx_32 : FFLAGS = -O3  -m32 -heap-arrays -vec_report0 -ipo
 intel_osx_32 : LFLAGS = -static-intel
 intel_osx_32 : FCOMPL = ifort
 intel_osx_32 : obj = fds_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0 -ipo
+mpi_intel_osx_32 : FFLAGS  = -O3 -m32 -heap-arrays -vec_report0 -ipo
 mpi_intel_osx_32 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_32 : FCOMPL  = mpif77
 mpi_intel_osx_32 : obj = fds_mpi_intel_osx_32
@@ -232,14 +232,14 @@ mpi_intel_osx_32_db : setup $(obj_mpi)
 
 # 64 bit
 
-intel_osx_64 : FFLAGS = -O2 -m64 -heap-arrays -ipo
+intel_osx_64 : FFLAGS = -O3 -m64 -heap-arrays -ipo
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : obj = fds_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0 -ipo
+mpi_intel_osx_64 : FFLAGS  = -O3 -m64 -heap-arrays -vec_report0 -ipo
 mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64 : FCOMPL  = mpif77
 mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
@@ -297,7 +297,7 @@ lahey_linux_mpi : $(obj_mpi)
 
 #*** Sun Solaris 10 f95 Compiler ***
 
-f95_solaris10 : FFLAGS   = -O2 -m64 -Bstatic
+f95_solaris10 : FFLAGS   = -O3 -m64 -Bstatic
 f95_solaris10 : FCOMPL   = f95
 f95_solaris10 : obj = fds_solaris
 f95_solaris10 : $(obj_serial)
@@ -327,7 +327,7 @@ f95_solaris11_mpi : obj = fds_mpi_solaris11
 f95_solaris11_mpi : $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
 
-sun_linux_64 : FFLAGS   = -O2 -m64 -Bstatic
+sun_linux_64 : FFLAGS   = -O3 -m64 -Bstatic
 sun_linux_64 : FCOMPL   = /opt/oracle/solstudio12.2/bin/sunf95
 sun_linux_64 : obj = fds_sun_linux_64
 sun_linux_64 : $(obj_serial)
@@ -341,7 +341,7 @@ sun_linux_64 : $(obj_serial)
 # 3.  type: 
 # /opt/oracle/solstudio12.2/bin/xprof_btoa fds_sun_linux_64_profile.profile profile_results.out
 
-sun_linux_64_profile : FFLAGS   = -O2 -m64 -Bstatic -xprofile=collect
+sun_linux_64_profile : FFLAGS   = -O3 -m64 -Bstatic -xprofile=collect
 sun_linux_64_profile : FCOMPL   = /opt/oracle/solstudio12.2/bin/sunf95
 sun_linux_64_profile : obj = fds_sun_linux_64_profile
 sun_linux_64_profile : $(obj_serial)
@@ -366,7 +366,7 @@ mpi_pgi_linux_64: $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 #XLF-Compiler, IBM Power6 Core, OpenMP, full optimized settings
-xlf_openmp : FFLAGS  = -O2 -qhot -q64 -qtune=pwr6 -qarch=pwr6 -qmaxmem=-1 -bdatapsize:64K -bstackpsize:64K -btextpsize:64K -qsmp=omp
+xlf_openmp : FFLAGS  = -O3 -qhot -q64 -qtune=pwr6 -qarch=pwr6 -qmaxmem=-1 -bdatapsize:64K -bstackpsize:64K -btextpsize:64K -qsmp=omp
 xlf_openmp : FCOMPL  = xlf90_r
 xlf_openmp : obj     = fds_xlf_openmp
 xlf_openmp : $(obj_serial)
@@ -380,7 +380,7 @@ xlf_openmp_nooptimization : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial) 
 
 #AIX, JUMP, MPI-Version
-aix_mpi : FFLAGS  = -O2 -q64
+aix_mpi : FFLAGS  = -O3 -q64
 aix_mpi : FCOMPL  = mpxlf90
 aix_mpi : obj     = fds_jump_mpi_64
 aix_mpi : $(obj_mpi)
@@ -408,18 +408,18 @@ gnu_mpi_32 : obj = fds_gnu_mpi_32
 gnu_mpi_32 : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-gnu_linux_64 : FFLAGS = -O2 -unroll -static -frecord-marker=4
+gnu_linux_64 : FFLAGS = -O3 -unroll -static -frecord-marker=4
 gnu_linux_64 : FCOMPL = gfortran
 gnu_linux_64 : obj = fds_gnu_linux_64
 gnu_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-xxxmpi_gnu_linux_64 : FFLAGS = -O2 -unroll -static -frecord-marker=4 
+xxxmpi_gnu_linux_64 : FFLAGS = -O3 -unroll -static -frecord-marker=4 
 xxxmpi_gnu_linux_64 : FCOMPL = mpif77
 xxxmpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64 
 xxxmpi_gnu_linux_64 : setup $(obj_mpi) 
 
-mpi_gnu_linux_64 : FFLAGS = -m64 -O2 -unroll
+mpi_gnu_linux_64 : FFLAGS = -m64 -O3 -unroll
 mpi_gnu_linux_64 : FCOMPL = mpif77
 mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64 
 mpi_gnu_linux_64 : setup $(obj_mpi) 
@@ -432,7 +432,7 @@ mpi_gnu_osx_32_db : obj = fds_mpi_gnu_osx_32_db
 mpi_gnu_osx_32_db : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
 
-mpi_gnu_osx_32 : FFLAGS = -O2 -ffree-line-length-256
+mpi_gnu_osx_32 : FFLAGS = -O3 -ffree-line-length-256
 mpi_gnu_osx_32 : FCOMPL = mpif90
 mpi_gnu_osx_32 : obj = fds_mpi_gnu_osx_32 
 mpi_gnu_osx_32 : setup $(obj_mpi) 
