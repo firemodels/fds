@@ -328,7 +328,7 @@ Once $u^+$ has been determined from the model profile, the stress may be obtaine
 \label{eqn_wall_stress}
 \tau_w = \rho \left( \frac{u}{u^+} \right)^2
 \end{equation}
-Generally, this requires an iterative procedure since $\tau_w$ is needed to define $\delta_\nu$ and hence $y^+$.  The strategy employed in FDS is to first compute $\tau_w$ as if the flow is locally laminar (DNS), and if the calculation is an LES the laminar value is used as an initial guess.  Testing has shown that three iterations is sufficient to converge the residual error in the profile model to 1 \%.
+Generally, this requires an iterative procedure since $\tau_w$ is needed to define $\delta_\nu$ and hence $y^+$.  The strategy employed in FDS is to first compute $\tau_w$ as if the flow is locally laminar (DNS), and if the calculation is an LES the laminar value is used as an initial guess.  Testing has shown that three iterations is sufficient to converge the residual error in the profile model to 1\%.
 
 
 \section{Time Step and Stability Constraints}
@@ -398,10 +398,14 @@ Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, 
 
 A time scale restriction based on gravitational acceleration can be formed from $\delta t \le \sqrt{\delta z/g}$.  This check may be added by setting  {\ct CHECK\_GR=.TRUE.} on {\ct MISC}.
 
-\subsection{Adjusting the Time Step} In the call to {\ct CHECK\_STABILITY} both the CFL and VN numbers are compared with {\ct CFL\_MAX [1.0]}, {\ct CFL\_MIN [0.8]}, {\ct VN\_MAX [0.5]}, and {\ct VN\_MIN [0.4]}, respectively (default values shown in brackets).  To be clear, the CFL constraint is now given by
+\subsection{Adjusting the Time Step}
+
+In the default LES mode of operation, the CFL is compared with {\ct CFL\_MAX \![1.0]} and {\ct CFL\_MIN \![0.8]} (default values shown in brackets).  To be clear, the CFL constraint is now given by
 \begin{equation}
 \mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
 \end{equation}
+In DNS mode, VN is also checked by default ({\ct VN\_MAX \![0.5]}, {\ct VN\_MIN \![0.4]}).
+
 If either the current CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  The initial time step may be set and locked on the {\tt TIME} line of the FDS input file.  See the User's Guide for details.
 
 
@@ -422,8 +426,8 @@ not considered important in a given simulation. The pressure on the left hand si
 in the variable $\cal H$) is solved for directly.
 The reason for the decomposition of the pressure term is so that the linear algebraic system
 arising from the discretization of Eq.~(\ref{pe})
-has constant coefficients ({\em i.e.} it is {\em separable}) and can be solved to machine accuracy
-by a fast, direct ({\em i.e.} non-iterative) method that utilizes
+has constant coefficients ({\em i.e.}, it is {\em separable}) and can be solved to machine accuracy
+by a fast, direct ({\em i.e.}, non-iterative) method that utilizes
 Fast Fourier Transforms (FFT).
 
 The discretized form of the
@@ -434,7 +438,7 @@ Poisson equation for the modified pressure, $\hp$, is:
 \frac{\hp_{ij,k+1}-2\hp_{ijk}+\hp_{ij,k-1}}{\dz^2} \nonumber \\ =
     -\frac{F_{\x,ijk} - F_{\x,i-1,jk}}{\dx}
     -\frac{F_{\y,ijk} - F_{\y,i,j-1,k}}{\dy}
-    -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \dod{ }{t}(\nabla\!\cdot \bu)_{ijk}
+    -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk}
 \end{eqnarray}
 The lack of a superscript implies that all quantities are to be
 evaluated at the same time level.
@@ -445,11 +449,11 @@ elliptic equation solver FISHPAK, was originally developed at the National Cente
 Research (NCAR) in Boulder, Colorado.}.
 To ensure that the divergence of the fluid is consistent with the definition
 given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
-\be \dod{ }{t}(\nabla\!\cdot \bu)_{ijk} \equiv
+\be \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
           \frac{(\nabla\!\cdot \bu)_{ijk}^*
               - (\nabla\!\cdot \bu)_{ijk}^n}{\dt} \ee
 at the predictor step, and then
-\be \dod{ }{t}(\nabla\!\cdot \bu)_{ijk} \equiv
+\be \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
          \frac{(\nabla\!\cdot \bu)_{ijk}^{n+1} -
          \ha \left[ (\nabla\!\cdot \bu)_{ijk}^*
        + (\nabla\!\cdot \bu)_{ijk}^n \right]}{\dt/2} \ee
@@ -465,7 +469,7 @@ The pressure $\tilde{p}$ is set to $\tilde{p}_{ext}$ by the user ({\ct DYNAMIC\_
 \\
 \\
 Inflow: When fluid is entering the domain at an {\tt OPEN} vent we make the assumption that
-Bernoulli holds (i.e. inviscid, steady, incompressible) and that the fluid element on the boundary has
+Bernoulli holds (\emph{i.e.}, inviscid, steady, incompressible) and that the fluid element on the boundary has
 accelerated from the state \{$\tilde{p}_1,\rho_1,q_1$\} along a streamline:
 \begin{equation}
 \tilde{p}_1 + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \tilde{p}_2 + \mbox{$\frac{1}{2}$}\rho_2 q_2^2
@@ -486,6 +490,8 @@ The density $\rho_2$ is taken as the average density between the gas-phase and g
 
 
 \subsection{Solid Boundary Conditions}
+
+FDS uses a simple, direct-forcing immersed boundary method (IBM) \cite{Fadlun:2000} for block Cartesian geometries.  This section discusses the modifications required of the force terms in the momentum equation for IBM.
 
 Direct Poisson solvers are most efficient if the domain is a
 rectangular region, although other geometries such as cylinders
