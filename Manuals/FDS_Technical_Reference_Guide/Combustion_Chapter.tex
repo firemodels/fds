@@ -11,11 +11,11 @@ In the typical FDS problem we consider three lumped species: fuel, air, and prod
 \begin{equation}\label{eq:simple}
 \mathrm{Fuel + Air \rightarrow Products}
 \end{equation}
-The key assumption made in lumping the primitive species is that the new species groups transport together (implying equal diffusivities). Lumped species are also produced and consumed together. We can expand \ref{eq:simple}, to show the components of the lumped species for a simple, one-step methane reaction. Here air is assumed to be 21\% O$_2$ and 79\% N$_2$ by volume.
+The key assumption made in lumping the primitive species is that the new species groups transport together (implying equal diffusivities). Lumped species are also produced and consumed together. We can expand Eq.~(\ref{eq:simple}), to show the components of the lumped species for a simple, one-step methane reaction. Here air is assumed to be 21\% O$_2$ and 79\% N$_2$ by volume.
 \begin{equation}\label{eq:lumped_expand}
 \mathrm{2\underbrace{(\mbox{O}_2+(.79/.21)\mbox{N}_2)}_\text{Background(Oxidant),~Z$_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~Z$_1$} \rightarrow 1\underbrace{(\mbox{CO}_2+2\mbox{H}_2\mbox{O}+2(.79/.21)\mbox{N}_2)}_\text{Products,~Z$_2$}}
 \end{equation}
-As described by \ref{eq:lumped_expand}, two moles of the lumped species `Background' react with one mole of lumped species `Fuel', to produce one mole of lumped species `Products'. To convert from lumped species to primitive species, we need to find the mass fractions of the primitive species within a particular lumped species if the lumped species mass fraction were one. Consider, Z$_0$, the background species:
+As described by Eq.~(\ref{eq:lumped_expand}), two moles of the lumped species `Background' react with one mole of lumped species `Fuel', to produce one mole of lumped species `Products'. To convert from lumped species to primitive species, we need to find the mass fractions of the primitive species within a particular lumped species if the lumped species mass fraction were one. Consider, Z$_0$, the background species:
 
 \begin{alignat}{4}\label{eq:backgroud}
 Y_\mathrm{O_{2}} &= \frac{W_\mathrm{O_{2}}}{W_\mathrm{O_{2}}+(.79/.21)W_\mathrm{N_{2}}} &=& \frac{W_\mathrm{O_{2}}}{W_{\mathrm{Z_0}}} &= 0.2330 \\
@@ -31,7 +31,7 @@ A_{\alpha i} = \frac{\upsilon_{\alpha i}W_{\alpha}}{\displaystyle \sum_{\alpha}\
 \end{equation}
 where $\upsilon_{\alpha i}$ are the volume ratios of primitive species $\alpha$ in lumped species {i}.
 
-If we look at the primitive species in \ref{eq:lumped_expand} and assume that $\mathbf{Z} = [0.3\, \, 0.2\, \, 0.5]^\mathrm{T}$, we can transform from lumped species to primitive species:
+If we look at the primitive species in Eq.~(\ref{eq:lumped_expand}) and assume that $\mathbf{Z} = [0.3\, \, 0.2\, \, 0.5]^\mathrm{T}$, we can transform from lumped species to primitive species:
 
 \begin{displaymath}
 \mathbf{Y}=\left[\begin{array}{c}
@@ -65,7 +65,7 @@ To convert back to lumped species from primitive species we can perform linear a
 \begin{equation}\label{eq:transform_back}
 \textbf{Z}=B\textbf{Y} \, \, \, \text{where} \, \, \, \, B=(A^TA)^{-1}A^T
 \end{equation}
-If we revisit \ref{eq:lumped_expand} but decompose the reaction into all primitive species, we get:
+Now we revisit Eq.~(\ref{eq:lumped_expand}) but decompose the reaction into all primitive species, we get:
 \begin{equation}\label{eq:prim}
 \underbrace{\mbox{CH}_4}_\text{Fuel}+\underbrace{2\mbox{O}_2}_\text{Oxidizer}+\underbrace{7.52\mbox{N}_2}_\text	{Background}\rightarrow \underbrace{\mbox{CO}_2}_\text{P1}+\underbrace{2\mbox{H}_2\mbox{O}}_\text{P2}+\underbrace{7.52\mbox{N}_2}_\text{Background}
 \end{equation}
@@ -110,7 +110,7 @@ where $\tau_{chem}$ is the chemical time scale, $\tau_{d}$ is associated with mo
 \begin{equation}\label{eq:tau_g}
 \tau_{g}=\sqrt{2\Delta/g}
 \end{equation}
-In FDS, $\Delta$ is the filter width and is equivalent to the local cell size $\delta x$. Figure \ref{fig:reac_time_scale} shows the impact of the components of \ref{eq:tau_mix} on the value of $\tau_{mix}$. $\tau_{mix}$ is represented by the bold solid line.
+In FDS, $\Delta$ is the filter width and is equivalent to the local cell size $\delta x$. Fig~\ref{fig:reac_time_scale} shows the impact of the components of Eq.~(\ref{eq:tau_mix}) on the value of $\tau_{mix}$. $\tau_{mix}$ is represented by the bold solid line.
 
 \begin{figure}[h!]
 \begin{center}
@@ -135,7 +135,7 @@ where $m_\alpha(t)$ is the mixed mass of each of the $\alpha$ species in the sim
 \begin{equation}\label{eq:mixmass}
 \frac{\mbox{d}m_{\alpha}}{\mbox{d}t}=\frac{M(t) \, \nu_{\alpha} \, W_{\alpha}}{W_F}\displaystyle \sum_{i}^{\text{N\,Reactions}}r_{i}+Y_{\alpha,0}\frac{\mbox{d}M}{\mbox{d}t} 
 \end{equation}
-where $Y_{\alpha,0}$ is the mass fraction of each $\alpha$ species in the unmixed portion of the cell. The mass fractions of each species in the unmixed portion remain constant over an integration time step therefore the proportion of species which mix remains constant. $r_{i}$, the reaction rate, is discussed in detail in Section \ref{Reaction_Rate_Model}. The complete composition of the computational cell is found by a combination of the unmixed and mixed portions:
+where $Y_{\alpha,0}$ is the mass fraction of each $\alpha$ species in the unmixed portion of the cell. The mass fractions of each species in the unmixed portion remain constant over an integration time step therefore the proportion of species which mix remains constant. $r_{i}$, the reaction rate, is discussed in detail in section \ref{Reaction_Rate_Model}. The complete composition of the computational cell is found by a combination of the unmixed and mixed portions:
 
 \begin{equation}\label{eq:final_comp}
 Y_{\alpha}(t)=\zeta(t)Y_{\alpha,0}+(1-\zeta(t))\phi_{\alpha}(t)
@@ -160,7 +160,7 @@ Note that the rate expression can be dependent on temperature and that the rate 
 \end{equation}
 
 \subsection{Infinitely Fast Reaction}
-For fast chemistry reactions, $E$ and $n$ in \ref{eq:Arrheniusratemode} are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\frac{\mbox{d}\phi_\F}{\mbox{d}t}$ becomes sufficiently large such that all of the fuel in a computational cell is consumed in a single time step, effectively making the rate infinite. However, the rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.   
+For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\frac{\mbox{d}\phi_\F}{\mbox{d}t}$ becomes sufficiently large such that all of the fuel in a computational cell is consumed in a single time step, effectively making the rate infinite. However, the rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.   
 
 \subsection{Arrhenius Reaction}
 There are conditions under which the local temperature and species concentrations support the computation of the reaction rate.  One set of conditions is where the reacting regions of the flow can be considered a well-stirred reactor.  The other is during a DNS calculation.  In the first case rather than a reacting surface, there is a reacting volume.  In the second case, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
