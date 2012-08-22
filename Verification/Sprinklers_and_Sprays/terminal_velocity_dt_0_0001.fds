@@ -1,8 +1,8 @@
-&HEAD CHID='terminal_velocity_dt=0_001', TITLE='Water droplet terminal velocity test' /
+&HEAD CHID='terminal_velocity_dt_0_0001', TITLE='Water droplet terminal velocity test' /
 
 &MESH IJK=4,4,10, XB=-1.0,1.0,-1.0,1.0,1,-400 /
 
-&TIME DT=0.001, T_END=20., LOCK_TIME_STEP=.TRUE. /
+&TIME DT=0.0001, T_END=20., LOCK_TIME_STEP=.TRUE. /
 
 &RADI RADIATION=.FALSE./
 
