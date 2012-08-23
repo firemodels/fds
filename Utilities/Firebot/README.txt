@@ -111,7 +111,6 @@ MAIL=""
 
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
-# The run-once script maintains a lock to prevent the script from running twice
-56 21 * * * run-one bash -lc firebot_mac.sh
+56 21 * * * cd ~/firebot ; ./firebot_mac.sh
 
 ------------------------------------------------------------------------------------
