@@ -40,9 +40,9 @@
     This script writes out a plaintext .wiki file that can be 'cat' to /home/firebot/firebot/wiki_output/Firebot_Build_Status.wiki
     This script is invoked via crontab (details below).
 
-# firebot.sh
+# firebot_linux.sh
 
-    This is the primary Firebot automated test script.
+    This is the primary Firebot automated test script used on Linux.
     This script is invoked via crontab (details below).
 
 # /usr/local/bin/run-one (from https://launchpad.net/ubuntu/+source/run-one)
@@ -86,6 +86,6 @@ MAIL=""
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
 # The run-once script maintains a lock to prevent the script from running twice
-56 21 * * * run-one bash -lc firebot.sh
+56 21 * * * run-one bash -lc firebot_linux.sh
 
 ------------------------------------------------------------------------------------
