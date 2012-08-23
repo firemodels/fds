@@ -98,7 +98,7 @@ clean_firebot_history()
 {
    # Clean Firebot metafiles
    cd $FIREBOT_DIR
-   rm output/*
+   rm output/* > /dev/null
 }
 
 update_and_compile_cfast()
