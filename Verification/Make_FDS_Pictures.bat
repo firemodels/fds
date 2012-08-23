@@ -8,48 +8,10 @@ echo.
 echo erasing Verification scripted figures generated previously
 erase ..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES\*.png
 
-cd Controls
-smokeview -runscript activate_vents
+set BASEDIR=%CD%\
+set RUNSMV=call "%BASEDIR%\scripts\runsmv.bat"
+set SMOKEVIEW=smokeview
 
-cd ..\Detectors
-smokeview -runscript beam_detector
+..\Utilities\Data_Processing\sh2bat FDS_Pictures.sh FDS_Pictures.bat
 
-cd ..\Fires
-smokeview -runscript room_fire
-
-cd ..\Flowfields
-smokeview -runscript helium_2d
-smokeview -runscript symmetry_test
-smokeview -runscript jet_fan
-
-cd ..\HVAC
-smokeview -runscript HVAC_mass_conservation
-smokeview -runscript HVAC_energy_pressure
-smokeview -runscript leak_test_2
-
-cd ..\Miscellaneous
-smokeview -runscript pyramid
-
-cd ..\NS_Analytical_Solution
-smokeview -runscript ns2d_64
-
-cd ..\Pressure_Effects
-smokeview -runscript pressure_boundary
-
-cd ..\Scalar_Analytical_Solution
-smokeview -runscript move_slug
-smokeview -runscript move_slug_fl1
-
-cd ..\Species
-smokeview -runscript Propane_flame_deposition
-
-cd ..\Sprinklers_and_Sprays
-smokeview -runscript cascade
-
-cd ..\Turbulence
-smokeview -runscript csmag_64
-smokeview -runscript dsmag_64
-
-cd ..\Visualization
-smokeview -runscript objects_static
-smokeview -runscript objects_dynamic
+call FDS_Pictures.bat
