@@ -46,7 +46,7 @@ smokeview -runscript Propane_flame_deposition
 cd ..\Sprinklers_and_Sprays
 smokeview -runscript cascade
 
-cd ..\Sprinklers_and_Sprays
+cd ..\Turbulence
 smokeview -runscript csmag_64
 smokeview -runscript dsmag_64
 
