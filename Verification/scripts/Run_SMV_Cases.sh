@@ -65,7 +65,7 @@ else
 fi
 
 
-export BACKGROUND=$SVNROOT/Utilities/background/gnu_$PLATFORM2/background
+export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDSEXE=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
 export FDS=$FDSEXE
 export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
