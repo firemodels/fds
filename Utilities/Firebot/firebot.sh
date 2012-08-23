@@ -75,6 +75,16 @@ check_time_limit()
 }
 
 #  ========================
+#  = Additional functions =
+#  ========================
+
+set_files_world_readable()
+{
+   cd $FDS_SVNROOT
+   chmod -R go+r *
+}
+
+#  ========================
 #  ========================
 #  = Firebot Build Stages =
 #  ========================
@@ -138,6 +148,7 @@ update_and_compile_cfast()
       echo "CFAST failed to compile" >> $FIREBOT_DIR/output/stage1_cfast 2>&1
       BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
       ERROR_LOG=$FIREBOT_DIR/output/stage1_cfast
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -186,6 +197,7 @@ check_svn_checkout()
    then
       BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
       ERROR_LOG=$FIREBOT_DIR/output/stage1
+      set_files_world_readable
       save_build_status
       email_error_message
    else
@@ -217,6 +229,7 @@ check_compile_fds_db()
    else
       BUILD_STAGE_FAILURE="Stage 2a: FDS DB Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage2a
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -256,6 +269,7 @@ check_compile_fds_mpi_db()
    else
       BUILD_STAGE_FAILURE="Stage 2b: FDS MPI DB Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage2b
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -397,6 +411,7 @@ check_verification_cases_short()
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
       
       ERROR_LOG=$FIREBOT_DIR/output/stage3_errors
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -425,6 +440,7 @@ check_compile_fds()
    else
       BUILD_STAGE_FAILURE="Stage 4a: FDS Release Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage4a
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -465,6 +481,7 @@ check_compile_fds_mpi()
    else
       BUILD_STAGE_FAILURE="Stage 4b: FDS MPI Release Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage4b
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -537,6 +554,7 @@ check_verification_cases_long()
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
       
       ERROR_LOG=$FIREBOT_DIR/output/stage5_errors
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -579,6 +597,7 @@ check_smv_utilities()
    else
       BUILD_STAGE_FAILURE="Stage 6a: SMV Utilities Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage6a
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -606,6 +625,7 @@ check_compile_smv_db()
    else
       BUILD_STAGE_FAILURE="Stage 6b: SMV Debug Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage6b
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -646,6 +666,7 @@ check_smv_pictures_db()
       BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures (Debug Mode)"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c > $FIREBOT_DIR/output/stage6c_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage6c_errors
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -673,6 +694,7 @@ check_compile_smv()
    else
       BUILD_STAGE_FAILURE="Stage 6d: SMV Release Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage6d
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -713,6 +735,7 @@ check_smv_pictures()
       BUILD_STAGE_FAILURE="Stage 6e: Make SMV Pictures (Release Mode)"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e > $FIREBOT_DIR/output/stage6e_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage6e_errors
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -741,6 +764,7 @@ check_fds_pictures()
       BUILD_STAGE_FAILURE="Stage 6f: Make FDS Pictures"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f > $FIREBOT_DIR/output/stage6f_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage6f_errors
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -777,6 +801,7 @@ check_matlab_plotting()
       BUILD_STAGE_FAILURE="Stage 7: Matlab plotting and statistics"
       grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7* > $FIREBOT_DIR/output/stage7_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage7_errors
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -795,6 +820,7 @@ check_verification_stats()
       echo "Firebot Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7_errors
       echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $FIREBOT_DIR/output/stage7_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage7_errors
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -908,6 +934,7 @@ check_all_guides()
       BUILD_STAGE_FAILURE="Stage 8: FDS-SMV Guides"
       grep "! LaTeX Error:" -I $FIREBOT_DIR/output/stage8* > $FIREBOT_DIR/output/stage8_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage8_errors
+      set_files_world_readable
       save_build_status
       email_error_message
    fi
@@ -1070,5 +1097,6 @@ check_all_guides
 copy_all_guides_to_website
 
 ### Success! ###
+set_files_world_readable
 email_success_message
 save_build_status
