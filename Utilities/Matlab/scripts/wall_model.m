@@ -5,8 +5,9 @@
 % This script generates all plots necessary for the wall model section
 % of the verification guide.
 
-law_of_the_wall          % Figure 1: The law of the wall
-poiseuille_convergence   % Figure 3: Convergence for 2D Poiseuille flow
-fds_moody_chart          % Figure 5: The FDS Moody chart
-yplus                    % Figure X: Title
-heated_channel           % Figure X: Heated Channel Flow
+law_of_the_wall          % The law of the wall
+poiseuille_convergence   % Convergence for 2D Poiseuille flow
+fds_moody_chart          % The FDS Moody chart
+yplus                    % Near-wall grid resolution
+heated_channel           % Heated Channel Flow
+blasius                  % Blasius boundary layer
