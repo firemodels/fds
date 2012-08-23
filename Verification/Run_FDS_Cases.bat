@@ -19,6 +19,7 @@ Rem set FDS=%FDSEXE%
 set FDS=background -u 75 -d 10 %FDSEXE%
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
+set RUNFDSMPI=call %SVNROOT%\Utilities\Scripts\runfdsmpi_win32.bat
 
 echo You are about to run the Verification Test Suite.
 echo Press any key to begin.
@@ -29,6 +30,8 @@ Rem run FDS veriication cases
 Rem -------------------------
 echo creating FDS case list from FDS_Cases.sh
 ..\Utilities\Data_processing\sh2bat FDS_Cases.sh FDS_Cases.bat
+echo creating FDS_MPI case list from FDS_MPI_Cases.sh
+..\Utilities\Data_processing\sh2bat FDS_MPI_Cases.sh FDS_MPI_Cases.bat
 
 echo running FDS cases
 
@@ -37,6 +40,8 @@ date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
 call FDS_Cases.bat
+
+call FDS_MPI_Cases.bat
 
 echo "FDS test cases end" > %TIME_FILE%
 date /t >> %TIME_FILE%
