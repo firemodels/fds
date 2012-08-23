@@ -17,30 +17,31 @@ In the typical FDS problem we consider the simple reaction:
 \begin{equation}\label{eq:simple}
 \mathrm{Fuel + Air \rightarrow Products}
 \end{equation}
-Here fuel, air, and products are lumped species. The traditional approach for tracking species is to use a mixture fraction and progress variable \cite{fox2003}. A limitation in the progress variable approach is that the variable is not physically bounded and initial and boundary conditions can be ill-defined. The lumped species approach, which evolved out a need to track additional species, is similar to the progress variable approach for reactions in the form of Eq:~(\ref{eq:simple}). An advantage of the lumped species approach is that the variables are mass fractions and are therefore physically bounded between 0 and 1. 
+Here fuel, air, and products are lumped species. A traditional approach for tracking species is to use the mixture fraction and a progress variable \cite{fox2003}. A limitation in the progress variable approach is that the progress variable is not physically bounded and therefore initial and boundary conditions can be ill-defined. The lumped species approach is similar to the progress variable approach except the lumped species are mass fractions and are therefore physically bounded between 0 and 1.
 
-In a simple hydrocarbon reaction, the typical reactants are fuel, oxygen, and nitrogen with products being carbon dioxide, water vapor, and nitrogen. In FDS, each of these individual $\alpha$ species are known as primitive species and their mass fractions are represented by $Y_{\alpha}$.
-The key assumption made in lumping the primitive species is that the new species groups transport (implying equal diffusivities) and react together. We can expand Eq.~(\ref{eq:simple}), to show the components of the lumped species for a simple, one-step methane reaction. Here air is assumed to be 21\% O$_2$ and 79\% N$_2$ by volume.
+In a simple hydrocarbon reaction, reactants can be fuel, oxygen, and nitrogen with products being carbon dioxide, water vapor, and nitrogen. In FDS, each of these individual species are known as primitive species. Their mass fractions are indexed from $1:N_{y}$ in the vector ${\bf Y}$ by the Greek letter $\alpha$:
+\begin{equation}\label{eq:prim_vector}
+\mathrm{Y}_{\alpha} = [\mathrm{Y}_{\mathrm{CH}_4}\, \, \mathrm{Y}_{\mathrm{O}_2}\, \, \mathrm{Y}_{\mathrm{N}_4}\, \, \mathrm{Y}_{\mathrm{CO}_2}\, \, \mathrm{Y}_{\mathrm{H}_2\mathrm{O}}]^\mathrm{T}
+\end{equation}
+Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, `air' can be assumed to be a lumped species composed of 21\% O$_2$ and 79\% N$_2$ by volume. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together. 
+
+We can expand Eq.~(\ref{eq:simple}) to show the components of the lumped species for a simple, one-step methane reaction. 
 \begin{equation}\label{eq:lumped_expand}
 \mathrm{2\underbrace{(\mbox{O}_2+(.79/.21)\mbox{N}_2)}_\text{Background(Oxidant),~Z$_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~Z$_1$} \rightarrow 1\underbrace{(\mbox{CO}_2+2\mbox{H}_2\mbox{O}+2(.79/.21)\mbox{N}_2)}_\text{Products,~Z$_2$}}
 \end{equation}
-As described by Eq.~(\ref{eq:lumped_expand}), two moles of the lumped species `Background' react with one mole of lumped species `Fuel', to produce one mole of lumped species `Products'. To convert from lumped species to primitive species, we need to find the mass fractions of the primitive species within a particular lumped species if the lumped species mass fraction were one. Consider, Z$_0$, the background species:
+As described by Eq.~(\ref{eq:lumped_expand}), two moles of the lumped species `Background' react with one mole of lumped species `Fuel', to produce one mole of lumped species `Products'. In FDS, the background species is not transported but solved for since the sum of the mass fractions of the lumped species must be 1. Lumped species are defined by the vector $\textbf{Z}$ which is indexed from $0:N_{z}$ by the Roman numeral $i$. This means that $N_{z}$ transport equations are solved. In the case of Eq:~(\ref{eq:lumped_expand}), two transport equations are solved (fuel and products) which is the same number solved in the mixture fraction progress variable approach.
 
-\begin{alignat}{4}\label{eq:backgroud}
-Y_\mathrm{O_{2}} &= \frac{W_\mathrm{O_{2}}}{W_\mathrm{O_{2}}+(.79/.21)W_\mathrm{N_{2}}} &=& \frac{W_\mathrm{O_{2}}}{W_{\mathrm{Z_0}}} &= 0.2330 \\
-\nonumber Y_\mathrm{N_{2}} &= \frac{(.79/.21)W_\mathrm{N_{2}}}{W_\mathrm{O_{2}}+(.79/.21)W_\mathrm{N_{2}}} &=& \frac{(.79/.21)W_\mathrm{N_{2}}}{W_{\mathrm{Z_0}}} &= 0.7670
-\end{alignat}
-Lumped species are defined by the vector $\textbf{Z}$ which is indexed from $0:N_{z}$, since the background species will not be transported. This means that $N_{z}$ transport equations are solved. Each lumped species is a combination of primitive species which we can define by the vector $\textbf{Y}$ which is indexed from $1:N_{y}$. Therefore, the transformation matrix, $A$ is $N_{y} \times (N_{z}+1)$ (rows $\times$ columns) since it includes the background species. Transformation from lumped species to primitive species is defined by: 
+To convert from lumped species to primitive species, we need to find the mass fractions of the primitive species within a particular lumped species as if the lumped species mass fraction were one. The transformation matrix, $A$, is $N_{y} \times (N_{z}+1)$ (rows $\times$ columns) since it includes the background species. Transformation from lumped species to primitive species is defined by: 
 \begin{equation}\label{eq:transform}
 \textbf{Y}=A\textbf{Z} 
 \end{equation}
-The elements are $A$ are the mass fractions for each primitive species in a given lumped species:
+The elements in $A$ are the mass fractions for each primitive species in a given lumped species:
 \begin{equation}\label{eq:A_def}
-A_{\alpha i} = \frac{\upsilon_{\alpha i}W_{\alpha}}{\displaystyle \sum_{\alpha}\upsilon_{\alpha i}W_{\alpha}}
+A_{\alpha\,i} = \frac{\upsilon_{\alpha\,i}W_{\alpha}}{\displaystyle \sum_{\alpha}\upsilon_{\alpha i}W_{\alpha}}
 \end{equation}
-where $\upsilon_{\alpha i}$ are the volume ratios of primitive species $\alpha$ in lumped species {i}.
+where $\upsilon_{\alpha\,i}$ are the volume ratios of primitive species $\alpha$ in lumped species {i}.
 
-If we look at the primitive species in Eq.~(\ref{eq:lumped_expand}) and assume that $\mathbf{Z} = [0.3\, \, 0.2\, \, 0.5]^\mathrm{T}$, we can transform from lumped species to primitive species:
+If we look at the primitive species in Eq.~(\ref{eq:lumped_expand}) and for example set $\mathbf{Z} = [0.3\, \, 0.2\, \, 0.5]^\mathrm{T}$, we can transform from lumped species to primitive species:
 
 \begin{displaymath}
 \mathbf{Y}=\left[\begin{array}{c}
@@ -70,15 +71,10 @@ If we look at the primitive species in Eq.~(\ref{eq:lumped_expand}) and assume t
      0.0619\\
      \end{array}\right]
 \end{displaymath}
-To convert back to lumped species from primitive species we can perform linear algebra operations to get:
+To transform back to lumped species from primitive species we can use:
 \begin{equation}\label{eq:transform_back}
 \textbf{Z}=B\textbf{Y} \, \, \, \text{where} \, \, \, \, B=(A^TA)^{-1}A^T
 \end{equation}
-Now we revisit Eq.~(\ref{eq:lumped_expand}) but decompose the reaction into all primitive species, we get:
-\begin{equation}\label{eq:prim}
-\underbrace{\mbox{CH}_4}_\text{Fuel}+\underbrace{2\mbox{O}_2}_\text{Oxidizer}+\underbrace{7.52\mbox{N}_2}_\text	{Background}\rightarrow \underbrace{\mbox{CO}_2}_\text{P1}+\underbrace{2\mbox{H}_2\mbox{O}}_\text{P2}+\underbrace{7.52\mbox{N}_2}_\text{Background}
-\end{equation}
-In this formulation, we would have to solve transport equations for four species compared to two when the species were lumped. Note that in cases with all primitive species, $A$ becomes an identity matrix. With complex reactions, tracking all of the primitive species could lead to solving 10-20 equations, each with an additional 5~\% computational cost.
 
 \subsection{Specified CO and Soot Yield}
 The default reaction system in FDS is that fuel plus oxidizer goes to products, where the products are carbon dioxide, water vapor, nitrogen, carbon monoxide, and soot. The carbon monoxide and soot yields are by default zero and can be specified by the user on the {\ct REAC} line. For a typical hydrocarbon fuel, the reaction in FDS follows:
@@ -88,6 +84,9 @@ The default reaction system in FDS is that fuel plus oxidizer goes to products, 
 \nonumber \nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~Z$_2$}
 \end{eqnarray}
 Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha i}$ and the stoichiometric coefficients for the lumped $i$ are denoted by $\nu_{i}$. CO and soot yields ($y_{CO}$ and $y_{S}$ respectively) specified by the user determine the stoichiometric coefficients on the product side of the reaction by:
+
+%develop table like lumped species above to show similarities/differences
+
 \begin{equation}\label{eq:co_yield}
 \nu_{2}\upsilon_{\mathrm{CO},2}=-\nu_{1}\frac{W_1}{W_{\mathrm{CO}}}y_{\mathrm{CO}}
 \end{equation}
@@ -95,6 +94,20 @@ Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is 
 \nu_{2}\upsilon_{\mathrm{S},2}=-\nu_{1}\frac{W_1}{W_{\mathrm{S}}}y_{\mathrm{S}}
 \end{equation}
 Here, $W_{1}$ is the molecular weight of lumped species 1. The remaining coefficients come from an atom balance.
+
+
+\subsection{Use of Primitive Species}
+
+%example of water vapor
+
+Now we revisit Eq.~(\ref{eq:lumped_expand}) but decompose the reaction into all primitive species, we get:
+\begin{equation}\label{eq:prim}
+\underbrace{\mbox{CH}_4}_\text{Fuel}+\underbrace{2\mbox{O}_2}_\text{Oxidizer}+\underbrace{7.52\mbox{N}_2}_\text	{Background}\rightarrow \underbrace{\mbox{CO}_2}_\text{P1}+\underbrace{2\mbox{H}_2\mbox{O}}_\text{P2}+\underbrace{7.52\mbox{N}_2}_\text{Background}
+\end{equation}
+In this formulation, we would have to solve transport equations for four species compared to two when the species were lumped. Note that in cases with all primitive species, $A$ becomes an identity matrix. With complex reactions, tracking all of the primitive species could lead to solving 10-20 equations, each with an additional 5~\% computational cost.
+
+%show with matrix written out
+
 
 
 \section{Eddy Dissipation Concept}
