@@ -165,12 +165,12 @@ The $k$-$\epsilon$  model has been used successfully for many engineering applic
 
 \subsection{Large Eddy Simulation (LES)}
 
-The derivation of LES models is very similar to that of the RANS models, albeit with subtle differences in the interpretation of the decomposition of the primitive variables. RANS emphasizes temporal averaging, whereas LES emphasizes spatial averaging, or {\em filtering}. Regardless, the mechanics of the derivation are essentially the same, and the simplest of the LES models makes the same ``eddy viscosity'' argument in replacing the unresolved convection terms with diffusion terms. The key difference between the techniques lies in the magnitude of the diffusive coefficient, the ``eddy'' viscosity. With LES, one attempts to resolve the flow field as faithfully as possible on a given numerical grid. In other words, flow structures, like swirling eddies, can span just a few grid cells (Figure~\ref{30cm_collage}). To achieve this result, the eddy viscosity must be small enough to avoid smoothing out these small, but resolvable, eddies, but large enough to ensure numerical stability and account for the dissipation of energy at sub-grid scales.
+The derivation of LES models is very similar to that of the RANS models, albeit with subtle differences in the interpretation of the decomposition of the primitive variables. RANS emphasizes temporal averaging, whereas LES emphasizes spatial averaging, or {\em filtering}. Regardless, the mechanics of the derivation are essentially the same, and the simplest of the LES models makes the same ``eddy viscosity'' argument in replacing the unresolved convection terms with diffusion terms. The key difference between the techniques lies in the magnitude of the diffusive coefficient, the ``eddy'' viscosity. With LES, one attempts to resolve the flow field as faithfully as possible on a given numerical grid. In other words, flow structures, like swirling eddies, can span just a few grid cells (Figure~\ref{vector_plot}). To achieve this result, the eddy viscosity must be small enough to avoid smoothing out these small, but resolvable, eddies, but large enough to ensure numerical stability and account for the dissipation of energy at sub-grid scales.
 
 \begin{figure}[b]
-%\includegraphics[scale=.65]{30cm_collage}
-\caption{What is meant by ``resolvable.'' At right is an instantaneous map of the flow vectors for an LES simulation of a pool fire. the inset shows the smallest ``eddy'' that can be supported by the numerical grid, the spacing of which is indicated by the distance between the arrows.}
-\label{30cm_collage}
+\includegraphics[width=\textwidth]{vector_plot}
+\caption{What is meant by ``resolvable.'' At right is an instantaneous map of the flow vectors for an LES simulation of a helium plume. the inset shows the smallest ``eddy'' that can be supported by the numerical grid, the spacing of which is indicated by the distance between the arrows.}
+\label{vector_plot}
 \end{figure}
 
 To better understand the eddy viscosity model, the original Navier-Stokes equations are examined. An evolution equation for the kinetic energy of the gas is formed by taking the dot product of the momentum from Equation~\ref{eq:momcon} and the velocity vector $\mathbf{u}$:
@@ -472,7 +472,68 @@ It is a standard function in most mathematical or spread sheet programs.
 
 \section{Applications}
 
-This section presents examples of how CFD fire models are used in practice. These applications can be divided into two general categories -- design and forensic. The former usually involves the prediction of the spread of smoke and heat from a hypothetical fire in a real or planned building; the latter involves the reconstruction of an actual fire. For a design application, the fire is usually specified; that is, the ignition, growth, and eventual decay of the fire are not predicted by the model but rather specified by the code enforcing authority. For a reconstruction, the model is usually used to explain how a small fire grew and spread to cause serious damage or injury. Rarely are fire models of the type described in this chapter used to show how a fire was actually ignited, as the physical mechanism of this event (electrical short, arcing fault, arson, etc.) is usually not included in the model.
+This section presents examples of how CFD fire models are used in practice. These applications can be divided into three general categories -- research, design, and forensic. For research, the models can help explain basic fire phenomena. For design, the models are used to predict the spread of smoke and heat from a hypothetical fire in a real or planned building. For forensics, the models aid in the reconstruction of an actual fire. For a design application, the fire is usually specified; that is, the ignition, growth, and eventual decay of the fire are not predicted by the model but rather specified by the code enforcing authority. For a reconstruction, the model is usually used to explain how a small fire grew and spread to cause serious damage or injury. Rarely are fire models of the type described in this chapter used to show how a fire was actually ignited, as the physical mechanism of this event (electrical short, arcing fault, arson, etc.) is usually not included in the model.
+
+\subsection{Fundamental Fire Dynamics}
+
+CFD, in particular large eddy simulation, provides a convenient way to study basic fire behavior. The most obvious place to start is to study the fire plume; predicting the height of the visible flames, its centerline
+velocity and temperature, and its pulsation frequency. To assess the model's prediction of flame height, we need to look at a wide array of fires.
+Heskestad~\cite{Heskestad:FSJ1983} defines flame height as the distance above the base of the fire
+where flames can be seen 50~\% of the time. His correlation for flame height, $L_f$, is:
+\begin{equation} 
+   \frac{L_f}{D} = 3.7 \; (Q^*)^{2/5} - 1.02  \quad ; \quad Q^* = \frac{\dot{Q}}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} \; D^{5/2} }
+\end{equation}
+$Q^*$ is a non-dimensional quantity that relates the fire's heat release rate, $\dot{Q}$, with the diameter of its base, $D$. The greater the value of $Q^*$, the
+higher the flame height relative to its base diameter. The correlation has been experimentally validated for a range $0.1 < Q^* < 10000$, which represents fires ranging from a lazy camp fire to an oil well blowout. Figure~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by
+\begin{equation}
+   D^* = \left( \frac{\dot{Q}}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g}} \right)^{2/5} 
+\end{equation}
+Given a grid cell size, $\delta x$, the three resolutions can be characterized by the non-dimensional quantity, $D^*/\delta x$, whose values in this case are 5, 10 and 20. A simulation where the characteristic diameter of the fire is spanned by only 5 grid cells might be considered poorly resolved, but it is not unusual in a practical fire
+protection design application where the overall volume of the enclosure may be much larger than that of the fire plume.
+
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=5.0in]{Flame_Height}
+\end{center}
+\caption{Comparison of FDS predictions of flame height from a 1~m square pan fire for Q* values ranging from
+0.1 to 10000.}
+\label{Flame_Height}
+\end{figure}
+
+
+Any fire pulsates with a frequency that is largely dependent on its heat release rate. The fundamental, or ``puffing,'' frequency is a quantity that the fire
+model ought to predict accurately.
+Figure~\ref{Sandia_Simulation} displays sequential flame images for a single puff from a simulation of a 1~m methane fire experiment (Test~17)
+conducted at Sandia National Laboratories~\cite{Tieszen:2002}. This is a well-resolved calculation, with $\delta x = 1.5$~cm ($D^*/\delta x$ = 100).
+To determine the puffing frequency, we record a time series of the vertical component of velocity along the plume centerline half a diameter from the base
+(this is the same location of the velocity measurement used to determine the puffing frequency in the Sandia experiment).
+The power spectrum of the signal, taken between 10~s and 20~s from the simulation, is plotted in Fig.~\ref{Sandia_CH4_1m_Test17_spectrum}.
+The dominant puffing mode shows good agreement with the measured puffing frequency of 1.65~Hz, denoted by the vertical dashed line.
+Higher frequency fluctuations from the simulation exhibit the classic -5/3 scaling of Kolmogorov turbulence~\cite{Pope:2000}.
+The temporal Nyquist limit of the simulation (the highest resolvable frequency due to the discrete time increment) is roughly 1000~Hz for this case ($\delta t=0.0005$), which means that the -5/3 scaling is physical, not fortuitous numerical noise.
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=1.2in]{Sandia_CH4_1m_Test17_dx1p5cm_0180}
+\includegraphics[width=1.2in]{Sandia_CH4_1m_Test17_dx1p5cm_0190}
+%\includegraphics[width=1.2in]{Sandia_CH4_1m_Test17_dx1p5cm_0200}
+\includegraphics[width=1.2in]{Sandia_CH4_1m_Test17_dx1p5cm_0210}
+\end{center}
+\caption{Snapshots of the flame envelope from a simulation of the Sandia 1~m diameter methane pool fire using 1.5~cm grid resolution.  The images span a single ``puff''.}
+\label{Sandia_Simulation}
+\end{figure}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[height=3.2in]{Sandia_CH4_1m_Test17_dx1p5cm_powerspectrum}
+\end{center}
+\caption{FDS power spectrum for the Sandia 1 m diameter methane pool fire.
+The dominant mode of the power spectrum from the simulation agrees well with the experimentally measured puffing frequency of 1.65~Hz.
+The higher frequency fluctuations from the simulation exhibit the classic -5/3 scaling of Kolmogorov turbulence~\cite{Pope:2000}.}
+\label{Sandia_CH4_1m_Test17_spectrum}
+\end{figure}
+
+
 
 \subsection{Smoke Movement}
 
