@@ -11,8 +11,8 @@
  = About =
  =========
 
-    Firebot is an automatic verification and validation test bot that is run at a regular interval (nightly).
-    More details on the Firebot build stages can be found in the FDS Configuration Management Plan.
+Firebot is an automatic verification and validation test bot that is run at a regular interval (nightly).
+More details on the Firebot build stages can be found in the FDS Configuration Management Plan.
 
  =========================
  = Firebot files/scripts =
@@ -42,7 +42,12 @@
 
 # firebot_linux.sh
 
-    This is the primary Firebot automated test script used on Linux.
+    This is the primary Firebot automated test script used on Linux with a queueing system (e.g., TORQUE).
+    This script is invoked via crontab (details below).
+
+# firebot_mac.sh
+
+    This is the primary Firebot automated test script used on Mac OS X.
     This script is invoked via crontab (details below).
 
 # /usr/local/bin/run-one (from https://launchpad.net/ubuntu/+source/run-one)
@@ -55,7 +60,7 @@
  = Crontab =
  ===========
 
-    The following information is in the firebot user's crontab:
+The following information is in the Linux (blaze) firebot user's crontab:
 
 ------------------------------------------------------------------------------------
 
@@ -87,5 +92,23 @@ MAIL=""
 # If no SVN argument is specified, then the latest SVN revision is used
 # The run-once script maintains a lock to prevent the script from running twice
 56 21 * * * run-one bash -lc firebot_linux.sh
+
+------------------------------------------------------------------------------------
+
+The following information is in the Mac (bluesky) firebot user's crontab:
+
+------------------------------------------------------------------------------------
+
+#  ========================
+#  = Firebot build script =
+#  ========================
+
+# Run svn update at 9:50 PM to get latest verison of Firebot
+50 21 * * * cd ~/firebot ; svn up
+
+# Run Firebot at 9:56 PM every night
+# If no SVN argument is specified, then the latest SVN revision is used
+# The run-once script maintains a lock to prevent the script from running twice
+56 21 * * * run-one bash -lc firebot_mac.sh
 
 ------------------------------------------------------------------------------------
