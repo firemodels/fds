@@ -1792,7 +1792,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      HX(I,J,K) = RHO_H_S_P(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  HX(I,J,K) = RHO_H_S_P(I,J,K)
+                  HX(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I+1,J,K))
                ENDIF
 
             ENDDO
@@ -1825,7 +1825,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      HY(I,J,K) = RHO_H_S_P(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  HY(I,J,K) = RHO_H_S_P(I,J,K)
+                  HY(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J+1,K))
                ENDIF
 
             ENDDO
@@ -1858,7 +1858,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      HZ(I,J,K) = RHO_H_S_P(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  HZ(I,J,K) = RHO_H_S_P(I,J,K)
+                  HZ(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J,K+1))
                ENDIF
 
             ENDDO
@@ -2067,7 +2067,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      FX(I,J,K,0) = RHOP(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  FX(I,J,K,0) = RHOP(I,J,K)
+                  FX(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I+1,J,K))
                ENDIF
 
             ENDDO
@@ -2100,7 +2100,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      FY(I,J,K,0) = RHOP(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  FY(I,J,K,0) = RHOP(I,J,K)
+                  FY(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I,J+1,K))
                ENDIF
 
             ENDDO
@@ -2133,7 +2133,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      FZ(I,J,K,0) = RHOP(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  FZ(I,J,K,0) = RHOP(I,J,K)
+                  FZ(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I,J,K+1))
                ENDIF
 
             ENDDO
@@ -2351,7 +2351,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      FX(I,J,K,N) = RHO_Z_P(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  FX(I,J,K,N) = RHO_Z_P(I,J,K)
+                  FX(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I+1,J,K))
                ENDIF
 
             ENDDO
@@ -2384,7 +2384,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      FY(I,J,K,N) = RHO_Z_P(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  FY(I,J,K,N) = RHO_Z_P(I,J,K)
+                  FY(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I,J+1,K))
                ENDIF
 
             ENDDO
@@ -2417,7 +2417,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                      FZ(I,J,K,N) = RHO_Z_P(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  FZ(I,J,K,N) = RHO_Z_P(I,J,K)
+                  FZ(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I,J,K+1))
                ENDIF
 
             ENDDO
