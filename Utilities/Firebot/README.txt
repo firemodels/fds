@@ -99,6 +99,9 @@ The following information is in the Mac (bluesky) firebot user's crontab:
 
 ------------------------------------------------------------------------------------
 
+PATH=/bin:/usr/bin:/usr/local/bin:/Users/firebot/firebot
+MAIL=""
+
 #  ========================
 #  = Firebot build script =
 #  ========================
