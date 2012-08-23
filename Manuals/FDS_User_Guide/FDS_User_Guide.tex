@@ -6129,7 +6129,7 @@ flow domain from the burning object.
 
 The heat of combustion can be determined in a couple of ways.
 One approach is to take the difference in the heats of formation for the products (assuming complete combustion) and the reactants.
-This is typically how values are tabulated for pure fuels (e.g. one species) in handbooks.
+This is typically how values are tabulated for pure fuels (e.g., one species) in handbooks.
 This ideal heat of combustion does not account for the  {\ct SOOT\_YIELD} or  {\ct CO\_YIELD} that occurs in a real fire.
 Carbon and hydrogen that go to soot and CO rather than CO$_2$ and H$_2$O result in a lower effective heat of combustion.
 Setting {\ct IDEAL=.TRUE.} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD} and {\ct CO\_YIELD}.
@@ -8052,7 +8052,7 @@ given {\ct TRIP\_DIRECTION}, which is just a positive or negative integer.
 The following parameters dictate how a device will control something:
 \begin{description}
 \item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device
-(e.g. heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
+(e.g., heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
 \item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change state when its value increases
 past the setpoint and a negative integer means the device will change state
 when its value decreases past the setpoint.  The default value is +1.
