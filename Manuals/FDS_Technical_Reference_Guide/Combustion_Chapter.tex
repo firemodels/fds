@@ -77,34 +77,59 @@ To transform back to lumped species from primitive species we can use:
 \end{equation}
 
 \subsection{Specified CO and Soot Yield}
-The default reaction system in FDS is that fuel plus oxidizer goes to products, where the products are carbon dioxide, water vapor, nitrogen, carbon monoxide, and soot. The carbon monoxide and soot yields are by default zero and can be specified by the user on the {\ct REAC} line. For a typical hydrocarbon fuel, the reaction in FDS follows:
+The default reaction system in FDS is fuel plus oxidizer goes to products, where the products are carbon dioxide, water vapor, nitrogen, carbon monoxide, and soot. Carbon monoxide and soot yields are zero by default. The user can specify the CO and soot yields ($y_{\mathrm{CO}}$ and $y_{\mathrm{S}}$ respectively) on the {\ct REAC} line which determine the composition of the {\ct PRODUCTS} lumped species. In this reaction system, {\ct AIR} (background) is lumped species 0, the {\ct FUEL} is lumped species 1, and {\ct PRODUCTS} are lumped species 2. To find the stoichiometric coefficients of CO and soot within the product lumped species, FDS uses:  
 
-\begin{eqnarray}
+\begin{eqnarray}\label{eq:yields}
+\nu_{2}\upsilon_{\mathrm{CO},2}&=&-\nu_{1}\frac{W_1}{W_{\mathrm{CO}}}y_{\mathrm{CO}} \\
+\nu_{2}\upsilon_{\mathrm{S},2}&=&-\nu_{1}\frac{W_1}{W_{\mathrm{S}}}y_{\mathrm{S}}
+\end{eqnarray}
+The remaining coefficients come from an atom balance. Consider a methane - air reaction where methane has a specified CO yield of $y_{\mathrm{CO}}=0.1$ and Soot yield of $y_{\mathrm{S}}=0.01$. The default FDS reaction system lumps these species into the {\ct PRODUCTS} lumped species. Note that by default, air is primarily composed of oxygen and nitrogen but includes trace amounts of carbon dioxide and water vapor. For this reaction the transformation matrix, $A$, is:
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline  & {\ct AIR} & {\ct FUEL} & {\ct PRODUCTS} \\ \hline \hline
+{\ct METHANE}           & 0.000000 & 1.000000 & 0.000000 \\
+{\ct NITROGEN}          & 0.763017 & 0.000000 & 0.720373 \\
+{\ct OXYGEN}            & 0.231163 & 0.000000 & 0.000000 \\
+{\ct CARBON DIOXIDE}    & 0.000592 & 0.000000 & 0.143067 \\
+{\ct CARBON MONOXIDE}   & 0.000000 & 0.000000 & 0.005589 \\ 
+{\ct WATER VAPOR}       & 0.005228 & 0.000000 & 0.130412 \\
+{\ct SOOT}              & 0.000000 & 0.000000 & 0.000559 \\ \hline
+\end{tabular}
+\end{center}
+
+The preceding table shows that the addition of carbon monoxide and soot has increases the number of primitive species in the reaction from five to seven, however the number of lumped species remains at three. The composition of {\ct PRODUCTS} has changed to include to the two additional species.
+
+For a typical hydrocarbon fuel, the chemical reaction in FDS follows:
+
+\begin{eqnarray}\label{eq:full_lump}
 \nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2)}_\text{Background(Oxidant),~Z$_0$}+\nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~Z$_1$} \rightarrow \\
 \nonumber \nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~Z$_2$}
 \end{eqnarray}
-Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha i}$ and the stoichiometric coefficients for the lumped $i$ are denoted by $\nu_{i}$. CO and soot yields ($y_{CO}$ and $y_{S}$ respectively) specified by the user determine the stoichiometric coefficients on the product side of the reaction by:
-
-%develop table like lumped species above to show similarities/differences
-
-\begin{equation}\label{eq:co_yield}
-\nu_{2}\upsilon_{\mathrm{CO},2}=-\nu_{1}\frac{W_1}{W_{\mathrm{CO}}}y_{\mathrm{CO}}
-\end{equation}
-\begin{equation}\label{eq:soot_yield}
-\nu_{2}\upsilon_{\mathrm{S},2}=-\nu_{1}\frac{W_1}{W_{\mathrm{S}}}y_{\mathrm{S}}
-\end{equation}
-Here, $W_{1}$ is the molecular weight of lumped species 1. The remaining coefficients come from an atom balance.
+Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha i}$ and the stoichiometric coefficients for the lumped $i$ are denoted by $\nu_{i}$.
 
 
 \subsection{Use of Primitive Species}
+There are cases where the use if primitive species is needed, such as water droplet evaporation or complex chemical reactions. In sprinkler activation cases, there is water vapor that is produced by fuel combustion that lives in the {\ct PRODUCTS} lumped species and there is water vapor that is produced from liquid water droplet evaporation. The evaporated water vapor cannot simply be added to the lumped species, because by definition, lumped species exist in the same proportion as which they were initially defined. As a result, the evaporated water vapor is transported as its own lumped species and then combined with the chemical reaction produced water vapor through the transformation matrix.   
 
-%example of water vapor
+If we revisit Eq.~(\ref{eq:full_lump}) but decompose the reaction into all primitive species, we get:
+\begin{eqnarray}\label{eq:prim}
+\nu_{\mathrm{O}_{2},0}\mathrm{O}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{fuel},0}(\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b) \rightarrow \\
+\nonumber \nu_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{CO},2}\mathrm{CO}+\nu_{\mathrm{S},2}\mathrm{S}
+\end{eqnarray}
+In this formulation, we would have to solve transport equations for six species compared to two when the species were lumped. Note that in cases with all primitive species, $A$ becomes an identity matrix:
 
-Now we revisit Eq.~(\ref{eq:lumped_expand}) but decompose the reaction into all primitive species, we get:
-\begin{equation}\label{eq:prim}
-\underbrace{\mbox{CH}_4}_\text{Fuel}+\underbrace{2\mbox{O}_2}_\text{Oxidizer}+\underbrace{7.52\mbox{N}_2}_\text	{Background}\rightarrow \underbrace{\mbox{CO}_2}_\text{P1}+\underbrace{2\mbox{H}_2\mbox{O}}_\text{P2}+\underbrace{7.52\mbox{N}_2}_\text{Background}
-\end{equation}
-In this formulation, we would have to solve transport equations for four species compared to two when the species were lumped. Note that in cases with all primitive species, $A$ becomes an identity matrix. With complex reactions, tracking all of the primitive species could lead to solving 10-20 equations, each with an additional 5~\% computational cost.
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline  & {\ct METHANE}  & {\ct NITROGEN} & {\ct OXYGEN} & {\ct CARBON DIOXIDE} & {\ct WATER VAPOR} \\ \hline \hline
+{\ct METHANE}           & 1.000000 & 0.000000 & 0.000000 & 0.000000 & 0.000000 \\
+{\ct NITROGEN}          & 0.000000 & 1.000000 & 0.000000 & 0.000000 & 0.000000 \\
+{\ct OXYGEN}            & 0.000000 & 0.000000 & 1.000000 & 0.000000 & 0.000000 \\
+{\ct CARBON DIOXIDE}    & 0.000000 & 0.000000 & 0.000000 & 1.000000 & 0.000000 \\
+{\ct WATER VAPOR}       & 0.000000 & 0.000000 & 0.000000 & 0.000000 & 1.000000 \\ \hline
+\end{tabular}
+\end{center}
+For cases that explicitly track all of the primitive species, FDS could end up solving upwards of 10-20 transport equations depending on the case, with each additional tracked species adding a 5~\% computational cost.
 
 %show with matrix written out
 
