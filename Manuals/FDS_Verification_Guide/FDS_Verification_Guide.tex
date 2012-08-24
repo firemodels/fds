@@ -1028,7 +1028,7 @@ The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}
 is determined from the steady state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\delta z = H/N_z$ in Figure \ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
 \begin{figure}
    \begin{center}
-      \includegraphics[width=4.5in]{SCRIPT_FIGURES/poiseuille_convergence.pdf}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/poiseuille_convergence.pdf}
       \caption[Convergence for laminar (Poiseuille) flow in a 2D channel]{\label{fig_poiseuille_convergence} FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
    \end{center}
 \end{figure}
@@ -1085,9 +1085,59 @@ With the same grid set up as described above the smooth walls, a series of cases
 
 \clearpage
 
+\subsection{Blasius boundary layer (\texorpdfstring{{\bf blasius}}{blasius})}
+
+{\bf Hyun-Wook Park and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
+
+\noindent Consider a steady flow over a semi-infinite flat plate aligned with the flow with free stream velocity $u_0$ . The Prandtl boundary layer equations (see \cite{Panton:1}) are:
+\begin{equation}
+\label{eqn_BL_momentum}
+u \frac{\partial u}{\partial x} + w \frac{\partial u}{\partial z} = \nu \frac{\partial^2 u}{\partial z^2} \,\mbox{,}
+\end{equation}
+\begin{equation}
+\label{eqn_BL_continuity}
+\frac{\partial u}{\partial x}+\frac{\partial w}{\partial z} = 0 \,\mbox{.}
+\end{equation}
+
+Famously, Paul Richard Heinrich Blasius found a solution to Eqs.~(\ref{eqn_BL_momentum}) and (\ref{eqn_BL_continuity}) by introducing a similarity variable:
+\begin{equation}
+\label{eta}
+\eta\equiv\frac{z}{\sqrt{\nu x/u_0}} \,\mbox{.}
+\end{equation}
+By substituting $\eta$ and the stream function ($u = \partial \psi/\partial z$, $w = -\partial \psi/\partial x$) into Eq.~(\ref{eqn_BL_momentum}), we get the following ODEs:
+\begin{eqnarray}
+\label{BL_ODE}
+\frac{1}{2}f f^{''}+f^{'''}&=&0 \\
+u&=&u_0 f^{'} \\
+w&=&\frac{1}{2}\sqrt{\frac{\nu \,u_0}{x}}(\eta f^{'}-f)
+\end{eqnarray}
+The solution of Eq.~(\ref{BL_ODE}) is the Blasius solution (see \cite{Panton:1}).
+
+The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform $\delta x = L/N_x$, $\delta z =H/N_z$ in each direction, and $N_x = 1.5 N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are {\ct OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ kg/m$^3$, $\mu = 0.001$ kg/m/s.
+
+Figure \ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. It is seen that the FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure \ref{blasius} (right) shows root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$ m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by 
+\begin{equation}
+\label{error_l2norm_bl}
+\varepsilon \equiv \sqrt{ \frac{1}{N_z} \sum_{k=1}^{N_z} \left[ u_{k} - u_{B,k} \right]^2 } \,\mbox{,}
+\end{equation}
+where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{B,k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile.pdf} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence.pdf}
+   \end{tabular*}
+   \caption{(Left) Comparison of theoretical and numerical results for the Blasius velocity profile ($u$ component). (Right) Error between FDS and Blasius solution for $u(z)$ plotted for each grid resolution.}
+   \label{blasius}
+\end{figure}
+
+
+\clearpage
+
 \subsection{Near-Wall Grid Resolution (\texorpdfstring{{\bf yplus}}{yplus})}
 
-The distance from the wall measured in viscous units is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
+{\bf Abbas Jaber, NIST SURF student}\\
+
+\noindent The distance from the wall measured in viscous units is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
 \begin{equation}
 \label{wall stress}
 \tau_w = - \delta \frac{\mbox{d}p}{\mbox{d}x},
@@ -1107,7 +1157,7 @@ In FDS, $\tau_w$ is obtained only from a wall model such as Werner-Wengle. The r
 
 \begin{figure}[h!]
 \begin{center}
-   \includegraphics[width=4.5in]{SCRIPT_FIGURES/yplus}
+   \includegraphics[width=3.2in]{SCRIPT_FIGURES/yplus}
    \caption{Verification of FDS $y^+$ output for $\delta z=[1/8, 1/16, 1/32]$.}
    \label{fig_yplus}
 \end{center}
@@ -1138,7 +1188,7 @@ In Figure \ref{fig_heated_channel}, FDS results are compared to DNS data for mea
 \label{eqn_friction_temperature}
 T_{\tau} \equiv \frac{\langle \dot{q}_w^{''} \rangle}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
 \end{equation}
-where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times.
+where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times. 
 
 As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the SGS scalar transport model.
 \begin{figure}[h]
