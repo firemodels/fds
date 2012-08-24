@@ -1,22 +1,32 @@
- =====================================
- = Firebot configuration information =
- =====================================
+=====================================
+= Firebot configuration information =
+=====================================
 
 # Firebot
 # FDS automatIc veRification and validation tEst bot
 # Kristopher Overholt
 # 7/2/2012
 
- =========
- = About =
- =========
+=========
+= About =
+=========
 
 Firebot is an automatic verification and validation test bot that is run at a regular interval (nightly).
 More details on the Firebot build stages can be found in the FDS Configuration Management Plan.
 
- =========================
- = Firebot files/scripts =
- =========================
+=========================
+= Firebot files/scripts =
+=========================
+
+# firebot_linux.sh
+
+    This is the primary Firebot automated test script used on Linux with a queueing system (e.g., TORQUE).
+    This script is invoked via crontab (details below).
+
+# firebot_mac.sh
+
+    This is the primary Firebot automated test script used on Mac OS X.
+    This script is invoked via crontab (details below).
 
 # firebot_website.py:
 
@@ -40,32 +50,24 @@ More details on the Firebot build stages can be found in the FDS Configuration M
     This script writes out a plaintext .wiki file that can be 'cat' to /home/firebot/firebot/wiki_output/Firebot_Build_Status.wiki
     This script is invoked via crontab (details below).
 
-# firebot_linux.sh
-
-    This is the primary Firebot automated test script used on Linux with a queueing system (e.g., TORQUE).
-    This script is invoked via crontab (details below).
-
-# firebot_mac.sh
-
-    This is the primary Firebot automated test script used on Mac OS X.
-    This script is invoked via crontab (details below).
-
 # /usr/local/bin/run-one (from https://launchpad.net/ubuntu/+source/run-one)
 
     This wrapper script allows the execution of only one instance of a command and its args at a time.
     It does this by using a flock mechanism. This is useful to prepend to Firebot's crontab for firebot.sh so that,
     if Firebot is stalled for a long period of time, then multiple Firebot scripts do not run over each other.
 
- ===========
- = Crontab =
- ===========
-
-The following information is in the Linux (blaze) firebot user's crontab:
+===========
+= Crontab =
+===========
 
 ------------------------------------------------------------------------------------
 
-PATH=/bin:/usr/bin:/usr/local/bin:/home/firebot/firebot
-MAIL=""
+#### The following information is in the Linux (Blaze) firebot user's crontab: ####
+
+------------------------------------------------------------------------------------
+
+PATH=/bin:/usr/bin:/usr/local/bin:/home/firebot/firebot:$PATH
+MAILTO=""
 
 #  ==========================
 #  = Firebot status outputs =
@@ -95,12 +97,12 @@ MAIL=""
 
 ------------------------------------------------------------------------------------
 
-The following information is in the Mac (bluesky) firebot user's crontab:
+#### The following information is in the Mac (Bluesky) firebot user's crontab: ####
 
 ------------------------------------------------------------------------------------
 
-PATH=/bin:/usr/bin:/usr/local/bin:/Users/firebot/firebot
-MAIL=""
+PATH=/bin:/usr/bin:/usr/local/bin:/Users/firebot/firebot:$PATH
+MAILTO=""
 
 #  ========================
 #  = Firebot build script =
