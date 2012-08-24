@@ -365,7 +365,7 @@ Along with design, CFD is increasingly used to reconstruct  actual  fires,  prov
 
 \section{Verification and Validation}
 
-The use of fire models currently extends beyond the fire research laboratories and into the engineering, fire service, and legal communities. Sufficient evaluation of the models is necessary to ensure that users can judge the adequacy of its technical basis, appropriateness of its use, and confidence level of its predictions. The model evaluation process consists of two main components: verification and validation~\cite{ASTM:E1355}. Verification is a process to check the correctness of the solution of the governing equations. Verification does not imply that the governing equations are appropriate, only that the equations are being solved correctly. Validation is a process to determine the appropriateness of the governing equations as a mathematical model of the physical phenomena of interest. Typically, validation involves comparing model results with experimental measurement. Differences that cannot be explained in terms of numerical errors in the model or uncertainty in the measurements are attributed to the assumptions and simplifications of the physical model.
+The use of fire models currently extends beyond the fire research laboratories and into the engineering, fire service, and legal communities. Sufficient evaluation of the models is necessary to ensure that users can judge the adequacy of its technical basis, appropriateness of its use, and confidence level of its predictions. The model evaluation process consists of two main components: verification and validation~\cite{ASTM:E1355}. Verification is a process to check the correctness of the solution of the governing equations. Verification does not imply that the governing equations are appropriate, only that the equations are being solved correctly. Validation is a process to determine the appropriateness of the governing equations as a mathematical model of the physical phenomena of interest. Typically, validation involves comparing model results with experimental measurement. Differences that cannot be attributed to uncertainty in the experimental measurements are attributed to the assumptions and simplifications of the physical model.
 
 It is commonly assumed by model users, particularly those who have purchased expensive CFD software, that verification and validation is the responsibility of the model developers. Certainly, CFD developers do a considerable amount of this type of work, in particular verification, but it is impossible to ensure that the model is ``validated'' for every conceivable application. Indeed, the very point of numerical modeling is to predict the outcome of fire scenarios that have not, or cannot be, replicated in a controlled laboratory environment. Thus, the burden of verification and validation must be shared by the model developer and user. The benefit to the user is twofold: first, it confirms that the user can use the software properly, at least for the given application; and second, it assures the user that the model can address the given fire scenario, even providing the user with some estimate of its accuracy.
 
@@ -391,21 +391,21 @@ The Fire Froude Number is a useful quantity for plume correlations and flame hei
 
 This ratio is a convenient way to express the physical size of the fire relative to the size of the room. A value greater than
 one indicates that there is flame impingement on the ceiling, an important consideration when evaluating devices such as sprinklers and smoke detectors.
-The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, based on Heskestad's correlation:
+The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, based on Heskestad's correlation~\cite{Heskestad:FSJ1983}:
 \begin{equation}
-   L_{\hbox{\tiny f}} = D \, \left( 3.7 \, (\dot{Q}^*)^{2/5} - 1.02 \right)
+   L_{\hbox{\tiny f}} = D \, \left( 3.7 \, (\dot{Q}^*)^{2/5} - 1.02 \right) \label{Heskestad_Flame_Height}
 \end{equation}
 
 \paragraph{Global Equivalence Ratio, $\phi$}
 
-The equivalence ratio is the ratio of the mass flux of fuel from the fire to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio.
+The equivalence ratio is the ratio of the mass flux of fuel from the fire to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio. A convenient way to express this ratio for fire applications is as follows:
 \begin{equation}
-   \phi = \frac{\dot{m}_{\hbox{\tiny f}}}{r\, \dot{m}{\hbox{\tiny O$_2$}}} \equiv  \frac{\dot{Q} \, \hbox{(kW)}}{13,100 \, \hbox{(kJ/kg)} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
+   \phi = \frac{\dot{Q}}{\Delta H_{\hbox{\tiny O$_2$}} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
    \begin{array}{r@{\quad \quad}l}
       \frac{1}{2} \, 0.23 \, A_0 \sqrt{H_0} & \hbox{Natural Ventilation} \\ [0.1in]
       0.23 \, \rho \, \dot{V}       & \hbox{Mechanical Ventilation} \end{array} \right.
 \end{equation}
-Here, $r$ is the stoichiometric ratio, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the
+Here, $\dot{Q}$ is the peak heat release rate of the fire, $\Delta H_{\hbox{\tiny O$_2$}}$ is the heat of combustion per unit mass oxygen consumed, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the
 volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
 In general, under-ventilated fire scenarios are more challenging for the models because the combustion physics are more complicated.
 
@@ -429,7 +429,7 @@ by these models are limited in terms of compartment aspect ratio. For CFD, extre
 This ratio is a non-dimensional measure of the height of the fire plume.
 $D^*$ is length scale that incorporates the heat release rate of the fire.
 \begin{equation}
-   D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5}
+   D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5} \label{Dstar}
 \end{equation}
 The larger this ratio, the more important the plume becomes in the overall scenario. For empirical and zone models, it indicates whether or not the plume entrainment
 correlation is appropriate. For CFD, it indicates how ``high'' the plume actually is, in non-dimensional terms.
@@ -437,7 +437,13 @@ correlation is appropriate. For CFD, it indicates how ``high'' the plume actuall
 
 \subsection{Quantifying Model Uncertainty}
 
-Having determined the appropriateness of the chosen experiments, it is now necessary to quantify the accuracy of the model in predicting the outcome of these experiments. For each quantity of interest, a summary plot of the results should be constructed like the one shown in Figure 1. If a particular prediction and measurement are the same, the resulting point falls on the solid diagonal line. The longer-dashed off-diagonal lines indicate the experimental uncertainty. The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements of a given quantity. For example, the bias factor for the data shown in Figure 1 is 1.02. This means that the model has been shown to slightly over-estimate target temperatures by 2~\%, on average, and this is shown graphically by the red dash-dot line just above the diagonal. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Figure 1, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence intervals. The second set of off-diagonal lines, shown as short-dashed red lines, indicates the model uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_M$. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
+Having determined the appropriateness of the chosen experiments, it is now necessary to quantify the accuracy of the model in predicting the outcome of these experiments. For each quantity of interest, a summary plot of the results should be constructed like the one shown in Figure~\ref{scatterplot}. 
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{Wall_Temperature_Scatter} 
+\caption{A comparison of measured versus predicted wall temperature. The off-diagonal lines indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
+\label{scatterplot}
+\end{figure}
+The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements. For example, the bias factor for the data shown in Figure~\ref{scatterplot} is 1.14. This means that the model has been shown to over-estimate target temperatures by 14~\%, on average, and this is shown graphically by the dash-dot line. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Figure~\ref{scatterplot}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence intervals. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_M$. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge and the dash-dot bias line would overlap the solid diagonal line. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
 
 The derivation of the relevant uncertainty statistics is described in Ref.~\cite{McGrattan:Metrologia}, and it is summarized here. The difference between the measured and predicted values is a function of the experimental and the model uncertainty. The purpose of the uncertainty calculation is to subtract off, in a statistical sense, the experimental uncertainty so that the model uncertainty can be estimated. Before describing the calculation, a few assumptions must be made:
 \begin{enumerate}
@@ -476,22 +482,7 @@ This section presents examples of how CFD fire models are used in practice. Thes
 
 \subsection{Fundamental Fire Dynamics}
 
-CFD, in particular large eddy simulation, provides a convenient way to study basic fire behavior. The most obvious place to start is to study the fire plume; predicting the height of the visible flames, its centerline
-velocity and temperature, and its pulsation frequency. To assess the model's prediction of flame height, we need to look at a wide array of fires.
-Heskestad~\cite{Heskestad:FSJ1983} defines flame height as the distance above the base of the fire
-where flames can be seen 50~\% of the time. His correlation for flame height, $L_f$, is:
-\begin{equation} 
-   \frac{L_f}{D} = 3.7 \; (Q^*)^{2/5} - 1.02  \quad ; \quad Q^* = \frac{\dot{Q}}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} \; D^{5/2} }
-\end{equation}
-$Q^*$ is a non-dimensional quantity that relates the fire's heat release rate, $\dot{Q}$, with the diameter of its base, $D$. The greater the value of $Q^*$, the
-higher the flame height relative to its base diameter. The correlation has been experimentally validated for a range $0.1 < Q^* < 10000$, which represents fires ranging from a lazy camp fire to an oil well blowout. Figure~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by
-\begin{equation}
-   D^* = \left( \frac{\dot{Q}}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g}} \right)^{2/5} 
-\end{equation}
-Given a grid cell size, $\delta x$, the three resolutions can be characterized by the non-dimensional quantity, $D^*/\delta x$, whose values in this case are 5, 10 and 20. A simulation where the characteristic diameter of the fire is spanned by only 5 grid cells might be considered poorly resolved, but it is not unusual in a practical fire
-protection design application where the overall volume of the enclosure may be much larger than that of the fire plume.
-
-
+CFD, in particular large eddy simulation, provides a convenient means to study basic fire behavior. The most obvious application is the study of fire plumes; for example, predicting the height of the visible flame, the centerline velocity and temperature, and the pulsation frequency. Heskestad's empirical flame height correlation (Eq.~\ref{Heskestad_Flame_Height}) is valid for values of  $Q^*$ between 0.1 and 10,000, characterizing intermittent grass fires all the way to oil well blowout fires. Figure~\ref{Flame_Height} compares FDS predictions with Heskestad's correlation. Note that the simulations were run at three different grid resolutions. A useful way to characterize the grid resolution of a fire simulation is via the ratio $D^*/\delta x$, where $D^*$ (Eq.~\ref{Dstar}) is a measure of the effective fire diameter, based on heat release rate, and $\delta x$ is the size of a grid cell. In effect, $D^*/\delta x$ is the number of grid cells spanning the effective fire diameter.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=5.0in]{Flame_Height}
@@ -501,17 +492,7 @@ protection design application where the overall volume of the enclosure may be m
 \label{Flame_Height}
 \end{figure}
 
-
-Any fire pulsates with a frequency that is largely dependent on its heat release rate. The fundamental, or ``puffing,'' frequency is a quantity that the fire
-model ought to predict accurately.
-Figure~\ref{Sandia_Simulation} displays sequential flame images for a single puff from a simulation of a 1~m methane fire experiment (Test~17)
-conducted at Sandia National Laboratories~\cite{Tieszen:2002}. This is a well-resolved calculation, with $\delta x = 1.5$~cm ($D^*/\delta x$ = 100).
-To determine the puffing frequency, we record a time series of the vertical component of velocity along the plume centerline half a diameter from the base
-(this is the same location of the velocity measurement used to determine the puffing frequency in the Sandia experiment).
-The power spectrum of the signal, taken between 10~s and 20~s from the simulation, is plotted in Fig.~\ref{Sandia_CH4_1m_Test17_spectrum}.
-The dominant puffing mode shows good agreement with the measured puffing frequency of 1.65~Hz, denoted by the vertical dashed line.
-Higher frequency fluctuations from the simulation exhibit the classic -5/3 scaling of Kolmogorov turbulence~\cite{Pope:2000}.
-The temporal Nyquist limit of the simulation (the highest resolvable frequency due to the discrete time increment) is roughly 1000~Hz for this case ($\delta t=0.0005$), which means that the -5/3 scaling is physical, not fortuitous numerical noise.
+The fundamental, or ``puffing,'' frequency is a quantity that the fire model also ought to predict accurately. Figure~\ref{Sandia_Simulation} displays sequential flame images for a single puff from a simulation of a 1~m methane fire experiment conducted at Sandia National Laboratories~\cite{Tieszen:2002}. The dominant puffing mode shows good agreement with the measured puffing frequency of 1.65~Hz. Higher frequency fluctuations from the simulation exhibit the classic -5/3 scaling of Kolmogorov turbulence~\cite{Pope:2000}.
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=1.2in]{Sandia_CH4_1m_Test17_dx1p5cm_0180}
@@ -521,16 +502,6 @@ The temporal Nyquist limit of the simulation (the highest resolvable frequency d
 \end{center}
 \caption{Snapshots of the flame envelope from a simulation of the Sandia 1~m diameter methane pool fire using 1.5~cm grid resolution.  The images span a single ``puff''.}
 \label{Sandia_Simulation}
-\end{figure}
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[height=3.2in]{Sandia_CH4_1m_Test17_dx1p5cm_powerspectrum}
-\end{center}
-\caption{FDS power spectrum for the Sandia 1 m diameter methane pool fire.
-The dominant mode of the power spectrum from the simulation agrees well with the experimentally measured puffing frequency of 1.65~Hz.
-The higher frequency fluctuations from the simulation exhibit the classic -5/3 scaling of Kolmogorov turbulence~\cite{Pope:2000}.}
-\label{Sandia_CH4_1m_Test17_spectrum}
 \end{figure}
 
 
@@ -617,11 +588,11 @@ Most of the assumptions required by integral models can be removed by taking adv
 
 \subsection{Tunnels}
 
-Historically, smoke control inside tunnels was often considered as an afterthought to design of ventilation for the provision of fresh air. Where natural ventilation was insufficient, mechanical ventilation was designed using network flow theory aided in recent years by network models. As a two-layer description is generally not valid within a tunnel environment, fire zone models have been applied to tunnels in only a limited number of cases. CFD, however, is now finding increasing application to fire hazard analysis for road tunnels in particular. In re- cent years a number of major tunnel fire incidents such as the tragedy in the Mont Blanc tunnel in 1999, resulting in 39 deaths, have highlighted the need to understand better the mechanism of fire development and spread inside tunnels. In particular, heat transfer to the tunnel walls is important to account for correctly as this has a strong influence on the distribution of heat along the tunnel, the degree of stratification that can be expected, and the threat to the integrity of the structure.
+Historically, smoke control inside tunnels was often considered as an afterthought to design of ventilation for the provision of fresh air. Where natural ventilation was insufficient, mechanical ventilation was designed using network flow theory aided in recent years by network models. As a two-layer description is generally not valid within a tunnel environment, fire zone models have been applied to tunnels in only a limited number of cases. CFD, however, is now finding increasing application to fire hazard analysis for road tunnels in particular. In recent years a number of major tunnel fire incidents such as the tragedy in the Mont Blanc tunnel in 1999, resulting in 39 deaths, have highlighted the need to understand better the mechanism of fire development and spread inside tunnels. In particular, heat transfer to the tunnel walls is important to account for correctly as this has a strong influence on the distribution of heat along the tunnel, the degree of stratification that can be expected, and the threat to the integrity of the structure.
 
-One area where CFD has been applied successfully is in the analysis of the critical velocity required in a longitudinally ventilated tunnel to control the spread of heat and smoke so that it is forced in the downstream direction, providing safe conditions upstream~\cite{Hwang}. Another area currently receiving much attention is the choice of design fire for tunnel fire safety design. In the light of the recent tunnel fire incidents and full-scale fire tests~\cite{Ingason}, the size of the fire load that can be generated from what were previously considered as nonhazardous cargoes has been revised. Heat release rates well in excess of 100~MW have been measured for heavy-goods vehicles carrying commercial merchandise.
+One area where CFD has been applied successfully is in the analysis of the critical velocity required in a longitudinally ventilated tunnel to control the spread of heat and smoke so that it is forced in the downstream direction, providing safe conditions upstream~\cite{Hwang}. Another area currently receiving much attention is the choice of design fire for tunnel fire safety design. In the light of the recent tunnel fire incidents and full-scale fire tests~\cite{Ingason}, the size of the fire load that can be generated from what were previously considered as nonhazardous cargoes has been revised. Heat release rates well in excess of 100~MW have been measured for heavy-goods vehicles carrying commercial merchandize.
 
-CFD was used in the investigation into the Mont Blanc tunnel fire incident in 1999. One of the modeling studies involved the use of the JASMINE fire model to re-construct conditions inside the tunnel during the first 30~minutes, during which time most of the fatalities would have occurred. Using information available on the ventilation settings and the location of vehicles, the model predicted the transport of smoke and heat along the length of the tunnel. The data were then fed into a model for fractional effective dose to enable an assessment of when and how the fatalities occurred. Subsequent parametric simulations were performed to investigate whether alter- native tunnel ventilation measures would have helped on the day of the incident~\cite{Miles:2004}.
+CFD was used in the investigation into the Mont Blanc tunnel fire incident in 1999. One of the modeling studies involved the use of the JASMINE fire model to re-construct conditions inside the tunnel during the first 30~minutes, during which time most of the fatalities would have occurred. Using information available on the ventilation settings and the location of vehicles, the model predicted the transport of smoke and heat along the length of the tunnel. The data were then fed into a model for fractional effective dose to enable an assessment of when and how the fatalities occurred. Subsequent parametric simulations were performed to investigate whether alternative tunnel ventilation measures would have helped on the day of the incident~\cite{Miles:2004}.
 
 
 \subsection{Smoke Detector Spacing}
@@ -632,7 +603,7 @@ Spacing guidelines for spot-type smoke detectors are typically based on the assu
 \caption{Simulation of smoke filling under a coffered ceiling. (Figure courtesy Aon Fire Protection Engineering Corp.)}
 \label{waffle_ceiling}
 \end{figure}
-To address this issue, CFD modeling has been applied in several studies~\cite{O'Connor:NFPRF,Mealy:NFPRF} to assess the performance of spot smoke detectors on smooth, sloped, and beamed ceilings. The studies evaluated the appropriateness of the prescriptive provisions and identified ceiling structure parameters, which if altered, would cause significant differences in smoke detection performance as compared to a smooth level ceiling. It had been believed that such beam projections would significantly delay the activation time. The use of CFD modeling showed this expectation to be incorrect and a subsequent full-scale experimental study proved the general findings of the CFD analysis~\cite{Mealy:NFPRF}.
+To address this issue, CFD modeling has been applied in several studies~\cite{O'Connor:NFPRF,Mealy:NFPRF} to assess the performance of spot smoke detectors on smooth, sloped, and beamed ceilings. The studies evaluated the appropriateness of the prescriptive provisions and identified ceiling structure parameters, which if altered, would cause significant differences in smoke detection performance as compared to a smooth level ceiling. It had been believed that such beam projections would significantly delay the activation time. The use of CFD modeling showed this expectation to be incorrect and a subsequent full-scale experimental study proved the general findings of the CFD analysis~\cite{Gottuk:2008}.
 
 
 
