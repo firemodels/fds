@@ -403,7 +403,7 @@ LOGICAL :: EX,OP
 CHARACTER(60) :: FN
 CHARACTER(100) :: MESSAGE
 REAL(FB) :: DUMMY_FB_REAL,DUMMY_FB_REAL2
-REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E-10_EB,TOL=1.E-9_EB
+REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E-10_EB,MIN_AREA=1.E-16_EB,TOL=1.E-9_EB
 !LOGICAL :: END_OF_LIST
 TYPE (GEOMETRY_TYPE), POINTER :: G
 TYPE (FACET_TYPE), POINTER :: FC=>NULL()
@@ -775,7 +775,8 @@ FACE_LOOP: DO N=1,N_FACE
    V1 = (/VERTEX(FACET(N)%VERTEX(1))%X,VERTEX(FACET(N)%VERTEX(1))%Y,VERTEX(FACET(N)%VERTEX(1))%Z/)
    V2 = (/VERTEX(FACET(N)%VERTEX(2))%X,VERTEX(FACET(N)%VERTEX(2))%Y,VERTEX(FACET(N)%VERTEX(2))%Z/)
    V3 = (/VERTEX(FACET(N)%VERTEX(3))%X,VERTEX(FACET(N)%VERTEX(3))%Y,VERTEX(FACET(N)%VERTEX(3))%Z/)
-
+   FACET(N)%AW = TRIANGLE_AREA(V1,V2,V3)
+   
    BB(1) = MIN(V1(1),V2(1),V3(1))
    BB(2) = MAX(V1(1),V2(1),V3(1))
    BB(3) = MIN(V1(2),V2(2),V3(2))
@@ -811,7 +812,7 @@ FACE_LOOP: DO N=1,N_FACE
                CALL TRIANGLE_POLYGON_POINTS(IERR2,NXP,XPC,V1,V2,V3,NP,PC,BB)
                IF (IERR2 == 1)  THEN                  
                   AREA = POLYGON_AREA(NXP,XPC)
-                  IF (AREA > CUTCELL_TOLERANCE) THEN
+                  IF (AREA > MIN_AREA) THEN
                      
                      ! check if the cutcell area needs to be assigned to a neighbor cell
                      V_POLYGON_CENTROID = POLYGON_CENTROID(NXP,XPC)
@@ -1438,7 +1439,7 @@ IMPLICIT NONE
 REAL(EB), INTENT(IN) :: P(3),V1(3),V2(3),V3(3)
 REAL(EB) :: E(3),E1(3),E2(3),N(3),R(3),Q(3)
 INTEGER :: I
-REAL(EB), PARAMETER :: EPS=1.E-10_EB
+REAL(EB), PARAMETER :: EPS=1.E-16_EB
 
 ! This routine tests whether the projection of P, in the plane normal
 ! direction, onto to the plane defined by the triangle (V1,V2,V3) is
@@ -2092,7 +2093,7 @@ REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),PC(18),BB(6)
 INTEGER :: I,J,K
 REAL(EB) :: U(3),V(3),W(3),S1P0(3),XC(3)
 REAL(EB) :: A,B,C,D,E,DD,SC,TC
-REAL(EB), PARAMETER :: EPS=1.E-10_EB
+REAL(EB), PARAMETER :: EPS=1.E-20_EB,TOL=1.E-12_EB
 !LOGICAL :: POINT_IN_BB, POINT_IN_TRIANGLE
 
 IERR = 0
@@ -2140,7 +2141,7 @@ TRIANGLE_LOOP: DO I=1,3
       ELSE 
          SC = (B*E-C*D)/DD
          TC = (A*E-B*D)/DD
-         IF (SC>0._EB .AND. SC<1._EB .AND. TC>0._EB .AND. TC<1._EB ) THEN
+         IF (SC>-TOL .AND. SC<1._EB+TOL .AND. TC>-TOL .AND. TC<1._EB+TOL ) THEN
             NXP = NXP+1
             XC = S1P0+SC*U
             DO K=1,3
@@ -2215,7 +2216,7 @@ IMPLICIT NONE
 INTEGER, INTENT(INOUT):: NP
 REAL(EB), INTENT(INOUT) :: PC(27)
 INTEGER :: NP2,I,J,K
-REAL(EB), PARAMETER :: EPS=1.E-6_EB
+REAL(EB), PARAMETER :: EPS=1.E-16_EB
 REAL(EB) :: U(3),V(3),W(3)
 
 I = 1
