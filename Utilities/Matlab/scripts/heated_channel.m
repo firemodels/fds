@@ -43,7 +43,6 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 xlabel('$y^+$','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('$u^+$','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
-text(225,18.5,'Pr=1.0','Interpreter',Font_Interpreter,'Fontname',Font_Name,'FontSize',Label_Font_Size)
 
 figure(2)
 set(gcf,'DefaultLineLineWidth',Line_Width)
