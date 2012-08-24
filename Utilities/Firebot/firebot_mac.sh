@@ -387,7 +387,7 @@ check_compile_fds_mpi()
 
 wait_verification_cases_long_end()
 {
-   # Scans qstat and waits for verification cases to end
+   # Scans processes and waits for verification cases to end
    while [[ `ps x | grep intel_osx_64 | wc -l` -gt 1 ]]; do
       JOBS_RUNNING=`ps x | grep intel_osx_64 | wc -l`
       echo "${JOBS_RUNNING} verification cases currently running." >> $FIREBOT_DIR/output/stage5
