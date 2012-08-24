@@ -101,7 +101,7 @@ MAILTO=""
 
 ------------------------------------------------------------------------------------
 
-PATH=/bin:/usr/bin:/usr/local/bin:/Users/firebot/firebot:$PATH
+PATH=/bin:/usr/bin:/usr/local/bin:/usr/sbin:/Users/firebot/firebot:$PATH
 MAILTO=""
 
 #  ========================
