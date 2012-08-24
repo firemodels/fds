@@ -34,6 +34,7 @@ $RUNFDS Fires couch
 $RUNFDS Fires room_fire
 $RUNFDS Fires spray_burner
 
+$RUNFDS Flowfields divergence_test
 $RUNFDS Flowfields gas_filling
 $RUNFDS Flowfields helium_2d
 $RUNFDS Flowfields jet_fan
