@@ -753,7 +753,10 @@ the corresponding location in space and time.  The figure confirms that the adve
 \section{2D Vortex Simulation (\texorpdfstring{{\bf vort2d}}{vort2d})}
 \label{two_dimensional_vortex}
 
-In this section we present another case that demonstrates the second-order accuracy of the FDS transport algorithm. We consider the analytically stable flow field consisting of a single vortex advected by a uniform flow, a test case developed by CERFACS\footnote{Centre Europ\'een de Recherche et de Formation Avanc\'ee en Calcul Scientifique} \cite{cerfacs_test}. Maintaining the geometry of the vortex over time provides a good measure of the order of accuracy of the transport scheme.
+{\bf Max Gould, NIST SURF student}\\
+{\bf Ragini Acharya, United Technologies Research Center}\\
+
+\noindent In this section we present another case that demonstrates the second-order accuracy of the FDS transport algorithm. We consider the analytically stable flow field consisting of a single vortex advected by a uniform flow, a test case developed by CERFACS\footnote{Centre Europ\'een de Recherche et de Formation Avanc\'ee en Calcul Scientifique} \cite{cerfacs_test}. Maintaining the geometry of the vortex over time provides a good measure of the order of accuracy of the transport scheme.
 
 \begin{figure}[h!]
    \centering
@@ -812,7 +815,7 @@ t_{f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}.
 To ensure that the numerical solution converges to the analytical solution, we set the time step, $\dt$, so that the Courant-Friedrichs-Lewy (CFL) number is 0.5.
 
 
-\begin{figure}[h!]
+\begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_uzgraph} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_uzgraph}
@@ -823,12 +826,12 @@ To ensure that the numerical solution converges to the analytical solution, we s
 
 A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays these plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most passes through the computational domain while the green lines represent the vortex in the initial phase. The broken black line represents the analytical solution. As the vortex undergoes more passes through the computational domain, its velocity profile diverges further and further from the analytical profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
 
-   \begin{figure}[h!]
-         \centering
-         \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/vort2d_error}}
-      \caption[Two-dimensional vortex convergence study]{Rms error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
-      \label{fig_vort2d_error}
-   \end{figure}
+\begin{figure}[h!]
+	\centering
+    \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_error}
+    \caption[Two-dimensional vortex convergence study]{Rms error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
+    \label{fig_vort2d_error}
+\end{figure}
 
 The rate with which the simulated profiles converge to the analytical one defines the order of accuracy of the numerical scheme. In Figure~\ref{fig_vort2d_error} we plot the rms error of the numerical solution as a function of the grid resolution. The three colored curves represent the rms error at three different pass-through times. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second-order accuracy of the numerical scheme.
 
