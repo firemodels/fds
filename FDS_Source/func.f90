@@ -2358,27 +2358,38 @@ ENDDO
 
 END SUBROUTINE SPRAY_ANGLE_DISTRIBUTION
 
-REAL(EB) FUNCTION FED(Y_IN,RSUM)
+REAL(EB) FUNCTION FED(Y_IN,RSUM,FED_ACTIVITY)
 
 ! Returns the integrand of FED (Fractional Effective Dose) calculation.
 
 REAL(EB), INTENT(IN) :: Y_IN(1:N_TRACKED_SPECIES),RSUM
+INTEGER, INTENT(IN) :: FED_ACTIVITY
 INTEGER  :: N
 REAL(EB) :: Y_MF_INT, TMP_1
+REAL(EB), DIMENSION(3) :: CO_FED_FAC
+!                at rest           light work(default) heavy work
+DATA CO_FED_FAC /0.70486250E-5_EB, 2.7641667E-5_EB,    8.2925E-5_EB/
 
-! All equations from D.A. Purser, SFPE Handbook, 4th Ed.
+! All equations from D.A. Purser, Sec. 2, Chap. 6, SFPE Handbook, 4th Ed.
 ! Note: Purser uses minutes, here dt is in seconds. Conversion at the end of the function.
 ! Total FED dose:
 ! FED_dose = (FED_LCO + FED_LCN + FED_LNOx + FLD_irr)*FED_VCO2 + FED_LO2;
 
 
 ! Carbon monoxide (CO)
+!          at rest    light work heavy work
+! RMV_FED /8.5_EB,    25.0_EB,   50.0_EB /
+! D_FED   /40.0_EB,   30.0_EB,   20.0_EB /
+! RMV/D   /0.2125_EB, 0.8333_EB, 2.5_EB/ 
+!
 ! FED_LCO = (3.317E-5 * (C_CO)^1.036 * RMV * (dt/60)) / D;
 !   with RMV=25 [l/min], D=30 [%] COHb concentration at incapacitation and C_CO in ppm
+!   
 IF (CO_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(CO_INDEX)%RCON*Y_MF_INT*1.E6_EB/RSUM
-   FED   = 2.764E-5_EB*TMP_1**(1.036_EB)
+   ! FED   = 2.764E-5_EB*TMP_1**(1.036_EB)
+   FED   = CO_FED_FAC(FED_ACTIVITY)*TMP_1**(1.036_EB)
 ENDIF
 
 ! Nitrogen oxides (NOx, here NO + NO2)
