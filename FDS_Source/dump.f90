@@ -3393,7 +3393,7 @@ ISOF_LOOP: DO N=1,N_ISOF
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX,0,IS%Y_INDEX,IS%Z_INDEX,0,IS%VELO_INDEX,0,T,NM)
+            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX,0,IS%Y_INDEX,IS%Z_INDEX,0,IS%VELO_INDEX,0,0,T,NM)
          ENDDO
       ENDDO
    ENDDO
@@ -3468,7 +3468,8 @@ DATA_FILE_LOOP: DO DATA_FILE_FLAG=1,2
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
-                  FF(I,J,K) = RHO(I,J,K)*GAS_PHASE_OUTPUT(I,J,K,SMOKE3D_QUANTITY_INDEX,0,SMOKE3D_Y_INDEX,SMOKE3D_Z_INDEX,0,0,0,T,NM)
+                  FF(I,J,K) = RHO(I,J,K)*&
+                       GAS_PHASE_OUTPUT(I,J,K,SMOKE3D_QUANTITY_INDEX,0,SMOKE3D_Y_INDEX,SMOKE3D_Z_INDEX,0,0,0,0,T,NM)
                ENDDO
             ENDDO
          ENDDO
@@ -3732,7 +3733,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
       DO K=KK1,KK2
          DO J=JJ1,JJ2
             DO I=II1,II2
-               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,T,NM)
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,T,NM)
             ENDDO
          ENDDO
       ENDDO
@@ -3742,7 +3743,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          DO J=JJ1,JJ2
             DO K=KK1,KK2
                KTS = K_AGL_SLICE(I,J,NTSL) 
-               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,T,NM)
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,T,NM)
             ENDDO
          ENDDO
       ENDDO
@@ -4017,19 +4018,19 @@ DEVICE_LOOP: DO N=1,N_DEVC
             CASE('null','RMS','TIME MIN','TIME MAX') GAS_STATS_SELECT
 
                VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,&
-                                        DV%PIPE_INDEX,T,NM)
+                                        DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
 
             CASE('COV','CORRCOEF') GAS_STATS_SELECT
 
                VALUE  = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,&
-                                         DV%PIPE_INDEX,T,NM)
+                                         DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
                VALUE2 = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT2_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,&
-                                         DV%PIPE_INDEX,T,NM)
+                                         DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
 
             CASE('TIME INTEGRAL') GAS_STATS_SELECT
 
                VALUE = DV%TI_VALUE + (T-DV%TI_T)*GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
                DV%TI_VALUE = VALUE
                DV%TI_T = T
 
@@ -4045,36 +4046,38 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            CASE('MAX')
                               STAT_VALUE = MAX(STAT_VALUE, &
                                                GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM))
+                                                                DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM))
                            CASE('MIN')
                               STAT_VALUE = MIN(STAT_VALUE, &
                                                GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM))
+                                                                DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM))
                            CASE('MEAN')
                               STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
+                                                                         DV%PROP_INDEX,T,NM)
                               STAT_COUNT = STAT_COUNT + 1
                            CASE('VOLUME INTEGRAL')
                               STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)*VOL
+                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
+                                                                         DV%PROP_INDEX,T,NM)*VOL
                            CASE('MASS INTEGRAL')
                               STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)* &
-                                                                         VOL*RHO(I,J,K)
+                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
+                                                                         DV%PROP_INDEX,T,NM)*VOL*RHO(I,J,K)
                            CASE('AREA INTEGRAL')
                               SELECT CASE (ABS(DV%IOR))
                                  CASE(1)
                                     STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)* &
                                                  GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
                                  CASE(2)
                                     STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
                                                  GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
                                  CASE(3)
                                     STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
                                                  GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
                               END SELECT
                            CASE('TENSOR SURFACE INTEGRAL')
                               ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of XB
@@ -4097,12 +4100,12 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            CASE('VOLUME MEAN')
                               STAT_VALUE = STAT_VALUE + &
                                            GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                            DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)*VOL
+                                                            DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)*VOL
                               SUM_VALUE = SUM_VALUE + VOL
                            CASE('MASS MEAN')
                               STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)* &
                                            GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,&
-                                                            DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                                                            DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
                               SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
                      END SELECT STATISTICS_SELECT
                   ENDDO I_DEVICE_CELL_LOOP
@@ -4329,7 +4332,7 @@ ENDIF EVAC_ONLY6
 END SUBROUTINE UPDATE_DEVICES
  
 
-REAL(EB) RECURSIVE FUNCTION GAS_PHASE_OUTPUT(II,JJ,KK,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,T,NM)
+REAL(EB) RECURSIVE FUNCTION GAS_PHASE_OUTPUT(II,JJ,KK,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,T,NM)
 
 ! Compute Gas Phase Output Quantities
 
@@ -4342,13 +4345,13 @@ USE CONTROL_VARIABLES, ONLY: CONTROL
 USE SCRC, ONLY: SCARC_ITERATIONS, SCARC_RESIDUAL, SCARC_CAPPA
 
 REAL(EB), INTENT(IN) :: T
-INTEGER, INTENT(IN) :: II,JJ,KK,IND,IND2,NM,VELO_INDEX,PIPE_INDEX
+INTEGER, INTENT(IN) :: II,JJ,KK,IND,IND2,NM,VELO_INDEX,PIPE_INDEX,PROP_INDEX
 REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL,K_G,&
             Q_SUM,TMP_G,UU,VV,WW,VEL2,Y_MF_INT,EXT_COEF,MASS_EXT_COEF,&
             VELSR,WATER_VOL_FRAC,RHS,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,CPBAR,CP,ZZ_GET(0:N_TRACKED_SPECIES),RCON, &
             EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,R_Y_H2O,R_DN,SGN,Y_ALL(N_SPECIES),H_S
 REAL(FB) :: TMPUP,TMPLOW,ZINT,TMP_WGT,DELTA,RHO2
-INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,Y_INDEX,Z_INDEX,PART_INDEX,ITMP,IP,JP,KP,FLOW_INDEX,IW
+INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,Y_INDEX,Z_INDEX,PART_INDEX,ITMP,IP,JP,KP,FLOW_INDEX,IW,FED_ACTIVITY
 CHARACTER(100) :: MESSAGE
 
 ! Get species mass fraction if necessary
@@ -4680,7 +4683,12 @@ SELECT CASE(IND)
 
    CASE(109)  ! FED
       ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
-      GAS_PHASE_OUTPUT = FED(ZZ_GET,RSUM(II,JJ,KK))
+      IF (PROP_INDEX>0) THEN
+         FED_ACTIVITY = PROPERTY(PROP_INDEX)%FED_ACTIVITY
+      ELSE
+         FED_ACTIVITY = 2
+      ENDIF
+      GAS_PHASE_OUTPUT = FED(ZZ_GET,RSUM(II,JJ,KK),FED_ACTIVITY)
 
    CASE(110)  ! THERMOCOUPLE
       IF (ASSUMED_GAS_TEMPERATURE>0._EB) THEN
@@ -6805,24 +6813,24 @@ REAL(EB) :: SS(4)
 ! wavelet error measure
 WAVELET_ERROR_MEASURE = 0._EB
 
-SS(1) = GAS_PHASE_OUTPUT(MAX(0,II-2),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-SS(2) = GAS_PHASE_OUTPUT(MAX(0,II-1),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-SS(4) = GAS_PHASE_OUTPUT(MIN(MESHES(NM)%IBP1,II+1),JJ,KK,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
+SS(1) = GAS_PHASE_OUTPUT(MAX(0,II-2),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+SS(2) = GAS_PHASE_OUTPUT(MAX(0,II-1),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+SS(4) = GAS_PHASE_OUTPUT(MIN(MESHES(NM)%IBP1,II+1),JJ,KK,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
 WAVELET_ERROR_MEASURE = WAVELET_ERROR(SS)
 
 IF (.NOT.TWO_D) THEN
-   SS(1) = GAS_PHASE_OUTPUT(II,MAX(0,JJ-2),KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-   SS(2) = GAS_PHASE_OUTPUT(II,MAX(0,JJ-1),KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-   SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-   SS(4) = GAS_PHASE_OUTPUT(II,MIN(MESHES(NM)%JBP1,JJ+1),KK,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
+   SS(1) = GAS_PHASE_OUTPUT(II,MAX(0,JJ-2),KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+   SS(2) = GAS_PHASE_OUTPUT(II,MAX(0,JJ-1),KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+   SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+   SS(4) = GAS_PHASE_OUTPUT(II,MIN(MESHES(NM)%JBP1,JJ+1),KK,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
    WAVELET_ERROR_MEASURE = MAX(WAVELET_ERROR_MEASURE,WAVELET_ERROR(SS))
 ENDIF
 
-SS(1) = GAS_PHASE_OUTPUT(II,JJ,MAX(0,KK-2),              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-SS(2) = GAS_PHASE_OUTPUT(II,JJ,MAX(0,KK-1),              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
-SS(4) = GAS_PHASE_OUTPUT(II,JJ,MIN(MESHES(NM)%KBP1,KK+1),IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
+SS(1) = GAS_PHASE_OUTPUT(II,JJ,MAX(0,KK-2),              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+SS(2) = GAS_PHASE_OUTPUT(II,JJ,MAX(0,KK-1),              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
+SS(4) = GAS_PHASE_OUTPUT(II,JJ,MIN(MESHES(NM)%KBP1,KK+1),IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
 WAVELET_ERROR_MEASURE = MAX(WAVELET_ERROR_MEASURE,WAVELET_ERROR(SS))
 
 END FUNCTION WAVELET_ERROR_MEASURE
@@ -6910,7 +6918,7 @@ DO K=KK-1,KK+1
       DO I=II-1,II+1
          LL=MIN(MESHES(NM)%IBP1,MAX(0,I))
                
-         ZZ(I-II+2,J-JJ+2,K-KK+2) = GAS_PHASE_OUTPUT(LL,MM,NN,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0._EB,NM)
+         ZZ(I-II+2,J-JJ+2,K-KK+2) = GAS_PHASE_OUTPUT(LL,MM,NN,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0._EB,NM)
       ENDDO
    ENDDO
 ENDDO

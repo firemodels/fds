@@ -62,6 +62,7 @@ MODULE EVAC
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
      REAL(EB) :: TIME_FALL_DOWN=0._EB, TARGET_X=0._EB, TARGET_Y=0._EB, DELTA_X=0._EB, DELTA_Y=0._EB
+     REAL(EB) :: T_START_FED=0._EB
      CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
      CHARACTER(30) :: GRID_NAME='null', PROP_ID='null'
      LOGICAL :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
@@ -386,14 +387,15 @@ MODULE EVAC
   !
   !
   LOGICAL :: NOT_RANDOM, EVAC_FDS6=.TRUE., L_FALLING_MODEL=.FALSE.
-  INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR, MAX_HUMANS_DIM
+  INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR, MAX_HUMANS_DIM, SMOKE_KS_SPEED_FUNCTION, &
+             FED_ACTIVITY
   REAL(EB) :: EVAC_MASS_EXTINCTION_COEFF
   REAL(EB) ::  FAC_A_WALL, FAC_B_WALL, LAMBDA_WALL, &
        NOISEME, NOISETH, NOISECM, RADIUS_COMPLETE_0, &
        RADIUS_COMPLETE_1, GROUP_EFF, FED_DOOR_CRIT, &
        TDET_SMOKE_DENS, DENS_INIT, EVAC_DT_MAX, GROUP_DENS, &
        FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
-       SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR, &
+       SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_FACTOR, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR, &
        HUMAN_SMOKE_HEIGHT, TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, &
        CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
        CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, FAC_DOOR_ALPHA,&
@@ -401,7 +403,8 @@ MODULE EVAC
        DOT_HERDING, EVAC_DELTA_SEE, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
        ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, A_HAWK_T_START, T_STOP_HD_GAME, &
        F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN, PROB_FALL_DOWN, &
-       T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK
+       T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
+       SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -475,7 +478,7 @@ CONTAINS
          TAU_MEAN,TAU_PARA,TAU_PARA2,TAU_LOW,TAU_HIGH, &
          FCONST_A,FCONST_B,L_NON_SP,C_YOUNG,GAMMA,KAPPA,ANGLE, &
          D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA, TARGET_X, TARGET_Y, &
-         DELTA_X, DELTA_Y, MAXIMUM_V0_FACTOR
+         DELTA_X, DELTA_Y, MAXIMUM_V0_FACTOR, TIME_START_FED
     !Issue1547: The MAXIMUM_V0_FACTOR should be difined as a variable in Fortran, because it is used
     !Issue1547: in a namelist (PERS-namelist) to read an user input, if given.
     INTEGER :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, MAX_HUMANS, AGENT_TYPE
@@ -542,7 +545,7 @@ CONTAINS
          AVATAR_COLOR, AVATAR_RGB, SHOW, PRE_EVAC_DIST, DET_EVAC_DIST, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
          DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE, PROP_ID, TIME_FALL_DOWN, &
-         GUARD_MEN_IN, TARGET_X, TARGET_Y, DELTA_X, DELTA_Y
+         GUARD_MEN_IN, TARGET_X, TARGET_Y, DELTA_X, DELTA_Y, TIME_START_FED
     NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW, TIME_FALL_DOWN
 
     NAMELIST /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
@@ -567,7 +570,7 @@ CONTAINS
          OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, OUTPUT_DENSITY, &
          OUTPUT_MOTIVE_ANGLE, OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, &
          OUTPUT_ACCELERATION, OUTPUT_NERVOUSNESS, COLOR_INDEX, DEAD_RGB, DEAD_COLOR, &
-         SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, &
+         SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_FACTOR, SMOKE_MIN_SPEED_VISIBILITY, &
          TAU_CHANGE_DOOR, RGB, COLOR, AVATAR_COLOR, AVATAR_RGB, HUMAN_SMOKE_HEIGHT, &
          TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
          FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
@@ -579,10 +582,11 @@ CONTAINS
          ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, T_STOP_HD_GAME, A_HAWK_T_START, &
          F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, PROB_FALL_DOWN, &
          T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, &
-         MAXIMUM_V0_FACTOR
+         MAXIMUM_V0_FACTOR, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
+         SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, SMOKE_KS_SPEED_FUNCTION, FED_ACTIVITY
     !Issue1547: Added new output keyword for the PERS namelist, here the new output
     !Issue1547: keyword OUTPUT_NERVOUSNES is added to the namelist. Also the user input
-    !Issue1547: for the social force MAXIMUM_V0_FACTO is added to the namelist.
+    !Issue1547: for the social force MAXIMUM_V0_FACTOR is added to the namelist.
     !
     NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
          PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
@@ -1418,12 +1422,24 @@ CONTAINS
       TDET_SMOKE_DENS = -999.9_EB  ! 
       FED_DOOR_CRIT   = -100.0_EB ! Which doors are 'smoke free' Evac >= 2.2.2
       GROUP_DENS      = 0.0_EB
-      SMOKE_MIN_SPEED = 0.1_EB
+      SMOKE_MIN_SPEED = -99999._EB
+      SMOKE_MIN_SPEED_FACTOR = -99999._EB
       SMOKE_MIN_SPEED_VISIBILITY = 0.0_EB
+      SMOKE_KS_SPEED_FUNCTION = 1 ! Linear function c(Ks) = (1 + beta*Ks/alpha)
+      FED_ACTIVITY = 2  ! 2:light work, 1: at rest, 3: heavy work
       TAU_CHANGE_DOOR = 1.0_EB
-      DENS_INIT       = 0.0_EB
+      DENS_INIT           = -99999.0_EB
+      MAX_INITIAL_OVERLAP = -99999.0_EB
       EVAC_DT_MAX     = 0.01_EB
       EVAC_DT_MIN     = 0.001_EB
+      !Issue1547: Some time is needed, because the agents are initially at rest, so the initial
+      !Issue1547: acceleration time is not counted. Time units are seconds, so 60 seconds.
+      TIME_INIT_NERVOUSNESS    = 60.0_EB
+
+      ! Linear speed vs smoke density function, default is the Lund fit.
+      ! c(Ks) = ( 1 + (BETA*Ks)/ALPHA )  [0,1] interval, c(Ks=0)=1, c(Ks=inf)=0
+      SMOKE_SPEED_ALPHA = 0.706_EB   ! Lund 2003, report 3126 (Frantzich & Nilsson)
+      SMOKE_SPEED_BETA  = -0.057_EB  ! Lund 2003, report 3126 (Frantzich & Nilsson)
 
       ! Next parameters are for the counterflow (CF)
       ! Evac 2.2.0: Counterflow treatment is the default
@@ -1861,6 +1877,13 @@ CONTAINS
             END IF
          END IF
 
+         IF (FED_ACTIVITY < 1 .OR. FED_ACTIVITY > 3) THEN
+            IF (MYID == MAX(0,EVAC_PROCESS)) THEN
+               WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: PERS ',TRIM(ID), ' not a valid FED activity switch: ',FED_ACTIVITY
+               CALL SHUTDOWN(MESSAGE)
+            END IF
+         END IF
+
          DIAMETER_DIST = MAX(0,DIAMETER_DIST)
          VELOCITY_DIST = MAX(0,VELOCITY_DIST)
          TAU_EVAC_DIST = MAX(0,TAU_EVAC_DIST)
@@ -1992,13 +2015,37 @@ CONTAINS
          C_HAWK = 1000000000000000.0_EB ! Default, all doves if t_i < t_aset-t_0
       END IF
 
+      IF (MAX_INITIAL_OVERLAP <= -99998.0_EB .AND. DENS_INIT <= -99998.0_EB) THEN
+         ! No inputs given, use the defaults
+         DENS_INIT = 1.0_EB
+         MAX_INITIAL_OVERLAP = 0.08_EB
+      END IF
+      IF (MAX_INITIAL_OVERLAP <= -99998.0_EB .AND. DENS_INIT > -99998.0_EB) THEN
+         ! Just the density given => old input format behavour
+         IF (DENS_INIT > 2.0_EB) THEN
+            MAX_INITIAL_OVERLAP = 0.0_EB
+         ELSE
+            MAX_INITIAL_OVERLAP = 0.08_EB
+         END IF
+         IF (DENS_INIT > 10.0_EB)  MAX_INITIAL_OVERLAP = -0.1_EB
+      END IF
+      ! The default is at least 0.08 m empty space between the agents
+      IF (MAX_INITIAL_OVERLAP < -99998.0_EB) MAX_INITIAL_OVERLAP = 0.08_EB
+      DENS_INIT = MAX(DENS_INIT,1.0_EB)
+
       R_HERDING = MAX(0.1_EB,R_HERDING)  ! Avoid divisions by zero
       IF (GROUP_DENS <= 0.01_EB) GROUP_DENS = 0.25_EB
       IF (GROUP_DENS > 3.50_EB) GROUP_DENS = 3.50_EB
       DENS_INIT = MAX(GROUP_DENS,DENS_INIT)
       IF (TDET_SMOKE_DENS < 0.0_EB) TDET_SMOKE_DENS = HUGE(TDET_SMOKE_DENS)
 
-      IF(SMOKE_MIN_SPEED < 0.0_EB ) SMOKE_MIN_SPEED = 0.0_EB
+      IF(SMOKE_MIN_SPEED < 0.0_EB .AND. SMOKE_MIN_SPEED_FACTOR < 0.0_EB) THEN
+         SMOKE_MIN_SPEED_FACTOR = 0.1_EB ! Default min speed = v0_i*v_s_min_fac
+      END IF
+      IF(SMOKE_MIN_SPEED > -99998.0_EB .AND. SMOKE_MIN_SPEED_FACTOR > -99998.0_EB) THEN
+         WRITE(MESSAGE,'(A,I3,A)') 'ERROR: READ_EVAC both SMOKE_MIN_SPEED and SMOKE_MIN_SPEED_FACTOR are given'
+         CALL SHUTDOWN(MESSAGE)
+      END IF
       IF(SMOKE_MIN_SPEED_VISIBILITY < 0.01_EB) THEN
          SMOKE_MIN_SPEED_VISIBILITY = 0.01_EB  ! No divisions by zero
       END IF
@@ -4003,6 +4050,7 @@ CONTAINS
          TIME_START               = -99.0_EB
          TIME_STOP                = -99.0_EB
          TIME_FALL_DOWN           = HUGE(TIME_FALL_DOWN)
+         TIME_START_FED           = T_BEGIN
          GN_MIN                   = 1
          GN_MAX                   = 1      
          PRE_EVAC_DIST = -1  ! If Tpre given on EVAC namelist, override PERS
@@ -4151,6 +4199,7 @@ CONTAINS
          !
          HPT%CLASS_NAME = PERS_ID
          HPT%T_START    = TIME_START
+         HPT%T_START_FED = TIME_START_FED
          HPT%I_AGENT_TYPE = AGENT_TYPE
          HPT%PROP_ID    = TRIM(PROP_ID)
          HPT%TIME_FALL_DOWN = TIME_FALL_DOWN
@@ -5005,6 +5054,8 @@ CONTAINS
     INTEGER :: size_rnd
     INTEGER, DIMENSION(8) :: t_rnd
     INTEGER, DIMENSION(:), ALLOCATABLE :: seed_rnd
+    CHARACTER(30), DIMENSION(3) :: FED_ACT_NAME
+    DATA FED_ACT_NAME /'at rest or at sleep', 'light work', 'heavy work'/
     !
     TYPE (MESH_TYPE), POINTER :: MFF =>NULL()
     TYPE (DEVICE_TYPE), POINTER :: DV =>NULL()
@@ -5033,6 +5084,11 @@ CONTAINS
     LU_EVACOUT = GET_FILE_NUMBER()
     FN_EVACOUT = TRIM(CHID)//'_evac.out'
 
+    L_fed_read = BTEST(I_EVAC,3)
+    L_fed_save = BTEST(I_EVAC,1)
+    L_eff_read = BTEST(I_EVAC,2)
+    L_eff_save = BTEST(I_EVAC,0)
+
     !
 
     ! Open evacuation output file
@@ -5060,11 +5116,16 @@ CONTAINS
     IF (EVAC_FDS6) WRITE(LU_EVACOUT,FMT='(A)') ' **************************'
 
     WRITE(LU_EVACOUT,FMT='(/A,I2)')  ' FDS+Evac Color_Method    :', COLOR_METHOD
-    IF (Fed_Door_Crit >= 0) THEN
-       WRITE(LU_EVACOUT,FMT='(A,F14.8)') ' FDS+Evac Fed_Door_Crit   :', FED_DOOR_CRIT
+    IF (L_fed_read .OR. L_fed_save) THEN
+       IF (Fed_Door_Crit >= 0) THEN
+          WRITE(LU_EVACOUT,FMT='(A,F14.8)') ' FDS+Evac Fed_Door_Crit   :', FED_DOOR_CRIT
+       ELSE
+          ! Visibility S = 3/K, K is extinction coeff.
+          WRITE(LU_EVACOUT,FMT='(A,F14.8,A)') ' FDS+Evac Vis_Door_Crit   :', ABS(FED_DOOR_CRIT), ' m'
+       END IF
+       WRITE(LU_EVACOUT,FMT='(A,A)') ' FDS+Evac: FED activity level is ', TRIM(FED_ACT_NAME(FED_ACTIVITY))
     ELSE
-       ! Visibility S = 3/K, K is extinction coeff.
-       WRITE(LU_EVACOUT,FMT='(A,F14.8,A)') ' FDS+Evac Vis_Door_Crit   :', ABS(FED_DOOR_CRIT), ' m'
+       WRITE(LU_EVACOUT,FMT='(A)') ' FDS+Evac: Evacuation drill mode '
     END IF
     IF (NOT_RANDOM ) WRITE(LU_EVACOUT,FMT='(A)') ' FDS+Evac Random seed is not used.'
     CALL RANDOM_SEED(size=size_rnd)
@@ -5103,11 +5164,6 @@ CONTAINS
        WRITE(LU_EVACOUT,FMT='(A,f12.2)') '           F_MIN_FALL     = ',F_MIN_FALL
        WRITE(LU_EVACOUT,FMT='(A,f12.2)') '           F_MAX_FALL     = ',F_MAX_FALL
     END IF
-    !
-    L_fed_read = BTEST(I_EVAC,3)
-    L_fed_save = BTEST(I_EVAC,1)
-    L_eff_read = BTEST(I_EVAC,2)
-    L_eff_save = BTEST(I_EVAC,0)
 
     n_cols = n_egrids + n_corrs + N_EXITS + N_DOORS + 1 + N_EXITS - n_co_exits + N_DOORS
     ! Initialize the FED counters:
@@ -6194,13 +6250,12 @@ CONTAINS
                 END DO EH_Loop
 
                 !Check, that a person is not put on top of some other person
-                IF (DENS_INIT > 2.0_EB .OR. HPT_ORDERED) THEN
+                IF (HPT_ORDERED) THEN
                    ! High density is wanted
-                   d_max = 0.0_EB
+                   d_max = MIN(0.0_EB, MAX_INITIAL_OVERLAP)
                 ELSE
-                   d_max = 1.0_EB*HR%B
+                   d_max = MAX_INITIAL_OVERLAP
                 END IF
-                IF (DENS_INIT > 10.0_EB) d_max = -0.1_EB
                 dens_fac = MAX(1.0_EB,DENS_INIT)
 
                 IF (i_endless_loop >= 10*INT(dens_fac*(16.0_EB*MAX(1.0_EB,LOG10(2.5_EB*VOL2))) / &
@@ -6801,7 +6856,7 @@ CONTAINS
                       NOM = ABS(HUMAN_GRID(I,J)%IMESH)
                       CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                            HUMAN_GRID(I,J)%FED_CO_CO2_O2,HUMAN_GRID(I,J)%SOOT_DENS,&
-                           HUMAN_GRID(I,J)%TMP_G, HUMAN_GRID(I,J)%RADFLUX, ZZ_GET)
+                           HUMAN_GRID(I,J)%TMP_G, HUMAN_GRID(I,J)%RADFLUX, ZZ_GET, FED_ACTIVITY)
                    END IF
                    ! Save FED, SOOT, TEMP(C), and RADFLUX
                    WRITE (LU_EVACFED) &
@@ -6843,7 +6898,7 @@ CONTAINS
                 NOM = EVAC_CORRS(I)%FED_MESH
                 CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                      EVAC_CORRS(I)%FED_CO_CO2_O2(1),EVAC_CORRS(I)%SOOT_DENS(1),&
-                     EVAC_CORRS(I)%TMP_G(1), EVAC_CORRS(I)%RADFLUX(1), ZZ_GET)
+                     EVAC_CORRS(I)%TMP_G(1), EVAC_CORRS(I)%RADFLUX(1), ZZ_GET, FED_ACTIVITY)
              ELSE
                 ! No FED_MESH found
                 EVAC_CORRS(I)%FED_CO_CO2_O2(1) = 0.0_EB
@@ -6859,7 +6914,7 @@ CONTAINS
                 NOM = EVAC_CORRS(I)%FED_MESH2
                 CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                      EVAC_CORRS(I)%FED_CO_CO2_O2(2),EVAC_CORRS(I)%SOOT_DENS(2),&
-                     EVAC_CORRS(I)%TMP_G(2), EVAC_CORRS(I)%RADFLUX(2), ZZ_GET)
+                     EVAC_CORRS(I)%TMP_G(2), EVAC_CORRS(I)%RADFLUX(2), ZZ_GET, FED_ACTIVITY)
              ELSE
                 ! No FED_MESH2 found
                 EVAC_CORRS(I)%FED_CO_CO2_O2(2) = 0.0_EB
@@ -6909,7 +6964,7 @@ CONTAINS
                    NOM = EVAC_DOORS(I)%FED_MESH
                    CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                         EVAC_DOORS(I)%FED_CO_CO2_O2,EVAC_DOORS(I)%SOOT_DENS,&
-                        EVAC_DOORS(I)%TMP_G, EVAC_DOORS(I)%RADFLUX, ZZ_GET)
+                        EVAC_DOORS(I)%TMP_G, EVAC_DOORS(I)%RADFLUX, ZZ_GET, FED_ACTIVITY)
                 ELSE
                    ! No FED_MESH found
                    EVAC_DOORS(I)%FED_CO_CO2_O2 = 0.0_EB
@@ -6951,7 +7006,7 @@ CONTAINS
                    NOM = EVAC_EXITS(I)%FED_MESH
                    CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                         EVAC_EXITS(I)%FED_CO_CO2_O2,EVAC_EXITS(I)%SOOT_DENS,&
-                        EVAC_EXITS(I)%TMP_G, EVAC_EXITS(I)%RADFLUX, ZZ_GET)
+                        EVAC_EXITS(I)%TMP_G, EVAC_EXITS(I)%RADFLUX, ZZ_GET, FED_ACTIVITY)
                 ELSE
                    ! No FED_MESH found
                    EVAC_EXITS(I)%FED_CO_CO2_O2 = 0.0_EB
@@ -7218,6 +7273,7 @@ CONTAINS
     !
     REAL(EB) :: P2P_TORQUE, FC_X, FC_Y, OMEGA_NEW, ANGLE, A1, TC_Z, FC_X1, FC_Y1
     REAL(EB) :: OMEGA_MAX, OMEGA_0, FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, TAU_FAC, SPEED_X, SPEED_Y
+    REAL(EB) :: SMOKE_MIN_SPEED_TMP
     REAL(EB), DIMENSION(6) :: Y_TMP, X_TMP, R_TMP, V_TMP, U_TMP
     !
     ! Next are for the block list of the double agent-agent loop (speed up)
@@ -8055,7 +8111,13 @@ CONTAINS
              ! Calculate purser's fractional effective dose (FED)
              ! Note: Purser uses minutes, here DT is in seconds
              ! FED_DOSE = FED_LCO*FED_VCO2 + FED_LO
-             HR%INTDOSE = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + HR%INTDOSE
+             IF (HR%IEL > 0) THEN  ! From an evac line
+                IF (EVAC_EVACS(HR%IEL)%T_START_FED >= T) THEN
+                   HR%INTDOSE = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + HR%INTDOSE
+                END IF
+             ELSE ! From an entr line
+                HR%INTDOSE = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + HR%INTDOSE
+             END IF
              ! Smoke density vs speed
              ! Lund 2003, report 3126 (Frantzich & Nilsson)
              ! V0(K) = V0*( 1 + (BETA*K)/ALPHA ), Where [K]=1/M EXT.COEFF
@@ -8066,17 +8128,32 @@ CONTAINS
              ! [MASS_EXTINCTION_COEFFICIENT] = m2/kg
              ! K = MASS_EXTINCTION_COEFFICIENT*SOOT_DENS*1.0E-6
              ! VISIBILITY = 3/K  [m]
-             SMOKE_BETA  = -0.057_EB
-             SMOKE_ALPHA = 0.706_EB
-             SMOKE_SPEED_FAC = 1.0_EB + (SMOKE_BETA/SMOKE_ALPHA)* &
-                  EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS
+             SMOKE_BETA  = SMOKE_SPEED_BETA
+             SMOKE_ALPHA = SMOKE_SPEED_ALPHA
+             IF (SMOKE_MIN_SPEED_FACTOR > -99998.0_EB) THEN
+                SMOKE_MIN_SPEED_TMP = SMOKE_MIN_SPEED_FACTOR
+             ELSE
+                SMOKE_MIN_SPEED_TMP = SMOKE_MIN_SPEED/HR%SPEED
+             END IF
+
+             SELECT CASE(SMOKE_KS_SPEED_FUNCTION)
+             CASE (1)
+                ! Linear smoke density vs speed function, c(Ks) = 1 + beta*Ks/alpha
+                SMOKE_SPEED_FAC = 1.0_EB + (SMOKE_BETA/SMOKE_ALPHA)* &
+                     EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS
+             CASE DEFAULT
+                WRITE(MESSAGE,'(A,I3)') 'ERROR: PERS line has a non-valid SMOKE_KS_SPEED_FUNCTION,',SMOKE_KS_SPEED_FUNCTION
+                CALL SHUTDOWN(MESSAGE)
+             END SELECT
+             ! Next if is just an obsolote feature (Poland request), it is not used
+             ! if default SMOKE_MIN_SPEED_VISIBILITY is given.
              IF (EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS > &
-                  3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) THEN
+                  3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) THEN  ! 1/m > 300 1/m
                 SMOKE_SPEED_FAC = MIN(SMOKE_SPEED_FAC, SMOKE_SPEED_FAC*( 2.0_EB - &
                      (EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS - & 
                      3.0_EB/SMOKE_MIN_SPEED_VISIBILITY ) / (3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) ) )
              END IF
-             SMOKE_SPEED_FAC = MAX(SMOKE_SPEED_FAC, SMOKE_MIN_SPEED)
+             SMOKE_SPEED_FAC = MAX(SMOKE_SPEED_FAC, SMOKE_MIN_SPEED_TMP)
 
              ! Check the smoke density for the detection by smoke
              IF (.NOT.L_DEAD .AND. HUMAN_GRID(II,JJ)%SOOT_DENS > TDET_SMOKE_DENS) THEN
@@ -13838,7 +13915,8 @@ CONTAINS
     !Issue1547: Some time is needed, because the agents are initially at rest, so the initial
     !Issue1547: acceleration time is not counted. Time units are seconds, so 60 seconds.
     HR%Speed_ave = 1.0_EB
-    HR%T_Speed_ave = 60.0_EB
+    ! HR%T_Speed_ave = 60.0_EB
+    HR%T_Speed_ave = TIME_INIT_NERVOUSNESS
     !
   END SUBROUTINE CLASS_PROPERTIES
 
@@ -14888,11 +14966,11 @@ CONTAINS
     RETURN
   END SUBROUTINE Find_walls
 
-  SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux, ZZ_GET)
+  SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux, ZZ_GET, FED_ACTIVITY)
     IMPLICIT NONE
     !
     ! Passed variables
-    INTEGER, INTENT(IN) :: I, J, K, NOM
+    INTEGER, INTENT(IN) :: I, J, K, NOM, FED_ACTIVITY
     REAL(EB), INTENT(OUT) :: fed_indx, soot_dens, gas_temp, rad_flux
     REAL(EB), INTENT(INOUT) :: ZZ_GET(0:N_TRACKED_SPECIES)
     !
@@ -14909,7 +14987,7 @@ CONTAINS
        soot_dens = 0._EB
     ENDIF
     ! Calculate Purser's fractional effective dose (FED)
-    fed_indx = FED(ZZ_GET,MESHES(nom)%RSUM(I,J,K))
+    fed_indx = FED(ZZ_GET,MESHES(nom)%RSUM(I,J,K),FED_ACTIVITY)
     ! Gas temperature, ind=5, C
     gas_temp  = MESHES(nom)%TMP(I,J,K)
     ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)
