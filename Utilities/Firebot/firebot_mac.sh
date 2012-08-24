@@ -390,7 +390,7 @@ wait_verification_cases_long_end()
    # Scans qstat and waits for verification cases to end
    while [[ `ps x | grep intel_osx_64 | wc -l` -gt 1 ]]; do
       JOBS_REMAINING=`ps x | grep intel_osx_64 | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
+      echo "${JOBS_REMAINING} verification cases currently running." >> $FIREBOT_DIR/output/stage5
       TIME_LIMIT_STAGE="5"
       check_time_limit
       sleep 60
