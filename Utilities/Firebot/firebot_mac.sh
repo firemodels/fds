@@ -465,6 +465,7 @@ email_error_message()
    # Check for warnings
    if [ -e "output/warnings" ]
    then
+      cat "" >> $ERROR_LOG
       cat output/warnings >> $ERROR_LOG
 
       # Send email with failure message and warnings, body of email contains appropriate log file
