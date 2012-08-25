@@ -24,6 +24,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(*meshvisptr,NULL);
 SVEXTERN int SVDECL(from_commandline,0);
 SVEXTERN filelistdata SVDECL(*ini_filelist,NULL);
 SVEXTERN int SVDECL(nini_filelist,0);

@@ -1236,6 +1236,8 @@ void drawsmoke3d(smoke3ddata *smoke3di){
 
   have_light = smoke3di->have_light;
   meshi = meshinfo + smoke3di->blocknumber;
+  if(meshvisptr[meshi-meshinfo]==0)return;
+
   if(meshi->merge_alpha==NULL||meshi->update_firehalfdepth==1){
     meshi->update_firehalfdepth=0;
     mergesmoke3dcolors(smoke3di);
@@ -3029,6 +3031,8 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
   mesh *meshi;
 
   meshi = meshinfo + smoke3di->blocknumber;
+  if(meshvisptr[meshi-meshinfo]==0)return;
+
   firecolor=smoke3di->hrrpuv_color;
 
   {
@@ -3050,6 +3054,7 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
   // hrrpuv_max_smv;
 
   meshi = meshinfo + smoke3di->blocknumber;
+  if(meshvisptr[meshi-meshinfo]==0)return;
   value[0]=255;
   value[1]=255;
   value[2]=255;
@@ -4217,6 +4222,7 @@ void drawsmoke3dCULL(void){
     culli = sort_cullplaneinfo[ncullplaneinfo-1-nn];
 
     meshi = culli->cull_mesh;
+    if(meshvisptr[meshi-meshinfo]==0)continue;
   
     if(meshi!=mesh_old){
       mesh_old=meshi;

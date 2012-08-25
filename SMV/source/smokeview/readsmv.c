@@ -2049,6 +2049,11 @@ void update_mesh_coords(void){
     meshi->vent_offset[YYY] = ventoffset_factor*(meshi->yplt[1]-meshi->yplt[0]);
     meshi->vent_offset[ZZZ] = ventoffset_factor*(meshi->zplt[1]-meshi->zplt[0]);
   }
+  NewMemory((void **)&meshvisptr,nmeshes*sizeof(int));
+  for(i=0;i<nmeshes;i++){
+    meshvisptr[i]=1;
+  }
+
 }
 
 /* ------------------ is_slice_dup ------------------------ */

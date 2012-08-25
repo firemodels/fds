@@ -792,6 +792,7 @@ void drawsmoke3dVOL(void){
     vi = volfacelistinfoptrs[ii];
     iwall=vi->iwall;
     meshi = vi->facemesh;
+    if(meshvisptr[meshi-meshinfo]==0)continue;
     xplt = meshi->xplt;
     yplt = meshi->yplt;
     zplt = meshi->zplt;
@@ -1033,6 +1034,7 @@ void drawsmoke3dGPUVOL(void){
     iwall=vi->iwall;
     meshi = vi->facemesh;
 
+    if(meshvisptr[meshi-meshinfo]==0)continue;
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
     vr = &meshi->volrenderinfo;
