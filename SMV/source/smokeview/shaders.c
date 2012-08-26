@@ -285,17 +285,14 @@ int setVolSmokeShaders() {
 #ifdef pp_GPUDEPTH
 // http://en.wikipedia.org/wiki/Depth_buffer#Mathematics
     "float LinearizeDepth(vec2 uv){"
-    "  float A, B, zprime;"
-    "  float near,far;"
+    "  float near, far, z;"
     "  near=nearfar.x;"
     "  far=nearfar.y;"
-    "  A = (far+near)/(far-near);"
-    "  B = (-2.0*far*near)/(far-near);"
-    "  float z = texture2D(depthtexture, uv).x;"
-    "  zprime = A + B/z;"
-    "  return (zprime+1.0)/2.0;"
+    "  z = texture2D(depthtexture, uv).x;"
+    "  return (near*far)/(far+z*(near-far));"
     "}"
 #endif
+
     "float rand(vec2 co){"
     "  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);"
     "}"
@@ -393,11 +390,7 @@ int setVolSmokeShaders() {
     "    gray=0.299*color_cum.r + 0.587*color_cum.g + 0.114*color_cum.b;"
     "    color_cum=vec3(gray,gray,gray);"
     "  }"
-#ifdef pp_GPUDEPTH
-    "  gl_FragColor = vec4(uv.x,uv.y,0.0,1.0);"
-#else
     "  gl_FragColor = vec4(color_cum/alphahat,alphahat);"
-#endif
     "}" // end of main
   };
 
