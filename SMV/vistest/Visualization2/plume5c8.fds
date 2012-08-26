@@ -7,11 +7,11 @@
 
 &MISC HRRPUV_MAX_SMV=1300.0 /
 
-&DUMP NFRAMES=1200 DT_PL3D=8.0, DT_SL3D=0.03333 /
+&DUMP NFRAMES=750 DT_PL3D=8.0, DT_SL3D=0.03333 /
 
 &INIT XB=0.2,1.4,0.2,1.4,0.5,2.2  TEMPERATURE=600.0 /
 
-&TIME T_END=40. /  Total simulation time
+&TIME T_END=25. /  Total simulation time
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
