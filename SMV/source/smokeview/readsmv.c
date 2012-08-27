@@ -2049,11 +2049,109 @@ void update_mesh_coords(void){
     meshi->vent_offset[YYY] = ventoffset_factor*(meshi->yplt[1]-meshi->yplt[0]);
     meshi->vent_offset[ZZZ] = ventoffset_factor*(meshi->zplt[1]-meshi->zplt[0]);
   }
+  NewMemory((void **)&smoke3dinfo_sorted,nsmoke3dinfo*sizeof(smoke3ddata *));
   NewMemory((void **)&meshvisptr,nmeshes*sizeof(int));
   for(i=0;i<nmeshes;i++){
     meshvisptr[i]=1;
   }
+  for(i=0;i<nsmoke3dinfo;i++){
+    smoke3dinfo_sorted[i]=smoke3dinfo+i;
+  }
+}
 
+/* ----------------------- compare_meshes ----------------------------- */
+
+int compare_meshes( const void *arg1, const void *arg2 ){
+  smoke3ddata *smoke3di, *smoke3dj;
+  mesh *meshi, *meshj;
+  float *xyzmini, *xyzmaxi;
+  float *xyzminj, *xyzmaxj;
+  int dir=0;
+  int returnval=0;
+
+  smoke3di = *(smoke3ddata **)arg1;
+  smoke3dj = *(smoke3ddata **)arg2;
+  meshi = meshinfo + smoke3di->blocknumber;
+  meshj = meshinfo + smoke3dj->blocknumber;
+  if(meshi==meshj)return 0;
+  xyzmini = meshi->boxmin;
+  xyzmaxi = meshi->boxmax;
+  xyzminj = meshj->boxmin;
+  xyzmaxj = meshj->boxmax;
+  if(dir==0){
+    if(xyzmaxi[0]<=xyzminj[0])dir=1;
+    if(xyzmaxj[0]<=xyzmini[0])dir=-1;
+  }
+  if(dir==0){
+    if(xyzmaxi[1]<=xyzminj[1])dir=2;
+    if(xyzmaxj[1]<=xyzmini[1])dir=-2;
+  }
+  if(dir==0){
+    if(xyzmaxi[2]<=xyzminj[2])dir=3;
+    if(xyzmaxj[2]<=xyzmini[2])dir=-3;
+  }
+  switch (dir) {
+    case 0:
+      returnval=0;
+      break;
+    case 1:
+      if(world_eyepos[0]<xyzmaxi[0]){
+        returnval=1;
+      }
+      else{
+        returnval=-1;
+      }
+      break;
+    case -1:
+      if(world_eyepos[0]<xyzmaxj[0]){
+        returnval=-1;
+      }
+      else{
+        returnval=1;
+      }
+      break;
+    case 2:
+      if(world_eyepos[1]<xyzmaxi[1]){
+        returnval=1;
+      }
+      else{
+        returnval=-1;
+      }
+      break;
+    case -2:
+      if(world_eyepos[1]<xyzmaxj[1]){
+        returnval=-1;
+      }
+      else{
+        returnval=1;
+      }
+      break;
+    case 3:
+      if(world_eyepos[2]<xyzmaxi[2]){
+        returnval=1;
+      }
+      else{
+        returnval=-1;
+      }
+      break;
+    case -3:
+      if(world_eyepos[2]<xyzmaxj[2]){
+        returnval=-1;
+      }
+      else{
+        returnval=1;
+      }
+      break;
+  }
+  return returnval;
+}
+
+/* ------------------ sort_meshinfo ------------------------ */
+
+void sort_smoke3dinfo(void){
+  if(nsmoke3dinfo>1){
+    qsort((mesh **)smoke3dinfo_sorted,(size_t)nsmoke3dinfo,sizeof(smoke3ddata *),compare_meshes);
+  }
 }
 
 /* ------------------ is_slice_dup ------------------------ */

@@ -25,6 +25,7 @@
 #include "MALLOC.h"
 
 SVEXTERN int SVDECL(*meshvisptr,NULL);
+SVEXTERN smoke3ddata SVDECL(**smoke3dinfo_sorted,NULL);
 SVEXTERN int SVDECL(from_commandline,0);
 SVEXTERN filelistdata SVDECL(*ini_filelist,NULL);
 SVEXTERN int SVDECL(nini_filelist,0);

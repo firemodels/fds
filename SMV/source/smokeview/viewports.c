@@ -992,6 +992,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       }
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){
+      sort_smoke3dinfo();
       getsmokedir(modelview_scratch);
       SNIFF_ERRORS("after getsmokedir");
 #ifdef pp_CULL

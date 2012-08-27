@@ -359,7 +359,7 @@ void drawsmoke_frame(void){
       for(i=0;i<nsmoke3dinfo;i++){
         smoke3ddata *smoke3di;
 
-        smoke3di = smoke3dinfo + i;
+        smoke3di = smoke3dinfo_sorted[i];
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
         if(smoke3di->d_display==0)continue;
         if(is_fire_or_soot(smoke3di)==0)continue;
