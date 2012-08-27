@@ -7006,8 +7006,8 @@ updatemenu=0;
     if(showgluizip==0)glutAddMenuEntry(_("Compression/Smokezip...  ALT+z"),24);
   }
 #endif
-  if(showcolorbar_dialog==1)glutAddMenuEntry(_("*Customize colorbar...  ALT+c"),23);
-  if(showcolorbar_dialog==0)glutAddMenuEntry(_("Customize colorbar...  ALT+c"),23);
+  if(showcolorbar_dialog==1)glutAddMenuEntry(_("*Customize colorbar...  ALT+C"),23);
+  if(showcolorbar_dialog==0)glutAddMenuEntry(_("Customize colorbar...  ALT+C"),23);
   if(ndeviceinfo>0){
     if(showdevice_dialog==1)glutAddMenuEntry(_("*Devices/Objects..."),28);
     if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."),28);

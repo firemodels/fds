@@ -1169,23 +1169,30 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'C':
-      if(nrooms>0){
-        zone_highlight = 1 - zone_highlight;
-        if(zone_highlight==1){
-          printf("room %i\n",zone_highlight_room+1);
-        }
-      }
+      switch (keystate){
+        case GLUT_ACTIVE_ALT:
+          DialogMenu(23); // colorbar dialog
+          break;
+        case GLUT_ACTIVE_CTRL:
+        default: 
+          if(nrooms>0){
+            zone_highlight = 1 - zone_highlight;
+            if(zone_highlight==1){
+              printf("room %i\n",zone_highlight_room+1);
+            }
+          }
 #ifdef pp_CULL
-      else{
-        if(nsmoke3dinfo>0&&cullactive==1&&gpuactive==1){
-          cullsmoke=1-cullsmoke;
-          update_smoke3dflags();
-          initcull(cullsmoke);
-          print_gpu_cull_state();
-        }
-        if(cullactive==0||gpuactive==0)cullsmoke=0;
-      }
+          else{
+            if(nsmoke3dinfo>0&&cullactive==1&&gpuactive==1){
+              cullsmoke=1-cullsmoke;
+              update_smoke3dflags();
+              initcull(cullsmoke);
+              print_gpu_cull_state();
+            }
+            if(cullactive==0||gpuactive==0)cullsmoke=0;
+          }
 #endif
+      }
       break;
     case 'd':
     case 'D':
