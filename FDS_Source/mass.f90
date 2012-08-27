@@ -355,9 +355,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          END SELECT
 
          ! At interpolated boundaries, use the actual normal components of velocity, not the ones that have been forced to match.
-         ! This line is temporarily commented out because it may not be necessary.
        
-     !!  IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+         IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
 
          ! Compute species mass flux on the face of the wall cell
 
@@ -512,17 +511,36 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
       SELECT CASE(IOR)
          CASE( 1)
-            FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+            UN = UU(II,JJ,KK)
          CASE(-1)
-            FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)
+            UN = UU(II-1,JJ,KK)
          CASE( 2)
-            FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+            UN = VV(II,JJ,KK)
          CASE(-2)
-            FY(II,JJ-1,KK,N) = WC%RHO_F*WC%ZZ_F(N)
+            UN = VV(II,JJ-1,KK)
+         CASE( 3)
+            UN = WW(II,JJ,KK)
+         CASE(-3)
+            UN = WW(II,JJ,KK-1)
+      END SELECT
+
+      ! In case of interpolated boundary, use the original velocity, not the averaged value
+
+      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+
+      SELECT CASE(IOR)
+         CASE( 1)
+            IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II,JJ,KK)
+         CASE(-1)
+            IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II-1,JJ,KK)
+         CASE( 2)
+            IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/VV(II,JJ,KK)
+         CASE(-2)
+            IF (ABS(VV(II,JJ-1,KK))>TWO_EPSILON_EB) FY(II,JJ-1,KK,N) = WC%RHO_F*WC%ZZ_F(N)*UN/VV(II,JJ-1,KK)
          CASE( 3) 
-            FZ(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+            IF (ABS(WW(II,JJ,KK))  >TWO_EPSILON_EB) FZ(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/WW(II,JJ,KK)
          CASE(-3) 
-            FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)
+            IF (ABS(WW(II,JJ,KK-1))>TWO_EPSILON_EB) FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)*UN/WW(II,JJ,KK-1)
       END SELECT
 
    ENDDO WALL_LOOP_2
