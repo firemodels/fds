@@ -13,14 +13,14 @@ typedef struct {
 } filelistdata;
 
 #ifdef BIT64
-#ifdef X64
 #define FILESIZE unsigned long long
+#ifdef X64
 #define FSEEK(a,b,c) _fseeki64(a,b,c)
 #else
-#define FILESIZE unsigned int
 #define FSEEK(a,b,c) fseeko(a,b,c)
 #endif
 #else
+#define FILESIZE unsigned int
 #define FSEEK(a,b,c) fseek(a,b,c)
 #endif
 
