@@ -12,7 +12,7 @@ SVNROOT=`pwd`/../..
 cd $SVNROOT/Verification
 
 # Write header information to fds_timing_stats.csv file
-echo 'FDS Case,CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric' > $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
+echo 'FDS Case,CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
 
 # Loop over all .out files in the Verification directory
 for i in */*.out
@@ -57,7 +57,7 @@ do
       NUM_TIME_STEPS=0
       PERFORMANCE=0
    else
-      let PERFORMANCE=`echo "($CPU_TIME*$NUM_TOTAL_CELLS)/$NUM_TIME_STEPS" | bc`
+      let PERFORMANCE=`echo "1000000*$CPU_TIME/($NUM_TOTAL_CELLS*$NUM_TIME_STEPS)" | bc`
    fi
 
    # Write results to fds_timing_stats.csv file
