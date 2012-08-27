@@ -27,7 +27,7 @@ Lumped species are groups of primitive species which only exist in the flow in c
 
 We can expand Eq.~(\ref{eq:simple}) to show the components of the lumped species for a simple, one-step methane reaction. 
 \begin{equation}\label{eq:lumped_expand}
-\mathrm{2\underbrace{(\mbox{O}_2+(.79/.21)\mbox{N}_2)}_\text{Background(Oxidant),~Z$_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~Z$_1$} \rightarrow 1\underbrace{(\mbox{CO}_2+2\mbox{H}_2\mbox{O}+2(.79/.21)\mbox{N}_2)}_\text{Products,~Z$_2$}}
+\mathrm{2\underbrace{(\mbox{O}_2+(.79/.21)\mbox{N}_2)}_\text{Background,~Z$_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~Z$_1$} \rightarrow 1\underbrace{(\mbox{CO}_2+2\mbox{H}_2\mbox{O}+2(.79/.21)\mbox{N}_2)}_\text{Products,~Z$_2$}}
 \end{equation}
 As described by Eq.~(\ref{eq:lumped_expand}), two moles of the lumped species `Background' react with one mole of lumped species `Fuel', to produce one mole of lumped species `Products'. In FDS, the background species is not transported but solved for since the sum of the mass fractions of the lumped species must be 1. Lumped species are defined by the vector $\textbf{Z}$ which is indexed from $0:N_{z}$ by the Roman numeral $i$. This means that $N_{z}$ transport equations are solved. In the case of Eq:~(\ref{eq:lumped_expand}), two transport equations are solved (fuel and products) which is the same number solved in the mixture fraction progress variable approach.
 
@@ -103,10 +103,10 @@ The preceding table shows that the addition of carbon monoxide and soot has incr
 For a typical hydrocarbon fuel, the chemical reaction in FDS follows:
 
 \begin{eqnarray}\label{eq:full_lump}
-\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2)}_\text{Background(Oxidant),~Z$_0$}+\nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~Z$_1$} \rightarrow \\
+\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2)}_\text{Background,~Z$_0$}+\nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~Z$_1$} \rightarrow \\
 \nonumber \nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~Z$_2$}
 \end{eqnarray}
-Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha i}$ and the stoichiometric coefficients for the lumped $i$ are denoted by $\nu_{i}$.
+Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha\,i}$ and the stoichiometric coefficients for the lumped $i$ are denoted by $\nu_{i}$.
 
 
 \subsection{Use of Primitive Species}
@@ -131,51 +131,132 @@ In this formulation, we would have to solve transport equations for six species 
 \end{center}
 For cases that explicitly track all of the primitive species, FDS could end up solving upwards of 10-20 transport equations depending on the case, with each additional tracked species adding a 5~\% computational cost.
 
-%show with matrix written out
 
 
+\section{Turbulent Combustion}
+FDS can model multiple, simultaneous, reversible chemical reactions.  In FDS only the species that have mixed have the potential to react. Once mixed, FDS uses one of two approaches to compute the reaction rate for a chemical reaction.  The first approach is an infinite fast chemical reaction rate. That is, the reactants (e.g., fuel and air) react infinitely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to specified Arrhenius reaction parameters. The Arrhenius rate can still be limited by the amount of mixing within a computational cell. This latter model is most often used in a direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be modeled directly. However, most often for large eddy simulations (LES), where the grid is not fine enough to resolve the diffusion of fuel and oxygen, the mixing-controlled combustion model is assumed. A single FDS simulation can contain a mix of reaction rate types.
 
-\section{Eddy Dissipation Concept}
-FDS can model multiple, simultaneous, reversible chemical reactions.  In FDS only the species that have mixed have the potential to react. Once mixed, FDS uses one of two approaches to compute the reaction rate for a chemical reaction.  The first approach is an infinite fast chemical reaction rate. That is the reactants (e.g., fuel and air) react infinitely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to specified Arrhenius reaction parameters. The Arrhenius rate can still be limited by the amount of mixing within a computational cell. This latter model is most often used in a direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be modeled directly. However, most often for large eddy simulations (LES), where the grid is not fine enough to resolve the diffusion of fuel and oxygen,
-the mixing-controlled combustion model is assumed. A single FDS simulation can contain a mix of reaction rate types.
+Mathematically modeling chemical reactions is challenging because of turbulence chemistry interactions; coupling turbulent flow within a computational cell and the kinetics that describe the chemical reactions. The model used to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in Eq.~(\ref{species}) is the Eddy Dissipation Concept (EDC) \cite{Magnussen:1}. In the EDC, each computational cell can be thought of as a batch reactor. Within the batch reactor, there exits two environments: the mean concentration of species which FDS transports and the amount of mixing within the reactor. At the start of an FDS time step, each cell has an initial concentration of species (reactants, products, inerts) that exist in some degree of mixing. Currently, each cell is completely unmixed at the start of a time step. The rate of mixing is driven by the mean species concentration and the mixing time, $\tau_{mix}$; detailed discussion of $\tau_{mix}$ can be found in section \ref{sec:reac_time_scale}. Once mixed, species can react based on user specified reaction parameters. Section \ref{sec:EDC} discusses the model that couples mixing and chemical reactions. 
 
-In the eddy dissipation concept model (EDC) each computational cell can be thought of as a batch reactor. The species contained within this reactor exist in one of two states: unmixed or mixed. The proportion of the cell in the mixed state is governed by $\zeta$, the unmixed fraction. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). In a combustion sense, $\zeta=1$  represents a diffusion flame and $\zeta=0$ represents a premixed flame. $\zeta(t;\tau_{mix})$, a function of time (t) and parameterized by the mixing time ($\tau_{mix}$), is governed by the following ordinary differential equation:
+\subsection{Reaction Time Scale Model}
+\label{sec:reac_time_scale}
 
-\begin{equation}\label{eq:zeta}
-\frac{\mbox{d}\zeta}{\mbox{d}t}=-\frac{\zeta}{\tau_{mix}}
-\end{equation}     
-Only those species in the mixed state can react, therefore the proportion of the cell (reactor) composition in the mixed state must be known as function of time. 
+In the fast chemistry limit, our task is to provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale.
 
-The mixing time, $\tau_{mix}$, is found by examining characteristics of the local state of the flow field by \cite{McDermott:2011}:
-\begin{equation}\label{eq:tau_mix}
-\tau_{mix}=\mbox{max}(\tau_{chem},\mbox{min}(\tau_{d},\tau_{u},\tau_{g},\tau_{flame}))
-\end{equation}
-where $\tau_{chem}$ is the chemical time scale, $\tau_{d}$ is associated with molecular diffusion, $\tau_{g}$ is the gravitational time school, $\tau_{u}$ is the time scale associated with turbulent advection, and $\tau_{flame}$ is upper limit of the time scale since all fuel must be consumed within a computational cell. The mathematical description of the sub models are:
-\begin{equation}\label{eq:tau_d}
-\tau_{d}=\frac{\mbox{Sc}_{t}\bar{\rho}\Delta^2}{\mu+\mu_{t}}
-\end{equation}
-\begin{equation}\label{eq:tau_u}
-\tau_{u}=\frac{\Delta}{\sqrt{2k_{sgs}}}
-\end{equation}
-\begin{equation}\label{eq:tau_g}
-\tau_{g}=\sqrt{2\Delta/g}
-\end{equation}
-In FDS, $\Delta$ is the filter width and is equivalent to the local cell size $\delta x$. Fig.~\ref{fig:reac_time_scale} shows the impact of the components of Eq.~(\ref{eq:tau_mix}) on the value of $\tau_{mix}$. $\tau_{mix}$ is represented by the bold solid line.
+It is important to consider the behavior of a model as the filter width varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale which, though small, is finite. At a slightly larger scale we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_d$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies. For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_u$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000} (we will see why later).  This is the regime where most LES submodels are valid.
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[height=2.2in]{FIGURES/reaction_time_scale}
-\caption{\label{fig:reac_time_scale} Reaction time scale model.}
-\end{center}
+Now let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires--which are generally buoyancy-driven flows--we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_g$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot. But, as we will see, the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{flame}$, since all fuel must be consumed within a single cell.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\linewidth]{FIGURES/reaction_time_scale.pdf}
+\vskip-.2cm
+\caption{Reaction time scale model.}
+\label{fig_reaction_time_scale}
 \end{figure}
 
-The following equations define the cell composition:
+Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak the $\tau_g$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_u$ line.  Or, for highly turbulent jet flames $\tau_{flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_u$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
+
+The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically represented by
+\begin{equation}
+\label{eqn_tau_mix}
+\tau_{mix} = \max(\tau_{chem},\min(\tau_d,\tau_u,\tau_g,\tau_{flame}))
+\end{equation}
+The mathematical details of the submodels are as follows:
+\begin{equation}
+\label{eq:tau_diff}
+\begin{array}{rcl}
+\mathnormal{\tau_{d}} &=& \displaystyle \frac{\mbox{Sc}_t\bar{\rho}\Delta^2}{\mu + \mu_t}
+\end{array}
+\end{equation}
+\vspace{-.5\baselineskip}
+\begin{equation}
+\label{eq:tau_sgs}
+\begin{array}{rcl}
+\tau_{u} &=& \displaystyle \frac{\Delta}{\sqrt{2k_{sgs}}}
+\end{array}
+\end{equation}
+\vspace{-.5\baselineskip}
+\begin{equation}
+\label{eqn_tau_grav}
+\begin{array}{rcl}
+\tau_{g} &=& \displaystyle \sqrt{ 2\Delta/g }
+\end{array}
+\end{equation}
+
+Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which is discussed further below. The acceleration time scale $\tau_{g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=9.81$ m/s$^2$.
+
+{\bf Remark} The turbulent viscosity is included in the diffusion time scale in Eq.~\ref{eq:tau_diff} and the reader may wonder why the diffusion time scale does not then also account for turbulent advection.  This idea is reasonable and in fact FDS uses such a model.  The shortcoming of the approach is that a proportionality constant is required in the expression and the correct diffusion behavior is then not recovered as $\Delta \rightarrow 0$.  In FDS, the model constant used in front of Eq.~\ref{eq:tau_diff} is 0.1, so for our proposed model $\tau_d > \tau_u$ in the subgrid advection regime.  By including the turbulent viscosity in $\tau_d$, however, the diffusion time scale helps bridge the gap between dissipation and inertial range scaling.
+
+\subsubsection{Estimating the Subgrid Kinetic Energy}
+
+If the mixing is controlled by unresolved turbulent advection we presume that an inertial subrange of length scales exists and that the filter width lies within this range.  The subgrid kinetic energy may then be estimated by integrating a Kolmogorov spectrum \cite{Pope:2000} from the filter wavenumber ($\kappa = \pi/\Delta$) to the smallest possible length scales (highest wavenumbers),
+\begin{equation}
+\label{eqn_ksgs}
+\begin{array}{rcl}
+k_{sgs} &=& \displaystyle C \,\varepsilon^{2/3} \int_{\pi/\Delta}^{\infty} \kappa^{-5/3} \,\mbox{d} \kappa \\
+\\
+&=& \displaystyle C \,\varepsilon^{2/3} \frac{3}{2} \left(\frac{\Delta}{\pi}\right)^{2/3}
+\end{array}
+\end{equation}
+where $C=1.5$ is the Kolmogorov constant \cite{Pope:2000} and $\varepsilon$ is the kinetic energy dissipation rate (which requires closure, as discussed below).  It is convenient to take the upper limit of integration as infinite, since (a) the integral converges and the result is quite simple, and (b) if the dissipation range is important to the time scale we are likely in a regime where $\tau_d < \tau_u$.  We therefore currently avoid the need to explicitly model the high-wavenumber spectrum.  However, this may be revisited in the future if deemed necessary.  Note that combining Eq.~\ref{eqn_tau_sgs} with Eq.~\ref{eqn_ksgs} leads to $\tau_u \sim \Delta^{2/3}$ which explains the two thirds scaling mentioned above and shown in Fig.~\ref{fig_reaction_time_scale}.
+
+For closure we require a model for the dissipation rate which is a physical parameter of the flow.  The ideal model, therefore, does not vary with filter width (remember, the filter width is a user-specified artificial parameter).  The model we employ assumes that production of subgrid-scale kinetic energy is equal to the dissipation of total kinetic energy \cite{Pope:2000},
+\begin{equation}
+\label{eqn_dissipation}
+\varepsilon = (\mu_t/\bar{\rho}) \, |\tilde{S}|^2 % - \frac{2}{3} (\nabla\!\cdot \mathbf{u})^2 \right) 
+\end{equation}
+where $|\tilde{S}| \equiv (2 \tilde{S}_{ij} \tilde{S}_{ij})^{1/2}$ is the filtered rate of strain invariant.  Pope \cite{Pope:2000} discusses the important observation that $|\tilde{S}|\sim \Delta^{-2/3}$ for $\Delta$ in the inertial subrange of an incompressible flow.  For this limiting case, the constant coefficient Smagorinsky model gives $(\mu_t/\bar{\rho}) = (C_s \Delta)^2 |\tilde{S}| \sim \Delta^{4/3}$ and we find the dissipation rate is correctly invariant with filter width, $\varepsilon \sim \Delta^{4/3} (\Delta^{-2/3})^2 \sim \Delta^0$.
+
+\subsubsection{Effect of Buoyancy on the Dissipation Rate}
+
+The turbulent viscosity is a critical component of the model: it affects large scale dynamics and energy dissipation, it affects diffusive transport, and it affects the rate of reaction in the EDC combustion model.  As with the mixing rate, it is important that we consider the behavior of the turbulent viscosity as the filter width varies.  Most LES models assume the filter width lies within the inertial subrange.  If this is the case we want to use the dynamic Smagorinsky model \cite{Germano:1991,Moin:1991,Smagorinsky:1}.  If the flow is under-resolved, however, the dynamic model may lead to wildly oscillatory behavior.  For consideration, here we propose a viscosity model to deal with under-resolved, buoyant flows that retains the desired convergent behavior of the dynamic model.  A turbulent viscosity based on the graviational time scale, similar to Teiszen's model \cite{Teiszen:2004b}, may be constructed as follows,
+\begin{equation}
+\label{eqn_muturb}
+\mu_t = \left\{ \begin{array}{rcll} \mu_{\mbox{\scriptsize Smag}}&=&\bar{\rho} (C_s[\mathbf{x},t] \Delta)^2 |\tilde{S}| & \mbox{if} \quad \Delta\le\Delta_g \\ 
+\\
+\mu_{\mbox{\scriptsize Grav}} &=& \displaystyle \frac{\Delta^3}{\mbox{Pr}_t \tau_g} \max(0,\partial \bar{\rho}/\partial z) & \mbox{if} \quad \Delta > \Delta_g  \end{array} \right.
+\end{equation}
+where, employing Eq.~\ref{eqn_tau_grav}, the gravitational length scale is
+\begin{equation}
+\label{eqn_deltag}
+\Delta_g = \frac{2}{g} \left(\frac{\mbox{Pr}_t C_s^2 \bar{\rho} |\tilde{S}| }{\max(0,\partial \bar{\rho}/\partial z) } \right)^2
+\end{equation}
+
+Equation \ref{eqn_deltag}  is derived by equating the viscosities $\mu_{\mbox{\scriptsize Smag}}$ and $\mu_{\mbox{\scriptsize Grav}}$ with $C_s=0.2$ and has the effect of automatically selecting the flow regime.  If the density stratification is neutral or stable ($\partial \bar{\rho}/\partial z \le 0$), then $\Delta_g = \infty$ and we employ the dynamic Smagorinsky model.  On the other hand, if the cell size is large relative the to gravitational length scale, this implies that the unstable stratification will dominate momentum transport and subgrid kinetic energy production.  When the gravitational viscosity is invoked, the LES dissipation rate (i.e. production of subgrid kinetic energy) becomes
+\begin{equation}
+\label{eqn_buoyancy_production}
+\varepsilon = \frac{\mu_{\mbox{\scriptsize Smag}}}{\bar{\rho}^2 \mbox{Pr}_t C_s^2 \sqrt{2}} \sqrt{\!g\Delta} |\tilde{S}| \max(0,\partial \bar{\rho}/\partial z) \end{equation}
+
+Equation \ref{eqn_buoyancy_production} is similar to a typical $k$-$\epsilon$ RANS model for production of turbulent kinetic energy due to buoyancy (see \cite{Teiszen:2004b,Merci:2005}), except here the acceleration scale, typcially just $g$, is given by $\sqrt{\!g\Delta}|\tilde{S}|$, highlighting the interplay between gravity and strain.  Of further note, the quantity $\mu_{\mbox{\scriptsize Smag}}/C_s^2$ corresponds to an effective viscosity from a $k$-$\epsilon$ model, acceptable since the LES viscosity is usually less than that for RANS.  Lastly, note that Eq.~\ref{eqn_buoyancy_production} is unlikely to directly enter into $\tau_{mix}$ since if $\Delta > \Delta_g$ we are likely in a regime where $\tau_g < \tau_u$ (use of the dynamic model makes this difficult to analyze \emph{a priori}).
+
+
+\subsection{Eddy Dissipation Concept}
+\label{sec:EDC} 
+Within the batch reactor, the proportion of the cell that is mixed is $\zeta(t;\tau_{mix})$, the unmixed fraction. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). In a combustion sense, $\zeta=1$  represents a diffusion flame and $\zeta=0$ represents a premixed flame. The amount of mixing within a computational cell is defined by:
+\begin{equation}\label{eq:zeta}
+\frac{\mbox{d}\zeta}{\mbox{d}t}=-\frac{\zeta}{\tau_{mix}}
+\end{equation}
+The governing mixing model physics are included in Eq.~(\ref{eq:zeta}) through the definition of the unmixed fraction while the turbulence physics are buried in the mixing time. Presently in FDS, the Interaction by Exchange with Mean (IEM) mixing model is used \cite{fox2003}. The IEM says that scalar values ($\psi$) will relax to their mean at a rate based on the mixing time and distance from mean value.  If, for $n_{\alpha}$ species, we define $\zeta$ to be:
+\begin{equation}\label{eq:zeta_def}
+\zeta \equiv \frac{\displaystyle \sum_{\alpha}(\psi_{\alpha}- \langle \psi_{\alpha} \rangle )}{n_{\alpha} - 1}
+\end{equation}
+we can show how Eq.~(\ref{eq:zeta}) becomes the IEM model by substituting the definition of $\zeta$, Eq.~(\ref{eq:zeta_def}).
+\begin{equation}\label{eq:iem1}
+\displaystyle \sum_{\alpha}\left(\frac{1}{n_{\alpha}-1}\right) \frac{\mbox{d}\psi_{\alpha}}{\mbox{d}t} = - \left(\frac{1}{\tau_{mix}}\right) \left(\frac{1}{n_{\alpha}-1} \right) \displaystyle \sum_{\alpha}(\psi_{\alpha}- \langle \psi_{\alpha} \rangle)
+\end{equation}
+We can simplify Eq.~(\ref{eq:iem1}) and obtain the definition of the IEM model \cite{fox2003}:
+\begin{equation}\label{eq:iem2}
+\frac{\mbox{d}\psi}{\mbox{d}t} = \frac{1}{\tau_{mix}}(\langle \psi \rangle - \psi)
+\end{equation}
+      
+Since only those species in the mixed environment can react, the proportion of the cell (reactor) composition in the mixed state must be known as function of time. The following equations define the cell composition:
 \begin{eqnarray}\label{eq:mixunmix}
-\rho V &= U(t) + M(t) \\
-U(t) &= \zeta(t)\,\rho V \\
-M(t) &= (1-\zeta(t))\,\rho V
+\rho V &=& U(t) + M(t) \\
+U(t) &=& \zeta(t)\,\rho V \\
+M(t) &=& (1-\zeta(t))\,\rho V
 \end{eqnarray} 
-where $\rho V$ is the total mass in the reactor, $U(t)$ is unmixed portion of the mass, and $M(t)$ is the mixed portion of the mass. $\rho V$ is not a function of time as the total mass in a cell remains constant during a single FDS time interval. From the portion of mass that is mixed, $M(t)$, the local mixed composition ($\phi_{\alpha}(t)$) is found by:
+where $\rho V$ is the total mass in the reactor, $U(t)$ is unmixed portion of the mass, and $M(t)$ is the mixed portion of the mass. Cell mass, $\rho V$, is not a function of time as the total mass in a cell remains constant during a single FDS time interval. From the portion of mass that is mixed, $M(t)$, the local mixed composition ($\phi_{\alpha}(t)$) is found by:
 
 \begin{equation}\label{eq:phi}
 \phi_{\alpha}(t)=\frac{m_{\alpha}(t)}{M(t)}
@@ -183,9 +264,9 @@ where $\rho V$ is the total mass in the reactor, $U(t)$ is unmixed portion of th
 where $m_\alpha(t)$ is the mixed mass of each of the $\alpha$ species in the simulation. The mixed mass of each species as a function of time is governed by:
 
 \begin{equation}\label{eq:mixmass}
-\frac{\mbox{d}m_{\alpha}}{\mbox{d}t}=\frac{M(t) \, \nu_{\alpha} \, W_{\alpha}}{W_F}\displaystyle \sum_{i}^{\text{N\,Reactions}}r_{i}+Y_{\alpha,0}\frac{\mbox{d}M}{\mbox{d}t} 
+\frac{\mbox{d}m_{\alpha}}{\mbox{d}t}=\frac{M(t) \, \nu_{\alpha} \, W_{\alpha}}{W_F}\displaystyle \sum_{i}^{\text{N\,Reactions}}\frac{\mbox{d}\phi_{\F,i}}{\mbox{d}t}+Y_{\alpha,0}\frac{\mbox{d}M}{\mbox{d}t} 
 \end{equation}
-where $Y_{\alpha,0}$ is the mass fraction of each $\alpha$ species in the unmixed portion of the cell. The mass fractions of each species in the unmixed portion remain constant over an integration time step therefore the proportion of species which mix remains constant. $r_{i}$, the reaction rate, is discussed in detail in section \ref{Reaction_Rate_Model}. The complete composition of the computational cell is found by a combination of the unmixed and mixed portions:
+where $Y_{\alpha,0}$ is the mass fraction of each $\alpha$ species in the unmixed portion of the cell. The mass fractions of each species in the unmixed portion remain constant over an integration time step therefore the proportion of species which mix remains constant. The rate at which species react, $\mbox{d}\phi_\F/\mbox{d}t$, is discussed in section \ref{Reaction_Rate_Model}. The complete composition of the computational cell is found by a combination of the unmixed and mixed portions:
 
 \begin{equation}\label{eq:final_comp}
 Y_{\alpha}(t)=\zeta(t)Y_{\alpha,0}+(1-\zeta(t))\phi_{\alpha}(t)
@@ -195,6 +276,24 @@ Finally the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha
 \dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t}
 \end{equation}
 
+\section{Heat Release Rate}
+
+Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
+\begin{equation}\label{eq:vol_heat_gen}
+\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime} \Delta H_{f,\alpha}
+\end{equation}
+While the mixing controlled reaction rate is an easily computed and robust subgrid-scale model of and the Arrhenius rate is certainly a robust model when applicable, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
+this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
+is sometimes too coarse to expect the simple mixing time model to work effectively.
+A scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
+heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses by default a value of 2500~kW/m$^3$ as an upper bound\footnote{Note that
+for DNS, FDS imposes a less restrictive upper bound on the local heat release rate per unit volume. It is
+\be \dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3 \ee
+The value of 200~kW/m$^2$ is an upper bound on the heat release rate per unit area of flame sheet.}
+on the local value of the heat release rate per unit volume. Typically, this bound only affects fires whose value of $Q^*$
+is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the
+area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
+
 \section{Reaction Rate} 
 
 \label{Reaction_Rate_Model}
@@ -203,14 +302,14 @@ The rate expression (on a fuel basis) for both infinitely fast chemistry and Arr
 \begin{equation}\label{eq:Arrheniusrateeqn}
 \frac{\mbox{d}[X_\F]}{\mbox{d}t} = -A \; \prod \left([X_{\alpha}]^{a_{\alpha}} \right) T^n \; e^{-E/RT} 
 \end{equation}
-Note that the rate expression can be dependent on temperature and that the rate can be dependent upon species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only "species" that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species could participate as a collision species.  Therefore, rather than $\frac{\mbox{d}[X_\F]}{\mbox{d}t}$,  FDS must solve for $\frac{\mbox{d}\phi_\F}{\mbox{d}t}$.  Additionally since it is quicker to determine $\phi_i$ rather than $X_i$, the relation $[X_i]=\frac{\phi_i \rho}{W_i}$ is used.  Combined, these result in a modified rate equation:
+Note that the rate expression can be dependent on temperature and that the rate can be dependent upon species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only "species" that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species could participate as a collision species.  Therefore, rather than $\mbox{d}[X_\F]/\mbox{d}t$,  FDS must solve for $\mbox{d}\phi_\F/\mbox{d}t$.  Additionally since it is quicker to determine $\phi_i$ rather than $X_i$, the relation $[X_i]=\phi_i \rho/W_i$ is used.  Combined, these result in a modified rate equation:
 
 \begin{equation}\label{eq:Arrheniusratemode}
 \frac{\mbox{d}\phi_\F}{\mbox{d}t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
 \end{equation}
 
 \subsection{Infinitely Fast Reaction}
-For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\frac{\mbox{d}\phi_\F}{\mbox{d}t}$ becomes sufficiently large such that all of the fuel in a computational cell is consumed in a single time step, effectively making the rate infinite. However, the rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.   
+For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\mbox{d}\phi_\F/\mbox{d}t$ becomes sufficiently large such that all of the fuel in a computational cell is consumed in a single time step, effectively making the rate infinite. However, the rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.   
 
 \subsection{Arrhenius Reaction}
 There are conditions under which the local temperature and species concentrations support the computation of the reaction rate.  One set of conditions is where the reacting regions of the flow can be considered a well-stirred reactor.  The other is during a DNS calculation.  In the first case rather than a reacting surface, there is a reacting volume.  In the second case, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
@@ -257,31 +356,11 @@ extinction based on the species and temperature present in the flame sheet.  The
 \section{Time Integration of Chemical Reactions}
 
 \subsection{Single Step, Mixing-Controlled Reaction Rates}
-For single-step chemical reactions with mixing-controlled reaction rates, an explicit Euler scheme is used to solve the system of ODEs that determine the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$.   
-
+For single-step chemical reactions with mixing-controlled reaction rates, an explicit Euler scheme is used to solve the system of ODEs that determine the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$. 
 
 \subsection{Other Chemistry Models}
 
 For anything other than single step chemistry with mixing-controlled reaction rates a more complex ODE solver is employed.  A fourth-order explicit integrator with error control is used.  Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance.  Time integration is halted once no reactants are present or if the local heat release rate exceeds maximum allowable values.
 
 More information on the numerical methods of the integrators can be found in Appendix~\ref{chemistry_integration}.
-
-
-\section{Heat Release Rate}
-
-Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
-\begin{equation}\label{eq:vol_heat_gen}
-\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime} \Delta H_{f,\alpha}
-\end{equation}
-While the mixing controlled reaction rate is an easily computed and robust subgrid-scale model of and the Arrhenius rate is certainly a robust model when applicable, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
-this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
-is sometimes too coarse to expect the simple mixing time model to work effectively.
-A scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
-heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses by default a value of 2500~kW/m$^3$ as an upper bound\footnote{Note that
-for DNS, FDS imposes a less restrictive upper bound on the local heat release rate per unit volume. It is
-\be \dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3 \ee
-The value of 200~kW/m$^2$ is an upper bound on the heat release rate per unit area of flame sheet.}
-on the local value of the heat release rate per unit volume. Typically, this bound only affects fires whose value of $Q^*$
-is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the
-area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
 
