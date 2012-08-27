@@ -60,8 +60,6 @@ do
       let PERFORMANCE=`echo "($CPU_TIME*$NUM_TOTAL_CELLS)/$NUM_TIME_STEPS" | bc`
    fi
 
-   echo $NUM_TIME_STEPS
-
    # Write results to fds_timing_stats.csv file
    echo "$FILE,$CPU_TIME,$NUM_TOTAL_CELLS,$NUM_TIME_STEPS,$PERFORMANCE" >> $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
 
