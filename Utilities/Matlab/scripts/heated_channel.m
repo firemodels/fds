@@ -159,7 +159,15 @@ set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_Tplus')
 
 
-
+% % Compute pressure gradient from Re_tau
+% 
+% mu=1.8216e-5
+% rho=101325*28.84852/(8314.5*293.15)
+% Re_tau=590
+% delta=1
+% u_tau=Re_tau*mu/rho/delta
+% tau_w=rho*u_tau^2
+% dpdx=tau_w/delta
 
 
 
