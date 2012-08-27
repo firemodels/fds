@@ -355,7 +355,7 @@ As computers get faster and calculations get bigger, there is a tremendous need 
 
 This trend to realism is more than superficial. In both design and forensic applications, the realistic rendering of smoke is very valuable, but it requires graphical techniques that stretch the limits of even the best video cards available. Visibility is a key consideration in the design of any large structure, especially given the current trend of open architecture. Unlike temperature or species concentration, visibility is not defined at a point but rather integrated over a path connecting the virtual occupant and the virtual exit sign. The CFD model can produce a spatially and temporally varying smoke density field, but it is difficult or impossible to integrate {\em a priori} the density over every possible path between the sign and the moving occupant. Fortunately, graphical techniques are now available that can process the smoke density data and produce at any given time and any given place in any given direction a realistic view through the smoke, allowing the viewer to assess whether or not the sign (or whatever is of interest) would be visible in the event of a real fire.
 
-Along with design, CFD is increasingly used to reconstruct  actual  fires,  providing  fire  service  personnel and fire investigators with a better understanding of the events that led to injury, loss of life, or loss of the structure. In any reconstruction, the time line of events provided by the first responders and other eyewitnesses is as crucial as the model input, but it is also invaluable in assessing the results. Rendering the results of the simulation as realistically as possible facilitates the synthesis of model simulation with photographic and visual evidence. Most people at the fire scene are certainly not experts in CFD, but they are very experienced with fire. Examples of how CFD has been used in actual fire reconstructions are available~\cite{Grosshandler, McGrattan:2005, Madrzykowski:2000, Madrzykowski:2004, Christensen}.
+
 
 
 
@@ -550,23 +550,17 @@ CFD fire modeling is commonly used during the renovation of historic buildings. 
 \end{figure}
 
 
-\subsection{Fire Spread}
+\subsection{Fire Investigation}
 
-The National Institute of Standards and Technology (NIST) undertook an investigation of a fire that occurred in a nightclub in West Warwick, Rhode Island, in 2003~\cite{Grosshandler}. During a band performance, pyrotechnics ignited polyurethane foam insulation lining the walls and ceiling behind the band. The fire spread quickly up the wall and along the ceiling over the dance floor. Smoke was visible in the exit doorways in a little more than 1 minute, and flames were observed breaking through a portion of the roof in less than 5 minutes.
+CFD is increasingly used to reconstruct  actual  fires,  providing  fire  service  personnel and fire investigators with a better understanding of the events that led to injury, loss of life, or loss of the structure. In any reconstruction, the time line of events provided by the first responders and other eyewitnesses is as crucial as the model input, but it is also invaluable in assessing the results. Rendering the results of the simulation as realistically as possible facilitates the synthesis of model simulation with photographic and visual evidence. Most people at the fire scene are certainly not experts in CFD, but they are very experienced with fire. Examples of how CFD has been used in actual fire reconstructions are available~\cite{Grosshandler, McGrattan:2005, Madrzykowski:2000, Madrzykowski:2004, Christensen}.
 
-Real-scale mock-up experiments were conducted to characterize the fire growth and spread in the early stage of the fire. Approximately 20 percent of the nightclub was reconstructed in real scale including all of the stage and the surrounding area. By designing the experiments carefully, in terms of controlling factors such as fuel and ventilation, the mock-up tests provided a means to gain insight as to the conditions in the nightclub during the early stages of fire growth and spread. Results from the experiments, which included video records, measurements of heat release rate, temperature, heat flux, oxygen volume fraction, and gas velocity, were compared with the CFD model, Fire Dynamics Simulator (FDS).
-
-The principal fuels in the mock-up were the polyurethane foam wall covering and plywood paneling. The complexity of this arrangement limited the extent to which the burning composite fuel could be modeled {\em a priori}. Therefore, several simplifications and assumptions were made in order to generate model results that were representative of the experimental data including the variable-thickness foam, which was approximated as a uniform flat solid. A comparison of the experiment and the simulation at 20 seconds is shown in Figure~\ref{Station}.
-
-\begin{figure}[b]
-%\includegraphics[scale=.65]{Station}
-\caption{Comparison of nightclub experiment and simulation, 20 seconds after ignition. (Figure courtesy of NIST.)}
-\label{Station}
+As an example, NIST researchers used the Fire Dynamics Simulator to analyze a fire that occurred on the evening of June 18, 2007, in a furniture store in Charleston, South Carolina~\cite{Bryner:2011}. Using evidence collected at the scene and eyewitness accounts, the investigators put together a plausible sequence of events that led to the deaths of nine fire fighters. Figure~\ref{furniture_store} presents a snapshot of the numerical simulation compared to a photograph of the actual fire.
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{SSS_Comparison_1884s_100914b}
+\caption{Comparison of photographs of the Charleston furniture store fire with a numerical simulation. Figure courtesy of NIST.}
+\label{furniture_store}
 \end{figure}
 
-The results from the mock-up experiments were compared with the FDS simulations of the experiments. The visual comparisons indicated a lag in fire development in the simulation relative to the experiments, but as the fire grew larger, the fire growth rate and smoke development were consistent with the experiments. The temperature, heat flux, and the oxygen concentration comparisons showed agreement between the experiments and the model in terms of both trends and range.
-
-The simulation of the early stage of the fire was very sensitive to the thermal properties of the foam. That is, small changes in parameters such as thermal conductivity or heat of pyrolysis led to significant changes in the predictions. This is a common characteristic of flame spread calculations. Consequently, the real-scale experiments served to partially calibrate the model for use in simulating the fire in the entire nightclub. To gauge the accuracy of the full nightclub simulation results, they were compared with a news video record of the incident. The FDS simulation predicted rapid fire growth due to the burning of the polyurethane foam. The simulation was consistent with the video record until flames spread throughout the structure.
 
 
 \subsection{Outdoor Applications and Wind}
