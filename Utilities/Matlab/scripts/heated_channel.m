@@ -110,7 +110,7 @@ end
 
 figure(1)
 
-h = legend(hfig1,'FDS','DNS','Location','Northwest');
+h = legend(hfig1,'FDS','DNS Re$_\tau=180$','Location','Northwest');
 set(h,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
@@ -135,7 +135,7 @@ print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated
 
 figure(2)
 
-h = legend(hfig2,'FDS','DNS','Location','Northwest');
+h = legend(hfig2,'FDS','DNS Re$_\tau=180$','Location','Northwest');
 set(h,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
