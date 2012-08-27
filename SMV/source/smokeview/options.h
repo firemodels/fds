@@ -58,7 +58,7 @@
 
 #ifdef pp_BETA
 // #define pp_BENCHMARK
-#define pp_GPUDEPTH
+//#define pp_GPUDEPTH
 #define pp_OPEN
 #define pp_SHOWLIGHT
 #endif

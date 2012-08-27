@@ -321,10 +321,10 @@ int getfileinfo(char *filename, char *source_dir, FILE_SIZE *filesize){
 
   /* ------------------ getfilesize ------------------------ */
 
-FILESIZE getfilesize(char *filename){
+int getfilesize(char *filename){
   STRUCTSTAT statbuffer;
   int statfile;
-  FILESIZE filesize;
+  int filesize;
 
   filesize=0;
   statfile=STAT(filename,&statbuffer);
