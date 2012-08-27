@@ -1212,7 +1212,8 @@ int get_volsmoke_nframes(volrenderdata *vr){
 	slicedata *fireslice, *smokeslice;
   FILE *volstream=NULL;
   int framesize,skip_local;
-  int nframes,filesize;
+  int nframes;
+  FILESIZE filesize;
 
   smokeslice=vr->smoke;
   if(load_volcompressed==1&&vr->smoke->vol_file!=NULL){
