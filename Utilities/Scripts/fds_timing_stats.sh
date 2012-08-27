@@ -4,8 +4,8 @@
 # Kristopher Overholt
 # 8/24/2012
 
-# This script checks the .out files for the FDS Verification Suite
-# and generates a .csv file of the CPU time called fds_timing_stats.csv
+# This script checks the .out files for the FDS Verification Suite and generates
+# a .csv file of the CPU time (and other metrics) called fds_timing_stats.csv
 
 # cd to Verification directory
 SVNROOT=`pwd`/../..
@@ -31,7 +31,7 @@ do
    fi
 
    # Convert hr to s
-   if [[ $CPU_TIME_UNITS = 'h' ]]
+   if [[ $CPU_TIME_UNITS = 'hr' ]]
    then
       CPU_TIME=`echo "$CPU_TIME_VALUE*3600" | bc`
    fi
