@@ -16,8 +16,7 @@
 #  = Input variables =
 #  ===================
 
-# mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
-mailTo="kristopher.overholt@nist.gov"
+mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
 FIREBOT_USERNAME="firebot"
 
 FIREBOT_HOME_DIR="/Users/$FIREBOT_USERNAME"
