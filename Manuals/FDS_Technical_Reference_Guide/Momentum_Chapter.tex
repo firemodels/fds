@@ -51,37 +51,36 @@ are located at cell edges pointing in the $x$, $y$ and $z$ directions,
 respectively. The same is true for the off-diagonal terms of the viscous
 stress tensor: $\tau_{zy}=\tau_{yz}$, $\tau_{xz}=\tau_{zx}$, and
 $\tau_{xy}=\tau_{yx}$. The diagonal components of the stress
-tensor $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$; the external force
-components $(f_x,f_y,f_z)$; and the Courant numbers
-$\epsilon_u$, $\epsilon_v$, and $\epsilon_w$ are located at their
+tensor $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$; and the external force
+components $(f_x,f_y,f_z)$ are located at their
 respective cell faces.
 \begin{align}
 F_{\x,ijk} &=  \left(
- \frac{1\mp\epsilon_w}{2} w_{i+\ha,jk} \; \om_{y,ijk} +
- \frac{1\pm\epsilon_w}{2} w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right) \nonumber \\
-          &  - \left(
- \frac{1\mp\epsilon_v}{2} v_{i+\ha,jk} \; \om_{z,ijk} +
- \frac{1\pm\epsilon_v}{2} v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\
+ w_{i+\ha,jk} \; \om_{y,ijk} +
+ w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right)
+            - \left(
+ v_{i+\ha,jk} \; \om_{z,ijk} +
+ v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\
            &  - \frac{1}{\rho_{i+\ha,jk}} \left( f_{x,ijk}
   + \frac{\tau_{xx,i+1,jk}-\tau_{xx,ijk}}{\dx}
   + \frac{\tau_{xy,ijk}-\tau_{xy,i,j-1,k}}{\dy}
   + \frac{\tau_{xz,ijk}-\tau_{xz,i,j,k-1}}{\dz}  \right)  \\
 F_{\y,ijk} &= \left(
- \frac{1\mp\epsilon_u}{2} u_{i,j+\ha,k} \; \om_{z,ijk} +
- \frac{1\pm\epsilon_u}{2} u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right) \nonumber \\
-           &  - \left(
- \frac{1\mp\epsilon_w}{2} w_{i,j+\ha,k} \; \om_{x,ijk}+
- \frac{1\pm\epsilon_w}{2} w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\
+ u_{i,j+\ha,k} \; \om_{z,ijk} +
+ u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right) 
+             - \left(
+ w_{i,j+\ha,k} \; \om_{x,ijk}+
+ w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\
            &  - \frac{1}{\rho_{i,j+\ha,k}} \left( f_{y,ijk}
   + \frac{\tau_{yx,ijk}-\tau_{yx,i-1,jk}}{\dx}
   + \frac{\tau_{yy,i,j+1,k}-\tau_{yy,ijk}}{\dy}
   + \frac{\tau_{yz,ijk}-\tau_{yz,i,j,k-1}}{\dz} \right) \\
 F_{\z,ijk} &=  \left(
- \frac{1\mp\epsilon_v}{2} v_{ij,k+\ha} \; \om_{x,ijk} +
- \frac{1\pm\epsilon_v}{2} v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right)\nonumber \\
-           &  -\left(
- \frac{1\mp\epsilon_u}{2} u_{ij,k+\ha} \; \om_{y,ijk} +
- \frac{1\pm\epsilon_u}{2} u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\
+ v_{ij,k+\ha} \; \om_{x,ijk} +
+ v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right)
+             -\left(
+ u_{ij,k+\ha} \; \om_{y,ijk} +
+ u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\
            &  - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk}
   + \frac{\tau_{zx,ijk}-\tau_{zx,i-1,jk}}{\dx}
   + \frac{\tau_{zy,ijk}-\tau_{zy,i,j-1,k}}{\dy}
@@ -113,16 +112,7 @@ F_{\z,ijk} &=  \left(
                         + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right)
 \end{align}
 
-\noindent The variables $\epsilon_u$, $\epsilon_v$ and $\epsilon_w$ are local
-Courant numbers evaluated at the same locations as the velocity component
-immediately following them, and serve to bias the differencing of
-the convective terms, upwind biasing for the predictor step and downwind biasing for the corrector step, resulting in a second-order scheme
-which is consistent with the scheme used for the continuity equation.
-\be
-\epsilon_u = \frac{u \, \dt}{\dx} \quad ; \quad \epsilon_v = \frac{v \, \dt}{\dy} \quad ; \quad \epsilon_w = \frac{w \, \dt}{\dz}
-\ee
-The subscript $i+\ha$ indicates that a variable is an average of its
-values at the $i$th and the $(i+1)$th cell.
+\noindent 
 By construction, the divergence defined in Eq.~(\ref{eqn_divfromeos})
 is identically equal to the divergence defined by
 \be (\nabla\!\cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} +
@@ -133,28 +123,17 @@ of the form of the discretized equations, the time-stepping scheme, and
 the direct solution of the Poisson equation for the pressure.
 
 
+\newpage
 
 \section{Large Eddy Simulation (LES)}
 \label{LES}
 
-The most distinguishing feature of any CFD model is its treatment of turbulence.
-Chapter 1 contains a brief history of turbulence modeling as it has been applied to the fire
-problem. Of the three main techniques of simulating turbulence, FDS contains only Large Eddy
-Simulation (LES) and Direct Numerical Simulation (DNS). There is no Reynolds-Averaged Navier-Stokes (RANS)
-capability in FDS.
-
 LES is a technique used to model the dissipative processes (viscosity,
 thermal conductivity, material diffusivity) that occur at length scales smaller than those that
-are explicitly resolved on the numerical grid. This means that the parameters $\mu$, $k$ and $D$ in the equations
-above cannot be used directly in most practical simulations. They must be replaced by surrogate expressions
-that ``model'' their impact on the approximate form of the governing equations.
-This section contains a simple explanation of how these terms are modeled
-in FDS. Note that this discussion is quite different than what it typically found in the
-literature, thus the reader is encouraged to consider other explanations of the technique in the references that are
-listed in a review article by Pope~\cite{Pope:2004}.
+are explicitly resolved on the numerical grid. This means that the parameters $\mu$, $k$ and $D$ in the governing equations
+must be modeled. Additional explanation of the various assumptions can be found in a review article by Pope~\cite{Pope:2004}.
 
-There is a small term in the energy equation
-known as the {\em dissipation rate}, $\epsilon$,
+There is a small term in the energy equation known as the {\em dissipation rate}, $\epsilon$,
 the rate at which kinetic energy is converted to thermal energy by viscosity:
 \begin{align}
 \epsilon &\equiv \btau_{ij} \cdot \nabla \bu \quad =  \quad
@@ -190,8 +169,7 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 constant for a given scenario.
 
 The model for the viscosity, $\mu_{\hbox{\tiny LES}}$, serves two roles: first, it provides a stabilizing
-effect in the numerical
-algorithm, damping out numerical instabilities as they arise in the flow field, especially where vorticity is
+effect in the numerical algorithm, damping out numerical instabilities as they arise in the flow field, especially where vorticity is
 generated. Second, it has the appropriate mathematical form to describe the dissipation of kinetic energy from the flow.
 Note the similar mathematical form of $\mu_{\hbox{\tiny LES}}$ and
 the dissipation rate, $\epsilon$, defined in Eq.~(\ref{dissipation}).
@@ -215,6 +193,8 @@ has shown that the best results are obtained when the Smagorinsky constant $C_s$
 as low as possible to maintain numerical stability. In other words, the most realistic
 flow simulations are obtained when resolvable eddies are not ``damped'' by excessive
 amounts of artificial viscosity.
+
+\subsection{Numerical Implementation}
 
 In the discretized form of the momentum equation, the LES form of the dynamic viscosity
 is defined at cell centers
@@ -244,6 +224,8 @@ $C_s$ is 0.20, $\PR_t$ and $\SC_t$ are 0.5. There are no rigorous justifications
 for these choices other than through comparison with
 experimental data~\cite{Zhang:1}.
 
+
+\newpage
 
 \section{Direct Numerical Simulation (DNS)}
 \label{DNS}
@@ -282,6 +264,7 @@ into nitrogen
 where species 0 is nitrogen.
 
 
+\newpage
 
 \section{Velocity Boundary Conditions}
 \label{info:velocity_bc}
@@ -330,6 +313,7 @@ Once $u^+$ has been determined from the model profile, the stress may be obtaine
 \end{equation}
 Generally, this requires an iterative procedure since $\tau_w$ is needed to define $\delta_\nu$ and hence $y^+$.  The strategy employed in FDS is to first compute $\tau_w$ as if the flow is locally laminar (DNS), and if the calculation is an LES the laminar value is used as an initial guess.  Testing has shown that three iterations is sufficient to converge the residual error in the profile model to 1\%.
 
+\newpage
 
 \section{Time Step and Stability Constraints}
 
