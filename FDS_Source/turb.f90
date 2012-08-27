@@ -580,7 +580,7 @@ DO K = 1,KBAR
          ! calculate the effective viscosity
 
          ! handle the case where we divide by zero, note MMHAT is positive semi-definite
-         IF (MMHAT(I,J,K)<=ZERO_P) THEN
+         IF (MMHAT(I,J,K)<=TWO_EPSILON_EB) THEN
             CSD2(I,J,K) = 0._EB
          ELSE
             CSD2(I,J,K) = MLHAT(I,J,K)/MMHAT(I,J,K) ! (Cs*Delta)**2
@@ -983,7 +983,7 @@ IF (TMP_S<TMP_G) THEN ! stability correction needed
    B = -U_TAU**3*TMP_G*LOG(ZP)
    C = (TMP_S-TMP_G)*U_TAU**4*KAPPA*GRAV   ! negative, so DET should be positive
    DET = B**2-4._EB*A*C
-   IF (DET>ZERO_P) THEN
+   IF (DET>TWO_EPSILON_EB) THEN
       Q3S = (-B-SQRT(DET))/(2._EB*A)       ! take negative root, else Q3S>0, which we know is not correct here
       L = -U_TAU**3*TMP_G/(KAPPA*GRAV*Q3S) ! Eq. (28), Obukhov length
       PSI_H = -3.9_EB*DZ/MAX(L,MICRON)     ! Eq. (30), 3.9 = 7.8*0.5
@@ -1092,10 +1092,10 @@ REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0
 ! find a vector PP in the tangent plane of the surface and orthogonal to U_VELO-U_SURF
 U_RELA = U_VELO-U_SURF
 CALL CROSS_PRODUCT(PP,NN,U_RELA) ! PP = NN x U_RELA
-IF (ABS(NORM2(PP))<=ZERO_P) THEN
+IF (ABS(NORM2(PP))<=TWO_EPSILON_EB) THEN
    ! tangent vector is completely arbitrary, just perpendicular to NN
-   IF (ABS(NN(1))>=ZERO_P .OR.  ABS(NN(2))>=ZERO_P) PP = (/NN(2),-NN(1),0._EB/)
-   IF (ABS(NN(1))<=ZERO_P .AND. ABS(NN(2))<=ZERO_P) PP = (/NN(3),0._EB,-NN(1)/)
+   IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) PP = (/NN(2),-NN(1),0._EB/)
+   IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) PP = (/NN(3),0._EB,-NN(1)/)
 ENDIF
 PP = PP/NORM2(PP) ! normalize to unit vector
 CALL CROSS_PRODUCT(SS,PP,NN) ! define the streamwise unit vector SS
@@ -1163,7 +1163,7 @@ IF (DNS) THEN
    ETA = U_NORM + RRHO*MU*RDN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
    BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
-   IF (ABS(AA)>=ZERO_P) THEN
+   IF (ABS(AA)>=TWO_EPSILON_EB) THEN
       U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
    ELSE
       VELTAN3D = U_INT
@@ -1180,7 +1180,7 @@ ELSE
       AA  = -(0.5_EB*DUSDS + TWTH*U_NORM*RDN + ETA)
       BB  = -(U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN))
       !print *,MU*RRHO*DT/(DN**2)
-      IF (ABS(AA)>=ZERO_P) THEN
+      IF (ABS(AA)>=TWO_EPSILON_EB) THEN
          U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
       ELSE
          VELTAN3D = U_INT
