@@ -35,7 +35,7 @@ echo creating FDS_MPI case list from FDS_MPI_Cases.sh
 
 echo running FDS cases
 
-echo "FDS test cases begin" > %TIME_FILE%
+echo "FDS test cases begin" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
