@@ -2049,7 +2049,7 @@ void update_mesh_coords(void){
     meshi->vent_offset[YYY] = ventoffset_factor*(meshi->yplt[1]-meshi->yplt[0]);
     meshi->vent_offset[ZZZ] = ventoffset_factor*(meshi->zplt[1]-meshi->zplt[0]);
   }
-  NewMemory((void **)&smoke3dinfo_sorted,nsmoke3dinfo*sizeof(smoke3ddata *));
+  if(nsmoke3dinfo>0)NewMemory((void **)&smoke3dinfo_sorted,nsmoke3dinfo*sizeof(smoke3ddata *));
   NewMemory((void **)&meshvisptr,nmeshes*sizeof(int));
   for(i=0;i<nmeshes;i++){
     meshvisptr[i]=1;
