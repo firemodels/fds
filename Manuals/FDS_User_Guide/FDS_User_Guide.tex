@@ -5349,7 +5349,7 @@ The HVAC output quantities can be used to determine the leakage flows.  FDS give
 \subsection{Special Topic: Stack Effect}
 \label{info:stackeffect}
 
-Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flow patterns within vertical shafts (stairwells, atriums, elevator shafts, {\em etc.}) due to leaks or openings at different levels.  To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
+Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, {\em etc.}) due to leaks or openings at different levels.  To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
 is important to capture the pressure and density decrease in the atmosphere based on the specified temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line.
 
 For the case where the stack flow is through small leakage paths, divide the building into one or more pressure {\ct ZONE}s.  The leakage paths can be defined in terms of HVAC components.  Note that the leakage model combines all leaky surfaces over the entire height of the building and as a result averages out the pressure gradients. For doing stack effect calculations individual leakage paths should be defined. A simple example is described next.
@@ -5365,16 +5365,17 @@ The initial density stratification inside and outside the building can be calcul
    \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{{\cal R} T_0} z \right)
 \ee
 where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature.
-Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and
-1.1858~kg/m$^3$, respectively.
+Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
 
-Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. The pressure difference across the building's wall is computed from
+Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
+\be \frac{\Delta H }{H_n} = 1 + \frac{T_b}{T_\infty} \ee
+where $H_n$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points.  This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building.  Note that this is close to the midpoint value of 50~m above the bottom of the building.
+
+The pressure difference across the building's wall is computed from
 \be
-   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, h} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right)
+   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right)
 \ee
-where $h$ is the distance from the neutral plane.  The neutral plane is located where the mass flows in and out are balanced.  This can be computed from
-\be \frac{H}{H_n} = 1 + \frac{T_\infty}{T_b} \ee
-where $H_n$ is the neutral plane height above the bottom of the shaft and $H=95$~m is the distance between the leak points.  This gives a neutral plane of 46.79~m and pressure differences of 44.3~Pa and 50.7~Pa at the top and bottom of the vent.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.85~m/s and an outflow velocity at the top of 4.21~m/s. Results for velocity and density are shown in Figure~\ref{fig_stack_effect}.
+where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane locatioin, the $ \Delta z$ values are 46.68~m for the lower vent and 48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of 19.4~Pa and 20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Figure~\ref{fig_stack_effect}.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
