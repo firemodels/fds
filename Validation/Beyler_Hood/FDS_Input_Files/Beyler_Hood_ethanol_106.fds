@@ -22,12 +22,11 @@
 &SPEC ID='SOOT', MASS_FRACTION_0 = 0.0 /
 
 &REAC ID = 'R1'
-      A = 1e163
+      A = 1e16
       E = 0
       FUEL = 'ETHANOL'
       SMIX_ID='ETHANOL','OXYGEN','CARBON MONOXIDE','WATER VAPOR','SOOT',
-      NU= -1,-1.9735,1.947,3.,0.053
-      ODE_SOLVER= 'EDCM RK2' /
+      NU= -1,-1.9735,1.947,3.,0.053 /
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
@@ -37,9 +36,8 @@
       SPEC_ID='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-0.5,1
       N_S = 0.25,1,0.5
-      SUPPRESSION=.FALSE.
-      ODE_SOLVER= 'EDCM RK2' /
-
+      SUPPRESSION=.FALSE. /
+      
 &REAC ID = 'R3'
       FUEL = 'CARBON DIOXIDE'
       A = 5e8
@@ -48,10 +46,7 @@
       SPEC_ID='CARBON DIOXIDE'
       NU= -1,0.5,1
       N_S = 1.0
-      FWD_ID = 'R2'
-      REVERSIBLE=.TRUE.
-      SUPPRESSION=.FALSE.
-      ODE_SOLVER= 'EDCM RK2' /
+      SUPPRESSION=.FALSE. /
 
 &SLCF PBY=0.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBY=0.0,QUANTITY='HRRPUV' /
