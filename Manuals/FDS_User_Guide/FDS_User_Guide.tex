@@ -8123,23 +8123,28 @@ appear/disappear at the various designated times. These lines are part of the si
 
 \footnotesize
 \begin{verbatim}
-&HOLE XB=0.25,0.45,0.20,0.30,0.20,0.30, COLOR='RED',   DEVC_ID='timer 1' /
-&HOLE XB=0.25,0.45,0.70,0.80,0.70,0.80, COLOR='GREEN', DEVC_ID='timer 2' /
-&OBST XB=0.70,0.80,0.20,0.30,0.20,0.30, COLOR='BLUE',  DEVC_ID='timer 3' /
-&OBST XB=0.70,0.80,0.60,0.70,0.60,0.70, COLOR='PINK',  DEVC_ID='timer 4' /
+&OBST XB=0.30,0.40,0.10,0.90,0.10,0.90, COLOR='PURPLE' / 
+&HOLE XB=0.25,0.45,0.20,0.30,0.20,0.30, COLOR='RED', TRANSPARENCY=0.75, DEVC_ID='timer 1' / 
+&HOLE XB=0.25,0.45,0.70,0.80,0.70,0.80, COLOR='GREEN', DEVC_ID='timer 2' / 
+&OBST XB=0.70,0.80,0.20,0.30,0.20,0.30, COLOR='BLUE',  DEVC_ID='timer 3' / 
+&OBST XB=0.70,0.80,0.60,0.70,0.60,0.70, COLOR='PINK',  DEVC_ID='timer 4' / 
+&OBST XB=0.5,1.0,0.0,1.0,0.0,0.1,COLOR='YELLOW',DEVC_ID='timer 5'/
+&HOLE XB=0.7,0.8,0.7,0.8,0.0,0.1,COLOR='BLACK',DEVC_ID='timer 6'/
+&HOLE XB=0.7,0.8,0.2,0.3,0.0,0.1,COLOR='GRAY 50',DEVC_ID='timer 7'/
 
-&DEVC XYZ=..., ID='timer 1', SETPOINT= 1., QUANTITY='TIME', INITIAL_STATE=.FALSE./
-&DEVC XYZ=..., ID='timer 2', SETPOINT= 2., QUANTITY='TIME', INITIAL_STATE=.TRUE. /
-&DEVC XYZ=..., ID='timer 3', SETPOINT= 3., QUANTITY='TIME', INITIAL_STATE=.FALSE./
-&DEVC XYZ=..., ID='timer 4', SETPOINT= 4., QUANTITY='TIME', INITIAL_STATE=.TRUE. /
+&DEVC XYZ=0.1,0.1,0.1, ID='timer 1', SETPOINT= 1.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.2,0.1,0.1, ID='timer 2', SETPOINT= 2.0, QUANTITY='TIME', INITIAL_STATE=.TRUE. /
+&DEVC XYZ=0.1,0.1,0.1, ID='timer 3', SETPOINT= 3.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.2,0.1,0.1, ID='timer 4', SETPOINT= 4.0, QUANTITY='TIME', INITIAL_STATE=.TRUE./
+&DEVC XYZ=0.2,0.1,0.1, ID='timer 5', SETPOINT= 5.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
+&DEVC XYZ=0.2,0.1,0.1, ID='timer 6', SETPOINT= 6.0, QUANTITY='TIME', INITIAL_STATE=.TRUE./
+&DEVC XYZ=0.2,0.1,0.1, ID='timer 7', SETPOINT= 6.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
+
 \end{verbatim}
 \normalsize
 
 \noindent
-The blue obstruction appears at 3~s because its initial state is false, meaning that it does not exist initially. The pink
-obstruction disappears at 4~s because it does exist initially. The red hole is created at 1~s because it does not exist initially (it is filled in with a
-red obstruction). The green hole is filled in at 2~s because it does exist (as a hole) initially. {\bf You should always try a simple example first before
-embarking on a complicated creation/removal scheme for obstructions and holes.}
+At the start, the purple obstruction is present with a red transparent block in it (this is a {\ct HOLE} initial state is false, i.e. the hole is filled) and a hole present in it.  Also at the start the pink obstruction is visible.  At 1~s the red block disappears.  At 2~s the initally present hole in the purple obstruction is filled with a green block.  This {\ct HOLE} was initially true meaning the hole was there at the start.  The blue obstruction appears at 3~s because its initial state is false, meaning that it does not exist initially. The pink obstruction disappears at 4~s because it does exist initially. At 5~s a yellow obstruction appears with one hole in it and one black block in it.  At 6~s the black block disappears as it was a hole that was initially false and therefore was created as a block when its parent obstruction (yellow) was created.  Also at 6~s the hole oringally present in the yellow obstruction is filled with a gray block as it was a hole that was intially true and therefore is filled when its {\ct DEVC} changes state.  {\bf You should always try a simple example first before embarking on a complicated creation/removal scheme for obstructions and holes.}
 
 To learn how to create and remove obstructions multiple times, see Section~\ref{info:CUSTOM} for information about the custom control feature.
 
