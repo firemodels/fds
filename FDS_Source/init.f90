@@ -2192,27 +2192,87 @@ OBST_LOOP: DO N=1,N_OBST
 
    ! Decide if a DEVICE/CONTROL action is needed
 
-   IF (.NOT.CREATE_OBST .AND. .NOT.REMOVE_OBST) THEN
-      IF (OB%DEVC_INDEX > 0) THEN
-         IF (DEVICE(OB%DEVC_INDEX)%CURRENT_STATE .EQV. DEVICE(OB%DEVC_INDEX)%PRIOR_STATE) CYCLE OBST_LOOP
-         IF (DEVICE(OB%DEVC_INDEX)%CURRENT_STATE) THEN
-            IF (.NOT.OB%HOLE_FILLER) CREATE_OBST = .TRUE.
-            IF (     OB%HOLE_FILLER) REMOVE_OBST = .TRUE.
-         ELSE
-            IF (.NOT.OB%HOLE_FILLER) REMOVE_OBST = .TRUE.      
-            IF (     OB%HOLE_FILLER) CREATE_OBST = .TRUE.      
-         ENDIF
-      ELSEIF (OB%CTRL_INDEX > 0) THEN
-         IF (CONTROL(OB%CTRL_INDEX)%CURRENT_STATE .EQV. CONTROL(OB%CTRL_INDEX)%PRIOR_STATE) CYCLE OBST_LOOP
-         IF (CONTROL(OB%CTRL_INDEX)%CURRENT_STATE) THEN
-            IF (.NOT.OB%HOLE_FILLER) CREATE_OBST = .TRUE.
-            IF (     OB%HOLE_FILLER) REMOVE_OBST = .TRUE.
-         ELSE
-            IF (.NOT.OB%HOLE_FILLER) REMOVE_OBST = .TRUE.      
-            IF (     OB%HOLE_FILLER) CREATE_OBST = .TRUE.      
-         ENDIF
-      ENDIF
-   ENDIF
+   CREATE_REMOVE_IF: IF (.NOT.CREATE_OBST .AND. .NOT.REMOVE_OBST) THEN
+      HOLE_FILL_IF: IF (.NOT. OB%HOLE_FILLER) THEN
+         !OBST is not a HOLE
+         IF (OB%DEVC_INDEX > 0) THEN
+            IF (DEVICE(OB%DEVC_INDEX)%CURRENT_STATE .EQV. DEVICE(OB%DEVC_INDEX)%PRIOR_STATE) CYCLE OBST_LOOP
+            IF (DEVICE(OB%DEVC_INDEX)%CURRENT_STATE) THEN
+               CREATE_OBST = .TRUE.
+            ELSE
+               REMOVE_OBST = .TRUE.      
+            ENDIF
+         ELSEIF (OB%CTRL_INDEX > 0) THEN
+            IF (CONTROL(OB%CTRL_INDEX)%CURRENT_STATE .EQV. CONTROL(OB%CTRL_INDEX)%PRIOR_STATE) CYCLE OBST_LOOP
+            IF (CONTROL(OB%CTRL_INDEX)%CURRENT_STATE) THEN
+               CREATE_OBST = .TRUE.
+            ELSE
+               REMOVE_OBST = .TRUE.      
+            ENDIF
+         ENDIF         
+      ELSE HOLE_FILL_IF
+
+         !OBST is a HOLE.  CREATE/REMOVE also depends on parent OBST.
+         CHECK_PARENT: IF (OB%DEVC_INDEX_O > 0 .OR. OB%CTRL_INDEX_O > 0) THEN
+            !If parent OBST is hidden, do not fill hole.
+            IF (OB%DEVC_INDEX_O > 0) THEN
+               IF (.NOT. DEVICE(OB%DEVC_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
+            ELSEIF(OB%CTRL_INDEX_O > 0) THEN
+               IF (.NOT. CONTROL(OB%CTRL_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
+            ENDIF
+            !If parent OBST is visible, check to see if hole needs to be made.
+            IF (.NOT. REMOVE_OBST) THEN
+               IF (OB%DEVC_INDEX > 0) THEN
+                  IF (DEVICE(OB%DEVC_INDEX)%CURRENT_STATE .EQV. DEVICE(OB%DEVC_INDEX)%PRIOR_STATE) THEN
+                     IF (OB%DEVC_INDEX_O > 0 .AND. .NOT. DEVICE(OB%DEVC_INDEX)%CURRENT_STATE) THEN
+                        IF (DEVICE(OB%DEVC_INDEX_O)%CURRENT_STATE .NEQV. DEVICE(OB%DEVC_INDEX_O)%PRIOR_STATE) CREATE_OBST=.TRUE.
+                     ELSEIF(OB%CTRL_INDEX_O > 0 .AND. .NOT. DEVICE(OB%DEVC_INDEX)%CURRENT_STATE) THEN
+                        IF (CONTROL(OB%CTRL_INDEX_O)%CURRENT_STATE .NEQV. CONTROL(OB%CTRL_INDEX_O)%PRIOR_STATE) CREATE_OBST=.TRUE.
+                     ENDIF
+                  ELSE
+                     IF (DEVICE(OB%DEVC_INDEX)%CURRENT_STATE) THEN
+                        REMOVE_OBST = .TRUE.
+                     ELSE
+                        CREATE_OBST = .TRUE.      
+                     ENDIF
+                  ENDIF
+               ELSEIF (OB%CTRL_INDEX > 0) THEN
+                  IF (CONTROL(OB%CTRL_INDEX)%CURRENT_STATE .EQV. CONTROL(OB%CTRL_INDEX)%PRIOR_STATE) THEN
+                     IF (OB%DEVC_INDEX_O > 0 .AND. .NOT. CONTROL(OB%CTRL_INDEX)%CURRENT_STATE) THEN
+                        IF (DEVICE(OB%DEVC_INDEX_O)%CURRENT_STATE .NEQV. DEVICE(OB%DEVC_INDEX_O)%PRIOR_STATE) CREATE_OBST=.TRUE.
+                     ELSEIF(OB%CTRL_INDEX_O > 0 .AND. .NOT. CONTROL(OB%CTRL_INDEX)%CURRENT_STATE) THEN
+                        IF (CONTROL(OB%CTRL_INDEX_O)%CURRENT_STATE .NEQV. CONTROL(OB%CTRL_INDEX_O)%PRIOR_STATE) CREATE_OBST=.TRUE.
+                     ENDIF                     
+                  ELSE
+                     IF (CONTROL(OB%CTRL_INDEX)%CURRENT_STATE) THEN
+                        REMOVE_OBST = .TRUE.
+                     ELSE
+                        CREATE_OBST = .TRUE.      
+                     ENDIF
+                  ENDIF
+               ENDIF            
+            ENDIF
+         ELSE CHECK_PARENT
+            IF (OB%DEVC_INDEX > 0) THEN
+               IF (DEVICE(OB%DEVC_INDEX)%CURRENT_STATE .EQV. DEVICE(OB%DEVC_INDEX)%PRIOR_STATE) CYCLE OBST_LOOP
+               IF (DEVICE(OB%DEVC_INDEX)%CURRENT_STATE) THEN
+                  REMOVE_OBST = .TRUE.
+               ELSE
+                  CREATE_OBST = .TRUE.      
+               ENDIF
+            ELSEIF (OB%CTRL_INDEX > 0) THEN
+               IF (CONTROL(OB%CTRL_INDEX)%CURRENT_STATE .EQV. CONTROL(OB%CTRL_INDEX)%PRIOR_STATE) CYCLE OBST_LOOP
+               IF (CONTROL(OB%CTRL_INDEX)%CURRENT_STATE) THEN
+                  REMOVE_OBST = .TRUE.
+               ELSE
+                  CREATE_OBST = .TRUE.      
+               ENDIF
+            ENDIF             
+         ENDIF CHECK_PARENT
+         
+      ENDIF HOLE_FILL_IF
+      
+   ENDIF CREATE_REMOVE_IF
 
    SV_LABEL  = 'null'
 
