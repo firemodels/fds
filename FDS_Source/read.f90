@@ -7183,7 +7183,7 @@ CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 LOGICAL :: EVACUATION_HOLE
 LOGICAL :: EVACUATION
-INTEGER :: NM,N_HOLE,NN,NDO,N,I1,I2,J1,J2,K1,K2,RGB(3),N_HOLE_NEW,N_HOLE_O,II,JJ,KK,NNN
+INTEGER :: NM,N_HOLE,NN,NDO,N,I1,I2,J1,J2,K1,K2,RGB(3),N_HOLE_NEW,N_HOLE_O,II,JJ,KK,NNN,DEVC_INDEX_O,CTRL_INDEX_O
 REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,TRANSPARENCY
 NAMELIST /HOLE/ COLOR,CTRL_ID,DEVC_ID,FYI,EVACUATION,MESH_ID,MULT_ID,RGB,TRANSPARENCY,XB
 TYPE(OBSTRUCTION_TYPE), ALLOCATABLE, DIMENSION(:) :: TEMP_OBST
@@ -7335,6 +7335,8 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                   NN=NN+1
                   IF (NN>N_OBST) EXIT OBST_LOOP
                   OB=>OBSTRUCTION(NN)
+                  DEVC_INDEX_O = OB%DEVC_INDEX
+                  CTRL_INDEX_O = OB%CTRL_INDEX
                   IF (.NOT.OB%PERMIT_HOLE) CYCLE OBST_LOOP
           
                   ! TEMP_OBST(0) is the intersection of HOLE and OBST
@@ -7473,6 +7475,8 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
          
                      OBSTRUCTION(NN) = TEMP_OBST(0)
                      OB => OBSTRUCTION(NN)
+                     OB%DEVC_INDEX_O = DEVC_INDEX_O
+                     OB%CTRL_INDEX_O = CTRL_INDEX_O
                      OB%DEVC_ID = DEVC_ID
                      OB%CTRL_ID = CTRL_ID
                      CALL SEARCH_CONTROLLER('HOLE',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
@@ -7481,14 +7485,23 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                         OB%HOLE_FILLER = .TRUE.
                         OB%CTRL_INDEX = -1
                         IF (DEVICE(OB%DEVC_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                        IF (OB%DEVC_INDEX_O > 0) THEN
+                           IF(.NOT. DEVICE(OB%DEVC_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                        ELSEIF (OB%CTRL_INDEX_O > 0) THEN
+                           IF(.NOT. CONTROL(OB%CTRL_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                        ENDIF
                      ENDIF
                      IF (CTRL_ID /='null') THEN
                         OB%REMOVABLE   = .TRUE.
                         OB%HOLE_FILLER = .TRUE.
                         OB%DEVC_INDEX = -1
                         IF (CONTROL(OB%CTRL_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                        IF (OB%DEVC_INDEX_O > 0) THEN
+                           IF(.NOT. DEVICE(OB%DEVC_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                        ELSEIF (OB%CTRL_INDEX_O > 0) THEN
+                           IF(.NOT. CONTROL(OB%CTRL_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                        ENDIF                        
                      ENDIF
-                     
                      IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.
          
                      SELECT CASE (COLOR)
