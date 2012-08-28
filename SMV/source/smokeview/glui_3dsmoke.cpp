@@ -350,7 +350,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   }
 
   if(nsmoke3dinfo>0){
-    panel_slices = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Slice render settings"),true);
+    panel_slices = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Slice render settings"),false);
     panel_slices->set_alignment(GLUI_ALIGN_LEFT);
  
 #ifdef pp_GPU
@@ -474,9 +474,7 @@ extern "C" void SMOKE_3D_CB(int var){
   case SMOKE_OPTIONS:
     if(smoke_render_option==0){
       if(panel_hrrcut!=NULL)panel_hrrcut->enable();
-      if(panel_slices!=NULL)panel_slices->enable();
       if(panel_absorption!=NULL)panel_absorption->enable();
-      if(panel_volume!=NULL)panel_volume->disable();
       use_firesmokemap=use_firesmokemap_save;
       CHECKBOX_use_firesmokemap->set_int_val(use_firesmokemap);
       CHECKBOX_use_firesmokemap->enable();
@@ -484,9 +482,7 @@ extern "C" void SMOKE_3D_CB(int var){
     }
     else{
       if(panel_hrrcut!=NULL)panel_hrrcut->disable();
-      if(panel_slices!=NULL)panel_slices->disable();
       if(panel_absorption!=NULL)panel_absorption->disable();
-      if(panel_volume!=NULL)panel_volume->enable();
       use_firesmokemap_save=use_firesmokemap;
       use_firesmokemap=1;
       CHECKBOX_use_firesmokemap->set_int_val(use_firesmokemap);
