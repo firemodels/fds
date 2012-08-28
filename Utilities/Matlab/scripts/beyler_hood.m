@@ -1,6 +1,6 @@
 % Floyd
-% 8-18-2012
-% Beyler_hood_2.m
+% 8-28-2012
+% Beyler_hood.m
 
 close all
 clear all
