@@ -43,7 +43,7 @@ call FDS_Cases.bat
 
 call FDS_MPI_Cases.bat
 
-echo "FDS test cases end" > %TIME_FILE%
+echo "FDS test cases end" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
