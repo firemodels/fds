@@ -49,7 +49,7 @@ fi
 # This routine checks the elapsed time of Firebot.
 # If Firebot runs more than 12 hours, an email notification is sent.
 # This is a notification only and does not terminate Firebot.
-# This check runs during Stages 3 and 5.
+# This check runs during Stage 5.
 
 # Start firebot timer
 START_TIME=$(date +%s)
@@ -214,87 +214,6 @@ compile_background()
    cd $FDS_SVNROOT/Utilities/background/intel_osx_32
    echo 'Compiling background:' >> $FIREBOT_DIR/output/stage1_background 2>&1
    ./make_background.sh >> $FIREBOT_DIR/output/stage1_background 2>&1
-}
-
-#  =============================
-#  = Stage 2a - Compile FDS DB =
-#  =============================
-
-compile_fds_db()
-{
-   # Clean and compile FDS DB
-   cd $FDS_SVNROOT/FDS_Compilation/intel_osx_64_db
-   make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
-}
-
-check_compile_fds_db()
-{
-   # Check for errors in FDS DB compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_osx_64_db
-   if [ -e "fds_intel_osx_64_db" ]
-   then
-      # Continue along
-      :
-   else
-      BUILD_STAGE_FAILURE="Stage 2a: FDS DB Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage2a
-      set_files_world_readable
-      save_build_status
-      email_error_message
-   fi
-
-   # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Stage 2a warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
-   fi
-}
-
-#  =================================
-#  = Stage 2b - Compile FDS MPI DB =
-#  =================================
-
-compile_fds_mpi_db()
-{
-   # Clean and compile FDS MPI DB
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_osx_64_db
-   make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
-}
-
-check_compile_fds_mpi_db()
-{
-   # Check for errors in FDS MPI DB compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_osx_64_db
-   if [ -e "fds_mpi_intel_osx_64_db" ]
-   then
-      # Continue along
-      :
-   else
-      BUILD_STAGE_FAILURE="Stage 2b: FDS MPI DB Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage2b
-      set_files_world_readable
-      save_build_status
-      email_error_message
-   fi
-
-   # Check for compiler warnings/remarks
-   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Stage 2b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
-   fi
 }
 
 #  ==================================
@@ -506,14 +425,6 @@ clean_svn_repo
 do_svn_checkout
 check_svn_checkout
 compile_background
-
-### Stage 2a ###
-compile_fds_db
-check_compile_fds_db
-
-### Stage 2b ###
-compile_fds_mpi_db
-check_compile_fds_mpi_db
 
 ### Stage 4a ###
 compile_fds
