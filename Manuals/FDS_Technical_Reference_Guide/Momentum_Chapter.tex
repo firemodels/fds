@@ -67,7 +67,7 @@ F_{\x,ijk} &=  \left(
   + \frac{\tau_{xz,ijk}-\tau_{xz,i,j,k-1}}{\dz}  \right)  \\
 F_{\y,ijk} &= \left(
  u_{i,j+\ha,k} \; \om_{z,ijk} +
- u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right) 
+ u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right)
              - \left(
  w_{i,j+\ha,k} \; \om_{x,ijk}+
  w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\
@@ -112,7 +112,7 @@ F_{\z,ijk} &=  \left(
                         + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right)
 \end{align}
 
-\noindent 
+\noindent
 By construction, the divergence defined in Eq.~(\ref{eqn_divfromeos})
 is identically equal to the divergence defined by
 \be (\nabla\!\cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} +
@@ -130,7 +130,7 @@ the direct solution of the Poisson equation for the pressure.
 
 LES is a technique used to model the dissipative processes (viscosity,
 thermal conductivity, material diffusivity) that occur at length scales smaller than those that
-are explicitly resolved on the numerical grid. This means that the parameters $\mu$, $k$ and $D$ in the governing equations
+are explicitly resolved on the numerical grid~\cite{Deardorff:1,Germano:1,Lilly:1}. This means that the parameters $\mu$, $k$ and $D$ in the governing equations
 must be modeled. Additional explanation of the various assumptions can be found in a review article by Pope~\cite{Pope:2004}.
 
 There is a small term in the energy equation known as the {\em dissipation rate}, $\epsilon$,
@@ -153,20 +153,6 @@ it is convenient to work with the Lagrangian form of the conservation equations.
     \rho \bof_b \cdot \bu - \nabla p \cdot \bu + \nabla\!\cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
 As mentioned above $\epsilon$ is a negligible quantity in the energy equation. However, its functional form
 is useful in representing the dissipation of kinetic energy from the resolved flow field.
-Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the viscosity $\mu$ is modeled
-\be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
-   \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla\!\cdot \overline{\bu})^2 \right)^\ha \ee
-where $C_s$ is an empirical constant and $\Delta$ is a length on the
-order of the size of a grid cell.
-The bar above the various quantities denotes that these are the resolved values, meaning
-that they are computed from the numerical solution sampled on a coarse grid (relative to DNS).
-The other diffusive parameters,
-the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
-\be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
-\quad ; \quad
- (\rho D)_{l,\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be
-constant for a given scenario.
 
 The model for the viscosity, $\mu_{\hbox{\tiny LES}}$, serves two roles: first, it provides a stabilizing
 effect in the numerical algorithm, damping out numerical instabilities as they arise in the flow field, especially where vorticity is
@@ -177,27 +163,52 @@ In the parlance of the turbulence community, the dissipation
 rate is related to the turbulent kinetic energy (most often denoted by $k$) by the
 relation $\epsilon \approx k^{3/2}/L$, where $L$ is a length scale.
 
-There have been numerous refinements of the original Smagorinsky
-model~\cite{Deardorff:1,Germano:1,Lilly:1},
-but it is difficult to assess the improvements offered by these newer
-schemes for fires. There are two reasons for this. First, the structure of the
-fire plume is so dominated by the large-scale resolvable eddies that
-even a constant eddy viscosity gives results comparable to
-those obtained using the Smagorinsky model~\cite{Baum:4}. Second, the lack
-of precision in most large-scale fire test data makes it difficult to
-assess the relative accuracy of each model.
-The Smagorinsky model with constant $C_s$ produces satisfactory results
-for most large-scale applications where boundary layers are not
-well-resolved (see Volume 3, {\em Experimental Validation}). In fact, experience to date using the simple form of LES described above
-has shown that the best results are obtained when the Smagorinsky constant $C_s$ is set
-as low as possible to maintain numerical stability. In other words, the most realistic
-flow simulations are obtained when resolvable eddies are not ``damped'' by excessive
-amounts of artificial viscosity.
+There are several different variations of LES included in FDS. Following is a description of each.
+
+\subsection{Constant Coefficient Smagorinsky Model}
+
+Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the viscosity is modeled
+\be \mu_t = \mu + \rho \, (C_s\, \Delta)^2 \,
+   \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla\!\cdot \overline{\bu})^2 \right)^\ha \label{constant_coef_LES}
+\ee
+where $\mu$ is the actual molecular viscosity of the fluid, $C_s$ is an empirical constant, and $\Delta$ is a length on the
+order of the size of a grid cell. The bar atop the variables denotes the resolved values.
+
+\subsection{Dynamic Smagorinsky Model}
+
+For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_s$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions. Details of the procedure are found in Appendix~\ref{app_dynsmag}.
+
+\subsection{Deardorff Model}
+
+By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1}:
+\be 
+  \mu_t = \mu + \rho \, C \, \Delta \, \sqrt{k_{\hbox{\tiny sgs}} } \quad ; \quad  
+  k_{\hbox{\tiny sgs}} = \ha \left( (\overline{u}-\hat{u})^2 + (\overline{v}-\hat{v})^2 + (\overline{w}-\hat{w})^2 \right)  \label{Deardorff_LES}
+\ee
+where $\overline{u}$ is the average value of $u$ at the grid cell center and $\hat{u}$ is a weighted average of $u$ over the adjacent cells:
+\be
+   \hat{u} = \frac{u_{ijk}}{2} + \frac{u_{i-1,jk} + u_{i+1,jk} }{4}
+\ee
+The terms $\hat{v}$ and $\hat{w}$ are defined similarly.
+
+
+\subsection{Thermal Conduction and Gas Species Diffusion}
+
+The other diffusive parameters,
+the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
+\be k_t = \frac{\mu_t \, c_p}{\PR_t}
+\quad ; \quad
+ (\rho D)_{\alpha,t} =\frac{\mu_t}{\SC_t} \ee
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario.
+
+
+
+
+
 
 \subsection{Numerical Implementation}
 
-In the discretized form of the momentum equation, the LES form of the dynamic viscosity
-is defined at cell centers
+In the discretized form of the momentum equation, the modeled viscosity is defined at cell centers. For example, the constant coefficient Smagorinsky model takes on the following form:
 \be \mu_{ijk} = \rho_{ijk} \, (C_s\, \Delta)^2 \, |S|   \ee
 where $C_s$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
 \be |S|^2 = 2\left(\dod{u}{x}\right)^2 + 2\left(\dod{v}{y}\right)^2+
