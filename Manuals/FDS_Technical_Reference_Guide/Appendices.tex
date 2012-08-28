@@ -117,7 +117,7 @@ Using the ideal gas law and differentiating the equation of state leads to
 \label{eqn_div_1}
 \Div\mathbf{u} &= \left(\frac{1}{\rho c_p T} - \frac{1}{\bar{p}} \right)\frac{\mbox{D} \bar{p}}{\mbox{D} t} \notag\\
 &+ \frac{1}{\rho c_p T} \left[ \dot{q}^\tripleprime - \Div \dot{\mathbf{q}}^\pp \right] \notag\\
-&+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \left[ \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime \right] 
+&+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \left[ \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime \right]
 \end{align}
 
 \subsection*{From Sensible Enthalpy}
@@ -157,7 +157,7 @@ The \emph{conservative form} of the sensible enthalpy transport equation---which
 \label{eqn_conservative_enthalpy}
 \frac{\partial (\rho h_s)}{\partial t} + \underbrace{\Div(\rho h_s \mathbf{u})}_{\mbox{mean transport}} = \frac{\D \bar{p}}{\D t} + \dot{q}^\tripleprime - \Div \dot{\mathbf{q}}^\pp \,\mbox{.}
 \end{equation}
-This form is called conservative because, by Gauss's theorem, the integral of the discrete flux divergence over the domain is equivalent to the surface integral of the flux over the boundary of the domain.  For a periodic domain the integral is zero---\emph{flow in} must equal \emph{flow out}. The key to guaranteeing discrete conservation of sensible enthalpy is to first discretize the mean transport term.  Below an overline will denote a slope-limiting interpolation operator.  As discussed in Section \ref{app_transport_decomposition}, this operator is specially designed to be consistent with flux-limited, total variation diminishing (TVD) transport for the conservative form of the mean transport term. 
+This form is called conservative because, by Gauss's theorem, the integral of the discrete flux divergence over the domain is equivalent to the surface integral of the flux over the boundary of the domain.  For a periodic domain the integral is zero---\emph{flow in} must equal \emph{flow out}. The key to guaranteeing discrete conservation of sensible enthalpy is to first discretize the mean transport term.  Below an overline will denote a slope-limiting interpolation operator.  As discussed in Section \ref{app_transport_decomposition}, this operator is specially designed to be consistent with flux-limited, total variation diminishing (TVD) transport for the conservative form of the mean transport term.
 
 Expanding the mean transport term and rearranging (\ref{eqn_conservative_enthalpy}) in terms of the discrete divergence yields
 \begin{equation}
@@ -232,29 +232,29 @@ Using the ideal gas law, the time derivative of the enthalpy can be decomposed a
 \begin{align}
 \label{eqn_drhdt}
 \frac{\partial (\rho h_s)}{\partial t} &= \rho \frac{\partial h_s}{\partial t} + h_s \frac{\partial \rho}{\partial t} \notag\\
-&= \rho \sum_\alpha \left( Y_\alpha c_{p,\alpha} \frac{\partial T}{\partial t} + h_{s,\alpha} \frac{\partial Y_\alpha}{\partial t}\right) + h_s \frac{\partial \rho}{\partial t} \notag\\ 
+&= \rho \sum_\alpha \left( Y_\alpha c_{p,\alpha} \frac{\partial T}{\partial t} + h_{s,\alpha} \frac{\partial Y_\alpha}{\partial t}\right) + h_s \frac{\partial \rho}{\partial t} \notag\\
 &= \rho c_p \frac{\partial T}{\partial t} + \rho \sum_\alpha h_{s,\alpha} \frac{\partial Y_\alpha}{\partial t} + h_s \frac{\partial \rho}{\partial t} \notag\\
 &= \rho c_p T \left[ \frac{1}{\bar{p}} \frac{\partial \bar{p}}{\partial t} + \frac{1}{\overline{W}} \frac{\partial \overline{W}}{\partial t} - \frac{1}{\rho} \frac{\partial \rho}{\partial t}\right] + \rho \sum_\alpha h_{s,\alpha} \frac{\partial Y_\alpha}{\partial t} + h_s \frac{\partial \rho}{\partial t} \notag\\
 &= \rho c_p T \left[ \frac{1}{\bar{p}} \frac{\partial \bar{p}}{\partial t} - \sum_\alpha \frac{\overline{W}}{W_\alpha} \frac{\partial Y_\alpha}{\partial t} - \frac{1}{\rho} \frac{\partial \rho}{\partial t}\right] + \rho \sum_\alpha h_{s,\alpha} \frac{\partial Y_\alpha}{\partial t} + h_s \frac{\partial \rho}{\partial t} \notag\\
 &=  \frac{\rho c_p T}{\bar{p}} \frac{\partial \bar{p}}{\partial t}  + \rho \sum_\alpha \left( h_{s,\alpha} - c_p T \frac{\overline{W}}{W_\alpha}\right)\frac{\partial Y_\alpha}{\partial t} + (h_s - c_p T) \frac{\partial \rho}{\partial t}
-\end{align}  
+\end{align}
 The time derivative of the mass fractions, which originates from the species transport equation, is:
 \begin{align}
 \label{eqn_dydt}
-\frac{\partial Y_\alpha}{\partial t} &= \frac{1}{\rho} \left[ \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime - Y_\alpha \frac{\partial \rho}{\partial t} - \Div (\rho Y_\alpha \mathbf{u}) \right] 
+\frac{\partial Y_\alpha}{\partial t} &= \frac{1}{\rho} \left[ \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime - Y_\alpha \frac{\partial \rho}{\partial t} - \Div (\rho Y_\alpha \mathbf{u}) \right]
 \end{align}
 Using (\ref{eqn_dydt}) in (\ref{eqn_drhdt}) and summing over species to eliminate the density time derivative we obtain
 \begin{align}
 \label{eqn_drhdt2}
 \frac{\partial (\rho h_s)}{\partial t} &= \frac{\rho c_p T}{\bar{p}} \frac{\partial \bar{p}}{\partial t}  + \sum_\alpha \left( h_{s,\alpha} - c_p T \frac{\overline{W}}{W_\alpha}\right)\left[ \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime - \mathbf{u}\cdot\nabla(\rho Y_\alpha) - \rho Y_\alpha \Div \mathbf{u} \right]
-\end{align}  
+\end{align}
 Plugging (\ref{eqn_drhdt2}) into (\ref{eqn_div_new}) yields (almost done)
 %\begin{align}
 %\label{eqn_div_3}
 %\Div \mathbf{u} &= \frac{1}{\rho h_s}\frac{\mbox{D} \bar{p}}{\mbox{D} t} - \frac{c_p T}{h_s}\frac{1}{\bar{p}} \frac{\partial \bar{p}}{\partial t} \notag\\
 %&+ \frac{1}{\rho h_s}\left[ \dot{q}^\tripleprime - \Div \dot{\mathbf{q}}^\pp - \mathbf{u} \cdot\nabla (\rho h_s) \right] \notag\\
 %&+ \frac{1}{\rho h_s} \sum_\alpha \left(c_p T\frac{\overline{W}}{W_\alpha} - h_{s,\alpha} \right) \bigg[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) - \rho Y_\alpha \Div \mathbf{u} \bigg] \notag\\
-%&+ \frac{1}{\rho h_s} \sum_\alpha \left(c_p T\frac{\overline{W}}{W_\alpha} - h_{s,\alpha} \right) \dot{m}_\alpha^\tripleprime 
+%&+ \frac{1}{\rho h_s} \sum_\alpha \left(c_p T\frac{\overline{W}}{W_\alpha} - h_{s,\alpha} \right) \dot{m}_\alpha^\tripleprime
 %\end{align}
 \begin{align}
 \label{eqn_div_4}
@@ -273,7 +273,7 @@ Finally... (compare with (\ref{eqn_div_2}))
 \label{eqn_div_6}
 \Div \mathbf{u} &= \frac{1}{\rho c_p T}\frac{\mbox{D} \bar{p}}{\mbox{D} t} - \frac{1}{\bar{p}} \frac{\partial \bar{p}}{\partial t} \notag\\
 &+ \frac{1}{\rho c_p T}\left[ \dot{q}^\tripleprime - \Div \dot{\mathbf{q}}^\pp - \mathbf{u} \cdot\nabla (\rho h_s) \right] \notag\\
-&+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \bigg[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) + \dot{m}_\alpha^\tripleprime \bigg] 
+&+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \bigg[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) + \dot{m}_\alpha^\tripleprime \bigg]
 \end{align}
 
 \section{Equivalence between Divergence Expressions}
@@ -374,7 +374,7 @@ The implementation of RK2 in FDS is as follows:
 y^*_{n+1}           &=& y_n+h\,f(y_{n},t_{n}) \\
 \nonumber y^*_{n+2} &=& y^*_{n+1}+h\,f(y^*_{n+1},t_{n+1}) \\
 \nonumber y_{n+1} &=& (1/2)\,(y_{n}+y^*_{n+2})
-\end{eqnarray} 
+\end{eqnarray}
 
 This second-order scheme is an improvement upon the first-order explicit scheme used for simple chemistry. However, to maintain stability in stiff problems, this mechanism requires such small integration time steps compared to the global FDS time step that the simulation can become intractable. To improve the capabilities of this integrator, Richardson extrapolation is used. Richardson extrapolation can increase the order of the error within a numerical scheme and provide the foundation for an error controller to be implemented. Consider a generic case where a function, $f(y,t)$, is integrated from $t^*$ to $t$ using two different time sub-intervals: $h$ and $\frac{h}{2}$. Taking a Taylor expansion at $h$ results in:
 \begin{equation}\label{eq:h1}
@@ -395,14 +395,14 @@ A=\frac{4\,A_4-A_2}{3}  + \mathcal{O}(h^4)
 In addition to increasing the order of the error in the numerical scheme, Richardson extrapolation also provides an estimate of the error value. This estimate is calculated via the Taylor expansion:
 \begin{equation}\label{eq:error}
 error \approx \frac{1}{15}(\frac{4\,A_4-A_2}{3} - \frac{4\,A_2-A_1}{3})
-\end{equation}  
+\end{equation}
 The time step ($\Delta t_{new}$) required to maintain the specified/acceptable error ($err\_tol$) can be calculated by using the local error ($error$), the current time step ($\Delta t$), and the order of error within the numerical integration scheme ($\mathcal{O}$):
 \begin{equation}\label{eq:dt_new}
 \Delta t_{new}=\Delta t (\frac{err\_tol}{error})^{\mathcal{O}^{-1}}
 \end{equation}
 In this case, the scheme is fourth-order accurate, and thus the exponent in Eq.~(\ref{eq:dt_new}) becomes $(1/4)$. Eq.~(\ref{eq:dt_new}) indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required. Additionally, by setting an error tolerance, the algorithm will select a new time step to satisfy that value, which bounds the solution.
 
-Although error control can bound the solution, it does not eliminate numerical fluctuations, which can occur in some cases such as those with reversible reactions. Only the value at the end of a time step is returned by the integrator. Therefore, if the values are fluctuating around a fixed point while also being bounded by the error tolerance, the integrator is doing extra work by continuing to calculate every fluctuation within a time step. To minimize the computational expense, a total variation (TV) scheme was implemented. This scheme examines the differences in species mass fractions at four consecutive sub-time steps. Within this four point stencil there are three differences for each species mass fraction. The TV scheme compares the absolute value of the sum of the differences to the sum of the absolute values of the differences: 
+Although error control can bound the solution, it does not eliminate numerical fluctuations, which can occur in some cases such as those with reversible reactions. Only the value at the end of a time step is returned by the integrator. Therefore, if the values are fluctuating around a fixed point while also being bounded by the error tolerance, the integrator is doing extra work by continuing to calculate every fluctuation within a time step. To minimize the computational expense, a total variation (TV) scheme was implemented. This scheme examines the differences in species mass fractions at four consecutive sub-time steps. Within this four point stencil there are three differences for each species mass fraction. The TV scheme compares the absolute value of the sum of the differences to the sum of the absolute values of the differences:
 \begin{equation}\label{eq:TV}
 \displaystyle \sum_{i=1}^{4}|Y(i+1)-Y(i)| = 3.0|\displaystyle \sum_{i=1}^{4}(Y(i+1)-Y(i))|
 \end{equation}
@@ -421,7 +421,7 @@ to the absolute value of the sum of the differences:
 \begin{equation}\label{eq:abs_sum_tv}
 |\displaystyle \sum_{i=1}^{4}(Y(i+1)-Y(i))| = |(1-0)+(0-1)+(1-0)| = 1
 \end{equation}
-The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use 2.5 because floating point division might not return a value of exactly 3. If fluctuations have been identified, then the values at the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-time steps being taken by the integrator. Because the error controller is bounding the solution, any one of the values within the stencil is within the error tolerance and is a sufficiently accurate answer.   
+The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use 2.5 because floating point division might not return a value of exactly 3. If fluctuations have been identified, then the values at the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-time steps being taken by the integrator. Because the error controller is bounding the solution, any one of the values within the stencil is within the error tolerance and is a sufficiently accurate answer.
 
 %\chapter{Derivation of the Werner Wengle Wall Model}
 %%\subsubsection{R. McDermott, BFRL}
@@ -813,6 +813,7 @@ Assembling Eqs. (\ref{ud_exact}) and (\ref{ug_second_order}), the solution for $
 \end{align}
 
 \subsubsection{Particle velocities and positions}
+
 The results of the previous section are not directly useful unless $\mathbf{U}_p(t)$ is known. $\mathbf{U}_p(t)$ can be found via the conservation of momentum and this leads to a solution for the particle velocities and positions.
 
 The fluid and particles can gain or lose momentum due to gravity. Drag forces exchange momentum between the fluid and particle, which does not change the total momentum of the system. As gravity is the only force that can change momentum, the time derivative of the fluid-particle system momentum is $m_p \mathbf{g}$ by Newton's second law, so we can write
@@ -845,7 +846,9 @@ Integrating Eq. (\ref{mom_u_p_full}) leads to an equation for the particle posit
     \label{mom_x_p_full}
     \mathbf{x}_p = \mathbf{x}_{p,0} + \left(\frac{\mathbf{u}_{p,0} + \alpha_p \mathbf{U}_{p,0}}{1 + \alpha_p}\right) t - \frac{\alpha_p (\mathbf{u}_{p,0} - \mathbf{U}_{p,0})}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p t + 1) + \frac{\mathbf{g} t^2}{2} - \frac{\alpha_p \beta_p t^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_{\text{r},0} \left(\frac{\mathbf{u}_{\text{r},0} \cdot \mathbf{g}}{|\mathbf{u}_{\text{r},0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^4) \,.
 \end{align}
+
 \subsubsection{Implementation in FDS}
+
 The particle positions are computed in {\ct part.f90} in {\ct DROPLET\_LOOP}. The solutions are used to advance $\Delta t$ forward in time much like a normal finite-difference scheme. The exact solution is used for the case without drag.
 \begin{align}
     \mathbf{u}_p^{n+1} &= \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_\text{r}^n \left(\frac{\mathbf{u}_\text{r}^n \cdot \mathbf{g}}{|\mathbf{u}_\text{r}^n|^2}\right) + \mathbf{g}\right] \\[1cm]
@@ -893,7 +896,7 @@ However absorption spectra that begin from 1 $\mu$m exists for a few liquids of 
 
 Often we are not interested in resolving the spectra of the transmitted radiation; rather, we are interested in modeling the total transmitted radiation. In these cases, it is convenient to write the radiation transport equations in terms of mean absorption coefficients. This is done to avoid the time-consuming integrations over all wavelengths. For this reason, a number of mean absorption coefficients have been introduced, such as the Rosselland-mean absorption coefficient and the Planck-mean absorption coefficient. These correspond to the optically-thin approximation and the Rosselland diffusion approximation of radiation transport.
 
-The absorption coefficients of liquids are highly wavelength dependent and are even transparent in some areas. In this case, the Planck-mean absorption coefficients lead to mean absorption coefficients that are too large by several orders of magnitude. 
+The absorption coefficients of liquids are highly wavelength dependent and are even transparent in some areas. In this case, the Planck-mean absorption coefficients lead to mean absorption coefficients that are too large by several orders of magnitude.
 
 It is preferable to determine an effective absorption coefficient that attempts to replicate the absorption of radiation over a certain path length $S$. Here the path length is not a physical measure of the system but some characteristic length over which the majority of the radiation is assumed absorbed.
 
@@ -919,13 +922,13 @@ It can be easily seen that increasing the path-length leads to lower effective a
 
 \subsubsection{Absorption Coefficients of Selected Fuels}
 
-Absorption coefficients are determined from Eq.~\ref{eqn_effcoeff}. When available, spectrally resolved absorption coefficients are used to determine the total transmitted fraction of radiation according to Eqns. \ref{eqn_beerslaw} and \ref{eqn_totintens}.  The transmission data in Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} was used for JP-8, ethanol, and toluene. The spectrally resolved absorption coefficients from Keefe et al. were used to calculate the total transmission for toluene, benzene, water and methanol. Complex refractive index spectra reported by Sazhin et al. 2004a \cite{Sazhin:JHT2004a} were used to calculate the transmission of diesel fuel. 
+Absorption coefficients are determined from Eq.~\ref{eqn_effcoeff}. When available, spectrally resolved absorption coefficients are used to determine the total transmitted fraction of radiation according to Eqns. \ref{eqn_beerslaw} and \ref{eqn_totintens}.  The transmission data in Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} was used for JP-8, ethanol, and toluene. The spectrally resolved absorption coefficients from Keefe et al. were used to calculate the total transmission for toluene, benzene, water and methanol. Complex refractive index spectra reported by Sazhin et al. 2004a \cite{Sazhin:JHT2004a} were used to calculate the transmission of diesel fuel.
 
-Table \ref{tbl_abscoeff} lists absorption coefficients for some liquid fuels. The absorption coefficient is very sensitive to the spectrum of the incoming radiation, as shown in Figure \ref{fig_kapvtemp}. Table \ref{tbl_abscoeff} contains two types of absorption coefficients. One type is determined by assuming the incoming radiation is blackbody radiation at a temperature of 1450~K. The other set of absorption coefficients is based on actual flame radiation spectra. If the wavenumber range is listed, then a blackbody temperature 1450~K is assumed in calculating the transmission. If the wavenumber range is not listed, then transmission data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} is used. The path length is 3~mm in all cases. 
+Table \ref{tbl_abscoeff} lists absorption coefficients for some liquid fuels. The absorption coefficient is very sensitive to the spectrum of the incoming radiation, as shown in Figure \ref{fig_kapvtemp}. Table \ref{tbl_abscoeff} contains two types of absorption coefficients. One type is determined by assuming the incoming radiation is blackbody radiation at a temperature of 1450~K. The other set of absorption coefficients is based on actual flame radiation spectra. If the wavenumber range is listed, then a blackbody temperature 1450~K is assumed in calculating the transmission. If the wavenumber range is not listed, then transmission data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} is used. The path length is 3~mm in all cases.
 
-The assumption of black body radiation is adequate for sooty flames in which radiation from soot dominates the flame radiation spectra. This can be seen from similar values of absorption coefficient that were determined for toluene using the data from Suo-Anttila et al. and by using the blackbody radiation assumption. However, for fuels with low sooting flames, the incoming radiation spectrum differs considerably from blackbody spectrum. This explains the large difference in listed absorption coefficients for ethanol and methanol. The ethanol absorption coefficient is based on actual emission spectra of an ethanol flame, whereas the methanol absorption coefficient is calculated based on the blackbody spectrum. The correct value for methanol is likely to be closer to the absorption coefficient of ethanol. 
+The assumption of black body radiation is adequate for sooty flames in which radiation from soot dominates the flame radiation spectra. This can be seen from similar values of absorption coefficient that were determined for toluene using the data from Suo-Anttila et al. and by using the blackbody radiation assumption. However, for fuels with low sooting flames, the incoming radiation spectrum differs considerably from blackbody spectrum. This explains the large difference in listed absorption coefficients for ethanol and methanol. The ethanol absorption coefficient is based on actual emission spectra of an ethanol flame, whereas the methanol absorption coefficient is calculated based on the blackbody spectrum. The correct value for methanol is likely to be closer to the absorption coefficient of ethanol.
 
-Figure~\ref{fig_trans2} and Figure~\ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS solid phase radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}. The predictions are better for fuels with relatively low absorption coefficients. 
+Figure~\ref{fig_trans2} and Figure~\ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS solid phase radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}. The predictions are better for fuels with relatively low absorption coefficients.
 
 \begin{table}[ht]
 \caption{Characterization of data sources used for determining absorption coefficients and effective absorption coefficients for selected liquids. If the wavenumber range is listed, then a blackbody temperature of 1450~K is assumed in calculating the transmission. If the wavenumber range is not listed, then transmission data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} is used. The path length is 3~mm in all cases. }
@@ -988,28 +991,28 @@ The 1D heat conduction equation is in Cartesian coordinates
 
 \begin{equation}
 \label{heat_cond_cart}
-     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{\partial}{\partial x} k_s \frac{\partial T_s}{\partial x} + \dot{q}^{'''}_s, 
+     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{\partial}{\partial x} k_s \frac{\partial T_s}{\partial x} + \dot{q}^{'''}_s,
 \end{equation}
 
 in cylindrical coordinates
 
 \begin{equation}
 \label{heat_cond_cyl}
-     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r}\frac{\partial}{\partial r} (r k_s \frac{\partial T_s}{\partial r}) + \dot{q}^{'''}_s, 
+     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r}\frac{\partial}{\partial r} (r k_s \frac{\partial T_s}{\partial r}) + \dot{q}^{'''}_s,
 \end{equation}
 
 and in spherical coordinates
 
 \begin{equation}
 \label{heat_cond_spher}
-     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^2}\frac{\partial}{\partial r} (r^2 k_s \frac{\partial T_s}{\partial r}) + \dot{q}^{'''}_s. 
+     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^2}\frac{\partial}{\partial r} (r^2 k_s \frac{\partial T_s}{\partial r}) + \dot{q}^{'''}_s.
 \end{equation}
- 
+
 The general form is
 
 \begin{equation}
 \label{heat_cond_cyl2}
-     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} (r^I k_s \frac{\partial T_s}{\partial r}) + \dot{q}^{'''}_s, 
+     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} (r^I k_s \frac{\partial T_s}{\partial r}) + \dot{q}^{'''}_s,
 \end{equation}
 
 where I is 0 for Cartesian, 1 for cylindrical and 2 for spherical geometries. The indexes and nodes are shown in Figure~\ref{fig_solid_nodes}.
@@ -1025,7 +1028,7 @@ The right side term using the central difference in Cartesian coordinates is
 
 \begin{equation}
 \label{T_cart}
-    \frac{\partial}{\partial x} k_s \frac{\partial}{\partial x} T_{s,i} 
+    \frac{\partial}{\partial x} k_s \frac{\partial}{\partial x} T_{s,i}
     \approx \frac{1}{\delta x_i}(k_{s,i+\frac{1}{2}}\frac{T_{s,i+1}-T_{i}}{\delta x_{i+\frac{1}{2}}}-k_{s, i-\frac{1}{2}}\frac{T_{s,i}-T_{i-1}}{\delta x_{i+\frac{1}{2}}}),
 \end{equation}
 
@@ -1033,7 +1036,7 @@ in cylindrical coordinates
 
 \begin{equation}
 \label{T_cyl}
-    \frac{1}{r}\frac{\partial}{\partial r} rk_s \frac{\partial}{\partial r} T_{s,i} 
+    \frac{1}{r}\frac{\partial}{\partial r} rk_s \frac{\partial}{\partial r} T_{s,i}
     \approx \frac{1}{r_{i-\frac{1}{2}} \delta r_i}(r_{i}k_{s,i+\frac{1}{2}}\frac{T_{s,i+1}-T_{s,i}}{\delta r_{i+\frac{1}{2}}}-r_{i-1}k_{s,i-\frac{1}{2}}\frac{T_{s,i}-T_{s,i-1}}{\delta r_{i-\frac{1}{2}}})
 \end{equation}
 
@@ -1041,7 +1044,7 @@ and in spherical coordinates
 
 \begin{equation}
 \label{T_spher}
-    \frac{1}{r^2}\frac{\partial}{\partial r} r^2 k_s \frac{\partial}{\partial r} T_{s,i} 
+    \frac{1}{r^2}\frac{\partial}{\partial r} r^2 k_s \frac{\partial}{\partial r} T_{s,i}
     \approx \frac{1}{r^2_{i-\frac{1}{2}} \delta r_i}(r_{i}^2 k_{s,i+\frac{1}{2}}\frac{T_{s,i+1}-T_{s,i}}{\delta r_{i+\frac{1}{2}}}-r^2_{i-1}k_{s,i-\frac{1}{2}}\frac{T_{s,i}-T_{s,i-1}}{\delta r_{i-\frac{1}{2}}}).
 \end{equation}
 
@@ -1049,7 +1052,7 @@ In general form this becomes
 
 \begin{equation}
 \label{T_general}
-    \frac{1}{r^{I}}\frac{\partial}{\partial r} r^{I}k_s \frac{\partial}{\partial r} T_{s,i} 
+    \frac{1}{r^{I}}\frac{\partial}{\partial r} r^{I}k_s \frac{\partial}{\partial r} T_{s,i}
     \approx \frac{1}{r_{i-\frac{1}{2}}^I \delta r_i}(r_{i}^{I}k_{s,i+\frac{1}{2}}\frac{T_{s,i+1}-T_{s,i}}{\delta r_{i+\frac{1}{2}}}-r_{i-1}^{I}k_{s,i-\frac{1}{2}}\frac{T_{s,i}-T_{s,i-1}}{\delta r_{i-\frac{1}{2}}}),
 \end{equation}
 
@@ -1070,14 +1073,14 @@ Collecting the temperatures at time step \textit{n+1} to the left side of the eq
 \label{crank-nicolson_2}
   \lefteqn{T_{s,i}^{n+1}-\frac{\delta t}{2(\rho_s c_s)_i}\frac{1}{r_{i-\frac{1}{2}}^I \delta r_i}(r_{i}^{I}k_{s,i+\frac{1}{2}}\frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\delta r_{i+\frac{1}{2}}}-r_{i-1}^{I}k_{s,i-\frac{1}{2}}\frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\delta r_{i-\frac{1}{2}}})}\nonumber\\
  & =\frac{\delta t}{2(\rho_s c_s)_i}\frac{1}{r_{i-\frac{1}{2}}^I \delta r_i}(r_{i}^{I}k_{s,i+\frac{1}{2}}\frac{T_{s,i+1}^{n}-T_{s,i}^{n}}{\delta r_{i+\frac{1}{2}}}-r_{i-1}^{I}k_{s,i-\frac{1}{2}}\frac{T_{s,i}^{n}-T_{s,i-1}^{n}}{\delta r_{i-\frac{1}{2}}})+T_{s,i}^{n}+\frac{\dot{q}^{'''}_s}{\rho_s c_s}.\nonumber\\
-\end{eqnarray} 
+\end{eqnarray}
 
 \section{Boundary conditions}
 The temperatures at front and back are derived from the boundary conditions. The boundary condition at front is always
 
 \begin{equation}
 \label{bc_front}
-  -k_s \frac{\partial T}{\partial x} (0,t) 
+  -k_s \frac{\partial T}{\partial x} (0,t)
   = -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta x_{\frac{1}{2}}}
   =  \dot{q}_{c}^{''}+\dot{q}_{r}^{''}
 \end{equation}
@@ -1100,9 +1103,9 @@ which leads to approximation for the radiative flux
 
 \begin{equation}
 \label{radi}
-  \dot{q}_{r,net}^{'''^{n+1}} 
-  = \dot{q}_{r, in}^{'''} - \epsilon\sigma T_{s,\frac{1}{2}}^{n+1^4} 
-  \approx \dot{q}_{r, in}^{'''} - \epsilon\sigma T_{s,\frac{1}{2}}^{n^4} - 4\epsilon\sigma T_{s,\frac{1}{2}}^{n^3}(T_{s,\frac{1}{2}}^{n+1}-T_{s,\frac{1}{2}}^n) 
+  \dot{q}_{r,net}^{'''^{n+1}}
+  = \dot{q}_{r, in}^{'''} - \epsilon\sigma T_{s,\frac{1}{2}}^{n+1^4}
+  \approx \dot{q}_{r, in}^{'''} - \epsilon\sigma T_{s,\frac{1}{2}}^{n^4} - 4\epsilon\sigma T_{s,\frac{1}{2}}^{n^3}(T_{s,\frac{1}{2}}^{n+1}-T_{s,\frac{1}{2}}^n)
   = \dot{q}_{r, in}^{'''}-4\epsilon\sigma T_{s,\frac{1}{2}}^{n^3}T_{s,\frac{1}{2}}^{n+1} + 3\epsilon\sigma T_{s,\frac{1}{2}}^{n^4}.
 \end{equation}
 
@@ -1111,7 +1114,7 @@ Now the front boundary condition is
 \begin{equation}
 \label{bc_front_2}
   -k_s \frac{T_1^{n+1}-T_0^{n+1}}{\delta x_{\frac{1}{2}}}
-  \approx h(T_g - \frac{1}{2}(T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1})) + 
+  \approx h(T_g - \frac{1}{2}(T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1})) +
   \dot{q}_{r, in}^{'''}-4\epsilon\sigma T_{s,\frac{1}{2}}^{n^3}T_{s,\frac{1}{2}}^{n+1} + 3\epsilon\sigma T_{s,\frac{1}{2}}^{n^4}
 \end{equation}
 
@@ -1120,7 +1123,7 @@ When the temperatures of the time step \textit{n+1} are moved to the left side o
 \begin{equation}
 \label{bc_front_3}
   -k_s \frac{T_1^{n+1}-T_0^{n+1}}{\delta x_{\frac{1}{2}}} + \frac{1}{2}hT_{s,\frac{1}{2}}^{n+1} + 4\epsilon\sigma T_{s,\frac{1}{2}}^{n^3} T_{s,\frac{1}{2}}^{n+1}
-  \approx h(T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n) + 
+  \approx h(T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n) +
   \dot{q}_{r, in}^{'''} + 3\epsilon\sigma T_{s,\frac{1}{2}}^{n^4}
 \end{equation}
 
@@ -1136,7 +1139,7 @@ and therefore the boundary condition becomes
 \begin{equation}
 \label{bc_front_4}
   -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta x_{\frac{1}{2}}} + (\frac{1}{2}h+ 4\epsilon\sigma T_{s,\frac{1}{2}}^{n^3}) \frac{T_{s,1}^{n+1}+T_{s,0}^{n+1}}{2}
-  \approx h(T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n) + 
+  \approx h(T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n) +
   \dot{q}_{r, in}^{'''} + 3\epsilon\sigma T_{s,\frac{1}{2}}^{n^4}
 \end{equation}
 
@@ -1163,7 +1166,7 @@ For insulated backing and cylindrical and spherical geometries, the boundary con
   -k_s \frac{\partial T}{\partial x} (N+1,t) = 0.
 \end{equation}
 
-This has been implemented by setting $\epsilon_B$, $\dot{q}_{r,B}^{'''}$ and $h_B$ to 0 in eq.(\ref{TN+1}). 
+This has been implemented by setting $\epsilon_B$, $\dot{q}_{r,B}^{'''}$ and $h_B$ to 0 in eq.(\ref{TN+1}).
 
 \section{Tridiagonal solver}
 After re-arranging the terms, the eq.(\ref{crank-nicolson_2}) becomes (using the denotation of the source code) for all wall cells \textit{i}
