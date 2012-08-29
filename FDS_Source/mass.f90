@@ -429,39 +429,39 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    KK  = WC%ONE_D%KK
    IOR = WC%ONE_D%IOR
 
-   SELECT CASE(IOR)
-      CASE( 1)
-         UN = UU(II,JJ,KK)
-      CASE(-1)
-         UN = UU(II-1,JJ,KK)
-      CASE( 2)
-         UN = VV(II,JJ,KK)
-      CASE(-2)
-         UN = VV(II,JJ-1,KK)
-      CASE( 3)
-         UN = WW(II,JJ,KK)
-      CASE(-3)
-         UN = WW(II,JJ,KK-1)
-   END SELECT
-
-   ! In case of interpolated boundary, use the original velocity, not the averaged value
-
-   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
-
-   SELECT CASE(IOR)
-      CASE( 1)
-         IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,0)   = WC%RHO_F*UN/UU(II,JJ,KK)
-      CASE(-1)
-         IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,0) = WC%RHO_F*UN/UU(II-1,JJ,KK)
-      CASE( 2)
-         IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,0)   = WC%RHO_F*UN/VV(II,JJ,KK)
-      CASE(-2)
-         IF (ABS(VV(II,JJ-1,KK))>TWO_EPSILON_EB) FY(II,JJ-1,KK,0) = WC%RHO_F*UN/VV(II,JJ-1,KK)
-      CASE( 3)
-         IF (ABS(WW(II,JJ,KK))  >TWO_EPSILON_EB) FZ(II,JJ,KK,0)   = WC%RHO_F*UN/WW(II,JJ,KK)
-      CASE(-3)
-         IF (ABS(WW(II,JJ,KK-1))>TWO_EPSILON_EB) FZ(II,JJ,KK-1,0) = WC%RHO_F*UN/WW(II,JJ,KK-1)
-   END SELECT
+   BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
+      CASE DEFAULT
+         SELECT CASE(IOR)
+            CASE( 1)
+               FX(II,JJ,KK,0)   = WC%RHO_F
+            CASE(-1)
+               FX(II-1,JJ,KK,0) = WC%RHO_F
+            CASE( 2)
+               FY(II,JJ,KK,0)   = WC%RHO_F
+            CASE(-2)
+               FY(II,JJ-1,KK,0) = WC%RHO_F
+            CASE( 3)
+               FZ(II,JJ,KK,0)   = WC%RHO_F
+            CASE(-3)
+               FZ(II,JJ,KK-1,0) = WC%RHO_F
+         END SELECT
+      CASE(INTERPOLATED_BOUNDARY)
+         UN = UVW_SAVE(IW)
+         SELECT CASE(IOR)
+            CASE( 1)
+               IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,0)   = WC%RHO_F*UN/UU(II,JJ,KK)
+            CASE(-1)
+               IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,0) = WC%RHO_F*UN/UU(II-1,JJ,KK)
+            CASE( 2)
+               IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,0)   = WC%RHO_F*UN/VV(II,JJ,KK)
+            CASE(-2)
+               IF (ABS(VV(II,JJ-1,KK))>TWO_EPSILON_EB) FY(II,JJ-1,KK,0) = WC%RHO_F*UN/VV(II,JJ-1,KK)
+            CASE( 3)
+               IF (ABS(WW(II,JJ,KK))  >TWO_EPSILON_EB) FZ(II,JJ,KK,0)   = WC%RHO_F*UN/WW(II,JJ,KK)
+            CASE(-3)
+               IF (ABS(WW(II,JJ,KK-1))>TWO_EPSILON_EB) FZ(II,JJ,KK-1,0) = WC%RHO_F*UN/WW(II,JJ,KK-1)
+         END SELECT
+   END SELECT BOUNDARY_SELECT
 
 ENDDO WALL_LOOP
 
@@ -496,41 +496,39 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       KK  = WC%ONE_D%KK
       IOR = WC%ONE_D%IOR
      
-      ! Compute species mass flux on the face of the wall cell
-
-      SELECT CASE(IOR)
-         CASE( 1)
-            UN = UU(II,JJ,KK)
-         CASE(-1)
-            UN = UU(II-1,JJ,KK)
-         CASE( 2)
-            UN = VV(II,JJ,KK)
-         CASE(-2)
-            UN = VV(II,JJ-1,KK)
-         CASE( 3)
-            UN = WW(II,JJ,KK)
-         CASE(-3)
-            UN = WW(II,JJ,KK-1)
-      END SELECT
-
-      ! In case of interpolated boundary, use the original velocity, not the averaged value
-
-      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
-
-      SELECT CASE(IOR)
-         CASE( 1)
-            IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II,JJ,KK)
-         CASE(-1)
-            IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II-1,JJ,KK)
-         CASE( 2)
-            IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/VV(II,JJ,KK)
-         CASE(-2)
-            IF (ABS(VV(II,JJ-1,KK))>TWO_EPSILON_EB) FY(II,JJ-1,KK,N) = WC%RHO_F*WC%ZZ_F(N)*UN/VV(II,JJ-1,KK)
-         CASE( 3) 
-            IF (ABS(WW(II,JJ,KK))  >TWO_EPSILON_EB) FZ(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/WW(II,JJ,KK)
-         CASE(-3) 
-            IF (ABS(WW(II,JJ,KK-1))>TWO_EPSILON_EB) FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)*UN/WW(II,JJ,KK-1)
-      END SELECT
+      BOUNDARY_SELECT_2: SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT
+            SELECT CASE(IOR)
+               CASE( 1)
+                  FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+               CASE(-1)
+                  FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)
+               CASE( 2)
+                  FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+               CASE(-2)
+                  FY(II,JJ-1,KK,N) = WC%RHO_F*WC%ZZ_F(N)
+               CASE( 3)
+                  FZ(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+               CASE(-3)
+                  FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)
+            END SELECT
+         CASE(INTERPOLATED_BOUNDARY)
+            UN = UVW_SAVE(IW)
+            SELECT CASE(IOR)
+               CASE( 1)
+                  IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II,JJ,KK)
+               CASE(-1)
+                  IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II-1,JJ,KK)
+               CASE( 2)
+                  IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/VV(II,JJ,KK)
+               CASE(-2)
+                  IF (ABS(VV(II,JJ-1,KK))>TWO_EPSILON_EB) FY(II,JJ-1,KK,N) = WC%RHO_F*WC%ZZ_F(N)*UN/VV(II,JJ-1,KK)
+               CASE( 3)
+                  IF (ABS(WW(II,JJ,KK))  >TWO_EPSILON_EB) FZ(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/WW(II,JJ,KK)
+               CASE(-3)
+                  IF (ABS(WW(II,JJ,KK-1))>TWO_EPSILON_EB) FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)*UN/WW(II,JJ,KK-1)
+            END SELECT
+      END SELECT BOUNDARY_SELECT_2
 
    ENDDO WALL_LOOP_2
    !$OMP END DO
