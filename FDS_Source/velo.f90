@@ -300,7 +300,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                          MU_DNS/RHO(IIG,JJG,KKG),1._EB/WC%RDN,SURFACE(WC%SURF_INDEX)%ROUGHNESS)
          IF (LES) THEN
             ! Van Driest damping function (see Wilcox, Turbulence Modeling for CFD, 2nd Ed., Eq. (3.104))
-            VDF = MAX(0._EB,1._EB - EXP(-WC%Y_PLUS*APLUS))
+            VDF = 1._EB - EXP(-WC%Y_PLUS*APLUS)
             SELECT CASE (IOR)
                CASE ( 1); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG+1,JJG,KKG))
                CASE (-1); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG-1,JJG,KKG))

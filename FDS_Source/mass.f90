@@ -682,6 +682,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             RHOS(I,J,K) = RHO(I,J,K)-DT*FRHO(I,J,K)
          ENDDO
       ENDDO
@@ -735,7 +736,8 @@ CASE(.TRUE.) PREDICTOR_STEP
       !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
       DO K=1,KBAR
          DO J=1,JBAR
-            DO I=1,IBAR   
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
                CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
             ENDDO
@@ -750,6 +752,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
          ENDDO
       ENDDO
@@ -792,6 +795,7 @@ CASE(.FALSE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
          ENDDO
       ENDDO
@@ -845,7 +849,8 @@ CASE(.FALSE.) PREDICTOR_STEP
       !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
       DO K=1,KBAR
          DO J=1,JBAR
-            DO I=1,IBAR   
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
                CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) 
             ENDDO
@@ -860,6 +865,7 @@ CASE(.FALSE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
          ENDDO
       ENDDO
