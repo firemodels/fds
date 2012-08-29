@@ -169,9 +169,9 @@ TestID(7,8)  = 167;
 TestID(7,9)  = 168;
 TestID(7,10) = 170;
 
-Species{1} = 'O_2';
-Species{2} = 'CO_2';
-Species{3} = 'H_2O';
+Species{1} = 'O$_2$';
+Species{2} = 'CO$_2$';
+Species{3} = 'H$_2$O';
 Species{4} = 'CO';
 Species{5} = 'UHC';
 Species{6} = 'Soot';
@@ -215,7 +215,7 @@ LineWidth = 1.5;
 
 for f = 1:N_Fuels
    for s = 1:NumPoints(f)
-      FDS_File = ['Beyler_Hood_' Fuel{f} '_' num2str(TestID(f,s)) '_devc.csv']
+      FDS_File = ['Beyler_Hood_' Fuel{f} '_' num2str(TestID(f,s)) '_devc.csv'];
       [fds_data] = csvread(FDS_File,2);
       n_fds = size(fds_data,1);
       for ns = 1:N_Species
@@ -227,16 +227,16 @@ end
 
 for ns = 1:N_Species
    hf(ns)=figure(ns);
-   n = 0; 
+   %n = 0; 
    Xmax = max(max(FDSPlot(:,:,ns)));
    Xmax = max(max(max(ExpPlot(:,:,ns))),Xmax);
    Xmax = ceil(Xmax*10)/10;
    for s = 1:NumPoints(f)
       for f = 1:N_Fuels
          XLegendStr{f} = [Fuel{f}];
-         n = n + 1;
-         hX(n) = plot(ExpPlot(f,s,ns),FDSPlot(f,s,ns));
-         set(hX(n),'Marker',marker{f},...
+         %n = n + 1;
+         hX(f) = plot(ExpPlot(f,s,ns),FDSPlot(f,s,ns));
+         set(hX(f),'Marker',marker{f},...
         'MarkerSize',MarkerSize,...
         'MarkerEdgeColor',color{f},...
         'MarkerFaceColor','none',...
@@ -250,7 +250,7 @@ xmin = 0;
 ymin = 0;
 xmax = Xmax;
 ymax = xmax;
-plot([xmin xmax],[ymin ymax],'k-.')
+plot([xmin xmax],[ymin ymax],'k-')
 axis([xmin xmax ymin ymax])
 
 plot_style
@@ -260,8 +260,8 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(1),'DefaultLineLineWidth',Line_Width)
-xtitle = ['Measured $' Species{ns} '$ (volume fraction)'];
-ytitle = ['Predicted $' Species{ns} '$ (volume fraction)'];
+xtitle = ['Measured ' Species{ns} ' (volume fraction)'];
+ytitle = ['Predicted ' Species{ns} ' (volume fraction)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 %legend(hX,XLegendStr,'Location',X_leg_pos)
@@ -286,7 +286,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/FIGURES/Beyler_Hood/Beyler_Hood_' Species{ns}]
+plotname = ['../../Manuals/FDS_Validation_Guide/FIGURES/Beyler_Hood/Beyler_Hood_' Species{ns}];
 print(gcf,'-dpdf',plotname);
    
 clear hX
