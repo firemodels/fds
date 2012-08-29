@@ -31,7 +31,7 @@ flame_height
 cat_mccaffrey
 NIST_RSE
 
-dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
+% dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
 
 cfil = [pwd,'/FDS_validation_dataplot_inputs.csv'];
 vdir = [pwd,'/../../Validation/'];
@@ -41,7 +41,7 @@ qfil = [pwd,'/FDS_validation_scatterplot_inputs.csv'];
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
 scatplot(saved_data,drange,qfil)
 
-Miscellaneous other scripts for special cases
+% Miscellaneous other scripts for special cases
 
 harrisonplumes
 beyler_hood
