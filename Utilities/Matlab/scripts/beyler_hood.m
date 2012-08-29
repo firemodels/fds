@@ -57,24 +57,24 @@ TestID(3,11) = 141;
 
 Fuel{4} = 'methanol';
 
-TestID(3,1)  = 938;
-TestID(3,2)  = 939;
-TestID(3,3)  = 940;
-TestID(3,4)  = 941;
-TestID(3,5)  = 942;
-TestID(3,6)  = 943;
-TestID(3,7)  = 945;
-TestID(3,8)  = 946;
-TestID(3,9)  = 947;
-TestID(3,10) = 948;
-TestID(3,11) = 949;
-TestID(3,12) = 950;
-TestID(3,13) = 951;
-TestID(3,14) = 953;
-TestID(3,15) = 954;
-TestID(3,16) = 955;
-TestID(3,17) = 956;
-TestID(3,18) = 957;
+TestID(4,1)  = 938;
+TestID(4,2)  = 939;
+TestID(4,3)  = 940;
+TestID(4,4)  = 941;
+TestID(4,5)  = 942;
+TestID(4,6)  = 943;
+TestID(4,7)  = 945;
+TestID(4,8)  = 946;
+TestID(4,9)  = 947;
+TestID(4,10) = 948;
+TestID(4,11) = 949;
+TestID(4,12) = 950;
+TestID(4,13) = 951;
+TestID(4,14) = 953;
+TestID(4,15) = 954;
+TestID(4,16) = 955;
+TestID(4,17) = 956;
+TestID(4,18) = 957;
 
 Fuel{5} = 'propane';
 
@@ -219,7 +219,7 @@ for f = 1:N_Fuels
       [fds_data] = csvread(FDS_File,2);
       n_fds = size(fds_data,1);
       for ns = 1:N_Species
-         ExpPlot(f,s,ns) = exp_data(s,(f-1)*N_Fuels+ns);
+         ExpPlot(f,s,ns) = exp_data(s,(f-1)*N_Species+ns);
          FDSPlot(f,s,ns) = mean(fds_data(n_fds-200:n_fds,253+ns));
       end   
    end
@@ -228,8 +228,8 @@ end
 for ns = 1:N_Species
    hf(ns)=figure(ns);
    n = 0; 
-   Xmax = max(max(FDSPlot(:,:,ns)))
-   Xmax = max(max(max(ExpPlot(:,:,ns))),Xmax)
+   Xmax = max(max(FDSPlot(:,:,ns)));
+   Xmax = max(max(max(ExpPlot(:,:,ns))),Xmax);
    Xmax = ceil(Xmax*10)/10;
    for s = 1:NumPoints(f)
       for f = 1:N_Fuels
@@ -260,8 +260,8 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(1),'DefaultLineLineWidth',Line_Width)
-xtitle = ['Measured $' Species{ns} '$ (volume fraction)']
-ytitle = ['Predicted $' Species{ns} '$ (volume fraction)']
+xtitle = ['Measured $' Species{ns} '$ (volume fraction)'];
+ytitle = ['Predicted $' Species{ns} '$ (volume fraction)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 %legend(hX,XLegendStr,'Location',X_leg_pos)
