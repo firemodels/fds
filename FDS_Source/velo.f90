@@ -1887,14 +1887,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
  
             ! Choose the appropriate boundary condition to apply
 
-            IF (HVAC_TANGENTIAL)  THEN
+            HVAC_IF: IF (HVAC_TANGENTIAL)  THEN
 
                VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                ALTERED_GRADIENT(ICD_SGN) = .TRUE.
       
-            ELSE
+            ELSE HVAC_IF
 
                BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
 
@@ -1933,7 +1933,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      ENDIF
 
                END SELECT BOUNDARY_CONDITION
-            ENDIF
+
+            ENDIF HVAC_IF
 
          ELSE INTERPOLATION_IF  ! Use data from another mesh
  
@@ -2715,7 +2716,7 @@ HEAT_TRANSFER_IF: IF (CHECK_HT) THEN
       KKG = WC%ONE_D%KKG
       IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
       CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(IIG,JJG,KKG))
-      UVW = 2._EB*ABS(WC%ONE_D%QRADIN-WC%ONE_D%QRADOUT+WC%ONE_D%QCONF)/(WC%RHO_F*CP)
+      UVW = ABS(WC%ONE_D%QCONF)/(WC%RHO_F*CP)
       IF (UVW>=UVWMAX) THEN
          UVWMAX = UVW
          ICFL=IIG
