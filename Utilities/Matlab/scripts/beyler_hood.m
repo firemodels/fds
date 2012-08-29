@@ -176,6 +176,13 @@ Species{4} = 'CO';
 Species{5} = 'UHC';
 Species{6} = 'Soot';
 
+SaveName{1} = 'O2';
+SaveName{2} = 'CO2';
+SaveName{3} = 'H2O;'
+SaveName{4} = 'CO';
+SaveName{5} = 'UHC';
+SaveName{6} = 'Soot';
+
 NumPoints(1) = 13;
 NumPoints(2) = 11;
 NumPoints(3) = 11;
@@ -286,7 +293,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/FIGURES/Beyler_Hood/Beyler_Hood_' Species{ns}];
+plotname = ['../../Manuals/FDS_Validation_Guide/FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
 print(gcf,'-dpdf',plotname);
    
 clear hX
