@@ -34,7 +34,6 @@ EXTERNCPP int getfileinfo(char *filename, char *sourcedir, FILE_SIZE *filesize);
 EXTERNCPP char *get_zonefilename(char *buffer);
 EXTERNCPP int can_write_to_dir(char *dir);
 EXTERNCPP int file_exists(char *filename);
-EXTERNCPP int getfilesize(char *filename);
 
 EXTERNCPP void free_filelist(filelistdata *filelist, int *nfilelist);
 EXTERNCPP int get_nfilelist(const char *path, char *key) ;

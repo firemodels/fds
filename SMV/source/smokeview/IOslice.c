@@ -933,7 +933,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       return;
     }
     if(settmax_s==0&&settmin_s==0&&sd->compression_type==0){
-      sd->ntimes = (getfilesize(file)-headersize)/framesize;
+      sd->ntimes = (get_filesize(file)-headersize)/framesize;
       if(sliceframestep>1)sd->ntimes/=sliceframestep;
     }
     if(error!=0||sd->ntimes<1){

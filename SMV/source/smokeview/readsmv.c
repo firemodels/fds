@@ -11562,21 +11562,6 @@ void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis, float *dpsi){
   }
 }
 
-/* ------------------ get_filesize ------------------------ */
-
-FILE_SIZE get_filesize(const char *filename){
-  STRUCTSTAT statbuffer;
-  int statfile;
-  FILE_SIZE return_val;
-
-  return_val=0;
-  if(filename==NULL)return return_val;
-  statfile=STAT(filename,&statbuffer);
-  if(statfile!=0)return return_val;
-  return_val = statbuffer.st_size;
-  return return_val;
-}
-
 /* ------------------ get_labels ------------------------ */
 
 void get_labels(char *buffer, int kind, char **label1, char **label2, char prop_buffer[255]){

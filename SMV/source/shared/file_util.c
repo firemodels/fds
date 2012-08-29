@@ -319,18 +319,19 @@ int getfileinfo(char *filename, char *source_dir, FILE_SIZE *filesize){
   return statfile;
 }
 
-  /* ------------------ getfilesize ------------------------ */
+/* ------------------ get_filesize ------------------------ */
 
-int getfilesize(char *filename){
+FILE_SIZE get_filesize(const char *filename){
   STRUCTSTAT statbuffer;
   int statfile;
-  int filesize;
+  FILE_SIZE return_val;
 
-  filesize=0;
+  return_val=0;
+  if(filename==NULL)return return_val;
   statfile=STAT(filename,&statbuffer);
-  if(statfile!=0)return 0;
-  filesize=statbuffer.st_size;
-  return filesize;
+  if(statfile!=0)return return_val;
+  return_val = statbuffer.st_size;
+  return return_val;
 }
 
   /* ------------------ file_exists ------------------------ */
