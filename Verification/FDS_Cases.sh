@@ -30,7 +30,7 @@ $RUNFDS Fires box_burn_away1
 $RUNFDS Fires box_burn_away2
 $RUNFDS Fires box_burn_away3
 $RUNFDS Fires box_burn_away4
-# $RUNFDS Fires couch
+$RUNFDS Fires couch
 $RUNFDS Fires fire_whirl_pool
 $RUNFDS Fires room_fire
 $RUNFDS Fires spray_burner
