@@ -178,7 +178,7 @@ Species{6} = 'Soot';
 
 SaveName{1} = 'O2';
 SaveName{2} = 'CO2';
-SaveName{3} = 'H2O;'
+SaveName{3} = 'H2O';
 SaveName{4} = 'CO';
 SaveName{5} = 'UHC';
 SaveName{6} = 'Soot';
