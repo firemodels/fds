@@ -24,13 +24,14 @@
       SPECIFIC_HEAT          = 2.2464
       BOILING_TEMPERATURE    = 98.5       
       DENSITY                = 684.
-      ABSORPTION_COEFFICIENT = 100. / 
+      / 
 
 &SURF ID                     = 'N-HEPTANE POOL'
       BACKING                = 'INSULATED'
       COLOR                  = 'YELLOW'
       MATL_ID                = 'N-HEPTANE LIQUID'
       THICKNESS              = 0.01
+      CELL_SIZE_FACTOR       = 0.5
       EXTERNAL_FLUX          = 50. /
 
 &VENT ID = 'Sample', SURF_ID = 'N-HEPTANE POOL', XB = -0.5,0.5,-0.5,0.5,0,0.0 /
