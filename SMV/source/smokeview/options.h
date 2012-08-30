@@ -123,6 +123,16 @@
 #define STAT stat
 #endif
 
+#define LINT long int
+#ifdef X64
+#undef LINT
+#ifdef WIN32
+#define LINT __int64
+#else
+#define LINT long long int
+#endif
+#endif
+
 #ifndef pp_OSX
 #define pp_JPEG
 #endif

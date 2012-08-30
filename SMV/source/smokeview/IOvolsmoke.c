@@ -245,8 +245,8 @@ void init_volrender(void){
       NewMemory((void **)&vr->smokecolor_xy1,4*nx*ny*sizeof(float));
       if(vr->ntimes>0){
         NewMemory((void **)&vr->times,vr->ntimes*sizeof(float));
-        NewMemory((void **)&vr->firepos,vr->ntimes*sizeof(long int));
-        NewMemory((void **)&vr->smokepos,vr->ntimes*sizeof(long int));
+        NewMemory((void **)&vr->firepos,vr->ntimes*sizeof(LINT));
+        NewMemory((void **)&vr->smokepos,vr->ntimes*sizeof(LINT));
         NewMemory((void **)&vr->firedataptrs,vr->ntimes*sizeof(float *));
         NewMemory((void **)&vr->smokedataptrs,vr->ntimes*sizeof(float *));
         NewMemory((void **)&vr->dataready,vr->ntimes*sizeof(int));
@@ -1211,7 +1211,8 @@ void drawsmoke3dGPUVOL(void){
 int get_volsmoke_nframes(volrenderdata *vr){
 	slicedata *fireslice, *smokeslice;
   FILE *volstream=NULL;
-  int framesize,skip_local;
+  int framesize;
+  LINT skip_local;
   int nframes;
   FILE_SIZE filesize;
 
@@ -1263,7 +1264,7 @@ float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
   int framesize,returncode;
   float time_local=0.0;
   int endianswitch=0;
-  int skip_local;
+  LINT skip_local;
 
   if(framenum<0||framenum>=vr->ntimes)return time_local;
   smokeslice=vr->smoke;
@@ -1274,7 +1275,7 @@ float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
   skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
   skip_local +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
   skip_local += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
-  skip_local += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
+  skip_local += (LINT)framenum*(LINT)(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
 
   SLICEFILE=fopen(smokeslice->reg_file,"rb");
   if(SLICEFILE==NULL)return time_local;
@@ -1341,7 +1342,8 @@ void get_volsmoke_all_times(volrenderdata *vr){
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 	slicedata *fireslice, *smokeslice;
   FILE *SLICEFILE;
-  int framesize,framesize2,skip_local,returncode;
+  int framesize,framesize2,returncode;
+  LINT skip_local;
   float time_local, *smokeframe_data, *fireframe_data;
   int endianswitch=0;
   char *meshlabel;
@@ -1397,7 +1399,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
     skip_local +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
     skip_local += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
-    skip_local += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
+    skip_local += (LINT)framenum*(LINT)(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
 
     SLICEFILE=fopen(smokeslice->reg_file,"rb");
     if(SLICEFILE==NULL)return;

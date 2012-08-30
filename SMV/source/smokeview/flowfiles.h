@@ -454,7 +454,7 @@ typedef struct _volrenderdata {
   unsigned char *c_smokedata_view, *c_firedata_view;
   float *smokedata_full, *firedata_full;
   float *smokedata_view, *firedata_view;
-  long int *firepos, *smokepos;
+  LINT *firepos, *smokepos;
   void *smokedataptr, *firedataptr;
   void **smokedataptrs, **firedataptrs;
   int *nsmokedata_compressed, *nfiredata_compressed;
