@@ -26,9 +26,9 @@ temp_0 = 298.15;        % intial temperature [K]
 volume = 0.001;         % volume [m^3]
 rho=1.1294838;          % density [kg/m^3]
 R = 8.3145;             % gas constnat [J/mol K]
-mass = rho* volume;     % mass [kg]
+mass = rho*volume;      % mass [kg]
 
-yf0 = [0.7251786; 0.05820957; 0.21661179; 0.0; 0.0];
+yf0 = [0.7252; 0.0582; 0.2166; 0.0; 0.0];
 y_MW = [28.0134; 16.042460; 31.9988; 44.0095; 18.01528]; % [g/mol]
 
 y_hf = [0.0; -74873; 0.0; -393522; -241826]; % [J/mol]
@@ -40,7 +40,7 @@ pres_0 = temp_0*sum(N0)*R/volume;      % initial pressure
 %-----------------------
 % Setup time vector for integration
 %-----------------------
-tspan=0:5:100;
+tspan=0:5:60;
 
 %-----------------------
 % Setup vector of moles for integrator
@@ -105,7 +105,7 @@ while abs(tol0)>tol
     else 
         coeff(:,3) = [20.91111;10.72071;-2.020498;0.146449;9.245722;5.337651;0.0]; 
     end
-    %carbon dooxide cp coeffs [J/mol K]
+    %carbon dioxide cp coeffs [J/mol K]
     if Tf_guess <= 1200
         coeff(:,4) = [24.99735;55.18696;-33.69137;7.948387;-0.136638;-403.6075;-393.5224];    
     else    
@@ -169,17 +169,17 @@ tss=5*(1:16)+25;
 Tf=Tf*ones(1,16);
 dP=dP*ones(1,16);
 
-% tss=[75;80;85;90;95;100];
-% Tf=[Tf;Tf;Tf;Tf;Tf;Tf];
-% dP=[dP;dP;dP;dP;dP;dP];
+tss=[35;40;45;50;55;60];
+Tf=[Tf;Tf;Tf;Tf;Tf;Tf];
+dP=[dP;dP;dP;dP;dP;dP];
 
 %------------------------------------------------
-% Write Expected Data CSV File
+%Write Expected Data CSV File
 %------------------------------------------------
 yff(:,1) = tspan;
 
 header1 = {'Time','O2','CH4','CO2','H2O'};
-filename1 = '../../Verification/Species/EDM_Methane_1Step_Nonpremix_Species.csv';
+filename1 = '../../Verification/Species/EDC_Methane_1Step_Nonpremix_Species.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s, %s\n',header1{:});
 for j=8:length(tspan)
@@ -188,7 +188,7 @@ end
 fclose(fid);
 
 header1 = {'Time','TEMP','PRES'};
-filename1 = '../../Verification/Species/EDM_Methane_1Step_Nonpremix_TempPres.csv';
+filename1 = '../../Verification/Species/EDC_Methane_1Step_Nonpremix_TempPres.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s\n',header1{:});
 for j=1:length(tss)
