@@ -4786,8 +4786,16 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
     int j;
     int maxj;
+    float xhalf;
 
-    constval = xplttemp[plotx]+offset_slice*sd->sliceoffset;
+    if(plotx>0){
+      xhalf = (xplttemp[plotx]+xplttemp[plotx-1])/2.0;
+    }
+    else{
+      xhalf = xplttemp[plotx];
+    }
+
+    constval = xhalf+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
     glBegin(GL_LINES);
     maxj = sd->js2;
@@ -4914,8 +4922,16 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   }
   if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
     int maxi;
+    float yhalf;
 
-    constval = yplttemp[ploty]+offset_slice*sd->sliceoffset;
+    if(ploty>0){
+      yhalf = (yplttemp[ploty]+yplttemp[ploty-1])/2.0;
+    }
+    else{
+      yhalf = yplttemp[ploty];
+    }
+
+    constval = yhalf+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
     maxi = sd->is1+sd->nslicei-1;
     if(sd->is1+1>maxi)maxi=sd->is1+1;
@@ -5048,8 +5064,16 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   }
   if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
     int maxi;
+    float zhalf;
 
-    constval = zplttemp[plotz]+offset_slice*sd->sliceoffset;
+    if(plotz>0){
+      zhalf = (zplttemp[plotz]+zplttemp[plotz-1])/2.0;
+    }
+    else{
+      zhalf = zplttemp[plotz];
+    }
+
+    constval = zhalf+offset_slice*sd->sliceoffset;
     glLineWidth(vectorlinewidth);
     maxi = sd->is1+sd->nslicei-1;
     if(sd->is1+1>maxi)maxi=sd->is1+1;
