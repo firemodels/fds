@@ -1,8 +1,8 @@
-Test Case to examine fixed mixing reaction
+Test Case to examine EDC reaction
 CH4+2*O2->CO2+2*H2O
 ------------------------------------------------
 
-&HEAD CHID='ReactionRate_EDM_O2lim_1Step', TITLE='Fixed_Mixing_Time_Test_Case' /
+&HEAD CHID='ReactionRate_EDC_O2lim_1Step', TITLE='Fixed_Mixing_Time_Test_Case' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC GVEC=0.0, 0.0, 0.0, EDC=.TRUE. /
 &TIME T_END=1.0, DT=0.05 /
@@ -27,9 +27,5 @@ CH4+2*O2->CO2+2*H2O
 &DEVC XB=0.0,0.1,0.0,0.1,0.0,0.1, QUANTITY='MASS FRACTION', STATISTICS='MEAN', SPEC_ID='METHANE',  ID='CH4' /
 &DEVC XB=0.0,0.1,0.0,0.1,0.0,0.1, QUANTITY='MASS FRACTION', STATISTICS='MEAN', SPEC_ID='CARBON DIOXIDE',  ID='CO2' /
 &DEVC XB=0.0,0.1,0.0,0.1,0.0,0.1, QUANTITY='MASS FRACTION', STATISTICS='MEAN', SPEC_ID='WATER VAPOR',  ID='H2O' /
-
-&SLCF PBY = 0.05, QUANTITY = 'MASS FRACTION', SPEC_ID='METHANE' /
-&SLCF PBY = 0.05, QUANTITY = 'MASS FRACTION', SPEC_ID='OXYGEN' /
-&SLCF PBY = 0.05, QUANTITY = 'MASS FRACTION', SPEC_ID='CARBON DIOXIDE' /
 
 &TAIL /
