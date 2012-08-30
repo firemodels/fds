@@ -51,7 +51,7 @@ y0=[N0(1) N0(2) N0(3) N0(4) N0(5)];
 % Pass information to integrator
 %-----------------------
 options = odeset('RelTol',1e-10,'AbsTol',1e-10);
-[T,Y]=ode113(@EDM_spec_methane,tspan,y0, options);
+[T,Y]=ode113(@EDC_spec_methane,tspan,y0, options);
 
 Nf = Y(end,:);
 

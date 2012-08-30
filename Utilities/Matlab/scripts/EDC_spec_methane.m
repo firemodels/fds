@@ -1,7 +1,7 @@
-function dy=EDM_spec_propane(t,y)
+function dy=EDC_spec_methane(t,y)
 
 % (1) - nitrogen
-% (2) - propane
+% (2) - methane
 % (3) - oxygen
 % (4) - co2
 % (5) - h2o
@@ -11,9 +11,9 @@ function dy=EDM_spec_propane(t,y)
 %-----------------------
 
 m=1;                % chemical reaction coefficient fuel
-s=5;                % chemical reaction coefficient oxygen
-c=3;                % chemical reaction coefficient carbon dioxide
-h=4;                % chemical reaction coefficient water vapor
+s=2;                % chemical reaction coefficient oxygen
+c=1;                % chemical reaction coefficient carbon dioxide
+h=2;                % chemical reaction coefficient water vapor
 tau_mix=0.125;      % set mixing time [s]
 
 %-----------------------
