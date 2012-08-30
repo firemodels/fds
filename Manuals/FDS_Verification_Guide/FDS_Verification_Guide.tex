@@ -1619,7 +1619,9 @@ Air is pumped into the box at a rate of 0.5~m/s. Anything that might lead to an 
 natural convection, and random noise. The resulting flow field is shown at the left in Fig.~\ref{symmetry_test}. On the right are plots of the three components of velocity
 at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw
 this off almost immediately.
-\begin{figure}[h!]
+
+
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.png} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.pdf}
@@ -1629,18 +1631,12 @@ this off almost immediately.
 \end{figure}
 
 
+\clearpage
 
 \subsection{Velocity boundary condition implementation (\texorpdfstring{{\bf velocity\_bc\_test}}{velocity\_bc\_test})}
 
-In this example, a simple jet is created by pushing air through a square duct. The obstructions forming the duct are built three different ways. The first way is to build the duct with thin (zero cell thick) plates (bottom of Fig.~\ref{velocity_bc_test_image}). The second is to carve the duct out of a solid block (middle of Fig.~\ref{velocity_bc_test_image}). The third way is to build the duct out of one cell thick plates (top of Fig.~\ref{velocity_bc_test_image}). Ideally, the three jets ought to be exactly the same, but subtle differences in the pressure solution and the random generation of noise lead to three unique flow patterns that are only the same in a time-averaged sense. To test this, the centerline pressure and velocity are recorded for a 2~m/s jet emanating from a 0.8~m square duct that is 5~m long. The grid resolution is fairly crude (0.2~m) because the purpose of this exercise is to show that the steady-state velocity and pressure profiles are essentially the same. Figure~\ref{velocity_bc_test} displays the profiles. The curves ought to overlap each other. Errors in the implementation of the velocity boundary conditions are likely to throw the three cases out of alignment.
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/velocity_bc_test}
-\end{center}
-\caption[Images of {\bf velocity\_bc\_test} case.]{Time-averaged contours of velocity for the {\bf velocity\_bc\_test} case.}
-\label{velocity_bc_test_image}
-\end{figure}
-\begin{figure}[h!]
+In this example, a simple jet is created by pushing air through a square duct. The obstructions forming the duct are built three different ways. The first way is to build the duct with thin (zero cell thick) plates. The second is to carve the duct out of a solid block. The third way is to build the duct out of one cell thick plates. Ideally, the three jets ought to be exactly the same, but subtle differences in the pressure solution and the random generation of noise lead to three unique flow patterns that are only the same in a time-averaged sense. To test this, the centerline pressure and velocity are recorded for a 2~m/s jet emanating from a 0.8~m square duct that is 5~m long. The grid resolution is fairly crude (0.2~m) because the purpose of this exercise is to show that the steady-state velocity and pressure profiles are essentially the same. Figure~\ref{velocity_bc_test} displays the profiles. The curves ought to overlap each other. Errors in the implementation of the velocity boundary conditions are likely to throw the three cases out of alignment.
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_pres} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_vel}
@@ -2032,111 +2028,120 @@ mass of the three combustion products. The figure compares the simple chemistry 
 
 \section{Reaction Rates (\texorpdfstring{\bf ReactionRate\_}{ReactionRate\_})}
 
-This section describes a series of test cases designed to check the reaction rate mechanism for eddy dissipation, finite-rate, and mixed-mode reaction schemes.
+This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. In the infinite-rate case, the rate becomes limited by the species concentrations of the reactants that have mixed. For finite-rate reactions, the rate is dependent on factors such as local species concentration and temperature:
 
-\subsection{Eddy Dissipation Model (EDM) Reactions (\texorpdfstring{\bf ReactionRate\_EDM\_}{ReactionRate\_EDM})}
-
-The eddy dissipation (mixed is burned) reaction model with local extinction is the default reaction mechanism in FDS. The reaction rate is determined by assuming that the consumption rate of fuel for each reaction is determined from the local fuel, oxidizer, and product mass fractions and the turbulent mixing time by the following equation \cite{Poinsot:TNC}:
-
-\begin{equation}\label{eq:EDM}
-\dot{m}^{\prime\prime\prime}_{fuel,i} = \frac{C_{EDM}}{\tau_{mix}} \, \min \left( Y_F,\frac{Y_\OTWO}{s},\beta_{EDM}\frac{Y_P}{(1+s)} \right)
+\begin{equation}\label{eq:Arrheniusratemode}
+\frac{\mbox{d}\phi_\F}{\mbox{d}t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
 \end{equation}
-where $C_{EDM}$ is a model constant related to the turbulent subgrid model, $\beta_{EDM}$ is a model constant related to combustion, and $s$ is the mass stoichiometric coefficient. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species ($\alpha$):
-\begin{equation}\label{eq:spec_ode}
-\frac{dY_{\alpha}}{dt}= \frac{\nu_{\alpha} \, W_{\alpha}}{W_F} \, \dot{m}^{\prime\prime\prime}_{F}
-\end{equation}
-To test this implementation, consider both a one-step methane and a one-step propane reaction:
-\begin{eqnarray}\label{eq:1step_reacs}
-\mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O} \\
-\mathrm{C_3H_8 + 5\, O_2 \rightarrow  3\, CO_2 + 4\, H_2O}
-\end{eqnarray}
-In both cases the reactants are premixed and react in a constant volume, adiabatic enclosure under stoichiometric conditions with a fixed mixing time, $\tau_{mix}=0.125$~s (Figure \ref{fig:EDM_1Step}). Using Equations \ref{eq:EDM} and \ref{eq:spec_ode}, species evolutions from FDS simulations are compared to expected values.
+More detailed discussion on the combustion routines can be found in the FDS Technical Reference Guide \cite{FDS_Tech_Guide}.
 
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_CH4_Spec} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_C3H8_Spec}
-\end{tabular*}
-\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a one-step EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s. (Left) Methane reaction (Right) Propane reaction}
-\label{fig:EDM_1Step}
-\end{figure}
-We also want to compare FDS predictions for temperature and pressure. For this reacting system, the internal energy remains constant, so temperature can be found from:
-\begin{equation}\label{eq:del_u}
-\overline{u}_{P,\alpha} - \overline{u}_{R,\alpha} = 0
-\end{equation}
-where $P$ is products, $R$ is reactants, and $\overline{u}_{\alpha}=\overline{h}_{\alpha}-\overline{R}T$. In this case, $\overline{h}_{\alpha}$ is defined as the sum of the enthalpy of formation ($\overline{h}_{f}^{\circ}$) and sensible enthalpy ($\Delta \overline{h}$) for each of the $\alpha$ species. Assuming the products behave like an ideal gas, the final pressure can be found using the equation of state for an ideal gas:
-\begin{equation}\label{eq:ideal_gas}
-PV = n\overline{R}T
+\subsection{Mixing-Controlled Reactions (\texorpdfstring{\bf ReactionRate\_EDC\_}{ReactionRate\_EDC})}
+
+The cases presented in the section are designed to examine species evolutions for reactions of varying complexity using the EDC model with infinitely fast chemistry. The first test case is a one-step methane reaction that occurs in a constant volume, adiabatic "reactor'' with a fixed mixing time of $\tau_{mix}=0.125$~s. Each computational cell contains a stoichiometric mixture of fuel and air. In this problem ``air" is defined to be 21\% oxygen and 79\% nitrogen by volume. 
+\begin{equation}\label{eq:1step_methane}
+\mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O}
 \end{equation}
 
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_CH4_Temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_CH4_Pres}
-\end{tabular*}
-\caption[Temperature Evolution in Mixing Controlled Reaction]{Temperature (left) and pressure (right) evolution for a one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
-\label{fig:EDM_Methane_TempPres}
-\end{figure}
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_C3H8_Temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_C3H8_Pres}
-\end{tabular*}
-\caption[Temperature Evolution in Mixing Controlled Reaction]{Temperature (left) and pressure (right) evolution for a one-step propane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
-\label{fig:EDM_Propane_TempPres}
-\end{figure}
-A non-premixed, fuel-rich case is also analyzed for the one-step methane reaction. Figures \ref{fig:EDM_methan_nonpremix_spec} and \ref{fig:EDM_methan_nonpremix_TempPres} show the species concentrations, temperature, and pressure from FDS and the expected values. The figures show that the only difference is that the final state is not reached until approximately 35 seconds compared to 1 second for the premixed cases.
-
-\begin{figure}[ht]
+\begin{figure}[h!]
 \begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_1Step_Nonpremix_Spec}
-\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a non-premixed one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.001$~s. }
-\label{fig:EDM_methan_nonpremix_spec}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_CH4_Spec}
+\caption[Species Evolution in a One-Step Methane EDC Reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\label{fig:EDC_1Step_meth_spec}
 \end{center}
 \end{figure}
 
-\begin{figure}[ht]
+In addition to species, we want to compare FDS predictions for temperature and pressure. For this reacting system, the internal energy remains constant, so temperature can be found from:
+\begin{equation}\label{eq:del_u}
+\overline{u}_{P,\alpha} - \overline{u}_{R,\alpha} = 0
+\end{equation}
+where $P$ is products, $R$ is reactants, and $\overline{u}_{\alpha}=\overline{h}_{\alpha}-\overline{R}T$. The total enthalpy, $\overline{h}_{\alpha}$, is defined as the sum of the enthalpy of formation ($\overline{h}_{f}^{\circ}$) and sensible enthalpy ($\Delta \overline{h}$) for each of the $\alpha$ species. Assuming the products behave like an ideal gas, the final pressure can be found using the equation of state for an ideal gas:
+\begin{equation}\label{eq:ideal_gas}
+PV = n\overline{R}T
+\end{equation}  
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_1Step_Nonpremix_Temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_1Step_Nonpremix_Pres}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_CH4_Temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_CH4_Pres}
 \end{tabular*}
-\caption[Temperature Evolution in Mixing Controlled Reaction]{Temperature (left) and pressure (right) evolution for a non-premixed one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.001$~s.}
-\label{fig:EDM_methan_nonpremix_TempPres}
+\caption[Temperature and Pressure Evolution in a One-Step Methane EDC Reaction]{Time evolution of temperature and pressure for a one-step methane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\label{fig:EDC_1Step_meth_temppres}
 \end{figure}
 
-Additionally, the EDM reaction implementation is tested to check species evolution for a two-step methane reaction:
+Under the same conditions as the methane case, species, temperature, and pressure are compared to expected results for a one-step propane reaction:
+\begin{equation}\label{eq:1step_propane}
+\mathrm{C_3H_8 + 5\, O_2 \rightarrow  3\, CO_2 + 4\, H_2O}
+\end{equation}
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_C3H8_Spec}
+\caption[Species Evolution in a One-Step Propane EDC Reaction]{Time evolution of species mass fraction for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\label{fig:EDC_1Step_prop_spec}
+\end{center}
+\end{figure}
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_C3H8_Temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_C3H8_Pres}
+\end{tabular*}
+\caption[Temperature and Pressure Evolution in a One-Step Propane EDC Reaction]{Time evolution of temperature and pressure for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\label{fig:EDC_1Step_prop_temppres}
+\end{figure}
+The results for the propane case are shown in Figure \ref{fig:EDC_1Step_prop_spec} (species) and \ref{fig:EDC_1Step_prop_temppres} (temperature and pressure).
 
+In the previous two examples each computational cell contained a stoichiometric mixture of fuel and air. For this third example cells are initialized to be all fuel in one part of the reactor and all air in the remaining volume. Globally, the reactor is fuel rich and follows the same one-step methane reaction as described by \ref{eq:1step_methane}. Figures \ref{fig:EDC_meth_non_spec} and \ref{fig:EDC_meth_non_temppres} show the species concentrations, temperature, and pressure from FDS and the expected values. In this case the final state is not reached until approximately 35 seconds compared to 1 second for the cases where each cell contained a flammable composition.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_1Step_Nonmix_Spec}
+\caption[Species Evolution in One-Step Methane EDC Reaction]{Time evolution of species mass fraction for a one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s. }
+\label{fig:EDC_meth_non_spec}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_1Step_Nonmix_Temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_1Step_Nonmix_Pres}
+\end{tabular*}
+\caption[Temperature and Pressure Evolution in a One-Step Methane EDC Reaction]{Temperature (left) and pressure (right) evolution for a one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\label{fig:EDC_meth_non_temppres}
+\end{figure}
+
+The EDC reaction implementation is also tested to check species evolution for chemical reactions of increased complexity. The first is a consecutive two-step, fuel-limited methane reaction:
 \begin{eqnarray}\label{eq:2step_methane}
-\mathrm{CH_4 + 1.5 \, O_2 \rightarrow  CO + 2 \, H_2O} \\
-\nonumber \mathrm{CO + 0.5 \, O_2 \rightarrow CO_2}
+\mathrm{CH_4 + 1.5 \, O_2} &\rightarrow&  \mathrm{CO + 2 \, H_2O} \\
+\nonumber \mathrm{CO + 0.5 \, O_2} &\rightarrow& \mathrm{CO_2}
 \end{eqnarray}
-for both fuel-limited and oxygen-limited conditions with a fixed mixing time, $\tau_{mix}=0.1$~s (Figure \ref{fig:EDM_2Step}).
+Each cell in the model reaction is initialized with an oxygen rich mixture and the mixing time, $\tau_{mix}$, is fixed at $0.1$~seconds (Figure \ref{fig:EDC_2Step_fuel}).
 
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_2Step} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_O2lim_2Step}
-\end{tabular*}
-\caption[Species Evolution in EDM Reaction]{Time evolution of species mass fraction for a two-step EDM reaction with a fixed mixing time of $\tau_{mix}=0.1$~s. (Left) Fuel-limited reaction. (Right) Oxygen-limited reaction.}
-\label{fig:EDM_2Step}
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_2Step}
+\caption[Species Evolution in Two-Step Methane EDC Reaction]{Time evolution of species mass fraction for a two-step, fuel-limited EDC reaction with a fixed mixing time of $\tau_{mix}=0.1$~s.}
+\label{fig:EDC_2Step_fuel}
+\end{center}
 \end{figure}
+
+The second test case has two competing, oxygen-limited reactions; a one-step methane and one-step propane reaction.
+\begin{eqnarray}\label{eq:2step_o2_lim}
+\mathrm{CH_4 + 2 \, O_2} &\rightarrow&  \mathrm{CO_2 + 2 \, H_2O} \\
+\nonumber \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow& \mathrm{3 \,CO_2 + 4 \, H_2O}
+\end{eqnarray}
+The species evolutions are compared to expected values in Figure \ref{fig:EDC_2Step_ox}.
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_O2lim_2Step}
+\caption[Species Evolution in Two Competing EDC Reactions]{Time evolution of species mass fraction for a two-step, oxygen-limited EDC reaction with a fixed mixing time of $\tau_{mix}=0.1$~s.}
+\label{fig:EDC_2Step_ox}
+\end{center}
+\end{figure}
+
+
+
 
 \subsection{Finite Rate Reactions (\texorpdfstring{\bf ReactionRate\_Arrhenius\_}{ReactionRate\_Arrhenius\_})}
 
-The solution process for species evolution in finite rate reactions is similar to mixing-controlled reactions in that species evolution is found by solving a system of ordinary differential equations similar to (\ref{eq:spec_ode}). The main difference between the mechanisms is that instead of the reaction rate being determined by the turbulent mixing time, the reaction rate in finite rate reactions is found using an Arrhenius reaction equation:
-\begin{equation}\label{eq:FR_Arr}
-{k}_{i}=-AT^{n_{\alpha}}\exp(-E/RT)
-\end{equation}
-where $A$ is the pre-exponential, $E$ is the activation energy, and $n_{\alpha}$ determines the temperature dependence of the reaction. $A$, $E$, and $n_{\alpha}$ are user defined inputs based on a specifically defined reaction. The species mass flux for each reaction is defined by:
-\begin{equation}\label{eq:FR_mdot}
-\dot{m}^{\prime\prime\prime}_{\alpha,i}=k_{i}\,\displaystyle\prod Y_{\alpha}^{a_{\alpha,i}}
-\end{equation}
-where $a_{\alpha,i}$ is a vector of species exponents defined by the user. To determine the species evolution for the reaction, a system of ordinary equations is solved for each of the participating species:
-\begin{equation}\label{eq:FR_spec}
-\frac{dY_{\alpha}}{dt}=\displaystyle\sum_{i=1}^{NR} \dot{m}^{\prime\prime\prime}_{\alpha,i}
-\end{equation}
-where $\alpha$ represents each species and $\mathrm{NR}$ is the number of reactions. The values of $a_{\alpha}$ in Equation (\ref{eq:FR_mdot}) are specific to each reaction and for non-zero values, Equation (\ref{eq:FR_spec}) becomes  a system of non-linear differential equations. We consider both linear and non-linear cases with one and two-step reaction mechanisms. First we examine two one-step cases; a zero-order and second-order reaction. Equation (\ref{eq:1step_CO}) shows a one-step, zero-order test case of carbon monoxide oxidation:
+The main difference between Arrhenius rate reactions and the mixing-controlled reactions is that the reaction rate in finite rate reactions is found from local parameters such as species concentration and temperature as well as rate constants. The values of $a_{\alpha}$ in Equation (\ref{eq:Arrheniusratemode}) are specific to each reaction and for non-zero values, $\frac{\mbox{d}\phi_{F}}{\mbox{d}t}$ becomes  a non-linear differential equation. We consider both linear and non-linear cases with one and two-step reaction mechanisms. First we examine two one-step cases; a zero-order and second-order reaction. Equation (\ref{eq:1step_CO}) shows a one-step, zero-order test case of carbon monoxide oxidation:
 \begin{equation}\label{eq:1step_CO}
 \mathrm{CO+0.5 \, O_2 \rightarrow  CO_2}
 \end{equation}
@@ -2151,11 +2156,11 @@ The reaction rate input parameters are shown in the table below. $E$, $a_{\alpha
 $\alpha$ is defined as [$\mathrm{CO}$ $\mathrm{O_2}$ $\mathrm{CO_2}$].
 \end{center}
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_0Order_1Step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_0Order_1Step}
 \end{center}
-\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction.}
+\caption[Species Evolution in a Zero-Order 1 Step Finite Rate Reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_0Order_1step}
 \end{figure}
 The second test case is a one-step, second-order propane reaction:
@@ -2174,11 +2179,11 @@ The table below shows the reaction rate input parameters. In this case, $a_{\alp
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO_2}$ $\mathrm{H_2O}$].
 \end{center}
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_2Order_1Step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_2Order_1Step}
 \end{center}
-\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction.}
+\caption[Species Evolution in a Second-Order 1 Step Finite Rate Reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
 Multi-step Arrhenius finite rate reactions are also examined. First, we consider a two-step forward propane reaction:
@@ -2197,7 +2202,7 @@ with the following reaction input parameters:
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
-The species evolutions for the two-step 1.75 order reaction mechanism are shown in the left plot in Figure \ref{fig:Arrhenius_175Order_23step}. We also consider a two-step reversible propane reaction:
+The species evolutions for the two-step 1.75 order reaction mechanism are shown in Figure \ref{fig:Arrhenius_175Order_2step}. We also consider a two-step reversible propane reaction:
 \begin{eqnarray}\label{eq:2step_propane_rev}
 \mathrm{C_3H_8+3.5 \, O_2 \rightarrow  3 \, CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2 \leftrightarrow CO_2}
@@ -2214,20 +2219,27 @@ with the following reaction input parameters:
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
-Equation (\ref{eq:2step_propane_rev}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ which the forward only two-step mechanism, Equation (\ref{eq:2step_propane}), does not. This reverse reaction mechanism is represented by three separate reactions on the {\ct REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in the right plot in Figure \ref{fig:Arrhenius_175Order_23step}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
+Equation (\ref{eq:2step_propane_rev}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ which the forward only two-step mechanism, Equation (\ref{eq:2step_propane}), does not. This reverse reaction mechanism is represented by three separate reactions on the {\ct REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in Figure \ref{fig:Arrhenius_175Order_2stepR}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
 \vskip8pt
 Note: the values of $E$ and $A$ used in these examples are necessarily representative of the chemical reactions presented. When using finite rate chemistry consult experimental data or literature for appropriate reaction parameters.
 
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2Step} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2StepR}
-\end{tabular*}
-\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for multi-step Arrhenius finite rate propane reactions. (Left) Two-step reaction. (Right) Two-step reaction with reversible CO reaction.}
-\label{fig:Arrhenius_175Order_23step}
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2Step}
+\end{center}
+\caption[Species Evolution in a 1.75-Order 2 Step Finite Rate Reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions.}
+\label{fig:Arrhenius_175Order_2step}
 \end{figure}
-\vskip8pt
-To couple verification of species mass fraction, compartment temperature, and compartment pressure an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Equation (\ref{eq:2step_propane_rev}), is used to drive the FDS simulation. The initial temperature is set to 350 $^\circ$C to ensure the reaction occurs in timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}. The heat of combustion for reaction \ref{eq:2step_propane_rev} a and \ref{eq:2step_propane_rev} b were found using data from the NIST JANAF tables \cite{NIST_JANAF}. The heat of combustion for the reversible reaction, \ref{eq:2step_propane_rev} c, was calculated by FDS by setting {\ct REVERSIBLE=.TRUE.} on the {\ct REAC} line and identifying the appropriate forward reaction ID.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2StepR}
+\end{center}
+\caption[Species Evolution in a 1.75-Order 2 Step Reversible Finite Rate Reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions.}
+\label{fig:Arrhenius_175Order_2stepR}
+\end{figure}
+
+To couple verification of species mass fraction, compartment temperature, and compartment pressure an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Equation (\ref{eq:2step_propane_rev}), is used to drive the FDS simulation. The initial temperature is set to 350 $^\circ$C to ensure the reaction occurs in timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}.
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
@@ -2238,13 +2250,13 @@ To couple verification of species mass fraction, compartment temperature, and co
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
-Equilibrium values were determined using the NASA code Chemical Equilibrium with Applications (CEA) \cite{Gordon:1994}. A constant volume, constant internal energy equilibrium calculation was performed where the equilibrium values were found by minimizing Helmholtz Energy. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, and $\mathrm{CO_2}$; the same species tracked by FDS.
+Equilibrium values were determined using the NASA code Chemical Equilibrium with Applications (CEA) \cite{Gordon:1994}. A constant volume, constant internal energy equilibrium calculation was performed where the equilibrium values were found by minimizing Helmholtz Energy. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, and $\mathrm{CO_2}$; the same species tracked in the FDS simulation.
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Species}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Species}
 \end{center}
-\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values.}
+\caption[Species Evolution in an Equilibrium Case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values.}
 \label{fig:Arrhenius_2Order_1stepb}
 \end{figure}
 
@@ -2253,11 +2265,9 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Temperature} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Pressure}
 \end{tabular*}
-\caption[Temperature and Pressure equilibrium comparison]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
+\caption[Temperature and Pressure Evolution for Equilibrium Case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
-
-\subsection{Mixed mode reactions (\texorpdfstring{\bf ReactionRate\_Mixed\_}{ReactionRate\_Mixed\_})}
 
 \clearpage
 
