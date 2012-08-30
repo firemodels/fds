@@ -1,8 +1,7 @@
 %-----------------------
 % C Weinschenk
 % Verification of EDM (Species,Temp,Pres)
-% Fuel: Methane
-% Non premix case/fuel rich
+% Fuel: Propane
 % 1/2012
 %-----------------------
 
@@ -16,7 +15,7 @@ close all
 %-------------
 % vector key
 % (1) = nitrogen
-% (2) = methane
+% (2) = propane
 % (3) = oxygen
 % (4) = carbon dioxide
 % (5) = water vapor
@@ -24,14 +23,15 @@ close all
 
 temp_0 = 298.15;        % intial temperature [K]
 volume = 0.001;         % volume [m^3]
-rho=1.1294838;          % density [kg/m^3]
+rho=1.2043424;          % density [kg/m^3]
 R = 8.3145;             % gas constnat [J/mol K]
-mass = rho*volume;      % mass [kg]
+mass = rho* volume;     % mass [kg]
 
-yf0 = [0.7252; 0.0582; 0.2166; 0.0; 0.0];
-y_MW = [28.0134; 16.042460; 31.9988; 44.0095; 18.01528]; % [g/mol]
+yf0 = [0.720828; 0.060321; 0.218851; 0.0; 0.0];  % initial mass fraction
 
-y_hf = [0.0; -74873; 0.0; -393522; -241826]; % [J/mol]
+y_MW = [28.0134; 44.09562; 31.9988; 44.0095; 18.01528]; % [g/mol]
+
+y_hf = [0.0; -103850; 0.0; -393522; -241826]; % [J/mol]
 
 N0 = (1000*volume*rho*yf0)./(y_MW);  % initial moles
 
@@ -40,7 +40,7 @@ pres_0 = temp_0*sum(N0)*R/volume;      % initial pressure
 %-----------------------
 % Setup time vector for integration
 %-----------------------
-tspan=0:5:60;
+tspan=0:0.1:2;
 
 %-----------------------
 % Setup vector of moles for integrator
@@ -51,7 +51,7 @@ y0=[N0(1) N0(2) N0(3) N0(4) N0(5)];
 % Pass information to integrator
 %-----------------------
 options = odeset('RelTol',1e-10,'AbsTol',1e-10);
-[T,Y]=ode113(@EDM_spec_methane,tspan,y0, options);
+[T,Y]=ode113(@EDC_spec_propane,tspan,y0, options);
 
 Nf = Y(end,:);
 
@@ -74,11 +74,11 @@ count = 0;
 while abs(tol0)>tol
     %---------
     %NOTE: coefficients were found from NIST Webbook
-    %---------
+    %---------    
     
     %initial temperature coeffs
     coeff0(:,1) = [28.98641;1.853978;-9.647459;16.63537;0.000117;-8.671914;0.0];
-    coeff0(:,2) = [-0.703029;108.4773;-42.52157;5.862788;0.678565;-76.84376;-74.87310];
+    coeff0(:,2) = [1;1;1;1;1;1;1]; %placeholder for propane
     coeff0(:,3) = [31.32234;-20.23531;57.86644;-36.50624;-0.007374;-8.903471;0.0];
     coeff0(:,4) = [24.99735;55.18696;-33.69137;7.948387;-0.136638;-403.6075;-393.5224];
     coeff0(:,5) = [30.09200;6.832514;6.793435;-2.534480;0.082139;-250.8810;-241.8264];
@@ -91,11 +91,11 @@ while abs(tol0)>tol
     else 
         coeff(:,1) = [35.51872;1.128728;-0.196103;0.014662;-4.553760;-18.97091;0.0]; 
     end
-    %methane cp coeffs [J/mol K]
+    %propane cp coeffs [J/mol K]
     if Tf_guess <= 1300
-        coeff(:,2) = [-0.703029;108.4773;-42.52157;5.862788;0.678565;-76.84376;-74.87310];
+        coeff(:,2) = [1;1;1;1;1;1;1]; %placeholder for propane
     else
-        coeff(:,2) = [85.81217;11.26467;-2.114146;0.138190;-26.42221;-153.5327;-74.87310];
+        coeff(:,2) = [1;1;1;1;1;1;1]; %placeholder for propane
     end
     %oxygen cp coeffs [J/mol K]
     if Tf_guess <=700
@@ -105,7 +105,7 @@ while abs(tol0)>tol
     else 
         coeff(:,3) = [20.91111;10.72071;-2.020498;0.146449;9.245722;5.337651;0.0]; 
     end
-    %carbon dioxide cp coeffs [J/mol K]
+    %carbon dooxide cp coeffs [J/mol K]
     if Tf_guess <= 1200
         coeff(:,4) = [24.99735;55.18696;-33.69137;7.948387;-0.136638;-403.6075;-393.5224];    
     else    
@@ -127,9 +127,17 @@ while abs(tol0)>tol
                 * 1000;
         end
     end
+    
+    %overwrite del_h(2,:) for propane
+    coeff2(:,1) = [1.67536e-9;-5.46675e-6;4.38029e-3;2.7949;6.11728e2];
+    for j=1:3
+        del_h(2,j)=((1/5)*coeff2(1,1)*Tf_guess(j)^5+(1/4)*coeff2(2,1)*Tf_guess(j)^4+(1/3)*coeff2(3,1)*Tf_guess(j)^3+(1/2)*coeff2(4,1)*Tf_guess(j)^2+coeff2(5,1)*Tf_guess(j))...
+            -((1/5)*coeff2(1,1)*temp_0^5+(1/4)*coeff2(2,1)*temp_0^4+(1/3)*coeff2(3,1)*temp_0^3+(1/2)*coeff2(4,1)*temp_0^2+coeff2(5,1)*temp_0)...
+            .* (Tf_guess(j) - temp_0);
+    end
    
     h_fc = Nf(4)*y_hf(4)+Nf(5)*y_hf(5)-N0(2)*y_hf(2);
-    del_hN = Nf(1).*del_h(1,:)+Nf(4).*del_h(4,:)+Nf(5).*del_h(5,:)+Nf(2).*del_h(2,:);
+    del_hN = Nf(1).*del_h(1,:)+Nf(4).*del_h(4,:)+Nf(5).*del_h(5,:);
     RT0 = sum(N0)*R*temp_0;
     RTf = -sum(Nf)*R*Tf_guess;
 
@@ -156,7 +164,6 @@ while abs(tol0)>tol
  
     count = count+1;
 end
-
 Tf=Tf_guess(2);
 Pf=(Tf_guess(2)*sum(Nf)*R)/volume;
 dP = Pf-pres_0;
@@ -165,30 +172,27 @@ Tf = Tf - 273.15;
 %-----------------------
 % Create SS Vector of T and P
 %-----------------------
-tss=5*(1:16)+25;
-Tf=Tf*ones(1,16);
-dP=dP*ones(1,16);
 
-tss=[35;40;45;50;55;60];
-Tf=[Tf;Tf;Tf;Tf;Tf;Tf];
-dP=[dP;dP;dP;dP;dP;dP];
+tss=[1;1.25;1.5;1.75;2];
+Tf=[Tf;Tf;Tf;Tf;Tf];
+dP=[dP;dP;dP;dP;dP];
 
 %------------------------------------------------
-%Write Expected Data CSV File
+% Write Expected Data CSV File
 %------------------------------------------------
 yff(:,1) = tspan;
 
-header1 = {'Time','O2','CH4','CO2','H2O'};
-filename1 = '../../Verification/Species/EDC_Methane_1Step_Nonpremix_Species.csv';
+header1 = {'Time','O2','C3H8','CO2','H2O'};
+filename1 = '../../Verification/Species/EDC_Propane_1Step_Species.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s, %s\n',header1{:});
-for j=8:length(tspan)
+for j=1:length(tspan)
     fprintf(fid,'%f, %f, %f, %f, %f\n',yff(j,:));
 end
 fclose(fid);
 
 header1 = {'Time','TEMP','PRES'};
-filename1 = '../../Verification/Species/EDC_Methane_1Step_Nonpremix_TempPres.csv';
+filename1 = '../../Verification/Species/EDC_Propane_1Step_TempPres.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s\n',header1{:});
 for j=1:length(tss)
