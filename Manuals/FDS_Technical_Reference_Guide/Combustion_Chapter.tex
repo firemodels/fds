@@ -88,13 +88,13 @@ The remaining coefficients come from an atom balance. Consider a methane - air r
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline  & {\ct AIR} & {\ct FUEL} & {\ct PRODUCTS} \\ \hline \hline
-{\ct METHANE}           & 0.000000 & 1.000000 & 0.000000 \\
-{\ct NITROGEN}          & 0.763017 & 0.000000 & 0.720373 \\
-{\ct OXYGEN}            & 0.231163 & 0.000000 & 0.000000 \\
-{\ct CARBON DIOXIDE}    & 0.000592 & 0.000000 & 0.143067 \\
-{\ct CARBON MONOXIDE}   & 0.000000 & 0.000000 & 0.005589 \\ 
-{\ct WATER VAPOR}       & 0.005228 & 0.000000 & 0.130412 \\
-{\ct SOOT}              & 0.000000 & 0.000000 & 0.000559 \\ \hline
+{CH$_4$}           & 0.000000 & 1.000000 & 0.000000 \\
+{N$_2$}            & 0.763017 & 0.000000 & 0.720373 \\
+{O$_2$}            & 0.231163 & 0.000000 & 0.000000 \\
+{CO$_2$}           & 0.000592 & 0.000000 & 0.143067 \\
+{CO}               & 0.000000 & 0.000000 & 0.005589 \\ 
+{H$_2$O}           & 0.005228 & 0.000000 & 0.130412 \\
+{C}                & 0.000000 & 0.000000 & 0.000559 \\ \hline
 \end{tabular}
 \end{center}
 
@@ -120,13 +120,15 @@ If we revisit Eq.~(\ref{eq:full_lump}) but decompose the reaction into all primi
 In this formulation, we would have to solve transport equations for six species compared to two when the species were lumped. Note that in cases with all primitive species, $A$ becomes an identity matrix:
 
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|}
-\hline  & {\ct METHANE}  & {\ct NITROGEN} & {\ct OXYGEN} & {\ct CARBON DIOXIDE} & {\ct WATER VAPOR} \\ \hline \hline
-{\ct METHANE}           & 1.000000 & 0.000000 & 0.000000 & 0.000000 & 0.000000 \\
-{\ct NITROGEN}          & 0.000000 & 1.000000 & 0.000000 & 0.000000 & 0.000000 \\
-{\ct OXYGEN}            & 0.000000 & 0.000000 & 1.000000 & 0.000000 & 0.000000 \\
-{\ct CARBON DIOXIDE}    & 0.000000 & 0.000000 & 0.000000 & 1.000000 & 0.000000 \\
-{\ct WATER VAPOR}       & 0.000000 & 0.000000 & 0.000000 & 0.000000 & 1.000000 \\ \hline
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline  & {CH$_4$} & {N$_2$} & {O$_2$} & {CO$_2$} & {CO} & {H$_2$O} & {C} \\ \hline \hline
+{CH$_4$}            & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+{N$_2$}             & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+{O$_2$}             & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+{CO$_2$}            & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 \\
+{CO}                & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 \\ 
+{H$_2$O}            & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 \\ 
+{C}                 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 \\\hline
 \end{tabular}
 \end{center}
 For cases that explicitly track all of the primitive species, FDS could end up solving upwards of 10-20 transport equations depending on the case, with each additional tracked species adding a 5~\% computational cost.
@@ -207,29 +209,6 @@ For closure we require a model for the dissipation rate which is a physical para
 \varepsilon = (\mu_t/\bar{\rho}) \, |\tilde{S}|^2 % - \frac{2}{3} (\nabla\!\cdot \mathbf{u})^2 \right) 
 \end{equation}
 where $|\tilde{S}| \equiv (2 \tilde{S}_{ij} \tilde{S}_{ij})^{1/2}$ is the filtered rate of strain invariant.  Pope \cite{Pope:2000} discusses the important observation that $|\tilde{S}|\sim \Delta^{-2/3}$ for $\Delta$ in the inertial subrange of an incompressible flow.  For this limiting case, the constant coefficient Smagorinsky model gives $(\mu_t/\bar{\rho}) = (C_s \Delta)^2 |\tilde{S}| \sim \Delta^{4/3}$ and we find the dissipation rate is correctly invariant with filter width, $\varepsilon \sim \Delta^{4/3} (\Delta^{-2/3})^2 \sim \Delta^0$.
-
-\subsubsection{Effect of Buoyancy on the Dissipation Rate}
-
-The turbulent viscosity is a critical component of the model: it affects large scale dynamics and energy dissipation, it affects diffusive transport, and it affects the rate of reaction in the EDC combustion model.  As with the mixing rate, it is important that we consider the behavior of the turbulent viscosity as the filter width varies.  Most LES models assume the filter width lies within the inertial subrange.  If this is the case we want to use the dynamic Smagorinsky model \cite{Germano:1991,Moin:1991,Smagorinsky:1}.  If the flow is under-resolved, however, the dynamic model may lead to wildly oscillatory behavior.  For consideration, here we propose a viscosity model to deal with under-resolved, buoyant flows that retains the desired convergent behavior of the dynamic model.  A turbulent viscosity based on the graviational time scale, similar to Teiszen's model \cite{Teiszen:2004b}, may be constructed as follows,
-\begin{equation}
-\label{eqn_muturb}
-\mu_t = \left\{ \begin{array}{rcll} \mu_{\mbox{\scriptsize Smag}}&=&\bar{\rho} (C_s[\mathbf{x},t] \Delta)^2 |\tilde{S}| & \mbox{if} \quad \Delta\le\Delta_g \\ 
-\\
-\mu_{\mbox{\scriptsize Grav}} &=& \displaystyle \frac{\Delta^3}{\mbox{Pr}_t \tau_g} \max(0,\partial \bar{\rho}/\partial z) & \mbox{if} \quad \Delta > \Delta_g  \end{array} \right.
-\end{equation}
-where, employing Eq.~\ref{eqn_tau_grav}, the gravitational length scale is
-\begin{equation}
-\label{eqn_deltag}
-\Delta_g = \frac{2}{g} \left(\frac{\mbox{Pr}_t C_s^2 \bar{\rho} |\tilde{S}| }{\max(0,\partial \bar{\rho}/\partial z) } \right)^2
-\end{equation}
-
-Equation \ref{eqn_deltag}  is derived by equating the viscosities $\mu_{\mbox{\scriptsize Smag}}$ and $\mu_{\mbox{\scriptsize Grav}}$ with $C_s=0.2$ and has the effect of automatically selecting the flow regime.  If the density stratification is neutral or stable ($\partial \bar{\rho}/\partial z \le 0$), then $\Delta_g = \infty$ and we employ the dynamic Smagorinsky model.  On the other hand, if the cell size is large relative the to gravitational length scale, this implies that the unstable stratification will dominate momentum transport and subgrid kinetic energy production.  When the gravitational viscosity is invoked, the LES dissipation rate (i.e. production of subgrid kinetic energy) becomes
-\begin{equation}
-\label{eqn_buoyancy_production}
-\varepsilon = \frac{\mu_{\mbox{\scriptsize Smag}}}{\bar{\rho}^2 \mbox{Pr}_t C_s^2 \sqrt{2}} \sqrt{\!g\Delta} |\tilde{S}| \max(0,\partial \bar{\rho}/\partial z) \end{equation}
-
-Equation \ref{eqn_buoyancy_production} is similar to a typical $k$-$\epsilon$ RANS model for production of turbulent kinetic energy due to buoyancy (see \cite{Teiszen:2004b,Merci:2005}), except here the acceleration scale, typcially just $g$, is given by $\sqrt{\!g\Delta}|\tilde{S}|$, highlighting the interplay between gravity and strain.  Of further note, the quantity $\mu_{\mbox{\scriptsize Smag}}/C_s^2$ corresponds to an effective viscosity from a $k$-$\epsilon$ model, acceptable since the LES viscosity is usually less than that for RANS.  Lastly, note that Eq.~\ref{eqn_buoyancy_production} is unlikely to directly enter into $\tau_{mix}$ since if $\Delta > \Delta_g$ we are likely in a regime where $\tau_g < \tau_u$ (use of the dynamic model makes this difficult to analyze \emph{a priori}).
-
 
 \subsection{Eddy Dissipation Concept}
 \label{sec:EDC} 
