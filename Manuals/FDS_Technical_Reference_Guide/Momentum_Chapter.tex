@@ -191,7 +191,6 @@ where $\overline{u}$ is the average value of $u$ at the grid cell center and $\h
 \ee
 The terms $\hat{v}$ and $\hat{w}$ are defined similarly.
 
-
 \subsection{Thermal Conduction and Gas Species Diffusion}
 
 The other diffusive parameters,
@@ -200,11 +199,6 @@ the thermal conductivity and material diffusivity, are related to the turbulent 
 \quad ; \quad
  (\rho D)_{\alpha,t} =\frac{\mu_t}{\SC_t} \ee
 The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario.
-
-
-
-
-
 
 \subsection{Numerical Implementation}
 
@@ -323,6 +317,23 @@ Once $u^+$ has been determined from the model profile, the stress may be obtaine
 \tau_w = \rho \left( \frac{u}{u^+} \right)^2
 \end{equation}
 Generally, this requires an iterative procedure since $\tau_w$ is needed to define $\delta_\nu$ and hence $y^+$.  The strategy employed in FDS is to first compute $\tau_w$ as if the flow is locally laminar (DNS), and if the calculation is an LES the laminar value is used as an initial guess.  Testing has shown that three iterations is sufficient to converge the residual error in the profile model to 1\%.
+
+\subsection{Wall Damping of the Turbulent Viscosity}
+\label{sec:wall_damping}
+
+The turbulent viscosity $\nu_t = \mu_t/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{mix} = C_s \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the kinematic viscosity has units of length$^2$/time.
+
+The mixing length increases with distance from the wall.  Van Driest (see \cite{Wilcox:1}) proposed the following functionality:
+\begin{equation}
+\ell_{mix} = \kappa \,y \left[ 1 - e^{-y^+/A} \right]
+\end{equation}
+where $\kappa = 0.41$ is the von K\'arm\'an constant and $A=26$.
+
+In FDS, the turbulent viscosity of the first off-wall cell is interpolated between $\nu_t(y=0)=0$ at the wall and $\nu_t(y = 3\delta y/2)$ from the second off-wall cell.  The interpolation function is based on the Van Driest mixing length with $y^+ = (\delta y/2)/\delta_\nu$.  Considering that the viscosity scales with $\ell_{mix}^{\,2}$\,, we obtain
+\begin{equation}
+\nu_t(\delta y/2) = \nu_t(3\delta y/2) \left[ \frac{(1 - e^{-y^+/A}) }{3 ( 1 - e^{-3y^+/A}) } \right]^2
+\end{equation}
+In practice the exponentials are evaluated using truncated Taylor series.
 
 \newpage
 
