@@ -301,11 +301,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          IF (LES) THEN
             MU(IIG,JJG,KKG) = MU_DNS
             ! Van Driest damping function (see Wilcox, Turbulence Modeling for CFD, 2nd Ed., Eq. (3.104))
-            ! VDF = ( (0.5_EB/1.5_EB)*(1._EB - EXP(-WC%Y_PLUS*RAPLUS))/(1._EB - EXP(-3._EB*WC%Y_PLUS*RAPLUS)) )**2
-            ! Below we compute VDF from a truncated Taylor series to avoid the expense of 2 EXP evaluations.
-            ! Note that the Y_PLUS from WALL_MODEL is y+=0.5dy/delta_nu for the first grid cell.  The Y_PLUS
-            ! of the center of the second off-wall cell is 1.5dy/delta_nu = 3y+.  The turbulent viscosity goes
-            ! as the mixing length squared.
             YPA1 = -WC%Y_PLUS*RAPLUS
             YPA2 = YPA1*3._EB
             VDF = ( ONTH*( YPA1 + 0.5_EB*YPA1**2 + ONSI*YPA1**3 )/( YPA2 + 0.5_EB*YPA2**2 + ONSI*YPA2**3 ) )**2
