@@ -68,6 +68,9 @@ copy %sh2bat%\sh2bat.exe %smvdir%\.
 echo copying note.txt
 copy note.txt %smvdir%\.
 
+echo copying wrapup_smv_install_%platform%.bat
+copy wrapup_smv_install_%platform%.bat "%smvdir%\wrapup_smv_install.bat
+
 echo copying smokeview.ini
 copy smokeview.ini %smvdir%\.
 
@@ -83,5 +86,5 @@ wzzip -a -r -p %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\FDS\%fds_edition%\bin"
+wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\FDS\%fds_edition%\bin" -c wrapup_smv_install.bat
 copy %zipbase%.exe ..\.
