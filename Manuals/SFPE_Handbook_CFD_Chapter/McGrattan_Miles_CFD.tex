@@ -285,6 +285,8 @@ The  equations  described  in  the  previous  sections are all written in contin
 
 \subsection{Finite Difference Approximation}
 
+\label{fin_diff}
+
 A commonly used technique for solving the governing conservation equations is known as finite-differencing. The three-dimensional volume of interest, say a room in a building, is subdivided with a mesh made up of many small grid cells, with each cell containing an average value of each flow variable. In general, more grid cells produce a more accurate approximation of the true solution but at increasing computational cost. The simplest meshes consist of cells that are box-shaped with the dimensions of the boxes either fixed or varying. Such a mesh is described as rectilinear. Meshes that conform to the boundaries of complicated objects are known as body-fitted. Fire models that are intended for building applications most often use rectilinear meshes, whereas special applications, like furnaces and combustors, often employ body-fitted coordinate systems.
 
 As an example of how finite-differencing works, consider the discretization of the mass conservation Equation~\ref{eq:masscon} on a three-dimensional rectilinear mesh. The cells are typically indexed by the integers $i$, $j$, and $k$. Each flow variable is represented as an average over the cell volume, $\delta x \; \delta y \; \delta z$, and over the time step, $\delta t$. At the start of the simulation, all the flow variables in each grid cell are assigned an initial value, and as the simulation progresses in time, these values are updated at each discrete time step. A common discretization  technique is to define scalar quantities at the center of each cell and vector components at their respective cell faces. For example, $\rho_{ijk}^n$ represents the average density in the cell with indices $ijk$ at the $n$th time step, whereas $u_{ijk}^n$  and $u_{i-1,jk}^n$ represent the averages of the velocity component $u$ over the faces of the cell that point in the positive and negative directions of $x$ in the standard Cartesian coordinate system. A simple way to advance the density of each cell in time is to write the mass conservation equation in an approximate form as follows:
@@ -366,26 +368,32 @@ The use of fire models currently extends beyond the fire research laboratories a
 
 It is commonly assumed by model users, particularly those who have purchased expensive CFD software, that verification and validation is the responsibility of the model developers. Certainly, CFD developers do a considerable amount of this type of work, in particular verification, but it is impossible to ensure that the model is ``validated'' for every conceivable application. Indeed, the very point of numerical modeling is to predict the outcome of fire scenarios that have not, or cannot be, replicated in a controlled laboratory environment. Thus, the burden of verification and validation must be shared by the model developer and user. The benefit to the user is twofold: first, it confirms that the user can use the software properly, at least for the given application; and second, it assures the user that the model can address the given fire scenario, even providing the user with some estimate of its accuracy.
 
-The term {\em proper use} is relative. There is currently no consensus standard by which CFD model users can be evaluated. As CFD models become easier to use, with improved user interfaces and colorful graphics, there is a risk that users will rush through an analysis without comparing their results quantitatively to either empirical correlations or experimental test data. There exists in the fire literature, in particular this very handbook, a wealth of simple, empirical correlations that summarize decades of fire experiments. It is relatively easy to simulate with a CFD model fire plumes, ceiling jets, single-compartment fires, and so on and compare results. The accuracy of the model can be assessed for various selections of grid size, numerical parameters, and physical properties. Such an exercise is often called a sensitivity analysis, and it should be performed, to some extent, for every application. Indeed, in other fields of engineering, like aerospace, it is virtually impossible to publish results of a CFD analysis unless a grid sensitivity study, at the very least, is performed.
+\subsection{Verification}
 
-In addition to comparisons with simple fire scenarios, the user should obtain or produce experimental measurements for fire scenarios that are representative of the given application. Articles in the various fire journals often describe experiments for which the test data are available on request. If not, at the very least, the model user should reproduce results that can be found in the article itself. In making comparisons with test data, the modeler should evaluate separately the model's ability to (1) predict the burning rate of the fire, (2) predict the transport of hot gases throughout the enclosure, and (3) predict the response of a target, detector, sprinkler, and so on. If the evaluation combines two or three of these processes, it will be impossible to assess the source of the discrepancy between prediction and measurement. The exercise will merely indicate how well or poorly the model is working, but it will not provide any guidance for model improvement. If one is interested in predicting the burning rate or fire growth, then the validation exercise ought to focus on that part of it with the transport algorithm merely providing an estimate of the compartment conditions. To evaluate the transport algorithm, choose test data for which the burning rate has been measured accurately. To evaluate target response, choose test data for which the near-field environment has been characterized. For example, to evaluate a smoke detector activation algorithm, use measured, not predicted, values of velocity, temperature, and smoke concentration near the detector. Otherwise, errors in the CFD prediction will confound the assessment of the detector model.
+The most important task for a CFD modeler to perform a {\em grid resolution study} for the particular application of the model.  
+The accuracy of a CFD calculation is dependent on the resolution of the underlying numerical grid. As discussed in Section~\ref{fin_diff}, the order of accuracy of a numerical algorithm indicates the rate at which the solution of the approximate governing equations converges towards the solution of the exact equations. For example, if the scheme is second-order accurate in space and time, the approximate solution of the governing equations will decrease by a factor of 4 if the grid cell and time step decrease by a factor of 2. Demonstrating this for a particular application of the model is known as a grid resolution study. Selection of an appropriate grid size should be based on whether or not a particular level of accuracy is achieved for a particular grid cell size.
+
+In addition to a grid resolution study, there are a variety of other tests that a model user should perform to ensure that the model is solving the governing equations correctly, and that the model user is running the model properly. What tests to perform depends on the application. For example, if the application involves a pressure rise in a relatively tight compartment, simple tests should be performed to ensure that the pressure increase obeys the basic laws of thermodynamics. If water droplets are involved, simple tests should be performed to ensure that mass and energy conservation laws are properly applied in the model. 
 
 
-\subsection{Applicability of Validation Experiments}
+\subsection{Validation}
+
+The typical way to validate a CFD fire model is to compare its results to experimental measurements. This involves two important tasks -- (1) selecting appropriate experiments and (2) quantifying the accuracy of the model's prediction of the outcome of these experiments. The following two sections address these two tasks.
+
+\paragraph{Applicability of Validation Experiments}
 
 How can one determine if a particular application of the model has been validated? For example, suppose the problem at hand is a fire in a warehouse with a 10~m ceiling, sprinklers, roof vents, and HVAC system. There is probably no experimental data set that is exactly like it, and it would be too expensive to conduct new experiments. How does one determine if any validation work is appropriate for this scenario? The approach taken in a fire model validation study conducted by the U.S.~Nuclear Regulatory Commission (NRC) and the Electrical Power Research Institute (EPRI) was to characterize the experiments used in the study in terms of a handful of commonly used non-dimensional quantities from the fire literature~\cite{Hill:2007}. This essentially defines the ``parameter space'' for which the model was validated. The model users are warned that the models should only be applied within this parameter space. This prevents the tendency by users to simply declare that the model has been validated and can be used for any application. The non-dimensionalized parameters used in the NRC/EPRI study are:
 
-\paragraph{Fire Froude Number, $\dot{Q}^*$}
-
+\begin{description}
+\item[\bf Fire Froude Number, $\dot{Q}^*$:]
 A convenient way to express the heat release rate of the fire relative to its base area is by way of the non-dimensionalized quantity:
 \begin{equation}
  Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} \; D^2}
 \end{equation}
 where $\dot{Q}$ is the peak heat release rate of the fire and $D$ is the equivalent diameter of the base of the fire.
-The Fire Froude Number is a useful quantity for plume correlations and flame height estimates. A large value of $\dot{Q}^*$ describes a fire for which the energy output is relatively large compared to its physical diameter, like an oil well blowout fire.  A low value describes a fire for which the energy output is relatively small compared to its diameter, like a brush fire.  Most common accidental fire scenarios have $\dot{Q}^*$ values on the order of 1.
+The Fire Froude Number is a useful quantity for plume correlations and flame height estimates. A large value of $\dot{Q}^*$ describes a fire for which the energy output is relatively large compared to its physical diameter, like an oil well blowout fire.  A low value describes a fire for which the energy output is relatively small compared to its diameter, like a brush fire.  Most common accidental fire scenarios have $\dot{Q}^*$ values on the order of 1. 
 
-\paragraph{Flame Height relative to Ceiling Height, $L_{\hbox{\tiny f}}/H$}
-
+\item[\bf Flame Height relative to Ceiling Height, $L_{\hbox{\tiny f}}/H$:]
 This ratio is a convenient way to express the physical size of the fire relative to the size of the room. A value greater than
 one indicates that there is flame impingement on the ceiling, an important consideration when evaluating devices such as sprinklers and smoke detectors.
 The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, based on Heskestad's correlation~\cite{Heskestad:FSJ1983}:
@@ -393,8 +401,7 @@ The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, base
    L_{\hbox{\tiny f}} = D \, \left( 3.7 \, (\dot{Q}^*)^{2/5} - 1.02 \right) \label{Heskestad_Flame_Height}
 \end{equation}
 
-\paragraph{Global Equivalence Ratio, $\phi$}
-
+\item[Global Equivalence Ratio, $\phi$:]
 The equivalence ratio is the ratio of the mass flux of fuel from the fire to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio. A convenient way to express this ratio for fire applications is as follows:
 \begin{equation}
    \phi = \frac{\dot{Q}}{\Delta H_{\hbox{\tiny O$_2$}} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
@@ -406,23 +413,19 @@ Here, $\dot{Q}$ is the peak heat release rate of the fire, $\Delta H_{\hbox{\tin
 volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
 In general, under-ventilated fire scenarios are more challenging for the models because the combustion physics are more complicated.
 
-\paragraph{Relative Distance along the Ceiling, $r_{\hbox{\tiny cj}}/H$}
-
+\item[Relative Distance along the Ceiling, $r_{\hbox{\tiny cj}}/H$:]
 This ratio indicates the distance from the fire plume of a sprinkler, smoke detector, {\em etc.}, relative to the
 compartment height, $H$. The maximum ceiling jet temperature, important  in determining device activation, has been shown to be a function of this ratio.
 
-\paragraph{Relative Distance from the Fire, $r_{\hbox{\tiny rad}}/D$}
-
+\item[Relative Distance from the Fire, $r_{\hbox{\tiny rad}}/D$:]
 This ratio indicates whether a ``target'' is near or far from the fire. In general, it is more challenging to predict the
 radiative heat flux to objects near the fire.
 
-\paragraph{Room Length and Width relative to the Ceiling Height, $L/H$ and $W/H$}
-
+\item[Room Length and Width relative to the Ceiling Height, $L/H$ and $W/H$:]
 These ratios are useful mainly when assessing an empirical or zone model because most of the correlations used
 by these models are limited in terms of compartment aspect ratio. For CFD, extreme values of these ratios might indicate unusual fire behavior.
 
-\paragraph{Ceiling Height relative to the Fire Diameter, $H/D^*$}
-
+\item[Ceiling Height relative to the Fire Diameter, $H/D^*$:]
 This ratio is a non-dimensional measure of the height of the fire plume.
 $D^*$ is length scale that incorporates the heat release rate of the fire.
 \begin{equation}
@@ -430,6 +433,7 @@ $D^*$ is length scale that incorporates the heat release rate of the fire.
 \end{equation}
 The larger this ratio, the more important the plume becomes in the overall scenario. For empirical and zone models, it indicates whether or not the plume entrainment
 correlation is appropriate. For CFD, it indicates how ``high'' the plume actually is, in non-dimensional terms.
+\end{description}
 
 
 \subsection{Quantifying Model Uncertainty}
