@@ -398,8 +398,8 @@ The typical way to validate a CFD fire model is to compare its results to experi
 
 How can one determine if a particular application of the model has been validated? For example, suppose the problem at hand is a fire in a warehouse with a 10~m ceiling, sprinklers, roof vents, and HVAC system. There is probably no experimental data set that is exactly like it, and it would be too expensive to conduct new experiments. How does one determine if any validation work is appropriate for this scenario? The approach taken in a fire model validation study conducted by the U.S.~Nuclear Regulatory Commission (NRC) and the Electrical Power Research Institute (EPRI) was to characterize the experiments used in the study in terms of a handful of commonly used non-dimensional quantities from the fire literature~\cite{Hill:2007}. This essentially defines the ``parameter space'' for which the model was validated. The model users are warned that the models should only be applied within this parameter space. This prevents the tendency by users to simply declare that the model has been validated and can be used for any application. The non-dimensionalized parameters used in the NRC/EPRI study are:
 
-\begin{description}
-\item[\bf Fire Froude Number, $\dot{Q}^*$:]
+\begin{enumerate}
+\item {\em Fire Froude Number, $\dot{Q}^*$:}
 A convenient way to express the heat release rate of the fire relative to its base area is by way of the non-dimensionalized quantity:
 \begin{equation}
  Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} \; D^2}
@@ -407,7 +407,7 @@ A convenient way to express the heat release rate of the fire relative to its ba
 where $\dot{Q}$ is the peak heat release rate of the fire and $D$ is the equivalent diameter of the base of the fire.
 The Fire Froude Number is a useful quantity for plume correlations and flame height estimates. A large value of $\dot{Q}^*$ describes a fire for which the energy output is relatively large compared to its physical diameter, like an oil well blowout fire.  A low value describes a fire for which the energy output is relatively small compared to its diameter, like a brush fire.  Most common accidental fire scenarios have $\dot{Q}^*$ values on the order of 1.
 
-\item[\bf Flame Height relative to Ceiling Height, $L_{\hbox{\tiny f}}/H$:]
+\item {\em Flame Height relative to Ceiling Height, $L_{\hbox{\tiny f}}/H$:}
 This ratio is a convenient way to express the physical size of the fire relative to the size of the room. A value greater than
 one indicates that there is flame impingement on the ceiling, an important consideration when evaluating devices such as sprinklers and smoke detectors.
 The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, based on Heskestad's correlation~\cite{Heskestad:FSJ1983}:
@@ -415,7 +415,7 @@ The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, base
    L_{\hbox{\tiny f}} = D \, \left( 3.7 \, (\dot{Q}^*)^{2/5} - 1.02 \right) \label{Heskestad_Flame_Height}
 \end{equation}
 
-\item[Global Equivalence Ratio, $\phi$:]
+\item {\em Global Equivalence Ratio, $\phi$:}
 The equivalence ratio is the ratio of the mass flux of fuel from the fire to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio. A convenient way to express this ratio for fire applications is as follows:
 \begin{equation}
    \phi = \frac{\dot{Q}}{\Delta H_{\hbox{\tiny O$_2$}} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
@@ -427,19 +427,19 @@ Here, $\dot{Q}$ is the peak heat release rate of the fire, $\Delta H_{\hbox{\tin
 volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
 In general, under-ventilated fire scenarios are more challenging for the models because the combustion physics are more complicated.
 
-\item[Relative Distance along the Ceiling, $r_{\hbox{\tiny cj}}/H$:]
+\item {\em Relative Distance along the Ceiling, $r_{\hbox{\tiny cj}}/H$:}
 This ratio indicates the distance from the fire plume of a sprinkler, smoke detector, {\em etc.}, relative to the
 compartment height, $H$. The maximum ceiling jet temperature, important  in determining device activation, has been shown to be a function of this ratio.
 
-\item[Relative Distance from the Fire, $r_{\hbox{\tiny rad}}/D$:]
+\item {\em Relative Distance from the Fire, $r_{\hbox{\tiny rad}}/D$:}
 This ratio indicates whether a ``target'' is near or far from the fire. In general, it is more challenging to predict the
 radiative heat flux to objects near the fire.
 
-\item[Room Length and Width relative to the Ceiling Height, $L/H$ and $W/H$:]
+\item {\em Room Length and Width relative to the Ceiling Height, $L/H$ and $W/H$:}
 These ratios are useful mainly when assessing an empirical or zone model because most of the correlations used
 by these models are limited in terms of compartment aspect ratio. For CFD, extreme values of these ratios might indicate unusual fire behavior.
 
-\item[Ceiling Height relative to the Fire Diameter, $H/D^*$:]
+\item {\em Ceiling Height relative to the Fire Diameter, $H/D^*$:}
 This ratio is a non-dimensional measure of the height of the fire plume.
 $D^*$ is length scale that incorporates the heat release rate of the fire.
 \begin{equation}
@@ -447,10 +447,10 @@ $D^*$ is length scale that incorporates the heat release rate of the fire.
 \end{equation}
 The larger this ratio, the more important the plume becomes in the overall scenario. For empirical and zone models, it indicates whether or not the plume entrainment
 correlation is appropriate. For CFD, it indicates how ``high'' the plume actually is, in non-dimensional terms.
-\end{description}
+\end{enumerate}
 
 
-\subsection{Quantifying Model Uncertainty}
+\paragraph{Quantifying Model Uncertainty}
 
 Having determined the appropriateness of the chosen experiments, it is now necessary to quantify the accuracy of the model in predicting the outcome of these experiments. For each quantity of interest, a summary plot of the results should be constructed like the one shown in Figure~\ref{scatterplot}.
 \begin{figure}[ht]
@@ -458,7 +458,7 @@ Having determined the appropriateness of the chosen experiments, it is now neces
 \caption{A comparison of measured versus predicted wall temperature. The off-diagonal lines indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
 \label{scatterplot}
 \end{figure}
-The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements. For example, the bias factor for the data shown in Figure~\ref{scatterplot} is 1.14. This means that the model has been shown to over-estimate target temperatures by 14~\%, on average, and this is shown graphically by the dash-dot line. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Figure~\ref{scatterplot}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence intervals. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_M$. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge and the dash-dot bias line would overlap the solid diagonal line. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
+The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements. For example, the bias factor for the data shown in Fig.~\ref{scatterplot} is 1.14. This means that the model over-predicts wall temperatures by 14~\%, on average, and this is shown graphically by the dash-dot line. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Fig.~\ref{scatterplot}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the estimated experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence intervals. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_M$. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge and the dash-dot bias line would overlap the solid diagonal line. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
 
 The derivation of the relevant uncertainty statistics is described in Ref.~\cite{McGrattan:Metrologia}, and it is summarized here. The difference between the measured and predicted values is a function of the experimental and the model uncertainty. The purpose of the uncertainty calculation is to subtract off, in a statistical sense, the experimental uncertainty so that the model uncertainty can be estimated. Before describing the calculation, a few assumptions must be made:
 \begin{enumerate}
@@ -488,6 +488,12 @@ Note that the complimentary error function is defined as follows:
    \hbox{erfc}(x) = \frac{2}{\sqrt{\pi}} \int_t^\infty e^{-t^2} dt
 \end{equation}
 It is a standard function in most mathematical or spread sheet programs.
+
+As an example of the procedure, suppose the model depicted in Fig.~\ref{scatterplot} has predicted that the wall temperature within a compartment would reach a peak temperature of 300~$^\circ$C due to a particular design fire. Suppose also that the failure criterion for this particular wall lining material is 325~$^\circ$C. What is the probability that the wall temperature could reach 325~$^\circ$C?
+\begin{equation}
+   P(\Delta T>305) = \frac{1}{2} \hbox{erfc} \left( \frac{305-245.6}{34.4 \sqrt{2}} \right) = 0.04
+\end{equation}
+It must be emphasized that this estimated probability of failure is based only on the model uncertainty. It does not account for parameter uncertainty; that is, the uncertainty in the input parameters. 
 
 
 
@@ -572,6 +578,24 @@ CFD fire modeling is commonly used during the renovation of historic buildings. 
 \label{Dome}
 \end{figure}
 
+\paragraph{Tunnels}
+
+Historically, smoke control inside tunnels was often considered as an afterthought to design of ventilation for the provision of fresh air. Where natural ventilation was insufficient, mechanical ventilation was designed using network flow theory aided in recent years by network models. As a two-layer description is generally not valid within a tunnel environment, fire zone models have been applied to tunnels in only a limited number of cases. CFD, however, is now finding increasing application to fire hazard analysis for road tunnels in particular. In recent years a number of major tunnel fire incidents such as the tragedy in the Mont Blanc tunnel in 1999, resulting in 39 deaths, have highlighted the need to understand better the mechanism of fire development and spread inside tunnels. In particular, heat transfer to the tunnel walls is important to account for correctly as this has a strong influence on the distribution of heat along the tunnel, the degree of stratification that can be expected, and the threat to the integrity of the structure.
+
+One area where CFD has been applied successfully is in the analysis of the critical velocity required in a longitudinally ventilated tunnel to control the spread of heat and smoke so that it is forced in the downstream direction, providing safe conditions upstream~\cite{Hwang}. Another area currently receiving much attention is the choice of design fire for tunnel fire safety design. In the light of the recent tunnel fire incidents and full-scale fire tests~\cite{Ingason}, the size of the fire load that can be generated from what were previously considered as nonhazardous cargoes has been revised. Heat release rates well in excess of 100~MW have been measured for heavy-goods vehicles carrying commercial merchandize.
+
+CFD was used in the investigation into the Mont Blanc tunnel fire incident in 1999. One of the modeling studies involved the use of the JASMINE fire model to re-construct conditions inside the tunnel during the first 30~minutes, during which time most of the fatalities would have occurred. Using information available on the ventilation settings and the location of vehicles, the model predicted the transport of smoke and heat along the length of the tunnel. The data were then fed into a model for fractional effective dose to enable an assessment of when and how the fatalities occurred. Subsequent parametric simulations were performed to investigate whether alternative tunnel ventilation measures would have helped on the day of the incident~\cite{Miles:2004}.
+
+
+\paragraph{Parking Garages}
+
+The application of CFD to the analysis and design of smoke control systems in basement car parks may share elements that apply also to road tunnels. Not only is the potential fire source similar, the ventilation strategies and performance criteria may well overlap. Two ventilation strategies that might be considered in a basement car park include dilution (purging by fresh air) and the directional control of smoke by the application of applied air flows.
+
+While diluting smoke and vehicle emissions can in principle be achieved by ventilating at a specified air change rate, in many cases additional ventilation provisions will be required in order to ensure an even mixing of fresh air and the elimination of stagnant regions. This is commonly achieved by the strategic location of impulse (jet) fans on the underside of the ceiling, which assist the movement of air from the inlet points to the exhaust locations. CFD may be usefully employed to determine the number and location of these fans.
+
+The directional control of smoke in the event of a fire, with the objective of providing a relatively smoke free access to the location of the fire for fire fighting personnel, presents a greater challenge than simply purging smoke from the car park. Here careful design of the ventilation system is required, with the impulse fans operating akin to the case of a longitudinally ventilated tunnel, directing the smoke and heat in a direction away from the approaching personnel.
+
+
 
 \subsection{Fire Investigation}
 
@@ -600,22 +624,6 @@ Most of the assumptions required by integral models can be removed by taking adv
 \end{figure}
 
 
-\subsection{Tunnels}
-
-Historically, smoke control inside tunnels was often considered as an afterthought to design of ventilation for the provision of fresh air. Where natural ventilation was insufficient, mechanical ventilation was designed using network flow theory aided in recent years by network models. As a two-layer description is generally not valid within a tunnel environment, fire zone models have been applied to tunnels in only a limited number of cases. CFD, however, is now finding increasing application to fire hazard analysis for road tunnels in particular. In recent years a number of major tunnel fire incidents such as the tragedy in the Mont Blanc tunnel in 1999, resulting in 39 deaths, have highlighted the need to understand better the mechanism of fire development and spread inside tunnels. In particular, heat transfer to the tunnel walls is important to account for correctly as this has a strong influence on the distribution of heat along the tunnel, the degree of stratification that can be expected, and the threat to the integrity of the structure.
-
-One area where CFD has been applied successfully is in the analysis of the critical velocity required in a longitudinally ventilated tunnel to control the spread of heat and smoke so that it is forced in the downstream direction, providing safe conditions upstream~\cite{Hwang}. Another area currently receiving much attention is the choice of design fire for tunnel fire safety design. In the light of the recent tunnel fire incidents and full-scale fire tests~\cite{Ingason}, the size of the fire load that can be generated from what were previously considered as nonhazardous cargoes has been revised. Heat release rates well in excess of 100~MW have been measured for heavy-goods vehicles carrying commercial merchandize.
-
-CFD was used in the investigation into the Mont Blanc tunnel fire incident in 1999. One of the modeling studies involved the use of the JASMINE fire model to re-construct conditions inside the tunnel during the first 30~minutes, during which time most of the fatalities would have occurred. Using information available on the ventilation settings and the location of vehicles, the model predicted the transport of smoke and heat along the length of the tunnel. The data were then fed into a model for fractional effective dose to enable an assessment of when and how the fatalities occurred. Subsequent parametric simulations were performed to investigate whether alternative tunnel ventilation measures would have helped on the day of the incident~\cite{Miles:2004}.
-
-
-\subsection{Basement Car Parks}
-
-The application of CFD to the analysis and design of smoke control systems in basement car parks may share elements that apply also to road tunnels. Not only is the potential fire source similar, the ventilation strategies and performance criteria may well overlap. Two ventilation strategies that might be considered in a basement car park include dilution (purging by fresh air) and the directional control of smoke by the application of applied air flows.
-
-While diluting smoke and vehicle emissions can in principle be achieved by ventilating at a specified air change rate, in many cases additional ventilation provisions will be required in order to ensure an even mixing of fresh air and the elimination of stagnant regions. This is commonly achieved by the strategic location of impulse (jet) fans on the underside of the ceiling, which assist the movement of air from the inlet points to the exhaust locations. CFD may be usefully employed to determine the number and location of these fans.
-
-The directional control of smoke in the event of a fire, with the objective of providing a relatively smoke free access to the location of the fire for fire fighting personnel, presents a greater challenge than simply purging smoke from the car park. Here careful design of the ventilation system is required, with the impulse fans operating akin to the case of a longitudinally ventilated tunnel, directing the smoke and heat in a direction away from the approaching personnel. Figure {ref} shows an example of the movement of smoke in a large basement car park where impulse fans are employed to provide a clear path from the fire service access stair.
 
 
 
