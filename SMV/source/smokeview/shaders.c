@@ -275,10 +275,11 @@ int setVolSmokeShaders() {
     "uniform vec2 nearfar;"
 #endif
     "uniform sampler3D soot_density_texture,fire_texture,blockage_texture;"
-    "uniform int dir,inside,havefire,volbw;"
+    "uniform int inside,havefire,volbw;"
     "uniform float xyzmaxdiff,dcell,opacity_factor;"
     "uniform float temperature_min,temperature_cutoff,temperature_max;"
     "uniform vec3 eyepos,boxmin,boxmax;"
+    "uniform int drawsides[7];"
     "varying vec3 fragpos;"
     "uniform float mass_extinct;"
     
@@ -310,17 +311,37 @@ int setVolSmokeShaders() {
     "  float tauhat, alphahat, taui, tauterm;"
     "  float dstep,onedn_iter,xi,offset;"
     "  int i,n_iter;"
+    "  int side;"
 
     "  alpha_min=1000000.0;"
     "  dalphamin=-(boxmin-fragpos)/(eyepos-fragpos);"
     "  dalphamax=-(boxmax-fragpos)/(eyepos-fragpos);"
+    "  side=0;"
     "  if(inside==0){"
-    "    if(dir!=-1&&dalphamin.x>0.0&&dalphamin.x<alpha_min)alpha_min=dalphamin.x;"
-    "    if(dir!=1 &&dalphamax.x>0.0&&dalphamax.x<alpha_min)alpha_min=dalphamax.x;"
-    "    if(dir!=-2&&dalphamin.y>0.0&&dalphamin.y<alpha_min)alpha_min=dalphamin.y;"
-    "    if(dir!=2 &&dalphamax.y>0.0&&dalphamax.y<alpha_min)alpha_min=dalphamax.y;"
-    "    if(dir!=-3&&dalphamin.z>0.0&&dalphamin.z<alpha_min)alpha_min=dalphamin.z;"
-    "    if(dir!=3 &&dalphamax.z>0.0&&dalphamax.z<alpha_min)alpha_min=dalphamax.z;"
+    "    if(drawsides[-1+3]==0&&dalphamin.x>0.0&&dalphamin.x<alpha_min){"
+    "      alpha_min=dalphamin.x;"
+    "      side=-1;"
+    "    }"
+    "    if(drawsides[ 1+3]==0&&dalphamax.x>0.0&&dalphamax.x<alpha_min){"
+    "      alpha_min=dalphamax.x;"
+    "      side=1;"
+    "    }"
+    "    if(drawsides[-2+3]==0&&dalphamin.y>0.0&&dalphamin.y<alpha_min){"
+    "      alpha_min=dalphamin.y;"
+    "      side=-2;"
+    "    }"
+    "    if(drawsides[ 2+3]==0&&dalphamax.y>0.0&&dalphamax.y<alpha_min){"
+    "      alpha_min=dalphamax.y;"
+    "      side=2;"
+    "    }"
+    "    if(drawsides[-3+3]==0&&dalphamin.z>0.0&&dalphamin.z<alpha_min){"
+    "      alpha_min=dalphamin.z;"
+    "      side=-3;"
+    "    }"
+    "    if(drawsides[ 3+3]==0&&dalphamax.z>0.0&&dalphamax.z<alpha_min){"
+    "      alpha_min=dalphamax.z;"
+    "      side=3;"
+    "    }"
     "  }" // end inside=0
     "  if(inside==1){"
     "  }" // end inside=1
@@ -447,7 +468,6 @@ int setVolSmokeShaders() {
   printInfoLog(p_volsmoke);
 #endif
   GPUvol_inside = glGetUniformLocation(p_volsmoke,"inside");
-  GPUvol_dir    = glGetUniformLocation(p_volsmoke,"dir");
   GPUvol_eyepos = glGetUniformLocation(p_volsmoke,"eyepos");
 #ifdef pp_GPUDEPTH
   GPUvol_depthtexture = glGetUniformLocation(p_volsmoke,"depthtexture");
@@ -469,6 +489,7 @@ int setVolSmokeShaders() {
   GPUvol_fire = glGetUniformLocation(p_volsmoke,"fire_texture");
   GPUvol_havefire = glGetUniformLocation(p_volsmoke,"havefire");
   GPUvol_smokecolormap = glGetUniformLocation(p_volsmoke,"smokecolormap");
+  GPUvol_drawsides = glGetUniformLocation(p_volsmoke,"drawsides");
 
   if(error_code!=1)return error_code;
   return error_code;

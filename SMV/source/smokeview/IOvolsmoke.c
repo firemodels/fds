@@ -986,10 +986,7 @@ void drawsmoke3dVOL(void){
 #ifdef pp_GPU
 void drawsmoke3dGPUVOL(void){
 
-#define NROWS_GPU 2
-#define NCOLS_GPU 2
   int iwall;
-  float dx, dy, dz;
   mesh *meshold=NULL;
   int ii;
 
@@ -1046,6 +1043,7 @@ void drawsmoke3dGPUVOL(void){
       glUniform1i(GPUvol_inside,meshi->inside);
       glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
       glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
+      glUniform1iv(GPUvol_drawsides,7,meshi->drawsides);
       update_volsmoke_texture(meshi,vr->smokedataptr,vr->firedataptr);
       if(vr->firedataptr!=NULL){
         glUniform1i(GPUvol_havefire,1);
@@ -1070,26 +1068,23 @@ void drawsmoke3dGPUVOL(void){
 
       meshold=meshi;
     }
-    glUniform1i(GPUvol_dir,iwall);
     glBegin(GL_TRIANGLES);
 
     switch (iwall){
       case 1:
       case -1:
-        dy = (meshi->y1-meshi->y0)/(NCOLS_GPU-1);
-        dz = (meshi->z1-meshi->z0)/(NROWS_GPU-1);
         if(iwall<0){
           xx = meshi->x0;
         }
         else{
           xx = meshi->x1;
         }
-        for(i=0;i<NCOLS_GPU-1;i++){
-          yy1 = meshi->y0 + i*dy;
-          yy2 = yy1 + dy;
-          for(j=0;j<NROWS_GPU-1;j++){
-            z1 = meshi->z0 + j*dz;
-            z2 = z1 + dz;
+        for(i=0;i<1;i++){
+          yy1 = meshi->y0;
+          yy2 = meshi->y1;
+          for(j=0;j<1;j++){
+            z1 = meshi->z0;
+            z2 = meshi->z1;
             
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glVertex3f(xx,yy1,z1);
@@ -1114,20 +1109,18 @@ void drawsmoke3dGPUVOL(void){
         break;
       case 2:
       case -2:
-        dx = (meshi->x1-meshi->x0)/(NCOLS_GPU-1);
-        dz = (meshi->z1-meshi->z0)/(NROWS_GPU-1);
         if(iwall<0){
           yy = meshi->y0;
         }
         else{
           yy = meshi->y1;
         }
-        for(i=0;i<NCOLS_GPU-1;i++){
-          x1 = meshi->x0 + i*dx;
-          x2 = x1 + dx;
-          for(j=0;j<NROWS_GPU-1;j++){
-            z1 = meshi->z0 + j*dz;
-            z2 = z1 + dz;
+        for(i=0;i<1;i++){
+          x1 = meshi->x0;
+          x2 = meshi->x1;
+          for(j=0;j<1;j++){
+            z1 = meshi->z0;
+            z2 = meshi->z1;
 
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glVertex3f(x1,yy,z1);
@@ -1152,20 +1145,18 @@ void drawsmoke3dGPUVOL(void){
         break;
       case 3:
       case -3:
-        dx = (meshi->x1-meshi->x0)/(NCOLS_GPU-1);
-        dy = (meshi->y1-meshi->y0)/(NROWS_GPU-1);
         if(iwall<0){
           zz = meshi->z0;
         }
         else{
           zz = meshi->z1;
         }
-        for(i=0;i<NCOLS_GPU-1;i++){
-          x1 = meshi->x0 + i*dx;
-          x2 = x1 + dx;
-          for(j=0;j<NROWS_GPU-1;j++){
-            yy1 = meshi->y0 + j*dy;
-            yy2 = yy1 + dy;
+        for(i=0;i<1;i++){
+          x1 = meshi->x0;
+          x2 = meshi->x1;
+          for(j=0;j<1;j++){
+            yy1 = meshi->y0;
+            yy2 = meshi->y1;
 
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glVertex3f(x1,yy1,zz);

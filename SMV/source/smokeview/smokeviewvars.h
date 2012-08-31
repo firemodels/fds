@@ -168,11 +168,11 @@ SVEXTERN int GPUzone_boxmin, GPUzone_boxmax;
 SVEXTERN int GPUzone_zlay;
 SVEXTERN int GPUzone_odl, GPUzone_odu;
 
-SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff;
+SVEXTERN int GPUvol_inside, GPUvol_eyepos, GPUvol_xyzmaxdiff;
 SVEXTERN int GPUvol_soot_density, GPUvol_fire, GPUvol_blockage;
 SVEXTERN int GPUvol_opacity_factor,GPUvol_volbw,GPUvol_mass_extinct;
 SVEXTERN int GPUvol_temperature_min,GPUvol_temperature_cutoff,GPUvol_temperature_max;
-SVEXTERN int GPUvol_boxmin, GPUvol_boxmax;
+SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_drawsides;
 SVEXTERN int GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
 
 SVEXTERN int GPU3dslice_valtexture,GPU3dslice_colormap;
