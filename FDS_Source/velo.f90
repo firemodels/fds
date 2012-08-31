@@ -51,9 +51,9 @@ USE MATH_FUNCTIONS, ONLY:EVALUATE_RAMP
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_EDDY,DELTA,KSGS,U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
-            DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,MU_DNS,VDF,DUMMY,VEL_GAS,VEL_T,RAMP_T,TSI
+            DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,MU_DNS,VDF,DUMMY,VEL_GAS,VEL_T,RAMP_T,TSI,YPA1,YPA2
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,TURB_MODEL_TMP,IOR
-REAL(EB), PARAMETER :: APLUS = 1._EB/26._EB
+REAL(EB), PARAMETER :: RAPLUS = 1._EB/26._EB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
                                        UP_HAT=>NULL(),VP_HAT=>NULL(),WP_HAT=>NULL(), &
                                        UU=>NULL(),VV=>NULL(),WW=>NULL()
@@ -299,15 +299,31 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          CALL WALL_MODEL(DUMMY,WC%U_TAU,WC%Y_PLUS,VEL_GAS-VEL_T,&
                          MU_DNS/RHO(IIG,JJG,KKG),1._EB/WC%RDN,SURFACE(WC%SURF_INDEX)%ROUGHNESS)
          IF (LES) THEN
+            MU(IIG,JJG,KKG) = MU_DNS
             ! Van Driest damping function (see Wilcox, Turbulence Modeling for CFD, 2nd Ed., Eq. (3.104))
-            VDF = 1._EB - EXP(-WC%Y_PLUS*APLUS)
+            ! VDF = ( (0.5_EB/1.5_EB)*(1._EB - EXP(-WC%Y_PLUS*RAPLUS))/(1._EB - EXP(-3._EB*WC%Y_PLUS*RAPLUS)) )**2
+            ! Below we compute VDF from a truncated Taylor series to avoid the expense of 2 EXP evaluations.
+            ! Note that the Y_PLUS from WALL_MODEL is y+=0.5dy/delta_nu for the first grid cell.  The Y_PLUS
+            ! of the center of the second off-wall cell is 1.5dy/delta_nu = 3y+.  The turbulent viscosity goes
+            ! as the mixing length squared.
+            YPA1 = -WC%Y_PLUS*RAPLUS
+            YPA2 = YPA1*3._EB
+            VDF = ( ONTH*( YPA1 + 0.5_EB*YPA1**2 + ONSI*YPA1**3 )/( YPA2 + 0.5_EB*YPA2**2 + ONSI*YPA2**3 ) )**2
+            VDF = MAX(0._EB,MIN(1._EB,VDF))
+            VDF = RHO(IIG,JJG,KKG)*VDF
             SELECT CASE (IOR)
-               CASE ( 1); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG+1,JJG,KKG))
-               CASE (-1); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG-1,JJG,KKG))
-               CASE ( 2); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG+1,KKG))
-               CASE (-2); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG-1,KKG))
-               CASE ( 3); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG,KKG+1))
-               CASE (-3); MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG,KKG-1))
+               CASE ( 1)
+                  IF (.NOT.SOLID(CELL_INDEX(IIG+1,JJG,KKG))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG+1,JJG,KKG)/RHO(IIG+1,JJG,KKG))
+               CASE (-1)
+                  IF (.NOT.SOLID(CELL_INDEX(IIG-1,JJG,KKG))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG-1,JJG,KKG)/RHO(IIG-1,JJG,KKG))
+               CASE ( 2)
+                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG+1,KKG))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG+1,KKG)/RHO(IIG,JJG+1,KKG))
+               CASE (-2)
+                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG-1,KKG))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG-1,KKG)/RHO(IIG,JJG-1,KKG))
+               CASE ( 3)
+                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG+1))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG,KKG+1)/RHO(IIG,JJG,KKG+1))
+               CASE (-3)
+                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG-1))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG,KKG-1)/RHO(IIG,JJG,KKG-1))
             END SELECT
          ENDIF
          IF (SOLID(CELL_INDEX(II,JJ,KK))) MU(II,JJ,KK) = MU(IIG,JJG,KKG)
@@ -646,7 +662,7 @@ DO K=1,KBAR
          DTXYDY= RDY(J) *(TXYP-TXYM)
          DTXZDZ= RDZ(K) *(TXZP-TXZM)
          VTRM  = DTXXDX + DTXYDY + DTXZDZ
-         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) - GX(I) + RRHO*(GX(I)*RHO_0(K)- VTRM - FVEC(1))
+         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) - GX(I) + RRHO*(GX(I)*RHO_0(K) - VTRM - FVEC(1))
       ENDDO 
    ENDDO   
 ENDDO
@@ -698,7 +714,7 @@ DO K=1,KBAR
          DTYYDY= RDYN(J)*(TYYP-TYYM)
          DTYZDZ= RDZ(K) *(TYZP-TYZM)
          VTRM  = DTXYDX + DTYYDY + DTYZDZ
-         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) - GY(I) + RRHO*(GY(I)*RHO_0(K)- VTRM - FVEC(2))
+         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) - GY(I) + RRHO*(GY(I)*RHO_0(K) - VTRM - FVEC(2))
       ENDDO
    ENDDO   
 ENDDO
