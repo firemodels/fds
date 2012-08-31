@@ -152,7 +152,6 @@ update_and_compile_cfast()
       BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
       ERROR_LOG=$FIREBOT_DIR/output/stage1_cfast
       set_files_world_readable
-      save_build_status
       email_error_message
    fi
 
