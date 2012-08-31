@@ -1493,7 +1493,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
             VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN,&
             BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
-LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL
+LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,SHARP_CORNER
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
                                        V_X=>NULL(),V_Z=>NULL(),W_X=>NULL(),W_Y=>NULL(),RHOP=>NULL(),VEL_OTHER=>NULL()
@@ -1709,16 +1709,19 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! If only one adjacent wall cell is defined, use its properties.
     
+         SHARP_CORNER = .FALSE.
          IF (IWM>0) THEN
             WCM => WALL(IWM)
          ELSE
             WCM => WALL(IWP)
+            SHARP_CORNER = .TRUE.
          ENDIF
 
          IF (IWP>0) THEN
             WCP => WALL(IWP)
          ELSE
             WCP => WALL(IWM)
+            SHARP_CORNER = .TRUE.
          ENDIF
 
          ! If both adjacent wall cells are NULL, cycle out.
@@ -1925,20 +1928,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                   CASE (WALL_MODEL_BC) BOUNDARY_CONDITION
 
-                     IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .OR. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
-                        MU_WALL = MUA
-                        SLIP_COEF=-1._EB
-                     ELSE
-                        ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
-                        MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
-                        RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
-                        CALL WALL_MODEL(SLIP_COEF,DUMMY,DUMMY,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
-                     ENDIF
+                     ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
+                     MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
+                     RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
+                     CALL WALL_MODEL(SLIP_COEF,DUMMY,DUMMY,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
                      VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                      MU_DUIDXJ(ICD_SGN) = MU_WALL*(VEL_GAS-VEL_T)*I_SGN*(1._EB-SLIP_COEF)/DXX(ICD)
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-                     IF (BOUNDARY_TYPE_M==SOLID_BOUNDARY .NEQV. BOUNDARY_TYPE_P==SOLID_BOUNDARY) THEN
+                     IF (SHARP_CORNER) THEN
                         DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
                         MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
                      ENDIF
