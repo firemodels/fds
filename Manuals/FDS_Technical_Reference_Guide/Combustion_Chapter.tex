@@ -1,15 +1,18 @@
 \chapter{Combustion (Chemically Reacting Flows)}
 
 \label{combustionsection}
-In FDS, the combustion routine is responsible for the chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ Eq.~(\ref{eq:m_tprime_alpha}), and appears in the species transport equation, Eq.~(\ref{species}). The heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, is also obtained from the combustion routine, found by multiplying the sum of the lumped species mass production rates by their respective heat of formation, Eq.~(\ref{eq:q_tprime}).
-
+The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in species concentration over a time step for a single grid cell:
 \begin{equation}\label{eq:m_tprime_alpha}
-\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t}
+\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{Y_\alpha(\delta t) - Y_\alpha(0)}{\delta t}
+\end{equation}
+The integration of the mean chemical source term is time split from the integration of the transport equation such that each cell may be thought of as a partially-stirred batch reactor.  As we discuss below, given the chemical composition, cell temperature, and extent of mixing at the start of the time step, the final cell composition depends on the rates of chemical kinetics and turbulent mixing.
+
+The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and typically the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).  The heat release rate is found by summing the lumped species mass production rates times their respective heats of formation:
+\begin{equation}\label{eq:q_tprime}
+\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}_\alpha^{\prime\prime\prime} \Delta H_{f,\alpha}
 \end{equation}
 
-\begin{equation}\label{eq:q_tprime}
-\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime} \Delta H_{f,\alpha}
-\end{equation}
+{\bf Add a short paragraph describing the organization of the rest of the chapter.}
 
 
 \section{Lumped Species Approach}
@@ -17,11 +20,11 @@ In the typical FDS problem we consider the simple reaction:
 \begin{equation}\label{eq:simple}
 \mathrm{Fuel + Air \rightarrow Products}
 \end{equation}
-Here fuel, air, and products are lumped species. A traditional approach for tracking species is to use the mixture fraction and a progress variable \cite{fox2003}. A limitation in the progress variable approach is that the progress variable is not physically bounded and therefore initial and boundary conditions can be ill-defined. The lumped species approach is similar to the progress variable approach except the lumped species are mass fractions and are therefore physically bounded between 0 and 1.
+We refer to fuel, air, and products as \emph{lumped species}.  The lumped species approach is a simplified reaction progress variable approach \cite{fox2003} in which all the progress variables behave as mass fractions. This avoids the complications related to unbounded values and ill-defined initial and boundary conditions in the traditional approach.
 
-In a simple hydrocarbon reaction, reactants can be fuel, oxygen, and nitrogen with products being carbon dioxide, water vapor, and nitrogen. In FDS, each of these individual species are known as primitive species. Their mass fractions are indexed from $1:N_{y}$ in the vector ${\bf Y}$ by the Greek letter $\alpha$:
+In a simple hydrocarbon reaction, reactants can be fuel, oxygen, and nitrogen with products being carbon dioxide, water vapor, and nitrogen. The primitive species mass fractions are given by the composition vector:
 \begin{equation}\label{eq:prim_vector}
-\mathrm{Y}_{\alpha} = [\mathrm{Y}_{\mathrm{CH}_4}\, \, \mathrm{Y}_{\mathrm{O}_2}\, \, \mathrm{Y}_{\mathrm{N}_4}\, \, \mathrm{Y}_{\mathrm{CO}_2}\, \, \mathrm{Y}_{\mathrm{H}_2\mathrm{O}}]^\mathrm{T}
+\mathbf{Y} = [Y_{\mathrm{CH}_4}\, \, Y_{\mathrm{O}_2}\, \, Y_{\mathrm{N}_4}\, \, Y_{\mathrm{CO}_2}\, \, Y_{\mathrm{H}_2\mathrm{O}}]^T
 \end{equation}
 Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, `air' can be assumed to be a lumped species composed of 21\% O$_2$ and 79\% N$_2$ by volume. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together. 
 
@@ -151,7 +154,7 @@ Now let us imagine what should happen to the mixing time as the filter width inc
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.8\linewidth]{FIGURES/reaction_time_scale.pdf}
+\includegraphics[width=4.5in]{FIGURES/reaction_time_scale.pdf}
 \vskip-.2cm
 \caption{Reaction time scale model.}
 \label{fig_reaction_time_scale}
