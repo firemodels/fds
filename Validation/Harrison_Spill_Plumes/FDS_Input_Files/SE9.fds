@@ -7,7 +7,7 @@
 Simulation Time
 &TIME T_END=240. /
 &MISC TMPA=20. /
-&DUMP NFRAMES=240, DT_DEVC=20. /
+&DUMP NFRAMES=240, DT_DEVC=20., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
 Fire Characteristics
 &SURF ID='fire', HRRPUA=791./
