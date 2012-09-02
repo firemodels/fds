@@ -323,17 +323,16 @@ Generally, this requires an iterative procedure since $\tau_w$ is needed to defi
 
 The turbulent viscosity $\nu_t = \mu_t/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{mix} = C_s \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the kinematic viscosity has units of length$^2$/time.
 
-The mixing length increases with distance from the wall.  Van Driest (see \cite{Wilcox:1}) proposed the following functionality:
+To achieve the correct decay of the Reynolds stresses near a wall, Van Driest (see \cite{Wilcox:1}) proposed the following modification:
 \begin{equation}
-\ell_{mix} = \kappa \,y \left[ 1 - e^{-y^+/A} \right]
+\ell_{mix} = C_s \Delta \left[ 1 - e^{-y^+/A} \right]
 \end{equation}
-where $\kappa = 0.41$ is the von K\'arm\'an constant and $A=26$.
+where $A=26$.  The additional factor (in brackets) we refer to as the Van Driest damping function.
 
-In FDS, the turbulent viscosity of the first off-wall cell is interpolated between $\nu_t(y=0)=0$ at the wall and $\nu_t(y = 3\delta y/2)$ from the second off-wall cell.  The interpolation function is based on the Van Driest mixing length with $y^+ = (\delta y/2)/\delta_\nu$.  Considering that the viscosity scales with $\ell_{mix}^{\,2}$\,, we obtain
+In FDS, the turbulent viscosity of the first off-wall cell is interpolated between $\nu_t(y=0)=0$ at the wall and $\nu_t(y = 3\delta y/2)$ from the second off-wall cell.  The interpolation function is based on the Van Driest damping function with $y^+ = (\delta y/2)/\delta_\nu$.  Considering that the viscosity scales with $\ell_{mix}^{\,2}$\,, we obtain
 \begin{equation}
-\nu_t(\delta y/2) = \nu_t(3\delta y/2) \left[ \frac{(1 - e^{-y^+/A}) }{3 ( 1 - e^{-3y^+/A}) } \right]^2
+\nu_t(\delta y/2) = \nu_t(3\delta y/2) \left[ \frac{(1 - e^{-y^+/A}) }{( 1 - e^{-3y^+/A}) } \right]^2
 \end{equation}
-In practice the exponentials are evaluated using truncated Taylor series.
 
 \newpage
 
