@@ -1,7 +1,7 @@
 &HEAD CHID='Beyler_Hood_methanol_949',TITLE='Beyler Hood Test 949 11.03 kW methanol, 22.6 cm burner, 0 cm seperation'/
 &MESH XB=-0.54,0.54,-0.54,0.54,-0.24,0.48,IJK=72,72,48/
 &TIME T_END=300./
-&DUMP NFRAMES=600/
+&DUMP NFRAMES=300, SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
 &VENT MB='ZMIN',SURF_ID='OPEN'/
 &VENT MB='XMIN',SURF_ID='OPEN'/
