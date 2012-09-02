@@ -7577,7 +7577,7 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
 
 /* ------------------ initmesh ------------------------ */
 
-int merge_meshes(void){
+int Merge_Meshes(void){
   int i;
   float dx, dy, dz,eps=0.001;
   float xmin, ymin, zmin;
