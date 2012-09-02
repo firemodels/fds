@@ -274,6 +274,8 @@ void init_volrender(void){
     NewMemory((void **)&volfacelistinfo,6*nmeshes*sizeof(volfacelistdata));
     NewMemory((void **)&volfacelistinfoptrs,6*nmeshes*sizeof(volfacelistdata *));
   }
+  can_merge_smoke=Merge_Meshes();
+
 }
 
 /* ------------------ get_cum_smokecolor ------------------------ */
@@ -1026,6 +1028,7 @@ void drawsmoke3dGPUVOL(void){
     int i,j;
     float x1, x2, yy1, yy2, z1, z2;
     float xx, yy, zz;
+    int ijk_offset[3]={0,0,0};
 
     vi = volfacelistinfoptrs[ii];
     iwall=vi->iwall;
@@ -1044,7 +1047,7 @@ void drawsmoke3dGPUVOL(void){
       glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
       glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
       glUniform1iv(GPUvol_drawsides,7,meshi->drawsides);
-      update_volsmoke_texture(meshi,vr->smokedataptr,vr->firedataptr);
+      update_volsmoke_texture(ijk_offset,meshi,vr->smokedataptr,vr->firedataptr);
       if(vr->firedataptr!=NULL){
         glUniform1i(GPUvol_havefire,1);
       }
@@ -1781,38 +1784,29 @@ void init_volsmoke_texture(mesh *meshi){
 
 /* ------------------ update_3dsmoke_texture ------------------------ */
 
-void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedata_local){
-  GLint xoffset=0,yoffset=0,zoffset=0;
-  GLsizei nx, ny, nz;
+void update_volsmoke_texture(int *ijk_offset, mesh *meshi, float *smokedata_local, float *firedata_local){
+  GLsizei ni, nj, nk;
 
 //  glGetIntegerv(GL_MAX_TEXTURE_COORDS,&ntextures);
-  nx = meshi->ibar+1;
-  ny = meshi->jbar+1;
-  nz = meshi->kbar+1;
+  ni = meshi->ibar+1;
+  nj = meshi->jbar+1;
+  nk = meshi->kbar+1;
 #ifdef pp_GPUTHROTTLE
-  GPUnframes+=3*nx*ny*nz;
+  GPUnframes+=3*ni*nj*nk;
 #endif
   glActiveTexture(GL_TEXTURE0);
-  glTexSubImage3D(GL_TEXTURE_3D,0,
-    xoffset,yoffset,zoffset,
-    nx, ny, nz,
-    GL_RED, GL_FLOAT, smokedata_local);
+  glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, smokedata_local);
 
   if(firedata_local!=NULL){  
     glActiveTexture(GL_TEXTURE1);
-    glTexSubImage3D(GL_TEXTURE_3D,0,
-      xoffset,yoffset,zoffset,
-      nx, ny, nz,
-      GL_RED, GL_FLOAT, firedata_local);
+    glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, firedata_local);
   }
 
-#ifndef pp_GPUTEXTURE
   glActiveTexture(GL_TEXTURE3);
-  nx = meshi->ibar;
-  ny = meshi->jbar;
-  nz = meshi->kbar;
-  glTexSubImage3D(GL_TEXTURE_3D,0,xoffset,yoffset,zoffset,nx, ny, nz,GL_RED, GL_FLOAT, meshi->f_iblank_cell);
-#endif
+  ni = meshi->ibar;
+  nj = meshi->jbar;
+  nk = meshi->kbar;
+  glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, meshi->f_iblank_cell);
 
   glActiveTexture(GL_TEXTURE0);
 }

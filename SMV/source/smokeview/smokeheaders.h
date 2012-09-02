@@ -5,6 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP int Merge_Smoke(void);
 EXTERNCPP void sort_smoke3dinfo(void);
 
 EXTERNCPP void keyboard_CB(unsigned char key, int x, int y);

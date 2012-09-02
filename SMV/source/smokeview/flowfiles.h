@@ -470,6 +470,7 @@ typedef struct _volrenderdata {
 /* --------------------------  mesh ------------------------------------ */
 
 typedef struct _mesh {
+  int ijk_offset[3];
   int update_firehalfdepth;
   terraindata *terrain;
   int mesh_type;
