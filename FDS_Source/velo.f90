@@ -299,26 +299,29 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          CALL WALL_MODEL(DUMMY,WC%U_TAU,WC%Y_PLUS,VEL_GAS-VEL_T,&
                          MU_DNS/RHO(IIG,JJG,KKG),1._EB/WC%RDN,SURFACE(WC%SURF_INDEX)%ROUGHNESS)
          IF (LES) THEN
-            MU(IIG,JJG,KKG) = MU_DNS
             ! Van Driest damping function (see Wilcox, Turbulence Modeling for CFD, 2nd Ed., Eq. (3.104))
             YPA1 = -WC%Y_PLUS*RAPLUS
             YPA2 = YPA1*3._EB
-            VDF = ( ONTH*( YPA1 + 0.5_EB*YPA1**2 + ONSI*YPA1**3 )/( YPA2 + 0.5_EB*YPA2**2 + ONSI*YPA2**3 ) )**2
-            VDF = MAX(0._EB,MIN(1._EB,VDF))
-            VDF = RHO(IIG,JJG,KKG)*VDF
+            VDF = ( (1._EB-EXP(YPA1))/(1._EB-EXP(YPA2)) )**2
             SELECT CASE (IOR)
                CASE ( 1)
-                  IF (.NOT.SOLID(CELL_INDEX(IIG+1,JJG,KKG))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG+1,JJG,KKG)/RHO(IIG+1,JJG,KKG))
+                  IF (.NOT.SOLID(CELL_INDEX(IIG+1,JJG,KKG))) &
+                     MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG+1,JJG,KKG)*RHO(IIG,JJG,KKG)/RHO(IIG+1,JJG,KKG))
                CASE (-1)
-                  IF (.NOT.SOLID(CELL_INDEX(IIG-1,JJG,KKG))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG-1,JJG,KKG)/RHO(IIG-1,JJG,KKG))
+                  IF (.NOT.SOLID(CELL_INDEX(IIG-1,JJG,KKG))) &
+                     MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG-1,JJG,KKG)*RHO(IIG,JJG,KKG)/RHO(IIG-1,JJG,KKG))
                CASE ( 2)
-                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG+1,KKG))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG+1,KKG)/RHO(IIG,JJG+1,KKG))
+                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG+1,KKG))) &
+                     MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG+1,KKG)*RHO(IIG,JJG,KKG)/RHO(IIG,JJG+1,KKG))
                CASE (-2)
-                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG-1,KKG))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG-1,KKG)/RHO(IIG,JJG-1,KKG))
+                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG-1,KKG))) &
+                     MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG-1,KKG)*RHO(IIG,JJG,KKG)/RHO(IIG,JJG-1,KKG))
                CASE ( 3)
-                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG+1))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG,KKG+1)/RHO(IIG,JJG,KKG+1))
+                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG+1))) &
+                     MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG,KKG+1)*RHO(IIG,JJG,KKG)/RHO(IIG,JJG,KKG+1))
                CASE (-3)
-                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG-1))) MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG,KKG-1)/RHO(IIG,JJG,KKG-1))
+                  IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG-1))) &
+                     MU(IIG,JJG,KKG) = MAX(MU_DNS,VDF*MU(IIG,JJG,KKG-1)*RHO(IIG,JJG,KKG)/RHO(IIG,JJG,KKG-1))
             END SELECT
          ENDIF
          IF (SOLID(CELL_INDEX(II,JJ,KK))) MU(II,JJ,KK) = MU(IIG,JJG,KKG)
