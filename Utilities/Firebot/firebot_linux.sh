@@ -997,16 +997,14 @@ do_svn_checkout
 check_svn_checkout
 
 ### Stage 2a ###
-if $stage1_success ; then
-   compile_fds_db
-   check_compile_fds_db
-fi
+# No stage dependencies
+compile_fds_db
+check_compile_fds_db
 
 ### Stage 2b ###
-if $stage1_success ; then
-   compile_fds_mpi_db
-   check_compile_fds_mpi_db
-fi
+# No stage dependencies
+compile_fds_mpi_db
+check_compile_fds_mpi_db
 
 ### Stage 3 ###
 if [ "$stage2a_success" -a "$stage2b_success" ] ; then
@@ -1033,16 +1031,14 @@ if [ "$stage4a_success" -a "$stage4b_success" ] ; then
 fi
 
 ### Stage 6a ###
-if $stage1_success ; then
-   compile_smv_utilities
-   check_smv_utilities
-fi
+# No stage dependencies
+compile_smv_utilities
+check_smv_utilities
 
 ### Stage 6b ###
-if $stage1_success ; then
-   compile_smv_db
-   check_compile_smv_db
-fi
+# No stage dependencies
+compile_smv_db
+check_compile_smv_db
 
 ### Stage 6c ###
 if [ "$stage5_success" -a "$stage6b_success" ] ; then
@@ -1076,6 +1072,7 @@ if $stage5_success ; then
 fi
 
 ### Stage 8 ###
+# No stage dependencies
 make_fds_user_guide
 make_fds_technical_guide
 make_fds_verification_guide
