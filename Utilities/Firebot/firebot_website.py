@@ -12,7 +12,7 @@ import os, re, time
 # 7/2/2012
 #
 # This Python script can be 'cat' to /var/www/html/firebot/index.html
-# at a regular interval to display the status of the 100 most
+# at a regular interval to display the status of the 30 most
 # recent Firebot test runs.
 
 # Absolute path to Firebot history directory
@@ -67,7 +67,7 @@ hr {
 
 <h3>Firebot Build Status</h3>
 
-This page displays the build status for up to 100 of the most recent build/test cycles.<br>
+This page displays the build status for up to 30 of the most recent build/test cycles.<br>
 To view a detailed error log, mouse over a fail or warning status.<br>
 
 <br>
@@ -117,9 +117,9 @@ for i in revision_files:
         revision_list.append(rev_number_only)
 
 #  =======================================
-#  = Print last 100 build status updates =
+#  = Print last 30 build status updates =
 #  =======================================
-for rev in sorted(revision_list, reverse=True)[:100]:
+for rev in sorted(revision_list, reverse=True)[:30]:
 
     #  ====================
     #  = Case: build fail =
