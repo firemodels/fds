@@ -170,7 +170,6 @@ clean_svn_repo()
    # If not, create FDS repository and checkout
    else
       echo "Downloading FDS repository:" >> $FIREBOT_DIR/output/stage1 2>&1
-      mkdir -p $FDS_SVNROOT
       cd $FIREBOT_HOME_DIR
       svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV >> $FIREBOT_DIR/output/stage1 2>&1
    fi
