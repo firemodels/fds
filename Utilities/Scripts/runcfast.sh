@@ -45,6 +45,13 @@ outlog=$fulldir/$infile.log
 
 scriptfile=$scratchdir/script.$$
 
+# Do not run CFAST if -s option is specified
+
+if [ $STOPFDS ]; then
+ echo "skipping CFAST case: $infile"
+ exit
+fi
+
 # ensure that various files and directories exist
 
 if ! [ -e $CFAST ];  then
