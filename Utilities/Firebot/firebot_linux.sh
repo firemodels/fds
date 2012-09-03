@@ -1015,7 +1015,7 @@ compile_fds_mpi_db
 check_compile_fds_mpi_db
 
 ### Stage 3 ###
-if [ "$stage2a_success" -a "$stage2b_success" ] ; then
+if [[ $stage2a_success && $stage2b_success ]] ; then
    run_verification_cases_short
    check_verification_cases_short
 fi
@@ -1033,7 +1033,7 @@ if $stage2b_success ; then
 fi
 
 ### Stage 5 ###
-if [ "$stage4a_success" -a "$stage4b_success" ] ; then
+if [[ $stage4a_success && $stage4b_success ]] ; then
    run_verification_cases_long
    check_verification_cases_long
 fi
@@ -1049,13 +1049,13 @@ compile_smv_db
 check_compile_smv_db
 
 ### Stage 6c ###
-if [ "$stage5_success" -a "$stage6b_success" ] ; then
+if [[ $stage5_success && $stage6b_success ]] ; then
    make_smv_pictures_db
    check_smv_pictures_db
 fi
 
 ### Stage 6d ###
-if [ "$stage5_success" -a "$stage6b_success" ] ; then
+if [[ $stage5_success && $stage6b_success ]] ; then
    compile_smv
    check_compile_smv
 fi
@@ -1067,7 +1067,7 @@ if $stage6d_success ; then
 fi
 
 ### Stage 6f ###
-if [ "$stage5_success" -a "$stage6d_success" ] ; then
+if [[ $stage5_success && $stage6d_success ]] ; then
    make_fds_pictures
    check_fds_pictures
 fi
