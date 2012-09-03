@@ -136,14 +136,12 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         # Write "Build fail" and hover of error log
         error_line = """<a href="http://code.google.com/p/fds-smv/source/detail?r=%(revision_num)s">Revision %(revision_num)s</a>:
         <font style='BACKGROUND-COLOR: lightcoral'>[&#10007;]</font>
-        <span class="dropt">Build failure<span style="width:700px;">"""
+        <span class="dropt">Build failure.<span style="width:700px;">"""
 
         print error_line % {'revision_num': rev}
 
         for line in error_log:
             print line + "<br>"
-
-        print "</span>%s</span><br>" % (stage_log[0].split("failure")[1])
 
     #  ======================================
     #  = Case: build success, with warnings =
