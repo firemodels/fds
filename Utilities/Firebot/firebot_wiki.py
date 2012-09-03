@@ -81,10 +81,10 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         f_stage.close()
 
         # Write "Build fail" and hover of error log
-        error_line = """Revision %(revision_num)s: [<font color="lightcoral"><b>x</b></font>] Build failure %(stage)s"""
+        error_line = """Revision %(revision_num)s: [<font color="lightcoral"><b>x</b></font>] Build failure."""
 
         print
-        print error_line % {'revision_num': rev, 'stage': (stage_log[0].split("failure")[1].strip())}
+        print error_line % {'revision_num': rev}
 
     #  ======================================
     #  = Case: build success, with warnings =
