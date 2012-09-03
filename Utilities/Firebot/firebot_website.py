@@ -143,6 +143,8 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         for line in error_log:
             print line + "<br>"
 
+        print "</span></span><br>"
+
     #  ======================================
     #  = Case: build success, with warnings =
     #  ======================================
