@@ -69,7 +69,6 @@ check_time_limit()
 
       if [ $ELAPSED_TIME -gt $TIME_LIMIT ]
       then
-         echo 'Sending email'
          echo -e "Firebot has been running for more than 12 hours in Stage ${TIME_LIMIT_STAGE}. \n\nPlease ensure that there are no problems. \n\nThis is a notification only and does not terminate Firebot." | mail -s "[Firebot@Blaze] Notice: Firebot has been running for more than 12 hours." $mailTo > /dev/null
          TIME_LIMIT_EMAIL_NOTIFICATION="sent"
       fi
@@ -201,7 +200,8 @@ check_svn_checkout()
       echo "Errors from Stage 1 - SVN operations:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
-      email_error_message
+      email_build_status
+      exit
    else
       stage1_success=true
    fi
@@ -783,7 +783,7 @@ check_verification_stats()
       echo "Firebot Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7_errors
       echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $FIREBOT_DIR/output/stage7_errors
       
-      echo "Stage 7 errors:" >> $ERROR_LOG
+      echo "Errors from Stage 7 - Matlab plotting and statistics:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage7_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -928,57 +928,61 @@ copy_all_guides_to_website()
 }
 
 #  ==================================================
-#  = Build status report - email and save functions =
+#  = Build status reporting - email and save functions =
 #  ==================================================
 
-email_success_message()
+email_build_status()
 {
    cd $FIREBOT_DIR
-   # Check for warnings
-   if [ -e "output/warnings" ]
+   # Check for warnings and errors
+   if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
+     cat "" >> $ERROR_LOG
+     cat $WARNING_LOG >> $ERROR_LOG
+     # Send email with failure message and warnings, body of email contains appropriate log file
+     mail -s "[Firebot@Blaze] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+
+   # Check for errors only
+   elif [ -e $ERROR_LOG ]
+      # Send email with failure message, body of email contains error log file
+      mail -s "[Firebot@Blaze] Build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+
+   # Check for warnings only
+   elif [ -e $WARNING_LOG ]
       # Send email with success message, include warnings
       mail -s "[Firebot@Blaze] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
+
+   # No errors or warnings
    else
       # Send empty email with success message
       mail -s "[Firebot@Blaze] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
    fi
 }
 
-email_error_message()
-{
-   cd $FIREBOT_DIR
-   # Check for warnings
-   if [ -e "output/warnings" ]
-   then
-      cat "" >> $ERROR_LOG
-      cat $WARNING_LOG >> $ERROR_LOG
-
-      # Send email with failure message and warnings, body of email contains appropriate log file
-      mail -s "[Firebot@Blaze] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < ${ERROR_LOG} > /dev/null
-   else
-      # Send email with failure message, body of email contains appropriate log file
-      mail -s "[Firebot@Blaze] Build failure for Revision ${SVN_REVISION}." $mailTo < ${ERROR_LOG} > /dev/null
-   fi
-   exit
-}
-
 save_build_status()
 {
    cd $FIREBOT_DIR
    # Save status outcome of build to a text file
-   if [ -e "output/errors" ]
+   if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
+     cat "" >> $ERROR_LOG
+     cat $WARNING_LOG >> $ERROR_LOG
+     echo "Build failure and warnings for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+     cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+
+   # Check for errors only
+   elif [ -e $ERROR_LOG ]
       echo "Build failure for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+
+   # Check for warnings only
+   elif [ -e $WARNING_LOG ]
+      echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+      cat $WARNING_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
+
+   # No errors or warnings
    else
-      if [ -e "output/warnings" ]
-         then 
-         echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-         cat $WARNING_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
-      else
-         echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-      fi
+      echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
    fi
 }
 
@@ -1007,7 +1011,7 @@ compile_fds_mpi_db
 check_compile_fds_mpi_db
 
 ### Stage 3 ###
-if [[ $stage2a_success && $stage2b_success ]] ; then
+if [ "$stage2a_success" -a "$stage2b_success" ] ; then
    run_verification_cases_short
    check_verification_cases_short
 fi
@@ -1025,7 +1029,7 @@ if $stage2b_success ; then
 fi
 
 ### Stage 5 ###
-if [[ $stage4a_success && $stage4b_success ]] ; then
+if [ "$stage4a_success" -a "$stage4b_success" ] ; then
    run_verification_cases_long
    check_verification_cases_long
 fi
@@ -1041,13 +1045,13 @@ compile_smv_db
 check_compile_smv_db
 
 ### Stage 6c ###
-if [[ $stage5_success && $stage6b_success ]] ; then
+if [ "$stage5_success" -a "$stage6b_success" ] ; then
    make_smv_pictures_db
    check_smv_pictures_db
 fi
 
 ### Stage 6d ###
-if [[ $stage5_success && $stage6b_success ]] ; then
+if [ "$stage5_success" -a "$stage6b_success" ] ; then
    compile_smv
    check_compile_smv
 fi
@@ -1059,7 +1063,7 @@ if $stage6d_success ; then
 fi
 
 ### Stage 6f ###
-if [[ $stage5_success && $stage6d_success ]] ; then
+if [ "$stage5_success" -a "$stage6d_success" ] ; then
    make_fds_pictures
    check_fds_pictures
 fi
@@ -1088,5 +1092,5 @@ fi
 
 ### Report results ###
 set_files_world_readable
-email_success_message
 save_build_status
+email_build_status
