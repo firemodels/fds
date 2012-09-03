@@ -13,7 +13,8 @@
 #  = Input variables =
 #  ===================
 
-mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
+# mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
+mailTo="kristopher.overholt@nist.gov"
 FIREBOT_USERNAME="firebot"
 
 FIREBOT_HOME_DIR="/home/$FIREBOT_USERNAME"
@@ -21,6 +22,8 @@ FIREBOT_DIR="/home/$FIREBOT_USERNAME/firebot"
 FDS_SVNROOT="/home/$FIREBOT_USERNAME/FDS-SMV"
 CFAST_SVNROOT="/home/$FIREBOT_USERNAME/cfast"
 SVN_REVISION=$1
+ERROR_LOG=$FIREBOT_DIR/output/errors
+WARNING_LOG=$FIREBOT_DIR/output/warnings
 
 #  ====================
 #  = End user warning =
@@ -84,22 +87,22 @@ set_files_world_readable()
    chmod -R go+r *
 }
 
-#  ========================
-#  ========================
-#  = Firebot Build Stages =
-#  ========================
-#  ========================
-
-#  ============================
-#  = Stage 1 - SVN operations =
-#  ============================
-
 clean_firebot_history()
 {
    # Clean Firebot metafiles
    cd $FIREBOT_DIR
    rm output/* > /dev/null
 }
+
+#  ========================
+#  ========================
+#  = Firebot Build Stages =
+#  ========================
+#  ========================
+
+#  ===================================
+#  = Stage 0 - External dependencies =
+#  ===================================
 
 update_and_compile_cfast()
 {
@@ -109,7 +112,7 @@ update_and_compile_cfast()
    if [ -e "$CFAST_SVNROOT" ]
    # If yes, then update the CFAST repository and compile CFAST
    then
-      echo "Updating and compiling CFAST:" > $FIREBOT_DIR/output/stage1_cfast
+      echo "Updating and compiling CFAST:" > $FIREBOT_DIR/output/stage0_cfast
       cd $CFAST_SVNROOT/CFAST
       
       # Clean unversioned and modified files
@@ -117,42 +120,44 @@ update_and_compile_cfast()
       svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
       
       # Update to latest SVN revision
-      svn update >> $FIREBOT_DIR/output/stage1_cfast 2>&1
+      svn update >> $FIREBOT_DIR/output/stage0_cfast 2>&1
       
       # Build CFAST
       cd $CFAST_SVNROOT/CFAST/intel_linux_64
       make --makefile ../makefile clean &> /dev/null
-      ./make_cfast.sh >> $FIREBOT_DIR/output/stage1_cfast 2>&1
+      ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
    # If no, then checkout the CFAST repository and compile CFAST
    else
-      echo "Downloading and compiling CFAST:" > $FIREBOT_DIR/output/stage1_cfast
+      echo "Downloading and compiling CFAST:" > $FIREBOT_DIR/output/stage0_cfast
       mkdir -p $CFAST_SVNROOT
       cd $CFAST_SVNROOT
 
       # Checkout latest CFAST SVN revision
-      svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $FIREBOT_DIR/output/stage1_cfast 2>&1
+      svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $FIREBOT_DIR/output/stage0_cfast 2>&1
       
       # Build CFAST
       cd $CFAST_SVNROOT/CFAST/intel_linux_64
       make --makefile ../makefile clean &> /dev/null
-      ./make_cfast.sh >> $FIREBOT_DIR/output/stage1_cfast 2>&1
+      ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
    fi
 
    # Check for errors in CFAST compilation
    cd $CFAST_SVNROOT/CFAST/intel_linux_64
    if [ -e "cfast6_linux_64" ]
    then
-      # Continue along
-      :
+      stage0_success=true
    else
-      echo "CFAST failed to compile" >> $FIREBOT_DIR/output/stage1_cfast 2>&1
-      BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
-      ERROR_LOG=$FIREBOT_DIR/output/stage1_cfast
-      set_files_world_readable
-      email_error_message
+      echo "Errors from Stage 0 - CFAST:" >> $ERROR_LOG
+      echo "CFAST failed to compile" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage0_cfast >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
 }
+
+#  ============================
+#  = Stage 1 - SVN operations =
+#  ============================
 
 clean_svn_repo()
 {
@@ -194,14 +199,12 @@ check_svn_checkout()
    # Check for SVN errors
    if [[ `grep -E 'Updated|At revision' $FIREBOT_DIR/output/stage1 | wc -l` -ne 1 ]];
    then
-      BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
-      ERROR_LOG=$FIREBOT_DIR/output/stage1
-      set_files_world_readable
-      save_build_status
+      echo "Errors from Stage 1 - SVN operations:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage1 >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
       email_error_message
    else
-      # Continue along
-      :
+      stage1_success=true
    fi
 }
 
@@ -223,14 +226,11 @@ check_compile_fds_db()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    if [ -e "fds_intel_linux_64_db" ]
    then
-      # Continue along
-      :
+      stage2a_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 2a: FDS DB Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage2a
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 2a - Compile FDS DB:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
@@ -239,9 +239,9 @@ check_compile_fds_db()
       # Continue along
       :
    else
-      echo "Stage 2a warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Stage 2a warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -263,14 +263,11 @@ check_compile_fds_mpi_db()
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
    if [ -e "fds_mpi_intel_linux_64_db" ]
    then
-      # Continue along
-      :
+      stage2b_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 2b: FDS MPI DB Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage2b
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 2b - Compile FDS MPI DB:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage2b >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
@@ -280,9 +277,9 @@ check_compile_fds_mpi_db()
       # Continue along
       :
    else
-      echo "Stage 2b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Stage 2b warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -399,20 +396,16 @@ check_verification_cases_short()
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
    then
-      # Continue along
-      :
+      stage3_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 3: FDS Verification Cases"
-      
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage3_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage3_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
       
-      ERROR_LOG=$FIREBOT_DIR/output/stage3_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 3 - Run verification cases (short run):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -434,14 +427,11 @@ check_compile_fds()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
    if [ -e "fds_intel_linux_64" ]
    then
-      # Continue along
-      :
+      stage4a_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 4a: FDS Release Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage4a
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 4a - Compile FDS release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage4a >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
@@ -451,9 +441,9 @@ check_compile_fds()
       # Continue along
       :
    else
-      echo "Stage 4a warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Stage 4a warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -475,14 +465,11 @@ check_compile_fds_mpi()
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64
    if [ -e "fds_mpi_intel_linux_64" ]
    then
-      # Continue along
-      :
+      stage4b_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 4b: FDS MPI Release Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage4b
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 4b - Compile FDS MPI release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage4b >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
@@ -493,9 +480,9 @@ check_compile_fds_mpi()
       # Continue along
       :
    else
-      echo "Stage 4b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Stage 4b warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -542,20 +529,16 @@ check_verification_cases_long()
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
    then
-      # Continue along
-      :
+      stage5_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 5: FDS-SMV Verification Cases"
-      
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
       
-      ERROR_LOG=$FIREBOT_DIR/output/stage5_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 5 - Run verification cases (long run):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -591,14 +574,11 @@ check_smv_utilities()
       [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_linux_64/smokediff_linux_64" ]  && \
       [ -e "$FDS_SVNROOT/Utilities/background/intel_linux_32/background" ]
    then
-      # Continue along
-      :
+      stage6a_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 6a: SMV Utilities Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage6a
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 6a - Compile SMV utilities:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6a >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -619,14 +599,11 @@ check_compile_smv_db()
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    if [ -e "smokeview_linux_64_db" ]
    then
-      # Continue along
-      :
+      stage6b_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 6b: SMV Debug Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage6b
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 6b - Compile SMV DB:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6b >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
@@ -636,9 +613,9 @@ check_compile_smv_db()
       # Continue along
       :
    else
-      echo "Stage 6b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Stage 6b warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -659,15 +636,13 @@ check_smv_pictures_db()
    cd $FIREBOT_DIR
    if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c` == "" ]]
    then
-      # Continue along
-      :
+      stage6c_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures (Debug Mode)"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c > $FIREBOT_DIR/output/stage6c_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage6c_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+
+      echo "Errors from Stage 6c - Make SMV pictures (debug mode):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6c_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -688,14 +663,11 @@ check_compile_smv()
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64
    if [ -e "smokeview_linux_64" ]
    then
-      # Continue along
-      :
+      stage6d_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 6d: SMV Release Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage6d
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 6d - Compile SMV release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6d >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
@@ -705,9 +677,9 @@ check_compile_smv()
       # Continue along
       :
    else
-      echo "Stage 6d warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Stage 6d warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -728,15 +700,13 @@ check_smv_pictures()
    cd $FIREBOT_DIR
    if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e` == "" ]]
    then
-      # Continue along
-      :
+      stage6e_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 6e: Make SMV Pictures (Release Mode)"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e > $FIREBOT_DIR/output/stage6e_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage6e_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+
+      echo "Errors from Stage 6e - Make SMV pictures (release mode):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6e >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -757,15 +727,13 @@ check_fds_pictures()
    cd $FIREBOT_DIR
    if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f` == "" ]]
    then
-      # Continue along
-      :
+      stage6f_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 6f: Make FDS Pictures"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f > $FIREBOT_DIR/output/stage6f_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage6f_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      
+      echo "Errors from Stage 6f - Make FDS pictures:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6f_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -794,15 +762,13 @@ check_matlab_plotting()
    cd $FIREBOT_DIR
    if [[ `grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7*` == "" ]]
    then
-      # Continue along
-      :
+      stage7_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 7: Matlab plotting and statistics"
       grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7* > $FIREBOT_DIR/output/stage7_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage7_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      
+      echo "Errors from Stage 7 - Matlab plotting and statistics:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage7_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -815,13 +781,12 @@ check_verification_stats()
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 7: Matlab plotting and statistics"
       echo "Firebot Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7_errors
       echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $FIREBOT_DIR/output/stage7_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage7_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      
+      echo "Stage 7 errors:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage7_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Scan and report warnings for any verification cases that are outside of their specified error tolerance
@@ -830,10 +795,10 @@ check_verification_stats()
       # Continue along
       :
    else
-      echo "Stage 7 warnings:" >> $FIREBOT_DIR/output/warnings
-      echo "The following cases are outside of their specified error tolerance:" >> $FIREBOT_DIR/output/warnings
-      grep ",No," FDS_verification_scatterplot_output.csv >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Stage 7 warnings:" >> $WARNING_LOG
+      echo "The following cases are outside of their specified error tolerance:" >> $WARNING_LOG
+      grep ",No," FDS_verification_scatterplot_output.csv >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -927,15 +892,13 @@ check_all_guides()
    cd $FIREBOT_DIR
    if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output/stage8*` == "" ]]
    then
-      # Continue along
-      :
+      stage8_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 8: FDS-SMV Guides"
       grep "! LaTeX Error:" -I $FIREBOT_DIR/output/stage8* > $FIREBOT_DIR/output/stage8_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage8_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      
+      echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage8_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for LaTeX warnings (undefined references or duplicate labels)
@@ -944,9 +907,9 @@ check_all_guides()
       # Continue along
       :
    else
-      echo "Stage 8 warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -E "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8* >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Stage 8 warnings:" >> $WARNING_LOG
+      grep -E "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8* >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -976,7 +939,7 @@ email_success_message()
    if [ -e "output/warnings" ]
    then
       # Send email with success message, include warnings
-      mail -s "[Firebot@Blaze] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output/warnings > /dev/null
+      mail -s "[Firebot@Blaze] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
    else
       # Send empty email with success message
       mail -s "[Firebot@Blaze] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
@@ -990,13 +953,13 @@ email_error_message()
    if [ -e "output/warnings" ]
    then
       cat "" >> $ERROR_LOG
-      cat output/warnings >> $ERROR_LOG
+      cat $WARNING_LOG >> $ERROR_LOG
 
       # Send email with failure message and warnings, body of email contains appropriate log file
-      mail -s "[Firebot@Blaze] Build failure, with warnings! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
+      mail -s "[Firebot@Blaze] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < ${ERROR_LOG} > /dev/null
    else
       # Send email with failure message, body of email contains appropriate log file
-      mail -s "[Firebot@Blaze] Build failure! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
+      mail -s "[Firebot@Blaze] Build failure for Revision ${SVN_REVISION}." $mailTo < ${ERROR_LOG} > /dev/null
    fi
    exit
 }
@@ -1005,15 +968,15 @@ save_build_status()
 {
    cd $FIREBOT_DIR
    # Save status outcome of build to a text file
-   if [[ $BUILD_STAGE_FAILURE != "" ]]
+   if [ -e "output/errors" ]
    then
-      echo "Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+      echo "Build failure for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
    else
       if [ -e "output/warnings" ]
          then 
          echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-         cat $FIREBOT_DIR/output/warnings > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
+         cat $WARNING_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
       else
          echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       fi
@@ -1024,65 +987,94 @@ save_build_status()
 #  = Primary script execution =
 #  ============================
 
-### Stage 1 ###
 clean_firebot_history
+
+### Stage 0 ###
 update_and_compile_cfast
+
+### Stage 1 ###
 clean_svn_repo
 do_svn_checkout
 check_svn_checkout
 
 ### Stage 2a ###
-compile_fds_db
-check_compile_fds_db
+if $stage1_success ; then
+   compile_fds_db
+   check_compile_fds_db
+fi
 
 ### Stage 2b ###
-compile_fds_mpi_db
-check_compile_fds_mpi_db
+if $stage1_success ; then
+   compile_fds_mpi_db
+   check_compile_fds_mpi_db
+fi
 
 ### Stage 3 ###
-run_verification_cases_short
-check_verification_cases_short
+if [ "$stage2a_success" -a "$stage2b_success" ] ; then
+   run_verification_cases_short
+   check_verification_cases_short
+fi
 
 ### Stage 4a ###
-compile_fds
-check_compile_fds
+if $stage2a_success ; then
+   compile_fds
+   check_compile_fds
+fi
 
 ### Stage 4b ###
-compile_fds_mpi
-check_compile_fds_mpi
+if $stage2b_success ; then
+   compile_fds_mpi
+   check_compile_fds_mpi
+fi
 
 ### Stage 5 ###
-run_verification_cases_long
-check_verification_cases_long
+if [ "$stage4a_success" -a "$stage4b_success" ] ; then
+   run_verification_cases_long
+   check_verification_cases_long
+fi
 
 ### Stage 6a ###
-compile_smv_utilities
-check_smv_utilities
+if $stage1_success ; then
+   compile_smv_utilities
+   check_smv_utilities
+fi
 
 ### Stage 6b ###
-compile_smv_db
-check_compile_smv_db
+if $stage1_success ; then
+   compile_smv_db
+   check_compile_smv_db
+fi
 
 ### Stage 6c ###
-make_smv_pictures_db
-check_smv_pictures_db
+if [ "$stage5_success" -a "$stage6b_success" ] ; then
+   make_smv_pictures_db
+   check_smv_pictures_db
+fi
 
 ### Stage 6d ###
-compile_smv
-check_compile_smv
+if [ "$stage5_success" -a "$stage6b_success" ] ; then
+   compile_smv
+   check_compile_smv
+fi
 
 ### Stage 6e ###
-make_smv_pictures
-check_smv_pictures
+if $stage6d_success ; then
+   make_smv_pictures
+   check_smv_pictures
+fi
 
 ### Stage 6f ###
-make_fds_pictures
-check_fds_pictures
+if [ "$stage5_success" -a "$stage6d_success" ] ; then
+   make_fds_pictures
+   check_fds_pictures
+fi
 
 ### Stage 7 ###
-run_matlab_plotting
-check_matlab_plotting
-check_verification_stats
+if $stage5_success ; then
+   run_matlab_plotting
+   check_matlab_plotting
+   check_verification_stats
+fi
 
 ### Stage 8 ###
 make_fds_user_guide
@@ -1094,9 +1086,11 @@ make_smv_user_guide
 make_smv_technical_guide
 make_smv_verification_guide
 check_all_guides
-copy_all_guides_to_website
+if $stage8_success ; then
+   copy_all_guides_to_website
+fi
 
-### Success! ###
+### Report results ###
 set_files_world_readable
 email_success_message
 save_build_status
