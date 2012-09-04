@@ -27,6 +27,7 @@ $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
 $VDIR/NRCC_Facade/FDS_Output_Files/Process_Output.csh
 $VDIR/NRL_HAI/FDS_Output_Files/Process_Output.csh
+$VDIR/Pool_Fires/FDS_Output_Files/Process_Output.csh
 $VDIR/PRISME/FDS_Output_Files/Process_Output.csh
 $VDIR/Restivo_Experiment/FDS_Output_Files/Process_Output.csh
 $VDIR/Sandia_Plumes/FDS_Output_Files/Process_Output.csh
