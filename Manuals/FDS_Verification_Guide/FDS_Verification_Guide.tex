@@ -3602,15 +3602,16 @@ where $f(z,t)$ is the particle number density at lateral distance $z$ from the s
 \chapter{Heating, Ventilating, and Air Conditioning (HVAC)}
 
 \section{Duct Flow Losses (\texorpdfstring{\bf HVAC\_flow\_loss}{HVAC\_flow\_loss})}
+\label{HVAC_flow_loss}
 
-Steady-state flow in a duct is given by
-\be \frac{K \rho \, u^2}{2} = \Delta p \label {HVAC_steady_state}\ee
-where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop across the duct.  A simple duct network is created from three 0.1~m$^2$ ducts connected with a tee.  One of the ducts is assigned a constant flow rate of 0.3~m$^3$/s.  The other two ducts are given loss coefficients of 4 and 16 and are given inlets at the same elevation.  Based on the above equation, it can be seen that since the ducts have the same conditions at their nodes (both connected to the same tee and both connected to ambient at the same elevation), that once steady state is reached that the velocities in the three ducts should be 3~m/s, 2~m/s, and 1~m/s.
+The pressure drop due to steady flow in a duct is given by
+\be \Delta p = \frac{K \rho \, u^2}{2}  \label {HVAC_steady_state}\ee
+where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $u$ is the mean velocity. In this example, a duct is split at a tee joint into two ducts. All ducts have the same cross sectional area.  The primary duct is assigned a constant flow rate of 0.3~m$^3$/s.  The other two ducts are assigned loss coefficients of 4 and 16 and outlets at the same elevation.  From Eq.~(\ref{HVAC_steady_state}), it can be shown that since the two branch ducts have the same pressure at their outlets, the steady-state velocities in the three ducts should be 3~m/s, 2~m/s, and 1~m/s.
 
 \begin{figure}[ht]
    \begin{center}
       \includegraphics[height=3.00in]{SCRIPT_FIGURES/HVAC_flow_loss.pdf}
-     \caption[Duct velocities with varied duct flow loss]{\label{fig_HVAC_loss} Duct velocities with varied duct flow loss.}
+     \caption[The {\bf HVAC\_flow\_loss} test case]{\label{fig_HVAC_loss} Duct velocities in three ducts with different loss coefficients.}
    \end{center}
 \end{figure}
 
@@ -3618,19 +3619,19 @@ where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop
 
 \section{Node Flow Losses (\texorpdfstring{\bf HVAC\_tee\_loss\_1}{HVAC\_tee\_loss\_1} and \texorpdfstring{\bf HVAC\_tee\_loss\_2}{HVAC\_tee\_loss\_2})}
 
-Node flow losses are implemented by partitioning the node loss to upstream and downstream ducts connected to a node as a function of the combination of flow directions present.  These two cases replicate the duct flow loss geometry and HVAC system ((HVAC\_flow\_loss.fds)) . However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first test case, HVAC\_tee\_loss\_1.fds, flow is into the main leg of the tee and out the two secondary legs.  The secondary branches of the tee are given losses of 15 and 3 and the nodes discharging to the FDS domain are assigned losses of 1.  This gives total losses of 16 and 4, the same as in the duct loss example.  In the second case, HVAC\_tee\_loss\_2.fds, flow is out the main leg of the tee and in the two secondary legs of the tee.  Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned.  It is expected that the duct velocities in both cases should be 3~m/s, 2~m/s, and 1~m/s.
+These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first case, {\bf HVAC\_tee\_loss\_1}, the flow goes into the primary leg of the tee. The secondary branches are assigned loss coefficients of 15 and 3 and the discharge nodes are assigned losses of 1.  This gives total losses of 16 and 4. In the second case, {\bf HVAC\_tee\_loss\_2}, the flow goes out the primary leg of the tee. Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned.  It is expected that the duct velocities in both cases should be 3~m/s, 2~m/s, and 1~m/s.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_1} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_2} }
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_1}  &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_2} 
    \end{tabular*}
-   \caption[Duct velocities with varied node loss]{Duct velocities with varied node loss. HVAC\_tee\_loss\_1 (left) and (HVAC\_tee\_loss\_2 (right)}
+   \caption[The {\bf HVAC\_tee\_loss} test cases]{Duct velocities with varied node loss. {\bf HVAC\_tee\_loss\_1} (left) and {\bf HVAC\_tee\_loss\_2} (right)}
    \label{fig_HVAC_node}
 \end{figure}
 
-\clearpage
 
+\clearpage
 
 \section{HVAC Mass Conservation (\texorpdfstring{\bf HVAC\_mass\_conservation}{HVAC\_mass\_conservation})}
 
@@ -3644,6 +3645,7 @@ A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compar
    \caption[The {\bf HVAC\_mass\_conservation} case]{SPEC1 mass fraction at 1 s (left) and SPEC1 and total mass (right)}
    \label{fig_HVAC_mass}
 \end{figure}
+
 
 \clearpage
 
@@ -3671,17 +3673,25 @@ The second duct is placed in the upper half of the compartment and is assigned a
 
 \clearpage
 
-\section{Single Zone Leakage (\texorpdfstring{\bf leak\_test}{leak\_test})}
+\section{Leakage}
 
-In the following examples, both leaks and fans are demonstrated. A two compartments (each 3.6~m by 2.4~m by 2.4~m) are connected by a small fan and a leak at the floor.
+In the following examples, both leaks and fans are demonstrated.
 
-The volume flow rate of the fan is given by the ``fan curve'' \be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
-U_{\hbox{\footnotesize max}} \;
+\subsection{Single Zone Leakage (\texorpdfstring{\bf leak\_test}{leak\_test})}
+\label{single_zone_leak}
+
+Two compartments (each 3.6~m by 2.4~m by 2.4~m) are connected by a small fan and a leak at the floor. The volume flow rate of the fan is given by the ``fan curve'' 
+\be 
+  \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
+  U_{\hbox{\footnotesize max}} \;
    \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
-   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.1$~m$^2$, $U_{\hbox{\scriptsize max}}=0.6$~m/s, and $\Delta
-p_{\hbox{\scriptsize max}}=300$~Pa. The volume flow due to the leak is given by: \be \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}}
-\sqrt{ \frac{ 2 \Delta p}{ \rho} } \ee where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho$ is the density at the leakage vent on the discharge side of the fan.  Assuming that the pressure difference is evenly split between the two compartments, equating the fan and leak volume flow rates, and solving for $\Delta_p$, $\Delta_p$ is 190.7~Pa. The results are shown in Fig.~\ref{leak_test}.  Since the leakage flow cannot begin until there is a pressure rise on the discharge side of the compartment, it is expected that the true split in the pressure will be biased slightly high on the fan discharge side.  The total pressure difference, however, should match.
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  
+\ee
+where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.1$~m$^2$, $U_{\hbox{\scriptsize max}}=0.6$~m/s, and $\Delta p_{\hbox{\scriptsize max}}=300$~Pa. The volume flow due to the leak is given by: 
+\be 
+   \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}} \sqrt{ \frac{ 2 \Delta p}{ \rho} } 
+\ee 
+where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho$ is the density at the discharge side. Equating the fan and leak volume flow rates, we can solve for $\Delta_p$. The results are shown in Fig.~\ref{leak_test}.  
 
 \begin{figure}[ht]
    \begin{center}
@@ -3690,21 +3700,16 @@ p_{\hbox{\scriptsize max}}=300$~Pa. The volume flow due to the leak is given by:
    \end{center}
 \end{figure}
 
+\subsection{Multiple zone leakage (\texorpdfstring{\bf leak\_test\_2}{leak\_test\_2})}
 
-\section{Multiple zone leakage (\texorpdfstring{\bf leak\_test\_2}{leak\_test\_2})}
-
-This sample case starts with the same input as leak\_test.  A second leakage vent is added to the floor of the discharge side of the fan.  This vent leaks to the ambient.  When the simulation starts the fan will begin to remove air from the suction side and discharge it to the other compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.
-Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments will
-decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the
-ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the
-two compartments is the same as the pressure difference from leak\_test (190.7~Pa.) only now the discharge side should be at 0~Pa.
+This case starts with the same input as {\bf leak\_test}.  A second leakage vent is added to the floor of the discharge side of the fan.  This vent leaks to the ambient.  When the simulation starts the fan pushes air from one compartment to the other. As the pressure rises, the leakage increases until the leakage flow rate is equal to the fan flow rate. Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments decreases until the pressure of the interior compartment is equal to that of the ambient. At this point in time, there is no more leakage to the outside and the fan flow rate equals the leakage flow rate between the two compartments.  Given the leakage area and the fan curve, this occurs when the pressure difference between the two compartments is the same as the pressure difference from leak\_test, only now the discharge side should be at 0~Pa.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2_vector} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2.pdf} }
    \end{tabular*}
-   \caption[The {\bf leak\_test\_2} case]{Vector plot of pressure at 10 s with geometry clipped to show compartment interiors (left) and line plot of zone pressures (right)}
+   \caption[The {\bf leak\_test\_2} test case]{Vector plot of pressure at 10 s with geometry clipped to show compartment interiors (left) and a plot of zone pressures (right).}
    \label{fig_HVAC_leak_fan}
 \end{figure}
 
@@ -3714,16 +3719,15 @@ two compartments is the same as the pressure difference from leak\_test (190.7~P
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{{\bf ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{{\bf ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, and \texorpdfstring{{\bf ashrae\_7\_table}}{ashrae\_7\_table})}
 
-ASHRAE sample problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Figure~\ref{ASHRAE7} consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components were defined as well as the fan flow rate.  Pressure drops and flow rates in the remaining components can be computed by hand.  Also shown in Figure~\ref{ASHRAE7} are the predict pressure drops using a fixed flow fan, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e. the flow rate of 1.45 m$^3$/s and pressure drop of 1913.5 Pa from the fixed flow simulation sits on the quadratic curve), and a fan using a {\ct RAMP} to define the same quadratic fan curve at 500 Pa intervals.  The hand calculations assume a constant density, whereas, the FDS computation will have slightly non uniform density in HVAC network due to pressure drops and the equation of state.  It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since inputting a fan curve as a table results in a piecewise linear approximation, it is expected that the user defined fan curve results will vary slightly from the quadratic and fixed flow results.
+ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Fig.~\ref{ASHRAE7}, consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components are specified, as well as the fan flow rate. The pressure drops and flow rates can be computed by hand.  Also listed in Fig.~\ref{ASHRAE7} are the predicted pressure drops for a fan with a fixed flow rate, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e. the flow rate of 1.45~m$^3$/s and pressure drop of 1913.5~Pa from the fixed flow simulation sits on the quadratic curve), and a fan with a {\ct RAMP} to define the same quadratic fan curve at 500~Pa intervals. The hand calculations assume a constant density, whereas the FDS computation will have a slightly non-uniform density in the network due to pressure drops. It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since specifying a fan curve via a table results in a piecewise linear approximation, it is expected that the user-defined fan curve results will vary slightly from the quadratic and fixed flow results.
 
 
 \begin{figure}[ht]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{FIGURES/HVAC/ashrae_7.pdf} &
-\end{tabular*}
+\begin{center}
+\includegraphics[width=4.in]{FIGURES/ashrae_7.pdf} 
+\end{center}
 \input{SCRIPT_FIGURES/ashrae_7.tex}
-\caption[Results of {\bf ashrae\_7} test case]{Clockwise from top left: Schematic of ASHRAE sample problem 7, pressure drops for a fixed flow fan curve, pressure drops for a quadratic fan curve, pressure drops for a table defined fan curve}
+\caption[Results of {\bf ashrae\_7} test cases]{Schematic of ASHRAE Sample Problem 7, and tabulated pressure drops for a fixed flow fan curve, quadratic fan curve, and a table defined fan curve}
 \label{ASHRAE7}
 \end{figure}
 
