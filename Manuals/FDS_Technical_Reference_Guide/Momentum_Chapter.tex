@@ -55,30 +55,30 @@ tensor $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$; and the external force
 components $(f_x,f_y,f_z)$ are located at their
 respective cell faces.
 \begin{align}
-F_{\x,ijk} &=  \left(
+F_{\x,ijk} &=  \ha \left(
  w_{i+\ha,jk} \; \om_{y,ijk} +
  w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right)
-            - \left(
+            - \ha \left(
  v_{i+\ha,jk} \; \om_{z,ijk} +
  v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\
            &  - \frac{1}{\rho_{i+\ha,jk}} \left( f_{x,ijk}
   + \frac{\tau_{xx,i+1,jk}-\tau_{xx,ijk}}{\dx}
   + \frac{\tau_{xy,ijk}-\tau_{xy,i,j-1,k}}{\dy}
   + \frac{\tau_{xz,ijk}-\tau_{xz,i,j,k-1}}{\dz}  \right)  \\
-F_{\y,ijk} &= \left(
+F_{\y,ijk} &= \ha \left(
  u_{i,j+\ha,k} \; \om_{z,ijk} +
  u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right)
-             - \left(
+             - \ha \left(
  w_{i,j+\ha,k} \; \om_{x,ijk}+
  w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\
            &  - \frac{1}{\rho_{i,j+\ha,k}} \left( f_{y,ijk}
   + \frac{\tau_{yx,ijk}-\tau_{yx,i-1,jk}}{\dx}
   + \frac{\tau_{yy,i,j+1,k}-\tau_{yy,ijk}}{\dy}
   + \frac{\tau_{yz,ijk}-\tau_{yz,i,j,k-1}}{\dz} \right) \\
-F_{\z,ijk} &=  \left(
+F_{\z,ijk} &=  \ha \left(
  v_{ij,k+\ha} \; \om_{x,ijk} +
  v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right)
-             -\left(
+             -\ha \left(
  u_{ij,k+\ha} \; \om_{y,ijk} +
  u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\
            &  - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk}
@@ -187,7 +187,7 @@ By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1}:
 \ee
 where $\overline{u}$ is the average value of $u$ at the grid cell center and $\hat{u}$ is a weighted average of $u$ over the adjacent cells:
 \be
-   \hat{u} = \frac{u_{ijk}}{2} + \frac{u_{i-1,jk} + u_{i+1,jk} }{4}
+   \overline{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{u}_{ijk} = \frac{\overline{u}_{ijk}}{2} + \frac{\overline{u}_{i-1,jk} + \overline{u}_{i+1,jk} }{4}
 \ee
 The terms $\hat{v}$ and $\hat{w}$ are defined similarly.
 
