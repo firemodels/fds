@@ -372,7 +372,7 @@ email_success_message()
       mail -s "[Firebot@Bluesky] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output/warnings > /dev/null
    else
       # Send empty email with success message
-      mail -s "[Firebot@Bluesky] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
+      echo -e "Build tests on Bluesky include:\n\n Stage 1: SVN operations\n Stage 4a and 4b: FDS release compilation\n Stage 5: Run verification cases (long run)" | mail -s "[Firebot@Bluesky] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo > /dev/null
    fi
 }
 
