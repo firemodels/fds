@@ -7575,9 +7575,9 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
   strcpy(bc->label,blocklabel);
 }
 
-/* ------------------ initmesh ------------------------ */
-
-int Merge_Meshes(void){
+/* ------------------ Merge_Smoke ------------------------ */
+#ifdef pp_MERGESMOKE
+int Merge_Smoke(void){
   int i;
   float dx, dy, dz,eps=0.001;
   float xmin, ymin, zmin;
@@ -7716,6 +7716,7 @@ int Merge_Meshes(void){
   FREEMEMORY(cells);
   return 1;
 }
+#endif
 
 /* ------------------ initmesh ------------------------ */
 

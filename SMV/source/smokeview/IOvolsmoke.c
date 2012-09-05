@@ -274,7 +274,9 @@ void init_volrender(void){
     NewMemory((void **)&volfacelistinfo,6*nmeshes*sizeof(volfacelistdata));
     NewMemory((void **)&volfacelistinfoptrs,6*nmeshes*sizeof(volfacelistdata *));
   }
-//  can_merge_smoke=Merge_Meshes();
+#ifdef pp_MERGESMOKE
+  can_merge_smoke=Merge_Smoke();
+#endif
 
 }
 
