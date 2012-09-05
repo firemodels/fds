@@ -458,14 +458,14 @@ Having determined the appropriateness of the chosen experiments, it is now neces
 \caption{A comparison of measured versus predicted wall temperature. The off-diagonal lines indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
 \label{scatterplot}
 \end{figure}
-The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements. For example, the bias factor for the data shown in Fig.~\ref{scatterplot} is 1.14. This means that the model over-predicts wall temperatures by 14~\%, on average, and this is shown graphically by the dash-dot line. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Fig.~\ref{scatterplot}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the estimated experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence intervals. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_M$. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge and the dash-dot bias line would overlap the solid diagonal line. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
+The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements. For example, the bias factor for the data shown in Fig.~\ref{scatterplot} is 1.13. This means that the model over-predicts wall temperatures by 13~\%, on average, and this is shown graphically by the dash-dot line. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Fig.~\ref{scatterplot}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the estimated experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence interval for the measurements. In this case, $\widetilde{\sigma}_E=0.07$. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. The slopes of these lines are $\delta (1\pm 2 \widetilde{\sigma}_M)$. In this case, $\widetilde{\sigma}_M=0.2$. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge and the dash-dot bias line would overlap the solid diagonal line. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
 
-The derivation of the relevant uncertainty statistics is described in Ref.~\cite{McGrattan:Metrologia}, and it is summarized here. The difference between the measured and predicted values is a function of the experimental and the model uncertainty. The purpose of the uncertainty calculation is to subtract off, in a statistical sense, the experimental uncertainty so that the model uncertainty can be estimated. Before describing the calculation, a few assumptions must be made:
+The derivation of these uncertainty statistics is described in Ref.~\cite{McGrattan:Metrologia}, and it is summarized here. First, a few assumptions are made:
 \begin{enumerate}
 \item The experimental measurements are assumed to be unbiased, and their uncertainty is assumed to be normally distributed with a constant relative standard deviation, $\widetilde{\sigma}_E$.
 \item The model uncertainty is assumed to be normally distributed about the predicted value divided by a bias factor, $\delta$. The relative standard deviation of the distribution is denoted as $\widetilde{\sigma}_M$.
 \end{enumerate}
-Given a set of experimental measurements, $E_i$, and a corresponding set of model predictions, $M_i$, compute the following:
+Now, given a set of experimental measurements, $E_i$, and a corresponding set of model predictions, $M_i$, compute the following:
 \begin{equation}
    \overline{\ln (M/E)} = \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i)
 \end{equation}
@@ -481,7 +481,7 @@ The bias factor is:
 For a given model prediction, $M$, the ``true'' value of the quantity of interest is assumed to be a normally distributed random variable with a mean $\mu=M/\delta$ and a standard deviation of $\sigma=\widetilde{\sigma}_M (M/\delta)$.
 Using these values, the probability of exceeding a critical value, $x_c$, is:
 \begin{equation}
-   P(x>x_c) = \frac{1}{2} \hbox{erfc} \left( \frac{x_c-\mu}{\sigma \sqrt{2}} \right)
+   P(x>x_c) = \frac{1}{2} \; \hbox{erfc} \left( \frac{x_c-\mu}{\sigma \sqrt{2}} \right) \label{prob}
 \end{equation}
 Note that the complimentary error function is defined as follows:
 \begin{equation}
@@ -489,10 +489,11 @@ Note that the complimentary error function is defined as follows:
 \end{equation}
 It is a standard function in most mathematical or spread sheet programs.
 
-As an example of the procedure, suppose the model depicted in Fig.~\ref{scatterplot} has predicted that the wall temperature within a compartment would reach a peak temperature of 300~$^\circ$C due to a particular design fire. Suppose also that the failure criterion for this particular wall lining material is 325~$^\circ$C. What is the probability that the wall temperature could reach 325~$^\circ$C?
-\begin{equation}
-   P(\Delta T>305) = \frac{1}{2} \hbox{erfc} \left( \frac{305-245.6}{34.4 \sqrt{2}} \right) = 0.04
-\end{equation}
+As an example of the procedure, suppose that the model whose results are plotted in Fig.~\ref{scatterplot} has predicted that the wall temperature within a compartment would peak at a value of 300~$^\circ$C due to a given design fire. Suppose also that the failure criterion for the wall lining material is 325~$^\circ$C. What is the probability that the wall temperature could reach 325~$^\circ$C? First, it is best to work in terms of temperature rise. The ambient temperature is 20~$^\circ$C; thus, the predicted temperature rise, $\Delta T_p$, is 280~$^\circ$C and the critical temperature rise, $\Delta T_c$, is 305~$^\circ$C. From Eq.~\ref{prob}, the probability that the temperature could exceed the critical value is:
+\begin{eqnarray}
+   P(\Delta T>\Delta T_c) &=& \frac{1}{2} \; \hbox{erfc} \left( \frac{\Delta T_c-(\Delta T_p/\delta)}{\widetilde{\sigma}_M \, (\Delta T_p/\delta) \sqrt{2}} \right) \\ [0.1in]
+    &=& \frac{1}{2} \; \hbox{erfc} \left( \frac{305-(280/1.13)}{0.2 \; (280/1.13) \, \sqrt{2}} \right) \cong 0.12
+\end{eqnarray}
 It must be emphasized that this estimated probability of failure is based only on the model uncertainty. It does not account for parameter uncertainty; that is, the uncertainty in the input parameters.
 
 
@@ -580,7 +581,7 @@ CFD fire modeling is commonly used during the renovation of historic buildings. 
 
 \paragraph{Smoke transport in a multistory residential building}
 
-To assist means of escape and fire fighter access in high rise residential buildings it is common practice to provide some form of smoke control to the stairwells, which could take the form of a sophisticated pressurization scheme or a relatively simple natural ventilation provision. There may be cases where smoke protection is required also in the corridors and lobbies at each story, possibly as a compensatory measure for extended travel distances. Another approach, adopted in some parts of the world, is to provide mechanical ventilation in the corridor. In the event of a fire in an adjoining apartment smoke is purged from the corridor, while at the same time the ventilation system provides smoke protection to the stairwell by the combined action of pressure differentials and open-door airflows akin to a stair pressurization system. CFD modeling of the air and smoke transport in the corridor and stairwell is often required in support of the design, in particular where the corridors and lobbies have a more complicated layout or the ventilation inlets and outlets cannot be installed in ideal locations. 
+To assist means of escape and fire fighter access in high rise residential buildings it is common practice to provide some form of smoke control to the stairwells, which could take the form of a sophisticated pressurization scheme or a relatively simple natural ventilation provision. There may be cases where smoke protection is required also in the corridors and lobbies at each story, possibly as a compensatory measure for extended travel distances. Another approach, adopted in some parts of the world, is to provide mechanical ventilation in the corridor. In the event of a fire in an adjoining apartment smoke is purged from the corridor, while at the same time the ventilation system provides smoke protection to the stairwell by the combined action of pressure differentials and open-door airflows akin to a stair pressurization system. CFD modeling of the air and smoke transport in the corridor and stairwell is often required in support of the design, in particular where the corridors and lobbies have a more complicated layout or the ventilation inlets and outlets cannot be installed in ideal locations.
 
 
 
