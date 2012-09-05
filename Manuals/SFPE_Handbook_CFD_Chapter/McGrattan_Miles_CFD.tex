@@ -493,7 +493,7 @@ As an example of the procedure, suppose the model depicted in Fig.~\ref{scatterp
 \begin{equation}
    P(\Delta T>305) = \frac{1}{2} \hbox{erfc} \left( \frac{305-245.6}{34.4 \sqrt{2}} \right) = 0.04
 \end{equation}
-It must be emphasized that this estimated probability of failure is based only on the model uncertainty. It does not account for parameter uncertainty; that is, the uncertainty in the input parameters. 
+It must be emphasized that this estimated probability of failure is based only on the model uncertainty. It does not account for parameter uncertainty; that is, the uncertainty in the input parameters.
 
 
 
@@ -552,11 +552,8 @@ Here $K_1$ is a constant usually set to 3 for reflecting signs and 8 for illumin
 
 \paragraph{Sprinklers}
 
-Although the inclusion of the processes of water suppression and extinguishment in CFD modeling remains a research topic, and is not generally a practical option for most fire engineering applications, the interaction of the water spray with the fire gases can be more readily incorporated. This is generally in the guise of a Lagrangian particle tracking sub-model, in which statistically representative water particles are tracked numerically through the gas phase. The impact on the fire gases from the transfer of mass, momentum and heat associated with the trajectories and evaporation of the water particles is included as source terms in the underlying fluid dynamics equations. A good summary of this approach is given by {ref}.
+Although the inclusion of the processes of water suppression and extinguishment in CFD modeling remains a research topic, and is not generally a practical option for most fire engineering applications, the interaction of the water spray with the fire gases can be more readily incorporated. This is generally in the guise of a Lagrangian particle tracking sub-model, in which statistically representative water particles are tracked numerically through the gas phase. The impact on the fire gases from the transfer of mass, momentum and heat associated with the trajectories and evaporation of the water particles is included as source terms in the underlying fluid dynamics equations. A good summary of this approach is given by Makhviladze~{\em et al.}~\cite{Makhviladze}.
 
-In respect to the control of the size of fire by water suppression systems, one approach that has been adopted {ref} is to allow the fire size (burning rate) to increase to two times that at the time of the activation of the suppression system and then remain fixed at this size.
-
-This section on smoke movement concludes with some examples of the application of CFD, taken from the ever-increasing number of cases.
 
 \paragraph{Smoke transport in a mechanically ventilated library}
 
@@ -577,6 +574,15 @@ CFD fire modeling is commonly used during the renovation of historic buildings. 
 \caption{Smoke filling analysis of the Rhode island State capitol. (Figure courtesy Hughes Associates.)}
 \label{Dome}
 \end{figure}
+
+
+
+
+\paragraph{Smoke transport in a multistory residential building}
+
+To assist means of escape and fire fighter access in high rise residential buildings it is common practice to provide some form of smoke control to the stairwells, which could take the form of a sophisticated pressurization scheme or a relatively simple natural ventilation provision. There may be cases where smoke protection is required also in the corridors and lobbies at each story, possibly as a compensatory measure for extended travel distances. Another approach, adopted in some parts of the world, is to provide mechanical ventilation in the corridor. In the event of a fire in an adjoining apartment smoke is purged from the corridor, while at the same time the ventilation system provides smoke protection to the stairwell by the combined action of pressure differentials and open-door airflows akin to a stair pressurization system. CFD modeling of the air and smoke transport in the corridor and stairwell is often required in support of the design, in particular where the corridors and lobbies have a more complicated layout or the ventilation inlets and outlets cannot be installed in ideal locations. 
+
+
 
 \paragraph{Tunnels}
 
@@ -640,6 +646,24 @@ The researchers evaluated the appropriateness of the prescriptive provisions and
 
 
 
+
+\subsection{Fire-Structure Interface}
+
+While the modeling of the transport of smoke and heat within the gas phase remains the primary role of a CFD fire model in the majority of fire engineering applications, there are others where the coupling with the compartment boundaries and supporting structures is the main focus. For example, the absorption and transmission of heat through elements of glazing, possibly to predict the likelihood of failure or to calculate the irradiance where people may be escaping on the unexposed side, might be required. Another example would be to investigate the response of concrete linings to fully developed fire conditions, for example in a road tunnel.
+
+The area where the coupling of CFD and structural response has been considered in most detail is arguably in relation to the fire protection of supporting steel structures. By conducting CFD calculations of reasonably worst case fire scenarios, the thermal conditions to which the steel elements would be exposed can be applied as a boundary condition to the solid phase model describing the transfer of heat and mechanical forces within the structure. In the simplest approach, the analysis would ascertain whether the temperature of the steel elements reaches a critical level beyond which the structure might become unstable or even collapse. The methodology adopted to transfer the information, {\em i.e.} surface temperature and convective and radiative thermal fluxes, between the CFD and structural model is non-trivial, and is an area of on-going research, see for example~\cite{Welch}.
+
+
+
+
+
+\section{The Role of CFD in the Design Process}
+
+As discussed elsewhere in this chapter, CFD has an ever increasing role to play in the development of fire safety science, and has an important contribution to make in better understanding the fundamentals such as flame spread and chemical species production where it is being used in parallel with physical experiments. However, it is as a fire engineering design tool that CFD is probably of most relevance to the majority of readers. Here a few words of caution are worth noting.
+
+CFD modeling has a useful, and sometimes critical, role in developing safe and robust fire engineering solutions where the control of smoke and heat generated by fire forms part of the fire safety strategy. It allows architectural designs to be adopted that in previous eras would have been difficult to justify, for example in respect to smoke control in large and complicated building atria or where a reduced level of structural fire protection is desired. It should, however, be seen as a contributing component to the overall design process, and not as a ``black box'' that faithfully provides the correct answers regardless of the inputs and assumptions made. A great deal of care and experience is required in order to sensibly use CFD in support of fire engineering designs, and it should be employed alongside simpler calculation and design methods wherever possible to confirm that the CFD results are comparable to the empirical correlations that have traditionally been applied in fire protection engineering.
+
+It is as a parametric design tool that CFD is often most gainfully employed, allowing the impact of varying the input and boundary conditions to be examined. For example, how sensitive is the smoke control solution to the design fire size, or how much influence does a change in wind direction have on a natural smoke ventilation strategy? The reader is encouraged to consult the guidance documents available on the best practice use of CFD in the various application areas and to consult the guidance documentation provided with the CFD model being employed. For example, the guidance document prepared by the U.S.~Nuclear Regulatory Commission and the Electrical Power Research Institute (EPRI) on fire modeling for nuclear power plants~\cite{Stroup:2012} includes useful information on the appropriate role and application of CFD in the fire safety design process, and is relevant also to fire scenarios outside the nuclear field.
 
 
 
