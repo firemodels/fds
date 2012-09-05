@@ -338,10 +338,8 @@ void num2string(char *string, float tval,float range){
   float tval2,mant10;
   int exp10;
 
-  //if(ABS((double)tval)<ABS((double)range)/100.0f)tval=0.0f;
-  tval2=tval; 
-  if(tval2<0.0)tval2=-tval2;
-  if(0.01<=tval2&&tval2<0.1){
+  tval2=ABS(tval); 
+  if(0.01-.001<=tval2&&tval2<0.1){
     sprintf(string,"%3.2f",tval);
   }
   else if(0.1<=tval2&&tval2<1.0){
@@ -362,7 +360,9 @@ void num2string(char *string, float tval,float range){
   else if(10000.0<=tval2&&tval2<100000.0){
     sprintf(string,"%5.0f",tval);
     }
-  else if(tval2==0.0){STRCPY(string,"0.00");}
+  else if(tval2==0.0){
+    STRCPY(string,"0.00");
+  }
   else{
     mant10 = frexp10(tval,&exp10);
     mant10 = (float)((int)(10.0f*mant10+0.5f))/10.0f;
@@ -370,12 +370,22 @@ void num2string(char *string, float tval,float range){
       mant10/=10.0f;
       exp10++;
     }
-    if(exp10<-99)STRCPY(string,"0.00");
-    else if(exp10>=-99&&exp10<-9){sprintf(string,"%2.1f%i",mant10,exp10);}
-    else if(exp10>99)STRCPY(string,"***");
+    if(exp10<-99){
+      STRCPY(string,"0.00");
+    }
+    else if(exp10>=-99&&exp10<-9){
+      sprintf(string,"%2.1f%i",mant10,exp10);
+    }
+    else if(exp10>99){
+      STRCPY(string,"***");
+    }
     else{
-      if(exp10==0){sprintf(string,"%2.1f",mant10);}
-      else{sprintf(string,"%2.1fE%i",mant10,exp10);}
+      if(exp10==0){
+        sprintf(string,"%2.1f",mant10);
+      }
+      else{
+        sprintf(string,"%2.1fE%i",mant10,exp10);
+      }
     }
 
     /*sprintf(string,"%1.1e",tval); */

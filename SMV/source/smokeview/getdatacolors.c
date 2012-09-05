@@ -14,7 +14,7 @@ char getdatacolors_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-#define EXPMIN -2
+#define EXPMIN -1
 #define EXPMAX 3
 
 /* ------------------ getBoundaryColors ------------------------ */
