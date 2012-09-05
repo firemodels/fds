@@ -39,7 +39,7 @@ In contrast to zone models, the techniques of CFD evolved outside the fire commu
 
 CFD provides the potential to study these complicated problems that are only partially amenable to reduced-scale physical modeling because of the large number of non-dimensional groups that need to be preserved to simulate full-scale behavior. Furthermore, CFD has emerged as an important tool because the assumptions employed in zone models limit their range of application to relatively simple fire scenarios that can be described in terms of a small number of idealized components ({\em e.g.}, unperturbed fire plume, unconfined ceiling jet, uniform hot gas layer).
 
-The starting point for CFD models is the set of partial differential equations that assert conservation of mass, momentum, and energy within the fire and throughout the space surrounding it. These equations are solved numerically to yield time-varying predictions of temperature,  gas  velocity,  gas species concentrations, and so forth on a three dimensional mesh of control volumes that spans the geometry being modeled. Unlike two zone models, CFD models enforce the conservation laws in each of the thousands or millions of relatively small control volumes. However, the exact solution of the governing equations, resolving fully the length and time scales that occur in the turbulent flows associated with fire, is still beyond the capabilities of even the largest computers currently available. To capture the details of the chemical processes of a fire would require spatial resolution of less than 1 millimeter. As a consequence, it is necessary to modify the governing equations to model the unresolvable turbulence. Two main approaches are currently employed in CFD simulations of fire: large eddy simulation (LES) and Reynolds-averaged Navier-Stokes (RANS) equations, which are described later in this chapter.
+The starting point for CFD models is the set of partial differential equations that assert conservation of mass, momentum, and energy within the fire and throughout the space surrounding it. These equations are solved numerically to yield time-varying predictions of temperature,  gas  velocity,  gas species concentrations, and so forth, on a three dimensional mesh of control volumes that spans the geometry being modeled. Unlike two zone models, CFD models enforce the conservation laws in each of the thousands or millions of relatively small control volumes. However, the exact solution of the governing equations, resolving fully the length and time scales that occur in the turbulent flows associated with fire, is still beyond the capabilities of even the largest computers currently available. To capture the details of the chemical processes of a fire would require spatial resolution of less than 1 millimeter. As a consequence, it is necessary to modify the governing equations to model the unresolvable turbulence. Two main approaches are currently employed in CFD simulations of fire: large eddy simulation (LES) and Reynolds-averaged Navier-Stokes (RANS) equations, which are described later in this chapter.
 
 In addition to the uncertainties associated with the modeling of turbulent flow, others are introduced by the description of combustion chemistry; radiation; and mass, momentum, and heat transfer at solid boundaries. Further complexity is introduced in the numerical solution of the equation set in which the choice of numerical schemes and the resolution of the numerical mesh strongly influences the quality of the CFD solution. An appreciation of all these issues is important in the successful exploitation of CFD to solve fire problems.
 It should be recognized that this topic is rapidly evolving and that this chapter can only represent a ``snapshot'' in time. Whereas a thousand mesh points constituted a detailed CFD solution in the early 1980s, simulations using millions of mesh points are now routine. This number can be expected to increase further, especially as parallel processing becomes more widespread. However, although the modeling of smoke transport may be considered reasonably mature, there remains considerable research and development still to be done with some of the more complex issues related to the underlying combustion and fire science ({\em e.g.}, flame spread, oxygen vitiation, soot formation, and water suppression). Here the challenges remain considerable and will not be satisfactorily solved for some time yet.
@@ -123,33 +123,33 @@ Direct numerical simulation (DNS) means that the governing equations are solved 
 
 The approach to modeling turbulence in many commercial and fire-specific CFD models is to solve a statistically time-averaged form of the conservation equations, often referred to as the Reynolds-averaged Navier-Stokes (RANS)\footnote{A density-weighted variant of Reynolds averaging (Favre averaging) is often necessary for the treatment of regions where density fluctuations have a significant effect. This variant is not usually necessary for smoke movement studies but can be important close to the fire source. This treatment is not presented here but can be found in, for example, Cox~\cite{Cox:1995}.} equations after Osborne Reynolds who introduced the idea over a century ago. The starting point in Reynolds averaging is to decompose the velocity components, enthalpy, and species mass fractions, into a time-averaged component (denoted by an overbar) and a fluctuating component (denoted by a prime):
 \begin{equation}
-\phi(\mathbf{x},t) = \overline{\phi}(\mathbf{x},t) + \phi'(\mathbf{x},t)
+\phi(\mathbf{x},t) = \bar{\phi}(\mathbf{x},t) + \phi'(\mathbf{x},t)
 \label{eq:phidef}
 \end{equation}
 Notice that for transient flows the time-averaged component is still a function of time, representing the evolution of the mean flow field. In typical fire simulations, the time scale associated with the time-averaged component is on the order of several seconds, whereas that of the fluctuating component is on the order of milliseconds. Substituting the decomposed primitive variables into the conservation equations (Equations~\ref{eq:masscon}, \ref{eq:momcon}, and \ref{eq:encon}) and then applying the same time-averaging process to the entire system of equations yields a set of equations that is similar in form to the original equations, with the mass conservation equation remaining unchanged:
 \begin{equation}
-\frac{\partial (\rho \overline{\mathbf{u}})}{\partial t} + \nabla \cdot (\rho \overline{\mathbf{u}} \overline{\mathbf{u}}) = -\nabla p + \mathbf{f} + \nabla \cdot \overline{\tens{\tau}}
+\frac{\partial (\rho \bar{\mathbf{u}})}{\partial t} + \nabla \cdot (\rho \bar{\mathbf{u}} \bar{\mathbf{u}}) = -\nabla p + \mathbf{f} + \nabla \cdot \bar{\tens{\tau}}
 - \nabla \cdot \rho \overline{ \mathbf{u}' \mathbf{u}' }
 \label{eq:filmomcon}
 \end{equation}
 \begin{equation}
-\frac{\partial (\rho \overline{h})}{\partial t} + \nabla \cdot (\rho \overline{h} \overline{\mathbf{u}}) = \frac{Dp}{Dt} + \dot{q}''' - \nabla \cdot \overline{\mathbf{q}}
-+ \overline{\epsilon} - \nabla \cdot \rho \overline{ \mathbf{u}' h' }
+\frac{\partial (\rho \bar{h})}{\partial t} + \nabla \cdot (\rho \bar{h} \bar{\mathbf{u}}) = \frac{Dp}{Dt} + \dot{q}''' - \nabla \cdot \bar{\mathbf{q}}
++ \bar{\epsilon} - \nabla \cdot \rho \overline{ \mathbf{u}' h' }
 \label{eq:filencon}
 \end{equation}
 Notice that the Reynolds-averaging process has introduced additional terms on the right-hand sides of the equations and increased the number of unknowns. Thus, the system of equations is no longer closed ({\em i.e.}, there are more unknowns than equations). The additional terms are referred to as the Reynolds stresses and the turbulent scalar flux, respectively. The scalar, $h$, is the sensible enthalpy, and similar equations can be derived for the other scalars ({e.g.}, gas species mass fractions). Note that the pressure and density in the preceding equations refer to their time-averaged components.
 
 The majority of commercial and fire-specific CFD models that employ the RANS approach use an eddy viscosity turbulence model to close the set of equations. The basic idea is that the unresolved, turbulent fluctuations can be modeled with diffusive terms that effectively represent the dissipation of turbulent energy:
 \begin{equation}
--\rho \overline{ u_i' u_j' } = \mu_t \left( \frac{\partial \overline{u}_i}{\partial x_j} + \frac{\partial \overline{u}_j}{\partial x_i} \right) - \frac{2}{3} \delta_{ij} \rho k \quad ; \quad \delta_{ij} = \left\{ \begin{array}{l} 1 \; \mathrm{if} \; i=j \\ 0 \; \mathrm{if} \; i\neq j \end{array} \right.
+-\rho \overline{ u_i' u_j' } = \mu_t \left( \frac{\partial \bar{u}_i}{\partial x_j} + \frac{\partial \bar{u}_j}{\partial x_i} \right) - \frac{2}{3} \delta_{ij} \rho k \quad ; \quad \delta_{ij} = \left\{ \begin{array}{l} 1 \; \mathrm{if} \; i=j \\ 0 \; \mathrm{if} \; i\neq j \end{array} \right.
 \label{eq:rans}
 \end{equation}
 \begin{equation}
--\rho \overline{ u_j' h' } = \Lambda_t \frac{\partial \overline{h}}{\partial x_j}
+-\rho \overline{ u_j' h' } = \lambda_t \frac{\partial \bar{h}}{\partial x_j}
 \end{equation}
-Here  $\mu_t$ is the turbulent (eddy) viscosity, $k$ the turbulent kinetic energy, and $\Lambda_t$ the turbulent diffusivity, which is related to the eddy viscosity by the expression
+Here  $\mu_t$ is the turbulent (eddy) viscosity, $k$ the turbulent kinetic energy, and $\lambda_t$ the turbulent diffusivity, which is related to the eddy viscosity by the expression
 \begin{equation}
-\Lambda_t = \frac{\mu_t}{\sigma_t}
+\lambda_t = \frac{\mu_t}{\sigma_t}
 \end{equation}
 where $\sigma_t$ is known as the turbulent Prandtl or Schmidt number, depending on whether the scalar quantity is an energy or species variable. It is usually assigned a constant value depending on the scalar variable in question.
 
@@ -187,14 +187,14 @@ which appears as a source term in the energy conservation Equation~\ref{eq:encon
 \begin{equation}
 \frac{D}{Dt} (\rho h) = \cdots + \epsilon
 \end{equation}
-Extra terms have been hidden to make the point more clearly, and no approximations have been introduced thus far to the Navier-Stokes equations. This exercise merely explains in mathematical terms how the kinetic energy of the flow is converted into thermal energy by the action of the viscosity, $\mu$. In the early 1960s, a meteorologist named Joseph Smagorinsky~\cite{Smagorinsky} suggested, based mainly on dimensional arguments, that the dissipative effect of the viscosity could be represented in a large-scale flow simulation by the expression
+Extra terms have been hidden to make the point more clearly, and no approximations have been introduced thus far to the Navier-Stokes equations. This exercise merely explains in mathematical terms how the kinetic energy of the flow is converted into thermal energy by the action of the viscosity, $\mu$. In the early 1960s, a meteorologist named Joseph Smagorinsky~\cite{Smagorinsky} suggested, based mainly on dimensional arguments, that the effect of the viscosity could modeled by a ``turbulent'' viscosity coefficient:
 \begin{equation}
-\mu_{\mathrm{LES}} = \rho (C_s \Delta)^2 \left[ 2 \left( \frac{\delta \overline{u}}{\delta x} \right)^2 + \cdots \right]^{\frac{1}{2}}
+\mu_t = \rho (C_s \Delta)^2 \left[ 2 \left( \frac{\delta \bar{u}}{\delta x} \right)^2 + \cdots \right]^{\frac{1}{2}}
 \label{eq:muLES}
 \end{equation}
-where $C_s$ is an empirical constant, $\Delta$ is the size of a grid cell, and the expression in brackets has the same functional form as the kinetic energy dissipation rate. The notation $\delta \overline{u}/\delta x$ emphasizes that the LES  eddy viscosity is calculated from finite difference approximations of the gradients of the computed velocity components. The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the eddy viscosity through the expressions
+where $C_s$ is an empirical constant, $\Delta$ is a filter length comparable to the size of a grid cell, and the expression in brackets has the same functional form as the kinetic energy dissipation rate. The notation $\delta \bar{u}/\delta x$ emphasizes that the turbulent viscosity is calculated from finite difference approximations of the gradients of the computed velocity components. The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the eddy viscosity through the expressions
 \begin{equation}
-k_{\mathrm{LES}} = \frac{\mu_{\mathrm{LES}} \, c_p}{\mathrm{Pr}_t} \quad ; \quad D_{\mathrm{LES}} = \frac{\mu_{\mathrm{LES}}}{\rho \, \mathrm{Sc}_t}
+k_t = \frac{\mu_t \, c_p}{\mathrm{Pr}_t} \quad ; \quad D_t = \frac{\mu_t}{\rho \, \mathrm{Sc}_t}
 \end{equation}
 The ``turbulent'' Prandtl and Schmidt numbers are assumed to be constant and of order unity. The appeal of LES is that no additional equations need be solved, as in the RANS $k$-$\epsilon$  model, and that the dynamics of the fire are captured in the simulation, rendering a more realistic-looking flow field than the time-averaged RANS model. The drawback of LES is that it demands that the model user pay close attention to the choice of numerical grid because the accuracy of the technique can be degraded significantly if there are not enough grid cells to describe the flow field adequately. Various perspectives on LES in general can be found in Pope~\cite{Pope}.
 
@@ -384,15 +384,14 @@ It is commonly assumed by model users, particularly those who have purchased exp
 
 \subsection{Verification}
 
-The most important task for a CFD modeler to perform a {\em grid resolution study} for the particular application of the model.
-The accuracy of a CFD calculation is dependent on the resolution of the underlying numerical grid. As discussed in Section~\ref{fin_diff}, the order of accuracy of a numerical algorithm indicates the rate at which the solution of the approximate governing equations converges towards the solution of the exact equations. For example, if the scheme is second-order accurate in space and time, the approximate solution of the governing equations will decrease by a factor of 4 if the grid cell and time step decrease by a factor of 2. Demonstrating this for a particular application of the model is known as a grid resolution study. Selection of an appropriate grid size should be based on whether or not a particular level of accuracy is achieved for a particular grid cell size.
+The most important task for a CFD modeler is to perform a {\em grid resolution study} for the particular application at hand. The accuracy of a CFD calculation is dependent on the resolution of the underlying numerical grid. As discussed in Section~\ref{fin_diff}, the order of accuracy of a numerical algorithm indicates the rate at which the solution of the discretized governing equations converges towards the solution of the exact equations. For example, if the scheme is second-order accurate in space and time, the error due to the finite difference/volume approximation will decrease by a factor of 4 if the grid cell and time step decrease by a factor of 2. Demonstrating this for a particular application of the model is known as a grid resolution study. Selection of an appropriate grid size should be based on whether or not a particular level of accuracy is achieved for a particular grid cell size.
 
 In addition to a grid resolution study, there are a variety of other tests that a model user should perform to ensure that the model is solving the governing equations correctly, and that the model user is running the model properly. What tests to perform depends on the application. For example, if the application involves a pressure rise in a relatively tight compartment, simple tests should be performed to ensure that the pressure increase obeys the basic laws of thermodynamics. If water droplets are involved, simple tests should be performed to ensure that mass and energy conservation laws are properly applied in the model.
 
 
 \subsection{Validation}
 
-The typical way to validate a CFD fire model is to compare its results to experimental measurements. This involves two important tasks -- (1) selecting appropriate experiments and (2) quantifying the accuracy of the model's prediction of the outcome of these experiments. The following two sections address these two tasks.
+The typical way to validate a CFD fire model is to compare its results to experimental measurements. This involves two important tasks: (1) selecting appropriate experiments and (2) quantifying the accuracy of the model's prediction of the outcome of these experiments. The following two sections address these two tasks.
 
 \paragraph{Applicability of Validation Experiments}
 
@@ -416,7 +415,7 @@ The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, base
 \end{equation}
 
 \item {\em Global Equivalence Ratio, $\phi$:}
-The equivalence ratio is the ratio of the mass flux of fuel from the fire to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio. A convenient way to express this ratio for fire applications is as follows:
+The equivalence ratio is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio. A convenient way to express this ratio for fire applications is as follows:
 \begin{equation}
    \phi = \frac{\dot{Q}}{\Delta H_{\hbox{\tiny O$_2$}} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
    \begin{array}{r@{\quad \quad}l}
@@ -424,7 +423,7 @@ The equivalence ratio is the ratio of the mass flux of fuel from the fire to the
       0.23 \, \rho \, \dot{V}       & \hbox{Mechanical Ventilation} \end{array} \right.
 \end{equation}
 Here, $\dot{Q}$ is the peak heat release rate of the fire, $\Delta H_{\hbox{\tiny O$_2$}}$ is the heat of combustion per unit mass oxygen consumed, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the
-volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
+volume flow of air into the compartment. The factor 0.23 is the mass fraction of oxygen in air. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
 In general, under-ventilated fire scenarios are more challenging for the models because the combustion physics are more complicated.
 
 \item {\em Relative Distance along the Ceiling, $r_{\hbox{\tiny cj}}/H$:}
@@ -441,12 +440,11 @@ by these models are limited in terms of compartment aspect ratio. For CFD, extre
 
 \item {\em Ceiling Height relative to the Fire Diameter, $H/D^*$:}
 This ratio is a non-dimensional measure of the height of the fire plume.
-$D^*$ is length scale that incorporates the heat release rate of the fire.
+$D^*$ is a length scale that incorporates the heat release rate of the fire:
 \begin{equation}
    D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5} \label{Dstar}
 \end{equation}
-The larger this ratio, the more important the plume becomes in the overall scenario. For empirical and zone models, it indicates whether or not the plume entrainment
-correlation is appropriate. For CFD, it indicates how ``high'' the plume actually is, in non-dimensional terms.
+The larger the ratio $H/D^*$, the more important the plume becomes in the overall scenario. For empirical and zone models, it indicates whether or not the plume entrainment correlation is appropriate. For CFD, it indicates how ``high'' the plume actually is, in non-dimensional terms.
 \end{enumerate}
 
 
@@ -458,7 +456,7 @@ Having determined the appropriateness of the chosen experiments, it is now neces
 \caption{A comparison of measured versus predicted wall temperature. The off-diagonal lines indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
 \label{scatterplot}
 \end{figure}
-The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements. For example, the bias factor for the data shown in Fig.~\ref{scatterplot} is 1.13. This means that the model over-predicts wall temperatures by 13~\%, on average, and this is shown graphically by the dash-dot line. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Fig.~\ref{scatterplot}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the estimated experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence interval for the measurements. In this case, $\widetilde{\sigma}_E=0.07$. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. The slopes of these lines are $\delta (1\pm 2 \widetilde{\sigma}_M)$. In this case, $\widetilde{\sigma}_M=0.2$. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge and the dash-dot bias line would overlap the solid diagonal line. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
+The accuracy of the model can be expressed in terms of two statistical parameters. The first, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements. For example, the bias factor for the data shown in Figure~\ref{scatterplot} is 1.13. This means that the model over-predicts wall temperatures by 13~\%, on average, and this is shown graphically by the dash-dot line. The second statistic is the relative standard deviation of the model, $\widetilde{\sigma}_M$. This indicates the degree of scatter of the points. Referring again to Figure~\ref{scatterplot}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the estimated experimental uncertainty. The slopes of these lines are $1\pm 2 \widetilde{\sigma}_E$, {\em i.e.} the 95~\% confidence interval for the measurements. In this case, $\widetilde{\sigma}_E=0.07$. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. The slopes of these lines are $\delta (1\pm 2 \widetilde{\sigma}_M)$. In this case, $\widetilde{\sigma}_M=0.2$. If the model were as accurate as the measurements against which it is compared, the two sets of off-diagonal lines would merge and the dash-dot bias line would overlap the solid diagonal line. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
 
 The derivation of these uncertainty statistics is described in Ref.~\cite{McGrattan:Metrologia}, and it is summarized here. First, a few assumptions are made:
 \begin{enumerate}
@@ -489,9 +487,9 @@ Note that the complimentary error function is defined as follows:
 \end{equation}
 It is a standard function in most mathematical or spread sheet programs.
 
-As an example of the procedure, suppose that the model whose results are plotted in Fig.~\ref{scatterplot} has predicted that the wall temperature within a compartment would peak at a value of 300~$^\circ$C due to a given design fire. Suppose also that the failure criterion for the wall lining material is 325~$^\circ$C. What is the probability that the wall temperature could reach 325~$^\circ$C? First, it is best to work in terms of temperature rise. The ambient temperature is 20~$^\circ$C; thus, the predicted temperature rise, $\Delta T_p$, is 280~$^\circ$C and the critical temperature rise, $\Delta T_c$, is 305~$^\circ$C. From Eq.~\ref{prob}, the probability that the temperature could exceed the critical value is:
+As an example of the procedure, suppose that the model whose results are plotted in Figure~\ref{scatterplot} has predicted that the wall temperature within a compartment would peak at a value of 300~$^\circ$C due to a given design fire. Suppose also that the failure criterion for the wall lining material is 325~$^\circ$C. What is the probability that the wall temperature could reach 325~$^\circ$C? First, it is best to work in terms of temperature rise. The ambient temperature is 20~$^\circ$C; thus, the predicted temperature rise, $\Delta T_p$, is 280~$^\circ$C and the critical temperature rise, $\Delta T_c$, is 305~$^\circ$C. From Equation~\ref{prob}, the probability that the temperature could exceed the critical value is:
 \begin{eqnarray}
-   P(\Delta T>\Delta T_c) &=& \frac{1}{2} \; \hbox{erfc} \left( \frac{\Delta T_c-(\Delta T_p/\delta)}{\widetilde{\sigma}_M \, (\Delta T_p/\delta) \sqrt{2}} \right) \\ [0.1in]
+   P(\Delta T>\Delta T_c) &=& \frac{1}{2} \; \hbox{erfc} \left( \frac{\Delta T_c-(\Delta T_p/\delta)}{\widetilde{\sigma}_M \, (\Delta T_p/\delta) \sqrt{2}} \right) \nonumber \\ [0.1in]
     &=& \frac{1}{2} \; \hbox{erfc} \left( \frac{305-(280/1.13)}{0.2 \; (280/1.13) \, \sqrt{2}} \right) \cong 0.12
 \end{eqnarray}
 It must be emphasized that this estimated probability of failure is based only on the model uncertainty. It does not account for parameter uncertainty; that is, the uncertainty in the input parameters.
@@ -504,7 +502,7 @@ This section presents examples of how CFD fire models are used in practice. Thes
 
 \subsection{Fundamental Fire Dynamics}
 
-CFD, in particular large eddy simulation, provides a convenient means to study basic fire behavior. The most obvious application is the study of fire plumes; for example, predicting the height of the visible flame, the centerline velocity and temperature, and the pulsation frequency. Heskestad's empirical flame height correlation (Eq.~\ref{Heskestad_Flame_Height}) is valid for values of  $Q^*$ between 0.1 and 10,000, characterizing intermittent grass fires all the way to oil well blowout fires. Figure~\ref{Flame_Height} compares FDS predictions with Heskestad's correlation. Note that the simulations were run at three different grid resolutions. A useful way to characterize the grid resolution of a fire simulation is via the ratio $D^*/\delta x$, where $D^*$ (Eq.~\ref{Dstar}) is a measure of the effective fire diameter, based on heat release rate, and $\delta x$ is the size of a grid cell. In effect, $D^*/\delta x$ is the number of grid cells spanning the effective fire diameter.
+CFD, in particular large eddy simulation, provides a convenient means to study basic fire behavior. The most obvious application is the study of fire plumes; for example, predicting the height of the visible flame, the centerline velocity and temperature, and the pulsation frequency. Heskestad's empirical flame height correlation (Equation~\ref{Heskestad_Flame_Height}) is valid for values of  $Q^*$ between 0.1 and 10,000, characterizing intermittent grass fires all the way to oil well blowout fires. Figure~\ref{Flame_Height} compares FDS predictions with Heskestad's correlation. Note that the simulations were run at three different grid resolutions. A useful way to characterize the grid resolution of a fire simulation is via the ratio $D^*/\delta x$, where $D^*$ (Equation~\ref{Dstar}) is a measure of the effective fire diameter, based on heat release rate, and $\delta x$ is the size of a grid cell. In effect, $D^*/\delta x$ is the number of grid cells spanning the effective fire diameter.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=5.0in]{Flame_Height}
@@ -636,7 +634,7 @@ Most of the assumptions required by integral models can be removed by taking adv
 
 \subsection{Virtual Experiments}
 
-Many codes and standards for fire protection are based upon simple room geometries. For example, the spacing for smoke detectors has historically been based upon smooth, level ceilings with some additional rules for beams, slope, and height.  Under those rules a single story room with a 30~m by 30~m smooth ceiling could be protected by a grid of nine smoke detectors, but a ceiling of waffle concrete construction (Fig.~\ref{waffle_ceiling}) with structural deep beams 1~m on center, could, under a strict interpretation of the guidelines, require 900 detectors, one in each beam pocket. While this is obviously unreasonable, making a change to the building code requires evidence. In lieu of a large number of costly full-scale experiments, a small set of full-scale experiments was combined with a large set of ``virtual'' experiments done with CFD~\cite{O'Connor:NFPRF,Mealy:NFPRF}.
+Many codes and standards for fire protection are based upon simple room geometries. For example, the spacing for smoke detectors has historically been based upon smooth, level ceilings with some additional rules for beams, slope, and height.  Under those rules a single story room with a 30~m by 30~m smooth ceiling could be protected by a grid of nine smoke detectors, but a ceiling of waffle concrete construction (Figure~\ref{waffle_ceiling}) with structural deep beams 1~m on center, could, under a strict interpretation of the guidelines, require 900 detectors, one in each beam pocket. While this is obviously unreasonable, making a change to the building code requires evidence. In lieu of a large number of costly full-scale experiments, a small set of full-scale experiments was combined with a large set of ``virtual'' experiments done with CFD~\cite{O'Connor:NFPRF,Mealy:NFPRF}.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{waffle_ceiling}
 \caption{Simulation of smoke filling under a coffered ceiling. (Figure courtesy Aon Fire Protection Engineering Corp.)}
@@ -710,6 +708,7 @@ $Y_\alpha$               \> mass fraction of species
 \begin{tabbing}
 $\epsilon$ \hspace{1in}  \= rate of dissipation of turbulent kinetic energy \\
 $\kappa$                 \> radiation absorption coefficient \\
+$\lambda$                \> generalized diffusion coefficient \\
 $\mu$                    \> dynamic viscosity \\
 $\mu_t$                  \> turbulent viscosity (in eddy viscosity turbulence model) \\
 $\rho$                   \> density \\
@@ -749,8 +748,8 @@ These expressions assert that the viscous stresses are linearly related to the s
 \end{equation}
 The dissipation function, $\epsilon$, is a scalar formed by the dot product of two $3 \times 3$ matrices:
 \begin{eqnarray}
-\epsilon &\equiv& \tens{\tau} \cdot \nabla \mathbf{u} \nonumber  \\
-         &=& \mu \left( 2u_x^2 + 2v_y^2 + 2w_z^2 + (v_x+u_y)^2 + (w_y+v_z)^2 + (u_z+w_x)^2 - \frac{2}{3} (\nabla \cdot \mathbf{u})^2 \right)
+  \epsilon \equiv \tens{\tau} \cdot \nabla \mathbf{u} &=& \mu \bigg( 2u_x^2 + 2v_y^2 + 2w_z^2   \nonumber \\ 
+  && + (v_x+u_y)^2 + (w_y+v_z)^2 + (u_z+w_x)^2 - \frac{2}{3} (\nabla \cdot \mathbf{u})^2 \bigg)
 \end{eqnarray}
 
 
