@@ -638,6 +638,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! Compute velocity difference
 
    VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
+   WC%VELOCITY_ERROR = ABS(VELOCITY_ERROR)
    WALL_WORK1(IW) = -SIGN(1,IOR)*ITERATIVE_FACTOR*VELOCITY_ERROR/(WC%RDN*DT)
 
    ! If the grid cells in the current mesh are smaller than those of the other mesh, do not include in error tolerance
