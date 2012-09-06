@@ -127,14 +127,14 @@ MP5 \cite{Suresh:1997}   && see below
 Once $B(r)$ has been determined, the scalar face value is found from
 \begin{equation}
 \label{eqn_flux_limiter}
-\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_i) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
-\phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i+1}) & \mbox{if} \quad u_i<0 \end{array} \right.
+\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2} \,\delta \phi_{loc} & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
+\phi_{i+1} &-& B(r) \,\frac{1}{2} \,\delta \phi_{loc} & \mbox{if} \quad u_i<0 \end{array} \right.
 \end{equation}
 For CHARM, the face value is given by~\cite{Kempf:2003}
 \begin{equation}
 \label{eqn_charm_limiter}
-\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i-1}) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
-\phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_{i+2}) & \mbox{if} \quad u_i<0 \end{array} \right.
+\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2} \,\delta \phi_{up} & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
+\phi_{i+1} &-& B(r) \,\frac{1}{2} \,\delta \phi_{up} & \mbox{if} \quad u_i<0 \end{array} \right.
 \end{equation}
 
 \paragraph{Monotonicity-Preserving 5th-Order (MP5)}
