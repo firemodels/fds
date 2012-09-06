@@ -178,7 +178,7 @@ for j=qrange
         set(gca,'FontName','Times')
         set(gca,'FontSize',12)
         set(gca,'YTick',get(gca,'XTick'))
-        set(gca,'Position',[1,1,4.5,4.5])
+        set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
         
         text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
             Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter)

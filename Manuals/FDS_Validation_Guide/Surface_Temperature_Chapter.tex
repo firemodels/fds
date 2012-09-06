@@ -231,7 +231,7 @@ cylindrical coordinates.
 \section{SP Adiabatic Surface Temperature Experiments}
 
 Comparisons of FDS predictions of gas, plate thermometer, and steel temperatures for compartment and pool fire experiments conducted at SP, Sweden, are
-presented on the following pages. 
+presented on the following pages.
 
 \subsection{Compartment Fire Experiments}
 
@@ -425,9 +425,9 @@ At each height, comparable predictions were made with FDS, but at only one angul
 
 \begin{figure}[p]
 \begin{center}
-\includegraphics[height=2.2in]{FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-1} 
-\includegraphics[height=2.2in]{FIGURES/SP_AST/SP_AST_Diesel_1p1_PT-1} 
-\includegraphics[height=2.2in]{FIGURES/SP_AST/SP_AST_Diesel_1p1_Steel-1} 
+\includegraphics[height=2.2in]{FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-1}
+\includegraphics[height=2.2in]{FIGURES/SP_AST/SP_AST_Diesel_1p1_PT-1}
+\includegraphics[height=2.2in]{FIGURES/SP_AST/SP_AST_Diesel_1p1_Steel-1}
 \end{center}
 \label{SP_Diesel_1p1_1m}
 \end{figure}
@@ -693,7 +693,7 @@ temperatures can often be explained in terms of comparable errors in the predict
 \begin{figure}[p]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Cable_Temperature} \\
+\includegraphics[width=5.0in]{FIGURES/ScatterPlots/NIST_NRC_Cable_Temperature} \\
 \vspace{0.25in}
 \end{tabular}
 \end{center}
@@ -708,11 +708,9 @@ temperatures can often be explained in terms of comparable errors in the predict
 \section{CAROLFIRE Cable Temperatures}
 
 On the following pages are predictions of the THIEF (thermally-induced electrical failure) model compared to 35
-experiments conducted in a heated cylindrical ``shroud.'' The shroud temperature is input into the model, and
-the cable temperature (and in some cases that of the steel conduit enclosing the cable) is predicted. Note that the cables
-generally fall into two categories -- thermoset and thermoplastic. Thermoset cables form a char layer when burned and typically
+experiments conducted at Sandia National Laboratory~\cite{CAROLFIRE}. In these experiments, an instrumented electrical cable was run through a heated cylindrical ``shroud.'' The shroud temperature in an input for the model, and the cable temperature (and in some cases that of the steel conduit enclosing the cable) is predicted. Note that the cables generally fall into two categories -- thermoset and thermoplastic. Thermoset cables form a char layer when burned and typically
 fail electrically at temperatures near 400~$^\circ$C. Thermoplastic cables typically melt and then burn, leaving little residue
-behind except the conductors. These cables typically fail at about 250~$^\circ$C~\cite{CAROLFIRE}. Some cables, as in
+behind except the conductors. These cables typically fail between 200~$^\circ$C and 250~$^\circ$C. Some cables, as in
 Tests~18 and 31, do not fall into either category. The thermoset cables were exposed to temperatures in the neighborhood of
 480~$^\circ$C, and the thermoplastics were exposed to temperatures near 300~$^\circ$C.
 
@@ -721,6 +719,9 @@ jacket until the cable fails electrically. In some experiments, the short-circui
 pyrolyzates. This behavior is not captured in the model, which is why some of the experimental data shows a rapid rise in
 temperature at a certain point in the test. In almost all cases, electrical failure occurred very shortly, or at about the
 same time, as ignition.
+
+Figure~\ref{CAROLFIRE_Summary_Plot} compares the measured versus predicted time to a ``threshold'' temperature. The threshold temperature is
+400~$^\circ$C for thermoset cables and 200~$^\circ$C for thermoplastics.
 
 \newpage
 
@@ -797,6 +798,7 @@ same time, as ignition.
 \end{center}
 \caption[Summary of time to threshold temperature, CAROLFIRE test series.]
 {Summary of time to threshold temperature for the CAROLFIRE test series.}
+\label{CAROLFIRE_Summary_Plot}
 \end{figure}
 
 
