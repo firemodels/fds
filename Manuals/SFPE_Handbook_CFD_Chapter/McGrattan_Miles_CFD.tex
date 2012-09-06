@@ -229,7 +229,7 @@ The most widely used combustion models for fire applications are the Eddy Break-
 \end{equation}
 $C$ is a dimensionless empirical constant and $\tau_{\hbox{\tiny mix}} \approx k/\epsilon$ is the mixing time. RANS and LES models treat the turbulent kinetic energy, $k$, and the dissipation rate, $\epsilon$, differently, but the basic idea is the same in both types of models. The heat release rate is obtained by multiplying the fuel mass consumption rate by an effective heat of combustion. Equation~\ref{eq:fuelconsump} may be augmented by an additional term involving the products of combustion and also by an Arrhenius expression to limit the rate of reaction in cold mixtures. The EBU and EDC models have the merit of simplicity while permitting heat to be released over a distributed volume determined by the enclosure geometry and availability of air. Furthermore, the phenomenon of flame lengthening as a consequence of ventilation control is incorporated by this modeling approach. It has been applied with reasonable success by Miles, Kumar, and Cox~\cite{Miles} and Holen, Brostrom, and Magnussen~\cite{Holen} as it has been in other areas of combustion engineering.
 
-Modeling the generation of species such as CO and soot requires finite rate chemistry to be included in the combustion model. An approach that has been exploited in a number of fire studies is to assume that the flame is a statistical ensemble of thin laminar flamelets that incorporates detailed chemistry from either experimental measurements or detailed kinetic calculations. Details of this approach may be found in Peters~\cite{Peters} and in the references of Cox~\cite{Cox:1998} and Novozhilov~\cite{Novozhilov}. Magnussen and Hjertager~\cite{Magnussen} extended the eddy breakup model to include soot formation and oxidation, using the mechanisms suggested by Tesner, Snegirova, and Knorre~\cite{Tesner}. This involved the solution of two further transport equations. Soot modeling is, however, difficult and not generally included within current CFD fire computations and remains a topic for research.
+The hazard posed by high temperatures and the loss of visibility due to fire may be compounded by exposure to toxic gases such as carbon monoxide or hydrogen cyanide. Although advanced combustion models may include the capability to predict some of these toxic gas species, it is generally necessary in fire engineering to prescribe the species yields. In other words, the production rate of smoke and other combustion products is usually specified by the user based on experimental measurements. Predicting, rather than specifying, the generation of species such as CO, HCN, and soot requires finite rate chemistry to be included in the combustion model. An approach that has been exploited in a number of fire studies is to assume that the flame is a statistical ensemble of thin laminar flamelets that incorporates detailed chemistry from either experimental measurements or detailed kinetic calculations. Details of this approach may be found in Peters~\cite{Peters} and in the references of Cox~\cite{Cox:1998} and Novozhilov~\cite{Novozhilov}. Magnussen and Hjertager~\cite{Magnussen} extended the eddy breakup model to include soot formation and oxidation, using the mechanisms suggested by Tesner, Snegirova, and Knorre~\cite{Tesner}. This involved the solution of two further transport equations. Soot modeling is, however, difficult and not generally included within current CFD fire computations and remains a topic for research.
 
 
 \subsection{Radiation Heat Transfer}
@@ -285,6 +285,32 @@ The definition of the surface temperature is trivial in the case of isothermal b
 
 A more sophisticated solution may be provided by coupling the CFD model with a separate solid phase calculation of the thermal conduction within the solid structure(s). This calculation could take the form of a fully coupled gas and solid-phase model, or a coupling of boundary conditions between a CFD model and a separate solid-phase model. In general, the required information to be passed from the solid-phase model to the CFD model is the surface temperature and pyrolysis rate and, in the other direction, the convective and radiative heat fluxes.
 
+\subsection{Open boundary conditions}
+
+The results of a CFD fire analysis can be sensitive to the location of the ``free'' (ambient or open air) boundaries at the edge of the computational domain. These should be located at a sufficient distance from the fire source and regions of interest so that they do not incorrectly influence the solution. The setting of ambient values in relation to other boundary conditions may require special attention ({\em e.g.}, it can dictate whether smoke can be expected to vent naturally in an air-conditioned atrium). Heat losses to solid boundaries can also have a significant influence on smoke movement, particularly where the smoke has cooled down and the amount of heat transferred to walls and ceilings can determine the degree of buoyancy and stratification of the smoke gases.
+
+
+
+\subsection{Visibility}
+
+Fire protection applications often require an estimate of visibility, the distance through smoke that a person is expected to be able to see, say, an exit sign. Visibility distance may be derived from a CFD solution using the predicted concentration of soot particulates. The correspondence between smoke concentration and visibility is based on the work of Jin~\cite{Jin} and Mullholland~\cite{Mulholland} and is commonly implemented into CFD models using the following (or similar) expression for visibility distance:
+\begin{equation}
+S = \frac{K_1}{K_2 \, m_s}
+\label{eq:vis}
+\end{equation}
+Here $K_1$ is a constant usually set to 3 for reflecting signs and 8 for illuminated ones, $K_2$ is the specific extinction coefficient (often taken as 7.6 m$^2$/g for flaming combustion), and $m_s$ is the mass concentration of soot particles in units of g/m$^3$.  The fire model predicts this latter quantity. Visibility distance calculated in this way at a CFD grid cell represents the visibility corresponding to a homogenous smoke layer and assumes the smoke density at the cell applies everywhere in the domain. Using the CFD solution data, it is possible to perform a more realistic ``line of sight'' calculation using the computed data at each grid cell along this line~\cite{Husted}.
+
+
+\subsection{Sprinklers and Fire Suppression}
+
+It is fairly straight forward to include a sprinkler activation algorithm within a CFD fire model, based on the RTI (Response Time Index) concept of Heskestad and Bill~\cite{Heskestad:1988}. This algorithm requires the gas temperature and velocity in the vicinity of the device. Following sprinkler activation, the water spray interaction with the hot gases can be modeled in a variety of ways. It is most often done using a Lagrangian particle tracking sub-model, in which statistically representative water particles are tracked numerically through the gas phase. The impact on the fire gases from the transfer of mass, momentum and heat associated with the trajectories and evaporation of the water particles is included as source terms in the underlying fluid dynamics equations. A good summary of this approach is given by Makhviladze~{\em et al.}~\cite{Makhviladze}. Water suppression and extinguishment, however, are far more difficult to model, and these phenomena are not generally a practical option for most fire engineering applications.
+
+
+\subsection{Fire-Structure Interface}
+
+While the modeling of the transport of smoke and heat within the gas phase remains the primary role of a CFD fire model in the majority of fire engineering applications, there are others where the coupling with the compartment boundaries and supporting structures is the main focus. For example, the absorption and transmission of heat through elements of glazing, possibly to predict the likelihood of failure or to calculate the irradiance where people may be escaping on the unexposed side, might be required. Another example would be to investigate the response of concrete linings to fully developed fire conditions, for example in a road tunnel.
+
+The area where the coupling of CFD and structural response has been considered in most detail is arguably in relation to the fire protection of supporting steel structures. By conducting CFD calculations of reasonably worst case fire scenarios, the thermal conditions to which the steel elements would be exposed can be applied as a boundary condition to the solid phase model describing the transfer of heat and mechanical forces within the structure. In the simplest approach, the analysis would ascertain whether the temperature of the steel elements reaches a critical level beyond which the structure might become unstable or even collapse. The methodology adopted to transfer the information, {\em i.e.} surface temperature and convective and radiative thermal fluxes, between the CFD and structural model is non-trivial, and is an area of on-going research, see for example~\cite{Welch}.
 
 
 \section{Numerical Solution}
@@ -505,7 +531,7 @@ This section presents examples of how CFD fire models are used in practice. Thes
 CFD, in particular large eddy simulation, provides a convenient means to study basic fire behavior. The most obvious application is the study of fire plumes; for example, predicting the height of the visible flame, the centerline velocity and temperature, and the pulsation frequency. Heskestad's empirical flame height correlation (Equation~\ref{Heskestad_Flame_Height}) is valid for values of  $Q^*$ between 0.1 and 10,000, characterizing intermittent grass fires all the way to oil well blowout fires. Figure~\ref{Flame_Height} compares FDS predictions with Heskestad's correlation. Note that the simulations were run at three different grid resolutions. A useful way to characterize the grid resolution of a fire simulation is via the ratio $D^*/\delta x$, where $D^*$ (Equation~\ref{Dstar}) is a measure of the effective fire diameter, based on heat release rate, and $\delta x$ is the size of a grid cell. In effect, $D^*/\delta x$ is the number of grid cells spanning the effective fire diameter.
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=5.0in]{Flame_Height}
+\includegraphics[width=4.0in]{Flame_Height}
 \end{center}
 \caption{Comparison of FDS predictions of flame height from a 1~m square pan fire for Q* values ranging from
 0.1 to 10000.}
@@ -513,7 +539,7 @@ CFD, in particular large eddy simulation, provides a convenient means to study b
 \end{figure}
 
 The fundamental, or ``puffing,'' frequency is a quantity that the fire model also ought to predict accurately. Figure~\ref{Sandia_Simulation} displays sequential flame images for a single puff from a simulation of a 1~m methane fire experiment conducted at Sandia National Laboratories~\cite{Tieszen:2002}. The dominant puffing mode shows good agreement with the measured puffing frequency of 1.65~Hz. Higher frequency fluctuations from the simulation exhibit the classic -5/3 scaling of Kolmogorov turbulence~\cite{Pope:2000}.
-\begin{figure}[t]
+\begin{figure}[ht]
 \begin{center}
 \includegraphics[width=1.2in]{fire_1}
 \includegraphics[width=1.2in]{fire_2}
@@ -530,27 +556,6 @@ The fundamental, or ``puffing,'' frequency is a quantity that the fire model als
 A significant proportion of fire fatalities can be attributed to the inhalation of smoke particulates and toxic gases. Furthermore, the effects of reduced visibility, high temperature, radiative flux, and oxygen depletion may add to the hazard associated with the smoke generated by an enclosure fire. Means to control the movement of smoke include physical barriers, natural or mechanical smoke exhaust, and pressurization of protected spaces. In routine applications, the design of the smoke control measures may often be achieved by recourse to various guidance publications and empirical correlations~\cite{Klote, NFPA:92B}. Network airflow and zone fire models are also available to assist in the design process. However, where the building space is large or complex in shape, or where a novel ventilation system is proposed, CFD can be a useful tool. Covered shopping malls, atria in hotels and office buildings, leisure complexes, airport terminals, and large warehouses are just some examples of where CFD is being increasingly employed.
 
 Many  of  the  earliest  examples  of  the  application of CFD to fire engineering were in smoke movement applications~\cite{Pericleous, Cox:1990}. Simulations were at that time restricted to a few tens of thousands of grid cells. Although this number has increased to hundreds of thousands or even millions of cells, many of the modeling issues remain the same and are discussed later~\cite{Kumar}.
-
-\paragraph{Fire source}
-
-The hazard posed by high temperatures and the loss of visibility may be compounded by exposure to toxic gases such as carbon monoxide or hydrogen cyanide. Although advanced combustion models may include the capability to predict some of these toxic gas species, it is generally necessary in fire engineering to prescribe the species yields. In other words, the production rate of smoke and other combustion products is usually specified by the user based on experimental measurements. It is still beyond the capability of practical fire models to predict reliably the growth, spread, and species yields of a fire that consumes realistic building contents.
-
-\paragraph{Open boundary conditions}
-
-The solution to a smoke movement analysis can be sensitive to the location of the ``free'' (ambient or open air) boundaries at the edge of the computational domain. These should be located at a sufficient distance from the fire source and regions of interest so that they do not incorrectly influence the solution. The setting of ambient values in relation to other boundary conditions may require special attention ({\em e.g.}, it can dictate whether smoke can be expected to vent naturally in an air-conditioned atrium). Heat losses to solid boundaries can also have a significant influence on smoke movement, particularly where the smoke has cooled down and the amount of heat transferred to walls and ceilings can determine the degree of buoyancy and stratification of the smoke gases.
-
-\paragraph{Visibility}
-
-Together with gas temperatures and heat fluxes, smoke movement applications often require an estimate of visibility, the distance through smoke that a person is expected to be able to see, say, an exit sign. Visibility distance may be derived from a CFD solution using the predicted concentration of soot particulates. The correspondence between smoke concentration and visibility is based on the work of Jin~\cite{Jin} and Mullholland~\cite{Mulholland} and is commonly implemented into CFD models using the following (or similar) expression for visibility distance:
-\begin{equation}
-S = \frac{K_1}{K_2 \, m_s}
-\label{eq:vis}
-\end{equation}
-Here $K_1$ is a constant usually set to 3 for reflecting signs and 8 for illuminated ones, $K_2$ is the specific extinction coefficient (often taken as 7.6 m$^2$/g for flaming combustion), and $m_s$ is the mass concentration of soot particles in units of g/m$^3$.  The fire model predicts this latter quantity. Visibility distance calculated in this way at a CFD grid cell represents the visibility corresponding to a homogenous smoke layer and assumes the smoke density at the cell applies everywhere in the domain. Using the CFD solution data, it is possible to perform a more realistic ``line of sight'' calculation using the computed data at each grid cell along this line~\cite{Husted}.
-
-\paragraph{Sprinklers}
-
-Although the inclusion of the processes of water suppression and extinguishment in CFD modeling remains a research topic, and is not generally a practical option for most fire engineering applications, the interaction of the water spray with the fire gases can be more readily incorporated. This is generally in the guise of a Lagrangian particle tracking sub-model, in which statistically representative water particles are tracked numerically through the gas phase. The impact on the fire gases from the transfer of mass, momentum and heat associated with the trajectories and evaporation of the water particles is included as source terms in the underlying fluid dynamics equations. A good summary of this approach is given by Makhviladze~{\em et al.}~\cite{Makhviladze}.
 
 
 \paragraph{Smoke transport in a mechanically ventilated library}
@@ -621,14 +626,11 @@ Buoyant windblown plumes have been studied since the early 1960s. A summary of t
 The potential shortcomings of these types of models are that they were designed for typical industrial sources, like smokestacks, that are much smaller in terms of energy output than a large fire. The plume from an oil or forest fire will rise higher into the atmosphere, and it is difficult to predict the rise based on empirical correlations. If the plume rise is not calculated correctly, substantial errors in downwind concentration can result. In the case of smoke-stack emissions, the plume does not rise appreciably high, reducing the uncertainty of the results.
 Most of the assumptions required by integral models can be removed by taking advantage of the advances in CFD over the past few decades. For example, as part of the process of evaluating the feasibility of using in situ burning as a remediation tool for large oil spills, NIST developed a numerical model, ALOFT (A Large Out- door Fire plume Trajectory), to predict the concentration of smoke and other combustion products downwind of a large fire~\cite{Baum}. The model is simply a variant of the large eddy simulation model FDS, with a simplified plume rise model coupled with a coarsely gridded wind calculation spanning tens of kilometers (Figure~\ref{ALOFT}). This combination of models is not unusual for outdoor application, as the range of length scales spans at least three orders of magnitude.
 
-\begin{figure}[b]
+\begin{figure}[ht]
 \includegraphics[width=\textwidth]{narrows}
 \caption{Simulation of smoke from a large oil fire in the Valdez narrows, Alaska. (Figure courtesy of NIST.)}
 \label{ALOFT}
 \end{figure}
-
-
-
 
 
 
@@ -641,18 +643,6 @@ Many codes and standards for fire protection are based upon simple room geometri
 \label{waffle_ceiling}
 \end{figure}
 The researchers evaluated the appropriateness of the prescriptive provisions and identified ceiling structure parameters, which if altered, would cause significant differences in smoke detection performance as compared to a smooth level ceiling. It had been believed that such beam projections would significantly delay the activation time. The use of CFD modeling showed this expectation to be incorrect and a subsequent full-scale experimental study proved the general findings of the CFD analysis~\cite{Gottuk:2008}. The final result of the study led to an exception, under some circumstances, to the code requirement of a smoke detector in every beam pocket.
-
-
-
-
-\subsection{Fire-Structure Interface}
-
-While the modeling of the transport of smoke and heat within the gas phase remains the primary role of a CFD fire model in the majority of fire engineering applications, there are others where the coupling with the compartment boundaries and supporting structures is the main focus. For example, the absorption and transmission of heat through elements of glazing, possibly to predict the likelihood of failure or to calculate the irradiance where people may be escaping on the unexposed side, might be required. Another example would be to investigate the response of concrete linings to fully developed fire conditions, for example in a road tunnel.
-
-The area where the coupling of CFD and structural response has been considered in most detail is arguably in relation to the fire protection of supporting steel structures. By conducting CFD calculations of reasonably worst case fire scenarios, the thermal conditions to which the steel elements would be exposed can be applied as a boundary condition to the solid phase model describing the transfer of heat and mechanical forces within the structure. In the simplest approach, the analysis would ascertain whether the temperature of the steel elements reaches a critical level beyond which the structure might become unstable or even collapse. The methodology adopted to transfer the information, {\em i.e.} surface temperature and convective and radiative thermal fluxes, between the CFD and structural model is non-trivial, and is an area of on-going research, see for example~\cite{Welch}.
-
-
-
 
 
 \section{The Role of CFD in the Design Process}
@@ -678,7 +668,7 @@ Moving forward will require a new generation of engineers who have expertise in 
 
 \begin{tabbing}
 $c_p$ 	\hspace{1in}     \= specific heat \\
-$D$	                     \> material diffusivity \\
+$D_\alpha$	             \> material diffusivity of species $\alpha$ \\
 $\mathbf{f}$	         \> external body force \\
 $h$                      \>	sensible enthalpy \\
 $h_c$ 	                 \> convective heat transfer coefficient \\
@@ -700,7 +690,7 @@ $T$	                     \> temperature \\
 $\mathbf{u}=(u,v,w)$     \> velocity vector \\
 $\overline{W}$	         \> average molecular weight \\
 $\mathbf{x}=(x,y,z)$	 \> position vector \\
-$Y_\alpha$               \> mass fraction of species
+$Y_\alpha$               \> mass fraction of species $\alpha$
 \end{tabbing}
 
 \subsection{Greek Letters}
@@ -748,7 +738,7 @@ These expressions assert that the viscous stresses are linearly related to the s
 \end{equation}
 The dissipation function, $\epsilon$, is a scalar formed by the dot product of two $3 \times 3$ matrices:
 \begin{eqnarray}
-  \epsilon \equiv \tens{\tau} \cdot \nabla \mathbf{u} &=& \mu \bigg( 2u_x^2 + 2v_y^2 + 2w_z^2   \nonumber \\ 
+  \epsilon \equiv \tens{\tau} \cdot \nabla \mathbf{u} &=& \mu \bigg( 2u_x^2 + 2v_y^2 + 2w_z^2   \nonumber \\
   && + (v_x+u_y)^2 + (w_y+v_z)^2 + (u_z+w_x)^2 - \frac{2}{3} (\nabla \cdot \mathbf{u})^2 \bigg)
 \end{eqnarray}
 
