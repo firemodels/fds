@@ -46,7 +46,8 @@ For additional information on Firebot, please refer to the FDS Configuration Man
   * Stage 6d: Compile SMV release
   * Stage 6e: Make SMV pictures (release mode)
   * Stage 6f: Make FDS pictures
-  * Stage 7:  Matlab plotting and statistics
+  * Stage 7a:  Matlab plotting and statistics (verification)
+  * Stage 7b:  Matlab plotting (validation)
   * Stage 8:  Build FDS-SMV Guides
 """
 
