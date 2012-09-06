@@ -114,8 +114,8 @@ stage6c_success=false
 stage6d_success=false
 stage6e_success=false
 stage6f_success=false
-stage7_success=false
-stage8_success=false
+stage7a_success=false
+stage7b_success=false
 
 #  ===================================
 #  = Stage 0 - External dependencies =
@@ -754,11 +754,11 @@ check_fds_pictures()
    fi
 }
 
-#  ============================================
-#  = Stage 7 - Matlab plotting and statistics =
-#  ============================================
+#  ============================================================
+#  = Stage 7a - Matlab plotting and statistics (verification) =
+#  ============================================================
 
-run_matlab_plotting()
+run_matlab_verification()
 {
    # Run Matlab plotting script
    cd $FDS_SVNROOT/Utilities/Matlab/scripts
@@ -769,22 +769,26 @@ run_matlab_plotting()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $FDS_SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7_verification
-   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7_validation
+   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7a_verification
+
+   # Restore LaTeX as plot_style interpreter
+   cd scripts
+   sed -i 's/TeX/LaTeX/g' plot_style.m
+   cd ..
 }
 
-check_matlab_plotting()
+check_matlab_verification()
 {
    # Scan and report any errors in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7*` == "" ]]
+   if [[ `grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
    then
-      stage7_success=true
+      stage7a_success=true
    else
-      grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7* > $FIREBOT_DIR/output/stage7_errors
+      grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification > $FIREBOT_DIR/output/stage7a_errors
       
-      echo "Errors from Stage 7 - Matlab plotting and statistics:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage7_errors >> $ERROR_LOG
+      echo "Errors from Stage 7a - Matlab plotting and statistics (verification):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage7a_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
@@ -798,11 +802,11 @@ check_verification_stats()
       # Continue along
       :
    else
-      echo "Firebot Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7_errors
-      echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $FIREBOT_DIR/output/stage7_errors
+      echo "Firebot Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7a_errors
+      echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $FIREBOT_DIR/output/stage7a_errors
       
-      echo "Errors from Stage 7 - Matlab plotting and statistics:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage7_errors >> $ERROR_LOG
+      echo "Errors from Stage 7a - Matlab plotting and statistics (verification):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage7a_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
@@ -819,9 +823,73 @@ check_verification_stats()
    fi
 }
 
+#  ===========================================
+#  = Stage 7b - Matlab plotting (validation) =
+#  ===========================================
+
+run_matlab_validation()
+{
+   # Run Matlab plotting script
+   cd $FDS_SVNROOT/Utilities/Matlab/scripts
+
+   # Replace LaTeX with TeX for Interpreter in plot_style.m
+   # This allows displayless automatic Matlab plotting
+   # Otherwise Matlab crashes due to a known bug
+   sed -i 's/LaTeX/TeX/g' plot_style.m 
+
+   cd $FDS_SVNROOT/Utilities/Matlab
+   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7b_validation
+
+   # Restore LaTeX as plot_style interpreter
+   cd scripts
+   sed -i 's/TeX/LaTeX/g' plot_style.m
+   cd ..
+}
+
+check_matlab_validation()
+{
+   # Scan and report any errors in Matlab scripts
+   cd $FIREBOT_DIR
+   if [[ `grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation` == "" ]]
+   then
+      stage7b_success=true
+   else
+      grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation > $FIREBOT_DIR/output/stage7b_errors
+      
+      echo "Errors from Stage 7b - Matlab plotting (validation):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage7b_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+}
+
 #  ==================================
 #  = Stage 8 - Build FDS-SMV Guides =
 #  ==================================
+
+check_guide()
+{
+   # Scan and report any errors in build process for guides
+   cd $FIREBOT_DIR
+   if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output/${1}` == "" ]]
+   then
+      cp $2 /var/www/html/firebot/manuals/
+   else
+      echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
+      grep "! LaTeX Error:" -I $1 >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+
+   # Check for LaTeX warnings (undefined references or duplicate labels)
+   if [[ `grep -E "undefined|multiply defined|multiply-defined" -I ${1}` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Stage 8 warnings:" >> $WARNING_LOG
+      grep -E "undefined|multiply defined|multiply-defined" -I $1 >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
 
 make_fds_user_guide()
 {
@@ -831,6 +899,9 @@ make_fds_user_guide()
    bibtex FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
    pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
    pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
+
+   # Check guide for completion and copy to website if successful
+   check_guide $FIREBOT_DIR/output/stage8_fds_user_guide FDS_User_Guide/FDS_User_Guide.pdf
 }
 
 make_fds_technical_guide()
@@ -841,6 +912,9 @@ make_fds_technical_guide()
    bibtex FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
    pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
    pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
+
+   # Check guide for completion and copy to website if successful
+   check_guide $FIREBOT_DIR/output/stage8_fds_technical_guide FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf
 }
 
 make_fds_verification_guide()
@@ -851,6 +925,9 @@ make_fds_verification_guide()
    bibtex FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
    pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
    pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
+
+   # Check guide for completion and copy to website if successful
+   check_guide $FIREBOT_DIR/output/stage8_fds_verification_guide FDS_Verification_Guide/FDS_Verification_Guide.pdf
 }
 
 make_fds_validation_guide()
@@ -861,6 +938,9 @@ make_fds_validation_guide()
    bibtex FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
    pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
    pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
+
+   # Check guide for completion and copy to website if successful
+   check_guide $FIREBOT_DIR/output/stage8_fds_validation_guide FDS_Validation_Guide/FDS_Validation_Guide.pdf
 }
 
 make_fds_configuration_management_plan()
@@ -871,6 +951,9 @@ make_fds_configuration_management_plan()
    bibtex FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
    pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
    pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
+
+   # Check guide for completion and copy to website if successful
+   check_guide $FIREBOT_DIR/output/stage8_fds_configuration_management_plan FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf
 }
 
 make_smv_user_guide()
@@ -881,6 +964,9 @@ make_smv_user_guide()
    bibtex SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
+
+   # Check guide for completion and copy to website if successful
+   check_guide $FIREBOT_DIR/output/stage8_smv_user_guide SMV_User_Guide/SMV_User_Guide.pdf
 }
 
 make_smv_technical_guide()
@@ -891,6 +977,9 @@ make_smv_technical_guide()
    bibtex SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
+
+   # Check guide for completion and copy to website if successful
+   check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf
 }
 
 make_smv_verification_guide()
@@ -901,48 +990,9 @@ make_smv_verification_guide()
    bibtex SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-}
 
-check_all_guides()
-{
-   # Scan and report any errors in build process for guides
-   cd $FIREBOT_DIR
-   if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output/stage8*` == "" ]]
-   then
-      stage8_success=true
-   else
-      grep "! LaTeX Error:" -I $FIREBOT_DIR/output/stage8* > $FIREBOT_DIR/output/stage8_errors
-      
-      echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage8_errors >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for LaTeX warnings (undefined references or duplicate labels)
-   if [[ `grep -E "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8*` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Stage 8 warnings:" >> $WARNING_LOG
-      grep -E "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8* >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-copy_all_guides_to_website()
-{
-   # Copy all guides to Blaze status website
-   cd $FDS_SVNROOT/Manuals
-   cp FDS_User_Guide/FDS_User_Guide.pdf \
-   FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf \
-   FDS_Verification_Guide/FDS_Verification_Guide.pdf \
-   FDS_Validation_Guide/FDS_Validation_Guide.pdf \
-   FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf \
-   SMV_User_Guide/SMV_User_Guide.pdf \
-   SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf \
-   SMV_Verification_Guide/SMV_Verification_Guide.pdf \
-   /var/www/html/firebot/manuals/
+   # Check guide for completion and copy to website if successful
+   check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide SMV_Verification_Guide/SMV_Verification_Guide.pdf
 }
 
 #  ==================================================
@@ -1090,27 +1140,34 @@ if [[ $stage5_success && $stage6d_success ]] ; then
    check_fds_pictures
 fi
 
-### Stage 7 ###
+### Stage 7a ###
 if $stage5_success ; then
-   run_matlab_plotting
-   check_matlab_plotting
+   run_matlab_verification
+   check_matlab_verification
    check_verification_stats
 fi
 
-### Stage 8 ###
+### Stage 7b ###
 # No stage dependencies
-make_fds_user_guide
-make_fds_technical_guide
-make_fds_verification_guide
-make_fds_validation_guide
-make_fds_configuration_management_plan
-make_smv_user_guide
-make_smv_technical_guide
-make_smv_verification_guide
-check_all_guides
-if $stage8_success ; then
-   copy_all_guides_to_website
+run_matlab_validation
+check_matlab_validation
+
+### Stage 8 ###
+if [[ $stage5_success && stage6f_success ]] ; then
+   make_fds_user_guide
+   make_fds_verification_guide
+   make_fds_technical_guide
 fi
+if [[ $stage7b_success ]] ; then
+   make_fds_validation_guide
+fi
+if [[ $stage6e_success ]] ; then
+   make_smv_user_guide
+   make_smv_technical_guide
+   make_smv_verification_guide
+fi
+# No stage dependencies
+make_fds_configuration_management_plan
 
 ### Report results ###
 set_files_world_readable
