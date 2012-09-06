@@ -86,7 +86,8 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 <b>Stage 6d:</b> Compile SMV release <br>
 <b>Stage 6e:</b> Make SMV pictures (release mode) <br>
 <b>Stage 6f:</b> Make FDS pictures <br>
-<b>Stage 7: </b> Matlab plotting and statistics <br>
+<b>Stage 7a: </b> Matlab plotting and statistics (verification) <br>
+<b>Stage 7b: </b> Matlab plotting (validation) <br>
 <b>Stage 8: </b> Build FDS-SMV Guides <br>
 </span></span>"""
 
