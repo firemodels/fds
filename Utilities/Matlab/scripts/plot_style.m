@@ -31,6 +31,11 @@ Plot_Height     = 3.4;
 Plot_X          = 1.2;
 Plot_Y          = 0.8;
 
+Scat_Plot_Width      = 4.75;
+Scat_Plot_Height     = 4.75;
+Scat_Plot_X          = 0.75;
+Scat_Plot_Y          = 0.75;
+
 % paper properties
 Paper_Units     = 'inches';
 Paper_Width     = 6.5;
