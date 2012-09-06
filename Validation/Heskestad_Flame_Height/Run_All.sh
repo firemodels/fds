@@ -1,10 +1,27 @@
 #!/bin/bash -f
 
+queue=
+while getopts 'q:s' OPTION
+do
+case $OPTION in
+  q)
+   queue="$OPTARG"
+   ;;
+  s)
+   export STOPFDS=1
+   ;;
+esac
+done
+if [ "$queue" != "" ]; then
+   queue="-q $queue"
+fi
+
+
 export SVNROOT=`pwd`/../..
 export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
+export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 export BASEDIR=`pwd`
-export INDIR=Current_Results
+export INDIR="Current_Results"
 
 # uncomment following line to stop all cases
 # export STOPFDS=1
