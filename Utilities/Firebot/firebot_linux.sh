@@ -870,7 +870,7 @@ check_guide()
 {
    # Scan and report any errors in build process for guides
    cd $FIREBOT_DIR
-   if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output/${1}` == "" ]]
+   if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
    then
       cp $2 /var/www/html/firebot/manuals/
    else
@@ -901,7 +901,7 @@ make_fds_user_guide()
    pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_user_guide FDS_User_Guide/FDS_User_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_user_guide $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.pdf
 }
 
 make_fds_technical_guide()
@@ -914,7 +914,7 @@ make_fds_technical_guide()
    pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_technical_guide FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_technical_guide $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf
 }
 
 make_fds_verification_guide()
@@ -927,7 +927,7 @@ make_fds_verification_guide()
    pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_verification_guide FDS_Verification_Guide/FDS_Verification_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_verification_guide $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf
 }
 
 make_fds_validation_guide()
@@ -940,7 +940,7 @@ make_fds_validation_guide()
    pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_validation_guide FDS_Validation_Guide/FDS_Validation_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_validation_guide $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf
 }
 
 make_fds_configuration_management_plan()
@@ -953,7 +953,7 @@ make_fds_configuration_management_plan()
    pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_configuration_management_plan FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_configuration_management_plan $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf
 }
 
 make_smv_user_guide()
@@ -966,7 +966,7 @@ make_smv_user_guide()
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_user_guide SMV_User_Guide/SMV_User_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 }
 
 make_smv_technical_guide()
@@ -979,7 +979,7 @@ make_smv_technical_guide()
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf
 }
 
 make_smv_verification_guide()
@@ -992,7 +992,7 @@ make_smv_verification_guide()
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide SMV_Verification_Guide/SMV_Verification_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 }
 
 #  ==================================================
