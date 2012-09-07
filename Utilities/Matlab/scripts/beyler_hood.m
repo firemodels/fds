@@ -227,7 +227,7 @@ for f = 1:N_Fuels
       n_fds = size(fds_data,1);
       for ns = 1:N_Species
          ExpPlot(f,s,ns) = exp_data(s,(f-1)*N_Species+ns);
-         FDSPlot(f,s,ns) = mean(fds_data(n_fds-200:n_fds,253+ns));
+         FDSPlot(f,s,ns) = mean(fds_data(n_fds-50:n_fds,253+ns));
       end   
    end
 end
@@ -263,15 +263,12 @@ axis([xmin xmax ymin ymax])
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
-Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
-Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
+set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
 set(hf(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured ' Species{ns} ' (volume fraction)'];
 ytitle = ['Predicted ' Species{ns} ' (volume fraction)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
-%legend(hX,XLegendStr,'Location',X_leg_pos)
 legend(hX,XLegendStr,'Location','NorthWest')
 
 % add SVN if file is available
