@@ -1,7 +1,7 @@
 &HEAD CHID='Qs=20_RI=10', TITLE='Flame Height Test, Q*=20' /
 
 &MESH IJK=33,33,80, XB=-6.0,6.0,-6.0,6.0,-1.50,28.5 /
-&TIME T_END=110. /
+&TIME T_END=97. /
 
 &REAC FUEL='PROPANE', 
       SOOT_YIELD=0.015
