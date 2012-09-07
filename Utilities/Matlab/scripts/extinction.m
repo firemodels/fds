@@ -282,8 +282,8 @@ plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-xlabel('Mass Fraction','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-ylabel('Temperature (K)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+xlabel('Temperature (K)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+ylabel('Mass Fraction Oxygen','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 legend('Mowrer','Expected Ignition','FDS Ignition','Expected Extinction','FDS Extinction','Location','NorthEast')
 
 % add SVN if file is available
