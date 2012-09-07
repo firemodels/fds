@@ -7126,7 +7126,7 @@ specifies that half the particle is facing upwards and half is facing downwards.
 For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere.
 To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable,
 the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}.
-The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.  The {\ct DRAG\_COEFFICIENT} is a triplet indicating the drag along each coordinate axis.  If only the first value of the triplet is assigned, the drag is assumed to be isotropic.
+The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
 
 \subsection{Gas Generating Particles}
@@ -8123,11 +8123,11 @@ appear/disappear at the various designated times. These lines are part of the si
 
 \footnotesize
 \begin{verbatim}
-&OBST XB=0.30,0.40,0.10,0.90,0.10,0.90, COLOR='PURPLE' / 
-&HOLE XB=0.25,0.45,0.20,0.30,0.20,0.30, COLOR='RED', TRANSPARENCY=0.75, DEVC_ID='timer 1' / 
-&HOLE XB=0.25,0.45,0.70,0.80,0.70,0.80, COLOR='GREEN', DEVC_ID='timer 2' / 
-&OBST XB=0.70,0.80,0.20,0.30,0.20,0.30, COLOR='BLUE',  DEVC_ID='timer 3' / 
-&OBST XB=0.70,0.80,0.60,0.70,0.60,0.70, COLOR='PINK',  DEVC_ID='timer 4' / 
+&OBST XB=0.30,0.40,0.10,0.90,0.10,0.90, COLOR='PURPLE' /
+&HOLE XB=0.25,0.45,0.20,0.30,0.20,0.30, COLOR='RED', TRANSPARENCY=0.75, DEVC_ID='timer 1' /
+&HOLE XB=0.25,0.45,0.70,0.80,0.70,0.80, COLOR='GREEN', DEVC_ID='timer 2' /
+&OBST XB=0.70,0.80,0.20,0.30,0.20,0.30, COLOR='BLUE',  DEVC_ID='timer 3' /
+&OBST XB=0.70,0.80,0.60,0.70,0.60,0.70, COLOR='PINK',  DEVC_ID='timer 4' /
 &OBST XB=0.5,1.0,0.0,1.0,0.0,0.1,COLOR='YELLOW',DEVC_ID='timer 5'/
 &HOLE XB=0.7,0.8,0.7,0.8,0.0,0.1,COLOR='BLACK',DEVC_ID='timer 6'/
 &HOLE XB=0.7,0.8,0.2,0.3,0.0,0.1,COLOR='GRAY 50',DEVC_ID='timer 7'/
