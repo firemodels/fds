@@ -999,36 +999,6 @@ make_smv_verification_guide()
 #  = Build status reporting - email and save functions =
 #  ==================================================
 
-email_build_status()
-{
-   cd $FIREBOT_DIR
-   # Check for warnings and errors
-   if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
-   then
-     cat "" >> $ERROR_LOG
-     cat $WARNING_LOG >> $ERROR_LOG
-     # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "[Firebot@Blaze] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
-
-   # Check for errors only
-   elif [ -e $ERROR_LOG ]
-   then
-      # Send email with failure message, body of email contains error log file
-      mail -s "[Firebot@Blaze] Build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
-
-   # Check for warnings only
-   elif [ -e $WARNING_LOG ]
-   then
-      # Send email with success message, include warnings
-      mail -s "[Firebot@Blaze] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
-
-   # No errors or warnings
-   else
-      # Send empty email with success message
-      mail -s "[Firebot@Blaze] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
-   fi
-}
-
 save_build_status()
 {
    cd $FIREBOT_DIR
@@ -1055,6 +1025,34 @@ save_build_status()
    # No errors or warnings
    else
       echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+   fi
+}
+
+email_build_status()
+{
+   cd $FIREBOT_DIR
+   # Check for warnings and errors
+   if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
+   then
+     # Send email with failure message and warnings, body of email contains appropriate log file
+     mail -s "[Firebot@Blaze] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+
+   # Check for errors only
+   elif [ -e $ERROR_LOG ]
+   then
+      # Send email with failure message, body of email contains error log file
+      mail -s "[Firebot@Blaze] Build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+
+   # Check for warnings only
+   elif [ -e $WARNING_LOG ]
+   then
+      # Send email with success message, include warnings
+      mail -s "[Firebot@Blaze] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
+
+   # No errors or warnings
+   else
+      # Send empty email with success message
+      mail -s "[Firebot@Blaze] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
    fi
 }
 
