@@ -641,7 +641,7 @@ ELSE
    TAU_D = DELTA**2/TAU_D
    IF (LES) THEN
       IF (TURB_MODEL==DEARDORFF) THEN
-         TAU_U = 0.1_EB*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! turbulent mixing time scale
+         TAU_U = C_DEARDORFF*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! turbulent mixing time scale
       ELSE
          TAU_U = DELTA/SQRT(2._EB*KSGS(I,J,K)+EPS) ! advective time scale
       ENDIF
