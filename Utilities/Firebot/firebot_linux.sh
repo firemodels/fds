@@ -995,9 +995,9 @@ make_smv_verification_guide()
    check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 }
 
-#  ==================================================
+#  =====================================================
 #  = Build status reporting - email and save functions =
-#  ==================================================
+#  =====================================================
 
 save_build_status()
 {
