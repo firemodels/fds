@@ -60,7 +60,7 @@ Since the two models are not fully coupled, the extrapolated pressure is an esti
    \end{center}
 \end{figure}
 
-The extrapolated pressure for a compartment can be determined by using Eq.~(\ref{concon}) and correcting the integral over velocity for the current solution of
+The extrapolated pressure for a compartment can be determined by using Eq.~(\ref{concon2}) and correcting the integral over velocity for the current solution of
 all interdependent HVAC flows into or out of an FDS pressure zone:
 \be \tilde{P}^n_i=P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, dV}\right)\Delta t^n
    \label{HVACextrapolatedpressure} \ee
