@@ -26,10 +26,10 @@ $RUNFDS $INDIR McCaffrey_33_kW_coarse
 $RUNFDS $INDIR McCaffrey_45_kW_coarse
 $RUNFDS $INDIR McCaffrey_57_kW_coarse
 
-$RUNFDSMPI 36 $INDIR McCaffrey_14_kW_fine
-$RUNFDSMPI 36 $INDIR McCaffrey_22_kW_fine
-$RUNFDSMPI 36 $INDIR McCaffrey_33_kW_fine
-$RUNFDSMPI 36 $INDIR McCaffrey_45_kW_fine
-$RUNFDSMPI 36 $INDIR McCaffrey_57_kW_fine
+$RUNFDSMPI 4 $INDIR McCaffrey_14_kW_fine
+$RUNFDSMPI 4 $INDIR McCaffrey_22_kW_fine
+$RUNFDSMPI 4 $INDIR McCaffrey_33_kW_fine
+$RUNFDSMPI 4 $INDIR McCaffrey_45_kW_fine
+$RUNFDSMPI 4 $INDIR McCaffrey_57_kW_fine
 
 echo FDS cases submitted
