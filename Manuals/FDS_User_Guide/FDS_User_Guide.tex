@@ -4703,8 +4703,7 @@ given vent, or whether the given volume flux is desired.
 \label{info:MASS_FLUX_TOTAL}
 
 Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at
-a solid surface. However, you may wish to control the mass flow rate (kg/s), as opposed to the volume flow
-rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
+a solid surface. However, you may wish to control the total mass flow rate per unit area (kg/m$^2$/s) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
 {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
 for an outflow is adjusted based on the local density.
 
