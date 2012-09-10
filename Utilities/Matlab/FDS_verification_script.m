@@ -63,5 +63,6 @@ run scripts/terminal_velocity_convergence
 run scripts/flat_fire_comparison
 run scripts/fluid_part
 run scripts/scarc2d
+run scripts/extinction
 
 display('verification scripts completed successfully!')
