@@ -111,15 +111,15 @@ for j=qrange
                     % Compute the appropriate type of statistics, depending
                     % on the 'Quantity' specification in dataplot_inputs
                     if strcmp(error_type, 'Relative Error')
-                        error_val = ((single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m));
+                        error_val = abs((single_predicted_metric(m)-single_measured_metric(m))/single_measured_metric(m));
                     elseif strcmp(error_type, 'Absolute Error')
-                        error_val = (single_predicted_metric(m)-single_measured_metric(m));
+                        error_val = abs(single_predicted_metric(m)-single_measured_metric(m));
                     end
                     
                     % Compare the error to the specified error tolerance,
                     % which is in the dataplot_inputs column called 'Error_Tolerance'
                     error_tolerance = str2num(Save_Error_Tolerance{i,1});
-                    if abs(error_val) <= error_tolerance
+                    if error_val <= error_tolerance
                         within_tolerance = 'Yes';
                     else
                         within_tolerance = 'No';
