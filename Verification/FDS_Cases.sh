@@ -26,6 +26,8 @@ $RUNFDS Evacuation evac_smv_testcase0
 $RUNFDS Evacuation evac_smv_testcase1
 $RUNFDS Evacuation evac_smv_testcase2
 
+$RUNFDS Extinction Extinction
+
 $RUNFDS Fires box_burn_away1
 $RUNFDS Fires box_burn_away2
 $RUNFDS Fires box_burn_away3
