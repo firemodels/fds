@@ -4550,7 +4550,7 @@ int readsmv(char *file, char *file2){
           }
           get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
     
-          init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
+          init_device(devicecopy,xyz,xyznorm,0,0,NULL,"target");
           devicecopy->prop=NULL;
 
           devicecopy++;
