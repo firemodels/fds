@@ -2270,6 +2270,29 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 
 \clearpage
 
+\section{Extinction Model}
+\label{Extinct}
+
+The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1600 K. 
+
+Here, we examine a 10 $\times$ 10 array of cases: varying initial temperature from 300 K to 1875 K and initial fuel (methane) mass fraction from 0.05 to 0.95. The oxidizer is air which is assumed to be 23 \% oxygen  and 77 \% nitrogen by mass. A simple one-step methane reaction is used to govern the combustion:
+\begin{equation}\label{eq:methane_ex}
+\mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O}
+\end{equation}
+Based on the combination of initial oxygen concentration, methane concentration, and temperature each case can either be able to sustain burning for a finite period of time or not - Fig.~\ref{fig:extinct}
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=3.2in]{SCRIPT_FIGURES/Extinction}
+\end{center}
+\caption[Extinction model test cases]{Array of initial temperatures and oxygen concentrations that can can sustain burning.}
+\label{fig:extinct}
+\end{figure}
+
+Note: This test case is designed to test the implementation of the extinction model over a wide temperature and composition space, not whether the model has the appropriate delineation between cases that burn and cases that do not.
+
+
+\clearpage
+
 \section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) (\texorpdfstring{{\bf FED\_FIC}}{FED\_FIC}) }
 \label{FED_FIC}
 
