@@ -273,12 +273,14 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_smoke3d_hrrpuv_cutoff->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
     panel_meshvis = glui_3dsmoke->add_rollout_to_panel(panel_overall,"Mesh Visibility",false);
 #ifdef pp_BETA
+#ifdef WIN32
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
 
       meshi = meshinfo + i;
       glui_3dsmoke->add_checkbox_to_panel(panel_meshvis,meshi->label,meshvisptr+i);
     }
+#endif
 #endif    
   }
 
