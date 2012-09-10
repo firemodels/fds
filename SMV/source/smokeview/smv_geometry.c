@@ -281,7 +281,7 @@ mesh *getmesh(float *xyz){
       return meshi;
     }
   }
-  return NULL;
+  return meshinfo;
 }
 
 /* ------------------ ExtractFrustum ------------------------ */
