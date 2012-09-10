@@ -325,13 +325,14 @@ The turbulent viscosity $\nu_t = \mu_t/\rho$ may be thought of as a ``mixing len
 
 To achieve the correct decay of the Reynolds stresses near a wall, Van Driest (see \cite{Wilcox:1}) proposed the following modification:
 \begin{equation}
+\label{eqn_vdf}
 \ell_{mix} = C_s \Delta \left[ 1 - e^{-y^+/A} \right]
 \end{equation}
 where $A=26$.  The additional factor (in brackets) we refer to as the Van Driest damping function.
 
-In FDS, the turbulent viscosity of the first off-wall cell is interpolated between $\nu_t(y=0)=0$ at the wall and $\nu_t(y = 3\delta y/2)$ from the second off-wall cell.  The interpolation function is based on the Van Driest damping function with $y^+ = (\delta y/2)/\delta_\nu$.  Considering that the viscosity scales with $\ell_{mix}^{\,2}$\,, we obtain
-\begin{equation}
-\nu_t(\delta y/2) = \nu_t(3\delta y/2) \left[ \frac{(1 - e^{-y^+/A}) }{( 1 - e^{-3y^+/A}) } \right]^2
+In FDS, due to difficulties defining a consistent test filter (for use with either Deardorff or the dynamic model) near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagroinsky model with Van Driest damping of the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_s = 0.2$.  The viscosity is then given by\begin{equation}
+\label{eqn_nearwall_viscosity}
+\nu_t = \ell_{mix}^{\,2}\,|S|
 \end{equation}
 
 \newpage
