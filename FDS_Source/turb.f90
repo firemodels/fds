@@ -834,7 +834,7 @@ Y_CELL_CENTER = 0.5_EB*DY
 TAU_W = NU*ABS(U)/Y_CELL_CENTER         ! actually tau_w/rho
 U_TAU = SQRT(TAU_W)                     ! friction velocity
 DELTA_NU = NU/(U_TAU+EPS)               ! viscous length scale
-Y_PLUS = MAX(1._EB,Y_CELL_CENTER/(DELTA_NU+EPS))
+Y_PLUS = Y_CELL_CENTER/(DELTA_NU+EPS)
 SLIP_FACTOR = -1._EB
 
 ! Step 2: compute turbulent (LES) stress
