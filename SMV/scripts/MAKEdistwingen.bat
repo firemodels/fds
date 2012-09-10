@@ -32,6 +32,7 @@ set svzipbuild=%svn_root%\Utilities\smokezip\%BUILDDIR%
 set svdiffbuild=%svn_root%\Utilities\smokediff\%BUILDDIR%
 set bgbuild=%svn_root%\Utilities\background\intel_win_32
 set sh2bat=%svn_root%\Utilities\Data_Processing
+set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
 set zipbase=smv_%version%_win%platform%
 set smvdir=to_google\%zipbase%
@@ -41,6 +42,9 @@ echo
 echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
+
+echo copying set_path.exe
+copy "%bundleinfo%\set_path.exe" "%smvdir%\set_path.exe"
 
 echo copying smokeview_win_%platform%.exe to smokeview.exe
 copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\smokeview.exe

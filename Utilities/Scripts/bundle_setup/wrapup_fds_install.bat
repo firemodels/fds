@@ -13,6 +13,7 @@ echo.
 echo Removing previous FDS/Smokeview entries from the system and user path.
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
+call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS5"
 
 Rem create c:\bin directory
 
