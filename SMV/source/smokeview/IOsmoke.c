@@ -1041,7 +1041,7 @@ void mergesmoke3dcolors(smoke3ddata *smoke3dset){
 
   mesh *meshi;
 
-  i_hrrpuv_cutoff=254*hrrpuv_cutoff/hrrpuv_max_smv;
+  i_hrrpuv_cutoff=254*global_hrrpuv_cutoff/hrrpuv_max_smv;
 
 #ifdef pp_CULL
   for(i=0;i<nmeshes;i++){
@@ -1085,7 +1085,7 @@ void mergesmoke3dcolors(smoke3ddata *smoke3dset){
 #ifdef pp_CULL
     meshi->cull_smoke3d=smoke3di;
 #endif
-    i_hrrpuv_cutoff=254*meshi->hrrpuv_cutoff/hrrpuv_max_smv;
+    i_hrrpuv_cutoff=254*global_hrrpuv_cutoff/hrrpuv_max_smv;
 
     if(fire_halfdepth<=0.0){
       smoke3di->fire_alpha=255;
@@ -3105,7 +3105,7 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
   glUniform1i(GPU_smokecolormap,0);
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
   glUniform1f(GPU_hrrpuv_max_smv,hrrpuv_max_smv);
-  glUniform1f(GPU_hrrpuv_cutoff,meshi->hrrpuv_cutoff);
+  glUniform1f(GPU_hrrpuv_cutoff,global_hrrpuv_cutoff);
   glUniform1f(GPU_fire_alpha,smoke3di->fire_alpha);
 
   transparenton();
@@ -4306,7 +4306,7 @@ void drawsmoke3dCULL(void){
       glUniform1i(GPU_smokecolormap,0);
       glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
       glUniform1f(GPU_hrrpuv_max_smv,hrrpuv_max_smv);
-      glUniform1f(GPU_hrrpuv_cutoff,meshi->hrrpuv_cutoff);
+      glUniform1f(GPU_hrrpuv_cutoff,global_hrrpuv_cutoff);
       glUniform1f(GPU_aspectratio,aspectratio);
       glUniform1f(GPU_fire_alpha,smoke3di->fire_alpha);
 

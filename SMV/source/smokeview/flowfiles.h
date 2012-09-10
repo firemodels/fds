@@ -500,7 +500,6 @@ typedef struct _mesh {
   float offset[3];
   float xyzmaxdiff;
   float boxoffset;
-  float hrrpuv_cutoff;
   int plot3dfilenum,isofilenum,patchfilenum;
   int ibar, jbar, kbar;
   int *iplotx_all, *iploty_all, *iplotz_all;

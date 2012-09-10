@@ -92,14 +92,12 @@ GLUI_Spinner *SPINNER_smoke3d_fire_green=NULL;
 GLUI_Spinner *SPINNER_smoke3d_fire_blue=NULL;
 GLUI_Spinner *SPINNER_smoke3d_hrrpuv_cutoff=NULL;
 GLUI_Spinner *SPINNER_smoke3d_fire_halfdepth=NULL;
-GLUI_Spinner **SPINNER_smoke3d_hrrpuv_cutoffptr=NULL;
 GLUI_Checkbox **CHECKBOX_meshvisptr=NULL;
 GLUI_Checkbox *CHECKBOX_meshvis=NULL;
 GLUI_Panel *panel_overall=NULL;
 GLUI_Panel *panel_colormap2=NULL;
 GLUI_Panel *panel_colormap=NULL;
 GLUI_Rollout *panel_meshvis=NULL;
-GLUI_Rollout *panel_hrrcut=NULL;
 GLUI_Panel *panel_absorption=NULL,*panel_smokesensor=NULL;
 GLUI_Rollout *panel_slices=NULL;
 GLUI_Rollout *panel_volume=NULL;
@@ -186,8 +184,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   
   if(nsmoke3dinfo<=0&&nvolrenderinfo<=0)return;
-  if(SPINNER_smoke3d_hrrpuv_cutoffptr!=NULL)FREEMEMORY(SPINNER_smoke3d_hrrpuv_cutoffptr);
-  NewMemory((void **)&SPINNER_smoke3d_hrrpuv_cutoffptr,(nmeshes+1)*sizeof(GLUI_Spinner *));
   if(CHECKBOX_meshvisptr!=NULL)FREEMEMORY(CHECKBOX_meshvisptr);
   NewMemory((void **)&CHECKBOX_meshvisptr,nmeshes*sizeof(GLUI_Checkbox *));
   
@@ -272,33 +268,18 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #define HRRPUV_CUTOFF_MAX (hrrpuv_max_smv-0.01)
 
   if(nsmoke3dinfo>0){
-    panel_hrrcut = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("HRRPUV cutoff (kW/m3):"),false);
-
-    if(nmeshes>1){
-      SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=glui_3dsmoke->add_spinner_to_panel
-        (panel_hrrcut,_("All meshes"),GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
-      SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
-    }
-    else{
-      SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=NULL;
-    }
-    for(i=0;i<nmeshes;i++){
-      mesh *meshi;
-
-      meshi = meshinfo + i;
-      if(meshi->hrrpuv_cutoff>HRRPUV_CUTOFF_MAX)meshi->hrrpuv_cutoff=HRRPUV_CUTOFF_MAX;
-      SPINNER_smoke3d_hrrpuv_cutoffptr[i]=glui_3dsmoke->add_spinner_to_panel
-        (panel_hrrcut,meshi->label,GLUI_SPINNER_FLOAT,&meshi->hrrpuv_cutoff,FIRE_CUTOFF,SMOKE_3D_CB);
-      SPINNER_smoke3d_hrrpuv_cutoffptr[i]->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
-    }
+    SPINNER_smoke3d_hrrpuv_cutoff=glui_3dsmoke->add_spinner_to_panel
+      (panel_overall,_("HRRPUV cutoff (kW/m3):"),GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
+    SPINNER_smoke3d_hrrpuv_cutoff->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
     panel_meshvis = glui_3dsmoke->add_rollout_to_panel(panel_overall,"Mesh Visibility",false);
+#ifdef pp_BETA
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
 
       meshi = meshinfo + i;
       glui_3dsmoke->add_checkbox_to_panel(panel_meshvis,meshi->label,meshvisptr+i);
     }
-      
+#endif    
   }
 
 #ifdef _DEBUG
@@ -478,7 +459,7 @@ extern "C" void SMOKE_3D_CB(int var){
     break;
   case SMOKE_OPTIONS:
     if(smoke_render_option==0){
-      if(panel_hrrcut!=NULL)panel_hrrcut->enable();
+      if(SPINNER_smoke3d_hrrpuv_cutoff!=NULL)SPINNER_smoke3d_hrrpuv_cutoff->enable();
       if(panel_absorption!=NULL)panel_absorption->enable();
       use_firesmokemap=use_firesmokemap_save;
       CHECKBOX_use_firesmokemap->set_int_val(use_firesmokemap);
@@ -486,7 +467,7 @@ extern "C" void SMOKE_3D_CB(int var){
       SMOKE_3D_CB(USE_FIRESMOKEMAP);
     }
     else{
-      if(panel_hrrcut!=NULL)panel_hrrcut->disable();
+      if(SPINNER_smoke3d_hrrpuv_cutoff!=NULL)SPINNER_smoke3d_hrrpuv_cutoff->disable();
       if(panel_absorption!=NULL)panel_absorption->disable();
       use_firesmokemap_save=use_firesmokemap;
       use_firesmokemap=1;
@@ -542,9 +523,6 @@ extern "C" void SMOKE_3D_CB(int var){
     hide_glui_3dsmoke();
     break;
   case GLOBAL_FIRE_CUTOFF:
-    for(i=0;i<nmeshes;i++){
-      SPINNER_smoke3d_hrrpuv_cutoffptr[i]->set_float_val(global_hrrpuv_cutoff);
-    }
     glutPostRedisplay();
     force_redisplay=1;
     Idle_CB();

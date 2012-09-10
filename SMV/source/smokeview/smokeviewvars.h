@@ -1122,7 +1122,7 @@ SVEXTERN smoke3ddata SVDECL(*smoke3dinfo,NULL);
 SVEXTERN int fire_red, fire_green, fire_blue;
 SVEXTERN float SVDECL(smoke_shade,0.0);
 SVEXTERN float fire_halfdepth;
-SVEXTERN float hrrpuv_cutoff, global_hrrpuv_cutoff;
+SVEXTERN float SVDECL(global_hrrpuv_cutoff,200.0);
 
 SVEXTERN int SVDECL(use_firesmokemap,0),SVDECL(use_firesmokemap_save,0);
 SVEXTERN int smokecullflag;

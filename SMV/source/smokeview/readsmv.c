@@ -4930,22 +4930,9 @@ int readsmv(char *file, char *file2){
       sscanf(buffer,"%i",&nhrrpuvcut);
       if(nhrrpuvcut>=1){
         fgets(buffer,255,stream);
-        sscanf(buffer,"%f",&hrrpuvcut);
-        for(i=0;i<nmeshes;i++){
-          mesh *meshi;
-
-          meshi=meshinfo+i;
-          meshi->hrrpuv_cutoff=hrrpuvcut;
-        }
-        global_hrrpuv_cutoff=meshinfo->hrrpuv_cutoff;
+        sscanf(buffer,"%f",&global_hrrpuv_cutoff);
         for(i=1;i<nhrrpuvcut;i++){
-          mesh *meshi;
-
           fgets(buffer,255,stream);
-          if(i>=nmeshes)continue;
-          sscanf(buffer,"%f",&hrrpuvcut);
-          meshi=meshinfo+i;
-          meshi->hrrpuv_cutoff=hrrpuvcut;
         }
       }
       continue;
@@ -7758,7 +7745,6 @@ void initmesh(mesh *meshi){
   meshi->showsmoothtimelist=NULL;
   meshi->cellsize=0.0;
   meshi->smokeloaded=0;
-  meshi->hrrpuv_cutoff=600.0;
   meshi->smokedir=1;
   meshi->merge_alpha=NULL;
   meshi->merge_color=NULL;

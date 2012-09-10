@@ -467,7 +467,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       int ihrrcut;
       float xxl, xxr, yyl, yyu, ddx=0.03, ddy=0.2;
 
-      ihrrcut = (int)current_mesh->hrrpuv_cutoff;
+      ihrrcut = (int)global_hrrpuv_cutoff;
 
       sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
       outputText((float)(xtimeright+0.06),0.56f, hrrcut_label);
