@@ -5894,7 +5894,7 @@ These inputs define two {\ct CARBON DIOXIDE} species.  Both will use the built i
 
 \subsubsection{Specifying a RadCal Species}
 
-There are only a small number of species with predefined RadCal absorptivities (See ~\ref{info:RadCal_fuelspecies}).  There are many other species which are absorbing.  For absorbing species no present in Radcal {\ct RADCAL\_ID} can be used to identify a RadCal species to be used as a surrogate. Note that fuel species other than {\ct METHANE}, can only be accessed if {\ct NEW\_ABSORPTION = .TRUE.}.  For example:
+There are only a small number of species with predefined RadCal absorptivities (See ~\ref{info:RadCal_fuelspecies}).  There are many other species which are absorbing.  For absorbing species not present in Radcal {\ct RADCAL\_ID} can be used to identify a RadCal species to be used as a surrogate. Note that fuel species other than {\ct METHANE}, can only be accessed if {\ct NEW\_ABSORPTION = .TRUE.}.  For example:
 
 \begin{verbatim}
 &SPEC ID='ETHANOL', RADCAL_ID='METHANOL'/
