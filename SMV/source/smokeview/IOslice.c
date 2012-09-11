@@ -352,7 +352,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         NewMemory((void **)&iblank,jbar*kbar*sizeof(char));
         for(j=0;j<jbar;j++){
           for(k=0;k<kbar;k++){
-            iblank[k+j*kbar]=meshi->c_iblank_x[IJKNODE(fed_slice->is1,j,k)];
+            iblank[k+j*kbar]=2*meshi->c_iblank_cell[IJKCELL(fed_slice->is1,j,k)];
           }
         }
         break;
@@ -360,7 +360,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         NewMemory((void **)&iblank,ibar*kbar*sizeof(char));
         for(i=0;i<ibar;i++){
           for(k=0;k<kbar;k++){
-            iblank[k+i*kbar]=meshi->c_iblank_y[IJKNODE(i,fed_slice->js1,k)];
+            iblank[k+i*kbar]=2*meshi->c_iblank_cell[IJKCELL(i,fed_slice->js1,k)];
           }
         }
         break;
@@ -368,7 +368,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         NewMemory((void **)&iblank,ibar*jbar*sizeof(char));
         for(i=0;i<ibar;i++){
           for(j=0;j<jbar;j++){
-            iblank[j+i*jbar]=meshi->c_iblank_z[IJKNODE(i,j,fed_slice->ks1)];
+            iblank[j+i*jbar]=2*meshi->c_iblank_cell[IJKCELL(i,j,fed_slice->ks1)];
           }
         }
         break;
@@ -458,13 +458,13 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       initcontour(fed_contours,NULL,nlevels);
       getcontours(xgrid, ygrid, nx, ny, fed_frame, iblank, levels, GET_AREAS, fed_contours);
       areas = fed_contours->areas;
-      fprintf(AREA_STREAM,"\"time\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\"\n");
-      fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
-        times[0],(areas[3]+areas[0])*area_factor,areas[1]*area_factor,areas[2]*area_factor,areas[4]*area_factor);
       contour_areas[0]=(areas[0]+areas[3])*area_factor;
       contour_areas[1]=areas[1]*area_factor;
       contour_areas[2]=areas[2]*area_factor;
       contour_areas[3]=areas[4]*area_factor;
+      fprintf(AREA_STREAM,"\"time\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\"\n");
+      fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
+        times[0],contour_areas[0],contour_areas[1],contour_areas[2],contour_areas[3]);
       mslice_contour_areas[0]+=contour_areas[0];
       mslice_contour_areas[1]+=contour_areas[1];
       mslice_contour_areas[2]+=contour_areas[2];
@@ -516,13 +516,13 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         initcontour(fed_contours,NULL,nlevels);
         getcontours(xgrid, ygrid, nx, ny, fed_frame, iblank, levels, GET_AREAS, fed_contours);
         areas = fed_contours->areas;
+        contour_areas[0]=(areas[0]+areas[3])*area_factor;
+        contour_areas[1]=areas[1]*area_factor;
+        contour_areas[2]=areas[2]*area_factor;
+        contour_areas[3]=areas[4]*area_factor;
         if(AREA_STREAM!=NULL){
           fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
-            times[i],(areas[3]+areas[0])*area_factor,areas[1]*area_factor,areas[2]*area_factor,areas[4]*area_factor);
-          contour_areas[0]=(areas[0]+areas[3])*area_factor;
-          contour_areas[1]=areas[1]*area_factor;
-          contour_areas[2]=areas[2]*area_factor;
-          contour_areas[3]=areas[4]*area_factor;
+            times[i],contour_areas[0],contour_areas[1],contour_areas[2],contour_areas[3]);
           mslice_contour_areas[0]+=contour_areas[0];
           mslice_contour_areas[1]+=contour_areas[1];
           mslice_contour_areas[2]+=contour_areas[2];
@@ -1832,6 +1832,21 @@ void getsliceparams(void){
       nk = ks2 + 1 - ks1;
     }
     if(error==0){
+      mesh *meshslice;
+
+      meshslice = meshinfo + sd->blocknumber;
+      if(is1==is2&&is1==meshslice->ibar){
+        is1=meshslice->ibar-1;
+        is2=is1;
+      }
+      if(js1==js2&&js1==meshslice->jbar){
+        js1=meshslice->jbar-1;
+        js2=js1;
+      }
+      if(ks1==ks2&&ks1==meshslice->kbar){
+        ks1=meshslice->kbar-1;
+        ks2=ks1;
+      }
       sd->is1=is1;
       sd->is2=is2;
       sd->js1=js1;

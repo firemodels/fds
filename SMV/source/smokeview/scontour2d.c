@@ -600,16 +600,14 @@ void getlinecontournodes(double linelevel, const double x[4], const double y[4],
 /*  ------------------ getarea ------------------------ */
 
 float getarea(float *xnodes, float *ynodes, int ind){
-  float v1[3], v2[3];
+  float v1[2], v2[2];
   float area;
 
   v1[0]=xnodes[ind]-xnodes[0];
   v1[1]=ynodes[ind]-ynodes[0];
-  v1[2]=0.0;
 
   v2[0]=xnodes[ind+1]-xnodes[0];
   v2[1]=ynodes[ind+1]-ynodes[0];
-  v2[2]=0.0;
 
 //  i    j    k
 //  v10  v11  0
@@ -620,7 +618,7 @@ float getarea(float *xnodes, float *ynodes, int ind){
   return area;
 }
 
-/*  ------------------ drawcontours ------------------------ */
+/*  ------------------ GetContourAreas ------------------------ */
 
 void GetContourAreas(const contour *ci){
   int nlevels, n;
@@ -631,19 +629,21 @@ void GetContourAreas(const contour *ci){
   for(n=0;n<nlevels;n++){
     float *xnode, *ynode;
     int ipoly,npolys;
-    int *npolysv, *polysize;
+    int *polysize;
 
     areas[n]=0.0;
     xnode=ci->xnode[n];
     ynode=ci->ynode[n];
     polysize=ci->polysize[n];
-    npolysv=ci->npolys;
-    npolys=npolysv[n];
+    npolys=ci->npolys[n];
     for(ipoly=0;ipoly<npolys;ipoly++){
       int j;
 
       for(j=1;j<polysize[ipoly]-1;j++){
-        areas[n]+=getarea(xnode,ynode,j);
+        float area;
+
+        area=getarea(xnode,ynode,j);
+        areas[n]+=area;
       }
       xnode+=polysize[ipoly];
       ynode+=polysize[ipoly];
