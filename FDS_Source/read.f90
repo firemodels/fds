@@ -1621,7 +1621,7 @@ IF (DNS) THEN
 ELSE
    FLUX_LIMITER = SUPERBEE_LIMITER
    TURBULENCE_MODEL = 'DEARDORFF'
-   LES_FILTER_WIDTH = 'MAX'
+   LES_FILTER_WIDTH = 'MEAN'
 ENDIF
    
 ! Re-read the line to pick up any user-specified options
