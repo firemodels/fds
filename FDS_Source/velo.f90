@@ -310,7 +310,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          ENDIF
          
          IF (STABILITY_CORRECTION) THEN
-            MU_VELOCITY_ERROR = RHO(IIG,JJG,KKG)*ABS(WC%VELOCITY_ERROR)/WC%RDN
+            MU_VELOCITY_ERROR = RHO(IIG,JJG,KKG)*ABS(WC%VEL_ERR_NEW)/WC%RDN
             MU(IIG,JJG,KKG) = MU(IIG,JJG,KKG) + MU_VELOCITY_ERROR
          ENDIF
    
@@ -1084,7 +1084,7 @@ SUBROUTINE NO_FLUX(NM)
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL()
-REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT
+REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT,ACCEL_TERM
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
@@ -1248,26 +1248,28 @@ WALL_FV: IF (PREDICTOR) THEN
       JJ  = WC%ONE_D%JJ
       KK  = WC%ONE_D%KK
       IOR = WC%ONE_D%IOR
+
+      ACCEL_TERM = 0.5_EB*(WC%VEL_ERR_NEW+WC%VEL_ERR_OLD)
    
       IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
          SELECT CASE(IOR)
             CASE( 1) 
-               DUUDT =       RFODT*(-WC%ONE_D%UWS-U(II,JJ,KK))
+               DUUDT =       RFODT*(-WC%ONE_D%UWS-U(II,JJ,KK)-ACCEL_TERM)
                FVX(II,JJ,KK)   = -RDXN(II)  *(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
             CASE(-1) 
-               DUUDT =       RFODT*( WC%ONE_D%UWS-U(II-1,JJ,KK))
+               DUUDT =       RFODT*( WC%ONE_D%UWS-U(II-1,JJ,KK)-ACCEL_TERM)
                FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
             CASE( 2) 
-               DVVDT =       RFODT*(-WC%ONE_D%UWS-V(II,JJ,KK))
+               DVVDT =       RFODT*(-WC%ONE_D%UWS-V(II,JJ,KK)-ACCEL_TERM)
                FVY(II,JJ,KK)   = -RDYN(JJ)  *(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
             CASE(-2)
-               DVVDT =       RFODT*( WC%ONE_D%UWS-V(II,JJ-1,KK))
+               DVVDT =       RFODT*( WC%ONE_D%UWS-V(II,JJ-1,KK)-ACCEL_TERM)
                FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
             CASE( 3) 
-               DWWDT =       RFODT*(-WC%ONE_D%UWS-W(II,JJ,KK))
+               DWWDT =       RFODT*(-WC%ONE_D%UWS-W(II,JJ,KK)-ACCEL_TERM)
                FVZ(II,JJ,KK)   = -RDZN(KK)  *(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
             CASE(-3) 
-               DWWDT =       RFODT*( WC%ONE_D%UWS-W(II,JJ,KK-1))
+               DWWDT =       RFODT*( WC%ONE_D%UWS-W(II,JJ,KK-1)-ACCEL_TERM)
                FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
          END SELECT
       ENDIF
@@ -1301,26 +1303,28 @@ ELSE WALL_FV !CORRECTOR
       JJ  = WC%ONE_D%JJ
       KK  = WC%ONE_D%KK
       IOR = WC%ONE_D%IOR
+
+      ACCEL_TERM = 0.5_EB*(WC%VEL_ERR_NEW+WC%VEL_ERR_OLD)
    
       IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
          SELECT CASE(IOR)
             CASE( 1) 
-               DUUDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)))
+               DUUDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK))-ACCEL_TERM)
                FVX(II,JJ,KK)   = -RDXN(II)  *(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
             CASE(-1) 
-               DUUDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)))
+               DUUDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK))-ACCEL_TERM)
                FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
             CASE( 2) 
-               DVVDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)))
+               DVVDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK))-ACCEL_TERM)
                FVY(II,JJ,KK)   = -RDYN(JJ)  *(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
             CASE(-2)
-               DVVDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)))
+               DVVDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK))-ACCEL_TERM)
                FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
             CASE( 3) 
-               DWWDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)))
+               DWWDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK))-ACCEL_TERM)
                FVZ(II,JJ,KK)   = -RDZN(KK)  *(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
             CASE(-3) 
-               DWWDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)))
+               DWWDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1))-ACCEL_TERM)
                FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
          END SELECT
       ENDIF
