@@ -12,8 +12,6 @@
 
 &TIME T_END=15./
 
-&MISC TURBULENCE_MODEL='VREMAN'/
-
 &REAC FUEL               = 'N-HEPTANE'
       FYI                = 'Heptane, C_7 H_16'
       HEAT_OF_COMBUSTION = 44400.
