@@ -2431,7 +2431,7 @@ breach. Its default value is 1~s, meaning that equilibrium is achieved in roughl
 To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the
 case called {\bf duct\_flow}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the
 duct. Figure~\ref{duct_flow} displays the computed inflow and outflow as a function of time, and the number of pressure iterations required. The outflow does not match
-the inflow exactly because of inaccuracies at the solid and mesh boundaries. The {\ct VELOCITY\_TOLERANCE} has been set to 0.01~m/s and the grid cell size is 0.1~m.
+the inflow exactly because of inaccuracies at the solid and mesh boundaries. The {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.
 
 \begin{figure}[ht]
 \begin{center}
