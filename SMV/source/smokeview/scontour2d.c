@@ -252,7 +252,6 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
   for(n=0;n<nlevels-2;n++){
     ci->levels[n]=levels[n];
   }
-  // 0 1 2 ... nlevels-3 nlevels-2 nlevels-1
 
   for(n=0;n<nlevels;n++){
     minfill=0;
@@ -300,30 +299,17 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
         x[1]=(double)xgrid[i];
         x[2]=(double)xgrid[i+1];
         x[3]=(double)xgrid[i+1];
-        if(cellflag==GET_CELL_AREAS){
-          if(dataflag==DATA_FORTRAN){
-            ij0=ijnodeF(i,j);
-          }
-          else{
-            ij0=ijnodeC(i,j);
-          }
-          ij2=ij0;
-          i2j2=ij0;;
-          i2j=ij0;;
+        if(dataflag==DATA_FORTRAN){
+          ij0=ijnodeF(i,j);
+          ij2=ijnodeF(i,j+1);
+          i2j2=ijnodeF(i+1,j+1);
+          i2j=ijnodeF(i+1,j);
         }
         else{
-          if(dataflag==DATA_FORTRAN){
-            ij0=ijnodeF(i,j);
-            ij2=ijnodeF(i,j+1);
-            i2j2=ijnodeF(i+1,j+1);
-            i2j=ijnodeF(i+1,j);
-          }
-          else{
-            ij0=ijnodeC(i,j);
-            ij2=ijnodeC(i,j+1);
-            i2j2=ijnodeC(i+1,j+1);
-            i2j=ijnodeC(i+1,j);
-          }
+          ij0=ijnodeC(i,j);
+          ij2=ijnodeC(i,j+1);
+          i2j2=ijnodeC(i+1,j+1);
+          i2j=ijnodeC(i+1,j);
         }
         if(iblank!=NULL){
           int cellij;
@@ -338,17 +324,15 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
             lastcasenum=-1;
             continue;
           }
-          if(cellflag!=GET_CELL_AREAS){
-            if(dataflag==DATA_FORTRAN){
-              if(iblank[ijcellF(i,j+1)]!=2)ij2=ij0;
-              if(iblank[ijcellF(i+1,j+1)]!=2)i2j2=ij0;
-              if(iblank[ijcellF(i+1,j)]!=2)i2j=ij0;
-            }
-            else{
-              if(iblank[ijcellC(i,j+1)]!=2)ij2=ij0;
-              if(iblank[ijcellC(i+1,j+1)]!=2)i2j2=ij0;
-              if(iblank[ijcellC(i+1,j)]!=2)i2j=ij0;
-            }
+          if(dataflag==DATA_FORTRAN){
+            if(iblank[ijcellF(i,j+1)]!=2)ij2=ij0;
+            if(iblank[ijcellF(i+1,j+1)]!=2)i2j2=ij0;
+            if(iblank[ijcellF(i+1,j)]!=2)i2j=ij0;
+          }
+          else{
+            if(iblank[ijcellC(i,j+1)]!=2)ij2=ij0;
+            if(iblank[ijcellC(i+1,j+1)]!=2)i2j2=ij0;
+            if(iblank[ijcellC(i+1,j)]!=2)i2j=ij0;
           }
         }
         v[0]=(double)vals[ij0];
@@ -414,7 +398,7 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
     ci->polysize[n]=polysize;
   }
   /* printf("polygon count=%i\n",npolystotal); */
-  if(cellflag==GET_CELL_AREAS||cellflag==GET_NODE_AREAS)GetContourAreas(ci);
+  if(cellflag==GET_NODE_AREAS)GetContourAreas(ci);
 
 }
 

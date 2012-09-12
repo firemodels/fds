@@ -237,6 +237,56 @@ void output_mfed_csv(multislicedata *mslicei){
   fclose(AREA_STREAM);
 }
 
+#define ijnodeC(i,j) ((j)*nx+(i))
+#define ijcellC(i,j) ((j)*(nx-1)+(i))
+
+/* ------------------ GetCellAreas ------------------------ */
+
+void GetCellAreas(float *xgrid, float *ygrid, int nx, int ny, float *fed_frame, char *iblank, float *levels, int nlevels, float *areas){
+  int i;
+  float area;
+  float dx;
+
+  areas[0]=0.0;
+  areas[1]=0.0;
+  areas[2]=0.0;
+  areas[3]=0.0;
+  areas[4]=0.0;
+  for(i=0;i<nx-1;i++){
+    int j;
+    float dx;
+
+    dx = xgrid[i+1]-xgrid[i];
+    for(j=0;j<ny-1;j++){
+      float dy;
+      float val;
+      int k;
+
+      if(iblank[ijcellC(i,j)]!=2)continue;
+      dy = ygrid[j+1]-ygrid[j];
+      area = dx*dy;
+      val = fed_frame[ijnodeC(i,j)];
+      for(k=0;i<nlevels;k++){
+        if(k==0){
+          if(val<levels[0]){
+            areas[0]+=area;
+            break;
+          }
+        }
+        else if(k==nlevels-1){
+          areas[nlevels-1]+=area;
+        }
+        else{
+          if(levels[k-1]<=val&&val<levels[k]){
+            areas[k]+=area;
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+
 /* ------------------ readfed ------------------------ */
 
 void readfed(int file_index, int flag, int file_type, int *errorcode){
@@ -244,7 +294,6 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   slicedata *fed_slice,*o2,*co2,*co;
   isodata *fed_iso;
   int error_local;
-  contour *fed_contours=NULL;
   mesh *meshi;
   float *xgrid=NULL, *ygrid=NULL;
   char *iblank;
@@ -253,7 +302,6 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   int nxdata, nydata;
   float levels[6]={-0.00001,0.3,1.0,3.0};
   int nlevels=5; // 2 extra levels for below 0.0 and above 3.0
-  float *areas;
   int ibar, jbar, kbar;
 
 #define FEDCO(CO) ( (2.764/100000.0)*pow(1000000.0*CLAMP(CO,0.0,0.1),1.036)/60.0 )
@@ -449,24 +497,30 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       fed_frame[i]=0.0;
     }
     if(AREA_STREAM!=NULL){
-      if(fed_contours==NULL){
-        NewMemory((void **)&fed_contours,sizeof(contour));
-      }
-      else{
-        freecontour(fed_contours);
-      }
-      initcontour(fed_contours,NULL,nlevels);
       if(fed_slice->slicetype==SLICE_CENTER){
-        getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_CELL_AREAS, DATA_C, fed_contours);
+        float areas[5];
+
+        GetCellAreas(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, nlevels, areas);
+        contour_areas[0]=(areas[0]+areas[1])*area_factor;
+        contour_areas[1]=areas[2]*area_factor;
+        contour_areas[2]=areas[3]*area_factor;
+        contour_areas[3]=areas[4]*area_factor;
       }
       else{
+        float *areas;
+        contour *fed_contours=NULL;
+
+        NewMemory((void **)&fed_contours,sizeof(contour));
+        initcontour(fed_contours,NULL,nlevels);
         getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_NODE_AREAS, DATA_C, fed_contours);
+        areas = fed_contours->areas;
+        contour_areas[0]=(areas[0]+areas[3])*area_factor;
+        contour_areas[1]=areas[1]*area_factor;
+        contour_areas[2]=areas[2]*area_factor;
+        contour_areas[3]=areas[4]*area_factor;
+        freecontour(fed_contours);
+        FREEMEMORY(fed_contours);
       }
-      areas = fed_contours->areas;
-      contour_areas[0]=(areas[0]+areas[3])*area_factor;
-      contour_areas[1]=areas[1]*area_factor;
-      contour_areas[2]=areas[2]*area_factor;
-      contour_areas[3]=areas[4]*area_factor;
       fprintf(AREA_STREAM,"\"time\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\"\n");
       fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
         times[0],contour_areas[0],contour_areas[1],contour_areas[2],contour_areas[3]);
@@ -512,24 +566,30 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
       // compute fed areas 
 
-        if(fed_contours==NULL){
-          NewMemory((void **)&fed_contours,sizeof(contour));
-        }
-        else{
-          freecontour(fed_contours);
-        }
-        initcontour(fed_contours,NULL,nlevels);
         if(fed_slice->slicetype==SLICE_CENTER){
-          getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_CELL_AREAS, DATA_C, fed_contours);
+          float areas[5];
+
+          GetCellAreas(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, nlevels, areas);
+          contour_areas[0]=(areas[0]+areas[1])*area_factor;
+          contour_areas[1]=areas[2]*area_factor;
+          contour_areas[2]=areas[3]*area_factor;
+          contour_areas[3]=areas[4]*area_factor;
         }
         else{
+          float *areas;
+          contour *fed_contours=NULL;
+
+          NewMemory((void **)&fed_contours,sizeof(contour));
+          initcontour(fed_contours,NULL,nlevels);
           getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_NODE_AREAS, DATA_C, fed_contours);
+          areas = fed_contours->areas;
+          contour_areas[0]=(areas[0]+areas[3])*area_factor;
+          contour_areas[1]=areas[1]*area_factor;
+          contour_areas[2]=areas[2]*area_factor;
+          contour_areas[3]=areas[4]*area_factor;
+          freecontour(fed_contours);
+          FREEMEMORY(fed_contours);
         }
-        areas = fed_contours->areas;
-        contour_areas[0]=(areas[0]+areas[3])*area_factor;
-        contour_areas[1]=areas[1]*area_factor;
-        contour_areas[2]=areas[2]*area_factor;
-        contour_areas[3]=areas[4]*area_factor;
         if(AREA_STREAM!=NULL){
           fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
             times[i],contour_areas[0],contour_areas[1],contour_areas[2],contour_areas[3]);
@@ -544,10 +604,6 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     }
     FREEMEMORY(iblank);
     if(AREA_STREAM!=NULL)fclose(AREA_STREAM);
-    if(fed_contours!=NULL){
-      freecontour(fed_contours);
-      FREEMEMORY(fed_contours);
-    }
     out_slicefile(fed_slice);
     if(fed_slice->volslice==1){
       float *xplt, *yplt, *zplt;
