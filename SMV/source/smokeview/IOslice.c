@@ -249,11 +249,12 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   float *xgrid=NULL, *ygrid=NULL;
   char *iblank;
   int nx, ny;
+  int nxy;
+  int nxdata, nydata;
   float levels[6]={-0.00001,0.3,1.0,3.0};
   int nlevels=5; // 2 extra levels for below 0.0 and above 3.0
   float *areas;
   int ibar, jbar, kbar;
-  int nxy;
 
 #define FEDCO(CO) ( (2.764/100000.0)*pow(1000000.0*CLAMP(CO,0.0,0.1),1.036)/60.0 )
 #define FEDO2(O2)  ( exp( -(8.13-0.54*(20.9-100.0*CLAMP(O2,0.0,0.2))) )/60.0 ) 
@@ -288,27 +289,28 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   jbar = meshi->jbar;
   kbar = meshi->kbar;
 
+  nx = meshi->ibar+1;
+  ny = meshi->jbar+1;
+  nxy = nx*ny;
+
   switch (fed_slice->idir){
     case 1:
       xgrid = meshi->yplt;
       ygrid = meshi->zplt;
-      nx = co->js2 + 1 - co->js1;
-      ny = co->ks2 + 1 - co->ks1;
-      nxy = nx*ny;
+      nxdata = co->js2 + 1 - co->js1;
+      nydata = co->ks2 + 1 - co->ks1;
       break;
     case 2:
       xgrid = meshi->xplt;
       ygrid = meshi->zplt;
-      nx = co->is2 + 1 - co->is1;
-      ny = co->ks2 + 1 - co->ks1;
-      nxy = nx*ny;
+      nxdata = co->is2 + 1 - co->is1;
+      nydata = co->ks2 + 1 - co->ks1;
       break;
     case 3:
       xgrid = meshi->xplt;
       ygrid = meshi->yplt;
-      nx = co->is2 + 1 - co->is1;
-      ny = co->js2 + 1 - co->js1;
-      nxy = nx*ny;
+      nxdata = co->is2 + 1 - co->is1;
+      nydata = co->js2 + 1 - co->js1;
       break;
     default:
       ASSERT(0);
@@ -347,28 +349,26 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     float *contour_areas,*mslice_contour_areas;
     multislicedata *mslicei;
 
+    NewMemory((void **)&iblank,nxdata*nydata*sizeof(char));
     switch (fed_slice->idir){
       case 1:
-        NewMemory((void **)&iblank,jbar*kbar*sizeof(char));
-        for(j=0;j<jbar;j++){
-          for(k=0;k<kbar;k++){
-            iblank[k+j*kbar]=2*meshi->c_iblank_cell[IJKCELL(fed_slice->is1,j,k)];
+        for(j=0;j<nxdata-1;j++){
+          for(k=0;k<nydata-1;k++){
+            iblank[j+k*(nxdata-1)]=meshi->c_iblank_x[IJKNODE(fed_slice->is1,fed_slice->js1+j,fed_slice->ks1+k)];
           }
         }
         break;
       case 2:
-        NewMemory((void **)&iblank,ibar*kbar*sizeof(char));
-        for(i=0;i<ibar;i++){
-          for(k=0;k<kbar;k++){
-            iblank[k+i*kbar]=2*meshi->c_iblank_cell[IJKCELL(i,fed_slice->js1,k)];
+        for(i=0;i<nxdata-1;i++){
+          for(k=0;k<nydata-1;k++){
+            iblank[i+k*(nxdata-1)]=meshi->c_iblank_y[IJKNODE(fed_slice->is1+i,fed_slice->js1,fed_slice->ks1+k)];
           }
         }
         break;
       case 3:
-        NewMemory((void **)&iblank,ibar*jbar*sizeof(char));
-        for(i=0;i<ibar;i++){
-          for(j=0;j<jbar;j++){
-            iblank[j+i*jbar]=2*meshi->c_iblank_cell[IJKCELL(i,j,fed_slice->ks1)];
+        for(i=0;i<nxdata-1;i++){
+          for(j=0;j<nydata-1;j++){
+            iblank[i+j*(nxdata-1)]=meshi->c_iblank_z[IJKNODE(fed_slice->is1+i,fed_slice->js1+j,fed_slice->ks1)];
           }
         }
         break;
@@ -394,7 +394,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
        return;
     }
 
-    fed_slice->is1=co->is1; // nx = is2 + 1 - is1
+    fed_slice->is1=co->is1;
     fed_slice->is2=co->is2;
     fed_slice->js1=co->js1;
     fed_slice->js2=co->js2;
@@ -456,7 +456,12 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         freecontour(fed_contours);
       }
       initcontour(fed_contours,NULL,nlevels);
-      getcontours(xgrid, ygrid, nx, ny, fed_frame, iblank, levels, GET_AREAS, fed_contours);
+      if(fed_slice->slicetype==SLICE_CENTER){
+        getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_CELL_AREAS, DATA_C, fed_contours);
+      }
+      else{
+        getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_NODE_AREAS, DATA_C, fed_contours);
+      }
       areas = fed_contours->areas;
       contour_areas[0]=(areas[0]+areas[3])*area_factor;
       contour_areas[1]=areas[1]*area_factor;
@@ -514,7 +519,12 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
           freecontour(fed_contours);
         }
         initcontour(fed_contours,NULL,nlevels);
-        getcontours(xgrid, ygrid, nx, ny, fed_frame, iblank, levels, GET_AREAS, fed_contours);
+        if(fed_slice->slicetype==SLICE_CENTER){
+          getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_CELL_AREAS, DATA_C, fed_contours);
+        }
+        else{
+          getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_NODE_AREAS, DATA_C, fed_contours);
+        }
         areas = fed_contours->areas;
         contour_areas[0]=(areas[0]+areas[3])*area_factor;
         contour_areas[1]=areas[1]*area_factor;
@@ -2223,8 +2233,6 @@ void update_fedinfo(void){
     fedi->fed_slice=sliceinfo+fedi->fed_index;
     fedi->fed_iso=NULL;
 
-    setlabels(&(sd->label),"Fractional effective dose","FED"," ");
-
     co2 = fedi->co2;
     sd->file=NULL;
     sd->is1=co2->is1;
@@ -2239,6 +2247,12 @@ void update_fedinfo(void){
     sd->is_fed=1;
     sd->fedptr=fedi;
     sd->slicetype=co2->slicetype;
+    if(sd->slicetype==SLICE_CENTER){
+      setlabels(&(sd->label),"Fractional effective dose(cell centered)","FED"," ");
+    }
+    else{
+      setlabels(&(sd->label),"Fractional effective dose","FED"," ");
+    }
     sd->reg_file=NULL;
     sd->comp_file=NULL;
     sd->compression_type=co2->compression_type;

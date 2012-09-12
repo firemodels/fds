@@ -763,21 +763,16 @@ do
     do i = 1, nxsp
       irowstart = (i-1)*(nzsp+koff)
   	  kk = istart + irowstart
-	    qdata(kk+1:kk+nzsp+koff) = qq(i,1,1:nzsp+koff)
-	    qmax = max(qmax,maxval(qq(i,1,1:nzsp+koff)))
-	    qmin = min(qmin,minval(qq(i,1,1:nzsp+koff)))
+      qdata(kk+1:kk+nzsp+koff) = qq(i,1,1:nzsp+koff)
+      qmax = max(qmax,maxval(qq(i,1,1:nzsp+koff)))
+      qmin = min(qmin,minval(qq(i,1,1:nzsp+koff)))
     end do
    else
-!!    istart = (nsteps-1)*(nysp+joff)*(nzsp+koff)
     istart = (nsteps-1)*(nysp+joff)*(nzsp+koff)*nxsp
     do i = 1, nxsp
     do j = 1, nysp+joff
-!!      irowstart = (j-1)*(nzsp+koff)
       irowstart = (i-1)*nysp*(nzsp+koff)+(j-1)*(nzsp+koff)
       kk = istart + irowstart
-!!      qdata(kk+1:kk+nzsp+koff) = qq(1,j,1:nzsp+koff)
-!!      qmax = max(qmax,maxval(qq(1,j,1:nzsp+koff)))
-!!      qmin = min(qmin,minval(qq(1,j,1:nzsp+koff)))
       qdata(kk+1:kk+nzsp+koff) = qq(i,j,1:nzsp+koff)
       qmax = max(qmax,maxval(qq(i,j,1:nzsp+koff)))
       qmin = min(qmin,minval(qq(i,j,1:nzsp+koff)))

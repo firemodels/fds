@@ -17,8 +17,10 @@
 #endif
 
 #define DONT_GET_AREAS 0
-#define GET_AREAS 1
-
+#define GET_CELL_AREAS 1
+#define GET_NODE_AREAS 2
+#define DATA_FORTRAN 0
+#define DATA_C 1
 typedef struct {
   float *levels,*areas;
   int nlevels, *nnodes, *npolys, *nlines;
@@ -42,7 +44,7 @@ void DrawContours(const contour *ci);
 void DrawLineContours(const contour *ci, float linewidth);
 void setcontourslice(contour *ci,int idir,float xyz);
 void getcontours(const float *xgrid, const float *ygrid, int nx, int ny,  
-                 const float *vals, const char *iblank, const float *levels,int flag, 
+                 const float *vals, const char *iblank, const float *levels,int cellflag, int dataflag,
                  const contour *ci);
 void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
                  const float *vals, const char *iblank, const float level_min, const float level_max,

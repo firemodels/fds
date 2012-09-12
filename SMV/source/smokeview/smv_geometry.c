@@ -1256,7 +1256,7 @@ int makeiblank(void){
   int ibar,jbar,kbar;
   int nx, ny, nxy;
   float *fblank_cell=NULL;
-  char *iblank_node=NULL,*iblank_cell=NULL,*iblank_x=NULL,*iblank_y=NULL,*iblank_z=NULL;
+  char *iblank_node=NULL,*iblank_cell=NULL,*c_iblank_x=NULL,*c_iblank_y=NULL,*c_iblank_z=NULL;
 
   printf("  initializing blanking array\n");
   if(use_iblank==0)return 0;
@@ -1271,25 +1271,25 @@ int makeiblank(void){
     if(NewMemory((void **)&iblank_node,ijksize*sizeof(char))==0)return 1;
     if(NewMemory((void **)&iblank_cell,ibar*jbar*kbar*sizeof(char))==0)return 1;
     if(NewMemory((void **)&fblank_cell,ibar*jbar*kbar*sizeof(float))==0)return 1;
-    if(NewMemory((void **)&iblank_x,ijksize*sizeof(char))==0)return 1;
-    if(NewMemory((void **)&iblank_y,ijksize*sizeof(char))==0)return 1;
-    if(NewMemory((void **)&iblank_z,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&c_iblank_x,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&c_iblank_y,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&c_iblank_z,ijksize*sizeof(char))==0)return 1;
 
     meshi->c_iblank_node=iblank_node;
     meshi->c_iblank_cell=iblank_cell;
     meshi->f_iblank_cell=fblank_cell;
-    meshi->c_iblank_x=iblank_x;
-    meshi->c_iblank_y=iblank_y;
-    meshi->c_iblank_z=iblank_z;
+    meshi->c_iblank_x=c_iblank_x;
+    meshi->c_iblank_y=c_iblank_y;
+    meshi->c_iblank_z=c_iblank_z;
 
     for(i=0;i<ibar*jbar*kbar;i++){
       iblank_cell[i]=1;
     }
     for(i=0;i<ijksize;i++){
       iblank_node[i]=1;
-      iblank_x[i]=1;
-      iblank_y[i]=1;
-      iblank_z[i]=1;
+      c_iblank_x[i]=1;
+      c_iblank_y[i]=1;
+      c_iblank_z[i]=1;
     }
 
     nx = ibar+1;
@@ -1330,30 +1330,30 @@ int makeiblank(void){
 
     for(j=0;j<jbar;j++){
       for(k=0;k<kbar;k++){
-        iblank_x[IJKNODE(0,j,k)]   =2*iblank_cell[IJKCELL(0,j,k)];
+        c_iblank_x[IJKNODE(0,j,k)]   =2*iblank_cell[IJKCELL(0,j,k)];
         for(i=1;i<ibar;i++){
-          iblank_x[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i-1,j,k)]+iblank_cell[IJKCELL(i,j,k)];
+          c_iblank_x[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i-1,j,k)]+iblank_cell[IJKCELL(i,j,k)];
         }
-        iblank_x[IJKNODE(ibar,j,k)]=2*iblank_cell[IJKCELL(ibar-1,j,k)];
+        c_iblank_x[IJKNODE(ibar,j,k)]=2*iblank_cell[IJKCELL(ibar-1,j,k)];
       }
     }
     for(i=0;i<ibar;i++){
       for(k=0;k<kbar;k++){
-        iblank_y[IJKNODE(i,0,k)]=2*iblank_cell[IJKCELL(i,0,k)];
+        c_iblank_y[IJKNODE(i,0,k)]=2*iblank_cell[IJKCELL(i,0,k)];
         for(j=1;j<jbar;j++){
-          iblank_y[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j-1,k)]+iblank_cell[IJKCELL(i,j,k)];
+          c_iblank_y[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j-1,k)]+iblank_cell[IJKCELL(i,j,k)];
         }
-        iblank_y[IJKNODE(i,jbar,k)]=2*iblank_cell[IJKCELL(i,jbar-1,k)];
+        c_iblank_y[IJKNODE(i,jbar,k)]=2*iblank_cell[IJKCELL(i,jbar-1,k)];
       }
     }
 
     for(i=0;i<ibar;i++){
       for(j=0;j<jbar;j++){
-        iblank_z[IJKNODE(i,j,0)]=2*iblank_cell[IJKCELL(i,j,0)];
+        c_iblank_z[IJKNODE(i,j,0)]=2*iblank_cell[IJKCELL(i,j,0)];
         for(k=1;k<kbar;k++){
-          iblank_z[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j,k-1)]+iblank_cell[IJKCELL(i,j,k)];
+          c_iblank_z[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j,k-1)]+iblank_cell[IJKCELL(i,j,k)];
         }
-        iblank_z[IJKNODE(i,j,kbar)]=2*iblank_cell[IJKCELL(i,j,kbar-1)];
+        c_iblank_z[IJKNODE(i,j,kbar)]=2*iblank_cell[IJKCELL(i,j,kbar-1)];
       }
     }
   }
