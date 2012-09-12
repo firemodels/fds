@@ -14,6 +14,7 @@ Rem VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 Rem Choose FDS version (repository or release)
 
 set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
+Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64_db\fds_win_64_db
 Rem set FDSEXE=fds
 
 Rem Choose CFAST version (repository or release)
