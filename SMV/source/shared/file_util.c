@@ -48,7 +48,7 @@ void filecopy(char *destdir, char *file_in, char *file_out){
 
   streamout=fopen(full_file_out,"rb");
   if(streamout!=NULL){
-    printf("  Warning: will not overwrite %s%s\n",destdir,file_in);
+    fprintf(stderr,"*** Warning: will not overwrite %s%s\n",destdir,file_in);
     fclose(streamout);
     fclose(streamin);
     return;
@@ -684,7 +684,7 @@ char *which(char *progname){
     dir=strtok(NULL,pathsep);
   }
 #ifdef pp_BETA
-  printf("%s not found in any path directory\n",prog);
+  fprintf(stderr,"*** Warning: %s not found in any path directory\n",prog);
 #endif
   return NULL;
 }
