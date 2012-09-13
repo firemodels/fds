@@ -870,7 +870,7 @@ check_guide()
 {
    # Scan and report any errors in build process for guides
    cd $FIREBOT_DIR
-   if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
+   if [[ `grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I $1` == "" ]]
    then
       cp $2 /var/www/html/firebot/manuals/
    else
