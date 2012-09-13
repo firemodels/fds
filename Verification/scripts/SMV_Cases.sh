@@ -4,7 +4,7 @@ $RUNFDS Visualization cell_test
 $RUNCFAST Visualization cfast_test
 $RUNFDS Visualization colorbar
 $RUNFDS Visualization colorconv
-$RUNFDS Visualization fed_test
+#$RUNFDS Visualization fed_test
 $RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization objects_elem
 $RUNFDS Visualization objects_static
