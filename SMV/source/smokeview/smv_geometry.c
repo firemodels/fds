@@ -277,13 +277,13 @@ mesh *getmesh(float *xyz){
     zplt = meshi->zplt_orig;
 
     if(
-      xplt[0]+MESHEPS<=xyz[0]&&xyz[0]-MESHEPS<=xplt[ibar]&&
-      yplt[0]+MESHEPS<=xyz[1]&&xyz[1]-MESHEPS<=yplt[jbar]&&
-      zplt[0]+MESHEPS<=xyz[2]&&xyz[2]-MESHEPS<=zplt[kbar]){
+      xplt[0]<=xyz[0]+MESHEPS&&xyz[0]-MESHEPS<=xplt[ibar]&&
+      yplt[0]<=xyz[1]+MESHEPS&&xyz[1]-MESHEPS<=yplt[jbar]&&
+      zplt[0]<=xyz[2]+MESHEPS&&xyz[2]-MESHEPS<=zplt[kbar]){
       return meshi;
     }
   }
-  return NULL;
+  return meshinfo;
 }
 
 /* ------------------ ExtractFrustum ------------------------ */
