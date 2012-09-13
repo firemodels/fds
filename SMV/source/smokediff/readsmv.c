@@ -74,8 +74,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   }
 
   if(nmeshes!=ipdim){
-    fprintf(stderr,"*** fatal error: number of GRID statements (%i) not equal to\n",nmeshes);
-    printf("                 number of PDIM statements (%i)\n",ipdim);
+    fprintf(stderr,"*** Fatal error: number of GRID statements (%i) not equal to\n",nmeshes);
+    fprintf(stderr,"                 number of PDIM statements (%i)\n",ipdim);
     exit(0);
   }
 

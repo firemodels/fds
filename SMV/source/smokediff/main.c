@@ -24,11 +24,13 @@ int main(int argc, char **argv){
 
   char *smv1=NULL, *smv2=NULL, *arg;
   char smv1_out[1024];
+  char svdlogfile[1024];
   char smoke1[1024], smoke2[1024], smv_out[1024];
   FILE *stream_out, *stream_in1, *stream_in2;
   int no_plot3d=0, no_slice=0, no_boundary=0;
   int i;
   int open_smokeview=0;
+  int redirect=0;
 
   initMALLOC();
 #ifdef WIN32
@@ -99,6 +101,9 @@ int main(int argc, char **argv){
           return 1;
         }
         break;
+      case 'r':
+        redirect=1;
+        break;
       case 's':
         if(arg[2]=='m'&&arg[3]=='v'){
           open_smokeview=1;
@@ -153,6 +158,13 @@ int main(int argc, char **argv){
   }
   // make sure smv file names exists
 
+  if(redirect==1){
+    strcpy(svdlogfile,"");
+    if(destdir!=NULL)strcat(svdlogfile,destdir);
+    strcat(svdlogfile,smv1);
+    strcat(svdlogfile,"_diff.svdlog");
+    LOGSTREAM=freopen(svdlogfile,"w",stdout);
+  }
   if(getfileinfo(smoke1,NULL,NULL)!=0||getfileinfo(smoke2,NULL,NULL)!=0){
     if(getfileinfo(smoke1,NULL,NULL)!=0){
       fprintf(stderr,"*** Error The .smv file, %s, does not exist\n",smoke1);
