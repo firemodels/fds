@@ -371,7 +371,7 @@ void setup_glut(int argc, char **argv){
     }
   }
 #ifdef pp_BETA
-  printf("%s\n",_("*** This version of Smokeview is intended for review and testing ONLY. ***"));
+  fprintf(stderr,"%s\n",_("*** This version of Smokeview is intended for review and testing ONLY. ***"));
 #endif
 
 #ifdef pp_OSX
