@@ -519,8 +519,7 @@ void parse_commandline(int argc, char **argv){
       exit(0);
     }
     else if(
-      strncmp(argv[i],"-redirect",9)==0||
-      strncmp(argv[i],"-r",2)==0
+      strncmp(argv[i],"-redirect",9)==0
       ){
         LOGSTREAM=freopen(logfilename,"w",stdout);
     }
