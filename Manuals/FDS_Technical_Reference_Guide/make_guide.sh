@@ -13,7 +13,7 @@ if [[ `grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I FDS_Technical_Ref
       :
    else
       echo "LaTeX errors detected:"
-      grep "! LaTeX Error:" -I FDS_Technical_Reference_Guide.err
+      grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I FDS_Technical_Reference_Guide.err
       clean_build=0
 fi
 
