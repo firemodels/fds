@@ -27,4 +27,4 @@ fi
 
 source ~/.bashrc_fds intel64
 cd $fulldir
-$SMV $SMVBINDIR -r -runscript $in
+$SMV $SMVBINDIR -redirect -runscript $in
