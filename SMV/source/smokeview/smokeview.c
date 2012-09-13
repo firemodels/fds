@@ -370,9 +370,9 @@ void parse_commandline(int argc, char **argv){
   }
 
   FREEMEMORY(logfilename);
-  NewMemory((void **)&logfilename,len+4+1);
+  NewMemory((void **)&logfilename,len+7+1);
   STRCPY(logfilename,fdsprefix);
-  STRCAT(logfilename,".log");
+  STRCAT(logfilename,".smvlog");
 
   FREEMEMORY(caseinifilename);
   NewMemory((void **)&caseinifilename,len+strlen(ini_ext)+1);
@@ -517,6 +517,12 @@ void parse_commandline(int argc, char **argv){
       ){
       display_version_info();
       exit(0);
+    }
+    else if(
+      strncmp(argv[i],"-redirect",9)==0||
+      strncmp(argv[i],"-r",2)==0
+      ){
+        LOGSTREAM=freopen(logfilename,"w",stdout);
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
       from_commandline=1;

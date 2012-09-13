@@ -24,6 +24,8 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN FILE SVDECL(*LOGSTREAM,NULL);
+
 #ifdef pp_MERGESMOKE
 SVEXTERN int SVDECL(can_merge_smoke,0),SVDECL(merge_smoke,0);
 #endif
