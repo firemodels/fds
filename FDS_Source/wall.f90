@@ -769,7 +769,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%SPECIES_BC_INDEX)
          DO ITER=1,5
             UN    = MFT/WC%RHO_F
             SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
-               DD = 2.*WC%RHODW(N)*WC%RDN
+               DD = 2._EB*WC%RHODW(N)*WC%RDN
                ZZ_G  = ZZP(IIG,JJG,KKG,N)
                WC%ZZ_F(N) = ( ONE_D%MASSFLUX(N) + DD*ZZ_G ) / (DD + UN*WC%RHO_F)
             ENDDO SPECIES_LOOP
