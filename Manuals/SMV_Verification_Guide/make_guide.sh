@@ -7,7 +7,7 @@ pdflatex -interaction nonstopmode SMV_Verification_Guide &> SMV_Verification_Gui
 pdflatex -interaction nonstopmode SMV_Verification_Guide &> SMV_Verification_Guide.err
 
 # Scan and report any errors in the LaTeX build process
-if [[ `grep "! LaTeX Error:" -I SMV_Verification_Guide.err` == "" ]]
+if [[ `grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I SMV_Verification_Guide.err` == "" ]]
    then
       # Continue along
       :

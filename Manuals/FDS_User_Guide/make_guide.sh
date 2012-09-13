@@ -7,7 +7,7 @@ pdflatex -interaction nonstopmode FDS_User_Guide &> FDS_User_Guide.err
 pdflatex -interaction nonstopmode FDS_User_Guide &> FDS_User_Guide.err
 
 # Scan and report any errors in the LaTeX build process
-if [[ `grep "! LaTeX Error:" -I FDS_User_Guide.err` == "" ]]
+if [[ `grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I FDS_User_Guide.err` == "" ]]
    then
       # Continue along
       :
