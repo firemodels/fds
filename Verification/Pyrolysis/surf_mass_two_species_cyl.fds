@@ -4,12 +4,14 @@
 
 &TIME T_END=1000./ 
 
+
 &REAC FUEL = 'FUEL'
       C = 3.4
       H = 6.2
       O = 2.5
       HEAT_OF_COMBUSTION = 12000.
-      Y_O2_INFTY=0.01 /
+      Y_O2_INFTY=0.01
+      CRITICAL_FLAME_TEMPERATURE=2000  /
 
 &SPEC ID='WATER VAPOR', MASS_FRACTION_0=0. /
 
