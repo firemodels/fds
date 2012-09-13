@@ -7,7 +7,7 @@ pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> FDS_Confi
 pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> FDS_Configuration_Management_Plan.err
 
 # Scan and report any errors in the LaTeX build process
-if [[ `grep "! LaTeX Error:" -I FDS_Configuration_Management_Plan.err` == "" ]]
+if [[ `grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I FDS_Configuration_Management_Plan.err` == "" ]]
    then
       # Continue along
       :

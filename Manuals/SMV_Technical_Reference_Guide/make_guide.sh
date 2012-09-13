@@ -7,7 +7,7 @@ pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> SMV_Technical
 pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> SMV_Technical_Reference_Guide.err
 
 # Scan and report any errors in the LaTeX build process
-if [[ `grep "! LaTeX Error:" -I SMV_Technical_Reference_Guide.err` == "" ]]
+if [[ `grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I SMV_Technical_Reference_Guide.err` == "" ]]
    then
       # Continue along
       :
