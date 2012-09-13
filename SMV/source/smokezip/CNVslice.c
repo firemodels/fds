@@ -63,13 +63,13 @@ int convert_volslice(slice *slicei, int *thread_index){
   trim(filetype);
 
   if(getfileinfo(slice_file,NULL,NULL)!=0){
-    printf("  %s does not exist\n",slice_file);
+    fprintf(stderr,"*** Warning: The file %s does not exist\n",slice_file);
     return 0;
   }
 
   SLICEFILE=fopen(slice_file,"rb");
   if(SLICEFILE==NULL){
-    printf("  %s could not be opened\n",slice_file);
+    fprintf(stderr,"*** Warning: The file %s could not be opened\n",slice_file);
     return 0;
   }
 
@@ -102,15 +102,15 @@ int convert_volslice(slice *slicei, int *thread_index){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
       fclose(slicestream);
-      printf("  %s exists.\n",slicefile_svz);
-      printf("     Use the -f option to overwrite smokezip compressed files\n");
+      fprintf(stderr,"*** Warning: The file %s exists.\n",slicefile_svz);
+      fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
       return 0;
     }
   }
 
   slicestream=fopen(slicefile_svz,"wb");
   if(slicestream==NULL){
-    printf("  %s could not be opened for writing\n",slicefile_svz);
+    fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",slicefile_svz);
     return 0;
   }
 
@@ -323,13 +323,13 @@ int convert_slice(slice *slicei, int *thread_index){
   trim(filetype);
 
   if(getfileinfo(slice_file,NULL,NULL)!=0){
-    printf("  %s does not exist\n",slice_file);
+    fprintf(stderr,"*** Warning: The file %s does not exist\n",slice_file);
     return 0;
   }
 
   SLICEFILE=fopen(slice_file,"rb");
   if(SLICEFILE==NULL){
-    printf("  %s could not be opened\n",slice_file);
+    fprintf(stderr,"*** Warning: The file %s could not be opened\n",slice_file);
     return 0;
   }
 
@@ -407,8 +407,8 @@ int convert_slice(slice *slicei, int *thread_index){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
       fclose(slicestream);
-      printf("  %s exists.\n",slicefile_svz);
-      printf("     Use the -f option to overwrite smokezip compressed files\n");
+      fprintf(stderr,"*** Warning:  %s exists.\n",slicefile_svz);
+      fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
       return 0;
     }
   }
@@ -417,10 +417,10 @@ int convert_slice(slice *slicei, int *thread_index){
   slicesizestream=fopen(slicesizefile_svz,"w");
   if(slicestream==NULL||slicesizestream==NULL){
     if(slicestream==NULL){
-      printf("  %s could not be opened for writing\n",slicefile_svz);
+      fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",slicefile_svz);
     }
     if(slicesizestream==NULL){
-      printf("  %s could not be opened for writing\n",slicesizefile_svz);
+      fprintf(stderr,"  %s could not be opened for writing\n",slicesizefile_svz);
     }
     if(slicestream!=NULL)fclose(slicestream);
     if(slicesizestream!=NULL)fclose(slicesizestream);

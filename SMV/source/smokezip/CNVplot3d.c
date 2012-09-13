@@ -57,13 +57,13 @@ int convert_plot3d(plot3d *plot3di){
   trim(filetype);
 
   if(getfileinfo(plot3d_file,NULL,NULL)!=0){
-    printf("  %s does not exist\n",plot3d_file);
+    fprintf(stderr,"*** Warning: The file %s does not exist\n",plot3d_file);
     return 0;
   }
 
   PLOT3DFILE=fopen(plot3d_file,"rb");
   if(PLOT3DFILE==NULL){
-    printf("  %s could not be opened\n",plot3d_file);
+    fprintf(stderr,"*** Warning: The file %s could not be opened\n",plot3d_file);
     return 0;
   }
 
@@ -103,8 +103,8 @@ int convert_plot3d(plot3d *plot3di){
     plot3dstream=fopen(plot3dfile_svz,"rb");
     if(plot3dstream!=NULL){
       fclose(plot3dstream);
-      printf("  %s exists.\n",plot3dfile_svz);
-      printf("     Use the -f option to overwrite smokezip compressed files\n");
+      fprintf(stderr,"*** Warning: The file %s exists.\n",plot3dfile_svz);
+      fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
       return 0;
     }
   }
@@ -112,7 +112,7 @@ int convert_plot3d(plot3d *plot3di){
   plot3dstream=fopen(plot3dfile_svz,"wb");
   if(plot3dstream==NULL){
     if(plot3dstream==NULL){
-      printf("  %s could not be opened for writing\n",plot3dfile_svz);
+      fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",plot3dfile_svz);
     }
     fclose(PLOT3DFILE);
     return 0;

@@ -146,13 +146,13 @@ int convert_boundary(patch *patchi, int *thread_index){
   trim(filetype);
 
   if(getfileinfo(boundary_file,NULL,NULL)!=0){
-    printf("  %s does not exist\n",boundary_file);
+    fprintf(stderr,"*** Warning: The file %s does not exist\n",boundary_file);
     return 0;
   }
 
   BOUNDARYFILE=fopen(boundary_file,"rb");
   if(BOUNDARYFILE==NULL){
-    printf("  %s could not be opened\n",boundary_file);
+    fprintf(stderr,"*** Warning: The file %s could not be opened\n",boundary_file);
     return 0;
   }
 
@@ -182,8 +182,8 @@ int convert_boundary(patch *patchi, int *thread_index){
     if(boundarystream!=NULL||boundarysizestream!=NULL){
       if(boundarystream!=NULL){
         fclose(boundarystream);
-        printf("  %s exists.\n",boundaryfile_svz);
-        printf("     Use the -f option to overwrite smokezip compressed files\n");
+        fprintf(stderr,"*** Warning: The file %s exists.\n",boundaryfile_svz);
+        fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
       }
       fclose(BOUNDARYFILE);
       return 0;
@@ -194,10 +194,10 @@ int convert_boundary(patch *patchi, int *thread_index){
   boundarysizestream=fopen(boundarysizefile_svz,"w");
   if(boundarystream==NULL||boundarysizestream==NULL){
     if(boundarystream==NULL){
-      printf("  %s could not be opened for writing\n",boundaryfile_svz);
+      fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",boundaryfile_svz);
     }
     if(boundarysizestream==NULL){
-      printf("  %s could not be opened for writing\n",boundarysizefile_svz);
+      fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",boundarysizefile_svz);
     }
     if(boundarystream!=NULL)fclose(boundarystream);
     if(boundarysizestream!=NULL)fclose(boundarysizestream);

@@ -281,13 +281,13 @@ void convert_part(part *parti, int *thread_index){
   // check if part file is accessible
 
   if(getfileinfo(partfile,NULL,NULL)!=0){
-    printf("Particle file %s does not exist\n",partfile);
+    fprintf(stderr,"*** Warning: The particle file %s does not exist\n",partfile);
     return;
   }
 
   PARTFILEstream=fopen(partfile,"rb");
   if(PARTFILEstream==NULL){
-    printf("Particle file %s could not be opened\n",partfile);
+    fprintf(stderr,"*** Warning: The particle file %s could not be opened\n",partfile);
     return;
   }
 
@@ -301,7 +301,7 @@ void convert_part(part *parti, int *thread_index){
   strcat(partfile_svz,".svz");
   partstream=fopen(partfile_svz,"wb");
   if(partstream==NULL){
-    printf("The file %s could not be opened for writing\n",partfile_svz);
+    fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",partfile_svz);
     fclose(PARTFILEstream);
     return;
   }
@@ -317,7 +317,7 @@ void convert_part(part *parti, int *thread_index){
   partsizestream=fopen(partsizefile_svz,"w");
 
   if(partsizestream==NULL){
-    printf("The file %s could not be opened for writing\n",partsizefile_svz);
+    fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",partsizefile_svz);
     fclose(PARTFILEstream);
     fclose(partstream);
     return;
@@ -349,8 +349,8 @@ void convert_part(part *parti, int *thread_index){
     partstream=fopen(partfile_svz,"rb");
     if(partstream!=NULL){
       fclose(partstream);
-      printf("  %s exists.\n",partfile_svz);
-      printf("     Use the -f option to overwrite smokezip compressed files\n");
+      fprintf(stderr,"** Warning: The file %s exists.\n",partfile_svz);
+      fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
       return;
     }
   }

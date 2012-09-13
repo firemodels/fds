@@ -32,6 +32,7 @@ int main(int argc, char **argv){
   char *filebase;
   int filelen;
   char smvfile[1024];
+  char smzlogfile[1024];
   char smvfilebase[1024];
   char *ext;
   char inifile[1024];
@@ -40,6 +41,7 @@ int main(int argc, char **argv){
   int i;
   int endian_fds;
   int endian_info;
+  int redirect=0;
 
   initMALLOC();
   GLOBdoit_lighting=0;
@@ -246,6 +248,9 @@ int main(int argc, char **argv){
       case 'e':
         endian_info=1;
         break;
+      case 'r':
+        redirect=1;
+        break;
       case 's':
         if(i+1>=argc)break;
         if(lenarg==2){
@@ -256,7 +261,7 @@ int main(int argc, char **argv){
               strcat(GLOBsourcedir,dirseparator);
             }
             if(getfileinfo(GLOBsourcedir,NULL,NULL)!=0){
-              printf("The source directory specified, %s, does not exist or cannot be accessed\n",GLOBsourcedir);
+              fprintf(stderr,"*** Warning: The source directory specified, %s, does not exist or cannot be accessed\n",GLOBsourcedir);
               return 1;
             }
            i++;
@@ -287,7 +292,7 @@ int main(int argc, char **argv){
             strcat(GLOBdestdir,dirseparator);
           }
  //         if(getfileinfo(GLOBdestdir,NULL,NULL)!=0){
- //           printf("The destination directory %s does not exist or cannot be accessed\n",GLOBdestdir);
+ //           fprintf(stderr,"*** Warning: The destination directory %s does not exist or cannot be accessed\n",GLOBdestdir);
  //           return 1;
  //         }
           i++;
@@ -346,10 +351,13 @@ int main(int argc, char **argv){
   }
   if(GLOBsourcedir==NULL){
     strcpy(smvfile,filebase);
+    strcpy(smzlogfile,filebase);
   }
   else{
     strcpy(smvfile,GLOBsourcedir);
     strcat(smvfile,filebase);
+    strcpy(smzlogfile,GLOBsourcedir);
+    strcat(smzlogfile,filebase);
   }
   strcpy(smvfilebase,filebase);
   if(GLOBpartfile2iso==1||GLOBcleanfiles==1){
@@ -357,7 +365,18 @@ int main(int argc, char **argv){
     strcat(GLOBsmvisofile,".isosmv");
   }
 
-  strcat(smvfile,".smv");
+  if(redirect==1){
+    if(GLOBsourcedir==NULL){
+      strcpy(smzlogfile,filebase);
+    }
+    else{
+      strcpy(smzlogfile,GLOBsourcedir);
+      strcat(smzlogfile,filebase);
+    }
+    strcat(smvfile,".smv");
+    strcat(smzlogfile,".smzlog");
+    freopen(smzlogfile,"w",stdout);
+  }
   
   // construct ini file name
 
@@ -372,7 +391,7 @@ int main(int argc, char **argv){
   // make sure smv file name exists
 
   if(getfileinfo(smvfile,NULL,NULL)!=0){
-    printf("file: %s does not exist\n",smvfile);
+    fprintf(stderr,"*** Error: The file %s does not exist\n",smvfile);
     return 1;
   }
 
@@ -423,16 +442,16 @@ int main(int argc, char **argv){
       printf("Smokezip running on a little endian computer.\n");
   }
   if(GLOBendf==0&&GLOBsyst==0){
-    printf("Warning: casename.end file is missing.  Endianness of\n");
-    printf("         FDS boundary file data is unknown.\n");
+    fprintf(stderr,"Warning: casename.end file is missing.  Endianness of\n");
+    fprintf(stderr,"         FDS boundary file data is unknown.\n");
     if(getendian()==1){
-      printf("         Assuming FDS boundary data is big endian - \n");
+      fprintf(stderr,"         Assuming FDS boundary data is big endian - \n");
     }
     if(getendian()==0){
-      printf("         Assuming FDS boundary data is little endian - \n");
+      fprintf(stderr,"         Assuming FDS boundary data is little endian - \n");
     }
-    printf("         or equivalently assuming FDS and Smokezip are\n");
-    printf("         being run on the same type of computer\n");
+    fprintf(stderr,"         or equivalently assuming FDS and Smokezip are\n");
+    fprintf(stderr,"         being run on the same type of computer\n");
     endianswitch=0;
   }
   else{

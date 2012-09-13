@@ -62,12 +62,12 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   }
 
   if(getfileinfo(smoke3dfile,NULL,NULL)!=0){
-    printf("  %s does not exist\n",smoke3dfile);
+    fprintf(stderr,"*** Warning:  %s does not exist\n",smoke3dfile);
     return;
   }
   SMOKE3DFILE=EGZ_FOPEN(smoke3dfile,"rb",0,2);
   if(SMOKE3DFILE==NULL){
-    printf("  %s could not be opened\n",smoke3dfile);
+    fprintf(stderr,"*** Warning:  %s could not be opened\n",smoke3dfile);
     return;
   }
 
@@ -121,8 +121,8 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     smoke3dstream=fopen(smoke3dfile_svz,"rb");
     if(smoke3dstream!=NULL){
       fclose(smoke3dstream);
-      printf("  %s exists.\n",smoke3dfile_svz);
-      printf("     Use the -f option to overwrite smokezip compressed files\n");
+      fprintf(stderr,"*** Warning:  %s exists.\n",smoke3dfile_svz);
+      fprintf(stderr,"*** Warning:     Use the -f option to overwrite smokezip compressed files\n");
       return;
     }
   }
@@ -132,10 +132,10 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   if(smoke3dstream==NULL||smoke3dsizestream==NULL
     ){
     if(smoke3dstream==NULL){
-      printf("  3dsmoke file, %s, could not be opened for output\n",smoke3dfile_svz);
+      fprintf(stderr,"*** Warning:  3dsmoke file, %s, could not be opened for output\n",smoke3dfile_svz);
     }
     if(smoke3dsizestream==NULL){
-      printf("  3dsmoke size file, %s, could not be opened for output\n",smoke3dsizefile_svz);
+      fprintf(stderr,"*** Warning:  3dsmoke size file, %s, could not be opened for output\n",smoke3dsizefile_svz);
     }
     if(smoke3dsizestream!=NULL)fclose(smoke3dsizestream);
     if(smoke3dstream!=NULL)fclose(smoke3dstream);
@@ -226,7 +226,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     nfull_data=irle(compressed_alphabuffer, ncompressed_rle, full_alphabuffer);
     CheckMemory;
     if(nfull_file!=nfull_data){
-      printf("  ***warning frame size expected=%i frame size found=%i\n",nfull_file,nfull_data);
+      fprintf(stderr,"*** Warning frame size expected=%i frame size found=%i\n",nfull_file,nfull_data);
     }
 
     if(GLOBdoit_lighting==1&&smoke3di->is_soot==1){
@@ -240,7 +240,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     returncode=compress(compressed_alphabuffer, &ncompressed_zlib, full_alphabuffer, nfull_data);
     CheckMemory;
     if(returncode!=0){
-      printf("  ***warning zlib compressor failed - frame %f\n",time_local);
+      fprintf(stderr,"*** Warning zlib compressor failed - frame %f\n",time_local);
     }
 
     data_loc=EGZ_FTELL(SMOKE3DFILE);
