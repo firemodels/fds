@@ -55,7 +55,7 @@ CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
 
-export SMV=$SVNROOT/SMV/Build/intel_$VERSION/smokeview_$VERSION
+export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
 export SMVBINDIR="-bindir ../../SMV/for_bundle"
 
 export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
@@ -64,7 +64,7 @@ export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM\_32/background
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
-echo Program locations:
+echo Generating smokeview images using:
 echo smokeview : $SMV $SMVBINDIR
 echo smokezip  : $SMOKEZIP
 echo smokediff : $SMOKEDIFF
@@ -114,11 +114,16 @@ rm -f *.png
 $SMV -version > smokeview.version
 
 cd $SVNROOT/Verification/Visualization
-$SMOKEZIP -part2iso plumeiso
+echo Converting particles to isosurfaces in case plumeiso
+$SMOKEZIP -r -part2iso plumeiso
 
 cd $SVNROOT/Verification/Visualization
-$SMOKEDIFF plume5c plume5cdelta
-$SMOKEDIFF thouse5 thouse5delta
+echo Differencing cases plume5c and plume5cdelta
+$SMOKEDIFF -r plume5c plume5cdelta
+echo Differencing cases thouse5 and thouse5delta
+$SMOKEDIFF -r thouse5 thouse5delta
+
+echo Generating images
 
 source $STARTX
 cd $SVNROOT/Verification
