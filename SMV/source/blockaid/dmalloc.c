@@ -32,12 +32,12 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
     if(physmemused!=NULL)*physmemused=(stat.dwTotalPhys-stat.dwAvailPhys)/(1024*1024);
 #ifdef _DEBUG
     if(size!=0&&size<=stat.dwAvailPhys-0.1*stat.dwTotalPhys){
-      printf("*** Available Memory: %i M \n",
+      fprintf(stderr,"*** Available Memory: %i M \n",
             stat.dwAvailPhys/(1024*1024));
     }
 #endif
     if(size!=0&&size>stat.dwAvailPhys-0.1*stat.dwTotalPhys){
-      printf("*** Low Memory Warning. Only %i M available for viewing data.\n",
+      fprintf(stderr,"*** Low Memory Warning. Only %i M available for viewing data.\n",
            (int)stat.dwAvailPhys/(1024*1024));
       printf("    Unload datafiles or system performance may degrade.\n");
     }

@@ -867,9 +867,6 @@ SVEXTERN char SVDECL(*trainer_filename,NULL), SVDECL(*test_filename,NULL);
 SVEXTERN char SVDECL(*filename_sb,NULL);
 SVEXTERN int SVDECL(read_smoothobst,0);
 SVEXTERN FILE SVDECL(*STREAM_SB,NULL);
-#ifdef pp_MESSAGE
-SVEXTERN int show_glui_warning,show_glui_error,show_glui_abort;
-#endif
 SVEXTERN time_t smv_modtime;
 SVEXTERN float temp_threshold;
 SVEXTERN char SVDECL(*smvfilename,NULL);

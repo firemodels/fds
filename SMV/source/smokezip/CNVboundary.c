@@ -364,7 +364,7 @@ int convert_boundary(patch *patchi, int *thread_index){
       ncompressed_zlib=ncompressed_zlibSAVE;
       returncode=compress(compressed_boundarybuffer, &ncompressed_zlib, full_boundarybuffer, npatchfull);
       if(returncode!=0){
-        printf("*** error: compress returncode=%i\n",returncode);
+        fprintf(stderr,"*** Error: compress returncode=%i\n",returncode);
       }
 //      printf("time=%f before %i after=%i\n",time_local,npatchfull,ncompressed_zlib);
 

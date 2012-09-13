@@ -147,8 +147,8 @@ void diff_slices(FILE *stream_out){
       FORTclosefortranfile(&unit1);
       FORTclosefortranfile(&unit2);
       if(error1!=0||error2a!=0){
-        if(error1==0)printf("*** problem opening %s\n",fullfile1);
-        if(error2a==0)printf("*** problem opening %s\n",fullfile2);
+        if(error1==0)fprintf(stderr,"*** problem opening %s\n",fullfile1);
+        if(error2a==0)fprintf(stderr,"*** problem opening %s\n",fullfile2);
       }
       continue;
     }
@@ -174,7 +174,7 @@ void diff_slices(FILE *stream_out){
     if(error1!=0){
       FORTclosefortranfile(&unit1);
       FORTclosefortranfile(&unit2);
-      printf("*** problem writing out header for %s\n",fullfile1);
+      fprintf(stderr,"*** problem writing out header for %s\n",fullfile1);
       continue;
     }
     printf("Subtracting %s from %s\n",fullfile2,fullfile1);

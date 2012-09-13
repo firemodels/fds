@@ -490,7 +490,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
                  &smoke3di->ntimes_full,&have_light)==1){
     readsmoke3d(ifile,UNLOAD,&error);
     *errorcode=1;
-    printf("*** error: problems sizing 3d smoke data for %s\n",smoke3di->file);
+    fprintf(stderr,"*** Error: problems sizing 3d smoke data for %s\n",smoke3di->file);
     return;
   }
   smoke3di->have_light=have_light;
@@ -505,7 +505,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
      NewMemory((void **)&meshi->merge_alpha,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0){
      readsmoke3d(ifile,UNLOAD,&error);
      *errorcode=1;
-     printf("*** error: problems allocating memory for 3d smoke file: %s\n",smoke3di->file);
+     fprintf(stderr,"*** Error: problems allocating memory for 3d smoke file: %s\n",smoke3di->file);
      return;
   }
   if(have_light==1){
@@ -529,7 +529,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   if(NewMemory((void **)&smoke3di->smoke_comp_all,ncomp_smoke_total_skipped*sizeof(unsigned char))==0){
     readsmoke3d(ifile,UNLOAD,&error);
     *errorcode=1;
-     printf("*** error: problems allocating memory for 3d smoke file: %s\n",smoke3di->file);
+     fprintf(stderr,"*** Error: problems allocating memory for 3d smoke file: %s\n",smoke3di->file);
     return;
   }
   smoke3di->ncomp_smoke_total=ncomp_smoke_total_skipped;
@@ -4137,7 +4137,7 @@ int init_cull_exts(void){
   cullactive=0;
   version_string=glGetString(GL_VERSION);
   if(version_string==NULL){
-    printf("*** warning: GL_VERSION string is NULL in init_cull_exts()\n");
+    fprintf(stderr,"*** Warning: GL_VERSION string is NULL in init_cull_exts()\n");
     err = 1;
     return err;
   }

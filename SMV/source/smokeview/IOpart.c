@@ -1227,7 +1227,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
           nb,nv,nspr,mxframepoints,staticframe0,npartpoints,npartframes,partframestep,partpointstep);
     }
     else{
-      printf("*** warning:  unable to write to %s\n",partsizefile);
+      fprintf(stderr,"*** Warning:  unable to write to %s\n",partsizefile);
     }
     file_unit=15;
     FORTget_file_unit(&file_unit,&file_unit);
@@ -1238,11 +1238,11 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   iframebeg=0;
   if(staticframe0==1)iframebeg=1;
   if(error!=0){
-    printf("*** warning: problem reading %s\n",file);
+    fprintf(stderr,"*** Warning: problem reading %s\n",file);
     return;
   }
   if(npartpoints<=0){
-    printf("*** warning: the particle file:%s is empty\n",file);
+    fprintf(stderr,"*** Warning: the particle file:%s is empty\n",file);
     return;
   }
   if(nspr>0){
@@ -1271,8 +1271,8 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
      NewMemory((void **)&parti->zparts,npartpoints*sizeof(short))==0){
     *errorcode=1;
     FORTclosefortranfile(&file_unit);
-    printf("***error: memory allocation failed while attempting .\n");
-    printf("          to load %s.\n",parti->file);
+    fprintf(stderr,"*** Error: memory allocation failed while attempting .\n");
+    fprintf(stderr,"          to load %s.\n",parti->file);
     readpart("",ifile,UNLOAD,&error);
     return;
   }
@@ -1285,8 +1285,8 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
      NewMemory((void **)&parti->sframe,npartframes*sizeof(int))==0||
      NewMemory((void **)&parti->sprframe,npartframes*sizeof(int))==0){
       *errorcode=1;
-    printf("***error: memory allocation failed while attempting .\n");
-    printf("          to load %s.\n",parti->file);
+    fprintf(stderr,"*** Error: memory allocation failed while attempting .\n");
+    fprintf(stderr,"          to load %s.\n",parti->file);
       FORTclosefortranfile(&file_unit);
       readpart("",ifile,UNLOAD,&error);
       return;
@@ -1311,7 +1311,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   if(error!=0){
     *errorcode=1;
-    printf("*** warning: problem reading %s\n",file);
+    fprintf(stderr,"*** Warning: problem reading %s\n",file);
     readpart("",ifile,UNLOAD,&error);
     return;
   }
@@ -1330,7 +1330,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     &offset_x, &offset_y, &offset_z,
     &error,1);
   if(error!=0||parti->ntimes==0){
-    if(error!=0)printf("*** warning: problem reading %s\n",file);
+    if(error!=0)fprintf(stderr,"*** Warning: problem reading %s\n",file);
     *errorcode=1;
     readpart("",ifile,UNLOAD,&error);
     return;

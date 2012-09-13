@@ -39,7 +39,6 @@
 #define pp_CULL
 #define pp_GPUTHROTTLE
 #endif
-//#define pp_MESSAGE
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB

@@ -2823,6 +2823,7 @@ void allocate_faces(){
     int mem_sum;
     float rmem;
     int nfaces_temp;
+    char errormessage[255];
 
     mem_sum=0;
     nfaces_temp=0;
@@ -2838,20 +2839,20 @@ void allocate_faces(){
       ntotal2 += ntotal;
     }
     mem_sum+= ntotal2*sizeof(facedata *);
-    printf("*** Fatal error.  Unable to allocate ");
+    fprintf(stderr,"*** Fatal error.  Unable to allocate ");
     if(mem_sum>=1000000000){
       rmem=(float)mem_sum/1000000000.0;
-      printf("%4.2f GB of memory\n",rmem);
-      printf("                  for %i blockage faces.\n",nfaces_temp);
+      fprintf(stderr,"%4.2f GB of memory\n",rmem);
+      fprintf(stderr,"                  for %i blockage faces.\n",nfaces_temp);
     }
     else if(mem_sum>1000000&&mem_sum<1000000000){
       rmem=(float)mem_sum/1000000.0;
-      printf("%4.2f MB of memory\n",rmem);
-      printf("                  for %i blockage faces.\n",nfaces_temp);
+      fprintf(stderr,"%4.2f MB of memory\n",rmem);
+      fprintf(stderr,"                  for %i blockage faces.\n",nfaces_temp);
     }
     else{
-      printf("%i bytes of memory\n",mem_sum);
-      printf("                  for %i blockage faces.\n",nfaces_temp);
+      fprintf(stderr,"%i bytes of memory\n",mem_sum);
+      fprintf(stderr,"                  for %i blockage faces.\n",nfaces_temp);
     }
     abortSV(_("memory allocation error."));
   }

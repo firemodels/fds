@@ -155,10 +155,10 @@ int main(int argc, char **argv){
 
   if(getfileinfo(smoke1,NULL,NULL)!=0||getfileinfo(smoke2,NULL,NULL)!=0){
     if(getfileinfo(smoke1,NULL,NULL)!=0){
-      printf("***error The .smv file, %s, does not exist\n",smoke1);
+      fprintf(stderr,"*** Error The .smv file, %s, does not exist\n",smoke1);
     }
     if(getfileinfo(smoke2,NULL,NULL)!=0){
-      printf("***error The .smv file, %s, does not exist\n",smoke2);
+      fprintf(stderr,"*** Error The .smv file, %s, does not exist\n",smoke2);
     }
     return 1;
   }
@@ -166,15 +166,15 @@ int main(int argc, char **argv){
 
   stream_out=fopen(smv_out,"w");
   if(stream_out==NULL){
-    printf("***error The .smv file, %s, could not be opened for output.\n",smv_out);
+    fprintf(stderr,"*** Error The .smv file, %s, could not be opened for output.\n",smv_out);
   }
   stream_in1=fopen(smoke1,"r");
   if(stream_in1==NULL){
-    printf("***error The .smv file, %s, could not be opened for input\n",smoke1);
+    fprintf(stderr,"*** Error The .smv file, %s, could not be opened for input\n",smoke1);
   }
   stream_in2=fopen(smoke2,"r");
   if(stream_in2==NULL){
-    printf("***error The .smv file, %s, could not be opened for input.\n",smoke2);
+    fprintf(stderr,"*** Error The .smv file, %s, could not be opened for input.\n",smoke2);
   }
   if(stream_out==NULL||stream_in1==NULL||stream_in2==NULL)return 1;
 

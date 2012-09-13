@@ -2609,7 +2609,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
     slice_type_j = getslicetype(sd);
     if(slice_type_j!=slice_type_index)continue;
     if(sd->qslicedata==NULL){
-      printf("*** warning: data not available from %s to generate contours\n",sd->reg_file);
+      fprintf(stderr,"*** Warning: data not available from %s to generate contours\n",sd->reg_file);
       continue;
     }
     printf("generating contours for %s\n",sd->file);
@@ -2691,7 +2691,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
     }
   }
   if(contours_gen==0){
-    printf("*** warning: no slice files of type %s are currently loaded\n",sb->datalabel);
+    fprintf(stderr,"*** Warning: no slice files of type %s are currently loaded\n",sb->datalabel);
   }
 }
 
@@ -2983,7 +2983,7 @@ void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax){
       nsmall=0;
       nbig=NBUCKETS;
       if(NewMemory((void **)&buckets,NBUCKETS*sizeof(int))==0){
-        printf("*** Warning: Unable to allocate memory in getdatabounds\n");
+        fprintf(stderr,"*** Warning: Unable to allocate memory in getdatabounds\n");
         return;
       }
 

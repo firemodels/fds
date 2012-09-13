@@ -249,10 +249,6 @@ EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 EXTERNCPP mesh *getmesh(float *xyz);
 
-EXTERNCPP void message_message(char *message);
-EXTERNCPP void warning_message(char *message);
-EXTERNCPP void error_message(char *message);
-EXTERNCPP void abort_message(char *message);
 EXTERNCPP sv_object *get_object(char *label);
 EXTERNCPP void get_labels(char *buffer, int type, char **label1, char **label2, char prop_buffer[255]);
 EXTERNCPP void snap_view_angles(void);
@@ -462,9 +458,6 @@ EXTERNCPP void update_whichface(int which_face);
 EXTERNCPP void update_blockvals(int flag);
 EXTERNCPP void show_glui_colorbar(void);
 EXTERNCPP void hide_glui_colorbar(void);
-#ifdef pp_MESSAGE
-EXTERNCPP void hide_glui_message(void);
-#endif
 EXTERNCPP void show_glui_motion(void);
 EXTERNCPP void hide_glui_motion(void);
 EXTERNCPP void show_glui_clip(void);
@@ -819,5 +812,6 @@ EXTERNCPP void update_triangles(void);
 #ifndef CPP
 #include "smokefortheaders.h"
 #endif
+#include "message.h"
 
 #endif

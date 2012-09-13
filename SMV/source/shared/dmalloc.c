@@ -35,14 +35,14 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
     if(physmemused!=NULL)*physmemused=(stat.dwTotalPhys-stat.dwAvailPhys)/(1024*1024);
 #ifdef pp_MEMDEBUG
     if(size!=0&&size<=stat.dwAvailPhys-0.1*stat.dwTotalPhys){
-      printf("*** Available Memory: %i M \n",
+      fprintf(stderr,"*** Available Memory: %i M \n",
            (int)stat.dwAvailPhys/(1024*1024));
     }
 #endif
     if(size!=0&&size>stat.dwAvailPhys-0.1*stat.dwTotalPhys){
-      printf("*** Low Memory Warning. Only %i M available for viewing data.\n",
+      fprintf(stderr,"*** Low Memory Warning. Only %i M available for viewing data.\n",
            (int)stat.dwAvailPhys/(1024*1024));
-      printf("    Unload datafiles or system performance may degrade.\n");
+      fprintf(stderr,"    Unload datafiles or system performance may degrade.\n");
     }
 }
 #endif
@@ -78,14 +78,14 @@ mallocflag _NewMemory(void **ppv, size_t size, char *varname, char *file, int li
   LOCK_MEM;
   returnval=_NewMemoryNOTHREAD(ppv, size);
   if(returnval!=1){
-    printf("*** warning: memory allocation request failed.\n");
+    fprintf(stderr,"*** Warning: memory allocation request failed.\n");
     if(varname!=NULL){
-      printf("             variable: %s\n",varname);
-      printf("                 size: %u\n",(unsigned int)size);
+      fprintf(stderr,"             variable: %s\n",varname);
+      fprintf(stderr,"                 size: %u\n",(unsigned int)size);
     }
     if(file!=NULL){
-      printf("                 file: %s\n",file);
-      printf("          line number: %i\n",linenumber);
+      fprintf(stderr,"                 file: %s\n",file);
+      fprintf(stderr,"          line number: %i\n",linenumber);
     }
   }
   UNLOCK_MEM;
@@ -224,14 +224,14 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew,  char *varname, char *file,
   LOCK_MEM;
   returnval=_ResizeMemoryNOTHREAD(ppv, sizeNew);
   if(returnval!=1){
-    printf("*** warning: memory allocation request failed.\n");
+    fprintf(stderr,"*** Warning: memory allocation request failed.\n");
     if(varname!=NULL){
-      printf("             variable: %s\n",varname);
-      printf("                 size: %u\n",(unsigned int)sizeNew);
+      fprintf(stderr,"             variable: %s\n",varname);
+      fprintf(stderr,"                 size: %u\n",(unsigned int)sizeNew);
     }
     if(file!=NULL){
-      printf("                 file: %s\n",file);
-      printf("          line number: %i\n",linenumber);
+      fprintf(stderr,"                 file: %s\n",file);
+      fprintf(stderr,"          line number: %i\n",linenumber);
     }
   }
   UNLOCK_MEM;
@@ -358,14 +358,14 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
     strcat(pbi->varname,"\0");
   }
   if(return_code!=1){
-    printf("*** warning: memory allocation request failed.\n");
+    fprintf(stderr,"*** Warning: memory allocation request failed.\n");
     if(varname!=NULL){
-      printf("             variable: %s\n",varname);
-      printf("                 size: %u\n",(unsigned int)size);
+      fprintf(stderr,"             variable: %s\n",varname);
+      fprintf(stderr,"                 size: %u\n",(unsigned int)size);
     }
     if(file!=NULL){
-      printf("                 file: %s\n",file);
-      printf("          line number: %i\n",linenumber);
+      fprintf(stderr,"                 file: %s\n",file);
+      fprintf(stderr,"          line number: %i\n",linenumber);
     }
   }
   UNLOCK_MEM;
@@ -398,14 +398,14 @@ mallocflag __ResizeMemory(void **ppv, size_t size, char *varname, char *file, in
     strcat(pbi->varname,"\0");
   }
   if(return_code!=1){
-    printf("*** warning: memory allocation request failed.\n");
+    fprintf(stderr,"*** Warning: memory allocation request failed.\n");
     if(varname!=NULL){
-      printf("             variable: %s\n",varname);
-      printf("                 size: %u\n",(unsigned int)size);
+      fprintf(stderr,"             variable: %s\n",varname);
+      fprintf(stderr,"                 size: %u\n",(unsigned int)size);
     }
     if(file!=NULL){
-      printf("                 file: %s\n",file);
-      printf("          line number: %i\n",linenumber);
+      fprintf(stderr,"                 file: %s\n",file);
+      fprintf(stderr,"          line number: %i\n",linenumber);
     }
   }
   UNLOCK_MEM;

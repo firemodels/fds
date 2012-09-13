@@ -220,7 +220,7 @@ int convert_volslice(slice *slicei, int *thread_index){
 
     }
     if(returncode!=0){
-      printf("*** error: compress returncode=%i\n",returncode);
+      fprintf(stderr,"*** Error: compress returncode=%i\n",returncode);
     }
     FREEMEMORY(sliceframe_data);
   }
@@ -676,7 +676,7 @@ int convert_slice(slice *slicei, int *thread_index){
       fprintf(slicesizestream,"%f %i, %li\n",time_local,(int)ncompressed_zlib,fileloc);
     }
     if(returncode!=0){
-      printf("*** error: compress returncode=%i\n",returncode);
+      fprintf(stderr,"*** Error: compress returncode=%i\n",returncode);
     }
   }
 

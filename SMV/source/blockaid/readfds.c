@@ -951,11 +951,11 @@ void get_keywords(blockaiddata *blockaidi, char *buffer){
     lenkey=strlen(key);
     lenval=strlen(val);
     if(endline!=NULL&&endval>endline){
-      printf("**********\n");
+      fprintf(stderr,"**********\n");
       printf("ERROR: A keyword value can't be split across a line\n");
       printf("    keyword: %s\n",key);
       printf("    value: %s\n",val);
-      printf("**********\n");
+      fprintf(stderr,"**********\n");
       break;
     }
     if(lenkey<1||lenval<1)continue;

@@ -1497,19 +1497,19 @@ void update_endian_info(void){
 
 #ifndef WIN32
   if(endian_smv!=getendian()){
-    printf("*** Warning: Smokeview is running on a ");
+    fprintf(stderr,"*** Warning: Smokeview is running on a ");
     if(getendian()==1){
-      printf(" little endian computer\n");
+      fprintf(stderr," little endian computer\n");
     }
     else{
-      printf(" big endian computer\n");
+      fprintf(stderr," big endian computer\n");
     }
-    printf("    but the data being visualized was generated on a ");
+    fprintf(stderr,"    but the data being visualized was generated on a ");
     if(endian_smv==1){
-      printf(" little endian computer\n");
+      fprintf(stderr," little endian computer\n");
     }
     else{
-      printf(" big endian computer\n");
+      fprintf(stderr," big endian computer\n");
     }
   }
 #endif
@@ -3017,7 +3017,7 @@ int readsmv(char *file, char *file2){
       if(nmeshes!=ntrnx||nmeshes!=ntrny||nmeshes!=ntrnz||
          nmeshes!=npdim||nmeshes!=nobst||nmeshes!=nvent||
          nmeshes!=noffset){
-        printf("*** fatal error:\n");
+        fprintf(stderr,"*** fatal error:\n");
         if(nmeshes!=ntrnx)printf("  found %i TRNX keywords, was expecting %i\n",ntrnx,nmeshes);
         if(nmeshes!=ntrny)printf("  found %i TRNY keywords, was expecting %i\n",ntrny,nmeshes);
         if(nmeshes!=ntrnz)printf("  found %i TRNZ keywords, was expecting %i\n",ntrnz,nmeshes);
@@ -7942,13 +7942,13 @@ int readini(int scriptconfigfile){
   // check if config files read in earlier were modifed later
 
   if(is_file_newer(smvprogini_ptr,INIfile)==1){
-    printf("*** warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
+    fprintf(stderr,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
   }
   if(is_file_newer(smvprogini_ptr,caseinifilename)==1){
-    printf("*** warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseinifilename);
+    fprintf(stderr,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseinifilename);
   }
   if(is_file_newer(INIfile,caseinifilename)==1){
-    printf("*** warning: The conig file,\n  %s, is newer than\n  %s \n\n",INIfile,caseinifilename);
+    fprintf(stderr,"*** Warning: The conig file,\n  %s, is newer than\n  %s \n\n",INIfile,caseinifilename);
   }
 
   // read in config files if they exist
@@ -9156,7 +9156,7 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&nrgb2_ini);
       if(nrgb2_ini<8){
-        printf("*** fatal error: must have at lease 8 colors in COLOR2BAR\n");
+        fprintf(stderr,"*** fatal error: must have at lease 8 colors in COLOR2BAR\n");
         exit(1);
       }
       FREEMEMORY(rgb2_ini);
@@ -9313,7 +9313,7 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i ",&renderfiletype);
 #ifndef pp_JPEG
       if(renderfiletype==1){
-        printf("*** warning: JPEG not supported, render filetype changed to PNG\n");
+        fprintf(stderr,"*** Warning: JPEG not supported, render filetype changed to PNG\n");
         renderfiletype=0;
       }
 #endif

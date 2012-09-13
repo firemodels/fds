@@ -275,7 +275,7 @@ void cleanbuffer(char *buffer, char *buffer2){
 
 void start_script(void){
   if(scriptinfo==NULL){
-    printf("*** warning: Smokeview script does not exist\n");
+    fprintf(stderr,"*** Warning: Smokeview script does not exist\n");
     return;
   }
   glui_script_disable();
@@ -347,12 +347,12 @@ int compile_script(char *scriptfile){
 
   return_val=1;
   if(scriptfile==NULL){
-    printf("*** internal smokeview error, scriptfile name is NULL\n");
+    fprintf(stderr,"*** internal smokeview error, scriptfile name is NULL\n");
     return return_val;
   }
   stream=fopen(scriptfile,"r");
   if(stream==NULL){
-    printf("*** scriptfile, %s, could not be opened for input\n",scriptfile);
+    fprintf(stderr,"*** scriptfile, %s, could not be opened for input\n",scriptfile);
     return return_val;
   }
 
@@ -507,7 +507,7 @@ int compile_script(char *scriptfile){
   }
 
   if(nscriptinfo==0){
-    printf("*** warning: scriptfile has no usable commands\n");
+    fprintf(stderr,"*** Warning: scriptfile has no usable commands\n");
     return 1;
   }
 
@@ -1589,7 +1589,7 @@ int run_script(void){
       if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
         script_dir_path=scripti->cval;
         if(can_write_to_dir(script_dir_path)==0){
-          printf("*** error: Cannot write to the RENDERDIR directory: %s\n",script_dir_path);
+          fprintf(stderr,"*** Error: Cannot write to the RENDERDIR directory: %s\n",script_dir_path);
         }
         printf("script: setting render path to %s\n",script_dir_path);
       }

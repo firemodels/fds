@@ -25,9 +25,6 @@ extern char glui_clip_revision[];
 extern char glui_colorbar_revision[];
 extern char glui_device_revision[];
 extern char glui_labels_revision[];
-#ifdef pp_MESSAGE
-extern char glui_message_revision[];
-#endif
 extern char glui_motion_revision[];
 #ifdef pp_SHOOTER
 extern char glui_shooter_revision[];
@@ -59,6 +56,7 @@ extern char IOzone_revision[];
 extern char isobox_revision[];
 extern char main_revision[];
 extern char menu_revision[];
+extern char message_revision[];
 extern char output_revision[];
 extern char readsmv_revision[];
 extern char renderfile_revision[];

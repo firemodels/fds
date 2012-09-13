@@ -498,18 +498,18 @@ void readzone(int ifile, int flag, int *errorcode){
     updatetimes();
     ReadZoneFile=0;
     if(nrooms!=nrooms2){
-      printf("*** error: number of rooms specified in the smv file (%i)\n",nrooms);
-      printf("    not consistent with the number specified in the zone file (%i)\n",nrooms2);
+      fprintf(stderr,"*** Error: number of rooms specified in the smv file (%i)\n",nrooms);
+      fprintf(stderr,"    not consistent with the number specified in the zone file (%i)\n",nrooms2);
     }
     if(nzhvents!=nzhvents2){
-      printf("*** error: number of horizontal flow vents specified in the smv file (%i)\n",nzhvents);
-      printf("    not consistent with the number specified in the data file (%i)\n",nzhvents2);
+      fprintf(stderr,"*** Error: number of horizontal flow vents specified in the smv file (%i)\n",nzhvents);
+      fprintf(stderr,"    not consistent with the number specified in the data file (%i)\n",nzhvents2);
     }
     if(nzvvents!=nzvvents2){
-      printf("*** error: number of vertical flow vents specified in the smv file (%i)\n",nzvvents);
-      printf("    not consistent with the number specified in the data file (%i)\n",nzvvents2);
+      fprintf(stderr,"*** Error: number of vertical flow vents specified in the smv file (%i)\n",nzvvents);
+      fprintf(stderr,"    not consistent with the number specified in the data file (%i)\n",nzvvents2);
     }
-    if(nzone_times<=0)printf("*** warning: The file, %s, contains no data\n",file);
+    if(nzone_times<=0)fprintf(stderr,"*** Warning: The file, %s, contains no data\n",file);
     return;
   }
   FREEMEMORY(zonelonglabels);

@@ -2277,9 +2277,9 @@ void ScriptMenu(int value){
           start_script();
         }
         else{
-          printf("*** fatal error: unable to open script file");
-          if(file!=NULL)printf(": %s",file);
-          printf("\n");
+          fprintf(stderr,"*** Fatal error: unable to open script file");
+          if(file!=NULL)fprintf(stderr,": %s",file);
+          fprintf(stderr,"\n");
           if(from_commandline==1)exit(1);
         }
         break;
@@ -3344,8 +3344,8 @@ void LoadVolSmoke3DMenu(int value){
         read_volsmoke_allframes_allmeshes();
       }
       else{
-        printf("*** warning: 3D smoke is currently being loaded\n");
-        printf("   Load data when this is complete.\n");
+        fprintf(stderr,"*** Warning: 3D smoke is currently being loaded\n");
+        fprintf(stderr,"   Load data when this is complete.\n");
       }
     }
   }
@@ -3355,12 +3355,12 @@ void LoadVolSmoke3DMenu(int value){
     }
       else{
         if(read_vol_mesh==-2){
-          printf("*** warning: data is currently being unloaded\n");
+          fprintf(stderr,"*** Warning: data is currently being unloaded\n");
         }
         else{
-          printf("*** warning: data is currently being loaded\n");
+          fprintf(stderr,"*** Warning: data is currently being loaded\n");
         }
-        printf("    Continue when this is complete.\n");
+        fprintf(stderr,"    Continue when this is complete.\n");
       }
   }
   else if(value==LOAD_ALL){  // load all
@@ -3374,12 +3374,12 @@ void LoadVolSmoke3DMenu(int value){
     }
     else{
       if(read_vol_mesh==-2){
-        printf("*** warning: data is currently being unloaded\n");
+        fprintf(stderr,"*** Warning: data is currently being unloaded\n");
       }
       else{
-        printf("*** warning: data is currently being loaded\n");
+        fprintf(stderr,"*** Warning: data is currently being loaded\n");
       }
-      printf("    Continue when this is complete.\n");
+      fprintf(stderr,"    Continue when this is complete.\n");
     }
   }
   updatemenu=1;  

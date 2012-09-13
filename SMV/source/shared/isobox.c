@@ -442,14 +442,14 @@ int edgelist2[15][16]={
 
   }
   if(outofbounds==1){
-    printf("*** warning - computed isosurface vertices are out of bounds for :\n");
-    printf("case number=%i level=%f\n",casenum,level);
-    printf("values=");
+    fprintf(stderr,"*** Warning - computed isosurface vertices are out of bounds for :\n");
+    fprintf(stderr,"case number=%i level=%f\n",casenum,level);
+    fprintf(stderr,"values=");
     for(n=0;n<8;n++){
-      printf("%f ",vals[n]);
+      fprintf(stderr,"%f ",vals[n]);
     }
-    printf("\n");
-    printf("x=%f %f y=%f %f z=%f %f\n\n",x[0],x[1],y[0],y[1],z[0],z[1]);
+    fprintf(stderr,"\n");
+    fprintf(stderr,"x=%f %f y=%f %f z=%f %f\n\n",x[0],x[1],y[0],y[1],z[0],z[1]);
   }
 
   /* copy coordinates to output array */

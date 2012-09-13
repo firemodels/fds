@@ -159,7 +159,7 @@ int main(int argc, char **argv){
   }
 
   if(argin==NULL){
-    printf("***error: An input file was not specified\n");
+    fprintf(stderr,"*** Error: An input file was not specified\n");
     return 1;
   }
   csv=strstr(argin,".csv");
@@ -176,13 +176,13 @@ int main(int argc, char **argv){
 
   stream_in=fopen(file_in,"r");
   if(stream_in==NULL){
-    printf("***error: The file %s could not be opened for input\n",file_in);
+    fprintf(stderr,"*** Error: The file %s could not be opened for input\n",file_in);
     return 1;
   }
 
   stream_out=fopen(file_out,"w");
   if(stream_out==NULL){
-    printf("***error: The file %s could not be opened for output\n",file_out);
+    fprintf(stderr,"*** Error: The file %s could not be opened for output\n",file_out);
     return 1;
   }
 
@@ -200,20 +200,20 @@ int main(int argc, char **argv){
   NewMemory((void **)&zdev,buffer_len*sizeof(float));
 
   if(fgets(labels,buffer_len,stream_in)==NULL){
-    printf("***error: The file %s is empty\n",file_in);
+    fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
     return 1;
   }
   if(is_sodar_file==1){
     while(strncmp(labels,"Sodar",5)==0){
       if(fgets(labels,buffer_len,stream_in)==NULL){
-        printf("***error: The file %s is empty\n",file_in);
+        fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
         return 1;
       }
     }
   }
   else{
     if(fgets(labels,buffer_len,stream_in)==NULL){
-      printf("***error: The file %s is empty\n",file_in);
+      fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
       return 1;
     }
   }
@@ -355,11 +355,11 @@ int main(int argc, char **argv){
   }
   if(is_sodar_file==0){
     if(fgets(labels,buffer_len,stream_in)==NULL){
-      printf("***error: The file %s is empty\n",file_in);
+      fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
       return 1;
     }
     if(fgets(labels,buffer_len,stream_in)==NULL){
-      printf("***error: The file %s is empty\n",file_in);
+      fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
       return 1;
     }
   }

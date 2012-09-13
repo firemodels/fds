@@ -74,7 +74,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   }
 
   if(nmeshes!=ipdim){
-    printf("*** fatal error: number of GRID statements (%i) not equal to\n",nmeshes);
+    fprintf(stderr,"*** fatal error: number of GRID statements (%i) not equal to\n",nmeshes);
     printf("                 number of PDIM statements (%i)\n",ipdim);
     exit(0);
   }
@@ -399,7 +399,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         iplot3d++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",full_file);
+        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",full_file);
         CheckMemory;
         if(readlabels(plot3di->labels+0,streamsmv)==2)break;
         if(readlabels(plot3di->labels+1,streamsmv)==2)break;
@@ -475,7 +475,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
         STRCPY(slicei->file,trim_front(buffer));
         if(readlabels(&slicei->label,streamsmv)==2){
-          printf("*** Warning: problem reading SLCF entry\n");
+          fprintf(stderr,"*** Warning: problem reading SLCF entry\n");
           break;
         }
         slicei->filesize=filesize;
@@ -501,7 +501,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         islice++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&sliceinfo[islice].label,streamsmv)==2)break;
         nsliceinfo--;
         smvcase->nsliceinfo=nsliceinfo;
@@ -557,7 +557,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         NewMemory((void **)&boundaryi->histogram,sizeof(histogramdata));
         STRCPY(boundaryi->file,trim_front(buffer));
         if(readlabels(&boundaryi->label,streamsmv)==2){
-          printf("*** Warning: problem reading BNDF entry\n");
+          fprintf(stderr,"*** Warning: problem reading BNDF entry\n");
           break;
         }
         boundaryi->filesize=filesize;
@@ -608,7 +608,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         iboundary++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&boundaryinfo[iboundary].label,streamsmv)==2)break;
         nboundary_files--;
         smvcase->nboundary_files=nboundary_files;

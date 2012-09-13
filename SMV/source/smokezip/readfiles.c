@@ -434,7 +434,7 @@ int readsmv(char *smvfile){
         ismoke3d++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
         nsmoke3dinfo--;
       }
       continue;
@@ -547,7 +547,7 @@ int readsmv(char *smvfile){
         npartinfo++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer2);
+        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer2);
       }
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       sscanf(buffer,"%i",&parti->nclasses);
@@ -612,7 +612,7 @@ int readsmv(char *smvfile){
           STRCPY(patchi->file,buffer2);
         }
         if(readlabels(&patchi->label,streamsmv)==2){
-          printf("*** Warning: problem reading BNDF entry\n");
+          fprintf(stderr,"*** Warning: problem reading BNDF entry\n");
           break;
         }
         patchi->filesize=filesize;
@@ -656,7 +656,7 @@ int readsmv(char *smvfile){
         ipatch++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&patchinfo[ipatch].label,streamsmv)==2)break;
         npatchinfo--;
       }
@@ -733,14 +733,14 @@ int readsmv(char *smvfile){
           STRCPY(slicei->file,buffer2);
         }
         if(readlabels(&slicei->label,streamsmv)==2){
-          printf("*** Warning: problem reading SLCF entry\n");
+          fprintf(stderr,"*** Warning: problem reading SLCF entry\n");
           break;
         }
         slicei->filesize=filesize;
         islice++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer2);
+        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer2);
         if(readlabels(&sliceinfo[islice].label,streamsmv)==2)break;
         nsliceinfo--;
       }
@@ -810,14 +810,14 @@ int readsmv(char *smvfile){
            readlabels(&plot3di->labels[2],streamsmv)==2||
            readlabels(&plot3di->labels[3],streamsmv)==2||
            readlabels(&plot3di->labels[4],streamsmv)==2){
-          printf("*** Warning: problem reading PL3D entry\n");
+          fprintf(stderr,"*** Warning: problem reading PL3D entry\n");
           break;
         }
         plot3di->filesize=filesize;
         iplot3d++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&plot3dinfo[iplot3d].labels[0],streamsmv)==2)break;
         if(readlabels(&plot3dinfo[iplot3d].labels[1],streamsmv)==2)break;
         if(readlabels(&plot3dinfo[iplot3d].labels[2],streamsmv)==2)break;

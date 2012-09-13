@@ -4377,8 +4377,8 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 	    toki->included_object=NULL;
       if(error_code==1){
         frame->error=1;
-        printf("*** error: unable to identify the command, %s, while parsing:\n\n",toki->token);
-        printf("      %s\n\n",object_buffer);
+        fprintf(stderr,"*** Error: unable to identify the command, %s, while parsing:\n\n",toki->token);
+        fprintf(stderr,"      %s\n\n",object_buffer);
       }
       frame->command_list[ncommands]=toki;
       if(frame->device!=NULL)frame->device->use_displaylist=use_displaylist;
@@ -4396,11 +4396,11 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       if(nargs_actual!=toki->nvars){
         frame->error=1;
         if(toki->nvars==1){
-          printf("*** error: The command %s in device %s has %i arguments, %i was expected\n",
+          fprintf(stderr,"*** Error: The command %s in device %s has %i arguments, %i was expected\n",
             toki->token,frame->device->label,nargs_actual,toki->nvars);
         }
         else{
-          printf("*** error: The command %s in device %s has %i arguments, %i were expected\n",
+          fprintf(stderr,"*** Error: The command %s in device %s has %i arguments, %i were expected\n",
             toki->token,frame->device->label,nargs_actual,toki->nvars);
         }
       }
@@ -4419,11 +4419,11 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         }
         if(noutargs_actual!=toki->noutvars){
           if(toki->noutvars==1){
-            printf("*** error: The command %s in device %s has %i output arguments, %i was expected\n",
+            fprintf(stderr,"*** Error: The command %s in device %s has %i output arguments, %i was expected\n",
               toki->token,frame->device->label,noutargs_actual,toki->noutvars);
             }
           else{
-            printf("*** error: The command %s in device %s has %i output arguments, %i were expected\n",
+            fprintf(stderr,"*** Error: The command %s in device %s has %i output arguments, %i were expected\n",
               toki->token,frame->device->label,noutargs_actual,toki->noutvars);
           }
         }
@@ -4445,7 +4445,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         frame->error=1;
         toki->varptr=NULL;
         toki->stringptr=NULL;
-        printf("*** error: The label %s in device %s is not defined\n",toki->token,frame->device->label);
+        fprintf(stderr,"*** Error: The label %s in device %s is not defined\n",toki->token,frame->device->label);
       }
 
       toki->type=TOKEN_GETVAL;
@@ -4537,7 +4537,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     if(c!=':')continue;
 #ifdef _DEBUG
     if(toki->reads==0){
-      printf("*** warning: token %s in device %s was not used\n",
+      fprintf(stderr,"*** Warning: token %s in device %s was not used\n",
         toki->token,frame->device->label);
     }
 #endif
@@ -4642,7 +4642,7 @@ void rewind_device_file(FILE *stream){
     }
   }
   if(found_data==0){
-    printf("*** warning //DATA keyword not found in spreadsheet file\n");
+    fprintf(stderr,"*** Warning //DATA keyword not found in spreadsheet file\n");
   }
   return;
 }
@@ -4923,7 +4923,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     devices[i]=devicei;
 #ifdef _DEBUG
     if(devicei==NULL){
-      printf("*** warning: spreadsheet entry: %s is not present in %s\n",devclabels[i],smvfilename);
+      fprintf(stderr,"*** Warning: spreadsheet entry: %s is not present in %s\n",devclabels[i],smvfilename);
       continue;
     }
 #endif
@@ -5395,7 +5395,7 @@ int read_object_defs(char *file){
           }
         }
         if(npushpop>0){
-          printf("*** error: The number of push and pop commands are not equal\n");
+          fprintf(stderr,"*** Error: The number of push and pop commands are not equal\n");
           framei->error=1;
         }
         framei=framei->next;

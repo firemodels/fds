@@ -1730,11 +1730,6 @@ void update_glui_names(void){
   hide_glui_display();
   update_glui_labels=1;
   
-#ifdef pp_MESSAGE
-  hide_glui_message();
-  update_glui_message=1;
-#endif
-  
   hide_glui_motion();
   update_glui_motion=1;
 
@@ -1787,9 +1782,6 @@ void Update_Glui_Dialogs(void){
   if(update_glui_clip==1)glui_clip_setup(mainwindow_id);
   if(update_glui_device==1)glui_device_setup(mainwindow_id);
   if(update_glui_labels==1)glui_labels_setup(mainwindow_id);
-#ifdef pp_MESSAGE
-  if(update_glui_message==1)glui_message_setup(mainwindow_id);
-#endif
   if(update_glui_motion==1)glui_motion_setup(mainwindow_id);
 #ifdef pp_SHOOTER
   if(update_glui_shooter==1)glui_shooter_setup(mainwindow_id);

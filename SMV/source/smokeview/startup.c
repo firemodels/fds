@@ -27,9 +27,6 @@ void glui_motion_setup(int main_window);
 #ifdef pp_SHOOTER
 void glui_shooter_setup(int main_window);
 #endif
-#ifdef pp_MESSAGE
-void glui_message_setup(int main_window);
-#endif
 void glui_bounds_setup(int main_window);
 void glui_labels_setup(int main_window);
 void glui_device_setup(int main_window);
@@ -248,11 +245,7 @@ int setup_case(int argc, char **argv){
         strcpy(message,_("Input file "));
         strcat(message,input_file);
         strcat(message,_(" not found"));
-#ifdef pp_MESSAGE
-        warning_message(message);
-#else
         printf("%s\n",message);
-#endif
       }
       pauseSV();
       return 1;
@@ -503,9 +496,6 @@ void InitOpenGL(void){
   printf("%s\n",_("   window created"));
 #endif
 
-#ifdef pp_MESSAGE
-  glui_message_setup(mainwindow_id);
-#endif
 #ifdef _DEBUG
   printf("%s",_("   Initializing callbacks - "));
 #endif
@@ -1489,11 +1479,6 @@ void initvars(void){
   parttype=0;
   allexterior=1,showexterior=1;
   allinterior=1;
-#ifdef pp_MESSAGE
-  show_glui_warning=0;
-  show_glui_error=0;
-  show_glui_abort=0;
-#endif
   hrrpuv_iso_color[0]=1.0;
   hrrpuv_iso_color[1]=0.5;
   hrrpuv_iso_color[2]=0.0;
@@ -2221,9 +2206,6 @@ int getmaxrevision(void){
   MAXREV(glui_colorbar_revision);
   MAXREV(glui_device_revision);
   MAXREV(glui_labels_revision);
-#ifdef pp_MESSAGE
-  MAXREV(glui_message_revision);
-#endif
   MAXREV(glui_motion_revision);
 #ifdef pp_SHOOTER
   MAXREV(glui_shooter_revision);
@@ -2256,6 +2238,7 @@ int getmaxrevision(void){
   MAXREV(isobox_revision);
   MAXREV(main_revision);
   MAXREV(menu_revision);
+  MAXREV(message_revision);
   MAXREV(output_revision);
   MAXREV(readsmv_revision);
   MAXREV(renderfile_revision);
