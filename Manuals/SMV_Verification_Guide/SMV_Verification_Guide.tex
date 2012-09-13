@@ -847,30 +847,30 @@ The images for this test were created automatically by running the smokeview scr
  \caption[PLOT3D file test]{PLOT3D file test showing iso-surface for 50~\degC, 230~\degC, 410~\degC\ and 590~\degC.}
 \label{figPLOT3Dtestiso}%
 \end{figure}
-\section{Fire Lines}
-Figure \ref{figfirelinetest} presents images verifying the display of a fire line.
-A fire line is used with wildland fire simulations as an efficient method for visualizing the motion of a fire across the simulation.
-A fire line in the context of Smokeview is just a special case of a temperature slice file.  The fire line slice is formed by setting the min and max temperature bounds to 20\degC\ and 200\degC\ respectively and chopping data below 150\degC.   The fire line slice file can then be made very small using Smokezip to compress it.   Fire line images are drawn at 10.0~s, 20.0~s, 30.0~s and 40.0~s.  The fire lines conform to the hill going through the middle of the scene.
-The FDS input file for this test is {\tt fire\_line.fds}.
-The images for this test were created automatically by running the smokeview script, {\tt fire\_line.ssf}.
+%\section{Fire Lines}
+%Figure \ref{figfirelinetest} presents images verifying the display of a fire line.
+%A fire line is used with wildland fire simulations as an efficient method for visualizing the motion of a fire across the simulation.
+%A fire line in the context of Smokeview is just a special case of a temperature slice file.  The fire line slice is formed by setting the min and max temperature bounds to 20\degC\ and 200\degC\ respectively and chopping data below 150\degC.   The fire line slice file can then be made very small using Smokezip to compress it.   Fire line images are drawn at 10.0~s, 20.0~s, 30.0~s and 40.0~s.  The fire lines conform to the hill going through the middle of the scene.
+%The FDS input file for this test is {\tt fire\_line.fds}.
+%The images for this test were created automatically by running the smokeview script, {\tt fire\_line.ssf}.
 
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=\figheightD]{SCRIPT_FIGURES/fire_line_fireline_10}&
-\includegraphics[height=\figheightD]{SCRIPT_FIGURES/fire_line_fireline_20}\\
-10 s&20 s\\
+%\begin{figure}[\figoptions]
+%\begin{center}
+%\begin{tabular}{cc}
+%\includegraphics[height=\figheightD]{SCRIPT_FIGURES/fire_line_fireline_10}&
+%\includegraphics[height=\figheightD]{SCRIPT_FIGURES/fire_line_fireline_20}\\
+%10 s&20 s\\
 
-\includegraphics[height=\figheightD]{SCRIPT_FIGURES/fire_line_fireline_30}&
-\includegraphics[height=\figheightD]{SCRIPT_FIGURES/fire_line_fireline_40}\\
-30 s&40 s\\
+%\includegraphics[height=\figheightD]{SCRIPT_FIGURES/fire_line_fireline_30}&
+%\includegraphics[height=\figheightD]{SCRIPT_FIGURES/fire_line_fireline_40}\\
+%30 s&40 s\\
 
- \end{tabular}
-\end{center}
- \caption[Fire line test]{Fire line test.  The fire line, a region of high temperature, follows the terrain as
- it progresses from left to right.}
-\label{figfirelinetest}%
-\end{figure}
+%\end{tabular}
+%\end{center}
+% \caption[Fire line test]{Fire line test.  The fire line, a region of high temperature, follows the terrain as
+% it progresses from left to right.}
+%\label{figfirelinetest}%
+%\end{figure}
 
 
 \chapter{Smoke Visualization Tests}
