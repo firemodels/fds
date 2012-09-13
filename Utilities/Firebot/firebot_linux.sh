@@ -875,7 +875,7 @@ check_guide()
       cp $2 /var/www/html/firebot/manuals/
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
-      grep "! LaTeX Error:" -I $1 >> $ERROR_LOG
+      grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I $1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
