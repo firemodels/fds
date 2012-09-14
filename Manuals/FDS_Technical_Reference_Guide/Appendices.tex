@@ -293,7 +293,29 @@ The equivalence between (\ref{eqn_div_1}) and (\ref{eqn_div_2}) is apparent base
 &= -\frac{1}{\bar{p}} \mathbf{u}\cdot \nabla \bar{p}
 \end{align}
 
+\chapter{Multi-environment Extension of EDC}
 
+\label{multi_env_edc}
+
+In the current formulation of the EDC there are two environments: the mean species concentrations which FDS currently transports and the amount of mixing within a cell (unmixed fraction) which FDS does not transport. Since FDS does not transport the mixing variable, at the start of a time step, the mixing environment is assumed to be in the unmixed state. We would like to extend this approach to more environments so that we can eventually construct PDFs of reactor concentration. The difficulty is how to construct/transport the necessary information to build the PDF.
+
+One efficient way to describe a PDF is to use moments; where a moment can be thought of a statistical descriptor of the distribution. The first moment of a distribution is the mean of the distribution, the second is the variance, etc. Therefore, the more moments we know, the better the description of the distribution we have. For a given PDF, p(y), the $k^{th}$ moment of $y$ of the distribution is:
+\begin{equation}\label{eq:int_moment}
+_{y}M_{k} = \int y^{k}p(y)\mathrm{d}y
+\end{equation}
+Solving this integral equation can become difficult as it requires the function form of the PDF. An alternative way to compute moments is to use Gaussian-quadrature, which represents the moment integral in Eq.~\ref{eq:int_moment} as an n-point sum \cite{mcgraw:1997}:
+\begin{equation}\label{eq:qmom}
+_{y}M_{k}=\displaystyle \sum_{i=1}^{n} \hat y_{i}^{k} w_{i}
+\end{equation}
+This technique is known as the quadrature method of moments (QMOM) where  $\hat y_i^k$ is known at the $i^{th}$ quadrature point, $w_i$ is known as the $i^{th}$ quadrature weight, and $n$ is the number of quadrature points. If we consider the unmixed fraction as a weight describing the amount of mixing, the steps to obtain higher order statistics about the batch reactor composition begin to take shape. The unmixed fraction, $\zeta$, exists in two probabilistic states: $p1$ and $p2$, where $p2 = 1-p1$. State 1 ($p1$) describes the amount of the cell that is mixed while state 2 ($p2$) describes the unmixed portion. If we know the mass fractions of species in both mixing states (quadrature points) and the corresponding weights to those states, then we can use QMOM to construct the reactor distribution.
+
+In this case, the quadrature weights become the unmixed fraction, $\zeta_{i}$, and the quadrature points become the mass fractions $\phi_{\alpha,i}$. Applying Eq.~\ref{eq:qmom}, the moments of the distribution in the reactor are:
+\begin{eqnarray}\label{eq:moments}
+M_{0} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \\
+\nonumber M_{1} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \phi_{\alpha,i} \\
+\nonumber M_{2} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \phi_{\alpha,i}^2
+\end{eqnarray}
+The mean of the distribution becomes $M_{1}$ and the centered variance becomes $M_{2}-M_{1}^{2}$. To implement subgrid statistics in FDS, we would either need to transport the unmixed fraction or develop a model for the subgrid variance. Since scalar transport is expensive, a first approach is to develop a model to approximate the subgrid variance. If the variance is known, QMOM can then be used to solve for the initial unmixed fraction.    
 
 
 \chapter{A Simple Model of Flame Extinction}
