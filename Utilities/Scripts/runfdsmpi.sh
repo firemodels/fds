@@ -17,6 +17,10 @@ function usage {
   exit
 }
 
+if [ "$JOBPREFIX" == "" ]; then
+  JOBPREFIX=VV_
+fi
+
 while getopts 'hq:' OPTION
 do
 case $OPTION in
@@ -92,12 +96,12 @@ if [ -e $outlog ]; then
 fi
 cat << EOF > $scriptfile
 #!/bin/bash
-#PBS -N VV_$infile(MPI)
+#PBS -N $JOBPREFIX$infile(MPI)
 #PBS -l nodes=$nnodes:ppn=$nprocs
 #PBS -S /bin/bash
 #PBS -e $outerr
 #PBS -o $outlog
-#\$ -N VV_$infile(MPI)
+#\$ -N $JOBPREFIX$infile(MPI)
 #\$ -pe mpi $nthreads
 #\$ -S /bin/bash
 #\$ -e $outerr

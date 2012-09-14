@@ -6,6 +6,10 @@ queue=
 background=no
 QSUB=qsub
 
+if [ "$JOBPREFIX" == "" ]; then
+  JOBPREFIX=VV_
+fi
+
 while getopts 'q:' OPTION
 do
 case $OPTION in
@@ -75,8 +79,8 @@ fi
 cat << EOF > $scriptfile
 #!/bin/bash -f
 #\$ -S /bin/bash
-#\$ -N VV_$infile -e $outerr -o $outlog
-#PBS -N VV_$infile -e $outerr -o $outlog
+#\$ -N $JOBPREFIX$infile -e $outerr -o $outlog
+#PBS -N $JOBPREFIX$infile -e $outerr -o $outlog
 cd $fulldir
 
 echo Time: \`date\`
