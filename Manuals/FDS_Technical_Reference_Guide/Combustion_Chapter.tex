@@ -258,26 +258,7 @@ Finally the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha
 \dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t} \approx \rho \left(\frac{Y_{\alpha}(\delta t) - Y_{\alpha,0}}{\delta t}\right)
 \end{equation}
 
-\subsubsection{Multi-environment Extension of EDC}
-In the current formulation of the EDC there are two environments: the mean species concentrations which FDS currently transports and the amount of mixing within a cell (unmixed fraction) which FDS does not transport. Since FDS does not transport the mixing variable, at the start of a time step, the mixing environment is assumed to be at its mean value in the unmixed state. We would like to extend this approach to more mixing environments and eventually build PDFs of reactor concentration. The difficulty is how to construct/transport all of the information within a PDF.
-
-One efficient way to describe a PDF is to use a moment; where a moment can be thought of a statistical descriptor of the distribution. The first moment of a distribution is the mean of the distribution, the second is the variance, etc. Therefore, the more moments we know, the better the description of the distribution we have. For a given PDF, p(y), the $k^{th}$ moment of $y$ of the distribution is:
-\begin{equation}\label{eq:int_moment}
-_{y}M_{k} = \int y^{k}p(y)\mathrm{d}y
-\end{equation}
-Solving this integral equation can become difficult as it requires the function form of the PDF. As an alternative way to compute moments, the quadrature method of moments was developed, which represents the moment integral in Eq.~\ref{eq:int_moment} as an n-point sum \cite{mcgraw:1997}:
-\begin{equation}\label{eq:qmom}
-_{y}M_{k}=\displaystyle \sum_{i=1}^{n} \hat y_{i}^{k} w_{i}
-\end{equation}
-This technique is known as the quadrature method of moments (QMOM) where  $\hat y_i^k$ is known at the $i^{th}$ quadrature point, $w_i$ is known as the $i^{th}$ quadrature weight, and $n$ is the number of quadrature points. If we consider the unmixed fraction as a weight describing the amount of mixing, the steps to obtain higher order statistics about the batch reactor composition begin to take shape. The unmixed fraction, $\zeta$, exists in two probabilistic states: $p1$ and $p2$, where $p2 = 1-p1$. State 1 ($p1$) describes the amount of the cell that is mixed while state 2 ($p2$) describes the unmixed portion. If we know the mass fractions of species in both mixing states (quadrature points) and the corresponding weights to those states, then we can use QMOM to cons the reactor distribution.
-
-If we apply this to the current formulation, the quadrature weights become the unmixed fraction, $\zeta_{i}$, and the quadrature points become the mass fractions $\phi_{\alpha,i}$. Applying this to Eq.~\ref{eq:qmom} the moments of the distribution in the reactor are:
-\begin{eqnarray}\label{eq:moments}
-M_{0} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \\
-\nonumber M_{1} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \phi_{\alpha,i} \\
-\nonumber M_{2} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \phi_{\alpha,i}^2
-\end{eqnarray}
-The mean of the distribution becomes $M_{1}$ and the centered standard deviation becomes $\sqrt{M_{2}-M_{1}^{2}}$. For this concept to be implemented, further works needs to be done in developing an efficient way to transport the unmixed fraction and the concentrations that exist within each state.
+Discussion on the extension of the EDC to include multiple environments as a way to model subgrid variance is included in Appendix~{\ref{multi_env_edc}.
 
 \section{Heat Release Rate}
 
@@ -337,7 +318,7 @@ extinction is still an area of active research in the combustion
 community.
 
 Simple empirical rules can be used to predict local
-extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two parts. The first, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second part the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur. If either criteria is failed, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. This is done in the following steps:
+extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two parts based on the critical flame temperature \cite{SFPE:Beyler}. The first, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second part the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur. If either criteria is failed, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. This is done in the following steps:
 
 \begin{enumerate}
 \item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
