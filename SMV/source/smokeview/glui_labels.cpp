@@ -571,8 +571,8 @@ extern "C" void Labels_CB(int var){
       printf(  "    for more accurate results.  The \"flashing\" that occurs is normal.\n");
     }
     else{
-      printf("\n*** Error: a file needs to be loaded before benchmarking\n");
-      printf("           can be performed\n");
+      fprintf(stderr,"\n*** Error: a file needs to be loaded before benchmarking\n");
+      fprintf(stderr,"           can be performed\n");
     }
     break;
   case LABELS_showall:

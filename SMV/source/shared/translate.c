@@ -168,9 +168,9 @@ void init_translate(char *bindir, char *tr_name){
       printf("\n");
     }
     else{
-      printf("Failed to parse translation file: %s",smokeview_lang);
-      printf("\n");
-      printf("%s\n","Menus will be in English");
+      fprintf(stderr,"*** Warning: Failed to parse translation file: %s",smokeview_lang);
+      fprintf(stderr,"\n");
+      fprintf(stderr,"%s\n","Menus will be in English");
     }
   }
 }

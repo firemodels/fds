@@ -7942,13 +7942,13 @@ int readini(int scriptconfigfile){
   // check if config files read in earlier were modifed later
 
   if(is_file_newer(smvprogini_ptr,INIfile)==1){
-    printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
+    fprintf(stderr,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
   }
   if(is_file_newer(smvprogini_ptr,caseinifilename)==1){
-    printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseinifilename);
+    fprintf(stderr,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseinifilename);
   }
   if(is_file_newer(INIfile,caseinifilename)==1){
-    printf("*** Warning: The conig file,\n  %s, is newer than\n  %s \n\n",INIfile,caseinifilename);
+    fprintf(stderr,"*** Warning: The conig file,\n  %s, is newer than\n  %s \n\n",INIfile,caseinifilename);
   }
 
   // read in config files if they exist
@@ -10598,11 +10598,11 @@ void writeini(int flag){
   if(flag==SCRIPT_INI)flag=LOCAL_INI;
   if(fileout==NULL){
     if(outfilename!=NULL){
-      printf("error: unable to open %s for writing\n",outfilename);
+      fprintf(stderr,"*** Error: unable to open %s for writing\n",outfilename);
       return;
     }
     else{
-      printf("error: unable to open ini file for output\n");
+      fprintf(stderr,"*** Error: unable to open ini file for output\n");
     }
   }
 

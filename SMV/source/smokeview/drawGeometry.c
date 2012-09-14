@@ -801,7 +801,7 @@ void readcad2geom(cadgeom *cd){
     calcQuadNormal(xyzpoints, normal);
   }
   if(iquad<nquads){
-    printf("  *** warning: number of faces expected=%i number of faces found=%i\n",cd->nquads,iquad);
+    fprintf(stderr,"*** Warning: number of faces expected=%i number of faces found=%i\n",cd->nquads,iquad);
     cd->nquads=iquad;
   }
   for(i=0;i<cd->nquads;i++){
@@ -3401,8 +3401,8 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
       read_error=ReadSmoothIsoSurface(asurface);
       if(read_error!=0){
         read_smoothobst=0;
-        printf(" *** warning: unexpected end of file encountered while\n");
-        printf("              reading the smooth blockage file.\n");
+        fprintf(stderr,"*** Warning: unexpected end of file encountered while\n");
+        fprintf(stderr,"              reading the smooth blockage file.\n");
       }
     }
     if(read_smoothobst==0){
@@ -3533,8 +3533,8 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
       read_error=ReadSmoothIsoSurface(asurface);
       if(read_error!=0){
         read_smoothobst=0;
-        printf(" *** warning: unexpected end of file encountered while\n");
-        printf("              reading the smooth blockage file.\n");
+        fprintf(stderr,"*** Warning: unexpected end of file encountered while\n");
+        fprintf(stderr,"              reading the smooth blockage file.\n");
       }
     }
     else{
