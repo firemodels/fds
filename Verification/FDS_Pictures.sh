@@ -23,7 +23,7 @@ $RUNSMV Immersed_Boundary_Method tri_cube_cut_cell_test_12
 $RUNSMV Miscellaneous pyramid
 $RUNSMV NS_Analytical_Solution ns2d_64
 $RUNSMV Pressure_Effects pressure_boundary
-$RUNSMV Pressure_Solver dancing_eddies
+$RUNSMV Pressure_Solver dancing_eddies_tight
 $RUNSMV Scalar_Analytical_Solution move_slug
 $RUNSMV Scalar_Analytical_Solution move_slug_fl1
 $RUNSMV Species propane_flame_deposition

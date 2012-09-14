@@ -2445,18 +2445,16 @@ the inflow exactly because of inaccuracies at the solid and mesh boundaries. The
 
 \subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
 
-In this example, air is pushed through a 300~m long, two-dimensional channel at 5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational
-domain is divided into 4 meshes, each 75~m long. Two simulations are performed, one in which the {\ct VELOCITY\_TOLERANCE} is set to 0.1~m/s ({\ct dancing\_eddies\_tol=p1.fds}), and one
-in which it is set to 0.01~m/s ({\ct dancing\_eddies.fds}). Figure~\ref{dancing_eddies} shows the downstream pressure histories for these two cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost.
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Two simulations are performed, one in which the {\ct VELOCITY\_TOLERANCE} is set to a relatively small value, and one in which it is set to the default value. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these two cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost.
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_p1}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_p01}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_default}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight}
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
 \end{center}
-\caption[Results of the dancing eddies test case.]{(Top) Comparison of pressure traces 200~m from the left opening of the channel for two different settings
-of {\ct VELOCITY\_TOLERANCE}. (Bottom) A contour plot of the pressure after 120~s for the case with the tolerance set to 0.01~m/s.}
+\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for two different settings
+of {\ct VELOCITY\_TOLERANCE}, the default value on the left and a tighter tolerance on the right. (Bottom) A contour plot of the pressure after 2~s.}
 \label{dancing_eddies}
 \end{figure}
 
