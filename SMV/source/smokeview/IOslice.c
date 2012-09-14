@@ -244,8 +244,6 @@ void output_mfed_csv(multislicedata *mslicei){
 
 void GetCellAreas(float *xgrid, float *ygrid, int nx, int ny, float *fed_frame, char *iblank, float *levels, int nlevels, float *areas){
   int i;
-  float area;
-  float dx;
 
   areas[0]=0.0;
   areas[1]=0.0;
@@ -258,8 +256,7 @@ void GetCellAreas(float *xgrid, float *ygrid, int nx, int ny, float *fed_frame, 
 
     dx = xgrid[i+1]-xgrid[i];
     for(j=0;j<ny-1;j++){
-      float dy;
-      float val;
+      float dy, val, area;
       int k;
 
       if(iblank[ijcellC(i,j)]!=2)continue;
