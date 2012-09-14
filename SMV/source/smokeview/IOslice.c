@@ -266,7 +266,7 @@ void GetCellAreas(float *xgrid, float *ygrid, int nx, int ny, float *fed_frame, 
       dy = ygrid[j+1]-ygrid[j];
       area = dx*dy;
       val = fed_frame[ijnodeC(i,j)];
-      for(k=0;i<nlevels;k++){
+      for(k=0;k<nlevels;k++){
         if(k==0){
           if(val<levels[0]){
             areas[0]+=area;
