@@ -30,6 +30,7 @@ BigGamma = 0.0359157;
 
 % Define mesh sizes to be analyzed
 meshsize = [40 80 160 320];
+meshname = {'40' '80' '160' '320'};
 
 % Set time step of DEVC output
 DT = 1.1114*10.^(-4);
@@ -40,16 +41,15 @@ DT = 1.1114*10.^(-4);
 FLOWTIME = int16(0.3112/(U0*DT));
     
 % Set the number of time steps to be analyzed
-    % Do not set below 3 (see 'Export Error for Plotting')
-TIMESTEPS = 4;
+% Do not set below 3 (see 'Export Error for Plotting')
+TIMESTEPS = [4 4 4 3];
 
 % Allocate space for arrays
-MatIn = cell(4);
 DEVCNUM = zeros(1,4);
 STEPSIZE = zeros(1,4);
-AxisPlotLabels = cell(1,TIMESTEPS+1);
-COUNT = zeros(4,TIMESTEPS);
-RMS = zeros(4,TIMESTEPS);
+AxisPlotLabels = cell(1,TIMESTEPS(1)+1);
+COUNT = zeros(4,TIMESTEPS(1));
+RMS = zeros(4,TIMESTEPS(1));
     
 % Define step sizes for each mesh
 for m = 1:4
@@ -62,13 +62,11 @@ end
 %-------------------------------------------------------------------------%
 
 for m = 1:4
-    meshname = num2str(40*2.^(m-1));
-    endrow = FLOWTIME*TIMESTEPS+3;
-    endcol = DEVCNUM(m);
-    MatIn{m}  = csvread([input_dir,'vort2d_',meshname,'_devc.csv'],2,0,...
-                       [2,0,endrow,endcol]);
+    filename = [input_dir,'vort2d_',meshname{m},'_devc.csv'];
+    M{m} = importdata(filename,',',2);
+    %M{m}.data
 end
-    
+
 %-------------------------------------------------------------------------%
 % Plot Data
 %-------------------------------------------------------------------------%
@@ -81,9 +79,6 @@ plot_style
 
 % Run for each mesh size
 for m = 1:4
-        
-    % Create mesh-size string for variable file-name output
-    meshname = num2str(40*2.^(m-1));
 
     %-----------------------------------------------------------------%
     % Plot U-Velocity at X=0 Data for a Range of Times
@@ -95,8 +90,7 @@ for m = 1:4
     Z  = -2*Rc+Z0:STEPSIZE(m):2*Rc-Z0;
     
     % Plot analytical solution
-    AxisPlotExact = plot(Z,U0-BigGamma.*Z.*...
-                         exp(-Z.^2./(2*Rc.^2))./Rc.^2,'--');
+    AxisPlotExact = plot(Z,U0-BigGamma.*Z.*exp(-Z.^2./(2*Rc.^2))./Rc.^2,'--');
     
     % Define plot color as black
     set(AxisPlotExact,'Color',[0 0 0],'LineWidth',1.4);
@@ -106,7 +100,7 @@ for m = 1:4
     
     % Plot FDS simulation values with
     % different colors for each time step
-    for t = 1:TIMESTEPS+1
+    for t = 1:TIMESTEPS(m)+1
         
         % Set time steps to be integer multiples
         % of the flow-through time
@@ -121,14 +115,13 @@ for m = 1:4
         
         for k = 2:DEVCNUM(m)+1
             % Create array of u-velocity values
-            UArray(k-1) = MatIn{m}(TIME,k);
+            UArray(k-1) = M{m}.data(TIME,k);
             
             % Define actual z-coordinate (see UZEXACT)
             ZVAL = -2*Rc+Z0+(k-2)*STEPSIZE(m);
             
             % Calculate analytical u-velocity values
-            AxisExact = U0-BigGamma.*ZVAL.*...
-                            exp(-ZVAL.^2./(2*Rc.^2))./Rc.^2;
+            AxisExact = U0-BigGamma.*ZVAL.*exp(-ZVAL.^2./(2*Rc.^2))./Rc.^2;
             
             % Calculate initial error values
             RMS(m,t) = RMS(m,t)+((UArray(k-1)-AxisExact)).^2;
@@ -142,8 +135,8 @@ for m = 1:4
         AxisPlotFDS = plot(Z,UArray);
         
         % Define color functions
-        CFRed = real(0.5*(tanh(6*t/TIMESTEPS-3)+1));
-        CFGreen = real(-0.5*(tanh(7*t/TIMESTEPS-6)-1));
+        CFRed = real(0.5*(tanh(6*t/TIMESTEPS(m)-3)+1));
+        CFGreen = real(-0.5*(tanh(7*t/TIMESTEPS(m)-6)-1));
         
         % Define plot colors
         set(AxisPlotFDS,'Color',[CFRed CFGreen 0]);
@@ -173,24 +166,24 @@ for m = 1:4
     
     % Define legend-label strings
     AxisPlotLabels{1} = 'Analytical';
-    for t = 2:TIMESTEPS+2
+    for t = 2:TIMESTEPS(m)+2
         TIME_INDEX = num2str(double((t-2)*FLOWTIME)*DT,'%6.3f');
         AxisPlotLabels{t} = ['FDS (t=',TIME_INDEX,' s)'];
     end
     
     % Create legend
-    AxisPlotLeg = legend(AxisPlotLabels,'Location','NorthEast');
+    AxisPlotLeg = legend(AxisPlotLabels(1:m),'Location','NorthEast');
     set(AxisPlotLeg,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
 
     % Save plot to file
-    print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname,'_uzgraph']);
+    print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname{m},'_uzgraph']);
 
     %-----------------------------------------------------------------%
     % Plot U-Velocity at a Point as a Function of Time
     %-----------------------------------------------------------------%
 
     % Define plot range
-    T = 0.0:DT:DT*double(FLOWTIME*TIMESTEPS+1);
+    T = 0.0:DT:DT*double(FLOWTIME*TIMESTEPS(m)+1);
         
     % Define actual coordinates of point for analytical solution
         % Must correspond to device coordinates
@@ -222,7 +215,8 @@ for m = 1:4
         % Device specification must correspond to
         % point location for analytical solution
         % ---------------------------v
-    PointPlotFDS = plot(T,MatIn{m}(:,2),'--');
+    T = M{m}.data(:,1);
+    PointPlotFDS = plot(T,M{m}.data(:,2),'--');
         
     % Plot all plots together (from hold on)
     hold off
@@ -255,7 +249,7 @@ for m = 1:4
     set(PointPlotLeg,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
 
     % Save plot to file
-    print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname,'_upgraph']);
+    print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname{m},'_upgraph']);
 end
 
 %-------------------------------------------------------------------------%
