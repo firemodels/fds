@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# Firebot
-# FDS automatIc veRification and validation tEst bot
-# Kristopher Overholt
-# 6/22/2012
+# Smokebot
+# this script is derived from Kris Overholt's firebot script
 
-# The Firebot script is part of an automated continuous integration system.
-# Please consult the Utilities/Firebot/README.txt file and the
-# FDS Configuration Management Plan for more information.
+# The Smokebot script runs the smokeview verification suite
+# and generates images for these cases.
 
 #  ===================
 #  = Input variables =
@@ -17,8 +14,9 @@
 mailTo="glenn.forney@nist.gov"
 
 FIREBOT_QUEUE=fire7080s
+FIREBOT_USERNAME="smokebot"
 
-FIREBOT_HOME_DIR=~
+FIREBOT_HOME_DIR="/home/$FIREBOT_USERNAME"
 FIREBOT_DIR="$FIREBOT_HOME_DIR/SMOKEBOT"
 FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
 CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
@@ -29,6 +27,18 @@ WARNING_LOG=$FIREBOT_DIR/output/warnings
 #  ====================
 #  = End user warning =
 #  ====================
+# Warn if running as user other than smokebot
+if [[ `whoami` == "$FIREBOT_USERNAME" ]];
+   then
+      # Continue along
+      :
+   else
+      echo "Warning: You are running the smokebot script as an end user."
+      echo "This is not supported at the present time."
+      echo "Terminating script."
+      exit
+fi
+
 
 #  =============================================
 #  = Firebot timing and notification mechanism =
