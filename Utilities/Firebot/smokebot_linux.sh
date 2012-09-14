@@ -1,44 +1,41 @@
 #!/bin/bash
 
 # Smokebot
-# this script is derived from Kris Overholt's firebot script
-
-# The Smokebot script runs the smokeview verification suite
-# and generates images for these cases.
+# This script is a simplified version of Kris Overholt's firebot script.
+# It runs the smokeview verification suite (not FDS) on the latest
+# revision of the repository.  It does not erase files that are not
+# the repository.  This allows one to test working files before they
+# have been committed.  
 
 #  ===================
 #  = Input variables =
 #  ===================
 
+FIREBOT_QUEUE=firebot
+while getopts 'q:' OPTION
+do
+case $OPTION in
+  q)
+   FIREBOT_QUEUE="$OPTARG"
+   ;;
+esac
+done
+shift $(($OPTIND-1))
+
 #mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
 mailTo="glenn.forney@nist.gov"
 
-FIREBOT_QUEUE=fire7080s
-FIREBOT_USERNAME="smokebot"
+FIREBOT_USERNAME="`whoami`"
 
 FIREBOT_HOME_DIR="/home/$FIREBOT_USERNAME"
 FIREBOT_DIR="$FIREBOT_HOME_DIR/SMOKEBOT"
 FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
 CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
-SVN_REVISION=$1
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
+GUIDE_DIR=$FIREBOT_DIR/guides
 
-#  ====================
-#  = End user warning =
-#  ====================
-# Warn if running as user other than smokebot
-if [[ `whoami` == "$FIREBOT_USERNAME" ]];
-   then
-      # Continue along
-      :
-   else
-      echo "Warning: You are running the smokebot script as an end user."
-      echo "This is not supported at the present time."
-      echo "Terminating script."
-      exit
-fi
-
+export JOBPREFIX=SB_
 
 #  =============================================
 #  = Firebot timing and notification mechanism =
@@ -68,7 +65,7 @@ check_time_limit()
 
       if [ $ELAPSED_TIME -gt $TIME_LIMIT ]
       then
-         echo -e "Firebot has been running for more than 12 hours in Stage ${TIME_LIMIT_STAGE}. \n\nPlease ensure that there are no problems. \n\nThis is a notification only and does not terminate Firebot." | mail -s "[Firebot@Blaze] Notice: Firebot has been running for more than 12 hours." $mailTo > /dev/null
+         echo -e "smokebot has been running for more than 12 hours in Stage ${TIME_LIMIT_STAGE}. \n\nPlease ensure that there are no problems. \n\nThis is a notification only and does not terminate smokebot." | mail -s "smokebot Notice: smokebot has been running for more than 12 hours." $mailTo > /dev/null
          TIME_LIMIT_EMAIL_NOTIFICATION="sent"
       fi
    fi
@@ -88,7 +85,7 @@ clean_firebot_history()
 {
    # Clean Firebot metafiles
    cd $FIREBOT_DIR
-   rm output/* > /dev/null
+   rm -f output/* > /dev/null
 }
 
 #  ========================
@@ -184,15 +181,10 @@ do_svn_checkout()
 {
    cd $FDS_SVNROOT
    # If an SVN revision number is specified, then get that revision
-   if [[ $SVN_REVISION != "" ]]; then
-      echo "Checking out revision r${SVN_REVISION}." >> $FIREBOT_DIR/output/stage1 2>&1
-      svn update -r $SVN_REVISION >> $FIREBOT_DIR/output/stage1 2>&1
-   # If no SVN revision number is specified, then get the latest revision
-   else
-      echo "Checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
-      svn update >> $FIREBOT_DIR/output/stage1 2>&1
-      SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
-   fi
+
+   echo "Checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
+   svn update >> $FIREBOT_DIR/output/stage1 2>&1
+   SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
 }
 
 check_svn_checkout()
@@ -294,7 +286,7 @@ wait_verification_cases_short_start()
 {
    # Scans qstat and waits for verification cases to start
    while [[ `qstat | grep $(whoami) | grep Q` != '' ]]; do
-      JOBS_REMAINING=`qstat | grep $(whoami) | grep Q | wc -l`
+      JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | grep Q | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
       check_time_limit
@@ -306,7 +298,7 @@ wait_verification_cases_short_end()
 {
    # Scans qstat and waits for verification cases to end
    while [[ `qstat | grep $(whoami)` != '' ]]; do
-      JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
+      JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
       check_time_limit
@@ -342,9 +334,10 @@ run_verification_cases_short()
    #  = Remove .stop files =
    #  ======================
 
-   # Remove all .stop files from Verification directories (recursively)
+   # Remove all .stop and .err files from Verification directories (recursively)
    cd $FDS_SVNROOT/Verification
    find . -name '*.stop' -exec rm -f {} \;
+   find . -name '*.err' -exec rm -f {} \;
 }
 
 check_verification_cases_short()
@@ -455,7 +448,7 @@ wait_verification_cases_long_end()
 {
    # Scans qstat and waits for verification cases to end
    while [[ `qstat | grep $(whoami)` != '' ]]; do
-      JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
+      JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
       TIME_LIMIT_STAGE="5"
       check_time_limit
@@ -646,7 +639,7 @@ make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6e
+   ./Make_SMV_Pictures.sh | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6e
 }
 
 check_smv_pictures()
@@ -675,7 +668,10 @@ check_guide()
    cd $FIREBOT_DIR
    if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
    then
-      cp $2 /var/www/html/smokebot/manuals/
+      if [ "$FIREBOT_USERNAME" == "smokebot" ]; then
+        cp $2 /var/www/html/smokebot/manuals/
+      fi
+      cp $2 $GUIDE_DIR/.
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
       grep "! LaTeX Error:" -I $1 >> $ERROR_LOG
@@ -773,24 +769,24 @@ email_build_status()
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "[Firebot@Blaze] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+     mail -s "smokebot build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       # Send email with failure message, body of email contains error log file
-      mail -s "[Firebot@Blaze] Build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+      mail -s "smokebot build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       # Send email with success message, include warnings
-      mail -s "[Firebot@Blaze] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
+      mail -s "smokebot build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
       # Send empty email with success message
-      mail -s "[Firebot@Blaze] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
+      mail -s "smokebot build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
    fi
 }
 

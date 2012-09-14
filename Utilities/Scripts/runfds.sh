@@ -16,6 +16,10 @@ esac
 done
 shift $(($OPTIND-1))
 
+if [ "$JOBPREFIX" == "" ]; then
+  JOBPREFIX=VV_
+fi
+
 # If queue is "none" then use "background" to submit jobs
 # instead of qsub (ie a queing system).
 
@@ -77,8 +81,8 @@ fi
 cat << EOF > $scriptfile
 #!/bin/bash -f
 #\$ -S /bin/bash
-#\$ -N VV_$infile -e $outerr -o $outlog
-#PBS -N VV_$infile -e $outerr -o $outlog
+#\$ -N $JOBPREFIX$infile -e $outerr -o $outlog
+#PBS -N $JOBPREFIX$infile -e $outerr -o $outlog
 cd $fulldir
 
 echo Time: \`date\`

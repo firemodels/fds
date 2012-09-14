@@ -4,12 +4,7 @@ dir=$1
 in=$2
 
 fulldir=$BASEDIR/$dir
-echo "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"
-echo "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"
-echo "     smokeview: $SMV"
-echo "    input file: $fulldir/$in.smv"
-echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+echo "*** generating images for: $in.smv"
 
 scriptfile=$scratchdir/script.$$
 if ! [ -e $SMV ];  then
