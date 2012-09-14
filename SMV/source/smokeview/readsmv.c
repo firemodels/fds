@@ -7942,13 +7942,13 @@ int readini(int scriptconfigfile){
   // check if config files read in earlier were modifed later
 
   if(is_file_newer(smvprogini_ptr,INIfile)==1){
-    fprintf(stderr,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
+    printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
   }
   if(is_file_newer(smvprogini_ptr,caseinifilename)==1){
-    fprintf(stderr,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseinifilename);
+    printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseinifilename);
   }
   if(is_file_newer(INIfile,caseinifilename)==1){
-    fprintf(stderr,"*** Warning: The conig file,\n  %s, is newer than\n  %s \n\n",INIfile,caseinifilename);
+    printf("*** Warning: The conig file,\n  %s, is newer than\n  %s \n\n",INIfile,caseinifilename);
   }
 
   // read in config files if they exist
