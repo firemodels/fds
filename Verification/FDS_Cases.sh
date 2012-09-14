@@ -108,9 +108,7 @@ $RUNFDS Pressure_Effects zone_break_fast
 $RUNFDS Pressure_Effects zone_break_slow
 $RUNFDS Pressure_Effects zone_shape
 
-$RUNFDS Pressure_Solver dancing_eddies
 $RUNFDS Pressure_Solver dancing_eddies_1mesh
-$RUNFDS Pressure_Solver dancing_eddies_tol_p1
 $RUNFDS Pressure_Solver scarc2d_fft_1mesh
 $RUNFDS Pressure_Solver scarc2d_fft_8mesh
 $RUNFDS Pressure_Solver scarc2d_cg_8mesh
