@@ -850,7 +850,7 @@ LES_IF: IF (LES) THEN
 
       IF (S_PLUS < S0) THEN
          ! smooth wall
-         Y_PLUS = MAX(1._EB,Y_CELL_CENTER/(DELTA_NU+EPS))
+         Y_PLUS = Y_CELL_CENTER/(DELTA_NU+EPS)
          IF (Y_PLUS < Y1) THEN
             ! viscous sublayer
             TAU_W = ( U/Y_PLUS )**2
@@ -870,7 +870,7 @@ LES_IF: IF (LES) THEN
          ELSE
             BTILDE = BTILDE_ROUGH ! fully rough
          ENDIF
-         Y_PLUS = MAX(1._EB,Y_CELL_CENTER/S)
+         Y_PLUS = Y_CELL_CENTER/S
          TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+BTILDE) )**2  ! Pope (2000) p. 297, Eq. (7.121)
       ENDIF
 
