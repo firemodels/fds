@@ -165,6 +165,8 @@ void addcolorbar(int icolorbar){
   ncolorbars++;
   CheckMemory;
   ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
+  current_colorbar = colorbarinfo + colorbartype;
+
   cb_from = colorbarinfo + icolorbar;
   CheckMemory;
 
@@ -414,6 +416,8 @@ void initdefaultcolorbars(void){
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
   NewMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
+  current_colorbar = colorbarinfo + colorbartype;
+
 
   // rainbow colorbar
 
@@ -562,7 +566,7 @@ void initdefaultcolorbars(void){
 
   // blue->yellow->orange split
 
-  strcpy(cbi->label,"blue->yellow->orange split");
+  strcpy(cbi->label,"FED");
   cbi->label_ptr=cbi->label;
 
   cbi->nnodes=6;
@@ -1028,6 +1032,8 @@ void drawColorBars(void){
   float *partfactor=NULL;
   float partrange=0.0;
 
+  int fed_slice=0;
+
   char partunitlabel2[256], partshortlabel2[256];
 
   GLfloat *color1, *color2;
@@ -1283,6 +1289,7 @@ void drawColorBars(void){
     }
     outputBarText(right[leftslice],bottom[0],color1,"Slice");
     outputBarText(right[leftslice],bottom[1],color1,sb->label->shortlabel);
+    if(strcmp(sb->label->shortlabel,"FED")==0&&current_colorbar!=NULL&&strcmp(current_colorbar->label,"FED")==0)fed_slice=1;
     outputBarText(right[leftslice],bottom[2],color1,unitlabel);
     if(strcmp(unitlabel,"ppm")==0&&slicefactor!=NULL){
       slicefactor2[0]=*slicefactor*sb->fscale;
@@ -1483,20 +1490,39 @@ void drawColorBars(void){
       iposition = get_label_position(position,dyfont,barbot);
       outputBarText(right[leftslice],position,color2,slicecolorlabel_ptr);
     }
-    for (i=0; i<nrgb-1; i++){
-      float vert_position;
-      char slicecolorlabel[256];
-      char *slicecolorlabel_ptr=NULL;
+    if(fed_slice==1){
+      if(strcmp(sb->colorlabels[1],"0.00")!=0||strcmp(sb->colorlabels[nrgb-1],"3.00")!=0)fed_slice=0;
+    }
+    if(fed_slice==1){
+      for (i=0; i<nrgb-1; i++){
+        float vert_position;
 
-      vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
-      if(iposition==i)continue;
-      slicecolorlabel_ptr=&(sb->colorlabels[i+1][0]);
-      if(sliceflag==1){
-        val = tttmin + i*slicerange/(nrgb-2);
-        scalefloat2string(val,slicecolorlabel, slicefactor, slicerange);
-        slicecolorlabel_ptr=slicecolorlabel;
+        vert_position = (float)(0)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+        outputBarText(right[leftslice],vert_position,color1,"0.00");
+        vert_position = (float)(1)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+        outputBarText(right[leftslice],vert_position,color1,"0.30");
+        vert_position = (float)(3.333)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+        outputBarText(right[leftslice],vert_position,color1,"1.00");
+        vert_position = (float)(nrgb-2)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+        outputBarText(right[leftslice],vert_position,color1,"3.00");
       }
-      outputBarText(right[leftslice],vert_position,color1,slicecolorlabel_ptr);
+    }
+    else{
+      for (i=0; i<nrgb-1; i++){
+        float vert_position;
+        char slicecolorlabel[256];
+        char *slicecolorlabel_ptr=NULL;
+
+        vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+        if(iposition==i)continue;
+        slicecolorlabel_ptr=&(sb->colorlabels[i+1][0]);
+        if(sliceflag==1){
+          val = tttmin + i*slicerange/(nrgb-2);
+          scalefloat2string(val,slicecolorlabel, slicefactor, slicerange);
+          slicecolorlabel_ptr=slicecolorlabel;
+        }
+        outputBarText(right[leftslice],vert_position,color1,slicecolorlabel_ptr);
+      }
     }
   }
   if(showpatch==1){

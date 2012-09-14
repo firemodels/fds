@@ -8461,6 +8461,7 @@ int readini2(char *inifile, int localfile){
       if(colorbartype!=colorbartype_default){
         colorbartype_ini=colorbartype;
       }
+      if(colorbarinfo!=NULL)current_colorbar = colorbarinfo + colorbartype;
       continue;
     }
     if(match(buffer,"FIRECOLORMAP")==1){
