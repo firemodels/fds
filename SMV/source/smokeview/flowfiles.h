@@ -1013,6 +1013,7 @@ typedef struct _slicedata {
   contour *line_contours;
   int nline_contours;
   float *contour_areas;
+  int *contour_areas_percen;
   int ncontour_areas;
   compinfo *compindex;
   unsigned char *slicelevel;
@@ -1049,6 +1050,7 @@ typedef struct _multislicedata {
   int nslices;
   int *islices;
   float *contour_areas;
+  int *contour_areas_percen;
   int ncontour_areas;
   char menulabel[128];
   char menulabel2[128];
