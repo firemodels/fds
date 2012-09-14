@@ -452,7 +452,7 @@ void drawplot3d_texture(mesh *meshi){
   float *dx_xzcopy, *dy_xzcopy, *dz_xzcopy;
   float *dx_xycopy, *dy_xycopy, *dz_xycopy;
   int nx, ny, nz,nxy;
-  char *iblank_x, *iblank_y, *iblank_z, *iblank;
+  char *c_iblank_x, *c_iblank_y, *c_iblank_z, *iblank;
   float *vector_color;
 
   plotx = meshi->iplotx_all[iplotx_all];
@@ -468,9 +468,9 @@ void drawplot3d_texture(mesh *meshi){
   xplt = meshi->xplt;
   yplt = meshi->yplt;
   zplt = meshi->zplt;
-  iblank_x = meshi->c_iblank_x;
-  iblank_y = meshi->c_iblank_y;
-  iblank_z = meshi->c_iblank_z;
+  c_iblank_x = meshi->c_iblank_x;
+  c_iblank_y = meshi->c_iblank_y;
+  c_iblank_z = meshi->c_iblank_z;
   iblank = meshi->c_iblank_node;
 
 
@@ -542,7 +542,7 @@ void drawplot3d_texture(mesh *meshi){
         color1t=yzcolortbase + j*nz;
         color2t=color1t+nz;
         for(k=0; k<kbar; k++){
-          if(iblank_x==NULL||iblank_x[IJKNODE(plotx,j,k)]==2){
+          if(c_iblank_x==NULL||c_iblank_x[IJKNODE(plotx,j,k)]==2){
             if(ABS(color1t[k]-color2t[k+1])<ABS(color1t[k+1]-color2t[k])){
               glTexCoord1f(color1t[k]);  glVertex3f(xplt[plotx],yplt[j],zplt[k]);
               glTexCoord1f(color2t[k]);  glVertex3f(xplt[plotx],yplt[j+1],zplt[k]);
@@ -647,7 +647,7 @@ void drawplot3d_texture(mesh *meshi){
         color1t=xzcolortbase + i*nz;
         color2t=color1t+nz;
         for(k=0; k<kbar; k++){
-          if(iblank_y==NULL||iblank_y[IJKNODE(i,ploty,k)]==2){
+          if(c_iblank_y==NULL||c_iblank_y[IJKNODE(i,ploty,k)]==2){
             if(ABS(color1t[k]-color2t[k+1])<ABS(color1t[k+1]-color2t[k])){
               glTexCoord1f(color1t[k]);  glVertex3f(xplt[i],yplt[ploty],zplt[k]);
               glTexCoord1f(color2t[k]);  glVertex3f(xplt[i+1],yplt[ploty],zplt[k]);
@@ -756,7 +756,7 @@ void drawplot3d_texture(mesh *meshi){
         color1t=xycolortbase + i*ny;
         color2t=color1t+ny;
         for(j=0; j<jbar; j++){
-          if(iblank_z==NULL||iblank_z[IJKNODE(i,j,plotz)]==2){
+          if(c_iblank_z==NULL||c_iblank_z[IJKNODE(i,j,plotz)]==2){
             if(ABS(color1t[j]-color2t[j+1])<ABS(color1t[j+1]-color2t[j])){
               glTexCoord1f(  color1t[j]);glVertex3f(  xplt[i],  yplt[j],zplt[plotz]);
               glTexCoord1f(  color2t[j]);glVertex3f(xplt[i+1],  yplt[j],zplt[plotz]);
@@ -895,7 +895,7 @@ void drawplot3d(mesh *meshi){
   float *dx_xzcopy, *dy_xzcopy, *dz_xzcopy;
   float *dx_xycopy, *dy_xycopy, *dz_xycopy;
   int nx, ny, nz,nxy;
-  char *iblank_x, *iblank_y, *iblank_z, *iblank;
+  char *c_iblank_x, *c_iblank_y, *c_iblank_z, *iblank;
   float *vector_color;
 
   plotx = meshi->iplotx_all[iplotx_all];
@@ -912,9 +912,9 @@ void drawplot3d(mesh *meshi){
   xplt = meshi->xplt;
   yplt = meshi->yplt;
   zplt = meshi->zplt;
-  iblank_x = meshi->c_iblank_x;
-  iblank_y = meshi->c_iblank_y;
-  iblank_z = meshi->c_iblank_z;
+  c_iblank_x = meshi->c_iblank_x;
+  c_iblank_y = meshi->c_iblank_y;
+  c_iblank_z = meshi->c_iblank_z;
   iblank = meshi->c_iblank_node;
 
 
@@ -976,7 +976,7 @@ void drawplot3d(mesh *meshi){
         color1=yzcolorbase + j*nz;
         color2=color1+nz;
         for(k=0; k<kbar; k++){
-          if(iblank_x==NULL||iblank_x[IJKNODE(plotx,j,k)]==2){
+          if(c_iblank_x==NULL||c_iblank_x[IJKNODE(plotx,j,k)]==2){
             if(ABS(color1[k]-color2[k+1])<ABS(color1[k+1]-color2[k])){
               glColor4fv(rgb_plot3d+4*color1[k]);  glVertex3f(xplt[plotx],yplt[j],zplt[k]);
               glColor4fv(rgb_plot3d+4*color2[k]);  glVertex3f(xplt[plotx],yplt[j+1],zplt[k]);
@@ -1081,7 +1081,7 @@ void drawplot3d(mesh *meshi){
         color1=xzcolorbase + i*nz;
         color2=color1+nz;
         for(k=0; k<kbar; k++){
-          if(iblank_y==NULL||iblank_y[IJKNODE(i,ploty,k)]==2){
+          if(c_iblank_y==NULL||c_iblank_y[IJKNODE(i,ploty,k)]==2){
             if(ABS(color1[k]-color2[k+1])<ABS(color1[k+1]-color2[k])){
               glColor4fv(rgb_plot3d+4*color1[k]);  glVertex3f(xplt[i],yplt[ploty],zplt[k]);
               glColor4fv(rgb_plot3d+4*color2[k]);  glVertex3f(xplt[i+1],yplt[ploty],zplt[k]);
@@ -1190,7 +1190,7 @@ void drawplot3d(mesh *meshi){
         color1=xycolorbase + i*ny;
         color2=color1+ny;
         for(j=0; j<jbar; j++){
-          if(iblank_z==NULL||iblank_z[IJKNODE(i,j,plotz)]==2){
+          if(c_iblank_z==NULL||c_iblank_z[IJKNODE(i,j,plotz)]==2){
             if(ABS(color1[j]-color2[j+1])<ABS(color1[j+1]-color2[j])){
               glColor4fv(rgb_plot3d+4*color1[j]);glVertex3f(xplt[i],yplt[j],zplt[plotz]);
               glColor4fv(rgb_plot3d+4*color2[j]);glVertex3f(xplt[i+1],yplt[j],zplt[plotz]);
@@ -1535,7 +1535,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   unsigned char *iqdata;
   char *iblank_xy=NULL, *iblank_xz=NULL, *iblank_yz=NULL;
   int nx, ny, nz, nxy, nxyz;
-  char *iblank_x, *iblank_y, *iblank_z;
+  char *c_iblank_x, *c_iblank_y, *c_iblank_z;
   float qval;
 
   meshi = mesh_in;
@@ -1549,9 +1549,9 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   xplt = meshi->xplt;
   yplt = meshi->yplt;
   zplt = meshi->zplt;
-  iblank_x = meshi->c_iblank_x;
-  iblank_y = meshi->c_iblank_y;
-  iblank_z = meshi->c_iblank_z;
+  c_iblank_x = meshi->c_iblank_x;
+  c_iblank_y = meshi->c_iblank_y;
+  c_iblank_z = meshi->c_iblank_z;
 
   yzcolorbase=meshi->yzcolorbase;
   xzcolorbase=meshi->xzcolorbase;
@@ -1612,7 +1612,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       NewMemory((void **)&iblank_yz,jbar*kbar*sizeof(char));
       for(j=0;j<jbar;j++){
         for(k=0;k<kbar;k++){
-          iblank_yz[k+j*kbar]=iblank_x[IJKNODE(plotx,j,k)];
+          iblank_yz[k+j*kbar]=c_iblank_x[IJKNODE(plotx,j,k)];
         }
       }
     }
@@ -1663,7 +1663,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       NewMemory((void **)&iblank_xz,ibar*kbar*sizeof(char));
       for(i=0;i<ibar;i++){
         for(k=0;k<kbar;k++){
-          iblank_xz[k+i*kbar]=iblank_y[IJKNODE(i,ploty,k)];
+          iblank_xz[k+i*kbar]=c_iblank_y[IJKNODE(i,ploty,k)];
         }
       }
     }
@@ -1712,7 +1712,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       NewMemory((void **)&iblank_xy,ibar*jbar*sizeof(char));
       for(i=0;i<ibar;i++){
         for(j=0;j<jbar;j++){
-          iblank_xy[j+i*jbar]=iblank_z[IJKNODE(i,j,plotz)];
+          iblank_xy[j+i*jbar]=c_iblank_z[IJKNODE(i,j,plotz)];
         }
       }
     }

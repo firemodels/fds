@@ -215,7 +215,7 @@ void setventdirs(void){
   int i, j, k;
   int index1,index2, index3;
   int nx, ny, nxy;
-  char *iblank_x, *iblank_y, *iblank_z;
+  char *c_iblank_x, *c_iblank_y, *c_iblank_z;
   int state1, state2, state3;
   int breakloop;
   int ventdir;
@@ -232,9 +232,9 @@ void setventdirs(void){
     nx = meshi->ibar+1;
     ny = meshi->jbar+1;
     nxy = nx*ny;
-    iblank_x = meshi->c_iblank_x;
-    iblank_y = meshi->c_iblank_y;
-    iblank_z = meshi->c_iblank_z;
+    c_iblank_x = meshi->c_iblank_x;
+    c_iblank_y = meshi->c_iblank_y;
+    c_iblank_z = meshi->c_iblank_z;
     xplttemp=meshi->xplt;
     yplttemp=meshi->yplt;
     zplttemp=meshi->zplt;
@@ -271,9 +271,9 @@ void setventdirs(void){
               index2=ijkcell(i,j,k);
               index3=ijkcell(i,j,k);
               if(use_iblank==1){
-                state1=iblank_x[index1];
-                state2=iblank_x[index2];
-                state3=iblank_x[index3];
+                state1=c_iblank_x[index1];
+                state2=c_iblank_x[index2];
+                state3=c_iblank_x[index3];
               }
               else{
                 state1=2;
@@ -329,9 +329,9 @@ void setventdirs(void){
               index2=ijkcell(i,j,k);
               index3=ijkcell(i,j,k);
               if(use_iblank==1){
-                state1=iblank_y[index1];
-                state2=iblank_y[index2];
-                state3=iblank_y[index3];
+                state1=c_iblank_y[index1];
+                state2=c_iblank_y[index2];
+                state3=c_iblank_y[index3];
               }
               else{
                 state1=2;
@@ -387,9 +387,9 @@ void setventdirs(void){
               index2=ijkcell(i,j,k);
               index3=ijkcell(i,j,k);
               if(use_iblank==1){
-                state1=iblank_z[index1];
-                state2=iblank_z[index2];
-                state3=iblank_z[index3];
+                state1=c_iblank_z[index1];
+                state2=c_iblank_z[index2];
+                state3=c_iblank_z[index3];
               }
               else{
                 state1=2;

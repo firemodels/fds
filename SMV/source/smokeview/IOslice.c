@@ -293,7 +293,6 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   int error_local;
   mesh *meshi;
   float *xgrid=NULL, *ygrid=NULL;
-  char *iblank;
   int nx, ny;
   int nxy;
   int nxdata, nydata;
@@ -393,6 +392,8 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     float area_factor;
     float *contour_areas,*mslice_contour_areas;
     multislicedata *mslicei;
+
+  char *iblank;
 
     NewMemory((void **)&iblank,nxdata*nydata*sizeof(char));
     switch (fed_slice->idir){
@@ -3565,7 +3566,7 @@ void drawvolslice_texture(const slicedata *sd){
   float *xplt, *yplt, *zplt;
   int ibar,jbar;
   int nx,ny,nxy;
-  char *iblank_x, *iblank_y, *iblank_z;
+  char *c_iblank_x, *c_iblank_y, *c_iblank_z;
   char *iblank_embed;
   int plotx, ploty, plotz;
 
@@ -3589,9 +3590,9 @@ void drawvolslice_texture(const slicedata *sd){
   }
   ibar=meshi->ibar;
   jbar=meshi->jbar;
-  iblank_x=meshi->c_iblank_x;
-  iblank_y=meshi->c_iblank_y;
-  iblank_z=meshi->c_iblank_z;
+  c_iblank_x=meshi->c_iblank_x;
+  c_iblank_y=meshi->c_iblank_y;
+  c_iblank_z=meshi->c_iblank_z;
   iblank_embed = meshi->c_iblank_embed;
   nx = ibar + 1;
   ny = jbar + 1;
@@ -3628,7 +3629,7 @@ void drawvolslice_texture(const slicedata *sd){
 
        n++; n2++; 
        if(show_slice_in_obst==0){
-         if(iblank_x[IJK(plotx,j,k)]!=2)continue;
+         if(c_iblank_x[IJK(plotx,j,k)]!=2)continue;
        }
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
@@ -3689,7 +3690,7 @@ void drawvolslice_texture(const slicedata *sd){
 
        n++; n2++; 
        if(show_slice_in_obst==0){
-         if(iblank_y[IJK(i,ploty,k)]!=2)continue;
+         if(c_iblank_y[IJK(i,ploty,k)]!=2)continue;
        }
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
@@ -3753,7 +3754,7 @@ void drawvolslice_texture(const slicedata *sd){
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
        if(show_slice_in_obst==0){
-         if(iblank_z[IJK(i,j,plotz)]!=2)continue;
+         if(c_iblank_z[IJK(i,j,plotz)]!=2)continue;
        }
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
