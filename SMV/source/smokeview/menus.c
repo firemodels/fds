@@ -832,6 +832,9 @@ void ShowHideSliceMenu(int value){
     case -13:
       planar_terrain_slice=1-planar_terrain_slice;
       break;
+    case -14:
+      show_fed_area=1-show_fed_area;
+      break;
     default:
       ASSERT(FFALSE);
     }
@@ -885,6 +888,8 @@ void ShowMultiSliceMenu(int value){
   case -12:
     offset_slice=1-offset_slice;
     break;
+  case -14:
+    show_fed_area=1-show_fed_area;
   default:
     mslicei = multisliceinfo + value;
     mdisplay=0;
@@ -6411,6 +6416,8 @@ updatemenu=0;
     if(show_slice_in_obst==0)glutAddMenuEntry(_("Show multi slice in blockage"),-11);
     if(offset_slice==1)glutAddMenuEntry(_("*Offset slice"),-12);
     if(offset_slice==0)glutAddMenuEntry(_("Offset slice"),-12);
+    if(show_fed_area==1)glutAddMenuEntry("*Show FED areas",-14);
+    if(show_fed_area==0)glutAddMenuEntry("Show FED areas",-14);
   }
 
 /* --------------------------------showslice menu -------------------------- */
@@ -6448,6 +6455,8 @@ updatemenu=0;
     if(show_slice_in_obst==0)glutAddMenuEntry(_("Show slice in blockage"),-11);
     if(offset_slice==1)glutAddMenuEntry(_("*Offset slice"),-12);
     if(offset_slice==0)glutAddMenuEntry(_("Offset slice"),-12);
+    if(show_fed_area==1)glutAddMenuEntry("*Show FED areas",-14);
+    if(show_fed_area==0)glutAddMenuEntry("Show FED areas",-14);
     if(nsliceloaded>0&&sd_shown!=NULL){
       glutAddMenuEntry("-",-10);
       STRCPY(menulabel,_("Show all"));

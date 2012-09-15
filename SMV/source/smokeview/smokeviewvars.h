@@ -24,6 +24,8 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(show_fed_area,1);
+SVEXTERN int SVDECL(*fed_areas,NULL);
 SVEXTERN FILE SVDECL(*LOGSTREAM,NULL);
 
 #ifdef pp_MERGESMOKE

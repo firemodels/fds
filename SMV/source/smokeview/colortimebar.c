@@ -577,22 +577,22 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[1]=96;
   cbi->rgb_node[2]=255;
 
-  cbi->index_node[1]=26;
+  cbi->index_node[1]=27;
   cbi->rgb_node[3]=96;
   cbi->rgb_node[4]=96;
   cbi->rgb_node[5]=255;
 
-  cbi->index_node[2]=26;
+  cbi->index_node[2]=27;
   cbi->rgb_node[6]=255;
   cbi->rgb_node[7]=255;
   cbi->rgb_node[8]=0;
 
-  cbi->index_node[3]=85;
+  cbi->index_node[3]=86;
   cbi->rgb_node[9]=255;
   cbi->rgb_node[10]=255;
   cbi->rgb_node[11]=0;
 
-  cbi->index_node[4]=85;
+  cbi->index_node[4]=86;
   cbi->rgb_node[12]=255;
   cbi->rgb_node[13]=155;
   cbi->rgb_node[14]=0;
@@ -1084,8 +1084,18 @@ void drawColorBars(void){
     showpatch==1||
     (showzone==1&&sethazardcolor==0)||
     showplot3d==1){
+    
     SNIFF_ERRORS("before colorbar");
     CheckMemory;
+   if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
+     sb = slicebounds + islicetype;
+
+     if(strcmp(sb->label->shortlabel,"FED")==0&&
+       current_colorbar!=NULL&&strcmp(current_colorbar->label,"FED")==0){
+       fed_slice=1;
+       if(strcmp(sb->colorlabels[1],"0.00")!=0||strcmp(sb->colorlabels[nrgb-1],"3.00")!=0)fed_slice=0;
+      }
+    }
     if(showplot3d==1&&contour_type==STEPPED_CONTOURS){
       float top, tophat;
 
@@ -1158,16 +1168,28 @@ void drawColorBars(void){
       // draw all other colorbars
       top = barbot+nrgb+DYFONT;
       tophat = top - (top-barbot)/255.0;
-/* xxx fed area labels 
-      yy = MIX2((int)(0.15/3.0*255),255,tophat,barbot);
-      outputBarText(barright,yy,foreground_color,"10%");
-      yy = MIX2((int)(0.65/3.0*255),255,tophat,barbot);
-      outputBarText(barright,yy,foreground_color,"20%");
-      yy = MIX2((int)(2.0/3.0*255),255,tophat,barbot);
-      outputBarText(barright,yy,foreground_color,"30%");
-      yy = MIX2((int)(1.0*255),255,tophat,barbot);
-      outputBarText(barright,yy,foreground_color,"40%");
-*/
+
+      if(show_fed_area==1&&fed_slice==1&&fed_areas!=NULL){
+        char area_label[256];
+        char percen[]="%";
+
+        sprintf(area_label,"%i%s",fed_areas[0],percen);
+        yy = MIX2((int)(0.15/3.0*255),255,tophat,barbot);
+        outputBarText(barright+0.025,yy,foreground_color,area_label);
+
+        sprintf(area_label,"%i%s",fed_areas[1],percen);
+        yy = MIX2((int)(0.65/3.0*255),255,tophat,barbot);
+        outputBarText(barright+0.025,yy,foreground_color,area_label);
+
+        sprintf(area_label,"%i%s",fed_areas[2],percen);
+        yy = MIX2((int)(2.0/3.0*255),255,tophat,barbot);
+        outputBarText(barright+0.025,yy,foreground_color,area_label);
+
+        sprintf(area_label,"%i%s",fed_areas[3],percen);
+        yy = MIX2((int)(1.005*255),255,tophat,barbot);
+        outputBarText(barright+0.025,yy,foreground_color,area_label);
+      }
+
       glBegin(GL_QUADS);
       for (i = 0; i < nrgb_full-1; i++){
         float *rgb_cb,*rgb_cb2;
@@ -1299,7 +1321,6 @@ void drawColorBars(void){
     }
     outputBarText(right[leftslice],bottom[0],foreground_color,"Slice");
     outputBarText(right[leftslice],bottom[1],foreground_color,sb->label->shortlabel);
-    if(strcmp(sb->label->shortlabel,"FED")==0&&current_colorbar!=NULL&&strcmp(current_colorbar->label,"FED")==0)fed_slice=1;
     outputBarText(right[leftslice],bottom[2],foreground_color,unitlabel);
     if(strcmp(unitlabel,"ppm")==0&&slicefactor!=NULL){
       slicefactor2[0]=*slicefactor*sb->fscale;
@@ -1313,16 +1334,6 @@ void drawColorBars(void){
   if(showiso_colorbar==1){
     sb = isobounds + iisottype;
     strcpy(unitlabel,sb->label->unit);
-    /*
-    getunitinfo(sb->label->unit,&isounitclass,&isounittype);
-    if(isounitclass>=0&&isounitclass<nunitclasses){
-      if(isounittype>0){
-        isoflag=1;
-        isofactor=unitclasses[isounitclass].units[isounittype].scale;
-        strcpy(unitlabel,unitclasses[isounitclass].units[isounittype].unit);
-      }
-    }
-    */
     outputBarText(right[leftiso],bottom[0],foreground_color,"Iso");
     outputBarText(right[leftiso],bottom[1],foreground_color,sb->label->shortlabel);
     outputBarText(right[leftiso],bottom[2],foreground_color,unitlabel);
@@ -1370,7 +1381,6 @@ void drawColorBars(void){
     else{
       outputBarText(right[0],bottom[3],foreground_color,scalep3[plotn-1]);
     }
-
   }
   if(showzone==1&&sethazardcolor==0){
     strcpy(unitlabel,"C");
@@ -1501,9 +1511,6 @@ void drawColorBars(void){
       outputBarText(right[leftslice],position,red_color,slicecolorlabel_ptr);
     }
     if(fed_slice==1){
-      if(strcmp(sb->colorlabels[1],"0.00")!=0||strcmp(sb->colorlabels[nrgb-1],"3.00")!=0)fed_slice=0;
-    }
-    if(fed_slice==1){
       for (i=0; i<nrgb-1; i++){
         float vert_position;
 
@@ -1516,7 +1523,7 @@ void drawColorBars(void){
         vert_position = (float)(3.333)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
         outputBarText(right[leftslice],vert_position,foreground_color,"1.00");
 
-        vert_position = (float)(nrgb-2)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+        vert_position = (float)(nrgb-2.25)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
         outputBarText(right[leftslice],vert_position,foreground_color,"3.00");
       }
     }

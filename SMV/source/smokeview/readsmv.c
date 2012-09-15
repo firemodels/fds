@@ -8177,6 +8177,12 @@ int readini2(char *inifile, int localfile){
       if(regenerate_fed!=0)regenerate_fed=1;
       continue;
     }
+   if(match(buffer,"SHOWFEDAREA")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&show_fed_area);
+      if(show_fed_area!=0)show_fed_area=1;
+      continue;
+    }
    if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i",&showdeviceval,&showvdeviceval,&devicetypes_index);
@@ -10885,6 +10891,8 @@ void writeini(int flag){
   fprintf(fileout,"------------\n\n");
   fprintf(fileout,"FED\n");
   fprintf(fileout," %i\n",regenerate_fed);
+  fprintf(fileout,"SHOWFEDAREA\n");
+  fprintf(fileout," %i\n",show_fed_area);
   fprintf(fileout,"NOPART\n");
   fprintf(fileout," %i\n",nopart);
   fprintf(fileout,"PARTPOINTSTEP\n");

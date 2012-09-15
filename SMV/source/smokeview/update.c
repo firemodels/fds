@@ -126,6 +126,8 @@ void update_framenumber(int changetime){
       geomi->itime=geomi->timeslist[itimes];
     }
     if(showslice==1||showvslice==1){
+      int showfed=0;
+
       for(ii=0;ii<nslice_loaded;ii++){
         slicedata *sd;
 
@@ -139,6 +141,36 @@ void update_framenumber(int changetime){
         if(sd->volslice==1){
           if(sd->itime==sd->ntimes-1)sd->itime--;
           if(sd->itime<0)sd->itime=0;
+        }
+        if(sd->is_fed==1)showfed=1;
+      }
+      if(showfed==1){
+        fed_areas=NULL;
+        for(i=0;i<nmultislices;i++){
+          multislicedata *mslicei;
+          int itime;
+          int j;
+
+          mslicei = multisliceinfo + i;
+          if(mslicei->contour_areas_percen==NULL)continue;
+          if(fed_areas!=NULL){
+            fed_areas=NULL;
+            break;
+          }
+          for(j=0;j<mslicei->nslices;j++){
+            slicedata *slicej;
+
+            slicej = sliceinfo + mslicei->islices[j];
+            if(slicej->loaded==0||slicej->display==0)continue;
+            itime = slicej->itime;
+            if(mslicei->nslices==1){
+              fed_areas=slicej->contour_areas_percen+4*itime;
+            }
+            else{
+              fed_areas=mslicei->contour_areas_percen+4*itime;
+            }
+            break;
+          }
         }
       }
     }

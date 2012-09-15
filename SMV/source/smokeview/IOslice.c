@@ -568,6 +568,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       mslice_contour_areas[3]+=contour_areas[3];
       mslice_contour_areas+=4;
       contour_areas+=4;
+      contour_areas_percen+=4;
     }
     for(i=1;i<fed_slice->ntimes;i++){
       int jj;
@@ -656,9 +657,9 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
           mslice_contour_areas[2]+=contour_areas[2];
           mslice_contour_areas[3]+=contour_areas[3];
           mslice_contour_areas+=4;
-          contour_areas+=4;
-          contour_areas_percen+=4;
         }
+        contour_areas+=4;
+        contour_areas_percen+=4;
       }
     }
     FREEMEMORY(iblank);
@@ -950,6 +951,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     if(flag==UNLOAD){
 
+      fed_areas=NULL;
       sd->ntimes=0;
       updatemenu=1;
       sd->loaded=0;
@@ -2133,6 +2135,8 @@ void getsliceparams(void){
       sd = sliceinfo + sliceorderindex[0];
       mslicei->islices[0] = sliceorderindex[0];
       mslicei->type=sd->type;
+      mslicei->contour_areas=NULL;
+      mslicei->contour_areas_percen=NULL;
       for(i=1;i<nsliceinfo;i++){
         slicedata *sdold;
 
@@ -2146,6 +2150,8 @@ void getsliceparams(void){
           mslicei->type=sd->type;
           mslicei->mesh_type=sd->mesh_type;
           mslicei->islices=NULL;
+          mslicei->contour_areas=NULL;
+          mslicei->contour_areas_percen=NULL;
           NewMemory((void **)&mslicei->islices,sizeof(int)*nsliceinfo);
         }
         mslicei->nslices++;
