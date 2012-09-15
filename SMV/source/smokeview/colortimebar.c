@@ -577,22 +577,22 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[1]=96;
   cbi->rgb_node[2]=255;
 
-  cbi->index_node[1]=27;
+  cbi->index_node[1]=26; // 0.295276,0.307087
   cbi->rgb_node[3]=96;
   cbi->rgb_node[4]=96;
   cbi->rgb_node[5]=255;
 
-  cbi->index_node[2]=27;
+  cbi->index_node[2]=26;
   cbi->rgb_node[6]=255;
   cbi->rgb_node[7]=255;
   cbi->rgb_node[8]=0;
 
-  cbi->index_node[3]=86;
+  cbi->index_node[3]=85; // 0.992126,1.003937
   cbi->rgb_node[9]=255;
   cbi->rgb_node[10]=255;
   cbi->rgb_node[11]=0;
 
-  cbi->index_node[4]=86;
+  cbi->index_node[4]=85;
   cbi->rgb_node[12]=255;
   cbi->rgb_node[13]=155;
   cbi->rgb_node[14]=0;

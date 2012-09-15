@@ -312,7 +312,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   int nx, ny;
   int nxy;
   int nxdata, nydata;
-  float levels[6]={-0.00001,0.3,1.0,3.0};
+  float levels[6]={-0.00001,0.295276,0.992126,3.0};
   int nlevels=5; // 2 extra levels for below 0.0 and above 3.0
   int ibar, jbar, kbar;
 
