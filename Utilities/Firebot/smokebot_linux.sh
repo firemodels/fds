@@ -23,7 +23,7 @@ done
 shift $(($OPTIND-1))
 
 #mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
-mailTo="glenn.forney@nist.gov, kristopher.overholt@nist.gov"
+mailTo="glenn.forney@nist.gov, kristopher.overholt@nist.gov, koverholt@gmail.com"
 
 FIREBOT_USERNAME="`whoami`"
 
