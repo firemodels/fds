@@ -481,11 +481,11 @@ where Kn is the particle Knudsen number given by the ratio of the mean free path
 
 The thermophoretic velocity is computed as
 \be
-u_{th} = \frac{K_{th} \nu}{T_g} \; \frac{dT}{dx}
+u_{th} = \frac{K_{th} \nu}{T_g} \; \frac{\mbox{d}T}{\mbox{d}x}
 \ee
 This requires the wall temperature gradient which is only resolved in a DNS simulation. For an LES simulation this is computed from the wall heat transfer coefficient.
 \be
- \frac{dT}{dx} = \frac{h \left( T_g - T_w \right)}{k_g}
+ \frac{\mbox{d}T}{\mbox{d}x} = \frac{h \left( T_g - T_w \right)}{k_g}
 \ee
 $K_{th}$ is the thermophoretic velocity coefficient, and it is calculated using the following correlation~\cite{Brock:1}
 \be
