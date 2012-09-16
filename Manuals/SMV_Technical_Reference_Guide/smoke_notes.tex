@@ -23,6 +23,7 @@ This \paper\ is organized as follows.  A model for visualizing smoke and fire is
 \section{Radiation Transport Equation}
 The model used here to visualize smoke is the radiation transport equation (RTE)~\cite{Siegel:2001}.  This equation uses radiance to represent smoke appearance.  Radiance has units of Watts per square meter per unit solid angle~(W/(sr$\cdot$m$^2$)).  The solid angle accounts for the fact that a light source appears brighter if it emits a given amount of light through a smaller cross-sectional area.  This has the interesting implication, ignoring atmospheric effects and as pointed out in Ref.~\cite{dutre:2002}, that the sun's radiance appears the same observed from Earth as from Mars.  The diminished heat flux $(W/\mbox{m}^2)$ on Mars due to the increased distance from the sun is exactly offset by the reduced solid angle ($sr$) that the sun's disk subtends.  From a visualization perspective, this implies that image radiance does not depend on distance from the observer unless  participating media is present to absorb or scatter  light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
 
+\newcommand{\dx}[1]{\,\mbox{d}#1}
 \newcommand{\siga}{ \sigma_a(x) }
 \newcommand{\sigt}{ \sigma_t(x) }
 \newcommand{\sigs}{ \sigma_s(x) }
@@ -30,11 +31,12 @@ The model used here to visualize smoke is the radiation transport equation (RTE)
 \newcommand{\Le}{ C_e(x) }
 \newcommand{\Lexo}{ C_e(x,\omega) }
 \newcommand{\Lxo}{ C(x,\omega) }
-\newcommand{\dLdx}{ \frac{dC}{dx}(x)}
-\newcommand{\intf}[2]{ \exp\left({\int_{#1}^{#2} \sigts ds}\right) }
-\newcommand{\intff}[2]{ {\int_{#1}^{#2} \sigts ds} }
-\newcommand{\intmf}[2]{ \exp\left({-\int_{#1}^{#2} \sigts ds}\right) }
-\newcommand{\intmff}[2]{ {-\int_#1^#2 \sigts ds} }
+\newcommand{\dLdx}{ \frac{\dx{C}}{\dx{x}}(x)}
+\newcommand{\intf}[2]{ \exp\left({\int_{#1}^{#2} \sigts \dx{s}}\right) }
+\newcommand{\intff}[2]{ {\int_{#1}^{#2} \sigts \dx{s}} }
+\newcommand{\intmf}[2]{ \exp\left({-\int_{#1}^{#2} \sigts \dx{s}}\right) }
+\newcommand{\intmff}[2]{ {-\int_#1^#2 \sigts \dx{s}} }
+\newcommand{\ddx}{ \frac{\mbox{d}}{\dx{x}} }
 
 The radiation transport equation is used to calculate radiance due to one or more light sources within a region possibly containing a participating media such as smoke~\cite{Siegel:2001}. The change in radiance along a ray with direction $\omega$ at any one instant and wavelength may be expressed using
 
@@ -43,7 +45,7 @@ The radiation transport equation is used to calculate radiance due to one or mor
  \left(\omega\cdot\nabla\right)\Lxo =
 -\underbrace{\siga\Lxo}_\mathrm{absorption}-\underbrace{\sigs\Lxo}_\mathrm{out-scattering}
 + \underbrace{\siga\Lexo}_\mathrm{emission} +
-\underbrace{\sigs\int_{4\pi}p(x,\omega,\omega')C_i(x,\omega')d\omega'}_\mathrm{in-scattering}
+\underbrace{\sigs\int_{4\pi}p(x,\omega,\omega')C_i(x,\omega')\dx{\omega'}}_\mathrm{in-scattering}
 \end{eqnarray}
 
 \noindent where  $\Lxo$ represents the  radiance at $x$ along a direction $\omega$.
@@ -71,24 +73,24 @@ Equation (\ref{eq:fullrte}) is then approximated by neglecting the integral term
  C(x_0)&=&C_0
 \end{eqnarray*}
 
-This equation may be solved by rearranging terms and applying the integrating factor $\exp(\int_{x_0}^x \sigts ds)$ obtaining
+This equation may be solved by rearranging terms and applying the integrating factor $\exp(\int_{x_0}^x \sigts \dx{s})$ obtaining
 
 \begin{eqnarray*}
 \intf{x_0}{x}\left(\dLdx+\sigt C(x)\right)&=&  \intf{x_0}{x}\siga \Le\\
-\frac{d}{dx}\left(\intf{x_0}{x} C(x)\right)&=& \intf{x_0}{x}\siga \Le
+\ddx\left(\intf{x_0}{x} C(x)\right)&=& \intf{x_0}{x}\siga \Le
 \end{eqnarray*}
 
 Integrating both sides and substituting the integration limits results in
 
 \begin{eqnarray*}
-\left.\intf{x_0}{x} C(x)\right|_{x_0}^{x_N}&=& \int_{x_0}^{x_N}\intf{x_0}{x}\siga \Le dx \\
-\intf{x_0}{x_N} C(x_N)-C_0&=& \int_{x_0}^{x_N}\intf{x_0}{x}\siga \Le dx
+\left.\intf{x_0}{x} C(x)\right|_{x_0}^{x_N}&=& \int_{x_0}^{x_N}\intf{x_0}{x}\siga \Le \dx{x} \\
+\intf{x_0}{x_N} C(x_N)-C_0&=& \int_{x_0}^{x_N}\intf{x_0}{x}\siga \Le \dx{x}
 \end{eqnarray*}
 
 Solving for $C(x_N)$ after noting that $\intff{x_0}{x}-\intff{x_0}{x_N}=-\intff{x}{x_N}$ results in
 
 \begin{eqnarray*}
-C(x_N)&=&\intmf{x_0}{x_N} C_0+ \int_{x_0}^{x_N}\intmf{x}{x_N}\siga \Le dx\\
+C(x_N)&=&\intmf{x_0}{x_N} C_0+ \int_{x_0}^{x_N}\intmf{x}{x_N}\siga \Le \dx{x}\\
 \end{eqnarray*}
 
 which may be simplified to
@@ -96,7 +98,7 @@ which may be simplified to
 \begin{equation}
 \label{eq:rte_simp}
 \label{eq:rtesoln}
- C(x_N)=\tau(x_0,x_N)C_0 + \int_{x_0}^{x_N}\tau(x,x_N)\siga\Le dx
+ C(x_N)=\tau(x_0,x_N)C_0 + \int_{x_0}^{x_N}\tau(x,x_N)\siga\Le \dx{x}
 \end{equation}
 
 after defining $\tau(a,b)$ as
@@ -138,7 +140,7 @@ radiance within a column of 3D smoke data. The transparency across the interval 
 The optical depth, $\tau(a,b)$, defined in (\ref{eq:optdepth}) is discretized using a Riemann sum  after defining sample points $s_j=x_0+j\Delta s$ for $j=0$ to $N$ with spacing $\Delta s=(x_N-x_0)/N$ to obtain
 
 \begin{eqnarray*}
-\htau{i}=\tau(x_i,x_N)&=&\exp\left(-\int_{x_i}^{x_N}\sigma_t(s)ds\right)\approx\exp\left(-\sum_{j=i}^{N-1}\sigma_t(s_j)\Delta s\right)\\
+\htau{i}=\tau(x_i,x_N)&=&\exp\left(-\int_{x_i}^{x_N}\sigma_t(s)\dx{s}\right)\approx\exp\left(-\sum_{j=i}^{N-1}\sigma_t(s_j)\Delta s\right)\\
 &=&\prod_{j=i}^{N-1}\exp\left(-\sigma_t(s_j)\Delta s\right)=\prod_{j=i}^{N-1}\tau_j
 \end{eqnarray*}
 
@@ -222,15 +224,15 @@ Let $C$ be a radiance computed on $[x_0,x_N]$ and $C_1$ and $C_2$ be radiances c
 From (\ref{eq:rte_simp}) and (\ref{eq:optdepth}), the radiance $C$ and optical depth $\tau$ are given by
 
 \begin{eqnarray*}
-C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
+C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
 \tau&=&\tau(x_0,x_N)
 \end{eqnarray*}
 
 Likewise, the radiances $C_1$ and $C_2$ and optical depths $\tau_1$ and $\tau_2$ for the intervals $[x_0,D]$ and $[D,x_N]$ are given by
 
 \begin{eqnarray*}
-C_1&=&\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx\\
-C_2&=&\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
+C_1&=&\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)\dx{x}\\
+C_2&=&\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
 \tau_1&=&\tau(x_0,D)\\
 \tau_2&=&\tau(D,x_N)
 \end{eqnarray*}
@@ -242,9 +244,9 @@ The optical depth $\tau$ can be split into two parts giving
 since from (\ref{eq:optdepth}) it can be shown that for any $x$, $\tau(a,b)=\tau(a,x)\tau(x,b)$.
 The radiance $C$ can also be split into two parts giving
 \begin{eqnarray*}
-C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-&=&\int_{x_0}^{D}\tau(x,x_N)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-&=&\tau(D,x_N)\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
+C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
+&=&\int_{x_0}^{D}\tau(x,x_N)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
+&=&\tau(D,x_N)\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
 &=&\tau_2C_1+C_2
 \end{eqnarray*}
 
@@ -299,9 +301,9 @@ The absorption parameter, $\alpha$, needs to be adjusted for view directions not
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=3.5in]{FIGURES/forney_figure4}}
 \caption [Diagram illustrating the adjustment required to the opaqueness parameter, $\alpha$,
-for non-axis aligned views.] 
+for non-axis aligned views.]
 { Diagram illustrating the adjustment required to the opaqueness parameter, $\alpha$,
-for non axis aligned views. 
+for non axis aligned views.
 The adjusted opacity $\hat{\alpha}$ along the $\Delta\hat{x}$ segment is related to $\alpha$ value along the $\Delta x$ segment using $(1-\hat{\alpha})=(1-\alpha)^{\Delta \hat{x}/\Delta x}$}
 \label{figray}
 \end{figure}
@@ -466,7 +468,7 @@ To overcome this problem, the RTE needs to be solved across the full 3D data mes
 % -------------------  A Solution using Volumes ------------------------
 
 \section{Volume Rendering}
-Volume rendering is the process of visualizing 3D data by projecting partially transparent colors derived from 3D data onto a 2D plane forming an image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  Transfer functions or colormaps are used to map data to color and optical density (opacity).  In this application temperature is mapped to color and soot density is mapped to opacity.  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  
+Volume rendering is the process of visualizing 3D data by projecting partially transparent colors derived from 3D data onto a 2D plane forming an image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  Transfer functions or colormaps are used to map data to color and optical density (opacity).  In this application temperature is mapped to color and soot density is mapped to opacity.  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.
 Soot density is mapped to opacity.  The colors and opacities are then combined to form an image.  The strategy then is to perform color mixing in the same way that light would behave by solving an approximate form of the radiation transport equation.  The approximate RTE solution given in (\ref{eq:rtesoln})  is used to collapse 3D data into 2D images projected onto the sides of the mesh visible to the observer.
 
 \begin{figure}[\figoptions]
@@ -501,10 +503,10 @@ The image, in a), is as viewed by the observer.  The other two images, b) and c)
 \label{fig:volplume_example}
 \end{figure}
 
-Three example colormaps  are illustrated in Figure \ref{fig:colormaps}.  
-The black/orange colormap in Figure \ref{fig:colormaps}a 
-is used to produce an image.  If the temperature is below a user specified value, the color is black, representing soot (where emission is not significant).  If the temperature is above this value then it is a shade of orange, representing emission from a fire.  The particular shade chosen is based on the color emmitted by a black body source.  
-The black to white colormap in Figure \ref{fig:colormaps}b along with an extinction coefficient appropriate for infrared could be used to simulate the effect of a thermal imager by using black for cool temperatures and white for warm temperatures.  
+Three example colormaps  are illustrated in Figure \ref{fig:colormaps}.
+The black/orange colormap in Figure \ref{fig:colormaps}a
+is used to produce an image.  If the temperature is below a user specified value, the color is black, representing soot (where emission is not significant).  If the temperature is above this value then it is a shade of orange, representing emission from a fire.  The particular shade chosen is based on the color emmitted by a black body source.
+The black to white colormap in Figure \ref{fig:colormaps}b along with an extinction coefficient appropriate for infrared could be used to simulate the effect of a thermal imager by using black for cool temperatures and white for warm temperatures.
 The rainbow colormap in Figure \ref{fig:colormaps}c produces non-realistic images which can still be of value for highlighting data of interest.
 
 \begin{figure}[\figoptions]
