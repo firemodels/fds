@@ -298,6 +298,8 @@ run_verification_cases_short()
    cd $FDS_SVNROOT/Verification
    find . -name '*.stop' -exec rm -f {} \;
    find . -name '*.err' -exec rm -f {} \;
+   find Visualization -name '*.smv' -exec rm -f {} \;
+   find WUI -name '*.smv' -exec rm -f {} \;
 }
 
 check_verification_cases_short()
