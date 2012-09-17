@@ -1,4 +1,7 @@
 #!/bin/csh -f
-cd ~/SMOKEBOT
+echo updating repository
+cd ~/FDS-SMV
+svn update
 echo starting smokebot
-./run_smokebot.sh &
+cd ~/SMOKEBOT
+./run_smokebot.sh 
