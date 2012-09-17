@@ -54,8 +54,8 @@ fi
 # Start firebot timer
 START_TIME=$(date +%s)
 
-# Set time limit (43,200 seconds = 12 hours)
-TIME_LIMIT=43200
+# Set time limit (57,600 seconds = 16 hours)
+TIME_LIMIT=57600
 TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
 
 check_time_limit()
