@@ -1,8 +1,8 @@
-&HEAD CHID='NIST_Dunes_2000_Mattress_A', TITLE='NIST Dunes 2000 Mattress Test A (Specimen 108856)' /
+&HEAD CHID='NIST_Dunes_2000_SDC10', TITLE='NIST Dunes 2000 Test SDC10 (Chair Specimen 108858)' /
 
 &MESH IJK=220,60,28, XB=-1,21,-1,5,0,2.8 /
 
-&TIME T_END=100.0 /
+&TIME T_END=120.0 /
 
 &DUMP DT_HRR=1., DT_DEVC=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
@@ -18,52 +18,51 @@
 = Fire =
 ========
 
-&OBST XB=17.8,19.7,2.8,3.8,0.0,0.3 / Mattress
-&VENT XB=17.8,18.4,2.8,3.4,0.3,0.3, SURF_ID='fire' /
-&SURF ID='fire', HRRPUA=5989, RAMP_Q='fireramp', COLOR='RED' /
+&OBST XB=12.0,12.6,2.9,3.5,0.0,0.3 / Chair
+&VENT XB=12.0,12.6,2.9,3.5,0.3,0.3, SURF_ID='fire' /
+&SURF ID='fire', HRRPUA=7857, RAMP_Q='fireramp', COLOR='RED' /
 
-&RAMP ID='fireramp', T=0.0, F=0.01 /
-&RAMP ID='fireramp', T=10.0, F=0.01 /
-&RAMP ID='fireramp', T=20.0, F=0.01 /
-&RAMP ID='fireramp', T=30.0, F=0.01 /
-&RAMP ID='fireramp', T=40.0, F=0.01 /
-&RAMP ID='fireramp', T=50.0, F=0.01 /
-&RAMP ID='fireramp', T=60.0, F=0.02 /
-&RAMP ID='fireramp', T=70.0, F=0.03 /
-&RAMP ID='fireramp', T=80.0, F=0.04 /
-&RAMP ID='fireramp', T=90.0, F=0.05 /
-&RAMP ID='fireramp', T=100.0, F=0.06 /
-&RAMP ID='fireramp', T=110.0, F=0.06 /
-&RAMP ID='fireramp', T=120.0, F=0.06 /
-&RAMP ID='fireramp', T=130.0, F=0.08 /
-&RAMP ID='fireramp', T=140.0, F=0.12 /
-&RAMP ID='fireramp', T=150.0, F=0.19 /
-&RAMP ID='fireramp', T=160.0, F=0.3 /
-&RAMP ID='fireramp', T=170.0, F=0.44 /
-&RAMP ID='fireramp', T=180.0, F=0.58 /
-&RAMP ID='fireramp', T=190.0, F=0.7 /
-&RAMP ID='fireramp', T=200.0, F=0.78 /
-&RAMP ID='fireramp', T=210.0, F=0.77 /
-&RAMP ID='fireramp', T=220.0, F=0.68 /
-&RAMP ID='fireramp', T=230.0, F=0.54 /
-&RAMP ID='fireramp', T=240.0, F=0.37 /
-&RAMP ID='fireramp', T=250.0, F=0.22 /
-&RAMP ID='fireramp', T=260.0, F=0.11 /
-&RAMP ID='fireramp', T=270.0, F=0.06 /
-&RAMP ID='fireramp', T=280.0, F=0.03 /
-&RAMP ID='fireramp', T=290.0, F=0.02 /
-&RAMP ID='fireramp', T=300.0, F=0.01 /
-&RAMP ID='fireramp', T=310.0, F=0.01 /
-&RAMP ID='fireramp', T=320.0, F=0.01 /
-&RAMP ID='fireramp', T=330.0, F=0.01 /
-&RAMP ID='fireramp', T=340.0, F=0.01 /
-&RAMP ID='fireramp', T=350.0, F=0.01 /
-&RAMP ID='fireramp', T=360.0, F=0.01 /
-&RAMP ID='fireramp', T=370.0, F=0.01 /
-&RAMP ID='fireramp', T=380.0, F=0.01 /
-&RAMP ID='fireramp', T=390.0, F=0.0 /
-&RAMP ID='fireramp', T=400.0, F=0.0 /
-&RAMP ID='fireramp', T=410.0, F=0.0 /
+&RAMP ID='fireramp', T=0.0, F=0.0 /
+&RAMP ID='fireramp', T=3.0, F=0.0 /
+&RAMP ID='fireramp', T=6.0, F=0.0 /
+&RAMP ID='fireramp', T=9.0, F=0.0 /
+&RAMP ID='fireramp', T=12.0, F=0.0 /
+&RAMP ID='fireramp', T=15.0, F=0.0 /
+&RAMP ID='fireramp', T=18.0, F=0.0 /
+&RAMP ID='fireramp', T=21.0, F=0.0 /
+&RAMP ID='fireramp', T=24.0, F=0.0 /
+&RAMP ID='fireramp', T=27.0, F=0.0 /
+&RAMP ID='fireramp', T=30.0, F=0.0 /
+&RAMP ID='fireramp', T=33.0, F=0.0 /
+&RAMP ID='fireramp', T=36.0, F=0.0 /
+&RAMP ID='fireramp', T=39.0, F=0.0 /
+&RAMP ID='fireramp', T=42.0, F=0.0 /
+&RAMP ID='fireramp', T=45.0, F=0.0 /
+&RAMP ID='fireramp', T=48.0, F=0.0 /
+&RAMP ID='fireramp', T=51.0, F=0.0 /
+&RAMP ID='fireramp', T=54.0, F=0.0 /
+&RAMP ID='fireramp', T=57.0, F=0.0 /
+&RAMP ID='fireramp', T=60.0, F=0.0 /
+&RAMP ID='fireramp', T=63.0, F=0.0 /
+&RAMP ID='fireramp', T=66.0, F=0.0 /
+&RAMP ID='fireramp', T=69.0, F=0.0 /
+&RAMP ID='fireramp', T=72.0, F=0.0 /
+&RAMP ID='fireramp', T=75.0, F=0.01 /
+&RAMP ID='fireramp', T=78.0, F=0.01 /
+&RAMP ID='fireramp', T=81.0, F=0.01 /
+&RAMP ID='fireramp', T=84.0, F=0.01 /
+&RAMP ID='fireramp', T=87.0, F=0.01 /
+&RAMP ID='fireramp', T=90.0, F=0.01 /
+&RAMP ID='fireramp', T=93.0, F=0.01 /
+&RAMP ID='fireramp', T=96.0, F=0.01 /
+&RAMP ID='fireramp', T=99.0, F=0.01 /
+&RAMP ID='fireramp', T=102.0, F=0.01 /
+&RAMP ID='fireramp', T=105.0, F=0.02 /
+&RAMP ID='fireramp', T=108.0, F=0.02 /
+&RAMP ID='fireramp', T=111.0, F=0.02 /
+&RAMP ID='fireramp', T=114.0, F=0.01 /
+&RAMP ID='fireramp', T=117.0, F=0.01 /
+&RAMP ID='fireramp', T=120.0, F=0.02 /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
@@ -132,6 +131,8 @@
 &OBST XB=13.4,13.5,3.5,4.0,0.0,2.2 /
 
 &OBST XB=13.4,17.5,1.3,1.4,0.0,2.3 / Bedroom 3 corridor wall
+&HOLE XB=14.3,14.9,1.3,1.4,0.0,0.6 / Open vent
+&HOLE XB=14.3,14.9,3.9,4.1,0.0,0.6 / Open vent
 
 &OBST XB=6.1,6.2,0.0,0.5,0.0,2.2 / Bathroom walls
 &OBST XB=6.1,6.2,0.5,1.1,0.0,2.3 /
@@ -312,60 +313,3 @@
 # Optical Density
 &DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.02 from ceil' /
 &DEVC XYZ=11.75, 0.38, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.9 from ceil' /
-
-&SLCF PBX=19.63,  QUANTITY='TEMPERATURE' /
-&SLCF PBY=2.2315, QUANTITY='TEMPERATURE' /
-
-&SLCF PBX=2.30, QUANTITY='TEMPERATURE' /
-&SLCF PBY=2.31, QUANTITY='TEMPERATURE' /
-
-&SLCF PBX=16.16, QUANTITY='TEMPERATURE' /
-&SLCF PBY=1.50,  QUANTITY='TEMPERATURE' /
-
-&SLCF PBX=3.17, QUANTITY='TEMPERATURE' /
-&SLCF PBY=3.43, QUANTITY='TEMPERATURE' /
-
-&SLCF PBX=7.18, QUANTITY='TEMPERATURE' /
-&SLCF PBY=1.93, QUANTITY='TEMPERATURE' /
-
-&SLCF PBX=7.98, QUANTITY='TEMPERATURE' /
-&SLCF PBY=3.48, QUANTITY='TEMPERATURE' /
-
-
-&SLCF PBX=19.63, QUANTITY='soot density', VECTOR=.TRUE. /
-&SLCF PBY=2.2315, QUANTITY='soot density', VECTOR=.TRUE. /
-
-&SLCF PBX=2.30, QUANTITY='soot density', VECTOR=.TRUE. /
-&SLCF PBY=2.31, QUANTITY='soot density', VECTOR=.TRUE. /
-
-&SLCF PBX=16.16, QUANTITY='soot density', VECTOR=.TRUE. /
-&SLCF PBY=1.50, QUANTITY='soot density', VECTOR=.TRUE. /
-
-&SLCF PBX=3.17, QUANTITY='soot density', VECTOR=.TRUE. /
-&SLCF PBY=3.43, QUANTITY='soot density', VECTOR=.TRUE. /
-
-&SLCF PBX=7.18, QUANTITY='soot density', VECTOR=.TRUE. /
-&SLCF PBY=1.93, QUANTITY='soot density', VECTOR=.TRUE. /
-
-&SLCF PBX=7.98, QUANTITY='soot density', VECTOR=.TRUE. /
-&SLCF PBY=3.48, QUANTITY='soot density', VECTOR=.TRUE. /
-
-
-&SLCF PBX=19.63, QUANTITY='VELOCITY' /
-&SLCF PBY=2.2315, QUANTITY='VELOCITY' /
-
-&SLCF PBX=2.30, QUANTITY='VELOCITY' /
-&SLCF PBY=2.31, QUANTITY='VELOCITY' /
-
-&SLCF PBX=16.16, QUANTITY='VELOCITY' /
-&SLCF PBY=1.50, QUANTITY='VELOCITY' /
-
-&SLCF PBX=3.17, QUANTITY='VELOCITY' /
-&SLCF PBY=3.43, QUANTITY='VELOCITY' /
-
-&SLCF PBX=7.18, QUANTITY='VELOCITY' /
-&SLCF PBY=1.93, QUANTITY='VELOCITY' /
-
-&SLCF PBX=7.98, QUANTITY='VELOCITY' /
-&SLCF PBY=3.48, QUANTITY='VELOCITY' /
-
