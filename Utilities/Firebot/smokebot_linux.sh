@@ -11,7 +11,7 @@
 #  = Input variables =
 #  ===================
 
-FIREBOT_QUEUE=firebot
+FIREBOT_QUEUE=smokebot
 while getopts 'q:' OPTION
 do
 case $OPTION in
