@@ -655,13 +655,20 @@ learning how to create new input files.
 
 \section{Starting an FDS Calculation}
 
-FDS can be run from the command prompt, or with a third party Graphical User Interface (GUI).
-In the discussion to follow, it is assumed that FDS is being run from the command prompt.
-FDS can be run on a single computer, using only one CPU, or it can be run on multiple
-computers and use multiple CPUs. For any operating system, there are two FDS executable files.
-The single CPU 32 bit Windows executable is called {\ct fds\_win\_32.exe}.
-The parallel executable is called {\ct fds\_mpi\_win\_32.exe}. The letters {\ct mpi} in the filename denote
-Message Passing Interface, which will be discussed below.
+FDS can be run from the command prompt, or with a third party
+Graphical User Interface (GUI). In the discussion to follow, it is
+assumed that FDS is being run from the command prompt. FDS can be
+run on a single computer, using only one CPU, or it can be run on
+multiple computers and use multiple CPUs. The executable names are
+the same across all platform types (Windows, Linux and OSX) and
+sizes (32 and 64 bits). The single CPU executable is called {\ct
+fds}\ (with an {\ct .exe}\ file extension on Windows).  The
+parallel executable is called {\ct fds\_mpi} (again with an {\ct
+.exe}\ file extension for Windows). The letters {\ct mpi} in the
+filename denote Message Passing Interface, which will be discussed
+below.  Batch files (Windows) or aliases ( Linux or OSX) may be
+defined to distinguish executables if you wish to install multiple
+versions of FDS.
 
 \begin{warning}
 \noindent
@@ -687,15 +694,16 @@ input file for the case is located, then run the code by typing at the command p
 \begin{verbatim}
 fds job_name.fds
 \end{verbatim}
-On a 64 bit machine, substitute 64 for 32.
-The character string {\ct job\_name} is usually
-designated within the input file as the {\ct CHID}. It is recommended that the
-name of the input file and the {\ct CHID} be the same so that all of the
-files associated with a given calculation have a consistent name.  The progress of a simulation is indicated by diagnostic output that is written
-out onto the screen. Detailed diagnostic information is automatically
-written to a file {\ct CHID.out}, where {\ct CHID} is a character
-string, usually the same as {\ct job\_name}, designated in the input file..
-Screen output can be redirected to a file via the alternative command
+The character string {\ct job\_name} is usually designated within
+the input file as the {\ct CHID}. It is recommended that the name
+of the input file and the {\ct CHID} be the same so that all of
+the files associated with a given calculation have a consistent
+name.  The progress of a simulation is indicated by diagnostic
+output that is written out onto the screen. Detailed diagnostic
+information is automatically written to a file {\ct CHID.out},
+where {\ct CHID} is a character string, usually the same as {\ct
+job\_name}, designated in the input file. Screen output can be
+redirected to a file via the alternative command
 \begin{verbatim}
 fds job_name.fds > job_name.err
 \end{verbatim}
@@ -708,28 +716,40 @@ This action will cause previously generated output files to be over-written.
 
 \subsubsection{Mac OS X, Unix, Linux}
 
-Depending on the type of installation, you may need to set various
-path or environment variables in order to invoke FDS without a full
-path reference to the executable. The easiest way to do this is via
-an ``alias'' in your shell start-up script. For the example below,
-it is assumed that {\ct fds} is an alias for the specific executable used.
-You may also need to ``chmod + x'' to make the file executable.
-Once this is done, run FDS from the command line by typing:
+The installer for Mac OS X, Unix and Linux versions of FDS sets
+the {\ct PATH}\ variable allowing one to invoke FDS without a full
+path reference to the executable.  To run FDS from the command
+line type:
 \begin{verbatim}
 fds job_name.fds
 \end{verbatim}
 The input parameters are read from the file {\ct job\_name.fds},
-and error statements and other diagnostics are written out to the screen.
-To run the job in the background:
+and error statements and other diagnostics are written out to the
+screen. To run the job in the background:
 \begin{verbatim}
 fds job_name.fds >& job_name.err &
 \end{verbatim}
-Note that in the latter case, the screen output is stored in the file
-{\ct job\_name.err} and the detailed diagnostics are saved automatically
-in a file {\ct CHID.out}, where {\ct CHID} is a character string, usually
-the same as {\ct job\_name}, designated in the input file. It is preferable
-to run jobs in the background so as to free the console for other uses.
+Note that in the latter case, the screen output is stored in the
+file {\ct job\_name.err} and the detailed diagnostics are saved
+automatically in a file {\ct CHID.out}, where {\ct CHID} is a
+character string, usually the same as {\ct job\_name}, designated
+in the input file. It is preferable to run jobs in the background
+so as to free the console for other uses. To see output while an
+FDS job is running type:
+\begin{verbatim}
+tail -f job_name.err
+\end{verbatim}
+or
+\begin{verbatim}
+tail -f job_name.out
+\end{verbatim}
 
+The installer also defines aliases named fds6 and fds6\_mpi
+pointing to the executables. Other aliases may be defined by
+adding entries to the shell start-up script. Note, do not use
+``{\ct fds}'' or ``{\ct fds\_mpi}'' for alias names as these are
+the names used for executables distributed with FDS. You may also
+need to use ``chmod~+x'' to make the file executable.
 
 
 \subsection{Starting an FDS Calculation (Multiple Processor Version)}
@@ -2321,7 +2341,7 @@ When specifying an initial density it is important to recognize the order in whi
 \end{verbatim}
 \normalsize
 
-\noindent This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature. 
+\noindent This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
 \subsection*{Heat Release Rate Per Unit Volume (HRRPUV)}
 
@@ -3181,8 +3201,8 @@ By analogy, we define the non-dimensional temperature $T^+ \equiv (T_g-T_w)/T_\t
 \begin{equation}
 h = \frac{\dot{q}^{''}_w}{\Delta T} = \frac{\rho_w c_p u_\tau}{T^+}
 \end{equation}
-Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular 
-surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. 
+Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular
+surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
@@ -3943,7 +3963,7 @@ Both the fabric and the foam decompose into fuel gases via
 single-step reactions. The fuel gases from each have different
 composition and heats of combustion. FDS automatically adjusts
 the mass loss rate of each so that the ``effective'' fuel gas
-is that specified by the user on the {\ct REAC} line.  
+is that specified by the user on the {\ct REAC} line.
 
 The same couch model is included in a room-scale fire simulation, known as the
 {\ct room\_fire} test case. Figure~\ref{room_fire} shows the fire after 3 and 5~minutes, respectively.
@@ -4581,7 +4601,7 @@ specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$
 \noindent
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER\_ID}, or {\ct FAN\_ID} should be specified for a duct.
 
-To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  
+To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3in]{FIGURES/hvac-simplify.png}
@@ -4623,7 +4643,7 @@ If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS 
 \end{description}
 
 \noindent
-A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT=.TRUE.} or a specified {\ct VENT\_ID}.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID} to {\ct 'HVAC'} and you must set the {\ct VENT\_ID}.  
+A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT=.TRUE.} or a specified {\ct VENT\_ID}.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID} to {\ct 'HVAC'} and you must set the {\ct VENT\_ID}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -4823,7 +4843,7 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 \item[{\ct DEVC\_ID}] is the name of a device controlling the operation of the aircoil. A {\ct CTRL\_ID} can be used as an alternative.
 \item[{\ct EFFICIENCY}] is the heat exchanger efficiency, $\eta$, from 0 to 1.  A value of 1 indicates the exit temperatures on both sides of the heat exchanger will be equal.
 \item[{\ct FIXED\_Q}] is the constant heat exchange rate. A negative value indicates heat removal from the duct.  The heat exchange rate can be controlled by either {\ct RAMP\_ID} or by {\ct TAU\_AC}.
-\item[{\ct TAU\_AC}]  defines a tanh ({\ct TAU\_AC}>0) or t$^2$ ramp ({\ct TAU\_AC}<0) for the aircoil.  This is applied to the {\ct FIXED\_Q} of the aircoil. Alternatively, a {\ct RAMP\_ID} can be given. 
+\item[{\ct TAU\_AC}]  defines a tanh ({\ct TAU\_AC}>0) or t$^2$ ramp ({\ct TAU\_AC}<0) for the aircoil.  This is applied to the {\ct FIXED\_Q} of the aircoil. Alternatively, a {\ct RAMP\_ID} can be given.
 \end{description}
 
 \noindent
