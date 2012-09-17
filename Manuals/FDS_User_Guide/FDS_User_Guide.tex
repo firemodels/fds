@@ -4725,7 +4725,9 @@ The second is an open duct with a flow loss of 10. The relevant input lines are:
 \noindent
 The volume flow through the fans is obtained from Eq.~(\ref{fan_curve}). $\dot{V}_{\hbox{\footnotesize max}}=0.16$~m$^3$/s is the maximum output of the fan from
 Zone~1 to Zone~2 and 0.2~m/s is the flow speed from Zone~2 to Zone~1. $\Delta p_{\hbox{\footnotesize max}}=10$~Pa is the maximum pressure difference at which the fan can operate. In steady state, the volume flow from compartment to compartment should be equal and opposite in sign.
-This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss through the return duct:
+This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss, $K$, through the return duct.  The volume flow through the duct for a given pressure drop can be found from the duct momentum equation ignoring all terms but the flow loss:
+\be  \dot{V}_{\hbox{\footnotesize fan}}=A_{\hbox{\footnotesize duct}} \sqrt{\frac{2 \Delta p}{\rho K}} \ee
+Setting the above equation equal to Eq.~(\ref{fan_curve}), the pressure drop can be determined:
 \be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{kg/m$^3$}) 10}} (0.4 \; \hbox{m/s}) =
    (0.16 \; \hbox{m$^3$/s})  \;
    \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  } \ee
@@ -4825,11 +4827,10 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 \end{description}
 
 \noindent
-Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the latter case, the heat exchange is computed as:
-
+Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the latter case, the heat exchange is computed as a two step process.  First, the outlet temperature is determined assuming 100 \% efficient (i.e. both fluids exit at the same temperature):
 \be T_{fluid,out}=\frac{c_{p,gas} u_{duct} A_{duct} \rho_{duct} T_{duct,in} + c_{p,fluid} \dm_{fluid} T_{fluid,in}}{c_{p,gas} u_{duct} A_{duct} \rho_{duct} + c_{p,fluid} \dm_{fluid}}
 \ee
-
+Second, the actual heat exchanged is computed using the {\ct EFFICIENCY}.
 \be \dq_{coil}=\eta  c_{p,fluid} \dm_{fluid} \left( T_{fluid,in} - T_{fluid,out} \right)
 \ee
 
