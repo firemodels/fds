@@ -240,46 +240,6 @@ check_compile_fds_db()
    fi
 }
 
-#  =================================
-#  = Stage 2b - Compile FDS MPI DB =
-#  =================================
-
-compile_fds_mpi_db()
-{
-   # Clean and compile FDS MPI DB
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
-   make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
-}
-
-check_compile_fds_mpi_db()
-{
-   # Check for errors in FDS MPI DB compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
-   if [ -e "fds_mpi_intel_linux_64_db" ]
-   then
-      stage2b_success=true
-   else
-      echo "Errors from Stage 2b - Compile FDS MPI DB:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage2b >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Stage 2b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-#  ================================================
-#  = Stage 3 - Run verification cases (short run) =
 #  ================================================
 
 wait_verification_cases_short_start()
@@ -397,45 +357,6 @@ check_compile_fds()
    else
       echo "Stage 4a warnings:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-#  ======================================
-#  = Stage 4b - Compile FDS MPI release =
-#  ======================================
-
-compile_fds_mpi()
-{
-   # Clean and compile FDS MPI
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64
-   make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage4b
-}
-
-check_compile_fds_mpi()
-{
-   # Check for errors in FDS MPI compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64
-   if [ -e "fds_mpi_intel_linux_64" ]
-   then
-      stage4b_success=true
-   else
-      echo "Errors from Stage 4b - Compile FDS MPI release:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage4b >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Stage 4b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -809,13 +730,8 @@ check_svn_checkout
 compile_fds_db
 check_compile_fds_db
 
-### Stage 2b ###
-# No stage dependencies
-compile_fds_mpi_db
-check_compile_fds_mpi_db
-
 ### Stage 3 ###
-if [[ $stage2a_success && $stage2b_success ]] ; then
+if [[ $stage2a_success ]] ; then
    run_verification_cases_short
    check_verification_cases_short
 fi
@@ -826,14 +742,9 @@ if $stage2a_success ; then
    check_compile_fds
 fi
 
-### Stage 4b ###
-if $stage2b_success ; then
-   compile_fds_mpi
-   check_compile_fds_mpi
-fi
-
 ### Stage 5 ###
-if [[ $stage4a_success && $stage4b_success ]] ; then
+#if [[ $stage4a_success && $stage4b_success ]] ; then
+if [[ $stage4a_success ]] ; then
    run_verification_cases_long
    check_verification_cases_long
 fi
