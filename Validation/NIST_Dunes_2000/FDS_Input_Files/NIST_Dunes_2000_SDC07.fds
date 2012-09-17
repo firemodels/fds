@@ -1,0 +1,315 @@
+&HEAD CHID='NIST_Dunes_2000_SDC07', TITLE='NIST Dunes 2000 Test SDC07 (Mattress Specimen 108856)' /
+
+&MESH IJK=220,60,28, XB=-1,21,-1,5,0,2.8 /
+
+&TIME T_END=120.0 /
+
+&DUMP DT_HRR=1., DT_DEVC=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+
+&REAC FUEL       = 'POLYURETHANE'
+      FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
+      SOOT_YIELD = 0.10
+      N          = 1.0
+      C          = 6.3
+      H          = 7.1
+      O          = 2.1 /
+
+========
+= Fire =
+========
+
+&OBST XB=17.8,19.7,2.8,3.8,0.0,0.3 / Mattress
+&VENT XB=17.8,18.4,2.8,3.4,0.3,0.3, SURF_ID='fire' /
+&SURF ID='fire', HRRPUA=5989, RAMP_Q='fireramp', COLOR='RED' /
+
+&RAMP ID='fireramp', T=0.0, F=0.0 /
+&RAMP ID='fireramp', T=3.0, F=0.0 /
+&RAMP ID='fireramp', T=6.0, F=0.0 /
+&RAMP ID='fireramp', T=9.0, F=0.0 /
+&RAMP ID='fireramp', T=12.0, F=0.0 /
+&RAMP ID='fireramp', T=15.0, F=0.0 /
+&RAMP ID='fireramp', T=18.0, F=0.0 /
+&RAMP ID='fireramp', T=21.0, F=0.0 /
+&RAMP ID='fireramp', T=24.0, F=0.0 /
+&RAMP ID='fireramp', T=27.0, F=0.0 /
+&RAMP ID='fireramp', T=30.0, F=0.0 /
+&RAMP ID='fireramp', T=33.0, F=0.0 /
+&RAMP ID='fireramp', T=36.0, F=0.0 /
+&RAMP ID='fireramp', T=39.0, F=0.0 /
+&RAMP ID='fireramp', T=42.0, F=0.0 /
+&RAMP ID='fireramp', T=45.0, F=0.0 /
+&RAMP ID='fireramp', T=48.0, F=0.0 /
+&RAMP ID='fireramp', T=51.0, F=0.0 /
+&RAMP ID='fireramp', T=54.0, F=0.0 /
+&RAMP ID='fireramp', T=57.0, F=0.0 /
+&RAMP ID='fireramp', T=60.0, F=0.0 /
+&RAMP ID='fireramp', T=63.0, F=0.0 /
+&RAMP ID='fireramp', T=66.0, F=0.0 /
+&RAMP ID='fireramp', T=69.0, F=0.0 /
+&RAMP ID='fireramp', T=72.0, F=0.0 /
+&RAMP ID='fireramp', T=75.0, F=0.0 /
+&RAMP ID='fireramp', T=78.0, F=0.0 /
+&RAMP ID='fireramp', T=81.0, F=0.0 /
+&RAMP ID='fireramp', T=84.0, F=0.0 /
+&RAMP ID='fireramp', T=87.0, F=0.0 /
+&RAMP ID='fireramp', T=90.0, F=0.0 /
+&RAMP ID='fireramp', T=93.0, F=0.01 /
+&RAMP ID='fireramp', T=96.0, F=0.01 /
+&RAMP ID='fireramp', T=99.0, F=0.01 /
+&RAMP ID='fireramp', T=102.0, F=0.01 /
+&RAMP ID='fireramp', T=105.0, F=0.01 /
+&RAMP ID='fireramp', T=108.0, F=0.01 /
+&RAMP ID='fireramp', T=111.0, F=0.01 /
+&RAMP ID='fireramp', T=114.0, F=0.02 /
+&RAMP ID='fireramp', T=117.0, F=0.02 /
+&RAMP ID='fireramp', T=120.0, F=0.02 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='WALL' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&MATL ID            = 'GYPSUM PLASTER'
+      FYI           = 'Quintiere, Fire Behavior'
+      CONDUCTIVITY  = 0.48
+      SPECIFIC_HEAT = 0.84
+      DENSITY       = 1440. /
+
+&SURF ID             = 'WALL'
+      RGB            = 200,200,180
+      MATL_ID        = 'GYPSUM PLASTER'
+      THICKNESS      = 0.012
+      DEFAULT        = .TRUE. /
+
+============
+= Geometry =
+============
+
+&OBST XB=0.0,0.1,0.0,4.0,0.0,2.1 / Exterior walls
+&OBST XB=20.0,20.1,0.0,4.0,0.0,2.1 /
+&OBST XB=0.0,20.1,3.9,4.1,0.0,2.1 /
+&OBST XB=0.0,20.1,-0.1,0.0,0.0,2.1 /
+
+&OBST XB=0.0,20.1,-0.1,0.5,2.1,2.2 / Ceiling/roof
+&OBST XB=0.0,20.1,0.5,1.1,2.2,2.3 /
+&OBST XB=0.0,20.1,1.1,1.7,2.3,2.4 /
+&OBST XB=0.0,20.1,1.7,2.3,2.4,2.5 /
+&OBST XB=0.0,20.1,2.3,2.9,2.3,2.4 /
+&OBST XB=0.0,20.1,2.9,3.5,2.2,2.3 /
+&OBST XB=0.0,20.1,3.5,4.1,2.1,2.2 /
+
+&OBST XB=0.0,0.1,0.5,3.5,2.1,2.2 / Left side roof
+&OBST XB=0.0,0.1,1.1,2.9,2.1,2.3 /
+&OBST XB=0.0,0.1,1.7,2.3,2.1,2.4 /
+
+&OBST XB=20.0,20.1,0.5,3.5,2.1,2.2 / Right side roof
+&OBST XB=20.0,20.1,1.1,2.9,2.1,2.3 /
+&OBST XB=20.0,20.1,1.7,2.3,2.1,2.4 /
+
+&OBST XB=17.4,17.5,1.3,1.7,0.0,2.4 / Main bedroom wall
+&OBST XB=17.4,17.5,1.7,2.3,0.0,2.5 /
+&OBST XB=17.4,17.5,2.3,2.9,0.0,2.4 /
+&OBST XB=17.4,17.5,2.9,3.5,0.0,2.3 /
+&OBST XB=17.4,17.5,3.5,4.0,0.0,2.2 /
+
+&HOLE XB=17.4,17.5,1.5,2.5,0.0,2.0 / Main bedroom closet door
+
+&OBST XB=15.7,15.8,1.3,1.7,0.0,2.4 / Bedroom 3 closet wall
+&OBST XB=15.7,15.8,1.7,2.3,0.0,2.5 /
+&OBST XB=15.7,15.8,2.3,2.9,0.0,2.4 /
+&OBST XB=15.7,15.8,2.9,3.5,0.0,2.3 /
+&OBST XB=15.7,15.8,3.5,4.0,0.0,2.2 /
+
+&OBST XB=15.8,17.4,2.7,2.8,0.0,2.4 / Closet dividing wall
+
+&OBST XB=13.4,13.5,1.3,1.7,0.0,2.4 / Bedroom 3 / living room wall
+&OBST XB=13.4,13.5,1.7,2.3,0.0,2.5 /
+&OBST XB=13.4,13.5,2.3,2.9,0.0,2.4 /
+&OBST XB=13.4,13.5,2.9,3.5,0.0,2.3 /
+&OBST XB=13.4,13.5,3.5,4.0,0.0,2.2 /
+
+&OBST XB=13.4,17.5,1.3,1.4,0.0,2.3 / Bedroom 3 corridor wall
+&HOLE XB=14.3,14.9,1.3,1.4,0.0,0.6 / Open vent
+&HOLE XB=14.3,14.9,3.9,4.1,0.0,0.6 / Open vent
+
+&OBST XB=6.1,6.2,0.0,0.5,0.0,2.2 / Bathroom walls
+&OBST XB=6.1,6.2,0.5,1.1,0.0,2.3 /
+&OBST XB=6.1,6.2,1.1,1.7,0.0,2.4 /
+&OBST XB=6.1,6.2,1.7,2.3,0.0,2.5 /
+&OBST XB=4.0,4.1,0.0,0.5,0.0,2.2 /
+&OBST XB=4.0,4.1,0.5,1.1,0.0,2.3 /
+&OBST XB=4.0,4.1,1.1,1.7,0.0,2.4 /
+&OBST XB=4.0,4.1,1.7,2.3,0.0,2.5 /
+&OBST XB=4.0,6.2,2.2,2.3,0.0,2.5 /
+
+&OBST XB=0.0,3.4,3.5,3.6,0.0,2.2 / Remote bedroom closet
+&OBST XB=3.4,3.5,3.5,4.0,0.0,2.2 /
+
+&HOLE XB=0.9,1.9,3.4,3.7,0.0,2.0 / Remote bedroom closet door
+
+&OBST XB=7.5,10.7,3.3,4.0,0.0,1.3 / Kitchen area
+&OBST XB=9.9,10.7,2.2,4.0,0.0,1.3 /
+
+===================
+= Smoke detectors =
+===================
+
+&PROP ID='Heskestad', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION=3.24 /
+&PROP ID='I1', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=2.5, BETA_E=-0.7, ALPHA_C=0.8, BETA_C=-0.9, ACTIVATION_OBSCURATION=3.24 /
+&PROP ID='I2', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=1.8, BETA_E=-1.1, ALPHA_C=1.0, BETA_C=-0.8, ACTIVATION_OBSCURATION=3.24 /
+&PROP ID='P1', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=1.8, BETA_E=-1.0, ALPHA_C=1.0, BETA_C=-0.8, ACTIVATION_OBSCURATION=3.24 /
+&PROP ID='P2', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=1.8, BETA_E=-0.8, ALPHA_C=0.8, BETA_C=-0.8, ACTIVATION_OBSCURATION=3.24 /
+
+=============
+= Station A =
+=============
+
+&DEVC ID='Detector A Heskestad', PROP_ID='Heskestad', XYZ=0.38, 1.63, 2.28 /
+&DEVC ID='Detector A Ion 1',     PROP_ID='I1',        XYZ=0.38, 1.63, 2.28 /
+&DEVC ID='Detector A Ion 2',     PROP_ID='I2',        XYZ=0.38, 1.63, 2.28 /
+&DEVC ID='Detector A Photo 1',   PROP_ID='P1',        XYZ=0.38, 1.63, 2.28 /
+&DEVC ID='Detector A Photo 2',   PROP_ID='P2',        XYZ=0.38, 1.63, 2.28 /
+
+&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='soot density', ID='Stat A soot'/
+&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='VELOCITY',     ID='Stat A velo'/
+&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat A temp'/
+
+=============
+= Station B =
+=============
+
+&DEVC ID='Detector B Heskestad', PROP_ID='Heskestad', XYZ=17.9, 1.63, 2.28 /
+&DEVC ID='Detector B Ion 1',     PROP_ID='I1',        XYZ=17.9, 1.63, 2.28 /
+&DEVC ID='Detector B Ion 2',     PROP_ID='I2',        XYZ=17.9, 1.63, 2.28 /
+&DEVC ID='Detector B Photo 1',   PROP_ID='P1',        XYZ=17.9, 1.63, 2.28 /
+&DEVC ID='Detector B Photo 2',   PROP_ID='P2',        XYZ=17.9, 1.63, 2.28 /
+
+&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='soot density', ID='Stat B soot'/
+&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='VELOCITY',     ID='Stat B velo'/
+&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat B temp'/
+
+=============
+= Station C =
+=============
+
+&DEVC ID='Detector C Heskestad', PROP_ID='Heskestad', XYZ=3.8, 2.51, 2.28 /
+&DEVC ID='Detector C Ion 1',     PROP_ID='I1',        XYZ=3.8, 2.51, 2.28 /
+&DEVC ID='Detector C Ion 2',     PROP_ID='I2',        XYZ=3.8, 2.51, 2.28 /
+&DEVC ID='Detector C Photo 1',   PROP_ID='P1',        XYZ=3.8, 2.51, 2.28 /
+&DEVC ID='Detector C Photo 2',   PROP_ID='P2',        XYZ=3.8, 2.51, 2.28 /
+
+&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='soot density', ID='Stat C soot'/
+&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='VELOCITY',     ID='Stat C velo'/
+&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat C temp'/
+
+=============
+= Station D =
+=============
+
+&DEVC ID='Detector D Heskestad', PROP_ID='Heskestad', XYZ=17.2, 0.9, 2.19 /
+&DEVC ID='Detector D Ion 1',     PROP_ID='I1',        XYZ=17.2, 0.9, 2.19 /
+&DEVC ID='Detector D Ion 2',     PROP_ID='I2',        XYZ=17.2, 0.9, 2.19 /
+&DEVC ID='Detector D Photo 1',   PROP_ID='P1',        XYZ=17.2, 0.9, 2.19 /
+&DEVC ID='Detector D Photo 2',   PROP_ID='P2',        XYZ=17.2, 0.9, 2.19 /
+
+&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='soot density', ID='Stat D soot'/
+&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='VELOCITY',     ID='Stat D velo'/
+&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='THERMOCOUPLE', ID='Stat D temp'/
+
+=============
+= Station E =
+=============
+
+&DEVC ID='Detector E Heskestad', PROP_ID='Heskestad', XYZ=12.4, 1.63, 2.28 /
+&DEVC ID='Detector E Ion 1',     PROP_ID='I1',        XYZ=12.4, 1.63, 2.28 /
+&DEVC ID='Detector E Ion 2',     PROP_ID='I2',        XYZ=12.4, 1.63, 2.28 /
+&DEVC ID='Detector E Photo 1',   PROP_ID='P1',        XYZ=12.4, 1.63, 2.28 /
+&DEVC ID='Detector E Photo 2',   PROP_ID='P2',        XYZ=12.4, 1.63, 2.28 /
+
+&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='soot density', ID='Stat E soot'/
+&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='VELOCITY',     ID='Stat E velo'/
+&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat E temp'/
+
+==============================
+= Additional instrumentation =
+==============================
+
+# Point A
+# Temperature
+&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.002 from ceil' /
+&DEVC XYZ=1.0, 2.1, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.3  from ceil' /
+&DEVC XYZ=1.0, 2.1, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.6  from ceil' /
+&DEVC XYZ=1.0, 2.1, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.9  from ceil' /
+&DEVC XYZ=1.0, 2.1, 1.18, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.22 from ceil' /
+&DEVC XYZ=1.0, 2.1, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.52 from ceil' /
+&DEVC XYZ=1.0, 2.1, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.82 from ceil' /
+# Optical Density
+&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.002 from ceil' /
+&DEVC XYZ=1.0, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.9  from ceil' /
+
+# Point B
+# Temperature
+&DEVC XYZ=18.7, 2.0, 2.38, QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.02 from ceil' /
+&DEVC XYZ=18.7, 2.0, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.3  from ceil' /
+&DEVC XYZ=18.7, 2.0, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.61 from ceil' /
+&DEVC XYZ=18.7, 2.0, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.9  from ceil' /
+&DEVC XYZ=18.7, 2.0, 1.18, QUANTITY='THERMOCOUPLE', ID='Temp tree B 1.22 from ceil' /
+&DEVC XYZ=18.7, 2.0, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree B 1.52 from ceil' /
+&DEVC XYZ=18.7, 2.0, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree B 1.82 from ceil' /
+# Optical Density
+&DEVC XYZ=18.7, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT',ID='B smoke 0.02 from ceil' /
+&DEVC XYZ=18.7, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT',ID='B smoke 0.9  from ceil' /
+
+# Point C
+# Temperature
+&DEVC XYZ=5.0, 3.86, 2.08, QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.02 from ceil' /
+&DEVC XYZ=5.0, 3.86, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.3  from ceil' /
+&DEVC XYZ=5.0, 3.86, 1.49, QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.6  from ceil' /
+&DEVC XYZ=5.0, 3.86, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.9  from ceil' /
+&DEVC XYZ=5.0, 3.86, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree C 1.22 from ceil' /
+&DEVC XYZ=5.0, 3.86, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree C 1.52 from ceil' /
+&DEVC XYZ=5.0, 3.86, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree C 1.82 from ceil' /
+# Optical Density
+&DEVC XYZ=5.0, 3.86, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='C smoke 0.02 from ceil' /
+&DEVC XYZ=5.0, 3.86, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='C smoke 0.9  from ceil' /
+
+# Point D
+# Temperature
+&DEVC XYZ=17.2, 0.10, 2.08, QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.02 from ceil' /
+&DEVC XYZ=17.2, 0.10, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.3  from ceil' /
+&DEVC XYZ=17.2, 0.10, 1.49, QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.61 from ceil' /
+&DEVC XYZ=17.2, 0.10, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.9  from ceil' /
+&DEVC XYZ=17.2, 0.10, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree D 1.22 from ceil' /
+&DEVC XYZ=17.2, 0.10, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree D 1.52 from ceil' /
+&DEVC XYZ=17.2, 0.10, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree D 1.82 from ceil' /
+# Optical Density
+&DEVC XYZ=17.2, 0.10, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='D smoke 0.02 from ceil' /
+&DEVC XYZ=17.2, 0.10, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='D smoke 0.9  from ceil' /
+
+# Point E
+# Temperature
+&DEVC XYZ=12.55, 2.1, 2.38, QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.02 from ceil' /
+&DEVC XYZ=12.55, 2.1, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.3  from ceil' /
+&DEVC XYZ=12.55, 2.1, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.6  from ceil' /
+&DEVC XYZ=12.55, 2.1, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.9  from ceil' /
+&DEVC XYZ=12.55, 2.1, 1.18, QUANTITY='THERMOCOUPLE', ID='Temp tree E 1.22 from ceil' /
+&DEVC XYZ=12.55, 2.1, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree E 1.52 from ceil' /
+&DEVC XYZ=12.55, 2.1, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree E 1.82 from ceil' /
+# Optical Density
+&DEVC XYZ=12.55, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='E smoke 0.02 from ceil' /
+&DEVC XYZ=12.55, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='E smoke 0.9 from ceil' /
+
+# Point F
+# Temperature
+&DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.02 from ceil' /
+&DEVC XYZ=11.75, 0.38, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.3  from ceil' /
+&DEVC XYZ=11.75, 0.38, 1.49, QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.6  from ceil' /
+&DEVC XYZ=11.75, 0.38, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.9  from ceil' /
+&DEVC XYZ=11.75, 0.38, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree F 1.22 from ceil' /
+&DEVC XYZ=11.75, 0.38, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree F 1.52 from ceil' /
+&DEVC XYZ=11.75, 0.38, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree F 1.82 from ceil' /
+# Optical Density
+&DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.02 from ceil' /
+&DEVC XYZ=11.75, 0.38, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.9 from ceil' /
