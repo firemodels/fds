@@ -367,6 +367,9 @@ SELECT CASE(SLIP_CONDITION)
       ELSE
          DUDN = (U_TAU*Y_WW + RKAPPA*LOG(2._EB*Y_PLUS/Y_WW))/DY
       ENDIF
+   CASE(3) ! bisector of no slip and sampled gradient
+      DUDN = ABS(VEL)/Y_CELL_CENTER
+      IF (Y_PLUS>Y_WW) DUDN = 0.5_EB*(DUDN + U_TAU*RKAPPA/Y_CELL_CENTER)
 END SELECT
 NU_WALL = TAU_W/(DUDN+TWO_EPSILON_EB)
 
