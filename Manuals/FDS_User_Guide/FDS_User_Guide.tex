@@ -3977,6 +3977,35 @@ the room flashes over.
 \label{room_fire}
 \end{figure}
 
+\subsection{Shrinking and swelling materials}
+
+Many practical materials change in thickness during the thermal reactions. For example:
+\begin{itemize}
+\item Non-charring materials will shrink as material is removed from the condensed 
+phase to the gas phase. 
+\item Porous materials like foams would shrink when the material melts and forms a non-porous layer. 
+\item Some charring materials swell, i.e. get thicker, when a porous char layer is formed.
+\item Intumescent fire protection materials would swell significantly, creating an insulating layer.
+\end{itemize}
+In FDS, the layer thickess is updated according to the ratio of the instantaneous material density and the density of the material in its pure form, i.e. 
+the {\ct DENSITY} on the {\ct MATL-line}. In case of several material components, the amount of swelling and shrinking is determined by the maximum and sum 
+of these ratios, respectively. In mathematical terms, this means that in each time step, 
+the size of each condenced phase cell is changed according to the ratio $\delta$
+\be
+\delta = 
+   \begin{cases}
+ 	\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right) & \text{if }\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right)\geq 1 \\
+ 	\sum_i\left(\frac{\rho_{s,i}}{\rho_i}\right) & \text{if }\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right)<1 
+   \end{cases}
+\ee
+For example, if the original material with {\ct DENSITY = 500.} is completely converted into a residue with {\ct DENSITY = 1000.}, the thickness
+of the material layer will be half of the original.
+
+\begin{warning}
+Prior to FDS version 6, the densities of the charring products (residues) did not have much significance. Now they they do as they directly 
+influence the shrinking/swelling.
+\end{warning}
+
 \subsection{Multiple Solid Phase Reactions}
 
 The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple -- a single, homogeneous material is
