@@ -4,19 +4,20 @@ dir=$1
 in=$2
 
 fulldir=$BASEDIR/$dir
-echo "*** generating images for: $in.smv"
+echo ""
+echo "--- generating images for: $in.smv"
 
 scriptfile=$scratchdir/script.$$
 if ! [ -e $SMV ];  then
-  echo "The file $SMV does not exist. Run aborted"
+  echo "*** Error (fatal): The file $SMV does not exist. Run aborted"
   exit
 fi
 if ! [ -d $fulldir ]; then
-  echo "The directory $fulldir does not exist. Run aborted."
+  echo "*** Error (fatal): The directory $fulldir does not exist. Run aborted."
   exit
 fi
 if ! [ -e $fulldir/$in.smv ]; then
-  echo "The smokeview file, $fulldir/$in.smv, does not exist. Run aborted."
+  echo "*** Error (fatal): The smokeview file, $fulldir/$in.smv, does not exist. Run aborted."
   exit
 fi
 
