@@ -3535,9 +3535,6 @@ Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers.
 mesh cells half the size. The scaling always applies to all layers.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the
 {\ct TIME} line. This forces the solid phase temperatures to be solved on every time step.
-\item[Enforce the re-gridding] of shrinking wall cells by setting {\ct REGRID\_FACTOR} on the {\ct SURF} line to a value that is larger than 0.9 (default)
-and smaller than 1.0. For example, {\ct REGRID\_FACTOR=0.99} will cause re-gridding when any of the cells has changed one percent in size, thus
-reducing the amount of interpolation errors. Setting {\ct REGRID\_FACTOR} to less than 0.9 can save computing time in some cases.
 \end{description}
 If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
 the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets
@@ -3980,7 +3977,6 @@ the room flashes over.
 \label{room_fire}
 \end{figure}
 
-
 \subsection{Multiple Solid Phase Reactions}
 
 The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple -- a single, homogeneous material is
@@ -4097,29 +4093,21 @@ The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``thresho
 
 For a liquid fuel, the thermal properties are similar to those of a solid
 material, with a few exceptions. The evaporation rate of the fuel
-is governed by the Clausius-Clapeyron equation (see FDS Technical Reference
-Guide for details). The drawback of this approach is that the fuel
-mass flux is not an explicit function of temperature, but rather an
-iterative result depending on the temperature and flow conditions. To
-initiate the evaporation, an initial value of the fuel vapor volume
-flux is needed. If the initial value is (relatively) high, the evaporation
-starts regardless of any ignition source, and the the fuel begins
-burning at once.
-
-The properties of a liquid fuel are given on the {\ct MATL} line:
+is governed by the mass transfer number (see FDS Technical Reference
+Guide for details). The properties of a liquid fuel are given on the {\ct MATL} line:
 
 \footnotesize
 \begin{verbatim}
 &MATL ID                     = 'ETHANOL LIQUID'
-      EMISSIVITY             = 1.0
-      SPEC_ID                = 'FUEL'
+      EMISSIVITY             = 1.
       NU_SPEC                = 0.97
-      HEAT_OF_REACTION       = 880.
+      SPEC_ID                = 'ETHANOL'
+      HEAT_OF_REACTION       = 836.98
       CONDUCTIVITY           = 0.17
-      SPECIFIC_HEAT          = 2.45
-      DENSITY                = 787.
-      ABSORPTION_COEFFICIENT = 40.
-      BOILING_TEMPERATURE    = 76. /
+      SPECIFIC_HEAT          = 2.4398
+      DENSITY                = 789.
+      BOILING_TEMPERATURE    = 78.5            
+      ABSORPTION_COEFFICIENT = 1534.3 /
 \end{verbatim} \normalsize
 
 \noindent
@@ -4139,9 +4127,6 @@ Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
 just absorb radiation at the surface, but rather over a thin layer
 near the surface. Its effect on the burning rate is significant.
-
-The initial value of the fuel vapor volume flux can be specified using
-the parameter {\ct INITIAL\_VAPOR\_FLUX}. Its default value is $5 \times 10^{-4}$~m/s. This is rarely needed for most fuels.
 
 \subsection{Fuel Burnout}
 
