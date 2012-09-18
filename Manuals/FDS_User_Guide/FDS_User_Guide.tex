@@ -606,7 +606,7 @@ A Gigabit or 1000 Mbps network will further reduce latency and improve data tran
 The goal of making FDS and Smokeview publicly available has been to enable
 practicing fire protection engineers to perform fairly sophisticated
 fire simulations at a reasonable cost. Thus, FDS and Smokeview have been
-designed for computers running Microsoft Windows, Mac OS X, and various
+designed for computers running Microsoft Windows, Mac OS~X, and various
 implementations of Unix/Linux.
 
 \begin{description}
@@ -617,9 +617,9 @@ released prior to Windows 2000.
 
 \item[{\bf Mac OS X}]
 A zip archive is available for Intel architectures.
-Mac OS X 10.4.x or better is recommended, versions of OS X prior to 10.4.x are not
+Mac OS~X 10.4.x or better is recommended, versions of OS~X prior to 10.4.x are not
 officially supported. Users can always download the latest version of FDS source and
-compile FDS for other versions of OS X (See Appendix~\ref{info:compilation} for details).
+compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
 
 \item[{\bf Linux}]
 Pre-compiled executables are available that can be installed in an appropriate directory. Note that
@@ -656,24 +656,24 @@ learning how to create new input files.
 
 \section{Starting an FDS Calculation}
 
-FDS can be run from the command prompt, or with a third party
+FDS can be run from the command prompt, or with a third-party
 Graphical User Interface (GUI). In the discussion to follow, it is
 assumed that FDS is being run from the command prompt. FDS can be
 run on a single computer, using only one CPU, or it can be run on
 multiple computers and use multiple CPUs. The executable names are
-the same across all platform types (Windows, Linux and OSX) and
-sizes (32 and 64 bits). The single CPU executable is called {\ct
+the same across all platform types (Windows, Linux, and OS~X) and
+sizes (32~and~64~bits). The single CPU executable is called {\ct
 fds}\ (with an {\ct .exe}\ file extension on Windows).  The
 parallel executable is called {\ct fds\_mpi} (again with an {\ct
 .exe}\ file extension for Windows). The letters {\ct mpi} in the
 filename denote Message Passing Interface, which will be discussed
-below.  Batch files (Windows) or aliases ( Linux or OSX) may be
+below.  Batch files (Windows) or aliases (Linux or OS~X) may be
 defined to distinguish executables if you wish to install multiple
 versions of FDS.
 
 \begin{warning}
 \noindent
-Note that the input file for both single and parallel versions of FDS are the same.
+Note that the input file is the same for both single and parallel versions of FDS.
 In fact, it is recommended that before embarking on parallel processing, you should run your input
 file in serial mode to ensure that it is properly set up.
 \end{warning}
@@ -704,7 +704,7 @@ output that is written out onto the screen. Detailed diagnostic
 information is automatically written to a file {\ct CHID.out},
 where {\ct CHID} is a character string, usually the same as {\ct
 job\_name}, designated in the input file. Screen output can be
-redirected to a file via the alternative command
+redirected to a file via the alternative command:
 \begin{verbatim}
 fds job_name.fds > job_name.err
 \end{verbatim}
@@ -717,7 +717,7 @@ This action will cause previously generated output files to be over-written.
 
 \subsubsection{Mac OS X, Unix, Linux}
 
-The installer for Mac OS X, Unix and Linux versions of FDS sets
+The installer for Mac OS~X, Unix, and Linux versions of FDS sets
 the {\ct PATH}\ variable allowing one to invoke FDS without a full
 path reference to the executable.  To run FDS from the command
 line type:
@@ -791,7 +791,7 @@ Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, where
 0, 1, 2, and so on. Thus, Mesh~1 is assigned to Process~0; Mesh~2 to Process~1, and so on.
 As a user, you do not explicitly number the meshes or the processes yourself, but
 error statements from FDS or from MPI might refer to the meshes or processes by number.
-As an example, if a five mesh FDS case is run in parallel, the first printout (usually to the screen unless
+As an example, if a FDS case with five meshes is run in parallel, the first printout (usually to the screen unless
 otherwise directed) is:
 
 \footnotesize
@@ -823,15 +823,15 @@ the subroutine calls has been widely accepted in the community,
 allowing different vendors and organizations the freedom to develop
 better software while working within an open framework.
 
-The way FDS is executed in parallel depends on which implementation of MPI has been installed.  For Mac OSX and Linux, we recommend using Open MPI. For Windows, we recommend MPICH2, a free implementation of MPI from Argonne National Laboratory, USA.
+The way FDS is executed in parallel depends on which implementation of MPI has been installed.  For Mac OS~X and Linux, we recommend using Open MPI. For Windows, we recommend MPICH2, a free implementation of MPI from Argonne National Laboratory, USA.
 
 \subsubsection{MPICH2}
 
 With MPICH2, a parallel FDS calculation can be invoked either
 from the command line or by using a Graphical User Interface
 (GUI). After the MPICH2 libraries are installed on each computer and
-the necessary directories are shared, FDS is run using the command
-issued from one of the computers
+the necessary directories are shared, FDS is run using the following command
+issued from one of the computers:
 \begin{verbatim}
 mpiexec -file config.txt
 \end{verbatim}
@@ -840,7 +840,7 @@ of the FDS executable, name of the FDS input file, the working directory,
 and the names of the various computers that are to run the job. For
 example, the {\ct config.txt} file looks something like this:
 \begin{verbatim}
-exe \\host_1\FDS\fds_mpi_win_32.exe job_name.fds
+exe \\host_1\FDS\fds_mpi.exe job_name.fds
 dir \\host_1\Projects\
 hosts
 host_1 2
@@ -856,14 +856,14 @@ latter having read and write permissions.
 
 Both at VTT and NIST, we use Open MPI, an open source MPI-2 implementation that is developed and maintained by a consortium of academic,
 research, and industry partners.
-With Open~MPI, FDS is run using the command
+With Open~MPI, FDS is run using the command:
 \begin{verbatim}
-mpirun -np 5 fds_mpi_linux_64 job_name.fds
+mpirun -np 5 fds_mpi job_name.fds
 \end{verbatim}
 where the 5 indicates that 5 processors are to be used. In this case, the executable {\ct fds\_mpi\_linux\_64} is located in the
-working directory, but you can invoke it by its full path name. To make the process run in the background
+working directory, but you can invoke it by its full path name. To make the process run in the background, use the command:
 \begin{verbatim}
-mpirun -np 5 fds_mpi_linux_32 job_name.fds >& job_name.err &
+mpirun -np 5 fds_mpi job_name.fds >& job_name.err &
 \end{verbatim}
 The file {\ct job\_name.err} contains what is normally printed out to the screen.
 
@@ -877,6 +877,7 @@ that parallel processing is a relatively new area of computer science,
 and there are bound to be painful growth spurts in the years ahead.
 \end{warning}
 
+\newpage
 
 \section{Monitoring Progress}
 
