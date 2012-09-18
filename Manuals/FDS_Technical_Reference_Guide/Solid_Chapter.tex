@@ -454,6 +454,21 @@ For simplicity, the liquid fuel itself is treated like a thermally-thick
 solid for the purpose of computing the heat conduction. There is no
 computation of the convection of the liquid within the pool.
 
+\subsection{Shrinking and swelling materials}
+
+The layer thickess is updated according to the ratio of the instantaneous material density and the density of the material in its pure form.
+In case of several material components, the amount of swelling and shrinking is determined by the maximum and sum 
+of these ratios, respectively. In each time step, 
+the size of each condenced phase cell is multiplied by the following factor $\delta$
+\be
+\delta = 
+   \begin{cases}
+ 	\max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) & \text{if }\max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) \geq 1 \\
+ 	\sum_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) & \text{if }\max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) < 1 
+   \end{cases}
+\ee
+Correspondingly, the densities are divided by the factor $\delta$ to conserve mass.
+
 \clearpage
 
 \section{Aerosol Deposition}
