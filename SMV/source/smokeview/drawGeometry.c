@@ -2839,7 +2839,7 @@ void allocate_faces(){
       ntotal2 += ntotal;
     }
     mem_sum+= ntotal2*sizeof(facedata *);
-    fprintf(stderr,"*** Fatal error.  Unable to allocate ");
+    fprintf(stderr,"*** Error (fatal):  Unable to allocate ");
     if(mem_sum>=1000000000){
       rmem=(float)mem_sum/1000000000.0;
       fprintf(stderr,"%4.2f GB of memory\n",rmem);

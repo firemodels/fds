@@ -3017,7 +3017,7 @@ int readsmv(char *file, char *file2){
       if(nmeshes!=ntrnx||nmeshes!=ntrny||nmeshes!=ntrnz||
          nmeshes!=npdim||nmeshes!=nobst||nmeshes!=nvent||
          nmeshes!=noffset){
-        fprintf(stderr,"*** fatal error:\n");
+        fprintf(stderr,"*** Error:\n");
         if(nmeshes!=ntrnx)printf("  found %i TRNX keywords, was expecting %i\n",ntrnx,nmeshes);
         if(nmeshes!=ntrny)printf("  found %i TRNY keywords, was expecting %i\n",ntrny,nmeshes);
         if(nmeshes!=ntrnz)printf("  found %i TRNZ keywords, was expecting %i\n",ntrnz,nmeshes);
@@ -9163,7 +9163,7 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&nrgb2_ini);
       if(nrgb2_ini<8){
-        fprintf(stderr,"*** fatal error: must have at lease 8 colors in COLOR2BAR\n");
+        fprintf(stderr,"*** Error: must have at lease 8 colors in COLOR2BAR\n");
         exit(1);
       }
       FREEMEMORY(rgb2_ini);

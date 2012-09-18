@@ -65,7 +65,7 @@ void error_message(char *message){
 
 void abort_message(char *message){
   if(message==NULL||strlen(message)==0)return;
-  fprintf(stderr,_("*** Fatal error: "));
+  fprintf(stderr,_("*** Error (fatal): "));
   wrap_message(message);
 }
 

@@ -2282,7 +2282,7 @@ void ScriptMenu(int value){
           start_script();
         }
         else{
-          fprintf(stderr,"*** Fatal error: unable to open script file");
+          fprintf(stderr,"*** Error (fatal): unable to open script file");
           if(file!=NULL)fprintf(stderr,": %s",file);
           fprintf(stderr,"\n");
           if(from_commandline==1)exit(1);
