@@ -5925,7 +5925,7 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
 \end{verbatim} \normalsize
 
 \noindent
-Note that the stoichiometry\footnote{There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry. 
+Note that the stoichiometry\footnote{There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry.
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will
 check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (Default {\ct .TRUE.})
@@ -5988,7 +5988,7 @@ Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order 
 &INIT MASS_FRACTION(1)=0.229, SPEC_ID(1)='PVC' /
 \end{verbatim} \normalsize
 
-\noindent Since this is not a simple chemistry problem, either the enthalpy of formation of PVC or the heat of combustion of the reaction should be specified. In this case, the heat of combustion for PVC is taken from the SFPE Handbook~\cite{SFPE:Tewarson}. 
+\noindent Since this is not a simple chemistry problem, either the enthalpy of formation of PVC or the heat of combustion of the reaction should be specified. In this case, the heat of combustion for PVC is taken from the SFPE Handbook~\cite{SFPE:Tewarson}.
 
 \footnotesize
 \begin{verbatim}
@@ -6096,7 +6096,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 
 \begin{itemize}
 \item The species must be explicitly tracked.
-\item The species name is its chemical formula as defined on the {\ct SPEC} line or by the species {\ct ID}. 
+\item The species name is its chemical formula as defined on the {\ct SPEC} line or by the species {\ct ID}.
 \item The stoichiometry is given before each species and is separated by an asterisk. Real numbers are allowed but not exponential notation ({\em i.e.}, {\ct 201.1} but not {\ct 2.011E2}).
 \item The reactants and products are separated by an equal sign.
 \end{itemize}
@@ -6156,7 +6156,7 @@ If Eq.~(\ref{eq:PROPANE_depo}) is properly balanced, you can directly use the st
 \end{verbatim} \normalsize
 
 \noindent
-The heat of combustion for propane is found in the SFPE Handbook~\cite{SFPE:Tewarson}. 
+The heat of combustion for propane is found in the SFPE Handbook~\cite{SFPE:Tewarson}.
 
 \footnotesize
 \begin{verbatim}
@@ -6311,7 +6311,9 @@ additional fuel bands, set {\ct CH4\_BANDS=.TRUE.} on the {\ct RADI} line. Read 
 Reference Guide~\cite{FDS_Tech_Guide} for more details. Note also that when
 {\ct WIDE\_BAND\_MODEL=.TRUE.}, the {\ct ABSORPTION\_COEFFICIENT}
 output quantity becomes practically useless, because it then
-corresponds to one individual band of the spectrum. It is also possible to set the band limits used in the wide band model by specifying WL\_BAND\_LIMITS on RADI line.
+corresponds to one individual band of the spectrum. 
+
+It is also possible to set your own band limits for the wide band model by specifying {\ct BAND\_LIMITS} on the {\ct RADI} line. The limits should be given in ascending order, in units of microns ($\mu$m). The maximum number of bands is 9, in which case you would specify 10 real numbers separated by commas.
 
 
 
@@ -10947,19 +10949,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\
 \hline \hline
 \endhead
-{\ct ANGLE\_INCREMENT}              & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 5                 \\ \hline
-{\ct CH4\_BANDS          }          & Logical   & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
-{\ct KAPPA0                   }     & Real      & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
-{\ct NEW\_ABSORPTION}               & Logical   & Section~\ref{info:RadCal_fuelspecies}     &                   & {\ct .FALSE.}     \\ \hline
-{\ct NMIEANG                  }     & Integer   & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
-{\ct NUMBER\_RADIATION\_ANGLES}     & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
-{\ct PATH\_LENGTH }                 & Real      & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
-{\ct RADIATION}                     & Logical   & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
-{\ct RADIATIVE\_FRACTION}           & Real      & Section~\ref{info:RADI}                   &                   & 0.35              \\ \hline
-{\ct RADTMP                   }     & Real      & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900               \\ \hline
-{\ct TIME\_STEP\_INCREMENT}         & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
-{\ct WIDE\_BAND\_MODEL    }         & Logical   & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
-{\ct WL\_BAND\_LIMITS    }         &  Real      & Section~\ref{info:RADI_Wide_Band}         &  $\mu~m$                & -     \\ \hline
+{\ct ANGLE\_INCREMENT}              & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 5                 \\ \hline
+{\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         &  $\mu$m           &                   \\ \hline
+{\ct CH4\_BANDS          }          & Logical       & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
+{\ct KAPPA0                   }     & Real          & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
+{\ct NEW\_ABSORPTION}               & Logical       & Section~\ref{info:RadCal_fuelspecies}     &                   & {\ct .FALSE.}     \\ \hline
+{\ct NMIEANG                  }     & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
+{\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
+{\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
+{\ct RADIATION}                     & Logical       & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
+{\ct RADIATIVE\_FRACTION}           & Real          & Section~\ref{info:RADI}                   &                   & 0.35              \\ \hline
+{\ct RADTMP                   }     & Real          & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900               \\ \hline
+{\ct TIME\_STEP\_INCREMENT}         & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
+{\ct WIDE\_BAND\_MODEL    }         & Logical       & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
