@@ -24,6 +24,12 @@ do
    CPU_TIME_VALUE=`grep -H "Total CPU:" "$i" | tail -n 1 | awk -F' ' '{print $(NF-1)}'`
    CPU_TIME_UNITS=`grep -H "Total CPU:" "$i" | tail -n 1 | awk -F' ' '{print $NF}'`
 
+   # Keep seconds as is
+   if [[ $CPU_TIME_UNITS = 's' ]]
+   then
+      CPU_TIME=$CPU_TIME_VALUE
+   fi
+
    # Convert min to s
    if [[ $CPU_TIME_UNITS = 'min' ]]
    then
