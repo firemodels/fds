@@ -40,7 +40,7 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
     }
 #endif
     if(size!=0&&size>stat.dwAvailPhys-0.1*stat.dwTotalPhys){
-      fprintf(stderr,"*** Low Memory Warning. Only %i M available for viewing data.\n",
+      fprintf(stderr,"*** Warning: Low Memory. Only %i M available for viewing data.\n",
            (int)stat.dwAvailPhys/(1024*1024));
       fprintf(stderr,"    Unload datafiles or system performance may degrade.\n");
     }

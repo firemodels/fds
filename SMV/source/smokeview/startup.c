@@ -439,7 +439,7 @@ int get_opengl_version(char *version_label){
   
   version_string=glGetString(GL_VERSION);
   if(version_string==NULL){
-    printf("   *** warning: GL_VERSION string is NULL\n");
+    printf("*** Warning: GL_VERSION string is NULL\n");
     return -1;
   }
   strcpy(version_label2,(char *)version_string);
