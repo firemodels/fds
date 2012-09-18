@@ -1301,7 +1301,7 @@ REAL(EB) :: ZZ_0(0:N_TRACKED_SPECIES),DZZDT1_1(0:N_TRACKED_SPECIES),DZZDT1_2(0:N
             DT_SUB,DT_SUB_NEW,DT_ITER,ZZ_STORE(0:N_TRACKED_SPECIES,0:3),TV(0:2),ZZ_DIFF(0:2),&
             ZZ_MIXED(0:N_TRACKED_SPECIES),ZZ_GET_0(0:N_TRACKED_SPECIES),ZETA_0,ZETA,ZETA1,CELL_VOLUME,CELL_MASS,&
             DZZDT(0:N_TRACKED_SPECIES),SMIX_MIX_MASS(0:N_TRACKED_SPECIES,0:1),TOTAL_MIX_MASS(0:1),TAU_D,TAU_G,TAU_U,DELTA,&
-            TMP_GUESS_1,TMP_GUESS_2,CP_BAR_GUESS,CP_BAR_0,TMP_0
+            TMP_GUESS_1,TMP_GUESS_2,CP_BAR_GUESS,CP_BAR_0,TMP_0,ZZ_SUM
 REAL(EB), PARAMETER :: DT_SUB_MIN=1.E-10_EB,ZZ_MIN=1.E-10_EB,RADIATIVE_FRACTION = 0.35_EB
 INTEGER :: NR,NS,NSS,ITER,TVI,RICH_ITER,TMP_ITER
 INTEGER, PARAMETER :: SUB_DT1=1,SUB_DT2=2,SUB_DT4=4,TV_ITER_MIN=5,RICH_ITER_MAX=50
@@ -1336,7 +1336,7 @@ DT_ITER = 0._EB
 DT_SUB = DT 
 DT_SUB_NEW = DT_SUB
 ERR_TOL = RICHARDSON_ERROR_TOLERANCE
-
+ZZ_SUM = SUM(ZZ_GET)
 ZZ_GET_0 = ZZ_GET
 ZZ_TEMP = ZZ_GET       
 ZZ_MIXED = ZZ_GET_0
@@ -1435,7 +1435,7 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
             ENDDO REACTION_LOOP1_2    
             A1 = A1 + DZZDT1_2*DT_SUB 
             A1 = 0.5_EB*(ZZ_0 + A1)
-            IF (SUM(A1)-1._EB > TWO_EPSILON_EB) CALL SHUTDOWN('ERROR: Error in Reaction Species')                               
+            IF (SUM(A1)-ZZ_SUM > TWO_EPSILON_EB) CALL SHUTDOWN('ERROR: Error in Reaction Species')                               
          ENDDO ODE_LOOP1   
          !--------------------
          ! Calculate A2 term
@@ -1481,7 +1481,7 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
             ENDDO REACTION_LOOP2_2    
             A2 = A2 + DZZDT2_2*(DT_SUB*0.5_EB)
             A2 = 0.5_EB*(ZZ_0 + A2) 
-            IF (SUM(A2)-1._EB > TWO_EPSILON_EB) CALL SHUTDOWN('ERROR: Error in Reaction Species')               
+            IF (SUM(A2)-ZZ_SUM> TWO_EPSILON_EB) CALL SHUTDOWN('ERROR: Error in Reaction Species')               
             ZZ_0 = A2
          ENDDO ODE_LOOP2     
          !--------------------
@@ -1528,7 +1528,7 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
             ENDDO REACTION_LOOP4_2    
             A4 = A4 + DZZDT4_2*(DT_SUB*0.25_EB)
             A4 = 0.5_EB*(ZZ_0 + A4) 
-            IF (SUM(A4)-1._EB > TWO_EPSILON_EB) CALL SHUTDOWN('ERROR: Error A4 in Reaction Species')             
+            IF (SUM(A4)-ZZ_SUM > TWO_EPSILON_EB) CALL SHUTDOWN('ERROR: Error A4 in Reaction Species')             
             ZZ_0 = A4
          ENDDO ODE_LOOP4
 
