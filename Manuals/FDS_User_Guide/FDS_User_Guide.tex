@@ -3988,10 +3988,10 @@ phase to the gas phase.
 \item Some charring materials swell, i.e. get thicker, when a porous char layer is formed.
 \item Intumescent fire protection materials would swell significantly, creating an insulating layer.
 \end{itemize}
-In FDS, the layer thickess is updated according to the ratio of the instantaneous material density and the density of the material in its pure form, i.e.
+In FDS, the layer thickness is updated according to the ratio of the instantaneous material density and the density of the material in its pure form, i.e.
 the {\ct DENSITY} on the {\ct MATL-line}. In case of several material components, the amount of swelling and shrinking is determined by the maximum and sum
 of these ratios, respectively. In mathematical terms, this means that in each time step,
-the size of each condenced phase cell is changed according to the ratio $\delta$
+the size of each condensed phase cell is changed according to the ratio $\delta$
 \be
 \delta =
    \begin{cases}
