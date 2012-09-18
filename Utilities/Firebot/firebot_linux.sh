@@ -644,18 +644,18 @@ make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh -d &> $FIREBOT_DIR/output/stage6c
+   ./Make_SMV_Pictures.sh -d 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6c
 }
 
 check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c` == "" ]]
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c` == "" && `grep "*** Error" -I $FIREBOT_DIR/output/stage6c` == "" ]]
    then
       stage6c_success=true
    else
-      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c > $FIREBOT_DIR/output/stage6c_errors
+       cp $FIREBOT_DIR/output/stage6c $FIREBOT_DIR/output/stage6c_errors
 
       echo "Errors from Stage 6c - Make SMV pictures (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6c_errors >> $ERROR_LOG
@@ -708,18 +708,18 @@ make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6e
+   ./Make_SMV_Pictures.sh 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6e
 }
 
 check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e` == "" ]]
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e` == "" && `grep "*** Error" -I $FIREBOT_DIR/output/stage6e` == "" ]]
    then
       stage6e_success=true
    else
-      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e > $FIREBOT_DIR/output/stage6e_errors
+      cp $FIREBOT_DIR/output/stage6e $FIREBOT_DIR/output/stage6e_errors
 
       echo "Errors from Stage 6e - Make SMV pictures (release mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6e >> $ERROR_LOG
