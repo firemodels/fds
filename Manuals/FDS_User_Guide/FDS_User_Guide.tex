@@ -4001,6 +4001,10 @@ the size of each condenced phase cell is changed according to the ratio $\delta$
 For example, if the original material with {\ct DENSITY = 500.} is completely converted into a residue with {\ct DENSITY = 1000.}, the thickness
 of the material layer will be half of the original.
 
+You can prevent shrinking by specifying {\ct ALLOW\_SHRINKING = .FALSE.} on the {\ct MATL} line. You can prevent swelling by specifying 
+{\ct ALLOW\_SWELLING = .FALSE.}. By default, these flags are true. Shrinking/swelling does not take place if any of the materials with non-zero density
+has the corresponding flag set to false.
+
 \begin{warning}
 Prior to FDS version 6, the densities of the charring products (residues) did not have much significance. Now they they do as they directly 
 influence the shrinking/swelling.
