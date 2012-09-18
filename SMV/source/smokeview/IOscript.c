@@ -347,12 +347,12 @@ int compile_script(char *scriptfile){
 
   return_val=1;
   if(scriptfile==NULL){
-    fprintf(stderr,"*** internal smokeview error, scriptfile name is NULL\n");
+    fprintf(stderr,"*** Error: scriptfile name is NULL\n");
     return return_val;
   }
   stream=fopen(scriptfile,"r");
   if(stream==NULL){
-    fprintf(stderr,"*** scriptfile, %s, could not be opened for input\n",scriptfile);
+    fprintf(stderr,"*** Error: scriptfile, %s, could not be opened for input\n",scriptfile);
     return return_val;
   }
 

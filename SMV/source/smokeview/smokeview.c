@@ -138,7 +138,7 @@ void _Sniff_Errors(char *whereat){
   char *glu_error;
   while((error=glGetError())!=GL_NO_ERROR){
     glu_error=(char *)gluErrorString((unsigned int)error);
-    fprintf(stderr,"OpenGL Error:%s, where:%s %i\n",
+    fprintf(stderr,"*** Error: OpenGL error:%s, where:%s %i\n",
       glu_error,whereat,snifferrornumber);
       snifferrornumber++;
   }
