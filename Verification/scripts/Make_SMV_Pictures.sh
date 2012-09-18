@@ -55,7 +55,7 @@ CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
 
-export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
+export SMV=$SVNROOT/SMV/Build/intel_$VERSION2$DEBUG/smokeview_$VERSION
 export SMVBINDIR="-bindir ../../SMV/for_bundle"
 
 export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
