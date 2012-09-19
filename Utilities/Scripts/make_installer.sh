@@ -38,9 +38,9 @@ echo "Options:"
 echo "  1) Press <Enter> to begin installation"
 echo "  2) Type \"extract\" to copy the installation files to"
 echo "     the file $FDS_TAR"
-echo ""
 
 FDS_root=$INSTALLDIR
+BAK=\`date +%Y%m%d_%H%M%S\`
 
 # record the name of this script and the name of the directory 
 # it will run in
@@ -83,7 +83,7 @@ fi
 # get FDS root directory
 
 echo ""
-echo "Where would you like to install FDS (default: \$FDS_root)"
+echo "Where would you like to install FDS? (default: \$FDS_root)"
 read answer
 if [ "\$answer" != "" ]; then
 FDS_root=\$answer
@@ -93,7 +93,7 @@ fi
  
 if [ ! -d \$FDS_root ]
 then
-echo "creating directory \$FDS_root"
+echo "Creating directory \$FDS_root"
 mkdir -p \$FDS_root>&/dev/null
 else
 while true; do
@@ -113,6 +113,8 @@ then
 mkdir \$HOMEBINDIR
 fi
 
+echo Creating fds6, smokeview6, smokediff6 and smokezip6 scripts
+
 cat << FDS > \$HOMEBINDIR/fds6
 #!/bin/bash 
 \$FDS_root/bin/fds \\\$@
@@ -124,6 +126,18 @@ cat << SMV > \$HOMEBINDIR/smokeview6
 \$FDS_root/bin/smokeview \\\$@
 SMV
 chmod +x \$HOMEBINDIR/smokeview6
+
+cat << SMV > \$HOMEBINDIR/smokediff6
+#!/bin/bash 
+\$FDS_root/bin/smokediff \\\$@
+SMV
+chmod +x \$HOMEBINDIR/smokediff6
+
+cat << SMV > \$HOMEBINDIR/smokezip6
+#!/bin/bash 
+\$FDS_root/bin/smokezip \\\$@
+SMV
+chmod +x \$HOMEBINDIR/smokezip6
 
 # did we succeed?
 
@@ -159,7 +173,7 @@ cat << CSHRC > \$CSHFDS
 #/bin/csh -f
 set platform=\\\$1
 
-# unalias application names installed by FDS installer
+# unalias application names used by FDS
 
 unalias fds >& /dev/null
 unalias smokeview >& /dev/null
@@ -227,7 +241,7 @@ cat << BASH > \$BASHFDS
 
 platform=\\\$1
 
-# unalias application names installed by FDS installer
+# unalias application names used by FDS
 
 unalias fds >& /dev/null
 unalias smokeview >& /dev/null
@@ -264,16 +278,14 @@ export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:~/bin:\\\$PATH
 
 # if compilers are present then pre-define environment for their use
 
-if [ ! -e "\\\$IFORT_COMPILER/bin/ifortvars.sh" ]
+if [ -e "\\\$IFORT_COMPILER/bin/ifortvars.sh" ]
 then
-return
-fi
-
 case "\\\$platform" in
   "intel64" | "ia32" )
     source \\\$IFORT_COMPILER/bin/ifortvars.sh \\\$platform
   ;;
 esac
+fi
 
 BASH
 
@@ -281,14 +293,14 @@ echo
 echo Creating .bashrc_fds and .cshrc_fds startup files.
 if [ -e ~/.cshrc_fds ]
 then
-echo Backing up .cshrc_fds
-cp ~/.cshrc_fds ~/.cshrc_fds.BAK_\$\$
+echo Backing up .cshrc_fds to ~/.cshrc_fds_\$BAK
+cp ~/.cshrc_fds ~/.cshrc_fds_\$BAK
 fi
 
 if [ -e ~/.bashrc_fds ]
 then
-echo Backing up .bashrc_fds
-cp ~/.bashrc_fds ~/.bashrc_fds.BAK_\$\$
+echo Backing up .bashrc_fds to ~/.bashrc_fds_\$BAK
+cp ~/.bashrc_fds ~/.bashrc_fds_\$BAK
 fi
 
 cp \$BASHFDS ~/.bashrc_fds
@@ -297,14 +309,21 @@ rm \$BASHFDS
 cp \$CSHFDS ~/.cshrc_fds
 rm \$CSHFDS
 
-cd \$THISDIR
-touch ~/.bash_profile
-nlines=\$(grep bashrc_fds ~/.bash_profile | wc -l)
-if [ \$nlines -eq 0 ]
+if [ -e ~/.bash_profile ]
 then
-echo Updating .bash_profile
-echo source \~/.bashrc_fds $ossize >> ~/.bash_profile
+echo Backing up .bash_profile to ~/.bash_profile_\$BAK
+cp ~/.bash_profile ~/.bash_profile_\$BAK
 fi
+
+BASHPROFILETEMP=/tmp/.bash_profile_temp_\$\$
+cd \$THISDIR
+echo "Updating .bash_profile"
+grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
+echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
+echo "#FDS of .bash_profile is saves in ~/.bash_profile_\$BAK" >> \$BASHPROFILETEMP
+echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
+cp \$BASHPROFILETEMP ~/.bash_profile
+
 touch ~/.cshrc
 nlines=\$(grep cshrc_fds ~/.cshrc | wc -l)
 if [ \$nlines -eq 0 ]
