@@ -2021,8 +2021,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
                      IF (SHARP_CORNER) THEN
-                        DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
-                        MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
+                        DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                !!      DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
+                !!      MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
                      ENDIF
 
                END SELECT BOUNDARY_CONDITION
