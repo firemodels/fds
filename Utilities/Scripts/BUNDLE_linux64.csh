@@ -15,6 +15,6 @@ setenv MAJOR $7
 
 setenv FDSOS _linux_64
 setenv FDSOS2 _linux_32
-setenv INSTALLDIR \~/FDS/$FDSEDITION
+setenv INSTALLDIR \\\~/FDS/$FDSEDITION
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
