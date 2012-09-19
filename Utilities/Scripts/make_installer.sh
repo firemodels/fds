@@ -40,7 +40,53 @@ echo "  2) Type \"extract\" to copy the installation files to"
 echo "     the file $FDS_TAR"
 
 FDS_root=$INSTALLDIR
-BAK=\`date +%Y%m%d_%H%M%S\`
+BAK=_\`date +%Y%m%d_%H%M%S\`
+
+BACKUP_FILE()
+{
+  INFILE=\$1
+  if [ -e \$INFILE ]
+  then
+  echo Backing up \$INFILE to \$\INFILE\$BAK
+  cp \$INFILE \$INFILE\$BAK
+fi
+}
+
+MKDIR()
+{
+  DIR=\$1
+  if [ ! -d \$DIR ]
+  then
+    echo "Creating directory \$DIR"
+    mkdir -p \$DIR>&/dev/null
+  else
+    while true; do
+        echo "The directory, \$DIR, already exists."
+        read -p "Do you wish to overwrite it? (yes/no)" yn
+        case \$yn in
+            [Yy]* ) break;;
+            [Nn]* ) echo "Installation cancelled";exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+  fi
+  if [ ! -d \$DIR ]
+  then
+    echo "\`whoami\` does not have permission to create \$DIR."
+    echo "FDS installation aborted."
+    exit 0
+  else
+    echo "\$DIR has been created."
+  fi
+  touch \$DIR/temp.\$\$>&/dev/null
+  if ! [ -e \$DIR/temp.\$\$ ]
+  then
+    echo "\`whoami\` does not have permission to write to \$DIR"
+    echo "FDS installation aborted."
+    exit 0
+  fi
+  rm \$DIR/temp.\$\$
+}
 
 # record the name of this script and the name of the directory 
 # it will run in
@@ -91,83 +137,46 @@ fi
  
 # make the FDS root directory
  
-if [ ! -d \$FDS_root ]
-then
-echo "Creating directory \$FDS_root"
-mkdir -p \$FDS_root>&/dev/null
-else
-while true; do
-    echo "The directory, \$FDS_root, already exists."
-    read -p "Do you wish to overwrite it? (yes/no)" yn
-    case \$yn in
-        [Yy]* ) break;;
-        [Nn]* ) echo "Installation cancelled";exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
-fi
-  
-HOMEBINDIR=~/bin
-if [ ! -d \$HOMEBINDIR ]
-then
-mkdir \$HOMEBINDIR
-fi
+MKDIR \$FDS_root
+
+SHORTCUTDIR=\$FDS_root/../shortcuts
+MKDIR \$SHORTCUTDIR
 
 echo Creating fds6, smokeview6, smokediff6 and smokezip6 scripts
 
-cat << FDS > \$HOMEBINDIR/fds6
+cat << FDS > \$SHORTCUTDIR/fds6
 #!/bin/bash 
 \$FDS_root/bin/fds \\\$@
 FDS
-chmod +x \$HOMEBINDIR/fds6
+chmod +x \$SHORTCUTDIR/fds6
 
-cat << SMV > \$HOMEBINDIR/smokeview6
+cat << SMV > \$SHORTCUTDIR/smokeview6
 #!/bin/bash 
 \$FDS_root/bin/smokeview \\\$@
 SMV
-chmod +x \$HOMEBINDIR/smokeview6
+chmod +x \$SHORTCUTDIR/smokeview6
 
-cat << SMV > \$HOMEBINDIR/smokediff6
+cat << SMV > \$SHORTCUTDIR/smokediff6
 #!/bin/bash 
 \$FDS_root/bin/smokediff \\\$@
 SMV
-chmod +x \$HOMEBINDIR/smokediff6
+chmod +x \$SHORTCUTDIR/smokediff6
 
-cat << SMV > \$HOMEBINDIR/smokezip6
+cat << SMV > \$SHORTCUTDIR/smokezip6
 #!/bin/bash 
 \$FDS_root/bin/smokezip \\\$@
 SMV
-chmod +x \$HOMEBINDIR/smokezip6
+chmod +x \$SHORTCUTDIR/smokezip6
 
-# did we succeed?
-
-if [ ! -d \$FDS_root ]
-then
-echo "\`whoami\` does not have permission to create \$FDS_root."
-echo "FDS installation aborted."
-exit 0
-else
-echo "\$FDS_root has been created."
-fi
-
-# can we write to the FDS root directory?
-
-touch \$FDS_root/temp.\$\$>&/dev/null
-if ! [ -e \$FDS_root/temp.\$\$ ]
-then
-echo "\`whoami\` does not have permission to write to \$FDS_root."
-echo "FDS installation aborted."
-exit 0
-fi
-rm \$FDS_root/temp.\$\$
-
-# now copy installation files into the FDS_root directory
+# ***** copy installation files into the FDS_root directory
 
 echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THIS | tar -xz
 echo "Copy complete."
+
+# ***** create CSH startup file
 
 cat << CSHRC > \$CSHFDS
 #/bin/csh -f
@@ -236,6 +245,8 @@ endif
 
 CSHRC
 
+# ***** create BASH startup file
+
 cat << BASH > \$BASHFDS
 #/bin/bash
 
@@ -247,10 +258,15 @@ unalias fds >& /dev/null
 unalias smokeview >& /dev/null
 unalias smokezip >& /dev/null
 unalias smokediff >& /dev/null
+unalias fds6 >& /dev/null
+unalias smokeview6 >& /dev/null
+unalias smokezip6 >& /dev/null
+unalias smokediff6 >& /dev/null
 
 # define FDS bin directory location
 
 export FDSBINDIR=\`pwd\`/bin
+SHORTCUTDIR=\`pwd\`/../shortcuts
 
 # define openmpi library locations:
 #   32/64 bit gigabit ethernet
@@ -274,7 +290,7 @@ esac
 # Update LD_LIBRARY_PATH and PATH variables
 
 export $LDLIBPATH=\\\$MPIDIST/lib:\\\$FORTLIB:\\\$$LDLIBPATH
-export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:~/bin:\\\$PATH
+export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$MPIDIST/bin:\\\$PATH
 
 # if compilers are present then pre-define environment for their use
 
@@ -289,48 +305,49 @@ fi
 
 BASH
 
+# ***** create .cshrc_fds startup file
+
 echo
-echo Creating .bashrc_fds and .cshrc_fds startup files.
-if [ -e ~/.cshrc_fds ]
-then
-echo Backing up .cshrc_fds to ~/.cshrc_fds_\$BAK
-cp ~/.cshrc_fds ~/.cshrc_fds_\$BAK
-fi
+echo Creating .cshrc_fds startup file.
 
-if [ -e ~/.bashrc_fds ]
-then
-echo Backing up .bashrc_fds to ~/.bashrc_fds_\$BAK
-cp ~/.bashrc_fds ~/.bashrc_fds_\$BAK
-fi
-
-cp \$BASHFDS ~/.bashrc_fds
-rm \$BASHFDS
-
+BACKUP_FILE ~/.cshrc_fds
 cp \$CSHFDS ~/.cshrc_fds
 rm \$CSHFDS
 
-if [ -e ~/.bash_profile ]
-then
-echo Backing up .bash_profile to ~/.bash_profile_\$BAK
-cp ~/.bash_profile ~/.bash_profile_\$BAK
-fi
+# ***** create .bash_fds startup file
+
+echo Creating .bashrc_fds startup file.
+BACKUP_FILE ~/.bashrc_fds
+cp \$BASHFDS ~/.bashrc_fds
+rm \$BASHFDS
+
+# ***** update .bash_profile
+
+BACKUP_FILE ~/.bash_profile
 
 BASHPROFILETEMP=/tmp/.bash_profile_temp_\$\$
 cd \$THISDIR
 echo "Updating .bash_profile"
 grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
 echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
-echo "#FDS of .bash_profile is saved in ~/.bash_profile_\$BAK" >> \$BASHPROFILETEMP
+echo "#FDS of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
 echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
 cp \$BASHPROFILETEMP ~/.bash_profile
+rm \$BASHPROFILETEMP
 
-touch ~/.cshrc
-nlines=\$(grep cshrc_fds ~/.cshrc | wc -l)
-if [ \$nlines -eq 0 ]
-then
-echo Updating .cshrc
-echo source \~/.cshrc_fds $ossize >> ~/.cshrc
-fi
+# ***** update .cshrc
+
+BACKUP_FILE ~/.cshrc
+
+CSHTEMP=/tmp/.cshrc_temp_\$\$
+echo "Updating .cshrc"
+grep -v cshrc_fds ~/.cshrc | grep -v "#FDS" > \$CSHTEMP
+echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$CSHTEMP
+echo "#FDS of .cshrc is saved in ~/.cshrc\$BAK" >> \$CSHTEMP
+echo source \~/.cshrc_fds $ossize >> \$CSHTEMP
+cp \$CSHTEMP ~/.cshrc
+rm \$CSHTEMP
+
 echo ""
 echo "Installation complete."
 exit 0
