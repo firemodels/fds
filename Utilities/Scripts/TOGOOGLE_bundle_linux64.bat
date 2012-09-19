@@ -1,4 +1,6 @@
 @echo off
+Title Uploading FDS-SMV bundle for 64 bit Linux
+
 
 Rem Windows batch file to upload 64 bit windows bundle to the google download site
 
