@@ -13,6 +13,7 @@ echo "-h - display this message"
 echo "-p path - specify path of the smokeview executable"
 echo "-r - use release version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
+echo "-t - use test version of smokeview"
 exit
 }
 
@@ -28,7 +29,7 @@ DEBUG=
 TEST=
 SMV_PATH=""
 
-while getopts 'dhp:rs:' OPTION
+while getopts 'dhp:rs:t' OPTION
 do
 case $OPTION  in
   d)
@@ -50,6 +51,9 @@ case $OPTION  in
    else
      SIZE=_32
    fi
+  ;;
+  t)
+   TEST=_test
   ;;
 esac
 done
