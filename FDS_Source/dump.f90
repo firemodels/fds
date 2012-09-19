@@ -3917,6 +3917,22 @@ ENDIF
 DEVICE_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
+
+   ! Check to see if the device is tied to an INIT line, in which case it is tied to a specific particle. Test to see if the
+   ! particle is in the current mesh.
+
+   IF (DV%INIT_ID/='null') THEN
+      IF (DV%LP_TAG>0) THEN
+         CALL GET_LAGRANGIAN_PARTICLE_INDEX(NM,DV%PART_INDEX,DV%LP_TAG,LP_INDEX)
+         IF (LP_INDEX==0) CYCLE DEVICE_LOOP
+         IF (LP_INDEX>0)  DV%MESH = NM
+      ELSE
+         CYCLE DEVICE_LOOP
+      ENDIF
+   ENDIF
+
+   ! If the device is not in the current MESH, cycle
+
    IF (DV%MESH/=NM) CYCLE DEVICE_LOOP
 
    ! Reset state variables so that if a change occurs due to a setpoint being reached, action can be taken
@@ -3967,12 +3983,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                IF (DV%WALL_INDEX>0) THEN
                   VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=DV%WALL_INDEX)
                ELSEIF (DV%LP_TAG>0) THEN
-                  CALL GET_LAGRANGIAN_PARTICLE_INDEX(NM,DV%PART_INDEX,DV%LP_TAG,LP_INDEX)
-                  IF (LP_INDEX>0) THEN
-                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_LP_INDEX=LP_INDEX)
-                  ELSE
-                     CYCLE DEVICE_LOOP
-                  ENDIF
+                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_LP_INDEX=LP_INDEX)
                ELSEIF (DV%FACE_INDEX>0) THEN
                   VALUE = 1000._EB
                ENDIF
