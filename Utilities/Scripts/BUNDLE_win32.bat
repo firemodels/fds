@@ -1,4 +1,5 @@
 @echo off
+Title Bundle FDS and Smokeview for 32 bit Windows
 
 Rem Script to bundle fds and smokeview into an installation file
 

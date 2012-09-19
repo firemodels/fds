@@ -1,4 +1,5 @@
 @echo off
+Title Uploading FDS-SMV bundle for 64 bit OSX
 
 Rem Windows batch file to upload 64 bit OSX bundle to the google download site
 

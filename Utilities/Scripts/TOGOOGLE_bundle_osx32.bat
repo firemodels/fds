@@ -1,4 +1,6 @@
 @echo off
+Title Uploading FDS-SMV bundle for 32 bit OSX
+
 
 Rem Windows batch file to upload 32 bit windows bundle to the google download site
 

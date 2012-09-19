@@ -1,4 +1,5 @@
 @echo off
+Title Bundle FDS and Smokeview for 64 bit Windows
 
 Rem Windows batch file to upload 64 bit windows bundle to the google download site
 

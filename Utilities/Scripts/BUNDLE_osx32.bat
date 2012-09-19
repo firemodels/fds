@@ -1,4 +1,5 @@
 @echo off
+Title Bundle FDS and Smokeview for 32 bit OSX
 Rem Batch file used to bundle a 32 bit OSX of FDS/Smokeview
 
 set envfile="%userprofile%\fds_smv_env.bat"

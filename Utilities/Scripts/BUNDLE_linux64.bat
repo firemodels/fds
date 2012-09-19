@@ -1,4 +1,5 @@
 @echo off
+Title Bundle FDS and Smokeview for 64 bit Linux
 
 Rem Batch file used to build a 64 bit FDS/Smokeview bundle
 
