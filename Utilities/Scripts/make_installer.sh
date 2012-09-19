@@ -47,19 +47,35 @@ BACKUP_FILE()
   INFILE=\$1
   if [ -e \$INFILE ]
   then
-  echo Backing up \$INFILE to \$\INFILE\$BAK
+  echo Backing up \$INFILE to \$INFILE\$BAK
   cp \$INFILE \$INFILE\$BAK
 fi
+}
+COPYEXE()
+{
+  EXE=\$1
+  OUTFILE=\$2
+
+cat << SHORTCUTFILE > \$TEMPFILE
+#!/bin/bash 
+\$FDS_root/bin/\$EXE \\\$@
+SHORTCUTFILE
+
+cp \$TEMPFILE \$OUTFILE
+chmod +x \$OUTFILE
 }
 
 MKDIR()
 {
   DIR=\$1
+  CHECK=\$2
   if [ ! -d \$DIR ]
   then
     echo "Creating directory \$DIR"
     mkdir -p \$DIR>&/dev/null
   else
+    if [ "\$CHECK" == "1" ] 
+    then
     while true; do
         echo "The directory, \$DIR, already exists."
         read -p "Do you wish to overwrite it? (yes/no)" yn
@@ -69,6 +85,7 @@ MKDIR()
             * ) echo "Please answer yes or no.";;
         esac
     done
+    fi
   fi
   if [ ! -d \$DIR ]
   then
@@ -76,7 +93,7 @@ MKDIR()
     echo "FDS installation aborted."
     exit 0
   else
-    echo "\$DIR has been created."
+    echo The directory, "\$DIR, has been created."
   fi
   touch \$DIR/temp.\$\$>&/dev/null
   if ! [ -e \$DIR/temp.\$\$ ]
@@ -137,36 +154,18 @@ fi
  
 # make the FDS root directory
  
-MKDIR \$FDS_root
+MKDIR \$FDS_root 1
 
 SHORTCUTDIR=\$FDS_root/../shortcuts
-MKDIR \$SHORTCUTDIR
+MKDIR \$SHORTCUTDIR 0
 
-echo Creating fds6, smokeview6, smokediff6 and smokezip6 scripts
-
-cat << FDS > \$SHORTCUTDIR/fds6
-#!/bin/bash 
-\$FDS_root/bin/fds \\\$@
-FDS
-chmod +x \$SHORTCUTDIR/fds6
-
-cat << SMV > \$SHORTCUTDIR/smokeview6
-#!/bin/bash 
-\$FDS_root/bin/smokeview \\\$@
-SMV
-chmod +x \$SHORTCUTDIR/smokeview6
-
-cat << SMV > \$SHORTCUTDIR/smokediff6
-#!/bin/bash 
-\$FDS_root/bin/smokediff \\\$@
-SMV
-chmod +x \$SHORTCUTDIR/smokediff6
-
-cat << SMV > \$SHORTCUTDIR/smokezip6
-#!/bin/bash 
-\$FDS_root/bin/smokezip \\\$@
-SMV
-chmod +x \$SHORTCUTDIR/smokezip6
+TEMPFILE=/tmp/exetemp_\$\$
+echo Adding shortcuts to \$SHORTCUTDIR
+COPYEXE fds \$SHORTCUTDIR/fds6
+COPYEXE smokeview \$SHORTCUTDIR/smokeview6
+COPYEXE smokediff \$SHORTCUTDIR/smokediff6
+COPYEXE smokezip \$SHORTCUTDIR/smokezip6
+rm -f \$TEMPFILE
 
 # ***** copy installation files into the FDS_root directory
 
