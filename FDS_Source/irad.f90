@@ -24,9 +24,10 @@ INTEGER, ALLOCATABLE, DIMENSION(:)   :: NRP
 REAL(EB) :: RADTMP, PATH_LENGTH, RADIATIVE_FRACTION
 REAL(EB) :: DGROUP_A, DGROUP_B, WEIGH_CYL
 REAL(EB) :: DPHI0, FOUR_SIGMA, RPI_SIGMA, LTSTEP, RTMPMAX, RTMPMIN
+REAL(EB) :: MIE_MINIMUM_DIAMETER,MIE_MAXIMUM_DIAMETER
 
 INTEGER :: TIME_STEP_INCREMENT,NMIEANG
-INTEGER :: NRDMIE, NLMBDMIE, NDG = 50
+INTEGER :: NRDMIE, NLMBDMIE, MIE_NDG
 INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 
 LOGICAL :: WIDE_BAND_MODEL, CH4_BANDS
@@ -53,7 +54,7 @@ CHARACTER(30) :: RADCAL_SPECIES(11)='null'
 !     INRAD_W   Incident radiative heat flux on a cell (QRADIN = E_WALL*INRAD_W)
 !     R50       Array of PARTICLE radii corresponding to the median diameters 
 !               of the distributions used in the generation of WQABS and WQSCA arrays.
-!     NDG       Number of PARTICLE radii in WQABS and WQSCA arrays
+!     MIE_NDG   Number of PARTICLE radii in WQABS and WQSCA arrays
 !     NLMBDMIE  Number of wave lengths in Mie calculations
 !     NMIEANG   Number of angle bins in forward scattering integration
 !     NUMBER_RADIATION_ANGLES
@@ -5048,47 +5049,50 @@ REAL(EB) :: RMMAX,RMMIN,RDTMP,IB,IBSUM,AVAL,BVAL,ASUM,BSUM,B_WIEN
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE (TABLES_TYPE),  POINTER :: TA=>NULL()
  
-! Physical parameters
- 
-RMMIN = 0.5E-6_EB   ! minimum mean radius (m)
-B_WIEN = 2.8977685E-3_EB
-
-NSB = NUMBER_SPECTRAL_BANDS
- 
-! Find the maximum mean PARTICLE radius
- 
-RMMAX = 0.0_EB
 LPC => LAGRANGIAN_PARTICLE_CLASS(CLASS_NUMBER) 
-IF (LPC%DIAMETER>2._EB*RMMAX) RMMAX = 0.5_EB*LPC%DIAMETER
- 
-! Allow increase of the mean radius
-RMMAX = 1.5_EB*RMMAX
+NSB = NUMBER_SPECTRAL_BANDS
+
+! Physical parameters
+! minimum mean radius (m)
+RMMIN = 0.5_EB*1.E-6*MIE_MINIMUM_DIAMETER
+IF (RMMIN < EPSILON_EB) RMMIN = 0.5E-6_EB   
+
+! maximum mean radius (m)
+RMMAX = 0.5_EB*1.E-6*MIE_MAXIMUM_DIAMETER
+IF (RMMAX < EPSILON_EB) THEN  
+   RMMAX = 0.5_EB*LPC%DIAMETER
+   ! Allow increase of the mean radius
+   RMMAX = 1.5_EB*RMMAX
+ENDIF
+
+! Other constants
+
+B_WIEN = 2.8977685E-3_EB
  
 ! Calculate parameters of the PARTICLE group lookup table
  
-DGROUP_A = (LOG(RMMAX)-LOG(RMMIN))/(NDG-1)
-DGROUP_B = LOG(RMMAX)-DGROUP_A*NDG
+DGROUP_A = (LOG(RMMAX)-LOG(RMMIN))/(MIE_NDG-1)
+DGROUP_B = LOG(RMMAX)-DGROUP_A*MIE_NDG
 
 ! Generate the PARTICLE radii for mie table (microns)
  
-RDTMP = 0.2_EB
+RDTMP = 0.5_EB*RMMIN
 NX = 0
-DO WHILE (RDTMP < 3._EB*RMMAX*1.0E6_EB) 
+DO WHILE (RDTMP < 2._EB*RMMAX) 
    NX = NX + 1
-   RDTMP = RDTMP + MIN(3000._EB,0.2_EB*RDTMP**(1._EB))
+   RDTMP = RDTMP + MIN(1.0E6_EB,0.2_EB*RDTMP**(1._EB))
 ENDDO
 NRDMIE = NX 
 
 ALLOCATE(RDMIE(1:NRDMIE),STAT=IZERO)
 CALL ChkMemErr('MIEV','RDMIE',IZERO)
 
-RDTMP = 0.2_EB
+RDTMP = 0.5_EB*RMMIN
 RDMIE(1) = RDTMP
 DO NX = 2, NRDMIE
-   RDTMP = RDTMP + MIN(3000._EB,0.2_EB*RDTMP**(1.0_EB))
+   RDTMP = RDTMP + MIN(3.0E6_EB,0.2_EB*RDTMP**(1.0_EB))
    RDMIE(NX) = RDTMP
 ENDDO
-RDMIE = RDMIE*1.0E-6_EB
 
 ! Radiative properties
 
@@ -5124,7 +5128,7 @@ CALL ChkMemErr('INIT','CMPLX_REF_INDX',IZERO)
 
 ! Radiative properties
 
-LMBDMIE(1:NLMBDMIE)          = CPLXREF_WATER(1:NLMBDMIE,1)
+LMBDMIE(1:NLMBDMIE) = CPLXREF_WATER(1:NLMBDMIE,1)
 IF (LPC%RADIATIVE_PROPERTY_INDEX > 0) THEN
    DO NX = 1,NLMBDMIE
       CALL INTERPOLATE1D(TA%TABLE_DATA(:,1)*1.0E-6_EB,TA%TABLE_DATA(:,2),LMBDMIE(NX),REAL_REF_INDX(NX))
@@ -5173,7 +5177,7 @@ BANDLOOP: DO IBND = 1,NSB
    !     Loop over all PARTICLE size groups
 
 
-   DRGROUPLOOP: DO ND = 1, NDG
+   DRGROUPLOOP: DO ND = 1, MIE_NDG
 
       LPC%R50(ND) = EXP(DGROUP_A*REAL(ND,EB) + DGROUP_B)
 
