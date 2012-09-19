@@ -15,13 +15,14 @@ call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS5"
 
-Rem create c:\bin directory
+set SHORTCUTSDIR=%CD%\..\shortcuts
+Rem create shortcuts directory
 
 echo
-if exist c:\bin goto existbin
+if exist %SHORTCUTSDIR% goto existbin
 echo.
-echo Creating the directory c:\bin
-mkdir c:\bin
+echo Creating the directory %SHORTCUTSDIR%
+mkdir %SHORTCUTSDIR%
 :existbin
 
 Rem ------------ create aliases ----------------
@@ -29,10 +30,10 @@ Rem ------------ create aliases ----------------
 Rem *** fds5 (32 bit)
 
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5.exe"
-set fds5bat="c:\bin\fds5.bat"
+set fds5bat="%SHORTCUTSDIR%\fds5.bat"
 
 if exist %fds5exe% (
-  echo Adding fds5.bat to c:\bin
+  echo Adding fds5.bat to %SHORTCUTSDIR%
   echo @echo off > %fds5bat%
   echo %fds5exe% %%* >> %fds5bat%
 )
@@ -41,7 +42,7 @@ Rem *** fds5 (64 bit)
 
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5_win_64.exe"
 if exist %fds5exe% (
-  echo Adding fds5.bat to c:\bin
+  echo Adding fds5.bat to %SHORTCUTSDIR%
   echo @echo off > %fds5bat%
   echo %fds5exe% %%* >> %fds5bat%
 )
@@ -49,38 +50,52 @@ if exist %fds5exe% (
 Rem *** smokeview5
 
 set smv5exe="c:\Program Files\FDS\FDS5\bin\smokeview.exe"
-set smv5bat="c:\bin\smokeview5.bat"
+set smv5bat="%SHORTCUTSDIR%\smokeview5.bat"
 if exist %smv5exe% (
-  echo Adding smokeview5.bat to c:\bin
+  echo Adding smokeview5.bat to %SHORTCUTSDIR%
   echo @echo off > %smv5bat%
   echo %smv5exe% %%* >> %smv5bat%
 )
 
 Rem *** fds6
 
-echo Adding fds6.bat to c:\bin
-set fds6=c:\bin\fds6.bat
+echo Adding fds6.bat to %SHORTCUTSDIR%
+set fds6=%SHORTCUTSDIR%\fds6.bat
 echo @echo off > %fds6%
 echo "%CD%\bin\fds" %%* >> %fds6%
 
 Rem *** smokeview6
 
-echo Adding smokeview6.bat to c:\bin
-set smv6=c:\bin\smokeview6.bat
+echo Adding smokeview6.bat to %SHORTCUTSDIR%
+set smv6=%SHORTCUTSDIR%\smokeview6.bat
 echo @echo off > %smv6%
 echo "%CD%\bin\smokeview" %%* >> %smv6%
 
-Rem ------------ setting up path ------------
+Rem *** smokediff6
 
-Rem *** c:\bin
-echo.
-echo Adding c:\bin to the system path 
-call "%CD%\set_path.exe" -s -m -a "c:\bin"
+echo Adding smokediff6.bat to %SHORTCUTSDIR%
+set smd6=%SHORTCUTSDIR%\smokediff6.bat
+echo @echo off > %smd6%
+echo "%CD%\bin\smokediff" %%* >> %smd6%
+
+Rem *** smokezip6
+
+echo Adding smokezip6.bat to %SHORTCUTSDIR%
+set smz6=%SHORTCUTSDIR%\smokezip6.bat
+echo @echo off > %smdz%
+echo "%CD%\bin\smokezip" %%* >> %smz6%
+
+Rem ------------ setting up path ------------
 
 Rem *** c:\...\FDS\FDS6\bin
 echo.
 echo Adding %CD%\bin to the system path 
 call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
+
+Rem *** c:\...\FDS\shortcuts
+echo.
+echo Adding %CD%\..\shortcuts to the system path 
+call "%CD%\set_path.exe" -s -m -a "%CD%\..\shortcuts
 
 Rem ------------- file association -------------
 echo.
@@ -125,6 +140,7 @@ Rem ----------- setting up uninstall file
 echo echo. >> Uninstall\Uninstall.bat
 echo echo Removing directory, %CD%\bin, from the System Path >> Uninstall\Uninstall.bat
 echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\Uninstall.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\..\shortcuts" >> Uninstall\Uninstall.bat
 
 echo echo. >> Uninstall\Uninstall.bat
 echo echo Delete the directory %CD% by hand (as administrator) to complete the removal of FDS and Smokeview >> Uninstall\Uninstall.bat
