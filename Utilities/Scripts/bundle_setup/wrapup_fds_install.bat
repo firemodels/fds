@@ -15,17 +15,21 @@ call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS5"
 
-set SHORTCUTSDIR=%CD%\..\shortcuts
+set SHORTCUTSDIR="%CD%\..\shortcuts"
 Rem create shortcuts directory
 
-echo
+echo.
 if exist %SHORTCUTSDIR% goto existbin
 echo.
 echo Creating the directory %SHORTCUTSDIR%
 mkdir %SHORTCUTSDIR%
 :existbin
 
+echo. 
+echo Adding program shortcuts to %SHORTCUTSDIR%
 Rem ------------ create aliases ----------------
+
+set tempfile="%TEMP%\fds_tempfile"
 
 Rem *** fds5 (32 bit)
 
@@ -33,18 +37,18 @@ set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5.exe"
 set fds5bat="%SHORTCUTSDIR%\fds5.bat"
 
 if exist %fds5exe% (
-  echo Adding fds5.bat to %SHORTCUTSDIR%
-  echo @echo off > %fds5bat%
-  echo %fds5exe% %%* >> %fds5bat%
+  echo @echo off > %tempfile%
+  echo %fds5exe% %%* >> %tempfile%
+  copy %tempfile% %SHORTCUTSDIR%\fds5.bat
 )
 
 Rem *** fds5 (64 bit)
 
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5_win_64.exe"
 if exist %fds5exe% (
-  echo Adding fds5.bat to %SHORTCUTSDIR%
-  echo @echo off > %fds5bat%
-  echo %fds5exe% %%* >> %fds5bat%
+  echo @echo off > %tempfile%
+  echo %fds5exe% %%* >> %tempfile%
+  copy %tempfile% %SHORTCUTSDIR%\fds5.bat
 )
 
 Rem *** smokeview5
@@ -52,38 +56,34 @@ Rem *** smokeview5
 set smv5exe="c:\Program Files\FDS\FDS5\bin\smokeview.exe"
 set smv5bat="%SHORTCUTSDIR%\smokeview5.bat"
 if exist %smv5exe% (
-  echo Adding smokeview5.bat to %SHORTCUTSDIR%
-  echo @echo off > %smv5bat%
-  echo %smv5exe% %%* >> %smv5bat%
+  echo @echo off > %tempfile%
+  echo %smv5exe% %%* >> %tempfile%
+  copy %tempfile% %SHORTCUTSDIR%\s5.bat
 )
 
 Rem *** fds6
 
-echo Adding fds6.bat to %SHORTCUTSDIR%
-set fds6=%SHORTCUTSDIR%\fds6.bat
-echo @echo off > %fds6%
-echo "%CD%\bin\fds" %%* >> %fds6%
+echo @echo off > %tempfile%
+echo "%CD%\bin\fds" %%* >> %tempfile%
+copy %tempfile% %SHORTCUTSDIR%\fds6.bat
 
 Rem *** smokeview6
 
-echo Adding smokeview6.bat to %SHORTCUTSDIR%
-set smv6=%SHORTCUTSDIR%\smokeview6.bat
-echo @echo off > %smv6%
-echo "%CD%\bin\smokeview" %%* >> %smv6%
+echo @echo off > %tempfile%
+echo "%CD%\bin\smokeview" %%* >> %tempfile%
+copy %tempfile% %SHORTCUTSDIR%\smokeview6.bat
 
 Rem *** smokediff6
 
-echo Adding smokediff6.bat to %SHORTCUTSDIR%
-set smd6=%SHORTCUTSDIR%\smokediff6.bat
-echo @echo off > %smd6%
-echo "%CD%\bin\smokediff" %%* >> %smd6%
+echo @echo off > %tempfile%
+echo "%CD%\bin\smokediff" %%* >> %tempfile%
+copy %tempfile% %smd6% %SHORTCUTSDIR%\smokediff6.bat
 
 Rem *** smokezip6
 
-echo Adding smokezip6.bat to %SHORTCUTSDIR%
-set smz6=%SHORTCUTSDIR%\smokezip6.bat
-echo @echo off > %smdz%
-echo "%CD%\bin\smokezip" %%* >> %smz6%
+echo @echo off > %tempfile%
+echo "%CD%\bin\smokezip" %%* >> %tempfile%
+copy %tempfile% %smd6% %SHORTCUTSDIR%\smokezip6.bat
 
 Rem ------------ setting up path ------------
 
@@ -108,7 +108,7 @@ set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\FDS6
 
 Rem ------------- start menu shortcuts ---------------
 echo. 
-echo Adding shortcuts to the Start menu.
+echo Adding document shortcuts to the Start menu.
 if exist "%FDSSTART%" rmdir /q /s "%FDSSTART%"
 
 mkdir "%FDSSTART%"
