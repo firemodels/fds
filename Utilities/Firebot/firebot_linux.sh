@@ -98,25 +98,6 @@ clean_firebot_history()
 #  ========================
 #  ========================
 
-# Initialize stage success flags to false
-
-stage0_success=false
-stage1_success=false
-stage2a_success=false
-stage2b_success=false
-stage3_success=false
-stage4a_success=false
-stage4b_success=false
-stage5_success=false
-stage6a_success=false
-stage6b_success=false
-stage6c_success=false
-stage6d_success=false
-stage6e_success=false
-stage6f_success=false
-stage7a_success=false
-stage7b_success=false
-
 #  ===================================
 #  = Stage 0 - External dependencies =
 #  ===================================
