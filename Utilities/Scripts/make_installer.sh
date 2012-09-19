@@ -320,7 +320,7 @@ cd \$THISDIR
 echo "Updating .bash_profile"
 grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
 echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
-echo "#FDS of .bash_profile is saves in ~/.bash_profile_\$BAK" >> \$BASHPROFILETEMP
+echo "#FDS of .bash_profile is saved in ~/.bash_profile_\$BAK" >> \$BASHPROFILETEMP
 echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
 cp \$BASHPROFILETEMP ~/.bash_profile
 
