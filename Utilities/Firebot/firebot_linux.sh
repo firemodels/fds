@@ -843,8 +843,24 @@ check_matlab_validation()
    fi
 }
 
+#  ======================================
+#  = Stage 7c - FDS run time statistics =
+#  ======================================
+
+generate_timing_stats()
+{
+   cd $FDS_SVNROOT/Utilities/Scripts
+   ./fds_timing_stats.sh
+}
+
+archive_timing_stats()
+{
+   cd $FDS_SVNROOT/Utilities/Scripts
+   cp fds_timing_stats.csv "$FIREBOT_DIR/history/${SVN_REVISION}_timing.csv"
+}
+
 #  ==================================
-#  = Stage 8 - Build FDS-SMV Guides =
+#  = Stage 8 - Build FDS-SMV guides =
 #  ==================================
 
 check_guide()
@@ -1130,6 +1146,12 @@ fi
 # No stage dependencies
 run_matlab_validation
 check_matlab_validation
+
+### Stage 7c ###
+if $stage5_success ; then
+   generate_timing_stats
+   archive_timing_stats
+fi
 
 ### Stage 8 ###
 if [[ $stage5_success && stage6f_success ]] ; then

@@ -73,22 +73,23 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 <br>
 <span class="dropt">View a list of build stages<br>
 <span style="width:700px;">
-<b>Stage 1: </b> SVN operations <br>
+<b>Stage 1:</b> SVN operations <br>
 <b>Stage 2a:</b> Compile FDS DB <br>
 <b>Stage 2b:</b> Compile FDS MPI DB <br>
-<b>Stage 3: </b> Run verification cases (short run) <br>
+<b>Stage 3:</b> Run verification cases (short run) <br>
 <b>Stage 4a:</b> Compile FDS release <br>
 <b>Stage 4b:</b> Compile FDS MPI release <br>
-<b>Stage 5: </b> Run verification cases (long run) <br>
+<b>Stage 5:</b> Run verification cases (long run) <br>
 <b>Stage 6a:</b> Compile SMV utilities <br>
 <b>Stage 6b:</b> Compile SMV DB <br>
 <b>Stage 6c:</b> Make SMV pictures (debug mode) <br>
 <b>Stage 6d:</b> Compile SMV release <br>
 <b>Stage 6e:</b> Make SMV pictures (release mode) <br>
 <b>Stage 6f:</b> Make FDS pictures <br>
-<b>Stage 7a: </b> Matlab plotting and statistics (verification) <br>
-<b>Stage 7b: </b> Matlab plotting (validation) <br>
-<b>Stage 8: </b> Build FDS-SMV Guides <br>
+<b>Stage 7a:</b> Matlab plotting and statistics (verification) <br>
+<b>Stage 7b:</b> Matlab plotting (validation) <br>
+<b>Stage 7c:</b> FDS run time statistics <br>
+<b>Stage 8:</b> Build FDS-SMV guides <br>
 </span></span>"""
 
 print "<br><hr align='left'><br>"
