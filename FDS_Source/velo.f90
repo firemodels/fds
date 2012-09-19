@@ -672,14 +672,22 @@ DO K=1,KBAR
          IEYM  = EDGE_INDEX(6,IC)
          IEZP  = EDGE_INDEX(12,IC)
          IEZM  = EDGE_INDEX(10,IC)
-         IF (OME_E(-1,IEYP)>-1.E5_EB) OMYP = OME_E(-1,IEYP)
-         IF (OME_E( 1,IEYM)>-1.E5_EB) OMYM = OME_E( 1,IEYM)
-         IF (OME_E(-2,IEZP)>-1.E5_EB) OMZP = OME_E(-2,IEZP)
-         IF (OME_E( 2,IEZM)>-1.E5_EB) OMZM = OME_E( 2,IEZM)
-         IF (TAU_E(-1,IEYP)>-1.E5_EB) TXZP = TAU_E(-1,IEYP)
-         IF (TAU_E( 1,IEYM)>-1.E5_EB) TXZM = TAU_E( 1,IEYM)
-         IF (TAU_E(-2,IEZP)>-1.E5_EB) TXYP = TAU_E(-2,IEZP)
-         IF (TAU_E( 2,IEZM)>-1.E5_EB) TXYM = TAU_E( 2,IEZM)
+         IF (OME_E(-1,IEYP)>-1.E5_EB) THEN
+            OMYP = OME_E(-1,IEYP)
+            TXZP = TAU_E(-1,IEYP)
+         ENDIF
+         IF (OME_E( 1,IEYM)>-1.E5_EB) THEN
+            OMYM = OME_E( 1,IEYM)
+            TXZM = TAU_E( 1,IEYM)
+         ENDIF
+         IF (OME_E(-2,IEZP)>-1.E5_EB) THEN
+            OMZP = OME_E(-2,IEZP)
+            TXYP = TAU_E(-2,IEZP)
+         ENDIF
+         IF (OME_E( 2,IEZM)>-1.E5_EB) THEN
+            OMZM = OME_E( 2,IEZM)
+            TXYM = TAU_E( 2,IEZM)
+         ENDIF
          WOMY  = WP*OMYP + WM*OMYM
          VOMZ  = VP*OMZP + VM*OMZM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
@@ -724,14 +732,22 @@ DO K=1,KBAR
          IEXM  = EDGE_INDEX(2,IC)
          IEZP  = EDGE_INDEX(12,IC)
          IEZM  = EDGE_INDEX(11,IC)
-         IF (OME_E(-2,IEXP)>-1.E5_EB) OMXP = OME_E(-2,IEXP)
-         IF (OME_E( 2,IEXM)>-1.E5_EB) OMXM = OME_E( 2,IEXM)
-         IF (OME_E(-1,IEZP)>-1.E5_EB) OMZP = OME_E(-1,IEZP)
-         IF (OME_E( 1,IEZM)>-1.E5_EB) OMZM = OME_E( 1,IEZM)
-         IF (TAU_E(-2,IEXP)>-1.E5_EB) TYZP = TAU_E(-2,IEXP)
-         IF (TAU_E( 2,IEXM)>-1.E5_EB) TYZM = TAU_E( 2,IEXM)
-         IF (TAU_E(-1,IEZP)>-1.E5_EB) TXYP = TAU_E(-1,IEZP)
-         IF (TAU_E( 1,IEZM)>-1.E5_EB) TXYM = TAU_E( 1,IEZM)
+         IF (OME_E(-2,IEXP)>-1.E5_EB) THEN
+            OMXP = OME_E(-2,IEXP)
+            TYZP = TAU_E(-2,IEXP)
+         ENDIF
+         IF (OME_E( 2,IEXM)>-1.E5_EB) THEN
+            OMXM = OME_E( 2,IEXM)
+            TYZM = TAU_E( 2,IEXM)
+         ENDIF
+         IF (OME_E(-1,IEZP)>-1.E5_EB) THEN
+            OMZP = OME_E(-1,IEZP)
+            TXYP = TAU_E(-1,IEZP)
+         ENDIF
+         IF (OME_E( 1,IEZM)>-1.E5_EB) THEN
+            OMZM = OME_E( 1,IEZM)
+            TXYM = TAU_E( 1,IEZM)
+         ENDIF
          WOMX  = WP*OMXP + WM*OMXM
          UOMZ  = UP*OMZP + UM*OMZM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J+1,K))
@@ -776,14 +792,22 @@ DO K=0,KBAR
          IEXM  = EDGE_INDEX(3,IC)
          IEYP  = EDGE_INDEX(8,IC)
          IEYM  = EDGE_INDEX(7,IC)
-         IF (OME_E(-1,IEXP)>-1.E5_EB) OMXP = OME_E(-1,IEXP)
-         IF (OME_E( 1,IEXM)>-1.E5_EB) OMXM = OME_E( 1,IEXM)
-         IF (OME_E(-2,IEYP)>-1.E5_EB) OMYP = OME_E(-2,IEYP)
-         IF (OME_E( 2,IEYM)>-1.E5_EB) OMYM = OME_E( 2,IEYM)
-         IF (TAU_E(-1,IEXP)>-1.E5_EB) TYZP = TAU_E(-1,IEXP)
-         IF (TAU_E( 1,IEXM)>-1.E5_EB) TYZM = TAU_E( 1,IEXM)
-         IF (TAU_E(-2,IEYP)>-1.E5_EB) TXZP = TAU_E(-2,IEYP)
-         IF (TAU_E( 2,IEYM)>-1.E5_EB) TXZM = TAU_E( 2,IEYM)
+         IF (OME_E(-1,IEXP)>-1.E5_EB) THEN
+            OMXP = OME_E(-1,IEXP)
+            TYZP = TAU_E(-1,IEXP)
+         ENDIF
+         IF (OME_E( 1,IEXM)>-1.E5_EB) THEN
+            OMXM = OME_E( 1,IEXM)
+            TYZM = TAU_E( 1,IEXM)
+         ENDIF
+         IF (OME_E(-2,IEYP)>-1.E5_EB) THEN
+            OMYP = OME_E(-2,IEYP)
+            TXZP = TAU_E(-2,IEYP)
+         ENDIF
+         IF (OME_E( 2,IEYM)>-1.E5_EB) THEN
+            OMYM = OME_E( 2,IEYM)
+            TXZM = TAU_E( 2,IEYM)
+         ENDIF
          UOMY  = UP*OMYP + UM*OMYM
          VOMX  = VP*OMXP + VM*OMXM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
@@ -1025,10 +1049,14 @@ DO K= 1,KBAR
       IC    = CELL_INDEX(I,J,K)
       IEYP  = EDGE_INDEX(8,IC)
       IEYM  = EDGE_INDEX(6,IC)
-      IF (OME_E(-1,IEYP)>-1.E5_EB) OMYP = OME_E(-1,IEYP)
-      IF (OME_E( 1,IEYM)>-1.E5_EB) OMYM = OME_E( 1,IEYM)
-      IF (TAU_E(-1,IEYP)>-1.E5_EB) TXZP = TAU_E(-1,IEYP)
-      IF (TAU_E( 1,IEYM)>-1.E5_EB) TXZM = TAU_E( 1,IEYM)
+      IF (OME_E(-1,IEYP)>-1.E5_EB) THEN
+         OMYP = OME_E(-1,IEYP)
+         TXZP = TAU_E(-1,IEYP)
+      ENDIF
+      IF (OME_E( 1,IEYM)>-1.E5_EB) THEN
+         OMYM = OME_E( 1,IEYM)
+         TXZM = TAU_E( 1,IEYM)
+      ENDIF
       WOMY  = WP*OMYP + WM*OMYM
       RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
       AH    = RHO_0(K)*RRHO - 1._EB   
@@ -1060,10 +1088,14 @@ DO K=0,KBAR
       IC    = CELL_INDEX(I,J,K)
       IEYP  = EDGE_INDEX(8,IC)
       IEYM  = EDGE_INDEX(7,IC)
-      IF (OME_E(-2,IEYP)>-1.E5_EB) OMYP = OME_E(-2,IEYP)
-      IF (OME_E( 2,IEYM)>-1.E5_EB) OMYM = OME_E( 2,IEYM)
-      IF (TAU_E(-2,IEYP)>-1.E5_EB) TXZP = TAU_E(-2,IEYP)
-      IF (TAU_E( 2,IEYM)>-1.E5_EB) TXZM = TAU_E( 2,IEYM)
+      IF (OME_E(-2,IEYP)>-1.E5_EB) THEN
+         OMYP = OME_E(-2,IEYP)
+         TXZP = TAU_E(-2,IEYP)
+      ENDIF
+      IF (OME_E( 2,IEYM)>-1.E5_EB) THEN
+         OMYM = OME_E( 2,IEYM)
+         TXZM = TAU_E( 2,IEYM)
+      ENDIF
       UOMY  = UP*OMYP + UM*OMYM
       RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
       AH    = 0.5_EB*(RHO_0(K)+RHO_0(K+1))*RRHO - 1._EB
