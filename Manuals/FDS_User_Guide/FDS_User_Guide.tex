@@ -5664,7 +5664,10 @@ The logical parameter {\ct SMIX\_COMPONENT\_ONLY} denotes that the species is on
 \item[{\ct MASS\_FRACTION}] The mass fractions of the components of the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1. Alternatively, {\ct VOLUME\_FRACTION} can be specified. Do not use both on an {\ct SMIX} line.
 \end{description}
 
-\noindent Any FDS input that requires a {\ct SPEC\_ID} can also use the {\ct ID} of an {\ct SMIX}.
+\noindent The addition of species mixtures to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs. 
+For {\ct REAC} and {\ct SMIX}, {\ct SPEC\_ID} refers to the {\ct ID} of a {\ct SPEC}. For outputs and devices that require a 
+{\ct SPEC\_ID} one can used either the {\ct ID} of an {\ct SMIX} or a {\ct SPEC}.  For {\ct INIT}, {\ct MATL}, {\ct PART}, 
+and {\ct SURF}, {\ct SPEC\_ID} refers to either an {\ct SMIX} or a {\ct SPEC} with {\ct SMIX\_COMPONENT\_ONLY=.FALSE.}
 
 
 
