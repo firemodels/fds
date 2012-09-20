@@ -1,4 +1,4 @@
-&HEAD CHID='fed_test_area', TITLE='Check FED computation in smokeview, SVN $Revision: 12143 $'/
+&HEAD CHID='fed_test_area', TITLE='Check FED computation in smokeview, SVN $Revision$'/
 
 &MESH XB=-0.1,2.3,0.0,0.1,-0.1,1.1, IJK=24,1,12 /
 
