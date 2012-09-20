@@ -36,11 +36,12 @@ echo "FDS $FDSVERSION and Smokeview $SMVVERSION installer for $ostype $ossize"
 echo ""
 echo "Options:"
 echo "  1) Press <Enter> to begin installation"
-echo "  2) Type \"extract\" to copy the installation files to"
-echo "     the file $FDS_TAR"
+echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
 
 FDS_root=$INSTALLDIR
 BAK=_\`date +%Y%m%d_%H%M%S\`
+
+#--- make a backup of a file
 
 BACKUP_FILE()
 {
@@ -51,6 +52,9 @@ BACKUP_FILE()
   cp \$INFILE \$INFILE\$BAK
 fi
 }
+
+#--- create a script that points to an installed executable
+
 COPYEXE()
 {
   EXE=\$1
@@ -64,6 +68,8 @@ SHORTCUTFILE
 cp \$TEMPFILE \$OUTFILE
 chmod +x \$OUTFILE
 }
+
+#--- make a directory, checking if the user has permission
 
 MKDIR()
 {
@@ -105,45 +111,47 @@ MKDIR()
   rm \$DIR/temp.\$\$
 }
 
-# record the name of this script and the name of the directory 
+#--- record the name of this script and the name of the directory 
 # it will run in
 
 THIS=\`pwd\`/\$0
 THISDIR=\`pwd\`
 
+#--- record temporary start up file names
+
 CSHFDS=/tmp/cshrc_fds.\$\$
 BASHFDS=/tmp/bashrc_fds.\$\$
 
-# Find the beginning of the included FDS tar file so that it can be
+#--- Find the beginning of the included FDS tar file so that it can be
 # subsequently un-tar'd
  
 SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
 
-# extract tar.gz file from this script if 'extract' specified
+#--- extract tar.gz file from this script if 'extract' specified
 
 read  option
 if [ "\$option" == "extract" ]
 then
-name=\$0
-THAT=$FDS_TAR
-if [ -e \$THAT ]
-then
-while true; do
-    echo "The file, \$THAT, already exists."
-    read -p "Do you wish to overwrite it? (yes/no)" yn
-    case \$yn in
+  name=\$0
+  THAT=$FDS_TAR
+  if [ -e \$THAT ]
+  then
+    while true; do
+      echo "The file, \$THAT, already exists."
+      read -p "Do you wish to overwrite it? (yes/no)" yn
+      case \$yn in
         [Yy]* ) break;;
         [Nn]* ) echo "Extraction cancelled";exit;;
         * ) echo "Please answer yes or no.";;
-    esac
-done
-fi
-echo Extracting the file embedded in this installer to \$THAT
-tail -n +\$SKIP \$THIS > \$THAT
-exit 0
+      esac
+    done
+  fi
+  echo Extracting the file embedded in this installer to \$THAT
+  tail -n +\$SKIP \$THIS > \$THAT
+  exit 0
 fi
 
-# get FDS root directory
+#--- get FDS root directory
 
 echo ""
 echo "Where would you like to install FDS? )"
@@ -177,9 +185,11 @@ else
   fi
 fi
  
-# make the FDS root directory
+#--- make the FDS root directory
  
 MKDIR \$FDS_root 1
+
+#--- make shortcuts
 
 SHORTCUTDIR=\$FDS_root/../shortcuts
 MKDIR \$SHORTCUTDIR 0
@@ -192,7 +202,7 @@ COPYEXE smokediff \$SHORTCUTDIR/smokediff6
 COPYEXE smokezip \$SHORTCUTDIR/smokezip6
 rm -f \$TEMPFILE
 
-# ***** copy installation files into the FDS_root directory
+#--- copy installation files into the FDS_root directory
 
 echo
 echo "Copying FDS installation files to"  \$FDS_root
@@ -200,7 +210,7 @@ cd \$FDS_root
 tail -n +\$SKIP \$THIS | tar -xz
 echo "Copy complete."
 
-# ***** create CSH startup file
+#--- create CSH startup file
 
 cat << CSHRC > \$CSHFDS
 #/bin/csh -f
@@ -269,7 +279,7 @@ endif
 
 CSHRC
 
-# ***** create BASH startup file
+#--- create BASH startup file
 
 cat << BASH > \$BASHFDS
 #/bin/bash
@@ -329,7 +339,7 @@ fi
 
 BASH
 
-# ***** create .cshrc_fds startup file
+#--- create .cshrc_fds startup file
 
 echo
 echo Creating .cshrc_fds startup file.
@@ -338,14 +348,14 @@ BACKUP_FILE ~/.cshrc_fds
 cp \$CSHFDS ~/.cshrc_fds
 rm \$CSHFDS
 
-# ***** create .bash_fds startup file
+#--- create .bash_fds startup file
 
 echo Creating .bashrc_fds startup file.
 BACKUP_FILE ~/.bashrc_fds
 cp \$BASHFDS ~/.bashrc_fds
 rm \$BASHFDS
 
-# ***** update .bash_profile
+#--- update .bash_profile
 
 BACKUP_FILE ~/.bash_profile
 
@@ -360,7 +370,7 @@ echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
 cp \$BASHPROFILETEMP ~/.bash_profile
 rm \$BASHPROFILETEMP
 
-# ***** update .cshrc
+#--- update .cshrc
 
 BACKUP_FILE ~/.cshrc
 
