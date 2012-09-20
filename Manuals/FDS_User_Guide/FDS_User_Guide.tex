@@ -2291,27 +2291,24 @@ assumed constant with height, and the density and pressure decrease with height 
 decrease is not noticed in most building scale calculations, but it is important in large outdoor
 simulations. There are some scenarios for which it is convenient to change the ambient conditions within some
 rectangular region of the domain.
+
 \subsection*{Species}
+
 Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID='NITROGEN', BACKGROUND=.TRUE. /
-&SPEC ID='PROPANE' /
-&SPEC ID='OXYGEN' /
-&SPEC ID='WATER VAPOR' /
-&SPEC ID='CARBON DIOXIDE' /
-&SPEC ID='CARBON MONOXIDE' /
-
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE' /
 \end{verbatim}
 \normalsize
-\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively.
+
+\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.
 
 \subsection*{Temperature}
+
 To modify the local initial temperature, add lines of the form,
 
 \footnotesize
@@ -8283,6 +8280,7 @@ the simulation divided by {\ct NFRAMES}.
 {\ct CHID.notready} which is deleted, if the simulation is completed
 successfully. This file can be used as an error indicator. It is {\ct
 .FALSE.} by default.
+\item[{\ct EB\_DUMP\_FILE}] If {\ct .TRUE.} write out the particle output file using 8 byte reals. Default {\ct .FALSE.}
 \end{description}
 
 
@@ -8719,7 +8717,7 @@ where $C$ is a non-dimensional constant characteristic of
 the type of object being viewed through the smoke, {\em i.e.}
 $C=8$ for a light-emitting sign and $C=3$ for a light-reflecting
 sign~\cite{SFPE:Mulholland}. Since $K$ varies from point to point in the
-domain, the visibility $S$ does as well. 
+domain, the visibility $S$ does as well.
 
 Three parameter control smoke production and visibility; each
 parameter is input on the {\ct REAC} line. The first parameter
@@ -8768,7 +8766,7 @@ ceiling. Define $T_u$ as the upper layer temperature, $T_l$ as the
 lower layer temperature, and $z_{int}$ as the interface
 height. Compute the quantities:
 \begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; dz &=& I_1 \\ [0.1in]
-                  (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 
+                  (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2
 \end{eqnarray*}
 Solve for $z_{int}$:
 \be z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} \ee
@@ -8876,7 +8874,7 @@ For more information about specifying arrays of devices via the parameter {\ct P
 \subsection{Particle Output Quantities}
 \label{info:part_output}
 
-This section lists various output quantities associated with Lagrangian particles. 
+This section lists various output quantities associated with Lagrangian particles.
 
 \subsubsection{Solid Phase}
 
@@ -8964,14 +8962,14 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 {\ct 'ENTHALPY'}            & $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$     & $f_2$  & kJ/m$^3$ \\
 {\ct 'PARTICLE FLUX X'}     & $(4/3)\rho_i r_i^3 u_i$                                               & $f_2$  & kg/m$^2$s \\
 {\ct 'PARTICLE FLUX Y'}     & $(4/3)\rho_i r_i^3 v_i$                                               & $f_2$  & kg/m$^2$s \\
-{\ct 'PARTICLE FLUX Z'}     & $(4/3)\rho_i r_i^3 w_i$                                               & $f_2$  & kg/m$^2$s \\   
-{\ct 'U-VELOCITY'}          & $u_i$                                                                 & $f_1$  & m/s \\         
-{\ct 'V-VELOCITY'}          & $v_i$                                                                 & $f_1$  & m/s \\         
-{\ct 'W-VELOCITY'}          & $w_i$                                                                 & $f_1$  & m/s \\         
-{\ct 'VELOCITY'}            & $(u_i^2+v_i^2+w_i^2)^{1/2}$                                           & $f_1$  & m/s \\         
-{\ct 'TEMPERATURE'}         & $T_i$                                                                 & $f_1$  & ${}^\circ$C \\ 
-{\ct 'MASS CONCENTRATION'}  & $(4/3)\rho r_i^3 $                                                    & $f_2$  & kg/m$^3$ \\    
-{\ct 'NUMBER CONCENTRATION'}& 1                                                                     & $f_2$  & \\             
+{\ct 'PARTICLE FLUX Z'}     & $(4/3)\rho_i r_i^3 w_i$                                               & $f_2$  & kg/m$^2$s \\
+{\ct 'U-VELOCITY'}          & $u_i$                                                                 & $f_1$  & m/s \\
+{\ct 'V-VELOCITY'}          & $v_i$                                                                 & $f_1$  & m/s \\
+{\ct 'W-VELOCITY'}          & $w_i$                                                                 & $f_1$  & m/s \\
+{\ct 'VELOCITY'}            & $(u_i^2+v_i^2+w_i^2)^{1/2}$                                           & $f_1$  & m/s \\
+{\ct 'TEMPERATURE'}         & $T_i$                                                                 & $f_1$  & ${}^\circ$C \\
+{\ct 'MASS CONCENTRATION'}  & $(4/3)\rho r_i^3 $                                                    & $f_2$  & kg/m$^3$ \\
+{\ct 'NUMBER CONCENTRATION'}& 1                                                                     & $f_2$  & \\
  \hline
 \end{tabular}
 \end{center}
@@ -9005,7 +9003,7 @@ time 5~s.
       PDPA_N=2
       PDPA_RADIUS=0.01
       PDPA_START=5. /
-      
+
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d32' /
 \end{verbatim}
 \normalsize
@@ -9022,7 +9020,7 @@ time 5~s.
       PDPA_HISTOGRAM=.TRUE.
       PDPA_HISTOGRAM_NBINS=20
       PDPA_HISTOGRAM_LIMITS=0,2000E-6 /
-      
+
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d' /
 \end{verbatim}
 
@@ -9382,7 +9380,7 @@ the actual volume fraction of CO, and the second line reports the output of a ga
 \footnotesize
 \begin{verbatim}
 &DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE'/
-&DEVC ID='dry CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE', 
+&DEVC ID='dry CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE',
       DRY=.TRUE. /
 \end{verbatim}
 \normalsize
@@ -10114,8 +10112,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & 1000000.                       \\ \hline
 {\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /5}             \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-%{\ct DT\_VEG}                       & Real         &                                        &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-%{\ct EB\_PART\_FILE}                 & Logical         & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
+{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct .TRUE.}                   \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:DUMP}                &           & 500000                         \\ \hline
@@ -10139,8 +10136,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
-
-% Undocumented: CUTCELL_DATA_FILE, DT_BNDE, DT_GEOM, DT_VEG
 
 \vspace{\baselineskip}
 
@@ -10478,13 +10473,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EVAC\_TIME\_ITERATIONS}                    & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 {\ct FLUX\_LIMITER}                             & Integer       & Reference~\cite{FDS_Tech_Guide}                       &               & 4                 \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
-{\ct FREEZE\_VELOCITY}                          & Logical       & Constant velocity                                     &               & {\ct .FALSE.}     \\ \hline
+%{\ct FREEZE\_VELOCITY}                          & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
 {\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
-{\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}              & 1.0               \\ \hline
+{\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               & 1.0           &                   \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES\_FILTER\_WIDTH}                        & Character     & Section~\ref{info:LES}                                &               & {\ct 'MAX'}       \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
@@ -10527,11 +10522,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
 {\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
-%{\ct WFDS                                       & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
-%Undocumented: HRRPUVCUT_MAX, HRRPUV_MAX_SMV, NEW_EVAP_DROP
+%Undocumented: NEW_EVAP_DROP
 
 
 \vspace{\baselineskip}
@@ -10905,7 +10899,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct A}                                   & Real        & Section~\ref{info:finite}                 &   cm$^3$/mol/s    &     \\ \hline
-%{\ct A\_LEAN}                             & Real        & Section~\ref{info:finite}                 &   cm$^3$/mol/s    &     \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:extinction}             &   K               &  0  \\ \hline
 {\ct BETA\_EDC}                           & Real        & Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 3    \\ \hline
@@ -10913,7 +10906,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CO\_YIELD}                           & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0        \\ \hline
 {\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Section~\ref{info:extinction}             &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Section~\ref{info:finite}                 &   kJ/kmol         &     \\ \hline
-%{\ct E\_LEAN}                             & Real        & Section~\ref{info:finite}                 &   kJ/kmol         &     \\ \hline
 %{\ct EDCM}                                & Logical     & Section~\ref{??}                          &                   & {\ct .FALSE.}   \\ \hline
 {\ct EPUMO2}                              & Real        & Section~\ref{info:heat_of_combustion}     &   kJ/kg           & 13100    \\ \hline
 {\ct EQUATION}                            & Character   & Section~\ref{info:EQUATION}               &                   &          \\ \hline
@@ -11449,7 +11441,7 @@ identifies the version of the entire repository rather than of a specific file (
 A record of the version number is maintained that indicates when a specific file was changed, which is referred to as a revision number.
 
 Anyone can obtain a copy of the repository or retrieve a specific revision of the
-repository.  However, only the FDS and Smokeview developers can commit changes to the repository. The current location of the FDS repository is 
+repository.  However, only the FDS and Smokeview developers can commit changes to the repository. The current location of the FDS repository is
 
 \footnotesize
 \begin{verbatim}
@@ -11996,7 +11988,8 @@ These files are written out from {\ct dump.f90} using lines equivalent to the fo
     IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
     IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
   ELSE IF (GEOM_TYPE.EQ.1) THEN
-    ! rotation and translation parameters used to transform geometry from first dynamic time step
+    ! rotation and translation parameters used to transform geometry from first 
+    ! dynamic time step
     WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
               .
