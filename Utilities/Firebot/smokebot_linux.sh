@@ -748,29 +748,21 @@ compile_smv_db
 check_compile_smv_db
 
 ### Stage 6c ###
-if [[ $stage5_success && $stage6b_success ]] ; then
    make_smv_pictures_db
    check_smv_pictures_db
-fi
 
 ### Stage 6d ###
-if [[ $stage5_success && $stage6b_success ]] ; then
    compile_smv
    check_compile_smv
-fi
 
 ### Stage 6e ###
-if [[ $stage6d_success ]] ; then
    make_smv_pictures
    check_smv_pictures
-fi
 
 ### Stage 8 ###
-if [[ $stage6e_success ]] ; then
    make_smv_user_guide
    make_smv_technical_guide
    make_smv_verification_guide
-fi
 # No stage dependencies
 
 ### Report results ###
