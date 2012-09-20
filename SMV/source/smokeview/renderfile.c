@@ -569,7 +569,7 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
 
     if(texturedir==NULL){
       if(printflag==1){
-        fprintf("*** Error: texture file: %s unavailable\n",filename);
+        fprintf(stderr,"*** Error: texture file: %s unavailable\n",filename);
       }
       return NULL;
     }
