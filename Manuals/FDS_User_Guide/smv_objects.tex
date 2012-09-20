@@ -1,7 +1,4 @@
-%
-% newcommands needed by this include file
-%
-%\newcommand{\ct}{\tt \small}
+
 \newcommand{\devicewidth}{1.5in}
 \newcommand{\boxwidth}{3.0in}
 \newcommand{\incgraphics}[1]{
@@ -24,7 +21,7 @@ Smokeview objects may be static or dynamic.  A static object is defined entirely
 found in the {\ct objects.svo}\ file.  Its appearance remains the same regardless of how an FDS input file is set up.  A
 dynamic object is also defined using instructions found in {\ct objects.svo}, but in addition uses data specified on
 the {\ct PROP}  line and/or data contained in a particle file.  As a result, the appearance of dynamic
-objects depends on the particular FDS case that is run.   
+objects depends on the particular FDS case that is run.
 
 
 \subsection{Static Smokeview Objects}
@@ -138,27 +135,31 @@ Each entry shows an image of the object and the parameters used to customize its
 \endhead
 
 {\ct ball} &
-\parbox[c]{\boxwidth}{
+\parbox[c]{\boxwidth}{ 
+\hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=128','G=192','B=255',}\\
 {\ct 'DX=0.5','DY=.75','DZ=1.0'}\\  \\
 R, G, B - red, green, blue color components ranging from 0 to 255\\
-DX, DY, DZ - amount ball is stretched along x, y, z axis respectively
-} &
+DX, DY, DZ - amount ball is stretched along x, y, z axis respectively \\
+\hspace{1in} } &
 \incgraphics{SCRIPT_FIGURES/ball} \\ \hline
 
 {\ct cone} &
 \parbox[c]{\boxwidth}{
+\hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:5)=}\\
 {\ct 'R=128','G=255','B=192',}\\
 {\ct 'D=0.4','H=0.6'}\\ \\
 R, G, B - red, green, blue color components ranging from 0 to 255\\
-D, H - diameter and length of cone respectively
+D, H - diameter and length of cone respectively \\
+\hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/cone} \\ \hline
 
 {\ct fan} &
 \parbox[c]{\boxwidth}{
+\hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:11)=}\\
 {\ct 'HUB\_R=0','HUB\_G=0','HUB\_B=0',}\\
 {\ct 'HUB\_D=0.1','HUB\_L=0.12',}\\
@@ -168,12 +169,14 @@ D, H - diameter and length of cone respectively
 HUB\_R, HUB\_G, HUB\_B - red, green, blue color components of fan hub ranging from 0 to 255\\
 HUB\_D, HUB\_L - diameter and length of fan hub\\
 BLADE\_R, BLADE\_G, BLADE\_B - red, green, blue color components of fan blades ranging from 0 to 255\\
-BLADE\_ANGLE, BLADE\_D, BLADE\_H - angle, diameter and height of a fan blade
+BLADE\_ANGLE, BLADE\_D, BLADE\_H - angle, diameter and height of a fan blade \\
+\hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/fan} \\ \hline
 
 {\ct tsphere} &
 \parbox[c]{\boxwidth}{
+\hspace{1in} \\
     {\ct SMOKEVIEW\_PARAMETERS(1:9)=}\\
     {\ct 'R=255','G=255','B=255',}\\
     {\ct 'AX0=0.0','ELEV0=90.0',}\\
@@ -184,19 +187,21 @@ R, G, B - red, green, blue color components ranging from 0 to 255\\
 AX0, ELEV0, ROT0 - initial azimuth, elevation and rotation angle respectively\\
 ROTATION\_RATE - rotation rate about z axis in degrees per second\\
 D - diameter of sphere \\
-tfile - name of texture map file
-
+tfile - name of texture map file \\
+\hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/tsphere} \\ \hline
 
 {\ct vent} &
 \parbox[c]{\boxwidth}{
+\hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=192','G=192','B=128',}\\
 {\ct 'W=0.5','H=1.0', 'ROT=90.0'}\\ \\
 R, G, B - red, green, blue color components ranging from 0 to 255\\
 W, H - width and height of vent respectively\\
-ROT - angle that vent is rotated
+ROT - angle that vent is rotated \\
+\hspace{1in}
 } &
 \parbox[c]{\devicewidth}{
 \vspace{0.01in}
@@ -229,7 +234,7 @@ OBJECTDEF // color with FDS quantity, stretch with velocity
  velegg
  :R=0 :G=0 :B=0 :D :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0
  \end{verbatim} \normalsize
- 
+
 \noindent The variables {\ct U-VEL}, {\ct V-VEL}, and {\ct W-VEL} in the above line are also particle file quantities (shortened version) that may be
 selected in an FDS input file.  If they are selected, then the {\ct velegg} object may be used to display
 particle file information. This  object colors the sphere using the currently selected Smokeview particle
@@ -253,26 +258,31 @@ keyword or using particle file data.
 
 {\ct box} &
 \parbox[c]{\boxwidth}{
+\hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=192','G=255','B=128',}\\
 {\ct 'DX=0.25','DY=.5','DZ=0.125'}\\  \\
 R, G, B - red, green, blue color components ranging from 0 to 255\\
-DX, DY, DZ - amount box is stretched along x, y, z axis respectively
+DX, DY, DZ - amount box is stretched along x, y, z axis respectively \\
+\hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/box} \\ \hline
 
 {\ct tube} &
 \parbox[c]{\boxwidth}{
+\hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:5)=}\\
 {\ct 'R=255','G=0','B=0',}\\
 {\ct 'D=0.2','L=0.6'}\\ \\
 R, G, B - red, green, blue color components ranging from 0 to 255\\
-D, L - diameter and length of tube respectively
+D, L - diameter and length of tube respectively \\
+\hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/tube} \\ \hline
 
-{ct velegg} &
+{\ct velegg} &
 \parbox[c]{\boxwidth}{
+\hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:9)=}\\
 :R=0 :G=0 :B=0 \\
 :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0  \\
@@ -280,12 +290,14 @@ D, L - diameter and length of tube respectively
 R, G, B - red, green, blue color components ranging from 0 to 255\\
 U-VEL, V-VEL, W-VEL - u, v, w components of velocity\\
 VELMIN, VELMAX - minimum and maximum velocity\\
-D - diameter of egg at maximum velocity
+D - diameter of egg at maximum velocity \\
+\hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/velegg} \\ \hline
 
 {\ct veltube} &
 \parbox[c]{\boxwidth}{
+\hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:9)=}\\
 :R=0 :G=0 :B=0 \\
 :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0  \\
@@ -293,7 +305,8 @@ D - diameter of egg at maximum velocity
 R, G, B - red, green, blue color components ranging from 0 to 255\\
 U-VEL, V-VEL, W-VEL - u, v, w components of velocity\\
 VELMIN, VELMAX - minimum and maximum velocity\\
-D - diameter of tube at VELMAX
+D - diameter of tube at VELMAX \\
+\hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/veltube} \\ \hline
 \end{longtable}
