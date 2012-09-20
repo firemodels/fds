@@ -784,7 +784,7 @@ REAL(EB), PARAMETER :: Y1=5._EB,Y2=30._EB
 REAL(EB), PARAMETER :: U1=5._EB,U2=RKAPPA*LOG(Y2)+B
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
-REAL(EB) :: Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS
+REAL(EB) :: Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS,DUDY
 INTEGER :: ITER
 
 ! References:
@@ -793,18 +793,19 @@ INTEGER :: ITER
 !
 ! Comments:
 !
-! The slip factor (SF) is based on the following approximation to the wall stress
+! The slip factor (SF) is based on the following approximation to the wall gradient
 ! (note that u0 is the ghost cell value of the streamwise velocity component and
 ! y is the wall-normal direction):
-! tau_w = mu*(u-u0)/dy = mu*(u-SF*u)/dy = mu*u/dy*(1-SF)
-! note that tau_w/rho = nu*u/dy*(1-SF)
+! dudy = (u-u0)/dy = (u-SF*u)/dy = u/dy*(1-SF) => SF = 1 - dudy*dy/u
+! In this routine, dudy is sampled from the wall model at the location y_cell_center.
 
 ! New scheme
 
 ! Step 1: compute laminar (DNS) stress, and initial guess for LES stress
 
 Y_CELL_CENTER = 0.5_EB*DY
-TAU_W = NU*ABS(U)/Y_CELL_CENTER         ! actually tau_w/rho
+DUDY = ABS(U)/Y_CELL_CENTER
+TAU_W = NU*DUDY                         ! actually tau_w/rho
 U_TAU = SQRT(TAU_W)                     ! friction velocity
 DELTA_NU = NU/(U_TAU+EPS)               ! viscous length scale
 Y_PLUS = Y_CELL_CENTER/(DELTA_NU+EPS)
@@ -824,15 +825,21 @@ LES_IF: IF (LES) THEN
       IF (S_PLUS < S0) THEN
          ! smooth wall
          Y_PLUS = Y_CELL_CENTER/(DELTA_NU+EPS)
-         IF (Y_PLUS < Y1) THEN
+         IF (Y_PLUS < Y_WERNER_WENGLE) THEN
             ! viscous sublayer
             TAU_W = ( U/Y_PLUS )**2
-         ELSE IF (Y_PLUS < Y2) THEN
-            ! buffer layer
-            TAU_W = ( U/U_PLUS_BUFFER_SEMILOG(Y_PLUS) )**2
+            U_TAU = SQRT(TAU_W)
+            DUDY = ABS(U)/Y_CELL_CENTER
+         !ELSE IF (Y_PLUS < Y2) THEN
+         !   ! buffer layer
+         !   TAU_W = ( U/U_PLUS_BUFFER_SEMILOG(Y_PLUS) )**2
+         !   U_TAU = SQRT(TAU_W)
+         !   DUDY = 0.5_EB*(ABS(U)/Y_CELL_CENTER + U_TAU*RKAPPA/Y_CELL_CENTER)
          ELSE
             ! log layer
             TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+B) )**2
+            U_TAU = SQRT(TAU_W)
+            DUDY = U_TAU*RKAPPA/Y_CELL_CENTER
          ENDIF
       ELSE
          ! rough wall
@@ -845,14 +852,15 @@ LES_IF: IF (LES) THEN
          ENDIF
          Y_PLUS = Y_CELL_CENTER/S
          TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+BTILDE) )**2  ! Pope (2000) p. 297, Eq. (7.121)
+         U_TAU = SQRT(TAU_W)
+         DUDY = U_TAU*RKAPPA/Y_CELL_CENTER
       ENDIF
 
-      U_TAU = SQRT(TAU_W)
       DELTA_NU = NU/(U_TAU+EPS)
 
    ENDDO
 
-   SLIP_FACTOR = 1._EB-TAU_W/(NU*ABS(U)/DY+EPS)
+   SLIP_FACTOR = 1._EB-DUDY*DY/(ABS(U)+EPS)
 
 ENDIF LES_IF
 
@@ -900,30 +908,30 @@ SUBROUTINE HEAT_FLUX_MODEL(H,YPLUS,U_TAU,K,RHO,CP,MU)
 
 REAL(EB), INTENT(OUT) :: H
 REAL(EB), INTENT(IN) :: YPLUS,U_TAU,K,RHO,CP,MU
-REAL(EB) :: PR_M,TPLUS,T1,T2,CA,CB,B_T
+REAL(EB) :: PR_M,TPLUS,B_T !,T1,T2,CA,CB
 REAL(EB), PARAMETER :: RKAPPA=1._EB/0.41_EB
 REAL(EB), PARAMETER :: Y1=5._EB,Y2=30._EB
 REAL(EB), PARAMETER :: LOG_Y1=LOG(Y1),LOG_Y2=LOG(Y2),DLOGY=LOG(Y2/Y1)
 
 PR_M = CP*MU/K
 
-IF (YPLUS < Y1) THEN
+IF (YPLUS < Y_WERNER_WENGLE) THEN
    ! viscous sublayer
    TPLUS = PR_M*YPLUS
 ELSE
    B_T = (3.85_EB*PR_M**ONTH-1.3_EB)**2 + 2.12_EB*LOG(PR_M) ! Kader, 1981
-   IF (YPLUS < Y2) THEN
-      ! buffer layer
-      T2 = PR*RKAPPA*LOG_Y2 + B_T
-      T1 = PR_M*Y1
-      T2 = MAX(T1,T2)
-      CA = (T2-T1)/DLOGY
-      CB = T1-CA*LOG_Y1
-      TPLUS = CA*LOG(YPLUS)+CB
-   ELSE
+   !IF (YPLUS < Y2) THEN
+   !   ! buffer layer
+   !   T2 = PR*RKAPPA*LOG_Y2 + B_T
+   !   T1 = PR_M*Y1
+   !   T2 = MAX(T1,T2)
+   !   CA = (T2-T1)/DLOGY
+   !   CB = T1-CA*LOG_Y1
+   !   TPLUS = CA*LOG(YPLUS)+CB
+   !ELSE
       ! log layer
       TPLUS = PR*RKAPPA*LOG(YPLUS)+B_T
-   ENDIF
+   !ENDIF
 ENDIF
 
 H = RHO*U_TAU*CP/TPLUS
