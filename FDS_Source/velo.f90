@@ -343,39 +343,6 @@ MU(0,JBP1,0:KBP1)    = MU(   1,JBAR,0:KBP1)
 END SUBROUTINE COMPUTE_VISCOSITY
 
 
-SUBROUTINE EFFECTIVE_VISCOSITY(NU_WALL,DUDN,U_TAU,Y_PLUS,DY,VEL)
-
-REAL(EB), INTENT(IN) :: U_TAU,Y_PLUS,DY,VEL
-REAL(EB), INTENT(OUT) :: NU_WALL,DUDN
-REAL(EB) :: Y_CELL_CENTER,TAU_W
-REAL(EB), PARAMETER :: Y_WW=11.81_EB,RKAPPA=2.44_EB
-
-TAU_W = U_TAU**2
-Y_CELL_CENTER=0.5_EB*DY
-SELECT CASE(SLIP_CONDITION)
-   CASE(0) ! no slip
-      DUDN = ABS(VEL)/Y_CELL_CENTER
-   CASE(1) ! sample gradient from wall model (current default)
-      IF (Y_PLUS<Y_WW) THEN
-         DUDN = U_TAU*Y_PLUS/Y_CELL_CENTER
-      ELSE
-         DUDN = U_TAU*RKAPPA/Y_CELL_CENTER
-      ENDIF
-   CASE(2) ! average gradient over cell height from wall model
-      IF (Y_PLUS<Y_WW) THEN
-         DUDN = U_TAU*Y_PLUS/Y_CELL_CENTER
-      ELSE
-         DUDN = (U_TAU*Y_WW + RKAPPA*LOG(2._EB*Y_PLUS/Y_WW))/DY
-      ENDIF
-   CASE(3) ! bisector of no slip and sampled gradient
-      DUDN = ABS(VEL)/Y_CELL_CENTER
-      IF (Y_PLUS>Y_WW) DUDN = 0.5_EB*(DUDN + U_TAU*RKAPPA/Y_CELL_CENTER)
-END SELECT
-NU_WALL = TAU_W/(DUDN+TWO_EPSILON_EB)
-
-END SUBROUTINE EFFECTIVE_VISCOSITY
-
-
 SUBROUTINE COMPUTE_STRAIN_RATE(NM)
 
 INTEGER, INTENT(IN) :: NM
@@ -1563,7 +1530,7 @@ USE TURBULENCE, ONLY: WALL_MODEL
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,DUDN
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
             VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN,&
             BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
@@ -1999,10 +1966,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                      MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-                     IF (SHARP_CORNER) THEN
-                        DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
-                        MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
-                     ENDIF
 
                   CASE (WALL_MODEL_BC) BOUNDARY_CONDITION
 
@@ -2010,21 +1973,28 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
                      RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
                      CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
-                     
-                     !VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-                     !DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     !MU_DUIDXJ(ICD_SGN) = MU_WALL*(VEL_GAS-VEL_T)*I_SGN*(1._EB-SLIP_COEF)/DXX(ICD)
-
-                     CALL EFFECTIVE_VISCOSITY(MU_WALL,DUDN,U_TAU,Y_PLUS,DXX(ICD),VEL_GAS-VEL_T)
-                     DUIDXJ(ICD_SGN) = DUDN*SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
-                     MU_DUIDXJ(ICD_SGN) = RHO_WALL*MU_WALL*DUIDXJ(ICD_SGN)
-
+                     SELECT CASE(SLIP_CONDITION)
+                        CASE(0)
+                           SLIP_COEF = -1._EB
+                        CASE(1)
+                           SLIP_COEF = 0._EB
+                        CASE(2)
+                           SLIP_COEF = 0.5_EB
+                        CASE(3)
+                           SLIP_COEF = SLIP_COEF
+                        CASE(4)
+                           SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)
+                        CASE(5)
+                           SLIP_COEF = TWTH*SLIP_COEF-ONTH
+                        CASE(6)
+                           WT1 = MAX(0._EB,MIN(1._EB,(Y_PLUS-Y_WERNER_WENGLE)/(Y_PLUS+TWO_EPSILON_EB)))
+                           WT2 = 1._EB-WT1
+                           SLIP_COEF = WT1*SLIP_COEF-WT2
+                     END SELECT
+                     VEL_GHOST = VEL_T + SLIP_COEF*(VEL_GAS-VEL_T)
+                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                     MU_DUIDXJ(ICD_SGN) = RHO_WALL*(U_TAU)**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_GHOST))
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-                     IF (SHARP_CORNER) THEN
-                        DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                !!      DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
-                !!      MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
-                     ENDIF
 
                END SELECT BOUNDARY_CONDITION
 
