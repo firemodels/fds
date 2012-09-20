@@ -146,10 +146,36 @@ fi
 # get FDS root directory
 
 echo ""
-echo "Where would you like to install FDS? (default: \$FDS_root)"
+echo "Where would you like to install FDS? )"
+echo "Options:"
+if [ "$ostype" == "OSX" ]
+then
+  echo "  Press 1 to install at \$FDS_root"
+  echo "  Enter directtory to install elsewhere"
+else
+  echo "  Press 1 to install at /opt/FDS/FDS6"
+  echo "  Press 2 to install at /usr/local/bin/FDS/FDS6"
+  echo "  Press 3 to install at \$FDS_root"
+  echo "  Enter directory path to install elsewhere"
+fi
 read answer
-if [ "\$answer" != "" ]; then
-FDS_root=\$answer
+if [ "$ostype" == "OSX" ]
+then
+  if [ "\$answer" == "1" ]; then
+    FDS_root=\$FDS_root
+  else
+    eval FDS_root=\$FDS_root
+  fi
+else
+  if [ "\$answer" == "1" ]; then
+    FDS_root=/opt/FDS/FDS6
+  elif [ "\$answer" == "2" ]; then
+    FDS_root=/usr/local/bin/FDS/FDS6
+  elif [ "\$answer" == "3" ]; then
+    FDS_root=\$FDS_root
+  else
+    eval FDS_root=\$FDS_root
+  fi
 fi
  
 # make the FDS root directory
@@ -328,6 +354,7 @@ BASHPROFILETEMP=/tmp/.bash_profile_temp_\$\$
 cd \$THISDIR
 echo "Updating .bash_profile"
 grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
+echo "#FDS " >> \$BASHPROFILETEMP
 echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
 echo "#FDS of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
 echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
