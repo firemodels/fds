@@ -228,6 +228,7 @@ $RUNFDS Radiation TC_heating
 $RUNFDS Radiation TC_view_factor
 $RUNFDS Radiation wall_internal_radiation
 
+$RUNFDS Species Burke_Schumann
 $RUNFDS Species FED_FIC
 $RUNFDS Species FED_FIC_SMIX
 $RUNFDS Species Methane_flame_simple
