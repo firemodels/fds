@@ -151,13 +151,12 @@ echo "Options:"
 if [ "$ostype" == "OSX" ]
 then
   echo "  Press 1 to install at \$FDS_root"
-  echo "  Enter directtory to install elsewhere"
 else
   echo "  Press 1 to install at /opt/FDS/FDS6"
   echo "  Press 2 to install at /usr/local/bin/FDS/FDS6"
   echo "  Press 3 to install at \$FDS_root"
-  echo "  Enter directory path to install elsewhere"
 fi
+echo "  Enter directory path to install elsewhere"
 read answer
 if [ "$ostype" == "OSX" ]
 then
