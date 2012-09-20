@@ -137,6 +137,7 @@ config = svn:mime-type=text/plain;svn:eol-style=native
 *.cpp  = svn:mime-type=text/plain;svn:eol-style=native
 *.csh  = svn:mime-type=text/plain;svn:eol-style=native;svn:executable
 *.csv  = svn:mime-type=text/plain;svn:eol-style=native
+*.exe  = svn:mime-type=application/octet-stream;svn:executable
 *.f    = svn:mime-type=text/plain;svn:keywords=Author Date Id Rev URL;svn:eol-style=native
 *.f90  = svn:mime-type=text/plain;svn:keywords=Author Date Id Rev URL;svn:eol-style=native
 *.fds  = svn:mime-type=text/plain;svn:keywords=Author Date Id Rev URL;svn:eol-style=native
