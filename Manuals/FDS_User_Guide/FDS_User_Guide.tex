@@ -28,6 +28,7 @@
 \usepackage{rotating}
 \usepackage{epsfig,psfrag}
 \usepackage{geometry}
+\usepackage{relsize}
 %\usepackage{tabularx}
 \usepackage{longtable}
 \usepackage{lscape}
@@ -6350,8 +6351,8 @@ properties of different types of Lagrangian particles:
 \end{verbatim}
 \normalsize
 
-\noindent 
-Particles are introduced into the calculation in several different ways. Liquid droplets are usually introduced via a sprinkler or nozzle. Massless tracer particles are often introduced at a blowing vent or burning surface. Solid particles that represent subgrid-scale objects are introduced randomly throughout a designated volume. Details are found below. 
+\noindent
+Particles are introduced into the calculation in several different ways. Liquid droplets are usually introduced via a sprinkler or nozzle. Massless tracer particles are often introduced at a blowing vent or burning surface. Solid particles that represent subgrid-scale objects are introduced randomly throughout a designated volume. Details are found below.
 
 The way to describe particles depends on the type.
 If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct PART} line. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets.
@@ -7079,7 +7080,7 @@ over a span of the domain, like a beam smoke detector. For example, a sprinkler 
 
 \noindent
 The physical coordinates of the
-device are given by a triplet of real numbers, {\ct XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located.  
+device are given by a triplet of real numbers, {\ct XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located.
 The properties of the device are contained on the {\ct PROP} line
 designated by {\ct PROP\_ID}, which will be explained below for each of the
 special devices included in FDS.
@@ -7267,8 +7268,8 @@ The jets are centered at points 30$^\circ$ below the ``equator,'' and are separa
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10, 
-      PART_ID='water_drops', FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1', 
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10,
+      PART_ID='water_drops', FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1',
       SMOKEVIEW_ID='sprinkler_upright', PARTICLE_VELOCITY=10. /
 
 &TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
@@ -7449,7 +7450,7 @@ for the single parameter Heskestad model. Note that a {\ct PROP} line is mandato
 \footnotesize
 \begin{verbatim}
 &PROP ID='Acme Smoke Detector I2', QUANTITY='CHAMBER OBSCURATION',
-      ALPHA_E=1.8, BETA_E=-1.1, ALPHA_C=1.0, BETA_C=-0.8, 
+      ALPHA_E=1.8, BETA_E=-1.1, ALPHA_C=1.0, BETA_C=-0.8,
       ACTIVATION_OBSCURATION=3.24 /
 \end{verbatim}
 \normalsize
@@ -7649,7 +7650,7 @@ in Fig.~\ref{aspiration_detector}.
 Devices can be used to control various actions, like creating and removing obstructions, or activating and deactivating
 fans and vents. Every device has an associated {\ct QUANTITY}, whether it is included directly on the {\ct DEVC} line or
 indirectly on the optional {\ct PROP} line. Using the {\ct DEVC} parameter {\ct SETPOINT}, you can trigger an action to
-occur when the {\ct QUANTITY} value passes above, or below, the given {\ct SETPOINT}. 
+occur when the {\ct QUANTITY} value passes above, or below, the given {\ct SETPOINT}.
 The following parameters dictate how a device will control something:
 \begin{description}
 \item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device
@@ -8230,55 +8231,34 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 \chapter{Output}
 \label{info:outputdata}
 
-Before a calculation is started, carefully consider
-what information should be saved. All output quantities must be specified
-at the start of the calculation. In most cases, there is no way to
-retrieve information after the calculation ends if it was not specified from the start.
-There are several different ways of visualizing the results of a
-calculation. Most familiar to
-experimentalists is to save a given quantity at a single point in space so
-that this quantity can be plotted as a function of time, like a
-thermocouple temperature measurement. The namelist group {\ct DEVC},
-described previously, is used to specify point measurements.
+FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and
+rendered by Smokeview. Some of the files are just comma-delimited text files. It is important to remember that you must explicitly declare in
+the input file most of the FDS output data. A considerable amount of the input file is usually devoted to this.
 
 To visualize the flow patterns better, save planar
 slices of data, either in the gas or solid phases, by using the
 {\ct SLCF} (SLiCe File) or {\ct BNDF} (BouNDary File) namelist group.
 Both of these output formats permit you to animate these quantities in
-time.
-
-For static pictures of the flow field, use the PLot3D files
-that are automatically generated 5 times a run. Plot3D format is used by many CFD programs as a simple
-way to store specified quantities over the entire mesh at one instant in
-time.
-
+time. For static pictures of the flow field, use the Plot3D output, a format that is used by many CFD programs as a simple
+way to store specified quantities over the entire mesh at one instant in time.
 Finally, tracer particles can be injected into the flow field from
 vents or obstacles, and then viewed in Smokeview. Use the {\ct PART}
 namelist group to control the injection rate, sampling rate and other
 parameters associated with particles.
-
-\begin{warning}
-\noindent
-Note: unlike in FDS version 1,
-particles are no longer used to introduce heat into the flow, thus
-particles no longer are ejected automatically from burning surfaces.
-\end{warning}
 
 
 \section{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
 \label{info:DUMP}
 
 The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files
-are written, and various other global parameters associated with output files.
-This namelist group is new starting in FDS 5, although its
-parameters have been specified via other namelist groups in past versions.
+are written, and various other global parameters associated with output files. Its parameters include:
 
 \begin{description}
 \item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000.
 Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and
 control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified
 using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF},
-or {\ct DT\_CTRL} Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the
+or {\ct DT\_CTRL}. Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the
 output of heat release rate and associated quantities.
 \item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time.
 It is {\ct .FALSE.} by default because the calculation
@@ -8303,23 +8283,15 @@ successfully. This file can be used as an error indicator. It is {\ct
 \end{description}
 
 
-\clearpage
-
-\section{Output File Types}
-
-FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and
-rendered by Smokeview. Some of the files are just comma-delimited text files. It is important to remember that you must explicitly declare in
-the input file most of the FDS output data. A considerable amount of the input file is usually devoted to this.
 
 
-\subsection{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
+\section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 
+Every device {\ct DEVC} contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
-For many commonly used measurement devices there is no need to associate a
-specific {\ct PROP} line to the {\ct DEVC} entry. In such cases, use the character string
-{\ct QUANTITY} to indicate that a particular gas or solid phase quantity at the point should be recorded in
-the output file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}.
-Many of the gas phase quantities are self-explanatory. For example, if you just want to record the time history of the temperature at a given point, add
+\subsection{Single Point Output}
+
+If you just want to record the time history of the temperature at a given point, add the line:
 
 \footnotesize
 \begin{verbatim}
@@ -8329,27 +8301,20 @@ Many of the gas phase quantities are self-explanatory. For example, if you just 
 
 \noindent
 and a column will be added to the output file {\ct CHID\_devc.csv} under the label {\ct 'T-1'}. In this case, the {\ct ID} has no other role than as a column label in the output file.
-Note that versions of FDS prior to version 5 used an 8 cell linear interpolation for a given {\em gas phase} point measurement. In other words, if you
-specified a point via the triplet of real numbers, {\ct XYZ}, FDS would calculate the value of the quantity by linearly interpolating the
-values defined at the centers of the 8 nearest cells. Starting in FDS 5, this is no longer done. Instead, FDS reports the value of the {\ct QUANTITY} in
-the cell where the point {\ct XYZ} is located.
+FDS reports the value of the {\ct QUANTITY} in the cell where the point {\ct XYZ} is located.
 
 \subsubsection{Devices on Solid Surfaces}
 
 When prescribing a solid phase quantity, be sure to position the
-probe at a solid surface. It is not always obvious where the
+device at a solid surface. It is not always obvious where the
 solid surface is since the mesh does not always align with the input obstruction
 locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included
 when designating a solid phase quantity, except when using the {\ct STATISTICS} feature described in
 Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point
 on the surface.
 If the orientation of the solid surface is in the
-positive $x$ direction {\ct IOR=1}, negative $x$ direction {\ct IOR=-1},
-positive $y$ {\ct IOR=2}, negative {\ct IOR=-2}, positive $z$ {\ct IOR=3},
-and negative $z$ {\ct IOR=-3}. There are still instances where FDS cannot
-determine which solid surface is being designated, in which case an
-error message appears in the diagnostic output file.
-Re-position the probe and try again. For example, the line
+positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions.
+For example, the line
 
 \footnotesize
 \begin{verbatim}
@@ -8359,9 +8324,12 @@ Re-position the probe and try again. For example, the line
 
 \noindent
 designates the surface temperature of a wall facing the negative $y$
-direction.
+direction. There are still instances where FDS cannot
+determine which solid surface is being designated, in which case an
+error message appears in the diagnostic output file.
+Re-position the probe and try again.
 
-\subsubsection{Non-Pointwise Devices}
+\subsubsection{Integrated Quantities}
 
 In addition to point measurements, the {\ct DEVC} group can be used
 to report integrated quantities (See Table~\ref{tab:output}).
@@ -8388,10 +8356,11 @@ use in the integration, and it chooses the finest mesh overlapping
 the centroid of the designated plane or volume.
 
 
-\subsubsection{Linear Array of Point Devices}
+
+\subsection{Linear Array of Point Devices}
 \label{info:line_file}
 
-The {\ct DEVC} input construct enables you to specify a linear array of devices. By adding the parameter {\ct POINTS} and using the
+You can use a single {\ct DEVC} line to specify a linear array of devices. By adding the parameter {\ct POINTS} and using the
 sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devices from $(x_1,y_1,z_1)$ to $(x_2,y_2,z_2)$ as follows:
 
 \footnotesize
@@ -8400,8 +8369,7 @@ sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devic
 \end{verbatim}
 \normalsize
 
-\noindent This feature is convenient for dumping single-point first and second-order statistics, such as the mean velocity profile in a doorway or the average concentration of a particular scalar quantity spanning the width of a buoyant plume.
-
+\noindent This feature is convenient for recording time-averaged profiles.
 In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is
 different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and
 $z$ coordinates. The last column contains the 20 temperature points presented as a running average. The
@@ -8412,7 +8380,7 @@ A single ``line'' file can hold more than a single line of data. By default, the
 either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add
 {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates.
 
-\paragraph{Single-Point Statistics}
+\subsubsection{Single-Point Statistics}
 
 \begin{description}
 \item[Mean] By default, a {\em line} of devices records a mean profile of a particular quantity,
@@ -8440,11 +8408,16 @@ To output this statistic the user must add a {\ct QUANTITY2} to the device line 
 \be
    \rho_{uv} = \frac{ \overline{u\, v} }{ u_{rms} \,v_{rms} }
 \ee
-Here again the user must add a {\ct QUANTITY2} to the device line.
+Here again you must add a {\ct QUANTITY2} to the device line.
 \item[Min, Max] For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
 \end{description}
 
-\subsection{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
+
+
+
+\clearpage
+
+\section{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
 FDS uses a fine, non-uniform, one-dimensional mesh at each boundary
@@ -8459,12 +8432,12 @@ profiles within a given solid obstruction:
 
 \footnotesize
 \begin{verbatim}
-&PROF XYZ=..., QUANTITY='TEMPERATURE', ID='TU1SA_FDS', IOR=3 /
+&PROF XYZ=..., QUANTITY='TEMPERATURE', ID='T-1', IOR=3 /
 \end{verbatim} \normalsize
 
 \noindent
 Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of
-solid material components ({\ct QUANTITY = 'MATL\_ID'}), where {\ct MATL\_ID} is the name of the
+solid material components ({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the
 material.
 
 Each {\ct PROF} line creates a separate file. This may be more than is
@@ -8483,8 +8456,8 @@ Note that this {\ct QUANTITY} is allowed only as a {\ct DEVC}, not a
 {\ct BNDF}, output. Also note that if the wall thickness is decreasing
 over time due to the solid phase reactions, the distance is
 measured from the current surface, and the measurement point is
-'moving' towards the back side of the solid. Eventually, the
-measurement point may get out of the solid, in which case it starts to
+moving towards the back side of the solid. Eventually, the
+measurement point may emerge from the solid, in which case it starts to
 show ambient temperature. If you just want to know the temperature of the back surface
 of the ``wall,'' then use
 
@@ -8512,8 +8485,7 @@ calculation.
 
 
 
-
-\subsection{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
+\section{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
 \label{info:SLCF}
 
 The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF})
@@ -8529,7 +8501,8 @@ that the entire plane $y=5.3$ slicing through the domain be saved.
 {\ct PBX} and {\ct PBZ} control planes perpendicular to the
 $x$ and $z$ axes, respectively.
 
-If the ``slice'' is a volume specified with {\ct XB}, then its output frequency is controlled by the parameter {\ct DT\_SL3D}.  By default, FDS sets {\ct DT\_SL3D=(T\_END-T\_BEGIN)/5}, the same default frequency as Plot3D file output.  The user may specify a different value of {\ct DT\_SL3D} on {\ct DUMP}.  The user is cautioned that 3D slice files can become extremely large if {\ct DT\_SL3D} is small.
+By default, 1-D and 2-D slice files are saved {\ct NFRAMES} times per simulation. You can control the frequency of output with {\ct DT\_SLCF} on the {\ct DUMP} line.
+If the ``slice'' is a 3-D volume, then its output frequency is controlled by the parameter {\ct DT\_SL3D}.  By default, FDS sets {\ct DT\_SL3D=(T\_END-T\_BEGIN)/5}.  You may specify a different value of {\ct DT\_SL3D} on {\ct DUMP}.  Note that 3-D slice files can become extremely large if {\ct DT\_SL3D} is small.
 
 Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF}
 entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity
@@ -8551,7 +8524,7 @@ plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 
 
 
-\subsection{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
+\section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
 
 The {\ct BNDF} (``boundary file'') namelist group parameters allows you
@@ -8564,7 +8537,7 @@ the {\ct PROP} namelist group. In such cases, add the character string, {\ct PRO
 to tell FDS where to find the necessary extra information.
 
 Note that {\ct BNDF} files (Section~\ref{out:BNDF}) can become very
-large, so be careful in prescribing the time interval.
+large, so be careful in prescribing the time interval, {\ct DT\_BNDF} on the {\ct DUMP} line.
 One way to reduce the size of the output file is to turn off the
 drawing of boundary information on desired obstructions. On any given
 {\ct OBST} line, if the string {\ct BNDF\_OBST=.FALSE.} is included,
@@ -8577,11 +8550,11 @@ via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for t
 Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they
 are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening,
 set {\ct CELL\_CENTERED=.TRUE.} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this
-feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes.
+feature is mainly useful for diagnostics.
 
 
 
-\subsection{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
+\section{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
 \label{info:ISOF}
 
 The {\ct ISOF} (``ISOsurface File'') namelist group is used to specify the output of
@@ -8604,16 +8577,23 @@ files {\ct CHID\_$n$.iso} can become very large, so experiment with different sa
 Any gas phase quantity can animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be
 computed in every mesh cell at every output time step. For quantities like {\ct TEMPERATURE}, this is not a problem, as FDS computes it and saves it
 anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell.
-
-Remember to include the {\ct SPEC\_ID} or {\ct COLOR\_SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
-
+Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
 
 
 
-\subsection{Plot3D Static Data Dumps}
+
+\section{Plot3D Static Data Dumps}
 \label{info:PL3D}
 
-By default, flow field data in Plot3D format is output 5 times a run.
+Data stored in Plot3D~\cite{PLOT3D} files (See Section~\ref{out:PL3D}) use a format developed by
+NASA and used by many CFD programs for representing simulation results.
+Plot3D data is visualized in three ways: as 2-D contours, vector plots and iso-surfaces.
+Vector plots may be viewed if one or more of the $u$, $v$ and $w$
+velocity components are stored in the Plot3D file. The vector
+length and direction show the direction and relative speed of the
+fluid flow. The vector colors show a scalar fluid quantity such as
+temperature.
+
 Five quantities are written out to a file at one instant in time. The default specification is:
 
 \footnotesize
@@ -8625,23 +8605,9 @@ Five quantities are written out to a file at one instant in time. The default sp
 
 \noindent
 It's best to leave the velocity components as is, because Smokeview
-uses them to draw velocity vectors. The first and fifth quantities can
-be changed with the parameters {\ct PLOT3D\_QUANTITY(1)} and {\ct PLOT3D\_QUANTITY(5)}
-on the {\ct DUMP} line. If any of the specified quantities require the additional specification of a particular species,
+uses them to draw velocity vectors. If any of the specified quantities require the additional specification of a particular species,
 use {\ct PLOT3D\_SPEC\_ID(n)} to provide the {\ct SPEC\_ID} for {\ct PLOT3D\_QUANTITY(n)}.
 
-\begin{warning}
-Note that there can only be one {\ct DUMP} line.
-\end{warning}
-
-Data stored in Plot3D~\cite{PLOT3D} files (See Section~\ref{out:PL3D}) use a format developed by
-NASA and used by many CFD programs for representing simulation results.
-Plot3D data is visualized in three ways: as 2D contours, vector plots and iso-surfaces.
-Vector plots may be viewed if one or more of the $u$, $v$ and $w$
-velocity components are stored in the Plot3D file. The vector
-length and direction show the direction and relative speed of the
-fluid flow. The vector colors show a scalar fluid quantity such as
-temperature.
 Plot3D data are stored in files with extension {\ct .q} . There is
 an optional file that can be output with coordinate information
 if another visualization package is being used to render the
@@ -8652,34 +8618,29 @@ obtained elsewhere.
 
 
 
-\subsection{SMOKE3D: Realistic Smoke and Fire}
+\section{SMOKE3D: Realistic Smoke and Fire}
 
 \label{info:SMOKE3D}
 
 When you do a fire simulation, FDS automatically creates two output files that are rendered by
-Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume)
-are used in the visualization. You have the option of rendering any other species mass fraction instead of {\ct 'SOOT'}, so long as the
+Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species mass fraction instead of {\ct 'SOOT'}, so long as the
 {\ct MASS\_EXTINCTION\_COEFFICIENT} (either from the {\ct REAC} line, or over-ridden by the value on the {\ct SPEC} line) is appropriate in
 describing the attenuation of visible light by the specified gas species.
-The alternative gas species is given by {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
+
+An alternative to {\ct SOOT} mass fraction can be specified via {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
 If the specified quantity requires the additional specification of a particular species,
 use {\ct SMOKE3D\_SPEC\_ID} to provide the {\ct SPEC\_ID}.
-See the Smokeview User's Guide for more details on how these quantities are rendered.
-
-Here is an example of how to control the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined.
+Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 
 \footnotesize
 \begin{verbatim}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
-&SURF ID='NO FIRE', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
-&VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='NO FIRE' /
 &DUMP SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='MY SMOKE' /
 \end{verbatim}
 
 \normalsize
 \noindent
-The production rate of {\ct 'MY SMOKE'} is 0.0001~kg/m$^2$/s, applied to an area of 0.16~m$^2$. The \\ {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to
-Smokeview to be used for visualization.
+The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
 
 
@@ -8743,8 +8704,8 @@ The light extinction coefficient, $K$, is a product of the
 density of smoke particulate, $\rho Y_s$, and a mass specific
 extinction coefficient that is fuel dependent
 \be K = K_m \; \rho \, Y_s \label{mec} \ee
-Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct QUANTITY} of {\ct ASPIRATION}, {\ct CHAMBER OBSCURATION} (smoke
-detector), or {\ct PATH OBSCURATION} (beam detector) are discussed
+Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct QUANTITY} of {\ct 'ASPIRATION'}, {\ct 'CHAMBER OBSCURATION'} (smoke
+detector), or {\ct 'PATH OBSCURATION'} (beam detector) are discussed
 respectively in Section~\ref{info:aspiration_detector},
 Section~\ref{info:smoke_detector}, and Section~\ref{info:beam_detector}
 
@@ -8755,10 +8716,7 @@ where $C$ is a non-dimensional constant characteristic of
 the type of object being viewed through the smoke, {\em i.e.}
 $C=8$ for a light-emitting sign and $C=3$ for a light-reflecting
 sign~\cite{SFPE:Mulholland}. Since $K$ varies from point to point in the
-domain, the visibility $S$ does as well. Keep in mind that
-FDS can only track smoke whose production rate and composition
-are specified. Predicting either is beyond the
-capability of the present version of the model.
+domain, the visibility $S$ does as well. 
 
 Three parameter control smoke production and visibility; each
 parameter is input on the {\ct REAC} line. The first parameter
@@ -8774,7 +8732,7 @@ constant $C$ in Eq.~(\ref{vis}). It is 3 by default.
 The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar quantity is the
 {\ct 'OPTICAL DENSITY'}, $K/2.3$, the result of using $\log_{10}$ in the definition
 \be D \equiv - \frac{1}{L} \, \log_{10} \left( \frac{I}{I_0} \right) = K \, \log_{10} e   \ee
-The visibility $S$ is output via the keyword {\ct VISIBILITY}. Note
+The visibility $S$ is output via the {\ct QUANTITY} called {\ct 'VISIBILITY'}. Note
 that, by default, the visibility is associated with the smoke that is implicitly defined by the simple chemistry
 model. However, this quantity can also be associated with an
 explicitly defined species via the inclusion of a {\ct SPEC\_ID}.
@@ -8806,8 +8764,9 @@ the floor $z$, where $z=0$ is the floor and $z=H$ is the
 ceiling. Define $T_u$ as the upper layer temperature, $T_l$ as the
 lower layer temperature, and $z_{int}$ as the interface
 height. Compute the quantities:
-\begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; dz &=& I_1 \\
-                  (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 \end{eqnarray*}
+\begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; dz &=& I_1 \\ [0.1in]
+                  (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 
+\end{eqnarray*}
 Solve for $z_{int}$:
 \be z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} \ee
 Let $T_l$ be the temperature in the lowest mesh cell and, using
@@ -8816,11 +8775,9 @@ $I_2$. $T_u$ is defined as the average upper layer temperature via
 \be (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz \ee
 Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
-The quantities {\ct LAYER HEIGHT}, {\ct UPPER TEMPERATURE} and {\ct
-LOWER TEMPERATURE} can be designated via ``device'' ({\ct DEVC}) lines
-in the input file\footnote{Note that in FDS 5 and beyond, these
-quantities are no longer available as slice files.}. For example, the
-entry
+The quantities {\ct 'LAYER HEIGHT'}, {\ct 'UPPER TEMPERATURE'} and {\ct
+'LOWER TEMPERATURE'} can be designated via {\ct DEVC} lines
+in the input file. For example, the line:
 
 \footnotesize
 \begin{verbatim}
@@ -8913,22 +8870,18 @@ For more information about specifying arrays of devices via the parameter {\ct P
 
 
 
-\subsection{Droplet Output Quantities}
+\subsection{Particle Output Quantities}
 \label{info:part_output}
 
-This section lists various output quantities associated with droplets and particles. Note whether or not the quantity is appropriate for the gas or
-solid surfaces.
+This section lists various output quantities associated with Lagrangian particles. 
 
-\subsubsection{Droplet Quantities on Solid Surfaces}
+\subsubsection{Solid Phase}
 
 It is possible to record various properties of droplets and particles. Some of the output quantities are associated with solid boundaries. For example,
 {\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named {\ct PART\_ID}.
 Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea.
 Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area,
-and the accumulated total, respectively.  It should be noted that these quantities are not identical measures.  AMPUA is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period.  In this case case each grid cell on the floor is considered its own bucket.  AMPUA will only count each particle or droplet once and only count the particle or droplet when it reaches the floor.  \footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
-is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line).
-In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from
-the simulation for the purpose of saving CPU time.} MPUA counts a particle whenever it is on any solid surface, including the walls.  If the particle or droplet moves from one solid wall
+and the accumulated total, respectively.  It should be noted that these quantities are not identical measures.  The quantity {\ct 'AMPUA'} is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period.  In this case case each grid cell on the floor is considered its own bucket.  Each droplet is counted only once when it reaches the floor\footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from the simulation for the purpose of saving CPU time.}. MPUA counts a particle whenever it is on any solid surface, including the walls.  If the particle or droplet moves from one solid wall
 cell to another, then it will be counted again.  The cooling of a solid surface by droplets of a
 given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.  Since a typical sprinkler simulation only tracks a small fraction of the droplets emitted from a sprinkler, both MPUA and CPUA also perform an exponential smoothing.  This avoids having spotted distributions on surfaces due to the infrequent arrival of particles that likely have a high weighting factor.
 
@@ -8952,16 +8905,15 @@ floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there real
 \end{figure}
 
 
-
-
-
-\subsubsection{Droplet Mass and Fluxes in Gas Phase}
+\subsubsection{Gas Phase}
 
 Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of the droplets as they fly through
 the air, in units of kg/m$^3$.  {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce {\em only} slice and Plot3D files
 of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
 
-\subsubsection{Local Spray Properties}
+
+
+\subsection{Special Topic: Detailed Spray Properties}
 \label{PDPA}
 
 Detailed experimental measurements of sprays using \underline{P}hase \underline{D}oppler \underline{P}article
@@ -8974,17 +8926,17 @@ By default, the PDPA device output at time $t$ is computed as a time integral
 \be
 F(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} f(t) \, dt
 \ee
-but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE = .FALSE.} on the corresponding {\ct PROP} line, in which case
+but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE} equal to {\ct .FALSE.} on the corresponding {\ct PROP} line, in which case
 \be
 F(t) = f(t)
 \ee
 The function $f(t)$ has two forms:
 \be
-f_1(t) =  \frac{\sum_i n_i d_i^m \, x}{\sum_i n_i d_i^n}  \quad ; \quad
-f_2(t) = \frac{\sum_i n_i \, x}{V}
+f_1(t) =  \frac{\sum_i n_i d_i^m \, \phi}{\sum_i n_i d_i^n}  \quad ; \quad
+f_2(t) = \frac{\sum_i n_i \, \phi}{V}
 \ee
 where $n_i$ is the number of real particles represented by the single simulated particle, $d_i$
-is the particle diameter, and $x$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere
+is the particle diameter, and $\phi$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere
 with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}.
 
 The first form $f_1(t)$ is used for the computation of various mean diameters, with
@@ -9004,26 +8956,26 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
-{\ct QUANTITY}          & $x$                           & $f(x)$ & Unit \\ \hline
-{\ct 'DIAMETER'} (default) & 1                          & $f_1$  & $\mu$m \\
-{\ct 'ENTHALPY'}        & $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$     & $f_2$  & kJ/m$^3$ \\
-{\ct 'PARTICLE FLUX X'}  & $(4/3)\rho_i r_i^3 u_i$       & $f_2$  & kg/m$^2$s \\
-{\ct 'PARTICLE FLUX Y'}  & $(4/3)\rho_i r_i^3 v_i$       & $f_2$  & kg/m$^2$s \\
-{\ct 'PARTICLE FLUX Z'}  & $(4/3)\rho_i r_i^3 w_i$       & $f_2$  & kg/m$^2$s \\
-{\ct 'U-VELOCITY'}      & $u_i$                         & $f_1$  & m/s \\
-{\ct 'V-VELOCITY'}      & $v_i$                         & $f_1$  & m/s \\
-{\ct 'W-VELOCITY'}      & $w_i$                         & $f_1$  & m/s \\
-{\ct 'VELOCITY'}        & $(u_i^2+v_i^2+w_i^2)^{1/2}$   & $f_1$  & m/s \\
-{\ct 'TEMPERATURE'}     & $T_i$                         & $f_1$  & ${}^\circ$C \\
-{\ct 'MASS CONCENTRATION'} & $(4/3)\rho r_i^3 $         & $f_2$  & kg/m$^3$ \\
-{\ct 'NUMBER CONCENTRATION'} & 1                        & $f_2$  & \\
+{\ct QUANTITY}              & $\phi$                                                                & $f$    & Unit \\ \hline
+{\ct 'DIAMETER'} (default)  & 1                                                                     & $f_1$  & $\mu$m \\
+{\ct 'ENTHALPY'}            & $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$     & $f_2$  & kJ/m$^3$ \\
+{\ct 'PARTICLE FLUX X'}     & $(4/3)\rho_i r_i^3 u_i$                                               & $f_2$  & kg/m$^2$s \\
+{\ct 'PARTICLE FLUX Y'}     & $(4/3)\rho_i r_i^3 v_i$                                               & $f_2$  & kg/m$^2$s \\
+{\ct 'PARTICLE FLUX Z'}     & $(4/3)\rho_i r_i^3 w_i$                                               & $f_2$  & kg/m$^2$s \\   
+{\ct 'U-VELOCITY'}          & $u_i$                                                                 & $f_1$  & m/s \\         
+{\ct 'V-VELOCITY'}          & $v_i$                                                                 & $f_1$  & m/s \\         
+{\ct 'W-VELOCITY'}          & $w_i$                                                                 & $f_1$  & m/s \\         
+{\ct 'VELOCITY'}            & $(u_i^2+v_i^2+w_i^2)^{1/2}$                                           & $f_1$  & m/s \\         
+{\ct 'TEMPERATURE'}         & $T_i$                                                                 & $f_1$  & ${}^\circ$C \\ 
+{\ct 'MASS CONCENTRATION'}  & $(4/3)\rho r_i^3 $                                                    & $f_2$  & kg/m$^3$ \\    
+{\ct 'NUMBER CONCENTRATION'}& 1                                                                     & $f_2$  & \\             
  \hline
 \end{tabular}
 \end{center}
 ${}^*$ $T_m$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} normalized histogram bin counts  are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $d_i^m x$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins.
+It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} normalized histogram bin counts  are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $d_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins.
 
 The output file contains two-columns for each device giving an histogram output. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram is thought consist of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line  to {\ct 3} and {\ct 2} respectively.
 
@@ -9036,7 +8988,7 @@ As the spray simulation may contain some initial transient phase, it may be usef
 \item[{\ct PDPA\_INTEGRATE}] A logical parameter for choosing between time integrated or instantaneous values. {\ct .TRUE.} by default.
 \item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
 \item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
-\item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $x$.
+\item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $\phi$.
 \item[{\ct PDPA\_HISTOGRAM\_NBINS}] Number of bins used for the histogram.
 \end{description}
 
@@ -9050,6 +9002,7 @@ time 5~s.
       PDPA_N=2
       PDPA_RADIUS=0.01
       PDPA_START=5. /
+      
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d32' /
 \end{verbatim}
 \normalsize
@@ -9065,8 +9018,8 @@ time 5~s.
       PDPA_M=1
       PDPA_HISTOGRAM=.TRUE.
       PDPA_HISTOGRAM_NBINS=20
-      PDPA_HISTOGRAM_LIMITS=0,2000E-6
-      /
+      PDPA_HISTOGRAM_LIMITS=0,2000E-6 /
+      
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d' /
 \end{verbatim}
 
@@ -9120,7 +9073,7 @@ response) than FDS can provide.
 \subsection{Useful Solid Phase Outputs}
 \label{info:material_components}
 
-In addition to the {\ct PROF}ile output, there are various additional quantities that are useful for monitoring reacting
+In addition to the profile ({\ct PROF}) output, there are various additional quantities that are useful for monitoring reacting
 surfaces. For example, {\ct 'WALL THICKNESS'} gives the overall thickness of the solid surface
 element. {\ct 'SURFACE DENSITY'} gives the overall mass per unit area for the
 solid surface element, computed as an integral of material density over wall
@@ -9144,7 +9097,7 @@ density represents the mass of {\ct 'wood'} per unit volume of the mixture. Note
 \label{info:FED}
 
 The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation
-due to the combustion gases. The specification of gases and mixtures is explained in Chapter~\ref{info:Chemical Species}. The FED value is calculated as
+due to the combustion gases. The FED value is calculated as
 \be
 \mathrm{FED}_\mathrm{tot} = (\mathrm{FED}_\mathrm{CO} + \mathrm{FED}_\mathrm{CN} + \mathrm{FED}_\mathrm{NO_x} + \mathrm{FLD}_\mathrm{irr}) \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
 \ee
@@ -9154,7 +9107,7 @@ The fraction of an incapacitating dose of CO is calculated as
 \ee
 where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm). The fraction of an incapacitating dose of CN is calculated as
 \be
-\mathrm{FED}_\mathrm{CN} = \int_0^t \left( \frac{\exp\left( \frac{C_\mathrm{CN}(t)}{43} \right)}{220} - 0.0045 \right) \, dt
+\mathrm{FED}_\mathrm{CN} = \mathlarger{\int}_0^t \left( \frac{1}{220} \; \exp \left( \frac{C_\mathrm{CN}(t)}{43} \right) - 0.0045 \right) \, dt
 \ee
 where $t$ is time in minutes and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as
 \be
@@ -9181,7 +9134,7 @@ The Fractional Lethal Dose (FLD) of irritants is calculated as
 where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and
 the denominators the exposure doses of respective irritants predicted to be lethal to half the population.
 The lethal exposure doses~\cite{SFPE:Purser} are given in Table~\ref{tbl:FIC}. To include the effect of an irritant gas not listed in the table,
-the user should specify $\mathrm{F_{FLD}}$ in ppm$\times$min using the {\ct FLD\_LETHAL\_DOSE} property of the corresponding {\ct SPEC} line.
+you should specify $\mathrm{F_{FLD}}$ in ppm$\times$min using the {\ct FLD\_LETHAL\_DOSE} property of the corresponding {\ct SPEC} line.
 \begin{table}[ht]
 \caption[Coefficients used for the computation of irritant effects of gases]{Coefficients used for the computation of irritant effects of gases.}
 \label{tbl:FIC}
@@ -9223,7 +9176,7 @@ To include the irritant effect of a gas not listed in the table, the user should
 property on the corresponding {\ct SPEC} line.
 
 Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
-use of the {\ct TIME INTEGRAL} (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point
+use of the {\ct 'TIME INTEGRAL'} statistic (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point
 measurement.
 
 \subsection{Spatially-Integrated Outputs}
@@ -9285,7 +9238,7 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 \subsubsection{Mass-Weighted Mean}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
-\be \frac{ \int \rho(x,y,z) \, \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
+\be \frac{ \int \rho(x,y,z) \; \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
 which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
 statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
@@ -9301,7 +9254,7 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 \subsubsection{Mass Integral}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS INTEGRAL'} produces the discrete analog of
-\be \int \, \rho(x,y,z) \, \phi(x,y,z) \; dx \, dy \, dz \ee
+\be \int \, \rho(x,y,z) \; \phi(x,y,z) \; dx \, dy \, dz \ee
 Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
@@ -9380,9 +9333,9 @@ free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the
 
 \footnotesize
 \begin{verbatim}
-&BNDF QUANTITY='PRESSURE COEFFICIENT', PROP_ID='whatever' /
-&DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE COEFFICIENT', PROP_ID='whatever' /
-&PROP ID='whatever', CHARACTERISTIC_VELOCITY=3.4 /
+&BNDF QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
+&DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
+&PROP ID='U', CHARACTERISTIC_VELOCITY=3.4 /
 \end{verbatim}
 \normalsize
 
@@ -9393,11 +9346,14 @@ Thus, you can either paint values of $C_p$ at all surface points, or create a si
 \label{info:yplus}
 
 Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are the Werner-Wengle wall model \cite{Werner:1991} for smooth walls and a rough wall log law for rough walls \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, the user may add a boundary file output as follows:
+
 \footnotesize
 \begin{verbatim}
 &BNDF QUANTITY='YPLUS' /
 \end{verbatim}
 \normalsize
+
+\noindent
 The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the local viscous length scale, $\delta_\nu$ \cite{Pope:2000}:
 \be
 y^+ = \frac{1}{2} \frac{\delta n}{\delta_\nu} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
@@ -9409,7 +9365,7 @@ where $\tau_w = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress eva
 \end{verbatim}
 \normalsize
 
-Wall functions for LES are still under development, but as a general guideline it is recommended that the first grid cell fall within the log layer: a value $y^+=30$ would be considered highly resolved, the upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
+\noindent Wall functions for LES are still under development, but as a general guideline it is recommended that the first grid cell fall within the log layer: a value $y^+=30$ would be considered highly resolved, the upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
 
 \subsection{Dry Volume and Mass Fractions}
 \label{info:dry}
@@ -9423,7 +9379,8 @@ the actual volume fraction of CO, and the second line reports the output of a ga
 \footnotesize
 \begin{verbatim}
 &DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE'/
-&DEVC ID='dry CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE', DRY=.TRUE. /
+&DEVC ID='dry CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE', 
+      DRY=.TRUE. /
 \end{verbatim}
 \normalsize
 
@@ -9443,7 +9400,7 @@ Currently there are three different device options for outputting soot concentra
 \noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} of soot will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} of soot will output the volume fraction of soot in the gas phase treating soot as if it were an ideal gas. The quantity {\ct 'SOOT VOLUME FRACTION'} will output the volume fraction of soot as if it was a solid particle in computational cell based on the following equation,
 
 \begin{equation}\label{eq:soot_volume_fraction}
-\mbox{Soot Volume Fraction} = \rho Y_{s} / \rho_{s}
+f_v = \rho Y_{s} / \rho_{s}
 \end{equation}
 \noindent where $\rho$ is the local density, $Y_{s}$ is the local mass fraction of soot, and $\rho_{s}$ is density of soot defined to be 1850~(kg/m$^3$).
 
@@ -9752,7 +9709,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:PROF}                       & $^\circ$C      & D            \\ \hline
-{\ct ITERATION}                                 & Number of time steps                          &                & D            \\ \hline
+{\ct ITERATION}                                 & Current time step                             &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
@@ -9770,7 +9727,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct OPTICAL DENSITY}                           & $K/2.3$ (Section~\ref{info:visibility})       & 1/m            & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
-{\ct PARTICLE AGE}                              & $t_d$                                         & s              & PA           \\ \hline
+{\ct PARTICLE AGE}                              & Section~\ref{info:particle_quantities}        & s              & PA           \\ \hline
 {\ct PARTICLE DIAMETER}                         & $2 r_d$                                       & $\mu$m         & PA           \\ \hline
 {\ct PARTICLE FLUX X}$^{**}$                    & Section~\ref{info:part_output}                & kg/m$^2$/s     & P,S          \\ \hline
 {\ct PARTICLE FLUX Y}$^{**}$                    & Section~\ref{info:part_output}                & kg/m$^2$/s     & P,S          \\ \hline
@@ -9783,8 +9740,8 @@ remember that all output quantity names ought to be in single quotes.
 {\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                       &                & D,S          \\ \hline
 {\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
-{\ct SCALAR RESOLUTION}$^{*****}$               &  Section~\ref{info:meshquality}               &                & S            \\ \hline
+{\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
+{\ct SCALAR RESOLUTION}$^{*****}$               & Section~\ref{info:meshquality}                &                & S            \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct SOOT VOLUME FRACTION}                      & $\rho Y_s/\rho_s$ (Section~\ref{info:soot})   & mol/mol        & D,I,P,S      \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
@@ -10266,34 +10223,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COOLANT\_MASS\_FLOW}       & Real              & Section~\ref{info:HVACaircoil}                                                & kg/s          &                \\ \hline
 {\ct COOLANT\_SPECIFIC\_HEAT}   & Real              & Section~\ref{info:HVACaircoil}                                                & kJ/kg/K       &                \\ \hline
 {\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C     &                \\ \hline
-{\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, and \ref{info:HVACfilter}   &               &                \\ \hline
+{\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}       &               &                \\ \hline
 {\ct DAMPER}                    & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
-{\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, and \ref{info:HVACfilter}  &               &        \\ \hline
-{\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                                   &  m            &        \\ \hline
-{\ct DUCT\_ID}                  & Character Array   & Section~\ref{info:HVACnode}                                                   &               &        \\ \hline
-{\ct EFFICIENCY}                & Real Array        & Sections ~\ref{info:HVACfilter} and ~\ref{info:HVACaircoil}                   &               & 1.0    \\ \hline
-{\ct FAN\_ID}                   & Character         & Section~\ref{info:HVACduct}                                                   &               &        \\ \hline
-{\ct FILTER\_ID}                & Character         & Section~\ref{info:HVACnode}                                                   &               &        \\ \hline
-{\ct FIXED\_Q}                  & Real              & Section ~\ref{info:HVACaircoil}                                               & kW            &        \\ \hline
-{\ct ID}                        & Character         & Section~\ref{info:HVAC}                                                       &               &        \\ \hline
-{\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                                   &  m            &        \\ \hline
-{\ct LOADING}                   & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0    \\ \hline
-{\ct LOADING\_MULTIPLIER}       & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0    \\ \hline
-{\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}                        &               & 0.0    \\ \hline
-{\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &        \\ \hline
-{\ct MAX\_PRESSURE}             & Real              &  Section ~\ref{info:HVACfan}                                                  &  Pa           &        \\ \hline
-{\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &        \\ \hline
-{\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, ~\ref{info:HVACfilter}, and~\ref{info:HVACfan} &               &        \\ \hline
+{\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}      &               &                \\ \hline
+{\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
+{\ct DUCT\_ID}                  & Character Array   & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
+{\ct EFFICIENCY}                & Real Array        & Sections ~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                       &               & 1.0            \\ \hline
+{\ct FAN\_ID}                   & Character         & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
+{\ct FILTER\_ID}                & Character         & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
+{\ct FIXED\_Q}                  & Real              & Section ~\ref{info:HVACaircoil}                                               & kW            &                \\ \hline
+{\ct ID}                        & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
+{\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
+{\ct LOADING}                   & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0            \\ \hline
+{\ct LOADING\_MULTIPLIER}       & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0            \\ \hline
+{\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}                        &               & 0.0            \\ \hline
+{\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
+{\ct MAX\_PRESSURE}             & Real              &  Section ~\ref{info:HVACfan}                                                  &  Pa           &                \\ \hline
+{\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
+{\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline
 {\ct REVERSE}                   & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
-{\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            & 0.0    \\ \hline
-{\ct SPEC\_ID}                  & Character         & Section ~\ref{info:HVACfilter}                                                &               &        \\ \hline
-{\ct TAU\_AC}                   & Real              & Section ~\ref{info:HVACaircoil}                                                   & s             & 1.0    \\ \hline
-{\ct TAU\_FAN}                  & Real              & Section ~\ref{info:HVACfan}                                                   & s             & 1.0    \\ \hline
-{\ct TAU\_VF}                   & Real              & Section~\ref{info:HVACduct}                                                   & s             & 1.0    \\ \hline
-{\ct TYPE\_ID}                  & Character         & Section~\ref{info:HVAC}                                                       &               &        \\ \hline
-{\ct VENT\_ID}                  & Character         & Section~\ref{info:HVACnode}                                                   &               &        \\ \hline
-{\ct VOLUME\_FLOW}              & Real              & Section~\ref{info:HVACduct} and ~\ref{info:HVACfan}                           &  m$^3$/s      &        \\ \hline
-{\ct XYZ}                       & Real Triplet      & Section~\ref{info:HVACnode}                                                   &  m            &        \\ \hline
+{\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            & 0.0            \\ \hline
+{\ct SPEC\_ID}                  & Character         & Section ~\ref{info:HVACfilter}                                                &               &                \\ \hline
+{\ct TAU\_AC}                   & Real              & Section ~\ref{info:HVACaircoil}                                               & s             & 1.0            \\ \hline
+{\ct TAU\_FAN}                  & Real              & Section ~\ref{info:HVACfan}                                                   & s             & 1.0            \\ \hline
+{\ct TAU\_VF}                   & Real              & Section~\ref{info:HVACduct}                                                   & s             & 1.0            \\ \hline
+{\ct TYPE\_ID}                  & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
+{\ct VENT\_ID}                  & Character         & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
+{\ct VOLUME\_FLOW}              & Real              & Section~\ref{info:HVACduct}, \ref{info:HVACfan}                               &  m$^3$/s      &                \\ \hline
+{\ct XYZ}                       & Real Triplet      & Section~\ref{info:HVACnode}                                                   &  m            &                \\ \hline
 \end{longtable}
 
 
@@ -10318,7 +10275,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}            & Logical           & Section~\ref{info:initial_droplets}           &               & .FALSE.               \\ \hline
+{\ct CELL\_CENTERED}            & Logical           & Section~\ref{info:initial_droplets}           &               & {\ct .FALSE.} \\ \hline
 {\ct CTRL\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct DENSITY}                   & Real              & Section~\ref{info:INIT}                       & kg/m$^3$      & Ambient       \\ \hline
 {\ct DEVC\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
@@ -10367,7 +10324,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR\_SPEC\_ID}       & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct QUANTITY}              & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct REDUCE\_TRIANGLES}     & Integer       & Reference~\cite{Smokeview_Users_Guide}    &       & 1       \\ \hline
 {\ct SPEC\_ID}              & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
@@ -10685,7 +10641,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct AGE}                           & Real            & Section~\ref{info:particle_quantities}  & s         & 100000.       \\ \hline
 {\ct BREAKUP}                       & Logical         & Section~\ref{info:secondary_breakup}    &           & {\ct .FALSE.} \\ \hline
 {\ct BREAKUP\_CNF\_RAMP\_ID}        & Character       & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
-{\ct BREAKUP\_DISTRIBUTION}         & Character       & Section~\ref{info:secondary_breakup}    &           & {\ct 'ROSIN-RAMMLER-LOGNORMAL'} \\ \hline
+{\ct BREAKUP\_DISTRIBUTION}         & Character       & Section~\ref{info:secondary_breakup}    &           & {\ct 'ROSIN...'} \\ \hline
 {\ct BREAKUP\_GAMMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           & 2.4           \\ \hline
 {\ct BREAKUP\_RATIO}                & Real            & Section~\ref{info:secondary_breakup}    &           & $\frac{3}{7}$ \\ \hline
 {\ct BREAKUP\_SIGMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
@@ -10698,7 +10654,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DENSITY}                       & Real            & Section~\ref{thermal_part_props}        & kg/m$^3$  & 1000.         \\ \hline
 {\ct DEVC\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DIAMETER}                      & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 500.          \\ \hline
-{\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN-RAMMLER-LOGNORMAL'} \\ \hline
+{\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN...'} \\ \hline
 {\ct DRAG\_LAW}                     & Character       & Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
 {\ct FREE\_AREA\_FRACTION}          & Real            & Section~\ref{info:particle_screen}               &           &               \\ \hline
 {\ct GAMMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
@@ -10721,7 +10677,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SIGMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                      & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                        & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
-{\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & 72.8$\cdot 10^3$  \\ \hline
+{\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & $72.8 \times 10^3$  \\ \hline
 {\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 %{\ct TURBULENT\_DISPERSION}         & Logical         &                                         &           & {\ct .FALSE.} \\ \hline
 {\ct DRAG\_COEFFICIENT(3)}          & Real Array      & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
@@ -11489,11 +11445,15 @@ Under this system a centralized repository containing all project files resides 
 identifies the version of the entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are incremented in version number).
 A record of the version number is maintained that indicates when a specific file was changed, which is referred to as a revision number.
 
-As an open source program, any individual can obtain a copy of the repository or retrieve a specific revision of the
-repository.  Only the FDS and Smokeview developers can commit changes to the repository.
+Anyone can obtain a copy of the repository or retrieve a specific revision of the
+repository.  However, only the FDS and Smokeview developers can commit changes to the repository. The current location of the FDS repository is 
 
-The current location of the FDS repository is \href{http://code.google.com/p/fds-smv/source/checkout}
-{{\ct http://fds-smv.googlecode.com/svn/trunk/FDS/trunk}}. The repository contains the following files:
+\footnotesize
+\begin{verbatim}
+http://code.google.com/p/fds-smv/source/checkout
+\end{verbatim} \normalsize
+
+\noindent The repository contains the following files:
 \begin{enumerate}
 \item FDS and Smokeview source code files
 \item FDS and Smokeview documentation
@@ -11511,9 +11471,6 @@ The wikis are particularly useful in describing the details of how you go about 
 \chapter{Compiling FDS}
 \label{info:compilation}
 
-This section describes what you need to know if you want to compile the FDS source code yourself.
-It is not a step by step guide, more detailed instructions can be found on Developer section of the web site at \href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}}.
-
 If a compiled version of FDS exists for the machine on which the
 calculation is to be run and no changes have been made to
 the original source code, there is no need to re-compile the code.
@@ -11528,15 +11485,13 @@ compile the code. Fortran 90/95 compilers are needed for compilation.
 
 Table~\ref{tab:sourcefiles} lists the files that make up the source code.
 Files with the ``.f90'' suffix contain free form Fortran 90 instructions
-conforming to the ANSI and ISO standards.
-The source files should be compiled in the order in which they are listed
-in Table~\ref{tab:sourcefiles} because some routines are dependent on others.
+conforming to the ANSI and ISO standards (2003 edition).
 For Unix/Linux users, {\ct makefiles} for various platforms are available
 that assist in the compilation. Compiler options differ from platform to platform.
 Note the following:
 \begin{itemize}
 \item The source code consists entirely of Fortran 90
-statements organized into about 25 files.
+statements organized into about 30 files.
 The only compiler option necessary is for full optimization (usually -O or some variant). Some
 compilers have a standard optimization level, plus various degrees of
 ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
@@ -11846,11 +11801,7 @@ Smokeview can display the Plot3D data. In
 addition, the Plot3D data sets can be read into some other graphics
 programs that accept the data format.
 This particular format is very convenient, and recognized by
-a number of graphics packages, including AVS, IRIS Explorer
-and Tecplot
-\footnote{With the exception of Smokeview,
-the graphics packages referred to in this document are
-not included with the source code, but are commercially available.}.
+a number of graphics packages.
 
 
 \section{Boundary Files}
@@ -11979,7 +11930,7 @@ smoke file is given by:
 
 ! header
 
-  WRITE(LU_SMOKE3D)ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
+  WRITE(LU_SMOKE3D) ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
 
 ! time depended data
 
@@ -11992,7 +11943,7 @@ smoke file is given by:
 \normalsize
 
 \noindent
-The first {\em ONE}\ is an endian flag.  Smokeview uses this number to
+The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to
 determine whether the computer creating the 3-D smoke file and the
 computer viewing the 3-D smoke file use the same or different byte
 swap (endian) conventions for storing floating point numbers.  The
