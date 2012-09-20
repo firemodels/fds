@@ -1084,13 +1084,13 @@ if [[ $stage2a_success && $stage2b_success ]] ; then
 fi
 
 ### Stage 4a ###
-if $stage2a_success ; then
+if [[ $stage2a_success ]] ; then
    compile_fds
    check_compile_fds
 fi
 
 ### Stage 4b ###
-if $stage2b_success ; then
+if [[ $stage2b_success ]] ; then
    compile_fds_mpi
    check_compile_fds_mpi
 fi
@@ -1124,7 +1124,7 @@ if [[ $stage5_success && $stage6b_success ]] ; then
 fi
 
 ### Stage 6e ###
-if $stage6d_success ; then
+if [[ $stage6d_success ]] ; then
    make_smv_pictures
    check_smv_pictures
 fi
@@ -1136,7 +1136,7 @@ if [[ $stage5_success && $stage6d_success ]] ; then
 fi
 
 ### Stage 7a ###
-if $stage5_success ; then
+if [[ $stage5_success ]] ; then
    run_matlab_verification
    check_matlab_verification
    check_verification_stats
@@ -1148,7 +1148,7 @@ run_matlab_validation
 check_matlab_validation
 
 ### Stage 7c ###
-if $stage5_success ; then
+if [[ $stage5_success ]] ; then
    generate_timing_stats
    archive_timing_stats
 fi
