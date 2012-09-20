@@ -560,7 +560,7 @@ void parse_commandline(int argc, char **argv){
       exit(0);
     }
     else {
-      printf(" unknown option: %s\n",argv[i]);
+      fprintf(stderr,"*** Error: unknown option: %s\n",argv[i]);
       usage(argv);
       exit(1);
     }
@@ -732,7 +732,7 @@ void usage(char **argv){
     strcat(label,", WIN32");
 #endif
     printf("  \n");
-    printf("%s\n\n",_("  Smokeview was built with the following pre-processing directives set:"));
+    printf("%s\n\n",_("  Smokeview was built using the following pre-processing directives:"));
     printf("%s \n",labelptr);
   }
 }

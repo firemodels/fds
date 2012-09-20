@@ -141,7 +141,7 @@ void RenderFrame(int view_mode){
       strcpy(renderfile_dir,smokeviewtempdir);
     }
     else{
-      printf("unable to output render file\n");
+      fprintf(stderr,"*** Error: unable to output render file\n");
       return;
     }
   }
@@ -347,8 +347,7 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
     {
       char message[256];
 
-      sprintf(message,"unable to write to %s",renderfile);
-      warning_message(message);
+      fprintf(stderr,"*** Error: unable to write to %s",renderfile);
     }
     return 1;
   }
@@ -570,7 +569,7 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
 
     if(texturedir==NULL){
       if(printflag==1){
-        printf("Texture file: %s unavailable\n",filename);
+        fprintf("*** Error: texture file: %s unavailable\n",filename);
       }
       return NULL;
     }
@@ -586,7 +585,7 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
       stream=fopen(filebuffer,"rb");
       if(stream==NULL){
         if(printflag==1){
-          printf("Texture file: %s unavailable\n",filebuffer);
+          fprintf(stderr,"*** Error: texture file: %s unavailable\n",filebuffer);
         }
         FREEMEMORY(filebuffer);
         return NULL;
@@ -627,6 +626,7 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
     }
     else{
       printf(" - failed\n");
+      fprintf(stderr,"*** Error: attempt to input %s failed\n",filename);
     }
   }
   return returncode;
