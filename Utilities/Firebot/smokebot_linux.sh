@@ -123,6 +123,7 @@ update_and_compile_cfast()
    fi
     # Build CFAST
     cd $CFAST_SVNROOT/CFAST/intel_linux_64
+    rm -f cfast6_linux_64
     make --makefile ../makefile clean &> /dev/null
     ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
 
@@ -192,6 +193,7 @@ compile_fds_db()
 {
    # Clean and compile FDS DB
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
+   rm -f fds_intel_linux_64_db
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
 }
@@ -314,6 +316,7 @@ compile_fds()
 {
    # Clean and compile FDS
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
+   rm -f fds_intel_linux_64
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
@@ -442,6 +445,7 @@ compile_smv_db()
 {
    # Clean and compile SMV DB
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
+   rm -f smokeview_linux_64_db
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6b
 }
 
@@ -507,6 +511,7 @@ compile_smv()
 {
    # Clean and compile SMV
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64
+   rm -f smokeview_linux_64
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6d
 }
 
