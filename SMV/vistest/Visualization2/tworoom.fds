@@ -1,4 +1,4 @@
-&HEAD CHID='tworoom',TITLE='two room case SVN $Revision: 12191 $' /
+&HEAD CHID='tworoom',TITLE='two room case SVN $Revision$' /
 
 &MESH IJK=16,16,24, XB=1.6,3.2,0.0,1.6,0.0,2.4 /
 &MESH IJK=32,16,24, XB=3.2,6.4,0.0,1.6,0.0,2.4 /

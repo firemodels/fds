@@ -1,4 +1,4 @@
-&HEAD CHID='volrender', TITLE='Test volume rendering visualization, SVN $Revision: 12143 $' /
+&HEAD CHID='volrender', TITLE='Test volume rendering visualization, SVN $Revision$' /
 
 &MESH IJK=100,100,40, XB=0.0,10.0,0.0,10.0,0.0,4.0 /
 

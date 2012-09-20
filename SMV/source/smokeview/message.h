@@ -1,6 +1,6 @@
-// $Date: 2012-09-10 16:12:45 -0400 (Mon, 10 Sep 2012) $ 
-// $Revision: 12564 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #ifndef MESSAGE_H_DEFINED
 #define MESSAGE_H_DEFINED
