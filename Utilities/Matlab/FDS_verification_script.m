@@ -34,6 +34,7 @@ flame_species;            display('flame_species complete...')
 EDC_species;              display('EDM_species complete...')
 cutcell_area;             display('cutcell_area complete...')
 cat_propane_depo;         display('cat_propane_depo complete...')
+burke_schumann;           display('burke_schumann complete...')
 
 % The main plotting routine is dataplot
 
@@ -43,7 +44,7 @@ plotdir = [pwd,'/../../Manuals/'];
 qfil = [pwd,'/FDS_verification_scatterplot_inputs.csv'];
 output_file = [pwd,'/FDS_verification_scatterplot_output.csv'];
 
-[saved_data,drange] = dataplot(cfil,vdir,plotdir);
+[saved_data,drange] = dataplot(cfil,vdir,plotdir,9:10);
 scatplot(saved_data,drange,qfil,output_file)
 
 % Special cases
@@ -64,5 +65,6 @@ run scripts/flat_fire_comparison
 run scripts/fluid_part
 run scripts/scarc2d
 run scripts/extinction
+
 
 display('verification scripts completed successfully!')
