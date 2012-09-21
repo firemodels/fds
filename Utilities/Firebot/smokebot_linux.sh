@@ -23,7 +23,7 @@ done
 shift $(($OPTIND-1))
 
 #mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
-mailTo="glenn.forney@nist.gov, koverholt@gmail.com"
+mailTo="glenn.forney@nist.gov, gforney@gmail.com, koverholt@gmail.com"
 
 FIREBOT_USERNAME="`whoami`"
 
@@ -405,18 +405,21 @@ compile_smv_utilities()
 {  
    # smokezip:
    cd $FDS_SVNROOT/Utilities/smokezip/intel_linux_64
+   rm -f *.o smokezip_linux_64
    echo 'Compiling smokezip:' > $FIREBOT_DIR/output/stage6a 2>&1
    ./make_zip.sh >> $FIREBOT_DIR/output/stage6a 2>&1
    echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
    
    # smokediff:
    cd $FDS_SVNROOT/Utilities/smokediff/intel_linux_64
+   rm -f *.o smokediff_linux_64
    echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage6a 2>&1
    ./make_diff.sh >> $FIREBOT_DIR/output/stage6a 2>&1
    echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
    
    # background:
    cd $FDS_SVNROOT/Utilities/background/intel_linux_32
+   rm -f *.o background
    echo 'Compiling background:' >> $FIREBOT_DIR/output/stage6a 2>&1
    ./make_background.sh >> $FIREBOT_DIR/output/stage6a 2>&1
 }
@@ -653,22 +656,26 @@ save_build_status()
      cat $WARNING_LOG >> $ERROR_LOG
      echo "Build failure and warnings for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
      cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+     touch status_errors_and_warnings
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       echo "Build failure for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+      touch status_errors
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $WARNING_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
+      touch status_warnings
 
    # No errors or warnings
    else
       echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+      touch status_success
    fi
 }
 
