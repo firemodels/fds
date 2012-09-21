@@ -1156,20 +1156,14 @@ if [[ $stage5_success ]] ; then
 fi
 
 ### Stage 8 ###
-if [[ $stage5_success && stage6f_success ]] ; then
-   make_fds_user_guide
-   make_fds_verification_guide
-   make_fds_technical_guide
-fi
-if [[ $stage7b_success ]] ; then
-   make_fds_validation_guide
-fi
-if [[ $stage6e_success ]] ; then
-   make_smv_user_guide
-   make_smv_technical_guide
-   make_smv_verification_guide
-fi
 # No stage dependencies
+make_fds_user_guide
+make_fds_verification_guide
+make_fds_technical_guide
+make_fds_validation_guide
+make_smv_user_guide
+make_smv_technical_guide
+make_smv_verification_guide
 make_fds_configuration_management_plan
 
 ### Report results ###
