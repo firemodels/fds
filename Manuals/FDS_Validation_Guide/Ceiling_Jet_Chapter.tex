@@ -672,19 +672,24 @@ Also included is a plot comparing predicted sprinkler activation times with the 
 
 \section{NIST Dunes 2000 Experiments}
 
-The experiments selected for model validation were conducted in the single-story manufactured home.
-Only tests that used a flaming ignition source were considered; smoldering and cooking ignition sources
-were not considered in this validation. The burning behavior of the upholstered chair and mattress fuel
-packages was characterized by separate tests conducted by Omega Point Laboratories (OPL).
-The upholstered chair was tested in accordance with CAL TB~133 standards (with a modified ignition source).
-The mattress was tested in accordance with CAL TB~129 standards (with a modified ignition source).
+The experiments that were conducted in the single-story manufactured home were selected for model validation.
+Only tests that used a flaming ignition source were considered; the smoldering and cooking ignition sources
+were not considered. The burning behavior of the upholstered chair and mattress fuel packages was characterized
+by separate tests conducted by Omega Point Laboratories (OPL).
+The upholstered chair was tested in accordance with the CAL TB~133 standard (with a modified ignition source).
+The mattress was tested in accordance with the CAL TB~129 standard (with a modified ignition source).
 
-The transient HRRs of the upholstered chair (OPL Project No.~15638-108858) and
-mattress (OPL Project No.~15638-108856) were determined by multiplying the mass loss rate of the
+The transient HRR of the upholstered chair (OPL Project No.~15638-108858) and
+mattress (OPL Project No.~15638-108856) was calculated by multiplying the mass loss rate of the
 fuel specimen by a heat of combustion of 21,000~kJ/kg (mattress) or 30,000~kJ/kg (upholstered chair).
+The resulting transient HRR was input into FDS as a fire ramp.
+Because the fuel characterization tests were conducted independent of the smoke alarm activation tests,
+there is a time difference in the burning behavior due to the small ignition. To correct for this time shift,
+the HRR ramp was offset in FDS by aligning the peak temperatures of the highest thermocouple in the
+fire room. The offset is reported in Table~\ref{NIST_Dunes_2000_Summary} as the time to peak temperature
+from the experiment minus the time to peak temperature from FDS.
 
-A summary of the
-seven tests selected for model validation is shown in Table~\ref{NIST_Dunes_2000_Summary}.
+A summary of the seven tests selected for model validation is shown in Table~\ref{NIST_Dunes_2000_Summary}.
 Figure~\ref{NIST_Dunes_2000_Scatterplot} compares measured versus predicted smoke alarm activation times.
 
 \begin{table}[h!]
@@ -692,14 +697,14 @@ Figure~\ref{NIST_Dunes_2000_Scatterplot} compares measured versus predicted smok
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline
-Test No.  &  Fire Source  &  Fire Location    \\ \hline \hline
-SDC02    &  Chair            &  Living Room  \\ \hline
-SDC05    &  Mattress       &  Bedroom       \\ \hline
-SDC07    &  Mattress       &  Bedroom       \\ \hline
-SDC10    &  Chair            &  Living Room  \\ \hline
-SDC33    &  Chair            &  Living Room  \\ \hline
-SDC35    &  Chair            &  Living Room  \\ \hline
-SDC39    &  Mattress       &  Bedroom       \\ \hline
+Test No.  &  Fire Source  &  Fire Location & HRR Offset (s)    \\ \hline \hline
+SDC02    &  Chair            &  Living Room  &  \emph{Placeholder}  \\ \hline
+SDC05    &  Mattress       &  Bedroom       &  \emph{Placeholder}  \\ \hline
+SDC07    &  Mattress       &  Bedroom       &  \emph{Placeholder}  \\ \hline
+SDC10    &  Chair            &  Living Room  &  \emph{Placeholder}  \\ \hline
+SDC33    &  Chair            &  Living Room  &  \emph{Placeholder}  \\ \hline
+SDC35    &  Chair            &  Living Room  &  \emph{Placeholder}  \\ \hline
+SDC39    &  Mattress       &  Bedroom       &  \emph{Placeholder}  \\ \hline
 \end{tabular}
 \end{center}
 \label{NIST_Dunes_2000_Summary}
