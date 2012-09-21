@@ -656,26 +656,26 @@ save_build_status()
      cat $WARNING_LOG >> $ERROR_LOG
      echo "Build failure and warnings for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
      cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
-     touch status_errors_and_warnings
+     touch output/status_errors_and_warnings
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       echo "Build failure for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
-      touch status_errors
+      touch output/status_errors
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $WARNING_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
-      touch status_warnings
+      touch output/status_warnings
 
    # No errors or warnings
    else
       echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-      touch status_success
+      touch output/status_success
    fi
 }
 
