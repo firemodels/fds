@@ -176,8 +176,10 @@ fi
 echo ""
 echo "Where would you like to install FDS? )"
 echo "Options:"
-  echo "  Press 1 to install at \$HOME/$INSTALLDIR"
-  if [ "$ostype" != "OSX" ]; then
+  if [ "$ostype" == "OSX" ]; then
+    echo "  Press 1 to install at /Applications/$INSTALLDIR"
+  else
+    echo "  Press 1 to install at \$HOME/$INSTALLDIR"
     echo "  Press 2 to install at /opt/$INSTALLDIR"
     echo "  Press 3 to install at /usr/local/bin/$INSTALLDIR"
   fi
@@ -317,7 +319,7 @@ unalias smokediff6 >& /dev/null
 # define FDS bin directory location
 
 export FDSBINDIR=\`pwd\`/bin
-SHORTCUTDIR=\`pwd\`/../shortcuts
+SHORTCUTDIR=\$SHORTCUTDIR
 
 # define openmpi library locations:
 #   32/64 bit gigabit ethernet
