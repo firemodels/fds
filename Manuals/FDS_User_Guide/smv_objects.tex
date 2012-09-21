@@ -135,13 +135,13 @@ Each entry shows an image of the object and the parameters used to customize its
 \endhead
 
 {\ct ball} &
-\parbox[c]{\boxwidth}{ 
+\parbox[c]{\boxwidth}{
 \hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=128','G=192','B=255',}\\
 {\ct 'DX=0.5','DY=.75','DZ=1.0'}\\  \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-DX, DY, DZ - amount ball is stretched along x, y, z axis respectively \\
+R, G, B - color components (0 to 255) \\
+DX, DY, DZ - amount ball is stretched along x, y, z axis (m) \\
 \hspace{1in} } &
 \incgraphics{SCRIPT_FIGURES/ball} \\ \hline
 
@@ -151,8 +151,8 @@ DX, DY, DZ - amount ball is stretched along x, y, z axis respectively \\
 {\ct SMOKEVIEW\_PARAMETERS(1:5)=}\\
 {\ct 'R=128','G=255','B=192',}\\
 {\ct 'D=0.4','H=0.6'}\\ \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-D, H - diameter and length of cone respectively \\
+R, G, B - color components ranging (0 to 255) \\
+D, H - diameter and height (m) \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/cone} \\ \hline
@@ -166,9 +166,9 @@ D, H - diameter and length of cone respectively \\
 {\ct 'BLADE\_R=128','BLADE\_G=64',}\\
 {\ct 'BLADE\_B=32','BLADE\_ANGLE=60.0',}\\
 {\ct 'BLADE\_D=0.5','BLADE\_H=0.09'}\\  \\
-HUB\_R, HUB\_G, HUB\_B - red, green, blue color components of fan hub ranging from 0 to 255\\
-HUB\_D, HUB\_L - diameter and length of fan hub\\
-BLADE\_R, BLADE\_G, BLADE\_B - red, green, blue color components of fan blades ranging from 0 to 255\\
+HUB\_R, HUB\_G, HUB\_B - color components of fan hub (0 to 255) \\
+HUB\_D, HUB\_L - diameter and length of fan hub (m) \\
+BLADE\_R, BLADE\_G, BLADE\_B - color components of fan blades (0 to 255) \\
 BLADE\_ANGLE, BLADE\_D, BLADE\_H - angle, diameter and height of a fan blade \\
 \hspace{1in}
 } &
@@ -183,10 +183,10 @@ BLADE\_ANGLE, BLADE\_D, BLADE\_H - angle, diameter and height of a fan blade \\
     {\ct 'ROT0=0.0','ROTATION\_RATE=10.0',}\\
     {\ct 'D=1.0',}\\
     {\ct 'tfile="t\%sphere\_cover\_04.png"'}\\ \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-AX0, ELEV0, ROT0 - initial azimuth, elevation and rotation angle respectively\\
-ROTATION\_RATE - rotation rate about z axis in degrees per second\\
-D - diameter of sphere \\
+R, G, B - color components (0 to 255) \\
+AX0, ELEV0, ROT0 - initial azimuth, elevation and rotation angle (deg) \\
+ROTATION\_RATE - rotation rate about z axis (deg/s) \\
+D - diameter (m) \\
 tfile - name of texture map file \\
 \hspace{1in}
 } &
@@ -198,9 +198,9 @@ tfile - name of texture map file \\
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=192','G=192','B=128',}\\
 {\ct 'W=0.5','H=1.0', 'ROT=90.0'}\\ \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-W, H - width and height of vent respectively\\
-ROT - angle that vent is rotated \\
+R, G, B - color components (0 to 255) \\
+W, H - width and height (m) \\
+ROT - rotation angle (deg) \\
 \hspace{1in}
 } &
 \parbox[c]{\devicewidth}{
@@ -262,8 +262,8 @@ keyword or using particle file data.
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=192','G=255','B=128',}\\
 {\ct 'DX=0.25','DY=.5','DZ=0.125'}\\  \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-DX, DY, DZ - amount box is stretched along x, y, z axis respectively \\
+R, G, B - color components (0 to 255) \\
+DX, DY, DZ - amount box is stretched along x, y, z axis \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/box} \\ \hline
@@ -274,8 +274,8 @@ DX, DY, DZ - amount box is stretched along x, y, z axis respectively \\
 {\ct SMOKEVIEW\_PARAMETERS(1:5)=}\\
 {\ct 'R=255','G=0','B=0',}\\
 {\ct 'D=0.2','L=0.6'}\\ \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-D, L - diameter and length of tube respectively \\
+R, G, B - color components (0 to 255) \\
+D, L - diameter and length (m) \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/tube} \\ \hline
@@ -283,14 +283,14 @@ D, L - diameter and length of tube respectively \\
 {\ct velegg} &
 \parbox[c]{\boxwidth}{
 \hspace{1in} \\
-{\ct SMOKEVIEW\_PARAMETERS(1:9)=}\\
-:R=0 :G=0 :B=0 \\
-:U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0  \\
-:VELMIN :VELMAX :D \\  \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-U-VEL, V-VEL, W-VEL - u, v, w components of velocity\\
+{\ct SMOKEVIEW\_PARAMETERS(1:9)=} \\
+{\ct 'R=0', 'G=0', 'B=0'} \\
+{\ct 'U-VEL=1.', 'V-VEL=1.', 'W-VEL=1.'}  \\
+{\ct 'VELMIN=0.01', 'VELMAX=0.2', 'D=1.0'} \\  \\
+R, G, B - color components (0 to 255) \\
+U-VEL, V-VEL, W-VEL - velocity components (m/s) \\
 VELMIN, VELMAX - minimum and maximum velocity\\
-D - diameter of egg at maximum velocity \\
+D - diameter of egg at maximum velocity (m) \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/velegg} \\ \hline
@@ -299,13 +299,13 @@ D - diameter of egg at maximum velocity \\
 \parbox[c]{\boxwidth}{
 \hspace{1in} \\
 {\ct SMOKEVIEW\_PARAMETERS(1:9)=}\\
-:R=0 :G=0 :B=0 \\
-:U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0  \\
-:VELMIN :VELMAX :D \\  \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-U-VEL, V-VEL, W-VEL - u, v, w components of velocity\\
-VELMIN, VELMAX - minimum and maximum velocity\\
-D - diameter of tube at VELMAX \\
+{\ct 'R=0', 'G=0',  'B=0'} \\
+{\ct 'U-VEL=1.', 'V-VEL=1.', 'W-VEL=1.' }  \\
+{\ct 'VELMIN=0.01', 'VELMAX=0.2', 'D=0.1'} \\  \\
+R, G, B - color components (0 to 255) \\
+U-VEL, V-VEL, W-VEL - velocity components (m/s) \\
+VELMIN, VELMAX - minimum and maximum velocity \\
+D - diameter of tube at VELMAX (m) \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/veltube} \\ \hline
