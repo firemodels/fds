@@ -1977,16 +1977,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
                         CASE(0)
                            SLIP_COEF = -1._EB
                         CASE(1)
-                           SLIP_COEF = 0._EB
-                        CASE(2)
-                           SLIP_COEF = 0.5_EB
-                        CASE(3)
                            SLIP_COEF = SLIP_COEF
-                        CASE(4)
+                        CASE(2)
                            SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)
-                        CASE(5)
-                           SLIP_COEF = TWTH*SLIP_COEF-ONTH
-                        CASE(6)
+                        CASE(3)
                            WT1 = MAX(0._EB,MIN(1._EB,(Y_PLUS-Y_WERNER_WENGLE)/(Y_PLUS+TWO_EPSILON_EB)))
                            WT2 = 1._EB-WT1
                            SLIP_COEF = WT1*SLIP_COEF-WT2
