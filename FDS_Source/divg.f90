@@ -20,8 +20,9 @@ SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF,GET_SENSIBLE_ENTHALPY
-USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
+USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EMESH_INDEX, EVAC_FDS6, N_EXITS, N_CO_EXITS, N_DOORS
 USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL
+USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 
 ! Compute contributions to the divergence term
  
@@ -32,10 +33,10 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,RCON_DIFF
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,RCON_DIFF,X1,Y1,X2,Y2,Z1,Z2
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ,I_VENT
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
  
@@ -59,13 +60,108 @@ SELECT CASE(PREDICTOR)
       RHOP => RHO
 END SELECT
 
+RTRM => WORK1
+
 R_PBAR = 1._EB/PBAR_P
+
+! Zero out divergence to start
+
+DP = 0._EB
+
+! Evacuation flow field calculation: Change the outflow vent pressure zone and initialize everything
+
+EVACUATION_ZONE_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6 .AND. PREDICTOR) THEN
+   ITMP = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
+   EVACUATION_NEW_FIELD: IF (MOD(ICYC-1,ITMP) == 0 .AND. ICYC < 0) THEN
+      ! New exit/door flow field calculation (new outflow-vent), do the necessary initializaions,
+      ! because same arrays are used for exits/doors at a main evacuation mesh.  Each evacuation
+      ! flow field calculation has just one exit/door, i.e., outflow vent, so the pressure zone
+      ! is defined so that the front of the door is in the pressure zone.  So, pressure zone
+      ! is also redefined for this main evacuation mesh. (New FDS 6 formalism, EVAC_FDS6=.TRUE.)
+      ! One pressure zone is defined for each main evacuation mesh.
+
+      I_VENT = 0
+      ITMP = (ABS(ICYC)+1)/ITMP
+      FIND_EXIT_LOOP: DO I=1,N_EXITS-N_CO_EXITS+N_DOORS
+         IF (.NOT.EMESH_EXITS(I)%MAINMESH==NM) CYCLE
+         IF (.NOT.EMESH_EXITS(I)%DEFINE_MESH) CYCLE
+         I_VENT = I_VENT + 1
+         IF (I_VENT==ITMP) THEN
+            X1 = EMESH_EXITS(I)%XB(1); X2 = EMESH_EXITS(I)%XB(2)
+            Y1 = EMESH_EXITS(I)%XB(3); Y2 = EMESH_EXITS(I)%XB(4)
+            Z1 = EMESH_EXITS(I)%XB(5); Z2 = EMESH_EXITS(I)%XB(6)
+            SELECT CASE (EMESH_EXITS(I)%IOR)
+            CASE(+1)
+               X1 = EMESH_EXITS(I)%XB(1) - MESHES(EMESH_EXITS(I)%MAINMESH)%DXI
+            CASE(-1)
+               X2 = EMESH_EXITS(I)%XB(2) + MESHES(EMESH_EXITS(I)%MAINMESH)%DXI
+            CASE(+2)
+               Y1 = EMESH_EXITS(I)%XB(3) - MESHES(EMESH_EXITS(I)%MAINMESH)%DETA
+            CASE(-2)
+               Y2 = EMESH_EXITS(I)%XB(4) + MESHES(EMESH_EXITS(I)%MAINMESH)%DETA
+            END SELECT
+            EXIT FIND_EXIT_LOOP
+         END IF
+      END DO FIND_EXIT_LOOP
+      N = 0
+      DO I = 1,N_ZONE
+         IF (.NOT.(P_ZONE(I)%EVACUATION)) CYCLE
+         IF (P_ZONE(I)%MESH_INDEX==NM) THEN
+            N = I ! The ordinar number of the pressure zone of this main evacuation mesh
+            EXIT
+         END IF
+      END DO
+      IF (N==0) THEN 
+         WRITE(LU_ERR,'(A,A)') 'ERROR FDS+Evac: Zone error, no pressure zone found for mesh ',TRIM(MESH_NAME(NM))
+      END IF
+
+      U=0._EB; V=0._EB; W=0._EB; US=0._EB; VS=0._EB; WS=0._EB; FVX=0._EB; FVY=0._EB; FVZ=0._EB
+      H=0._EB; HS=0._EB; KRES=0._EB; DDDT=0._EB; D=0._EB; DS=0._EB
+      P_0=P_INF; TMP_0=TMPA
+      PBAR=P_INF; PBAR_S=P_INF; R_PBAR=0._EB; D_PBAR_DT=0._EB; D_PBAR_DT_S=0._EB
+      RHO=RHO_0(1); RHOS=RHO_0(1); TMP=TMPA
+      FRHO= 0._EB; 
+      USUM(:,NM) = 0.0_EB ; DSUM(:,NM) = 0.0_EB; PSUM(:,NM) = 0.0_EB
+      PRESSURE_ZONE = 0
+      
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               IF (PRESSURE_ZONE(I,J,K)==N) CYCLE
+               IF (XC(I) - X1 >=0._EB .AND. XC(I) < X2 .AND. &
+                    YC(J) - Y1 >=0._EB .AND. YC(J) < Y2 .AND. &
+                    ZC(K) - Z1 >=0._EB .AND. ZC(K) < Z2) THEN 
+                  PRESSURE_ZONE(I,J,K) = N
+                  IF (.NOT.SOLID(CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,XC(I),YC(J),ZC(K),N)
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         WC%PRESSURE_ZONE = 0
+         WC%ONE_D%UW = 0._EB
+         WC%U_TAU = 0._EB
+         WC%RHO_F = RHO_0(1)
+         WC%Y_PLUS = 1._EB
+         WC%RHODW = 0.1_EB ! Do not initialize to zero to avoid divide by zero in the first time step
+         II  = WC%ONE_D%II
+         JJ  = WC%ONE_D%JJ
+         KK  = WC%ONE_D%KK
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IF (KK==1) WC%PRESSURE_ZONE = PRESSURE_ZONE(IIG,JJG,KKG)
+      END DO
+   END IF EVACUATION_NEW_FIELD
+END IF EVACUATION_ZONE_IF
 
 ! Determine if pressure ZONEs have merged
 
 CONNECTED_ZONES(:,:,NM) = .FALSE.
 
-EVAC_ONLY_1: IF (.NOT. EVACUATION_ONLY(NM)) THEN
+NOT_EVACUATION_ONLY: IF (.NOT. EVACUATION_ONLY(NM)) THEN  ! Evacuation zones do not merge or change with time
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. &
@@ -108,21 +204,14 @@ EVAC_ONLY_1: IF (.NOT. EVACUATION_ONLY(NM)) THEN
       END SELECT
    ENDIF
    
-ENDIF EVAC_ONLY_1
-! Zero out divergence to start
+   IF (N_TRACKED_SPECIES > 0) DEL_RHO_D_DEL_Z = 0._EB
 
-DP = 0._EB
-
-IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) DEL_RHO_D_DEL_Z = 0._EB
-
-! Add species diffusion terms to divergence expression and compute diffusion term for species equations
+   ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
  
-IF (N_TRACKED_SPECIES > 0) THEN
-   RHO_D => WORK4
-   IF (LES) RHO_D = MU*RSC
-ENDIF
-
-EVAC_ONLY_2: IF (.NOT. EVACUATION_ONLY(NM)) THEN
+   IF (N_TRACKED_SPECIES > 0) THEN
+      RHO_D => WORK4
+      IF (LES) RHO_D = MU*RSC
+   ENDIF
 
    SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
@@ -276,13 +365,10 @@ EVAC_ONLY_2: IF (.NOT. EVACUATION_ONLY(NM)) THEN
 
    ENDDO SPECIES_LOOP
 
-ENDIF EVAC_ONLY_2   
-   
-! Get the specific heat
+   ! Get the specific heat
 
-CP => WORK5
+   CP => WORK5
 
-IF (.NOT.EVACUATION_ONLY(NM)) THEN
    IF (N_TRACKED_SPECIES > 0) THEN
       DO K=1,KBAR
          DO J=1,JBAR
@@ -304,76 +390,75 @@ IF (.NOT.EVACUATION_ONLY(NM)) THEN
          ENDDO
       ENDDO            
    ENDIF
-ENDIF
 
-! Compute del dot k del T
+   ! Compute del dot k del T
  
-KDTDX => WORK1
-KDTDY => WORK2
-KDTDZ => WORK3
-KP    => WORK4
+   KDTDX => WORK1
+   KDTDY => WORK2
+   KDTDZ => WORK3
+   KP    => WORK4
    
-! Compute thermal conductivity k (KP)
+   ! Compute thermal conductivity k (KP)
  
-K_DNS_OR_LES: IF (DNS) THEN
+   K_DNS_OR_LES: IF (DNS) THEN
 
-   KP = 0._EB
-   IF (N_TRACKED_SPECIES > 0) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-               CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
+      KP = 0._EB
+      IF (N_TRACKED_SPECIES > 0) THEN
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+                  CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-   ELSE
-      ZZ_GET = 0._EB
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
+      ELSE
+         ZZ_GET = 0._EB
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-   ENDIF
+      ENDIF
    
-   BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IIG = WC%ONE_D%IIG
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
-      KP(II,JJ,KK) = KP(IIG,JJG,KKG)
-   ENDDO BOUNDARY_LOOP
-   
-ELSE K_DNS_OR_LES
-   
-   KP = MU*CPOPR
+      BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         II  = WC%ONE_D%II
+         JJ  = WC%ONE_D%JJ
+         KK  = WC%ONE_D%KK
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         KP(II,JJ,KK) = KP(IIG,JJG,KKG)
+      ENDDO BOUNDARY_LOOP
       
-ENDIF K_DNS_OR_LES
+   ELSE K_DNS_OR_LES
+      
+      KP = MU*CPOPR
+      
+   ENDIF K_DNS_OR_LES
 
-! Compute k*dT/dx, etc
+   ! Compute k*dT/dx, etc
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
-         KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
-         DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
-         KDTDY(I,J,K) = .5_EB*(KP(I,J+1,K)+KP(I,J,K))*DTDY
-         DTDZ = (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
-         KDTDZ(I,J,K) = .5_EB*(KP(I,J,K+1)+KP(I,J,K))*DTDZ
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
+            DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+            KDTDY(I,J,K) = .5_EB*(KP(I,J+1,K)+KP(I,J,K))*DTDY
+            DTDZ = (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            KDTDZ(I,J,K) = .5_EB*(KP(I,J,K+1)+KP(I,J,K))*DTDZ
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-! Correct thermal gradient (k dT/dn) at boundaries
-IF (.NOT. EVACUATION_ONLY(NM)) THEN
+   ! Correct thermal gradient (k dT/dn) at boundaries
+
    CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS   
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP
@@ -406,12 +491,11 @@ IF (.NOT. EVACUATION_ONLY(NM)) THEN
       END SELECT
       DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
    ENDDO CORRECTION_LOOP
-ENDIF
-! Compute (q + del dot k del T) and add to the divergence
 
-CYLINDER3: SELECT CASE(CYLINDRICAL)
-CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
-   IF (.NOT.EVACUATION_ONLY(NM)) THEN
+   ! Compute (q + del dot k del T) and add to the divergence
+
+   CYLINDER3: SELECT CASE(CYLINDRICAL)
+   CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -422,25 +506,21 @@ CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
             ENDDO
          ENDDO
       ENDDO
-   END IF
-CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DELKDELT = & 
-                 (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                      (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+   CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DELKDELT = & 
+                    (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                    (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
+               DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-END SELECT CYLINDER3
+   END SELECT CYLINDER3
 
 ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
  
-RTRM => WORK1
-
-IF (.NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -450,77 +530,77 @@ IF (.NOT.EVACUATION_ONLY(NM)) THEN
          ENDDO
       ENDDO 
    ENDDO
-ENDIF
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
 
-IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
-   SM0 => SPECIES_MIXTURE(0)
-   DO N=1,N_TRACKED_SPECIES
-      IF (EVACUATION_ONLY(NM)) CYCLE
-      SM  => SPECIES_MIXTURE(N)
-      RCON_DIFF = SM%RCON-SM0%RCON
+   IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+      SM0 => SPECIES_MIXTURE(0)
+      DO N=1,N_TRACKED_SPECIES
+         SM  => SPECIES_MIXTURE(N)
+         RCON_DIFF = SM%RCON-SM0%RCON
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
+                  DP(I,J,K) = DP(I,J,K) + ( RCON_DIFF/RSUM(I,J,K) - HDIFF/(CP(I,J,K)*TMP(I,J,K)) )* &
+                       DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Add contribution of reactions
+ 
+   IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Add contribution of evaporating particles
+
+   IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+   
+   ! Add contribution of unstructured geometry
+
+   IF (N_FACE>0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_GEOMETRY(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+   
+   ! Atmospheric stratification term
+   
+   IF (STRATIFICATION) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
-               DP(I,J,K) = DP(I,J,K) + ( RCON_DIFF/RSUM(I,J,K) - HDIFF/(CP(I,J,K)*TMP(I,J,K)) )* &
-                                       DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
+               DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,PRESSURE_ZONE(I,J,K))-RTRM(I,J,K))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
             ENDDO
          ENDDO
       ENDDO
-   ENDDO
-ENDIF
+   ENDIF
 
-! Add contribution of reactions
- 
-IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Add contribution of evaporating particles
-
-IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-   
-! Add contribution of unstructured geometry
-
-IF (N_FACE>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_GEOMETRY(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-   
-! Atmospheric stratification term
-   
-IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,PRESSURE_ZONE(I,J,K))-RTRM(I,J,K))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
+ENDIF NOT_EVACUATION_ONLY
 
 ! Compute normal component of velocity at boundaries, UWS
 
@@ -607,7 +687,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                         WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                   END SELECT
                ENDIF
-               EVAC_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6) THEN
+               EVAC_FDS6_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6) THEN
                   II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
                   IF ((ABS(ICYC)+1) > (WC%VENT_INDEX-1)*II .AND. (ABS(ICYC)+1) <= WC%VENT_INDEX*II) THEN
                      TSI = T + DT - (MAXVAL(EMESH_NFIELDS)-WC%VENT_INDEX)*II*EVAC_DT_FLOWFIELD
@@ -616,7 +696,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                      TIME_RAMP_FACTOR = 0.0_EB
                   END IF
                   WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
-               END IF EVAC_IF
+               END IF EVAC_FDS6_IF
             ENDIF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
             II = WC%ONE_D%II
@@ -660,7 +740,9 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
    PSUM(IPZ,NM) = 0._EB
    ZONE_VOLUME  = 0._EB
 
-   IF (EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (.NOT.EVAC_FDS6 .AND. EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (EVACUATION_ONLY(NM)) RTRM=1._EB
 
    DO K=1,KBAR
       DO J=1,JBAR
@@ -694,6 +776,7 @@ SUBROUTINE DIVERGENCE_PART_2(NM)
 ! Finish computing the divergence of the flow, D, and then compute its time derivative, DDDT
 
 USE COMP_FUNCTIONS, ONLY: SECOND
+USE EVAC, ONLY: EVAC_FDS6
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
 REAL(EB) :: USUM_ADD(N_ZONE)
@@ -731,7 +814,7 @@ RTRM => WORK1
 USUM_ADD = 0._EB
 
 DO IPZ=1,N_ZONE
-   IF (EVACUATION_ONLY(NM)) CYCLE
+   IF (EVACUATION_ONLY(NM) .OR. P_ZONE(IPZ)%EVACUATION) CYCLE
    SUM_P_PSUM = PBAR_P(1,IPZ)*PSUM(IPZ,NM)
    OPEN_ZONE  = .FALSE.
    SUM_USUM = USUM(IPZ,NM)
@@ -768,7 +851,8 @@ ENDDO
 
 PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
-   IF (EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (.NOT. EVAC_FDS6 .AND. EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
 
    IF (PREDICTOR) D_PBAR_DT_P => D_PBAR_DT_S
    IF (CORRECTOR) D_PBAR_DT_P => D_PBAR_DT
@@ -979,9 +1063,10 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF,GET_SENSIBLE_ENTHALPY,&
                               GET_VISCOSITY
-USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
+USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6, N_EXITS, N_CO_EXITS, N_DOORS
 USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL
 USE MASS, ONLY: SCALAR_FACE_VALUE
+USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 
 ! Compute contributions to the divergence term
  
@@ -993,10 +1078,10 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN,RCON_DIFF
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN,RCON_DIFF,X1,Y1,X2,Y2,Z1,Z2
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ,NF,IC
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ,NF,IC,I_VENT
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(FACET_TYPE), POINTER :: FACE=>NULL()
@@ -1023,11 +1108,106 @@ END SELECT
 
 R_PBAR = 1._EB/PBAR_P
 
+RTRM => WORK1
+
+! Zero out divergence to start
+
+DP = 0._EB
+
+! Evacuation flow field calculation: Change the outflow vent pressure zone and initialize everything
+
+EVACUATION_ZONE_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6 .AND. PREDICTOR) THEN
+   ITMP = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
+   EVACUATION_NEW_FIELD: IF (MOD(ICYC-1,ITMP) == 0 .AND. ICYC < 0) THEN
+      ! New exit/door flow field calculation (new outflow-vent), do the necessary initializaions,
+      ! because same arrays are used for exits/doors at a main evacuation mesh.  Each evacuation
+      ! flow field calculation has just one exit/door, i.e., outflow vent, so the pressure zone
+      ! is defined so that the front of the door is in the pressure zone.  So, pressure zone
+      ! is also redefined for this main evacuation mesh. (New FDS 6 formalism, EVAC_FDS6=.TRUE.)
+      ! One pressure zone is defined for each main evacuation mesh.
+
+      I_VENT = 0
+      ITMP = (ABS(ICYC)+1)/ITMP
+      FIND_EXIT_LOOP: DO I=1,N_EXITS-N_CO_EXITS+N_DOORS
+         IF (.NOT.EMESH_EXITS(I)%MAINMESH==NM) CYCLE
+         IF (.NOT.EMESH_EXITS(I)%DEFINE_MESH) CYCLE
+         I_VENT = I_VENT + 1
+         IF (I_VENT==ITMP) THEN
+            X1 = EMESH_EXITS(I)%XB(1); X2 = EMESH_EXITS(I)%XB(2)
+            Y1 = EMESH_EXITS(I)%XB(3); Y2 = EMESH_EXITS(I)%XB(4)
+            Z1 = EMESH_EXITS(I)%XB(5); Z2 = EMESH_EXITS(I)%XB(6)
+            SELECT CASE (EMESH_EXITS(I)%IOR)
+            CASE(+1)
+               X1 = EMESH_EXITS(I)%XB(1) - MESHES(EMESH_EXITS(I)%MAINMESH)%DXI
+            CASE(-1)
+               X2 = EMESH_EXITS(I)%XB(2) + MESHES(EMESH_EXITS(I)%MAINMESH)%DXI
+            CASE(+2)
+               Y1 = EMESH_EXITS(I)%XB(3) - MESHES(EMESH_EXITS(I)%MAINMESH)%DETA
+            CASE(-2)
+               Y2 = EMESH_EXITS(I)%XB(4) + MESHES(EMESH_EXITS(I)%MAINMESH)%DETA
+            END SELECT
+            EXIT FIND_EXIT_LOOP
+         END IF
+      END DO FIND_EXIT_LOOP
+      N = 0
+      DO I = 1,N_ZONE
+         IF (.NOT.(P_ZONE(I)%EVACUATION)) CYCLE
+         IF (P_ZONE(I)%MESH_INDEX==NM) THEN
+            N = I ! The ordinar number of the pressure zone of this main evacuation mesh
+            EXIT
+         END IF
+      END DO
+      IF (N==0) THEN 
+         WRITE(LU_ERR,'(A,A)') 'ERROR FDS+Evac: Zone error, no pressure zone found for mesh ',TRIM(MESH_NAME(NM))
+      END IF
+
+      U=0._EB; V=0._EB; W=0._EB; US=0._EB; VS=0._EB; WS=0._EB; FVX=0._EB; FVY=0._EB; FVZ=0._EB
+      H=0._EB; HS=0._EB; KRES=0._EB; DDDT=0._EB; D=0._EB; DS=0._EB
+      P_0=P_INF; TMP_0=TMPA
+      PBAR=P_INF; PBAR_S=P_INF; R_PBAR=0._EB; D_PBAR_DT=0._EB; D_PBAR_DT_S=0._EB
+      RHO=RHO_0(1); RHOS=RHO_0(1); TMP=TMPA
+      FRHO= 0._EB; 
+      USUM(:,NM) = 0.0_EB ; DSUM(:,NM) = 0.0_EB; PSUM(:,NM) = 0.0_EB
+      PRESSURE_ZONE = 0
+
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               IF (PRESSURE_ZONE(I,J,K)==N) CYCLE
+               IF (XC(I) - X1 >=0._EB .AND. XC(I) < X2 .AND. &
+                    YC(J) - Y1 >=0._EB .AND. YC(J) < Y2 .AND. &
+                    ZC(K) - Z1 >=0._EB .AND. ZC(K) < Z2) THEN 
+                  PRESSURE_ZONE(I,J,K) = N
+                  IF (.NOT.SOLID(CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,XC(I),YC(J),ZC(K),N)
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         WC%PRESSURE_ZONE = 0
+         WC%ONE_D%UW = 0._EB
+         WC%U_TAU = 0._EB
+         WC%RHO_F = RHO_0(1)
+         WC%Y_PLUS = 1._EB
+         WC%RHODW = 0.1_EB ! Do not initialize to zero to avoid divide by zero in the first time step
+         II  = WC%ONE_D%II
+         JJ  = WC%ONE_D%JJ
+         KK  = WC%ONE_D%KK
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IF (KK==1) WC%PRESSURE_ZONE = PRESSURE_ZONE(IIG,JJG,KKG)
+      END DO
+   END IF EVACUATION_NEW_FIELD
+END IF EVACUATION_ZONE_IF
+
 ! Determine if pressure ZONEs have merged
 
 CONNECTED_ZONES(:,:,NM) = .FALSE.
 
-NOT_EVAC_ONLY_1: IF (.NOT. EVACUATION_ONLY(NM)) THEN
+NOT_EVACUATION_ONLY: IF (.NOT. EVACUATION_ONLY(NM)) THEN
 
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
@@ -1070,47 +1250,37 @@ NOT_EVAC_ONLY_1: IF (.NOT. EVACUATION_ONLY(NM)) THEN
       END SELECT
    ENDIF
 
-ENDIF NOT_EVAC_ONLY_1
+   IF (N_TRACKED_SPECIES > 0) DEL_RHO_D_DEL_Z = 0._EB
 
-! Zero out divergence to start
+   ! If RESEARCH_MODE, account for molecular and turbulent transport
 
-DP = 0._EB
-
-IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DEL_RHO_D_DEL_Z = 0._EB
-ENDIF
-
-! If RESEARCH_MODE, account for molecular and turbulent transport
-
-IF (RESEARCH_MODE) THEN
-   MU_DNS => WORK8
-   MU_DNS = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_VISCOSITY(ZZ_GET,MU_DNS(I,J,K),TMP(I,J,K))
+   IF (RESEARCH_MODE) THEN
+      MU_DNS => WORK8
+      MU_DNS = 0._EB
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_VISCOSITY(ZZ_GET,MU_DNS(I,J,K),TMP(I,J,K))
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-ENDIF
+   ENDIF
 
-! Add species diffusion terms to divergence expression and compute diffusion term for species equations
+   ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
  
-IF (N_TRACKED_SPECIES > 0) THEN
-   RHO_D => WORK4
-   IF (LES) THEN
-      IF (.NOT.RESEARCH_MODE) THEN
-         RHO_D = MU*RSC
-      ELSE
-         RHO_D_TURB => WORK5
-         RHO_D_TURB = MAX(0._EB,(MU-MU_DNS))*RSC
+   IF (N_TRACKED_SPECIES > 0) THEN
+      RHO_D => WORK4
+      IF (LES) THEN
+         IF (.NOT.RESEARCH_MODE) THEN
+            RHO_D = MU*RSC
+         ELSE
+            RHO_D_TURB => WORK5
+            RHO_D_TURB = MAX(0._EB,(MU-MU_DNS))*RSC
+         ENDIF
       ENDIF
    ENDIF
-ENDIF
-
-NOT_EVAC_ONLY_2: IF (.NOT. EVACUATION_ONLY(NM)) THEN
 
    SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
@@ -1265,13 +1435,10 @@ NOT_EVAC_ONLY_2: IF (.NOT. EVACUATION_ONLY(NM)) THEN
 
    ENDDO SPECIES_LOOP
 
-ENDIF NOT_EVAC_ONLY_2
+   ! Get the specific heat
 
-! Get the specific heat
+   CP => WORK5
 
-CP => WORK5
-
-IF (.NOT.EVACUATION_ONLY(NM)) THEN
    IF (N_TRACKED_SPECIES>0) THEN
       DO K=1,KBAR
          DO J=1,JBAR
@@ -1293,213 +1460,204 @@ IF (.NOT.EVACUATION_ONLY(NM)) THEN
          ENDDO
       ENDDO
    ENDIF
-ENDIF
 
-! Compute del dot k del T
+   ! Compute del dot k del T
  
-KDTDX => WORK1
-KDTDY => WORK2
-KDTDZ => WORK3
-KP    => WORK4
+   KDTDX => WORK1
+   KDTDY => WORK2
+   KDTDZ => WORK3
+   KP    => WORK4
    
-! Compute thermal conductivity k (KP)
+   ! Compute thermal conductivity k (KP)
  
-K_DNS_OR_LES: IF (DNS .OR. RESEARCH_MODE) THEN
+   K_DNS_OR_LES: IF (DNS .OR. RESEARCH_MODE) THEN
 
-   KP = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
+      KP = 0._EB
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
+            ENDDO
+         ENDDO
+      ENDDO
+      
+      IF (RESEARCH_MODE) THEN
+         KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
+      ENDIF
+      
+      BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         II  = WC%ONE_D%II
+         JJ  = WC%ONE_D%JJ
+         KK  = WC%ONE_D%KK
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         KP(II,JJ,KK) = KP(IIG,JJG,KKG)
+      ENDDO BOUNDARY_LOOP
+      
+   ELSE K_DNS_OR_LES
+   
+      KP = MU*CPOPR
+      
+   ENDIF K_DNS_OR_LES
+
+   ! Compute k*dT/dx, etc
+
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
+            DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+            KDTDY(I,J,K) = .5_EB*(KP(I,J+1,K)+KP(I,J,K))*DTDY
+            DTDZ = (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            KDTDZ(I,J,K) = .5_EB*(KP(I,J,K+1)+KP(I,J,K))*DTDZ
          ENDDO
       ENDDO
    ENDDO
 
-   IF (RESEARCH_MODE) THEN
-      KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
-   ENDIF
-   
-   BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
+   ! Correct thermal gradient (k dT/dn) at boundaries
+
+   CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP
       II  = WC%ONE_D%II
       JJ  = WC%ONE_D%JJ
       KK  = WC%ONE_D%KK
       IIG = WC%ONE_D%IIG
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
-      KP(II,JJ,KK) = KP(IIG,JJG,KKG)
-   ENDDO BOUNDARY_LOOP
-   
-ELSE K_DNS_OR_LES
-   
-   KP = MU*CPOPR
-      
-ENDIF K_DNS_OR_LES
+      IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+         WC%KW = 0.5_EB*(KP(IIG,JJG,KKG)+KP(II,JJ,KK))
+         CYCLE CORRECTION_LOOP
+      ELSE
+         WC%KW = KP(IIG,JJG,KKG)
+      ENDIF
+      IOR = WC%ONE_D%IOR
+      SELECT CASE(IOR)
+      CASE( 1)
+         KDTDX(II,JJ,KK)   = 0._EB
+      CASE(-1)
+         KDTDX(II-1,JJ,KK) = 0._EB
+      CASE( 2)
+         KDTDY(II,JJ,KK)   = 0._EB
+      CASE(-2)
+         KDTDY(II,JJ-1,KK) = 0._EB
+      CASE( 3)
+         KDTDZ(II,JJ,KK)   = 0._EB
+      CASE(-3)
+         KDTDZ(II,JJ,KK-1) = 0._EB
+      END SELECT
+      DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
+   ENDDO CORRECTION_LOOP
 
-! Compute k*dT/dx, etc
+   ! Store KW for unstructured geometry
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
-         KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
-         DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
-         KDTDY(I,J,K) = .5_EB*(KP(I,J+1,K)+KP(I,J,K))*DTDY
-         DTDZ = (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
-         KDTDZ(I,J,K) = .5_EB*(KP(I,J,K+1)+KP(I,J,K))*DTDZ
-      ENDDO
+   DO NF=1,N_FACE
+      FACE=>FACET(NF)
+      CL=>FACE%CUTCELL_LIST
+      FACE%KW=0._EB
+      CUTCELL_LOOP_2: DO
+         IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
+         IC = CL%INDEX
+         IIG = I_CUTCELL(IC)
+         JJG = J_CUTCELL(IC)
+         KKG = K_CUTCELL(IC)
+         FACE%KW  = FACE%KW + CL%AREA*KP(IIG,KKG,JJG)
+         CL=>CL%NEXT ! point to the next index in the linked list
+      ENDDO CUTCELL_LOOP_2
    ENDDO
-ENDDO
-
-! Correct thermal gradient (k dT/dn) at boundaries
-
-CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   IF (EVACUATION_ONLY(NM)) CYCLE CORRECTION_LOOP
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
-      WC%KW = 0.5_EB*(KP(IIG,JJG,KKG)+KP(II,JJ,KK))
-      CYCLE CORRECTION_LOOP
-   ELSE
-      WC%KW = KP(IIG,JJG,KKG)
-   ENDIF
-   IOR = WC%ONE_D%IOR
-   SELECT CASE(IOR)
-   CASE( 1)
-      KDTDX(II,JJ,KK)   = 0._EB
-   CASE(-1)
-      KDTDX(II-1,JJ,KK) = 0._EB
-   CASE( 2)
-      KDTDY(II,JJ,KK)   = 0._EB
-   CASE(-2)
-      KDTDY(II,JJ-1,KK) = 0._EB
-   CASE( 3)
-      KDTDZ(II,JJ,KK)   = 0._EB
-   CASE(-3)
-      KDTDZ(II,JJ,KK-1) = 0._EB
-   END SELECT
-   DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
-ENDDO CORRECTION_LOOP
-
-! Store KW for unstructured geometry
-
-DO NF=1,N_FACE
-   FACE=>FACET(NF)
-   CL=>FACE%CUTCELL_LIST
-   FACE%KW=0._EB
-   CUTCELL_LOOP_2: DO
-      IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
-      IC = CL%INDEX
-      IIG = I_CUTCELL(IC)
-      JJG = J_CUTCELL(IC)
-      KKG = K_CUTCELL(IC)
-      FACE%KW  = FACE%KW + CL%AREA*KP(IIG,KKG,JJG)
-      CL=>CL%NEXT ! point to the next index in the linked list
-   ENDDO CUTCELL_LOOP_2
-ENDDO
-
-! Compute (q + del dot k del T) and add to the divergence
-
-CYLINDER3: SELECT CASE(CYLINDRICAL)
-CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
-   IF (.NOT.EVACUATION_ONLY(NM)) THEN
+   
+   ! Compute (q + del dot k del T) and add to the divergence
+   
+   CYLINDER3: SELECT CASE(CYLINDRICAL)
+   CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                          (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                          (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
+                    (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
+                    (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
                DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
             ENDDO
          ENDDO
       ENDDO
-   END IF
-CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
+   CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DELKDELT = & 
+                    (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                    (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
+               DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   END SELECT CYLINDER3
+
+   ! New form of divergence expression starts here
+
+   RHO_H_S_P=>WORK1
+   IF (N_TRACKED_SPECIES > 0) THEN
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+               RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
+            ENDDO
+         ENDDO
+      ENDDO
+   ELSE
+      ZZ_GET = 0._EB
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+               RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+   
+   IF (PREDICTOR) THEN
+      UU=>U
+      VV=>V
+      WW=>W
+   ELSE
+      UU=>US
+      VV=>VS
+      WW=>WS
+   ENDIF
+   
+   CALL ENTHALPY_ADVECTION ! computes U_DOT_DEL_RHO_H_S (contained below)
+   
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            DELKDELT = & 
-                 (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                      (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            DP(I,J,K) = DP(I,J,K) - U_DOT_DEL_RHO_H_S(I,J,K)
          ENDDO
       ENDDO
    ENDDO
-END SELECT CYLINDER3
 
-! New form of divergence expression starts here
-
-EVACUATION_IF: IF (.NOT.EVACUATION_ONLY(NM)) THEN
-RHO_H_S_P=>WORK1
-IF (N_TRACKED_SPECIES > 0) THEN
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
-         ENDDO
-      ENDDO
-   ENDDO
-ELSE
-   ZZ_GET = 0._EB
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-IF (PREDICTOR) THEN
-   UU=>U
-   VV=>V
-   WW=>W
-ELSE
-   UU=>US
-   VV=>VS
-   WW=>WS
-ENDIF
-
-CALL ENTHALPY_ADVECTION ! computes U_DOT_DEL_RHO_H_S (contained below)
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DP(I,J,K) = DP(I,J,K) - U_DOT_DEL_RHO_H_S(I,J,K)
-      ENDDO
-   ENDDO 
-ENDDO
-
-! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
+   ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
  
-RTRM => WORK1
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
-         DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
+            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+         ENDDO
       ENDDO
-   ENDDO 
-ENDDO
-ENDIF EVACUATION_IF
+   ENDDO
+   
+   ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
 
-! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
-
-IF ( .NOT.EVACUATION_ONLY(NM) ) THEN
    CALL DENSITY_ADVECTION ! compute mass flux for density equation
    SM0 => SPECIES_MIXTURE(0)
    DO K=1,KBAR
@@ -1530,56 +1688,57 @@ IF ( .NOT.EVACUATION_ONLY(NM) ) THEN
          ENDDO
       ENDDO
    ENDDO
-ENDIF
 
-! Add contribution of reactions
+   ! Add contribution of reactions
  
-IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
+   IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-ENDIF
+   ENDIF
 
-! Add contribution of evaporating particles
+   ! Add contribution of evaporating particles
 
-IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+   IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-ENDIF
+   ENDIF
    
-! Add contribution of unstructured geometry
+   ! Add contribution of unstructured geometry
 
-IF (N_FACE>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_GEOMETRY(I,J,K)
+   IF (N_FACE>0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_GEOMETRY(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-ENDIF
+   ENDIF
+   
+   ! Atmospheric stratification term
 
-! Atmospheric stratification term
-
-IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
+   IF (STRATIFICATION) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-ENDIF
+   ENDIF
+
+ENDIF NOT_EVACUATION_ONLY
 
 ! Compute normal component of velocity at boundaries, UWS
 
@@ -1668,7 +1827,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                         WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                   END SELECT
                ENDIF
-               EVAC_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6) THEN
+               EVAC_FDS6_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6) THEN
                   II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
                   IF ((ABS(ICYC)+1) > (WC%VENT_INDEX-1)*II .AND. (ABS(ICYC)+1) <= WC%VENT_INDEX*II) THEN
                      TSI = T + DT - (MAXVAL(EMESH_NFIELDS)-WC%VENT_INDEX)*II*EVAC_DT_FLOWFIELD
@@ -1677,7 +1836,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                      TIME_RAMP_FACTOR = 0.0_EB
                   END IF
                   WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
-               END IF EVAC_IF
+               END IF EVAC_FDS6_IF
             ENDIF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
             II = WC%ONE_D%II
@@ -1721,7 +1880,9 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
    PSUM(IPZ,NM) = 0._EB
    ZONE_VOLUME  = 0._EB
 
-   IF (EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (.NOT.EVAC_FDS6 .AND. EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (EVACUATION_ONLY(NM)) RTRM=1._EB
 
    DO K=1,KBAR
       DO J=1,JBAR
