@@ -318,7 +318,7 @@ L1000: DO KK=1, NOM
                      CASE('MMA')
                         CALL MMA(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
                      CASE DEFAULT
-                        CALL CH4(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                        CALL CH4_NEW(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
                   END SELECT                 
                ELSE
                   CALL CH4(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
