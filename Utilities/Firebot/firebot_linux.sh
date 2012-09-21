@@ -237,7 +237,7 @@ check_compile_fds_db()
       # Continue along
       :
    else
-      echo "Stage 2a warnings:" >> $WARNING_LOG
+      echo "Warnings from Stage 2a - Compile FDS DB:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -275,7 +275,7 @@ check_compile_fds_mpi_db()
       # Continue along
       :
    else
-      echo "Stage 2b warnings:" >> $WARNING_LOG
+      echo "Warnings from Stage 2b - Compile FDS MPI DB:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -439,7 +439,7 @@ check_compile_fds()
       # Continue along
       :
    else
-      echo "Stage 4a warnings:" >> $WARNING_LOG
+      echo "Warnings from Stage 4a - Compile FDS release:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -478,7 +478,7 @@ check_compile_fds_mpi()
       # Continue along
       :
    else
-      echo "Stage 4b warnings:" >> $WARNING_LOG
+      echo "Warnings from Stage 4b - Compile FDS MPI release:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -611,7 +611,7 @@ check_compile_smv_db()
       # Continue along
       :
    else
-      echo "Stage 6b warnings:" >> $WARNING_LOG
+      echo "Warnings from Stage 6b - Compile SMV DB:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -675,7 +675,7 @@ check_compile_smv()
       # Continue along
       :
    else
-      echo "Stage 6d warnings:" >> $WARNING_LOG
+      echo "Warnings from Stage 6d - Compile SMV release:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -797,7 +797,7 @@ check_verification_stats()
       # Continue along
       :
    else
-      echo "Stage 7 warnings:" >> $WARNING_LOG
+      echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
       echo "The following cases are outside of their specified error tolerance:" >> $WARNING_LOG
       grep ",No," FDS_verification_scatterplot_output.csv >> $WARNING_LOG
       echo "" >> $WARNING_LOG
@@ -872,6 +872,7 @@ check_guide()
       cp $2 /var/www/html/firebot/manuals/
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
+      echo $3 >> $ERROR_LOG
       grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I $1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -882,7 +883,8 @@ check_guide()
       # Continue along
       :
    else
-      echo "Stage 8 warnings:" >> $WARNING_LOG
+      echo "Warnings from Stage 8 - Build FDS-SMV Guides:" >> $WARNING_LOG
+      echo $3 >> $WARNING_LOG
       grep -E "undefined|multiply defined|multiply-defined" -I $1 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -898,7 +900,7 @@ make_fds_user_guide()
    pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_user_guide $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_user_guide $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.pdf 'FDS User Guide'
 }
 
 make_fds_technical_guide()
@@ -911,7 +913,7 @@ make_fds_technical_guide()
    pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_technical_guide $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_technical_guide $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf 'FDS Technical Reference Guide'
 }
 
 make_fds_verification_guide()
@@ -924,7 +926,7 @@ make_fds_verification_guide()
    pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_verification_guide $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_verification_guide $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf 'FDS Verification Guide'
 }
 
 make_fds_validation_guide()
@@ -937,7 +939,7 @@ make_fds_validation_guide()
    pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_validation_guide $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_validation_guide $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
 }
 
 make_fds_configuration_management_plan()
@@ -950,7 +952,7 @@ make_fds_configuration_management_plan()
    pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_fds_configuration_management_plan $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf
+   check_guide $FIREBOT_DIR/output/stage8_fds_configuration_management_plan $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf 'FDS Configuration Management Plan'
 }
 
 make_smv_user_guide()
@@ -963,7 +965,7 @@ make_smv_user_guide()
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf 'SMV User Guide'
 }
 
 make_smv_technical_guide()
@@ -976,7 +978,7 @@ make_smv_technical_guide()
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf 'SMV Technical Reference Guide'
 }
 
 make_smv_verification_guide()
@@ -989,7 +991,7 @@ make_smv_verification_guide()
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
 }
 
 #  =====================================================
