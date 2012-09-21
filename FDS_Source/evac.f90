@@ -782,14 +782,14 @@ CONTAINS
           END IF
           SELECT CASE (IOR)
           CASE (-1,+1)
-             IF ( (XB(2)-XB(1)) > 0.0_EB ) THEN
+             IF ( (XB(2)-XB(1)) >= TWO_EPSILON_EB ) THEN
                 IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' IOR=+-1 but not a vertical plane '
                    CALL SHUTDOWN(MESSAGE)
                 END IF
              END IF
           CASE (-2,+2)
-             IF ( (XB(4)-XB(3)) > 0.0_EB ) THEN
+             IF ( (XB(4)-XB(3)) >= TWO_EPSILON_EB ) THEN
                 IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' IOR=+-2 but not a vertical plane '
                    CALL SHUTDOWN(MESSAGE)
@@ -906,14 +906,14 @@ CONTAINS
           END IF
           SELECT CASE (IOR)
           CASE (-1,+1)
-             IF ( (XB(2)-XB(1)) > 0.0_EB ) THEN
+             IF ( (XB(2)-XB(1)) >= TWO_EPSILON_EB ) THEN
                 IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' IOR=+-1 but not a vertical plane '
                    CALL SHUTDOWN(MESSAGE)
                 END IF
              END IF
           CASE (-2,+2)
-             IF ( (XB(4)-XB(3)) > 0.0_EB ) THEN
+             IF ( (XB(4)-XB(3)) >= TWO_EPSILON_EB ) THEN
                 IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' IOR=+-2 but not a vertical plane '
                    CALL SHUTDOWN(MESSAGE)
@@ -975,7 +975,7 @@ CONTAINS
        ALLOCATE(Tsteps(NMESHES),STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','Tsteps',IZERO) 
        Tsteps(:) = EVAC_DT_FLOWFIELD
-       IF (ABS(TIME_SHRINK_FACTOR-1.0_EB) > 0.000000000001_EB ) CALL SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR')
+       IF (ABS(TIME_SHRINK_FACTOR-1.0_EB) >= TWO_EPSILON_EB ) CALL SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR')
     END IF
     !
     ! I_EVAC: 'binary' index:
@@ -1151,7 +1151,7 @@ CONTAINS
             END IF
             READ(LU_INPUT,NML=ENTR,END=227,ERR=228,IOSTAT=IOS)
             N_ENTRYS = N_ENTRYS + 1
-            IF (COLOR_METHOD == 0 .AND. (MAX_FLOW > 0.0_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) THEN
+            IF (COLOR_METHOD == 0 .AND. (MAX_FLOW >= TWO_EPSILON_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) THEN
                EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
             END IF
 228         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with ENTR line')
@@ -3180,14 +3180,14 @@ CONTAINS
          PCX%Width = MAX( ABS(XB(4)-XB(3)) , ABS(XB(2)-XB(1)) )
 
          PCX%Eff_Width = 0.0_EB
-         IF (EFF_WIDTH > 0.0_EB ) THEN
+         IF (EFF_WIDTH >= TWO_EPSILON_EB ) THEN
             PCX%Eff_Width = EFF_WIDTH
          ELSE
             PCX%Eff_Width = PCX%Width
          END IF
 
          PCX%Eff_Length = 0.0_EB
-         IF (EFF_LENGTH > 0.0_EB ) THEN
+         IF (EFF_LENGTH >= TWO_EPSILON_EB ) THEN
             PCX%Eff_Length = EFF_LENGTH
          ELSE
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(PCX%ID),' EFF_LENGTH <= 0'
@@ -3434,7 +3434,7 @@ CONTAINS
                   XB_STAIRS(I,4) = STRP%XB(4)
                END IF
                STRP%NODE_IOR(2*I) = +1
-               IF (STR_Length > 0._EB) XB_STAIRS(I,7) = COS(ATAN(STR_Height/STR_Length))
+               IF (STR_Length >= TWO_EPSILON_EB) XB_STAIRS(I,7) = COS(ATAN(STR_Height/STR_Length))
                XB_STAIRS(I,8) = 1._EB
             ELSE IF (XB_LANDINGS(I+1,2)<XB_LANDINGS(I,1)) THEN ! From +x to -x
                XB_STAIRS(I,1) = XB_LANDINGS(I+1,2)
@@ -3448,7 +3448,7 @@ CONTAINS
                   XB_STAIRS(I,4) = STRP%XB_CORE(J,3)
                END IF
                STRP%NODE_IOR(2*I) = -1
-               IF (STR_Length > 0._EB) XB_STAIRS(I,7) = COS(ATAN(STR_Height/STR_Length))
+               IF (STR_Length >= TWO_EPSILON_EB) XB_STAIRS(I,7) = COS(ATAN(STR_Height/STR_Length))
                XB_STAIRS(I,8) = 1._EB
             END IF
             IF (XB_LANDINGS(I+1,3)>XB_LANDINGS(I,4)) THEN ! From -y to +y
@@ -3464,7 +3464,7 @@ CONTAINS
                STR_Length = XB_STAIRS(I,4)-XB_STAIRS(I,3)
                STRP%NODE_IOR(2*I) = +2
                XB_STAIRS(I,7) = 1._EB
-               IF (STR_Length > 0._EB) XB_STAIRS(I,8) = COS(ATAN(STR_Height/STR_Length))
+               IF (STR_Length >= TWO_EPSILON_EB) XB_STAIRS(I,8) = COS(ATAN(STR_Height/STR_Length))
             ELSE IF (XB_LANDINGS(I+1,4)<XB_LANDINGS(I,3)) THEN ! From +y to -y
                IF (RIGHT_HANDED) THEN
                   XB_STAIRS(I,1) = STRP%XB(1)
@@ -3478,7 +3478,7 @@ CONTAINS
                STR_Length = XB_STAIRS(I,4)-XB_STAIRS(I,3)
                STRP%NODE_IOR(2*I) = -2
                XB_STAIRS(I,7) = 1._EB
-               IF (STR_Length > 0._EB) XB_STAIRS(I,8) = COS(ATAN(STR_Height/STR_Length))
+               IF (STR_Length >= TWO_EPSILON_EB) XB_STAIRS(I,8) = COS(ATAN(STR_Height/STR_Length))
             END IF
          END DO
 
@@ -3685,7 +3685,7 @@ CONTAINS
          IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
          IF (ANY(AVATAR_RGB < 0) .AND. AVATAR_COLOR=='null') AVATAR_COLOR = 'ROYAL BLUE 4'
          IF (AVATAR_COLOR /= 'null') CALL COLOR2RGB(AVATAR_RGB,AVATAR_COLOR)
-         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW > 0.0_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) THEN
+         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW >= TWO_EPSILON_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) THEN
             i_avatar_color = i_avatar_color + 1
             EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
          END IF
@@ -3693,7 +3693,7 @@ CONTAINS
          TMP_AVATAR_TYPE_INDEX(N) = 0       ! Defaults for entries that do not generate new agents
          TMP_AVATAR_TYPE_NAME(N)  = 'null'
          TMP_AVATAR_TYPE_PROP(N)  = TRIM(PROP_ID)
-         IF (MAX_FLOW > 0.0_EB .OR. TRIM(MAX_HUMANS_RAMP)/='null') THEN
+         IF (MAX_FLOW >= TWO_EPSILON_EB .OR. TRIM(MAX_HUMANS_RAMP)/='null') THEN
             IF (TRIM(AVATAR_TYPE) == 'null' .OR. TRIM(AVATAR_TYPE) == 'Human') THEN
                TMP_AVATAR_TYPE_INDEX(N) = 1
                TMP_AVATAR_TYPE_NAME(N) = TRIM('Human')
@@ -3743,7 +3743,7 @@ CONTAINS
                END IF
             END DO
          END IF
-         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW > 0.0_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) &
+         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW >= TWO_EPSILON_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) &
               PNX%Avatar_Color_Index = i_avatar_color
 
          IF (EVAC_MESH /= 'null') THEN
@@ -6646,10 +6646,10 @@ CONTAINS
              I_TMP2 = -1
           END IF
           IF (N_CHANGE_DOORS/MAX(1,M%N_HUMANS) > 10*M%N_HUMANS) I_TMP2 = I_TMP
-          IF (ABS(FAC_DOOR_QUEUE) <= 0.001_EB) I_CHANGE_OLD = N_CHANGE_DOORS  ! DO NOT ITERATE THE NASH EQUILIBRIUM
+          IF (ABS(FAC_DOOR_QUEUE) < TWO_EPSILON_EB) I_CHANGE_OLD = N_CHANGE_DOORS  ! DO NOT ITERATE THE NASH EQUILIBRIUM
           I_MODE = 1  ! change_target_door initializations have now been done
        END DO         ! Nash iterations
-       IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) WRITE(LU_EVACOUT,FMT='(A,F14.2,A,I8)') &
+       IF (ABS(FAC_DOOR_QUEUE) >= TWO_EPSILON_EB) WRITE(LU_EVACOUT,FMT='(A,F14.2,A,I8)') &
             ' INIT: Changes per agent ', REAL(N_CHANGE_DOORS,EB)/REAL(M%N_HUMANS,EB), &
             ', Nash iterations', N_CHANGE_TRIALS/M%N_HUMANS
        TUSED(12,NOM)=TUSED(12,NOM)+SECOND()-TNOW
@@ -7597,7 +7597,7 @@ CONTAINS
        ! ========================================================
        ! Change target door?
        ! ========================================================
-       IF (T > 0.0_EB .AND. .NOT.NM_STRS_MESH) THEN
+       IF (T >= TWO_EPSILON_EB .AND. .NOT.NM_STRS_MESH) THEN
           CHANGE_DOOR_LOOP: DO I = 1, N_HUMANS
              HR => HUMAN(I)
 
@@ -8258,18 +8258,18 @@ CONTAINS
              FAC_V0_UP   = ESS%FAC_V0_UP
              FAC_V0_DOWN = ESS%FAC_V0_DOWN
              FAC_V0_HORI = ESS%FAC_V0_HORI
-             IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_HORI > 0.0_EB) THEN
+             IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_HORI >= TWO_EPSILON_EB) THEN
                 FAC_V0_HORI = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
              END IF
-             IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP > 0.0_EB) THEN
-                IF ((ESS%H - ESS%H0) < 0.0_EB) THEN
+             IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP >= TWO_EPSILON_EB) THEN
+                IF ((ESS%H - ESS%H0) <= -TWO_EPSILON_EB) THEN
                    FAC_V0_DOWN = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
                 ELSE
                    FAC_V0_UP = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
                 END IF
              END IF
-             IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN > 0.0_EB) THEN
-                IF ((ESS%H - ESS%H0) < 0.0_EB) THEN
+             IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN >= TWO_EPSILON_EB) THEN
+                IF ((ESS%H - ESS%H0) <= -TWO_EPSILON_EB) THEN
                    FAC_V0_UP = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN 
                 ELSE
                    FAC_V0_DOWN = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN 
@@ -8392,7 +8392,7 @@ CONTAINS
           ! check, if a new random force is needed on next time step.
           ! Poisson distribution, i.e., the agents do not have memory.
           ! P[NO CHANGE DURING DT] = EXP(-DTSP/HR%TAU)
-          IF (GATH > 0.0_EB .AND. T > T_BEGIN) THEN
+          IF (GATH >= TWO_EPSILON_EB .AND. T > T_BEGIN) THEN
              CALL RANDOM_NUMBER(RN_REAL)
              RN = REAL(RN_REAL,EB)
              IF (RN > EXP(-DTSP/(0.2_EB*HR_TAU))) HR%NEWRND = .TRUE.
@@ -8416,7 +8416,7 @@ CONTAINS
           END IF
 
           ! Add random force term
-          IF (GATH > 0.0_EB .AND. T > T_BEGIN) THEN
+          IF (GATH >= TWO_EPSILON_EB .AND. T > T_BEGIN) THEN
              U_NEW = U_NEW + 0.5_EB*DTSP*HR%V0_FAC*HR%MASS*HR%KSI*COS(HR%ETA)/HR%MASS
              V_NEW = V_NEW + 0.5_EB*DTSP*HR%V0_FAC*HR%MASS*HR%KSI*SIN(HR%ETA)/HR%MASS
              OMEGA_NEW = OMEGA_NEW + 0.5_EB*DTSP* 1.0_EB*SIGN(HR%KSI,HR%ETA-PI)
@@ -8503,7 +8503,7 @@ CONTAINS
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
                    CALL GET_IW(IIN,JJN,KK,-1,TIM_IW)
                    SURF_INDEX =WALL(TIM_IW)%SURF_INDEX
-                   IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+                   IF (SURFACE(SURF_INDEX)%VEL >= TWO_EPSILON_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
                       HR%X = X1 
                       HR%Y = HR%Y
                       Y1 = HR%Y
@@ -8512,7 +8512,7 @@ CONTAINS
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
                    CALL GET_IW(IIN,JJN,KK,+1,TIM_IW)
                    SURF_INDEX = WALL(TIM_IW)%SURF_INDEX
-                   IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+                   IF (SURFACE(SURF_INDEX)%VEL >= TWO_EPSILON_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
                       HR%X = X1 
                       HR%Y = HR%Y
                       Y1 = HR%Y
@@ -8524,7 +8524,7 @@ CONTAINS
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
                    CALL GET_IW(IIN,JJN,KK,-2,TIM_IW)
                    SURF_INDEX = WALL(TIM_IW)%SURF_INDEX
-                   IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+                   IF (SURFACE(SURF_INDEX)%VEL > TWO_EPSILON_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
                       HR%X = HR%X
                       X1 = HR%X
                       HR%Y = Y1
@@ -8533,7 +8533,7 @@ CONTAINS
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
                    CALL GET_IW(IIN,JJN,KK,+2,TIM_IW)
                    SURF_INDEX = WALL(TIM_IW)%SURF_INDEX
-                   IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+                   IF (SURFACE(SURF_INDEX)%VEL > TWO_EPSILON_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
                       HR%X = HR%X
                       X1 = HR%X
                       HR%Y = Y1 
@@ -8887,7 +8887,7 @@ CONTAINS
           ! Collision avoidance (incl. counterflow)
           ! Do not do collision avoidance on every time step, do it every 0.1 s on the average by default.
           ! No need for collision avoidance if the target velocity is zero.
-          IF (TAU_CHANGE_V0 > 1.0E-12_EB .AND. EVEL > 0.0_EB) THEN
+          IF (TAU_CHANGE_V0 >= TWO_EPSILON_EB .AND. EVEL >= TWO_EPSILON_EB) THEN
              CALL RANDOM_NUMBER(RN_REAL)
              RNCF = REAL(RN_REAL,EB)
           ELSE
@@ -8930,7 +8930,7 @@ CONTAINS
                    N_queue = EVAC_EXITS(I_TMP)%NTARGET(ii)
                    Width = EVAC_EXITS(I_TMP)%Width
                 END IF
-                IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) THEN
+                IF (ABS(FAC_DOOR_QUEUE) >= TWO_EPSILON_EB) THEN
                    ! Queueing time is included
                    T_tmp  = SQRT((x_o-X1)**2 + (y_o-Y1)**2)
                    T_tmp1 = REAL(N_queue,EB)/(ABS(FAC_DOOR_QUEUE)*Width)
@@ -9012,18 +9012,18 @@ CONTAINS
                 FAC_V0_UP   = ESS%FAC_V0_UP
                 FAC_V0_DOWN = ESS%FAC_V0_DOWN
                 FAC_V0_HORI = ESS%FAC_V0_HORI
-                IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_HORI > 0.0_EB) THEN
+                IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_HORI >= TWO_EPSILON_EB) THEN
                    FAC_V0_HORI = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
                 END IF
-                IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP > 0.0_EB) THEN
-                   IF ((ESS%H - ESS%H0) < 0.0_EB) THEN
+                IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP >= TWO_EPSILON_EB) THEN
+                   IF ((ESS%H - ESS%H0) <= -TWO_EPSILON_EB) THEN
                       FAC_V0_DOWN = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
                    ELSE
                       FAC_V0_UP = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
                    END IF
                 END IF
-                IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN > 0.0_EB) THEN
-                   IF ((ESS%H - ESS%H0) < 0.0_EB) THEN
+                IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN >= TWO_EPSILON_EB) THEN
+                   IF ((ESS%H - ESS%H0) <= -TWO_EPSILON_EB) THEN
                       FAC_V0_UP = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN 
                    ELSE
                       FAC_V0_DOWN = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN 
@@ -9144,7 +9144,7 @@ CONTAINS
              IF (P2P_DIST < (MIN(MAX(P2P_DIST_MAX,P2P_SUUNTA_MAX),1.5_EB)+HR%RADIUS+HRE%RADIUS)**2) THEN
                 I_COUNT_DENSITY = I_COUNT_DENSITY + 1
                 EVEL = SQRT(HR%UBAR**2 + HR%VBAR**2)
-                IF (EVEL > 0.0_EB) THEN
+                IF (EVEL >= TWO_EPSILON_EB) THEN
                    EVEL = MAX(0.001_EB,SQRT(HR%UBAR**2 + HR%VBAR**2))
                    IF (HR%VBAR >= 0.0_EB) THEN
                       ANGLE_HR = ACOS(HR%UBAR/EVEL)
@@ -9157,7 +9157,7 @@ CONTAINS
                 END IF
                 
                 D_NEW = SQRT((HRE%X-HR%X)**2 + (HRE%Y-HR%Y)**2)
-                IF ((HRE%Y-HR%Y) >= 0.0_EB) THEN
+                IF ((HRE%Y-HR%Y) >= TWO_EPSILON_EB) THEN
                    ANGLE_HRE = ACOS((HRE%X-HR%X)/D_NEW)
                 ELSE
                    ANGLE_HRE = 2.0_EB*PI - ACOS((HRE%X-HR%X)/D_NEW)
@@ -9225,7 +9225,7 @@ CONTAINS
                          ! (UBAR,VBAR) are unit vectors
                          IF (P2P_DIST < TIM_DIST) N_SUUNTA(III) = N_SUUNTA(III) + 1
                          IF (P2P_DIST < TIM_DIST .AND. VR_2R <= -0.2_EB) N_SUUNTACF(III) = N_SUUNTACF(III) + 1
-                         IF (VR_2R > 0.0_EB) THEN ! Same direction
+                         IF (VR_2R >= TWO_EPSILON_EB) THEN ! Same direction
                             V_HRE = HRE%U*UBAR + HRE%V*VBAR  ! HRE speed along the v0 direction
                             V_HR  = MAX(0.0_EB,HR%U*UBAR + HR%V*VBAR)  ! HR speed along the v0 direction
                             V_HRE = CONST_DF + FAC_DF*(MIN(HR%V0_FAC*HR_SPEED,V_HRE) - &
@@ -9257,7 +9257,7 @@ CONTAINS
              ! ========================================================
              ! Angle dependent social force:
              ! ========================================================
-             IF ( (HR%U**2 +HR%V**2) > 0.0_EB ) THEN
+             IF ( (HR%U**2 +HR%V**2) >= TWO_EPSILON_EB ) THEN
                 COSPHIFAC = ( (HRE%X-X1)*HR%U + (HRE%Y-Y1)*HR%V ) &
                      / ( SQRT((HRE%X-X1)**2 + (HRE%Y-Y1)**2)*SQRT(HR%U**2 +HR%V**2) )
                 COSPHIFAC = HR%LAMBDA + 0.5_EB*(1.0_EB-HR%LAMBDA)*(1.0_EB+COSPHIFAC)
@@ -9289,9 +9289,9 @@ CONTAINS
                       TIM_DIST = MAX(0.001_EB,SQRT((X_TMP(III)-X_TMP(JJJ))**2 + (Y_TMP(III)-Y_TMP(JJJ))**2))
                       ! Next is |vector1|*|vector2|
                       EVEL = SQRT((X_TMP(JJJ)-X_TMP(III))**2+(Y_TMP(JJJ)-Y_TMP(III))**2)* SQRT(U_TMP(III)**2+V_TMP(III)**2)
-                      IF (EVEL > 0.0_EB) EVEL = ((X_TMP(JJJ)-X_TMP(III))*U_TMP(III) + &
+                      IF (EVEL >= TWO_EPSILON_EB) EVEL = ((X_TMP(JJJ)-X_TMP(III))*U_TMP(III) + &
                            (Y_TMP(JJJ)-Y_TMP(III))*V_TMP(III)) / EVEL   ! COS THETA (SCAL_PROD/(LENGHT1*LENGTH2)
-                      IF (EVEL > 0.01_EB) THEN
+                      IF (EVEL >= TWO_EPSILON_EB) THEN
                          D_HUMANS = MIN( (TIM_DIST-(R_TMP(III)+R_TMP(JJJ))) /EVEL, D_HUMANS)
                       ELSE
                          D_HUMANS = MIN( (TIM_DIST-(R_TMP(III)+R_TMP(JJJ))) /0.01_EB , D_HUMANS)
@@ -9376,9 +9376,9 @@ CONTAINS
                       TIM_DIST = SQRT((X_TMP(III)-X_TMP(JJJ))**2 + (Y_TMP(III)-Y_TMP(JJJ))**2)
                       ! Next is |vector1|*|vector2|
                       EVEL = SQRT((X_TMP(JJJ)-X_TMP(III))**2+(Y_TMP(JJJ)-Y_TMP(III))**2)* SQRT(U_TMP(III)**2+V_TMP(III)**2)
-                      IF (EVEL > 0.0_EB) EVEL = ((X_TMP(JJJ)-X_TMP(III))*U_TMP(III) + &
+                      IF (EVEL >= TWO_EPSILON_EB) EVEL = ((X_TMP(JJJ)-X_TMP(III))*U_TMP(III) + &
                            (Y_TMP(JJJ)-Y_TMP(III))*V_TMP(III)) / EVEL   ! COS THETA (SCAL_PROD/(LENGHT1*LENGTH2)
-                      IF (EVEL > 0.01_EB) THEN
+                      IF (EVEL >= TWO_EPSILON_EB) THEN
                          D_HUMANS = MIN( (TIM_DIST-(R_TMP(III)+R_TMP(JJJ))) /EVEL, D_HUMANS)
                       ELSE
                          D_HUMANS = MIN( (TIM_DIST-(R_TMP(III)+R_TMP(JJJ))) /0.01_EB , D_HUMANS)
@@ -9518,7 +9518,7 @@ CONTAINS
              DO III = 1, N_SECTORS
                 ! Avoid walls, do not take a direction where there is a wall closer than
                 ! D_PERP = 0.6 m (perpendicular).
-                IF (ABS(SIN_THETA(III)) > 0.0001_EB) THEN
+                IF (ABS(SIN_THETA(III)) >= TWO_EPSILON_EB) THEN
                    X11 = HR%X + U_THETA(III)*MIN(P2P_SUUNTA_MAX, 0.6_EB/ABS(SIN_THETA(III)))
                    Y11 = HR%Y + V_THETA(III)*MIN(P2P_SUUNTA_MAX, 0.6_EB/ABS(SIN_THETA(III)))
                 ELSE ! Straight ahead
@@ -9620,7 +9620,7 @@ CONTAINS
           ELSE ! CHANGE_V0_RNCF2
              ! Do not change direction during this time step, use the previous direction
              EVEL = UBAR**2 + VBAR**2
-             IF (TAU_CHANGE_V0 > 1.0E-12_EB .AND. EVEL > 0.0_EB) THEN
+             IF (TAU_CHANGE_V0 > 1.0E-12_EB .AND. EVEL >= TWO_EPSILON_EB) THEN
                 UBAR = HR%UBAR
                 VBAR = HR%VBAR
                 ANGLE_OLD = HR%ANGLE_OLD
@@ -9912,7 +9912,7 @@ CONTAINS
           OMEGA_NEW = HR%OMEGA + 0.5_EB*DTSP*HR%TORQUE/HR%M_INER
 
           ! Add the effect of the random force
-          IF (GATH > 0.0_EB .AND. T > T_BEGIN ) THEN
+          IF (GATH >= TWO_EPSILON_EB .AND. T > T_BEGIN ) THEN
              U_NEW = U_NEW + 0.5_EB*DTSP*HR%V0_FAC*HR%MASS*HR%KSI*COS(HR%ETA)/HR%MASS
              V_NEW = V_NEW + 0.5_EB*DTSP*HR%V0_FAC*HR%MASS*HR%KSI*SIN(HR%ETA)/HR%MASS
              P2P_U = P2P_U + HR%V0_FAC*HR%MASS*HR%KSI*COS(HR%ETA)
@@ -9931,7 +9931,7 @@ CONTAINS
              HR_TAU = MAX(CF_MIN_TAU, 0.1_EB*HR%TAU)
              IF ( (T+DTSP_NEW) > TPRE) THEN
                 EVEL = SQRT(UBAR**2 + VBAR**2)
-                IF (EVEL > 0.0_EB) THEN
+                IF (EVEL >= TWO_EPSILON_EB) THEN
                    SPEED = SPEED_YP*(0.5_EB + SIGN(0.5_EB,VBAR)) + SPEED_YM*(0.5_EB - SIGN(0.5_EB,VBAR)) 
                    SPEED = SPEED*HR%V0_FAC
                    TAU_FAC = (SPEED*(VBAR/EVEL))**2
@@ -9950,7 +9950,7 @@ CONTAINS
           END IF
 
           EVEL = SQRT(UBAR**2 + VBAR**2)
-          IF (T > TPRE .AND. EVEL > 0.0001_EB) THEN
+          IF (T > TPRE .AND. EVEL >= TWO_EPSILON_EB) THEN
              SPEED = SPEED_YP*(0.5_EB + SIGN(0.5_EB,VBAR)) + SPEED_YM*(0.5_EB - SIGN(0.5_EB,VBAR)) 
              SPEED = SPEED*HR%V0_FAC
              TAU_FAC = (SPEED*(VBAR/EVEL))**2
@@ -9964,7 +9964,7 @@ CONTAINS
 
           ! Add self-propelling force terms, self-consistent VV
           EVEL = SQRT(UBAR**2 + VBAR**2)
-          IF (EVEL > 0.0001_EB) THEN
+          IF (EVEL >= TWO_EPSILON_EB) THEN
              SPEED = SPEED_XP*(0.5_EB + SIGN(0.5_EB,UBAR)) + SPEED_XM*(0.5_EB - SIGN(0.5_EB,UBAR)) 
              SPEED = SPEED*HR%V0_FAC
              SPEED_X = SPEED
@@ -10733,7 +10733,7 @@ CONTAINS
                      DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + 1000.0_EB ! Penalty for floor ==> door ==> stairs doors
                   END IF
                END IF
-               IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) THEN
+               IF (ABS(FAC_DOOR_QUEUE) >= TWO_EPSILON_EB) THEN
                   DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 )
                   T_TMP1 = MIN(1.5_EB*PI*DIST_TO_DOOR_TMP**2/(ABS(FAC_DOOR_QUEUE)*WIDTH), &
                        REAL(N_QUEUE,EB)/(ABS(FAC_DOOR_QUEUE)*WIDTH))
@@ -10781,7 +10781,7 @@ CONTAINS
                   ELSE
                      DIST_TO_DOOR_TMP = 0.0_EB
                   END IF
-                  IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) THEN
+                  IF (ABS(FAC_DOOR_QUEUE) >= TWO_EPSILON_EB) THEN
                      DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 )
                      T_TMP1 = MIN(1.5_EB*PI*DIST_TO_DOOR_TMP**2/(ABS(FAC_DOOR_QUEUE)*WIDTH), &
                           REAL(N_QUEUE,EB)/(ABS(FAC_DOOR_QUEUE)*WIDTH))
@@ -10897,13 +10897,13 @@ CONTAINS
                   DOOR_IOR   = EVAC_EXITS(N)%IOR
                   DOOR_WIDTH = EVAC_EXITS(N)%WIDTH
                   IF (ABS(DOOR_IOR)==1) THEN
-                     IF (DOOR_IOR*(HR%X-X_XYZ) > 0.0_EB) THEN
+                     IF (DOOR_IOR*(HR%X-X_XYZ) >= TWO_EPSILON_EB) THEN
                         UBAR = 0.0_EB ; VBAR = 0.0_EB
                         V0_IS_SET_ZERO = .TRUE.
                         Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
                      END IF
                   ELSE
-                     IF (DOOR_IOR*(HR%Y-Y_XYZ) > 0.0_EB) THEN
+                     IF (DOOR_IOR*(HR%Y-Y_XYZ) >= TWO_EPSILON_EB) THEN
                         UBAR = 0.0_EB ; VBAR = 0.0_EB
                         V0_IS_SET_ZERO = .TRUE.
                         Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
@@ -10917,13 +10917,13 @@ CONTAINS
                   DOOR_IOR   = EVAC_DOORS(N)%IOR
                   DOOR_WIDTH = EVAC_DOORS(N)%WIDTH
                   IF (ABS(DOOR_IOR)==1) THEN
-                     IF (DOOR_IOR*(HR%X-X_XYZ) > 0.0_EB) THEN
+                     IF (DOOR_IOR*(HR%X-X_XYZ) >= TWO_EPSILON_EB) THEN
                         UBAR = 0.0_EB ; VBAR = 0.0_EB
                         V0_IS_SET_ZERO = .TRUE.
                         Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
                      END IF
                   ELSE
-                     IF (DOOR_IOR*(HR%Y-Y_XYZ) > 0.0_EB) THEN
+                     IF (DOOR_IOR*(HR%Y-Y_XYZ) >= TWO_EPSILON_EB) THEN
                         UBAR = 0.0_EB ; VBAR = 0.0_EB
                         V0_IS_SET_ZERO = .TRUE.
                         Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
@@ -11003,7 +11003,7 @@ CONTAINS
 
                ! Calculate the angle (left or right) to the door relative to the v0 direction
                EVEL = SQRT(UBAR**2 + VBAR**2)
-               IF (EVEL > 0.0_EB) THEN
+               IF (EVEL >= TWO_EPSILON_EB) THEN
                   EVEL = MAX(0.001_EB,SQRT(UBAR**2 + VBAR**2))
                   IF (VBAR >= 0.0_EB) THEN
                      ANGLE_HR = ACOS(UBAR/EVEL)
@@ -11129,7 +11129,7 @@ CONTAINS
       END IF If_Strs_Mesh2
 
       EVEL = SQRT(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is an unit vector
-      IF (EVEL > 0.0_EB) THEN
+      IF (EVEL >= TWO_EPSILON_EB) THEN
          UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
       ELSE
          ! If no v0 found for the current position of the agent, use the previous value of the agent
@@ -11178,7 +11178,7 @@ CONTAINS
          HR%UBAR_CENTER = (GROUP_LIST(J)%GROUP_X - HR%X)
          HR%VBAR_CENTER = (GROUP_LIST(J)%GROUP_Y - HR%Y)
          EVEL = SQRT(HR%UBAR_CENTER**2 + HR%VBAR_CENTER**2)
-         IF ( EVEL > 0.0_EB .AND. .NOT. L_DEAD ) THEN
+         IF ( EVEL >= TWO_EPSILON_EB .AND. .NOT. L_DEAD ) THEN
             HR%UBAR_CENTER = HR%UBAR_CENTER / EVEL
             HR%VBAR_CENTER = HR%VBAR_CENTER / EVEL
          ELSE
@@ -11196,7 +11196,7 @@ CONTAINS
          END IF
 
          EVEL = UBAR**2 + VBAR**2
-         IF (GROUP_LIST(J)%COMPLETE == 1 .AND. EVEL > 0.0_EB) THEN
+         IF (GROUP_LIST(J)%COMPLETE == 1 .AND. EVEL >= TWO_EPSILON_EB) THEN
             ! The group is already gathered together
             UBAR = (1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_CENTER/ &
                  SQRT(((1-GROUP_EFF)*UBAR + GROUP_EFF*HR%UBAR_CENTER)**2+ &
@@ -12954,7 +12954,7 @@ CONTAINS
       END IF
       u = u_tmp(2) ; v = v_tmp(2)
 
-      IF ( (u**2+v**2) > 0.0_EB ) THEN
+      IF ( (u**2+v**2) >= TWO_EPSILON_EB ) THEN
          CosPhiFac = ((x11-X1)*u + (y11-Y1)*v) / (dist*SQRT(u**2+v**2))
          CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
       ELSE
@@ -12970,9 +12970,9 @@ CONTAINS
 
          ! Next is |vector1|*|vector2|
          evel = SQRT((x11-x_tmp(iii))**2+(y11-y_tmp(iii))**2)*SQRT(u_tmp(iii)**2+v_tmp(iii)**2)
-         IF (evel > 0.0_EB) evel = ((x11-x_tmp(iii))*u_tmp(iii) + &
+         IF (evel >= TWO_EPSILON_EB) evel = ((x11-x_tmp(iii))*u_tmp(iii) + &
               (y11-y_tmp(iii))*v_tmp(iii)) / evel   ! cos theta (scal_prod/(lenght1*length2)
-         IF (evel > 0.01_EB) THEN
+         IF (evel >= TWO_EPSILON_EB) THEN
             d_walls = MIN( (dist-r_tmp(iii))/evel, d_walls)
          ELSE
             d_walls = MIN( (dist-r_tmp(iii))/0.01_EB, d_walls)
@@ -13136,7 +13136,7 @@ CONTAINS
       DO iii = 1,3
          dist = ABS(d_xy(idir) - x_tmp(iii)) ! wall - agent centre distance
          IF (dist-r_tmp(iii) <= P2P_DIST_MAX .AND. FoundWall_xy(idir)) THEN
-            IF ( (HR%U**2+HR%V**2) > 0.0_EB ) THEN
+            IF ( (HR%U**2+HR%V**2) >= TWO_EPSILON_EB ) THEN
                CosPhiFac = (is*HR%U)/SQRT(HR%U**2+HR%V**2)
                CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
             ELSE
@@ -13155,7 +13155,7 @@ CONTAINS
       DO iii = 1,3
          dist = ABS(d_xy(idir) - x_tmp(iii)) ! wall - agent centre distance
          IF (dist-r_tmp(iii) <= P2P_DIST_MAX .AND. FoundWall_xy(idir)) THEN
-            IF ( (HR%U**2+HR%V**2) > 0.0_EB ) THEN
+            IF ( (HR%U**2+HR%V**2) >= TWO_EPSILON_EB ) THEN
                CosPhiFac = (is*HR%U)/SQRT(HR%U**2+HR%V**2)
                CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
             ELSE
@@ -13174,7 +13174,7 @@ CONTAINS
       DO iii = 1,3
          dist = ABS(d_xy(idir) - y_tmp(iii)) ! wall - agent centre distance
          IF (dist-r_tmp(iii) <= P2P_DIST_MAX .AND. FoundWall_xy(idir)) THEN
-            IF ( (HR%U**2+HR%V**2) > 0.0_EB ) THEN
+            IF ( (HR%U**2+HR%V**2) >= TWO_EPSILON_EB ) THEN
                CosPhiFac = (is*HR%V)/SQRT(HR%U**2+HR%V**2)
                CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
             ELSE
@@ -13193,7 +13193,7 @@ CONTAINS
       DO iii = 1,3
          dist = ABS(d_xy(idir) - y_tmp(iii)) ! wall - agent centre distance
          IF (dist-r_tmp(iii) <= P2P_DIST_MAX .AND. FoundWall_xy(idir)) THEN
-            IF ( (HR%U**2+HR%V**2) > 0.0_EB ) THEN
+            IF ( (HR%U**2+HR%V**2) >= TWO_EPSILON_EB ) THEN
                CosPhiFac = (is*HR%V)/SQRT(HR%U**2+HR%V**2)
                CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
             ELSE
@@ -13247,7 +13247,7 @@ CONTAINS
          ! Next is |vector1|*|vector2|
          evel = ABS(d_xy(idir)-x_tmp)*SQRT(u_tmp**2+v_tmp**2)
          ! Next is cos(theta) = (scal_prod/(lenght1*length2)
-         IF (evel > 0.0_EB) evel = ((d_xy(idir)-x_tmp)*u_tmp) / evel
+         IF (evel >= TWO_EPSILON_EB) evel = ((d_xy(idir)-x_tmp)*u_tmp) / evel
          IF (evel > 0.01_EB) THEN
             d_walls = MIN( (dist-r_tmp)/evel, d_walls)
          ELSE
@@ -13280,7 +13280,7 @@ CONTAINS
          ! Next is |vector1|*|vector2|
          evel = ABS(d_xy(idir)-x_tmp)*SQRT(u_tmp**2+v_tmp**2)
          ! Next is cos(theta) = (scal_prod/(lenght1*length2)
-         IF (evel > 0.0_EB) evel = ((d_xy(idir)-x_tmp)*u_tmp) / evel
+         IF (evel >= TWO_EPSILON_EB) evel = ((d_xy(idir)-x_tmp)*u_tmp) / evel
          IF (evel > 0.01_EB) THEN
             d_walls = MIN( (dist-r_tmp)/evel, d_walls)
          ELSE
@@ -13313,7 +13313,7 @@ CONTAINS
          ! Next is |vector1|*|vector2|
          evel = ABS(d_xy(idir)-y_tmp)*SQRT(u_tmp**2+v_tmp**2)
          ! Next is cos(theta) = (scal_prod/(lenght1*length2)
-         IF (evel > 0.0_EB) evel = ((d_xy(idir)-y_tmp)*v_tmp) / evel
+         IF (evel >= TWO_EPSILON_EB) evel = ((d_xy(idir)-y_tmp)*v_tmp) / evel
          IF (evel > 0.01_EB) THEN
             d_walls = MIN( (dist-r_tmp)/evel, d_walls)
          ELSE
@@ -13346,7 +13346,7 @@ CONTAINS
          ! Next is |vector1|*|vector2|
          evel = ABS(d_xy(idir)-y_tmp)*SQRT(u_tmp**2+v_tmp**2)
          ! Next is cos(theta) = (scal_prod/(lenght1*length2)
-         IF (evel > 0.0_EB) evel = ((d_xy(idir)-y_tmp)*v_tmp) / evel
+         IF (evel >= TWO_EPSILON_EB) evel = ((d_xy(idir)-y_tmp)*v_tmp) / evel
          IF (evel > 0.01_EB) THEN
             d_walls = MIN( (dist-r_tmp)/evel, d_walls)
          ELSE
@@ -14157,7 +14157,7 @@ CONTAINS
              SELECT CASE(EVAC_QUANTITIES_INDEX(NN))
              CASE(240)  ! MOTIVE_ACCELERATION, Unimpeded walking Speed / tau
                 EVEL = SQRT(HR%UBAR**2 + HR%VBAR**2)
-                IF (EVEL > 0.0_EB) THEN
+                IF (EVEL >= TWO_EPSILON_EB) THEN
                    QP(NPP,NN) = REAL(HR%Speed/HR%Tau,FB)
                 ELSE
                    QP(NPP,NN) = REAL(EVEL,FB)
@@ -14179,7 +14179,7 @@ CONTAINS
                 QP(NPP,NN) = REAL(HR%COLOR_INDEX - 1,FB)
              CASE(248)  ! MOTIVE_ANGLE, 
                 EVEL = SQRT(HR%UBAR**2 + HR%VBAR**2)
-                IF (EVEL > 0.0_EB) THEN
+                IF (EVEL >= TWO_EPSILON_EB) THEN
                    IF (HR%VBAR >= 0.0_EB) THEN
                       angle_hr = ACOS(HR%UBAR/EVEL)
                    ELSE
@@ -14805,7 +14805,7 @@ CONTAINS
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+          IF (SURFACE(SURF_INDEX)%VEL >= TWO_EPSILON_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_mx = d_mx + is*(2.0_EB*d_cutoff)
              FoundWall_xy(1) = .FALSE.
           END IF
@@ -14854,7 +14854,7 @@ CONTAINS
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+          IF (SURFACE(SURF_INDEX)%VEL > TWO_EPSILON_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_px = d_px + is*(2.0_EB*d_cutoff)
              FoundWall_xy(2) = .FALSE.
           END IF
@@ -14903,7 +14903,7 @@ CONTAINS
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+          IF (SURFACE(SURF_INDEX)%VEL >= TWO_EPSILON_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_my = d_my + is*(2.0_EB*d_cutoff)
              FoundWall_xy(3) = .FALSE.
           END IF
@@ -14952,7 +14952,7 @@ CONTAINS
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+          IF (SURFACE(SURF_INDEX)%VEL > TWO_EPSILON_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_py = d_py + is*(2.0_EB*d_cutoff)
              FoundWall_xy(4) = .FALSE.
           END IF
@@ -15425,13 +15425,13 @@ CONTAINS
                 Width = EVAC_EXITS(EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%Width
                 N_queue = EVAC_EXITS(EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%NTARGET(ii)
              END IF
-             IF (FED_DOOR_CRIT > 0.0_EB) THEN
+             IF (FED_DOOR_CRIT >= TWO_EPSILON_EB) THEN
                 L2_tmp = FED_max_Door(i) * SQRT((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
              ELSE
                 L2_tmp = K_ave_Door(i)
              END IF
              IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD*L2_tmp
-             IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) THEN
+             IF (ABS(FAC_DOOR_QUEUE) >= TWO_EPSILON_EB) THEN
                 T_tmp  = SQRT((x_o-x1_old)**2 + (y_o-y1_old)**2)
                 T_tmp1 = MIN(1.5_EB*Pi*T_tmp**2/(ABS(FAC_DOOR_QUEUE)*Width), REAL(N_queue,EB)/(ABS(FAC_DOOR_QUEUE)*Width))
                 IF (FAC_DOOR_QUEUE < -0.001_EB) THEN
@@ -15486,7 +15486,7 @@ CONTAINS
                         EVAC_EXITS(EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%Y2)
                    i_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%I_VENT_FFIELD
                 END IF
-                IF (FED_DOOR_CRIT > 0.0_EB) THEN
+                IF (FED_DOOR_CRIT >= TWO_EPSILON_EB) THEN
                    ! L2_tmp = FED_max_Door(i)*SQRT((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
                    ! Now L1 norm for non-visible doors (21.9.2010)
                    L2_tmp = FED_max_Door(i)*(ABS(x1_old-x_o) + ABS(y1_old-y_o))/Speed
@@ -15537,7 +15537,7 @@ CONTAINS
                            EVAC_EXITS(EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%Y2)
                       i_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%I_VENT_FFIELD
                    END IF
-                   IF (FED_DOOR_CRIT > 0.0_EB) THEN
+                   IF (FED_DOOR_CRIT >= TWO_EPSILON_EB) THEN
                       L2_tmp = FED_max_Door(i)*SQRT((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
                    ELSE
                       l2_tmp = K_ave_Door(i)
@@ -15583,7 +15583,7 @@ CONTAINS
                               EVAC_EXITS(EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%Y2)
                          i_o = EVAC_EXITS(EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%I_VENT_FFIELD
                       END IF
-                      IF (FED_DOOR_CRIT > 0.0_EB) THEN
+                      IF (FED_DOOR_CRIT >= TWO_EPSILON_EB) THEN
                          IF (j > 0) THEN
                             IF (Is_Visible_Door(i)) THEN
                                L2_tmp = Group_List(j)%IntDose + FED_max_Door(i) * SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
@@ -15731,7 +15731,7 @@ CONTAINS
           HR%FFIELD_NAME = TRIM(name_new_ffield)
           IF (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
           IF (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
-          IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) RETURN
+          IF (ABS(FAC_DOOR_QUEUE) >= TWO_EPSILON_EB) RETURN
           IF (imode > 0) THEN
              WRITE (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') ' EVAC: Human ',ie,', new ffield: ', &
                   TRIM(name_new_ffield), ', old ffield: ',TRIM(name_old_ffield)
@@ -15746,7 +15746,7 @@ CONTAINS
           IF (COLOR_METHOD == 5) HR%COLOR_INDEX = color_index
           IF (COLOR_METHOD == 4) HR%COLOR_INDEX = color_index
           Color_Tmp(j) = color_index
-          IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) RETURN
+          IF (ABS(FAC_DOOR_QUEUE) >= TWO_EPSILON_EB) RETURN
           IF (imode > 0) THEN
              WRITE (LU_EVACOUT,fmt='(a,i5,a,a,a,a)') ' EVAC: Group ',j,', new ffield: ', &
                   TRIM(name_new_ffield), ', old ffield: ', TRIM(name_old_ffield)

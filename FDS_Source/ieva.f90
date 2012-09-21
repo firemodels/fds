@@ -7518,35 +7518,35 @@ Contains
     !
     Implicit None
 
-    Real ( kind = 8 ) :: absstp
-    Real ( kind = 8 ) :: abstol
-    Real ( kind = 8 ) :: big
-    Real ( kind = 8 ) fbig
-    Real ( kind = 8 ) fsmall
+    Real ( kind = 8 ), Save :: absstp
+    Real ( kind = 8 ), Save :: abstol
+    Real ( kind = 8 ), Save :: big
+    Real ( kind = 8 ), Save :: fbig
+    Real ( kind = 8 ), Save :: fsmall
     Real ( kind = 8 ) fx
-    Integer i99999
-    Logical qbdd
-    Logical qcond
-    Logical qdum1
-    Logical qdum2
+    Integer, Save :: i99999
+    Logical, Save :: qbdd
+    Logical, Save :: qcond
+    Logical, Save :: qdum1
+    Logical, Save :: qdum2
     Logical qhi
-    Logical qincr
+    Logical, Save :: qincr
     Logical qleft
-    Logical qlim
-    Logical qup
-    Real ( kind = 8 ) :: relstp
-    Real ( kind = 8 ) :: reltol
-    Real ( kind = 8 ) :: small
+    Logical, Save :: qlim
+    Logical, Save :: qup
+    Real ( kind = 8 ), Save :: relstp
+    Real ( kind = 8 ), Save :: reltol
+    Real ( kind = 8 ), Save :: small
     Integer status
-    Real ( kind = 8 ) step
-    Real ( kind = 8 ) :: stpmul
+    Real ( kind = 8 ), Save :: step
+    Real ( kind = 8 ), Save :: stpmul
     Real ( kind = 8 ) x
-    Real ( kind = 8 ) xhi
-    Real ( kind = 8 ) xlb
-    Real ( kind = 8 ) xlo
-    Real ( kind = 8 ) xsave
-    Real ( kind = 8 ) xub
-    Real ( kind = 8 ) yy
+    Real ( kind = 8 ), Save :: xhi
+    Real ( kind = 8 ), Save :: xlb
+    Real ( kind = 8 ), Save :: xlo
+    Real ( kind = 8 ), Save :: xsave
+    Real ( kind = 8 ), Save :: xub
+    Real ( kind = 8 ), Save :: yy
     Real ( kind = 8 ) zabsst
     Real ( kind = 8 ) zabsto
     Real ( kind = 8 ) zbig
@@ -7554,7 +7554,7 @@ Contains
     Real ( kind = 8 ) zrelto
     Real ( kind = 8 ) zsmall
     Real ( kind = 8 ) zstpmu
-    Save
+!Timo:    Save
 
     If ( 0 < status ) Then
        ! go to i99999
