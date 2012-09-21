@@ -512,8 +512,14 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                CASE(-3)
                   FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)
             END SELECT
-         CASE(INTERPOLATED_BOUNDARY)
-            UN = UVW_SAVE(IW)
+         CASE(INTERPOLATED_BOUNDARY,SOLID_BOUNDARY)
+            SELECT CASE(WC%BOUNDARY_TYPE)
+               CASE(SOLID_BOUNDARY)
+                  IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+                  IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               CASE(INTERPOLATED_BOUNDARY)
+                  UN = UVW_SAVE(IW)
+            END SELECT
             SELECT CASE(IOR)
                CASE( 1)
                   IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II,JJ,KK)
