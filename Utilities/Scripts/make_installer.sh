@@ -69,7 +69,7 @@ cp \$TEMPFILE \$OUTFILE
 chmod +x \$OUTFILE
 }
 
-#--- make a directory, checking if the user has permission
+#--- make a directory, checking if the user has permission to create it
 
 MKDIR()
 {
@@ -114,7 +114,7 @@ MKDIR()
 #--- record the name of this script and the name of the directory 
 # it will run in
 
-THIS=\`pwd\`/\$0
+THISSCRIPT=\$0
 THISDIR=\`pwd\`
 
 #--- record temporary start up file names
@@ -147,7 +147,7 @@ then
     done
   fi
   echo Extracting the file embedded in this installer to \$THAT
-  tail -n +\$SKIP \$THIS > \$THAT
+  tail -n +\$SKIP \$THISSCRIPT > \$THAT
   exit 0
 fi
 
@@ -156,32 +156,29 @@ fi
 echo ""
 echo "Where would you like to install FDS? )"
 echo "Options:"
-if [ "$ostype" == "OSX" ]
-then
   echo "  Press 1 to install at \$FDS_root"
-else
-  echo "  Press 1 to install at /opt/FDS/FDS6"
-  echo "  Press 2 to install at /usr/local/bin/FDS/FDS6"
-  echo "  Press 3 to install at \$FDS_root"
-fi
+  if [ "$ostype" != "OSX" ]; then
+    echo "  Press 2 to install at /opt/FDS/FDS6"
+    echo "  Press 3 to install at /usr/local/bin/FDS/FDS6"
+  fi
 echo "  Enter directory path to install elsewhere"
 read answer
-if [ "$ostype" == "OSX" ]
-then
+
+if [ "$ostype" == "OSX" ]; then
   if [ "\$answer" == "1" ]; then
     FDS_root=\$FDS_root
   else
-    eval FDS_root=\$FDS_root
+    eval FDS_root=\$answer
   fi
 else
   if [ "\$answer" == "1" ]; then
-    FDS_root=/opt/FDS/FDS6
-  elif [ "\$answer" == "2" ]; then
-    FDS_root=/usr/local/bin/FDS/FDS6
-  elif [ "\$answer" == "3" ]; then
     FDS_root=\$FDS_root
+  elif [ "\$answer" == "2" ]; then
+    FDS_root=/opt/FDS/FDS6
+  elif [ "\$answer" == "3" ]; then
+    FDS_root=/usr/local/bin/FDS/FDS6
   else
-    eval FDS_root=\$FDS_root
+    eval FDS_root=\$answer
   fi
 fi
  
@@ -207,7 +204,7 @@ rm -f \$TEMPFILE
 echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
-tail -n +\$SKIP \$THIS | tar -xz
+tail -n +\$SKIP \$THISSCRIPT | tar -xz
 echo "Copy complete."
 
 #--- create CSH startup file
