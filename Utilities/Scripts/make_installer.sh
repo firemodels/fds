@@ -38,7 +38,6 @@ echo "Options:"
 echo "  1) Press <Enter> to begin installation"
 echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
 
-FDS_root=$INSTALLDIR
 BAK=_\`date +%Y%m%d_%H%M%S\`
 
 #--- make a backup of a file
@@ -55,18 +54,39 @@ fi
 
 #--- create a script that points to an installed executable
 
-COPYEXE()
+MAKESHORTCUT()
 {
-  EXE=\$1
-  OUTFILE=\$2
+  FDS_base=\$1
+  EXE=\$2
+  OUTFILE=\$3
 
 cat << SHORTCUTFILE > \$TEMPFILE
 #!/bin/bash 
-\$FDS_root/bin/\$EXE \\\$@
+\$FDS_base/bin/\$EXE \\\$@
 SHORTCUTFILE
 
 cp \$TEMPFILE \$OUTFILE
 chmod +x \$OUTFILE
+}
+
+#--- convert a path to it absolute equivalent
+
+function ABSPATH() {
+  pushd . > /dev/null;
+  if [ -d "\$1" ];
+  then
+    cd "\$1";
+    dirs -l +0;
+  else
+    cd "\`dirname \"\$1\"\`";
+    cur_dir=\`dirs -l +0\`;
+    if [ "\$cur_dir" == "/" ]; then
+      echo "\$cur_dir\`basename \"\$1\"\`";
+    else
+      echo "\$cur_dir/\`basename \"\$1\"\`";
+    fi;
+  fi;
+  popd > /dev/null;
 }
 
 #--- make a directory, checking if the user has permission to create it
@@ -114,7 +134,7 @@ MKDIR()
 #--- record the name of this script and the name of the directory 
 # it will run in
 
-THISSCRIPT=\$0
+THISSCRIPT=\`ABSPATH \$0\`
 THISDIR=\`pwd\`
 
 #--- record temporary start up file names
@@ -156,27 +176,27 @@ fi
 echo ""
 echo "Where would you like to install FDS? )"
 echo "Options:"
-  echo "  Press 1 to install at \$FDS_root"
+  echo "  Press 1 to install at \$HOME/$INSTALLDIR"
   if [ "$ostype" != "OSX" ]; then
-    echo "  Press 2 to install at /opt/FDS/FDS6"
-    echo "  Press 3 to install at /usr/local/bin/FDS/FDS6"
+    echo "  Press 2 to install at /opt/$INSTALLDIR"
+    echo "  Press 3 to install at /usr/local/bin/$INSTALLDIR"
   fi
 echo "  Enter directory path to install elsewhere"
 read answer
 
 if [ "$ostype" == "OSX" ]; then
   if [ "\$answer" == "1" ]; then
-    FDS_root=\$FDS_root
+    eval FDS_root=/Applications/$INSTALLDIR
   else
     eval FDS_root=\$answer
   fi
 else
   if [ "\$answer" == "1" ]; then
-    FDS_root=\$FDS_root
+    eval FDS_root=\$HOME/$INSTALLDIR
   elif [ "\$answer" == "2" ]; then
-    FDS_root=/opt/FDS/FDS6
+    FDS_root=/opt/$INSTALLDIR
   elif [ "\$answer" == "3" ]; then
-    FDS_root=/usr/local/bin/FDS/FDS6
+    FDS_root=/usr/local/bin/$INSTALLDIR
   else
     eval FDS_root=\$answer
   fi
@@ -188,15 +208,15 @@ MKDIR \$FDS_root 1
 
 #--- make shortcuts
 
-SHORTCUTDIR=\$FDS_root/../shortcuts
+SHORTCUTDIR=\`ABSPATH \$FDS_root/../shortcuts\`
 MKDIR \$SHORTCUTDIR 0
 
 TEMPFILE=/tmp/exetemp_\$\$
 echo Adding shortcuts to \$SHORTCUTDIR
-COPYEXE fds \$SHORTCUTDIR/fds6
-COPYEXE smokeview \$SHORTCUTDIR/smokeview6
-COPYEXE smokediff \$SHORTCUTDIR/smokediff6
-COPYEXE smokezip \$SHORTCUTDIR/smokezip6
+MAKESHORTCUT \$FDS_root fds \$SHORTCUTDIR/fds6
+MAKESHORTCUT \$FDS_root smokeview \$SHORTCUTDIR/smokeview6
+MAKESHORTCUT \$FDS_root smokediff \$SHORTCUTDIR/smokediff6
+MAKESHORTCUT \$FDS_root smokezip \$SHORTCUTDIR/smokezip6
 rm -f \$TEMPFILE
 
 #--- copy installation files into the FDS_root directory

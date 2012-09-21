@@ -16,6 +16,6 @@ setenv MAJOR $7
 
 setenv FDSOS _osx_32
 setenv FDSOS2 _osx_32
-setenv INSTALLDIR /Applications/FDS/$FDSEDITION
+setenv INSTALLDIR FDS/$FDSEDITION
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
