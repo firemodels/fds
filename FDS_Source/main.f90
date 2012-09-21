@@ -685,6 +685,7 @@ MAIN_LOOP: DO
       IF (FIRST_PASS .OR. SYNCHRONIZE) CALL MESH_EXCHANGE(1)
 
       ! Do mass and energy boundary conditions, and begin divergence calculation
+      
       COMPUTE_DIVERGENCE_LOOP: DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DIVERGENCE_LOOP
          IF (IMMERSED_BOUNDARY_METHOD>=0 .AND. FIRST_PASS) CALL INIT_IBM(T(NM),NM)
