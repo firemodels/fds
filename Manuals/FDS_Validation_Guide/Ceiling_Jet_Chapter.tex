@@ -667,3 +667,53 @@ Also included is a plot comparing predicted sprinkler activation times with the 
 \caption{Predicted vs. Measured Activation Times of all the Vettori Sloped Ceiling Cases}
 \label{Vettori_Sloped_Activation}
 \end{figure}
+
+\clearpage
+
+\section{NIST Dunes 2000 Experiments}
+
+The experiments selected for model validation were conducted in the single-story manufactured home.
+Only tests that used a flaming ignition source were considered. The burning behavior of the upholstered
+chair and mattress fuel packages were characterized by separate tests conducted by Omega Point
+Laboratories (OPL). The upholstered chair was tested in accordance with CAL TB~133 standards (with a
+modified ignition source). The mattress was tested in accordance with CAL TB~129 standards (with a
+modified ignition source).
+
+The transient HRRs of the upholstered chair (OPL Project No.~15638-108858) and
+mattress (OPL Project No.~15638-108856) were determined by multiplying the mass loss rate of the
+fuel specimen by a heat of combustion of 21,000~kJ/kg (mattress) or 30,000~kJ/kg (upholstered chair).
+
+A summary of the
+seven tests selected for model validation is shown in Table~\ref{NIST_Dunes_2000_Summary}.
+Figure~\ref{NIST_Dunes_2000_Scatterplot} compares measured versus predicted smoke alarm activation times.
+
+\begin{table}[h!]
+\caption{Summary of NIST Dunes 2000 experiments selected for model validation.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Test No.  &  Fire Source  &  Fire Location    \\ \hline \hline
+SDC02    &  Chair            &  Living Room  \\ \hline
+SDC05    &  Mattress       &  Bedroom       \\ \hline
+SDC07    &  Mattress       &  Bedroom       \\ \hline
+SDC10    &  Chair            &  Living Room  \\ \hline
+SDC33    &  Chair            &  Living Room  \\ \hline
+SDC35    &  Chair            &  Living Room  \\ \hline
+SDC39    &  Mattress       &  Bedroom       \\ \hline
+\end{tabular}
+\end{center}
+\label{NIST_Dunes_2000_Summary}
+\end{table}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Smoke_Alarm_Activations} \\
+\vspace{0.25in}
+\end{tabular}
+\end{center}
+\caption[Summary of smoke alarm activation times, NIST Dunes 2000 test series.]
+{Summary of smoke alarm activation times, NIST Dunes 2000 test series.}
+\label{NIST_Dunes_2000_Scatterplot}
+\end{figure}
+
