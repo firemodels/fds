@@ -2116,10 +2116,10 @@ In the previous two examples each computational cell contained a stoichiometric 
 \end{figure}
 
 The EDC reaction implementation is also tested to check species evolution for chemical reactions of increased complexity. The first is a consecutive two-step, fuel-limited methane reaction:
-\begin{eqnarray}\label{eq:2step_methane}
-\mathrm{CH_4 + 1.5 \, O_2} &\rightarrow&  \mathrm{CO + 2 \, H_2O} \\
-\nonumber \mathrm{CO + 0.5 \, O_2} &\rightarrow& \mathrm{CO_2}
-\end{eqnarray}
+\begin{align}\label{eq:2step_methane}
+\mathrm{CH_4 + 1.5 \, O_2} &\rightarrow  \mathrm{CO + 2 \, H_2O} \\
+\nonumber \mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2}
+\end{align}
 Each cell in the model reaction is initialized with an oxygen rich mixture and the mixing time, $\tau_{mix}$, is fixed at $0.1$~seconds (Figure \ref{fig:EDC_2Step_fuel}).
 
 \begin{figure}[h!]
@@ -2131,10 +2131,10 @@ Each cell in the model reaction is initialized with an oxygen rich mixture and t
 \end{figure}
 
 The second test case has two competing, oxygen-limited reactions; a one-step methane and one-step propane reaction.
-\begin{eqnarray}\label{eq:2step_o2_lim}
-\mathrm{CH_4 + 2 \, O_2} &\rightarrow&  \mathrm{CO_2 + 2 \, H_2O} \\
-\nonumber \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow& \mathrm{3 \,CO_2 + 4 \, H_2O}
-\end{eqnarray}
+\begin{align}\label{eq:2step_o2_lim}
+\mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O} \\
+\nonumber \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}
+\end{align}
 The species evolutions are compared to expected values in Figure \ref{fig:EDC_2Step_ox}.
 \begin{figure}[h!]
 \begin{center}
@@ -2190,10 +2190,10 @@ $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO_2}$ $\mathr
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
 Multi-step Arrhenius finite rate reactions are also examined. First, we consider a two-step forward propane reaction:
-\begin{eqnarray}\label{eq:2step_propane}
-\mathrm{C_3H_8+3.5 \, O_2 \rightarrow  3 \, CO + 4 \, H_2O} \\
-\nonumber \mathrm{CO+0.5 \, O_2 \rightarrow CO_2}
-\end{eqnarray}
+\begin{align}\label{eq:2step_propane}
+\mathrm{C_3H_8+3.5 \, O_2} &\rightarrow  \mathrm{3 \, CO + 4 \, H_2O} \\
+\nonumber \mathrm{CO+0.5 \, O_2} &\rightarrow \mathrm{CO_2}
+\end{align}
 with the following reaction input parameters:
 
 \begin{center}
@@ -2206,10 +2206,10 @@ with the following reaction input parameters:
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
 The species evolutions for the two-step 1.75 order reaction mechanism are shown in Figure \ref{fig:Arrhenius_175Order_2step}. We also consider a two-step reversible propane reaction:
-\begin{eqnarray}\label{eq:2step_propane_rev}
-\mathrm{C_3H_8+3.5 \, O_2 \rightarrow  3 \, CO+4 \, H_2O} \\
-\nonumber \mathrm{CO + 0.5 \, O_2 \leftrightarrow CO_2}
-\end{eqnarray}
+\begin{align}\label{eq:2step_propane_rev}
+\mathrm{C_3H_8+3.5 \, O_2} &\rightarrow \mathrm{3 \, CO+4 \, H_2O} \\
+\nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightarrow \mathrm{CO_2}
+\end{align}
 with the following reaction input parameters:
 
 \begin{center}
@@ -2274,7 +2274,52 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 
 \clearpage
 
-\section{Extinction Model}
+\section{Mixture Fraction ({\bf Burke\_Schumann})}
+\label{Mix_Frac}
+
+The mixture fraction output quantity is valid for simple one-step reactions of the form A + B $\rightarrow$ C. To test that mixture fraction is correctly implemented we consider a series of test reactors that have been initialized with equivalence ratios from $\phi=0$ to $\phi=1$ to simulate the range of equivalence ratios that exist across a flame sheet. A simple one-step methane reaction is used to govern the combustion:
+\begin{equation}\label{eq:methane_ex}
+\underbrace{\mathrm{CH_4}}_{fuel} + \underbrace{\mathrm{2\,(O_2 + 3.76\,N_2)}}_{oxidizer} \rightarrow  \underbrace{\mathrm{CO_2 + 2\, H_2O + 7.52\,N_2}}_{products}
+\end{equation}
+The simulation results are compared to state relationships which govern temperature and species as a function of mixture fraction \cite{Turns:1996}. The species state relations are governed by two sets of equations based on whether the mixture fraction ($f$) falls inside the flame sheet (fuel rich) or outside the flame sheet (fuel lean).  For fuel rich combustion ($f_{stoic} < f \le 1$): 
+\begin{align}\label{eq:mix_relate_rich}
+Y_{fuel} &= \frac{f-f_{stoich}}{1-f_{stoich}} \\
+Y_{ox} &= 0 \\
+Y_{prod} &= \frac{1-f}{1-f_{stoich}}
+\end{align}
+For fuel lean combustion ($0 \le f < f_{stoich}$): 
+\begin{align}\label{eq:mix_relate_lean}
+Y_{fuel} &= 0 \\
+Y_{ox} &= 1- \frac{f}{f_{stoich}} \\
+Y_{prod} &= \frac{f}{f_{stoich}}
+\end{align}
+At stoichiometric conditions, the species mass fractions are the same whether approaching from fuel lean or fuel rich: $Y_{fuel} = 0$, $Y_{ox}=0$, and $Y_{prod}=1$. Fig.~\ref{fig:burke_schumann_spec} shows the comparison between the final lumped species concentrations (fuel, oxidizer, and products) as a function of mixture fraction from fuel lean to fuel rich combustion. 
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Burke_Schumann_Spec}
+\end{center}
+\caption[Mixture fraction state relation for species]{Lumped species mass fractions variation as function of mixture fraction.}
+\label{fig:burke_schumann_spec}
+\end{figure}
+
+The state relationship for temperature is dependent upon the mixture fraction and the appropriate definition of $Y_{fuel}$ based on the mixture fraction:
+\begin{equation}\label{eq:mix_relate_temp}
+T = (f-Y_{fuel})\frac{\Delta h_{c}}{c_{p}} + f(T_{fuel,i}-T_{ox,i}) + T_{ox,i}
+\end{equation}
+The predicted temperature profile does not currently agree with the expected value and there is on going work to determine the source of the differences (Fig.~\ref{fig:burke_schumann_temp}).
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Burke_Schumann_Temp}
+\end{center}
+\caption[Mixture fraction state relation for temperature]{Temperature variation as function of mixture fraction.}
+\label{fig:burke_schumann_temp}
+\end{figure}
+
+
+\clearpage
+
+\section{Extinction Model ({\bf Extinction})}
 \label{Extinct}
 
 The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1600 K. 
@@ -2288,7 +2333,7 @@ Based on the combination of initial oxygen concentration, methane concentration,
 \begin{center}
 \includegraphics[height=3.2in]{SCRIPT_FIGURES/Extinction}
 \end{center}
-\caption[Extinction model test cases]{Array of initial temperatures and oxygen concentrations that can can sustain burning.}
+\caption[{\bf Extinction} model test cases]{Array of initial temperatures and oxygen concentrations that can can sustain burning.}
 \label{fig:extinct}
 \end{figure}
 
