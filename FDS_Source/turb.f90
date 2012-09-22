@@ -806,7 +806,7 @@ INTEGER :: ITER
 Y_CELL_CENTER = 0.5_EB*DY
 DUDY = ABS(U)/Y_CELL_CENTER
 TAU_W = NU*DUDY                         ! actually tau_w/rho
-U_TAU = SQRT(TAU_W)                     ! friction velocity
+U_TAU = SQRT(ABS(TAU_W))                ! friction velocity
 DELTA_NU = NU/(U_TAU+EPS)               ! viscous length scale
 Y_PLUS = Y_CELL_CENTER/(DELTA_NU+EPS)
 SLIP_FACTOR = -1._EB
@@ -828,7 +828,7 @@ LES_IF: IF (LES) THEN
          IF (Y_PLUS < Y_WERNER_WENGLE) THEN
             ! viscous sublayer
             TAU_W = ( U/Y_PLUS )**2
-            U_TAU = SQRT(TAU_W)
+            U_TAU = SQRT(ABS(TAU_W))
             DUDY = ABS(U)/Y_CELL_CENTER
          !ELSE IF (Y_PLUS < Y2) THEN
          !   ! buffer layer
@@ -838,7 +838,7 @@ LES_IF: IF (LES) THEN
          ELSE
             ! log layer
             TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+B) )**2
-            U_TAU = SQRT(TAU_W)
+            U_TAU = SQRT(ABS(TAU_W))
             DUDY = U_TAU*RKAPPA/Y_CELL_CENTER
          ENDIF
       ELSE
@@ -852,7 +852,7 @@ LES_IF: IF (LES) THEN
          ENDIF
          Y_PLUS = Y_CELL_CENTER/S
          TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+BTILDE) )**2  ! Pope (2000) p. 297, Eq. (7.121)
-         U_TAU = SQRT(TAU_W)
+         U_TAU = SQRT(ABS(TAU_W))
          DUDY = U_TAU*RKAPPA/Y_CELL_CENTER
       ENDIF
 
