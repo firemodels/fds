@@ -1132,11 +1132,9 @@ if [[ $stage6d_success ]] ; then
 fi
 
 ### Stage 7a ###
-if [[ $stage5_success ]] ; then
-   run_matlab_verification
-   check_matlab_verification
-   check_verification_stats
-fi
+run_matlab_verification
+check_matlab_verification
+check_verification_stats
 
 ### Stage 7b ###
 # No stage dependencies
@@ -1144,10 +1142,8 @@ run_matlab_validation
 check_matlab_validation
 
 ### Stage 7c ###
-if [[ $stage5_success ]] ; then
-   generate_timing_stats
-   archive_timing_stats
-fi
+generate_timing_stats
+archive_timing_stats
 
 ### Stage 8 ###
 # No stage dependencies
