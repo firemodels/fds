@@ -40,6 +40,8 @@ echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
 
 BAK=_\`date +%Y%m%d_%H%M%S\`
 
+#--- output message
+
 #--- make a backup of a file
 
 BACKUP_FILE()
@@ -47,6 +49,7 @@ BACKUP_FILE()
   INFILE=\$1
   if [ -e \$INFILE ]
   then
+  echo
   echo Backing up \$INFILE to \$INFILE\$BAK
   cp \$INFILE \$INFILE\$BAK
 fi
@@ -203,8 +206,24 @@ else
     eval FDS_root=\$answer
   fi
 fi
+
+#--- do we want to proceed
+
+while true; do
+    echo ""
+    echo "Installation directory: \$FDS_root"
+    read -p "Do you wish to begin the installation? (yes/no)" yn
+    case \$yn in
+        [Yy]* ) break;;
+        [Nn]* ) echo "Installation cancelled";exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
  
 #--- make the FDS root directory
+
+echo ""
+echo "Installation beginning"
  
 MKDIR \$FDS_root 1
 
@@ -361,16 +380,26 @@ BASH
 #--- create .cshrc_fds startup file
 
 echo
-echo Creating .cshrc_fds startup file.
 
 BACKUP_FILE ~/.cshrc_fds
+
+if [ -e ~/.cshrc_fds ] ; then
+  echo Updating .cshrc_fds
+else
+  echo Creating .cshrc_fds
+fi
 cp \$CSHFDS ~/.cshrc_fds
 rm \$CSHFDS
 
 #--- create .bash_fds startup file
 
-echo Creating .bashrc_fds startup file.
 BACKUP_FILE ~/.bashrc_fds
+
+if [ -e ~/.bashrc_fds ] ; then
+  echo Updating .bashrc_fds
+else
+  echo Creating .bashrc_fds
+fi
 cp \$BASHFDS ~/.bashrc_fds
 rm \$BASHFDS
 
