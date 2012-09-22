@@ -1059,6 +1059,7 @@ email_build_status()
 #  = Primary script execution =
 #  ============================
 
+### Clean up on start ###
 clean_firebot_history
 
 ### Stage 0 ###
@@ -1070,16 +1071,15 @@ do_svn_checkout
 check_svn_checkout
 
 ### Stage 2a ###
-# No stage dependencies
 compile_fds_db
 check_compile_fds_db
 
 ### Stage 2b ###
-# No stage dependencies
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
 ### Stage 3 ###
+# Depends on successful FDS DB compile
 if [[ $stage2a_success && $stage2b_success ]] ; then
    run_verification_cases_short
    check_verification_cases_short
@@ -1094,22 +1094,22 @@ compile_fds_mpi
 check_compile_fds_mpi
 
 ### Stage 5 ###
+# Depends on successful FDS compile
 if [[ $stage4a_success && $stage4b_success ]] ; then
    run_verification_cases_long
    check_verification_cases_long
 fi
 
 ### Stage 6a ###
-# No stage dependencies
 compile_smv_utilities
 check_smv_utilities
 
 ### Stage 6b ###
-# No stage dependencies
 compile_smv_db
 check_compile_smv_db
 
 ### Stage 6c ###
+# Depends on successful SMV DB compile
 if [[ $stage6b_success ]] ; then
    make_smv_pictures_db
    check_smv_pictures_db
@@ -1120,12 +1120,14 @@ compile_smv
 check_compile_smv
 
 ### Stage 6e ###
+# Depends on successful SMV compile
 if [[ $stage6d_success ]] ; then
    make_smv_pictures
    check_smv_pictures
 fi
 
 ### Stage 6f ###
+# Depends on successful SMV compile
 if [[ $stage6d_success ]] ; then
    make_fds_pictures
    check_fds_pictures
@@ -1137,7 +1139,6 @@ check_matlab_verification
 check_verification_stats
 
 ### Stage 7b ###
-# No stage dependencies
 run_matlab_validation
 check_matlab_validation
 
@@ -1146,7 +1147,6 @@ generate_timing_stats
 archive_timing_stats
 
 ### Stage 8 ###
-# No stage dependencies
 make_fds_user_guide
 make_fds_verification_guide
 make_fds_technical_guide
@@ -1156,7 +1156,7 @@ make_smv_technical_guide
 make_smv_verification_guide
 make_fds_configuration_management_plan
 
-### Report results ###
+### Wrap up and report results ###
 set_files_world_readable
 save_build_status
 email_build_status
