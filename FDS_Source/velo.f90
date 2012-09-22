@@ -1987,7 +1987,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      END SELECT
                      VEL_GHOST = VEL_T + SLIP_COEF*(VEL_GAS-VEL_T)
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = RHO_WALL*(U_TAU)**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_GHOST))
+                     MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                END SELECT BOUNDARY_CONDITION
