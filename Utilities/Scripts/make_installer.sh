@@ -177,14 +177,13 @@ fi
 #--- get FDS root directory
 
 echo ""
-echo "Where would you like to install FDS? )"
-echo "Options:"
+echo "Where would you like to install FDS?"
   if [ "$ostype" == "OSX" ]; then
-    echo "  Press 1 to install at /Applications/$INSTALLDIR"
+    echo "  Press 1 to install in /Applications/$INSTALLDIR"
   else
-    echo "  Press 1 to install at \$HOME/$INSTALLDIR"
-    echo "  Press 2 to install at /opt/$INSTALLDIR"
-    echo "  Press 3 to install at /usr/local/bin/$INSTALLDIR"
+    echo "  Press 1 to install in \$HOME/$INSTALLDIR"
+    echo "  Press 2 to install in /opt/$INSTALLDIR"
+    echo "  Press 3 to install in /usr/local/bin/$INSTALLDIR"
   fi
 echo "  Enter directory path to install elsewhere"
 read answer
@@ -260,6 +259,10 @@ unalias fds >& /dev/null
 unalias smokeview >& /dev/null
 unalias smokezip >& /dev/null
 unalias smokediff >& /dev/null
+unalias fds6 >& /dev/null
+unalias smokeview6 >& /dev/null
+unalias smokezip6 >& /dev/null
+unalias smokediff6 >& /dev/null
 
 # define FDS bin directory location
 
@@ -405,18 +408,37 @@ rm \$BASHFDS
 
 #--- update .bash_profile
 
-BACKUP_FILE ~/.bash_profile
+if [ "$ostype" == "OSX" ]; then
+  BACKUP_FILE ~/.bash_profile
 
-BASHPROFILETEMP=/tmp/.bash_profile_temp_\$\$
-cd \$THISDIR
-echo "Updating .bash_profile"
-grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
-echo "#FDS " >> \$BASHPROFILETEMP
-echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
-echo "#FDS of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
-echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
-cp \$BASHPROFILETEMP ~/.bash_profile
-rm \$BASHPROFILETEMP
+  BASHPROFILETEMP=/tmp/.bash_profile_temp_\$\$
+  cd \$THISDIR
+  echo "Updating .bash_profile"
+  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
+  echo "#FDS " >> \$BASHPROFILETEMP
+  echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
+  echo "#FDS of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
+  echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
+  cp \$BASHPROFILETEMP ~/.bash_profile
+  rm \$BASHPROFILETEMP
+fi
+
+#--- update .bashrc
+
+if [ "$ostype" != "OSX" ]; then
+  BACKUP_FILE ~/.bashrc
+
+  BASHRCTEMP=/tmp/.bashrc_temp_\$\$
+  cd \$THISDIR
+  echo "Updating .bashrc"
+  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHRCTEMP
+  echo "#FDS " >> \$BASHRCTEMP
+  echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHRCTEMP
+  echo "#FDS of .bashrc is saved in ~/.bashrc\$BAK" >> \$BASHRCTEMP
+  echo source \~/.bashrc_fds $ossize >> \$BASHRCTEMP
+  cp \$BASHRCTEMP ~/.bashrc
+  rm \$BASHRCTEMP
+fi
 
 #--- update .cshrc
 
