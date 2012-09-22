@@ -581,7 +581,7 @@ check_guide()
    cd $FIREBOT_DIR
    if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
    then
-      if [ "$FIREBOT_USERNAME" == "smokebot" ]; then
+      if [ "$FIREBOT_USERNAME" == "gforney" ]; then
         cp $2 /var/www/html/smokebot/manuals/
       fi
       cp $2 $GUIDE_DIR/.
