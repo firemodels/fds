@@ -22,7 +22,53 @@ NRA = [30 60 100];
 
 Exact_Flux_2D = 105.34;
 Exact_Flux_cart = 81.8;
-Exact_Flux_cyl = 74.1; 
+Exact_Flux_cyl = 74.1;
+
+skip_case = 0;
+
+if ~exist('plate_view_factor_2D_30_devc.csv')
+    display('Error: File plate_view_factor_2D_30_devc.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if ~exist('plate_view_factor_2D_60_devc.csv')
+    display(['Error: File plate_view_factor_2D_60_devc.csv does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist('plate_view_factor_2D_100_devc.csv')
+    display(['Error: File plate_view_factor_2D_100_devc.csv does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if ~exist('plate_view_factor_cart_30_devc.csv')
+    display('Error: File plate_view_factor_cart_30_devc.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if ~exist('plate_view_factor_cart_60_devc.csv')
+    display(['Error: File plate_view_factor_cart_60_devc.csv does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist('plate_view_factor_cart_100_devc.csv')
+    display(['Error: File plate_view_factor_cart_100_devc.csv does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if ~exist('plate_view_factor_cyl_30_devc.csv')
+    display('Error: File plate_view_factor_cyl_30_devc.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if ~exist('plate_view_factor_cyl_60_devc.csv')
+    display(['Error: File plate_view_factor_cyl_60_devc.csv does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist('plate_view_factor_cyl_100_devc.csv')
+    display(['Error: File plate_view_factor_cyl_100_devc.csv does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+
+if skip_case
+    return
+end
 
 %2D 
 M = csvread('plate_view_factor_2D_30_devc.csv',2,0);

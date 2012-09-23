@@ -13,6 +13,80 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 data_dir = '../../../Verification/Scalar_Analytical_Solution/';
 plot_dir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
+skip_case = 0;
+
+if ~exist([data_dir,'compression_wave_FL0_16_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_16_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL0_32_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_32_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL0_64_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_64_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL0_128_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_128_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if ~exist([data_dir,'compression_wave_FL2_16_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_16_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL2_32_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_32_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL2_64_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_64_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL2_128_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_128_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if ~exist([data_dir,'compression_wave_FL4_16_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_16_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL4_32_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_32_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL4_64_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_64_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL4_128_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_128_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if ~exist([data_dir,'compression_wave_FL5_16_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_16_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL5_32_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_32_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL5_64_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_64_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'compression_wave_FL5_128_devc.csv'])
+    display(['Error: File ' [data_dir,'compression_wave_FL0_128_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if skip_case
+    return
+end
+
 % central differencing, FL=0
 
 M_FL0_16 = csvread([data_dir,'compression_wave_FL0_16_devc.csv'],2,0);

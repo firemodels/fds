@@ -76,17 +76,29 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 
 if strcmp(chid,'csmag_32')
+    if ~exist('mu0_32_devc.csv')
+        display('Error: File mu0_32_devc.csv does not exist. Skipping case.')
+        return
+    end
     M = csvread('mu0_32_devc.csv',2,0);
     t = M(:,1);
     ke = M(:,2);
     H(1)=plot(t,ke,'k-.'); hold on
     
+    if ~exist('csmag0_32_devc.csv')
+        display('Error: File csmag0_32_devc.csv does not exist. Skipping case.')
+        return
+    end
     M = csvread('csmag0_32_devc.csv',2,0);
     t = M(:,1);
     ke = M(:,2);
     H(2)=plot(t,ke,'k--'); hold on
 end
 
+if ~exist([chid,'_devc.csv'])
+    display(['Error: File ' [chid,'_devc.csv'] ' does not exist. Skipping case.'])
+    return
+end
 M = csvread([chid,'_devc.csv'],2,0);
 t = M(:,1);
 ke = M(:,2);

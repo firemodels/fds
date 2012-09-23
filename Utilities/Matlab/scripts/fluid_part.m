@@ -12,6 +12,25 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 ddir='../../../Verification/Sprinklers_and_Sprays/';
 
+skip_case = 0;
+
+if ~exist([ddir,'fluid_part_mom_x_devc.csv'])
+    display(['Error: File ' [ddir,'fluid_part_mom_x_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([ddir,'fluid_part_mom_y_devc.csv'])
+    display(['Error: File ' [ddir,'fluid_part_mom_y_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([ddir,'fluid_part_mom_z_devc.csv'])
+    display(['Error: File ' [ddir,'fluid_part_mom_z_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if skip_case
+    return
+end
+
 M = importdata([ddir,'fluid_part_mom_x_devc.csv'],',',2);
 tx = M.data(:,1);
 U = M.data(:,2);

@@ -19,6 +19,19 @@ set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
+skip_case = 0;
+if ~exist('water_ice_water_devc.csv')
+    display('Error: File water_ice_water_devc.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if ~exist('water_ice_water_prof_01.csv')
+    display('Error: File water_ice_water_prof_01.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if skip_case
+    return
+end
+
 wiw_M = csvread('water_ice_water_devc.csv',2);
 wiw_m = csvread('water_ice_water_prof_01.csv',2);
 

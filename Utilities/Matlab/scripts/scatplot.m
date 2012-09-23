@@ -93,6 +93,10 @@ for j=qrange
             size_measured = size(nonzeros(Measured_Metric(k,:,:)));
             size_predicted = size(nonzeros(Predicted_Metric(k,:,:)));
             % Check to see if measured and predicted arrays are the same size
+            if size_predicted(1)==0
+                display('Error: Size of predicted metric is zero.  Skipping case.')
+                continue
+            end
             if size_measured(1) ~= size_predicted(1)
                 error('Matlab error: Mismatched measured and predicted arrays in scatter plot. Verify that the statistical metrics are being used properly for all cases.')
             end

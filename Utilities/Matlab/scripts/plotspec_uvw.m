@@ -4,6 +4,10 @@
 
 function [handle]=plotspec_uvw(filename,marker_format)
 
+if ~exist(filename)
+    display(['Error: File ' filename ' does not exist. Skipping case.'])
+    return
+end
 M = csvread(filename);
 s = size(M);
 n = round(s(1)^(1/3));

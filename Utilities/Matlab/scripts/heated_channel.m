@@ -86,10 +86,25 @@ linefile = {'heated_channel_Pr_0p10_32_line.csv', ...
             'heated_channel_Pr_1p00_32_line.csv', ...
             'heated_channel_Pr_2p00_32_line.csv'};
 
+skip_case = 0;
+        
 for i = [1,2,3,4]
+    
+    if ~exist([datadir,devcfile{i}])
+        display(['Error: Files ' [datadir,devcfile{i}] ' does not exist. Skipping case.'])
+        skip_case = 1;
+        continue
+    end
+    
     M = importdata([datadir,devcfile{i}],',',2);
     q_w = mean(M.data(3,2:3));
     T_tau = q_w/(rho*u_tau*cp);
+    
+    if ~exist([datadir,linefile{i}])
+        display(['Error: Files ' [datadir,linefile{i}] ' does not exist. Skipping case.'])
+        skip_case = 1;
+        continue
+    end
     
     M = importdata([datadir,linefile{i}],',',2);
     
@@ -106,6 +121,10 @@ for i = [1,2,3,4]
         Tp = (0.5*(T1+T2)-T_w)/T_tau;
         figure(2); hfig2(1)=semilogx(zp,Tp,'ksq-');
     end
+end
+
+if skip_case
+    return
 end
 
 figure(1)

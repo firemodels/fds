@@ -15,6 +15,63 @@ plot_dir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 devc_col = 3; % (x,y)=(pi,pi)-->devc_col=2, (x,y)=(1.5*pi,1.5*pi)-->devc_col=3
 
+skip_case = 0;
+
+if ~exist([data_dir,'pulsating_FL2_16_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_16_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL2_32_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_32_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL2_64_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_64_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL2_128_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_128_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if ~exist([data_dir,'pulsating_FL4_16_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_16_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL4_32_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_32_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL4_64_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_64_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL4_128_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_128_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if ~exist([data_dir,'pulsating_FL0_16_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_16_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL0_32_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_32_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL0_64_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_64_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'pulsating_FL0_128_devc.csv'])
+    display(['Error: File ' [data_dir,'pulsating_FL2_128_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if skip_case
+    return
+end
+
 % Superbee limiter, FL=2
 M_FL2_16 = csvread([data_dir,'pulsating_FL2_16_devc.csv'],2,0);
 M_FL2_32 = csvread([data_dir,'pulsating_FL2_32_devc.csv'],2,0);
