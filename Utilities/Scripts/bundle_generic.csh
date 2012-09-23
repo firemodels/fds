@@ -76,7 +76,8 @@ echo Copying program files
 
 # share libraries for INTEL build
 if $?INTELLIB then
-cp $bundle_setup/README_LINUX.html $bundledir/bin/.
+#cp $bundle_setup/README_LINUX.html $bundledir/bin/.
+echo copying $INTELLIB to $bundledir/bin/.
 cp -r $INTELLIB $bundledir/bin/.
 set SETLDPATH="LD_LIBRARY_PATH=$INTELLIB;" 
 else
