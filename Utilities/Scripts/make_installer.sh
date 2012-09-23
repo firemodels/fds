@@ -189,13 +189,13 @@ echo "  Enter directory path to install elsewhere"
 read answer
 
 if [ "$ostype" == "OSX" ]; then
-  if [ "\$answer" == "1" ]; then
+  if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
     eval FDS_root=/Applications/$INSTALLDIR
   else
     eval FDS_root=\$answer
   fi
 else
-  if [ "\$answer" == "1" ]; then
+  if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
     eval FDS_root=\$HOME/$INSTALLDIR
   elif [ "\$answer" == "2" ]; then
     FDS_root=/opt/$INSTALLDIR
