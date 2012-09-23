@@ -92,13 +92,15 @@ for j=qrange
             Group_Key_Label(k)  = Save_Group_Key_Label(i);
             size_measured = size(nonzeros(Measured_Metric(k,:,:)));
             size_predicted = size(nonzeros(Predicted_Metric(k,:,:)));
-            % Check to see if measured and predicted arrays are the same size
+            % Skip case if predicted metric is zero
             if size_predicted(1)==0
-                display('Error: Size of predicted metric is zero.  Skipping case.')
+                display(['Error: Size of predicted metric is zero for scatterplot ', Scatter_Plot_Title, '. Skipping scatterplot.'])
                 continue
             end
+            % Check to see if measured and predicted arrays are the same size
             if size_measured(1) ~= size_predicted(1)
-                error('Matlab error: Mismatched measured and predicted arrays in scatter plot. Verify that the statistical metrics are being used properly for all cases.')
+                display(['Error: Mismatched measured and predicted arrays in scatter plot for scatterplot ', Scatter_Plot_Title, '. Verify that the statistical metrics are being used properly for all cases. Skipping scatterplot.'])
+                continue
             end
             K(k) = plot(nonzeros(Measured_Metric(k,:,:)),nonzeros(Predicted_Metric(k,:,:)),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
@@ -155,7 +157,14 @@ for j=qrange
         n_pts = length(nonzeros(Measured_Metric));
         E_bar = mean(log(nonzeros(Measured_Metric)));
         M_bar = mean(log(nonzeros(Predicted_Metric)));
-      %  [normality,p] = lillietest(log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric)));
+        size_measured = size(nonzeros(Measured_Metric));
+        size_predicted = size(nonzeros(Predicted_Metric));
+        % Check to see if measured and predicted arrays are the same size
+        if size_measured(1) ~= size_predicted(1)
+            display(['Error: Mismatched measured and predicted arrays for scatterplot ', Scatter_Plot_Title, '. Skipping scatterplot.'])
+            continue
+        end
+        %  [normality,p] = lillietest(log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric)));
         normality = 0;
         u  = sqrt( sum( ( (log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric))) - (M_bar-E_bar) ).^2 )/(n_pts-1) );
         Sigma_E = Sigma_2_E/200;
