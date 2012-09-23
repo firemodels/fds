@@ -819,7 +819,7 @@ run_matlab_validation()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $FDS_SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error:'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7b_validation
+   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7b_validation
 
    # Restore LaTeX as plot_style interpreter
    cd scripts
