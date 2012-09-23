@@ -6,6 +6,24 @@ close all
 clear all
 
 dir = '../../../Verification/Turbulence/';
+
+skip_case = 0;
+if ~exist([dir,'yplus_8_devc.csv'])
+    display(['Error: Files ' [dir,'yplus_8_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([dir,'yplus_16_devc.csv'])
+    display(['Error: Files ' [dir,'yplus_16_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([dir,'yplus_32_devc.csv'])
+    display(['Error: Files ' [dir,'yplus_32_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if skip_case
+    return
+end
+
 M_8  = importdata([dir,'yplus_8_devc.csv'],',',2);
 M_16 = importdata([dir,'yplus_16_devc.csv'],',',2);
 M_32 = importdata([dir,'yplus_32_devc.csv'],',',2);

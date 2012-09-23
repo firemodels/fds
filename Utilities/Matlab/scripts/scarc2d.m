@@ -13,6 +13,33 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 data_dir = '../../../Verification/Pressure_Solver/';
 plot_dir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
+skip_case = 0;
+
+if ~exist([data_dir,'scarc2d_fft_1mesh_devc.csv'])
+    display(['Error: File ' [data_dir,'scarc2d_fft_1mesh_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'scarc2d_fft_8mesh_devc.csv'])
+    display(['Error: File ' [data_dir,'scarc2d_fft_8mesh_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'scarc2d_cg_8mesh_devc.csv'])
+    display(['Error: File ' [data_dir,'scarc2d_cg_8mesh_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'scarc2d_bicg_8mesh_devc.csv'])
+    display(['Error: File ' [data_dir,'scarc2d_bicg_8mesh_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([data_dir,'scarc2d_gmg_8mesh_devc.csv'])
+    display(['Error: File ' [data_dir,'scarc2d_gmg_8mesh_devc.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if skip_case
+    return
+end
+
 FFT_1MESH  = csvread([data_dir,'scarc2d_fft_1mesh_devc.csv'],2,0);
 FFT_8MESH = csvread([data_dir,'scarc2d_fft_8mesh_devc.csv'],2,0);
 

@@ -24,9 +24,13 @@ duct{6} = '56';
 duct{7} = '6';
 duct{8} = '7';
 
- M = csvread(infile{1},6,1);
+M = csvread(infile{1},6,1);
 
 for n = 2:4
+    if ~exist(infile{n})
+        display(['Error: File ',infile{n},' does not exist. Skipping case.'])
+        return
+    end
     m = csvread(infile{n},2,1);
     pressure(n,1:8) = m(length(m(:,1)),1:8);
 end

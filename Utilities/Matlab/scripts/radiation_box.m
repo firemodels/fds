@@ -51,10 +51,15 @@ label{ 9} = 'Flux_100_1000';
 label{10} = 'Flux_100_2000';
 
 for n=1:10
+   if ~exist(infile{n})
+       display(['Error: File ',infile{n},' does not exist. Skipping case.'])
+       return
+   end
    M = csvread(infile{n},3,0);
    t = M(1,1);
    flux(1:20,n) = M(1,2:21)';
 end
+
 
 filename = [dir,'radiation_box_devc.csv'];
 fid = fopen(filename,'wt');

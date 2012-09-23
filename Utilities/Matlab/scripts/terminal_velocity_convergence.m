@@ -7,6 +7,33 @@ plot_style
 
 repository = '../../../Verification/Sprinklers_and_Sprays/';
 
+skip_case = 0;
+
+if ~exist([repository, 'terminal_velocity_dt_1_0.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_1_0.prt5'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([repository, 'terminal_velocity_dt_0_1.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_0_1.prt5'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([repository, 'terminal_velocity_dt_0_01.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_0_01.prt5'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([repository, 'terminal_velocity_dt_0_001.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_0_001.prt5'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([repository, 'terminal_velocity_dt_0_0001.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_0_0001.prt5'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if skip_case
+    return
+end
+
 g = 9.8;
 Cd = 1;
 rhoa = 1.19926615231088;

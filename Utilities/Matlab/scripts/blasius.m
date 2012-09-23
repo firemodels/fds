@@ -13,6 +13,11 @@ repository = '../../../Verification/Flowfields/';
 %gather FDS result(n=16)
 filename=[repository,'blasius_16_line.csv'];
 
+if ~exist(filename)
+    display(['Error: File ' filename ' does not exist. Skipping case.'])
+    return
+end
+
 M = csvread(filename,2,0);
 
 u_16 = M(:,2);
