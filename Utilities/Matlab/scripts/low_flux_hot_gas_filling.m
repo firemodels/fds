@@ -14,6 +14,12 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 filename = 'low_flux_hot_gas_filling_mass.csv';
+
+if ~exist(filename)
+    display(['Error: File ' filename ' does not exist. Skipping case.'])
+    return
+end
+
 H = plot_mass(filename,.0001,6,2,4);
 
 set(gca,'FontName',Font_Name)

@@ -10,6 +10,31 @@ clear all
 
 FDS_Output_Files = '../../Verification/Species/';
 
+skip_case = 0;
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+    display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_devc.csv'],' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+    display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_none_devc.csv'],' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+    display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_gravitational_devc.csv'],' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+    display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_thermophoretic_devc.csv'],' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+    display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_turbulent_devc.csv'],' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if skip_case
+    return
+end
+
 M1 = importdata([FDS_Output_Files,'propane_flame_deposition_devc.csv'],',',2);
 M2 = importdata([FDS_Output_Files,'propane_flame_deposition_none_devc.csv'],',',2);
 M3 = importdata([FDS_Output_Files,'propane_flame_deposition_gravitational_devc.csv'],',',2);

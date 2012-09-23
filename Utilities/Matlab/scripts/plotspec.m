@@ -30,6 +30,23 @@ uvw_file1 = [chid,'_uvw_001.csv'];
 uvw_file2 = [chid,'_uvw_002.csv'];
 uvw_file3 = [chid,'_uvw_003.csv'];
 
+skip_case = 0;
+if ~exist(uvw_file1)
+    display(['Error: File ' uvw_file1 ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist(uvw_file2)
+    display(['Error: File ' uvw_file2 ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist(uvw_file3)
+    display(['Error: File ' uvw_file3 ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if skip_case
+    return
+end
+
 % Plot the FDS data
 H(1) = plotspec_uvw(uvw_file1,'k.-'); hold on
 H(2) = plotspec_uvw(uvw_file2,'r.-');

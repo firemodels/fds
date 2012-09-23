@@ -32,6 +32,11 @@ vexact = g ./ (2 * K * V_0 * (K * V_0 * tvec + 1))...
 
 repository = '../../../Verification/Sprinklers_and_Sprays/';
 
+if ~exist([repository, 'flat_fire.prt5'])
+    display(['Error: File ' [repository, 'flat_fire.prt5'] ' does not exist. Skipping case.'])
+    return
+end
+
 [STIME, XP, YP, ZP, QP] = read_prt5([repository, 'flat_fire.prt5'],'real*4');
 
 H(1) = plot(xexact, yexact, '-k');

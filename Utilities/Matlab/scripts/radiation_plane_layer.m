@@ -54,6 +54,10 @@ exact(6) = 148.9709;
 
 for j=1:5
    for i=1:6
+      if ~exist([dir,infile{i,j}])
+         display(['Error: File ',[dir,infile{i,j}],' does not exist. Skipping case.'])
+         return
+      end
       M = csvread([dir,infile{i,j}],3,0);
       t = M(1,1);
       flux(i,j) = M(1,2);

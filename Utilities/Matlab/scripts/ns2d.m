@@ -40,6 +40,10 @@ for  k=1:2
     for j=1:4
         M_11 = fopen(outfile{j,k}, 'wt');
         fprintf(M_11, '%s\n', 'Time, u-vel');
+        if ~exist(infile{j,k})
+            display(['Error: File ',infile{j,k},' does not exist. Skipping case.'])
+            return
+        end
         M_10 = csvread(infile{j,k}, 2, 0);
         rms(j,k) = 0.0;
         cnt(j,k) = 0.0;

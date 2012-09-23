@@ -39,6 +39,19 @@ end
 
 addpath('../../../Verification/Pyrolysis')
 
+skip_case = 0;
+if ~exist('pcm_slab_prof_01.csv')
+    display('Error: File pcm_slab_prof_01.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if ~exist('pcm_slab_devc.csv.csv')
+    display('Error: File pcm_slab_devc.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if skip_case
+    return
+end
+
 Iprof = csvread('pcm_slab_prof_01.csv',2);
 M_fds = csvread('pcm_slab_devc.csv',2);
 %

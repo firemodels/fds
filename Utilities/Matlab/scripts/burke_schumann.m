@@ -14,6 +14,10 @@ addpath('../../Verification/Species/')
 % Read in FDS Data File
 %-----------------------
 
+if ~exist('Burke_Schumann_devc.csv')
+    display(['Error: File ../../Verification/Species/Burke_Schumann_devc.csv does not exist. Skipping case.'])
+    return
+end
 Burke_Schumann_Data=importdata('Burke_Schumann_devc.csv');
 burke(:,:)=Burke_Schumann_Data.data; % data
 

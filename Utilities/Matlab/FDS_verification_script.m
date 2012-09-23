@@ -24,17 +24,17 @@ addpath 'scripts'
 
 % Scripts to run prior to dataplot
 
-radiation_box;            display('radiation_box complete...')
-radiation_plane_layer;    display('radiation_plane_layer complete...')
-ns2d;                     display('ns2d complete...')
-vort2d;                   display('vort2d complete...')
-wall_internal_radiation;  display('wall_internal_radiation complete...')
-ashrae_7;                 display('ashrae_7 complete...')
-flame_species;            display('flame_species complete...')
-EDC_species;              display('EDM_species complete...')
-cutcell_area;             display('cutcell_area complete...')
-cat_propane_depo;         display('cat_propane_depo complete...')
-burke_schumann;           display('burke_schumann complete...')
+radiation_box
+radiation_plane_layer
+ns2d
+vort2d
+wall_internal_radiation
+ashrae_7
+flame_species
+EDC_species
+cutcell_area
+cat_propane_depo
+burke_schumann
 
 % The main plotting routine is dataplot
 

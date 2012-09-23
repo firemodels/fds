@@ -205,6 +205,11 @@ end
 %-----------------------
 epsilon = 1e-10;
 
+if ~exist('Extinction_devc.csv')
+    display('Error: File Extinction_devc.csv does not exist. Skipping case.')
+    return
+end
+
 Extinction_2=importdata('Extinction_devc.csv');
 extinct_2(:,:)=Extinction_2.data; % data
 

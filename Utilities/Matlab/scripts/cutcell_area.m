@@ -32,6 +32,10 @@ for kcase=1:12
         otherwise
             target_cell = 1;
     end
+    if ~exist([dir,infile{kcase}])
+        display(['Error: File ',[dir,infile{kcase}],' does not exist. Skipping case.'])
+        return
+    end
     M = csvread([dir,infile{kcase}],1,0);
     [nrow,ncol] = size(M);
     for i=1:nrow

@@ -63,6 +63,10 @@ end
 
 for m = 1:4
     filename = [input_dir,'vort2d_',meshname{m},'_devc.csv'];
+    if ~exist(filename)
+        display(['Error: File ',filename,' does not exist. Skipping case.'])
+        return
+    end
     M{m} = importdata(filename,',',2);
     %M{m}.data
 end

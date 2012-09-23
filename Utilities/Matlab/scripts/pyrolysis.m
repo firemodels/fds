@@ -96,8 +96,16 @@ for i_plot=1:2
 
     if show_fds==1
         if i_plot==1
+            if ~exist('pyrolysis_1_devc.csv')
+                display('Error: File pyrolysis_1_devc.csv does not exist. Skipping case.')
+                return
+            end
             FDS = csvread('pyrolysis_1_devc.csv',2,0);
         else
+            if ~exist('pyrolysis_2_devc.csv')
+                display('Error: File pyrolysis_2_devc.csv does not exist. Skipping case.')
+                return
+            end
             FDS = csvread('pyrolysis_2_devc.csv',2,0);
         end
         h=plot(FDS(:,3),FDS(:,2)/FDS(1,2),'b--');

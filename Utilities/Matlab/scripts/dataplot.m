@@ -152,7 +152,7 @@ for i=2:2000
         % plot the experimental data or analytical solution (d1)
         
         if ~exist(d1_Filename,'file')
-           display(['Matlab error: File ' d1_Filename ' does not exist. Skipping case.'])
+           display(['Error: File ' d1_Filename ' does not exist. Skipping case.'])
            continue
         end
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
@@ -229,7 +229,7 @@ for i=2:2000
         % plot the FDS or model data (d2)
        
         if ~exist(d2_Filename,'file')
-           display(['Error: File ' d2_Filename ' does not exist. Skipping case'])
+           display(['Error: File ' d2_Filename ' does not exist. Skipping case.'])
            continue
         end
         [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
