@@ -865,15 +865,28 @@ archive_timing_stats()
 
 check_guide()
 {
-   # Scan and report any errors in build process for guides
+   # Scan and report any fatal errors in build process for guides
    cd $FIREBOT_DIR
-   if [[ `grep -E "Error:|Fatal error|! LaTeX Error:" -I $1` == "" ]]
+   if [[ `grep "Fatal error" -I $1` == "" ]]
    then
+      # Copy guide over only if no fatal errors occurred
       cp $2 /var/www/html/firebot/manuals/
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
-      grep -E "Error:|Fatal error|! LaTeX Error:" -I $1 >> $ERROR_LOG
+      grep "Fatal error" -I $1 >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+
+   # Scan and report any non-fatal errors in build process for guides
+   if [[ `grep -E "Error:|! LaTeX Error:" -I $1` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
+      echo $3 >> $ERROR_LOG
+      grep -E "Error:|! LaTeX Error:" -I $1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
