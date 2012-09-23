@@ -16,5 +16,6 @@ setenv MAJOR $7
 setenv FDSOS _linux_32
 setenv FDSOS2 _linux_32
 setenv INSTALLDIR FDS/$FDSEDITION
+setenv INTELLIB ~/FIRE-LOCAL/LIBS/LINUX/LIB32
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
