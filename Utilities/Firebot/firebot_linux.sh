@@ -879,14 +879,15 @@ check_guide()
    fi
 
    # Scan and report any non-fatal errors in build process for guides
-   if [[ `grep -E "Error:|! LaTeX Error:" -I $1` == "" ]]
+   # grep -v 'xpdf supports version 1.5' ignores a known PDF warning
+   if [[ `grep -E "Error:|! LaTeX Error:" -I $1 | grep -v "xpdf supports version 1.5"` == "" ]]
    then
       # Continue along
       :
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
-      grep -E "Error:|! LaTeX Error:" -I $1 >> $ERROR_LOG
+      grep -E "Error:|! LaTeX Error:" -I $1 | grep -v "xpdf supports version 1.5" >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
