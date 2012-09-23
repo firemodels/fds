@@ -867,13 +867,13 @@ check_guide()
 {
    # Scan and report any errors in build process for guides
    cd $FIREBOT_DIR
-   if [[ `grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I $1` == "" ]]
+   if [[ `grep -E "Error:|Fatal error|! LaTeX Error:" -I $1` == "" ]]
    then
       cp $2 /var/www/html/firebot/manuals/
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
-      grep -E "Error: pdflatex|Fatal error|! LaTeX Error:" -I $1 >> $ERROR_LOG
+      grep -E "Error:|Fatal error|! LaTeX Error:" -I $1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
