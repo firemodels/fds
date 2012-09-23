@@ -762,11 +762,11 @@ check_matlab_verification()
 {
    # Scan and report any errors in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
+   if [[ `grep -A 50 -E "Error|Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
    then
       stage7a_success=true
    else
-      grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification > $FIREBOT_DIR/output/stage7a_errors
+      grep -A 50 -E "Error|Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification > $FIREBOT_DIR/output/stage7a_errors
       
       echo "Errors from Stage 7a - Matlab plotting and statistics (verification):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage7a_errors >> $ERROR_LOG
@@ -831,11 +831,11 @@ check_matlab_validation()
 {
    # Scan and report any errors in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation` == "" ]]
+   if [[ `grep -A 50 -E "Error|Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation` == "" ]]
    then
       stage7b_success=true
    else
-      grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation > $FIREBOT_DIR/output/stage7b_errors
+      grep -A 50 -E "Error|Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation > $FIREBOT_DIR/output/stage7b_errors
       
       echo "Errors from Stage 7b - Matlab plotting (validation):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage7b_errors >> $ERROR_LOG
