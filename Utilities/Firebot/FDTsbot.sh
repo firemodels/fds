@@ -49,7 +49,7 @@ run_matlab_plotting()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab Validation script'), FDTs_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit"
+   matlab -r "try, disp('Running Matlab Validation script'), FDTs_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit"
 
    # Restore LaTeX as plot_style interpreter
    cd $SVNROOT/Utilities/Matlab/scripts
