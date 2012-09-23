@@ -7,13 +7,13 @@ pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Gui
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 
 # Scan and report any errors in the LaTeX build process
-if [[ `grep -E "Error:|Fatal error|! LaTeX Error:" -I FDS_Verification_Guide.err` == "" ]]
+if [[ `grep -E "Error:|Fatal error|! LaTeX Error:" -I FDS_Verification_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
    then
       # Continue along
       :
    else
       echo "LaTeX errors detected:"
-      grep -E "Error:|Fatal error|! LaTeX Error:" -I FDS_Verification_Guide.err
+      grep -E "Error:|Fatal error|! LaTeX Error:" -I FDS_Verification_Guide.err | grep -v "xpdf supports version 1.5"
       clean_build=0
 fi
 
