@@ -107,7 +107,7 @@ MKDIR()
     then
     while true; do
         echo "The directory, \$DIR, already exists."
-        read -p "Do you wish to overwrite it? (yes/no)" yn
+        read -p "Do you wish to overwrite it? (yes/no) " yn
         case \$yn in
             [Yy]* ) break;;
             [Nn]* ) echo "Installation cancelled";exit;;
@@ -161,7 +161,7 @@ then
   then
     while true; do
       echo "The file, \$THAT, already exists."
-      read -p "Do you wish to overwrite it? (yes/no)" yn
+      read -p "Do you wish to overwrite it? (yes/no) " yn
       case \$yn in
         [Yy]* ) break;;
         [Nn]* ) echo "Extraction cancelled";exit;;
@@ -211,7 +211,7 @@ fi
 while true; do
     echo ""
     echo "Installation directory: \$FDS_root"
-    read -p "Do you wish to begin the installation? (yes/no)" yn
+    read -p "Do you wish to begin the installation? (yes/no) " yn
     case \$yn in
         [Yy]* ) break;;
         [Nn]* ) echo "Installation cancelled";exit;;
