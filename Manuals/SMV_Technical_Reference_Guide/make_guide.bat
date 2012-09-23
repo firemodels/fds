@@ -11,7 +11,7 @@ pdflatex -interaction nonstopmode %paper% > %paper%.err
 
 find "! LaTeX Error:" %paper%.err
 find "Fatal error" %paper%.err
-find "Error: pdflatex" %paper%.err
+find "Error:" %paper%.err
 
 echo %paper% build complete
 pause
