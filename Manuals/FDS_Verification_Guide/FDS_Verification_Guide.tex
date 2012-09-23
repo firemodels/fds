@@ -739,8 +739,8 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_error.pdf} } &
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_nupt1_error.pdf} }
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_error} } &
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_nupt1_error} }
    \end{tabular*}
    \caption[Navier-Stokes convergence study]{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The triangles represent the rms error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
    \label{fig_ns2d_convergence}
@@ -891,10 +891,10 @@ To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corr
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_spectra.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_spectra.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using constant Smagorinsky]{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots. The vertical dashed line represents the wavenumber of the grid Nyquist limit. }
 \end{figure}
@@ -924,10 +924,10 @@ Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model ana
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_spectra.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_spectra.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using dynamic Smagorinsky]{\label{fig_dynsmag_cbc} Dynamic Smagorinsky model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -941,10 +941,10 @@ In this section we present the results for the FDS implantation of the Deardorff
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_spectra.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_spectra.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using Deardorff's model]{\label{fig_deardorff_cbc} Deardorff model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -958,10 +958,10 @@ The Vreman eddy viscosity model \cite{Vreman:2004} is an efficient alternative t
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_spectra.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_spectra.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using Vreman's model]{\label{fig_vreman_cbc} Vreman model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -988,7 +988,7 @@ u_{max}(x) =    \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
 Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dotted lines) and $h/\delta x=16$ (colored solid lines).
 \begin{center}
 \begin{figure}[h]
-  \includegraphics[width=\textwidth]{SCRIPT_FIGURES/jet_decay.pdf}
+  \includegraphics[width=\textwidth]{SCRIPT_FIGURES/jet_decay}
   \caption[Jet centerline velocity decay]{Centerline velocity decay for a high Reynolds number jet (Re$_h = 1 \times 10^5$) with a square orifice of side $h$.  FDS results (colored lines) are shown for various turbulence models at two grid resolutions.  For comparison, analytical results (black lines) are shown for two values of the mixing number $m$.}
   \label{fig_jet_decay}
 \end{figure}
@@ -1033,7 +1033,7 @@ The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}
 is determined from the steady state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\delta z = H/N_z$ in Figure \ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
 \begin{figure}
    \begin{center}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/poiseuille_convergence.pdf}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/poiseuille_convergence}
       \caption[Convergence for laminar (Poiseuille) flow in a 2D channel]{\label{fig_poiseuille_convergence} FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
    \end{center}
 \end{figure}
@@ -1055,7 +1055,7 @@ for the case $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ and $N_z=32$.
 
 \begin{figure}
    \begin{center}
-      \includegraphics[width=4.5in]{FIGURES/channel_flow_setup.pdf}
+      \includegraphics[width=4.5in]{FIGURES/channel_flow_setup}
       \caption[LES of square duct flow]{\label{fig_channel_flow_setup} LES of square duct flow with smooth walls and periodic streamwise boundaries.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
    \end{center}
 \end{figure}
@@ -1083,7 +1083,7 @@ With the same grid set up as described above the smooth walls, a series of cases
 
 \begin{figure}
    \begin{center}
-      \includegraphics[width=5.5in]{SCRIPT_FIGURES/fds_moody_chart.pdf}
+      \includegraphics[width=5.5in]{SCRIPT_FIGURES/fds_moody_chart}
       \caption[FDS Moody chart]{\label{fig_fds_moody_chart} The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re$_H$, based on duct height. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are Relative roughness $s/H$ shown on the right axis.}
    \end{center}
 \end{figure}
@@ -1128,8 +1128,8 @@ Figure \ref{blasius} (left) shows a comparison of the streamwise velocity from F
 where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{B,k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile.pdf} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence.pdf}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence}
    \end{tabular*}
    \caption[Blasius profile and convergence]{(Left) Comparison of theoretical and numerical results for the Blasius velocity profile ($u$ component). (Right) Error between FDS and Blasius solution for $u(z)$ plotted for each grid resolution.}
    \label{blasius}
@@ -1198,8 +1198,8 @@ where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux
 As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the SGS scalar transport model.
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus.pdf} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus.pdf}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
    \end{tabular*}
    \caption[Mean velocity and temperature profiles for heated channel flow]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser \emph{et al.} \cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin \cite{Kim:1987}.}
 \end{figure}
@@ -1302,8 +1302,8 @@ An example of the solution to (\ref{eqn_2dsoln}) is shown in Figure \ref{fig_pul
 
 \begin{figure}[ht]
     \begin{tabular}{rl}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series.pdf} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence.pdf}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence}
    \end{tabular}
          \caption[Pulsating wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
    \label{fig_pulsating 2D wave}
@@ -1387,8 +1387,8 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Figure \ref{fi
 
 \begin{figure}[t]
    \begin{tabular}{rl}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_time_series.pdf} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_convergence.pdf}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_time_series} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_convergence}
    \end{tabular}
    \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
    \label{fig_compression_wave}
@@ -1417,10 +1417,10 @@ this test case confirms that relatively low levels of diffusion are incurred at 
 
 \begin{figure}[t]
    \begin{tabular}{rl}
-      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_t0.png} &
-      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tm.png} \\
-      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tf.png} &
-      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL1_tf.png} \\
+      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_t0} &
+      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tm} \\
+      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tf} &
+      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL1_tf} \\
    \end{tabular}
    \caption[Multi-mesh square wave transport]{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for LES (FDS default).}
    \label{fig_move_slug}
@@ -1590,7 +1590,7 @@ This case tests the ability of FDS to properly account for temperature dependent
 The enthalpy of the mixture at the outlet is $2 \times 1 \times (900+273.15) + 2 \times 10 \times (20+273.15) = 8209.3$ kJ/(m$^2$ s).  The mixture heat capacity at the outlet is 5.5 kJ/(kg K) and the flux is 4 kg/(m2 s).  Therefore the outlet temperature is $8209.3/4/5.5 - 273.15 = 100$ $^\circ$C.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_tmix.pdf}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_tmix}
 \caption[Outlet temperature for {\bf energy\_budget\_tmix} case]{\label{fig_outlet_temperature} Outlet temperature for energy\_budget\_tmix case.  Black circles represent the correct result of 100 $^\circ$C.}
 \end{figure}
 
@@ -1622,8 +1622,8 @@ at equidistant corners of the enclosure. Ideally, there should be two equal and 
 this off almost immediately.
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.png} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.pdf}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_plot}
 \end{tabular*}
 \caption[The {\bf symmetry\_test} case]{Flow field (left) and velocity component plot (right) for the symmetry\_test case.}
 \label{symmetry_test}
@@ -1726,7 +1726,7 @@ calculated using the analytical expressions for the view factors.
 
 A comparison of exact values and FDS predictions at three different angular resolutions is shown below.
 \begin{center}
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/plate_view_factor.pdf}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/plate_view_factor}
 \end{center}
 
 
@@ -1740,7 +1740,7 @@ A comparison of exact values and FDS predictions at three different angular reso
 This verification case tests the computation of three-dimensional configuration factor $\Phi$ inside a cube box with one hot wall and five cold (0~K)
 walls. An overview of the test geometry is shown here:
 \begin{center}
-\includegraphics[width=4.0in]{FIGURES/box.pdf}
+\includegraphics[width=4.0in]{FIGURES/box}
 \end{center}
 The configuration factors are calculated at the diagonal of the cold wall opposite to the hot wall. The exact values of the configuration factor from
 plane element $dA$ to parallel rectangle $H$ are calculated using the analytical solution~\cite{Siegel:1}
@@ -3682,7 +3682,7 @@ where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $
 
 \begin{figure}[ht]
    \begin{center}
-      \includegraphics[height=3.00in]{SCRIPT_FIGURES/HVAC_flow_loss.pdf}
+      \includegraphics[height=3.00in]{SCRIPT_FIGURES/HVAC_flow_loss}
      \caption[The {\bf HVAC\_flow\_loss} test case]{\label{fig_HVAC_loss} Duct velocities in three ducts with different loss coefficients.}
    \end{center}
 \end{figure}
@@ -3711,8 +3711,8 @@ A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compar
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation.png} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation_plot} }
    \end{tabular*}
    \caption[The {\bf HVAC\_mass\_conservation} case]{SPEC1 mass fraction at 1 s (left) and SPEC1 and total mass (right)}
    \label{fig_HVAC_mass}
@@ -3733,9 +3733,9 @@ The second duct is placed in the upper half of the compartment and is assigned a
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_energy_pressure} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_velocity.pdf} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_enthalpy.pdf} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_pressure.pdf}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_velocity} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_enthalpy} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_pressure}
 \end{tabular*}
 \caption[The {\bf HVAC\_energy\_pressure} case]{Clockwise from top left: Temperature at 1 s, duct velocities, total enthalpy in the domain, and duct node pressures for the top duct}
 \label{fig_HVAC_e_p}
@@ -3767,7 +3767,7 @@ where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho$ is the density at th
 
 \begin{figure}[ht]
    \begin{center}
-      \includegraphics[width=3.5in]{SCRIPT_FIGURES/leak_test.pdf}
+      \includegraphics[width=3.5in]{SCRIPT_FIGURES/leak_test}
      \caption[The {\bf leak\_test} case]{\label{leak_test} Pressure rise in sealed compartment with leakage.}
    \end{center}
 \end{figure}
@@ -3779,7 +3779,7 @@ This case starts with the same input as {\bf leak\_test}.  A second leakage vent
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2_vector} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2} }
    \end{tabular*}
    \caption[The {\bf leak\_test\_2} test case]{Vector plot of pressure at 10 s with geometry clipped to show compartment interiors (left) and a plot of zone pressures (right).}
    \label{fig_HVAC_leak_fan}
@@ -3796,7 +3796,7 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=4.in]{FIGURES/ashrae_7.pdf} 
+\includegraphics[width=4.in]{FIGURES/ashrae_7} 
 \end{center}
 \input{SCRIPT_FIGURES/ashrae_7.tex}
 \caption[Results of {\bf ashrae\_7} test cases]{Schematic of ASHRAE Sample Problem 7, and tabulated pressure drops for a fixed flow fan curve, quadratic fan curve, and a table defined fan curve}

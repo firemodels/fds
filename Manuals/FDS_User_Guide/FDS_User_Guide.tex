@@ -322,7 +322,7 @@ FDS Version 6.0 \\
 
 \vfill
 
-\flushright{\includegraphics[width=1in]{../Bibliography/doc.pdf} }
+\flushright{\includegraphics[width=1in]{../Bibliography/doc} }
 
 \titlesigs
 
@@ -1522,7 +1522,7 @@ An example of an axially-symmetric helium plume is given in Section~\ref{barocli
 
 
 \begin{figure}[ht!]
-\includegraphics[width=\textwidth]{FIGURES/hallways.jpg}
+\includegraphics[width=\textwidth]{FIGURES/hallways}
 \caption{An example of a multiple-mesh geometry}
 \label{fig:domain}
 \end{figure}
@@ -4623,7 +4623,7 @@ Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER\_ID}, or {\ct FAN\_ID} shou
 To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=3in]{FIGURES/hvac-simplify.png}
+\includegraphics[width=3in]{FIGURES/hvac-simplify}
 \end{center}
 \caption[An example of simplifying a complex duct]{An example of simplifying a complex duct.}
 \label{fig:HVAC_Simplify}
@@ -4880,8 +4880,8 @@ The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoi
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_aircoil_Q.pdf} } &
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_aircoil_T.pdf} }
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_aircoil_Q} } &
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_aircoil_T} }
    \end{tabular*}
    \caption[Results of the {\ct HVAC\_aircoil} case]{(Left) Heat addition and (Right) duct exit temperature for the {\ct HVAC\_aircoil} case.}
    \label{fig_aircoil}
@@ -5106,8 +5106,8 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_v.pdf} } &
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_rho.pdf} }
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_v} } &
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_rho} }
    \end{tabular*}
    \caption[Results of the {\ct stack\_effect} test case]{(Left) Velocity at the upper and lower vents for the {\ct stack\_effect} case.  (Right) Upper and lower exterior and interior densities.}
    \label{fig_stack_effect}
