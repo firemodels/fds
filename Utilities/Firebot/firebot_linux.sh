@@ -750,7 +750,7 @@ run_matlab_verification()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $FDS_SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7a_verification
+   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7a_verification
 
    # Restore LaTeX as plot_style interpreter
    cd scripts
@@ -762,11 +762,11 @@ check_matlab_verification()
 {
    # Scan and report any errors in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `grep -A 50 -E "Error|Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
+   if [[ `grep -A 50 -E "Error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
    then
       stage7a_success=true
    else
-      grep -A 50 -E "Error|Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification > $FIREBOT_DIR/output/stage7a_errors
+      grep -A 50 -E "Error|License checkout failed" $FIREBOT_DIR/output/stage7a_verification > $FIREBOT_DIR/output/stage7a_errors
       
       echo "Errors from Stage 7a - Matlab plotting and statistics (verification):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage7a_errors >> $ERROR_LOG
@@ -783,7 +783,7 @@ check_verification_stats()
       # Continue along
       :
    else
-      echo "Firebot Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7a_errors
+      echo "Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7a_errors
       echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $FIREBOT_DIR/output/stage7a_errors
       
       echo "Errors from Stage 7a - Matlab plotting and statistics (verification):" >> $ERROR_LOG
@@ -819,7 +819,7 @@ run_matlab_validation()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $FDS_SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7b_validation
+   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error:'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7b_validation
 
    # Restore LaTeX as plot_style interpreter
    cd scripts
@@ -831,11 +831,11 @@ check_matlab_validation()
 {
    # Scan and report any errors in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `grep -A 50 -E "Error|Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation` == "" ]]
+   if [[ `grep -A 50 -E "Error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation` == "" ]]
    then
       stage7b_success=true
    else
-      grep -A 50 -E "Error|Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation > $FIREBOT_DIR/output/stage7b_errors
+      grep -A 50 -E "Error|License checkout failed" $FIREBOT_DIR/output/stage7b_validation > $FIREBOT_DIR/output/stage7b_errors
       
       echo "Errors from Stage 7b - Matlab plotting (validation):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage7b_errors >> $ERROR_LOG
