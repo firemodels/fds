@@ -109,7 +109,7 @@ MODULE RADCALV
 ! Module wrapper for RadCal subroutine
 
 USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS, ONLY: AL2O3,NEW_ABSORPTION
+USE GLOBAL_CONSTANTS, ONLY: AL2O3
 IMPLICIT NONE
 
 PRIVATE
@@ -301,28 +301,17 @@ L1000: DO KK=1, NOM
             CASE (2)
                CALL H2O(OMEGA,TEMP,GC(2),SDWEAK,GDINV,GDDINV)
             CASE (3)
-               IF (NEW_ABSORPTION) THEN
-                  SELECT CASE(RADCAL_ID)
-                     CASE('METHANE')
-                        CALL CH4_NEW(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-                     CASE('PROPANE')
-                        CALL C3H8(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-                     CASE('N-HEPTANE')
-                        CALL C7H16(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-                     CASE('METHANOL')
-                        CALL CH3OH(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-                     CASE('TOLUENE')
-                        CALL C7H8(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-                     CASE('PROPYLENE')
-                        CALL C3H6(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-                     CASE('MMA')
-                        CALL MMA(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-                     CASE DEFAULT
-                        CALL CH4_NEW(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-                  END SELECT                 
-               ELSE
-                  CALL CH4(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
-               ENDIF
+               SELECT CASE(RADCAL_ID)
+                  CASE('METHANE_OLD') ; CALL CH4_OLD(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                  CASE('METHANE')     ; CALL CH4(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                  CASE('PROPANE')     ; CALL C3H8(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                  CASE('N-HEPTANE')   ; CALL C7H16(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                  CASE('METHANOL')    ; CALL CH3OH(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                  CASE('TOLUENE')     ; CALL C7H8(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                  CASE('PROPYLENE')   ; CALL C3H6(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                  CASE('MMA')         ; CALL MMA(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+                  CASE DEFAULT        ; CALL CH4(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,GDINV,GDDINV)
+               END SELECT                 
             CASE (4)
                CALL CO(OMEGA,TEMP,GC(4),SDWEAK,GDINV,GDDINV)
          END SELECT
@@ -1110,7 +1099,7 @@ END SUBROUTINE POD
 
 
 !==============================================================================
-SUBROUTINE CH4(OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV)
+SUBROUTINE CH4_OLD(OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV)
 !==============================================================================
 INTEGER I,J
 REAL(EB) OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV,BE,Q2, &
@@ -1225,11 +1214,11 @@ ELSE
    ENDIF
 ENDIF
 !------------------------------------------------------------------------------
-END SUBROUTINE CH4
+END SUBROUTINE CH4_OLD
 
 
 !==============================================================================
-SUBROUTINE CH4_NEW(OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV)
+SUBROUTINE CH4(OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV)
 !==============================================================================
 ! COMPUTE METHANE OPTICAL PROPERTIES USING SINGLE LINE GROUP
 !
@@ -1361,7 +1350,7 @@ ELSE IF((OM_BND_CH4(1,1)<=OMEGA).AND.(OMEGA<OM_BND_CH4(1,2))) THEN
 ENDIF 
 
 !------------------------------------------------------------------------------
-END SUBROUTINE CH4_NEW
+END SUBROUTINE CH4
 
 !==============================================================================
 SUBROUTINE C3H8(OMEGA,TEMP,PC3H8,PTOT,GC3,SDWEAK,GDINV,GDDINV)
