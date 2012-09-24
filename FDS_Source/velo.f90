@@ -1744,9 +1744,21 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (IWM==0 .AND. IWP==0) CYCLE ORIENTATION_LOOP
 
-         ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
+         ! If there is a solid wall separating the two adjacent wall cells, set vorticity to zero, and cycle out of the loop.
+         !
+         !              |
+         !              |
+         !          IWMI|IWPI
+         !              |
+         !              |
+         !   ----IWM----X----IWP----
 
-         IF (WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IWPI)%BOUNDARY_TYPE==SOLID_BOUNDARY) CYCLE ORIENTATION_LOOP
+         IF (WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IWPI)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+            DUIDXJ(ICD_SGN) = 0._EB
+            MU_DUIDXJ(ICD_SGN) = 0._EB
+            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+            CYCLE ORIENTATION_LOOP
+         ENDIF
 
          ! If only one adjacent wall cell is defined, use its properties.
     
@@ -2117,8 +2129,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                ENDIF
          END SELECT
             
-      ENDDO ORIENTATION_LOOP  
-      
+      ENDDO ORIENTATION_LOOP
    ENDDO SIGN_LOOP
 
    ! If the edge is on an interpolated boundary, cycle
