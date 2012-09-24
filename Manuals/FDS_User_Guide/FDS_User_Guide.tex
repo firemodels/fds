@@ -5439,9 +5439,13 @@ Following is a very simple example of how a gas can be introduced into the simul
 
 \subsubsection{Sample Case: Filling a Compartment with Gas}
 
-A simple input file called {\ct gas\_filling.fds} demonstrates how to add a gas species to your simulation. The relevant lines are as follows:
+Consider the short input file ({\ct gas\_filling.fds}):
+
 \footnotesize
 \begin{verbatim}
+&HEAD CHID='gas_filling', TITLE='Fill an Empty Room with Hydrogen' /
+&MESH IJK=32,32,15, XB=-3.2,3.2,-3.2,3.2,0.0,3.0 /
+&TIME T_END=300.0 /
 &SPEC ID='HYDROGEN' /
 &SURF ID='LEAK', SPEC_ID(1)='HYDROGEN', MASS_FLUX(1)=0.01667, RAMP_MF(1)='leak_ramp' /
 &RAMP ID='leak_ramp', T=  0., F=0.0 /
@@ -5450,11 +5454,13 @@ A simple input file called {\ct gas\_filling.fds} demonstrates how to add a gas 
 &RAMP ID='leak_ramp', T=181., F=0.0 /
 &VENT XB=-0.6,0.4,-0.6,0.4,0.0,0.0, SURF_ID='LEAK', COLOR='RED' /
 &DUMP MASS_FILE=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='HYDROGEN' /
+&TAIL /
 \end{verbatim}
 \normalsize
 
 \noindent
-The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~kg/m$^2$/s and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
+The case is nothing more than hydrogen gas filling a box. The gas is injected through a 1~m by 1~m vent at a rate of 0.01667~kg/m$^2$/s and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/gas_filling_mass}
@@ -5553,7 +5559,7 @@ the {\ct REFERENCE\_ENTHALPY} (kJ/kg).  If {\ct SPECIFIC\_HEAT} is specified and
 Species that can absorb and emit thermal radiation are defined via the logical parameter {\ct ABSORBING} on the {\ct SPEC} line.  If {\ct .TRUE.} and the
 species is not in the recognized list, then it will be assumed to be a fuel when invoking RadCal to compute its absorptivity.
 
-There are only a small number of species with predefined RadCal absorptivities (See ~\ref{info:RadCal_fuelspecies}).  There are many other species which are absorbing.  For absorbing species not present in Radcal {\ct RADCAL\_ID} can be used to identify a RadCal species to be used as a surrogate. For example:
+There are only a small number of species with predefined RadCal absorptivities (See ~\ref{info:RadCal_fuelspecies}).  There are many other species which are absorbing.  For absorbing species not present in Radcal {\ct RADCAL\_ID} can be used to identify a RadCal species to be used as a surrogate. Note that fuel species other than {\ct METHANE} can only be accessed if {\ct NEW\_ABSORPTION = .TRUE.}.  For example:
 
 \footnotesize
 \begin{verbatim}
@@ -5655,9 +5661,9 @@ The logical parameter {\ct SMIX\_COMPONENT\_ONLY} denotes that the species is on
 \item[{\ct MASS\_FRACTION}] The mass fractions of the components of the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1. Alternatively, {\ct VOLUME\_FRACTION} can be specified. Do not use both on an {\ct SMIX} line.
 \end{description}
 
-\noindent The addition of species mixtures to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs.
-For {\ct REAC} and {\ct SMIX}, {\ct SPEC\_ID} refers to the {\ct ID} of a {\ct SPEC}. For outputs and devices that require a
-{\ct SPEC\_ID} one can use either the {\ct ID} of an {\ct SMIX} or a {\ct SPEC}.  For {\ct INIT}, {\ct MATL}, {\ct PART},
+\noindent The addition of species mixtures to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs. 
+For {\ct REAC} and {\ct SMIX}, {\ct SPEC\_ID} refers to the {\ct ID} of a {\ct SPEC}. For outputs and devices that require a 
+{\ct SPEC\_ID} one can use either the {\ct ID} of an {\ct SMIX} or a {\ct SPEC}.  For {\ct INIT}, {\ct MATL}, {\ct PART}, 
 and {\ct SURF}, {\ct SPEC\_ID} refers to either an {\ct SMIX} or a {\ct SPEC} with {\ct SMIX\_COMPONENT\_ONLY=.FALSE.}
 
 
@@ -5735,7 +5741,7 @@ Note that this parameter is only appropriate when the simple chemistry model is 
 For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided.
 Note that this parameter is only appropriate when the simple chemistry model is applied.
 (Default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
-\item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
+\item[{\ct FUEL\_RADCAL\_ID}] If {\ct NEW\_ABSORPTION=.TRUE.} (see Section~\ref{info:RadCal_fuelspecies}), this specifies the RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default.
 \end{description}
 
 \noindent
@@ -5930,13 +5936,7 @@ check the stoichiometry to ensure that atoms are conserved.  Setting this flag t
 for the reaction stoichiometry mass balance check.  (Default 0.0001)
 \end{description}} pertains to the species mixtures, and not the primitive species.
 
-Obviously, for this example, the first {\ct REAC} line is preferable to the second. However, there are many situations where you cannot use the simple chemistry model and
-must resort to the second formulation.
-
-
-
-
-
+Obviously, for this example, the first {\ct REAC} line is preferable to the second. However, there are many situations where you cannot use the simple chemistry model and must resort to the second formulation.
 
 
 \subsection{Complex Fuel Molecules}
@@ -6002,90 +6002,75 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 \label{pvc_combustion}
 \end{figure}
 
-
-
-\subsection{Two-Step Reaction Involving the Formation of CO}
-
-Consider the simplified two-step methane oxidation reaction developed by Westbrook and Dryer~\cite{Westbrook:1}:
-
-\begin{eqnarray}\label{eq:2step_methane_rev}
-\mathrm{CH_4+1.5 \, O_2}&\rightarrow&  \mathrm{CO+2 \, H_2O} \\
-\nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons& \mathrm{CO_2}
+\subsection{Multiple Chemical Reactions}
+\label{info:multi-reac}
+There may exist times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider to simultaneous, mixing controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of Y$_{\mathrm{soot}}$ = 0.01 and a CO yield of Y$_{\mathrm{CO}}$= 0.131 \cite{SFPE:Tewarson} is:
+\begin{eqnarray}\label{eq:pu_combust}
+1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.3274\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \rightarrow \\
+\nonumber 1\,\underbrace{\mathrm{(19.7441\; CO_2 + 0.166587 \; CO + 21 \; H_2O + 5.0893\; C + 103.751 \; N_2)}}_\text{Products\_1}
 \end{eqnarray}
-In this case, if we use all primitive species and select nitrogen as the background species, Eq.~(\ref{eq:2step_methane_rev}) can be used directly. Each of the species in the reactions, plus the background species, must be defined by {\ct SPEC} lines:
-
-\footnotesize
-\begin{verbatim}
-&SPEC ID='NITROGEN',        BACKGROUND=.TRUE. /
-&SPEC ID='METHANE',         MASS_FRACTION_0=0.0 /
-&SPEC ID='OXYGEN',          MASS_FRACTION_0=0.23 /
-&SPEC ID='CARBON MONOXIDE', MASS_FRACTION_0=0.0 /
-&SPEC ID='WATER VAPOR',     MASS_FRACTION_0=0.0 /
-&SPEC ID='CARBON DIOXIDE',  MASS_FRACTION_0=0.0 /
+and the reaction for wood with a soot yield of Y$_{\mathrm{soot}}$ = 0.01 and a CO yield of Y$_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
+\begin{eqnarray}\label{eq:wood_combust}
+1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.02121\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \rightarrow \\
+\nonumber 1\,\underbrace{\mathrm{(0.964384\; CO_2 + 0.003655 \; CO + 0.85 \; H_2O + 0.031961\; C + 3.84076 \; N_2)}}_\text{Products\_2}
+\end{eqnarray}
+Similar to example in Section~\ref{info:Complex_Fuel},we will used the lumped species approach to minimize the number of species that FDS needs to transport. Therefore, the species are defined in the following manner:
+\footnotesize \begin{verbatim}
+&SPEC ID = 'POLYURETHANE', FORMULA = 'C25H42O6N2' /
+&SPEC ID = 'WOOD', FORMULA = 'CH1.7O0.74N0.002' /
+&SPEC ID = 'OXYGEN',            SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON MONOXIDE',   SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'SOOT',              SMIX_COMPONENT_ONLY = .TRUE. /
 \end{verbatim} \normalsize
-
-\noindent
-The initial mass fraction of oxygen is 0.23 with the remainder being the background, nitrogen. To define the reactions from Eq.~(\ref{eq:2step_methane_rev}), you must specify a {\ct REAC} line for each, including the reversible reaction:
-
-\footnotesize
-\begin{verbatim}
-&REAC ID='FWD_METHANE'
-      FUEL='METHANE'
-      SMIX_ID='METHANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      NU=-1,-1.5,1,2 /
-
-&REAC ID='FWD_CO'
-      FUEL='CARBON MONOXIDE'
-      SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-      NU=-1,-0.5,1 /
-
-&REAC ID='REV_CO2'
-      FUEL='CARBON DIOXIDE'
-      SMIX_ID='CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-      NU=-1,0.5,1 /
+Examination of Eq.~(\ref{eq:pu_combust}) and Eq.~(\ref{eq:wood_combust}) show that while Products\_1 and Products\_2 are composed of the same species, the species do not exist in the same proportion or a multiple thereof. As a result, we must construct to separate product lumped species.
+\footnotesize \begin{verbatim}
+&SMIX ID = 'AIR', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1,3.76, BACKGROUND=.TRUE. /
+&SMIX ID = 'PRODUCTS_1', SPEC_ID ='CARBON DIOXIDE','CARBON MONOXIDE','WATER VAPOR','SOOT',
+           'NITROGEN', VOLUME_FRACTION = 19.7441,0.166587,21,5.0893,103.751 /
+&SMIX ID = 'PRODUCTS_2', SPEC_ID ='CARBON DIOXIDE','CARBON MONOXIDE','WATER VAPOR','SOOT',
+           'NITROGEN', VOLUME_FRACTION = 0.964384,0.003655,0.85,0.031961,3.84076 /
 \end{verbatim} \normalsize
+Once we have constructed the lumped species, we can define the {\ct REAC} lines.
+\footnotesize \begin{verbatim}
+&REAC ID = 'plastic',
+    FUEL = 'POLYURETHANE',
+    HEAT_OF_COMBUSTION=26200,
+    SMIX_ID = 'POLYURETHANE','AIR','PRODUCTS_1'
+    NU=-1,-27.3274,1 /
 
-\noindent
-In this example, the {\ct SMIX\_ID}s refer directly to the {\ct SPEC} lines, since all of the species have been defined as primitive. The stoichiometric coefficients can be taken directly from Eq.~(\ref{eq:2step_methane_rev}). As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species at a time step and the enthalpy of formation of the species. This approach makes specifying an endothermic reaction such as the reversible CO$_2$ reaction, no different than typical FDS exothermic combustion reactions.
+&REAC ID = 'wood' 
+    FUEL = 'WOOD',
+    HEAT_OF_COMBUSTION=16400,
+    SMIX_ID = 'WOOD','AIR','PRODUCTS_2'
+    NU=-1,-1.02121,1 /
+\end{verbatim} \normalsize
+In both of these reactions the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuels is unknown to FDS so the {\ct HEAT\_OF\_COMBUSTION} is specified for each reaction. Typically in FDS, to set the fire size the Heat Release per Unit Area ({\ct HRRPUA}) is specified on the {\ct SURF} line. The {\ct HRRPUA} parameter cannot currently be used when there is more than one fuel, so the mass flux of fuel must be specified for each fuel. In this example, we want both fuels to flow out of the same burner and ramp up to a 1200~kW fire after 60~s. The first thing is to create a 1~m$^2$ burner by defining a {\ct VENT} line:
+\footnotesize \begin{verbatim}
+&VENT XB=4.0,5.0,4.0,5.0,0.0,0.0, SURF_ID='FIRE1', COLOR='RED'/
+\end{verbatim} \normalsize
+This {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using both fuels:
+\footnotesize \begin{verbatim}
+&SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) = 0.241665, RAMP_MF(1)='poly' 
+                    SPEC_ID(2)='WOOD',         MASS_FLUX(2) = 0.386074, RAMP_MF(2)='wood' /
+\end{verbatim} \normalsize
+Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. The mass flux values were determined by the desired heat release,the proportion of the total heat release rate each fuel contributes, the burner area, and the heat of combustion of each fuel. We want each fuel to ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the 600~s simulation. 
+\footnotesize \begin{verbatim}
+&RAMP ID='poly'	 T = 0   F = 0.0  / 
+&RAMP ID='poly'	 T = 50  F = 0.5  /        
+&RAMP ID='poly'	 T = 100 F = 1.0  / 
+&RAMP ID='poly'	 T = 600 F = 1.0  /      
 
+&RAMP ID='wood'	 T = 0   F = 0.0  / 
+&RAMP ID='wood'	 T = 50  F = 0.5  /        
+&RAMP ID='wood'	 T = 100 F = 1.0  / 
+&RAMP ID='wood'	 T = 600 F = 1.0  /
+\end{verbatim} \normalsize
+Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass flux specified on the {\ct SURF} line.
 
-\subsection{Finite Rate Combustion}
-\label{info:finite}
-
-By default, FDS uses a mixing-controlled combustion model. However, FDS can also employ finite-rate reactions using an Arrhenius model. This section describes how to do this.
-
-\begin{enumerate}
-\item It is strongly recommended that finite-rate reactions be invoked only
-when FDS is running in DNS mode. Set {\ct DNS=.TRUE.} on the {\ct MISC} line.
-You may use the finite-rate reaction model in an
-LES calculation, but because the temperature in a large scale calculation
-is smeared out over a mesh cell, some of the reaction parameters may need
-to be modified to account for the lower temperatures.
-\item The background species, if unspecified on a {\ct SPEC} or {\ct SMIX} line, is normally set to be {\ct 'AIR'}.
-\item Read Sections~\ref{info:SPEC} and \ref{info:SMIX} for a description of the boundary
-conditions for the gas species.
-\item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
-parameters.  For a finite-rate reaction you can specify multiple {\ct REAC} lines.  Note that FDS will evaluate the reactions simultaneously.
-\end{enumerate}
-
-\noindent The inputs to use the finite-rate model are given below:
-
-\begin{description}
-\item[{\ct FUEL}] Character string indicating which of the listed gas species is the fuel.
-\item[{\ct A}] Pre-exponential factor in units of cm$^3$/mole/s.
-\item[{\ct E}] Activation energy in units of kJ/kmol.
-\item[{\ct EQUATION}] (Optional) Character string defining the reaction stoichiometry.  Can be used instead of specifying {\ct SMIX\_ID} and {\ct NU}.  See~\ref{info:EQUATION}.
-\item[{\ct NU}] Array containing the stoichiometric coefficients where negative values indicate reactants and positive values indicate products.
-\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each species.
-\item[{\ct N\_T}] The temperature exponent for the rate (Default is 0 or no temperature dependence).
-\item[{\ct SPEC\_ID}] Array containing the names of the species in the rate equation for the reaction. Note that it is possible that a given {\ct SPEC} can
-contribute to the rate but not be a reactant or product. In other words,
-the rate equation can be dependent on a species that does not participate directly in the reaction. These entries correspond to the inputs on {\ct N\_S}.
-\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. Not required if all enthalpy of formations are known. (No default)
-\end{description}
-
-
-\subsubsection{Special Topic: Using the {\ct EQUATION} input parameter}
+\subsection{Special Topic: Using the {\ct EQUATION} input parameter}
 \label{info:EQUATION}
 
 When specifying a reaction scheme using all primitive variables ({\em i.e., no lumped species}), a convenient shortcut for specifying the reaction is via the input parameter {\ct EQUATION}, which allows the specification of the reaction in text form.  The rules are:
@@ -6111,6 +6096,122 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
       HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
+
+
+\clearpage
+
+\section{Finite Rate Combustion}
+\label{info:finite}
+
+By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. This section describes how to do this.
+
+\begin{enumerate}
+\item It is recommended that finite-rate reactions be invoked only
+when FDS is running in DNS mode. Set {\ct DNS=.TRUE.} on the {\ct MISC} line.
+You may use the finite-rate reaction model in an
+LES calculation, but because the temperature in a large scale calculation
+is smeared out over a mesh cell, some of the reaction parameters may need
+to be modified to account for the lower temperatures.
+\item The background species, if unspecified on a {\ct SPEC} or {\ct SMIX} line, is normally set to be {\ct 'AIR'}.
+\item Read Sections~\ref{info:SPEC} and \ref{info:SMIX} for a description of the boundary
+conditions for the gas species.
+\item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
+parameters.  For a finite-rate reaction you can specify multiple {\ct REAC} lines.  Note that FDS will evaluate the reactions simultaneously.
+\end{enumerate}
+First, we consider a single-step reaction mechanism for complete propane combustion:
+\begin{equation}\label{eq:propane_1step}
+\mathrm{C_3H_8 + 5\,O_{2} \rightarrow 3\,CO_{2} + 4\,H_{2}O}
+\end{equation}
+In this case we use all primitive species:
+\footnotesize
+\begin{verbatim}
+&SPEC ID='NITROGEN', BACKGROUND=.TRUE./
+&SPEC ID='PROPANE' /
+&SPEC ID='OXYGEN' /
+&SPEC ID='WATER VAPOR' /
+&SPEC ID='CARBON DIOXIDE' /
+\end{verbatim} \normalsize
+with a rate expression of the form:
+\begin{equation}\label{eq:reac_rate}
+k = AT^{N_{T}}e^{-E/RT}[Y_{\alpha}]^{N_{S}}
+\end{equation}
+
+\noindent From Eq.~(\ref{eq:reac_rate}), we can see that the inputs unique to the finite-rate model are given below.
+
+\begin{description}
+\item[{\ct A}] Pre-exponential factor in units of cm$^3$/mole/s.
+\item[{\ct E}] Activation energy in units of kJ/kmol.
+\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each species.
+\item[{\ct N\_T}] The temperature exponent for the rate (Default is 0 or no temperature dependence).
+\end{description}
+If we use Arrhenius parameters found from experiments/literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), Eq.~(\ref{eq:reac_rate}) for the single-step propane reaction becomes:
+\begin{equation}\label{eq:reac_rate2}
+k = 8.6 \times 10^{11}\,T^{0}\,e^{-125520/RT}[Y_{\mathrm{C_3H_8}}]^{0.1}[Y_{\mathrm{O_2}}]^{1.65}
+\end{equation}
+and the resulting {\ct REAC} line is:
+\footnotesize
+\begin{verbatim}
+&REAC ID = 'R1'
+      FUEL = 'PROPANE'
+      A = 8.6e11 
+      E = 125520
+      SMIX_ID = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      NU = -1,-5,3,4
+      SPEC_ID = 'PROPANE','OXYGEN'
+      N_S = 0.1,1.65
+\end{verbatim} \normalsize
+In this example, the {\ct SMIX\_ID}s refer directly to the {\ct SPEC} lines, since all of the species have been defined as primitive. The stoichiometric coefficients ({\ct NU}) can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we end up with Eq.~(\ref{eq:propane_2step})  
+
+\begin{align}\label{eq:propane_2step}
+\mathrm{C_3H_8+3.5 \, O_2}&\rightarrow  \mathrm{3\,CO+4 \, H_2O} \\
+\nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
+\end{align}
+Again, we will use primitive species for these reactions.
+\footnotesize
+\begin{verbatim}
+&SPEC ID='NITROGEN' BACKGROUND=.TRUE. /
+&SPEC ID='METHANE' /
+&SPEC ID='OXYGEN' /
+&SPEC ID='CARBON MONOXIDE' /
+&SPEC ID='WATER VAPOR' /
+&SPEC ID='CARBON DIOXIDE' /
+\end{verbatim} \normalsize
+
+\noindent To create the reactions from Eq.~(\ref{eq:propane_2step}), a {\ct REAC} line needs to be defined for each reaction including the reversible reaction. Similar to the one step reaction, the Arrhenius parameters are found from Westbrook and Dryer~\cite{Westbrook:1}:
+
+\footnotesize
+\begin{verbatim}
+&REAC ID = 'R1'
+      FUEL = 'PROPANE'
+      A = 1.0e12 
+      E = 125520
+      SMIX_ID='PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      NU= -1,-3.5,3,4
+      SPEC_ID='PROPANE','OXYGEN'
+      N_S = 0.1,1.65 /
+
+&REAC ID = 'R2'
+      FUEL = 'CARBON MONOXIDE'
+      A = 4e14
+      E = 167360
+      SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
+      NU= -1,-0.5,1
+      SPEC_ID='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      N_S = 0.25,1,0.5 /
+
+&REAC ID = 'R3'
+      FUEL = 'CARBON DIOXIDE'
+      A = 5e8
+      E = 167360
+      SMIX_ID= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
+      NU= -1,0.5,1
+      SPEC_ID='CARBON DIOXIDE'
+      N_S = 1.0 /
+\end{verbatim} \normalsize
+
+\noindent In {\ct REAC ID = 'R2'}, {\ct WATER VAPOR} concentration impacts the reaction rate as shown by its inclusion on the {\ct SPEC\_ID} and {\ct N\_S} lines, however it does not explicitly participate in the reaction as it is not defined on the {\ct SMIX\_ID} or {\ct NU} lines.
+
+As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species at a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
 
 \newpage
@@ -6268,7 +6369,7 @@ Its default value is five times the width of a single grid cell.
 
 \label{info:RadCal_fuelspecies}
 
-The original version of RadCal only included absorption data for methane as a surrogate for any fuel. Work is currently underway to extend the list of fuels.  The current list of additional fuels includes: {\ct METHANE}, {\ct PROPANE}, {\ct N-HEPTANE}, {\ct METHANOL}, {\ct TOLUENE}, {\ct PROPYLENE}, and {\ct MMA}.  These species are in addition to the RadCal species of: {\ct CARBON DIOXIDE}, {\ct CARBON MONOXIDE}, {\ct WATER VAPOR}, and {\ct SOOT}.
+The original version of RadCal only included absorption data for methane as a surrogate for any fuel. Work is currently underway to extend the list of fuels.  The experimental routines extending the list of fuels can be accessed by using {\ct NEW\_ABSORPTION}.  The current list of additional fuels includes: {\ct METHANE}, {\ct PROPANE}, {\ct N-HEPTANE}, {\ct METHANOL}, {\ct TOLUENE}, {\ct PROPYLENE}, and {\ct MMA}.  These species are in addition to the RadCal species of: {\ct CARBON DIOXIDE}, {\ct CARBON MONOXIDE}, {\ct WATER VAPOR}, and {\ct SOOT}.
 
 
 \subsection{Radiative Absorption and Scattering by Particles}
@@ -10834,6 +10935,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MIE\_MINIMUM\_DIAMETER}        & Real          & Section~\ref{radiative_part_props}        & $\mu$m            & 0.5               \\ \hline
 {\ct MIE\_MAXIMUM\_DIAMETER}        & Real          & Section~\ref{radiative_part_props}        & $\mu$m            & 1.5$\times D$     \\ \hline
 {\ct MIE\_NDG}                      & Integer       & Section~\ref{radiative_part_props}        &                   & 50                \\ \hline
+{\ct NEW\_ABSORPTION}               & Logical       & Section~\ref{info:RadCal_fuelspecies}     &                   & {\ct .FALSE.}     \\ \hline
 {\ct NMIEANG                  }     & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
 {\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
@@ -11981,7 +12083,7 @@ These files are written out from {\ct dump.f90} using lines equivalent to the fo
     IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
     IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
   ELSE IF (GEOM_TYPE.EQ.1) THEN
-    ! rotation and translation parameters used to transform geometry from first
+    ! rotation and translation parameters used to transform geometry from first 
     ! dynamic time step
     WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
