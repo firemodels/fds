@@ -343,6 +343,9 @@ $RUNFDS Turbulence heated_channel_Pr_1p00_32
 $RUNFDS Turbulence heated_channel_Pr_2p00_32
 $RUNFDS Turbulence channel_flow_Re_tau_180_32
 $RUNFDS Turbulence channel_flow_Re_tau_590_32
+$RUNFDS Turbulence ribbed_channel_20
+$RUNFDS Turbulence ribbed_channel_40
+$RUNFDS Turbulence ribbed_channel_80
 
 $RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization objects_static
