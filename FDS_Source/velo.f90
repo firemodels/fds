@@ -1744,7 +1744,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (IWM==0 .AND. IWP==0) CYCLE ORIENTATION_LOOP
 
-         ! If there is a solid wall separating the two adjacent wall cells, set vorticity to zero, and cycle out of the loop.
+         ! If there is a solid wall separating the two adjacent wall cells, set gradient to zero and cycle out of the loop.
          !
          !              |
          !              |
