@@ -1786,7 +1786,7 @@ included to test the correct integration of heat fluxes over multiple bands. For
 using a solid wall of temperature 1273.15~K, is computed to test the wall heat flux computation. The exact values and FDS predictions of
 the wall heat fluxes are given in the table below.
 
-\input{SCRIPT_FIGURES/radiation_plane_layer.tex}
+\IfFileExists{SCRIPT_FIGURES/radiation_plane_layer.tex}{\input{SCRIPT_FIGURES/radiation_plane_layer.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/radiation_plane_layer.tex}}
 
 
 \clearpage
@@ -1804,7 +1804,7 @@ The exact solutions for radiative flux are the analytical solutions of plane lay
 where $S_b = \sigma T^4$ is the black-body heat flux from the radiating plane and $E_3(\tau)$ is the exponential
 integral function (order 3) of optical depth, $\tau$. The exact solutions and FDS results are shown in the table below.
 
-\input{SCRIPT_FIGURES/wall_internal_radiation.tex}
+\IfFileExists{SCRIPT_FIGURES/wall_internal_radiation.tex}{\input{SCRIPT_FIGURES/wall_internal_radiation.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/wall_internal_radiation.tex}}
 
 
 
@@ -3798,7 +3798,7 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 \begin{center}
 \includegraphics[width=4.in]{FIGURES/ashrae_7} 
 \end{center}
-\input{SCRIPT_FIGURES/ashrae_7.tex}
+\IfFileExists{SCRIPT_FIGURES/ashrae_7.tex}{\input{SCRIPT_FIGURES/ashrae_7.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ashrae_7.tex}}
 \caption[Results of {\bf ashrae\_7} test cases]{Schematic of ASHRAE Sample Problem 7, and tabulated pressure drops for a fixed flow fan curve, quadratic fan curve, and a table defined fan curve}
 \label{ASHRAE7}
 \end{figure}
@@ -3813,7 +3813,7 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 
 A cut-cell algorithm is developed for calculating the intersection area between a triangle and a bounding box (e.g., Cartesian grid cell). It is difficult to directly calculate the intersection area, because the intersection shape is generally an irregular polygon. The area calculation can be divided into three steps. The first step is to obtain the points that the triangle-determined plane intersects with the bounding box edges. These points are sorted to give an intermediate polygon. Please note this intermediate polygon is in the same plane as the blue-edge triangle. The second step is to determine all vertices of the final intersection polygon, by checking whether the triangle edges are intersecting with the edges of the intermediate polygon. Lastly, the area can be easily calculated for the final polygon, which is always convex in this study.
 
-\input{SCRIPT_FIGURES/cutcell_area.tex}
+\IfFileExists{SCRIPT_FIGURES/cutcell_area.tex}{\input{SCRIPT_FIGURES/cutcell_area.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/cutcell_area.tex}}
 
  Twelve testing examples in which different triangles intersect with a bounding box are summarized in the table below.  NXP is the vertices of the intersection polygon, whose area is calculated as shown. Examples (1) through (4) and (6) through (8) have a regular triangle intersection. Examples (5) and (9) have a point and line intersection, both with zero area. Examples (10), (11), and (12) are more complicated cases. The intersection polygon has six (6), seven (7), and nine (9) vertices, respectively.
 
@@ -3830,6 +3830,6 @@ A cut-cell algorithm is developed for calculating the intersection area between 
 
 This appendix summarizes the accuracy of results from cases in the FDS verification suite. These metrics are an integral part of a process known as regression testing, which aims to evaluate the accuracy of output predicted by a numerical software package. The results from this appendix can be compared to another version of FDS as a way of measuring the quality of results between revisions. These statistical metrics also help determine the impact of code additions on the overall accuracy of FDS and can help identify errors in the FDS source code.
 
-\input{SCRIPT_FIGURES/verification_statistics.tex}
+\IfFileExists{SCRIPT_FIGURES/verification_statistics.tex}{\input{SCRIPT_FIGURES/verification_statistics.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/verification_statistics.tex}}
 
 \end{document}
