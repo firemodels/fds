@@ -674,20 +674,22 @@ Also included is a plot comparing predicted sprinkler activation times with the 
 
 The experiments that were conducted in the single-story manufactured home were selected for model validation.
 Only tests that used a flaming ignition source were considered; the smoldering and cooking ignition sources
-were not considered. The burning behavior of the upholstered chair and mattress was characterized
-by separate tests conducted by Omega Point Laboratories (OPL).
-The upholstered chair was tested in accordance with the CAL TB~133 standard (with a modified ignition source).
-The mattress was tested in accordance with the CAL TB~129 standard (with a modified ignition source).
+were not considered.
 
-The transient HRR of the upholstered chair (OPL Project No.~15638-108858) and
-mattress (OPL Project No.~15638-108856) was calculated by multiplying the mass loss rate of the
-fuel specimen by a heat of combustion of 30,000~kJ/kg for the upholstered chair and 21,000~kJ/kg for the mattress.
-The resulting transient HRR was input into FDS as a fire ramp.
-Because the fuel characterization tests were conducted independent of the smoke alarm activation tests,
-there is a time difference in the burning behavior due to the small ignition source. To correct for this time shift,
-the HRR ramp was offset in FDS by aligning the peak temperatures of the highest thermocouple in the
-fire room. The offset is reported in Table~\ref{NIST_Dunes_2000_Summary} as the time to peak temperature
-from the experiment minus the time to peak temperature from FDS.
+The mass loss rates of the upholstered chair and mattress were measured at Omega Point
+Laboratories\footnote{Project Nos.~15638-108858 (upholstered chair) and 15638-108856 (mattress).}.
+The upholstered chair was tested in accordance with California Bureau of Home Furnishings Technical
+Bulletin 133~\cite{CALTB133} (with a modified ignition source). The mattress was tested in accordance
+with California Bureau of Home Furnishings Technical Bulletin 129~\cite{CALTB129} (with a modified ignition source).
+The HRR was then calculated by multiplying the mass loss rate of the fuel specimen by a heat of combustion of
+30,000~kJ/kg for the upholstered chair and 21,000~kJ/kg for the mattress. The resulting transient HRR was
+input into FDS as a fire ramp.
+
+Because the fuel characterization tests were conducted independent of the
+smoke alarm activation tests, there is a time difference in the burning behavior due to the small ignition
+source. To correct for this time shift, the HRR ramp was offset in FDS by aligning the peak temperatures
+of the highest thermocouple in the fire room. The offset is reported in Table~\ref{NIST_Dunes_2000_Summary}
+as the time to peak temperature from the experiment minus the time to peak temperature from FDS.
 
 A summary of the seven tests selected for model validation is shown in Table~\ref{NIST_Dunes_2000_Summary}.
 Figure~\ref{NIST_Dunes_2000_Scatterplot} compares the measured versus predicted smoke alarm activation times.
