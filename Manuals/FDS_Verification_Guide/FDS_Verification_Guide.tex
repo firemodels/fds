@@ -2278,7 +2278,7 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \label{Mix_Frac}
 
 The mixture fraction output quantity is valid for simple one-step reactions of the form A + B $\rightarrow$ C. To test that mixture fraction is correctly implemented we consider a series of test reactors that have been initialized with equivalence ratios from $\phi=0$ to $\phi=1$ to simulate the range of equivalence ratios that exist across a flame sheet. A simple one-step methane reaction is used to govern the combustion:
-\begin{equation}\label{eq:methane_ex}
+\begin{equation}\label{eq:methane_ex2}
 \underbrace{\mathrm{CH_4}}_{fuel} + \underbrace{\mathrm{2\,(O_2 + 3.76\,N_2)}}_{oxidizer} \rightarrow  \underbrace{\mathrm{CO_2 + 2\, H_2O + 7.52\,N_2}}_{products}
 \end{equation}
 The simulation results are compared to state relationships which govern temperature and species as a function of mixture fraction \cite{Turns:1996}. The species state relations are governed by two sets of equations based on whether the mixture fraction ($f$) falls inside the flame sheet (fuel rich) or outside the flame sheet (fuel lean).  For fuel rich combustion ($f_{stoic} < f \le 1$): 
