@@ -44,7 +44,7 @@ if ~exist('pcm_slab_prof_01.csv')
     display('Error: File pcm_slab_prof_01.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('pcm_slab_devc.csv.csv')
+if ~exist('pcm_slab_devc.csv')
     display('Error: File pcm_slab_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
