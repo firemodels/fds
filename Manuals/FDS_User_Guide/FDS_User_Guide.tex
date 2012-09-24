@@ -5439,13 +5439,9 @@ Following is a very simple example of how a gas can be introduced into the simul
 
 \subsubsection{Sample Case: Filling a Compartment with Gas}
 
-Consider the short input file ({\ct gas\_filling.fds}):
-
+A simple input file called {\ct gas\_filling.fds} demonstrates how to add a gas species to your simulation. The relevant lines are as follows: 
 \footnotesize
 \begin{verbatim}
-&HEAD CHID='gas_filling', TITLE='Fill an Empty Room with Hydrogen' /
-&MESH IJK=32,32,15, XB=-3.2,3.2,-3.2,3.2,0.0,3.0 /
-&TIME T_END=300.0 /
 &SPEC ID='HYDROGEN' /
 &SURF ID='LEAK', SPEC_ID(1)='HYDROGEN', MASS_FLUX(1)=0.01667, RAMP_MF(1)='leak_ramp' /
 &RAMP ID='leak_ramp', T=  0., F=0.0 /
@@ -5454,13 +5450,11 @@ Consider the short input file ({\ct gas\_filling.fds}):
 &RAMP ID='leak_ramp', T=181., F=0.0 /
 &VENT XB=-0.6,0.4,-0.6,0.4,0.0,0.0, SURF_ID='LEAK', COLOR='RED' /
 &DUMP MASS_FILE=.TRUE. /
-&SLCF PBY=0.0, QUANTITY='HYDROGEN' /
-&TAIL /
 \end{verbatim}
 \normalsize
 
 \noindent
-The case is nothing more than hydrogen gas filling a box. The gas is injected through a 1~m by 1~m vent at a rate of 0.01667~kg/m$^2$/s and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
+The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~kg/m$^2$/s and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/gas_filling_mass}
@@ -5661,9 +5655,9 @@ The logical parameter {\ct SMIX\_COMPONENT\_ONLY} denotes that the species is on
 \item[{\ct MASS\_FRACTION}] The mass fractions of the components of the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1. Alternatively, {\ct VOLUME\_FRACTION} can be specified. Do not use both on an {\ct SMIX} line.
 \end{description}
 
-\noindent The addition of species mixtures to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs. 
-For {\ct REAC} and {\ct SMIX}, {\ct SPEC\_ID} refers to the {\ct ID} of a {\ct SPEC}. For outputs and devices that require a 
-{\ct SPEC\_ID} one can use either the {\ct ID} of an {\ct SMIX} or a {\ct SPEC}.  For {\ct INIT}, {\ct MATL}, {\ct PART}, 
+\noindent The addition of species mixtures to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs.
+For {\ct REAC} and {\ct SMIX}, {\ct SPEC\_ID} refers to the {\ct ID} of a {\ct SPEC}. For outputs and devices that require a
+{\ct SPEC\_ID} one can use either the {\ct ID} of an {\ct SMIX} or a {\ct SPEC}.  For {\ct INIT}, {\ct MATL}, {\ct PART},
 and {\ct SURF}, {\ct SPEC\_ID} refers to either an {\ct SMIX} or a {\ct SPEC} with {\ct SMIX\_COMPONENT\_ONLY=.FALSE.}
 
 
@@ -11988,7 +11982,7 @@ These files are written out from {\ct dump.f90} using lines equivalent to the fo
     IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
     IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
   ELSE IF (GEOM_TYPE.EQ.1) THEN
-    ! rotation and translation parameters used to transform geometry from first 
+    ! rotation and translation parameters used to transform geometry from first
     ! dynamic time step
     WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
