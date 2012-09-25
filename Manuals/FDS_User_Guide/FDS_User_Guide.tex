@@ -159,8 +159,6 @@
 \newcommand{\parmc}{0.25}
 %\newcommand{\bold}[1]{{\bf #1}}
 \newcommand{\etc}{{\em etc}}
-\newcommand{\ie}{{\em i.e.}}
-\newcommand{\eg}{{\em e.g.}}
 \newcommand{\via}{{\em via\ }}
 \newcommand{\loadmenu}{\fbox{\ct Load/Unload}}
 \newcommand{\blist}{
@@ -1444,7 +1442,7 @@ the number of which depends on the desired resolution of the flow dynamics.
 \subsection{Basics}
 \label{info:MESH_Basics}
 
-A mesh is a single right parallelepiped, {\em i.e.}, a box.
+A mesh is a single right parallelepiped, i.e., a box.
 The coordinate system within a mesh conforms to the right hand rule.
 The origin point of a mesh is defined by the first, third
 and fifth values of the real number sextuplet, {\ct XB}, and the opposite
@@ -2760,7 +2758,7 @@ be the same, denoting a plane as opposed to a solid.
 \begin{warning}
 \noindent
 Note that only one {\ct VENT} may be specified for any given wall cell.  If additional {\ct VENT} lines are specified for a
-given wall cell, FDS will output a warning message and ignore the subsequent lines ({\em i.e.}, only the first vent
+given wall cell, FDS will output a warning message and ignore the subsequent lines (i.e., only the first vent
 will be applied)
 \end{warning}
 
@@ -4398,8 +4396,8 @@ The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} o
 a {\ct SURF\_ID} with some form of specified velocity or volume flow rate.
 The normal component of velocity is usually specified directly via the parameter
 {\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the
-computational domain, {\em i.e.}, a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the
-domain, {\em i.e.}, an exhaust vent. For example, the lines
+computational domain, i.e., a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the
+domain, i.e., an exhaust vent. For example, the lines
 
 \footnotesize
 \begin{verbatim}
@@ -4570,7 +4568,7 @@ There are occasions where simply defining fixed flow and fixed species boundary 
 If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
 duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
-The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.}, what goes in during a time step, goes out during a time step).
+The current HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step).
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
@@ -4585,7 +4583,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 \begin{description}
 \item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct 'DUCT'}, {\ct 'NODE'}, {\ct 'FAN'}, {\ct 'FILTER'}, or {\ct 'AIRCOIL'}.
-\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types ({\em i.e.}, a duct and a node can have the same name but two ducts cannot).
+\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types (i.e., a duct and a node can have the same name but two ducts cannot).
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
@@ -4620,7 +4618,7 @@ specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$
 \noindent
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER\_ID}, or {\ct FAN\_ID} should be specified for a duct.
 
-To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.}, a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
+To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes (i.e., a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3in]{FIGURES/hvac-simplify}
@@ -4652,10 +4650,10 @@ Below are three example duct node inputs representing a typical tee-type connect
 \noindent where:
 
 \begin{description}
-\item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.}, it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
+\item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient (i.e., it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
 \item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter can only have two connected ducts.
-\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node ({\em e.g.}, a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
+\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
@@ -5085,7 +5083,7 @@ For the case where the stack flow is through small leakage paths, divide the bui
 
 The {\em stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only.  Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
 The interior air temperature, $T_b$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
-10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 ({\em e.g.}, an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
+10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
 
 The initial density stratification inside and outside the building can be calculated using the relation:
 \be
@@ -5587,7 +5585,7 @@ More detail is included in Chapter~\ref{info:PART}.
 If you want FDS to compute the molecular weight of the gas species, you can input a {\ct FORMULA} rather than the molecular weight, {\ct MW}.
 This will also be used as the label for the gas species by Smokeview.  {\ct FORMULA} is a character string consisting of elements followed by their atom count.
 Subgroups bracketed by parentheses can also be given.  The element name is given by its standard, case-sensitive, IUPAC\footnote{International Union of Pure
-and Applied Chemistry} abbreviation ({\em e.g.}, C for carbon, He for helium).
+and Applied Chemistry} abbreviation (e.g., C for carbon, He for helium).
 The following are all equivalent:
 
 \footnotesize
@@ -6078,7 +6076,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \begin{itemize}
 \item The species must be explicitly tracked.
 \item The species name is its chemical formula as defined on the {\ct SPEC} line or by the species {\ct ID}.
-\item The stoichiometry is given before each species and is separated by an asterisk. Real numbers are allowed but exponential notation is not ({\em i.e.}, {\ct 201.1} but not {\ct 2.011E2}).
+\item The stoichiometry is given before each species and is separated by an asterisk. Real numbers are allowed but exponential notation is not (i.e., {\ct 201.1} but not {\ct 2.011E2}).
 \item The reactants and products are separated by an equals sign.
 \end{itemize}
 
@@ -7015,7 +7013,7 @@ model, but their results for various polyvinyl chloride (PVC) cables suggested t
 sufficient for engineering analyses of a wider variety of cables. The U.S. Nuclear Regulatory
 Commission sponsored a study of cable failure known as CAROLFIRE~\cite{CAROLFIRE}. The primary project objective of CAROLFIRE was to
 characterize the various modes of electrical
-failure ({\em e.g.}, hot shorts, shorts to ground) within bundles of power, control and instrument cables.
+failure (e.g., hot shorts, shorts to ground) within bundles of power, control and instrument cables.
 A secondary objective of the project was to develop a simple model to predict thermally-induced
 electrical failure when a given interior region of the cable reaches an empirically
 determined threshold temperature. The measurements used for these purposes are described in
@@ -7749,7 +7747,7 @@ occur when the {\ct QUANTITY} value passes above, or below, the given {\ct SETPO
 The following parameters dictate how a device will control something:
 \begin{description}
 \item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device
-({\em e.g.}, heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
+(e.g., heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
 \item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change state when its value increases
 past the setpoint and a negative integer means the device will change state
 when its value decreases past the setpoint.  The default value is +1.
@@ -8024,7 +8022,7 @@ The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose v
 a {\ct DEADBAND}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'},
 the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops
 below the lower value in {\ct DEADBAND} and reverts when it increases past the upper value, i.e., like a heating system.
-The reverse will occur if {\ct ON\_BOUND='UPPER'}, {\em i.e.}, a cooling system.
+The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e., a cooling system.
 
 For an HVAC system, the following lines of input would set up a simple thermostat:
 
@@ -8097,7 +8095,7 @@ state until the timer reaches 120~s and would then change back to false.
 
 \begin{warning}
 Note that when using control functions the {\ct ID}s assigned to both the
-{\ct CTRL} and the {\ct DEVC} inputs must be unique across both sets of inputs, {i.e.}, you cannot use the
+{\ct CTRL} and the {\ct DEVC} inputs must be unique across both sets of inputs, i.e., you cannot use the
 same {\ct ID} for both a control function and a device.
 \end{warning}
 
@@ -8274,7 +8272,7 @@ multiply-colored vents that activate at different times, depending on the partic
 \label{info:RAMPDEVC}
 
 For any user-defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.
-This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} is used as the independent variable for the {\ct RAMP}.  A {\ct CTRL\_ID} can also be specified as long as the control function outputs a numerical value ({\em i.e.}, is a mathematical function (Section~\ref{info:CONTROL_MATH}) or a PID function (Section~\ref{info:CONTROL_PID}).
+This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} is used as the independent variable for the {\ct RAMP}.  A {\ct CTRL\_ID} can also be specified as long as the control function outputs a numerical value (i.e., is a mathematical function (Section~\ref{info:CONTROL_MATH}) or a PID function (Section~\ref{info:CONTROL_PID}).
 In the following example a blower is ramped from 0~\% flow at 20~$^\circ$C, to 50~\% flow when the temperature exceeds 100~$^\circ$C, and to 100~\% flow when the temperature exceeds 200~$^\circ$C.
 This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
 
@@ -8809,7 +8807,7 @@ Estimates of visibility through smoke can be made by using the
 equation
 \be  S = C/K  \label{vis}  \ee
 where $C$ is a non-dimensional constant characteristic of
-the type of object being viewed through the smoke, {\em i.e.},
+the type of object being viewed through the smoke, i.e.,
 $C=8$ for a light-emitting sign and $C=3$ for a light-reflecting
 sign~\cite{SFPE:Mulholland}. Since $K$ varies from point to point in the
 domain, the visibility $S$ does as well.
@@ -11690,7 +11688,7 @@ start of the run; {\ct Time step} is the time step size for the given mesh;
 {\ct Total time} is the time of the simulation;
 {\ct Max/Min divergence} is the max/min value of the
 function $\nabla \cdot \bu$ and is used as a diagnostic when the flow
-is incompressible ({\em i.e.}, no heating); and {\ct Max CFL number} is the
+is incompressible (i.e., no heating); and {\ct Max CFL number} is the
 maximum value of the CFL number. The {\ct Radiation Loss to Boundaries} is the
 amount of energy that is being radiated to the boundaries. As compartments
 heat up, the energy lost to the boundaries can grow to be an appreciable
