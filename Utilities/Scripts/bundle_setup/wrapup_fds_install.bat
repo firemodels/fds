@@ -141,16 +141,16 @@ erase "%CD%"\shortcut.exe
 Rem ----------- setting up uninstall file
 
 echo echo. >> Uninstall\Uninstall.bat
-echo echo Removing directory, %CD%\bin, from the System Path >> Uninstall\Uninstall.bat
+echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall\Uninstall.bat
 echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\Uninstall.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\..\shortcuts" >> Uninstall\Uninstall.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SHORTCUTSDIR%" >> Uninstall\Uninstall.bat
 
 echo echo. >> Uninstall\Uninstall.bat
 echo echo Delete the directory %CD% by hand (as administrator) to complete the removal of FDS and Smokeview >> Uninstall\Uninstall.bat
 echo pause >> Uninstall\Uninstall.bat
 
 echo.
-echo Press any key to complete Installation.
+echo *** Press any key to complete the installation.
 pause>NUL
 
 erase "%CD%"\wrapup_fds_install.bat
