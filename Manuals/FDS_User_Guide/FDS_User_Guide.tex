@@ -6049,12 +6049,17 @@ In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuel
 \footnotesize \begin{verbatim}
 &VENT XB=4.0,5.0,4.0,5.0,0.0,0.0, SURF_ID='FIRE1', COLOR='RED'/
 \end{verbatim} \normalsize
-This {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using both fuels:
+The {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using both fuels. The mass flux values for each fuel are determined by the desired heat release, the proportion of the total heat release rate each fuel contributes, the burner area, and the heat of combustion of each fuel. In this case we want a 1200~kW fire where each fuel contributes 50\% to the total heat release rate (600~kW).
+\begin{align}
+\dot{m}^{\prime \prime}_{poly} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{26200~\mathrm{kJ/kg}} = 0.022901~\mathrm{\frac{kg}{m^2\,s}}\\
+\dot{m}^{\prime \prime}_{wood} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{16400~\mathrm{kJ/kg}} = 0.036585~\mathrm{\frac{kg}{m^2\,s}}
+\end{align}
+
 \footnotesize \begin{verbatim}
-&SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) = 0.241665, RAMP_MF(1)='poly' 
-                    SPEC_ID(2)='WOOD',         MASS_FLUX(2) = 0.386074, RAMP_MF(2)='wood' /
+&SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) = 0.022901, RAMP_MF(1)='poly' 
+                    SPEC_ID(2)='WOOD',         MASS_FLUX(2) = 0.036585, RAMP_MF(2)='wood' /
 \end{verbatim} \normalsize
-Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. The mass flux values were determined by the desired heat release, the proportion of the total heat release rate each fuel contributes, the burner area, and the heat of combustion of each fuel. We want each fuel to follow a ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the 600~s simulation. 
+Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. We also want each fuel to follow a ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the remainder of a 600~s simulation. 
 \footnotesize \begin{verbatim}
 &RAMP ID='poly'	 T = 0  , F = 0.0  / 
 &RAMP ID='poly'	 T = 50 , F = 0.5  /        
@@ -6066,7 +6071,15 @@ Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to
 &RAMP ID='wood'	 T = 100, F = 1.0  / 
 &RAMP ID='wood'	 T = 600, F = 1.0  /
 \end{verbatim} \normalsize
-Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass flux specified on the {\ct SURF} line.
+Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass flux specified on the {\ct SURF} line. Fig.~\ref{fig:hrr_two_fuels} compares the resulting FDS heat release rate (HRR) to the expected HRR from the defined ramp. Note that in this simulation, there is 10~s averaging on the FDS output HRR ({\ct \&DUMP DT\_HRR=10}) and the expected results account for this averaging.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_adiabatic_two_fuels}
+\caption[HRR for {\ct energy\_budget\_adiabatic\_two\_fuels} test case]{HRR for {\ct energy\_budget\_adiabatic\_two\_fuels} test case.}
+\label{fig:hrr_two_fuels}
+\end{figure}
+
 
 \subsection{Special Topic: Using the {\ct EQUATION} input parameter}
 \label{info:EQUATION}
