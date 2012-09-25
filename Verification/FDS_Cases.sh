@@ -15,6 +15,7 @@ $RUNFDS Detectors aspiration_detector
 $RUNFDS Detectors beam_detector
 
 $RUNFDS Energy_Budget energy_budget_adiabatic_walls
+$RUNFDS Engery_Budget energy_budget_adiabatic_two_fuels
 $RUNFDS Energy_Budget energy_budget_cold_walls
 $RUNFDS Energy_Budget energy_budget_dns_100
 $RUNFDS Energy_Budget energy_budget_tmix
