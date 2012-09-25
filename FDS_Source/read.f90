@@ -7261,11 +7261,6 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
 
    CALL CHECK_XB(XB)
 
-   IF (ALL(EVACUATION_ONLY)) THEN
-      ! DEVC_ID    = 'null'
-      CTRL_ID    = 'null'
-   END IF
-
    ! Loop over all the meshes to determine where the HOLE is
  
    MESH_LOOP: DO NM=1,NMESHES
@@ -7279,6 +7274,8 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
       IF (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
       IF (EVACUATION_ONLY(NM)) THEN 
          IF (.NOT.TEMP_HOLE_EVAC(N)) CYCLE MESH_LOOP
+         DEVC_ID    = 'null'
+         CTRL_ID    = 'null'
       ENDIF
  
       ! Loop over all possible multiples of the HOLE
