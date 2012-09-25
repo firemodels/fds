@@ -102,8 +102,6 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\parmc}{0.25}
 \newcommand{\bold}[1]{{\bf #1}}
 \newcommand{\etc}{{\em etc}}
-\newcommand{\ie}{{\em i.e.}}
-\newcommand{\eg}{{\em e.g.}}
 \newcommand{\via}{{via\ }}
 \newcommand{\dialoguenmenu}{\fbox{\tt Dialog} }
 \newcommand{\optionmenu}{\fbox{\tt Option} }
@@ -1463,7 +1461,7 @@ may be found in Ref.~\cite{FDS_Users_Guide}
 \subsection{Isosurfaces from particle files}
 The Smokezip -part2iso option may be used to generate isosurfaces from particle data.
 Isosurface locations indicate a boundary separating particle and
-no-particle regions, {\em i.e.},\ wherever particle density is 0.5
+no-particle regions, i.e., wherever particle density is 0.5
 particles per grid cell.  Isosurface  coloring is determined using
 averaged particle data.  Representing particle data with an
 isosurface is useful when particles are used to model objects such
@@ -2297,7 +2295,7 @@ object consists of one or more arguments followed by the command, for example,
 the command sequence {\tt 0.3 drawsphere} draws a sphere with diameter 0.3 (all units as with FDS are in meters).
 
 Some portion of the object is
-designated as the origin, {\em i.e.},\ with coordinate $(0,0,0)$.
+designated as the origin, i.e., with coordinate $(0,0,0)$.
 The origin location is indicated by the intersection two cylinders, a red cylinder indicating the up or (0,0,1) direction, and a green cylinder indicating the {\em orientation}\ or (1,0,0) direction.  The origin location and orientation and up directions are used by the transformation commands described in the next section to assemble the elementary objects described in this section so that more complex parts may be created.
 
 
@@ -4015,7 +4013,7 @@ since only a small number (depending on the maximum usage level specified) will 
 running at any one time.
 
 MPI is a message passing software library used to enable implement parallel processing
-at the program {\em i.e.},\ FORTRAN source code level.  This enables one to make use of
+at the program i.e., FORTRAN source code level.  This enables one to make use of
 multiple CPUs thereby speeding up a calculation. {\em background.exe}\ allows parallel
 processing to occur at the program level.  It is often the case that one is doing a
 parameter study or running a long list of cases to verify the use of FDS. Typically you
@@ -6326,7 +6324,7 @@ contained in a file named {\tt objects.svo}. The default location
 of this file on the PC is
 C:$\backslash$Program Files$\backslash$FDS$\backslash$FDS5$\backslash$bin$\backslash$objects.svo . This
 file may be customized by the user by adding instructions for
-devices of their own design ({\em i.e.}, custom devices may be
+devices of their own design (i.e., custom devices may be
 added to a Smokeview visualization without re-programming
 Smokeview). See Chapter \ref{chap:devices} for more information on how to do this. The
 format for the {\tt DEVICE}\ keyword is
@@ -6449,7 +6447,7 @@ FIRE
 where {\tt i}\ is the room number containing the fire and $(x,y,z)$ is the location within the room of the base of the fire.
 One {\tt FIRE}\ entry is specified  for each fire.
 The order of the {\tt FIRE}\ entries found in the .smv file should correspond
-to the ordering of the fires ({\em i.e.},\ The n'th fire is specified with the n'th .smv {\tt FIRE}\ entry.)
+to the ordering of the fires (i.e., The n'th fire is specified with the n'th .smv {\tt FIRE}\ entry.)
 
 \hitem{VENTGEOM}The {\tt VENTGEOM}\ keyword defines the location, orientation and size of a zone fire modeling vent (
 with horizontal flow).
@@ -6464,7 +6462,7 @@ right wall=2, back wall=3, left wall=4), {\tt width}\ is the vent width, {\tt bo
 is the elevation (relative to the floor) of the vent soffit and {\tt r, g, b}\ are the red, green and blue components
 (ranging from 0.0 to 1.0) of the vent color.
 The order of the {\tt VENTGEOM}\ entries found in the .smv file should correspond
-to the ordering of the vents  ({\em i.e.},\ The n'th vent is specified with the n'th .smv {\tt VENTGEOM}\ entry.)
+to the ordering of the vents  (i.e., The n'th vent is specified with the n'th .smv {\tt VENTGEOM}\ entry.)
 
 \hitem{ROOM}The {\tt ROOM}\ keyword defines the size and location of a zone fire modeling compartment or room.
 The format for the {\tt ROOM}\ keyword is
@@ -6476,7 +6474,7 @@ ROOM
 where $(x,y,z)$ is the width, depth and height of the room respectively and $(x0,y0,z0)$ is the location of the
 left, front, bottom corner of the room.
 The order of the {\tt ROOM}\ entries found in the .smv file should correspond
-to the ordering of the rooms ({\em i.e.},\ The n'th room is specified with the n'th .smv {\tt ROOM}\ entry.)
+to the ordering of the rooms (i.e., The n'th room is specified with the n'th .smv {\tt ROOM}\ entry.)
 
 \hitem{ZONE}The {\tt ZONE}\ keyword defines the file used to store zone fire modeling data and the types of data
 found within the file. The format for the {\tt ZONE}\ keyword is

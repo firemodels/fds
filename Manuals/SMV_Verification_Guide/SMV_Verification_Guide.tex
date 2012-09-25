@@ -101,8 +101,6 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\parmc}{0.25}
 \newcommand{\bold}[1]{{\bf #1}}
 \newcommand{\etc}{{\em etc}}
-\newcommand{\ie}{{\em i.e.}}
-\newcommand{\eg}{{\em e.g.}}
 \newcommand{\via}{{via\ }}
 \newcommand{\blist}{
 \begin{list}
@@ -348,7 +346,7 @@ This document then verifies that various Smokeview features are working as inten
 {\em Verification} in the context of Smokeview is a process to check the correctness
 of the visualization.  Verification does not imply that the underlying data is correct, only
 that the data is presented or visualized correctly.
-A separate Guide~\cite{FDS_Verification_Guide} documents verification for FDS.  One set of scripts is used to run FDS cases and a second set of scripts is used by Smokeview to generate images.  The verification process then becomes much easier to accomplish since the use of scripts ({\em i.e.},\ a non manual methods) guarantees that consistent figures (same view points, same time points, same data files loaded {\em etc.}) are produced as new versions of this verification document are generated using updated version of FDS and/or Smokeview.  Another way of looking at this verification process is to
+A separate Guide~\cite{FDS_Verification_Guide} documents verification for FDS.  One set of scripts is used to run FDS cases and a second set of scripts is used by Smokeview to generate images.  The verification process then becomes much easier to accomplish since the use of scripts (i.e., a non manual methods) guarantees that consistent figures (same view points, same time points, same data files loaded {\em etc.}) are produced as new versions of this verification document are generated using updated version of FDS and/or Smokeview.  Another way of looking at this verification process is to
 consider this document and the FDS verification document~\cite{FDS_Verification_Guide} as being a {\em live}\ (not a static) document, easily updated as algorithms in FDS and/or Smokeview are enhanced and improved.
 
 Smokeview has several limitations that need to be addressed.  The
@@ -567,7 +565,7 @@ The error $\Delta x_m$ may then be bounded to obtain
 
 Figure \ref{figparttest} presents images verifying the display of particles and streaks.
 Images are drawn at 1.0~s, 10.0~s and 30.0~s.
-The first column shows particles while the second and third columns shows streaks with duration 0.5~s and 1.0~s.  Streaks are a good way of visualizing motion in a still image ({\em i.e.},\ on paper) since the streak shows a history of where the particle has been.
+The first column shows particles while the second and third columns shows streaks with duration 0.5~s and 1.0~s.  Streaks are a good way of visualizing motion in a still image (i.e., on paper) since the streak shows a history of where the particle has been.
 The FDS input file for this test is {\tt plume5c.fds}.
 The images for this test were created automatically by running the smokeview script.
 
