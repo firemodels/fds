@@ -369,7 +369,7 @@ Usually mesh cell sizes 0.25~m or larger can be used without any
 problems.  For example, if you have 1.2~m wide doors you could use
 0.3~m, 0.6~m, or 1.2~m cell spacing depending on how detailed geometry
 is needed.  Note, that Smokeview does not yet fully support the
-evacuation calculation, \em e.g.\em, the positions of some evacuation
+evacuation calculation, \emph{e.g.}, the positions of some evacuation
 objects are not shown by Smokeview.  Note also that the spaces, where
 agents are allowed to move, should be at least about 0.7~m wide,
 because FDS+Evac is not able to move agents in narrower exit paths
@@ -380,7 +380,7 @@ geometry is to do a calculation without any fire mesh definitions.
 Then Smokeview shows just the evacuation geometry.  It is a good
 practice to construct first the FDS fire calculation input file and do
 a short test run.  After this one can add the evacuation meshes to the
-calculation and deactivate the fire meshes, \emph{i.e.,} try to
+calculation and deactivate the fire meshes, \emph{i.e.}, try to
 simulate (and see) just the evacuation part of the calculation.  When
 the evacuation part of the input file seems to be working as it should
 then a full fire + evacuation calculation could be done.
@@ -832,7 +832,7 @@ evacuating agents is decided by the user input by giving distributions
 for the detection and reaction times.  In addition to the detection
 time given by the user, the local smoke concentration can be used to
 trigger the detection of a fire.  Currently, the fire detection can
-not be connected to the control logic of FDS, \emph{e.g.}  the
+not be connected to the control logic of FDS, \emph{e.g.}, the
 smoke/heat detectors in FDS fire calculation can not be used to
 trigger the movement of the agents.
 
@@ -2508,7 +2508,7 @@ programme the default value of this parameter was 0.5.
 \section{Introduction}
 
 \noindent Previous chapters are dealing on the fact that how the
-implementation of the model worked as a computer code, \emph{i.e.} it
+implementation of the model worked as a computer code, \emph{i.e.}, it
 was tested that the programme is functioning as planned and it was
 also considered how sensitive the model is to its input parameters.
 These tests give confidence on how the model is working and how
@@ -3072,7 +3072,7 @@ run parallel fire calculations by reading the User's Guide of FDS.
 The combined fire and evacuation simulation can be run almost
 similarly, but you should be sure that all fire mesh definitions are
 preceding all evacuation mesh definitions, because all the evacuation
-meshes are treated in the last single thread, \emph{i.e.,} all
+meshes are treated in the last single thread, \emph{i.e.}, all
 evacuation meshes are assigned to same process number.  For example,
 if you are using MPIH2, the example \Timtt{config.txt} file given in
 the User's Guide of FDS should be modified as:
@@ -3085,7 +3085,7 @@ fire_2.nist.gov 2
 fire_3.nist.gov 2
 \end{verbatim}
 So the first five processes are fire meshes and the evacuation
-calculation is using the sixth process, \emph{i.e.,} it is run in the
+calculation is using the sixth process, \emph{i.e.}, it is run in the
 machine fire\_3.nist.gov.  Note that there should always be one more
 process (``thread'') defined for MPICH2 in fire+evacuation calculation
 than the corresponding fire calculation would have.  This one extra
@@ -3096,7 +3096,7 @@ error message and the programme ends with a crush.
 
 
 Note that for now the evacuation part of the programme is always run
-as a single thread, \emph{i.e.,} all evacuation calculation meshes are
+as a single thread, \emph{i.e.}, all evacuation calculation meshes are
 run on a single processor.  This means that the model size is limited
 by the computer memory, because the evacuation calculation can not be
 spread over many processors and computers.  If a fire drill is
@@ -3146,7 +3146,7 @@ evacuation input geometry.
   calculation to some other processor.  If you are going to run
   FDS+Evac only in the ``fire drill mode'' then it is best to use the
   serial version of the executable, because all evacuation meshes are
-  always calculated as a single thread, \emph{i.e.,} evacuation
+  always calculated as a single thread, \emph{i.e.}, evacuation
   calculation utilises just one processor.  Note: If you plan to do an
   evacuation simulation which uses smoke then you should not perform a
   full fire simulation before than you have specified the evacuation
@@ -3208,7 +3208,7 @@ evacuation input geometry.
   \Timtt{MISC} namelist.  Use \Timtt{COLOR} or \Timtt{RGB} to colour
   your additional obstacles so these are easier to see in Smokeview.
   Usually these additional obstacles are needed to close some holes in
-  the fire geometry, \emph{e.g.} open windows, which the agents should
+  the fire geometry, \emph{e.g.}, open windows, which the agents should
   not be using as egress paths.
 %
 \item Make additional holes with \verb|EVACUATION=.TRUE.|, where they
@@ -3653,9 +3653,9 @@ main fire loop time step stays constant during the whole calculation.
 The understanding of the time stepping is important to understand how
 the different meshes are connected to each others.  Evacuation and
 fire meshes can not exchange information faster than the main loop
-time step in FDS, \emph{i.e.,} the time step of the fire meshes.  The
+time step in FDS, \emph{i.e.}, the time step of the fire meshes.  The
 evacuation meshes are exchanging information at every iteration of the
-main evacuation time step loop, \emph{i.e.,} at least every
+main evacuation time step loop, \emph{i.e.}, at least every
 \Timts{EVAC\_DT\_STEADY\_STATE} seconds.  This is important when the
 agents are going from one mesh to the next mesh, like using stairs to
 go to the next level or if there is merging flows in staircases.  It
@@ -3712,20 +3712,20 @@ guiding flow fields towards the exit doors.
 \item[\Timts{NO\_EVACUATION}] If set to true then no evacuation
   calculation is done.  If there are no fire meshes defined, then
   ``ERROR: No MESH line(s) defined'' is printed on the screen output.
-  The default is \Timtt{.FALSE.}, \emph{i.e.,} the default mode is
+  The default is \Timtt{.FALSE.}, \emph{i.e.}, the default mode is
   fire+evacuation calculation.
 %
 \item[\Timts{EVACUATION\_MC\_MODE}] If set to true then no fire meshes
   are read in and no fire calcualtion is done.  The EFF and FED files
   are tried to read from the hard disk if they exist.  The default is
-  \Timtt{.FALSE.}, \emph{i.e.,} (re)calculate the FED and EFF files,
+  \Timtt{.FALSE.}, \emph{i.e.}, (re)calculate the FED and EFF files,
   if appropriate.  If \Timts{EVACUATION\_DRILL} is also set true then
   the FED file is not used.
 %
 \item[\Timts{EVACUATION\_DRILL}] If set to true then no fire meshes
   are read in and no fire calcualtion is done.  The EFF file is
   recalculated and no smoke information (the FED file) is used in the
-  calculation.  The default is \Timtt{.FALSE.}, \emph{i.e.,}
+  calculation.  The default is \Timtt{.FALSE.}, \emph{i.e.},
   (re)calculate the FED and EFF files, if appropriate.
 %
 \item[\Timts{EVAC\_SURF\_DEFAULT}] is the surface default for the
@@ -3792,7 +3792,7 @@ Because one needs to specify special \Timtt{VENT}s for the evacuation
 calculation, the \Timtt{VENT} namelist group has an additional logical
 item \Timtt{EVACUATION}.  If it is \Timtt{.TRUE.} then this
 \Timtt{VENT} is omitted in the fire calculation.  The default value is
-\Timtt{.FALSE.}, \emph{i.e.,} the fire calculation boundary conditions
+\Timtt{.FALSE.}, \emph{i.e.}, the fire calculation boundary conditions
 are not used in the evacuation geometry.  The keyword \Timtt{MESH\_ID}
 should also be given, if the \Timtt{VENT} is not needed in all
 evacuation flow field calculations on this floor.  Note, that an
@@ -4000,7 +4000,7 @@ are used.
   the torso and shoulder circles, see Table~\ref{Table_DefaultHumans}
   and Fig.~\ref{Fig_HumanBody}.  The variations of these diameters are
   determined by the diameter distribution of the agent circle
-  ($2R_d$).  E.g., $2R_{t,i} = R_{t,mean} R_{d,i}/R_{d,mean}$
+  ($2R_d$). E.g., $2R_{t,i} = R_{t,mean} R_{d,i}/R_{d,mean}$
 %
 \item[\Timts{TAU\_ROT}] The relaxation time, $\tau_i^z$, for the
   rotational equation of motion, see Eq.~(\ref{Eq_motive_torque}).
@@ -4181,7 +4181,7 @@ programme.
   before the presently chosen door is considered to be in the
   ``smoke'' category, see \Timts{FED\_DOOR\_CRIT}.  Default is 0.1
   which means that the \Timts{FED\_DOOR\_CRIT} is ten times larger for
-  the presently chosen door, \emph{i.e.,} more smoke is tolerated.
+  the presently chosen door, \emph{i.e.}, more smoke is tolerated.
 %
 \item[\Timts{FAC\_DOOR\_OLD2}] This factor is used in the exit
   selection algorithm to decide how much more smoke is too much,
@@ -4363,7 +4363,7 @@ namelist group is used to define the initial positions of the agents.
   namelist that defines the evacuation flow field the agents are
   following if there are no known nor visible doors available at the
   main evacuation mesh, where the agents are placed.  By default it is
-  the \Timtt{ID} of the main evacuation mesh, \emph{i.e.} the agents
+  the \Timtt{ID} of the main evacuation mesh, \emph{i.e.}, the agents
   are ``flowing'' towards all the exit/doors which are defined on this
   main evacuation mesh.
 %
@@ -4467,7 +4467,7 @@ be safe.
   flow field mesh behind this exit door.  The agents are guided to
   this exit door by the specified flow field.  If none is given then
   the agents, whose target this exit is, are following the flow field
-  of the current main evacuation mesh, \emph{i.e.,} they are just
+  of the current main evacuation mesh, \emph{i.e.}, they are just
   going where the flow goes and not towards this exit.  This parameter
   should be given if the exit selection algorithm of FDS+Evac is being
   used.
@@ -4689,7 +4689,7 @@ part of the calculation, \emph{e.g.}, to stairs or to a different
   flow field mesh behind this door.  The agents are guided to this
   door by the specified flow field.  If none is given then the agents,
   whose target this door is, are following the flow field of the
-  current main evacuation mesh, \emph{i.e.,} they are just going where
+  current main evacuation mesh, \emph{i.e.}, they are just going where
   the flow goes and not towards this door.  This parameter should be
   given if the exit selection algorithm of FDS+Evac is being used.
 %

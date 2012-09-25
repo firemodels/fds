@@ -1509,7 +1509,7 @@ Next, the same compartment with the same fire is now assumed to have cold (20~$^
 
 \subsection{Gas Injection via an Isentropic Process (\texorpdfstring{{\bf isentropic}}{isentropic})}
 
-This example checks that if nitrogen is added to a sealed compartment with adiabatic ({\em i.e.} no heat loss) walls, that the
+This example checks that if nitrogen is added to a sealed compartment with adiabatic ({\em i.e.}, no heat loss) walls, that the
 density, pressure and temperature ought to rise according to the ideal gas law for an isentropic process:
 \be \frac{p_2}{p_1} = \left( \frac{\rho_2}{\rho_1} \right)^\gamma = \left( \frac{T_2}{T_1} \right)^{\frac{\gamma}{\gamma-1}}  \ee
 The subscripts 2 and 1 refer to the final and initial state, respectively. Nitrogen is a diatomic gas for which $\gamma=1.4$. As an additional
@@ -1531,7 +1531,7 @@ inject the nitrogen at a specified rate into the particular grid cell that each 
 
 \subsection{Gas Injection via a Non-Isentropic Process (\texorpdfstring{{\bf isentropic2}}{isentropic2})}
 
-This example checks that if nitrogen is added via an external vent to a sealed compartment with adiabatic ({\em i.e.} no heat loss) walls, that the
+This example checks that if nitrogen is added via an external vent to a sealed compartment with adiabatic ({\em i.e.}, no heat loss) walls, that the
 density, pressure and temperature ought to rise to the same values regardless of the time of injection.
 In the two cases, 0.2~kg of N$_2$ are added to a compartment that is 1~m$^3$ in volume. In the first case, the injection occurs in 10~s, in the
 second case in 50~s. The temperature of the gas in both cases is 500~$^\circ$C. It is expected that the pressure, $p$, should rise at the rate:
@@ -2686,7 +2686,7 @@ described by a {\ct PART} line.
 mixture fraction model, or an additional gas species, defined by a {\ct SPEC} line.
 \end{enumerate}
 In all cases, the wall thickness (or radius for cylindrical and spherical geometries) is 0.01~m. The material density is 360~kg/m$^3$ and the yield of gaseous
-products for the charring cases is 0.5, {\em i.e.} half of the original mass. For Cartesian surfaces, the mass loss per unit area is
+products for the charring cases is 0.5, {\em i.e.}, half of the original mass. For Cartesian surfaces, the mass loss per unit area is
 1.8~kg/m$^2$ for charring, and 3.6~kg/m$^2$ for non-charring materials.
 For cylindrical surfaces, the volume per unit surface area is $r/2$, and thus the mass loss per unit area
 is $360(1-0.5) \times r/2$=0.9~kg/m$^2$ for charring, and 1.8~kg/m$^2$ for non-charring materials.
@@ -3791,7 +3791,7 @@ This case starts with the same input as {\bf leak\_test}.  A second leakage vent
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{{\bf ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{{\bf ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, and \texorpdfstring{{\bf ashrae\_7\_table}}{ashrae\_7\_table})}
 
-ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Fig.~\ref{ASHRAE7}, consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components are specified, as well as the fan flow rate. The pressure drops and flow rates can be computed by hand.  Also listed in Fig.~\ref{ASHRAE7} are the predicted pressure drops for a fan with a fixed flow rate, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e. the flow rate of 1.45~m$^3$/s and pressure drop of 1913.5~Pa from the fixed flow simulation sits on the quadratic curve), and a fan with a {\ct RAMP} to define the same quadratic fan curve at 500~Pa intervals. The hand calculations assume a constant density, whereas the FDS computation will have a slightly non-uniform density in the network due to pressure drops. It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since specifying a fan curve via a table results in a piecewise linear approximation, it is expected that the user-defined fan curve results will vary slightly from the quadratic and fixed flow results.
+ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Fig.~\ref{ASHRAE7}, consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components are specified, as well as the fan flow rate. The pressure drops and flow rates can be computed by hand.  Also listed in Fig.~\ref{ASHRAE7} are the predicted pressure drops for a fan with a fixed flow rate, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e., the flow rate of 1.45~m$^3$/s and pressure drop of 1913.5~Pa from the fixed flow simulation sits on the quadratic curve), and a fan with a {\ct RAMP} to define the same quadratic fan curve at 500~Pa intervals. The hand calculations assume a constant density, whereas the FDS computation will have a slightly non-uniform density in the network due to pressure drops. It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since specifying a fan curve via a table results in a piecewise linear approximation, it is expected that the user-defined fan curve results will vary slightly from the quadratic and fixed flow results.
 
 
 \begin{figure}[ht]
