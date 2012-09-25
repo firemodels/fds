@@ -50,7 +50,7 @@ volume = 0.001;                   % volume of each "reactor" [m^3]
 temp_0 = temperature(1,1);        % initial temperature [K]
 density = rho(1,5);               % stoichiometric density [kg/m^3]
 R = 8.3145;                       % gas constnat [J/mol K]
-mass = density * volume;          % mass [kg]
+mass = rho(1,:) * volume;          % mass [kg]
 
 %-------------
 % vector key
@@ -63,23 +63,22 @@ mass = density * volume;          % mass [kg]
 
 y_MW = [28.0134; 16.042460; 31.9988; 44.0095; 18.015280];         % molecular weight [g/mol]
 y_hf = [0.0; -74873; 0.0; 0.0; 0.0];                              % heat of formation all zero except fuel [J/mol]
-yf0 = [n2(1,5); ch4(1,5); o2(1,5); co2(1,5); h2o(1,5)];           % intial mass fractions @ stoichiometric
-N0 = (1000*volume*density*yf0)./(y_MW);                           % initial moles @ stoichiometric  
-yff = [n2(end,5); ch4(end,5); o2(end,5); co2(end,5); h2o(end,5)]; % final mass fractions
-Nf = (1000*volume*density*yff)./(y_MW);                           % final moles
+yf0 = [n2(1,:); ch4(1,:); o2(1,:); co2(1,:); h2o(1,:)];           % intial mass fractions @ stoichiometric
+yff = [n2(end,:); ch4(end,:); o2(end,:); co2(end,:); h2o(end,:)]; % final mass fractions
+for i=1:length(yf0)
+   N0(:,i) = (1000*volume*density*yf0(:,i))./(y_MW);              % initial moles @ stoichiometric  
+   Nf(:,i) = (1000*volume*density*yff(:,i))./(y_MW);              % final moles
+   mean_mw_f(:,i) = sum(y_MW.*(Nf(:,i)./sum(Nf(:,i))));           % mole average molecular weight
+   Rw(i) = (R./mean_mw_f(i))*1000;                                % ideal gas constant [J/kg/K]
+end
 
 hc = -y_hf(2)/y_MW(2)*1000;  % heat of combustion [J/kg]
 cp = 1000;                   % specific heat [J/kg/K] set constant for all species
-
-mean_mw_f = sum(y_MW.*(Nf./sum(Nf))); % mole average molecular weight
-Rf = sum(R./mean_mw_f)*1000;          % ideal gas constant [J/kg/K]
-k = (1-(Rf/cp))^(-1);
-%k=1.3;
-
+cv = cp - Rw;
 %-----------------------
 % Calculate State Relationships
 %-----------------------
-z_st = yf0(2);
+z_st = yf0(2,5);
 f = mix_frac(1,:);
 
 for i =1:length(f)
@@ -87,23 +86,22 @@ for i =1:length(f)
         Yf(i)     = (f(i)-z_st)/(1-z_st);
         Yo2(i)    = 0;
         Yp(i)     = (1-f(i))/(1-z_st);
-        T_calc(i) = f(i)*(-(z_st/(1-z_st))*(hc/cp))+temp_0+(z_st)/((1-z_st)*cp)*hc;
+        T_calc(i) = f(i)*(-(z_st/(1-z_st))*(hc/cv(i)))+temp_0+(z_st)/((1-z_st)*cv(i))*hc;
     elseif f(i) >= 0 && f(i) < z_st
         Yf(i)     = 0;
         Yo2(i)    = 1 - f(i)/z_st;
         Yp(i)     = f(i)/z_st;
-        T_calc(i) = f(i)*((hc)/(cp))+temp_0;
+        T_calc(i) = f(i)*((hc)/(cv(i)))+temp_0;
     else
         Yf(i)     = 0;
         Yo2(i)    = 0;
         Yp(i)     = 1;
-        T_calc(i) = yf0(2)*(hc/cp)+temp_0;
+        T_calc(i) = yf0(2,5)*(hc/cv(i))+temp_0;
     end
 end
 
 T_calc_norm = (T_calc-temp_0)./(T_calc(5)-temp_0);                          % normalized expected temperature
-TF_fds = (temperature(end,:)).*(pressure(1,:)./pressure(end,:)).^((k-1)/k); % corrected temperature due to constant volume
-FDS_temp_norm = (TF_fds-temp_0)./(T_calc(5)-temp_0);                        % normalized FDS temperature
+FDS_temp_norm = (temperature(end,:)-temp_0)./(T_calc(5)-temp_0);            % normalized FDS temperature
 
 %------------------------------------------------
 % Write FDS and Expected Data to CSV Files
