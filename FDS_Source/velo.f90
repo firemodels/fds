@@ -1611,11 +1611,11 @@ OME_E = -1.E6_EB
 !$OMP         BOUNDARY_TYPE_P,WALL,HVAC_TANGENTIAL)
 EDGE_LOOP: DO IE=1,N_EDGES
 
-   ! Throw out edges that are completely surrounded by blockages or the exterior of the domain
+   ! Throw out edges that are XXXcompletely surrounded by blockages orXXX the exterior of the domain
 
    PROCESS_EDGE = .FALSE.
    DO IS=5,8
-      IF (.NOT.EXTERIOR(IJKE(IS,IE)) .AND. .NOT.SOLID(IJKE(IS,IE))) THEN
+      IF (.NOT.EXTERIOR(IJKE(IS,IE))) THEN ! .AND. .NOT.SOLID(IJKE(IS,IE))) THEN
          PROCESS_EDGE = .TRUE.
          EXIT
       ENDIF
@@ -1772,7 +1772,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          BOUNDARY_TYPE_M = WCM%BOUNDARY_TYPE
          BOUNDARY_TYPE_P = WCP%BOUNDARY_TYPE
 
-         IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
+         !IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
          ! At OPEN boundaries, set the external velocity component equal to the internal and exit the EDGE loop.
          ! Note that this is done only for edges with OPEN boundaries on each side.
@@ -1836,6 +1836,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IIGP = I_CELL(ICPP)
             JJGP = J_CELL(ICPP)
             KKGP = K_CELL(ICPP)
+         ENDIF
+
+         ! If cells between face defining VEL_GAS are both SOLID, set gradient to zero and cycle
+
+         IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .AND. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
+            DUIDXJ(ICD_SGN) = 0._EB
+            MU_DUIDXJ(ICD_SGN) = 0._EB
+            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+            CYCLE ORIENTATION_LOOP
          ENDIF
 
          ! Decide whether or not to process edge using data interpolated from another mesh
