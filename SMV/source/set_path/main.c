@@ -160,7 +160,7 @@ int main(int argc, char **argv){
     if(reg_path(REG_GET,REG_USER_PATH,pathbuffer)==0)return 1;
     if(display_path==1){
       if(strlen(pathbuffer)>0){
-        printf("User path:\n%s\n",pathbuffer);
+        printf("  User path:\n%s\n",pathbuffer);
       }
     }
   }
@@ -168,7 +168,7 @@ int main(int argc, char **argv){
     if(reg_path(REG_GET,REG_SYSTEM_PATH,pathbuffer)==0)return 1;
     if(display_path==1){
       if(strlen(pathbuffer)>0){
-        printf("System path:\n%s\n",pathbuffer);
+        printf("  System path:\n%s\n",pathbuffer);
       }
     }
   }
@@ -189,7 +189,7 @@ int main(int argc, char **argv){
     }
     if(newentry_present==1){
       if(path_summary==1){
-        printf("The directory %s is already present in the %s path.\n",newentry,path_type);
+        printf("  %s already present in the %s path.\n",newentry,path_type);
       }
     }
     else{
@@ -209,11 +209,11 @@ int main(int argc, char **argv){
           if(reg_path(REG_SET,REG_SYSTEM_PATH,pathbuffer)==0)return 1;
         }
         if(path_summary==1){
-          printf("The directory %s was added to the %s path.\n",newentry,path_type);
-          printf("Reboot your computer so the path change may take effect.\n");
+          printf("  %s was added to the %s path.\n",newentry,path_type);
+          printf("  Reboot your computer so path changes may take effect.\n");
         }
         if(display_path==1){
-          printf("\n%s path set to:\n%s\n",path_type,pathbuffer);
+          printf("\n  %s path set to:\n%s\n",path_type,pathbuffer);
         }
       }
     }
@@ -249,17 +249,17 @@ int main(int argc, char **argv){
           if(reg_path(REG_SET,REG_SYSTEM_PATH,newpath)==0)return 1;
         }
         if(path_summary==1){
-          printf("All directories containing %s were removed from the %s path.\n",newentry,path_type);
-          printf("Reboot your computer so the path change may take effect.\n");
+          printf("  All directories containing %s were removed from the %s path.\n",newentry,path_type);
+          printf("  Reboot your computer so the path change may take effect.\n");
         }
       }
       if(display_path==1){
-        printf("\n%s path set to:\n%s\n",path_type,newpath);
+        printf("\n  %s path set to:\n%s\n",path_type,newpath);
       }
     }
     else{
       if(path_summary==1){
-        printf("Directories containing %s were not found in the %s path.\n",newentry,path_type);
+        printf("  %s not found in the %s path.\n",newentry,path_type);
       }
     }
   }
