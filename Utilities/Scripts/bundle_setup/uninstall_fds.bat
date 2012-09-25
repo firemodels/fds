@@ -1,7 +1,15 @@
 @echo off
 
 echo.
-echo Uninstall FDS and Smokeview version 6
+echo Uninstalling FDS and Smokeview version 6
+NET SESSION >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+    echo *** Error: This script is running as %username%.  It must run as Administrator.
+    echo       Run again, after right clicking on this script and selecting "Run as Adminstrator"
+    echo       FDS/Smokeview uninstaller aborted.
+    pause
+    exit
+)
 echo.
 echo Press any key to proceed or CTRL C to abort
 pause>NUL
