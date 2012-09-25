@@ -7,8 +7,7 @@ exit
 :dircheck
 
 echo.
-echo *** Wrapping up FDS and Smokeview installation.
-echo.
+echo *** Wrapping up the FDS and Smokeview installation.
 echo.
 echo *** Removing previous FDS/Smokeview entries from the system and user path.
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
@@ -31,7 +30,6 @@ echo Creating the directory %SHORTCUTSDIR%
 mkdir "%SHORTCUTSDIR%"
 :existbin
 
-echo. 
 echo *** Adding program shortcuts to %SHORTCUTSDIR%
 Rem ------------ create aliases ----------------
 
