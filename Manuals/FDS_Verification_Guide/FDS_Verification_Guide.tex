@@ -2293,7 +2293,7 @@ Y_{fuel} &= 0 \\
 Y_{ox} &= 1- \frac{f}{f_{stoich}} \\
 Y_{prod} &= \frac{f}{f_{stoich}}
 \end{align}
-At stoichiometric conditions, the species mass fractions are the same whether approaching from fuel lean or fuel rich: $Y_{fuel} = 0$, $Y_{ox}=0$, and $Y_{prod}=1$. Fig.~\ref{fig:burke_schumann_spec} shows the comparison between the final lumped species concentrations (fuel, oxidizer, and products) as a function of mixture fraction from fuel lean to fuel rich combustion. 
+At stoichiometric conditions, the species mass fractions are the same whether approaching from fuel lean or fuel rich: $Y_{fuel} = 0$, $Y_{ox}=0$, and $Y_{prod}=1$. Fig.~\ref{fig:burke_schumann_spec} shows the comparison between the final FDS lumped species concentrations (fuel, oxidizer, and products) and state relation results as a function of mixture fraction. 
 
 \begin{figure}[h!]
 \begin{center}
@@ -2303,11 +2303,11 @@ At stoichiometric conditions, the species mass fractions are the same whether ap
 \label{fig:burke_schumann_spec}
 \end{figure}
 
-The state relationship for temperature is dependent upon the mixture fraction and the appropriate definition of $Y_{fuel}$ based on the mixture fraction:
+The state relationship for temperature is dependent upon the mixture fraction, the appropriate definition of $Y_{fuel}(f)$, the heat of combustion, and the specific heat. The specific heat, $c_p$, for each species is set to be a constant 1~kJ/kg\,K as defined by Turns \cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to 0, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) instead needs to be based on $c_v$. We use the  following relationship $c_v = c_p - R/<MW>$ to determine $c_v$. 
 \begin{equation}\label{eq:mix_relate_temp}
-T = (f-Y_{fuel})\frac{\Delta h_{c}}{c_{p}} + f(T_{fuel,i}-T_{ox,i}) + T_{ox,i}
+T = (f-Y_{fuel})\frac{\Delta h_{c}}{c_{v}} + f(T_{fuel,i}-T_{ox,i}) + T_{ox,i}
 \end{equation}
-The predicted temperature profile does not currently agree with the expected value and there is on going work to determine the source of the differences (Fig.~\ref{fig:burke_schumann_temp}).
+The molecular weight of the species were not set to be uniform, so the average molecular weight and therefore $c_v$, will change as a function of the mixture fraction. As a result, the traditional linear temperature profile is not expected.
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/Burke_Schumann_Temp}
