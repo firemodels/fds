@@ -1444,7 +1444,7 @@ the number of which depends on the desired resolution of the flow dynamics.
 \subsection{Basics}
 \label{info:MESH_Basics}
 
-A mesh is a single right parallelepiped, {\em i.e.} a box.
+A mesh is a single right parallelepiped, {\em i.e.}, a box.
 The coordinate system within a mesh conforms to the right hand rule.
 The origin point of a mesh is defined by the first, third
 and fifth values of the real number sextuplet, {\ct XB}, and the opposite
@@ -2760,7 +2760,7 @@ be the same, denoting a plane as opposed to a solid.
 \begin{warning}
 \noindent
 Note that only one {\ct VENT} may be specified for any given wall cell.  If additional {\ct VENT} lines are specified for a
-given wall cell, FDS will output a warning message and ignore the subsequent lines ({\em i.e.} only the first vent
+given wall cell, FDS will output a warning message and ignore the subsequent lines ({\em i.e.}, only the first vent
 will be applied)
 \end{warning}
 
@@ -3984,10 +3984,10 @@ Many practical materials change in thickness during the thermal reactions. For e
 \item Non-charring materials will shrink as material is removed from the condensed
 phase to the gas phase.
 \item Porous materials like foams would shrink when the material melts and forms a non-porous layer.
-\item Some charring materials swell, i.e. get thicker, when a porous char layer is formed.
+\item Some charring materials swell, i.e., get thicker, when a porous char layer is formed.
 \item Intumescent fire protection materials would swell significantly, creating an insulating layer.
 \end{itemize}
-In FDS, the layer thickness is updated according to the ratio of the instantaneous material density and the density of the material in its pure form, i.e.
+In FDS, the layer thickness is updated according to the ratio of the instantaneous material density and the density of the material in its pure form, i.e.,
 the {\ct DENSITY} on the {\ct MATL-line}. In case of several material components, the amount of swelling and shrinking is determined by the maximum and sum
 of these ratios, respectively. In mathematical terms, this means that in each time step,
 the size of each condensed phase cell is changed according to the ratio $\delta$
@@ -4098,7 +4098,7 @@ reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
 is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
 
 The threshold temperature can be used to simulate simple phase change reactions, such as melting and freezing.
-To make the reaction rate controlled by available energy, i.e. {\em not} kinetics, another optional term should be included
+To make the reaction rate controlled by available energy, i.e., {\em not} kinetics, another optional term should be included
 in the reaction rate formula
 \be
   r_{ij} = A_{ij}\frac{1}{H_{r,\alpha\beta}\Delta t} \max\left[0,S_{thr,ij}(T_s-T_{thr,ij})\right]^{n_{t,ij}}
@@ -4570,7 +4570,7 @@ There are occasions where simply defining fixed flow and fixed species boundary 
 If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
 duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
-The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.} what goes in during a time step, goes out during a time step).
+The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.}, what goes in during a time step, goes out during a time step).
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
@@ -4585,7 +4585,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 \begin{description}
 \item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct 'DUCT'}, {\ct 'NODE'}, {\ct 'FAN'}, {\ct 'FILTER'}, or {\ct 'AIRCOIL'}.
-\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types ({\em i.e.} a duct and a node can have the same name but two ducts cannot).
+\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types ({\em i.e.}, a duct and a node can have the same name but two ducts cannot).
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
@@ -4620,7 +4620,7 @@ specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$
 \noindent
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER\_ID}, or {\ct FAN\_ID} should be specified for a duct.
 
-To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
+To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.}, a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3in]{FIGURES/hvac-simplify}
@@ -4652,10 +4652,10 @@ Below are three example duct node inputs representing a typical tee-type connect
 \noindent where:
 
 \begin{description}
-\item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.} it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
+\item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.}, it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
 \item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter can only have two connected ducts.
-\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node ({\em e.g.} a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
+\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node ({\em e.g.}, a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
@@ -4866,7 +4866,7 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 \end{description}
 
 \noindent
-Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the latter case, the heat exchange is computed as a two step process.  First, the outlet temperature is determined assuming 100 \% efficient (i.e. both fluids exit at the same temperature):
+Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the latter case, the heat exchange is computed as a two step process.  First, the outlet temperature is determined assuming 100 \% efficient (i.e., both fluids exit at the same temperature):
 \be T_{fluid,out}=\frac{c_{p,gas} u_{duct} A_{duct} \rho_{duct} T_{duct,in} + c_{p,fluid} \dm_{fluid} T_{fluid,in}}{c_{p,gas} u_{duct} A_{duct} \rho_{duct} + c_{p,fluid} \dm_{fluid}}
 \ee
 Second, the actual heat exchanged is computed using the {\ct EFFICIENCY}.
@@ -4943,7 +4943,7 @@ meshes, make sure that the specified rectangular coordinates do so as well. This
 mesh.
 
 Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two
-zones abut (i.e. touch) even if one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when
+zones abut (i.e., touch) even if one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when
 two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one
 of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created
 gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
@@ -5085,7 +5085,7 @@ For the case where the stack flow is through small leakage paths, divide the bui
 
 The {\em stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only.  Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
 The interior air temperature, $T_b$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
-10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 ({\em e.g.} an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
+10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 ({\em e.g.}, an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
 
 The initial density stratification inside and outside the building can be calculated using the relation:
 \be
@@ -5587,7 +5587,7 @@ More detail is included in Chapter~\ref{info:PART}.
 If you want FDS to compute the molecular weight of the gas species, you can input a {\ct FORMULA} rather than the molecular weight, {\ct MW}.
 This will also be used as the label for the gas species by Smokeview.  {\ct FORMULA} is a character string consisting of elements followed by their atom count.
 Subgroups bracketed by parentheses can also be given.  The element name is given by its standard, case-sensitive, IUPAC\footnote{International Union of Pure
-and Applied Chemistry} abbreviation ({\em e.g.} C for carbon, He for helium).
+and Applied Chemistry} abbreviation ({\em e.g.}, C for carbon, He for helium).
 The following are all equivalent:
 
 \footnotesize
@@ -7015,7 +7015,7 @@ model, but their results for various polyvinyl chloride (PVC) cables suggested t
 sufficient for engineering analyses of a wider variety of cables. The U.S. Nuclear Regulatory
 Commission sponsored a study of cable failure known as CAROLFIRE~\cite{CAROLFIRE}. The primary project objective of CAROLFIRE was to
 characterize the various modes of electrical
-failure ({\em e.g.} hot shorts, shorts to ground) within bundles of power, control and instrument cables.
+failure ({\em e.g.}, hot shorts, shorts to ground) within bundles of power, control and instrument cables.
 A secondary objective of the project was to develop a simple model to predict thermally-induced
 electrical failure when a given interior region of the cable reaches an empirically
 determined threshold temperature. The measurements used for these purposes are described in
@@ -7749,7 +7749,7 @@ occur when the {\ct QUANTITY} value passes above, or below, the given {\ct SETPO
 The following parameters dictate how a device will control something:
 \begin{description}
 \item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device
-({\em e.g.} heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
+({\em e.g.}, heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
 \item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change state when its value increases
 past the setpoint and a negative integer means the device will change state
 when its value decreases past the setpoint.  The default value is +1.
@@ -7835,7 +7835,7 @@ appear/disappear at the various designated times. These lines are part of the si
 \normalsize
 
 \noindent
-At the start, the purple obstruction is present with a red block in it (this is a {\ct HOLE} initial state is false, i.e. the hole is filled) and a hole present in it.  Also at the start the pink obstruction is visible.  At 1~s the red block disappears.  At 2~s the initially present hole in the purple obstruction is filled with a green block.  This {\ct HOLE} was initially true meaning the hole was there at the start.  The blue obstruction appears at 3~s because its initial state is false, meaning that it does not exist initially. The pink obstruction disappears at 4~s because it does exist initially. At 5~s a yellow obstruction appears with one hole in it and one black block in it.  At 6~s the black block disappears as it was a hole that was initially false and therefore was created as a block when its parent obstruction (yellow) was created.  Also at 6~s the hole originally present in the yellow obstruction is filled with a gray block as it was a hole that was initially true and therefore is filled when its {\ct DEVC} changes state.  {\em You should always try a simple example first before embarking on a complicated creation/removal scheme for obstructions and holes.}
+At the start, the purple obstruction is present with a red block in it (this is a {\ct HOLE} initial state is false, i.e., the hole is filled) and a hole present in it.  Also at the start the pink obstruction is visible.  At 1~s the red block disappears.  At 2~s the initially present hole in the purple obstruction is filled with a green block.  This {\ct HOLE} was initially true meaning the hole was there at the start.  The blue obstruction appears at 3~s because its initial state is false, meaning that it does not exist initially. The pink obstruction disappears at 4~s because it does exist initially. At 5~s a yellow obstruction appears with one hole in it and one black block in it.  At 6~s the black block disappears as it was a hole that was initially false and therefore was created as a block when its parent obstruction (yellow) was created.  Also at 6~s the hole originally present in the yellow obstruction is filled with a gray block as it was a hole that was initially true and therefore is filled when its {\ct DEVC} changes state.  {\em You should always try a simple example first before embarking on a complicated creation/removal scheme for obstructions and holes.}
 
 To learn how to create and remove obstructions multiple times, see Section~\ref{info:CUSTOM} for information about the custom control feature.
 
@@ -8023,7 +8023,7 @@ This control function behaves like an HVAC thermostat.  It can operate in one of
 The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function,
 a {\ct DEADBAND}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'},
 the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops
-below the lower value in {\ct DEADBAND} and reverts when it increases past the upper value, i.e. like a heating system.
+below the lower value in {\ct DEADBAND} and reverts when it increases past the upper value, i.e., like a heating system.
 The reverse will occur if {\ct ON\_BOUND='UPPER'}, {\em i.e.}, a cooling system.
 
 For an HVAC system, the following lines of input would set up a simple thermostat:
@@ -8809,7 +8809,7 @@ Estimates of visibility through smoke can be made by using the
 equation
 \be  S = C/K  \label{vis}  \ee
 where $C$ is a non-dimensional constant characteristic of
-the type of object being viewed through the smoke, {\em i.e.}
+the type of object being viewed through the smoke, {\em i.e.},
 $C=8$ for a light-emitting sign and $C=3$ for a light-reflecting
 sign~\cite{SFPE:Mulholland}. Since $K$ varies from point to point in the
 domain, the visibility $S$ does as well.
@@ -9608,7 +9608,7 @@ where
 T_{res} &=& \tilde{\varphi}^2 \\
 T_{sgs} &=& (\tilde{\varphi} - \hat{\tilde{\varphi}})^2
 \end{eqnarray}
-Here again the model for the SGS scalar energy fluctuations is taken from scale similarity \cite{Bardina:1980}.  The field $\hat{\tilde{\varphi}}$ is test filtered at a scale $2\Delta$.  The cross-term energy (i.e. $\langle 2 \tilde{\varphi}\varphi^{\prime} \rangle$, where $\varphi^\prime = \varphi - \tilde{\varphi}$) is ignored, but this does not affect the bounds of the measure.  Further, it can be shown that this term is small if sufficient resolution is used. There is evidence to suggest that the requirements for scalar resolution may be somewhat more stringent than for the velocity field \cite{Vervisch:2010}.  Therefore, currently the best advice is to keep the mean value of MSR less than 0.2.
+Here again the model for the SGS scalar energy fluctuations is taken from scale similarity \cite{Bardina:1980}.  The field $\hat{\tilde{\varphi}}$ is test filtered at a scale $2\Delta$.  The cross-term energy (i.e., $\langle 2 \tilde{\varphi}\varphi^{\prime} \rangle$, where $\varphi^\prime = \varphi - \tilde{\varphi}$) is ignored, but this does not affect the bounds of the measure.  Further, it can be shown that this term is small if sufficient resolution is used. There is evidence to suggest that the requirements for scalar resolution may be somewhat more stringent than for the velocity field \cite{Vervisch:2010}.  Therefore, currently the best advice is to keep the mean value of MSR less than 0.2.
 
 \subsubsection{Wavelet Error Measure}
 \label{wavelets}
@@ -11532,7 +11532,7 @@ it is strongly suggested that you download onto your computer the entire FDS/Smo
 All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered
 by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.apache.org/}{{Subversion}} (SVN) revision management system.
 Under this system a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that
-identifies the version of the entire repository rather than of a specific file (i.e. anytime a change is made to the repository all files are incremented in version number).
+identifies the version of the entire repository rather than of a specific file (i.e., anytime a change is made to the repository all files are incremented in version number).
 A record of the version number is maintained that indicates when a specific file was changed, which is referred to as a revision number.
 
 Anyone can obtain a copy of the repository or retrieve a specific revision of the
@@ -11690,7 +11690,7 @@ start of the run; {\ct Time step} is the time step size for the given mesh;
 {\ct Total time} is the time of the simulation;
 {\ct Max/Min divergence} is the max/min value of the
 function $\nabla \cdot \bu$ and is used as a diagnostic when the flow
-is incompressible ({\em i.e.} no heating); and {\ct Max CFL number} is the
+is incompressible ({\em i.e.}, no heating); and {\ct Max CFL number} is the
 maximum value of the CFL number. The {\ct Radiation Loss to Boundaries} is the
 amount of energy that is being radiated to the boundaries. As compartments
 heat up, the energy lost to the boundaries can grow to be an appreciable
