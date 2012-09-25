@@ -522,8 +522,8 @@ not considered important in a given simulation. The pressure on the left hand si
 in the variable $\cal H$) is solved for directly.
 The reason for the decomposition of the pressure term is so that the linear algebraic system
 arising from the discretization of Eq.~(\ref{pe})
-has constant coefficients ({\em i.e.}, it is {\em separable}) and can be solved to machine accuracy
-by a fast, direct ({\em i.e.}, non-iterative) method that utilizes
+has constant coefficients (i.e., it is {\em separable}) and can be solved to machine accuracy
+by a fast, direct (i.e., non-iterative) method that utilizes
 Fast Fourier Transforms (FFT).
 
 The discretized form of the
@@ -565,7 +565,7 @@ The pressure $\tilde{p}$ is set to $\tilde{p}_{ext}$ by the user ({\ct DYNAMIC\_
 \\
 \\
 Inflow: When fluid is entering the domain at an {\tt OPEN} vent we make the assumption that
-Bernoulli holds (\emph{i.e.}, inviscid, steady, incompressible) and that the fluid element on the boundary has
+Bernoulli holds (i.e., inviscid, steady, incompressible) and that the fluid element on the boundary has
 accelerated from the state \{$\tilde{p}_1,\rho_1,q_1$\} along a streamline:
 \begin{equation}
 \tilde{p}_1 + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \tilde{p}_2 + \mbox{$\frac{1}{2}$}\rho_2 q_2^2
