@@ -10,7 +10,7 @@ set(gcf,'DefaultLineLineWidth',Line_Width)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-ddir='../../../Verification/Sprinklers_and_Sprays/';
+ddir='../../Verification/Sprinklers_and_Sprays/';
 
 skip_case = 0;
 
@@ -184,7 +184,7 @@ set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 display('Printing plot fluid_part_momentum.pdf...')
           
-print -dpdf ../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_momentum
+print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_momentum
 
 % plot velocities
 
@@ -260,7 +260,7 @@ set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 display('Printing plot fluid_part_velocity.pdf...')
           
-print -dpdf ../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_velocity
+print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_velocity
 
 
 

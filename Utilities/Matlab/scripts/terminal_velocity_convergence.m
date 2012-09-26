@@ -5,7 +5,7 @@ clear all
 
 plot_style
 
-repository = '../../../Verification/Sprinklers_and_Sprays/';
+repository = '../../Verification/Sprinklers_and_Sprays/';
 
 skip_case = 0;
 
@@ -114,7 +114,7 @@ if exist(SVN_Filename,'file')
 end
 
 display('Printing plot terminal_velocity_convergence.pdf...')
-print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/terminal_velocity_convergence');
+print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/terminal_velocity_convergence');
 
 close all
 clear H
@@ -160,7 +160,7 @@ if exist(SVN_Filename,'file')
 end
 
 display('Printing plot position_convergence.pdf...')
-print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');
+print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');
 
 % figure(1)
 % H(1) = loglog(dtvec, errtvec, '-*k');
@@ -204,4 +204,4 @@ print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/posi
 %         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 % end
 % 
-% print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');
+% print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');
