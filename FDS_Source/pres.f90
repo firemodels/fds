@@ -111,7 +111,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             CASE( 1)
                IF (PREDICTOR) DUUDT =       RFODT*(-WC%ONE_D%UWS -         U(0,J,K)           )
                IF (CORRECTOR) DUUDT = 2._EB*RFODT*(-WC%ONE_D%UW  - 0.5_EB*(U(0,J,K)+US(0,J,K)))
-               BXS(J,K) = HP(1,J,K)     + 0.5_EB*DX(0)   *(DUUDT+FVX(0,J,K))
+               BXS(J,K) = HP(1,J,K)     + 0.5_EB*DX(0)  *(DUUDT+FVX(0,J,K))
             CASE(-1) 
                IF (PREDICTOR) DUUDT =       RFODT*( WC%ONE_D%UWS -         U(IBAR,J,K)              )
                IF (CORRECTOR) DUUDT = 2._EB*RFODT*( WC%ONE_D%UW  - 0.5_EB*(U(IBAR,J,K)+US(IBAR,J,K)))
@@ -159,19 +159,19 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                BXS(J,K) = (DX_OTHER*HP(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER) + WALL_WORK1(IW)
             CASE(-1)
                DX_OTHER = MESHES(NOM)%DX(WC%NOM_IB(1))
-               BXF(J,K) = (DX_OTHER*HP(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)+ WALL_WORK1(IW)
+               BXF(J,K) = (DX_OTHER*HP(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER) + WALL_WORK1(IW)
             CASE( 2)
                DY_OTHER = MESHES(NOM)%DY(WC%NOM_IB(2))
-               BYS(I,K) = (DY_OTHER*HP(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)+ WALL_WORK1(IW)
+               BYS(I,K) = (DY_OTHER*HP(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER) + WALL_WORK1(IW)
             CASE(-2)
                DY_OTHER = MESHES(NOM)%DY(WC%NOM_IB(2))
-               BYF(I,K) = (DY_OTHER*HP(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)+ WALL_WORK1(IW)
+               BYF(I,K) = (DY_OTHER*HP(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER) + WALL_WORK1(IW)
             CASE( 3)
                DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
-               BZS(I,J) = (DZ_OTHER*HP(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)+ WALL_WORK1(IW)
+               BZS(I,J) = (DZ_OTHER*HP(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER) + WALL_WORK1(IW)
             CASE(-3)
                DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
-               BZF(I,J) = (DZ_OTHER*HP(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)+ WALL_WORK1(IW)
+               BZF(I,J) = (DZ_OTHER*HP(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER) + WALL_WORK1(IW)
          END SELECT
 
       ENDIF INTERPOLATED_ONLY
@@ -629,18 +629,17 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
       IF (PREDICTOR) THEN
-         UN_NEW_OTHER = -SIGN(1,IOR)*WC%ONE_D%UWS
+         UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
       ELSE
-         UN_NEW_OTHER = -SIGN(1,IOR)*WC%ONE_D%UW
+         UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
       ENDIF
    ENDIF
 
    ! Compute velocity difference
 
    VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
-   WC%VEL_ERR_OLD = WC%VEL_ERR_NEW
    WC%VEL_ERR_NEW = VELOCITY_ERROR
-   WALL_WORK1(IW) = -SIGN(1,IOR)*ITERATIVE_FACTOR*VELOCITY_ERROR/(WC%RDN*DT)
+   WALL_WORK1(IW) = -SIGN(1._EB,REAL(IOR,EB))*ITERATIVE_FACTOR*VELOCITY_ERROR/(WC%RDN*DT)
 
    ! If the grid cells in the current mesh are smaller than those of the other mesh, do not include in error tolerance
 
