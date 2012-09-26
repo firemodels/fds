@@ -228,22 +228,29 @@ for i=1:100
     end
 end
 
+%-----------------------
+% Simple Extinction Model
+%-----------------------
+
+simple_o2 = [0.15 0];
+simple_temp = [273.15 1700];
+
 
 %-----------------------
 % Plotting
 %-----------------------
 figure(1)
-plot(ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'m+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'m*')
+plot(simple_temp,simple_o2,'k',ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'r+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'b*')
 axis([273.15 1900 0 0.23])
 MarkerSize = 7;
-LineWidth = 1.5;
+LineWidth = 2;
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
 xlabel('Temperature (K)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 ylabel('Mass Fraction Oxygen','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-legend('Expected Burning','FDS Burning','Expected Extinction','FDS Extinction','Location','NorthEast')
+legend('Simple Model','Expected Burning','FDS Burning','Expected Extinction','FDS Extinction','Location','NorthEast')
 
 % add SVN if file is available
 
