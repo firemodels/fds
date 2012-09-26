@@ -63,6 +63,7 @@ $RUNFDS HVAC ashrae7_table
 $RUNFDS HVAC door_crack
 $RUNFDS HVAC fan_test
 $RUNFDS HVAC HVAC_aircoil
+$RUNFDS HVAC HVAC_damper
 $RUNFDS HVAC HVAC_filter
 $RUNFDS HVAC HVAC_flow_loss
 $RUNFDS HVAC HVAC_mass_conservation
