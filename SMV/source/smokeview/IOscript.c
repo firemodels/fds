@@ -379,9 +379,10 @@ int get_script_keyword_index(char *keyword){
 
 /* ------------------ script_error_check ------------------------ */
 
-void script_error_check(char *data){
+void script_error_check(char *keyword, char *data){
   if(get_script_keyword_index(data)!=SCRIPT_UNKNOWN){
-    fprintf(stderr,"*** Error: while parsing a smokeview script, the keyword %s was found when expecting data\n",data);
+    fprintf(stderr,"*** Error: While parsing the Smokeview script entry: %s ,\n",keyword);
+    fprintf(stderr,"           a keyword was found in \"%s\", data was expected.\n",data);
   }
 }
 
@@ -390,7 +391,7 @@ if(fgets(buffer2,255,stream)==NULL){\
   scriptEOF=1;\
   break;\
 }\
-script_error_check(buffer2);\
+script_error_check(keyword,buffer2);\
 scripti->cval=script_set_buffer(buffer2)
 
 #define SETcval2 \
@@ -398,7 +399,7 @@ if(fgets(buffer2,255,stream)==NULL){\
   scriptEOF=1;\
   break;\
 }\
-script_error_check(buffer2);\
+script_error_check(keyword,buffer2);\
 scripti->cval2=script_set_buffer(buffer2)
 
 /* ------------------ compile_script ------------------------ */
@@ -455,6 +456,7 @@ int compile_script(char *scriptfile){
   while(!feof(stream)){
     int keyword_index;
     int scriptEOF;
+    char keyword[255];
 
     if(fgets(buffer2,255,stream)==NULL)break;
     cleanbuffer(buffer,buffer2);
@@ -462,6 +464,7 @@ int compile_script(char *scriptfile){
 
     keyword_index = get_script_keyword_index(buffer);
     if(keyword_index==SCRIPT_UNKNOWN)continue;
+    strcpy(keyword,buffer);
 
     scripti = scriptinfo + nscriptinfo;
     init_scripti(scripti,keyword_index,buffer);
@@ -469,7 +472,9 @@ int compile_script(char *scriptfile){
     scriptEOF=0;
     switch (keyword_index){
       case SCRIPT_UNLOADALL:
+      case SCRIPT_LOADPARTICLES:
         break;
+
       case SCRIPT_RENDERDIR:
         {
         int len;
@@ -479,7 +484,7 @@ int compile_script(char *scriptfile){
           scriptEOF=1;
           break;
         }
-        script_error_check(buffer2);
+        script_error_check(keyword,buffer2);
         cleanbuffer(buffer,buffer2);
         len = strlen(buffer);
         if(len>0){
@@ -500,8 +505,10 @@ int compile_script(char *scriptfile){
         break;
 
       case SCRIPT_SCENECLIP:
+      case SCRIPT_LOADVOLSMOKE:
         SETcval;
-        sscanf(buffer2,"%i",&scripti->ival);
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer,"%i",&scripti->ival);
         break;
 
       case SCRIPT_XSCENECLIP:
@@ -570,6 +577,7 @@ int compile_script(char *scriptfile){
       case SCRIPT_LOADTOUR:
       case SCRIPT_LOAD3DSMOKE:
       case SCRIPT_LOADISO:
+      case SCRIPT_SETVIEWPOINT:
         SETcval;
         break;
 
@@ -588,12 +596,6 @@ int compile_script(char *scriptfile){
         }
         break;
 
-      case SCRIPT_LOADVOLSMOKE:
-        SETcval;
-        cleanbuffer(buffer,buffer2);
-        sscanf(buffer,"%i",&scripti->ival);
-        break;
-
       case SCRIPT_LOADVOLSMOKEFRAME:
         SETcval;
         cleanbuffer(buffer,buffer2);
@@ -601,15 +603,6 @@ int compile_script(char *scriptfile){
         break;
 
       case SCRIPT_LOADSLICE:
-        SETcval;
-
-        SETcval2;
-        cleanbuffer(buffer,buffer2);
-        sscanf(buffer,"%i %f",&scripti->ival,&scripti->fval);
-        if(scripti->ival<1)scripti->ival=1;
-        if(scripti->ival>3)scripti->ival=3;
-        break;
-
       case SCRIPT_LOADVSLICE:
         SETcval;
 
@@ -621,9 +614,6 @@ int compile_script(char *scriptfile){
         if(scripti->ival>3)scripti->ival=3;
         break;
 
-      case SCRIPT_LOADPARTICLES:
-        break;
-  
       case SCRIPT_LOADPLOT3D:
         SETcval;
         cleanbuffer(buffer,buffer2);
@@ -637,9 +627,6 @@ int compile_script(char *scriptfile){
         if(scripti->fval<0.0)scripti->fval=0.0;
         break;
 
-      case SCRIPT_SETVIEWPOINT:
-        SETcval;
-        break;
     }
     if(scriptEOF==1)break;
     if(keyword_index!=SCRIPT_UNKNOWN)nscriptinfo++;
