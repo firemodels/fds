@@ -2,13 +2,12 @@
 
 \section{Point Source Radiation Heat Flux}
 
-The point source model assumes that radiant energy is released at a point located at the center of the fire. The radiant heat flux at any distance from the source fire is inversely related to the horizontal separation distance (r), by the following equation (Drysdale, 1998)
+The point source model assumes that radiant energy is released at a point located at the center of the fire. The radiant heat flux at any distance $x$ from the source fire is inversely related to the horizontal separation distance $r$, by the following equation
 
 \be
-\dot q_r'' = \frac{x}{r} \left( \frac{\chi_r \dot Q}{4 \pi r^2} \right)
+\dot q_r'' = \frac{x}{r} \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right)
+\label{eq:point_source}
 \ee
-
-\noindent where
 
 \be
 r = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
@@ -16,6 +15,7 @@ r = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
 
 \be
 D = \sqrt{\frac{4 A}{\pi}}
+\label{eq:point_source_D}
 \ee
 
 \be
@@ -25,6 +25,10 @@ Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
 \be
 L_f = D (3.7 Q^{*^{2/5}} - 1.02)
 \ee
+
+In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(kW), and $R$ is the radial distance from the center of the flame to the edge of the target~(m).
+
+In Eq.~\ref{eq:point_source_D}, $D$ is the diameter of the fire source~(m).
 
 \clearpage
 
