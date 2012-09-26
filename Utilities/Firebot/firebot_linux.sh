@@ -172,7 +172,7 @@ clean_svn_repo()
    else
       echo "Downloading FDS repository:" >> $FIREBOT_DIR/output/stage1 2>&1
       cd $FIREBOT_HOME_DIR
-      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV >> $FIREBOT_DIR/output/stage1 2>&1
+      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV --username fds.firebot >> $FIREBOT_DIR/output/stage1 2>&1
    fi
 }
 
@@ -205,6 +205,28 @@ check_svn_checkout()
    else
       stage1_success=true
    fi
+}
+
+fix_svn_properties()
+{
+   # This function fixes SVN properties
+   # (e.g., svn:executable, svn:keywords, svn:eol-style, and svn:mime-type)
+   # throughout the FDS-SMV repository.
+
+   # cd to SVN root
+   cd $FDS_SVNROOT
+
+   # Delete all svn:executable properties
+   svn propdel svn:executable --recursive
+
+   # Restore local executable property to svn-fix-props.pl
+   chmod +x Utilities/Subversion/svn-fix-props.pl
+
+   # Run svn-fix-props.pl script (fixes all SVN properties)
+   Utilities/Subversion/svn-fix-props.pl ./
+
+   # Commit back results
+   svn commit -m 'Firebot: Fix SVN properties throughout repository'
 }
 
 #  =============================
@@ -1084,6 +1106,7 @@ update_and_compile_cfast
 clean_svn_repo
 do_svn_checkout
 check_svn_checkout
+fix_svn_properties
 
 ### Stage 2a ###
 compile_fds_db
