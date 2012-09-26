@@ -5,7 +5,7 @@
 close all
 clear all
 
-dir = '../../../Verification/Turbulence/';
+dir = '../../Verification/Turbulence/';
 
 skip_case = 0;
 if ~exist([dir,'yplus_8_devc.csv'])
@@ -73,5 +73,5 @@ end
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/yplus')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/yplus')
 

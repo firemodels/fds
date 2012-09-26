@@ -49,22 +49,21 @@ scatplot(saved_data,drange,qfil,output_file)
 
 % Special cases
  
-run scripts/turb_model
-run scripts/jet_decay
-run scripts/wall_model
-run scripts/pyrolysis
-run scripts/birch_tga
-run scripts/water_ice_water
-run scripts/pcm_slab
-run scripts/pulsating
-run scripts/compression_wave
-run scripts/plate_view_factor
-run scripts/low_flux_hot_gas_filling
-run scripts/terminal_velocity_convergence
-run scripts/flat_fire_comparison
-run scripts/fluid_part
-run scripts/scarc2d
-run scripts/extinction
-
+turb_model
+jet_decay
+wall_model
+pyrolysis
+birch_tga
+water_ice_water
+pcm_slab
+pulsating
+compression_wave
+plate_view_factor
+low_flux_hot_gas_filling
+terminal_velocity_convergence
+flat_fire_comparison
+fluid_part
+scarc2d
+extinction
 
 display('verification scripts completed successfully!')

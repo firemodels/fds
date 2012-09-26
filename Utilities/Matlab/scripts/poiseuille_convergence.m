@@ -9,7 +9,7 @@ dpdx = -1;
 L = 1;
 N = [8,16,32,64];
 
-dir = '../../../Validation/Moody_Chart/FDS_Output_Files/';
+dir = '../../Validation/Moody_Chart/FDS_Output_Files/';
 
 [f(1),Re(1)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N8_mu025_devc.csv']);
 [f(2),Re(2)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N16_mu025_devc.csv']);
@@ -53,4 +53,4 @@ end
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/poiseuille_convergence')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/poiseuille_convergence')
