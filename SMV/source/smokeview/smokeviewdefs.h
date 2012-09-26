@@ -116,6 +116,8 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_PART_FILE 3
 #define SCRIPT_ISO_FILE 4
 
+#define SCRIPT_UNKNOWN -1
+
 #define DIRX 1
 #define DIRY 2
 #define DIRZ 3

@@ -337,6 +337,70 @@ void init_scripti(scriptdata *scripti, int command,char *label){
   scripti->ival5=0;
 }
 
+/* ------------------ init_script_keyword ------------------------ */
+
+int get_script_keyword_index(char *keyword){
+  if(keyword==NULL||strlen(keyword)==0)return SCRIPT_UNKNOWN;
+  if(match_upper(keyword,"UNLOADALL") == 1)return SCRIPT_UNLOADALL;
+  if(match_upper(keyword,"EXIT") == 1)return SCRIPT_EXIT;
+  if(match_upper(keyword,"KEYBOARD") == 1)return SCRIPT_KEYBOARD;
+  if(match_upper(keyword,"RENDERDIR") == 1)return SCRIPT_RENDERDIR;
+  if(match_upper(keyword,"SCENECLIP") == 1)return SCRIPT_SCENECLIP;
+  if(match_upper(keyword,"XSCENECLIP") == 1)return SCRIPT_XSCENECLIP;
+  if(match_upper(keyword,"YSCENECLIP") == 1)return SCRIPT_YSCENECLIP;
+  if(match_upper(keyword,"ZSCENECLIP") == 1)return SCRIPT_ZSCENECLIP;
+  if(match_upper(keyword,"RENDERCLIP") == 1)return SCRIPT_RENDERCLIP;
+  if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
+  if(match_upper(keyword,"RENDERDOUBLEONCE") == 1)return SCRIPT_RENDERDOUBLEONCE;
+  if(match_upper(keyword,"RENDERALL") == 1)return SCRIPT_RENDERALL;
+  if(match_upper(keyword,"VOLSMOKERENDERALL") == 1)return SCRIPT_VOLSMOKERENDERALL;
+  if(match_upper(keyword,"LOADFILE") == 1)return SCRIPT_LOADFILE;
+  if(match_upper(keyword,"LOADINIFILE") == 1)return SCRIPT_LOADINIFILE;
+  if(match_upper(keyword,"LOADVFILE") == 1)return SCRIPT_LOADVFILE;
+  if(match_upper(keyword,"LOADBOUNDARY") == 1)return SCRIPT_LOADBOUNDARY;
+  if(match_upper(keyword,"PARTCLASSCOLOR") == 1)return SCRIPT_PARTCLASSCOLOR;
+  if(match_upper(keyword,"PARTCLASSTYPE") == 1)return SCRIPT_PARTCLASSTYPE;
+  if(match_upper(keyword,"SHOWPLOT3DDATA") == 1)return SCRIPT_SHOWPLOT3DDATA;
+  if(match_upper(keyword,"PLOT3DPROPS") == 1)return SCRIPT_PLOT3DPROPS;
+  if(match_upper(keyword,"LOADTOUR") == 1)return SCRIPT_LOADTOUR;
+  if(match_upper(keyword,"UNLOADTOUR") == 1)return SCRIPT_UNLOADTOUR;
+  if(match_upper(keyword,"LOAD3DSMOKE") == 1)return SCRIPT_LOAD3DSMOKE;
+  if(match_upper(keyword,"LOADVOLSMOKE") == 1)return SCRIPT_LOADVOLSMOKE;
+  if(match_upper(keyword,"LOADVOLSMOKEFRAME") == 1)return SCRIPT_LOADVOLSMOKEFRAME;
+  if(match_upper(keyword,"LOADSLICE") == 1)return SCRIPT_LOADSLICE;
+  if(match_upper(keyword,"LOADVSLICE") == 1)return SCRIPT_LOADVSLICE;
+  if(match_upper(keyword,"LOADISO") == 1)return SCRIPT_LOADISO;
+  if(match_upper(keyword,"LOADPARTICLES") == 1)return SCRIPT_LOADPARTICLES;
+  if(match_upper(keyword,"LOADPLOT3D") == 1)return SCRIPT_LOADPLOT3D;
+  if(match_upper(keyword,"SETTIMEVAL") == 1)return SCRIPT_SETTIMEVAL;
+  if(match_upper(keyword,"SETVIEWPOINT") == 1)return SCRIPT_SETVIEWPOINT;
+  return SCRIPT_UNKNOWN;
+}
+
+/* ------------------ script_error_check ------------------------ */
+
+void script_error_check(char *data){
+  if(get_script_keyword_index(data)!=SCRIPT_UNKNOWN){
+    fprintf(stderr,"*** Error: while parsing a smokeview script, the keyword %s was found when expecting data\n",data);
+  }
+}
+
+#define SETcval \
+if(fgets(buffer2,255,stream)==NULL){\
+  scriptEOF=1;\
+  break;\
+}\
+script_error_check(buffer2);\
+scripti->cval=script_set_buffer(buffer2)
+
+#define SETcval2 \
+if(fgets(buffer2,255,stream)==NULL){\
+  scriptEOF=1;\
+  break;\
+}\
+script_error_check(buffer2);\
+scripti->cval2=script_set_buffer(buffer2)
+
 /* ------------------ compile_script ------------------------ */
 
 int compile_script(char *scriptfile){
@@ -370,140 +434,7 @@ int compile_script(char *scriptfile){
     if(fgets(buffer2,255,stream)==NULL)break;
     cleanbuffer(buffer,buffer2);
 
-    if(strncmp(buffer," ",1)==0)continue;
-
-    if(match_upper(buffer,"UNLOADALL") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"EXIT") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"KEYBOARD") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERDIR") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"SCENECLIP") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"XSCENECLIP") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"YSCENECLIP") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"ZSCENECLIP") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERCLIP") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERONCE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERDOUBLEONCE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERALL") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"VOLSMOKERENDERALL") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADFILE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADINIFILE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADVFILE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADBOUNDARY") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"PARTCLASSCOLOR") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"PARTCLASSTYPE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"SHOWPLOT3DDATA") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"PLOT3DPROPS") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADTOUR") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"UNLOADTOUR") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOAD3DSMOKE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADVOLSMOKE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADVOLSMOKEFRAME") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADSLICE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADVSLICE") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADISO") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADPARTICLES") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADPLOT3D") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"SETTIMEVAL") == 1){
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"SETVIEWPOINT") == 1){
-      nscriptinfo++;
-      continue;
-    }
+    if(get_script_keyword_index(buffer)!=SCRIPT_UNKNOWN)nscriptinfo++;
   }
 
   if(nscriptinfo==0){
@@ -522,392 +453,196 @@ int compile_script(char *scriptfile){
   nscriptinfo=0;
   rewind(stream);
   while(!feof(stream)){
+    int keyword_index;
+    int scriptEOF;
+
     if(fgets(buffer2,255,stream)==NULL)break;
     cleanbuffer(buffer,buffer2);
     if(strlen(buffer)==0)continue;
 
-    if(match_upper(buffer,"UNLOADALL") == 1){//x0
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_UNLOADALL,buffer);
+    keyword_index = get_script_keyword_index(buffer);
+    if(keyword_index==SCRIPT_UNKNOWN)continue;
 
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERDIR") == 1){
-      int len;
-      int i;
+    scripti = scriptinfo + nscriptinfo;
+    init_scripti(scripti,keyword_index,buffer);
 
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERDIR,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      cleanbuffer(buffer,buffer2);
-      len = strlen(buffer);
-      if(len>0){
+    scriptEOF=0;
+    switch (keyword_index){
+      case SCRIPT_UNLOADALL:
+        break;
+      case SCRIPT_RENDERDIR:
+        {
+        int len;
+        int i;
+
+        if(fgets(buffer2,255,stream)==NULL){
+          scriptEOF=1;
+          break;
+        }
+        script_error_check(buffer2);
+        cleanbuffer(buffer,buffer2);
+        len = strlen(buffer);
+        if(len>0){
 #ifdef WIN32
-        for(i=0;i<len;i++){
-          if(buffer[i]=='/')buffer[i]='\\';
-        }
-        if(buffer[len-1]!='\\')strcat(buffer,dirseparator);        
+          for(i=0;i<len;i++){
+            if(buffer[i]=='/')buffer[i]='\\';
+          }
+          if(buffer[len-1]!='\\')strcat(buffer,dirseparator);        
 #else
-        for(i=0;i<len;i++){
-          if(buffer[i]=='\\')buffer[i]='/';
-        }
-        if(buffer[len-1]!='/')strcat(buffer,dirseparator);        
+          for(i=0;i<len;i++){
+            if(buffer[i]=='\\')buffer[i]='/';
+          }
+          if(buffer[len-1]!='/')strcat(buffer,dirseparator);        
 #endif
-        scripti->cval=script_set_buffer(buffer);
-      }
+          scripti->cval=script_set_buffer(buffer);
+        }
+        }
+        break;
 
-      nscriptinfo++;
-      continue;
+      case SCRIPT_SCENECLIP:
+        SETcval;
+        sscanf(buffer2,"%i",&scripti->ival);
+        break;
+
+      case SCRIPT_XSCENECLIP:
+      case SCRIPT_YSCENECLIP:
+      case SCRIPT_ZSCENECLIP:
+        SETcval;
+        sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
+        break;
+
+      case SCRIPT_RENDERCLIP:
+        SETcval;
+        sscanf(buffer2,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4, &scripti->ival5);
+        break;
+
+      case SCRIPT_RENDERONCE:
+      case SCRIPT_RENDERDOUBLEONCE:
+        SETcval2;
+        break;
+
+      case SCRIPT_RENDERALL:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer,"%i",&scripti->ival);
+        if(scripti->ival<1)scripti->ival=1;
+        if(scripti->ival>20)scripti->ival=20;
+
+        SETcval2;
+        break;
+
+      case SCRIPT_VOLSMOKERENDERALL:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer,"%i",&scripti->ival);
+        if(scripti->ival<1)scripti->ival=1;
+        if(scripti->ival>20)scripti->ival=20;
+        scripti->exit=0;
+        scripti->first=1;
+        scripti->remove_frame=-1;
+
+        SETcval2;
+        break;;
+
+      case SCRIPT_LOADINIFILE:
+        {
+        int len;
+
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        len=strlen(buffer);
+        NewMemory((void **)&scripti->cval,len+1);
+        strcpy(scripti->cval,buffer);
+        }
+        break;
+
+      case SCRIPT_EXIT:
+      case SCRIPT_UNLOADTOUR:
+        scripti->cval=NULL;
+        break;
+
+      case SCRIPT_KEYBOARD:
+      case SCRIPT_LOADFILE:
+      case SCRIPT_LOADVFILE:
+      case SCRIPT_LOADBOUNDARY:
+      case SCRIPT_PARTCLASSCOLOR:
+      case SCRIPT_PARTCLASSTYPE:
+      case SCRIPT_LOADTOUR:
+      case SCRIPT_LOAD3DSMOKE:
+      case SCRIPT_LOADISO:
+        SETcval;
+        break;
+
+      case SCRIPT_PLOT3DPROPS:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer2,"%i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4);
+        break;
+
+      case SCRIPT_SHOWPLOT3DDATA:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer2,"%i %i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->fval);
+        if(scripti->ival2==4){
+          sscanf(buffer2,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->ival5);
+        }
+        break;
+
+      case SCRIPT_LOADVOLSMOKE:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer,"%i",&scripti->ival);
+        break;
+
+      case SCRIPT_LOADVOLSMOKEFRAME:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival2);
+        break;
+
+      case SCRIPT_LOADSLICE:
+        SETcval;
+
+        SETcval2;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer,"%i %f",&scripti->ival,&scripti->fval);
+        if(scripti->ival<1)scripti->ival=1;
+        if(scripti->ival>3)scripti->ival=3;
+        break;
+
+      case SCRIPT_LOADVSLICE:
+        SETcval;
+
+        SETcval2;
+        cleanbuffer(buffer,buffer2);
+
+        sscanf(buffer,"%i %f",&scripti->ival,&scripti->fval);
+        if(scripti->ival<1)scripti->ival=1;
+        if(scripti->ival>3)scripti->ival=3;
+        break;
+
+      case SCRIPT_LOADPARTICLES:
+        break;
+  
+      case SCRIPT_LOADPLOT3D:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer," %i %f",&scripti->ival,&scripti->fval);
+        break;
+
+      case SCRIPT_SETTIMEVAL:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer,"%f",&scripti->fval);
+        if(scripti->fval<0.0)scripti->fval=0.0;
+        break;
+
+      case SCRIPT_SETVIEWPOINT:
+        SETcval;
+        break;
     }
-    if(match_upper(buffer,"KEYBOARD") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_KEYBOARD,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"SCENECLIP") == 1){
-
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_SCENECLIP,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      sscanf(buffer2,"%i",&scripti->ival);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"XSCENECLIP") == 1){
-
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_XSCENECLIP,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"XSCENECLIP") == 1){
-
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_XSCENECLIP,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"YSCENECLIP") == 1){
-
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_YSCENECLIP,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"ZSCENECLIP") == 1){
-
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_ZSCENECLIP,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERCLIP") == 1){
-
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERCLIP,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      sscanf(buffer2,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4, &scripti->ival5);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERONCE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERONCE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval2=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERDOUBLEONCE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERDOUBLEONCE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval2=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"RENDERALL") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERALL,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer,"%i",&scripti->ival);
-      if(scripti->ival<1)scripti->ival=1;
-      if(scripti->ival>20)scripti->ival=20;
-
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval2=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"VOLSMOKERENDERALL") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_VOLSMOKERENDERALL,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer,"%i",&scripti->ival);
-      if(scripti->ival<1)scripti->ival=1;
-      if(scripti->ival>20)scripti->ival=20;
-      scripti->exit=0;
-      scripti->first=1;
-      scripti->remove_frame=-1;
-
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval2=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADINIFILE") == 1){
-      int len;
-
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADINIFILE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      len=strlen(buffer);
-      NewMemory((void **)&scripti->cval,len+1);
-      strcpy(scripti->cval,buffer);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADFILE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADFILE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADVFILE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVFILE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"EXIT") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_EXIT,buffer);
-      scripti->cval=NULL;
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADBOUNDARY") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADBOUNDARY,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"PARTCLASSCOLOR") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_PARTCLASSCOLOR,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"PARTCLASSTYPE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_PARTCLASSTYPE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"PLOT3DPROPS") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_PLOT3DPROPS,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer2,"%i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"SHOWPLOT3DDATA") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_SHOWPLOT3DDATA,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer2,"%i %i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->fval);
-      if(scripti->ival2==4){
-        sscanf(buffer2,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->ival5);
-      }
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADTOUR") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADTOUR,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"UNLOADTOUR") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      scripti->cval=NULL;
-      init_scripti(scripti,SCRIPT_UNLOADTOUR,buffer);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOAD3DSMOKE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOAD3DSMOKE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADVOLSMOKE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVOLSMOKE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer,"%i",&scripti->ival);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADVOLSMOKEFRAME") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVOLSMOKEFRAME,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADSLICE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADSLICE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval2=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer,"%i %f",&scripti->ival,&scripti->fval);
-      if(scripti->ival<1)scripti->ival=1;
-      if(scripti->ival>3)scripti->ival=3;
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADVSLICE") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVSLICE,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      if(fgets(buffer2,255,stream)==NULL)break;
-      cleanbuffer(buffer,buffer2);
-      scripti->cval2=script_set_buffer(buffer2);
-      sscanf(buffer,"%i %f",&scripti->ival,&scripti->fval);
-      if(scripti->ival<1)scripti->ival=1;
-      if(scripti->ival>3)scripti->ival=3;
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADISO") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADISO,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADPARTICLES") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADPARTICLES,buffer);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"LOADPLOT3D") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADPLOT3D,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer," %i %f",&scripti->ival,&scripti->fval);
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"SETTIMEVAL") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_SETTIMEVAL,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-      cleanbuffer(buffer,buffer2);
-      sscanf(buffer,"%f",&scripti->fval);
-      if(scripti->fval<0.0)scripti->fval=0.0;
-
-      nscriptinfo++;
-      continue;
-    }
-    if(match_upper(buffer,"SETVIEWPOINT") == 1){
-      scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_SETVIEWPOINT,buffer);
-      if(fgets(buffer2,255,stream)==NULL)break;
-      scripti->cval=script_set_buffer(buffer2);
-
-      nscriptinfo++;
-      continue;
-    }
+    if(scriptEOF==1)break;
+    if(keyword_index!=SCRIPT_UNKNOWN)nscriptinfo++;
   }
   fclose(stream);
   return return_val;
