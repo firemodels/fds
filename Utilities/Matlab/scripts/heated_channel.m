@@ -17,7 +17,7 @@ plot_style
 
 % plot the DNS results
 
-datadir='../../../Verification/Turbulence/';
+datadir='../../Verification/Turbulence/';
 
 M = importdata([datadir,'heated_channel_dns_data.csv'],',',1);
 
@@ -150,7 +150,7 @@ end
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_uplus')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_uplus')
 
 figure(2)
 
@@ -175,7 +175,7 @@ end
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_Tplus')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_Tplus')
 
 
 % % Compute pressure gradient from Re_tau

@@ -11,3 +11,4 @@ fds_moody_chart          % The FDS Moody chart
 yplus                    % Near-wall grid resolution
 heated_channel           % Heated Channel Flow
 blasius                  % Blasius boundary layer
+ribbed_channel           % Ribbed channel flow

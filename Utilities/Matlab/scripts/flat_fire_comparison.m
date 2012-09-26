@@ -30,7 +30,7 @@ vexact = g ./ (2 * K * V_0 * (K * V_0 * tvec + 1))...
     - g * tvec ./ 2 ...
     - g / (2 * K * V_0);
 
-repository = '../../../Verification/Sprinklers_and_Sprays/';
+repository = '../../Verification/Sprinklers_and_Sprays/';
 
 if ~exist([repository, 'flat_fire.prt5'])
     display(['Error: File ' [repository, 'flat_fire.prt5'] ' does not exist. Skipping case.'])
@@ -68,7 +68,7 @@ if exist(SVN_Filename,'file')
         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_trajectory.pdf...')
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_trajectory')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_trajectory')
 
 close all
 H(1) = plot(tvec, xexact, '-k');
@@ -100,7 +100,7 @@ if exist(SVN_Filename,'file')
         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_x.pdf...')
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_x')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_x')
 
 close all
 H(1) = plot(tvec, yexact, '-k');
@@ -132,7 +132,7 @@ if exist(SVN_Filename,'file')
         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_z.pdf...')
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_z')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_z')
 
 close all
 H(1) = plot(tvec, uexact, '-k');
@@ -164,7 +164,7 @@ if exist(SVN_Filename,'file')
         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_u.pdf...')
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_u')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_u')
 
 close all
 H(1) = plot(tvec, vexact, '-k');
@@ -196,5 +196,5 @@ if exist(SVN_Filename,'file')
         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_w.pdf...')
-print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_w')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_w')
 

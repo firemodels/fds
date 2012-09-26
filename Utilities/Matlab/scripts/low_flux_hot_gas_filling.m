@@ -5,7 +5,7 @@
 close all
 clear all
 
-addpath('../../../Verification/Flowfields')
+datadir='../../Verification/Flowfields/';
 
 plot_style
 set(gcf,'DefaultLineLineWidth',Line_Width)
@@ -13,7 +13,7 @@ set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-filename = 'low_flux_hot_gas_filling_mass.csv';
+filename = [datadir,'low_flux_hot_gas_filling_mass.csv'];
 
 if ~exist(filename)
     display(['Error: File ' filename ' does not exist. Skipping case.'])
@@ -48,7 +48,7 @@ end
 
 % print to pdf
 
-plotdir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
+plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 Plot_Filename = 'low_flux_hot_gas_filling';
 
 set(gcf,'Visible','on');
