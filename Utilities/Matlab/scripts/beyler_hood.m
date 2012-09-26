@@ -141,13 +141,13 @@ for f = 1:N_Fuels
       end   
    end
 end
-
+Xmax = [0.25 0.2 0.2 0.2 0.07 0.04]
 for ns = 1:N_Species
    hf(ns)=figure(ns);
    %n = 0; 
-   Xmax = max(max(FDSPlot(:,:,ns)));
-   Xmax = max(max(max(ExpPlot(:,:,ns))),Xmax);
-   Xmax = ceil(Xmax*10)/10;
+   %Xmax = max(max(FDSPlot(:,:,ns)));
+   %Xmax = max(max(max(ExpPlot(:,:,ns))),Xmax);
+   %Xmax = ceil(Xmax*10)/10;
    for f = 1:N_Fuels
       for s = 1:NumPoints(f)      
          XLegendStr{f} = [Fuel{f}];
@@ -163,47 +163,47 @@ for ns = 1:N_Species
       end
    end
    
-xmin = 0;
-ymin = 0;
-xmax = Xmax;
-ymax = xmax;
-plot([xmin xmax],[ymin ymax],'k-')
-axis([xmin xmax ymin ymax])
+   xmin = 0;
+   ymin = 0;
+   xmax = Xmax(ns);
+   ymax = xmax;
+   plot([xmin xmax],[ymin ymax],'k-')
+   axis([xmin xmax ymin ymax])
 
-plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xtitle = ['Measured ' Species{ns} ' (volume fraction)'];
-ytitle = ['Predicted ' Species{ns} ' (volume fraction)'];
-xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
-ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
-legend(hX,XLegendStr,'Location','NorthWest')
+   plot_style
+   set(gca,'Units',Plot_Units)
+   set(gca,'FontName',Font_Name)
+   set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
+   set(hf(1),'DefaultLineLineWidth',Line_Width)
+   xtitle = ['Measured ' Species{ns} ' (volume fraction)'];
+   ytitle = ['Predicted ' Species{ns} ' (volume fraction)'];
+   xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+   ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+   legend(hX,XLegendStr,'Location','NorthWest')
 
-% add SVN if file is available
+   % add SVN if file is available
 
-svn_file = '../../Validation/Beyler_Hood/FDS_Output_Files/Beyler_Hood_acetone_117_lr_svn.txt';
+   svn_file = '../../Validation/Beyler_Hood/FDS_Output_Files/Beyler_Hood_acetone_117_lr_svn.txt';
 
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+   if exist(svn_file,'file')
+       SVN = importdata(svn_file);
+       x_lim = get(gca,'XLim');
+       y_lim = get(gca,'YLim');
+       X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+       Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+       text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+           'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+   end
 
-% print to pdf
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
-print(gcf,'-dpdf',plotname);
+   % print to pdf
+   set(gcf,'Visible',Figure_Visibility);
+   set(gcf,'PaperUnits',Paper_Units);
+   set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
+   set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+   plotname = ['../../Manuals/FDS_Validation_Guide/FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
+   print(gcf,'-dpdf',plotname);
    
-clear hX
+   clear hX
 
 end
 
