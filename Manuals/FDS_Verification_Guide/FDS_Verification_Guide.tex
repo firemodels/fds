@@ -2208,7 +2208,7 @@ $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{
 The species evolutions for the two-step 1.75 order reaction mechanism are shown in Figure \ref{fig:Arrhenius_175Order_2step}. We also consider a two-step reversible propane reaction:
 \begin{align}\label{eq:2step_propane_rev}
 \mathrm{C_3H_8+3.5 \, O_2} &\rightarrow \mathrm{3 \, CO+4 \, H_2O} \\
-\nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightarrow \mathrm{CO_2}
+\nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
 \end{align}
 with the following reaction input parameters:
 
@@ -2307,7 +2307,7 @@ The state relationship for temperature is dependent upon the mixture fraction, t
 \begin{equation}\label{eq:mix_relate_temp}
 T = (f-Y_{fuel})\frac{\Delta h_{c}}{c_{v}} + f(T_{fuel,i}-T_{ox,i}) + T_{ox,i}
 \end{equation}
-The molecular weight of the species were not set to be uniform, so the average molecular weight and therefore $c_v$, will change as a function of the mixture fraction. As a result, the traditional linear temperature profile is not expected.
+The molecular weight of the species were not set to be uniform, so the average molecular weight and $c_v$ will change as a function of the mixture fraction. As a result, the traditional linear temperature profile is not expected.
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/Burke_Schumann_Temp}
@@ -2324,11 +2324,11 @@ The molecular weight of the species were not set to be uniform, so the average m
 
 The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1600 K. 
 
-Here, we examine a 10 $\times$ 10 array of cases: varying initial temperature from 300 K to 1875 K and initial fuel (methane) mass fraction from 0.05 to 0.95. The oxidizer is air which is assumed to be 23 \% oxygen  and 77 \% nitrogen by mass. A simple one-step methane reaction is used to govern the combustion:
+Here, we examine a 10 $\times$ 10 array of cases: varying initial temperature from 300 K to 1875 K and initial fuel (methane) mass fraction from 0.05 to 0.95. The oxidizer is air which is assumed to be 23 \% oxygen  and 77 \% nitrogen by mass. A simple one-step methane reaction is used to govern combustion:
 \begin{equation}\label{eq:methane_ex}
 \mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O}
 \end{equation}
-Based on the combination of initial oxygen concentration, methane concentration, and temperature each case can either be able to sustain burning for a finite period of time or not - Fig.~\ref{fig:extinct}
+Based on the combination of oxygen concentration, methane concentration, and temperature each case can either sustain burning for a finite period of time or not (Fig.~\ref{fig:extinct}).
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[height=3.2in]{SCRIPT_FIGURES/Extinction}
@@ -2336,9 +2336,7 @@ Based on the combination of initial oxygen concentration, methane concentration,
 \caption[{\bf Extinction} model test cases]{Array of initial temperatures and oxygen concentrations that can can sustain burning.}
 \label{fig:extinct}
 \end{figure}
-
-Note: This test case is designed to test the implementation of the extinction model over a wide temperature and composition space, not whether the model has the appropriate delineation between cases that burn and cases that do not.
-
+For the same initial conditions, FDS predictions for burning or extinction (closed symbols) fall identically on the expected results (open symbols). This example also illustrates that for these initial conditions, the delineation between burning and extinction is not linear as the simple model suggests. More detailed information on the extinction model, which uses the critical flame temperature and local enthalpy change, can be found in the Technical Reference Guide \cite{FDS_Tech_Guide}.
 
 \clearpage
 
