@@ -1534,7 +1534,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
             VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN,&
             BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
-LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL !,SHARP_CORNER
+LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,SHARP_CORNER
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
                                        V_X=>NULL(),V_Z=>NULL(),W_X=>NULL(),W_Y=>NULL(),RHOP=>NULL(),VEL_OTHER=>NULL()
@@ -1615,7 +1615,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
    PROCESS_EDGE = .FALSE.
    DO IS=5,8
-      IF (.NOT.EXTERIOR(IJKE(IS,IE))) THEN ! .AND. .NOT.SOLID(IJKE(IS,IE))) THEN
+      IF (.NOT.EXTERIOR(IJKE(IS,IE)) .AND. .NOT.SOLID(IJKE(IS,IE))) THEN
          PROCESS_EDGE = .TRUE.
          EXIT
       ENDIF
@@ -1750,22 +1750,20 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! If only one adjacent wall cell is defined, use its properties.
     
-!          SHARP_CORNER = .FALSE.
-!          IF (IWM>0) THEN
-!             WCM => WALL(IWM)
-!          ELSE
-!             WCM => WALL(IWP)
-!             SHARP_CORNER = .TRUE.
-!          ENDIF
+         SHARP_CORNER = .FALSE.
+         IF (IWM>0) THEN
+            WCM => WALL(IWM)
+         ELSE
+            WCM => WALL(IWP)
+            SHARP_CORNER = .TRUE.
+         ENDIF
 
-!          IF (IWP>0) THEN
-!             WCP => WALL(IWP)
-!          ELSE
-!             WCP => WALL(IWM)
-!             SHARP_CORNER = .TRUE.
-!          ENDIF
-         WCM => WALL(IWM)
-         WCP => WALL(IWP)
+         IF (IWP>0) THEN
+            WCP => WALL(IWP)
+         ELSE
+            WCP => WALL(IWM)
+            SHARP_CORNER = .TRUE.
+         ENDIF
 
          ! If both adjacent wall cells are NULL, cycle out.
 
@@ -1836,15 +1834,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IIGP = I_CELL(ICPP)
             JJGP = J_CELL(ICPP)
             KKGP = K_CELL(ICPP)
-         ENDIF
-
-         ! If cells between face defining VEL_GAS are both SOLID, set gradient to zero and cycle
-
-         IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .AND. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
-            DUIDXJ(ICD_SGN) = 0._EB
-            MU_DUIDXJ(ICD_SGN) = 0._EB
-            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-            CYCLE ORIENTATION_LOOP
          ENDIF
 
          ! Decide whether or not to process edge using data interpolated from another mesh
