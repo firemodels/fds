@@ -137,7 +137,6 @@ xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Density (kg/m$^3$)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 axis([0 12.5 0 2])
 legend_handle=legend(H,'FDS N=16','FDS N=32','FDS N=64','FDS N=128','Analytical Solution','Location','NorthEast');
-legend boxoff
 set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
@@ -183,7 +182,6 @@ xlabel('Grid Spacing, $\delta x$ (m)','FontSize',Title_Font_Size,'Interpreter',F
 ylabel('L2 Error (kg/m$^3$)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 axis([1e-2 1e0 1e-6 1e-1])
 legend_handle=legend(H(1:5),'FDS Central','FDS Superbee','FDS CHARM','${\cal O}(\delta x)$','${\cal O}(\delta x^2)$','Location','NorthWest');
-legend boxoff
 set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
