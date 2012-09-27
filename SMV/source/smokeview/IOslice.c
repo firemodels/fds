@@ -783,7 +783,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
     readslice(u->file,vd->iu,LOAD,errorcode);
     if(*errorcode!=0){
       vd->loaded=1;
-      printf("*** Error: unable to load U velocity vector components in %s . Vector load aborted\n",u->file);
+      fprintf(stderr,"*** Error: unable to load U velocity vector components in %s . Vector load aborted\n",u->file);
       readvslice(ivslice,UNLOAD,errorcode);
       *errorcode=1;
       return;
@@ -799,7 +799,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
     vd->v=v;
     readslice(v->file,vd->iv,LOAD,errorcode);
     if(*errorcode!=0){
-      printf("*** Error: unable to load V velocity vector components in %s . Vector load aborted\n",v->file);
+      fprintf(stderr,"*** Error: unable to load V velocity vector components in %s . Vector load aborted\n",v->file);
       vd->loaded=1;
       readvslice(ivslice,UNLOAD,errorcode);
       *errorcode=1;
@@ -817,7 +817,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
     vd->w=w;
     readslice(w->file,vd->iw,LOAD,errorcode);
     if(*errorcode!=0){
-      printf("*** Error: unable to load W velocity vector components in %s . Vector load aborted\n",w->file);
+      fprintf(stderr,"*** Error: unable to load W velocity vector components in %s . Vector load aborted\n",w->file);
       vd->loaded=1;
       readvslice(ivslice,UNLOAD,errorcode);
       *errorcode=1;
@@ -836,7 +836,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
     vd->val=val;
     readslice(val->file,vd->ival,LOAD,errorcode);
     if(*errorcode!=0){
-      printf("*** Error: unable to load vector values in %s . Vector load aborted\n",val->file);
+      fprintf(stderr,"*** Error: unable to load vector values in %s . Vector load aborted\n",val->file);
       vd->loaded=1;
       readvslice(ivslice,UNLOAD,errorcode);
       *errorcode=1;

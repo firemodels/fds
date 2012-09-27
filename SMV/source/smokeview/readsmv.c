@@ -3018,13 +3018,13 @@ int readsmv(char *file, char *file2){
          nmeshes!=npdim||nmeshes!=nobst||nmeshes!=nvent||
          nmeshes!=noffset){
         fprintf(stderr,"*** Error:\n");
-        if(nmeshes!=ntrnx)printf("  found %i TRNX keywords, was expecting %i\n",ntrnx,nmeshes);
-        if(nmeshes!=ntrny)printf("  found %i TRNY keywords, was expecting %i\n",ntrny,nmeshes);
-        if(nmeshes!=ntrnz)printf("  found %i TRNZ keywords, was expecting %i\n",ntrnz,nmeshes);
-        if(nmeshes!=npdim)printf("  found %i PDIM keywords, was expecting %i\n",npdim,nmeshes);
-        if(nmeshes!=nobst)printf("  found %i OBST keywords, was expecting %i\n",nobst,nmeshes);
-        if(nmeshes!=nvent)printf("  found %i VENT keywords, was expecting %i\n",nvent,nmeshes);
-        if(nmeshes!=noffset)printf("  found %i OFFSET keywords, was expecting %i\n",noffset,nmeshes);
+        if(nmeshes!=ntrnx)fprintf(stderr,"*** Error:  found %i TRNX keywords, was expecting %i\n",ntrnx,nmeshes);
+        if(nmeshes!=ntrny)fprintf(stderr,"*** Error:  found %i TRNY keywords, was expecting %i\n",ntrny,nmeshes);
+        if(nmeshes!=ntrnz)fprintf(stderr,"*** Error:  found %i TRNZ keywords, was expecting %i\n",ntrnz,nmeshes);
+        if(nmeshes!=npdim)fprintf(stderr,"*** Error:  found %i PDIM keywords, was expecting %i\n",npdim,nmeshes);
+        if(nmeshes!=nobst)fprintf(stderr,"*** Error:  found %i OBST keywords, was expecting %i\n",nobst,nmeshes);
+        if(nmeshes!=nvent)fprintf(stderr,"*** Error:  found %i VENT keywords, was expecting %i\n",nvent,nmeshes);
+        if(nmeshes!=noffset)fprintf(stderr,"*** Error:  found %i OFFSET keywords, was expecting %i\n",noffset,nmeshes);
         return 2;
       }
      }
