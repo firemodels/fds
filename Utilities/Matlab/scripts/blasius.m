@@ -73,7 +73,6 @@ xlabel('$u$ (m/s)','Interpreter',Font_Interpreter,'FontName',Font_Name)
 ylabel('$z$ (m)','Interpreter',Font_Interpreter,'FontName',Font_Name)
 
 h = legend(H,'Blasius','$N_z=16$','$N_z=32$','$N_z=64$','Location','northwest');
-legend boxoff
 set(h,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
@@ -143,7 +142,6 @@ xlabel('Grid Spacing, $\delta z$ (m)','FontSize',Title_Font_Size,'Interpreter',F
 ylabel('RMS Error (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 axis([1e-3 1e-1 1e-3 1e-0])
 legend_handle=legend(H,'FDS','${\cal O}(\delta z)$','${\cal O}(\delta z^2)$','Location','Northwest');
-legend boxoff
 set(legend_handle,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
