@@ -641,7 +641,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     }
    
     if(break_frame==1){
-      fprintf(stderr,"*** Warning: memory allocation attempt failed at time step: %i while reading isosurface file\n",itime);
+      fprintf(stderr,"*** Error: memory allocation attempt failed at time step: %i while reading isosurface file\n",itime);
       meshi->niso_times=itime;
       break;
     }

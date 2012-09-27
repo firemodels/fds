@@ -509,7 +509,7 @@ void readzone(int ifile, int flag, int *errorcode){
       fprintf(stderr,"*** Error: number of vertical flow vents specified in the smv file (%i)\n",nzvvents);
       fprintf(stderr,"    not consistent with the number specified in the data file (%i)\n",nzvvents2);
     }
-    if(nzone_times<=0)fprintf(stderr,"*** Warning: The file, %s, contains no data\n",file);
+    if(nzone_times<=0)fprintf(stderr,"*** Error: The file, %s, contains no data\n",file);
     return;
   }
   FREEMEMORY(zonelonglabels);

@@ -684,7 +684,7 @@ char *which(char *progname){
     dir=strtok(NULL,pathsep);
   }
 #ifdef pp_BETA
-  fprintf(stderr,"*** Warning: %s not found in any path directory\n",prog);
+  fprintf(stderr,"*** Error: %s not found in any path directory\n",prog);
 #endif
   return NULL;
 }

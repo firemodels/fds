@@ -4923,7 +4923,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     devices[i]=devicei;
 #ifdef _DEBUG
     if(devicei==NULL){
-      fprintf(stderr,"*** Warning: spreadsheet entry: %s is not present in %s\n",devclabels[i],smvfilename);
+      fprintf(stderr,"*** Error: spreadsheet entry: %s is not present in %s\n",devclabels[i],smvfilename);
       continue;
     }
 #endif

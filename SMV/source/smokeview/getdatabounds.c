@@ -26,7 +26,7 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
       nsmall=0;
       nbig=NBUCKETS;
       if(NewMemory((void **)&buckets,NBUCKETS*sizeof(int))==0){
-        fprintf(stderr,"*** Warning: Unable to allocate memory in getdatabounds\n");
+        fprintf(stderr,"*** Error: Unable to allocate memory in getdatabounds\n");
         return;
       }
 
@@ -276,7 +276,7 @@ void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, c
       nsmall=0;
       nbig=NBUCKETS;
       if(NewMemory((void **)&buckets,NBUCKETS*sizeof(int))==0){
-        fprintf(stderr,"*** Warning: Unable to allocate memory in getdatabounds\n");
+        fprintf(stderr,"*** Error: Unable to allocate memory in getdatabounds\n");
         return;
       }
 
@@ -349,7 +349,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
       nsmall=0;
       nbig=NBUCKETS;
       if(NewMemory((void **)&buckets,NBUCKETS*sizeof(int))==0){
-        fprintf(stderr,"*** Warning: Unable to allocate memory in getdatabounds\n");
+        fprintf(stderr,"*** Error: Unable to allocate memory in getdatabounds\n");
         return;
       }
 

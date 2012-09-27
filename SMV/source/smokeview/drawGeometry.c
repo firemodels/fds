@@ -742,6 +742,7 @@ void readcad2geom(cadgeom *cd){
       floortex=readpicture(texti->file,&texwid,&texht,0);
       if(floortex==NULL){
         printf(" - failed\n");
+        fprintf(stderr,"*** Error: Texture file %s failed to load\n",texti->file);
         continue;
       }
       errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
@@ -3401,7 +3402,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
       read_error=ReadSmoothIsoSurface(asurface);
       if(read_error!=0){
         read_smoothobst=0;
-        fprintf(stderr,"*** Warning: unexpected end of file encountered while\n");
+        fprintf(stderr,"*** Error: unexpected end of file encountered while\n");
         fprintf(stderr,"              reading the smooth blockage file.\n");
       }
     }
@@ -3533,7 +3534,7 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
       read_error=ReadSmoothIsoSurface(asurface);
       if(read_error!=0){
         read_smoothobst=0;
-        fprintf(stderr,"*** Warning: unexpected end of file encountered while\n");
+        fprintf(stderr,"*** Error: unexpected end of file encountered while\n");
         fprintf(stderr,"              reading the smooth blockage file.\n");
       }
     }

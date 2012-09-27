@@ -1227,7 +1227,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
           nb,nv,nspr,mxframepoints,staticframe0,npartpoints,npartframes,partframestep,partpointstep);
     }
     else{
-      fprintf(stderr,"*** Warning:  unable to write to %s\n",partsizefile);
+      fprintf(stderr,"*** Error:  unable to write to %s\n",partsizefile);
     }
     file_unit=15;
     FORTget_file_unit(&file_unit,&file_unit);
@@ -1238,7 +1238,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   iframebeg=0;
   if(staticframe0==1)iframebeg=1;
   if(error!=0){
-    fprintf(stderr,"*** Warning: problem reading %s\n",file);
+    fprintf(stderr,"*** Error: problem reading %s\n",file);
     return;
   }
   if(npartpoints<=0){
@@ -1311,7 +1311,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   if(error!=0){
     *errorcode=1;
-    fprintf(stderr,"*** Warning: problem reading %s\n",file);
+    fprintf(stderr,"*** Error: problem reading %s\n",file);
     readpart("",ifile,UNLOAD,&error);
     return;
   }
@@ -1330,7 +1330,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     &offset_x, &offset_y, &offset_z,
     &error,1);
   if(error!=0||parti->ntimes==0){
-    if(error!=0)fprintf(stderr,"*** Warning: problem reading %s\n",file);
+    if(error!=0)fprintf(stderr,"*** Error: problem reading %s\n",file);
     *errorcode=1;
     readpart("",ifile,UNLOAD,&error);
     return;

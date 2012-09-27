@@ -275,7 +275,7 @@ void cleanbuffer(char *buffer, char *buffer2){
 
 void start_script(void){
   if(scriptinfo==NULL){
-    fprintf(stderr,"*** Warning: Smokeview script does not exist\n");
+    fprintf(stderr,"*** Error: Smokeview script does not exist\n");
     return;
   }
   glui_script_disable();
@@ -439,7 +439,7 @@ int compile_script(char *scriptfile){
   }
 
   if(nscriptinfo==0){
-    fprintf(stderr,"*** Warning: scriptfile has no usable commands\n");
+    fprintf(stderr,"*** Error: scriptfile has no usable commands\n");
     return 1;
   }
 
