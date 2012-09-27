@@ -240,11 +240,9 @@ int setup_case(int argc, char **argv){
   switch (return_code){
     case 1:
       fprintf(stderr,"*** Error: Smokeview file, %s, not found\n",input_file);
-      pauseSV();
       return 1;
     case 2:
       fprintf(stderr,"*** Error: problem reading Smokeview file, %s\n",input_file);
-      pauseSV();
       return 2;
     case 0:
       readsmv_dynamic(input_file);

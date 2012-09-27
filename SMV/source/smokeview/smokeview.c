@@ -736,12 +736,3 @@ void usage(char **argv){
     printf("%s \n",labelptr);
   }
 }
-
-/* ------------------ pauseSV ------------------------ */
-
-void pauseSV(void){
-  int i;
-  printf("program paused - press <CTRL> c to close window\n");
-  scanf("%i",&i);
-}
-

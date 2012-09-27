@@ -319,7 +319,6 @@ EXTERNCPP void update_glui_zoom(void);
 EXTERNCPP void SetTour(tourdata *thetour);
 EXTERNCPP void freetrainers(void);
 EXTERNCPP void update_plot3d_display(void);
-EXTERNCPP void pauseSV(void);
 EXTERNCPP void ShellMenu(int var);
 EXTERNCPP int getshellmenu_index(int menuid);
 EXTERNCPP void makeshellmenus(int menuid,int flag);

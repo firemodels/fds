@@ -454,8 +454,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   NewMemory((void **)&OpenGLimage,width2 * height2 * sizeof(GLubyte) * 3);
   if(OpenGLimage == NULL){
     fprintf(stderr,"*** Error allocating render image: %s\n",RENDERfilename);
-    pauseSV();
-    exit(1);
+    return 1;
   }
   printf("Rendering to: %s .",RENDERfilename);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
