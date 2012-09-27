@@ -156,12 +156,12 @@ legend_position=get(legend_handle,'Position');
 set(plot_handle,'Position',plot_position)
 set(plot_handle,'OuterPosition',plot_outerposition)
 
-Legend_XYWidthHeight = legend_position;
-Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.2;
-Legend_XYWidthHeight(2) = plot_position(2);
-Legend_XYWidthHeight(3) = 2.8;
-Legend_XYWidthHeight(4) = plot_position(4);
-set(legend_handle,'Position',Legend_XYWidthHeight)
+% Legend_XYWidthHeight = legend_position;
+% Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.2;
+% Legend_XYWidthHeight(2) = plot_position(2);
+% Legend_XYWidthHeight(3) = 2.8;
+% Legend_XYWidthHeight(4) = plot_position(4);
+% set(legend_handle,'Position',Legend_XYWidthHeight)
           
 % add SVN if file is available
 
@@ -234,12 +234,12 @@ legend_position=get(legend_handle,'Position');
 set(plot_handle,'Position',plot_position)
 set(plot_handle,'OuterPosition',plot_outerposition)
 
-Legend_XYWidthHeight = legend_position;
-Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.2;
-Legend_XYWidthHeight(2) = plot_position(2)+.5;
-Legend_XYWidthHeight(3) = 3.0;
-Legend_XYWidthHeight(4) = 2.4;
-set(legend_handle,'Position',Legend_XYWidthHeight)
+% Legend_XYWidthHeight = legend_position;
+% Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.2;
+% Legend_XYWidthHeight(2) = plot_position(2)+.5;
+% Legend_XYWidthHeight(3) = 3.0;
+% Legend_XYWidthHeight(4) = 2.4;
+% set(legend_handle,'Position',Legend_XYWidthHeight)
           
 % add SVN if file is available
 
