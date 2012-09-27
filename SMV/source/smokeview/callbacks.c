@@ -2648,7 +2648,7 @@ void Display_CB(void){
   if(update_screensize==1){
     update_screensize=0;
     update_windowsizelist();
-    ResizeWindow(screenWidth,screenHeight);
+    ResizeWindow(screenWidthINI,screenHeightINI);
   }
   if(update_colorbar_select_index==1&&colorbar_select_index>=0&&colorbar_select_index<=255){
     update_colorbar_select_index=0;

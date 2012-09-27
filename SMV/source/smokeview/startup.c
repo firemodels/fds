@@ -1906,12 +1906,6 @@ void initvars(void){
   part5show=1;
   streak5show=0;
   update_streaks=0;
-  update_screensize=0;
-//SVEXTERN int nstreak_value; // 5
-//SVEXTERN char *streak_values[5]; // "1","2","4","8","16"
-//SVEXTERN float streak_rvalue[5]; // 1.0, 2.0 4.0, 8.0, 16.0 
-//SVEXTERN int streak_index;       // 0
-//SVEXTERN float float_streak5value;// 1.0
 
   streak_rvalue[0]=0.25;
   streak_rvalue[1]=0.5;

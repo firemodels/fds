@@ -414,6 +414,7 @@ SVEXTERN float ratio, aspect;
 SVEXTERN int visLIGHT0, visLIGHT1, visLIGHTMENU, UpdateLIGHTS;
 
 SVEXTERN int SVDECL(screenWidth,640), SVDECL(screenHeight,480);
+SVEXTERN int SVDECL(screenWidthINI,640), SVDECL(screenHeightINI,480);
 SVEXTERN int SVDECL(renderW,640), SVDECL(renderH,480), render_option;
 SVEXTERN int SVDECL(glui_screenWidth,640), SVDECL(glui_screenHeight,480);
 SVEXTERN int windowsize_pointer;
@@ -1082,7 +1083,7 @@ SVEXTERN zvent SVDECL(*zventinfo,NULL);
 SVEXTERN zonedata SVDECL(*zoneinfo,NULL);
 SVEXTERN zonedata SVDECL(*activezone,NULL);
 SVEXTERN partdata SVDECL(*partinfo,NULL);
-SVEXTERN int update_screensize;
+SVEXTERN int SVDECL(update_screensize,0);
 SVEXTERN int part5show;
 SVEXTERN int streak5show,streak5value, streak5step, showstreakhead;
 SVEXTERN int nstreak_value; // 5

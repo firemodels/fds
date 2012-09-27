@@ -9730,6 +9730,7 @@ int readini2(char *inifile, int localfile){
         }
         if(scrWidth!=screenWidth){
           setScreenSize(&scrWidth,NULL);
+          screenWidthINI=scrWidth;
           update_screensize=1;
         }
         continue;
@@ -9744,6 +9745,7 @@ int readini2(char *inifile, int localfile){
         }
         if(scrHeight!=screenHeight){
           setScreenSize(NULL,&scrHeight);
+          screenHeightINI=scrHeight;
           update_screensize=1;
         }
         continue;
