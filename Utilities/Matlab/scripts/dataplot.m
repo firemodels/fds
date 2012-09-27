@@ -58,12 +58,12 @@ end
 % set the plot style parameters
 
 plot_style
-set(gcf,'DefaultLineLineWidth',Line_Width)
-WPos = get(gcf,'Position');
-set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
-set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+% set(gcf,'DefaultLineLineWidth',Line_Width)
+% WPos = get(gcf,'Position');
+% set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
+% set(gca,'FontName',Font_Name)
+% set(gca,'Units',Plot_Units)
+% set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % read the configuration file
 
