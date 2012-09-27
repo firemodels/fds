@@ -205,13 +205,13 @@ end
 %-----------------------
 epsilon = 1e-10;
 
-if ~exist('Extinction_devc.csv')
-    display('Error: File Extinction_devc.csv does not exist. Skipping case.')
+if ~exist('extinction_devc.csv')
+    display('Error: File extinction_devc.csv does not exist. Skipping case.')
     return
 end
 
-Extinction_2=importdata('Extinction_devc.csv');
-extinct_2(:,:)=Extinction_2.data; % data
+extinction_2=importdata('extinction_devc.csv');
+extinct_2(:,:)=extinction_2.data; % data
 
 for i=1:100
    hrr_ext(:,i) = extinct_2(:,4*i-2);
@@ -240,10 +240,8 @@ simple_temp = [273.15 1700];
 % Plotting
 %-----------------------
 figure(1)
-plot(simple_temp,simple_o2,'k',ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'r+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'b*')
+plot(simple_temp,simple_o2,'k',ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'r+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'b*','LineWidth',1,'MarkerSize',4)
 axis([273.15 1900 0 0.23])
-MarkerSize = 7;
-LineWidth = 2;
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
@@ -254,7 +252,7 @@ legend('Simple Model','Expected Burning','FDS Burning','Expected Extinction','FD
 
 % add SVN if file is available
 
-svn_file = 'Extinction_svn.txt';
+svn_file = 'extinction_svn.txt';
 
 if exist(svn_file,'file')
     SVN = importdata(svn_file);
@@ -271,4 +269,4 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Extinction');
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/extinction');
