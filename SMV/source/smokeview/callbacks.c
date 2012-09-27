@@ -2321,6 +2321,20 @@ void Idle_CB(void){
   }
 }
 
+/* ------------------ setScreenSize ------------------------ */
+
+void setScreenSize(int *width, int *height){
+  if(width!=NULL){
+ //   printf(" screen width before/after %i/%i ",screenWidth,*width);
+    screenWidth=*width;
+  }
+  if(height!=NULL){
+    printf(" screen height before/after %i/%i ",screenHeight,*height);
+  //  screenHeight=*height;
+  }
+  printf("\n");
+}
+
 /* ------------------ update_camera_ypos ------------------------ */
 
 void Reshape_CB(int width, int height){
@@ -2330,8 +2344,7 @@ void Reshape_CB(int width, int height){
   ratio = (float)width/(float)height;
   aspect = ratio;
   if(ratio<1.0){ratio=1.0/ratio;}
-  screenWidth = width;            
-  screenHeight = height;
+  setScreenSize(&width,&height);
   screenWidth2 = screenWidth - dwinWW;   
   screenHeight2 = screenHeight - dwinH;
   windowresized=1;

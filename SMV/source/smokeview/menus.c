@@ -1398,8 +1398,7 @@ void RenderState(int onoff){
     render_double=0;
     render_double_state=0;
     RenderGif=0;
-    screenWidth=saveW;
-    screenHeight=saveH;
+    setScreenSize(&saveW,&saveH);
     ResizeWindow(screenWidth,screenHeight);
   }
 }

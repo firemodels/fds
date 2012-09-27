@@ -386,10 +386,12 @@ void setup_glut(int argc, char **argv){
     max_screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
     if(trainer_mode==1){
       int TRAINER_WIDTH;
+      int scrW, scrH;
 
       TRAINER_WIDTH=300;
-      screenWidth = glutGet(GLUT_SCREEN_WIDTH)-TRAINER_WIDTH;
-      screenHeight = glutGet(GLUT_SCREEN_HEIGHT)-50; 
+      scrW = glutGet(GLUT_SCREEN_WIDTH)-TRAINER_WIDTH;
+      scrH = glutGet(GLUT_SCREEN_HEIGHT)-50; 
+      setScreenSize(&scrW,&scrH);
       max_screenWidth = screenWidth;
       max_screenHeight = screenHeight;
     }
@@ -1392,9 +1394,6 @@ void initvars(void){
   visLIGHTMENU=1;
   UpdateLIGHTS=1;
 
-  screenWidth = 640, screenHeight = 480;
-  renderW = 640, renderH=480;
-  glui_screenWidth=640, glui_screenHeight=480;
   windowsize_pointer=0;
   sethazardcolor=0;
   timedrag=0,colordrag=0,colorsplitdrag=0;

@@ -10,6 +10,7 @@ EXTERNCPP int Merge_Smoke(void);
 #endif
 EXTERNCPP void sort_smoke3dinfo(void);
 
+EXTERNCPP void setScreenSize(int *width, int *height);
 EXTERNCPP void keyboard_CB(unsigned char key, int x, int y);
 EXTERNCPP void keyboard_up_CB(unsigned char key, int x, int y);
 EXTERNCPP void Reshape_CB(int width, int height);

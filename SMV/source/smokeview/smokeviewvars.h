@@ -413,9 +413,9 @@ SVEXTERN int nrooms,nzoneinfo, nfires;
 SVEXTERN float ratio, aspect;
 SVEXTERN int visLIGHT0, visLIGHT1, visLIGHTMENU, UpdateLIGHTS;
 
-SVEXTERN int screenWidth, screenHeight;
-SVEXTERN int renderW, renderH, render_option;
-SVEXTERN int glui_screenWidth, glui_screenHeight;
+SVEXTERN int SVDECL(screenWidth,640), SVDECL(screenHeight,480);
+SVEXTERN int SVDECL(renderW,640), SVDECL(renderH,480), render_option;
+SVEXTERN int SVDECL(glui_screenWidth,640), SVDECL(glui_screenHeight,480);
 SVEXTERN int windowsize_pointer;
 SVEXTERN int sethazardcolor;
 SVEXTERN int mxframepoints;

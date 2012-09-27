@@ -891,8 +891,7 @@ extern "C" void TRANSLATE_CB(int var){
       if(windowsize_pointer>=2){
         SPINNER_window_width->set_int_val(glui_screenWidth);
         SPINNER_window_height->set_int_val(glui_screenHeight);
-        screenWidth=glui_screenWidth;
-        screenHeight=glui_screenHeight;
+        setScreenSize(&glui_screenWidth,&glui_screenHeight);
         ResizeWindow(screenWidth,screenHeight);
       }
       break;
@@ -900,8 +899,7 @@ extern "C" void TRANSLATE_CB(int var){
       snap_view_angles();
       break;
     case WINDOW_RESIZE:
-      screenWidth=glui_screenWidth;
-      screenHeight=glui_screenHeight;
+      setScreenSize(&glui_screenWidth,&glui_screenHeight);
       update_windowsizelist();
       ResizeWindow(screenWidth,screenHeight);
       break;
