@@ -4605,7 +4605,7 @@ A typical input line specifying a duct is as follows:
 \begin{description}
 \item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.
 \item[{\ct AREA}] is the cross sectional area of the duct in m$^2$. {\ct DIAMETER} (m) can be used instead.
-\item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Section~\ref{HVAC:damper}.
+\item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Section~\ref{info:HVACdamper}).
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of
 specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  The operation of the fan can be controlled by either a device or a control function.
@@ -4630,10 +4630,10 @@ This could be input as each individual fitting or duct with its associated area 
 \be K_{\mbox{\tiny eff}} = \sum_i {K_i \frac {A_{\mbox{\tiny eff}}}{A_i}} \ee
 where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 
-\subsubsection{HVAC Dampers}
+\subsection{HVAC Dampers}
 \label{info:HVACdamper}
 
-A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open.  The sample below is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a {\ct DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s and~0 m/s.  Results of this are shown in \ref{HVAC_damper}.
+A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open.  The sample below is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a {\ct DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
 
 \footnotesize
 \begin{verbatim}
