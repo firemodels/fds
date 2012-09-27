@@ -3,7 +3,7 @@
 
 \section{Hot Gas Layer Temperature (MQH)}
 
-The approximate formula for the hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is as follows
+For a compartment with natural ventilation, the approximate formula for the hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is as follows
 
 \be
 \Delta T_g = 6.85 \left( \frac{\dot Q^2}{A_v \sqrt{H_v} h_k A_T} \right)^{1/3}
@@ -66,7 +66,7 @@ A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_
 
 \section{Hot Gas Layer Temperature (FPA)}
 
-The upper-layer gas temperature increase above ambient is given as a function of the fire HRR, the compartment ventilation flow rate, the gas-specific heat capacity, the compartment surface area, and an effective heat transfer coefficient. The nondimensional form of the resulting temperature correlation is as follows
+For a compartment with forced ventilation, the upper-layer gas temperature increase above ambient is given as a function of the fire HRR, the compartment ventilation flow rate, the gas-specific heat capacity, the compartment surface area, and an effective heat transfer coefficient. The nondimensional form of the resulting temperature correlation is as follows
 
 \be
 \Delta T_g = \left[ 1 + 0.63 \left( \frac{\dot Q}{\dot m c_p T_\infty} \right)^{0.72} \left( \frac{h_k A_T}{\dot m c_p} \right)^{-0.36} \right] T_\infty
@@ -96,7 +96,7 @@ A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_
 
 \section{Hot Gas Layer Temperature (Deal and Beyler)}
 
-The approximate compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
+For a compartment with forced ventilation, the approximate compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
 
 \be
 \Delta T_g = \left( \frac{\dot Q}{\dot m c_p + h_k A_T} \right)
@@ -135,7 +135,7 @@ A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_
 
 \section{Hot Gas Layer Temperature (Beyler)}
 
-For constant HRR, the compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
+For a compartment with no ventilation (closed doors) and constant HRR, the compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
 
 \be
 \Delta T_g = \frac{2 K_2}{K_1^2} (K_1 \sqrt{t} - 1 + e^{-K_1 \sqrt{t}})
