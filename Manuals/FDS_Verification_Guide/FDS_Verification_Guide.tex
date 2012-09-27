@@ -2274,7 +2274,7 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 
 \clearpage
 
-\section{Mixture Fraction ({\bf Burke\_Schumann})}
+\section{Mixture Fraction ({\bf burke\_schumann})}
 \label{Mix_Frac}
 
 The mixture fraction output quantity is valid for simple one-step reactions of the form A + B $\rightarrow$ C. To test that mixture fraction is correctly implemented we consider a series of test reactors that have been initialized with equivalence ratios from $\phi=0$ to $\phi=1$ to simulate the range of equivalence ratios that exist across a flame sheet. A simple one-step methane reaction is used to govern the combustion:
@@ -2297,9 +2297,9 @@ At stoichiometric conditions, the species mass fractions are the same whether ap
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/Burke_Schumann_Spec}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
 \end{center}
-\caption[Mixture fraction state relation for species]{Lumped species mass fractions variation as function of mixture fraction.}
+\caption[Mixture fraction state relation for species ({\bf burke\_schumann})]{Lumped species mass fractions variation as function of mixture fraction.}
 \label{fig:burke_schumann_spec}
 \end{figure}
 
@@ -2310,9 +2310,9 @@ T = (f-Y_{fuel})\frac{\Delta h_{c}}{c_{v}} + f(T_{fuel,i}-T_{ox,i}) + T_{ox,i}
 The molecular weight of the species were not set to be uniform, so the average molecular weight and $c_v$ will change as a function of the mixture fraction. As a result, the traditional linear temperature profile is not expected.
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/Burke_Schumann_Temp}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_temp}
 \end{center}
-\caption[Mixture fraction state relation for temperature]{Temperature variation as function of mixture fraction.}
+\caption[Mixture fraction state relation for temperature ({\bf burke\_schumann})]{Temperature variation as function of mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
 
