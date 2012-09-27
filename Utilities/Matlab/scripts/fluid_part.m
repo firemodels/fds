@@ -5,10 +5,9 @@
 close all
 clear all
 
+% set the plot style parameters
+
 plot_style
-set(gcf,'DefaultLineLineWidth',Line_Width)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 ddir='../../Verification/Sprinklers_and_Sprays/';
 
@@ -135,9 +134,6 @@ end
 H(10)=plot(t_soln,MX(1)*U_soln,'b-');
 H(11)=plot(t_soln,n*pwt*m_p*u_soln,'r-');
 
-plot_handle = gca;
-plot_position = get(plot_handle,'Position');
-
 axis([min(tx) max(tx) 0 150])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
@@ -148,21 +144,8 @@ legend_handle = legend(H(1:11),'FDS fluid U','FDS fluid V','FDS fluid W', ...
               'FDS particle U','FDS particle V','FDS particle W', ...
               'FDS total U','FDS total V','FDS total W', ...
               'analytical fluid','analytical particle','Location','EastOutside');
-		  
 set(legend_handle,'Interpreter',Font_Interpreter)
-plot_outerposition = get(plot_handle,'OuterPosition');
-legend_position=get(legend_handle,'Position');
 
-set(plot_handle,'Position',plot_position)
-set(plot_handle,'OuterPosition',plot_outerposition)
-
-% Legend_XYWidthHeight = legend_position;
-% Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.2;
-% Legend_XYWidthHeight(2) = plot_position(2);
-% Legend_XYWidthHeight(3) = 2.8;
-% Legend_XYWidthHeight(4) = plot_position(4);
-% set(legend_handle,'Position',Legend_XYWidthHeight)
-          
 % add SVN if file is available
 
 SVN_Filename = [ddir,'fluid_part_mom_x_svn.txt'];
@@ -176,12 +159,12 @@ if exist(SVN_Filename,'file')
         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
-Paper_Width=1.5*Paper_Width;
+PDF_Paper_Width = 1.5*Paper_Width;
 
 set(gcf,'Visible','on');
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
 display('Printing plot fluid_part_momentum.pdf...')
           
 print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_momentum
@@ -189,10 +172,6 @@ print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_momen
 % plot velocities
 
 figure(2)
-
-set(gcf,'DefaultLineLineWidth',Line_Width)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 H(1)=plot(tx(range),U(range),'bo'); hold on
 H(2)=plot(ty(range),V(range),'bv');
@@ -214,9 +193,6 @@ H(7)=plot(tx,U_eq,'g--');
 H(7)=plot(ty,V_eq,'g--');
 H(7)=plot(tz,W_eq,'g--');
 
-plot_handle = gca;
-plot_position = get(plot_handle,'Position');
-
 axis([min(tx) max(tx) 0 10])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
@@ -226,21 +202,8 @@ ylabel('Velocity (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Siz
 legend_handle = legend(H(1:7),'FDS fluid U','FDS fluid V','FDS fluid W',...
               'FDS particle U','FDS particle V','FDS particle W',...
               'equilibrium velocity','Location','EastOutside');
-
 set(legend_handle,'Interpreter',Font_Interpreter)
-plot_outerposition = get(plot_handle,'OuterPosition');
-legend_position=get(legend_handle,'Position');
 
-set(plot_handle,'Position',plot_position)
-set(plot_handle,'OuterPosition',plot_outerposition)
-
-% Legend_XYWidthHeight = legend_position;
-% Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.2;
-% Legend_XYWidthHeight(2) = plot_position(2)+.5;
-% Legend_XYWidthHeight(3) = 3.0;
-% Legend_XYWidthHeight(4) = 2.4;
-% set(legend_handle,'Position',Legend_XYWidthHeight)
-          
 % add SVN if file is available
 
 SVN_Filename = [ddir,'fluid_part_mom_x_svn.txt'];
@@ -256,8 +219,8 @@ end
 
 set(gcf,'Visible','on');
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
 display('Printing plot fluid_part_velocity.pdf...')
           
 print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_velocity
