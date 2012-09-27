@@ -2,15 +2,29 @@
 
 \section{Point Source Radiation Heat Flux}
 
-The point source model assumes that radiant energy is released at a point located at the center of the fire. The radiant heat flux at any distance $x$ from the source fire is inversely related to the horizontal separation distance $r$, by the following equation
+The point source model assumes that radiant energy is concentrated at a point located within the flame. Here the point source is located at a point one-third the height of the flame. The radiant heat flux at any distance $R$ from this point is given by
 
 \be
-\dot q_r'' = \frac{x}{r} \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right)
+\dot q_r'' = \cos\theta \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right) =
+\frac{x}{R} \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right)
 \label{eq:point_source}
 \ee
 
+\noindent where
+
 \be
-r = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
+R = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
+\label{eq:point_source_R}
+\ee
+
+\be
+L_f = D (3.7 Q^{*^{2/5}} - 1.02)
+\label{eq:point_source_Lf}
+\ee
+
+\be
+Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
+\label{eq:point_source_Qstar}
 \ee
 
 \be
@@ -18,17 +32,11 @@ D = \sqrt{\frac{4 A}{\pi}}
 \label{eq:point_source_D}
 \ee
 
-\be
-Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
-\ee
+In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), the $\cos\theta$ (or $x/R$) term accounts for a target that is at an angle $\theta$ from the source, $x$ is the horizontal distance from the point source to the edge of the target~(m), $R$ is the radial distance from the point source to the edge of the target~(m), $\chi_r$ is the radiative fraction~(-), and $\dot Q$ is the HRR of the fire~(kW).
 
-\be
-L_f = D (3.7 Q^{*^{2/5}} - 1.02)
-\ee
+In Eq.~\ref{eq:point_source_R}, $z$ is the height of the heat flux target~(m), and $L_f$ is the flame height given by Eq.~\ref{eq:point_source_Lf}~(m).
+In Eq.~\ref{eq:point_source_Lf}, $D$ is the diameter of the fire source~(m), and $Q^*$ is the nondimensional HRR given by Eq.~\ref{eq:point_source_Qstar}. In Eq.~\ref{eq:point_source_Qstar}, $\rho_\infty$ is the ambient air density~(kg/m$^3$), $c_p$ is the specific heat of air~(kJ/kg-K), $T_\infty$ is the ambient air temperature~(K), and $g$ is the acceleration of gravity~(m/s$^2$). In Eq.~\ref{eq:point_source_D}, $A$ is the area of the fire source~(m$^2$).
 
-In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(kW), and $R$ is the radial distance from the center of the flame to the edge of the target~(m).
-
-In Eq.~\ref{eq:point_source_D}, $D$ is the diameter of the fire source~(m).
 
 \clearpage
 
@@ -55,9 +63,10 @@ The immersed HGL radiation heat flux can be calculated by
 
 \be
 \dot q_r'' = \sigma (T_g^4 - T_\infty^4)
+\label{eq:immersed_HGL_radiation}
 \ee
 
-\noindent where $\sigma$ is the Stefan-Boltzmann constant ($W/m^2/K^4$), $T_g$ is the hot gas layer temperature from the appropriate method described in Chapter~\ref{HGL:Chapter}, and $T_\infty$ is the ambient temperature (K).
+In Eq.~\ref{eq:immersed_HGL_radiation}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), $\sigma$ is the Stefan-Boltzmann constant ($W/m^2$-$K^4$), $T_g$ is the hot gas layer temperature from the appropriate method described in Chapter~\ref{HGL:Chapter}~(K), and $T_\infty$ is the ambient temperature (K).
 
 \clearpage
 
@@ -84,9 +93,10 @@ The immersed plume radiation heat flux can be calculated by
 
 \be
 \dot q_r'' = \sigma (T_p^4)
+\label{eq:immersed_plume_radiation}
 \ee
 
-\noindent where $\sigma$ is the Stefan-Boltzmann constant ($W/m^2/K^4$), and $T_p$ is the plume temperature (K) at a given height using the McCaffrey centerline plume temperature correlation described in Eq.~\ref{eq:McCaffrey}.
+In Eq.~\ref{eq:immersed_plume_radiation}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), $\sigma$ is the Stefan-Boltzmann constant ($W/m^2$-$K^4$), and $T_p$ is the plume temperature (K) at a given height using the McCaffrey centerline plume temperature correlation described in Eq.~\ref{eq:McCaffrey}.
 
 \clearpage
 
