@@ -2329,8 +2329,8 @@ void setScreenSize(int *width, int *height){
     screenWidth=*width;
   }
   if(height!=NULL){
-    printf(" screen height before/after %i/%i ",screenHeight,*height);
-  //  screenHeight=*height;
+  //  printf(" screen height before/after %i/%i ",screenHeight,*height);
+    screenHeight=*height;
   }
   printf("\n");
 }
