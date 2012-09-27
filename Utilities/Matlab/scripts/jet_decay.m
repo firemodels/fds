@@ -45,9 +45,6 @@ for j=1:length(x)
 end
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
 
 H(1)=plot(x/h,u_1/u_0,'k--'); hold on
 H(2)=plot(x/h,u_2/u_0,'k-');
@@ -61,8 +58,6 @@ H(9)=plot(x/h,u_vreman_10/u_0,'r--');
 H(10)=plot(x/h,u_vreman_5/u_0,'r-');
 
 plot_handle = gca;
-plot_position = get(plot_handle,'Position');
-
 axis([0 25 0.2 1.2])
 set(plot_handle,'XTick',[0 5 10 15 20 25])
 set(plot_handle,'YTick',[0.2 0.4 0.6 0.8 1.0 1.2])
@@ -79,28 +74,7 @@ legend_handle = legend(H,'analytical, m=0.12','analytical, m=0.20',...
 	                     'dsmag, $h/\delta x=8$','dsmag, $h/\delta x=16$',...
 		                 'Deardorff, $h/\delta x=8$','Deardorff, $h/\delta x=16$',...
 		                 'Vreman, $h/\delta x=8$','Vreman, $h/\delta x=16$',...
-						 'Location','Southwest');
-					 
-set(legend_handle,'Interpreter',Font_Interpreter)
-%LP=get(legend_handle,'Position');
-set(legend_handle,'Position',[1.2699    0.8535    2.4    2.2])
-
-plot_outerposition = get(plot_handle,'OuterPosition');
-legend_position=get(legend_handle,'Position');
-
-set(plot_handle,'Position',plot_position)
-set(plot_handle,'OuterPosition',plot_outerposition)
-
-Legend_XYWidthHeight = legend_position;
-Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.1;
-Legend_XYWidthHeight(2) = plot_position(2);
-Legend_XYWidthHeight(3) = 2.5;
-Legend_XYWidthHeight(4) = plot_position(4);
-set(legend_handle,'Position',Legend_XYWidthHeight)
-
-%set(plot_handle,'YTick',[1e-1 1e0 1e1 1e2 1e3])
-%set(plot_handle,'XTick',[1e-1 1e0 1e1 1e2 1e3 1e4])
-set(plot_handle,'Position',plot_position)
+						 'Location','EastOutside');
 
 % add SVN if file is available
 
