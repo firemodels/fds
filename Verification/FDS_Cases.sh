@@ -234,9 +234,9 @@ $RUNFDS Radiation wall_internal_radiation
 $RUNFDS Species Burke_Schumann
 $RUNFDS Species FED_FIC
 $RUNFDS Species FED_FIC_SMIX
-$RUNFDS Species Methane_flame_simple
-$RUNFDS Species Methane_flame_primitive
-$RUNFDS Species Methane_flame_lumped
+$RUNFDS Species methane_flame_simple
+$RUNFDS Species methane_flame_primitive
+$RUNFDS Species methane_flame_lumped
 $RUNFDS Species propane_flame_deposition
 $RUNFDS Species propane_flame_deposition_none
 $RUNFDS Species propane_flame_deposition_gravitational
