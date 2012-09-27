@@ -7975,7 +7975,20 @@ int readini(int scriptconfigfile){
   // read in ini file specified in script
 
   if(scriptinifilename2!=NULL&&scriptconfigfile==2){
-    if(readini2(scriptinifilename2,1)==2)return 2;
+    int return_code;
+    
+    return_code = readini2(scriptinifilename2,1);
+
+    if(return_code==1||return_code==2){
+      if(scriptinifilename==NULL){
+        fprint(stderr,"*** Error: Unable to read .ini file\n");
+      }
+      else{
+        fprint(stderr,"*** Error: Unable to read %s\n",scriptinifilename);
+      }
+    }
+    if(return_code==2)return 2;
+    
     updatecolors(-1);
     updateshowtitles();
     scriptinifilename2=NULL;

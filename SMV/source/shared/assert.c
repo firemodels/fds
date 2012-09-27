@@ -23,7 +23,7 @@ void _Assert(char *filename, unsigned linenumber){
    fprintf(stderr,"y=%f\n",y);
 #endif
    fflush(NULL);
-   fprintf(stderr, "\nAssertion failed: %s, line %u\n",filename, linenumber);
+   fprintf(stderr, "\n*** Error: Assertion failed: %s, line %u\n",filename, linenumber);
    fflush(stderr);
    scanf("%i",&dummy);
    abort();

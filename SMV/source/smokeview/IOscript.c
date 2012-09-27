@@ -663,6 +663,7 @@ void script_volsmokerenderall(scriptdata *scripti){
 void script_loadparticles(scriptdata *scripti){
   int i;
   int errorcode;
+  int count=0;
 
   printf("script: loading particles files\n\n");
 
@@ -674,6 +675,7 @@ void script_loadparticles(scriptdata *scripti){
     if(parti->evac==1)continue;
     if(parti->version==1){
       readpart(parti->file,i,UNLOAD,&errorcode);
+      count++;
     }
   }
   for(i=0;i<npartinfo;i++){
@@ -683,8 +685,10 @@ void script_loadparticles(scriptdata *scripti){
     if(parti->evac==1)continue;
     if(parti->version==1){
       readpart(parti->file,i,LOAD,&errorcode);
+      count++;
     }
   }
+  if(count==0)fprintf(stderr,"*** Error: Particles files failed to load\n");
   force_redisplay=1;
   update_framenumber(0);
   updatemenu=1;
@@ -695,6 +699,7 @@ void script_loadparticles(scriptdata *scripti){
 void script_loadiso(scriptdata *scripti){
   int i;
   int errorcode;
+  int count=0;
 
   printf("script: loading isosurface files of type: %s\n\n",scripti->cval);
 
@@ -708,8 +713,10 @@ void script_loadiso(scriptdata *scripti){
     imatch = match_upper(isoi->surface_label.longlabel,scripti->cval);
     if(imatch==1||imatch==2){
       readiso(isoi->file,i,LOAD,&errorcode);
+      count++;
     }
   }
+  if(count==0)fprintf(stderr,"*** Error: Isosurface files of type %s failed to load\n",scripti->cval);
   force_redisplay=1;
   updatemenu=1;
 
@@ -790,6 +797,7 @@ void script_loadvolsmokeframe2(void){
 void script_load3dsmoke(scriptdata *scripti){
   int i;
   int errorcode;
+  int count=0;
 
   printf("script: loading smoke3d files of type: %s\n\n",scripti->cval);
 
@@ -799,8 +807,10 @@ void script_load3dsmoke(scriptdata *scripti){
     smoke3di = smoke3dinfo + i;
     if(match_upper(smoke3di->label.longlabel,scripti->cval)==1){
       readsmoke3d(i,LOAD,&errorcode);
+      count++;
     }
   }
+  if(count==0)fprintf(stderr,"*** Error: Smoke3d files of type %s failed to load\n",scripti->cval);
   force_redisplay=1;
   updatemenu=1;
 
@@ -833,6 +843,7 @@ void script_loadslice(scriptdata *scripti){
     } 
     break;
   }
+  fprintf(stderr,"*** Error: Slice files of type %s failed to load\n",scripti->cval);
 }
 
 /* ------------------ script_loadvslice ------------------------ */
@@ -840,6 +851,7 @@ void script_loadslice(scriptdata *scripti){
 void script_loadvslice(scriptdata *scripti){
   int i;
   float delta_orig;
+  int count=0;
 
   printf("script: loading vector slice files of type: %s\n\n",scripti->cval);
 
@@ -859,15 +871,18 @@ void script_loadvslice(scriptdata *scripti){
 
     for(j=0;j<mvslicei->nvslices;j++){
       LoadVSliceMenu(mvslicei->ivslices[j]);
+      count++;
     } 
     break;
   }
+  if(count==0)fprintf(stderr,"*** Error: Vector slice files of type %s failed to load\n",scripti->cval);
 }
 
 /* ------------------ script_loadtour ------------------------ */
 
 void script_loadtour(scriptdata *scripti){
   int i;
+  int count=0;
 
   printf("script: loading tour %s\n\n",scripti->cval);
   
@@ -879,10 +894,12 @@ void script_loadtour(scriptdata *scripti){
       TourMenu(i);
       viewtourfrompath=0;
       TourMenu(-5);
+      count++;
       break;
     }
   }
 
+  if(count==0)fprintf(stderr,"*** Error: The tour %s failed to load\n",scripti->cval);
   force_redisplay=1;
   updatemenu=1;
 }
@@ -892,6 +909,7 @@ void script_loadtour(scriptdata *scripti){
 void script_loadboundary(scriptdata *scripti){
   int i;
   int errorcode;
+  int count=0;
 
   printf("Script: loading boundary files of type: %s\n\n",scripti->cval);
 
@@ -902,9 +920,11 @@ void script_loadboundary(scriptdata *scripti){
     if(strcmp(patchi->label.longlabel,scripti->cval)==0){
       LOCK_COMPRESS
       readpatch(i,LOAD,&errorcode);
+      count++;
       UNLOCK_COMPRESS
     }
   }
+  if(count==0)fprintf(stderr,"*** Error: Boundary files of type %s failed to load\n",scripti->cval);
   force_redisplay=1;
   updatemenu=1;
   update_framenumber(0);
@@ -915,6 +935,7 @@ void script_loadboundary(scriptdata *scripti){
 
 void script_partclasscolor(scriptdata *scripti){
   int i;
+  int count=0;
 
   for(i=0;i<npart5prop;i++){
     part5prop *propi;
@@ -923,8 +944,10 @@ void script_partclasscolor(scriptdata *scripti){
     if(propi->particle_property==0)continue;
     if(strcmp(propi->label->longlabel,scripti->cval)==0){
       ParticlePropShowMenu(i);
+      count++;
     }
   }
+  if(count==0)fprintf(stderr,"*** Error: particle class color: %s failed to be set\n",scripti->cval);
 }
 
 
@@ -1038,6 +1061,7 @@ void script_showplot3ddata(scriptdata *scripti){
 
 void script_partclasstype(scriptdata *scripti){
   int i;
+  int count=0;
 
   for(i=0;i<npart5prop;i++){
     part5prop *propi;
@@ -1053,9 +1077,11 @@ void script_partclasstype(scriptdata *scripti){
       if(partclassj->kind==HUMANS)continue;
       if(strcmp(partclassj->name,scripti->cval)==0){
         ParticlePropShowMenu(-10-j);
+        count++;
       }
     }
   }
+  if(count==0)fprintf(stderr,"*** Error: particle class type %s failed to be set\n",scripti->cval);
 }
 
 /* ------------------ script_loadinifile ------------------------ */
@@ -1089,7 +1115,6 @@ void script_loadfile(scriptdata *scripti){
       }
       return;
     }
-
   }
   for(i=0;i<npatchinfo;i++){
     patchdata *patchi;
@@ -1149,8 +1174,7 @@ void script_loadfile(scriptdata *scripti){
     }
   }
 
-  printf("script: file %s was not loaded\n",scripti->cval);
-
+  fprintf(stderr,"*** Error: file %s failed to load\n",scripti->cval);
 }
 
 
@@ -1160,6 +1184,7 @@ void script_loadplot3d(scriptdata *scripti){
   int i;
   float time_local;
   int blocknum;
+  int count=0;
 
   time_local = scripti->fval;
   blocknum = scripti->ival-1;
@@ -1169,11 +1194,13 @@ void script_loadplot3d(scriptdata *scripti){
 
     plot3di = plot3dinfo + i;
     if(plot3di->blocknumber==blocknum&&ABS(plot3di->time-time_local)<0.5){
+      count++;
       LoadPlot3dMenu(i);
     }
   }
   updatecolors(-1);
   set_labels_controls();
+  if(count==0)fprintf(stderr,"*** Error: Plot3d file failed to load\n");
 
   //update_menu();
 }
@@ -1196,7 +1223,7 @@ void script_loadvfile(scriptdata *scripti){
       return;
     }
   }
-  printf("script: vector slice file %s was not loaded\n",scripti->cval);
+  fprintf(stderr,"*** Error: Vector slice file %s was not loaded\n",scripti->cval);
 
 }
 
@@ -1209,8 +1236,20 @@ void script_settimeval(scriptdata *scripti){
   timeval = scripti->fval;
   printf("script: setting time to %f\n\n",timeval);
   if(global_times!=NULL&&nglobal_times>0){
-    if(timeval<global_times[0])timeval=global_times[0];
-    if(timeval>global_times[nglobal_times-1]-0.0001)timeval=global_times[nglobal_times-1]-0.0001;
+    if(timeval<global_times[0]){
+      timeval=global_times[0];
+    }
+    if(timeval>global_times[nglobal_times-1]-0.0001){
+      float dt;
+
+      dt = timeval-global_times[nglobal_times-1]-0.0001;
+      if(nglobal_times>1&&dt>global_times[1]-global_times[0]){
+        fprintf(stderr,"*** Error: data not available at time requested\n");
+        fprintf(stderr,"           time requested: %f s, max time available: %f s\n",
+          timeval,global_times[nglobal_times-1]);
+      }
+      timeval=global_times[nglobal_times-1]-0.0001;
+    }
     for(i=0;i<nglobal_times-1;i++){
       if(global_times[i]<=timeval&&timeval<global_times[i+1]){
         itimes=i;
@@ -1266,15 +1305,18 @@ void settimeval(float timeval){
 void script_setviewpoint(scriptdata *scripti){
   char *viewpoint;
   camera *ca;
+  int count=0;
 
   viewpoint = scripti->cval;
   printf("script: set viewpoint to %s\n\n",viewpoint);
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(strcmp(scripti->cval,ca->name)==0){
       ResetMenu(ca->view_id);
+      count++;
       break;
     }
   }
+  if(count==0)fprintf(stderr,"*** Error: The viewpoint %s was not found\n",viewpoint);
 }
 
 /* ------------------ run_script ------------------------ */
