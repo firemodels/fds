@@ -2319,7 +2319,7 @@ The molecular weight of the species were not set to be uniform, so the average m
 
 \clearpage
 
-\section{Extinction Model ({\bf Extinction})}
+\section{Extinction Model ({\bf extinction})}
 \label{Extinct}
 
 The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1600 K. 
@@ -2331,9 +2331,9 @@ Here, we examine a 10 $\times$ 10 array of cases: varying initial temperature fr
 Based on the combination of oxygen concentration, methane concentration, and temperature each case can either sustain burning for a finite period of time or not (Fig.~\ref{fig:extinct}).
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=3.2in]{SCRIPT_FIGURES/Extinction}
+\includegraphics[height=3.2in]{SCRIPT_FIGURES/extinction}
 \end{center}
-\caption[{\bf Extinction} model test cases]{Array of initial temperatures and oxygen concentrations that can can sustain burning.}
+\caption[{\bf extinction} model test cases]{Array of initial temperatures and oxygen concentrations that can can sustain burning.}
 \label{fig:extinct}
 \end{figure}
 For the same initial conditions, FDS predictions for burning or extinction (closed symbols) fall identically on the expected results (open symbols). This example also illustrates that for these initial conditions, the delineation between burning and extinction is not linear as the simple model suggests. More detailed information on the extinction model, which uses the critical flame temperature and local enthalpy change, can be found in the Technical Reference Guide \cite{FDS_Tech_Guide}.
