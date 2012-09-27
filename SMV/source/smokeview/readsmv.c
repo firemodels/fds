@@ -7980,11 +7980,11 @@ int readini(int scriptconfigfile){
     return_code = readini2(scriptinifilename2,1);
 
     if(return_code==1||return_code==2){
-      if(scriptinifilename==NULL){
+      if(scriptinifilename2==NULL){
         fprintf(stderr,"*** Error: Unable to read .ini file\n");
       }
       else{
-        fprintf(stderr,"*** Error: Unable to read %s\n",scriptinifilename);
+        fprintf(stderr,"*** Error: Unable to read %s\n",scriptinifilename2);
       }
     }
     if(return_code==2)return 2;

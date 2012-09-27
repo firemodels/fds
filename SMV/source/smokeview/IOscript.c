@@ -820,6 +820,7 @@ void script_load3dsmoke(scriptdata *scripti){
 
 void script_loadslice(scriptdata *scripti){
   int i;
+  int count=0;
 
   printf("script: loading slice files of type: %s\n\n",scripti->cval);
 
@@ -840,10 +841,11 @@ void script_loadslice(scriptdata *scripti){
 
     for(j=0;j<mslicei->nslices;j++){
       LoadSliceMenu(mslicei->islices[j]);
+      count++;
     } 
     break;
   }
-  fprintf(stderr,"*** Error: Slice files of type %s failed to load\n",scripti->cval);
+  if(count==0)fprintf(stderr,"*** Error: Slice files of type %s failed to load\n",scripti->cval);
 }
 
 /* ------------------ script_loadvslice ------------------------ */
