@@ -2854,7 +2854,7 @@ void allocate_faces(){
       fprintf(stderr,"%i bytes of memory\n",mem_sum);
       fprintf(stderr,"                  for %i blockage faces.\n",nfaces_temp);
     }
-    abortSV(_("memory allocation error."));
+    fprintf(stderr,"*** Error: memory allocation error\n");
   }
   printf("\n");
 }

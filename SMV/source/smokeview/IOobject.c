@@ -5412,11 +5412,7 @@ int read_object_defs(char *file){
 
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected){
   if(numargs_found==numargs_expected)return;
-  {
-    char message[256];
-    sprintf(message,"%i arguments were found (%i expected) for the token, %s, while parsing: %s\n",numargs_found,numargs_expected,token,buffer);
-    error_message(message);
-  }
+  fprintf(stderr,"*** Error: %i arguments were found (%i expected) for the token, %s, while parsing: %s\n",numargs_found,numargs_expected,token,buffer);
 }
 
 /* ----------------------- get_device_label ----------------------------- */

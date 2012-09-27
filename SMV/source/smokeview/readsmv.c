@@ -4151,12 +4151,7 @@ int readsmv(char *file, char *file2){
           found_texture=1;
         }
         if(texturebuffer!=NULL&&buffer3!=NULL&&found_texture==0&&strncmp(buffer3,"null",4)!=0){
-          char message[1024];
-
-          strcpy(message,"The texture file: ");
-          strcat(message,buffer3);
-          strcat(message," was not found.");
-          warning_message(message);
+          fprintf(stderr,"*** Error: The texture file %s was not found\n",buffer3);
         }
       }
       nsurfinfo++;
@@ -6430,12 +6425,7 @@ typedef struct {
       }
       else{
         if(trainer_mode==0){
-          char message[1024];
-
-          strcpy(message,_("the file, "));
-          strcat(message,buffer);
-          strcat(message,_(" does not exist"));
-          warning_message(message);
+          fprintf(stderr,"*** Error: The file %s does not exist\n",buffer);
         }
         if(readlabels(&patchi->label,stream)==2)return 2;
         npatchinfo--;
@@ -6561,12 +6551,7 @@ typedef struct {
       else{
         get_isolevels=0;
         if(trainer_mode==0){
-          char message[1024];
-
-          strcpy(message,_("the file, "));
-          strcat(message,buffer);
-          strcat(message,_(" does not exist"));
-          warning_message(message);
+          fprintf(stderr,"*** Error: the file %s does not exist\n",buffer);
         }
 
         if(readlabels(&isoi->surface_label,stream)==2)return 2;

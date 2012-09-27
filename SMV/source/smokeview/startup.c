@@ -239,23 +239,11 @@ int setup_case(int argc, char **argv){
   }
   switch (return_code){
     case 1:
-      {
-        char message[256];
-
-        strcpy(message,_("Input file "));
-        strcat(message,input_file);
-        strcat(message,_(" not found"));
-        printf("%s\n",message);
-      }
+      fprintf(stderr,"*** Error: Smokeview file, %s, not found\n",input_file);
       pauseSV();
       return 1;
     case 2:
-      {
-        char message[256];
-
-        strcpy(message,_("problem reading Smokeview file"));
-        abort_message(message);
-      }
+      fprintf(stderr,"*** Error: problem reading Smokeview file, %s\n",input_file);
       pauseSV();
       return 2;
     case 0:
@@ -475,7 +463,7 @@ void InitOpenGL(void){
     }
     else{
       videoSTEREO=0;
-      warning_message(_("video hardware does not support stereo"));
+      fprintf(stderr,"*** Error: video hardware does not support stereo\n");
     }
   }
 
@@ -2238,7 +2226,6 @@ int getmaxrevision(void){
   MAXREV(isobox_revision);
   MAXREV(main_revision);
   MAXREV(menu_revision);
-  MAXREV(message_revision);
   MAXREV(output_revision);
   MAXREV(readsmv_revision);
   MAXREV(renderfile_revision);

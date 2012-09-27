@@ -737,16 +737,6 @@ void usage(char **argv){
   }
 }
 
-/* ------------------ abortSV ------------------------ */
-
-void abortSV(char *message){
-  int i;
-  if(message!=NULL&&strlen(message)>0){
-    abort_message(message);
-  }
-  scanf("%i",&i);
-}
-
 /* ------------------ pauseSV ------------------------ */
 
 void pauseSV(void){

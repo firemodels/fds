@@ -448,20 +448,12 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   RENDERfile = fopen(RENDERfilename, "wb");
   if (RENDERfile == NULL) {
-    char message[1024];
-
-    strcpy(message,_("unable to write to "));
-    strcat(message,RENDERfilename);
-    warning_message(message);
+    fprintf(stderr,"*** Error: Unable to write to %s\n",RENDERfilename);
     return 1;
   }
   NewMemory((void **)&OpenGLimage,width2 * height2 * sizeof(GLubyte) * 3);
   if(OpenGLimage == NULL){
-    char message[1024];
-    
-    strcpy(message,_("error allocating render image: "));
-    strcat(message,RENDERfilename);
-    error_message(message);
+    fprintf(stderr,"*** Error allocating render image: %s\n",RENDERfilename);
     pauseSV();
     exit(1);
   }
