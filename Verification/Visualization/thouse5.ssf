@@ -367,7 +367,7 @@ RENDERONCE
 // render fed iso file
 
 LOADINIFILE
- thouse5_fed2.ini
+ thouse5.ini
 UNLOADALL
 SETVIEWPOINT
  external
