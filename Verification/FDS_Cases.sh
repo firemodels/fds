@@ -242,18 +242,18 @@ $RUNFDS Species propane_flame_deposition_none
 $RUNFDS Species propane_flame_deposition_gravitational
 $RUNFDS Species propane_flame_deposition_thermophoretic
 $RUNFDS Species propane_flame_deposition_turbulent
-$RUNFDS Species ReactionRate_Arrhenius_0Order_1Step
-$RUNFDS Species ReactionRate_Arrhenius_2Order_1Step
-$RUNFDS Species ReactionRate_Arrhenius_1p75Order_2Step
-$RUNFDS Species ReactionRate_Arrhenius_1p75Order_2StepR
-$RUNFDS Species ReactionRate_Arrhenius_Equilibrium
+$RUNFDS Species reactionrate_arrhenius_0order_1step
+$RUNFDS Species reactionrate_arrhenius_2order_1step
+$RUNFDS Species reactionrate_arrhenius_1p75order_2step
+$RUNFDS Species reactionrate_arrhenius_1p75order_2stepr
+$RUNFDS Species reactionrate_arrhenius_equilibrium
 $RUNFDS Species ReactionRate_EDC_1Step_CH4_nonmix
 $RUNFDS Species ReactionRate_EDC_Flim_1Step_C3H8
 $RUNFDS Species ReactionRate_EDC_Flim_1Step_CH4
 $RUNFDS Species ReactionRate_EDC_Flim_2Step
 $RUNFDS Species ReactionRate_EDC_O2lim_1Step
 $RUNFDS Species ReactionRate_EDC_O2lim_2Step
-$RUNFDS Species PVC_Combustion
+$RUNFDS Species pvc_combustion
 $RUNFDS Species soot_gravitational_settling
 
 $RUNFDS Sprinklers_and_Sprays activate_sprinklers
