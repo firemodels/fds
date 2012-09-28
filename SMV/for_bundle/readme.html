@@ -21,6 +21,22 @@
 
 <ul>
 
+<li>6.05 (build xxxx) - September xxx
+
+<ol>
+<li>enhancement: add option to display fed area percents in color bar
+<li>usability: add error checking to smokeview scripting
+<li>usability: customize colorbar labels for fed data
+<li>usability: add command line option (-redirect) to redirect smokeview output (stdout) to a log file
+<li>usability: consolidate per mesh hrrpuv_cutoff variables into one
+<li>fix: fix window resizing bug occuring on Mac
+smokeview source: consolidate screen size intialization to one routine
+<li>fix: adust fed contour levels to be consistent with quantized values available on the colorbar
+<li>fix: correct problem with getmesh routine that was causing firebot to crash
+<li>fix: fix area computation (for one mesh, full slice) and use of blanking arrays when computing FEDs - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1728&can=1&sort=-id">Issue 1728</a>)
+</ol>
+
 <li>6.0.4 (build 12556) - September 10, 2012
 <ol>
 <li>usability: improve the colorbar display by eliminating the overlap of numerical labels and the colorbar - 
