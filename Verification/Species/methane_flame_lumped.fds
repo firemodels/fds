@@ -9,7 +9,7 @@ Yields       kg/kg fuel   kg
         H2O: 2.25         0.0225
         CO:  0.10         0.0010
 
-&HEAD CHID='methane_flame_lumped', TITLE='Verification of simple chemistry flame, SVN $Revision: 12143 $'/
+&HEAD CHID='methane_flame_lumped', TITLE='Verification of simple chemistry flame, SVN $Revision$'/
 
 &MESH IJK=10,10,20, XB=0.0,1.0,0.0,1.0,0.0,2.0 /
 
