@@ -247,12 +247,12 @@ $RUNFDS Species reactionrate_arrhenius_2order_1step
 $RUNFDS Species reactionrate_arrhenius_1p75order_2step
 $RUNFDS Species reactionrate_arrhenius_1p75order_2stepr
 $RUNFDS Species reactionrate_arrhenius_equilibrium
-$RUNFDS Species ReactionRate_EDC_1Step_CH4_nonmix
-$RUNFDS Species ReactionRate_EDC_Flim_1Step_C3H8
-$RUNFDS Species ReactionRate_EDC_Flim_1Step_CH4
-$RUNFDS Species ReactionRate_EDC_Flim_2Step
-$RUNFDS Species ReactionRate_EDC_O2lim_1Step
-$RUNFDS Species ReactionRate_EDC_O2lim_2Step
+$RUNFDS Species reactionrate_EDC_1step_CH4_nonmix
+$RUNFDS Species reactionrate_EDC_flim_1step_C3H8
+$RUNFDS Species reactionrate_EDC_flim_1step_CH4
+$RUNFDS Species reactionrate_EDC_flim_2step
+$RUNFDS Species reactionrate_EDC_O2lim_1step
+$RUNFDS Species reactionrate_EDC_O2lim_2step
 $RUNFDS Species pvc_combustion
 $RUNFDS Species soot_gravitational_settling
 
