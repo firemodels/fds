@@ -2096,7 +2096,6 @@ void initvars(void){
 
   demo_mode=0;
   update_demo=1;
-  menu_view_number=0;
   mxplot3dvars=MAXPLOT3DVARS;
 
   valindex=0;

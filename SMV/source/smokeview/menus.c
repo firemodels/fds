@@ -1326,10 +1326,34 @@ void OptionMenu(int value){
   }
 }
 
+/* ------------------ Get_Next_View_Label ------------------------ */
+
+void Get_Next_View_Label(char *label){
+  camera *ca;
+  int i;
+
+  for(i=1;;i++){
+    char view[256],*newview;
+
+    sprintf(view,"view %i",i);
+    newview=NULL;
+    for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
+      if(strcmp(view,ca->name)==0){
+        newview=ca->name;
+        break;
+      }
+    }
+    if(newview==NULL){
+      strcpy(label,view);
+      return;
+    }
+  }
+}
+
 /* ------------------ ResetMenu ------------------------ */
 
 void ResetMenu(int value){
-  char line[256];
+  char view_label[256];
 
   if(value==MENU_DUMMY)return;
   switch (value){
@@ -1349,9 +1373,8 @@ void ResetMenu(int value){
     updatetimes();
     break;
   case MENU_SAVEVIEW:
-    menu_view_number++;
-    sprintf(line,"view %i",menu_view_number);
-    add_list_view(line);
+    Get_Next_View_Label(view_label);
+    add_list_view(view_label);
     break;
   case MENU_STARTUPVIEW:
     if(selected_view==-999)ResetMenu(MENU_SAVEVIEW);

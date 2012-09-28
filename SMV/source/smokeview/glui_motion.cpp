@@ -1274,6 +1274,7 @@ extern "C" void add_list_view(char *label_in){
   cex=&camera_list_first;
   cex=cex->next;
   cex=cex->next;
+  cex=cex->next; // this just added - not sure if needed
   for(ca=cex;ca->next!=NULL;ca=ca->next){
     if(ca->view_id==ival)break;
   }
