@@ -2043,7 +2043,7 @@ This section describes a series of test cases designed to check the reaction rat
 \end{equation}
 More detailed discussion on the combustion routines can be found in the FDS Technical Reference Guide \cite{FDS_Tech_Guide}.
 
-\subsection{Mixing-Controlled Reactions (\texorpdfstring{\bf ReactionRate\_EDC\_}{ReactionRate\_EDC})}
+\subsection{Mixing-Controlled Reactions (\texorpdfstring{\bf reactionrate\_EDC}{reactionrate\_EDC})}
 
 The cases presented in the section are designed to examine species evolutions for reactions of varying complexity using the EDC model with infinitely fast chemistry. The first test case is a one-step methane reaction that occurs in a constant volume, adiabatic "reactor'' with a fixed mixing time of $\tau_{mix}=0.125$~s. Each computational cell contains a stoichiometric mixture of fuel and air. In this problem ``air" is defined to be 21\% oxygen and 79\% nitrogen by volume. 
 \begin{equation}\label{eq:1step_methane}
@@ -2052,8 +2052,8 @@ The cases presented in the section are designed to examine species evolutions fo
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_CH4_Spec}
-\caption[Species Evolution in a One-Step Methane EDC Reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_spec}
+\caption[Species evolution in a 1-step methane EDC reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
 \label{fig:EDC_1Step_meth_spec}
 \end{center}
 \end{figure}
@@ -2068,10 +2068,10 @@ PV = n\overline{R}T
 \end{equation}  
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_CH4_Temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_CH4_Pres}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_pres}
 \end{tabular*}
-\caption[Temperature and Pressure Evolution in a One-Step Methane EDC Reaction]{Time evolution of temperature and pressure for a one-step methane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\caption[Temperature and pressure evolution in a 1-step methane EDC reaction]{Time evolution of temperature and pressure for a one-step methane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
 \label{fig:EDC_1Step_meth_temppres}
 \end{figure}
 
@@ -2081,17 +2081,17 @@ Under the same conditions as the methane case, species, temperature, and pressur
 \end{equation}
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_C3H8_Spec}
-\caption[Species Evolution in a One-Step Propane EDC Reaction]{Time evolution of species mass fraction for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_spec}
+\caption[Species evolution in a 1-step propane EDC reaction]{Time evolution of species mass fraction for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
 \label{fig:EDC_1Step_prop_spec}
 \end{center}
 \end{figure}
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_C3H8_Temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_1Step_C3H8_Pres}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_pres}
 \end{tabular*}
-\caption[Temperature and Pressure Evolution in a One-Step Propane EDC Reaction]{Time evolution of temperature and pressure for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\caption[Temperature and pressure evolution in a 1-step propane EDC reaction]{Time evolution of temperature and pressure for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
 \label{fig:EDC_1Step_prop_temppres}
 \end{figure}
 The results for the propane case are shown in Figure \ref{fig:EDC_1Step_prop_spec} (species) and \ref{fig:EDC_1Step_prop_temppres} (temperature and pressure).
@@ -2100,18 +2100,18 @@ In the previous two examples each computational cell contained a stoichiometric 
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_1Step_Nonmix_Spec}
-\caption[Species Evolution in One-Step Methane EDC Reaction]{Time evolution of species mass fraction for a one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s. }
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_spec}
+\caption[Species evolution in 1-Step methane EDC reaction]{Time evolution of species mass fraction for a one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s. }
 \label{fig:EDC_meth_non_spec}
 \end{center}
 \end{figure}
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_1Step_Nonmix_Temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDC_1Step_Nonmix_Pres}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_pres}
 \end{tabular*}
-\caption[Temperature and Pressure Evolution in a One-Step Methane EDC Reaction]{Temperature (left) and pressure (right) evolution for a one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\caption[Temperature and pressure evolution in a 1-step Methane EDC reaction]{Temperature (left) and pressure (right) evolution for a one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
 \label{fig:EDC_meth_non_temppres}
 \end{figure}
 
@@ -2124,8 +2124,8 @@ Each cell in the model reaction is initialized with an oxygen rich mixture and t
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_Flim_2Step}
-\caption[Species Evolution in Two-Step Methane EDC Reaction]{Time evolution of species mass fraction for a two-step, fuel-limited EDC reaction with a fixed mixing time of $\tau_{mix}=0.1$~s.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_2step}
+\caption[Species evolution in 2-step methane EDC reaction]{Time evolution of species mass fraction for a two-step, fuel-limited EDC reaction with a fixed mixing time of $\tau_{mix}=0.1$~s.}
 \label{fig:EDC_2Step_fuel}
 \end{center}
 \end{figure}
@@ -2138,8 +2138,8 @@ The second test case has two competing, oxygen-limited reactions; a one-step met
 The species evolutions are compared to expected values in Figure \ref{fig:EDC_2Step_ox}.
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_EDC_O2lim_2Step}
-\caption[Species Evolution in Two Competing EDC Reactions]{Time evolution of species mass fraction for a two-step, oxygen-limited EDC reaction with a fixed mixing time of $\tau_{mix}=0.1$~s.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_O2lim_2step}
+\caption[Species evolution in two competing EDC reactions]{Time evolution of species mass fraction for a two-step, oxygen-limited EDC reaction with a fixed mixing time of $\tau_{mix}=0.1$~s.}
 \label{fig:EDC_2Step_ox}
 \end{center}
 \end{figure}
