@@ -30,5 +30,6 @@ $RUNSMV Species propane_flame_deposition
 $RUNSMV Sprinklers_and_Sprays cascade
 $RUNSMV Turbulence csmag_64
 $RUNSMV Turbulence dsmag_64
+$RUNSMV Turbulence ribbed_channel_80
 $RUNSMV Visualization objects_static
 $RUNSMV Visualization objects_dynamic
