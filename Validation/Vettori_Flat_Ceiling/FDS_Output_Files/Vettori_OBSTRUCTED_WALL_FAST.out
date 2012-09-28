@@ -1,12 +1,12 @@
 
  Fire Dynamics Simulator
 
- Compilation Date : Sun, 02 Sep 2012
+ Compilation Date : Mon, 24 Sep 2012
  Version          : 6.0.0 Serial
 
  OpenMP Disabled
 
- SVN Revision No. : 12440
+ SVN Revision No. : 12864
 
  Job TITLE        : Obstructed Beamed Ceiling, Wall Burner Location, Fast Growth Rate Fire, Experiments 19 and 20
  Job ID string    : Vettori_OBSTRUCTED_WALL_FAST
@@ -463,1595 +463,1559 @@
 
  Run Time Diagnostics
 
-       Time Step       1   September  5, 2012  01:22:05
+       Time Step       1   September 24, 2012  12:44:25
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.38E-02 on Mesh   1 at (  64  26  28)
+       Maximum Velocity Error:  0.28E-02 on Mesh   1 at (  64  11  31)
        ----------------------------------------------
-       CPU/step:     3.309 s, Total CPU:      3.31 s
+       CPU/step:     2.469 s, Total CPU:      2.47 s
        Time step:  0.10000 s, Total time:     0.10 s
        Max CFL number:  0.21E-01 at ( 38, 12, 14)
        Max divergence:  0.22E-01 at ( 52,  3,  4)
        Min divergence: -0.14E-04 at (  8, 53, 30)
-       Total Heat Release Rate:              0.275 kW
-       Radiation Loss to Boundaries:        -0.575 kW
+       Total Heat Release Rate:              0.291 kW
+       Radiation Loss to Boundaries:        -0.577 kW
  
-       Time Step       2   September  5, 2012  01:22:06
+       Time Step       2   September 24, 2012  12:44:25
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.22E-02 on Mesh   1 at (   5  36  29)
+       Maximum Velocity Error:  0.22E-02 on Mesh   1 at (  64  26  28)
        ----------------------------------------------
-       CPU/step:     1.035 s, Total CPU:      4.34 s
+       CPU/step:     0.814 s, Total CPU:      3.28 s
        Time step:  0.10000 s, Total time:     0.20 s
        Max CFL number:  0.21E-01 at ( 38, 12, 14)
-       Max divergence:  0.58E-01 at ( 54,  6,  4)
+       Max divergence:  0.98E-01 at ( 53,  5,  4)
        Min divergence: -0.14E-04 at ( 42, 50, 30)
-       Total Heat Release Rate:              0.605 kW
-       Radiation Loss to Boundaries:        -0.621 kW
+       Total Heat Release Rate:              1.269 kW
+       Radiation Loss to Boundaries:        -0.714 kW
  
-       Time Step       3   September  5, 2012  01:22:07
+       Time Step       3   September 24, 2012  12:44:26
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.18E-02 on Mesh   1 at (  64  26  28)
+       Maximum Velocity Error:  0.18E-02 on Mesh   1 at (   9  53  31)
        ----------------------------------------------
-       CPU/step:     0.918 s, Total CPU:      5.26 s
+       CPU/step:     0.767 s, Total CPU:      4.05 s
        Time step:  0.10000 s, Total time:     0.30 s
-       Max CFL number:  0.22E-01 at ( 53,  5,  4)
-       Max divergence:  0.12E+00 at ( 52,  3,  4)
-       Min divergence: -0.14E-04 at ( 42, 50, 30)
-       Total Heat Release Rate:              1.405 kW
-       Radiation Loss to Boundaries:        -0.733 kW
+       Max CFL number:  0.31E-01 at ( 53,  5,  4)
+       Max divergence:  0.18E+00 at ( 53,  5,  4)
+       Min divergence: -0.19E-01 at ( 48,  2,  4)
+       Total Heat Release Rate:              2.315 kW
+       Radiation Loss to Boundaries:        -0.860 kW
  
-       Time Step       4   September  5, 2012  01:22:09
+       Time Step       4   September 24, 2012  12:44:27
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.43E-02 on Mesh   1 at (  51   3   3)
+       Maximum Velocity Error:  0.14E-02 on Mesh   1 at (  38  13  31)
        ----------------------------------------------
-       CPU/step:     1.644 s, Total CPU:      6.91 s
+       CPU/step:     1.146 s, Total CPU:      5.20 s
        Time step:  0.10000 s, Total time:     0.40 s
-       Max CFL number:  0.33E-01 at ( 53,  5,  4)
-       Max divergence:  0.24E+00 at ( 54,  6,  4)
-       Min divergence: -0.98E-05 at (  4, 28, 30)
-       Total Heat Release Rate:              1.409 kW
-       Radiation Loss to Boundaries:        -0.553 kW
+       Max CFL number:  0.46E-01 at ( 53,  5,  4)
+       Max divergence:  0.27E+00 at ( 53,  5,  4)
+       Min divergence: -0.21E-01 at ( 52,  7,  4)
+       Total Heat Release Rate:              3.399 kW
+       Radiation Loss to Boundaries:        -0.828 kW
  
-       Time Step       5   September  5, 2012  01:22:10
+       Time Step       5   September 24, 2012  12:44:28
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.30E-01 on Mesh   1 at (  51   3   3)
+       Maximum Velocity Error:  0.12E-02 on Mesh   1 at (  38  13  31)
        ----------------------------------------------
-       CPU/step:     1.032 s, Total CPU:      7.94 s
+       CPU/step:     0.767 s, Total CPU:      5.96 s
        Time step:  0.10000 s, Total time:     0.50 s
-       Max CFL number:  0.46E-01 at ( 54,  6,  4)
-       Max divergence:  0.11E+01 at ( 51,  3,  4)
-       Min divergence: -0.52E-01 at ( 48,  2,  4)
-       Total Heat Release Rate:              7.869 kW
-       Radiation Loss to Boundaries:        -1.458 kW
+       Max CFL number:  0.64E-01 at ( 53,  5,  4)
+       Max divergence:  0.35E+00 at ( 53,  5,  4)
+       Min divergence: -0.22E-01 at ( 49,  7,  4)
+       Total Heat Release Rate:              4.505 kW
+       Radiation Loss to Boundaries:        -0.983 kW
  
-       Time Step       6   September  5, 2012  01:22:11
+       Time Step       6   September 24, 2012  12:44:29
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.41E-01 on Mesh   1 at (  51   3   3)
+       Maximum Velocity Error:  0.13E-02 on Mesh   1 at (  51   4   3)
        ----------------------------------------------
-       CPU/step:     1.050 s, Total CPU:      8.99 s
+       CPU/step:     0.814 s, Total CPU:      6.78 s
        Time step:  0.10000 s, Total time:     0.60 s
-       Max CFL number:  0.18E+00 at ( 51,  3,  4)
-       Max divergence:  0.14E+01 at ( 54,  6,  4)
-       Min divergence: -0.44E-01 at ( 55,  6,  4)
-       Total Heat Release Rate:              0.841 kW
-       Radiation Loss to Boundaries:        -0.476 kW
+       Max CFL number:  0.84E-01 at ( 54,  3,  4)
+       Max divergence:  0.44E+00 at ( 53,  5,  4)
+       Min divergence: -0.23E-01 at ( 50,  7,  4)
+       Total Heat Release Rate:              5.624 kW
+       Radiation Loss to Boundaries:        -1.139 kW
  
-       Time Step       7   September  5, 2012  01:22:12
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.26E-01 on Mesh   1 at (  49   1   3)
+       Time Step       7   September 24, 2012  12:44:30
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.16E-02 on Mesh   1 at (  52   5   3)
        ----------------------------------------------
-       CPU/step:     1.446 s, Total CPU:     10.43 s
+       CPU/step:     1.104 s, Total CPU:      7.88 s
        Time step:  0.10000 s, Total time:     0.70 s
-       Max CFL number:  0.21E+00 at ( 54,  6,  4)
-       Max divergence:  0.48E+01 at ( 52,  4,  4)
-       Min divergence: -0.41E+00 at ( 49,  6,  4)
-       Total Heat Release Rate:             38.144 kW
-       Radiation Loss to Boundaries:        -5.468 kW
+       Max CFL number:  0.12E+00 at ( 54,  6,  4)
+       Max divergence:  0.52E+00 at ( 54,  3,  4)
+       Min divergence: -0.21E-01 at ( 55,  5,  4)
+       Total Heat Release Rate:              6.750 kW
+       Radiation Loss to Boundaries:        -1.141 kW
  
-       Time Step       8   September  5, 2012  01:22:13
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.32E-01 on Mesh   1 at (  55   1   3)
+       Time Step       8   September 24, 2012  12:44:31
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.18E-02 on Mesh   1 at (  52   5   3)
        ----------------------------------------------
-       CPU/step:     0.994 s, Total CPU:     11.43 s
+       CPU/step:     0.815 s, Total CPU:      8.69 s
        Time step:  0.10000 s, Total time:     0.80 s
-       Max CFL number:  0.76E+00 at ( 52,  2,  4)
-       Max divergence:  0.26E+00 at ( 52,  6,  4)
-       Min divergence: -0.11E+00 at ( 51,  1,  4)
-       Total Heat Release Rate:              0.214 kW
-       Radiation Loss to Boundaries:        -0.190 kW
+       Max CFL number:  0.16E+00 at ( 54,  6,  4)
+       Max divergence:  0.60E+00 at ( 53,  5,  4)
+       Min divergence: -0.23E-01 at ( 54,  3,  5)
+       Total Heat Release Rate:              7.882 kW
+       Radiation Loss to Boundaries:        -1.301 kW
  
-       Time Step       9   September  5, 2012  01:22:15
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.32E-01 on Mesh   1 at (  55   1   3)
+       Time Step       9   September 24, 2012  12:44:32
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.26E-02 on Mesh   1 at (  52   5   3)
        ----------------------------------------------
-       CPU/step:     1.027 s, Total CPU:     12.45 s
+       CPU/step:     0.767 s, Total CPU:      9.46 s
        Time step:  0.10000 s, Total time:     0.90 s
-       Max CFL number:  0.31E+00 at ( 51,  0,  4)
-       Max divergence:  0.26E+01 at ( 53,  1,  4)
-       Min divergence: -0.35E-01 at ( 52,  6,  5)
-       Total Heat Release Rate:             28.714 kW
-       Radiation Loss to Boundaries:        -4.171 kW
+       Max CFL number:  0.22E+00 at ( 54,  6,  4)
+       Max divergence:  0.69E+00 at ( 53,  5,  4)
+       Min divergence: -0.23E-01 at ( 49,  1,  5)
+       Total Heat Release Rate:              9.019 kW
+       Radiation Loss to Boundaries:        -1.461 kW
  
-       Time Step      10   September  5, 2012  01:22:16
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.21E-01 on Mesh   1 at (  55   1   3)
+       Time Step      10   September 24, 2012  12:44:33
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.36E-02 on Mesh   1 at (  52   5   3)
        ----------------------------------------------
-       CPU/step:     1.586 s, Total CPU:     14.04 s
+       CPU/step:     1.151 s, Total CPU:     10.61 s
        Time step:  0.10000 s, Total time:     1.00 s
-       Max CFL number:  0.56E+00 at ( 52,  4,  4)
-       Max divergence:  0.19E+01 at ( 52,  4,  4)
-       Min divergence: -0.11E+00 at ( 53,  1,  4)
-       Total Heat Release Rate:              8.414 kW
-       Radiation Loss to Boundaries:        -1.204 kW
+       Max CFL number:  0.29E+00 at ( 49,  6,  4)
+       Max divergence:  0.78E+00 at ( 53,  5,  4)
+       Min divergence: -0.28E-01 at ( 49,  6,  5)
+       Total Heat Release Rate:             10.166 kW
+       Radiation Loss to Boundaries:        -1.490 kW
  
-       Time Step      20   September  5, 2012  01:22:30
+       Time Step      20   September 24, 2012  12:44:43
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.91E-02 on Mesh   1 at (  52   4   3)
+       ----------------------------------------------
+       CPU/step:     0.992 s, Total CPU:     20.53 s
+       Time step:  0.04624 s, Total time:     1.82 s
+       Max CFL number:  0.86E+00 at ( 51,  4,  5)
+       Max divergence:  0.31E+01 at ( 51,  4,  4)
+       Min divergence: -0.67E+00 at ( 51,  3,  6)
+       Total Heat Release Rate:             19.735 kW
+       Radiation Loss to Boundaries:        -2.668 kW
+ 
+       Time Step      30   September 24, 2012  12:44:53
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.15E-02 on Mesh   1 at (  52   1   3)
+       ----------------------------------------------
+       CPU/step:     0.991 s, Total CPU:     30.44 s
+       Time step:  0.02856 s, Total time:     2.18 s
+       Max CFL number:  0.97E+00 at ( 52,  2,  7)
+       Max divergence:  0.29E+01 at ( 52,  1,  4)
+       Min divergence: -0.74E+00 at ( 51,  2,  9)
+       Total Heat Release Rate:             21.797 kW
+       Radiation Loss to Boundaries:        -2.879 kW
+ 
+       Time Step      40   September 24, 2012  12:45:03
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  52   3   3)
+       Maximum Velocity Error:  0.30E-02 on Mesh   1 at (  51   3   3)
        ----------------------------------------------
-       CPU/step:     1.381 s, Total CPU:     27.85 s
-       Time step:  0.02938 s, Total time:     1.54 s
-       Max CFL number:  0.87E+00 at ( 52,  4,  8)
-       Max divergence:  0.61E+01 at ( 51,  3,  4)
-       Min divergence: -0.15E+01 at ( 52,  4,  8)
-       Total Heat Release Rate:             20.118 kW
-       Radiation Loss to Boundaries:        -2.696 kW
+       CPU/step:     0.960 s, Total CPU:     40.05 s
+       Time step:  0.02523 s, Total time:     2.43 s
+       Max CFL number:  0.89E+00 at ( 52,  2, 11)
+       Max divergence:  0.24E+01 at ( 51,  4,  4)
+       Min divergence: -0.60E+00 at ( 52,  1, 10)
+       Total Heat Release Rate:             25.615 kW
+       Radiation Loss to Boundaries:        -3.347 kW
  
-       Time Step      30   September  5, 2012  01:22:42
+       Time Step      50   September 24, 2012  12:45:12
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.23E-02 on Mesh   1 at (  52   1   3)
+       ----------------------------------------------
+       CPU/step:     0.965 s, Total CPU:     49.69 s
+       Time step:  0.02497 s, Total time:     2.68 s
+       Max CFL number:  0.95E+00 at ( 51,  3, 10)
+       Max divergence:  0.25E+01 at ( 50,  3,  4)
+       Min divergence: -0.13E+01 at ( 51,  2,  6)
+       Total Heat Release Rate:             27.357 kW
+       Radiation Loss to Boundaries:        -3.629 kW
+ 
+       Time Step      60   September 24, 2012  12:45:23
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.43E-02 on Mesh   1 at (  52   2   3)
+       Maximum Velocity Error:  0.54E-02 on Mesh   1 at (  52   1  31)
        ----------------------------------------------
-       CPU/step:     1.205 s, Total CPU:     39.89 s
-       Time step:  0.02305 s, Total time:     1.79 s
-       Max CFL number:  0.90E+00 at ( 51,  1, 10)
-       Max divergence:  0.24E+01 at ( 52,  3,  4)
-       Min divergence: -0.11E+01 at ( 52,  2, 12)
-       Total Heat Release Rate:             18.846 kW
-       Radiation Loss to Boundaries:        -2.444 kW
+       CPU/step:     1.105 s, Total CPU:      1.01 min
+       Time step:  0.02237 s, Total time:     2.91 s
+       Max CFL number:  0.94E+00 at ( 51,  2, 12)
+       Max divergence:  0.28E+01 at ( 50,  3,  4)
+       Min divergence: -0.13E+01 at ( 51,  1,  6)
+       Total Heat Release Rate:             31.783 kW
+       Radiation Loss to Boundaries:        -4.220 kW
  
-       Time Step      40   September  5, 2012  01:22:55
+       Time Step      70   September 24, 2012  12:45:35
        Pressure Iterations:      1
-       Maximum Velocity Error:  0.19E-02 on Mesh   1 at (  52   1  31)
+       Maximum Velocity Error:  0.89E-02 on Mesh   1 at (  52   1  31)
        ----------------------------------------------
-       CPU/step:     1.235 s, Total CPU:     52.24 s
-       Time step:  0.01907 s, Total time:     2.00 s
-       Max CFL number:  0.97E+00 at ( 52,  1, 12)
-       Max divergence:  0.24E+01 at ( 51,  1,  4)
-       Min divergence: -0.63E+00 at ( 53,  2, 14)
-       Total Heat Release Rate:             21.212 kW
-       Radiation Loss to Boundaries:        -2.744 kW
+       CPU/step:     1.148 s, Total CPU:      1.20 min
+       Time step:  0.01956 s, Total time:     3.11 s
+       Max CFL number:  0.92E+00 at ( 52,  2, 20)
+       Max divergence:  0.30E+01 at ( 51,  1,  4)
+       Min divergence: -0.20E+01 at ( 51,  1,  7)
+       Total Heat Release Rate:             33.999 kW
+       Radiation Loss to Boundaries:        -4.497 kW
  
-       Time Step      50   September  5, 2012  01:23:06
-       Pressure Iterations:      1
-       Maximum Velocity Error:  0.42E-02 on Mesh   1 at (  50   1  31)
-       ----------------------------------------------
-       CPU/step:     1.157 s, Total CPU:      1.06 min
-       Time step:  0.01907 s, Total time:     2.19 s
-       Max CFL number:  0.96E+00 at ( 52,  0, 16)
-       Max divergence:  0.23E+01 at ( 52,  4,  4)
-       Min divergence: -0.63E+00 at ( 51,  3,  6)
-       Total Heat Release Rate:             23.629 kW
-       Radiation Loss to Boundaries:        -3.086 kW
- 
-       Time Step      60   September  5, 2012  01:23:18
-       Pressure Iterations:      1
-       Maximum Velocity Error:  0.21E-01 on Mesh   1 at (  51   1  28)
-       ----------------------------------------------
-       CPU/step:     1.143 s, Total CPU:      1.25 min
-       Time step:  0.01907 s, Total time:     2.38 s
-       Max CFL number:  0.99E+00 at ( 52,  0, 21)
-       Max divergence:  0.24E+01 at ( 52,  3,  4)
-       Min divergence: -0.89E+00 at ( 51,  3,  9)
-       Total Heat Release Rate:             25.828 kW
-       Radiation Loss to Boundaries:        -3.406 kW
- 
-       Time Step      70   September  5, 2012  01:23:30
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  52   1  31)
-       ----------------------------------------------
-       CPU/step:     1.246 s, Total CPU:      1.46 min
-       Time step:  0.01907 s, Total time:     2.57 s
-       Max CFL number:  0.91E+00 at ( 52,  1, 26)
-       Max divergence:  0.24E+01 at ( 52,  3,  4)
-       Min divergence: -0.97E+00 at ( 51,  2,  9)
-       Total Heat Release Rate:             27.976 kW
-       Radiation Loss to Boundaries:        -3.692 kW
- 
-       Time Step      80   September  5, 2012  01:23:43
+       Time Step      80   September 24, 2012  12:45:47
        Pressure Iterations:      3
-       Maximum Velocity Error:  0.38E-01 on Mesh   1 at (  53   1  31)
+       Maximum Velocity Error:  0.89E-02 on Mesh   1 at (  52   2  31)
        ----------------------------------------------
-       CPU/step:     1.270 s, Total CPU:      1.67 min
-       Time step:  0.02097 s, Total time:     2.77 s
-       Max CFL number:  0.89E+00 at ( 51,  2, 24)
-       Max divergence:  0.26E+01 at ( 50,  2,  4)
-       Min divergence: -0.11E+01 at ( 51,  2, 10)
-       Total Heat Release Rate:             30.119 kW
-       Radiation Loss to Boundaries:        -3.992 kW
+       CPU/step:     1.166 s, Total CPU:      1.40 min
+       Time step:  0.01747 s, Total time:     3.30 s
+       Max CFL number:  0.88E+00 at ( 50,  1, 20)
+       Max divergence:  0.31E+01 at ( 51,  1,  4)
+       Min divergence: -0.16E+01 at ( 51,  1, 11)
+       Total Heat Release Rate:             35.944 kW
+       Radiation Loss to Boundaries:        -4.768 kW
  
-       Time Step      90   September  5, 2012  01:23:56
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  55   5  31)
+       Time Step      90   September 24, 2012  12:45:59
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  50   1  31)
        ----------------------------------------------
-       CPU/step:     1.244 s, Total CPU:      1.88 min
-       Time step:  0.02097 s, Total time:     2.98 s
-       Max CFL number:  0.95E+00 at ( 51,  1, 18)
-       Max divergence:  0.32E+01 at ( 51,  1,  4)
-       Min divergence: -0.99E+00 at ( 51,  3,  8)
-       Total Heat Release Rate:             32.447 kW
-       Radiation Loss to Boundaries:        -4.300 kW
+       CPU/step:     1.201 s, Total CPU:      1.60 min
+       Time step:  0.01747 s, Total time:     3.48 s
+       Max CFL number:  0.93E+00 at ( 49,  1, 23)
+       Max divergence:  0.30E+01 at ( 50,  4,  4)
+       Min divergence: -0.14E+01 at ( 51,  1, 15)
+       Total Heat Release Rate:             38.128 kW
+       Radiation Loss to Boundaries:        -5.059 kW
  
-       Time Step     100   September  5, 2012  01:24:09
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.47E-01 on Mesh   1 at (  55   9  31)
+       Time Step     100   September 24, 2012  12:46:14
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.94E-02 on Mesh   1 at (  47   1  31)
        ----------------------------------------------
-       CPU/step:     1.283 s, Total CPU:      2.09 min
-       Time step:  0.02097 s, Total time:     3.19 s
-       Max CFL number:  0.99E+00 at ( 52,  0, 23)
-       Max divergence:  0.39E+01 at ( 52,  1,  4)
-       Min divergence: -0.11E+01 at ( 52,  2,  6)
-       Total Heat Release Rate:             35.067 kW
-       Radiation Loss to Boundaries:        -4.620 kW
+       CPU/step:     1.370 s, Total CPU:      1.83 min
+       Time step:  0.01747 s, Total time:     3.65 s
+       Max CFL number:  0.87E+00 at ( 48,  1, 26)
+       Max divergence:  0.33E+01 at ( 50,  4,  4)
+       Min divergence: -0.17E+01 at ( 48,  1, 28)
+       Total Heat Release Rate:             40.314 kW
+       Radiation Loss to Boundaries:        -5.330 kW
  
-       Time Step     200   September  5, 2012  01:26:19
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.47E-01 on Mesh   1 at (  47  23  31)
+       Time Step     200   September 24, 2012  12:48:34
+       Pressure Iterations:      5
+       Maximum Velocity Error:  0.88E-02 on Mesh   1 at (  51   4  28)
        ----------------------------------------------
-       CPU/step:     1.268 s, Total CPU:      4.21 min
-       Time step:  0.01553 s, Total time:     4.93 s
-       Max CFL number:  0.83E+00 at ( 50,  3, 13)
-       Max divergence:  0.54E+01 at ( 52,  2,  4)
-       Min divergence: -0.18E+01 at ( 50,  3, 14)
-       Total Heat Release Rate:             56.153 kW
-       Radiation Loss to Boundaries:        -7.550 kW
+       CPU/step:     1.320 s, Total CPU:      4.03 min
+       Time step:  0.01569 s, Total time:     5.34 s
+       Max CFL number:  0.90E+00 at ( 52,  2, 21)
+       Max divergence:  0.56E+01 at ( 51,  3,  4)
+       Min divergence: -0.18E+01 at ( 52,  1,  8)
+       Total Heat Release Rate:             59.537 kW
+       Radiation Loss to Boundaries:        -8.022 kW
  
-       Time Step     300   September  5, 2012  01:28:28
+       Time Step     300   September 24, 2012  12:50:45
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.69E-02 on Mesh   1 at (  54   2  31)
+       ----------------------------------------------
+       CPU/step:     1.258 s, Total CPU:      6.12 min
+       Time step:  0.01305 s, Total time:     6.81 s
+       Max CFL number:  0.86E+00 at ( 52,  3, 25)
+       Max divergence:  0.45E+01 at ( 50,  5,  4)
+       Min divergence: -0.20E+01 at ( 51,  3, 19)
+       Total Heat Release Rate:             60.098 kW
+       Radiation Loss to Boundaries:        -8.166 kW
+ 
+       Time Step     400   September 24, 2012  12:52:42
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.94E-02 on Mesh   1 at (  52   4  31)
+       ----------------------------------------------
+       CPU/step:     1.115 s, Total CPU:      7.98 min
+       Time step:  0.01508 s, Total time:     8.28 s
+       Max CFL number:  0.87E+00 at ( 52,  3, 17)
+       Max divergence:  0.11E+02 at ( 51,  1,  4)
+       Min divergence: -0.40E+01 at ( 52,  1,  9)
+       Total Heat Release Rate:             79.239 kW
+       Radiation Loss to Boundaries:       -10.686 kW
+ 
+       Time Step     500   September 24, 2012  12:54:41
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  47   1  31)
+       ----------------------------------------------
+       CPU/step:     1.143 s, Total CPU:      9.89 min
+       Time step:  0.01520 s, Total time:     9.63 s
+       Max CFL number:  0.92E+00 at ( 52,  3, 16)
+       Max divergence:  0.42E+01 at ( 52,  2,  4)
+       Min divergence: -0.20E+01 at ( 52,  2,  9)
+       Total Heat Release Rate:             59.519 kW
+       Radiation Loss to Boundaries:        -8.337 kW
+ 
+       Time Step     600   September 24, 2012  12:56:37
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.75E-02 on Mesh   1 at (  52  20  31)
+       ----------------------------------------------
+       CPU/step:     1.106 s, Total CPU:     11.73 min
+       Time step:  0.01332 s, Total time:    11.02 s
+       Max CFL number:  0.83E+00 at ( 51,  2, 25)
+       Max divergence:  0.73E+01 at ( 52,  4,  4)
+       Min divergence: -0.23E+01 at ( 52,  4,  9)
+       Total Heat Release Rate:             78.329 kW
+       Radiation Loss to Boundaries:       -11.123 kW
+ 
+       Time Step     700   September 24, 2012  12:58:52
        Pressure Iterations:      3
-       Maximum Velocity Error:  0.34E-01 on Mesh   1 at (  52   5  31)
+       Maximum Velocity Error:  0.94E-02 on Mesh   1 at (  54   2  31)
        ----------------------------------------------
-       CPU/step:     1.263 s, Total CPU:      6.31 min
-       Time step:  0.01538 s, Total time:     6.29 s
-       Max CFL number:  0.95E+00 at ( 51,  1,  9)
-       Max divergence:  0.48E+01 at ( 51,  2,  4)
-       Min divergence: -0.21E+01 at ( 52,  2,  7)
-       Total Heat Release Rate:             57.235 kW
-       Radiation Loss to Boundaries:        -7.815 kW
+       CPU/step:     1.283 s, Total CPU:     13.87 min
+       Time step:  0.01404 s, Total time:    12.31 s
+       Max CFL number:  0.82E+00 at ( 51,  4,  8)
+       Max divergence:  0.83E+01 at ( 51,  4,  4)
+       Min divergence: -0.29E+01 at ( 51,  2, 11)
+       Total Heat Release Rate:            101.049 kW
+       Radiation Loss to Boundaries:       -13.991 kW
  
-       Time Step     400   September  5, 2012  01:30:38
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.31E-01 on Mesh   1 at (  47  25  31)
+       Time Step     800   September 24, 2012  13:00:52
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.88E-02 on Mesh   1 at (  52   5  31)
        ----------------------------------------------
-       CPU/step:     1.278 s, Total CPU:      8.44 min
-       Time step:  0.01571 s, Total time:     7.65 s
-       Max CFL number:  0.91E+00 at ( 52,  1,  9)
-       Max divergence:  0.70E+01 at ( 52,  3,  4)
-       Min divergence: -0.39E+01 at ( 53,  2, 12)
-       Total Heat Release Rate:             73.923 kW
-       Radiation Loss to Boundaries:        -9.974 kW
+       CPU/step:     1.144 s, Total CPU:     15.78 min
+       Time step:  0.01035 s, Total time:    13.56 s
+       Max CFL number:  0.82E+00 at ( 54,  2, 23)
+       Max divergence:  0.53E+01 at ( 54,  5,  4)
+       Min divergence: -0.30E+01 at ( 54,  1, 23)
+       Total Heat Release Rate:             81.055 kW
+       Radiation Loss to Boundaries:       -11.755 kW
  
-       Time Step     500   September  5, 2012  01:32:48
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  55  13  31)
+       Time Step     900   September 24, 2012  13:02:54
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.88E-02 on Mesh   1 at (  50   7  31)
        ----------------------------------------------
-       CPU/step:     1.270 s, Total CPU:     10.56 min
-       Time step:  0.01354 s, Total time:     9.03 s
-       Max CFL number:  0.87E+00 at ( 51,  0, 22)
-       Max divergence:  0.54E+01 at ( 51,  2,  4)
-       Min divergence: -0.27E+01 at ( 51,  3, 10)
-       Total Heat Release Rate:             68.909 kW
-       Radiation Loss to Boundaries:        -9.439 kW
+       CPU/step:     1.164 s, Total CPU:     17.72 min
+       Time step:  0.01480 s, Total time:    14.82 s
+       Max CFL number:  0.97E+00 at ( 51,  2, 14)
+       Max divergence:  0.57E+01 at ( 52,  2,  8)
+       Min divergence: -0.24E+01 at ( 51,  2, 13)
+       Total Heat Release Rate:            103.219 kW
+       Radiation Loss to Boundaries:       -14.894 kW
  
-       Time Step     600   September  5, 2012  01:35:00
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.32E-01 on Mesh   1 at (  48   2  31)
+       Time Step    1000   September 24, 2012  13:05:14
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.63E-02 on Mesh   1 at (  47  11  31)
        ----------------------------------------------
-       CPU/step:     1.285 s, Total CPU:     12.70 min
-       Time step:  0.01501 s, Total time:    10.39 s
-       Max CFL number:  0.91E+00 at ( 52,  3, 13)
-       Max divergence:  0.76E+01 at ( 53,  5,  4)
-       Min divergence: -0.18E+01 at ( 52,  1,  5)
-       Total Heat Release Rate:             70.333 kW
-       Radiation Loss to Boundaries:        -9.902 kW
+       CPU/step:     1.322 s, Total CPU:     19.92 min
+       Time step:  0.00957 s, Total time:    16.07 s
+       Max CFL number:  0.92E+00 at ( 51,  3, 16)
+       Max divergence:  0.72E+01 at ( 51,  5,  4)
+       Min divergence: -0.31E+01 at ( 51,  3, 16)
+       Total Heat Release Rate:            122.964 kW
+       Radiation Loss to Boundaries:       -17.271 kW
  
-       Time Step     700   September  5, 2012  01:37:14
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.25E-01 on Mesh   1 at (  54  13  31)
+       Time Step    1100   September 24, 2012  13:07:31
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.38E-02 on Mesh   1 at (  50   1  31)
        ----------------------------------------------
-       CPU/step:     1.306 s, Total CPU:     14.88 min
-       Time step:  0.01132 s, Total time:    11.62 s
-       Max CFL number:  0.90E+00 at ( 51,  1, 10)
-       Max divergence:  0.97E+01 at ( 51,  1,  4)
-       Min divergence: -0.26E+01 at ( 51,  4,  4)
-       Total Heat Release Rate:            105.746 kW
-       Radiation Loss to Boundaries:       -14.619 kW
+       CPU/step:     1.294 s, Total CPU:     22.08 min
+       Time step:  0.01323 s, Total time:    17.22 s
+       Max CFL number:  0.95E+00 at ( 52,  3, 13)
+       Max divergence:  0.85E+01 at ( 53,  4,  4)
+       Min divergence: -0.28E+01 at ( 52,  3, 15)
+       Total Heat Release Rate:            146.045 kW
+       Radiation Loss to Boundaries:       -20.858 kW
  
-       Time Step     800   September  5, 2012  01:39:28
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.29E-01 on Mesh   1 at (  50  15  31)
+       Time Step    1200   September 24, 2012  13:09:31
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.80E-02 on Mesh   1 at (  52   4   3)
        ----------------------------------------------
-       CPU/step:     1.308 s, Total CPU:     17.06 min
-       Time step:  0.00812 s, Total time:    12.66 s
-       Max CFL number:  0.90E+00 at ( 51,  0, 26)
-       Max divergence:  0.12E+02 at ( 50,  1,  4)
-       Min divergence: -0.24E+01 at ( 51,  2,  4)
-       Total Heat Release Rate:            105.810 kW
-       Radiation Loss to Boundaries:       -14.659 kW
+       CPU/step:     1.146 s, Total CPU:     23.98 min
+       Time step:  0.01254 s, Total time:    18.45 s
+       Max CFL number:  0.86E+00 at ( 52,  2, 16)
+       Max divergence:  0.75E+01 at ( 50,  2,  4)
+       Min divergence: -0.41E+01 at ( 51,  1, 12)
+       Total Heat Release Rate:            133.869 kW
+       Radiation Loss to Boundaries:       -19.467 kW
  
-       Time Step     900   September  5, 2012  01:41:42
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.24E-01 on Mesh   1 at (  43   5  31)
+       Time Step    1300   September 24, 2012  13:11:41
+       Pressure Iterations:      5
+       Maximum Velocity Error:  0.83E-02 on Mesh   1 at (  51   3  28)
        ----------------------------------------------
-       CPU/step:     1.302 s, Total CPU:     19.23 min
-       Time step:  0.01365 s, Total time:    13.88 s
-       Max CFL number:  0.87E+00 at ( 54,  2, 22)
+       CPU/step:     1.225 s, Total CPU:     26.03 min
+       Time step:  0.01023 s, Total time:    19.54 s
+       Max CFL number:  0.86E+00 at ( 52,  3, 20)
+       Max divergence:  0.73E+01 at ( 51,  1,  5)
+       Min divergence: -0.31E+01 at ( 52,  3, 14)
+       Total Heat Release Rate:            126.519 kW
+       Radiation Loss to Boundaries:       -18.652 kW
+ 
+       Time Step    1400   September 24, 2012  13:13:58
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.85E-02 on Mesh   1 at (  50   4  31)
+       ----------------------------------------------
+       CPU/step:     1.292 s, Total CPU:     28.18 min
+       Time step:  0.01108 s, Total time:    20.64 s
+       Max CFL number:  0.93E+00 at ( 52,  3, 17)
+       Max divergence:  0.92E+01 at ( 51,  2,  4)
+       Min divergence: -0.25E+01 at ( 52,  3, 10)
+       Total Heat Release Rate:            120.318 kW
+       Radiation Loss to Boundaries:       -18.111 kW
+ 
+       Time Step    1500   September 24, 2012  13:15:56
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.93E-02 on Mesh   1 at (  50   1  31)
+       ----------------------------------------------
+       CPU/step:     1.131 s, Total CPU:     30.07 min
+       Time step:  0.01046 s, Total time:    21.71 s
+       Max CFL number:  0.87E+00 at ( 51,  2, 22)
        Max divergence:  0.11E+02 at ( 50,  1,  4)
-       Min divergence: -0.24E+01 at ( 51,  2,  4)
-       Total Heat Release Rate:             83.688 kW
-       Radiation Loss to Boundaries:       -12.179 kW
+       Min divergence: -0.36E+01 at ( 52,  2, 17)
+       Total Heat Release Rate:            131.633 kW
+       Radiation Loss to Boundaries:       -19.904 kW
  
-       Time Step    1000   September  5, 2012  01:43:56
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.31E-01 on Mesh   1 at (  50  13  31)
+       Time Step    1600   September 24, 2012  13:18:05
+       Pressure Iterations:      5
+       Maximum Velocity Error:  0.82E-02 on Mesh   1 at (  47   6  31)
        ----------------------------------------------
-       CPU/step:     1.305 s, Total CPU:     21.40 min
-       Time step:  0.01266 s, Total time:    15.02 s
-       Max CFL number:  0.89E+00 at ( 49,  1, 26)
-       Max divergence:  0.10E+02 at ( 51,  4,  4)
-       Min divergence: -0.22E+01 at ( 51,  3, 10)
-       Total Heat Release Rate:             84.728 kW
-       Radiation Loss to Boundaries:       -12.282 kW
+       CPU/step:     1.212 s, Total CPU:     32.09 min
+       Time step:  0.01040 s, Total time:    22.76 s
+       Max CFL number:  0.89E+00 at ( 53,  3, 22)
+       Max divergence:  0.79E+01 at ( 50,  2,  4)
+       Min divergence: -0.34E+01 at ( 53,  3, 23)
+       Total Heat Release Rate:            108.778 kW
+       Radiation Loss to Boundaries:       -16.958 kW
  
-       Time Step    1100   September  5, 2012  01:46:12
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  52  16  31)
+       Time Step    1700   September 24, 2012  13:20:01
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.82E-02 on Mesh   1 at (  47   6  31)
        ----------------------------------------------
-       CPU/step:     1.318 s, Total CPU:     23.60 min
-       Time step:  0.01256 s, Total time:    16.21 s
-       Max CFL number:  0.97E+00 at ( 51,  0, 15)
-       Max divergence:  0.10E+02 at ( 52,  3,  4)
-       Min divergence: -0.38E+01 at ( 51,  2, 14)
-       Total Heat Release Rate:            135.062 kW
-       Radiation Loss to Boundaries:       -19.247 kW
+       CPU/step:     1.114 s, Total CPU:     33.94 min
+       Time step:  0.01019 s, Total time:    23.76 s
+       Max CFL number:  0.91E+00 at ( 50,  2, 22)
+       Max divergence:  0.99E+01 at ( 51,  4,  4)
+       Min divergence: -0.27E+01 at ( 51,  1,  5)
+       Total Heat Release Rate:            125.171 kW
+       Radiation Loss to Boundaries:       -19.916 kW
  
-       Time Step    1200   September  5, 2012  01:48:26
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.40E-01 on Mesh   1 at (  53  14  31)
+       Time Step    1800   September 24, 2012  13:22:19
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.70E-02 on Mesh   1 at (  50   1   3)
        ----------------------------------------------
-       CPU/step:     1.300 s, Total CPU:     25.76 min
-       Time step:  0.01371 s, Total time:    17.30 s
-       Max CFL number:  0.98E+00 at ( 52,  2, 18)
-       Max divergence:  0.72E+01 at ( 53,  2,  4)
-       Min divergence: -0.43E+01 at ( 52,  2, 19)
-       Total Heat Release Rate:            101.177 kW
-       Radiation Loss to Boundaries:       -15.167 kW
- 
-       Time Step    1300   September  5, 2012  01:50:41
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.47E-01 on Mesh   1 at (  52   1   3)
-       ----------------------------------------------
-       CPU/step:     1.321 s, Total CPU:     27.97 min
-       Time step:  0.01066 s, Total time:    18.29 s
-       Max CFL number:  0.79E+00 at ( 52,  3, 22)
-       Max divergence:  0.10E+02 at ( 52,  3,  4)
-       Min divergence: -0.21E+01 at ( 52,  2, 20)
-       Total Heat Release Rate:            112.491 kW
-       Radiation Loss to Boundaries:       -16.239 kW
- 
-       Time Step    1400   September  5, 2012  01:52:54
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.48E-01 on Mesh   1 at (  52   1   3)
-       ----------------------------------------------
-       CPU/step:     1.293 s, Total CPU:     30.12 min
-       Time step:  0.01069 s, Total time:    19.42 s
-       Max CFL number:  0.90E+00 at ( 51,  1, 14)
-       Max divergence:  0.11E+02 at ( 52,  1,  4)
-       Min divergence: -0.32E+01 at ( 52,  2, 11)
-       Total Heat Release Rate:            138.727 kW
-       Radiation Loss to Boundaries:       -19.777 kW
- 
-       Time Step    1500   September  5, 2012  01:55:10
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.36E-01 on Mesh   1 at (  53  10  31)
-       ----------------------------------------------
-       CPU/step:     1.320 s, Total CPU:     32.32 min
-       Time step:  0.00990 s, Total time:    20.59 s
-       Max CFL number:  0.88E+00 at ( 54,  1, 13)
-       Max divergence:  0.63E+01 at ( 50,  1,  4)
-       Min divergence: -0.32E+01 at ( 51,  3,  9)
-       Total Heat Release Rate:            113.130 kW
-       Radiation Loss to Boundaries:       -16.780 kW
- 
-       Time Step    1600   September  5, 2012  01:57:25
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  52   7  31)
-       ----------------------------------------------
-       CPU/step:     1.314 s, Total CPU:     34.51 min
-       Time step:  0.01181 s, Total time:    21.59 s
-       Max CFL number:  0.91E+00 at ( 51,  2, 17)
-       Max divergence:  0.85E+01 at ( 50,  1,  6)
-       Min divergence: -0.30E+01 at ( 51,  3,  4)
-       Total Heat Release Rate:            117.751 kW
-       Radiation Loss to Boundaries:       -18.430 kW
- 
-       Time Step    1700   September  5, 2012  01:59:41
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  52  10  31)
-       ----------------------------------------------
-       CPU/step:     1.321 s, Total CPU:     36.71 min
-       Time step:  0.01011 s, Total time:    22.56 s
-       Max CFL number:  0.84E+00 at ( 53,  0, 26)
-       Max divergence:  0.11E+02 at ( 50,  2,  4)
-       Min divergence: -0.27E+01 at ( 51,  2,  8)
-       Total Heat Release Rate:            132.250 kW
-       Radiation Loss to Boundaries:       -20.073 kW
- 
-       Time Step    1800   September  5, 2012  02:01:55
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.39E-01 on Mesh   1 at (  53  10  31)
-       ----------------------------------------------
-       CPU/step:     1.312 s, Total CPU:     38.90 min
-       Time step:  0.00833 s, Total time:    23.57 s
-       Max CFL number:  0.92E+00 at ( 54,  1, 20)
-       Max divergence:  0.96E+01 at ( 51,  3,  4)
-       Min divergence: -0.26E+01 at ( 54,  1, 21)
-       Total Heat Release Rate:            152.833 kW
-       Radiation Loss to Boundaries:       -22.353 kW
- 
-       Time Step    1900   September  5, 2012  02:04:10
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.34E-01 on Mesh   1 at (  52  14  31)
-       ----------------------------------------------
-       CPU/step:     1.318 s, Total CPU:     41.09 min
-       Time step:  0.00813 s, Total time:    24.59 s
-       Max CFL number:  0.88E+00 at ( 53,  0, 21)
-       Max divergence:  0.11E+02 at ( 52,  1,  4)
-       Min divergence: -0.35E+01 at ( 53,  4,  9)
-       Total Heat Release Rate:            191.890 kW
-       Radiation Loss to Boundaries:       -27.444 kW
- 
-       Time Step    2000   September  5, 2012  02:06:28
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.36E-01 on Mesh   1 at (  52  26  31)
-       ----------------------------------------------
-       CPU/step:     1.336 s, Total CPU:     43.32 min
-       Time step:  0.00757 s, Total time:    25.58 s
-       Max CFL number:  0.88E+00 at ( 54,  0, 21)
-       Max divergence:  0.89E+01 at ( 50,  4,  5)
-       Min divergence: -0.34E+01 at ( 54,  1, 23)
-       Total Heat Release Rate:            180.608 kW
-       Radiation Loss to Boundaries:       -26.430 kW
- 
-       Time Step    2100   September  5, 2012  02:08:43
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.33E-01 on Mesh   1 at (  52   3  31)
-       ----------------------------------------------
-       CPU/step:     1.311 s, Total CPU:     45.51 min
-       Time step:  0.00959 s, Total time:    26.52 s
-       Max CFL number:  0.85E+00 at ( 50,  1, 14)
-       Max divergence:  0.97E+01 at ( 51,  4,  4)
-       Min divergence: -0.38E+01 at ( 49,  2, 17)
-       Total Heat Release Rate:            177.947 kW
-       Radiation Loss to Boundaries:       -26.566 kW
- 
-       Time Step    2200   September  5, 2012  02:11:01
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.30E-01 on Mesh   1 at (  53   1  31)
-       ----------------------------------------------
-       CPU/step:     1.335 s, Total CPU:     47.73 min
-       Time step:  0.00753 s, Total time:    27.42 s
-       Max CFL number:  0.84E+00 at ( 54,  0, 25)
+       CPU/step:     1.300 s, Total CPU:     36.11 min
+       Time step:  0.01016 s, Total time:    24.86 s
+       Max CFL number:  0.82E+00 at ( 50,  2, 20)
        Max divergence:  0.11E+02 at ( 50,  1,  4)
-       Min divergence: -0.40E+01 at ( 51,  3,  5)
-       Total Heat Release Rate:            162.187 kW
-       Radiation Loss to Boundaries:       -24.851 kW
+       Min divergence: -0.37E+01 at ( 51,  2, 16)
+       Total Heat Release Rate:            145.684 kW
+       Radiation Loss to Boundaries:       -22.219 kW
  
-       Time Step    2300   September  5, 2012  02:13:18
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  52   4  31)
+       Time Step    1900   September 24, 2012  13:24:19
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.88E-02 on Mesh   1 at (  55   2  31)
        ----------------------------------------------
-       CPU/step:     1.325 s, Total CPU:     49.94 min
-       Time step:  0.00871 s, Total time:    28.38 s
-       Max CFL number:  0.81E+00 at ( 52,  3, 23)
-       Max divergence:  0.95E+01 at ( 49,  5,  4)
-       Min divergence: -0.40E+01 at ( 51,  2, 10)
-       Total Heat Release Rate:            142.393 kW
-       Radiation Loss to Boundaries:       -22.108 kW
+       CPU/step:     1.139 s, Total CPU:     38.01 min
+       Time step:  0.00972 s, Total time:    25.84 s
+       Max CFL number:  0.90E+00 at ( 51,  1, 21)
+       Max divergence:  0.97E+01 at ( 53,  6,  4)
+       Min divergence: -0.35E+01 at ( 52,  1, 11)
+       Total Heat Release Rate:            149.196 kW
+       Radiation Loss to Boundaries:       -23.289 kW
  
-       Time Step    2400   September  5, 2012  02:15:33
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  47   1  31)
-       ----------------------------------------------
-       CPU/step:     1.317 s, Total CPU:     52.14 min
-       Time step:  0.01128 s, Total time:    29.34 s
-       Max CFL number:  0.92E+00 at ( 48,  1, 28)
-       Max divergence:  0.92E+01 at ( 53,  5,  4)
-       Min divergence: -0.30E+01 at ( 50,  2, 10)
-       Total Heat Release Rate:            150.633 kW
-       Radiation Loss to Boundaries:       -23.733 kW
- 
-       Time Step    2500   September  5, 2012  02:17:53
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.37E-01 on Mesh   1 at (  50   1  31)
-       ----------------------------------------------
-       CPU/step:     1.351 s, Total CPU:     54.39 min
-       Time step:  0.00758 s, Total time:    30.26 s
-       Max CFL number:  0.81E+00 at ( 51,  1, 24)
-       Max divergence:  0.81E+01 at ( 54,  4,  4)
-       Min divergence: -0.38E+01 at ( 51,  2, 14)
-       Total Heat Release Rate:            154.991 kW
-       Radiation Loss to Boundaries:       -24.541 kW
- 
-       Time Step    2600   September  5, 2012  02:20:13
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.29E-01 on Mesh   1 at (  52   9  31)
-       ----------------------------------------------
-       CPU/step:     1.354 s, Total CPU:     56.64 min
-       Time step:  0.01002 s, Total time:    31.12 s
-       Max CFL number:  0.87E+00 at ( 50,  4, 17)
-       Max divergence:  0.75E+01 at ( 54,  3,  4)
-       Min divergence: -0.46E+01 at ( 51,  4, 21)
-       Total Heat Release Rate:            124.606 kW
-       Radiation Loss to Boundaries:       -21.397 kW
- 
-       Time Step    2700   September  5, 2012  02:22:27
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.37E-01 on Mesh   1 at (  54   1  31)
-       ----------------------------------------------
-       CPU/step:     1.307 s, Total CPU:     58.82 min
-       Time step:  0.01157 s, Total time:    32.09 s
-       Max CFL number:  0.95E+00 at ( 52,  2, 15)
-       Max divergence:  0.11E+02 at ( 50,  3,  4)
-       Min divergence: -0.34E+01 at ( 51,  3,  5)
-       Total Heat Release Rate:            176.117 kW
-       Radiation Loss to Boundaries:       -27.875 kW
- 
-       Time Step    2800   September  5, 2012  02:24:41
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.29E-01 on Mesh   1 at (  47  12  31)
-       ----------------------------------------------
-       CPU/step:     1.307 s, Total CPU:      1.02 hr
-       Time step:  0.00883 s, Total time:    33.08 s
-       Max CFL number:  0.84E+00 at ( 52,  0, 23)
-       Max divergence:  0.12E+02 at ( 54,  4,  4)
-       Min divergence: -0.33E+01 at ( 50,  4,  4)
-       Total Heat Release Rate:            204.723 kW
-       Radiation Loss to Boundaries:       -31.135 kW
- 
-       Time Step    2900   September  5, 2012  02:26:55
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.36E-01 on Mesh   1 at (  47   1  31)
-       ----------------------------------------------
-       CPU/step:     1.305 s, Total CPU:      1.05 hr
-       Time step:  0.00737 s, Total time:    33.87 s
-       Max CFL number:  0.77E+00 at ( 51,  0, 26)
-       Max divergence:  0.79E+01 at ( 51,  4,  5)
-       Min divergence: -0.38E+01 at ( 51,  2, 19)
-       Total Heat Release Rate:            159.902 kW
-       Radiation Loss to Boundaries:       -25.772 kW
- 
-       Time Step    3000   September  5, 2012  02:29:13
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  55   7  31)
-       ----------------------------------------------
-       CPU/step:     1.337 s, Total CPU:      1.09 hr
-       Time step:  0.00881 s, Total time:    34.88 s
-       Max CFL number:  0.90E+00 at ( 53,  2, 14)
-       Max divergence:  0.10E+02 at ( 50,  2,  4)
-       Min divergence: -0.42E+01 at ( 51,  1,  5)
-       Total Heat Release Rate:            194.336 kW
-       Radiation Loss to Boundaries:       -30.163 kW
- 
-       Time Step    3100   September  5, 2012  02:31:29
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.29E-01 on Mesh   1 at (  50  34  31)
-       ----------------------------------------------
-       CPU/step:     1.314 s, Total CPU:      1.13 hr
-       Time step:  0.01046 s, Total time:    35.90 s
-       Max CFL number:  0.82E+00 at ( 51,  3, 13)
-       Max divergence:  0.76E+01 at ( 51,  4,  6)
-       Min divergence: -0.35E+01 at ( 51,  3, 16)
-       Total Heat Release Rate:            210.477 kW
-       Radiation Loss to Boundaries:       -32.783 kW
- 
-       Time Step    3200   September  5, 2012  02:33:46
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.38E-01 on Mesh   1 at (  54   2  31)
-       ----------------------------------------------
-       CPU/step:     1.327 s, Total CPU:      1.16 hr
-       Time step:  0.00889 s, Total time:    36.85 s
-       Max CFL number:  0.92E+00 at ( 52,  3, 18)
-       Max divergence:  0.10E+02 at ( 52,  4,  5)
-       Min divergence: -0.37E+01 at ( 54,  2, 29)
-       Total Heat Release Rate:            214.776 kW
-       Radiation Loss to Boundaries:       -33.243 kW
- 
-       Time Step    3300   September  5, 2012  02:36:01
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.38E-01 on Mesh   1 at (  55   6  31)
-       ----------------------------------------------
-       CPU/step:     1.312 s, Total CPU:      1.20 hr
-       Time step:  0.00949 s, Total time:    37.79 s
-       Max CFL number:  0.92E+00 at ( 52,  2, 21)
-       Max divergence:  0.83E+01 at ( 53,  5,  4)
-       Min divergence: -0.32E+01 at ( 49,  2, 26)
-       Total Heat Release Rate:            152.465 kW
-       Radiation Loss to Boundaries:       -25.952 kW
- 
-       Time Step    3400   September  5, 2012  02:38:18
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  50   2  31)
-       ----------------------------------------------
-       CPU/step:     1.333 s, Total CPU:      1.24 hr
-       Time step:  0.00770 s, Total time:    38.78 s
-       Max CFL number:  0.85E+00 at ( 51,  0, 23)
-       Max divergence:  0.10E+02 at ( 53,  1,  5)
-       Min divergence: -0.25E+01 at ( 51,  4, 16)
-       Total Heat Release Rate:            184.837 kW
-       Radiation Loss to Boundaries:       -30.954 kW
- 
-       Time Step    3500   September  5, 2012  02:40:35
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  52   2  31)
-       ----------------------------------------------
-       CPU/step:     1.325 s, Total CPU:      1.27 hr
-       Time step:  0.00867 s, Total time:    39.66 s
-       Max CFL number:  0.79E+00 at ( 52,  2, 20)
-       Max divergence:  0.86E+01 at ( 50,  4,  4)
-       Min divergence: -0.36E+01 at ( 50,  2, 12)
-       Total Heat Release Rate:            204.198 kW
-       Radiation Loss to Boundaries:       -33.607 kW
- 
-       Time Step    3600   September  5, 2012  02:42:54
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.47E-01 on Mesh   1 at (  50   8  31)
-       ----------------------------------------------
-       CPU/step:     1.347 s, Total CPU:      1.31 hr
-       Time step:  0.00998 s, Total time:    40.59 s
-       Max CFL number:  0.89E+00 at ( 52,  2, 17)
-       Max divergence:  0.98E+01 at ( 50,  1,  6)
-       Min divergence: -0.36E+01 at ( 50,  2, 12)
-       Total Heat Release Rate:            163.725 kW
-       Radiation Loss to Boundaries:       -29.383 kW
- 
-       Time Step    3700   September  5, 2012  02:45:17
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.40E-01 on Mesh   1 at (  54  20  31)
-       ----------------------------------------------
-       CPU/step:     1.375 s, Total CPU:      1.35 hr
-       Time step:  0.00937 s, Total time:    41.53 s
-       Max CFL number:  0.89E+00 at ( 50,  2, 19)
-       Max divergence:  0.12E+02 at ( 49,  3,  4)
-       Min divergence: -0.40E+01 at ( 51,  1,  4)
-       Total Heat Release Rate:            201.598 kW
-       Radiation Loss to Boundaries:       -33.143 kW
- 
-       Time Step    3800   September  5, 2012  02:47:36
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  46   1  31)
-       ----------------------------------------------
-       CPU/step:     1.345 s, Total CPU:      1.39 hr
-       Time step:  0.00887 s, Total time:    42.43 s
-       Max CFL number:  0.10E+01 at ( 51,  2, 13)
-       Max divergence:  0.98E+01 at ( 50,  1, 10)
-       Min divergence: -0.38E+01 at ( 50,  3, 18)
-       Total Heat Release Rate:            260.037 kW
-       Radiation Loss to Boundaries:       -41.015 kW
- 
-       Time Step    3900   September  5, 2012  02:49:53
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  52  16  31)
-       ----------------------------------------------
-       CPU/step:     1.329 s, Total CPU:      1.42 hr
-       Time step:  0.00853 s, Total time:    43.22 s
-       Max CFL number:  0.81E+00 at ( 51,  3, 20)
-       Max divergence:  0.10E+02 at ( 50,  3,  4)
-       Min divergence: -0.36E+01 at ( 50,  3, 15)
-       Total Heat Release Rate:            240.265 kW
-       Radiation Loss to Boundaries:       -39.182 kW
- 
-       Time Step    4000   September  5, 2012  02:52:09
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  52   1  31)
-       ----------------------------------------------
-       CPU/step:     1.317 s, Total CPU:      1.46 hr
-       Time step:  0.00638 s, Total time:    44.08 s
-       Max CFL number:  0.76E+00 at ( 51,  0, 25)
-       Max divergence:  0.11E+02 at ( 50,  2,  5)
-       Min divergence: -0.39E+01 at ( 51,  2,  5)
-       Total Heat Release Rate:            215.772 kW
-       Radiation Loss to Boundaries:       -37.516 kW
- 
-       Time Step    4100   September  5, 2012  02:54:25
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.44E-01 on Mesh   1 at (  50   6  31)
-       ----------------------------------------------
-       CPU/step:     1.320 s, Total CPU:      1.50 hr
-       Time step:  0.00924 s, Total time:    44.97 s
-       Max CFL number:  0.96E+00 at ( 52,  1, 17)
-       Max divergence:  0.12E+02 at ( 52,  5,  4)
-       Min divergence: -0.40E+01 at ( 51,  2, 22)
-       Total Heat Release Rate:            234.994 kW
-       Radiation Loss to Boundaries:       -39.071 kW
- 
-       Time Step    4200   September  5, 2012  02:56:41
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.36E-01 on Mesh   1 at (  43   1  31)
-       ----------------------------------------------
-       CPU/step:     1.323 s, Total CPU:      1.53 hr
-       Time step:  0.00871 s, Total time:    45.89 s
-       Max CFL number:  0.92E+00 at ( 52,  1, 24)
-       Max divergence:  0.11E+02 at ( 50,  2,  5)
-       Min divergence: -0.26E+01 at ( 51,  3, 15)
-       Total Heat Release Rate:            234.385 kW
-       Radiation Loss to Boundaries:       -39.652 kW
- 
-       Time Step    4300   September  5, 2012  02:58:59
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.41E-01 on Mesh   1 at (  52   1  31)
-       ----------------------------------------------
-       CPU/step:     1.338 s, Total CPU:      1.57 hr
-       Time step:  0.00735 s, Total time:    46.79 s
-       Max CFL number:  0.85E+00 at ( 53,  0, 25)
-       Max divergence:  0.12E+02 at ( 49,  5,  4)
-       Min divergence: -0.30E+01 at ( 54,  1, 22)
-       Total Heat Release Rate:            272.808 kW
-       Radiation Loss to Boundaries:       -44.506 kW
- 
-       Time Step    4400   September  5, 2012  03:01:16
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  52   4  31)
-       ----------------------------------------------
-       CPU/step:     1.325 s, Total CPU:      1.61 hr
-       Time step:  0.00754 s, Total time:    47.66 s
-       Max CFL number:  0.87E+00 at ( 51,  0, 23)
-       Max divergence:  0.86E+01 at ( 49,  5,  4)
-       Min divergence: -0.32E+01 at ( 51,  1, 22)
-       Total Heat Release Rate:            171.644 kW
-       Radiation Loss to Boundaries:       -31.498 kW
- 
-       Time Step    4500   September  5, 2012  03:03:33
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  55  24  31)
-       ----------------------------------------------
-       CPU/step:     1.329 s, Total CPU:      1.64 hr
-       Time step:  0.00851 s, Total time:    48.57 s
-       Max CFL number:  0.84E+00 at ( 48,  1, 19)
-       Max divergence:  0.96E+01 at ( 52,  6,  4)
-       Min divergence: -0.32E+01 at ( 51,  3, 15)
-       Total Heat Release Rate:            305.728 kW
-       Radiation Loss to Boundaries:       -49.276 kW
- 
-       Time Step    4600   September  5, 2012  03:05:49
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.36E-01 on Mesh   1 at (  57   6  31)
-       ----------------------------------------------
-       CPU/step:     1.320 s, Total CPU:      1.68 hr
-       Time step:  0.00848 s, Total time:    49.51 s
-       Max CFL number:  0.92E+00 at ( 50,  3, 16)
-       Max divergence:  0.11E+02 at ( 49,  1,  8)
-       Min divergence: -0.40E+01 at ( 50,  4, 19)
-       Total Heat Release Rate:            318.100 kW
-       Radiation Loss to Boundaries:       -51.761 kW
- 
-       Time Step    4700   September  5, 2012  03:08:07
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.34E-01 on Mesh   1 at (  55  26  31)
-       ----------------------------------------------
-       CPU/step:     1.339 s, Total CPU:      1.72 hr
-       Time step:  0.00898 s, Total time:    50.43 s
-       Max CFL number:  0.79E+00 at ( 51,  0, 18)
-       Max divergence:  0.99E+01 at ( 49,  5,  4)
-       Min divergence: -0.39E+01 at ( 51,  5,  4)
-       Total Heat Release Rate:            205.449 kW
-       Radiation Loss to Boundaries:       -37.747 kW
- 
-       Time Step    4800   September  5, 2012  03:10:30
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.34E-01 on Mesh   1 at (  55  14  31)
-       ----------------------------------------------
-       CPU/step:     1.369 s, Total CPU:      1.76 hr
-       Time step:  0.00767 s, Total time:    51.26 s
-       Max CFL number:  0.89E+00 at ( 51,  2, 22)
-       Max divergence:  0.11E+02 at ( 51,  1,  7)
-       Min divergence: -0.31E+01 at ( 52,  2, 22)
-       Total Heat Release Rate:            276.785 kW
-       Radiation Loss to Boundaries:       -47.219 kW
- 
-       Time Step    4900   September  5, 2012  03:12:50
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  55   1  31)
-       ----------------------------------------------
-       CPU/step:     1.353 s, Total CPU:      1.79 hr
-       Time step:  0.00928 s, Total time:    52.10 s
-       Max CFL number:  0.82E+00 at ( 51,  2, 17)
-       Max divergence:  0.11E+02 at ( 53,  1,  5)
-       Min divergence: -0.28E+01 at ( 51,  4,  5)
-       Total Heat Release Rate:            235.070 kW
-       Radiation Loss to Boundaries:       -43.834 kW
- 
-       Time Step    5000   September  5, 2012  03:15:11
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.40E-01 on Mesh   1 at (  52   6  31)
-       ----------------------------------------------
-       CPU/step:     1.359 s, Total CPU:      1.83 hr
-       Time step:  0.00762 s, Total time:    52.99 s
-       Max CFL number:  0.85E+00 at ( 50,  2, 15)
-       Max divergence:  0.11E+02 at ( 50,  3,  5)
-       Min divergence: -0.29E+01 at ( 54,  1, 24)
-       Total Heat Release Rate:            427.286 kW
-       Radiation Loss to Boundaries:       -75.652 kW
- 
-       Time Step    5100   September  5, 2012  03:17:32
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  47  13  31)
-       ----------------------------------------------
-       CPU/step:     1.357 s, Total CPU:      1.87 hr
-       Time step:  0.00854 s, Total time:    53.85 s
-       Max CFL number:  0.86E+00 at ( 52,  1, 19)
-       Max divergence:  0.12E+02 at ( 54,  3,  5)
-       Min divergence: -0.42E+01 at ( 54,  3, 14)
-       Total Heat Release Rate:            303.463 kW
-       Radiation Loss to Boundaries:       -52.466 kW
- 
-       Time Step    5200   September  5, 2012  03:19:47
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.36E-01 on Mesh   1 at (  52   3  31)
-       ----------------------------------------------
-       CPU/step:     1.320 s, Total CPU:      1.91 hr
-       Time step:  0.00844 s, Total time:    54.67 s
-       Max CFL number:  0.90E+00 at ( 51,  1, 22)
-       Max divergence:  0.96E+01 at ( 53,  4,  5)
-       Min divergence: -0.28E+01 at ( 50,  1, 22)
-       Total Heat Release Rate:            286.947 kW
-       Radiation Loss to Boundaries:       -50.956 kW
- 
-       Time Step    5300   September  5, 2012  03:22:07
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  48   7  31)
-       ----------------------------------------------
-       CPU/step:     1.350 s, Total CPU:      1.94 hr
-       Time step:  0.00835 s, Total time:    55.45 s
-       Max CFL number:  0.94E+00 at ( 50, 12, 29)
-       Max divergence:  0.12E+02 at ( 51,  1,  6)
-       Min divergence: -0.39E+01 at ( 52,  2, 22)
-       Total Heat Release Rate:            326.440 kW
-       Radiation Loss to Boundaries:       -58.101 kW
- 
-       Time Step    5400   September  5, 2012  03:24:25
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  52   1  31)
-       ----------------------------------------------
-       CPU/step:     1.337 s, Total CPU:      1.98 hr
-       Time step:  0.00723 s, Total time:    56.27 s
-       Max CFL number:  0.91E+00 at ( 51,  1, 25)
-       Max divergence:  0.11E+02 at ( 50,  6,  4)
-       Min divergence: -0.56E+01 at ( 49,  1, 21)
-       Total Heat Release Rate:            326.616 kW
-       Radiation Loss to Boundaries:       -60.573 kW
- 
-       Time Step    5500   September  5, 2012  03:26:47
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.40E-01 on Mesh   1 at (  52   8  31)
-       ----------------------------------------------
-       CPU/step:     1.368 s, Total CPU:      2.02 hr
-       Time step:  0.00832 s, Total time:    57.01 s
-       Max CFL number:  0.91E+00 at ( 51,  0, 17)
-       Max divergence:  0.12E+02 at ( 49,  2,  7)
-       Min divergence: -0.37E+01 at ( 53,  3,  4)
-       Total Heat Release Rate:            239.355 kW
-       Radiation Loss to Boundaries:       -48.011 kW
- 
-       Time Step    5600   September  5, 2012  03:29:07
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.41E-01 on Mesh   1 at (  48  10  31)
-       ----------------------------------------------
-       CPU/step:     1.348 s, Total CPU:      2.06 hr
-       Time step:  0.00759 s, Total time:    57.87 s
-       Max CFL number:  0.88E+00 at ( 51,  1, 22)
-       Max divergence:  0.14E+02 at ( 53,  1, 19)
-       Min divergence: -0.64E+01 at ( 54,  1, 13)
-       Total Heat Release Rate:            320.438 kW
-       Radiation Loss to Boundaries:       -59.916 kW
- 
-       Time Step    5700   September  5, 2012  03:31:29
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.39E-01 on Mesh   1 at (  52  15  31)
-       ----------------------------------------------
-       CPU/step:     1.365 s, Total CPU:      2.09 hr
-       Time step:  0.00762 s, Total time:    58.60 s
-       Max CFL number:  0.81E+00 at ( 54,  2, 21)
-       Max divergence:  0.16E+02 at ( 52,  1, 16)
-       Min divergence: -0.54E+01 at ( 54,  2, 24)
-       Total Heat Release Rate:            415.425 kW
-       Radiation Loss to Boundaries:       -70.905 kW
- 
-       Time Step    5800   September  5, 2012  03:33:49
-       Pressure Iterations:      2
-       Maximum Velocity Error:  0.41E-01 on Mesh   1 at (  50   3  31)
-       ----------------------------------------------
-       CPU/step:     1.362 s, Total CPU:      2.13 hr
-       Time step:  0.00627 s, Total time:    59.36 s
-       Max CFL number:  0.87E+00 at ( 51,  0, 24)
-       Max divergence:  0.11E+02 at ( 54,  2,  4)
-       Min divergence: -0.32E+01 at ( 55,  4, 28)
-       Total Heat Release Rate:            321.174 kW
-       Radiation Loss to Boundaries:       -62.711 kW
- 
-       Time Step    5900   September  5, 2012  03:36:11
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.36E-01 on Mesh   1 at (  52   5  31)
-       ----------------------------------------------
-       CPU/step:     1.363 s, Total CPU:      2.17 hr
-       Time step:  0.00820 s, Total time:    60.19 s
-       Max CFL number:  0.90E+00 at ( 53,  3, 17)
-       Max divergence:  0.14E+02 at ( 53,  2, 21)
-       Min divergence: -0.50E+01 at ( 51,  4,  5)
-       Total Heat Release Rate:            346.553 kW
-       Radiation Loss to Boundaries:       -68.327 kW
- 
-       Time Step    6000   September  5, 2012  03:38:27
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.29E-01 on Mesh   1 at (  50  20  31)
-       ----------------------------------------------
-       CPU/step:     1.320 s, Total CPU:      2.21 hr
-       Time step:  0.00819 s, Total time:    61.08 s
-       Max CFL number:  0.84E+00 at ( 52,  4, 19)
-       Max divergence:  0.12E+02 at ( 54,  4,  4)
-       Min divergence: -0.76E+01 at ( 52,  4, 21)
-       Total Heat Release Rate:            438.444 kW
-       Radiation Loss to Boundaries:       -81.434 kW
- 
-       Time Step    6100   September  5, 2012  03:40:43
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.37E-01 on Mesh   1 at (  59  14  31)
-       ----------------------------------------------
-       CPU/step:     1.327 s, Total CPU:      2.24 hr
-       Time step:  0.00770 s, Total time:    61.87 s
-       Max CFL number:  0.89E+00 at ( 51,  4, 20)
-       Max divergence:  0.13E+02 at ( 53,  3,  7)
-       Min divergence: -0.36E+01 at ( 51,  4, 24)
-       Total Heat Release Rate:            433.693 kW
-       Radiation Loss to Boundaries:       -78.223 kW
- 
-       Time Step    6200   September  5, 2012  03:42:59
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.47E-01 on Mesh   1 at (  55   5  31)
-       ----------------------------------------------
-       CPU/step:     1.321 s, Total CPU:      2.28 hr
-       Time step:  0.00800 s, Total time:    62.64 s
-       Max CFL number:  0.84E+00 at ( 54,  1, 26)
-       Max divergence:  0.10E+02 at ( 54,  1,  4)
-       Min divergence: -0.38E+01 at ( 50,  5,  7)
-       Total Heat Release Rate:            290.392 kW
-       Radiation Loss to Boundaries:       -62.637 kW
- 
-       Time Step    6300   September  5, 2012  03:45:25
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  55   9  31)
-       ----------------------------------------------
-       CPU/step:     1.402 s, Total CPU:      2.32 hr
-       Time step:  0.00680 s, Total time:    63.42 s
-       Max CFL number:  0.80E+00 at ( 52,  2, 21)
-       Max divergence:  0.11E+02 at ( 49,  3,  4)
-       Min divergence: -0.30E+01 at ( 50,  4,  4)
-       Total Heat Release Rate:            296.067 kW
-       Radiation Loss to Boundaries:       -74.667 kW
- 
-       Time Step    6400   September  5, 2012  03:47:51
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  49   5  31)
-       ----------------------------------------------
-       CPU/step:     1.405 s, Total CPU:      2.36 hr
-       Time step:  0.00651 s, Total time:    64.19 s
-       Max CFL number:  0.86E+00 at ( 51,  0, 18)
-       Max divergence:  0.13E+02 at ( 49,  3,  4)
-       Min divergence: -0.74E+01 at ( 50,  1, 30)
-       Total Heat Release Rate:            463.894 kW
-       Radiation Loss to Boundaries:      -113.410 kW
- 
-       Time Step    6500   September  5, 2012  03:50:23
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.38E-01 on Mesh   1 at (  52  39  31)
-       ----------------------------------------------
-       CPU/step:     1.444 s, Total CPU:      2.40 hr
-       Time step:  0.00839 s, Total time:    64.94 s
-       Max CFL number:  0.92E+00 at ( 49,  1, 21)
-       Max divergence:  0.11E+02 at ( 49,  6,  4)
-       Min divergence: -0.46E+01 at ( 51,  2, 17)
-       Total Heat Release Rate:            395.903 kW
-       Radiation Loss to Boundaries:       -81.560 kW
- 
-       Time Step    6600   September  5, 2012  03:52:48
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.44E-01 on Mesh   1 at (  47   7  31)
-       ----------------------------------------------
-       CPU/step:     1.391 s, Total CPU:      2.44 hr
-       Time step:  0.00858 s, Total time:    65.70 s
-       Max CFL number:  0.85E+00 at ( 53,  1, 16)
-       Max divergence:  0.13E+02 at ( 53,  1, 18)
-       Min divergence: -0.30E+01 at ( 50,  4,  4)
-       Total Heat Release Rate:            467.412 kW
-       Radiation Loss to Boundaries:       -90.768 kW
- 
-       Time Step    6700   September  5, 2012  03:55:15
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  52  23  31)
-       ----------------------------------------------
-       CPU/step:     1.409 s, Total CPU:      2.48 hr
-       Time step:  0.00749 s, Total time:    66.46 s
-       Max CFL number:  0.84E+00 at ( 54, 15, 30)
-       Max divergence:  0.12E+02 at ( 49,  3,  4)
-       Min divergence: -0.25E+01 at ( 52,  2, 26)
-       Total Heat Release Rate:            431.171 kW
-       Radiation Loss to Boundaries:       -88.969 kW
- 
-       Time Step    6800   September  5, 2012  03:57:41
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.44E-01 on Mesh   1 at (  50   1  31)
-       ----------------------------------------------
-       CPU/step:     1.400 s, Total CPU:      2.51 hr
-       Time step:  0.00820 s, Total time:    67.22 s
-       Max CFL number:  0.95E+00 at ( 51,  4, 18)
-       Max divergence:  0.11E+02 at ( 54,  3,  4)
-       Min divergence: -0.45E+01 at ( 49,  7, 28)
-       Total Heat Release Rate:            328.458 kW
-       Radiation Loss to Boundaries:       -75.357 kW
- 
-       Time Step    6900   September  5, 2012  04:00:06
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  47   6  31)
-       ----------------------------------------------
-       CPU/step:     1.388 s, Total CPU:      2.55 hr
-       Time step:  0.00716 s, Total time:    68.05 s
-       Max CFL number:  0.88E+00 at ( 52,  1, 21)
-       Max divergence:  0.11E+02 at ( 49,  6,  4)
-       Min divergence: -0.43E+01 at ( 56,  2, 19)
-       Total Heat Release Rate:            465.750 kW
-       Radiation Loss to Boundaries:      -101.073 kW
- 
-       Time Step    7000   September  5, 2012  04:02:32
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.47E-01 on Mesh   1 at (  43   9  31)
-       ----------------------------------------------
-       CPU/step:     1.398 s, Total CPU:      2.59 hr
-       Time step:  0.00837 s, Total time:    68.78 s
-       Max CFL number:  0.93E+00 at ( 53,  4, 20)
-       Max divergence:  0.11E+02 at ( 49,  1,  4)
-       Min divergence: -0.50E+01 at ( 52,  5, 27)
-       Total Heat Release Rate:            565.835 kW
-       Radiation Loss to Boundaries:      -106.756 kW
- 
-       Time Step    7100   September  5, 2012  04:04:58
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.44E-01 on Mesh   1 at (  47   6  31)
-       ----------------------------------------------
-       CPU/step:     1.402 s, Total CPU:      2.63 hr
-       Time step:  0.00833 s, Total time:    69.50 s
-       Max CFL number:  0.85E+00 at ( 50,  0, 22)
-       Max divergence:  0.12E+02 at ( 53,  2,  5)
-       Min divergence: -0.49E+01 at ( 49,  1, 29)
-       Total Heat Release Rate:            550.011 kW
-       Radiation Loss to Boundaries:      -129.687 kW
- 
-       Time Step    7200   September  5, 2012  04:07:22
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.40E-01 on Mesh   1 at (  59   1  31)
-       ----------------------------------------------
-       CPU/step:     1.377 s, Total CPU:      2.67 hr
-       Time step:  0.00794 s, Total time:    70.26 s
-       Max CFL number:  0.98E+00 at ( 52,  1, 23)
-       Max divergence:  0.15E+02 at ( 55,  1, 26)
-       Min divergence: -0.41E+01 at ( 51,  1, 22)
-       Total Heat Release Rate:            671.086 kW
-       Radiation Loss to Boundaries:      -149.150 kW
- 
-       Time Step    7300   September  5, 2012  04:09:55
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.41E-01 on Mesh   1 at (  48  14  31)
-       ----------------------------------------------
-       CPU/step:     1.458 s, Total CPU:      2.71 hr
-       Time step:  0.00750 s, Total time:    71.00 s
-       Max CFL number:  0.77E+00 at ( 53,  3, 18)
-       Max divergence:  0.14E+02 at ( 54,  1, 19)
-       Min divergence: -0.45E+01 at ( 52,  6, 26)
-       Total Heat Release Rate:            545.587 kW
-       Radiation Loss to Boundaries:      -130.149 kW
- 
-       Time Step    7400   September  5, 2012  04:12:23
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.47E-01 on Mesh   1 at (  55  15  31)
-       ----------------------------------------------
-       CPU/step:     1.429 s, Total CPU:      2.75 hr
-       Time step:  0.00762 s, Total time:    71.74 s
-       Max CFL number:  0.89E+00 at ( 51,  1, 20)
-       Max divergence:  0.11E+02 at ( 49,  4,  4)
-       Min divergence: -0.42E+01 at ( 50,  5,  4)
-       Total Heat Release Rate:            409.104 kW
-       Radiation Loss to Boundaries:      -130.906 kW
- 
-       Time Step    7500   September  5, 2012  04:14:55
+       Time Step    2000   September 24, 2012  13:26:22
        Pressure Iterations:     10
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  59   1  31)
+       Maximum Velocity Error:  0.11E-01 on Mesh   1 at (  55   4  31)
        ----------------------------------------------
-       CPU/step:     1.457 s, Total CPU:      2.79 hr
-       Time step:  0.00715 s, Total time:    72.52 s
-       Max CFL number:  0.89E+00 at ( 50,  2, 19)
-       Max divergence:  0.16E+02 at ( 50,  1, 25)
-       Min divergence: -0.61E+01 at ( 48,  1, 24)
-       Total Heat Release Rate:            625.876 kW
-       Radiation Loss to Boundaries:      -150.210 kW
+       CPU/step:     1.163 s, Total CPU:     39.95 min
+       Time step:  0.01270 s, Total time:    26.87 s
+       Max CFL number:  0.96E+00 at ( 51,  3, 16)
+       Max divergence:  0.88E+01 at ( 50,  1,  6)
+       Min divergence: -0.33E+01 at ( 52,  1, 13)
+       Total Heat Release Rate:            178.664 kW
+       Radiation Loss to Boundaries:       -28.011 kW
  
-       Time Step    7600   September  5, 2012  04:17:28
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.40E-01 on Mesh   1 at (  55   1  31)
-       ----------------------------------------------
-       CPU/step:     1.457 s, Total CPU:      2.83 hr
-       Time step:  0.00705 s, Total time:    73.26 s
-       Max CFL number:  0.91E+00 at ( 50,  0, 22)
-       Max divergence:  0.11E+02 at ( 49,  2, 10)
-       Min divergence: -0.53E+01 at ( 47,  1, 26)
-       Total Heat Release Rate:            542.603 kW
-       Radiation Loss to Boundaries:      -140.613 kW
- 
-       Time Step    7700   September  5, 2012  04:20:03
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.47E-01 on Mesh   1 at (  50   1  31)
-       ----------------------------------------------
-       CPU/step:     1.476 s, Total CPU:      2.87 hr
-       Time step:  0.00753 s, Total time:    74.00 s
-       Max CFL number:  0.91E+00 at ( 52,  5, 21)
-       Max divergence:  0.12E+02 at ( 50,  1, 20)
-       Min divergence: -0.43E+01 at ( 50,  6, 25)
-       Total Heat Release Rate:            728.391 kW
-       Radiation Loss to Boundaries:      -196.736 kW
- 
-       Time Step    7800   September  5, 2012  04:22:34
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  50  15  31)
-       ----------------------------------------------
-       CPU/step:     1.447 s, Total CPU:      2.91 hr
-       Time step:  0.00781 s, Total time:    74.77 s
-       Max CFL number:  0.85E+00 at ( 51,  3, 17)
-       Max divergence:  0.11E+02 at ( 49,  3,  4)
-       Min divergence: -0.35E+01 at ( 54,  4, 22)
-       Total Heat Release Rate:            525.995 kW
-       Radiation Loss to Boundaries:      -172.379 kW
- 
-       Time Step    7900   September  5, 2012  04:25:03
-       Pressure Iterations:      3
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  56   1  31)
-       ----------------------------------------------
-       CPU/step:     1.434 s, Total CPU:      2.95 hr
-       Time step:  0.00724 s, Total time:    75.56 s
-       Max CFL number:  0.82E+00 at ( 54,  2, 26)
-       Max divergence:  0.12E+02 at ( 51,  1, 18)
-       Min divergence: -0.43E+01 at ( 53,  1, 28)
-       Total Heat Release Rate:            573.350 kW
-       Radiation Loss to Boundaries:      -137.066 kW
- 
-       Time Step    8000   September  5, 2012  04:27:37
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.39E-01 on Mesh   1 at (  50  13  31)
-       ----------------------------------------------
-       CPU/step:     1.465 s, Total CPU:      2.99 hr
-       Time step:  0.00779 s, Total time:    76.34 s
-       Max CFL number:  0.89E+00 at ( 53,  4, 23)
-       Max divergence:  0.17E+02 at ( 53,  1, 18)
-       Min divergence: -0.32E+01 at ( 50,  4, 14)
-       Total Heat Release Rate:            659.305 kW
-       Radiation Loss to Boundaries:      -157.112 kW
- 
-       Time Step    8100   September  5, 2012  04:30:08
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.42E-01 on Mesh   1 at (  50   9  31)
-       ----------------------------------------------
-       CPU/step:     1.442 s, Total CPU:      3.03 hr
-       Time step:  0.00756 s, Total time:    77.08 s
-       Max CFL number:  0.84E+00 at ( 50,  3, 25)
-       Max divergence:  0.15E+02 at ( 53,  1, 20)
-       Min divergence: -0.38E+01 at ( 55,  2, 19)
-       Total Heat Release Rate:            729.665 kW
-       Radiation Loss to Boundaries:      -211.550 kW
- 
-       Time Step    8200   September  5, 2012  04:32:35
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  50   1  31)
-       ----------------------------------------------
-       CPU/step:     1.424 s, Total CPU:      3.07 hr
-       Time step:  0.00691 s, Total time:    77.83 s
-       Max CFL number:  0.81E+00 at ( 50,  0, 23)
-       Max divergence:  0.16E+02 at ( 51,  1, 25)
-       Min divergence: -0.55E+01 at ( 52,  1, 22)
-       Total Heat Release Rate:            692.447 kW
-       Radiation Loss to Boundaries:      -155.977 kW
- 
-       Time Step    8300   September  5, 2012  04:35:09
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  55  10  31)
-       ----------------------------------------------
-       CPU/step:     1.464 s, Total CPU:      3.11 hr
-       Time step:  0.00826 s, Total time:    78.57 s
-       Max CFL number:  0.85E+00 at ( 55,  3, 24)
-       Max divergence:  0.12E+02 at ( 50,  3, 13)
-       Min divergence: -0.35E+01 at ( 50,  5,  4)
-       Total Heat Release Rate:            674.620 kW
-       Radiation Loss to Boundaries:      -171.099 kW
- 
-       Time Step    8400   September  5, 2012  04:37:40
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.33E-01 on Mesh   1 at (  47   9  31)
-       ----------------------------------------------
-       CPU/step:     1.446 s, Total CPU:      3.15 hr
-       Time step:  0.00797 s, Total time:    79.36 s
-       Max CFL number:  0.85E+00 at ( 53,  1, 21)
-       Max divergence:  0.13E+02 at ( 56,  1, 17)
-       Min divergence: -0.54E+01 at ( 55,  1, 18)
-       Total Heat Release Rate:            466.270 kW
-       Radiation Loss to Boundaries:      -129.718 kW
- 
-       Time Step    8500   September  5, 2012  04:40:07
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.37E-01 on Mesh   1 at (  55  11  31)
-       ----------------------------------------------
-       CPU/step:     1.414 s, Total CPU:      3.19 hr
-       Time step:  0.00730 s, Total time:    80.13 s
-       Max CFL number:  0.80E+00 at ( 52,  3, 17)
-       Max divergence:  0.12E+02 at ( 54,  1, 11)
-       Min divergence: -0.34E+01 at ( 51,  2,  4)
-       Total Heat Release Rate:            607.160 kW
-       Radiation Loss to Boundaries:      -152.304 kW
- 
-       Time Step    8600   September  5, 2012  04:42:34
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  59   1  31)
-       ----------------------------------------------
-       CPU/step:     1.418 s, Total CPU:      3.23 hr
-       Time step:  0.00779 s, Total time:    80.85 s
-       Max CFL number:  0.88E+00 at ( 55,  2, 22)
-       Max divergence:  0.12E+02 at ( 51,  2,  6)
-       Min divergence: -0.56E+01 at ( 50,  3,  5)
-       Total Heat Release Rate:            680.315 kW
-       Radiation Loss to Boundaries:      -188.176 kW
- 
-       Time Step    8700   September  5, 2012  04:45:07
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  47   8  31)
-       ----------------------------------------------
-       CPU/step:     1.460 s, Total CPU:      3.27 hr
-       Time step:  0.00726 s, Total time:    81.64 s
-       Max CFL number:  0.84E+00 at ( 51,  3, 23)
-       Max divergence:  0.16E+02 at ( 54,  2, 14)
-       Min divergence: -0.42E+01 at ( 54,  1, 14)
-       Total Heat Release Rate:            650.790 kW
-       Radiation Loss to Boundaries:      -202.750 kW
- 
-       Time Step    8800   September  5, 2012  04:47:34
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.36E-01 on Mesh   1 at (  47  11  31)
-       ----------------------------------------------
-       CPU/step:     1.419 s, Total CPU:      3.31 hr
-       Time step:  0.00748 s, Total time:    82.39 s
-       Max CFL number:  0.83E+00 at ( 52,  2, 20)
-       Max divergence:  0.12E+02 at ( 49,  2,  4)
-       Min divergence: -0.45E+01 at ( 53,  1, 25)
-       Total Heat Release Rate:            729.282 kW
-       Radiation Loss to Boundaries:      -209.353 kW
- 
-       Time Step    8900   September  5, 2012  04:50:07
+       Time Step    2100   September 24, 2012  13:28:25
        Pressure Iterations:      7
-       Maximum Velocity Error:  0.37E-01 on Mesh   1 at (  55  10  31)
+       Maximum Velocity Error:  0.91E-02 on Mesh   1 at (  55   2  31)
        ----------------------------------------------
-       CPU/step:     1.458 s, Total CPU:      3.35 hr
-       Time step:  0.00842 s, Total time:    83.16 s
-       Max CFL number:  0.89E+00 at ( 55,  8, 30)
-       Max divergence:  0.12E+02 at ( 49,  1,  4)
-       Min divergence: -0.32E+01 at ( 47,  5, 26)
-       Total Heat Release Rate:            780.335 kW
-       Radiation Loss to Boundaries:      -247.125 kW
+       CPU/step:     1.173 s, Total CPU:     41.90 min
+       Time step:  0.00980 s, Total time:    27.91 s
+       Max CFL number:  0.96E+00 at ( 51,  4, 16)
+       Max divergence:  0.10E+02 at ( 51,  6,  4)
+       Min divergence: -0.41E+01 at ( 51,  4,  5)
+       Total Heat Release Rate:            203.626 kW
+       Radiation Loss to Boundaries:       -30.336 kW
  
-       Time Step    9000   September  5, 2012  04:52:42
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.41E-01 on Mesh   1 at (  47   4  31)
-       ----------------------------------------------
-       CPU/step:     1.477 s, Total CPU:      3.39 hr
-       Time step:  0.00710 s, Total time:    83.91 s
-       Max CFL number:  0.87E+00 at ( 54,  3, 22)
-       Max divergence:  0.13E+02 at ( 50,  1,  6)
-       Min divergence: -0.61E+01 at ( 54,  4, 25)
-       Total Heat Release Rate:            730.157 kW
-       Radiation Loss to Boundaries:      -260.305 kW
- 
-       Time Step    9100   September  5, 2012  04:55:15
-       Pressure Iterations:      6
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  52   6  31)
-       ----------------------------------------------
-       CPU/step:     1.463 s, Total CPU:      3.43 hr
-       Time step:  0.00662 s, Total time:    84.65 s
-       Max CFL number:  0.76E+00 at ( 52,  2, 19)
-       Max divergence:  0.13E+02 at ( 53,  3,  6)
-       Min divergence: -0.30E+01 at ( 54,  3, 22)
-       Total Heat Release Rate:            604.328 kW
-       Radiation Loss to Boundaries:      -233.615 kW
- 
-       Time Step    9200   September  5, 2012  04:57:46
+       Time Step    2200   September 24, 2012  13:30:31
        Pressure Iterations:      4
-       Maximum Velocity Error:  0.37E-01 on Mesh   1 at (  55   8  31)
+       Maximum Velocity Error:  0.85E-02 on Mesh   1 at (  52   3  31)
        ----------------------------------------------
-       CPU/step:     1.453 s, Total CPU:      3.47 hr
-       Time step:  0.00701 s, Total time:    85.45 s
-       Max CFL number:  0.87E+00 at ( 51,  2, 18)
-       Max divergence:  0.12E+02 at ( 50,  1,  6)
-       Min divergence: -0.29E+01 at ( 57,  1, 26)
-       Total Heat Release Rate:            722.919 kW
-       Radiation Loss to Boundaries:      -242.193 kW
+       CPU/step:     1.188 s, Total CPU:     43.88 min
+       Time step:  0.00955 s, Total time:    28.93 s
+       Max CFL number:  0.94E+00 at ( 52,  1, 18)
+       Max divergence:  0.12E+02 at ( 52,  1,  4)
+       Min divergence: -0.52E+01 at ( 52,  1, 19)
+       Total Heat Release Rate:            220.221 kW
+       Radiation Loss to Boundaries:       -32.833 kW
  
-       Time Step    9300   September  5, 2012  05:00:13
+       Time Step    2300   September 24, 2012  13:32:35
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.75E-02 on Mesh   1 at (  55   6  31)
+       ----------------------------------------------
+       CPU/step:     1.177 s, Total CPU:     45.84 min
+       Time step:  0.01084 s, Total time:    29.91 s
+       Max CFL number:  0.89E+00 at ( 50,  1, 15)
+       Max divergence:  0.11E+02 at ( 52,  3,  6)
+       Min divergence: -0.45E+01 at ( 55,  1, 27)
+       Total Heat Release Rate:            160.073 kW
+       Radiation Loss to Boundaries:       -25.665 kW
+ 
+       Time Step    2400   September 24, 2012  13:34:36
        Pressure Iterations:      4
-       Maximum Velocity Error:  0.38E-01 on Mesh   1 at (  50  33  31)
+       Maximum Velocity Error:  0.78E-02 on Mesh   1 at (  49   8  31)
        ----------------------------------------------
-       CPU/step:     1.411 s, Total CPU:      3.51 hr
-       Time step:  0.00789 s, Total time:    86.22 s
-       Max CFL number:  0.78E+00 at ( 53,  3, 23)
-       Max divergence:  0.14E+02 at ( 53,  1, 19)
-       Min divergence: -0.39E+01 at ( 57,  1, 26)
-       Total Heat Release Rate:            745.912 kW
-       Radiation Loss to Boundaries:      -229.764 kW
+       CPU/step:     1.145 s, Total CPU:     47.75 min
+       Time step:  0.00937 s, Total time:    31.06 s
+       Max CFL number:  0.90E+00 at ( 51,  2, 18)
+       Max divergence:  0.85E+01 at ( 53,  3,  4)
+       Min divergence: -0.44E+01 at ( 52,  2, 21)
+       Total Heat Release Rate:            144.878 kW
+       Radiation Loss to Boundaries:       -22.805 kW
  
-       Time Step    9400   September  5, 2012  05:02:45
+       Time Step    2500   September 24, 2012  13:36:41
        Pressure Iterations:      6
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  50  10  31)
+       Maximum Velocity Error:  0.91E-02 on Mesh   1 at (  47  12  31)
        ----------------------------------------------
-       CPU/step:     1.457 s, Total CPU:      3.55 hr
-       Time step:  0.00730 s, Total time:    86.98 s
-       Max CFL number:  0.91E+00 at ( 50, 11, 29)
-       Max divergence:  0.12E+02 at ( 47,  1, 27)
-       Min divergence: -0.41E+01 at ( 48,  1, 27)
-       Total Heat Release Rate:            821.334 kW
-       Radiation Loss to Boundaries:      -247.351 kW
+       CPU/step:     1.180 s, Total CPU:     49.72 min
+       Time step:  0.00940 s, Total time:    32.06 s
+       Max CFL number:  0.82E+00 at ( 54,  2, 24)
+       Max divergence:  0.94E+01 at ( 54,  4,  4)
+       Min divergence: -0.37E+01 at ( 52,  1, 11)
+       Total Heat Release Rate:            181.037 kW
+       Radiation Loss to Boundaries:       -28.663 kW
  
-       Time Step    9500   September  5, 2012  05:05:20
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.30E-01 on Mesh   1 at (  52  19  31)
-       ----------------------------------------------
-       CPU/step:     1.477 s, Total CPU:      3.59 hr
-       Time step:  0.00779 s, Total time:    87.73 s
-       Max CFL number:  0.88E+00 at ( 53,  3, 15)
-       Max divergence:  0.11E+02 at ( 54,  3,  4)
-       Min divergence: -0.48E+01 at ( 53,  5,  4)
-       Total Heat Release Rate:            975.717 kW
-       Radiation Loss to Boundaries:      -327.182 kW
- 
-       Time Step    9600   September  5, 2012  05:07:52
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  52   2  31)
-       ----------------------------------------------
-       CPU/step:     1.453 s, Total CPU:      3.63 hr
-       Time step:  0.00742 s, Total time:    88.49 s
-       Max CFL number:  0.87E+00 at ( 52,  3, 16)
-       Max divergence:  0.14E+02 at ( 52,  2, 17)
-       Min divergence: -0.36E+01 at ( 45,  1, 29)
-       Total Heat Release Rate:            773.175 kW
-       Radiation Loss to Boundaries:      -285.244 kW
- 
-       Time Step    9700   September  5, 2012  05:10:25
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.48E-01 on Mesh   1 at (  50   1  31)
-       ----------------------------------------------
-       CPU/step:     1.461 s, Total CPU:      3.68 hr
-       Time step:  0.00769 s, Total time:    89.25 s
-       Max CFL number:  0.89E+00 at ( 51,  2, 18)
-       Max divergence:  0.12E+02 at ( 49,  5,  4)
-       Min divergence: -0.42E+01 at ( 51,  2,  5)
-       Total Heat Release Rate:            766.482 kW
-       Radiation Loss to Boundaries:      -302.712 kW
- 
-       Time Step    9800   September  5, 2012  05:12:59
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.41E-01 on Mesh   1 at (  52  11  31)
-       ----------------------------------------------
-       CPU/step:     1.474 s, Total CPU:      3.72 hr
-       Time step:  0.00676 s, Total time:    89.99 s
-       Max CFL number:  0.89E+00 at ( 50,  2, 22)
-       Max divergence:  0.12E+02 at ( 49,  2,  4)
-       Min divergence: -0.39E+01 at ( 48,  1, 25)
-       Total Heat Release Rate:            871.613 kW
-       Radiation Loss to Boundaries:      -288.084 kW
- 
-       Time Step    9900   September  5, 2012  05:15:33
-       Pressure Iterations:      6
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  55  14  31)
-       ----------------------------------------------
-       CPU/step:     1.464 s, Total CPU:      3.76 hr
-       Time step:  0.00842 s, Total time:    90.74 s
-       Max CFL number:  0.95E+00 at ( 52,  8, 30)
-       Max divergence:  0.15E+02 at ( 51,  2, 15)
-       Min divergence: -0.39E+01 at ( 55,  5, 17)
-       Total Heat Release Rate:            932.135 kW
-       Radiation Loss to Boundaries:      -306.550 kW
- 
-       Time Step   10000   September  5, 2012  05:18:08
-       Pressure Iterations:      6
-       Maximum Velocity Error:  0.40E-01 on Mesh   1 at (  50  15  31)
-       ----------------------------------------------
-       CPU/step:     1.481 s, Total CPU:      3.80 hr
-       Time step:  0.00753 s, Total time:    91.49 s
-       Max CFL number:  0.92E+00 at ( 50, 13, 30)
-       Max divergence:  0.12E+02 at ( 54,  3,  6)
-       Min divergence: -0.41E+01 at ( 53,  4, 15)
-       Total Heat Release Rate:            714.111 kW
-       Radiation Loss to Boundaries:      -290.377 kW
- 
-       Time Step   10100   September  5, 2012  05:20:43
-       Pressure Iterations:      7
-       Maximum Velocity Error:  0.39E-01 on Mesh   1 at (  55   7  31)
-       ----------------------------------------------
-       CPU/step:     1.478 s, Total CPU:      3.84 hr
-       Time step:  0.00780 s, Total time:    92.25 s
-       Max CFL number:  0.92E+00 at ( 59, 10, 30)
-       Max divergence:  0.19E+02 at ( 54,  3, 21)
-       Min divergence: -0.29E+01 at ( 59, 12, 30)
-       Total Heat Release Rate:           1195.655 kW
-       Radiation Loss to Boundaries:      -359.987 kW
- 
-       Time Step   10200   September  5, 2012  05:23:19
-       Pressure Iterations:      6
-       Maximum Velocity Error:  0.44E-01 on Mesh   1 at (  55  17  31)
-       ----------------------------------------------
-       CPU/step:     1.483 s, Total CPU:      3.88 hr
-       Time step:  0.00839 s, Total time:    93.01 s
-       Max CFL number:  0.87E+00 at ( 53,  3, 21)
-       Max divergence:  0.16E+02 at ( 52,  2, 19)
-       Min divergence: -0.42E+01 at ( 54,  2, 25)
-       Total Heat Release Rate:            805.603 kW
-       Radiation Loss to Boundaries:      -268.780 kW
- 
-       Time Step   10300   September  5, 2012  05:25:53
-       Pressure Iterations:      6
-       Maximum Velocity Error:  0.43E-01 on Mesh   1 at (  52  15  31)
-       ----------------------------------------------
-       CPU/step:     1.466 s, Total CPU:      3.92 hr
-       Time step:  0.00825 s, Total time:    93.79 s
-       Max CFL number:  0.93E+00 at ( 47, 17, 30)
-       Max divergence:  0.12E+02 at ( 50,  2, 18)
-       Min divergence: -0.38E+01 at ( 47,  1, 15)
-       Total Heat Release Rate:            772.637 kW
-       Radiation Loss to Boundaries:      -296.508 kW
- 
-       Time Step   10400   September  5, 2012  05:28:29
-       Pressure Iterations:      7
-       Maximum Velocity Error:  0.37E-01 on Mesh   1 at (  50  27  31)
-       ----------------------------------------------
-       CPU/step:     1.489 s, Total CPU:      3.96 hr
-       Time step:  0.00850 s, Total time:    94.56 s
-       Max CFL number:  0.82E+00 at ( 51,  3, 22)
-       Max divergence:  0.12E+02 at ( 49,  1,  5)
-       Min divergence: -0.36E+01 at ( 50,  7, 11)
-       Total Heat Release Rate:            907.935 kW
-       Radiation Loss to Boundaries:      -353.482 kW
- 
-       Time Step   10500   September  5, 2012  05:31:06
-       Pressure Iterations:      6
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  50  10  31)
-       ----------------------------------------------
-       CPU/step:     1.491 s, Total CPU:      4.00 hr
-       Time step:  0.00873 s, Total time:    95.33 s
-       Max CFL number:  0.90E+00 at ( 53,  2, 18)
-       Max divergence:  0.15E+02 at ( 50,  2, 16)
-       Min divergence: -0.40E+01 at ( 47, 14, 30)
-       Total Heat Release Rate:           1001.529 kW
-       Radiation Loss to Boundaries:      -389.847 kW
- 
-       Time Step   10600   September  5, 2012  05:33:46
-       Pressure Iterations:      7
-       Maximum Velocity Error:  0.41E-01 on Mesh   1 at (  52  11  31)
-       ----------------------------------------------
-       CPU/step:     1.515 s, Total CPU:      4.05 hr
-       Time step:  0.00801 s, Total time:    96.11 s
-       Max CFL number:  0.89E+00 at ( 53,  4, 22)
-       Max divergence:  0.13E+02 at ( 52,  1, 26)
-       Min divergence: -0.28E+01 at ( 52,  1, 25)
-       Total Heat Release Rate:           1053.906 kW
-       Radiation Loss to Boundaries:      -421.506 kW
- 
-       Time Step   10700   September  5, 2012  05:36:26
-       Pressure Iterations:     10
-       Maximum Velocity Error:  0.45E-01 on Mesh   1 at (  43   1  31)
-       ----------------------------------------------
-       CPU/step:     1.517 s, Total CPU:      4.09 hr
-       Time step:  0.00739 s, Total time:    96.88 s
-       Max CFL number:  0.87E+00 at ( 47, 12, 29)
-       Max divergence:  0.14E+02 at ( 52,  1, 22)
-       Min divergence: -0.43E+01 at ( 51,  1, 21)
-       Total Heat Release Rate:            850.817 kW
-       Radiation Loss to Boundaries:      -349.211 kW
- 
-       Time Step   10800   September  5, 2012  05:39:04
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  56   4  31)
-       ----------------------------------------------
-       CPU/step:     1.495 s, Total CPU:      4.13 hr
-       Time step:  0.00850 s, Total time:    97.66 s
-       Max CFL number:  0.86E+00 at ( 55,  4, 20)
-       Max divergence:  0.15E+02 at ( 58,  1, 28)
-       Min divergence: -0.61E+01 at ( 55,  5, 23)
-       Total Heat Release Rate:           1026.078 kW
-       Radiation Loss to Boundaries:      -379.977 kW
- 
-       Time Step   10900   September  5, 2012  05:41:41
-       Pressure Iterations:      6
-       Maximum Velocity Error:  0.40E-01 on Mesh   1 at (  55  10  31)
-       ----------------------------------------------
-       CPU/step:     1.502 s, Total CPU:      4.17 hr
-       Time step:  0.00768 s, Total time:    98.43 s
-       Max CFL number:  0.83E+00 at ( 53,  3, 22)
-       Max divergence:  0.12E+02 at ( 49,  1,  6)
-       Min divergence: -0.36E+01 at ( 55,  9, 26)
-       Total Heat Release Rate:           1034.063 kW
-       Radiation Loss to Boundaries:      -446.878 kW
- 
-       Time Step   11000   September  5, 2012  05:44:13
-       Pressure Iterations:      5
-       Maximum Velocity Error:  0.48E-01 on Mesh   1 at (  58   1  31)
-       ----------------------------------------------
-       CPU/step:     1.452 s, Total CPU:      4.21 hr
-       Time step:  0.00610 s, Total time:    99.22 s
-       Max CFL number:  0.89E+00 at ( 52,  4, 23)
-       Max divergence:  0.13E+02 at ( 51,  1, 19)
-       Min divergence: -0.41E+01 at ( 50,  1, 14)
-       Total Heat Release Rate:           1021.975 kW
-       Radiation Loss to Boundaries:      -403.750 kW
- 
-       Time Step   11100   September  5, 2012  05:46:49
-       Pressure Iterations:      4
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  55   1  31)
-       ----------------------------------------------
-       CPU/step:     1.489 s, Total CPU:      4.25 hr
-       Time step:  0.00699 s, Total time:    99.99 s
-       Max CFL number:  0.84E+00 at ( 55,  0, 21)
-       Max divergence:  0.12E+02 at ( 50,  2, 27)
-       Min divergence: -0.38E+01 at ( 50,  2, 30)
-       Total Heat Release Rate:           1169.222 kW
-       Radiation Loss to Boundaries:      -511.450 kW
- 
-       Time Step   11102   September  5, 2012  05:46:52
+       Time Step    2600   September 24, 2012  13:38:55
        Pressure Iterations:      8
-       Maximum Velocity Error:  0.46E-01 on Mesh   1 at (  50   2  31)
+       Maximum Velocity Error:  0.80E-02 on Mesh   1 at (  55  11  31)
        ----------------------------------------------
-       CPU/step:     1.393 s, Total CPU:      4.25 hr
-       Time step:  0.00699 s, Total time:   100.01 s
-       Max CFL number:  0.87E+00 at ( 55,  2, 23)
-       Max divergence:  0.12E+02 at ( 50,  2, 27)
-       Min divergence: -0.38E+01 at ( 50,  2, 30)
-       Total Heat Release Rate:           1171.883 kW
-       Radiation Loss to Boundaries:      -510.765 kW
+       CPU/step:     1.261 s, Total CPU:     51.82 min
+       Time step:  0.01067 s, Total time:    33.07 s
+       Max CFL number:  0.87E+00 at ( 53,  3, 23)
+       Max divergence:  0.86E+01 at ( 49,  1,  4)
+       Min divergence: -0.35E+01 at ( 50,  3, 19)
+       Total Heat Release Rate:            123.520 kW
+       Radiation Loss to Boundaries:       -21.911 kW
+ 
+       Time Step    2700   September 24, 2012  13:41:07
+       Pressure Iterations:      5
+       Maximum Velocity Error:  0.85E-02 on Mesh   1 at (  50   1  31)
+       ----------------------------------------------
+       CPU/step:     1.244 s, Total CPU:     53.89 min
+       Time step:  0.00963 s, Total time:    34.07 s
+       Max CFL number:  0.87E+00 at ( 51,  1, 21)
+       Max divergence:  0.88E+01 at ( 49,  6,  4)
+       Min divergence: -0.47E+01 at ( 52,  1, 13)
+       Total Heat Release Rate:            158.565 kW
+       Radiation Loss to Boundaries:       -27.087 kW
+ 
+       Time Step    2800   September 24, 2012  13:43:23
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.86E-02 on Mesh   1 at (  52   8  31)
+       ----------------------------------------------
+       CPU/step:     1.283 s, Total CPU:     56.03 min
+       Time step:  0.01094 s, Total time:    35.04 s
+       Max CFL number:  0.84E+00 at ( 52,  2, 16)
+       Max divergence:  0.13E+02 at ( 50,  1,  8)
+       Min divergence: -0.44E+01 at ( 52,  1, 13)
+       Total Heat Release Rate:            198.678 kW
+       Radiation Loss to Boundaries:       -32.550 kW
+ 
+       Time Step    2900   September 24, 2012  13:45:42
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.84E-02 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.307 s, Total CPU:     58.21 min
+       Time step:  0.00907 s, Total time:    35.96 s
+       Max CFL number:  0.86E+00 at ( 52,  3, 16)
+       Max divergence:  0.84E+01 at ( 50,  4,  4)
+       Min divergence: -0.43E+01 at ( 52,  3, 16)
+       Total Heat Release Rate:            174.482 kW
+       Radiation Loss to Boundaries:       -29.323 kW
+ 
+       Time Step    3000   September 24, 2012  13:47:47
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.74E-02 on Mesh   1 at (  55  21  31)
+       ----------------------------------------------
+       CPU/step:     1.184 s, Total CPU:      1.00 hr
+       Time step:  0.00758 s, Total time:    36.90 s
+       Max CFL number:  0.86E+00 at ( 50,  2, 22)
+       Max divergence:  0.10E+02 at ( 51,  1,  5)
+       Min divergence: -0.40E+01 at ( 50,  2, 23)
+       Total Heat Release Rate:            253.071 kW
+       Radiation Loss to Boundaries:       -39.717 kW
+ 
+       Time Step    3100   September 24, 2012  13:49:53
+       Pressure Iterations:      5
+       Maximum Velocity Error:  0.87E-02 on Mesh   1 at (  55   8  31)
+       ----------------------------------------------
+       CPU/step:     1.198 s, Total CPU:      1.04 hr
+       Time step:  0.01175 s, Total time:    37.90 s
+       Max CFL number:  0.93E+00 at ( 51,  3, 12)
+       Max divergence:  0.87E+01 at ( 53,  5,  4)
+       Min divergence: -0.45E+01 at ( 52,  1, 17)
+       Total Heat Release Rate:            218.615 kW
+       Radiation Loss to Boundaries:       -34.887 kW
+ 
+       Time Step    3200   September 24, 2012  13:51:56
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.88E-02 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.164 s, Total CPU:      1.07 hr
+       Time step:  0.00831 s, Total time:    38.82 s
+       Max CFL number:  0.80E+00 at ( 51,  2, 17)
+       Max divergence:  0.93E+01 at ( 51,  6,  4)
+       Min divergence: -0.52E+01 at ( 51,  1, 11)
+       Total Heat Release Rate:            168.199 kW
+       Radiation Loss to Boundaries:       -28.595 kW
+ 
+       Time Step    3300   September 24, 2012  13:54:03
+       Pressure Iterations:      5
+       Maximum Velocity Error:  0.88E-02 on Mesh   1 at (  59   6  31)
+       ----------------------------------------------
+       CPU/step:     1.209 s, Total CPU:      1.10 hr
+       Time step:  0.00838 s, Total time:    39.79 s
+       Max CFL number:  0.90E+00 at ( 51,  2, 16)
+       Max divergence:  0.85E+01 at ( 49,  5,  4)
+       Min divergence: -0.48E+01 at ( 50,  1, 17)
+       Total Heat Release Rate:            205.598 kW
+       Radiation Loss to Boundaries:       -34.193 kW
+ 
+       Time Step    3400   September 24, 2012  13:56:09
+       Pressure Iterations:      5
+       Maximum Velocity Error:  0.83E-02 on Mesh   1 at (  47  10  31)
+       ----------------------------------------------
+       CPU/step:     1.188 s, Total CPU:      1.14 hr
+       Time step:  0.00895 s, Total time:    40.72 s
+       Max CFL number:  0.93E+00 at ( 51,  2, 18)
+       Max divergence:  0.92E+01 at ( 49,  6,  4)
+       Min divergence: -0.48E+01 at ( 52,  2, 15)
+       Total Heat Release Rate:            245.028 kW
+       Radiation Loss to Boundaries:       -39.451 kW
+ 
+       Time Step    3500   September 24, 2012  13:58:24
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.90E-02 on Mesh   1 at (  55   3  31)
+       ----------------------------------------------
+       CPU/step:     1.270 s, Total CPU:      1.17 hr
+       Time step:  0.00882 s, Total time:    41.65 s
+       Max CFL number:  0.96E+00 at ( 51,  1, 19)
+       Max divergence:  0.11E+02 at ( 49,  4,  4)
+       Min divergence: -0.72E+01 at ( 50,  1, 25)
+       Total Heat Release Rate:            222.853 kW
+       Radiation Loss to Boundaries:       -36.113 kW
+ 
+       Time Step    3600   September 24, 2012  14:00:32
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.93E-02 on Mesh   1 at (  50   3   3)
+       ----------------------------------------------
+       CPU/step:     1.212 s, Total CPU:      1.20 hr
+       Time step:  0.01031 s, Total time:    42.62 s
+       Max CFL number:  0.95E+00 at ( 50,  3, 23)
+       Max divergence:  0.10E+02 at ( 52,  1,  7)
+       Min divergence: -0.66E+01 at ( 51,  1, 10)
+       Total Heat Release Rate:            152.500 kW
+       Radiation Loss to Boundaries:       -28.659 kW
+ 
+       Time Step    3700   September 24, 2012  14:02:38
+       Pressure Iterations:      9
+       Maximum Velocity Error:  0.91E-02 on Mesh   1 at (  50   1  31)
+       ----------------------------------------------
+       CPU/step:     1.188 s, Total CPU:      1.24 hr
+       Time step:  0.00792 s, Total time:    43.55 s
+       Max CFL number:  0.80E+00 at ( 50,  3, 25)
+       Max divergence:  0.11E+02 at ( 50,  3,  4)
+       Min divergence: -0.45E+01 at ( 51,  1, 11)
+       Total Heat Release Rate:            204.728 kW
+       Radiation Loss to Boundaries:       -36.294 kW
+ 
+       Time Step    3800   September 24, 2012  14:04:43
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.98E-02 on Mesh   1 at (  47   1  31)
+       ----------------------------------------------
+       CPU/step:     1.176 s, Total CPU:      1.27 hr
+       Time step:  0.01096 s, Total time:    44.49 s
+       Max CFL number:  0.78E+00 at ( 49,  3, 25)
+       Max divergence:  0.87E+01 at ( 52,  2,  6)
+       Min divergence: -0.42E+01 at ( 51,  1, 12)
+       Total Heat Release Rate:            215.274 kW
+       Radiation Loss to Boundaries:       -37.781 kW
+ 
+       Time Step    3900   September 24, 2012  14:06:49
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.85E-02 on Mesh   1 at (  55   3  31)
+       ----------------------------------------------
+       CPU/step:     1.190 s, Total CPU:      1.30 hr
+       Time step:  0.01101 s, Total time:    45.45 s
+       Max CFL number:  0.86E+00 at ( 50,  5, 17)
+       Max divergence:  0.96E+01 at ( 49,  4,  4)
+       Min divergence: -0.32E+01 at ( 51,  1, 10)
+       Total Heat Release Rate:            223.230 kW
+       Radiation Loss to Boundaries:       -38.815 kW
+ 
+       Time Step    4000   September 24, 2012  14:08:53
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.80E-02 on Mesh   1 at (  47   1  31)
+       ----------------------------------------------
+       CPU/step:     1.179 s, Total CPU:      1.34 hr
+       Time step:  0.01005 s, Total time:    46.41 s
+       Max CFL number:  0.95E+00 at ( 49,  3, 23)
+       Max divergence:  0.10E+02 at ( 49,  4,  4)
+       Min divergence: -0.43E+01 at ( 48,  1, 20)
+       Total Heat Release Rate:            228.824 kW
+       Radiation Loss to Boundaries:       -39.184 kW
+ 
+       Time Step    4100   September 24, 2012  14:10:55
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  52   1   3)
+       ----------------------------------------------
+       CPU/step:     1.161 s, Total CPU:      1.37 hr
+       Time step:  0.00831 s, Total time:    47.37 s
+       Max CFL number:  0.88E+00 at ( 50,  3, 16)
+       Max divergence:  0.10E+02 at ( 49,  4,  4)
+       Min divergence: -0.30E+01 at ( 50,  3, 16)
+       Total Heat Release Rate:            232.200 kW
+       Radiation Loss to Boundaries:       -40.326 kW
+ 
+       Time Step    4200   September 24, 2012  14:12:58
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.78E-02 on Mesh   1 at (  50   2  31)
+       ----------------------------------------------
+       CPU/step:     1.162 s, Total CPU:      1.40 hr
+       Time step:  0.00984 s, Total time:    48.23 s
+       Max CFL number:  0.88E+00 at ( 52,  2, 15)
+       Max divergence:  0.94E+01 at ( 51,  1,  7)
+       Min divergence: -0.54E+01 at ( 51,  1, 13)
+       Total Heat Release Rate:            246.335 kW
+       Radiation Loss to Boundaries:       -43.751 kW
+ 
+       Time Step    4300   September 24, 2012  14:15:03
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.10E-01 on Mesh   1 at (  50   1  31)
+       ----------------------------------------------
+       CPU/step:     1.183 s, Total CPU:      1.43 hr
+       Time step:  0.00933 s, Total time:    49.18 s
+       Max CFL number:  0.94E+00 at ( 51,  3, 24)
+       Max divergence:  0.12E+02 at ( 49,  5,  4)
+       Min divergence: -0.47E+01 at ( 52,  1, 19)
+       Total Heat Release Rate:            312.942 kW
+       Radiation Loss to Boundaries:       -51.590 kW
+ 
+       Time Step    4400   September 24, 2012  14:17:09
+       Pressure Iterations:      9
+       Maximum Velocity Error:  0.90E-02 on Mesh   1 at (  50   1  31)
+       ----------------------------------------------
+       CPU/step:     1.188 s, Total CPU:      1.47 hr
+       Time step:  0.00794 s, Total time:    50.06 s
+       Max CFL number:  0.77E+00 at ( 52,  3, 12)
+       Max divergence:  0.11E+02 at ( 49,  4,  4)
+       Min divergence: -0.38E+01 at ( 52,  1, 11)
+       Total Heat Release Rate:            231.633 kW
+       Radiation Loss to Boundaries:       -41.446 kW
+ 
+       Time Step    4500   September 24, 2012  14:19:17
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.84E-02 on Mesh   1 at (  50   2  31)
+       ----------------------------------------------
+       CPU/step:     1.209 s, Total CPU:      1.50 hr
+       Time step:  0.00905 s, Total time:    50.97 s
+       Max CFL number:  0.97E+00 at ( 52,  2, 16)
+       Max divergence:  0.12E+02 at ( 49,  5,  4)
+       Min divergence: -0.50E+01 at ( 48,  1, 24)
+       Total Heat Release Rate:            245.078 kW
+       Radiation Loss to Boundaries:       -43.306 kW
+ 
+       Time Step    4600   September 24, 2012  14:21:49
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.23E-01 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.420 s, Total CPU:      1.54 hr
+       Time step:  0.00814 s, Total time:    51.81 s
+       Max CFL number:  0.98E+00 at ( 51,  2, 22)
+       Max divergence:  0.11E+02 at ( 49,  4,  4)
+       Min divergence: -0.44E+01 at ( 48,  1, 28)
+       Total Heat Release Rate:            244.578 kW
+       Radiation Loss to Boundaries:       -44.625 kW
+ 
+       Time Step    4700   September 24, 2012  14:24:21
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.90E-02 on Mesh   1 at (  52   2  31)
+       ----------------------------------------------
+       CPU/step:     1.423 s, Total CPU:      1.58 hr
+       Time step:  0.00787 s, Total time:    52.62 s
+       Max CFL number:  0.85E+00 at ( 52,  1, 23)
+       Max divergence:  0.12E+02 at ( 54,  5,  4)
+       Min divergence: -0.52E+01 at ( 51,  1, 21)
+       Total Heat Release Rate:            350.904 kW
+       Radiation Loss to Boundaries:       -61.034 kW
+ 
+       Time Step    4800   September 24, 2012  14:26:30
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.62E-02 on Mesh   1 at (  52   3  31)
+       ----------------------------------------------
+       CPU/step:     1.213 s, Total CPU:      1.61 hr
+       Time step:  0.00773 s, Total time:    53.50 s
+       Max CFL number:  0.93E+00 at ( 54,  1, 21)
+       Max divergence:  0.11E+02 at ( 49,  4,  4)
+       Min divergence: -0.12E+02 at ( 55,  1, 24)
+       Total Heat Release Rate:            374.849 kW
+       Radiation Loss to Boundaries:       -73.909 kW
+ 
+       Time Step    4900   September 24, 2012  14:28:37
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.87E-02 on Mesh   1 at (  50   4  31)
+       ----------------------------------------------
+       CPU/step:     1.191 s, Total CPU:      1.65 hr
+       Time step:  0.00851 s, Total time:    54.30 s
+       Max CFL number:  0.85E+00 at ( 53,  1, 16)
+       Max divergence:  0.12E+02 at ( 49,  6,  4)
+       Min divergence: -0.55E+01 at ( 52,  1, 22)
+       Total Heat Release Rate:            268.046 kW
+       Radiation Loss to Boundaries:       -50.543 kW
+ 
+       Time Step    5000   September 24, 2012  14:31:00
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.94E-02 on Mesh   1 at (  55   5  31)
+       ----------------------------------------------
+       CPU/step:     1.343 s, Total CPU:      1.68 hr
+       Time step:  0.00913 s, Total time:    55.16 s
+       Max CFL number:  0.97E+00 at ( 51,  1, 19)
+       Max divergence:  0.10E+02 at ( 49,  6,  4)
+       Min divergence: -0.56E+01 at ( 51,  1, 19)
+       Total Heat Release Rate:            350.769 kW
+       Radiation Loss to Boundaries:       -61.317 kW
+ 
+       Time Step    5100   September 24, 2012  14:33:25
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.56E-02 on Mesh   1 at (  55   2  31)
+       ----------------------------------------------
+       CPU/step:     1.354 s, Total CPU:      1.72 hr
+       Time step:  0.00770 s, Total time:    56.01 s
+       Max CFL number:  0.95E+00 at ( 51,  3, 20)
+       Max divergence:  0.16E+02 at ( 50,  1, 13)
+       Min divergence: -0.42E+01 at ( 51,  1, 26)
+       Total Heat Release Rate:            431.801 kW
+       Radiation Loss to Boundaries:       -85.837 kW
+ 
+       Time Step    5200   September 24, 2012  14:35:56
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.66E-02 on Mesh   1 at (  50   1  31)
+       ----------------------------------------------
+       CPU/step:     1.405 s, Total CPU:      1.76 hr
+       Time step:  0.00786 s, Total time:    56.78 s
+       Max CFL number:  0.96E+00 at ( 51,  2, 20)
+       Max divergence:  0.11E+02 at ( 52,  6,  4)
+       Min divergence: -0.53E+01 at ( 51,  1, 22)
+       Total Heat Release Rate:            333.776 kW
+       Radiation Loss to Boundaries:       -63.306 kW
+ 
+       Time Step    5300   September 24, 2012  14:38:14
+       Pressure Iterations:      9
+       Maximum Velocity Error:  0.89E-02 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.292 s, Total CPU:      1.80 hr
+       Time step:  0.00782 s, Total time:    57.55 s
+       Max CFL number:  0.86E+00 at ( 55,  1, 21)
+       Max divergence:  0.12E+02 at ( 50,  2,  6)
+       Min divergence: -0.57E+01 at ( 53,  1, 20)
+       Total Heat Release Rate:            282.308 kW
+       Radiation Loss to Boundaries:       -57.660 kW
+ 
+       Time Step    5400   September 24, 2012  14:40:29
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.91E-02 on Mesh   1 at (  47  15  31)
+       ----------------------------------------------
+       CPU/step:     1.267 s, Total CPU:      1.83 hr
+       Time step:  0.00885 s, Total time:    58.33 s
+       Max CFL number:  0.90E+00 at ( 50,  1, 16)
+       Max divergence:  0.11E+02 at ( 51,  6,  4)
+       Min divergence: -0.45E+01 at ( 50,  1, 16)
+       Total Heat Release Rate:            310.823 kW
+       Radiation Loss to Boundaries:       -61.812 kW
+ 
+       Time Step    5500   September 24, 2012  14:42:50
+       Pressure Iterations:      9
+       Maximum Velocity Error:  0.88E-02 on Mesh   1 at (  55  12  31)
+       ----------------------------------------------
+       CPU/step:     1.323 s, Total CPU:      1.87 hr
+       Time step:  0.00858 s, Total time:    59.15 s
+       Max CFL number:  0.92E+00 at ( 53,  2, 20)
+       Max divergence:  0.11E+02 at ( 49,  1,  4)
+       Min divergence: -0.43E+01 at ( 51,  1, 20)
+       Total Heat Release Rate:            365.211 kW
+       Radiation Loss to Boundaries:       -76.596 kW
+ 
+       Time Step    5600   September 24, 2012  14:45:03
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.99E-02 on Mesh   1 at (  55   1  31)
+       ----------------------------------------------
+       CPU/step:     1.241 s, Total CPU:      1.90 hr
+       Time step:  0.00772 s, Total time:    59.94 s
+       Max CFL number:  0.84E+00 at ( 51,  2, 20)
+       Max divergence:  0.13E+02 at ( 52,  5,  5)
+       Min divergence: -0.41E+01 at ( 51,  1, 20)
+       Total Heat Release Rate:            352.030 kW
+       Radiation Loss to Boundaries:       -76.373 kW
+ 
+       Time Step    5700   September 24, 2012  14:47:12
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.10E-01 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.215 s, Total CPU:      1.94 hr
+       Time step:  0.00761 s, Total time:    60.72 s
+       Max CFL number:  0.95E+00 at ( 51,  3, 22)
+       Max divergence:  0.12E+02 at ( 54,  1,  4)
+       Min divergence: -0.41E+01 at ( 52,  1,  9)
+       Total Heat Release Rate:            333.188 kW
+       Radiation Loss to Boundaries:       -66.637 kW
+ 
+       Time Step    5800   September 24, 2012  14:49:32
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.92E-02 on Mesh   1 at (  55   5  31)
+       ----------------------------------------------
+       CPU/step:     1.307 s, Total CPU:      1.97 hr
+       Time step:  0.00806 s, Total time:    61.53 s
+       Max CFL number:  0.89E+00 at ( 48,  1, 20)
+       Max divergence:  0.13E+02 at ( 49,  3,  4)
+       Min divergence: -0.59E+01 at ( 48,  2, 24)
+       Total Heat Release Rate:            299.208 kW
+       Radiation Loss to Boundaries:       -63.485 kW
+ 
+       Time Step    5900   September 24, 2012  14:51:49
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.74E-02 on Mesh   1 at (  59   9  31)
+       ----------------------------------------------
+       CPU/step:     1.286 s, Total CPU:      2.01 hr
+       Time step:  0.00862 s, Total time:    62.39 s
+       Max CFL number:  0.86E+00 at ( 50,  5, 19)
+       Max divergence:  0.12E+02 at ( 49,  4,  4)
+       Min divergence: -0.45E+01 at ( 52,  1, 12)
+       Total Heat Release Rate:            441.384 kW
+       Radiation Loss to Boundaries:       -83.198 kW
+ 
+       Time Step    6000   September 24, 2012  14:53:59
+       Pressure Iterations:      9
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  56   1  31)
+       ----------------------------------------------
+       CPU/step:     1.213 s, Total CPU:      2.04 hr
+       Time step:  0.00860 s, Total time:    63.17 s
+       Max CFL number:  0.91E+00 at ( 53,  1, 19)
+       Max divergence:  0.12E+02 at ( 49,  1,  4)
+       Min divergence: -0.82E+01 at ( 53,  1, 20)
+       Total Heat Release Rate:            398.716 kW
+       Radiation Loss to Boundaries:       -81.671 kW
+ 
+       Time Step    6100   September 24, 2012  14:56:07
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.11E-01 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.208 s, Total CPU:      2.07 hr
+       Time step:  0.00814 s, Total time:    63.91 s
+       Max CFL number:  0.90E+00 at ( 52,  2, 21)
+       Max divergence:  0.12E+02 at ( 52,  6,  4)
+       Min divergence: -0.46E+01 at ( 50,  5,  4)
+       Total Heat Release Rate:            349.372 kW
+       Radiation Loss to Boundaries:       -75.707 kW
+ 
+       Time Step    6200   September 24, 2012  14:58:21
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.82E-02 on Mesh   1 at (  55   1  31)
+       ----------------------------------------------
+       CPU/step:     1.254 s, Total CPU:      2.11 hr
+       Time step:  0.00743 s, Total time:    64.70 s
+       Max CFL number:  0.92E+00 at ( 53,  2, 17)
+       Max divergence:  0.13E+02 at ( 49,  4,  4)
+       Min divergence: -0.44E+01 at ( 54,  2, 25)
+       Total Heat Release Rate:            400.972 kW
+       Radiation Loss to Boundaries:       -82.503 kW
+ 
+       Time Step    6300   September 24, 2012  15:00:30
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.91E-02 on Mesh   1 at (  47   5  31)
+       ----------------------------------------------
+       CPU/step:     1.212 s, Total CPU:      2.14 hr
+       Time step:  0.00711 s, Total time:    65.45 s
+       Max CFL number:  0.87E+00 at ( 50,  2, 25)
+       Max divergence:  0.12E+02 at ( 49,  5,  4)
+       Min divergence: -0.46E+01 at ( 50,  1, 25)
+       Total Heat Release Rate:            420.980 kW
+       Radiation Loss to Boundaries:      -119.381 kW
+ 
+       Time Step    6400   September 24, 2012  15:02:47
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.15E-01 on Mesh   1 at (  52   3  31)
+       ----------------------------------------------
+       CPU/step:     1.290 s, Total CPU:      2.18 hr
+       Time step:  0.00821 s, Total time:    66.25 s
+       Max CFL number:  0.96E+00 at ( 52,  1, 17)
+       Max divergence:  0.16E+02 at ( 53,  1, 23)
+       Min divergence: -0.85E+01 at ( 53,  2, 23)
+       Total Heat Release Rate:            456.425 kW
+       Radiation Loss to Boundaries:      -100.500 kW
+ 
+       Time Step    6500   September 24, 2012  15:05:04
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  47   8  31)
+       ----------------------------------------------
+       CPU/step:     1.275 s, Total CPU:      2.21 hr
+       Time step:  0.00785 s, Total time:    67.05 s
+       Max CFL number:  0.89E+00 at ( 50,  1, 18)
+       Max divergence:  0.12E+02 at ( 49,  4,  4)
+       Min divergence: -0.54E+01 at ( 49,  1, 21)
+       Total Heat Release Rate:            495.673 kW
+       Radiation Loss to Boundaries:      -113.659 kW
+ 
+       Time Step    6600   September 24, 2012  15:07:15
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  52   2  31)
+       ----------------------------------------------
+       CPU/step:     1.228 s, Total CPU:      2.25 hr
+       Time step:  0.00800 s, Total time:    67.78 s
+       Max CFL number:  0.88E+00 at ( 50,  3, 25)
+       Max divergence:  0.12E+02 at ( 49,  4,  4)
+       Min divergence: -0.44E+01 at ( 50,  1, 23)
+       Total Heat Release Rate:            441.186 kW
+       Radiation Loss to Boundaries:       -96.713 kW
+ 
+       Time Step    6700   September 24, 2012  15:09:28
+       Pressure Iterations:      9
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  55  10  31)
+       ----------------------------------------------
+       CPU/step:     1.242 s, Total CPU:      2.28 hr
+       Time step:  0.00868 s, Total time:    68.55 s
+       Max CFL number:  0.93E+00 at ( 53,  2, 18)
+       Max divergence:  0.12E+02 at ( 51,  6,  4)
+       Min divergence: -0.64E+01 at ( 50,  3,  5)
+       Total Heat Release Rate:            455.093 kW
+       Radiation Loss to Boundaries:      -101.544 kW
+ 
+       Time Step    6800   September 24, 2012  15:11:57
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.83E-02 on Mesh   1 at (  47  13  31)
+       ----------------------------------------------
+       CPU/step:     1.389 s, Total CPU:      2.32 hr
+       Time step:  0.00793 s, Total time:    69.29 s
+       Max CFL number:  0.88E+00 at ( 50,  2, 22)
+       Max divergence:  0.12E+02 at ( 54,  3,  4)
+       Min divergence: -0.57E+01 at ( 52,  1, 25)
+       Total Heat Release Rate:            547.593 kW
+       Radiation Loss to Boundaries:      -125.431 kW
+ 
+       Time Step    6900   September 24, 2012  15:14:10
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.91E-02 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.246 s, Total CPU:      2.36 hr
+       Time step:  0.00751 s, Total time:    70.04 s
+       Max CFL number:  0.87E+00 at ( 52,  3, 17)
+       Max divergence:  0.12E+02 at ( 54,  3,  4)
+       Min divergence: -0.31E+01 at ( 51,  1, 22)
+       Total Heat Release Rate:            558.955 kW
+       Radiation Loss to Boundaries:      -169.253 kW
+ 
+       Time Step    7000   September 24, 2012  15:16:21
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.87E-02 on Mesh   1 at (  52  12  31)
+       ----------------------------------------------
+       CPU/step:     1.224 s, Total CPU:      2.39 hr
+       Time step:  0.00805 s, Total time:    70.77 s
+       Max CFL number:  0.85E+00 at ( 52,  1, 23)
+       Max divergence:  0.12E+02 at ( 54,  1,  4)
+       Min divergence: -0.34E+01 at ( 52,  3, 20)
+       Total Heat Release Rate:            396.156 kW
+       Radiation Loss to Boundaries:      -102.476 kW
+ 
+       Time Step    7100   September 24, 2012  15:18:42
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.76E-02 on Mesh   1 at (  47  16  31)
+       ----------------------------------------------
+       CPU/step:     1.320 s, Total CPU:      2.43 hr
+       Time step:  0.00770 s, Total time:    71.51 s
+       Max CFL number:  0.85E+00 at ( 50,  2, 22)
+       Max divergence:  0.12E+02 at ( 49,  4,  4)
+       Min divergence: -0.56E+01 at ( 50,  1, 23)
+       Total Heat Release Rate:            430.282 kW
+       Radiation Loss to Boundaries:      -106.478 kW
+ 
+       Time Step    7200   September 24, 2012  15:20:58
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.11E-01 on Mesh   1 at (  50   1  31)
+       ----------------------------------------------
+       CPU/step:     1.278 s, Total CPU:      2.46 hr
+       Time step:  0.00780 s, Total time:    72.29 s
+       Max CFL number:  0.89E+00 at ( 53,  3, 19)
+       Max divergence:  0.12E+02 at ( 49,  4,  4)
+       Min divergence: -0.36E+01 at ( 56,  1, 19)
+       Total Heat Release Rate:            554.609 kW
+       Radiation Loss to Boundaries:      -146.353 kW
+ 
+       Time Step    7300   September 24, 2012  15:23:28
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.97E-02 on Mesh   1 at (  55   8  31)
+       ----------------------------------------------
+       CPU/step:     1.395 s, Total CPU:      2.50 hr
+       Time step:  0.00723 s, Total time:    73.05 s
+       Max CFL number:  0.80E+00 at ( 50,  2, 20)
+       Max divergence:  0.11E+02 at ( 54,  3,  4)
+       Min divergence: -0.52E+01 at ( 53,  6,  4)
+       Total Heat Release Rate:            527.083 kW
+       Radiation Loss to Boundaries:      -161.932 kW
+ 
+       Time Step    7400   September 24, 2012  15:26:05
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.82E-02 on Mesh   1 at (  55   7  31)
+       ----------------------------------------------
+       CPU/step:     1.448 s, Total CPU:      2.54 hr
+       Time step:  0.00673 s, Total time:    73.80 s
+       Max CFL number:  0.89E+00 at ( 52,  1, 21)
+       Max divergence:  0.14E+02 at ( 49,  2,  4)
+       Min divergence: -0.62E+01 at ( 52,  1, 21)
+       Total Heat Release Rate:            510.432 kW
+       Radiation Loss to Boundaries:      -146.585 kW
+ 
+       Time Step    7500   September 24, 2012  15:28:30
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.17E-01 on Mesh   1 at (  50   4  31)
+       ----------------------------------------------
+       CPU/step:     1.351 s, Total CPU:      2.58 hr
+       Time step:  0.00748 s, Total time:    74.52 s
+       Max CFL number:  0.93E+00 at ( 52,  1, 18)
+       Max divergence:  0.12E+02 at ( 49,  2,  4)
+       Min divergence: -0.48E+01 at ( 54,  1, 19)
+       Total Heat Release Rate:            536.857 kW
+       Radiation Loss to Boundaries:      -186.752 kW
+ 
+       Time Step    7600   September 24, 2012  15:30:42
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.83E-02 on Mesh   1 at (  52   4  31)
+       ----------------------------------------------
+       CPU/step:     1.237 s, Total CPU:      2.61 hr
+       Time step:  0.00630 s, Total time:    75.28 s
+       Max CFL number:  0.77E+00 at ( 51,  2, 24)
+       Max divergence:  0.12E+02 at ( 49,  5,  4)
+       Min divergence: -0.40E+01 at ( 50,  1, 25)
+       Total Heat Release Rate:            599.705 kW
+       Radiation Loss to Boundaries:      -187.059 kW
+ 
+       Time Step    7700   September 24, 2012  15:32:53
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.17E-01 on Mesh   1 at (  47   1  31)
+       ----------------------------------------------
+       CPU/step:     1.227 s, Total CPU:      2.65 hr
+       Time step:  0.00738 s, Total time:    76.04 s
+       Max CFL number:  0.85E+00 at ( 53,  3, 23)
+       Max divergence:  0.12E+02 at ( 49,  5,  4)
+       Min divergence: -0.62E+01 at ( 52,  1, 20)
+       Total Heat Release Rate:            597.073 kW
+       Radiation Loss to Boundaries:      -189.523 kW
+ 
+       Time Step    7800   September 24, 2012  15:35:24
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.13E-01 on Mesh   1 at (  55  11  31)
+       ----------------------------------------------
+       CPU/step:     1.401 s, Total CPU:      2.69 hr
+       Time step:  0.00756 s, Total time:    76.77 s
+       Max CFL number:  0.93E+00 at ( 53,  3, 25)
+       Max divergence:  0.12E+02 at ( 49,  1, 14)
+       Min divergence: -0.44E+01 at ( 49,  1, 13)
+       Total Heat Release Rate:            702.808 kW
+       Radiation Loss to Boundaries:      -165.229 kW
+ 
+       Time Step    7900   September 24, 2012  15:38:07
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.83E-02 on Mesh   1 at (  47  18  31)
+       ----------------------------------------------
+       CPU/step:     1.507 s, Total CPU:      2.73 hr
+       Time step:  0.00786 s, Total time:    77.51 s
+       Max CFL number:  0.88E+00 at ( 51,  3, 20)
+       Max divergence:  0.12E+02 at ( 53,  3, 20)
+       Min divergence: -0.34E+01 at ( 46,  1, 27)
+       Total Heat Release Rate:            690.752 kW
+       Radiation Loss to Boundaries:      -182.029 kW
+ 
+       Time Step    8000   September 24, 2012  15:40:49
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.92E-02 on Mesh   1 at (  56   1  31)
+       ----------------------------------------------
+       CPU/step:     1.500 s, Total CPU:      2.77 hr
+       Time step:  0.00791 s, Total time:    78.27 s
+       Max CFL number:  0.93E+00 at ( 52,  3, 24)
+       Max divergence:  0.13E+02 at ( 54,  3, 13)
+       Min divergence: -0.42E+01 at ( 51,  5,  5)
+       Total Heat Release Rate:            637.191 kW
+       Radiation Loss to Boundaries:      -173.627 kW
+ 
+       Time Step    8100   September 24, 2012  15:43:30
+       Pressure Iterations:      7
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  46   1  31)
+       ----------------------------------------------
+       CPU/step:     1.491 s, Total CPU:      2.81 hr
+       Time step:  0.00680 s, Total time:    79.05 s
+       Max CFL number:  0.89E+00 at ( 51,  3, 18)
+       Max divergence:  0.12E+02 at ( 50,  4,  6)
+       Min divergence: -0.57E+01 at ( 47,  1, 22)
+       Total Heat Release Rate:            553.483 kW
+       Radiation Loss to Boundaries:      -154.510 kW
+ 
+       Time Step    8200   September 24, 2012  15:46:08
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.15E-01 on Mesh   1 at (  47   1  31)
+       ----------------------------------------------
+       CPU/step:     1.472 s, Total CPU:      2.85 hr
+       Time step:  0.00730 s, Total time:    79.79 s
+       Max CFL number:  0.99E+00 at ( 51,  3, 24)
+       Max divergence:  0.12E+02 at ( 54,  6,  4)
+       Min divergence: -0.33E+01 at ( 50,  7, 30)
+       Total Heat Release Rate:            714.765 kW
+       Radiation Loss to Boundaries:      -220.582 kW
+ 
+       Time Step    8300   September 24, 2012  15:48:46
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.16E-01 on Mesh   1 at (  55   1  31)
+       ----------------------------------------------
+       CPU/step:     1.466 s, Total CPU:      2.89 hr
+       Time step:  0.00733 s, Total time:    80.50 s
+       Max CFL number:  0.92E+00 at ( 52,  2, 21)
+       Max divergence:  0.12E+02 at ( 53,  2,  5)
+       Min divergence: -0.47E+01 at ( 56,  1, 19)
+       Total Heat Release Rate:            625.693 kW
+       Radiation Loss to Boundaries:      -193.356 kW
+ 
+       Time Step    8400   September 24, 2012  15:51:25
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.12E-01 on Mesh   1 at (  43   7  31)
+       ----------------------------------------------
+       CPU/step:     1.470 s, Total CPU:      2.93 hr
+       Time step:  0.00726 s, Total time:    81.23 s
+       Max CFL number:  0.83E+00 at ( 51,  2, 20)
+       Max divergence:  0.12E+02 at ( 53,  3,  6)
+       Min divergence: -0.50E+01 at ( 47,  1, 24)
+       Total Heat Release Rate:            615.729 kW
+       Radiation Loss to Boundaries:      -162.168 kW
+ 
+       Time Step    8500   September 24, 2012  15:53:47
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.99E-02 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.326 s, Total CPU:      2.97 hr
+       Time step:  0.00774 s, Total time:    81.99 s
+       Max CFL number:  0.85E+00 at ( 52,  1, 22)
+       Max divergence:  0.15E+02 at ( 51,  2, 22)
+       Min divergence: -0.31E+01 at ( 53,  1, 25)
+       Total Heat Release Rate:            725.684 kW
+       Radiation Loss to Boundaries:      -217.891 kW
+ 
+       Time Step    8600   September 24, 2012  15:56:00
+       Pressure Iterations:      6
+       Maximum Velocity Error:  0.85E-02 on Mesh   1 at (  50  26  31)
+       ----------------------------------------------
+       CPU/step:     1.247 s, Total CPU:      3.01 hr
+       Time step:  0.00712 s, Total time:    82.75 s
+       Max CFL number:  0.87E+00 at ( 51,  1, 18)
+       Max divergence:  0.12E+02 at ( 49,  4,  4)
+       Min divergence: -0.38E+01 at ( 45,  1, 27)
+       Total Heat Release Rate:            676.585 kW
+       Radiation Loss to Boundaries:      -239.085 kW
+ 
+       Time Step    8700   September 24, 2012  15:58:11
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.13E-01 on Mesh   1 at (  47   1  31)
+       ----------------------------------------------
+       CPU/step:     1.228 s, Total CPU:      3.04 hr
+       Time step:  0.00783 s, Total time:    83.51 s
+       Max CFL number:  0.87E+00 at ( 53,  2, 20)
+       Max divergence:  0.13E+02 at ( 55,  1, 20)
+       Min divergence: -0.67E+01 at ( 55,  2, 23)
+       Total Heat Release Rate:            768.105 kW
+       Radiation Loss to Boundaries:      -228.005 kW
+ 
+       Time Step    8800   September 24, 2012  16:00:24
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.16E-01 on Mesh   1 at (  55   1  31)
+       ----------------------------------------------
+       CPU/step:     1.242 s, Total CPU:      3.07 hr
+       Time step:  0.00783 s, Total time:    84.29 s
+       Max CFL number:  0.88E+00 at ( 53,  4, 19)
+       Max divergence:  0.12E+02 at ( 49,  4,  4)
+       Min divergence: -0.36E+01 at ( 52,  4,  5)
+       Total Heat Release Rate:            639.691 kW
+       Radiation Loss to Boundaries:      -191.144 kW
+ 
+       Time Step    8900   September 24, 2012  16:02:34
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.11E-01 on Mesh   1 at (  52   4  31)
+       ----------------------------------------------
+       CPU/step:     1.215 s, Total CPU:      3.11 hr
+       Time step:  0.00775 s, Total time:    85.05 s
+       Max CFL number:  0.89E+00 at ( 53,  3, 26)
+       Max divergence:  0.12E+02 at ( 49,  6,  4)
+       Min divergence: -0.34E+01 at ( 52,  6, 12)
+       Total Heat Release Rate:            664.092 kW
+       Radiation Loss to Boundaries:      -235.895 kW
+ 
+       Time Step    9000   September 24, 2012  16:04:47
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.19E-01 on Mesh   1 at (  47   3  31)
+       ----------------------------------------------
+       CPU/step:     1.246 s, Total CPU:      3.14 hr
+       Time step:  0.00723 s, Total time:    85.81 s
+       Max CFL number:  0.89E+00 at ( 51,  3, 20)
+       Max divergence:  0.13E+02 at ( 49,  6,  4)
+       Min divergence: -0.44E+01 at ( 49,  4, 25)
+       Total Heat Release Rate:            787.998 kW
+       Radiation Loss to Boundaries:      -276.408 kW
+ 
+       Time Step    9100   September 24, 2012  16:06:59
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.35E-01 on Mesh   1 at (  55   1  31)
+       ----------------------------------------------
+       CPU/step:     1.240 s, Total CPU:      3.18 hr
+       Time step:  0.00730 s, Total time:    86.55 s
+       Max CFL number:  0.88E+00 at ( 52,  3, 20)
+       Max divergence:  0.10E+02 at ( 53,  3, 14)
+       Min divergence: -0.60E+01 at ( 51,  1, 20)
+       Total Heat Release Rate:            640.597 kW
+       Radiation Loss to Boundaries:      -306.025 kW
+ 
+       Time Step    9200   September 24, 2012  16:09:11
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.95E-02 on Mesh   1 at (  56   1  31)
+       ----------------------------------------------
+       CPU/step:     1.235 s, Total CPU:      3.21 hr
+       Time step:  0.00724 s, Total time:    87.30 s
+       Max CFL number:  0.95E+00 at ( 50,  3, 22)
+       Max divergence:  0.11E+02 at ( 50,  2,  5)
+       Min divergence: -0.35E+01 at ( 54,  1, 24)
+       Total Heat Release Rate:            823.655 kW
+       Radiation Loss to Boundaries:      -267.058 kW
+ 
+       Time Step    9300   September 24, 2012  16:11:25
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.14E-01 on Mesh   1 at (  50   4  31)
+       ----------------------------------------------
+       CPU/step:     1.252 s, Total CPU:      3.25 hr
+       Time step:  0.00770 s, Total time:    88.10 s
+       Max CFL number:  0.89E+00 at ( 51,  3, 22)
+       Max divergence:  0.13E+02 at ( 51,  3, 12)
+       Min divergence: -0.40E+01 at ( 46,  1, 27)
+       Total Heat Release Rate:            805.192 kW
+       Radiation Loss to Boundaries:      -283.478 kW
+ 
+       Time Step    9400   September 24, 2012  16:13:55
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.13E-01 on Mesh   1 at (  59   1  31)
+       ----------------------------------------------
+       CPU/step:     1.390 s, Total CPU:      3.28 hr
+       Time step:  0.00789 s, Total time:    88.86 s
+       Max CFL number:  0.84E+00 at ( 53,  3, 22)
+       Max divergence:  0.13E+02 at ( 50,  2,  6)
+       Min divergence: -0.49E+01 at ( 49,  5, 19)
+       Total Heat Release Rate:            918.355 kW
+       Radiation Loss to Boundaries:      -322.100 kW
+ 
+       Time Step    9500   September 24, 2012  16:16:39
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.10E-01 on Mesh   1 at (  52  11  31)
+       ----------------------------------------------
+       CPU/step:     1.513 s, Total CPU:      3.33 hr
+       Time step:  0.00706 s, Total time:    89.59 s
+       Max CFL number:  0.80E+00 at ( 53,  6, 26)
+       Max divergence:  0.12E+02 at ( 52,  4, 21)
+       Min divergence: -0.32E+01 at ( 53,  8, 30)
+       Total Heat Release Rate:            935.445 kW
+       Radiation Loss to Boundaries:      -311.200 kW
+ 
+       Time Step    9600   September 24, 2012  16:19:19
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.76E-02 on Mesh   1 at (  52   5  31)
+       ----------------------------------------------
+       CPU/step:     1.485 s, Total CPU:      3.37 hr
+       Time step:  0.00733 s, Total time:    90.35 s
+       Max CFL number:  0.86E+00 at ( 52,  3, 23)
+       Max divergence:  0.17E+02 at ( 54,  1, 19)
+       Min divergence: -0.46E+01 at ( 50,  1, 22)
+       Total Heat Release Rate:            741.469 kW
+       Radiation Loss to Boundaries:      -252.452 kW
+ 
+       Time Step    9700   September 24, 2012  16:22:01
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.14E-01 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.497 s, Total CPU:      3.41 hr
+       Time step:  0.00778 s, Total time:    91.12 s
+       Max CFL number:  0.99E+00 at ( 51,  4, 16)
+       Max divergence:  0.12E+02 at ( 51,  5,  6)
+       Min divergence: -0.71E+01 at ( 52,  5, 23)
+       Total Heat Release Rate:            947.000 kW
+       Radiation Loss to Boundaries:      -354.799 kW
+ 
+       Time Step    9800   September 24, 2012  16:24:44
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.32E-01 on Mesh   1 at (  55   8  31)
+       ----------------------------------------------
+       CPU/step:     1.515 s, Total CPU:      3.45 hr
+       Time step:  0.00766 s, Total time:    91.85 s
+       Max CFL number:  0.94E+00 at ( 54,  2, 21)
+       Max divergence:  0.13E+02 at ( 53,  3,  8)
+       Min divergence: -0.45E+01 at ( 49,  9, 30)
+       Total Heat Release Rate:            796.399 kW
+       Radiation Loss to Boundaries:      -341.923 kW
+ 
+       Time Step    9900   September 24, 2012  16:27:27
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.15E-01 on Mesh   1 at (  55  12  31)
+       ----------------------------------------------
+       CPU/step:     1.502 s, Total CPU:      3.49 hr
+       Time step:  0.00793 s, Total time:    92.60 s
+       Max CFL number:  0.85E+00 at ( 53,  5, 17)
+       Max divergence:  0.12E+02 at ( 51,  2, 13)
+       Min divergence: -0.41E+01 at ( 52,  6, 24)
+       Total Heat Release Rate:            991.944 kW
+       Radiation Loss to Boundaries:      -403.076 kW
+ 
+       Time Step   10000   September 24, 2012  16:30:11
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.10E-01 on Mesh   1 at (  47  16  31)
+       ----------------------------------------------
+       CPU/step:     1.519 s, Total CPU:      3.54 hr
+       Time step:  0.00766 s, Total time:    93.36 s
+       Max CFL number:  0.95E+00 at ( 53,  3, 23)
+       Max divergence:  0.13E+02 at ( 54,  1, 21)
+       Min divergence: -0.37E+01 at ( 45,  2, 28)
+       Total Heat Release Rate:            924.596 kW
+       Radiation Loss to Boundaries:      -344.850 kW
+ 
+       Time Step   10100   September 24, 2012  16:32:55
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.20E-01 on Mesh   1 at (  47   1  31)
+       ----------------------------------------------
+       CPU/step:     1.509 s, Total CPU:      3.58 hr
+       Time step:  0.00771 s, Total time:    94.13 s
+       Max CFL number:  0.90E+00 at ( 52,  4, 24)
+       Max divergence:  0.12E+02 at ( 49,  6,  4)
+       Min divergence: -0.41E+01 at ( 53,  7, 30)
+       Total Heat Release Rate:            831.172 kW
+       Radiation Loss to Boundaries:      -350.122 kW
+ 
+       Time Step   10200   September 24, 2012  16:35:38
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.17E-01 on Mesh   1 at (  55   9  31)
+       ----------------------------------------------
+       CPU/step:     1.509 s, Total CPU:      3.62 hr
+       Time step:  0.00690 s, Total time:    94.91 s
+       Max CFL number:  0.92E+00 at ( 51,  2, 22)
+       Max divergence:  0.13E+02 at ( 50,  2,  9)
+       Min divergence: -0.48E+01 at ( 52, 12, 30)
+       Total Heat Release Rate:            975.384 kW
+       Radiation Loss to Boundaries:      -345.836 kW
+ 
+       Time Step   10300   September 24, 2012  16:38:22
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.27E-01 on Mesh   1 at (  52   1  31)
+       ----------------------------------------------
+       CPU/step:     1.515 s, Total CPU:      3.66 hr
+       Time step:  0.00797 s, Total time:    95.70 s
+       Max CFL number:  0.90E+00 at ( 52,  1, 22)
+       Max divergence:  0.12E+02 at ( 50,  1, 27)
+       Min divergence: -0.56E+01 at ( 48,  1, 25)
+       Total Heat Release Rate:            921.862 kW
+       Radiation Loss to Boundaries:      -421.538 kW
+ 
+       Time Step   10400   September 24, 2012  16:41:05
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.11E-01 on Mesh   1 at (  50   1  31)
+       ----------------------------------------------
+       CPU/step:     1.510 s, Total CPU:      3.70 hr
+       Time step:  0.00725 s, Total time:    96.47 s
+       Max CFL number:  0.85E+00 at ( 53,  2, 18)
+       Max divergence:  0.12E+02 at ( 51,  4, 12)
+       Min divergence: -0.44E+01 at ( 50,  2, 28)
+       Total Heat Release Rate:            953.766 kW
+       Radiation Loss to Boundaries:      -418.420 kW
+ 
+       Time Step   10500   September 24, 2012  16:43:40
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.11E-01 on Mesh   1 at (  55   7  31)
+       ----------------------------------------------
+       CPU/step:     1.435 s, Total CPU:      3.74 hr
+       Time step:  0.00790 s, Total time:    97.23 s
+       Max CFL number:  0.90E+00 at ( 52,  3, 21)
+       Max divergence:  0.12E+02 at ( 49,  3,  9)
+       Min divergence: -0.40E+01 at ( 53,  1, 23)
+       Total Heat Release Rate:           1137.819 kW
+       Radiation Loss to Boundaries:      -435.881 kW
+ 
+       Time Step   10600   September 24, 2012  16:46:18
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.19E-01 on Mesh   1 at (  59   1  31)
+       ----------------------------------------------
+       CPU/step:     1.466 s, Total CPU:      3.78 hr
+       Time step:  0.00743 s, Total time:    98.01 s
+       Max CFL number:  0.87E+00 at ( 50,  2, 23)
+       Max divergence:  0.14E+02 at ( 52, 13, 28)
+       Min divergence: -0.44E+01 at ( 55,  3, 26)
+       Total Heat Release Rate:           1042.524 kW
+       Radiation Loss to Boundaries:      -476.762 kW
+ 
+       Time Step   10700   September 24, 2012  16:48:49
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.17E-01 on Mesh   1 at (  55   1  31)
+       ----------------------------------------------
+       CPU/step:     1.398 s, Total CPU:      3.82 hr
+       Time step:  0.00786 s, Total time:    98.79 s
+       Max CFL number:  0.90E+00 at ( 50,  4, 17)
+       Max divergence:  0.11E+02 at ( 49,  6,  4)
+       Min divergence: -0.37E+01 at ( 59,  1, 28)
+       Total Heat Release Rate:           1112.819 kW
+       Radiation Loss to Boundaries:      -458.815 kW
+ 
+       Time Step   10800   September 24, 2012  16:51:04
+       Pressure Iterations:     10
+       Maximum Velocity Error:  0.14E-01 on Mesh   1 at (  60   1  31)
+       ----------------------------------------------
+       CPU/step:     1.261 s, Total CPU:      3.86 hr
+       Time step:  0.00747 s, Total time:    99.56 s
+       Max CFL number:  0.86E+00 at ( 54,  2, 23)
+       Max divergence:  0.11E+02 at ( 59,  1, 28)
+       Min divergence: -0.42E+01 at ( 56,  1, 28)
+       Total Heat Release Rate:            929.061 kW
+       Radiation Loss to Boundaries:      -379.478 kW
+ 
+       Time Step   10856   September 24, 2012  16:52:22
+       Pressure Iterations:      8
+       Maximum Velocity Error:  0.93E-02 on Mesh   1 at (  52   7  31)
+       ----------------------------------------------
+       CPU/step:     1.295 s, Total CPU:      3.88 hr
+       Time step:  0.00793 s, Total time:   100.01 s
+       Max CFL number:  0.90E+00 at ( 54,  4, 25)
+       Max divergence:  0.11E+02 at ( 59,  1, 28)
+       Min divergence: -0.42E+01 at ( 56,  1, 28)
+       Total Heat Release Rate:            941.840 kW
+       Radiation Loss to Boundaries:      -412.976 kW
  
 
 
  DEVICE Activation Times
 
-   1  SPRINKLER 1                       75.0 s
-   2  SPRINKLER 2                       69.7 s
-   3  SPRINKLER 3                       73.7 s
-   4  SPRINKLER 4                       75.3 s
+   1  SPRINKLER 1                       71.6 s
+   2  SPRINKLER 2                       71.1 s
+   3  SPRINKLER 3                       73.5 s
+   4  SPRINKLER 4                       74.6 s
 
 
  CPU Time Usage, Mesh   1
 
                  CPU (s)        %  
        ----------------------------
-       MAIN     15845.46     100.00
-       DIVG      4547.92      28.70
-       MASS      1150.36       7.26
-       VELO      3474.29      21.93
-       PRES      2307.49      14.56
-       WALL       987.18       6.23
-       DUMP       254.93       1.61
+       MAIN     14872.21     100.00
+       DIVG      3565.22      23.97
+       MASS       811.56       5.46
+       VELO      3023.18      20.33
+       PRES      3450.19      23.20
+       WALL       794.79       5.34
+       DUMP       197.82       1.33
        PART         0.00       0.00
-       RADI      2461.04      15.53
-       FIRE       130.54       0.82
-       COMM         0.39       0.00
-       SubTot   15314.12      96.65
+       RADI      2014.35      13.54
+       FIRE       102.09       0.69
+       COMM         0.43       0.00
+       SubTot   13959.63      93.86
 
 
- Time Stepping Wall Clock Time (s):    15890.081
- Total Elapsed Wall Clock Time (s):    15895.465
+ Time Stepping Wall Clock Time (s):    14879.682
+ Total Elapsed Wall Clock Time (s):    14884.513
 
 STOP: FDS completed successfully
