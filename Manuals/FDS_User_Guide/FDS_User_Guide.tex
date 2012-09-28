@@ -2020,11 +2020,12 @@ You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
 
 \footnotesize
 \begin{verbatim}
+&MISC PROJECTION=.TRUE. /
 &CSVF UVWFILE='my_velocity_field.csv' /
 \end{verbatim}
 \normalsize
 
-\noindent If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.
+\noindent If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.  It is recommended that the user also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
 
 \subsection{Special Topic: Defying Gravity}
