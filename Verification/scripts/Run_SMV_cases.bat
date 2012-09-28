@@ -2,8 +2,15 @@
 set svn_drive=c:
 
 set SCRIPT_DIR=%CD%
-set BASEDIR=%CD%\..
-set SVNROOT=%BASEDIR%\..\
+cd %CD%\..
+set BASEDIR=%CD%
+
+cd %BASEDIR%\..\
+set SVNROOT=%CD%
+
+cd %SVNROOT%\..\cfast\
+set CFAST=%CD%
+
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
@@ -20,7 +27,7 @@ Rem set FDSEXE=fds
 Rem Choose CFAST version (repository or release)
 
 Rem set CFASTEXE=cfast6
-set CFASTEXE=%SVNROOT%\..\cfast\CFAST\intel_win_64\cfast6_win_64
+set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast6_win_64
 
 Rem Run jobs in background (or not)
 
@@ -32,7 +39,7 @@ Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 set FDS=%bg%%FDSEXE%
 set CFAST=%bg%%CFASTEXE%
-set SH2BAT=..\..\Utilities\Data_Processing\sh2bat
+set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
 
 echo You are about to run the Smokeview Verification Test Suite.
 echo.
@@ -42,6 +49,7 @@ echo.
 echo Press any key to proceed, CTRL c to abort
 pause > Nul
 
+cd %SCRIPT_DIR%
 echo creating FDS case list from SMV_Cases.sh
 %SH2BAT% SMV_Cases.sh SMV_Cases.bat
 
@@ -54,7 +62,7 @@ time /t >> %TIME_FILE%
 Rem create a text file containing the FDS5 version used to run these tests.
 Rem This file is included in the smokeview user's guide
 
-set smvug="%CD%\..\Manuals\SMV_User_Guide\"
+set smvug="%SVNROOT%\Manuals\SMV_User_Guide\"
 echo | %FDSEXE% 2> "%smvug%\figures\fds5.version"
 
 call %SCRIPT_DIR%\SMV_Cases.bat
