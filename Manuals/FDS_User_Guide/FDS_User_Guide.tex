@@ -3993,8 +3993,8 @@ the size of each condensed phase cell is changed according to the ratio $\delta$
 \be
 \delta =
    \begin{cases}
- 	\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right) & \text{if }\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right)\geq 1 \\
- 	\sum_i\left(\frac{\rho_{s,i}}{\rho_i}\right) & \text{if }\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right)<1
+   \max_i\left(\frac{\rho_{s,i}}{\rho_i}\right) & \text{if }\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right)\geq 1 \\
+   \sum_i\left(\frac{\rho_{s,i}}{\rho_i}\right) & \text{if }\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right)<1
    \end{cases}
 \ee
 For example, if the original material with {\ct DENSITY = 500.} is completely converted into a residue with {\ct DENSITY = 1000.}, the thickness
@@ -6094,15 +6094,15 @@ The {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using bo
 \end{verbatim} \normalsize
 Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. We also want each fuel to follow a ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the remainder of a 600~s simulation. 
 \footnotesize \begin{verbatim}
-&RAMP ID='poly'	 T = 0  , F = 0.0  / 
-&RAMP ID='poly'	 T = 50 , F = 0.5  /        
-&RAMP ID='poly'	 T = 100, F = 1.0  / 
-&RAMP ID='poly'	 T = 600, F = 1.0  /      
+&RAMP ID='poly'    T = 0  , F = 0.0  / 
+&RAMP ID='poly'    T = 50 , F = 0.5  /        
+&RAMP ID='poly'    T = 100, F = 1.0  / 
+&RAMP ID='poly'    T = 600, F = 1.0  /      
 
-&RAMP ID='wood'	 T = 0  , F = 0.0  / 
-&RAMP ID='wood'	 T = 50 , F = 0.5  /        
-&RAMP ID='wood'	 T = 100, F = 1.0  / 
-&RAMP ID='wood'	 T = 600, F = 1.0  /
+&RAMP ID='wood'    T = 0  , F = 0.0  / 
+&RAMP ID='wood'    T = 50 , F = 0.5  /        
+&RAMP ID='wood'    T = 100, F = 1.0  / 
+&RAMP ID='wood'    T = 600, F = 1.0  /
 \end{verbatim} \normalsize
 Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass flux specified on the {\ct SURF} line. Fig.~\ref{fig:hrr_two_fuels} compares the resulting FDS heat release rate (HRR) to the expected HRR from the defined ramp. Note that in this simulation, there is 10~s averaging on the FDS output HRR ({\ct \&DUMP DT\_HRR=10}) and the expected results account for this averaging.
 
@@ -9825,6 +9825,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
 {\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%             & D            \\ \hline
+{\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                    & Pa             & D,I,P,S      \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:PROF}                       & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
