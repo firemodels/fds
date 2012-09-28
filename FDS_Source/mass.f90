@@ -625,7 +625,11 @@ INTEGER, INTENT(IN) :: NM
  
 IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
-IF (PERIODIC_TEST==2) RETURN
+
+! If the RHS of the continuity equation does not yet satisfy the divergence constraint, return.
+! This is typical of the case where an initial velocity field is specified by the user.
+
+IF (PROJECTION .AND. ICYC<=1) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
