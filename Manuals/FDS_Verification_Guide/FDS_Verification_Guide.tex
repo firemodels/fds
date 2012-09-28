@@ -2034,7 +2034,7 @@ mass of the three combustion products. The figure compares the simple chemistry 
 
 \clearpage
 
-\section{Reaction Rates (\texorpdfstring{\bf ReactionRate\_}{ReactionRate\_})}
+\section{Reaction Rates (\texorpdfstring{\bf reactionrate}{reactionrate})}
 
 This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. In the infinite-rate case, the rate becomes limited by the species concentrations of the reactants that have mixed. For finite-rate reactions, the rate is dependent on factors such as local species concentration and temperature:
 
@@ -2147,7 +2147,7 @@ The species evolutions are compared to expected values in Figure \ref{fig:EDC_2S
 
 
 
-\subsection{Finite Rate Reactions (\texorpdfstring{\bf ReactionRate\_Arrhenius\_}{ReactionRate\_Arrhenius\_})}
+\subsection{Finite Rate Reactions (\texorpdfstring{\bf reactionrate\_arrhenius}{reactionrate\_arrhenius})}
 
 The main difference between Arrhenius rate reactions and the mixing-controlled reactions is that the reaction rate in finite rate reactions is found from local parameters such as species concentration and temperature as well as rate constants. The values of $a_{\alpha}$ in Equation (\ref{eq:Arrheniusratemode}) are specific to each reaction and for non-zero values, $\frac{\mbox{d}\phi_{F}}{\mbox{d}t}$ becomes  a non-linear differential equation. We consider both linear and non-linear cases with one and two-step reaction mechanisms. First we examine two one-step cases; a zero-order and second-order reaction. Equation (\ref{eq:1step_CO}) shows a one-step, zero-order test case of carbon monoxide oxidation:
 \begin{equation}\label{eq:1step_CO}
@@ -2166,9 +2166,9 @@ $\alpha$ is defined as [$\mathrm{CO}$ $\mathrm{O_2}$ $\mathrm{CO_2}$].
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_0Order_1Step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_0order_1step}
 \end{center}
-\caption[Species Evolution in a Zero-Order 1 Step Finite Rate Reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction.}
+\caption[Species evolution in a 0-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_0Order_1step}
 \end{figure}
 The second finite rate test case is a one-step, second-order propane reaction, Eq.~(\ref{eq:1step_propane}). The table below shows the reaction rate input parameters. In this case, $a_{\alpha}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively. This makes the reaction second-order as $\mathcal{O}=\sum a_{\alpha}$. Species evolutions for the one-step second-order reaction are shown in Figure \ref{fig:Arrhenius_2Order_1step}.
@@ -2184,9 +2184,9 @@ $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO_2}$ $\mathr
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_2Order_1Step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step}
 \end{center}
-\caption[Species Evolution in a Second-Order 1 Step Finite Rate Reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction.}
+\caption[Species evolution in a 2-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
 Multi-step Arrhenius finite rate reactions are also examined. First, we consider a two-step forward propane reaction:
@@ -2228,17 +2228,17 @@ Note: the values of $E$ and $A$ used in these examples are necessarily represent
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2Step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step}
 \end{center}
-\caption[Species Evolution in a 1.75-Order 2 Step Finite Rate Reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions.}
+\caption[Species evolution in a 1.75-order 2-step finite rate reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions.}
 \label{fig:Arrhenius_175Order_2step}
 \end{figure}
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2StepR}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr}
 \end{center}
-\caption[Species Evolution in a 1.75-Order 2 Step Reversible Finite Rate Reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions.}
+\caption[Species evolution in a 1.75-order 2-step reversible finite rate reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions.}
 \label{fig:Arrhenius_175Order_2stepR}
 \end{figure}
 
@@ -2257,18 +2257,18 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Species}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_species}
 \end{center}
-\caption[Species Evolution in an Equilibrium Case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values.}
+\caption[Species evolution in an equilibrium case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values.}
 \label{fig:Arrhenius_2Order_1stepb}
 \end{figure}
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Temperature} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Pressure}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure}
 \end{tabular*}
-\caption[Temperature and Pressure Evolution for Equilibrium Case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
+\caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
 
