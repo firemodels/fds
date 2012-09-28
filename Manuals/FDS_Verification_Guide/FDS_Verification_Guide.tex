@@ -1206,6 +1206,27 @@ As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile 
 
 \clearpage
 
+\subsection{Ribbed Square Duct Flow (\texorpdfstring{{\bf ribbed\_channel}}{ribbed\_channel})}
+
+\begin{figure}[h]
+   \begin{center}
+      \includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/ribbed_channel_80_s1000}
+      \caption[Image]{\label{fig_ribbed_channel_image} Ribbed square duct image.}
+   \end{center}
+\end{figure}
+
+\begin{figure}[h!]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_strm} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_prof} \\
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_urms_strm} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_urms_prof} \\
+   \end{tabular*}
+   \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara_1}.}
+\end{figure}
+
+\clearpage
+
 \section{Analytical Solutions to the Continuity Equation}
 
 Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for computational fluid dynamics (CFD).  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.  However, to our knowledge, there are no similar (i.e., time dependent and periodic in space) analytical solutions for the compressible NS equations, which could be used for verification of both compressible and variable-density low-Mach flow solvers.
