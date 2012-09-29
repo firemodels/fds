@@ -985,8 +985,6 @@ void motion_CB(int xm, int ym){
   }
 #endif
   
-  reset_glui_view(-1);
-
   glutPostRedisplay();
 
   if( colordrag==1&&(showtime==1 || showplot3d==1)){

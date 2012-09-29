@@ -33,10 +33,10 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define LABEL_VIEW 4
 
 #define LIST_VIEW 5
-#define ADD_LIST_VIEW 6
-#define DELETE_LIST_VIEW 7
-#define RESTORE_LIST_VIEW 8
-#define SAVE_LIST_VIEW 9
+#define ADD_VIEW 6
+#define DELETE_VIEW 7
+#define RESTORE_VIEW 8
+#define REPLACE_VIEW 9
 #define STARTUP 10
 #define CYCLEVIEWS 11
 #define ZOOM 12
@@ -183,7 +183,13 @@ extern "C" void gluiIdleNULL(void){
 
 extern "C" void reset_glui_view(int ival){
   
-  if(ival!=old_listview)view_lists->set_int_val(ival);
+  if(ival==-2){
+    view_lists->set_int_val(-1);
+    return;
+  }
+  if(ival!=old_listview){
+    view_lists->set_int_val(ival);
+  }
   if(ival==-1){
     replace_view->disable();
     edit_view_label->set_text("new view");
@@ -191,7 +197,7 @@ extern "C" void reset_glui_view(int ival){
   else{
     selected_view=ival;
     replace_view->enable();
-    BUTTON_Reset_CB(RESTORE_LIST_VIEW);
+    BUTTON_Reset_CB(RESTORE_VIEW);
     enable_disable_views();
   }
 }
@@ -242,13 +248,14 @@ extern "C" void update_cursor_checkbox(void){
 
 extern "C" void update_view_gluilist(void){
   camera *ca;
+
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     view_lists->add_item(ca->view_id,ca->name);
   }
   view_lists->set_int_val(startup_view_ini);
   selected_view=startup_view_ini;
   enable_disable_views();
-  BUTTON_Reset_CB(RESTORE_LIST_VIEW);
+  BUTTON_Reset_CB(RESTORE_VIEW);
 
 }
 
@@ -455,7 +462,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   reset_panel1 = glui_motion->add_panel_to_panel(reset_panel,"",false);
 
-  delete_view=glui_motion->add_button_to_panel(reset_panel1,_("Delete"),DELETE_LIST_VIEW,BUTTON_Reset_CB);
+  delete_view=glui_motion->add_button_to_panel(reset_panel1,_("Delete"),DELETE_VIEW,BUTTON_Reset_CB);
   delete_view_is_disabled=0;
   startup_button=glui_motion->add_button_to_panel(reset_panel1,_("view at startup"),STARTUP,BUTTON_Reset_CB);
   cycle_views_button=glui_motion->add_button_to_panel(reset_panel1,_("Cycle"),CYCLEVIEWS,BUTTON_Reset_CB);
@@ -465,8 +472,8 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_column_to_panel(reset_panel,true);
   reset_panel2 = glui_motion->add_panel_to_panel(reset_panel,"",false);
 
-  replace_view=glui_motion->add_button_to_panel(reset_panel2,_("Replace"),SAVE_LIST_VIEW,BUTTON_Reset_CB);
-  add_view=glui_motion->add_button_to_panel(reset_panel2,_("Add"),ADD_LIST_VIEW,BUTTON_Reset_CB);
+  replace_view=glui_motion->add_button_to_panel(reset_panel2,_("Replace"),REPLACE_VIEW,BUTTON_Reset_CB);
+  add_view=glui_motion->add_button_to_panel(reset_panel2,_("Add"),ADD_VIEW,BUTTON_Reset_CB);
   edit_view_label=glui_motion->add_edittext_to_panel(reset_panel2,_("View name"),GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
 
   panel_scale = glui_motion->add_rollout(_("Scaling/Depth params"),false);
@@ -1085,6 +1092,20 @@ void BUTTON_hide2_CB(int var){
   }
 }
 
+/* ------------------ dup_view ------------------------ */
+
+int dup_view(void){
+  camera *ca;
+  char *label;
+
+  label=edit_view_label->get_text();
+  if(label==NULL)return 0;
+  for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
+    if(strcmp(label,ca->name)==0)return 1;
+  }
+  return 0;
+}
+
 /* ------------------ BUTTON_Reset_CB ------------------------ */
 
 void BUTTON_Reset_CB(int var){
@@ -1109,7 +1130,7 @@ void BUTTON_Reset_CB(int var){
   case LABEL_VIEW:
     updatemenu=1;
     break;
-  case SAVE_LIST_VIEW:
+  case REPLACE_VIEW:
     ival=view_lists->get_int_val();
     selected_view=ival;
     label=edit_view_label->get_text();
@@ -1138,10 +1159,15 @@ void BUTTON_Reset_CB(int var){
     strcpy(ca->name,label);
 
     break;
-  case ADD_LIST_VIEW:
-    add_list_view(NULL);
+  case ADD_VIEW:
+    if(dup_view()==0){
+      add_list_view(NULL);
+    }
+    else{
+      BUTTON_Reset_CB(REPLACE_VIEW);
+    }
     break;
-  case DELETE_LIST_VIEW:
+  case DELETE_VIEW:
     ival=view_lists->get_int_val();
     label=edit_view_label->get_text();
     cex=&camera_list_first;
@@ -1167,10 +1193,10 @@ void BUTTON_Reset_CB(int var){
       view_lists->set_int_val(0);
       selected_view=0;
     }
-    BUTTON_Reset_CB(RESTORE_LIST_VIEW);
+    BUTTON_Reset_CB(RESTORE_VIEW);
     enable_disable_views();
     break;
-  case RESTORE_LIST_VIEW:
+  case RESTORE_VIEW:
     ival=view_lists->get_int_val();
     selected_view=ival;
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
@@ -1199,7 +1225,7 @@ void BUTTON_Reset_CB(int var){
         delete_view_is_disabled=0;
       }
     }
-    BUTTON_Reset_CB(RESTORE_LIST_VIEW);
+    BUTTON_Reset_CB(RESTORE_VIEW);
     updatezoommenu=1;
     enable_disable_views();
     break;
@@ -1242,7 +1268,7 @@ void BUTTON_Reset_CB(int var){
     }
     view_lists->set_int_val(ival);
     selected_view=ival;
-    BUTTON_Reset_CB(RESTORE_LIST_VIEW);
+    BUTTON_Reset_CB(RESTORE_VIEW);
     break;
     default:
       ASSERT(FFALSE);
@@ -1274,7 +1300,6 @@ extern "C" void add_list_view(char *label_in){
   cex=&camera_list_first;
   cex=cex->next;
   cex=cex->next;
-  cex=cex->next; // this just added - not sure if needed
   for(ca=cex;ca->next!=NULL;ca=ca->next){
     if(ca->view_id==ival)break;
   }

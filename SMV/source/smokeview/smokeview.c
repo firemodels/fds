@@ -239,6 +239,7 @@ void ResetView(int option){
 
   switch (option){
   case RESTORE_EXTERIOR_VIEW_ZOOM:
+    break;
   case RESTORE_EXTERIOR_VIEW:
     eyeview_save = camera_current->eyeview;
     copy_camera(camera_current,camera_external);
