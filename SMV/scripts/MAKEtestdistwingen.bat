@@ -49,6 +49,9 @@ copy ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %
 echo copying background.exe
 copy ..\..\Utilities\background\intel_win_32\background.exe %smvdir%\background.exe
 
+echo copying set_path.exe
+copy ..\..\Utilities\set_fds_path\intel_win_32\set_path32.exe %smvdir%\set_path.exe
+
 echo copying objects.svo
 copy objects.svo %smvdir%\.
 

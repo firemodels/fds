@@ -24,5 +24,6 @@ call "%CD%\set_path.exe" -s -m -a "%CD%"
 
 echo Press any key to complete update.
 pause>NUL
+erase "%CD%|\set_path.exe"
 erase "%CD%"\wrapup_smv_install.bat
 
