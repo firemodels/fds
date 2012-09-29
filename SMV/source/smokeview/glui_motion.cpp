@@ -106,10 +106,11 @@ GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
 GLUI_Button *eyerotate90_z=NULL,*eyelevel=NULL, *floorlevel=NULL, *reset_saved_view=NULL;
 GLUI_Button *replace_view=NULL,*add_view=NULL,*delete_view=NULL;
 GLUI_Button *startup_button=NULL,*cycle_views_button=NULL;
-GLUI_Rollout *reset_panel=NULL;
+GLUI_Panel *reset_panel=NULL;
 GLUI_Rollout *render_panel=NULL;
 GLUI_Panel *reset_panel1=NULL;
 GLUI_Panel *reset_panel2=NULL;
+GLUI_Rollout *reset_panel3=NULL;
 GLUI_EditText *edit_view_label=NULL;
 GLUI_Listbox *view_lists=NULL;
 GLUI_Listbox *LIST_windowsize=NULL;
@@ -182,17 +183,19 @@ extern "C" void gluiIdleNULL(void){
 /* ------------------ reset_glui_view ------------------------ */
 
 extern "C" void reset_glui_view(int ival){
+  int current_val;
+
+  current_val=view_lists->get_int_val();
+  if(current_val>1)return;
   
-  if(ival==-2){
-    view_lists->set_int_val(-1);
-    return;
-  }
   if(ival!=old_listview){
     view_lists->set_int_val(ival);
   }
   if(ival==-1){
     replace_view->disable();
+    add_view->enable();
     edit_view_label->set_text("new view");
+    edit_view_label->enable();
   }
   else{
     selected_view=ival;
@@ -458,16 +461,19 @@ extern "C" void glui_motion_setup(int main_window){
   render_start=glui_motion->add_button_to_panel(render_panel,_("Start"),RENDER_START,RENDER_CB);
   render_stop=glui_motion->add_button_to_panel(render_panel,_("Stop"),RENDER_STOP,RENDER_CB);
   
-  reset_panel = glui_motion->add_rollout(_("Viewpoints"),false);
+  reset_panel3 = glui_motion->add_rollout(_("Viewpoints"),false);
+  view_lists = glui_motion->add_listbox_to_panel(reset_panel3,_("Select"),&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
+  view_lists->set_alignment(GLUI_ALIGN_CENTER);
+
+  reset_panel = glui_motion->add_panel_to_panel(reset_panel3,"",false);
+
 
   reset_panel1 = glui_motion->add_panel_to_panel(reset_panel,"",false);
 
   delete_view=glui_motion->add_button_to_panel(reset_panel1,_("Delete"),DELETE_VIEW,BUTTON_Reset_CB);
   delete_view_is_disabled=0;
-  startup_button=glui_motion->add_button_to_panel(reset_panel1,_("view at startup"),STARTUP,BUTTON_Reset_CB);
+  startup_button=glui_motion->add_button_to_panel(reset_panel1,_("Apply at startup"),STARTUP,BUTTON_Reset_CB);
   cycle_views_button=glui_motion->add_button_to_panel(reset_panel1,_("Cycle"),CYCLEVIEWS,BUTTON_Reset_CB);
-  view_lists = glui_motion->add_listbox_to_panel(reset_panel1,_("Select"),&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
-  view_lists->add_item(-1,"-");
 
   glui_motion->add_column_to_panel(reset_panel,true);
   reset_panel2 = glui_motion->add_panel_to_panel(reset_panel,"",false);
@@ -509,36 +515,39 @@ extern "C" void glui_motion_setup(int main_window){
 
 void enable_disable_views(void){
   int ival;
-
-  ival=view_lists->get_int_val();
-  if(ival==-1)return;
-  selected_view=ival;
   camera *cex;
 
-  cex=&camera_list_first;
-  cex=cex->next;
-  cex=cex->next;
-  cex=cex->next;
-  if(cex->next==NULL){
-    cycle_views_button->disable();
-  }
-  else{
-    cycle_views_button->enable();
+  ival=view_lists->get_int_val();
+  if(ival>=0){
+
+    selected_view=ival;
+
+    cex=&camera_list_first;
+    cex=cex->next;
+    cex=cex->next;
+    cex=cex->next;
+    if(cex->next==NULL){
+      cycle_views_button->disable();
+    }
+    else{
+      cycle_views_button->enable();
+    }
   }
 
   switch (ival){
-  case 0:
-  case 1:
-    replace_view->disable();
-    delete_view->disable();
-   // edit_view_label->disable();
-    break;
-  default:
-    edit_view_label->enable();
-    replace_view->enable();
-    add_view->enable();
-    delete_view->enable();
-
+    case -1:
+    case 0:
+    case 1:
+      replace_view->disable();
+      delete_view->disable();
+      add_view->disable();
+      edit_view_label->disable();
+      break;
+    default:
+      edit_view_label->enable();
+      replace_view->enable();
+      add_view->enable();
+      delete_view->enable();
     break;
   }
 }
