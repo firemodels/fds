@@ -1150,12 +1150,18 @@ REAL(EB) R, THICKNESS, X_DIVIDE
 
    ! Adjust 1/dx_n to 1/rdr for cylindrical case and 1/r^2dr for spaherical
 
-   IF (GEOMETRY /=SURF_CARTESIAN) THEN
-      DO I=1,N_CELLS
-         R = THICKNESS-0.5_EB*(X_S(I)+X_S(I-1))
-         RDX(I) = RDX(I)/R**I_GRAD
-      ENDDO
-   ENDIF
+   SELECT CASE(GEOMETRY)
+      CASE(SURF_CYLINDRICAL) 
+         DO I=1,N_CELLS
+            R = 0.5_EB*RDX(I)*((THICKNESS-X_S(I-1))**2-(THICKNESS-X_S(I))**2)
+            RDX(I) = RDX(I)/R**I_GRAD
+         ENDDO
+      CASE(SURF_SPHERICAL) 
+         DO I=1,N_CELLS
+            R = SQRT(ONTH*RDX(I)*((THICKNESS-X_S(I-1))**3-(THICKNESS-X_S(I))**3))
+            RDX(I) = RDX(I)/R**I_GRAD
+         ENDDO
+   END SELECT
    RDX(0)         = RDX(1)
    RDX(N_CELLS+1) = RDX(N_CELLS)
 
