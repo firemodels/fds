@@ -963,10 +963,14 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     glMultMatrixf(modelview_rotate);
     
     glTranslatef(xcen,ycen,zcen);
+
+    // rotate scene
+    
     if(eyeview==WORLD_CENTERED){
       glRotatef(angleyzINI,vecyz[0],vecyz[1],vecyz[2]);  /* rotate about the transformed x axis */
     }
     glRotatef(anglexyINI,0.0,0.0,1.0);                   /* rotate about z axis */
+    
     glTranslatef(-xcen,-ycen,-zcen);
 
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
