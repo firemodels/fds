@@ -24,6 +24,8 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(use_glui_rotate,0);
+SVEXTERN float glui_rotation_matrix[16];
 SVEXTERN int SVDECL(show_fed_area,1);
 SVEXTERN int SVDECL(*fed_areas,NULL);
 SVEXTERN FILE SVDECL(*LOGSTREAM,NULL);

@@ -1133,6 +1133,12 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+  // define initial rotation matrix to be the identity
+  
+  for(i=0;i<16;i++){
+    glui_rotation_matrix[i]=0.0;
+    if(i%5==0)glui_rotation_matrix[i]=1.0;
+  }
 #ifdef pp_LANG
   strcpy(startup_lang_code,"en");
 #endif

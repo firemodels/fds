@@ -334,6 +334,7 @@ extern "C" void glui_motion_setup(int main_window){
     meshlist1->add_item(nmeshes,_("world center"));
     meshlist1->set_int_val(*rotation_index);
   }
+
   panel_anglebuttons = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
   eyerotate90_z=glui_motion->add_button_to_panel(panel_anglebuttons,"90 deg",EYE_ROTATE_90,TRANSLATE_CB);
   eyerotate90_z->disable();
