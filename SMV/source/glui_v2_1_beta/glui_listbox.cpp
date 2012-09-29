@@ -311,10 +311,12 @@ static void listbox_callback( int i )
   ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->set_int_val(i);
 
   /****   If value changed, execute callback   ****/
-  if ( old_val != 
-       ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->int_val ) {
+//  if ( old_val != 
+//       ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->int_val ) {
+//    ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->execute_callback();
+//  }
+  /****   always call execute callback   ****/
     ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->execute_callback();
-  }
 }
 
 
