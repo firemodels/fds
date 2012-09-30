@@ -21,7 +21,7 @@ do
    FILE=$i
 
    # Grep for wall clock time
-   WALL_CLOCK_TIME_VALUE=`grep -H "Total Elapsed Wall Clock Time (s):" "$i" | tail -n 1 | awk -F' ' '{print $(NF)}'`
+   WALL_CLOCK_TIME_VALUE=`grep -H "Total Elapsed Wall Clock Time (s):" "$i" | awk -F' ' '{print $(NF)}'`
 
    # Grep for CPU time and units
    CPU_TIME_VALUE=`grep -H "Total CPU:" "$i" | tail -n 1 | awk -F' ' '{print $(NF-1)}'`
