@@ -145,12 +145,12 @@ extern "C" void update_smoke3dflags(void){
 
 void Update_Smoke_Type(void){  
   if(smoke_render_option==0){
-    panel_slices->open();
-    panel_volume->close();
+    if(panel_slices!=NULL)panel_slices->open();
+    if(panel_volume!=NULL)panel_volume->close();
   }
   else{
-    panel_slices->close();
-    panel_volume->open();
+    if(panel_slices!=NULL)panel_slices->close();
+    if(panel_volume!=NULL)panel_volume->open();
   }
 }
 
