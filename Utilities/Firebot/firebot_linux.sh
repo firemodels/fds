@@ -655,7 +655,7 @@ check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c` == "" && `grep "*** Error" -I $FIREBOT_DIR/output/stage6c` == "" ]]
+   if [[ `grep -E "Segmentation|Error" -I $FIREBOT_DIR/output/stage6c` == "" ]]
    then
       stage6c_success=true
    else
@@ -719,7 +719,7 @@ check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e` == "" && `grep "*** Error" -I $FIREBOT_DIR/output/stage6e` == "" ]]
+   if [[ `grep -E "Segmentation|Error" -I $FIREBOT_DIR/output/stage6e` == "" ]]
    then
       stage6e_success=true
    else
@@ -746,11 +746,11 @@ check_fds_pictures()
 {
    # Scan and report any errors in make FDS pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f` == "" ]]
+   if [[ `grep -E "Segmentation|Error" -I $FIREBOT_DIR/output/stage6f` == "" ]]
    then
       stage6f_success=true
    else
-      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f > $FIREBOT_DIR/output/stage6f_errors
+      cp $FIREBOT_DIR/output/stage6f $FIREBOT_DIR/output/stage6f_errors
       
       echo "Errors from Stage 6f - Make FDS pictures:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6f_errors >> $ERROR_LOG
