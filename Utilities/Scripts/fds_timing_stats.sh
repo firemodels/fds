@@ -12,13 +12,16 @@ SVNROOT=`pwd`/../..
 cd $SVNROOT/Verification
 
 # Write header information to fds_timing_stats.csv file
-echo 'FDS Case,CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
+echo 'FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
 
 # Loop over all .out files in the Verification directory
 for i in */*.out
 do
    # Get current file name
    FILE=$i
+
+   # Grep for wall clock time
+   WALL_CLOCK_TIME_VALUE=`grep -H "Total Elapsed Wall Clock Time (s):" "$i" | tail -n 1 | awk -F' ' '{print $(NF)}'`
 
    # Grep for CPU time and units
    CPU_TIME_VALUE=`grep -H "Total CPU:" "$i" | tail -n 1 | awk -F' ' '{print $(NF-1)}'`
@@ -67,7 +70,7 @@ do
    fi
 
    # Write results to fds_timing_stats.csv file
-   echo "$FILE,$CPU_TIME,$NUM_TOTAL_CELLS,$NUM_TIME_STEPS,$PERFORMANCE" >> $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
+   echo "$FILE,$WALL_CLOCK_TIME_VALUE,$CPU_TIME,$NUM_TOTAL_CELLS,$NUM_TIME_STEPS,$PERFORMANCE" >> $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
 
    # Reset variables
    NUM_TOTAL_CELLS=0
