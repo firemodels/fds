@@ -141,7 +141,7 @@ for f = 1:N_Fuels
       end   
    end
 end
-Xmax = [0.25 0.2 0.2 0.2 0.07 0.04]
+Xmax = [0.25 0.2 0.2 0.2 0.07 0.04];
 for ns = 1:N_Species
    hf(ns)=figure(ns);
    %n = 0; 
