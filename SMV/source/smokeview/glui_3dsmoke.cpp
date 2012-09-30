@@ -141,6 +141,19 @@ extern "C" void update_smoke3dflags(void){
   glutPostRedisplay();
 }
 
+/* ------------------ Update_Smoke_Type ------------------------ */
+
+void Update_Smoke_Type(void){  
+  if(smoke_render_option==0){
+    panel_slices->open();
+    panel_volume->close();
+  }
+  else{
+    panel_slices->close();
+    panel_volume->open();
+  }
+}
+
 /* ------------------ update_apha ------------------------ */
 
 void update_alpha(void){
@@ -208,17 +221,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #ifdef pp_GPU
   CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_overall,_("Use GPU"),&usegpu,VOL_SMOKE,SMOKE_3D_CB);
 #endif
-  if(nsmoke3dinfo>0&&nvolrenderinfo>0){
-    rendergroup = glui_3dsmoke->add_radiogroup_to_panel(panel_overall,&smoke_render_option,SMOKE_OPTIONS,SMOKE_3D_CB);
-    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Slice render settings"));
-    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Volume render settings"));
-  }
-  else{
-    smoke_render_option=0;
-    if(nsmoke3dinfo>0)smoke_render_option=0;
-    if(nvolrenderinfo>0)smoke_render_option=1;
-  }
-
 
   if(active_smokesensors==1){
     panel_smokesensor = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Visibility"));
@@ -291,8 +293,21 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   glui_3dsmoke->add_column_to_panel(panel_overall,false);
 
+  if(nsmoke3dinfo>0&&nvolrenderinfo>0){
+    rendergroup = glui_3dsmoke->add_radiogroup_to_panel(panel_overall,&smoke_render_option,SMOKE_OPTIONS,SMOKE_3D_CB);
+    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Slice render settings"));
+    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Volume render settings"));
+  }
+  else{
+    smoke_render_option=0;
+    if(nsmoke3dinfo>0)smoke_render_option=0;
+    if(nvolrenderinfo>0)smoke_render_option=1;
+  }
+
+  // volume render dialog
+  
   if(nvolrenderinfo>0){
-    panel_volume = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Volume Render Settings"),false);
+    panel_volume = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Volume render settings"),false);
     if(have_volcompressed==1){
       loadvolgroup = glui_3dsmoke->add_radiogroup_to_panel(panel_volume,&glui_load_volcompressed,LOAD_COMPRESSED_DATA,SMOKE_3D_CB);
         glui_3dsmoke->add_radiobutton_to_group(loadvolgroup,_("Load full data"));
@@ -337,6 +352,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #endif
   }
 
+  // slice render dialog
+  
   if(nsmoke3dinfo>0){
     panel_slices = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Slice render settings"),false);
     panel_slices->set_alignment(GLUI_ALIGN_LEFT);
@@ -404,6 +421,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("both"));
   }
 
+  Update_Smoke_Type();
 
 #ifdef pp_GPU
   SMOKE_3D_CB(VOL_SMOKE);
@@ -477,6 +495,7 @@ extern "C" void SMOKE_3D_CB(int var){
       CHECKBOX_use_firesmokemap->disable();
       SMOKE_3D_CB(USE_FIRESMOKEMAP);
     }
+    Update_Smoke_Type();
     break;
   case USE_FIRESMOKEMAP:
     if(use_firesmokemap==1){
