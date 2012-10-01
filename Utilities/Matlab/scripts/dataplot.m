@@ -152,244 +152,265 @@ for i=2:2000
         % plot the experimental data or analytical solution (d1)
         
         if ~exist(d1_Filename,'file')
-           display(['Error: File ' d1_Filename ' does not exist. Skipping case.'])
+           display(['Error: File ', d1_Filename ', does not exist. Skipping case.'])
            continue
         end
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
         R1 = parse(d1_Ind_Col_Name);
         S1 = parse(d1_Dep_Col_Name);
         style = parse(d1_Style);
-        for j=1:length(S1)
-            d1_Ind_Col = find(strcmp(H,R1(min(j,length(R1)))));
-            d1_Dep_Col = find(strcmp(H,S1(j)));
-            clear indices
-            % Clear flag for stat_x_y metric
-            using_stat_x_y = 0;
-            using_stat_x_y_check_zero = 0;
-            indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
-            if strcmp(Metric,'max')
-                Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
-            elseif strcmp(Metric,'min')
-                Save_Measured_Metric(i,j,1) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
-            elseif strcmp(Metric,'mean')
-                Save_Measured_Metric(i,j,1) = mean(M(indices,d1_Dep_Col));
-            % If mean_x_y is specified for a plot with multiple curves,
-            % then get the results from curve x only
-            elseif strfind(Metric,'mean_')
-                using_stat_x_y = 1;
-                compare_indices = sscanf(Metric, ['mean_' '%f' '_' '%f']);
-                if compare_indices(1) == j
-                    Save_Measured_Metric(i,1,1) = mean(M(indices,d1_Dep_Col));
-                    using_stat_x_y_check_zero = 1;
+        % Wrap entire d1 dataplot routine in try loop
+        % Skips case upon any Matlab error
+        try
+            for j=1:length(S1)
+                d1_Ind_Col = find(strcmp(H,R1(min(j,length(R1)))));
+                d1_Dep_Col = find(strcmp(H,S1(j)));
+                clear indices
+                % Clear flag for stat_x_y metric
+                using_stat_x_y = 0;
+                using_stat_x_y_check_zero = 0;
+                indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
+                if strcmp(Metric,'max')
+                    Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
+                elseif strcmp(Metric,'min')
+                    Save_Measured_Metric(i,j,1) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
+                elseif strcmp(Metric,'mean')
+                    Save_Measured_Metric(i,j,1) = mean(M(indices,d1_Dep_Col));
+                % If mean_x_y is specified for a plot with multiple curves,
+                % then get the results from curve x only
+                elseif strfind(Metric,'mean_')
+                    using_stat_x_y = 1;
+                    compare_indices = sscanf(Metric, ['mean_' '%f' '_' '%f']);
+                    if compare_indices(1) == j
+                        Save_Measured_Metric(i,1,1) = mean(M(indices,d1_Dep_Col));
+                        using_stat_x_y_check_zero = 1;
+                    end
+                elseif strcmp(Metric,'all')
+                    Save_Measured_Metric(i,j,1:length(indices)) = M(indices,d1_Dep_Col);
+                elseif strcmp(Metric,'threshold')
+                    Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
+                elseif strcmp(Metric,'area')
+                    Save_Measured_Metric(i,j,1) = trapz(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col));
+                elseif strcmp(Metric,'end')
+                    Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col);
+                % If end_x_y is specified for a plot with multiple curves,
+                % then get the results from curve x only
+                elseif strfind(Metric,'end_')
+                    using_stat_x_y = 1;
+                    compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
+                    if compare_indices(1) == j
+                        Save_Measured_Metric(i,1,1) = M(indices(end),d1_Dep_Col);
+                        using_stat_x_y_check_zero = 1;
+                    end
+                else
+                    Save_Measured_Metric(i,j,1) = 0;
                 end
-            elseif strcmp(Metric,'all')
-                Save_Measured_Metric(i,j,1:length(indices)) = M(indices,d1_Dep_Col);
-            elseif strcmp(Metric,'threshold')
-                Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
-            elseif strcmp(Metric,'area')
-                Save_Measured_Metric(i,j,1) = trapz(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col));
-            elseif strcmp(Metric,'end')
-                Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col);
-            % If end_x_y is specified for a plot with multiple curves,
-            % then get the results from curve x only
-            elseif strfind(Metric,'end_')
-                using_stat_x_y = 1;
-                compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
-                if compare_indices(1) == j
-                    Save_Measured_Metric(i,1,1) = M(indices(end),d1_Dep_Col);
-                    using_stat_x_y_check_zero = 1;
+                % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
+                if (Save_Measured_Metric(i,j,1) == 0) & (~using_stat_x_y)
+                    Save_Measured_Metric(i,j,1) = 1E-12;
                 end
-            else
-                Save_Measured_Metric(i,j,1) = 0;
+                % Special case to pass a zero if using stat_x_y
+                if (Save_Measured_Metric(i,1,1) == 0) & (using_stat_x_y_check_zero)
+                    Save_Measured_Metric(i,1,1) = 1E-12;
+                end
+                clear indices
+                indices = find(d1_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_End);
+                if strcmp(Flip_Axis,'no')
+                    X = M(indices,d1_Ind_Col)/Scale_Ind;
+                    Y = M(indices,d1_Dep_Col)/Scale_Dep;
+                else
+                    X = M(indices,d1_Dep_Col)/Scale_Dep;
+                    Y = M(indices,d1_Ind_Col)/Scale_Ind;
+                end
+                if Plot_Type=='linear'
+                    K(j) = plot(X,Y,char(style(j))); hold on
+                elseif Plot_Type=='loglog'
+                    K(j) = loglog(X,Y,char(style(j))); hold on
+                end
             end
-            % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
-            if (Save_Measured_Metric(i,j,1) == 0) & (~using_stat_x_y)
-                Save_Measured_Metric(i,j,1) = 1E-12;
-            end
-            % Special case to pass a zero if using stat_x_y
-            if (Save_Measured_Metric(i,1,1) == 0) & (using_stat_x_y_check_zero)
-                Save_Measured_Metric(i,1,1) = 1E-12;
-            end
-            clear indices
-            indices = find(d1_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_End);
-            if strcmp(Flip_Axis,'no')
-                X = M(indices,d1_Ind_Col)/Scale_Ind;
-                Y = M(indices,d1_Dep_Col)/Scale_Dep;
-            else
-                X = M(indices,d1_Dep_Col)/Scale_Dep;
-                Y = M(indices,d1_Ind_Col)/Scale_Ind;
-            end
-            if Plot_Type=='linear'
-                K(j) = plot(X,Y,char(style(j))); hold on
-            elseif Plot_Type=='loglog'
-                K(j) = loglog(X,Y,char(style(j))); hold on
-            end
+        catch
+            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname, '); check syntax of analytical/expected/experimental (d1) columns. Skipping case.'])
+            continue
         end
         
         % plot the FDS or model data (d2)
        
         if ~exist(d2_Filename,'file')
-           display(['Error: File ' d2_Filename ' does not exist. Skipping case.'])
+           display(['Error: File ', d2_Filename, ' does not exist. Skipping case.'])
            continue
         end
         [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
         R2 = parse(d2_Ind_Col_Name);
         S2 = parse(d2_Dep_Col_Name);
         style = parse(d2_Style);
-        for j=1:length(S2)
-            d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
-            d2_Dep_Col = find(strcmp(H,S2(j)));
-            clear indices
-            % Clear flag for stat_x_y metric
-            using_stat_x_y = 0;
-            using_stat_x_y_check_zero = 0;
-            indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
-            if strcmp(Metric,'max')
-                Save_Predicted_Metric(i,j,1) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
-            elseif strcmp(Metric,'min')
-                Save_Predicted_Metric(i,j,1) = d2_Initial_Value-min(M(indices,d2_Dep_Col));
-            elseif strcmp(Metric,'mean')
-                Save_Predicted_Metric(i,j,1) = mean(M(indices,d2_Dep_Col));
-            % If mean_x_y is specified for a plot with multiple curves,
-            % then get the results from curve y only
-            elseif strfind(Metric,'mean_')
-                using_stat_x_y = 1;
-                compare_indices = sscanf(Metric, ['mean_' '%f' '_' '%f']);
-                if compare_indices(2) == j
-                    Save_Predicted_Metric(i,1,1) = mean(M(indices,d2_Dep_Col));
-                    using_stat_x_y_check_zero = 1;
+        % Wrap entire d2 dataplot routine in try loop
+        % Skips case upon any Matlab error
+        try
+            for j=1:length(S2)
+                d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
+                d2_Dep_Col = find(strcmp(H,S2(j)));
+                clear indices
+                % Clear flag for stat_x_y metric
+                using_stat_x_y = 0;
+                using_stat_x_y_check_zero = 0;
+                indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
+                if strcmp(Metric,'max')
+                    Save_Predicted_Metric(i,j,1) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
+                elseif strcmp(Metric,'min')
+                    Save_Predicted_Metric(i,j,1) = d2_Initial_Value-min(M(indices,d2_Dep_Col));
+                elseif strcmp(Metric,'mean')
+                    Save_Predicted_Metric(i,j,1) = mean(M(indices,d2_Dep_Col));
+                % If mean_x_y is specified for a plot with multiple curves,
+                % then get the results from curve y only
+                elseif strfind(Metric,'mean_')
+                    using_stat_x_y = 1;
+                    compare_indices = sscanf(Metric, ['mean_' '%f' '_' '%f']);
+                    if compare_indices(2) == j
+                        Save_Predicted_Metric(i,1,1) = mean(M(indices,d2_Dep_Col));
+                        using_stat_x_y_check_zero = 1;
+                    end
+                elseif strcmp(Metric,'all')
+                    Save_Predicted_Metric(i,j,1:length(indices)) = M(indices,d2_Dep_Col);
+                elseif strcmp(Metric,'threshold')
+                    Save_Predicted_Metric(i,j,1) = min(M(indices,d2_Dep_Col));
+                elseif strcmp(Metric,'area')
+                    Save_Predicted_Metric(i,j,1) = trapz(M(indices,d2_Ind_Col), M(indices,d2_Dep_Col));
+                elseif strcmp(Metric,'end')
+                    Save_Predicted_Metric(i,j,1) = M(indices(end),d2_Dep_Col);
+                % If end_x_y is specified for a plot with multiple curves,
+                % then get the results from curve y only
+                elseif strfind(Metric,'end_')
+                    using_stat_x_y = 1;
+                    compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
+                    if compare_indices(2) == j
+                        Save_Predicted_Metric(i,1,1) = M(indices(end),d2_Dep_Col);
+                        using_stat_x_y_check_zero = 1;
+                    end
+                else
+                    Save_Predicted_Metric(i,j,1) = 0;
                 end
-            elseif strcmp(Metric,'all')
-                Save_Predicted_Metric(i,j,1:length(indices)) = M(indices,d2_Dep_Col);
-            elseif strcmp(Metric,'threshold')
-                Save_Predicted_Metric(i,j,1) = min(M(indices,d2_Dep_Col));
-            elseif strcmp(Metric,'area')
-                Save_Predicted_Metric(i,j,1) = trapz(M(indices,d2_Ind_Col), M(indices,d2_Dep_Col));
-            elseif strcmp(Metric,'end')
-                Save_Predicted_Metric(i,j,1) = M(indices(end),d2_Dep_Col);
-            % If end_x_y is specified for a plot with multiple curves,
-            % then get the results from curve y only
-            elseif strfind(Metric,'end_')
-                using_stat_x_y = 1;
-                compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
-                if compare_indices(2) == j
-                    Save_Predicted_Metric(i,1,1) = M(indices(end),d2_Dep_Col);
-                    using_stat_x_y_check_zero = 1;
+                % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
+                if (Save_Predicted_Metric(i,j,1) == 0) & (~using_stat_x_y)
+                    Save_Predicted_Metric(i,j,1) = 1E-12;
                 end
-            else
-                Save_Predicted_Metric(i,j,1) = 0;
+                % Special case to pass a zero if using stat_x_y
+                if (Save_Predicted_Metric(i,1,1) == 0) & (using_stat_x_y_check_zero)
+                    Save_Predicted_Metric(i,1,1) = 1E-12;
+                end
+                clear indices
+                indices = find(d2_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_End);
+                if strcmp(Flip_Axis,'no')
+                    X = M(indices,d2_Ind_Col)/Scale_Ind;
+                    Y = M(indices,d2_Dep_Col)/Scale_Dep;
+                else
+                    X = M(indices,d2_Dep_Col)/Scale_Dep;
+                    Y = M(indices,d2_Ind_Col)/Scale_Ind;
+                end
+                if Plot_Type=='linear'
+                    K(length(S1)+j) = plot(X,Y,char(style(j)));
+                elseif Plot_Type=='loglog'
+                    K(length(S1)+j) = loglog(X,Y,char(style(j)));
+                end
             end
-            % Prevent a value of zero of being returned, which would be erased in statplot using nonzeros()
-            if (Save_Predicted_Metric(i,j,1) == 0) & (~using_stat_x_y)
-                Save_Predicted_Metric(i,j,1) = 1E-12;
-            end
-            % Special case to pass a zero if using stat_x_y
-            if (Save_Predicted_Metric(i,1,1) == 0) & (using_stat_x_y_check_zero)
-                Save_Predicted_Metric(i,1,1) = 1E-12;
-            end
-            clear indices
-            indices = find(d2_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_End);
-            if strcmp(Flip_Axis,'no')
-                X = M(indices,d2_Ind_Col)/Scale_Ind;
-                Y = M(indices,d2_Dep_Col)/Scale_Dep;
-            else
-                X = M(indices,d2_Dep_Col)/Scale_Dep;
-                Y = M(indices,d2_Ind_Col)/Scale_Ind;
-            end
-            if Plot_Type=='linear'
-                K(length(S1)+j) = plot(X,Y,char(style(j)));
-            elseif Plot_Type=='loglog'
-                K(length(S1)+j) = loglog(X,Y,char(style(j)));
-            end
+        catch
+            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname, '); check syntax of FDS/model results (d2) columns. Skipping case.'])
+            continue
         end
         hold off
         
-        if Plot_Type=='linear' & strcmp(Flip_Axis,'no')
-            X_Title_Position = Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind);
-            Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
-        elseif Plot_Type=='linear' & strcmp(Flip_Axis,'yes')
-            X_Title_Position = Min_Dep+Title_Position(1)*(Max_Dep-Min_Dep);
-            Y_Title_Position = Min_Ind+Title_Position(2)*(Max_Ind-Min_Ind);
-        elseif Plot_Type=='loglog' & strcmp(Flip_Axis,'no')
-            X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
-            Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Min_Dep)));
-        elseif Plot_Type=='loglog' & strcmp(Flip_Axis,'yes')
-            X_Title_Position = 10^(log10(Min_Dep)+Title_Position(1)*(log10(Max_Dep)-log10(Min_Dep)));
-            Y_Title_Position = 10^(log10(Min_Ind)+Title_Position(2)*(log10(Max_Ind)-log10(Min_Ind)));
-        end
-        
-        set(gca,'FontName',Font_Name)
-        set(gca,'FontSize',Label_Font_Size)
-     
-        if strcmp(Flip_Axis,'no')
-            xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-            ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-            axis([Min_Ind Max_Ind Min_Dep Max_Dep])
-            text(X_Title_Position,Y_Title_Position,...
-                Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-        else
-            xlabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-            ylabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-            axis([Min_Dep Max_Dep Min_Ind Max_Ind])
-            text(X_Title_Position,Y_Title_Position,...
-                Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-        end
-        if size(Key_Position)>0
-            legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
-%             if isequal(Key_Position,'EastOutside')
-%                pos = get(legend_handle,'position');
-%                set(legend_handle,'position',[Paper_Width pos(2:4)])
-%             end
-%             if isequal(Key_Position,'SouthEastOutside')
-%                pos = get(legend_handle,'position');
-%                set(legend_handle,'position',[Paper_Width 0.5 pos(3:4)])
-%             end
-            set(legend_handle,'Interpreter',Font_Interpreter);
-            set(legend_handle,'Fontsize',Key_Font_Size);
-            set(legend_handle,'Box','on');
-            if size(d1_Tick)>0
-               set(gca,'XTick',d1_Tick)
+        % Wrap entire plot/save routine in try loop
+        % Skips case upon any Matlab error
+        try
+            if Plot_Type=='linear' & strcmp(Flip_Axis,'no')
+                X_Title_Position = Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind);
+                Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
+            elseif Plot_Type=='linear' & strcmp(Flip_Axis,'yes')
+                X_Title_Position = Min_Dep+Title_Position(1)*(Max_Dep-Min_Dep);
+                Y_Title_Position = Min_Ind+Title_Position(2)*(Max_Ind-Min_Ind);
+            elseif Plot_Type=='loglog' & strcmp(Flip_Axis,'no')
+                X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
+                Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Min_Dep)));
+            elseif Plot_Type=='loglog' & strcmp(Flip_Axis,'yes')
+                X_Title_Position = 10^(log10(Min_Dep)+Title_Position(1)*(log10(Max_Dep)-log10(Min_Dep)));
+                Y_Title_Position = 10^(log10(Min_Ind)+Title_Position(2)*(log10(Max_Ind)-log10(Min_Ind)));
             end
-            if size(d2_Tick)>0
-               set(gca,'YTick',d2_Tick)
-            end
-            if size(Legend_XYWidthHeight)>0
-               legend_position=get(legend_handle,'Position');
-               if Legend_XYWidthHeight(1)>0; legend_position(1)=Legend_XYWidthHeight(1); end % X
-               if Legend_XYWidthHeight(2)>0; legend_position(2)=Legend_XYWidthHeight(2); end % Y
-               if Legend_XYWidthHeight(3)>0; legend_position(3)=Legend_XYWidthHeight(3); end % Width
-               if Legend_XYWidthHeight(4)>0; legend_position(4)=Legend_XYWidthHeight(4); end % Height
-               set(legend_handle,'Position',legend_position)
-            end
-        end
-        
-        % add SVN if file is available
-        
-        if exist(SVN_Filename,'file')
-            SVN = importdata(SVN_Filename);
-            x_lim = get(gca,'XLim');
-            y_lim = get(gca,'YLim');
-            if strcmp(Plot_Type,'loglog')
-                X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-                Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
+
+            set(gca,'FontName',Font_Name)
+            set(gca,'FontSize',Label_Font_Size)
+
+            if strcmp(Flip_Axis,'no')
+                xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+                ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+                axis([Min_Ind Max_Ind Min_Dep Max_Dep])
+                text(X_Title_Position,Y_Title_Position,...
+                    Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
             else
-                X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-                Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+                xlabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+                ylabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+                axis([Min_Dep Max_Dep Min_Ind Max_Ind])
+                text(X_Title_Position,Y_Title_Position,...
+                    Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
             end
-            text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-                'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-        end
-        
-        % print to pdf
-		
-		PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
-        
-        set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
-        set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]); 
-        display(['Printing plot ',num2str(i),'...'])
-        print(gcf,'-dpdf',[plotdir,Plot_Filename])
+            if size(Key_Position)>0
+                legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
+    %             if isequal(Key_Position,'EastOutside')
+    %                pos = get(legend_handle,'position');
+    %                set(legend_handle,'position',[Paper_Width pos(2:4)])
+    %             end
+    %             if isequal(Key_Position,'SouthEastOutside')
+    %                pos = get(legend_handle,'position');
+    %                set(legend_handle,'position',[Paper_Width 0.5 pos(3:4)])
+    %             end
+                set(legend_handle,'Interpreter',Font_Interpreter);
+                set(legend_handle,'Fontsize',Key_Font_Size);
+                set(legend_handle,'Box','on');
+                if size(d1_Tick)>0
+                   set(gca,'XTick',d1_Tick)
+                end
+                if size(d2_Tick)>0
+                   set(gca,'YTick',d2_Tick)
+                end
+                if size(Legend_XYWidthHeight)>0
+                   legend_position=get(legend_handle,'Position');
+                   if Legend_XYWidthHeight(1)>0; legend_position(1)=Legend_XYWidthHeight(1); end % X
+                   if Legend_XYWidthHeight(2)>0; legend_position(2)=Legend_XYWidthHeight(2); end % Y
+                   if Legend_XYWidthHeight(3)>0; legend_position(3)=Legend_XYWidthHeight(3); end % Width
+                   if Legend_XYWidthHeight(4)>0; legend_position(4)=Legend_XYWidthHeight(4); end % Height
+                   set(legend_handle,'Position',legend_position)
+                end
+            end
+
+            % add SVN if file is available
+
+            if exist(SVN_Filename,'file')
+                SVN = importdata(SVN_Filename);
+                x_lim = get(gca,'XLim');
+                y_lim = get(gca,'YLim');
+                if strcmp(Plot_Type,'loglog')
+                    X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
+                    Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
+                else
+                    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+                    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+                end
+                text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+                    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+            end
+
+            % print to pdf
+
+            PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
+
+            set(gcf,'Visible',Figure_Visibility);
+            set(gcf,'PaperUnits',Paper_Units);
+            set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
+            set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]); 
+            display(['Printing plot ',num2str(i),'...'])
+            print(gcf,'-dpdf',[plotdir,Plot_Filename])
+        catch
+            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname, '); check syntax of plot/save settings. Skipping case.'])
+            continue
+        end    
         
     end
     clear S1 S2 K style H M X Y P parameters
