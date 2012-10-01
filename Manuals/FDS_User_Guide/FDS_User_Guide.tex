@@ -1929,8 +1929,18 @@ In FDS, the user may invoke the most rudimentary of data assimilation techniques
 Similar to the {\ct MEAN\_FORCING} feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
 
 \begin{equation}
-\frac{\partial u_i}{\partial t} = F_i/\rho
+\frac{\partial u_i}{\partial t} = -F_i/\rho
 \end{equation}
+
+\noindent This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
+
+\footnotesize
+\begin{verbatim}
+&MISC FORCE_VECTOR(1)=0.01 /
+&VENT MB='XMIN', SURF_ID='PERIODIC' /
+&VENT MB='XMAX', SURF_ID='PERIODIC' /
+\end{verbatim}
+\normalsize
 
 \subsection{Special Topic: Stopping and Restarting Calculations}
 \label{info:restart}
