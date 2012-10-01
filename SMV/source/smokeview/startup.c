@@ -1832,10 +1832,6 @@ void initvars(void){
 
   cpuframe=0;
 
-  direction_angleINI=0.0;
-
-  direction_angleINI0=0.0;
-
   adjustalphaflag=3;
   colorband=1;
   show_extremedata=0;

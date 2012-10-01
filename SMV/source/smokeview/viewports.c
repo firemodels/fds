@@ -747,6 +747,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   float StereoCameraOffset,FrustumAsymmetry;
   float aperture_temp;
   float widthdiv2;
+  float anglexyINI, angleyzINI;
+  float eyexINI, eyeyINI, eyezINI;
+  float direction_angleINI;
 
   if(showstereo==2){
     down=0;
