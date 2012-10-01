@@ -970,18 +970,6 @@ SVEXTERN int SVDECL(*plotiso,NULL);
 SVEXTERN float SVDECL(*global_times,NULL),cputimes[20];
 SVEXTERN int cpuframe;
 
-SVEXTERN float eyexINI, eyeyINI, eyezINI;
-SVEXTERN float anglexyINI, angleyzINI;
-SVEXTERN float direction_angleINI;
-
-SVEXTERN float eyexINI0_last, eyeyINI0_last, eyezINI0_last;
-SVEXTERN float anglexyINI0_last, anglexzINI0_last, angleyzINI0_last;
-SVEXTERN float direction_angleINI0_last;
-
-SVEXTERN float eyexINI0, eyeyINI0, eyezINI0;
-SVEXTERN float anglexyINI0, anglexzINI0, angleyzINI0;
-SVEXTERN float direction_angleINI0;
-
 SVEXTERN float xyzeyeorig[3],xeyedir[3], yeyedir[3], zeyedir[3];
 SVEXTERN int adjustalphaflag;
 SVEXTERN int colorband, show_extremedata;
@@ -1100,7 +1088,7 @@ SVEXTERN part5prop SVDECL(*part5propinfo,NULL), SVDECL(*current_property,NULL);
 SVEXTERN int SVDECL(npart5prop,0),ipart5prop,ipart5prop_old;
 SVEXTERN int prop_index;
 SVEXTERN targ SVDECL(*targinfo,NULL);
-SVEXTERN slicedata SVDECL(*sliceinfo,NULL),SVDECL(*slicexyzinfo,NULL);;
+SVEXTERN slicedata SVDECL(*sliceinfo,NULL),SVDECL(*slicexyzinfo,NULL);
 SVEXTERN feddata SVDECL(*fedinfo,NULL);
 SVEXTERN camdata SVDECL(*caminfo,NULL);
 SVEXTERN multislicedata SVDECL(*multisliceinfo,NULL);

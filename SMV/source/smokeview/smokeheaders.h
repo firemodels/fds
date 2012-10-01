@@ -10,8 +10,11 @@ EXTERNCPP int Merge_Smoke(void);
 #endif
 EXTERNCPP void sort_smoke3dinfo(void);
 
+EXTERNCPP void angleaxis2quat(float angle, float axis[3], float quat[4]);
 EXTERNCPP void quat2rot(float quat[4],float rot[16]);
 EXTERNCPP void mult_quat(float x[4], float y[4], float z[4]);
+EXTERNCPP void normalize_quat(float x[4]);
+
 EXTERNCPP void setScreenSize(int *width, int *height);
 EXTERNCPP void keyboard_CB(unsigned char key, int x, int y);
 EXTERNCPP void keyboard_up_CB(unsigned char key, int x, int y);
