@@ -1611,7 +1611,7 @@ OME_E = -1.E6_EB
 !$OMP         BOUNDARY_TYPE_P,WALL,HVAC_TANGENTIAL)
 EDGE_LOOP: DO IE=1,N_EDGES
 
-   ! Throw out edges that are XXXcompletely surrounded by blockages orXXX the exterior of the domain
+   ! Throw out edges that are completely surrounded by blockages or the exterior of the domain
 
    PROCESS_EDGE = .FALSE.
    DO IS=5,8
