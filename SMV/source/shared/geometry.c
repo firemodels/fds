@@ -50,7 +50,7 @@ void quat2rot(float quat[4],float rot[16]){
 
   rot[4] = 2.0*x*y - 2.0*w*z;
   rot[5] = 1.0 - 2.0*x*x - 2.0*z*z;
-  rot[6] = 2.0*y*z - 2.0*w*x;
+  rot[6] = 2.0*y*z + 2.0*w*x;
   rot[7] = 0.0;
 
   rot[8] = 2.0*x*z + 2.0*w*y;

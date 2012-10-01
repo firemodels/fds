@@ -616,6 +616,11 @@ void update_mouseinfo(int flag, int xm, int ym){
   float thistime;
   float dx, dy;
   int maxWH;
+  float quat_temp[4];
+  float axis[3]={0.0,0.0,1.0};
+  float *angle,*lastangle;
+  float delta_angle,delta_angle2;
+  float delta_distance;
 
   // flip y
 
@@ -631,7 +636,10 @@ void update_mouseinfo(int flag, int xm, int ym){
   xdirection = mouseinfo.xdirection;
   lasttime = &mouseinfo.lasttime;
   distance = &mouseinfo.distance;
+  angle = &mouseinfo.angle;
+  lastangle = &mouseinfo.lastangle;
 
+  maxWH = MAX(screenWidth,screenHeight);
   switch (flag){
     case MOUSE_DOWN:
       initial[0]=xm;
@@ -642,9 +650,19 @@ void update_mouseinfo(int flag, int xm, int ym){
       last[1]=ym;
       direction[0]=0;
       direction[1]=0;
+      *angle = 0.0;
+      *lastangle=0.0;
       *lasttime = glutGet(GLUT_ELAPSED_TIME)/1000.0;
+      xcurrent[0] = (float)(current[0]-screenWidth/2)/(float)maxWH;
+      xcurrent[1] = (float)(current[1]-screenHeight/2)/(float)maxWH;
+      *angle=atan2(xcurrent[1],xcurrent[0]);
+      delta_angle2 = 0.0;
+      *lastangle=*angle;
+      delta_distance=0.0;
       break;
     case MOUSE_UP:
+      delta_angle2=0.0;
+      delta_distance=0.0;
       break;
     case MOUSE_MOTION:
       thistime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
@@ -657,11 +675,16 @@ void update_mouseinfo(int flag, int xm, int ym){
         last[1]=current[1];
         *lasttime=thistime;
       }
+      xcurrent[0] = (float)(current[0]-screenWidth/2)/(float)maxWH;
+      xcurrent[1] = (float)(current[1]-screenHeight/2)/(float)maxWH;
+      dx = (float)(current[0]-last[0])/(float)maxWH;
+      dy = (float)(current[1]-last[1])/(float)maxWH;
+      delta_distance=sqrt(dx*dx+dy*dy);
+      *angle=atan2(xcurrent[1],xcurrent[0]);
+      delta_angle2 = *angle - *lastangle;
+      *lastangle = *angle;
       break;
   }
-  maxWH = MAX(screenWidth,screenHeight);
-  xcurrent[0] = (float)(current[0]-screenWidth/2)/(float)maxWH;
-  xcurrent[1] = (float)(current[1]-screenHeight/2)/(float)maxWH;
   
   if(direction[0]==0&&direction[1]==0){
     xdirection[0]=0.0;
@@ -684,6 +707,23 @@ void update_mouseinfo(int flag, int xm, int ym){
     direction[0],direction[1],
     xdirection[0],xdirection[1],
     atan2(xdirection[1],xdirection[0])*180.0/3.14159);
+
+
+  if(*distance<0.3){
+    delta_angle = (delta_distance);
+    axis[0]=-xdirection[1];
+    axis[1]=0.0;
+    axis[2]=xdirection[0];
+    angleaxis2quat(delta_angle,axis,quat_temp);
+  }
+  else{
+    axis[0]=0.0;
+    axis[1]=1.0;
+    axis[2]=0.0;
+    angleaxis2quat(-delta_angle2,axis,quat_temp);
+  }
+  mult_quat(quat_temp,quat_general,quat_general);
+  quat2rot(quat_general,quat_rotation);
 
 }
 
@@ -1075,7 +1115,7 @@ int throttle_gpu(void){
 void motion_CB(int xm, int ym){
 
 #ifdef pp_GENERAL_ROTATION
-  if(use_general_rotation==1){
+  if(use_general_rotation==1&&key_state == KEY_NONE){
     update_mouseinfo(MOUSE_MOTION,xm,ym);
   }
 #endif

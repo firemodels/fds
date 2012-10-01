@@ -817,6 +817,7 @@ typedef struct {
 typedef struct {
   int initial[2], current[2], last[2], direction[2];
   float xcurrent[2], xdirection[2], distance;
+  float angle, lastangle;
   float lasttime;
 } mousedata;
 

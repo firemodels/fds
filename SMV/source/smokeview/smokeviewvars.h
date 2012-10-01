@@ -24,10 +24,11 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN float quat_general[4], quat_rotation[16];
+
 SVEXTERN mousedata mouseinfo;
 SVEXTERN int SVDECL(use_general_rotation,0);
 SVEXTERN int SVDECL(use_glui_rotate,0);
-SVEXTERN float glui_rotation_matrix[16];
 SVEXTERN int SVDECL(show_fed_area,1);
 SVEXTERN int SVDECL(*fed_areas,NULL);
 SVEXTERN FILE SVDECL(*LOGSTREAM,NULL);

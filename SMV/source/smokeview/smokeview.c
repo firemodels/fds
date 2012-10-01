@@ -237,6 +237,12 @@ void transparentoff(void){
 void ResetView(int option){
   int eyeview_save;
 
+  quat_general[0]=1.0;
+  quat_general[1]=0.0;
+  quat_general[2]=0.0;
+  quat_general[3]=0.0;
+  quat2rot(quat_general,quat_rotation);
+
   switch (option){
   case RESTORE_EXTERIOR_VIEW_ZOOM:
     break;
