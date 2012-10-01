@@ -603,10 +603,105 @@ int setup_timebar_drag(int x, int y){
   return 0;
 }
 
+/* ------------------ update_mouseinfo ------------------------ */
+
+#define MOUSE_DOWN 0
+#define MOUSE_UP 1
+#define MOUSE_MOTION 2
+
+void update_mouseinfo(int flag, int xm, int ym){
+  int *initial, *current, *last, *direction;
+  float *xcurrent, *xdirection, *lasttime;
+  float *distance;
+  float thistime;
+  float dx, dy;
+  int maxWH;
+
+  // flip y
+
+  ym = screenHeight - ym;
+
+  // define pointers
+
+  initial = mouseinfo.initial;
+  current = mouseinfo.current;
+  last = mouseinfo.last;
+  direction  = mouseinfo.direction;
+  xcurrent = mouseinfo.xcurrent;
+  xdirection = mouseinfo.xdirection;
+  lasttime = &mouseinfo.lasttime;
+  distance = &mouseinfo.distance;
+
+  switch (flag){
+    case MOUSE_DOWN:
+      initial[0]=xm;
+      initial[1]=ym;
+      current[0]=xm;
+      current[1]=ym;
+      last[0]=xm;
+      last[1]=ym;
+      direction[0]=0;
+      direction[1]=0;
+      *lasttime = glutGet(GLUT_ELAPSED_TIME)/1000.0;
+      break;
+    case MOUSE_UP:
+      break;
+    case MOUSE_MOTION:
+      thistime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
+      current[0]=xm;
+      current[1]=ym;
+      if(thistime-*lasttime>0.2){
+        direction[0]=current[0]-last[0];
+        direction[1]=current[1]-last[1];
+        last[0]=current[0];
+        last[1]=current[1];
+        *lasttime=thistime;
+      }
+      break;
+  }
+  maxWH = MAX(screenWidth,screenHeight);
+  xcurrent[0] = (float)(current[0]-screenWidth/2)/(float)maxWH;
+  xcurrent[1] = (float)(current[1]-screenHeight/2)/(float)maxWH;
+  
+  if(direction[0]==0&&direction[1]==0){
+    xdirection[0]=0.0;
+    xdirection[1]=0.0;
+  }
+  else{
+    float sum;
+
+    sum = direction[0]*direction[0] + direction[1]*direction[1];
+    sum = sqrt(sum);
+    xdirection[0]=direction[0]/sum;
+    xdirection[1]=direction[1]/sum;
+  }
+  dx = xcurrent[0];
+  dy = xcurrent[1];
+  *distance = sqrt(dx*dx+dy*dy);
+  printf(" location: (%i,%i) (%f,%f)\n",current[0],current[1],xcurrent[0],xcurrent[1]);
+  printf(" distance: %f\n",*distance);
+  printf("direction: (%i,%i) (%f,%f) %f\n\n",
+    direction[0],direction[1],
+    xdirection[0],xdirection[1],
+    atan2(xdirection[1],xdirection[0])*180.0/3.14159);
+
+}
+
 /* ------------------ mouse ------------------------ */
 
-void mouse_CB(int button, int state, int x, int y){
+void mouse_CB(int button, int state, int xm, int ym){
   float *eye_xyz;
+
+#ifdef pp_GENERAL_ROTATION
+  if(use_general_rotation==1){
+    if(state==GLUT_DOWN){
+      update_mouseinfo(MOUSE_DOWN,xm,ym);
+    }
+    else if(state==GLUT_UP){
+      update_mouseinfo(MOUSE_UP,xm,ym);
+    }
+  }
+#endif
 
   if(trainer_mode==1){
     update_glui_viewlist();
@@ -658,17 +753,17 @@ void mouse_CB(int button, int state, int x, int y){
     /* edit blockages */
 
     if(button==GLUT_LEFT_BUTTON){
-      if(blockageSelect==1)mouse_edit_blockage(button,state,x,y);
-      if(edittour==1&&blockageSelect==0)mouse_edit_tour(button,state,x,y);
-      if(select_avatar==1)mouse_select_avatar(button,state,x,y);
-      if(select_device==1)mouse_select_device(button,state,x,y);
+      if(blockageSelect==1)mouse_edit_blockage(button,state,xm,ym);
+      if(edittour==1&&blockageSelect==0)mouse_edit_tour(button,state,xm,ym);
+      if(select_avatar==1)mouse_select_avatar(button,state,xm,ym);
+      if(select_device==1)mouse_select_device(button,state,xm,ym);
     }
     glutPostRedisplay();
     if( showtime==1 || showplot3d==1){
-      if(setup_colorbar_drag(x,y)==1)return;
+      if(setup_colorbar_drag(xm,ym)==1)return;
     }
     if(visTimeLabels==1&&showtime==1){
-      if(setup_timebar_drag(x,y)==1)return;
+      if(setup_timebar_drag(xm,ym)==1)return;
     }
     copy_camera(camera_last,camera_current);
     if(canrestorelastview==0){
@@ -703,13 +798,13 @@ void mouse_CB(int button, int state, int x, int y){
       case GLUT_ACTIVE_SHIFT:
       default:
         key_state = KEY_NONE;
-        start_xyz0[0]=x;
-        start_xyz0[1]=y;
+        start_xyz0[0]=xm;
+        start_xyz0[1]=ym;
         touring=0;
         break;
     }
-    mouse_down_xy0[0]=x; 
-    mouse_down_xy0[1]=y;
+    mouse_down_xy0[0]=xm; 
+    mouse_down_xy0[1]=ym;
   }
   glutPostRedisplay();
   if(blockageSelect==1){
@@ -978,6 +1073,12 @@ int throttle_gpu(void){
 /* ------------------ motion ------------------------ */
 
 void motion_CB(int xm, int ym){
+
+#ifdef pp_GENERAL_ROTATION
+  if(use_general_rotation==1){
+    update_mouseinfo(MOUSE_MOTION,xm,ym);
+  }
+#endif
 
 #ifdef pp_GPUTHROTTLE
   if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1){

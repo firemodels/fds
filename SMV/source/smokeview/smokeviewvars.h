@@ -24,6 +24,8 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN mousedata mouseinfo;
+SVEXTERN int SVDECL(use_general_rotation,0);
 SVEXTERN int SVDECL(use_glui_rotate,0);
 SVEXTERN float glui_rotation_matrix[16];
 SVEXTERN int SVDECL(show_fed_area,1);

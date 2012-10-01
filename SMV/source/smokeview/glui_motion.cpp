@@ -316,9 +316,9 @@ extern "C" void glui_motion_setup(int main_window){
   eyerotate_z->disable();
  
   eyeview_radio=glui_motion->add_radiogroup_to_panel(panel_motion,&eyeview,0,EYEVIEW_CB);
-  RADIO_button_1c=glui_motion->add_radiobutton_to_group(eyeview_radio,_("general rotations"));
+  RADIO_button_1c=glui_motion->add_radiobutton_to_group(eyeview_radio,_("general (2 axis) rotations"));
   RADIO_button_1d=glui_motion->add_radiobutton_to_group(eyeview_radio,_("first person movement"));
-  RADIO_button_1e=glui_motion->add_radiobutton_to_group(eyeview_radio,_("level rotations"));
+  RADIO_button_1e=glui_motion->add_radiobutton_to_group(eyeview_radio,_("level (1 axis) rotations"));
 
   rotation_index=&camera_current->rotation_index;
   *rotation_index=nmeshes;
@@ -346,12 +346,16 @@ extern "C" void glui_motion_setup(int main_window){
 
 
 #ifdef pp_BETA
-  panel_specify = glui_motion->add_rollout_to_panel(panel_motion,_("Specify"));
+  panel_specify = glui_motion->add_rollout_to_panel(panel_motion,_("Specify eye location"));
 
   SPINNER_set_view_x=glui_motion->add_spinner_to_panel(panel_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz,SET_VIEW_XYZ,TRANSLATE_CB);
   SPINNER_set_view_y=glui_motion->add_spinner_to_panel(panel_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,TRANSLATE_CB);
   SPINNER_set_view_z=glui_motion->add_spinner_to_panel(panel_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,TRANSLATE_CB);
 #endif
+
+#ifdef _DEBUG
+  glui_motion->add_checkbox_to_panel(panel_motion,"Use 3 axis rotations",&use_general_rotation);
+#endif  
 
   panel_gslice = glui_motion->add_rollout(_("General slice motion"),false);
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){

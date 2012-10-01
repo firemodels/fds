@@ -812,6 +812,14 @@ typedef struct {
   char menulabel[128];
 } camdata;
 
+/* --------------------------  mousedata ------------------------------------ */
+
+typedef struct {
+  int initial[2], current[2], last[2], direction[2];
+  float xcurrent[2], xdirection[2], distance;
+  float lasttime;
+} mousedata;
+
 /* --------------------------  camera ------------------------------------ */
 
 typedef struct _camera {
