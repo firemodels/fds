@@ -110,6 +110,15 @@ As seen in Eq.~(\ref{HVACfullexpansion}), flow loss terms appear ionly in the eq
 \item If there is flow into multiple ducts and out of multiple ducts, then each outgoing duct is given the average loss from the inflowing ducts weighted by the volume flow.
 \end{enumerate}
 
+\subsection{Duct Losses}
+
+The total flow loss in the duct, $K$, is the sum of fitting losses in the duct (e.g. elbows, expansion/reduction, orifice plates) plus losses due to wall friction.  Wall friction losses are computed as
+\be K \; = \; \frac{f L}{D} \ee
+where $D$ is the duct diameter.  $f$ is given by the Colebrook equation; however, since that equation is non-analytic for $f$ and approximation by Zigrang and Sylvester is used~\cite{Zigrang:1}.
+\be \frac{1}{\sqrt{f}} \; = \; -2 \log_{10} \left(\frac{\frac{\epsilon}{D}}{3.7}\; - \; \frac{4.518}{\mathrm{Re}_D} \log_{10} \left(
+\frac{6.9}{\mathrm{Re}_D}+\left( \frac{\frac{\epsilon}{D}}{3.7} \right)^{1.11} \right) \right) \ee
+where $\epsilon$ is the absolute roughness of the duct.
+
 \subsection{Heating and Coiling Coils}
 
 A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model is a constant heat model that adds or removes heat at a fixed rate as long as the coil is operating.  The second model is an effectivness type heat exchanger model where four parameters are specified: the enthalpy of the working fluid ($c_{p,fl}$), the temperature of the working fluid, ($T_{fl}$), the mass flow rate of the working fluid ($\dot{m}_{fl}$), and the effectiveness ($\eta$).  The rate of enthalpy change is then computed as follows:
