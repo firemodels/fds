@@ -51,10 +51,10 @@ setup_win:
 func.o: FFLAGS += $(FOPENMPFLAGS)
 #part.o: FFLAGS += $(FOPENMPFLAGS)
 #turb.o: FFLAGS += $(FOPENMPFLAGS)
-#mass.o: FFLAGS += $(FOPENMPFLAGS)
+mass.o: FFLAGS += $(FOPENMPFLAGS)
 fire.o: FFLAGS += $(FOPENMPFLAGS)
 #divg.o: FFLAGS += $(FOPENMPFLAGS)
-velo.o: FFLAGS += $(FOPENMPFLAGS)
+#velo.o: FFLAGS += $(FOPENMPFLAGS)
 pres.o: FFLAGS += $(FOPENMPFLAGS)
 #pois.o: FFLAGS += $(FOPENMPFLAGS)
 read.o: FOPTIMIZATIONFLAGS = -O0
@@ -62,10 +62,10 @@ read.o: FOPTIMIZATIONFLAGS = -O0
 func.obj: FFLAGS += $(FOPENMPFLAGS)
 #part.obj: FFLAGS += $(FOPENMPFLAGS)
 #turb.obj: FFLAGS += $(FOPENMPFLAGS)
-#mass.obj: FFLAGS += $(FOPENMPFLAGS)
+mass.obj: FFLAGS += $(FOPENMPFLAGS)
 fire.obj: FFLAGS += $(FOPENMPFLAGS)
 #divg.obj: FFLAGS += $(FOPENMPFLAGS)
-velo.obj: FFLAGS += $(FOPENMPFLAGS)
+#velo.obj: FFLAGS += $(FOPENMPFLAGS)
 pres.obj: FFLAGS += $(FOPENMPFLAGS)
 #pois.obj: FFLAGS += $(FOPENMPFLAGS)
 read.obj: FOPTIMIZATIONFLAGS = -Od
@@ -86,7 +86,7 @@ read.obj: FOPTIMIZATIONFLAGS = -Od
 openmp_intel_win_32 : FFLAGS = /Qvec_report0
 openmp_intel_win_32 : FCOMPL = ifort
 openmp_intel_win_32 : CCOMPL = icl
-openmp_intel_win_32 : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
+openmp_intel_win_32 : FOPENMPFLAGS = /Qopenmp
 openmp_intel_win_32 : FOPTIMIZATIONFLAGS = -O2
 openmp_intel_win_32 : obj = fds_openmp_win_32
 openmp_intel_win_32 : setup_win $(objwin_serial)
@@ -95,7 +95,7 @@ openmp_intel_win_32 : setup_win $(objwin_serial)
 openmp_mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 openmp_mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
 openmp_mpi_intel_win_32 : FFLAGS = /Qvec_report0 /I $(MPIINCLUDE) 
-openmp_mpi_intel_win_32 : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
+openmp_mpi_intel_win_32 : FOPENMPFLAGS = /Qopenmp
 openmp_mpi_intel_win_32 : FOPTIMIZATIONFLAGS = -O2
 openmp_mpi_intel_win_32 : FCOMPL = ifort
 openmp_mpi_intel_win_32 : CCOMPL = icl
@@ -112,10 +112,10 @@ openmp_intel_win_64 : obj = fds_win_64_openmp
 openmp_intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) /F100000000 $(objwin_serial)
 
-openmp_intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:all /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f95 /Z7
+openmp_intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:all /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03 /Z7
 openmp_intel_win_64_db : FCOMPL = ifort
 openmp_intel_win_64_db : CCOMPL = icl
-openmp_intel_win_64_db : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
+openmp_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 openmp_intel_win_64_db : FOPTIMIZATIONFLAGS = /Od
 openmp_intel_win_64_db : obj = fds_win_64_openmp_db
 openmp_intel_win_64_db : setup_win $(objwin_serial)
