@@ -185,24 +185,12 @@ extern "C" void gluiIdleNULL(void){
 extern "C" void reset_glui_view(int ival){
   int current_val;
 
-  current_val=view_lists->get_int_val();
-  if(current_val>1)return;
-  
-  if(ival!=old_listview){
-    view_lists->set_int_val(ival);
-  }
-  if(ival==-1){
-    replace_view->disable();
-    add_view->enable();
-    edit_view_label->set_text("new view");
-    edit_view_label->enable();
-  }
-  else{
-    selected_view=ival;
-    replace_view->enable();
-    BUTTON_Reset_CB(RESTORE_VIEW);
-    enable_disable_views();
-  }
+  ASSERT(ival>=0);
+  if(ival!=old_listview)view_lists->set_int_val(ival);
+  selected_view=ival;
+  replace_view->enable();
+  BUTTON_Reset_CB(RESTORE_VIEW);
+  enable_disable_views();
 }
 
 /* ------------------ enable_reset_saved_view ------------------------ */
@@ -1017,7 +1005,6 @@ extern "C" void TRANSLATE_CB(int var){
 
   switch (var){
     case SET_VIEW_XYZ:
-      reset_glui_view(-1);
       normalize_xyz(eye_xyz,set_view_xyz);
       eye_xyz0[0]=eye_xyz[0];
       eye_xyz0[1]=eye_xyz[1];
@@ -1026,7 +1013,6 @@ extern "C" void TRANSLATE_CB(int var){
       break;
     case EYE_ROTATE:
     case TRANSLATE_XY:
-      reset_glui_view(-1);
       if(glui_move_mode==EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
@@ -1039,7 +1025,6 @@ extern "C" void TRANSLATE_CB(int var){
       glui_move_mode=TRANSLATE_XY;
       break;
     case GLUI_Z:
-      reset_glui_view(-1);
       if(glui_move_mode==EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
@@ -1056,7 +1041,6 @@ extern "C" void TRANSLATE_CB(int var){
     case SNAPVIEW:
       break;
     case ROTATE_ZX:
-      reset_glui_view(-1);
       break;
     default:
       ASSERT(FFALSE);
