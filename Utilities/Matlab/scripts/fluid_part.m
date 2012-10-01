@@ -143,7 +143,7 @@ ylabel('Momentum (kg m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_
 legend_handle = legend(H(1:11),'FDS fluid U','FDS fluid V','FDS fluid W', ...
               'FDS particle U','FDS particle V','FDS particle W', ...
               'FDS total U','FDS total V','FDS total W', ...
-              'analytical fluid','analytical particle','Location','EastOutside');
+              'Analytical fluid','Analytical particle','Location','EastOutside');
 set(legend_handle,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
@@ -201,7 +201,7 @@ ylabel('Velocity (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Siz
 
 legend_handle = legend(H(1:7),'FDS fluid U','FDS fluid V','FDS fluid W',...
               'FDS particle U','FDS particle V','FDS particle W',...
-              'equilibrium velocity','Location','EastOutside');
+              'Equilibrium velocity','Location','EastOutside');
 set(legend_handle,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
