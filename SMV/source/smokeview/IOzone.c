@@ -276,7 +276,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
       zoneqfire_local[iif]=1000.0*zoneqfire_devs[j]->vals[i];
       zonefheight_local[iif]=zonefheight_devs[j]->vals[i];
       area=zonefarea_devs[j]->vals[i];
-      diam=2.0*sqrt(area/3.14159);
+      diam=2.0*sqrt(area/PI);
       if(diam<0.0001){
         diam=0.1/xyzmaxdiff;
       }

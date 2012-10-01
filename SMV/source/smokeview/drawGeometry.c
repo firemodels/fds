@@ -4458,6 +4458,25 @@ void snap_view_angles(void){
   update_trainer_moves();
   camera_current->dirty=1;
 
+  if(use_general_rotation==1&&key_state == KEY_NONE){
+    float angle;
+
+    angle = 2.0*RAD2DEG*acos(quat_general[0]);
+    if(angle>0.0){
+      iaz = (angle+DELTA/2.0)/DELTA;
+    }
+    else{
+      iaz = (angle-DELTA/2.0)/DELTA;
+    }
+    angle = (int)(DELTA*iaz);
+
+    quat_general[0]=cos(DEG2RAD*angle/2.0);
+    quat_general[1]=0.0;
+    quat_general[2]=0.0;
+    quat_general[3]=sin(DEG2RAD*angle/2.0);
+    quat2rot(quat_general,quat_rotation);
+  }
+
 }
 
 /* ------------------ get_drawing_parms ------------------------ */

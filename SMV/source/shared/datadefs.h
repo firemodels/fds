@@ -5,8 +5,12 @@
 #ifndef DATADEFS_H_DEFINED
 #define DATADEFS_H_DEFINED
 
-#ifndef PIFACTOR
-#define PIFACTOR (3.14159/180.0)
+#ifndef DEG2RAD
+#define DEG2RAD (3.14159265359f/180.0)
+#endif
+
+#ifndef RAD2DEG
+#define RAD2DEG (180.0/3.14159265359f)
 #endif
 
 #ifndef PERCENT

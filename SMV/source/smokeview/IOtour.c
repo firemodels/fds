@@ -344,7 +344,7 @@ void drawtours(void){
           dxy[0]=oview[0]-eye[0];
           dxy[1]=oview[1]-eye[1];
           if(dxy[0]!=0.0||dxy[1]!=0.0){
-            az_angle=atan2(dxy[1],dxy[0])*180.0/3.14159;
+            az_angle=atan2(dxy[1],dxy[0])*RAD2DEG;
           }
           else{
             az_angle=0.0;
@@ -1045,7 +1045,7 @@ void init_circulartour(void){
   if(dy>max_xyz)max_xyz=dy;
   if(dz>max_xyz)max_xyz=dz;
 
-  rad = max_xyz+max_xyz/tan(20.0/180.0*3.14159);
+  rad = max_xyz+max_xyz/tan(20.0*DEG2RAD);
   elev_path=0.0;
 
   thisframe=&touri->first_frame;

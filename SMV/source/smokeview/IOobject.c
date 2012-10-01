@@ -695,7 +695,7 @@ void draw_devices(void){
 
         vv=vel[0]*xyzmaxdiff/max_dev_vel;
         height=2.0*dvel*xyzmaxdiff/max_dev_vel;
-        dd=2.0*vv*tan(PIFACTOR*dangle);
+        dd=2.0*vv*tan(DEG2RAD*dangle);
         d1=dd*(vv+dvel)/vv;
         d2=dd*(MAX(vv-dvel,0.0))/vv;
         glPushMatrix();
@@ -708,8 +708,8 @@ void draw_devices(void){
         glVertex3f(0.0,0.0,vv);
         glEnd();
 
-        anglemin=-dangle*PIFACTOR;
-        anglemax=-dangle*PIFACTOR;
+        anglemin=-dangle*DEG2RAD;
+        anglemax=-dangle*DEG2RAD;
         rmin=MAX(vv-dvel,0.0);
         rmax=vv+dvel;
         drawsphereseg(anglemin,anglemax,rmin,rmax);

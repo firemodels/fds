@@ -770,8 +770,8 @@ void GSLICE_CB(int var){
         elev-=180.0;
         SPINNER_gslice_normal_elev->set_float_val(elev);
       }
-      az*=(3.14159/180.0);
-      elev*=(3.14159/180.0);
+      az*=DEG2RAD;
+      elev*=DEG2RAD;
       gslice_norm[0]=cos(az)*cos(elev);
       gslice_norm[1]=sin(az)*cos(elev);;
       gslice_norm[2]=sin(elev);

@@ -22,11 +22,6 @@ char callbacks_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
-#define KEY_ALT 0
-#define KEY_CTRL 1
-#define KEY_SHIFT 3
-#define KEY_NONE 2
-
 #define TERRAIN_FIRE_LINE_UPDATE 39
 
 #undef pp_GPU_CULL_STATE
@@ -706,7 +701,7 @@ void update_mouseinfo(int flag, int xm, int ym){
   printf("direction: (%i,%i) (%f,%f) %f\n\n",
     direction[0],direction[1],
     xdirection[0],xdirection[1],
-    atan2(xdirection[1],xdirection[0])*180.0/3.14159);
+    atan2(xdirection[1],xdirection[0])*RAD2DEG);
 
 
   if(*distance<0.3){

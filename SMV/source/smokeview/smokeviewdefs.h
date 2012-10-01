@@ -15,6 +15,11 @@ void _Sniff_Errors(char *whereat);
 #define YYY 1
 #define ZZZ 2
 
+#define KEY_ALT 0
+#define KEY_CTRL 1
+#define KEY_SHIFT 3
+#define KEY_NONE 2
+
 #define NORMALIZE_X(x) (((x)-xbar0)/xyzmaxdiff)
 #define NORMALIZE_Y(y) (((y)-ybar0)/xyzmaxdiff)
 #define NORMALIZE_Z(z) (((z)-zbar0)/xyzmaxdiff)
