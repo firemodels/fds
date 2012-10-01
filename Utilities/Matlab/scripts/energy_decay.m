@@ -107,17 +107,17 @@ H(3)=plot(t,ke,'k-'); hold on
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Key_Font_Size)
 
-xlabel('time (s)','FontSize',Title_Font_Size)
-ylabel('kinetic energy (m^2/s^2)','FontSize',Title_Font_Size)
+xlabel('Time (s)','FontSize',Title_Font_Size)
+ylabel('Kinetic Energy (m^2/s^2)','FontSize',Title_Font_Size)
 
 H(4)=plot(0.0,E1_bar,'ko','MarkerSize',8);
 plot(0.28,E2_bar,'ro','MarkerSize',8)
 plot(0.66,E3_bar,'bo','MarkerSize',8)
 
 if strcmp(chid,'csmag_32')
-    legend(H(1:4),'FDS zero visc','FDS mol visc','FDS eddy visc','filtered CBC data','Location','East')
+    legend(H(1:4),'FDS zero visc','FDS mol visc','FDS eddy visc','Filtered CBC data','Location','East')
 else
-    legend(H(3:4),'FDS','filtered CBC data','Location','NorthEast')
+    legend(H(3:4),'FDS','Filtered CBC data','Location','NorthEast')
 end
 
 % add SVN if file is available
