@@ -4605,7 +4605,7 @@ A typical input line specifying a duct is as follows:
 
 \begin{description}
 \item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.
-\item[{\ct AREA}] is the cross sectional area of the duct in m$^2$. {\ct DIAMETER} (m) can be used instead.
+\item[{\ct AREA}] is the cross sectional area of the duct in m$^2$. {\ct DIAMETER} (m) can be used instead.  Currently only round ducts are supported.
 \item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Section~\ref{info:HVACdamper}).
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of
@@ -4689,7 +4689,7 @@ Below are three example duct node inputs representing a typical tee-type connect
 \item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
-If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
+If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}. Note that if you do not specify an {\ct XYZ} for an interior node, then FDS will use the default value of 0,0,0.  
 \end{description}
 
 \noindent
@@ -10388,7 +10388,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TYPE\_ID}                  & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
 {\ct VENT\_ID}                  & Character         & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
 {\ct VOLUME\_FLOW}              & Real              & Section~\ref{info:HVACduct}, \ref{info:HVACfan}                               &  m$^3$/s      &                \\ \hline
-{\ct XYZ}                       & Real Triplet      & Section~\ref{info:HVACnode}                                                   &  m            &                \\ \hline
+{\ct XYZ}                       & Real Triplet      & Section~\ref{info:HVACnode}                                                   &  m            &  0.0           \\ \hline
 \end{longtable}
 
 
