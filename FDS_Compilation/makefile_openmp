@@ -107,7 +107,7 @@ openmp_intel_win_64 : FFLAGS = /Qvec_report0 /nologo
 openmp_intel_win_64 : FCOMPL = ifort
 openmp_intel_win_64 : CCOMPL = icl
 openmp_intel_win_64 : FOPENMPFLAGS = /Qopenmp
-openmp_intel_win_64 : FOPTIMIZATIONFLAGS = -Od
+openmp_intel_win_64 : FOPTIMIZATIONFLAGS = -O2
 openmp_intel_win_64 : obj = fds_win_64_openmp
 openmp_intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) /F100000000 $(objwin_serial)
