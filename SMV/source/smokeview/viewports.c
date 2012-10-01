@@ -966,7 +966,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
     // rotate scene
     
-    if(use_glui_rotate==1){
+    if(use_general_rotation==1&&1==0){
       glMultMatrixf(glui_rotation_matrix);
     }
     else{
