@@ -710,7 +710,6 @@ SVEXTERN int rendertourcount;
 SVEXTERN int list_memcheck_index;
 SVEXTERN int SVDECL(visUsagememory,0);
 #endif
-SVEXTERN float vecyz[4];
 SVEXTERN float gslice_norm[3];
 #ifdef INMAIN
 SVEXTERN float gslice_xyz[3]={-1000001.0,-1000001.0,-1000001.0};

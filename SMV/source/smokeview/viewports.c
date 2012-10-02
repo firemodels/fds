@@ -958,11 +958,6 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_setup);
     getinverse(modelview_setup,inverse_modelview_setup);
 
-    vecyz[0]=   cs_direction_angle; 
-    vecyz[1] = -sn_direction_angle; 
-    vecyz[2] = 0.0; 
-    vecyz[3] = 1.0;
-
     glMultMatrixf(modelview_rotate);
     
     glTranslatef(xcen,ycen,zcen);
@@ -974,7 +969,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
     else{
       if(eyeview==WORLD_CENTERED){
-        glRotatef(angleyzINI,vecyz[0],vecyz[1],vecyz[2]);  /* rotate about the transformed x axis */
+        glRotatef(angleyzINI,cs_direction_angle,-sn_direction_angle,0.0);  /* rotate about the transformed x axis */
       }
       glRotatef(anglexyINI,0.0,0.0,1.0);                   /* rotate about z axis */
     }
