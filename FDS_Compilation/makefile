@@ -125,6 +125,13 @@ intel_linux_32 : obj = fds_intel_linux_32
 intel_linux_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
+intel_linux_32_dv : FFLAGS = -m32 -O2 -vec_report0 -traceback
+intel_linux_32_dv : LFLAGS = -static-intel
+intel_linux_32_dv : FCOMPL = ifort
+intel_linux_32_dv : obj = fds_intel_linux_32_dv
+intel_linux_32_dv : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
+
 #
 # to profile FDS:
 # 1.  build FDS using intel_linux_32_profile target
