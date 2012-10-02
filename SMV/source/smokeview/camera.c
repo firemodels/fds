@@ -103,7 +103,7 @@ void init_camera(camera *camera_data,char *name){
   strcpy(camera_data->name,name);
   camera_data->rotation_index=nmeshes;
   camera_data->defined=1;
-  camera_data->direction_angle=0.0;
+  camera_data->azimuth=0.0;
   camera_data->view_angle=0.0;
   camera_data->eye[0]=eyexfactor*xbar;
   update_camera_ypos(camera_data);
@@ -132,13 +132,13 @@ void init_camera(camera *camera_data,char *name){
   camera_data->zcen=zbar/2.0;
   camera_data->eyeview=eyeview;
 
-  camera_data->direction_angle=0.0;
-  camera_data->cos_direction_angle=1.0;
-  camera_data->sin_direction_angle=0.0;
+  camera_data->azimuth=0.0;
+  camera_data->cos_azimuth=1.0;
+  camera_data->sin_azimuth=0.0;
 
-  camera_data->elevation_angle=0.0;
-  camera_data->cos_elevation_angle=1.0;
-  camera_data->sin_elevation_angle=0.0;
+  camera_data->elevation=0.0;
+  camera_data->cos_elevation=1.0;
+  camera_data->sin_elevation=0.0;
 
   camera_data->view_angle=0.0;
   camera_data->cos_view_angle=1.0;
@@ -218,17 +218,17 @@ void copy_camera(camera *to, camera *from){
 void update_camera(camera *ca){
   float local_angle;
 
-  local_angle = ca->direction_angle*PI/180.0;
-  ca->cos_direction_angle=cos(local_angle);
-  ca->sin_direction_angle=sin(local_angle);
+  local_angle = ca->azimuth*DEG2RAD;
+  ca->cos_azimuth=cos(local_angle);
+  ca->sin_azimuth=sin(local_angle);
 
-  local_angle = ca->view_angle*PI/180.0;
+  local_angle = ca->view_angle*DEG2RAD;
   ca->cos_view_angle=cos(local_angle);
   ca->sin_view_angle=sin(local_angle);
 
-  local_angle = ca->elevation_angle*PI/180.0;
-  ca->cos_elevation_angle=cos(local_angle);
-  ca->sin_elevation_angle=sin(local_angle);
+  local_angle = ca->elevation*DEG2RAD;
+  ca->cos_elevation=cos(local_angle);
+  ca->sin_elevation=sin(local_angle);
 
   if(ca==camera_current){
     eyeview=ca->eyeview;
@@ -276,9 +276,9 @@ void set_camera_current(float angles[2], float eye[3], float zzoom){
   eyey = eye[1];
   eyez = eye[2];
 
-  camera_current->direction_angle=azimuth;
+  camera_current->azimuth=azimuth;
   camera_current->view_angle=0.0;
-  camera_current->elevation_angle=elevation;
+  camera_current->elevation=elevation;
 
   camera_current->eye[0]=eyex;
   camera_current->eye[1]=eyey;

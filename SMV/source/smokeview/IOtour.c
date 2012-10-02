@@ -921,7 +921,7 @@ void defaulttour(void){
   angle_zx = camera_current->angle_zx;
 
   anglexy0 = angle_zx[0];
-  direction_angle0 = camera_current->direction_angle;
+  azimuth0 = camera_current->azimuth;
   eyex0 = eye_xyz[0];
   eyey0 = eye_xyz[1];
   eyez0 = eye_xyz[2];

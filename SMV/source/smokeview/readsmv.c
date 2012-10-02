@@ -9933,8 +9933,8 @@ int readini2(char *inifile, int localfile){
 		  fgets(buffer,255,stream);
 		  sscanf(buffer,"%f %f %f %i",
         &camera_ini->view_angle, 
-        &camera_ini->direction_angle,
-        &camera_ini->elevation_angle,
+        &camera_ini->azimuth,
+        &camera_ini->elevation,
         &p_type);
       if(p_type!=1)p_type=0;
       camera_ini->projection_type=p_type;
@@ -11369,8 +11369,8 @@ void writeini(int flag){
           zoom,zoomindex);
   		  fprintf(fileout," %f %f %f %i\n",
           ca->view_angle, 
-          ca->direction_angle,
-          ca->elevation_angle,
+          ca->azimuth,
+          ca->elevation,
           ca->projection_type);
 		    fprintf(fileout," %f %f %f\n",
           ca->xcen,

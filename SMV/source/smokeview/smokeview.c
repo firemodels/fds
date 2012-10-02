@@ -232,16 +232,43 @@ void transparentoff(void){
   glDisable(GL_BLEND);
 }
 
+/* ------------------ smv2quat ------------------------ */
+
+void smv2quat(void){
+  float azimuth, elevation,axis[3];
+  float quat_temp[4];
+  float x, y;
+   
+  azimuth = camera_current->angle_zx[0]*DEG2RAD;
+  elevation = (camera_current->angle_zx[1])*DEG2RAD;
+
+  x = cos(azimuth);
+  y = sin(azimuth);
+
+  axis[0]=x;
+  axis[1]=-y;
+  axis[2]=0.0;
+
+  printf("new: %f %f %f %f\n",x,-y,elevation*RAD2DEG,azimuth*RAD2DEG);
+
+  angleaxis2quat(elevation,axis,quat_temp);
+
+  axis[0]=0.0;
+  axis[1]=0.0;
+  axis[2]=1.0;
+
+  angleaxis2quat(azimuth,axis,quat_general);
+
+  mult_quat(quat_temp,quat_general,quat_general);
+
+  quat2rot(quat_general,quat_rotation);
+}
+
+
 /* ------------------ ResetView ------------------------ */
 
 void ResetView(int option){
   int eyeview_save;
-
-  quat_general[0]=1.0;
-  quat_general[1]=0.0;
-  quat_general[2]=0.0;
-  quat_general[3]=0.0;
-  quat2rot(quat_general,quat_rotation);
 
   switch (option){
   case RESTORE_EXTERIOR_VIEW_ZOOM:
@@ -269,6 +296,34 @@ void ResetView(int option){
   default:
     ASSERT(FFALSE);
     break;
+  }
+  if(use_general_rotation==1){
+    float azimuth, elevation,axis[3];
+    float quat_temp[4];
+    float x, y, z;
+   
+    azimuth = camera_current->angle_zx[0]*DEG2RAD;
+    elevation = camera_current->angle_zx[1]*DEG2RAD;
+
+    x = cos(azimuth);
+    y = sin(azimuth);
+    z = cos(elevation);
+
+    axis[0]=0.0;
+    axis[1]=0.0;
+    axis[2]=1.0;
+
+    angleaxis2quat(azimuth,axis,quat_temp);
+
+    axis[0]=x;
+    axis[1]=y;
+    axis[2]=0.0;
+
+    angleaxis2quat(acos(z),axis,quat_general);
+
+    mult_quat(quat_temp,quat_general,quat_general);
+
+    quat2rot(quat_general,quat_rotation);
   }
   if(option==RESTORE_EXTERIOR_VIEW_ZOOM)camera_current->zoom=zooms[zoomindex];
   zoom=camera_current->zoom;

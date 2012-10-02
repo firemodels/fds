@@ -48,7 +48,7 @@
 #define pp_SHOOTER
 #define pp_FREEZE_VOLSMOKE
 #define pp_LIGHT
-#ifdef _DEBUG
+#ifdef pp_BETA
 #define pp_GENERAL_ROTATION
 #endif
 

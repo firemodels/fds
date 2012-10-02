@@ -49,6 +49,7 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define SET_VIEW_XYZ 22
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
+#define USE_GENERAL_ROTATION 28
 
 #define RENDER_TYPE 0
 #define RENDER_SIZE_LIST 1
@@ -341,8 +342,8 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_set_view_z=glui_motion->add_spinner_to_panel(panel_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,TRANSLATE_CB);
 #endif
 
-#ifdef _DEBUG
-  glui_motion->add_checkbox_to_panel(panel_motion,"Use 3 axis rotations",&use_general_rotation);
+#ifdef pp_GENERAL_ROTATION
+  glui_motion->add_checkbox_to_panel(panel_motion,"Use 3 axis rotations",&use_general_rotation,USE_GENERAL_ROTATION,BUTTON_Reset_CB);
 #endif  
 
   panel_gslice = glui_motion->add_rollout(_("General slice motion"),false);
@@ -604,7 +605,7 @@ extern "C" void update_translate(void){
   translate_z->set_y(eye_xyz[2]);
   rotate_zx->set_x(angle_zx[0]);
   rotate_zx->set_y(angle_zx[1]);
-  eyerotate_z->set_x(camera_current->direction_angle);
+  eyerotate_z->set_x(camera_current->azimuth);
 }
 
 /* ------------------ update_rotation_index ------------------------ */
@@ -642,9 +643,9 @@ void update_rotation_index(int val){
   angle_zx[0]=0.; 
   angle_zx[1]=0.; 
 
-  camera_current->direction_angle=0.0;
-  camera_current->cos_direction_angle = 1.0;
-  camera_current->sin_direction_angle = 0.0;
+  camera_current->azimuth=0.0;
+  camera_current->cos_azimuth = 1.0;
+  camera_current->sin_azimuth = 0.0;
 
   camera_current->view_angle=0.0;
   camera_current->cos_view_angle = 1.0;
@@ -671,7 +672,7 @@ extern "C" void update_projection_type(void){
 }
 
 extern "C" void update_eyerotate(void){
-  eyerotate_z->set_x(camera_current->direction_angle);
+  eyerotate_z->set_x(camera_current->azimuth);
 }
 
 /* ------------------ showhide_translate ------------------------ */
@@ -778,8 +779,8 @@ extern "C" void TRANSLATE_CB(int var){
   float dx, dy;
   float dx2, dy2;
   float *eye_xyz;
-  float *direction_angle;
-  float *cos_direction_angle, *sin_direction_angle;
+  float *azimuth;
+  float *cos_azimuth, *sin_azimuth;
   int *rotation_index;
   int i;
 
@@ -806,9 +807,9 @@ extern "C" void TRANSLATE_CB(int var){
     return;
   }
   eye_xyz = camera_current->eye;
-  direction_angle=&camera_current->direction_angle;
-  cos_direction_angle=&camera_current->cos_direction_angle;
-  sin_direction_angle=&camera_current->sin_direction_angle;
+  azimuth=&camera_current->azimuth;
+  cos_azimuth=&camera_current->cos_azimuth;
+  sin_azimuth=&camera_current->sin_azimuth;
   rotation_index = &camera_current->rotation_index;
   if(selected_view!=-999){
     selected_view=-999;
@@ -818,9 +819,9 @@ extern "C" void TRANSLATE_CB(int var){
   switch (var){
 
     case EYE_ROTATE:
-      *direction_angle=motion_dir[0];
-      *cos_direction_angle = cos(PI*(*direction_angle)/180.0);
-      *sin_direction_angle = sin(PI*(*direction_angle)/180.0);
+      *azimuth=motion_dir[0];
+      *cos_azimuth = cos(PI*(*azimuth)/180.0);
+      *sin_azimuth = sin(PI*(*azimuth)/180.0);
       if(glui_move_mode!=EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
@@ -833,17 +834,17 @@ extern "C" void TRANSLATE_CB(int var){
         float diffangle;
         int intangle;
 
-        intangle = (int)((*direction_angle+45)/90)*90.0;
-        diffangle = *direction_angle-intangle;
+        intangle = (int)((*azimuth+45)/90)*90.0;
+        diffangle = *azimuth-intangle;
         if(diffangle<0.0)diffangle = -diffangle;
         if(diffangle>1.0){
-          *direction_angle=intangle;
+          *azimuth=intangle;
         }
         else{
-          *direction_angle+=90.0;
+          *azimuth+=90.0;
         }
       }
-      if(*direction_angle>=360.0)*direction_angle-=360.0;
+      if(*azimuth>=360.0)*azimuth-=360.0;
       TRANSLATE_CB(EYE_ROTATE);
       glui_move_mode=EYE_ROTATE_90;
       return;
@@ -984,10 +985,10 @@ extern "C" void TRANSLATE_CB(int var){
     dy=motion_dir[1]*TRANSLATE_SPEED*(float)screenWidth/1800.0;
   }
   if(eyeview==EYE_CENTERED){
-    *cos_direction_angle = cos(PI*(*direction_angle)/180.0);
-    *sin_direction_angle = sin(PI*(*direction_angle)/180.0);
-    dx2 = *cos_direction_angle*dx + *sin_direction_angle*dy;
-    dy2 = -(*sin_direction_angle)*dx + (*cos_direction_angle)*dy;
+    *cos_azimuth = cos(PI*(*azimuth)/180.0);
+    *sin_azimuth = sin(PI*(*azimuth)/180.0);
+    dx2 = *cos_azimuth*dx + *sin_azimuth*dy;
+    dy2 = -(*sin_azimuth)*dx + (*cos_azimuth)*dy;
     dx = dx2;
     dy = dy2;
   }
@@ -1197,6 +1198,9 @@ void BUTTON_Reset_CB(int var){
     BUTTON_Reset_CB(RESTORE_VIEW);
     enable_disable_views();
     break;
+  case USE_GENERAL_ROTATION:
+    if(use_general_rotation==1)smv2quat();
+    break;
   case RESTORE_VIEW:
     ival=view_lists->get_int_val();
     selected_view=ival;
@@ -1204,14 +1208,13 @@ void BUTTON_Reset_CB(int var){
       if(ca->view_id==ival)break;
     }
 
-   eyeview_save = ca->eyeview;
-   copy_camera(camera_current,ca);
-   if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0){
-     updatezoommenu=1;
-   }
-   camera_current->eyeview=eyeview_save;
-   edit_view_label->set_text(ca->name);
-   break;
+    eyeview_save = ca->eyeview;
+    copy_camera(camera_current,ca);
+    if(use_general_rotation==1)smv2quat();
+    if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0)updatezoommenu=1;
+    camera_current->eyeview=eyeview_save;
+    edit_view_label->set_text(ca->name);
+    break;
   case LIST_VIEW:
     ival=view_lists->get_int_val();
     old_listview=-2;

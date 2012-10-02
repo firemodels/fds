@@ -16,19 +16,22 @@ char geometry_revision[]="$Revision$";
 
 /* ------------------ mult_quat ------------------------ */
 
-void angleaxis2quat(float angle, float axis[3], float quat[4]){
-  // angle is in radians
-  // axis is a unit vector
-
+void angleaxis2quat(float angle, float *axis, float *quat){
+  float sum;
   float cosang, sinang;
+
+  // angle is in radians
+  // axis is a vector
+
+  sum = sqrt(axis[0]*axis[0]+axis[1]*axis[1]+axis[2]*axis[2]);
 
   cosang = cos(angle/2.0);
   sinang = sin(angle/2.0);
 
   quat[0] = cosang;
-  quat[1] = axis[0]*sinang;
-  quat[2] = axis[1]*sinang;
-  quat[3] = axis[2]*sinang;
+  quat[1] = axis[0]*sinang/sum;
+  quat[2] = axis[1]*sinang/sum;
+  quat[3] = axis[2]*sinang/sum;
 }
 
 /* ------------------ mult_quat ------------------------ */
@@ -67,12 +70,17 @@ void quat2rot(float quat[4],float rot[16]){
 /* ------------------ mult_quat ------------------------ */
 
 void mult_quat(float x[4], float y[4], float z[4]){
-  z[0] = x[0]*y[0] - x[1]*y[1] - x[2]*y[2] - x[3]*y[3];
-  z[1] = x[0]*y[1] + x[1]*y[0] + x[2]*y[3] - x[3]*y[2];
-  z[2] = x[0]*y[2] - x[1]*y[3] + x[2]*y[0] + x[3]*y[1];
-  z[3] = x[0]*y[3] + x[1]*y[2] - x[2]*y[1] + x[3]*y[0];
-}
+  float z2[4];
 
+  z2[0] = x[0]*y[0] - x[1]*y[1] - x[2]*y[2] - x[3]*y[3];
+  z2[1] = x[0]*y[1] + x[1]*y[0] + x[2]*y[3] - x[3]*y[2];
+  z2[2] = x[0]*y[2] - x[1]*y[3] + x[2]*y[0] + x[3]*y[1];
+  z2[3] = x[0]*y[3] + x[1]*y[2] - x[2]*y[1] + x[3]*y[0];
+  z[0]=z2[0];
+  z[1]=z2[1];
+  z[2]=z2[2];
+  z[3]=z2[3];
+}
 
 /* ------------------ mult_quat ------------------------ */
 

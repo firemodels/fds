@@ -706,19 +706,23 @@ void update_mouseinfo(int flag, int xm, int ym){
 
   if(*distance<0.3){
     delta_angle = (delta_distance);
-    axis[0]=-xdirection[1];
-    axis[1]=0.0;
-    axis[2]=xdirection[0];
-    angleaxis2quat(delta_angle,axis,quat_temp);
+    if(delta_angle!=0.0&&ABS(xdirection[0])+ABS(xdirection[1])>0.0){
+      axis[0]=-xdirection[1];
+      axis[1]=0.0;
+      axis[2]=xdirection[0];
+      angleaxis2quat(delta_angle,axis,quat_temp);
+      mult_quat(quat_temp,quat_general,quat_general);
+      quat2rot(quat_general,quat_rotation);
+    }
   }
   else{
     axis[0]=0.0;
     axis[1]=1.0;
     axis[2]=0.0;
     angleaxis2quat(-delta_angle2,axis,quat_temp);
+    mult_quat(quat_temp,quat_general,quat_general);
+    quat2rot(quat_general,quat_rotation);
   }
-  mult_quat(quat_temp,quat_general,quat_general);
-  quat2rot(quat_general,quat_rotation);
 
 }
 
@@ -991,8 +995,8 @@ void Move_Scene(int xm, int ym){
   float *eye_xyz, *angle_zx;
   int screenWidth2, screenHeight2;
   int dxm, dym;
-  float direction_angle;
-  float elevation_angle;
+  float azimuth;
+  float elevation;
   float xx, yy;
 
   eye_xyz = camera_current->eye;
@@ -1019,19 +1023,19 @@ void Move_Scene(int xm, int ym){
           break;
         case EYE_CENTERED:
 #define ANGLE_FACTOR 0.25
-          camera_current->direction_angle += dxm*ANGLE_FACTOR;
-          direction_angle=camera_current->direction_angle;
-          camera_current->cos_direction_angle = cos(PI*direction_angle/180.0);
-          camera_current->sin_direction_angle = sin(PI*direction_angle/180.0);
+          camera_current->azimuth += dxm*ANGLE_FACTOR;
+          azimuth=camera_current->azimuth;
+          camera_current->cos_azimuth = cos(azimuth*DEG2RAD);
+          camera_current->sin_azimuth = sin(azimuth*DEG2RAD);
           start_xyz0[0]=xm;
 
-          camera_current->elevation_angle -= dym*ANGLE_FACTOR;
-          elevation_angle=camera_current->elevation_angle;
-          if(elevation_angle>80.0)elevation_angle=80.0;
-          if(elevation_angle<-80.0)elevation_angle=-80.0;
-          camera_current->elevation_angle=elevation_angle;
-          camera_current->cos_elevation_angle = cos(PI*elevation_angle/180.0);
-          camera_current->sin_elevation_angle = sin(PI*elevation_angle/180.0);
+          camera_current->elevation -= dym*ANGLE_FACTOR;
+          elevation=camera_current->elevation;
+          if(elevation>80.0)elevation=80.0;
+          if(elevation<-80.0)elevation=-80.0;
+          camera_current->elevation=elevation;
+          camera_current->cos_elevation = cos(elevation*DEG2RAD);
+          camera_current->sin_elevation = sin(elevation*DEG2RAD);
           start_xyz0[1]=ym;
           break;
         default:
@@ -1051,8 +1055,8 @@ void Move_Scene(int xm, int ym){
         if(eyeview==EYE_CENTERED){
           float xx2, yy2;
 
-          xx2 = camera_current->cos_direction_angle*xx - camera_current->sin_direction_angle*yy;
-          yy2 = camera_current->sin_direction_angle*xx + camera_current->cos_direction_angle*yy;
+          xx2 = camera_current->cos_azimuth*xx - camera_current->sin_azimuth*yy;
+          yy2 = camera_current->sin_azimuth*xx + camera_current->cos_azimuth*yy;
           xx = xx2;
           yy = yy2;
         }
@@ -2141,27 +2145,27 @@ void handle_plot3d_keys(int  key){
 void handle_move_keys(int  key){
   int state;
   float dx, dy;
-  float *cos_direction_angle, *sin_direction_angle;
-  float *elevation_angle, *cos_elevation_angle, *sin_elevation_angle;
+  float *cos_azimuth, *sin_azimuth;
+  float *elevation, *cos_elevation, *sin_elevation;
 
   const float INC_ANGLE0=0.1;
 
   float INC_XY, INC_Z, INC_ANGLE;
 
   float *eye_xyz;
-  float *direction_angle;
+  float *azimuth;
 #define LOOKANGLE_CHANGE 11.25
 
 
   eye_xyz = camera_current->eye;
-  direction_angle=&camera_current->direction_angle;
+  azimuth=&camera_current->azimuth;
 
-  cos_direction_angle=&camera_current->cos_direction_angle;
-  sin_direction_angle=&camera_current->sin_direction_angle;
+  cos_azimuth=&camera_current->cos_azimuth;
+  sin_azimuth=&camera_current->sin_azimuth;
 
-  elevation_angle=&camera_current->elevation_angle;
-  cos_elevation_angle=&camera_current->cos_elevation_angle;
-  sin_elevation_angle=&camera_current->sin_elevation_angle;
+  elevation=&camera_current->elevation;
+  cos_elevation=&camera_current->cos_elevation;
+  sin_elevation=&camera_current->sin_elevation;
 
 
   glui_move_mode=-1;
@@ -2189,27 +2193,27 @@ void handle_move_keys(int  key){
   case GLUT_KEY_RIGHT:
     switch (key_state){
     case KEY_ALT:
-      dx = INC_XY*(*cos_direction_angle);
-      dy = INC_XY*(*sin_direction_angle);
+      dx = INC_XY*(*cos_azimuth);
+      dy = INC_XY*(*sin_azimuth);
       getnewpos(eye_xyz,dx,-dy,0.0,1.0);
       break;
     case KEY_SHIFT:
     case KEY_CTRL:
     default:
       if(key_state==KEY_SHIFT){
-        *direction_angle += 4.0*INC_ANGLE;
+        *azimuth += 4.0*INC_ANGLE;
       }
       else{
-        *direction_angle += INC_ANGLE;
+        *azimuth += INC_ANGLE;
       }
-      *cos_direction_angle = cos(PI*(*direction_angle)/180.0);
-      *sin_direction_angle = sin(PI*(*direction_angle)/180.0);
+      *cos_azimuth = cos((*azimuth)*DEG2RAD);
+      *sin_azimuth = sin((*azimuth)*DEG2RAD);
       break;
     }
     break;
   case 256+'d':
-    dx = INC_XY*(*cos_direction_angle);
-    dy = INC_XY*(*sin_direction_angle);
+    dx = INC_XY*(*cos_azimuth);
+    dy = INC_XY*(*sin_azimuth);
     {
       float local_speed_factor=1.0;
 
@@ -2220,27 +2224,27 @@ void handle_move_keys(int  key){
   case GLUT_KEY_LEFT:
     switch (key_state){
     case KEY_ALT:
-      dx = INC_XY*(*cos_direction_angle);
-      dy = INC_XY*(*sin_direction_angle);
+      dx = INC_XY*(*cos_azimuth);
+      dy = INC_XY*(*sin_azimuth);
       getnewpos(eye_xyz,-dx,dy,0.0,1.0);
       break;
     case KEY_SHIFT:
     case KEY_CTRL:
     default:
       if(key_state==KEY_SHIFT){
-        *direction_angle -= 4.0*INC_ANGLE;
+        *azimuth -= 4.0*INC_ANGLE;
       }
       else{
-        *direction_angle -= INC_ANGLE;
+        *azimuth -= INC_ANGLE;
       }
-      *cos_direction_angle = cos(PI*(*direction_angle)/180.0);
-      *sin_direction_angle = sin(PI*(*direction_angle)/180.0);
+      *cos_azimuth = cos((*azimuth)*DEG2RAD);
+      *sin_azimuth = sin((*azimuth)*DEG2RAD);
       break;
     }
     break;
   case 256+'a':
-    dx = INC_XY*(*cos_direction_angle);
-    dy = INC_XY*(*sin_direction_angle);
+    dx = INC_XY*(*cos_azimuth);
+    dy = INC_XY*(*sin_azimuth);
     if(key_state==KEY_SHIFT){
       getnewpos(eye_xyz,-dx,dy,0.0,4.0);
     }
@@ -2256,8 +2260,8 @@ void handle_move_keys(int  key){
       float local_speed_factor=1.0;
 
       if(key_state==KEY_SHIFT)local_speed_factor=4.0;
-      dx = INC_XY*(*sin_direction_angle);
-      dy = INC_XY*(*cos_direction_angle);
+      dx = INC_XY*(*sin_azimuth);
+      dy = INC_XY*(*cos_azimuth);
       getnewpos(eye_xyz,-dx,-dy,0.0,local_speed_factor);
     }
     break;
@@ -2269,26 +2273,26 @@ void handle_move_keys(int  key){
       float local_speed_factor=1.0;
   
       if(key_state==KEY_SHIFT)local_speed_factor=4.0;
-      dx = INC_XY*(*sin_direction_angle);
-      dy = INC_XY*(*cos_direction_angle);
+      dx = INC_XY*(*sin_azimuth);
+      dy = INC_XY*(*cos_azimuth);
       getnewpos(eye_xyz,dx,dy,0.0,local_speed_factor);
     }
     break;
   case GLUT_KEY_PAGE_UP:
-    *elevation_angle += LOOKANGLE_CHANGE;
-    *cos_elevation_angle=cos(*elevation_angle*PI/180.0);
-    *sin_elevation_angle=sin(*elevation_angle*PI/180.0);
+    *elevation += LOOKANGLE_CHANGE;
+    *cos_elevation=cos(*elevation*DEG2RAD);
+    *sin_elevation=sin(*elevation*DEG2RAD);
     break;
   case GLUT_KEY_HOME:
-    *elevation_angle=0.0;
-    *cos_elevation_angle=1.0;
-    *sin_elevation_angle=0.0;
+    *elevation=0.0;
+    *cos_elevation=1.0;
+    *sin_elevation=0.0;
     break;
   case GLUT_KEY_INSERT:
   case GLUT_KEY_PAGE_DOWN:
-    *elevation_angle-=LOOKANGLE_CHANGE;
-    *cos_elevation_angle=cos(*elevation_angle*PI/180.0);
-    *sin_elevation_angle=sin(*elevation_angle*PI/180.0);
+    *elevation-=LOOKANGLE_CHANGE;
+    *cos_elevation=cos(*elevation*DEG2RAD);
+    *sin_elevation=sin(*elevation*DEG2RAD);
     break;
   case GLUT_KEY_END:
     ResetView(RESTORE_EXTERIOR_VIEW);
@@ -2296,8 +2300,8 @@ void handle_move_keys(int  key){
   case GLUT_KEY_F4:
     camera_current->view_angle-=LOOKANGLE_CHANGE;
     if(camera_current->view_angle<0.0)camera_current->view_angle+=360.0;
-    camera_current->cos_view_angle=cos(camera_current->view_angle*PI/180.0);
-    camera_current->sin_view_angle=sin(camera_current->view_angle*PI/180.0);
+    camera_current->cos_view_angle=cos(camera_current->view_angle*DEG2RAD);
+    camera_current->sin_view_angle=sin(camera_current->view_angle*DEG2RAD);
     break;
   case GLUT_KEY_F5:
     camera_current->view_angle=0.0;
@@ -2307,8 +2311,8 @@ void handle_move_keys(int  key){
   case GLUT_KEY_F6:
     camera_current->view_angle+=LOOKANGLE_CHANGE;
     if(camera_current->view_angle>360.0)camera_current->view_angle-=360.0;
-    camera_current->cos_view_angle=cos(camera_current->view_angle*PI/180.0);
-    camera_current->sin_view_angle=sin(camera_current->view_angle*PI/180.0);
+    camera_current->cos_view_angle=cos(camera_current->view_angle*DEG2RAD);
+    camera_current->sin_view_angle=sin(camera_current->view_angle*DEG2RAD);
     break;
   default:
     ASSERT(FFALSE);
@@ -2889,12 +2893,12 @@ void Display_CB(void){
       float *angle_zx;
 
       angle_zx = camera_current->angle_zx;
-      angle_zx[0] = anglexy0 + angle_global*180./PI;
+      angle_zx[0] = anglexy0 + angle_global*RAD2DEG;
     }
     else{          
-      camera_current->direction_angle = direction_angle0 + angle_global*180./PI;
-      camera_current->cos_direction_angle = cos(PI*camera_current->direction_angle/180.0);
-      camera_current->sin_direction_angle = sin(PI*camera_current->direction_angle/180.0);
+      camera_current->azimuth = azimuth0 + angle_global*RAD2DEG;
+      camera_current->cos_azimuth = cos(camera_current->azimuth*DEG2RAD);
+      camera_current->sin_azimuth = sin(camera_current->azimuth*DEG2RAD);
     }
     glutPostRedisplay();
   }

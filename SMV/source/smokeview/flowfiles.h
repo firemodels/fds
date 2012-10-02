@@ -830,10 +830,10 @@ typedef struct _camera {
   float eye[3], view[3], up[3], eye_save[3];
   float isometric_y;
   float angle_zx[2];
-  float view_angle, direction_angle, elevation_angle;
+  float view_angle, azimuth, elevation;
   float sin_view_angle, cos_view_angle;
-  float sin_direction_angle, cos_direction_angle;
-  float sin_elevation_angle, cos_elevation_angle;
+  float sin_azimuth, cos_azimuth;
+  float sin_elevation, cos_elevation;
   float xcen, ycen, zcen;
   float zoom;
   float modelview[16];

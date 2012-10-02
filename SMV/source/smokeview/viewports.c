@@ -747,9 +747,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   float StereoCameraOffset,FrustumAsymmetry;
   float aperture_temp;
   float widthdiv2;
-  float anglexyINI, angleyzINI;
+  float azimuth, elevation;
   float eyexINI, eyeyINI, eyezINI;
-  float direction_angleINI;
+  float azimuthINI;
 
   if(showstereo==2){
     down=0;
@@ -809,7 +809,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     camera_current->eye[0]=selected_avatar_pos[0];
     camera_current->eye[1]=selected_avatar_pos[1];
     camera_current->eye[2]=selected_avatar_pos[2];
-    camera_current->direction_angle=selected_avatar_angle;
+    camera_current->azimuth=selected_avatar_angle;
     camera_current->view_angle=0.0;
     update_camera(camera_current);
     //camera_current->angle_zx[1]=0.0;
@@ -820,8 +820,8 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   eyeyINI = camera_current->eye[1];
   eyezINI = camera_current->eye[2];
 
-  angleyzINI = camera_current->angle_zx[1];
-  anglexyINI = camera_current->angle_zx[0];
+  elevation = camera_current->angle_zx[1];
+  azimuth = camera_current->angle_zx[0];
   
   fnear =  - eyeyINI-1.0;
   if(fnear<nearclip)fnear=nearclip;
@@ -887,7 +887,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
   {
     float sin_dv_sum, cos_dv_sum;
-    float sn_direction_angle, cs_direction_angle;
+    float sin_azimuth, cos_azimuth;
     float sn_view_angle, cs_view_angle;
     float *uup;
     float *modelview_rotate;
@@ -898,10 +898,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     sn_view_angle=camera_current->sin_view_angle;
     cs_view_angle=camera_current->cos_view_angle;
 
-    sn_direction_angle=camera_current->sin_direction_angle;
-    cs_direction_angle=camera_current->cos_direction_angle;
+    sin_azimuth=camera_current->sin_azimuth;
+    cos_azimuth=camera_current->cos_azimuth;
 
-    direction_angleINI = camera_current->direction_angle;
+    azimuthINI = camera_current->azimuth;
 
     modelview_rotate = camera_current->modelview;
 
@@ -909,11 +909,11 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     ycen = camera_current->ycen;
     zcen = camera_current->zcen;
 
-    cos_elevation_angle=camera_current->cos_elevation_angle;
-    sin_elevation_angle=camera_current->sin_elevation_angle;
+    cos_elevation_angle=camera_current->cos_elevation;
+    sin_elevation_angle=camera_current->sin_elevation;
 
-    sin_dv_sum = sn_direction_angle*cs_view_angle + cs_direction_angle*sn_view_angle;
-    cos_dv_sum = cs_direction_angle*cs_view_angle - sn_direction_angle*sn_view_angle;
+    sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
+    cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;
 
 
     posx = eyexINI+StereoCameraOffset*cos_dv_sum;
@@ -943,8 +943,8 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
           viewx = pj->oview[0]+StereoCameraOffset*cos_dv_sum;
           viewy = pj->oview[1]-StereoCameraOffset*sin_dv_sum;
           viewz = pj->oview[2];
-          angleyzINI=0.0;
-          anglexyINI=0.0;
+          elevation=0.0;
+          azimuth=0.0;
         }
       }
     }
@@ -969,9 +969,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
     else{
       if(eyeview==WORLD_CENTERED){
-        glRotatef(angleyzINI,cs_direction_angle,-sn_direction_angle,0.0);  /* rotate about the transformed x axis */
+        printf("normal: %f %f %f %f\n",cos_azimuth,-sin_azimuth,elevation,azimuth);
+        glRotatef(elevation,cos_azimuth,-sin_azimuth,0.0);  /* rotate about the transformed x axis */
       }
-      glRotatef(anglexyINI,0.0,0.0,1.0);                   /* rotate about z axis */
+      glRotatef(azimuth,0.0,0.0,1.0);                   /* rotate about z axis */
     }
     
     glTranslatef(-xcen,-ycen,-zcen);
