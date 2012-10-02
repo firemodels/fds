@@ -1911,7 +1911,7 @@ convenient to start the flow immediately, like in an outdoor simulation involvin
 \subsection{Special Topic: Mean Forcing and Data Assimilation}
 \label{info:mean_forcing}
 
-A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Usually, one knows only that the mean wind is 10 m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
+A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Usually, a user knows only that the mean wind is 10 m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
 
 In FDS, the user may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to set a northeast wind at 10 m/s use
 
@@ -1926,7 +1926,7 @@ In FDS, the user may invoke the most rudimentary of data assimilation techniques
 \subsection{Special Topic: Specified Force Field}
 \label{info:force_vector}
 
-Similar to the {\ct MEAN\_FORCING} feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
+Similar to the {\ct MEAN\_FORCING} feature, the user may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
 
 \begin{equation}
 \frac{\partial u_i}{\partial t} = -F_i/\rho
@@ -9611,8 +9611,8 @@ is approximately 12, equivalent to 8 byte or double precision following conventi
 \label{info:meshquality}
 The quality of a particular simulation is most directly tied to grid resolution.  Three slice file output quantities are suggested here for measuring errors in the velocity and scalar fields:
 \begin{enumerate}
-\item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the `Pope criterion' \cite{Pope:2004}), MTR
-\item A model for the fraction of unresolved scalar energy fluctuations called \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
+\item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the ``Pope criterion'' \cite{Pope:2004}), MTR
+\item A model for the fraction of unresolved scalar energy fluctuations called the \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
 \item A \emph{wavelet-based error measure} \cite{McDermott:2010}, WEM
 \end{enumerate}
 Examples:
@@ -9621,7 +9621,7 @@ Examples:
 \begin{verbatim}
 &SLCF PBY=0, QUANTITY='TURBULENCE RESOLUTION' /
 &SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', QUANTITY2='MASS FRACTION', SPEC_ID='HELIUM' /
-&SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV', CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV' /
 \end{verbatim} \normalsize
 Note that an additional scalar {\ct QUANTITY2} is required for MSR and WEM.  {\ct QUANTITY2} may be any output quantity appropriate for {\ct SLCF}.
 Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
@@ -9681,7 +9681,7 @@ f(r) \approx \sum_j s_j \varphi_{[r_j,r_j+h]}(r)
 By ``viewing'' the signal at a coarser resolution, say $2h$, an identical reconstruction of the function $f$ over the interval $[r_j,r_j+2h]$ may be obtained from
 \begin{eqnarray}
 \label{eqn_wavelet_decomp}
-f_{[r_j,r_j+2h]}(r) = \underbrace{\mbox{$\frac{s_j+s_{j+1}}{2}$}}_a \,\varphi_{[r_j,r_j+2h]}(r) + \underbrace{\mbox{$\frac{s_j-s_{j+1}}{2}$}}_c \,\psi_{[r_j,r_j+2h]}(r)
+f_{[r_j,r_j+2h]}(r) = \underbrace{\frac{s_j+s_{j+1}}{2}}_a \,\varphi_{[r_j,r_j+2h]}(r) + \underbrace{\frac{s_j-s_{j+1}}{2}}_c \,\psi_{[r_j,r_j+2h]}(r)
 \end{eqnarray}
 where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} coefficient.  The Haar \emph{mother wavelet} (Figure \ref{fig_haar_mother}) is identified as
 \begin{eqnarray}
@@ -9690,7 +9690,7 @@ where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.5\linewidth]{FIGURES/haar_mother}
+\includegraphics[width=3.2in]{FIGURES/haar_mother}
 \vskip-0.2cm
 \caption[Haar mother wavelet]{Haar mother wavelet on the interval [0,1].}
 \label{fig_haar_mother}
@@ -9707,10 +9707,10 @@ Note that we have arbitrarily scaled the measure so that a step function leads t
 \begin{figure}[ht]
 \centering
 \begin{tabular}{rl}
-\includegraphics[width=0.4\linewidth]{FIGURES/haar_step} &
-\includegraphics[width=0.4\linewidth]{FIGURES/haar_line} \\
-\includegraphics[width=0.4\linewidth]{FIGURES/haar_eddy} &
-\includegraphics[width=0.4\linewidth]{FIGURES/haar_extr}
+\includegraphics[width=3.2in]{FIGURES/haar_step} &
+\includegraphics[width=3.2in]{FIGURES/haar_line} \\
+\includegraphics[width=3.2in]{FIGURES/haar_eddy} &
+\includegraphics[width=3.2in]{FIGURES/haar_extr}
 \end{tabular}
 \vskip-0.2cm
 \caption[Haar wavelet transforms on four typical signals]{Averages and coefficients for local Haar wavelet transforms on four typical signals.}
