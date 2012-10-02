@@ -556,8 +556,8 @@ void getPart5Colors(partdata *parti, int nlevel){
         for(m=0;m<datacopy->npoints;m++){
           float az, elev, length;
 
-          az= azimuth_data[m]*PI/180.0;
-          elev = elevation_data[m]*PI/180.0;
+          az= azimuth_data[m]*DEG2RAD;
+          elev = elevation_data[m]*DEG2RAD;
           length=length_data[m]/xyzmaxdiff;
           dsx[m] = cos(az)*cos(elev)*length/2.0;
           dsy[m] = sin(az)*cos(elev)*length/2.0;

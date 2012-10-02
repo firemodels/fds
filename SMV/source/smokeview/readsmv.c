@@ -6883,8 +6883,8 @@ typedef struct {
         partclassi->diameter/=xyzmaxdiff;
         partclassi->length/=xyzmaxdiff;
         length=partclassi->length;
-        azimuth = partclassi->azimuth*PI/180.0;
-        elevation = partclassi->elevation*PI/180.0;
+        azimuth = partclassi->azimuth*DEG2RAD;
+        elevation = partclassi->elevation*DEG2RAD;
         partclassi->dx = cos(azimuth)*cos(elevation)*length/2.0;
         partclassi->dy = sin(azimuth)*cos(elevation)*length/2.0;
         partclassi->dz =              sin(elevation)*length/2.0;
@@ -11680,14 +11680,12 @@ void update_loaded_lists(void){
 /* ------------------ get_elevaz ------------------------ */
 
 void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis, float *dpsi){
-  float pi;
 
   // cos(dtheta) = (xyznorm .dot. vec3(0,0,1))/||xyznorm||
   // rotate_axis = xyznorm .cross. vec3(0,0,1)
 
-  pi=4.0*atan(1.0);
   normalize(xyznorm,3);
-  *dtheta = 180.0*acos(xyznorm[2])/pi;
+  *dtheta = RAD2DEG*acos(xyznorm[2]);
   rotate_axis[0]=-xyznorm[1];
   rotate_axis[1]= xyznorm[0];
   rotate_axis[2]=0.0;
@@ -11698,7 +11696,7 @@ void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis, float *dpsi){
     xyznorm2[0]=xyznorm[0];
     xyznorm2[1]=xyznorm[1];
     normalize(xyznorm2,2);
-    *dpsi = 180.0*acos(xyznorm2[1])/pi;
+    *dpsi = RAD2DEG*acos(xyznorm2[1]);
     if(xyznorm2[0]<0.0)*dpsi=-(*dpsi);
   }
 }

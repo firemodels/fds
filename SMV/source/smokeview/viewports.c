@@ -856,7 +856,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   }
 
 
-  widthdiv2 = fnear*tan(0.5*PI*aperture_temp/180.);
+  widthdiv2 = fnear*tan(0.5*aperture_temp*DEG2RAD);
   fleft = -widthdiv2;
   fright = widthdiv2;
   fup = aspect*widthdiv2;

@@ -2742,7 +2742,7 @@ void rotatexyz(float x, float y, float z){
   normxyz=x*x+y*y+z*z;
   normxyz=sqrt(normxyz);
   if(normxyz<0.00001)return;
-  angle=180.0*acos(z/normxyz)/PI;
+  angle=RAD2DEG*acos(z/normxyz);
   glRotatef(angle,-y/normxy,x/normxy,0.0);
 }
 

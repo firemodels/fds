@@ -4297,7 +4297,7 @@ int get_tick_dir(float *mm){
     cosangle = normdir[2]/sqrt(normdir[0]*normdir[0]+normdir[1]*normdir[1]+normdir[2]*normdir[2]);
     if(cosangle>1.0)cosangle=1.0;
     if(cosangle<-1.0)cosangle=-1.0;
-    absangle=acos(cosangle)*180.0/pi;
+    absangle=acos(cosangle)*RAD2DEG;
     if(absangle<0.0)absangle=-absangle;
     if(absangle<minangle){
       iminangle=i;

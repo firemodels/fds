@@ -821,10 +821,10 @@ void createtourpaths(void){
         dx /= denom;
         dy /= denom;
         az = pj->eye[3];
-        az = az*pi/180.0;
+        az = az*DEG2RAD;
         dx2 = dx*cos(az) - dy*sin(az);
         dy2 = dx*sin(az) + dy*cos(az);
-        dz = tan(pj->elev_path*pi/180.0)/10.0;
+        dz = tan(pj->elev_path*DEG2RAD)/10.0;
         oview[0]=eye[0]+dx2;
         oview[1]=eye[1]+dy2;
         oview[2]=eye[2]+dz;
@@ -1290,12 +1290,12 @@ void adjustviewangle(keyframe *kf, float *az_path, float *elev_path){
   dy /= distxy;
   dz /= distxy;
 
-  angle_temp = 180.0*atan2(dy,dx)/PI;
-  angle_temp2 = 180.0*atan2(dy2,dx2)/PI;
+  angle_temp = RAD2DEG*atan2(dy,dx);
+  angle_temp2 = RAD2DEG*atan2(dy2,dx2);
   az = angle_temp - angle_temp2;
   if(az>180.0)az = 360.0 - az;
   if(az<-180.0)az = az + 360.0;
-  elev=atan(dz)*180.0/PI;
+  elev=atan(dz)*RAD2DEG;
 
   kf->nodeval.elev_path=elev;
   kf->az_path=az;

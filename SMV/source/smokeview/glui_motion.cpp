@@ -820,8 +820,8 @@ extern "C" void TRANSLATE_CB(int var){
 
     case EYE_ROTATE:
       *azimuth=motion_dir[0];
-      *cos_azimuth = cos(PI*(*azimuth)/180.0);
-      *sin_azimuth = sin(PI*(*azimuth)/180.0);
+      *cos_azimuth = cos((*azimuth)*DEG2RAD);
+      *sin_azimuth = sin((*azimuth)*DEG2RAD);
       if(glui_move_mode!=EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
@@ -985,8 +985,8 @@ extern "C" void TRANSLATE_CB(int var){
     dy=motion_dir[1]*TRANSLATE_SPEED*(float)screenWidth/1800.0;
   }
   if(eyeview==EYE_CENTERED){
-    *cos_azimuth = cos(PI*(*azimuth)/180.0);
-    *sin_azimuth = sin(PI*(*azimuth)/180.0);
+    *cos_azimuth = cos((*azimuth)*DEG2RAD);
+    *sin_azimuth = sin((*azimuth)*DEG2RAD);
     dx2 = *cos_azimuth*dx + *sin_azimuth*dy;
     dy2 = -(*sin_azimuth)*dx + (*cos_azimuth)*dy;
     dx = dx2;

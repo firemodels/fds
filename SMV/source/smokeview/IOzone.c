@@ -413,7 +413,7 @@ void getzonesmokedir(float *mm){
       cosdir = (eyedir[0]*norm[0]+eyedir[1]*norm[1]+eyedir[2]*norm[2]);
       if(cosdir>1.0)cosdir=1.0;
       if(cosdir<-1.0)cosdir=-1.0;
-      cosdir=acos(cosdir)*180.0/pi;
+      cosdir=acos(cosdir)*RAD2DEG;
       if(cosdir<0.0)cosdir=-cosdir;
       angles[3+i]=cosdir;
     }
