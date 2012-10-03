@@ -2,7 +2,9 @@
 %7-06-2010
 %vettori_sloped.m
 
-clear all; close all; clc;
+clear all
+close all
+
 addpath('../../Validation/Vettori_Sloped_Ceiling');
 
 %Import sorting information
@@ -42,7 +44,7 @@ for n=1:72
     elseif n>60 & n<=72
         K(6) = plot(exp_data(1:4,n),fds_data(1:4,n),'bh');
     end
-hold on
+    hold on
 end
 
 %Format the Plot 
@@ -52,36 +54,31 @@ set(gcf,'DefaultLineLineWidth',Line_Width)
 set(gca,'FontSize',Title_Font_Size)
 set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
-set(gca,'Position',[1,1,4.5,4.5])
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
-xmin = 0 ;
+xmin = 0;
 ymin = 0;
 xmax = 250;
 ymax = xmax;
-plot([xmin xmax],[ymin ymax],'k-');
-axis([xmin xmax ymin ymax]);
+plot([xmin xmax],[ymin ymax],'k-')
+axis([xmin xmax ymin ymax])
 
-xlabel('Measured Activation Time (s)')
-ylabel('Predicted Activation Time (s)')
+xlabel('Measured Activation Time (s)','FontSize',Label_Font_Size,'FontName',Font_Name)
+ylabel('Predicted Activation Time (s)','FontSize',Label_Font_Size,'FontName',Font_Name)
 
 h = legend(K,'Flat Smooth','Flat Obstructed','13 Smooth','13 Obstructed','24 Smooth','24 Obstructed','Location','SouthEast');
-set(h,'Interpreter',Font_Interpreter)
 
-text(0.05*xmax,0.95*ymax,'Vettori Sloped Ceiling Activation Times','FontSize',14,'FontName','Times','Interpreter',Font_Interpreter)
-
-hold off
+text(0.05*xmax,0.95*ymax,'Vettori Sloped Ceiling Activation Times','FontSize',Title_Font_Size,'FontName',Font_Name)
  
 %Print the Plot 
 
-paper_width  = 6.0; % inches
-paper_height = 6.0; % inches
-
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[paper_width paper_height]);
-set(gcf,'PaperPosition',[0 0 paper_width paper_height]);      
+set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+display(['Printing plot Vettori_Sloped_Activation_Time ...'])
 print(gcf,'-dpdf',['../../Manuals/FDS_Validation_Guide/FIGURES/Vettori_Sloped_Ceiling/Vettori_Sloped_Activation_Time'])
 
 %Brag about accomplishments
 
-disp('Vettori Sloped Printed Successfully')
+disp('Taylor is the Man')

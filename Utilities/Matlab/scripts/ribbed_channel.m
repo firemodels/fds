@@ -60,8 +60,8 @@ for i=1:lnx
     H(1+i)=plot(x/h,u_fds,fds_marker{i});
 end
 
-xlabel('$x/h$','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
-ylabel('Streamwise Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
+xlabel('$x/h$','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+ylabel('Streamwise Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
 
 axis([0 10 -0.8 0.8])
 set(gca,'YTick',-0.8:0.4:0.8)
@@ -120,8 +120,8 @@ for i=1:lnx
     H(1+i)=plot(x/h,urms_fds,fds_marker{i});
 end
 
-xlabel('$x/h$','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
-yh = ylabel('Streamwise RMS Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size);
+xlabel('$x/h$','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+yh = ylabel('Streamwise RMS Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
 set(yh,'Position',[-0.8194-.2    0.2963-.025    1.0001])
 
 axis([0 10 0 0.6])
