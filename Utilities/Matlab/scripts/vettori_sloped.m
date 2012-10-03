@@ -63,12 +63,12 @@ ymax = xmax;
 plot([xmin xmax],[ymin ymax],'k-')
 axis([xmin xmax ymin ymax])
 
-xlabel('Measured Activation Time (s)','FontSize',Label_Font_Size,'FontName',Font_Name)
-ylabel('Predicted Activation Time (s)','FontSize',Label_Font_Size,'FontName',Font_Name)
+xlabel('Measured Activation Time (s)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+ylabel('Predicted Activation Time (s)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 
 h = legend(K,'Flat Smooth','Flat Obstructed','13 Smooth','13 Obstructed','24 Smooth','24 Obstructed','Location','SouthEast');
 
-text(0.05*xmax,0.95*ymax,'Vettori Sloped Ceiling Activation Times','FontSize',Title_Font_Size,'FontName',Font_Name)
+text(0.05*xmax,0.95*ymax,'Vettori Sloped Ceiling Activation Times','FontSize',Scat_Title_Font_Size,'FontName',Font_Name)
  
 %Print the Plot 
 
