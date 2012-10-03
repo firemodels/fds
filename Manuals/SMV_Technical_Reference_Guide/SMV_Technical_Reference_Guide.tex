@@ -77,7 +77,6 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\parmb}{.5}
 \newcommand{\parmc}{0.25}
 \newcommand{\bold}[1]{{\bf #1}}
-\newcommand{\etc}{{\em etc}}
 \newcommand{\via}{{via\ }}
 \newcommand{\dialoguenmenu}{\fbox{\tt Diaglog} }
 \newcommand{\optionmenu}{\fbox{\tt Option} }
@@ -531,7 +530,7 @@ topics such as image rendering and data compression are detailed.
 
 \chapter{Preliminaries}
 \label{visoverview}
-\section{Defining Objects} Smokeview defines object locations in terms of a right handed coordinate system with the x axis pointing to the right, the y axis pointing to the back and the z axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents {\em etc.}\ are transformed internally within Smokeview to lie between 0.0 and 1.0.
+\section{Defining Objects} Smokeview defines object locations in terms of a right handed coordinate system with the x axis pointing to the right, the y axis pointing to the back and the z axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents, etc. are transformed internally within Smokeview to lie between 0.0 and 1.0.
 All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1791,7 +1790,7 @@ that of FDS in one important respect.  Smokeview is an {\em event
 driven}\ program with a graphical user interface.  The term {\em
 event driven}\ in this context means that the user controls the
 program flow using various means such as pressing a key, clicking
-or dragging the mouse, selecting a menu item {\em etc.}  In other
+or dragging the mouse, selecting a menu item, etc.  In other
 words, the user initiates events not the program. The Smokeview
 response then depends on which {\em event}\ has occurred.
 
@@ -1801,7 +1800,7 @@ OpenGL environment. This is followed by a call to a GLUT routine
 that implements the {\em event loop}. The {\em event loop}\ is
 literally a program loop without an exit which detects when the
 user invokes the various events, again these are key clicks, mouse
-clicks, menu selection {\em etc.}. Once an event is detected, a
+clicks, menu selection, etc. Once an event is detected, a
 user {\em callback}\ routine is called.  Note that user callback
 routines are Smokeview code and the event loop is GLUT library
 code. Part of Smokeview's initialization process is to define
@@ -1840,7 +1839,7 @@ does not interact with the user or the operating system. Smokeview
 uses the graphics library utility toolkit (GLUT) for interacting
 with the user {\em via}\ the keyboard and mouse and for
 interacting with the operating system to swap display buffers, to
-display fonts, to set maximum frame rates {\em etc}. Though not as
+display fonts, to set maximum frame rates, etc. Though not as
 sophisticated as other libraries, GLUT is simple to use and is
 portable allowing Smokeview to be built on a number of different
 computer platforms including a PC running Windows or Linux, a

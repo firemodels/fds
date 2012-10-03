@@ -1745,7 +1745,7 @@ Some of the qualitative verification cases of the agent movement
 algorithm are based on the International Maritime Organization (IMO)
 document ``Guidelines for Evacuation Analyses for New and Existing
 Passenger Ships''~\cite{IMO07}, where eleven different test cases are
-listed.  These tests are referred below as ``IMO 1'', \emph{etc}.
+listed.  These tests are referred below as ``IMO 1'', etc.
 Note, that the IMO document specifies the test persons to be 30--50
 years old males defined in the table 3.4 of the IMO
 document~\cite{IMO07}.  This person group is similar to the default
@@ -2122,7 +2122,7 @@ parameters on the FDS+Evac results.  Especially the flows through
 doors, corridors, and stairs are examined, because these are usually
 the main bottlenecks of an evacuation event in a building.  This
 section does not address the point if the chosen algorithms, numerical
-methods, \emph{etc}.  are appropriate for the evacuation simulation or
+methods, etc.  are appropriate for the evacuation simulation or
 not.  Only the sensitivity of the chosen algorithms and numerical
 methods are examined and reported.  The tests presented here were done
 in a ``fire drill'' mode, i.e., the egress processes were
@@ -2138,7 +2138,7 @@ But the implementation of the method in FDS+Evac introduces
 computational meshes.  These meshes are used to define the geometry of
 the calculation.  The most obvious mesh sensitivity issue is that the
 spatial resolution of the obstructions, like doors, stairs,
-\emph{etc.}, is the resolution of the underlaying mesh.  The other,
+etc., is the resolution of the underlaying mesh.  The other,
 subtler effect, is the way how the mesh resolution changes the flow
 fields of the evacuation meshes, which are used to guide the agents
 towards the exit doors.  In some cases, a finer grid does not always
@@ -3175,7 +3175,7 @@ evacuation input geometry.
   defined by the \Timtt{HUMAN\_SMOKE\_HEIGHT} parameter on (some)
   \Timtt{PERS} namelist.  Try to make the mesh division such that the
   mesh cell sizes $dx$ and $dy$ in the $x$ and $y$ directions are nice
-  round numbers, like 0.25~m, 0.35~m, 0.5~m, \emph{etc}, depending on
+  round numbers, like 0.25~m, 0.35~m, 0.5~m, etc, depending on
   the widths of the egress paths.  Note: Do not include floors or
   ceilings accidentally to the evacuation geometry, the \Timtt{XB} of
   the evacuation meshes should not be touching a floor nor a ceiling.
@@ -3331,10 +3331,10 @@ evacuation input geometry.
   information (the \Timtt{CHID\_evac.fed} file) from the hard disk if
   it exists.  Copy the results (\Timtt{CHID\_evac.csv}) to some other
   name or collect them directly to a spreadsheet and rerun once again,
-  \emph{etc}.  For a given fire, you should run the evacuation part a
+  etc.  For a given fire, you should run the evacuation part a
   couple of dozen times, because the FDS+Evac is not deterministic
   model.  After the runs, examine the results: plot the number of
-  agents vs time, calculate averages, variances, \emph{etc}.  Compare
+  agents vs time, calculate averages, variances, etc.  Compare
   the results with and without the smoke/fed effects.  Note that the
   keyword \Timtt{EVACUATION\_DRILL} on the \Timtt{MISC} namelist
   forces a fire drill mode and no smoke (fed) information is read from
@@ -5845,7 +5845,7 @@ manual.  These features are still work-on-progress stage.
 \item More intelligence in the exit door selection algorithm,
   e.g., better treatment of the non-visible known doors.
 %
-\item Social interactions like herding, small groups, \emph{etc.}.  A
+\item Social interactions like herding, small groups, etc..  A
   small group feature is already implemented but it is not yet validated.
 %
 \item Spreading of the information: agent to agent communication like
