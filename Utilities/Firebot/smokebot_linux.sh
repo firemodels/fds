@@ -240,7 +240,7 @@ wait_verification_cases_short_start()
 wait_verification_cases_short_end()
 {
    # Scans qstat and waits for verification cases to end
-   while [[ `qstat | grep $(whoami)` != '' ]]; do
+   while [[ `qstat | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
       JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
