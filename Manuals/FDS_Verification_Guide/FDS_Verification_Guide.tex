@@ -397,9 +397,9 @@ possible if there were a fundamental flaw in the hydrodynamic solver.
 \section{Sensitivity Analysis}
 
 A sensitivity  analysis considers the  extent to which  uncertainty in model  inputs influences  model output.  Model parameters  can  be the
-physical properties of solids  and gases, boundary conditions, initial conditions, {\em  etc.} The parameters  can also be  purely numerical, like
+physical properties of solids  and gases, boundary conditions, initial conditions, etc. The parameters  can also be  purely numerical, like
 the size  of the numerical grid. FDS  typically requires the user to  provide several  dozen different  types of  input  parameters that describe the
-geometry, materials,  combustion phenomena, {\em etc.} By design,  the user  is  not expected  to  provide numerical  parameters besides the grid
+geometry, materials,  combustion phenomena, etc. By design,  the user  is  not expected  to  provide numerical  parameters besides the grid
 size,  although the optional numerical parameters are described in both the Technical Reference Guide and the User's Guide.
 
 FDS does not  limit the range of most of  the input parameters because applications often push beyond the  range for which the model has been
@@ -410,7 +410,7 @@ the prescription of all parameters.   The FDS manuals can only provide guidance.
 
 The grid size is the  most important numerical parameter in the model, as it  dictates the spatial  and temporal accuracy of  the discretized partial
 differential equations.  The heat  release rate  is  the most important physical parameter,  as it is the source  term in the energy equation.
-Property data, like  the thermal conductivity, density, heat of vaporization,  heat capacity, {\em  etc.}, ought to be  assessed in terms of their
+Property data, like  the thermal conductivity, density, heat of vaporization,  heat capacity, etc., ought to be  assessed in terms of their
 influence on  the heat release rate. Validation studies have shown that FDS predicts well the transport of heat and smoke when the HRR is prescribed.
 In  such cases, minor changes in the properties of  bounding  surfaces  do  not  have  a  significant  impact  on  the results. However, when the HRR
 is not prescribed, but rather predicted by the  model using  the thermophysical properties  of the  fuels, the model output is sensitive to even
@@ -648,7 +648,7 @@ Even with all the code checking, it is still possible for errors to go unnoticed
 FDS is publicly released. Although it consists of on the order of 100,000 lines of Fortran statements, various independent researchers have been
 able to work with it, add enhancements needed for very specific applications or for research purposes, and report back to the developers bugs that
 have been detected. The source code is organized into 27 separate files, each containing subroutines related to a particular feature of the model,
-like the mass, momentum, and energy conservation equations, sprinkler activation and sprays, the pressure solver, {\em etc.} The lengthiest routines
+like the mass, momentum, and energy conservation equations, sprinkler activation and sprays, the pressure solver, etc. The lengthiest routines
 are devoted to input, output and initialization.  Most of those working with the source code do not concern themselves with these lengthy routines
 but rather focus on the finite-difference algorithm contained in a few of the more important files. Most serious errors are found in these files, for
 they contain the core of the algorithm. The external researchers provide feedback on the organization of the code and its internal documentation,
