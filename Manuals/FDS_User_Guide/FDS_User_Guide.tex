@@ -4634,7 +4634,7 @@ A typical input line specifying a duct is as follows:
 
 \begin{description}
 \item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.
-\item[{\ct AREA}] is the cross sectional area of the duct in m$^2$.  
+\item[{\ct AREA}] is the cross sectional area of the duct in m$^2$.
 \item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Section~\ref{info:HVACdamper}).
 \item[{\ct DIAMETER}] the diameter of the duct in m.  If only {\ct DIAMETER} is specified, the {\ct AREA} will be computed assuming a round duct.  Do not specify both {\ct DIAMETER} and {\ct PERIMETER}.
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
@@ -4720,7 +4720,7 @@ Below are three example duct node inputs representing a typical tee-type connect
 \item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
-If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}. Note that if you do not specify an {\ct XYZ} for an interior node, then FDS will use the default value of 0,0,0.  
+If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}. Note that if you do not specify an {\ct XYZ} for an interior node, then FDS will use the default value of 0,0,0.
 \end{description}
 
 \noindent
@@ -5300,7 +5300,7 @@ dependent variables (such as a sprinkler flow rate and droplet speed).
 At the start of any calculation, the temperature is ambient
 everywhere, the flow velocity is zero everywhere, nothing is burning,
 and the mass fractions of all species are uniform.  When the
-calculation starts temperatures, velocities, burning rates, 
+calculation starts temperatures, velocities, burning rates,
 etc., are ramped-up from their starting values because nothing can
 happen instantaneously. By default, everything is ramped-up to their
 prescribed values in roughly 1~s. However, you can control the rate at which
@@ -5530,49 +5530,49 @@ The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~kg/m$^2$
 \caption[Optional gas and liquid species]{Optional gas and liquid species~\cite{Reid:1}}
 \label{tab:gasspecies}
 \vspace{0.1in}
-\begin{tabular}{|l|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|c|l|}
 \hline
-Species &   Mol.~Wgt.           & Formula          & $\sigma$ & $\epsilon/k$   & Liquid \\
-        &   (g/mol)             &                  & (\AA)    & (K)            &        \\ \hline
+Species &   Mol.~Wgt.           & Formula          & $\sigma$ & $\epsilon/k$   & Liquid   & RadCal                          \\
+        &   (g/mol)             &                  & (\AA)    & (K)            &          & Surrogate                       \\ \hline
 \hline
-{\ct ACETONE}            & 58.07914   & C$_3$H$_6$O      & 4.6      & 560.2    &  Y   \\ \hline
-{\ct ACETYLENE}          & 26.037280  & C$_2$H$_2$       & 4.033    & 231.8    &      \\ \hline
-{\ct ACROLEIN}           & 56.063260  & C$_3$H$_4$O      & 4.549    & 576.7    &  Y   \\ \hline
-{\ct AIR}                & 28.848523  &                  & 3.711    & 78.6     &  Y   \\ \hline
-{\ct ARGON}              & 39.948000  & Ar               & 3.42     & 124.0    &  Y   \\ \hline
-{\ct BENZENE}            & 78.11184   & C$_6$H$_6$       & 5.349    & 412.3    &  Y   \\ \hline
-{\ct BUTANE}             & 58.122200  & C$_4$H$_{10}$    & 4.687    & 531.4    &  Y   \\ \hline
-{\ct CARBON DIOXIDE}     & 44.009500  & CO$_2$           & 3.941    & 195.2    &      \\ \hline
-{\ct CARBON MONOXIDE}    & 28.010100  & CO               & 3.690    & 91.7     &  Y   \\ \hline
-{\ct ETHANE}             & 30.069040  & C$_2$H$_6$       & 4.443    & 215.7    &  Y   \\ \hline
-{\ct ETHANOL}            & 46.068440  & C$_2$H$_5$OH     & 4.530    & 362.6    &  Y   \\ \hline
-{\ct ETHYLENE}           & 28.053160  & C$_2$H$_4$       & 4.163    & 224.7    &  Y   \\ \hline
-{\ct FORMALDEHYDE}       & 30.025980  & CH$_2$O          & 3.626    & 481.8    &  Y   \\ \hline
-{\ct HELIUM}             & 4.002602   & He               & 2.551    & 10.22    &  Y   \\ \hline
-{\ct HYDROGEN}           & 2.015880   & H$_2$            & 2.827    & 59.7     &  Y   \\ \hline
-{\ct HYDROGEN BROMIDE}   & 80.911940  & HBr              & 3.353    & 449.0    &  Y   \\ \hline
-{\ct HYDROGEN CHLORIDE}  & 36.460940  & HCl              & 3.339    & 344.7    &  Y   \\ \hline
-{\ct HYDROGEN CYANIDE}   & 27.025340  & HCN              & 3.63     & 569.1    &  Y   \\ \hline
-{\ct HYDROGEN FLUORIDE}  & 20.006343  & HF               & 3.148    & 330.0    &  Y   \\ \hline
-{\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y   \\ \hline
-{\ct METHANE}            & 16.042460  & CH$_4$           & 3.758    & 148.6    &  Y   \\ \hline
-{\ct METHANOL}           & 32.041860  & CH$_2$OH         & 3.626    & 481.8    &  Y   \\ \hline
-{\ct N-DECANE}           & 142.281680 & C$_{10}$H$_{22}$ & 5.233    & 226.46   &      \\ \hline
-{\ct N-HEPTANE}          & 100.201940 & C$_7$H$_{16}$    & 4.701    & 205.75   &  Y   \\ \hline
-{\ct N-HEXANE}           & 86.175360  & C$_6$H$_{12}$    & 5.949    & 399.3    &  Y   \\ \hline
-{\ct N-OCTANE}           & 114.228520 & C$_8$H$_{18}$    & 4.892    & 231.16   &  Y   \\ \hline
-{\ct NITRIC OXIDE}       & 30.006100  & NO               & 3.492    & 116.7    &  Y   \\ \hline
-{\ct NITROGEN}           & 28.013400  & N$_2$            & 3.798    & 71.4     &  Y   \\ \hline
-{\ct NITROGEN DIOXIDE}   & 46.05500   & NO$_2$           & 3.992    & 204.88   &  Y   \\ \hline
-{\ct NITROUS OXIDE}      & 44.012800  & N$_2$O           & 3.828    & 232.4    &  Y   \\ \hline
-{\ct OXYGEN}             & 31.998800  & O$_2$            & 3.467    & 106.7    &  Y   \\ \hline
-{\ct PROPANE}            & 44.095620  & C$_3$H$_8$       & 5.118    & 237.1    &  Y   \\ \hline
-{\ct PROPYLENE}          & 42.079740  & C$_3$H$_6$       & 4.678    & 298.9    &  Y   \\ \hline
-{\ct SOOT}               & 12.010700  & C                & 3.798    & 71.4     &      \\ \hline
-{\ct SULFUR DIOXIDE}     & 64.063800  & SO$_2$           & 4.112    & 335.4    &  Y   \\ \hline
-{\ct SULFUR HEXAFLUORIDE}& 146.055419 & SF$_6$           & 5.128    & 146.0    &      \\ \hline
-{\ct TOLUENE}            & 92.138420  & C$_6$H$_5$CH$_3$ & 5.698    & 480.0    &  Y   \\ \hline
-{\ct WATER VAPOR}        & 18.015280  & H$_2$O           & 2.641    & 809.1    &  Y   \\ \hline
+{\ct ACETONE}            & 58.07914   & C$_3$H$_6$O      & 4.6      & 560.2    &  Y       &  {\ct METHANOL}                 \\ \hline
+{\ct ACETYLENE}          & 26.037280  & C$_2$H$_2$       & 4.033    & 231.8    &          &  {\ct PROPYLENE}                \\ \hline
+{\ct ACROLEIN}           & 56.063260  & C$_3$H$_4$O      & 4.549    & 576.7    &  Y       &  {\ct MMA}                      \\ \hline
+{\ct AIR}                & 28.848523  &                  & 3.711    & 78.6     &  Y       &                                 \\ \hline
+{\ct ARGON}              & 39.948000  & Ar               & 3.42     & 124.0    &  Y       &                                 \\ \hline
+{\ct BENZENE}            & 78.11184   & C$_6$H$_6$       & 5.349    & 412.3    &  Y       &  {\ct PROPYLENE}                \\ \hline
+{\ct BUTANE}             & 58.122200  & C$_4$H$_{10}$    & 4.687    & 531.4    &  Y       &  {\ct METHANE}                  \\ \hline
+{\ct CARBON DIOXIDE}     & 44.009500  & CO$_2$           & 3.941    & 195.2    &          &  {\ct CARBON DIOXIDE}           \\ \hline
+{\ct CARBON MONOXIDE}    & 28.010100  & CO               & 3.690    & 91.7     &  Y       &  {\ct CARBON MONOXIDE}          \\ \hline
+{\ct ETHANE}             & 30.069040  & C$_2$H$_6$       & 4.443    & 215.7    &  Y       &  {\ct METHANE}                  \\ \hline
+{\ct ETHANOL}            & 46.068440  & C$_2$H$_5$OH     & 4.530    & 362.6    &  Y       &  {\ct METHANOL}                 \\ \hline
+{\ct ETHYLENE}           & 28.053160  & C$_2$H$_4$       & 4.163    & 224.7    &  Y       &  {\ct PROPYLENE}                \\ \hline
+{\ct FORMALDEHYDE}       & 30.025980  & CH$_2$O          & 3.626    & 481.8    &  Y       &  {\ct METHANOL}                 \\ \hline
+{\ct HELIUM}             & 4.002602   & He               & 2.551    & 10.22    &  Y       &                                 \\ \hline
+{\ct HYDROGEN}           & 2.015880   & H$_2$            & 2.827    & 59.7     &  Y       &                                 \\ \hline
+{\ct HYDROGEN BROMIDE}   & 80.911940  & HBr              & 3.353    & 449.0    &  Y       &                                 \\ \hline
+{\ct HYDROGEN CHLORIDE}  & 36.460940  & HCl              & 3.339    & 344.7    &  Y       &                                 \\ \hline
+{\ct HYDROGEN CYANIDE}   & 27.025340  & HCN              & 3.63     & 569.1    &  Y       &                                 \\ \hline
+{\ct HYDROGEN FLUORIDE}  & 20.006343  & HF               & 3.148    & 330.0    &  Y       &                                 \\ \hline
+{\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y       &  {\ct METHANOL}                 \\ \hline
+{\ct METHANE}            & 16.042460  & CH$_4$           & 3.758    & 148.6    &  Y       &  {\ct METHANE}                  \\ \hline
+{\ct METHANOL}           & 32.041860  & CH$_2$OH         & 3.626    & 481.8    &  Y       &  {\ct METHANOL}                 \\ \hline
+{\ct N-DECANE}           & 142.281680 & C$_{10}$H$_{22}$ & 5.233    & 226.46   &          &  {\ct N-HEPTANE}                \\ \hline
+{\ct N-HEPTANE}          & 100.201940 & C$_7$H$_{16}$    & 4.701    & 205.75   &  Y       &  {\ct N-HEPTANE}                \\ \hline
+{\ct N-HEXANE}           & 86.175360  & C$_6$H$_{12}$    & 5.949    & 399.3    &  Y       &  {\ct N-HEPTANE}                \\ \hline
+{\ct N-OCTANE}           & 114.228520 & C$_8$H$_{18}$    & 4.892    & 231.16   &  Y       &  {\ct N-HEPTANE}                \\ \hline
+{\ct NITRIC OXIDE}       & 30.006100  & NO               & 3.492    & 116.7    &  Y       &                                 \\ \hline
+{\ct NITROGEN}           & 28.013400  & N$_2$            & 3.798    & 71.4     &  Y       &                                 \\ \hline
+{\ct NITROGEN DIOXIDE}   & 46.05500   & NO$_2$           & 3.992    & 204.88   &  Y       &                                 \\ \hline
+{\ct NITROUS OXIDE}      & 44.012800  & N$_2$O           & 3.828    & 232.4    &  Y       &                                 \\ \hline
+{\ct OXYGEN}             & 31.998800  & O$_2$            & 3.467    & 106.7    &  Y       &                                 \\ \hline
+{\ct PROPANE}            & 44.095620  & C$_3$H$_8$       & 5.118    & 237.1    &  Y       &  {\ct PROPANE}                  \\ \hline
+{\ct PROPYLENE}          & 42.079740  & C$_3$H$_6$       & 4.678    & 298.9    &  Y       &  {\ct PROPYLENE}                \\ \hline
+{\ct SOOT}               & 12.010700  & C                & 3.798    & 71.4     &          &  {\ct SOOT}                     \\ \hline
+{\ct SULFUR DIOXIDE}     & 64.063800  & SO$_2$           & 4.112    & 335.4    &  Y       &                                 \\ \hline
+{\ct SULFUR HEXAFLUORIDE}& 146.055419 & SF$_6$           & 5.128    & 146.0    &          &                                 \\ \hline
+{\ct TOLUENE}            & 92.138420  & C$_6$H$_5$CH$_3$ & 5.698    & 480.0    &  Y       &  {\ct TOLUENE}                  \\ \hline
+{\ct WATER VAPOR}        & 18.015280  & H$_2$O           & 2.641    & 809.1    &  Y       &  {\ct WATER VAPOR}              \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -5615,15 +5615,14 @@ the {\ct REFERENCE\_ENTHALPY} (kJ/kg).  If {\ct SPECIFIC\_HEAT} is specified and
 Species that can absorb and emit thermal radiation are defined via the logical parameter {\ct ABSORBING} on the {\ct SPEC} line.  If {\ct .TRUE.} and the
 species is not in the recognized list, then it will be assumed to be a fuel when invoking RadCal to compute its absorptivity.
 
-There are only a small number of species with predefined RadCal absorptivities (See ~\ref{info:RadCal_fuelspecies}).  There are many other species which are absorbing.  For absorbing species not present in Radcal {\ct RADCAL\_ID} can be used to identify a RadCal species to be used as a surrogate. For example:
+There are only a small number of species with predefined RadCal absorptivities (See ~\ref{info:RadCal_fuelspecies}).  There are many other species which are absorbing.  For absorbing species not present in Radcal, {\ct RADCAL\_ID} can be used to identify a RadCal species to serve as a surrogate. For example:
 
 \footnotesize
 \begin{verbatim}
 &SPEC ID='ETHANOL', RADCAL_ID='METHANOL' /
 \end{verbatim} \normalsize
 
-\noindent would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}.
-
+\noindent would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}. Table~\ref{tab:gasspecies} lists the default RadCal surrogates for various gas species. 
 
 \subsubsection{Liquids}
 
@@ -6090,14 +6089,14 @@ Examination of Eq.~(\ref{eq:pu_combust}) and Eq.~(\ref{eq:wood_combust}) shows t
       SPEC_ID(1) = 'OXYGEN',   VOLUME_FRACTION(1)=1,
       SPEC_ID(2) = 'NITROGEN', VOLUME_FRACTION(2)=3.76,
       BACKGROUND=.TRUE. /
-      
+
 &SMIX ID = 'PRODUCTS_1',
       SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 19.7441,
       SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.166587,
       SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 21,
       SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 5.0893,
       SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 103.751 /
-      
+
 &SMIX ID = 'PRODUCTS_2',
       SPEC_ID(1) = 'CARBON DIOXIDE',  VOLUME_FRACTION(1) = 0.964384,
       SPEC_ID(2) = 'CARBON MONOXIDE', VOLUME_FRACTION(2) = 0.003655,
@@ -6113,7 +6112,7 @@ Once we have constructed the lumped species, we can define the {\ct REAC} lines.
       SMIX_ID = 'POLYURETHANE','AIR','PRODUCTS_1'
       NU=-1,-27.3274,1 /
 
-&REAC ID = 'wood' 
+&REAC ID = 'wood'
       FUEL = 'WOOD',
       HEAT_OF_COMBUSTION=16400,
       SMIX_ID = 'WOOD','AIR','PRODUCTS_2'
@@ -6130,19 +6129,19 @@ The {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using bo
 \end{align}
 
 \footnotesize \begin{verbatim}
-&SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) = 0.022901, RAMP_MF(1)='poly' 
+&SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) = 0.022901, RAMP_MF(1)='poly'
                     SPEC_ID(2)='WOOD',         MASS_FLUX(2) = 0.036585, RAMP_MF(2)='wood' /
 \end{verbatim} \normalsize
-Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. We also want each fuel to follow a ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the remainder of a 600~s simulation. 
+Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. We also want each fuel to follow a ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the remainder of a 600~s simulation.
 \footnotesize \begin{verbatim}
-&RAMP ID='poly'    T = 0  , F = 0.0  / 
-&RAMP ID='poly'    T = 50 , F = 0.5  /        
-&RAMP ID='poly'    T = 100, F = 1.0  / 
-&RAMP ID='poly'    T = 600, F = 1.0  /      
+&RAMP ID='poly'    T = 0  , F = 0.0  /
+&RAMP ID='poly'    T = 50 , F = 0.5  /
+&RAMP ID='poly'    T = 100, F = 1.0  /
+&RAMP ID='poly'    T = 600, F = 1.0  /
 
-&RAMP ID='wood'    T = 0  , F = 0.0  / 
-&RAMP ID='wood'    T = 50 , F = 0.5  /        
-&RAMP ID='wood'    T = 100, F = 1.0  / 
+&RAMP ID='wood'    T = 0  , F = 0.0  /
+&RAMP ID='wood'    T = 50 , F = 0.5  /
+&RAMP ID='wood'    T = 100, F = 1.0  /
 &RAMP ID='wood'    T = 600, F = 1.0  /
 \end{verbatim} \normalsize
 Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass flux specified on the {\ct SURF} line. Fig.~\ref{fig:hrr_two_fuels} compares the resulting FDS heat release rate (HRR) to the expected HRR from the defined ramp. Note that in this simulation, there is 10~s averaging on the FDS output HRR ({\ct \&DUMP DT\_HRR=10}) and the expected results account for this averaging.
@@ -6188,26 +6187,19 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \section{Finite Rate Combustion}
 \label{info:finite}
 
-By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. This section describes how to do this.
-
-\begin{enumerate}
-\item It is recommended that finite-rate reactions be invoked only
-when FDS is running in DNS mode. Set {\ct DNS=.TRUE.} on the {\ct MISC} line.
-You may use the finite-rate reaction model in an
+By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only
+when FDS is running in DNS mode ({\ct DNS=.TRUE.} on the {\ct MISC} line).
+You can use the finite-rate reaction model in an
 LES calculation, but because the temperature in a large scale calculation
 is smeared out over a mesh cell, some of the reaction parameters may need
-to be modified to account for the lower temperatures.
-\item The background species, if unspecified on a {\ct SPEC} or {\ct SMIX} line, is normally set to be {\ct 'AIR'}.
-\item Read Sections~\ref{info:SPEC} and \ref{info:SMIX} for a description of the boundary
-conditions for the gas species.
-\item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
-parameters.  For a finite-rate reaction you can specify multiple {\ct REAC} lines.  Note that FDS will evaluate the reactions simultaneously.
-\end{enumerate}
-First, we consider a single-step reaction mechanism for complete propane combustion:
+to be modified to account for the lower cell-averaged temperatures.
+
+Consider a single-step reaction mechanism for complete propane combustion:
 \begin{equation}\label{eq:propane_1step}
 \mathrm{C_3H_8 + 5\,O_{2} \rightarrow 3\,CO_{2} + 4\,H_{2}O}
 \end{equation}
-In this case we use all primitive species:
+In this case we explicitly define all primitive species:
+
 \footnotesize
 \begin{verbatim}
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE./
@@ -6216,59 +6208,49 @@ In this case we use all primitive species:
 &SPEC ID='WATER VAPOR' /
 &SPEC ID='CARBON DIOXIDE' /
 \end{verbatim} \normalsize
-with a rate expression of the form:
+
+\noindent with a rate expression of the form:
 \begin{equation}\label{eq:reac_rate}
-k = AT^{N_{T}}e^{-E/RT}[Y_{\alpha}]^{N_{S}}
+k = A \; T^{N_{T}} \; e^{-E/RT} \; [Y_{\alpha}]^{N_S}
 \end{equation}
-
-\noindent From Eq.~(\ref{eq:reac_rate}), we can see that the inputs unique to the finite-rate model are given below.
-
+where
 \begin{description}
-\item[{\ct A}] Pre-exponential factor in units of cm$^3$/mole/s.
-\item[{\ct E}] Activation energy in units of kJ/kmol.
-\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each species.
-\item[{\ct N\_T}] The temperature exponent for the rate (Default is 0 or no temperature dependence).
+\item[{\ct A}] is the pre-exponential factor in units of cm$^3$/mole/s,
+\item[{\ct E}] is the activation energy in units of kJ/kmol,
+\item[{\ct N\_S}] is an array containing the concentration exponents (default 1),
+\item[{\ct N\_T}] is the temperature exponent (default is 0, meaning no temperature dependence).
 \end{description}
-If we use Arrhenius parameters found from experiments/literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), Eq.~(\ref{eq:reac_rate}) for the single-step propane reaction becomes:
+If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), Eq.~(\ref{eq:reac_rate}) for the single-step propane reaction becomes:
 \begin{equation}\label{eq:reac_rate2}
-k = 8.6 \times 10^{11}\,T^{0}\,e^{-125520/RT}[Y_{\mathrm{C_3H_8}}]^{0.1}[Y_{\mathrm{O_2}}]^{1.65}
+k = 8.6 \times 10^{11} \; T^{0} \; e^{-125520/RT} \; [Y_{\mathrm{C_3H_8}}]^{0.1}[Y_{\mathrm{O_2}}]^{1.65}
 \end{equation}
 and the resulting {\ct REAC} line is:
+
 \footnotesize
 \begin{verbatim}
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
-      A = 8.6e11 
+      A = 8.6e11
       E = 125520
       SMIX_ID = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU = -1,-5,3,4
       SPEC_ID = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65
 \end{verbatim} \normalsize
-In this example, the {\ct SMIX\_ID}s refer directly to the {\ct SPEC} lines, since all of the species have been defined as primitive. The stoichiometric coefficients ({\ct NU}) can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we end up with Eq.~(\ref{eq:propane_2step})  
 
+\noindent
+In this example, the array {\ct SMIX\_ID} refers directly to the primitive species. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
 \begin{align}\label{eq:propane_2step}
 \mathrm{C_3H_8+3.5 \, O_2}&\rightarrow  \mathrm{3\,CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
 \end{align}
-Again, we will use primitive species for these reactions.
-\footnotesize
-\begin{verbatim}
-&SPEC ID='NITROGEN' BACKGROUND=.TRUE. /
-&SPEC ID='METHANE' /
-&SPEC ID='OXYGEN' /
-&SPEC ID='CARBON MONOXIDE' /
-&SPEC ID='WATER VAPOR' /
-&SPEC ID='CARBON DIOXIDE' /
-\end{verbatim} \normalsize
-
-\noindent To create the reactions from Eq.~(\ref{eq:propane_2step}), a {\ct REAC} line needs to be defined for each reaction including the reversible reaction. Similar to the one-step reaction, the Arrhenius parameters are found from Westbrook and Dryer~\cite{Westbrook:1}:
+As before, we use primitive species rather than mixtures. A {\ct REAC} line is needed for each reaction including the reverse reaction. The Arrhenius parameters are again found from Westbrook and Dryer~\cite{Westbrook:1}:
 
 \footnotesize
 \begin{verbatim}
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
-      A = 1.0e12 
+      A = 1.0e12
       E = 125520
       SMIX_ID='PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-3.5,3,4
@@ -6294,7 +6276,7 @@ Again, we will use primitive species for these reactions.
       N_S = 1.0 /
 \end{verbatim} \normalsize
 
-\noindent In {\ct REAC ID = 'R2'}, {\ct WATER VAPOR} concentration impacts the reaction rate as shown by its inclusion on the {\ct SPEC\_ID} and {\ct N\_S} lines, however it does not explicitly participate in the reaction because it is not defined on the {\ct SMIX\_ID} or {\ct NU} lines.
+\noindent For {\ct REAC ID='R2'}, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of {\ct N\_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, {\ct NU}.
 
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species at a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
@@ -12167,7 +12149,7 @@ These files are written out from {\ct dump.f90} using lines equivalent to the fo
     IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
     IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
   ELSE IF (GEOM_TYPE.EQ.1) THEN
-    ! rotation and translation parameters used to transform geometry from first 
+    ! rotation and translation parameters used to transform geometry from first
     ! dynamic time step
     WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
