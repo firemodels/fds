@@ -15,7 +15,7 @@ All material properties are completely fabricated.
       H          = 7.1
       O          = 2.1  /
 
-&SURF ID='BURNER', HRRPUA=1000., COLOR='RASPBERRY' /
+ SURF ID='BURNER', HRRPUA=1000., COLOR='RASPBERRY' /
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
@@ -84,7 +84,11 @@ All material properties are completely fabricated.
 &OBST XB= 3.10, 3.30, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Couch, armrest
 &OBST XB= 1.50, 3.10, 4.40, 4.60, 0.60, 1.20, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Couch, back cushions
 
-&VENT XB= 2.40, 2.60, 4.30, 4.40, 0.60, 0.60, SURF_ID='BURNER' / Ignition source on couch
+ VENT XB= 2.40, 2.60, 4.30, 4.40, 0.60, 0.60, SURF_ID='BURNER' / Ignition source on couch
+
+&PART ID='ignitor particle', SURF_ID='ignitor', STATIC=.TRUE., AGE=30. /
+&SURF ID='ignitor', TMP_FRONT=1500., GEOMETRY='CYLINDRICAL', LENGTH=0.15, RADIUS=0.01 /
+&INIT XYZ=2.45,4.35,0.65, DX=0.1, PART_ID='ignitor particle', N_PARTICLES=3 /
 
 &OBST XB= 4.00, 4.60, 3.80, 4.60, 0.00, 0.40 /
 &OBST XB= 4.00, 4.60, 3.80, 4.60, 0.40, 0.60, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Chair, back corner, seat cushion
