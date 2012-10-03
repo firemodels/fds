@@ -234,28 +234,36 @@ void transparentoff(void){
 
 /* ------------------ smv2quat ------------------------ */
 
-void smv2quat(void){
-  float azimuth, elevation,axis[3];
-  float quat_temp[4];
-   
-  azimuth = camera_current->angle_zx[0]*DEG2RAD;
-  elevation = (camera_current->angle_zx[1])*DEG2RAD;
+void camera2quat(camera *ca, float *quat, float *rotation){
+  if(ca->quat_defined==1){
+    quat[0]=ca->quaternion[0];
+    quat[1]=ca->quaternion[1];
+    quat[2]=ca->quaternion[2];
+    quat[3]=ca->quaternion[3];
+  }
+  else{
+    float quat_temp[4];
+    float azimuth, elevation,axis[3];
 
-  axis[0]=1.0;
-  axis[1]=0.0;
-  axis[2]=0.0;
+    azimuth = ca->angle_zx[0]*DEG2RAD;
+    elevation = (ca->angle_zx[1])*DEG2RAD;
 
-  angleaxis2quat(elevation,axis,quat_temp);
+    axis[0]=1.0;
+    axis[1]=0.0;
+    axis[2]=0.0;
 
-  axis[0]=0.0;
-  axis[1]=0.0;
-  axis[2]=1.0;
+    angleaxis2quat(elevation,axis,quat_temp);
 
-  angleaxis2quat(azimuth,axis,quat_general);
+    axis[0]=0.0;
+    axis[1]=0.0;
+    axis[2]=1.0;
 
-  mult_quat(quat_temp,quat_general,quat_general);
+    angleaxis2quat(azimuth,axis,quat);
 
-  quat2rot(quat_general,quat_rotation);
+    mult_quat(quat_temp,quat,quat);
+  }
+
+  if(rotation!=NULL)quat2rot(quat,rotation);
 }
 
 

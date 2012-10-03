@@ -9877,16 +9877,23 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"VIEWPOINT3")==1
       ||match(buffer,"VIEWPOINT4")==1
       ||match(buffer,"VIEWPOINT5")==1
+      ||match(buffer,"VIEWPOINT6")==1
       ){
       int p_type;
       float *eye,*mat,*angle_zx;
       int is_viewpoint4=0;
       int is_viewpoint5=0;
+      int is_viewpoint6=0;
 
       if(match(buffer,"VIEWPOINT4")==1)is_viewpoint4=1;
       if(match(buffer,"VIEWPOINT5")==1){
         is_viewpoint4=1;
         is_viewpoint5=1;
+      }
+      if(match(buffer,"VIEWPOINT6")==1){
+        is_viewpoint4=1;
+        is_viewpoint5=1;
+        is_viewpoint6=1;
       }
       eye=camera_ini->eye;
       mat=camera_ini->modelview;
@@ -9930,32 +9937,42 @@ int readini2(char *inifile, int localfile){
       }
 
       p_type=0;
-		  fgets(buffer,255,stream);
-		  sscanf(buffer,"%f %f %f %i",
-        &camera_ini->view_angle, 
-        &camera_ini->azimuth,
-        &camera_ini->elevation,
-        &p_type);
+	    fgets(buffer,255,stream);
+	    sscanf(buffer,"%f %f %f %i",&camera_ini->view_angle, &camera_ini->azimuth,&camera_ini->elevation,&p_type);
       if(p_type!=1)p_type=0;
       camera_ini->projection_type=p_type;
 
-		  fgets(buffer,255,stream);
-		  sscanf(buffer,"%f %f %f",&camera_ini->xcen,&camera_ini->ycen,&camera_ini->zcen);
+	    fgets(buffer,255,stream);
+	    sscanf(buffer,"%f %f %f",&camera_ini->xcen,&camera_ini->ycen,&camera_ini->zcen);
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",angle_zx,angle_zx+1);
 
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",mat,mat+1,mat+2,mat+3);
+      if(is_viewpoint6==1){
+        float *q;
+        
+        for(i=0;i<16;i++){
+          mat[i]=0.0;
+          if(i%5==0)mat[i]=1.0;
+        }
+        q = camera_ini->quaternion;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %f %f %f %f",&camera_ini->quat_defined,q,q+1,q+2,q+3);
+      }
+      else{
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",mat,mat+1,mat+2,mat+3);
 
-		  fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",mat+4,mat+5,mat+6,mat+7);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",mat+4,mat+5,mat+6,mat+7);
 
-		  fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",mat+8,mat+9,mat+10,mat+11);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",mat+8,mat+9,mat+10,mat+11);
 
-		  fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",mat+12,mat+13,mat+14,mat+15);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",mat+12,mat+13,mat+14,mat+15);
+      }
+      
       if(is_viewpoint5==1){
         camera *ci;
 
@@ -9969,7 +9986,6 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%f %f %f %f %f %f",
           &ci->clip_x_val,&ci->clip_y_val,&ci->clip_z_val,
           &ci->clip_X_val,&ci->clip_Y_val,&ci->clip_Z_val);
-
       }
       if(is_viewpoint4==1){
         char *bufferptr;
@@ -11355,7 +11371,7 @@ void writeini(int flag){
       for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
         if(strcmp(ca->name,"internal")==0)continue;
         if(strcmp(ca->name,"external")==0)continue;
-        fprintf(fileout,"VIEWPOINT5\n");
+        fprintf(fileout,"VIEWPOINT6\n");
         eye = ca->eye;
         angle_zx = ca->angle_zx;
         mat = ca->modelview;
@@ -11378,10 +11394,15 @@ void writeini(int flag){
           ca->zcen);
 
         fprintf(fileout," %f %f\n",angle_zx[0],angle_zx[1]);
-        fprintf(fileout," %f %f %f %f\n",mat[0],mat[1],mat[2],mat[3]);
-        fprintf(fileout," %f %f %f %f\n",mat[4],mat[5],mat[6],mat[7]);
-        fprintf(fileout," %f %f %f %f\n",mat[8],mat[9],mat[10],mat[11]);
-        fprintf(fileout," %f %f %f %f\n",mat[12],mat[13],mat[14],mat[15]);
+        if(ca->quat_defined==1){
+          fprintf(fileout," 1 %f %f %f %f\n",ca->quaternion[0],ca->quaternion[1],ca->quaternion[2],ca->quaternion[3]);
+        }
+        else{
+          float quat[4];
+
+          camera2quat(ca,quat,NULL);
+          fprintf(fileout," 0 %f %f %f %f\n",quat[0],quat[1],quat[2],quat[3]);
+        }
         fprintf(fileout," %i %i %i %i %i %i %i\n",
             ca->xyz_clipplane,
             ca->clip_x,ca->clip_y,ca->clip_z,

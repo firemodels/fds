@@ -111,6 +111,11 @@ void init_camera(camera *camera_data,char *name){
   camera_data->eye_save[0]=camera_data->eye[0];
   camera_data->eye_save[1]=camera_data->eye[1];
   camera_data->eye_save[2]=camera_data->eye[2];
+  camera_data->quat_defined=0;
+  camera_data->quaternion[0]=1.0;
+  camera_data->quaternion[0]=0.0;
+  camera_data->quaternion[0]=0.0;
+  camera_data->quaternion[0]=0.0;
 
   x=camera_data->modelview;
   for(i=0;i<16;i++){
@@ -210,6 +215,13 @@ void copy_camera(camera *to, camera *from){
   to->dirty=1;
   if(to==camera_current&&updateclipvals==0){
     cam2clip(camera_current);
+  }
+  if(to==camera_current&&to->quat_defined==1){
+    use_genera_rotation=1;
+    quat_general[0]=to->quaternion[0];
+    quat_general[1]=to->quaternion[1];
+    quat_general[2]=to->quaternion[2];
+    quat_general[3]=to->quaternion[3];
   }
 }
 

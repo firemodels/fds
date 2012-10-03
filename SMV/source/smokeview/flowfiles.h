@@ -836,6 +836,8 @@ typedef struct _camera {
   float sin_elevation, cos_elevation;
   float xcen, ycen, zcen;
   float zoom;
+  int quat_defined;
+  float quaternion[4];
   float modelview[16];
 
   int xyz_clipplane;

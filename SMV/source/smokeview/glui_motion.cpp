@@ -456,7 +456,7 @@ extern "C" void glui_motion_setup(int main_window){
   render_stop=glui_motion->add_button_to_panel(render_panel,_("Stop"),RENDER_STOP,RENDER_CB);
   
   reset_panel3 = glui_motion->add_rollout(_("Viewpoints"),false);
-  view_lists = glui_motion->add_listbox_to_panel(reset_panel3,_("Select"),&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
+  view_lists = glui_motion->add_listbox_to_panel(reset_panel3,_("Select:"),&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
   view_lists->set_alignment(GLUI_ALIGN_CENTER);
 
   reset_panel = glui_motion->add_panel_to_panel(reset_panel3,"",false);
@@ -1199,7 +1199,12 @@ void BUTTON_Reset_CB(int var){
     enable_disable_views();
     break;
   case USE_GENERAL_ROTATION:
-    if(use_general_rotation==1)smv2quat();
+    if(use_general_rotation==1){
+      camera2quat(camera_current,quat_general,quat_rotation);
+    }
+    else{
+      camera_current->quat_defined=0;
+    }
     break;
   case RESTORE_VIEW:
     ival=view_lists->get_int_val();
@@ -1210,7 +1215,7 @@ void BUTTON_Reset_CB(int var){
 
     rotation_type_save = ca->rotation_type;
     copy_camera(camera_current,ca);
-    if(use_general_rotation==1)smv2quat();
+    if(use_general_rotation==1)camera2quat(camera_current,quat_general,quat_rotation);
     if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0)updatezoommenu=1;
     camera_current->rotation_type=rotation_type_save;
     edit_view_label->set_text(ca->name);

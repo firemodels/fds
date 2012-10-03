@@ -726,6 +726,11 @@ void update_mouseinfo(int flag, int xm, int ym){
     mult_quat(quat_temp,quat_general,quat_general);
     quat2rot(quat_general,quat_rotation);
   }
+  camera_current->quaternion[0]=quat_general[0];
+  camera_current->quaternion[1]=quat_general[1];
+  camera_current->quaternion[2]=quat_general[2];
+  camera_current->quaternion[3]=quat_general[3];
+  camera_current->quat_defined=1;
 
 }
 

@@ -30,7 +30,7 @@ char menu_revision[]="$Revision$";
 #endif
 
 #define MENU_TIMEVIEW -103
-#define MENU_SAVEVIEW -101
+#define SAVE_VIEWPOINT -101
 #define MENU_STARTUPVIEW -102
 #define MENU_OUTLINEVIEW -104
 #define MENU_SIZEPRESERVING -105
@@ -1372,12 +1372,12 @@ void ResetMenu(int value){
   case MENU_TIMEVIEW:
     updatetimes();
     break;
-  case MENU_SAVEVIEW:
+  case SAVE_VIEWPOINT:
     Get_Next_View_Label(view_label);
     add_list_view(view_label);
     break;
   case MENU_STARTUPVIEW:
-    if(selected_view==-999)ResetMenu(MENU_SAVEVIEW);
+    if(selected_view==-999)ResetMenu(SAVE_VIEWPOINT);
     set_startup_view();
     break;
   default:
@@ -6673,7 +6673,7 @@ updatemenu=0;
       glutAddMenuEntry("-",MENU_DUMMY);
     }
     if(trainer_mode==0){
-      glutAddMenuEntry(_("Save"),MENU_SAVEVIEW);
+      glutAddMenuEntry(_("Save"),SAVE_VIEWPOINT);
       glutAddMenuEntry(_("Set as Startup"),MENU_STARTUPVIEW);
       glutAddSubMenu(_("Zoom"),zoommenu); //xx
       if(projection_type==1)glutAddMenuEntry(_("Switch to perspective view       ALT+v"),MENU_SIZEPRESERVING);
