@@ -65,5 +65,6 @@ flat_fire_comparison
 fluid_part
 scarc2d
 extinction
+fan_curve
 
 display('verification scripts completed successfully!')
