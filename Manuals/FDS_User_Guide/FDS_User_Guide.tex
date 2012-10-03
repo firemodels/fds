@@ -1541,7 +1541,7 @@ An example of an axially-symmetric helium plume is given in Section~\ref{barocli
 
 \begin{figure}[ht!]
 \includegraphics[width=\textwidth]{FIGURES/hallways}
-\caption{An example of a multiple-mesh geometry}
+\caption{An example of a multiple-mesh geometry.}
 \label{fig:domain}
 \end{figure}
 
@@ -3056,7 +3056,6 @@ Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
 {\ct LAVENDER} & \textcolor{LAVENDER} {$\blacksquare$} & 230& 230& 250& {\ct VIOLET RED} &  \textcolor{VIOLET RED} {$\blacksquare$} & 208& 32& 144  \\ \hline
 {\ct LIME GREEN} & \textcolor{LIME GREEN} {$\blacksquare$} & 50& 205& 50& {\ct WHITE} &  \textcolor{WHITE} {$\blacksquare$} & 255& 255& 255  \\ \hline
 {\ct MAGENTA} & \textcolor{MAGENTA} {$\blacksquare$} & 255& 0& 255& {\ct YELLOW} &  \textcolor{YELLOW} {$\blacksquare$} & 255& 255& 0  \\ \hline
-\hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -4691,7 +4690,7 @@ A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with e
 \begin{figure}[ht!]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/HVAC_damper}
-\caption[Example case {\ct HVAC\_damper}]{Simple duct network with a damper, case {\ct HVAC\_damper}}
+\caption[Example case {\ct HVAC\_damper}]{Simple duct network with a damper, case {\ct HVAC\_damper}.}
 \label{fig:HVAC_damper}
 \end{center}
 \end{figure}
@@ -4860,7 +4859,7 @@ a short passageway that draws gases in one side and expels them out the other. T
 \begin{figure}[ht!]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/jet_fan}
-\caption[Example of a jet fan]{Jet fan with a louvered output {\ct UVW=-1,0,-1}}
+\caption[Example of a jet fan]{Jet fan with a louvered output {\ct UVW=-1,0,-1}.}
 \label{fig:Jet_Fan}
 \end{center}
 \end{figure}
@@ -4902,7 +4901,7 @@ The sample case {\ct HVAC\_filter} demonstrates the use of the filter input.  A 
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_v} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_kg} }
    \end{tabular*}
-   \caption[Results for the {\ct HVAC\_filter} sample case]{Compartment pressure (upper left), compartment temperature (upper right), duct velocity (lower left), and particulate mass in the compartment and on the filter (lower right)}
+   \caption[Results for the {\ct HVAC\_filter} sample case]{Compartment pressure (upper left), compartment temperature (upper right), duct velocity (lower left), and particulate mass in the compartment and on the filter (lower right).}
    \label{fig_filter}
 \end{figure}
 
@@ -5862,12 +5861,15 @@ For a given reaction, if the only species missing an enthalpy of formation is th
 \subsubsection{Option 3: Use of EPUMO2 (Simple Chemistry)}
 If the enthalpy of formation of the fuel and heat of combustion are not specified, for simple chemistry cases only, the heat of combustion is assumed to be
 \begin{equation}
-\Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}
+\Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { \nu_{f} W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}
 \label{EPUMO2}
 \end{equation}
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
-Its default is 13,100~kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
-specified that FDS will ignore the value for {\ct EPUMO2}. From the {\ct HEAT\_OF\_COMBUSTION}, FDS solves for the enthalpy of formation of the fuel.
+Its default is 13,100~kJ/kg. Typically, a chemical reaction is balanced by setting
+the stoichiometric coefficient of the fuel $\nu_{f}$ to 1. In FDS, the stoichiometric coefficients of
+the chemical reaction are normalized by the  stoichiometric coefficient of the fuel, effectively setting $\nu_{f}$ to 1.
+Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are specified that FDS will ignore
+the value for {\ct EPUMO2}. From the {\ct HEAT\_OF\_COMBUSTION}, FDS solves for the enthalpy of formation of the fuel.
 
 If heats of reaction have been specified on the
 {\ct MATL} lines and
@@ -8337,7 +8339,7 @@ multiply-colored vents that activate at different times, depending on the partic
 \includegraphics[width=2.05in]{SCRIPT_FIGURES/activate_vents_10} &
 \includegraphics[width=2.05in]{SCRIPT_FIGURES/activate_vents_15}
 \end{tabular*}
-\caption[Snapshots of the {\ct activate\_vents} test case]{Output of the {\ct activate\_vents} test case at 5, 10 and 15~s.}
+\caption[Snapshots of the {\ct activate\_vents} test case]{Output of the {\ct activate\_vents} test case at 5, 10, and 15~s.}
 \label{activate_vents}
 \end{figure}
 
@@ -8386,7 +8388,7 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 \includegraphics[width=3.0in]{SCRIPT_FIGURES/hrr_freeze_T} &
 \includegraphics[width=3.0in]{SCRIPT_FIGURES/hrr_freeze_B} &
 \end{tabular*}
-\caption[Example of freezing the output of a {\ct RAMP}]{Temperature (left) and burning rate (right) outputs of the {\ct hrr\_freeze} test case}
+\caption[Example of freezing the output of a {\ct RAMP}]{Temperature (left) and burning rate (right) outputs of the {\ct hrr\_freeze} test case.}
 \label{freeze_hrr}
 \end{figure}
 
@@ -11610,28 +11612,25 @@ For those interested in obtaining the FDS and Smokeview source codes, either for
 it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.''
 All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered
 by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.apache.org/}{{Subversion}} (SVN) revision management system.
-Under this system a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that
-identifies the version of the entire repository rather than of a specific file (i.e., anytime a change is made to the repository all files are incremented in version number).
+Under this system, a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that
+identifies the version of the entire repository rather than of a specific file.
 A record of the version number is maintained that indicates when a specific file was changed, which is referred to as a revision number.
 
 Anyone can obtain a copy of the repository or retrieve a specific revision of the
-repository.  However, only the FDS and Smokeview developers can commit changes to the repository. The current location of the FDS repository is
+repository.  However, only the FDS and Smokeview developers can commit changes to the repository.
+Detailed instructions for checking out the FDS repository can be found at
+\href{http://code.google.com/p/fds-smv/source/checkout}{{http://code.google.com/p/fds-smv/source/checkout}}.
 
-\footnotesize
-\begin{verbatim}
-http://code.google.com/p/fds-smv/source/checkout
-\end{verbatim} \normalsize
-
-\noindent The repository contains the following files:
+The repository contains the following files:
 \begin{enumerate}
 \item FDS and Smokeview source code files
 \item FDS and Smokeview documentation
 \item Input files for software testing (Examples), verification testing, and validation testing
 \item Experimental data files used for validation testing
 \item Scripts and post-processing utilities used for software testing
-\item Web pages and wikis
+\item Web pages and Wiki Pages
 \end{enumerate}
-The wikis are particularly useful in describing the details of how you go about working with the Repository assets.
+The Wiki Pages are particularly useful in describing the details of how you go about working with the repository assets.
 
 
 
@@ -11643,7 +11642,7 @@ The wikis are particularly useful in describing the details of how you go about 
 If a compiled version of FDS exists for the machine on which the
 calculation is to be run and no changes have been made to
 the original source code, there is no need to re-compile the code.
-For example, the file {\ct fds\_win\_32.exe} is the
+For example, the file {\ct fds.exe} is the
 compiled single processor program for a 32 bit Windows-based PC;
 thus PC users do not need a
 Fortran compiler and do not need to compile the source code.
