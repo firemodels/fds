@@ -158,7 +158,6 @@
 \newcommand{\parmb}{.5}
 \newcommand{\parmc}{0.25}
 %\newcommand{\bold}[1]{{\bf #1}}
-\newcommand{\etc}{{\em etc}}
 \newcommand{\via}{{\em via\ }}
 \newcommand{\loadmenu}{\fbox{\ct Load/Unload}}
 \newcommand{\blist}{
@@ -615,17 +614,17 @@ It is not recommended to run FDS/Smokeview under any version of MS Windows
 released prior to Windows 2000.
 
 \item[{\bf Mac OS X}]
-A zip archive is available for Intel architectures.
+An installation script is available for Intel architectures.
 Mac OS~X 10.4.x or better is recommended, versions of OS~X prior to 10.4.x are not
 officially supported. Users can always download the latest version of FDS source and
 compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
 
 \item[{\bf Linux}]
-Pre-compiled executables are available that can be installed in an appropriate directory. Note that
-the installation package is simply an archive and no path variables are set. If the pre-compiled
-FDS executable does not work (usually because of library incompatibilities),
-the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview
-does not work on the Linux workstation, you can use the Windows version to view FDS output.
+Pre-compiled executables are installed in an appropriate directory via an installation script.
+If the pre-compiled FDS executable does not work (usually because of library
+incompatibilities), the FDS Fortran source code can be downloaded and compiled
+(See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation,
+you can use the Windows version to view FDS output.
 
 \item[{\bf Unix}]
 There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies
@@ -744,7 +743,7 @@ or
 tail -f job_name.out
 \end{verbatim}
 
-The installer also defines aliases named fds6 and fds6\_mpi
+The installer also defines aliases named {\ct fds6}\ and {\ct fds6\_mpi}\
 pointing to the executables. Other aliases may be defined by
 adding entries to the shell start-up script. Note, do not use
 ``{\ct fds}'' or ``{\ct fds\_mpi}'' for alias names as these are
@@ -761,7 +760,7 @@ processor version.  More is required of the user to make the
 connections between the machines as seamless as possible. This
 involves creating accounts for a given user on each machine, sharing
 directories, increasing the speed of the network, making each machine
-aware of the others, {\em etc.}  Some of these details are handled by
+aware of the others, etc.  Some of these details are handled by
 the parallel-processing software, others are not. Undoubtedly the
 procedure will be simplified in years to come, but for the moment,
 parallel-processing is still relatively new and requires more
@@ -795,18 +794,18 @@ otherwise directed) is:
 
 \footnotesize
 \begin{verbatim}
-Process  4 of  4 is running on fire65
-Process  3 of  4 is running on fire64
-Process  2 of  4 is running on fire63
 Process  0 of  4 is running on fire61
 Process  1 of  4 is running on fire62
+Process  2 of  4 is running on fire63
+Process  3 of  4 is running on fire64
+Process  4 of  4 is running on fire65
 Mesh   1 is assigned to Process   0
 Mesh   2 is assigned to Process   1
 Mesh   3 is assigned to Process   2
 Mesh   4 is assigned to Process   3
 Mesh   5 is assigned to Process   4
 \end{verbatim} \normalsize
-This means that 5 processes (numbered 0 to 4) have started on the computers named fire61, fire62, {\em etc}., and that each mesh is being computed as an individual process on the
+This means that 5 processes (numbered 0 to 4) have started on the computers named fire61, fire62, etc., and that each mesh is being computed as an individual process on the
 individual computers. Each computer has its own memory (RAM), and MPI is the protocol by which information is passed from process to process during the calculation. Note that these
 computers may have multiple processors, and each processor may have multiple ``cores.'' You have control over how many processes get assigned to each computer, but you may or may not
 have control over how the processes are handled by a given computer. That depends on the operating system and the particular version of MPI. For example, the computer named fire62 happens to have
@@ -924,10 +923,12 @@ For example, do not attempt to simulate a fire spreading through an entire floor
 building unless you have simulated the burning of the various combustibles with relatively small calculations.
 
 Along with the FDS User's Guide, there are resources available on the Internet.
-These include an ``Issue Tracker,'' that allows you to report bugs, request new features, and ask specific clarifying questions,
-and ``Group Discussions,'' which support more general topics than just specific problems.
+These resources include an ``Issue Tracker'' for reporting bugs and requesting new features,
+a ``Discussion Group'' for clarifying questions and discussing more general
+topics rather than just specific problems, and ``Wiki Pages'' that provide supplementary information
+about FDS-SMV development, third-party tools, and other resources.
 Before using these on-line resources, it is important to first try to solve your own
-problems by performing simple test calculations, or debugging your input file. The next few sections
+problems by performing simple test calculations or debugging your input file. The next few sections
 provide a list of error statements and suggestions on how to solve problems.
 
 \section{The Version Number}
@@ -1026,7 +1027,10 @@ forrtl: severe (47): write to READONLY file, unit 8598, file C:\Users\...\
 The unit, in this case 8598, is just a number that FDS has associated with one of the output files. If this error occurs just after the start of
 the calculation, you can try adding the phrase \\ {\ct FLUSH\_FILE\_BUFFERS=.FALSE.} \\ on the {\ct DUMP} line of the input file (see Section~\ref{info:DUMP}).
 This will prevent FDS from attempting to flush the contents of the internal buffers, something it does to make it possible to view the FDS output
-in Smokeview during the FDS simulation.
+in Smokeview during the FDS simulation. On some Windows machines, you might encounter
+security settings that prevent command line programs such as FDS from writing to system
+folders that contain program files. In this case, try to rerun the case in a non-system folder
+(i.e., a location within your home user directory).
 
 \item[{\bf Poisson Initialization}:]
 Sometimes at the very start of a calculation, an error
@@ -1046,24 +1050,25 @@ Because FDS development is on-going, problems will inevitably occur
 with various routines and features. The developers need to know if a certain
 feature is not working, and reporting problems is encouraged. However, the
 problem must be clearly identified. The best way to do this is to simplify
-the input file as much as possible so that the bug can be diagnosed.
+the input file as much as possible so that the bug can be diagnosed
+(i.e., create and submit a minimal working example).
 Also, limit the bug reports to those features that clearly do not work.
 Physical problems such as fires that do not ignite, flames that do not
-spread, {\em etc.}, may be related to the mesh resolution or scenario
+spread, etc., may be related to the mesh resolution or scenario
 formulation and need to be investigated first by the user before being
 reported. If an error message originates from the operating system as
 opposed to FDS, first investigate some of the more obvious possibilities,
-such as memory size, disk space, {\em etc.}
+such as memory size, disk space, etc.
 
 If that does not solve the problem, report the problem with as much information about the error message and
 circumstances related to the problem. The input file should be simplified
 as much as possible so that the bug occurs early in the calculation.
 Attach the simplified input file if necessary, following the instructions provided at the web site.
-In this way, the developers can quickly run the problem input file and hopefully diagnose the problem.
+In this way, the developers can quickly run the problematic input file and hopefully diagnose the problem.
 
 \begin{warning}
 \noindent
-NOTE: Reports of specific problems, feature requests and enhancements
+Note: Reports of specific bugs, problems, feature requests, and enhancements
 should be posted to the Issue Tracker and not the Discussion Group.
 \end{warning}
 
@@ -1131,9 +1136,24 @@ before the ampersand except a space and nothing comes between the ampersand
 and the slash except appropriate parameters corresponding
 to that particular namelist group.
 
-The parameters in the input file can be integers ({\ct T\_END=5400}),
-real numbers ({\ct CO\_YIELD=0.008}), groups of real numbers or integers
-({\ct XYZ=6.04,0.28,3.65}) or ({\ct IJK=90,36,38}),
+\noindent
+The parameters in the input file can be integers:
+
+{\ct T\_END=5400}
+
+\noindent
+real numbers:
+
+{\ct CO\_YIELD=0.008}
+
+\noindent
+groups of real numbers or integers:
+
+{\ct XYZ=6.04,0.28,3.65}
+
+{\ct IJK=90,36,38}
+
+\noindent
 character strings:
 
 {\ct CHID='WTC\_05\_v5'}
@@ -1178,7 +1198,7 @@ Be careful not to create the input file by pasting text from something other tha
 simple text editor, in which case the punctuation marks may not transfer
 properly into the text file.
 
-Depending on compiler and operating system, some text file encodings may not work on all systems.
+Depending on the compiler and operating system, some text file encodings may not work on all systems.
 If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding.
 It does not appear that current Fortran compilers support the UTF-8 encoding standard for reading namelist inputs.
 
@@ -2465,7 +2485,7 @@ It is possible for the species mass fractions to dip slightly below zero or incr
 A considerable amount of work in setting up a calculation lies in specifying the
 geometry of the space to be modeled and applying boundary conditions
 to the solid surfaces. The geometry is described in terms
-of rectangular obstructions that can heat up, burn, conduct heat, {\em etc.};
+of rectangular obstructions that can heat up, burn, conduct heat, etc.;
 and vents from which air or fuel can be
 either injected into, or drawn from, the flow domain.
 A boundary condition needs to be assigned to each obstruction
@@ -5070,7 +5090,7 @@ compartment to another is then designated on the input lines defining the indivi
 
 \noindent
 The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order
-implicitly defines Zone~1, Zone~2, {\em etc.}
+implicitly defines Zone~1, Zone~2, etc.
 Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak
 is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa)
 with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur.
@@ -5119,7 +5139,7 @@ Pressure will continue to rise due to the fire until the pressure relief due to 
 \subsection{Special Topic: Stack Effect}
 \label{info:stackeffect}
 
-Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, {\em etc.}) due to leaks or openings at different levels.  To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
+Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, etc.) due to leaks or openings at different levels.  To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
 is important to capture the pressure and density decrease in the atmosphere based on the specified temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line.
 
 For the case where the stack flow is through small leakage paths, divide the building into one or more pressure {\ct ZONE}s.  The leakage paths can be defined in terms of HVAC components.  Note that the leakage model combines all leaky surfaces over the entire height of the building and as a result averages out the pressure gradients. For doing stack effect calculations individual leakage paths should be defined. A simple example is described next.
@@ -5281,8 +5301,8 @@ dependent variables (such as a sprinkler flow rate and droplet speed).
 At the start of any calculation, the temperature is ambient
 everywhere, the flow velocity is zero everywhere, nothing is burning,
 and the mass fractions of all species are uniform.  When the
-calculation starts temperatures, velocities, burning rates, {\em
-etc.}, are ramped-up from their starting values because nothing can
+calculation starts temperatures, velocities, burning rates, 
+etc., are ramped-up from their starting values because nothing can
 happen instantaneously. By default, everything is ramped-up to their
 prescribed values in roughly 1~s. However, you can control the rate at which
 things turn on, or turn off, by specifying time histories either with
@@ -5313,7 +5333,7 @@ lines of the form:
 
 \noindent
 Here, {\ct T} is the time, and {\ct F} indicates the fraction of the heat
-release rate, wall temperature, velocity, mass fraction, {\em etc.}, to apply.
+release rate, wall temperature, velocity, mass fraction, etc., to apply.
 Linear interpolation\footnote{By default, FDS uses a linear interpolation routine to find time or temperature-dependent values between user-specified points.
 The default number of interpolation points is 5000, more than enough for most applications. However, you can change this value
 by specifying {\ct NUMBER\_INTERPOLATION\_POINTS} on any {\ct RAMP} line.} is used to fill in intermediate time points.
@@ -6773,7 +6793,7 @@ If you set {\ct CHECK\_DISTRIBUTION=.TRUE.} on the {\ct PART} line, FDS will wri
 By default, the range of particle sizes is divided into seven bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles is assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.
 
 
-\subsection{Secondary breakup}
+\subsection{Secondary Breakup}
 \label{info:secondary_breakup}
 
 If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup.
@@ -8664,7 +8684,7 @@ Normally, FDS averages slice file data at cell corners. For example, gas tempera
 are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening,
 set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this
 feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes. Note also that this
-feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, {\em etc.}
+feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, etc.
 
 Slice file information is recorded in files (See Section~\ref{out:SLCF})
 labeled {\ct CHID\_$n$.sf}, where $n$ is the index of the slice file.
@@ -11460,7 +11480,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\caption[Pressure Zone parameters ({\ct ZONE} namelist group)]{For more information see Section~\ref{info:ZONE}.}
+\caption[Pressure zone parameters ({\ct ZONE} namelist group)]{For more information see Section~\ref{info:ZONE}.}
 \label{tbl:ZONE} \\
 \hline
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
@@ -11780,7 +11800,7 @@ Time,HRR,Q_RADI,Q_CONV,Q_COND,...,BURN_RATE,ZONE_01,ZONE_02, ...
 
 \noindent
 Details of the integrated energy quantities can be found in Section~\ref{info:HRR}.
-{\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, {\em etc.}, are the background pressures of the various
+{\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, etc., are the background pressures of the various
 pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual
 material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by the user.
 The background pressure is discussed in Section~\ref{info:ZONE}.
