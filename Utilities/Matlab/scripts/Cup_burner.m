@@ -8,6 +8,8 @@ clear all
 addpath('../../Validation/Cup_Burner/Experimental_Data')
 addpath('../../Validation/Cup_Burner/FDS_Output_Files')
 
+plot_style
+
 % load experimental data and FDS prediction
 [exp_data] = csvread('Cup_burner_data.csv',2);
 
@@ -41,8 +43,7 @@ marker{7} = '^';
 marker{8} = '<';
 marker{9} = '>';
 
-MarkerSize = 7;
-LineWidth = 1.5;
+MarkerSize = 10;
 
 % Collect data
 
@@ -86,7 +87,7 @@ for s = 1:N_Agents
       'MarkerSize',MarkerSize,...
       'MarkerEdgeColor',color{f},...
       'MarkerFaceColor','none',...
-      'LineWidth',LineWidth,...
+      'LineWidth',Line_Width,...
       'LineStyle','none');
    hold on
 end
@@ -98,13 +99,12 @@ ymax = xmax;
 plot([xmin xmax],[ymin ymax],'k-.')
 axis([xmin xmax ymin ymax])
 
-plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
 set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Measured MEC (volume fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
-ylabel('Predicted MEC (volume fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+xlabel('Measured MEC (volume fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+ylabel('Predicted MEC (volume fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 legend(hX,XLegendStr,'Location','NorthWest')
 
 % add SVN if file is available
@@ -142,7 +142,7 @@ for s = 1:N_Agents
       'MarkerSize',MarkerSize,...
       'MarkerEdgeColor',color{f},...
       'MarkerFaceColor','none',...
-      'LineWidth',LineWidth,...
+      'LineWidth',Line_Width,...
       'LineStyle','none');
    hold on
 end
@@ -159,8 +159,8 @@ set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
 set(hf(2),'DefaultLineLineWidth',Line_Width)
-xlabel('Measured MEC (mass fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
-ylabel('Predicted MEC (mass fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+xlabel('Measured MEC (mass fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+ylabel('Predicted MEC (mass fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 legend(hY,YLegendStr,'Location','NorthWest')
 
 % add SVN if file is available
