@@ -80,6 +80,7 @@ GLUI_Spinner *SPINNER_clip_right=NULL;
 GLUI_Spinner *SPINNER_clip_bottom=NULL;
 GLUI_Spinner *SPINNER_clip_top=NULL;
 GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
+GLUI_Checkbox *CHECKBOX_general_rotation=NULL;
 
 GLUI_Spinner *SPINNER_gslice_center_x=NULL;
 GLUI_Spinner *SPINNER_gslice_center_y=NULL;
@@ -154,6 +155,13 @@ void update_gslice_parms(void){
   SPINNER_gslice_normal_az->set_float_val(gslice_normal_azelev[0]);
   SPINNER_gslice_normal_elev->set_float_val(gslice_normal_azelev[1]);
   CHECKBOX_gslice_data->set_int_val(vis_gslice_data);
+}
+
+/* ------------------ update_general_rotation ------------------------ */
+
+extern "C" void update_general_rotation(int val){
+  use_general_rotation=val;
+  if(CHECKBOX_general_rotation!=NULL)CHECKBOX_general_rotation->set_int_val(use_general_rotation);
 }
 
 /* ------------------ update_glui_set_view_xyz ------------------------ */
@@ -343,7 +351,7 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
 
 #ifdef pp_GENERAL_ROTATION
-  glui_motion->add_checkbox_to_panel(panel_motion,"Use 3 axis rotations",&use_general_rotation,USE_GENERAL_ROTATION,BUTTON_Reset_CB);
+  CHECKBOX_general_rotation=glui_motion->add_checkbox_to_panel(panel_motion,"Use 3 axis rotations",&use_general_rotation,USE_GENERAL_ROTATION,BUTTON_Reset_CB);
 #endif  
 
   panel_gslice = glui_motion->add_rollout(_("General slice motion"),false);
@@ -1215,6 +1223,12 @@ void BUTTON_Reset_CB(int var){
 
     rotation_type_save = ca->rotation_type;
     copy_camera(camera_current,ca);
+    if(camera_current->quat_defined==1){
+      update_general_rotation(1);
+    }
+    else{
+      update_general_rotation(0);
+    }
     if(use_general_rotation==1)camera2quat(camera_current,quat_general,quat_rotation);
     if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0)updatezoommenu=1;
     camera_current->rotation_type=rotation_type_save;

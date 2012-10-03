@@ -8,6 +8,8 @@
 #ifdef pp_MERGESMOKE
 EXTERNCPP int Merge_Smoke(void);
 #endif
+
+EXTERNCPP void update_general_rotation(int val);
 EXTERNCPP void sort_smoke3dinfo(void);
 
 EXTERNCPP void camera2quat(camera *ca, float *quat, float *rotation);

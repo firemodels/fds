@@ -22,7 +22,7 @@ float zoom2aperture(float zoom0){
   //                                D=20==distance from eye to monitor
   // (rounded off to 45 degrees)
 
-  ap = (360.0/PI)*atan(tan(45.0*DEG2RAD/2.0)/zoom0);
+  ap = 2.0*RAD2DEG*atan(tan(45.0*DEG2RAD/2.0)/zoom0);
   return ap;
 }
 
@@ -217,7 +217,6 @@ void copy_camera(camera *to, camera *from){
     cam2clip(camera_current);
   }
   if(to==camera_current&&to->quat_defined==1){
-    use_general_rotation=1;
     quat_general[0]=to->quaternion[0];
     quat_general[1]=to->quaternion[1];
     quat_general[2]=to->quaternion[2];
