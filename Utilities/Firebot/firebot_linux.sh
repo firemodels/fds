@@ -311,8 +311,8 @@ check_compile_fds_mpi_db()
 wait_verification_cases_short_start()
 {
    # Scans qstat and waits for verification cases to start
-   while [[ `qstat | grep $(whoami) | grep Q` != '' ]]; do
-      JOBS_REMAINING=`qstat | grep $(whoami) | grep Q | wc -l`
+   while [[ `qstat | grep $(whoami) | awk '{print $5}' | grep Q` != '' ]]; do
+      JOBS_REMAINING=`qstat | grep $(whoami) | awk '{print $5}' | grep Q | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
       check_time_limit
