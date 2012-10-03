@@ -217,7 +217,7 @@ void copy_camera(camera *to, camera *from){
     cam2clip(camera_current);
   }
   if(to==camera_current&&to->quat_defined==1){
-    use_genera_rotation=1;
+    use_general_rotation=1;
     quat_general[0]=to->quaternion[0];
     quat_general[1]=to->quaternion[1];
     quat_general[2]=to->quaternion[2];
