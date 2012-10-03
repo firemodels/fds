@@ -2702,8 +2702,12 @@ ALLOCATE(REACTION(N_REACTIONS),STAT=IZERO)
 
 REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
+   ! Read the REAC line
+
    CALL SET_REAC_DEFAULTS
    READ(LU_INPUT,REAC)
+
+   ! Ensure that there is a specified fuel
 
    IF (FUEL=='null' .AND. ID/='null') FUEL = ID ! Backward compatibility
 
@@ -2711,6 +2715,20 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       WRITE(MESSAGE,'(A,I1,A)') 'ERROR: REAC ',NR,' requires a FUEL'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
+
+   ! If the FUEL is a recognized RADCAL species, set FUEL_RADCAL_ID
+
+   IF (FUEL_RADCAL_ID=='null') THEN
+      IF (FUEL=='METHANE')   FUEL_RADCAL_ID = 'METHANE'
+      IF (FUEL=='METHANOL')  FUEL_RADCAL_ID = 'METHANOL'
+      IF (FUEL=='MMA')       FUEL_RADCAL_ID = 'MMA'
+      IF (FUEL=='N-HEPTANE') FUEL_RADCAL_ID = 'N-HEPTANE'
+      IF (FUEL=='PROPANE')   FUEL_RADCAL_ID = 'PROPANE'
+      IF (FUEL=='PROPYLENE') FUEL_RADCAL_ID = 'PROPYLENE'
+      IF (FUEL=='TOLUENE')   FUEL_RADCAL_ID = 'TOLUENE'
+   ENDIF
+
+   ! Set up the SIMPLE_CHEMISTRY model
 
    RN => REACTION(NR)
 
