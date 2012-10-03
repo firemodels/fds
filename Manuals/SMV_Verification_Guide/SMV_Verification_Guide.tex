@@ -100,7 +100,6 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\parmb}{.5}
 \newcommand{\parmc}{0.25}
 \newcommand{\bold}[1]{{\bf #1}}
-\newcommand{\etc}{{\em etc}}
 \newcommand{\via}{{via\ }}
 \newcommand{\blist}{
 \begin{list}
@@ -346,7 +345,7 @@ This document then verifies that various Smokeview features are working as inten
 {\em Verification} in the context of Smokeview is a process to check the correctness
 of the visualization.  Verification does not imply that the underlying data is correct, only
 that the data is presented or visualized correctly.
-A separate Guide~\cite{FDS_Verification_Guide} documents verification for FDS.  One set of scripts is used to run FDS cases and a second set of scripts is used by Smokeview to generate images.  The verification process then becomes much easier to accomplish since the use of scripts (i.e., a non manual methods) guarantees that consistent figures (same view points, same time points, same data files loaded {\em etc.}) are produced as new versions of this verification document are generated using updated version of FDS and/or Smokeview.  Another way of looking at this verification process is to
+A separate Guide~\cite{FDS_Verification_Guide} documents verification for FDS.  One set of scripts is used to run FDS cases and a second set of scripts is used by Smokeview to generate images.  The verification process then becomes much easier to accomplish since the use of scripts (i.e., a non manual methods) guarantees that consistent figures (same view points, same time points, same data files loaded, etc.) are produced as new versions of this verification document are generated using updated version of FDS and/or Smokeview.  Another way of looking at this verification process is to
 consider this document and the FDS verification document~\cite{FDS_Verification_Guide} as being a {\em live}\ (not a static) document, easily updated as algorithms in FDS and/or Smokeview are enhanced and improved.
 
 Smokeview has several limitations that need to be addressed.  The
@@ -377,8 +376,8 @@ FDS generated data is presumed
 to be correct.  FDS has its own set of verification cases to test the correctness of the data.
 The purpose of the cases used here is to confirm that data is drawn or visualized correctly.
 In particular these cases confirm
-that correct files are loaded, data is scaled and drawn correctly, geometry is drawn correctly
-{\em etc.}   Three types of verification cases are presented. The first set are the most important. Those cases verify that data is drawn correctly.  The second set of
+that correct files are loaded, data is scaled and drawn correctly, geometry is drawn correctly, 
+etc.   Three types of verification cases are presented. The first set are the most important. Those cases verify that data is drawn correctly.  The second set of
 cases verify that various geometric elements are drawn correctly and the third set verifies
 that the various options and underlying features are implemented and perform properly.
 
@@ -876,7 +875,7 @@ The images for this test were created automatically by running the smokeview scr
 
 Proper smoke visualization requires that smoke flow be both computed and drawn correctly.
 The FDS Verification Guide~\cite{FDS_Verification_Guide} addresses the question of correct
-computation in terms of soot/smoke production, transport {\em etc.}  In this chapter, it is presumed that the FDS component of verification is correct and considers the question, ``Is the smoke drawn correctly?''.  More precisely, given a known density and distribution of soot does the 3D smoke drawn by Smokeview match how {\em theory}\ suggests it should look.  Presently, the main interest is in how smoke obscures objects in the background.  Visualization effects due to light scattering are not modeled except to consider the smoke albedo when drawing its grey level.
+computation in terms of soot/smoke production, transport, etc.  In this chapter, it is presumed that the FDS component of verification is correct and considers the question, ``Is the smoke drawn correctly?''.  More precisely, given a known density and distribution of soot does the 3D smoke drawn by Smokeview match how {\em theory}\ suggests it should look.  Presently, the main interest is in how smoke obscures objects in the background.  Visualization effects due to light scattering are not modeled except to consider the smoke albedo when drawing its grey level.
 
 The smoke drawing verification problem can be broken down into two steps.  The first step is to verify that Smokeview can record or denote the correct grey level of smoke that is drawn.
 The second step is to verify that Smokeview can draw the correct shade of grey given a known soot density level.
