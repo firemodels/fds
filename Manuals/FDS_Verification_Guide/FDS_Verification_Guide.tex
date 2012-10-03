@@ -2057,7 +2057,7 @@ same amount of each product species should be produced in each case. The followi
 mass of the three combustion products. The figure compares the simple chemistry versus the primitive species versus the lumped species.
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/methane_flame_reac_comp}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/methane_flame_reac_comp}
 \caption[Yield of combustion products for alternative reactions]{The combustion product masses using three alternative definitions of the reaction:  Simple chemistry vs. primitive species vs. lumped species. }
 \label{fig_methane_flame_yields}
 \end{center}
@@ -3265,8 +3265,8 @@ As the case proceeds momentum is exchanged between the fluid and the particles. 
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=.9\textwidth]{SCRIPT_FIGURES/fluid_part_momentum}\\
-\includegraphics[width=.9\textwidth]{SCRIPT_FIGURES/fluid_part_velocity}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/fluid_part_momentum}\\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/fluid_part_velocity}
 \caption[Test of fluid-particle momentum transfer for nonstationary particles]{Outputs of the {\bf fluid\_part\_mom} cases.  (Top) The fluid momentum (blue), the particle momentum (red), and the total momentum (green) are plotted for each coordinate direction, $x$ (circles), $y$ (inverted triangles), and $z$ (plus symbols).  The analytical solutions for the fluid and particle equations are shown by the solid blue and red lines, respectively. The total momentum should be constant, as indicated by the green symbols. (Bottom) The fluid (blue) and particle (red) velocities are plotted for each direction.  Also, the equilibrium velocity (total momentum [fluid plus particles] divided by the total mass) is shown as a dashed green line.  Stability of the momentum exchange is guaranteed because, by construction, the fluid velocity cannot overshoot the equilibrium velocity; the fluid velocity relaxes toward it.}
 \label{fig_fluid_part_mom}
 \end{center}
@@ -3711,7 +3711,7 @@ where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $
 
 \begin{figure}[ht]
    \begin{center}
-      \includegraphics[height=3.00in]{SCRIPT_FIGURES/HVAC_flow_loss}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_flow_loss}
      \caption[The {\bf HVAC\_flow\_loss} test case]{\label{fig_HVAC_loss} Duct velocities in three ducts with different loss coefficients.}
    \end{center}
 \end{figure}
@@ -3838,7 +3838,7 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 
 %\section{Fluid-Structure Interaction}
 
-\section{Cut-cell Algorithm (\texorpdfstring{\bf tri\_cube\_cut\_cell\_test\_}{tri\_cube\_cut\_cell\_test\_})}
+\section{Cut-cell Algorithm (\texorpdfstring{\bf tri\_cube\_cut\_cell\_test}{tri\_cube\_cut\_cell\_test})}
 
 A cut-cell algorithm is developed for calculating the intersection area between a triangle and a bounding box (e.g., Cartesian grid cell). It is difficult to directly calculate the intersection area, because the intersection shape is generally an irregular polygon. The area calculation can be divided into three steps. The first step is to obtain the points that the triangle-determined plane intersects with the bounding box edges. These points are sorted to give an intermediate polygon. Note that this intermediate polygon is in the same plane as the blue-edge triangle. The second step is to determine all vertices of the final intersection polygon, by checking whether the triangle edges are intersecting with the edges of the intermediate polygon. Lastly, the area can be easily calculated for the final polygon, which is always convex in this study.
 
