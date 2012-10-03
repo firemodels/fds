@@ -43,7 +43,7 @@ set fds5bat="%SHORTCUTSDIR%\fds5.bat"
 if exist %fds5exe% (
   echo @echo off > %tempfile%
   echo %fds5exe% %%* >> %tempfile%
-  copy %tempfile% %SHORTCUTSDIR%\fds5.bat > Nul
+  copy %tempfile% "%SHORTCUTSDIR%\fds5.bat" > Nul
 )
 
 Rem *** fds5 (64 bit)
@@ -52,7 +52,7 @@ set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5_win_64.exe"
 if exist %fds5exe% (
   echo @echo off > %tempfile%
   echo %fds5exe% %%* >> %tempfile%
-  copy %tempfile% %SHORTCUTSDIR%\fds5.bat > Nul
+  copy %tempfile% "%SHORTCUTSDIR%\fds5.bat" > Nul
 )
 
 Rem *** smokeview5
@@ -62,32 +62,32 @@ set smv5bat="%SHORTCUTSDIR%\smokeview5.bat"
 if exist %smv5exe% (
   echo @echo off > %tempfile%
   echo %smv5exe% %%* >> %tempfile%
-  copy %tempfile% %SHORTCUTSDIR%\smokeview5.bat > Nul
+  copy %tempfile% "%SHORTCUTSDIR%\smokeview5.bat" > Nul
 )
 
 Rem *** fds6
 
 echo @echo off > %tempfile%
 echo "%CD%\bin\fds" %%* >> %tempfile%
-copy %tempfile% %SHORTCUTSDIR%\fds6.bat > Nul
+copy %tempfile% "%SHORTCUTSDIR%\fds6.bat" > Nul
 
 Rem *** smokeview6
 
 echo @echo off > %tempfile%
 echo "%CD%\bin\smokeview" %%* >> %tempfile%
-copy %tempfile% %SHORTCUTSDIR%\smokeview6.bat > Nul
+copy %tempfile% "%SHORTCUTSDIR%\smokeview6.bat" > Nul
 
 Rem *** smokediff6
 
 echo @echo off > %tempfile%
 echo "%CD%\bin\smokediff" %%* >> %tempfile%
-copy %tempfile% %smd6% %SHORTCUTSDIR%\smokediff6.bat > Nul
+copy %tempfile% %smd6% "%SHORTCUTSDIR%\smokediff6.bat" > Nul
 
 Rem *** smokezip6
 
 echo @echo off > %tempfile%
 echo "%CD%\bin\smokezip" %%* >> %tempfile%
-copy %tempfile% %smd6% %SHORTCUTSDIR%\smokezip6.bat > Nul
+copy %tempfile% %smd6% "%SHORTCUTSDIR%\smokezip6.bat" > Nul
 
 Rem ------------ setting up path ------------
 
