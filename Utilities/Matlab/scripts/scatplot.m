@@ -183,8 +183,8 @@ for j=qrange
          end
         
         % format the legend and axis labels
-        xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
-        ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+        xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+        ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
         axis([Plot_Min Plot_Max Plot_Min Plot_Max])
         
         set(gca,'Units','inches')
