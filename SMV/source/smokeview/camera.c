@@ -22,7 +22,7 @@ float zoom2aperture(float zoom0){
   //                                D=20==distance from eye to monitor
   // (rounded off to 45 degrees)
 
-  ap = (360.0/PI)*atan(tan(45.0*PI/360.0)/zoom0);
+  ap = (360.0/PI)*atan(tan(45.0*DEG2RAD/2.0)/zoom0);
   return ap;
 }
 
@@ -30,7 +30,7 @@ float zoom2aperture(float zoom0){
 
 float aperture2zoom(float ap){
   float zoom0;
-  zoom0 = tan(45.0*PI/360.0)/tan(ap*PI/360.0);
+  zoom0 = tan(45.0*DEG2RAD/2.0)/tan(ap*DEG2RAD/2.0);
   return zoom0;
 }
 
@@ -84,7 +84,7 @@ void update_camera_ypos(camera *camera_data){
   if(zbar/asp>xbar){
     width=zbar/asp;
   }
-  eyeyfactor = -1.10*width/2.0/tan(local_aperture_default*PI/360.0);
+  eyeyfactor = -1.10*width/2.0/tan(local_aperture_default*DEG2RAD/2.0);
   camera_data->eye[1]=eyeyfactor*xyzbox;
   if(viscolorbarpath==1){
     camera_data->eye[0]=0.7;

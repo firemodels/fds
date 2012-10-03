@@ -444,7 +444,7 @@ void createtourpaths(void){
   float tour_tstart, tour_tstop;
   float viewx_local, viewy_local, dummy;
 
-  float dz, dist, pi;
+  float dz, dist;
 //  keyframe *framejm1;
 
   keyframe **tourknotskeylist_copy;
@@ -461,7 +461,6 @@ void createtourpaths(void){
   }
 
   ntourknots=0;
-  pi=4.0*atan(1.0);
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     nframes=0;
@@ -1020,10 +1019,7 @@ void init_circulartour(void){
   float f1;
   float rad, cosangle, sinangle;
   float max_xyz, dx, dy, dz;
-  float pi;
   keyframe *thisframe,*addedframe;
-
-  pi=4.0*atan(1.0);
 
   touri = tourinfo;
   inittour(touri);
@@ -1055,7 +1051,7 @@ void init_circulartour(void){
     params[0] = 0.0;
     params[1] = 0.0;
     params[2] = 0.0;
-    angle_local = 2.0*pi*(float)j/(float)(nkeyframes-1);
+    angle_local = 2.0*PI*(float)j/(float)(nkeyframes-1);
     cosangle = cos(angle_local);
     sinangle = sin(angle_local);
 

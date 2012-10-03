@@ -328,12 +328,9 @@ void getzonesmokedir(float *mm){
     */
   int i,ii,j;
   float norm[3];
-  float pi;
   float eyedir[3];
   float cosdir;
   float angles[7];
-
-  pi=4.0*atan(1.0);
 
   xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
   xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];

@@ -78,7 +78,7 @@ float get_angle(float d1, float d2, float d3){
   arg = (d2*d2+d3*d3-d1*d1)/(2.0*d2*d3);
   if(arg<-1.0)arg=-1.0;
   if(arg>1.0)arg=1.0;
-  angle_local = acos(arg)*180.0/(4.0*atan(1.0));
+  angle_local = acos(arg)*RAD2DEG;
   return angle_local;
 }
 

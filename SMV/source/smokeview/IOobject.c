@@ -1662,7 +1662,7 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
   anglemax=0.0;
 
   danglei = (anglemax-anglemin)/(float)NLAT;
-  danglej = 2.0*4.0*atan(1.0)/(float)NLONG;
+  danglej = 2.0*PI/(float)NLONG;
 
   if(object_outlines==0){
   glColor4fv(coloredge);
@@ -3063,13 +3063,12 @@ void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbco
 
   float x[33], y[33], xnorm[32], ynorm[32];
   float radius;
-  float factor,factor2,pi;
+  float factor,factor2;
 
   if(nsides>32)nsides=32;
   if(nsides<3)nsides=3;
 
-  pi = 4.0*atan(1.0);
-  factor=2.0*pi/nsides;
+  factor=2.0*PI/nsides;
   factor2 = factor/2.0;
 
   for(i=0;i<nsides;i++){
@@ -3744,7 +3743,7 @@ sv_object *get_SVOBJECT_type2(char *olabel,sv_object *default_object){
 /* ----------------------- initcircle ----------------------------- */
 
 void initcircle(unsigned int npoints){
-  float drad, pi;
+  float drad;
   int i;
 
   if(ncirc!=0)freecircle();
@@ -3752,8 +3751,7 @@ void initcircle(unsigned int npoints){
   ncirc=npoints;
   NewMemory( (void **)&xcirc,(ncirc+1)*sizeof(float));
   NewMemory( (void **)&ycirc,(ncirc+1)*sizeof(float));
-  pi=4.0*atan(1.0);
-  drad=2.0*pi/(float)ncirc;
+  drad=2.0*PI/(float)ncirc;
   for(i=0;i<ncirc;i++){
     xcirc[i] = cos(i*drad);
     ycirc[i] = sin(i*drad);
@@ -3766,7 +3764,7 @@ void initcircle(unsigned int npoints){
 /* ----------------------- initspheresegs ----------------------------- */
 
 void initspheresegs(int nlat, int nlong){
-  float dlat, dlong, pi;
+  float dlat, dlong;
   int i;
 
   FREEMEMORY(cos_lat);
@@ -3777,18 +3775,17 @@ void initspheresegs(int nlat, int nlong){
   NewMemory( (void **)&sin_lat,(nlat+1)*sizeof(float));
   NewMemory( (void **)&cos_long,(nlong+1)*sizeof(float));
   NewMemory( (void **)&sin_long,(nlong+1)*sizeof(float));
-  pi=4.0*atan(1.0);
 
-  dlat=pi/(float)nlat;
+  dlat=PI/(float)nlat;
   for(i=0;i<=nlat;i++){
     float angle;
 
-    angle = -pi/2.0 + i*dlat;
+    angle = -PI/2.0 + i*dlat;
     cos_lat[i] = cos(angle);
     sin_lat[i] = sin(angle);
   }
 
-  dlong=2.0*pi/(float)nlong;
+  dlong=2.0*PI/(float)nlong;
   for(i=0;i<nlong;i++){
     float angle;
 

@@ -4252,9 +4252,6 @@ int get_tick_dir(float *mm){
   float normdir[3];
   float absangle,cosangle,minangle;
   int iminangle;
-  float pi;
-
-  pi=4.0*atan(1.0);
 
   xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
   xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];

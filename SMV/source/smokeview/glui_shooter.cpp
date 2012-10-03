@@ -232,7 +232,7 @@ extern "C" void glui_shooter_setup(int main_window){
 /* ------------------ SHOOTER_CB ------------------------ */
 
 void SHOOTER_CB(int var){
-  float pi,ang;
+  float ang;
   if(shooter_firstframe==1){
     reset_itimes0();
   }
@@ -260,8 +260,7 @@ void SHOOTER_CB(int var){
       }
       break;
     case SHOOTER_VEL:
-      pi = 4.0*atan(1.0);
-      ang = 2.0*pi*shooter_veldir/360.0;
+      ang = DEG2RAD*shooter_veldir;
       shooter_velz=0.0;
       shooter_velx = shooter_u0*cos(ang);
       shooter_vely = shooter_u0*sin(ang);
