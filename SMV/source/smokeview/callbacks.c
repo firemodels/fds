@@ -696,13 +696,6 @@ void update_mouseinfo(int flag, int xm, int ym){
   dx = xcurrent[0];
   dy = xcurrent[1];
   *distance = sqrt(dx*dx+dy*dy);
-  printf(" location: (%i,%i) (%f,%f)\n",current[0],current[1],xcurrent[0],xcurrent[1]);
-  printf(" distance: %f\n",*distance);
-  printf("direction: (%i,%i) (%f,%f) %f\n\n",
-    direction[0],direction[1],
-    xdirection[0],xdirection[1],
-    atan2(xdirection[1],xdirection[0])*RAD2DEG);
-
 
   if(*distance<0.3){
     delta_angle = (delta_distance);

@@ -237,19 +237,13 @@ void transparentoff(void){
 void smv2quat(void){
   float azimuth, elevation,axis[3];
   float quat_temp[4];
-  float x, y;
    
   azimuth = camera_current->angle_zx[0]*DEG2RAD;
   elevation = (camera_current->angle_zx[1])*DEG2RAD;
 
-  x = cos(azimuth);
-  y = sin(azimuth);
-
-  axis[0]=x;
-  axis[1]=-y;
+  axis[0]=1.0;
+  axis[1]=0.0;
   axis[2]=0.0;
-
-  printf("new: %f %f %f %f\n",x,-y,elevation*RAD2DEG,azimuth*RAD2DEG);
 
   angleaxis2quat(elevation,axis,quat_temp);
 

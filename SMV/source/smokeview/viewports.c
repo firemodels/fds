@@ -747,9 +747,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   float StereoCameraOffset,FrustumAsymmetry;
   float aperture_temp;
   float widthdiv2;
-  float azimuth, elevation;
   float eyexINI, eyeyINI, eyezINI;
-  float azimuthINI;
 
   if(showstereo==2){
     down=0;
@@ -820,9 +818,6 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   eyeyINI = camera_current->eye[1];
   eyezINI = camera_current->eye[2];
 
-  elevation = camera_current->angle_zx[1];
-  azimuth = camera_current->angle_zx[0];
-  
   fnear =  - eyeyINI-1.0;
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
@@ -891,9 +886,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     float sn_view_angle, cs_view_angle;
     float *uup;
     float *modelview_rotate;
-    float cos_elevation_angle, sin_elevation_angle;
+    float cos_elevation, sin_elevation;
     float xcen, ycen, zcen;
     float posx, posy, posz;
+    float azimuth, elevation;
 
     sn_view_angle=camera_current->sin_view_angle;
     cs_view_angle=camera_current->cos_view_angle;
@@ -901,16 +897,14 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     sin_azimuth=camera_current->sin_azimuth;
     cos_azimuth=camera_current->cos_azimuth;
 
-    azimuthINI = camera_current->azimuth;
-
     modelview_rotate = camera_current->modelview;
 
     xcen = camera_current->xcen;
     ycen = camera_current->ycen;
     zcen = camera_current->zcen;
 
-    cos_elevation_angle=camera_current->cos_elevation;
-    sin_elevation_angle=camera_current->sin_elevation;
+    cos_elevation=camera_current->cos_elevation;
+    sin_elevation=camera_current->sin_elevation;
 
     sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
     cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;
@@ -920,10 +914,13 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     posy = eyeyINI-StereoCameraOffset*sin_dv_sum;
     posz = eyezINI;
 
-    viewx = posx + sin_dv_sum*cos_elevation_angle;
-    viewy = posy + cos_dv_sum*cos_elevation_angle;
-    viewz = posz + sin_elevation_angle;
+    viewx = posx + sin_dv_sum*cos_elevation;
+    viewy = posy + cos_dv_sum*cos_elevation;
+    viewz = posz + sin_elevation;
 
+    elevation = camera_current->angle_zx[1];
+    azimuth = camera_current->angle_zx[0];
+    
     /* set view direction for virtual tour */
     {
       tourdata *touri;
@@ -969,10 +966,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
     else{
       if(eyeview==WORLD_CENTERED){
-        printf("normal: %f %f %f %f\n",cos_azimuth,-sin_azimuth,elevation,azimuth);
-        glRotatef(elevation,cos_azimuth,-sin_azimuth,0.0);  /* rotate about the transformed x axis */
+        glRotatef(elevation,1.0,0.0,0.0);  /* rotate about x axis */
       }
-      glRotatef(azimuth,0.0,0.0,1.0);                   /* rotate about z axis */
+      glRotatef(azimuth,0.0,0.0,1.0);      /* rotate about z axis */
     }
     
     glTranslatef(-xcen,-ycen,-zcen);
