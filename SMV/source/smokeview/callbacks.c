@@ -700,9 +700,19 @@ void update_mouseinfo(int flag, int xm, int ym){
   if(*distance<0.3){
     delta_angle = (delta_distance);
     if(delta_angle!=0.0&&ABS(xdirection[0])+ABS(xdirection[1])>0.0){
-      axis[0]=-xdirection[1];
-      axis[1]=0.0;
-      axis[2]=xdirection[0];
+      if(ABS(xdirection[1])>ABS(xdirection[0])){
+//        axis[0]=-xdirection[1];
+//        axis[1]=0.0;
+//        axis[2]=xdirection[0];
+        axis[0]=-(float)SIGN(xdirection[1]);
+        axis[1]=0.0;
+        axis[2]=0.0;
+      }
+      else{
+        axis[0]=0.0;
+        axis[1]=0.0;
+        axis[2]=(float)SIGN(xdirection[0]);
+      }
       angleaxis2quat(delta_angle,axis,quat_temp);
       mult_quat(quat_temp,quat_general,quat_general);
       quat2rot(quat_general,quat_rotation);
@@ -1010,11 +1020,11 @@ void Move_Scene(int xm, int ym){
   dym = ym - start_xyz0[1];
   switch (key_state){
     case KEY_NONE:
-      switch (eyeview){
-        case WORLD_CENTERED:
-        case WORLD_CENTERED_LEVEL:
+      switch (rotation_type){
+        case ROTATION_2AXIS:
+        case ROTATION_1AXIS:
           angle_zx[0] += dxm;
-          if(eyeview==WORLD_CENTERED){
+          if(rotation_type==ROTATION_2AXIS){
             angle_zx[1] += dym;
           }
           else{
@@ -1054,7 +1064,7 @@ void Move_Scene(int xm, int ym){
         xx = xx/(float)screenWidth2;
         yy = ym-mouse_down_xy0[1];
         yy = yy/(float)screenHeight2;
-        if(eyeview==EYE_CENTERED){
+        if(rotation_type==EYE_CENTERED){
           float xx2, yy2;
 
           xx2 = camera_current->cos_azimuth*xx - camera_current->sin_azimuth*yy;
@@ -1245,8 +1255,8 @@ void keyboard(unsigned char key, int flag){
 
   switch (key2){
     case 'a':
-      if((eyeview==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1)){
-        if(eyeview==EYE_CENTERED){
+      if((rotation_type==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1)){
+        if(rotation_type==EYE_CENTERED){
           handle_move_keys(256+key2);
         }
         else{
@@ -1342,7 +1352,7 @@ void keyboard(unsigned char key, int flag){
         break;
       case GLUT_ACTIVE_CTRL:
       default:
-        if(eyeview==EYE_CENTERED){
+        if(rotation_type==EYE_CENTERED){
           handle_move_keys(256+key2);
         }
         else{
@@ -1360,9 +1370,9 @@ void keyboard(unsigned char key, int flag){
         break;
       case GLUT_ACTIVE_CTRL:
       default:
-        eyeview++;
-        if(eyeview>2)eyeview=0;
-        handle_eyeview(0);
+        rotation_type++;
+        if(rotation_type>2)rotation_type=0;
+        handle_rotation_type(0);
       }
       break;
     case 'f':
@@ -1687,7 +1697,7 @@ void keyboard(unsigned char key, int flag){
         snap_view_angles();
         break;
       default:
-        if(eyeview==EYE_CENTERED){
+        if(rotation_type==EYE_CENTERED){
           handle_move_keys(GLUT_KEY_DOWN);
         }
         else{
@@ -1768,7 +1778,7 @@ void keyboard(unsigned char key, int flag){
           break;
         case GLUT_ACTIVE_CTRL:
         default:
-          if(eyeview==EYE_CENTERED){
+          if(rotation_type==EYE_CENTERED){
             handle_move_keys(GLUT_KEY_UP);
           }
           else if(SHOW_gslice_data==1){
@@ -1936,33 +1946,33 @@ void keyboard_CB(unsigned char key, int x, int y){
   updatemenu=1;
 }
 
-/* ------------------ handle_eyeview ------------------------ */
+/* ------------------ handle_rotation_type ------------------------ */
 
-void handle_eyeview(int flag){
+void handle_rotation_type(int flag){
   float *angle_zx;
 
-  if(eyeview==eyeview_old)return;
-  camera_current->eyeview=eyeview;
+  if(rotation_type==rotation_type_old)return;
+  camera_current->rotation_type=rotation_type;
   angle_zx = camera_current->angle_zx;
   updatemenu=1;
-  switch (eyeview){
-  case WORLD_CENTERED:
+  switch (rotation_type){
+  case ROTATION_2AXIS:
       if(trainer_mode==0)printf("world centered\n");
-      if(showtrainer_dialog==0&&flag==0&&eyeview_old==EYE_CENTERED){
+      if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case EYE_CENTERED:
        angle_zx[1]=0.0;
-       if(showtrainer_dialog==0&&flag==0&&eyeview_old!=EYE_CENTERED){
+       if(showtrainer_dialog==0&&flag==0&&rotation_type_old!=EYE_CENTERED){
          ResetView(RESTORE_EXTERIOR_VIEW);
        }
       if(trainer_mode==0)printf("eye centered\n");
       break;
-  case WORLD_CENTERED_LEVEL:
+  case ROTATION_1AXIS:
     angle_zx[1]=0.0;
     if(trainer_mode==0)printf("world centered, level rotations\n");
-    if(showtrainer_dialog==0&&flag==0&&eyeview_old==EYE_CENTERED){
+    if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }
     break;
@@ -1970,8 +1980,8 @@ void handle_eyeview(int flag){
     ASSERT(FFALSE);
     break;
   }
-  showhide_translate(eyeview);
-  eyeview_old = eyeview;
+  showhide_translate(rotation_type);
+  rotation_type_old = rotation_type;
   return;
 }
 
@@ -2029,7 +2039,7 @@ void specialkeyboard_CB(int key, int x, int y){
 
   switch (cursorPlot3D){
     case 0:
-      if(eyeview==EYE_CENTERED){
+      if(rotation_type==EYE_CENTERED){
         keymode=EYE_MODE;
       }
       else{
@@ -2320,7 +2330,7 @@ void handle_move_keys(int  key){
     ASSERT(FFALSE);
     break;
   }
-  if(eyeview==EYE_CENTERED){
+  if(rotation_type==EYE_CENTERED){
     eye_xyz0[0]=eye_xyz[0];
     eye_xyz0[1]=eye_xyz[1];
     eye_xyz0[2]=eye_xyz[2];
@@ -2891,7 +2901,7 @@ void Display_CB(void){
     }
     if(RenderGif == 0)angle_global += dang_global;
     if(angle_global>PI){angle_global -= -2.0f*PI;}
-    if(eyeview==WORLD_CENTERED||eyeview==WORLD_CENTERED_LEVEL){
+    if(rotation_type==ROTATION_2AXIS||rotation_type==ROTATION_1AXIS){
       float *angle_zx;
 
       angle_zx = camera_current->angle_zx;

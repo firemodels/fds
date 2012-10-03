@@ -304,7 +304,7 @@ extern "C" void glui_motion_setup(int main_window){
   eyerotate_z->set_speed(180.0/(float)screenWidth);
   eyerotate_z->disable();
  
-  eyeview_radio=glui_motion->add_radiogroup_to_panel(panel_motion,&eyeview,0,EYEVIEW_CB);
+  eyeview_radio=glui_motion->add_radiogroup_to_panel(panel_motion,&rotation_type,0,EYEVIEW_CB);
   RADIO_button_1c=glui_motion->add_radiobutton_to_group(eyeview_radio,_("general (2 axis) rotations"));
   RADIO_button_1d=glui_motion->add_radiobutton_to_group(eyeview_radio,_("first person movement"));
   RADIO_button_1e=glui_motion->add_radiobutton_to_group(eyeview_radio,_("level (1 axis) rotations"));
@@ -501,7 +501,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   BUTTON_motion_2=glui_motion->add_button_to_panel(panel_close,_("Close"),1,BUTTON_hide2_CB);
 
-  showhide_translate(eyeview);
+  showhide_translate(rotation_type);
   glui_motion->set_main_gfx_window( main_window );
 }
 
@@ -598,7 +598,7 @@ extern "C" void update_translate(void){
   d_eye_xyz[2]=eye_xyz[2]-eye_xyz0[2];
 
   translate_xy->set_x(d_eye_xyz[0]);
-  if(eyeview==WORLD_CENTERED_LEVEL){
+  if(rotation_type==ROTATION_1AXIS){
     d_eye_xyz[1]=0.0;
   }
   translate_xy->set_y(d_eye_xyz[1]);
@@ -688,7 +688,7 @@ extern "C" void showhide_translate(int var){
   d_eye_xyz[0]=0.0;
   d_eye_xyz[1]=0.0;
   switch (var){
-  case WORLD_CENTERED:
+  case ROTATION_2AXIS:
     if(panel_translate!=NULL)panel_translate->enable();
     if(rotate_zx!=NULL)rotate_zx->enable();
     if(eyerotate_z!=NULL)eyerotate_z->disable();
@@ -696,7 +696,7 @@ extern "C" void showhide_translate(int var){
     if(blockpath_checkbox!=NULL)blockpath_checkbox->disable();
     if(panel_speed!=NULL)panel_speed->disable();
     if(panel_height!=NULL)panel_height->disable();
-    if(eyeview_radio!=NULL)eyeview_radio->set_int_val(eyeview);
+    if(eyeview_radio!=NULL)eyeview_radio->set_int_val(rotation_type);
     if(eyelevel!=NULL)eyelevel->disable();
     if(floorlevel!=NULL)floorlevel->disable();
     if(meshlist1!=NULL)meshlist1->enable();
@@ -710,13 +710,13 @@ extern "C" void showhide_translate(int var){
     if(blockpath_checkbox!=NULL)blockpath_checkbox->enable();
     if(panel_speed!=NULL)panel_speed->enable();
     if(panel_height!=NULL)panel_height->enable();
-    if(eyeview_radio!=NULL)eyeview_radio->set_int_val(eyeview);
+    if(eyeview_radio!=NULL)eyeview_radio->set_int_val(rotation_type);
     if(eyelevel!=NULL)eyelevel->enable();
     if(floorlevel!=NULL)floorlevel->enable();
     if(meshlist1!=NULL)meshlist1->disable();
     if(button_snap!=NULL)button_snap->disable();
     break;
-  case WORLD_CENTERED_LEVEL:
+  case ROTATION_1AXIS:
     if(panel_translate!=NULL)panel_translate->enable();
     if(rotate_zx!=NULL)rotate_zx->enable();
     if(eyerotate_z!=NULL)eyerotate_z->disable();
@@ -724,7 +724,7 @@ extern "C" void showhide_translate(int var){
     if(blockpath_checkbox!=NULL)blockpath_checkbox->disable();
     if(panel_speed!=NULL)panel_speed->disable();
     if(panel_height!=NULL)panel_height->disable();
-    if(eyeview_radio!=NULL)eyeview_radio->set_int_val(eyeview);
+    if(eyeview_radio!=NULL)eyeview_radio->set_int_val(rotation_type);
     if(eyelevel!=NULL)eyelevel->disable();
     if(floorlevel!=NULL)floorlevel->disable();
     if(meshlist1!=NULL)meshlist1->enable();
@@ -984,7 +984,7 @@ extern "C" void TRANSLATE_CB(int var){
   if(var==EYE_ROTATE){
     dy=motion_dir[1]*TRANSLATE_SPEED*(float)screenWidth/1800.0;
   }
-  if(eyeview==EYE_CENTERED){
+  if(rotation_type==EYE_CENTERED){
     *cos_azimuth = cos((*azimuth)*DEG2RAD);
     *sin_azimuth = sin((*azimuth)*DEG2RAD);
     dx2 = *cos_azimuth*dx + *sin_azimuth*dy;
@@ -1055,8 +1055,8 @@ extern "C" void update_meshlist1(int val){
   if(meshlist1==NULL)return;
   meshlist1->set_int_val(val);
   if(val>=0&&val<nmeshes){
-    eyeview_radio->set_int_val(0);
-    handle_eyeview(0);
+    eyeview_radio->set_int_val(ROTATION_2AXIS);
+    handle_rotation_type(0);
   }
 }
 
@@ -1112,7 +1112,7 @@ int dup_view(void){
 
 void BUTTON_Reset_CB(int var){
   int ival;
-  int eyeview_save;
+  int rotation_type_save;
   camera *cam1,*cex,*ca;
   char *label;
   camera *prev, *next;
@@ -1208,11 +1208,11 @@ void BUTTON_Reset_CB(int var){
       if(ca->view_id==ival)break;
     }
 
-    eyeview_save = ca->eyeview;
+    rotation_type_save = ca->rotation_type;
     copy_camera(camera_current,ca);
     if(use_general_rotation==1)smv2quat();
     if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0)updatezoommenu=1;
-    camera_current->eyeview=eyeview_save;
+    camera_current->rotation_type=rotation_type_save;
     edit_view_label->set_text(ca->name);
     break;
   case LIST_VIEW:
@@ -1325,7 +1325,7 @@ extern "C" void add_list_view(char *label_in){
 /* ------------------ EYEVIEW_CB ------------------------ */
 
 void EYEVIEW_CB(int var){
-  handle_eyeview(0);
+  handle_rotation_type(0);
 }
 
 /* ------------------ RENDER_CB ------------------------ */

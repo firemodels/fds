@@ -28,6 +28,10 @@
 #define ABS(a) ((a)>=0 ? (a) : (-(a)))
 #endif
 
+#ifndef SIGN
+#define SIGN(x) ((x)>=0 ?  1  :  -1)
+#endif
+
 #ifndef MIX
 #define MIX(f,a,b) ( (f)*(a) + (1.0-(f))*(b))
 #endif

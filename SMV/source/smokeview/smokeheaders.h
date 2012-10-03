@@ -449,7 +449,7 @@ EXTERNCPP void updatepatchmenulabels(void);
 EXTERNCPP void updateslicemenulabels(void);
 EXTERNCPP void updatevslicemenulabels(void);
 EXTERNCPP void updateplot3dmenulabels(void);
-EXTERNCPP void handle_eyeview(int flag);
+EXTERNCPP void handle_rotation_type(int flag);
 
 EXTERNCPP void init_texturedir(void);
 EXTERNCPP void getrgb(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb);

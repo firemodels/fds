@@ -9763,7 +9763,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"EYEVIEW")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&eyeview);
+      sscanf(buffer,"%i",&rotation_type);
       continue;
     }
     if(localfile==1&&match(buffer,"SCRIPTFILE")==1){
@@ -9899,7 +9899,7 @@ int readini2(char *inifile, int localfile){
       }
 
 		  fgets(buffer,255,stream);
-		  sscanf(buffer,"%i %i %i",&camera_ini->eyeview,&camera_ini->rotation_index,&camera_ini->view_id);
+		  sscanf(buffer,"%i %i %i",&camera_ini->rotation_type,&camera_ini->rotation_index,&camera_ini->view_id);
 
       {
         float zoom_in;
@@ -11312,7 +11312,7 @@ void writeini(int flag){
   fprintf(fileout,"EYEZ\n");
   fprintf(fileout," %f\n",eyezfactor);
   fprintf(fileout,"EYEVIEW\n");
-  fprintf(fileout," %i\n",eyeview);
+  fprintf(fileout," %i\n",rotation_type);
   {
     char *label;
 
@@ -11361,7 +11361,7 @@ void writeini(int flag){
         mat = ca->modelview;
 
 		    fprintf(fileout," %i %i %i\n",
-          ca->eyeview,
+          ca->rotation_type,
           ca->rotation_index,
           ca->view_id);
 		    fprintf(fileout," %f %f %f %f %i\n",

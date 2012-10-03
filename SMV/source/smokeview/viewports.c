@@ -965,7 +965,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       glMultMatrixf(quat_rotation);
     }
     else{
-      if(eyeview==WORLD_CENTERED){
+      if(rotation_type==ROTATION_2AXIS){
         glRotatef(elevation,1.0,0.0,0.0);  /* rotate about x axis */
       }
       glRotatef(azimuth,0.0,0.0,1.0);      /* rotate about z axis */

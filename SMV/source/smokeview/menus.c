@@ -4228,7 +4228,7 @@ void BlockageMenu(int value){
 /* ------------------ RotateTypeMenu ------------------------ */
 
 void RotateTypeMenu(int value){
-  eyeview = value;
+  rotation_type = value;
   updatemenu=1;  
   glutPostRedisplay();
 }
@@ -5648,21 +5648,21 @@ updatemenu=0;
 /* --------------------------------rotate type menu -------------------------- */
 
   CREATEMENU(rotatetypemenu,RotateTypeMenu);
-  switch (eyeview){
+  switch (rotation_type){
   case EYE_CENTERED:
-    glutAddMenuEntry(_("World centered"),0);
-    glutAddMenuEntry(_("*Eye centered"),1);
-    glutAddMenuEntry(_("World centered, level rotation"),2);
+    glutAddMenuEntry(_("World centered"),ROTATION_2AXIS);
+    glutAddMenuEntry(_("*Eye centered"),EYE_CENTERED);
+    glutAddMenuEntry(_("World centered, level rotation"),ROTATION_1AXIS);
     break;
-  case WORLD_CENTERED:
-    glutAddMenuEntry(_("*World centered"),0);
-    glutAddMenuEntry(_("Eye centered"),1);
-    glutAddMenuEntry(_("World centered, level rotation"),2);
+  case ROTATION_2AXIS:
+    glutAddMenuEntry(_("*World centered"),ROTATION_2AXIS);
+    glutAddMenuEntry(_("Eye centered"),EYE_CENTERED);
+    glutAddMenuEntry(_("World centered, level rotation"),ROTATION_1AXIS);
     break;
-  case WORLD_CENTERED_LEVEL:
-    glutAddMenuEntry(_("World centered"),0);
-    glutAddMenuEntry(_("Eye centered"),1);
-    glutAddMenuEntry(_("*World centered, level rotation"),2);
+  case ROTATION_1AXIS:
+    glutAddMenuEntry(_("World centered"),ROTATION_2AXIS);
+    glutAddMenuEntry(_("Eye centered"),EYE_CENTERED);
+    glutAddMenuEntry(_("*World centered, level rotation"),ROTATION_1AXIS);
     break;
   default:
     ASSERT(FFALSE);
@@ -7333,7 +7333,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  L: unload last slice file loaded"),6);
     glutAddMenuEntry(_("  1-9: number of frames to skip"),6);
   }
-  if(eyeview==EYE_CENTERED){
+  if(rotation_type==EYE_CENTERED){
     glutAddMenuEntry(_("Motion"),1);
     glutAddMenuEntry(_("   left/right cursor: rotate left/right"),1);
     glutAddMenuEntry(_("      up/down cursor: move forward/backward"),1);

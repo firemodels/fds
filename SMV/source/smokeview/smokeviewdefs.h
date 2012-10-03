@@ -146,9 +146,10 @@ void _Sniff_Errors(char *whereat);
 #define TOGGLE_TITLE_SAFE 5
 #define RESTORE_EXTERIOR_VIEW_ZOOM 6
 
-#define WORLD_CENTERED 0
+#define ROTATION_2AXIS 0
 #define EYE_CENTERED 1
-#define WORLD_CENTERED_LEVEL 2
+#define ROTATION_1AXIS 2
+#define ROTATION_3AXIS 3
 
 #define TO_BW 0
 #define TO_COLOR 1

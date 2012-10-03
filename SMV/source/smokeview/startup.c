@@ -1426,8 +1426,8 @@ void initvars(void){
   smoke3dframeskip=0;
   vectorskip=1;
   iframe=0, iframebeg=0, izone=0;
-  eyeview=0,eyeview_level=1;
-  eyeview_old=0,eyeview_SAVE=0,eyeview_last=0;
+  rotation_type=0,eyeview_level=1;
+  rotation_type_old=0,eyeview_SAVE=0,eyeview_last=0;
   frameratevalue=1000;
   setpartmin=PERCENTILE_MIN, setpartmax=PERCENTILE_MAX;
   setpartmin_old=setpartmin;

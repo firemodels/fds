@@ -262,23 +262,23 @@ void smv2quat(void){
 /* ------------------ ResetView ------------------------ */
 
 void ResetView(int option){
-  int eyeview_save;
+  int rotation_type_save;
 
   switch (option){
   case RESTORE_EXTERIOR_VIEW_ZOOM:
     break;
   case RESTORE_EXTERIOR_VIEW:
-    eyeview_save = camera_current->eyeview;
+    rotation_type_save = camera_current->rotation_type;
     copy_camera(camera_current,camera_external);
-    camera_current->eyeview=eyeview_save;
+    camera_current->rotation_type=rotation_type_save;
     if(camera_current->projection_type==1){
       camera_current->eye[1]=camera_current->isometric_y;
     }
     break;
   case RESTORE_INTERIOR_VIEW:
-    eyeview_save = camera_current->eyeview;
+    rotation_type_save = camera_current->rotation_type;
     copy_camera(camera_current,camera_internal);
-    camera_current->eyeview=eyeview_save;
+    camera_current->rotation_type=rotation_type_save;
     break;
   case RESTORE_SAVED_VIEW:
     copy_camera(camera_current,camera_save);

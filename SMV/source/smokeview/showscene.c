@@ -137,7 +137,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     SNIFF_ERRORS("after setColorbarClipPlanes 1");
   }
 
-  if(eyeview==1&&nskyboxinfo>0)draw_skybox();
+  if(rotation_type==EYE_CENTERED&&nskyboxinfo>0)draw_skybox();
 
   if(UpdateLIGHTS==1)updateLights(0);
 

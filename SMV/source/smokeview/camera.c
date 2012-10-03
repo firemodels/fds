@@ -130,7 +130,7 @@ void init_camera(camera *camera_data,char *name){
   camera_data->xcen=xbar/2.0;
   camera_data->ycen=ybar/2.0;
   camera_data->zcen=zbar/2.0;
-  camera_data->eyeview=eyeview;
+  camera_data->rotation_type=rotation_type;
 
   camera_data->azimuth=0.0;
   camera_data->cos_azimuth=1.0;
@@ -231,7 +231,7 @@ void update_camera(camera *ca){
   ca->sin_elevation=sin(local_angle);
 
   if(ca==camera_current){
-    eyeview=ca->eyeview;
+    rotation_type=ca->rotation_type;
     if(ca->rotation_index>=0&&ca->rotation_index<nmeshes){
       update_current_mesh(meshinfo + ca->rotation_index);
     }
@@ -239,7 +239,7 @@ void update_camera(camera *ca){
       update_current_mesh(meshinfo);
     }
     highlight_mesh = current_mesh-meshinfo;
-    handle_eyeview(1);
+    handle_rotation_type(EYE_CENTERED);
     update_meshlist1(ca->rotation_index);
     update_trainer_moves();
 
@@ -284,7 +284,7 @@ void set_camera_current(float angles[2], float eye[3], float zzoom){
   camera_current->eye[1]=eyey;
   camera_current->eye[2]=eyez;
 
-  camera_current->eyeview=EYE_CENTERED;
+  camera_current->rotation_type=EYE_CENTERED;
 
   camera_current->zoom=zzoom;
 
