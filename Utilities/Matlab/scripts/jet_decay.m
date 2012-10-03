@@ -65,7 +65,7 @@ set(plot_handle,'YTick',[0.2 0.4 0.6 0.8 1.0 1.2])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Key_Font_Size)
 
-text(1,1.1,'Jet Centerline Velocity Decay','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+text(1,1.1,'Jet Centerline Velocity Decay','FontSize',Label_Font_Size,'FontName',Font_Name)
 
 xlabel('$x/h$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter);
 ylabel('$u_{max}/u_0$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
