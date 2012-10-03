@@ -2411,26 +2411,26 @@ SELECT CASE(GAS_NAME)
       EPSOK = 226.46_EB
       FORMULA = 'C10H22'
       H_F = -249.7E6_EB  
-      IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
+      IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('N-HEPTANE')
       SIGMA = 4.701_EB
       EPSOK = 205.78_EB
       FORMULA = 'C7H16'
       H_F = -187.8E6_EB
-      IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
+      IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('N-HEXANE')
       SIGMA = 5.949_EB
       EPSOK = 399.3_EB 
       FORMULA = 'C6H14'
       H_F = -167.1E6_EB  
       ABSORBING = .TRUE.
-      IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
+      IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('N-OCTANE')
       SIGMA = 4.892_EB
       EPSOK = 231.16_EB
       FORMULA = 'C8H18'
       H_F = -208.7E6_EB
-      IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
+      IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('NITRIC OXIDE')        
       SIGMA = 3.492_EB 
       EPSOK = 116.7_EB  
