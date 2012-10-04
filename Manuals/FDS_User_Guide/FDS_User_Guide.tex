@@ -4659,7 +4659,8 @@ where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 \subsection{HVAC Dampers}
 \label{info:HVACdamper}
 
-A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. For futher details see the{\ct HVAC\_damper} example case which is documented in the verification guide.  
+A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. For further details see the {\ct HVAC\_damper} example case, which is documented in the
+Verification Guide.
 
 \footnotesize
 \begin{verbatim}
@@ -4769,7 +4770,7 @@ If the pressure difference increases beyond this, air will be forced backwards t
 &RAMP ID='fan curve',F= 1000,T=-10.00/
 \end{verbatim}\normalsize
 
-Figure~\ref{fig:Fan_Curve} displays a typical fan curves.  Additional examples can be found in the {\ct ashrae7} and {\ct fan\_test} example cases which are documented in the Verification Guide.
+Figure~\ref{fig:Fan_Curve} displays a typical fan curve.  Additional examples can be found in the {\ct ashrae7} and {\ct fan\_test} example cases, which are documented in the Verification Guide.
 
 \begin{figure}[ht!]
 \begin{center}
@@ -4825,7 +4826,7 @@ A sample input for a filter is given by:
 
 \noindent
 
-A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial flow loss of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter} which is documented in the Verification Guide.
+A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial flow loss of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter}, which is documented in the Verification Guide.
 
 \footnotesize
 \begin{verbatim}
