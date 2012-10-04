@@ -4770,7 +4770,7 @@ If the pressure difference increases beyond this, air will be forced backwards t
 &RAMP ID='fan curve',F= 1000,T=-10.00/
 \end{verbatim}\normalsize
 
-Figure~\ref{fig:Fan_Curve} displays a typical fan curve.  Additional examples can be found in the {\ct ashrae7} and {\ct fan\_test} example cases, which are documented in the Verification Guide.
+Figure~\ref{fig:Fan_Curve} displays the fan curves for the inputs shown above.  Additional examples can be found in the {\ct ashrae7} and {\ct fan\_test} example cases, which are documented in the Verification Guide.
 
 \begin{figure}[ht!]
 \begin{center}
@@ -4832,7 +4832,8 @@ A sample set of filter inputs is shown below.  These lines define a filter that 
 \begin{verbatim}
 &SPEC ID='PARTICULATE',MW=28.,MASS_FRACTION_0=0.001,SPECIFIC_HEAT=1./
 &HVAC TYPE_ID='NODE',ID='FILTER',DUCT_ID='DUCT1','DUCT2',XYZ(3)=0.55,FILTER_ID='FILTER'/
-&HVAC TYPE_ID='FILTER',ID='FILTER',CLEAN_LOSS=1.,SPEC_ID='PARTICULATE',EFFICIENCY=1.,LOSS=7732.446,LOADING_MULTIPLIER=1./
+&HVAC TYPE_ID='FILTER',ID='FILTER',CLEAN_LOSS=1.,SPEC_ID='PARTICULATE',EFFICIENCY=1.,
+      LOSS=7732.446,LOADING_MULTIPLIER=1./
 \end{verbatim}\normalsize
 
 Note that a filter input refers to a class of filters and that multiple ducts can reference the same filter definition.
@@ -4842,6 +4843,7 @@ Note that a filter input refers to a class of filters and that multiple ducts ca
 
 An aircoil refers to a device that either adds or removes heat from air flowing through a duct.  In a typical HVAC system this is done by blowing the air over a heat exchanger (hence the term aircoil) containing a working fluid such as chilled water or a refrigerant.  A sample input is line is as follows:
 
+\footnotesize
 \begin{verbatim}
 &HVAC TYPE='AIRCOIL', ID='aircoil 1', DEVC_ID='device 1', EFFICIENCY=0.5,
       COOLANT_SPECIFIC_HEAT=4.186, COOLANT_TEMPERATURE=10., COOLANT_MASS_FLOW=1./
@@ -7423,7 +7425,9 @@ For some simulations there may be groups of independent sprinklers or nozzles.  
 \end{verbatim}
 \normalsize
 
-\noindent These lines indicate that the fuel spray nozzles are a separate pipe network from the water sprinklers.  With these inputs, the {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.
+\noindent These lines indicate that the fuel spray nozzles are a separate pipe network from the water sprinklers.  With these
+inputs, a {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.  See the example case 
+{\ct flow\_rate\_2} in the Verification Guide for further details on the use of {\ct PIPE\_INDEX}.
 
 \subsection{Nozzles}
 \label{info:nozzles}
