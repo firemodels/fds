@@ -66,5 +66,6 @@ fluid_part
 scarc2d
 extinction
 fan_curve
+mesh_transformation
 
 display('verification scripts completed successfully!')
