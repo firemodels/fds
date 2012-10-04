@@ -8,7 +8,7 @@ The case is meant as a teaching tool and to test functionality.
 &TIME T_END=900. /
 &DUMP DT_RESTART=100. /
 
-&SURF ID='BURNER', HRRPUA=1000.  /
+ SURF ID='BURNER', HRRPUA=1000.  /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
@@ -60,7 +60,11 @@ The case is meant as a teaching tool and to test functionality.
 &OBST XB= 3.10, 3.30, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
 &OBST XB= 1.50, 3.10, 4.40, 4.60, 0.60, 1.20, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
 
-&VENT XB= 2.40, 2.60, 4.30, 4.40, 0.60, 0.60, SURF_ID='BURNER' /
+ VENT XB= 2.40, 2.60, 4.30, 4.40, 0.60, 0.60, SURF_ID='BURNER' /
+
+&PART ID='ignitor particle', SURF_ID='ignitor', STATIC=.TRUE. /
+&SURF ID='ignitor', TMP_FRONT=1000., GEOMETRY='CYLINDRICAL', LENGTH=0.15, RADIUS=0.01 /
+&INIT XYZ=2.45,4.35,0.65, DX=0.1, PART_ID='ignitor particle', N_PARTICLES=3 /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /  
 &VENT MB='XMAX', SURF_ID='OPEN' /  

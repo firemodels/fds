@@ -42,9 +42,9 @@ See Section~\ref{glossary} for an explanation of terms.}
 \hline
 Property                    & Units         & HDPE                  & HIPS                  & PMMA                  & Unc. (\%) & Method                &  Ref.                         \\ \hline \hline
 Density                     & kg/m$^3$      & 860                   & 950                   & 1100                  & 5         & Direct                &  \cite{Stoliarov:CF2009}      \\ \hline
-Conductivity                & W/m/K         & 0.29                  & 0.22                  & 0.20                  & 15        & Transient Line Source &  \cite{Stoliarov:CF2009}      \\ \hline
+Conductivity                & W/m/K         & 0.29                  & 0.22                  & 0.20                  & 15        & TLC                   &  \cite{Stoliarov:CF2009}      \\ \hline
 Specific Heat               & kJ/kg/K       & 3.5                   & 2.0                   & 2.2                   & 15        & DSC                   &  \cite{Stoliarov:PDS2008}     \\ \hline
-Emissivity                  &               & 0.92                  & 0.86                  & 0.85                  & 20        & Integrating Sphere    &  \cite{Hallman:PES1974}       \\ \hline
+Emissivity                  &               & 0.92                  & 0.86                  & 0.85                  & 20        & IS                    &  \cite{Hallman:PES1974}       \\ \hline
 Absorption Coef.            & m$^{-1}$      & 1300                  & 2700                  & 2700                  & 50        & FTIR                  &  \cite{Tsilingiris:ECM2003}   \\ \hline
 Pre-Exp.~Factor             & s$^{-1}$      & $4.8 \times 10^{22}$  & $1.2 \times 10^{16}$  & $8.5 \times 10^{12}$  & 50        & TGA                   &  \cite{Stoliarov:CF2009}      \\ \hline
 Activation Energy           & kJ/kmol       & $3.49 \times 10^{5}$  & $2.47 \times 10^{5}$  & $1.88 \times 10^{5}$  & 3         & TGA                   &  \cite{Stoliarov:CF2009}      \\ \hline
@@ -83,13 +83,13 @@ that forms fuel gas and char.
 \begin{table}[h!]
 \caption[Properties of polycarbonate (PC).]{Properties of polycarbonate (PC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|l|l|}
+\begin{tabular}{|l|c|c|l|l|}
 \hline
 Property                    & Units         & Value                             & Method                &  Reference                                \\ \hline \hline
 Polymer Density             & kg/m$^3$      & 1180 $\pm$ 60                     & Direct                &  \cite{Stoliarov:CF2010}                  \\ \hline
 Polymer Conductivity        & W/m/K         & 0.22 $\pm$ 0.03                   & Literature            &  \cite{Stoliarov:CF2010}                  \\ \hline
 Polymer Specific Heat       & kJ/kg/K       & 1.9 $\pm$ 0.3                     & DSC                   &  \cite{Stoliarov:PDS2008}                 \\ \hline
-Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   & Integrating  Sphere   &  \cite{Hallman:PES1974}                   \\ \hline
+Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   & IS                    &  \cite{Hallman:PES1974}                   \\ \hline
 Polymer Absorption Coef.    & m$^{-1}$      & 1770 $\pm$ 590                    & FTIR                  &  \cite{Tsilingiris:ECM2003}               \\ \hline
 Char Density                & kg/m$^3$      & 248                               & Cone Calorimeter      &  \cite{Stoliarov:CF2010}                  \\ \hline
 Char Conductivity           & W/m/K         & 0.37                              & Cone Calorimeter      &  \cite{Stoliarov:CF2010}                  \\ \hline
@@ -144,7 +144,7 @@ Property                    & Units         & Value                             
 Polymer Density             & kg/m$^3$      & 1430 $\pm$ 70                     & Direct                    &  \cite{Stoliarov:CF2010}                  \\ \hline
 Polymer Conductivity        & W/m/K         & 0.17 $\pm$ 0.01                   & Literature                &  \cite{Stoliarov:CF2010}                  \\ \hline
 Polymer Specific Heat       & kJ/kg/K       & 1.55 $\pm$ 0.25                   & DSC                       &  \cite{Stoliarov:PDS2008}                 \\ \hline
-Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   & Integrating Sphere        &  \cite{Hallman:PES1974}                   \\ \hline
+Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   & IS                        &  \cite{Hallman:PES1974}                   \\ \hline
 Polymer Absorption Coef.    & m$^{-1}$      & 2145 $\pm$ 715                    & FTIR                      &  \cite{Tsilingiris:ECM2003}               \\ \hline
 Char 1 Density              & kg/m$^3$      & 629                               & Assumed Constant Volume   &  \cite{Stoliarov:CF2010}                  \\ \hline
 Char 1 Conductivity         & W/m/K         & 0.17                              & Assumed Same as Polymer   &  \cite{Stoliarov:CF2010}                  \\ \hline
@@ -294,7 +294,7 @@ The heat capacity value is increased by 0.13~kJ/kg/K to account for the heat of 
 Property                & Units     & Value                             & Method                                & Reference                     \\ \hline \hline
 Density                 & kg/m$^3$  & 1300 $\pm$ 70                     & Direct                                & \cite{Kempel:1}               \\ \hline
 Specific Heat           & kJ/kg/K   & 2.23 $\pm$ 0.34                   & DSC                                   & \cite{Kempel:1}               \\ \hline
-Conductivity            & W/m/K     & 0.29 $\pm$ 0.05                   & Transient Line Source                 & \cite{Kempel:1}               \\ \hline
+Conductivity            & W/m/K     & 0.29 $\pm$ 0.05                   & TLS                                   & \cite{Kempel:1}               \\ \hline
 Emissivity              &           & 0.88 $\pm$ 0.05                   & FTIR                                  & \cite{Linteris:2}             \\ \hline
 Absorption Coefficient  & m$^{-1}$  & 2561 $\pm$ 140                    & FTIR                                  & \cite{Linteris:2}             \\ \hline
 Pre-Exp. Factor         & s$^{-1}$  & $(2.49 \pm 0.62) \times 10^{14}$  & TGA                                   & \cite{Kempel:1}               \\ \hline
@@ -342,12 +342,12 @@ Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an
 are the result of averaging the reported temperature dependent properties over the room to decomposition temperature range (300~K -- 650~K).
 The heat capacity value is increased by 0.09~kJ/kg/K to account for the heat of melting (-32~kJ/kg), which takes place at 493~K.}
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|}
+\begin{tabular}{|l|c|c|l|l|}
 \hline
 Property                &      Units    &      Value                        & Method                                    & Reference                     \\ \hline \hline
 Polymer Density         &     kg/m$^3$  & 1520 $\pm$ 80                     & Direct                                    & \cite{Kempel:1}               \\ \hline
 Polymer Specific Heat   &    kJ/kg/K    & 1.68 $\pm$ 0.26                   & DSC                                       & \cite{Kempel:1}               \\ \hline
-Polymer Conductivity    &      W/m/K    & 0.36 $\pm$ 0.06                   & Transient Line Source                     & \cite{Kempel:1}               \\ \hline
+Polymer Conductivity    &      W/m/K    & 0.36 $\pm$ 0.06                   & TLS                                       & \cite{Kempel:1}               \\ \hline
 Polymer Emissivity      &               & 0.87 $\pm$ 0.05                   & FTIR                                      & \cite{Linteris:2}             \\ \hline
 Polymer Absorption Coef.&  m$^{-1}$     & 2860 $\pm$ 150                    & FTIR                                      & \cite{Linteris:2}             \\ \hline
 Char Density            &     kg/m$^3$  &        482                        & Assumed Constant Volume                   & \cite{Kempel:1}               \\ \hline
@@ -397,13 +397,13 @@ Combustion Efficiency   &               &          1                        & As
 \item[Fit to Cone Data:] Property was established by fitting a model to experimental values obtained in the Cone Calorimeter.
 \item[FTIR:] Fourier Transform Infrared Spectroscopy uses a spectrometer to simultaneously characterize the absorption of all frequencies of infrared light. In testing a sample is exposed to infrared light and a detector records light that has passed through the sample. A Fourier transform of detector measurement is then translated into absorption information.
 \item[Gasification Apparatus:] Similar to the Cone Calorimeter however flaming is prevented. This is done typically through the introduction of inert purge gases.
-\item[Integrating Sphere:] (ASTM E 1175 \cite{intgsphere}) An Integrating Sphere, or an Ulbricht Sphere, is a hollow cavity whose interior has a high diffuse reflectivity. A sample placed inside the sphere is exposed to incident radiation and reflectivity measured. Emissivity can be determined from this information. The standard above is for measurement of Solar reflectivity, and was not necessarily precisely followed.
+\item[IS:] (ASTM E 1175 \cite{intgsphere}) An Integrating Sphere, or an Ulbricht Sphere, is a hollow cavity whose interior has a high diffuse reflectivity. A sample placed inside the sphere is exposed to incident radiation and reflectivity measured. Emissivity can be determined from this information. The standard above is for measurement of Solar reflectivity, and was not necessarily precisely followed.
 \item[Laser Flash:] (ASTM E1461 \cite{laserflash}) In the Laser Flash Method one surface of a sample is rapidly heated using a single pulse from a laser. Heat sensors on the opposite side of the sample record the arrival of the resulting temperature disturbance. From this thermal diffusivity/thermal conductivity can be calculated.
 \item[Literature:] Results were found within previously published literature.
 \item[MCC:] (ASTM D 7309 \cite{microcc}) The Microscale Combustion Calorimeter (MCC)  rapidly pyrolyzes a milligram size sample in an inert atmosphere. The pyrolyzate is then exposed to an abundance of oxygen.  Heat release history is obtained from oxygen consumption. Similar to TGA with  heat release recorded rather than mass loss rate.
 \item[Pulsed Current:] Can refer to different types of tests. Generally, a sample is positioned between two electrodes in a sealed chamber with an inert atmosphere. The sample is heated through pulses of current. Measurements of the sample and the chamber can give information regarding specific heat, emissivity, or other material properties.
 \item[TGA:] (ASTM E 1131 \cite{thermalga}) In Thermal Gravimetric Analysis (TGA)  a small sample is heated at uniform rate, generally in an Nitrogen (N$_2$) atmosphere. The percentage weight loss of the sample is recorded relative to the sample's temperature. Rate constants can then be fitted to the data. Similar to MCC with mass loss recorded instead of heat release.
-\item[Transient Line Source:] (ASTM D 5930 \cite{transline}) The Transient Line Source method records temperature of a single point at a fixed distance in a sample over time using a probe. Given knowledge of the heat exposure of the sample the thermal conductivity can be found from the slope of the recorded data.
+\item[TLS:] (ASTM D 5930 \cite{transline}) The Transient Line Source method records temperature of a single point at a fixed distance in a sample over time using a probe. Given knowledge of the heat exposure of the sample the thermal conductivity can be found from the slope of the recorded data.
 \end{description}
 
 

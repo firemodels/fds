@@ -1,4 +1,3 @@
-
 \chapter{Surface Temperature}
 
 All solid surfaces in an FDS model are assigned thermal boundary conditions.
@@ -12,25 +11,9 @@ the heat equation in either cartesian or cylindrical coordinates. The latter is 
 
 The compartment for the WTC experiments contained a hollow box column roughly 0.5~m from the fire pan, two trusses over the top
 of the pan, and one or two steel bars resting on the lower truss flanges. In Tests 1, 2 and 3, the steel was bare, and in Tests 4, 5 and 6, the
-steel was coated with various thicknesses of sprayed fire-resistive materials.
+steel was coated with various thicknesses of sprayed fire-resistive materials. The column was instrumented near its base (about 0.5~m from the floor, middle (1.5~m), and upper (2.5~m). Four measurements of steel (and insulation) temperatures were made at each location, for each of its four sides. These elements were modeled using thin sheet obstructions with a resolution of 10~cm.
 
-The column was instrumented near its base (about
-0.5~m from the floor, middle (1.5~m), and upper (2.5~m). Four measurements of steel (and insulation) temperatures were made at each location, for
-each of its four sides.
-
-In FDS, these elements were modeled using thin sheet obstructions with a resolution of 10~cm.
-
-Five cylinders (``slugs'') of nickel 200 ($\ge$ 99~\% nickel), 25.4~cm long and 10.2~cm in diameter, were positioned
-50~cm north of the centerline in the WTC experiments. Slugs 1 through 5 were 2.92~m, 1.82~m, 0.57~m, 0.05~m, and 1.56~m, respectively, from the
-longitudinal axis of the fire pan. All the slugs were 50~cm north of the lateral axis. The fire pan measured 2~m by 1~m. Four thermocouples were
-inserted into each slug at various locations. All four temperatures for each slug were virtually indistinguishable.
-
-In FDS, rectangular obstructions were used to model the slugs, but the one-dimensional heat conduction calculation was performed using
-cylindrical coordinates.
-
-\newpage
-
-
+Five cylinders (``slugs'') of nickel 200 ($\ge$ 99~\% nickel), 25.4~cm long and 10.2~cm in diameter, were positioned 50~cm north of the centerline in the WTC experiments. Slugs 1 through 5 were 2.92~m, 1.82~m, 0.57~m, 0.05~m, and 1.56~m, respectively, from the longitudinal axis of the fire pan. All the slugs were 50~cm north of the lateral axis. The fire pan measured 2~m by 1~m. Four thermocouples were inserted into each slug at various locations. All four temperatures for each slug were virtually indistinguishable. Rectangular obstructions were used to model the slugs, but the one-dimensional heat conduction calculation was performed using cylindrical coordinates.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -214,18 +197,6 @@ cylindrical coordinates.
 \end{figure}
 
 
-\begin{figure}[p]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Steel_Temperature} \\
-\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Insulated_Steel_Temperature}
-\end{tabular}
-\end{center}
-\caption[Summary of steel temperature predictions, WTC test series.]
-{Summary of steel temperature predictions for the WTC test series.}
-\end{figure}
-
-
 \clearpage
 
 \section{SP Adiabatic Surface Temperature Experiments}
@@ -395,22 +366,9 @@ plate, not the insulation material.
 \label{SP_Test_3_Station_C}
 \end{figure}
 
-
-
-
-
-\begin{figure}[p]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/SP_Temperature} \\
-\vspace{0.25in}
-\end{tabular}
-\end{center}
-\caption[Summary of gas, plate thermometer, and steel temperatures, SP AST Experiments.]
-{Summary of gas, plate thermometer, and steel temperatures, SP AST Experiments.}
-\end{figure}
-
 \clearpage
+
+
 
 \subsection{Pool Fire Experiments}
 
@@ -564,9 +522,8 @@ At each height, comparable predictions were made with FDS, but at only one angul
 \label{SP_Heptane_1p1_5m}
 \end{figure}
 
-
-
 \clearpage
+
 
 \section{NIST/NRC Test Series, Cables}
 
@@ -583,8 +540,6 @@ computes the radial heat transfer as a function of the heat flux to a designated
 The superposition of gas temperature, heat flux and surface temperature in the figures on the following pages
 provides information about how cables heat up in fires.  Favorable or unfavorable predictions of cable surface
 temperatures can often be explained in terms of comparable errors in the prediction of the thermal environment in the vicinity of the cable.
-
-\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -690,20 +645,9 @@ temperatures can often be explained in terms of comparable errors in the predict
 \label{NIST_NRC_Cable_G_Open}
 \end{figure}
 
-\begin{figure}[p]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/NIST_NRC_Cable_Temperature} \\
-\vspace{0.25in}
-\end{tabular}
-\end{center}
-\caption[Summary of cable surface temperature predictions, NIST/NRC test series.]
-{Summary of cable surface temperature predictions for the NIST/NRC test series.}
-\end{figure}
-
-
-
 \clearpage
+
+
 
 \section{CAROLFIRE Cable Temperatures}
 
@@ -930,20 +874,7 @@ TCW4IN              & 0.05      & 0.07      & 3.83      \\ \hline
 \label{NIST_WTC_Inner_Wall}
 \end{figure}
 
-\begin{figure}[p]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/WTC_Surface_Temperature}
-\end{tabular}
-\end{center}
-\caption[Summary of wall and ceiling temperature predictions, WTC test series.]
-{Summary of wall and ceiling temperature predictions for the WTC test series.}
-\end{figure}
-
-
 \clearpage
-
-
 
 
 
@@ -1102,14 +1033,19 @@ TC East U-4-2     & 21.66 & 5.70 & 2.42     & TC Ceiling U-8-2  & 18.71 & 3.54  
 \label{NIST_NRC_Floor_Temp_Open}
 \end{figure}
 
+\clearpage
 
 
-\begin{figure}[p]
+\section{Summary of Surface Temperature Predictions}
+
+
+\begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Wall_Temperature}
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Target_Temperature} \\
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Wall_Temperature}
 \end{tabular}
 \end{center}
-\caption[Summary of wall, floor and ceiling temperature predictions, NIST/NRC test series.]
-{Summary of wall, floor and ceiling temperature predictions for the NIST/NRC test series.}
+\caption[Summary of target and wall temperature predictions]
+{Summary of target and wall temperature predictions.}
 \end{figure}
