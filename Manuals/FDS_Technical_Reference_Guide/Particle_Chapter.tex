@@ -300,9 +300,9 @@ Note that $a$ is an empirical constant.
 \section{Using Lagrangian Particles to Model Complex Objects}
 
 There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform
-to the rectilinear mesh. For example, electrical cables, dry brush, tree branches and so on, are potential fuels that cannot
+to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot
 be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the
-movement of hot gases through the complex collection of objects. As a potential remedy for the problem, these objects can
+movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can
 be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface
 type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be
 thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either
@@ -317,6 +317,23 @@ where $A$ is the surface area of the particle and $\dx \dy \dz$ is the volume of
 The net radiative heat flux onto the surface of the particle is
 \be \dq_{r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_p^4 \right) \ee
 
+\subsection{Porous Media (Screens, Metal Meshes, and Similar Materials)}
+
+Catwalk grating, expanded metal mesh, window screens, and similar thin porous materials are commonly found in buildings.  For a
+typical calculation, the dimensions of the holes in the porous material and the material surrounding them are going to be much
+smaller than the grid size.  There is, therefore, no easy way to model these materials using the standard inputs for obstructions.
+Lagrangian particles can; however, be used to represent both the drag and the mass of these materials.  As discussed previously, particles can be assigned material properties for heat trasnfer.  In this manner, a plane of Lagrangian particles could be defined to represent the mass of a window screen.  Since the particles are not a solid obstruction, gas can flow through them.  By modifying the particle drag law, the particles can impose drag appropriate for a thin porous material.  The pressure drop across a screen is given by~\cite{Bartzanas:1}:
+\be \frac {\d p}{\d x} \; = \; \frac{K}{\mu} u \; + \; \rho \frac{Y}{\sqrt{K}}u^2\ee
+where $K$ is a permeability factor, $Y$ is an inertial factor, $u$ is the normal velocity to the screen, $\rho$ the density of the gas, and $\mu$ the viscosity of the gas.  K and Y are given as functions of $\varepsilon$, the screen porosity (free area/total area):
+\be K \; = \; 3.44 \times 10^{-9}\varepsilon^{1.6} \quad ; \quad Y \; = \; 4.30 \times 10^{-2}\varepsilon^{2.13} \ee
+
+The acceleration of the gas is given by applying the pressure drop over the width of the screen and the mass of gas flowing through 
+it.  The acceleration, $a$, is the term used by FDS to account for the drag.  It is given by:
+\begin{eqnarray}
+a & = & \frac{F}{m} \; = \; \frac{p A}{m} \\
+a & = & \frac{\frac{\d p}{\d x} \Delta x_{screen} A_{cell}}{V_{cell} \rho} \\
+a & = & \left( \frac{K}{\mu} u \; + \; \rho \frac{Y}{\sqrt{K}}u^2 \right) \frac{\Delta x_{screen} A_{cell}}{V_{cell} \rho} 
+\end{eqnarray}
 
 \clearpage
 
