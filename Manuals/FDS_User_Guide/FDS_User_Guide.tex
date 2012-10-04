@@ -703,9 +703,9 @@ information is automatically written to a file {\ct CHID.out},
 where {\ct CHID} is a character string, usually the same as {\ct
 job\_name}, designated in the input file. Screen output can be
 redirected to a file via the alternative command:
-\begin{verbatim}
+\small\begin{verbatim}
 fds job_name.fds > job_name.err
-\end{verbatim}
+\end{verbatim}\normalsize
 Note that it is also possible to associate the ``.fds'' extension with the FDS executable directly, thereby making FDS run by
 double-clicking on the input file. If you do this, note that error messages will be written to the file called {\ct job\_name.out}. Also, if you
 associate the input file with the FDS executable, be careful not to accidentally double-click on the input file when trying to edit it.
@@ -719,15 +719,15 @@ The installer for Mac OS~X, Unix, and Linux versions of FDS sets
 the {\ct PATH}\ variable allowing one to invoke FDS without a full
 path reference to the executable.  To run FDS from the command
 line type:
-\begin{verbatim}
+\small\begin{verbatim}
 fds job_name.fds
-\end{verbatim}
+\end{verbatim}\normalsize
 The input parameters are read from the file {\ct job\_name.fds},
 and error statements and other diagnostics are written out to the
 screen. To run the job in the background:
-\begin{verbatim}
+\small\begin{verbatim}
 fds job_name.fds >& job_name.err &
-\end{verbatim}
+\end{verbatim}\normalsize
 Note that in the latter case, the screen output is stored in the
 file {\ct job\_name.err} and the detailed diagnostics are saved
 automatically in a file {\ct CHID.out}, where {\ct CHID} is a
@@ -735,13 +735,13 @@ character string, usually the same as {\ct job\_name}, designated
 in the input file. It is preferable to run jobs in the background
 so as to free the console for other uses. To see output while an
 FDS job is running type:
-\begin{verbatim}
+\small\begin{verbatim}
 tail -f job_name.err
-\end{verbatim}
+\end{verbatim}\normalsize
 or
-\begin{verbatim}
+\small\begin{verbatim}
 tail -f job_name.out
-\end{verbatim}
+\end{verbatim}\normalsize
 
 The installer also defines aliases named {\ct fds6}\ and {\ct fds6\_mpi}\
 pointing to the executables. Other aliases may be defined by
@@ -791,7 +791,6 @@ As a user, you do not explicitly number the meshes or the processes yourself, bu
 error statements from FDS or from MPI might refer to the meshes or processes by number.
 As an example, if a FDS case with five meshes is run in parallel, the first printout (usually to the screen unless
 otherwise directed) is:
-
 \footnotesize
 \begin{verbatim}
 Process  0 of  4 is running on fire61
@@ -830,13 +829,14 @@ from the command line or by using a Graphical User Interface
 (GUI). After the MPICH2 libraries are installed on each computer and
 the necessary directories are shared, FDS is run using the following command
 issued from one of the computers:
-\begin{verbatim}
+\small\begin{verbatim}
 mpiexec -file config.txt
-\end{verbatim}
+\end{verbatim}\normalsize
 where {\ct config.txt} is a text file containing the name and location
 of the FDS executable, name of the FDS input file, the working directory,
 and the names of the various computers that are to run the job. For
 example, the {\ct config.txt} file looks something like this:
+\small
 \begin{verbatim}
 exe \\host_1\FDS\fds_mpi.exe job_name.fds
 dir \\host_1\Projects\
@@ -844,7 +844,7 @@ hosts
 host_1 2
 host_2 1
 host_3 2
-\end{verbatim}
+\end{verbatim}\normalsize
 The numbers following the machine names represent the number of threads to run on that particular machine. In this
 example, 5 threads are run for an FDS calculation that has 5 meshes. The {\ct exe} and {\ct dir} directories need to be shared, with the
 latter having read and write permissions.
@@ -855,14 +855,14 @@ latter having read and write permissions.
 Both at VTT and NIST, we use Open MPI, an open source MPI-2 implementation that is developed and maintained by a consortium of academic,
 research, and industry partners.
 With Open~MPI, FDS is run using the command:
-\begin{verbatim}
+\small\begin{verbatim}
 mpirun -np 5 fds_mpi job_name.fds
-\end{verbatim}
+\end{verbatim}\normalsize
 where the 5 indicates that 5 processors are to be used. In this case, the executable {\ct fds\_mpi\_linux\_64} is located in the
 working directory, but you can invoke it by its full path name. To make the process run in the background, use the command:
-\begin{verbatim}
+\small\begin{verbatim}
 mpirun -np 5 fds_mpi job_name.fds >& job_name.err &
-\end{verbatim}
+\end{verbatim}\normalsize
 The file {\ct job\_name.err} contains what is normally printed out to the screen.
 
 
@@ -1117,14 +1117,11 @@ Parameters are specified within the input file by using {\em namelist} formatted
 Each namelist record begins with the ampersand character, {\ct \&}, followed
 immediately by the name of the namelist group, then a comma-delimited list of the input parameters, and
 finally a forward slash, {\ct /}. For example, the line
-
 \footnotesize
 \begin{verbatim}
 &DUMP NFRAMES=1800, DT_HRR=10., DT_DEVC=10., DT_PROF=30. /
-\end{verbatim}
-
-\normalsize \noindent
-sets various values of parameters contained in the {\ct DUMP} namelist group. The meanings of these various parameters will
+\end{verbatim}\normalsize
+\noindent sets various values of parameters contained in the {\ct DUMP} namelist group. The meanings of these various parameters will
 be explained in subsequent chapters. The namelist records can span multiple lines in the input file, but just be sure to
 end the record with a slash or else the data will not be understood. Do not add anything to a namelist line other than the
 parameters and values appropriate for that group. Otherwise, FDS will stop immediately upon execution.
@@ -2230,11 +2227,11 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
 Three choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
-{\ct CFL\_VELOCITY\_NORM=0} (FDS 5 default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=0} (default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=1} (FDS 6 default, most restrictive, corresponds to $L_1$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=1} (most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
     \end{equation}
@@ -3307,7 +3304,6 @@ materials are often listed as in the following example:
       COLOR     = 'RED'
       BACKING   = 'EXPOSED'
       THICKNESS = 0.20,0.10 /
-
 \end{verbatim}
 \normalsize
 
@@ -3340,7 +3336,6 @@ brick layer contains some additional water, the input could look like this:
       COLOR                     = 'RED'
       BACKING                   = 'EXPOSED'
       THICKNESS                 = 0.20,0.10 /  <--- for layers 1 and 2
-
 \end{verbatim}
 \normalsize
 \noindent
@@ -3891,8 +3886,7 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
 \end{align*}
 \end{minipage}
 \caption[Simple demonstration of the pyrolysis model]{The blue curve represents the normalized mass, $Y=\rho_s/\rho_{s0}$, of a solid material
-undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-dY/dt$. The system of ordinary differential equations that
-describe the transformation is shown at right. Note that the parameters $T_p$, $r_p$, and $\nu_s$ represent the ``reference'' temperature,
+undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-\d Y/\d t$. The system of ordinary differential equations that describe the transformation is shown at right. Note that the parameters $T_p$, $r_p$, and $\nu_s$ represent the ``reference'' temperature,
 reaction rate, and residue yield of the single reaction. From these parameters, values of $A$ and $E$ can be estimated using
 the formulae in (\ref{AandE}). The full set of parameters for this case are listed in {\ct pyrolysis\_1.fds}.}
 \label{pyrolysis}
