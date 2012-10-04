@@ -1013,9 +1013,9 @@ Details of the FDS formulation are given in the Technical Guide \cite{FDS_Math_G
 \end{equation}
 \begin{equation}
 \label{eqn_mom1}
-\frac{\partial \bar{u}_i}{\partial t} + \frac{\partial \bar{u}_i \bar{u}_j}{\partial x_j} = -\frac{1}{\rho} \left[ \frac{\mbox{d}p}{\mbox{d}x_i} + \frac{\partial \tilde{p}}{\partial x_i} + \frac{\partial \bar{\tau}_{ij}}{\partial x_j} + \frac{\partial \tau_{ij}^{r}}{\partial x_j} \right]\,\mbox{,}
+\frac{\partial \bar{u}_i}{\partial t} + \frac{\partial \bar{u}_i \bar{u}_j}{\partial x_j} = -\frac{1}{\rho} \left[ \frac{\d p}{\d x_i} + \frac{\partial \tilde{p}}{\partial x_i} + \frac{\partial \bar{\tau}_{ij}}{\partial x_j} + \frac{\partial \tau_{ij}^{r}}{\partial x_j} \right]\,\mbox{,}
 \end{equation}
-where $\tau_{ij}^{r}$ is the deviatoric part of the residual stress tensor.  In this work we specify a constant pressure drop $\mbox{d}p/\mbox{d}x$ in the streamwise direction to drive the flow.  The hydrodynamic pressure $\tilde{p}$ is obtained from a Poisson equation which enforces (\ref{eqn_cont}). Details of the model used for the viscous stress at the wall, e.g., $\bar{\tau}_{xz}|_{z=0}$, are provided in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
+where $\tau_{ij}^{r}$ is the deviatoric part of the residual stress tensor.  In this work we specify a constant pressure drop $\d p/\d x$ in the streamwise direction to drive the flow.  The hydrodynamic pressure $\tilde{p}$ is obtained from a Poisson equation which enforces (\ref{eqn_cont}). Details of the model used for the viscous stress at the wall, e.g., $\bar{\tau}_{xz}|_{z=0}$, are provided in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 \subsubsection{Laminar Results}
 \label{laminar}
@@ -1025,7 +1025,7 @@ flow through a straight channel.
 The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.
 The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.
 The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.
-The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
+The mean pressure drop is prescribed to be $\d p/ \d x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
 \begin{equation}
 \label{eqn_moodyf}
 \Delta p = f \frac{L}{H} \frac{1}{2} \rho \bar{u}^2 \,\mbox{,}
@@ -1051,12 +1051,12 @@ To verify the wall model for turbulent flow we perform 3D LES of a square duct w
 which is a fit to the turbulent range of the Moody chart (for example, see Ref.~\cite{MYO}).  The parameter $s/H$ is the relative
 roughness where $H$ is the hydraulic diameter of the pipe or channel and Re$_H$ is the Reynolds number based on $H$.
 To provide a qualitative picture of the flow field, Figure~\ref{fig_channel_flow_setup} shows contours of streamwise velocity
-for the case $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ and $N_z=32$.
+for the case $\d p/\d x = -1$ Pa m$^{-1}$ and $N_z=32$.
 
 \begin{figure}
    \begin{center}
       \includegraphics[width=4.5in]{FIGURES/channel_flow_setup}
-      \caption[LES of square duct flow]{\label{fig_channel_flow_setup} LES of square duct flow with smooth walls and periodic streamwise boundaries.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
+      \caption[LES of square duct flow]{\label{fig_channel_flow_setup} LES of square duct flow with smooth walls and periodic streamwise boundaries.  For this image $N_z=32$ and the mean pressure drop is $\d p/ \d x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
    \end{center}
 \end{figure}
 
@@ -1067,7 +1067,7 @@ The height of the first grid cell $\delta z$ is given in viscous units $z^+$ for
 \vspace{0.5cm}
 \begin{tabular}{|*{9}{l|}}
 \hline
-$\mbox{d}p/\mbox{d}x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$ Colebrook & Rel. error \\
+$\d p/\d x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$ Colebrook & Rel. error \\
 \hline (Pa/m)           & $N_z=8$          & $N_z=16$          & $N_z=32$          &                   & $(N_z=32)$ & Eq. (\ref{eqn_colebrook}) & \% \\
 \hline\hline -0.01      & 190              & 95                & 47                & $5.9\times 10^4$  & 0.0212     & 0.0202   & 4.8                 \\
 \hline -1.    & $1.9\times 10^3$ & 950               & 470               & $7.5\times 10^5$  & 0.0128     & 0.0122   & 4.6                 \\
@@ -1145,7 +1145,7 @@ where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at
 \noindent The distance from the wall measured in viscous units is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
 \begin{equation}
 \label{wall stress}
-\tau_w = - \delta \frac{\mbox{d}p}{\mbox{d}x},
+\tau_w = - \delta \frac{\d p}{\d x},
 \end{equation}
 where $p$ is pressure and $\delta$ is half the height of the channel. This, in turn, allows for determining the friction velocity,
 \begin{equation}
@@ -1567,11 +1567,11 @@ This example checks that if nitrogen is added via an external vent to a sealed c
 density, pressure and temperature ought to rise to the same values regardless of the time of injection.
 In the two cases, 0.2~kg of N$_2$ are added to a compartment that is 1~m$^3$ in volume. In the first case, the injection occurs in 10~s, in the
 second case in 50~s. The temperature of the gas in both cases is 500~$^\circ$C. It is expected that the pressure, $p$, should rise at the rate:
-\be \frac{dp}{dt} = \frac{\gamma \, p \, u \, A}{V} \ee
+\be \frac{\d p}{\d t} = \frac{\gamma \, p \, u \, A}{V} \ee
 where $u$ is the injection velocity and $A$ is the area of the vent. The vent area is 0.04~m$^2$. The density of the incoming N$_2$ is found from the equation of state:
 \be \rho = \frac{ \overline{W} \, p }{ {\cal R} T} \ee
 The injection velocity is the mass flux divided by the density, $u=\dot{m}''/\rho$, in which case, the pressure rise can be written
-\be \frac{dp}{dt} = \frac{\gamma \, \dot{m}'' \, {\cal R} T \, A}{\overline{W} \, V} \ee
+\be \frac{\d p}{\d t} = \frac{\gamma \, \dot{m}'' \, {\cal R} T \, A}{\overline{W} \, V} \ee
 Note that the pressure rise is constant. In both the fast and slow injection cases, the pressure is expected to rise 64,282~Pa above ambient. The density
 and temperature rise are also linear. The density increases from 1.164~kg/m$^3$ to 1.364~kg/m$^3$. The temperature increases from 20~$^\circ$C to 135.7~$^\circ$C.
 The change in the internal energy of the system, based on the mass and temperature of the added N$_2$, is:
@@ -1881,7 +1881,7 @@ This case tests the conservation of energy that is absorbed by liquid droplets. 
 absorbed thermal radiation is accurately converted into internal energy of the droplets. The average droplet temperature $\overline{T_d}$ is
 increased by the radiation energy absorbed by all the droplets, $\dot{Q}_r$, according to the following equation:
 \be
-m \, c_p \frac{d \overline{T_d}}{dt} = \dot{Q}_r
+m \, c_p \frac{\d \overline{T_d}}{\d t} = \dot{Q}_r
 \ee
 where $m$ and $c_p$ are the total mass and specific heat of the droplets, respectively. The convective heat transfer between the
 gas and droplets is small because the gas phase Prandtl number has been set to an artificially high value.
@@ -1956,7 +1956,7 @@ The heat transfer coefficient is set to zero to eliminate convective heating. Th
 The thermocouple heats up according to the equation:
 \be
 \label{eq: rad}
-  \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}} \frac{dT_{\hbox{\tiny TC}}}{dt}=\epsilon_{\hbox{\tiny TC}} \, \sigma \, A_{\hbox{\tiny TC}}
+  \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}} \frac{\d T_{\hbox{\tiny TC}}}{\d t}=\epsilon_{\hbox{\tiny TC}} \, \sigma \, A_{\hbox{\tiny TC}}
   \left(T_s^{4}-T_{\hbox{\tiny TC}}^4 \right)
 \ee
 whose analytical solution is:
@@ -2070,7 +2070,7 @@ mass of the three combustion products. The figure compares the simple chemistry 
 This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. In the infinite-rate case, the rate becomes limited by the species concentrations of the reactants that have mixed. For finite-rate reactions, the rate is dependent on factors such as local species concentration and temperature:
 
 \begin{equation}\label{eq:Arrheniusratemode}
-\frac{\mbox{d}\phi_\F}{\mbox{d}t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
+\frac{\d \phi_\F}{\d t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
 \end{equation}
 More detailed discussion on the combustion routines can be found in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
@@ -2180,7 +2180,7 @@ The species evolutions are compared to expected values in Figure \ref{fig:EDC_2S
 
 \subsection{Finite Rate Reactions (\texorpdfstring{\bf reactionrate\_arrhenius}{reactionrate\_arrhenius})}
 
-The main difference between Arrhenius rate reactions and the mixing-controlled reactions is that the reaction rate in finite rate reactions is found from local parameters such as species concentration and temperature as well as rate constants. The values of $a_{\alpha}$ in Equation (\ref{eq:Arrheniusratemode}) are specific to each reaction and for non-zero values, $\mbox{d}\phi_{F}/\mbox{dt}$ becomes  a non-linear differential equation. We consider both linear and non-linear cases with one and two-step reaction mechanisms. First we examine two one-step cases; a zero-order and second-order reaction. Equation (\ref{eq:1step_CO}) shows a one-step, zero-order test case of carbon monoxide oxidation:
+The main difference between Arrhenius rate reactions and the mixing-controlled reactions is that the reaction rate in finite rate reactions is found from local parameters such as species concentration and temperature as well as rate constants. The values of $a_{\alpha}$ in Equation (\ref{eq:Arrheniusratemode}) are specific to each reaction and for non-zero values, $\d \phi_{F}/ \d t$ becomes  a non-linear differential equation. We consider both linear and non-linear cases with one and two-step reaction mechanisms. First we examine two one-step cases; a zero-order and second-order reaction. Equation (\ref{eq:1step_CO}) shows a one-step, zero-order test case of carbon monoxide oxidation:
 \begin{equation}\label{eq:1step_CO}
 \mathrm{CO+0.5 \, O_2 \rightarrow  CO_2}
 \end{equation}
@@ -2381,11 +2381,11 @@ due to the combustion gases. The FED value is calculated as
 \ee
 The fraction of an incapacitating dose of CO is calculated as
 \be
-\mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, dt
+\mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, \d t
 \ee
 where $t$ is time (minutes), and $C_\mathrm{CO}$ is the CO concentration (ppm). The fraction of an incapacitating dose of CN is calculated as
 \be
-\mathrm{FED}_\mathrm{CN} = \int_0^t \left( \frac{\exp\left( \frac{C_\mathrm{CN}(t)}{43} \right)}{220} - 0.0045 \right) \, dt
+\mathrm{FED}_\mathrm{CN} = \int_0^t \left( \frac{\exp\left( \frac{C_\mathrm{CN}(t)}{43} \right)}{220} - 0.0045 \right) \, \d t
 \ee
 where $t$ is time (minutes), and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as
 \be
@@ -2393,7 +2393,7 @@ C_\mathrm{CN} = C_\mathrm{HCN} - C_\mathrm{NO_2}
 \ee
 The fraction of an incapacitating dose of NO$_x$ is calculated as
 \be
-\mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, dt
+\mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, \d t
 \ee
 where $t$ is time (minutes), and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm).
 The Fractional Lethal Dose (FLD) of irritants is calculated as
@@ -2406,7 +2406,7 @@ The Fractional Lethal Dose (FLD) of irritants is calculated as
     \frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FLD,NO_2}} +
     \frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FLD,C_3H_4O}} +
     \frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FLD,CH_2O}}
-    \right) \, dt
+    \right) \, \d t
 \ee
 where $t$ is time (minutes), the numerators are the instantaneous concentrations (ppm) of each irritant, and
 the denominators are the exposure doses of respective irritants predicted to be lethal to half the population.
@@ -2420,7 +2420,7 @@ F${}_\mathrm{FIC}$ (ppm) & 900 & 900 & 900 & 120 & 350 & 20 & 30 \\ \hline
 \end{center}
 The fraction of an incapacitating dose of low O${}_2$ hypoxia is calculated as
 \be
-\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{\exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
+\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{\d t}{\exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
 \ee
 where $t$ is time (minutes), and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume percent).
 The hyperventilation factor induced by carbon dioxide is calculated as
@@ -2949,7 +2949,7 @@ Swell 3	        & 1000	&0.9	&1000	&0.1	&F	&450	&1000	&1000	&0.001	&0.001 \\ \hli
 Consider a thin plate of conductive material that is exposed on one side to an elevated temperature heat source and exposed on the
 other to an ambient temperature void. In the thermally thin limit, the temperature of the slab is governed by the following equation
 \be
-   \frac{dT_s}{dt} = \frac{\dq_{\hbox{\tiny front}}'' + \dq_{\hbox{\tiny back}}''}{c_s \, \rho_s \, \delta}
+   \frac{\d T_s}{\d t} = \frac{\dq_{\hbox{\tiny front}}'' + \dq_{\hbox{\tiny back}}''}{c_s \, \rho_s \, \delta}
 \ee
 In this example, the initial exposure to the front side of the slab is
 3~kW/m$^2$. The original material A undergoes a reaction to form material B.  The reaction rate is constant, 0.2~s$^{-1}$, which in this
@@ -3042,9 +3042,9 @@ Consider  the simplified set  of ordinary  differential equations  describing th
 fraction of  three  components of  a  solid material  undergoing thermal
 degradation:
 \begin{eqnarray}
-    \frac{dY_a}{dt} &=&  -K_{ab} Y_a \nonumber  \\
-    \frac{dY_b}{dt} &=&   K_{ab} Y_a  -  K_{bc}  Y_b  \\
-    \frac{dY_c}{dt} &=&   K_{bc} Y_a
+    \frac{\d Y_a}{\d t} &=&  -K_{ab} Y_a \nonumber  \\
+    \frac{\d Y_b}{\d t} &=&   K_{ab} Y_a  -  K_{bc}  Y_b  \\
+    \frac{\d Y_c}{\d t} &=&   K_{bc} Y_a
     \nonumber
 \end{eqnarray}
 where  the  mass  fraction  of  component  $a$  is  1  initially.  The
@@ -3083,24 +3083,24 @@ thermal gravimetric analysis (TGA). Assume that the solid consists of $N$ materi
 $Y_i(t)$. As the solid is heated, each component undergoes a reaction to form undetermined gases or a single solid residue whose
 mass fraction is denoted $Y_r(t)$ and whose yield is denoted by $\nu_r$. The governing equations for the component mass fractions is then:
 \begin{eqnarray}
-   \frac{dY_i}{dt} &=& -A_i \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y_i(0) = Y_{0,i} \quad ; \quad i=1,N  \label{dYdt} \\
-   \frac{dY_r}{dt} &=& -\nu_r  \sum_i \frac{dY_i}{dt}                        \quad ; \quad Y_r(0) = 0  \label{dYrdt}
+   \frac{\d Y_i}{\d t} &=& -A_i \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y_i(0) = Y_{0,i} \quad ; \quad i=1,N  \label{dYdt} \\
+   \frac{\d Y_r}{\d t} &=& -\nu_r  \sum_i \frac{\d Y_i}{\d t}                        \quad ; \quad Y_r(0) = 0  \label{dYrdt}
 \end{eqnarray}
 In the TGA apparatus, the temperature of the sample is increased linearly in time, $dT/dt=\beta$. Because TGA results are usually expressed as a function of
 temperature rather than time, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
 \be
-   \frac{dY_i}{dT} = -\frac{A_i}{\beta} \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_{0,i}  \label{dYdT}
+   \frac{\d Y_i}{\d T} = -\frac{A_i}{\beta} \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_{0,i}  \label{dYdT}
 \ee
 The decomposition rate, $-dY_i/dt$, peaks at a temperature denoted by $T_{p,i}$ with a value denoted by $r_{p,i}$.
 At this temperature, the second derivative of $Y_i$ is zero:
 \be
-   \frac{d^2 Y_i}{dT^2} = -\frac{A_i}{\beta} \, \frac{dY_i}{dT} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) -
+   \frac{\d^2 Y_i}{\d T^2} = -\frac{A_i}{\beta} \, \frac{\d Y_i}{\d T} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) -
    \frac{A_i}{\beta} \, Y_i \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) \, \frac{E_i}{R T_{p,i}^2}
-   = -\frac{dY_i}{dT} \left[ \frac{A_i}{\beta} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) - \frac{E_i}{R T_{p,i}^2} \right] = 0  \label{d2YdT2}
+   = -\frac{\d Y_i}{\d T} \left[ \frac{A_i}{\beta} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) - \frac{E_i}{R T_{p,i}^2} \right] = 0  \label{d2YdT2}
 \ee
 Next, Eq.~(\ref{dYdT}) can be integrated from $Y_{0,i}$ to $Y_{p,i}$ (the value of $Y_i$ at the peak), and $T_0$ to $T_{p,i}$:
 \be
-   \int_{Y_{0,i}}^{Y_{p,i}} \left( \frac{dY_i'}{Y_i'} \right) = - \frac{A_i}{\beta} \int_{T_0}^{T_{p,i}} \exp \left( -\frac{E_i}{RT'} \right) \; dT'
+   \int_{Y_{0,i}}^{Y_{p,i}} \left( \frac{\d Y_i'}{Y_i'} \right) = - \frac{A_i}{\beta} \int_{T_0}^{T_{p,i}} \exp \left( -\frac{E_i}{RT'} \right) \; dT'
    \approx - \frac{A_i R T_{p,i}^2}{ \beta \, (E_i+2 R T_{p,i}) } \; \exp \left( -\frac{E_i}{RT_{p,i}} \right)
 \ee
 Using Eq.~(\ref{d2YdT2}) to eliminate $A_i$ yields:
@@ -3368,11 +3368,10 @@ These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with ei
 \be  \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{screen} \ee
 where K and Y are empirical constants defined in the User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Figure~\ref{screen_drag_plots}.
 
-
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_1}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_2}
-\caption[Sample cases {\bf screen\_drag}]{Outputs of the {\bf screen\_drag} test cases compared with analytical solutions.}
+\caption[Sample cases {\bf screen\_drag}]{Outputs of the {\bf screen\_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.}
 \label{screen_drag_plots}
 \end{figure}
 
@@ -3391,7 +3390,7 @@ the solution below and equivalent definition of $K$ for a droplet is found.
 % Cd = 1.0
 % g = -9.8 m/s^2
 \be
-    u = \frac{d x}{d t} = - \sqrt{\frac{g}{K}} \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
+    u = \frac{\d x}{\d t} = - \sqrt{\frac{g}{K}} \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
     x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
     K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
 \ee
@@ -3474,7 +3473,7 @@ To ensure that the flat fire assumption is valid, the following ICs are used: $x
     K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
 \ee
 \be
-    u = \frac{\mbox{d} x}{\mbox{d} t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad w = \frac{\mbox{d} z}{\mbox{d} t} = \frac{g}{2 V_0 K (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
+    u = \frac{\d x}{\d t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad w = \frac{\d z}{\d t} = \frac{g}{2 V_0 K (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
 \ee
 The following case was run in FDS and compared against the approximate solution:
 \begin{center}
@@ -3519,10 +3518,10 @@ performed due to pressure. It is the internal energy of the system that is conse
 enthalpy, pressure and density:
 \begin{equation} e = h - \frac{p}{\rho} \end{equation}
 In differential form:
-\begin{equation} de = dh - \frac{1}{\rho} \; dp - p \; d \left(\frac{1}{\rho}
-\right) = dh - v \; dp - p \; dv \end{equation}
+\begin{equation} \d e = \d h - \frac{1}{\rho} \; \d p - p \; d \left(\frac{1}{\rho}
+\right) = \d h - v \; \d p - p \; \d v \end{equation}
 Multiplying by mass and noting that the volume, $V$, is constant yields:
-\begin{equation} dE = dH - V \; dp \end{equation}
+\begin{equation} \d E = \d H - V \; \d p \end{equation}
 The enthalpy
 decrease of the liquid water droplets is equal to the enthalpy gain of the gas (both expressed in kJ) minus the
 pressure increase times the volume in
