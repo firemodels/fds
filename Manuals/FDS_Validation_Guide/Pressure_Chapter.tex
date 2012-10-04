@@ -53,20 +53,6 @@ and the peak (albeit small) under-pressures are compared in the open door tests.
 \label{NIST_NRC_Pressure_Open}
 \end{figure}
 
-\begin{figure}[p]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Compartment_Pressure} \\
-\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Open_Compartment_Pressure}
-\end{tabular}
-\end{center}
-\caption[Summary of pressure predictions, NIST/NRC test series.]
-{Summary of Pressure Results. The top graph shows the compartment ``over-pressure'' in closed door tests; the lower graph
-shows the small pressure perturbation in the open door tests.}
-\end{figure}
-
-
-
 \clearpage
 
 \section{LLNL Enclosure Series}
@@ -74,7 +60,7 @@ shows the small pressure perturbation in the open door tests.}
 The test report of the LLNL Enclosure experiments lists the mass flow rate, $\dot{m}$, through the exhaust duct at different times
 during the tests. It also lists the compartment over-pressures, $\Delta p$, at these same times. From the simple leak formula:
 \be \frac{\dot{m}}{\rho_0} = A \, \sqrt{\frac{2 \, \Delta p}{\rho_0}} \ee
-the leakage area, $A$, is estimated to be 0.018~m$^2$, based on the initial exhaust rate and pressure. 
+the leakage area, $A$, is estimated to be 0.018~m$^2$, based on the initial exhaust rate and pressure.
 For modeling purposes, the ``leakage area'' is assumed to be the sum of the
 inlet duct area plus any actual compartment leakage area. The mass flow rate through the exhaust duct is specified explicitly in
 the model. There is not enough details of the ventilation system to model the fan and filtration system within the exhaust duct.
@@ -83,7 +69,7 @@ In the figures on the following pages, the open circles represent the measured p
 predicted pressures are time-averaged over a time interval that is one-tenth the total simulation time. In general, the short-duration pressure
 spike that is typical of fires within relatively tight compartments has been smoothed over in the reported test data. Depending on the simulation, it
 often appears in the simulation data. The comparison of measurement and prediction is based on the final few pressure points, not the
-initial spike. 
+initial spike.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -197,10 +183,19 @@ initial spike.
 \label{LLNL_Enclosure_Pres_8}
 \end{figure}
 
-\begin{figure}[p]
+\clearpage
+
+\section{Summary of Pressure Predictions}
+
+
+\begin{figure}[h!]
 \begin{center}
-\includegraphics[width=4.0in]{FIGURES/ScatterPlots/LLNL_Pressure} 
+\begin{tabular}{c}
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Compartment_Pressure} \\
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Open_Compartment_Pressure}
+\end{tabular}
 \end{center}
-\caption[Summary of pressure predictions, LLNL Enclosure Experiments.]
-{Comparison of measured and predicted pressure rise in the LLNL Enclosure Experiments.}
+\caption[Summary of pressure predictions]{Summary of pressure predictions for open and closed compartments.}
+\label{Pressure_Summary}
 \end{figure}
+
