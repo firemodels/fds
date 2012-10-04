@@ -162,8 +162,6 @@ clean_svn_repo()
 do_svn_checkout()
 {
    cd $FDS_SVNROOT
-   # If an SVN revision number is specified, then get that revision
-
    echo "Checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
    svn update >> $FIREBOT_DIR/output/stage1 2>&1
    SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
@@ -571,6 +569,22 @@ check_smv_pictures()
    fi
 }
 
+#  ======================================
+#  = Stage 7 - FDS run time statistics =
+#  ======================================
+
+generate_timing_stats()
+{
+   cd $FDS_SVNROOT/Utilities/Scripts
+   ./fds_timing_stats.sh
+}
+
+archive_timing_stats()
+{
+   cd $FDS_SVNROOT/Utilities/Scripts
+   cp fds_timing_stats.csv "$FIREBOT_DIR/history/${SVN_REVISION}_timing.csv"
+}
+
 #  ==================================
 #  = Stage 8 - Build FDS-SMV Guides =
 #  ==================================
@@ -755,21 +769,25 @@ compile_smv_db
 check_compile_smv_db
 
 ### Stage 6c ###
-   make_smv_pictures_db
-   check_smv_pictures_db
+make_smv_pictures_db
+check_smv_pictures_db
 
 ### Stage 6d ###
-   compile_smv
-   check_compile_smv
+compile_smv
+check_compile_smv
 
 ### Stage 6e ###
-   make_smv_pictures
-   check_smv_pictures
+make_smv_pictures
+check_smv_pictures
+
+### Stage 7 ###
+generate_timing_stats
+archive_timing_stats
 
 ### Stage 8 ###
-   make_smv_user_guide
-   make_smv_technical_guide
-   make_smv_verification_guide
+make_smv_user_guide
+make_smv_technical_guide
+make_smv_verification_guide
 # No stage dependencies
 
 ### Report results ###
