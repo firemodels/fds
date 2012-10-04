@@ -1,35 +1,23 @@
-Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Plot_Width,Sigma_2_E,Model_Error,Plot_Filename
-Hot Gas Layer Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature
-Hot Gas Layer Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,20,0.03 0.95,SouthEast,4,13,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Depth
-Ceiling Jet Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Ceiling_Jet_Temperature
-Plume Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,4,14,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Plume_Temperature
-Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,0.03 0.95,SouthEast,4,9,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Oxygen_Concentration
-Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.15,0.03 0.95,SouthEast,4,9,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Carbon_Dioxide_Concentration
-Compartment Over-Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,400,0.03 0.95,SouthEast,4,40,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Compartment_Pressure
-NIST/NRC Heat Flux near Cables,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,20,0.03 0.95,SouthEast,4,20,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_NRC_Heat_Flux
-WTC Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,120,0.03 0.95,SouthEast,4,20,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/WTC_Heat_Flux
-NIST/NRC Cable Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_NRC_Cable_Temperature
-NIST/NRC Wall Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Wall_Temperature
-Smoke Concentration,Measured Density (mg/m$^3$),Predicted Density (mg/m$^3$),0,400,0.03 0.95,SouthEast,4,33,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Concentration
-Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.001,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Carbon_Monoxide_Concentration
-Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0,5,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Velocity
-Open Compartment Over-Pressure,Measured Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,5,0.03 0.95,SouthEast,4,40,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Open_Compartment_Pressure
-WTC Insulated Steel Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Insulated_Steel_Temperature
-WTC Steel Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Steel_Temperature
-WTC Wall and Ceiling Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/WTC_Surface_Temperature
-HGL Temperature Steckler Compartment,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,300,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_Steckler
-Doorway Velocity Steckler Compartment,Measured Velocity (m/s),Predicted Velocity (m/s),0,5,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Velocity_Steckler
-Hydrogen/Helium Concentration,Measured Volume Fraction,Predicted Volume Fraction,0,1,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Hydrogen
-Temperatures (SP AST Experiments),Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/SP_Temperature
-UL/NFPRF Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/UL_NFPRF_Actuations
-"Oxygen, NIST FSE 2008",Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.25,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Oxygen_Concentration
-"Carbon Monoxide, NIST FSE 2008",Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.1,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Carbon_Monoxide_Concentration
-"Carbon Dioxide, NIST FSE 2008",Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.2,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Carbon_Dioxide_Concentration
-"HGL Temperature, Forced Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,300,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_Forced_Ventilation
-USCG/HAI Extinction,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/USCG_HAI_Extinction
-HGL Temperature LLNL Enclosures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,300,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_LLNL
-USN Plume Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,250,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/USN_Plume_Temperature
-LLNL Enclosure Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,150,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/LLNL_Pressure
-Pool Fires Burning Rates,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.1,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Pool_Fires_Burning_Rates
-Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Cable_Temperature
-Smoke Alarm Activations,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,4,33,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Alarm_Activations
+Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Sigma_2_E,Model_Error,Plot_Filename
+"HGL Temperature, Forced Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_Forced_Ventilation
+"HGL Temperature, Natural Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_Natural_Ventilation
+"HGL Temperature, No Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_No_Ventilation
+HGL Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,20,0.03 0.95,SouthEast,13,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Depth
+Ceiling Jet Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Ceiling_Jet_Temperature
+Plume Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Plume_Temperature
+Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,0.03 0.95,SouthEast,9,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Oxygen_Concentration
+Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.15,0.03 0.95,SouthEast,9,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Carbon_Dioxide_Concentration
+Smoke Concentration,Measured Density (mg/m$^3$),Predicted Density (mg/m$^3$),0,400,0.03 0.95,SouthEast,33,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Concentration
+Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.001,0.03 0.95,SouthEast,9,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Carbon_Monoxide_Concentration
+Compartment Over-Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,400,0.03 0.95,SouthEast,40,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Compartment_Pressure
+Open Compartment Over-Pressure,Measured Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,5,0.03 0.95,SouthEast,40,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Open_Compartment_Pressure
+Target Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,120,0.03 0.95,SouthEast,20,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Target_Heat_Flux
+Wall Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,120,0.03 0.95,SouthEast,20,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Wall_Heat_Flux
+Target Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Target_Temperature
+Wall Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Wall_Temperature
+Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0,5,0.03 0.95,SouthEast,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Velocity
+UL/NFPRF Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/UL_NFPRF_Actuations
+USCG/HAI Extinction,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/USCG_HAI_Extinction
+Burning Rate,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.1,0.03 0.95,SouthEast,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Pool_Fires_Burning_Rates
+Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Cable_Temperature
+Smoke Alarm Activations,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,33,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Alarm_Activations
