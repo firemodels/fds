@@ -605,55 +605,43 @@ int setup_timebar_drag(int x, int y){
 #define MOUSE_MOTION 2
 
 void update_mouseinfo(int flag, int xm, int ym){
-  int *initial, *current, *last, *direction;
-  float *xcurrent, *xdirection, *lasttime;
-  float *distance;
   float thistime;
   float dx, dy;
   int maxWH;
   float quat_temp[4];
-  float axis[3]={0.0,0.0,1.0};
-  float *angle,*lastangle;
-  float delta_angle,delta_angle2;
-  float delta_distance;
+  float delta_angle,delta_angle2,delta_distance;
+  float xymax;
+  mousedata *mi;
 
-  // flip y
+  mi = &mouseinfo;
 
-  ym = screenHeight - ym;
-
-  // define pointers
-
-  initial = mouseinfo.initial;
-  current = mouseinfo.current;
-  last = mouseinfo.last;
-  direction  = mouseinfo.direction;
-  xcurrent = mouseinfo.xcurrent;
-  xdirection = mouseinfo.xdirection;
-  lasttime = &mouseinfo.lasttime;
-  distance = &mouseinfo.distance;
-  angle = &mouseinfo.angle;
-  lastangle = &mouseinfo.lastangle;
+  ym = screenHeight - ym; // flip y
 
   maxWH = MAX(screenWidth,screenHeight);
+  xymax = 0.3*(float)MIN(screenWidth,screenHeight)/(float)maxWH;
   switch (flag){
     case MOUSE_DOWN:
-      initial[0]=xm;
-      initial[1]=ym;
-      current[0]=xm;
-      current[1]=ym;
-      last[0]=xm;
-      last[1]=ym;
-      direction[0]=0;
-      direction[1]=0;
-      *angle = 0.0;
-      *lastangle=0.0;
-      *lasttime = glutGet(GLUT_ELAPSED_TIME)/1000.0;
-      xcurrent[0] = (float)(current[0]-screenWidth/2)/(float)maxWH;
-      xcurrent[1] = (float)(current[1]-screenHeight/2)/(float)maxWH;
-      *angle=atan2(xcurrent[1],xcurrent[0]);
+      mi->current[0]=xm;
+      mi->current[1]=ym;
+      mi->last[0]=xm;
+      mi->last[1]=ym;
+      mi->direction[0]=0;
+      mi->direction[1]=0;
+      mi->angle = 0.0;
+      mi->lastangle=0.0;
+      mi->lasttime = glutGet(GLUT_ELAPSED_TIME)/1000.0;
+      mi->xcurrent[0] = (float)(mi->current[0]-screenWidth/2)/(float)maxWH;
+      mi->xcurrent[1] = (float)(mi->current[1]-screenHeight/2)/(float)maxWH;
+      mi->angle=atan2(mi->xcurrent[1],mi->xcurrent[0]);
       delta_angle2 = 0.0;
-      *lastangle=*angle;
+      mi->lastangle=mi->angle;
       delta_distance=0.0;
+      if(ABS(mi->xcurrent[0])<xymax&&ABS(mi->xcurrent[1])<xymax){
+        mi->region=0;
+      }
+      else{
+        mi->region=1;
+      }
       break;
     case MOUSE_UP:
       delta_angle2=0.0;
@@ -661,64 +649,54 @@ void update_mouseinfo(int flag, int xm, int ym){
       break;
     case MOUSE_MOTION:
       thistime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
-      current[0]=xm;
-      current[1]=ym;
-      if(thistime-*lasttime>0.2){
-        direction[0]=current[0]-last[0];
-        direction[1]=current[1]-last[1];
-        last[0]=current[0];
-        last[1]=current[1];
-        *lasttime=thistime;
+      mi->current[0]=xm;
+      mi->current[1]=ym;
+      if(thistime-mi->lasttime>0.2){
+        mi->direction[0]=mi->current[0]-mi->last[0];
+        mi->direction[1]=mi->current[1]-mi->last[1];
+        mi->last[0]=mi->current[0];
+        mi->last[1]=mi->current[1];
+        mi->lasttime=thistime;
       }
-      xcurrent[0] = (float)(current[0]-screenWidth/2)/(float)maxWH;
-      xcurrent[1] = (float)(current[1]-screenHeight/2)/(float)maxWH;
-      dx = (float)(current[0]-last[0])/(float)maxWH;
-      dy = (float)(current[1]-last[1])/(float)maxWH;
+      mi->xcurrent[0] = (float)(mi->current[0]-screenWidth/2)/(float)maxWH;
+      mi->xcurrent[1] = (float)(mi->current[1]-screenHeight/2)/(float)maxWH;
+      dx = (float)(mi->current[0]-mi->last[0])/(float)maxWH;
+      dy = (float)(mi->current[1]-mi->last[1])/(float)maxWH;
       delta_distance=sqrt(dx*dx+dy*dy);
-      *angle=atan2(xcurrent[1],xcurrent[0]);
-      delta_angle2 = *angle - *lastangle;
-      *lastangle = *angle;
+      mi->angle=atan2(mi->xcurrent[1],mi->xcurrent[0]);
+      delta_angle2 = mi->angle - mi->lastangle;
+      mi->lastangle = mi->angle;
       break;
   }
   
-  if(direction[0]==0&&direction[1]==0){
-    xdirection[0]=0.0;
-    xdirection[1]=0.0;
+  if(mi->direction[0]==0&&mi->direction[1]==0){
+    mi->xdirection[0]=0.0;
+    mi->xdirection[1]=0.0;
   }
   else{
     float sum;
 
-    sum = direction[0]*direction[0] + direction[1]*direction[1];
+    sum = mi->direction[0]*mi->direction[0] + mi->direction[1]*mi->direction[1];
     sum = sqrt(sum);
-    xdirection[0]=direction[0]/sum;
-    xdirection[1]=direction[1]/sum;
+    mi->xdirection[0]=mi->direction[0]/sum;
+    mi->xdirection[1]=mi->direction[1]/sum;
   }
-  dx = xcurrent[0];
-  dy = xcurrent[1];
-  *distance = sqrt(dx*dx+dy*dy);
-
-  if(*distance<0.3){
+  if(mi->region==0){
     delta_angle = (delta_distance);
-    if(delta_angle!=0.0&&ABS(xdirection[0])+ABS(xdirection[1])>0.0){
-      if(ABS(xdirection[1])>ABS(xdirection[0])){
-//        axis[0]=-xdirection[1];
-//        axis[1]=0.0;
-//        axis[2]=xdirection[0];
-        axis[0]=-(float)SIGN(xdirection[1]);
-        axis[1]=0.0;
-        axis[2]=0.0;
-      }
-      else{
-        axis[0]=0.0;
-        axis[1]=0.0;
-        axis[2]=(float)SIGN(xdirection[0]);
-      }
+    if(delta_angle!=0.0&&ABS(mi->xdirection[0])+ABS(mi->xdirection[1])>0.0){
+      float axis[3];
+
+      axis[0]=-mi->xdirection[1]; // direction orthogonal to mouse motion
+      axis[1]=0.0;
+      axis[2]=mi->xdirection[0];
       angleaxis2quat(delta_angle,axis,quat_temp);
       mult_quat(quat_temp,quat_general,quat_general);
       quat2rot(quat_general,quat_rotation);
     }
   }
   else{
+    float axis[3];
+
     axis[0]=0.0;
     axis[1]=1.0;
     axis[2]=0.0;
@@ -731,7 +709,6 @@ void update_mouseinfo(int flag, int xm, int ym){
   camera_current->quaternion[2]=quat_general[2];
   camera_current->quaternion[3]=quat_general[3];
   camera_current->quat_defined=1;
-
 }
 
 /* ------------------ mouse ------------------------ */

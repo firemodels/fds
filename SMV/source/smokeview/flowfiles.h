@@ -815,8 +815,9 @@ typedef struct {
 /* --------------------------  mousedata ------------------------------------ */
 
 typedef struct {
-  int initial[2], current[2], last[2], direction[2];
-  float xcurrent[2], xdirection[2], distance;
+  int current[2], last[2], direction[2];
+  float xcurrent[2], xdirection[2];
+  int region;
   float angle, lastangle;
   float lasttime;
 } mousedata;
