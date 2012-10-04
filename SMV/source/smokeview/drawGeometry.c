@@ -4455,7 +4455,8 @@ void snap_view_angles(void){
   update_trainer_moves();
   camera_current->dirty=1;
 
-  if(use_general_rotation==1&&key_state == KEY_NONE){
+#ifdef pp_GENERAL_ROTATION  
+  if(rotation_type==ROTATION_3AXIS&&key_state == KEY_NONE){
     float angle;
 
     angle = 2.0*RAD2DEG*acos(quat_general[0]);
@@ -4473,6 +4474,7 @@ void snap_view_angles(void){
     quat_general[3]=sin(DEG2RAD*angle/2.0);
     quat2rot(quat_general,quat_rotation);
   }
+#endif
 
 }
 

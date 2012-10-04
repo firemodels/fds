@@ -299,7 +299,7 @@ void ResetView(int option){
     ASSERT(FFALSE);
     break;
   }
-  if(use_general_rotation==1){
+  if(rotation_type==ROTATION_3AXIS){
     float azimuth, elevation,axis[3];
     float quat_temp[4];
     float x, y, z;

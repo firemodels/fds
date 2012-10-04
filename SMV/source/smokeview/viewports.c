@@ -961,7 +961,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
     // rotate scene
     
-    if(use_general_rotation==1){
+    if(rotation_type==ROTATION_3AXIS){
       glMultMatrixf(quat_rotation);
     }
     else{

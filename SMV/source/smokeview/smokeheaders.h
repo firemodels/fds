@@ -9,7 +9,8 @@
 EXTERNCPP int Merge_Smoke(void);
 #endif
 
-EXTERNCPP void update_general_rotation(int val);
+EXTERNCPP void rotation_type_CB(int var);
+EXTERNCPP  void update_rotation_type(int val);
 EXTERNCPP void sort_smoke3dinfo(void);
 
 EXTERNCPP void camera2quat(camera *ca, float *quat, float *rotation);
