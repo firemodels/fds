@@ -1834,7 +1834,7 @@ the parameters are specified (assuming that this is the third mesh):
 
 \noindent
 which correspond to the constraints
-$f(0.75)=0.75$ and $\frac{df}{d\xi}(0.75) = 0.5$, or, in words, the
+$f(0.75)=0.75$ and $\frac{\d f}{\d \xi}(0.75) = 0.5$, or, in words, the
 function maps 0.75 into 0.75 and the slope of the function at
 $\xi=0.75$ is 0.5~.
 The transform function must also pass through the points (0,0) and (1.5,1.5), meaning that
@@ -5971,9 +5971,17 @@ The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspe
 
 \footnotesize
 \begin{verbatim}
-&SMIX ID='AIR', SPEC_ID='OXYGEN','NITROGEN', VOLUME_FRACTION=1.53,5.76, BACKGROUND=.TRUE. /
-&SMIX ID='PRODUCTS', SPEC_ID='HYDROGEN CHLORIDE','WATER VAPOR','CARBON MONOXIDE',
-      'CARBON DIOXIDE','SOOT','NITROGEN', VOLUME_FRACTION=1.0,1.0,0.14,0.96,0.90,5.76 /
+&SMIX ID='AIR', BACKGROUND=.TRUE.
+      SPEC_ID(1)='OXYGEN',   VOLUME_FRACTION(1)=1.53,
+      SPEC_ID(2)='NITROGEN', VOLUME_FRACTION(2)=5.76 /
+
+&SMIX ID='PRODUCTS',
+      SPEC_ID(1)='HYDROGEN CHLORIDE', VOLUME_FRACTION(1)=1.0,
+      SPEC_ID(2)='WATER VAPOR',       VOLUME_FRACTION(2)=1.0,
+      SPEC_ID(3)='CARBON MONOXIDE',   VOLUME_FRACTION(3)=0.14,
+      SPEC_ID(4)='CARBON DIOXIDE',    VOLUME_FRACTION(4)=0.96,
+      SPEC_ID(5)='SOOT',              VOLUME_FRACTION(5)=0.90,
+      SPEC_ID(6)='NITROGEN',          VOLUME_FRACTION(6)=5.76 /
 \end{verbatim} \normalsize
 
 \noindent
@@ -6363,11 +6371,11 @@ By default FDS employs a gray gas model for the radiation absorption coefficient
 of gas composition and temperature, which are
 tabulated in a look-up table using the routines found in RadCal.
 
-\subsection{RadCal Issues}
+\subsection{RadCal Considerations}
 
 \label{info:RadCal}
 
-There are several issues to keep in mind with regard to RadCal.
+There are several considerations with regard to RadCal:
 
 \subsubsection{Path Length}
 
