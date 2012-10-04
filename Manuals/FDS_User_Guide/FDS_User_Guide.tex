@@ -1825,7 +1825,7 @@ applied to the second mesh in a multiple mesh job.
 
 The second type of transformation is
 a polynomial function whose constraints are of the form
-$$ \frac{\d^n f(\hbox{\ct CC})}{\d\xi^n} = \hbox{\ct PC}   $$
+$$ \frac{d^n f(\hbox{\ct CC})}{d\xi^n} = \hbox{\ct PC}   $$
 Figure~\ref{fig:grid1} gives an example of a polynomial transformation, for which
 the parameters are specified (assuming that this is the third mesh):
 
@@ -3881,7 +3881,7 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
 \hfill
 \begin{minipage}{0.5\textwidth}
 \begin{equation*}
-   \frac{\d Y}{\d t} = -A \, Y \, \exp(-E/RT)   \quad \; \quad    Y(0) =1
+   \frac{dY}{dt} = -A \, Y \, \exp(-E/RT)   \quad \; \quad    Y(0) =1
 \end{equation*}
 \begin{align*}
    T_p &= 300 \; ^\circ\mathrm{C}  \\
@@ -4062,9 +4062,9 @@ neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a
 \begin{minipage}{0.5\textwidth}
 \footnotesize
 \begin{align*}
-   \frac{\d Y_1}{\d t} &= -A_{1,1} \, Y_1 \, \exp(-E_{1,1}/RT)                  & Y_1(0) &=0.1 \\
-   \frac{\d Y_2}{\d t} &= -A_{2,1} \, Y_2 \, \exp(-E_{2,1}/RT)                  & Y_2(0) &=0.9 \\
-   \frac{\d Y_3}{\d t} &= -\nu_{s,2,1} \frac{dY_2}{dt}                          & Y_3(0) &=0.0
+   \frac{dY_1}{dt} &= -A_{1,1} \, Y_1 \, \exp(-E_{1,1}/RT)                  & Y_1(0) &=0.1 \\
+   \frac{dY_2}{dt} &= -A_{2,1} \, Y_2 \, \exp(-E_{2,1}/RT)                  & Y_2(0) &=0.9 \\
+   \frac{dY_3}{dt} &= -\nu_{s,2,1} \frac{dY_2}{dt}                          & Y_3(0) &=0.0
 \end{align*}
 \begin{align*}
    T_{p,1,1} &= 100+273 \; \mathrm{K}        & T_{p,2,1}   &= 300+273 \; \mathrm{K} \\
@@ -4074,7 +4074,7 @@ neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a
 \end{align*}
 \end{minipage} \normalsize
 \caption[A more complicated demonstration of the pyrolysis model]{The blue curve represents the combined mass fraction,
-$\sum Y_i$, and the green curve the net reaction rate, $-\d/\!\d t(\sum Y_i)$, for a material that contains
+$\sum Y_i$, and the green curve the net reaction rate, $-d/dt(\sum Y_i)$, for a material that contains
 10~\% water (by mass) that evaporates at a temperature of 100~$^\circ$C,
 and 90~\% solid material that pyrolyzes at 300~$^\circ$C, leaving a 20~\% (by mass) residue behind.
 Note that the numbered subscripts refer
@@ -4665,36 +4665,14 @@ where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 \subsection{HVAC Dampers}
 \label{info:HVACdamper}
 
-A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open.  The sample below is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a {\ct DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
+A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. For futher details see the{\ct HVAC\_damper} example case which is documented in the verification guide.  
 
 \footnotesize
 \begin{verbatim}
-&HVAC TYPE_ID='NODE',ID='SUPPLY 1',VENT_ID='SUPPLY 1',DUCT_ID='SUPPLY 1',LOSS=0,0/
-
-&HVAC TYPE_ID='NODE',ID='EXHAUST 1',VENT_ID='EXHAUST 1',DUCT_ID='EXHAUST 1',LOSS=1,1/
-&HVAC TYPE_ID='NODE',ID='EXHAUST 2',VENT_ID='EXHAUST 2',DUCT_ID='EXHAUST 2',LOSS=1,1/
-
-&HVAC TYPE_ID='NODE',ID='TEE',DUCT_ID='SUPPLY 1','EXHAUST 1','EXHAUST 2',XYZ(3)=0.0,
- LOSS(1,2)=15,LOSS(1,3)=3,LOSS(2,1)=15,LOSS(2,3)=3,LOSS(3,2)=15,LOSS(3,1)=3/
-
-
-&HVAC TYPE_ID='DUCT',ID='SUPPLY 1',NODE_ID='SUPPLY 1','TEE',AREA=0.01,
-      VOLUME_FLOW=0.03,LENGTH=1,LOSS=0,0/
-&HVAC TYPE_ID='DUCT',ID='EXHAUST 1',NODE_ID='TEE','EXHAUST 1',AREA=0.01,
-      LENGTH=1.0,LOSS=0,0/
 &HVAC TYPE_ID='DUCT',ID='EXHAUST 2',NODE_ID='TEE','EXHAUST 2',AREA=0.01,
       LENGTH=1.0,LOSS=0,0,DAMPER=.TRUE.,DEVC_ID='TIMER'/
 &DEVC QUANTITY='TIME',ID='TIMER',SETPOINT=10,INITIAL_STATE=.TRUE.,XYZ=0,0,0/
 \end{verbatim}\normalsize
-
-\begin{figure}[ht!]
-\begin{center}
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/HVAC_damper}
-\caption[Example case {\ct HVAC\_damper}]{Simple duct network with a damper, case {\ct HVAC\_damper}.}
-\label{fig:HVAC_damper}
-\end{center}
-\end{figure}
-
 
 \subsection{HVAC Node Parameters}
 \label{info:HVACnode}
@@ -4775,73 +4753,36 @@ pressure between the downstream compartment, or ``zone,'' and the upstream. The 
 The term, $\Delta p_{\hbox{\footnotesize max}}$, is the maximum
 pressure difference, {\ct MAX\_PRESSURE}, the fan can operate upon, and it is assumed to be a positive number.
 The flow through a fan will decrease from $\dot{V}_{\hbox{\footnotesize max}}$ at zero pressure difference to 0~m$^3$/s at $\Delta p_{\hbox{\footnotesize max}}$.
-If the pressure difference increases beyond this, air will be forced backwards through the fan.  Figure~\ref{fig:Fan_Curve} displays a typical fan curve. More complicated fan curves can be specified by defining a {\ct RAMP}.
+If the pressure difference increases beyond this, air will be forced backwards through the fan.   If the downstream pressure becomes negative, then the volume flow through the fan will increase beyond {\ct MAX\_FLOW}. More complicated fan curves can be specified by defining a {\ct RAMP}.  In the example inputs below, one fan of each type is specified.  A constant volume flow fan with a {\ct VOLUME\_FLOW} of 10~m$^3$/s, a quadratic fan with {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}, and a user defined fan with the {\ct RAMP} set to the values of the quadratic fan in 200~Pa increments,
+
+\footnotesize
+\begin{verbatim}
+&HVAC TYPE='FAN', ID='constant volume', VOLUME_FLOW=10.0/
+
+&HVAC TYPE='FAN', ID='quadratic', MAX_FLOW=10., MAX_PRESSURE=500./
+
+&HVAC TYPE='FAN', ID='user fan curve', RAMP_ID='fan curve'/
+&RAMP ID='fan curve',T=-1000,F= 17.32/
+&RAMP ID='fan curve',T= -800,F= 16.12/
+&RAMP ID='fan curve',T= -600,F= 14.83/
+&RAMP ID='fan curve',T= -400,F= 13.42/
+&RAMP ID='fan curve',T= -200,F= 11.83/
+&RAMP ID='fan curve',T=    0,F= 10.00/
+&RAMP ID='fan curve',T=  200,F=  7.75/
+&RAMP ID='fan curve',T=  400,F=  4.47/
+&RAMP ID='fan curve',T=  600,F= -4.47/
+&RAMP ID='fan curve',T=  800,F= -7.75/
+&RAMP ID='fan curve',T= 1000,F=-10.00/
+\end{verbatim}\normalsize
+
+Figure~\ref{fig:Fan_Curve} displays a typical fan curves.  Additional examples can be found in the {\ct ashrae7} and {\ct fan\_test} example cases which are documented in the Verification Guide.
 
 \begin{figure}[ht!]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/fan_curve}
-\caption[Example of a fan curve]{Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}. Note that a volume flow greater than
-10~m$^3$/s is brought about by a negative pressure difference; that is, when the downstream pressure is less than the upstream. Note also that when
-the pressure difference is greater than 500~Pa, the volume flow becomes negative; that is, the flow reverses.}
+\caption[Example of fan curves]{Fan curves corresponding to a constant fan with {\ct VOLUME\_FLOW=10}, a quadratic fan with {\ct MAX\_FLOW=10} and {\ct MAX\_PRESSURE=500}, and a user defined {\ct RAMP} equivalent to the quadratic fan.}
 \label{fig:Fan_Curve}
 \end{center}
-\end{figure}
-
-
-
-\subsubsection{Example Case: Specifying Fans}
-
-Two compartments share a common wall. Both compartments are considered as
-separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan with a maximum volumetric flow of 0.16~m$^3$/s and a stall pressure of 10~Pa.
-The second is an open duct with a flow loss of 10. The relevant input lines are:
-
-\footnotesize
-\begin{verbatim}
-&OBST XB= -0.15, 0.15,-1.0, 1.0, 0.0, 2.0 / Partition Wall
-
-
-&VENT XB=-0.15,-0.15,-0.2, 0.2, 0.4, 0.6, COLOR='RED', ID='BLOW LEFT 1',
-      SURF_ID='HVAC',IOR=-1/
-&VENT XB= 0.15, 0.15,-0.2, 0.2, 0.4, 0.6, COLOR='GREEN', ID='BLOW LEFT 2',
-      SURF_ID='HVAC',IOR=1/
-&VENT XB=-0.15,-0.15,-0.2, 0.2, 1.4, 1.6, COLOR='BLUE', ID='BLOW RIGHT 1',
-      SURF_ID='HVAC',IOR=-1/
-&VENT XB= 0.15, 0.15,-0.2, 0.2, 1.4, 1.6, COLOR='YELLOW', ID='BLOW RIGHT 2',
-      SURF_ID='HVAC',IOR=1/
-
-&HVAC ID='LEFT 1',  TYPE_ID='NODE', DUCT_ID='LEFT',  VENT_ID='BLOW LEFT 1' /
-&HVAC ID='LEFT 2',  TYPE_ID='NODE', DUCT_ID='LEFT',  VENT_ID='BLOW LEFT 2' /
-&HVAC ID='RIGHT 1', TYPE_ID='NODE', DUCT_ID='RIGHT', VENT_ID='BLOW RIGHT 1' /
-&HVAC ID='RIGHT 2', TYPE_ID='NODE', DUCT_ID='RIGHT', VENT_ID='BLOW RIGHT 2' /
-
-&HVAC ID='LEFT',  TYPE_ID='DUCT', NODE_ID='LEFT 1','LEFT 2',
-      LENGTH=1, AREA=0.04, FAN_ID='LEFT', REVERSE=.TRUE., LOSS=0,0 /
-&HVAC ID='RIGHT', TYPE_ID='DUCT', NODE_ID='RIGHT 1','RIGHT 2',
-      LENGTH=1, AREA=0.04, LOSS=10,10 /
-
-&HVAC ID='LEFT',TYPE_ID='FAN',MAX_FLOW=0.16,MAX_PRESSURE=10./
-\end{verbatim}
-\normalsize
-
-\noindent
-The volume flow through the fans is obtained from Eq.~(\ref{fan_curve}). $\dot{V}_{\hbox{\footnotesize max}}=0.16$~m$^3$/s is the maximum output of the fan from
-Zone~1 to Zone~2 and 0.2~m/s is the flow speed from Zone~2 to Zone~1. $\Delta p_{\hbox{\footnotesize max}}=10$~Pa is the maximum pressure difference at which the fan can operate. In steady state, the volume flow from compartment to compartment should be equal and opposite in sign.
-This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss, $K$, through the return duct.  The volume flow through the duct for a given pressure drop can be found from the duct momentum equation ignoring all terms but the flow loss:
-\be  \dot{V}_{\hbox{\footnotesize fan}}=A_{\hbox{\footnotesize duct}} \sqrt{\frac{2 \Delta p}{\rho K}} \ee
-Setting the above equation equal to Eq.~(\ref{fan_curve}), the pressure drop can be determined:
-\be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{kg/m$^3$}) 10}} (0.04 \; \hbox{m}^2) =
-   (0.16 \; \hbox{m$^3$/s})  \;
-   \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  } \ee
-The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test}). Note that the sign of the volume flow in the duct indicates whether the flow is moving from the first node to the second (positive) or the second node to the first (negative).
-This convention can make these types of calculations a bit tricky.
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Pressure} &
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Volume_Flow}
-\end{tabular*}
-\caption[Results of the {\ct fan\_test} case]{Pressure and volume flow for the {\ct fan\_test}.}
-\label{fan_test}
 \end{figure}
 
 \subsubsection{Jet Fans}
@@ -4863,7 +4804,6 @@ a short passageway that draws gases in one side and expels them out the other. T
 \label{fig:Jet_Fan}
 \end{center}
 \end{figure}
-
 
 
 \subsection{HVAC Filter Parameters}
@@ -4890,20 +4830,17 @@ A sample input for a filter is given by:
 \end{description}
 
 \noindent
+
+A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial flow loss of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter} which is documented in the Verification Guide.
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID='PARTICULATE',MW=28.,MASS_FRACTION_0=0.001,SPECIFIC_HEAT=1./
+&HVAC TYPE_ID='NODE',ID='FILTER',DUCT_ID='DUCT1','DUCT2',XYZ(3)=0.55,FILTER_ID='FILTER'/
+&HVAC TYPE_ID='FILTER',ID='FILTER',CLEAN_LOSS=1.,SPEC_ID='PARTICULATE',EFFICIENCY=1.,LOSS=7732.446,LOADING_MULTIPLIER=1./
+\end{verbatim}\normalsize
+
 Note that a filter input refers to a class of filters and that multiple ducts can reference the same filter definition.
-
-The sample case {\ct HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~kg$^{-1}$ (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~m$^3$/s takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Figure~\ref{fig_filter}.
-
-\begin{figure}[t]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_p} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_t} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_v} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_kg} }
-   \end{tabular*}
-   \caption[Results for the {\ct HVAC\_filter} sample case]{Compartment pressure (upper left), compartment temperature (upper right), duct velocity (lower left), and particulate mass in the compartment and on the filter (lower right).}
-   \label{fig_filter}
-\end{figure}
 
 \subsection{HVAC Aircoil Parameters}
 \label{info:HVACaircoil}
@@ -5976,19 +5913,11 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
 &SPEC ID='WATER VAPOR',    SMIX_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='CARBON DIOXIDE', SMIX_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='METHANE' /
-
-&SMIX ID='AIR', BACKGROUND=.TRUE.,
-      SPEC_ID(1)='OXYGEN',         VOLUME_FRACTION(1)=0.2076,
-      SPEC_ID(2)='NITROGEN',       VOLUME_FRACTION(2)=0.7825,
-      SPEC_ID(3)='WATER VAPOR',    VOLUME_FRACTION(3)=0.0095,
-      SPEC_ID(4)='CARBON DIOXIDE', VOLUME_FRACTION(4)=0.0004 /
-
-&SMIX ID='PRODUCTS',
-      SPEC_ID(1)='CARBON DIOXIDE', VOLUME_FRACTION(1)=0.0944,
-      SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.1966,
-      SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.7090 /
-
-&REAC FUEL='METHANE',SPEC_ID='METHANE','AIR','PRODUCTS',
+&SMIX ID='AIR', SPEC_ID='OXYGEN','NITROGEN','WATER VAPOR','CARBON DIOXIDE',
+      VOLUME_FRACTION=0.2076,0.7825,0.0095,0.0004, BACKGROUND=.TRUE. /
+&SMIX ID='PRODUCTS', SPEC_ID=,'CARBON DIOXIDE','WATER VAPOR','NITROGEN'
+      VOLUME_FRACTION=0.0944,0.1966,0.7090 /
+&REAC FUEL='METHANE', SPEC_ID='METHANE','AIR','PRODUCTS',
       NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
@@ -6769,7 +6698,7 @@ width of the distribution is controlled by the parameter {\ct GAMMA\_D} (default
 The Rosin-Rammler/log-normal distribution is given by
 \be F(d) = \left\{ \begin{array}{ll}
    \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^d} \, \frac{1}{\sigma\, d'} \,
-   e^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}} \; \d d'       & (d \le d_m) \\
+   e^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}} \; dd'       & (d \le d_m) \\
    1 - e^{-0.693 \left(\frac{d}{d_m}\right)^\gamma }  & (d_m < d)
    \end{array} \right.
 \ee
@@ -8233,7 +8162,7 @@ The control functions that perform simple math operations ({\ct SUM},  {\ct SUBT
 \label{info:CONTROL_PID}
 
 A PID (Proportional Integral Derivative) control function is a commonly used feedback controller for controlling electrical and mechanical systems.  The function computes an error between a process variable and a desired setpoint.  The goal of the PID function is to minimize the error.  A PID control function is computed as
-\be u(t) \; = \; K_p e(t) \; + \; \; K_i \int_0^t \! e(t) \, \d t   \; + \; K_d \frac{\d e(t)}{\d t}\ee
+\be u(t) \; = \; K_p e(t) \; + \; \; K_i \int_0^t \! e(t) \, dt   \; + \; K_d \frac{de(t)}{dt}\ee
 where $K_p$, $K_i$, and $K_d$ are respectively the {\ct PROPORTIONAL\_GAIN}, the {\ct INTEGRAL\_GAIN}, and the
 {\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subtracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.
 
@@ -8836,14 +8765,14 @@ is {\ct DT\_HRR} on the {\ct DUMP} line. The columns in this file record the tim
 The columns are defined as follows:
 \begin{eqnarray}
 \label{eqn_enthalpytransport}
-\underbrace{\frac{\partial}{\partial t} \int \rho h_s \, \d V }_{\hbox{\ct Q\_ENTH}} &=&
-\underbrace{\dm_b h_{s,b} - \int \rho \bu h_s \cdot \d {\bf S}}_{\hbox{\ct Q\_CONV}}
-\; + \; \underbrace{\dq_{b,w} + \int k \nabla T \cdot \d {\bf S}}_{\hbox{\ct Q\_COND}}
-\; + \; \underbrace{\sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \d {\bf S}}_{\hbox{\ct Q\_DIFF}}  \nonumber \\
+\underbrace{\frac{\partial}{\partial t} \int \rho h_s \, dV }_{\hbox{\ct Q\_ENTH}} &=&
+\underbrace{\dm_b h_{s,b} - \int \rho \bu h_s \cdot \dS}_{\hbox{\ct Q\_CONV}}
+\; + \; \underbrace{\dq_{b,w} + \int k \nabla T \cdot \dS}_{\hbox{\ct Q\_COND}}
+\; + \; \underbrace{\sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \dS}_{\hbox{\ct Q\_DIFF}}  \nonumber \\
 &&
-+\underbrace{\dq_{b,r} - \int \dot{\mathbf{q}}^{\prime\prime}_{r} \cdot \d {\bf S}}_{\hbox{\ct Q\_RADI}}
-\; + \; \underbrace{\int \dot{q}''' \, \d V}_{\hbox{\ct HRR}}
-\; + \; \underbrace{\int \frac{d \overline{p} }{\d t} \, \d V}_{\hbox{\ct Q\_PRES}}
++\underbrace{\dq_{b,r} - \int \dot{\mathbf{q}}^{\prime\prime}_{r} \cdot \dS}_{\hbox{\ct Q\_RADI}}
+\; + \; \underbrace{\int \dot{q}''' \, dV}_{\hbox{\ct HRR}}
+\; + \; \underbrace{\int \frac{d \overline{p} }{dt} \, dV}_{\hbox{\ct Q\_PRES}}
 \; + \; \underbrace{\left( -\dq_{b,c} - \dq_{b,r} - \dq_{b,w} \right) }_{\hbox{\ct Q\_PART}}
 \end{eqnarray}
 An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right hand side of the equation. Ideally, this sum should equal the term on the left, {\ct Q\_ENTH}. All terms
@@ -8935,15 +8864,15 @@ the floor $z$, where $z=0$ is the floor and $z=H$ is the
 ceiling. Define $T_u$ as the upper layer temperature, $T_l$ as the
 lower layer temperature, and $z_{int}$ as the interface
 height. Compute the quantities:
-\begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; \d z &=& I_1 \\ [0.1in]
-                  (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; \d z &=& I_2
+\begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; dz &=& I_1 \\ [0.1in]
+                  (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2
 \end{eqnarray*}
 Solve for $z_{int}$:
 \be z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} \ee
 Let $T_l$ be the temperature in the lowest mesh cell and, using
 Simpson's Rule, perform the numerical integration of $I_1$ and
 $I_2$. $T_u$ is defined as the average upper layer temperature via
-\be (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; \d z \ee
+\be (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz \ee
 Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
 The quantities {\ct 'LAYER HEIGHT'}, {\ct 'UPPER TEMPERATURE'} and {\ct
@@ -8968,7 +8897,7 @@ If multiple meshes are being used, the vertical path {\em cannot} cross mesh bou
 The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocouple. The thermocouple temperature lags the true gas temperature by an amount determined mainly
 by its bead size. It is found by solving the following equation for the thermocouple temperature, $T_{\hbox{\tiny TC}}$~\cite{Welsh:1}
 \be
-   \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, \frac{\d T_{\hbox{\tiny TC}}}{\d t} = \epsilon_{\hbox{\tiny TC}} \, (U/4 - \sigma T_{\hbox{\tiny TC}}^4) + h(T_g - T_{\hbox{\tiny TC}}) = 0
+   \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, \frac{dT_{\hbox{\tiny TC}}}{dt} = \epsilon_{\hbox{\tiny TC}} \, (U/4 - \sigma T_{\hbox{\tiny TC}}^4) + h(T_g - T_{\hbox{\tiny TC}}) = 0
    \label{TC}
 \ee
 where $\epsilon_{\hbox{\tiny TC}}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_g$ is the true gas temperature, and
@@ -9095,7 +9024,7 @@ distributions, but only various mean properties.
 
 By default, the PDPA device output at time $t$ is computed as a time integral
 \be
-F(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} f(t) \, \d t
+F(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} f(t) \, dt
 \ee
 but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE} equal to {\ct .FALSE.} on the corresponding {\ct PROP} line, in which case
 \be
@@ -9274,11 +9203,11 @@ due to the combustion gases. The FED value is calculated as
 \ee
 The fraction of an incapacitating dose of CO is calculated as
 \be
-\mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, \d t
+\mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, dt
 \ee
 where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm). The fraction of an incapacitating dose of CN is calculated as
 \be
-\mathrm{FED}_\mathrm{CN} = \mathlarger{\int}_0^t \left( \frac{1}{220} \; \exp \left( \frac{C_\mathrm{CN}(t)}{43} \right) - 0.0045 \right) \, \d t
+\mathrm{FED}_\mathrm{CN} = \mathlarger{\int}_0^t \left( \frac{1}{220} \; \exp \left( \frac{C_\mathrm{CN}(t)}{43} \right) - 0.0045 \right) \, dt
 \ee
 where $t$ is time in minutes and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as
 \be
@@ -9286,7 +9215,7 @@ C_\mathrm{CN} = C_\mathrm{HCN} - C_\mathrm{NO_2}
 \ee
 The fraction of an incapacitating dose of NO$_x$ is calculated as
 \be
-\mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, \d t
+\mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, dt
 \ee
 where $t$ is time in minutes and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm).
 
@@ -9300,7 +9229,7 @@ The Fractional Lethal Dose (FLD) of irritants is calculated as
     \frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FLD,NO_2}} +
     \frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FLD,C_3H_4O}} +
     \frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FLD,CH_2O}}
-    \right) \, \d t
+    \right) \, dt
 \ee
 where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and
 the denominators the exposure doses of respective irritants predicted to be lethal to half the population.
@@ -9320,7 +9249,7 @@ F${}_\mathrm{FIC}$ (ppm) & 900 & 900 & 900 & 120 & 350 & 20 & 30 \\ \hline
 
 The fraction of an incapacitating dose of low O${}_2$ hypoxia is calculated as
 \be
-\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{\d t}{\exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
+\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{\exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
 \ee
 where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume percent).
 The hyperventilation factor induced by carbon dioxide is calculated as
@@ -9401,7 +9330,7 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 \subsubsection{Volume-Weighted Mean}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME MEAN'} produces the discrete analog of
-\be \frac{1}{V} \; \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \frac{1}{V} \; \int \phi(x,y,z) \; dx \, dy \, dz \ee
 which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this
 statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
@@ -9409,7 +9338,7 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 \subsubsection{Mass-Weighted Mean}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
-\be \frac{ \int \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\int \rho \; \d x \, \d y \, \d z}  \ee
+\be \frac{ \int \rho(x,y,z) \; \phi(x,y,z) \; dx \, dy \, dz}{\int \rho \; dx \, dy \, dz}  \ee
 which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
 statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
@@ -9417,7 +9346,7 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 \subsubsection{Volume Integral}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
-\be \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \int \phi(x,y,z) \; dx \, dy \, dz \ee
 Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example,
 heat release rate per unit volume is an appropriate output quantity. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
@@ -9425,14 +9354,14 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 \subsubsection{Mass Integral}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS INTEGRAL'} produces the discrete analog of
-\be \int \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \int \, \rho(x,y,z) \; \phi(x,y,z) \; dx \, dy \, dz \ee
 Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
 coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
 \subsubsection{Area Integral}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='AREA INTEGRAL'} produces the discrete analog of
-\be \int \phi(x,y,z) \; \d A \ee
+\be \int \phi(x,y,z) \; dA \ee
 where $dA$ depends on the coordinates you specify for {\ct XB}.
 Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
 the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that
@@ -9443,7 +9372,7 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 \subsubsection{Surface Integral}
 
 For a given solid phase output quantity, $\phi$, {\ct STATISTICS='SURFACE INTEGRAL'} produces the discrete analog of
-\be \int \phi \; \d A \ee
+\be \int \phi \; dA \ee
 Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass
 fluxes are appropriate output quantities.
 
@@ -9463,9 +9392,9 @@ the device ({\ct DEVC}) namelist group only. For example:
 \noindent
 outputs the net integrated mass flux through the given planar area, oriented in the positive $z$ direction, in this case. The three flows -- {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'},
 and {\ct 'HEAT FLOW'} are defined:
-\begin{eqnarray*} \dot{V} &=& \int \bu \cdot \d \mathbf{S}  \\
-                  \dot{m} &=& \int \rho \bu \cdot \d \mathbf{S} \\
-                  \dot{q} &=& \int c_p \rho (T-T_\infty) \bu \cdot \d \mathbf{S} 
+\begin{eqnarray*} \dot{V} &=& \int \bu \cdot \dS  \\
+                  \dot{m} &=& \int \rho \bu \cdot \dS \\
+                  \dot{q} &=& \int c_p \rho (T-T_\infty) \bu \cdot \dS
 \end{eqnarray*}
 The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names
 yields the integral of the flow in the positive or negative direction
@@ -9483,7 +9412,7 @@ The quantities {\ct 'MASS FLOW'} and {\ct 'HEAT FLOW'} should not be applied at 
 In addition to the spatial statistics, a time integral of an {\ct DEVC} output can be computed by specifying
 {\ct STATISTICS = 'TIME INTEGRAL'} on the {\ct DEVC} line. This produces a discrete analog of
 \be
- \int_{t_0}^t \phi(\tau) \; \d \tau
+ \int_{t_0}^t \phi(\tau) \; d\tau
 \ee
 Note that the spatial and time integrals can not be used simultaneously.
 
@@ -9590,7 +9519,7 @@ with measurements. For Plot3D files, add {\ct PLOT3D\_VELO\_INDEX(N)=...} to the
 
 There are several outputs that report the enthalpy of the gas mixture. First, the {\ct 'SPECIFIC ENTHALPY'} and the {\ct 'SPECIFIC SENSIBLE ENTHALPY'} are defined:
 \be
-   h = h^0 + \int_0^{T'} c_p \, \d T'  \quad ; \quad h_s = \int_0^{T'} c_p \, \d T'
+   h = h^0 + \int_0^{T'} c_p \, dT'  \quad ; \quad h_s = \int_0^{T'} c_p \, dT'
 \ee
 Both have units of kJ/kg.
 The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTHALPY'} are $H=\rho h$ and $H_s=\rho h_s$, respectively, in units of kJ/m$^3$.
@@ -9876,7 +9805,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct H}                                         & ${\cal H}=|\bu|^2/2 + \tp/\rho_0$             & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT FLOW}                                 & Section~\ref{info:flows}                      & kW             & D            \\ \hline
 {\ct NET HEAT FLUX}                             & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct HRR}                                       & $\int \dq''' \; \d V$                           & kW             & D            \\ \hline
+{\ct HRR}                                       & $\int \dq''' \; dV$                           & kW             & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
@@ -9990,8 +9919,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
 {\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & W/m$^2$/K      & B,D          \\ \hline
-{\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
-{\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
+{\ct HRRPUL}                                    & $\int \dq''' \, dx \, dy$                         & kW/m           & D            \\ \hline
+{\ct INTEGRATED INTENSITY}                      & $U=\int I \, d\bs$                                & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 %{\ct LEAKAGE}                                   & Volume flow due to leaks                          & m$^3$/s        & D            \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           &                & D            \\ \hline
