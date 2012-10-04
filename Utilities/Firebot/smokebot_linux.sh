@@ -29,9 +29,10 @@ FIREBOT_USERNAME="`whoami`"
 
 FIREBOT_HOME_DIR="/home/$FIREBOT_USERNAME"
 FIREBOT_DIR="$FIREBOT_HOME_DIR/SMOKEBOT"
-FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
+export FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
 CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 ERROR_LOG=$FIREBOT_DIR/output/errors
+TIME_LOG=$FIREBOT_DIR/output/timings
 WARNING_LOG=$FIREBOT_DIR/output/warnings
 GUIDE_DIR=$FIREBOT_DIR/guides
 
@@ -280,6 +281,7 @@ run_verification_cases_short()
    find . -name '*.stop' -exec rm -f {} \;
    find . -name '*.err' -exec rm -f {} \;
    find Visualization -name '*.smv' -exec rm -f {} \;
+   find scripts/Outfiles -name '*.out' -exec rm -f {} \;
    find WUI -name '*.smv' -exec rm -f {} \;
 }
 
@@ -575,8 +577,15 @@ check_smv_pictures()
 
 generate_timing_stats()
 {
-   cd $FDS_SVNROOT/Utilities/Scripts
-   ./fds_timing_stats.sh
+   cd $FDS_SVNROOT/Verification/scripts/
+   export RUNCFAST="$FDS_SVNROOT/Verification/scripts/copyout.sh"
+   export RUNFDS="$FDS_SVNROOT/Verification/scripts/copyout.sh"
+
+   cd $FDS_SVNROOT/Verification
+   scripts/SMV_Cases.sh
+
+   cd $FDS_SVNROOT/Verification/scripts
+   ./fdssmv_timing_stats.sh
 }
 
 archive_timing_stats()
@@ -695,36 +704,45 @@ save_build_status()
 
 email_build_status()
 {
+   stop_time=`date`
+   echo "-------------------------------" > $TIME_LOG
+   echo start time=$start_time >> $TIME_LOG
+   echo stop time=$stop_time >> $TIME_LOG
+   echo "-------------------------------" >> $TIME_LOG
    cd $FIREBOT_DIR
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
+     cat $TIME_LOG >> $ERROR_LOG
+     cat $TIME_LOG >> $WARNING_LOG
      # Send email with failure message and warnings, body of email contains appropriate log file
      mail -s "smokebot build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
+     cat $TIME_LOG >> $ERROR_LOG
       # Send email with failure message, body of email contains error log file
       mail -s "smokebot build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
+     cat $TIME_LOG >> $WARNING_LOG
       # Send email with success message, include warnings
       mail -s "smokebot build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
       # Send empty email with success message
-      mail -s "smokebot build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
+      mail -s "smokebot build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < $TIME_LOG > /dev/null
    fi
 }
 
 #  ============================
 #  = Primary script execution =
 #  ============================
-
+start_time=`date`
 clean_firebot_history
 
 ### Stage 0 ###
