@@ -87,6 +87,7 @@ $RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_11
 $RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_12
 
 $RUNFDS Miscellaneous pyramid
+$RUNFDS Miscellaneous mesh_transformation
 
 $RUNFDS NS_Analytical_Solution ns2d_16
 $RUNFDS NS_Analytical_Solution ns2d_16_nupt1
