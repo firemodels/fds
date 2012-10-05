@@ -2269,7 +2269,7 @@ SELECT CASE(GAS_NAME)
       FORMULA = "C3H6O"
       H_F= -218.5E6 ! NIST webbook
       ABSORBING = .TRUE.   
-      IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'      
+      IF (RADCAL_NAME=='null') RADCAL_NAME='MMA'      
    CASE('ACETYLENE')
       SIGMA = 4.033_EB
       EPSOK = 231.8_EB 
@@ -2301,14 +2301,14 @@ SELECT CASE(GAS_NAME)
       FORMULA = 'C6H6'
       ABSORBING = .TRUE.       
       H_F = 82.9E6 ! NIST webbook 
-      IF (RADCAL_NAME=='null') RADCAL_NAME='PROPYLENE'      
+      IF (RADCAL_NAME=='null') RADCAL_NAME='TOLUENE'      
    CASE('BUTANE')
       SIGMA = 4.687_EB
       EPSOK = 531.4_EB 
       ABSORBING = .TRUE.
       FORMULA = 'C4H10'
       H_F = -125.6E6_EB
-      IF (RADCAL_NAME=='null') RADCAL_NAME='METHANE'
+      IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
    CASE('CARBON DIOXIDE')  
       SIGMA = 3.941_EB 
       EPSOK = 195.2_EB  
@@ -2329,7 +2329,7 @@ SELECT CASE(GAS_NAME)
       FORMULA = 'C7H16'
       H_F = -187.8E6_EB
       ABSORBING=.TRUE.  
-      IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'      
+      IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'      
    CASE('ETHANE')
       SIGMA = 4.443_EB
       EPSOK = 215.7_EB 
