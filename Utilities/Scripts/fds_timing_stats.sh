@@ -10,9 +10,6 @@
 # Mode argument: smokebot, or anything else (including no argument) for normal mode
 MODE=$1
 
-# cd to Verification directory
-SVNROOT=`pwd`/../..
-
 # Check to see if mode argument is "smokebot" (calculate timing for smokebot FDS cases only)
 # Otherwise, run fds_timing_stats as usual (calculate timing for all FDS verification cases)
 if [[ $MODE == "smokebot" ]]; then
