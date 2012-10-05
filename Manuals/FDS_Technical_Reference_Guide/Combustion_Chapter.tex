@@ -258,7 +258,7 @@ Finally the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha
 \dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t} \approx \rho \left(\frac{Y_{\alpha}(\delta t) - Y_{\alpha,0}}{\delta t}\right)
 \end{equation}
 
-Discussion on the extension of the EDC to include multiple environments as a way to model subgrid variance is included in Appendix~{\ref{multi_env_edc}.
+Discussion on the extension of the EDC to include multiple environments as a way to model subgrid variance is included in Appendix~{\ref{multi_env_edc}}.
 
 \section{Heat Release Rate}
 
@@ -292,7 +292,23 @@ Note that the rate expression can be dependent on temperature and that the rate 
 \end{equation}
 
 \subsection{Infinitely Fast Reaction}
-For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\mbox{d}\phi_\F/\mbox{d}t$ becomes sufficiently large such that all of the fuel in a computational cell is consumed in a single time step, effectively making the rate infinite. However, the rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.   
+For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\mbox{d}\phi_\F/\mbox{d}t$ becomes sufficiently large such that all of the fuel (or all of the oxidizer) in a computational cell is consumed in a single time step, effectively making the rate infinite. The rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.
+
+\subsubsection{Multiple Infinitely Fast Reactions}   
+In the case where there are multiple infinitely fast reactions special consideration needs to be taken if the reactions are oxygen-limited. Since any given infinitely fast reaction does not take precedent over another and each wants to consume all of the available oxidizer, the reactions rates must further be restricted because the mass fraction of oxidizer must remain realizable. The first step is to determine the amount of oxidizer that is present in the mixed state of the computational cell. The second step is to calculate the amount of oxidizer that would be needed to stoichiometrically consume all of the fuel in each reaction in the mixed state of the computational cell. If the required stoichiometric oxidizer amount is larger than the available amount of oxidizer then the computational cell is globally fuel rich.
+
+If the cell is determined to be globally fuel rich, then for each of the $n$ reactions the stoichiometric amount of fuel consumed ($DZ_F$) based on the limiting $i^{th}$ reactant is found:
+\begin{equation}\label{eq:stoich_fuel}
+DZ_F(n) = min\left (DZ_F(n),\frac{-Z_{i}W_{\mathrm{fuel}}}{\nu_{i}W_{i}}\right)
+\end{equation}
+To prevent more than the available amount of oxidizer from being consumed, a weight factor ($DF_{R}$) for each reaction is calculated based on the total amount of fuel being consumed.
+\begin{equation}\label{eq:fuel_weight}
+DF_R(n) = \frac{DZ_F(n)}{\Sigma \, DZ_F}
+\end{equation}
+For a given timestep, $\delta t$, the rate at which fuel is consumed for each infinitely fast reaction becomes:
+\begin{equation}\label{eq:fuel_rate}
+Rate(n) = \frac{DZ_F(n)\,DF_R(n)}{\delta t}
+\end{equation}
 
 \subsection{Arrhenius Reaction}
 There are conditions under which the local temperature and species concentrations support the computation of the reaction rate.  One set of conditions is where the reacting regions of the flow can be considered a well-stirred reactor.  The other is during a DNS calculation.  In the first case rather than a reacting surface, there is a reacting volume.  In the second case, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
