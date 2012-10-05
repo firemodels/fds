@@ -4228,6 +4228,7 @@ void BlockageMenu(int value){
 /* ------------------ RotateTypeMenu ------------------------ */
 
 void RotateTypeMenu(int value){
+  if(value==999)return;
   rotation_type = value;
   update_rotation_type(rotation_type);
   rotation_type_CB(0);
@@ -5650,39 +5651,42 @@ updatemenu=0;
 /* --------------------------------rotate type menu -------------------------- */
 
   CREATEMENU(rotatetypemenu,RotateTypeMenu);
+  glutAddMenuEntry("Scene centered:",999);
   switch (rotation_type){
   case EYE_CENTERED:
-    glutAddMenuEntry(_("World centered (2 axis rotation)"),ROTATION_2AXIS);
-    glutAddMenuEntry(_("*Eye centered"),EYE_CENTERED);
-    glutAddMenuEntry(_("World centered, level rotation"),ROTATION_1AXIS);
+    glutAddMenuEntry("  2 axis",ROTATION_2AXIS);
+    glutAddMenuEntry("  Level (1 axis)",ROTATION_1AXIS);
 #ifdef pp_GENERAL_ROTATION
-    glutAddMenuEntry(_("World centered, (3 axis rotation)"),ROTATION_3AXIS);
+    glutAddMenuEntry("  3 axis",ROTATION_3AXIS);
 #endif    
+    glutAddMenuEntry("*Eye centered",EYE_CENTERED);
     break;
   case ROTATION_2AXIS:
-    glutAddMenuEntry(_("*World centered (2 axis rotation)"),ROTATION_2AXIS);
-    glutAddMenuEntry(_("Eye centered"),EYE_CENTERED);
-    glutAddMenuEntry(_("World centered, level rotation"),ROTATION_1AXIS);
+    glutAddMenuEntry("  *2 axis",ROTATION_2AXIS);
+    glutAddMenuEntry("  Level (1 axis)",ROTATION_1AXIS);
 #ifdef pp_GENERAL_ROTATION
-    glutAddMenuEntry(_("World centered, (3 axis rotation)"),ROTATION_3AXIS);
+    glutAddMenuEntry("  3 axis",ROTATION_3AXIS);
 #endif    
+    glutAddMenuEntry("Eye centered",EYE_CENTERED);
     break;
   case ROTATION_1AXIS:
-    glutAddMenuEntry(_("World centered (2 axis rotation)"),ROTATION_2AXIS);
-    glutAddMenuEntry(_("Eye centered"),EYE_CENTERED);
-    glutAddMenuEntry(_("*World centered, level rotation"),ROTATION_1AXIS);
+    glutAddMenuEntry("  2 axis",ROTATION_2AXIS);
+    glutAddMenuEntry("  *Level (1 axis)",ROTATION_1AXIS);
 #ifdef pp_GENERAL_ROTATION
-    glutAddMenuEntry(_("World centered, (3 axis rotation)"),ROTATION_3AXIS);
+    glutAddMenuEntry("  3 axis",ROTATION_3AXIS);
 #endif    
+    glutAddMenuEntry("Eye centered",EYE_CENTERED);
     break;
+#ifdef pp_GENERAL_ROTATION
   case ROTATION_3AXIS:
-    glutAddMenuEntry(_("World centered (2 axis rotation)"),ROTATION_2AXIS);
-    glutAddMenuEntry(_("Eye centered"),EYE_CENTERED);
-    glutAddMenuEntry(_("World centered, level rotation"),ROTATION_1AXIS);
+    glutAddMenuEntry("  2 axis",ROTATION_2AXIS);
+    glutAddMenuEntry("  Level (1 axis)",ROTATION_1AXIS);
 #ifdef pp_GENERAL_ROTATION
-    glutAddMenuEntry(_("*World centered, (3 axis rotation)"),ROTATION_3AXIS);
+    glutAddMenuEntry("  *3 axis",ROTATION_3AXIS);
 #endif    
+    glutAddMenuEntry("Eye centered",EYE_CENTERED);
     break;
+#endif    
   default:
     ASSERT(FFALSE);
     break;
@@ -7221,7 +7225,7 @@ updatemenu=0;
 #ifdef pp_SHOWLIGHT
   if(showlightmenu==1)glutAddSubMenu(_("Lighting"),lightingmenu);
 #endif
-  glutAddSubMenu(_("Rotation"),rotatetypemenu);
+  glutAddSubMenu(_("Rotation type"),rotatetypemenu);
   glutAddSubMenu(_("Max frame rate"),frameratemenu);
   glutAddSubMenu(_("Render"),rendermenu);
   glutAddSubMenu(_("Tours"),tourmenu);

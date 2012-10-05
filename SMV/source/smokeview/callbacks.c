@@ -1949,14 +1949,14 @@ void handle_rotation_type(int flag){
   switch (rotation_type){
 #ifdef pp_GENERAL_ROTATION
   case ROTATION_3AXIS:
-      if(trainer_mode==0)printf("world centered (3 axis rotation)\n");
+      if(trainer_mode==0)printf("Scene centered (3 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
       break;
 #endif
   case ROTATION_2AXIS:
-      if(trainer_mode==0)printf("world centered (2 axis rotation)\n");
+      if(trainer_mode==0)printf("Scene centered (2 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
@@ -1970,7 +1970,7 @@ void handle_rotation_type(int flag){
       break;
   case ROTATION_1AXIS:
     angle_zx[1]=0.0;
-    if(trainer_mode==0)printf("world centered (level rotation)\n");
+    if(trainer_mode==0)printf("Scene centered (level rotation)\n");
     if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }

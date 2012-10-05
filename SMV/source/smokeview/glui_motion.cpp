@@ -71,6 +71,7 @@ GLUI_Button *render_stop=NULL ;
 
 GLUI *glui_motion=NULL;
 GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
+GLUI_Panel *panel_radiorotate=NULL;
 GLUI_Panel *panel_gslice=NULL;
 GLUI_Panel *panel_gslice_center=NULL;
 GLUI_Panel *panel_gslice_normal=NULL;
@@ -312,12 +313,13 @@ extern "C" void glui_motion_setup(int main_window){
   eyerotate_z->set_speed(180.0/(float)screenWidth);
   eyerotate_z->disable();
  
-  RADIO_rotation_type=glui_motion->add_radiogroup_to_panel(panel_motion,&rotation_type,0,rotation_type_CB);
-  RADIO_button_1c=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,_("general (2 axis) rotations"));
-  RADIO_button_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,_("first person movement"));
-  RADIO_button_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,_("level (1 axis) rotations"));
+  panel_radiorotate=glui_motion->add_panel_to_panel(panel_motion,"Rotation type:");
+  RADIO_rotation_type=glui_motion->add_radiogroup_to_panel(panel_radiorotate,&rotation_type,0,rotation_type_CB);
+  RADIO_button_1c=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"2 axis");
+  RADIO_button_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"eye centered");
+  RADIO_button_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"level (1 axis)");
 #ifdef pp_GENERAL_ROTATION
-  RADIO_button_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,_("general (3 axis) rotations"));
+  RADIO_button_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"3 axis");
 #endif
   rotation_type_CB(0);
 
