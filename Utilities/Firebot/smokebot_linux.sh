@@ -584,8 +584,8 @@ generate_timing_stats()
    cd $FDS_SVNROOT/Verification
    scripts/SMV_Cases.sh
 
-   cd $FDS_SVNROOT/Verification/scripts
-   ./fdssmv_timing_stats.sh
+   cd $FDS_SVNROOT/Utilities/Scripts
+   ./fds_timing_stats.sh smokebot
 }
 
 archive_timing_stats()

@@ -7,15 +7,27 @@
 # This script checks the .out files for the FDS Verification Suite and generates
 # a .csv file of the CPU time (and other metrics) called fds_timing_stats.csv
 
+# Mode argument: smokebot, or anything else (including no argument) for normal mode
+MODE=$1
+
 # cd to Verification directory
 SVNROOT=`pwd`/../..
-cd $SVNROOT/Verification
+
+# Check to see if mode argument is "smokebot" (calculate timing for smokebot FDS cases only)
+# Otherwise, run fds_timing_stats as usual (calculate timing for all FDS verification cases)
+if [[ $MODE == "smokebot" ]]; then
+   cd $SVNROOT/Verification/scripts/Outfiles
+   OUT_FILES=*.out
+else
+   cd $SVNROOT/Verification
+   OUT_FILES=*/*.out
+fi
 
 # Write header information to fds_timing_stats.csv file
 echo 'FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
 
 # Loop over all .out files in the Verification directory
-for i in */*.out
+for i in $OUT_FILES
 do
    # Get current file name
    FILE=$i
