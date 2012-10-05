@@ -704,6 +704,19 @@ void update_mouseinfo(int flag, int xm, int ym){
     mult_quat(quat_temp,quat_general,quat_general);
     quat2rot(quat_general,quat_rotation);
   }
+#ifdef _DEBUG
+  {
+    float denom;
+
+    denom = sqrt(1.0-quat_general[0]*quat_general[0]);
+    if(denom>0.0){
+      printf("angle= %f axis=(%f,%f,%f)\n",2.0*RAD2DEG*acos(quat_general[0]),quat_general[1]/denom,quat_general[2]/denom,quat_general[3]/denom);
+    }
+    else{
+      printf("angle= %f axis=(*,*,*)\n",2.0*RAD2DEG*acos(quat_general[0]));
+    }
+  }
+#endif
   camera_current->quaternion[0]=quat_general[0];
   camera_current->quaternion[1]=quat_general[1];
   camera_current->quaternion[2]=quat_general[2];
@@ -1685,7 +1698,7 @@ void keyboard(unsigned char key, int flag){
         DialogMenu(20); // 3d smoke dialog
         break;
       case GLUT_ACTIVE_CTRL:
-        snap_view_angles();
+        snap_scene();
         break;
       default:
         if(rotation_type==EYE_CENTERED){
@@ -1813,8 +1826,11 @@ void keyboard(unsigned char key, int flag){
         return;
       }
       break;
+    case '~':
+      level_scene();
+      break;
     case '!':
-      snap_view_angles();
+      snap_scene();
       break;
     case '@':
       cell_center_text = 1 - cell_center_text;

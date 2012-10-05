@@ -45,7 +45,7 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define SAVE_SETTINGS 14
 #define WINDOW_RESIZE 16
 #define WINDOWSIZE_LIST 17
-#define SNAPVIEW 21
+#define SNAPSCENE 21
 #define SET_VIEW_XYZ 22
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
@@ -343,7 +343,7 @@ extern "C" void glui_motion_setup(int main_window){
   eyerotate90_z->disable();
   eyerotate90_z->set_alignment(GLUI_ALIGN_LEFT);
 //  glui_motion->add_column_to_panel(panel_anglebuttons,false);
-  button_snap=glui_motion->add_button_to_panel(panel_anglebuttons,_("Snap"),SNAPVIEW,TRANSLATE_CB);
+  button_snap=glui_motion->add_button_to_panel(panel_anglebuttons,_("Snap"),SNAPSCENE,TRANSLATE_CB);
 
   //glui_motion->add_column(false);
 
@@ -921,8 +921,8 @@ extern "C" void TRANSLATE_CB(int var){
         ResizeWindow(screenWidth,screenHeight);
       }
       break;
-    case SNAPVIEW:
-      snap_view_angles();
+    case SNAPSCENE:
+      snap_scene();
       break;
     case WINDOW_RESIZE:
       setScreenSize(&glui_screenWidth,&glui_screenHeight);
@@ -1052,7 +1052,7 @@ extern "C" void TRANSLATE_CB(int var){
     case PROJECTION:
     case WINDOW_RESIZE:
     case WINDOWSIZE_LIST:
-    case SNAPVIEW:
+    case SNAPSCENE:
       break;
     case ROTATE_ZX:
       break;

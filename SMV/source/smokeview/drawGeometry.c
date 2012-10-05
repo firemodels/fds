@@ -4426,9 +4426,27 @@ void drawBlockages(int mode, int trans_flag){
   }
 }
 
-/* ------------------ snap_view_angles ------------------------ */
 
-void snap_view_angles(void){
+/* ------------------ level_scene ------------------------ */
+
+void level_scene(void){
+
+#ifdef pp_GENERAL_ROTATION  
+  if(rotation_type==ROTATION_3AXIS&&key_state == KEY_NONE){
+    float denom;
+
+    // keep quat_general[0] (the rotation) the same
+    quat_general[1]=0.0;
+    quat_general[2]=0.0;
+    quat_general[3]=SIGN(quat_general[3])*sqrt(1.0-quat_general[0]*quat_general[0]);
+    quat2rot(quat_general,quat_rotation);
+  }
+#endif
+
+}
+/* ------------------ snap_scene ------------------------ */
+
+void snap_scene(void){
   float *az, *elev;
   int iaz, ielev;
 
