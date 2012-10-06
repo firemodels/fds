@@ -262,7 +262,7 @@ EXTERNCPP mesh *getmesh(float *xyz);
 EXTERNCPP sv_object *get_object(char *label);
 EXTERNCPP void get_labels(char *buffer, int type, char **label1, char **label2, char prop_buffer[255]);
 EXTERNCPP void snap_scene(void);
-EXTERNCPP void level_scene(void);
+EXTERNCPP void level_scene(int level_x, int level_y, float *quat);
 #ifdef pp_SHOOTER
 EXTERNCPP void get_plot3d_uvw(float xyz[3], float uvw[3]);
 EXTERNCPP void solve_shooter_data(void);

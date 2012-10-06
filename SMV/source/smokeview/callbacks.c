@@ -691,6 +691,7 @@ void update_mouseinfo(int flag, int xm, int ym){
       axis[2]=mi->xdirection[0];
       angleaxis2quat(delta_angle,axis,quat_temp);
       mult_quat(quat_temp,quat_general,quat_general);
+     // level_scene(0,1,quat_general);
       quat2rot(quat_general,quat_rotation);
     }
   }
@@ -702,6 +703,7 @@ void update_mouseinfo(int flag, int xm, int ym){
     axis[2]=0.0;
     angleaxis2quat(-delta_angle2,axis,quat_temp);
     mult_quat(quat_temp,quat_general,quat_general);
+   // level_scene(0,1,quat_general);
     quat2rot(quat_general,quat_rotation);
   }
 #ifdef _DEBUG
@@ -1827,7 +1829,8 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case '~':
-      level_scene();
+      level_scene(1,1,quat_general);
+      quat2rot(quat_general,quat_rotation);
       break;
     case '!':
       snap_scene();

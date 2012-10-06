@@ -4425,25 +4425,31 @@ void drawBlockages(int mode, int trans_flag){
     }
   }
 }
-
-
 /* ------------------ level_scene ------------------------ */
 
-void level_scene(void){
+void level_scene(int level_x, int level_y, float *quat){
 
 #ifdef pp_GENERAL_ROTATION  
   if(rotation_type==ROTATION_3AXIS&&key_state == KEY_NONE){
-    float denom;
+    float alpha,sum_axis;
 
-    // keep quat_general[0] (the rotation) the same
-    quat_general[1]=0.0;
-    quat_general[2]=0.0;
-    quat_general[3]=SIGN(quat_general[3])*sqrt(1.0-quat_general[0]*quat_general[0]);
-    quat2rot(quat_general,quat_rotation);
+    if(level_x==1)quat[1]=0.0;
+    if(level_y==1)quat[2]=0.0;
+    sum_axis = quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3];
+    if(sum_axis==0.0){
+      quat[0]=1.0;
+    }
+    else if(0.0<sum_axis&&sum_axis<1.0){
+      alpha = sqrt((1.0-quat[0]*quat[0])/sum_axis);
+      quat[1]*=alpha;
+      quat[2]*=alpha;
+      quat[3]*=alpha;
+    }
+    // do nothing if norm(quaternion axis)=1
   }
 #endif
-
 }
+
 /* ------------------ snap_scene ------------------------ */
 
 void snap_scene(void){
