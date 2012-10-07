@@ -22,7 +22,8 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #include "IOvolsmoke.h"
 
 #define TRANSLATE_XY 101
-#define ROTATE_ZX 102
+#define ROTATE_2AXIS 102
+#define ROTATE_3RDAXIS 103
 #define GLUI_Z 2
 #define MESH_LIST 4
 #define EYE_ROTATE 5
@@ -63,60 +64,39 @@ void BUTTON_hide2_CB(int var);
 void BUTTON_Reset_CB(int var);
 void GSLICE_CB(int var);
 
-GLUI_Listbox *meshlist1=NULL;
-GLUI_Listbox *render_size_list=NULL;
-GLUI_Listbox *render_skip_list=NULL;
-GLUI_Button *render_start=NULL ;
-GLUI_Button *render_stop=NULL ;
-
 GLUI *glui_motion=NULL;
-GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
-GLUI_Panel *panel_radiorotate=NULL;
-GLUI_Panel *panel_gslice=NULL;
-GLUI_Panel *panel_gslice_center=NULL;
-GLUI_Panel *panel_gslice_normal=NULL;
-GLUI_Panel *panel_gslice_show=NULL;
+
+GLUI_Panel *PANEL_rotate=NULL, *PANEL_translate=NULL,*PANEL_close=NULL;
+GLUI_Panel *PANEL_radiorotate=NULL;
+GLUI_Panel *PANEL_gslice=NULL;
+GLUI_Panel *PANEL_gslice_center=NULL;
+GLUI_Panel *PANEL_gslice_normal=NULL;
+GLUI_Panel *PANEL_gslice_show=NULL;
+GLUI_Panel *PANEL_speed=NULL;
+GLUI_Panel *PANEL_height=NULL;
+GLUI_Panel *PANEL_translate2=NULL,*PANEL_translate3=NULL;
+GLUI_Panel *PANEL_anglebuttons=NULL;
+GLUI_Panel *PANEL_reset1=NULL;
+GLUI_Panel *PANEL_reset2=NULL;
+GLUI_Panel *PANEL_scale=NULL;
+GLUI_Panel *PANEL_reset=NULL;
+
+GLUI_Rollout *ROLLOUT_motion=NULL;
+GLUI_Rollout *ROLLOUT_scene_clip=NULL;
+GLUI_Rollout *ROLLOUT_specify=NULL;
+GLUI_Rollout *ROLLOUT_projection=NULL;
+GLUI_Rollout *ROLLOUT_render=NULL;
+GLUI_Rollout *ROLLOUT_reset3=NULL;
+
 GLUI_Spinner *SPINNER_clip_left=NULL;
 GLUI_Spinner *SPINNER_clip_right=NULL;
 GLUI_Spinner *SPINNER_clip_bottom=NULL;
 GLUI_Spinner *SPINNER_clip_top=NULL;
-GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
-GLUI_Checkbox *CHECKBOX_general_rotation=NULL;
-
 GLUI_Spinner *SPINNER_gslice_center_x=NULL;
 GLUI_Spinner *SPINNER_gslice_center_y=NULL;
 GLUI_Spinner *SPINNER_gslice_center_z=NULL;
 GLUI_Spinner *SPINNER_gslice_normal_az=NULL;
 GLUI_Spinner *SPINNER_gslice_normal_elev=NULL;
-GLUI_Translation *gslice_htranslate=NULL, *gslice_vtranslate=NULL;
-
-GLUI_Panel *panel_rotate=NULL;
-GLUI_Panel *panel_speed=NULL;
-GLUI_Panel *panel_height=NULL;
-GLUI_Rollout *panel_motion=NULL;
-GLUI_Rollout *panel_scene_clip=NULL;
-GLUI_Rollout *panel_specify=NULL;
-GLUI_Panel *panel_translate2=NULL,*panel_translate3=NULL;
-GLUI_Rollout *panel_projection=NULL;
-GLUI_Panel *panel_anglebuttons=NULL;
-GLUI_RadioGroup *projection_radio=NULL,*RADIO_rotation_type=NULL;
-GLUI_RadioGroup *render_type_radio=NULL;
-GLUI_RadioGroup *render_label_radio=NULL;
-GLUI_Translation *rotate_zx=NULL,*eyerotate_z=NULL;
-GLUI_Translation *translate_z=NULL,*translate_xy=NULL;
-GLUI_Checkbox *blockpath_checkbox=NULL,*cursor_checkbox=NULL;
-GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
-GLUI_Button *eyerotate90_z=NULL,*eyelevel=NULL, *floorlevel=NULL, *reset_saved_view=NULL;
-GLUI_Button *replace_view=NULL,*add_view=NULL,*delete_view=NULL;
-GLUI_Button *startup_button=NULL,*cycle_views_button=NULL;
-GLUI_Panel *reset_panel=NULL;
-GLUI_Rollout *render_panel=NULL;
-GLUI_Panel *reset_panel1=NULL;
-GLUI_Panel *reset_panel2=NULL;
-GLUI_Rollout *reset_panel3=NULL;
-GLUI_EditText *edit_view_label=NULL;
-GLUI_Listbox *view_lists=NULL;
-GLUI_Listbox *LIST_windowsize=NULL;
 GLUI_Spinner *SPINNER_set_view_x=NULL;
 GLUI_Spinner *SPINNER_set_view_y=NULL;
 GLUI_Spinner *SPINNER_set_view_z=NULL;
@@ -124,14 +104,25 @@ GLUI_Spinner *SPINNER_zoom=NULL,*SPINNER_aperture=NULL;
 GLUI_Spinner *SPINNER_speed_crawl=NULL, *SPINNER_speed_walk=NULL;
 GLUI_Spinner *SPINNER_xx=NULL, *SPINNER_yy=NULL, *SPINNER_zz=NULL;
 GLUI_Spinner *SPINNER_window_width=NULL, *SPINNER_window_height=NULL;
-GLUI_Button *window_update=NULL ;
-GLUI_Button *button_snap=NULL;
-GLUI_Panel *panel_scale=NULL;
 GLUI_Spinner *SPINNER_scalex=NULL;
 GLUI_Spinner *SPINNER_scaley=NULL;
 GLUI_Spinner *SPINNER_scalez=NULL;
 GLUI_Spinner *SPINNER_nearclip=NULL;
 GLUI_Spinner *SPINNER_farclip=NULL;
+
+GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
+GLUI_Checkbox *CHECKBOX_general_rotation=NULL;
+GLUI_Checkbox *CHECKBOX_blockpath=NULL,*CURSOR_blockpath=NULL;
+GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
+
+GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
+GLUI_Translation *ROTATE_3rdaxis=NULL;
+GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
+
+GLUI_RadioGroup *RADIO_projection=NULL,*RADIO_rotation_type=NULL;
+GLUI_RadioGroup *RADIO_render_type=NULL;
+GLUI_RadioGroup *RADIO_render_label=NULL;
+
 GLUI_RadioButton *RADIO_button_1a=NULL;
 GLUI_RadioButton *RADIO_button_1b=NULL;
 GLUI_RadioButton *RADIO_button_1c=NULL;
@@ -139,8 +130,24 @@ GLUI_RadioButton *RADIO_button_1d=NULL;
 GLUI_RadioButton *RADIO_button_1e=NULL;
 GLUI_RadioButton *RADIO_button_1f=NULL;
 GLUI_RadioButton *RADIO_button_1g=NULL;
+
+GLUI_Button *BUTTON_90_z=NULL,*BUTTON_eyelevel=NULL, *BUTTON_floorlevel=NULL, *BUTTON_reset_saved_view=NULL;
+GLUI_Button *BUTTON_replace_view=NULL,*BUTTON_add_view=NULL,*BUTTON_delete_view=NULL;
+GLUI_Button *BUTTON_startup=NULL,*BUTTON_cycle_views=NULL;
+GLUI_Button *BUTTON_snap=NULL;
+GLUI_Button *BUTTON_render_start=NULL ;
+GLUI_Button *BUTTON_render_stop=NULL ;
 GLUI_Button *BUTTON_motion_1=NULL;
 GLUI_Button *BUTTON_motion_2=NULL;
+GLUI_Button *BUTTON_window_update=NULL;
+
+GLUI_EditText *EDIT_view_label=NULL;
+
+GLUI_Listbox *LIST_viewpoints=NULL;
+GLUI_Listbox *LIST_windowsize=NULL;
+GLUI_Listbox *LIST_mesh2=NULL;
+GLUI_Listbox *LIST_render_size=NULL;
+GLUI_Listbox *LIST_render_skip=NULL;
 
 void RENDER_CB(int var);
 void enable_disable_views(void);
@@ -196,9 +203,9 @@ extern "C" void reset_glui_view(int ival){
   int current_val;
 
   ASSERT(ival>=0);
-  if(ival!=old_listview)view_lists->set_int_val(ival);
+  if(ival!=old_listview)LIST_viewpoints->set_int_val(ival);
   selected_view=ival;
-  replace_view->enable();
+  BUTTON_replace_view->enable();
   BUTTON_Reset_CB(RESTORE_VIEW);
   enable_disable_views();
 }
@@ -206,7 +213,7 @@ extern "C" void reset_glui_view(int ival){
 /* ------------------ enable_reset_saved_view ------------------------ */
 
 extern "C" void enable_reset_saved_view(void){
-  if(reset_saved_view!=NULL)reset_saved_view->enable();
+  if(BUTTON_reset_saved_view!=NULL)BUTTON_reset_saved_view->enable();
 }
 
 
@@ -214,12 +221,12 @@ extern "C" void enable_reset_saved_view(void){
 
 extern "C" void update_glui_filelabel(int var){
   if(var==0||var==1){
-    if(render_label_radio!=NULL){
+    if(RADIO_render_label!=NULL){
       int val1;
 
-      val1 = render_label_radio->get_int_val();
+      val1 = RADIO_render_label->get_int_val();
       if(val1!=var){
-        render_label_radio->set_int_val(var);
+        RADIO_render_label->set_int_val(var);
       }
     }
   }
@@ -236,13 +243,13 @@ extern "C" void update_glui_zoom(void){
 /* ------------------ update_camera_label ------------------------ */
 
 extern "C" void update_camera_label(void){
-  edit_view_label->set_text(camera_label);
+  EDIT_view_label->set_text(camera_label);
 }
 
 /* ------------------ update_cursor_checkbox ------------------------ */
 
 extern "C" void update_cursor_checkbox(void){
-  cursor_checkbox->set_int_val(cursorPlot3D);
+  CURSOR_blockpath->set_int_val(cursorPlot3D);
 }
 
 /* ------------------ update_view_list ------------------------ */
@@ -251,9 +258,9 @@ extern "C" void update_view_gluilist(void){
   camera *ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
-    view_lists->add_item(ca->view_id,ca->name);
+    LIST_viewpoints->add_item(ca->view_id,ca->name);
   }
-  view_lists->set_int_val(startup_view_ini);
+  LIST_viewpoints->set_int_val(startup_view_ini);
   selected_view=startup_view_ini;
   enable_disable_views();
   BUTTON_Reset_CB(RESTORE_VIEW);
@@ -285,9 +292,9 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion = GLUI_Master.create_glui(_("Motion/View/Render"),0,0,0);
   if(showmotion_dialog==0)glui_motion->hide();
 
-  panel_motion = glui_motion->add_rollout(_("Scene motion"));
+  ROLLOUT_motion = glui_motion->add_rollout(_("Scene motion"));
 
-  panel_translate2 = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
+  PANEL_translate2 = glui_motion->add_panel_to_panel(ROLLOUT_motion,"Translate");
   d_eye_xyz[0]=0.0;
   d_eye_xyz[1]=0.0;
   d_eye_xyz[2]=0.0;
@@ -295,26 +302,28 @@ extern "C" void glui_motion_setup(int main_window){
   dsave_eye_xyz[1]=0.0;
   dsave_eye_xyz[2]=0.0;
 
-  translate_xy=glui_motion->add_translation_to_panel(panel_translate2,_("Horizontal"),GLUI_TRANSLATION_XY,d_eye_xyz,TRANSLATE_XY,TRANSLATE_CB);
-  translate_xy->set_speed(TRANSLATE_SPEED);
+  TRANSLATE_xy=glui_motion->add_translation_to_panel(PANEL_translate2,_("Horizontal"),GLUI_TRANSLATION_XY,d_eye_xyz,TRANSLATE_XY,TRANSLATE_CB);
+  TRANSLATE_xy->set_speed(TRANSLATE_SPEED);
 
-  glui_motion->add_column_to_panel(panel_translate2,false);
+  glui_motion->add_column_to_panel(PANEL_translate2,false);
 
-  translate_z=glui_motion->add_translation_to_panel(panel_translate2,_("Vertical"),GLUI_TRANSLATION_Y,eye_xyz+2,GLUI_Z,TRANSLATE_CB);
-  translate_z->set_speed(TRANSLATE_SPEED);
+  TRANSLATE_z=glui_motion->add_translation_to_panel(PANEL_translate2,_("Vertical"),GLUI_TRANSLATION_Y,eye_xyz+2,GLUI_Z,TRANSLATE_CB);
+  TRANSLATE_z->set_speed(TRANSLATE_SPEED);
 
-//  panel_rotate = glui_motion->add_panel_to_panel(panel_motion,"Rotate");
-  panel_rotatebuttons = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
+  PANEL_rotate = glui_motion->add_panel_to_panel(ROLLOUT_motion,"Rotate");
 
-  rotate_zx=glui_motion->add_translation_to_panel(panel_rotatebuttons,_("Rotate"),GLUI_TRANSLATION_XY,motion_ab,ROTATE_ZX,TRANSLATE_CB);
-  glui_motion->add_column_to_panel(panel_rotatebuttons,false);
+  ROTATE_2axis=glui_motion->add_translation_to_panel(PANEL_rotate,_("2 axis"),GLUI_TRANSLATION_XY,motion_ab,ROTATE_2AXIS,TRANSLATE_CB);
+  glui_motion->add_column_to_panel(PANEL_rotate,false);
 
-  eyerotate_z=glui_motion->add_translation_to_panel(panel_rotatebuttons,_("first person"),GLUI_TRANSLATION_X,motion_dir,EYE_ROTATE,TRANSLATE_CB);
-  eyerotate_z->set_speed(180.0/(float)screenWidth);
-  eyerotate_z->disable();
+  ROTATE_3rdaxis=glui_motion->add_translation_to_panel(PANEL_rotate,_("3rd axis"),GLUI_TRANSLATION_Y,motion_ab,ROTATE_3RDAXIS,TRANSLATE_CB);
+  glui_motion->add_column_to_panel(PANEL_rotate,false);
+
+  ROTATE_eye_z=glui_motion->add_translation_to_panel(PANEL_rotate,_("View"),GLUI_TRANSLATION_X,motion_dir,EYE_ROTATE,TRANSLATE_CB);
+  ROTATE_eye_z->set_speed(180.0/(float)screenWidth);
+  ROTATE_eye_z->disable();
  
-  panel_radiorotate=glui_motion->add_panel_to_panel(panel_motion,"Rotation type:");
-  RADIO_rotation_type=glui_motion->add_radiogroup_to_panel(panel_radiorotate,&rotation_type,0,rotation_type_CB);
+  PANEL_radiorotate=glui_motion->add_panel_to_panel(ROLLOUT_motion,"Rotation type:");
+  RADIO_rotation_type=glui_motion->add_radiogroup_to_panel(PANEL_radiorotate,&rotation_type,0,rotation_type_CB);
   RADIO_button_1c=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"2 axis");
   RADIO_button_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"eye centered");
   RADIO_button_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"level (1 axis)");
@@ -327,74 +336,74 @@ extern "C" void glui_motion_setup(int main_window){
   *rotation_index=nmeshes;
   rotation_index_OLD=nmeshes;
   if(nmeshes>1){
-    meshlist1 = glui_motion->add_listbox_to_panel(panel_motion,_("Rotate about:"),rotation_index,MESH_LIST,TRANSLATE_CB);
+    LIST_mesh2 = glui_motion->add_listbox_to_panel(ROLLOUT_motion,_("Rotate about:"),rotation_index,MESH_LIST,TRANSLATE_CB);
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
 
       meshi = meshinfo + i;
-      meshlist1->add_item(i,meshi->label);
+      LIST_mesh2->add_item(i,meshi->label);
     }
-    meshlist1->add_item(nmeshes,_("world center"));
-    meshlist1->set_int_val(*rotation_index);
+    LIST_mesh2->add_item(nmeshes,_("world center"));
+    LIST_mesh2->set_int_val(*rotation_index);
   }
 
-  panel_anglebuttons = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
-  eyerotate90_z=glui_motion->add_button_to_panel(panel_anglebuttons,"90 deg",EYE_ROTATE_90,TRANSLATE_CB);
-  eyerotate90_z->disable();
-  eyerotate90_z->set_alignment(GLUI_ALIGN_LEFT);
-//  glui_motion->add_column_to_panel(panel_anglebuttons,false);
-  button_snap=glui_motion->add_button_to_panel(panel_anglebuttons,_("Snap"),SNAPSCENE,TRANSLATE_CB);
+  PANEL_anglebuttons = glui_motion->add_panel_to_panel(ROLLOUT_motion,"",GLUI_PANEL_NONE);
+  BUTTON_90_z=glui_motion->add_button_to_panel(PANEL_anglebuttons,"90 deg",EYE_ROTATE_90,TRANSLATE_CB);
+  BUTTON_90_z->disable();
+  BUTTON_90_z->set_alignment(GLUI_ALIGN_LEFT);
+//  glui_motion->add_column_to_panel(PANEL_anglebuttons,false);
+  BUTTON_snap=glui_motion->add_button_to_panel(PANEL_anglebuttons,_("Snap"),SNAPSCENE,TRANSLATE_CB);
 
   //glui_motion->add_column(false);
 
 
 #ifdef pp_BETA
-  panel_specify = glui_motion->add_rollout_to_panel(panel_motion,_("Specify eye location"));
+  ROLLOUT_specify = glui_motion->add_rollout_to_panel(ROLLOUT_motion,_("Specify eye location"));
 
-  SPINNER_set_view_x=glui_motion->add_spinner_to_panel(panel_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz,SET_VIEW_XYZ,TRANSLATE_CB);
-  SPINNER_set_view_y=glui_motion->add_spinner_to_panel(panel_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,TRANSLATE_CB);
-  SPINNER_set_view_z=glui_motion->add_spinner_to_panel(panel_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,TRANSLATE_CB);
+  SPINNER_set_view_x=glui_motion->add_spinner_to_panel(ROLLOUT_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz,SET_VIEW_XYZ,TRANSLATE_CB);
+  SPINNER_set_view_y=glui_motion->add_spinner_to_panel(ROLLOUT_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,TRANSLATE_CB);
+  SPINNER_set_view_z=glui_motion->add_spinner_to_panel(ROLLOUT_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,TRANSLATE_CB);
 #endif
 
-  panel_gslice = glui_motion->add_rollout(_("General slice motion"),false);
+  PANEL_gslice = glui_motion->add_rollout(_("General slice motion"),false);
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
     gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
     gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
     gslice_xyz[2]=(zbar0+DENORMALIZE_Z(zbar))/2.0;
   }
 
-  panel_gslice_center = glui_motion->add_panel_to_panel(panel_gslice,_("rotation center"),true);
-  SPINNER_gslice_center_x=glui_motion->add_spinner_to_panel(panel_gslice_center,"x:",GLUI_SPINNER_FLOAT,gslice_xyz,GSLICE_TRANSLATE,GSLICE_CB);
-  SPINNER_gslice_center_y=glui_motion->add_spinner_to_panel(panel_gslice_center,"y:",GLUI_SPINNER_FLOAT,gslice_xyz+1,GSLICE_TRANSLATE,GSLICE_CB);
-  SPINNER_gslice_center_z=glui_motion->add_spinner_to_panel(panel_gslice_center,"z:",GLUI_SPINNER_FLOAT,gslice_xyz+2,GSLICE_TRANSLATE,GSLICE_CB);
+  PANEL_gslice_center = glui_motion->add_panel_to_panel(PANEL_gslice,_("rotation center"),true);
+  SPINNER_gslice_center_x=glui_motion->add_spinner_to_panel(PANEL_gslice_center,"x:",GLUI_SPINNER_FLOAT,gslice_xyz,GSLICE_TRANSLATE,GSLICE_CB);
+  SPINNER_gslice_center_y=glui_motion->add_spinner_to_panel(PANEL_gslice_center,"y:",GLUI_SPINNER_FLOAT,gslice_xyz+1,GSLICE_TRANSLATE,GSLICE_CB);
+  SPINNER_gslice_center_z=glui_motion->add_spinner_to_panel(PANEL_gslice_center,"z:",GLUI_SPINNER_FLOAT,gslice_xyz+2,GSLICE_TRANSLATE,GSLICE_CB);
   SPINNER_gslice_center_x->set_float_limits(xbar0,DENORMALIZE_X(xbar),GLUI_LIMIT_CLAMP);
   SPINNER_gslice_center_y->set_float_limits(ybar0,DENORMALIZE_Y(ybar),GLUI_LIMIT_CLAMP);
   SPINNER_gslice_center_z->set_float_limits(zbar0,DENORMALIZE_Z(zbar),GLUI_LIMIT_CLAMP);
   GSLICE_CB(GSLICE_TRANSLATE);
   
-  panel_gslice_normal = glui_motion->add_panel_to_panel(panel_gslice,_("normal"),true);
-  SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(panel_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,GSLICE_CB);
-  SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(panel_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,GSLICE_CB);
+  PANEL_gslice_normal = glui_motion->add_panel_to_panel(PANEL_gslice,_("normal"),true);
+  SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(PANEL_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,GSLICE_CB);
+  SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(PANEL_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,GSLICE_CB);
   GSLICE_CB(GSLICE_NORMAL);
 
-  panel_gslice_show = glui_motion->add_panel_to_panel(panel_gslice,_("show"),true);
-  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(panel_gslice_show,"data",&vis_gslice_data);
-  glui_motion->add_checkbox_to_panel(panel_gslice_show,"triangle outline",&show_gslice_triangles);
-  glui_motion->add_checkbox_to_panel(panel_gslice_show,"triangulation",&show_gslice_triangulation);
-  glui_motion->add_checkbox_to_panel(panel_gslice_show,"plane normal",&show_gslice_normal);
+  PANEL_gslice_show = glui_motion->add_panel_to_panel(PANEL_gslice,_("show"),true);
+  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"data",&vis_gslice_data);
+  glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangle outline",&show_gslice_triangles);
+  glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangulation",&show_gslice_triangulation);
+  glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"plane normal",&show_gslice_normal);
   
-  panel_projection = glui_motion->add_rollout(_("Window properties"),false);
-  projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
-  RADIO_button_1a=glui_motion->add_radiobutton_to_group(projection_radio,_("Perspective"));
-  RADIO_button_1b=glui_motion->add_radiobutton_to_group(projection_radio,_("Size preserving"));
-  SPINNER_zoom=glui_motion->add_spinner_to_panel(panel_projection,_("Zoom"),GLUI_SPINNER_FLOAT,&zoom,ZOOM,TRANSLATE_CB);
+  ROLLOUT_projection = glui_motion->add_rollout(_("Window properties"),false);
+  RADIO_projection=glui_motion->add_radiogroup_to_panel(ROLLOUT_projection,&projection_type,PROJECTION,TRANSLATE_CB);
+  RADIO_button_1a=glui_motion->add_radiobutton_to_group(RADIO_projection,_("Perspective"));
+  RADIO_button_1b=glui_motion->add_radiobutton_to_group(RADIO_projection,_("Size preserving"));
+  SPINNER_zoom=glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("Zoom"),GLUI_SPINNER_FLOAT,&zoom,ZOOM,TRANSLATE_CB);
   SPINNER_zoom->set_float_limits(0.10,10.0,GLUI_LIMIT_CLAMP);
   aperture_glui=zoom2aperture(zoom);
-  SPINNER_aperture=glui_motion->add_spinner_to_panel(panel_projection,_("aperture"),GLUI_SPINNER_FLOAT,&aperture_glui,
+  SPINNER_aperture=glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("aperture"),GLUI_SPINNER_FLOAT,&aperture_glui,
     APERTURE,TRANSLATE_CB);
-  glui_motion->add_separator_to_panel(panel_projection);
+  glui_motion->add_separator_to_panel(ROLLOUT_projection);
   
-  LIST_windowsize = glui_motion->add_listbox_to_panel(panel_projection,_("Size:"),&windowsize_pointer,WINDOWSIZE_LIST,TRANSLATE_CB);
+  LIST_windowsize = glui_motion->add_listbox_to_panel(ROLLOUT_projection,_("Size:"),&windowsize_pointer,WINDOWSIZE_LIST,TRANSLATE_CB);
   LIST_windowsize->add_item(0,_("Custom"));
   LIST_windowsize->add_item(1,"-");
   LIST_windowsize->add_item(2, "320x240");
@@ -408,108 +417,108 @@ extern "C" void glui_motion_setup(int main_window){
   if(max_screenWidth>=1920&&max_screenHeight>=1080)  LIST_windowsize->add_item(8,"1920x1080");
   update_windowsizelist();
 
-  SPINNER_window_width = glui_motion->add_spinner_to_panel(panel_projection,_("width"),GLUI_SPINNER_INT,&glui_screenWidth);
+  SPINNER_window_width = glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("width"),GLUI_SPINNER_INT,&glui_screenWidth);
   SPINNER_window_width->set_int_limits(100,max_screenWidth);
-  SPINNER_window_height = glui_motion->add_spinner_to_panel(panel_projection,_("height"),GLUI_SPINNER_INT,&glui_screenHeight);
+  SPINNER_window_height = glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("height"),GLUI_SPINNER_INT,&glui_screenHeight);
   SPINNER_window_height->set_int_limits(100,max_screenHeight);
-  window_update=glui_motion->add_button_to_panel(panel_projection,_("Apply"),WINDOW_RESIZE,TRANSLATE_CB);
+  BUTTON_window_update=glui_motion->add_button_to_panel(ROLLOUT_projection,_("Apply"),WINDOW_RESIZE,TRANSLATE_CB);
 
-  render_panel = glui_motion->add_rollout(_("Render"),false);
-  render_type_radio=glui_motion->add_radiogroup_to_panel(render_panel,&renderfiletype,RENDER_TYPE,RENDER_CB);
-  glui_motion->add_radiobutton_to_group(render_type_radio,"PNG");
+  ROLLOUT_render = glui_motion->add_rollout(_("Render"),false);
+  RADIO_render_type=glui_motion->add_radiogroup_to_panel(ROLLOUT_render,&renderfiletype,RENDER_TYPE,RENDER_CB);
+  glui_motion->add_radiobutton_to_group(RADIO_render_type,"PNG");
 #ifdef pp_JPEG
-  glui_motion->add_radiobutton_to_group(render_type_radio,"JPEG");
+  glui_motion->add_radiobutton_to_group(RADIO_render_type,"JPEG");
 #endif
-  glui_motion->add_separator_to_panel(render_panel);
-  render_label_radio=glui_motion->add_radiogroup_to_panel(render_panel,&renderfilelabel,RENDER_LABEL,RENDER_CB);
-  RADIO_button_1f=glui_motion->add_radiobutton_to_group(render_label_radio,"frame number");
-  RADIO_button_1g=glui_motion->add_radiobutton_to_group(render_label_radio,"time (s)");
+  glui_motion->add_separator_to_panel(ROLLOUT_render);
+  RADIO_render_label=glui_motion->add_radiogroup_to_panel(ROLLOUT_render,&renderfilelabel,RENDER_LABEL,RENDER_CB);
+  RADIO_button_1f=glui_motion->add_radiobutton_to_group(RADIO_render_label,"frame number");
+  RADIO_button_1g=glui_motion->add_radiobutton_to_group(RADIO_render_label,"time (s)");
   update_glui_filelabel(renderfilelabel);
 
 
   render_size_index=RenderWindow; 
-  render_size_list = glui_motion->add_listbox_to_panel(render_panel,_("Size:"),&render_size_index,RENDER_SIZE_LIST,RENDER_CB);
-  render_size_list->add_item(Render320,"320x240");
-  render_size_list->add_item(Render640,"640x480");
-  render_size_list->add_item(RenderWindow,_("Current"));
-  render_size_list->add_item(Render2Window,_("2*Current"));
-  render_size_list->set_int_val(render_size_index);
+  LIST_render_size = glui_motion->add_listbox_to_panel(ROLLOUT_render,_("Size:"),&render_size_index,RENDER_SIZE_LIST,RENDER_CB);
+  LIST_render_size->add_item(Render320,"320x240");
+  LIST_render_size->add_item(Render640,"640x480");
+  LIST_render_size->add_item(RenderWindow,_("Current"));
+  LIST_render_size->add_item(Render2Window,_("2*Current"));
+  LIST_render_size->set_int_val(render_size_index);
 
   render_skip_index=RenderOnce; 
-  render_skip_list = glui_motion->add_listbox_to_panel(render_panel,_("Frames:"),&render_skip_index,RENDER_SKIP_LIST,RENDER_CB);
-  render_skip_list->add_item(RenderOnce,_("One"));
-  render_skip_list->add_item(1,_("All"));
-  render_skip_list->add_item(2,_("Every 2nd"));
-  render_skip_list->add_item(3,_("Every 3rd"));
-  render_skip_list->add_item(4,_("Every 4th"));
-  render_skip_list->add_item(5,_("Every 5th"));
-  render_skip_list->add_item(10,_("Every 10th"));
-  render_skip_list->add_item(20,_("Every 20th"));
+  LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render,_("Frames:"),&render_skip_index,RENDER_SKIP_LIST,RENDER_CB);
+  LIST_render_skip->add_item(RenderOnce,_("One"));
+  LIST_render_skip->add_item(1,_("All"));
+  LIST_render_skip->add_item(2,_("Every 2nd"));
+  LIST_render_skip->add_item(3,_("Every 3rd"));
+  LIST_render_skip->add_item(4,_("Every 4th"));
+  LIST_render_skip->add_item(5,_("Every 5th"));
+  LIST_render_skip->add_item(10,_("Every 10th"));
+  LIST_render_skip->add_item(20,_("Every 20th"));
 
 
-  panel_scene_clip = glui_motion->add_rollout_to_panel(render_panel,"Clip rendered scene");
-  SPINNER_clip_left=glui_motion->add_spinner_to_panel(panel_scene_clip,"left:",GLUI_SPINNER_INT,&render_clip_left);
+  ROLLOUT_scene_clip = glui_motion->add_rollout_to_panel(ROLLOUT_render,"Clip rendered scene");
+  SPINNER_clip_left=glui_motion->add_spinner_to_panel(ROLLOUT_scene_clip,"left:",GLUI_SPINNER_INT,&render_clip_left);
   SPINNER_clip_left->set_int_limits(0,screenWidth);
 
-  SPINNER_clip_right=glui_motion->add_spinner_to_panel(panel_scene_clip,"right:",GLUI_SPINNER_INT,&render_clip_right);
+  SPINNER_clip_right=glui_motion->add_spinner_to_panel(ROLLOUT_scene_clip,"right:",GLUI_SPINNER_INT,&render_clip_right);
   SPINNER_clip_right->set_int_limits(0,screenWidth);
 
-  SPINNER_clip_bottom=glui_motion->add_spinner_to_panel(panel_scene_clip,"bottom:",GLUI_SPINNER_INT,&render_clip_bottom);
+  SPINNER_clip_bottom=glui_motion->add_spinner_to_panel(ROLLOUT_scene_clip,"bottom:",GLUI_SPINNER_INT,&render_clip_bottom);
   SPINNER_clip_bottom->set_int_limits(0,screenHeight);
 
-  SPINNER_clip_top=glui_motion->add_spinner_to_panel(panel_scene_clip,"top:",GLUI_SPINNER_INT,&render_clip_top);
+  SPINNER_clip_top=glui_motion->add_spinner_to_panel(ROLLOUT_scene_clip,"top:",GLUI_SPINNER_INT,&render_clip_top);
   SPINNER_clip_top->set_int_limits(0,screenHeight);
 
-  CHECKBOX_clip_rendered_scene = glui_motion->add_checkbox_to_panel(panel_scene_clip,"clip rendered scene",&clip_rendered_scene);
+  CHECKBOX_clip_rendered_scene = glui_motion->add_checkbox_to_panel(ROLLOUT_scene_clip,"clip rendered scene",&clip_rendered_scene);
 
-  render_start=glui_motion->add_button_to_panel(render_panel,_("Start"),RENDER_START,RENDER_CB);
-  render_stop=glui_motion->add_button_to_panel(render_panel,_("Stop"),RENDER_STOP,RENDER_CB);
+  BUTTON_render_start=glui_motion->add_button_to_panel(ROLLOUT_render,_("Start"),RENDER_START,RENDER_CB);
+  BUTTON_render_stop=glui_motion->add_button_to_panel(ROLLOUT_render,_("Stop"),RENDER_STOP,RENDER_CB);
   
-  reset_panel3 = glui_motion->add_rollout(_("Viewpoints"),false);
-  view_lists = glui_motion->add_listbox_to_panel(reset_panel3,_("Select:"),&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
-  view_lists->set_alignment(GLUI_ALIGN_CENTER);
+  ROLLOUT_reset3 = glui_motion->add_rollout(_("Viewpoints"),false);
+  LIST_viewpoints = glui_motion->add_listbox_to_panel(ROLLOUT_reset3,_("Select:"),&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
+  LIST_viewpoints->set_alignment(GLUI_ALIGN_CENTER);
 
-  reset_panel = glui_motion->add_panel_to_panel(reset_panel3,"",false);
+  PANEL_reset = glui_motion->add_panel_to_panel(ROLLOUT_reset3,"",false);
 
 
-  reset_panel1 = glui_motion->add_panel_to_panel(reset_panel,"",false);
+  PANEL_reset1 = glui_motion->add_panel_to_panel(PANEL_reset,"",false);
 
-  delete_view=glui_motion->add_button_to_panel(reset_panel1,_("Delete"),DELETE_VIEW,BUTTON_Reset_CB);
+  BUTTON_delete_view=glui_motion->add_button_to_panel(PANEL_reset1,_("Delete"),DELETE_VIEW,BUTTON_Reset_CB);
   delete_view_is_disabled=0;
-  startup_button=glui_motion->add_button_to_panel(reset_panel1,_("Apply at startup"),STARTUP,BUTTON_Reset_CB);
-  cycle_views_button=glui_motion->add_button_to_panel(reset_panel1,_("Cycle"),CYCLEVIEWS,BUTTON_Reset_CB);
+  BUTTON_startup=glui_motion->add_button_to_panel(PANEL_reset1,_("Apply at startup"),STARTUP,BUTTON_Reset_CB);
+  BUTTON_cycle_views=glui_motion->add_button_to_panel(PANEL_reset1,_("Cycle"),CYCLEVIEWS,BUTTON_Reset_CB);
 
-  glui_motion->add_column_to_panel(reset_panel,true);
-  reset_panel2 = glui_motion->add_panel_to_panel(reset_panel,"",false);
+  glui_motion->add_column_to_panel(PANEL_reset,true);
+  PANEL_reset2 = glui_motion->add_panel_to_panel(PANEL_reset,"",false);
 
-  replace_view=glui_motion->add_button_to_panel(reset_panel2,_("Replace"),REPLACE_VIEW,BUTTON_Reset_CB);
-  add_view=glui_motion->add_button_to_panel(reset_panel2,_("Add"),ADD_VIEW,BUTTON_Reset_CB);
-  edit_view_label=glui_motion->add_edittext_to_panel(reset_panel2,_("Edit:"),GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
+  BUTTON_replace_view=glui_motion->add_button_to_panel(PANEL_reset2,_("Replace"),REPLACE_VIEW,BUTTON_Reset_CB);
+  BUTTON_add_view=glui_motion->add_button_to_panel(PANEL_reset2,_("Add"),ADD_VIEW,BUTTON_Reset_CB);
+  EDIT_view_label=glui_motion->add_edittext_to_panel(PANEL_reset2,_("Edit:"),GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
 
-  panel_scale = glui_motion->add_rollout(_("Scaling/Depth params"),false);
-  SPINNER_scalex=glui_motion->add_spinner_to_panel(panel_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
+  PANEL_scale = glui_motion->add_rollout(_("Scaling/Depth params"),false);
+  SPINNER_scalex=glui_motion->add_spinner_to_panel(PANEL_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
   SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_scaley=glui_motion->add_spinner_to_panel(panel_scale,_("Scale y"),GLUI_SPINNER_FLOAT,mscale+1);
+  SPINNER_scaley=glui_motion->add_spinner_to_panel(PANEL_scale,_("Scale y"),GLUI_SPINNER_FLOAT,mscale+1);
   SPINNER_scaley->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_scalez=glui_motion->add_spinner_to_panel(panel_scale,_("Scale z"),GLUI_SPINNER_FLOAT,mscale+2);
+  SPINNER_scalez=glui_motion->add_spinner_to_panel(PANEL_scale,_("Scale z"),GLUI_SPINNER_FLOAT,mscale+2);
   SPINNER_scalez->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_nearclip=glui_motion->add_spinner_to_panel(panel_scale,_("Near depth"),GLUI_SPINNER_FLOAT,&nearclip);
+  SPINNER_nearclip=glui_motion->add_spinner_to_panel(PANEL_scale,_("Near depth"),GLUI_SPINNER_FLOAT,&nearclip);
   SPINNER_nearclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_farclip=glui_motion->add_spinner_to_panel(panel_scale,_("Far depth"),GLUI_SPINNER_FLOAT,&farclip);
+  SPINNER_farclip=glui_motion->add_spinner_to_panel(PANEL_scale,_("Far depth"),GLUI_SPINNER_FLOAT,&farclip);
   SPINNER_farclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
-  cursor_checkbox=glui_motion->add_checkbox(_("Map cursor keys for Plot3D use"),&cursorPlot3D,CURSOR,TRANSLATE_CB);
-  panel_close = glui_motion->add_panel("",GLUI_PANEL_NONE);
+  CURSOR_blockpath=glui_motion->add_checkbox(_("Map cursor keys for Plot3D use"),&cursorPlot3D,CURSOR,TRANSLATE_CB);
+  PANEL_close = glui_motion->add_panel("",GLUI_PANEL_NONE);
 
-  BUTTON_motion_1=glui_motion->add_button_to_panel(panel_close,_("Save settings"),SAVE_SETTINGS,BUTTON_hide2_CB);
+  BUTTON_motion_1=glui_motion->add_button_to_panel(PANEL_close,_("Save settings"),SAVE_SETTINGS,BUTTON_hide2_CB);
 
-  glui_motion->add_column_to_panel(panel_close,false);
+  glui_motion->add_column_to_panel(PANEL_close,false);
 
-  BUTTON_motion_2=glui_motion->add_button_to_panel(panel_close,_("Close"),1,BUTTON_hide2_CB);
+  BUTTON_motion_2=glui_motion->add_button_to_panel(PANEL_close,_("Close"),1,BUTTON_hide2_CB);
 
   showhide_translate(rotation_type);
   glui_motion->set_main_gfx_window( main_window );
@@ -521,7 +530,7 @@ void enable_disable_views(void){
   int ival;
   camera *cex;
 
-  ival=view_lists->get_int_val();
+  ival=LIST_viewpoints->get_int_val();
   if(ival>=0){
 
     selected_view=ival;
@@ -531,10 +540,10 @@ void enable_disable_views(void){
     cex=cex->next;
     cex=cex->next;
     if(cex->next==NULL){
-      cycle_views_button->disable();
+      BUTTON_cycle_views->disable();
     }
     else{
-      cycle_views_button->enable();
+      BUTTON_cycle_views->enable();
     }
   }
 
@@ -542,16 +551,16 @@ void enable_disable_views(void){
     case -1:
     case 0:
     case 1:
-      replace_view->disable();
-      delete_view->disable();
-      add_view->disable();
-      edit_view_label->disable();
+      BUTTON_replace_view->disable();
+      BUTTON_delete_view->disable();
+      BUTTON_add_view->disable();
+      EDIT_view_label->disable();
       break;
     default:
-      edit_view_label->enable();
-      replace_view->enable();
-      add_view->enable();
-      delete_view->enable();
+      EDIT_view_label->enable();
+      BUTTON_replace_view->enable();
+      BUTTON_add_view->enable();
+      BUTTON_delete_view->enable();
     break;
   }
 }
@@ -607,15 +616,15 @@ extern "C" void update_translate(void){
   d_eye_xyz[1]=eye_xyz[1]-eye_xyz0[1];
   d_eye_xyz[2]=eye_xyz[2]-eye_xyz0[2];
 
-  translate_xy->set_x(d_eye_xyz[0]);
+  TRANSLATE_xy->set_x(d_eye_xyz[0]);
   if(rotation_type==ROTATION_1AXIS){
     d_eye_xyz[1]=0.0;
   }
-  translate_xy->set_y(d_eye_xyz[1]);
-  translate_z->set_y(eye_xyz[2]);
-  rotate_zx->set_x(angle_zx[0]);
-  rotate_zx->set_y(angle_zx[1]);
-  eyerotate_z->set_x(camera_current->azimuth);
+  TRANSLATE_xy->set_y(d_eye_xyz[1]);
+  TRANSLATE_z->set_y(eye_xyz[2]);
+  ROTATE_2axis->set_x(angle_zx[0]);
+  ROTATE_2axis->set_y(angle_zx[1]);
+  ROTATE_eye_z->set_x(camera_current->azimuth);
 }
 
 /* ------------------ update_rotation_index ------------------------ */
@@ -670,7 +679,7 @@ void update_rotation_index(int val){
 /* ------------------ update_projection_type ------------------------ */
 
 extern "C" void update_projection_type(void){
-  if(projection_radio!=NULL)projection_radio->set_int_val(projection_type);
+  if(RADIO_projection!=NULL)RADIO_projection->set_int_val(projection_type);
   if(projection_type==1){
     if(SPINNER_zoom!=NULL)    SPINNER_zoom->disable();
     if(SPINNER_aperture!=NULL)SPINNER_aperture->disable();
@@ -682,7 +691,7 @@ extern "C" void update_projection_type(void){
 }
 
 extern "C" void update_eyerotate(void){
-  eyerotate_z->set_x(camera_current->azimuth);
+  ROTATE_eye_z->set_x(camera_current->azimuth);
 }
 
 /* ------------------ showhide_translate ------------------------ */
@@ -700,48 +709,65 @@ extern "C" void showhide_translate(int var){
   switch (var){
 #ifdef pp_GENERAL_ROTATION
   case ROTATION_3AXIS:
+    if(ROTATE_3rdaxis!=NULL)ROTATE_3rdaxis->enable();
+    if(PANEL_translate!=NULL)PANEL_translate->enable();
+    if(ROTATE_2axis!=NULL)ROTATE_2axis->enable();
+    if(ROTATE_eye_z!=NULL)ROTATE_eye_z->disable();
+    if(BUTTON_90_z!=NULL)BUTTON_90_z->disable();
+    if(CHECKBOX_blockpath!=NULL)CHECKBOX_blockpath->disable();
+    if(PANEL_speed!=NULL)PANEL_speed->disable();
+    if(PANEL_height!=NULL)PANEL_height->disable();
+    if(RADIO_rotation_type!=NULL)RADIO_rotation_type->set_int_val(rotation_type);
+    if(BUTTON_eyelevel!=NULL)BUTTON_eyelevel->disable();
+    if(BUTTON_floorlevel!=NULL)BUTTON_floorlevel->disable();
+    if(LIST_mesh2!=NULL)LIST_mesh2->enable();
+    if(BUTTON_snap!=NULL)BUTTON_snap->enable();
+    break;
 #endif
   case ROTATION_2AXIS:
-    if(panel_translate!=NULL)panel_translate->enable();
-    if(rotate_zx!=NULL)rotate_zx->enable();
-    if(eyerotate_z!=NULL)eyerotate_z->disable();
-    if(eyerotate90_z!=NULL)eyerotate90_z->disable();
-    if(blockpath_checkbox!=NULL)blockpath_checkbox->disable();
-    if(panel_speed!=NULL)panel_speed->disable();
-    if(panel_height!=NULL)panel_height->disable();
+    if(ROTATE_3rdaxis!=NULL)ROTATE_3rdaxis->disable();
+    if(PANEL_translate!=NULL)PANEL_translate->enable();
+    if(ROTATE_2axis!=NULL)ROTATE_2axis->enable();
+    if(ROTATE_eye_z!=NULL)ROTATE_eye_z->disable();
+    if(BUTTON_90_z!=NULL)BUTTON_90_z->disable();
+    if(CHECKBOX_blockpath!=NULL)CHECKBOX_blockpath->disable();
+    if(PANEL_speed!=NULL)PANEL_speed->disable();
+    if(PANEL_height!=NULL)PANEL_height->disable();
     if(RADIO_rotation_type!=NULL)RADIO_rotation_type->set_int_val(rotation_type);
-    if(eyelevel!=NULL)eyelevel->disable();
-    if(floorlevel!=NULL)floorlevel->disable();
-    if(meshlist1!=NULL)meshlist1->enable();
-    if(button_snap!=NULL)button_snap->enable();
+    if(BUTTON_eyelevel!=NULL)BUTTON_eyelevel->disable();
+    if(BUTTON_floorlevel!=NULL)BUTTON_floorlevel->disable();
+    if(LIST_mesh2!=NULL)LIST_mesh2->enable();
+    if(BUTTON_snap!=NULL)BUTTON_snap->enable();
     break;
   case EYE_CENTERED:
-    if(panel_translate!=NULL)panel_translate->enable();
-    if(rotate_zx!=NULL)rotate_zx->disable();
-    if(eyerotate_z!=NULL)eyerotate_z->enable();
-    if(eyerotate90_z!=NULL)eyerotate90_z->enable();
-    if(blockpath_checkbox!=NULL)blockpath_checkbox->enable();
-    if(panel_speed!=NULL)panel_speed->enable();
-    if(panel_height!=NULL)panel_height->enable();
+    if(ROTATE_3rdaxis!=NULL)ROTATE_3rdaxis->disable();
+    if(PANEL_translate!=NULL)PANEL_translate->enable();
+    if(ROTATE_2axis!=NULL)ROTATE_2axis->disable();
+    if(ROTATE_eye_z!=NULL)ROTATE_eye_z->enable();
+    if(BUTTON_90_z!=NULL)BUTTON_90_z->enable();
+    if(CHECKBOX_blockpath!=NULL)CHECKBOX_blockpath->enable();
+    if(PANEL_speed!=NULL)PANEL_speed->enable();
+    if(PANEL_height!=NULL)PANEL_height->enable();
     if(RADIO_rotation_type!=NULL)RADIO_rotation_type->set_int_val(rotation_type);
-    if(eyelevel!=NULL)eyelevel->enable();
-    if(floorlevel!=NULL)floorlevel->enable();
-    if(meshlist1!=NULL)meshlist1->disable();
-    if(button_snap!=NULL)button_snap->disable();
+    if(BUTTON_eyelevel!=NULL)BUTTON_eyelevel->enable();
+    if(BUTTON_floorlevel!=NULL)BUTTON_floorlevel->enable();
+    if(LIST_mesh2!=NULL)LIST_mesh2->disable();
+    if(BUTTON_snap!=NULL)BUTTON_snap->disable();
     break;
   case ROTATION_1AXIS:
-    if(panel_translate!=NULL)panel_translate->enable();
-    if(rotate_zx!=NULL)rotate_zx->enable();
-    if(eyerotate_z!=NULL)eyerotate_z->disable();
-    if(eyerotate90_z!=NULL)eyerotate90_z->disable();
-    if(blockpath_checkbox!=NULL)blockpath_checkbox->disable();
-    if(panel_speed!=NULL)panel_speed->disable();
-    if(panel_height!=NULL)panel_height->disable();
+    if(ROTATE_3rdaxis!=NULL)ROTATE_3rdaxis->disable();
+    if(PANEL_translate!=NULL)PANEL_translate->enable();
+    if(ROTATE_2axis!=NULL)ROTATE_2axis->enable();
+    if(ROTATE_eye_z!=NULL)ROTATE_eye_z->disable();
+    if(BUTTON_90_z!=NULL)BUTTON_90_z->disable();
+    if(CHECKBOX_blockpath!=NULL)CHECKBOX_blockpath->disable();
+    if(PANEL_speed!=NULL)PANEL_speed->disable();
+    if(PANEL_height!=NULL)PANEL_height->disable();
     if(RADIO_rotation_type!=NULL)RADIO_rotation_type->set_int_val(rotation_type);
-    if(eyelevel!=NULL)eyelevel->disable();
-    if(floorlevel!=NULL)floorlevel->disable();
-    if(meshlist1!=NULL)meshlist1->enable();
-    if(button_snap!=NULL)button_snap->enable();
+    if(BUTTON_eyelevel!=NULL)BUTTON_eyelevel->disable();
+    if(BUTTON_floorlevel!=NULL)BUTTON_floorlevel->disable();
+    if(LIST_mesh2!=NULL)LIST_mesh2->enable();
+    if(BUTTON_snap!=NULL)BUTTON_snap->enable();
     break;
   default:
     ASSERT(FFALSE);
@@ -799,7 +825,7 @@ extern "C" void TRANSLATE_CB(int var){
 
 #ifdef pp_GPUTHROTTLE
   if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1&&
-     (var==EYE_ROTATE||var==EYE_ROTATE_90||var==ROTATE_ZX||var==TRANSLATE_XY||var==GLUI_Z)
+     (var==EYE_ROTATE||var==EYE_ROTATE_90||var==ROTATE_2AXIS||var==ROTATE_3RDAXIS||var==TRANSLATE_XY||var==GLUI_Z)
     ){
     float fps;
 
@@ -861,13 +887,19 @@ extern "C" void TRANSLATE_CB(int var){
       TRANSLATE_CB(EYE_ROTATE);
       glui_move_mode=EYE_ROTATE_90;
       return;
-    case ROTATE_ZX:
-      {
+    case ROTATE_2AXIS:
+      if(rotation_type==ROTATE_2AXIS){
         float *angle_zx;
+
         angle_zx = camera_current->angle_zx;
-        angle_zx[0] = rotate_zx->get_x();
-        angle_zx[1] = -rotate_zx->get_y();
+        angle_zx[0] = ROTATE_2axis->get_x();
+        angle_zx[1] = -ROTATE_2axis->get_y();
+        printf("x=%f y=%f\n",angle_zx[0],angle_zx[1]);
       }
+      else if(rotation_type==ROTATION_3AXIS){
+      }
+      break;
+    case ROTATE_3RDAXIS:
       break;
     case WINDOWSIZE_LIST:
       switch (windowsize_pointer){
@@ -1032,9 +1064,9 @@ extern "C" void TRANSLATE_CB(int var){
         eye_xyz0[1]=eye_xyz[1];
         update_translate();
       }
-      if(translate_xy!=NULL){
-        translate_xy->set_x(d_eye_xyz[0]);
-        translate_xy->set_y(d_eye_xyz[1]);
+      if(TRANSLATE_xy!=NULL){
+        TRANSLATE_xy->set_x(d_eye_xyz[0]);
+        TRANSLATE_xy->set_y(d_eye_xyz[1]);
       }
       glui_move_mode=TRANSLATE_XY;
       break;
@@ -1054,7 +1086,9 @@ extern "C" void TRANSLATE_CB(int var){
     case WINDOWSIZE_LIST:
     case SNAPSCENE:
       break;
-    case ROTATE_ZX:
+    case ROTATE_2AXIS:
+      break;
+    case ROTATE_3RDAXIS:
       break;
     default:
       ASSERT(FFALSE);
@@ -1065,8 +1099,8 @@ extern "C" void TRANSLATE_CB(int var){
 /* ------------------ update_meshlist1 ------------------------ */
 
 extern "C" void update_meshlist1(int val){
-  if(meshlist1==NULL)return;
-  meshlist1->set_int_val(val);
+  if(LIST_mesh2==NULL)return;
+  LIST_mesh2->set_int_val(val);
   if(val>=0&&val<nmeshes){
     RADIO_rotation_type->set_int_val(ROTATION_2AXIS);
     handle_rotation_type(0);
@@ -1113,7 +1147,7 @@ int dup_view(void){
   camera *ca;
   char *label;
 
-  label=edit_view_label->get_text();
+  label=EDIT_view_label->get_text();
   if(label==NULL)return 0;
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(strcmp(label,ca->name)==0)return 1;
@@ -1139,16 +1173,16 @@ void BUTTON_Reset_CB(int var){
     break;
   case SAVE_VIEW:
     strcpy(camera_current->name,camera_label);
-    reset_saved_view->enable();
+    BUTTON_reset_saved_view->enable();
     ViewpointMenu(SAVE_VIEW);
     break;
   case LABEL_VIEW:
     updatemenu=1;
     break;
   case REPLACE_VIEW:
-    ival=view_lists->get_int_val();
+    ival=LIST_viewpoints->get_int_val();
     selected_view=ival;
-    label=edit_view_label->get_text();
+    label=EDIT_view_label->get_text();
     cex=&camera_list_first;
     cex=cex->next;
     cex=cex->next;
@@ -1169,8 +1203,8 @@ void BUTTON_Reset_CB(int var){
     ca->next=next;
     ca->view_id=view_id;
 
-    view_lists->delete_item(ival);
-    view_lists->add_item(ival,label);
+    LIST_viewpoints->delete_item(ival);
+    LIST_viewpoints->add_item(ival,label);
     strcpy(ca->name,label);
 
     break;
@@ -1183,8 +1217,8 @@ void BUTTON_Reset_CB(int var){
     }
     break;
   case DELETE_VIEW:
-    ival=view_lists->get_int_val();
-    label=edit_view_label->get_text();
+    ival=LIST_viewpoints->get_int_val();
+    label=EDIT_view_label->get_text();
     cex=&camera_list_first;
     cex=cex->next;
     cex=cex->next;
@@ -1197,15 +1231,15 @@ void BUTTON_Reset_CB(int var){
     else{
       return;
     }
-    view_lists->delete_item(ival);
+    LIST_viewpoints->delete_item(ival);
     prev=cam1->prev;
     delete_camera(cam1);
     if(prev->view_id!=-1){
-      view_lists->set_int_val(prev->view_id);
+      LIST_viewpoints->set_int_val(prev->view_id);
       selected_view=prev->view_id;
     }
     else{
-      view_lists->set_int_val(0);
+      LIST_viewpoints->set_int_val(0);
       selected_view=0;
     }
     BUTTON_Reset_CB(RESTORE_VIEW);
@@ -1220,7 +1254,7 @@ void BUTTON_Reset_CB(int var){
     }
     break;
   case RESTORE_VIEW:
-    ival=view_lists->get_int_val();
+    ival=LIST_viewpoints->get_int_val();
     selected_view=ival;
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
       if(ca->view_id==ival)break;
@@ -1231,19 +1265,19 @@ void BUTTON_Reset_CB(int var){
     if(rotation_type==ROTATION_3AXIS)camera2quat(camera_current,quat_general,quat_rotation);
     if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0)updatezoommenu=1;
     camera_current->rotation_type=rotation_type_save;
-    edit_view_label->set_text(ca->name);
+    EDIT_view_label->set_text(ca->name);
     break;
   case LIST_VIEW:
-    ival=view_lists->get_int_val();
+    ival=LIST_viewpoints->get_int_val();
     old_listview=-2;
     if(ival==-1&&delete_view_is_disabled==0){
-      delete_view->disable();
+      BUTTON_delete_view->disable();
       delete_view_is_disabled=1;
       break;
     }
     else{
       if(delete_view_is_disabled==1){
-        delete_view->enable();
+        BUTTON_delete_view->enable();
         delete_view_is_disabled=0;
       }
     }
@@ -1252,12 +1286,12 @@ void BUTTON_Reset_CB(int var){
     enable_disable_views();
     break;
   case STARTUP:
-    startup_view_ini=view_lists->get_int_val();
+    startup_view_ini=LIST_viewpoints->get_int_val();
     selected_view=startup_view_ini;
     writeini(LOCAL_INI);
     break;
   case CYCLEVIEWS:
-    ival=view_lists->get_int_val();
+    ival=LIST_viewpoints->get_int_val();
     selected_view=ival;
     cex=&camera_list_first;
     cex=cex->next;
@@ -1288,7 +1322,7 @@ void BUTTON_Reset_CB(int var){
       }
       break;
     }
-    view_lists->set_int_val(ival);
+    LIST_viewpoints->set_int_val(ival);
     selected_view=ival;
     BUTTON_Reset_CB(RESTORE_VIEW);
     break;
@@ -1311,14 +1345,14 @@ extern "C" void add_list_view(char *label_in){
   char *label;
   camera *cam1,*cam2,*cex,*ca;
 
-  ival=view_lists->get_int_val();
+  ival=LIST_viewpoints->get_int_val();
   if(ival==-1){
-    view_lists->set_int_val(0);
-    ival=view_lists->get_int_val();
+    LIST_viewpoints->set_int_val(0);
+    ival=LIST_viewpoints->get_int_val();
   }
   selected_view=ival;
   label=label_in;
-  if(label==NULL)label=edit_view_label->get_text();
+  if(label==NULL)label=EDIT_view_label->get_text();
   cex=&camera_list_first;
   cex=cex->next;
   cex=cex->next;
@@ -1333,8 +1367,8 @@ extern "C" void add_list_view(char *label_in){
   }
   cam2 = insert_camera(cam1,camera_current,label);
   if(cam2!=NULL){
-    view_lists->add_item(cam2->view_id,cam2->name);
-    view_lists->set_int_val(cam2->view_id);
+    LIST_viewpoints->add_item(cam2->view_id,cam2->name);
+    LIST_viewpoints->set_int_val(cam2->view_id);
     selected_view=cam2->view_id;
   }
   enable_disable_views();
@@ -1375,7 +1409,7 @@ void RENDER_CB(int var){
       }
       else{
         render_skip_index = RenderOnce;
-        render_skip_list->set_int_val(render_skip_index);
+        LIST_render_skip->set_int_val(render_skip_index);
         RenderMenu(render_skip_index);
       }
       break;
@@ -1392,9 +1426,9 @@ void RENDER_CB(int var){
 
 extern "C" void update_glui_render(void){
   if(RenderTime==1&&RenderTimeOld==0){
-    if(render_skip_list!=NULL&&render_skip_index==RenderOnce){
+    if(LIST_render_skip!=NULL&&render_skip_index==RenderOnce){
       render_skip_index=1;
-      render_skip_list->set_int_val(render_skip_index);
+      LIST_render_skip->set_int_val(render_skip_index);
     }
   }
   RenderTimeOld=RenderTime;
