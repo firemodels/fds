@@ -1001,7 +1001,7 @@ void Move_Gen_Slice(int xm, int ym){
 /* ------------------ Move_Scene ------------------------ */
 
 void Move_Scene(int xm, int ym){
-  float *eye_xyz, *angle_zx;
+  float *eye_xyz, *az_elev;
   int screenWidth2, screenHeight2;
   int dxm, dym;
   float azimuth;
@@ -1009,7 +1009,7 @@ void Move_Scene(int xm, int ym){
   float xx, yy;
 
   eye_xyz = camera_current->eye;
-  angle_zx = camera_current->angle_zx;
+  az_elev = camera_current->az_elev;
   screenWidth2 = screenWidth - dwinWW;
   screenHeight2 = screenHeight - dwinH;
 
@@ -1024,12 +1024,12 @@ void Move_Scene(int xm, int ym){
 #endif        
         case ROTATION_2AXIS:
         case ROTATION_1AXIS:
-          angle_zx[0] += dxm;
+          az_elev[0] += dxm;
           if(rotation_type==ROTATION_2AXIS){
-            angle_zx[1] += dym;
+            az_elev[1] += dym;
           }
           else{
-            angle_zx[1]=0.0;
+            az_elev[1]=0.0;
           }
           start_xyz0[0]=xm;
           start_xyz0[1]=ym;
@@ -1959,11 +1959,11 @@ void keyboard_CB(unsigned char key, int x, int y){
 /* ------------------ handle_rotation_type ------------------------ */
 
 void handle_rotation_type(int flag){
-  float *angle_zx;
+  float *az_elev;
 
   if(rotation_type==rotation_type_old)return;
   camera_current->rotation_type=rotation_type;
-  angle_zx = camera_current->angle_zx;
+  az_elev = camera_current->az_elev;
   updatemenu=1;
   switch (rotation_type){
 #ifdef pp_GENERAL_ROTATION
@@ -1981,14 +1981,14 @@ void handle_rotation_type(int flag){
       }
       break;
   case EYE_CENTERED:
-       angle_zx[1]=0.0;
+       az_elev[1]=0.0;
        if(showtrainer_dialog==0&&flag==0&&rotation_type_old!=EYE_CENTERED){
          ResetView(RESTORE_EXTERIOR_VIEW);
        }
       if(trainer_mode==0)printf("eye centered\n");
       break;
   case ROTATION_1AXIS:
-    angle_zx[1]=0.0;
+    az_elev[1]=0.0;
     if(trainer_mode==0)printf("Scene centered (level rotation)\n");
     if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
       ResetView(RESTORE_EXTERIOR_VIEW);
@@ -2920,10 +2920,7 @@ void Display_CB(void){
     if(RenderGif == 0)angle_global += dang_global;
     if(angle_global>PI){angle_global -= -2.0f*PI;}
     if(rotation_type==ROTATION_2AXIS||rotation_type==ROTATION_1AXIS){
-      float *angle_zx;
-
-      angle_zx = camera_current->angle_zx;
-      angle_zx[0] = anglexy0 + angle_global*RAD2DEG;
+      camera_current->az_elev[0] = anglexy0 + angle_global*RAD2DEG;
     }
     else{          
       camera_current->azimuth = azimuth0 + angle_global*RAD2DEG;

@@ -136,8 +136,8 @@ extern "C" void update_trainer_moves(void){
   float *eye_xyz;
   float *az, *elev;
 
-  az = camera_current->angle_zx;
-  elev = camera_current->angle_zx+1;
+  az = camera_current->az_elev;
+  elev = camera_current->az_elev+1;
 
   eye_xyz = camera_current->eye;
 
@@ -253,8 +253,8 @@ void ROTATE_CB(int var){
   float *eye_xyz, *az, *elev;
 
   eye_xyz = camera_current->eye;
-  az = camera_current->angle_zx;
-  elev = camera_current->angle_zx+1;
+  az = camera_current->az_elev;
+  elev = camera_current->az_elev+1;
 
 
   if(rotation_type!=ROTATION_2AXIS){

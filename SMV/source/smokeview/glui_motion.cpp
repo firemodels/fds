@@ -607,10 +607,10 @@ extern "C" void update_windowsizelist(void){
 /* ------------------ update_translate ------------------------ */
 
 extern "C" void update_translate(void){
-  float *eye_xyz,*angle_zx;
+  float *eye_xyz,*az_elev;
 
   eye_xyz = camera_current->eye;
-  angle_zx = camera_current->angle_zx;
+  az_elev = camera_current->az_elev;
 
   d_eye_xyz[0]=eye_xyz[0]-eye_xyz0[0];
   d_eye_xyz[1]=eye_xyz[1]-eye_xyz0[1];
@@ -622,9 +622,13 @@ extern "C" void update_translate(void){
   }
   TRANSLATE_xy->set_y(d_eye_xyz[1]);
   TRANSLATE_z->set_y(eye_xyz[2]);
-  ROTATE_2axis->set_x(angle_zx[0]);
-  ROTATE_2axis->set_y(angle_zx[1]);
-  ROTATE_eye_z->set_x(camera_current->azimuth);
+  if(rotation_type==ROTATION_3AXIS){
+  }
+  else{
+    ROTATE_2axis->set_x(az_elev[0]);
+    ROTATE_2axis->set_y(az_elev[1]);
+    ROTATE_eye_z->set_x(camera_current->azimuth);
+  }
 }
 
 /* ------------------ update_rotation_index ------------------------ */
@@ -633,7 +637,7 @@ void update_rotation_index(int val){
   mesh *meshi;
   int i;
   float *modelview_rotate;
-  float *angle_zx;
+  float *az_elev;
   int *rotation_index;
 
   rotation_index = &camera_current->rotation_index;
@@ -657,10 +661,10 @@ void update_rotation_index(int val){
     modelview_rotate[i]=modelview_current[i];
   }
 
-  angle_zx = camera_current->angle_zx;
+  az_elev = camera_current->az_elev;
 
-  angle_zx[0]=0.; 
-  angle_zx[1]=0.; 
+  az_elev[0]=0.; 
+  az_elev[1]=0.; 
 
   camera_current->azimuth=0.0;
   camera_current->cos_azimuth = 1.0;
@@ -889,12 +893,12 @@ extern "C" void TRANSLATE_CB(int var){
       return;
     case ROTATE_2AXIS:
       if(rotation_type==ROTATE_2AXIS){
-        float *angle_zx;
+        float *az_elev;
 
-        angle_zx = camera_current->angle_zx;
-        angle_zx[0] = ROTATE_2axis->get_x();
-        angle_zx[1] = -ROTATE_2axis->get_y();
-        printf("x=%f y=%f\n",angle_zx[0],angle_zx[1]);
+        az_elev = camera_current->az_elev;
+        az_elev[0] = ROTATE_2axis->get_x();
+        az_elev[1] = -ROTATE_2axis->get_y();
+        printf("x=%f y=%f\n",az_elev[0],az_elev[1]);
       }
       else if(rotation_type==ROTATION_3AXIS){
       }

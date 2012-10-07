@@ -912,14 +912,14 @@ float hermiteview(float t, int i, keyframe *kf1, keyframe *kf2, float *slope){
 /* ------------------ defaulttour ------------------------ */
 
 void defaulttour(void){
-  float *eye_xyz,*angle_zx;
+  float *eye_xyz,*az_elev;
 
   touring=1;
   angle_global=0;
   eye_xyz = camera_current->eye;
-  angle_zx = camera_current->angle_zx;
+  az_elev = camera_current->az_elev;
 
-  anglexy0 = angle_zx[0];
+  anglexy0 = az_elev[0];
   azimuth0 = camera_current->azimuth;
   eyex0 = eye_xyz[0];
   eyey0 = eye_xyz[1];

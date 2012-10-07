@@ -245,8 +245,8 @@ void camera2quat(camera *ca, float *quat, float *rotation){
     float quat_temp[4];
     float azimuth, elevation,axis[3];
 
-    azimuth = ca->angle_zx[0]*DEG2RAD;
-    elevation = (ca->angle_zx[1])*DEG2RAD;
+    azimuth = ca->az_elev[0]*DEG2RAD;
+    elevation = (ca->az_elev[1])*DEG2RAD;
 
     axis[0]=1.0;
     axis[1]=0.0;
@@ -304,8 +304,8 @@ void ResetView(int option){
     float quat_temp[4];
     float x, y, z;
    
-    azimuth = camera_current->angle_zx[0]*DEG2RAD;
-    elevation = camera_current->angle_zx[1]*DEG2RAD;
+    azimuth = camera_current->az_elev[0]*DEG2RAD;
+    elevation = camera_current->az_elev[1]*DEG2RAD;
 
     x = cos(azimuth);
     y = sin(azimuth);

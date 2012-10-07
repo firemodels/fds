@@ -9880,7 +9880,7 @@ int readini2(char *inifile, int localfile){
       ||match(buffer,"VIEWPOINT6")==1
       ){
       int p_type;
-      float *eye,*mat,*angle_zx;
+      float *eye,*mat,*az_elev;
       int is_viewpoint4=0;
       int is_viewpoint5=0;
       int is_viewpoint6=0;
@@ -9897,7 +9897,7 @@ int readini2(char *inifile, int localfile){
       }
       eye=camera_ini->eye;
       mat=camera_ini->modelview;
-      angle_zx=camera_ini->angle_zx;
+      az_elev=camera_ini->az_elev;
 
       {
         char name_ini[32];
@@ -9946,7 +9946,7 @@ int readini2(char *inifile, int localfile){
 	    sscanf(buffer,"%f %f %f",&camera_ini->xcen,&camera_ini->ycen,&camera_ini->zcen);
 
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",angle_zx,angle_zx+1);
+      sscanf(buffer,"%f %f",az_elev,az_elev+1);
 
       if(is_viewpoint6==1){
         float *q;
@@ -11365,7 +11365,7 @@ void writeini(int flag){
     ((INI_fds_filein!=NULL&&fds_filein!=NULL&&strcmp(INI_fds_filein,fds_filein)==0)||
     flag==LOCAL_INI)){
     {
-      float *eye, *angle_zx, *mat;
+      float *eye, *az_elev, *mat;
       camera *ca;
 
       for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
@@ -11373,7 +11373,7 @@ void writeini(int flag){
         if(strcmp(ca->name,"external")==0)continue;
         fprintf(fileout,"VIEWPOINT6\n");
         eye = ca->eye;
-        angle_zx = ca->angle_zx;
+        az_elev = ca->az_elev;
         mat = ca->modelview;
 
 		    fprintf(fileout," %i %i %i\n",
@@ -11393,7 +11393,7 @@ void writeini(int flag){
           ca->ycen,
           ca->zcen);
 
-        fprintf(fileout," %f %f\n",angle_zx[0],angle_zx[1]);
+        fprintf(fileout," %f %f\n",az_elev[0],az_elev[1]);
         if(ca->quat_defined==1){
           fprintf(fileout," 1 %f %f %f %f\n",ca->quaternion[0],ca->quaternion[1],ca->quaternion[2],ca->quaternion[3]);
         }

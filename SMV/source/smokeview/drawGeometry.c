@@ -4458,8 +4458,8 @@ void snap_scene(void){
 
 #define DELTA 45.0
 
-  az = camera_current->angle_zx;
-  elev = camera_current->angle_zx+1;
+  az = camera_current->az_elev;
+  elev = camera_current->az_elev+1;
 
   if(*az>0.0){
     iaz = (*az+DELTA/2.0)/DELTA;

@@ -124,8 +124,8 @@ void init_camera(camera *camera_data,char *name){
   for(i=0;i<16;i+=5){
     x[i]=1.0;
   }
-  camera_data->angle_zx[0]=0.0;
-  camera_data->angle_zx[1]=0.0;
+  camera_data->az_elev[0]=0.0;
+  camera_data->az_elev[1]=0.0;
   camera_data->up[0]=0.0;
   camera_data->up[1]=0.0;
   camera_data->up[2]=1.0;

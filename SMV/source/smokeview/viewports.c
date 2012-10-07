@@ -796,8 +796,8 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
         camera_current->eye[0]=pj->eye[0];
         camera_current->eye[1]=pj->eye[1];
         camera_current->eye[2]=pj->eye[2];
-        camera_current->angle_zx[1]=0.0;
-        camera_current->angle_zx[0]=0.0;
+        camera_current->az_elev[1]=0.0;
+        camera_current->az_elev[0]=0.0;
 
       }
     }
@@ -810,8 +810,8 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     camera_current->azimuth=selected_avatar_angle;
     camera_current->view_angle=0.0;
     update_camera(camera_current);
-    //camera_current->angle_zx[1]=0.0;
-    //camera_current->angle_zx[0]=0.0;
+    //camera_current->az_elev[1]=0.0;
+    //camera_current->az_elev[0]=0.0;
   }
 
   eyexINI = camera_current->eye[0];
@@ -918,8 +918,8 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     viewy = posy + cos_dv_sum*cos_elevation;
     viewz = posz + sin_elevation;
 
-    elevation = camera_current->angle_zx[1];
-    azimuth = camera_current->angle_zx[0];
+    elevation = camera_current->az_elev[1];
+    azimuth = camera_current->az_elev[0];
     
     /* set view direction for virtual tour */
     {
