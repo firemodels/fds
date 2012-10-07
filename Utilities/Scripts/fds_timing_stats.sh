@@ -7,6 +7,8 @@
 # This script checks the .out files for the FDS Verification Suite and generates
 # a .csv file of the CPU time (and other metrics) called fds_timing_stats.csv
 
+SVNROOT=`pwd`/../..
+
 # Mode argument: smokebot, or anything else (including no argument) for normal mode
 MODE=$1
 
