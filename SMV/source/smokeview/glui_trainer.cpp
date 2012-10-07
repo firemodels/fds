@@ -40,18 +40,25 @@ void TRAINER_CB(int var);
 #define MENU_OUTLINEVIEW -104
 
 GLUI *glui_trainer=NULL;
+
 GLUI_Checkbox *CHECKBOX_pause=NULL;
 GLUI_Checkbox *CHECKBOX_outline=NULL;
+
 GLUI_Listbox *LIST_trainerpath=NULL,*LIST_viewpoint=NULL;
-GLUI_Panel *panel_smokeview=NULL;
-GLUI_Panel *panel_explore=NULL;
-GLUI_Panel *panel_manual=NULL;//, *panel_automatic=NULL;
-GLUI_Panel *panel_move=NULL,*panel_rotate2=NULL;
+
+GLUI_Panel *PANEL_smokeview=NULL;
+GLUI_Panel *PANEL_explore=NULL;
+GLUI_Panel *PANEL_manual=NULL;//, *PANEL_automatic=NULL;
+GLUI_Panel *PANEL_move=NULL,*PANEL_rotate2=NULL;
+
 GLUI_Button *BUTTON_smoke3d=NULL, *BUTTON_temp=NULL, *BUTTON_oxy=NULL, *BUTTON_unload=NULL;
 GLUI_Button *BUTTON_toggle_view=NULL;
-GLUI_Translation *TRANS_updown=NULL,*TRANS_leftright_inout=NULL;
-GLUI_Translation *TRANS_az_elev=NULL;
+
+GLUI_Translation *TRANSLATE_updown=NULL,*TRANSLATE_leftright_inout=NULL;
+GLUI_Translation *TRANSLATE_az_elev=NULL;
+
 GLUI_StaticText *STATIC_alert=NULL;
+
 GLUI *glui_alert=NULL;
 
 /* ------------------ update_glui_viewlist ------------------------ */
@@ -134,21 +141,21 @@ extern "C" void update_trainer_moves(void){
 
   eye_xyz = camera_current->eye;
 
-  if(TRANS_leftright_inout!=NULL){
-    TRANS_leftright_inout->set_x(eye_xyz[0]);
-    TRANS_leftright_inout->set_y(eye_xyz[1]);
-    TRANS_leftright_inout->set_speed(1.0/(float)screenWidth);
+  if(TRANSLATE_leftright_inout!=NULL){
+    TRANSLATE_leftright_inout->set_x(eye_xyz[0]);
+    TRANSLATE_leftright_inout->set_y(eye_xyz[1]);
+    TRANSLATE_leftright_inout->set_speed(1.0/(float)screenWidth);
   }
 
-  if(TRANS_updown!=NULL){
-    TRANS_updown->set_x(eye_xyz[2]);
-    TRANS_updown->set_speed(1.0/(float)screenHeight);
+  if(TRANSLATE_updown!=NULL){
+    TRANSLATE_updown->set_x(eye_xyz[2]);
+    TRANSLATE_updown->set_speed(1.0/(float)screenHeight);
   }
 
-  if(TRANS_az_elev!=NULL){
-    TRANS_az_elev->set_x(*az);
-    TRANS_az_elev->set_speed(180.0/(float)screenHeight);
-    TRANS_az_elev->set_y(*elev);
+  if(TRANSLATE_az_elev!=NULL){
+    TRANSLATE_az_elev->set_x(*az);
+    TRANSLATE_az_elev->set_speed(180.0/(float)screenHeight);
+    TRANSLATE_az_elev->set_y(*elev);
   }
 
 }
@@ -167,20 +174,20 @@ extern "C" void glui_trainer_setup(int main_window){
   if(showgluitrainer==0)glui_trainer->hide();
   
   glui_trainer->set_main_gfx_window( main_window );
-  panel_smokeview = glui_trainer->add_panel(_("Data"));
-  BUTTON_smoke3d = glui_trainer->add_button_to_panel(panel_smokeview,_("Smoke/Fire"),LOAD_SMOKE,TRAINER_CB);
+  PANEL_smokeview = glui_trainer->add_panel(_("Data"));
+  BUTTON_smoke3d = glui_trainer->add_button_to_panel(PANEL_smokeview,_("Smoke/Fire"),LOAD_SMOKE,TRAINER_CB);
   if(AnySmoke(NULL)==0)BUTTON_smoke3d->disable();
-  BUTTON_temp = glui_trainer->add_button_to_panel(panel_smokeview,_("Temperature"),LOAD_TEMP,TRAINER_CB);
+  BUTTON_temp = glui_trainer->add_button_to_panel(PANEL_smokeview,_("Temperature"),LOAD_TEMP,TRAINER_CB);
   if(AnySlices("TEMPERATURE")==0)BUTTON_temp->disable();
-  BUTTON_oxy = glui_trainer->add_button_to_panel(panel_smokeview,_("Oxygen"),LOAD_OXY,TRAINER_CB);
+  BUTTON_oxy = glui_trainer->add_button_to_panel(PANEL_smokeview,_("Oxygen"),LOAD_OXY,TRAINER_CB);
   if(AnySlices("oxygen")==0&&AnySlices(_("oxygen VOLUME FRACTION"))==0){
     BUTTON_oxy->disable();
   }
   
-  panel_explore = glui_trainer->add_panel("Explore",true);
+  PANEL_explore = glui_trainer->add_panel("Explore",true);
 
   trainer_path=-1;
-  LIST_trainerpath = glui_trainer->add_listbox_to_panel(panel_explore,_("Path:"),&trainer_path,TRAINERPATH,TRAINER_CB);
+  LIST_trainerpath = glui_trainer->add_listbox_to_panel(PANEL_explore,_("Path:"),&trainer_path,TRAINERPATH,TRAINER_CB);
   {
     int i;
     LIST_trainerpath->add_item(-1,_("Manual"));
@@ -193,7 +200,7 @@ extern "C" void glui_trainer_setup(int main_window){
     }
   }
 
-  LIST_viewpoint = glui_trainer->add_listbox_to_panel(panel_explore,_("Viewpoint:"),&trainer_viewpoints,TRAINERVIEWPOINTS,TRAINER_CB);
+  LIST_viewpoint = glui_trainer->add_listbox_to_panel(PANEL_explore,_("Viewpoint:"),&trainer_viewpoints,TRAINERVIEWPOINTS,TRAINER_CB);
   {
     camera *ca;
 
@@ -213,23 +220,23 @@ extern "C" void glui_trainer_setup(int main_window){
       if(ca->view_id>=1)ntrainer_viewpoints++;
     }
   }
-  BUTTON_toggle_view = glui_trainer->add_button_to_panel(panel_explore,_("Toggle View"),TOGGLE_VIEW,TRAINER_CB);
+  BUTTON_toggle_view = glui_trainer->add_button_to_panel(PANEL_explore,_("Toggle View"),TOGGLE_VIEW,TRAINER_CB);
   if(ntrainer_viewpoints<=2)BUTTON_toggle_view->disable();
 
-  CHECKBOX_outline = glui_trainer->add_checkbox_to_panel(panel_explore,_("Show walls"),&trainer_outline,TRAINEROUTLINE,TRAINER_CB);
-  CHECKBOX_pause = glui_trainer->add_checkbox_to_panel(panel_explore,_("Pause"),&trainer_pause,TRAINER_PAUSE,TRAINER_CB);
+  CHECKBOX_outline = glui_trainer->add_checkbox_to_panel(PANEL_explore,_("Show walls"),&trainer_outline,TRAINEROUTLINE,TRAINER_CB);
+  CHECKBOX_pause = glui_trainer->add_checkbox_to_panel(PANEL_explore,_("Pause"),&trainer_pause,TRAINER_PAUSE,TRAINER_CB);
 
   update_trainer_outline();
-  panel_move = glui_trainer->add_panel_to_panel(panel_explore,_("Move"),false);
-  TRANS_leftright_inout = glui_trainer->add_translation_to_panel(panel_move,_("Horizontal"),
+  PANEL_move = glui_trainer->add_panel_to_panel(PANEL_explore,_("Move"),false);
+  TRANSLATE_leftright_inout = glui_trainer->add_translation_to_panel(PANEL_move,_("Horizontal"),
     GLUI_TRANSLATION_XY,trainer_xzy,TRAINER_LEFTRIGHT_INOUT,ROTATE_CB);
-  glui_trainer->add_column_to_panel(panel_move,false);
+  glui_trainer->add_column_to_panel(PANEL_move,false);
 
-  TRANS_updown = glui_trainer->add_translation_to_panel(panel_move,_("Vertical"),
+  TRANSLATE_updown = glui_trainer->add_translation_to_panel(PANEL_move,_("Vertical"),
     GLUI_TRANSLATION_Y,trainer_xzy+2,TRAINER_UPDOWN,ROTATE_CB);
-  glui_trainer->add_column_to_panel(panel_move,false);
+  glui_trainer->add_column_to_panel(PANEL_move,false);
 
-  TRANS_az_elev = glui_trainer->add_translation_to_panel(panel_move,_("Rotate"),
+  TRANSLATE_az_elev = glui_trainer->add_translation_to_panel(PANEL_move,_("Rotate"),
     GLUI_TRANSLATION_XY,trainer_ab,TRAINER_AZ_ELEV,ROTATE_CB);
 
   update_trainer_moves();
@@ -265,15 +272,15 @@ void ROTATE_CB(int var){
   }
   switch (var){
   case TRAINER_AZ_ELEV:
-    *az = TRANS_az_elev->get_x();
-    *elev = -TRANS_az_elev->get_y();
+    *az = TRANSLATE_az_elev->get_x();
+    *elev = -TRANSLATE_az_elev->get_y();
     break;
   case TRAINER_LEFTRIGHT_INOUT:
-    eye_xyz[0]=TRANS_leftright_inout->get_x();
-    eye_xyz[1]=TRANS_leftright_inout->get_y();
+    eye_xyz[0]=TRANSLATE_leftright_inout->get_x();
+    eye_xyz[1]=TRANSLATE_leftright_inout->get_y();
     break;
   case TRAINER_UPDOWN:
-    eye_xyz[2]=TRANS_updown->get_y();
+    eye_xyz[2]=TRANSLATE_updown->get_y();
     break;
   default:
     ASSERT(FFALSE);

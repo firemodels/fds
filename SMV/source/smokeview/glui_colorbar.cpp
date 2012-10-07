@@ -23,28 +23,30 @@ extern "C" char glui_colorbar_revision[]="$Revision$";
 //
 // setColorbarClipPlanes(1);
 
-GLUI_Panel *panel_cb1=NULL;
-GLUI_Panel *panel_cb2=NULL;
-GLUI_Panel *panel_cb2L=NULL;
-GLUI_Panel *panel_cb2R=NULL;
-GLUI_Panel *panel_cb2R2=NULL;
-GLUI_Panel *panel_cb3=NULL;
-GLUI_Panel *panel_cb4=NULL;
-GLUI_Panel *panel_cb4L=NULL;
-GLUI_Panel *panel_cb4R=NULL;
-GLUI_Panel *panel_point=NULL;
-GLUI_Panel *panel_extreme=NULL;
-GLUI_Panel *panel_cb5=NULL;
-GLUI_Panel *panel_cb5a=NULL;
-GLUI_Panel *panel_cb5b=NULL;
-GLUI_Panel *panel_cb6=NULL;
-GLUI_Panel *panel_cb7=NULL;
-GLUI_Panel *panel_cb8=NULL;
-GLUI_Panel *panel_cb9=NULL;
-GLUI_Panel *panel_cb10=NULL;
+GLUI *glui_colorbar=NULL;
+
+GLUI_Panel *PANEL_cb1=NULL;
+GLUI_Panel *PANEL_cb2=NULL;
+GLUI_Panel *PANEL_cb2L=NULL;
+GLUI_Panel *PANEL_cb2R=NULL;
+GLUI_Panel *PANEL_cb2R2=NULL;
+GLUI_Panel *PANEL_cb3=NULL;
+GLUI_Panel *PANEL_cb4=NULL;
+GLUI_Panel *PANEL_cb4L=NULL;
+GLUI_Panel *PANEL_cb4R=NULL;
+GLUI_Panel *PANEL_point=NULL;
+GLUI_Panel *PANEL_extreme=NULL;
+GLUI_Panel *PANEL_cb5=NULL;
+GLUI_Panel *PANEL_cb5a=NULL;
+GLUI_Panel *PANEL_cb5b=NULL;
+GLUI_Panel *PANEL_cb6=NULL;
+GLUI_Panel *PANEL_cb7=NULL;
+GLUI_Panel *PANEL_cb8=NULL;
+GLUI_Panel *PANEL_cb9=NULL;
+GLUI_Panel *PANEL_cb10=NULL;
 
 GLUI_Listbox *LISTBOX_colorbar=NULL;
-GLUI *glui_colorbar=NULL;
+
 GLUI_Spinner *SPINNER_down_red=NULL;
 GLUI_Spinner *SPINNER_down_green=NULL;
 GLUI_Spinner *SPINNER_down_blue=NULL;
@@ -57,6 +59,11 @@ GLUI_Spinner *SPINNER_left_blue=NULL;
 GLUI_Spinner *SPINNER_right_red=NULL;
 GLUI_Spinner *SPINNER_right_green=NULL;
 GLUI_Spinner *SPINNER_right_blue=NULL;
+GLUI_Spinner *SPINNER_valmin=NULL;
+GLUI_Spinner *SPINNER_valmax=NULL;
+GLUI_Spinner *SPINNER_val=NULL;
+GLUI_Spinner *SPINNER_colorindex=NULL;
+
 GLUI_Button *BUTTON_next=NULL,*BUTTON_prev=NULL;
 GLUI_Button *BUTTON_new=NULL;
 GLUI_Button *BUTTON_delete=NULL;
@@ -66,13 +73,12 @@ GLUI_Button *BUTTON_savesettings=NULL;
 GLUI_Button *BUTTON_update=NULL;
 GLUI_Button *BUTTON_colorbar_save=NULL;
 GLUI_Button *BUTTON_colorbar_close=NULL;
+
 GLUI_Checkbox *CHECKBOX_usebounds=NULL;
-GLUI_Spinner *SPINNER_valmin=NULL;
-GLUI_Spinner *SPINNER_valmax=NULL;
-GLUI_Spinner *SPINNER_val=NULL;
-GLUI_Spinner *SPINNER_colorindex=NULL;
 GLUI_Checkbox *CHECKBOX_hidesv=NULL;
+
 GLUI_EditText *EDITTEXT_colorbar_label=NULL;
+
 GLUI_StaticText *STATICTEXT_left=NULL, *STATICTEXT_right=NULL;
 
 
@@ -177,18 +183,18 @@ extern "C" void glui_colorbar_setup(int main_window){
   glui_colorbar = GLUI_Master.create_glui(_("Colorbar editor"),0,0,0);
   if(showcolorbar_dialog==0)glui_colorbar->hide();
 
-  panel_cb2R2 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  BUTTON_new=glui_colorbar->add_button_to_panel(panel_cb2R2,_("New colorbar"),COLORBAR_NEW,COLORBAR_CB);
-  glui_colorbar->add_column_to_panel(panel_cb2R2,false);
-  BUTTON_delete=glui_colorbar->add_button_to_panel(panel_cb2R2,_("Delete colorbar"),COLORBAR_DELETE,COLORBAR_CB);
-  glui_colorbar->add_column_to_panel(panel_cb2R2,false);
+  PANEL_cb2R2 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
+  BUTTON_new=glui_colorbar->add_button_to_panel(PANEL_cb2R2,_("New colorbar"),COLORBAR_NEW,COLORBAR_CB);
+  glui_colorbar->add_column_to_panel(PANEL_cb2R2,false);
+  BUTTON_delete=glui_colorbar->add_button_to_panel(PANEL_cb2R2,_("Delete colorbar"),COLORBAR_DELETE,COLORBAR_CB);
+  glui_colorbar->add_column_to_panel(PANEL_cb2R2,false);
   cb_hidesv=1;
-  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(panel_cb2R2,_("Hide scene"),&cb_hidesv);
+  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(PANEL_cb2R2,_("Hide scene"),&cb_hidesv);
 
-  panel_cb1 = glui_colorbar->add_panel(_("Colorbar"));
+  PANEL_cb1 = glui_colorbar->add_panel(_("Colorbar"));
   if(ncolorbars>0){
     selectedcolorbar_index=-1;
-    LISTBOX_colorbar=glui_colorbar->add_listbox_to_panel(panel_cb1,"",&selectedcolorbar_index,COLORBAR_LIST,COLORBAR_CB);
+    LISTBOX_colorbar=glui_colorbar->add_listbox_to_panel(PANEL_cb1,"",&selectedcolorbar_index,COLORBAR_LIST,COLORBAR_CB);
 
     for(i=0;i<ncolorbars;i++){
       cbi = colorbarinfo + i;
@@ -197,56 +203,56 @@ extern "C" void glui_colorbar_setup(int main_window){
     }
     LISTBOX_colorbar->set_int_val(colorbartype);
   }
-  EDITTEXT_colorbar_label=glui_colorbar->add_edittext_to_panel(panel_cb1,_("Label"),GLUI_EDITTEXT_TEXT,colorbar_label,COLORBAR_LABEL,COLORBAR_CB);  
-  BUTTON_update=glui_colorbar->add_button_to_panel(panel_cb1,_("Update label"),COLORBAR_UPDATE,COLORBAR_CB);
-  glui_colorbar->add_column_to_panel(panel_cb1,false);
+  EDITTEXT_colorbar_label=glui_colorbar->add_edittext_to_panel(PANEL_cb1,_("Label"),GLUI_EDITTEXT_TEXT,colorbar_label,COLORBAR_LABEL,COLORBAR_CB);  
+  BUTTON_update=glui_colorbar->add_button_to_panel(PANEL_cb1,_("Update label"),COLORBAR_UPDATE,COLORBAR_CB);
+  glui_colorbar->add_column_to_panel(PANEL_cb1,false);
 
-  panel_point = glui_colorbar->add_panel(_("Node"));
+  PANEL_point = glui_colorbar->add_panel(_("Node"));
   
-  panel_cb5 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
+  PANEL_cb5 = glui_colorbar->add_panel_to_panel(PANEL_point,"",GLUI_PANEL_NONE);
 
-  BUTTON_prev=glui_colorbar->add_button_to_panel(panel_cb5,_("Previous"),COLORBAR_PREV,COLORBAR_CB);
-  BUTTON_deletepoint=glui_colorbar->add_button_to_panel(panel_cb5,_("Delete"),COLORBAR_DELETEPOINT,COLORBAR_CB);
+  BUTTON_prev=glui_colorbar->add_button_to_panel(PANEL_cb5,_("Previous"),COLORBAR_PREV,COLORBAR_CB);
+  BUTTON_deletepoint=glui_colorbar->add_button_to_panel(PANEL_cb5,_("Delete"),COLORBAR_DELETEPOINT,COLORBAR_CB);
   
-  glui_colorbar->add_column_to_panel(panel_cb5,false);
+  glui_colorbar->add_column_to_panel(PANEL_cb5,false);
 
-  BUTTON_next=glui_colorbar->add_button_to_panel(panel_cb5,_("Next"),COLORBAR_NEXT,COLORBAR_CB);
-  BUTTON_addpoint=glui_colorbar->add_button_to_panel(panel_cb5,_("Insert"),COLORBAR_ADDPOINT,COLORBAR_CB);
+  BUTTON_next=glui_colorbar->add_button_to_panel(PANEL_cb5,_("Next"),COLORBAR_NEXT,COLORBAR_CB);
+  BUTTON_addpoint=glui_colorbar->add_button_to_panel(PANEL_cb5,_("Insert"),COLORBAR_ADDPOINT,COLORBAR_CB);
 
-  panel_cb4 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
-  SPINNER_colorindex=  glui_colorbar->add_spinner_to_panel(panel_cb4,_("node index"),  GLUI_SPINNER_INT,&cb_colorindex,  COLORBAR_COLORINDEX,COLORBAR_CB);
+  PANEL_cb4 = glui_colorbar->add_panel_to_panel(PANEL_point,"",GLUI_PANEL_NONE);
+  SPINNER_colorindex=  glui_colorbar->add_spinner_to_panel(PANEL_cb4,_("node index"),  GLUI_SPINNER_INT,&cb_colorindex,  COLORBAR_COLORINDEX,COLORBAR_CB);
   SPINNER_colorindex->set_int_limits(0,255);
-  SPINNER_right_red=  glui_colorbar->add_spinner_to_panel(panel_cb4,_("red"),  GLUI_SPINNER_INT,cb_rgb,COLORBAR_RGB,COLORBAR_CB);
-  SPINNER_right_green=glui_colorbar->add_spinner_to_panel(panel_cb4,_("green"),GLUI_SPINNER_INT,cb_rgb+1,COLORBAR_RGB,COLORBAR_CB);
-  SPINNER_right_blue= glui_colorbar->add_spinner_to_panel(panel_cb4,_("blue"), GLUI_SPINNER_INT,cb_rgb+2,COLORBAR_RGB,COLORBAR_CB);
+  SPINNER_right_red=  glui_colorbar->add_spinner_to_panel(PANEL_cb4,_("red"),  GLUI_SPINNER_INT,cb_rgb,COLORBAR_RGB,COLORBAR_CB);
+  SPINNER_right_green=glui_colorbar->add_spinner_to_panel(PANEL_cb4,_("green"),GLUI_SPINNER_INT,cb_rgb+1,COLORBAR_RGB,COLORBAR_CB);
+  SPINNER_right_blue= glui_colorbar->add_spinner_to_panel(PANEL_cb4,_("blue"), GLUI_SPINNER_INT,cb_rgb+2,COLORBAR_RGB,COLORBAR_CB);
 
   SPINNER_right_red->set_int_limits(0,255);
   SPINNER_right_green->set_int_limits(0,255);
   SPINNER_right_blue->set_int_limits(0,255);
 
-  panel_extreme = glui_colorbar->add_panel("");
+  PANEL_extreme = glui_colorbar->add_panel("");
 
-  CHECKBOX_usebounds=glui_colorbar->add_checkbox_to_panel(panel_extreme,_("Highlight extreme data"),&show_extremedata,
+  CHECKBOX_usebounds=glui_colorbar->add_checkbox_to_panel(PANEL_extreme,_("Highlight extreme data"),&show_extremedata,
     COLORBAR_EXTREME,COLORBAR_CB);
-  panel_cb9 = glui_colorbar->add_panel_to_panel(panel_extreme,"",GLUI_PANEL_NONE);
-  panel_cb8 = glui_colorbar->add_panel_to_panel(panel_cb9,_("Below specified min"));
-  SPINNER_down_red=  glui_colorbar->add_spinner_to_panel(panel_cb8,_("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-  SPINNER_down_green=glui_colorbar->add_spinner_to_panel(panel_cb8,_("green"),GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-  SPINNER_down_blue= glui_colorbar->add_spinner_to_panel(panel_cb8,_("blue"), GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  PANEL_cb9 = glui_colorbar->add_panel_to_panel(PANEL_extreme,"",GLUI_PANEL_NONE);
+  PANEL_cb8 = glui_colorbar->add_panel_to_panel(PANEL_cb9,_("Below specified min"));
+  SPINNER_down_red=  glui_colorbar->add_spinner_to_panel(PANEL_cb8,_("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  SPINNER_down_green=glui_colorbar->add_spinner_to_panel(PANEL_cb8,_("green"),GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  SPINNER_down_blue= glui_colorbar->add_spinner_to_panel(PANEL_cb8,_("blue"), GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
 
-  glui_colorbar->add_column_to_panel(panel_cb9);
+  glui_colorbar->add_column_to_panel(PANEL_cb9);
 
-  panel_cb7 = glui_colorbar->add_panel_to_panel(panel_cb9,_("Above specified max"));
-  SPINNER_up_red=  glui_colorbar->add_spinner_to_panel(panel_cb7,_("red"),  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-  SPINNER_up_green=glui_colorbar->add_spinner_to_panel(panel_cb7,_("green"),GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-  SPINNER_up_blue= glui_colorbar->add_spinner_to_panel(panel_cb7,_("blue"), GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  PANEL_cb7 = glui_colorbar->add_panel_to_panel(PANEL_cb9,_("Above specified max"));
+  SPINNER_up_red=  glui_colorbar->add_spinner_to_panel(PANEL_cb7,_("red"),  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  SPINNER_up_green=glui_colorbar->add_spinner_to_panel(PANEL_cb7,_("green"),GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  SPINNER_up_blue= glui_colorbar->add_spinner_to_panel(PANEL_cb7,_("blue"), GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
 
   colorbar_global2local();
 
-  panel_cb10 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  BUTTON_colorbar_save=glui_colorbar->add_button_to_panel(panel_cb10,_("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
-  glui_colorbar->add_column_to_panel(panel_cb10,false);
-  BUTTON_colorbar_close=glui_colorbar->add_button_to_panel(panel_cb10,_("Close"),COLORBAR_CLOSE,COLORBAR_CB);
+  PANEL_cb10 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
+  BUTTON_colorbar_save=glui_colorbar->add_button_to_panel(PANEL_cb10,_("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
+  glui_colorbar->add_column_to_panel(PANEL_cb10,false);
+  BUTTON_colorbar_close=glui_colorbar->add_button_to_panel(PANEL_cb10,_("Close"),COLORBAR_CLOSE,COLORBAR_CB);
 
   glui_colorbar->set_main_gfx_window( main_window );
 }

@@ -28,18 +28,23 @@ extern "C" char glui_blockedit_revision[]="$Revision$";
 #define UPDATE_LIST 31
 #define RADIO_WALL 32
 
-GLUI_StaticText *statictext_blockage_index=NULL;
-GLUI_StaticText *statictext_mesh_index=NULL;
-GLUI_StaticText *statictext_label=NULL;
-
-GLUI_Panel *panel_blockageview=NULL;
 GLUI *glui_edit=NULL;
-GLUI_Panel *panel_obj_select=NULL,*panel_surface=NULL;
-GLUI_Panel *panel_obj_stretch2=NULL,*panel_obj_stretch3=NULL, *panel_obj_stretch4=NULL;
-GLUI_EditText *edittext_xmin=NULL, *edittext_ymin=NULL, *edittext_zmin=NULL;
-GLUI_EditText *edittext_xmax=NULL, *edittext_ymax=NULL, *edittext_zmax=NULL;
-GLUI_Listbox *surfacelists[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-GLUI_Checkbox *blockage_checkbox=NULL;
+
+GLUI_StaticText *STATIC_blockage_index=NULL;
+GLUI_StaticText *STATIC_mesh_index=NULL;
+GLUI_StaticText *STATIC_label=NULL;
+
+GLUI_Panel *PANEL_blockageview=NULL;
+GLUI_Panel *PANEL_obj_select=NULL,*PANEL_surface=NULL;
+GLUI_Panel *PANEL_obj_stretch2=NULL,*PANEL_obj_stretch3=NULL, *PANEL_obj_stretch4=NULL;
+
+GLUI_EditText *EDIT_xmin=NULL, *EDIT_ymin=NULL, *EDIT_zmin=NULL;
+GLUI_EditText *EDIT_xmax=NULL, *EDIT_ymax=NULL, *EDIT_zmax=NULL;
+
+GLUI_Listbox *LIST_surface[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+
+GLUI_Checkbox *CHECKBOX_blockage=NULL;
+
 GLUI_Button *BUTTON_blockage_1=NULL;
 
 void BUTTON_hide3_CB(int var);
@@ -71,19 +76,19 @@ extern "C" void glui_edit_setup(int main_window){
   glui_edit = GLUI_Master.create_glui("Blockage Info",0,0,0);
   if(showedit_dialog==0)glui_edit->hide();
 
-  panel_obj_select = glui_edit->add_panel("SURFs");
+  PANEL_obj_select = glui_edit->add_panel("SURFs");
 
-  panel_surface=glui_edit->add_panel_to_panel(panel_obj_select,"",GLUI_PANEL_NONE);
+  PANEL_surface=glui_edit->add_panel_to_panel(PANEL_obj_select,"",GLUI_PANEL_NONE);
 
-  glui_edit->add_column_to_panel(panel_surface,false);
+  glui_edit->add_column_to_panel(PANEL_surface,false);
 
   if(nsurfinfo>0){
     int not_used=0;
 
-    glui_edit->add_statictext_to_panel(panel_surface,"");
+    glui_edit->add_statictext_to_panel(PANEL_surface,"");
 
-    surfacelists[NOT_USED] = glui_edit->add_listbox_to_panel(panel_surface,_("Unused SURFs"),surface_indices+NOT_USED,UPDATE_LIST,OBJECT_CB);
-    surfacelists[NOT_USED]->set_w(260);
+    LIST_surface[NOT_USED] = glui_edit->add_listbox_to_panel(PANEL_surface,_("Unused SURFs"),surface_indices+NOT_USED,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[NOT_USED]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst==1)continue;
@@ -98,135 +103,135 @@ extern "C" void glui_edit_setup(int main_window){
         if(surfi->used_by_vent==1)continue;
         if(surfi->obst_surface==0)continue;
         surfacelabel = surfi->surfacelabel;
-        surfacelists[NOT_USED]->add_item(i,surfacelabel);
+        LIST_surface[NOT_USED]->add_item(i,surfacelabel);
         surface_indices[NOT_USED]=i;
         surface_indices_bak[NOT_USED]=surface_indices[NOT_USED];
       }
     }
     else{
-      surfacelists[NOT_USED]->add_item(0,_("None"));
+      LIST_surface[NOT_USED]->add_item(0,_("None"));
       surface_indices[NOT_USED]=0;
       surface_indices_bak[NOT_USED]=surface_indices[NOT_USED];
     }
-    surfacelists[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
+    LIST_surface[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
 
-    surfacelists[DOWN_X] = glui_edit->add_listbox_to_panel(panel_surface,_("Left"),surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
-    surfacelists[DOWN_X]->set_w(260);
+    LIST_surface[DOWN_X] = glui_edit->add_listbox_to_panel(PANEL_surface,_("Left"),surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[DOWN_X]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
-      surfacelists[DOWN_X]->add_item(i,surfacelabel);
+      LIST_surface[DOWN_X]->add_item(i,surfacelabel);
     }
 
-    surfacelists[UP_X] = glui_edit->add_listbox_to_panel(panel_surface,_("Right"),surface_indices+UP_X,UPDATE_LIST,OBJECT_CB);
-    surfacelists[UP_X]->set_w(260);
+    LIST_surface[UP_X] = glui_edit->add_listbox_to_panel(PANEL_surface,_("Right"),surface_indices+UP_X,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[UP_X]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
-      surfacelists[UP_X]->add_item(i,surfacelabel);
+      LIST_surface[UP_X]->add_item(i,surfacelabel);
     }
 
-    surfacelists[DOWN_Y] = glui_edit->add_listbox_to_panel(panel_surface,_("Front"),surface_indices+DOWN_Y,UPDATE_LIST,OBJECT_CB);
-    surfacelists[DOWN_Y]->set_w(260);
+    LIST_surface[DOWN_Y] = glui_edit->add_listbox_to_panel(PANEL_surface,_("Front"),surface_indices+DOWN_Y,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[DOWN_Y]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
-      surfacelists[DOWN_Y]->add_item(i,surfacelabel);
+      LIST_surface[DOWN_Y]->add_item(i,surfacelabel);
     }
 
-    surfacelists[UP_Y] = glui_edit->add_listbox_to_panel(panel_surface,_("Back"),surface_indices+UP_Y,UPDATE_LIST,OBJECT_CB);
-    surfacelists[UP_Y]->set_w(260);
+    LIST_surface[UP_Y] = glui_edit->add_listbox_to_panel(PANEL_surface,_("Back"),surface_indices+UP_Y,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[UP_Y]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
-      surfacelists[UP_Y]->add_item(i,surfacelabel);
+      LIST_surface[UP_Y]->add_item(i,surfacelabel);
     }
 
-    surfacelists[DOWN_Z] = glui_edit->add_listbox_to_panel(panel_surface,_("Down"),surface_indices+DOWN_Z,UPDATE_LIST,OBJECT_CB);
-    surfacelists[DOWN_Z]->set_w(260);
+    LIST_surface[DOWN_Z] = glui_edit->add_listbox_to_panel(PANEL_surface,_("Down"),surface_indices+DOWN_Z,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[DOWN_Z]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
-      surfacelists[DOWN_Z]->add_item(i,surfacelabel);
+      LIST_surface[DOWN_Z]->add_item(i,surfacelabel);
     }
 
-    surfacelists[UP_Z] = glui_edit->add_listbox_to_panel(panel_surface,_("Up"),surface_indices+UP_Z,UPDATE_LIST,OBJECT_CB);
-    surfacelists[UP_Z]->set_w(260);
+    LIST_surface[UP_Z] = glui_edit->add_listbox_to_panel(PANEL_surface,_("Up"),surface_indices+UP_Z,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[UP_Z]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
-      surfacelists[UP_Z]->add_item(i,surfacelabel);
+      LIST_surface[UP_Z]->add_item(i,surfacelabel);
     }
 
     OBJECT_CB(RADIO_WALL);
     for(i=0;i<6;i++){
-      surfacelists[i]->disable();
+      LIST_surface[i]->disable();
     }
   }
 
   glui_edit->add_column(false);
 
-  panel_obj_stretch4=glui_edit->add_panel("",GLUI_PANEL_NONE);
+  PANEL_obj_stretch4=glui_edit->add_panel("",GLUI_PANEL_NONE);
 
   {
     char meshlabel[255];
 
     strcpy(meshlabel,_("Mesh:"));
     strcat(meshlabel,meshinfo->label);
-    statictext_mesh_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,meshlabel);
+    STATIC_mesh_index=glui_edit->add_statictext_to_panel(PANEL_obj_stretch4,meshlabel);
 
   }
-  statictext_blockage_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST number: ");
-  statictext_label=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST label:");
+  STATIC_blockage_index=glui_edit->add_statictext_to_panel(PANEL_obj_stretch4,"&OBST number: ");
+  STATIC_label=glui_edit->add_statictext_to_panel(PANEL_obj_stretch4,"&OBST label:");
 
-  panel_obj_stretch2 = glui_edit->add_panel("Coordinates");
+  PANEL_obj_stretch2 = glui_edit->add_panel("Coordinates");
 
-  blockage_checkbox=glui_edit->add_checkbox_to_panel(panel_obj_stretch2,_("Dimensions snapped to grid"),&blockage_snapped,
+  CHECKBOX_blockage=glui_edit->add_checkbox_to_panel(PANEL_obj_stretch2,_("Dimensions snapped to grid"),&blockage_snapped,
     BLOCKAGE_AS_INPUT,OBJECT_CB);
-  panel_obj_stretch3 = glui_edit->add_panel_to_panel(panel_obj_stretch2,"",GLUI_PANEL_NONE);
-  edittext_xmin=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"x",GLUI_EDITTEXT_FLOAT,&glui_block_xmin,XMIN_SPIN,OBJECT_CB);
-  edittext_ymin=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"y",GLUI_EDITTEXT_FLOAT,&glui_block_ymin,YMIN_SPIN,OBJECT_CB);
-  edittext_zmin=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"z",GLUI_EDITTEXT_FLOAT,&glui_block_zmin,ZMIN_SPIN,OBJECT_CB);
+  PANEL_obj_stretch3 = glui_edit->add_panel_to_panel(PANEL_obj_stretch2,"",GLUI_PANEL_NONE);
+  EDIT_xmin=glui_edit->add_edittext_to_panel(PANEL_obj_stretch3,"x",GLUI_EDITTEXT_FLOAT,&glui_block_xmin,XMIN_SPIN,OBJECT_CB);
+  EDIT_ymin=glui_edit->add_edittext_to_panel(PANEL_obj_stretch3,"y",GLUI_EDITTEXT_FLOAT,&glui_block_ymin,YMIN_SPIN,OBJECT_CB);
+  EDIT_zmin=glui_edit->add_edittext_to_panel(PANEL_obj_stretch3,"z",GLUI_EDITTEXT_FLOAT,&glui_block_zmin,ZMIN_SPIN,OBJECT_CB);
 
-  glui_edit->add_column_to_panel(panel_obj_stretch3,false);
-  edittext_xmax=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"",GLUI_EDITTEXT_FLOAT,&glui_block_xmax,XMAX_SPIN,OBJECT_CB);
-  edittext_ymax=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"",GLUI_EDITTEXT_FLOAT,&glui_block_ymax,YMAX_SPIN,OBJECT_CB);
-  edittext_zmax=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"",GLUI_EDITTEXT_FLOAT,&glui_block_zmax,ZMAX_SPIN,OBJECT_CB);
+  glui_edit->add_column_to_panel(PANEL_obj_stretch3,false);
+  EDIT_xmax=glui_edit->add_edittext_to_panel(PANEL_obj_stretch3,"",GLUI_EDITTEXT_FLOAT,&glui_block_xmax,XMAX_SPIN,OBJECT_CB);
+  EDIT_ymax=glui_edit->add_edittext_to_panel(PANEL_obj_stretch3,"",GLUI_EDITTEXT_FLOAT,&glui_block_ymax,YMAX_SPIN,OBJECT_CB);
+  EDIT_zmax=glui_edit->add_edittext_to_panel(PANEL_obj_stretch3,"",GLUI_EDITTEXT_FLOAT,&glui_block_zmax,ZMAX_SPIN,OBJECT_CB);
 
-  edittext_xmin->disable();
-  edittext_ymin->disable();
-  edittext_zmin->disable();
+  EDIT_xmin->disable();
+  EDIT_ymin->disable();
+  EDIT_zmin->disable();
 
-  edittext_xmax->disable();
-  edittext_ymax->disable();
-  edittext_zmax->disable();
+  EDIT_xmax->disable();
+  EDIT_ymax->disable();
+  EDIT_zmax->disable();
   OBJECT_CB(BLOCKAGE_AS_INPUT);
 
-  edittext_xmin->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
-  edittext_xmax->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
-  edittext_ymin->set_float_limits(yplt_orig[0],yplt_orig[jbar],GLUI_LIMIT_CLAMP);
-  edittext_ymax->set_float_limits(yplt_orig[0],yplt_orig[jbar],GLUI_LIMIT_CLAMP);
-  edittext_zmin->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
-  edittext_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
+  EDIT_xmin->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
+  EDIT_xmax->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
+  EDIT_ymin->set_float_limits(yplt_orig[0],yplt_orig[jbar],GLUI_LIMIT_CLAMP);
+  EDIT_ymax->set_float_limits(yplt_orig[0],yplt_orig[jbar],GLUI_LIMIT_CLAMP);
+  EDIT_zmin->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
+  EDIT_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
 
-  panel_blockageview = glui_edit->add_rollout("Hide blockages by mesh",false);
+  PANEL_blockageview = glui_edit->add_rollout("Hide blockages by mesh",false);
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
     meshi = meshinfo + i;
-    glui_edit->add_checkbox_to_panel(panel_blockageview,meshi->label,&meshi->blockvis);
+    glui_edit->add_checkbox_to_panel(PANEL_blockageview,meshi->label,&meshi->blockvis);
   }
   glui_edit->add_separator();
   BUTTON_blockage_1=glui_edit->add_button(_("Close"),CLOSE_WINDOW,BUTTON_hide3_CB);
@@ -294,19 +299,19 @@ extern "C" void update_blockvals(int flag){
   jbar = current_mesh->jbar;
   kbar = current_mesh->kbar;
 
-  edittext_xmin->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
-  edittext_xmax->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
-  edittext_ymin->set_float_limits(yplt_orig[0],yplt_orig[jbar],GLUI_LIMIT_CLAMP);
-  edittext_ymax->set_float_limits(yplt_orig[0],yplt_orig[jbar],GLUI_LIMIT_CLAMP);
-  edittext_zmin->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
-  edittext_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
+  EDIT_xmin->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
+  EDIT_xmax->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
+  EDIT_ymin->set_float_limits(yplt_orig[0],yplt_orig[jbar],GLUI_LIMIT_CLAMP);
+  EDIT_ymax->set_float_limits(yplt_orig[0],yplt_orig[jbar],GLUI_LIMIT_CLAMP);
+  EDIT_zmin->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
+  EDIT_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
 
-  edittext_xmin->set_float_val(xmin);
-  edittext_xmax->set_float_val(xmax);
-  edittext_ymin->set_float_val(ymin);
-  edittext_ymax->set_float_val(ymax);
-  edittext_zmin->set_float_val(zmin);
-  edittext_zmax->set_float_val(zmax);
+  EDIT_xmin->set_float_val(xmin);
+  EDIT_xmax->set_float_val(xmax);
+  EDIT_ymin->set_float_val(ymin);
+  EDIT_ymax->set_float_val(ymax);
+  EDIT_zmin->set_float_val(zmin);
+  EDIT_zmax->set_float_val(zmax);
   if(bchighlight!=NULL&&nsurfinfo>0){
     wall_case=bchighlight->walltype;
 #ifdef pp_WALLGROUP
@@ -323,13 +328,13 @@ extern "C" void update_blockvals(int flag){
       if(nmeshes>1){
         blockmesh = meshinfo + bchighlight->meshindex;
         sprintf(dialog_label,"Mesh label: %s",blockmesh->label);
-        statictext_mesh_index->set_text(dialog_label);
+        STATIC_mesh_index->set_text(dialog_label);
       }
       sprintf(dialog_label,"&OBST index: %i",bchighlight->id);
-      statictext_blockage_index->set_text(dialog_label);
+      STATIC_blockage_index->set_text(dialog_label);
       strcpy(dialog_label,"&OBST label: ");
       strcat(dialog_label,bchighlight->label);
-      statictext_label->set_text(dialog_label);
+      STATIC_label->set_text(dialog_label);
 
       switch (wall_case){
       case WALL_1:
@@ -355,7 +360,7 @@ extern "C" void update_blockvals(int flag){
         for(i=0;i<6;i++){
           surface_indices[i] = inv_sorted_surfidlist[bchighlight->surf_index[i]];
           surface_indices_bak[i] = inv_sorted_surfidlist[bchighlight->surf_index[i]];
-          surfacelists[i]->set_int_val(surface_indices[i]);
+          LIST_surface[i]->set_int_val(surface_indices[i]);
         }
       }
     }
@@ -364,7 +369,7 @@ extern "C" void update_blockvals(int flag){
         for(i=0;i<6;i++){
           surface_indices[i]=inv_sorted_surfidlist[0];
           surface_indices_bak[i]=inv_sorted_surfidlist[0];
-          surfacelists[i]->set_int_val(surface_indices[i]);
+          LIST_surface[i]->set_int_val(surface_indices[i]);
         }
       }
     }
@@ -379,7 +384,7 @@ extern "C" void OBJECT_CB(int var){
     case UPDATE_LIST:
       if(surface_indices[NOT_USED]!=surface_indices_bak[NOT_USED]){
         surface_indices[NOT_USED]=surface_indices_bak[NOT_USED];
-        surfacelists[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
+        LIST_surface[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
       }
       switch (wall_case){
       case WALL_1:
@@ -387,7 +392,7 @@ extern "C" void OBJECT_CB(int var){
         if(nsurfinfo>0){
           for(i=0;i<6;i++){
             surface_indices[i]=temp;
-            surfacelists[i]->set_int_val(temp);
+            LIST_surface[i]->set_int_val(temp);
           }
         }
         break;
@@ -396,7 +401,7 @@ extern "C" void OBJECT_CB(int var){
           for(i=0;i<6;i++){
             temp=surface_indices_bak[i];
             surface_indices[i]=temp;
-            surfacelists[i]->set_int_val(temp);
+            LIST_surface[i]->set_int_val(temp);
           }
         }
         break;
@@ -405,7 +410,7 @@ extern "C" void OBJECT_CB(int var){
           for(i=0;i<6;i++){
             temp=surface_indices_bak[i];
             surface_indices[i]=temp;
-            surfacelists[i]->set_int_val(temp);
+            LIST_surface[i]->set_int_val(temp);
           }
         }
         break;
@@ -436,43 +441,43 @@ extern "C" void OBJECT_CB(int var){
       switch (wall_case){
       case WALL_6:
         for(i=0;i<6;i++){
-          surfacelists[i]->enable();
+          LIST_surface[i]->enable();
         }
-        surfacelists[DOWN_Z]->set_name("z lower face");
-        surfacelists[UP_Z]->set_name("z upper face");
-        surfacelists[DOWN_Y]->set_name("y lower face");
-        surfacelists[UP_Y]->set_name("y upper face");
-        surfacelists[DOWN_X]->set_name("x lower face");
-        surfacelists[UP_X]->set_name("x upper face");
+        LIST_surface[DOWN_Z]->set_name("z lower face");
+        LIST_surface[UP_Z]->set_name("z upper face");
+        LIST_surface[DOWN_Y]->set_name("y lower face");
+        LIST_surface[UP_Y]->set_name("y upper face");
+        LIST_surface[DOWN_X]->set_name("x lower face");
+        LIST_surface[UP_X]->set_name("x upper face");
         break;
       case WALL_3:
         for(i=0;i<6;i++){
-          surfacelists[i]->disable();
+          LIST_surface[i]->disable();
         }
-        surfacelists[DOWN_Z]->enable();
-        surfacelists[UP_Z]->enable();
-        surfacelists[UP_Y]->enable();
+        LIST_surface[DOWN_Z]->enable();
+        LIST_surface[UP_Z]->enable();
+        LIST_surface[UP_Y]->enable();
 
-        surfacelists[DOWN_Z]->set_name("z lower face");
-        surfacelists[UP_Z]->set_name("z upper face");
-        surfacelists[UP_Y]->set_name("side faces");
-        surfacelists[DOWN_Y]->set_name("");
-        surfacelists[DOWN_X]->set_name("");
-        surfacelists[UP_X]->set_name("");
+        LIST_surface[DOWN_Z]->set_name("z lower face");
+        LIST_surface[UP_Z]->set_name("z upper face");
+        LIST_surface[UP_Y]->set_name("side faces");
+        LIST_surface[DOWN_Y]->set_name("");
+        LIST_surface[DOWN_X]->set_name("");
+        LIST_surface[UP_X]->set_name("");
 
         break;
       case WALL_1:
         for(i=0;i<6;i++){
-          surfacelists[i]->disable();
+          LIST_surface[i]->disable();
         }
-        surfacelists[UP_Z]->enable();
-        surfacelists[UP_Z]->set_name("All faces");
+        LIST_surface[UP_Z]->enable();
+        LIST_surface[UP_Z]->set_name("All faces");
 
-        surfacelists[DOWN_Z]->set_name("");
-        surfacelists[DOWN_Y]->set_name("");
-        surfacelists[UP_Y]->set_name("");
-        surfacelists[DOWN_X]->set_name("");
-        surfacelists[UP_X]->set_name("");
+        LIST_surface[DOWN_Z]->set_name("");
+        LIST_surface[DOWN_Y]->set_name("");
+        LIST_surface[UP_Y]->set_name("");
+        LIST_surface[DOWN_X]->set_name("");
+        LIST_surface[UP_X]->set_name("");
         break;
       default:
         ASSERT(FFALSE);
@@ -484,7 +489,7 @@ extern "C" void OBJECT_CB(int var){
       case BLOCKAGE_AS_INPUT:
         if(var==BLOCKAGE_AS_INPUT2){
           blockage_snapped=1-blockage_as_input;
-          blockage_checkbox->set_int_val(blockage_snapped);
+          CHECKBOX_blockage->set_int_val(blockage_snapped);
         }
         blockage_as_input=1-blockage_snapped;
         if(blockage_as_input==1){

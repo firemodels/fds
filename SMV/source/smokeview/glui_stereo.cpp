@@ -20,21 +20,25 @@ extern "C" char glui_stereo_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
+GLUI *glui_stereo=NULL;
+
 GLUI_Panel *panel_stereo_method=NULL;
+
 GLUI_RadioGroup *RADIO_showstereo=NULL;
 GLUI_RadioGroup *RADIO_showstereo_frame=NULL;
-GLUI_RadioButton *RADIO_seq=NULL;
-GLUI_RadioButton *RADIO_button_1=NULL;
-GLUI_RadioButton *RADIO_button_2=NULL;
-GLUI_RadioButton *RADIO_button_3=NULL;
-GLUI_RadioButton *RADIO_button_4=NULL;
-GLUI_RadioButton *RADIO_button_5=NULL;
-GLUI *glui_stereo=NULL;
+
+GLUI_RadioButton *RADIOBUTTON_seq=NULL;
+GLUI_RadioButton *RADIOBUTTON_1=NULL;
+GLUI_RadioButton *RADIOBUTTON_2=NULL;
+GLUI_RadioButton *RADIOBUTTON_3=NULL;
+GLUI_RadioButton *RADIOBUTTON_4=NULL;
+GLUI_RadioButton *RADIOBUTTON_5=NULL;
+
 GLUI_Spinner *SPINNER_zero_parallax=NULL, *SPINNER_right_green2=NULL, *SPINNER_right_blue2=NULL;
+
 GLUI_Button *BUTTON_stereo_1=NULL;
 GLUI_Button *BUTTON_stereo_2=NULL;
 GLUI_Button *BUTTON_stereo_3=NULL;
-
 
 #define STEREO_CLOSE 0
 #define STEREO_RESET 2
@@ -78,13 +82,13 @@ extern "C" void glui_stereo_setup(int main_window){
   
   panel_stereo_method = glui_stereo->add_panel(_("Stereo Method"));
   RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(panel_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
-  RADIO_button_1=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Off"));
-  RADIO_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Successive frames"));
-  if(videoSTEREO==0)RADIO_seq->disable();
-  RADIO_button_2=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Left/Right"));
-  RADIO_button_3=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));
-  RADIO_button_4=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Cyan"));
-  RADIO_button_5=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Custom Red/Custom Blue"));
+  RADIOBUTTON_1=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Off"));
+  RADIOBUTTON_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Successive frames"));
+  if(videoSTEREO==0)RADIOBUTTON_seq->disable();
+  RADIOBUTTON_2=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Left/Right"));
+  RADIOBUTTON_3=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));
+  RADIOBUTTON_4=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Cyan"));
+  RADIOBUTTON_5=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Custom Red/Custom Blue"));
   SPINNER_right_green2=glui_stereo->add_spinner_to_panel(panel_stereo_method,_("green"),GLUI_SPINNER_FLOAT,&right_green,STEREO_GREEN,STEREO_CB);
   SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(panel_stereo_method, _("blue"),GLUI_SPINNER_FLOAT,&right_blue,STEREO_BLUE,STEREO_CB);
   

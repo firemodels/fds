@@ -20,25 +20,26 @@ extern "C" char glui_clip_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-GLUI_RadioGroup *radio_clip=NULL;
 GLUI *glui_clip=NULL;
+
+GLUI_RadioGroup *radio_clip=NULL;
+
 GLUI_Spinner *SPINNER_clip_xupper=NULL, *SPINNER_clip_xlower=NULL;
 GLUI_Spinner *SPINNER_clip_yupper=NULL, *SPINNER_clip_ylower=NULL;
 GLUI_Spinner *SPINNER_clip_zupper=NULL, *SPINNER_clip_zlower=NULL;
+GLUI_Spinner *SPINNER_moveclip_x=NULL;
+GLUI_Spinner *SPINNER_moveclip_y=NULL;
+GLUI_Spinner *SPINNER_moveclip_z=NULL;
 
 GLUI_Checkbox *CHECKBOX_clip_xlower=NULL, *CHECKBOX_clip_xupper=NULL;
 GLUI_Checkbox *CHECKBOX_clip_ylower=NULL, *CHECKBOX_clip_yupper=NULL;
 GLUI_Checkbox *CHECKBOX_clip_zlower=NULL, *CHECKBOX_clip_zupper=NULL;
 
-GLUI_Panel *panel_clip_lower=NULL, *panel_clip_upper=NULL, *panel_clip=NULL,*panel_wrapup=NULL;
-GLUI_Panel *panel_clipx=NULL, *panel_clipX=NULL;
-GLUI_Panel *panel_clipy=NULL, *panel_clipY=NULL;
-GLUI_Panel *panel_clipz=NULL, *panel_clipZ=NULL;
+GLUI_Panel *PANEL_clip_lower=NULL, *PANEL_clip_upper=NULL, *PANEL_clip=NULL,*panel_wrapup=NULL;
+GLUI_Panel *PANEL_clipx=NULL, *PANEL_clipX=NULL;
+GLUI_Panel *PANEL_clipy=NULL, *PANEL_clipY=NULL;
+GLUI_Panel *PANEL_clipz=NULL, *PANEL_clipZ=NULL;
 
-GLUI_Panel *panel_moveclip=NULL;
-GLUI_Spinner *SPINNER_moveclip_x=NULL;
-GLUI_Spinner *SPINNER_moveclip_y=NULL;
-GLUI_Spinner *SPINNER_moveclip_z=NULL;
 GLUI_Listbox *LIST_mesh=NULL;
 
 GLUI_RadioButton *RADIOBUTTON_clip_1a=NULL;
@@ -88,54 +89,54 @@ extern "C" void glui_clip_setup(int main_window){
   glui_clip = GLUI_Master.create_glui("clip",0,0,0);
   if(showclip_dialog==0)glui_clip->hide();
 
-  panel_clip = glui_clip->add_panel("",GLUI_PANEL_NONE);
-  panel_clip_lower = glui_clip->add_panel_to_panel(panel_clip,_("Clip Lower"));
-  panel_clipx = glui_clip->add_panel_to_panel(panel_clip_lower,"X",GLUI_PANEL_NONE);
-  SPINNER_clip_xlower=glui_clip->add_spinner_to_panel(panel_clipx,"X",GLUI_SPINNER_FLOAT,&clip_x_val,SPINNER_xlower,CLIP_CB);
+  PANEL_clip = glui_clip->add_panel("",GLUI_PANEL_NONE);
+  PANEL_clip_lower = glui_clip->add_panel_to_panel(PANEL_clip,_("Clip Lower"));
+  PANEL_clipx = glui_clip->add_panel_to_panel(PANEL_clip_lower,"X",GLUI_PANEL_NONE);
+  SPINNER_clip_xlower=glui_clip->add_spinner_to_panel(PANEL_clipx,"X",GLUI_SPINNER_FLOAT,&clip_x_val,SPINNER_xlower,CLIP_CB);
   SPINNER_clip_xlower->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
-  glui_clip->add_column_to_panel(panel_clipx,false);
-  CHECKBOX_clip_xlower=glui_clip->add_checkbox_to_panel(panel_clipx,"",&clip_x,CLIP_xlower,CLIP_CB);
+  glui_clip->add_column_to_panel(PANEL_clipx,false);
+  CHECKBOX_clip_xlower=glui_clip->add_checkbox_to_panel(PANEL_clipx,"",&clip_x,CLIP_xlower,CLIP_CB);
 
-  panel_clipy = glui_clip->add_panel_to_panel(panel_clip_lower,"Y",GLUI_PANEL_NONE);
-  SPINNER_clip_ylower=glui_clip->add_spinner_to_panel(panel_clipy,"Y",GLUI_SPINNER_FLOAT,&clip_y_val,SPINNER_ylower,CLIP_CB);
+  PANEL_clipy = glui_clip->add_panel_to_panel(PANEL_clip_lower,"Y",GLUI_PANEL_NONE);
+  SPINNER_clip_ylower=glui_clip->add_spinner_to_panel(PANEL_clipy,"Y",GLUI_SPINNER_FLOAT,&clip_y_val,SPINNER_ylower,CLIP_CB);
   SPINNER_clip_ylower->set_float_limits(yclip_min,yclip_max,GLUI_LIMIT_CLAMP);
-  glui_clip->add_column_to_panel(panel_clipy,false);
-  CHECKBOX_clip_ylower=glui_clip->add_checkbox_to_panel(panel_clipy,"",&clip_y,CLIP_ylower,CLIP_CB);
+  glui_clip->add_column_to_panel(PANEL_clipy,false);
+  CHECKBOX_clip_ylower=glui_clip->add_checkbox_to_panel(PANEL_clipy,"",&clip_y,CLIP_ylower,CLIP_CB);
 
-  panel_clipz = glui_clip->add_panel_to_panel(panel_clip_lower,"Z",GLUI_PANEL_NONE);
-  SPINNER_clip_zlower=glui_clip->add_spinner_to_panel(panel_clipz,"Z",GLUI_SPINNER_FLOAT,&clip_z_val,SPINNER_zlower,CLIP_CB);
+  PANEL_clipz = glui_clip->add_panel_to_panel(PANEL_clip_lower,"Z",GLUI_PANEL_NONE);
+  SPINNER_clip_zlower=glui_clip->add_spinner_to_panel(PANEL_clipz,"Z",GLUI_SPINNER_FLOAT,&clip_z_val,SPINNER_zlower,CLIP_CB);
   SPINNER_clip_zlower->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
-  glui_clip->add_column_to_panel(panel_clipz,false);
-  CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(panel_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
+  glui_clip->add_column_to_panel(PANEL_clipz,false);
+  CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(PANEL_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
 
-  radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
+  radio_clip = glui_clip->add_radiogroup_to_panel(PANEL_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
   RADIOBUTTON_clip_1a=glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping disabled"));
   RADIOBUTTON_clip_1b=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages and data"));
   RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages"));
 
-  glui_clip->add_column_to_panel(panel_clip,false);
+  glui_clip->add_column_to_panel(PANEL_clip,false);
 
-  panel_clip_upper = glui_clip->add_panel_to_panel(panel_clip,_("Clip upper"));
+  PANEL_clip_upper = glui_clip->add_panel_to_panel(PANEL_clip,_("Clip upper"));
 
-  panel_clipX = glui_clip->add_panel_to_panel(panel_clip_upper,"X",GLUI_PANEL_NONE);
-  SPINNER_clip_xupper=glui_clip->add_spinner_to_panel(panel_clipX,"X",GLUI_SPINNER_FLOAT,&clip_X_val,SPINNER_xupper,CLIP_CB);
+  PANEL_clipX = glui_clip->add_panel_to_panel(PANEL_clip_upper,"X",GLUI_PANEL_NONE);
+  SPINNER_clip_xupper=glui_clip->add_spinner_to_panel(PANEL_clipX,"X",GLUI_SPINNER_FLOAT,&clip_X_val,SPINNER_xupper,CLIP_CB);
   SPINNER_clip_xupper->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
-  glui_clip->add_column_to_panel(panel_clipX,false);
-  CHECKBOX_clip_xupper=glui_clip->add_checkbox_to_panel(panel_clipX,"",&clip_X,CLIP_xupper,CLIP_CB);
+  glui_clip->add_column_to_panel(PANEL_clipX,false);
+  CHECKBOX_clip_xupper=glui_clip->add_checkbox_to_panel(PANEL_clipX,"",&clip_X,CLIP_xupper,CLIP_CB);
 
-  panel_clipY = glui_clip->add_panel_to_panel(panel_clip_upper,"Y",GLUI_PANEL_NONE);
-  SPINNER_clip_yupper=glui_clip->add_spinner_to_panel(panel_clipY,"Y",GLUI_SPINNER_FLOAT,&clip_Y_val,SPINNER_yupper,CLIP_CB);
+  PANEL_clipY = glui_clip->add_panel_to_panel(PANEL_clip_upper,"Y",GLUI_PANEL_NONE);
+  SPINNER_clip_yupper=glui_clip->add_spinner_to_panel(PANEL_clipY,"Y",GLUI_SPINNER_FLOAT,&clip_Y_val,SPINNER_yupper,CLIP_CB);
   SPINNER_clip_yupper->set_float_limits(yclip_min,yclip_max,GLUI_LIMIT_CLAMP);
-  glui_clip->add_column_to_panel(panel_clipY,false);
-  CHECKBOX_clip_yupper=glui_clip->add_checkbox_to_panel(panel_clipY,"",&clip_Y,CLIP_yupper,CLIP_CB);
+  glui_clip->add_column_to_panel(PANEL_clipY,false);
+  CHECKBOX_clip_yupper=glui_clip->add_checkbox_to_panel(PANEL_clipY,"",&clip_Y,CLIP_yupper,CLIP_CB);
 
-  panel_clipZ = glui_clip->add_panel_to_panel(panel_clip_upper,"Z",GLUI_PANEL_NONE);
-  SPINNER_clip_zupper=glui_clip->add_spinner_to_panel(panel_clipZ,"Z",GLUI_SPINNER_FLOAT,&clip_Z_val,SPINNER_zupper,CLIP_CB);
+  PANEL_clipZ = glui_clip->add_panel_to_panel(PANEL_clip_upper,"Z",GLUI_PANEL_NONE);
+  SPINNER_clip_zupper=glui_clip->add_spinner_to_panel(PANEL_clipZ,"Z",GLUI_SPINNER_FLOAT,&clip_Z_val,SPINNER_zupper,CLIP_CB);
   SPINNER_clip_zupper->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
-  glui_clip->add_column_to_panel(panel_clipZ,false);
-  CHECKBOX_clip_zupper=glui_clip->add_checkbox_to_panel(panel_clipZ,"",&clip_Z,CLIP_zupper,CLIP_CB);
+  glui_clip->add_column_to_panel(PANEL_clipZ,false);
+  CHECKBOX_clip_zupper=glui_clip->add_checkbox_to_panel(PANEL_clipZ,"",&clip_Z,CLIP_zupper,CLIP_CB);
 
-  panel_wrapup = glui_clip->add_panel_to_panel(panel_clip,"",GLUI_PANEL_NONE);
+  panel_wrapup = glui_clip->add_panel_to_panel(PANEL_clip,"",GLUI_PANEL_NONE);
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 

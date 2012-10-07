@@ -47,28 +47,35 @@ filelistdata *gluiopen_filelist;
 char gluiopen_filter[sizeof(GLUI_String)];
 char gluiopen_filter2[sizeof(GLUI_String)];
 
-GLUI_Button *gluiopen_open_down=NULL ;
-GLUI_Panel *gluiopen_panel_open=NULL;
-GLUI_Panel *gluiopen_panel_open2=NULL;
-GLUI_Panel *gluiopen_panel_open3=NULL;
-GLUI_Listbox *gluiopen_LISTBOX_open=NULL;
-GLUI_EditText *gluiopen_EDIT_filter=NULL;
-
 GLUI *glui_device=NULL;
-GLUI_Panel *panel_objects=NULL;
-GLUI_Spinner *SPINNER_sensorrelsize=NULL;
-GLUI_Panel *panel_devicevis=NULL;
-GLUI_RadioGroup *RADIO_devicetypes=NULL;
-GLUI_Panel *panel_label3=NULL;
-GLUI_Checkbox *CHECKBOX_device_1=NULL;
-GLUI_Checkbox *CHECKBOX_device_2=NULL;
-GLUI_Checkbox *CHECKBOX_device_3=NULL;
+
+GLUI_Button *BUTTON_open_down=NULL ;
 GLUI_Button *BUTTON_device_1=NULL;
 GLUI_Button *BUTTON_device_2=NULL;
 GLUI_Button *BUTTON_device_3=NULL;
 GLUI_Button *BUTTON_device_4=NULL;
 GLUI_Button *BUTTON_device_5=NULL;
 GLUI_Button *BUTTON_device_6=NULL;
+
+GLUI_Panel *PANEL_open1=NULL;
+GLUI_Panel *PANEL_open2=NULL;
+GLUI_Panel *PANEL_open3=NULL;
+GLUI_Panel *PANEL_objects=NULL;
+GLUI_Panel *PANEL_devicevis=NULL;
+GLUI_Panel *PANEL_label3=NULL;
+
+GLUI_Listbox *LIST_open=NULL;
+
+GLUI_EditText *EDIT_filter=NULL;
+
+GLUI_Spinner *SPINNER_sensorrelsize=NULL;
+
+GLUI_RadioGroup *RADIO_devicetypes=NULL;
+
+GLUI_Checkbox *CHECKBOX_device_1=NULL;
+GLUI_Checkbox *CHECKBOX_device_2=NULL;
+GLUI_Checkbox *CHECKBOX_device_3=NULL;
+
 
 
 void Device_CB(int var);
@@ -89,14 +96,14 @@ extern "C" void glui_device_setup(int main_window){
   if(ndeviceinfo>0){
     int i;
 
-    panel_objects = glui_device->add_panel("Devices/Objects",false);
-    SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(panel_objects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
+    PANEL_objects = glui_device->add_panel("Devices/Objects",false);
+    SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_objects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
     if(ndevicetypes>0){
-      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(panel_objects,_("Show velocity vectors"),&showvdeviceval);
-      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(panel_objects,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
-      CHECKBOX_device_3=glui_device->add_checkbox_to_panel(panel_objects,_("Outline"),&object_outlines);
-      panel_devicevis=glui_device->add_panel_to_panel(panel_objects,"",false);
-      RADIO_devicetypes=glui_device->add_radiogroup_to_panel(panel_devicevis,&devicetypes_index,DEVICE_devicetypes,Device_CB);
+      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_objects,_("Show velocity vectors"),&showvdeviceval);
+      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_objects,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
+      CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_objects,_("Outline"),&object_outlines);
+      PANEL_devicevis=glui_device->add_panel_to_panel(PANEL_objects,"",false);
+      RADIO_devicetypes=glui_device->add_radiogroup_to_panel(PANEL_devicevis,&devicetypes_index,DEVICE_devicetypes,Device_CB);
       for(i=0;i<ndevicetypes;i++){
         glui_device->add_radiobutton_to_group(RADIO_devicetypes,devicetypes[i]->quantity);
       }
@@ -105,34 +112,34 @@ extern "C" void glui_device_setup(int main_window){
     }
   }
 
-  panel_label3 = glui_device->add_panel("",false);
-  glui_device->add_column_to_panel(panel_label3,false);
+  PANEL_label3 = glui_device->add_panel("",false);
+  glui_device->add_column_to_panel(PANEL_label3,false);
 
-  BUTTON_device_1=glui_device->add_button_to_panel(panel_label3,_("Save settings"),SAVE_SETTINGS,Device_CB);
-  glui_device->add_column_to_panel(panel_label3,false);
+  BUTTON_device_1=glui_device->add_button_to_panel(PANEL_label3,_("Save settings"),SAVE_SETTINGS,Device_CB);
+  glui_device->add_column_to_panel(PANEL_label3,false);
 
-  BUTTON_device_2=glui_device->add_button_to_panel(panel_label3,_("Close"),DEVICE_close,Device_CB);
+  BUTTON_device_2=glui_device->add_button_to_panel(PANEL_label3,_("Close"),DEVICE_close,Device_CB);
 
 #ifdef pp_OPEN
   strcpy(gluiopen_filter,"*.csv");
-  gluiopen_panel_open = glui_device->add_panel(_("Open"),true);
-  gluiopen_panel_open3 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
-  BUTTON_device_6=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Up"),OPEN_UP,Open_CB);
-  glui_device->add_column_to_panel(gluiopen_panel_open3);
-  gluiopen_open_down=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Down"),OPEN_DOWN,Open_CB);
+  PANEL_open1 = glui_device->add_panel(_("Open"),true);
+  PANEL_open3 = glui_device->add_panel_to_panel(PANEL_open1,"",false);
+  BUTTON_device_6=glui_device->add_button_to_panel(PANEL_open3,_("Up"),OPEN_UP,Open_CB);
+  glui_device->add_column_to_panel(PANEL_open3);
+  BUTTON_open_down=glui_device->add_button_to_panel(PANEL_open3,_("Down"),OPEN_DOWN,Open_CB);
   gluiopen_file_index=0;
-  gluiopen_LISTBOX_open=glui_device->add_listbox_to_panel(gluiopen_panel_open,"",&gluiopen_file_index,OPEN_FILEINDEX,Open_CB);
+  LIST_open=glui_device->add_listbox_to_panel(PANEL_open1,"",&gluiopen_file_index,OPEN_FILEINDEX,Open_CB);
   strcpy(gluiopen_path_dir,".");
   Open_CB(OPEN_UPDATE_LIST);
-  gluiopen_panel_open2 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
-  gluiopen_EDIT_filter=glui_device->add_edittext_to_panel(gluiopen_panel_open2,_("filter:"),GLUI_EDITTEXT_TEXT,gluiopen_filter,OPEN_FILTER,Open_CB);
-  glui_device->add_column_to_panel(gluiopen_panel_open2);
-  BUTTON_device_3=glui_device->add_button_to_panel(gluiopen_panel_open2,_("Apply Filter"),OPEN_APPLY_FILTER,Open_CB);
+  PANEL_open2 = glui_device->add_panel_to_panel(PANEL_open1,"",false);
+  EDIT_filter=glui_device->add_edittext_to_panel(PANEL_open2,_("filter:"),GLUI_EDITTEXT_TEXT,gluiopen_filter,OPEN_FILTER,Open_CB);
+  glui_device->add_column_to_panel(PANEL_open2);
+  BUTTON_device_3=glui_device->add_button_to_panel(PANEL_open2,_("Apply Filter"),OPEN_APPLY_FILTER,Open_CB);
 
-  gluiopen_panel_open3 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
-  BUTTON_device_4=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Open"),OPEN_OPEN,Open_CB);
-  glui_device->add_column_to_panel(gluiopen_panel_open3);
-  BUTTON_device_5=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Cancel"),OPEN_CANCEL,Open_CB);
+  PANEL_open3 = glui_device->add_panel_to_panel(PANEL_open1,"",false);
+  BUTTON_device_4=glui_device->add_button_to_panel(PANEL_open3,_("Open"),OPEN_OPEN,Open_CB);
+  glui_device->add_column_to_panel(PANEL_open3);
+  BUTTON_device_5=glui_device->add_button_to_panel(PANEL_open3,_("Cancel"),OPEN_CANCEL,Open_CB);
 
 #endif
 
@@ -183,10 +190,10 @@ void Open_CB(int var){
       if(gluiopen_filelist==NULL)break;
       filei = gluiopen_filelist + gluiopen_file_index;
       if(filei->type==1){
-        gluiopen_open_down->enable();
+        BUTTON_open_down->enable();
       }
       else{
-        gluiopen_open_down->disable();
+        BUTTON_open_down->disable();
       }
       break;
     case OPEN_OPEN:
@@ -209,11 +216,11 @@ void Open_CB(int var){
       strcpy(gluiopen_filter2,gluiopen_filter);
       trim(gluiopen_filter2);
       open_filter_ptr = trim_front(gluiopen_filter2);
-      gluiopen_EDIT_filter->set_text(open_filter_ptr);
+      EDIT_filter->set_text(open_filter_ptr);
       Open_CB(OPEN_UPDATE_LIST);
       break;
     case OPEN_UPDATE_LIST:
-      gluiopen_LISTBOX_open->delete_item("");
+      LIST_open->delete_item("");
       for(i=0;i<gluiopen_nfilelist;i++){
         char label[1024];
 
@@ -222,19 +229,19 @@ void Open_CB(int var){
           strcat(label,"> ");
         }
         strcat(label,gluiopen_filelist[i].file);
-        gluiopen_LISTBOX_open->delete_item(label);
+        LIST_open->delete_item(label);
       }
       free_filelist(gluiopen_filelist,&gluiopen_nfilelist);
       gluiopen_nfilelist=get_nfilelist(gluiopen_path_dir,gluiopen_filter);
       if(gluiopen_nfilelist==0){
-        gluiopen_LISTBOX_open->add_item(0,"");
+        LIST_open->add_item(0,"");
       }
       get_filelist(gluiopen_path_dir, gluiopen_filter,gluiopen_nfilelist,&gluiopen_filelist);
       if(gluiopen_nfilelist>0&&gluiopen_filelist[0].type==1){
-        gluiopen_open_down->enable();
+        BUTTON_open_down->enable();
       }
       else{
-        gluiopen_open_down->disable();
+        BUTTON_open_down->disable();
       }
       for(i=0;i<gluiopen_nfilelist;i++){
         char label[1024];
@@ -244,7 +251,7 @@ void Open_CB(int var){
           strcat(label,"> ");
         }
         strcat(label,gluiopen_filelist[i].file);
-        gluiopen_LISTBOX_open->add_item(i,label);
+        LIST_open->add_item(i,label);
       }
       break;
     default:
@@ -267,12 +274,12 @@ void Device_CB(int var){
     devicetypes[devicetypes_index]->type2vis=1;
     break;
   case SHOWDEVICEVALS:
-    if(panel_devicevis!=NULL){
+    if(PANEL_devicevis!=NULL){
       if(showdeviceval==1){
-        panel_devicevis->enable();
+        PANEL_devicevis->enable();
       }
       else{
-        panel_devicevis->disable();
+        PANEL_devicevis->disable();
       }
     }
 

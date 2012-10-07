@@ -112,7 +112,7 @@ GLUI_Spinner *SPINNER_farclip=NULL;
 
 GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
 GLUI_Checkbox *CHECKBOX_general_rotation=NULL;
-GLUI_Checkbox *CHECKBOX_blockpath=NULL,*CURSOR_blockpath=NULL;
+GLUI_Checkbox *CHECKBOX_blockpath=NULL,*CHECKBOX_cursor_blockpath=NULL;
 GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
 
 GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
@@ -123,13 +123,13 @@ GLUI_RadioGroup *RADIO_projection=NULL,*RADIO_rotation_type=NULL;
 GLUI_RadioGroup *RADIO_render_type=NULL;
 GLUI_RadioGroup *RADIO_render_label=NULL;
 
-GLUI_RadioButton *RADIO_button_1a=NULL;
-GLUI_RadioButton *RADIO_button_1b=NULL;
-GLUI_RadioButton *RADIO_button_1c=NULL;
-GLUI_RadioButton *RADIO_button_1d=NULL;
-GLUI_RadioButton *RADIO_button_1e=NULL;
-GLUI_RadioButton *RADIO_button_1f=NULL;
-GLUI_RadioButton *RADIO_button_1g=NULL;
+GLUI_RadioButton *RADIOBUTTON_1a=NULL;
+GLUI_RadioButton *RADIOBUTTON_1b=NULL;
+GLUI_RadioButton *RADIOBUTTON_1c=NULL;
+GLUI_RadioButton *RADIOBUTTON_1d=NULL;
+GLUI_RadioButton *RADIOBUTTON_1e=NULL;
+GLUI_RadioButton *RADIOBUTTON_1f=NULL;
+GLUI_RadioButton *RADIOBUTTON_1g=NULL;
 
 GLUI_Button *BUTTON_90_z=NULL,*BUTTON_eyelevel=NULL, *BUTTON_floorlevel=NULL, *BUTTON_reset_saved_view=NULL;
 GLUI_Button *BUTTON_replace_view=NULL,*BUTTON_add_view=NULL,*BUTTON_delete_view=NULL;
@@ -249,7 +249,7 @@ extern "C" void update_camera_label(void){
 /* ------------------ update_cursor_checkbox ------------------------ */
 
 extern "C" void update_cursor_checkbox(void){
-  CURSOR_blockpath->set_int_val(cursorPlot3D);
+  CHECKBOX_cursor_blockpath->set_int_val(cursorPlot3D);
 }
 
 /* ------------------ update_view_list ------------------------ */
@@ -324,11 +324,11 @@ extern "C" void glui_motion_setup(int main_window){
  
   PANEL_radiorotate=glui_motion->add_panel_to_panel(ROLLOUT_motion,"Rotation type:");
   RADIO_rotation_type=glui_motion->add_radiogroup_to_panel(PANEL_radiorotate,&rotation_type,0,rotation_type_CB);
-  RADIO_button_1c=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"2 axis");
-  RADIO_button_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"eye centered");
-  RADIO_button_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"level (1 axis)");
+  RADIOBUTTON_1c=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"2 axis");
+  RADIOBUTTON_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"eye centered");
+  RADIOBUTTON_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"level (1 axis)");
 #ifdef pp_GENERAL_ROTATION
-  RADIO_button_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"3 axis");
+  RADIOBUTTON_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"3 axis");
 #endif
   rotation_type_CB(0);
 
@@ -394,8 +394,8 @@ extern "C" void glui_motion_setup(int main_window){
   
   ROLLOUT_projection = glui_motion->add_rollout(_("Window properties"),false);
   RADIO_projection=glui_motion->add_radiogroup_to_panel(ROLLOUT_projection,&projection_type,PROJECTION,TRANSLATE_CB);
-  RADIO_button_1a=glui_motion->add_radiobutton_to_group(RADIO_projection,_("Perspective"));
-  RADIO_button_1b=glui_motion->add_radiobutton_to_group(RADIO_projection,_("Size preserving"));
+  RADIOBUTTON_1a=glui_motion->add_radiobutton_to_group(RADIO_projection,_("Perspective"));
+  RADIOBUTTON_1b=glui_motion->add_radiobutton_to_group(RADIO_projection,_("Size preserving"));
   SPINNER_zoom=glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("Zoom"),GLUI_SPINNER_FLOAT,&zoom,ZOOM,TRANSLATE_CB);
   SPINNER_zoom->set_float_limits(0.10,10.0,GLUI_LIMIT_CLAMP);
   aperture_glui=zoom2aperture(zoom);
@@ -431,8 +431,8 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
   glui_motion->add_separator_to_panel(ROLLOUT_render);
   RADIO_render_label=glui_motion->add_radiogroup_to_panel(ROLLOUT_render,&renderfilelabel,RENDER_LABEL,RENDER_CB);
-  RADIO_button_1f=glui_motion->add_radiobutton_to_group(RADIO_render_label,"frame number");
-  RADIO_button_1g=glui_motion->add_radiobutton_to_group(RADIO_render_label,"time (s)");
+  RADIOBUTTON_1f=glui_motion->add_radiobutton_to_group(RADIO_render_label,"frame number");
+  RADIOBUTTON_1g=glui_motion->add_radiobutton_to_group(RADIO_render_label,"time (s)");
   update_glui_filelabel(renderfilelabel);
 
 
@@ -511,7 +511,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_farclip=glui_motion->add_spinner_to_panel(PANEL_scale,_("Far depth"),GLUI_SPINNER_FLOAT,&farclip);
   SPINNER_farclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
-  CURSOR_blockpath=glui_motion->add_checkbox(_("Map cursor keys for Plot3D use"),&cursorPlot3D,CURSOR,TRANSLATE_CB);
+  CHECKBOX_cursor_blockpath=glui_motion->add_checkbox(_("Map cursor keys for Plot3D use"),&cursorPlot3D,CURSOR,TRANSLATE_CB);
   PANEL_close = glui_motion->add_panel("",GLUI_PANEL_NONE);
 
   BUTTON_motion_1=glui_motion->add_button_to_panel(PANEL_close,_("Save settings"),SAVE_SETTINGS,BUTTON_hide2_CB);

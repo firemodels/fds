@@ -28,7 +28,6 @@ GLUI *glui_labels=NULL;
 
 #ifdef pp_BETA
 GLUI_Spinner *SPINNER_cullgeom_portsize=NULL;
-GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
 #endif
 GLUI_Spinner *SPINNER_tick_xmin=NULL;
 GLUI_Spinner *SPINNER_tick_ymin=NULL;
@@ -36,14 +35,6 @@ GLUI_Spinner *SPINNER_tick_zmin=NULL;
 GLUI_Spinner *SPINNER_tick_xmax=NULL;
 GLUI_Spinner *SPINNER_tick_ymax=NULL;
 GLUI_Spinner *SPINNER_tick_zmax=NULL;
-
-GLUI_Rollout *panel_user_tick=NULL;
-GLUI_Rollout *panel_label1=NULL;
-GLUI_Panel *panel_label2=NULL;
-GLUI_Panel *panel_tick1;
-GLUI_Panel *panel_tick1a;
-GLUI_Panel *panel_tick1b;
-GLUI_Panel *panel_tick2;
 GLUI_Spinner *SPINNER_gridlinewidth=NULL;
 GLUI_Spinner *SPINNER_linewidth=NULL;
 GLUI_Spinner *SPINNER_tick_x0=NULL;
@@ -52,16 +43,18 @@ GLUI_Spinner *SPINNER_tick_z0=NULL;
 GLUI_Spinner *SPINNER_tick_dx0=NULL;
 GLUI_Spinner *SPINNER_tick_dy0=NULL;
 GLUI_Spinner *SPINNER_tick_dz0=NULL;
-GLUI_Panel *panel_transparency=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_face=NULL;
+GLUI_Spinner *SPINNER_subtick=NULL;
+
+#ifdef pp_BETA
+GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
+#endif
 GLUI_Checkbox *CHECKBOX_labels_colorbar=NULL;
 GLUI_Checkbox *CHECKBOX_labels_timebar=NULL;
 GLUI_Checkbox *CHECKBOX_labels_ticks=NULL;
 GLUI_Checkbox *CHECKBOX_labels_title=NULL;
 GLUI_Checkbox *CHECKBOX_labels_axis=NULL;
 GLUI_Checkbox *CHECKBOX_labels_hms=NULL;
-GLUI_Spinner *SPINNER_subtick=NULL;
-
 GLUI_Checkbox *CHECKBOX_labels_framerate=NULL;
 GLUI_Checkbox *CHECKBOX_labels_timelabel=NULL;
 GLUI_Checkbox *CHECKBOX_labels_framelabel=NULL;
@@ -76,16 +69,28 @@ GLUI_Checkbox *CHECKBOX_user_ticks_show_x=NULL;
 GLUI_Checkbox *CHECKBOX_user_ticks_show_y=NULL;
 GLUI_Checkbox *CHECKBOX_user_ticks_show_z=NULL;
 GLUI_Checkbox *CHECKBOX_tick_auto=NULL;
-
 GLUI_Checkbox *CHECKBOX_label_1=NULL;
 GLUI_Checkbox *CHECKBOX_label_2=NULL;
 GLUI_Checkbox *CHECKBOX_label_3=NULL;
-
 GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
 
+GLUI_Rollout *ROLLOUT_user_tick=NULL;
+GLUI_Rollout *ROLLOUT_label1=NULL;
+
+GLUI_Panel *PANEL_label2=NULL;
+GLUI_Panel *PANEL_tick1;
+GLUI_Panel *PANEL_tick1a;
+GLUI_Panel *PANEL_tick1b;
+GLUI_Panel *PANEL_tick2;
+GLUI_Panel *PANEL_transparency=NULL;
+GLUI_Panel *PANEL_showhide=NULL;
+
 GLUI_RadioGroup *RADIO_fontsize=NULL,*RADIO_showhide=NULL;
+GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
+GLUI_RadioButton *RADIOBUTTON_label_1b=NULL;
+
 GLUI_Button *Button_EVAC=NULL;
 GLUI_Button *Button_PART=NULL;
 GLUI_Button *Button_SLICE=NULL;
@@ -99,10 +104,6 @@ GLUI_Button *BUTTON_label_1=NULL;
 GLUI_Button *BUTTON_label_2=NULL;
 GLUI_Button *BUTTON_label_3=NULL;
 GLUI_Button *BUTTON_label_4=NULL;
-GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
-GLUI_RadioButton *RADIOBUTTON_label_1b=NULL;
-
-GLUI_Panel *panel_showhide=NULL;
 
 #define LABELS_label 0
 #define FRAME_label 21
@@ -135,7 +136,7 @@ GLUI_Panel *panel_showhide=NULL;
 
 extern "C" void glui_labels_rename(void){
 
-  panel_label1->set_name(_("General Settings"));
+  ROLLOUT_label1->set_name(_("General Settings"));
   CHECKBOX_labels_colorbar->set_name(_("Colorbar"));
   CHECKBOX_labels_timebar->set_name(_("Time bar"));
   CHECKBOX_labels_timelabel->set_name(_("Time label"));
@@ -166,7 +167,7 @@ extern "C" void glui_labels_rename(void){
   CHECKBOX_labels_shade->set_name(_("Shades of grey"));
 
   if(nface_transparent>0){
-    panel_transparency->set_name(_("Geometry transparency"));
+    PANEL_transparency->set_name(_("Geometry transparency"));
     CHECKBOX_labels_transparent_override->set_name(_("Use level:"));
   }
 
@@ -177,22 +178,22 @@ extern "C" void glui_labels_rename(void){
   RADIOBUTTON_label_1b->set_name(_("large font"));
 
 
-  panel_user_tick->set_name("User tick settings");
+  ROLLOUT_user_tick->set_name("User tick settings");
 
-  panel_tick1->set_name(_("Display"));
+  PANEL_tick1->set_name(_("Display"));
 
   CHECKBOX_vis_user_ticks->set_name(_("Show user ticks"));
   SPINNER_subtick->set_name(_("sub-intervals")); 
   CHECKBOX_tick_auto->set_name(_("Auto place (2D)"));
 
-  panel_tick2->set_name(_("Parameters"));
+  PANEL_tick2->set_name(_("Parameters"));
   SPINNER_tick_x0->set_name(_("origin"));
   SPINNER_tick_xmin->set_name(_("Min"));
   SPINNER_tick_xmax->set_name(_("Max"));
   SPINNER_tick_dx0->set_name(_("Step"));
 
   if((npartinfo>0)||nsliceinfo>0||nvsliceinfo>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
-    panel_showhide->set_name(_("Show/Hide Loaded Files"));
+    PANEL_showhide->set_name(_("Show/Hide Loaded Files"));
   }
 
 //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show"));
@@ -217,136 +218,136 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels = GLUI_Master.create_glui("Display",0,0,0);
   if(showdisplay_dialog==0)glui_labels->hide();
 
-  panel_label1 = glui_labels->add_rollout(_("General Settings"),true);
-  CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(panel_label1,_("Colorbar"),&visColorbarLabels,LABELS_label,Labels_CB);
-  CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(panel_label1,_("Time bar"),&visTimeLabels,LABELS_label,Labels_CB);
-  CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(panel_label1,_("Time label"),&visTimelabel,LABELS_label,Labels_CB);
-  CHECKBOX_labels_framelabel=glui_labels->add_checkbox_to_panel(panel_label1,_("Frame label"),&visFramelabel,FRAME_label,Labels_CB);
-  CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox_to_panel(panel_label1,_("HRR label"),&visHRRlabel,HRR_label,Labels_CB);
-  CHECKBOX_labels_hrrcutoff=glui_labels->add_checkbox_to_panel(panel_label1,_("HRRPUV cutoff"),&show_hrrcutoff,HRRPUVCUTOFF_label,Labels_CB);
-  CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(panel_label1,_("FDS Ticks"),&visTicks,LABELS_label,Labels_CB);
+  ROLLOUT_label1 = glui_labels->add_rollout(_("General Settings"),true);
+  CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Colorbar"),&visColorbarLabels,LABELS_label,Labels_CB);
+  CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Time bar"),&visTimeLabels,LABELS_label,Labels_CB);
+  CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Time label"),&visTimelabel,LABELS_label,Labels_CB);
+  CHECKBOX_labels_framelabel=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Frame label"),&visFramelabel,FRAME_label,Labels_CB);
+  CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("HRR label"),&visHRRlabel,HRR_label,Labels_CB);
+  CHECKBOX_labels_hrrcutoff=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("HRRPUV cutoff"),&show_hrrcutoff,HRRPUVCUTOFF_label,Labels_CB);
+  CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("FDS Ticks"),&visTicks,LABELS_label,Labels_CB);
   if(ntotal_blockages>0||isZoneFireModel==0){
-    CHECKBOX_labels_gridloc=glui_labels->add_checkbox_to_panel(panel_label1,_("Grid loc"),&visgridloc,LABELS_label,Labels_CB);
+    CHECKBOX_labels_gridloc=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Grid loc"),&visgridloc,LABELS_label,Labels_CB);
   }
-  if(nsliceinfo>0)CHECKBOX_labels_average=glui_labels->add_checkbox_to_panel(panel_label1,_("Average"),&vis_slice_average,LABELS_label,Labels_CB);
-  glui_labels->add_column_to_panel(panel_label1,false);
+  if(nsliceinfo>0)CHECKBOX_labels_average=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Average"),&vis_slice_average,LABELS_label,Labels_CB);
+  glui_labels->add_column_to_panel(ROLLOUT_label1,false);
 
 
-  CHECKBOX_labels_title=glui_labels->add_checkbox_to_panel(panel_label1,_("Title"),&visTitle0,LABELS_label,Labels_CB);
-  CHECKBOX_labels_axis=glui_labels->add_checkbox_to_panel(panel_label1,_("Axis"),&visaxislabels,LABELS_label,Labels_CB);
-  CHECKBOX_labels_framerate=glui_labels->add_checkbox_to_panel(panel_label1,_("Frame rate"),&visFramerate,LABELS_label,Labels_CB);
+  CHECKBOX_labels_title=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Title"),&visTitle0,LABELS_label,Labels_CB);
+  CHECKBOX_labels_axis=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Axis"),&visaxislabels,LABELS_label,Labels_CB);
+  CHECKBOX_labels_framerate=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Frame rate"),&visFramerate,LABELS_label,Labels_CB);
 #ifdef pp_memstatus
-  CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(panel_label1,_("Memory load"),&visAvailmemory,LABELS_label,Labels_CB);
+  CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Memory load"),&visAvailmemory,LABELS_label,Labels_CB);
 #endif
-  CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(panel_label1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
-  CHECKBOX_label_1=glui_labels->add_checkbox_to_panel(panel_label1,_("Fast blockage drawing"),&use_new_drawface,LABELS_drawface,Labels_CB);
-  CHECKBOX_label_2=glui_labels->add_checkbox_to_panel(panel_label1,_("Sort transparent faces"),&sort_transparent_faces,LABELS_drawface,Labels_CB);
-  CHECKBOX_label_3=glui_labels->add_checkbox_to_panel(panel_label1,_("Hide overlaps"),&hide_overlaps,LABELS_hide_overlaps,Labels_CB);
-  BUTTON_label_1=glui_labels->add_button_to_panel(panel_label1,_("Show all"),LABELS_showall,Labels_CB);
-  BUTTON_label_2=glui_labels->add_button_to_panel(panel_label1,_("Hide all"),LABELS_hideall,Labels_CB);
+  CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
+  CHECKBOX_label_1=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Fast blockage drawing"),&use_new_drawface,LABELS_drawface,Labels_CB);
+  CHECKBOX_label_2=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Sort transparent faces"),&sort_transparent_faces,LABELS_drawface,Labels_CB);
+  CHECKBOX_label_3=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Hide overlaps"),&hide_overlaps,LABELS_hide_overlaps,Labels_CB);
+  BUTTON_label_1=glui_labels->add_button_to_panel(ROLLOUT_label1,_("Show all"),LABELS_showall,Labels_CB);
+  BUTTON_label_2=glui_labels->add_button_to_panel(ROLLOUT_label1,_("Hide all"),LABELS_hideall,Labels_CB);
 
 
-  glui_labels->add_column_to_panel(panel_label1,true);
+  glui_labels->add_column_to_panel(ROLLOUT_label1,true);
 
-  CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(panel_label1,_("Flip background"),&background_flip,LABELS_flip,Labels_CB);
-  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(panel_label1,_("Shades of grey"),&setbw,LABELS_shade,Labels_CB);
+  CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Flip background"),&background_flip,LABELS_flip,Labels_CB);
+  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("Shades of grey"),&setbw,LABELS_shade,Labels_CB);
 
   if(nface_transparent>0){
-    panel_transparency = glui_labels->add_panel_to_panel(panel_label1,_("Geometry transparency"));
-    CHECKBOX_labels_transparent_override=glui_labels->add_checkbox_to_panel(panel_transparency,_("Use level:"),&use_transparency_geom,LABELS_transparent,Labels_CB);
-    SPINNER_labels_transparency_face=glui_labels->add_spinner_to_panel(panel_transparency,"",GLUI_SPINNER_FLOAT,&transparency_geom,LABELS_transparent,Labels_CB);
+    PANEL_transparency = glui_labels->add_panel_to_panel(ROLLOUT_label1,_("Geometry transparency"));
+    CHECKBOX_labels_transparent_override=glui_labels->add_checkbox_to_panel(PANEL_transparency,_("Use level:"),&use_transparency_geom,LABELS_transparent,Labels_CB);
+    SPINNER_labels_transparency_face=glui_labels->add_spinner_to_panel(PANEL_transparency,"",GLUI_SPINNER_FLOAT,&transparency_geom,LABELS_transparent,Labels_CB);
     SPINNER_labels_transparency_face->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
     Labels_CB(LABELS_transparent);
   }
 
 
-  CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(panel_label1,_("hms time label"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
+  CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("hms time label"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
 
-  RADIO_fontsize = glui_labels->add_radiogroup_to_panel(panel_label1,&fontindex,LABELS_fontsize,Labels_CB);
+  RADIO_fontsize = glui_labels->add_radiogroup_to_panel(ROLLOUT_label1,&fontindex,LABELS_fontsize,Labels_CB);
   RADIOBUTTON_label_1a=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small font"));
   RADIOBUTTON_label_1b=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large font"));
 
-  SPINNER_linewidth=glui_labels->add_spinner_to_panel(panel_label1,"blockage line width",GLUI_SPINNER_FLOAT,&linewidth);
+  SPINNER_linewidth=glui_labels->add_spinner_to_panel(ROLLOUT_label1,"blockage line width",GLUI_SPINNER_FLOAT,&linewidth);
   SPINNER_linewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
-  SPINNER_gridlinewidth=glui_labels->add_spinner_to_panel(panel_label1,"grid line width",GLUI_SPINNER_FLOAT,&gridlinewidth);
+  SPINNER_gridlinewidth=glui_labels->add_spinner_to_panel(ROLLOUT_label1,"grid line width",GLUI_SPINNER_FLOAT,&gridlinewidth);
   SPINNER_gridlinewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
 
 
-  panel_user_tick = glui_labels->add_rollout("User tick settings",false);
+  ROLLOUT_user_tick = glui_labels->add_rollout("User tick settings",false);
 
 
-  panel_tick1 = glui_labels->add_panel_to_panel(panel_user_tick,_("Display"),true);
-  panel_tick1a = glui_labels->add_panel_to_panel(panel_tick1,"",false);
+  PANEL_tick1 = glui_labels->add_panel_to_panel(ROLLOUT_user_tick,_("Display"),true);
+  PANEL_tick1a = glui_labels->add_panel_to_panel(PANEL_tick1,"",false);
 
-  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(panel_tick1a,_("Show user ticks"),&vis_user_ticks);
-  glui_labels->add_column_to_panel(panel_tick1a,false);
-  SPINNER_subtick=glui_labels->add_spinner_to_panel(panel_tick1a,_("sub-intervals"),GLUI_SPINNER_INT,&user_tick_sub); 
+  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(PANEL_tick1a,_("Show user ticks"),&vis_user_ticks);
+  glui_labels->add_column_to_panel(PANEL_tick1a,false);
+  SPINNER_subtick=glui_labels->add_spinner_to_panel(PANEL_tick1a,_("sub-intervals"),GLUI_SPINNER_INT,&user_tick_sub); 
   SPINNER_subtick->set_int_limits(1,10,GLUI_LIMIT_CLAMP);
 
-  panel_tick1b = glui_labels->add_panel_to_panel(panel_tick1,"",false);
-  CHECKBOX_tick_auto=glui_labels->add_checkbox_to_panel(panel_tick1b,_("Auto place (2D)"),&auto_user_tick_placement,LABELS_ticks,Labels_CB);
-  glui_labels->add_column_to_panel(panel_tick1b,false);
-  CHECKBOX_user_ticks_show_x=glui_labels->add_checkbox_to_panel(panel_tick1b,"x",&user_tick_show_x);
-  glui_labels->add_column_to_panel(panel_tick1b,false);
-  CHECKBOX_user_ticks_show_y=glui_labels->add_checkbox_to_panel(panel_tick1b,"y",&user_tick_show_y);
-  glui_labels->add_column_to_panel(panel_tick1b,false);
-  CHECKBOX_user_ticks_show_z=glui_labels->add_checkbox_to_panel(panel_tick1b,"z",&user_tick_show_z);
+  PANEL_tick1b = glui_labels->add_panel_to_panel(PANEL_tick1,"",false);
+  CHECKBOX_tick_auto=glui_labels->add_checkbox_to_panel(PANEL_tick1b,_("Auto place (2D)"),&auto_user_tick_placement,LABELS_ticks,Labels_CB);
+  glui_labels->add_column_to_panel(PANEL_tick1b,false);
+  CHECKBOX_user_ticks_show_x=glui_labels->add_checkbox_to_panel(PANEL_tick1b,"x",&user_tick_show_x);
+  glui_labels->add_column_to_panel(PANEL_tick1b,false);
+  CHECKBOX_user_ticks_show_y=glui_labels->add_checkbox_to_panel(PANEL_tick1b,"y",&user_tick_show_y);
+  glui_labels->add_column_to_panel(PANEL_tick1b,false);
+  CHECKBOX_user_ticks_show_z=glui_labels->add_checkbox_to_panel(PANEL_tick1b,"z",&user_tick_show_z);
   Labels_CB(LABELS_ticks);
 
-  panel_tick2 = glui_labels->add_panel_to_panel(panel_user_tick,_("Parameters"),true);
-  glui_labels->add_statictext_to_panel(panel_tick2,"                    x");
-  SPINNER_tick_x0=glui_labels->add_spinner_to_panel(panel_tick2,_("origin"),GLUI_SPINNER_FLOAT,user_tick_origin);
-  SPINNER_tick_xmin=glui_labels->add_spinner_to_panel(panel_tick2,_("Min"),GLUI_SPINNER_FLOAT,user_tick_min);
-  SPINNER_tick_xmax=glui_labels->add_spinner_to_panel(panel_tick2,_("Max"),GLUI_SPINNER_FLOAT,user_tick_max);
-  SPINNER_tick_dx0=glui_labels->add_spinner_to_panel(panel_tick2,_("Step"),GLUI_SPINNER_FLOAT,user_tick_step);
+  PANEL_tick2 = glui_labels->add_panel_to_panel(ROLLOUT_user_tick,_("Parameters"),true);
+  glui_labels->add_statictext_to_panel(PANEL_tick2,"                    x");
+  SPINNER_tick_x0=glui_labels->add_spinner_to_panel(PANEL_tick2,_("origin"),GLUI_SPINNER_FLOAT,user_tick_origin);
+  SPINNER_tick_xmin=glui_labels->add_spinner_to_panel(PANEL_tick2,_("Min"),GLUI_SPINNER_FLOAT,user_tick_min);
+  SPINNER_tick_xmax=glui_labels->add_spinner_to_panel(PANEL_tick2,_("Max"),GLUI_SPINNER_FLOAT,user_tick_max);
+  SPINNER_tick_dx0=glui_labels->add_spinner_to_panel(PANEL_tick2,_("Step"),GLUI_SPINNER_FLOAT,user_tick_step);
 
-  glui_labels->add_column_to_panel(panel_tick2,false);
+  glui_labels->add_column_to_panel(PANEL_tick2,false);
 
-  glui_labels->add_statictext_to_panel(panel_tick2,"                    y");
-  SPINNER_tick_y0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_origin+1);
-  SPINNER_tick_ymin=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_min+1);
-  SPINNER_tick_ymax=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+1);
-  SPINNER_tick_dy0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+1);
+  glui_labels->add_statictext_to_panel(PANEL_tick2,"                    y");
+  SPINNER_tick_y0=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_origin+1);
+  SPINNER_tick_ymin=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_min+1);
+  SPINNER_tick_ymax=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+1);
+  SPINNER_tick_dy0=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+1);
 
-  glui_labels->add_column_to_panel(panel_tick2,false);
+  glui_labels->add_column_to_panel(PANEL_tick2,false);
 
-  glui_labels->add_statictext_to_panel(panel_tick2,"                    z");
-  SPINNER_tick_z0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_origin+2);
-  SPINNER_tick_zmin=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_min+2);
-  SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
-  SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
+  glui_labels->add_statictext_to_panel(PANEL_tick2,"                    z");
+  SPINNER_tick_z0=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_origin+2);
+  SPINNER_tick_zmin=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_min+2);
+  SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
+  SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
   
   if((npartinfo>0)||nsliceinfo>0||nvsliceinfo>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
-    panel_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
+    PANEL_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
 
-    RADIO_showhide = glui_labels->add_radiogroup_to_panel(panel_showhide,&showhide_option);
+    RADIO_showhide = glui_labels->add_radiogroup_to_panel(PANEL_showhide,&showhide_option);
     glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show"));
     glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show Only"));
     glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Hide"));
 
-    glui_labels->add_column_to_panel(panel_showhide,false);
+    glui_labels->add_column_to_panel(PANEL_showhide,false);
 
     if(nevac>0){}
-    if(npartinfo>0&&nevac!=npartinfo)Button_PART=glui_labels->add_button_to_panel(panel_showhide,"Particle",LABELS_particleshow,Labels_CB);
-    if(nevac>0)Button_EVAC=glui_labels->add_button_to_panel(panel_showhide,"Evacuation",LABELS_evacshow,Labels_CB);
-    if(nsliceinfo>0)Button_SLICE=glui_labels->add_button_to_panel(panel_showhide,"Slice",LABELS_sliceshow,Labels_CB);
-    if(nvsliceinfo>0)Button_VSLICE=glui_labels->add_button_to_panel(panel_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
-    if(nisoinfo>0)Button_ISO=glui_labels->add_button_to_panel(panel_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
-    if(npatchinfo>0)Button_BOUNDARY=glui_labels->add_button_to_panel(panel_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
-    if(nsmoke3dinfo>0)Button_3DSMOKE=glui_labels->add_button_to_panel(panel_showhide,"3D smoke",LABELS_3dsmokeshow,Labels_CB);
-    if(nplot3dinfo>0)Button_PLOT3D=glui_labels->add_button_to_panel(panel_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
+    if(npartinfo>0&&nevac!=npartinfo)Button_PART=glui_labels->add_button_to_panel(PANEL_showhide,"Particle",LABELS_particleshow,Labels_CB);
+    if(nevac>0)Button_EVAC=glui_labels->add_button_to_panel(PANEL_showhide,"Evacuation",LABELS_evacshow,Labels_CB);
+    if(nsliceinfo>0)Button_SLICE=glui_labels->add_button_to_panel(PANEL_showhide,"Slice",LABELS_sliceshow,Labels_CB);
+    if(nvsliceinfo>0)Button_VSLICE=glui_labels->add_button_to_panel(PANEL_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
+    if(nisoinfo>0)Button_ISO=glui_labels->add_button_to_panel(PANEL_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
+    if(npatchinfo>0)Button_BOUNDARY=glui_labels->add_button_to_panel(PANEL_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
+    if(nsmoke3dinfo>0)Button_3DSMOKE=glui_labels->add_button_to_panel(PANEL_showhide,"3D smoke",LABELS_3dsmokeshow,Labels_CB);
+    if(nplot3dinfo>0)Button_PLOT3D=glui_labels->add_button_to_panel(PANEL_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
 
     update_showhidebuttons();
   }
 
-  panel_label2 = glui_labels->add_panel("",false);
-  Button_BENCHMARK=glui_labels->add_button_to_panel(panel_label2,_("Benchmark"),LABELS_BENCHMARK,Labels_CB);
-  glui_labels->add_column_to_panel(panel_label2,false);
+  PANEL_label2 = glui_labels->add_panel("",false);
+  Button_BENCHMARK=glui_labels->add_button_to_panel(PANEL_label2,_("Benchmark"),LABELS_BENCHMARK,Labels_CB);
+  glui_labels->add_column_to_panel(PANEL_label2,false);
 
-  BUTTON_label_3=glui_labels->add_button_to_panel(panel_label2,_("Save settings"),SAVE_SETTINGS,Labels_CB);
-  glui_labels->add_column_to_panel(panel_label2,false);
+  BUTTON_label_3=glui_labels->add_button_to_panel(PANEL_label2,_("Save settings"),SAVE_SETTINGS,Labels_CB);
+  glui_labels->add_column_to_panel(PANEL_label2,false);
 
-  BUTTON_label_4=glui_labels->add_button_to_panel(panel_label2,_("Close"),LABELS_close,Labels_CB);
+  BUTTON_label_4=glui_labels->add_button_to_panel(PANEL_label2,_("Close"),LABELS_close,Labels_CB);
 
   glui_labels->set_main_gfx_window( main_window );
 }
