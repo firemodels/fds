@@ -47,7 +47,7 @@ GLUI_Checkbox *CHECKBOX_blockage=NULL;
 
 GLUI_Button *BUTTON_blockage_1=NULL;
 
-void BUTTON_hide3_CB(int var);
+void Blockedit_DLG_CB(int var);
 
 char a_updatelabel[1000];
 char *updatelabel=NULL;
@@ -234,7 +234,7 @@ extern "C" void glui_edit_setup(int main_window){
     glui_edit->add_checkbox_to_panel(PANEL_blockageview,meshi->label,&meshi->blockvis);
   }
   glui_edit->add_separator();
-  BUTTON_blockage_1=glui_edit->add_button(_("Close"),CLOSE_WINDOW,BUTTON_hide3_CB);
+  BUTTON_blockage_1=glui_edit->add_button(_("Close"),CLOSE_WINDOW,Blockedit_DLG_CB);
 
 
   glui_edit->set_main_gfx_window( main_window );
@@ -260,9 +260,9 @@ extern "C" void show_glui_edit(void){
   glui_edit->show();
 }
 
-/* ------------------ BUTTON_hide3_CB ------------------------ */
+/* ------------------ Blockedit_DLG_CB ------------------------ */
 
-void BUTTON_hide3_CB(int var){
+void Blockedit_DLG_CB(int var){
   switch (var){
   case CLOSE_WINDOW: 
     DialogMenu(16);

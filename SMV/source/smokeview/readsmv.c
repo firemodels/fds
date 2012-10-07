@@ -8717,7 +8717,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"PROJECTION")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&projection_type);
-      TRANSLATE_CB(PROJECTION);
+      Motion_CB(PROJECTION);
       update_projection_type();
       continue;
     }

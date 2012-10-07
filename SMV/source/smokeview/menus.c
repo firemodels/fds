@@ -1359,7 +1359,7 @@ void ResetMenu(int value){
   switch (value){
   case MENU_SIZEPRESERVING:
     projection_type = 1 - projection_type;
-    TRANSLATE_CB(PROJECTION);
+    Motion_CB(PROJECTION);
     break;
   case MENU_OUTLINEVIEW:
     if(visBlocks==visBLOCKOutline){

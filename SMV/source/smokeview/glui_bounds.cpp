@@ -28,7 +28,7 @@ void Memcheck_CB(int val);
 #endif
 void SETslicemax(int setslicemax, float slicemax,int setslicechopmax, float slicechopmax);
 void SETslicemin(int setslicemin, float slicemin, int setslicechopmin, float slicechopmin);
-void BUTTON_hide_CB(int var);
+void Bounds_DLG_CB(int var);
 void PART_CB(int var);
 void Bound_CB(int var);
 void PLOT3D_CB(int var);
@@ -906,9 +906,9 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_button_to_panel(ROLLOUT_AUTOLOAD,_("Save auto load file list"),SAVE_FILE_LIST,Bound_CB);
   glui_bounds->add_button_to_panel(ROLLOUT_AUTOLOAD,_("Auto load now"),LOAD_FILES,Bound_CB);
 
-  glui_bounds->add_button(_("Save settings"),SAVE_SETTINGS,BUTTON_hide_CB);
+  glui_bounds->add_button(_("Save settings"),SAVE_SETTINGS,Bounds_DLG_CB);
 
-  glui_bounds->add_button(_("Close"),CLOSE,BUTTON_hide_CB);
+  glui_bounds->add_button(_("Close"),CLOSE,Bounds_DLG_CB);
 
   glui_bounds->set_main_gfx_window( main_window );
 }
@@ -1704,11 +1704,11 @@ void Bound_CB(int var){
     updatemenu=1;
     break;
   case STARTUP:
-    BUTTON_hide_CB(SAVE_SETTINGS);
+    Bounds_DLG_CB(SAVE_SETTINGS);
     break;
   case SAVE_FILE_LIST:
     set_3dsmoke_startup();
-    BUTTON_hide_CB(SAVE_SETTINGS);
+    Bounds_DLG_CB(SAVE_SETTINGS);
     break;
   case LOAD_FILES:
       load_startup_smoke();
@@ -2416,9 +2416,9 @@ extern "C" void updateglui(void){
   GLUI_Master.sync_live_all();
 }
 
-/* ------------------ BUTTON_hide_CB ------------------------ */
+/* ------------------ Bounds_DLG_CB ------------------------ */
 
-void BUTTON_hide_CB(int var){
+void Bounds_DLG_CB(int var){
   switch (var){
   case CLOSE:
     glui_bounds->hide();

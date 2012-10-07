@@ -1758,7 +1758,7 @@ void keyboard(unsigned char key, int flag){
       switch (keystate){
         case GLUT_ACTIVE_ALT:
           projection_type = 1 - projection_type;
-          TRANSLATE_CB(PROJECTION);
+          Motion_CB(PROJECTION);
           break;
         default:
           visVector=1-visVector;

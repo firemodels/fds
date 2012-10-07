@@ -363,7 +363,7 @@ EXTERNCPP void drawgslice_dataGPU(slicedata *slicei);
 EXTERNCPP void drawgslice_data(slicedata *slicei);
 EXTERNCPP void drawgslice_outline(void);
 EXTERNCPP void drawpatch_frame(void);
-EXTERNCPP void TRANSLATE_CB(int var);
+EXTERNCPP void Motion_CB(int var);
 EXTERNCPP void init_slice3d_texture(mesh *meshi);
 
 #ifdef pp_GPU
