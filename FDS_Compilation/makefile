@@ -210,14 +210,14 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 
 # 32 bit
 
-intel_osx_32 : FFLAGS = -O3  -m32 -heap-arrays -vec_report0 -ipo -axSSE2,SSE3,SSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX-I
+intel_osx_32 : FFLAGS = -O3  -m32 -heap-arrays -vec_report0 -ipo -axSSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX-I
 intel_osx_32 : LFLAGS = -static-intel
 intel_osx_32 : FCOMPL = ifort
 intel_osx_32 : obj = fds_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_32 : FFLAGS  = -O3 -m32 -heap-arrays -vec_report0 -ipo -axSSE2,SSE3,SSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX-I
+mpi_intel_osx_32 : FFLAGS  = -O3 -m32 -heap-arrays -vec_report0 -ipo -axSSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX-I
 mpi_intel_osx_32 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_32 : FCOMPL  = mpif77
 mpi_intel_osx_32 : obj = fds_mpi_intel_osx_32
@@ -239,14 +239,14 @@ mpi_intel_osx_32_db : setup $(obj_mpi)
 
 # 64 bit
 
-intel_osx_64 : FFLAGS = -O3 -m64 -heap-arrays -ipo -axSSE2,SSE3,SSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX-I
+intel_osx_64 : FFLAGS = -O3 -m64 -heap-arrays -ipo -axSSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX-I
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : obj = fds_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS  = -O3 -m64 -heap-arrays -vec_report0 -ipo -axSSE2,SSE3,SSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX-I
+mpi_intel_osx_64 : FFLAGS  = -O3 -m64 -heap-arrays -vec_report0 -ipo -axSSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX-I
 mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64 : FCOMPL  = mpif77
 mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
