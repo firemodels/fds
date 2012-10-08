@@ -1,8 +1,31 @@
 #!/bin/bash
 
-PLATFORM=64
+size=64
+
+while getopts 'p:' OPTION
+do
+case $OPTION in
+  p)
+   size="$OPTARG"
+   ;;
+esac
+#shift
+done
+
+if [ "$size" != "32" ]; then
+  size=64
+fi
+size=_$size
+
+OS=`uname`
+if [ "$OS" == "Darwin" ]; then
+  PLATFORM=osx$size
+else
+  PLATFORM=linux$size
+fi
+
 export SVNROOT=`pwd`/..
-export SMV=$SVNROOT/SMV/Build/intel_linux_$PLATFORM/smokeview_linux_$PLATFORM
+export SMV=$SVNROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
 export RUNSMV="$SVNROOT/Utilities/Scripts/runsmv.sh"
 export MAKEMOVIE=$SVNROOT/Utilities/Scripts/makemovie.sh
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
