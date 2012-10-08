@@ -23,7 +23,6 @@ extern "C" char glui_motion_revision[]="$Revision$";
 
 #define TRANSLATE_XY 101
 #define ROTATE_2AXIS 102
-#define ROTATE_3RDAXIS 103
 #define GLUI_Z 2
 #define MESH_LIST 4
 #define EYE_ROTATE 5
@@ -116,7 +115,6 @@ GLUI_Checkbox *CHECKBOX_blockpath=NULL,*CHECKBOX_cursor_blockpath=NULL;
 GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
 
 GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
-GLUI_Translation *ROTATE_3rdaxis=NULL;
 GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
 
 GLUI_RadioGroup *RADIO_projection=NULL,*RADIO_rotation_type=NULL;
@@ -313,9 +311,6 @@ extern "C" void glui_motion_setup(int main_window){
   PANEL_rotate = glui_motion->add_panel_to_panel(ROLLOUT_motion,"Rotate");
 
   ROTATE_2axis=glui_motion->add_translation_to_panel(PANEL_rotate,_("2 axis"),GLUI_TRANSLATION_XY,motion_ab,ROTATE_2AXIS,Motion_CB);
-  glui_motion->add_column_to_panel(PANEL_rotate,false);
-
-  ROTATE_3rdaxis=glui_motion->add_translation_to_panel(PANEL_rotate,_("3rd axis"),GLUI_TRANSLATION_Y,motion_ab,ROTATE_3RDAXIS,Motion_CB);
   glui_motion->add_column_to_panel(PANEL_rotate,false);
 
   ROTATE_eye_z=glui_motion->add_translation_to_panel(PANEL_rotate,_("View"),GLUI_TRANSLATION_X,motion_dir,EYE_ROTATE,Motion_CB);
@@ -713,9 +708,8 @@ extern "C" void showhide_translate(int var){
   switch (var){
 #ifdef pp_GENERAL_ROTATION
   case ROTATION_3AXIS:
-    if(ROTATE_3rdaxis!=NULL)ROTATE_3rdaxis->enable();
     if(PANEL_translate!=NULL)PANEL_translate->enable();
-    if(ROTATE_2axis!=NULL)ROTATE_2axis->enable();
+    if(ROTATE_2axis!=NULL)ROTATE_2axis->disable();
     if(ROTATE_eye_z!=NULL)ROTATE_eye_z->disable();
     if(BUTTON_90_z!=NULL)BUTTON_90_z->disable();
     if(CHECKBOX_blockpath!=NULL)CHECKBOX_blockpath->disable();
@@ -729,7 +723,6 @@ extern "C" void showhide_translate(int var){
     break;
 #endif
   case ROTATION_2AXIS:
-    if(ROTATE_3rdaxis!=NULL)ROTATE_3rdaxis->disable();
     if(PANEL_translate!=NULL)PANEL_translate->enable();
     if(ROTATE_2axis!=NULL)ROTATE_2axis->enable();
     if(ROTATE_eye_z!=NULL)ROTATE_eye_z->disable();
@@ -744,7 +737,6 @@ extern "C" void showhide_translate(int var){
     if(BUTTON_snap!=NULL)BUTTON_snap->enable();
     break;
   case EYE_CENTERED:
-    if(ROTATE_3rdaxis!=NULL)ROTATE_3rdaxis->disable();
     if(PANEL_translate!=NULL)PANEL_translate->enable();
     if(ROTATE_2axis!=NULL)ROTATE_2axis->disable();
     if(ROTATE_eye_z!=NULL)ROTATE_eye_z->enable();
@@ -759,7 +751,6 @@ extern "C" void showhide_translate(int var){
     if(BUTTON_snap!=NULL)BUTTON_snap->disable();
     break;
   case ROTATION_1AXIS:
-    if(ROTATE_3rdaxis!=NULL)ROTATE_3rdaxis->disable();
     if(PANEL_translate!=NULL)PANEL_translate->enable();
     if(ROTATE_2axis!=NULL)ROTATE_2axis->enable();
     if(ROTATE_eye_z!=NULL)ROTATE_eye_z->disable();
@@ -829,7 +820,7 @@ extern "C" void Motion_CB(int var){
 
 #ifdef pp_GPUTHROTTLE
   if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1&&
-     (var==EYE_ROTATE||var==EYE_ROTATE_90||var==ROTATE_2AXIS||var==ROTATE_3RDAXIS||var==TRANSLATE_XY||var==GLUI_Z)
+     (var==EYE_ROTATE||var==EYE_ROTATE_90||var==ROTATE_2AXIS||var==TRANSLATE_XY||var==GLUI_Z)
     ){
     float fps;
 
@@ -892,7 +883,7 @@ extern "C" void Motion_CB(int var){
       glui_move_mode=EYE_ROTATE_90;
       return;
     case ROTATE_2AXIS:
-      if(rotation_type==ROTATE_2AXIS){
+      if(rotation_type==ROTATION_2AXIS){
         float *az_elev;
 
         az_elev = camera_current->az_elev;
@@ -900,10 +891,6 @@ extern "C" void Motion_CB(int var){
         az_elev[1] = -ROTATE_2axis->get_y();
         printf("x=%f y=%f\n",az_elev[0],az_elev[1]);
       }
-      else if(rotation_type==ROTATION_3AXIS){
-      }
-      break;
-    case ROTATE_3RDAXIS:
       break;
     case WINDOWSIZE_LIST:
       switch (windowsize_pointer){
@@ -1091,8 +1078,6 @@ extern "C" void Motion_CB(int var){
     case SNAPSCENE:
       break;
     case ROTATE_2AXIS:
-      break;
-    case ROTATE_3RDAXIS:
       break;
     default:
       ASSERT(FFALSE);
