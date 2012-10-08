@@ -4,9 +4,8 @@ MAKEMOVIES=
 while getopts 'm' OPTION
 do case $OPTION in
   m)
-   MAKEMOVIES=-m
+   MAKEMOVIES="-m"
   ;;
 esac
 done
-
-run-one bash -lc ./smokebot_linux.sh $MAKEMOVIES &
+run-one bash -lc "./smokebot_linux.sh $MAKEMOVIES" &
