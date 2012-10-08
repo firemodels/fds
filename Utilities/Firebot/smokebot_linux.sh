@@ -26,7 +26,6 @@ esac
 done
 shift $(($OPTIND-1))
 
-#mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
 mailTo="gforney@gmail.com, koverholt@gmail.com"
 
 FIREBOT_USERNAME="`whoami`"
