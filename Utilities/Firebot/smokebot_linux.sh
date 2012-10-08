@@ -18,6 +18,7 @@ do
 case $OPTION in
   m)
    MAKEMOVIES="1"
+   ;;
   q)
    FIREBOT_QUEUE="$OPTARG"
    ;;
