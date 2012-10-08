@@ -12,9 +12,12 @@
 #  ===================
 
 FIREBOT_QUEUE=smokebot
-while getopts 'q:' OPTION
+MAKEMOVIES=
+while getopts 'mq:' OPTION
 do
 case $OPTION in
+  m)
+   MAKEMOVIES="1"
   q)
    FIREBOT_QUEUE="$OPTARG"
    ;;
@@ -571,6 +574,31 @@ check_smv_pictures()
    fi
 }
 
+#  ===============================================
+#  = Stage 6f - Make SMV movies (release mode) =
+#  ===============================================
+
+make_smv_movies()
+{
+   cd $FDS_SVNROOT/Verification
+   scripts/Make_SMV_Movies.sh 2>&1  &> $FIREBOT_DIR/output/stage6f
+}
+
+check_smv_movies()
+{
+   cd $FIREBOT_DIR
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f` == "" && `grep "*** Error" -I $FIREBOT_DIR/output/stage6f` == "" ]]
+   then
+      stage6f_success=true
+   else
+      cp $FIREBOT_DIR/output/stage6f  $FIREBOT_DIR/output/stage6f_errors
+
+      echo "Errors from Stage 6f - Make SMV movies " >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6f >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+}
+
 #  ======================================
 #  = Stage 7 - FDS run time statistics =
 #  ======================================
@@ -797,6 +825,13 @@ check_compile_smv
 ### Stage 6e ###
 make_smv_pictures
 check_smv_pictures
+
+### Stage 6f ###
+if [ "$MAKEMOVIES" == "1" ]
+then
+  make_smv_movies
+  check_smv_movies
+fi
 
 ### Stage 7 ###
 generate_timing_stats
