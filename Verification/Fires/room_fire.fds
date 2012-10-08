@@ -86,8 +86,8 @@ All material properties are completely fabricated.
 
  VENT XB= 2.40, 2.60, 4.30, 4.40, 0.60, 0.60, SURF_ID='BURNER' / Ignition source on couch
 
-&PART ID='ignitor particle', SURF_ID='ignitor', STATIC=.TRUE., AGE=30. /
-&SURF ID='ignitor', TMP_FRONT=1500., GEOMETRY='CYLINDRICAL', LENGTH=0.15, RADIUS=0.01 /
+&PART ID='ignitor particle', SURF_ID='ignitor', STATIC=.TRUE. /
+&SURF ID='ignitor', TMP_FRONT=1000., GEOMETRY='CYLINDRICAL', LENGTH=0.15, RADIUS=0.01 /
 &INIT XYZ=2.45,4.35,0.65, DX=0.1, PART_ID='ignitor particle', N_PARTICLES=3 /
 
 &OBST XB= 4.00, 4.60, 3.80, 4.60, 0.00, 0.40 /
