@@ -8111,6 +8111,12 @@ MESH_LOOP_2: DO NM=1,NMESHES
                CALL BLOCK_CELL(NM,I1+1,  I2,J1+1,  J2,KBP1,KBP1,0,0)
          END SELECT
       ENDIF
+      
+      ! Check UVW
+      IF (ABS(VT%UVW(ABS(VT%IOR))) < ZERO_P) THEN
+         WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' cannot have normal component of UVW equal to 0'
+         CALL SHUTDOWN(MESSAGE)         
+      ENDIF
  
    ENDDO VENT_LOOP_2
  
