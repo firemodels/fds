@@ -822,61 +822,68 @@ problems found in video cards on older computers.
 
 \chapter{Manipulating the Scene}
 
-The scene may be
-manipulated from two points of view, a world or global view and a
-first person or {\em eye}\ view.  These views may be switched by
-pressing the ``e'' key or by selecting the appropriate radio
-button in the {\em Motion/View}\ dialog box.
+A Smokeview scene may be manipulated using two different reference
+points, the scene center and the user location. Motion about the
+scene center is called world or global view and motion about the
+user location is called eye or first person view. These view
+methods may be switched by pressing the ``e'' key or by selecting
+the appropriate radio button in the {\em Motion/View}\ dialog box.
 
 \section{World View}
 
-The scene may be rotated or translated while in world view, either
-directly with the mouse or by using controls contained in the
-{\em Motion/View/Render}\ dialog box. This dialog box is opened from the
-\fbox{Dialogs$>$Motion/View/Render}\ menu item and is illustrated in
-Figure \ref{figMOTION}.
+The scene may be rotated or translated directly using the mouse or
+by using controls in the {\em Motion/View/Render}\ dialog box.
+This dialog box, illustrated in Figure \ref{figMOTION}a, is opened
+using the \fbox{Dialogs$>$Motion/View/Render}\ menu item.
 
-Clicking on the scene and dragging the
-mouse horizontally, vertically or a combination of both results in
-scene rotation or translation depending upon whether the left,
-middle or right mouse button is depressed.
+Clicking on the scene and dragging the mouse horizontally,
+vertically or a combination of both results in scene rotation or
+translation depending upon whether the modifier keys CTRL or ALT
+are pressed or not.
 
 \blist
 
-\hitem{left mouse button} horizontal and vertical mouse motion results in scene rotation.
+\hitem{no modifier keys} Horizontal mouse movement results in
+scene rotation about the Z axis. Vertical mouse movement results
+in scene rotation about the X axis.  If the 3-axis rotation option
+is selected then mouse movement around the periphery of the scene
+results in clockwise or counter clockwise movement about the Y
+axis.
 
-\hitem{middle mouse button} Horizontal mouse movement when the middle mouse button is depressed
-results in
+\hitem{CTRL key depressed} Horizontal mouse movement results in
 scene translation from side to side along the X axis. Vertical
-mouse movement results in scene translation into and out of the
-computer screen along the Y axis.
-Alternatively, one can depress the CTRL key and the left mouse button to achieve the same effect.
+mouse movement results in scene translation in and out of the
+along the Y axis.
 
-\hitem{right mouse button} Vertical mouse movement when the right mouse button is depressed results in vertical scene
-translation along the Z axis.  Horizontal mouse movement has no
-effect.  Alternatively,  one can depress the ALT key and the left mouse button to achieve the same effect.
-Note that the right mouse button is also used to display Smokeview menus.  To switch this behavior to scene movement, press the {\em M}\ key.
-Press the {\em M}\ key again to switch back to menu use.
+\hitem{ALT key depressed} Vertical mouse movement results in scene
+translation up and down along the Z axis. Horizontal mouse
+movement has no effect.
 
 \elist
 
-%\begin{wrapfigure}[15]{O}[0.5in]{3.5in}
 \begin{figure}[\figoptions]
 \centerline{
-\includegraphics[width=2.40277777in]{FIGURES/figMOTION}
+\begin{tabular}{cc}
+\includegraphics[width=2.40277777in]{FIGURES/figMOTION}&
+\includegraphics[width=2.416667in]{FIGURES/figMOTION2}\\
+ a) Motion&b) Render image and Scene scaling
+\end{tabular}
 }
-\caption[Motion/View/Render Dialog Box - Motion, Window Properties and Viewpoint Regions.]{Motion/View Dialog/Render Box - Motion, Window Properties and Viewpoint Regions. Rotate or translate
-the scene by clicking an {\em arrow}\ and dragging the mouse. The
-Motion/View/Render Dialog Box is invoked by selecting
-\frameit{Dialogs$>$Motion/View/Render}. }
+\caption[Motion/View/Render Dialog Box]{Motion/View/Render
+Dialog Box - Motion, Window Properties and Viewpoint Regions.
+Rotate or translate the scene by clicking an {\em arrow}\ and
+dragging the mouse. The Motion/View/Render Dialog Box is invoked
+by selecting \frameit{Dialogs$>$Motion/View/Render}. }
 \label{figMOTION}
 \end{figure}
-%\end{wrapfigure}
 
-The {\em Motion/View/Render}\ dialog box, illustrated in Figure \ref{figMOTION}\, may be used to move the scene in a
-more controlled manner. For example, buttons in the {\em Motion}\ region allows one to translate or rotate the scene.
-The \frameit{Horizontal} button allows one to translate the scene horizontally in a left/right or in/out
-direction while the \frameit{Vertical}\ button allows one to translate the scene in an up/down direction.
+The {\em Motion/View/Render}\ dialog box may be used to move the
+scene in a more controlled manner. Buttons in the {\em Motion}\
+region allows one to translate or rotate the scene. The
+\frameit{Horizontal} button allows one to translate the scene
+horizontally in a left/right or in/out direction while the
+\frameit{Vertical}\ button allows one to translate the scene in an
+up/down direction.
 
 Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box
 allow one to change the scene magnification or zoom factor and the
@@ -887,18 +894,11 @@ object smaller when drawn at a distance. An isometric or size preserving project
 on the other hand draws an objects the same size regardless of
 where it is drawn in the scene.
 
-\begin{figure}[\figoptions]
-\centerline{
-\includegraphics[width=2.416667in]{FIGURES/figMOTION2}
-}
-\caption[Motion/View/Render Dialog Box - Render and Scaling/Depth regions.]{Motion/View Dialog/Render Box. Render and Scaling/Depth regions.}
-\label{figMOTIONb}
-\end{figure}
-%\end{wrapfigure}
-
-Controls in the {\em Render} and {\em Scaling Depth} regions, as illustrated in Figure \ref{figMOTIONb},
-allow one to render images using either PNG or JPEG file formats and to scale the Smokeview scene
-(say for visualizing tunnel scenarios) in any or all of the coordinate directions.
+Controls in the {\em Render} and {\em Scaling Depth} regions, as
+illustrated in Figure \ref{figMOTION}b, allow one to render images
+using either PNG or JPEG image file formats and to scale the
+Smokeview scene (say for visualizing tunnel scenarios) in any or
+all of the coordinate directions.
 
 The \frameit{zoom}\ and \frameit{aperture} edit boxes allow one to
 change the magnification of the scene or equivalently the angle of
