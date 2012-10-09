@@ -57,6 +57,16 @@ START_TIME=$(date +%s)
 TIME_LIMIT=43200
 TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
 
+MKDIR ()
+{
+  DIR=$1
+  if [ ! -d $DIR ]
+  then
+    echo Creating directory $DIR
+    mkdir $DIR
+  fi
+}
+
 check_time_limit()
 {
    if [ "$TIME_LIMIT_EMAIL_NOTIFICATION" == "sent" ]
@@ -87,8 +97,13 @@ set_files_world_readable()
 
 clean_firebot_history()
 {
+   
    # Clean Firebot metafiles
+   MKDIR $FIREBOT_DIR
    cd $FIREBOT_DIR
+   MKDIR guides
+   MKDIR history
+   MKDIR output
    rm -f output/* > /dev/null
 }
 
