@@ -6471,7 +6471,7 @@ properties of different types of Lagrangian particles:
 \normalsize
 
 \noindent
-Particles are introduced into the calculation in several different ways: they may be introduced via a sprinkler or nozzle (liquid droplets are usually introduced this way), they may be introduced at a blowing vent or burning surface (mass tracer particles or partivles representing embers are usually introduced this way), and they may be introduced randomly or at fixed points within a designated volume (solid particles that represent subgrid-scale objects are usually intoduced  this way). Details are found below.
+Particles are introduced into the calculation in several different ways: they may be introduced via a sprinkler or nozzle (liquid droplets are usually introduced this way), they may be introduced at a blowing vent or burning surface (mass tracer particles or particles representing embers are usually introduced this way), and they may be introduced randomly or at fixed points within a designated volume (solid particles that represent subgrid-scale objects are usually introduced this way). Details are found below.
 
 The way to describe particles depends on the type.
 If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct PART} line. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets. For any other type of particle, such as particles that represent subgrid-scale objects, like office clutter or vegetation, you add a {\ct SURF\_ID} to the {\ct PART} line. All of these different types of particles are described below.
