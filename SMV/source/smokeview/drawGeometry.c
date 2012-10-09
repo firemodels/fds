@@ -4428,6 +4428,14 @@ void drawBlockages(int mode, int trans_flag){
 /* ------------------ level_scene ------------------------ */
 
 void level_scene(int level_x, int level_y, float *quat){
+  if(rotation_type==ROTATION_2AXIS&&key_state == KEY_NONE){
+    float *elev;
+
+    elev = camera_current->az_elev+1;
+    *elev = 0.0;
+    update_trainer_moves();
+    camera_current->dirty=1;
+  }
 
 #ifdef pp_GENERAL_ROTATION  
   if(rotation_type==ROTATION_3AXIS&&key_state == KEY_NONE){
