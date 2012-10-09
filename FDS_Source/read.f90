@@ -1525,7 +1525,7 @@ CHARACTER(30) :: RAMP_GX,RAMP_GY,RAMP_GZ,TURBULENCE_MODEL
 NAMELIST /MISC/ AL2O3,ALLOW_SURFACE_PARTICLES,ALLOW_UNDERSIDE_PARTICLES,ASSUMED_GAS_TEMPERATURE,BAROCLINIC,BNDF_DEFAULT,&
                 CDF_CUTOFF,CFL_MAX,CFL_MIN,CFL_VELOCITY_NORM,CHECK_GR,CHECK_HT,CHECK_VN,CLIP_MASS_FRACTION,&
                 CONSTANT_SPECIFIC_HEAT,C_DEARDORFF,C_SMAGORINSKY,C_VREMAN,C_FORCED,&
-                C_FORCED_CYLINDER,C_FORCED_SPHERE,C_HORIZONTAL,C_VERTICAL,DNS,DRIFT_FLUX,EDC,&
+                C_FORCED_CYLINDER,C_FORCED_SPHERE,C_HORIZONTAL,C_VERTICAL,DNS,DRIFT_FLUX,&
                 EVACUATION_DRILL,EVACUATION_MC_MODE,EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS,&
                 FLUX_LIMITER,FORCE_VECTOR,FREEZE_VELOCITY,FYI,GAMMA,GRAVITATIONAL_DEPOSITION,GROUND_LEVEL,GVEC,HRRPUV_MAX_SMV, &
                 IMMERSED_BOUNDARY_METHOD,INITIAL_UNMIXED_FRACTION,LAPSE_RATE,LES_FILTER_WIDTH,&
@@ -2664,20 +2664,20 @@ REAL(EB) :: SOOT_YIELD,CO_YIELD,EPUMO2,A, &
             CRITICAL_FLAME_TEMPERATURE,HEAT_OF_COMBUSTION,NU(MAX_SPECIES),E,N_S(MAX_SPECIES),C,H,N,O, &
             AUTO_IGNITION_TEMPERATURE,HUMIDITY,SOOT_H_FRACTION,N_T
 REAL(EB) :: E_TMP=0._EB,S_TMP=0._EB,ATOM_COUNTS(118),MW_FUEL=0._EB,H_F
-LOGICAL :: A_TMP,L_TMP,CHECK_ATOM_BALANCE,EDCM,FAST_CHEMISTRY,REVERSIBLE
+LOGICAL :: A_TMP,L_TMP,CHECK_ATOM_BALANCE,FAST_CHEMISTRY,REVERSIBLE
 NAMELIST /REAC/ A,A_RAMP,AUTO_IGNITION_TEMPERATURE,BETA_EDC,C,CHECK_ATOM_BALANCE,CO_YIELD,CRITICAL_FLAME_TEMPERATURE,&
-                E,E_RAMP,EDCM,EPUMO2,EQUATION,EXTINCTION_MODEL,FIXED_MIX_TIME,FORMULA,FUEL,FUEL_RADCAL_ID, &
+                E,E_RAMP,EPUMO2,EQUATION,EXTINCTION_MODEL,FIXED_MIX_TIME,FORMULA,FUEL,FUEL_RADCAL_ID, &
                 FWD_ID,FYI,H,HEAT_OF_COMBUSTION,&
                 HRRPUA_SHEET,HRRPUV_AVERAGE,HUMIDITY,ID,IDEAL,N,NU,N_S,N_T,O,ODE_SOLVER,REAC_ATOM_ERROR,&
                 REAC_MASS_ERROR,REVERSIBLE,SMIX_ID,SOOT_H_FRACTION,SOOT_YIELD,SPEC_ID,SUPPRESSION,TAU_CHEM,TAU_FLAME,&
                 Y_CO2_INFTY,Y_O2_INFTY,Y_P_MIN_EDC
-                
+
 CALL MAKE_PERIODIC_TABLE
 CALL SIMPLE_SPECIES_MW
 ATOM_COUNTS = 0._EB
 N_REACTIONS = 0
 REWIND(LU_INPUT)
- 
+
 COUNT_REAC_LOOP: DO
    CALL CHECKREAD('REAC',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_REAC_LOOP
@@ -2724,8 +2724,8 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    IF (SIMPLE_CHEMISTRY) THEN
       IF(C<=TWO_EPSILON_EB .AND. H<=TWO_EPSILON_EB) THEN
          IF (TRIM(FORMULA)=='null') THEN
-            CALL GAS_PROPS(FUEL,S_TMP,E_TMP,MW_FUEL,A_TMP,FORMULA,L_TMP,ATOM_COUNTS,H_F,RADCAL_ID)   
-         ELSE         
+            CALL GAS_PROPS(FUEL,S_TMP,E_TMP,MW_FUEL,A_TMP,FORMULA,L_TMP,ATOM_COUNTS,H_F,RADCAL_ID)
+         ELSE
             CALL GET_FORMULA_WEIGHT(FORMULA,MW_FUEL,ATOM_COUNTS)   
          ENDIF
          IF (ATOM_COUNTS(1)+ATOM_COUNTS(6)+ATOM_COUNTS(7)+ATOM_COUNTS(8) - SUM(ATOM_COUNTS) < 0._EB) THEN
@@ -2756,7 +2756,6 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN%E                         = E*1000._EB
    RN%E_IN                      = E
    RN%E_RAMP                    = E_RAMP
-   RN%EDCM                      = EDCM
    RN%EQUATION                  = EQUATION
    RN%EPUMO2                    = EPUMO2*1000._EB
    RN%FAST_CHEMISTRY            = FAST_CHEMISTRY
@@ -2778,31 +2777,12 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    ! Background water vapor. Only used for simple chemistry model.
 
    Y_H2O_INFTY = WATER_VAPOR_MASS_FRACTION(HUMIDITY,TMPA)
-   IF (.NOT. EDC) THEN
-      ! Determine the type of reaction
 
-      IF (A > 0._EB) THEN 
-         IF (.NOT. EDCM) THEN
-            RN%MODE = FINITE_RATE
-         ELSE
-            RN%MODE = EDDY_DISSIPATION_CONCEPT
-         ENDIF
-      ELSE
-         RN%MODE = EDDY_DISSIPATION
-      ENDIF
-
-      IF (RN%A < 0._EB .AND. RN%E < 0._EB) THEN 
-         A = 1.E16_EB
-         E = 0._EB
+   IF (RN%A < 0._EB .OR. RN%A > 1.E15_EB) THEN
+      IF (RN%E < 0._EB .OR. RN%E == 0._EB) THEN 
+         RN%A_IN = 1.E16_EB
+         RN%E_IN = 0._EB
          RN%FAST_CHEMISTRY=.TRUE.
-      ENDIF
-   ELSE
-      IF (RN%A < 0._EB .OR. RN%A > 1.E15_EB) THEN
-         IF (RN%E < 0._EB .OR. RN%E == 0._EB) THEN 
-            RN%A_IN = 1.E16_EB
-            RN%E_IN = 0._EB
-            RN%FAST_CHEMISTRY=.TRUE.
-         ENDIF
       ENDIF     
    ENDIF   
    ! Determine the number of stoichiometric coefficients for this reaction
@@ -2859,16 +2839,6 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
 END DO REAC_READ_LOOP
 
-IF (.NOT. EDC) THEN
-   SIMP_CHEM: DO NR =1,N_REACTIONS
-      RN => REACTION(NR)
-      IF (.NOT. RN%FAST_CHEMISTRY) THEN
-         SIMPLE_CHEM = .FALSE.
-         EXIT SIMP_CHEM
-      ENDIF
-   ENDDO SIMP_CHEM
-ENDIF
-
 REWIND(LU_INPUT)
 
 CONTAINS
@@ -2884,7 +2854,6 @@ CO_YIELD                    = 0._EB
 CRITICAL_FLAME_TEMPERATURE  = 1327._EB   ! C
 E                           = -1._EB     ! kJ/kmol
 E_RAMP                      = 'null'
-EDCM                        = .FALSE.
 EPUMO2                      = 13100._EB  ! kJ/kg
 EQUATION                    = 'null'
 EXTINCTION_MODEL            = 'null'
@@ -2922,10 +2891,9 @@ END SUBROUTINE READ_REAC
 SUBROUTINE PROC_REAC
 USE PROPERTY_DATA, ONLY : PARSE_EQUATION, SHUTDOWN_ATOM
 REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118)
-INTEGER :: NS,NS2,NR,NSPEC,NRR,NFR,R_COUNT,F_COUNT,HF_COUNT
+INTEGER :: NS,NS2,NR,NSPEC,HF_COUNT
 LOGICAL :: NAME_FOUND,SKIP_ATOM_BALANCE
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
-TYPE(REACTION_TYPE), POINTER :: RR=>NULL(),FR=>NULL()
 
 IF (N_REACTIONS <=0) RETURN
 
@@ -2956,12 +2924,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and simple chemistry'
       CALL SHUTDOWN(MESSAGE)
    ENDIF 
-   IF (.NOT. EDC) THEN   
-      IF (.NOT. SIMPLE_CHEMISTRY .AND. RN%HEAT_OF_COMBUSTION <-1.E10_EB) THEN
-         WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. HEAT_OF_COMBUSTION not set.'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF 
-   ENDIF
    IF (TRIM(RN%EQUATION)/='null') THEN
       IF(ANY(ABS(RN%NU_READ)>TWO_EPSILON_EB)) THEN
          WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Cannot set NUs if an EQUATION is specified.'
@@ -3030,7 +2992,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
    ENDDO
 
-
    ! Adjust mol/cm^3/s based rate to kg/m^3/s rate
    RN%RHO_EXPONENT = 0._EB
    DO NS=1,RN%N_SPEC
@@ -3050,7 +3011,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       IF (.NOT. NAME_FOUND) THEN
          WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Primitive species ', &
                                        TRIM(RN%SPEC_ID_READ(NS)),' not found.'
-         CALL SHUTDOWN(MESSAGE)      
+         CALL SHUTDOWN(MESSAGE)
       ENDIF     
    ENDDO
    
@@ -3107,184 +3068,117 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
-   ! Heat of Combustion calculation for SIMPLE_CHEMISTRY
-
-   IF (SIMPLE_CHEMISTRY .AND. .NOT. EDC) THEN
-      IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
-         RN%HEAT_OF_COMBUSTION = -RN%EPUMO2*RN%NU_SPECIES(O2_INDEX)*SPECIES(O2_INDEX)%MW/SPECIES(FUEL_INDEX)%MW
-      ELSE
-         IF (IDEAL) THEN
-            RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION*SPECIES(FUEL_INDEX)%MW*0.001 !J/kg -> J/mol
-            RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU_CO*(CO2_HEAT_OF_FORMATION - CO_HEAT_OF_FORMATION) &
-                                                          - RN%NU_SOOT*CO2_HEAT_OF_FORMATION*(1._EB-RN%SOOT_H_FRACTION) &
-                                                          - RN%NU_SOOT*H2O_HEAT_OF_FORMATION*RN%SOOT_H_FRACTION*0.5_EB
-            RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES(FUEL_INDEX)%MW*1000._EB !J/mol->J/kg
+   ! Heat of Combustion calculation
+   IF (RN%HEAT_OF_COMBUSTION > -1.E21) THEN ! User specified heat of combustion
+      DO NS = 0,N_TRACKED_SPECIES
+         HF_COUNT = 0
+         IF (RN%NU(NS) /= 0._EB) THEN
+            IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) HF_COUNT = HF_COUNT +1
+            IF (HF_COUNT > 1) THEN
+               WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing more than 1 heat of formation or combustion.'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
          ENDIF
-      ENDIF   
-   ENDIF
-
-   ! Heat of Combustion calculation for EDC
-   IF (EDC) THEN
-      IF (RN%HEAT_OF_COMBUSTION > -1.E21) THEN ! User specified heat of combustion
+      ENDDO
+      ! Find heat of formation of lumped fuel to satisfy specified heat of combustion
+      SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = 0._EB
+      SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
+                                                + RN%HEAT_OF_COMBUSTION*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+      DO NS = 0,N_TRACKED_SPECIES
+         IF  (NS == RN%FUEL_SMIX_INDEX) CYCLE
+            SM=>SPECIES_MIXTURE(NS)
+            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
+                                                      + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
+         ENDDO
+         SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
+                                                   (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
+   ELSE ! Heat of combustion not specified
+      IF (SIMPLE_CHEMISTRY) THEN ! Calculate heat of combustion based oxygen consumption
+         IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
+            RN%HEAT_OF_COMBUSTION = -RN%EPUMO2*RN%NU_SPECIES(O2_INDEX)*SPECIES(O2_INDEX)%MW/SPECIES(FUEL_INDEX)%MW
+         ELSE
+            IF (IDEAL) THEN
+               RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION*SPECIES(FUEL_INDEX)%MW*0.001 !J/kg -> J/mol
+               RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU_CO*(CO2_HEAT_OF_FORMATION - CO_HEAT_OF_FORMATION) &
+                                                             - RN%NU_SOOT*CO2_HEAT_OF_FORMATION*(1._EB-RN%SOOT_H_FRACTION) &
+                                                             - RN%NU_SOOT*H2O_HEAT_OF_FORMATION*RN%SOOT_H_FRACTION*0.5_EB
+               RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES(FUEL_INDEX)%MW*1000._EB !J/mol->J/kg
+            ENDIF
+         ENDIF   
+      ELSE
          DO NS = 0,N_TRACKED_SPECIES
-            HF_COUNT = 0
             IF (RN%NU(NS) /= 0._EB) THEN
-               IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) HF_COUNT = HF_COUNT +1
-               IF (HF_COUNT > 1) THEN
-                  WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing more than 1 heat of formation or combustion.'
+               IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) THEN ! Missing Heat of Formation
+                  WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing either heat of formation or combustion.'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
          ENDDO
-         ! Find heat of formation of lumped fuel to satisfy specified heat of combustion       
+      ENDIF   
+      IF (SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F <= -1.E21) THEN
          SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = 0._EB
          SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
                                                    + RN%HEAT_OF_COMBUSTION*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
          DO NS = 0,N_TRACKED_SPECIES
             IF  (NS == RN%FUEL_SMIX_INDEX) CYCLE
-               SM=>SPECIES_MIXTURE(NS)
-               SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
-                                                         + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
-            ENDDO
-            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
-                                                      (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
-      ELSE ! Heat of combustion not specified
-         IF (SIMPLE_CHEMISTRY) THEN ! Calculate heat of combustion based oxygen consumption
-            IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
-               RN%HEAT_OF_COMBUSTION = -RN%EPUMO2*RN%NU_SPECIES(O2_INDEX)*SPECIES(O2_INDEX)%MW/SPECIES(FUEL_INDEX)%MW
-            ELSE
-               IF (IDEAL) THEN
-                  RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION*SPECIES(FUEL_INDEX)%MW*0.001 !J/kg -> J/mol
-                  RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU_CO*(CO2_HEAT_OF_FORMATION - CO_HEAT_OF_FORMATION) &
-                                                                - RN%NU_SOOT*CO2_HEAT_OF_FORMATION*(1._EB-RN%SOOT_H_FRACTION) &
-                                                                - RN%NU_SOOT*H2O_HEAT_OF_FORMATION*RN%SOOT_H_FRACTION*0.5_EB
-                  RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES(FUEL_INDEX)%MW*1000._EB !J/mol->J/kg
-               ENDIF
-            ENDIF   
-         ELSE
-            DO NS = 0,N_TRACKED_SPECIES
-               IF (RN%NU(NS) /= 0._EB) THEN
-                  IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) THEN ! Missing Heat of Formation
-                     WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing either heat of formation or combustion.'
-                     CALL SHUTDOWN(MESSAGE)
-                  ENDIF
-               ENDIF
-            ENDDO
-         ENDIF   
-         IF (SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F <= -1.E21) THEN
-            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = 0._EB
-            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
-                                                      + RN%HEAT_OF_COMBUSTION*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-            DO NS = 0,N_TRACKED_SPECIES
-               IF  (NS == RN%FUEL_SMIX_INDEX) CYCLE
-               SM=>SPECIES_MIXTURE(NS)
-               SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
-                                                         + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
-            ENDDO
-            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
-                                                       (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
-         ENDIF
-         RN%HEAT_OF_COMBUSTION = 0._EB
-         DO NS = 0,N_TRACKED_SPECIES
             SM=>SPECIES_MIXTURE(NS)
-            RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
+            SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
+                                                      + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
          ENDDO
-         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+         SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
+                                                    (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
       ENDIF
-   
+      RN%HEAT_OF_COMBUSTION = 0._EB
+      DO NS = 0,N_TRACKED_SPECIES
+         SM=>SPECIES_MIXTURE(NS)
+         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
+      ENDDO
+      RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    ENDIF
+ 
    IF (NR==1) REACTION%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION 
    
 ENDDO REAC_LOOP
 
 
 ! Select integrator
-
-IF (.NOT. EDC) THEN
-   IF (TRIM(ODE_SOLVER)/='null') THEN
-      SELECT CASE (TRIM(ODE_SOLVER))
-         CASE ('SINGLE EXACT')
-            COMBUSTION_ODE = SINGLE_EXACT      
-         CASE ('EXPLICIT EULER')
-            COMBUSTION_ODE = EXPLICIT_EULER
-         CASE ('RUNGE-KUTTA 2')
-            COMBUSTION_ODE = RUNGE_KUTTA_2
-         !CASE ('RUNGE-KUTTA 4')
-         !   COMBUSTION_ODE = RUNGE_KUTTA_4
-         CASE ('RK2 RICHARDSON')
-            COMBUSTION_ODE = RK2_RICHARDSON
-         CASE ('EDCM RK2')
-            COMBUSTION_ODE = EDCM_RK2   
-         CASE DEFAULT
-            WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Name of ODE_SOLVER is not recognized.'
-            CALL SHUTDOWN(MESSAGE)
-      END SELECT
-   ELSE
-      IF (N_REACTIONS ==1 .AND. REACTION(1)%MODE==EDDY_DISSIPATION) THEN
-         COMBUSTION_ODE = SINGLE_EXACT
-      ELSE
-         COMBUSTION_ODE = RK2_RICHARDSON
-      ENDIF
-   ENDIF
-ELSE
-   IF (TRIM(ODE_SOLVER)/='null') THEN
-      SELECT CASE (TRIM(ODE_SOLVER))
-         CASE ('EXPLICIT EULER')
-            COMBUSTION_ODE = EXPLICIT_EULER
-         CASE ('EDCM RK2')
-            COMBUSTION_ODE = EDCM_RK2
-         CASE DEFAULT
+IF (TRIM(ODE_SOLVER)/='null') THEN
+   SELECT CASE (TRIM(ODE_SOLVER))
+      CASE ('EXPLICIT EULER')
+         COMBUSTION_ODE = EXPLICIT_EULER
+      CASE ('EDCM RK2')
+         COMBUSTION_ODE = EDC_RK2
+      CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Name of ODE_SOLVER is not recognized.'
          CALL SHUTDOWN(MESSAGE)
       END SELECT
-   ELSE
-      FAST_CHEM: DO NR =1,N_REACTIONS
-         RN => REACTION(NR)
-         IF (.NOT. RN%FAST_CHEMISTRY) THEN
-            COMBUSTION_ODE = EDCM_RK2
-            EXIT FAST_CHEM
-         ELSE
-            COMBUSTION_ODE = EXPLICIT_EULER
-         ENDIF
-      ENDDO FAST_CHEM
-   ENDIF   
+ELSE
+   FAST_CHEM: DO NR =1,N_REACTIONS
+      RN => REACTION(NR)
+      IF (.NOT. RN%FAST_CHEMISTRY) THEN
+         COMBUSTION_ODE = EDC_RK2
+         EXIT FAST_CHEM
+      ELSE
+         COMBUSTION_ODE = EXPLICIT_EULER
+      ENDIF
+   ENDDO FAST_CHEM
 ENDIF
 
 ! Selection Extinction Model
 IF (TRIM(EXTINCTION_MODEL)/='null') THEN
    SELECT CASE (TRIM(EXTINCTION_MODEL))
       CASE ('EXTINCTION 1')
-         EXTINCT_MOD = EXTINCTION_1      
+         EXTINCT_MOD = EXTINCTION_1
       CASE ('EXTINCTION 2')
          EXTINCT_MOD = EXTINCTION_2
       CASE DEFAULT
-         WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Name of ODE_SOLVER is not recognized.'
+         WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Name of EXTINCTION_MODEL is not recognized.'
          CALL SHUTDOWN(MESSAGE)
       END SELECT
 ELSE 
    EXTINCT_MOD = EXTINCTION_2
 ENDIF
 
-! Calculates Heat of Combustion for reverse reactions - can remove after EDC becomes default
-
-REVERSE_LOOP: DO NRR=1,N_REACTIONS
-   RR => REACTION(NRR)
-   R_COUNT=0
-   F_COUNT=0
-    IF (.NOT. RR%REVERSIBLE) CYCLE REVERSE_LOOP
-   R_COUNT = 1
-   FORWARD_LOOP: DO NFR=1,N_REACTIONS
-      FR => REACTION(NFR)     
-      IF(.NOT. FR%ID == RR%FWD_ID) CYCLE FORWARD_LOOP
-      F_COUNT = 1
-      RR%HEAT_OF_COMBUSTION=-FR%HEAT_OF_COMBUSTION*(SPECIES_MIXTURE(FR%FUEL_SMIX_INDEX)%MW/SPECIES_MIXTURE(RR%FUEL_SMIX_INDEX)%MW)
-      ENDDO FORWARD_LOOP
-   
-   IF(.NOT. R_COUNT /= F_COUNT) CYCLE REVERSE_LOOP
-      WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Forward reaction is not recognized.'
-      CALL SHUTDOWN(MESSAGE)
-ENDDO REVERSE_LOOP       
- 
 ! Change units of combustion quantities
 
 HRRPUV_AVERAGE = HRRPUV_AVERAGE*1000._EB   ! W/m3
