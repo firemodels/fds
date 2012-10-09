@@ -731,7 +731,6 @@ void update_mouseinfo(int flag, int xm, int ym){
 void mouse_CB(int button, int state, int xm, int ym){
   float *eye_xyz;
 
-#ifdef pp_GENERAL_ROTATION
   if(rotation_type==ROTATION_3AXIS){
     if(state==GLUT_DOWN){
       update_mouseinfo(MOUSE_DOWN,xm,ym);
@@ -740,7 +739,6 @@ void mouse_CB(int button, int state, int xm, int ym){
       update_mouseinfo(MOUSE_UP,xm,ym);
     }
   }
-#endif
 
   if(trainer_mode==1){
     update_glui_viewlist();
@@ -1018,10 +1016,8 @@ void Move_Scene(int xm, int ym){
   switch (key_state){
     case KEY_NONE:
       switch (rotation_type){
-#ifdef pp_GENERAL_ROTATION      
         case ROTATION_3AXIS:
         break;
-#endif        
         case ROTATION_2AXIS:
         case ROTATION_1AXIS:
           az_elev[0] += dxm;
@@ -1153,11 +1149,9 @@ void motion_CB(int xm, int ym){
     return;
   }
 
-#ifdef pp_GENERAL_ROTATION
   if(rotation_type==ROTATION_3AXIS&&key_state == KEY_NONE){
     update_mouseinfo(MOUSE_MOTION,xm,ym);
   }
-#endif
   Move_Scene(xm,ym);
 }
 
@@ -1371,12 +1365,8 @@ void keyboard(unsigned char key, int flag){
       case GLUT_ACTIVE_CTRL:
       default:
         rotation_type++;
-#ifdef pp_GENERAL_ROTATION
         if(rotation_type>3)rotation_type=0;
         rotation_type_CB(0);
-#else
-        if(rotation_type>2)rotation_type=0;
-#endif
         update_rotation_type(rotation_type);
         handle_rotation_type(0);
       }
@@ -1966,14 +1956,12 @@ void handle_rotation_type(int flag){
   az_elev = camera_current->az_elev;
   updatemenu=1;
   switch (rotation_type){
-#ifdef pp_GENERAL_ROTATION
   case ROTATION_3AXIS:
       if(trainer_mode==0)printf("Scene centered (3 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
       break;
-#endif
   case ROTATION_2AXIS:
       if(trainer_mode==0)printf("Scene centered (2 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){

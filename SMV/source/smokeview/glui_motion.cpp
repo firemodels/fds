@@ -49,7 +49,6 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define SET_VIEW_XYZ 22
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
-#define USE_GENERAL_ROTATION 28
 
 #define RENDER_TYPE 0
 #define RENDER_SIZE_LIST 1
@@ -322,9 +321,7 @@ extern "C" void glui_motion_setup(int main_window){
   RADIOBUTTON_1c=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"2 axis");
   RADIOBUTTON_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"eye centered");
   RADIOBUTTON_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"level (1 axis)");
-#ifdef pp_GENERAL_ROTATION
   RADIOBUTTON_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"3 axis");
-#endif
   rotation_type_CB(0);
 
   rotation_index=&camera_current->rotation_index;
@@ -706,7 +703,6 @@ extern "C" void showhide_translate(int var){
   d_eye_xyz[0]=0.0;
   d_eye_xyz[1]=0.0;
   switch (var){
-#ifdef pp_GENERAL_ROTATION
   case ROTATION_3AXIS:
     if(PANEL_translate!=NULL)PANEL_translate->enable();
     if(ROTATE_2axis!=NULL)ROTATE_2axis->disable();
@@ -721,7 +717,6 @@ extern "C" void showhide_translate(int var){
     if(LIST_mesh2!=NULL)LIST_mesh2->enable();
     if(BUTTON_snap!=NULL)BUTTON_snap->enable();
     break;
-#endif
   case ROTATION_2AXIS:
     if(PANEL_translate!=NULL)PANEL_translate->enable();
     if(ROTATE_2axis!=NULL)ROTATE_2axis->enable();
@@ -1233,14 +1228,6 @@ void Viewpoint_CB(int var){
     }
     Viewpoint_CB(RESTORE_VIEW);
     enable_disable_views();
-    break;
-  case USE_GENERAL_ROTATION:
-    if(rotation_type==ROTATION_3AXIS){
-      camera2quat(camera_current,quat_general,quat_rotation);
-    }
-    else{
-      camera_current->quat_defined=0;
-    }
     break;
   case RESTORE_VIEW:
     ival=LIST_viewpoints->get_int_val();

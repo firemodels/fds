@@ -4437,7 +4437,6 @@ void level_scene(int level_x, int level_y, float *quat){
     camera_current->dirty=1;
   }
 
-#ifdef pp_GENERAL_ROTATION  
   if(rotation_type==ROTATION_3AXIS&&key_state == KEY_NONE){
     float alpha,sum_axis;
 
@@ -4455,7 +4454,6 @@ void level_scene(int level_x, int level_y, float *quat){
     }
     // do nothing if norm(quaternion axis)=1
   }
-#endif
 }
 
 /* ------------------ snap_scene ------------------------ */
@@ -4487,7 +4485,6 @@ void snap_scene(void){
   update_trainer_moves();
   camera_current->dirty=1;
 
-#ifdef pp_GENERAL_ROTATION  
   if(rotation_type==ROTATION_3AXIS&&key_state == KEY_NONE){
     float angle;
 
@@ -4506,7 +4503,6 @@ void snap_scene(void){
     quat_general[3]=sin(DEG2RAD*angle/2.0);
     quat2rot(quat_general,quat_rotation);
   }
-#endif
 
 }
 

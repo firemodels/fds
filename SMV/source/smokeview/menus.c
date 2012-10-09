@@ -5656,37 +5656,27 @@ updatemenu=0;
   case EYE_CENTERED:
     glutAddMenuEntry("  2 axis",ROTATION_2AXIS);
     glutAddMenuEntry("  Level (1 axis)",ROTATION_1AXIS);
-#ifdef pp_GENERAL_ROTATION
     glutAddMenuEntry("  3 axis",ROTATION_3AXIS);
-#endif    
     glutAddMenuEntry("*Eye centered",EYE_CENTERED);
     break;
   case ROTATION_2AXIS:
     glutAddMenuEntry("  *2 axis",ROTATION_2AXIS);
     glutAddMenuEntry("  Level (1 axis)",ROTATION_1AXIS);
-#ifdef pp_GENERAL_ROTATION
     glutAddMenuEntry("  3 axis",ROTATION_3AXIS);
-#endif    
     glutAddMenuEntry("Eye centered",EYE_CENTERED);
     break;
   case ROTATION_1AXIS:
     glutAddMenuEntry("  2 axis",ROTATION_2AXIS);
     glutAddMenuEntry("  *Level (1 axis)",ROTATION_1AXIS);
-#ifdef pp_GENERAL_ROTATION
     glutAddMenuEntry("  3 axis",ROTATION_3AXIS);
-#endif    
     glutAddMenuEntry("Eye centered",EYE_CENTERED);
     break;
-#ifdef pp_GENERAL_ROTATION
   case ROTATION_3AXIS:
     glutAddMenuEntry("  2 axis",ROTATION_2AXIS);
     glutAddMenuEntry("  Level (1 axis)",ROTATION_1AXIS);
-#ifdef pp_GENERAL_ROTATION
     glutAddMenuEntry("  *3 axis",ROTATION_3AXIS);
-#endif    
     glutAddMenuEntry("Eye centered",EYE_CENTERED);
     break;
-#endif    
   default:
     ASSERT(FFALSE);
     break;

@@ -48,7 +48,6 @@
 #define pp_SHOOTER
 #define pp_FREEZE_VOLSMOKE
 #define pp_LIGHT
-#define pp_GENERAL_ROTATION
 
 #define _CRT_SECURE_NO_DEPRECATE
 
