@@ -174,6 +174,8 @@ for i=2:2000
                     Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
                 elseif strcmp(Metric,'min')
                     Save_Measured_Metric(i,j,1) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
+                elseif strcmp(Metric,'maxabs')
+                    Save_Measured_Metric(i,j,1) = max(abs(M(indices,d1_Dep_Col)-d1_Initial_Value));
                 elseif strcmp(Metric,'mean')
                     Save_Measured_Metric(i,j,1) = mean(M(indices,d1_Dep_Col));
                 % If mean_x_y is specified for a plot with multiple curves,
@@ -258,6 +260,8 @@ for i=2:2000
                     Save_Predicted_Metric(i,j,1) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
                 elseif strcmp(Metric,'min')
                     Save_Predicted_Metric(i,j,1) = d2_Initial_Value-min(M(indices,d2_Dep_Col));
+                elseif strcmp(Metric,'maxabs')
+                    Save_Predicted_Metric(i,j,1) = max(abs(M(indices,d2_Dep_Col)-d2_Initial_Value));
                 elseif strcmp(Metric,'mean')
                     Save_Predicted_Metric(i,j,1) = mean(M(indices,d2_Dep_Col));
                 % If mean_x_y is specified for a plot with multiple curves,
