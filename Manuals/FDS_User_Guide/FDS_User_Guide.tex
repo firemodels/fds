@@ -6471,11 +6471,10 @@ properties of different types of Lagrangian particles:
 \normalsize
 
 \noindent
-Particles are introduced into the calculation in several different ways. Liquid droplets are usually introduced via a sprinkler or nozzle. Massless tracer particles are often introduced at a blowing vent or burning surface. Solid particles that represent subgrid-scale objects are introduced randomly throughout a designated volume. Details are found below.
+Particles are introduced into the calculation in several different ways: they may be introduced via a sprinkler or nozzle (liquid droplets are usually introduced this way), they may be introduced at a blowing vent or burning surface (mass tracer particles or partivles representing embers are usually introduced this way), and they may be introduced randomly or at fixed points within a designated volume (solid particles that represent subgrid-scale objects are usually intoduced  this way). Details are found below.
 
 The way to describe particles depends on the type.
-If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct PART} line. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets.
-However, it is possible to assign arbitrary surface properties to particles that represent subgrid-scale objects, like office clutter or vegetation. To do this, you add a {\ct SURF\_ID} to the {\ct PART} line. All of these different types of particles are described below.
+If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct PART} line. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets. For any other type of particle, such as particles that represent subgrid-scale objects, like office clutter or vegetation, you add a {\ct SURF\_ID} to the {\ct PART} line. All of these different types of particles are described below.
 
 
 \subsection{Output Quantities}
@@ -6505,7 +6504,7 @@ trying to reduce the number of droplets or particles in a simulation.
 
 
 
-\subsection{Massless Particles}
+\section{Massless Particles}
 \label{info:MASSLESS}
 
 The simplest use of Lagrangian particles is for visualization, in which case the
@@ -6526,134 +6525,6 @@ rather than the local gas temperature.
 
 Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
 since {\ct MASSLESS} particles are for visualization only.
-
-
-
-\clearpage
-
-\section{Particle Insertion}
-\label{info:controlling_droplets}
-
-There are three ways of introducing droplets or particles into a simulation. The first way is to define a sprinkler or
-nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the droplet parameters. The second way is to
-add a {\ct PART\_ID} to a {\ct SURF} line, in which case particles or droplets will be ejected from that surface. Note that
-this only works if the surface has a normal velocity pointing into the flow domain. The third way to introduce particles or
-droplets is via an {\ct INIT} line that defines a volume within the computational domain in which the particles/droplets are
-to be introduced initially and/or periodically in time.
-
-
-\subsection{Particles Introduced at a Solid Surface}
-\label{info:particle_flux}
-
-If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line.
-The number of particles inserted at each solid cell every
-{\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
-value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
-
-\footnotesize
-\begin{verbatim}
-&PART ID='particles', ... /
-&SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
-&OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
-\end{verbatim} \normalsize
-
-\noindent
-creates an obstruction that ejects particles out of its sides at a rate
-of 0.1~kg/m$^2$/s and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface).
-FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The
-{\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the
-computational domain. This happens automatically if the surface is burning, but must be specified
-if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of
-particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block,
-0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux}.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_flux}
-\end{center}
-\caption[Results of the {\ct particle\_flux} test case]{Simple test case to demonstrate mass conservation of particles ejected from an obstruction.}
-\label{particle_flux}
-\end{figure}
-
-Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the
-activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either
-a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more
-information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
-
-
-
-\subsection{Droplets Introduced at a Sprinkler or Nozzle}
-\label{info:sprinkler_droplets}
-
-A sprinkler or nozzle is added to the simulation using a {\ct PROP} line to describe the features of the device and a {\ct DEVC} line to position and orient the
-device within the computational domain.
-{\ct PARTICLES\_PER\_SECOND} is the  number of droplets inserted every
-second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of
-the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles.
-Changing this parameter does {\em not} change the flow rate, but rather the number
-of droplets used to represent the flow.
-
-Note that {\ct PARTICLES\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
-liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a non-physical evaporation pattern, sometimes even to the
-point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing
-{\ct PARTICLES\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
-droplets created per second than the number that can be simulated.
-
-
-\subsection{Particles or Droplets Introduced within a Volume}
-\label{info:initial_droplets}
-
-Sometimes it is convenient to introduce Lagrangian particles within a particular region of the domain. To do this, use an {\ct INIT} line which contains the {\ct PART\_ID} for the type of particle to be inserted. Particles specified via an {\ct INIT} line can represent a number of different kinds of subgrid-scale objects. The particles can be massless tracers or they can be solid or liquid particles with mass. If not massless, specify {\ct MASS\_PER\_VOLUME} in units of kg/m$^3$. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
-For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$.
-
-\subsubsection{Randomly Distributed Particles within a Specified Volume}
-
-The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}.
-The format for {\ct XB} is the same as that used on the {\ct OBST} line. Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Examples of typical {\ct INIT} lines are:
-
-\footnotesize
-\begin{verbatim}
-&INIT PART_ID='droplets', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
-&INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE',
-      N_PARTICLES=..., MASS_PER_VOLUME=... /
-\end{verbatim} \normalsize
-
-\noindent
-Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved.
-
-\subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
-
-There are special applications where you might want to specify {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of a specified region.
-When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within each cell.  If you set {\ct CELL\_CENTERED=.TRUE.}, the particles will be placed at the center of each cell.
-
-
-\subsubsection{Single Particle Insertion}
-
-If you introduce
-only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}. You can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
-
-\footnotesize
-\begin{verbatim}
-&INIT PART_ID='target',  XYZ=1.2,3.4,5.6, N_PARTICLES=10, DX=0.1 /
-\end{verbatim} \normalsize
-
-\noindent
-creates a line of 10 particles starting at the point (1.2,3.4,5.6) separated by 0.1~m. This is handy for creating arrays of devices, like heat flux gauges. See Section~\ref{info:heat_flux} for more details.
-
-
-\subsubsection{Periodic Insertion of Particles within a Specified Volume}
-
-If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on
-the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the
-number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to
-indicate how much mass is to be introduced per second.
-
-If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device.
-See Section~\ref{info:basic_control} for more information on controlling devices.
-
-
-
-
 
 \clearpage
 
@@ -6819,9 +6690,6 @@ may not burn. Proper resolution depends on the type of
 fuel and the amount of fuel being ejected from the
 nozzle. Always test your burner at the resolution of your overall simulation.
 
-
-
-
 \clearpage
 
 \section{Solid Particles}
@@ -6836,7 +6704,7 @@ To demonstrate the basic syntax for solid particles, the following input lines c
 \footnotesize
 \begin{verbatim}
 &PART ID='spheres', SURF_ID='HOT', STATIC=.TRUE., PROP_ID='ball' /
-&SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL' /
+&SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL', SURFACE_DENSITY=13. /
 &PROP ID='ball', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
 &INIT PART_ID='spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, N_PARTICLES=10 /
 \end{verbatim}
@@ -6848,7 +6716,7 @@ The {\ct SURF} line establishes that the particles are hot spheres with a radius
 The {\ct GEOMETRY} options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If
 {\ct 'SPHERICAL'}, provide the {\ct RADIUS}. If {\ct 'CYLINDRICAL'}, provide the {\ct RADIUS} and the {\ct LENGTH}. If {\ct 'CARTESIAN'}, provide
 the {\ct LENGTH}, {\ct WIDTH}, and {\ct THICKNESS} of the plate. Note that the heat conduction calculation will be done in the appropriate coordinate
-system.
+system.  The {\ct SURFACE\_DENSITY} gives the mass of the particle in kg/m$^2$ of surface area.  If the {\ct SURF} references a set of {\ct MATL} inputs, then the particle mass will be based upon the {\ct DENSITY} in the {\ct MATL} inputs.
 The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres.
 
 The output quantities associated with complex particles are the same as those for solid walls. For example, to record the temperature of a given
@@ -7083,9 +6951,127 @@ The {\ct STATIC=.TRUE.} prevents the cable from moving. The {\ct INIT} line is u
 The {\ct DEVC} line records the cables inner temperature, in this case 1.52~mm below the surface. This is typically the jacket thickness.
 
 
+\clearpage
+
+\section{Particle Insertion}
+\label{info:controlling_droplets}
+
+There are three ways of introducing droplets or particles into a simulation. The first way is to define a sprinkler or
+nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the particle or droplet parameters. The second way is to
+add a {\ct PART\_ID} to a {\ct SURF} line, in which case particles or droplets will be ejected from that surface. Note that
+this only works if the surface has a normal velocity pointing into the flow domain. The third way to introduce particles or
+droplets is via an {\ct INIT} line that defines a volume within the computational domain in which the particles/droplets are
+to be introduced initially and/or periodically in time.
+
+
+\subsection{Particles Introduced at a Solid Surface}
+\label{info:particle_flux}
+
+If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line.
+The number of particles inserted at each solid cell every
+{\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
+value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
+
+\footnotesize
+\begin{verbatim}
+&PART ID='particles', ... /
+&SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
+&OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
+\end{verbatim} \normalsize
+
+\noindent
+creates an obstruction that ejects particles out of its sides at a rate
+of 0.1~kg/m$^2$/s and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface).
+FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The
+{\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the
+computational domain. This happens automatically if the surface is burning, but must be specified
+if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of
+particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block,
+0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux}.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_flux}
+\end{center}
+\caption[Results of the {\ct particle\_flux} test case]{Simple test case to demonstrate mass conservation of particles ejected from an obstruction.}
+\label{particle_flux}
+\end{figure}
+
+Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the
+activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either
+a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more
+information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
 
 
 
+\subsection{Particles or Droplets Introduced at a Sprinkler or Nozzle}
+\label{info:sprinkler_droplets}
+
+A sprinkler or nozzle is added to the simulation using a {\ct PROP} line to describe the features of the device and a {\ct DEVC} line to position and orient the
+device within the computational domain.
+{\ct PARTICLES\_PER\_SECOND} is the  number of droplets inserted every
+second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of
+the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles.
+Changing this parameter does {\em not} change the flow rate, but rather the number
+of droplets used to represent the flow.
+
+Note that {\ct PARTICLES\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
+liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a non-physical evaporation pattern, sometimes even to the
+point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing
+{\ct PARTICLES\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
+droplets created per second than the number that can be simulated.
+
+
+\subsection{Particles or Droplets Introduced within a Volume}
+\label{info:initial_droplets}
+
+Sometimes it is convenient to introduce Lagrangian particles within a particular region of the domain. To do this, use an {\ct INIT} line which contains the {\ct PART\_ID} for the type of particle to be inserted. Particles specified via an {\ct INIT} line can represent a number of different kinds of subgrid-scale objects. The particles can be massless tracers or they can be solid or liquid particles with mass. If not massless, specify {\ct MASS\_PER\_VOLUME} in units of kg/m$^3$. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
+For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$.
+
+\subsubsection{Randomly Distributed Particles within a Specified Volume}
+
+The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}.
+The format for {\ct XB} is the same as that used on the {\ct OBST} line. Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Examples of typical {\ct INIT} lines are:
+
+\footnotesize
+\begin{verbatim}
+&INIT PART_ID='droplets', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
+&INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE',
+      N_PARTICLES=..., MASS_PER_VOLUME=... /
+\end{verbatim} \normalsize
+
+\noindent
+Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved.
+
+\subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
+
+There are special applications where you might want to specify {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of a specified region.
+When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within each cell.  If you set {\ct CELL\_CENTERED=.TRUE.}, the particles will be placed at the center of each cell.
+
+
+\subsubsection{Single Particle Insertion}
+
+If you introduce
+only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}. You can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
+
+\footnotesize
+\begin{verbatim}
+&INIT PART_ID='target',  XYZ=1.2,3.4,5.6, N_PARTICLES=10, DX=0.1 /
+\end{verbatim} \normalsize
+
+\noindent
+creates a line of 10 particles starting at the point (1.2,3.4,5.6) separated by 0.1~m. This is handy for creating arrays of devices, like heat flux gauges. See Section~\ref{info:heat_flux} for more details.
+
+
+\subsubsection{Periodic Insertion of Particles within a Specified Volume}
+
+If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on
+the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the
+number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to
+indicate how much mass is to be introduced per second.
+
+If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device.
+See Section~\ref{info:basic_control} for more information on controlling devices.
 
 \clearpage
 
@@ -10771,7 +10757,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 %{\ct DENSE\_VOLUME\_FRACTION}       & Real            &                                         & m$^3$/m$^3$ & 1.E-5         \\ \hline
-{\ct DENSITY}                       & Real            & Section~\ref{thermal_part_props}        & kg/m$^3$  & 1000.         \\ \hline
 {\ct DEVC\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DIAMETER}                      & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 500.          \\ \hline
 {\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN...'} \\ \hline
