@@ -11371,37 +11371,31 @@ void writeini(int flag){
       for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
         if(strcmp(ca->name,"internal")==0)continue;
         if(strcmp(ca->name,"external")==0)continue;
-        fprintf(fileout,"VIEWPOINT6\n");
+
+        if(ca->quat_defined==1){
+          fprintf(fileout,"VIEWPOINT6\n");
+        }
+        else{
+          fprintf(fileout,"VIEWPOINT5\n");
+        }
         eye = ca->eye;
         az_elev = ca->az_elev;
         mat = ca->modelview;
 
-		    fprintf(fileout," %i %i %i\n",
-          ca->rotation_type,
-          ca->rotation_index,
-          ca->view_id);
-		    fprintf(fileout," %f %f %f %f %i\n",
-          eye[0],eye[1],eye[2],
-          zoom,zoomindex);
-  		  fprintf(fileout," %f %f %f %i\n",
-          ca->view_angle, 
-          ca->azimuth,
-          ca->elevation,
-          ca->projection_type);
-		    fprintf(fileout," %f %f %f\n",
-          ca->xcen,
-          ca->ycen,
-          ca->zcen);
+        fprintf(fileout," %i %i %i\n",ca->rotation_type,ca->rotation_index,ca->view_id);
+        fprintf(fileout," %f %f %f %f %i\n",eye[0],eye[1],eye[2],zoom,zoomindex);
+        fprintf(fileout," %f %f %f %i\n",ca->view_angle,ca->azimuth,ca->elevation,ca->projection_type);
+        fprintf(fileout," %f %f %f\n",ca->xcen,ca->ycen,ca->zcen);
 
         fprintf(fileout," %f %f\n",az_elev[0],az_elev[1]);
         if(ca->quat_defined==1){
           fprintf(fileout," 1 %f %f %f %f\n",ca->quaternion[0],ca->quaternion[1],ca->quaternion[2],ca->quaternion[3]);
         }
         else{
-          float quat[4];
-
-          camera2quat(ca,quat,NULL);
-          fprintf(fileout," 0 %f %f %f %f\n",quat[0],quat[1],quat[2],quat[3]);
+          fprintf(fileout," %f %f %f %f\n",mat[0],mat[1],mat[2],mat[3]);
+          fprintf(fileout," %f %f %f %f\n",mat[4],mat[5],mat[6],mat[7]);
+          fprintf(fileout," %f %f %f %f\n",mat[8],mat[9],mat[10],mat[11]);
+          fprintf(fileout," %f %f %f %f\n",mat[12],mat[13],mat[14],mat[15]);
         }
         fprintf(fileout," %i %i %i %i %i %i %i\n",
             ca->xyz_clipplane,
