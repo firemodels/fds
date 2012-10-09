@@ -1,9 +1,9 @@
 \chapter{HGL Temperature}
 \label{HGL:Chapter}
 
-\section{Hot Gas Layer Temperature (MQH)}
+\section{Natural Ventilation}
 
-For a compartment with natural ventilation, the approximate formula for the hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is as follows
+For a compartment with natural ventilation, the method of McCaffrey, Quintiere, and Harkleroad (MQH) can be used. In this method, the hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given as follows
 
 \be
 \Delta T_g = 6.85 \left( \frac{\dot Q^2}{A_v \sqrt{H_v} h_k A_T} \right)^{1/3}
@@ -45,28 +45,15 @@ The parameter $t_p$ is the thermal penetration time of the wall lining material,
 %
 %If the smoke layer height is below the door height, then the door height is used as the layer height.
 
-\clearpage
-
-A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_temperature_MQH_summary}. 
-
-\begin{figure}[ht]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=4.0in]{FIGURES/Scatterplots/HGL_Temperature_MQH}
-\end{tabular}
-\end{center}
-\caption[Summary of HGL temperature predictions (MQH).]
-{Summary of HGL temperature predictions (MQH).}
-\label{hgl_temperature_MQH_summary}
-\end{figure}
-
 
 \clearpage
 
 
-\section{Hot Gas Layer Temperature (FPA)}
+\section{Forced Ventilation}
 
-For a compartment with forced ventilation, the upper-layer gas temperature increase above ambient is given as a function of the fire HRR, the compartment ventilation flow rate, the gas-specific heat capacity, the compartment surface area, and an effective heat transfer coefficient. The nondimensional form of the resulting temperature correlation is as follows
+\subsection{FPA Method}
+
+For a compartment with forced ventilation, the method of Foote, Pagni, and Alvares (FPA) can be used. In this method, the upper-layer gas temperature increase above ambient is given as a function of the fire HRR, the compartment ventilation flow rate, the gas-specific heat capacity, the compartment surface area, and an effective heat transfer coefficient. The nondimensional form of the resulting temperature correlation is as follows
 
 \be
 \Delta T_g = \left[ 1 + 0.63 \left( \frac{\dot Q}{\dot m c_p T_\infty} \right)^{0.72} \left( \frac{h_k A_T}{\dot m c_p} \right)^{-0.36} \right] T_\infty
@@ -75,28 +62,10 @@ For a compartment with forced ventilation, the upper-layer gas temperature incre
 
 In Eq.~\ref{eq:FPA}, $\Delta T_g$ is the hot gas layer temperature rise above ambient~(K), $\dot Q$ is the HRR of the fire~(kW), $\dot m$ is the compartment ventilation mass flow rate~(kg/s), $c_p$ is the specific heat of air (kJ/kg-K), $T_\infty$ is the ambient air temperature~(K), $h_k$ is the heat transfer coefficient~(kW/m$^2$-K), and $A_T$ is the total area of compartment enclosing surfaces~(m$^2$).
 
-\clearpage
 
-A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_temperature_FPA_summary}. 
+\subsection{Deal and Beyler Method}
 
-\begin{figure}[ht]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=4.0in]{FIGURES/Scatterplots/HGL_Temperature_FPA}
-\end{tabular}
-\end{center}
-\caption[Summary of HGL temperature predictions (FPA).]
-{Summary of HGL temperature predictions (FPA).}
-\label{hgl_temperature_FPA_summary}
-\end{figure}
-
-
-\clearpage
-
-
-\section{Hot Gas Layer Temperature (Deal and Beyler)}
-
-For a compartment with forced ventilation, the approximate compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
+For a compartment with forced ventilation, the method of Deal and Beyler (DB) can be used. In this method, the approximate compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
 
 \be
 \Delta T_g = \left( \frac{\dot Q}{\dot m c_p + h_k A_T} \right)
@@ -114,28 +83,14 @@ In Eq.~\ref{eq:DB}, $\Delta T_g$ is the hot gas layer temperature rise above amb
 
 In Eq.~\ref{eq:DB_hk}, $k$ is the thermal conductivity of the interior lining~(kW/m-K), $\rho$ is the density of the interior lining~(kg/m$^3$), $c$ is the specific heat of the interior lining~(kJ/kg-K), $t$ is the exposure time~(s), and $\delta$ is the thickness of the interior lining~(m). This model is only valid for times up to 2000 seconds.
 
-\clearpage
-
-A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_temperature_DB_summary}.
-
-\begin{figure}[ht]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=4.0in]{FIGURES/Scatterplots/HGL_Temperature_DB}
-\end{tabular}
-\end{center}
-\caption[Summary of HGL temperature predictions (DB).]
-{Summary of HGL temperature predictions (DB).}
-\label{hgl_temperature_DB_summary}
-\end{figure}
 
 
 \clearpage
 
 
-\section{Hot Gas Layer Temperature (Beyler)}
+\section{No Ventilation}
 
-For a compartment with no ventilation (closed doors) and constant HRR, the compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
+For a compartment with no ventilation (closed doors) and constant HRR, the method of Belyer can be used. In this method, the compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
 
 \be
 \Delta T_g = \frac{2 K_2}{K_1^2} (K_1 \sqrt{t} - 1 + e^{-K_1 \sqrt{t}})
@@ -156,18 +111,45 @@ K_2 = \frac{\dot Q}{m c_p}
 
 In Eq.~\ref{eq:Beyler}, $\Delta T_g$ is the hot gas layer temperature rise above ambient~(K), and $t$ is the exposure time~(s). In Eq.~\ref{eq:Beyler_K1}, $k$ is the thermal conductivity of the interior lining~(kW/m-K), $\rho$ is the density of the interior lining~(kg/m$^3$), $c$ is the specific heat of the interior lining~(kJ/kg-K), $A_T$ the total area of compartment enclosing surfaces~(m$^2$), $m$ is the mass of gas in the compartment~(kg), and $c_p$ is the specific heat of air~(kJ/kg-K). In Eq.~\ref{eq:Beyler_K2}, $\dot Q$ is the HRR of the fire~(kW).
 
+
 \clearpage
 
-A summary scatter plot of HGL temperature predictions is given in Fig.~\ref{hgl_temperature_beyler_summary}. 
+
+\section{Summary of Hot Gas Layer Temperature and Height}
+
+Summary scatter plots of the HGL temperature predictions are given on the following pages.
 
 \begin{figure}[ht]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/HGL_Temperature_MQH}
+\end{tabular}
+\end{center}
+\caption[Summary of HGL temperature predictions for natural ventilation using the MQH method.]
+{Summary of HGL temperature predictions for natural ventilation using the MQH method.}
+\label{hgl_temperature_beyler_summary}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/HGL_Temperature_FPA} \\
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/HGL_Temperature_DB}
+\end{tabular}
+\end{center}
+\caption[Summary of HGL temperature predictions for forced ventilation using the FPA method (top) and DB method (bottom).]
+{Summary of HGL temperature predictions for forced ventilation using the FPA method (top) and DB method (bottom).}
+\label{hgl_temperature_FPA_summary}
+\end{figure}
+
+\begin{figure}[p]
 \begin{center}
 \begin{tabular}{l}
 \includegraphics[width=4.0in]{FIGURES/Scatterplots/HGL_Temperature_Beyler}
 \end{tabular}
 \end{center}
-\caption[Summary of HGL temperature predictions (Beyler).]
-{Summary of HGL temperature predictions (Beyler).}
-\label{hgl_temperature_beyler_summary}
+\caption[Summary of HGL temperature predictions for no ventilation using the Beyler method.]
+{Summary of HGL temperature predictions for no ventilation using the Beyler method.}
+\label{hgl_temperature_FPA_summary}
 \end{figure}
 
