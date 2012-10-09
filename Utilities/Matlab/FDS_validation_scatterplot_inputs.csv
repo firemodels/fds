@@ -21,3 +21,4 @@ USCG/HAI Extinction,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEa
 Burning Rate,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.1,0.03 0.95,SouthEast,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Pool_Fires_Burning_Rates
 Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Cable_Temperature
 Smoke Alarm Activations,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,33,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Alarm_Activations
+Fire Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1200,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Fire_Temperature
