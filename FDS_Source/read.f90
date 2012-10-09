@@ -4081,7 +4081,7 @@ PROP_LOOP: DO N=0,N_PROP
 
       ! Check to see if density is defined for sprinkler / nozzle
       IF (PY%FLOW_RATE > 0._EB .OR. PY%OPERATING_PRESSURE > 0._EB) THEN
-         IF(LPC%SURF_INDEX > 0) THEN
+         IF(LPC%SURF_INDEX > 0 .AND. LPC%SURF_INDEX/=DROPLET_SURF_INDEX) THEN
             IF(SURFACE(LPC%SURF_INDEX)%SURFACE_DENSITY <= 0._EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),&
                ', referenced PART_ID has no specified SURFACE_DENSITY.'
