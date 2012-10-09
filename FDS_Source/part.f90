@@ -395,12 +395,14 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
          IF (LP%Z<=ZS .OR. LP%Z>=ZF) CYCLE CHOOSE_COORDS
          CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
          IC = CELL_INDEX(II,JJ,KK)
+         LP%ONE_D%IIG = II
+         LP%ONE_D%JJG = JJ
+         LP%ONE_D%KKG = KK
          IF (.NOT.SOLID(IC)) EXIT CHOOSE_COORDS
-   
       ENDDO CHOOSE_COORDS
 
       ! Randomly choose PARTICLE size according to Cumulative Distribution Function (CDF)
-      
+
       CALL MAKE_PARTICLE
 
       LP => LAGRANGIAN_PARTICLE(NLP)
@@ -551,6 +553,10 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             LP%W =  WALL(IW)%ONE_D%UW
       END SELECT
    
+      LP%ONE_D%IIG = IIG
+      LP%ONE_D%JJG = JJG
+      LP%ONE_D%KKG = KKG
+         
       ! Save the insertion time (TP) and scalar property (SP) for the particle
    
       IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.
