@@ -114,7 +114,7 @@ color{3} = 'b';
 color{4} = 'g';
 color{5} = 'm';
 color{6} = 'c';
-color{7} = 'y';
+color{7} = 'k';
 
 % Marker per fuel
 marker{1} = 'o';
