@@ -7308,6 +7308,7 @@ An alternative is to provide the {\ct K\_FACTOR} in units of L/min/bar$^\ha$ and
 The flow rate is then given by $K \sqrt{p}$. Note that 1 bar is equivalent to
 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is
 equivalent to 14.41~L/min/bar$^\ha$.  If {\ct MASS\_FLOW\_RATE} is given then {\ct PARTICLE\_VELOCITY} must also be defined.
+Note that {\ct FLOW\_RATE} is only appropriate for liquid droplets; solid particles should use {\ct MASS\_FLOW\_RATE}
 \item[{\ct OFFSET}] Radius (m) of a sphere surrounding the
 sprinkler where the water droplets are initially placed in the simulation. It is assumed that beyond the {\ct OFFSET} the droplets have completely broken
 up and are transported independently of each other. (Default 0.05~m)
