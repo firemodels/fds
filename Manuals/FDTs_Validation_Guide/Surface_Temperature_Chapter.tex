@@ -1,8 +1,11 @@
 \chapter{Surface Temperature}
 
-\section{Time to Threshold Cable Temperature (THIEF Model)}
+\section{Time to Threshold Cable Temperature}
 
-The governing equation for the cable temperature, $T(r,t)$, is given by
+The thermally-induced electrical failure (THIEF) of a cable can be predicted via a simple
+one-dimensional heat transfer calculation, under the assumption that the cable can be
+treated as a homogeneous cylinder. The governing equation for the cable temperature,
+$T(r,t)$, is given by
 
 \be
 \rho_s c_s \left( \frac{\partial T_s}{\partial t} \right) = \frac{1}{r} \frac{\partial}{\partial r} k_s r \left( \frac{\partial T_s}{\partial r} \right)
@@ -27,21 +30,6 @@ T_i^{n+1} = T_i^n + \frac{\delta t \alpha}{r_{avg} \delta r} + \frac{r_i (T_{i+1
 \delta t = \frac{c_s \rho_s \delta r^2}{2 k_s}
 \ee
 
-\clearpage
-
-A summary scatter plot of time to threshold cable temperature predictions is given in Fig.~\ref{time_to_threshold_cable_temperature_summary}.
-
-\begin{figure}[ht]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=4.0in]{FIGURES/Scatterplots/Cable_Temperature}
-\end{tabular}
-\end{center}
-\caption[Summary of time to threshold cable temperature predictions.]
-{Summary of time to threshold cable temperature predictions.}
-\label{time_to_threshold_cable_temperature_summary}
-\end{figure}
-
 
 \clearpage
 
@@ -56,25 +44,6 @@ The following equation calculates the temperature development of an unprotected 
 \ee
 
 In Eq.~\ref{eq:unprotected_steel}, $\Delta T_s$ is the temperature of the steel member~($^\circ$C), $F/V$ is the ratio of heated surface area to volume~(m$^{-1}$), $\rho_s$ is the density of steel~(kg/m$^3$), $c_s$ is the specific heat of steel~(J/kg-K), $h_c$ is the convective heat transfer coefficient~(W/m$^2$-K), $T_g$ is the hot gas layer temperature from the appropriate method described in Chapter~\ref{HGL:Chapter}~($^\circ$C), $T_s$ is the steel temperature~($^\circ$C), $\sigma$ is the Stefan-Boltzmann constant ($W/m^2$-$K^4$), $\epsilon$ is the emissivity~(-), and $\Delta t$ is the time step~(s).
-
-
-\clearpage
-
-A summary scatter plot of unprotected steel temperature predictions is given in Fig.~\ref{unprotected_steel_temperature_summary}.
-
-\begin{figure}[ht]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=4.0in]{FIGURES/Scatterplots/Steel_Temperature_Uninsulated}
-\end{tabular}
-\end{center}
-\caption[Summary of unprotected steel temperature predictions.]
-{Summary of unprotected steel temperature predictions.}
-\label{unprotected_steel_temperature_summary}
-\end{figure}
-
-
-\clearpage
 
 
 \section{Protected Steel Temperature}
@@ -117,16 +86,30 @@ Plume         & > 0.2         & -1/3 & 1.1 \\
 
 \clearpage
 
-A summary scatter plot of protected steel temperature predictions is given in Fig.~\ref{protected_steel_temperature_summary}.
+\section{Summary of Surface Temperature}
 
-\begin{figure}[ht]
+Summary scatter plots of the surface temperature predictions are given on the following pages.
+
+\begin{figure}[p]
 \begin{center}
 \begin{tabular}{l}
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/Cable_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of time to threshold cable temperature predictions.]
+{Summary of time to threshold cable temperature predictions.}
+\label{time_to_threshold_cable_temperature_summary}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/Steel_Temperature_Uninsulated} \\
 \includegraphics[width=4.0in]{FIGURES/Scatterplots/Steel_Temperature_Insulated}
 \end{tabular}
 \end{center}
-\caption[Summary of protected steel temperature predictions.]
-{Summary of protected steel temperature predictions.}
+\caption[Summary of unprotected (top) and protected (bottom) steel temperature predictions.]
+{Summary of unprotected (top) and protected (bottom) steel temperature predictions.}
 \label{protected_steel_temperature_summary}
 \end{figure}
 
