@@ -14,6 +14,9 @@ ifort FDTs.f90 -o FDTs
 
 # Then, run all FDTs cases
 
+cd $VDIR/Arup_Tunnel/FDTs
+$FDTs Arup_Tunnel_FDTs_Inputs.txt
+
 cd $VDIR/CAROLFIRE/FDTs
 $FDTs CAROLFIRE_FDTs_Inputs.txt
 
