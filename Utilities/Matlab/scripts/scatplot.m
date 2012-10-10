@@ -154,19 +154,33 @@ for j=qrange
         
         % statistics
         
-        n_pts = length(nonzeros(Measured_Metric));
-        E_bar = mean(log(nonzeros(Measured_Metric)));
-        M_bar = mean(log(nonzeros(Predicted_Metric)));
-        size_measured = size(nonzeros(Measured_Metric));
-        size_predicted = size(nonzeros(Predicted_Metric));
+        Measured_Values  = nonzeros(Measured_Metric);
+        Predicted_Values = nonzeros(Predicted_Metric);
+        n_pts = length(Measured_Values);
+        for ib=1:10
+            bin_indices = find(Measured_Values>=(ib-1)*Plot_Max/10 & Measured_Values<ib*Plot_Max/10);
+            bin_weight(ib) = n_pts/length(bin_indices);
+            clear bin_indices
+        end
+        weight = zeros(size(Measured_Values));
+        for iv=1:n_pts
+            for ib=1:10
+                if Measured_Values(iv)>=(ib-1)*Plot_Max/10 & Measured_Values(iv)<ib*Plot_Max/10; weight(iv) = bin_weight(ib); end
+            end
+        end
+            
+        E_bar = sum(log(Measured_Values).*weight)/sum(weight);
+        M_bar = sum(log(Predicted_Values).*weight)/sum(weight);
+        size_measured = size(Measured_Values);
+        size_predicted = size(Predicted_Values);
         % Check to see if measured and predicted arrays are the same size
         if size_measured(1) ~= size_predicted(1)
             display(['Error: Mismatched measured and predicted arrays for scatterplot ', Scatter_Plot_Title, '. Skipping scatterplot.'])
             continue
         end
-        %  [normality,p] = lillietest(log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric)));
-        normality = 0;
-        u  = sqrt( sum( ( (log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric))) - (M_bar-E_bar) ).^2 )/(n_pts-1) );
+        
+        u2 = sum(    (((log(Predicted_Values)-log(Measured_Values)) - (M_bar-E_bar)).^2).*weight   )/(sum(weight)-1);
+        u  = sqrt(u2);
         Sigma_E = Sigma_2_E/200;
         Sigma_E = min(u/sqrt(2),Sigma_E);
         Sigma_M = sqrt( max(0,u*u - Sigma_E.^2) );
@@ -176,7 +190,7 @@ for j=qrange
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--') 
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
        
-         if strcmp(Model_Error,'yes') & normality==0
+         if strcmp(Model_Error,'yes') 
              plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
              plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
              plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
@@ -201,7 +215,7 @@ for j=qrange
                  ['$2 \, \tilde{\sigma}_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
          end
          
-        if strcmp(Model_Error,'yes') & normality==0
+        if strcmp(Model_Error,'yes')
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
                 ['$2 \, \tilde{\sigma}_M$=',num2str(2*Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
             
