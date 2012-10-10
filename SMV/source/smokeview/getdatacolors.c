@@ -1291,6 +1291,7 @@ void initcadcolors(void){
 /* ------------------ Update_Texturebar ------------------------ */
 
 void Update_Texturebar(void){
+  if(use_graphics==0)return;
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_full) ");
