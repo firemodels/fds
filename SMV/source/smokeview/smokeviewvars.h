@@ -620,6 +620,7 @@ SVEXTERN int ntitles,ititle;
 SVEXTERN int visSmoke, visZone;
 SVEXTERN int visEvac;
 SVEXTERN int visBlocks;
+SVEXTERN int SVDECL(solid_state,-1),SVDECL(outline_state,-1);
 SVEXTERN int smooth_block_solid;
 SVEXTERN int visSmoothAsNormal,visTransparentBlockage;
 SVEXTERN int visBlocksSave;

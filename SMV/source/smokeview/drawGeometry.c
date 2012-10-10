@@ -2021,13 +2021,13 @@ void update_facelists(void){
         }
       }
       if((
-         (visBlocks==visBLOCKOutline||visBlocks==visBLOCKSolidOutline)&&j<vent_offset)||
+         (visBlocks==visBLOCKAsInputOutline||visBlocks==visBLOCKOutline||visBlocks==visBLOCKSolidOutline)&&j<vent_offset)||
          (facej->patchpresent==1&&(vis_threshold==0||vis_onlythreshold==0||do_threshold==0))||
          (facej->type==BLOCK_outline&&visBlocks==visBLOCKAsInput)||
          ((j>=vent_offset&&j<vent_offset+meshi->nvents)&&vi->isOpenvent==1&&visOpenVentsAsOutline==1)
         ){
         meshi->face_outlines[n_outlines++]=facej;
-        if(visBlocks!=visBLOCKSolidOutline)continue;
+        if(visBlocks!=visBLOCKSolidOutline&&visBlocks!=visBLOCKAsInputOutline)continue;
       }
       if(j<vent_offset){
         int drawing_texture=0;
@@ -4519,7 +4519,7 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawi
     }
   }
   if(ntransparentblocks>0){
-    if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput){
+    if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput||visBlocks==visBLOCKAsInputOutline){
       if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide){
         *drawing_transparent=1;
         *drawing_blockage_transparent=1;

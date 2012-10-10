@@ -209,6 +209,7 @@ void _Sniff_Errors(char *whereat);
 #define SHADED_FRAME_face 3
 
 #define visBLOCKAsInput 1
+#define visBLOCKAsInputOutline 13
 #define visBLOCKNormal 8
 #define visBLOCKSolidOutline 12
 //#define visBLOCKFacet 3
@@ -218,6 +219,15 @@ void _Sniff_Errors(char *whereat);
 #define visBLOCKSmoothAsNormal 9
 #define visBLOCKTransparent 10
 #define visSmoothBLOCKSolid 11
+#define visBLOCKAddOutline 14
+#define visBLOCKOnlyOutline 15
+
+#define OUTLINE_NONE 0
+#define OUTLINE_ONLY 1
+#define OUTLINE_ADDED 2
+#define BLOCKAGE_ASINPUT 0
+#define BLOCKAGE_SOLID 1
+#define BLOCKAGE_HIDDEN 2
 
 #define BLOCKlocation_grid 5
 #define BLOCKlocation_exact 6

@@ -4157,18 +4157,76 @@ void ImmersedMenu(int value){
 
 /* ------------------ BlockageMenu ------------------------ */
 
-//     visBlocks (visBLOCKNormal, visBLOCKAsInput )
-//     visSmoothAsNormal
-//     visTransparentBlockage
-
 void BlockageMenu(int value){
+  int change_state=0;
+
+  if(solid_state<0)solid_state=visBlocks;
+  if(outline_state<0)outline_state=OUTLINE_NONE;
   switch (value){
-//   case visBLOCKFacet:
-//   case visBLOCKSmooth:
+    case visBLOCKOnlyOutline:
+      if(outline_state!=OUTLINE_ONLY){
+        outline_state=OUTLINE_ONLY;
+      }
+      else{
+        outline_state=OUTLINE_NONE;
+      }
+      change_state=1;
+      break;
+    case visBLOCKAddOutline:
+      if(outline_state!=OUTLINE_ADDED){
+        outline_state=OUTLINE_ADDED;
+        if(solid_state==visBLOCKHide)solid_state=visBLOCKAsInput;
+      }
+      else{
+        outline_state=OUTLINE_NONE;
+      }
+      change_state=1;
+      break;
+    case visBLOCKAsInput:
+      solid_state=visBLOCKAsInput;
+      if(outline_state==OUTLINE_ONLY)outline_state=OUTLINE_ADDED;
+      change_state=1;
+      break;
+    case visBLOCKNormal:
+      solid_state=visBLOCKNormal;
+      if(outline_state==OUTLINE_ONLY)outline_state=OUTLINE_ADDED;
+      change_state=1;
+      break;
+    case visBLOCKHide:
+      outline_state=OUTLINE_NONE;
+      solid_state=visBLOCKHide;
+      change_state=1;
+      break;
+  }
+  if(change_state==1){
+    switch (outline_state){
+      case OUTLINE_NONE:
+        value=solid_state;
+        break;
+      case OUTLINE_ONLY:
+        value=visBLOCKOutline;
+        break;
+      case OUTLINE_ADDED:
+        switch (solid_state){
+          case visBLOCKAsInput:
+            value=visBLOCKAsInputOutline;
+          break;
+          case visBLOCKNormal:
+            value=visBLOCKSolidOutline;
+            break;
+          case BLOCKAGE_HIDDEN:
+            value=visBLOCKOutline;
+            break;
+        }
+        break;
+    }
+  }
+
+  switch (value){
+   case visBLOCKAsInputOutline:
    case visBLOCKAsInput:
      visBlocks=value;
      update_trainer_outline();
-     
      break;
    case visSmoothBLOCKSolid:
      smooth_block_solid = 1 - smooth_block_solid;
@@ -4944,7 +5002,7 @@ updatemenu=0;
     glutAddMenuEntry(_("Smooth blockages now"),SMOOTH_BLOCKAGES);
   }
   glutAddMenuEntry(_("View Method:"),999);
-  if(visBlocks==visBLOCKAsInput){
+  if(visBlocks==visBLOCKAsInput||visBlocks==visBLOCKAsInputOutline){
     glutAddMenuEntry(_("   *Defined in input file"),visBLOCKAsInput);
   }
    else{
@@ -4958,7 +5016,7 @@ updatemenu=0;
       glutAddMenuEntry(_("       Smooth blockages drawn opaque"),visSmoothBLOCKSolid);
     }
   }
-  if(visBlocks==visBLOCKNormal){
+  if(visBlocks==visBLOCKNormal||visBlocks==visBLOCKSolidOutline){
     glutAddMenuEntry(_("   *Solid"),visBLOCKNormal);
     if(nsmoothblocks>0){
       if(visSmoothAsNormal==1){
@@ -4980,18 +5038,18 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("   Solid"),visBLOCKNormal);
   }
-  if(visBlocks==visBLOCKOutline){
-    glutAddMenuEntry(_("   *Outline"),visBLOCKOutline);
+  if(outline_state==OUTLINE_ONLY){
+    glutAddMenuEntry(_("   *Outline Only"),visBLOCKOnlyOutline);
   }
-   else{
-     glutAddMenuEntry(_("   Outline"),visBLOCKOutline);
-   }
-  if(visBlocks==visBLOCKSolidOutline){
-    glutAddMenuEntry(_("   *Solid and outline"),visBLOCKSolidOutline);
+  else{
+    glutAddMenuEntry(_("   Outline Only"),visBLOCKOnlyOutline);
   }
-   else{
-     glutAddMenuEntry(_("   Solid and outline"),visBLOCKSolidOutline);
-   }
+  if(outline_state==OUTLINE_ADDED){
+    glutAddMenuEntry(_("   *Outline Added"),visBLOCKAddOutline);
+  }
+  else{
+    glutAddMenuEntry(_("   Outline Added"),visBLOCKAddOutline);
+  }
   if(visBlocks==visBLOCKHide){
     glutAddMenuEntry(_("   *Hidden"),visBLOCKHide);
   }
