@@ -7373,7 +7373,7 @@ updatemenu=0;
   if(ntotal_blockages>0||isZoneFireModel==0){
     glutAddMenuEntry(_("  g: toggle grid visibility"),2);
   }
-  glutAddMenuEntry(_("  e: toggle between eye, world and world/level rotation motion"),7);
+  glutAddMenuEntry(_("  e: toggle between view rotation types: scene centered 2 axis, 1 axis, 3 axis and eye centered"),7);
   glutAddMenuEntry(_("  q: display blockages as specified by user or as used by FDS"),7);
   glutAddMenuEntry(_("  W: toggle clipping - use Options/Clip menu to specify clipping planes"),7);
   glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"),2);
@@ -7395,17 +7395,46 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("  #: save settings (create casename.ini file)"),2);
   }
-  glutAddMenuEntry(_("  !: snap scene's view angles"),2);
+  glutAddMenuEntry(_("  !: snap scene to closest 45 degree orientation"),2);
+  glutAddMenuEntry(_("  ~: level the scene"),2);
   glutAddMenuEntry(_("  &: toggle line anti-aliasing (draw lines smoothly)"),2);
 
   /* --------------------------------mouse help menu -------------------------- */
 
   CREATEMENU(mousehelpmenu,HelpMenu);
-  glutAddMenuEntry(_("       horizontal/vertical: rotate about z, x axis"),1);
-  glutAddMenuEntry(_("  CTRL horizontal/vertical: translate along x, y axis"),1);
-  glutAddMenuEntry(_("   ALT horizontal/vertical: translate along z axis"),1);
+  switch (rotation_type){
+    case ROTATION_2AXIS:
+      glutAddMenuEntry(_("horizontal/vertical: rotate about z, x axis"),1);
+      break;
+    case ROTATION_1AXIS:
+      glutAddMenuEntry(_("horizontal: rotate about z axis"),1);
+      break;
+    case ROTATION_3AXIS:
+      glutAddMenuEntry(_("horizontal/vertical: rotate about z, x axis (click near scene center)"),1);
+      glutAddMenuEntry(_("clock/counter clockwise: rotate about y axis (click near scene edge)"),1);
+      break;
+    case EYE_CENTERED:
+      glutAddMenuEntry(_("horizontal/vertical: rotate about user location"),1);
+      break;
+    default:
+      ASSERT(0);
+      break;
+  }
+  switch (rotation_type){
+    case EYE_CENTERED:
+      break;
+    case ROTATION_2AXIS:
+    case ROTATION_1AXIS:
+    case ROTATION_3AXIS:
+      glutAddMenuEntry(_("CTRL horizontal/vertical: translate along x, y axis"),1);
+      break;
+    default:
+      ASSERT(0);
+      break;
+  }
+  glutAddMenuEntry(    _("ALT vertical: translate along z axis"),1);
   if(SHOW_gslice_data==1){
-    glutAddMenuEntry(_("              double-click: rotate/translate 3D node-centered slice"),1);
+    glutAddMenuEntry(_("double-click: rotate/translate 3D node-centered slice"),1);
   }
 
   /* --------------------------------help menu -------------------------- */
