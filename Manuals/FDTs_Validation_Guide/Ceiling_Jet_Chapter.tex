@@ -1,5 +1,67 @@
 \chapter{Ceiling Jets and Device Activation}
 
+\section{Ceiling Jet Temperature}
+
+For steady-state fire, the ceiling jet temperature of a fire plume are given by the following expressions developed by Alpert (1972)
+
+\be
+T_{jet} = \frac{16.9 \dot Q^{2/3}}{H^{5/3}} + T_\infty \mathrm{\ for\ } r/H <= 0.18
+\label{eq:Alpert_Tjet_less}
+\ee
+
+\be
+T_{jet} = \frac{5.38 (\dot Q / r)^{2/3}}{H} + T_\infty \mathrm{\ for\ } r/H > 0.18
+\label{eq:Alpert_Tjet_greater}
+\ee
+
+In Eqs.~\ref{eq:Alpert_Tjet_less} and \ref{eq:Alpert_Tjet_greater}, $\dot Q$ is the total HRR~(kW), $H$ is the height of the ceiling above the fuel~(m), and $r$~is the radial distance to the detector~(m).
+
+
+\clearpage
+
+
+\section{Sprinkler Activation Time}
+
+For steady-state fire, the method for estimating the response of a smoke detector is based on the correlations developed by Alpert (1972) for activation of a sprinkler and is given by the following equation (Budnick, Evans, and Nelson, 1997)
+
+\be
+t_{activation} =  \frac{RTI}{\sqrt{u_{jet}}} ln \left( \frac{T_{jet} - T_\infty}{T_{jet} - T_{activation}} \right)\label{eq:Alpert}
+\ee
+
+\noindent where
+
+\be
+T_{jet} = \frac{16.9 \dot Q^{2/3}}{H^{5/3}} + T_\infty \mathrm{\ for\ } r/H <= 0.18
+\label{eq:Alpert_Tjet_lt}
+\ee
+
+\be
+T_{jet} = \frac{5.38 (\dot Q / r)^{2/3}}{H} + T_\infty \mathrm{\ for\ } r/H > 0.18
+\label{eq:Alpert_Tjet_gt}
+\ee
+
+\noindent and
+
+\be
+u_{jet} = 0.96 \left( \frac{\dot Q}{H} \right)^{1/3} \mathrm{\ for\ } r/H <= 0.15
+\label{eq:Alpert_ujet_lt}
+\ee
+
+\be
+u_{jet} = \frac{0.195 \dot Q^{1/3} H^{1/2}}{r^{5/6}} \mathrm{\ for\ } r/H > 0.15
+\label{eq:Alpert_ujet_gt}
+\ee
+
+In Eq.~\ref{eq:Alpert}, $t_{activation}$ is the activation time of the sprinkler~(s), $RTI$ is the response time index of the sprinkler~$(m$-$s)^{1/2}$, $u_{jet}$ is the ceiling jet velocity~(m/s), $T_{jet}$ is the ceiling jet temperature~($^\circ$C), $T_\infty$ is the ambient air temperature~($^\circ$C), and $T_{activation}$ is the activation temperature of the sprinkler~($^\circ$C).
+
+In Eqs.~\ref{eq:Alpert_Tjet_lt} and \ref{eq:Alpert_Tjet_gt}, $\dot Q$ is the total HRR~(kW), $H$ is the height of the ceiling above the fuel~(m), and $r$~is the radial distance to the detector~(m).
+
+Note that some or all of these cases use a t-squared fire source as a quasi-steady approach.
+
+
+\clearpage
+
+
 \section{Smoke Detector Activation Time}
 
 \subsection{Method of Milke}
@@ -60,46 +122,6 @@ Note that some or all of these cases use a t-squared fire source as a quasi-stea
 \clearpage
 
 
-\section{Sprinkler Activation Time}
-
-For steady-state fire, the method for estimating the response of a smoke detector is based on the correlations developed by Alpert (1972) for activation of a sprinkler and is given by the following equation (Budnick, Evans, and Nelson, 1997)
-
-\be
-t_{activation} =  \frac{RTI}{\sqrt{u_{jet}}} ln \left( \frac{T_{jet} - T_\infty}{T_{jet} - T_{activation}} \right)\label{eq:Alpert}
-\ee
-
-\noindent where
-
-\be
-T_{jet} = \frac{16.9 \dot Q^{2/3}}{H^{5/3}} + T_\infty \mathrm{\ for\ } r/H <= 0.18
-\label{eq:Alpert_Tjet_lt}
-\ee
-
-\be
-T_{jet} = \frac{5.38 (\dot Q / r)^{2/3}}{H} + T_\infty \mathrm{\ for\ } r/H > 0.18
-\label{eq:Alpert_Tjet_gt}
-\ee
-
-\noindent and
-
-\be
-u_{jet} = 0.96 \left( \frac{\dot Q}{H} \right)^{1/3} \mathrm{\ for\ } r/H <= 0.15
-\label{eq:Alpert_ujet_lt}
-\ee
-
-\be
-u_{jet} = \frac{0.195 \dot Q^{1/3} H^{1/2}}{r^{5/6}} \mathrm{\ for\ } r/H > 0.15
-\label{eq:Alpert_ujet_gt}
-\ee
-
-In Eq.~\ref{eq:Alpert}, $t_{activation}$ is the activation time of the sprinkler~(s), $RTI$ is the response time index of the sprinkler~$(m$-$s)^{1/2}$, $u_{jet}$ is the ceiling jet velocity~(m/s), $T_{jet}$ is the ceiling jet temperature~($^\circ$C), $T_\infty$ is the ambient air temperature~($^\circ$C), and $T_{activation}$ is the activation temperature of the sprinkler~($^\circ$C).
-
-In Eq.~\ref{eq:Alpert_Tjet_lt}, $\dot Q$ is the total HRR~(kW), and $H$ is the height of the ceiling above the fuel~(m). In Eq.~\ref{eq:Alpert_Tjet_gt}, $r$~is the radial distance to the detector~(m).
-
-Note that some or all of these cases use a t-squared fire source as a quasi-steady approach.
-
-\clearpage
-
 \section{Summary of Ceiling Jets and Device Activation Times}
 
 Summary scatter plots of the ceiling jet and device activation predictions are given on the following pages.
@@ -107,13 +129,12 @@ Summary scatter plots of the ceiling jet and device activation predictions are g
 \begin{figure}[ht]
 \begin{center}
 \begin{tabular}{l}
-\includegraphics[width=4.0in]{FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Milke} \\
-\includegraphics[width=4.0in]{FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Mowrer}
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/Ceiling_Jet_Temperature}
 \end{tabular}
 \end{center}
-\caption[Summary of smoke detector activation time predictions.]
-{Summary of smoke detector activation time predictions using the method of Milke (top) and Mowrer (bottom).}
-\label{Smoke_Detector_Activation_Summary}
+\caption[Summary of ceiling jet temperature predictions.]
+{Summary of ceiling jet temperature predictions.}
+\label{Ceiling_Jet_Temperature_Summary}
 \end{figure}
 
 \begin{figure}[p]
@@ -125,5 +146,17 @@ Summary scatter plots of the ceiling jet and device activation predictions are g
 \caption[Summary of sprinkler activation time predictions.]
 {Summary of sprinkler activation time predictions.}
 \label{Sprinkler_Activation_Summary}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Milke} \\
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Mowrer}
+\end{tabular}
+\end{center}
+\caption[Summary of smoke detector activation time predictions.]
+{Summary of smoke detector activation time predictions using the method of Milke (top) and Mowrer (bottom).}
+\label{Smoke_Detector_Activation_Summary}
 \end{figure}
 
