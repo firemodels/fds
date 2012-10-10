@@ -5368,6 +5368,39 @@ a fraction of some other quantity. Thus, if {\ct CONDUCTIVITY\_RAMP} is used, th
 value of {\ct CONDUCTIVITY} given. Note also that for values of temperature, {\ct T}, below and above the
 given range, FDS will assume a constant value equal to the first or last {\ct F} specified.
 
+\section{Arrhenius Parameter Functions}
+
+\label{info:RAMP_Arrhenius}
+
+Arrhenius reaction parameters are typically found for a particular range of equivalence ratios, however equivalence ratios within a simulation may exist in multiple ranges. In these cases a piecewise definition of Arrhenius parameters based on equivalence ratio can be used to define the pre-exponential, {\ct A} and activation energy {\ct E} using the {\ct RAMP} function with the defined chemical reaction like this:
+
+\footnotesize
+\begin{verbatim}
+&REAC ID = 'CARBON MONOXIDE'
+      FUEL = 'CARBON MONOXIDE'
+      A = 4e14
+      A_RAMP = 'rampa'
+      E = 167360       
+      E_RAMP = 'rampe'
+      SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
+      SPEC_ID='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      NU= -1,-0.5,1
+      N_S = 0.25,1,0.5
+      CRITICAL_FLAME_TEMPERATURE=1418./
+
+&RAMP ID='rampa',T = 0,       F = 1e7 /
+&RAMP ID='rampa',T = 1.00,    F = 1e7 /
+&RAMP ID='rampa',T = 1.00001, F = 1 /
+&RAMP ID='rampa',T = 100,     F = 1 /
+
+&RAMP ID='rampe',T = 0.,      F = 0 /
+&RAMP ID='rampe',T = 1.00,    F = 0 /
+&RAMP ID='rampe',T = 1.00001, F = 1 /
+&RAMP ID='rampe',T = 100.,    F = 1 /
+\end{verbatim}
+\normalsize
+Here {\ct A\_RAMP} and {\ct E\_RAMP} are the flags on the {\ct REAC} line to indicate that a {\ct RAMP} is being used. Unlike other {\ct RAMP} functions, {\ct T} is the equivalence ratio, {\em not} time or temperature. For Arrhenius ramps, {\ct F} is a fraction of the the quantity {\ct A} or {\ct E}. In this example for equivalence ratios of a 1 or less, the pre-exponential is large and the activation is energy is 0, indicating that reaction is fast. For equivalence ration greater than 1, the reaction parameters are equal to those defined on the {\ct REAC} line.
+
 
 
 \section{Tabular Functions}
@@ -6173,6 +6206,8 @@ where
 \item[{\ct N\_S}] is an array containing the concentration exponents (default 1),
 \item[{\ct N\_T}] is the temperature exponent (default is 0, meaning no temperature dependence).
 \end{description}
+Note that {\ct A} and {\ct E} can be defined using a {\ct RAMP} as a function of equivalence ratio as explained in Section~\ref{info:RAMP_Arrhenius}.
+
 If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), Eq.~(\ref{eq:reac_rate}) for the single-step propane reaction becomes:
 \begin{equation}\label{eq:reac_rate2}
 k = 8.6 \times 10^{11} \; T^{0} \; e^{-125520/RT} \; [Y_{\mathrm{C_3H_8}}]^{0.1}[Y_{\mathrm{O_2}}]^{1.65}
@@ -11007,6 +11042,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct A}                                   & Real        & Section~\ref{info:finite}                 &   cm$^3$/mol/s    &     \\ \hline
+{\ct A\_RAMP}                             & Character   & Section~\ref{info:RAMP_Arrhenius}         &                   &     \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:extinction}             &   K               &  0  \\ \hline
 {\ct BETA\_EDC}                           & Real        & Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 3    \\ \hline
@@ -11014,11 +11050,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CO\_YIELD}                           & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0        \\ \hline
 {\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Section~\ref{info:extinction}             &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Section~\ref{info:finite}                 &   kJ/kmol         &     \\ \hline
-%{\ct EDCM}                                & Logical     & Section~\ref{??}                          &                   & {\ct .FALSE.}   \\ \hline
+{\ct E\_RAMP}                             & Character   & Section~\ref{info:RAMP_Arrhenius}         &                   &         \\ \hline
 {\ct EPUMO2}                              & Real        & Section~\ref{info:heat_of_combustion}     &   kJ/kg           & 13100    \\ \hline
 {\ct EQUATION}                            & Character   & Section~\ref{info:EQUATION}               &                   &          \\ \hline
 %{\ct FIXED\_MIX\_TIME}                    & Real        & Section~\ref{??}                          &  s                &      \\ \hline
-%{\ct FWD\_ID}                             & Character   & Section~\ref{??}                          &                   &  \\ \hline
 {\ct FORMULA}                             & Character   & Section~\ref{info:simple_chemistry}       &                   &  \\ \hline
 {\ct FUEL}                                & Character   & Section~\ref{info:simple_chemistry}       &                   &   \\ \hline
 {\ct FUEL\_RADCAL\_ID}                    & Character   & Section~\ref{info:simple_chemistry}       &                   &       \\ \hline
@@ -11035,10 +11070,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_T}                                & Real        & Section~\ref{info:finite}                 &                   &     \\ \hline
 {\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
 %{\ct ODE\_SOLVER}                         & Character   & Section~\ref??}                           &                   &       \\ \hline
-%{\ct PHI\_DEPENDENCE}                     & Logical     & Section~\ref??}                           &                   & {\ct .FALSE.}   \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5    \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4    \\ \hline
-%{\ct REVERSIBLE}                         & Logical     & Section~\ref??}                           &                   & {\ct .FALSE.}   \\ \hline
 {\ct SMIX\_ID(:)}                         & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline
 {\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0    \\ \hline
