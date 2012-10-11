@@ -825,23 +825,14 @@ void mouse_CB(int button, int state, int xm, int ym){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
         touring=0;
-#ifdef pp_BETA
-        printf("CTRL key\n");
-#endif
         break;
       case GLUT_ACTIVE_ALT:
         key_state = KEY_ALT;
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[2]=eye_xyz[2];
         touring=0;
-#ifdef pp_BETA
-        printf("ALT key\n");
-#endif
         break;
       case GLUT_ACTIVE_SHIFT:
-#ifdef pp_BETA
-        printf("shift key\n");
-#endif
       default:
         key_state = KEY_NONE;
         start_xyz0[0]=xm;
@@ -2459,14 +2450,11 @@ void Idle_CB(void){
 
 void setScreenSize(int *width, int *height){
   if(width!=NULL){
- //   printf(" screen width before/after %i/%i ",screenWidth,*width);
     screenWidth=*width;
   }
   if(height!=NULL){
-  //  printf(" screen height before/after %i/%i ",screenHeight,*height);
     screenHeight=*height;
   }
-  printf("\n");
 }
 
 /* ------------------ update_camera_ypos ------------------------ */
@@ -2483,6 +2471,9 @@ void Reshape_CB(int width, int height){
   screenHeight2 = screenHeight - dwinH;
   windowresized=1;
   update_camera_ypos(camera_external);
+  if(strcmp(camera_current->name,"external")==0){
+    ResetView(RESTORE_EXTERIOR_VIEW);
+  }
   update_windowsizelist();
 #ifdef pp_GPU
 #ifdef pp_GPUDEPTH
