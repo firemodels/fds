@@ -5,7 +5,7 @@
 &MESH IJK=120,80,24, XB=-0.5,2.5,0.2,2.2,1.8,2.4/ 25 mm grid above spill edge
 
 Simulation Time
-&TIME T_END=240. /
+&TIME T_END=100. /
 &MISC TMPA=20. /
 &DUMP NFRAMES=240, DT_DEVC=20., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
