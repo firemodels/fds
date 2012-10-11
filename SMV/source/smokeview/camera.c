@@ -138,16 +138,10 @@ void init_camera(camera *camera_data,char *name){
   camera_data->rotation_type=rotation_type;
 
   camera_data->azimuth=0.0;
-  camera_data->cos_azimuth=1.0;
-  camera_data->sin_azimuth=0.0;
 
   camera_data->elevation=0.0;
-  camera_data->cos_elevation=1.0;
-  camera_data->sin_elevation=0.0;
 
   camera_data->view_angle=0.0;
-  camera_data->cos_view_angle=1.0;
-  camera_data->sin_view_angle=0.0;
   camera_data->next=NULL;
   camera_data->prev=NULL;
   camera_data->view_id=-1;
@@ -227,20 +221,6 @@ void copy_camera(camera *to, camera *from){
 /* ------------------ update_camera ------------------------ */
 
 void update_camera(camera *ca){
-  float local_angle;
-
-  local_angle = ca->azimuth*DEG2RAD;
-  ca->cos_azimuth=cos(local_angle);
-  ca->sin_azimuth=sin(local_angle);
-
-  local_angle = ca->view_angle*DEG2RAD;
-  ca->cos_view_angle=cos(local_angle);
-  ca->sin_view_angle=sin(local_angle);
-
-  local_angle = ca->elevation*DEG2RAD;
-  ca->cos_elevation=cos(local_angle);
-  ca->sin_elevation=sin(local_angle);
-
   if(ca==camera_current){
     rotation_type=ca->rotation_type;
     if(ca->rotation_index>=0&&ca->rotation_index<nmeshes){

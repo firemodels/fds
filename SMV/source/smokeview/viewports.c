@@ -891,11 +891,11 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     float posx, posy, posz;
     float azimuth, elevation;
 
-    sn_view_angle=camera_current->sin_view_angle;
-    cs_view_angle=camera_current->cos_view_angle;
+    sn_view_angle=sin(DEG2RAD*camera_current->view_angle);
+    cs_view_angle=cos(DEG2RAD*camera_current->view_angle);
 
-    sin_azimuth=camera_current->sin_azimuth;
-    cos_azimuth=camera_current->cos_azimuth;
+    sin_azimuth=sin(DEG2RAD*camera_current->azimuth);
+    cos_azimuth=cos(DEG2RAD*camera_current->azimuth);
 
     modelview_rotate = camera_current->modelview;
 
@@ -903,8 +903,8 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     ycen = camera_current->ycen;
     zcen = camera_current->zcen;
 
-    cos_elevation=camera_current->cos_elevation;
-    sin_elevation=camera_current->sin_elevation;
+    cos_elevation=cos(DEG2RAD*camera_current->elevation);
+    sin_elevation=sin(DEG2RAD*camera_current->elevation);
 
     sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
     cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;

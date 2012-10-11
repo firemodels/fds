@@ -659,12 +659,8 @@ void update_rotation_index(int val){
   az_elev[1]=0.; 
 
   camera_current->azimuth=0.0;
-  camera_current->cos_azimuth = 1.0;
-  camera_current->sin_azimuth = 0.0;
 
   camera_current->view_angle=0.0;
-  camera_current->cos_view_angle = 1.0;
-  camera_current->sin_view_angle = 0.0;
 
   update_meshlist1(val);
 
@@ -809,7 +805,6 @@ extern "C" void Motion_CB(int var){
   float dx2, dy2;
   float *eye_xyz;
   float *azimuth;
-  float *cos_azimuth, *sin_azimuth;
   int *rotation_index;
   int i;
 
@@ -837,8 +832,6 @@ extern "C" void Motion_CB(int var){
   }
   eye_xyz = camera_current->eye;
   azimuth=&camera_current->azimuth;
-  cos_azimuth=&camera_current->cos_azimuth;
-  sin_azimuth=&camera_current->sin_azimuth;
   rotation_index = &camera_current->rotation_index;
   if(selected_view!=-999){
     selected_view=-999;
@@ -849,8 +842,6 @@ extern "C" void Motion_CB(int var){
 
     case EYE_ROTATE:
       *azimuth=motion_dir[0];
-      *cos_azimuth = cos((*azimuth)*DEG2RAD);
-      *sin_azimuth = sin((*azimuth)*DEG2RAD);
       if(glui_move_mode!=EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
@@ -1016,10 +1007,12 @@ extern "C" void Motion_CB(int var){
     dy=motion_dir[1]*TRANSLATE_SPEED*(float)screenWidth/1800.0;
   }
   if(rotation_type==EYE_CENTERED){
-    *cos_azimuth = cos((*azimuth)*DEG2RAD);
-    *sin_azimuth = sin((*azimuth)*DEG2RAD);
-    dx2 = *cos_azimuth*dx + *sin_azimuth*dy;
-    dy2 = -(*sin_azimuth)*dx + (*cos_azimuth)*dy;
+    float cs_az, sn_az;
+
+    cs_az = cos((*azimuth)*DEG2RAD);
+    sn_az = sin((*azimuth)*DEG2RAD);
+    dx2 = cs_az*dx + sn_az*dy;
+    dy2 = -sn_az*dx + cs_az*dy;
     dx = dx2;
     dy = dy2;
   }
