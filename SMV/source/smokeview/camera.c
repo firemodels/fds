@@ -97,7 +97,6 @@ void update_camera_ypos(camera *camera_data){
 /* ------------------ init_camera ------------------------ */
 
 void init_camera(camera *camera_data,char *name){
-  float *x;
   int i;
 
   strcpy(camera_data->name,name);
@@ -117,13 +116,6 @@ void init_camera(camera *camera_data,char *name){
   camera_data->quaternion[0]=0.0;
   camera_data->quaternion[0]=0.0;
 
-  x=camera_data->modelview;
-  for(i=0;i<16;i++){
-    x[i]=0.0;
-  }
-  for(i=0;i<16;i+=5){
-    x[i]=1.0;
-  }
   camera_data->az_elev[0]=0.0;
   camera_data->az_elev[1]=0.0;
   camera_data->up[0]=0.0;

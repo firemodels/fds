@@ -48,6 +48,14 @@ void Init(void){
   FREEMEMORY(plotiso);
   NewMemory((void **)&plotiso,mxplot3dvars*sizeof(int));
 
+  for(i=0;i<16;i++){
+    if(i%5==0){
+      modelview_identity[i]=1.0;
+    }
+    else{
+      modelview_identity[i]=0.0;
+    }
+  }
   for(i=0;i<mxplot3dvars;i++){
     plotiso[i]=nrgb/2;
   }

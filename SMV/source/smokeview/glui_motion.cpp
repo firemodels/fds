@@ -628,7 +628,6 @@ extern "C" void update_translate(void){
 void update_rotation_index(int val){
   mesh *meshi;
   int i;
-  float *modelview_rotate;
   float *az_elev;
   int *rotation_index;
 
@@ -648,10 +647,6 @@ void update_rotation_index(int val){
     camera_current->zcen=zcenGLOBAL;
   }
   rotation_index_OLD=*rotation_index;
-  modelview_rotate = camera_current->modelview;
-  for(i=0;i<16;i++){
-    modelview_rotate[i]=modelview_current[i];
-  }
 
   az_elev = camera_current->az_elev;
 

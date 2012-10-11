@@ -9880,7 +9880,7 @@ int readini2(char *inifile, int localfile){
       ||match(buffer,"VIEWPOINT6")==1
       ){
       int p_type;
-      float *eye,*mat,*az_elev;
+      float *eye,mat[16],*az_elev;
       int is_viewpoint4=0;
       int is_viewpoint5=0;
       int is_viewpoint6=0;
@@ -9896,7 +9896,6 @@ int readini2(char *inifile, int localfile){
         is_viewpoint6=1;
       }
       eye=camera_ini->eye;
-      mat=camera_ini->modelview;
       az_elev=camera_ini->az_elev;
 
       {
@@ -11380,7 +11379,7 @@ void writeini(int flag){
         }
         eye = ca->eye;
         az_elev = ca->az_elev;
-        mat = ca->modelview;
+        mat = modelview_identity;
 
         fprintf(fileout," %i %i %i\n",ca->rotation_type,ca->rotation_index,ca->view_id);
         fprintf(fileout," %f %f %f %f %i\n",eye[0],eye[1],eye[2],zoom,zoomindex);

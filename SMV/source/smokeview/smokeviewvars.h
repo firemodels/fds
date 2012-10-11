@@ -26,6 +26,7 @@
 
 SVEXTERN float quat_general[4], quat_rotation[16];
 
+SVEXTERN float modelview_identity[16];
 SVEXTERN mousedata mouseinfo;
 SVEXTERN int SVDECL(use_glui_rotate,0);
 SVEXTERN int SVDECL(show_fed_area,1);

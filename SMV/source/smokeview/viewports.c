@@ -885,7 +885,6 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     float sin_azimuth, cos_azimuth;
     float sn_view_angle, cs_view_angle;
     float *uup;
-    float *modelview_rotate;
     float cos_elevation, sin_elevation;
     float xcen, ycen, zcen;
     float posx, posy, posz;
@@ -896,8 +895,6 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
     sin_azimuth=sin(DEG2RAD*camera_current->azimuth);
     cos_azimuth=cos(DEG2RAD*camera_current->azimuth);
-
-    modelview_rotate = camera_current->modelview;
 
     xcen = camera_current->xcen;
     ycen = camera_current->ycen;
@@ -955,7 +952,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_setup);
     getinverse(modelview_setup,inverse_modelview_setup);
 
-    glMultMatrixf(modelview_rotate);
+    glMultMatrixf(modelview_identity);
     
     glTranslatef(xcen,ycen,zcen);
 
