@@ -105,10 +105,10 @@ The preceding table shows that the addition of carbon monoxide and soot has incr
 
 For a typical hydrocarbon fuel, the chemical reaction in FDS follows:
 
-\begin{eqnarray}\label{eq:full_lump}
-\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2)}_\text{Background,~Z$_0$}+\nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~Z$_1$} \rightarrow \\
-\nonumber \nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~Z$_2$}
-\end{eqnarray}
+\begin{multline}\label{eq:full_lump}
+\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2 \upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2)}_\text{Background,~Z$_0$} \,\,+ \,\, \nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~Z$_1$} \quad \longrightarrow \\
+\nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~Z$_2$}
+\end{multline}
 Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha\,i}$ and the stoichiometric coefficients for the lumped $i$ are denoted by $\nu_{i}$.
 
 
@@ -116,10 +116,10 @@ Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is 
 There are cases where the use if primitive species is needed, such as water droplet evaporation or complex chemical reactions. In sprinkler activation cases, there is water vapor that is produced by fuel combustion that lives in the {\ct PRODUCTS} lumped species and there is water vapor that is produced from liquid water droplet evaporation. The evaporated water vapor cannot simply be added to the lumped species, because by definition, lumped species exist in the same proportion as which they were initially defined. As a result, the evaporated water vapor is transported as its own lumped species and then combined with the chemical reaction produced water vapor through the transformation matrix.   
 
 If we revisit Eq.~(\ref{eq:full_lump}) but decompose the reaction into all primitive species, we get:
-\begin{eqnarray}\label{eq:prim}
-\nu_{\mathrm{O}_{2},0}\mathrm{O}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{fuel},0}(\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b) \rightarrow \\
-\nonumber \nu_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{CO},2}\mathrm{CO}+\nu_{\mathrm{S},2}\mathrm{S}
-\end{eqnarray}
+\begin{multline}\label{eq:prim}
+\nu_{\mathrm{O}_{2},0}\mathrm{O}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{fuel},0}(\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b) \longrightarrow \\
+\nu_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{CO},2}\mathrm{CO}+\nu_{\mathrm{S},2}\mathrm{S}
+\end{multline}
 In this formulation, we would have to solve transport equations for six species compared to two when the species were lumped. Note that in cases with all primitive species, $A$ becomes an identity matrix:
 
 \begin{center}
