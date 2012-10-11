@@ -152,21 +152,6 @@ Plume temperatures are measured at two heights above the fire, 6~m and 12~m.
 The flames were observed to extend to about 4~m above the fire pan.
 
 
-%Photographs from the VTT tests are available. It is difficult to precisely measure the flame height,
-%but the photos and videos allow one to make estimates accurate to within a pan diameter.
-%Similarly, flame height in FDS is assessed using the visualization program Smokeview.
-%There are various ways to render the fire in Smokeview.  The
-%most direct method is to show, via three dimensional surface plots, the volume within which the energy from the fire is being released.
-%The other method is to show the stoichiometric iso-surface of the mixture fraction.
-%FDS tracks the fuel and oxygen via a single scalar variable called the mixture fraction.
-%The stoichiometric iso-surface is essentially a sheet on which combustion occurs.  The average vertical extent of either the volume
-%in which energy is being released or the stoichiometric mixture fraction iso-surface is the FDS predicted flame height.
-%Shown in Figure~\ref{FDS_Flame} are snapshots from the simulation of the 1.6 m diameter heptane pan fire.
-%The pan has been approximated as a square because of the requirement by FDS of rectangular geometry.
-%Figure~\ref{Simo_Photos} contains photographs of the actual fire.
-%The height of the visible flame in the photographs has been estimated to be between 2.4 and 3 pan diameters (3.8 m to 4.8 m).
-%The height of the simulated fire fluctuates from 5 m to 6 m during the peak heat release rate phase.
-
 \begin{figure}[h]
 \begin{center}
 \begin{tabular}{c}
@@ -178,7 +163,8 @@ The flames were observed to extend to about 4~m above the fire pan.
 \label{VTT_Plume}
 \end{figure}
 
-\newpage
+
+\clearpage
 
 \section{FM/SNL Test Series}
 
@@ -237,8 +223,6 @@ A large number of plume tempeature measurements are availible from both the Barb
 
 The hanagrs were very large in size (15 m and 22 m) and the fire heat release rate varied over a large range (100 kW to 33 MW). All validated tests consisted of a fuel pan filled with either JP-5 or JP-8 jet fuel, posistioned in the center of the hangar, lit and allowed to burn until extinguishment with a large plate covering of the pan.
 
-\newpage
-
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_01_1} &
@@ -291,7 +275,50 @@ The hanagrs were very large in size (15 m and 22 m) and the fire heat release ra
 
 \clearpage
 
-\section{Sandia 1 m Helium Plume}
+
+
+\section{Summary of Plume Temperature Predictions}
+
+Figure~\ref{Plume_Summary} provides a summary of the plume temperature predictions.
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Plume_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of plume temperature predictions]
+{Summary of plume temperature predictions.}
+\label{Plume_Summary}
+\end{figure}
+
+
+
+\clearpage
+
+\section{Harrison Spill Plumes}
+\label{Harrison_Spill_Plumes}
+
+In this series of reduced-scale spill plume experiments, the mass flow rate was measured at a series of heights by varying the flow through an exhaust hood to maintain a constant smoke layer depth.  The plot below shows measured and predicted mass flows rates at five different elevations for the fire scenarios labelled SE4 through SE21 in Ref.~\cite{Harrison:2009}. Two general configurations are considered -- one that is intended to mimic a balcony spill plume and one in which the plume adheres to a vertical wall above the compartment opening.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[height=4in]{FIGURES/ScatterPlots/Entrainment}
+\caption[Summary of plume entrainment predictions]{A comparison of predicted and measured mass flow rates at various heights for the Harrison Spill Plume experiments.}
+\label{Entrainment}
+\end{center}
+\end{figure}
+
+
+
+
+\clearpage
+
+\section{Sandia Plume Experiments}
+
+The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1~m in diameter surrounded by a 0.5~m steel ``ground plane''. Particle Image Velocimetry (PIV) and Planar Laser-Induced Fluorescence (PLIF) techniques were used to obtain instantaneous joint scalar and velocity fields.
+
+\subsection{Sandia 1 m Helium Plume}
 \label{Sandia plume}
 
 Calculations of the Sandia 1 m helium plume are run at three grid resolutions: 6 cm, 3 cm, and 1.5 cm.  To give the reader with a qualitative feel for the results, Fig.~\ref{Sandia_He_1m_image} provides a snapshot of density contours from the simulation. The calculations are run in parallel on 16 processors; the outlined blocks indicate the domain decomposition.  Data for vertical velocity, radial velocity, and helium mass fraction are recorded at three levels downstream from the base of the plume, $z = [0.2, 0.4, 0.6]$ m, corresponding to the experimental measurements of O'Hern et al.~\cite{OHern:2005}.  Results for the mean and root mean square (RMS) profiles are given in Figs.~\ref{Sandia_He_1m_velocity} - \ref{Sandia_He_1m_massfraction}.  The means are taken between $t=10$ and $t=20$ seconds in the simulation.
@@ -305,8 +332,6 @@ The domain is 3 m $\times$ 3 m $\times$ 4 m. The boundary conditions are open on
 \label{Sandia_He_1m_image}
 \end{center}
 \end{figure}
-
-\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -352,7 +377,7 @@ The domain is 3 m $\times$ 3 m $\times$ 4 m. The boundary conditions are open on
 
 \clearpage
 
-\section{Sandia 1 m Methane Pool Fire}
+\subsection{Sandia 1 m Methane Pool Fire}
 \label{Sandia_methane}
 
 The Sandia 1 m methane pool fire series provides data for three methane flow rates: Test 14 (low flow rate), Test 24 (medium flow rate), and Test 17 (high flow rate) \cite{Tieszen:2004}.  The experiments are simulated using three grid resolutions: 6 cm, 3 cm, and 1.5 cm.  Fig.~\ref{Sandia_CH4_1m_image} provides a snapshot of temperature contours from the 1.5 cm Test 17 simulation. The calculations are run in parallel on 16 processors---a similar computational set up as the helium case (the experiments were run in the same facility at Sandia).  Data for vertical velocity and radial velocity are recorded at three levels downstream from the base of the plume, $z = [0.3, 0.5, 0.9]$ m.  Results for the mean profiles (and turbulent kinetic energy for Test 24) are given in Figs.~\ref{Sandia_CH4_1m_Test14_velocity} - \ref{Sandia_CH4_1m_Test17_velocity}.  The means are taken between $t=10$ and $t=20$ seconds in the simulation.
@@ -436,7 +461,7 @@ For Test 17, we recorded the vertical velocity as a time series in four location
 
 \clearpage
 
-\section{Sandia 1 m Hydrogen Pool Fire}
+\subsection{Sandia 1 m Hydrogen Pool Fire}
 \label{Sandia_hydrogen}
 
 Sandia Test 35 \cite{Tieszen:2004} is simulated at three grid resolutions: 6 cm, 3 cm, and 1.5 cm.  The computational set up is nearly identical to the methane cases.  Results for mean vertical and radial velocity are given in Figs.~\ref{Sandia_H2_1m_Test35_velocity}.  Results for turbulent kinetic energy are presented in Fig.~\ref{Sandia_H2_1m_Test35_tke}.  Means are taken from a time average between $t=10$ and $t=20$ seconds in the simulation.
@@ -478,36 +503,7 @@ By examining movies of the simulation results we can see a qualitative differenc
 \end{center}
 \end{figure}
 
-\clearpage
 
-\section{Harrison Spill Plumes}
-\label{Harrison_Spill_Plumes}
 
-In this series of scale spill plume experiments mass flow was measured by through a series of heights by varying flow through and exhaust hood to maintain a constant smoke layer depth.  The plot below shows measured and predicted mass flows through 5 different slice heights for all configurations modeled.
-
-\begin{figure}[h]
-\begin{center}
-\includegraphics[height=5in]{FIGURES/ScatterPlots/Harrison_Spill_Plumes}
-\caption[Summary of Harrison Spill Plume predictions.]{A comparison of predicted and measured mass flow rates at various heights for the Harrison Spill Plume experiments.}
-\label{Harrison_Scatterplot}
-\end{center}
-\end{figure}
-
-\clearpage
-
-\section{Summary of Plume Temperature Predictions}
-
-Figure~\ref{Plume_Summary} provides a summary of the plume temperature predictions.
-
-\begin{figure}[h!]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Plume_Temperature}
-\end{tabular}
-\end{center}
-\caption[Summary of plume temperature predictions]
-{Summary of plume temperature predictions.}
-\label{Plume_Summary}
-\end{figure}
 
 
