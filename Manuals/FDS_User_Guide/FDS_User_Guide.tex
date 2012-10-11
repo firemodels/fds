@@ -5372,7 +5372,7 @@ given range, FDS will assume a constant value equal to the first or last {\ct F}
 
 \label{info:RAMP_Arrhenius}
 
-Arrhenius reaction parameters are typically found for a particular range of equivalence ratios, however equivalence ratios within a simulation may exist in multiple ranges. In these cases a piecewise definition of Arrhenius parameters based on equivalence ratio can be used to define the pre-exponential, {\ct A} and activation energy {\ct E} using the {\ct RAMP} function with the defined chemical reaction like this:
+Arrhenius reaction parameters are typically found for a particular range of equivalence ratios; however, equivalence ratios within a simulation may exist in multiple ranges. For these cases, a piecewise definition of Arrhenius parameters based on equivalence ratio can be used to define the pre-exponential {\ct A} and activation energy {\ct E} using the {\ct RAMP} function with a defined chemical reaction as follows:
 
 \footnotesize
 \begin{verbatim}
@@ -5386,20 +5386,21 @@ Arrhenius reaction parameters are typically found for a particular range of equi
       SPEC_ID='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-0.5,1
       N_S = 0.25,1,0.5
-      CRITICAL_FLAME_TEMPERATURE=1418./
+      CRITICAL_FLAME_TEMPERATURE=1418. /
 
-&RAMP ID='rampa',T = 0,       F = 1e7 /
-&RAMP ID='rampa',T = 1.00,    F = 1e7 /
-&RAMP ID='rampa',T = 1.00001, F = 1 /
-&RAMP ID='rampa',T = 100,     F = 1 /
+&RAMP ID='rampa', T = 0,       F = 1e7 /
+&RAMP ID='rampa', T = 1.00,    F = 1e7 /
+&RAMP ID='rampa', T = 1.00001, F = 1 /
+&RAMP ID='rampa', T = 100,     F = 1 /
 
-&RAMP ID='rampe',T = 0.,      F = 0 /
-&RAMP ID='rampe',T = 1.00,    F = 0 /
-&RAMP ID='rampe',T = 1.00001, F = 1 /
-&RAMP ID='rampe',T = 100.,    F = 1 /
+&RAMP ID='rampe', T = 0.,      F = 0 /
+&RAMP ID='rampe', T = 1.00,    F = 0 /
+&RAMP ID='rampe', T = 1.00001, F = 1 /
+&RAMP ID='rampe', T = 100.,    F = 1 /
 \end{verbatim}
 \normalsize
-Here {\ct A\_RAMP} and {\ct E\_RAMP} are the flags on the {\ct REAC} line to indicate that a {\ct RAMP} is being used. Unlike other {\ct RAMP} functions, {\ct T} is the equivalence ratio, {\em not} time or temperature. For Arrhenius ramps, {\ct F} is a fraction of the the quantity {\ct A} or {\ct E}. In this example for equivalence ratios of a 1 or less, the pre-exponential is large and the activation is energy is 0, indicating that reaction is fast. For equivalence ration greater than 1, the reaction parameters are equal to those defined on the {\ct REAC} line.
+
+Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line to indicate that a {\ct RAMP} is being used. Unlike other {\ct RAMP} functions, {\ct T} is the equivalence ratio, {\em not} time or temperature. For Arrhenius ramps, {\ct F} is a fraction of the the quantity {\ct A} or {\ct E}. In this example, for equivalence ratios less than or equal to 1, the pre-exponential is large and the activation is energy is 0, which indicates that the reaction is fast. For equivalence ratios greater than 1, the reaction parameters are equal to those defined on the {\ct REAC} line.
 
 
 
