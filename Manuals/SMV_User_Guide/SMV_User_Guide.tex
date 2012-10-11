@@ -102,13 +102,6 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\parmc}{0.25}
 \newcommand{\bold}[1]{{\bf #1}}
 \newcommand{\via}{{via\ }}
-\newcommand{\dialoguenmenu}{\fbox{\tt Dialog} }
-\newcommand{\optionmenu}{\fbox{\tt Option} }
-\newcommand{\loadmenu}{\fbox{\tt Load/Unload} }
-\newcommand{\tourmenu}{\fbox{\tt Tour} }
-\newcommand{\helpmenu}{\fbox{\tt Help} }
-\newcommand{\setbounds}{\fbox{\tt Set Bounds} }
-\newcommand{\showmenu}{\fbox{\tt Show/Hide} }
 \newcommand{\frameit}[1]{\fbox{\tt #1}}
 \newcommand{\blist}{
 \begin{list}
@@ -488,14 +481,14 @@ the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 Menus in Smokeview are activated by clicking the right mouse
 button anywhere within the Smokeview window.  Data files may be
-visualized by selecting the desired \loadmenu\ menu option. Other
-menu options are discussed in Appendix \ref{sectionmenu}. Many
-menu commands have equivalent keyboard shortcuts. These shortcuts
-are listed in \smokeview's \helpmenu\ menu and are described in
-Appendix \ref{sectionkeyboard}. Visualization features not
-controllable through the menus may be customized by using the
-\smokeview\ preference file, \svini, discussed in
-Appendix \ref{appendixini}.
+visualized by selecting the desired {\em Load/Unload}\ menu
+option. Other menu options are discussed in Appendix
+\ref{sectionmenu}. Many menu commands have equivalent keyboard
+shortcuts. These shortcuts are listed in \smokeview's {\em Help}\
+menu and are described in Appendix \ref{sectionkeyboard}.
+Visualization features not controllable through the menus may be
+customized by using the \smokeview\ preference file, \svini,
+discussed in Appendix \ref{appendixini}.
 
 \Smokeview\ is written in C~\cite{C:book} and Fortran 90~\cite{Fortran:book} and consists of about
 100,000 lines of code. The C portion of Smokeview visualizes the
@@ -591,17 +584,17 @@ isocontours may be stored in one file, allowing one to
 view several isosurface levels simultaneously.
 
 \subsubsection{Volumetric - Realistic Smoke}
-Smoke and fire (heat release rate per unit volume)
-are displayed
+Smoke and fire (heat release rate per unit volume) are displayed
 realistically using a series of partially transparent planes.  The
 smoke transparencies are determined by using smoke densities
 computed by FDS.  The fire and sprinkler spray transparencies are
 determined by using a heuristic based on heat release rate and
 water density data, again computed by FDS. Various settings for
 the 3D smoke option may be set using the {\em 3D Smoke}\ dialog
-box found in the \frameit{Dialogs}\ menu.  The windows version of
+box found in the {\em Dialogs}\ menu.  The windows version of
 Smokeview uses the graphical processing unit (GPU) on the video
-card to perform some of the calculations required to visualize smoke.
+card to perform some of the calculations required to visualize
+smoke.
 
 \subsection{Exploring Data}
 
@@ -610,7 +603,8 @@ data by altering its appearance to more easily identify features
 and behaviors found in the simulation data. One may flip or
 reverse the order of colors in the colorbar and also click in the
 colorbar and slide the mouse to highlight data values in the
-scene. These options may be found under \frameit{Options/Shades}.
+scene. These options may be found under the {\em Options/Shades}
+menu.
 
 The user may click in the time bar and slide the mouse to
 change the simulation time displayed. One use for the time
@@ -638,7 +632,7 @@ files are compressing.
 
 \subsection{Exploring the Scene}
 
-\subsubsection{Motion/View} The {\em motion/view}\ dialog box may be used to
+\subsubsection{Motion/View/Render} The {\em Motion/View/Render}\ dialog box may be used to
 allow more precise control of scene movement and orientation.
 Cursor keys have been mapped to scene translation/rotation to
 allow easy navigation within the scene.  Viewpoints may be saved for later access.
@@ -653,8 +647,10 @@ in complicated geometries due to the number of
 obstructed surfaces. Interior portions of the scene may be
 seen more easily by {\em clipping}\ part of the scene away.
 
-Clipping discussed above occurs in 3D within the scene.  A screenshot converted to a PNG or JPEG file may
-also be clipped or cropped using the Render portion of the Motion/View/Render dialog box.
+Clipping discussed above occurs in 3D within the scene.  A
+screenshot converted to a PNG or JPEG file may also be clipped or
+cropped using the Render portion of the {\em Motion/View/Render}\
+dialog box.
 
 \subsubsection{Stereo views}A method for displaying stereo/3D images has been implemented that does
 not require any specialized equipment such as shuttered glasses or quad buffered enabled video cards.  Stereo pair images are displayed side by side after invoking the option with
@@ -680,8 +676,9 @@ equally spaced tick marks between specified bounds. These marks
 along with {\tt LABEL} text may be used to specify length scales
 in the scene.
 
-The {\em User Tick Settings}\ tab of the Display dialog box
-provides an easier way to place ticks with length annotations along coordinate axes.
+The {\em User Tick Settings}\ tab of the {\em Display}\ dialog box
+provides an easier way to place ticks with length annotations
+along coordinate axes.
 
 \subsubsection{Texture Mapping} JPEG or PNG image files may be applied to a
 blockage, vent or enclosure boundary. This is called texture
@@ -705,13 +702,13 @@ or may be created by editing a text file.
 
 \subsubsection{Virtual Tour}   A series of checkpoints or key frames
 specifying position and view direction may be specified. A smooth
-path is computed using Kochanek-Bartels splines~\cite{Moller:02} to
-go through these key frames so that one may control the position
-and view direction of an observer as they move through the
-simulation. One can then see the simulation as the observer would.
-This option is available under the \tourmenu\ menu item. Existing
-tours may be edited and new tours may be created using the
-{\em Tour}\ dialog box found in the \frameit{Dialogs}\ menu. Tour
+path is computed using Kochanek-Bartels splines~\cite{Moller:02}
+to go through these key frames so that one may control the
+position and view direction of an observer as they move through
+the simulation. One can then see the simulation as the observer
+would. This option is available under the {\em Tour}\ menu item.
+Existing tours may be edited and new tours may be created using
+the {\em Tour}\ dialog box found in the {\em Dialogs}\ menu. Tour
 settings are stored in the local configuration file
 (casename.ini).
 
@@ -771,13 +768,14 @@ which are now relatively inexpensive.
 \Smokeview\  may be started on the PC by double-clicking the file
 named {\tt casename.smv} where casename is the name specified by
 the {\tt CHID} keyword defined in the \fds\ input data file. Menus
-are accessed by clicking with the right mouse button.  The
-\loadmenu\ menu may be used to read in the data files to be
-visualized. The \showmenu\ menu may be used to change how the
-visualizations are presented. For the most part, the menu choices
-are self explanatory. Menu items exist for showing and hiding
-various simulation elements, creating screen dumps, obtaining help,
-etc. Menu items are described in Appendix \ref{sectionmenu}.
+are accessed by clicking with the right mouse button.  The {\em
+Load/Unload}\ menu may be used to read in the data files to be
+visualized. The {\em Show/Hide}\ menu may be used to change how
+the visualizations are presented. For the most part, the menu
+choices are self explanatory. Menu items exist for showing and
+hiding various simulation elements, creating screen dumps,
+obtaining help, etc. Menu items are described in Appendix
+\ref{sectionmenu}.
 
 
 To use \smokeview\ from a {\em command line}, open a command shell.
@@ -824,17 +822,18 @@ problems found in video cards on older computers.
 
 A Smokeview scene may be manipulated using two different reference
 points, the scene center and the user location. Motion about the
-scene center is called world or global view and motion about the
+scene center is called world or global view while motion about the
 user location is called eye or first person view. These view
 methods may be switched by pressing the ``e'' key or by selecting
-the appropriate radio button in the {\em Motion/View}\ dialog box.
+the appropriate radio button in the {\em Motion/View/Render}\
+dialog box.
 
 \section{World View}
 
 The scene may be rotated or translated directly using the mouse or
 by using controls in the {\em Motion/View/Render}\ dialog box.
 This dialog box, illustrated in Figure \ref{figMOTION}a, is opened
-using the \fbox{Dialogs$>$Motion/View/Render}\ menu item.
+using the {\em Dialogs$>$Motion/View/Render}\ menu item.
 
 Clicking on the scene and dragging the mouse horizontally,
 vertically or a combination of both results in scene rotation or
@@ -868,13 +867,12 @@ movement has no effect.
 \includegraphics[width=2.416667in]{FIGURES/figMOTION2}\\
  a) Motion&b) Render image and Scene scaling
 \end{tabular}
-}
-\caption[Motion/View/Render Dialog Box]{Motion/View/Render
-Dialog Box - Motion, Window Properties and Viewpoint Regions.
-Rotate or translate the scene by clicking an {\em arrow}\ and
-dragging the mouse. The Motion/View/Render Dialog Box is invoked
-by selecting \frameit{Dialogs$>$Motion/View/Render}. }
-\label{figMOTION}
+} \caption[{\em Motion/View/Render}\ dialog Box]{{\em
+Motion/View/Render}\ dialog Box - Motion, Window Properties and
+Viewpoint Regions. Rotate or translate the scene by clicking an
+{\em arrow}\ and dragging the mouse. The {\em Motion/View/Render}\
+dialog Box is invoked by selecting {\em
+Dialogs$>$Motion/View/Render} menu item. } \label{figMOTION}
 \end{figure}
 
 The {\em Motion/View/Render}\ dialog box may be used to move the
@@ -900,10 +898,10 @@ using either PNG or JPEG image file formats and to scale the
 Smokeview scene (say for visualizing tunnel scenarios) in any or
 all of the coordinate directions.
 
-The \frameit{zoom}\ and \frameit{aperture} edit boxes allow one to
-change the magnification of the scene or equivalently the angle of
-view across the scene.  The relation between these two parameters
-is given by
+The {\em zoom}\ and {\em aperture} edit boxes allow one to change
+the magnification of the scene or equivalently the angle of view
+across the scene.  The relation between these two parameters is
+given by
 \begin{eqnarray*}
 \mbox{zoom}=\tan(45^\circ/2)/\tan(\mbox{aperture}/2)
 \end{eqnarray*}
@@ -950,15 +948,15 @@ the viewpoint that should be set when Smokeview first starts up.
 
 \section{Eye View}
 
-Radio buttons in the {\em Motion/View}\ dialog box allow one to toggle
-between world, eye centered and world level rotation scene
-movement modes. These modes may also be changed by using the ``e''
-key. When in {\em eye center}\ mode, several key mappings have been
-added, inspired by popular computer games, to allow for easier
-movement within the scene. For example, the up and down cursor
-keys allow one to move forward or backwards.  The left and right
-cursor keys allow one to rotate left or right. Other keyboard
-mappings are described in Table \ref{tabKEYS}.
+Radio buttons in the {\em Motion/View/Render}\ dialog box allow
+one to toggle between world, eye centered and world level rotation
+scene movement modes. These modes may also be changed by using the
+``e'' key. When in {\em eye center}\ mode, several key mappings
+have been added, inspired by popular computer games, to allow for
+easier movement within the scene. For example, the up and down
+cursor keys allow one to move forward or backwards.  The left and
+right cursor keys allow one to rotate left or right. Other
+keyboard mappings are described in Table \ref{tabKEYS}.
 
 \begin{table}[\figoptions]
 \begin{center}
@@ -1002,7 +1000,7 @@ water droplets would be colored blue. Particles are stored in
 files ending with the extension {\tt .prt5}\footnote{Particle
 files created with FDS version 4 and earlier use the {\tt .part}\
 extension} and are displayed by selecting the particle file entry
-from the \loadmenu\ menu.
+from the {\em Load/Unload}\ menu.
 
 Streaklines are a technique for showing motion in a still image.
 Figure \ref{figstreak} shows a snapshot of the same kitchen fire
@@ -1047,11 +1045,11 @@ files and Section \ref{section:isosurface} for some examples.
 
 \section{Realistic}
 \FDS\ generates several data files visualized by \smokeview. Each
-file type may be loaded or unloaded using the \loadmenu\  menu
-described in Appendix \ref{sectload}. Visualizations produced by
-these data files are described in this and the following sections.
-The format used to store each of the data files is given in the
-FDS User's Guide~\cite{FDS_Users_Guide}.
+file type may be loaded or unloaded using the {\em Load/Unload}\
+menu described in Appendix \ref{sectload}. Visualizations produced
+by these data files are described in this and the following
+sections. The format used to store each of the data files is given
+in the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 Visualizing smoke realistically is a daunting challenge for at
 least three reasons. First, the storage requirements for
@@ -1130,7 +1128,7 @@ gas velocity and heat release rate. Figure \ref{figslice} shows
 several snapshots of a vertical animated slice where the slice is
 colored according to gas temperature. Slice files have file names
 with extension {\tt .sf} and are displayed by selecting the
-desired entry from the \loadmenu\ menu.
+desired entry from the {\em Load/Unload}\ menu.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1166,12 +1164,12 @@ Ref.~\cite{FDS_Users_Guide}.
 slice files.  The direction and length of the vectors are
 determined from the $U$, $V$ and/or $W$ velocity slice files. The
 vector colors are determined from the file (such as temperature)
-selected from the \loadmenu\ menu. The length of the vectors can
-be adjusted by pressing the {\tt `a'}\ key. For cases with a fine
-grid, the number of vectors may be overwhelming.  Vectors may be
-skipped by pressing the {\tt `s'}\ key.  Figure \ref{figvslice}
-shows a sequence of vector slices corresponding to the shaded
-temperature contours found in Figure~\ref{figslice}.
+selected from the {\em Load/Unload}\ menu. The length of the
+vectors can be adjusted by pressing the {\tt `a'}\ key. For cases
+with a fine grid, the number of vectors may be overwhelming.
+Vectors may be skipped by pressing the {\tt `s'}\ key.  Figure
+\ref{figvslice} shows a sequence of vector slices corresponding to
+the shaded temperature contours found in Figure~\ref{figslice}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1250,15 +1248,16 @@ Double clicking and moving the mouse horizontally and vertically while holding d
 the {\tt SHIFT}\ key causes the center of rotation for the general slice to move along
 the {\tt X}\ and {\tt Y}\ axis respectively.
 
-General slices may also be oriented using the General slice motion region of the Motion/View/Render dialog box as illustrated
+General slices may also be oriented using the General slice motion
+region of the {\em Motion/View/Render}\ dialog box as illustrated
 in Figure \ref{figGSLICE}.
 
 \begin{figure}[\figoptions]
 \centerline{
 \includegraphics[width=1.80555in]{FIGURES/figGSLICE}
-}
-\caption[Motion/View/Render Dialog Box - General slice regions.]{Motion/View/Render Dialog Box - General slice regions.}
-\label{figGSLICE}
+} \caption[{\em Motion/View/Render}\ dialog Box - General slice
+regions.]{{\em Motion/View/Render}\ dialog Box - General slice
+regions.} \label{figGSLICE}
 \end{figure}
 
 
@@ -1337,9 +1336,9 @@ Figure \ref{figboundary} shows several snapshots of a boundary
 file animation where the surfaces are colored according to their
 temperature. Boundary files have file names with extension {\tt
 .bf} and are displayed by selecting the desired entry from the
-\loadmenu\  menu. Figure \ref{figtruncboundary} shows the same
-snapshots as in Figure \ref{figboundary} except that data below
-200~\degC\ is chopped.
+{\em Load/Unload}\  menu. Figure \ref{figtruncboundary} shows the
+same snapshots as in Figure \ref{figboundary} except that data
+below 200~\degC\ is chopped.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{ccc}
@@ -1445,7 +1444,8 @@ level surface or 3D contour. Isosurface files contain data
 specifying isosurface locations for a given quantity at one or
 more levels. These surfaces are represented as triangles.
 Isosurface files have file names with extension .iso and are
-displayed by selecting the desired entry from the \loadmenu\ menu.
+displayed by selecting the desired entry from the {\em
+Load/Unload}\ menu.
 
 Isosurfaces are specified in the \fds\ input file with the {\tt
 \&ISOF} keyword.  To specify isosurfaces for temperatures of
@@ -1540,21 +1540,21 @@ datam1,datam2, ..., dataMN
 where the {\tt unit}\ and {\tt label} entries are character strings and the {\tt data}\ entries are floating point numbers.
 
 FDS uses spreadsheet files to store device and heat release data.
-CFAST uses spreadsheet files to store the results of the simulation
-(room pressures, layer heights, layer temperatures, etc.).
-To view spreadsheet data generated by FDS, open the Devices/Objects dialog box
-illustrated in Figure \ref{figDEVICES} and select the ``Show values'' checkbox.
-If U, V and/or W velocity data is contained in the spreadsheet file
-then velocity vectors may also be displayed.
+CFAST uses spreadsheet files to store the results of the
+simulation (room pressures, layer heights, layer temperatures,
+etc.). To view spreadsheet data generated by FDS, open the {\em
+Devices/Objects}\ dialog box illustrated in Figure
+\ref{figDEVICES} and select the ``Show values'' checkbox. If U, V
+and/or W velocity data is contained in the spreadsheet file then
+velocity vectors may also be displayed.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=1.881944in]{FIGURES/figDEVICES}
 \end{center}
-\caption[Devices dialog box.]{Devices dialog box.
-This dialog box allows the user to display data values stored in FDS
-spreadsheet files.}
-\label{figDEVICES}
+\caption[{\em Devices}\ dialog box.]{{\em Devices}\ dialog box.
+This dialog box allows the user to display data values stored in
+FDS spreadsheet files.} \label{figDEVICES}
 \end{figure}
 
 
@@ -1702,17 +1702,16 @@ Reload...}\ or {\em Update}\ for the new bounds to take effect.}
 \label{figBOUNDSplot3d}
 \end{figure}
 
-The {\em File/Bounds...}\ dialog box is opened from the
-\frameit{Dialogs}\ menu. Each file type in Figure
-\ref{figBOUNDSplot3d} (slice, particle, Plot3D, etc.) has a set of
-{\em radio buttons}\ for selecting the variable type that data
-bounds are to be applied to. These variable types are determined
-from the files generated by \fds\ and are automatically recorded
-in the {\tt .smv} file. The data bounds are set in a pair of edit
-boxes. Radio buttons adjacent to the edit boxes determine what
-type of bounds should be applied.  The \frameit{Update}\ and
-\frameit{Reload}\ buttons are pressed to make the new bounds take
-effect.
+The {\em File/Bounds...}\ dialog box is opened from the {\em
+Dialogs}\ menu. Each file type in Figure \ref{figBOUNDSplot3d}
+(slice, particle, Plot3D, etc.) has a set of {\em radio buttons}\
+for selecting the variable type that data bounds are to be applied
+to. These variable types are determined from the files generated
+by \fds\ and are automatically recorded in the {\tt .smv} file.
+The data bounds are set in a pair of edit boxes. Radio buttons
+adjacent to the edit boxes determine what type of bounds should be
+applied.  The \frameit{Update}\ and \frameit{Reload}\ buttons are
+pressed to make the new bounds take effect.
 
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=2.375in]{FIGURES/figBOUND2}
@@ -1741,7 +1740,7 @@ effect.} \label{figBOUNDSslice}
 \end{tabular}
 \caption [Ceiling Jet Visualization.] {   Ceiling jet
 visualization created by {\em chopping data}\ below 140~$^\circ$C
-using the {\tt Bounds Dialog Box} as illustrated in
+using the {\em Bounds} dialog box as illustrated in
 Figure~\ref{figBOUNDSslice}. }
 \label{figceilingjet}%
 \end{center}
@@ -1756,7 +1755,7 @@ chopped or not drawn in the figure.
 
 Slice file data may be time averaged or smoothed over a user
 selectable time interval.  This option is also implemented from
-the Slice File section of the {\em File/Bounds} dialog box (see
+the Slice File section of the {\em File/Bounds}\ dialog box (see
 Figure \ref{figBOUNDSslice}.
 
 The {\bf Boundary File}\ portion of the {\em File/Bounds}\ dialog
@@ -1805,8 +1804,8 @@ velocity component is stored in a Plot3D file, then \smokeview\
 adds speed to the Plot3D variable list.} different simulated
 quantities, view flow vectors and iso or 3D contours. Plot3D file
 visualization is initiated by selecting the desired entry from the
-\loadmenu\ {\tt Plot3D} sub-menu and as with time files one may
-change color and transparency characteristics.
+{\em Load/Unload}\ {\tt Plot3D} sub-menu and as with time files
+one may change color and transparency characteristics.
 
 \subsection{2D contours}
 \Smokeview\ displays a 2D contour slice midway along the {\tt Y}
@@ -1819,11 +1818,11 @@ depress the {\tt x} or {\tt z} keys respectively.  Depressing the
 {\tt x}, {\tt y} or {\tt z} keys while the contour is visible will
 cause it to be hidden. The Plot3D variable viewed may be changed
 by either depressing the ``{\tt p}'' key or by selecting the {\tt
-Solution Variable} sub-menu of the \showmenu\ menu.
+Solution Variable} sub-menu of the {\em Show/Hide}\ menu.
 
 \subsection{Iso-Contours}Iso-contours also called 3D contours or level surfaces may be
 viewed by depressing the ``{\tt i} key or by selecting the {\tt
-Plot3D>3D Contours} sub-menu of the \showmenu\ menu.
+Plot3D>3D Contours} sub-menu of the {\em Show/Hide}\ menu.
 
 \subsection{Flow vectors}If at least one velocity component is present in the Plot3D
 file then the ``{\tt v}'' key may be depressed in order to view
@@ -1848,8 +1847,8 @@ properties.} \label{figProperties}
 The {\em Display}\ dialog box, illustrated in Figure
 \ref{figProperties}, allows one to set various options to control
 the display or {\em look}\ of the Smokeview scene.  It may be
-invoked by selecting the \fbox{Dialogs$>$Display}\ menu item.
-This dialog box also allows one to show or hide loaded data files.
+invoked by selecting the {\em Dialogs$>$Display}\ menu item. This
+dialog box also allows one to show or hide loaded data files.
 
 
 \subsection{Stereo}
@@ -1991,7 +1990,7 @@ regions with $x$ coordinates smaller than an `$x_{min}$' clipping
 value and larger than an `$x_{max}$' value. The y axis and z axis
 clipping planes behave similarly.  Clipping plane values are
 specified using the {\em Clipping}\ dialog box which is opened by
-selecting the \fbox{Dialogs$>$Clip Geometry}\ menu item. Figure
+selecting the {\em Dialogs$>$Clip Geometry}\ menu item. Figure
 \ref{figCLIP} shows this dialog box with the $y_{max}$ plane
 active. Figure \ref{figCLIPPED} shows three versions of a scene.
 Figure \ref{figCLIPPED}a is drawn with no clipping. Figure
@@ -2732,11 +2731,11 @@ Option}
 \includegraphics[width=4.4444in]{FIGURES/figTOUREXAMPLE}\\
 \end{center}
 \caption[Overhead view of the townhouse example showing the
-default {\em Circle}\ tour and a user defined tour.]{Overhead view of
-townhouse example showing the default {\em Circle}\ tour and a user
-defined tour.  The square dots indicate the keyframe locations.
-Keyframes may be edited using the Touring or Advanced Touring
-dialog boxes.}
+default {\em Circle}\ tour and a user defined tour.]{Overhead view
+of townhouse example showing the default {\em Circle}\ tour and a
+user defined tour.  The square dots indicate the keyframe
+locations. Keyframes may be edited using the {\em Touring}\ or
+{\em Advanced Touring}\ dialog boxes.}
  \label{figTOUREXAMPLE}
 \end{figure}
 
@@ -2748,31 +2747,32 @@ dialog boxes.}
 a) basic options&b) advanced options\\
 \end{tabular}
 \end{center}
-\caption[Touring dialog boxes.]{The Touring dialog boxes may be
-used to select tours or keyframes, change the position or view
-direction at each keyframe and change the tension of the tour
-path. }
+\caption[{\em Touring}\ dialog boxes.]{The {\em Touring}\ dialog
+boxes may be used to select tours or keyframes, change the
+position or view direction at each keyframe and change the tension
+of the tour path. }
  \label{figTOUR}
 \end{figure}
 
 The touring option allows one to specify arbitrary paths or tours
 through or around a Smokeview scene.  One may then view the
 scenario from the vantage point of an observer moving along one of
-these paths.    A tour
-may also be used to observe time dependent portions of the
-scenario such as blockage/vent openings and closings.  The default
-view direction is towards the direction of motion.  The path tension and start and stop times may be changed with the {\bf Advanced
-Settings}\ dialog box illustrated in Figure \ref{figTOUR}b.
+these paths.    A tour may also be used to observe time dependent
+portions of the scenario such as blockage/vent openings and
+closings.  The default view direction is towards the direction of
+motion.  The path tension and start and stop times may be changed
+with the {\em Advanced Settings}\ dialog box illustrated in Figure
+\ref{figTOUR}b.
 
 When Smokeview starts up it creates a tour, called the {\em circle
-tour}\ which surrounds the scene.  The {\em circle}\ tour and a user
-defined tour are illustrated in Figure \ref{figTOUREXAMPLE}. The
-circle tour is similar to the \tourmenu\ menu option found in
-earlier versions of Smokeview. The user may modify the {\em circle}\
-tour or define their own tours by using the {\em Tour}\ dialog box
-illustrated in Figure \ref{figTOUR}. The user places several
-points or keyframes in or around the scene. Smokeview creates a
-smooth path going through these points.
+tour}\ which surrounds the scene.  The {\em circle}\ tour and a
+user defined tour are illustrated in Figure \ref{figTOUREXAMPLE}.
+The circle tour is similar to the {\em Tour}\ menu option found in
+earlier versions of Smokeview. The user may modify the {\em
+circle}\ tour or define their own tours by using the {\em Tour}\
+dialog box illustrated in Figure \ref{figTOUR}. The user places
+several points or keyframes in or around the scene. Smokeview
+creates a smooth path going through these points.
 
 \section{Tour Settings}
 An existing tour may be modified by selecting it from the {\bf
@@ -2885,7 +2885,7 @@ go towards the front door and then end at the top of the stairs.
 These steps are illustrated in Figure \ref{figTutorial}.
 
 \begin{enumerate}
-\item Start by clicking the \fbox{Dialog$>$Tours...}\ menu item
+\item Start by clicking the {\em Dialog$>$Tours...}\ menu item
 which opens up the {\em Edit Tours}\ dialog box.
 
 \item  Click on the \frameit{New Tour}\ button in the {\em Edit Tour}\ dialog
@@ -2977,12 +2977,14 @@ most customizations to be performed through the use of .ini files.
 
 
 \section{Creating a Script}
-Scripts may be created by Smokeview using the script recorder feature
-or may be created by editing a text file using commands described in the glossary that follows.
-A script may be run using three methods.  It may be run from within Smokeview using
-the {\em Load/Unload$>$Script Option}\ menu or
-from the Scripts panel of the File/Bounds dialog box illustrated in Figure \ref{figSCRIPT}.
-It may also be run from a Windows command shell using the command
+Scripts may be created by Smokeview using the script recorder
+feature or may be created by editing a text file using commands
+described in the glossary that follows. A script may be run using
+three methods.  It may be run from within Smokeview using the {\em
+Load/Unload$>$Script Option}\ menu or from the Scripts panel of
+the {\em File/Bounds}\ dialog box illustrated in Figure
+\ref{figSCRIPT}. It may also be run from a Windows command shell
+using the command
 
 \begin{verbatim}
 smokeview -runscript casename
@@ -2994,12 +2996,10 @@ the {\tt CHID} keyword defined in the \fds\ input data file.
 \begin{figure}[\figoptions]
 \centerline{
 \includegraphics[width=3.145833in]{FIGURES/figSCRIPT}
-}
-\caption[Script Dialog Box.]{Script Dialog Box. The script dialog box allows one
-to setup and run smokeview scripts.  The
-Script Dialog Box is invoked by selecting
-\frameit{Dialogs$>$File/Bounds}. }
-\label{figSCRIPT}
+} \caption[{\em Script}\ dialog Box.]{{\em Script}\ dialog Box.
+The {\em Script}\ dialog box allows one to setup and run smokeview
+scripts. The {\em Script}\ dialog box is invoked by selecting the
+{\em Dialogs$>$File/Bounds} menu item. } \label{figSCRIPT}
 \end{figure}
 
 The recorder is turned on using the
@@ -3083,19 +3083,24 @@ the FDS$-$SMV repository.  Copy this file to a separate directory
  if a local copy of the repository already exists
  ( so that svn updates will not overwrite the script file generated in this example).  Of course, these steps may be repeated
  for any test case that have data files defined.
-\item Run the case with FDS
-\item Open the case in Smokeview
-\item Open the Scripts/Config panel of the File/Bounds dialog box,
-the Clip Geometry dialog box and the Viewpoints panel of the Motion/View
-dialog box.
+\item Run the case with FDS \item Open the case in Smokeview \item
+Open the Scripts/Config panel of the {\em File/Bounds}\ dialog
+box, the {\em Clip Geometry}\ dialog box and the Viewpoints panel
+of the {\em Motion/View/Render}\ dialog box.
 \end{enumerate}
 
 \subsubsection{Preliminary Steps - Setting up the viewpoints}
 
 \begin{enumerate}
-\item Rotate the scene slightly to the right of center so that you can see the left side of the geometry.  In the Viewpoints panel of the Motion/View dialog change {\tt new view}\ to {\tt left}\
+\item Rotate the scene slightly to the right of center so that you
+can see the left side of the geometry.  In the Viewpoints panel of
+the {\em Motion/View/Render}\ dialog change {\tt new view}\ to
+{\tt left}\
     then click on the {\em Add}\ button.
-\item Rotate the scene slightly to the left of center so that you can see the right side of the geometry.  In the Viewpoints panel of the Motion/View dialog change {\tt new view}\ to {\tt right}\
+\item Rotate the scene slightly to the left of center so that you
+can see the right side of the geometry.  In the Viewpoints panel
+of the {\em Motion/View/Render}\ dialog change {\tt new view}\ to
+{\tt right}\
     then click on the {\em Add}\ button.
 \item Click the {\em Save Settings}\ button.
 \end{enumerate}
@@ -3106,27 +3111,33 @@ An .ini file has now been saved with two custom view points defined named left a
 
 Defining the left clipping plane.
 \begin{enumerate}
-\item Click on the Clip Blockages + Data radio button,
-\item change the {\em Clip Lower x}\ value 0.5 after checking the check box next to edit field.
-\item Save an .ini file named script\_test\_left.ini by entering the text
-{\tt left}\ in the suffix field of the Config files section of the Scripts/Config dialog.
-\item Click on the Set button then the Save script\_test\_left.ini button.
+\item Click on the Clip Blockages + Data radio button, \item
+change the {\em Clip Lower x}\ value 0.5 after checking the check
+box next to edit field. \item Save an .ini file named
+script\_test\_left.ini by entering the text {\tt left}\ in the
+suffix field of the Config files section of the {\em
+Scripts/Config}\ dialog. \item Click on the Set button then the
+Save script\_test\_left.ini button.
 \end{enumerate}
 
 Defining the right clipping plane.
 \begin{enumerate}
-\item Click on the Clip Blockages + Data radio button,
-\item change {\em Clip Upper x}\ value 1.0 after checking check box next to edit field.
-\item Save an .ini file named script\_test\_right.ini by entering the text
-{\tt right}\ in the suffix field of the Config files section of the Scripts/Config dialog.
-\item Click on the Set button then the Save script\_test\_right.ini button.
+\item Click on the Clip Blockages + Data radio button, \item
+change {\em Clip Upper x}\ value 1.0 after checking check box next
+to edit field. \item Save an .ini file named
+script\_test\_right.ini by entering the text {\tt right}\ in the
+suffix field of the Config files section of the {\em
+Scripts/Config}\ dialog. \item Click on the Set button then the
+Save script\_test\_right.ini button.
 \end{enumerate}
 
 Two .ini files named {\tt scripts\_test\_left.ini}\
 and {\tt scripts\_test\_right.ini}\ have
 now been created.
 \subsubsection{Recording the Script}
-The script may be recorded now that the .ini files and viewpoints have been created.  The following steps reference the Scripts/Config dialog.
+The script may be recorded now that the .ini files and viewpoints
+have been created.  The following steps reference the {\em
+Scripts/Config}\ dialog.
 
 \begin{enumerate}
 \item Click on the Start Recording button
@@ -3486,18 +3497,18 @@ of a color node correspond to the red, green and blue components of the color at
 \begin{center}
 \includegraphics[width=2.722222in]{FIGURES/figCOLORBAR_EDITOR}
 \end{center}
-\caption[Colorbar Editor dialog box.]{
-Colorbar Editor dialog box.} \label{figCOLORBAR}
+\caption[{\em Colorbar Editor}\ dialog box.]{ {\em Colorbar
+Editor}\ dialog box.} \label{figCOLORBAR}
 \end{figure}
 
 \section{Using the Colorbar Editor}
-The Colorbar Editor dialog box is opened from the
-\frameit{Dialogs}$>$\frameit{Customize Colorbar}\ menu entry.
-When this menu item is selected, a spatial representation of the currently
-selected colorbar is displayed within the Smokeview scene along the
-Colorbar Editor dialog box.  The FDS simulation scene is hidden by default
-but may be shown along with the colorbar display by unchecking the
-{\em Hide scene}\ checkbox.
+The {\em Colorbar Editor}\ dialog box is opened from the {\em
+Dialogs$>$Customize Colorbar}\ menu entry. When this menu item is
+selected, a spatial representation of the currently selected
+colorbar is displayed within the Smokeview scene along the {\em
+Colorbar Editor}\ dialog box.  The FDS simulation scene is hidden
+by default but may be shown along with the colorbar display by
+un-checking the {\em Hide scene}\ checkbox.
 
 The colorbar is represented visually in two ways.  First, as a series
 of colored nodes and lines.
@@ -3512,24 +3523,27 @@ the position in the colorbar where the node color occurs.
 Once the node indices and colors are defined, Smokeview interpolates to
 form a table of colors (256 rows, 3 columns).
 
-The Colorbar Editor dialog box contains a list of colorbars
-pre-defined by Smokeview and others if defined by the user.
-A new colorbar is created by selecting the
-{\em New}\ button . The new colorbar is created initially by making
-a copy of the
-currently selected colorbar. Once created, it may be altered by
+The {\em Colorbar Editor}\ dialog box contains a list of colorbars
+pre-defined by Smokeview and others if defined by the user. A new
+colorbar is created by selecting the {\em New}\ button . The new
+colorbar is created initially by making a copy of the currently
+selected colorbar. Once created, it may be altered by
 adding/deleting nodes with the {\em Add/Delete}\ buttons and
-altering color with the red, green, blue spinners.
-Note that only colorbars created by a user may be changed.
-The {\em Add/Delete}\ and other buttons for modifying colorbar characteristics are only enabled for user defined colorbars.  They are disabled for Smokeview predefined colorbars.
-Colorbar definitions (only colorbars created by the user) are saved
-in the Smokeview configuration (.ini) file.
+altering color with the red, green, blue spinners. Note that only
+colorbars created by a user may be changed. The {\em Add/Delete}\
+and other buttons for modifying colorbar characteristics are only
+enabled for user defined colorbars.  They are disabled for
+Smokeview predefined colorbars. Colorbar definitions (only
+colorbars created by the user) are saved in the Smokeview
+configuration (.ini) file.
 
-The bottom portion of the Colorbar Editor dialog box is used to define colors for extreme data.  That is, data occurring below the specified minimum or above the specified maximum.  This data
-may be highlighted by selecting the {\em Highlight Extreme Data}\ checkbox.
-The color used to highlight this data may also be specified.  The colors
-defined using this dialog box are shown in the triangular regions at the top and bottom of the
-colorbar.
+The bottom portion of the {\em Colorbar Editor}\ dialog box is
+used to define colors for extreme data.  That is, data occurring
+below the specified minimum or above the specified maximum.  This
+data may be highlighted by selecting the {\em Highlight Extreme
+Data}\ checkbox. The color used to highlight this data may also be
+specified.  The colors defined using this dialog box are shown in
+the triangular regions at the top and bottom of the colorbar.
 
 \chapter{Smokeview - Demonstrator Mode}
 A simplified version of Smokeview may be invoked in order to present a fire
@@ -3561,7 +3575,7 @@ These tasks are detailed below.
   \item Define one or more tours that give the user an overview of the data or that highlight important
   aspects of the scenario.   Tours are setup using the {\em Touring}\ dialog box.
   \item Define one or more viewpoints that highlight some important
-  aspect of the simulation scenario.  The viewpoint is defined by manipulating the scene as desired and then selecting the {\em View>Save}\ menu item.  The viewpoint label may be changed by using the {\em Motion/View}\ dialog box.
+  aspect of the simulation scenario.  The viewpoint is defined by manipulating the scene as desired and then selecting the {\em View>Save}\ menu item.  The viewpoint label may be changed by using the {\em Motion/View/Render}\ dialog box.
   \item Pick the data to be viewed from a set of temperature and oxygen slice files and a set of 3D smoke and HRRPUV files.
   \begin{enumerate}
     \item Load the desired files into Smokeview.
@@ -3684,21 +3698,20 @@ unnecessary \fds\ {\tt COLOR} keywords and run the case.
 \end{enumerate}
 
 \section{Examining Blockages}  Blockages locations and SURF
-properties may be examined by selecting
-the menu item \frameit{Examine Blockages} which opens up the dialog box
-illustrated in Figure \ref{figEDIT}. Note, clipping planes need to be turned off
-when using this dialog box.
-Associating unique colors with each surface allows the user to quickly
-determine whether blockages are defined with the proper surfaces.
-One can then verify that these modeling elements have been
-defined and positioned as intended.
-Position coordinates are displayed
-{\em snapped}\ to the nearest grid line or as specified in the input file.
+properties may be examined by selecting the menu item {\em Examine
+Blockages}\ which opens up the dialog box illustrated in Figure
+\ref{figEDIT}. Note, clipping planes need to be turned off when
+using this dialog box. Associating unique colors with each surface
+allows the user to quickly determine whether blockages are defined
+with the proper surfaces. One can then verify that these modeling
+elements have been defined and positioned as intended. Position
+coordinates are displayed {\em snapped}\ to the nearest grid line
+or as specified in the input file.
 
 \begin{figure}[\figoptions]
 \centerline{
-\centerline{\includegraphics[width=4.402777in]{FIGURES/figEDIT} } }
-\caption{Examine Blockages Dialog Box.}
+\centerline{\includegraphics[width=4.402777in]{FIGURES/figEDIT} }
+} \caption{{Examine blockages}\ dialog Box.}
  \label{figEDITBLOCKS}
 \label{figEDIT}
 \end{figure}
@@ -3736,58 +3749,60 @@ local hard disk.  If the movie is to be placed on a web site then
 care needs to be taken to insure that the generated movie file is
 a reasonable size.  Two suggestions are to reduce the image size
 to $320\times 240$ or smaller by modifying the {\tt WINDOWWIDTH}
-and {\tt WINDOWHEIGHT} \svini\ keywords  and to reduce the
-number of frames to 300 or less by skipping intermediate frames
-{\em via} the \frameit{Options/Render} menu.
+and {\tt WINDOWHEIGHT} \svini\ keywords  and to reduce the number
+of frames to 300 or less by skipping intermediate frames {\em via}
+the {\em Options/Render} menu.
 
 Sometimes when copying or {\em capturing}\ a Smokeview scene it is
 desirable, or even necessary, to have a margin around the scene.
 This is because the capturing system does not include the entire
 scene but itself captures an indented portion of the scene. To
-indent the scene, either press the ``h'' key or select the
-\fbox{Option$>$Viewpoint$>$Offset Window}\ menu item. The
-default indentation is 45 pixels. This may be changed by
-adding/editing the WINDOW\_OFFSET keyword in the \svini\
-file.
+indent the scene, either press the ``h'' key or select the {\em
+Option$>$Viewpoint$>$Offset Window}\ menu item. The default
+indentation is 45 pixels. This may be changed by adding/editing
+the WINDOW\_OFFSET keyword in the \svini\ file.
 
 Note, the Smokeview animation must be running when the render command is selected or only one frame will be saved instead of the entire image sequence.
 
 \chapter{Annotating the Scene }
 \label{section:annotate} \label{subsect_features}
 \section{Overview}
-Smokeview scenes may be annotated by using the User Ticks dialog box or
-by using the TICKS and LABEL keywords.  The User Ticks dialog box is
-easier to use but  has limited flexibility in tick and label placement.
-A user may use the TICKS and LABELS keywords to duplicate the functionality
-of the User Ticks dialog box and also place text anywhere in the scene
-and at any time throughout the simulation.  This added generality makes
-it more difficult to exploit.
+Smokeview scenes may be annotated by using the User Ticks dialog
+box or by using the TICKS and LABEL keywords.  The User Ticks
+dialog box is easier to use but  has limited flexibility in tick
+and label placement. A user may use the TICKS and LABELS keywords
+to duplicate the functionality of the {\em User Ticks}\ dialog box
+and also place text anywhere in the scene and at any time
+throughout the simulation.  This added generality makes it more
+difficult to exploit.
 
 
-\section{User Ticks Settings Dialog Box}
-The User Ticks Settings dialog box allows one to place
-ticks and labels along one or more orthogonal coordinate axes.
-The user may specify tick spacing, number of sub-tick intervals and how far  axes extend.  There is an automatic
-placement option that allows the tick axes to be placed based upon
-the orientation of the scene.  The user may specify which tick axes are visible if the automatic placement option is not
-invoked.  Figure \ref{figTICKSdialog} illustrates the User Ticks Settings
-dialog box.  It is a panel of the Display dialog box.  Figure \ref{figTICKSdialogexample} shows the ticks and labels resulting from the dialog box.
+\section{{\em User Ticks Settings}\ Dialog Box}
+The {\em User Ticks Settings}\ dialog box allows one to place
+ticks and labels along one or more orthogonal coordinate axes. The
+user may specify tick spacing, number of sub-tick intervals and
+how far axes extend.  There is an automatic placement option that
+allows the tick axes to be placed based upon the orientation of
+the scene.  The user may specify which tick axes are visible if
+the automatic placement option is not invoked.  Figure
+\ref{figTICKSdialog} illustrates the {\em User Ticks Settings}\
+dialog box.  It is a panel of the {\em Display}\ dialog box.
+Figure \ref{figTICKSdialogexample} shows the ticks and labels
+resulting from the dialog box.
 
 \begin{figure}[\figoptions]
 \centerline{
 \includegraphics[width=3.5625in]{FIGURES/figTICKS}
-}
-\caption[Ticks Dialog Box.]{Ticks Dialog Box.  The
-Ticks Dialog Box is invoked by selecting
-\frameit{Dialogs$>$Display}. }
-\label{figTICKSdialog}
+} \caption[{\em Ticks}\ dialog box.]{{\em Ticks}\ dialog box. The
+{\em Ticks}\ dialog Box is invoked by selecting {\em
+Dialogs$>$Display}. } \label{figTICKSdialog}
 \end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=5.0in]{SCRIPT_FIGURES/thouse5_ticks}
 \end{center}
-\caption{Annotation example using the Ticks dialog box}
+\caption{Annotation example using the {\em Ticks}\ dialog box}
 \label{figTICKSdialogexample}%
 \end{figure}
 
@@ -3919,17 +3934,18 @@ files may be loaded automatically when smokeview first starts by
 selecting the autoload checkbox.} \label{figBOUNDScompress}
 \end{figure}
 
-3D smoke, boundary, isosurface and slice files may be compressed using the
-utility Smokezip.  FDS data files may also be compressed from within Smokeview using the
-compression menu item found in the \frameit{Load/Unload}\ menu.  File
-compression may also be activated from the Compressions, Autoload
-section of the {\em File Bounds}\ dialog box illustrated in Figure
-\ref{figBOUNDScompress}. Compression is performed using the ZLIB
-compression library (see \hhref{http://www.zlib.org}).
-Smokeview compresses files in the background
-allowing one to continue visualizing cases.  Smokeview adds the label
-{\em ZLIB}\ to Load menu entries for any file that has been
-compressed. Smokezip adds the extension .svz to any FDS data file that has been compressed.
+3D smoke, boundary, isosurface and slice files may be compressed
+using the utility Smokezip.  FDS data files may also be compressed
+from within Smokeview using the compression menu item found in the
+{\em Load/Unload}\ menu.  File compression may also be activated
+from the Compressions, Autoload section of the {\em File/Bounds}\
+dialog box illustrated in Figure \ref{figBOUNDScompress}.
+Compression is performed using the ZLIB compression library (see
+\hhref{http://www.zlib.org}). Smokeview compresses files in the
+background allowing one to continue visualizing cases.  Smokeview
+adds the label {\em ZLIB}\ to Load menu entries for any file that
+has been compressed. Smokezip adds the extension .svz to any FDS
+data file that has been compressed.
 
 The usage for Smokezip (which may be obtained by typing smokezip~-help at a command line) is
 {
@@ -4163,10 +4179,10 @@ the graphics library utility toolkit. The user interacts with
 \smokeview\ using 1) menus (right clicking with the mouse), 2)
 keyboard shortcuts and 3) the preference file (\svini\ or {\tt
 casename.ini}).  The main menu, illustrated in Figure
-\ref{fig_mainmenu} contains \loadmenu\, \showmenu,
-\frameit{Options}, \frameit{Dialogs}, \frameit{Help} and
-\frameit{Quit}\ menu items. Several of these menu options have
-sub-menus. These menus are described in the following sections.
+\ref{fig_mainmenu} contains {\em Load/Unload}\ \, {\em Show/Hide},
+{\em Options}, {\em Dialogs}, {\em Help} and {\em Quit}\ menu
+items. Several of these menu options have sub-menus. These menus
+are described in the following sections.
 
 \section{Main}
 
@@ -4220,25 +4236,24 @@ and software updates.
 \label{sectload}The Load/Unload menu, illustrated in Figure
 \ref{fig_loadmenu}, is used to load or unload data files generated
 by FDS or CFAST.  File formats are described in the FDS User's
-Guide~\cite{FDS_Users_Guide}. A sub-menu is present under
-\loadmenu\ for each file type generated for the simulation.
+Guide~\cite{FDS_Users_Guide}. A sub-menu is present under {\em
+Load/Unload}\ for each file type generated for the simulation.
 Selecting one of the files appearing in the sub-menu causes it to
 be loaded and then displayed. The data may be unloaded or freed by
-selecting an \fbox{\tt Unload}\ menu item appearing under the file
-list. Selecting \fbox{\tt Unload All}  as expected will unload all
-files. To hide a data file, select the \showmenu\ menu option
-corresponding to the  file type to be hidden.
+selecting an {\em Unload}\ menu item appearing under the file
+list. Selecting {\em Unload All}  as expected will unload all
+files. To hide a data file, select the {\em Show/Hide}\ menu
+option corresponding to the  file type to be hidden.
 
-The \smokeview\ {\tt .smv} file contains information about
-all data files appearing in the \loadmenu\  menu item. The
-\fds\ field modeling software creates this file. (See
-Appendix \ref{sectionsmv} for documentation on the format
-of this file).
+The \smokeview\ {\tt .smv} file contains information about all
+data files appearing in the {\em Load/Unload}\  menu item. The
+\fds\ field modeling software creates this file. (See Appendix
+\ref{sectionsmv} for documentation on the format of this file).
 
 The character ``{\tt *}'' occurring before a file name indicates
 that the file has already been loaded. If the file below is loaded
-but not visible, then use the appropriate \showmenu\ option to
-make it visible.
+but not visible, then use the appropriate {\em Show/Hide}\ option
+to make it visible.
 
 \blist
 
@@ -4307,16 +4322,15 @@ FDS.
 \elist
 
 \section{Show/Hide}
-\label{sectshow} The \showmenu\ menu item as illustrated
-in Figure \ref{fig_showhidemenu}\ allows one to
-show or hide various parts of the simulation. These menu items
-only appear if they pertain to
-the simulation.  For example the \fbox{\tt Particles}
+\label{sectshow} The {\em Show/Hide}\ menu item as illustrated in
+Figure \ref{fig_showhidemenu}\ allows one to show or hide various
+parts of the simulation. These menu items only appear if they
+pertain to the simulation.  For example the \fbox{\tt Particles}
 sub-menu only appears if a particle file has been loaded.
-Similarly, the \fbox{\tt Plot3D contouring} sub-menus only
-appear if a Plot3D file has been loaded. The ``{\tt *}''
-character is used to indicate whether the visualization
-feature corresponding to the menu item is set or active.
+Similarly, the \fbox{\tt Plot3D contouring} sub-menus only appear
+if a Plot3D file has been loaded. The ``{\tt *}'' character is
+used to indicate whether the visualization feature corresponding
+to the menu item is set or active.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -4343,16 +4357,16 @@ surfaces and the grid.
 
 \hitem{Obstacles} Obstacle sub-menus are divided into two groups.
 The first group allows the user to change how blockage appear
-(\frameit{Defined in Input File}, \frameit{Normal},
-\frameit{Outline}, \frameit{Hidden}).
+({\em Defined in Input File}, {\em Normal}, {\em Outline}, {\em
+Hidden}).
 
 The second group allows the user to change where blockages are
-located (actual or requested). The \frameit{Actual}\ sub-menu
+located (actual or requested). The {\em Actual}\ sub-menu
 positions blockages as computed by FDS (along grid lines).  The
-\frameit{Requested}\ sub-menu positions blockages at locations as
+{\em Requested}\ sub-menu positions blockages at locations as
 specified in the input file.  If the {\tt dx2dxf}\ conversion
 program was used to convert a CAD drawing to input compatible with
-FDS and Smokeview then a third menu option appears, \frameit{CAD}.
+FDS and Smokeview then a third menu option appears, {\em CAD}.
 This option displays the Smokeview scene in a form similar to the
 original CAD drawing.
 
@@ -4406,10 +4420,10 @@ This menu contains the following sub-menus .
 \hitem{Colorbars}A sub-menu which allows the user to choose and manipulate
 colorbars.
 
-\hitem{Highlight extreme data}This sub-menu allows one to color data above
-the specified maximum or below the specified minimum (extreme data) a
-different color.  This color may be specified using the Customize colorbar
-dialog box.
+\hitem{Highlight extreme data}This sub-menu allows one to color
+data above the specified maximum or below the specified minimum
+(extreme data) a different color.  This color may be specified
+using the {\em Edit colorbar}\ dialog box.
 
 \hitem{Shade Type}This sub-menu allows one to change the way the colorbar is
 displayed between continuous, stepped (solid blocks of color) and line.
@@ -4425,10 +4439,10 @@ is complex.
 \subsection{Viewpoints}Resets the simulation scene to an alternate view.
 The three choices are 1) exterior view, 2) interior view or a 3)
 user defined view.  A viewpoint may be saved by using this menu or
-by using the \fbox{\tt Viewpoint} sub-menu of the
-\frameit{Options}\ menu. If a time file is visible then two
-sub-menus occur allowing one to reset the view back to the
-original position or the time bar back to the initial time.
+by using the \fbox{\tt Viewpoint} sub-menu of the {\em Options}\
+menu. If a time file is visible then two sub-menus occur allowing
+one to reset the view back to the original position or the time
+bar back to the initial time.
 
 \subsection{Flip}Flip the background color between a dark and light shade.
 A dark background shade looks better on a computer monitor while
@@ -4503,7 +4517,7 @@ the Plot3D solution variable to be visualized. (Keyboard shortcut:
 
 
 \hitem{xy, xz, yz planes}These three menu items, appearing beneath
-the  \fbox{Solution Variables}\ menu item, allow one to select
+the  {\em Solution Variables}\ menu item, allow one to select
 which plane (xy, xz or yz) is displayed. (Applicable keyboard
 shortcuts: space bar, -, left/right cursor, up/down cursor, page
 up/down, {\tt 1...9})
@@ -4579,21 +4593,18 @@ same as {\tt World Centered} but with level rotations.
 
 \elist
 \subsection{Max Frame Rate}
-This option controls the rate at which image frames are
-displayed. The sub-menus allow one to specify a maximum
-frame rate.  The actual frame rate may be slower if the
-scene is complex and the graphics card is unable to draw
-the scene sufficiently fast. The \fbox{\tt unlimited\ }
-menu item allows one to display frames as rapidly as the
-graphics hardware permits.  The \fbox{Real Time}\ menu
-item allows one to draw frames so that the simulation time
-matches real time. The
-\fbox{step}\ menu item allows one to step through the
-simulation one time step at a time. This menu item may be
-used in concert with the \fbox{\tt Render}\ menu item
-described below to create images at the desired time and
-view orientation for inclusion into reports. This is how
-figures were generated in this report.
+This option controls the rate at which image frames are displayed.
+The sub-menus allow one to specify a maximum frame rate.  The
+actual frame rate may be slower if the scene is complex and the
+graphics card is unable to draw the scene sufficiently fast. The
+{\em unlimited}\ menu item allows one to display frames as rapidly
+as the graphics hardware permits.  The {\em Real Time}\ menu item
+allows one to draw frames so that the simulation time matches real
+time. The {\em step}\ menu item allows one to step through the
+simulation one time step at a time. This menu item may be used in
+concert with the {\em Render}\ menu item described below to create
+images at the desired time and view orientation for inclusion into
+reports. This is how figures were generated in this report.
 \\
 
 \begin{figure}[\figoptions]
@@ -4604,7 +4615,7 @@ figures were generated in this report.
 \end{figure}
 
 \subsection{Render}
-The \frameit{Render}\ menu, illustrated in Figure
+The {\em Render}\ menu, illustrated in Figure
 \ref{fig_rendermenu}, allows one to create PNG or JPEG image files
 of the currently displayed scene. The graphics library, GD 2.0.15,
 was used to create the rendered versions.  GD 1.0 is documented in
@@ -4644,7 +4655,7 @@ allowing the user to control the scene with the mouse.
 in previous versions of Smokeview.
 
 \hitem{List of tours}Each tour defined in the {\tt .ini}\ file is
-listed under the \frameit{Tour}\ menu.  A {\em circular}\ tour is
+listed under the {\em Tour}\ menu.  A {\em circular}\ tour is
 defined automatically by Smokeview.
 
 \elist
@@ -4659,7 +4670,7 @@ defined automatically by Smokeview.
 \caption{Dialogs Menu.} \label{fig_dialogmenu}
 \end{center}
 \end{figure}
-The \frameit{Dialogs}\ menu, illustrated in Figure
+The {\em Dialogs}\ menu, illustrated in Figure
 \ref{fig_dialogmenu}, allows one to select dialog boxes for
 setting various Smokeview features.
 
@@ -4714,8 +4725,8 @@ supporting quad buffering (left and right front buffer, and left and right back 
 \chapter{Keyboard Shortcuts}
 \label{sectionkeyboard} Many menu commands have equivalent
 keyboard shortcuts.  These shortcuts are described here and are
-also briefly described under the \fbox{Help}\ menu item from
-within \smokeview.
+also briefly described under the {\em Help}\ menu item from within
+\smokeview.
 
 \section{alphanumeric shortcuts}
 \blist
@@ -4828,23 +4839,23 @@ to the yz, xz and xy planes).
  \elist
 
  \section{ALT shortcuts}
-\blist \kitem{ALT c} Open the Clipping dialog box.
+\blist \kitem{ALT c} Open the {\em Clipping}\ dialog box.
 
-\kitem{ALT d} Open the Display dialog box.
+\kitem{ALT d} Open the {\em Display}\ dialog box.
 
-\kitem{ALT e}Open the Blockage info dialog box.
+\kitem{ALT e}Open the {\em Blockage info}\ dialog box.
 
-\kitem{ALT f}Open the File/Bounds dialog box.
+\kitem{ALT f}Open the {\em File/Bounds}\ dialog box.
 
-\kitem{ALT m}Open the Motion/View/Render dialog box.
+\kitem{ALT m}Open the {\em Motion/View/Render}\ dialog box.
 
 \kitem{ALT r}Toggle research mode (research mode uses global min
 and max for coloring data and turns off axis label smoothing when
 displaying it.)
 
-\kitem{ALT s}Open the 3D Smoke dialog box.
+\kitem{ALT s}Open the {\em 3D Smoke}\ dialog box.
 
-\kitem{ALT t}Open the Edit Tours dialog box.
+\kitem{ALT t}Open the {\em Edit Tours}\ dialog box.
 
 \kitem{ALT u} Toggle the option to draw a coarse portion of a 2D
 slice file within an embedded mesh.
@@ -4853,12 +4864,12 @@ slice file within an embedded mesh.
 scene. The two projection methods are size preserving and
 perspective.
 
-\kitem{ALT w}Open the WUI dialog box
+\kitem{ALT w}Open the {\em WUI}\ dialog box
 
 \kitem{ALT x}Close all dialog boxes.
 
-\kitem{ALT z}Open the Compress Files portion of the File/Bounds
-dialog box.
+\kitem{ALT z}Open the Compress Files portion of the {\em
+File/Bounds}\ dialog box.
  \elist
 
 \section{Special character short cuts}
@@ -5421,7 +5432,8 @@ V_BOUNDARY
 where {\tt TEMP} is the \smokeview\ colorbar labels displayed when
 showing the boundary file.
 
-These suffixes are added automatically when the Bounds dialog box is used to set data bounds.
+These suffixes are added automatically when the {\em File Bounds}\
+dialog box is used to set data bounds.
 
 \hitem{V\_PARTICLES}Defines the minimum and maximum
 data bounds used to convert particle data values to color indices.
@@ -5919,8 +5931,8 @@ minflag min-clipval maxflag max-clipval
 \end{verbatim}
 
 where the two flags, minflag and maxflag are 1 if turned on or 0
-if turned off. Clipping is specified with the {\em Clipping}\ dialog box
-found under the \fbox{Options}\ menu item.
+if turned off. Clipping is specified with the {\em Clipping}\
+dialog box found under the {\em Options}\ menu item.
  (default:
 \begin{verbatim}
 0
