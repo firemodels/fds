@@ -43,7 +43,6 @@ scatplot(saved_data,drange,qfil)
 
 % Miscellaneous other scripts for special cases
 
-harrisonplumes
 beyler_hood
 check_hrr
 sandia_helium_plume
