@@ -245,7 +245,7 @@ check_compile_fds_db()
 wait_verification_cases_short_start()
 {
    # Scans qstat and waits for verification cases to start
-   while [[ `qstat | grep $(whoami) | grep Q` != '' ]]; do
+   while [[ `qstat -a | grep $(whoami) | grep Q` != '' ]]; do
       JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | grep Q | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
@@ -257,7 +257,7 @@ wait_verification_cases_short_start()
 wait_verification_cases_short_end()
 {
    # Scans qstat and waits for verification cases to end
-   while [[ `qstat | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+   while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
       JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
@@ -372,7 +372,7 @@ check_compile_fds()
 wait_verification_cases_long_end()
 {
    # Scans qstat and waits for verification cases to end
-   while [[ `qstat | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+   while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
       JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
       echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
       TIME_LIMIT_STAGE="5"
