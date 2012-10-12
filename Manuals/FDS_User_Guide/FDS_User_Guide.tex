@@ -4943,6 +4943,8 @@ of the zone boundaries {\em into} the solid obstruction separating the two zones
 gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
 which point the zones will merge and no longer have distinct background pressures.
 
+For the special case where a zone has periodic boundaries ({\ct SURF\_ID='PERIODIC'} on {\ct VENT}), the user must add {\ct PERIODIC=.TRUE.} on the {\ct ZONE} line.
+
 
 \subsubsection{Example Case: Pressure Rise in a Compartment}
 
@@ -11459,6 +11461,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ID}                    & Character         & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
 {\ct LEAK\_AREA(N)}         & Real              & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
+{\ct PERIODIC}              & Logical           & Section~\ref{info:ZONE_Basics}     &        & {\ct .FALSE.} \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
 
