@@ -636,7 +636,7 @@ void update_mouseinfo(int flag, int xm, int ym){
       delta_angle2 = 0.0;
       mi->lastangle=mi->angle;
       delta_distance=0.0;
-      if(ABS(mi->xcurrent[0])<xymax&&ABS(mi->xcurrent[1])<xymax){
+      if((ABS(mi->xcurrent[0])<xymax&&ABS(mi->xcurrent[1])<xymax)||key_state==KEY_SHIFT){
         mi->region=0;
       }
       else{
@@ -686,9 +686,25 @@ void update_mouseinfo(int flag, int xm, int ym){
     if(delta_angle!=0.0&&ABS(mi->xdirection[0])+ABS(mi->xdirection[1])>0.0){
       float axis[3];
 
-      axis[0]=-mi->xdirection[1]; // direction orthogonal to mouse motion
-      axis[1]=0.0;
-      axis[2]=mi->xdirection[0];
+      if(key_state==KEY_SHIFT){
+        float w, x, y, z, zangle;
+        int inside=0;
+
+        w = quat_general[0];
+        x = quat_general[1];
+        y = quat_general[2];
+        z = quat_general[3];
+        if(z*z<x*x+y*y)inside=1;
+        if(inside==1&&dy<0.0||inside==0&&dx<0.0)delta_angle=-delta_angle;
+        axis[0]=2.0*x*z + 2.0*w*y;
+        axis[1]=2.0*y*z-2.0*w*x;
+        axis[2]=1.0-2*x*x-2*y*y;
+      }
+      else{
+        axis[0]=-mi->xdirection[1]; // direction orthogonal to mouse motion
+        axis[1]=0.0;
+        axis[2]=mi->xdirection[0];
+      }
       angleaxis2quat(delta_angle,axis,quat_temp);
       mult_quat(quat_temp,quat_general,quat_general);
      // level_scene(0,1,quat_general);
@@ -833,6 +849,11 @@ void mouse_CB(int button, int state, int xm, int ym){
         touring=0;
         break;
       case GLUT_ACTIVE_SHIFT:
+        key_state = KEY_SHIFT;
+        start_xyz0[0]=xm;
+        start_xyz0[1]=ym;
+        touring=0;
+        break;
       default:
         key_state = KEY_NONE;
         start_xyz0[0]=xm;
@@ -1138,7 +1159,7 @@ void motion_CB(int xm, int ym){
     return;
   }
 
-  if(rotation_type==ROTATION_3AXIS&&key_state == KEY_NONE){
+  if(rotation_type==ROTATION_3AXIS&&(key_state == KEY_NONE||key_state == KEY_SHIFT)){
     update_mouseinfo(MOUSE_MOTION,xm,ym);
   }
   Move_Scene(xm,ym);

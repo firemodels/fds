@@ -25,13 +25,21 @@ void angleaxis2quat(float angle, float *axis, float *quat){
 
   sum = sqrt(axis[0]*axis[0]+axis[1]*axis[1]+axis[2]*axis[2]);
 
-  cosang = cos(angle/2.0);
-  sinang = sin(angle/2.0);
+  if(sum>0.0){
+    cosang = cos(angle/2.0);
+    sinang = sin(angle/2.0);
 
-  quat[0] = cosang;
-  quat[1] = axis[0]*sinang/sum;
-  quat[2] = axis[1]*sinang/sum;
-  quat[3] = axis[2]*sinang/sum;
+    quat[0] = cosang;
+    quat[1] = axis[0]*sinang/sum;
+    quat[2] = axis[1]*sinang/sum;
+    quat[3] = axis[2]*sinang/sum;
+  }
+  else{
+    quat[0] = 1.0;
+    quat[1] = 0.0;
+    quat[2] = 0.0;
+    quat[3] = 0.0;
+  }
 }
 
 /* ------------------ mult_quat ------------------------ */
