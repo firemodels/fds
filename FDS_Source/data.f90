@@ -2349,7 +2349,7 @@ SELECT CASE(GAS_NAME)
       FORMULA = 'C2H4'
       H_F = 52.47E6_EB
       ABSORBING = .TRUE.
-      IF (RADCAL_NAME=='null') RADCAL_NAME='PROPYLENE'
+      IF (RADCAL_NAME=='null') RADCAL_NAME='ETHYLENE'
    CASE('FORMALDEHYDE')!Methanol as surrogate        
       SIGMA = 3.626_EB 
       EPSOK = 481.8_EB 
