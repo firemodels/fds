@@ -595,7 +595,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       RHO(IIG,JJG,KKG) = RHO_NEW
    ENDDO
 
-   ! Momentum sink terms (under development)
+   ! Momentum source terms (under development)
 
    IF (EVAPORATION_DRAG) THEN
       CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,IIG,JJG,KKG)
