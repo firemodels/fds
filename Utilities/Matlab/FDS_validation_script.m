@@ -49,7 +49,6 @@ sandia_helium_plume
 sandia_methane_fire
 spray_attenuation
 Cup_burner
-vettori_flat
 vettori_sloped
 flame_height2
  
