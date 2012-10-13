@@ -23,3 +23,4 @@ Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to T
 Smoke Alarm Activations,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,33,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Alarm_Activations
 Fire Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1200,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Fire_Temperature
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.6,0.03 0.95,SouthEast,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Entrainment
+Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,20,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Activation_Time
