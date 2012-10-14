@@ -574,7 +574,6 @@ void LOGO_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsize
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-//    outputLargeText(0.,0.,"NIST");
     {
       int n_loops=25,ipoint,ipoint2,iloop;
       float NIST[]={

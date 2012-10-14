@@ -53,63 +53,98 @@ void outputAxisLabels(){
   }
 }
 
+
+/* ------------------ outputSText3 ------------------------ */
+
+void outputSText3(float x, float y, float z, float scale, char *string){ 
+  char *c;
+
+  if(string==NULL)return;
+  glPushMatrix();
+  glTranslatef(x,y,z);
+  glRotatef(90.0,1.0,0.0,0.0);
+  glScalef(scale,scale,scale);
+  for (c=string; *c != '\0'; c++){
+    glutStrokeCharacter(GLUT_STROKE_ROMAN,*c);
+  }
+  glPopMatrix();
+}
+
+/* ------------------ outputSText2 ------------------------ */
+
+void outputSText2(float x, float y, float z, float scale, char *string){ 
+  char *c;
+
+  if(string==NULL)return;
+  glPushMatrix();
+  glTranslatef(x,y,z);
+  glScalef(scale/4.0,10.0*scale,scale);
+  for (c=string; *c != '\0'; c++){
+    glutStrokeCharacter(GLUT_STROKE_ROMAN,*c);
+  }
+  glPopMatrix();
+}
+
 /* ------------------ output3Val ------------------------ */
 
 void output3Val(float x, float y, float z, float val){
-  int len, i;
-  char string[256];
+  char *c,string[256];
 
   sprintf(string,"%f",val);
   trimzeros(string);
-  glColor3fv(foregroundcolor);
-  glRasterPos3f(x, y, z);
-  len = (int) strlen(string);
-  for (i = 0; i < len; i++)glutBitmapCharacter(large_font,string[i]);
+  output3Text(foregroundcolor,x,y,z,string);
 }
 
 /* ------------------ output3Text ------------------------ */
 
-void output3Text(float *color, float x, float y, float z, const char *string){
-  int len, i;
+void output3Text(float *color, float x, float y, float z, char *string){
+  char *c;
 
   if(string==NULL)return;
   glColor3fv(color);
+//  outputSText3(x,y,z,0.001,string);
+//  return;
   glRasterPos3f(x, y, z);
-  len = (int) strlen(string);
-  for (i = 0; i < len; i++)glutBitmapCharacter(large_font,string[i]);
+  for (c=string; *c!='\0'; c++){
+    glutBitmapCharacter(large_font,*c);
+  }
 }
 
 /* ------------------ outputLargeText ------------------------ */
 
-void outputLargeText(float x, float y, const char *string){
-  int len, i;
+void outputLargeText(float x, float y, char *string){
+  char *c;
+
   if(string==NULL)return;
   glColor3fv(foregroundcolor);
   glRasterPos2f(x, y);
-  len = (int) strlen(string);
-  for (i = 0; i < len; i++)glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,string[i]);
+  for (c=string; *c!='\0'; c++){
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,*c);
+  }
 }
-
 
 /* ------------------ outputText ------------------------ */
 
-void outputText(float x, float y, const char *string){
-  int len, i;
+void outputText(float x, float y, char *string){
+  char *c;
 
   if(string==NULL)return;
   glColor3fv(foregroundcolor);
+//  outputSText2(x,y,0.0,0.001,string);
+//  return;
   glRasterPos2f(x, y);
-  len = (int) strlen(string);
-  for (i = 0; i < len; i++)glutBitmapCharacter(large_font,string[i]);
+  for (c=string; *c!='\0'; c++){
+    glutBitmapCharacter(large_font,*c);
+  }
 }
 
 /* ------------------ outputBarText ------------------------ */
 
-void outputBarText(float x, float y, const GLfloat *color, const char *string){
-  int len, i;
+void outputBarText(float x, float y, const GLfloat *color, char *string){
   int length;
   float xlength;
   float xbeg;
+  char *c;
 
   if(string==NULL)return;
 
@@ -120,9 +155,8 @@ void outputBarText(float x, float y, const GLfloat *color, const char *string){
   xbeg=x-xlength;
   if(xbeg<0.0)xbeg=0.0;
   glRasterPos2f(xbeg, y);
-  len = (int) strlen(string);
-  for (i = 0; i < len; i++){
-    glutBitmapCharacter(small_font,string[i]);
+  for (c=string; *c!='\0'; c++){
+    glutBitmapCharacter(small_font,*c);
   }
 }
 
