@@ -420,7 +420,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_smoke3d_thick->set_int_limits(0,7);
 #endif
 
-    PANEL_absorption = glui_3dsmoke->add_panel_to_panel(PANEL_overall,_("Absorption adjustments"));
+    PANEL_absorption = glui_3dsmoke->add_panel_to_panel(PANEL_slices,_("Absorption adjustments"));
     PANEL_absorption->set_alignment(GLUI_ALIGN_LEFT);
     RADIO_alpha = glui_3dsmoke->add_radiogroup_to_panel(PANEL_absorption,&adjustalphaflag);
     glui_3dsmoke->add_radiobutton_to_group(RADIO_alpha,_("None"));
