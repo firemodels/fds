@@ -34,6 +34,7 @@ TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
+IF (INCOMPRESSIBLE) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
@@ -254,6 +255,7 @@ INTEGER, INTENT(IN) :: NM
  
 IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
+IF (INCOMPRESSIBLE) RETURN
 
 ! If the RHS of the continuity equation does not yet satisfy the divergence constraint, return.
 ! This is typical of the case where an initial velocity field is specified by the user.
