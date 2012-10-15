@@ -2277,11 +2277,6 @@ Anytime we have a velocity scale to resolve we have a CFL-type stability restric
 Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.
 This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
-\subsubsection{Gravitational Constraint}
-
-A time scale restriction based on gravitational acceleration can be formed from $\delta t \le \sqrt{\delta z/g}$, where $\dz$ is the grid size in the
-direction of gravity. This check may be invoked by setting {\ct CHECK\_GR=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
-
 
 \subsection{Adjusting the Time Step}
 
@@ -10596,7 +10591,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 1                \\ \hline
-{\ct CHECK\_GR}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
