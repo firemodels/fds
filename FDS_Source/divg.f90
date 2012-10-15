@@ -74,6 +74,10 @@ RTRM => WORK1
 
 DP = 0._EB
 
+! Skip divg part 1 if incompressible
+
+INCOMRESSIBLE_IF: IF (.NOT.INCOMPRESSIBLE) THEN
+
 ! Determine if pressure ZONEs have merged
 
 CONNECTED_ZONES(:,:,NM) = .FALSE.
@@ -606,6 +610,8 @@ IF (STRATIFICATION) THEN
       ENDDO
    ENDDO
 ENDIF
+
+ENDIF INCOMRESSIBLE_IF
 
 ! Compute normal component of velocity at boundaries, UWS
 
