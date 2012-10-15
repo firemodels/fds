@@ -61,6 +61,7 @@ void outputSText3(float x, float y, float z, float scale, char *string){
 
   if(string==NULL)return;
   glPushMatrix();
+//  glMultMatrixf(modelview_scratch);
   glTranslatef(x,y,z);
   glRotatef(90.0,1.0,0.0,0.0);
   glScalef(scale,scale,scale);
