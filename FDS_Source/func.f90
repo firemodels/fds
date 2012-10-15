@@ -2565,6 +2565,92 @@ LES_FILTER_WIDTH_2D_MIN = MIN(DX,DZ)
 END FUNCTION LES_FILTER_WIDTH_2D_MIN
 
 
+SUBROUTINE GET_EQBM(Y_EQ,T_EQ,M_EQ,T_G,T_L,ZZ_G,M_G,M_L,SPEC_INDEX,SMIX_INDEX)
+!For calling purposes PC%Y_INDEX = SPEC_INDEX, PC%Z_INDEX=SMIX_INDEX
+REAL(EB), INTENT(IN) :: T_G,T_L,M_G,M_L,ZZ_G(0:N_TRACKED_SPECIES)
+INTEGER,INTENT(IN) :: SPEC_INDEX,SMIX_INDEX
+REAL(EB), INTENT(OUT) :: Y_EQ,T_EQ,M_EQ
+REAL(EB) :: T_EQ_I,Y_G,MW_G,MW_RATIO,C_P_V,C_P_G,C_P_L,TMP_WGT,H_V,E_TOT,ZZ_NEW(0:N_TRACKED_SPECIES),X_EQ,&
+            MW_V,DHOR,M_EQ_MAX,M_EQ_MIN
+INTEGER :: ITMP,ITCOUNT
+LOGICAL :: ITER_T,ITER_M
+TYPE(SPECIES_TYPE), POINTER :: SS=>NULL()
+ 
+SS=>SPECIES(SPEC_INDEX)
+ 
+CALL GET_MOLECULAR_WEIGHT(ZZ_G,MW_G)
+MW_V = SS%MW
+MW_RATIO = MW_G/MW_V
+ 
+CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_G,C_P_G,T_G)
+C_P_L = SS%C_P_L(MIN(5000,NINT(T_L)))
+ 
+! Total energy of system
+E_TOT = M_L*C_P_L*T_L + M_G*C_P_G*T_G
+ 
+! Initial guess, evaporate all vapor
+M_EQ = M_L
+M_EQ_MAX = M_EQ
+M_EQ_MIN = 0._EB
+ 
+ITER_M = .TRUE.
+ 
+M_SEARCH: DO WHILE (ITER_M)
+ 
+   ! Compute new mass fractions of gas
+   ZZ_NEW = ZZ_G*M_G
+   ZZ_NEW(SMIX_INDEX)=ZZ_NEW(SMIX_INDEX)+M_EQ
+   ZZ_NEW = ZZ_NEW/(M_G+M_EQ)
+   CALL GET_MASS_FRACTION(ZZ_NEW,SPEC_INDEX,Y_G)
+ 
+   ! Get system temperature for current mass evaporated
+   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_NEW,C_P_V,T_G)
+   T_EQ_I=T_G
+   ITER_T = .TRUE.
+   ITCOUNT = 0
+   T_SEARCH: DO WHILE (ITER_T)
+      T_EQ = T_EQ_I+(E_TOT-((M_L-M_EQ)*C_P_L+(M_G+M_EQ)*C_P_G)*T_EQ_I)/((M_L-M_EQ)*C_P_L+(M_G+M_EQ)*C_P_G)
+      IF (ABS(T_EQ_I-T_EQ)>0.5) THEN
+         ITCOUNT = ITCOUNT + 1
+      ELSE
+         ITER_T = .FALSE.
+      ENDIF
+      IF (ITCOUNT > 10) THEN
+         T_EQ = 0.5_EB * (T_EQ + T_EQ_I)
+         EXIT T_SEARCH
+      ENDIF
+      T_EQ_I=T_EQ
+      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_NEW,C_P_V,T_EQ)
+      C_P_L = SS%C_P_L(MIN(5000,NINT(T_EQ)))
+   END DO T_SEARCH
+ 
+   ! Compute equilibrium vapor at current temperature
+   ITMP = MIN(5000,INT(T_EQ))
+   TMP_WGT = T_EQ - AINT(T_EQ)
+   H_V = SS%H_V(ITMP)+TMP_WGT*(SS%H_V(ITMP+1)-SS%H_V(ITMP))
+   DHOR = H_V*MW_V/R0
+   X_EQ = MIN(1._EB,EXP(DHOR*(1._EB/SS%TMP_V-1._EB/T_EQ)))
+   Y_EQ = X_EQ/(MW_RATIO+(1._EB-MW_RATIO)*X_EQ)
+ 
+   ! Adjust evaporated vapor, allow slight tolerance
+   IF (Y_G/Y_EQ > 1.0001_EB) THEN
+      ! We have evaporated too much
+      M_EQ_MAX = M_EQ
+      M_EQ = 0.5_EB*(M_EQ+M_EQ_MIN)
+   ELSEIF (Y_G/Y_EQ < 0.9999_EB) THEN
+      ! We have not evaporated enough
+      IF (ABS(M_EQ-M_L)<TWO_EPSILON_EB) EXIT M_SEARCH ! kick out on first pass if not saturated
+      M_EQ_MIN = M_EQ
+      M_EQ = 0.5_EB*(M_EQ+M_EQ_MAX)
+   ELSE
+      EXIT M_SEARCH
+   ENDIF
+ 
+ENDDO M_SEARCH
+ 
+END SUBROUTINE GET_EQBM
+
+
 END MODULE PHYSICAL_FUNCTIONS
 
 
