@@ -3952,12 +3952,7 @@ void draw_user_ticks(void){
   glTranslatef(-xbar0,-ybar0,-zbar0);
   glLineWidth(user_tick_width);
 
-  //glPointSize(20.0);
-  //glBegin(GL_POINTS);
-  //glVertex3fv(tick_origin);
-  //glEnd();
-    
- //*** x axis tick/lables
+ //*** x axis tick/labels
 
  // major ticks
   if(show_tick_x==1){
@@ -4040,11 +4035,11 @@ void draw_user_ticks(void){
       }
       sprintf(label,"%f",xyz[0]);
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2],label);
+      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2],xyzmaxdiff/20.0, -1.0, label);
     }
   }
 
- //*** y axis tick/lables
+ //*** y axis tick/labels
 
  // major ticks
 
@@ -4133,11 +4128,11 @@ void draw_user_ticks(void){
       }
       sprintf(label,"%f",xyz[1]);
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2],label);
+      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], xyzmaxdiff/20.0, -1.0, label);
     }
   }
 
- //*** z axis tick/lables
+ //*** z axis tick/labels
 
  // major ticks
   if(show_tick_z){
@@ -4221,7 +4216,7 @@ void draw_user_ticks(void){
       xyz2[2]=xyz[2];
       sprintf(label,"%f",xyz[2]);
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2],label);
+      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], xyzmaxdiff/20.0, -1.0, label);
     }
   }
 
@@ -4292,10 +4287,8 @@ int get_tick_dir(float *mm){
     normdir[2] = mm[2]*scalednorm[0] + mm[6]*scalednorm[1] + mm[10]*scalednorm[2];
 
     cosangle = normdir[2]/sqrt(normdir[0]*normdir[0]+normdir[1]*normdir[1]+normdir[2]*normdir[2]);
-    if(cosangle>1.0)cosangle=1.0;
-    if(cosangle<-1.0)cosangle=-1.0;
-    absangle=acos(cosangle)*RAD2DEG;
-    if(absangle<0.0)absangle=-absangle;
+    cosangle = CLAMP(cosangle,-1.0,1.0);
+    absangle=ABS(acos(cosangle)*RAD2DEG);
     if(absangle<minangle){
       iminangle=i;
       minangle=absangle;

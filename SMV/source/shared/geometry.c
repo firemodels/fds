@@ -16,6 +16,39 @@ char geometry_revision[]="$Revision$";
 
 /* ------------------ mult_quat ------------------------ */
 
+void rotateu2v(float *u, float *v, float *axis, float *angle){
+  float sum,cosangle,normu,normv;
+
+  /*
+  i  j  k
+  ux uy uz
+  vx vy vz
+  */
+
+  axis[0] = u[1]*v[2] -v[1]*u[2];
+  axis[1] = -u[0]*v[2]+v[0]*u[2];
+  axis[2] = u[0]*v[1] -v[0]*u[1];
+  sum = NORM3(axis);
+  normu = NORM3(u);
+  normv = NORM3(v);
+  if(sum>0.0&&normu>0.0&&normv>0.0){
+    axis[0]/=sum;
+    axis[1]/=sum;
+    axis[2]/=sum;
+    cosangle = CLAMP(DOT3(u,v)/(normu*normv),-1.0,1.0);
+    *angle=acos(cosangle);
+  }
+  else{
+    axis[0]=0.0;
+    axis[1]=0.0;
+    axis[2]=1.0;
+    *angle=0.0;
+  }
+}
+
+
+/* ------------------ mult_quat ------------------------ */
+
 void angleaxis2quat(float angle, float *axis, float *quat){
   float sum;
   float cosang, sinang;

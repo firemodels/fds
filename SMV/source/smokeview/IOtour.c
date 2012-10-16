@@ -274,7 +274,7 @@ void drawtours(void){
           char label[128];
           sprintf(label,"%8.2f",framej->disp_time+0.005);
           trimzeros(label);
-          output3Text(tmp_tourcol_text,eye[0]+0.02f,eye[1]+0.015f,eye[2]+0.015f,label);
+          output3Text(tmp_tourcol_text,eye[0]+0.02f,eye[1]+0.015f,eye[2]+0.015f,-1.0, -1.0, label);
         }
       }
     }

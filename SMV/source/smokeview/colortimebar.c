@@ -267,7 +267,7 @@ void drawcolorbarpath(void){
       ii = cbi->index_node[i];
       dzpoint = (float)cbi->index_node[i]/255.0;
       sprintf(cbuff,"%i",ii);
-      output3Text(foregroundcolor, 1.55,0.0,dzpoint,cbuff);
+      output3Text(foregroundcolor, 1.55,0.0,dzpoint, -1.0, -1.0, cbuff);
     }
     if(colorbarpoint>=0&&colorbarpoint<cbi->nnodes){
       float *rgbi;

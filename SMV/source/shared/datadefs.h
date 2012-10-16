@@ -5,6 +5,22 @@
 #ifndef DATADEFS_H_DEFINED
 #define DATADEFS_H_DEFINED
 
+#ifndef DOT2
+#define DOT2(x,y) (x[0]*y[0]+x[1]*y[1])
+#endif
+
+#ifndef DOT3
+#define DOT3(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
+#endif
+
+#ifndef NORM3
+#define NORM3(x) sqrt(x[0]*x[0]+x[1]*x[1]+x[2]*x[2])
+#endif
+
+#ifndef NORM2
+#define NORM2(x) sqrt(x[0]*x[0]+x[1]*x[1])
+#endif
+
 #ifndef DEG2RAD
 #define DEG2RAD (3.14159265359f/180.0)
 #endif

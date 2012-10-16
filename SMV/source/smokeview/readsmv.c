@@ -9358,8 +9358,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"FONTSIZE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&fontindex);
-      if(fontindex<0)fontindex=0;
-      if(fontindex>1)fontindex=1;
+      fontindex=CLAMP(fontindex,0,3);
       FontMenu(fontindex);
       continue;
     }

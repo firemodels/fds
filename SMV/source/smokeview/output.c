@@ -13,6 +13,7 @@ char output_revision[]="$Revision$";
 #endif
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "string_util.h"
 #include "smokeviewvars.h"
@@ -56,15 +57,55 @@ void outputAxisLabels(){
 
 /* ------------------ outputSText3 ------------------------ */
 
-void outputSText3(float x, float y, float z, float scale, char *string){ 
+void outputSText3(float x, float y, float z, float width, float height, char *string){ 
   char *c;
+  float u[3]={0.0,0.0,1.0},v[3];
+  float axis[3],angle,scale=0.001,theta;
+  float quateye[4],quatz[4],quat2[4],rot[16];
+  float *up;
+  int total_width;
+  float scale_x, scale_y;
+  int count=0;
+
+  up = camera_current->up;
+ // printf("up: %f %f %f\n",up[0],up[1],up[2]);
 
   if(string==NULL)return;
+  total_width=0;
+  for (c=string; *c != '\0'; c++){
+    count++;
+    total_width+=glutStrokeWidth(GLUT_STROKE_ROMAN,*c);
+  }
+  if(count==0)return;
+  if(width>0){
+    scale_x=(float)width/(float)total_width;
+  }
+  else{
+    scale_x=(float)(height*count)/(float)total_width;
+  }
+  if(height>0){
+    scale_y=(float)height/150.0;
+  }
+  else{
+    scale_y=(float)(width/count)/150.0;
+  }
   glPushMatrix();
-//  glMultMatrixf(modelview_scratch);
   glTranslatef(x,y,z);
-  glRotatef(90.0,1.0,0.0,0.0);
-  glScalef(scale,scale,scale);
+  v[0]=world_eyepos[0]-x;
+  v[1]=world_eyepos[1]-y;
+  v[2]=world_eyepos[2]-z;
+  rotateu2v(u,v,axis,&angle);
+  theta=atan2(v[0],-v[1])*RAD2DEG;
+  angleaxis2quat(theta*DEG2RAD,u,quatz);
+  angleaxis2quat(angle,axis,quateye);
+  mult_quat(quateye,quatz,quateye);
+  quat2rot(quateye,rot);
+  /*
+  glLoadIdentity();
+  glMultMatrixf(rot);*/
+  glRotatef(90.0,cos(theta*DEG2RAD),sin(theta*DEG2RAD),0.0);
+  glRotatef(theta,u[0],u[1],u[2]);
+  glScalef(scale_x,scale_y,1.0);
   for (c=string; *c != '\0'; c++){
     glutStrokeCharacter(GLUT_STROKE_ROMAN,*c);
   }
@@ -125,21 +166,25 @@ void output3Val(float x, float y, float z, float val){
 
   sprintf(string,"%f",val);
   trimzeros(string);
-  output3Text(foregroundcolor,x,y,z,string);
+  output3Text(foregroundcolor,x,y,z,-1.0,-1.0,string);
 }
 
 /* ------------------ output3Text ------------------------ */
 
-void output3Text(float *color, float x, float y, float z, char *string){
+void output3Text(float *color, float x, float y, float z, float width, float height, char *string){
   char *c;
 
   if(string==NULL)return;
   glColor3fv(color);
-//  outputSText3(x,y,z,0.001,string);
-//  return;
-  glRasterPos3f(x, y, z);
-  for (c=string; *c!='\0'; c++){
-    glutBitmapCharacter(large_font,*c);
+
+  if(fontindex==SCALED_FONT&&(width>0.0||height>0.0)){
+    outputSText3(x,y,z,width,height,string);
+  }
+  else{
+    glRasterPos3f(x, y, z);
+    for (c=string; *c!='\0'; c++){
+      glutBitmapCharacter(large_font,*c);
+    }
   }
 }
 
@@ -187,7 +232,7 @@ void outputBarText(float x, float y, float width, float height, const GLfloat *c
   glColor3fv(color);
 
   if(fontindex==SCALED_FONT&&width>0.0&&height>0.0){
-    outputSText2r(x,y,0.0,width/2.0,height/2.0,string);
+    outputSText2r(x,y,0.0,0.4*width,0.4*height,string);
   }
   else{
     length=glutBitmapLength(small_font, (const unsigned char *)string); 
@@ -342,7 +387,7 @@ void drawLabels(void){
         float xyz_pos[3];
 
         normalize_xyz(xyz_pos,xyz);
-        output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],labelcopy->label);
+        output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],-1.0,-1.0,labelcopy->label);
       }
     }
   }

@@ -9,6 +9,7 @@
 EXTERNCPP int Merge_Smoke(void);
 #endif
 
+EXTERNCPP void rotateu2v(float *u, float *v, float *axis, float *angle);
 EXTERNCPP void rotation_type_CB(int var);
 EXTERNCPP  void update_rotation_type(int val);
 EXTERNCPP void sort_smoke3dinfo(void);
@@ -745,7 +746,7 @@ EXTERNCPP int gettargetposition(int itarget, float time, float *x, float *y, flo
 EXTERNCPP void outputAxisLabels(void);
 EXTERNCPP void outputLargeText(float x, float y, char *string);
 EXTERNCPP void outputText(float x, float y, float width, float height, char *string);
-EXTERNCPP void output3Text(float *color, float x, float y, float z, char *string);
+EXTERNCPP void output3Text(float *color, float x, float y, float z, float width, float height, char *string);
 EXTERNCPP void output3Val(float x, float y, float z, float val);
 EXTERNCPP void outputBarText(float x, float y, float width, float height, const GLfloat *color, char *string);
 EXTERNCPP void getzonebounds(const float *pdata, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
