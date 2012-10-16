@@ -362,6 +362,7 @@ void _Sniff_Errors(char *whereat);
 #define SMALL_FONT 0
 #define LARGE_FONT 1
 #define LARGE_FONT_SAFE 2
+#define SCALED_FONT 3
 
 #define FFALSE 0
 #define TTRUE 1

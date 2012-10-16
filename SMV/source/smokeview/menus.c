@@ -1278,6 +1278,13 @@ void FontMenu(int value){
     fontWoffset=50;
     fontHoffset=50;
     break;
+  case SCALED_FONT:
+    fontWoffset=0;
+    fontHoffset=0;
+    dwinH=dwinHbase;
+    dwinH=1.2*dwinHbase;
+    fontindex=SCALED_FONT; 
+    break;
   default:
     ASSERT(FFALSE);
   }
@@ -7145,16 +7152,25 @@ updatemenu=0;
     CREATEMENU(fontmenu,FontMenu);
     switch (fontindex){
     case SMALL_FONT:
-      glutAddMenuEntry(_("*Normal"),0);
-      glutAddMenuEntry(_("Large"),1);
+      glutAddMenuEntry(_("*Normal"),SMALL_FONT);
+      glutAddMenuEntry(_("Large"),LARGE_FONT);
+#ifdef pp_BETA
+      glutAddMenuEntry(_("Scaled"),SCALED_FONT);
+#endif
       break;
     case LARGE_FONT:
-      glutAddMenuEntry(_("Normal"),0);
-      glutAddMenuEntry(_("*Large"),1);
+      glutAddMenuEntry(_("Normal"),SMALL_FONT);
+      glutAddMenuEntry(_("*Large"),LARGE_FONT);
+#ifdef pp_BETA
+      glutAddMenuEntry(_("Scaled"),SCALED_FONT);
+#endif
       break;
-    case LARGE_FONT_SAFE:
-      glutAddMenuEntry(_("Normal"),0);
-      glutAddMenuEntry(_("Large"),1);
+#ifdef pp_BETA
+    case SCALED_FONT:
+      glutAddMenuEntry(_("Normal"),SMALL_FONT);
+      glutAddMenuEntry(_("Large"),LARGE_FONT);
+      glutAddMenuEntry(_("*Scaled"),SCALED_FONT);
+#endif
       break;
     default:
       ASSERT(FFALSE);
@@ -7277,7 +7293,7 @@ updatemenu=0;
   glutAddSubMenu(_("Max frame rate"),frameratemenu);
   glutAddSubMenu(_("Render"),rendermenu);
   glutAddSubMenu(_("Tours"),tourmenu);
-  if(showfontmenu==1)glutAddSubMenu(_("Font size"),fontmenu);
+  if(showfontmenu==1)glutAddSubMenu(_("Font"),fontmenu);
 #ifdef pp_BENCHMARK
   glutAddMenuEntry("Benchmark",1);
 #endif

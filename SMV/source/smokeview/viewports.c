@@ -281,7 +281,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
     labellength=glutBitmapLength(large_font, (const unsigned char *)meshlabel);
     mesh_left=val_right-val_right*labellength/(float)dwinW;
     mesh_bot=val_top-val_top*large_font_height/(float)(dwinH-fontHoffset);
-    outputText(mesh_left,mesh_bot, meshlabel);
+    outputText(mesh_left,mesh_bot, -1.0, -1.0, meshlabel);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visx_all==1)||visGrid==noGridProbe||visGrid==GridProbe){
     float plotval;
@@ -309,7 +309,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       sprintf(slicelabel,"x: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-0.5,0.6f, slicelabel);
+    if(visgridloc==1)outputText(mesh_left-0.5,0.6f, -1.0,-1.0,slicelabel);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visy_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     float plotval;
@@ -336,7 +336,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       sprintf(slicelabel,"y: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-0.5,0.35f, slicelabel);
+    if(visgridloc==1)outputText(mesh_left-0.5,0.35f, -1.0,-1.0, slicelabel);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visz_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     float plotval;
@@ -363,7 +363,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       sprintf(slicelabel,"z: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-.5,0.1f, slicelabel);
+    if(visgridloc==1)outputText(mesh_left-.5,0.1f, -1.0,-1.0, slicelabel);
   }
 }
 
@@ -437,9 +437,9 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
      xtimeright=xtimeleft+0.6*(xtemp-xtimeleft);
 
      if( visTimeLabels==1&&showtime==1){
-      if(visTimelabel==1)outputText(0.0f,0.1f, timelabel);
-      if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, framelabel);
-      if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, hrrinfo->hrrlabel);
+      if(visTimelabel==1)outputText(0.0f,0.1f, -1.0,-1.0, timelabel);
+      if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, -1.0,-1.0, framelabel);
+      if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, -1.0,-1.0, hrrinfo->hrrlabel);
       drawTimeBar();
      }
 
@@ -456,11 +456,11 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
           sprintf(frameratelabel," *Frame rate:%4.1f",framerate);
         }
       }
-      outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
+      outputText((float)(xtimeright+0.025),0.08f, -1.0,-1.0, frameratelabel);
     }
     if(show_slice_average==1&&vis_slice_average==1&&slice_average_flag==1){
       sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
-      outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
+      outputText((float)(xtimeright+0.025),0.56, -1.0,-1.0, frameratelabel); // test print
     }
     if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL){
       char hrrcut_label[256];
@@ -470,7 +470,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       ihrrcut = (int)global_hrrpuv_cutoff;
 
       sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
-      outputText((float)(xtimeright+0.06),0.56f, hrrcut_label);
+      outputText((float)(xtimeright+0.06),0.56f, -1.0,-1.0, hrrcut_label);
       xxl = xtimeright+0.025;
       xxr = xxl+ddx;
       yyl = 0.56;
@@ -491,10 +491,10 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       MEMSTATUS(0,&availmemory,NULL,NULL);
       sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
       if((benchmark==1||visFramerate==1)&&showtime==1){
-        outputText((float)(xtimeright+0.025),0.32f, frameratelabel);
+        outputText((float)(xtimeright+0.025),0.32f, -1.0,-1.0, frameratelabel);
       }
       else{
-        outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
+        outputText((float)(xtimeright+0.025),0.08f, -1.0,-1.0, frameratelabel);
       }
     }
 #endif
@@ -508,10 +508,10 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
 
         getMemusage(MMtotalmemory,MEMlabel);
         if((benchmark==1||visFramerate==1)&&showtime==1){
-          outputText((float)(xtimeright+0.025),0.32f, MEMlabel);
+          outputText((float)(xtimeright+0.025),0.32f, -1.0,-1.0, MEMlabel);
         }
         else{
-          outputText((float)(xtimeright+0.025),0.08f, MEMlabel);
+          outputText((float)(xtimeright+0.025),0.08f, -1.0,-1.0, MEMlabel);
         }
     }
 #endif
@@ -523,6 +523,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
 void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
   GLint temp;
   float xnum;
+  float width, height;
 
 
   if(visColorbarLabels==1&&numColorbars!=0){
@@ -531,6 +532,8 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
     if(fontindex==LARGE_FONT)xnum*=1.5;
     if(screenWidth<screenHeight){
       barright=xnum/3.0+0.1f;
+      width = barright;
+      height = ratio;
       if(SUB_portortho(quad,
         screenWidth-2-dwinWW-fontWoffset-titlesafe_offset,
         temp+titlesafe_offset,
@@ -542,6 +545,8 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
       }
     }
     else{
+      width = barright;
+      height = 1.0;
       barright=(xnum/3.0+0.1f);
       if(SUB_portortho(quad,
         screenWidth-2-dwinWW-fontWoffset-titlesafe_offset,
@@ -558,7 +563,7 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
     glLoadIdentity();
 
     if( showtime==1 || showplot3d==1){
-      drawColorBars();
+      drawColorBars(width,height);
     }
   }
 }
@@ -695,19 +700,28 @@ void LOGO_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsize
 void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
   int left;
   float textdown;
+  int box_width_pixels, box_height_pixels;
+  float box_width, box_height;
 
   if(visTitle!=1)return;
-  
+  box_height_pixels=(int)(ntitles*dwinH/4);
+  box_width_pixels=screenWidth-dwinWW-fontWoffset-2*titlesafe_offset;
+  box_width=0.5;
+  box_height=(ntitles*ratio);
   if(screenWidth<screenHeight){
     if(SUB_portortho(quad,
-      fontWoffset+titlesafe_offset,(int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,screenWidth-dwinWW-fontWoffset-2*titlesafe_offset,(int)(ntitles*dwinH/4),
+      fontWoffset+titlesafe_offset,
+      (int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,
+      box_width_pixels,box_height_pixels,
       0.,1.,0.,(double)(ntitles*ratio),
       s_left, s_down, s_width, s_height)==0)return;
     left=(int)((float)75/(float)(screenWidth-dwinWW));
   }
   else{
     if(SUB_portortho(quad,
-      fontWoffset+titlesafe_offset,(int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,screenWidth-dwinWW-fontWoffset-2*titlesafe_offset,(int)(ntitles*dwinH/4),
+      fontWoffset+titlesafe_offset,
+      (int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,
+      box_width_pixels,box_height_pixels,
       0.,1.,0.,(double)(ntitles*ratio),
       s_left, s_down, s_width, s_height)==0)return;
     left=(int)((float)75/(float)(screenWidth-dwinWW)*ratio);
@@ -719,19 +733,19 @@ void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   ititle=0;
   if(showtitle2==1){
     ititle++;
-    outputText(left,(ititle-1)*ratio+textdown, TITLE2);
+    outputText(left,(ititle-1)*ratio+textdown, -1.0,-1.0, TITLE2);
   }
   if(showtitle1==1){
     ititle++;
-    outputText(left,(ititle-1)*ratio+textdown, TITLE1);
+    outputText(left,(ititle-1)*ratio+textdown, -1.0,-1.0, TITLE1);
   }
   if(visTitle0==1){
     ititle++;
     if(visFullTitle==1&&showplot3d==1){
-      outputText(left,(ititle-1)*ratio+textdown, FULLTITLE);
+      outputText(left,(ititle-1)*ratio+textdown, box_width, box_height, FULLTITLE);
     }
     else{
-      outputText(left,(ititle-1)*ratio+textdown, TITLE);
+      outputText(left,(ititle-1)*ratio+textdown, box_width, box_height, TITLE);
     }
   }
 }
