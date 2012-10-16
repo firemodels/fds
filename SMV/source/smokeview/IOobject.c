@@ -478,10 +478,10 @@ void draw_devices_val(void){
           break;
       }
       if(devicei->visval>128){
-        output3Text(black,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],-1.0, -1.0, label);
+        output3Text(black,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
       }
       else{
-        output3Text(white,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],-1.0, -1.0, label);
+        output3Text(white,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
       }
     }
   }
@@ -620,11 +620,11 @@ void output_device_val(devicedata *devicei){
   val=get_device_val(global_times[itimes],devicei,&valid);
   if(valid==1){
     sprintf(label,"%s: %.1f %s",devicei->quantity,val,devicei->unit);
-    output3Text(foregroundcolor,0.0,0.0,0.0,-1.0, -1.0, label);
+    output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
   else{
     sprintf(label,"not available");
-    output3Text(foregroundcolor,0.0,0.0,0.0,-1.0, -1.0, label);
+    output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
 }
 

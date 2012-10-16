@@ -24,6 +24,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(scaled_font_height,32);
 SVEXTERN float quat_general[4], quat_rotation[16];
 
 SVEXTERN float modelview_identity[16];

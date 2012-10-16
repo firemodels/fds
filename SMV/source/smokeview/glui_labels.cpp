@@ -45,6 +45,7 @@ GLUI_Spinner *SPINNER_tick_dy0=NULL;
 GLUI_Spinner *SPINNER_tick_dz0=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_face=NULL;
 GLUI_Spinner *SPINNER_subtick=NULL;
+GLUI_Spinner *SPINNER_scaled_font_height=NULL;
 
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
@@ -90,6 +91,7 @@ GLUI_Panel *PANEL_showhide=NULL;
 GLUI_RadioGroup *RADIO_fontsize=NULL,*RADIO_showhide=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1b=NULL;
+GLUI_RadioButton *RADIOBUTTON_label_1c=NULL;
 
 GLUI_Button *Button_EVAC=NULL;
 GLUI_Button *Button_PART=NULL;
@@ -134,6 +136,18 @@ GLUI_Button *BUTTON_label_4=NULL;
 
 /* ------------------ glui_labels_rename ------------------------ */
 
+extern "C" void glui_update_fontindex(void){
+  if(RADIO_fontsize!=NULL){
+    if(fontindex==SCALED_FONT){
+      SPINNER_scaled_font_height->enable();
+    }
+    else{
+      SPINNER_scaled_font_height->disable();
+    }
+  }
+}
+/* ------------------ glui_labels_rename ------------------------ */
+
 extern "C" void glui_labels_rename(void){
 
   ROLLOUT_label1->set_name(_("General Settings"));
@@ -176,6 +190,7 @@ extern "C" void glui_labels_rename(void){
 
   RADIOBUTTON_label_1a->set_name(_("small font"));
   RADIOBUTTON_label_1b->set_name(_("large font"));
+  RADIOBUTTON_label_1c->set_name(_("scaled font"));
 
 
   ROLLOUT_user_tick->set_name("User tick settings");
@@ -266,6 +281,10 @@ extern "C" void glui_labels_setup(int main_window){
   RADIO_fontsize = glui_labels->add_radiogroup_to_panel(ROLLOUT_label1,&fontindex,LABELS_fontsize,Labels_CB);
   RADIOBUTTON_label_1a=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small font"));
   RADIOBUTTON_label_1b=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large font"));
+  RADIOBUTTON_label_1c=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("scaled font"));
+
+  SPINNER_scaled_font_height=glui_labels->add_spinner_to_panel(ROLLOUT_label1,"font size:",GLUI_SPINNER_INT,&scaled_font_height);
+  glui_update_fontindex();
 
   SPINNER_linewidth=glui_labels->add_spinner_to_panel(ROLLOUT_label1,"blockage line width",GLUI_SPINNER_FLOAT,&linewidth);
   SPINNER_linewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);

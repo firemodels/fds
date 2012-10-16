@@ -4035,7 +4035,7 @@ void draw_user_ticks(void){
       }
       sprintf(label,"%f",xyz[0]);
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2],xyzmaxdiff/20.0, -1.0, label);
+      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
 
@@ -4128,7 +4128,7 @@ void draw_user_ticks(void){
       }
       sprintf(label,"%f",xyz[1]);
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], xyzmaxdiff/20.0, -1.0, label);
+      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
 
@@ -4216,7 +4216,7 @@ void draw_user_ticks(void){
       xyz2[2]=xyz[2];
       sprintf(label,"%f",xyz[2]);
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], xyzmaxdiff/20.0, -1.0, label);
+      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
 

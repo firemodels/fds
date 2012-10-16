@@ -1269,15 +1269,6 @@ void FontMenu(int value){
     fontHoffset=0;
     dwinH=1.2*dwinHbase;
     break;
-  case LARGE_FONT_SAFE:
-    fontindex=LARGE_FONT_SAFE;
-    large_font=GLUT_BITMAP_HELVETICA_18;
-    small_font=GLUT_BITMAP_HELVETICA_18;
-    large_font_height=18;
-    small_font_height=18;
-    fontWoffset=50;
-    fontHoffset=50;
-    break;
   case SCALED_FONT:
     fontWoffset=0;
     fontHoffset=0;
@@ -1288,6 +1279,7 @@ void FontMenu(int value){
   default:
     ASSERT(FFALSE);
   }
+  glui_update_fontindex();
   set_labels_controls();
 }
 

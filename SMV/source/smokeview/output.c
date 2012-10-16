@@ -57,38 +57,17 @@ void outputAxisLabels(){
 
 /* ------------------ outputSText3 ------------------------ */
 
-void outputSText3(float x, float y, float z, float width, float height, char *string){ 
+void outputSText3(float x, float y, float z, char *string){ 
   char *c;
   float u[3]={0.0,0.0,1.0},v[3];
   float axis[3],angle,scale=0.001,theta;
   float quateye[4],quatz[4],quat2[4],rot[16];
-  float *up;
-  int total_width;
   float scale_x, scale_y;
-  int count=0;
 
-  up = camera_current->up;
- // printf("up: %f %f %f\n",up[0],up[1],up[2]);
 
   if(string==NULL)return;
-  total_width=0;
-  for (c=string; *c != '\0'; c++){
-    count++;
-    total_width+=glutStrokeWidth(GLUT_STROKE_ROMAN,*c);
-  }
-  if(count==0)return;
-  if(width>0){
-    scale_x=(float)width/(float)total_width;
-  }
-  else{
-    scale_x=(float)(height*count)/(float)total_width;
-  }
-  if(height>0){
-    scale_y=(float)height/150.0;
-  }
-  else{
-    scale_y=(float)(width/count)/150.0;
-  }
+  scale_y = 0.025*(float)scaled_font_height/480.0;
+  scale_x = 0.025*(float)scaled_font_height/640.0;
   glPushMatrix();
   glTranslatef(x,y,z);
   v[0]=world_eyepos[0]-x;
@@ -166,19 +145,19 @@ void output3Val(float x, float y, float z, float val){
 
   sprintf(string,"%f",val);
   trimzeros(string);
-  output3Text(foregroundcolor,x,y,z,-1.0,-1.0,string);
+  output3Text(foregroundcolor,x,y,z,string);
 }
 
 /* ------------------ output3Text ------------------------ */
 
-void output3Text(float *color, float x, float y, float z, float width, float height, char *string){
+void output3Text(float *color, float x, float y, float z, char *string){
   char *c;
 
   if(string==NULL)return;
   glColor3fv(color);
 
-  if(fontindex==SCALED_FONT&&(width>0.0||height>0.0)){
-    outputSText3(x,y,z,width,height,string);
+  if(fontindex==SCALED_FONT){
+    outputSText3(x,y,z,string);
   }
   else{
     glRasterPos3f(x, y, z);
@@ -387,7 +366,7 @@ void drawLabels(void){
         float xyz_pos[3];
 
         normalize_xyz(xyz_pos,xyz);
-        output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],-1.0,-1.0,labelcopy->label);
+        output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],labelcopy->label);
       }
     }
   }

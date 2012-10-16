@@ -267,7 +267,7 @@ void drawcolorbarpath(void){
       ii = cbi->index_node[i];
       dzpoint = (float)cbi->index_node[i]/255.0;
       sprintf(cbuff,"%i",ii);
-      output3Text(foregroundcolor, 1.55,0.0,dzpoint, -1.0, -1.0, cbuff);
+      output3Text(foregroundcolor, 1.55,0.0,dzpoint, cbuff);
     }
     if(colorbarpoint>=0&&colorbarpoint<cbi->nnodes){
       float *rgbi;
@@ -1067,7 +1067,6 @@ void drawColorBars(float width, float height){
     dyfont = (float)(small_font_height+1)*(float)(nrgb+1)/(float)dyscreen;
     break;
   case LARGE_FONT:
-  case LARGE_FONT_SAFE:
     dyfont = (float)(large_font_height+1)*(float)(nrgb+1)/(float)dyscreen;
     break;
   case SCALED_FONT:
