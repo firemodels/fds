@@ -44,5 +44,9 @@ $RUNFDS $INDIR FAA_Polymers_PEEK_90
 $RUNFDS $INDIR FAA_Polymers_PEEK_50_solid_only
 $RUNFDS $INDIR FAA_Polymers_PEEK_70_solid_only
 $RUNFDS $INDIR FAA_Polymers_PEEK_90_solid_only
+$RUNFDS $INDIR FAA_Polymers_PP
+$RUNFDS $INDIR FAA_Polymers_PA66
+$RUNFDS $INDIR FAA_Polymers_POM
+$RUNFDS $INDIR FAA_Polymers_PET
 
 echo FDS cases submitted
