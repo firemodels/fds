@@ -62,7 +62,7 @@ Equation (\ref{eqn_LES_3}) is what is typically referred to as the LES momentum 
 
 \subsubsection*{Constitutive Relationship}
 
-There are a few more modifications we need to make in order to get Eq.~(\ref{eqn_LES_3}) into shape for FDS.  The first is to decompose the SGS stress and apply Newton's law of viscosity as the constitutive relationship for the deviatoric part.  Note that $\overline{\tau}_{ij}$ is already the deviatoric part of the viscous stress.  We define the total deviatoric stress as
+There are a few more modifications we need to make in order to get Eq.~(\ref{eqn_LES_3}) into shape for FDS.  The first is to decompose the SGS stress and apply Newton's law of viscosity as the constitutive relationship for the deviatoric part.  Note that $\overline{\tau}_{ij}$ is already the deviatoric part of the viscous stress.  We model the total deviatoric stress as
 \begin{equation}
 \label{eqn_newtons_law_sgs}
 \tau_{ij}^{dev} \equiv \overline{\tau}_{ij} + \tau_{ij}^{sgs} - \frac{1}{3}\tau_{kk}^{sgs}\delta_{ij} = - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right)
