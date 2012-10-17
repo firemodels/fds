@@ -1,9 +1,230 @@
 \chapter{Momentum Transport and Pressure}
 \label{momentum_chapter}
 
-This chapter describes the solution of the momentum equation. This consists of two major parts -- the
-discretization of the flux terms and then the solution of an elliptic partial differential equation for the
-pressure.
+This chapter describes the solution of the momentum equation. This consists of three major parts: the LES formulation, the
+discretization of the flux terms, and the solution of an elliptic partial differential equation for the pressure.
+
+\section{Large Eddy Simulation (LES)}
+\label{LES}
+
+In this section, we temporarily return to formal LES filter notation and adopt Cartesian tensor index notation (repeated suffixes imply summation) in order to precisely define modeled terms. The LES equations are derived by applying a low-pass filter of width $\Delta$ to the DNS equations. The kernel usually associated with finite volume LES is a box filter---grid resolved quantities are physically interpreted as cell means.  This interpretation is somewhat misleading (see \cite{McDermott:2005b}), but a thorough discussion of filtering is beyond our scope, so the cell mean interpretation will suffice.  In FDS, the filter width is taken to be the cube root of the cell volume, $\Delta = V_c^{1/3}$, $V_c = \delta x \,\delta y\, \delta z$.  Then for any scalar, $\phi$, a filtered field is defined as
+\begin{equation}
+\label{eqn_box_filter}
+\overline{\phi}(x,y,z,t) \equiv \frac{1}{V_c} \int_{x - \delta x/2}^{x + \delta x/2}\int_{y - \delta y/2}^{y + \delta y/2}\int_{z - \delta z/2}^{z + \delta z/2} \phi(x',y',z',t) \,\mbox{d} x' \,\mbox{d} y' \,\mbox{d} z' 
+\end{equation}
+It is also conventional to define a mass-weighted or Favre filter such that $\overline{\rho}\,\widetilde{\phi} \equiv \overline{\rho \phi}$.
+
+\subsection{The DNS Momentum Equation}
+
+In conservative form, the DNS momentum equation for the $i$th component of velocity is
+\begin{equation}
+\label{eqn_dns_conservative}
+\frac{\partial \rho u_i}{\partial t} + \frac{\partial}{\partial x_j} (\rho u_i u_j) = -\frac{\partial p}{\partial x_i} - \frac{\partial \tau_{ij}}{\partial x_j} + \rho g_i + f_{d,i} + \dot{m}_b^\ppp u_{b,i}
+\end{equation}
+In our two-phase formulation, $f_{d,i}$ represents the drag force due to unresolved Lagrangian particles.  The bulk source term, $\dot{m}_b^\ppp u_{b,i}$, accounts for the effects of evaporation or pyrolysis. For Eq.~(\ref{eqn_dns_conservative}) to be applicable, the grid resolution should be smaller than the Kolmogorov scale \cite{Pope:2000} (the length scale of the smallest turbulent eddies),
+\begin{equation}
+\label{eqn_kolmogorov_scale}
+\eta \equiv (\nu^3/\epsilon)^{1/4}
+\end{equation}
+Here, $\nu$ is the kinematic viscosity and $\epsilon$ is the rate of viscous dissipation (the conversion of kinetic energy to heat by viscosity),
+\begin{equation}
+\epsilon \equiv \tau_{ij} \frac{\partial u_i}{\partial x_j} = 2 \mu \left( S_{ij} S_{ij} - \frac{1}{3} (\nabla\!\cdot \bu)^2 \right) \quad ; \quad S_{ij} \equiv \frac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
+\end{equation}
+
+In fire scenarios, $\eta$ is usually on the order of one millimeter.  DNS is therefore impractical for all but special research flame calculations.
+
+\subsection{The LES Momentum Equation}
+
+With engineering domains ranging in size from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
+\begin{equation}
+\label{eqn_LES_1}
+\frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} + \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{d,i} + \overline{\dot{m}_b^\ppp u_{b,i}}
+\end{equation}
+Simple enough, we just put lines over everything.  The dilemma we now face is that the cell mean value $\overline{\rho u_i u_j}$ is not itself a primitive variable in the calculation---we have no way of computing the stuff under the bars to advance Eq.~(\ref{eqn_LES_1}) in time.  We must, therefore, decompose the terms, and this leads to closure problems.
+
+The next step is simply to apply the Favre filter,
+\begin{equation}
+\label{eqn_LES_2}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{d,i} + \overline{\dot{m}_b^\ppp} \, \widetilde{u}_{b,i}
+\end{equation}
+The first term is now separable, provided we have a solution for $\overline{\rho}$. But we still have no way to compute the correlation $\widetilde{u_i u_j}$ on the grid. We cannot simply use $\widetilde{u}_i \widetilde{u}_j$ as a substitute (this is the old problem of ``the mean of the square does not equal the square of the mean''). Instead, we define the subgrid-scale (SGS) stress:
+\begin{equation}
+\label{eqn_sgs_stress}
+\tau_{ij}^{sgs} \equiv \overline{\rho} ( \widetilde{u_i u_j} - \widetilde{u}_i \widetilde{u}_j )
+\end{equation}
+Substituting Eq.~(\ref{eqn_sgs_stress}) into Eq.~(\ref{eqn_LES_2}) yields
+\begin{equation}
+\label{eqn_LES_3}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} - \frac{\partial \tau_{ij}^{sgs}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{d,i} + \overline{\dot{m}_b^\ppp} \, \widetilde{u}_{b,i}
+\end{equation}
+
+Equation (\ref{eqn_LES_3}) is what is typically referred to as the LES momentum equation (analogous to the Cauchy equation---constitutive models have not been applied).  All variables are primitive or computable once we find a suitable closure for the subgrid scale stress, $\tau_{ij}^{sgs}$.
+
+\subsubsection*{Constitutive Relationship}
+
+There are a few more modifications we need to make in order to get Eq.~(\ref{eqn_LES_3}) into shape for FDS.  The first is to decompose the SGS stress and apply Newton's law of viscosity as the constitutive relationship for the deviatoric part.  Note that $\overline{\tau}_{ij}$ is already the deviatoric part of the viscous stress.  We define the total deviatoric stress as
+\begin{equation}
+\label{eqn_newtons_law_sgs}
+\tau_{ij}^{dev} \equiv \overline{\tau}_{ij} + \tau_{ij}^{sgs} - \frac{1}{3}\tau_{kk}^{sgs}\delta_{ij} = - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right)
+\end{equation}
+Note that $\delta_{ij}$ is the Kronecker delta ($\delta_{ij}=1$ if $i=j$, $\delta_{ij}=0$ if $i\ne j$).  The turbulent viscosity, $\mu_t$, requires modeling, as discussed below.
+
+\subsubsection*{Modified Pressure Term}
+
+In LES of low-Mach flows, the isotropic part of the SGS stress must be absorbed by the pressure term.  Define the subgrid kinetic energy as half the trace of the SGS stress,
+\begin{equation}
+\label{eqn_ksgs_2}
+k_{sgs} \equiv \frac{1}{2} \tau_{kk}^{sgs}
+\end{equation}
+and define the modified filtered pressure \cite{Pope:2000} as
+\begin{equation}
+\label{eqn_modified_pressure}
+\bar{p} \equiv \overline{p} + \frac{2}{3}k_{sgs}
+\end{equation}
+Upon substitution of Eqs.~(\ref{eqn_newtons_law_sgs}) and (\ref{eqn_modified_pressure}) into Eq.~(\ref{eqn_LES_3}), we have
+\begin{equation}
+\label{eqn_LES_4}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \bar{p}}{\partial x_i} - \frac{\partial \tau_{ij}^{dev}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{d,i} + \overline{\dot{m}_b^\ppp} \, \widetilde{u}_{b,i}
+\end{equation}
+
+Notice that Eq.~(\ref{eqn_LES_4}) closely resembles the DNS momentum equation, Eq.~(\ref{eqn_dns_conservative}).  For this reason, we may relax the filter formalism as we discuss the numerical details of the algorithm.  The user should simply understand that in the LES context when we write $\tau_{ij}$ we mean precisely $\tau_{ij}^{dev}$, and similarly for pressure in LES $p$ refers to $\bar{p}$.
+
+\subsubsection*{Bulk Mass Source Term}
+
+When writing the momentum equation in non-conservative form, which we will do below, we must account for the introduction of mass from subgrid particles (evaporation of water droplets, for example).  Using the continuity equation, Eq.~(\ref{mass}), we can rewrite Eq.~(\ref{eqn_LES_4}) as follows:
+\begin{equation}
+\label{eqn_LES_5}
+\overline{\rho} \,\DoD{\widetilde{u}_i}{t} = -\frac{\partial \bar{p}}{\partial x_i} - \frac{\partial \tau_{ij}^{dev}}{\partial x_j} + \overline{\rho} g_i + \underbrace{\bar{f}_{d,i} + \overline{\dot{m}_b^{\ppp}} (\widetilde{u}_{b,i} - \widetilde{u}_i)}_{\displaystyle\bar{f}_{b,i}}
+\end{equation}
+The last term in Eq.~(\ref{eqn_LES_5}) is absorbed into the bulk subgrid force term, $\bar{f}_{b,i}$, which also accounts for drag, as discussed in Chapter \ref{chapter:lagrangian_particles} on Lagrangian Particles.
+
+\subsection{Production of Subgrid Kinetic Energy}
+
+The transport equation for the resolved kinetic energy per unit mass, $K\equiv \mhalf \widetilde{u}_i\widetilde{u}_i$, is derived by dotting the LES momentum equation with the resolved velocity vector.  The result is
+\begin{align}
+\label{eqn_LES_KE}
+\overline{\rho} \,\DoD{K}{t} &= -\widetilde{u}_i\frac{\partial \bar{p}}{\partial x_i} - \widetilde{u}_i\frac{\partial \tau_{ij}^{dev}}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i \notag \\
+\overline{\rho} \,\DoD{K}{t} + \frac{\partial}{\partial x_j} ([\bar{p}\delta_{ij} + \tau_{ij}^{dev}]\widetilde{u}_i) &=  \bar{p} \frac{\partial \widetilde{u}_i}{\partial x_i} + \tau_{ij}^{dev}\frac{\partial \widetilde{u}_i}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i
+\end{align}
+The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence).
+
+Most simple LES subgrid closures take production of subgrid kinetic energy to be equal to the dissipation of total kinetic energy.  Using gradient diffusion for SGS closure, this assumption implies the following:
+\begin{align}
+\label{eqn_ke_dissipation}
+\tau_{ij}^{dev}\frac{\partial \widetilde{u}_i}{\partial x_j} &= - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \frac{\partial \widetilde{u}_i}{\partial x_j} && \notag\\
+&= - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \widetilde{S}_{ij} && \notag \\
+&= - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij}\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}})^2 \right) && = -2\mu \left(S_{ij}S_{ij} - \frac{1}{3}(\Div \mathbf{u})^2 \right) \equiv \varepsilon
+\end{align}
+Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.
+
+\newpage
+
+\section{Models for the Turbulent Viscosity}
+
+In LES, the ``turbulence model'' refers to the closure for SGS flux terms.  In FDS, \emph{gradient diffusion} is the turbulence model used to close both the SGS momentum and scalar flux terms.  We then require a model for the turbulent transport coefficient: the turbulent (or eddy) viscosity or the turbulent (or eddy) diffusivity.  The turbulent diffusivity is obtained using a constant Schmidt number (for mass diffusivity) or Prandtl number (for thermal diffusivity), as discussed below, and so the most important transport coefficient is the turbulent viscosity, $\mu_t$. There are several different options available in FDS. Following is a description of each. The Deardorff model, Section \ref{sec:deardorff}, is the default.
+
+\subsection{Constant Coefficient Smagorinsky Model}
+
+Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity is modeled by
+\be
+\mu_t = \overline{\rho} \, (C_s\, \Delta)^2 \, |\tilde{S}| \label{constant_coef_LES} \quad ; \quad |\tilde{S}| = \left(2 \widetilde{S}_{ij}\widetilde{S}_{ij} - \frac{2}{3} (\nabla\!\cdot \widetilde{\bu})^2 \right)^\ha
+\ee
+where $C_s=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width.
+
+\subsection{Dynamic Smagorinsky Model}
+
+For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_s$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions. Details of the procedure are found in Appendix~\ref{app_dynsmag}.
+
+\subsection{Deardorff Model}
+\label{sec:deardorff}
+
+By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1}:
+\be 
+  \mu_t = \overline{\rho} \, C_\nu \, \Delta \, \sqrt{k_{\hbox{\tiny sgs}} } \quad ; \quad  
+  k_{\hbox{\tiny sgs}} = \ha \left( (\overline{u}-\hat{u})^2 + (\overline{v}-\hat{v})^2 + (\overline{w}-\hat{w})^2 \right)  \label{Deardorff_LES}
+\ee
+where $\overline{u}$ is the average value of $u$ at the grid cell center and $\hat{u}$ is a weighted average of $u$ over the adjacent cells:
+\be
+   \overline{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{u}_{ijk} = \frac{\overline{u}_{ijk}}{2} + \frac{\overline{u}_{i-1,jk} + \overline{u}_{i+1,jk} }{4}
+\ee
+The terms $\hat{v}$ and $\hat{w}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.
+
+\subsection{Thermal Conduction and Gas Species Diffusion}
+
+The other diffusive parameters,
+the thermal conductivity and mass diffusivity, are related to the turbulent viscosity by
+\be k_t = \frac{\mu_t \, c_p}{\PR_t}
+\quad ; \quad
+ (\rho D)_t =\frac{\mu_t}{\SC_t} \ee
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario.  The default value is 0.5 for both.
+
+\subsection{Numerical Implementation}
+
+In the discretized form of the momentum equation, the modeled viscosity is defined at cell centers. For example, the constant coefficient Smagorinsky model takes on the following form:
+\be \mu_{ijk} = \rho_{ijk} \, (C_s\, \Delta)^2 \, |S|   \ee
+where $C_s$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
+\be |S|^2 = 2\left(\dod{u}{x}\right)^2 + 2\left(\dod{v}{y}\right)^2+
+  2\left( \dod{w}{z}\right)^2
+       + \left( \dod{u}{y} + \dod{v}{x} \right)^2
+       + \left( \dod{u}{z} + \dod{w}{x} \right)^2
+       + \left( \dod{v}{z} + \dod{w}{y} \right)^2
+       - \frac{2}{3} (\nabla\!\cdot \bu)^2  \ee
+The quantity $|S|$ consists of second order spatial differences
+averaged at cell centers. For example
+\begin{eqnarray}
+\dod{u}{x} &\approx& \frac{u_{ijk}-u_{i-1,jk}}{\dx_i} \\
+\dod{u}{y} &\approx& \frac{1}{2} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy_{j+\ha}} + \frac{u_{ijk}-u_{i,j-1,k}}{\dy_{j-\ha}} \right) \end{eqnarray}
+The divergence is described in Section~\ref{div_discret}.
+
+The thermal conductivity and material
+diffusivity of the fluid are related to the viscosity by
+\be k_{ijk} = \frac{c_{p,0} \, \mu_{ijk}}{\PR_t}  \quad ; \quad
+   (\rho D)_{ijk} = \frac{\mu_{ijk}}{\SC_t}  \ee
+where $\PR_t$ is the turbulent Prandtl number and $\SC_t$ is the turbulent Schmidt number, both
+assumed constant. Note that the specific heat $c_{p,0}$ is that of the
+dominant species of the mixture. Based on simulations of smoke plumes,
+$C_s$ is 0.20, $\PR_t$ and $\SC_t$ are 0.5. There are no rigorous justifications
+for these choices other than through comparison with
+experimental data~\cite{Zhang:1}.
+
+
+\subsection{Transport Coefficients for Direct Numerical Simulation (DNS)}
+\label{DNS}
+
+There are some flow scenarios where it is possible to use the molecular properties
+$\mu$, $k$ and $D$ directly. Usually, this means that the numerical grid cells are on the
+order of 1~mm or less, and the simulation is regarded as a
+Direct Numerical Simulation (DNS).
+For a DNS, the viscosity, thermal conductivity
+and material diffusivity are approximated from kinetic theory because the temperature
+dependence of each is important in combustion scenarios.
+The viscosity of the species $\alpha$ is given by
+\be \mu_\alpha = \frac{26.69\times 10^{-7} (W_\alpha \, T)^\ha}{\sigma_\alpha^2 \, \Omega_v}
+\quad [=] \quad \frac{\hbox{kg}}{\hbox{m s}} \ee
+where $\sigma_\alpha$ is the Lennard-Jones
+hard-sphere diameter ($\AA$) and $\Omega_v$ is the
+collision integral, an empirical function of the
+temperature $T$. The thermal conductivity of species $\alpha$ is given by
+\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad [=] \quad \frac{\hbox{W}}{\hbox{m K}}  \ee
+where the Prandtl number $\PR$ is 0.7.
+The viscosity and thermal conductivity of a gas mixture are given by
+\be \mu_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; \mu_\alpha  \quad ; \quad
+k_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; k_\alpha  \ee
+The binary diffusion coefficient of species $\alpha$
+diffusing into species $\beta$ is given by
+\be D_{\alpha \beta} = \frac{2.66\times 10^{-7} \, T^{3/2} }{W_{\alpha \beta}^\ha \, \sigma_{\alpha \beta}^2 \, \Omega_D }
+\quad [=] \quad \frac{\hbox{m$^2$}}{\hbox{s}} \ee
+where $W_{\alpha \beta}=2(1/W_\alpha+1/W_\beta)^{-1}$, $\sigma_{\alpha \beta}=(\sigma_\alpha+\sigma_\beta)/2$, and
+$\Omega_D$ is the diffusion collision integral, an empirical
+function of the temperature, $T$~\cite{Poling:1}.
+It is assumed that nitrogen is the dominant species in any combustion
+scenario considered here, thus the diffusion coefficient in the
+species mass conservation equations is that of the given species diffusing
+into nitrogen
+\be (\rho D)_{\alpha,\hbox{\tiny DNS}} = \rho \;  D_{\alpha, 0} \ee
+where species 0 is nitrogen.
+
+\newpage
 
 \section{Simplifying the Momentum Equation}
 
@@ -123,240 +344,6 @@ of the form of the discretized equations, the time-stepping scheme, and
 the direct solution of the Poisson equation for the pressure.
 
 
-\newpage
-
-\section{Large Eddy Simulation (LES)}
-\label{LES}
-
-In this section, we temporarily return to formal LES filter notation and adopt Cartesian tensor index notation (repeated suffixes imply summation) in order to precisely define modeled terms. The LES equations are derived by applying a low-pass filter of width $\Delta$ to the DNS equations. The kernel usually associated with finite volume LES is a box filter---grid resolved quantities are physically interpreted as cell means.  This interpretation is somewhat misleading (see \cite{McDermott:2005b}), but a thorough discussion of filtering is beyond our scope, so the cell mean interpretation will suffice.  In FDS, the filter width is taken to be the cube root of the cell volume, $\Delta = V_c^{1/3}$, $V_c = \delta x \,\delta y\, \delta z$.  Then for any scalar, $\phi$, a filtered field is defined as
-\begin{equation}
-\label{eqn_box_filter}
-\overline{\phi}(x,y,z,t) \equiv \frac{1}{V_c} \int_{x - \delta x/2}^{x + \delta x/2}\int_{y - \delta y/2}^{y + \delta y/2}\int_{z - \delta z/2}^{z + \delta z/2} \phi(x',y',z',t) \,\mbox{d} x' \,\mbox{d} y' \,\mbox{d} z' 
-\end{equation}
-It is also conventional to define a mass-weighted or Favre filter such that $\overline{\rho}\,\widetilde{\phi} \equiv \overline{\rho \phi}$.
-
-\subsection{The DNS Momentum Equation}
-
-In conservative form, the DNS momentum equation for the $i$th component of velocity is
-\begin{equation}
-\label{eqn_dns_conservative}
-\frac{\partial \rho u_i}{\partial t} + \frac{\partial}{\partial x_j} (\rho u_i u_j) = -\frac{\partial p}{\partial x_i} + \frac{\partial \tau_{ij}}{\partial x_j} + \rho g_i
-\end{equation}
-For this equation to be applicable, the grid resolution should be smaller than the Kolmogorov scale \cite{Pope:2000} (the length scale of the smallest turbulent eddies),
-\begin{equation}
-\label{eqn_kolmogorov_scale}
-\eta \equiv (\nu^3/\epsilon)^{1/4}
-\end{equation}
-Here, $\nu$ is the kinematic viscosity and $\epsilon$ is the rate of viscous dissipation (the conversion of kinetic energy to heat by viscosity),
-\begin{equation}
-\epsilon \equiv \tau_{ij} \frac{\partial u_i}{\partial x_j} = 2 \mu \left( S_{ij} S_{ij} - \frac{1}{3} (\nabla\!\cdot \bu)^2 \right) \quad ; \quad S_{ij} \equiv \frac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
-\end{equation}
-
-In fire scenarios, $\eta$ is usually on the order of one millimeter.  DNS is therefore impractical for all but special research flame calculations.
-
-\subsection{The LES Momentum Equation}
-
-With engineering domains ranging in size from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
-\begin{equation}
-\label{eqn_LES_1}
-\frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} + \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i
-\end{equation}
-Simple enough, we just put lines over everything.  The dilemma we now face is that the cell mean value $\overline{\rho u_i u_j}$ is not itself a primitive variable in the calculation---we have no way of computing the stuff under the bars to advance Eq.~(\ref{eqn_LES_1}) in time.  We must, therefore, decompose the terms, and this leads to closure problems.
-
-The next step is simply to apply the Favre filter,
-\begin{equation}
-\label{eqn_LES_2}
-\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i
-\end{equation}
-The first term is now separable, provided we have a solution for $\overline{\rho}$. But we still have no way to compute the correlation $\widetilde{u_i u_j}$ on the grid. We cannot simply use $\widetilde{u}_i \widetilde{u}_j$ as a substitute (this is the old problem of ``the mean of the square does not equal the square of the mean''). Instead, we define the subgrid-scale (SGS) stress:
-\begin{equation}
-\label{eqn_sgs_stress}
-\tau_{ij}^{sgs} \equiv \overline{\rho} ( \widetilde{u_i u_j} - \widetilde{u}_i \widetilde{u}_j )
-\end{equation}
-Substituting Eq.~(\ref{eqn_sgs_stress}) into Eq.~(\ref{eqn_LES_2}) yields
-\begin{equation}
-\label{eqn_LES_3}
-\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} - \frac{\partial \tau_{ij}^{sgs}}{\partial x_j} + \overline{\rho} g_i
-\end{equation}
-
-Equation (\ref{eqn_LES_3}) is what is typically referred to as the LES momentum equation (analogous to the Cauchy equation---constitutive models have not been applied).  All variables are primitive or computable.  It remains that we find a suitable closure for the subgrid scale stress, $\tau_{ij}^{sgs}$.
-
-\subsubsection*{Constitutive Relationship}
-
-There are a few more modifications we need to make in order to get Eq.~(\ref{eqn_LES_3}) into shape for FDS.  The first is to decompose the SGS stress and apply Newton's law of viscosity as the constitutive relationship for the deviatoric part.  Note that $\overline{\tau}_{ij}$ is already the deviatoric part of the viscous stress:
-\begin{equation}
-\label{eqn_newtons_law_sgs}
-\overline{\tau}_{ij} + \tau_{ij}^{sgs} - \frac{1}{3}\tau_{kk}^{sgs}\delta_{ij} = - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right)
-\end{equation}
-Note that $\delta_{ij}$ is the Kronecker delta ($\delta_{ij}=1$ if $i=j$, $\delta_{ij}=0$ if $i\ne j$) and that $\mu_t$ is the \emph{turbulent viscosity}, which requires modeling, as discussed below.
-
-\subsubsection*{Modified Pressure Term}
-
-A point often ignored in LES of low-Mach flows is that the isotropic part of the SGS stress must be absorbed by the pressure term.  Define the subgrid kinetic energy as half the trace of the SGS stress,
-\begin{equation}
-\label{eqn_ksgs_2}
-k_{sgs} \equiv \frac{1}{2} \tau_{kk}^{sgs}
-\end{equation}
-and define the modified filtered pressure \cite{Pope:2000} as
-\begin{equation}
-\label{eqn_modified_pressure}
-\bar{p} \equiv \overline{p} + \frac{2}{3}k_{sgs}
-\end{equation}
-
-Upon substitution of Eqs.~(\ref{eqn_newtons_law_sgs}) and (\ref{eqn_modified_pressure}) into Eq.~(\ref{eqn_LES_3}), we have
-
-\begin{equation}
-\label{eqn_LES_4}
-\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \bar{p}}{\partial x_i} + \frac{\partial}{\partial x_j}\left( 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \right) + \overline{\rho} g_i
-\end{equation}
-
-
-\subsection{Production of Subgrid Kinetic Energy}
-
-LES is a technique used to model the dissipative processes (viscosity,
-thermal conductivity, material diffusivity) that occur at length scales smaller than those that
-are explicitly resolved on the numerical grid~\cite{Deardorff:1,Germano:1,Lilly:1}. This means that the parameters $\mu$, $k$ and $D$ in the governing equations
-must be modeled. Additional explanation of the various assumptions can be found in a review article by Pope~\cite{Pope:2004}.
-
-There is a small term in the energy equation known as the {\em dissipation rate}, $\epsilon$,
-the rate at which kinetic energy is converted to thermal energy by viscosity:
-\begin{align}
-\epsilon &\equiv \btau_{ij} \cdot \nabla \bu \quad =  \quad
-   \mu \left( 2 \; \bS_{ij} \cdot \bS_{ij}
-                  - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)  \nonumber \\
-  &= \mu \left[ 2 \left(\dod{u}{x}\right)^2
- + 2 \left(\dod{v}{y}\right)^2 + 2 \left(\dod{w}{z}\right)^2 + \right. \nonumber \\
-&  \left.
-  \left(\dod{v}{x}+\dod{u}{y}\right)^2 + \left(\dod{w}{y}+\dod{v}{z}\right)^2
- + \left(\dod{u}{z}+\dod{w}{x}\right)^2 - \frac{2}{3}
-   \left(\dod{u}{x}+\dod{v}{y} + \dod{w}{z} \right)^2  \right]  \label{dissipation} \end{align}
-This term is usually neglected in the energy conservation equation because it is very small relative to the heat release rate of
-the fire. To understand where this term originates, form an evolution equation for the kinetic energy of the fluid by
-taking the dot product of the momentum equation (\ref{momeq}) with the velocity vector\footnote{In this section
-it is convenient to work with the Lagrangian form of the conservation equations. }:
-\be \rho \, \frac{\mbox{D}\bu}{\mbox{D}t} \cdot \bu = \rho  \, \frac{\mbox{D}\left(|\bu|^2/2\right)}{\mbox{D}t} =
-    \rho \bof_b \cdot \bu - \nabla p \cdot \bu + \nabla\!\cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
-As mentioned above $\epsilon$ is a negligible quantity in the energy equation. However, its functional form
-is useful in representing the dissipation of kinetic energy from the resolved flow field.
-
-The model for the viscosity, $\mu_{\hbox{\tiny LES}}$, serves two roles: first, it provides a stabilizing
-effect in the numerical algorithm, damping out numerical instabilities as they arise in the flow field, especially where vorticity is
-generated. Second, it has the appropriate mathematical form to describe the dissipation of kinetic energy from the flow.
-Note the similar mathematical form of $\mu_{\hbox{\tiny LES}}$ and
-the dissipation rate, $\epsilon$, defined in Eq.~(\ref{dissipation}).
-In the parlance of the turbulence community, the dissipation
-rate is related to the turbulent kinetic energy (most often denoted by $k$) by the
-relation $\epsilon \approx k^{3/2}/L$, where $L$ is a length scale.
-
-There are several different variations of LES included in FDS. Following is a description of each.
-
-\begin{equation}
-\label{eqn_strain_invariant}
-|\tilde{S}| = \left(2 \widetilde{S}_{ij}\widetilde{S}_{ij} - \frac{2}{3} (\nabla\!\cdot \widetilde{\bu})^2 \right)^\ha
-\end{equation}
-
-\subsection{Constant Coefficient Smagorinsky Model}
-
-Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the viscosity is modeled
-\be
-\mu_t = \overline{\rho} \, (C_s\, \Delta)^2 \, |\tilde{S}| \label{constant_coef_LES}
-\ee
-where $\mu$ is the actual molecular viscosity of the fluid, $C_s=0.2$ is a constant, and $\Delta$ is a length on the
-order of the size of a grid cell. The bar atop the variables denotes the resolved values.
-
-\subsection{Dynamic Smagorinsky Model}
-
-For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_s$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions. Details of the procedure are found in Appendix~\ref{app_dynsmag}.
-
-\subsection{Deardorff Model}
-
-By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1}:
-\be 
-  \mu_t = \overline{\rho} \, C_\nu \, \Delta \, \sqrt{k_{\hbox{\tiny sgs}} } \quad ; \quad  
-  k_{\hbox{\tiny sgs}} = \ha \left( (\overline{u}-\hat{u})^2 + (\overline{v}-\hat{v})^2 + (\overline{w}-\hat{w})^2 \right)  \label{Deardorff_LES}
-\ee
-where $\overline{u}$ is the average value of $u$ at the grid cell center and $\hat{u}$ is a weighted average of $u$ over the adjacent cells:
-\be
-   \overline{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{u}_{ijk} = \frac{\overline{u}_{ijk}}{2} + \frac{\overline{u}_{i-1,jk} + \overline{u}_{i+1,jk} }{4}
-\ee
-The terms $\hat{v}$ and $\hat{w}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.
-
-\subsection{Thermal Conduction and Gas Species Diffusion}
-
-The other diffusive parameters,
-the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
-\be k_t = \frac{\mu_t \, c_p}{\PR_t}
-\quad ; \quad
- (\rho D)_{\alpha,t} =\frac{\mu_t}{\SC_t} \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario.  The default value is 0.5 for both.
-
-\subsection{Numerical Implementation}
-
-In the discretized form of the momentum equation, the modeled viscosity is defined at cell centers. For example, the constant coefficient Smagorinsky model takes on the following form:
-\be \mu_{ijk} = \rho_{ijk} \, (C_s\, \Delta)^2 \, |S|   \ee
-where $C_s$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
-\be |S|^2 = 2\left(\dod{u}{x}\right)^2 + 2\left(\dod{v}{y}\right)^2+
-  2\left( \dod{w}{z}\right)^2
-       + \left( \dod{u}{y} + \dod{v}{x} \right)^2
-       + \left( \dod{u}{z} + \dod{w}{x} \right)^2
-       + \left( \dod{v}{z} + \dod{w}{y} \right)^2
-       - \frac{2}{3} (\nabla\!\cdot \bu)^2  \ee
-The quantity $|S|$ consists of second order spatial differences
-averaged at cell centers. For example
-\begin{eqnarray}
-\dod{u}{x} &\approx& \frac{u_{ijk}-u_{i-1,jk}}{\dx_i} \\
-\dod{u}{y} &\approx& \frac{1}{2} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy_{j+\ha}} + \frac{u_{ijk}-u_{i,j-1,k}}{\dy_{j-\ha}} \right) \end{eqnarray}
-The divergence is described in Section~\ref{div_discret}.
-
-The thermal conductivity and material
-diffusivity of the fluid are related to the viscosity by
-\be k_{ijk} = \frac{c_{p,0} \, \mu_{ijk}}{\PR_t}  \quad ; \quad
-   (\rho D)_{ijk} = \frac{\mu_{ijk}}{\SC_t}  \ee
-where $\PR_t$ is the turbulent Prandtl number and $\SC_t$ is the turbulent Schmidt number, both
-assumed constant. Note that the specific heat $c_{p,0}$ is that of the
-dominant species of the mixture. Based on simulations of smoke plumes,
-$C_s$ is 0.20, $\PR_t$ and $\SC_t$ are 0.5. There are no rigorous justifications
-for these choices other than through comparison with
-experimental data~\cite{Zhang:1}.
-
-
-\newpage
-
-\section{Transport Coefficients for Direct Numerical Simulation (DNS)}
-\label{DNS}
-
-There are some flow scenarios where it is possible to use the molecular properties
-$\mu$, $k$ and $D$ directly. Usually, this means that the numerical grid cells are on the
-order of 1~mm or less, and the simulation is regarded as a
-Direct Numerical Simulation (DNS).
-For a DNS, the viscosity, thermal conductivity
-and material diffusivity are approximated from kinetic theory because the temperature
-dependence of each is important in combustion scenarios.
-The viscosity of the species $\alpha$ is given by
-\be \mu_\alpha = \frac{26.69\times 10^{-7} (W_\alpha \, T)^\ha}{\sigma_\alpha^2 \, \Omega_v}
-\quad [=] \quad \frac{\hbox{kg}}{\hbox{m s}} \ee
-where $\sigma_\alpha$ is the Lennard-Jones
-hard-sphere diameter ($\AA$) and $\Omega_v$ is the
-collision integral, an empirical function of the
-temperature $T$. The thermal conductivity of species $\alpha$ is given by
-\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad [=] \quad \frac{\hbox{W}}{\hbox{m K}}  \ee
-where the Prandtl number $\PR$ is 0.7.
-The viscosity and thermal conductivity of a gas mixture are given by
-\be \mu_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; \mu_\alpha  \quad ; \quad
-k_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; k_\alpha  \ee
-The binary diffusion coefficient of species $\alpha$
-diffusing into species $\beta$ is given by
-\be D_{\alpha \beta} = \frac{2.66\times 10^{-7} \, T^{3/2} }{W_{\alpha \beta}^\ha \, \sigma_{\alpha \beta}^2 \, \Omega_D }
-\quad [=] \quad \frac{\hbox{m$^2$}}{\hbox{s}} \ee
-where $W_{\alpha \beta}=2(1/W_\alpha+1/W_\beta)^{-1}$, $\sigma_{\alpha \beta}=(\sigma_\alpha+\sigma_\beta)/2$, and
-$\Omega_D$ is the diffusion collision integral, an empirical
-function of the temperature, $T$~\cite{Poling:1}.
-It is assumed that nitrogen is the dominant species in any combustion
-scenario considered here, thus the diffusion coefficient in the
-species mass conservation equations is that of the given species diffusing
-into nitrogen
-\be (\rho D)_{\alpha,\hbox{\tiny DNS}} = \rho \;  D_{\alpha, 0} \ee
-where species 0 is nitrogen.
 
 
 \newpage
