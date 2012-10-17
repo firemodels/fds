@@ -45,7 +45,8 @@ GLUI_Spinner *SPINNER_tick_dy0=NULL;
 GLUI_Spinner *SPINNER_tick_dz0=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_face=NULL;
 GLUI_Spinner *SPINNER_subtick=NULL;
-GLUI_Spinner *SPINNER_scaled_font_height=NULL;
+GLUI_Spinner *SPINNER_scaled_font2d_size=NULL;
+GLUI_Spinner *SPINNER_scaled_font3d_size=NULL;
 
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
@@ -87,6 +88,7 @@ GLUI_Panel *PANEL_tick1b;
 GLUI_Panel *PANEL_tick2;
 GLUI_Panel *PANEL_transparency=NULL;
 GLUI_Panel *PANEL_showhide=NULL;
+GLUI_Panel *PANEL_font=NULL;
 
 GLUI_RadioGroup *RADIO_fontsize=NULL,*RADIO_showhide=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
@@ -139,10 +141,12 @@ GLUI_Button *BUTTON_label_4=NULL;
 extern "C" void glui_update_fontindex(void){
   if(RADIO_fontsize!=NULL){
     if(fontindex==SCALED_FONT){
-      SPINNER_scaled_font_height->enable();
+      SPINNER_scaled_font2d_size->enable();
+      SPINNER_scaled_font3d_size->enable();
     }
     else{
-      SPINNER_scaled_font_height->disable();
+      SPINNER_scaled_font2d_size->disable();
+      SPINNER_scaled_font3d_size->disable();
     }
   }
 }
@@ -188,9 +192,9 @@ extern "C" void glui_labels_rename(void){
 
   CHECKBOX_labels_hms->set_name(_("hms time label"));
 
-  RADIOBUTTON_label_1a->set_name(_("small font"));
-  RADIOBUTTON_label_1b->set_name(_("large font"));
-  RADIOBUTTON_label_1c->set_name(_("scaled font"));
+  RADIOBUTTON_label_1a->set_name(_("small"));
+  RADIOBUTTON_label_1b->set_name(_("large"));
+  RADIOBUTTON_label_1c->set_name(_("scaled"));
 
 
   ROLLOUT_user_tick->set_name("User tick settings");
@@ -278,12 +282,14 @@ extern "C" void glui_labels_setup(int main_window){
 
   CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(ROLLOUT_label1,_("hms time label"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
 
-  RADIO_fontsize = glui_labels->add_radiogroup_to_panel(ROLLOUT_label1,&fontindex,LABELS_fontsize,Labels_CB);
-  RADIOBUTTON_label_1a=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small font"));
-  RADIOBUTTON_label_1b=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large font"));
-  RADIOBUTTON_label_1c=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("scaled font"));
+  PANEL_font = glui_labels->add_panel_to_panel(ROLLOUT_label1,"font",true);
+  RADIO_fontsize = glui_labels->add_radiogroup_to_panel(PANEL_font,&fontindex,LABELS_fontsize,Labels_CB);
+  RADIOBUTTON_label_1a=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small"));
+  RADIOBUTTON_label_1b=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large"));
+  RADIOBUTTON_label_1c=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("scaled"));
 
-  SPINNER_scaled_font_height=glui_labels->add_spinner_to_panel(ROLLOUT_label1,"font size:",GLUI_SPINNER_INT,&scaled_font_height);
+  SPINNER_scaled_font2d_size=glui_labels->add_spinner_to_panel(PANEL_font,"size (labels):",GLUI_SPINNER_INT,&scaled_font2d_size);
+  SPINNER_scaled_font3d_size=glui_labels->add_spinner_to_panel(PANEL_font,"size (scene):",GLUI_SPINNER_INT,&scaled_font3d_size);
   glui_update_fontindex();
 
   SPINNER_linewidth=glui_labels->add_spinner_to_panel(ROLLOUT_label1,"blockage line width",GLUI_SPINNER_FLOAT,&linewidth);

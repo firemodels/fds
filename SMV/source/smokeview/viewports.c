@@ -36,6 +36,10 @@ int SUB_portortho(int quad,
 
   switch (quad){
   case 0:            
+    port_pixel_width = i_width;
+    port_pixel_height = i_height;
+    port_unit_width = x_right - x_left;
+    port_unit_height = x_top - x_down;
     glViewport(i_left,i_down,i_width,i_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -70,6 +74,10 @@ int SUB_portortho(int quad,
       nx_top = x_down + (screenHeight-n_down)*(x_top-x_down)/n_height;
       n_height = screenHeight-n_down;
     }
+    port_pixel_width = n_width;
+    port_pixel_height = n_height;
+    port_unit_width = nx_right - nx_left;
+    port_unit_height = nx_top - nx_down;
     glViewport(n_left,n_down,n_width,n_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -97,6 +105,10 @@ int SUB_portfrustum(int quad,
 
   switch (quad){
   case 0:
+    port_pixel_width = i_width;
+    port_pixel_height = i_height;
+    port_unit_width = x_right - x_left;
+    port_unit_height = x_top - x_down;
     glViewport(i_left,i_down,i_width,i_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -142,6 +154,10 @@ int SUB_portfrustum(int quad,
       nx_top = x_down + (screenHeight-n_down)*(x_top-x_down)/n_height;
       n_height = screenHeight-n_down;
     }
+    port_pixel_width = n_width;
+    port_pixel_height = n_height;
+    port_unit_width = nx_right - nx_left;
+    port_unit_height = nx_top - nx_down;
     glViewport(n_left,n_down,n_width,n_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -281,7 +297,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
     labellength=glutBitmapLength(large_font, (const unsigned char *)meshlabel);
     mesh_left=val_right-val_right*labellength/(float)dwinW;
     mesh_bot=val_top-val_top*large_font_height/(float)(dwinH-fontHoffset);
-    outputText(mesh_left,mesh_bot, -1.0, -1.0, meshlabel);
+    outputText(mesh_left,mesh_bot, meshlabel);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visx_all==1)||visGrid==noGridProbe||visGrid==GridProbe){
     float plotval;
@@ -309,7 +325,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       sprintf(slicelabel,"x: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-0.5,0.6f, -1.0,-1.0,slicelabel);
+    if(visgridloc==1)outputText(mesh_left-0.5,0.6f, slicelabel);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visy_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     float plotval;
@@ -336,7 +352,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       sprintf(slicelabel,"y: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-0.5,0.35f, -1.0,-1.0, slicelabel);
+    if(visgridloc==1)outputText(mesh_left-0.5,0.35f, slicelabel);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visz_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     float plotval;
@@ -363,7 +379,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       sprintf(slicelabel,"z: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-.5,0.1f, -1.0,-1.0, slicelabel);
+    if(visgridloc==1)outputText(mesh_left-.5,0.1f, slicelabel);
   }
 }
 
@@ -437,9 +453,9 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
      xtimeright=xtimeleft+0.6*(xtemp-xtimeleft);
 
      if( visTimeLabels==1&&showtime==1){
-      if(visTimelabel==1)outputText(0.0f,0.1f, -1.0,-1.0, timelabel);
-      if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, -1.0,-1.0, framelabel);
-      if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, -1.0,-1.0, hrrinfo->hrrlabel);
+      if(visTimelabel==1)outputText(0.0f,0.1f, timelabel);
+      if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, framelabel);
+      if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, hrrinfo->hrrlabel);
       drawTimeBar();
      }
 
@@ -456,11 +472,11 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
           sprintf(frameratelabel," *Frame rate:%4.1f",framerate);
         }
       }
-      outputText((float)(xtimeright+0.025),0.08f, -1.0,-1.0, frameratelabel);
+      outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
     }
     if(show_slice_average==1&&vis_slice_average==1&&slice_average_flag==1){
       sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
-      outputText((float)(xtimeright+0.025),0.56, -1.0,-1.0, frameratelabel); // test print
+      outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
     }
     if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL){
       char hrrcut_label[256];
@@ -470,7 +486,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       ihrrcut = (int)global_hrrpuv_cutoff;
 
       sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
-      outputText((float)(xtimeright+0.06),0.56f, -1.0,-1.0, hrrcut_label);
+      outputText((float)(xtimeright+0.06),0.56f, hrrcut_label);
       xxl = xtimeright+0.025;
       xxr = xxl+ddx;
       yyl = 0.56;
@@ -491,10 +507,10 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       MEMSTATUS(0,&availmemory,NULL,NULL);
       sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
       if((benchmark==1||visFramerate==1)&&showtime==1){
-        outputText((float)(xtimeright+0.025),0.32f, -1.0,-1.0, frameratelabel);
+        outputText((float)(xtimeright+0.025),0.32f, frameratelabel);
       }
       else{
-        outputText((float)(xtimeright+0.025),0.08f, -1.0,-1.0, frameratelabel);
+        outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
       }
     }
 #endif
@@ -508,10 +524,10 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
 
         getMemusage(MMtotalmemory,MEMlabel);
         if((benchmark==1||visFramerate==1)&&showtime==1){
-          outputText((float)(xtimeright+0.025),0.32f, -1.0,-1.0, MEMlabel);
+          outputText((float)(xtimeright+0.025),0.32f, MEMlabel);
         }
         else{
-          outputText((float)(xtimeright+0.025),0.08f, -1.0,-1.0, MEMlabel);
+          outputText((float)(xtimeright+0.025),0.08f, MEMlabel);
         }
     }
 #endif
@@ -733,19 +749,19 @@ void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   ititle=0;
   if(showtitle2==1){
     ititle++;
-    outputText(left,(ititle-1)*ratio+textdown, -1.0,-1.0, TITLE2);
+    outputText(left,(ititle-1)*ratio+textdown, TITLE2);
   }
   if(showtitle1==1){
     ititle++;
-    outputText(left,(ititle-1)*ratio+textdown, -1.0,-1.0, TITLE1);
+    outputText(left,(ititle-1)*ratio+textdown, TITLE1);
   }
   if(visTitle0==1){
     ititle++;
     if(visFullTitle==1&&showplot3d==1){
-      outputText(left,(ititle-1)*ratio+textdown, box_width, box_height, FULLTITLE);
+      outputText(left,(ititle-1)*ratio+textdown, FULLTITLE);
     }
     else{
-      outputText(left,(ititle-1)*ratio+textdown, box_width, box_height, TITLE);
+      outputText(left,(ititle-1)*ratio+textdown, TITLE);
     }
   }
 }

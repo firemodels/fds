@@ -66,8 +66,8 @@ void outputSText3(float x, float y, float z, char *string){
 
 
   if(string==NULL)return;
-  scale_y = 0.025*(float)scaled_font_height/480.0;
-  scale_x = 0.025*(float)scaled_font_height/640.0;
+  scale_x = xyzmaxdiff*((float)scaled_font3d_size/(float)104.76)/(float)port_pixel_width;
+  scale_y = xyzmaxdiff*((float)scaled_font3d_size/(float)152.38)/(float)port_pixel_height;
   glPushMatrix();
   glTranslatef(x,y,z);
   v[0]=world_eyepos[0]-x;
@@ -94,7 +94,7 @@ void outputSText3(float x, float y, float z, char *string){
 
 /* ------------------ outputSText2r ------------------------ */
 
-void outputSText2r(float x, float y, float z, float width, float height, char *string){ 
+void outputSText2r(float x, float y, float z, char *string){ 
   char *c;
   int total_width=0;
   float scale_x, scale_y;
@@ -105,9 +105,9 @@ void outputSText2r(float x, float y, float z, float width, float height, char *s
     total_width+=glutStrokeWidth(GLUT_STROKE_ROMAN,*c);
   }
   glPushMatrix();
-  scale_x=width/(float)total_width;
-  scale_y=height/150.0;
-  glTranslatef(x-1.1*scale_x*total_width,y,z);
+  scale_x = port_unit_width*((float)scaled_font2d_size/(float)104.76)/(float)port_pixel_width;
+  scale_y = port_unit_height*((float)scaled_font2d_size/(float)152.38)/(float)port_pixel_height;
+  glTranslatef(x-scale_x*total_width,y,z);
   glScalef(scale_x,scale_y,1.0);
   for (c=string; *c != '\0'; c++){
     glutStrokeCharacter(GLUT_STROKE_ROMAN,*c);
@@ -117,7 +117,7 @@ void outputSText2r(float x, float y, float z, float width, float height, char *s
 
 /* ------------------ outputSText2 ------------------------ */
 
-void outputSText2(float x, float y, float z, float width, float height, char *string){ 
+void outputSText2(float x, float y, float z, char *string){ 
   char *c;
   int total_width=0;
   float scale_x, scale_y;
@@ -128,8 +128,8 @@ void outputSText2(float x, float y, float z, float width, float height, char *st
     total_width+=glutStrokeWidth(GLUT_STROKE_ROMAN,*c);
   }
   glPushMatrix();
-  scale_x=width/(float)total_width;
-  scale_y=height/150.0;
+  scale_x = port_unit_width*((float)scaled_font2d_size/(float)104.76)/(float)port_pixel_width;
+  scale_y = port_unit_height*((float)scaled_font2d_size/(float)152.38)/(float)port_pixel_height;
   glTranslatef(x,y,z);
   glScalef(scale_x,scale_y,1.0);
   for (c=string; *c != '\0'; c++){
@@ -182,13 +182,13 @@ void outputLargeText(float x, float y, char *string){
 
 /* ------------------ outputText ------------------------ */
 
-void outputText(float x, float y, float width, float height, char *string){
+void outputText(float x, float y, char *string){
   char *c;
 
   if(string==NULL)return;
   glColor3fv(foregroundcolor);
-  if(fontindex==SCALED_FONT&&width>0.0&&height>0.0){
-    outputSText2(x,y,0.0,width,height,string);
+  if(fontindex==SCALED_FONT){
+    outputSText2(x,y,0.0,string);
     return;
   }
   else{
@@ -201,7 +201,7 @@ void outputText(float x, float y, float width, float height, char *string){
 
 /* ------------------ outputBarText ------------------------ */
 
-void outputBarText(float x, float y, float width, float height, const GLfloat *color, char *string){
+void outputBarText(float x, float y, const GLfloat *color, char *string){
   int length;
   float xlength;
   float xbeg;
@@ -210,8 +210,8 @@ void outputBarText(float x, float y, float width, float height, const GLfloat *c
   if(string==NULL)return;
   glColor3fv(color);
 
-  if(fontindex==SCALED_FONT&&width>0.0&&height>0.0){
-    outputSText2r(x,y,0.0,0.4*width,0.4*height,string);
+  if(fontindex==SCALED_FONT){
+    outputSText2r(x,y,0.0,string);
   }
   else{
     length=glutBitmapLength(small_font, (const unsigned char *)string); 
