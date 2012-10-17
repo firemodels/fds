@@ -13,6 +13,7 @@ char colorbar_revision[]="$Revision$";
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
+#endif
 
 #include "string_util.h"
 #include "smokeviewvars.h"
