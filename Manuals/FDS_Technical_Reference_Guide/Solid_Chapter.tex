@@ -510,14 +510,14 @@ The gravitational settling velocity is given by~\cite{Davies_Charles}
 u_g = g m_a \frac{\text{Cn}}{6 \pi \, \chi_d \, \mu \, r_a}
 \ee
 
-where $m_a$ is the particle mass, $\chi_d$ is a shape factor, $r_a$ is the particle radius,
+\noindent where $m_a$ is the particle mass, $\chi_d$ is a shape factor, $r_a$ is the particle radius,
 and Cn is the Cunningham slip factor given by~\cite{Cunningham:1}
 
 \be
-\text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; e^{-0.88/\text{Kn}}
+\text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; \mathrm{e}^{-0.88/\text{Kn}}
 \ee
 
-where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas
+\noindent where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas
 to the particle radius. The mean free path of a gas is proportional to its temperature,
 thus Kn is computed as~\cite{Sippola:1}
 
@@ -542,22 +542,22 @@ The thermophoretic velocity is computed as
 u_{th} = \frac{K_{th} \nu}{T_g} \; \frac{\d T}{\d x}
 \ee
 
-This requires the wall temperature gradient, which is only resolved in a DNS simulation.
+\noindent This requires the wall temperature gradient, which is only resolved in a DNS simulation.
 For an LES simulation, the temperature gradient is computed from the wall heat transfer coefficient.
 
 \be
  \frac{\d T}{\d x} = \frac{h \left( T_g - T_w \right)}{k_g}
 \ee
 
-$K_{th}$ is the thermophoretic velocity coefficient and is calculated using the following correlation~\cite{Brock:1}
+\noindent $K_{th}$ is the thermophoretic velocity coefficient and is calculated using the following correlation~\cite{Brock:1}
 
 \be
  K_{th} = \frac{2 \, C_s \left(\alpha + C_t \; \text{Kn} \right) \; \text{Cn}}{\left(1 + 3 \, C_m \; \text{Kn} \right) \left(1 + 2 \, \alpha + 2 \, C_t \, \text{Kn} \right) }
 \ee
 
-where $C_s$ is the thermal slip coefficient (1.17), $\alpha$ is the ratio of the gas
-conductivity to the particle conductivity, $C_m$ is the momentum accommodation
-coefficient (1.14), and $C_t$ is the thermal accommodation coefficient (2.18).
+\noindent where $C_s=1.17$ is the thermal slip coefficient, $\alpha$ is the ratio of the gas
+conductivity to the particle conductivity, $C_m=1.14$ is the momentum accommodation
+coefficient, and $C_t=2.18$ is the thermal accommodation coefficient.
 
 \subsection{Turbulent Deposition}
 
@@ -566,14 +566,14 @@ The diffusion-turbulence deposition velocity depends upon the flow regime
 for these regimes is given below~\cite{McCoy_Hanratty}.
 
 \be
-u_{dt} = \left\{ \begin{array}{r@{\quad \quad}c}
+u_{dt} = \left\{ \begin{array}{r@{\quad \quad}l}
          0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
          3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 30 \\
          0.17 \; u_{\tau}                             &  \tau^+ < 30
          \end{array} \right.
 \ee
 
-where $u_{\tau}$ is the wall friction velocity computed by the wall model,
+\noindent where $u_{\tau}$ is the wall friction velocity computed by the wall model,
 and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
 
 \be

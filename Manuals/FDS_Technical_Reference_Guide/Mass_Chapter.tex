@@ -68,7 +68,7 @@ Advection terms are written in flux divergence (conservative) form. In the predi
 \ee
 The quantity $\overline{\rho}^{FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
 
-Following the prediction of the velocity and background pressure at time level $(n+1)$, the density is corrected via
+Following the prediction of the velocity and background pressure at time level $n+1$, the density is corrected via
 \be \frac{\rho_{ijk}^{n+1}-\ha\left(\rho_{ijk}^n
      +\rho_{ijk}^{*}\right)} {\ha \dt}
     + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^{*}
