@@ -980,7 +980,7 @@ int get_label_position(float position, float dyfont, float barbot){
 
 /* ------------------ drawColorBars ------------------------ */
 
-void drawColorBars(float width, float height){
+void drawColorBars(void){
   float dyfont;
   int dyscreen;
   int temp;

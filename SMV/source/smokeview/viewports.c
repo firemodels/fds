@@ -539,8 +539,6 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
 void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
   GLint temp;
   float xnum;
-  float width, height;
-
 
   if(visColorbarLabels==1&&numColorbars!=0){
     temp = (int)(1.2f*dwinH);
@@ -548,8 +546,6 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
     if(fontindex==LARGE_FONT)xnum*=1.5;
     if(screenWidth<screenHeight){
       barright=xnum/3.0+0.1f;
-      width = barright;
-      height = ratio;
       if(SUB_portortho(quad,
         screenWidth-2-dwinWW-fontWoffset-titlesafe_offset,
         temp+titlesafe_offset,
@@ -561,8 +557,6 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
       }
     }
     else{
-      width = barright;
-      height = 1.0;
       barright=(xnum/3.0+0.1f);
       if(SUB_portortho(quad,
         screenWidth-2-dwinWW-fontWoffset-titlesafe_offset,
@@ -579,7 +573,7 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
     glLoadIdentity();
 
     if( showtime==1 || showplot3d==1){
-      drawColorBars(width,height);
+      drawColorBars();
     }
   }
 }
