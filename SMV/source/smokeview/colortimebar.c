@@ -9,11 +9,27 @@ char colorbar_revision[]="$Revision$";
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#ifdef pp_OSX
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
 
 #include "string_util.h"
 #include "smokeviewvars.h"
 
 #define DYFONT (-0.5)
+
+/* ------------------ getstringwidth ------------------------ */
+
+int getstringwidth(int font, char *string){
+  char *c;
+  int width=0;
+
+  for(c=string;c!='\0';c++){
+   // width+=glutBitmapWidth(font,*c);
+  }
+  return width;
+}
 
 /* ------------------ UpdateTimeLabels ------------------------ */
 
