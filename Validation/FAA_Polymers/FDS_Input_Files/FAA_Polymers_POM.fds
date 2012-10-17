@@ -22,7 +22,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       NU_SPEC=1.
       HEAT_OF_REACTION=2540.
       CONDUCTIVITY = 0.28
-      SPECIFIC_HEAT = 2.90 /
+      SPECIFIC_HEAT = 1.90 /
 
 &MATL ID='FOAMGLAS'
       CONDUCTIVITY = 0.08
