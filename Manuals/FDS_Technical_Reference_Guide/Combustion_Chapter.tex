@@ -152,7 +152,7 @@ Modeling chemical reactions in turbulent flow is mathematically challenging beca
 
 \subsection{Eddy Dissipation Concept}
 \label{sec:EDC} 
-Within the batch reactor, the proportion of the cell that is mixed is the unmixed fraction, $\zeta(t;\tau_{mix})$. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). In a combustion sense, $\zeta=1$  represents a diffusion flame and $\zeta=0$ represents a premixed flame. The amount of mixing within a computational cell is defined by:
+Within the batch reactor, the state of mixing in the cell is described by the \emph{unmixed} fraction, $\zeta(t;\tau_{mix})$. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). An initial unmixed fraction $\zeta_0=1$  represents a diffusion flame and $\zeta_0=0$ represents a premixed flame. The state of mixing within a computational cell is governed by the following simple ODE:
 \begin{equation}\label{eq:zeta}
 \frac{\mbox{d}\zeta}{\mbox{d}t}=-\frac{\zeta}{\tau_{mix}}
 \end{equation}
