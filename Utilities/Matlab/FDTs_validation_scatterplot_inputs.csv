@@ -1,6 +1,7 @@
 Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Sigma_2_E,Model_Error,Plot_Filename
 Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Cable_Temperature
-Ceiling Jet Temperature,Measured Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,600,0.03 0.95,NorthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Ceiling_Jet_Temperature
+"Ceiling Jet Temperature, Compartment",Measured Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,600,0.03 0.95,NorthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Ceiling_Jet_Temperature_Compartment
+"Ceiling Jet Temperature, Unconstrained",Measured Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,200,0.03 0.95,NorthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Ceiling_Jet_Temperature_Unconstrained
 "HGL Temperature, Forced Ventilation (FPA)",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_FPA
 "HGL Temperature, Forced Ventilation (DB)",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_DB
 "HGL Temperature, Natural Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_MQH
