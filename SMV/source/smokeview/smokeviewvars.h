@@ -912,9 +912,6 @@ SVEXTERN   int openfileflag;
 SVEXTERN float xyzmaxdiff;
 SVEXTERN char ext_png[5];
 SVEXTERN char ext_jpg[5];
-#ifdef pp_GDGIF
-SVEXTERN char ext_gif[5];
-#endif
 SVEXTERN int renderfiletype;
 SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];

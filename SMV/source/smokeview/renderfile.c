@@ -26,9 +26,6 @@ char renderfile_revision[]="$Revision$";
 #ifdef pp_JPEG
 #define JPEG 1
 #endif
-#ifdef pp_GDGIF
-#define GIF 2
-#endif
 
 /* ------------------ Render ------------------------ */
 
@@ -225,11 +222,6 @@ void RenderFrame(int view_mode){
     renderfile_ext=ext_jpg;
     break;
 #endif
-#ifdef pp_GDGIF
-  case 2:
-    renderfile_ext=ext_gif;
-    break;
-#endif
   default:
     renderfiletype=2;
     renderfile_ext=ext_png;
@@ -299,11 +291,6 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
 #ifdef pp_JPEG
   case JPEG:
     ext=ext_jpg;
-    break;
-#endif
-#ifdef pp_GDGIF
-  case GIF:
-    ext=ext_gif;
     break;
 #endif
   default:
@@ -399,11 +386,6 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
 #ifdef pp_JPEG
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
-    break;
-#endif
-#ifdef pp_GDGIF
-  case GIF:
-    gdImageGif(RENDERimage,RENDERfile);
     break;
 #endif
   default:
@@ -519,11 +501,6 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 #ifdef pp_JPEG
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
-    break;
-#endif
-#ifdef pp_GDGIF
-  case GIF:
-    gdImageGif(RENDERimage,RENDERfile);
     break;
 #endif
   default:

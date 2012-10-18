@@ -317,9 +317,6 @@ void _Sniff_Errors(char *whereat);
 #ifdef pp_JPEG
 #define RenderJPEG 997
 #endif
-#ifdef pp_GDGIF
-#define RenderGIF 988
-#endif
 #define RenderPNG 996
 #define Render320 995
 #define Render640 994
