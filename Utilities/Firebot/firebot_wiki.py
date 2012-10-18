@@ -31,6 +31,8 @@ This page displays the build status for up to 100 of the most recent build/test 
 
 For additional information on Firebot, please refer to the FDS Configuration Management Plan.
 
+The latest nightly version of the manuals from Firebot [https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit can be viewed here].
+
 ===Build stages:===
 
   * Stage 1:  SVN operations
@@ -83,7 +85,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         f_stage.close()
 
         # Write "Build fail" and hover of error log
-        error_line = """Revision %(revision_num)s: [<font color="lightcoral"><b>x</b></font>] Build failure."""
+        error_line = """Revision %(revision_num)s: <font color="lightcoral">██</font> Build failure."""
 
         print
         print error_line % {'revision_num': rev}
@@ -98,7 +100,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         f.close()
 
         # Write "Build success, with warnings" and hover of warning log
-        error_line = """Revision %(revision_num)s: [<font color="yellow"><b>-</b></font>] Build success, with warnings."""
+        error_line = """Revision %(revision_num)s: <font color="yellow">██</font> Build success, with warnings."""
 
         print
         print error_line % {'revision_num': rev}
@@ -108,7 +110,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     #  ========================
     else:
         print
-        print "Revision " + rev + ": [<font color='lime'><b>+</b></font>] Build success!"
+        print "Revision " + rev + ": <font color="#FDD017">██</font> Build success!"
 
     # Print time associated with history file
     print "<br>_<font color='#B0B0B0'>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt")) + "</font>_"
