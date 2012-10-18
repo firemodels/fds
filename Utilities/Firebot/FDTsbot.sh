@@ -67,7 +67,7 @@ make_fdts_validation_guide()
    echo ""
    cd $SVNROOT/Manuals/FDTs_Validation_Guide
    ./make_guide.sh
-   cp $SVNROOT/Manuals/FDTs_Validation_Guide/FDTs_Validation_Guide.pdf /var/www/html/firebot/manuals/
+   cp $SVNROOT/Manuals/FDTs_Validation_Guide/FDTs_Validation_Guide.pdf /var/www/html/firebot/fdts_manuals/
 }
 
 #  ============================
