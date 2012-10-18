@@ -101,7 +101,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         f.close()
 
         # Write "Build success, with warnings" and hover of warning log
-        error_line = """Revision %(revision_num)s: <font color="yellow">██</font> Build success, with warnings."""
+        error_line = """Revision %(revision_num)s: <font color="#FDD017">██</font> Build success, with warnings."""
 
         print
         print error_line % {'revision_num': rev}
@@ -111,7 +111,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     #  ========================
     else:
         print
-        print "Revision " + rev + """: <font color="#FDD017">██</font> Build success!"""
+        print "Revision " + rev + """: <font color="lime">██</font> Build success!"""
 
     # Print time associated with history file
     print "<br>_<font color='#B0B0B0'>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt")) + "</font>_"
