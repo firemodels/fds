@@ -31,7 +31,7 @@ This page displays the build status for up to 100 of the most recent build/test 
 
 For additional information on Firebot, please refer to the FDS Configuration Management Plan.
 
-The latest nightly version of the manuals from Firebot [https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit can be viewed here].
+The latest nightly versions of the documentation/manuals from Firebot [https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit can be viewed here].
 
 ===Build stages:===
 
@@ -110,7 +110,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     #  ========================
     else:
         print
-        print "Revision " + rev + ": <font color="#FDD017">██</font> Build success!"
+        print "Revision " + rev + """: <font color="#FDD017">██</font> Build success!"""
 
     # Print time associated with history file
     print "<br>_<font color='#B0B0B0'>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt")) + "</font>_"
