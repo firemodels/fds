@@ -749,6 +749,7 @@ email_build_status()
 {
    stop_time=`date`
    echo "-------------------------------" > $TIME_LOG
+   echo "host=$hostname " >> $TIME_LOG
    echo start time=$start_time >> $TIME_LOG
    echo stop time=$stop_time >> $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG
@@ -759,32 +760,33 @@ email_build_status()
      cat $TIME_LOG >> $ERROR_LOG
      cat $TIME_LOG >> $WARNING_LOG
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "smokebot build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+     mail -s "smokebot build failure and warnings on ${hostname}. Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
      cat $TIME_LOG >> $ERROR_LOG
       # Send email with failure message, body of email contains error log file
-      mail -s "smokebot build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+      mail -s "smokebot build failure on ${hostname}. Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
      cat $TIME_LOG >> $WARNING_LOG
       # Send email with success message, include warnings
-      mail -s "smokebot build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
+      mail -s "smokebot build success with warnings on ${hostname}. Revision ${SVN_REVISION}." $mailTo < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
       # Send empty email with success message
-      mail -s "smokebot build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < $TIME_LOG > /dev/null
+      mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
    fi
 }
 
 #  ============================
 #  = Primary script execution =
 #  ============================
+hostname=`hostname`
 start_time=`date`
 clean_firebot_history
 
