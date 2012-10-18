@@ -25,63 +25,63 @@ char  viewports_revision[]="$Revision$";
  /* ------------------------ SUB_portortho ------------------------- */
  
 int SUB_portortho(int quad, 
-                   GLint i_left, GLint i_down, GLsizei i_width, GLsizei i_height,
-                   GLdouble x_left, GLdouble x_right, GLdouble x_down, GLdouble x_top,
+                   GLint port_left, GLint port_down, GLsizei port_width, GLsizei port_height,
+                   GLdouble xport_left, GLdouble xport_right, GLdouble xport_down, GLdouble xport_top,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    ){
   
-  GLint n_left, n_down;
-  GLsizei n_width, n_height;
-  GLdouble nx_left, nx_right, nx_down, nx_top;
+  GLint subport_left, subport_down;
+  GLsizei subport_width, subport_height;
+  GLdouble xsubport_left, xsubport_right, xsubport_down, xsubport_top;
 
   switch (quad){
   case 0:            
-    port_pixel_width = i_width;
-    port_pixel_height = i_height;
-    port_unit_width = x_right - x_left;
-    port_unit_height = x_top - x_down;
-    glViewport(i_left,i_down,i_width,i_height);
+    port_pixel_width = port_width;
+    port_pixel_height = port_height;
+    port_unit_width = xport_right - xport_left;
+    port_unit_height = xport_top - xport_down;
+    glViewport(port_left,port_down,port_width,port_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(x_left,x_right,x_down,x_top);
+    gluOrtho2D(xport_left,xport_right,xport_down,xport_top);
     return 1;
   case 1:
-    n_left = 2*i_left - s_left;
-    n_down = 2*i_down - s_down;
-    n_width = 2*i_width;
-    n_height = 2*i_height;
-    nx_left = x_left;
-    nx_right = x_right;
-    nx_down = x_down;
-    nx_top = x_top;
-    if(n_left+n_width<0||n_down+n_height<0)return 0;
-    if(n_left>screenWidth||n_down>screenHeight)return 0;
-    if(n_left<0){
-      nx_left = x_left - n_left*(x_right-x_left)/n_width;
-      n_width = n_left + n_width;
-      n_left = 0;
+    subport_left = 2*port_left - s_left;
+    subport_down = 2*port_down - s_down;
+    subport_width = 2*port_width;
+    subport_height = 2*port_height;
+    xsubport_left = xport_left;
+    xsubport_right = xport_right;
+    xsubport_down = xport_down;
+    xsubport_top = xport_top;
+    if(subport_left+subport_width<0||subport_down+subport_height<0)return 0;
+    if(subport_left>screenWidth||subport_down>screenHeight)return 0;
+    if(subport_left<0){
+      xsubport_left = xport_left - subport_left*(xport_right-xport_left)/subport_width;
+      subport_width = subport_left + subport_width;
+      subport_left = 0;
     }
-    if(n_left+n_width>screenWidth){
-      nx_right = x_left + (screenWidth-n_left)*(x_right-x_left)/n_width;
-      n_width = screenWidth-n_left;
+    if(subport_left+subport_width>screenWidth){
+      xsubport_right = xport_left + (screenWidth-subport_left)*(xport_right-xport_left)/subport_width;
+      subport_width = screenWidth-subport_left;
     }
-    if(n_down<0){
-      nx_down = x_down - n_down*(x_top-x_down)/n_height;
-      n_height = n_down + n_height;
-      n_down = 0;
+    if(subport_down<0){
+      xsubport_down = xport_down - subport_down*(xport_top-xport_down)/subport_height;
+      subport_height = subport_down + subport_height;
+      subport_down = 0;
     }
-    if(n_down+n_height>screenHeight){
-      nx_top = x_down + (screenHeight-n_down)*(x_top-x_down)/n_height;
-      n_height = screenHeight-n_down;
+    if(subport_down+subport_height>screenHeight){
+      xsubport_top = xport_down + (screenHeight-subport_down)*(xport_top-xport_down)/subport_height;
+      subport_height = screenHeight-subport_down;
     }
-    port_pixel_width = n_width;
-    port_pixel_height = n_height;
-    port_unit_width = nx_right - nx_left;
-    port_unit_height = nx_top - nx_down;
-    glViewport(n_left,n_down,n_width,n_height);
+    port_pixel_width = subport_width;
+    port_pixel_height = subport_height;
+    port_unit_width = xsubport_right - xsubport_left;
+    port_unit_height = xsubport_top - xsubport_down;
+    glViewport(subport_left,subport_down,subport_width,subport_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(nx_left,nx_right,nx_down,nx_top);
+    gluOrtho2D(xsubport_left,xsubport_right,xsubport_down,xsubport_top);
     break;
   default:
     ASSERT(FFALSE);
@@ -531,6 +531,40 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
         }
     }
 #endif
+  }
+}
+
+/* --------------------- COLOR BAR Viewport2 ------------------------- */
+
+void COLORBAR_viewport2(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
+  GLint temp;
+  float xnum;
+
+  // visColorbarLabels
+  // numColorbars
+  // dwinH
+  // screenHeight
+  // screenWidth
+  // titlesafe_offset
+
+  if(visColorbarLabels==1&&numColorbars!=0){
+    if(screenWidth<screenHeight){
+  //    if(SUB_portortho(quad,)==0){
+  //        return;
+  //    }
+    }
+    else{
+     // if(SUB_portortho(quad,)==0){
+     //     return;
+     // }
+    }
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    if( showtime==1 || showplot3d==1){
+      drawColorBars();
+    }
   }
 }
 
