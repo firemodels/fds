@@ -20,17 +20,7 @@ char colorbar_revision[]="$Revision$";
 
 #define DYFONT (-0.5)
 
-/* ------------------ getstringwidth ------------------------ */
-
-int getstringwidth(int font, char *string){
-  char *c;
-  int width=0;
-
-  for(c=string;c!='\0';c++){
-   // width+=glutBitmapWidth(font,*c);
-  }
-  return width;
-}
+//i1 = glutBitmapLength(GLUT_BITMAP_HELVETICA_10,"-999.0");
 
 /* ------------------ UpdateTimeLabels ------------------------ */
 

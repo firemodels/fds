@@ -28,11 +28,7 @@ int main(int argc, char **argv){
   char **argv_sv;
   int return_code;
   char *progname;
-  //int i1, i2, i3;
 
-  //i1=getstringwidth(GLUT_BITMAP_HELVETICA_10,"-999.0");
-  //i2=getstringwidth(GLUT_BITMAP_HELVETICA_12,"-999.0");
-  //i3=getstringwidth(GLUT_BITMAP_HELVETICA_18,"-999.0");
   initMALLOC();
   initvars();
   if(argc==1)display_version_info();

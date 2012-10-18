@@ -9,7 +9,6 @@
 EXTERNCPP int Merge_Smoke(void);
 #endif
 
-EXTERNCPP int getstringwidth(int font, char *string);
 EXTERNCPP void glui_update_fontindex(void);
 EXTERNCPP void rotateu2v(float *u, float *v, float *axis, float *angle);
 EXTERNCPP void rotation_type_CB(int var);
