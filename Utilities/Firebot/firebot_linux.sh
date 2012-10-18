@@ -14,7 +14,7 @@
 #  ===================
 
 #mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, jfloyd@haifire.com, koverholt@gmail.com"
-mailTo="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov"
+mailTo="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com"
 FIREBOT_USERNAME="firebot"
 
 FIREBOT_HOME_DIR="/home/$FIREBOT_USERNAME"
