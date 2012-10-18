@@ -347,7 +347,7 @@ the input file containing all the necessary information needed to perform a simu
 
 \section{Version History}
 
-Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, version 4 in July 2004, version 5 in October 2007, and version 6 in September 2012.
+Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, version 4 in July 2004, version 5 in October 2007, and a beta test of version 6 in October 2012.
 
 Starting with FDS 5, a formal revision management system has been implemented to track changes to the FDS source code. The open-source program
 development tools are provided by an Internet-based organization known as Google Code (code.google.com).
@@ -831,10 +831,7 @@ of experiments.
 
 Testing will depend upon the type of baseline release:
 maintenance, minor, or major. A maintenance release occurs every few weeks.
-Each maintenance release is tested with the verification suite. Because each case requires no more than a few
-hours of computer time, the suite can be run overnight. The following day, the results of the calculations are automatically plotted and
-compared with the expected results. This is done simply be recompiling the FDS User's Guide and Verification Guide, each of which contains pictures
-and graphs that demonstrate the test was successful.
+Each maintenance release is tested with the verification suite during the nightly Firebot testing.
 
 A minor release occurs every three to six months.
 Each minor release is tested with both the verification and validation suites. The validation cases take considerably longer to run, but the
