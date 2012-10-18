@@ -29,7 +29,7 @@ Mach number approximation, were retained.
 The equations for large-eddy simulation (LES) are derived by applying a low-pass filter, parameterized by a width $\Delta$, to the transport equations for mass, momentum and energy.  For our purposes, it is sufficient to think of the filtered fields in the LES equations as cell means.  For example, in 1D the filtered density for a cell of width $\Delta$ is
 \begin{equation}
 \label{eqn_filtered_density}
-\bar{\rho}(x,t) = \frac{1}{\Delta}\int_{x-\Delta/2}^{x+\Delta/2} \rho(r,t) \,\mbox{d}r \mbox{.}
+\bar{\rho}(x,t) = \frac{1}{\Delta}\int_{x-\Delta/2}^{x+\Delta/2} \rho(r,t) \d r \mbox{.}
 \end{equation}
 
 In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x$ and is a key parameter in the submodels for the turbulent viscosity and the reaction time scale discussed later.  The practice of taking $\Delta = \delta x$ is called implicit filtering.  It is important to appreciate, however, that implicit filtering does not imply dissipative numerics.  FDS employs kinetic-energy-conserving central difference schemes for momentum with physically-based closures for the turbulent stress.  In what follows, the filter formalism is relaxed (the overline notation is suppressed for clarity) since no explicit filtering operations are performed in the algorithm.
@@ -112,7 +112,7 @@ described in terms of the differences in the background pressures, eliminating t
 The second consequence of the low Mach number approximation is that it eliminates the need to solve the energy transport
 equation explicitly.
 The energy conservation equation is written in terms of the {\em sensible enthalpy}, $h_s$:
-\be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \frac{\mbox{D}\bar{p}}{\mbox{D}t}  + \dq''' - \dq_b'''
+\be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \frac{\mbox{D}\bp}{\mbox{D}t}  + \dq''' - \dq_b'''
         - \nabla\!\cdot \dbq'' \label{energy} \ee
 Note that the material derivative of the thermodynamic pressure is simplified because of the low Mach number approximation:
 \be
@@ -129,12 +129,12 @@ where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of speci
 As mentioned above, we do not solve Eq.~(\ref{energy}) explicitly. Instead, we factor out the divergence as follows:
 \be
 \label{eqn_simplediv1}
-\Div\mathbf{u} = \frac{1}{\rho h_s} \left[ \frac{\mbox{D}}{\mbox{D} t}(\bar{p}-\rho h_s) + \dot{q}''' - \dq_b''' - \Div \dot{\mathbf{q}}'' \right]
+\Div\mathbf{u} = \frac{1}{\rho h_s} \left[ \frac{\mbox{D}}{\mbox{D} t}(\bp-\rho h_s) + \dq^\ppp + \dq_r^\ppp - \dq_b^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
 \ee
 Expanding the material derivatives on the right hand side of this equation produces a fairly complicated expression for
 the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations.
 Its importance to the overall algorithm is that it can be computed using only the
-thermodynamic variables $\rho$, $Z_\alpha$, and $\bar{p}$. As will be shown below, the way to advance the flow velocity in time
+thermodynamic variables $\rho$, $Z_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time
 is to first estimate the thermodynamic variables at the next time step, compute the divergence, and then solve an equation
 for the pressure that will guarantee that the divergence of the updated velocity is identical to that computed solely from
 the thermodynamic variables.
@@ -143,7 +143,7 @@ the thermodynamic variables.
 
 \section{Momentum Transport}
 
-Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written
+Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
 \be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg
 + \bof_b + \nabla\!\cdot \btau \Big]  \ee
 The term, $\bof_b$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}.
@@ -161,17 +161,16 @@ turbulent combustion of gaseous fuel and oxygen, the transport of thermal radiat
 thermal decomposition of real materials, the activation of sprinklers and smoke detectors, the transport of water and liquid fuel
 droplets, and a variety of other features that describe fires inside and outside of buildings.
 
-Combustion and radiation are introduced into the governing equations via the source terms, $\dq'''$ and $\nabla \cdot \dbq_r''$,
+Combustion and radiation are introduced into the governing equations via the source terms, $\dq^\ppp$ and $\dq_r^\ppp$,
 in the energy transport equation. Since the energy equation is not solved explicitly, these terms find their way into the
 expression for the divergence.
 
 \subsection{Combustion}
 
 For most applications, FDS uses a combustion model based on the mixing-limited, infinitely fast reaction of lumped species.
-Lumped species are reacting scalar quantities that represent a mixture of species such as air which is a mixture of
+Lumped species are reacting scalar quantities that represent a mixture of species.  For example, ``air'' is a lumped species which is a mixture of
 nitrogen, oxygen, water vapor, and carbon dioxide.  The reaction of fuel and oxygen is not necessarily instantaneous and
-complete, and there are
-several optional schemes that are designed to predict the extent of combustion in under-ventilated spaces.
+complete, and there are several optional schemes that are designed to predict the extent of combustion in under-ventilated spaces.
 
 For an infinitely-fast reaction, reactant species in a given grid cell are converted to product species at a rate determined by a
 characteristic mixing time, $\tau_{mix}$. The heat release rate per unit volume is defined by summing the lumped species mass production rates times their respective heats of formation
@@ -208,9 +207,9 @@ tens of centimeters. Relatively thin flame sheets cannot be resolved, in which c
 will not reflect the true temperatures one would expect to find in the reaction zone. Consequently, the
 source term is approximated in grid cells where fuel and oxygen react.
 Elsewhere, the subgrid temperature field is homogeneous
-and the source term can be computed directly.
+and the source term can be computed directly:
 \be \kappa \; I_b = \left\{ \begin{array}{cll}
-    \kappa \, \sigma \, T^4/\pi                                           & \hbox{Outside flame zone}, & \dot{q}'''=0  \\ [0.15in]
+    \kappa \, \sigma \, T^4/\pi      & \hbox{Outside flame zone}, & \dot{q}'''=0  \\ [0.1in]
     C\, \kappa \, \sigma \, T^4/\pi  & \hbox{Inside flame zone}, & \dot{q}'''>0
     \end{array} \right.  \label{radapprox1}
 \ee
@@ -219,9 +218,11 @@ The constant $C$ is adjusted dynamically such that the integrated quantity $\chi
 The radiation equation is solved using a technique similar to a finite
 volume method for convective transport, thus the name given to it is
 the Finite Volume Method (FVM). Using approximately 100 discrete
-angles which are updated over multiple time steps, the finite volume solver requires about 20~\% of the total CPU
+angles which are updated over multiple time steps, the finite volume solver requires about 20\% of the total CPU
 time of a calculation, a modest cost given the complexity of radiation
-heat transfer.  Water droplets can absorb and scatter thermal
+heat transfer.
+
+Water droplets can absorb and scatter thermal
 radiation. This is important in cases involving mist sprinklers, but
 also plays a role in all sprinkler cases. The absorption and
 scattering coefficients are based on Mie theory. The scattering from
@@ -231,7 +232,7 @@ the gaseous species and soot is not included in the model.
 
 \section{Solution Procedure}
 
-In given grid cell at the $n$th time step, we have the density, $\rho^n$, lumped species mass fractions, $Z_\alpha^n$, velocity
+In a given grid cell at the $n$th time step, we have the density, $\rho^n$, lumped species mass fractions, $Z_\alpha^n$, velocity
 vector, $\bu^n$, and the fluctuating stagnation energy per unit mass\footnote{Throughout this document $\cH$ may also be referred to simply as the perturbation pressure.}, $\cH^n$.
 In addition, for each compartment in the computational domain, we have a background pressure, $\bp^n$. The temperature is
 found from the equation of state. These variables are advanced in time using an explicit second-order predictor/corrector scheme.
@@ -244,6 +245,8 @@ The basic procedure is as follows:
 example, the density is estimated by
 \be \frac{\rho^*-\rho^n}{\dt} + \nabla\!\cdot \rho^n \bu^n = 0 \ee
 The asterisk denotes a first order accurate estimate at the next time step.  Note that the source term is time-split, as discussed below.
+
+\item Compute the temperature, $T^*$, from the equation of state.
 
 \item \label{step_pred_div} Compute the divergence, $(\nabla\!\cdot \bu)^*$, from Eq.~(\ref{eqn_simplediv1}) using the estimated thermodynamic quantities. Note that we use the parentheses to emphasize that an estimate of the velocity field, $\bu^*$, at the next time step has not been computed yet, only its divergence.
 
@@ -275,10 +278,14 @@ If the stability criterion is satisfied, the procedure continues to the correcto
 
 The lumped species mass fractions and background pressure are corrected in a similar way.
 
-\item \emph{Time splitting for mass source terms}. After the corrector step for the transport scheme, source terms are applied to the scalars.  The source terms are evaluated using the results from the corrected scalar transport scheme:
+\item Compute the temperature, $T^{**}$, from the equation of state.
+
+\item \emph{Time splitting for mass source terms}. After the corrector step for the transport scheme, source terms are applied to the scalars (for both chemical reactions and Lagrangian particles).  The source terms are evaluated using the results from the corrected scalar transport scheme.  For example,
 \be
 \frac{(\rho Y_\alpha)_{ijk}^{n+1}-(\rho Y_\alpha)_{ijk}^{**}}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Y}^{**},T^{**})
 \ee
+
+\item With the updated density and composition, compute the final temperature, $T^{n+1}$, from the equation of state.
 
 \item \label{step_cor_div} Compute the divergence, $(\nabla\!\cdot \bu)^{n+1}$, from the corrected thermodynamic quantities.
 
