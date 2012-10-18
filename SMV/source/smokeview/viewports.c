@@ -46,10 +46,10 @@ int SUB_portortho(int quad,
     gluOrtho2D(xport_left,xport_right,xport_down,xport_top);
     return 1;
   case 1:
-    subport_left = 2*port_left - s_left;
-    subport_down = 2*port_down - s_down;
-    subport_width = 2*port_width;
-    subport_height = 2*port_height;
+    subport_left = nrender_rows*port_left - s_left;
+    subport_down = nrender_rows*port_down - s_down;
+    subport_width = nrender_rows*port_width;
+    subport_height = nrender_rows*port_height;
     xsubport_left = xport_left;
     xsubport_right = xport_right;
     xsubport_down = xport_down;
@@ -126,10 +126,10 @@ int SUB_portfrustum(int quad,
     }
     return 1;
   case 1:
-    n_left = 2*i_left - s_left;
-    n_down = 2*i_down - s_down;
-    n_width = 2*i_width;
-    n_height = 2*i_height;
+    n_left = nrender_rows*i_left - s_left;
+    n_down = nrender_rows*i_down - s_down;
+    n_width = nrender_rows*i_width;
+    n_height = nrender_rows*i_height;
     nx_left = x_left;
     nx_right = x_right;
     nx_down = x_down;

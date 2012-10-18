@@ -2832,7 +2832,6 @@ void Display_CB(void){
         if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
       }
       else{
-        GLubyte *screenbuffers[4];
         int renderdoublenow=0;
 
         if(RenderOnceNow==1){
@@ -2849,38 +2848,31 @@ void Display_CB(void){
         }
 
         if(renderdoublenow==1){
+          int nrender_cols;
+          int i,ibuffer=0;
+          GLubyte **screenbuffers;
+
+          NewMemory((void **)&screenbuffers,nrender_rows*nrender_rows*sizeof(GLubyte *));
+
           glDrawBuffer(GL_BACK);
 
-          ShowScene(RENDER,VIEW_CENTER,1,0,0,screenWidth,screenHeight);
-          screenbuffers[0]=getscreenbuffer();
-          if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
+          nrender_cols=nrender_rows;
+          for(i=0;i<nrender_rows;i++){
+            int j;
 
-          ShowScene(RENDER,VIEW_CENTER,1,screenWidth,0,screenWidth,screenHeight);
-          screenbuffers[1]=getscreenbuffer();
-          if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
-
-          ShowScene(RENDER,VIEW_CENTER,1,0,screenHeight,screenWidth,screenHeight);
-          screenbuffers[2]=getscreenbuffer();
-          if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
-
-          ShowScene(RENDER,VIEW_CENTER,1,screenWidth,screenHeight,screenWidth,screenHeight);
-          screenbuffers[3]=getscreenbuffer();
-          if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
-
-          mergescreenbuffers(screenbuffers);
-
-          if(screenbuffers[0]!=NULL){
-            FREEMEMORY(screenbuffers[0]);
+            for(j=0;j<nrender_cols;j++){
+              ShowScene(RENDER,VIEW_CENTER,1,j*screenWidth,i*screenHeight,screenWidth,screenHeight);
+              screenbuffers[ibuffer++]=getscreenbuffer();
+              if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
+            }
           }
-          if(screenbuffers[1]!=NULL){
-            FREEMEMORY(screenbuffers[1]);
+
+          mergescreenbuffers(nrender_rows,screenbuffers);
+
+          for(i=0;i<nrender_rows*nrender_cols;i++){
+            FREEMEMORY(screenbuffers[i]);
           }
-          if(screenbuffers[2]!=NULL){
-            FREEMEMORY(screenbuffers[2]);
-          }
-          if(screenbuffers[3]!=NULL){
-            FREEMEMORY(screenbuffers[3]);
-          }
+          FREEMEMORY(screenbuffers);
         }
         if(renderdoublenow==0||RenderOnceNow==1){
           ASSERT(RenderSkip>0);

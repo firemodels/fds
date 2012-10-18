@@ -273,7 +273,7 @@ GLubyte *getscreenbuffer(void){
 
 /* ------------------ mergescreenbuffers ------------------------ */
 
-int mergescreenbuffers(GLubyte *screenbuffers[4]){
+int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
   char renderfile[1024];
   char renderfile2[1024];
@@ -283,7 +283,10 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   gdImagePtr RENDERimage;
   unsigned int r, g, b;
   int i,j,rgb_local;
+  int nscreen_cols;
+  int irow,screen=0;
 
+  nscreen_cols=nscreen_rows;
   switch (renderfiletype){
   case PNG:
     ext=ext_png;
@@ -338,42 +341,22 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
     }
     return 1;
   }
-  RENDERimage = gdImageCreateTrueColor(2*screenWidth,2*screenHeight);
+  RENDERimage = gdImageCreateTrueColor(nscreen_cols*screenWidth,nscreen_rows*screenHeight);
 
-  p=screenbuffers[0];
-  for (i = 2*screenHeight-1 ; i>=screenHeight; i--) {
-    for(j=0;j<screenWidth;j++){
-      r=*p++; g=*p++; b=*p++;
-      rgb_local = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb_local);
+  p = *screenbuffers++;
+  for(irow=0;irow<nscreen_rows;irow++){
+    int icol;
 
-    }
-  }
-  p=screenbuffers[1];
-  for (i = 2*screenHeight-1 ; i>=screenHeight; i--) {
-    for(j=screenWidth;j<2*screenWidth;j++){
-      r=*p++; g=*p++; b=*p++;
-      rgb_local = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb_local);
+    for(icol=0;icol<nscreen_cols;icol++){
+      for (i = (nscreen_rows-irow)*screenHeight-1 ; i>=(nscreen_rows-irow-1)*screenHeight; i--) {
+        for(j=icol*screenWidth;j<(icol+1)*screenWidth;j++){
+          r=*p++; g=*p++; b=*p++;
+          rgb_local = (r<<16)|(g<<8)|b;
+          gdImageSetPixel(RENDERimage,j,i,rgb_local);
 
-    }
-  }
-  p=screenbuffers[2];
-  for (i = screenHeight-1 ; i>=0; i--) {
-    for(j=0;j<screenWidth;j++){
-      r=*p++; g=*p++; b=*p++;
-      rgb_local = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb_local);
-
-    }
-  }
-  p=screenbuffers[3];
-  for (i = screenHeight-1 ; i>=0; i--) {
-    for(j=screenWidth;j<2*screenWidth;j++){
-      r=*p++; g=*p++; b=*p++;
-      rgb_local = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb_local);
-
+        }
+      }
+      p=*screenbuffers++;
     }
   }
 
