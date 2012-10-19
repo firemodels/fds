@@ -117,8 +117,6 @@ Most simple LES subgrid closures take production of subgrid kinetic energy to be
 \end{align}
 Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.
 
-\newpage
-
 \section{Models for the Turbulent Viscosity}
 \label{section:turbulent_viscosity}
 
@@ -225,7 +223,6 @@ into nitrogen
 \be (\rho D)_{\alpha,\hbox{\tiny DNS}} = \rho \;  D_{\alpha, 0} \ee
 where species 0 is nitrogen.
 
-\newpage
 
 \section{Simplifying the Momentum Equation}
 
@@ -346,9 +343,6 @@ the direct solution of the Poisson equation for the pressure.
 
 
 
-
-\newpage
-
 \section{Velocity Boundary Conditions}
 \label{info:velocity_bc}
 
@@ -415,10 +409,8 @@ In FDS, due to difficulties defining a consistent test filter (for use with eith
 \nu_t = \ell_{mix}^{\,2}\,|S|
 \end{equation}
 
-\newpage
 
 \section{Time Step and Stability Constraints}
-
 \label{stability}
 
 In explicit schemes, stability criteria may often be understood in terms of using the time step to maintain physically realizable conditions.  Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
@@ -493,7 +485,6 @@ In DNS mode, VN is also checked by default ({\ct VN\_MAX \![0.5]}, {\ct VN\_MIN 
 If either the current CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  The initial time step may be set and locked on the {\tt TIME} line of the FDS input file.  See the User's Guide for details.
 
 
-\clearpage
 \section{The Equation for Pressure (Poisson Equation)}
 
 An elliptic partial differential equation (known as a Poisson equation) is obtained by

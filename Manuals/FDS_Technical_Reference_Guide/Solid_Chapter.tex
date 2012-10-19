@@ -218,9 +218,6 @@ calculations.
 \subsection{Near-Wall Model for Heat Transfer}
 \label{conflux_wall_model}
 
-{\bf Kiyoung Moon and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
-{\bf Ezgi S. Oztekin, Fire Research Program, William J. Hughes Technical Center, NJ, 08405}\\
-
 This section describes an optional model for the heat transfer coefficient which may be more appropriate for well-resolved LES calculations.
 
 Wall models aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without resolving the smallest length scales. The theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, non-dimensional velocity can be defined as a function of non-dimensional length scale. In FDS, the wall model for velocity is implemented based on law of wall with semi-log fit connecting the limits of the viscous and log regions (see Section \ref{info:velocity_bc}).
@@ -295,7 +292,6 @@ where $\rho_\alpha$ is the density of material $\alpha$ in its pure form.
 Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$,
 of the individual components of the composite.
 
-\clearpage
 
 \section{Pyrolysis Models}
 \label{pyrosection}
@@ -469,7 +465,6 @@ the size of each condenced phase cell is multiplied by the following factor $\de
 \ee
 Correspondingly, the densities are divided by the factor $\delta$ to conserve mass.
 
-\clearpage
 
 \section{Aerosol Deposition}
 
@@ -532,7 +527,6 @@ for smoke transport described in Hu et al.~\cite{Hu:1}. The gravitational settli
 is also used in the total deposition velocity to deposit aerosols onto flat surfaces,
 as described above.
 
-\clearpage
 
 \subsection{Thermophoretic Deposition}
 
