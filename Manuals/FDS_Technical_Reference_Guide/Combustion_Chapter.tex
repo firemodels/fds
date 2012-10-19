@@ -2,7 +2,7 @@
 \label{chapter:combustion}
 
 \label{combustionsection}
-The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in species concentration over a time step for a single grid cell:
+The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in species concentration over a time step for a single grid cell to obtain
 \begin{equation}\label{eq:m_tprime_alpha}
 \dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{Y_\alpha(\delta t) - Y_\alpha(0)}{\delta t}
 \end{equation}
@@ -13,21 +13,20 @@ The combustion routine also returns the heat release for per unit volume, $\dot{
 \dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}_\alpha^{\prime\prime\prime} \Delta H_{f,\alpha}
 \end{equation}
 
-{\bf Add a short paragraph describing the organization of the rest of the chapter.}
-
+The remainder of this chapter consists of three main topics.  The first is a discussion of our ``lumped species'' approach, which aims to reduce the computational burden of the full chemical system by combining species into groups that transport and react together.  Next, we discuss our approach to describing the chemical mixing process.  We treat each computational cell as a partially-stirred batch reactor with a characteristic mixing time.  The model for the mixing time is discussed.  Once reactants are mixed, the reaction rate depends on kinetics.  The last part of this chapter discusses available kinetic mechanisms within FDS, from infinitely fast chemistry (default) to Arrhenius rate laws and reversible reactions.
 
 \section{Lumped Species Approach}
 In the typical FDS problem we consider the simple reaction:
 \begin{equation}\label{eq:simple}
 \mathrm{Fuel + Air \rightarrow Products}
 \end{equation}
-We refer to fuel, air, and products as \emph{lumped species}.  The lumped species approach is a simplified reaction progress variable approach \cite{fox2003} in which all the progress variables behave as mass fractions. This avoids the complications related to unbounded values and ill-defined initial and boundary conditions in the traditional approach.
+We refer to the Fuel, Air, and Products as \emph{lumped species}.  The lumped species approach is a simplified reaction progress variable approach \cite{fox2003} in which all the progress variables behave as mass fractions. This avoids the complications related to boundedness and ill-defined initial and boundary conditions in the traditional approach.
 
-In a simple hydrocarbon reaction, reactants may be fuel, oxygen, and nitrogen with products being carbon dioxide, water vapor, and nitrogen. The primitive species mass fractions are given by the composition vector:
+In a simple hydrocarbon reaction, the reactants are the fuel, oxygen, and nitrogen and the products are carbon dioxide, water vapor, and nitrogen. The primitive species mass fractions are given by the composition vector
 \begin{equation}\label{eq:prim_vector}
 \mathbf{Y} = [Y_{\mathrm{CH}_4}\, \, Y_{\mathrm{O}_2}\, \, Y_{\mathrm{N}_4}\, \, Y_{\mathrm{CO}_2}\, \, Y_{\mathrm{H}_2\mathrm{O}}]^T
 \end{equation}
-Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, ``air'' can be assumed to be a lumped species composed of 21\% O$_2$ and 79\% N$_2$ by volume. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together. 
+Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, ``Air'' can be assumed to be a lumped species composed of 21\% O$_2$ and 79\% N$_2$ by volume. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together. 
 
 We can expand Eq.~(\ref{eq:simple}) to show the components of the lumped species for a simple, one-step methane reaction. 
 \begin{equation}\label{eq:lumped_expand}
@@ -39,7 +38,7 @@ The linear transformation from lumped species to primitive species is given by:
 \begin{equation}\label{eq:transform}
 \textbf{Y}=A\textbf{Z} 
 \end{equation}
-where $A \in N_{y} \times (N_{z}+1)$ is the transformation matrix.  Each column of $A$ represents a different lumped species.  The elements of $A$ are the mass fractions for each primitive species in a given lumped species:
+where $A$ is the transformation matrix ($N_{y}$ rows $\times$ $(N_{z}+1)$ columns).  Each column of $A$ represents a different lumped species.  The elements of $A$ are the mass fractions for each primitive species in a given lumped species:
 \begin{equation}\label{eq:A_def}
 A_{\alpha\,i} = \frac{\upsilon_{\alpha\,i}W_{\alpha}}{\displaystyle \sum_{\alpha}\upsilon_{\alpha i}W_{\alpha}}
 \end{equation}
@@ -47,7 +46,7 @@ where $\upsilon_{\alpha\,i}$ are the volume ratios of primitive species $\alpha$
 
 If we want the primitive species in Eq.~(\ref{eq:lumped_expand}) and, as an example, say we have $\mathbf{Z} = [0.3 \,\,\, 0.2 \,\,\, 0.5]^T$, we can transform from lumped species to primitive species via
 
-\begin{displaymath}
+\begin{equation}\label{eq:transform_to_primitive}
 \mathbf{Y}=\left[\begin{array}{c}
        Y_{O_2} \\
        Y_{N_2} \\
@@ -74,7 +73,7 @@ If we want the primitive species in Eq.~(\ref{eq:lumped_expand}) and, as an exam
      0.0757\\
      0.0619\\
      \end{array}\right]
-\end{displaymath}
+\end{equation}
 To transform back to lumped species from primitive species we can use:
 \begin{equation}\label{eq:transform_back}
 \textbf{Z}=B\textbf{Y} \quad ; \quad B=(A^TA)^{-1}A^T
@@ -91,7 +90,7 @@ Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is 
 
 \subsection{Specified CO and Soot Yield}
 
-Carbon monoxide and soot yields are zero by default. The user can specify the CO and soot yields ($y_{\mathrm{CO}}$ and $y_{\mathrm{S}}$ respectively) on the {\ct REAC} line; this determines the composition of the productss. In this reaction system, air (background) is lumped species 0, the fuel is lumped species 1, and products is lumped species 2. To find the stoichiometric coefficients of CO and soot within the products lumped species, FDS uses
+Carbon monoxide and soot yields are zero by default. The user can specify the CO and soot yields ($y_{\mathrm{CO}}$ and $y_{\mathrm{S}}$ respectively) on the {\ct REAC} line; this determines the composition of the products. In this reaction system, Air (Background) is lumped species 0, Fuel is lumped species 1, and Products is lumped species 2. To find the stoichiometric coefficients of CO and soot within the products lumped species, FDS uses
 \begin{eqnarray}\label{eq:yields}
 \nu_{2}\upsilon_{\mathrm{CO},2}&=&-\nu_{1}\frac{W_1}{W_{\mathrm{CO}}}y_{\mathrm{CO}} \\
 \nu_{2}\upsilon_{\mathrm{S},2}&=&-\nu_{1}\frac{W_1}{W_{\mathrm{S}}}y_{\mathrm{S}}
@@ -99,9 +98,10 @@ Carbon monoxide and soot yields are zero by default. The user can specify the CO
 The remaining coefficients come from an atom balance.
 
 Consider a methane--air reaction where methane has a specified CO yield of $y_{\mathrm{CO}}=0.1$ and a Soot yield of $y_{\mathrm{S}}=0.01$. The default FDS reaction system lumps these species into the products. Note that, by default, air is primarily composed of oxygen and nitrogen but includes trace amounts of carbon dioxide and water vapor. For this reaction the transformation matrix, $A$, is
+
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
-\hline  & air & fuel & products \\ \hline \hline
+\hline  & Air & Fuel & Products \\ \hline \hline
 {CH$_4$}           & 0.000000 & 1.000000 & 0.000000 \\
 {N$_2$}            & 0.763017 & 0.000000 & 0.720373 \\
 {O$_2$}            & 0.231163 & 0.000000 & 0.000000 \\
@@ -111,14 +111,15 @@ Consider a methane--air reaction where methane has a specified CO yield of $y_{\
 {C}                & 0.000000 & 0.000000 & 0.000559 \\ \hline
 \end{tabular}
 \end{center}
-The preceding table shows that the addition of carbon monoxide and soot increases the number of primitive species in the reaction from five to seven. The number of lumped species, however, remains at three---the composition of products has changed to include to the two additional species.
+
+\noindent The preceding table shows that the addition of carbon monoxide and soot increases the number of primitive species in the reaction from five to seven. The number of lumped species, however, remains at three---the composition of products has changed to include to the two additional species.
 
 
 \subsection{Primitive Species}
 
 \subsubsection{Tracking Select Species (Such as Evaporating Droplets)}
 
-There are cases where tracking a particular primitive species is needed, such as water droplet evaporation or complex chemical reactions. In sprinkler nozzle cases, for example, there is water vapor that is produced by fuel combustion that lives in the products lumped species and there is water vapor that is produced from liquid water droplet evaporation. The evaporated water vapor cannot simply be added to the lumped species, because, by definition, the primitive species fraction within a given lumped species cannot change. As a result, the evaporated water vapor must be transported as its own lumped species.  If the local primitive species concentration of water vapor is needed, it may be obtained using the transformation in Eq.~(\ref{eq:transform_back}).   
+There are cases where tracking a particular primitive species is needed, such as water droplet evaporation or complex chemical reactions. In sprinkler nozzle cases, for example, there is water vapor that is produced by fuel combustion that lives in the products lumped species and there is water vapor that is produced from liquid water droplet evaporation. The evaporated water vapor cannot simply be added to the lumped species, because, by definition, the primitive species fraction within a given lumped species cannot change. As a result, the evaporated water vapor must be transported as its own lumped species.  If the local primitive species concentration of water vapor is needed, it may be obtained using the transformation in Eq.~(\ref{eq:transform_to_primitive}).   
 
 \subsubsection{Tracking All Species}
 
@@ -127,30 +128,30 @@ If we revisit Eq.~(\ref{eq:full_lump}) but decompose the reaction into all primi
 \nu_{\mathrm{O}_{2},0}\mathrm{O}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{fuel},0}(\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b) \longrightarrow \\
 \nu_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{CO},2}\mathrm{CO}+\nu_{\mathrm{S},2}\mathrm{S}
 \end{multline}
-In this formulation, we would have to solve transport equations for six species, as compared to two when the species are lumped. Note that in cases with all primitive species, $A$ becomes the identity matrix:
+In this formulation, we would have to solve transport equations for six species, as compared to two when the species are lumped. Note that in cases with all primitive species, $A$ becomes the identity matrix.
 
-\begin{center}
-\begin{tabular}{|c|c|c|c|c|c|c|c|}
-\hline  & {CH$_4$} & {N$_2$} & {O$_2$} & {CO$_2$} & {CO} & {H$_2$O} & {C} \\ \hline \hline
-{CH$_4$}            & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
-{N$_2$}             & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
-{O$_2$}             & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
-{CO$_2$}            & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 \\
-{CO}                & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 \\ 
-{H$_2$O}            & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 \\ 
-{C}                 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 \\\hline
-\end{tabular}
-\end{center}
+%\begin{center}
+%\begin{tabular}{|c|c|c|c|c|c|c|c|}
+%\hline  & {CH$_4$} & {N$_2$} & {O$_2$} & {CO$_2$} & {CO} & {H$_2$O} & {C} \\ \hline \hline
+%{CH$_4$}            & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+%{N$_2$}             & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+%{O$_2$}             & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+%{CO$_2$}            & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 \\
+%{CO}                & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 \\ 
+%{H$_2$O}            & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 \\ 
+%{C}                 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 \\\hline
+%\end{tabular}
+%\end{center}
 For cases that explicitly track all of the primitive species, FDS could end up solving upwards of 10-20 transport equations depending on the case, with each additional tracked species adding roughly 5\% to the computational cost.
 
 
 
 \section{Turbulent Combustion}
 
-Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation. To address these difficulties, FDS employs a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  In the diffusion flame limit, this method is similar to the Eddy Dissipation Concept (EDC) \cite{Magnussen:1}. Each computational cell is thought of as a batch reactor with two environments: the mean concentration of species which FDS transports and the amount of mixing within the reactor. At the start of an FDS time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. Currently, unless otherwise specified, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence.  The mixing time, $\tau_{mix}$, is discussed in Section \ref{sec:reac_time_scale}. Section \ref{sec:EDC} discusses the model that couples mixing and chemical reactions. Once mixed, species can react based specified reaction parameters.  Reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}). 
+Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation. To address these difficulties, FDS employs a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames, this method is similar to the Eddy Dissipation Concept (EDC) \cite{Magnussen:1}. Each computational cell is thought of as a batch reactor with two environments: the mean concentration of species which FDS transports and the amount of mixing within the reactor. At the start of an FDS time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. Currently, unless otherwise specified, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence.  The mixing time, $\tau_{mix}$, is discussed in Section \ref{sec:reac_time_scale}. Section \ref{sec:EDC} discusses the model that couples mixing and chemical reactions. Once mixed, species can react based specified reaction parameters.  Reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}). 
 
 
-\subsection{Eddy Dissipation Concept}
+\subsection{Partially-Stirred Batch Reactor Model}
 \label{sec:EDC} 
 Within the batch reactor, the state of mixing in the cell is described by the \emph{unmixed} fraction, $\zeta(t;\tau_{mix})$. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). An initial unmixed fraction $\zeta_0=1$  represents a diffusion flame and $\zeta_0=0$ represents a premixed flame. The state of mixing within a computational cell is governed by the following simple ODE:
 \begin{equation}\label{eq:zeta}
