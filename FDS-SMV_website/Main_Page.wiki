@@ -83,4 +83,19 @@ Information on FDS-SMV development, third-party tools, and other resources.
 
 <br>
 
+== FDS-SMV 6 Beta Testing ==
+
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+
+ FDS 6 is currently under development, and the FDS 6 beta will be released soon for testing by early adopters.
+
+ As part of the FDS 6 beta release, you can access [https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit nightly versions of the FDS-SMV documentation/manuals].
+
+ These manuals are generated automatically each night by the continuous integration testing process (Firebot), which is described in detail in the FDS Configuration Management Plan. You can view the status of recent nightly builds on the [http://code.google.com/p/fds-smv/wiki/Firebot_Build_Status Firebot Build Status] Wiki Page.
+
+ <b>Important</b>: _The guides linked above are unofficial documentation and are subject to change during the FDS 6 beta testing period. Please include the "SVN Repository Revision" number of the guide when referring to the nightly manuals in posts to the Issue Tracker or Discussion Group._
+</font>
+
+<br>
+
 <font size=1>Disclaimer: FDS and Smokeview are developed by the National Institute of Standards and Technology (NIST) of the United States Department of Commerce. FDS and Smokeview are free software developed through the National Institute of Standards and Technology (NIST) by employees of the Federal Government in the course of their official duties. Pursuant to Title 17, Section 105 of the United States Code, this work is not subject to copyright protection and is in the Public Domain. NIST assumes no responsibility whatsoever for use by other parties of its source code, documentation or compiled executables, and makes no guarantees, expressed or implied, about its quality, reliability, or any other characteristic.</font>
