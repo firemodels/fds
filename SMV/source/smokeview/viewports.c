@@ -27,7 +27,7 @@ char  viewports_revision[]="$Revision$";
 int SUB_portortho(int quad, 
                    GLint port_left, GLint port_down, GLsizei port_width, GLsizei port_height,
                    GLdouble portx_left, GLdouble portx_right, GLdouble portx_down, GLdouble portx_top,
-                   GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
+                   GLint screen_left, GLint screen_down, GLsizei screen_width, GLsizei screen_height
                    ){
   
   GLint subport_left, subport_down;
@@ -46,8 +46,8 @@ int SUB_portortho(int quad,
     gluOrtho2D(portx_left,portx_right,portx_down,portx_top);
     return 1;
   case 1:
-    subport_left = nrender_rows*port_left - s_left;
-    subport_down = nrender_rows*port_down - s_down;
+    subport_left = nrender_rows*port_left - screen_left;
+    subport_down = nrender_rows*port_down - screen_down;
     subport_width = nrender_rows*port_width;
     subport_height = nrender_rows*port_height;
     subportx_left = portx_left;
@@ -93,11 +93,11 @@ int SUB_portortho(int quad,
 /* ------------------------ SUB_portfrustum ------------------------- */
  
 int SUB_portfrustum(int quad, 
-                   GLint i_left, GLint i_down, GLsizei i_width, GLsizei i_height,
+                   GLint port_left, GLint port_down, GLsizei port_width, GLsizei port_height,
                    GLdouble portx_left, GLdouble portx_right, 
                    GLdouble portx_down, GLdouble portx_top,
                    GLdouble portx_near, GLdouble portx_far,
-                   GLint port_left, GLint port_down, GLsizei port_width, GLsizei port_height
+                   GLint screen_left, GLint screen_down, GLsizei screen_width, GLsizei screen_height
                    ){
   GLint subport_left, subport_down;
   GLsizei total_width, total_height;
@@ -105,11 +105,11 @@ int SUB_portfrustum(int quad,
 
   switch (quad){
   case 0:
-    port_pixel_width = i_width;
-    port_pixel_height = i_height;
+    port_pixel_width = port_width;
+    port_pixel_height = port_height;
     port_unit_width = portx_right - portx_left;
     port_unit_height = portx_top - portx_down;
-    glViewport(i_left,i_down,i_width,i_height);
+    glViewport(port_left,port_down,port_width,port_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     if(camera_current->projection_type==0){
@@ -126,10 +126,10 @@ int SUB_portfrustum(int quad,
     }
     return 1;
   case 1:
-    subport_left = nrender_rows*i_left - port_left;
-    subport_down = nrender_rows*i_down - port_down;
-    total_width = nrender_rows*i_width;
-    total_height = nrender_rows*i_height;
+    subport_left = nrender_rows*port_left - screen_left;
+    subport_down = nrender_rows*port_down - screen_down;
+    total_width = nrender_rows*port_width;
+    total_height = nrender_rows*port_height;
     subportx_left = portx_left;
     subportx_right = portx_right;
     subportx_down = portx_down;
