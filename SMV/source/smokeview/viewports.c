@@ -22,6 +22,8 @@ char  viewports_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
+#define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
+
  /* ------------------------ SUB_portortho ------------------------- */
  
 int SUB_portortho(int quad, 
@@ -30,9 +32,13 @@ int SUB_portortho(int quad,
                    GLint screen_left, GLint screen_down, GLsizei screen_width, GLsizei screen_height
                    ){
   
-  GLint subport_left, subport_down;
-  GLsizei subport_width, subport_height;
+  GLint subport_left, subport_right, subport_down, subport_top;
   GLdouble subportx_left, subportx_right, subportx_down, subportx_top;
+  GLsizei subport_width, subport_height;
+  GLint subwindow_left, subwindow_right, subwindow_down, subwindow_top;
+  GLint port_right, port_top;
+
+  int irow, icol;
 
   switch (quad){
   case 0:            
@@ -46,38 +52,42 @@ int SUB_portortho(int quad,
     gluOrtho2D(portx_left,portx_right,portx_down,portx_top);
     return 1;
   case 1:
-    subport_left = nrender_rows*port_left - screen_left;
-    subport_down = nrender_rows*port_down - screen_down;
-    subport_width = nrender_rows*port_width;
-    subport_height = nrender_rows*port_height;
-    subportx_left = portx_left;
-    subportx_right = portx_right;
-    subportx_down = portx_down;
-    subportx_top = portx_top;
-    if(subport_left+subport_width<0||subport_down+subport_height<0)return 0;
-    if(subport_left>screenWidth||subport_down>screenHeight)return 0;
-    if(subport_left<0){
-      subportx_left = portx_left - subport_left*(portx_right-portx_left)/subport_width;
-      subport_width += subport_left;
-      subport_left = 0;
-    }
-    if(subport_left+subport_width>screenWidth){
-      subportx_right = portx_left + (screenWidth-subport_left)*(portx_right-portx_left)/subport_width;
-      subport_width = screenWidth-subport_left;
-    }
-    if(subport_down<0){
-      subportx_down = portx_down - subport_down*(portx_top-portx_down)/subport_height;
-      subport_height += subport_down;
-      subport_down = 0;
-    }
-    if(subport_down+subport_height>screenHeight){
-      subportx_top = portx_down + (screenHeight-subport_down)*(portx_top-portx_down)/subport_height;
-      subport_height = screenHeight-subport_down;
-    }
+    icol = screen_left/screen_width;
+    irow = screen_down/screen_height;
+
+    subwindow_left = icol*screen_width;
+    subwindow_right = subwindow_left + screen_width;
+    subwindow_down = irow*screen_height;
+    subwindow_top = subwindow_down + screen_height;
+
+    port_right = port_left + port_width;
+    port_top = port_down + port_height;
+
+    subport_left =  MAX( nrender_rows*port_left,subwindow_left);
+    subport_right = MIN(nrender_rows*port_right,subwindow_right);
+    subport_down =  MAX( nrender_rows*port_down,subwindow_down);
+    subport_top =   MIN(  nrender_rows*port_top,subwindow_top);
+    if(subport_left>=subport_right||subport_down>=subport_top)return 0;
+
+#define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
+
+    subportx_left = CONV(subport_left,nrender_rows*port_left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_right = CONV(subport_right,nrender_rows*port_left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_down = CONV(subport_down,nrender_rows*port_down,nrender_rows*port_top,portx_down,portx_top);
+    subportx_top = CONV(subport_top,nrender_rows*port_down,nrender_rows*port_top,portx_down,portx_top);
+
+    subport_left -= icol*screen_width;
+    subport_right -= icol*screen_width;
+    subport_down -= irow*screen_height;
+    subport_top -= irow*screen_height;
+    subport_width = subport_right - subport_left;
+    subport_height = subport_top - subport_down;
+
     port_pixel_width = subport_width;
     port_pixel_height = subport_height;
     port_unit_width = subportx_right - subportx_left;
     port_unit_height = subportx_top - subportx_down;
+
     glViewport(subport_left,subport_down,subport_width,subport_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -99,9 +109,13 @@ int SUB_portfrustum(int quad,
                    GLdouble portx_near, GLdouble portx_far,
                    GLint screen_left, GLint screen_down, GLsizei screen_width, GLsizei screen_height
                    ){
-  GLint subport_left, subport_down;
-  GLsizei total_width, total_height;
+  GLint subport_left, subport_right, subport_down, subport_top;
   GLdouble subportx_left, subportx_right, subportx_down, subportx_top;
+  GLsizei subport_width, subport_height;
+  GLint subwindow_left, subwindow_right, subwindow_down, subwindow_top;
+  GLint port_right, port_top;
+
+  int irow, icol;
 
   switch (quad){
   case 0:
@@ -126,39 +140,41 @@ int SUB_portfrustum(int quad,
     }
     return 1;
   case 1:
-    subport_left = nrender_rows*port_left - screen_left;
-    subport_down = nrender_rows*port_down - screen_down;
-    total_width = nrender_rows*port_width;
-    total_height = nrender_rows*port_height;
-    subportx_left = portx_left;
-    subportx_right = portx_right;
-    subportx_down = portx_down;
-    subportx_top = portx_top;
-    if(subport_left+total_width<0||subport_down+total_height<0)return 0;
-    if(subport_left>screenWidth||subport_down>screenHeight)return 0;
-    if(subport_left<0){
-      subportx_left = portx_left - subport_left*(portx_right-portx_left)/total_width;
-      total_width += subport_left;
-      subport_left = 0;
-    }
-    if(subport_left+total_width>screenWidth){
-      subportx_right = portx_left + (screenWidth-subport_left)*(portx_right-portx_left)/total_width;
-      total_width = screenWidth-subport_left;
-    }
-    if(subport_down<0){
-      subportx_down = portx_down - subport_down*(portx_top-portx_down)/total_height;
-      total_height += subport_down;
-      subport_down = 0;
-    }
-    if(subport_down+total_height>screenHeight){
-      subportx_top = portx_down + (screenHeight-subport_down)*(portx_top-portx_down)/total_height;
-      total_height = screenHeight-subport_down;
-    }
-    port_pixel_width = total_width;
-    port_pixel_height = total_height;
+    icol = screen_left/screen_width;
+    irow = screen_down/screen_height;
+
+    subwindow_left = icol*screen_width;
+    subwindow_right = subwindow_left + screen_width;
+    subwindow_down = irow*screen_height;
+    subwindow_top = subwindow_down + screen_height;
+
+    port_right = port_left + port_width;
+    port_top = port_down + port_height;
+
+    subport_left =  MAX( nrender_rows*port_left,subwindow_left);
+    subport_right = MIN(nrender_rows*port_right,subwindow_right);
+    subport_down =  MAX( nrender_rows*port_down,subwindow_down);
+    subport_top =   MIN(  nrender_rows*port_top,subwindow_top);
+    if(subport_left>=subport_right||subport_down>=subport_top)return 0;
+
+    subportx_left = CONV(subport_left,nrender_rows*port_left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_right = CONV(subport_right,nrender_rows*port_left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_down = CONV(subport_down,nrender_rows*port_down,nrender_rows*port_top,portx_down,portx_top);
+    subportx_top = CONV(subport_top,nrender_rows*port_down,nrender_rows*port_top,portx_down,portx_top);
+
+    subport_left -= icol*screen_width;
+    subport_right -= icol*screen_width;
+    subport_down -= irow*screen_height;
+    subport_top -= irow*screen_height;
+    subport_width = subport_right - subport_left;
+    subport_height = subport_top - subport_down;
+
+    port_pixel_width = subport_width;
+    port_pixel_height = subport_height;
     port_unit_width = subportx_right - subportx_left;
     port_unit_height = subportx_top - subportx_down;
-    glViewport(subport_left,subport_down,total_width,total_height);
+
+    glViewport(subport_left,subport_down,subport_width,subport_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     if(camera_current->projection_type==0){
