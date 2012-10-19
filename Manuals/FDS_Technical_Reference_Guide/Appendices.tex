@@ -385,18 +385,18 @@ concentrations at extinction ranging from 12~\% to 15~\%. The default value in F
 \label{chemistry_integration}
 
 To solve the system of ordinary differential equations used for complex chemistry (e.g., multi-step reactions, reversible reactions), an integrator that is more robust than an explicit Euler scheme is needed. FDS uses a second-order Runge-Kutta (RK2) predictor-corrector scheme as the foundation for its numerical integrator. A common RK2 formulation is \cite{Moin:2001}:
-
-\begin{eqnarray}\label{RK2_moin}
-y^*_{n+1/2}=y_n+\frac{h}{2}\,f(y_{n},t_{n}) \\
-\nonumber y_{n+1}=y_{n}+h\,f(y^*_{n+1/2},t_{n+1/2})
-\end{eqnarray}
+\begin{align}
+\label{RK2_moin}
+y^*_{n+1/2} &= y_n+\frac{h}{2}\,f(y_{n},t_{n}) \notag\\
+y_{n+1}     &= y_{n}+h\,f(y^*_{n+1/2},t_{n+1/2})
+\end{align}
 The implementation of RK2 in FDS is as follows:
-
-\begin{eqnarray}\label{RK2}
-y^*_{n+1}           &=& y_n+h\,f(y_{n},t_{n}) \\
-\nonumber y^*_{n+2} &=& y^*_{n+1}+h\,f(y^*_{n+1},t_{n+1}) \\
-\nonumber y_{n+1} &=& (1/2)\,(y_{n}+y^*_{n+2})
-\end{eqnarray}
+\begin{align}
+\label{RK2}
+y^*_{n+1} &= y_n+h\,f(y_{n},t_{n}) \notag\\
+y^*_{n+2} &= y^*_{n+1}+h\,f(y^*_{n+1},t_{n+1}) \notag\\
+y_{n+1}   &= \frac{1}{2}\,(y_{n}+y^*_{n+2})
+\end{align}
 
 This second-order scheme is an improvement upon the first-order explicit scheme used for simple chemistry. However, to maintain stability in stiff problems, this mechanism requires such small integration time steps compared to the global FDS time step that the simulation can become intractable. To improve the capabilities of this integrator, Richardson extrapolation is used. Richardson extrapolation can increase the order of the error within a numerical scheme and provide the foundation for an error controller to be implemented. Consider a generic case where a function, $f(y,t)$, is integrated from $t^*$ to $t$ using two different time sub-intervals: $h$ and $\frac{h}{2}$. Taking a Taylor expansion at $h$ results in:
 \begin{equation}\label{eq:h1}
@@ -871,12 +871,13 @@ Integrating Eq. (\ref{mom_u_p_full}) leads to an equation for the particle posit
 
 \subsubsection{Implementation in FDS}
 
-The particle positions are computed in {\ct part.f90} in {\ct DROPLET\_LOOP}. The solutions are used to advance $\Delta t$ forward in time much like a normal finite-difference scheme. The exact solution is used for the case without drag.
+The following solutions are used to advance the particle positions forward in time by $\delta t$ much like a normal finite-difference scheme. The exact solution is used for the case without drag.
 \begin{align}
-    \mathbf{u}_p^{n+1} &= \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_\text{r}^n \left(\frac{\mathbf{u}_\text{r}^n \cdot \mathbf{g}}{|\mathbf{u}_\text{r}^n|^2}\right) + \mathbf{g}\right] \\[1cm]
-    \mathbf{x}_p^{n+1} &= \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2}
+    \mathbf{u}_p^{n+1} &= \frac{\mathbf{u}_p^n}{1 + \beta_p \delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \delta t}{(1 + \beta_p \delta t)(1 + \alpha_p)} + \mathbf{g} \delta t - \frac{\alpha_p \beta_p (\delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_\text{r}^n \left(\frac{\mathbf{u}_\text{r}^n \cdot \mathbf{g}}{|\mathbf{u}_\text{r}^n|^2}\right) + \mathbf{g}\right] \\
+    & \notag \\
+    \mathbf{x}_p^{n+1} &= \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\delta t)^2}{2}
 \end{align}
-The theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$ appears to be $\mathcal{O}(\Delta t^3)$ at first glance, but actual computation reveals it is $\mathcal{O}(\Delta t^2)$. This is due to the error in the velocity reducing the overall order of accuracy. The $\Delta t^3$ term can be dropped and was dropped above without a loss in accuracy for this reason. More details about this are available in the Lagrangian particles chapter in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
+At first glance, the theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$, Eq.~(\ref{mom_x_p_full}), appears to be $\mathcal{O}(\delta t^3)$. But computation reveals it is actually $\mathcal{O}(\delta t^2)$. This is due to the velocity error reducing the overall accuracy of the position solution. The $\delta t^3$ term, therefore, may be dropped from Eq.~(\ref{mom_x_p_full}) without loss of accuracy. More details about this are available in the Lagrangian Particles chapter in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
 \chapter{Finding Absorption Coefficients of Liquid Fuels}
 %\subsubsection{Topi Sikanen, entered by Michael Van Order}
