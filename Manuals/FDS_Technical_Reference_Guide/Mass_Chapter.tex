@@ -55,8 +55,6 @@ It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 \ee
 
 
-\newpage
-
 \section{Mass and Species Transport}
 
 The density and species transport equations are solved using the same basic predictor-corrector scheme.
@@ -224,9 +222,6 @@ We want to assert mass conservation at the mesh interface:
               u_{0,j'k'}^{(2)} \; \rho_{f,j'k'}^{(2)} \; \dy^{(2)} \, \dz^{(2)}  \label{rhou}
 \ee
 To enforce this condition, we obtain $\rho_{f,jk}^{(1)}$ on Mesh 1 and $\rho_{f,j'k'}^{(2)}$ on Mesh 2 from a flux limiter (see Section \ref{sec_flux_limiters}) once data has been exchanged between meshes.  Since only one layer of ghost cells is exchanged, the second upwind data value is linearly extrapolated to maintain second-order accuracy of the interpolated face density.
-
-
-\newpage
 
 
 \section{The Velocity Divergence}
