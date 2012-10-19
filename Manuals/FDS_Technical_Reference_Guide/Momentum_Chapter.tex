@@ -126,7 +126,7 @@ In LES, the ``turbulence model'' refers to the closure for SGS flux terms.  In F
 
 Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity is modeled by
 \be
-\mu_t = \overline{\rho} \, (C_s\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
+\mu_t = \rho \, (C_s\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
 \ee
 where $C_s=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width.
 
@@ -139,7 +139,7 @@ For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_s$ in Eq.
 
 By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1}:
 \be 
-  \mu_t = \overline{\rho} \, C_\nu \, \Delta \, \sqrt{k_{\hbox{\tiny sgs}} } \quad ; \quad  
+  \mu_t = \rho \, C_\nu \, \Delta \, \sqrt{k_{\hbox{\tiny sgs}} } \quad ; \quad  
   k_{\hbox{\tiny sgs}} = \ha \left( (\overline{u}-\hat{u})^2 + (\overline{v}-\hat{v})^2 + (\overline{w}-\hat{w})^2 \right)  \label{Deardorff_LES}
 \ee
 where $\overline{u}$ is the average value of $u$ at the grid cell center and $\hat{u}$ is a weighted average of $u$ over the adjacent cells:
@@ -147,6 +147,24 @@ where $\overline{u}$ is the average value of $u$ at the grid cell center and $\h
    \overline{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{u}_{ijk} = \frac{\overline{u}_{ijk}}{2} + \frac{\overline{u}_{i-1,jk} + \overline{u}_{i+1,jk} }{4}
 \ee
 The terms $\hat{v}$ and $\hat{w}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.
+
+\subsection{Vreman's Model}
+\label{sec:vreman}
+
+Vreman's eddy viscosity model \cite{vreman:2004} is given by
+\begin{equation}
+\label{eqn_mu_vreman}
+\mu_t = \rho \, c \, \sqrt{ \frac{B_\beta}{\alpha_{ij}\alpha_{ij}} }
+\end{equation}
+where
+\begin{align}
+B_\beta     &= \beta_{11}\beta_{22} - \beta_{12}^2 + \beta_{11}\beta_{33} - \beta_{13}^2 + \beta_{22}\beta_{33} - \beta_{23}^2 \quad ; \quad \beta_{ij} = \Delta_m^2 \alpha_{mi} \alpha_{mj} \\
+\alpha_{ij} &= \frac{\partial u_j}{\partial x_i}
+\end{align}
+
+The basic idea behind Vreman's model is to expand the velocity field in a Taylor series and to test filter this field analytically, thus avoiding the expensive explicit test filtering operations necessary in the dynamic model.  Therefore, this model is inexpensive.  Unlike constant coefficient Smagorinsky, however, Vreman's model is convergent, making it applicable to highly resolved LES calculations.
+
+The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_s^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_s = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS\_Verification\_Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
 
 \subsection{Thermal Conduction and Gas Species Diffusion}
 

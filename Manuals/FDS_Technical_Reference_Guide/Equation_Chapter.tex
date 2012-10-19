@@ -32,7 +32,7 @@ The equations for large-eddy simulation (LES) are derived by applying a low-pass
 \bar{\rho}(x,t) = \frac{1}{\Delta}\int_{x-\Delta/2}^{x+\Delta/2} \rho(r,t) \d r \mbox{.}
 \end{equation}
 
-In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x$ and is a key parameter in the submodels for the turbulent viscosity and the reaction time scale discussed later.  The practice of taking $\Delta = \delta x$ is called implicit filtering.  It is important to appreciate, however, that implicit filtering does not imply dissipative numerics.  FDS employs kinetic-energy-conserving central difference schemes for momentum with physically-based closures for the turbulent stress.  In what follows, the filter formalism is relaxed (the overline notation is suppressed for clarity) since no explicit filtering operations are performed in the algorithm.
+In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x$ and is a key parameter in the submodels for the turbulent viscosity and the reaction time scale discussed later.  The practice of taking $\Delta = \delta x$ is called implicit filtering.  It is important to appreciate, however, that implicit filtering does not imply dissipative numerics.  FDS employs kinetic-energy-conserving central difference schemes for momentum with physically-based closures for the turbulent stress.  In what follows, the filter formalism is relaxed (the overline notation is suppressed for clarity) since no explicit filtering operations are performed in the algorithm.  A detailed derivation of the formal LES equations is presented in Chapter \ref{momentum_chapter}.
 
 \section{Numerical Grid}
 \label{govequations}
