@@ -3770,7 +3770,7 @@ Note, the Smokeview animation must be running when the render command is selecte
 Smokeview scenes may be annotated by using the User Ticks dialog
 box or by using the TICKS and LABEL keywords.  The User Ticks
 dialog box is easier to use but  has limited flexibility in tick
-and label placement. A user may use the TICKS and LABELS keywords
+and label placement. A user may use the TICKS and LABEL keywords
 to duplicate the functionality of the {\em User Ticks}\ dialog box
 and also place text anywhere in the scene and at any time
 throughout the simulation.  This added generality makes it more
@@ -3807,9 +3807,9 @@ Dialogs$>$Display}. } \label{figTICKSdialog}
 \end{figure}
 
 
-\section{TICKS and LABELS keywords}
+\section{TICKS and LABEL keywords}
 Tick marks and label annotation
-can be also placed within the 3D scene using the TICKS and LABELS keywords.
+can be also placed within the 3D scene using the TICKS and LABEL keywords.
 FDS places tick marks and labels
 documenting the scene dimensions.  To replace or customize
 these annotations add the {\tt TICK} keyword to a .smv file
@@ -3847,7 +3847,7 @@ stop appearance time may also be specified. The format is
 given by
 
 \begin{verbatim}
-LABELS
+LABEL
 x y z r g b tstart tstop
 label
 \end{verbatim}
@@ -3861,7 +3861,7 @@ indicate the time interval when the label is visible. The text
 string is specified on the next line ({\tt label}).
 
 Figure \ref{figticklabels} shows how the {\tt TICKS} and
-{\tt LABELS} keywords can be used together to create a
+{\tt LABEL} keywords can be used together to create a
 {\em ruler}\ with major and minor tick marks illustrated in Figure
 \ref{figticklabelexample}.
 
