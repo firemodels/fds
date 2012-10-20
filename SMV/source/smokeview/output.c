@@ -366,7 +366,7 @@ void drawLabels(void){
         float xyz_pos[3];
 
         normalize_xyz(xyz_pos,xyz);
-        output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],labelcopy->label);
+        output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],labelcopy->name);
       }
     }
   }

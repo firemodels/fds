@@ -1146,7 +1146,7 @@ SVEXTERN int blockage_as_input, blockage_snapped;
 SVEXTERN int show_cad_and_grid;
 SVEXTERN int use_nistlogo;
 SVEXTERN int benchmark_flag;
-SVEXTERN labeldata SVDECL(*labelinfo,NULL);
+SVEXTERN labeldata SVDECL(*labelinfo,NULL),label_first, label_last, *label_first_ptr, *label_last_ptr;
 SVEXTERN int SVDECL(*slicetypes,NULL), SVDECL(*isotypes,NULL), SVDECL(*vslicetypes,NULL), SVDECL(*patchtypes,NULL);
 SVEXTERN plot3ddata SVDECL(*plot3dinfo,NULL);
 SVEXTERN float SVDECL(*plot3dtimelist,NULL);

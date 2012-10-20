@@ -1141,8 +1141,14 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
-  // define initial rotation matrix to be the identity
   
+  label_first_ptr = &label_first;
+  label_last_ptr = &label_last;
+  label_first_ptr->prev = NULL;
+  label_first_ptr->next = label_last_ptr;
+  label_last_ptr->prev = label_first_ptr;
+  label_last_ptr->next = NULL;
+
 #ifdef pp_LANG
   strcpy(startup_lang_code,"en");
 #endif

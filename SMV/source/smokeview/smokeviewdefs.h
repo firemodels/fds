@@ -11,6 +11,13 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#ifndef TYPE_SMV
+#define TYPE_SMV 0
+#endif
+#ifndef TYPE_INI
+#define TYPE_INI 1
+#endif
+
 #define XXX 0
 #define YYY 1
 #define ZZZ 2

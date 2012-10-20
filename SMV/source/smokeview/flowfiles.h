@@ -184,9 +184,11 @@ typedef struct {
 
 /* --------------------------  labeldata ------------------------------------ */
 
-typedef struct {
+typedef struct _labeldata {
+  struct _labeldata *prev, *next;
 	float xyz[3], rgb[4];
-	char label[256];
+	char name[256];
+  int labeltype; // smv or ini
   float tstart_stop[2];
   int useforegroundcolor;
 } labeldata;
