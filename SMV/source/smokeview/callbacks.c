@@ -1596,11 +1596,12 @@ void keyboard(unsigned char key, int flag){
 
 
         if(strncmp((const char *)&key2,"R",1)==0){
-          render_double=2;
+          if(nrender_rows==1)nrender_rows=2;
+          render_multi=2;
           rflag=1;
         }
         else{
-          render_double=0;
+          render_multi=0;
           if(render_from_menu==0){
             renderW=0;
             renderH=0;
@@ -2826,7 +2827,7 @@ void Display_CB(void){
       ShowScene(RENDER,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
     }
     else{
-      if(render_double==0){
+      if(render_multi==0){
         glDrawBuffer(GL_BACK);
         ShowScene(RENDER,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
         if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
@@ -2904,7 +2905,7 @@ void Display_CB(void){
 void ResizeWindow(int width, int height){
   float wscaled, hscaled;
 
-  if(render_double!=0)return;
+  if(render_multi!=0)return;
   glutSetWindow(mainwindow_id);
   wscaled = (float)width/(float)max_screenWidth;
   hscaled = (float)height/(float)max_screenHeight;

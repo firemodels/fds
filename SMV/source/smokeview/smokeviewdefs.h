@@ -313,7 +313,8 @@ void _Sniff_Errors(char *whereat);
 #define MAXRGB 256
 #define StepOn 10000
 #define RenderCancel 999
-#define RenderOnce 998
+#define RENDERONCE_SINGLE 998
+#define RENDERONCE_MULTIPLE 978
 #ifdef pp_JPEG
 #define RenderJPEG 997
 #endif
@@ -321,7 +322,6 @@ void _Sniff_Errors(char *whereat);
 #define Render320 995
 #define Render640 994
 #define RenderWindow 993
-#define Render2Window 992
 #define LABELLEN 30
 #define RenderLABELframenumber 980
 #define RenderLABELtime 979

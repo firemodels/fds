@@ -152,7 +152,7 @@ SVEXTERN int SVDECL(patchembedded,0);
 SVEXTERN int npartframes_max;
 SVEXTERN int force_isometric;
 SVEXTERN int SVDECL(updategluiview,1);
-SVEXTERN int render_double,render_double_state,render_double_menu,render_from_menu;
+SVEXTERN int render_multi,render_multi_state,render_multi_menu,render_from_menu;
 SVEXTERN int SVDECL(usetexturebar,1);
 SVEXTERN int show_smokelighting;
 SVEXTERN int sb_atstart;

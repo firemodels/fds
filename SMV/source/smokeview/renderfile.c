@@ -45,7 +45,7 @@ void Render(int view_mode){
     }
   }
   if(RenderOnceNow==0&&RenderGif !=0
-    &&render_double==0
+    &&render_multi==0
     ){
     if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
      if(itimes>=0&&itimes<nglobal_times&&
@@ -73,12 +73,12 @@ void Render(int view_mode){
     }
   }
 
-  if(render_double==0){
+  if(render_multi==0){
     SNIFF_ERRORS("after render");
   }
 
   if(RenderOnceNow==1||RenderOnceNowL==1||RenderOnceNowR==1){
-    if(render_double==0)RenderFrame(view_mode); 
+    if(render_multi==0)RenderFrame(view_mode); 
     RenderOnceNow=0;
     if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
     if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;

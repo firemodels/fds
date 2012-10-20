@@ -51,11 +51,12 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define GSLICE_NORMAL 27
 
 #define RENDER_TYPE 0
-#define RENDER_SIZE_LIST 1
-#define RENDER_SKIP_LIST 2
+#define RENDER_RESOLUTION 1
+#define RENDER_SKIP 2
 #define RENDER_START 3
 #define RENDER_STOP 4
 #define RENDER_LABEL 5
+#define RENDER_MULTIPLIER 6
 
 void rotation_type_CB(int var);
 void Motion_DLG_CB(int var);
@@ -65,6 +66,7 @@ void Gslice_CB(int var);
 GLUI *glui_motion=NULL;
 
 GLUI_Panel *PANEL_rotate=NULL, *PANEL_translate=NULL,*PANEL_close=NULL;
+GLUI_Panel *PANEL_file_suffix=NULL, *PANEL_file_type=NULL;
 GLUI_Panel *PANEL_radiorotate=NULL;
 GLUI_Panel *PANEL_gslice=NULL;
 GLUI_Panel *PANEL_gslice_center=NULL;
@@ -86,6 +88,7 @@ GLUI_Rollout *ROLLOUT_projection=NULL;
 GLUI_Rollout *ROLLOUT_render=NULL;
 GLUI_Rollout *ROLLOUT_reset3=NULL;
 
+GLUI_Spinner *SPINNER_nrender_rows=NULL;
 GLUI_Spinner *SPINNER_clip_left=NULL;
 GLUI_Spinner *SPINNER_clip_right=NULL;
 GLUI_Spinner *SPINNER_clip_bottom=NULL;
@@ -148,6 +151,25 @@ GLUI_Listbox *LIST_render_skip=NULL;
 
 void Render_CB(int var);
 void enable_disable_views(void);
+
+/* ------------------ update_nrender_rows ------------------------ */
+
+extern "C" void update_nrender_rows(void){
+  if(SPINNER_nrender_rows!=NULL){
+    if(render_size_index==RenderWindow){
+      SPINNER_nrender_rows->enable();
+    }
+    else{
+      SPINNER_nrender_rows->disable();
+    }
+    if(nrender_rows!=SPINNER_nrender_rows->get_int_val()){
+      SPINNER_nrender_rows->set_int_val(nrender_rows);
+    }
+  }
+  if(LIST_render_size!=NULL&&LIST_render_size->get_int_val()!=render_size_index){
+    LIST_render_size->set_int_val(render_size_index);
+  }
+}
 
 /* ------------------ update_gslice_parms ------------------------ */
 
@@ -416,29 +438,33 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_window_update=glui_motion->add_button_to_panel(ROLLOUT_projection,_("Apply"),WINDOW_RESIZE,Motion_CB);
 
   ROLLOUT_render = glui_motion->add_rollout(_("Render"),false);
-  RADIO_render_type=glui_motion->add_radiogroup_to_panel(ROLLOUT_render,&renderfiletype,RENDER_TYPE,Render_CB);
+
+  PANEL_file_type=glui_motion->add_panel_to_panel(ROLLOUT_render,"file type:",true);
+  RADIO_render_type=glui_motion->add_radiogroup_to_panel(PANEL_file_type,&renderfiletype,RENDER_TYPE,Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type,"PNG");
 #ifdef pp_JPEG
   glui_motion->add_radiobutton_to_group(RADIO_render_type,"JPEG");
 #endif
-  glui_motion->add_separator_to_panel(ROLLOUT_render);
-  RADIO_render_label=glui_motion->add_radiogroup_to_panel(ROLLOUT_render,&renderfilelabel,RENDER_LABEL,Render_CB);
+
+  PANEL_file_suffix=glui_motion->add_panel_to_panel(ROLLOUT_render,"file suffix:",true);
+  RADIO_render_label=glui_motion->add_radiogroup_to_panel(PANEL_file_suffix,&renderfilelabel,RENDER_LABEL,Render_CB);
   RADIOBUTTON_1f=glui_motion->add_radiobutton_to_group(RADIO_render_label,"frame number");
   RADIOBUTTON_1g=glui_motion->add_radiobutton_to_group(RADIO_render_label,"time (s)");
   update_glui_filelabel(renderfilelabel);
 
 
   render_size_index=RenderWindow; 
-  LIST_render_size = glui_motion->add_listbox_to_panel(ROLLOUT_render,_("Size:"),&render_size_index,RENDER_SIZE_LIST,Render_CB);
+  LIST_render_size = glui_motion->add_listbox_to_panel(ROLLOUT_render,_("Resolution:"),&render_size_index,RENDER_RESOLUTION,Render_CB);
   LIST_render_size->add_item(Render320,"320x240");
   LIST_render_size->add_item(Render640,"640x480");
   LIST_render_size->add_item(RenderWindow,_("Current"));
-  LIST_render_size->add_item(Render2Window,_("2*Current"));
   LIST_render_size->set_int_val(render_size_index);
+  SPINNER_nrender_rows=glui_motion->add_spinner_to_panel(ROLLOUT_render,"Resolution multiplier:",GLUI_SPINNER_INT,&nrender_rows,RENDER_MULTIPLIER,Render_CB);
+  SPINNER_nrender_rows->set_int_limits(2,10);
 
-  render_skip_index=RenderOnce; 
-  LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render,_("Frames:"),&render_skip_index,RENDER_SKIP_LIST,Render_CB);
-  LIST_render_skip->add_item(RenderOnce,_("One"));
+  render_skip_index=RENDERONCE_SINGLE; 
+  LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render,_("Which frames:"),&render_skip_index,RENDER_SKIP,Render_CB);
+  LIST_render_skip->add_item(RENDERONCE_SINGLE,_("One"));
   LIST_render_skip->add_item(1,_("All"));
   LIST_render_skip->add_item(2,_("Every 2nd"));
   LIST_render_skip->add_item(3,_("Every 3rd"));
@@ -463,7 +489,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   CHECKBOX_clip_rendered_scene = glui_motion->add_checkbox_to_panel(ROLLOUT_scene_clip,"clip rendered scene",&clip_rendered_scene);
 
-  BUTTON_render_start=glui_motion->add_button_to_panel(ROLLOUT_render,_("Start"),RENDER_START,Render_CB);
+  BUTTON_render_start=glui_motion->add_button_to_panel(ROLLOUT_render,_("Start rendering"),RENDER_START,Render_CB);
   BUTTON_render_stop=glui_motion->add_button_to_panel(ROLLOUT_render,_("Stop"),RENDER_STOP,Render_CB);
   
   ROLLOUT_reset3 = glui_motion->add_rollout(_("Viewpoints"),false);
@@ -1359,20 +1385,19 @@ void Render_CB(int var){
       break;
     case RENDER_TYPE:
       break;
-    case RENDER_SIZE_LIST:
+    case RENDER_MULTIPLIER:
+      break;
+    case RENDER_RESOLUTION:
       RenderMenu(render_size_index);
       break;
-    case RENDER_SKIP_LIST:
+    case RENDER_SKIP:
       break;
     case RENDER_START:
-      if(render_size_index==Render2Window){
-        Render_CB(RENDER_SIZE_LIST);
-      }
       if(RenderTime==1||touring==1){
         RenderMenu(render_skip_index);
       }
       else{
-        render_skip_index = RenderOnce;
+        render_skip_index = RENDERONCE_SINGLE;
         LIST_render_skip->set_int_val(render_skip_index);
         RenderMenu(render_skip_index);
       }
@@ -1390,7 +1415,7 @@ void Render_CB(int var){
 
 extern "C" void update_glui_render(void){
   if(RenderTime==1&&RenderTimeOld==0){
-    if(LIST_render_skip!=NULL&&render_skip_index==RenderOnce){
+    if(LIST_render_skip!=NULL&&render_skip_index==RENDERONCE_SINGLE){
       render_skip_index=1;
       LIST_render_skip->set_int_val(render_skip_index);
     }

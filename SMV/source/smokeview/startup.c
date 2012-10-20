@@ -1319,8 +1319,8 @@ void initvars(void){
   rgb_terrain[9][2]=0.5;
   rgb_terrain[9][3]=1.0;
 
-  render_double=0;
-  render_double_state=0;
+  render_multi=0;
+  render_multi_state=0;
   render_from_menu=0;
   percentile_level=0.01;
 

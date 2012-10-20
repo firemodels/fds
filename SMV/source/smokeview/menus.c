@@ -1408,7 +1408,7 @@ void RenderState(int onoff){
     }
     else{
       if(renderW>max_screenWidth){
-        render_double=render_double_state;
+        render_multi=render_multi_state;
         ResizeWindow(max_screenWidth,max_screenHeight);
       }
       else{
@@ -1417,8 +1417,8 @@ void RenderState(int onoff){
     }
   }
   else{
-    render_double=0;
-    render_double_state=0;
+    render_multi=0;
+    render_multi_state=0;
     RenderGif=0;
     setScreenSize(&saveW,&saveH);
     ResizeWindow(screenWidth,screenHeight);
@@ -1433,54 +1433,56 @@ void RenderMenu(int value){
   mesh *meshi;
 
   updatemenu=1;
-  if(value>=10000)return;
+  if(value>=11000)return;
   if(opengldefined==1){
     glutPostRedisplay();
   }
+  if(value>=10000&&value<=10005){
+    nrender_rows=value-10000;
+    update_nrender_rows();
+    return;
+  }
   switch (value){
   case Render320:
-    render_double_menu=0;
+    render_multi_menu=0;
     render_option=value;
-    render_double_state=0;
+    render_multi_state=0;
     renderW=320;
     renderH=240;
+    render_size_index=value;
     break;
   case Render640:
-    render_double_menu=0;
+    render_multi_menu=0;
     render_option=value;
-    render_double_state=0;
+    render_multi_state=0;
     renderW=640;
     renderH=480;
+    render_size_index=value;
     break;
   case RenderWindow:
-    render_double_menu=0;
+    render_multi_menu=0;
     render_option=value;
-    render_double_state=0;
+    render_multi_state=0;
     renderW=0;
     renderH=0;
+    render_size_index=value;
     break;
-  case Render2Window:
-    render_double_menu=1;
-    render_option=value;
-    renderW=2*screenWidth;
-    renderH=2*screenHeight;
-    render_double_state=2;
-    break;
-  case RenderOnce:
+  case RENDERONCE_SINGLE:
     render_from_menu=1;
-    if(render_double_menu==1)render_double_state=1;
-    if(render_double_state!=0){
-      render_double=render_double_state;
-      keyboard('R',FROM_SMOKEVIEW);
-    }
-    else{
-      keyboard('r',FROM_SMOKEVIEW);
-    }
+    keyboard('r',FROM_SMOKEVIEW);
      break;
+  case RENDERONCE_MULTIPLE:
+    if(nrender_rows==1)RenderMenu(RENDERONCE_SINGLE);
+    render_from_menu=1;
+    if(render_multi_menu==1)render_multi_state=1;
+    render_multi_state=nrender_rows;
+    render_multi=render_multi_state;
+    keyboard('R',FROM_SMOKEVIEW);
+    break;
   case RenderCancel:
-    render_double_menu=0;
-    render_double=0;
-    render_double_state=0;
+    render_multi_menu=0;
+    render_multi=0;
+    render_multi_state=0;
     RenderState(0);
     break;
   case RenderLABELframenumber:
@@ -1534,6 +1536,7 @@ void RenderMenu(int value){
     }
     break;
   }
+  update_nrender_rows();
 }
 
 /* ------------------ EvacShowMenu ------------------------ */
@@ -4615,7 +4618,8 @@ void InitMenus(int unload){
 
 static int titlemenu=0, labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
-static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0;
+static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0, resolutionmultipliermenu=0;
+static int startrenderingmenu=0;
 #ifdef pp_COMPRESS
 static int compressmenu=0;
 #endif
@@ -7003,6 +7007,7 @@ updatemenu=0;
     char renderwindow3[1024];
     char renderwindow4[1024];
     char rendertemp[1024];
+    int render_current=0;
 
     strcpy(renderwindow,"  ");
     if(renderW==320)strcat(renderwindow,"*");
@@ -7014,22 +7019,69 @@ updatemenu=0;
 
     sprintf(rendertemp,"%i%s%i (current)",screenWidth,"x",screenHeight);
     strcpy(renderwindow3,"  ");
-    if(renderW!=320&&renderW!=640&&renderW!=2*screenWidth)strcat(renderwindow3,"*");
+    if(renderW!=320&&renderW!=640&&renderW!=2*screenWidth){
+      render_current=1;
+      strcat(renderwindow3,"*");
+    }
     strcat(renderwindow3,rendertemp);
 
-    sprintf(rendertemp,"%i%s%i (2*current)",2*screenWidth,"x",2*screenHeight);
-    strcpy(renderwindow4,"  ");
-    if(renderW==2*screenWidth)strcat(renderwindow4,"*");
-    strcat(renderwindow4,rendertemp);
+    CREATEMENU(startrenderingmenu,RenderMenu);
+    glutAddMenuEntry(_("  One Frame (single part)"),RENDERONCE_SINGLE);
+    if(render_current==1){
+      sprintf(menulabel,"  One frame (%i x %i parts)",nrender_rows,nrender_rows);
+      glutAddMenuEntry(menulabel,RENDERONCE_MULTIPLE);
+    }
+    if(RenderTime==1||touring==1){
+      glutAddMenuEntry(_("  All frames"),1);
+      glutAddMenuEntry(_("  Every 2nd frame"),2);
+      glutAddMenuEntry(_("  Every 3rd frame"),3);
+      glutAddMenuEntry(_("  Every 4th frame"),4);
+      glutAddMenuEntry(_("  Every 5th frame"),5);
+      glutAddMenuEntry(_("  Every 10th frame"),10);
+      glutAddMenuEntry(_("  Every 20th frame"),20);
+      glutAddMenuEntry(_("  Cancel"),RenderCancel);
+    }
+
+    CREATEMENU(resolutionmultipliermenu,RenderMenu);
+    if(nrender_rows==2){
+      glutAddMenuEntry("  *2",10002);
+    }
+    else{
+      glutAddMenuEntry("  2",10002);
+    }
+    if(nrender_rows==3){
+      glutAddMenuEntry("  *3",10003);
+    }
+    else{
+      glutAddMenuEntry("  3",10003);
+    }
+    if(nrender_rows==4){
+      glutAddMenuEntry("  *4",10004);
+    }
+    else{
+      glutAddMenuEntry("  4",10004);
+    }
+    if(nrender_rows==5){
+      glutAddMenuEntry("  *5",10005);
+    }
+    else{
+      glutAddMenuEntry("  5",10005);
+    }
+    if(nrender_rows==6)glutAddMenuEntry("  *6",10005);
+    if(nrender_rows==7)glutAddMenuEntry("  *7",10005);
+    if(nrender_rows==8)glutAddMenuEntry("  *8",10005);
+    if(nrender_rows==9)glutAddMenuEntry("  *9",10005);
+    if(nrender_rows==10)glutAddMenuEntry("  *10",10005);
 
     CREATEMENU(rendermenu,RenderMenu);
-    glutAddMenuEntry("SIZE:",10000);
+    glutAddMenuEntry("Resolution:",11000);
     glutAddMenuEntry(renderwindow,Render320);
     glutAddMenuEntry(renderwindow2,Render640);
     glutAddMenuEntry(renderwindow3,RenderWindow);
-    glutAddMenuEntry(renderwindow4,Render2Window);
 
-    glutAddMenuEntry(_("Type:"),10000);
+    if(render_current==1)glutAddSubMenu(_("Resolution multiplier"),resolutionmultipliermenu);
+
+    glutAddMenuEntry(_("Type:"),11000);
     if(renderfiletype==0){
       glutAddMenuEntry("  *PNG",RenderPNG);
 #ifdef pp_JPEG
@@ -7049,7 +7101,7 @@ updatemenu=0;
 #endif
     }
 
-    glutAddMenuEntry("Suffix:",10000);
+    glutAddMenuEntry("File suffix:",11000);
     if(renderfilelabel==0){
       glutAddMenuEntry("  *Frame number",RenderLABELframenumber);
       glutAddMenuEntry("  Time",RenderLABELtime);
@@ -7058,19 +7110,9 @@ updatemenu=0;
       glutAddMenuEntry("  Frame number",RenderLABELframenumber);
       glutAddMenuEntry("  *Time",RenderLABELtime);
     }
-    glutAddMenuEntry(_("Number:"),10000);
-    glutAddMenuEntry(_("  One Frame"),RenderOnce);
+    
+    glutAddSubMenu(_("Start rendering:"),startrenderingmenu);    
     update_glui_render();
-    if(RenderTime==1||touring==1){
-      glutAddMenuEntry(_("  All frames"),1);
-      glutAddMenuEntry(_("  Every 2nd frame"),2);
-      glutAddMenuEntry(_("  Every 3rd frame"),3);
-      glutAddMenuEntry(_("  Every 4th frame"),4);
-      glutAddMenuEntry(_("  Every 5th frame"),5);
-      glutAddMenuEntry(_("  Every 10th frame"),10);
-      glutAddMenuEntry(_("  Every 20th frame"),20);
-      glutAddMenuEntry(_("  Cancel"),RenderCancel);
-    }
   }
 
    /* --------------------------------viewpoint menu -------------------------- */
