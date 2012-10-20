@@ -5691,7 +5691,7 @@ updatemenu=0;
   if(visUsagememory==1)glutAddMenuEntry(_("*Memory usage"),19);
   if(visUsagememory==0)glutAddMenuEntry(_("Memory usage"),19);
 #endif
-  if(nlabels>0){
+  if(label_first_ptr->next->next!=NULL){
     if(visLabels==1)glutAddMenuEntry(_("*Text labels"),7);
     if(visLabels==0)glutAddMenuEntry(_("Text labels"),7);
   }

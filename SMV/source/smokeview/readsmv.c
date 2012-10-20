@@ -2263,7 +2263,10 @@ labeldata *insert_scenelabel(labeldata *labeltemp){
     insert_after(lastuserptr,newlabel);
     return newlabel;
   }
-
+  if(firstuserptr==NULL&&lastuserptr==NULL){
+    insert_after(label_first_ptr,newlabel);
+    return newlabel;
+  }
   for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
     labeldata *nextlabel;
 
@@ -2393,10 +2396,6 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(tickinfo);
   nticks=0;
   ntickssmv=0;
-
-  FREEMEMORY(labelinfo);
-  nlabels=0;
-  nlabelssmv=0;
 
   FREEMEMORY(camera_external);
   if(file!=NULL)NewMemory((void **)&camera_external,sizeof(camera));
@@ -2898,11 +2897,6 @@ int readsmv(char *file, char *file2){
       ntickssmv++;
       continue;
     }
-    if(match(buffer,"LABEL") == 1){
-      nlabels++;
-      nlabelssmv++;
-      continue;
-    }
     if(match(buffer,"TRNX") == 1){
       ntrnx++;
       continue;
@@ -3277,12 +3271,6 @@ int readsmv(char *file, char *file2){
     if(NewMemory((void **)&tickinfo,nticks*sizeof(tickdata))==0)return 2;
     nticks=0;
     ntickssmv=0;
-  }
-
-  if(nlabels>0){
-    if(NewMemory((void **)&labelinfo,nlabels*sizeof(labeldata))==0)return 2;
-    nlabels=0;
-    nlabelssmv=0;
   }
 
   if(npropinfo>0){
@@ -3793,8 +3781,6 @@ int readsmv(char *file, char *file2){
   */
 
     if(match(buffer,"LABEL") == 1){
-      nlabels++;
-      nlabelssmv++;
 
       /*
       LABEL
@@ -3804,14 +3790,15 @@ int readsmv(char *file, char *file2){
       */
       {
         float *xyz, *rgbtemp, *tstart_stop;
-        labeldata *labeli;
+        labeldata labeltemp, *labeli;
 
-        labeli = labelinfo + nlabels-1;
+        labeli = &labeltemp;
 
         xyz = labeli->xyz;
         rgbtemp = labeli->rgb;
         tstart_stop = labeli->tstart_stop;
 
+        labeli->labeltype=TYPE_SMV;
         fgets(buffer,255,stream);
         rgbtemp[0]=-1.0;
         rgbtemp[1]=-1.0;
@@ -3830,7 +3817,11 @@ int readsmv(char *file, char *file2){
           labeli->useforegroundcolor=0;
         }
         fgets(buffer,255,stream);
-        strcpy(labeli->name,buffer);
+        trim(buffer);
+        bufferptr = trim_front(buffer);
+
+        strcpy(labeli->name,bufferptr);
+        insert_scenelabel(labeli);
       }
       continue;
     }
@@ -8004,7 +7995,6 @@ int readini(int scriptconfigfile){
   char smvprogini[1024];
   char *smvprogini_ptr=NULL;
 
-  nlabels=nlabelssmv;
   nticks=ntickssmv;
   strcpy(smvprogini,"");
   if(smokeview_bindir!=NULL)strcat(smvprogini,smokeview_bindir);
@@ -10379,8 +10369,6 @@ int readini2(char *inifile, int localfile){
   */
 
     if(localfile==1&&match(buffer,"LABEL") == 1){
-      nlabels++;
-      ResizeMemory((void **)&labelinfo,(nlabels)*sizeof(labeldata));
 
       /*
       LABEL
@@ -10390,10 +10378,12 @@ int readini2(char *inifile, int localfile){
       */
       {
         float *xyz, *rgbtemp, *tstart_stop;
-        labeldata *labeli;
+        labeldata labeltemp, *labeli;
+        char *bufferptr;
 
-        labeli = labelinfo + nlabels-1;
+        labeli = &labeltemp;
 
+        labeli->labeltype=TYPE_INI;
         xyz = labeli->xyz;
         rgbtemp = labeli->rgb;
         tstart_stop = labeli->tstart_stop;
@@ -10416,7 +10406,10 @@ int readini2(char *inifile, int localfile){
           labeli->useforegroundcolor=0;
         }
         fgets(buffer,255,stream);
-        strcpy(labeli->name,buffer);
+        trim(buffer);
+        bufferptr = trim_front(buffer);
+        strcpy(labeli->name,bufferptr);
+        insert_scenelabel(labeli);
       }
       continue;
     }
@@ -11370,17 +11363,20 @@ void writeini(int flag){
   fprintf(fileout," %f %f\n",nearclip,farclip);
 
   if(flag==LOCAL_INI){
+    labeldata *thislabel;
+
     fprintf(fileout,"XYZCLIP\n");
     fprintf(fileout," %i\n",xyz_clipplane);
     fprintf(fileout," %i %f %i %f\n",clip_x, clip_x_val, clip_X, clip_X_val);
     fprintf(fileout," %i %f %i %f\n",clip_y, clip_y_val, clip_Y, clip_Y_val);
     fprintf(fileout," %i %f %i %f\n",clip_z, clip_z_val, clip_Z, clip_Z_val);
 
-    for(i=nlabelssmv;i<nlabels;i++){
+    for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
       labeldata *labeli;
       float *xyz, *rgbtemp, *tstart_stop;
 
-      labeli = labelinfo + i;
+      labeli = thislabel;
+      if(labeli->labeltype==TYPE_SMV)continue;
       xyz = labeli->xyz;
       rgbtemp = labeli->rgb;
       tstart_stop = labeli->tstart_stop;

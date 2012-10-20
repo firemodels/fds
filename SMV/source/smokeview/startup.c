@@ -1520,7 +1520,7 @@ void initvars(void){
   nisoinfo=0, niso_bounds=0;
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;
   nobst=0,nvent=0,noffset=0;
-  nlabels=0,visLabels=0,nlabelssmv=0;
+  visLabels=0;
   ntarginfo=0;
   showallslicevectors=0;
   framerate=-1.0;

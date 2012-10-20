@@ -340,34 +340,30 @@ void bench_out(float localframerate){
 
 void drawLabels(void){
   int i;
+  labeldata *thislabel;
 
-  for(i=0;i<nlabels;i++){
-    labeldata *labelcopy;
+  for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+    float *labelcolor,*tstart_stop,*xyz;
+    int drawlabel=0;
 
-    labelcopy=labelinfo+i;
-    {
-      float *labelcolor,*tstart_stop,*xyz;
-      int drawlabel=0;
+    tstart_stop=thislabel->tstart_stop;
+    xyz=thislabel->xyz;
+    if(thislabel->useforegroundcolor==1){
+      labelcolor=foregroundcolor;
+    }
+    else{
+      labelcolor=thislabel->rgb;
+    }
+    if(plotstate!=DYNAMIC_PLOTS||showtime==0)drawlabel=1;
+    if(drawlabel==0&&plotstate==DYNAMIC_PLOTS&&showtime==1){
+      if(tstart_stop[0]<0.0||tstart_stop[1]<0.0)drawlabel=1;
+      if(drawlabel==0&&global_times[itimes]>=tstart_stop[0]-0.05&&global_times[itimes]<=tstart_stop[1]+0.05)drawlabel=1;
+    }
+    if(drawlabel==1){
+      float xyz_pos[3];
 
-      tstart_stop=labelcopy->tstart_stop;
-      xyz=labelcopy->xyz;
-      if(labelcopy->useforegroundcolor==1){
-        labelcolor=foregroundcolor;
-      }
-      else{
-        labelcolor=labelcopy->rgb;
-      }
-      if(plotstate!=DYNAMIC_PLOTS||showtime==0)drawlabel=1;
-      if(drawlabel==0&&plotstate==DYNAMIC_PLOTS&&showtime==1){
-        if(tstart_stop[0]<0.0||tstart_stop[1]<0.0)drawlabel=1;
-        if(drawlabel==0&&global_times[itimes]>=tstart_stop[0]-0.05&&global_times[itimes]<=tstart_stop[1]+0.05)drawlabel=1;
-      }
-      if(drawlabel==1){
-        float xyz_pos[3];
-
-        normalize_xyz(xyz_pos,xyz);
-        output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],labelcopy->name);
-      }
+      normalize_xyz(xyz_pos,xyz);
+      output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],thislabel->name);
     }
   }
 }
