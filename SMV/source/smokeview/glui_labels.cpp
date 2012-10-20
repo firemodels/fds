@@ -26,9 +26,20 @@ int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceload
 
 GLUI *glui_labels=NULL;
 
+GLUI_EditText *EDIT_LB_label_string=NULL;
+
 #ifdef pp_BETA
 GLUI_Spinner *SPINNER_cullgeom_portsize=NULL;
 #endif
+GLUI_Listbox *LIST_LB_labels=NULL;
+GLUI_Spinner *SPINNER_LB_time_start=NULL;
+GLUI_Spinner *SPINNER_LB_time_stop=NULL;
+GLUI_Spinner *SPINNER_LB_red=NULL;
+GLUI_Spinner *SPINNER_LB_green=NULL;
+GLUI_Spinner *SPINNER_LB_blue=NULL;
+GLUI_Spinner *SPINNER_LB_x=NULL;
+GLUI_Spinner *SPINNER_LB_y=NULL;
+GLUI_Spinner *SPINNER_LB_z=NULL;
 GLUI_Spinner *SPINNER_tick_xmin=NULL;
 GLUI_Spinner *SPINNER_tick_ymin=NULL;
 GLUI_Spinner *SPINNER_tick_zmin=NULL;
@@ -51,6 +62,8 @@ GLUI_Spinner *SPINNER_scaled_font3d_size=NULL;
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
 #endif
+GLUI_Checkbox *CHECKBOX_LB_label_use_foreground=NULL;
+GLUI_Checkbox *CHECKBOX_LB_label_show_always=NULL;
 GLUI_Checkbox *CHECKBOX_labels_colorbar=NULL;
 GLUI_Checkbox *CHECKBOX_labels_timebar=NULL;
 GLUI_Checkbox *CHECKBOX_labels_ticks=NULL;
@@ -78,9 +91,14 @@ GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
 
+GLUI_Rollout *ROLLOUT_user_labels=NULL;
 GLUI_Rollout *ROLLOUT_user_tick=NULL;
 GLUI_Rollout *ROLLOUT_label1=NULL;
 
+GLUI_Panel *PANEL_LB_panel1=NULL, *PANEL_LB_panel2=NULL, *PANEL_LB_panel3=NULL;
+GLUI_Panel *PANEL_LB_panel4=NULL, *PANEL_LB_panel5=NULL;
+GLUI_Panel *PANEL_LB_color=NULL, *PANEL_LB_time=NULL;
+GLUI_Panel *PANEL_LB_position=NULL;
 GLUI_Panel *PANEL_label2=NULL;
 GLUI_Panel *PANEL_tick1;
 GLUI_Panel *PANEL_tick1a;
@@ -95,6 +113,10 @@ GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1b=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1c=NULL;
 
+GLUI_Button *Button_LB_label_update=NULL;
+GLUI_Button *Button_LB_label_add=NULL;
+GLUI_Button *Button_LB_label_delete=NULL;
+GLUI_Button *Button_LB_label_set=NULL;
 GLUI_Button *Button_EVAC=NULL;
 GLUI_Button *Button_PART=NULL;
 GLUI_Button *Button_SLICE=NULL;
@@ -342,6 +364,49 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
   SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
   
+  ROLLOUT_user_labels = glui_labels->add_rollout("User labels",false);
+
+  PANEL_LB_panel1 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"",GLUI_PANEL_NONE);
+
+
+  PANEL_LB_panel3 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"Labels");
+ 
+  PANEL_LB_panel4 = glui_labels->add_panel_to_panel(PANEL_LB_panel3,"",GLUI_PANEL_NONE);
+  Button_LB_label_add=glui_labels->add_button_to_panel(PANEL_LB_panel4,"Add");
+  glui_labels->add_column_to_panel(PANEL_LB_panel4,false);
+  Button_LB_label_delete=glui_labels->add_button_to_panel(PANEL_LB_panel4,"Delete");
+
+  LIST_LB_labels=glui_labels->add_listbox_to_panel(PANEL_LB_panel3,"Select",&label_list_index);
+  LIST_LB_labels->add_item(0,"label 1");
+  LIST_LB_labels->add_item(1,"label 2");
+  LIST_LB_labels->add_item(2,"label 3");
+
+  PANEL_LB_panel2 = glui_labels->add_panel_to_panel(PANEL_LB_panel3,"",GLUI_PANEL_NONE);
+  EDIT_LB_label_string=glui_labels->add_edittext_to_panel(PANEL_LB_panel2,"Edit:",GLUI_EDITTEXT_TEXT,label_string);
+  glui_labels->add_column_to_panel(PANEL_LB_panel2,false);
+  Button_LB_label_update=glui_labels->add_button_to_panel(PANEL_LB_panel2,"Update");
+
+  PANEL_LB_panel5 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"",GLUI_PANEL_NONE);
+  PANEL_LB_position=glui_labels->add_panel_to_panel(PANEL_LB_panel5,"position");
+  SPINNER_LB_x=glui_labels->add_spinner_to_panel(PANEL_LB_position,"x",GLUI_SPINNER_FLOAT,&label_x);
+  SPINNER_LB_y=glui_labels->add_spinner_to_panel(PANEL_LB_position,"y",GLUI_SPINNER_FLOAT,&label_y);
+  SPINNER_LB_z=glui_labels->add_spinner_to_panel(PANEL_LB_position,"z",GLUI_SPINNER_FLOAT,&label_z);
+
+  glui_labels->add_column_to_panel(PANEL_LB_panel5,false);
+  PANEL_LB_time=glui_labels->add_panel_to_panel(PANEL_LB_panel5,"time");
+  SPINNER_LB_time_start=glui_labels->add_spinner_to_panel(PANEL_LB_time,"start",GLUI_SPINNER_FLOAT,&label_time_start);
+  SPINNER_LB_time_stop=glui_labels->add_spinner_to_panel(PANEL_LB_time,"start",GLUI_SPINNER_FLOAT,&label_time_stop);
+  CHECKBOX_LB_label_show_always=glui_labels->add_checkbox_to_panel(PANEL_LB_time,"Show always",&label_show_always);
+
+  PANEL_LB_color=glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"color");
+  SPINNER_LB_red=glui_labels->add_spinner_to_panel(PANEL_LB_color,"red",GLUI_SPINNER_INT,&label_red);
+  SPINNER_LB_green=glui_labels->add_spinner_to_panel(PANEL_LB_color,"green",GLUI_SPINNER_INT,&label_green);
+  SPINNER_LB_blue=glui_labels->add_spinner_to_panel(PANEL_LB_color,"blue",GLUI_SPINNER_INT,&label_blue);
+  SPINNER_LB_red->set_int_limits(0,255);
+  SPINNER_LB_green->set_int_limits(0,255);
+  SPINNER_LB_blue->set_int_limits(0,255);
+  CHECKBOX_LB_label_use_foreground=glui_labels->add_checkbox_to_panel(PANEL_LB_color,"Use foreground color",&label_use_foreground_color);
+
   if((npartinfo>0)||nsliceinfo>0||nvsliceinfo>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
     PANEL_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
 

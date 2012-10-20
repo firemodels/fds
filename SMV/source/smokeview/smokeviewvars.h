@@ -24,6 +24,17 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(label_red,0);
+SVEXTERN int SVDECL(label_green,0);
+SVEXTERN int SVDECL(label_blue,0);
+SVEXTERN float SVDECL(label_time_start,0.0);
+SVEXTERN float SVDECL(label_time_stop,1.0);
+SVEXTERN int SVDECL(label_use_foreground_color,1);
+SVEXTERN int SVDECL(label_show_always,1);
+SVEXTERN char label_string[256];
+SVEXTERN int SVDECL(label_list_index,0);
+SVEXTERN float SVDECL(label_x,0.0), SVDECL(label_y,0.0), SVDECL(label_z,0.0);
+
 SVEXTERN int SVDECL(nrender_rows,2);
 SVEXTERN int port_pixel_width, port_pixel_height;
 SVEXTERN float port_unit_width, port_unit_height;
