@@ -3767,19 +3767,14 @@ Note, the Smokeview animation must be running when the render command is selecte
 \chapter{Annotating the Scene }
 \label{section:annotate} \label{subsect_features}
 \section{Overview}
-Smokeview scenes may be annotated by using the User Ticks dialog
-box or by using the TICKS and LABEL keywords.  The User Ticks
-dialog box is easier to use but  has limited flexibility in tick
-and label placement. A user may use the TICKS and LABEL keywords
-to duplicate the functionality of the {\em User Ticks}\ dialog box
-and also place text anywhere in the scene and at any time
-throughout the simulation.  This added generality makes it more
-difficult to exploit.
-
+Smokeview scenes may be annotated by adding {\em ticks}\ with associated text documenting their location
+or by adding text strings at arbitrary locations and time durations.  Both of these annotations
+are added with the {\em User Ticks}\ and the {\em User Label}\ dialog
+box respectively.  These dialog boxes are both invoked by selecting the {\em Dialogs>Display}\ menu item.
 
 \section{{\em User Ticks Settings}\ Dialog Box}
 The {\em User Ticks Settings}\ dialog box allows one to place
-ticks and labels along one or more orthogonal coordinate axes. The
+ticks and labels along one or more coordinate axes. The
 user may specify tick spacing, number of sub-tick intervals and
 how far axes extend.  There is an automatic placement option that
 allows the tick axes to be placed based upon the orientation of
@@ -3805,6 +3800,22 @@ Dialogs$>$Display}. } \label{figTICKSdialog}
 \caption{Annotation example using the {\em Ticks}\ dialog box}
 \label{figTICKSdialogexample}%
 \end{figure}
+
+\section{{\em User Label}\ Dialog Box}
+The {\em User Label}\ dialog box allows one to place
+text strings at arbitrary locations within the scene.  The user may also
+control the time interval when they are visible.  Figure  and at arbitrary time intervals.
+Figure \ref{figLABELdialog} illustrates the {\em User Label}\
+dialog box.  It is a panel within {\em Display}\ dialog box.  It has controls for specifying the text string, $(x,y,z)$ location, start and stop time and color.
+
+\begin{figure}[\figoptions]
+\centerline{
+\includegraphics[width=3.513889in]{FIGURES/figLABEL}
+} \caption[{\em User Label}\ dialog box.]{{\em User Label}\ dialog box. The
+{\em User Label}\ dialog Box is invoked by selecting {\em
+Dialogs$>$Display}. } \label{figLABELdialog}
+\end{figure}
+
 
 
 \section{TICKS and LABEL keywords}
