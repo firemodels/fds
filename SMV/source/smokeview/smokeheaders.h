@@ -9,6 +9,17 @@
 EXTERNCPP int Merge_Smoke(void);
 #endif
 
+EXTERNCPP int LABEL_Get_Nuserlabels(void);
+EXTERNCPP labeldata *LABEL_Next(labeldata *gl);
+EXTERNCPP labeldata *LABEL_Previous(labeldata *gl);
+EXTERNCPP int LABEL_Init(labeldata *gl);
+EXTERNCPP void LABEL_resort(labeldata *label);
+EXTERNCPP void LABEL_copy(labeldata *label_to, labeldata *label_from);
+EXTERNCPP labeldata *LABEL_get(char *name);
+EXTERNCPP void LABEL_delete(labeldata *label);
+EXTERNCPP void LABEL_print(void);
+EXTERNCPP labeldata *LABEL_insert(labeldata *labeltemp);
+
 EXTERNCPP void update_nrender_rows(void);
 EXTERNCPP void glui_update_fontindex(void);
 EXTERNCPP void rotateu2v(float *u, float *v, float *axis, float *angle);

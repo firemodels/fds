@@ -186,11 +186,10 @@ typedef struct {
 
 typedef struct _labeldata {
   struct _labeldata *prev, *next;
-	float xyz[3], rgb[4];
-	char name[256];
-  int labeltype; // smv or ini
-  float tstart_stop[2];
-  int useforegroundcolor;
+  char name[301];
+  float xyz[3],frgb[4],tstart_stop[2];
+  int rgb[4], glui_id, labeltype; // smv or ini
+  int useforegroundcolor,show_always;
 } labeldata;
 
 
@@ -849,7 +848,7 @@ typedef struct _camera {
 
   int view_id;
   struct _camera *next,*prev;
-  char name[256];
+  char name[301];
 } camera;
 
 /* --------------------------  partclass ------------------------------------ */

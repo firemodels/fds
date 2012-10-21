@@ -9,6 +9,7 @@
 extern "C" char glui_labels_revision[]="$Revision$";
 
 extern "C" void ShowHideMenu(int val);
+void Text_Labels_CB(int var);
 
 #include <stdio.h>
 #include <string.h>
@@ -96,7 +97,7 @@ GLUI_Rollout *ROLLOUT_user_tick=NULL;
 GLUI_Rollout *ROLLOUT_label1=NULL;
 
 GLUI_Panel *PANEL_LB_panel1=NULL, *PANEL_LB_panel2=NULL, *PANEL_LB_panel3=NULL;
-GLUI_Panel *PANEL_LB_panel4=NULL, *PANEL_LB_panel5=NULL;
+GLUI_Panel *PANEL_LB_panel4=NULL, *PANEL_LB_panel5=NULL, *PANEL_LB_panel6=NULL;
 GLUI_Panel *PANEL_LB_color=NULL, *PANEL_LB_time=NULL;
 GLUI_Panel *PANEL_LB_position=NULL;
 GLUI_Panel *PANEL_label2=NULL;
@@ -113,23 +114,37 @@ GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1b=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1c=NULL;
 
-GLUI_Button *Button_LB_label_update=NULL;
-GLUI_Button *Button_LB_label_add=NULL;
-GLUI_Button *Button_LB_label_delete=NULL;
-GLUI_Button *Button_LB_label_set=NULL;
-GLUI_Button *Button_EVAC=NULL;
-GLUI_Button *Button_PART=NULL;
-GLUI_Button *Button_SLICE=NULL;
-GLUI_Button *Button_VSLICE=NULL;
-GLUI_Button *Button_PLOT3D=NULL;
-GLUI_Button *Button_3DSMOKE=NULL;
-GLUI_Button *Button_BOUNDARY=NULL;
-GLUI_Button *Button_ISO=NULL;
-GLUI_Button *Button_BENCHMARK=NULL;
+GLUI_Button *BUTTON_LB_label_previous=NULL;
+GLUI_Button *BUTTON_LB_label_next=NULL;
+GLUI_Button *BUTTON_LB_label_update=NULL;
+GLUI_Button *BUTTON_LB_label_add=NULL;
+GLUI_Button *BUTTON_LB_label_delete=NULL;
+GLUI_Button *BUTTON_LB_label_set=NULL;
+GLUI_Button *BUTTON_EVAC=NULL;
+GLUI_Button *BUTTON_PART=NULL;
+GLUI_Button *BUTTON_SLICE=NULL;
+GLUI_Button *BUTTON_VSLICE=NULL;
+GLUI_Button *BUTTON_PLOT3D=NULL;
+GLUI_Button *BUTTON_3DSMOKE=NULL;
+GLUI_Button *BUTTON_BOUNDARY=NULL;
+GLUI_Button *BUTTON_ISO=NULL;
+GLUI_Button *BUTTON_BENCHMARK=NULL;
 GLUI_Button *BUTTON_label_1=NULL;
 GLUI_Button *BUTTON_label_2=NULL;
 GLUI_Button *BUTTON_label_3=NULL;
 GLUI_Button *BUTTON_label_4=NULL;
+
+#define LB_LIST 0
+#define LB_ADD 1
+#define LB_DELETE 2
+#define LB_RGB 3
+#define LB_XYZ 4
+#define LB_STARTSTOP 5
+#define LB_SHOWALWAYS 6
+#define LB_FOREGROUND 7
+#define LB_UPDATE 8
+#define LB_PREVIOUS 9
+#define LB_NEXT 10
 
 #define LABELS_label 0
 #define FRAME_label 21
@@ -158,7 +173,57 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
 
+
 /* ------------------ glui_labels_rename ------------------------ */
+
+extern "C" void update_glui_label_text(void){
+  if(LABEL_Get_Nuserlabels()>0){
+    labeldata *gl;
+
+    gl=&LABEL_local;
+
+    LIST_LB_labels->set_int_val(gl->glui_id);
+    EDIT_LB_label_string->set_text(gl->name);
+    SPINNER_LB_x->set_float_val(gl->xyz[0]);
+    SPINNER_LB_y->set_float_val(gl->xyz[1]);
+    SPINNER_LB_z->set_float_val(gl->xyz[2]);
+    SPINNER_LB_time_start->set_float_val(gl->tstart_stop[0]);
+    SPINNER_LB_time_stop->set_float_val(gl->tstart_stop[1]);
+    CHECKBOX_LB_label_show_always->set_int_val(gl->show_always);
+
+    SPINNER_LB_red->set_int_val(gl->rgb[0]);
+    SPINNER_LB_green->set_int_val(gl->rgb[1]);
+    SPINNER_LB_blue->set_int_val(gl->rgb[2]);
+    CHECKBOX_LB_label_use_foreground->set_int_val(gl->useforegroundcolor);
+
+    LIST_LB_labels->enable();
+    EDIT_LB_label_string->enable();
+    SPINNER_LB_x->enable();
+    SPINNER_LB_y->enable();
+    SPINNER_LB_z->enable();
+    SPINNER_LB_time_start->enable();
+    SPINNER_LB_time_stop->enable();
+    SPINNER_LB_red->enable();
+    SPINNER_LB_green->enable();
+    SPINNER_LB_blue->enable();
+    CHECKBOX_LB_label_show_always->enable();
+  }
+  else{
+    LIST_LB_labels->disable();
+    EDIT_LB_label_string->disable();
+    SPINNER_LB_x->disable();
+    SPINNER_LB_y->disable();
+    SPINNER_LB_z->disable();
+    SPINNER_LB_time_start->disable();
+    SPINNER_LB_time_stop->disable();
+    SPINNER_LB_red->disable();
+    SPINNER_LB_green->disable();
+    SPINNER_LB_blue->disable();
+    CHECKBOX_LB_label_show_always->disable();
+  }
+}
+
+  /* ------------------ glui_labels_rename ------------------------ */
 
 extern "C" void glui_update_fontindex(void){
   if(RADIO_fontsize!=NULL){
@@ -241,7 +306,7 @@ extern "C" void glui_labels_rename(void){
 //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show Only"));
 //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Hide"));
 
-  Button_BENCHMARK->set_name(_("Benchmark"));
+  BUTTON_BENCHMARK->set_name(_("Benchmark"));
   BUTTON_label_3->set_name(_("Save settings"));
   BUTTON_label_4->set_name(_("Close"));
 }
@@ -250,6 +315,8 @@ extern "C" void glui_labels_rename(void){
 /* ------------------ glui_labels_setup ------------------------ */
 
 extern "C" void glui_labels_setup(int main_window){
+  labeldata *gl;
+  int init_status=0;
 
   update_glui_labels=0;
   if(glui_labels!=NULL){
@@ -364,6 +431,10 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
   SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(PANEL_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
   
+  // ----------------- label dialog
+
+  gl=&LABEL_local;
+  init_status=LABEL_Init(gl);
   ROLLOUT_user_labels = glui_labels->add_rollout("User labels",false);
 
   PANEL_LB_panel1 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"",GLUI_PANEL_NONE);
@@ -372,40 +443,55 @@ extern "C" void glui_labels_setup(int main_window){
   PANEL_LB_panel3 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"Labels");
  
   PANEL_LB_panel4 = glui_labels->add_panel_to_panel(PANEL_LB_panel3,"",GLUI_PANEL_NONE);
-  Button_LB_label_add=glui_labels->add_button_to_panel(PANEL_LB_panel4,"Add");
+  BUTTON_LB_label_add=glui_labels->add_button_to_panel(PANEL_LB_panel4,"Add",LB_ADD,Text_Labels_CB);
   glui_labels->add_column_to_panel(PANEL_LB_panel4,false);
-  Button_LB_label_delete=glui_labels->add_button_to_panel(PANEL_LB_panel4,"Delete");
+  BUTTON_LB_label_delete=glui_labels->add_button_to_panel(PANEL_LB_panel4,"Delete",LB_DELETE,Text_Labels_CB);
 
-  LIST_LB_labels=glui_labels->add_listbox_to_panel(PANEL_LB_panel3,"Select",&label_list_index);
-  LIST_LB_labels->add_item(0,"label 1");
-  LIST_LB_labels->add_item(1,"label 2");
-  LIST_LB_labels->add_item(2,"label 3");
+  LIST_LB_labels=glui_labels->add_listbox_to_panel(PANEL_LB_panel3,"Select",&label_list_index,LB_LIST,Text_Labels_CB);
+  {
+    labeldata *thislabel;
+    int count=0;
 
+    for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+      if(thislabel->labeltype==TYPE_SMV){
+        thislabel->glui_id=-1;
+        continue;
+      }
+      thislabel->glui_id=count;
+      LIST_LB_labels->add_item(count++,thislabel->name);
+    }
+  }
   PANEL_LB_panel2 = glui_labels->add_panel_to_panel(PANEL_LB_panel3,"",GLUI_PANEL_NONE);
-  EDIT_LB_label_string=glui_labels->add_edittext_to_panel(PANEL_LB_panel2,"Edit:",GLUI_EDITTEXT_TEXT,label_string);
+  EDIT_LB_label_string=glui_labels->add_edittext_to_panel(PANEL_LB_panel2,"Edit:",GLUI_EDITTEXT_TEXT,gl->name,LB_UPDATE,Text_Labels_CB);
   glui_labels->add_column_to_panel(PANEL_LB_panel2,false);
-  Button_LB_label_update=glui_labels->add_button_to_panel(PANEL_LB_panel2,"Update");
+  BUTTON_LB_label_update=glui_labels->add_button_to_panel(PANEL_LB_panel2,"Update",LB_UPDATE,Text_Labels_CB);
+
+  PANEL_LB_panel6 = glui_labels->add_panel_to_panel(PANEL_LB_panel3,"",GLUI_PANEL_NONE);
+  BUTTON_LB_label_previous=glui_labels->add_button_to_panel(PANEL_LB_panel6,"Previous",LB_PREVIOUS,Text_Labels_CB);
+  glui_labels->add_column_to_panel(PANEL_LB_panel6,false);
+  BUTTON_LB_label_next=glui_labels->add_button_to_panel(PANEL_LB_panel6,"Next",LB_NEXT,Text_Labels_CB);
 
   PANEL_LB_panel5 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"",GLUI_PANEL_NONE);
   PANEL_LB_position=glui_labels->add_panel_to_panel(PANEL_LB_panel5,"position");
-  SPINNER_LB_x=glui_labels->add_spinner_to_panel(PANEL_LB_position,"x",GLUI_SPINNER_FLOAT,&label_x);
-  SPINNER_LB_y=glui_labels->add_spinner_to_panel(PANEL_LB_position,"y",GLUI_SPINNER_FLOAT,&label_y);
-  SPINNER_LB_z=glui_labels->add_spinner_to_panel(PANEL_LB_position,"z",GLUI_SPINNER_FLOAT,&label_z);
+  SPINNER_LB_x=glui_labels->add_spinner_to_panel(PANEL_LB_position,"x",GLUI_SPINNER_FLOAT,gl->xyz,LB_XYZ,Text_Labels_CB);
+  SPINNER_LB_y=glui_labels->add_spinner_to_panel(PANEL_LB_position,"y",GLUI_SPINNER_FLOAT,gl->xyz+1,LB_XYZ,Text_Labels_CB);
+  SPINNER_LB_z=glui_labels->add_spinner_to_panel(PANEL_LB_position,"z",GLUI_SPINNER_FLOAT,gl->xyz+2,LB_XYZ,Text_Labels_CB);
 
   glui_labels->add_column_to_panel(PANEL_LB_panel5,false);
   PANEL_LB_time=glui_labels->add_panel_to_panel(PANEL_LB_panel5,"time");
-  SPINNER_LB_time_start=glui_labels->add_spinner_to_panel(PANEL_LB_time,"start",GLUI_SPINNER_FLOAT,&label_time_start);
-  SPINNER_LB_time_stop=glui_labels->add_spinner_to_panel(PANEL_LB_time,"start",GLUI_SPINNER_FLOAT,&label_time_stop);
-  CHECKBOX_LB_label_show_always=glui_labels->add_checkbox_to_panel(PANEL_LB_time,"Show always",&label_show_always);
+  SPINNER_LB_time_start=glui_labels->add_spinner_to_panel(PANEL_LB_time,"start",GLUI_SPINNER_FLOAT,gl->tstart_stop,LB_STARTSTOP,Text_Labels_CB);
+  SPINNER_LB_time_stop=glui_labels->add_spinner_to_panel(PANEL_LB_time,"stop",GLUI_SPINNER_FLOAT,gl->tstart_stop+1,LB_STARTSTOP,Text_Labels_CB);
+  CHECKBOX_LB_label_show_always=glui_labels->add_checkbox_to_panel(PANEL_LB_time,"Show always",&gl->show_always,LB_SHOWALWAYS,Text_Labels_CB);
 
   PANEL_LB_color=glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"color");
-  SPINNER_LB_red=glui_labels->add_spinner_to_panel(PANEL_LB_color,"red",GLUI_SPINNER_INT,&label_red);
-  SPINNER_LB_green=glui_labels->add_spinner_to_panel(PANEL_LB_color,"green",GLUI_SPINNER_INT,&label_green);
-  SPINNER_LB_blue=glui_labels->add_spinner_to_panel(PANEL_LB_color,"blue",GLUI_SPINNER_INT,&label_blue);
+  SPINNER_LB_red=glui_labels->add_spinner_to_panel(PANEL_LB_color,"red",GLUI_SPINNER_INT,gl->rgb,LB_RGB,Text_Labels_CB);
+  SPINNER_LB_green=glui_labels->add_spinner_to_panel(PANEL_LB_color,"green",GLUI_SPINNER_INT,gl->rgb+1,LB_RGB,Text_Labels_CB);
+  SPINNER_LB_blue=glui_labels->add_spinner_to_panel(PANEL_LB_color,"blue",GLUI_SPINNER_INT,gl->rgb+2,LB_RGB,Text_Labels_CB);
   SPINNER_LB_red->set_int_limits(0,255);
   SPINNER_LB_green->set_int_limits(0,255);
   SPINNER_LB_blue->set_int_limits(0,255);
-  CHECKBOX_LB_label_use_foreground=glui_labels->add_checkbox_to_panel(PANEL_LB_color,"Use foreground color",&label_use_foreground_color);
+  CHECKBOX_LB_label_use_foreground=glui_labels->add_checkbox_to_panel(PANEL_LB_color,"Use foreground color",&gl->useforegroundcolor,LB_FOREGROUND,Text_Labels_CB);
+  Text_Labels_CB(LB_LIST);
 
   if((npartinfo>0)||nsliceinfo>0||nvsliceinfo>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
     PANEL_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
@@ -418,20 +504,20 @@ extern "C" void glui_labels_setup(int main_window){
     glui_labels->add_column_to_panel(PANEL_showhide,false);
 
     if(nevac>0){}
-    if(npartinfo>0&&nevac!=npartinfo)Button_PART=glui_labels->add_button_to_panel(PANEL_showhide,"Particle",LABELS_particleshow,Labels_CB);
-    if(nevac>0)Button_EVAC=glui_labels->add_button_to_panel(PANEL_showhide,"Evacuation",LABELS_evacshow,Labels_CB);
-    if(nsliceinfo>0)Button_SLICE=glui_labels->add_button_to_panel(PANEL_showhide,"Slice",LABELS_sliceshow,Labels_CB);
-    if(nvsliceinfo>0)Button_VSLICE=glui_labels->add_button_to_panel(PANEL_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
-    if(nisoinfo>0)Button_ISO=glui_labels->add_button_to_panel(PANEL_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
-    if(npatchinfo>0)Button_BOUNDARY=glui_labels->add_button_to_panel(PANEL_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
-    if(nsmoke3dinfo>0)Button_3DSMOKE=glui_labels->add_button_to_panel(PANEL_showhide,"3D smoke",LABELS_3dsmokeshow,Labels_CB);
-    if(nplot3dinfo>0)Button_PLOT3D=glui_labels->add_button_to_panel(PANEL_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
+    if(npartinfo>0&&nevac!=npartinfo)BUTTON_PART=glui_labels->add_button_to_panel(PANEL_showhide,"Particle",LABELS_particleshow,Labels_CB);
+    if(nevac>0)BUTTON_EVAC=glui_labels->add_button_to_panel(PANEL_showhide,"Evacuation",LABELS_evacshow,Labels_CB);
+    if(nsliceinfo>0)BUTTON_SLICE=glui_labels->add_button_to_panel(PANEL_showhide,"Slice",LABELS_sliceshow,Labels_CB);
+    if(nvsliceinfo>0)BUTTON_VSLICE=glui_labels->add_button_to_panel(PANEL_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
+    if(nisoinfo>0)BUTTON_ISO=glui_labels->add_button_to_panel(PANEL_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
+    if(npatchinfo>0)BUTTON_BOUNDARY=glui_labels->add_button_to_panel(PANEL_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
+    if(nsmoke3dinfo>0)BUTTON_3DSMOKE=glui_labels->add_button_to_panel(PANEL_showhide,"3D smoke",LABELS_3dsmokeshow,Labels_CB);
+    if(nplot3dinfo>0)BUTTON_PLOT3D=glui_labels->add_button_to_panel(PANEL_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
 
     update_showhidebuttons();
   }
 
   PANEL_label2 = glui_labels->add_panel("",false);
-  Button_BENCHMARK=glui_labels->add_button_to_panel(PANEL_label2,_("Benchmark"),LABELS_BENCHMARK,Labels_CB);
+  BUTTON_BENCHMARK=glui_labels->add_button_to_panel(PANEL_label2,_("Benchmark"),LABELS_BENCHMARK,Labels_CB);
   glui_labels->add_column_to_panel(PANEL_label2,false);
 
   BUTTON_label_3=glui_labels->add_button_to_panel(PANEL_label2,_("Save settings"),SAVE_SETTINGS,Labels_CB);
@@ -523,66 +609,66 @@ extern "C" void update_showhidebuttons(void){
   if(CHECKBOX_label_3!=NULL){
     CHECKBOX_label_3->set_int_val(hide_overlaps);
   }
-  if(Button_PART!=NULL){
+  if(BUTTON_PART!=NULL){
     if(npartloaded==0){
-      Button_PART->disable();
+      BUTTON_PART->disable();
     }
     else{
-      Button_PART->enable();
+      BUTTON_PART->enable();
     }
   }
   
-  if(Button_SLICE!=NULL){
+  if(BUTTON_SLICE!=NULL){
     if(nsliceloaded==0){
-      Button_SLICE->disable();
+      BUTTON_SLICE->disable();
     }
     else{
-      Button_SLICE->enable();
+      BUTTON_SLICE->enable();
     }
   }
 
-  if(Button_VSLICE!=NULL){
+  if(BUTTON_VSLICE!=NULL){
     if(nvsliceloaded==0){
-      Button_VSLICE->disable();
+      BUTTON_VSLICE->disable();
     }
     else{
-      Button_VSLICE->enable();
+      BUTTON_VSLICE->enable();
     }
   }
 
-  if(Button_ISO!=NULL){
+  if(BUTTON_ISO!=NULL){
     if(nisoloaded==0){
-      Button_ISO->disable();
+      BUTTON_ISO->disable();
     }
     else{
-      Button_ISO->enable();
+      BUTTON_ISO->enable();
     }
   }
 
-  if(Button_BOUNDARY!=NULL){
+  if(BUTTON_BOUNDARY!=NULL){
     if(npatchloaded==0){
-      Button_BOUNDARY->disable();
+      BUTTON_BOUNDARY->disable();
     }
     else{
-      Button_BOUNDARY->enable();
+      BUTTON_BOUNDARY->enable();
     }
   }
 
-  if(Button_3DSMOKE!=NULL){
+  if(BUTTON_3DSMOKE!=NULL){
     if(nsmoke3dloaded==0){
-      Button_3DSMOKE->disable();
+      BUTTON_3DSMOKE->disable();
     }
     else{
-      Button_3DSMOKE->enable();
+      BUTTON_3DSMOKE->enable();
     }
   }
 
-  if(Button_PLOT3D!=NULL){
+  if(BUTTON_PLOT3D!=NULL){
     if(nplot3dloaded==0){
-      Button_PLOT3D->disable();
+      BUTTON_PLOT3D->disable();
     }
     else{
-      Button_PLOT3D->enable();
+      BUTTON_PLOT3D->enable();
     }
   }
 
@@ -608,6 +694,123 @@ extern "C" void hide_glui_display(void){
 extern "C" void show_glui_display(void){
   showdisplay_dialog=1;
   if(glui_labels!=NULL)glui_labels->show();
+}
+
+/* ------------------ Text_labels_CB ------------------------ */
+
+void Text_Labels_CB(int var){
+  labeldata *thislabel,*gl,*new_label;
+  int count;
+  char name[256];
+  int len;
+
+  len=sizeof(GLUI_String);
+
+  gl=&LABEL_local;
+  switch (var){
+    case LB_UPDATE:
+      for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+        if(thislabel->glui_id<0)continue;
+        LIST_LB_labels->delete_item(thislabel->glui_id);
+      }
+      strcpy(LABEL_global_ptr->name,gl->name);
+      LABEL_resort(LABEL_global_ptr);
+
+      count=0;
+      for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+        if(thislabel->labeltype==TYPE_SMV)continue;
+        thislabel->glui_id=count;
+        LIST_LB_labels->add_item(count++,thislabel->name);
+      }
+      break;
+    case LB_STARTSTOP:
+      memcpy(LABEL_global_ptr->tstart_stop,gl->tstart_stop,2*sizeof(float));
+      break;
+    case LB_SHOWALWAYS:
+      memcpy(&LABEL_global_ptr->show_always,&gl->show_always,sizeof(int));
+      break;
+    case LB_FOREGROUND:
+      memcpy(&LABEL_global_ptr->useforegroundcolor,&gl->useforegroundcolor,sizeof(int));
+      break;
+    case LB_PREVIOUS:
+      new_label=LABEL_get(LIST_LB_labels->curr_text);
+      new_label=LABEL_Previous(new_label);
+      if(new_label==NULL)break;
+      LABEL_global_ptr=new_label;
+      if(new_label!=NULL){
+        LABEL_copy(gl,new_label);
+        update_glui_label_text();
+      }
+      break;
+    case LB_NEXT:
+      new_label=LABEL_get(LIST_LB_labels->curr_text);
+      new_label=LABEL_Next(new_label);
+      if(new_label==NULL)break;
+      LABEL_global_ptr=new_label;
+      if(new_label!=NULL){
+        LABEL_copy(gl,new_label);
+        update_glui_label_text();
+      }
+      break;
+    case LB_LIST:
+      new_label=LABEL_get(LIST_LB_labels->curr_text);
+      LABEL_global_ptr=new_label;
+      if(new_label!=NULL){
+        LABEL_copy(gl,new_label);
+      }
+      update_glui_label_text();
+      break;
+    case LB_ADD:
+      if(LABEL_Get_Nuserlabels()>0){
+      strcpy(name,"copy of ");
+      strcat(name,gl->name);
+      strcpy(gl->name,name);
+      }
+      else{
+        strcpy(gl->name,"new");
+      }
+      for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+        if(thislabel->glui_id<0)continue;
+        LIST_LB_labels->delete_item(thislabel->glui_id);
+      }
+      LABEL_insert(gl);
+      count=0;
+      for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+        if(thislabel->labeltype==TYPE_SMV)continue;
+        thislabel->glui_id=count;
+        LIST_LB_labels->add_item(count++,thislabel->name);
+      }
+      Text_Labels_CB(LB_LIST);
+      break;
+    case LB_DELETE:
+      strcpy(name,LIST_LB_labels->curr_text);
+      for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+        if(thislabel->glui_id<0)continue;
+        LIST_LB_labels->delete_item(thislabel->glui_id);
+      }
+      thislabel=LABEL_get(name);
+      if(thislabel!=NULL){
+        LABEL_delete(thislabel);
+      }
+      count=0;
+      for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+        if(thislabel->labeltype==TYPE_SMV)continue;
+        thislabel->glui_id=count;
+        LIST_LB_labels->add_item(count++,thislabel->name);
+      }
+      Text_Labels_CB(LB_LIST);
+      break;
+    case LB_RGB:
+      gl->frgb[0]=gl->rgb[0]/255.0;
+      gl->frgb[1]=gl->rgb[1]/255.0;
+      gl->frgb[2]=gl->rgb[2]/255.0;
+      memcpy(LABEL_global_ptr->frgb,gl->frgb,3*sizeof(float));
+      memcpy(LABEL_global_ptr->rgb,gl->rgb,3*sizeof(int));
+      break;
+    case LB_XYZ:
+      memcpy(LABEL_global_ptr->xyz,gl->xyz,3*sizeof(float));
+      break;
+  }
 }
 
 /* ------------------ Labels_CB ------------------------ */

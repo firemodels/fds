@@ -1140,14 +1140,36 @@ void init_texturedir(void){
 
 void initvars(void){
   int i;
+  labeldata *gl;
 
   
   label_first_ptr = &label_first;
   label_last_ptr = &label_last;
+
   label_first_ptr->prev = NULL;
   label_first_ptr->next = label_last_ptr;
+  strcpy(label_first_ptr->name,"first");
+
   label_last_ptr->prev = label_first_ptr;
   label_last_ptr->next = NULL;
+  strcpy(label_last_ptr->name,"last");
+
+  {
+    labeldata *gl;
+  
+    gl=&LABEL_local;
+    gl->rgb[0]=0;
+    gl->rgb[1]=0;
+    gl->rgb[2]=0;
+    gl->tstart_stop[0]=0.0;
+    gl->tstart_stop[1]=1.0;
+    gl->useforegroundcolor=1;
+    gl->show_always=1;
+    strcpy(gl->name,"test");
+    gl->xyz[0]=0.0;
+    gl->xyz[1]=0.0;
+    gl->xyz[2]=0.0;
+  }
 
 #ifdef pp_LANG
   strcpy(startup_lang_code,"en");

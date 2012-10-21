@@ -2182,103 +2182,6 @@ int is_slice_dup(slicedata *sd){
   return 0;
 }
 
-/* ------------------ getnewlabel ------------------------ */
-
-labeldata *get_scenelabel(char *name){
-  labeldata *newlabel, *thislabel;
-
-  if(name==NULL)return NULL;
-  for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
-    if(thislabel->name==NULL)return NULL;
-    if(strcmp(thislabel->name,name)==0)return thislabel;
-  }
-  return NULL;
-}
-
-/* ------------------ insert_before ------------------------ */
-
-void insert_before(labeldata *listlabel, labeldata *label){
-  labeldata *prev, *next;
-
-  next = listlabel;
-  prev = listlabel->prev;
-  prev->next = label;
-  label->prev = prev;
-  next->prev=label;
-  label->next=next;
-}
-
-/* ------------------ insert_after ------------------------ */
-
-void delete_label(labeldata *label){
-  labeldata *prev, *next;
-
-  prev = label->prev;
-  next =label->next;
-  FREEMEMORY(label);
-  prev->next=next;
-  next->prev=prev;
-}
-
-/* ------------------ insert_after ------------------------ */
-
-void insert_after(labeldata *listlabel, labeldata *label){
-  labeldata *prev, *next;
-
-  prev = listlabel;
-  next = listlabel->next;
-  prev->next = label;
-  label->prev = prev;
-  next->prev=label;
-  label->next=next;
-}
-
-/* ------------------ getnewlabel ------------------------ */
-
-labeldata *insert_scenelabel(labeldata *labeltemp){
-  labeldata *newlabel, *thislabel;
-  labeldata *prev, *next;
-  labeldata *firstuserptr, *lastuserptr;
-
-  NewMemory((void **)&newlabel,sizeof(labeldata));
-  memcpy(newlabel,labeltemp,sizeof(labeldata));
-
-  thislabel = get_scenelabel(newlabel->name);
-  if(thislabel!=NULL){
-    insert_after(thislabel->prev,newlabel);
-    return newlabel;
-  }
-
-  firstuserptr=label_first_ptr->next;
-  if(firstuserptr==label_last_ptr)firstuserptr=NULL;
-
-  lastuserptr=label_last_ptr->prev;
-  if(lastuserptr==label_first_ptr)lastuserptr=NULL;
-
-  if(firstuserptr!=NULL&&strcmp(newlabel->name,firstuserptr->name)<0){
-    insert_before(firstuserptr,newlabel);
-    return newlabel;
-  }
-  if(lastuserptr!=NULL&&strcmp(newlabel->name,lastuserptr->name)>0){
-    insert_after(lastuserptr,newlabel);
-    return newlabel;
-  }
-  if(firstuserptr==NULL&&lastuserptr==NULL){
-    insert_after(label_first_ptr,newlabel);
-    return newlabel;
-  }
-  for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
-    labeldata *nextlabel;
-
-    nextlabel=thislabel->next;
-    if(strcmp(thislabel->name,newlabel->name)<0&&strcmp(newlabel->name,nextlabel->name)<0){
-      insert_after(thislabel,newlabel);
-      return newlabel;
-    }
-  }
-  return NULL;
-}
-
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file, char *file2){
@@ -3789,28 +3692,31 @@ int readsmv(char *file, char *file2){
 
       */
       {
-        float *xyz, *rgbtemp, *tstart_stop;
+        float *xyz, *frgbtemp, *tstart_stop;
+        int *rgbtemp;
         labeldata labeltemp, *labeli;
 
         labeli = &labeltemp;
 
         xyz = labeli->xyz;
+        frgbtemp = labeli->frgb;
         rgbtemp = labeli->rgb;
         tstart_stop = labeli->tstart_stop;
 
         labeli->labeltype=TYPE_SMV;
         fgets(buffer,255,stream);
-        rgbtemp[0]=-1.0;
-        rgbtemp[1]=-1.0;
-        rgbtemp[2]=-1.0;
-        rgbtemp[3]=1.0;
+        frgbtemp[0]=-1.0;
+        frgbtemp[1]=-1.0;
+        frgbtemp[2]=-1.0;
+        frgbtemp[3]=1.0;
         tstart_stop[0]=-1.0;
         tstart_stop[1]=-1.0;
         sscanf(buffer,"%f %f %f %f %f %f %f %f",
           xyz,xyz+1,xyz+2,
-          rgbtemp,rgbtemp+1,rgbtemp+2,
+          frgbtemp,frgbtemp+1,frgbtemp+2,
           tstart_stop,tstart_stop+1);
-        if(rgbtemp[0]<0.0||rgbtemp[1]<0.0||rgbtemp[2]<0.0||rgbtemp[0]>1.0||rgbtemp[1]>1.0||rgbtemp[2]>1.0){
+
+        if(frgbtemp[0]<0.0||frgbtemp[1]<0.0||frgbtemp[2]<0.0||frgbtemp[0]>1.0||frgbtemp[1]>1.0||frgbtemp[2]>1.0){
           labeli->useforegroundcolor=1;
         }
         else{
@@ -3821,7 +3727,10 @@ int readsmv(char *file, char *file2){
         bufferptr = trim_front(buffer);
 
         strcpy(labeli->name,bufferptr);
-        insert_scenelabel(labeli);
+        rgbtemp[0]=frgbtemp[0]*255;
+        rgbtemp[1]=frgbtemp[1]*255;
+        rgbtemp[2]=frgbtemp[2]*255;
+        LABEL_insert(labeli);
       }
       continue;
     }
@@ -10385,7 +10294,7 @@ int readini2(char *inifile, int localfile){
 
         labeli->labeltype=TYPE_INI;
         xyz = labeli->xyz;
-        rgbtemp = labeli->rgb;
+        rgbtemp = labeli->frgb;
         tstart_stop = labeli->tstart_stop;
 
         fgets(buffer,255,stream);
@@ -10409,7 +10318,7 @@ int readini2(char *inifile, int localfile){
         trim(buffer);
         bufferptr = trim_front(buffer);
         strcpy(labeli->name,bufferptr);
-        insert_scenelabel(labeli);
+        LABEL_insert(labeli);
       }
       continue;
     }
@@ -11378,7 +11287,7 @@ void writeini(int flag){
       labeli = thislabel;
       if(labeli->labeltype==TYPE_SMV)continue;
       xyz = labeli->xyz;
-      rgbtemp = labeli->rgb;
+      rgbtemp = labeli->frgb;
       tstart_stop = labeli->tstart_stop;
 
       fprintf(fileout,"LABEL\n");

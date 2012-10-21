@@ -352,7 +352,7 @@ void drawLabels(void){
       labelcolor=foregroundcolor;
     }
     else{
-      labelcolor=thislabel->rgb;
+      labelcolor=thislabel->frgb;
     }
     if(plotstate!=DYNAMIC_PLOTS||showtime==0)drawlabel=1;
     if(drawlabel==0&&plotstate==DYNAMIC_PLOTS&&showtime==1){
@@ -366,4 +366,193 @@ void drawLabels(void){
       output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],thislabel->name);
     }
   }
+}
+
+
+/* ------------------ LABEL_Next ------------------------ */
+
+labeldata *LABEL_Next(labeldata *label){
+  labeldata *thislabel;
+
+  if(label==NULL)return NULL;
+  if(label_first_ptr->next->next==NULL)return NULL;
+  for(thislabel=label->next;thislabel!=label;thislabel=thislabel->next){
+    if(thislabel->next==NULL)thislabel=label_first_ptr->next;
+    if(thislabel->labeltype==TYPE_SMV)continue;
+    return thislabel;
+  }
+  return NULL;
+}
+
+/* ------------------ LABEL_Next ------------------------ */
+
+labeldata *LABEL_Previous(labeldata *label){
+  labeldata *thislabel;
+
+  if(label==NULL)return NULL;
+  if(label_last_ptr->prev->prev==NULL)return NULL;
+  for(thislabel=label->prev;thislabel!=label;thislabel=thislabel->prev){
+    if(thislabel->prev==NULL)thislabel=label_last_ptr->prev;
+    if(thislabel->labeltype==TYPE_SMV)continue;
+    return thislabel;
+  }
+  return NULL;
+}
+
+/* ------------------ LABEL_Init ------------------------ */
+
+int LABEL_Init(labeldata *gl){
+  labeldata *thislabel;
+
+  for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+    if(thislabel->labeltype==TYPE_SMV)continue;
+    LABEL_copy(gl,thislabel);
+    return 1;
+  }
+  return 0;
+}
+
+/* ------------------ LABEL_Get_Nuserlabels ------------------------ */
+
+int LABEL_Get_Nuserlabels(void){
+  int count=0;
+  labeldata *thislabel;
+
+  for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+    if(thislabel->labeltype==TYPE_INI)count++;
+  }
+  return count;
+}
+
+/* ------------------ getnewlabel ------------------------ */
+
+labeldata *LABEL_get(char *name){
+  labeldata *newlabel, *thislabel;
+
+  if(name==NULL)return NULL;
+  for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+    if(thislabel->name==NULL)return NULL;
+    if(strcmp(thislabel->name,name)==0)return thislabel;
+  }
+  return NULL;
+}
+
+/* ------------------ LABEL_insert_before ------------------------ */
+
+void LABEL_insert_before(labeldata *listlabel, labeldata *label){
+  labeldata *prev, *next;
+
+  next = listlabel;
+  prev = listlabel->prev;
+  prev->next = label;
+  label->prev = prev;
+  next->prev=label;
+  label->next=next;
+}
+
+/* ------------------ LABEL_delete ------------------------ */
+
+void LABEL_delete(labeldata *label){
+  labeldata *prev, *next;
+
+  prev = label->prev;
+  next =label->next;
+  FREEMEMORY(label);
+  prev->next=next;
+  next->prev=prev;
+}
+
+/* ------------------ LABEL_copy ------------------------ */
+
+void LABEL_copy(labeldata *label_to, labeldata *label_from){
+  labeldata *prev, *next;
+
+  prev=label_to->prev;
+  next=label_to->next;
+  memcpy(label_to,label_from,sizeof(labeldata));
+  label_to->prev=prev;
+  label_to->next=next;
+
+}
+
+/* ------------------ LABEL_resort ------------------------ */
+
+void LABEL_resort(labeldata *label){
+  labeldata labelcopy,*labelcopyptr;
+
+  labelcopyptr=&labelcopy;
+  memcpy(labelcopyptr,label,sizeof(labeldata));
+  LABEL_delete(label);
+  LABEL_insert(labelcopyptr);
+}
+
+/* ------------------ LABEL_insert_after ------------------------ */
+
+void LABEL_insert_after(labeldata *listlabel, labeldata *label){
+  labeldata *prev, *next;
+
+  prev = listlabel;
+  next = listlabel->next;
+  prev->next = label;
+  label->prev = prev;
+  next->prev=label;
+  label->next=next;
+}
+
+/* ------------------ LABEL_print ------------------------ */
+
+void LABEL_print(void){
+  labeldata *thislabel;
+  float *xyz;
+
+  for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+    xyz = thislabel->xyz;
+    printf("label: %s position: %f %f %f\n",thislabel->name,xyz[0],xyz[1],xyz[2]);
+  }
+}
+
+/* ------------------ LABEL_insert ------------------------ */
+
+labeldata *LABEL_insert(labeldata *labeltemp){
+  labeldata *newlabel, *thislabel;
+  labeldata *prev, *next;
+  labeldata *firstuserptr, *lastuserptr;
+
+  NewMemory((void **)&newlabel,sizeof(labeldata));
+  memcpy(newlabel,labeltemp,sizeof(labeldata));
+
+  thislabel = LABEL_get(newlabel->name);
+  if(thislabel!=NULL){
+    LABEL_insert_after(thislabel->prev,newlabel);
+    return newlabel;
+  }
+
+  firstuserptr=label_first_ptr->next;
+  if(firstuserptr==label_last_ptr)firstuserptr=NULL;
+
+  lastuserptr=label_last_ptr->prev;
+  if(lastuserptr==label_first_ptr)lastuserptr=NULL;
+
+  if(firstuserptr!=NULL&&strcmp(newlabel->name,firstuserptr->name)<0){
+    LABEL_insert_before(firstuserptr,newlabel);
+    return newlabel;
+  }
+  if(lastuserptr!=NULL&&strcmp(newlabel->name,lastuserptr->name)>0){
+    LABEL_insert_after(lastuserptr,newlabel);
+    return newlabel;
+  }
+  if(firstuserptr==NULL&&lastuserptr==NULL){
+    LABEL_insert_after(label_first_ptr,newlabel);
+    return newlabel;
+  }
+  for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
+    labeldata *nextlabel;
+
+    nextlabel=thislabel->next;
+    if(strcmp(thislabel->name,newlabel->name)<0&&strcmp(newlabel->name,nextlabel->name)<0){
+      LABEL_insert_after(thislabel,newlabel);
+      return newlabel;
+    }
+  }
+  return NULL;
 }
