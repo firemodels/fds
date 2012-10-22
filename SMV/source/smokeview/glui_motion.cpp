@@ -86,7 +86,7 @@ GLUI_Rollout *ROLLOUT_scene_clip=NULL;
 GLUI_Rollout *ROLLOUT_specify=NULL;
 GLUI_Rollout *ROLLOUT_projection=NULL;
 GLUI_Rollout *ROLLOUT_render=NULL;
-GLUI_Rollout *ROLLOUT_reset3=NULL;
+GLUI_Rollout *ROLLOUT_viewpoints=NULL;
 
 GLUI_Spinner *SPINNER_nrender_rows=NULL;
 GLUI_Spinner *SPINNER_clip_left=NULL;
@@ -490,11 +490,11 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_render_start=glui_motion->add_button_to_panel(ROLLOUT_render,_("Start rendering"),RENDER_START,Render_CB);
   BUTTON_render_stop=glui_motion->add_button_to_panel(ROLLOUT_render,_("Stop"),RENDER_STOP,Render_CB);
   
-  ROLLOUT_reset3 = glui_motion->add_rollout(_("Viewpoints"),false);
-  LIST_viewpoints = glui_motion->add_listbox_to_panel(ROLLOUT_reset3,_("Select:"),&i_view_list,LIST_VIEW,Viewpoint_CB);
+  ROLLOUT_viewpoints = glui_motion->add_rollout(_("Viewpoints"),false);
+  LIST_viewpoints = glui_motion->add_listbox_to_panel(ROLLOUT_viewpoints,_("Select:"),&i_view_list,LIST_VIEW,Viewpoint_CB);
   LIST_viewpoints->set_alignment(GLUI_ALIGN_CENTER);
 
-  PANEL_reset = glui_motion->add_panel_to_panel(ROLLOUT_reset3,"",false);
+  PANEL_reset = glui_motion->add_panel_to_panel(ROLLOUT_viewpoints,"",false);
 
 
   PANEL_reset1 = glui_motion->add_panel_to_panel(PANEL_reset,"",false);
@@ -569,13 +569,9 @@ void enable_disable_views(void){
     case 1:
       BUTTON_replace_view->disable();
       BUTTON_delete_view->disable();
-      BUTTON_add_view->disable();
-      EDIT_view_label->disable();
       break;
     default:
-      EDIT_view_label->enable();
       BUTTON_replace_view->enable();
-      BUTTON_add_view->enable();
       BUTTON_delete_view->enable();
     break;
   }
@@ -1114,7 +1110,11 @@ extern "C" void hide_glui_motion(void){
 
 extern "C" void show_glui_motion(void){
   showmotion_dialog=1;
-  if(glui_motion!=NULL)glui_motion->show();
+  if(glui_motion!=NULL){
+    glui_motion->show();
+    ROLLOUT_viewpoints->open();
+    ROLLOUT_motion->close();
+  }
 }
 
 /* ------------------ Motion_DLG_CB ------------------------ */
@@ -1136,18 +1136,34 @@ void Motion_DLG_CB(int var){
   }
 }
 
-/* ------------------ dup_view ------------------------ */
+/* ------------------ view_exist ------------------------ */
 
-int dup_view(void){
+int view_exist(char *view){
   camera *ca;
-  char *label;
 
-  label=EDIT_view_label->get_text();
-  if(label==NULL)return 0;
+  if(view==NULL)return 0;
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
-    if(strcmp(label,ca->name)==0)return 1;
+    if(strcmp(view,ca->name)==0)return 1;
   }
   return 0;
+}
+
+/* ------------------ get_unique_view_name ------------------------ */
+
+void get_unique_view_name(void){
+  camera *ca;
+  char *label, viewlabel[300];
+
+  label=EDIT_view_label->get_text();
+  if(view_exist(label)==1){
+    int i;
+
+    for(i=1;;i++){
+      sprintf(viewlabel,"view %i",i);
+      if(view_exist(viewlabel)==0)break;
+    }
+    EDIT_view_label->set_text(viewlabel);
+  }
 }
 
 /* ------------------ Viewpoint_CB ------------------------ */
@@ -1204,12 +1220,9 @@ void Viewpoint_CB(int var){
 
     break;
   case ADD_VIEW:
-    if(dup_view()==0){
-      add_list_view(NULL);
-    }
-    else{
-      Viewpoint_CB(REPLACE_VIEW);
-    }
+
+    get_unique_view_name();
+    add_list_view(NULL);
     break;
   case DELETE_VIEW:
     ival=LIST_viewpoints->get_int_val();
