@@ -36,11 +36,11 @@ void Iso_CB(int var);
 void Smoke3D_CB(int var);
 void Time_CB(int var);
 void Script_CB(int var);
-void boundmenu(GLUI_Rollout **ROLLOUT_bound, GLUI_Rollout **ROLLOUT_chop, GLUI_Panel *panel, char *button_title,
-          GLUI_EditText **con_min,GLUI_EditText **con_max,
-          GLUI_RadioGroup **con_setmin,GLUI_RadioGroup **con_setmax,
-          GLUI_Checkbox **con_setchopmin, GLUI_Checkbox **con_setchopmax,
-          GLUI_EditText **con_chopmin, GLUI_EditText **con_chopmax,
+void boundmenu(GLUI_Rollout **ROLLOUT_bound, GLUI_Rollout **ROLLOUT_chop, GLUI_Panel *PANEL_panel, char *button_title,
+          GLUI_EditText **EDIT_con_min,GLUI_EditText **EDIT_con_max,
+          GLUI_RadioGroup **RADIO_con_setmin,GLUI_RadioGroup **RADIO_con_setmax,
+          GLUI_Checkbox **CHECKBOX_con_setchopmin, GLUI_Checkbox **CHECKBOX_con_setchopmax,
+          GLUI_EditText **EDIT_con_chopmin, GLUI_EditText **EDIT_con_chopmax,
           int *setminval, int *setmaxval,
           float *minval, float *maxval,
           int *setchopminval, int *setchopmaxval,
@@ -932,11 +932,11 @@ extern "C" void compress_onoff(int flag){
 
 /* ------------------ boundmenu ------------------------ */
 
-void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Panel *panel, char *button_title,
-          GLUI_EditText **con_min,GLUI_EditText **con_max,
-          GLUI_RadioGroup **con_setmin,GLUI_RadioGroup **con_setmax,
-          GLUI_Checkbox **con_setchopmin, GLUI_Checkbox **con_setchopmax,
-          GLUI_EditText **con_chopmin, GLUI_EditText **con_chopmax,
+void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Panel *PANEL_panel, char *button_title,
+          GLUI_EditText **EDIT_con_min,GLUI_EditText **EDIT_con_max,
+          GLUI_RadioGroup **RADIO_con_setmin,GLUI_RadioGroup **RADIO_con_setmax,
+          GLUI_Checkbox **CHECKBOX_con_setchopmin, GLUI_Checkbox **CHECKBOX_con_setchopmax,
+          GLUI_EditText **EDIT_con_chopmin, GLUI_EditText **EDIT_con_chopmax,
 
           int *setminval, int *setmaxval,
           float *minval, float *maxval,
@@ -950,30 +950,30 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
   GLUI_Rollout *PANEL_e=NULL,*PANEL_g=NULL;
   GLUI_Panel *PANEL_f=NULL;
 
-  PANEL_g = glui_bounds->add_rollout_to_panel(panel,_("Bound data"),false);
+  PANEL_g = glui_bounds->add_rollout_to_panel(PANEL_panel,_("Bound data"),false);
   if(bound_rollout!=NULL)*bound_rollout=PANEL_g;
   PANEL_a = glui_bounds->add_panel_to_panel(PANEL_g,"",GLUI_PANEL_NONE);
 
-  *con_min = glui_bounds->add_edittext_to_panel(PANEL_a,"",GLUI_EDITTEXT_FLOAT,minval,VALMIN,FILE_CB);
+  *EDIT_con_min = glui_bounds->add_edittext_to_panel(PANEL_a,"",GLUI_EDITTEXT_FLOAT,minval,VALMIN,FILE_CB);
   if(*setminval==0){
-    (*con_min)->disable();
+    (*EDIT_con_min)->disable();
   }
   glui_bounds->add_column_to_panel(PANEL_a,false);
-  *con_setmin = glui_bounds->add_radiogroup_to_panel(PANEL_a,setminval,SETVALMIN,FILE_CB);
-  glui_bounds->add_radiobutton_to_group(*con_setmin,_("percentile min"));
-  glui_bounds->add_radiobutton_to_group(*con_setmin,_("set min"));
-  glui_bounds->add_radiobutton_to_group(*con_setmin,_("global min"));
+  *RADIO_con_setmin = glui_bounds->add_radiogroup_to_panel(PANEL_a,setminval,SETVALMIN,FILE_CB);
+  glui_bounds->add_radiobutton_to_group(*RADIO_con_setmin,_("percentile min"));
+  glui_bounds->add_radiobutton_to_group(*RADIO_con_setmin,_("set min"));
+  glui_bounds->add_radiobutton_to_group(*RADIO_con_setmin,_("global min"));
   PANEL_b = glui_bounds->add_panel_to_panel(PANEL_g,"",GLUI_PANEL_NONE);
 
-  *con_max = glui_bounds->add_edittext_to_panel(PANEL_b,"",GLUI_EDITTEXT_FLOAT,maxval,VALMAX,FILE_CB);
+  *EDIT_con_max = glui_bounds->add_edittext_to_panel(PANEL_b,"",GLUI_EDITTEXT_FLOAT,maxval,VALMAX,FILE_CB);
   if(*setminval==0){
-    (*con_max)->disable();
+    (*EDIT_con_max)->disable();
   }
   glui_bounds->add_column_to_panel(PANEL_b,false);
-    *con_setmax = glui_bounds->add_radiogroup_to_panel(PANEL_b,setmaxval,SETVALMAX,FILE_CB);
-    glui_bounds->add_radiobutton_to_group(*con_setmax,_("percentile max"));
-    glui_bounds->add_radiobutton_to_group(*con_setmax,_("set max"));
-    glui_bounds->add_radiobutton_to_group(*con_setmax,_("global max"));
+    *RADIO_con_setmax = glui_bounds->add_radiogroup_to_panel(PANEL_b,setmaxval,SETVALMAX,FILE_CB);
+    glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("percentile max"));
+    glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("set max"));
+    glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("global max"));
 
   PANEL_c = glui_bounds->add_panel_to_panel(PANEL_g,"",GLUI_PANEL_NONE);
   
@@ -984,21 +984,21 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
     glui_bounds->add_button_to_panel(PANEL_c,button_title,FILERELOAD,FILE_CB);
   }           
 
-  if(con_chopmin!=NULL&&con_chopmax!=NULL&&con_setchopmin!=NULL&&con_setchopmax!=NULL){
-    PANEL_e = glui_bounds->add_rollout_to_panel(panel,_("Truncate data"),false);
+  if(EDIT_con_chopmin!=NULL&&EDIT_con_chopmax!=NULL&&CHECKBOX_con_setchopmin!=NULL&&CHECKBOX_con_setchopmax!=NULL){
+    PANEL_e = glui_bounds->add_rollout_to_panel(PANEL_panel,_("Truncate data"),false);
     if(chop_rollout!=NULL)*chop_rollout=PANEL_e;
     PANEL_f = glui_bounds->add_panel_to_panel(PANEL_e,"",GLUI_PANEL_NONE);
-    *con_chopmin = glui_bounds->add_edittext_to_panel(PANEL_f,"",GLUI_EDITTEXT_FLOAT,chopminval,CHOPVALMIN,FILE_CB);
-    *con_chopmax = glui_bounds->add_edittext_to_panel(PANEL_f,"",GLUI_EDITTEXT_FLOAT,chopmaxval,CHOPVALMAX,FILE_CB);
+    *EDIT_con_chopmin = glui_bounds->add_edittext_to_panel(PANEL_f,"",GLUI_EDITTEXT_FLOAT,chopminval,CHOPVALMIN,FILE_CB);
+    *EDIT_con_chopmax = glui_bounds->add_edittext_to_panel(PANEL_f,"",GLUI_EDITTEXT_FLOAT,chopmaxval,CHOPVALMAX,FILE_CB);
     glui_bounds->add_column_to_panel(PANEL_f,false);
-    *con_setchopmin=glui_bounds->add_checkbox_to_panel(PANEL_f,_("Below"),setchopminval,SETCHOPMINVAL,FILE_CB);
-    *con_setchopmax=glui_bounds->add_checkbox_to_panel(PANEL_f,_("Above"),setchopmaxval,SETCHOPMAXVAL,FILE_CB);
+    *CHECKBOX_con_setchopmin=glui_bounds->add_checkbox_to_panel(PANEL_f,_("Below"),setchopminval,SETCHOPMINVAL,FILE_CB);
+    *CHECKBOX_con_setchopmax=glui_bounds->add_checkbox_to_panel(PANEL_f,_("Above"),setchopmaxval,SETCHOPMAXVAL,FILE_CB);
 //  FILE_CB(SETCHOPMINVAL);
 //ERROR    FILE_CB(SETCHOPMAXVAL);
     glui_bounds->add_button_to_panel(PANEL_e,_("Update"),CHOPUPDATE,FILE_CB);
   }
 
-//  PANEL_d = glui_bounds->add_panel_to_panel(panel,"",GLUI_PANEL_NONE);
+//  PANEL_d = glui_bounds->add_panel_to_panel(PANEL_panel,"",GLUI_PANEL_NONE);
 
 }
 

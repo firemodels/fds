@@ -22,7 +22,7 @@ extern "C" char glui_stereo_revision[]="$Revision$";
 
 GLUI *glui_stereo=NULL;
 
-GLUI_Panel *panel_stereo_method=NULL;
+GLUI_Panel *PANEL_stereo_method=NULL;
 
 GLUI_RadioGroup *RADIO_showstereo=NULL;
 GLUI_RadioGroup *RADIO_showstereo_frame=NULL;
@@ -80,8 +80,8 @@ extern "C" void glui_stereo_setup(int main_window){
   glui_stereo = GLUI_Master.create_glui("stereo",0,0,0);
   if(showstereo_dialog==0)glui_stereo->hide();
   
-  panel_stereo_method = glui_stereo->add_panel(_("Stereo Method"));
-  RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(panel_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
+  PANEL_stereo_method = glui_stereo->add_panel(_("Stereo Method"));
+  RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(PANEL_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
   RADIOBUTTON_1=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Off"));
   RADIOBUTTON_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Successive frames"));
   if(videoSTEREO==0)RADIOBUTTON_seq->disable();
@@ -89,8 +89,8 @@ extern "C" void glui_stereo_setup(int main_window){
   RADIOBUTTON_3=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));
   RADIOBUTTON_4=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Cyan"));
   RADIOBUTTON_5=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Custom Red/Custom Blue"));
-  SPINNER_right_green2=glui_stereo->add_spinner_to_panel(panel_stereo_method,_("green"),GLUI_SPINNER_FLOAT,&right_green,STEREO_GREEN,STEREO_CB);
-  SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(panel_stereo_method, _("blue"),GLUI_SPINNER_FLOAT,&right_blue,STEREO_BLUE,STEREO_CB);
+  SPINNER_right_green2=glui_stereo->add_spinner_to_panel(PANEL_stereo_method,_("green"),GLUI_SPINNER_FLOAT,&right_green,STEREO_GREEN,STEREO_CB);
+  SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(PANEL_stereo_method, _("blue"),GLUI_SPINNER_FLOAT,&right_blue,STEREO_BLUE,STEREO_CB);
   
   SPINNER_right_green2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
   SPINNER_right_blue2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
