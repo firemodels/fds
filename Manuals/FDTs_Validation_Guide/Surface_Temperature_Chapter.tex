@@ -36,7 +36,7 @@ T_i^{n+1} = T_i^n + \frac{\delta t \alpha}{r_{avg} \delta r} + \frac{r_i (T_{i+1
 
 \section{Unprotected Steel Temperature}
 
-The following equation calculates the temperature development of an unprotected steel member, using a quasi-stationary approach, iterated for successive time steps of $\Delta t$ (sec)
+The following equation calculates the temperature rise (above ambient) of an unprotected steel member, using a quasi-stationary approach, iterated for successive time steps of $\Delta t$ (sec)
 
 \be
 \Delta T_s = \frac{F}{V} \frac{1}{\rho_s c_s} \left[ h_c (T_g - T_s) + \sigma \epsilon (T_g^4 - T_s^4) \right] \Delta t
@@ -49,7 +49,7 @@ In Eq.~\ref{eq:unprotected_steel}, $\Delta T_s$ is the temperature of the steel 
 \section{Protected Steel Temperature}
 \label{info:protected_steel_temperature}
 
-If the thermal capacity of the insulation layer is neglected, the temperature rise in the structural steel element can be calculated using the following equation
+If the thermal capacity of the insulation layer is neglected, the temperature rise (above ambient) in a structural steel element can be calculated using the following equation
 
 \be
 \Delta T_s = k_i \left( \frac{T_p - T_s}{c_s h \frac{W}{D} + \frac{1}{2} c_i \rho_i h^2} \right) \Delta t
@@ -61,11 +61,11 @@ In Eq.~\ref{eq:protected_steel}, $\Delta T_s$ is the temperature increase of the
 The McCaffrey centerline plume temperature correlation is given by
 
 \be
-T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{Z}{\dot Q^{2/5}} \right)^{2 \eta - 1} T_\infty \right] + T_\infty
+\Delta T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{Z}{\dot Q^{2/5}} \right)^{2 \eta - 1} \right] T_\infty
 \label{eq:McCaffrey}
 \ee
 
-In Eq.~\ref{eq:McCaffrey}, $T_p$ is the plume centerline temperature~(K), $g$ is the acceleration of gravity~(m/s$^2$), $Z$ is the elevation above the fire source~(m), $\dot Q$ is the HRR~(kW), and $T_\infty$ is the ambient air temperature~(K). The constants $\eta$ and $\kappa$ are a function of the height $Z$ within the plume and are listed in Table~\ref{tbl:McCaffrey_constants}.
+In Eq.~\ref{eq:McCaffrey}, $\Delta T_p$ is the plume centerline temperature rise above ambient~(K), $g$ is the acceleration of gravity~(m/s$^2$), $Z$ is the elevation above the fire source~(m), $\dot Q$ is the HRR~(kW), and $T_\infty$ is the ambient air temperature~(K). The constants $\eta$ and $\kappa$ are a function of the height $Z$ within the plume and are listed in Table~\ref{tbl:McCaffrey_constants}.
 
 \vspace{\baselineskip}
 \begin{table}[ht]
