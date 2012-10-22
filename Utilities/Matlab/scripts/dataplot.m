@@ -49,27 +49,24 @@ if nargin>=3
     vdir = varargin{2};
     plotdir = varargin{3};
 end
-if nargin==4
-    drange = varargin{4};
-else
-    drange = 2:2000;
-end
 
 % set the plot style parameters
 
 plot_style
-% set(gcf,'DefaultLineLineWidth',Line_Width)
-% WPos = get(gcf,'Position');
-% set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
-% set(gca,'FontName',Font_Name)
-% set(gca,'Units',Plot_Units)
-% set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % read the configuration file
 
 A = importdata(cfil);
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
+
+n_plots = length(A);
+
+if nargin==4
+    drange = varargin{4};
+else
+    drange = 2:n_plots;
+end
 
 if ~isnumeric(drange)
     dataname_col = find(strcmp(headers,'Dataname'));
@@ -80,15 +77,17 @@ else
     dstring = 'null';
 end
 
-Save_Measured_Metric = zeros(2000,10,10);
-Save_Predicted_Metric = zeros(2000,10,10);
+% allocate the arrays to hold the data for scatterplots
+
+Save_Measured_Metric = zeros(n_plots,10,10);
+Save_Predicted_Metric = zeros(n_plots,10,10);
 
 % search for "o" lines, to process Only those lines.
 
 otest_true = false;
-for i=2:2000
+for i=2:n_plots
 
-    if i>length(A); break; end
+    if i>n_plots; break; end
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
    
@@ -106,7 +105,7 @@ end
    
 % process the "d" or "o" lines one by one
 
-for i=2:2000
+for i=2:n_plots
     
     if i>length(A); break; end
 
