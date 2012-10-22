@@ -1,17 +1,17 @@
 @echo off
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
-set smv_version=6.0.1
-set smv_revision=11112
+set smv_version=6.0.6
+set smv_revision=13408
 
-set fds_version=6.0bundletest
-set fds_revision=11109
+set fds_version=bundletest9
+set fds_revision=13139
 
 set fdssmv_major_version=6
 
 Rem ---------- FDS-Smokeview repository settings ------------
 
-set fds_edition=FDS%fdssmv_major_version%
+set fds_edition=FDS6
 set svn_root=%userprofile%\fds-smv
 set svn_drive=c:
 set linux_svn_root=FDS-SMV
@@ -19,7 +19,7 @@ set linux_svn_root=FDS-SMV
 Rem ---------- User/Host names -----------------
 
 set linux_hostname=blaze.nist.gov
-set osx_hostname=bluesky.cfr.nist.gov
+set osx_hostname=bluesky
 
 set linux_username=%username%
 set svn_logon=%linux_username%@%linux_hostname%
