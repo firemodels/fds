@@ -187,7 +187,7 @@ DO I=0,50
 
    Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-TMP_A,',',Q_RAD
 
 ENDDO
 
@@ -238,7 +238,7 @@ DO
    Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
    IF (T>T_CLOCK) THEN
-      WRITE(11,'(F6.1,A1,F6.1,A1,F8.1,A1,F6.2)') T,',',TMP_G-273.,',',P-P_0,',',Q_RAD
+      WRITE(11,'(F6.1,A1,F6.1,A1,F8.1,A1,F6.2)') T,',',TMP_G-TMP_A,',',P-P_0,',',Q_RAD
       T_CLOCK = T_CLOCK + T_END/500.
    ENDIF
 
@@ -311,11 +311,11 @@ DO I=0,50
    ENDIF
 
    IF ((STEEL_UNPROTECTED == .TRUE.) .OR. (STEEL_PROTECTED == .TRUE.)) THEN
-      IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD,',',T_STEEL(1)-273
-      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD,',',T_STEEL(T)-273
+      IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2,A1,F7.2)') T,',',TMP_G-TMP_A,',',Z,',',Q_RAD,',',T_STEEL(1)-TMP_A
+      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2,A1,F7.2)') T,',',TMP_G-TMP_A,',',Z,',',Q_RAD,',',T_STEEL(T)-TMP_A
    ELSE
-      IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD
-      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD
+      IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-TMP_A,',',Z,',',Q_RAD
+      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-TMP_A,',',Z,',',Q_RAD
    ENDIF
 
 ENDDO
@@ -323,8 +323,8 @@ ENDDO
 IF (PROFILE) THEN
    WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') 0.,',',TMP_A-273.,',',Q_RAD
    WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') Z ,',',TMP_A-273.,',',Q_RAD
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') Z ,',',TMP_G-273.,',',Q_RAD
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') H ,',',TMP_G-273.,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') Z ,',',TMP_G-TMP_A,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') H ,',',TMP_G-TMP_A,',',Q_RAD
 ENDIF
 
 CLOSE(11)
@@ -360,7 +360,7 @@ DO I=0,50
 
    Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-TMP_A,',',Q_RAD
 
 ENDDO
 
@@ -596,10 +596,10 @@ DO I=0,50
          WRITE(FMT,'(A,I1.1,5A)') "(",N_PTS,"(","A",",','),","A",")"
          WRITE(11,FMT) 'Time',(TRIM(LABEL(K)),K=1,N_PTS)
          WRITE(FMT,'(A,I1.1,5A)') "(",N_PTS,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) T, (T_JET(K)-273,K=1,N_PTS)
+         WRITE(11,FMT) T, (T_JET(K)-TMP_A,K=1,N_PTS)
       ELSE
          WRITE(FMT,'(A,I1.1,5A)') "(",N_PTS,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) T, (T_JET(K)-273,K=1,N_PTS)
+         WRITE(11,FMT) T, (T_JET(K)-TMP_A,K=1,N_PTS)
    ENDIF
 
 ENDDO
@@ -704,7 +704,7 @@ DO I=1,30
       WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K)),K=1,N_Z)
    ENDIF
    WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
-   WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z)
+   WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-TMP_A,K=1,N_Z)
 ENDDO
 
 CLOSE(11)
@@ -795,20 +795,20 @@ DO I=1,9999
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","A",",','),","A",")"
          WRITE(11,FMT) 'Time', (TRIM(Z_LABEL(K)),K=1,N_Z), (TRIM('Radiation '//Z_LABEL(K)),K=1,N_Z), (TRIM('Steel Temperature '//Z_LABEL(K)),K=1,N_Z)
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z), (MAX_STEEL_TEMP(K)-273,K=1,N_Z)
+         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-TMP_A,K=1,N_Z), (Q_RAD(K),K=1,N_Z), (MAX_STEEL_TEMP(K)-TMP_A,K=1,N_Z)
       ELSEIF (.NOT. PROFILE) THEN
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z), (MAX_STEEL_TEMP(K)-273,K=1,N_Z)
+         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-TMP_A,K=1,N_Z), (Q_RAD(K),K=1,N_Z), (MAX_STEEL_TEMP(K)-TMP_A,K=1,N_Z)
       ENDIF
    ELSE
       IF ((I==1) .AND. (.NOT. PROFILE)) THEN
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","A",",','),","A",")"
          WRITE(11,FMT) 'Time', (TRIM(Z_LABEL(K)),K=1,N_Z), (TRIM('Radiation '//Z_LABEL(K)),K=1,N_Z)
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
+         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-TMP_A,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
       ELSEIF (.NOT. PROFILE) THEN
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
+         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-TMP_A,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
       ENDIF
    ENDIF
 ENDDO
