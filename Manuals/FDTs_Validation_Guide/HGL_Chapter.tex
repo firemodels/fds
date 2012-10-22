@@ -56,11 +56,11 @@ The parameter $t_p$ is the thermal penetration time of the wall lining material,
 For a compartment with forced ventilation, the method of Foote, Pagni, and Alvares (FPA) can be used. In this method, the upper-layer gas temperature increase above ambient is given as a function of the fire HRR, the compartment ventilation flow rate, the gas-specific heat capacity, the compartment surface area, and an effective heat transfer coefficient. The nondimensional form of the resulting temperature correlation is as follows
 
 \be
-\Delta T_g = \left[ 1 + 0.63 \left( \frac{\dot Q}{\dot m c_p T_\infty} \right)^{0.72} \left( \frac{h_k A_T}{\dot m c_p} \right)^{-0.36} \right]
+\Delta T_g = \left[ 1 + 0.63 \left( \frac{\dot Q}{\dot m c_p T_\infty} \right)^{0.72} \left( \frac{h_k A_T}{\dot m c_p} \right)^{-0.36} \right] T_\infty
 \label{eq:FPA}
 \ee
 
-In Eq.~\ref{eq:FPA}, $\Delta T_g$ is the hot gas layer temperature rise above ambient~(K), $\dot Q$ is the HRR of the fire~(kW), $\dot m$ is the compartment ventilation mass flow rate~(kg/s), $c_p$ is the specific heat of air (kJ/kg-K), $h_k$ is the heat transfer coefficient~(kW/m$^2$-K), and $A_T$ is the total area of compartment enclosing surfaces~(m$^2$).
+In Eq.~\ref{eq:FPA}, $\Delta T_g$ is the hot gas layer temperature rise above ambient~(K), $\dot Q$ is the HRR of the fire~(kW), $\dot m$ is the compartment ventilation mass flow rate~(kg/s), $c_p$ is the specific heat of air (kJ/kg-K), $T_\infty$ is the ambient air temperature~(K), $h_k$ is the heat transfer coefficient~(kW/m$^2$-K), and $A_T$ is the total area of compartment enclosing surfaces~(m$^2$).
 
 
 \subsection{Deal and Beyler Method}
@@ -79,9 +79,9 @@ h_k = 0.4\ \mathrm{max} \left( \sqrt{\frac{k \rho c}{t}} , \frac{k}{\delta} \rig
 \label{eq:DB_hk}
 \ee
 
-In Eq.~\ref{eq:DB}, $\Delta T_g$ is the hot gas layer temperature rise above ambient~(K), $\dot Q$ is the HRR of the fire~(kW), $\dot m$ is the compartment ventilation mass flow rate~(kg/s), $c_p$ is the specific heat of air (kJ/kg-K), $h_k$ is the heat transfer coefficient~(kW/m$^2$-K), and $A_T$ is the total area of compartment enclosing surfaces~(m$^2$).
+In Eq.~\ref{eq:DB}, $\Delta T_g$ is the hot gas layer temperature rise above ambient~(K), $\dot Q$ is the HRR of the fire~(kW), $\dot m$ is the compartment ventilation mass flow rate~(kg/s), $c_p$ is the specific heat of air (kJ/kg-K), $T_\infty$ is the ambient air temperature~(K), $h_k$ is the heat transfer coefficient~(kW/m$^2$-K), and $A_T$ is the total area of compartment enclosing surfaces~(m$^2$).
 
-In Eq.~\ref{eq:DB_hk}, $k$ is the thermal conductivity of the interior lining~(kW/m-K), $\rho$ is the density of the interior lining~(kg/m$^3$), $c$ is the specific heat of the interior lining~(kJ/kg-K), $t$ is the exposure time~(s), and $\delta$ is the thickness of the interior lining~(m). This model is only valid for times up to 2,000 seconds.
+In Eq.~\ref{eq:DB_hk}, $k$ is the thermal conductivity of the interior lining~(kW/m-K), $\rho$ is the density of the interior lining~(kg/m$^3$), $c$ is the specific heat of the interior lining~(kJ/kg-K), $t$ is the exposure time~(s), and $\delta$ is the thickness of the interior lining~(m). This model is only valid for times up to 2000 seconds.
 
 
 
@@ -90,7 +90,7 @@ In Eq.~\ref{eq:DB_hk}, $k$ is the thermal conductivity of the interior lining~(k
 
 \section{No Ventilation}
 
-For a compartment with no ventilation (closed doors) and constant HRR, the method of Belyer can be used. In this method, the compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_\infty$) is given by the following equation
+For a compartment with no ventilation (closed doors) and constant HRR, the method of Belyer can be used. In this method, the compartment hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_a$) is given by the following equation
 
 \be
 \Delta T_g = \frac{2 K_2}{K_1^2} (K_1 \sqrt{t} - 1 + e^{-K_1 \sqrt{t}})
