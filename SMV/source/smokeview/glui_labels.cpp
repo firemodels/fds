@@ -63,6 +63,7 @@ GLUI_Spinner *SPINNER_scaled_font3d_size=NULL;
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
 #endif
+GLUI_Checkbox *CHECKBOX_LB_visLabels=NULL;
 GLUI_Checkbox *CHECKBOX_LB_label_use_foreground=NULL;
 GLUI_Checkbox *CHECKBOX_LB_label_show_always=NULL;
 GLUI_Checkbox *CHECKBOX_labels_colorbar=NULL;
@@ -145,6 +146,7 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define LB_UPDATE 8
 #define LB_PREVIOUS 9
 #define LB_NEXT 10
+#define LB_VISLABELS 11
 
 #define LABELS_label 0
 #define FRAME_label 21
@@ -196,6 +198,7 @@ extern "C" void update_glui_label_text(void){
     SPINNER_LB_blue->set_int_val(gl->rgb[2]);
     CHECKBOX_LB_label_use_foreground->set_int_val(gl->useforegroundcolor);
 
+    CHECKBOX_LB_visLabels->enable();
     LIST_LB_labels->enable();
     EDIT_LB_label_string->enable();
     SPINNER_LB_x->enable();
@@ -209,6 +212,7 @@ extern "C" void update_glui_label_text(void){
     CHECKBOX_LB_label_show_always->enable();
   }
   else{
+    CHECKBOX_LB_visLabels->disable();
     LIST_LB_labels->disable();
     EDIT_LB_label_string->disable();
     SPINNER_LB_x->disable();
@@ -442,6 +446,8 @@ extern "C" void glui_labels_setup(int main_window){
 
   PANEL_LB_panel3 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"Labels");
  
+  CHECKBOX_LB_visLabels=glui_labels->add_checkbox_to_panel(PANEL_LB_panel3,"Show labels",&visLabels,LB_VISLABELS,Text_Labels_CB);
+
   PANEL_LB_panel4 = glui_labels->add_panel_to_panel(PANEL_LB_panel3,"",GLUI_PANEL_NONE);
   BUTTON_LB_label_add=glui_labels->add_button_to_panel(PANEL_LB_panel4,"Add",LB_ADD,Text_Labels_CB);
   glui_labels->add_column_to_panel(PANEL_LB_panel4,false);
@@ -476,6 +482,20 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_LB_x=glui_labels->add_spinner_to_panel(PANEL_LB_position,"x",GLUI_SPINNER_FLOAT,gl->xyz,LB_XYZ,Text_Labels_CB);
   SPINNER_LB_y=glui_labels->add_spinner_to_panel(PANEL_LB_position,"y",GLUI_SPINNER_FLOAT,gl->xyz+1,LB_XYZ,Text_Labels_CB);
   SPINNER_LB_z=glui_labels->add_spinner_to_panel(PANEL_LB_position,"z",GLUI_SPINNER_FLOAT,gl->xyz+2,LB_XYZ,Text_Labels_CB);
+  {
+    float xmin, ymin, zmin, xmax, ymax, zmax;
+
+    xmin = xbar0ORIG - 0.25*(xbarORIG-xbar0ORIG);
+    xmax = xbarORIG + 0.25*(xbarORIG-xbar0ORIG);
+    ymin = ybar0ORIG - 0.25*(ybarORIG-ybar0ORIG);
+    ymax = ybarORIG + 0.25*(ybarORIG-ybar0ORIG);
+    zmin = zbar0ORIG - 0.25*(zbarORIG-zbar0ORIG);
+    zmax = zbarORIG + 0.25*(zbarORIG-zbar0ORIG);
+    SPINNER_LB_x->set_float_limits(xmin,xmax);
+    SPINNER_LB_y->set_float_limits(ymin,ymax);
+    SPINNER_LB_z->set_float_limits(zmin,zmax);
+
+  }
 
   glui_labels->add_column_to_panel(PANEL_LB_panel5,false);
   PANEL_LB_time=glui_labels->add_panel_to_panel(PANEL_LB_panel5,"time");
@@ -701,20 +721,23 @@ extern "C" void show_glui_display(void){
 void Text_Labels_CB(int var){
   labeldata *thislabel,*gl,*new_label;
   int count;
-  char name[256];
+  char name[300];
   int len;
 
   len=sizeof(GLUI_String);
 
   gl=&LABEL_local;
   switch (var){
+    case LB_VISLABELS:
+      updatemenu=1;
+      break;
     case LB_UPDATE:
       for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
         if(thislabel->glui_id<0)continue;
         LIST_LB_labels->delete_item(thislabel->glui_id);
       }
       strcpy(LABEL_global_ptr->name,gl->name);
-      LABEL_resort(LABEL_global_ptr);
+      //LABEL_resort(LABEL_global_ptr);
 
       count=0;
       for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
@@ -761,14 +784,16 @@ void Text_Labels_CB(int var){
       update_glui_label_text();
       break;
     case LB_ADD:
+      updatemenu=1;
       if(LABEL_Get_Nuserlabels()>0){
-      strcpy(name,"copy of ");
-      strcat(name,gl->name);
-      strcpy(gl->name,name);
+        strcpy(name,"copy of ");
+        strcat(name,gl->name);
+        strcpy(gl->name,name);
       }
       else{
-        strcpy(gl->name,"new");
+        gl=&LABEL_default;
       }
+      gl->labeltype=TYPE_INI;
       for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
         if(thislabel->glui_id<0)continue;
         LIST_LB_labels->delete_item(thislabel->glui_id);
@@ -1093,6 +1118,7 @@ extern "C" void Labels_CB(int var){
 
 extern "C" void set_labels_controls(){
 
+  if(CHECKBOX_LB_visLabels!=NULL)CHECKBOX_LB_visLabels->set_int_val(visLabels);
   if(CHECKBOX_vis_user_ticks!=NULL)CHECKBOX_vis_user_ticks->set_int_val(vis_user_ticks);
   if(CHECKBOX_labels_hrrlabel!=NULL)CHECKBOX_labels_hrrlabel->set_int_val(visHRRlabel);
   if(CHECKBOX_labels_hrrcutoff!=NULL)CHECKBOX_labels_hrrcutoff->set_int_val(show_hrrcutoff);

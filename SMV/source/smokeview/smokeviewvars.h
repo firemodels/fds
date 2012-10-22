@@ -25,7 +25,7 @@
 #include "MALLOC.h"
 
 SVEXTERN int SVDECL(label_list_index,0);
-SVEXTERN labeldata LABEL_local, *LABEL_global_ptr;
+SVEXTERN labeldata LABEL_local, *LABEL_global_ptr, LABEL_default;
 
 SVEXTERN int SVDECL(nrender_rows,2);
 SVEXTERN int port_pixel_width, port_pixel_height;

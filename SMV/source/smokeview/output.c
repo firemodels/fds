@@ -344,8 +344,9 @@ void drawLabels(void){
 
   for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
     float *labelcolor,*tstart_stop,*xyz;
-    int drawlabel=0;
+    int drawlabel;
 
+    drawlabel=0;
     tstart_stop=thislabel->tstart_stop;
     xyz=thislabel->xyz;
     if(thislabel->useforegroundcolor==1){
@@ -457,6 +458,7 @@ void LABEL_delete(labeldata *label){
 
   prev = label->prev;
   next =label->next;
+  CheckMemory;
   FREEMEMORY(label);
   prev->next=next;
   next->prev=prev;
@@ -478,12 +480,13 @@ void LABEL_copy(labeldata *label_to, labeldata *label_from){
 /* ------------------ LABEL_resort ------------------------ */
 
 void LABEL_resort(labeldata *label){
-  labeldata labelcopy,*labelcopyptr;
+  labeldata labelcopy;
 
-  labelcopyptr=&labelcopy;
-  memcpy(labelcopyptr,label,sizeof(labeldata));
+  CheckMemory;
+  memcpy(&labelcopy,label,sizeof(labeldata));
+  CheckMemory;
   LABEL_delete(label);
-  LABEL_insert(labelcopyptr);
+  LABEL_insert(&labelcopy);
 }
 
 /* ------------------ LABEL_insert_after ------------------------ */

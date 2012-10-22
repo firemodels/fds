@@ -10288,14 +10288,18 @@ int readini2(char *inifile, int localfile){
       {
         float *xyz, *rgbtemp, *tstart_stop;
         labeldata labeltemp, *labeli;
+        int *useforegroundcolor;
         char *bufferptr;
+        int *show_always;
 
         labeli = &labeltemp;
 
         labeli->labeltype=TYPE_INI;
         xyz = labeli->xyz;
         rgbtemp = labeli->frgb;
+        useforegroundcolor=&labeli->useforegroundcolor;
         tstart_stop = labeli->tstart_stop;
+        show_always = &labeli->show_always;
 
         fgets(buffer,255,stream);
         rgbtemp[0]=-1.0;
@@ -10304,15 +10308,20 @@ int readini2(char *inifile, int localfile){
         rgbtemp[3]=1.0;
         tstart_stop[0]=-1.0;
         tstart_stop[1]=-1.0;
-        sscanf(buffer,"%f %f %f %f %f %f %f %f",
+        *useforegroundcolor=-1;
+        *show_always=1;
+
+        sscanf(buffer,"%f %f %f %f %f %f %f %f %i %i",
           xyz,xyz+1,xyz+2,
           rgbtemp,rgbtemp+1,rgbtemp+2,
-          tstart_stop,tstart_stop+1);
-        if(rgbtemp[0]<0.0||rgbtemp[1]<0.0||rgbtemp[2]<0.0||rgbtemp[0]>1.0||rgbtemp[1]>1.0||rgbtemp[2]>1.0){
-          labeli->useforegroundcolor=1;
-        }
-        else{
-          labeli->useforegroundcolor=0;
+          tstart_stop,tstart_stop+1,useforegroundcolor,show_always);
+        if(*useforegroundcolor==-1){
+          if(rgbtemp[0]<0.0||rgbtemp[1]<0.0||rgbtemp[2]<0.0||rgbtemp[0]>1.0||rgbtemp[1]>1.0||rgbtemp[2]>1.0){
+            *useforegroundcolor=1;
+          }
+          else{
+            *useforegroundcolor=0;
+          }
         }
         fgets(buffer,255,stream);
         trim(buffer);
@@ -11283,19 +11292,25 @@ void writeini(int flag){
     for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
       labeldata *labeli;
       float *xyz, *rgbtemp, *tstart_stop;
+      int *useforegroundcolor,*show_always;
 
       labeli = thislabel;
       if(labeli->labeltype==TYPE_SMV)continue;
       xyz = labeli->xyz;
       rgbtemp = labeli->frgb;
       tstart_stop = labeli->tstart_stop;
+      useforegroundcolor=&labeli->useforegroundcolor;
+      show_always=&labeli->show_always;
 
       fprintf(fileout,"LABEL\n");
-      fprintf(fileout," %f %f %f %f %f %f %f %f\n",xyz[0],xyz[1],xyz[2],rgbtemp[0],rgbtemp[1],rgbtemp[2],tstart_stop[0],tstart_stop[1]);
+      fprintf(fileout," %f %f %f %f %f %f %f %f %i %i\n",
+        xyz[0],xyz[1],xyz[2],
+        rgbtemp[0],rgbtemp[1],rgbtemp[2],
+        tstart_stop[0],tstart_stop[1],
+        *useforegroundcolor,*show_always);
       fprintf(fileout," %s\n",labeli->name);
     }
 
-    
     for(i=ntickssmv;i<nticks;i++){
       float *begt;
       float *endt;

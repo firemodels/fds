@@ -1157,18 +1157,25 @@ void initvars(void){
   {
     labeldata *gl;
   
-    gl=&LABEL_local;
+    gl=&LABEL_default;
     gl->rgb[0]=0;
     gl->rgb[1]=0;
     gl->rgb[2]=0;
+    gl->rgb[3]=255;
+    gl->frgb[0]=0.0;
+    gl->frgb[1]=0.0;
+    gl->frgb[2]=0.0;
+    gl->frgb[3]=1.0;
     gl->tstart_stop[0]=0.0;
     gl->tstart_stop[1]=1.0;
     gl->useforegroundcolor=1;
     gl->show_always=1;
-    strcpy(gl->name,"test");
+    strcpy(gl->name,"new");
     gl->xyz[0]=0.0;
     gl->xyz[1]=0.0;
     gl->xyz[2]=0.0;
+    gl->labeltype=TYPE_INI;
+    memcpy(&LABEL_local,&LABEL_default,sizeof(labeldata));
   }
 
 #ifdef pp_LANG

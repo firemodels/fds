@@ -186,7 +186,7 @@ typedef struct {
 
 typedef struct _labeldata {
   struct _labeldata *prev, *next;
-  char name[301];
+  char name[300];
   float xyz[3],frgb[4],tstart_stop[2];
   int rgb[4], glui_id, labeltype; // smv or ini
   int useforegroundcolor,show_always;
