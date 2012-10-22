@@ -10315,6 +10315,8 @@ int readini2(char *inifile, int localfile){
           xyz,xyz+1,xyz+2,
           rgbtemp,rgbtemp+1,rgbtemp+2,
           tstart_stop,tstart_stop+1,useforegroundcolor,show_always);
+        *show_always=CLAMP(*show_always,0,1);
+        *useforegroundcolor = CLAMP(*useforegroundcolor,-1,1);
         if(*useforegroundcolor==-1){
           if(rgbtemp[0]<0.0||rgbtemp[1]<0.0||rgbtemp[2]<0.0||rgbtemp[0]>1.0||rgbtemp[1]>1.0||rgbtemp[2]>1.0){
             *useforegroundcolor=1;
