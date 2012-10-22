@@ -2824,7 +2824,6 @@ void allocate_faces(){
     int mem_sum;
     float rmem;
     int nfaces_temp;
-    char errormessage[255];
 
     mem_sum=0;
     nfaces_temp=0;
@@ -4288,7 +4287,8 @@ int get_tick_dir(float *mm){
 
     cosangle = normdir[2]/sqrt(normdir[0]*normdir[0]+normdir[1]*normdir[1]+normdir[2]*normdir[2]);
     cosangle = CLAMP(cosangle,-1.0,1.0);
-    absangle=ABS(acos(cosangle)*RAD2DEG);
+    absangle=acos(cosangle)*RAD2DEG;
+    absangle=ABS(absangle);
     if(absangle<minangle){
       iminangle=i;
       minangle=absangle;

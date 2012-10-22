@@ -518,7 +518,6 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     if(AREA_STREAM!=NULL){
       if(fed_slice->slicetype==SLICE_CENTER){
         float areas[5];
-        float total;
 
         GetCellAreas(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, nlevels, areas);
         contour_areas[0]=(areas[0]+areas[1])*area_factor;

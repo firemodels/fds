@@ -78,7 +78,6 @@ void angleaxis2quat(float angle, float *axis, float *quat){
 /* ------------------ mult_quat ------------------------ */
 
 void quat2rot(float quat[4],float rot[16]){
-  int i;
   float w, x, y, z,sum;
 
   sum = sqrt(quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3]);

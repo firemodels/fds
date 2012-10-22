@@ -1140,8 +1140,6 @@ void init_texturedir(void){
 
 void initvars(void){
   int i;
-  labeldata *gl;
-
   
   label_first_ptr = &label_first;
   label_last_ptr = &label_last;

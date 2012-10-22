@@ -553,8 +553,6 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
 /* --------------------- COLOR BAR Viewport2 ------------------------- */
 
 void COLORBAR_viewport2(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-  GLint temp;
-  float xnum;
 
   // visColorbarLabels
   // numColorbars

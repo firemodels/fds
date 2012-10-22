@@ -97,8 +97,6 @@ void update_camera_ypos(camera *camera_data){
 /* ------------------ init_camera ------------------------ */
 
 void init_camera(camera *camera_data,char *name){
-  int i;
-
   strcpy(camera_data->name,name);
   camera_data->rotation_index=nmeshes;
   camera_data->defined=1;

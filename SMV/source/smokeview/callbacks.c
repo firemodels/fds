@@ -605,7 +605,7 @@ int setup_timebar_drag(int x, int y){
 #define MOUSE_MOTION 2
 
 void update_mouseinfo(int flag, int xm, int ym){
-  float thistime;
+  float thistime_local;
   float dx, dy;
   int maxWH;
   float quat_temp[4];
@@ -648,15 +648,15 @@ void update_mouseinfo(int flag, int xm, int ym){
       delta_distance=0.0;
       break;
     case MOUSE_MOTION:
-      thistime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
+      thistime_local=glutGet(GLUT_ELAPSED_TIME)/1000.0;
       mi->current[0]=xm;
       mi->current[1]=ym;
-      if(thistime-mi->lasttime>0.2){
+      if(thistime_local-mi->lasttime>0.2){
         mi->direction[0]=mi->current[0]-mi->last[0];
         mi->direction[1]=mi->current[1]-mi->last[1];
         mi->last[0]=mi->current[0];
         mi->last[1]=mi->current[1];
-        mi->lasttime=thistime;
+        mi->lasttime=thistime_local;
       }
       mi->xcurrent[0] = (float)(mi->current[0]-screenWidth/2)/(float)maxWH;
       mi->xcurrent[1] = (float)(mi->current[1]-screenHeight/2)/(float)maxWH;
@@ -687,7 +687,7 @@ void update_mouseinfo(int flag, int xm, int ym){
       float axis[3];
 
       if(key_state==KEY_SHIFT){
-        float w, x, y, z, zangle;
+        float w, x, y, z;
         int inside=0;
 
         w = quat_general[0];

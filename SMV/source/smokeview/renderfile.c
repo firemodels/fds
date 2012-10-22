@@ -284,7 +284,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   unsigned int r, g, b;
   int i,j,rgb_local;
   int nscreen_cols;
-  int irow,screen=0;
+  int irow;
 
   nscreen_cols=nscreen_rows;
   switch (renderfiletype){
@@ -334,11 +334,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   printf("Rendering to: %s .",renderfile);
   RENDERfile = fopen(renderfile, "wb");
   if (RENDERfile == NULL) {
-    {
-      char message[256];
-
-      fprintf(stderr,"*** Error: unable to write to %s",renderfile);
-    }
+    fprintf(stderr,"*** Error: unable to write to %s",renderfile);
     return 1;
   }
   RENDERimage = gdImageCreateTrueColor(nscreen_cols*screenWidth,nscreen_rows*screenHeight);

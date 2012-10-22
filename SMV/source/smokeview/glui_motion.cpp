@@ -219,8 +219,6 @@ extern "C" void gluiIdleNULL(void){
 /* ------------------ reset_glui_view ------------------------ */
 
 extern "C" void reset_glui_view(int ival){
-  int current_val;
-
   ASSERT(ival>=0);
   if(ival!=old_listview)LIST_viewpoints->set_int_val(ival);
   selected_view=ival;
@@ -653,7 +651,6 @@ extern "C" void update_translate(void){
 
 void update_rotation_index(int val){
   mesh *meshi;
-  int i;
   float *az_elev;
   int *rotation_index;
 

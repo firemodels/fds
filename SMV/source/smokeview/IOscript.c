@@ -549,7 +549,7 @@ int compile_script(char *scriptfile){
         scripti->remove_frame=-1;
 
         SETcval2;
-        break;;
+        break;
 
       case SCRIPT_LOADINIFILE:
         {

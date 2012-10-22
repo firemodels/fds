@@ -890,6 +890,7 @@ void ShowMultiSliceMenu(int value){
     break;
   case -14:
     show_fed_area=1-show_fed_area;
+    break;
   default:
     mslicei = multisliceinfo + value;
     mdisplay=0;
@@ -7005,7 +7006,6 @@ updatemenu=0;
     char renderwindow[1024];
     char renderwindow2[1024];
     char renderwindow3[1024];
-    char renderwindow4[1024];
     char rendertemp[1024];
     int render_current=0;
 

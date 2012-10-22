@@ -4913,7 +4913,6 @@ int readsmv(char *file, char *file2){
   */
     if(match(buffer,"HRRPUVCUT") == 1){
       int nhrrpuvcut;
-      float hrrpuvcut;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&nhrrpuvcut);

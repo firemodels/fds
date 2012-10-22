@@ -60,8 +60,8 @@ void outputAxisLabels(){
 void outputSText3(float x, float y, float z, char *string){ 
   char *c;
   float u[3]={0.0,0.0,1.0},v[3];
-  float axis[3],angle,scale=0.001,theta;
-  float quateye[4],quatz[4],quat2[4],rot[16];
+  float axis[3],angle,theta;
+  float quateye[4],quatz[4],rot[16];
   float scale_x, scale_y;
 
 
@@ -141,7 +141,7 @@ void outputSText2(float x, float y, float z, char *string){
 /* ------------------ output3Val ------------------------ */
 
 void output3Val(float x, float y, float z, float val){
-  char *c,string[256];
+  char string[256];
 
   sprintf(string,"%f",val);
   trimzeros(string);
@@ -339,7 +339,6 @@ void bench_out(float localframerate){
 /* ------------------ drawLabels ------------------------ */
 
 void drawLabels(void){
-  int i;
   labeldata *thislabel;
 
   for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
@@ -428,7 +427,7 @@ int LABEL_Get_Nuserlabels(void){
 /* ------------------ getnewlabel ------------------------ */
 
 labeldata *LABEL_get(char *name){
-  labeldata *newlabel, *thislabel;
+  labeldata *thislabel;
 
   if(name==NULL)return NULL;
   for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
@@ -518,7 +517,6 @@ void LABEL_print(void){
 
 labeldata *LABEL_insert(labeldata *labeltemp){
   labeldata *newlabel, *thislabel;
-  labeldata *prev, *next;
   labeldata *firstuserptr, *lastuserptr;
 
   NewMemory((void **)&newlabel,sizeof(labeldata));
