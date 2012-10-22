@@ -164,7 +164,7 @@ B_\beta     &= \beta_{11}\beta_{22} - \beta_{12}^2 + \beta_{11}\beta_{33} - \bet
 
 The basic idea behind Vreman's model is to expand the velocity field in a Taylor series and to test filter this field analytically, thus avoiding the expensive explicit test filtering operations necessary in the dynamic model.  Therefore, this model is inexpensive.  Unlike constant coefficient Smagorinsky, however, Vreman's model is convergent, making it applicable to highly resolved LES calculations.
 
-The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_s^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_s = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS\_Verification\_Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
+The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_s^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_s = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS Verification Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
 
 \subsection{Thermal Conduction and Gas Species Diffusion}
 

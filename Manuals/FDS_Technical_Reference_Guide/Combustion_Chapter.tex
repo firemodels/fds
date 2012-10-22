@@ -148,55 +148,103 @@ For cases that explicitly track all of the primitive species, FDS could end up s
 
 \section{Turbulent Combustion}
 
-Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation. To address these difficulties, FDS employs a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames, this method is similar to the Eddy Dissipation Concept (EDC) \cite{Magnussen:1}. Each computational cell is thought of as a batch reactor with two environments: the mean concentration of species which FDS transports and the amount of mixing within the reactor. At the start of an FDS time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. Currently, unless otherwise specified, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence.  The mixing time, $\tau_{mix}$, is discussed in Section \ref{sec:reac_time_scale}. Section \ref{sec:EDC} discusses the model that couples mixing and chemical reactions. Once mixed, species can react based specified reaction parameters.  Reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}). 
+Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation. To address these difficulties, FDS employs a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  As we will show below, for pure diffusion flames our method is similar to the Eddy Dissipation Concept (EDC) \cite{Magnussen:1}. Each computational cell is thought of as a batch reactor with two environments: the mean concentration of species, which FDS transports, and the amount of mixing within the reactor, which we model. At the start of an FDS time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence.  The mixing time, $\tau_{mix}$, is discussed in Section \ref{sec:reac_time_scale}. Section \ref{sec:EDC} discusses the model that couples mixing and chemical reactions. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}). 
 
 
 \subsection{Partially-Stirred Batch Reactor Model}
-\label{sec:EDC} 
-Within the batch reactor, the state of mixing in the cell is described by the \emph{unmixed} fraction, $\zeta(t;\tau_{mix})$. A cell can range from completely unmixed ($\zeta=1$) to completely mixed ($\zeta=0$). An initial unmixed fraction $\zeta_0=1$  represents a diffusion flame and $\zeta_0=0$ represents a premixed flame. The state of mixing within a computational cell is governed by the following simple ODE:
+\label{sec:EDC}
+
+At the start of the integration of the reactor model, the species transport equations have been solved and we know the mean cell concentrations of all reactants in our chemical system.  In this section, we will work in terms of primitive species mass fractions, $Y_\alpha$.  The cell mean is denoted $\overline{Y}_\alpha(t)$ and is a function of time.
+
+\subsubsection{Transport Versus Mixing}
+
+An issue that may be confused in turbulent combustion is the difference between \emph{transport} and \emph{mixing}.  It is especially important to distinguish these phenomena when considering infintely fast chemistry, because it is mixing (not transport) that dictates the rate of reaction.
+
+FDS employs a \emph{time splitting} scheme to solve the species equations in which we first compute transport (both advective and diffusive) and then we compute mixing.  Note that transport due to turbulent diffusion does not mix the chemical species.  This is illustrated in Fig.~\ref{fig_transport_vs_mixing}.  On the far left, we show a hypothetical computational cell at the end of the transport step and the beginning of the mixing and reaction step in our algorithm.  Notice that there is a subgrid distribution of the species mass fraction.  Locally in space the mass fraction may be pure fuel or pure oxidizer.  In this image, where there are already various shades of gray, it may be noted that  the initial condition of the cell may not be purely unmixed.  As we proceed to the right in our image sequence, the local cell composition is relaxing toward the mean value of 0.5. 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_1}\quad
+\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_2}\quad
+\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_3}\quad
+\includegraphics[height=1.6in]{FIGURES/transport_vs_mixing_colorbar}
+\caption{Subgrid-scale transport and mixing. The image sequence depicts a hypothetical computational cell with mean mass fraction 0.5 and, from left to right, increasing levels of mixing.}
+\label{fig_transport_vs_mixing}
+\end{figure}
+
+\subsubsection{The Interaction by Exchange with the Mean (IEM) Mixing Model}
+
+The simplest possible mixing model is the interaction by exchange with the mean (IEM) model.  IEM states that, in the abscense of chemical reaction, the local mass fractions obey the following ODE:
+\begin{equation}\label{eq:iem}
+\frac{\mbox{d}Y_\alpha}{\mbox{d}t} = \frac{1}{\tau_{mix}}(\overline{Y}_\alpha - Y_\alpha)
+\end{equation}
+where $\tau_{mix}$ is the characteristic mixing time for the cell.  This time scale is discussed below in Section \ref{sec:reac_time_scale}.  For now, simply note that small values of $\tau_{mix}$ correspond to high turbulence intensity (fast mixing) and visa versa.
+
+\subsubsection{A Simplified Mixing Environment}
+
+Suppose we are considering $n_s$ species in our reactor model.  It is actually unnecessary to solve Eq.~(\ref{eq:iem}) for each species individually. Let us define the state of mixing in the cell by the \emph{unmixed} fraction, $\zeta(t)$, such that the local mass fraction of any species may be written as
+\begin{equation}\label{eq:local_mass_fraction}
+Y_{\alpha}(t)=\zeta(t)+(1-\zeta(t))\overline{Y}_{\alpha}(t)
+\end{equation}
+
+Plugging Eq.~(\ref{eq:local_mass_fraction}) into Eq.~(\ref{eq:iem}) and summing over species we find that the unmixed fraction is governed by the following simple ODE:
 \begin{equation}\label{eq:zeta}
 \frac{\mbox{d}\zeta}{\mbox{d}t}=-\frac{\zeta}{\tau_{mix}}
 \end{equation}
-The governing mixing model physics are included in Eq.~(\ref{eq:zeta}) through the definition of the unmixed fraction while the turbulence physics are buried within the mixing time. Presently in FDS, the Interaction by Exchange with Mean (IEM) mixing model is used \cite{fox2003}. The IEM says that scalar values ($\psi$) will relax to their mean at a rate based on the mixing time and distance the scale value is from its mean value.  If, for $n_{\alpha}$ species, we define $\zeta$ to be:
-\begin{equation}\label{eq:zeta_def}
-\zeta \equiv \frac{\displaystyle \sum_{\alpha}(\psi_{\alpha}- \langle \psi_{\alpha} \rangle )}{n_{\alpha} - 1}
+with the solution
+\begin{equation}\label{eq:zeta_soln}
+\zeta(t) = \zeta_0 \exp(-t/\tau_{mix})
 \end{equation}
-we can show that Eq.~(\ref{eq:zeta}) becomes the IEM model by substituting in the definition of $\zeta$, Eq.~(\ref{eq:zeta_def}).
-\begin{equation}\label{eq:iem1}
-\displaystyle \sum_{\alpha}\left(\frac{1}{n_{\alpha}-1}\right) \frac{\mbox{d}\psi_{\alpha}}{\mbox{d}t} = - \left(\frac{1}{\tau_{mix}}\right) \left(\frac{1}{n_{\alpha}-1} \right) \displaystyle \sum_{\alpha}(\psi_{\alpha}- \langle \psi_{\alpha} \rangle)
-\end{equation}
-We can simplify Eq.~(\ref{eq:iem1}) and obtain the IEM model \cite{fox2003}:
-\begin{equation}\label{eq:iem2}
-\frac{\mbox{d}\psi}{\mbox{d}t} = \frac{1}{\tau_{mix}}(\langle \psi \rangle - \psi)
-\end{equation}
-      
-Since only those species in the mixed environment can react, the proportion of the cell (reactor) composition in the mixed state must be known as function of time. The following equations define the cell composition:
-\begin{eqnarray}\label{eq:mixunmix}
-\rho V &=& U(t) + M(t) \\
-U(t) &=& \zeta(t)\,\rho V \\
-M(t) &=& (1-\zeta(t))\,\rho V
+We may think of an initial unmixed fraction of $\zeta_0=1$ as representing a diffusion flame and $\zeta_0=0$ as a premixed flame.
+
+%\begin{equation}\label{eq:zeta_def}
+%\zeta \equiv \frac{\displaystyle \sum_{\alpha}(\psi_{\alpha}- \langle \psi_{\alpha} \rangle )}{n_{\alpha} - 1}
+%\end{equation}
+
+\subsubsection{Evolution of the Composition in the Mixed Reactor Zone}
+
+As just discussed, the present reactor model partitions the cell into two zones: an unmixed zone and a mixed zone.  Only the mixed zone may react chemically.  Our goal in this section is to describe the rate of change of the composition within the mixed zone.  This composition changes by two processes: mixing (mass is transfered from the unmixed zone to the mixed zone) and chemical reaction.  The mixed zone composition evolves in time over an FDS time step, $\delta t$.  At the end of the time step, the mixed and unmixed zones are then recombined to yield the final cell mean composition, $\overline{Y}_\alpha(\delta t)$.
+
+The total mass within the reactor (computational cell) is constant over the time step.  We denote this mass by $\rho V$, where $\rho$ is the initial cell mass density and $V$ is the cell volume.  The unmixed mass is denoted $U(t)$ and the mixed mass is denoted $M(t)$.  Given Eq.~(\ref{eq:zeta_soln}), the following equations describe the cell mass evolution:
+\begin{eqnarray}
+\label{eq:mixunmix_1} \rho V &=& U(t) + M(t) \\
+\label{eq:mixunmix_2} U(t) &=& \zeta(t)\,\rho V \\
+\label{eq:mixunmix_3} M(t) &=& (1-\zeta(t))\,\rho V
 \end{eqnarray} 
-where $\rho V$ is the total mass in the reactor, $U(t)$ is unmixed portion of the mass, and $M(t)$ is the mixed portion of the mass. Cell mass, $\rho V$, is not a function of time as the total mass in a cell remains constant during a single FDS time interval. From the portion of mass that is mixed, $M(t)$, the local mixed composition ($\phi_{\alpha}(t)$) is found by:
 
-\begin{equation}\label{eq:phi}
-\phi_{\alpha}(t)=\frac{m_{\alpha}(t)}{M(t)}
+Within the mixed reactor zone, let $m_\alpha(t)$ denote the mass of species $\alpha$.  The mass fraction of $\alpha$ in the mixed zone is denoted by
+\begin{equation}\label{eq:mass_fraction_mixed}
+\hat{Y}_{\alpha}(t)\equiv\frac{m_{\alpha}(t)}{M(t)}
 \end{equation}
-where $m_\alpha(t)$ is the mixed mass of each of the $\alpha$ species in the simulation. The mixed mass of each species as a function of time is governed by:
+This concentration is important because any Arrhenius rate equations (discussed below) will be based on the mixed composition only.
 
+The ODE governing the mixed species mass is
 \begin{equation}\label{eq:mixmass}
-\frac{\mbox{d}m_{\alpha}}{\mbox{d}t}=M\frac{\nu_{\alpha} \, W_{\alpha}}{W_F}\displaystyle \sum_{i\,>1}^{\mathrm{N_{R}}}\frac{\mbox{d}\phi_{\F,i}}{\mbox{d}t}+Y_{\alpha,0}\frac{\mbox{d}M}{\mbox{d}t} 
+\frac{\d m_{\alpha}}{\d t} = M \frac{\d \hat{Y}_\alpha}{\d t} + \hat{Y}_\alpha \frac{\d M}{\d t} = M \frac{\d \hat{Y}_\alpha}{\d t} - \overline{Y}_{\alpha,0} \frac{\d U}{\d t}
 \end{equation}
-where $Y_{\alpha,0}$ is the mass fraction of each $\alpha$ species in the unmixed portion of the cell. The mass fractions of each species in the unmixed portion remain constant over an integration time step therefore the proportion of species which mix remains constant. The rate at which species react, $\mbox{d}\phi_\F/\mbox{d}t$, is discussed in section \ref{Reaction_Rate_Model}. The complete composition of the computational cell is found by a combination of the unmixed and mixed portions:
+The first term on the RHS represents chemical kinetics.  The second term accounts for mixing.  Note that in the second step we have utilized the fact that the ummixed composition remains constant troughout the time step. Using Eqs.~(\ref{eq:zeta}) and (\ref{eq:mixunmix_2}), the second term becomes
+\begin{align}
+\overline{Y}_{\alpha,0} \frac{\d U}{\d t} &= \frac{\overline{Y}_{\alpha,0} \, U(t) }{\tau_{mix}}
+\end{align}
 
+The rate of reaction, $\d \hat{Y}_\alpha/\d t$, is discussed in Section \ref{Reaction_Rate_Model}. The reaction rate may be ``fast'' (default) or based on an Arrhenius rate law.  The integration of Eq.~(\ref{eq:mixmass}) for these special cases is discussed in Section \ref{sec:reac_time_integration}.
+
+Once the final mixed zone mass is known, the composition of the computational cell is found by recombining the unmixed and mixed portions:
 \begin{equation}\label{eq:final_comp}
-Y_{\alpha}(t)=\zeta(t)Y_{\alpha,0}+(1-\zeta(t))\phi_{\alpha}(t)
+\overline{Y}_{\alpha}(t)= \zeta(t) \, \overline{Y}_{\alpha,0} + (1-\zeta(t)) \, \hat{Y}_{\alpha}(t)
 \end{equation}
-Finally the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$, is:
+Finally, the mean chemical source term needed in Eq.~(\ref{eq:mass_source_terms}) is given by
 \begin{equation}\label{mass_prod_rate}
-\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t} \approx \rho \left(\frac{Y_{\alpha}(\delta t) - Y_{\alpha,0}}{\delta t}\right)
+\dot{m}^{\prime\prime\prime}_{\alpha} = \rho \frac{\overline{Y}_{\alpha}(\delta t) - \overline{Y}_{\alpha,0}}{\delta t}
 \end{equation}
 
-Discussion on the extension of the EDC to include multiple environments as a way to model subgrid variance is included in Appendix~{\ref{multi_env_edc}}.
+\subsubsection{A Limiting Case: The Eddy Dissipation Concept}
+
+For the special case where the initial unmixed fraction is set to unity and the chemical kinetics are taken to be infinitely fast, our model reduces to the eddy dissipation concept (EDC) model as presented in \cite{Poinsot:TNC}.
+
+\subsubsection{Future Work}
+
+Discussion on the extension of the partially-stirred reactor model to include multiple environments as a way to model subgrid variance is included in Appendix~{\ref{multi_env_edc}}.
 
 \subsection{Reaction Time Scale Model}
 \label{sec:reac_time_scale}
@@ -324,6 +372,7 @@ Note: $\Delta Z_{Air}$ is in stoichiometric proportion to $\Delta Z_{F}$.
 \end{enumerate}
 
 \subsection{Time Integration of Chemical Reactions}
+\label{sec:reac_time_integration}
 
 \subsubsection{Single Step, Mixing-Controlled Reaction Rates}
 For single-step chemical reactions with mixing-controlled reaction rates, an explicit Euler scheme is used to solve the system of ODEs that determine the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$. This is the default integration mechanism used in FDS.
