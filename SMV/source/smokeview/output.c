@@ -196,6 +196,7 @@ void outputText(float x, float y, char *string){
   if(string==NULL)return;
   glColor3fv(foregroundcolor);
   if(fontindex==SCALED_FONT){
+    scale_2dfont();
     outputSText2(x,y,0.0,string);
     return;
   }
@@ -219,6 +220,7 @@ void outputBarText(float x, float y, const GLfloat *color, char *string){
   glColor3fv(color);
 
   if(fontindex==SCALED_FONT){
+    scale_2dfont();
     outputSText2r(x,y,0.0,string);
   }
   else{
