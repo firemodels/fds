@@ -7923,19 +7923,23 @@ amount and then turns off when the temperature rises above that same setpoint by
 This behavior cannot be defined by merely specifying a single setpoint.
 You must also define the range or ``deadband'' around the setpoint, and whether an
 increasing or decreasing temperature activates the system.  For the HVAC example, crossing the
-lower edge of the deadband activates heating; crossing the upper edge activates cooling.
-
-There are numerous situations where an HVAC system responds to
-the fire in a non-trivial way.  The {\ct CTRL} input is used to define these more complicated behaviors.
-A control function will take as input the outputs of one or more devices and/or control functions.
-In this manner, complicated behaviors can be simulated by making functions of other functions.  For most of the
-control function types, the logical value output of the devices and control functions and the time they last changed
-state are used as the inputs.
+lower edge of the deadband activates heating; crossing the upper edge activates cooling.  These more complicated behaviors can be modeled in FDS using {\ct CTRL}s.  The following parameters dictate how a control function will behave:
+\begin{description}
+\item[{\ct ID}] A name for the control function that is unique over all control functions.  
+\item[{\ct FUNCTION\_TYPE}] The type of control function.  The possible types are shown in~\ref{tab:funcvalues}.
+\item[{\ct INPUT\_ID}] A list of {\ct DEVC} or {\ct CTRL} {\ct ID}s that are the inputs to the control function.  Up to forty inputs can be specified.  If a {\ct DEVC} or {\ct CTRL} is being used as an {\ct INPUT\_ID} for a control function, then it must have a unique {\ct ID} over both devices and control functions.  Additionally, a control function cannot be used as an input for itself.
+\item[{\ct SETPOINT}] The value of the control function at which its state changes. This is only appropriate for functions that return numerical values.
+\item[{\ct TRIP\_DIRECTION}] A positive integer means the control function will change state when its value increases
+past the setpoint and a negative integer means the control function will change state
+when its value decreases past the setpoint.  The default value is +1.
+\item[{\ct LATCH}] If this logical value is set to {\ct .TRUE.} the control function will only change state once.
+The default value is {\ct .TRUE.}.
+\item[{\ct INITIAL\_STATE}] This logical value is the initial state of the control function. The default value
+is {\ct .FALSE.} For example, if an obstruction associated with the control function is to disappear, set {\ct INITIAL\_STATE=.TRUE.}
+\end{description}
 
 For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} or {\ct VENT}), a {\ct CTRL\_ID} can be
-specified instead. A control is identified by the {\ct ID} parameter.  The inputs to the control are identified
-by the {\ct INPUT\_ID} parameter.  {\ct INPUT\_ID} would be passed one or more {\ct ID} strings
-from either devices or other controls.
+specified instead.  
 
 \begin{table}[h!]
 \caption[Control function types]{Control function types.}
