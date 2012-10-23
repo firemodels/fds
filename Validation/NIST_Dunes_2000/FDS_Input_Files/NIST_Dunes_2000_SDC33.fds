@@ -333,3 +333,29 @@
 # Optical Density
 &DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.02 from ceil' /
 &DEVC XYZ=11.75, 0.38, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.9 from ceil' /
+
+&CTRL ID='Det A Heskestad', INPUT_ID='Detector A Heskestad', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det A Ion 1',     INPUT_ID='Detector A Ion 1',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det A Ion 2',     INPUT_ID='Detector A Ion 2',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det A Photo 1',   INPUT_ID='Detector A Photo 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det A Photo 2',   INPUT_ID='Detector A Photo 2',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det B Heskestad', INPUT_ID='Detector B Heskestad', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det B Ion 1',     INPUT_ID='Detector B Ion 1',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det B Ion 2',     INPUT_ID='Detector B Ion 2',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det B Photo 1',   INPUT_ID='Detector B Photo 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det B Photo 2',   INPUT_ID='Detector B Photo 2',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det C Heskestad', INPUT_ID='Detector C Heskestad', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det C Ion 1',     INPUT_ID='Detector C Ion 1',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det C Ion 2',     INPUT_ID='Detector C Ion 2',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det C Photo 1',   INPUT_ID='Detector C Photo 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det C Photo 2',   INPUT_ID='Detector C Photo 2',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det D Heskestad', INPUT_ID='Detector D Heskestad', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det D Ion 1',     INPUT_ID='Detector D Ion 1',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det D Ion 2',     INPUT_ID='Detector D Ion 2',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det D Photo 1',   INPUT_ID='Detector D Photo 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det D Photo 2',   INPUT_ID='Detector D Photo 2',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det E Heskestad', INPUT_ID='Detector E Heskestad', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det E Ion 1',     INPUT_ID='Detector E Ion 1',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det E Ion 2',     INPUT_ID='Detector E Ion 2',     FUNCTION_TYPE='ANY' /
+&CTRL ID='Det E Photo 1',   INPUT_ID='Detector E Photo 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det E Photo 2',   INPUT_ID='Detector E Photo 2',   FUNCTION_TYPE='ANY' /
