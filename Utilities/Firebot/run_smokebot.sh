@@ -8,4 +8,4 @@ do case $OPTION in
   ;;
 esac
 done
-run-one bash -lc "./smokebot_linux.sh $MAKEMOVIES" &
+run-one bash -lc "./smokebot_linux.sh -q batch $MAKEMOVIES" &
