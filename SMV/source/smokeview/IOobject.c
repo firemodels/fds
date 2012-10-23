@@ -13,6 +13,7 @@ char IOobject_revision[]="$Revision$";
 
 #include "string_util.h"
 #include "smokeviewvars.h"
+#include "smokeviewdefs.h"
 
 #define CIRCLE_SEGS 12
 
@@ -422,6 +423,7 @@ void draw_devices_val(void){
   float black[3]={0.0,0.0,0.0};
   int doit=0;
 
+  if(fontindex==SCALED_FONT)scale_3dfont();
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -617,6 +619,7 @@ void output_device_val(devicedata *devicei){
   float val;
   int valid;
 
+  if(fontindex==SCALED_FONT)scale_3dfont();
   val=get_device_val(global_times[itimes],devicei,&valid);
   if(valid==1){
     sprintf(label,"%s: %.1f %s",devicei->quantity,val,devicei->unit);

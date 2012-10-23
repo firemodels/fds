@@ -2751,6 +2751,7 @@ void update_smoothblockage_info(void){
 void Display_CB(void){
   int dostereo;
 
+  renderdoublenow=0;
   DoScript();
   if(update_glui_dialogs!=0){
     switch (update_glui_dialogs){
@@ -2833,8 +2834,6 @@ void Display_CB(void){
         if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
       }
       else{
-        int renderdoublenow=0;
-
         if(RenderOnceNow==1){
           renderdoublenow=1;
         }

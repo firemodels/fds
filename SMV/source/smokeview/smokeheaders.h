@@ -9,6 +9,8 @@
 EXTERNCPP int Merge_Smoke(void);
 #endif
 
+EXTERNCPP void scale_2dfont(void);
+EXTERNCPP void scale_3dfont(void);
 EXTERNCPP int LABEL_Get_Nuserlabels(void);
 EXTERNCPP labeldata *LABEL_Next(labeldata *gl);
 EXTERNCPP labeldata *LABEL_Previous(labeldata *gl);

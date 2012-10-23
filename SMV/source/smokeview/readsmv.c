@@ -9691,7 +9691,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"RENDEROPTION")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&render_option);
+      sscanf(buffer,"%i %i",&render_option,&nrender_rows);
       RenderMenu(render_option);
       continue;
     }
@@ -10768,7 +10768,7 @@ void writeini(int flag){
   fprintf(fileout,"WINDOWOFFSET\n");
   fprintf(fileout," %i\n",titlesafe_offsetBASE);
   fprintf(fileout,"RENDEROPTION\n");
-  fprintf(fileout," %i\n",render_option);
+  fprintf(fileout," %i %i\n",render_option,nrender_rows);
   fprintf(fileout,"\n LINES\n");
   fprintf(fileout,"-----------\n\n");
   fprintf(fileout,"LINEWIDTH\n");

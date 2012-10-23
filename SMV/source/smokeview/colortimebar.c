@@ -252,8 +252,7 @@ void drawcolorbarpath(void){
 
 
   {
-    float zbot;
-    float dzpoint;
+    float zbot, dzpoint, xdenorm, ydenorm, zdenorm;
 
     glPointSize(10.0);
     glBegin(GL_POINTS);
@@ -267,15 +266,22 @@ void drawcolorbarpath(void){
     }
     glEnd();
 
+    xdenorm = DENORMALIZE_X(1.55);
+    ydenorm = DENORMALIZE_Y(0.0);
+    if(fontindex==SCALED_FONT)scale_3dfont();
+    glPushMatrix();
+    glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+    glTranslatef(-xbar0,-ybar0,-zbar0);
     for(i=0;i<cbi->nnodes;i++){
-      int ii;
       char cbuff[1024];
 
-      ii = cbi->index_node[i];
       dzpoint = (float)cbi->index_node[i]/255.0;
-      sprintf(cbuff,"%i",ii);
-      output3Text(foregroundcolor, 1.55,0.0,dzpoint, cbuff);
+      zdenorm = DENORMALIZE_Z(dzpoint);
+      sprintf(cbuff,"%i",cbi->index_node[i]);
+      output3Text(foregroundcolor, xdenorm,ydenorm,zdenorm, cbuff);
     }
+    glPopMatrix();
+    glLineWidth(5.0);
     if(colorbarpoint>=0&&colorbarpoint<cbi->nnodes){
       float *rgbi;
 

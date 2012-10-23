@@ -59,9 +59,11 @@ GLUI_Spinner *SPINNER_labels_transparency_face=NULL;
 GLUI_Spinner *SPINNER_subtick=NULL;
 GLUI_Spinner *SPINNER_scaled_font2d_size=NULL;
 GLUI_Spinner *SPINNER_scaled_font3d_size=NULL;
-
+GLUI_Spinner *SPINNER_scaled_font3d_width=NULL;
+GLUI_Spinner *SPINNER_scaled_font2d_width=NULL;
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
+
 #endif
 GLUI_Checkbox *CHECKBOX_LB_visLabels=NULL;
 GLUI_Checkbox *CHECKBOX_LB_label_use_foreground=NULL;
@@ -109,6 +111,8 @@ GLUI_Panel *PANEL_tick2;
 GLUI_Panel *PANEL_transparency=NULL;
 GLUI_Panel *PANEL_showhide=NULL;
 GLUI_Panel *PANEL_font=NULL;
+GLUI_Panel *PANEL_font2d=NULL;
+GLUI_Panel *PANEL_font3d=NULL;
 
 GLUI_RadioGroup *RADIO_fontsize=NULL,*RADIO_showhide=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
@@ -234,10 +238,14 @@ extern "C" void glui_update_fontindex(void){
     if(fontindex==SCALED_FONT){
       SPINNER_scaled_font2d_size->enable();
       SPINNER_scaled_font3d_size->enable();
+      SPINNER_scaled_font2d_width->enable();
+      SPINNER_scaled_font3d_width->enable();
     }
     else{
       SPINNER_scaled_font2d_size->disable();
       SPINNER_scaled_font3d_size->disable();
+      SPINNER_scaled_font2d_width->disable();
+      SPINNER_scaled_font3d_width->disable();
     }
   }
 }
@@ -381,8 +389,15 @@ extern "C" void glui_labels_setup(int main_window){
   RADIOBUTTON_label_1b=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large"));
   RADIOBUTTON_label_1c=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("scaled"));
 
-  SPINNER_scaled_font2d_size=glui_labels->add_spinner_to_panel(PANEL_font,"size (labels):",GLUI_SPINNER_INT,&scaled_font2d_size);
-  SPINNER_scaled_font3d_size=glui_labels->add_spinner_to_panel(PANEL_font,"size (scene):",GLUI_SPINNER_INT,&scaled_font3d_size);
+  PANEL_font2d = glui_labels->add_panel_to_panel(PANEL_font,"labels",true);
+  SPINNER_scaled_font2d_size=glui_labels->add_spinner_to_panel(PANEL_font2d,"size:",GLUI_SPINNER_INT,&scaled_font2d_size);
+  SPINNER_scaled_font2d_width=glui_labels->add_spinner_to_panel(PANEL_font2d,"width:",GLUI_SPINNER_INT,&scaled_font2d_width);
+  SPINNER_scaled_font2d_width->set_int_limits(1,10);
+
+  PANEL_font3d = glui_labels->add_panel_to_panel(PANEL_font,"scene",true);
+  SPINNER_scaled_font3d_size=glui_labels->add_spinner_to_panel(PANEL_font3d,"size:",GLUI_SPINNER_INT,&scaled_font3d_size);
+  SPINNER_scaled_font3d_width=glui_labels->add_spinner_to_panel(PANEL_font3d,"width:",GLUI_SPINNER_INT,&scaled_font3d_width);
+  SPINNER_scaled_font3d_width->set_int_limits(1,10);
   glui_update_fontindex();
 
   SPINNER_linewidth=glui_labels->add_spinner_to_panel(ROLLOUT_label1,"blockage line width",GLUI_SPINNER_FLOAT,&linewidth);

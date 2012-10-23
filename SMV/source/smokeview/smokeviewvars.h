@@ -27,6 +27,7 @@
 SVEXTERN int SVDECL(label_list_index,0);
 SVEXTERN labeldata LABEL_local, *LABEL_global_ptr, LABEL_default;
 
+SVEXTERN int SVDECL(renderdoublenow,0);
 SVEXTERN int SVDECL(nrender_rows,2);
 SVEXTERN int port_pixel_width, port_pixel_height;
 SVEXTERN float port_unit_width, port_unit_height;
@@ -662,6 +663,8 @@ SVEXTERN int stepclip_X,stepclip_Y,stepclip_Z;
 SVEXTERN float partpointsize,SVDECL(vectorpointsize,2.0),streaklinewidth;
 SVEXTERN float isopointsize, isolinewidth;
 SVEXTERN float plot3dpointsize, plot3dlinewidth;
+SVEXTERN int SVDECL(scaled_font3d_width,1);
+SVEXTERN int SVDECL(scaled_font2d_width,1);
 SVEXTERN float SVDECL(vectorlinewidth,1.0);
 SVEXTERN int SVDECL(cell_center_text,0);
 SVEXTERN float SVDECL(gridlinewidth,2.0);

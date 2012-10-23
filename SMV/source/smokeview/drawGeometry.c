@@ -3949,12 +3949,12 @@ void draw_user_ticks(void){
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  glLineWidth(user_tick_width);
 
  //*** x axis tick/labels
 
  // major ticks
   if(show_tick_x==1){
+    glLineWidth(user_tick_width);
     glBegin(GL_LINES);
     glColor3fv(foregroundcolor);
     for(i=0;i<user_tick_nxyz[0];i++){
@@ -4015,6 +4015,7 @@ void draw_user_ticks(void){
       }
     }
     glEnd();
+    if(fontindex==SCALED_FONT)scale_3dfont();
     for(i=0;i<user_tick_nxyz[0];i++){
       char label[128];
 
@@ -4104,6 +4105,7 @@ void draw_user_ticks(void){
       }
     }
     glEnd();
+    if(fontindex==SCALED_FONT)scale_3dfont();
     for(i=0;i<user_tick_nxyz[1];i++){
       char label[128];
 
@@ -4194,6 +4196,7 @@ void draw_user_ticks(void){
       }
     }
     glEnd();
+    if(fontindex==SCALED_FONT)scale_3dfont();
     for(i=0;i<user_tick_nxyz[2];i++){
       char label[128];
 

@@ -262,6 +262,7 @@ void drawtours(void){
     SNIFF_ERRORS("after select path, selected keyframe");
     CheckMemory;
 
+    if(fontindex==SCALED_FONT)scale_3dfont();
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
       if(touri->display==0)continue;

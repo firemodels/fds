@@ -107,6 +107,10 @@ void outputSText2r(float x, float y, float z, char *string){
   glPushMatrix();
   scale_x = port_unit_width*((float)scaled_font2d_size/(float)104.76)/(float)port_pixel_width;
   scale_y = port_unit_height*((float)scaled_font2d_size/(float)152.38)/(float)port_pixel_height;
+  if(renderdoublenow!=0){
+    scale_x *= (float)nrender_rows;
+    scale_y *= (float)nrender_rows;
+  }
   glTranslatef(x-scale_x*total_width,y,z);
   glScalef(scale_x,scale_y,1.0);
   for (c=string; *c != '\0'; c++){
@@ -130,6 +134,10 @@ void outputSText2(float x, float y, float z, char *string){
   glPushMatrix();
   scale_x = port_unit_width*((float)scaled_font2d_size/(float)104.76)/(float)port_pixel_width;
   scale_y = port_unit_height*((float)scaled_font2d_size/(float)152.38)/(float)port_pixel_height;
+  if(renderdoublenow!=0){
+    scale_x *= (float)nrender_rows;
+    scale_y *= (float)nrender_rows;
+  }
   glTranslatef(x,y,z);
   glScalef(scale_x,scale_y,1.0);
   for (c=string; *c != '\0'; c++){
@@ -341,6 +349,9 @@ void bench_out(float localframerate){
 void drawLabels(void){
   labeldata *thislabel;
 
+  glPushMatrix();
+  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glTranslatef(-xbar0,-ybar0,-zbar0);
   for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
     float *labelcolor,*tstart_stop,*xyz;
     int drawlabel;
@@ -360,12 +371,10 @@ void drawLabels(void){
       if(drawlabel==0&&global_times[itimes]>=tstart_stop[0]-0.05&&global_times[itimes]<=tstart_stop[1]+0.05)drawlabel=1;
     }
     if(drawlabel==1){
-      float xyz_pos[3];
-
-      normalize_xyz(xyz_pos,xyz);
-      output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],thislabel->name);
+      output3Text(labelcolor,xyz[0],xyz[1],xyz[2],thislabel->name);
     }
   }
+  glPopMatrix();
 }
 
 
@@ -557,3 +566,26 @@ labeldata *LABEL_insert(labeldata *labeltemp){
   }
   return NULL;
 }
+
+/* ----------------------- scale_2dfont ----------------------------- */
+
+void scale_2dfont(void){
+  if(render_multi!=0){
+    glLineWidth((float)nrender_rows*(float)scaled_font2d_width);
+  }
+  else{
+    glLineWidth((float)scaled_font2d_width);
+  }
+}
+
+/* ----------------------- scale_3dfont ----------------------------- */
+
+void scale_3dfont(void){
+  if(render_multi!=0){
+    glLineWidth((float)nrender_rows*(float)scaled_font3d_width);
+  }
+  else{
+    glLineWidth((float)scaled_font3d_width);
+  }
+}
+
