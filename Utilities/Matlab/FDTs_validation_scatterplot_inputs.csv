@@ -11,8 +11,8 @@ Immersed Plume Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat 
 Plume Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Plume_Temperature
 Point Source Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,120,0.03 0.95,SouthEast,20,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Point_Source_Radiation_Heat_Flux
 Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,300,0.03 0.95,SouthEast,80,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Pressure
-Smoke Detector Activation Time (Milke),Measured Activation Time (s),Predicted Activation Time (s),0,100,0.03 0.95,SouthEast,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Milke
-Smoke Detector Activation Time (Mowrer),Measured Activation Time (s),Predicted Activation Time (s),0,100,0.03 0.95,SouthEast,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Mowrer
+Smoke Detector Activation Time (Milke),Measured Activation Time (s),Predicted Activation Time (s),0,120,0.03 0.95,West,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Milke
+Smoke Detector Activation Time (Mowrer),Measured Activation Time (s),Predicted Activation Time (s),0,120,0.03 0.95,West,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Mowrer
 Sprinkler Activation Time,Measured Activation Time (s),Predicted Activation Time (s),0,300,0.03 0.95,SouthEast,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Sprinkler_Activation_Time
 Steel Temperature (Protected),Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Steel_Temperature_Protected
 Steel Temperature (Unprotected),Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Steel_Temperature_Unprotected
