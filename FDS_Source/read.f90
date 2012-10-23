@@ -9140,13 +9140,12 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
    ALLOCATE (CF%INPUT_TYPE(CF%N_INPUTS),STAT=IZERO)
    CALL ChkMemErr('READ','CF%INPUT_TYPE',IZERO)
    
-   BUILD_INPUT: DO NN = 1, CF%N_INPUTS
+BUILD_INPUT: DO NN = 1, CF%N_INPUTS
       IF (CF%INPUT_ID(NN)=='CONSTANT') THEN
          IF (CONSTANT_SPECIFIED) THEN
             WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' can only specify one input as a constant value'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
-         CYCLE BUILD_INPUT
          IF (CF%CONSTANT < -8.E30_EB) THEN
             WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' has the INPUT_ID CONSTANT but no constant value was specified'
             CALL SHUTDOWN(MESSAGE)
@@ -9162,7 +9161,8 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             IF (CF%CONTROL_INDEX == CUSTOM) THEN
                WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CUSTOM CTRL ',NC,' cannot have another CTRL as input'
                CALL SHUTDOWN(MESSAGE)
-            ENDIF 
+            ENDIF   
+            CYCLE BUILD_INPUT
          ENDIF
       END DO CTRL_LOOP
       DEVC_LOOP: DO NNN = 1, N_DEVC
