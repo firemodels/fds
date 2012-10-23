@@ -8665,6 +8665,10 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
+   ! Adjust the SETPOINT if it is a time
+
+   IF (QUANTITY=='TIME') SETPOINT = T_BEGIN + (SETPOINT-T_BEGIN)/TIME_SHRINK_FACTOR
+
    ! Reorder XB coordinates if necessary
 
    IF (POINTS==1) CALL CHECK_XB(XB)
