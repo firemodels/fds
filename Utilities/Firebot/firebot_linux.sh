@@ -16,10 +16,13 @@
 mailTo="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com"
 FIREBOT_USERNAME="firebot"
 
-FIREBOT_HOME_DIR="/home/$FIREBOT_USERNAME"
-FIREBOT_DIR="/home/$FIREBOT_USERNAME/firebot"
-FDS_SVNROOT="/home/$FIREBOT_USERNAME/FDS-SMV"
-CFAST_SVNROOT="/home/$FIREBOT_USERNAME/cfast"
+# Change to home directory
+cd
+
+FIREBOT_HOME_DIR="`pwd`"
+FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
+FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
+CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 SVN_REVISION=$1
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings

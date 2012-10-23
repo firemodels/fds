@@ -16,8 +16,8 @@
 #  = Input variables =
 #  ===================
 
-SVNROOT_WIKI="/home/firebot/fds_wiki"
-FIREBOT_DIR="/home/firebot/firebot"
+SVNROOT_WIKI="/home2/smokevis2/firebot/fds_wiki"
+FIREBOT_DIR="/home2/smokevis2/firebot/firebot"
 
 #  ============================
 #  = Primary script execution =

@@ -17,7 +17,7 @@ import os, re, time
 # recent Firebot test runs on the Google Code Firebot status wiki page.
 
 # Absolute path to Firebot history directory
-firebot_history_dir = "/home/firebot/firebot/history"
+firebot_history_dir = "/home2/smokevis2/firebot/firebot/history"
 
 # Print header information (doctype, head css, start of body)
 print """#summary Displays FDS-SMV build status for recent build/test cycles.
