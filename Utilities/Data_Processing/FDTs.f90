@@ -826,7 +826,7 @@ REAL :: Q,T_PL,T_CJ
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
-WRITE(11,'(A)') 'Time,Activation time,Total HRR'
+WRITE(11,'(A)') 'Time,Activation,Activation time,Total HRR'
 
 ITER = .TRUE.
 T = 1
@@ -844,7 +844,11 @@ DO WHILE (ITER)
 
    t_activation = T_PL + T_CJ
 
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.1)') T,',',t_activation,',',Q
+   IF (t_activation>T) THEN
+      WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1)') T,',',-1,',',t_activation,',',Q
+   ELSE
+      WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1)') T,',',1,',',t_activation,',',Q
+   ENDIF
 
    IF ((t_activation>0) .AND. (t_activation<=T)) THEN
       ITER = .FALSE.
@@ -864,7 +868,7 @@ REAL :: Q,Y,X
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
-WRITE(11,'(A)') 'Time,Activation time,Total HRR'
+WRITE(11,'(A)') 'Time,Activation,Activation time,Total HRR'
 
 ITER = .TRUE.
 T = 1
@@ -886,9 +890,11 @@ DO WHILE (ITER)
    t_activation = X*(H*(1./0.3048))**(4./3.)/(Q*(1./1.05505585))**(1./3.)
 
    IF (t_activation>9999) THEN
-      WRITE(11,'(F6.1,A5,F6.1)') T,',NaN,',Q
+      WRITE(11,'(F6.1,A1,I2,A5,F6.1)') T,',',-1,',NaN,',Q
+   ELSEIF (t_activation>T) THEN
+      WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1)') T,',',-1,',',t_activation,',',Q
    ELSE
-      WRITE(11,'(F6.1,A1,F6.1,A1,F6.1)') T,',',t_activation,',',Q
+      WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1)') T,',',1,',',t_activation,',',Q
    ENDIF
 
    IF ((t_activation>0) .AND. (t_activation<=T)) THEN
