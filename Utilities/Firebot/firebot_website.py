@@ -16,7 +16,7 @@ import os, re, time
 # recent Firebot test runs.
 
 # Absolute path to Firebot history directory
-firebot_history_dir = "/home/firebot/firebot/history"
+firebot_history_dir = "/home2/smokevis2/firebot/firebot/history"
 
 # Print header information (doctype, head css, start of body)
 print """<!DOCTYPE html>
