@@ -9165,7 +9165,8 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             IF (CF%CONTROL_INDEX == CUSTOM) THEN
                WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CUSTOM CTRL ',NC,' cannot have another CTRL as input'
                CALL SHUTDOWN(MESSAGE)
-            ENDIF   
+            ENDIF
+            EXIT CTRL_LOOP   
          ENDIF
       END DO CTRL_LOOP
       DEVC_LOOP: DO NNN = 1, N_DEVC
@@ -9176,6 +9177,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             ENDIF
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = DEVICE_INPUT
+            EXIT DEVC_LOOP
          ENDIF
       END DO DEVC_LOOP
       IF (CF%INPUT_TYPE(NN) > 0) CYCLE BUILD_INPUT
