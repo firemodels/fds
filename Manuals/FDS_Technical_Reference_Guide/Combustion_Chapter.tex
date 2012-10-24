@@ -316,34 +316,34 @@ area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g 
 
 The rate expression (on a fuel basis) for both infinitely fast chemistry and Arrhenius rate chemistry follow the same general form:
 \begin{equation}\label{eq:Arrheniusrateeqn}
-\frac{\mbox{d}[X_\F]}{\mbox{d}t} = -A \; \prod \left([X_{\alpha}]^{a_{\alpha}} \right) T^n \; e^{-E/RT} 
+\frac{\mbox{d}[\hat{X}_\F]}{\mbox{d}t} = -A \; \prod \left([\hat{X}_{\alpha}]^{a_{\alpha}} \right) T^n \; e^{-E/RT} 
 \end{equation}
-Note that the rate expression can be dependent on temperature and that the rate can be dependent upon species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species could participate as a collision species.  Therefore, rather than $\mbox{d}[X_\F]/\mbox{d}t$,  FDS must solve for $\mbox{d}\phi_\F/\mbox{d}t$.  Additionally since it is quicker to determine $\phi_i$ rather than $X_i$, the relation $[X_i]=\phi_i \rho/W_i$ is used.  Combined, these result in a modified rate equation:
+Note that the rate expression can be dependent upon the local temperature as well as concentrations of species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species can participate as a collision species.  Therefore, rather than $\mbox{d}[X_\F]/\mbox{d}t$,  FDS solves for $\mbox{d}\hat{Y}_{\F}/\mbox{d}t$.  Additionally since it is quicker to determine $\hat{Y}_{\alpha}$ rather than $\hat{X}_i$, the relation $[\hat{X}_i]=\hat{Y}_{\alpha} \rho/W_i$ is used.  Substituting $\hat{Y}_{\alpha}$ into Eq.~\ref{eq:Arrheniusrateeqn} and making the appropriate units change to $A$ results in a modified rate equation:
 
 \begin{equation}\label{eq:Arrheniusratemode}
-\frac{\mbox{d}\phi_\F}{\mbox{d}t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
+\frac{\mbox{d}\hat{Y}_{\F}}{\mbox{d}t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(\hat{Y}_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT}; \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
 \end{equation}
 
-\subsection{Infinitely Fast Reaction}
-For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. In this formulation, $\mbox{d}\phi_\F/\mbox{d}t$ becomes sufficiently large such that all of the fuel (or all of the oxidizer) in a computational cell is consumed in a single time step, effectively making the rate infinite. The rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation a mixing-controlled reaction.
+\subsubsection{Infinitely Fast Reaction}
+For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_\F/\mbox{d}t$ becomes sufficiently large such that all of the fuel (or all of the oxidizer) in a computational cell is consumed in a single time step, effectively making the rate infinite. Since the rate is limited by the minimum reactant (fuel or oxidizer) in the mixed composition of the cell which makes this formulation is also referred to as a mixing-controlled reaction.
 
 \subsubsection{Multiple Infinitely Fast Reactions}   
-In the case where there are multiple infinitely fast reactions special consideration needs to be taken if the reactions are oxygen-limited. Since any given infinitely fast reaction does not take precedent over another and each wants to consume all of the available oxidizer, the reaction rates must further be restricted because the mass fraction of oxidizer must remain realizable. The first step is to determine the amount of oxidizer that is present in the mixed state of the computational cell. The second step is to calculate the amount of oxidizer that would be needed to stoichiometrically consume all of the fuel in each reaction in the mixed state of the computational cell. If the required stoichiometric oxidizer amount is larger than the available amount of oxidizer then the computational cell is globally fuel rich.
+In the case where there are multiple infinitely fast reactions special consideration needs to be taken if the reactions are oxygen-limited. Since any given infinitely fast reaction does not take precedent over another and each wants to consume all of the available oxidizer, the reaction rates must further be restricted because the mass fraction of oxidizer must remain realizable (0 $\le \hat{Y}_{ox} \le$ 1). The first step is to determine the amount of oxidizer that is present in the mixed state of the computational cell. The second step is to calculate the amount of oxidizer that would be needed to stoichiometrically consume all of the fuel in each reaction in the mixed state of the computational cell. If the required stoichiometric oxidizer amount is larger than the available amount of oxidizer then the computational cell is globally fuel rich.
 
-If the cell is determined to be globally fuel rich, then for each of the $n$ reactions the stoichiometric amount of fuel consumed ($DZ_F$) based on the limiting $i^{th}$ reactant is found:
+If the cell is determined to be globally fuel rich, then for each of the $n$ reactions the stoichiometric amount of fuel consumed ($\hat{Y}_F$) based on the limiting $\alpha$ reactant is found:
 \begin{equation}\label{eq:stoich_fuel}
-DZ_F(n) = min\left (DZ_F(n),\frac{-Z_{i}W_{\mathrm{fuel}}}{\nu_{i}W_{i}}\right)
+\hat{Y}_{\F}= \min_{\alpha \; = \; reactant}\left (\hat{Y}_{\F},\frac{-\hat{Y}_{\alpha}W_{\mathrm{\F}}}{\nu_{\alpha} W_{\alpha}}\right)
 \end{equation}
-To prevent more than the available amount of oxidizer from being consumed, a weight factor ($DF_{R}$) for each reaction is calculated based on the total amount of fuel being consumed.
+To prevent more than the available amount of oxidizer from being consumed, a weight factor ($w_{ox\_limit}$) for each reaction is calculated based on the total amount of fuel being consumed.
 \begin{equation}\label{eq:fuel_weight}
-DF_R(n) = \frac{DZ_F(n)}{\Sigma \, DZ_F}
+w_{ox\_limit}(n) = \frac{\hat{Y}_{\F}(n)}{\Sigma \, \hat{Y}_{\F}(n)}
 \end{equation}
-For a given timestep, $\delta t$, the rate at which fuel is consumed for each infinitely fast reaction becomes:
+The maximum change in fuel for the $n^{th}$ reaction becomes
 \begin{equation}\label{eq:fuel_rate}
-Rate(n) = \frac{DZ_F(n)\,DF_R(n)}{\delta t}
+\hat{Y}_{\F}(n) = \hat{Y}_{\F}(n)\,w_{ox\_limit}(n)
 \end{equation}
 
-\subsection{Arrhenius Reaction}
+\subsubsection{Arrhenius Reaction}
 There are conditions under which the local temperature and species concentrations support the computation of the reaction rate.  One set of conditions is where the reacting regions of the flow can be considered a well-stirred reactor.  The other is during a DNS calculation.  In the first case rather than a reacting surface, there is a reacting volume.  In the second case, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
 oxygen, and combustion products).  This allows the flame to be resolved in a DNS calculation.  Under conditions where the local gas
 temperatures can be used to determine the reaction kinetics, Arrhenius rates can be used.
@@ -372,17 +372,17 @@ extinction based on the species and temperature present in the flame sheet.  The
 \begin{enumerate}
 \item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
 
-\be \Delta Z_F = \min_{i \; = \; reactant} \left(\frac{Z_i W_\F}{W_i \nu_i} \right) \ee
-If fuel is the limiting reactant then $\Delta Z_F$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta Z_F$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
-\item Store $\Delta Z_F$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
+\be \Delta \hat{Y}_{\F} = \min_{\alpha \; = \; reactant} \left(\frac{\hat{Y}_{\alpha} W_\F}{W_i \nu_i} \right) \ee
+If fuel is the limiting reactant then $\Delta \hat{Y}_{\F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{\F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
+\item Store $\Delta \hat{Y}_{\F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
 \item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
 
-\be \Delta Z_{Air} = \min_{i \; = \; non-fuel \; reactant} \left(\frac{\Delta Z_\F W_i \nu_i}{Z_i W_\F} \right) \ee
-Note: $\Delta Z_{Air}$ is in stoichiometric proportion to $\Delta Z_{F}$.
-\item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature.
+\be \Delta \hat{Y}_{\mbox{air}} = \min_{\alpha \; = \; non-fuel \; reactant} \left(\frac{\Delta \hat{Y}_{\F} W_i \nu_i}{Z_i W_\F} \right) \ee
+Note: $\Delta \hat{Y}_{\mbox{air}}$ is in stoichiometric proportion to $\Delta \hat{Y}_{\F}$.
+\item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature (LFT).
 \item Combustion is allowed if 
 
-\be \Delta Z_{Air} h_{air}(T)+\Delta Z_F \left( h_\F(T)+\Delta H_\F \right) > \Delta Z_{Air} h_{air}(T_{LFT})+ \Delta Z_\F h_\F(T_{LFT}) \ee
+\be \Delta \hat{Y}_{\mbox{air}} h_{\mbox{air}}(T)+\Delta \hat{Y}_{\F} \left( h_\F(T)+\Delta H_\F \right) > \Delta \hat{Y}_{\mbox{air}} h_{\mbox{air}}(T_{LFT})+ \Delta \hat{Y}_{\F} h_\F(T_{LFT}) \ee
 
 \end{enumerate}
 
