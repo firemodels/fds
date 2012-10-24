@@ -13,13 +13,17 @@
 #  = Input variables =
 #  ===================
 
+# Mailing list for status report
 mailTo="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com"
+
+# Firebot's username
 FIREBOT_USERNAME="firebot"
 
 # Change to home directory
 cd
-
 FIREBOT_HOME_DIR="`pwd`"
+
+# Additional definitions
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
 FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
 CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
