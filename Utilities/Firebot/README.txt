@@ -95,6 +95,14 @@ MAILTO=""
 # The run-once script maintains a lock to prevent the script from running twice
 56 21 * * * run-one bash -lc firebot_linux.sh
 
+# ============================
+# = DiskHog disk space alert =
+# ============================
+
+# Run DiskHog script daily at 8 AM to check disk usage on all nodes
+# Sends email alert if any disk on any node is more than 90% full
+00 08 * * * diskhog.sh
+
 ------------------------------------------------------------------------------------
 
 #### The following information is in the Mac (Bluesky) firebot user's crontab: ####
