@@ -77,7 +77,7 @@ MAILTO=""
 */10 * * * * firebot_website.py > /var/www/html/firebot/index.html
 
 # Update Firebot build status wiki page every 10 minutes (XX:01, XX:11, and so on)
-1,11,21,31,41,51 * * * * firebot_wiki.py > ~/firebot/firebot/wiki_output/Firebot_Build_Status.wiki
+1,11,21,31,41,51 * * * * firebot_wiki.py > ~/firebot/wiki_output/Firebot_Build_Status.wiki
 
 # Check every 10 minutes (XX:05, XX:15, and so on) for changes to Firebot status page
 # If it has changed, upload Firebot build status wiki page to Google Code
