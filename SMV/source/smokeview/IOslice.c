@@ -1394,6 +1394,10 @@ void updateslicebounds(void){
     for(jj=0;jj<nslice_loaded;jj++){
       j = slice_loaded_list[jj];
       if(sliceinfo[j].type!=i)continue;
+      if(ini_fed==0&&sliceinfo[j].is_fed==1){
+        slicebounds[i].setvalmin=SET_MIN;
+        slicebounds[i].valmin=0.0;
+      }
       if(slicebounds[i].setvalmin!=SET_MIN){
         if(minflag==0){
           valmin=sliceinfo[j].valmin;
@@ -1414,6 +1418,10 @@ void updateslicebounds(void){
     for(jj=0;jj<nslice_loaded;jj++){
       j = slice_loaded_list[jj];
       if(sliceinfo[j].type!=i)continue;
+      if(ini_fed==0&&sliceinfo[j].is_fed==1){
+        slicebounds[i].setvalmax=SET_MAX;
+        slicebounds[i].valmax=3.0;
+      }
       if(slicebounds[i].setvalmax!=SET_MAX){
         if(maxflag==0){
           valmax=sliceinfo[j].valmax;

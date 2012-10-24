@@ -24,6 +24,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(ini_fed,0);
 SVEXTERN int SVDECL(label_list_index,0);
 SVEXTERN labeldata LABEL_local, *LABEL_global_ptr, LABEL_default;
 
