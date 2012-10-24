@@ -272,10 +272,12 @@ void camera2quat(camera *ca, float *quat, float *rotation){
 void ResetView(int option){
   int rotation_type_save;
 
+  in_external=0;
   switch (option){
   case RESTORE_EXTERIOR_VIEW_ZOOM:
     break;
   case RESTORE_EXTERIOR_VIEW:
+    in_external=1;
     rotation_type_save = camera_current->rotation_type;
     copy_camera(camera_current,camera_external);
     camera_current->rotation_type=rotation_type_save;

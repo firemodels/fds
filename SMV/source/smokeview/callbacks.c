@@ -1132,6 +1132,7 @@ int throttle_gpu(void){
 
 void motion_CB(int xm, int ym){
 
+  in_external=0;
 #ifdef pp_GPUTHROTTLE
   if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1){
     if(throttle_gpu()==1)return;
@@ -2493,7 +2494,7 @@ void Reshape_CB(int width, int height){
   screenHeight2 = screenHeight - dwinH;
   windowresized=1;
   update_camera_ypos(camera_external);
-  if(strcmp(camera_current->name,"external")==0){
+  if(strcmp(camera_current->name,"external")==0&&in_external==1){
     ResetView(RESTORE_EXTERIOR_VIEW);
   }
   update_windowsizelist();
