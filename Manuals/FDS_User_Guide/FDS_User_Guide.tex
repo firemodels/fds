@@ -6758,17 +6758,7 @@ particle, use lines like the following:
 \normalsize
 
 \noindent
-If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. However, you can use the parameter {\ct ORIENTATION(1:N,1:3)} to specify {\ct N} unique directions for the particle. For example,
-
-\footnotesize
-\begin{verbatim}
-&PART ..., ORIENTATION(1,3)=1., ORIENTATION(2,3)=-1. /
-\end{verbatim}
-\normalsize
-
-\noindent
-specifies that half the particle is facing upwards and half is facing downwards. This is useful if the source of heating does not surround the particles.
-
+If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. However, you can specify unique directions for the particle if the source of heating does not surround the particles. More about particle splitting is explained in Section~\ref{info:particle_split}.
 
 \subsection{Drag}
 \label{info:particle_drag}
@@ -6778,6 +6768,43 @@ To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {
 the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}.
 The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
+\subsection{Splitting particles}
+\label{info:particle_split}
+
+If the radiation around the particle is not uniform, it may be useful to split the particle by orientations. This can be done by using the parameter {\ct ORIENTATION(1:N,1:3)} to specify {\ct N} unique directions for the particle. For example,
+
+\footnotesize
+\begin{verbatim}
+&PART ..., ORIENTATION(1,3)=1., ORIENTATION(2,3)=-1. /
+\end{verbatim}
+\normalsize
+
+\noindent
+specifies that half the particle is facing upwards and half is facing downwards.   Each orientation is modeled in practise by a separate particle that sees the radiation that is directed to a plane orthogonally to the orientation. The mass calculations and the surface that receives the radiation are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Figures~\ref{cart_split} -~\ref{sphere_split}. The orientation can naturally be any direction between the axis too. For cartesian particle only orientations that are perpendicular to the length-width -plane make physical sense.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{FIGURES/particle_cart_split}
+\end{center}
+\caption[Cartesian particle splitted in two]{Splitting in z-direction for a Cartesian particle.}
+\label{cart_split}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{FIGURES/particle_cyl_split}
+\end{center}
+\caption[Cylindrical particle splitted in two]{Splitting in y- and z-directions for a cylindrical particle.}
+\label{cyl_split}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{FIGURES/particle_sphere_split}
+\end{center}
+\caption[Spherical particle splitted in two]{Splitting in x-, y- and z-directions for a spherical particle.}
+\label{sphere_split}
+\end{figure}
 
 \subsection{Gas Generating Particles}
 \label{info:particle_mass_generation}
