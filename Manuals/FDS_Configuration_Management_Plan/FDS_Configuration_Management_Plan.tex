@@ -759,13 +759,13 @@ be changed to {\ct Verified}.  At this point the issue is closed.
 
 The FDS codebase undergoes an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot (\underline{F}DS automat\underline{I}c ve\underline{R}ification and validation t\underline{E}st \underline{BOT}). The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
 
-This automated built/test process runs on a regular schedule (nightly) to ensure that the FDS codebase is free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. For future reference, the results of a build/test process are tagged with the SVN revision number that was used. 
+This automated built/test process runs on a regular schedule (nightly) to ensure that the FDS codebase is free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. For future reference, the results of a build/test process are archived and tagged with the SVN revision number that was used. 
 
-Upon completion of the automated build/test process, the results of the build/test process are dispatched to the development team. In the event of a failure, the build/test process is aborted, and the appropriate error logs are dispatched to the development team. The automated build/test process consists of eight build stages, which are described in the following sections.
+Upon completion of the automated build/test process, the results of the build/test process are dispatched to the development team. In the event of a failure, the build/test process continues when possible, and the appropriate error logs are dispatched to the development team. The automated build/test process consists of eight build stages, which are described in the following sections.
 
 \subsection*{Stage 1: SVN checkout of FDS-SMV codebase}
 
-The most recent version of the FDS-SMV codebase is retrieved from the Google Code SVN server. At this stage, the Firebot script ensures that all temporary files are removed and that a clean copy of the repository is used for the later stages, as if an end user were downloading the repository for the first time.
+In the first stage, the newest version of the FDS-SMV codebase is retrieved from the SVN repository on Google Code. At this stage, the Firebot script ensures that all temporary files are removed and that a clean copy of the repository is used for the later stages, as if an end user were downloading the repository for the first time.
 
 \subsection*{Stage 2: Compilation of FDS debug versions}
 
@@ -773,7 +773,7 @@ The serial and MPI versions of FDS are compiled with debugging flags enabled. Th
 
 \subsection*{Stage 3: Short run of verification suite}
 
-All of the cases in the verification suite are invoked using the FDS debug versions that were compiled in Stage~2. The verification cases are run for at least one time step to ensure that the cases start without errors. After all of the verification cases run for at least one time step, the cases are stopped using an FDS stop file. Then the logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+All of the cases in the verification suite are invoked using the FDS debug versions that were compiled in Stage~2. The verification cases are run for at least one time step to ensure that the cases start without errors. After all of the verification cases run for at least one time step, the cases are stopped using an FDS stop file. Then the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
 \subsection*{Stage 4: Compilation of FDS release versions}
 
@@ -781,21 +781,21 @@ The serial and MPI release versions of FDS are compiled. Any compiler warnings a
 
 \subsection*{Stage 5: Full run of FDS verification suite}
 
-All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. After all of the verification cases run to completion, the logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. After all of the verification cases run to completion, the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
 \subsection*{Stage 6: Compilation of Smokeview and scripted generation of figures}
 
-The Smokeview debug, test, and release versions are compiled along with the Smokeview utilities (smokezip, smokediff, and background). Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
+The Smokeview debug and release versions are compiled along with the Smokeview utilities (smokezip, smokediff, and background). Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
 Additionally, scripts in the FDS and SMV verification suites are used to generate figures in Smokeview using automated Smokeview scripting commands. These figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides as well as the SMV User and Verification Guides.
 
 \subsection*{Stage 7: Generation of verification and validation plots and regression statistics}
 
-Scripts in the FDS verification and validation suites are used to generate plots and regression statistics using the results from Stage 5. These plots and figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides as well as the SMV User and Verification Guides.
+Scripts in the FDS verification and validation suites are used to generate plots, regression information, and timing statistics using the results from Stage~5. These plots, figures, and statistical information are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides as well as the SMV User and Verification Guides.
 
 \subsection*{Stage 8: Compilation of FDS-SMV Guides}
 
-The FDS User~\cite{FDS_Users_Guide}, Technical Reference~\cite{FDS_Math_Guide}, Verification~\cite{FDS_Verification_Guide}, and Validation~\cite{FDS_Validation_Guide} Guides, FDS Configuration Management Plan, and SMV User and Verification Guides are compiled to ensure that all figures and equations can be compiled without any \LaTeX\ errors.
+The FDS User~\cite{FDS_Users_Guide}, Technical Reference~\cite{FDS_Math_Guide}, Verification~\cite{FDS_Verification_Guide}, and Validation~\cite{FDS_Validation_Guide} Guides, FDS Configuration Management Plan, and SMV User, Technical, and Verification Guides are compiled to ensure that all figures and equations can be compiled without any \LaTeX\ errors.
 
 \clearpage
 
