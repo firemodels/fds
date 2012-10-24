@@ -1444,7 +1444,7 @@ heat the walls to steady-state can make the cost of the calculation prohibitive.
 of these materials roughly by 10. An example of an application where this parameter is handy is a validation experiment where a steady heat source
 warms up a compartment to a nearly equilibrium state at which point time-averaged flow quantities are measured.
 
-
+Note that when {\ct TIME\_SHRINK\_FACTOR} is used a device with {\ct QUANTITY='TIME'} or a device or control function with a {\ct DELAY} will have those values adjusted by the value of {\ct TIME\_SHRINK\_FACTOR}.  For example if a 10~s {\ct DELAY} is specified for a {\ct CTRL} input with a {\ct TIME\_SHRINK\_FACTOR} of 10, then FDS will adjust the {\ct DELAY} to 1~s.    
 
 \newpage
 
