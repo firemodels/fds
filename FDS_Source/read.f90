@@ -236,7 +236,7 @@ END SUBROUTINE READ_HEAD
  
 SUBROUTINE READ_MESH(IMODE)
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, &
-     EMESH_NM, N_DOOR_MESHES, EMESH_NFIELDS, EVAC_FDS6, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, &
+     EMESH_NM, N_DOOR_MESHES, EMESH_NFIELDS, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, &
      EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE, N_STRS, INPUT_EVAC_GRIDS, NO_EVAC_MESHES
 USE PHYSICAL_FUNCTIONS, ONLY: LES_FILTER_WIDTH_FUNCTION,LES_FILTER_WIDTH_2D_MAX,LES_FILTER_WIDTH_2D_MEAN,LES_FILTER_WIDTH_3D_MAX,&
                               LES_FILTER_WIDTH_3D_MEAN,LES_FILTER_WIDTH_2D_MIN,LES_FILTER_WIDTH_3D_MIN
@@ -275,7 +275,7 @@ COUNT_MESH_LOOP: DO
    IF (NO_EVACUATION .AND. EVACUATION) CYCLE COUNT_MESH_LOOP ! skip evacuation meshes
    IF (EVACUATION_DRILL .AND. .NOT.EVACUATION) CYCLE COUNT_MESH_LOOP ! skip fire meshes
    IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION) CYCLE COUNT_MESH_LOOP ! skip fire meshes
-   IF (EVACUATION .AND. EVAC_FDS6) NEVAC_MESHES = NEVAC_MESHES + 1
+   IF (EVACUATION) NEVAC_MESHES = NEVAC_MESHES + 1
    IF (IMODE==1 .AND. EVAC_HUMANS) NO_EVAC_MESHES = .FALSE.
    IF (IMODE==1 .AND. EVAC_HUMANS) INPUT_EVAC_GRIDS = INPUT_EVAC_GRIDS + 1
    N_MESH_NEW = 1
@@ -349,7 +349,7 @@ EVAC_MODE_IF: IF (IMODE==1) THEN
 END IF EVAC_MODE_IF
 
 IF (.NOT. NO_EVACUATION) NMESHES = NMESHES + N_DOOR_MESHES + NEVAC_MESHES
-IF (.NOT. NO_EVACUATION .AND. EVAC_FDS6) NMESHES = NMESHES + N_STRS
+IF (.NOT. NO_EVACUATION) NMESHES = NMESHES + N_STRS
 
 ! Allocate parameters associated with the mesh.
  
@@ -489,7 +489,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
             IF (EVAC_HUMANS) EVACUATION_GRID(NM) = .TRUE.
             IF (EVACUATION)  EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
             IF (EVACUATION)  M%N_EXTERNAL_WALL_CELLS = 2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
-            IF (EVAC_FDS6 .AND. EVACUATION .AND. .NOT.EVAC_HUMANS) THEN
+            IF (EVACUATION .AND. .NOT.EVAC_HUMANS) THEN
                WRITE(MESSAGE,'(A)') 'ERROR: NO DOOR FLOW EVACUATION MESHES IN FDS6'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
@@ -719,7 +719,7 @@ CONTAINS
 
        EMESH_EXITS(N)%MAINMESH = EMESH_NM(EMESH_EXITS(N)%EMESH)        ! The 1,...,NMESHES index
        ! Only main evacuation meshes in FDS6
-       IF (EVAC_FDS6) EMESH_EXITS(N)%IMESH = EMESH_EXITS(N)%MAINMESH   ! The mesh index (all meshes included)
+       EMESH_EXITS(N)%IMESH = EMESH_EXITS(N)%MAINMESH   ! The mesh index (all meshes included)
 
        ! Set MESH defaults
 
@@ -732,85 +732,7 @@ CONTAINS
        ALLOCATE(EMESH_EXITS(N)%V_EVAC(0:IJK(1)+1,0:IJK(2)+1),STAT=IZERO)
        CALL ChkMemErr('READ','EMESH_EXITS(N)%V_EVAC',IZERO)
 
-       IF (EVAC_FDS6) CYCLE LOOP_EXITS
-
-       TWO_D = .FALSE.
-       XB(1) = EMESH_XB(1,I)
-       XB(2) = EMESH_XB(2,I)
-       XB(3) = EMESH_XB(3,I)
-       XB(4) = EMESH_XB(4,I)
-       XB(5) = EMESH_XB(5,I)
-       XB(6) = EMESH_XB(6,I)
-       ID = TRIM(TRIM('Emesh_' // TRIM(EMESH_EXITS(N)%ID)))
-       SYNCHRONIZE = .FALSE.
-       EVACUATION  = .TRUE.
-       EVAC_HUMANS = .FALSE.
-       EVAC_Z_OFFSET = 1.0_EB
-       MPI_PROCESS = -1
-       LEVEL = 0
-       MULT_ID = 'null'
-
-       ! Increase the MESH counter by 1
-
-       NM = NM + 1
-       EMESH_EXITS(N)%IMESH = NM   ! The mesh index (all meshes included)
-
-       ! Fill in MESH related variables
-       
-       M => MESHES(NM)
-       M%MESH_LEVEL = LEVEL
-       M%IBAR = IJK(1)
-       M%JBAR = IJK(2)
-       M%KBAR = IJK(3)
-       IBAR_MAX = MAX(IBAR_MAX,M%IBAR)
-       JBAR_MAX = MAX(JBAR_MAX,M%JBAR)
-       KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
-       EVACUATION_ONLY(NM) = .TRUE.
-       SYNC_TIME_STEP(NM)  = .FALSE.
-       EVACUATION_GRID(NM) = .FALSE.
-       EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
-       M%N_EXTERNAL_WALL_CELLS = 2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
-       TWO_D = .FALSE.
-       IF (EVACUATION .AND. M%KBAR/=1) THEN
-          WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
-          CALL SHUTDOWN(MESSAGE)
-       ENDIF
-
-       ! Associate the MESH with the PROCESS
-         
-       PROCESS(NM) = CURRENT_MPI_PROCESS
-       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
-       IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
-
-       ! Mesh boundary colors
-   
-       ALLOCATE(M%RGB(3))
-       M%RGB = EMESH_EXITS(N)%RGB
-   
-       ! Mesh Geometry and Name
-   
-       WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
-       IF (ID/='null') MESH_NAME(NM) = ID
-   
-       M%XS    = XB(1)
-       M%XF    = XB(2)
-       M%YS    = XB(3)
-       M%YF    = XB(4)
-       M%ZS    = XB(5)
-       M%ZF    = XB(6)
-       M%DXI   = (M%XF-M%XS)/REAL(M%IBAR,EB)
-       M%DETA  = (M%YF-M%YS)/REAL(M%JBAR,EB)
-       M%DZETA = (M%ZF-M%ZS)/REAL(M%KBAR,EB)
-       M%RDXI  = 1._EB/M%DXI
-       M%RDETA = 1._EB/M%DETA
-       M%RDZETA= 1._EB/M%DZETA
-       M%IBM1  = M%IBAR-1
-       M%JBM1  = M%JBAR-1
-       M%KBM1  = M%KBAR-1
-       M%IBP1  = M%IBAR+1
-       M%JBP1  = M%JBAR+1
-       M%KBP1  = M%KBAR+1
-       WRITE (LU_ERR,FMT='(A,I5,3A)') ' EVAC: Mesh number ', NM, ' name ', TRIM(ID), ' defined for evacuation'
+       CYCLE LOOP_EXITS
     END DO LOOP_EXITS
 
     NN = 0
@@ -832,88 +754,86 @@ CONTAINS
                EMESH_NFIELDS(NN),' door flow fields'
        END IF
     END DO
+    
+    ! Next line should be executed only once during a FDS+Evac run
+    JMAX = MAXVAL(EMESH_NFIELDS)
+    EVAC_TIME_ITERATIONS = EVAC_TIME_ITERATIONS*JMAX
 
-    IF (EVAC_FDS6) THEN
-       ! Next line should be executed only once during a FDS+Evac run
-       JMAX = MAXVAL(EMESH_NFIELDS)
-       EVAC_TIME_ITERATIONS = EVAC_TIME_ITERATIONS*JMAX
+    LOOP_STAIRS: DO N = 1, N_STRS
+       ! Evacuation meshes for the stairs.
 
-       LOOP_STAIRS: DO N = 1, N_STRS
-          ! Evacuation meshes for the stairs.
+       ! Set MESH defaults
 
-          ! Set MESH defaults
+       RGB   = EMESH_STAIRS(N)%RGB
+       COLOR = 'null'
+       ID = TRIM('Emesh_' // TRIM(EMESH_STAIRS(N)%ID))
+       MPI_PROCESS = -1
+       LEVEL = 0
+       EVACUATION = .TRUE.
+       EVAC_HUMANS = .TRUE.
+       EVAC_Z_OFFSET = EMESH_STAIRS(N)%EVAC_Z_OFFSET
 
-          RGB   = EMESH_STAIRS(N)%RGB
-          COLOR = 'null'
-          ID = TRIM('Emesh_' // TRIM(EMESH_STAIRS(N)%ID))
-          MPI_PROCESS = -1
-          LEVEL = 0
-          EVACUATION = .TRUE.
-          EVAC_HUMANS = .TRUE.
-          EVAC_Z_OFFSET = EMESH_STAIRS(N)%EVAC_Z_OFFSET
-          
-          ! Increase the MESH counter by 1
+       ! Increase the MESH counter by 1
 
-          NM = NM + 1
-          EMESH_STAIRS(N)%IMESH = NM
+       NM = NM + 1
+       EMESH_STAIRS(N)%IMESH = NM
 
-          ! Fill in MESH related variables
-       
-          M => MESHES(NM)
-          M%MESH_LEVEL = LEVEL
-          M%IBAR = EMESH_STAIRS(N)%IBAR
-          M%JBAR = EMESH_STAIRS(N)%JBAR
-          M%KBAR = EMESH_STAIRS(N)%KBAR
-          IBAR_MAX = MAX(IBAR_MAX,M%IBAR)
-          JBAR_MAX = MAX(JBAR_MAX,M%JBAR)
-          KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
-          EVACUATION_ONLY(NM) = .TRUE.
-          SYNC_TIME_STEP(NM)  = .FALSE.
-          EVACUATION_GRID(NM) = .TRUE.
-          EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
-          M%N_EXTERNAL_WALL_CELLS = 2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
-          IF (EVACUATION .AND. M%KBAR/=1) THEN
-             WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
-             CALL SHUTDOWN(MESSAGE)
-          ENDIF
+       ! Fill in MESH related variables
 
-          ! Associate the MESH with the PROCESS
-         
-          PROCESS(NM) = CURRENT_MPI_PROCESS
-          IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
-          IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
+       M => MESHES(NM)
+       M%MESH_LEVEL = LEVEL
+       M%IBAR = EMESH_STAIRS(N)%IBAR
+       M%JBAR = EMESH_STAIRS(N)%JBAR
+       M%KBAR = EMESH_STAIRS(N)%KBAR
+       IBAR_MAX = MAX(IBAR_MAX,M%IBAR)
+       JBAR_MAX = MAX(JBAR_MAX,M%JBAR)
+       KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
+       EVACUATION_ONLY(NM) = .TRUE.
+       SYNC_TIME_STEP(NM)  = .FALSE.
+       EVACUATION_GRID(NM) = .TRUE.
+       EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
+       M%N_EXTERNAL_WALL_CELLS = 2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
+       IF (EVACUATION .AND. M%KBAR/=1) THEN
+          WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
+          CALL SHUTDOWN(MESSAGE)
+       ENDIF
 
-          ! Mesh boundary colors
-   
-          ALLOCATE(M%RGB(3))
-          M%RGB = EMESH_STAIRS(N)%RGB
-   
-          ! Mesh Geometry and Name
-   
-          WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
-          IF (ID/='null') MESH_NAME(NM) = ID
-   
-          M%XS    = EMESH_STAIRS(N)%XB(1)
-          M%XF    = EMESH_STAIRS(N)%XB(2)
-          M%YS    = EMESH_STAIRS(N)%XB(3)
-          M%YF    = EMESH_STAIRS(N)%XB(4)
-          M%ZS    = EMESH_STAIRS(N)%XB(5)
-          M%ZF    = EMESH_STAIRS(N)%XB(6)
-          M%DXI   = (M%XF-M%XS)/REAL(M%IBAR,EB)
-          M%DETA  = (M%YF-M%YS)/REAL(M%JBAR,EB)
-          M%DZETA = (M%ZF-M%ZS)/REAL(M%KBAR,EB)
-          M%RDXI  = 1._EB/M%DXI
-          M%RDETA = 1._EB/M%DETA
-          M%RDZETA= 1._EB/M%DZETA
-          M%IBM1  = M%IBAR-1
-          M%JBM1  = M%JBAR-1
-          M%KBM1  = M%KBAR-1
-          M%IBP1  = M%IBAR+1
-          M%JBP1  = M%JBAR+1
-          M%KBP1  = M%KBAR+1
-          WRITE (LU_ERR,FMT='(A,I5,3A)') ' EVAC: Mesh number ', NM, ' name ', TRIM(ID), ' defined for evacuation'
-       END DO LOOP_STAIRS
-    END IF
+       ! Associate the MESH with the PROCESS
+
+       PROCESS(NM) = CURRENT_MPI_PROCESS
+       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
+       IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
+
+       ! Mesh boundary colors
+
+       ALLOCATE(M%RGB(3))
+       M%RGB = EMESH_STAIRS(N)%RGB
+
+       ! Mesh Geometry and Name
+
+       WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+       IF (ID/='null') MESH_NAME(NM) = ID
+
+       M%XS    = EMESH_STAIRS(N)%XB(1)
+       M%XF    = EMESH_STAIRS(N)%XB(2)
+       M%YS    = EMESH_STAIRS(N)%XB(3)
+       M%YF    = EMESH_STAIRS(N)%XB(4)
+       M%ZS    = EMESH_STAIRS(N)%XB(5)
+       M%ZF    = EMESH_STAIRS(N)%XB(6)
+       M%DXI   = (M%XF-M%XS)/REAL(M%IBAR,EB)
+       M%DETA  = (M%YF-M%YS)/REAL(M%JBAR,EB)
+       M%DZETA = (M%ZF-M%ZS)/REAL(M%KBAR,EB)
+       M%RDXI  = 1._EB/M%DXI
+       M%RDETA = 1._EB/M%DETA
+       M%RDZETA= 1._EB/M%DZETA
+       M%IBM1  = M%IBAR-1
+       M%JBM1  = M%JBAR-1
+       M%KBM1  = M%KBAR-1
+       M%IBP1  = M%IBAR+1
+       M%JBP1  = M%JBAR+1
+       M%KBP1  = M%KBAR+1
+       WRITE (LU_ERR,FMT='(A,I5,3A)') ' EVAC: Mesh number ', NM, ' name ', TRIM(ID), ' defined for evacuation'
+    END DO LOOP_STAIRS
 
     IF (ALL(EVACUATION_ONLY)) THEN
        DO N = 1, NMESHES
@@ -6926,7 +6846,7 @@ CONTAINS
     ! on the outer boundary of the evacuation mesh, which is by default solid.
     ! The core of the STRS meshes are also defined.
     !
-    USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, N_DOOR_MESHES, EVAC_FDS6, &
+    USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, N_DOOR_MESHES, &
          N_STRS, EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE
     IMPLICIT NONE
     ! Passed variables
@@ -6974,14 +6894,12 @@ CONTAINS
              N_OBST = N_OBST + 1
              EMESH_EXITS(N)%I_OBST = N_OBST
              EVACUATION_OBST = .TRUE.
-             IF (.NOT.EVAC_FDS6 .AND. EMESH_EXITS(N)%IMESH==NM) EXIT NEND_LOOP_1  ! One VENT per door flow mesh
           END IF
        END DO NEND_LOOP_1
 
        NSTRS_LOOP_1: DO N = 1, N_STRS
 
           IF (.NOT.EMESH_STAIRS(N)%DEFINE_MESH) CYCLE NSTRS_LOOP_1
-          IF (.NOT.EVAC_FDS6) EXIT  NSTRS_LOOP_1  ! Automatic STRS meshes are for FDS6
           IF (EMESH_STAIRS(N)%IMESH==NM) THEN
 
              ! Move EMESH_STAIRS(N)%XB_CORE to mesh cell boundaries
@@ -7037,7 +6955,6 @@ CONTAINS
              END SELECT
              RGB(:) = EMESH_EXITS(N)%RGB(:)
              ID = TRIM('Eobst_' // TRIM(MESH_NAME(NM)))
-             IF (.NOT.EVAC_FDS6 .AND. EMESH_EXITS(N)%IMESH==NM) EXIT NEND_LOOP_2  ! One VENT per door flow mesh
           END IF
        END DO NEND_LOOP_2
 
@@ -7444,7 +7361,7 @@ CONTAINS
     !
     ! Clear the STRS meshes by a hole with size of XB of the stairs.
     ! The core is put there applying permit_hole=false.
-    USE EVAC, ONLY: EVAC_FDS6, N_STRS, EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE
+    USE EVAC, ONLY: N_STRS, EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE
     IMPLICIT NONE
     ! Passed variables
     INTEGER, INTENT(IN) :: IMODE
@@ -8060,7 +7977,7 @@ CONTAINS
     !
     ! Define the evacuation outflow VENTs for the doors/exits.
     !
-    USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, N_DOOR_MESHES, EVAC_FDS6
+    USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, N_DOOR_MESHES
     IMPLICIT NONE
     ! Passed variables
     INTEGER, INTENT(IN) :: NM, IMODE
@@ -8076,7 +7993,6 @@ CONTAINS
              EMESH_EXITS(N)%I_VENT = N_VENT
              EVACUATION_VENT = .TRUE.
              EVACUATION = .TRUE.
-             IF (.NOT.EVAC_FDS6 .AND. EMESH_EXITS(N)%IMESH==NM) EXIT NEND_LOOP_1
           END IF
        END DO NEND_LOOP_1
     END IF IMODE_1_IF
@@ -8098,7 +8014,6 @@ CONTAINS
              XB(6) = EMESH_EXITS(N)%XB(6)
              RGB(:) = EMESH_EXITS(N)%RGB(:)
              ID = TRIM('Event_' // TRIM(MESH_NAME(NM)))
-             IF (.NOT.EVAC_FDS6 .AND. EMESH_EXITS(N)%IMESH==NM) EXIT NEND_LOOP_2   ! One VENT per door flow mesh
           END IF
        END DO NEND_LOOP_2
     END IF IMODE_2_IF
@@ -8412,7 +8327,6 @@ END SUBROUTINE READ_INIT
 
 SUBROUTINE READ_ZONE
  
-USE EVAC, ONLY: EVAC_FDS6
 INTEGER, PARAMETER :: MAX_LEAK_PATHS=200
 REAL(EB) :: LEAK_AREA(0:MAX_LEAK_PATHS)
 INTEGER  :: N,NM,NN,N_EVAC_ZONE,N_EVAC_MESH,NM_EVAC
@@ -8448,8 +8362,7 @@ DO NM=1,NMESHES
          IF (VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) SEALED = .FALSE.
       ENDDO
    ELSE
-      IF (.NOT.EVAC_FDS6) N_EVAC_ZONE = N_EVAC_ZONE + 1
-      IF (EVAC_FDS6 .AND. EVACUATION_GRID(NM)) N_EVAC_ZONE = N_EVAC_ZONE + 1
+      IF (EVACUATION_GRID(NM)) N_EVAC_ZONE = N_EVAC_ZONE + 1
    END IF
 ENDDO
 
@@ -8548,7 +8461,7 @@ READ_EVACUATION_ZONE_LOOP: DO N=N_ZONE-N_EVAC_ZONE+1,N_ZONE
    N_EVAC_MESH = 0
    NM_EVAC = 0
    EVAC_MESH_NUMBER: DO NM=1,NMESHES
-      IF ((EVAC_FDS6.AND.EVACUATION_GRID(NM)).OR.(.NOT.EVAC_FDS6.AND.EVACUATION_ONLY(NM))) THEN      
+      IF (EVACUATION_GRID(NM)) THEN      
          N_EVAC_MESH = N_EVAC_MESH + 1
          NM_EVAC = NM
          IF (N_EVAC_MESH == N-(N_ZONE-N_EVAC_ZONE)) EXIT EVAC_MESH_NUMBER
@@ -9769,7 +9682,6 @@ END SUBROUTINE READ_ISOF
  
 SUBROUTINE READ_SLCF
 
-USE EVAC, ONLY: EVAC_FDS6
 REAL(EB) :: MAXIMUM_VALUE,MINIMUM_VALUE
 REAL(EB) :: AGL_SLICE
 INTEGER :: N,NN,NM,MESH_NUMBER,N_SLCF_O,NITER,ITER,VELO_INDEX,I_DUM
@@ -9799,8 +9711,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (MESH_NUMBER/=NM) CYCLE COUNT_SLCF_LOOP
       IF (.NOT.EVACUATION_ONLY(NM) .AND.      EVACUATION) CYCLE COUNT_SLCF_LOOP
       IF (     EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION) CYCLE COUNT_SLCF_LOOP
-      !IF (.NOT.EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE COUNT_SLCF_LOOP
-      IF (EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE COUNT_SLCF_LOOP
+      IF (EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE COUNT_SLCF_LOOP
       N_SLCF  = N_SLCF + 1
       IF (VECTOR .AND. TWO_D) N_SLCF = N_SLCF + 2
       IF (VECTOR .AND. .NOT. TWO_D) N_SLCF = N_SLCF + 3
@@ -9845,8 +9756,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (MESH_NUMBER/=NM) CYCLE SLCF_LOOP
       IF (.NOT.EVACUATION_ONLY(NM) .AND.      EVACUATION) CYCLE SLCF_LOOP
       IF (     EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION) CYCLE SLCF_LOOP
-      IF (     EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE SLCF_LOOP
-      !IF (.NOT.EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE SLCF_LOOP
+      IF (EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE SLCF_LOOP
  
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
          XB(1) = XS
