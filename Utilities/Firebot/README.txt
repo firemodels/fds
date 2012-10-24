@@ -88,7 +88,7 @@ MAILTO=""
 #  ========================
 
 # Run svn update at 9:50 PM to get latest verison of Firebot
-50 21 * * * cd ~/firebot ; svn up
+50 21 * * * cd ~/firebot ; svn revert * ; svn up
 
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
