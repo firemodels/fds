@@ -2,7 +2,7 @@
 \label{chapter:combustion}
 
 \label{combustionsection}
-The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in species concentration over a time step for a single grid cell to obtain
+The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in species concentration over a time step for a single grid cell to obtain the mean chemical source term,
 \begin{equation}\label{eq:m_tprime_alpha}
 \dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{Y_\alpha(\delta t) - Y_\alpha(0)}{\delta t}
 \end{equation}
@@ -158,15 +158,15 @@ At the start of the integration of the reactor model, the species transport equa
 
 \subsubsection{Transport Versus Mixing}
 
-An issue that may be confused in turbulent combustion is the difference between \emph{transport} and \emph{mixing}.  It is especially important to distinguish these phenomena when considering infintely fast chemistry, because it is mixing (not transport) that dictates the rate of reaction.
+In turbulent combustion, \emph{transport} and \emph{mixing} may be easily confused.  It is especially important to distinguish these phenomena when considering infinitely fast chemistry, because in that case it is mixing (not transport) that dictates the rate of reaction.
 
-FDS employs a \emph{time splitting} scheme to solve the species equations in which we first compute transport (both advective and diffusive) and then we compute mixing.  Note that transport due to turbulent diffusion does not mix the chemical species.  This is illustrated in Fig.~\ref{fig_transport_vs_mixing}.  On the far left, we show a hypothetical computational cell at the end of the transport step and the beginning of the mixing and reaction step in our algorithm.  Notice that there is a subgrid distribution of the species mass fraction.  Locally in space the mass fraction may be pure fuel or pure oxidizer.  In this image, where there are already various shades of gray, it may be noted that  the initial condition of the cell may not be purely unmixed.  As we proceed to the right in our image sequence, the local cell composition is relaxing toward the mean value of 0.5. 
+FDS employs a \emph{time splitting} scheme (Sections \ref{sec:solution_procedure} and \ref{sec_time_splitting}) to solve the species equations in which we first compute transport (both advective and diffusive) and then we compute mixing.  Note that transport due to turbulent diffusion does not mix the chemical species.  This is illustrated in Fig.~\ref{fig_transport_vs_mixing}.  On the far left, we show a hypothetical computational cell at the end of the transport step and the beginning of the mixing and reaction step in our algorithm.  Notice that there is a subgrid distribution of the species mass fraction.  Locally in space the mass fraction may be pure fuel or pure oxidizer.  In this image, where there are already various shades of gray, it may be noted that  the initial condition of the cell may not be purely unmixed.  As we proceed to the right in our image sequence, the local cell composition is relaxing toward the mean value of 0.5. 
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_1}\quad
-\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_2}\quad
-\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_3}\quad
+\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_1} \quad 
+\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_2} \quad
+\includegraphics[width=1.6in]{FIGURES/transport_vs_mixing_3} \quad
 \includegraphics[height=1.6in]{FIGURES/transport_vs_mixing_colorbar}
 \caption{Subgrid-scale transport and mixing. The image sequence depicts a hypothetical computational cell with mean mass fraction 0.5 and, from left to right, increasing levels of mixing.}
 \label{fig_transport_vs_mixing}
@@ -182,12 +182,26 @@ where $\tau_{mix}$ is the characteristic mixing time for the cell.  This time sc
 
 \subsubsection{A Simplified Mixing Environment}
 
-Suppose we are considering $n_s$ species in our reactor model.  It is actually unnecessary to solve Eq.~(\ref{eq:iem}) for each species individually. Let us define the state of mixing in the cell by the \emph{unmixed} fraction, $\zeta(t)$, such that the local mass fraction of any species may be written as
-\begin{equation}\label{eq:local_mass_fraction}
-Y_{\alpha}(t)=\zeta(t)+(1-\zeta(t))\overline{Y}_{\alpha}(t)
+In our model, the local concentration at any point within the cell exists in one of two states: completely unmixed or completely mixed.  With $\psi_\alpha \in [0,1]$ representing the sample space for the composition, the subgrid probability density function (PDF) may be written as
+\begin{equation}
+\label{eq:pdf}
+f(\psi_\alpha) = w_1 \delta(0-\psi_\alpha) + w_2 \delta(1-\psi_\alpha) + w_3 \delta(\overline{Y}_\alpha - \psi_\alpha)
 \end{equation}
+where $\delta(x)$ is the Dirac delta function.  In other words, if we look at a specific point in space, the mass fraction of species $\alpha$ may only be 0, 1, or equal to the cell mean, $\overline{Y}_\alpha$.  The weights $w_i$ must satisfy integral constraints on the cell: $\int f(\psi_\alpha) \d \psi_\alpha = 1$, $\int f(\psi_\alpha) \psi_\alpha \d \psi_\alpha = \overline{Y}_\alpha$.
 
-Plugging Eq.~(\ref{eq:local_mass_fraction}) into Eq.~(\ref{eq:iem}) and summing over species we find that the unmixed fraction is governed by the following simple ODE:
+For convenience (we will see why it is convenient in a moment), we define the \emph{unmixed} fraction, $\zeta(t)$, as the fraction of the cell existing as either 0 or 1.  To satisfy the integral constraints, the PDF weights must then be
+\begin{align}
+w_1 &= \zeta \, (1 - \overline{Y}_\alpha) \\
+w_2 &= \zeta \, \overline{Y}_\alpha \\
+w_3 &= 1-\zeta
+\end{align}
+
+As shown by Pope \cite{Pope:2000}, the PDF evolves by the Fokker-Planck equation
+\begin{equation}
+\label{eq:fokker-planck}
+\frac{\partial f}{\partial t} = -\frac{\partial}{\partial \psi_\alpha} \left(f \left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle \right)
+\end{equation}
+The term on the right in angled brackets is a conditional diffusion term which requires closure.  Using IEM, Eq.~(\ref{eq:iem}), as the model for this term, Eq.~(\ref{eq:fokker-planck}) implies that the unmixed fraction, $\zeta$, is governed by the following simple ODE\footnote{This is a good exercise for the reader.  Hint: Just consider the evolution of the second term in Eq.~(\ref{eq:pdf}) and utilize Appendix C in Pope \cite{Pope:2000}.}:
 \begin{equation}\label{eq:zeta}
 \frac{\mbox{d}\zeta}{\mbox{d}t}=-\frac{\zeta}{\tau_{mix}}
 \end{equation}
@@ -195,7 +209,8 @@ with the solution
 \begin{equation}\label{eq:zeta_soln}
 \zeta(t) = \zeta_0 \exp(-t/\tau_{mix})
 \end{equation}
-We may think of an initial unmixed fraction of $\zeta_0=1$ as representing a diffusion flame and $\zeta_0=0$ as a premixed flame.
+
+We may think of an initial unmixed fraction of $\zeta_0=1$ (default) as representing a diffusion flame and $\zeta_0=0$ as a premixed flame.
 
 %\begin{equation}\label{eq:zeta_def}
 %\zeta \equiv \frac{\displaystyle \sum_{\alpha}(\psi_{\alpha}- \langle \psi_{\alpha} \rangle )}{n_{\alpha} - 1}
@@ -222,7 +237,7 @@ The ODE governing the mixed species mass is
 \begin{equation}\label{eq:mixmass}
 \frac{\d m_{\alpha}}{\d t} = M \frac{\d \hat{Y}_\alpha}{\d t} + \hat{Y}_\alpha \frac{\d M}{\d t} = M \frac{\d \hat{Y}_\alpha}{\d t} - \overline{Y}_{\alpha,0} \frac{\d U}{\d t}
 \end{equation}
-The first term on the RHS represents chemical kinetics.  The second term accounts for mixing.  Note that in the second step we have utilized the fact that the ummixed composition remains constant troughout the time step. Using Eqs.~(\ref{eq:zeta}) and (\ref{eq:mixunmix_2}), the second term becomes
+The first term on the RHS represents chemical kinetics.  The second term accounts for mixing.  Note that in the second step we have utilized the fact that the ummixed composition remains constant (at the initial cell mean) throughout the time step. Using Eqs.~(\ref{eq:zeta}) and (\ref{eq:mixunmix_2}), the second term becomes
 \begin{align}
 -\overline{Y}_{\alpha,0} \frac{\d U}{\d t} &= \frac{\overline{Y}_{\alpha,0} \, U(t) }{\tau_{mix}}
 \end{align}
@@ -244,7 +259,7 @@ For the special case where the initial unmixed fraction is set to unity and the 
 
 \subsubsection{Future Work}
 
-Discussion on the extension of the partially-stirred reactor model to include multiple environments as a way to model subgrid variance is included in Appendix~{\ref{multi_env_edc}}.
+Discussion on the extension of the partially-stirred reactor model to include multiple environments as a way to determine the initial unmixed fraction (as opposed to specifying it, as we do currently) is included in Appendix~{\ref{multi_env_edc}}.
 
 \subsection{Reaction Time Scale Model}
 \label{sec:reac_time_scale}
