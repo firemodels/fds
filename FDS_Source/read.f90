@@ -9016,7 +9016,7 @@ SUBROUTINE PROC_CTRL
 
 USE CONTROL_VARIABLES
 USE DEVICE_VARIABLES, ONLY: N_DEVC,DEVICE
-LOGICAL :: CONSTANT_SPECIFIED
+LOGICAL :: CONSTANT_SPECIFIED,TSF_WARNING=.FALSE.
 INTEGER :: NC,NN,NNN
 TYPE (CONTROL_TYPE), POINTER :: CF=>NULL()
 
@@ -9024,6 +9024,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
 
    CF => CONTROL(NC)
    CONSTANT_SPECIFIED = .FALSE.
+   IF (CF%CONTROL_INDEX== TIME_DELAY) TSF_WARNING=.TRUE.
    ! setup input array
 
    CF%N_INPUTS = 0
@@ -9052,8 +9053,13 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
    CALL ChkMemErr('READ','CF%INPUT',IZERO)
    ALLOCATE (CF%INPUT_TYPE(CF%N_INPUTS),STAT=IZERO)
    CALL ChkMemErr('READ','CF%INPUT_TYPE',IZERO)
+   CF%INPUT_TYPE = -1
    
-   BUILD_INPUT: DO NN = 1, CF%N_INPUTS
+   BUILD_INPUT: DO NN = 1, CF%N_INPUTS      
+      IF (TRIM(CF%INPUT_ID(NN))==TRIM(CF%ID)) THEN
+         WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' cannot use a control function as an input to itself'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
       IF (CF%INPUT_ID(NN)=='CONSTANT') THEN
          IF (CONSTANT_SPECIFIED) THEN
             WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' can only specify one input as a constant value'
@@ -9068,30 +9074,40 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          CYCLE BUILD_INPUT
       ENDIF
       CTRL_LOOP: DO NNN = 1, N_CTRL
-         IF(CONTROL(NNN)%ID == CF%INPUT_ID(NN)) THEN
+         IF (CONTROL(NNN)%ID == CF%INPUT_ID(NN)) THEN
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = CONTROL_INPUT
             IF (CF%CONTROL_INDEX == CUSTOM) THEN
                WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CUSTOM CTRL ',NC,' cannot have another CTRL as input'
                CALL SHUTDOWN(MESSAGE)
             ENDIF   
-            CYCLE BUILD_INPUT
+            EXIT CTRL_LOOP
          ENDIF
       END DO CTRL_LOOP
       DEVC_LOOP: DO NNN = 1, N_DEVC
-         IF(DEVICE(NNN)%ID == CF%INPUT_ID(NN)) THEN
+         IF (DEVICE(NNN)%ID == CF%INPUT_ID(NN)) THEN
+            IF (DEVICE(NNN)%OUTPUT_INDEX==41 .OR. DEVICE(NNN)%OUTPUT2_INDEX==41) TSF_WARNING=.TRUE.
+            IF (CF%INPUT_TYPE(NN) > 0) THEN
+               WRITE(MESSAGE,'(A,I5,A,I5,A)')  'ERROR: CTRL ',NC,' input ',NN,' is the ID for both a DEVC and a CTRL'
+               CALL SHUTDOWN(MESSAGE)               
+            ENDIF
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = DEVICE_INPUT
-            CYCLE BUILD_INPUT
+            EXIT DEVC_LOOP
          ENDIF
       END DO DEVC_LOOP
+      IF (CF%INPUT_TYPE(NN) > 0) CYCLE BUILD_INPUT
+      WRITE(MESSAGE,'(A,I5,A,A)')  'ERROR: CTRL ',NC,' cannot locate item for input ', TRIM(CF%INPUT_ID(NN))
+      CALL SHUTDOWN(MESSAGE)
       IF (ALL(EVACUATION_ONLY)) CYCLE BUILD_INPUT
-   WRITE(MESSAGE,'(A,I5,A,A)')  'ERROR: CTRL ',NC,' cannot locate item for input ', TRIM(CF%INPUT_ID(NN))
-   CALL SHUTDOWN(MESSAGE)
    END DO BUILD_INPUT
 
 END DO PROC_CTRL_LOOP  
-   
+
+IF (ABS(TIME_SHRINK_FACTOR-1._EB)>TWO_EPSILON_EB) THEN   
+    IF (MYID==0)  WRITE(LU_ERR,'(A)') 'WARNING: One or more time based CTRL functions are being used with TIME_SHRINK_FACTOR'
+ENDIF
+
 END SUBROUTINE PROC_CTRL
    
 
