@@ -1536,7 +1536,7 @@ void initvars(void){
   surfincrement=0,visiso=0;
   isotest=0;
   isolevelindex=0, isolevelindex2=0;
-  pref=101325.,pamb=0.,tamb=288.;
+  pref=101325.,pamb=0.,tamb=293.15;
   ntc_total=0, nspr_total=0, nheat_total=0;
   n_devices=0;
 

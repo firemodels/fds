@@ -680,7 +680,6 @@ void fill_zonedata(int izone_index){
   float PAMB=101325;
   float CP=1004.0;
   float R=0.4*CP/1.4;
-  float TAMB=273.15+20.0;
 
   if(ReadZoneFile==0)return;
   pr0 = zonepr + izone_index*nrooms;
@@ -704,20 +703,20 @@ void fill_zonedata(int izone_index){
     roomi->tu=tu0[i]+273.15;
     roomi->itl=getZoneColor(tl0[i],zonemin,zonemax,nrgb_full);
     roomi->itu=getZoneColor(tu0[i],zonemin,zonemax,nrgb_full);
-    roomi->rho_L=PAMB/R/roomi->tl;
-    roomi->rho_U=PAMB/R/roomi->tu;
+    roomi->rho_L=(pref+pr0[i])/R/roomi->tl;
+    roomi->rho_U=(pref+pr0[i])/R/roomi->tu;
     if(zoneodl!=NULL)roomi->od_L=1.0/MAX(odl0[i],0.0001);
     if(zoneodu!=NULL)roomi->od_U=1.0/MAX(odu0[i],0.0001);
   }
   roomi=roominfo+nrooms;
   roomi->pfloor=0.0;
   roomi->ylay=99999.0;
-  roomi->tl=TAMB;
-  roomi->tu=TAMB;
-  roomi->itl=getZoneColor(TAMB-273.15,zonemin,zonemax,nrgb_full);
-  roomi->itu=getZoneColor(TAMB-273.15,zonemin,zonemax,nrgb_full);
-  roomi->rho_L=PAMB/R/roomi->tl;
-  roomi->rho_U=PAMB/R/roomi->tu;
+  roomi->tl=tamb;
+  roomi->tu=tamb;
+  roomi->itl=getZoneColor(tamb-273.15,zonemin,zonemax,nrgb_full);
+  roomi->itu=getZoneColor(tamb-273.15,zonemin,zonemax,nrgb_full);
+  roomi->rho_L=(pref+pamb)/R/roomi->tl;
+  roomi->rho_U=(pref+pamb)/R/roomi->tu;
   roomi->z0=0.0;
   roomi->z1=100000.0;
 }
