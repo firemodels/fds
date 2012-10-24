@@ -7,7 +7,7 @@
 ! appeared in an ACM publication and it is subject to their algorithms policy,
 ! see the comments at the start of the DCDFLIB in ieva.f90.
 !
-! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2011
+! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2012
 !
 !!!!!!!!!!!!!!
 !
@@ -44,10 +44,10 @@ MODULE EVAC
        EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE, NPC_EVAC, N_HOLES, &
        EVACUATION_TYPE, EVAC_HOLE_TYPE, EVAC_EVACS, EVAC_HOLES, N_CO_EXITS, N_DOOR_MESHES, N_STRS
   PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM, EMESH_NFIELDS, &
-       EMESH_INDEX, EVAC_FDS6, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, EVAC_EMESH_STAIRS_TYPE, EMESH_STAIRS
+       EMESH_INDEX, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, EVAC_EMESH_STAIRS_TYPE, EMESH_STAIRS
   PUBLIC NO_EVAC_MESHES, INPUT_EVAC_GRIDS
   !
-  CHARACTER(255):: EVAC_VERSION = '2.4.1'
+  CHARACTER(255):: EVAC_VERSION = '2.5.0'
   CHARACTER(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
 
@@ -386,7 +386,7 @@ MODULE EVAC
   INTEGER, DIMENSION(:), ALLOCATABLE :: NTT_Evac
   !
   !
-  LOGICAL :: NOT_RANDOM, EVAC_FDS6=.TRUE., L_FALLING_MODEL=.FALSE.
+  LOGICAL :: NOT_RANDOM, L_FALLING_MODEL=.FALSE.
   INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR, MAX_HUMANS_DIM, SMOKE_KS_SPEED_FUNCTION, &
              FED_ACTIVITY
   REAL(EB) :: EVAC_MASS_EXTINCTION_COEFF
@@ -488,7 +488,7 @@ CONTAINS
     LOGICAL :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, EXIT_SIGN, KEEP_XY, USE_V0, SHOW, COUNT_DENSITY, GLOBAL
     LOGICAL :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, OUTPUT_DENSITY, OUTPUT_ANGLE, &
          OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE, OUTPUT_ACCELERATION, OUTPUT_NERVOUSNESS, &
-         LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ, ELEVATOR
+         LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ, ELEVATOR, EVAC_FDS6
     !Issue1547: Added new output keyword for the PERS namelist, here is the definition
     !Issue1547: of the variable (OUTPUT_NERVOUSNES) that is needed by Fortran.
     INTEGER, DIMENSION(3) :: RGB, AVATAR_RGB
@@ -806,7 +806,6 @@ CONTAINS
           XB(6) = EMESH_XB(6,EMESH_EXITS(N_TMP)%EMESH)
           ! 
           ! Save the information needed in READ_MESH, etc.
-          IF (DEFINE_MESH .AND. .NOT.EVAC_FDS6) N_DOOR_MESHES = N_DOOR_MESHES + 1
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the exit line index (including count only ones)
           EMESH_EXITS(N_TMP)%IOR         = IOR
           EMESH_EXITS(N_TMP)%IS_EXIT     = .TRUE.
@@ -930,7 +929,6 @@ CONTAINS
           XB(6) = EMESH_XB(6,EMESH_EXITS(N_TMP)%EMESH)
           ! 
           ! Save the information needed in READ_MESH, etc.
-          IF (DEFINE_MESH .AND. .NOT.EVAC_FDS6) N_DOOR_MESHES = N_DOOR_MESHES + 1
           ! Default, for "no flow field" exits
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the door line index (including all doors)
           EMESH_EXITS(N_TMP)%IOR         = IOR
@@ -1075,7 +1073,10 @@ CONTAINS
             END IF
             READ(LU_INPUT,NML=PERS,END=221,ERR=222,IOSTAT=IOS)
             NPC_PERS = NPC_PERS + 1
-222         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with PERS line')
+222         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with PERS line number ',NPC_PERS+1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_PERS_LOOP
 221      REWIND(LU_INPUT)
          IF (COLOR_METHOD == 3) EVAC_AVATAR_NCOLOR = NPC_PERS + 1
@@ -1096,7 +1097,10 @@ CONTAINS
                EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
             END IF
             !
-220         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with EVAC line')
+220         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVAC line number ',NPC_EVAC+1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_EVAC_LOOP
 219      REWIND(LU_INPUT)
          !
@@ -1118,7 +1122,10 @@ CONTAINS
             END IF
             IF (COUNT_DENSITY) COUNT_ONLY=.TRUE.
             IF (COUNT_ONLY) N_CO_EXITS = N_CO_EXITS + 1
-224         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with EXIT line')
+224         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EXIT line number ',N_EXITS+1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_EXITS_LOOP
 223      REWIND(LU_INPUT)
          !
@@ -1135,7 +1142,10 @@ CONTAINS
             IF (COLOR_METHOD == 4) THEN
                EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
             END IF
-226         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with DOOR line')
+226         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with DOOR line number ',N_DOORS + 1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_DOORS_LOOP
 225      REWIND(LU_INPUT)
          !
@@ -1154,7 +1164,10 @@ CONTAINS
             IF (COLOR_METHOD == 0 .AND. (MAX_FLOW >= TWO_EPSILON_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) THEN
                EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
             END IF
-228         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with ENTR line')
+228         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with ENTR line number ',N_ENTRYS + 1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_ENTRYS_LOOP
 227      REWIND(LU_INPUT)
          !
@@ -1168,7 +1181,10 @@ CONTAINS
             END IF
             READ(LU_INPUT,NML=CORR,END=229,ERR=230,IOSTAT=IOS)
             N_CORRS = N_CORRS + 1
-230         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with CORR line')
+230         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with CORR line number ',N_CORRS + 1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_CORRS_LOOP
 229      REWIND(LU_INPUT)
          !
@@ -1182,7 +1198,10 @@ CONTAINS
             END IF
             READ(LU_INPUT,NML=EVHO,END=231,ERR=232,IOSTAT=IOS)
             N_HOLES = N_HOLES + 1
-232         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with EVHO line')
+232         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVHO line number ',N_HOLES + 1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_EVHO_LOOP
 231      REWIND(LU_INPUT)
          !
@@ -1196,7 +1215,10 @@ CONTAINS
             END IF
             READ(LU_INPUT,NML=EVSS,END=233,ERR=234,IOSTAT=IOS)
             N_SSTANDS = N_SSTANDS + 1
-234         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with EVSS line')
+234         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVSS line number ',N_SSTANDS + 1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_EVSS_LOOP
 233      REWIND(LU_INPUT)
          !
@@ -1210,7 +1232,10 @@ CONTAINS
             END IF
             READ(LU_INPUT,NML=STRS,END=235,ERR=236,IOSTAT=IOS)
             N_STRS = N_STRS + 1
-236         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with STRS line')
+236         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with STRS line number ',N_STRS + 1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_STRS_LOOP
 235      REWIND(LU_INPUT)
          !
@@ -1224,7 +1249,10 @@ CONTAINS
             END IF
             READ(LU_INPUT,NML=EDEV,END=237,ERR=238,IOSTAT=IOS)
             N_EDEV = N_EDEV + 1
-238         IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with EDEV line')
+238         IF (IOS > 0) THEN
+               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EDEV line number ',N_EDEV + 1
+               CALL SHUTDOWN(MESSAGE)
+            END IF
          END DO COUNT_EDEV_LOOP
 237      REWIND(LU_INPUT)
 
@@ -1403,7 +1431,7 @@ CONTAINS
       NOISETH     = 0.01_EB
       NOISECM     = 3.0_EB
       NOT_RANDOM  = .FALSE.
-      EVAC_FDS6   = .TRUE.
+      EVAC_FDS6   = .TRUE.  ! The default and only one, fds5 style is not supported anymore
       I_FRIC_SW   = 1
       V_MAX             = 20.0_EB ! m/s
       V_ANGULAR_MAX     = 8.0_EB  ! rps
@@ -1599,6 +1627,10 @@ CONTAINS
             END IF
             READ(LU_INPUT,PERS,END=24,IOSTAT=IOS)
 
+            IF (.NOT.EVAC_FDS6) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: PERS ',TRIM(ID),' EVAC_FDS6=F is not anymore supported.'
+               CALL SHUTDOWN(MESSAGE)
+            END IF
             ! IMO MSC.1/Circ. 1238, ANNEX 2, Table 3.4, uniform distributions for velocity
             SELECT CASE (TRIM(DEFAULT_PROPERTIES))
             CASE ('IMO_Male<30','imo_male<30','IMO_MALE<30','IMO_MaleCrew','imo_malecrew','IMO_MALECREW')
@@ -3331,7 +3363,7 @@ CONTAINS
          STRP%ID          = ID
          STRP%XB          = XB
          ii = 0
-         IF (EVAC_FDS6 .AND. TRIM(MESH_ID) == 'null') THEN
+         IF (TRIM(MESH_ID) == 'null') THEN
             MESH_ID = 'Emesh_' // TRIM(ID)
          END IF
          STRP_MeshLoop: DO I = 1, NMESHES
@@ -5111,9 +5143,6 @@ CONTAINS
          TRIM(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
     WRITE(LU_EVACOUT,'(A,A)')  ' FDS+Evac Version         : ', TRIM(EVAC_VERSION)
     WRITE(LU_EVACOUT,'(A,i0)')  ' FDS+Evac SVN Revision No.: ', EVAC_MODULE_REV
-    IF (EVAC_FDS6) WRITE(LU_EVACOUT,FMT='(A)') ' **************************'
-    IF (EVAC_FDS6) WRITE(LU_EVACOUT,FMT='(A)') ' FDS+Evac EVAC_FDS6 is true'
-    IF (EVAC_FDS6) WRITE(LU_EVACOUT,FMT='(A)') ' **************************'
 
     WRITE(LU_EVACOUT,FMT='(/A,I2)')  ' FDS+Evac Color_Method    :', COLOR_METHOD
     IF (L_fed_read .OR. L_fed_save) THEN
@@ -5191,69 +5220,64 @@ CONTAINS
              CALL SHUTDOWN(MESSAGE)
           END IF
           ! Do not read old format. Do not read new format, if there the numbers are not: n_egrids, 4, n_corrs, 8 
-          IF (I_FED_FILE_FORMAT>=-1) THEN  
-             IF ( ntmp2 /= 4 .OR. ntmp3 /= n_corrs .OR. ntmp1 >= 0 .OR. ntmp4 /= 8  .OR. &
-                  ntmp5 /= N_DOORS+N_EXITS .OR. ntmp6 /= 4) THEN
-                WRITE (MESSAGE,FMT='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', Restart failed'
-                CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
-             END IF
-          ELSE IF (I_FED_FILE_FORMAT==-2 .OR. I_FED_FILE_FORMAT==-3) THEN  ! version 2.2.2 file format, no doors and exits
+          IF (I_FED_FILE_FORMAT==-3) THEN  ! version 2.2.2 file format, no doors and exits
              IF ( ntmp2 /= 4 .OR. ntmp3 /= n_corrs .OR. ntmp1 >= 0 .OR. ntmp4 /= 8  .OR. &
                   ntmp5 /= 0 .OR. ntmp6 /= 4) THEN
                 WRITE (MESSAGE,FMT='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', Restart failed'
                 CLOSE (LU_EVACFED)
                 CALL SHUTDOWN(MESSAGE)
              END IF
+          ELSE
+             WRITE (MESSAGE,FMT='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', Old FED file format'
+             CLOSE (LU_EVACFED)
+             CALL SHUTDOWN(MESSAGE)
           END IF
           IF (n_egrids_tmp /= n_egrids) THEN
              WRITE(MESSAGE,'(A,2I4,A)') 'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids, ', Restart failed'
              CLOSE (LU_EVACFED)
              CALL SHUTDOWN(MESSAGE)
           END IF
-          EVAC_DEVICES_RESTART: IF (I_FED_FILE_FORMAT==-3) THEN
-             ! Next loop is for evacuation devices (like heat detectors)
-             READ (LU_EVACFED,IOSTAT=IOS) ntmp1
-             IF (IOS/=0) THEN
-                WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error1 for DEVC'
-                CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
-             END IF
-             ALLOCATE(EVAC_DEVICES(MAX(1,ntmp1)), STAT = IZERO)
-             CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','EVAC_DEVICES', IZERO)                
-             WRITE(LU_EVACOUT,'(A,I4)') ' FDS+Evac Number of evacuation devices written to the FED file: ',ntmp1
-             N_DEVC_EVAC = 0
-             DEVC_LOOP: DO I = 1, N_DEVC
-                DV => DEVICE(I)
-                IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP
-                IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP
-                N_DEVC_EVAC = N_DEVC_EVAC + 1
-                EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = DV%ID
-                EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = 0.0_EB
-                EVAC_DEVICES(N_DEVC_EVAC)%CURRENT     = .FALSE.
-                EVAC_DEVICES(N_DEVC_EVAC)%PRIOR       = .FALSE.
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Devc      = I
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = DEVICE_INPUT  ! 1
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
-             END DO DEVC_LOOP
-             CTRL_LOOP: DO I = 1, N_CTRL
-                CV => CONTROL(I)
-                IF (.NOT. CV%EVACUATION) CYCLE CTRL_LOOP
-                N_DEVC_EVAC = N_DEVC_EVAC + 1
-                EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = CV%ID
-                EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = 0.0_EB
-                EVAC_DEVICES(N_DEVC_EVAC)%CURRENT     = .FALSE.
-                EVAC_DEVICES(N_DEVC_EVAC)%PRIOR       = .FALSE.
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Devc      = I
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = CONTROL_INPUT  ! 2
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
-             END DO CTRL_LOOP
-             IF (ntmp1 /= N_DEVC_EVAC) THEN
-                WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error2 for DEVC'
-                CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
-             END IF
-          END IF EVAC_DEVICES_RESTART
+          ! Next loop is for evacuation devices (like heat detectors)
+          READ (LU_EVACFED,IOSTAT=IOS) ntmp1
+          IF (IOS/=0) THEN
+             WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error1 for DEVC'
+             CLOSE (LU_EVACFED)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          ALLOCATE(EVAC_DEVICES(MAX(1,ntmp1)), STAT = IZERO)
+          CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','EVAC_DEVICES', IZERO)                
+          WRITE(LU_EVACOUT,'(A,I4)') ' FDS+Evac Number of evacuation devices written to the FED file: ',ntmp1
+          N_DEVC_EVAC = 0
+          DEVC_LOOP: DO I = 1, N_DEVC
+             DV => DEVICE(I)
+             IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP
+             IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP
+             N_DEVC_EVAC = N_DEVC_EVAC + 1
+             EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = DV%ID
+             EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = 0.0_EB
+             EVAC_DEVICES(N_DEVC_EVAC)%CURRENT     = .FALSE.
+             EVAC_DEVICES(N_DEVC_EVAC)%PRIOR       = .FALSE.
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Devc      = I
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = DEVICE_INPUT  ! 1
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
+          END DO DEVC_LOOP
+          CTRL_LOOP: DO I = 1, N_CTRL
+             CV => CONTROL(I)
+             IF (.NOT. CV%EVACUATION) CYCLE CTRL_LOOP
+             N_DEVC_EVAC = N_DEVC_EVAC + 1
+             EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = CV%ID
+             EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = 0.0_EB
+             EVAC_DEVICES(N_DEVC_EVAC)%CURRENT     = .FALSE.
+             EVAC_DEVICES(N_DEVC_EVAC)%PRIOR       = .FALSE.
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Devc      = I
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = CONTROL_INPUT  ! 2
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
+          END DO CTRL_LOOP
+          IF (ntmp1 /= N_DEVC_EVAC) THEN
+             WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error2 for DEVC'
+             CLOSE (LU_EVACFED)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
 
           ! Position the FED file at the correct position, i.e., at the restart point.
           ! The FED file might have some time points after the restart time, because
@@ -5313,68 +5337,41 @@ CONTAINS
                    CALL SHUTDOWN(MESSAGE)
                 END IF
              END DO CORR_LOOP
-             IF (I_FED_FILE_FORMAT>=-1) THEN  ! no doors and exits for version 2.2.2
-                DOOR_LOOP: DO I = 1, N_DOORS
-                   READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4
-                   IF (IOS/=0) THEN
-                      WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error'
-                      CLOSE (LU_EVACFED)
-                      CALL SHUTDOWN(MESSAGE)
-                   END IF
-                END DO DOOR_LOOP
-                EXIT_LOOP: DO I = 1, N_EXITS
-                   IF (EVAC_EXITS(I)%COUNT_ONLY) CYCLE EXIT_LOOP
-                   READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4
-                   IF (IOS/=0) THEN
-                      WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error'
-                      CLOSE (LU_EVACFED)
-                      CALL SHUTDOWN(MESSAGE)
-                   END IF
-                END DO EXIT_LOOP
+             READ (LU_EVACFED,IOSTAT=IOS) ntmp1
+             IF (IOS/=0) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error3 for DEVC'
+                CLOSE (LU_EVACFED)
+                CALL SHUTDOWN(MESSAGE)
              END IF
-             New_Format_m3: IF (I_FED_FILE_FORMAT==-3) THEN
-                READ (LU_EVACFED,IOSTAT=IOS) ntmp1
+             n_devc_read = ntmp1
+             DO I = 1, n_devc_read
+                READ (LU_EVACFED,IOSTAT=IOS) ntmp3, DEVC_ID
                 IF (IOS/=0) THEN
-                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error3 for DEVC'
+                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error4 for DEVC'
                    CLOSE (LU_EVACFED)
                    CALL SHUTDOWN(MESSAGE)
                 END IF
-                n_devc_read = ntmp1
-                DO I = 1, n_devc_read
-                   READ (LU_EVACFED,IOSTAT=IOS) ntmp3, DEVC_ID
-                   IF (IOS/=0) THEN
-                      WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error4 for DEVC'
-                      CLOSE (LU_EVACFED)
-                      CALL SHUTDOWN(MESSAGE)
-                   END IF
-                   READ (LU_EVACFED,IOSTAT=IOS) ntmp1, ntmp2, CURRENT_STATE, PRIOR_STATE, tmpout1
-                   IF (IOS /= 0 .OR. ntmp1 > N_DEVC_EVAC) THEN
-                      WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error5 for DEVC'
-                      CLOSE (LU_EVACFED)
-                      CALL SHUTDOWN(MESSAGE)
-                   END IF
-                   j = ntmp1
-                   IF (ntmp2 /= EVAC_DEVICES(j)%I_Devc .OR. TRIM(DEVC_ID) /= TRIM(EVAC_DEVICES(j)%DEVC_ID) .OR. &
-                        ntmp3 /= EVAC_DEVICES(j)%I_Type) THEN
-                      WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error6 for DEVC'
-                      CLOSE (LU_EVACFED)
-                      CALL SHUTDOWN(MESSAGE)
-                   END IF
-                   EVAC_DEVICES(j)%T_Change = tmpout1
-                   EVAC_DEVICES(j)%CURRENT = CURRENT_STATE
-                   EVAC_DEVICES(j)%PRIOR = PRIOR_STATE
-                END DO
-             END IF New_Format_m3
+                READ (LU_EVACFED,IOSTAT=IOS) ntmp1, ntmp2, CURRENT_STATE, PRIOR_STATE, tmpout1
+                IF (IOS /= 0 .OR. ntmp1 > N_DEVC_EVAC) THEN
+                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error5 for DEVC'
+                   CLOSE (LU_EVACFED)
+                   CALL SHUTDOWN(MESSAGE)
+                END IF
+                j = ntmp1
+                IF (ntmp2 /= EVAC_DEVICES(j)%I_Devc .OR. TRIM(DEVC_ID) /= TRIM(EVAC_DEVICES(j)%DEVC_ID) .OR. &
+                     ntmp3 /= EVAC_DEVICES(j)%I_Type) THEN
+                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error6 for DEVC'
+                   CLOSE (LU_EVACFED)
+                   CALL SHUTDOWN(MESSAGE)
+                END IF
+                EVAC_DEVICES(j)%T_Change = tmpout1
+                EVAC_DEVICES(j)%CURRENT = CURRENT_STATE
+                EVAC_DEVICES(j)%PRIOR = PRIOR_STATE
+             END DO
           END DO TIME_LOOP
 324       CONTINUE
 
           WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', TRIM(FN_EVACFED), ' is calculated and used'
-          IF (I_FED_FILE_FORMAT==-3) &
-               WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.3.0)'
-          IF (I_FED_FILE_FORMAT==-2) &
-               WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.2.2)'
-          IF (I_FED_FILE_FORMAT==-1) &
-               WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version <= 2.2.1)'
        END IF FED_SAVE_RESTART
        ! 
        FED_READ_RESTART: IF (L_fed_read) THEN
@@ -5413,13 +5410,7 @@ CONTAINS
                 CLOSE (LU_EVACEFF)
                 CALL SHUTDOWN(MESSAGE)
              END IF
-             IF (.NOT.EVAC_FDS6 .AND. N_EGRIDS_TMP /= COUNT(EVACUATION_ONLY)) THEN
-                WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps, Restart: EFF ',n_egrids_tmp, COUNT(EVACUATION_ONLY)
-                CLOSE (LU_EVACEFF)
-                CALL SHUTDOWN(MESSAGE)
-             END IF
-             IF (EVAC_FDS6 .AND. N_EGRIDS_TMP /= SUM(EMESH_NFIELDS)) THEN
-                ! EMESH_NFIELDS(N_EGRIDS) ! How many fields for this main evacuation mesh
+             IF (N_EGRIDS_TMP /= SUM(EMESH_NFIELDS)) THEN
                 WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps, Restart: EFF ',N_EGRIDS_TMP, SUM(EMESH_NFIELDS)
                 CLOSE (LU_EVACEFF)
                 CALL SHUTDOWN(MESSAGE)
@@ -5448,13 +5439,7 @@ CONTAINS
              WRITE(LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
              CLOSE (LU_EVACEFF)
           END IF
-          IF (.NOT.EVAC_FDS6 .AND. N_EGRIDS_TMP /= COUNT(EVACUATION_ONLY) .AND. IOS < 1) THEN
-             IOS = 2
-             WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, COUNT(EVACUATION_ONLY)
-             WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
-             CLOSE (LU_EVACEFF)
-          END IF
-          IF (EVAC_FDS6 .AND. N_EGRIDS_TMP /=  SUM(EMESH_NFIELDS) .AND. IOS < 1) THEN
+          IF (N_EGRIDS_TMP /=  SUM(EMESH_NFIELDS) .AND. IOS < 1) THEN
              IOS = 2
              WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, SUM(EMESH_NFIELDS)
              WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
@@ -5484,83 +5469,71 @@ CONTAINS
           ntmp3 = N_CORRS
           ! Corrs: save for both XB1 and XB2 (if only XB, XB2 is then zeros)
           ntmp4 = 8
-          IF (I_FED_FILE_FORMAT>=-1) THEN
-             ntmp5 = N_DOORS+N_EXITS
-          ELSE
-             ntmp5 = 0
-          END IF
+          ntmp5 = 0
           ntmp6 = 4
           n_egrids_tmp = n_egrids
           WRITE (LU_EVACFED) ntmp1
           WRITE (LU_EVACFED) n_egrids_tmp, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6
-          EVAC_DEVICES_IF: IF (I_FED_FILE_FORMAT==-3) THEN
-             N_DEVC_EVAC = 0
-             DEVC_LOOP_WRITE: DO I = 1, N_DEVC
-                DV => DEVICE(I)
-                IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP_WRITE
-                IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP_WRITE
-                N_DEVC_EVAC = N_DEVC_EVAC + 1
-             END DO DEVC_LOOP_WRITE
-             CTRL_LOOP_WRITE: DO I = 1, N_CTRL
-                CV => CONTROL(I)
-                IF (.NOT. CV%EVACUATION) CYCLE CTRL_LOOP_WRITE
-                N_DEVC_EVAC = N_DEVC_EVAC + 1
-             END DO CTRL_LOOP_WRITE
-             ntmp1 = N_DEVC_EVAC
-             WRITE (LU_EVACFED) ntmp1
-             WRITE(LU_EVACOUT,'(A,I4)') ' FDS+Evac Number of evacuation devices written to the FED file: ',N_DEVC_EVAC
-             ALLOCATE(EVAC_DEVICES(MAX(1,N_DEVC_EVAC)), STAT = IZERO)
-             CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','EVAC_DEVICES', IZERO)                
-             N_DEVC_EVAC = 0
-             DEVC_LOOP_WRITE_2: DO I = 1, N_DEVC
-                DV => DEVICE(I)
-                IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP_WRITE_2
-                IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP_WRITE_2
-                N_DEVC_EVAC = N_DEVC_EVAC + 1
-                EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = DV%ID
-                EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = DV%T_CHANGE
-                EVAC_DEVICES(N_DEVC_EVAC)%CURRENT     = DV%CURRENT_STATE
-                EVAC_DEVICES(N_DEVC_EVAC)%PRIOR       = DV%PRIOR_STATE
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Devc      = I
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = DEVICE_INPUT  ! 1
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
-             END DO DEVC_LOOP_WRITE_2
-             CTRL_LOOP_WRITE_2: DO I = 1, N_CTRL
-                CV => CONTROL(I)
-                IF (.NOT. DV%EVACUATION) CYCLE CTRL_LOOP_WRITE_2
-                N_DEVC_EVAC = N_DEVC_EVAC + 1
-                EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = CV%ID
-                EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = CV%T_CHANGE
-                EVAC_DEVICES(N_DEVC_EVAC)%CURRENT     = CV%CURRENT_STATE
-                EVAC_DEVICES(N_DEVC_EVAC)%PRIOR       = CV%PRIOR_STATE
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Devc      = I
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = CONTROL_INPUT  ! 2
-                EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
-             END DO CTRL_LOOP_WRITE_2
-             ! Check the inputs for the EDEV namelist array EVAC_EDEV(1:N_EDEV)
-             EDEV_LOOP: DO I = 1, N_EDEV
-                EDV => EVAC_EDEV(I)
-                EDV%INPUT_DEVC_INDEX(:) = 0
-                INPUTS_LOOP: DO J = 1, EDV%N_INPUTS
-                   DEVICES_LOOP: DO K = 1, N_DEVC_EVAC
-                      IF (TRIM(EDV%INPUT_ID(J)) == TRIM(EVAC_DEVICES(K)%DEVC_ID)) THEN
-                         EDV%INPUT_DEVC_INDEX(J) = K
-                         CYCLE INPUTS_LOOP
-                      END IF
-                   END DO DEVICES_LOOP
-                   WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',I,' input ',TRIM(EDV%INPUT_ID(J)),' is not found'
-                   CALL SHUTDOWN(MESSAGE)
-                END DO INPUTS_LOOP
-             END DO EDEV_LOOP
-          END IF EVAC_DEVICES_IF
+          N_DEVC_EVAC = 0
+          DEVC_LOOP_WRITE: DO I = 1, N_DEVC
+             DV => DEVICE(I)
+             IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP_WRITE
+             IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP_WRITE
+             N_DEVC_EVAC = N_DEVC_EVAC + 1
+          END DO DEVC_LOOP_WRITE
+          CTRL_LOOP_WRITE: DO I = 1, N_CTRL
+             CV => CONTROL(I)
+             IF (.NOT. CV%EVACUATION) CYCLE CTRL_LOOP_WRITE
+             N_DEVC_EVAC = N_DEVC_EVAC + 1
+          END DO CTRL_LOOP_WRITE
+          ntmp1 = N_DEVC_EVAC
+          WRITE (LU_EVACFED) ntmp1
+          WRITE(LU_EVACOUT,'(A,I4)') ' FDS+Evac Number of evacuation devices written to the FED file: ',N_DEVC_EVAC
+          ALLOCATE(EVAC_DEVICES(MAX(1,N_DEVC_EVAC)), STAT = IZERO)
+          CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','EVAC_DEVICES', IZERO)                
+          N_DEVC_EVAC = 0
+          DEVC_LOOP_WRITE_2: DO I = 1, N_DEVC
+             DV => DEVICE(I)
+             IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP_WRITE_2
+             IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP_WRITE_2
+             N_DEVC_EVAC = N_DEVC_EVAC + 1
+             EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = DV%ID
+             EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = DV%T_CHANGE
+             EVAC_DEVICES(N_DEVC_EVAC)%CURRENT     = DV%CURRENT_STATE
+             EVAC_DEVICES(N_DEVC_EVAC)%PRIOR       = DV%PRIOR_STATE
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Devc      = I
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = DEVICE_INPUT  ! 1
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
+          END DO DEVC_LOOP_WRITE_2
+          CTRL_LOOP_WRITE_2: DO I = 1, N_CTRL
+             CV => CONTROL(I)
+             IF (.NOT. DV%EVACUATION) CYCLE CTRL_LOOP_WRITE_2
+             N_DEVC_EVAC = N_DEVC_EVAC + 1
+             EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = CV%ID
+             EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = CV%T_CHANGE
+             EVAC_DEVICES(N_DEVC_EVAC)%CURRENT     = CV%CURRENT_STATE
+             EVAC_DEVICES(N_DEVC_EVAC)%PRIOR       = CV%PRIOR_STATE
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Devc      = I
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = CONTROL_INPUT  ! 2
+             EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
+          END DO CTRL_LOOP_WRITE_2
+          ! Check the inputs for the EDEV namelist array EVAC_EDEV(1:N_EDEV)
+          EDEV_LOOP: DO I = 1, N_EDEV
+             EDV => EVAC_EDEV(I)
+             EDV%INPUT_DEVC_INDEX(:) = 0
+             INPUTS_LOOP: DO J = 1, EDV%N_INPUTS
+                DEVICES_LOOP: DO K = 1, N_DEVC_EVAC
+                   IF (TRIM(EDV%INPUT_ID(J)) == TRIM(EVAC_DEVICES(K)%DEVC_ID)) THEN
+                      EDV%INPUT_DEVC_INDEX(J) = K
+                      CYCLE INPUTS_LOOP
+                   END IF
+                END DO DEVICES_LOOP
+                WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',I,' input ',TRIM(EDV%INPUT_ID(J)),' is not found'
+                CALL SHUTDOWN(MESSAGE)
+             END DO INPUTS_LOOP
+          END DO EDEV_LOOP
 
           WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', TRIM(FN_EVACFED), ' is calculated and used'
-          IF (I_FED_FILE_FORMAT==-3) &
-               WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.3.1)'
-          IF (I_FED_FILE_FORMAT==-2) &
-               WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.2.2)'
-          IF (I_FED_FILE_FORMAT==-1) &
-               WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version <= 2.2.1)'
        END IF FED_SAVE
        ! 
        FED_READ: IF (L_fed_read) THEN
@@ -5580,68 +5553,48 @@ CONTAINS
                 CALL SHUTDOWN(MESSAGE)
              END IF
              I_FED_FILE_FORMAT = ntmp1
-             IF ( I_FED_FILE_FORMAT >= 0 ) THEN
-                ! Old format (version 1.10)
-                n_egrids_tmp = ntmp1
-             ELSE
-                ! New format (version 1.11)
-                READ (LU_EVACFED,Iostat=ios) n_egrids_tmp, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6
-                IF (ios/=0) THEN
-                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR'
-                   CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
-                END IF
+             IF (I_FED_FILE_FORMAT/=-3) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR, WRONG FORAT FOR FED FILE'
+                CLOSE (LU_EVACFED)
+                CALL SHUTDOWN(MESSAGE)
+             END IF
+             ! New format (version 1.11)
+             READ (LU_EVACFED,Iostat=ios) n_egrids_tmp, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6
+             IF (ios/=0) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR'
+                CLOSE (LU_EVACFED)
+                CALL SHUTDOWN(MESSAGE)
              END IF
 
              ! Do not read old format. Do not read new format, if there the numbers are not: n_egrids, 4, n_corrs, 8 
-             IF (I_FED_FILE_FORMAT>=-1) THEN  
-                IF ( ntmp2 /= 4 .OR. ntmp3 /= n_corrs .OR. ntmp1 >= 0 .OR. ntmp4 /= 8  .OR. &
-                     ntmp5 /= N_DOORS+N_EXITS .OR. ntmp6 /= 4) THEN
-                   WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', FED and soot not used'
-                   l_fed_read = .FALSE.
-                   l_fed_save = .FALSE.
-                   I_EVAC = IBCLR(I_EVAC,3) ! do not read FED
-                   I_EVAC = IBCLR(I_EVAC,1) ! do not save FED
-                   CLOSE (LU_EVACFED)
-                END IF
-             ELSE IF (I_FED_FILE_FORMAT==-2 .OR. I_FED_FILE_FORMAT==-3) THEN  ! version 2.2.2 file format, no doors and exits
-                IF ( ntmp2 /= 4 .OR. ntmp3 /= n_corrs .OR. ntmp1 >= 0 .OR. ntmp4 /= 8  .OR. &
-                     ntmp5 /= 0 .OR. ntmp6 /= 4) THEN
-                   WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', FED and soot not used'
-                   l_fed_read = .FALSE.
-                   l_fed_save = .FALSE.
-                   I_EVAC = IBCLR(I_EVAC,3) ! do not read FED
-                   I_EVAC = IBCLR(I_EVAC,1) ! do not save FED
-                   CLOSE (LU_EVACFED)
-                END IF
+             IF ( ntmp2 /= 4 .OR. ntmp3 /= n_corrs .OR. ntmp1 >= 0 .OR. ntmp4 /= 8  .OR. &
+                  ntmp5 /= 0 .OR. ntmp6 /= 4) THEN
+                WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', FED and soot not used'
+                l_fed_read = .FALSE.
+                l_fed_save = .FALSE.
+                I_EVAC = IBCLR(I_EVAC,3) ! do not read FED
+                I_EVAC = IBCLR(I_EVAC,1) ! do not save FED
+                CLOSE (LU_EVACFED)
              END IF
              IF (n_egrids_tmp /= n_egrids) THEN
                 WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids
                 CLOSE (LU_EVACFED)
                 CALL SHUTDOWN(MESSAGE)
              END IF
-             IF (I_FED_FILE_FORMAT==-3) THEN
-                ! Next is for evacuation devices (like heat detectors)
-                READ (LU_EVACFED,IOSTAT=IOS) ntmp1
-                IF (IOS/=0) THEN
-                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error1 for DEVC'
-                   CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
-                END IF
-                N_DEVC_EVAC = ntmp1
-                WRITE(LU_EVACOUT,'(A,I4)') ' FDS+Evac Number of evacuation devices in the FED file: ',N_DEVC_EVAC
-                ALLOCATE(EVAC_DEVICES(MAX(1,N_DEVC_EVAC)), STAT = IZERO)
-                CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','EVAC_DEVICES', IZERO)                
+             ! Next is for evacuation devices (like heat detectors)
+             READ (LU_EVACFED,IOSTAT=IOS) ntmp1
+             IF (IOS/=0) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error1 for DEVC'
+                CLOSE (LU_EVACFED)
+                CALL SHUTDOWN(MESSAGE)
              END IF
+             N_DEVC_EVAC = ntmp1
+             WRITE(LU_EVACOUT,'(A,I4)') ' FDS+Evac Number of evacuation devices in the FED file: ',N_DEVC_EVAC
+             ALLOCATE(EVAC_DEVICES(MAX(1,N_DEVC_EVAC)), STAT = IZERO)
+             CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','EVAC_DEVICES', IZERO)                
 
              IF (l_fed_read .OR. l_fed_save) THEN
                 WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', TRIM(FN_EVACFED), ' is used'
-                IF (I_FED_FILE_FORMAT==-3) &
-                     WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.3.1)'
-                IF (I_FED_FILE_FORMAT==-2) &
-                     WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.2.2)'
-                IF (I_FED_FILE_FORMAT==-1) &
-                     WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version <= 2.2.1)'
              END IF
           END IF NO_FED_AT_DISK
        END IF FED_READ
@@ -5663,13 +5616,7 @@ CONTAINS
                 WRITE(LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
                 CLOSE (LU_EVACEFF)
              END IF
-             IF (.NOT.EVAC_FDS6 .AND. N_EGRIDS_TMP /= COUNT(EVACUATION_ONLY) .AND. IOS < 1) THEN
-                IOS = 2
-                WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, COUNT(EVACUATION_ONLY)
-                WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
-                CLOSE (LU_EVACEFF)
-             END IF
-             IF (EVAC_FDS6 .AND. N_EGRIDS_TMP /= SUM(EMESH_NFIELDS) .AND. IOS < 1) THEN
+             IF (N_EGRIDS_TMP /= SUM(EMESH_NFIELDS) .AND. IOS < 1) THEN
                 IOS = 2
                 WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, SUM(EMESH_NFIELDS)
                 WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
@@ -5786,23 +5733,17 @@ CONTAINS
        N_END = N_EXITS - N_CO_EXITS + N_DOORS
        ReadEffLoop: DO NM = 1, NMESHES
           EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM)) THEN
-             IF (EVAC_FDS6 .AND. .NOT. EVACUATION_GRID(NM)) CYCLE ReadEffLoop
+             IF (.NOT. EVACUATION_GRID(NM)) CYCLE ReadEffLoop
              MFF=>MESHES(NM)
-             IF (EVAC_FDS6) THEN
-                NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM))
-             ELSE
-                NFIELDS = 1
-             END IF
+             NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM))
              DO IFIELD = 1, NFIELDS
 
-                IF (EVAC_FDS6) THEN
-                   LOOP_EXITS: DO JJ = 1, N_END
-                      IF (EMESH_EXITS(JJ)%MAINMESH == NM .AND. EMESH_EXITS(JJ)%I_DOORS_EMESH == IFIELD) THEN
-                         JJ_NOW = JJ
-                         EXIT LOOP_EXITS
-                      END IF
-                   END DO LOOP_EXITS
-                END IF
+                LOOP_EXITS: DO JJ = 1, N_END
+                   IF (EMESH_EXITS(JJ)%MAINMESH == NM .AND. EMESH_EXITS(JJ)%I_DOORS_EMESH == IFIELD) THEN
+                      JJ_NOW = JJ
+                      EXIT LOOP_EXITS
+                   END IF
+                END DO LOOP_EXITS
                 
                 READ (LU_EVACEFF,Iostat=ios) ibar_tmp, jbar_tmp, kbar_tmp
                 IF (IOS /= 0) THEN
@@ -5827,19 +5768,12 @@ CONTAINS
                          CLOSE (LU_EVACEFF)
                          EXIT ReadEffLoop
                       END IF
-                      IF (EVAC_FDS6) THEN
-                         EMESH_EXITS(JJ_NOW)%U_EVAC(I,J) = REAL(u_tmp,EB)
-                         EMESH_EXITS(JJ_NOW)%V_EVAC(I,J) = REAL(v_tmp,EB)
-                         MFF%U(i,j,:) = REAL(u_tmp,EB)
-                         MFF%V(i,j,:) = REAL(v_tmp,EB)
-                         MFF%W(i,j,:) = 0.0_EB
-                         MFF%KRES(i,j,:) = 0.5_EB*SQRT(REAL(u_tmp,EB)**2 + REAL(v_tmp,EB)**2)
-                      ELSE
-                         MFF%U(i,j,:) = REAL(u_tmp,EB)
-                         MFF%V(i,j,:) = REAL(v_tmp,EB)
-                         MFF%W(i,j,:) = 0.0_EB
-                         MFF%KRES(i,j,:) = 0.5_EB*SQRT(REAL(u_tmp,EB)**2 + REAL(v_tmp,EB)**2)
-                      END IF
+                      EMESH_EXITS(JJ_NOW)%U_EVAC(I,J) = REAL(u_tmp,EB)
+                      EMESH_EXITS(JJ_NOW)%V_EVAC(I,J) = REAL(v_tmp,EB)
+                      MFF%U(i,j,:) = REAL(u_tmp,EB)
+                      MFF%V(i,j,:) = REAL(v_tmp,EB)
+                      MFF%W(i,j,:) = 0.0_EB
+                      MFF%KRES(i,j,:) = 0.5_EB*SQRT(REAL(u_tmp,EB)**2 + REAL(v_tmp,EB)**2)
                    END DO
                 END DO
                 MFF%UVW_GHOST(:,1)=-1.E6_EB
@@ -5863,11 +5797,7 @@ CONTAINS
        l_eff_read = .FALSE.
        I_EVAC = IBCLR(I_EVAC,2)  ! do not read EFF
        OPEN (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', status='replace')
-       IF (EVAC_FDS6) THEN
-          n_egrids_tmp = SUM(EMESH_NFIELDS)
-       ELSE
-          n_egrids_tmp = COUNT(EVACUATION_ONLY)
-       END IF
+       n_egrids_tmp = SUM(EMESH_NFIELDS)
        WRITE (LU_EVACEFF) n_egrids_tmp
        WRITE (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', TRIM(FN_EVACEFF), ' is (re)calculated and used'
     END IF
@@ -5965,11 +5895,7 @@ CONTAINS
     CALL ChkMemErr('INIT_EVACUATION','HUMAN_GRID',IZERO)
     !
     CALL POINT_TO_MESH(NM)
-    IF (EVAC_FDS6) THEN
-       NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
-    ELSE
-       NM_SEE = NM
-    END IF
+    NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
     !
     ! Initialise HUMAN_GRID
     !
@@ -6953,171 +6879,85 @@ CONTAINS
           END IF                  ! Calculate and save FED
        END DO CORR_LOOP
 
-       IF (I_FED_FILE_FORMAT > -2) THEN
-          DOOR_LOOP: DO I = 1, N_DOORS
-             !
-             IF (L_FED_SAVE) THEN
-                IF ( EVAC_DOORS(I)%FED_MESH > 0 ) THEN
-                   I1 = EVAC_DOORS(I)%II
-                   J1 = EVAC_DOORS(I)%JJ
-                   K1 = EVAC_DOORS(I)%KK
-                   NOM = EVAC_DOORS(I)%FED_MESH
-                   CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
-                        EVAC_DOORS(I)%FED_CO_CO2_O2,EVAC_DOORS(I)%SOOT_DENS,&
-                        EVAC_DOORS(I)%TMP_G, EVAC_DOORS(I)%RADFLUX, ZZ_GET, FED_ACTIVITY)
-                ELSE
-                   ! No FED_MESH found
-                   EVAC_DOORS(I)%FED_CO_CO2_O2 = 0.0_EB
-                   EVAC_DOORS(I)%SOOT_DENS = 0.0_EB
-                   EVAC_DOORS(I)%TMP_G = 0.0_EB
-                   EVAC_DOORS(I)%RADFLUX = 0.0_EB
-                END IF                ! FED_MESH > 0, i.e. fire grid found
-
-                ! Save FED, SOOT, TEMP(C), and RADFLUX
-                WRITE (LU_EVACFED) &
-                     REAL(EVAC_DOORS(I)%FED_CO_CO2_O2,FB), &
-                     REAL(EVAC_DOORS(I)%SOOT_DENS,FB), &
-                     REAL(EVAC_DOORS(I)%TMP_G,FB), &
-                     REAL(EVAC_DOORS(I)%RADFLUX,FB)
-             ELSE                    ! Read FED from a file
-                ! Read FED, SOOT, TEMP(C), and RADFLUX
-                READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4
-                IF (IOS/=0) THEN
-                   WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error'
-                   CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
-                END IF
-                EVAC_DOORS(I)%FED_CO_CO2_O2 = TMPOUT1
-                EVAC_DOORS(I)%SOOT_DENS = TMPOUT2
-                EVAC_DOORS(I)%TMP_G = TMPOUT3
-                EVAC_DOORS(I)%RADFLUX = TMPOUT4
-             END IF                  ! Calculate and save FED
-          END DO DOOR_LOOP
-
-          EXIT_LOOP: DO I = 1, N_EXITS
-             !
-             ! Do not save/read data for counters.
-             IF (EVAC_EXITS(I)%COUNT_ONLY) CYCLE EXIT_LOOP
-             IF (L_FED_SAVE) THEN
-                IF ( EVAC_EXITS(I)%FED_MESH > 0 ) THEN
-                   I1 = EVAC_EXITS(I)%II
-                   J1 = EVAC_EXITS(I)%JJ
-                   K1 = EVAC_EXITS(I)%KK
-                   NOM = EVAC_EXITS(I)%FED_MESH
-                   CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
-                        EVAC_EXITS(I)%FED_CO_CO2_O2,EVAC_EXITS(I)%SOOT_DENS,&
-                        EVAC_EXITS(I)%TMP_G, EVAC_EXITS(I)%RADFLUX, ZZ_GET, FED_ACTIVITY)
-                ELSE
-                   ! No FED_MESH found
-                   EVAC_EXITS(I)%FED_CO_CO2_O2 = 0.0_EB
-                   EVAC_EXITS(I)%SOOT_DENS = 0.0_EB
-                   EVAC_EXITS(I)%TMP_G = 0.0_EB
-                   EVAC_EXITS(I)%RADFLUX = 0.0_EB
-                END IF                ! FED_MESH > 0, i.e. fire grid found
-
-                ! Save FED, SOOT, TEMP(C), and RADFLUX
-                WRITE (LU_EVACFED) &
-                     REAL(EVAC_EXITS(I)%FED_CO_CO2_O2,FB), &
-                     REAL(EVAC_EXITS(I)%SOOT_DENS,FB), &
-                     REAL(EVAC_EXITS(I)%TMP_G,FB), &
-                     REAL(EVAC_EXITS(I)%RADFLUX,FB)
-             ELSE                    ! Read FED from a file
-                ! Read FED, SOOT, TEMP(C), and RADFLUX
-                READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4
-                IF (IOS/=0) THEN
-                   WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error'
-                   CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
-                END IF
-                EVAC_EXITS(I)%FED_CO_CO2_O2 = TMPOUT1
-                EVAC_EXITS(I)%SOOT_DENS = TMPOUT2
-                EVAC_EXITS(I)%TMP_G = TMPOUT3
-                EVAC_EXITS(I)%RADFLUX = TMPOUT4
-             END IF                  ! Calculate and save FED
-          END DO EXIT_LOOP
-       END IF
-
-       EDEVICES_IN_FED: IF (I_FED_FILE_FORMAT == -3) THEN
-          EDEV_FED_SAVE: IF (L_FED_SAVE) THEN
-             ! Next loop is for evacuation devices (like heat detectors)
-             N_DEVC_WRITE_TMP = 0
-             DEVC_LOOP: DO I = 1, N_DEVC_EVAC
-                IF (EVAC_DEVICES(I)%CURRENT .NEQV. EVAC_DEVICES(I)%PRIOR .OR. ICYC==1) THEN
-                   N_DEVC_WRITE_TMP = N_DEVC_WRITE_TMP + 1
-                END IF
-             END DO DEVC_LOOP
-             WRITE (LU_EVACFED) N_DEVC_WRITE_TMP
-             DEVC_LOOP_2: DO I = 1, N_DEVC_EVAC
-                IF (EVAC_DEVICES(I)%CURRENT .NEQV. EVAC_DEVICES(I)%PRIOR .OR. ICYC==1) THEN
-                   N_DEVC_WRITE_TMP = EVAC_DEVICES(I)%I_Devc
-                   N_TMP = I
-                   N_TMP2 = EVAC_DEVICES(I)%I_Type
-                   WRITE (LU_EVACFED) N_TMP2, EVAC_DEVICES(I)%DEVC_ID
-                   WRITE (LU_EVACFED) N_TMP, N_DEVC_WRITE_TMP, EVAC_DEVICES(I)%CURRENT, &
-                        EVAC_DEVICES(I)%PRIOR, REAL(EVAC_DEVICES(I)%T_Change,FB)
-                   EVAC_DEVICES(I)%PRIOR = EVAC_DEVICES(I)%CURRENT
-                   EVAC_DEVICES(I)%USE_NOW = .TRUE.
-                END IF
-             END DO DEVC_LOOP_2
-          ELSE  ! Read evacuation devices info from the FED file
-             READ (LU_EVACFED,IOSTAT=IOS) N_DEVC_WRITE_TMP
-             IF (IOS/=0 .OR. N_DEVC_WRITE_TMP > N_DEVC_EVAC) THEN
-                WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error1 for DEVC'
+       EDEV_FED_SAVE: IF (L_FED_SAVE) THEN
+          ! Next loop is for evacuation devices (like heat detectors)
+          N_DEVC_WRITE_TMP = 0
+          DEVC_LOOP: DO I = 1, N_DEVC_EVAC
+             IF (EVAC_DEVICES(I)%CURRENT .NEQV. EVAC_DEVICES(I)%PRIOR .OR. ICYC==1) THEN
+                N_DEVC_WRITE_TMP = N_DEVC_WRITE_TMP + 1
+             END IF
+          END DO DEVC_LOOP
+          WRITE (LU_EVACFED) N_DEVC_WRITE_TMP
+          DEVC_LOOP_2: DO I = 1, N_DEVC_EVAC
+             IF (EVAC_DEVICES(I)%CURRENT .NEQV. EVAC_DEVICES(I)%PRIOR .OR. ICYC==1) THEN
+                N_DEVC_WRITE_TMP = EVAC_DEVICES(I)%I_Devc
+                N_TMP = I
+                N_TMP2 = EVAC_DEVICES(I)%I_Type
+                WRITE (LU_EVACFED) N_TMP2, EVAC_DEVICES(I)%DEVC_ID
+                WRITE (LU_EVACFED) N_TMP, N_DEVC_WRITE_TMP, EVAC_DEVICES(I)%CURRENT, &
+                     EVAC_DEVICES(I)%PRIOR, REAL(EVAC_DEVICES(I)%T_Change,FB)
+                EVAC_DEVICES(I)%PRIOR = EVAC_DEVICES(I)%CURRENT
+                EVAC_DEVICES(I)%USE_NOW = .TRUE.
+             END IF
+          END DO DEVC_LOOP_2
+       ELSE  ! Read evacuation devices info from the FED file
+          READ (LU_EVACFED,IOSTAT=IOS) N_DEVC_WRITE_TMP
+          IF (IOS/=0 .OR. N_DEVC_WRITE_TMP > N_DEVC_EVAC) THEN
+             WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error1 for DEVC'
+             CLOSE (LU_EVACFED)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          N_DEVC_WRITE = N_DEVC_WRITE_TMP
+          DEVC_LOOP_3: DO I = 1, N_DEVC_WRITE
+             READ (LU_EVACFED,IOSTAT=IOS) N_TMP2, DEVC_ID
+             IF (IOS/=0) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error2 for DEVC'
                 CLOSE (LU_EVACFED)
                 CALL SHUTDOWN(MESSAGE)
              END IF
-             N_DEVC_WRITE = N_DEVC_WRITE_TMP
-             DEVC_LOOP_3: DO I = 1, N_DEVC_WRITE
-                READ (LU_EVACFED,IOSTAT=IOS) N_TMP2, DEVC_ID
-                IF (IOS/=0) THEN
-                   WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error2 for DEVC'
-                   CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
-                END IF
-                READ (LU_EVACFED,IOSTAT=IOS) N_DEVC_WRITE_TMP, N_TMP, CURRENT_STATE, PRIOR_STATE, T_TMP
-                IF (IOS /= 0 .OR. N_DEVC_WRITE_TMP > N_DEVC_EVAC) THEN
-                   WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error3 for DEVC'
-                   CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
-                END IF
-                j = N_DEVC_WRITE_TMP
-                IF (ICYC==1) THEN
-                   EVAC_DEVICES(I)%DEVC_ID = TRIM(DEVC_ID)
-                   EVAC_DEVICES(I)%I_Devc = N_TMP
-                   EVAC_DEVICES(I)%I_Type = N_TMP2
-                   EVAC_DEVICES(I)%I_Devc_Evac = j
-                END IF
-                IF (N_TMP /= EVAC_DEVICES(j)%I_Devc .OR. TRIM(DEVC_ID) /= EVAC_DEVICES(j)%DEVC_ID .OR. &
-                     N_TMP2 /= EVAC_DEVICES(j)%I_Type) THEN
-                   WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error4 for DEVC'
-                   CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
-                END IF
-                T_CHANGE = T_TMP
-                EVAC_DEVICES(j)%T_Change = T_CHANGE
-                EVAC_DEVICES(j)%CURRENT = CURRENT_STATE
-                EVAC_DEVICES(j)%PRIOR = PRIOR_STATE
-                EVAC_DEVICES(I)%USE_NOW = .TRUE.
-             END DO DEVC_LOOP_3
-             IF (ICYC==1) THEN
-                ! Check the inputs for the EDEV namelist array EVAC_EDEV(1:N_EDEV)
-                EDEV_LOOP: DO I = 1, N_EDEV
-                   EDV => EVAC_EDEV(I)
-                   EDV%INPUT_DEVC_INDEX(:) = 0
-                   INPUTS_LOOP: DO J = 1, EDV%N_INPUTS
-                      DEVICES_LOOP: DO K = 1, N_DEVC_EVAC
-                         IF (TRIM(EDV%INPUT_ID(J)) == TRIM(EVAC_DEVICES(K)%DEVC_ID)) THEN
-                            EDV%INPUT_DEVC_INDEX(J) = K
-                            CYCLE INPUTS_LOOP
-                         END IF
-                      END DO DEVICES_LOOP
-                      WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',I,' input ',TRIM(EDV%INPUT_ID(J)),' is not found'
-                      CALL SHUTDOWN(MESSAGE)
-                   END DO INPUTS_LOOP
-                END DO EDEV_LOOP
+             READ (LU_EVACFED,IOSTAT=IOS) N_DEVC_WRITE_TMP, N_TMP, CURRENT_STATE, PRIOR_STATE, T_TMP
+             IF (IOS /= 0 .OR. N_DEVC_WRITE_TMP > N_DEVC_EVAC) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error3 for DEVC'
+                CLOSE (LU_EVACFED)
+                CALL SHUTDOWN(MESSAGE)
              END IF
-          END IF EDEV_FED_SAVE
-       END IF EDEVICES_IN_FED
+             j = N_DEVC_WRITE_TMP
+             IF (ICYC==1) THEN
+                EVAC_DEVICES(I)%DEVC_ID = TRIM(DEVC_ID)
+                EVAC_DEVICES(I)%I_Devc = N_TMP
+                EVAC_DEVICES(I)%I_Type = N_TMP2
+                EVAC_DEVICES(I)%I_Devc_Evac = j
+             END IF
+             IF (N_TMP /= EVAC_DEVICES(j)%I_Devc .OR. TRIM(DEVC_ID) /= EVAC_DEVICES(j)%DEVC_ID .OR. &
+                  N_TMP2 /= EVAC_DEVICES(j)%I_Type) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error4 for DEVC'
+                CLOSE (LU_EVACFED)
+                CALL SHUTDOWN(MESSAGE)
+             END IF
+             T_CHANGE = T_TMP
+             EVAC_DEVICES(j)%T_Change = T_CHANGE
+             EVAC_DEVICES(j)%CURRENT = CURRENT_STATE
+             EVAC_DEVICES(j)%PRIOR = PRIOR_STATE
+             EVAC_DEVICES(I)%USE_NOW = .TRUE.
+          END DO DEVC_LOOP_3
+          IF (ICYC==1) THEN
+             ! Check the inputs for the EDEV namelist array EVAC_EDEV(1:N_EDEV)
+             EDEV_LOOP: DO I = 1, N_EDEV
+                EDV => EVAC_EDEV(I)
+                EDV%INPUT_DEVC_INDEX(:) = 0
+                INPUTS_LOOP: DO J = 1, EDV%N_INPUTS
+                   DEVICES_LOOP: DO K = 1, N_DEVC_EVAC
+                      IF (TRIM(EDV%INPUT_ID(J)) == TRIM(EVAC_DEVICES(K)%DEVC_ID)) THEN
+                         EDV%INPUT_DEVC_INDEX(J) = K
+                         CYCLE INPUTS_LOOP
+                      END IF
+                   END DO DEVICES_LOOP
+                   WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',I,' input ',TRIM(EDV%INPUT_ID(J)),' is not found'
+                   CALL SHUTDOWN(MESSAGE)
+                END DO INPUTS_LOOP
+             END DO EDEV_LOOP
+          END IF
+       END IF EDEV_FED_SAVE
 
        IF (L_FED_SAVE) DEALLOCATE(ZZ_GET)
 
@@ -7152,41 +6992,30 @@ CONTAINS
 
     L_EFF_READ = BTEST(I_EVAC,2)
     L_EFF_SAVE = BTEST(I_EVAC,0)
-    !IF ( ICYC == 0 .AND. L_EFF_SAVE ) THEN
-    IF ((.NOT.EVAC_FDS6 .AND. ICYC == 0 .AND. L_EFF_SAVE ) .OR. (EVAC_FDS6 .AND. ICYC == 1 .AND. L_EFF_SAVE)) THEN
+    IF (ICYC == 1 .AND. L_EFF_SAVE) THEN
        N_END = N_EXITS - N_CO_EXITS + N_DOORS
        WRITE_EFF_LOOP: DO NM_TIM = 1, NMESHES
           EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM_TIM)) THEN
-             IF (EVAC_FDS6 .AND. .NOT. EVACUATION_GRID(NM_TIM)) CYCLE WRITE_EFF_LOOP
+             IF (.NOT. EVACUATION_GRID(NM_TIM)) CYCLE WRITE_EFF_LOOP
              MFF=>MESHES(NM_TIM)
              IBAR_TMP = MFF%IBAR
              JBAR_TMP = MFF%JBAR
              KBAR_TMP = 1
-             IF (EVAC_FDS6) THEN
-                NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM_TIM))
-             ELSE
-                NFIELDS = 1
-             END IF
+             NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM_TIM))
              DO IFIELD = 1, NFIELDS
 
-                IF (EVAC_FDS6) THEN
-                   LOOP_EXITS: DO JJ = 1, N_END
-                      IF (EMESH_EXITS(JJ)%MAINMESH == NM_TIM .AND. EMESH_EXITS(JJ)%I_DOORS_EMESH == IFIELD) THEN
-                         JJ_NOW = JJ
-                         EXIT LOOP_EXITS
-                      END IF
-                   END DO LOOP_EXITS
-                END IF
+                LOOP_EXITS: DO JJ = 1, N_END
+                   IF (EMESH_EXITS(JJ)%MAINMESH == NM_TIM .AND. EMESH_EXITS(JJ)%I_DOORS_EMESH == IFIELD) THEN
+                      JJ_NOW = JJ
+                      EXIT LOOP_EXITS
+                   END IF
+                END DO LOOP_EXITS
 
                 WRITE (LU_EVACEFF) IBAR_TMP, JBAR_TMP, KBAR_TMP
                 DO  I = 0, MFF%IBAR+1
                    DO J= 0, MFF%JBAR+1
-                      IF (EVAC_FDS6) THEN
-                         U_TMP = REAL(EMESH_EXITS(JJ_NOW)%U_EVAC(I,J),FB)
-                         V_TMP = REAL(EMESH_EXITS(JJ_NOW)%V_EVAC(I,J),FB)
-                      ELSE
-                         U_TMP = REAL(MFF%U(I,J,1),FB) ; V_TMP = REAL(MFF%V(I,J,1),FB)
-                      END IF
+                      U_TMP = REAL(EMESH_EXITS(JJ_NOW)%U_EVAC(I,J),FB)
+                      V_TMP = REAL(EMESH_EXITS(JJ_NOW)%V_EVAC(I,J),FB)
                       WRITE (LU_EVACEFF) U_TMP, V_TMP
                    END DO
                 END DO
@@ -7333,11 +7162,7 @@ CONTAINS
     DT_GROUP_DOOR  = TAU_CHANGE_DOOR
     !
     CALL POINT_TO_MESH(NM)
-    IF (EVAC_FDS6) THEN
-       NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
-    ELSE
-       NM_SEE = NM
-    END IF
+    NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
     !
     ! Find the smallest DELTA_X and/or DELTA_Y.  Note: Evac meshes should not be stretched ones.
     DX_MIN = MINVAL(DX)
@@ -10858,32 +10683,27 @@ CONTAINS
       ELSE IF (NM_STRS_MESH) THEN ! If_Strs_Mesh2: In stairs but not straight line to target
          CALL STRS_U_AND_V(STRP,HR%STR_SUB_INDX,HR%X,HR%Y,HR%STRS_DIRECTION,UBAR,VBAR)
       ELSE ! If_Strs_Mesh2: Is not a Strs Mesh
-         If_BeeLine: IF (HR%I_Door_Mode >= 2 .AND. HR%I_TARGET /= 0 .AND. EVAC_FDS6) THEN
+         If_BeeLine: IF (HR%I_Door_Mode >= 2 .AND. HR%I_TARGET /= 0) THEN
             ! Use the flow field by default
-            EVAC_FDS6_IF_1: IF (EVAC_FDS6) THEN
-               N = ABS(HR%I_TARGET)
-               N_END = N_EXITS - N_CO_EXITS + N_DOORS
-               IF (N > N_DOORS) THEN
-                  N = N - N_DOORS  ! The exit line number including also count only exits
-                  JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
-                  IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
-                     write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION' 
-                     write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
-                  END IF
-               ELSE
-                  JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
-                  IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
-                     write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION' 
-                     write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
-                  END IF
+            N = ABS(HR%I_TARGET)
+            N_END = N_EXITS - N_CO_EXITS + N_DOORS
+            IF (N > N_DOORS) THEN
+               N = N - N_DOORS  ! The exit line number including also count only exits
+               JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
+               IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                  write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION' 
+                  write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                END IF
-               ! JJ_NOW = ABS(HR%I_TARGET)  ! 1,....,n_doors+n_exits
-               UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
-               VBAR = (1.0_EB-(YJ-JJ+1))*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ-1) + (YJ-JJ+1)*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)
-            ELSE ! EVAC_FDS6_IF_1
-               UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
-               VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
-            END IF EVAC_FDS6_IF_1
+            ELSE
+               JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
+               IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                  write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION' 
+                  write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+               END IF
+            END IF
+            ! JJ_NOW = ABS(HR%I_TARGET)  ! 1,....,n_doors+n_exits
+            UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
+            VBAR = (1.0_EB-(YJ-JJ+1))*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ-1) + (YJ-JJ+1)*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)
             Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
             IF (HR%I_Door_Mode > 2) Is_XB_Visible = .TRUE.
             IF (HR%I_Door_Mode == 2 .OR. HR%I_Door_Mode == 4) Is_XYZ_Visible = .TRUE.
@@ -11078,53 +10898,48 @@ CONTAINS
             END IF
          ELSE  ! If_BeeLine (or not fds6)
             ! Normal case, use the flow field
-            EVAC_FDS6_IF_2: IF (EVAC_FDS6) THEN
-               N = ABS(HR%I_TARGET)
-               N_END = N_EXITS - N_CO_EXITS + N_DOORS
-               IF (N==0) THEN
-                  DEFAULT_TARGET: DO JJ_NOW = 1, N_END
-                     IF (EMESH_EXITS(JJ_NOW)%MAINMESH == NM .AND. EMESH_EXITS(JJ_NOW)%DEFINE_MESH) THEN
-                        IF (HR%I_Door_Mode < 0 .AND. .NOT.EMESH_EXITS(JJ_NOW)%IS_EXIT) THEN
-                           IF (EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_TYPE == 'Door') THEN
-                              IF (Trim(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%ID) == TRIM(EMESH_EXITS(JJ_NOW)%ID)) &
-                                   CYCLE DEFAULT_TARGET
-                           END IF
+            N = ABS(HR%I_TARGET)
+            N_END = N_EXITS - N_CO_EXITS + N_DOORS
+            IF (N==0) THEN
+               DEFAULT_TARGET: DO JJ_NOW = 1, N_END
+                  IF (EMESH_EXITS(JJ_NOW)%MAINMESH == NM .AND. EMESH_EXITS(JJ_NOW)%DEFINE_MESH) THEN
+                     IF (HR%I_Door_Mode < 0 .AND. .NOT.EMESH_EXITS(JJ_NOW)%IS_EXIT) THEN
+                        IF (EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_TYPE == 'Door') THEN
+                           IF (Trim(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%ID) == TRIM(EMESH_EXITS(JJ_NOW)%ID)) &
+                                CYCLE DEFAULT_TARGET
                         END IF
-                        N = JJ_NOW
-                        EXIT DEFAULT_TARGET
                      END IF
-                  END DO DEFAULT_TARGET
-                  IF (EMESH_EXITS(N)%IS_EXIT) THEN
-                     N = EMESH_EXITS(N)%NEXIT + N_DOORS ! I_Target index
-                  ELSE
-                     N = EMESH_EXITS(N)%NEXIT  ! I_Target index
+                     N = JJ_NOW
+                     EXIT DEFAULT_TARGET
                   END IF
+               END DO DEFAULT_TARGET
+               IF (EMESH_EXITS(N)%IS_EXIT) THEN
+                  N = EMESH_EXITS(N)%NEXIT + N_DOORS ! I_Target index
+               ELSE
+                  N = EMESH_EXITS(N)%NEXIT  ! I_Target index
                END IF
-
-               IF (N > N_DOORS) THEN
-                  N = N - N_DOORS  ! The exit line number including also count only exits
-                  JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
-                  IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
-                     write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
-                     write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
-                  END IF
+            END IF
+            
+            IF (N > N_DOORS) THEN
+               N = N - N_DOORS  ! The exit line number including also count only exits
+               JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
+               IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                  WRITE(LU_ERR,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                  WRITE(LU_ERR,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+               END IF
                ELSEIF (N > 0) THEN
                   JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
                   IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
-                     write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
-                     write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                     WRITE(LU_ERR,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                     WRITE(LU_ERR,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                   END IF
                END IF
                IF (EMESH_EXITS(JJ_NOW)%MAINMESH /= NM) THEN
-                  write(lu_err,*)'*** find direction error: ',JJ_NOW,NM, &
+                  WRITE(LU_ERR,*)'*** find direction error: ',JJ_NOW,NM, &
                        EMESH_EXITS(JJ_NOW)%MAINMESH,' ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                END IF
                UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
                VBAR = (1.0_EB-(YJ-JJ+1))*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ-1) + (YJ-JJ+1)*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)
-            ELSE ! EVAC_FDS6_IF_2
-               UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
-               VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
-            END IF EVAC_FDS6_IF_2
          END IF If_BeeLine
       END IF If_Strs_Mesh2
 
@@ -14600,12 +14415,8 @@ CONTAINS
     TYPE (MESH_TYPE), POINTER :: M =>NULL(), MFF =>NULL()
 
     M   => MESHES(NM)
-    IF (EVAC_FDS6) THEN
-       NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
-       MFF => MESHES(NM_SEE)
-    ELSE
-       MFF => MESHES(NM)
-    END IF
+    NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
+    MFF => MESHES(NM_SEE)
 
     See_door = .TRUE.  ! Default
     ave_K = 0.0_EB
@@ -15726,7 +15537,7 @@ CONTAINS
        IF (imode < 2) I_Target = -i_tmp
     END IF
     IF (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target
-    IF ( (i_new_ffield /= i_old_ffield) .OR. (imode == 0) .OR. (EVAC_FDS6 .AND. (I_Target /= I_Old_Target))) THEN
+    IF ( (i_new_ffield /= i_old_ffield) .OR. (imode == 0) .OR. (I_Target /= I_Old_Target)) THEN
        ! Change the field of this group/agent.
        IF ( j == 0 ) THEN
           ! Group index=0: 'lost souls' or lonely agents
