@@ -1608,7 +1608,6 @@ SUBROUTINE DIVERGENCE_PART_2(NM)
 ! Finish computing the divergence of the flow, D, and then compute its time derivative, DDDT
 
 USE COMP_FUNCTIONS, ONLY: SECOND
-USE EVAC, ONLY: EVAC_FDS6
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
 REAL(EB) :: USUM_ADD(N_ZONE)
@@ -1683,8 +1682,7 @@ ENDDO
 
 PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
-   IF (EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE PRESSURE_ZONE_LOOP
-   IF (.NOT. EVAC_FDS6 .AND. EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE PRESSURE_ZONE_LOOP
 
    IF (PREDICTOR) D_PBAR_DT_P => D_PBAR_DT_S
    IF (CORRECTOR) D_PBAR_DT_P => D_PBAR_DT
@@ -1891,7 +1889,7 @@ SUBROUTINE DIVERGENCE_PART_1_EVAC(T,NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6, N_EXITS, N_CO_EXITS, N_DOORS
+USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, N_EXITS, N_CO_EXITS, N_DOORS
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 
 ! Compute contributions to the divergence term for evacuation meshes
@@ -1936,14 +1934,14 @@ DP = 0._EB
 
 ! Evacuation flow field calculation: Change the outflow vent pressure zone and initialize everything
 
-EVACUATION_ZONE_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6 .AND. PREDICTOR) THEN
+EVACUATION_ZONE_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. PREDICTOR) THEN
    ITMP = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
    EVACUATION_NEW_FIELD: IF (MOD(ICYC-1,ITMP) == 0 .AND. ICYC < 0) THEN
       ! New exit/door flow field calculation (new outflow-vent), do the necessary initializaions,
       ! because same arrays are used for exits/doors at a main evacuation mesh.  Each evacuation
       ! flow field calculation has just one exit/door, i.e., outflow vent, so the pressure zone
       ! is defined so that the front of the door is in the pressure zone.  So, pressure zone
-      ! is also redefined for this main evacuation mesh. (New FDS 6 formalism, EVAC_FDS6=.TRUE.)
+      ! is also redefined for this main evacuation mesh.
       ! One pressure zone is defined for each main evacuation mesh.
 
       I_VENT = 0
@@ -2087,7 +2085,6 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                      WC%ONE_D%UWS = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%RDN)
                END SELECT
             ENDIF NEUMANN_IF
-            IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
             IF (WC%VENT_INDEX>0) THEN 
                VT=>VENTS(WC%VENT_INDEX)
@@ -2110,7 +2107,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                         WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                   END SELECT
                ENDIF
-               EVAC_FDS6_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6) THEN
+               EVACUATION_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM)) THEN
                   II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
                   IF ((ABS(ICYC)+1) > (WC%VENT_INDEX-1)*II .AND. (ABS(ICYC)+1) <= WC%VENT_INDEX*II) THEN
                      TSI = T + DT - (MAXVAL(EMESH_NFIELDS)-WC%VENT_INDEX)*II*EVAC_DT_FLOWFIELD
@@ -2119,7 +2116,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                      TIME_RAMP_FACTOR = 0.0_EB
                   END IF
                   WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
-               END IF EVAC_FDS6_IF
+               END IF EVACUATION_IF
             ENDIF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
             II = WC%ONE_D%II
@@ -2163,8 +2160,7 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
    PSUM(IPZ,NM) = 0._EB
    ZONE_VOLUME  = 0._EB
 
-   IF (EVAC_FDS6 .AND. EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE PRESSURE_ZONE_LOOP
-   IF (.NOT.EVAC_FDS6 .AND. EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
+   IF (EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE PRESSURE_ZONE_LOOP
    IF (.NOT.P_ZONE(IPZ)%EVACUATION) CYCLE PRESSURE_ZONE_LOOP
    RTRM=1._EB
 
