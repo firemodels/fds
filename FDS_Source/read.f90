@@ -3595,8 +3595,8 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       END DO
 
       SS%C_P_L(0) = SS%C_P_L(1)
-      SS%H_L(0) = SS%H_L(1)
-      
+      SS%H_L(0) = SS%H_L(1) - SS%C_P_L(1)
+
       ! Adjust liquid H_L to force H_V at H_V_REFERENCE_TEMPERATURE
 
       IF(SS%HEAT_OF_VAPORIZATION > 0._EB) H_V = SS%HEAT_OF_VAPORIZATION
@@ -3618,7 +3618,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
             SS%C_P_L_BAR(J) = SS%H_L(J) / REAL(J,EB)
          ENDIF
       ENDDO         
-      
+
       SS%H_V(0) = SS%H_V(1)  
       SS%C_P_L_BAR(0) = SS%H_L(1)
       
