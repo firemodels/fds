@@ -29,6 +29,15 @@ char  viewports_revision[]="$Revision$";
 void Get_VP_info(void){
   int doit;
 
+
+  // full screen viewport dimensions
+
+  VP_fullscreen.left = 0;
+  VP_fullscreen.down = 0;
+  VP_fullscreen.width = screenWidth;
+  VP_fullscreen.height = screenHeight;
+  VP_info.doit = 1;
+
   // INFO viewport dimensions
 
   doit=0;
@@ -139,7 +148,7 @@ void Get_VP_info(void){
  /* ------------------------ SUB_portortho ------------------------- */
  
 int SUB_portortho(int quad, 
-                   GLint port_left, GLint port_down, GLsizei port_width, GLsizei port_height,
+                  portdata *p,
                    GLdouble portx_left, GLdouble portx_right, GLdouble portx_down, GLdouble portx_top,
                    GLint screen_left, GLint screen_down
                    ){
@@ -154,11 +163,11 @@ int SUB_portortho(int quad,
 
   switch (quad){
   case 0:            
-    port_pixel_width = port_width;
-    port_pixel_height = port_height;
+    port_pixel_width = p->width;
+    port_pixel_height = p->height;
     port_unit_width = portx_right - portx_left;
     port_unit_height = portx_top - portx_down;
-    glViewport(port_left,port_down,port_width,port_height);
+    glViewport(p->left,p->down,p->width,p->height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(portx_left,portx_right,portx_down,portx_top);
@@ -172,21 +181,21 @@ int SUB_portortho(int quad,
     subwindow_down = irow*screenHeight;
     subwindow_top = subwindow_down + screenHeight;
 
-    port_right = port_left + port_width;
-    port_top = port_down + port_height;
+    port_right = p->left + p->width;
+    port_top = p->down + p->height;
 
-    subport_left =  MAX( nrender_rows*port_left,subwindow_left);
+    subport_left =  MAX( nrender_rows*p->left,subwindow_left);
     subport_right = MIN(nrender_rows*port_right,subwindow_right);
-    subport_down =  MAX( nrender_rows*port_down,subwindow_down);
+    subport_down =  MAX( nrender_rows*p->down,subwindow_down);
     subport_top =   MIN(  nrender_rows*port_top,subwindow_top);
     if(subport_left>=subport_right||subport_down>=subport_top)return 0;
 
 #define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
 
-    subportx_left = CONV(subport_left,nrender_rows*port_left,nrender_rows*port_right,portx_left,portx_right);
-    subportx_right = CONV(subport_right,nrender_rows*port_left,nrender_rows*port_right,portx_left,portx_right);
-    subportx_down = CONV(subport_down,nrender_rows*port_down,nrender_rows*port_top,portx_down,portx_top);
-    subportx_top = CONV(subport_top,nrender_rows*port_down,nrender_rows*port_top,portx_down,portx_top);
+    subportx_left = CONV(subport_left,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_right = CONV(subport_right,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_down = CONV(subport_down,nrender_rows*p->down,nrender_rows*port_top,portx_down,portx_top);
+    subportx_top = CONV(subport_top,nrender_rows*p->down,nrender_rows*port_top,portx_down,portx_top);
 
     subport_left -= icol*screenWidth;
     subport_right -= icol*screenWidth;
@@ -215,7 +224,7 @@ int SUB_portortho(int quad,
 /* ------------------------ SUB_portfrustum ------------------------- */
  
 int SUB_portfrustum(int quad, 
-                   GLint port_left, GLint port_down, GLsizei port_width, GLsizei port_height,
+                   portdata *p,
                    GLdouble portx_left, GLdouble portx_right, 
                    GLdouble portx_down, GLdouble portx_top,
                    GLdouble portx_near, GLdouble portx_far,
@@ -231,11 +240,11 @@ int SUB_portfrustum(int quad,
 
   switch (quad){
   case 0:
-    port_pixel_width = port_width;
-    port_pixel_height = port_height;
+    port_pixel_width = p->width;
+    port_pixel_height = p->height;
     port_unit_width = portx_right - portx_left;
     port_unit_height = portx_top - portx_down;
-    glViewport(port_left,port_down,port_width,port_height);
+    glViewport(p->left,p->down,p->width,p->height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     if(camera_current->projection_type==0){
@@ -260,19 +269,19 @@ int SUB_portfrustum(int quad,
     subwindow_down = irow*screenHeight;
     subwindow_top = subwindow_down + screenHeight;
 
-    port_right = port_left + port_width;
-    port_top = port_down + port_height;
+    port_right = p->left + p->width;
+    port_top = p->down + p->height;
 
-    subport_left =  MAX( nrender_rows*port_left,subwindow_left);
+    subport_left =  MAX( nrender_rows*p->left,subwindow_left);
     subport_right = MIN(nrender_rows*port_right,subwindow_right);
-    subport_down =  MAX( nrender_rows*port_down,subwindow_down);
+    subport_down =  MAX( nrender_rows*p->down,subwindow_down);
     subport_top =   MIN(  nrender_rows*port_top,subwindow_top);
     if(subport_left>=subport_right||subport_down>=subport_top)return 0;
 
-    subportx_left = CONV(subport_left,nrender_rows*port_left,nrender_rows*port_right,portx_left,portx_right);
-    subportx_right = CONV(subport_right,nrender_rows*port_left,nrender_rows*port_right,portx_left,portx_right);
-    subportx_down = CONV(subport_down,nrender_rows*port_down,nrender_rows*port_top,portx_down,portx_top);
-    subportx_top = CONV(subport_top,nrender_rows*port_down,nrender_rows*port_top,portx_down,portx_top);
+    subportx_left = CONV(subport_left,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_right = CONV(subport_right,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_down = CONV(subport_down,nrender_rows*p->down,nrender_rows*port_top,portx_down,portx_top);
+    subportx_top = CONV(subport_top,nrender_rows*p->down,nrender_rows*port_top,portx_down,portx_top);
 
     subport_left -= icol*screenWidth;
     subport_right -= icol*screenWidth;
@@ -321,7 +330,7 @@ void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
   x_down=0.0;
   x_top=screenHeight;
 
-  if(SUB_portortho(quad,0,0,screenWidth,screenHeight,x_left, x_right, x_down, x_top,screen_left, screen_down)==0)return;
+  if(SUB_portortho(quad,&VP_fullscreen,x_left, x_right, x_down, x_top,screen_left, screen_down)==0)return;
 
    c_left = render_clip_left-3;
    c_right = screenWidth + 3 - render_clip_right;
@@ -386,10 +395,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
   mesh_left=0.9;
   if(fontindex==LARGE_FONT)mesh_left=0.7;
  
-  if(SUB_portortho(quad,
-    port_left,port_down,port_width,port_height,
-    portx_left,portx_right,portx_down,portx_top,
-    screen_left, screen_down)==0)return;
+  if(SUB_portortho(quad,&VP_info,portx_left,portx_right,portx_down,portx_top,screen_left, screen_down)==0)return;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -542,7 +548,7 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   xtemp = 1.0;
   if(screenWidth>=screenHeight)xtemp*=window_aspect_ratio;
 
-  if(SUB_portortho(quad,port_left, port_down, port_width, port_height,portx_left,portx_right,portx_down,portx_top,screen_left,screen_down)==0)return;
+  if(SUB_portortho(quad,&VP_timebar,portx_left,portx_right,portx_down,portx_top,screen_left,screen_down)==0)return;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -687,7 +693,7 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   portx_top = (double)(nrgb+1);
   if(screenWidth<screenHeight)portx_top *= window_aspect_ratio;
 
-  if(SUB_portortho(quad,port_left, port_down, port_width, port_height,portx_left, portx_right, portx_down, portx_top,screen_left, screen_down)==0)return;
+  if(SUB_portortho(quad,&VP_colorbar,portx_left, portx_right, portx_down, portx_top,screen_left, screen_down)==0)return;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -715,7 +721,7 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   portx_down = 0.0;
   portx_top = (double)(window_aspect_ratio);
 
-  if(SUB_portortho(quad,port_left,port_down,port_width,port_height,portx_left,portx_right,portx_down,portx_top,screen_left,screen_down)==0)return;
+  if(SUB_portortho(quad,&VP_title,portx_left,portx_right,portx_down,portx_top,screen_left,screen_down)==0)return;
 
   left=(int)((float)75/(float)(screenWidth-colorbar_width));
   if(screenWidth>=screenHeight)left*=window_aspect_ratio;
@@ -741,7 +747,6 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   float aperture_temp;
   float widthdiv2;
   float eyexINI, eyeyINI, eyezINI;
-  GLint port_left, port_down, port_width, port_height; 
 
   down=0;
   up=screenHeight;
@@ -766,11 +771,6 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   }
   
   aspect=(float)(up-down)/(float)(right-left);
-
-  port_left=(int)(left+titlesafe_offset);
-  port_down=(int)(down+titlesafe_offset);
-  port_width=(int)(right-left-2*titlesafe_offset);
-  port_height=(int)(up-down-2*titlesafe_offset); 
 
   /* set view position for virtual tour */
 
@@ -862,11 +862,9 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     FrustumAsymmetry= -0.5*StereoCameraOffset*fnear/(fzero/xyzmaxdiff);
   }
 
-  if(SUB_portfrustum(quad,port_left,port_down,port_width,port_height,
-    (double)(fleft+FrustumAsymmetry),(double)(fright+FrustumAsymmetry),
-    (double)fdown,(double)fup,
-    (double)fnear,(double)ffar,
-      screen_left, screen_down)==0)return;
+  if(SUB_portfrustum(quad,&VP_scene,
+    (double)(fleft+FrustumAsymmetry),(double)(fright+FrustumAsymmetry),(double)fdown,(double)fup,(double)fnear,(double)ffar,
+    screen_left, screen_down)==0)return;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();

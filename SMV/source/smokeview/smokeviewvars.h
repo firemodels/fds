@@ -24,7 +24,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
-SVEXTERN portdata VP_title, VP_timebar, VP_colorbar, VP_scene, VP_info;
+SVEXTERN portdata VP_fullscreen, VP_title, VP_timebar, VP_colorbar, VP_scene, VP_info;
 SVEXTERN int SVDECL(ini_fed,0),SVDECL(in_external,0);
 SVEXTERN int SVDECL(label_list_index,0);
 SVEXTERN labeldata LABEL_local, *LABEL_global_ptr, LABEL_default;
