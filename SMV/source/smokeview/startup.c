@@ -1441,7 +1441,7 @@ void initvars(void){
   sethazardcolor=0;
   timedrag=0,colordrag=0,colorsplitdrag=0;
   global_changecolorindex=-1;
-  fontindex=0,fontWoffset=0,fontHoffset=0;
+  fontindex=0;
 
   xcenGLOBAL=0.5, ycenGLOBAL=0.5, zcenGLOBAL=0.5;
   xbar=1.0, ybar=1.0, zbar=1.0;
@@ -1680,7 +1680,7 @@ void initvars(void){
   ntargets=0;
   endian_data=0, endian_native=0, setendian=0;
 
-  mainwindow_id=0,dwinWW=dwinW;
+  mainwindow_id=0;
   rendertourcount=0;
 
   static_color[0]=0.0;
@@ -2000,9 +2000,6 @@ void initvars(void){
   buffertype=DOUBLE_BUFFER;
   benchmark=0;
   opengldefined=0;
-
-  dwinHbase=60;
-  dwinH=60;
 
   {
     char version[100];

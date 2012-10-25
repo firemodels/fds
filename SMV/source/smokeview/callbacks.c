@@ -546,8 +546,8 @@ int setup_colorbar_drag(int x, int y){
   int ifactor;
   int state;
 
-  temp = (int)(1.2*dwinH);
-  if(x>screenWidth-dwinWW){
+  temp = (int)(1.2*info_height);
+  if(x>screenWidth-colorbar_width){
     yy = screenHeight - y;
     factor=((float)(yy-temp)/(screenHeight-temp))*((nrgb+(float)1.0)/(nrgb-(float)0.5));
     if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
@@ -588,7 +588,7 @@ int setup_timebar_drag(int x, int y){
     else{
       xleft=xtimeleft;
     }
-    itimes=(int)((xtemp*x/((screenWidth-dwinWW))-xleft)*(nglobal_times-1)/(xtimeright-xleft));
+    itimes=(int)((xtemp*x/((screenWidth-colorbar_width))-xleft)*(nglobal_times-1)/(xtimeright-xleft));
     checktimebound();
     timedrag=1;
     stept=0;
@@ -879,8 +879,8 @@ void drag_colorbar(int xm, int ym){
   int valmax=255;
   int valmin=0;
 
-  temp = (int)(1.2*dwinH);
-  if(xm>screenWidth-dwinWW){
+  temp = (int)(1.2*info_height);
+  if(xm>screenWidth-colorbar_width){
     float yy;
 
     yy = screenHeight - ym;
@@ -907,8 +907,8 @@ void drag_colorbarsplit(int xm, int ym){
   int ifactor;
   float factor;
 
-  temp = (int)(1.2*dwinH);
-  if(xm>screenWidth-dwinWW){
+  temp = (int)(1.2*info_height);
+  if(xm>screenWidth-colorbar_width){
     int ii;
     float yy;
 
@@ -937,7 +937,7 @@ void drag_timebar(int xm, int ym){
   xxleft = xtimeleft;
   if(fontindex==LARGE_FONT)xxleft=xtimeleft+0.11;
   if(screenHeight-ym<50&&nglobal_times>0&&visTimeLabels==1&&showtime==1){
-    itimes=(int)((xtemp*xm/((screenWidth-dwinWW))-xxleft)*(nglobal_times-1)/(xtimeright-xxleft));
+    itimes=(int)((xtemp*xm/((screenWidth-colorbar_width))-xxleft)*(nglobal_times-1)/(xtimeright-xxleft));
     checktimebound();
     timedrag=1;
   }
@@ -950,8 +950,8 @@ void Move_Gen_Slice(int xm, int ym){
   int dxm, dym;
   int screenWidth2, screenHeight2;
 
-  screenWidth2 = screenWidth - dwinWW;
-  screenHeight2 = screenHeight - dwinH;
+  screenWidth2 = screenWidth - colorbar_width;
+  screenHeight2 = screenHeight - info_height;
 
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
@@ -1019,8 +1019,8 @@ void Move_Scene(int xm, int ym){
 
   eye_xyz = camera_current->eye;
   az_elev = camera_current->az_elev;
-  screenWidth2 = screenWidth - dwinWW;
-  screenHeight2 = screenHeight - dwinH;
+  screenWidth2 = screenWidth - colorbar_width;
+  screenHeight2 = screenHeight - info_height;
 
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
@@ -2492,8 +2492,8 @@ void Reshape_CB(int width, int height){
     window_aspect_ratio=1.0/window_aspect_ratio;
   }
   setScreenSize(&width,&height);
-  screenWidth2 = screenWidth - dwinWW;   
-  screenHeight2 = screenHeight - dwinH;
+  screenWidth2 = screenWidth - colorbar_width;   
+  screenHeight2 = screenHeight - info_height;
   windowresized=1;
   update_camera_ypos(camera_external);
   if(strcmp(camera_current->name,"external")==0&&in_external==1){

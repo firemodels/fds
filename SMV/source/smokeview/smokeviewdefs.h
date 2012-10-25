@@ -332,7 +332,6 @@ void _Sniff_Errors(char *whereat);
 #define LABELLEN 30
 #define RenderLABELframenumber 980
 #define RenderLABELtime 979
-#define dwinW 150
 
 #define EXTERIORwallmenu -1
 #define INTERIORwallmenu -2

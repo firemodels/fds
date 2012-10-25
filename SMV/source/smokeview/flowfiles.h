@@ -801,7 +801,6 @@ typedef struct {
   float eye[3], view[3];
 } camviewdata;
 
-
 /* --------------------------  camdata ------------------------------------ */
 
 typedef struct {
@@ -812,6 +811,14 @@ typedef struct {
   camviewdata *camviews;
   char menulabel[128];
 } camdata;
+
+/* --------------------------  camdata ------------------------------------ */
+
+typedef struct {
+GLint left, down, width, height;
+int doit;
+} portdata;
+
 
 /* --------------------------  mousedata ------------------------------------ */
 

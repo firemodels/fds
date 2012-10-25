@@ -225,7 +225,7 @@ void outputBarText(float x, float y, const GLfloat *color, char *string){
   }
   else{
     length=glutBitmapLength(small_font, (const unsigned char *)string); 
-    xlength = length*barright/dwinWW+0.02;
+    xlength = length*barright/colorbar_width+0.02;
 
     xbeg=x-xlength;
     if(xbeg<0.0)xbeg=0.0;

@@ -97,22 +97,32 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 
   if(mode==RENDER){
+    Get_VP_info();
+
     if(clip_rendered_scene==1){
       CLIP_viewport(quad,s_left,s_down);
       SNIFF_ERRORS("after CLIP_viewport");
     }
 
-    BLOCK_viewport(quad,s_left,s_down);
-    SNIFF_ERRORS("after BLOCK_viewport");
+    if(VP_info.doit==1){
+      INFO_viewport(quad,s_left,s_down);
+      SNIFF_ERRORS("after INFO_viewport");
+    }
 
-    TIMEBAR_viewport(quad,s_left,s_down);
-    SNIFF_ERRORS("after TIMEBAR_viewport");
+    if(VP_timebar.doit==1){
+      TIMEBAR_viewport(quad,s_left,s_down);
+      SNIFF_ERRORS("after TIMEBAR_viewport");
+    }
 
-    COLORBAR_viewport(quad,s_left,s_down);
-    SNIFF_ERRORS("after COLORBAR_viewport");
+    if(VP_colorbar.doit==1){
+      COLORBAR_viewport(quad,s_left,s_down);
+      SNIFF_ERRORS("after COLORBAR_viewport");
+    }
 
-    TITLE_viewport(quad,s_left,s_down);
-    SNIFF_ERRORS("after TITLE_viewport");
+    if(VP_title.doit==1){
+      TITLE_viewport(quad,s_left,s_down);
+      SNIFF_ERRORS("after TITLE_viewport");
+    }
 
     Scene_viewport(quad,view_mode,s_left,s_down);
     SNIFF_ERRORS("after Scene_viewport");

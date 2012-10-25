@@ -24,6 +24,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN portdata VP_title, VP_timebar, VP_colorbar, VP_scene, VP_info;
 SVEXTERN int SVDECL(ini_fed,0),SVDECL(in_external,0);
 SVEXTERN int SVDECL(label_list_index,0);
 SVEXTERN labeldata LABEL_local, *LABEL_global_ptr, LABEL_default;
@@ -230,11 +231,7 @@ SVEXTERN int SVDECL(update_fire_line,0);
 SVEXTERN int SVDECL(fire_line_index,-1);
 SVEXTERN int SVDECL(slice_bounds_dialog,1);
 
-SVEXTERN int dwinHbase;
-SVEXTERN int dwinH;
-
 SVEXTERN float xtemp;
-
 
 SVEXTERN char TITLEBASE[1024];
 
@@ -436,7 +433,7 @@ SVEXTERN int sethazardcolor;
 SVEXTERN int mxframepoints;
 SVEXTERN int timedrag,colordrag,colorsplitdrag;
 SVEXTERN int global_changecolorindex;
-SVEXTERN int fontindex,fontWoffset,fontHoffset;
+SVEXTERN int fontindex;
 
 SVEXTERN float xcenGLOBAL, ycenGLOBAL, zcenGLOBAL;
 SVEXTERN float xbar, ybar, zbar;
@@ -714,7 +711,8 @@ SVEXTERN int canrestorelastview;
 SVEXTERN int ntargets;
 SVEXTERN int endian_data, endian_native, setendian;
 
-SVEXTERN int mainwindow_id,dwinWW;
+SVEXTERN int mainwindow_id;
+SVEXTERN int SVDECL(info_width,150),SVDECL(colorbar_width,150),SVDECL(info_height_base,60), SVDECL(info_height,60);
 SVEXTERN int rendertourcount;
 
 #ifdef pp_MEMDEBUG

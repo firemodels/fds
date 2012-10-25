@@ -1233,10 +1233,7 @@ void FontMenu(int value){
     small_font=GLUT_BITMAP_HELVETICA_10;
     large_font_height=12;
     small_font_height=10;
-    fontWoffset=0;
-    fontHoffset=0;
-    dwinH=dwinHbase;
-    dwinH=1.2*dwinHbase;
+    info_height=1.2*info_height_base;
     break;
   case LARGE_FONT:
     fontindex=LARGE_FONT;
@@ -1244,15 +1241,10 @@ void FontMenu(int value){
     small_font=GLUT_BITMAP_HELVETICA_18;
     large_font_height=18;
     small_font_height=18;
-    fontWoffset=0;
-    fontHoffset=0;
-    dwinH=1.2*dwinHbase;
+    info_height=1.2*info_height_base;
     break;
   case SCALED_FONT:
-    fontWoffset=0;
-    fontHoffset=0;
-    dwinH=dwinHbase;
-    dwinH=1.2*dwinHbase;
+    info_height=1.2*info_height_base;
     fontindex=SCALED_FONT; 
     break;
   default:

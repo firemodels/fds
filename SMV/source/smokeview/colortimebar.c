@@ -1069,8 +1069,8 @@ void drawColorBars(void){
 
   labeltop=nrgb+1.0;
 
-  temp = (int)(1.2f*dwinH);
-  dyscreen=screenHeight-temp-fontHoffset-2*titlesafe_offset;
+  temp = (int)(1.2f*info_height);
+  dyscreen=screenHeight-temp-2*titlesafe_offset;
 
   switch (fontindex){
 
