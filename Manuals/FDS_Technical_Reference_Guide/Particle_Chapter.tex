@@ -11,20 +11,21 @@ For a spray, the force term $\bof_b$ in Eq.~(\ref{momentum})
 represents the momentum transferred from the droplets to the gas.
 It is obtained by summing the force transferred from each droplet
 in a grid cell and dividing by the cell volume
-\be {\bof_b} = \ha \frac{\sum \rho C_D \pi  r_d^2 (\bu_d-\bu) |\bu_d-\bu|}
-    {\dx \, \dy \, \dz} \ee
+\be
+    {\bof_b} = \frac{1}{V} \sum_{d\in V} \left[ \ha \rho C_D \pi  r_d^2 (\bu_d-\bu) |\bu_d-\bu| - \frac{\d m_d}{\d t}(\bu_d-\bu) \right]
+\ee
 where $C_D$ is the drag coefficient, $r_d$ is the droplet radius,
 $\bu_d$ is the velocity of the droplet, $\bu$ is the
 velocity of the gas, $\rho$ is the density of the gas,
-and $\dx \, \dy \, \dz$ is the volume of the grid cell.
+and $V = \dx \, \dy \, \dz$ is the volume of the grid cell.
 The acceleration of an individual droplet is governed by the equation
 \be
-    \frac{d}{dt} (m_d \bu_d) = m_d\, \bg - \ha \rho\,C_D \, \pi  r_d^2 \,
-    (\bu_d-\bu) |\bu_d-\bu|
+    \frac{\d \bu_d}{\d t} = \bg - \ha \frac{\rho\,C_D \, \pi  r_d^2}{m_d} \,
+    (\bu_d-\bu) |\bu_d-\bu| - \frac{\bu_d}{m_d} \frac{\d m_d}{\d t}
 \ee
 where $m_d$ is the mass of the droplet.  The trajectory of the droplet is governed by the equation
 \be
-    \frac{d \bx_d}{dt} = \bu_d
+    \frac{\d \bx_d}{\d t} = \bu_d
 \ee
 The drag coefficient (default based on a sphere) is a function of the local Reynolds number (based on droplet diameter)
 \begin{eqnarray}
@@ -145,8 +146,8 @@ and the local gas temperature, $T_g$. If the droplet is attached to a surface, $
 The mass and energy transfer between the gas and the liquid can be described by the
 following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
-\frac{dm_l}{dt}               & =  - A \; h_m \, \rho \, (Y_l - Y_g) \\
-m_l \; c_l \; \frac{dT_l}{dt} & =    A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \label{droplet_temp}   \end{align}
+\frac{\d m_l}{\d t}               & =  - A \; h_m \, \rho \, (Y_l - Y_g) \\
+m_l \; c_l \; \frac{\d T_l}{\d t} & =    A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{\d m_l}{\d t} \; h_v  \label{droplet_temp}   \end{align}
 Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the
 film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
 $\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_s$ is the heat transfer coefficient between the liquid and the
@@ -194,16 +195,16 @@ Note that a few terms have been left out to make the algorithm more clear.
 The equilibrium vapor mass fraction, $Y_l^n$, is a function of $T_l^n$ via
 Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
 \be
-   Y_l^{n+1} \approx Y_l^n + \left( \frac{dY_l}{dT_l} \right)^n \; \Big( T_l^{n+1}-T_l^n \Big)
+   Y_l^{n+1} \approx Y_l^n + \left( \frac{\d Y_l}{\d T_l} \right)^n \; \Big( T_l^{n+1}-T_l^n \Big)
 \ee
 where the derivative of $Y_l$ with respect to temperature is obtained via the chain rule:
 \be
-   \frac{dY_l}{dT_l} = \frac{dY_l}{dX_l} \, \frac{dX_l}{dT_l}  = \frac{W_a/W_l}{ (X_l (1-W_a/W_l) + W_a/W_l)^2 } \;
+   \frac{\d Y_l}{\d T_l} = \frac{\d Y_l}{\d X_l} \, \frac{\d X_l}{\d T_l}  = \frac{W_a/W_l}{ (X_l (1-W_a/W_l) + W_a/W_l)^2 } \;
      \frac{h_v W_l}{{\cal R} \, T_l^2} \, \exp \left[ \frac{h_v \, W_l}{\cal R} \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]
 \ee
 The amount of evaporated liquid is given by
 \be
-   \delta m_l = -\dt \, A \, h_m \, \rho  \left[  Y_l^n + \ha \left( \frac{dY_l}{dT_l} \right)^n \;
+   \delta m_l = -\dt \, A \, h_m \, \rho  \left[  Y_l^n + \ha \left( \frac{\d Y_l}{\d T_l} \right)^n \;
    \Big( T_l^{n+1}-T_l^n \Big)  - Y_g \right]
 \ee
 The amount of heat extracted from the gas is
@@ -296,7 +297,7 @@ a cylindrical, spherical or cartesian coordinate system.
 
 It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation
 equation. For a grid cell with indices $ijk$, the source term is:
-\be (-\nabla\!\cdot \dot{\bq}_r'')_{ijk} = \sum \left[ \kappa_p \left( U_{ijk} - 4 \sigma \, T_p^4 \right) \right] \ee
+\be \dq_{r,ijk}^\ppp \equiv (-\nabla\!\cdot \dot{\bq}_r'')_{ijk} = \sum \left[ \kappa_p \left( U_{ijk} - 4 \sigma \, T_p^4 \right) \right] \ee
 where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
 \be \kappa_p = \frac{A}{4 \, \dx \dy \dz} \ee
 where $A$ is the surface area of the particle and $\dx \dy \dz$ is the volume of the cell.

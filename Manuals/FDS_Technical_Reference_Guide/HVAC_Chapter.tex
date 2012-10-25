@@ -23,7 +23,7 @@ and may have varying area over its length.  The current implementation of the mo
 mass, energy, and momentum (in that order) are:
 \be \sum\limits_{j} \rho_j \, u_j \, A_j = 0   \label{HVACmass} \ee
 \be \sum\limits_{j} \rho_j \, u_j \, A_j \, h_j= 0   \label{HVACenergy} \ee
-\be \rho_j L_j \frac{d u_j}{d t} = \left(P_i - P_k\right)+\left(\rho g \Delta z\right)_j+\Delta P_j - \frac{1}{2}K_j \rho_j \left| u_j \right| u_j  \label{HVACmomentum} \ee
+\be \rho_j L_j \frac{\d u_j}{\d t} = \left(P_i - P_k\right)+\left(\rho g \Delta z\right)_j+\Delta P_j - \frac{1}{2}K_j \rho_j \left| u_j \right| u_j  \label{HVACmomentum} \ee
 where $u$ is the duct velocity, $A$ is the duct area, $h$ is the enthalpy of the fluid in the duct.
 The subscript $j$ indicates a duct segment, the subscripts $i$ and $k$ indicate nodes (where one or more ducts join or where a duct terminates in a compartment).
 $\Delta P$ is a fixed source of momentum (a fan or blower), $L$ is the length of the duct segment, and $K$ is the friction loss of the duct segment.
