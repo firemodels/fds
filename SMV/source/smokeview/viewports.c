@@ -569,40 +569,35 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down, GLsizei s
   GLint temp;
   float xnum;
 
-  if(visColorbarLabels==1&&numColorbars!=0){
-    temp = (int)(1.2f*dwinH);
-    xnum=numColorbars;
-    if(fontindex==LARGE_FONT)xnum*=1.5;
-    if(screenWidth<screenHeight){
-      barright=xnum/3.0+0.1f;
-      if(SUB_portortho(quad,
-        screenWidth-2-dwinWW-fontWoffset-titlesafe_offset,
-        temp+titlesafe_offset,
-        dwinWW,
-        screenHeight-temp-fontHoffset-2*titlesafe_offset,
-        0.,(double)barright,-1.5,(double)(window_aspect_ratio*(nrgb+1)),
-        screen_left, screen_down, screen_width, screen_height)==0){
-          return;
-      }
-    }
-    else{
-      barright=(xnum/3.0+0.1f);
-      if(SUB_portortho(quad,
-        screenWidth-2-dwinWW-fontWoffset-titlesafe_offset,
-        temp+titlesafe_offset,
-        dwinWW,
-        screenHeight-temp-fontHoffset-2*titlesafe_offset,
-        0.,(double)barright,-1.5,(double)(nrgb+1),
-        screen_left, screen_down, screen_width, screen_height)==0){
-        return;
-      }
-    }
+  GLint port_left, port_down, port_width, port_height; 
+  GLdouble portx_left, portx_right, portx_down, portx_top;
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+  if(visColorbarLabels==0||numColorbars==0||(showtime==0&&showplot3d==0))return;
 
-    if( showtime==1 || showplot3d==1)drawColorBars();
-  }
+  xnum=numColorbars;
+  if(fontindex==LARGE_FONT)xnum*=1.5;
+
+  barright=xnum/3.0+0.1f;
+
+  port_left = screenWidth-2-dwinWW-fontWoffset-titlesafe_offset;
+  port_down = (int)(1.2f*dwinH)+titlesafe_offset;
+  port_width = dwinWW;
+  port_height = screen_height-(int)(1.2f*dwinH)-fontHoffset-2*titlesafe_offset;
+
+  portx_left = 0.;
+  portx_right = (double)barright;
+  portx_down = -1.5;
+  portx_top = (double)(nrgb+1);
+  if(screen_width<screen_height)portx_top *= window_aspect_ratio;
+
+  if(SUB_portortho(quad,port_left, port_down, port_width, port_height,
+    portx_left, portx_right, portx_down, portx_top,
+    screen_left, screen_down, screen_width, screen_height)==0)return;
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  drawColorBars();
 }
 
     /* -------------------------- TITLE Viewport -------------------------- */
