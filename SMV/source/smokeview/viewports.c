@@ -399,25 +399,6 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   }
 }
 
-#ifdef pp_MEMDEBUG
-/* ------------------ getMemusage ------------------------ */
-
-void getMemusage(MMsize totalmemory,char *MEMlabel){
-  int size;
-  float rsize;
-
-  if(totalmemory<1000000000){
-    size = totalmemory/1000000;
-    sprintf(MEMlabel,"%i MB",size);
-  }
-  else{
-    rsize = totalmemory/1000000000.0;
-    sprintf(MEMlabel,"%4.2f GB",rsize);
-  }
-
-}
-#endif
-
 /* ------------------------ TIME BAR Viewport ------------------------- */
 
 void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
@@ -662,14 +643,6 @@ void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   ititle=0;
-  if(showtitle2==1){
-    ititle++;
-    outputText(left,(ititle-1)*ratio+textdown, TITLE2);
-  }
-  if(showtitle1==1){
-    ititle++;
-    outputText(left,(ititle-1)*ratio+textdown, TITLE1);
-  }
   if(visTitle0==1){
     ititle++;
     if(visFullTitle==1&&showplot3d==1){
@@ -681,7 +654,7 @@ void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   }
 }
 
-/* ----------------------- 3D scene Viewport ----------------------------- */
+/* ----------------------- Scene_viewport ----------------------------- */
 
 void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
 

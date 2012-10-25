@@ -2325,8 +2325,6 @@ int readsmv(char *file, char *file2){
   if(file!=NULL)NewMemory((void **)&camera_last,sizeof(camera));
  
   updatefaces=1;
-  STRCPY(TITLE1,"");
-  STRCPY(TITLE2,"");
   nfires=0;
   nrooms=0;
 
@@ -5059,32 +5057,6 @@ int readsmv(char *file, char *file2){
       }
       zvi->color=getcolorptr(color);
       CheckMemory;
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ TITLE1 ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"TITLE1")==1){
-      if(fgets(buffer,255,stream)==NULL){
-        BREAK;
-      }
-      bufferptr=trim_string(buffer);
-      strcpy(TITLE1,bufferptr);
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ TITLE2 ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"TITLE2")==1){
-      if(fgets(buffer,255,stream)==NULL){
-        BREAK;
-      }
-      bufferptr=trim_string(buffer);
-      strcpy(TITLE2,bufferptr);
       continue;
     }
   /*

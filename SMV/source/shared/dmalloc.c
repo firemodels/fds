@@ -647,3 +647,22 @@ char *_strcat(char *s1, const char *s2){
   return strcat(s1,s2);
 }
 #endif
+#ifdef pp_MEMDEBUG
+/* ------------------ getMemusage ------------------------ */
+
+void getMemusage(MMsize totalmemory,char *MEMlabel){
+  int size;
+  float rsize;
+
+  if(totalmemory<1000000000){
+    size = totalmemory/1000000;
+    sprintf(MEMlabel,"%i MB",size);
+  }
+  else{
+    rsize = totalmemory/1000000000.0;
+    sprintf(MEMlabel,"%4.2f GB",rsize);
+  }
+
+}
+#endif
+

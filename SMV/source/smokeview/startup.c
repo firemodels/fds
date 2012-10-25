@@ -1763,8 +1763,6 @@ void initvars(void){
   nmenus=0;
   showbuild=0;
 
-  strcpy(TITLE1,"");
-  strcpy(TITLE2,"");
   strcpy(TITLERELEASE,"");
   strcpy(TITLE,"");
   strcpy(FULLTITLE,"");

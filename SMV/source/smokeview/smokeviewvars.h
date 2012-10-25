@@ -768,8 +768,6 @@ SVEXTERN int showbuild;
 SVEXTERN int max_screenWidth, max_screenHeight;
 SVEXTERN int saveW, saveH;
 SVEXTERN char SVDECL(*texturedir,NULL);
-SVEXTERN char TITLE1[1024];
-SVEXTERN char TITLE2[1024];//xxx check
 SVEXTERN char TITLERELEASE[1024];
 SVEXTERN char TITLE[1024];
 SVEXTERN char FULLTITLE[1024];

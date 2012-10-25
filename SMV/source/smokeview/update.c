@@ -290,8 +290,6 @@ void updateShow(void){
   showterrain=0;
   ntitles=0;
   if(visTitle0==1)ntitles++;
-  if(strlen(TITLE1)!=0&&visTitle1==1){ntitles++;showtitle1=1;}
-  if(strlen(TITLE2)!=0&&visTitle2==1){ntitles++;showtitle2=1;}
   visTitle=0;
   if(visTitle0==1||showtitle1==1||showtitle2==1)visTitle=1;
   visTimeSmoke=1; visTimeSlice=1; visTimePatch=1; visTimeZone=1; visTimeIso=1;

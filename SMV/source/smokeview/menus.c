@@ -366,14 +366,6 @@ void LabelMenu(int value){
 void updateshowtitles(void){
   ntitles=0;
   if(visTitle0==1)ntitles++;
-  if(strlen(TITLE1)!=0&&visTitle1==1){
-    ntitles++;
-    showtitle1=1;
-  }
-  if(strlen(TITLE2)!=0&&visTitle2==1){
-    ntitles++;
-    showtitle2=1;
-  }
   visTitle=0;
   if(visTitle0==1||showtitle1==1||showtitle2==1)visTitle=1;
 }
@@ -5623,20 +5615,10 @@ updatemenu=0;
 /* --------------------------------title menu -------------------------- */
 
   ntitles=1;
-  if(strlen(TITLE1)!=0)ntitles++;
-  if(strlen(TITLE2)!=0)ntitles++;
   if(ntitles>1){
     CREATEMENU(titlemenu,TitleMenu);
     if(visTitle0==1)glutAddMenuEntry(_("*Default"),0);
     if(visTitle0==0)glutAddMenuEntry(_("Default"),0);
-    if(strlen(TITLE1)!=0){
-      if(visTitle1==1){glutAddMenuEntry(_("*User title 1"),1);}
-      if(visTitle1==0){glutAddMenuEntry(_("User title 1"),1);}
-    }
-    if(strlen(TITLE2)!=0){
-      if(visTitle2==1){glutAddMenuEntry(_("*User title 2"),2);}
-      if(visTitle2==0){glutAddMenuEntry(_("User title 2"),2);}
-    }
     glutAddMenuEntry(_("Show all"),3);
     glutAddMenuEntry(_("Hide all"),4);
   }
