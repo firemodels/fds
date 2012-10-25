@@ -326,7 +326,7 @@ Note that the rate expression can be dependent upon the local temperature as wel
 \subsubsection{Infinitely Fast Reaction}
 For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_F/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite. The change in fuel is based on the limiting reactant: 
 \begin{equation}\label{eq:stoich_fuel_single}
-\Delta \hat{Y}_{F} = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$, in reaction $n$}
+\Delta \hat{Y}_{F} = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
 
 \subsubsection{Multiple Infinitely Fast Reactions}   
@@ -348,23 +348,23 @@ The limiting change in fuel for the $n$th reaction becomes
 \paragraph{Example: Oxygen-limited, Premixed Methane-Propane Combustion}
 Consider the case where there are two, single step hydrocarbon oxidization reactions:
 \begin{align}
-\mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O} \label{eq:two_fuel_ox_limit1} \\
-\mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O} \label{eq:two_fuel_ox_limit2}
+&\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
+&\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
 \end{align}
-The initial composition of a pre-mixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions (Eqs.~\ref{eq:two_fuel_ox_limit1} and \ref{eq:two_fuel_ox_limit2}) and the composition of the reactor, we know that the reactor is oxygen-limited. The first step is use Eq.~\ref{eq:stoich_fuel} to find the stoichiometric fuel concentration based on the limiting reactant:
+The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, we know that the reactor is oxygen-limited. The first step is use Eq.~(\ref{eq:stoich_fuel}) to find the stoichiometric fuel concentration based on the limiting reactant:
 \begin{align}
-\hat{Y}_{F,lim}(\ref{eq:two_fuel_ox_limit1}) = \min \left (0.30,-\frac{(0.30)(16.04246 ~(g/mol))}{(-2)(31.9988 ~(g/mol))} \right) = 0.0752 \\
-\hat{Y}_{F,lim}(\ref{eq:two_fuel_ox_limit2}) = \min \left (0.40,-\frac{(0.40)(44.09562 ~(g/mol))}{(-5)(31.9988 ~(g/mol))} \right) = 0.0827
+\hat{Y}_{F,lim}(1) = \min \left (0.30,-\frac{(0.30)(16.04246 ~(\mbox{kg/kmol}))}{(-2)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0752 \\
+\hat{Y}_{F,lim}(2) = \min \left (0.40,-\frac{(0.40)(44.09562 ~(\mbox{kg/kmol}))}{(-5)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0827
 \end{align}
-Knowing, $\hat{Y}_{F,lim}$ for each reaction, Eq.~\ref{eq:fuel_weight} can be used to find the weighting factor, $w$.
+Knowing, $\hat{Y}_{F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to find the weighting factors:
 \begin{align}
-w(\ref{eq:two_fuel_ox_limit1}) =  \frac{0.0752}{0.1579} = 0.4763 \\
-w(\ref{eq:two_fuel_ox_limit2}) =  \frac{0.0827}{0.1579} = 0.5237
+w(1) =  \frac{0.0752}{0.1579} = 0.4763 \\
+w(2) =  \frac{0.0827}{0.1579} = 0.5237
 \end{align}
-Finally, using Eq.~\ref{eq:fuel_rate} the limiting change in fuel for the each reaction becomes:
+Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for the each reaction becomes:
 \begin{align}
-\Delta \hat{Y}_{F}(\ref{eq:two_fuel_ox_limit1}) =  (0.0752)(0.4763) = 0.0358 \\
-\Delta \hat{Y}_{F}(\ref{eq:two_fuel_ox_limit2}) =  (0.0827)(0.5237) = 0.0433
+\Delta \hat{Y}_{F}(1) =  (0.0752)(0.4763) = 0.0358 \\
+\Delta \hat{Y}_{F}(2) =  (0.0827)(0.5237) = 0.0433
 \end{align}
 
 \subsubsection{Arrhenius Reaction}
