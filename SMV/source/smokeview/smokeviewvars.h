@@ -424,7 +424,7 @@ SVEXTERN int staticframe0,visStaticSmoke;
 SVEXTERN int vis3DSmoke3D;
 SVEXTERN int smokeskip,smokeskipm1;
 SVEXTERN int nrooms,nzoneinfo, nfires;
-SVEXTERN float ratio, aspect;
+SVEXTERN float window_aspect_ratio, aspect;
 SVEXTERN int visLIGHT0, visLIGHT1, visLIGHTMENU, UpdateLIGHTS;
 
 SVEXTERN int SVDECL(screenWidth,640), SVDECL(screenHeight,480);

@@ -2486,9 +2486,11 @@ void Reshape_CB(int width, int height){
   int screenWidth2, screenHeight2;
 
   updatemenu=1;
-  ratio = (float)width/(float)height;
-  aspect = ratio;
-  if(ratio<1.0){ratio=1.0/ratio;}
+  window_aspect_ratio = (float)width/(float)height;
+  aspect = window_aspect_ratio;
+  if(window_aspect_ratio<1.0){
+    window_aspect_ratio=1.0/window_aspect_ratio;
+  }
   setScreenSize(&width,&height);
   screenWidth2 = screenWidth - dwinWW;   
   screenHeight2 = screenHeight - dwinH;
