@@ -1140,7 +1140,6 @@ SVEXTERN int smokedrawtest_nummax;
 SVEXTERN int ijkbarmax;
 SVEXTERN int blockage_as_input, blockage_snapped;
 SVEXTERN int show_cad_and_grid;
-SVEXTERN int use_nistlogo;
 SVEXTERN int benchmark_flag;
 SVEXTERN labeldata label_first, label_last, *label_first_ptr, *label_last_ptr;
 SVEXTERN int SVDECL(*slicetypes,NULL), SVDECL(*isotypes,NULL), SVDECL(*vslicetypes,NULL), SVDECL(*patchtypes,NULL);

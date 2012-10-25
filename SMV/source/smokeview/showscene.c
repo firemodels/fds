@@ -112,9 +112,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     COLORBAR_viewport(quad,          s_left,s_down,s_width,s_height);
     SNIFF_ERRORS("after COLORBAR_viewport");
 
-    LOGO_viewport(quad,          s_left,s_down,s_width,s_height);
-    SNIFF_ERRORS("after LOGO_viewport");
-    
     TITLE_viewport(quad,          s_left,s_down,s_width,s_height);
     SNIFF_ERRORS("after TITLE_viewport");
 

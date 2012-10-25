@@ -8970,11 +8970,6 @@ int readini2(char *inifile, int localfile){
       if(nmeshes<2&&highlight_flag!=0)highlight_flag=1;
       continue;
     }
-    if(match(buffer,"USENISTLOGO")==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&use_nistlogo);
-      continue;
-    }
     if(match(buffer,"SLICEDATAOUT")==1){
       {
         int sliceoutflag=0;
@@ -11163,10 +11158,6 @@ void writeini(int flag){
 
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");
-  if(use_nistlogo==1){
-    fprintf(fileout,"USENISTLOGO\n");
-    fprintf(fileout," %i\n",use_nistlogo);
-  }
   if(trainer_mode==1){
     fprintf(fileout,"TRAINERMODE\n");
     fprintf(fileout," %i\n",trainer_mode);
