@@ -605,22 +605,28 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down, GLsizei s
 void TITLE_viewport(int quad, GLint screen_left, GLint screen_down, GLsizei screen_width, GLsizei screen_height){
   int left;
   float textdown;
-  int box_width_pixels, box_height_pixels;
+  GLint port_left, port_down, port_width, port_height; 
+  GLdouble portx_left, portx_right, portx_down, portx_top;
 
   if(visTitle!=1)return;
-  
-  box_height_pixels=(int)(dwinH/4);
-  box_width_pixels=screenWidth-dwinWW-fontWoffset-2*titlesafe_offset;
+
+  port_left = fontWoffset+titlesafe_offset;
+  port_down = (int)(screen_height-1.1f*dwinH/4.f-fontHoffset)-titlesafe_offset;
+  port_width = screen_width-dwinWW-fontWoffset-2*titlesafe_offset;
+  port_height = (int)(dwinH/4);
+
+  portx_left = 0.0;
+  portx_right = 1.0;
+  portx_down = 0.0;
+  portx_top = (double)(window_aspect_ratio);
 
   if(SUB_portortho(quad,
-    fontWoffset+titlesafe_offset,
-    (int)(screenHeight-1.1f*dwinH/4.f-fontHoffset)-titlesafe_offset,
-    box_width_pixels,box_height_pixels,
-    0.,1.,0.,(double)(window_aspect_ratio),
+    port_left,port_down,port_width,port_height,
+    portx_left,portx_right,portx_down,portx_top,
     screen_left, screen_down, screen_width, screen_height)==0)return;
 
-  left=(int)((float)75/(float)(screenWidth-dwinWW));
-  if(screenWidth>=screenHeight)left*=window_aspect_ratio;
+  left=(int)((float)75/(float)(screen_width-dwinWW));
+  if(screenWidth>=screen_height)left*=window_aspect_ratio;
   textdown=window_aspect_ratio/5.0;
 
   glMatrixMode(GL_MODELVIEW);
