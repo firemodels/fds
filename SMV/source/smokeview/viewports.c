@@ -402,64 +402,63 @@ void BLOCK_viewport(int quad, GLint screen_left, GLint screen_down, GLsizei scre
 /* ------------------------ TIME BAR Viewport ------------------------- */
 
 void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down, GLsizei screen_width, GLsizei screen_height){
-  int timebarheight;
+  int doit=0;
 #ifdef pp_memstatus
   unsigned int availmemory;
   char percen[]="%";
 #endif
+  GLint port_left, port_down, port_width, port_height; 
+  GLdouble portx_left, portx_right, portx_down, portx_top;
 
 
   if(
     (visTimeLabels==1&&showtime==1)||
-    (showtime==1&&
-      (visFramerate==1||benchmark==1||
-       (vis_slice_average==1&&show_slice_average&&slice_average_flag==1)
-      )
-      ||(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
+    (showtime==1&&(visFramerate==1||benchmark==1||(vis_slice_average==1&&show_slice_average&&slice_average_flag==1))||
+    (hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
     )
 #ifdef pp_memstatus
     ||visAvailmemory==1
 #endif
-    )
-  {
-    timebarheight=(int)(0.75*dwinH);
-    if(screenWidth<screenHeight){
-      if(SUB_portortho(quad,
-        fontWoffset+titlesafe_offset, fontHoffset+titlesafe_offset, screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset, timebarheight,
-        0.0,1.0,0.0,0.75*(double)window_aspect_ratio,
-        screen_left, screen_down, screen_width, screen_height)==0){
-          return;
-      }
+    )doit=1;
 
-      xtemp=1.0;
-    }
-    else{
-      if(SUB_portortho(quad,
-        fontWoffset+titlesafe_offset, fontHoffset+titlesafe_offset, screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset, timebarheight,
-        0.0,window_aspect_ratio,0.,0.75,
-        screen_left, screen_down, screen_width, screen_height)==0){
-          return;
-      }
-      xtemp=window_aspect_ratio;
-    }
+  if(doit==0)return;
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+  port_left = fontWoffset+titlesafe_offset;
+  port_down = fontHoffset+titlesafe_offset;
+  port_width = screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset;
+  port_height = (int)(0.75*dwinH);
 
-     xtimeleft=85.0f*xtemp/(screenWidth-dwinWW);
-     xtimeright=xtimeleft+0.6*(xtemp-xtimeleft);
+  portx_left=0.0;
+  portx_right=1.0;
+  if(screenWidth>=screenHeight)portx_right*=window_aspect_ratio;
+  portx_down=0.0;
+  portx_top=0.75;
+  if(screenWidth<screenHeight)portx_top*=window_aspect_ratio;
 
-     if( visTimeLabels==1&&showtime==1){
-      if(visTimelabel==1)outputText(0.0f,0.1f, timelabel);
-      if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, framelabel);
-      if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, hrrinfo->hrrlabel);
-      drawTimeBar();
-     }
+  xtemp = 1.0;
+  if(screenWidth>=screenHeight)xtemp*=window_aspect_ratio;
 
-    if((benchmark==1||visFramerate==1)&&showtime==1
-      ){
-      if(benchmark==0){
-        sprintf(frameratelabel," Frame rate:%4.1f",framerate);
+  if(SUB_portortho(quad,
+    port_left, port_down, port_width, port_height,
+    portx_left,portx_right,portx_down,portx_top,
+    screen_left, screen_down, screen_width, screen_height)==0)return;
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+   xtimeleft=85.0f*xtemp/(screenWidth-dwinWW);
+   xtimeright=xtimeleft+0.6*(xtemp-xtimeleft);
+
+   if( visTimeLabels==1&&showtime==1){
+    if(visTimelabel==1)outputText(0.0f,0.1f, timelabel);
+    if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, framelabel);
+    if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, hrrinfo->hrrlabel);
+    drawTimeBar();
+   }
+
+  if((benchmark==1||visFramerate==1)&&showtime==1){
+    if(benchmark==0){
+      sprintf(frameratelabel," Frame rate:%4.1f",framerate);
       }
       else{
         if(framerate<0.0){
@@ -467,68 +466,65 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down, GLsizei sc
         }
         else{
           sprintf(frameratelabel," *Frame rate:%4.1f",framerate);
-        }
       }
+    }
+    outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
+  }
+  if(show_slice_average==1&&vis_slice_average==1&&slice_average_flag==1){
+    sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
+    outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
+  }
+  if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL){
+    char hrrcut_label[256];
+    int ihrrcut;
+    float xxl, xxr, yyl, yyu, ddx=0.03, ddy=0.2;
+
+    ihrrcut = (int)global_hrrpuv_cutoff;
+
+    sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
+    outputText((float)(xtimeright+0.06),0.56f, hrrcut_label);
+    xxl = xtimeright+0.025;
+    xxr = xxl+ddx;
+    yyl = 0.56;
+    yyu = yyl + ddy;
+
+    glBegin(GL_QUADS);
+    glColor3f(fire_red/255.0,fire_green/255.0,fire_blue/255.0);
+    glVertex3f(xxl,yyl,0.0);
+    glVertex3f(xxr,yyl,0.0);
+    glVertex3f(xxr,yyu,0.0);
+    glVertex3f(xxl,yyu,0.0);
+    glEnd();
+  }
+#ifdef pp_memstatus
+  if(visAvailmemory==1){
+    MEMSTATUS(0,&availmemory,NULL,NULL);
+    sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
+    if((benchmark==1||visFramerate==1)&&showtime==1){
+      outputText((float)(xtimeright+0.025),0.32f, frameratelabel);
+    }
+    else{
       outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
     }
-    if(show_slice_average==1&&vis_slice_average==1&&slice_average_flag==1){
-      sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
-      outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
-    }
-    if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL){
-      char hrrcut_label[256];
-      int ihrrcut;
-      float xxl, xxr, yyl, yyu, ddx=0.03, ddy=0.2;
-
-      ihrrcut = (int)global_hrrpuv_cutoff;
-
-      sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
-      outputText((float)(xtimeright+0.06),0.56f, hrrcut_label);
-      xxl = xtimeright+0.025;
-      xxr = xxl+ddx;
-      yyl = 0.56;
-      yyu = yyl + ddy;
-
-      glBegin(GL_QUADS);
-      glColor3f(fire_red/255.0,fire_green/255.0,fire_blue/255.0);
-      glVertex3f(xxl,yyl,0.0);
-      glVertex3f(xxr,yyl,0.0);
-      glVertex3f(xxr,yyu,0.0);
-      glVertex3f(xxl,yyu,0.0);
-      glEnd();
-    }
-#ifdef pp_memstatus
-    if(visAvailmemory==1
-    ){
-    
-      MEMSTATUS(0,&availmemory,NULL,NULL);
-      sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
-      if((benchmark==1||visFramerate==1)&&showtime==1){
-        outputText((float)(xtimeright+0.025),0.32f, frameratelabel);
-      }
-      else{
-        outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
-      }
-    }
+  }
 #endif
 #ifdef pp_MEMDEBUG
-    if(visUsagememory==1
+  if(visUsagememory==1
 #ifdef pp_memstatus
-       &&visAvailmemory==0
+     &&visAvailmemory==0
 #endif
-      ){
-        char MEMlabel[128];
+    ){
+      char MEMlabel[128];
 
-        getMemusage(MMtotalmemory,MEMlabel);
-        if((benchmark==1||visFramerate==1)&&showtime==1){
-          outputText((float)(xtimeright+0.025),0.32f, MEMlabel);
-        }
-        else{
-          outputText((float)(xtimeright+0.025),0.08f, MEMlabel);
-        }
-    }
-#endif
+      getMemusage(MMtotalmemory,MEMlabel);
+      if((benchmark==1||visFramerate==1)&&showtime==1){
+        outputText((float)(xtimeright+0.025),0.32f, MEMlabel);
+      }
+      else{
+        outputText((float)(xtimeright+0.025),0.08f, MEMlabel);
+      }
   }
+#endif
 }
 
 /* --------------------- COLOR BAR Viewport2 ------------------------- */
