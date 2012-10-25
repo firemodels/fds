@@ -11,7 +11,7 @@ the differential equation put forth by Heskestad and Bill~\cite{Heskestad:3},
 with the addition of a term to account for the cooling of the link
 by water droplets in the gas stream from previously activated
 sprinklers
-\be \frac{dT_l}{dt} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l) -
+\be \frac{\d T_l}{\d t} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l) -
    \frac{C}{\hbox{RTI}} (T_l - T_m) - \frac{C_2}{\hbox{RTI}} \beta |\bu|
    \label{actode} \ee
 Here $T_l$ is the link temperature, $T_g$ is the gas temperature in the
@@ -36,7 +36,7 @@ thermal radiation.
 
 As far as FDS is concerned, a heat detector is just a sprinkler with no water spray. In other words, the activation of a heat
 detector is governed by Eq.~(\ref{actode}), but with just the first term on the right hand side:
-\be \frac{dT_l}{dt} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l)  \label{heatactode} \ee
+\be \frac{\d T_l}{\d t} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l)  \label{heatactode} \ee
 Both the RTI and activation temperature are determined empirically.
 
 
@@ -64,7 +64,7 @@ sensing chamber of the detector $Y_c$ lags behind the mass fraction in the
 external free stream $Y_e$ by a time period $\delta t = L/u$,
 where $u$ is the free stream velocity and $L$ is a length characteristic of the detector geometry.
 The change in the mass fraction of smoke in the sensing chamber can be found by solving the following equation:
-\be \frac{d Y_c }{dt} = \frac{ Y_e(t) - Y_c(t)}{L/\bu} \label{HYoeq} \ee
+\be \frac{\d Y_c }{\d t} = \frac{ Y_e(t) - Y_c(t)}{L/\bu} \label{HYoeq} \ee
 The detector activates when $Y_c$ rises above a detector-specific threshold.
 
 A more detailed model of smoke detection involving two filling times rather than one has also been proposed.
@@ -81,7 +81,7 @@ free-stream velocity $u$ outside the detector
 The $\alpha$'s and $\beta$'s are empirical constants related to the specific detector geometry
 The change in the mass fraction of smoke in the sensing chamber $Y_c$ can be found by solving the following equation:
 \be
-\frac{d Y_c}{dt} = \frac{ Y_e(t-\delta t_e) - Y_c(t)}{\delta t_c} \label{Yoeq}
+\frac{\d Y_c}{\d t} = \frac{ Y_e(t-\delta t_e) - Y_c(t)}{\delta t_c} \label{Yoeq}
 \ee
 where $Y_e$ is the mass fraction of smoke outside of the detector in the free-stream.
 A simple interpretation of the equation is that the concentration of the smoke that enters the sensing chamber at time $t$
