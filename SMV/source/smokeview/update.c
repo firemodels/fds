@@ -283,15 +283,10 @@ void updateShow(void){
   showevac=0;
   showevac_colorbar=0;
   showtarget=0;
-  showtitle1=0; showtitle2=0;
   show3dsmoke=0;
   smoke3dflag=0;
   showtours=0;
   showterrain=0;
-  ntitles=0;
-  if(visTitle0==1)ntitles++;
-  visTitle=0;
-  if(visTitle0==1||showtitle1==1||showtitle2==1)visTitle=1;
   visTimeSmoke=1; visTimeSlice=1; visTimePatch=1; visTimeZone=1; visTimeIso=1;
 
   RenderTime=0;

@@ -407,7 +407,6 @@ EXTERNCPP void update_view_gluilist(void);
 EXTERNCPP void gluiIdle(void);
 EXTERNCPP void gluiIdleNULL(void);
 EXTERNCPP void reset_gltime(void);
-EXTERNCPP void updateshowtitles(void);
 EXTERNCPP void enable_reset_saved_view(void);
 EXTERNCPP void reset_glui_view(int ival);
 EXTERNCPP void init_camera(camera *camera_data,char *name);

@@ -453,7 +453,6 @@ SVEXTERN int unload_qdata;
 SVEXTERN int editwindow_status;
 SVEXTERN int startup_pass;
 SVEXTERN int ntargtimes;
-SVEXTERN int showtitle1, showtitle2;
 
 SVEXTERN int slicefilenumber;
 SVEXTERN int exportdata;
@@ -626,8 +625,7 @@ SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int visBlocklabel;
 SVEXTERN int visOpenVents,visDummyVents,visOtherVents;
 SVEXTERN int visOpenVentsAsOutline;
-SVEXTERN int visTitle0, visTitle1, visTitle2;
-SVEXTERN int ntitles,ititle;
+SVEXTERN int visTitle;
 SVEXTERN int visSmoke, visZone;
 SVEXTERN int visEvac;
 SVEXTERN int visBlocks;

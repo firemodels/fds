@@ -1457,7 +1457,6 @@ void initvars(void){
   editwindow_status=-1;
   startup_pass=1;
   ntargtimes=500;
-  showtitle1=0, showtitle2=0;
 
   slicefilenumber=0;
   exportdata=0;
@@ -1599,8 +1598,7 @@ void initvars(void){
   visBlocklabel=1;
   visOpenVents=1,visDummyVents=1;visOtherVents=1;
   visOpenVentsAsOutline=0;
-  visTitle0=1, visTitle1=1, visTitle2=1;
-  ntitles=0,ititle=0;
+  visTitle=1;
   visSmoke=1, visZone=0;
   visEvac=1;
   smooth_block_solid=0;

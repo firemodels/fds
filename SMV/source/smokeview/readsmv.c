@@ -7939,7 +7939,6 @@ int readini(int scriptconfigfile){
     if(return_code==2)return 2;
     
     updatecolors(-1);
-    updateshowtitles();
     scriptinifilename2=NULL;
   }
   updateglui();
@@ -9369,7 +9368,7 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"SHOWTITLE")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visTitle0);
+      sscanf(buffer,"%i ",&visTitle);
       continue;
       }
     if(match(buffer,"SHOWNORMALWHENSMOOTH")==1){
@@ -11045,7 +11044,7 @@ void writeini(int flag){
     }
   }
   fprintf(fileout,"SHOWTITLE\n");
-  fprintf(fileout," %i\n",visTitle0);
+  fprintf(fileout," %i\n",visTitle);
   fprintf(fileout,"SHOWCOLORBARS\n");
   fprintf(fileout," %i\n",visColorbarLabels);
   fprintf(fileout,"SHOWBLOCKS\n");

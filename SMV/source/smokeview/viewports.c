@@ -613,28 +613,28 @@ void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   int left;
   float textdown;
   int box_width_pixels, box_height_pixels;
-  float box_width, box_height;
 
   if(visTitle!=1)return;
-  box_height_pixels=(int)(ntitles*dwinH/4);
+  
+  box_height_pixels=(int)(dwinH/4);
   box_width_pixels=screenWidth-dwinWW-fontWoffset-2*titlesafe_offset;
-  box_width=0.5;
-  box_height=(ntitles*ratio);
+
   if(screenWidth<screenHeight){
     if(SUB_portortho(quad,
       fontWoffset+titlesafe_offset,
-      (int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,
+      (int)(screenHeight-1.1f*dwinH/4.f-fontHoffset)-titlesafe_offset,
       box_width_pixels,box_height_pixels,
-      0.,1.,0.,(double)(ntitles*ratio),
+      0.,1.,0.,(double)(ratio),
       s_left, s_down, s_width, s_height)==0)return;
+
     left=(int)((float)75/(float)(screenWidth-dwinWW));
   }
   else{
     if(SUB_portortho(quad,
       fontWoffset+titlesafe_offset,
-      (int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,
+      (int)(screenHeight-1.1f*dwinH/4.f-fontHoffset)-titlesafe_offset,
       box_width_pixels,box_height_pixels,
-      0.,1.,0.,(double)(ntitles*ratio),
+      0.,1.,0.,(double)(ratio),
       s_left, s_down, s_width, s_height)==0)return;
     left=(int)((float)75/(float)(screenWidth-dwinWW)*ratio);
   }
@@ -642,14 +642,12 @@ void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  ititle=0;
-  if(visTitle0==1){
-    ititle++;
+  if(visTitle==1){
     if(visFullTitle==1&&showplot3d==1){
-      outputText(left,(ititle-1)*ratio+textdown, FULLTITLE);
+      outputText(left,textdown, FULLTITLE);
     }
     else{
-      outputText(left,(ititle-1)*ratio+textdown, TITLE);
+      outputText(left,textdown, TITLE);
     }
   }
 }
@@ -678,7 +676,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     up=screenHeight;
     down=0;
     if(visColorbarLabels==1||(visBlocklabel==1&&nmeshes>1))right=screenWidth-dwinWW;
-    if(visTitle==1)up=screenHeight-1.1*ntitles*dwinH/4.0;
+    if(visTitle==1)up=screenHeight-1.1*dwinH/4.0;
   }
 
   if((visTimeLabels==1&&showtime==1)||(showtime==1&&(visFramerate==1||benchmark==1))||(visGrid!=noGridnoProbe&&visgridloc==1)

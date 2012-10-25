@@ -213,7 +213,7 @@ void LabelMenu(int value){
   glutPostRedisplay();
   ASSERTFLAG(visColorbarLabels);
   ASSERTFLAG(visTimeLabels);
-  ASSERTFLAG(visTitle0);
+  ASSERTFLAG(visTitle);
   ASSERTFLAG(visFramerate);
   ASSERTFLAG(visaxislabels);
   ASSERTFLAG(vis_slice_average);
@@ -225,7 +225,7 @@ void LabelMenu(int value){
     visTimeLabels=1-visTimeLabels;
     break;
    case 2:
-    visTitle0=1-visTitle0;
+    visTitle=1-visTitle;
     break;
    case 3:
     visFramerate = 1 - visFramerate;
@@ -234,9 +234,7 @@ void LabelMenu(int value){
     vis_user_ticks=1;
     visColorbarLabels=1;
     visTimeLabels=1;
-    visTitle0=1;
-    visTitle1=1;
-    visTitle2=1;
+    visTitle=1;
     visFramerate=1;
 #ifdef pp_memstatus
     visAvailmemory=1;
@@ -264,9 +262,7 @@ void LabelMenu(int value){
     vis_user_ticks=0;
     visColorbarLabels=0;
     visTimeLabels=0;
-    visTitle0=0;
-    visTitle1=0;
-    visTitle2=0;
+    visTitle=0;
     visFramerate=0;
     visaxislabels=0;
     visLabels=0;
@@ -356,18 +352,8 @@ void LabelMenu(int value){
      ASSERT(FFALSE);
      break;
   }
-  updateshowtitles();
   set_labels_controls();
 
-}
-
-/* ------------------ updateshowtitles ------------------------ */
-
-void updateshowtitles(void){
-  ntitles=0;
-  if(visTitle0==1)ntitles++;
-  visTitle=0;
-  if(visTitle0==1||showtitle1==1||showtitle2==1)visTitle=1;
 }
 
 /* ------------------ LightingMenu ------------------------ */
@@ -2154,7 +2140,6 @@ void SmokeviewiniMenu(int value){
   case 1:
     readini(0);
     updatecolors(-1);
-    updateshowtitles();
     break;
   case 2:
     writeini(GLOBAL_INI);
@@ -4288,28 +4273,16 @@ void RotateTypeMenu(int value){
 void TitleMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
-  ASSERTFLAG(visTitle0);
-  ASSERTFLAG(visTitle1);
-  ASSERTFLAG(visTitle2);
+  ASSERTFLAG(visTitle);
   switch (value){
   case 0:
-    visTitle0 = 1 - visTitle0;
-    break;
-  case 1:
-    visTitle1 = 1 - visTitle1;
-    break;
-  case 2:
-    visTitle2 = 1 - visTitle2;
+    visTitle = 1 - visTitle;
     break;
   case 3:
-    visTitle0=1;
-    visTitle1=1;
-    visTitle2=1;
+    visTitle=1;
     break;
   case 4:
-    visTitle0=0;
-    visTitle1=0;
-    visTitle2=0;
+    visTitle=0;
     break;
   default:
     ASSERT(FFALSE);
@@ -5612,17 +5585,6 @@ updatemenu=0;
   glutAddMenuEntry(_("Show all"),11);
   glutAddMenuEntry(_("Hide all"),13);
 
-/* --------------------------------title menu -------------------------- */
-
-  ntitles=1;
-  if(ntitles>1){
-    CREATEMENU(titlemenu,TitleMenu);
-    if(visTitle0==1)glutAddMenuEntry(_("*Default"),0);
-    if(visTitle0==0)glutAddMenuEntry(_("Default"),0);
-    glutAddMenuEntry(_("Show all"),3);
-    glutAddMenuEntry(_("Hide all"),4);
-  }
-
 /* --------------------------------label menu -------------------------- */
 
   CREATEMENU(labelmenu,LabelMenu);
@@ -5637,13 +5599,8 @@ updatemenu=0;
   if(vis_user_ticks==1)glutAddMenuEntry(_("*User settable ticks"),18);
   if(vis_user_ticks==0)glutAddMenuEntry(_("User settable ticks"),18);
 
-  if(ntitles>1){
-    glutAddSubMenu(_("Titles"),titlemenu);
-  }
-  else{
-    if(visTitle==1)glutAddMenuEntry(_("*Title"),2);
-    if(visTitle==0)glutAddMenuEntry(_("Title"),2);
-  }
+  if(visTitle==1)glutAddMenuEntry(_("*Title"),2);
+  if(visTitle==0)glutAddMenuEntry(_("Title"),2);
   if(visaxislabels==1)glutAddMenuEntry(_("*Axis"),6);
   if(visaxislabels==0)glutAddMenuEntry(_("Axis"),6);
   if(visFramerate==1)glutAddMenuEntry(_("*Frame rate"),3);
