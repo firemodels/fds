@@ -268,7 +268,7 @@ void mouse_edit_tour(int button, int state, int x, int y){
   glDisable(GL_TEXTURE_2D);
   glShadeModel(GL_FLAT);
 
-  ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+  ShowScene(SELECT,VIEW_CENTER,0,0,0);
   glReadBuffer(GL_BACK);
   glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
   glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
@@ -324,7 +324,7 @@ void mouse_edit_blockage(int button, int state, int x, int y){
   glDisable(GL_TEXTURE_2D);
   glShadeModel(GL_FLAT);
 
-  ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+  ShowScene(SELECT,VIEW_CENTER,0,0,0);
   glReadBuffer(GL_BACK);
   glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
   glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
@@ -409,7 +409,7 @@ void mouse_select_device(int button, int state, int x, int y){
   glDisable(GL_TEXTURE_2D);
   glShadeModel(GL_FLAT);
 
-  ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+  ShowScene(SELECT,VIEW_CENTER,0,0,0);
   glReadBuffer(GL_BACK);
   glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
   glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
@@ -457,7 +457,7 @@ void mouse_select_avatar(int button, int state, int x, int y){
   glDisable(GL_TEXTURE_2D);
   glShadeModel(GL_FLAT);
 
-  ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+  ShowScene(SELECT,VIEW_CENTER,0,0,0);
   glReadBuffer(GL_BACK);
   glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
   glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
@@ -2552,13 +2552,11 @@ int DoStereo(void){
   if(showstereo==1&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
     glDrawBuffer(GL_BACK_LEFT);
     if(showstereo_frame==0||showstereo_frame==2){
-      ShowScene(RENDER,VIEW_LEFT,0,
-        0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_LEFT,0,0,0);
     }
     glDrawBuffer(GL_BACK_RIGHT);
     if(showstereo_frame==1||showstereo_frame==2){
-      ShowScene(RENDER,VIEW_RIGHT,0,
-        0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_RIGHT,0,0,0);
     }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
     return_code=1;
@@ -2567,12 +2565,20 @@ int DoStereo(void){
     glDrawBuffer(GL_BACK);
     ClearBuffers(RENDER);
     if(showstereo_frame==0||showstereo_frame==2){
-      ShowScene(RENDER,VIEW_LEFT,0,
-        0,0,screenWidth/2,screenHeight);
+      int screenWidth_save;
+
+      screenWidth_save=screenWidth;
+      screenWidth/=2;
+      ShowScene(RENDER,VIEW_LEFT,0,0,0);
+      screenWidth=screenWidth_save;
     }
     if(showstereo_frame==1||showstereo_frame==2){
-      ShowScene(RENDER,VIEW_RIGHT,0,
-        screenWidth/2,0,screenWidth/2,screenHeight);
+      int screenWidth_save;
+
+      screenWidth_save=screenWidth;
+      screenWidth/=2;
+      ShowScene(RENDER,VIEW_RIGHT,0,screenWidth,0);
+      screenWidth=screenWidth_save;
     }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
     return_code=2;
@@ -2584,8 +2590,7 @@ int DoStereo(void){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(showstereo_frame==0||showstereo_frame==2){
       glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
-      ShowScene(RENDER,VIEW_LEFT,0,
-        0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_LEFT,0,0,0);
       glFlush();
     }
 
@@ -2595,8 +2600,7 @@ int DoStereo(void){
       glClearColor(0.0, 0.0, 1.0, 1.0); 
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-      ShowScene(RENDER,VIEW_RIGHT,0,
-        0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_RIGHT,0,0,0);
       glFlush();
     }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
@@ -2609,8 +2613,7 @@ int DoStereo(void){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(showstereo_frame==0||showstereo_frame==2){
       glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
-      ShowScene(RENDER,VIEW_LEFT,0,
-        0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_LEFT,0,0,0);
       glFlush();
     }
 
@@ -2620,8 +2623,7 @@ int DoStereo(void){
       glClearColor(0.0, 1.0, 1.0, 0.0); 
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-      ShowScene(RENDER,VIEW_RIGHT,0,
-        0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_RIGHT,0,0,0);
       glFlush();
     }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
@@ -2634,7 +2636,7 @@ int DoStereo(void){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(showstereo_frame==0||showstereo_frame==2){
       glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
-      ShowScene(RENDER,VIEW_LEFT,0,0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_LEFT,0,0,0);
       glFlush();
     }
     if(showstereo_frame==1||showstereo_frame==2){
@@ -2643,7 +2645,7 @@ int DoStereo(void){
       glClearColor(0.0, 1.0, 1.0, 1.0); 
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-      ShowScene(RENDER,VIEW_RIGHT,0,0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_RIGHT,0,0,0);
 
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
@@ -2828,12 +2830,12 @@ void Display_CB(void){
   if(dostereo==0){
     if(benchmark_flag==1){
       glDrawBuffer(GL_FRONT);
-      ShowScene(RENDER,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+      ShowScene(RENDER,VIEW_CENTER,0,0,0);
     }
     else{
       if(render_multi==0){
         glDrawBuffer(GL_BACK);
-        ShowScene(RENDER,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+        ShowScene(RENDER,VIEW_CENTER,0,0,0);
         if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
       }
       else{
@@ -2864,7 +2866,7 @@ void Display_CB(void){
             int j;
 
             for(j=0;j<nrender_cols;j++){
-              ShowScene(RENDER,VIEW_CENTER,1,j*screenWidth,i*screenHeight,screenWidth,screenHeight);
+              ShowScene(RENDER,VIEW_CENTER,1,j*screenWidth,i*screenHeight);
               screenbuffers[ibuffer++]=getscreenbuffer();
               if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
             }

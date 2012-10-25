@@ -562,7 +562,7 @@ EXTERNCPP void update_loaded_lists(void);
 EXTERNCPP void updateLights(int pos);
 EXTERNCPP int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers);
 EXTERNCPP GLubyte *getscreenbuffer(void);
-EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height);
+EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down);
 EXTERNCPP int  inblockage(const mesh *gb,float x, float y, float z);
 EXTERNCPP int inmesh_smoke(float x, float y, float z, int n, int flag);
 EXTERNCPP void initmesh(mesh *gb);

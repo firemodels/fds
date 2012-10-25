@@ -25,7 +25,7 @@ char showscene_revision[]="$Revision$";
 
 /* ------------------ ShowScene ------------------------ */
 
-void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
+void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   CheckMemory;
 
   show_mode=mode;
@@ -48,7 +48,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(loadfiles_at_startup&&update_load_startup==1){
     load_startup_smoke();
   }
-//  if(updategluiview==1&&updateclipvals==0){
   if(updategluiview==1){
     camera *ca;
 
