@@ -86,8 +86,8 @@ void _memorystatus(unsigned int size,unsigned int *availmem, unsigned int *memus
 #define MEMSTATUS(f,g,h,i)
 #endif
 
-void getMemusage(MMsize totalmemory,char *MEMlabel);
 #ifdef pp_MEMDEBUG
+void getMemusage(MMsize totalmemory,char *MEMlabel);
 void _CheckMemory(void);
 void _CheckMemoryNOTHREAD(void);
 void _CheckMemoryOn(void);
