@@ -548,6 +548,124 @@ Direct Numerical Simulation (DNS).
 \end{description}
 
 
+\section{What's New in FDS 6?}
+
+Many of the changes in FDS~6 are improvements to the various sub-models that do not affect the basic structure or parameters of the input file. 
+
+\begin{description}
+\item[Species Transport]
+The scalar transport solver has been overhauled to prevent the over or under-shooting of scalar values in the region of a steep gradient, for example, the base of the fire plume.
+\item[Turbulence]
+The default large eddy simulation framework now includes the Deardorff form of the modeled viscosity. Past versions of FDS used the constant coefficient Smagorinsky model. The change increases the dynamic range of the simulation, yielding improved plume dynamics on relatively coarse grids.
+\item[Particles]
+The functionality of Lagrangian particles has expanded to include the heat transfer and pyrolysis of solid walls. In other words, you can now assign a set of surface properties to planar, cylindrical, or spherical particles much like you would for a solid surface. Liquid droplets are treated in much the same way as past versions.
+\item[Pyrolysis] 
+The basic 1-D heat transfer and pyrolysis model for solid surfaces remains the same, but there has been a change in several of the input parameters to expand functiontionality and readability of the input file. 
+\item[HVAC] The functionality of the HVAC (Heating, Ventilation, Air Conditioning) has expanded to include more flexibility in specifying air coils, dampers, fans, louvers, and other devices. 
+\end{description}
+
+
+
+\section{Changes to Input Parameters in FDS 6}
+
+This section describes the changes in the input parameters between FDS version~5 and version~6. Table~\ref{tbl:Changes} lists in alphabetical order parameters from
+FDS~5 that have changed. Note that this table does not list new parameters in FDS~6.
+
+There has been a limited amount of backward compatibility programmed into FDS 6. In other words, several commonly used parameters and conventions from previous versions still
+work, but you are encouraged to gradually modify your input files to conform to the new conventions. Gradually, obsolescent features will be removed. Some of the more notable changes
+in FDS 6 are:
+\begin{itemize}
+\item If you want to model a fire, you {\em must} include a {\ct REAC} line with a specified {\ct FUEL}. See Chapter~\ref{info:REAC} for details.
+\item The output quantity {\ct 'MIXTURE\_FRACTION'} has been replaced with {\ct 'MIXTURE FRACTION'} and is only usable if there is a single {\ct REAC} input of the form $A \; + \; B \rightarrow C$.
+\item The {\ct ISOTHERMAL} feature is no longer an option.
+\item There is no longer a {\ct STATE\_FILE} because there is no longer a simple mixture fraction model.
+\item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
+\item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with
+{\ct SPEC\_ID} instead.
+\end{itemize}
+
+
+\begin{sidewaystable}[p]
+\caption[List of changes to input parameters for FDS 6]{Changes to input parameters, FDS version 5 to 6.}
+\label{tbl:Changes}
+\centering
+\begin{tabular}{@{\extracolsep{\fill}}|c|l|c|l|l|}
+\hline
+Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hline
+{\ct BNDF}    & {\ct RECOUNT\_DRIP}                 &              & Eliminated                                  &                                              \\ \hline
+{\ct CLIP}    & {\ct MAXIMUM\_MASS\_FRACTION}       &              & Eliminated                                  & Section~\ref{info:CLIP}                      \\ \hline
+{\ct CLIP}    & {\ct MINIMUM\_MASS\_FRACTION}       &              & Eliminated                                  &  Section~\ref{info:CLIP}                     \\ \hline
+{\ct DUMP}    & {\ct MAXIMUM\_DROPLETS}             &  {\ct DUMP}  &  {\ct MAXIMUM\_PARTICLES}                   &  Section~\ref{info:DUMP}                  \\ \hline
+{\ct DUMP}    & {\ct STATE\_FILE}                   &              & Eliminated                                  &                                              \\ \hline
+{\ct INIT}    & {\ct NUMBER\_INITIAL\_DROPLETS}     &  {\ct INIT}  &  {\ct N\_PARTICLES},  {\ct N\_PARTICLES\_PER\_CELL} &  Section~\ref{info:initial_droplets}                  \\ \hline
+{\ct MATL}    & {\ct NU\_FUEL}                      &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_GAS}                       &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_RESIDUE}                   &  {\ct MATL}  & {\ct NU\_MATL}                              & Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_WATER}                     &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct RESIDUE}                       &  {\ct MATL}  & {\ct MATL\_ID}                              & Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MISC}    & {\ct BACKGROUND\_SPECIES}           &  {\ct SPEC}  & {\ct BACKGROUND=.TRUE.}                     & Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct CONDUCTIVITY}                  &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct CO\_PRODUCTION}                &              & New procedure                               & Section~\ref{info:finite}                \\ \hline
+{\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Section~\ref{info:LES}                   \\ \hline
+{\ct MISC}    & {\ct HUMIDITY}                      &  {\ct SPEC}  & {\ct HUMIDITY}                              & Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct ISOTHERMAL}                    &              & Eliminated                                  &                                          \\ \hline
+{\ct MISC}    & {\ct MW}                            &  {\ct SPEC}  & {\ct MW}                                    & Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct PRESSURE\_CORRECTION}          &  {\ct PRES}  & {\ct VELOCITY\_TOLERANCE}                   & Section~\ref{info:PRES}                  \\ \hline
+{\ct MISC}    & {\ct RADIATION}                     &  {\ct RADI}  & {\ct RADIATION}                             & Section~\ref{info:RADI}                  \\ \hline
+{\ct MISC}    & {\ct EVAC\_SURF\_DEFAULT}           &  {\ct SURF}  & {\ct EVAC\_DEFAULT}                         & Section~\ref{info:SURF}                  \\ \hline
+{\ct MISC}    & {\ct SURF\_DEFAULT}                 &  {\ct SURF}  & {\ct DEFAULT}                               & Section~\ref{info:SURF}                  \\ \hline
+{\ct MISC}    & {\ct SUPPRESSION}                   &  {\ct REAC}  & {\ct SUPPRESSION}                           & Section~\ref{info:extinction}            \\ \hline
+{\ct MISC}    & {\ct VISCOSITY}                     &  {\ct SPEC}  &  {\ct VISCOSITY}                            & Section~\ref{info:SPEC}                  \\ \hline
+{\ct OBST}    & {\ct SAWTOOTH}                      &  {\ct SURF}  & {\ct FREE\_SLIP=.TRUE.}                     & Section~\ref{info:WALL_MODEL}            \\ \hline
+{\ct PART}    & {\ct EVAPORATE}                     &  {\ct PART}  & {\ct SPEC\_ID}                              & Section~\ref{info:PART_Basics}           \\ \hline
+{\ct PART}    & {\ct FUEL}                          &  {\ct PART}  & {\ct SPEC\_ID='[FUEL]'}                     & Section~\ref{info:fuel_droplets}         \\ \hline
+{\ct PART}    & {\ct HEAT\_OF\_VAPORIZATION}        &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZATION}               & Section~\ref{thermal_part_props}         \\ \hline
+{\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE}  &  {\ct SPEC}  &   {\ct H\_V\_REFERENCE\_TEMPERATURE}        & Section~\ref{thermal_part_props}         \\ \hline
+{\ct PART}    & {\ct MELTING\_TEMPERATURE}          &  {\ct SPEC}  & {\ct MELTING\_TEMPERATURE}                  & Section~\ref{thermal_part_props}         \\ \hline
+{\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS}     &  {\ct INIT}  & {\ct N\_PARTICLES}                          & Section~\ref{info:initial_droplets}      \\ \hline
+{\ct PART}    & {\ct PARTICLES\_PER\_SECOND}        &  {\ct PROP}  & {\ct PARTICLES\_PER\_SECOND}                & Section~\ref{info:sprinkler_droplets}    \\ \hline
+\end{tabular}
+\end{sidewaystable}
+
+\begin{sidewaystable}[p]
+\caption[List of changes to input parameters for FDS 6 (continued)]{Changes to input parameters, FDS version 5 to 6 (continued).}
+\label{tbl:Changes2}
+\centering
+\begin{tabular}{@{\extracolsep{\fill}}|c|l|c|l|l|}
+\hline
+Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Parameter & Notes \\ \hline \hline
+{\ct PART}    & {\ct SPECIFIC\_HEAT}                &  {\ct SPEC}  & {\ct SPECIFIC\_HEAT\_LIQUID}                & Section~\ref{thermal_part_props}         \\ \hline
+{\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}     &  {\ct SPEC}  & {\ct VAPORIZATION\_TEMPERATURE}             & Section~\ref{thermal_part_props}         \\ \hline
+{\ct PART}    & {\ct WATER}                         &  {\ct PART}  &  {\ct SPEC\_ID='WATER VAPOR'}               & Section~\ref{info:PART_Basics}               \\ \hline
+{\ct PROP}    & {\ct CABLE\_DIAMETER}               &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
+{\ct PROP}    & {\ct CABLE\_FAILURE\_TEMPERATURE}   &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
+{\ct PROP}    & {\ct CABLE\_JACKET\_THICKNESS}      &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
+{\ct PROP}    & {\ct CABLE\_MASS\_PER\_LENGTH}      &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
+{\ct PROP}    & {\ct CONDUIT\_DIAMETER}             &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
+{\ct PROP}    & {\ct CONDUIT\_THICKNESS}            &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
+{\ct PROP}    & {\ct DROPLETS\_PER\_SECOND}         &  {\ct PROP}  &  {\ct PARTICLES\_PER\_SECOND}               & Section~\ref{info:sprinkler_droplets} \\ \hline
+{\ct PROP}    & {\ct DROPLET\_VELOCITY}             &  {\ct PROP}  &  {\ct PARTICLE\_VELOCITY}                   & Section~\ref{info:sprinklers} \\ \hline
+{\ct PROP}    & {\ct DT\_INSERT}                    &              & New procedure                               & Section~\ref{info:controlling_droplets} \\ \hline
+{\ct REAC}    & {\ct BOF}                           &  {\ct REAC}  &  {\ct A}                                    & Section~\ref{info:finite}           \\ \hline
+{\ct REAC}    & {\ct ID}                            &  {\ct REAC}  &  {\ct FUEL}                                 & Section~\ref{info:simple_chemistry}       \\ \hline
+{\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  &  {\ct MASS\_EXTINCTION\_COEFFICIENT}        & Section~\ref{info:visibility}       \\ \hline
+{\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                  & Section~\ref{info:visibility}       \\ \hline
+{\ct REAC}    & {\ct OXIDIZER}                      &              & New procedure                               & Section~\ref{info:REAC_Diagnostics}          \\ \hline
+{\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  &  {\ct VISIBILITY\_FACTOR}                   & Section~\ref{info:visibility}       \\ \hline
+{\ct SURF}    & {\ct POROUS}                        &              & New procedure                               & Section~\ref{info:HVACfan}                   \\ \hline
+{\ct TIME}    & {\ct TWFIN}                         &  {\ct TIME}  & {\ct T\_END}                                & Section~\ref{info:TIME}                  \\ \hline
+{\ct VENT}    & {\ct MASS\_FRACTION}                &              & Eliminated                                  &                                              \\ \hline
+\end{tabular}
+\end{sidewaystable}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -8792,7 +8910,7 @@ obtained elsewhere.
 
 When you do a fire simulation, FDS automatically creates two output files that are rendered by
 Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species mass fraction instead of {\ct 'SOOT'}, so long as the
-{\ct MASS\_EXTINCTION\_COEFFICIENT} (either from the {\ct REAC} line, or over-ridden by the value on the {\ct SPEC} line) is appropriate in
+{\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in
 describing the attenuation of visible light by the specified gas species.
 
 An alternative to {\ct SOOT} mass fraction can be specified via {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
@@ -8886,15 +9004,13 @@ $C=8$ for a light-emitting sign and $C=3$ for a light-reflecting
 sign~\cite{SFPE:Mulholland}. Since $K$ varies from point to point in the
 domain, the visibility $S$ does as well.
 
-Three parameter control smoke production and visibility; each
-parameter is input on the {\ct REAC} line. The first parameter
-is {\ct SOOT\_YIELD}, which is the fraction of fuel mass that
-is converted to soot if the simple chemistry approach is being used. The second parameter is called the
-{\ct MASS\_EXTINCTION\_COEFFICIENT}, and it is the $K_m$ in
-Eq.~(\ref{mec}). The default value is 8700~m$^2$/kg, a value
+Three parameters control smoke production and visibility. 
+The first is the {\ct SOOT\_YIELD} on the {\ct REAC} line, defined as the fraction of fuel mass that
+is converted to soot if the simple chemistry approach is being used. The second parameter,
+{\ct MASS\_EXTINCTION\_COEFFICIENT}, is the $K_m$ in Eq.~(\ref{mec}). It is defined on one or more of the {\ct SPEC} lines\footnote{When using the simple chemistry combustion model, you can change the default mass extinction coefficient by adding a line to the input file of the form: \tt{\footnotesize \&SPEC ID='SOOT', MASS\_EXTINCTION\_COEFFICIENT=..., SMIX\_COMPONENT\_ONLY=.TRUE. /} } for the various light absorbing gas species. Its default value is 8700~m$^2$/kg, a value
 suggested for flaming combustion of wood and plastics\footnote{For most flaming fuels, a suggested value for $K_m$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
 wavelength of 633~nm~\cite{Mulholland:F+M}}.
-The third parameter is called the {\ct VISIBILITY\_FACTOR}, the
+The third parameter, {\ct VISIBILITY\_FACTOR} on the {\ct MISC} line, is the
 constant $C$ in Eq.~(\ref{vis}). It is 3 by default.
 
 The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar quantity is the
@@ -11233,7 +11349,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 \vspace{\baselineskip}
-\newpage
+
 
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
 
@@ -11470,7 +11586,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \section{\texorpdfstring{{\tt ZONE}}{ZONE} (Pressure Zone Parameters)}
 
-
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -11490,106 +11605,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PERIODIC}              & Logical           & Section~\ref{info:ZONE_Basics}     &        & {\ct .FALSE.} \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
-
-\vspace{\baselineskip}
-
-\newpage
-
-
-\section{Modifications of Input Parameters from FDS 5 to FDS 6}
-
-This section describes the changes in the input parameters between FDS version~5 and version~6. Table~\ref{tbl:Changes} lists in alphabetical order parameters from
-FDS~5 that have changed. Note that this table does not list new parameters in FDS~6.
-
-There has been a limited amount of backward compatibility programmed into FDS 6. In other words, several commonly used parameters and conventions from previous versions still
-work, but you are encouraged to gradually modify your input files to conform to the new conventions. Gradually, obsolescent features will be removed. Some of the more notable changes
-in FDS 6 are:
-\begin{itemize}
-\item If you want to model a fire, you {\em must} include a {\ct REAC} line with a specified {\ct FUEL}. See Chapter~\ref{info:REAC} for details.
-\item The output quantity {\ct 'MIXTURE\_FRACTION'} has been replaced with {\ct 'MIXTURE FRACTION'} and is only usable if there is a single {\ct REAC} input of the form $A \; + \; B \rightarrow C$.
-\item The {\ct ISOTHERMAL} feature is no longer an option.
-\item There is no longer a {\ct STATE\_FILE} because there is no longer a simple mixture fraction model.
-\item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
-\item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with
-{\ct SPEC\_ID} instead.
-\end{itemize}
-
-
-\begin{sidewaystable}[p]
-\caption[List of changes to input parameters for FDS 6]{Changes to input parameters, FDS version 5 to 6.}
-\label{tbl:Changes}
-\centering
-\begin{tabular}{@{\extracolsep{\fill}}|c|l|c|l|l|}
-\hline
-Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hline
-{\ct BNDF}    & {\ct RECOUNT\_DRIP}                 &              & Eliminated                                  &                                              \\ \hline
-{\ct CLIP}    & {\ct MAXIMUM\_MASS\_FRACTION}       &              & Eliminated                                  &                                              \\ \hline
-{\ct CLIP}    & {\ct MINIMUM\_MASS\_FRACTION}       &              & Eliminated                                  &                                              \\ \hline
-{\ct DUMP}    & {\ct MAXIMUM\_DROPLETS}             &  {\ct DUMP}  &  {\ct MAXIMUM\_PARTICLES}                   &  Section~\ref{info:DUMP}                  \\ \hline
-{\ct DUMP}    & {\ct STATE\_FILE}                   &              & Eliminated                                  &                                              \\ \hline
-{\ct INIT}    & {\ct NUMBER\_INITIAL\_DROPLETS}      &  {\ct INIT}  &  {\ct N\_PARTICLES},  {\ct N\_PARTICLES\_PER\_CELL} &  Section~\ref{info:initial_droplets}                  \\ \hline
-{\ct MATL}    & {\ct NU\_FUEL}                      &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_GAS}                       &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_RESIDUE}                   &  {\ct MATL}  & {\ct NU\_MATL}                              & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_WATER}                     &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct RESIDUE}                       &  {\ct MATL}  & {\ct MATL\_ID}                              & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MISC}    & {\ct BACKGROUND\_SPECIES}           &  {\ct SPEC}  & {\ct BACKGROUND=.TRUE.}                     & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct CONDUCTIVITY}                  &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct CO\_PRODUCTION}                &              & Eliminated                                  & Section~\ref{info:finite}                \\ \hline
-{\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Same functionality                       \\ \hline
-{\ct MISC}    & {\ct HUMIDITY}                      &  {\ct SPEC}  & {\ct HUMIDITY}                              & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct ISOTHERMAL}                    &              & Eliminated                                  &                                          \\ \hline
-{\ct MISC}    & {\ct MW}                            &  {\ct SPEC}  & {\ct MW}                                    & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct PRESSURE\_CORRECTION}          &              &  Eliminated                                 &                                          \\ \hline
-{\ct MISC}    & {\ct RADIATION}                     &  {\ct RADI}  & {\ct RADIATION}                             & Same functionality                       \\ \hline
-{\ct MISC}    & {\ct EVAC\_SURF\_DEFAULT}           &  {\ct SURF}  & {\ct EVAC\_DEFAULT}                         & Section~\ref{info:SURF}                  \\ \hline
-{\ct MISC}    & {\ct SURF\_DEFAULT}                 &  {\ct SURF}  & {\ct DEFAULT}                               & Section~\ref{info:SURF}                  \\ \hline
-{\ct MISC}    & {\ct SUPPRESSION}                   &  {\ct REAC}  & {\ct SUPPRESSION}                           & Section~\ref{info:extinction}            \\ \hline
-{\ct MISC}    & {\ct VISCOSITY}                     &  {\ct SPEC}  &  {\ct VISCOSITY}                            & Section~\ref{info:SPEC}                  \\ \hline
-{\ct OBST}    & {\ct SAWTOOTH}                      &              & Eliminated                                  & Use {\ct FREE\_SLIP}                     \\ \hline
-{\ct PART}    & {\ct EVAPORATE}                     &              &  Eliminated                                 &                                          \\ \hline
-{\ct PART}    & {\ct FUEL}                          &              &  Eliminated                                 & Section~\ref{info:fuel_droplets}         \\ \hline
-{\ct PART}    & {\ct HEAT\_OF\_VAPORIZATION}       &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZATION}              & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE}  &  {\ct SPEC}  &   {\ct H\_V\_REFERENCE\_TEMPERATURE}        & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct MELTING\_TEMPERATURE}          &  {\ct SPEC}  & {\ct MELTING\_TEMPERATURE}                  & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS}     &  {\ct INIT}  & {\ct N\_PARTICLES}                          & Section~\ref{info:initial_droplets}      \\ \hline
-{\ct PART}    & {\ct PARTICLES\_PER\_SECOND}        &  {\ct PROP}  & {\ct PARTICLES\_PER\_SECOND}                & Section~\ref{info:sprinkler_droplets}    \\ \hline
-\end{tabular}
-\end{sidewaystable}
-
-\begin{sidewaystable}[p]
-\caption[List of changes to input parameters for FDS 6 (continued)]{Changes to input parameters, FDS version 5 to 6 (continued).}
-\label{tbl:Changes2}
-\centering
-\begin{tabular}{@{\extracolsep{\fill}}|c|l|c|l|l|}
-\hline
-Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Parameter & Notes \\ \hline \hline
-{\ct PART}    & {\ct SPECIFIC\_HEAT}                &  {\ct SPEC}  & {\ct SPECIFIC\_HEAT\_LIQUID}                & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}     &  {\ct SPEC}  & {\ct VAPORIZATION\_TEMPERATURE}             & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct WATER}                         &              &  Eliminated                                 &                                              \\ \hline
-{\ct PROP}    & {\ct CABLE\_DIAMETER}               &              & Eliminated                                  & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CABLE\_FAILURE\_TEMPERATURE}   &              & Eliminated                                  & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CABLE\_JACKET\_THICKNESS}      &              & Eliminated                                  & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CABLE\_MASS\_PER\_LENGTH}      &              & Eliminated                                  & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CONDUIT\_DIAMETER}             &              & Eliminated                                  & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CONDUIT\_THICKNESS}            &              & Eliminated                                  & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct DROPLETS\_PER\_SECOND}         &  {\ct PROP}  &  {\ct PARTICLES\_PER\_SECOND}               & Same functionality \\ \hline
-{\ct PROP}    & {\ct DROPLET\_VELOCITY}             &  {\ct PROP}  &  {\ct PARTICLE\_VELOCITY}                  & Same functionality \\ \hline
-{\ct PROP}    & {\ct DT\_INSERT}                    &              & Eliminated                                  &                               \\ \hline
-{\ct REAC}    & {\ct BOF}                           &  {\ct REAC}  &  {\ct A}                                    & Same functionality                  \\ \hline
-{\ct REAC}    & {\ct ID}                            &  {\ct REAC}  &  {\ct FUEL}                                 & New requirement                  \\ \hline
-{\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  &  {\ct MASS\_EXTINCTION\_COEFFICIENT}        & Same functionality                  \\ \hline
-{\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                  & Same functionality                  \\ \hline
-{\ct REAC}    & {\ct OXIDIZER}                      &              & Eliminated                                  &                                              \\ \hline
-{\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                  & Same functionality                  \\ \hline
-{\ct SURF}    & {\ct POROUS}                        &              & Eliminated                                  & Use HVAC                                     \\ \hline
-{\ct TIME}    & {\ct TWFIN}                         &  {\ct TIME}  & {\ct T\_END}                                & Section~\ref{info:TIME}                  \\ \hline
-{\ct VENT}    & {\ct MASS\_FRACTION}                &              & Eliminated                                  &                                              \\ \hline
-\end{tabular}
-\end{sidewaystable}
-
-
-
 
 
 
