@@ -115,7 +115,7 @@ void Get_VP_info(void){
     VP_title.width = screenWidth-colorbar_width-2*titlesafe_offset;
     switch (fontindex){
       case SCALED_FONT:
-        VP_title.height = MAX(18,(int)( (25.0/18.0)*(float)scaled_font2d_size));
+        VP_title.height = MAX(18,(int)( (12.0/18.0)*(25.0/18.0)*(float)scaled_font2d_height));
         break;
       case SMALL_FONT:
       case LARGE_FONT:

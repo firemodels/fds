@@ -57,10 +57,12 @@ GLUI_Spinner *SPINNER_tick_dy0=NULL;
 GLUI_Spinner *SPINNER_tick_dz0=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_face=NULL;
 GLUI_Spinner *SPINNER_subtick=NULL;
-GLUI_Spinner *SPINNER_scaled_font2d_size=NULL;
-GLUI_Spinner *SPINNER_scaled_font3d_size=NULL;
-GLUI_Spinner *SPINNER_scaled_font3d_width=NULL;
-GLUI_Spinner *SPINNER_scaled_font2d_width=NULL;
+GLUI_Spinner *SPINNER_scaled_font2d_height=NULL;
+GLUI_Spinner *SPINNER_scaled_font3d_height=NULL;
+GLUI_Spinner *SPINNER_scaled_font2d_height2width=NULL;
+GLUI_Spinner *SPINNER_scaled_font3d_height2width=NULL;
+GLUI_Spinner *SPINNER_scaled_font3d_thickness=NULL;
+GLUI_Spinner *SPINNER_scaled_font2d_thickness=NULL;
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
 
@@ -236,16 +238,20 @@ extern "C" void update_glui_label_text(void){
 extern "C" void glui_update_fontindex(void){
   if(RADIO_fontsize!=NULL){
     if(fontindex==SCALED_FONT){
-      SPINNER_scaled_font2d_size->enable();
-      SPINNER_scaled_font3d_size->enable();
-      SPINNER_scaled_font2d_width->enable();
-      SPINNER_scaled_font3d_width->enable();
+      SPINNER_scaled_font2d_height->enable();
+      SPINNER_scaled_font3d_height->enable();
+      SPINNER_scaled_font2d_height2width->enable();
+      SPINNER_scaled_font3d_height2width->enable();
+      SPINNER_scaled_font2d_thickness->enable();
+      SPINNER_scaled_font3d_thickness->enable();
     }
     else{
-      SPINNER_scaled_font2d_size->disable();
-      SPINNER_scaled_font3d_size->disable();
-      SPINNER_scaled_font2d_width->disable();
-      SPINNER_scaled_font3d_width->disable();
+      SPINNER_scaled_font2d_height->disable();
+      SPINNER_scaled_font3d_height->disable();
+      SPINNER_scaled_font2d_height2width->disable();
+      SPINNER_scaled_font3d_height2width->disable();
+      SPINNER_scaled_font2d_thickness->disable();
+      SPINNER_scaled_font3d_thickness->disable();
     }
   }
 }
@@ -395,14 +401,18 @@ extern "C" void glui_labels_setup(int main_window){
   RADIOBUTTON_label_1c=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("scaled"));
 
   PANEL_font2d = glui_labels->add_panel_to_panel(ROLLOUT_font,"labels",true);
-  SPINNER_scaled_font2d_size=glui_labels->add_spinner_to_panel(PANEL_font2d,"size:",GLUI_SPINNER_INT,&scaled_font2d_size);
-  SPINNER_scaled_font2d_width=glui_labels->add_spinner_to_panel(PANEL_font2d,"width:",GLUI_SPINNER_INT,&scaled_font2d_width);
-  SPINNER_scaled_font2d_width->set_int_limits(1,10);
+  SPINNER_scaled_font2d_height=glui_labels->add_spinner_to_panel(PANEL_font2d,"height:",GLUI_SPINNER_INT,&scaled_font2d_height);
+  SPINNER_scaled_font2d_height2width=glui_labels->add_spinner_to_panel(PANEL_font2d,"height/width",GLUI_SPINNER_FLOAT,&scaled_font2d_height2width);
+  SPINNER_scaled_font2d_height2width->set_float_limits(0.5,1.5);
+  SPINNER_scaled_font2d_thickness=glui_labels->add_spinner_to_panel(PANEL_font2d,"thickness:",GLUI_SPINNER_INT,&scaled_font2d_thickness);
+  SPINNER_scaled_font2d_thickness->set_int_limits(1,10);
 
   PANEL_font3d = glui_labels->add_panel_to_panel(ROLLOUT_font,"scene",true);
-  SPINNER_scaled_font3d_size=glui_labels->add_spinner_to_panel(PANEL_font3d,"size:",GLUI_SPINNER_INT,&scaled_font3d_size);
-  SPINNER_scaled_font3d_width=glui_labels->add_spinner_to_panel(PANEL_font3d,"width:",GLUI_SPINNER_INT,&scaled_font3d_width);
-  SPINNER_scaled_font3d_width->set_int_limits(1,10);
+  SPINNER_scaled_font3d_height=glui_labels->add_spinner_to_panel(PANEL_font3d,"height:",GLUI_SPINNER_INT,&scaled_font3d_height);
+  SPINNER_scaled_font3d_height2width=glui_labels->add_spinner_to_panel(PANEL_font3d,"height/width:",GLUI_SPINNER_FLOAT,&scaled_font3d_height2width);
+  SPINNER_scaled_font3d_height2width->set_float_limits(0.5,1.5);
+  SPINNER_scaled_font3d_thickness=glui_labels->add_spinner_to_panel(PANEL_font3d,"thickness:",GLUI_SPINNER_INT,&scaled_font3d_thickness);
+  SPINNER_scaled_font3d_thickness->set_int_limits(1,10);
   glui_update_fontindex();
 
   ROLLOUT_user_tick = glui_labels->add_rollout("User tick settings",false);

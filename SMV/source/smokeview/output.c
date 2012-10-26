@@ -66,8 +66,8 @@ void outputSText3(float x, float y, float z, char *string){
 
 
   if(string==NULL)return;
-  scale_x = xyzmaxdiff*((float)scaled_font3d_size/(float)104.76)/(float)port_pixel_width;
-  scale_y = xyzmaxdiff*((float)scaled_font3d_size/(float)152.38)/(float)port_pixel_height;
+  scale_x = xyzmaxdiff*(scaled_font3d_height2width*(float)scaled_font3d_height/(float)104.76)/(float)port_pixel_width;
+  scale_y = xyzmaxdiff*((float)scaled_font3d_height/(float)152.38)/(float)port_pixel_height;
   glPushMatrix();
   glTranslatef(x,y,z);
   v[0]=world_eyepos[0]-x;
@@ -105,8 +105,8 @@ void outputSText2r(float x, float y, float z, char *string){
     total_width+=glutStrokeWidth(GLUT_STROKE_ROMAN,*c);
   }
   glPushMatrix();
-  scale_x = port_unit_width*((float)scaled_font2d_size/(float)104.76)/(float)port_pixel_width;
-  scale_y = port_unit_height*((float)scaled_font2d_size/(float)152.38)/(float)port_pixel_height;
+  scale_x = port_unit_width*(scaled_font2d_height2width*(float)scaled_font2d_height/(float)104.76)/(float)port_pixel_width;
+  scale_y = port_unit_height*((float)scaled_font2d_height/(float)152.38)/(float)port_pixel_height;
   if(renderdoublenow!=0){
     scale_x *= (float)nrender_rows;
     scale_y *= (float)nrender_rows;
@@ -132,8 +132,8 @@ void outputSText2(float x, float y, float z, char *string){
     total_width+=glutStrokeWidth(GLUT_STROKE_ROMAN,*c);
   }
   glPushMatrix();
-  scale_x = (25.0/36.0)*port_unit_width*((float)scaled_font2d_size/(float)104.76)/(float)port_pixel_width;
-  scale_y = (25.0/18.0)*port_unit_height*((float)scaled_font2d_size/(float)152.38)/(float)port_pixel_height;
+  scale_x = (25.0/36.0)*port_unit_width*(scaled_font2d_height2width*(float)scaled_font2d_height/(float)104.76)/(float)port_pixel_width;
+  scale_y = (12.0/18.0)*(25.0/18.0)*port_unit_height*((float)scaled_font2d_height/(float)152.38)/(float)port_pixel_height;
   if(renderdoublenow!=0){
     scale_x *= (float)nrender_rows;
     scale_y *= (float)nrender_rows;
@@ -574,10 +574,10 @@ labeldata *LABEL_insert(labeldata *labeltemp){
 
 void scale_2dfont(void){
   if(render_multi!=0){
-    glLineWidth((float)nrender_rows*(float)scaled_font2d_width);
+    glLineWidth((float)nrender_rows*(float)scaled_font2d_thickness);
   }
   else{
-    glLineWidth((float)scaled_font2d_width);
+    glLineWidth((float)scaled_font2d_thickness);
   }
 }
 
@@ -585,10 +585,10 @@ void scale_2dfont(void){
 
 void scale_3dfont(void){
   if(render_multi!=0){
-    glLineWidth((float)nrender_rows*(float)scaled_font3d_width);
+    glLineWidth((float)nrender_rows*(float)scaled_font3d_thickness);
   }
   else{
-    glLineWidth((float)scaled_font3d_width);
+    glLineWidth((float)scaled_font3d_thickness);
   }
 }
 
