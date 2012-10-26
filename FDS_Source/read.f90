@@ -1471,7 +1471,6 @@ MU_AIR_0     = 1.8E-5_EB                                           ! Dynamic Vis
 CP_AIR_0     = 1012._EB                                            ! Specific Heat of Air at 20 C (J/kg/K)
 PR_AIR       = 0.7_EB
 K_AIR_0      = MU_AIR_0*CP_AIR_0/PR_AIR                            ! Thermal Conductivity of Air at 20 C (W/m/K)
-RHO_SOOT     = 1850._EB                                            ! Density of soot particle (kg/m3)
 
 ! Empirical heat transfer constants
  
@@ -1639,8 +1638,6 @@ SELECT CASE (TRIM(TURBULENCE_MODEL))
       CALL SHUTDOWN(MESSAGE)
 END SELECT
    
-IF (AL2O3) RHO_SOOT = 4000._EB
-
 ! Level set based model of firespread in vegetation
 
 IF(VEG_LEVEL_SET) WIND_ONLY = .TRUE.
@@ -1755,7 +1752,7 @@ IF (TWO_D .OR. SOLID_PHASE_ONLY) SMOKE3D = .FALSE.
 IF (SMOKE3D_QUANTITY=='null') THEN
    IF (SOOT_INDEX > 0)  THEN
       SMOKE3D_QUANTITY = 'MASS FRACTION'
-      SMOKE3D_SPEC_ID  = 'SOOT'
+      SMOKE3D_SPEC_ID  = SPECIES(SOOT_INDEX)%ID
    ELSE
       IF (N_REACTIONS > 0)  THEN
          SMOKE3D_QUANTITY = 'HRRPUV'
@@ -2027,8 +2024,11 @@ SPEC_READ_LOOP: DO N=1,N_SPECIES
    IF (SS%DATA_ID=='SOOT' .AND. SS%ID/='SOOT') THEN
       IF (MASS_EXTINCTION_COEFFICIENT < 0._EB) SS%MASS_EXTINCTION_COEFFICIENT = 8700._EB
       IF (.NOT. SIMPLE_CHEMISTRY .AND. TRIM(SS%FORMULA)=='Soot') SS%ATOMS(6) = 1._EB
+      IF (SOOT_INDEX == 0) SOOT_INDEX = N
    ENDIF
-      
+   
+   IF (SS%RADCAL_ID=='SOOT' .AND. SOOT_INDEX==0) SOOT_INDEX = N
+   IF (SS%ID=='SOOT' .AND. AL2O3) SS%DENSITY_SOLID = 4000.
    IF (AEROSOL) SS%MODE = AEROSOL_SPECIES
 
    ! Get ramps
@@ -10138,10 +10138,10 @@ Z_INDEX = -1
 
 SPEC_ID = SPEC_ID_IN
 
-IF (QUANTITY=='OPTICAL DENSITY'        .AND. SPEC_ID=='null') SPEC_ID='SOOT'
-IF (QUANTITY=='EXTINCTION COEFFICIENT' .AND. SPEC_ID=='null') SPEC_ID='SOOT'
-IF (QUANTITY=='SOOT VOLUME FRACTION'   .AND. SPEC_ID=='null') SPEC_ID='SOOT'
-IF (QUANTITY=='VISIBILITY'             .AND. SPEC_ID=='null') SPEC_ID='SOOT'
+IF (QUANTITY=='OPTICAL DENSITY'         .AND. SPEC_ID=='null') SPEC_ID='SOOT'
+IF (QUANTITY=='EXTINCTION COEFFICIENT'  .AND. SPEC_ID=='null') SPEC_ID='SOOT'
+IF (QUANTITY=='AEROSOL VOLUME FRACTION' .AND. SPEC_ID=='null') SPEC_ID='SOOT'
+IF (QUANTITY=='VISIBILITY'              .AND. SPEC_ID=='null') SPEC_ID='SOOT'
 
 PART_INDEX = 0
 DUCT_INDEX = 0
