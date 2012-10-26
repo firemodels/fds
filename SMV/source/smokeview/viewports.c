@@ -31,18 +31,11 @@ void Get_VP_info(void){
   float text_height;
 
 
-  switch (fontindex){
-    case SCALED_FONT:
-      text_height = MAX(18,(int)( (12.0/18.0)*(25.0/18.0)*(float)scaled_font2d_height));
-      break;
-    case SMALL_FONT:
-    case LARGE_FONT:
-      text_height = 18;
-      break;
-    default:
-      ASSERT(0);
-      break;
+  text_height=18;
+  if(fontindex==SCALED_FONT){
+    text_height = MAX(18,(int)( (12.0/18.0)*(25.0/18.0)*(float)scaled_font2d_height));
   }
+
   // full screen viewport dimensions
 
   VP_fullscreen.left = 0;
@@ -97,7 +90,7 @@ void Get_VP_info(void){
   VP_timebar.doit=doit;
   if(doit==1){
     VP_timebar.width = screenWidth-colorbar_width-2*titlesafe_offset;
-    VP_title.height=2*text_height;
+    VP_timebar.height=2*text_height;
   }
   else{
     VP_timebar.width = 0;
