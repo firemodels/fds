@@ -9669,10 +9669,10 @@ the actual volume fraction of CO, and the second line reports the output of a ga
 \end{verbatim}
 \normalsize
 
-\subsection{Soot Concentration}
+\subsection{Aerosol and Soot Concentration}
 \label{info:soot}
 
-Currently there are three different device options for outputting soot concentration from FDS. It is important to recognize what each device is outputting so that the proper selection can be made.
+Currently there are three different device options for outputting aerosol concentration (e.g., soot concentration) from FDS. It is important to recognize what each device is outputting so that the proper selection can be made.
 
 \footnotesize
 \begin{verbatim}
@@ -9682,12 +9682,12 @@ Currently there are three different device options for outputting soot concentra
 \end{verbatim}
 \normalsize
 
-\noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} of soot will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} of soot will output the volume fraction of soot in the gas phase treating soot as if it were an ideal gas. The quantity {\ct 'AEROSOL VOLUME FRACTION'} will output the volume fraction of soot as if it was a solid particle in computational cell based on the following equation,
+\noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot in the gas phase treating the soot as if it were an ideal gas. The quantity {\ct 'AEROSOL VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot as if it were a solid particle in computational cell based on the following equation,
 
 \begin{equation}\label{eq:soot_volume_fraction}
-f_v = \rho Y_{s} / \rho_{s}
+f_v = \rho Y_{a} / \rho_{a}
 \end{equation}
-\noindent where $\rho$ is the local density, $Y_{s}$ is the local mass fraction of soot, and $\rho_{s}$ is density of soot defined using the {\ct SPEC} input {\ct DENSITY\_SOLID} which defaults to 1800~(kg/m$^3$).
+\noindent where $\rho$ is the local density, $Y_{a}$ is the local mass fraction of the aerosol, and $\rho_{a}$ is density of the aerosol defined using the {\ct SPEC} input {\ct DENSITY\_SOLID}, which defaults to 1800~(kg/m$^3$) for soot.
 
 \subsection{Gas Velocity}
 \label{info:velocity}
