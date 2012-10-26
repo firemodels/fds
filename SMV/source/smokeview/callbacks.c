@@ -546,7 +546,7 @@ int setup_colorbar_drag(int x, int y){
   int ifactor;
   int state;
 
-  temp = (int)(1.2*info_height);
+  temp = (int)(1.2*VP_info.height);
   if(x>screenWidth-colorbar_width){
     yy = screenHeight - y;
     factor=((float)(yy-temp)/(screenHeight-temp))*((nrgb+(float)1.0)/(nrgb-(float)0.5));
@@ -879,7 +879,7 @@ void drag_colorbar(int xm, int ym){
   int valmax=255;
   int valmin=0;
 
-  temp = (int)(1.2*info_height);
+  temp = (int)(1.2*VP_info.height);
   if(xm>screenWidth-colorbar_width){
     float yy;
 
@@ -907,7 +907,7 @@ void drag_colorbarsplit(int xm, int ym){
   int ifactor;
   float factor;
 
-  temp = (int)(1.2*info_height);
+  temp = (int)(1.2*VP_info.height);
   if(xm>screenWidth-colorbar_width){
     int ii;
     float yy;

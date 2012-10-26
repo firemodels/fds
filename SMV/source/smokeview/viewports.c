@@ -28,8 +28,21 @@ char  viewports_revision[]="$Revision$";
 
 void Get_VP_info(void){
   int doit;
+  float text_height;
 
 
+  switch (fontindex){
+    case SCALED_FONT:
+      text_height = MAX(18,(int)( (12.0/18.0)*(25.0/18.0)*(float)scaled_font2d_height));
+      break;
+    case SMALL_FONT:
+    case LARGE_FONT:
+      text_height = 18;
+      break;
+    default:
+      ASSERT(0);
+      break;
+  }
   // full screen viewport dimensions
 
   VP_fullscreen.left = 0;
@@ -59,7 +72,7 @@ void Get_VP_info(void){
   VP_info.doit = doit;
   if(doit==1){
     VP_info.width = info_width;
-    VP_info.height = info_height;
+    VP_info.height = 3*text_height;
   }
   else{
     VP_info.width = 0;
@@ -84,7 +97,7 @@ void Get_VP_info(void){
   VP_timebar.doit=doit;
   if(doit==1){
     VP_timebar.width = screenWidth-colorbar_width-2*titlesafe_offset;
-    VP_timebar.height = (int)(0.75*info_height);
+    VP_title.height=2*text_height;
   }
   else{
     VP_timebar.width = 0;
@@ -97,7 +110,7 @@ void Get_VP_info(void){
   if(visColorbarLabels==0||numColorbars==0||(showtime==0&&showplot3d==0))doit=0;
 
   VP_colorbar.left = screenWidth-2-colorbar_width-titlesafe_offset;
-  VP_colorbar.down = MAX(VP_timebar.height,VP_info.height)+titlesafe_offset;//(int)(1.2f*info_height)
+  VP_colorbar.down = MAX(VP_timebar.height,VP_info.height)+titlesafe_offset;
   VP_colorbar.doit = doit;
   if(doit==1){
     VP_colorbar.width = colorbar_width;
@@ -113,15 +126,7 @@ void Get_VP_info(void){
 
   if(visTitle==1){
     VP_title.width = screenWidth-colorbar_width-2*titlesafe_offset;
-    switch (fontindex){
-      case SCALED_FONT:
-        VP_title.height = MAX(18,(int)( (12.0/18.0)*(25.0/18.0)*(float)scaled_font2d_height));
-        break;
-      case SMALL_FONT:
-      case LARGE_FONT:
-        VP_title.height = 18;
-        break;
-    }
+    VP_title.height=text_height;
     VP_title.doit = 1;
   }
   else{
@@ -133,19 +138,6 @@ void Get_VP_info(void){
   VP_title.down = (int)screenHeight-VP_title.height-titlesafe_offset;
 
   // scene viewport dimensions
-
- /* down=0;
-  up=screenHeight;
-  if(showstereo==2){
-    left=screen_left;
-    right=screen_left+screenWidth;
-  }
-  else{
-    left=0.;
-    right=screenWidth;
-  }
-
-  aspect=(float)(up-down)/(float)(right-left);*/
 
   VP_scene.left=titlesafe_offset;
   VP_scene.down=titlesafe_offset+VP_timebar.height;
@@ -507,7 +499,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
     }
     labellength=glutBitmapLength(large_font, (const unsigned char *)meshlabel);
     mesh_left=val_right-val_right*labellength/(float)info_width;
-    mesh_bot=val_top-val_top*large_font_height/(float)(info_height);
+    mesh_bot=val_top-val_top*large_font_height/(float)(VP_info.height);
     outputText(mesh_left,mesh_bot, meshlabel);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visx_all==1)||visGrid==noGridProbe||visGrid==GridProbe){

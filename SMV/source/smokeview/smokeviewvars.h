@@ -714,7 +714,7 @@ SVEXTERN int ntargets;
 SVEXTERN int endian_data, endian_native, setendian;
 
 SVEXTERN int mainwindow_id;
-SVEXTERN int SVDECL(info_width,150),SVDECL(colorbar_width,150),SVDECL(info_height_base,60), SVDECL(info_height,60);
+SVEXTERN int SVDECL(info_width,150),SVDECL(colorbar_width,150);
 SVEXTERN int rendertourcount;
 
 #ifdef pp_MEMDEBUG
