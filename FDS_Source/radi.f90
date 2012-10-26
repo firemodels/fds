@@ -241,7 +241,7 @@ ENDIF INIT_WIDE_BAND
 !                  4        CO
 !                  5        O2
 !                  6        N2
-!          SVF=SOOT VOLUME FRACTION OF J TH ELEMENT
+!          SVF=AEROSOL VOLUME FRACTION OF J TH ELEMENT
 !          OMMIN=MINIMUM WAVE NUMBER IN SPECTRUM, CM-1.
 !          OMMAX=MAXIMUM WAVE NUMBER IN SPECTRUM, CM-1.
 !
@@ -371,12 +371,13 @@ MAKE_KAPPA_ARRAYS: IF (ANY(SPECIES%RADCAL_ID/='null')) THEN
       DO NS=0,N_TRACKED_SPECIES
          DO NS2=1,N_SPECIES
             IF (SPECIES(NS2)%RADCAL_INDEX > 0) THEN
-               IF (SPECIES(NS2)%ID/='SOOT') THEN
+               IF (SPECIES(NS2)%RADCAL_ID/='SOOT') THEN
                   Z2RADCAL_SPECIES(SPECIES(NS2)%RADCAL_INDEX,NS) = Z2RADCAL_SPECIES(SPECIES(NS2)%RADCAL_INDEX,NS) + &
-                                                                    REAL(N_KAPPA_Y,EB)**4 / SPECIES(NS2)%MW * Z2Y(NS2,NS)
+                                                                   REAL(N_KAPPA_Y,EB)**4 / SPECIES(NS2)%MW * Z2Y(NS2,NS)
                ELSE
                   Z2RADCAL_SPECIES(SPECIES(NS2)%RADCAL_INDEX,NS) = Z2RADCAL_SPECIES(SPECIES(NS2)%RADCAL_INDEX,NS) + &
-                                                                    REAL(N_KAPPA_Y,EB)**4 * 5._EB * Z2Y(NS2,NS)
+                                                                   REAL(N_KAPPA_Y,EB)**4 * 5._EB * Z2Y(NS2,NS) * &
+                                                                   SPECIES(SOOT_INDEX)%DENSITY_SOLID/SPECIES(NS2)%DENSITY_SOLID
                ENDIF
             ENDIF
          ENDDO
@@ -439,9 +440,9 @@ MAKE_KAPPA_ARRAYS: IF (ANY(SPECIES%RADCAL_ID/='null')) THEN
                         YY2 = YY * 0.2_EB
                         SPECIE = 0._EB
                         P      = 0._EB
-                        SPECIE(5) = YY2*RCRHO/RHO_SOOT
+                        SPECIE(5) = YY2*RCRHO/SPECIES(SOOT_INDEX)%DENSITY_SOLID
                         P(6) = 1._EB
-                        SVF = YY2*RCRHO/RHO_SOOT
+                        SVF = SPECIE(5)
                     CASE(5:13) ! FUELS
                         SVF    = 0._EB
                         SPECIE = 0._EB
