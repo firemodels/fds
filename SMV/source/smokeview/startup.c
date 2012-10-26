@@ -1430,8 +1430,6 @@ void initvars(void){
   nrooms=0;
   nzoneinfo=0;
   nfires=0;
-  window_aspect_ratio=1.0;
-  aspect=1.;
   visLIGHT0=1;
   visLIGHT1=1;
   visLIGHTMENU=1;

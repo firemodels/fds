@@ -948,10 +948,6 @@ void drag_timebar(int xm, int ym){
 
 void Move_Gen_Slice(int xm, int ym){
   int dxm, dym;
-  int screenWidth2, screenHeight2;
-
-  screenWidth2 = screenWidth - colorbar_width;
-  screenHeight2 = screenHeight - info_height;
 
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
@@ -960,8 +956,8 @@ void Move_Gen_Slice(int xm, int ym){
       {
         float daz, delev;
 
-        daz = 360.0*dxm/(float)screenWidth2;
-        delev = 360.0*dym/(float)screenHeight2;
+        daz = 360.0*dxm/(float)screenWidth;
+        delev = 360.0*dym/(float)screenHeight;
         gslice_normal_azelev[0] += daz;
         gslice_normal_azelev[1] += delev;
         update_gslice_parms();
@@ -975,9 +971,9 @@ void Move_Gen_Slice(int xm, int ym){
         float dx, dy;
 
         xx = xm-mouse_down_xy0[0];
-        xx = xx/(float)screenWidth2;
+        xx = xx/(float)screenWidth;
         yy = ym-mouse_down_xy0[1];
-        yy = yy/(float)screenHeight2;
+        yy = yy/(float)screenHeight;
         dx = (xyzbox+gslice_xyz0[0])*xx;
         dy = -(xyzbox-gslice_xyz0[1])*yy;
         gslice_xyz[0] += dx;
@@ -994,7 +990,7 @@ void Move_Gen_Slice(int xm, int ym){
         float yy;
 
         yy = ym-mouse_down_xy0[1];
-        yy = yy/(float)screenHeight2;
+        yy = yy/(float)screenHeight;
 
         gslice_xyz[2] = gslice_xyz0[2] - DENORMALIZE_Z(4*(xyzbox-NORMALIZE_Z(gslice_xyz0[2]))*yy);
         update_gslice_parms();
@@ -1012,15 +1008,12 @@ void Move_Gen_Slice(int xm, int ym){
 
 void Move_Scene(int xm, int ym){
   float *eye_xyz, *az_elev;
-  int screenWidth2, screenHeight2;
   int dxm, dym;
   float elevation;
   float xx, yy;
 
   eye_xyz = camera_current->eye;
   az_elev = camera_current->az_elev;
-  screenWidth2 = screenWidth - colorbar_width;
-  screenHeight2 = screenHeight - info_height;
 
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
@@ -1064,9 +1057,9 @@ void Move_Scene(int xm, int ym){
         float dx, dy;
 
         xx = xm-mouse_down_xy0[0];
-        xx = xx/(float)screenWidth2;
+        xx = xx/(float)screenWidth;
         yy = ym-mouse_down_xy0[1];
-        yy = yy/(float)screenHeight2;
+        yy = yy/(float)screenHeight;
         if(rotation_type==EYE_CENTERED){
           float xx2, yy2;
           float cs_az, sn_az;
@@ -1094,9 +1087,9 @@ void Move_Scene(int xm, int ym){
 
     case KEY_ALT:
       xx = xm-mouse_down_xy0[0];
-      xx = xx/(float)screenWidth2;
+      xx = xx/(float)screenWidth;
       yy = ym-mouse_down_xy0[1];
-      yy = yy/(float)screenHeight2;
+      yy = yy/(float)screenHeight;
 
       eye_xyz[0] = eye_xyz0[0]; /* disable horizontal motion */
       eye_xyz[2] = eye_xyz0[2] - 4*(xyzbox-eye_xyz0[2])*yy;
@@ -2483,17 +2476,10 @@ void setScreenSize(int *width, int *height){
 /* ------------------ update_camera_ypos ------------------------ */
 
 void Reshape_CB(int width, int height){
-  int screenWidth2, screenHeight2;
-
   updatemenu=1;
   window_aspect_ratio = (float)width/(float)height;
-  aspect = window_aspect_ratio;
-  if(window_aspect_ratio<1.0){
-    window_aspect_ratio=1.0/window_aspect_ratio;
-  }
+  if(window_aspect_ratio<1.0)window_aspect_ratio=1.0/window_aspect_ratio;
   setScreenSize(&width,&height);
-  screenWidth2 = screenWidth - colorbar_width;   
-  screenHeight2 = screenHeight - info_height;
   windowresized=1;
   update_camera_ypos(camera_external);
   if(strcmp(camera_current->name,"external")==0&&in_external==1){

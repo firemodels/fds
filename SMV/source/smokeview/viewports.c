@@ -113,7 +113,15 @@ void Get_VP_info(void){
 
   if(visTitle==1){
     VP_title.width = screenWidth-colorbar_width-2*titlesafe_offset;
-    VP_title.height = (int)(info_height/4);
+    switch (fontindex){
+      case SCALED_FONT:
+        VP_title.height = MAX(18,(int)( (25.0/18.0)*(float)scaled_font2d_size));
+        break;
+      case SMALL_FONT:
+      case LARGE_FONT:
+        VP_title.height = 18;
+        break;
+    }
     VP_title.doit = 1;
   }
   else{
@@ -122,7 +130,7 @@ void Get_VP_info(void){
     VP_title.doit = 0;
   }
   VP_title.left = titlesafe_offset;
-  VP_title.down = (int)screenHeight-1.1*VP_title.height-titlesafe_offset;
+  VP_title.down = (int)screenHeight-VP_title.height-titlesafe_offset;
 
   // scene viewport dimensions
 
@@ -143,6 +151,8 @@ void Get_VP_info(void){
   VP_scene.down=titlesafe_offset+VP_timebar.height;
   VP_scene.width=screenWidth-2*titlesafe_offset-VP_colorbar.width;
   VP_scene.height=screenHeight-MAX(VP_timebar.height,VP_info.height)-VP_title.height - 2*titlesafe_offset; 
+
+  scene_aspect_ratio = (float)VP_scene.height/(float)VP_scene.width;
 }
 
  /* ------------------------ SUB_portortho ------------------------- */
@@ -218,6 +228,87 @@ int SUB_portortho(int quad,
     ASSERT(FFALSE);
     break;
   }
+  return 1;
+}
+
+
+/* ------------------------ SUB_portortho ------------------------- */
+
+int SUB_portortho2(int quad, 
+                  portdata *p,
+                  GLint screen_left, GLint screen_down
+                  ){
+
+  GLint subport_left, subport_right, subport_down, subport_top;
+  GLdouble subportx_left, subportx_right, subportx_down, subportx_top;
+  GLsizei subport_width, subport_height;
+  GLint subwindow_left, subwindow_right, subwindow_down, subwindow_top;
+  GLint port_right, port_top;
+
+  int irow, icol;
+  GLdouble portx_left, portx_right, portx_down, portx_top;
+
+  portx_left = p->left;
+  portx_right = p->left + p->width;
+  portx_down = p->down;
+  portx_top = p->down + p->height;
+  switch (quad){
+  case 0:            
+    port_pixel_width = p->width;
+    port_pixel_height = p->height;
+    port_unit_width = portx_right - portx_left;
+    port_unit_height = portx_top - portx_down;
+    glViewport(p->left,p->down,p->width,p->height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(portx_left,portx_right,portx_down,portx_top);
+    return 1;
+  case 1:
+    icol = screen_left/screenWidth;
+    irow = screen_down/screenHeight;
+
+    subwindow_left = icol*screenWidth;
+    subwindow_right = subwindow_left + screenWidth;
+    subwindow_down = irow*screenHeight;
+    subwindow_top = subwindow_down + screenHeight;
+
+    port_right = p->left + p->width;
+    port_top = p->down + p->height;
+
+    subport_left =  MAX( nrender_rows*p->left,subwindow_left);
+    subport_right = MIN(nrender_rows*port_right,subwindow_right);
+    subport_down =  MAX( nrender_rows*p->down,subwindow_down);
+    subport_top =   MIN(  nrender_rows*port_top,subwindow_top);
+    if(subport_left>=subport_right||subport_down>=subport_top)return 0;
+
+#define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
+
+    subportx_left = CONV(subport_left,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_right = CONV(subport_right,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
+    subportx_down = CONV(subport_down,nrender_rows*p->down,nrender_rows*port_top,portx_down,portx_top);
+    subportx_top = CONV(subport_top,nrender_rows*p->down,nrender_rows*port_top,portx_down,portx_top);
+
+    subport_left -= icol*screenWidth;
+    subport_right -= icol*screenWidth;
+    subport_down -= irow*screenHeight;
+    subport_top -= irow*screenHeight;
+    subport_width = subport_right - subport_left;
+    subport_height = subport_top - subport_down;
+
+    port_pixel_width = subport_width;
+    port_pixel_height = subport_height;
+    port_unit_width = subportx_right - subportx_left;
+    port_unit_height = subportx_top - subportx_down;
+
+    glViewport(subport_left,subport_down,subport_width,subport_height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(subportx_left,subportx_right,subportx_down,subportx_top);
+    break;
+  default:
+    ASSERT(FFALSE);
+    break;
+                    }
   return 1;
 }
 
@@ -375,14 +466,8 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
   float val_right=1.0,val_top=1.0;
   mesh *mesh_xyz=NULL;
   float xyz[3];
-  GLint port_left, port_down, port_width, port_height; 
   GLdouble portx_left=0.0, portx_right=1.0, portx_down=0.0, portx_top=1.0;
 
-  port_left = screenWidth-info_width-titlesafe_offset;
-  port_down = titlesafe_offset;
-  port_width = info_width;
-  port_height = info_height;
-  
   if(screenWidth<screenHeight){
     val_top *= window_aspect_ratio;
     portx_top *= window_aspect_ratio;
@@ -512,31 +597,11 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
 /* ------------------------ TIME BAR Viewport ------------------------- */
 
 void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
-  int doit=0;
 #ifdef pp_memstatus
   unsigned int availmemory;
   char percen[]="%";
 #endif
-  GLint port_left, port_down, port_width, port_height; 
   GLdouble portx_left, portx_right, portx_down, portx_top;
-
-
-  if(
-    (visTimeLabels==1&&showtime==1)||
-    (showtime==1&&(visFramerate==1||benchmark==1||(vis_slice_average==1&&show_slice_average&&slice_average_flag==1))||
-    (hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
-    )
-#ifdef pp_memstatus
-    ||visAvailmemory==1
-#endif
-    )doit=1;
-
-  if(doit==0)return;
-
-  port_left = titlesafe_offset;
-  port_down = titlesafe_offset;
-  port_width = screenWidth-colorbar_width-2*titlesafe_offset;
-  port_height = (int)(0.75*info_height);
 
   portx_left=0.0;
   portx_right=1.0;
@@ -672,20 +737,12 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   GLint temp;
   float xnum;
 
-  GLint port_left, port_down, port_width, port_height; 
   GLdouble portx_left, portx_right, portx_down, portx_top;
-
-  if(visColorbarLabels==0||numColorbars==0||(showtime==0&&showplot3d==0))return;
 
   xnum=numColorbars;
   if(fontindex==LARGE_FONT)xnum*=1.5;
 
   barright=xnum/3.0+0.1f;
-
-  port_left = screenWidth-2-colorbar_width-titlesafe_offset;
-  port_down = (int)(1.2f*info_height)+titlesafe_offset;
-  port_width = colorbar_width;
-  port_height = screenHeight-(int)(1.2f*info_height)-2*titlesafe_offset;
 
   portx_left = 0.;
   portx_right = (double)barright;
@@ -704,28 +761,12 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
     /* -------------------------- TITLE Viewport -------------------------- */
 
 void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
-  int left;
-  float textdown;
-  GLint port_left, port_down, port_width, port_height; 
-  GLdouble portx_left, portx_right, portx_down, portx_top;
+  float left, textdown;
 
-  if(visTitle!=1)return;
+  if(SUB_portortho2(quad,&VP_title,screen_left,screen_down)==0)return;
 
-  port_left = titlesafe_offset;
-  port_down = (int)(screenHeight-1.1f*info_height/4.f)-titlesafe_offset;
-  port_width = screenWidth-colorbar_width-2*titlesafe_offset;
-  port_height = (int)(info_height/4);
-
-  portx_left = 0.0;
-  portx_right = 1.0;
-  portx_down = 0.0;
-  portx_top = (double)(window_aspect_ratio);
-
-  if(SUB_portortho(quad,&VP_title,portx_left,portx_right,portx_down,portx_top,screen_left,screen_down)==0)return;
-
-  left=(int)((float)75/(float)(screenWidth-colorbar_width));
-  if(screenWidth>=screenHeight)left*=window_aspect_ratio;
-  textdown=window_aspect_ratio/5.0;
+  left=0;
+  textdown=VP_title.down;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -741,61 +782,36 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
 
 void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_down){
 
-  float up, down, left, right;
   float fleft, fright, fup, fdown;
   float StereoCameraOffset,FrustumAsymmetry;
   float aperture_temp;
   float widthdiv2;
   float eyexINI, eyeyINI, eyezINI;
 
-  down=0;
-  up=screenHeight;
-  if(showstereo==2){
-    left=screen_left;
-    right=screen_left+screenWidth;
-  }
-  else{
-    left=0.;
-    right=screenWidth;
-    if(visColorbarLabels==1||(visBlocklabel==1&&nmeshes>1))right-=colorbar_width;
-    if(visTitle==1)up-=1.1*info_height/4.0;
-  }
-
-  if((visTimeLabels==1&&showtime==1)||(showtime==1&&(visFramerate==1||benchmark==1))||(visGrid!=noGridnoProbe&&visgridloc==1)
-#ifdef pp_memstatus
-      ||visAvailmemory==1
-#endif
-      ||(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
-    ){
-    down=0.75*info_height;
-  }
-  
-  aspect=(float)(up-down)/(float)(right-left);
-
-  /* set view position for virtual tour */
-
-  {
     tourdata *touri;
     pathdata *pj;
-    if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
-      if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
-        touri = tourinfo + selectedtour_index;
-        iframe = touri->timeslist[itimes];
-        if(keyframe_snap==1&&selected_frame!=NULL){
-          pj=&selected_frame->nodeval;
-        }
-        else{
-          pj = touri->pathnodes + iframe;
-        }
 
-        camera_current->eye[0]=pj->eye[0];
-        camera_current->eye[1]=pj->eye[1];
-        camera_current->eye[2]=pj->eye[2];
-        camera_current->az_elev[1]=0.0;
-        camera_current->az_elev[0]=0.0;
-
+  if(showstereo==2){
+    VP_scene.left=screen_left;
+    VP_scene.width=screenWidth;
+  }
+  if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
+    if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
+      touri = tourinfo + selectedtour_index;
+      iframe = touri->timeslist[itimes];
+      if(keyframe_snap==1&&selected_frame!=NULL){
+        pj=&selected_frame->nodeval;
       }
-    }
+      else{
+        pj = touri->pathnodes + iframe;
+      }
+
+      camera_current->eye[0]=pj->eye[0];
+      camera_current->eye[1]=pj->eye[1];
+      camera_current->eye[2]=pj->eye[2];
+      camera_current->az_elev[1]=0.0;
+      camera_current->az_elev[0]=0.0;
+     }
   }
 
   if(plotstate==DYNAMIC_PLOTS&&select_avatar==1&&selected_avatar_tag>0&&view_from_selected_avatar==1){
@@ -805,8 +821,6 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     camera_current->azimuth=selected_avatar_angle;
     camera_current->view_angle=0.0;
     update_camera(camera_current);
-    //camera_current->az_elev[1]=0.0;
-    //camera_current->az_elev[0]=0.0;
   }
 
   eyexINI = camera_current->eye[0];
@@ -819,10 +833,6 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   
   StereoCameraOffset=0.0;
   aperture_temp=aperture;
-//  zoom = tan(PI*aperture/360.0)/sqrt(3.0)
-//  aperture_temp = 360.0*atan(1.0/(zoom*sqrt(3.0)))/PI;
-//  aperture_temp = (360.0/PI)*atan(0.5/zoom);
-//  aperture_temp = (360.0/PI)*atan((8.5/20.0)/zoom);
   aperture_temp = zoom2aperture(zoom);
 
   {
@@ -845,12 +855,11 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     }
   }
 
-
   widthdiv2 = fnear*tan(0.5*aperture_temp*DEG2RAD);
   fleft = -widthdiv2;
   fright = widthdiv2;
-  fup = aspect*widthdiv2;
-  fdown = -aspect*widthdiv2;
+  fup = scene_aspect_ratio*widthdiv2;
+  fdown = -scene_aspect_ratio*widthdiv2;
   
   if(showstereo==0||view_mode==VIEW_CENTER){
     StereoCameraOffset=0.0;

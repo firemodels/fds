@@ -132,14 +132,15 @@ void outputSText2(float x, float y, float z, char *string){
     total_width+=glutStrokeWidth(GLUT_STROKE_ROMAN,*c);
   }
   glPushMatrix();
-  scale_x = port_unit_width*((float)scaled_font2d_size/(float)104.76)/(float)port_pixel_width;
-  scale_y = port_unit_height*((float)scaled_font2d_size/(float)152.38)/(float)port_pixel_height;
+  scale_x = (25.0/36.0)*port_unit_width*((float)scaled_font2d_size/(float)104.76)/(float)port_pixel_width;
+  scale_y = (25.0/18.0)*port_unit_height*((float)scaled_font2d_size/(float)152.38)/(float)port_pixel_height;
   if(renderdoublenow!=0){
     scale_x *= (float)nrender_rows;
     scale_y *= (float)nrender_rows;
   }
   glTranslatef(x,y,z);
   glScalef(scale_x,scale_y,1.0);
+  glTranslatef(0.0,25.0,0.0);
   for (c=string; *c != '\0'; c++){
     glutStrokeCharacter(GLUT_STROKE_ROMAN,*c);
   }
