@@ -582,6 +582,7 @@ in FDS 6 are:
 \item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
 \item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with
 {\ct SPEC\_ID} instead.
+\item The output quantity {\ct 'SOOT VOLUME FRACTION'} has been replaced with {\ct 'AEROSOL VOLUME FRACTION'} along with {\ct SPEC\_ID}.
 \end{itemize}
 
 
@@ -9676,17 +9677,17 @@ Currently there are three different device options for outputting soot concentra
 \footnotesize
 \begin{verbatim}
 &DEVC ID='MF_SOOT', XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='SOOT'/
-&DEVC ID='VF_SOOT', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='SOOT' /
-&DEVC ID='SOOT_VF', XYZ=..., QUANTITY='SOOT VOLUME FRACTION' /
+&DEVC ID='VF_SOOT', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='SOOT'/
+&DEVC ID='SOOT_VF', XYZ=..., QUANTITY='AEROSOL VOLUME FRACTION', SPEC_ID='SOOT'/
 \end{verbatim}
 \normalsize
 
-\noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} of soot will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} of soot will output the volume fraction of soot in the gas phase treating soot as if it were an ideal gas. The quantity {\ct 'SOOT VOLUME FRACTION'} will output the volume fraction of soot as if it was a solid particle in computational cell based on the following equation,
+\noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} of soot will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} of soot will output the volume fraction of soot in the gas phase treating soot as if it were an ideal gas. The quantity {\ct 'AEROSOL VOLUME FRACTION'} will output the volume fraction of soot as if it was a solid particle in computational cell based on the following equation,
 
 \begin{equation}\label{eq:soot_volume_fraction}
 f_v = \rho Y_{s} / \rho_{s}
 \end{equation}
-\noindent where $\rho$ is the local density, $Y_{s}$ is the local mass fraction of soot, and $\rho_{s}$ is density of soot defined to be 1850~(kg/m$^3$).
+\noindent where $\rho$ is the local density, $Y_{s}$ is the local mass fraction of soot, and $\rho_{s}$ is density of soot defined using the {\ct SPEC} input {\ct DENSITY\_SOLID} which defaults to 1800~(kg/m$^3$).
 
 \subsection{Gas Velocity}
 \label{info:velocity}
@@ -9967,6 +9968,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct ABSORPTION COEFFICIENT}                    & $\kappa$ (Section~\ref{info:RADI})            & 1/m            & D,I,P,S      \\ \hline
 {\ct ACTUATED SPRINKLERS}                       & Number of actuated sprinklers                 &                & D            \\ \hline
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
+{\ct AEROSOL VOLUME FRACTION}                   & $\rho Y_a/\rho_a$ (Section~\ref{info:soot})   & mol/mol        & D,I,P,S      \\ \hline
 {\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%             & D            \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                    & Pa             & D,I,P,S      \\ \hline
@@ -10028,7 +10030,6 @@ remember that all output quantity names ought to be in single quotes.
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
 {\ct SCALAR RESOLUTION}$^{*****}$               & Section~\ref{info:meshquality}                &                & S            \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
-{\ct SOOT VOLUME FRACTION}                      & $\rho Y_s/\rho_s$ (Section~\ref{info:soot})   & mol/mol        & D,I,P,S      \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
