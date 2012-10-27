@@ -29,11 +29,14 @@ char  viewports_revision[]="$Revision$";
 void Get_VP_info(void){
   int doit;
   float text_height;
+  float text_width;
 
-
+  v_space = 2;
   text_height=18;
+  text_width=18;
   if(fontindex==SCALED_FONT){
     text_height = MAX(18,(int)( (12.0/18.0)*(25.0/18.0)*(float)scaled_font2d_height));
+    text_width =  MAX(18, (25.0/36.0)*(scaled_font2d_height2width*(float)scaled_font2d_height));
   }
 
   // full screen viewport dimensions
@@ -42,6 +45,8 @@ void Get_VP_info(void){
   VP_fullscreen.down = 0;
   VP_fullscreen.width = screenWidth;
   VP_fullscreen.height = screenHeight;
+  VP_fullscreen.right = VP_fullscreen.left + VP_fullscreen.width;
+  VP_fullscreen.top = VP_fullscreen.down + VP_fullscreen.height;
   VP_info.doit = 1;
 
   // INFO viewport dimensions
@@ -63,14 +68,18 @@ void Get_VP_info(void){
   VP_info.left = screenWidth-info_width-titlesafe_offset;
   VP_info.down = titlesafe_offset;
   VP_info.doit = doit;
+  VP_info.text_height = text_height;
+  VP_info.text_width = text_width;
   if(doit==1){
     VP_info.width = info_width;
-    VP_info.height = 3*text_height;
+    VP_info.height = 3*(text_height+v_space);
   }
   else{
     VP_info.width = 0;
     VP_info.height = 0;
   }
+  VP_info.right = VP_info.left + VP_fullscreen.width;
+  VP_fullscreen.top = VP_fullscreen.down + VP_info.height;
 
   // timebar viewport dimensions
 
@@ -88,14 +97,19 @@ void Get_VP_info(void){
   VP_timebar.left = titlesafe_offset;
   VP_timebar.down = titlesafe_offset;
   VP_timebar.doit=doit;
+  VP_timebar.text_height=text_height;
+  VP_timebar.text_width = text_width;
   if(doit==1){
-    VP_timebar.width = screenWidth-colorbar_width-2*titlesafe_offset;
-    VP_timebar.height=2*text_height;
+    VP_timebar.width = screenWidth-colorbar_width-VP_info.width-2*titlesafe_offset;
+    VP_timebar.height=2*(text_height+v_space);
+    if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)VP_timebar.height=3*(text_height+v_space);
   }
   else{
     VP_timebar.width = 0;
     VP_timebar.height = 0;
   }
+  VP_timebar.right = VP_timebar.left + VP_timebar.width;
+  VP_timebar.top = VP_timebar.down + VP_timebar.height;
 
   // colorbar viewport dimensions
 
@@ -105,6 +119,8 @@ void Get_VP_info(void){
   VP_colorbar.left = screenWidth-2-colorbar_width-titlesafe_offset;
   VP_colorbar.down = MAX(VP_timebar.height,VP_info.height)+titlesafe_offset;
   VP_colorbar.doit = doit;
+  VP_colorbar.text_height=text_height;
+  VP_colorbar.text_width = text_width;
   if(doit==1){
     VP_colorbar.width = colorbar_width;
     VP_colorbar.height = screenHeight-MAX(VP_timebar.height,VP_info.height)-2*titlesafe_offset;
@@ -114,12 +130,14 @@ void Get_VP_info(void){
     VP_colorbar.width = 0;
     VP_colorbar.height = 0;
   }
+  VP_colorbar.right = VP_colorbar.left + VP_colorbar.width;
+  VP_colorbar.top = VP_colorbar.down + VP_colorbar.height;
 
     // title viewport dimensions
 
   if(visTitle==1){
     VP_title.width = screenWidth-colorbar_width-2*titlesafe_offset;
-    VP_title.height=text_height;
+    VP_title.height=text_height+v_space;
     VP_title.doit = 1;
   }
   else{
@@ -127,15 +145,23 @@ void Get_VP_info(void){
     VP_title.height = 0;
     VP_title.doit = 0;
   }
+  VP_title.text_height=text_height;
+  VP_title.text_width = text_width;
   VP_title.left = titlesafe_offset;
   VP_title.down = (int)screenHeight-VP_title.height-titlesafe_offset;
+  VP_title.right = VP_title.left + VP_title.width;
+  VP_title.top = VP_title.down + VP_title.height;
 
   // scene viewport dimensions
 
+  VP_scene.text_height = text_height;
+  VP_scene.text_width = text_width;
   VP_scene.left=titlesafe_offset;
   VP_scene.down=titlesafe_offset+VP_timebar.height;
   VP_scene.width=screenWidth-2*titlesafe_offset-VP_colorbar.width;
   VP_scene.height=screenHeight-MAX(VP_timebar.height,VP_info.height)-VP_title.height - 2*titlesafe_offset; 
+  VP_scene.right = VP_scene.left + VP_scene.width;
+  VP_scene.top = VP_scene.down + VP_scene.height;
 
   scene_aspect_ratio = (float)VP_scene.height/(float)VP_scene.width;
 }
@@ -586,71 +612,66 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   unsigned int availmemory;
   char percen[]="%";
 #endif
-  GLdouble portx_left, portx_right, portx_down, portx_top;
+  int left_label_width=7*VP_timebar.text_width;
+  int right_label_width=10.5*VP_timebar.text_width;
+  int right_label_pos,right_timebar_pos;
+  int left_label_pos,left_timebar_pos;
 
-  portx_left=0.0;
-  portx_right=1.0;
-  if(screenWidth>=screenHeight)portx_right*=window_aspect_ratio;
-  portx_down=0.0;
-  portx_top=0.75;
-  if(screenWidth<screenHeight)portx_top*=window_aspect_ratio;
+  if(SUB_portortho2(quad,&VP_timebar,screen_left,screen_down)==0)return;
 
-  xtemp = 1.0;
-  if(screenWidth>=screenHeight)xtemp*=window_aspect_ratio;
-
-  if(SUB_portortho(quad,&VP_timebar,portx_left,portx_right,portx_down,portx_top,screen_left,screen_down)==0)return;
+  left_timebar_pos = VP_timebar.left+left_label_width;
+  right_timebar_pos=VP_timebar.right-right_label_width;
+  right_label_pos = right_timebar_pos+h_space;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-   xtimeleft=85.0f*xtemp/(screenWidth-colorbar_width);
-   xtimeright=xtimeleft+0.6*(xtemp-xtimeleft);
-
-   if( visTimeLabels==1&&showtime==1){
-    if(visTimelabel==1)outputText(0.0f,0.1f, timelabel);
-    if(visFramelabel==1&&visHRRlabel==0)outputText(0.0f,0.4f, framelabel);
-    if(visHRRlabel==1&&hrrinfo!=NULL)outputText(0.0f,0.4f, hrrinfo->hrrlabel);
-    drawTimeBar();
-   }
+  if( visTimeLabels==1&&showtime==1){
+    if(visTimelabel==1){
+      outputText(VP_timebar.left,v_space, timelabel);
+    }
+    if(visFramelabel==1&&(visHRRlabel==0||hrrinfo==NULL)){
+      outputText(VP_timebar.left,v_space+VP_timebar.text_height+v_space, framelabel);
+    }
+    if(visHRRlabel==1&&hrrinfo!=NULL){
+      outputText(VP_timebar.left,v_space+VP_timebar.text_height+v_space, hrrinfo->hrrlabel);
+    }
+    drawTimeBar(left_timebar_pos,right_timebar_pos,v_space+VP_timebar.down,v_space+(VP_timebar.down+20));
+  }
 
   if((benchmark==1||visFramerate==1)&&showtime==1){
     if(benchmark==0){
       sprintf(frameratelabel," Frame rate:%4.1f",framerate);
+    }
+    else{
+      if(framerate<0.0){
+        strcpy(frameratelabel," *Frame rate:");
       }
       else{
-        if(framerate<0.0){
-          strcpy(frameratelabel," *Frame rate:");
-        }
-        else{
-          sprintf(frameratelabel," *Frame rate:%4.1f",framerate);
+        sprintf(frameratelabel," *Frame rate:%4.1f",framerate);
       }
     }
-    outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
+    outputText(right_label_pos,v_space,frameratelabel);
   }
   if(show_slice_average==1&&vis_slice_average==1&&slice_average_flag==1){
     sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
-    outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
+    outputText(right_label_pos,3*v_space+2*VP_timebar.text_height, frameratelabel); // test print
   }
   if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL){
     char hrrcut_label[256];
     int ihrrcut;
-    float xxl, xxr, yyl, yyu, ddx=0.03, ddy=0.2;
 
     ihrrcut = (int)global_hrrpuv_cutoff;
 
     sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
-    outputText((float)(xtimeright+0.06),0.56f, hrrcut_label);
-    xxl = xtimeright+0.025;
-    xxr = xxl+ddx;
-    yyl = 0.56;
-    yyu = yyl + ddy;
+    outputText(right_label_pos+25+h_space,3*v_space+2*VP_timebar.text_height,hrrcut_label);
 
     glBegin(GL_QUADS);
     glColor3f(fire_red/255.0,fire_green/255.0,fire_blue/255.0);
-    glVertex3f(xxl,yyl,0.0);
-    glVertex3f(xxr,yyl,0.0);
-    glVertex3f(xxr,yyu,0.0);
-    glVertex3f(xxl,yyu,0.0);
+    glVertex3f(right_label_pos+h_space   ,5+2*VP_timebar.text_height   ,0.0);
+    glVertex3f(right_label_pos+h_space+20,5+2*VP_timebar.text_height   ,0.0);
+    glVertex3f(right_label_pos+h_space+20,5+2*VP_timebar.text_height+20,0.0);
+    glVertex3f(right_label_pos+h_space   ,5+2*VP_timebar.text_height+20,0.0);
     glEnd();
   }
 #ifdef pp_memstatus
@@ -658,10 +679,10 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
     MEMSTATUS(0,&availmemory,NULL,NULL);
     sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
     if((benchmark==1||visFramerate==1)&&showtime==1){
-      outputText((float)(xtimeright+0.025),0.32f, frameratelabel);
+      outputText(right_label_pos,2*v_space+VP_timebar.text_height,frameratelabel);
     }
     else{
-      outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
+      outputText(right_label_pos,v_space,frameratelabel);
     }
   }
 #endif
@@ -675,10 +696,10 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 
       getMemusage(MMtotalmemory,MEMlabel);
       if((benchmark==1||visFramerate==1)&&showtime==1){
-        outputText((float)(xtimeright+0.025),0.32f, MEMlabel);
+        outputText(right_label_pos,2*v_space+VP_timebar.text_height,MEMlabel);
       }
       else{
-        outputText((float)(xtimeright+0.025),0.08f, MEMlabel);
+        outputText(right_label_pos,v_space,MEMlabel);
       }
   }
 #endif

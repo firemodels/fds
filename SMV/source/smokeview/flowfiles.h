@@ -815,7 +815,8 @@ typedef struct {
 /* --------------------------  camdata ------------------------------------ */
 
 typedef struct {
-GLint left, down, width, height;
+GLint left, right, down, top, width, height;
+int text_height, text_width;
 int doit;
 } portdata;
 

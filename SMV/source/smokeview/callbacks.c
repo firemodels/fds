@@ -579,16 +579,21 @@ int setup_colorbar_drag(int x, int y){
 /* ------------------ setup_timebar_drag ------------------------ */
 
 int setup_timebar_drag(int x, int y){
-  if(screenHeight-y<50&&nglobal_times>0){
-    float xleft;
+  if(screenHeight-y<VP_timebar.height&&nglobal_times>0){
+    int left_label_width=7*VP_timebar.text_width;
+    int right_label_width=10.5*VP_timebar.text_width;
+    int right_timebar_pos;
+    int left_timebar_pos;
 
-    if(fontindex==LARGE_FONT){
-      xleft=xtimeleft+0.11;
+    left_timebar_pos = VP_timebar.left+left_label_width;
+    right_timebar_pos=VP_timebar.right-right_label_width;
+
+    if(right_timebar_pos>left_timebar_pos){
+      itimes = (float)nglobal_times*(float)(x-left_timebar_pos)/(float)(right_timebar_pos-left_timebar_pos);
     }
     else{
-      xleft=xtimeleft;
+      itimes=0;
     }
-    itimes=(int)((xtemp*x/((screenWidth-colorbar_width))-xleft)*(nglobal_times-1)/(xtimeright-xleft));
     checktimebound();
     timedrag=1;
     stept=0;
@@ -932,12 +937,19 @@ void drag_colorbarsplit(int xm, int ym){
 /* ------------------ drag_timebar ------------------------ */
 
 void drag_timebar(int xm, int ym){
-  float xxleft;
+  if(screenHeight-ym<VP_timebar.height&&nglobal_times>0){
+    int left_label_width=7*VP_timebar.text_width;
+    int right_label_width=10.5*VP_timebar.text_width;
+    int right_timebar_pos;
+    int left_timebar_pos;
 
-  xxleft = xtimeleft;
-  if(fontindex==LARGE_FONT)xxleft=xtimeleft+0.11;
-  if(screenHeight-ym<50&&nglobal_times>0&&visTimeLabels==1&&showtime==1){
-    itimes=(int)((xtemp*xm/((screenWidth-colorbar_width))-xxleft)*(nglobal_times-1)/(xtimeright-xxleft));
+    left_timebar_pos = VP_timebar.left+left_label_width;
+    right_timebar_pos=VP_timebar.right-right_label_width;
+
+    itimes=0;
+    if(right_timebar_pos>left_timebar_pos){
+      itimes = (float)nglobal_times*(float)(xm-left_timebar_pos)/(float)(right_timebar_pos-left_timebar_pos);
+    }
     checktimebound();
     timedrag=1;
   }

@@ -72,13 +72,10 @@ void UpdateTimeLabels(void){
 
 /* ------------------ drawTimeBar ------------------------ */
 
-void drawTimeBar(void){
-  float xleft=.175f, xright=1.0f, ybot=0.10f, ytop=.35f, xxright;
+void drawTimeBar(float xleft, float xright, float ybot, float ytop){
+  float xxright;
 
   glDisable(GL_LIGHTING);
-  xleft = xtimeleft;
-  if(fontindex==LARGE_FONT)xleft=xtimeleft+0.11;
-  xright = xtimeright;
 
   glLineWidth(linewidth);
   glBegin(GL_LINE_LOOP);
@@ -102,7 +99,6 @@ void drawTimeBar(void){
   glVertex2f(xxright,ytop);
   glVertex2f(xleft,ytop);
   glEnd();
-
 }
 
 /* ------------------ setColorbarClipPlanes ------------------------ */
