@@ -75,6 +75,7 @@ void UpdateTimeLabels(void){
 void drawTimeBar(float xleft, float xright, float ybot, float ytop){
   float xxright;
 
+  if(xright<=xleft)return;
   glDisable(GL_LIGHTING);
 
   glLineWidth(linewidth);
