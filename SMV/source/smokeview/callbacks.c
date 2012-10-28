@@ -580,13 +580,11 @@ int setup_colorbar_drag(int x, int y){
 
 int setup_timebar_drag(int x, int y){
   if(screenHeight-y<VP_timebar.height&&nglobal_times>0){
-    int left_label_width=7*VP_timebar.text_width;
-    int right_label_width=10.5*VP_timebar.text_width;
     int right_timebar_pos;
     int left_timebar_pos;
 
-    left_timebar_pos = VP_timebar.left+left_label_width;
-    right_timebar_pos=VP_timebar.right-right_label_width;
+    left_timebar_pos = VP_timebar.left+timebar_left_width;
+    right_timebar_pos=VP_timebar.right-timebar_right_width;
 
     if(right_timebar_pos>left_timebar_pos){
       itimes = (float)nglobal_times*(float)(x-left_timebar_pos)/(float)(right_timebar_pos-left_timebar_pos);

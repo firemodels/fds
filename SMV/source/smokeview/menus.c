@@ -5608,10 +5608,8 @@ updatemenu=0;
   }
   if(vis_slice_average==1)glutAddMenuEntry(_("*Slice average"),15);
   if(vis_slice_average==0)glutAddMenuEntry(_("Slice average"),15);
-  if(nmeshes>1){
-    if(visBlocklabel==1)glutAddMenuEntry(_("*Mesh label"),10);
-    if(visBlocklabel==0)glutAddMenuEntry(_("Mesh label"),10);
-  }
+  if(visBlocklabel==1)glutAddMenuEntry(_("*Mesh label"),10);
+  if(visBlocklabel==0)glutAddMenuEntry(_("Mesh label"),10);
 #ifdef pp_memstatus
   if(visAvailmemory==1)glutAddMenuEntry(_("*Memory load"),11);
   if(visAvailmemory==0)glutAddMenuEntry(_("Memory load"),11);

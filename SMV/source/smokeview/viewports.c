@@ -24,17 +24,49 @@ char  viewports_revision[]="$Revision$";
 
 #define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
 
+/* ------------------------ getStringWidth ------------------------- */
+
+int getStringWidth(int fontindex, char *string){
+  char *c;
+  int length=0;
+
+  if(string==NULL)return 0;
+  switch (fontindex){
+    case SMALL_FONT:
+      length = strlen(string);
+      length *= (288.0/235.0)*glutBitmapWidth(GLUT_BITMAP_HELVETICA_10, 'a');
+      break;
+    case LARGE_FONT:
+      length = strlen(string);
+      length *= (416.0/423.0)*glutBitmapWidth(GLUT_BITMAP_HELVETICA_18, 'a');
+      break;
+    case SCALED_FONT:
+      for(c=string;*c!='\0';c++){
+        length += glutStrokeWidth(GLUT_STROKE_ROMAN, *c);
+      }
+      length *= (283.0/402.0)*scale_2d_x;
+      break;
+  }
+  return length;
+}
+
 /* ------------------------ GetVP_info ------------------------- */
 
 void Get_VP_info(void){
   int doit;
   float text_height;
   float text_width;
+  int ninfo_lines=0;
+
+  info_width = getStringWidth(fontindex,"y: 115, 11.5 m");
 
   v_space = 2;
   text_height=18;
   text_width=18;
   if(fontindex==SCALED_FONT){
+    scale_2d_x = (scaled_font2d_height2width*(float)scaled_font2d_height/(float)104.76);
+    scale_2d_y = ((float)scaled_font2d_height/(float)152.38);
+
     text_height = MAX(18,(int)( (12.0/18.0)*(25.0/18.0)*(float)scaled_font2d_height));
     text_width =  MAX(18, (25.0/36.0)*(scaled_font2d_height2width*(float)scaled_font2d_height));
   }
@@ -52,17 +84,27 @@ void Get_VP_info(void){
   // INFO viewport dimensions
 
   doit=0;
-  if(visBlocklabel==1&&nmeshes>1){
+  if(visBlocklabel==1){
+    ninfo_lines++;
     doit=1;  
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visx_all==1)||visGrid==noGridProbe||visGrid==GridProbe){
-    if(visgridloc==1)doit=1;  
+    if(visgridloc==1){
+      ninfo_lines++;
+      doit=1;  
+    }
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visy_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
-    if(visgridloc==1)doit=1;  
+    if(visgridloc==1){
+      ninfo_lines++;
+      doit=1;  
+    }
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visz_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
-    if(visgridloc==1)doit=1;
+    if(visgridloc==1){
+      ninfo_lines++;
+      doit=1;  
+    }
   }
 
   VP_info.left = screenWidth-info_width-titlesafe_offset;
@@ -72,7 +114,7 @@ void Get_VP_info(void){
   VP_info.text_width = text_width;
   if(doit==1){
     VP_info.width = info_width;
-    VP_info.height = 3*(text_height+v_space);
+    VP_info.height = ninfo_lines*(text_height+v_space);
   }
   else{
     VP_info.width = 0;
@@ -100,7 +142,7 @@ void Get_VP_info(void){
   VP_timebar.text_height=text_height;
   VP_timebar.text_width = text_width;
   if(doit==1){
-    VP_timebar.width = screenWidth-colorbar_width-VP_info.width-2*titlesafe_offset;
+    VP_timebar.width = screenWidth-VP_info.width-2*titlesafe_offset;
     VP_timebar.height=2*(text_height+v_space);
     if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)VP_timebar.height=3*(text_height+v_space);
   }
@@ -157,7 +199,7 @@ void Get_VP_info(void){
   VP_scene.text_height = text_height;
   VP_scene.text_width = text_width;
   VP_scene.left=titlesafe_offset;
-  VP_scene.down=titlesafe_offset+VP_timebar.height;
+  VP_scene.down=titlesafe_offset+MAX(VP_timebar.height,VP_info.height);
   VP_scene.width=screenWidth-2*titlesafe_offset-VP_colorbar.width;
   VP_scene.height=screenHeight-MAX(VP_timebar.height,VP_info.height)-VP_title.height - 2*titlesafe_offset; 
   VP_scene.right = VP_scene.left + VP_scene.width;
@@ -471,27 +513,12 @@ void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
  /* ------------------------ INFO_viewport ------------------------- */
 
 void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
-  float mesh_left;
   char slicelabel[255];
-  float mesh_bot;
-  float val_right=1.0,val_top=1.0;
   mesh *mesh_xyz=NULL;
   float xyz[3];
-  GLdouble portx_left=0.0, portx_right=1.0, portx_down=0.0, portx_top=1.0;
+  int info_lines=0;
 
-  if(screenWidth<screenHeight){
-    val_top *= window_aspect_ratio;
-    portx_top *= window_aspect_ratio;
-  }
-  else{
-    val_right *= window_aspect_ratio;
-    portx_right*=window_aspect_ratio;
-  }
-
-  mesh_left=0.9;
-  if(fontindex==LARGE_FONT)mesh_left=0.7;
- 
-  if(SUB_portortho(quad,&VP_info,portx_left,portx_right,portx_down,portx_top,screen_left, screen_down)==0)return;
+  if(SUB_portortho2(quad,&VP_info,screen_left, screen_down)==0)return;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -501,25 +528,6 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
     xyz[1]=DENORMALIZE_Y(ploty_all[iploty_all]);
     xyz[2]=DENORMALIZE_Z(plotz_all[iplotz_all]);
     mesh_xyz=getmesh(xyz);
-  }
-  if(visBlocklabel==1&&nmeshes>1){
-    int labellength;
-    char meshlabel[255];
-
-    if(mesh_xyz==NULL){
-      sprintf(meshlabel,"mesh: %i",highlight_mesh+1);
-      mesh_xyz = meshinfo + highlight_mesh;
-    }
-    else{
-      int imesh;
-
-      imesh = mesh_xyz-meshinfo+1;
-      sprintf(meshlabel,"mesh: %i",imesh);
-    }
-    labellength=glutBitmapLength(large_font, (const unsigned char *)meshlabel);
-    mesh_left=val_right-val_right*labellength/(float)info_width;
-    mesh_bot=val_top-val_top*large_font_height/(float)(VP_info.height);
-    outputText(mesh_left,mesh_bot, meshlabel);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visx_all==1)||visGrid==noGridProbe||visGrid==GridProbe){
     float plotval;
@@ -547,7 +555,10 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       sprintf(slicelabel,"x: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-0.5,0.6f, slicelabel);
+    if(visgridloc==1){
+      outputText(VP_info.left+h_space,VP_info.down+v_space, slicelabel);
+      info_lines++;
+    }
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visy_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     float plotval;
@@ -574,7 +585,10 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       sprintf(slicelabel,"y: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-0.5,0.35f, slicelabel);
+    if(visgridloc==1){
+      outputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), slicelabel);
+      info_lines++;
+    }
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visz_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     float plotval;
@@ -601,7 +615,26 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       sprintf(slicelabel,"z: %i, ",iplotval);
     }
     strcat(slicelabel,buff_label);
-    if(visgridloc==1)outputText(mesh_left-.5,0.1f, slicelabel);
+    if(visgridloc==1){
+      outputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), slicelabel);
+      info_lines++;
+    }
+  }
+  if(visBlocklabel==1){
+    int labellength;
+    char meshlabel[255];
+
+    if(mesh_xyz==NULL){
+      sprintf(meshlabel,"mesh: %i",highlight_mesh+1);
+      mesh_xyz = meshinfo + highlight_mesh;
+    }
+    else{
+      int imesh;
+
+      imesh = mesh_xyz-meshinfo+1;
+      sprintf(meshlabel,"mesh: %i",imesh);
+    }
+    outputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), meshlabel);
   }
 }
 
@@ -612,16 +645,17 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   unsigned int availmemory;
   char percen[]="%";
 #endif
-  int left_label_width=7*VP_timebar.text_width;
-  int right_label_width=10.5*VP_timebar.text_width;
   int right_label_pos,right_timebar_pos;
   int left_label_pos,left_timebar_pos;
 
   if(SUB_portortho2(quad,&VP_timebar,screen_left,screen_down)==0)return;
 
-  left_timebar_pos = VP_timebar.left+left_label_width;
-  right_timebar_pos=VP_timebar.right-right_label_width;
-  right_label_pos = right_timebar_pos+h_space;
+  timebar_left_width = getStringWidth(fontindex,"Time: 1234.11");
+  timebar_right_width = getStringWidth(fontindex,"Frame rate: 99.99");
+
+  left_timebar_pos = VP_timebar.left+timebar_left_width;
+  right_timebar_pos= VP_timebar.right-timebar_right_width-h_space;
+  right_label_pos  = right_timebar_pos+h_space;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -664,14 +698,14 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
     ihrrcut = (int)global_hrrpuv_cutoff;
 
     sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
-    outputText(right_label_pos+25+h_space,3*v_space+2*VP_timebar.text_height,hrrcut_label);
+    outputText(right_label_pos+5+h_space,3*v_space+2*VP_timebar.text_height,hrrcut_label);
 
     glBegin(GL_QUADS);
     glColor3f(fire_red/255.0,fire_green/255.0,fire_blue/255.0);
+    glVertex3f(right_label_pos+h_space-20,5+2*VP_timebar.text_height   ,0.0);
     glVertex3f(right_label_pos+h_space   ,5+2*VP_timebar.text_height   ,0.0);
-    glVertex3f(right_label_pos+h_space+20,5+2*VP_timebar.text_height   ,0.0);
-    glVertex3f(right_label_pos+h_space+20,5+2*VP_timebar.text_height+20,0.0);
     glVertex3f(right_label_pos+h_space   ,5+2*VP_timebar.text_height+20,0.0);
+    glVertex3f(right_label_pos+h_space-20,5+2*VP_timebar.text_height+20,0.0);
     glEnd();
   }
 #ifdef pp_memstatus
@@ -768,6 +802,7 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 
 void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   float left, textdown;
+  int text_width;
 
   if(SUB_portortho2(quad,&VP_title,screen_left,screen_down)==0)return;
 
@@ -776,11 +811,13 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+
   if(visFullTitle==1&&showplot3d==1){
     outputText(left,textdown, FULLTITLE);
   }
   else{
     outputText(left,textdown, TITLE);
+    text_width = getStringWidth(fontindex, TITLE);
   }
 }
 

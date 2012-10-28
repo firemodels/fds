@@ -1592,16 +1592,6 @@ void initvars(void){
 #ifdef pp_memstatus
   visAvailmemory=0;
 #endif
-  visHRRlabel=0;
-  visBlocklabel=1;
-  visOpenVents=1,visDummyVents=1;visOtherVents=1;
-  visOpenVentsAsOutline=0;
-  visTitle=1;
-  visSmoke=1, visZone=0;
-  visEvac=1;
-  smooth_block_solid=0;
-  autoterrain=0;
-  manual_terrain=0;
   visBlocks=visBLOCKAsInput;
   visSmoothAsNormal=1;
   visTransparentBlockage=0;

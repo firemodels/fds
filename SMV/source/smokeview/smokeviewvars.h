@@ -5,6 +5,7 @@
 #define SMOKEVIEWVARS_H_DEFINED
 //#include <time.h>
 
+
 #ifdef CPP
 #include "glui.h"
 #endif
@@ -24,6 +25,9 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN float scale_2d_x, scale_2d_y;
+
+SVEXTERN int timebar_left_width, timebar_right_width;
 SVEXTERN int SVDECL(h_space,2), SVDECL(v_space,2);
 SVEXTERN portdata VP_fullscreen, VP_title, VP_timebar, VP_colorbar, VP_scene, VP_info;
 SVEXTERN int SVDECL(ini_fed,0),SVDECL(in_external,0);
@@ -610,8 +614,8 @@ SVEXTERN int menustatus;
 SVEXTERN int visTimeZone, visTimeSmoke, visTimeSlice, visTimePatch, visTimeIso, visTimeEvac;
 SVEXTERN int vishmsTimelabel, visTimeLabels;
 SVEXTERN int SVDECL(visColorbarLabels,1), SVDECL(visColorbarLabels_save,1);
-SVEXTERN int visTitle, visFullTitle, visFramerate, visFramelabel, visTimelabel;
-SVEXTERN int visHRRlabel;
+SVEXTERN int SVDECL(visTitle,1), visFullTitle, visFramerate, visFramelabel, visTimelabel;
+SVEXTERN int SVDECL(visHRRlabel,0);
 #ifdef pp_memstatus
 SVEXTERN int visAvailmemory;
 #endif
@@ -619,18 +623,18 @@ SVEXTERN int SVDECL(block_volsmoke,1),SVDECL(smoke3dVoldebug,0);
 SVEXTERN slicedata SVDECL(*sd_shown,NULL);
 SVEXTERN vslicedata SVDECL(*vd_shown,NULL);
 SVEXTERN int SVDECL(show_all_slices,1);
-SVEXTERN int autoterrain,manual_terrain;
+SVEXTERN int SVDECL(autoterrain,0),SVDECL(manual_terrain,0);
 SVEXTERN float zterrain_max, zterrain_min;
 SVEXTERN int revision_smv, revision_fds;
-SVEXTERN int visBlocklabel;
-SVEXTERN int visOpenVents,visDummyVents,visOtherVents;
-SVEXTERN int visOpenVentsAsOutline;
+SVEXTERN int SVDECL(visBlocklabel,1);
+SVEXTERN int SVDECL(visOpenVents,1),SVDECL(visDummyVents,1),SVDECL(visOtherVents,1);
+SVEXTERN int SVDECL(visOpenVentsAsOutline,0);
 SVEXTERN int visTitle;
-SVEXTERN int visSmoke, visZone;
-SVEXTERN int visEvac;
+SVEXTERN int SVDECL(visSmoke,1), SVDECL(visZone,0);
+SVEXTERN int SVDECL(visEvac,1);
 SVEXTERN int visBlocks;
 SVEXTERN int SVDECL(solid_state,-1),SVDECL(outline_state,-1);
-SVEXTERN int smooth_block_solid;
+SVEXTERN int SVDECL(smooth_block_solid,0);
 SVEXTERN int visSmoothAsNormal,visTransparentBlockage;
 SVEXTERN int visBlocksSave;
 SVEXTERN int SVDECL(blocklocation,BLOCKlocation_grid);
