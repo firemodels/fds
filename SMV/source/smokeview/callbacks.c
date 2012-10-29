@@ -570,6 +570,10 @@ int colorbar_click(int x, int y){
     }
     return 1;
   }
+  else{
+    colordrag=0;
+    updatecolors(-1);
+  }
   return 0;
 }
 
