@@ -677,7 +677,6 @@ void fill_zonedata(int izone_index){
   int i;
   roomdata *roomi;
 
-  float PAMB=101325;
   float CP=1004.0;
   float R=0.4*CP/1.4;
 

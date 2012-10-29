@@ -1151,7 +1151,6 @@ int view_exist(char *view){
 /* ------------------ get_unique_view_name ------------------------ */
 
 void get_unique_view_name(void){
-  camera *ca;
   char *label, viewlabel[300];
 
   label=EDIT_view_label->get_text();

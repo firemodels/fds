@@ -26,7 +26,7 @@ char  viewports_revision[]="$Revision$";
 
 /* ------------------------ getStringWidth ------------------------- */
 
-int getStringWidth(int fontindex, char *string){
+int getStringWidth(char *string){
   char *c;
   int length=0;
 
@@ -46,6 +46,9 @@ int getStringWidth(int fontindex, char *string){
       }
       length *= (283.0/402.0)*scale_2d_x;
       break;
+    default:
+      ASSERT(0);
+      break;
   }
   return length;
 }
@@ -57,8 +60,10 @@ void Get_VP_info(void){
   float text_height;
   float text_width;
   int ninfo_lines=0;
+  int info_width;
 
-  info_width = getStringWidth(fontindex,"y: 115, 11.5 m");
+  info_width = getStringWidth("y: 115, 11.5 m");
+  colorbar_label_width = getStringWidth("*10^-02");
 
   v_space = 2;
   text_height=18;
@@ -157,14 +162,13 @@ void Get_VP_info(void){
 
   doit=1;
   if(visColorbarLabels==0||numColorbars==0||(showtime==0&&showplot3d==0))doit=0;
-
-  VP_colorbar.left = screenWidth-2-colorbar_width-titlesafe_offset;
+  VP_colorbar.left = screenWidth-colorbar_delta - numColorbars*(colorbar_label_width+2*h_space)-titlesafe_offset;
   VP_colorbar.down = MAX(VP_timebar.height,VP_info.height)+titlesafe_offset;
   VP_colorbar.doit = doit;
   VP_colorbar.text_height=text_height;
   VP_colorbar.text_width = text_width;
   if(doit==1){
-    VP_colorbar.width = colorbar_width;
+    VP_colorbar.width = colorbar_delta + h_space+numColorbars*(colorbar_label_width+h_space);
     VP_colorbar.height = screenHeight-MAX(VP_timebar.height,VP_info.height)-2*titlesafe_offset;
 
   }
@@ -172,13 +176,13 @@ void Get_VP_info(void){
     VP_colorbar.width = 0;
     VP_colorbar.height = 0;
   }
-  VP_colorbar.right = VP_colorbar.left + VP_colorbar.width;
-  VP_colorbar.top = VP_colorbar.down + VP_colorbar.height;
+  VP_colorbar.right = VP_colorbar.left+VP_colorbar.width;
+  VP_colorbar.top = VP_colorbar.down+VP_colorbar.height;
 
     // title viewport dimensions
 
   if(visTitle==1){
-    VP_title.width = screenWidth-colorbar_width-2*titlesafe_offset;
+    VP_title.width = screenWidth-VP_colorbar.width-2*titlesafe_offset;
     VP_title.height=text_height+v_space;
     VP_title.doit = 1;
   }
@@ -206,6 +210,12 @@ void Get_VP_info(void){
   VP_scene.top = VP_scene.down + VP_scene.height;
 
   scene_aspect_ratio = (float)VP_scene.height/(float)VP_scene.width;
+
+  colorbar_right_pos = VP_colorbar.right-h_space;
+  colorbar_left_pos = colorbar_right_pos - colorbar_delta;
+  colorbar_top_pos = VP_colorbar.top - 4*(v_space + VP_colorbar.text_height) - colorbar_delta;
+  colorbar_down_pos = VP_colorbar.down + colorbar_delta;
+
 }
 
  /* ------------------------ SUB_portortho ------------------------- */
@@ -252,8 +262,6 @@ int SUB_portortho(int quad,
     subport_down =  MAX( nrender_rows*p->down,subwindow_down);
     subport_top =   MIN(  nrender_rows*port_top,subwindow_top);
     if(subport_left>=subport_right||subport_down>=subport_top)return 0;
-
-#define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
 
     subportx_left = CONV(subport_left,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
     subportx_right = CONV(subport_right,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
@@ -333,8 +341,6 @@ int SUB_portortho2(int quad,
     subport_down =  MAX( nrender_rows*p->down,subwindow_down);
     subport_top =   MIN(  nrender_rows*port_top,subwindow_top);
     if(subport_left>=subport_right||subport_down>=subport_top)return 0;
-
-#define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
 
     subportx_left = CONV(subport_left,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
     subportx_right = CONV(subport_right,nrender_rows*p->left,nrender_rows*port_right,portx_left,portx_right);
@@ -621,7 +627,6 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
     }
   }
   if(visBlocklabel==1){
-    int labellength;
     char meshlabel[255];
 
     if(mesh_xyz==NULL){
@@ -645,17 +650,17 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   unsigned int availmemory;
   char percen[]="%";
 #endif
-  int right_label_pos,right_timebar_pos;
-  int left_label_pos,left_timebar_pos;
+  int right_label_pos,timebar_right_pos;
+  int timebar_left_pos;
 
   if(SUB_portortho2(quad,&VP_timebar,screen_left,screen_down)==0)return;
 
-  timebar_left_width = getStringWidth(fontindex,"Time: 1234.11");
-  timebar_right_width = getStringWidth(fontindex,"Frame rate: 99.99");
+  timebar_left_width = getStringWidth("Time: 1234.11");
+  timebar_right_width = getStringWidth("Frame rate: 99.99");
 
-  left_timebar_pos = VP_timebar.left+timebar_left_width;
-  right_timebar_pos= VP_timebar.right-timebar_right_width-h_space;
-  right_label_pos  = right_timebar_pos+h_space;
+  timebar_left_pos = VP_timebar.left+timebar_left_width;
+  timebar_right_pos= VP_timebar.right-timebar_right_width-h_space;
+  right_label_pos  = timebar_right_pos+h_space;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -670,7 +675,7 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
     if(visHRRlabel==1&&hrrinfo!=NULL){
       outputText(VP_timebar.left,v_space+VP_timebar.text_height+v_space, hrrinfo->hrrlabel);
     }
-    drawTimeBar(left_timebar_pos,right_timebar_pos,v_space+VP_timebar.down,v_space+(VP_timebar.down+20));
+    drawTimeBar(timebar_left_pos,timebar_right_pos,v_space+VP_timebar.down,v_space+(VP_timebar.down+20));
   }
 
   if((benchmark==1||visFramerate==1)&&showtime==1){
@@ -739,58 +744,10 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 #endif
 }
 
-/* --------------------- COLOR BAR Viewport2 ------------------------- */
-
-void COLORBAR_viewport2(int quad, GLint screen_left, GLint screen_down){
-
-  // visColorbarLabels
-  // numColorbars
-  // info_height
-  // screenHeight
-  // screenWidth
-  // titlesafe_offset
-
-  if(visColorbarLabels==1&&numColorbars!=0){
-    if(screenWidth<screenHeight){
-  //    if(SUB_portortho(quad,)==0){
-  //        return;
-  //    }
-    }
-    else{
-     // if(SUB_portortho(quad,)==0){
-     //     return;
-     // }
-    }
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    if( showtime==1 || showplot3d==1){
-      drawColorBars();
-    }
-  }
-}
-
 /* --------------------- COLOR BAR Viewport ------------------------- */
 
 void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
-  GLint temp;
-  float xnum;
-
-  GLdouble portx_left, portx_right, portx_down, portx_top;
-
-  xnum=numColorbars;
-  if(fontindex==LARGE_FONT)xnum*=1.5;
-
-  barright=xnum/3.0+0.1f;
-
-  portx_left = 0.;
-  portx_right = (double)barright;
-  portx_down = -1.5;
-  portx_top = (double)(nrgb+1);
-  if(screenWidth<screenHeight)portx_top *= window_aspect_ratio;
-
-  if(SUB_portortho(quad,&VP_colorbar,portx_left, portx_right, portx_down, portx_top,screen_left, screen_down)==0)return;
+  if(SUB_portortho2(quad,&VP_colorbar,screen_left, screen_down)==0)return;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -817,7 +774,7 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   }
   else{
     outputText(left,textdown, TITLE);
-    text_width = getStringWidth(fontindex, TITLE);
+    text_width = getStringWidth(TITLE);
   }
 }
 
@@ -831,15 +788,15 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   float widthdiv2;
   float eyexINI, eyeyINI, eyezINI;
 
-    tourdata *touri;
-    pathdata *pj;
-
   if(showstereo==2){
     VP_scene.left=screen_left;
     VP_scene.width=screenWidth;
   }
   if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
     if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
+      tourdata *touri;
+      pathdata *pj;
+
       touri = tourinfo + selectedtour_index;
       iframe = touri->timeslist[itimes];
       if(keyframe_snap==1&&selected_frame!=NULL){
@@ -878,23 +835,21 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   aperture_temp=aperture;
   aperture_temp = zoom2aperture(zoom);
 
-  {
-    tourdata *touri;
-    pathdata *pj;
+  if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
+    if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
+      tourdata *touri;
+      pathdata *pj;
 
-    if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
-      if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
-        touri = tourinfo + selectedtour_index;
-        iframe = touri->timeslist[itimes];
-        if(keyframe_snap==1&&selected_frame!=NULL){
-          pj=&selected_frame->nodeval;
-        }
-        else{
-          pj = touri->pathnodes + iframe;
-        }
-
-        aperture_temp=zoom2aperture(pj->zoom);
+      touri = tourinfo + selectedtour_index;
+      iframe = touri->timeslist[itimes];
+      if(keyframe_snap==1&&selected_frame!=NULL){
+        pj=&selected_frame->nodeval;
       }
+      else{
+        pj = touri->pathnodes + iframe;
+      }
+
+      aperture_temp=zoom2aperture(pj->zoom);
     }
   }
 

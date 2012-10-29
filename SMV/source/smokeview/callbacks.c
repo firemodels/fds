@@ -537,31 +537,28 @@ void checktimebound(void){
   }
 }
 
-/* ------------------ setup_colorbar_drag ------------------------ */
+/* ------------------ get_colorbar_index ------------------------ */
 
-int setup_colorbar_drag(int x, int y){
-  int temp;
-  int yy;
-  float factor;
+int get_colorbar_index(int flag, int x, int y){
+
+  if(flag==0||(colorbar_left_pos<=x&&x<=colorbar_right_pos)){
+      int index;
+  
+      index = CLAMP(255*(float)(screenHeight - y-colorbar_down_pos)/(float)(colorbar_top_pos - colorbar_down_pos),0,255);
+      return index;
+  }
+  return -1;
+}
+
+/* ------------------ colorbar_click ------------------------ */
+
+int colorbar_click(int x, int y){
   int ifactor;
-  int state;
 
-  temp = (int)(1.2*VP_info.height);
-  if(x>screenWidth-colorbar_width){
-    yy = screenHeight - y;
-    factor=((float)(yy-temp)/(screenHeight-temp))*((nrgb+(float)1.0)/(nrgb-(float)0.5));
-    if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
-    ifactor=(int)(255*factor);
-    if(ifactor>=0&&ifactor<256){
-      int valmax=255;
-      int valmin=0;
-
-      if(ifactor>valmax)ifactor=valmax;
-      if(ifactor<valmin)ifactor=valmin;
-    }
-    else{
-      ifactor=-1;
-    }
+  ifactor = get_colorbar_index(1,x,y);
+  if(ifactor>=0){
+    int state;
+ 
     colorbar_select_index=ifactor;
     state=glutGetModifiers();
     if(state==GLUT_ACTIVE_CTRL&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
@@ -576,18 +573,18 @@ int setup_colorbar_drag(int x, int y){
   return 0;
 }
 
-/* ------------------ setup_timebar_drag ------------------------ */
+/* ------------------ timebar_click ------------------------ */
 
-int setup_timebar_drag(int x, int y){
+int timebar_click(int x, int y){
   if(screenHeight-y<VP_timebar.height&&nglobal_times>0){
-    int right_timebar_pos;
-    int left_timebar_pos;
+    int timebar_right_pos;
+    int timebar_left_pos;
 
-    left_timebar_pos = VP_timebar.left+timebar_left_width;
-    right_timebar_pos=VP_timebar.right-timebar_right_width;
+    timebar_left_pos = VP_timebar.left+timebar_left_width;
+    timebar_right_pos=VP_timebar.right-timebar_right_width;
 
-    if(right_timebar_pos>left_timebar_pos){
-      itimes = (float)nglobal_times*(float)(x-left_timebar_pos)/(float)(right_timebar_pos-left_timebar_pos);
+    if(timebar_right_pos>timebar_left_pos){
+      itimes = (float)nglobal_times*(float)(x-timebar_left_pos)/(float)(timebar_right_pos-timebar_left_pos);
     }
     else{
       itimes=0;
@@ -816,10 +813,10 @@ void mouse_CB(int button, int state, int xm, int ym){
     }
     glutPostRedisplay();
     if( showtime==1 || showplot3d==1){
-      if(setup_colorbar_drag(xm,ym)==1)return;
+      if(colorbar_click(xm,ym)==1)return;
     }
     if(visTimeLabels==1&&showtime==1){
-      if(setup_timebar_drag(xm,ym)==1)return;
+      if(timebar_click(xm,ym)==1)return;
     }
     copy_camera(camera_last,camera_current);
     if(canrestorelastview==0){
@@ -873,31 +870,13 @@ void mouse_CB(int button, int state, int xm, int ym){
   }
 }
 
-/* ------------------ drag_colorbar ------------------------ */
+/* ------------------ colorbar_drag ------------------------ */
 
-void drag_colorbar(int xm, int ym){
-  int temp;
+void colorbar_drag(int xm, int ym){
   int ifactor;
-  float factor;
-  int valmax=255;
-  int valmin=0;
 
-  temp = (int)(1.2*VP_info.height);
-  if(xm>screenWidth-colorbar_width){
-    float yy;
-
-    yy = screenHeight - ym;
-    factor=(yy-temp)/(screenHeight-temp);
-    factor *= (nrgb+1.0)/(nrgb-0.5);
-    if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
-    ifactor=(int)(255*factor);
-    if(ifactor<256||ifactor>=0){
-      if(ifactor>valmax)ifactor=valmax;
-      if(ifactor<valmin)ifactor=valmin;
-    }
-    else{
-      ifactor=-1;
-    }
+  ifactor = get_colorbar_index(0,xm,ym);
+  if(ifactor>=0){
     colorbar_select_index=ifactor;
     updatecolors(ifactor);
   }
@@ -905,21 +884,12 @@ void drag_colorbar(int xm, int ym){
 
 /* ------------------ drag_colorsplit ------------------------ */
 
-void drag_colorbarsplit(int xm, int ym){
-  int temp;
+void colorbar_dragsplit(int xm, int ym){
   int ifactor;
-  float factor;
 
-  temp = (int)(1.2*VP_info.height);
-  if(xm>screenWidth-colorbar_width){
+  ifactor = get_colorbar_index(0,xm,ym);
+  if(ifactor>=0){
     int ii;
-    float yy;
-
-    yy = screenHeight - ym;
-    factor=(yy-temp)/(screenHeight-temp);
-    factor *= (nrgb+1.0)/(nrgb-0.5);
-    if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
-    ifactor=(int)(255*factor);
 
     if(ifactor>250)ifactor=250;
     if(ifactor<5)ifactor=5;
@@ -932,21 +902,21 @@ void drag_colorbarsplit(int xm, int ym){
   }
 }
 
-/* ------------------ drag_timebar ------------------------ */
+/* ------------------ timebar_drag ------------------------ */
 
-void drag_timebar(int xm, int ym){
+void timebar_drag(int xm, int ym){
   if(screenHeight-ym<VP_timebar.height&&nglobal_times>0){
     int left_label_width=7*VP_timebar.text_width;
     int right_label_width=10.5*VP_timebar.text_width;
-    int right_timebar_pos;
-    int left_timebar_pos;
+    int timebar_right_pos;
+    int timebar_left_pos;
 
-    left_timebar_pos = VP_timebar.left+left_label_width;
-    right_timebar_pos=VP_timebar.right-right_label_width;
+    timebar_left_pos = VP_timebar.left+left_label_width;
+    timebar_right_pos=VP_timebar.right-right_label_width;
 
     itimes=0;
-    if(right_timebar_pos>left_timebar_pos){
-      itimes = (float)nglobal_times*(float)(xm-left_timebar_pos)/(float)(right_timebar_pos-left_timebar_pos);
+    if(timebar_right_pos>timebar_left_pos){
+      itimes = (float)nglobal_times*(float)(xm-timebar_left_pos)/(float)(timebar_right_pos-timebar_left_pos);
     }
     checktimebound();
     timedrag=1;
@@ -1145,17 +1115,17 @@ void motion_CB(int xm, int ym){
   glutPostRedisplay();
 
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
-    drag_colorbar(xm,ym);
+    colorbar_drag(xm,ym);
     return;
   }
   if(
     colorsplitdrag==1&&
     (showtime==1 || showplot3d==1)&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
-    drag_colorbarsplit(xm,ym);
+    colorbar_dragsplit(xm,ym);
     return;
   }
   if(timedrag==1){
-    drag_timebar(xm,ym);
+    timebar_drag(xm,ym);
     return;
   }
   if(move_gslice==1){

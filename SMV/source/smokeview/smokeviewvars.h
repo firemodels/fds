@@ -25,7 +25,10 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int colorbar_left_pos, colorbar_right_pos, colorbar_down_pos, colorbar_top_pos;
 SVEXTERN float scale_2d_x, scale_2d_y;
+SVEXTERN int SVDECL(colorbar_delta,35);
+SVEXTERN int colorbar_label_width;
 
 SVEXTERN int timebar_left_width, timebar_right_width;
 SVEXTERN int SVDECL(h_space,2), SVDECL(v_space,2);
@@ -719,7 +722,6 @@ SVEXTERN int ntargets;
 SVEXTERN int endian_data, endian_native, setendian;
 
 SVEXTERN int mainwindow_id;
-SVEXTERN int SVDECL(info_width,150),SVDECL(colorbar_width,150);
 SVEXTERN int rendertourcount;
 
 #ifdef pp_MEMDEBUG

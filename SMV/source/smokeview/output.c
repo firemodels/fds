@@ -212,9 +212,6 @@ void outputText(float x, float y, char *string){
 /* ------------------ outputBarText ------------------------ */
 
 void outputBarText(float x, float y, const GLfloat *color, char *string){
-  int length;
-  float xlength;
-  float xbeg;
   char *c;
 
   if(string==NULL)return;
@@ -222,15 +219,10 @@ void outputBarText(float x, float y, const GLfloat *color, char *string){
 
   if(fontindex==SCALED_FONT){
     scale_2dfont();
-    outputSText2r(x,y,0.0,string);
+    outputSText2(x,y,0.0,string);
   }
   else{
-    length=glutBitmapLength(small_font, (const unsigned char *)string); 
-    xlength = length*barright/colorbar_width+0.02;
-
-    xbeg=x-xlength;
-    if(xbeg<0.0)xbeg=0.0;
-    glRasterPos2f(xbeg, y);
+    glRasterPos2f(x, y);
     for (c=string; *c!='\0'; c++){
       glutBitmapCharacter(small_font,*c);
     }

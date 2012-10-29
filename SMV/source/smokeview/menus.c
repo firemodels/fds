@@ -4160,6 +4160,9 @@ void BlockageMenu(int value){
       solid_state=visBLOCKHide;
       change_state=1;
       break;
+    default:
+      ASSERT(0);
+      break;
   }
   if(change_state==1){
     switch (outline_state){
@@ -4180,7 +4183,13 @@ void BlockageMenu(int value){
           case BLOCKAGE_HIDDEN:
             value=visBLOCKOutline;
             break;
+          default:
+            ASSERT(0);
+            break;
         }
+        break;
+      default:
+        ASSERT(0);
         break;
     }
   }
@@ -4571,7 +4580,7 @@ void InitMenus(int unload){
   int ntextures_used;
   int multiprop;
 
-static int titlemenu=0, labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
+static int labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
 static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0, resolutionmultipliermenu=0;
 static int startrenderingmenu=0;

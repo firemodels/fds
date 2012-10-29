@@ -620,8 +620,6 @@ void updateShow(void){
   if(ReadPlot3dFile==1&&numColorbars==0)numColorbars=1;
   /* note: animated iso-contours do not need a color bar,
            so we don't test for isosurface files */
-  colorbar_width = numColorbars*info_width/3;
-  if(fontindex==1)colorbar_width*=1.5;
   drawColorLabel=0;
   if((showtime==1||showplot3d==1)&&visColorbarLabels==1)drawColorLabel=1;
   if(drawColorLabel==1&&olddrawColorLabel==0)updatemenu=1;
