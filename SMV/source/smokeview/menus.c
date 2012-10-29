@@ -7053,6 +7053,17 @@ updatemenu=0;
    /* --------------------------------viewpoint menu -------------------------- */
 
   CREATEMENU(dialogmenu,DialogMenu);
+  if(showbounds_dialog==1)glutAddMenuEntry(_("*File bounds/Script...  ALT+f"),14);
+  if(showbounds_dialog==0)glutAddMenuEntry(_("File bounds/Script...  ALT+f"),14);
+  if(showmotion_dialog==1)glutAddMenuEntry(_("*Motion/View/Render...  ALT+m"),15);
+  if(showmotion_dialog==0)glutAddMenuEntry(_("Motion/View/Render...  ALT+m"),15);
+  if(showdisplay_dialog==1)glutAddMenuEntry(_("*Display...  ALT+d"),22);
+  if(showdisplay_dialog==0)glutAddMenuEntry(_("Display...  ALT+d"),22);
+  if(nsmoke3dinfo>0||nvolrenderinfo>0){
+    if(show3dsmoke_dialog==1)glutAddMenuEntry(_("*3D smoke...  ALT+s"),20);
+    if(show3dsmoke_dialog==0)glutAddMenuEntry(_("3D smoke...  ALT+s"),20);
+  }
+  glutAddMenuEntry("-",-1);
   if(nterraininfo>0){
     if(showwui_dialog==1)glutAddMenuEntry(_("*WUI display... ALT+w"),26);
     if(showwui_dialog==0)glutAddMenuEntry(_("WUI display... ALT+w..."),26);
@@ -7071,24 +7082,14 @@ updatemenu=0;
     if(showdevice_dialog==1)glutAddMenuEntry(_("*Devices/Objects..."),28);
     if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."),28);
   }
-  if(showdisplay_dialog==1)glutAddMenuEntry(_("*Display...  ALT+d"),22);
-  if(showdisplay_dialog==0)glutAddMenuEntry(_("Display...  ALT+d"),22);
   if(isZoneFireModel==0){
     if(showedit_dialog==1)glutAddMenuEntry(_("*Examine blockages...  ALT+e"),16);
     if(showedit_dialog==0)glutAddMenuEntry(_("Examine blockages...  ALT+e"),16);
   }
-  if(showbounds_dialog==1)glutAddMenuEntry(_("*File/Bound/Script settings...  ALT+f"),14);
-  if(showbounds_dialog==0)glutAddMenuEntry(_("File/Bound/Script settings...  ALT+f"),14);
-  if(showmotion_dialog==1)glutAddMenuEntry(_("*Motion/View/Render...  ALT+m"),15);
-  if(showmotion_dialog==0)glutAddMenuEntry(_("Motion/View/Render...  ALT+m"),15);
 #ifdef pp_SHOOTER
   if(showshooter_dialog==1)glutAddMenuEntry(_("*Particle tracking..."),27);
   if(showshooter_dialog==0)glutAddMenuEntry(_("Particle tracking..."),27);
 #endif
-  if(nsmoke3dinfo>0||nvolrenderinfo>0){
-    if(show3dsmoke_dialog==1)glutAddMenuEntry(_("*3D smoke...  ALT+s"),20);
-    if(show3dsmoke_dialog==0)glutAddMenuEntry(_("3D smoke...  ALT+s"),20);
-  }
   if(showstereo_dialog==1)glutAddMenuEntry(_("*Stereo parameters..."),19);
   if(showstereo_dialog==0)glutAddMenuEntry(_("Stereo parameters..."),19);
   if(showtour_dialog==1)glutAddMenuEntry(_("*Tours...  ALT+t"),21);
