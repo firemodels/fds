@@ -14,6 +14,20 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 &MATL ID='PA66'
       ABSORPTION_COEFFICIENT=3920.
       N_REACTIONS=1
+      A(1) = 1
+      E(1) = 0
+      EMISSIVITY=0.95
+      DENSITY=1150.
+      THRESHOLD_TEMPERATURE=262.
+      NU_RESIDUE=1.
+      RESIDUE='Liq'
+      HEAT_OF_REACTION=55.
+      CONDUCTIVITY = 0.34
+      SPECIFIC_HEAT = 2.60 /
+
+&MATL ID='Liq'
+      ABSORPTION_COEFFICIENT=3920.
+      N_REACTIONS=1
       A(1) = 5.70E17
       E(1) = 2.74E5
       EMISSIVITY=0.95
@@ -23,7 +37,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       HEAT_OF_REACTION=1390.
       CONDUCTIVITY = 0.34
       SPECIFIC_HEAT = 2.60 /
-
+	  
 &MATL ID='FOAMGLAS'
       CONDUCTIVITY = 0.08
       SPECIFIC_HEAT = 0.84
@@ -32,7 +46,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 &SURF ID='PA66 SLAB'
       COLOR='BLACK'
       MATL_ID='PA66','FOAMGLAS'
-      THICKNESS=0.006,0.025
+      THICKNESS=0.0068,0.025
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.04,0.04,-0.04,0.04,0.0,0.0, SURF_ID = 'PA66 SLAB' /
