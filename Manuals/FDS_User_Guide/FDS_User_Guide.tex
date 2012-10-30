@@ -3372,7 +3372,7 @@ surface be adiabatic, that is, there is no net heat transfer
 (radiative and convective) from the gas to the solid. For this case,
 all that must be prescribed on the {\ct SURF} line is {\ct ADIABATIC=.TRUE.}, and nothing else.  FDS will compute a wall temperature
 so that the sum of the net convective and radiative heat flux is zero.  Specifying a surface as {\ct ADIABATIC} will
-result in FDS defining {\ct NET\_HEAT\_FLUX=0}.
+result in FDS defining {\ct NET\_HEAT\_FLUX=0} and {\ct EMISSIVITY=1}. 
 
 \begin{warning}
 No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
