@@ -16,7 +16,7 @@
       DENSITY_SOLID = 1030 /
 
 &SURF ID               = 'INLET'
-      VEL              = -2.2
+      VEL              = -9.2
       COLOR            = 'BLUE'
       SPEC_ID(1)       = 'AEROSOL'
       MASS_FRACTION(1) = 8.3e-5 /
