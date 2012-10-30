@@ -4986,7 +4986,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%THERMAL_BC_INDEX = SPECIFIED_TEMPERATURE
    IF (SF%ADIABATIC) THEN
                                        SF%THERMAL_BC_INDEX = NET_FLUX_BC
-                                       SF%NET_HEAT_FLUX = 0._EB
+                                       SF%NET_HEAT_FLUX    = 0._EB
+                                       SF%EMISSIVITY       = 1._EB
    ENDIF
    IF (SF%NET_HEAT_FLUX < 1.E12_EB)    SF%THERMAL_BC_INDEX = NET_FLUX_BC
    IF (ABS(SF%CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB) SF%THERMAL_BC_INDEX = CONVECTIVE_FLUX_BC
