@@ -31,7 +31,7 @@ void SETslicemin(int setslicemin, float slicemin, int setslicechopmin, float sli
 void Bounds_DLG_CB(int var);
 void PART_CB(int var);
 void Bound_CB(int var);
-void PLOT3D_CB(int var);
+extern "C" void PLOT3D_CB(int var);
 void Iso_CB(int var);
 void Smoke3D_CB(int var);
 void Time_CB(int var);
@@ -352,18 +352,6 @@ extern "C" void update_evac_parms(void){
   if(CHECKBOX_constant_coloring!=NULL)CHECKBOX_constant_coloring->set_int_val(constant_evac_coloring);
   if(CHECKBOX_data_coloring!=NULL)CHECKBOX_data_coloring->set_int_val(data_evac_coloring);
   if(CHECKBOX_show_evac_color!=NULL)CHECKBOX_show_evac_color->set_int_val(show_evac_colorbar);
-}
-
-/* ------------------ update_colorbar_list2 ------------------------ */
-
-extern "C" void update_colorbar_list2(void){
-  LIST_colorbar2->set_int_val(selectedcolorbar_index2);
-}
-
-/* ------------------ add_colorbar_list2 ------------------------ */
-
-extern "C" void add_colorbar_list2(int index, char *label){
-  LIST_colorbar2->add_item(index,label);
 }
 
 /* ------------------ update_update_extreme2 ------------------------ */
@@ -2047,7 +2035,7 @@ extern "C" void Slice_CB(int var){
     return;
   }
   if(var==COLORBAR_LIST2){
-      selectedcolorbar_index=LIST_colorbar2->get_int_val();
+      selectedcolorbar_index=get_colorbar_list_index();
       update_colorbar_list();
       ColorBarMenu(selectedcolorbar_index);
       colorbar_global2local();
@@ -2057,6 +2045,8 @@ extern "C" void Slice_CB(int var){
     return;
   }
   switch (var){
+    case COLORBAR_LIST2:
+      break;
     case RESEARCH_MODE:
       for(i=0;i<nsliceinfo;i++){
         slicedata *slicei;

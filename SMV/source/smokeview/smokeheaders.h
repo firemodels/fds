@@ -9,6 +9,7 @@
 EXTERNCPP int Merge_Smoke(void);
 #endif
 
+EXTERNCPP int get_colorbar_list_index(void);
 EXTERNCPP int get_colorbar_index(int flag, int x, int y);
 EXTERNCPP void Get_VP_info(void);
 

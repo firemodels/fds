@@ -29,9 +29,11 @@ GLUI *glui_labels=NULL;
 
 GLUI_EditText *EDIT_LB_label_string=NULL;
 
+GLUI_Spinner *xxSPINNER_labels_transparency_data=NULL;
 #ifdef pp_BETA
 GLUI_Spinner *SPINNER_cullgeom_portsize=NULL;
 #endif
+GLUI_Listbox *xxLIST_colorbar2=NULL;
 GLUI_Listbox *LIST_LB_labels=NULL;
 GLUI_Spinner *SPINNER_LB_time_start=NULL;
 GLUI_Spinner *SPINNER_LB_time_stop=NULL;
@@ -67,6 +69,10 @@ GLUI_Spinner *SPINNER_scaled_font2d_thickness=NULL;
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
 
 #endif
+
+GLUI_Checkbox *xxCHECKBOX_axislabels_smooth=NULL, *xxCHECKBOX_extreme2=NULL, *xxCHECKBOX_transparentflag=NULL, *xxCHECKBOX_sort=NULL;
+GLUI_Checkbox *xxCHECKBOX_smooth=NULL;
+
 GLUI_Checkbox *CHECKBOX_LB_visLabels=NULL;
 GLUI_Checkbox *CHECKBOX_LB_label_use_foreground=NULL;
 GLUI_Checkbox *CHECKBOX_LB_label_show_always=NULL;
@@ -103,6 +109,7 @@ GLUI_Rollout *ROLLOUT_user_labels=NULL;
 GLUI_Rollout *ROLLOUT_user_tick=NULL;
 GLUI_Rollout *ROLLOUT_label1=NULL;
 
+GLUI_Panel *xxPANEL_contours=NULL;
 GLUI_Panel *PANEL_gen1, *PANEL_gen2;
 GLUI_Panel *PANEL_LB_panel1=NULL, *PANEL_LB_panel2=NULL, *PANEL_LB_panel3=NULL;
 GLUI_Panel *PANEL_LB_panel4=NULL, *PANEL_LB_panel5=NULL, *PANEL_LB_panel6=NULL;
@@ -118,6 +125,7 @@ GLUI_Panel *PANEL_showhide=NULL;
 GLUI_Panel *PANEL_font2d=NULL;
 GLUI_Panel *PANEL_font3d=NULL;
 
+GLUI_RadioGroup *RADIO2_plot3d_display=NULL;
 GLUI_RadioGroup *RADIO_fontsize=NULL,*RADIO_showhide=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1b=NULL;
@@ -182,6 +190,21 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define LABELS_BENCHMARK 17
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
+
+#define COLORBAR_SMOOTH 113
+
+#define COLORBAR_LIST2 112
+#define COLORBAR_EXTREME2 109
+#define DATA_transparent 26
+#define SORT_SURFACES 401
+#define SMOOTH_SURFACES 402
+#define TRANSPARENTLEVEL 110
+
+
+#define xxUPDATEPLOT 10
+#define UPDATEPLOT 10
+extern "C" void PLOT3D_CB(int var);
+
 
 
 /* ------------------ glui_labels_rename ------------------------ */
@@ -363,7 +386,6 @@ extern "C" void glui_labels_setup(int main_window){
   if(nsliceinfo>0)CHECKBOX_labels_average=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Average"),&vis_slice_average,LABELS_label,Labels_CB);
   glui_labels->add_column_to_panel(PANEL_gen1,false);
 
-
   CHECKBOX_labels_title=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Title"),&visTitle,LABELS_label,Labels_CB);
   CHECKBOX_labels_axis=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Axis"),&visaxislabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_framerate=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Frame rate"),&visFramerate,LABELS_label,Labels_CB);
@@ -391,10 +413,6 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_column_to_panel(PANEL_gen2,false);
   BUTTON_label_2=glui_labels->add_button_to_panel(PANEL_gen2,_("Hide all"),LABELS_hideall,Labels_CB);
 
-
-
-
-
   // -------------- Scene settings -------------------
 
   ROLLOUT_scene = glui_labels->add_rollout("Scene",false);
@@ -404,6 +422,43 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_linewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
   SPINNER_gridlinewidth=glui_labels->add_spinner_to_panel(ROLLOUT_scene,"grid line width",GLUI_SPINNER_FLOAT,&gridlinewidth);
   SPINNER_gridlinewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
+
+  if(ncolorbars>0){
+    int i;
+
+    selectedcolorbar_index2=-1;
+    xxLIST_colorbar2=glui_labels->add_listbox_to_panel(ROLLOUT_scene,_("Colorbar:"),&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
+
+    for(i=0;i<ncolorbars;i++){
+      colorbardata *cbi;
+
+      cbi = colorbarinfo + i;
+      cbi->label_ptr=cbi->label;
+      xxLIST_colorbar2->add_item(i,cbi->label_ptr);
+    }
+    xxLIST_colorbar2->set_int_val(colorbartype);
+  }
+  xxPANEL_contours = glui_labels->add_panel_to_panel(ROLLOUT_scene,_("Colorbar shade type"));
+  RADIO2_plot3d_display=glui_labels->add_radiogroup_to_panel(xxPANEL_contours,&contour_type,UPDATEPLOT,PLOT3D_CB);
+  glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Continuous"));
+  glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Stepped"));
+  glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Line"));
+  xxCHECKBOX_axislabels_smooth=glui_labels->add_checkbox_to_panel(ROLLOUT_scene,_("Smooth colorbar labels"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
+  xxCHECKBOX_extreme2=glui_labels->add_checkbox_to_panel(ROLLOUT_scene,_("Highlight extreme data"),
+    &show_extremedata,COLORBAR_EXTREME2,Slice_CB);
+  xxCHECKBOX_transparentflag=glui_labels->add_checkbox_to_panel(ROLLOUT_scene,_("Use transparency:"),
+    &use_transparency_data,DATA_transparent,Slice_CB);
+#ifdef pp_BETA
+  xxCHECKBOX_sort=glui_labels->add_checkbox_to_panel(ROLLOUT_scene,_("Sort transparent surfaces:"),
+    &sort_iso_triangles,SORT_SURFACES,Slice_CB);
+  xxCHECKBOX_smooth=glui_labels->add_checkbox_to_panel(ROLLOUT_scene,_("Smooth surfaces:"),
+    &smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
+#endif
+  xxSPINNER_labels_transparency_data=glui_labels->add_spinner_to_panel(ROLLOUT_scene,_("transparency level"),
+    GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
+  xxSPINNER_labels_transparency_data->set_w(0);
+  xxSPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
+
 
   // -------------- Data coloring -------------------
 
@@ -1185,3 +1240,20 @@ extern "C" void set_labels_controls(){
 
 }
 
+/* ------------------ update_colorbar_list2 ------------------------ */
+
+extern "C" void update_colorbar_list2(void){
+  xxLIST_colorbar2->set_int_val(selectedcolorbar_index2);
+}
+
+/* ------------------ add_colorbar_list2 ------------------------ */
+
+extern "C" void add_colorbar_list2(int index, char *label){
+  xxLIST_colorbar2->add_item(index,label);
+}
+
+/* ------------------ get_colorbar_list_index ------------------------ */
+
+extern "C" int get_colorbar_list_index(void){
+  return xxLIST_colorbar2->get_int_val();
+}
