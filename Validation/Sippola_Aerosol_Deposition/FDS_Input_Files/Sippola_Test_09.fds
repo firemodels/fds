@@ -1,4 +1,4 @@
-&HEAD CHID='square_duct_2_2_vel_1_um', TITLE='Validation of aerosol deposition in a square duct, 15 cm by 15 cm, SVN $Revision$'/
+&HEAD CHID='Sippola_Test_09', TITLE='Validation of aerosol deposition in a square duct, 15 cm by 15 cm, SVN $Revision$'/
 
 &MESH IJK=500,15,15, XB=-3.0,2.0,0.0,0.15,0.0,0.15 /
 
@@ -12,8 +12,14 @@
 
 &SPEC ID            = 'AEROSOL'
       AEROSOL       = .TRUE.
-      MEAN_DIAMETER = 1E-6
-      DENSITY_SOLID = 1350 /
+      MEAN_DIAMETER = 5.2E-6
+      DENSITY_SOLID = 1210 /
+
+&SURF ID               = 'INLET'
+      VEL              = -2.2
+      COLOR            = 'BLUE'
+      SPEC_ID(1)       = 'AEROSOL'
+      MASS_FRACTION(1) = 8.3e-5 /
 
 &MATL ID            = 'STEEL'
       FYI           = 'Drysdale, Intro to Fire Dynamics'
@@ -26,12 +32,6 @@
       MATL_ID    = 'STEEL'
       THICKNESS  = 0.001
       COLOR      = 'SNOW 3' /
-
-&SURF ID               = 'INLET'
-      VEL              = -2.2
-      COLOR            = 'BLUE'
-      SPEC_ID(1)       = 'AEROSOL'
-      MASS_FRACTION(1) = 8.3e-5 /
 
 &VENT MB='XMIN', SURF_ID='INLET' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
