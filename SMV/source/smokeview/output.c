@@ -30,6 +30,9 @@ void outputAxisLabels(){
   mesh *meshi;
 
   glColor3fv(foregroundcolor);
+  glPushMatrix();
+  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glTranslatef(-xbar0,-ybar0,-zbar0);
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
     ibar=meshi->ibar;
@@ -39,21 +42,18 @@ void outputAxisLabels(){
     yplt=meshi->yplt;
     zplt=meshi->zplt;
 
-
     xx0 = xplt[0]-0.02;
     yy0 = yplt[0]-0.02;
-    x = (xplt[0]+xplt[ibar])/2.0;
-    y = (yplt[0]+yplt[jbar])/2.0;
-    z = (zplt[0]+zplt[kbar])/2.0;
-    glRasterPos3f(x,yy0,(float)0.0);
-    glutBitmapCharacter(large_font,XX[0]);
-    glRasterPos3f(xx0,y,(float)0.0);
-    glutBitmapCharacter(large_font,YY[0]);
-    glRasterPos3f(xx0,yy0,z);
-    glutBitmapCharacter(large_font,ZZ[0]);
-  }
-}
 
+    x = DENORMALIZE_X((xplt[0]+xplt[ibar])/2.0);
+    y = DENORMALIZE_Y((yplt[0]+yplt[jbar])/2.0);
+    z = DENORMALIZE_Z((zplt[0]+zplt[kbar])/2.0);
+    output3Text(foregroundcolor,   x,yy0, 0.0, "X");
+    output3Text(foregroundcolor, xx0,  y, 0.0, "Y");
+    output3Text(foregroundcolor, xx0,yy0,   z, "Z");
+  }
+  glPopMatrix();
+}
 
 /* ------------------ outputSText3 ------------------------ */
 
@@ -79,11 +79,10 @@ void outputSText3(float x, float y, float z, char *string){
   angleaxis2quat(angle,axis,quateye);
   mult_quat(quateye,quatz,quateye);
   quat2rot(quateye,rot);
-  /*
-  glLoadIdentity();
-  glMultMatrixf(rot);*/
+
   glRotatef(90.0,cos(theta*DEG2RAD),sin(theta*DEG2RAD),0.0);
   glRotatef(theta,u[0],u[1],u[2]);
+ 
   glScalef(scale_x,scale_y,1.0);
   for (c=string; *c != '\0'; c++){
     glutStrokeCharacter(GLUT_STROKE_ROMAN,*c);
@@ -166,6 +165,7 @@ void output3Text(float *color, float x, float y, float z, char *string){
   glColor3fv(color);
 
   if(fontindex==SCALED_FONT){
+    scale_3dfont();
     outputSText3(x,y,z,string);
   }
   else{
