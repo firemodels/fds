@@ -35,7 +35,6 @@ GLUI_Panel *PANEL_cb4=NULL;
 GLUI_Panel *PANEL_cb4L=NULL;
 GLUI_Panel *PANEL_cb4R=NULL;
 GLUI_Panel *PANEL_point=NULL;
-GLUI_Panel *PANEL_extreme=NULL;
 GLUI_Panel *PANEL_cb5=NULL;
 GLUI_Panel *PANEL_cb5a=NULL;
 GLUI_Panel *PANEL_cb5b=NULL;
@@ -47,12 +46,6 @@ GLUI_Panel *PANEL_cb10=NULL;
 
 GLUI_Listbox *LISTBOX_colorbar=NULL;
 
-GLUI_Spinner *SPINNER_down_red=NULL;
-GLUI_Spinner *SPINNER_down_green=NULL;
-GLUI_Spinner *SPINNER_down_blue=NULL;
-GLUI_Spinner *SPINNER_up_red=NULL;
-GLUI_Spinner *SPINNER_up_green=NULL;
-GLUI_Spinner *SPINNER_up_blue=NULL;
 GLUI_Spinner *SPINNER_left_red=NULL;
 GLUI_Spinner *SPINNER_left_green=NULL;
 GLUI_Spinner *SPINNER_left_blue=NULL;
@@ -82,7 +75,7 @@ GLUI_EditText *EDITTEXT_colorbar_label=NULL;
 GLUI_StaticText *STATICTEXT_left=NULL, *STATICTEXT_right=NULL;
 
 
-int cb_rgb[3],cb_up_rgb[3],cb_down_rgb[3];
+int cb_rgb[3],xxcb_up_rgb[3],xxcb_down_rgb[3];
 int cb_usecolorbar_extreme;
 
 #define COLORBAR_LIST 0
@@ -101,9 +94,11 @@ int cb_usecolorbar_extreme;
 #define COLORBAR_EXTREME_RGB 15
 #define COLORBAR_EXTREME 16
 
+extern "C" void update_extreme_vals(void);
 extern "C" void colorbar_global2local(void);
 extern "C" void add_colorbar_list2(int index, char *label);
 
+extern "C" void Extreme_CB(int var);
 void COLORBAR_CB(int var);
 
 /* ------------------ update_colorbar_list ------------------------ */
@@ -116,7 +111,7 @@ extern "C" void update_colorbar_list(void){
 
 extern "C" void update_extreme(void){
   CHECKBOX_usebounds->set_int_val(show_extremedata);
-  COLORBAR_CB(COLORBAR_EXTREME);
+  Extreme_CB(COLORBAR_EXTREME);
 }
 
 
@@ -229,23 +224,6 @@ extern "C" void glui_colorbar_setup(int main_window){
   SPINNER_right_red->set_int_limits(0,255);
   SPINNER_right_green->set_int_limits(0,255);
   SPINNER_right_blue->set_int_limits(0,255);
-
-  PANEL_extreme = glui_colorbar->add_panel("");
-
-  CHECKBOX_usebounds=glui_colorbar->add_checkbox_to_panel(PANEL_extreme,_("Highlight extreme data"),&show_extremedata,
-    COLORBAR_EXTREME,COLORBAR_CB);
-  PANEL_cb9 = glui_colorbar->add_panel_to_panel(PANEL_extreme,"",GLUI_PANEL_NONE);
-  PANEL_cb8 = glui_colorbar->add_panel_to_panel(PANEL_cb9,_("Below specified min"));
-  SPINNER_down_red=  glui_colorbar->add_spinner_to_panel(PANEL_cb8,_("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-  SPINNER_down_green=glui_colorbar->add_spinner_to_panel(PANEL_cb8,_("green"),GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-  SPINNER_down_blue= glui_colorbar->add_spinner_to_panel(PANEL_cb8,_("blue"), GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-
-  glui_colorbar->add_column_to_panel(PANEL_cb9);
-
-  PANEL_cb7 = glui_colorbar->add_panel_to_panel(PANEL_cb9,_("Above specified max"));
-  SPINNER_up_red=  glui_colorbar->add_spinner_to_panel(PANEL_cb7,_("red"),  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-  SPINNER_up_green=glui_colorbar->add_spinner_to_panel(PANEL_cb7,_("green"),GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
-  SPINNER_up_blue= glui_colorbar->add_spinner_to_panel(PANEL_cb7,_("blue"), GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
 
   colorbar_global2local();
 
@@ -363,45 +341,6 @@ void COLORBAR_CB(int var){
     remapcolorbar(cbi);
     updatecolors(-1);
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
-    break;
-  case COLORBAR_EXTREME:
-    update_extreme2();
-    if(show_extremedata==1){
-      SPINNER_down_red->enable();
-      SPINNER_down_green->enable();
-      SPINNER_down_blue->enable();
-      SPINNER_up_red->enable();
-      SPINNER_up_green->enable();
-      SPINNER_up_blue->enable();
-    }
-    else{
-      SPINNER_down_red->disable();
-      SPINNER_down_green->disable();
-      SPINNER_down_blue->disable();
-      SPINNER_up_red->disable();
-      SPINNER_up_green->disable();
-      SPINNER_up_blue->disable();
-    }
-    if(colorbartype<0||colorbartype>=ncolorbars)return;
-    cbi = colorbarinfo + colorbartype;
-    remapcolorbar(cbi);
-    updatecolors(-1);
-    updatemenu=1;
-    break;
-  case COLORBAR_EXTREME_RGB:
-    if(colorbartype<0||colorbartype>=ncolorbars)return;
-    cbi = colorbarinfo + colorbartype;
-
-    rgb_nodes=rgb_above_max;
-    for(i=0;i<3;i++){
-      rgb_nodes[i]=cb_up_rgb[i];
-    }
-    rgb_nodes=rgb_below_min;
-    for(i=0;i<3;i++){
-      rgb_nodes[i]=cb_down_rgb[i];
-    }
-    remapcolorbar(cbi);
-    updatecolors(-1);
     break;
   case COLORBAR_RGB:
     if(colorbartype<0||colorbartype>=ncolorbars)return;
@@ -528,15 +467,7 @@ extern "C" void colorbar_global2local(void){
   SPINNER_right_green->set_int_val((int)(rgb_local[1]));
   SPINNER_right_blue->set_int_val( (int)(rgb_local[2]));
 
-  rgb_local = rgb_below_min;
-  SPINNER_down_red->set_int_val(  (int)(rgb_local[0]));
-  SPINNER_down_green->set_int_val(  (int)(rgb_local[1]));
-  SPINNER_down_blue->set_int_val(  (int)(rgb_local[2]));
+  update_extreme_vals();
 
-  rgb_local = rgb_above_max;
-  SPINNER_up_red->set_int_val(  (int)(rgb_local[0]));
-  SPINNER_up_green->set_int_val(  (int)(rgb_local[1]));
-  SPINNER_up_blue->set_int_val(  (int)(rgb_local[2]));
-
-  COLORBAR_CB(COLORBAR_EXTREME);
+  Extreme_CB(COLORBAR_EXTREME);
 }
