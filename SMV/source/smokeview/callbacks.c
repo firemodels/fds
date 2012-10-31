@@ -912,7 +912,7 @@ void colorbar_dragsplit(int xm, int ym){
 /* ------------------ timebar_drag ------------------------ */
 
 void timebar_drag(int xm, int ym){
-  if(screenHeight-ym<VP_timebar.height&&nglobal_times>0){
+  if(nglobal_times>0){
     int left_label_width=7*VP_timebar.text_width;
     int right_label_width=10.5*VP_timebar.text_width;
     int timebar_right_pos;
