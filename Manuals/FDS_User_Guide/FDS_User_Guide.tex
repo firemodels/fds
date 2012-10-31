@@ -6793,14 +6793,14 @@ For calculating the absorption of thermal radiation by particles, FDS uses a run
 \subsection{Size Distribution}
 \label{info:particle_size}
 
-For liquid droplets, particle sizes follow a given the Cumulative Volume Function (CVF) of droplet sizes.  Distribution can be selected by setting the {\ct DISTRIBUTION} parameter on the PART line. The default is {\ct ROSIN-RAMMLER-LOGNORMAL}. Other choices are {\ct LOGNORMAL} and {\ct ROSIN-RAMMLER}. Note that the specified {\ct DIAMETER} (in units of $\mu$m) on the {\ct PART} line is the median volumetric diameter of the droplets or particles. 
+For liquid droplets, particle sizes follow a given the Cumulative Volume Function (CVF) of droplet sizes. Distributions can be selected by setting the {\ct DISTRIBUTION} parameter on the PART line. The default is {\ct ROSIN-RAMMLER-LOGNORMAL}. Other choices are {\ct LOGNORMAL} and {\ct ROSIN-RAMMLER}. Note that the specified {\ct DIAMETER} (in units of $\mu$m) on the {\ct PART} line is the median volumetric diameter of the droplets or particles. 
 
 The {\ct LOGNORMAL} distribution is given by 
 \be
 \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^d} \, \frac{1}{\sigma\, d'} \,
    e^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}}.
 \ee
-The width of the distribution is controlled by parameter {\ct SIGMA\_D} on the {\ct PART} line. The {\ct ROSIN-RAMMLER} distribution is given by
+The width of the distribution is controlled by the parameter {\ct SIGMA\_D} on the {\ct PART} line. The {\ct ROSIN-RAMMLER} distribution is given by
 \be
    1 - e^{-0.693 \left(\frac{d}{d_m}\right)^\gamma. } 
 \ee
@@ -6817,7 +6817,7 @@ which ensures that the two functions are smoothly joined at $d=d_m$. You can als
 over-ride this feature. The larger the value of $\gamma$, the narrower the droplet size is
 distributed about the median value. 
 
-User can also define the particle size distribution by defining the Cumulative Number Function of the distribution (CNF). This is done by setting the {\ct USER\_CNF\_RAMP} on the {\ct PART} line and including a {\ct RAMP} that gives the CNF. For example, a particles with diameters following the normal distribution can be defined as follows.
+The particle size distribution can also defined using the Cumulative Number Function of the distribution (CNF). This is done by setting the {\ct USER\_CNF\_RAMP} on the {\ct PART} line and including a {\ct RAMP} that gives the CNF. For example, particles with diameters following the normal distribution can be defined as follows.
 \begin{verbatim}
 &PART ID='USER',
       CNF_RAMP_ID='USER_CNF',
@@ -6829,7 +6829,7 @@ User can also define the particle size distribution by defining the Cumulative N
 &RAMP ID="USER_CNF"   T= 1800 F= 0.999968/
 &RAMP ID="USER_CNF"   T= 2000 F= 1.000000/ 
 \end{verbatim}
-Note that the  {\ct RAMP} variable {\ct T} is given in micrometers. 
+Note that the {\ct RAMP} variable {\ct T} is given in micrometers. 
 
  Note that you can prevent droplets or particles from
 exceeding {\ct MAXIMUM\_DIAMETER}, which is infinitely large by default. Also note that
