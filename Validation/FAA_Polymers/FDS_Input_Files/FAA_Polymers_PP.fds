@@ -16,13 +16,11 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       N_REACTIONS=1
       A(1) = 1
       E(1) = 0
-	  N_S(1) = 0.0
-      N_T(1) = 1.0
 	  THRESHOLD_TEMPERATURE(1)=158.
       EMISSIVITY=0.96
       DENSITY=910.
-      NU_RESIDUE=1.
-      RESIDUE='Liq'
+      NU_MATL=1.
+      MATL_ID='Liq'
       HEAT_OF_REACTION=80.
       CONDUCTIVITY = 0.24
       SPECIFIC_HEAT = 2.55 /
