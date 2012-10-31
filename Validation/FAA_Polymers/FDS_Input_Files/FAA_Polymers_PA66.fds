@@ -18,7 +18,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       E(1) = 0
       EMISSIVITY=0.95
       DENSITY=1150.
-      THRESHOLD_TEMPERATURE=262.
+      THRESHOLD_TEMPERATURE(1)=262.
       NU_RESIDUE=1.
       RESIDUE='Liq'
       HEAT_OF_REACTION=55.
