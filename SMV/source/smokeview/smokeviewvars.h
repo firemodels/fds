@@ -632,7 +632,6 @@ SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int SVDECL(visBlocklabel,1);
 SVEXTERN int SVDECL(visOpenVents,1),SVDECL(visDummyVents,1),SVDECL(visOtherVents,1);
 SVEXTERN int SVDECL(visOpenVentsAsOutline,0);
-SVEXTERN int visTitle;
 SVEXTERN int SVDECL(visSmoke,1), SVDECL(visZone,0);
 SVEXTERN int SVDECL(visEvac,1);
 SVEXTERN int visBlocks;

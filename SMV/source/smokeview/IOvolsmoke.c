@@ -1232,7 +1232,7 @@ int get_volsmoke_nframes(volrenderdata *vr){
     nframes=0;
     filesize=get_filesize(smokeslice->reg_file);
     if(filesize>0){
-      nframes = (filesize-skip_local)/(12 + framesize);
+      nframes = (int)(filesize-skip_local)/(int)(12 + framesize);
     }
   }
   else{

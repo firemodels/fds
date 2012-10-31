@@ -1059,7 +1059,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       return;
     }
     if(settmax_s==0&&settmin_s==0&&sd->compression_type==0){
-      sd->ntimes = (get_filesize(file)-headersize)/framesize;
+      sd->ntimes = (int)(get_filesize(file)-headersize)/framesize;
       if(sliceframestep>1)sd->ntimes/=sliceframestep;
     }
     if(error!=0||sd->ntimes<1){
@@ -3354,7 +3354,6 @@ void update_gslice_planes(void){
 
 /* ------------------ drawgslice_outline ------------------------ */
 
-void getNormal(float *v1, float *v2, float *v3, float *area, float *normal);
 void drawgslice_outline(void){
   int i;
   float zero[3]={0.0,0.0,0.0};

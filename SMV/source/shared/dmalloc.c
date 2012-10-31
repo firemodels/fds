@@ -648,6 +648,34 @@ char *_strcat(char *s1, const char *s2){
 }
 #endif
 #ifdef pp_MEMDEBUG
+
+/* ------------------ set_memcheck ------------------------ */
+
+void set_memcheck(int index){
+  switch(index){
+  case 0:
+    MMmaxmemory=0;
+    break;
+  case 1:
+    MMmaxmemory=1000000000;
+    break;
+  case 2:
+    MMmaxmemory=2000000000;
+    break;
+#ifdef BIT64
+  case 3:
+    MMmaxmemory=4000000000;
+    break;
+  case 4:
+    MMmaxmemory=8000000000;
+    break;
+  default:
+    ASSERT(0);
+    break;
+#endif
+  }
+}
+
 /* ------------------ getMemusage ------------------------ */
 
 void getMemusage(MMsize totalmemory,char *MEMlabel){

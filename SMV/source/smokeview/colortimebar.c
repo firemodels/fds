@@ -18,10 +18,6 @@ char colorbar_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-#define DYFONT (-0.5)
-
-//i1 = glutBitmapLength(GLUT_BITMAP_HELVETICA_10,"-999.0");
-
 /* ------------------ UpdateTimeLabels ------------------------ */
 
 void UpdateTimeLabels(void){
@@ -964,30 +960,6 @@ void update_colorbar_splits(colorbardata *cbi){
   }
 }
 
-/* ------------------ get_label_position ------------------------ */
-
-int get_label_position(float position, float dyfont, float barbot){
-  float diff_position, min_diff;
-  int iposition;
-  int i;
-
-  iposition=-1;
-  min_diff = 1000.0;
-  for (i=0; i<nrgb-1; i++){
-    float vert_position;
-
-    vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
-    diff_position = position - vert_position;
-    if(diff_position<0.0)diff_position=-diff_position;
-    if(diff_position<min_diff){
-      iposition=i;
-      min_diff=diff_position;
-    }
-  }
-  if(min_diff>0.2)iposition=-1;
-  return iposition;
-}
-
 /* ------------------ drawColorBars ------------------------ */
 
 void drawColorBars(void){
@@ -1430,10 +1402,13 @@ void drawColorBars(void){
     tttmax = sb->levels256[255];
     isorange=tttmax-tttmin;
     iposition=-1;
-    /*
+    glPushMatrix();
+    glTranslatef(colorbar_left_pos-colorbar_label_width,-VP_colorbar.text_height/2.0,0.0);
+    glTranslatef(-leftiso*(colorbar_label_width+h_space),0.0,0.0);
     if(global_changecolorindex!=-1){
-      char isocolorlabel[256];
+      char isocolorlabel[256],isolabel[256];
       char *isocolorlabel_ptr=NULL;
+      float vert_position;
 
       tttval = sb->levels256[valindex];
       num2string(isolabel,tttval,isorange);
@@ -1442,13 +1417,10 @@ void drawColorBars(void){
         scalefloat2string(tttval,isocolorlabel, isofactor, isorange);
         isocolorlabel_ptr=isocolorlabel;
       }
-      position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
-      iposition = get_label_position(position,dyfont,barbot);
-      outputBarText(right[leftiso],position,red_color,isocolorlabel_ptr);
-    }*/
-    glPushMatrix();
-    glTranslatef(colorbar_left_pos-colorbar_label_width,-VP_colorbar.text_height/2.0,0.0);
-    glTranslatef(-leftiso*(colorbar_label_width+h_space),0.0,0.0);
+      vert_position = MIX2(global_changecolorindex,255,colorbar_top_pos,colorbar_down_pos);
+      iposition = MIX2(global_changecolorindex,255,nrgb-1,0);
+      outputBarText(0.0,vert_position,red_color,isocolorlabel_ptr);
+    }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
       char isocolorlabel[256];

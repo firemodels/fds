@@ -21,7 +21,9 @@ extern "C" char glui_bounds_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "MALLOC.h"
 
+extern "C" void set_memcheck(int index);
 extern "C" void colorbar_global2local(void);
+extern "C" void PLOT3D_CB(int var);
 
 #ifdef pp_MEMDEBUG
 void Memcheck_CB(int val);
@@ -31,7 +33,6 @@ void SETslicemin(int setslicemin, float slicemin, int setslicechopmin, float sli
 void Bounds_DLG_CB(int var);
 void PART_CB(int var);
 void Bound_CB(int var);
-extern "C" void PLOT3D_CB(int var);
 void Iso_CB(int var);
 void Smoke3D_CB(int var);
 void Time_CB(int var);
@@ -167,7 +168,6 @@ GLUI_Panel *PANEL_evac_direction=NULL;
 GLUI_Panel *PANEL_pan1=NULL;
 GLUI_Panel *PANEL_pan2=NULL;
 GLUI_Panel *PANEL_pan3=NULL;
-GLUI_Panel *PANEL_contours=NULL;
 GLUI_Panel *PANEL_isosurface=NULL;
 GLUI_Panel *PANEL_vector=NULL;
 GLUI_Panel *PANEL_slice_vector=NULL;
@@ -191,7 +191,6 @@ GLUI_Panel *PANEL_time2a=NULL;
 GLUI_Panel *PANEL_time2b=NULL;
 GLUI_Panel *PANEL_time2c=NULL;
 
-GLUI_Spinner *SPINNER_labels_transparency_data=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_data2=NULL;
 GLUI_Spinner *SPINNER_transparent_level=NULL;
 #ifdef pp_SLICECONTOURS
@@ -222,7 +221,6 @@ GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
 GLUI_Spinner *SPINNER_vectorlinelength=NULL;
 
 GLUI_Listbox *LIST_scriptlist=NULL;
-GLUI_Listbox *LIST_colorbar2=NULL;
 GLUI_Listbox *LIST_ini_list=NULL;
 
 GLUI_EditText *EDIT_ini=NULL;
@@ -247,14 +245,9 @@ GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
 GLUI_Checkbox *CHECKBOX_constant_coloring=NULL;
 GLUI_Checkbox *CHECKBOX_show_evac_color=NULL;
 GLUI_Checkbox *CHECKBOX_data_coloring=NULL;
-GLUI_Checkbox *CHECKBOX_transparentflag=NULL;
 GLUI_Checkbox *CHECKBOX_transparentflag2=NULL;
-GLUI_Checkbox *CHECKBOX_sort=NULL;
-GLUI_Checkbox *CHECKBOX_smooth=NULL;
 GLUI_Checkbox *CHECKBOX_sort2=NULL;
 GLUI_Checkbox *CHECKBOX_smooth2=NULL;
-GLUI_Checkbox *CHECKBOX_axislabels_smooth=NULL;
-GLUI_Checkbox *CHECKBOX_extreme2=NULL;
 GLUI_Checkbox *CHECKBOX_overwrite_all=NULL;
 GLUI_Checkbox *CHECKBOX_compress_autoloaded=NULL;
 GLUI_Checkbox *CHECKBOX_erase_all=NULL;
@@ -333,18 +326,6 @@ extern "C" void update_script_step(void){
   }
 }
 
-/* ------------------ transparency ------------------------ */
-
-extern "C" void update_transparency(void){
-  CHECKBOX_transparentflag->set_int_val(use_transparency_data);
-}
-
-/* ------------------ update_axislabels_smooth ------------------------ */
-
-extern "C" void update_axislabels_smooth(void){
-  CHECKBOX_axislabels_smooth->set_int_val(axislabels_smooth);
-}
-
 /* ------------------ update_evac_parms ------------------------ */
 
 extern "C" void update_evac_parms(void){
@@ -352,12 +333,6 @@ extern "C" void update_evac_parms(void){
   if(CHECKBOX_constant_coloring!=NULL)CHECKBOX_constant_coloring->set_int_val(constant_evac_coloring);
   if(CHECKBOX_data_coloring!=NULL)CHECKBOX_data_coloring->set_int_val(data_evac_coloring);
   if(CHECKBOX_show_evac_color!=NULL)CHECKBOX_show_evac_color->set_int_val(show_evac_colorbar);
-}
-
-/* ------------------ update_update_extreme2 ------------------------ */
-
-extern "C" void update_extreme2(void){
-  if(CHECKBOX_extreme2!=NULL)CHECKBOX_extreme2->set_int_val(show_extremedata);
 }
 
 /* ------------------ update_glui_plot3d ------------------------ */
@@ -730,36 +705,6 @@ extern "C" void glui_bounds_setup(int main_window){
 
   Time_CB(TBOUNDS_USE);
 
-  ROLLOUT_colorbar = glui_bounds->add_rollout(_("Data coloring"),false);
-  if(ncolorbars>0){
-    selectedcolorbar_index2=-1;
-    LIST_colorbar2=glui_bounds->add_listbox_to_panel(ROLLOUT_colorbar,_("Colorbar:"),&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
-
-    for(i=0;i<ncolorbars;i++){
-      colorbardata *cbi;
-
-      cbi = colorbarinfo + i;
-      cbi->label_ptr=cbi->label;
-      LIST_colorbar2->add_item(i,cbi->label_ptr);
-    }
-    LIST_colorbar2->set_int_val(colorbartype);
-  }
-  PANEL_contours = glui_bounds->add_panel_to_panel(ROLLOUT_colorbar,_("Colorbar shade type"));
-  RADIO_plot3d_display=glui_bounds->add_radiogroup_to_panel(PANEL_contours,&contour_type,UPDATEPLOT,PLOT3D_CB);
-  glui_bounds->add_radiobutton_to_group(RADIO_plot3d_display,_("Continuous"));
-  glui_bounds->add_radiobutton_to_group(RADIO_plot3d_display,_("Stepped"));
-  glui_bounds->add_radiobutton_to_group(RADIO_plot3d_display,_("Line"));
-  CHECKBOX_axislabels_smooth=glui_bounds->add_checkbox_to_panel(ROLLOUT_colorbar,_("Smooth colorbar labels"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
-  CHECKBOX_extreme2=glui_bounds->add_checkbox_to_panel(ROLLOUT_colorbar,_("Highlight extreme data"),&show_extremedata,
-    COLORBAR_EXTREME2,Slice_CB);
-  CHECKBOX_transparentflag=glui_bounds->add_checkbox_to_panel(ROLLOUT_colorbar,_("Use transparency:"),&use_transparency_data,DATA_transparent,Slice_CB);
-#ifdef pp_BETA
-  CHECKBOX_sort=glui_bounds->add_checkbox_to_panel(ROLLOUT_colorbar,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
-  CHECKBOX_smooth=glui_bounds->add_checkbox_to_panel(ROLLOUT_colorbar,_("Smooth surfaces:"),&smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
-#endif
-  SPINNER_labels_transparency_data=glui_bounds->add_spinner_to_panel(ROLLOUT_colorbar,_("transparency level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
-  SPINNER_labels_transparency_data->set_w(0);
-  SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
@@ -992,7 +937,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
 
 /* ------------------ PLOT3D_CB ------------------------ */
 
-void PLOT3D_CB(int var){
+extern "C" void PLOT3D_CB(int var){
   int i;
 
   switch (var){
@@ -1479,35 +1424,18 @@ extern "C"  void glui_script_disable(void){
   }
 
 #ifdef pp_MEMDEBUG
+
 /* ------------------ Memcheck_CB ------------------------ */
 
   void Memcheck_CB(int var){
   switch(var){
-  case MEMCHECK:
-    switch(list_memcheck_index){
-      case 0:
-        MMmaxmemory=0;
-        break;
-      case 1:
-        MMmaxmemory=1000000000;
-        break;
-      case 2:
-        MMmaxmemory=2000000000;
-        break;
-#ifdef BIT64
-      case 3:
-        MMmaxmemory=4000000000;
-        break;
-      case 4:
-        MMmaxmemory=8000000000;
-        break;
-#endif
+    case MEMCHECK:
+      set_memcheck(list_memcheck_index);
+      break;
+    default:
+      ASSERT(0);
+      break;
     }
-    break;
-  default:
-    ASSERT(0);
-    break;
-  }
 }
 #endif
 
@@ -2024,7 +1952,6 @@ extern "C" void Slice_CB(int var){
 
   updatemenu=1;
   if(var==DATA_transparent){
-    CHECKBOX_transparentflag->set_int_val(use_transparency_data);
     CHECKBOX_transparentflag2->set_int_val(use_transparency_data);
     updatechopcolors();
     return;
@@ -2092,7 +2019,6 @@ extern "C" void Slice_CB(int var){
       Slice_CB(FILEUPDATE);
       break;
     case SMOOTH_SURFACES:
-      CHECKBOX_smooth->set_int_val(smoothtrinormal);
       CHECKBOX_smooth2->set_int_val(smoothtrinormal);
       break;
     case SORT_SURFACES:
@@ -2103,7 +2029,6 @@ extern "C" void Slice_CB(int var){
         surfi = surfinfo + i;
         surfi->transparent_level=transparent_level;
       }
-      CHECKBOX_sort->set_int_val(sort_iso_triangles);
       CHECKBOX_sort2->set_int_val(sort_iso_triangles);
       break;
     case SHOW_EVAC_SLICES:
@@ -2125,7 +2050,6 @@ extern "C" void Slice_CB(int var){
       }
       updatecolors(-1);
       SPINNER_transparent_level->set_float_val(transparent_level);
-      SPINNER_labels_transparency_data->set_float_val(transparent_level);
       if(SPINNER_labels_transparency_data2!=NULL)SPINNER_labels_transparency_data2->set_float_val(transparent_level);
       break;
 #ifdef pp_SLICECONTOURS

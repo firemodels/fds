@@ -671,6 +671,9 @@ void update_mouseinfo(int flag, int xm, int ym){
       delta_angle2 = mi->angle - mi->lastangle;
       mi->lastangle = mi->angle;
       break;
+    default:
+      ASSERT(0);
+      break;
   }
   
   if(mi->direction[0]==0&&mi->direction[1]==0){

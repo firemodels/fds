@@ -22,7 +22,7 @@ char output_revision[]="$Revision$";
 
 void outputAxisLabels(){
   float x, y, z;
-  float x0, y0;
+  float xx0, yy0;
   char XX[1]={'X'}, YY[1]={'Y'}, ZZ[1]={'Z'};
   int ibar,jbar,kbar;
   float *xplt,*yplt,*zplt;
@@ -40,16 +40,16 @@ void outputAxisLabels(){
     zplt=meshi->zplt;
 
 
-    x0 = xplt[0]-0.02;
-    y0 = yplt[0]-0.02;
+    xx0 = xplt[0]-0.02;
+    yy0 = yplt[0]-0.02;
     x = (xplt[0]+xplt[ibar])/2.0;
     y = (yplt[0]+yplt[jbar])/2.0;
     z = (zplt[0]+zplt[kbar])/2.0;
-    glRasterPos3f(x,y0,(float)0.0);
+    glRasterPos3f(x,yy0,(float)0.0);
     glutBitmapCharacter(large_font,XX[0]);
-    glRasterPos3f(x0,y,(float)0.0);
+    glRasterPos3f(xx0,y,(float)0.0);
     glutBitmapCharacter(large_font,YY[0]);
-    glRasterPos3f(x0,y0,z);
+    glRasterPos3f(xx0,yy0,z);
     glutBitmapCharacter(large_font,ZZ[0]);
   }
 }

@@ -58,7 +58,6 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define RENDER_LABEL 5
 #define RENDER_MULTIPLIER 6
 
-void rotation_type_CB(int var);
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
 void Gslice_CB(int var);
@@ -173,7 +172,7 @@ extern "C" void update_nrender_rows(void){
 
 /* ------------------ update_gslice_parms ------------------------ */
 
-void update_gslice_parms(void){
+extern "C" void update_gslice_parms(void){
   Gslice_CB(GSLICE_NORMAL);
   Gslice_CB(GSLICE_TRANSLATE);
   SPINNER_gslice_center_x->set_float_val(gslice_xyz[0]);
@@ -808,6 +807,9 @@ void Gslice_CB(int var){
       gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0,DENORMALIZE_X(xbar));
       gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0,DENORMALIZE_Y(ybar));
       gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0,DENORMALIZE_Z(zbar));
+      break;
+    default:
+      ASSERT(0);
       break;
   }
 }
