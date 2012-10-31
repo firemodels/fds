@@ -1477,6 +1477,11 @@ END SELECT
  
 END FUNCTION EVALUATE_RAMP
 
+
+REAL(EB) FUNCTION ERF(X)
+REAL(EB),INTENT(IN)::X
+   ERF=1-ERFC(X)
+END FUNCTION ERF
  
 REAL(EB) FUNCTION ERFC(X)
  
@@ -2197,7 +2202,7 @@ END FUNCTION SURFACE_DENSITY
 
 
 SUBROUTINE PARTICLE_SIZE_DISTRIBUTION(DM,RR,CNF,NPT,GAMMA,SIGMA,DISTRIBUTION)
-USE MATH_FUNCTIONS, ONLY :IERFC 
+USE MATH_FUNCTIONS, ONLY :IERFC,ERF
 ! Compute PARTICLE Cumulative Number Fraction (CNF)
 
 ! CNF(d) = (3/(4*pi))*int_0^d(f(d')*(d'/2)^-3)dd', where f(d') is the PDF of size distribution.
@@ -2217,15 +2222,13 @@ SELECT CASE(DISTRIBUTION)
       DD1    = DM*EXP(X1*SQRT(2._EB)*SIGMA)
       DMIN   = MAX(DM*EXP(-X1*SQRT(2._EB)*SIGMA),0._EB)
       DD1    =(DD1-DMIN)/REAL(NPT,EB)
-      SFAC   = DD1/(SQRT(TWOPI)*SIGMA)
+      !       sqrt(%pi)*s*exp(9.d+0*s**2/2.d+0)*erf(log(x/mu)/(sqrt(2)*s)+3*s/sqrt(2))/(mu**3*sqrt(pi))/2.d+0
       DO J=1,NPT
          DI    = DMIN + (J-0.5_EB)*DD1
          RR(J) = 0.5_EB*DI
-         ETRM = EXP(-(LOG(DI/DM))**2/(2._EB*SIGMA**2))
-         SUM1 = SUM1 + (SFAC/DI**4)*ETRM
-         CNF(J) = SUM1
+         CNF(J) =  ERF(LOG(DI/DM)/(SQRT(2._EB)*SIGMA)+3*SIGMA/sqrt(2._EB))
       ENDDO
-      CNF = CNF/SUM1
+      CNF = CNF/CNF(NPT)
    CASE('ROSIN-RAMMLER')
       DD1    = (-LOG(CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
       DMIN   = (-LOG(1._EB-CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
@@ -2239,25 +2242,13 @@ SELECT CASE(DISTRIBUTION)
          CNF(J) = SUM1
       ENDDO
       CNF = CNF/SUM1
-   CASE('ROOT-NORMAL')
-      ! 1/(2*sigma*x^3*sqrt(2*pi*x))*exp(-0.5*((sqrt(x)-m)/sigma)^2)
-      X1     = IERFC(2._EB*CDF_CUTOFF)
-      DD1    = (SQRT(DM)+X1*SQRT(2._EB)*SIGMA)**2
-      DMIN   = MAX((SQRT(DM)-X1*SQRT(2._EB)*SIGMA)**2,0._EB)
-      DD1    = (DD1-DMIN)/REAL(NPT,EB)
-      GFAC   =1._EB/(2*SIGMA*SQRT(TWOPI))
-      DO J=1,NPT
-         DI     = DMIN + (J-0.5_EB)*DD1
-         RR(J)  = 0.5_EB*DI
-         ETRM   = EXP(-0.5*((SQRT(DI)-SQRT(DM))/SIGMA)**2)         
-         SUM1   = SUM1 + GFAC*ETRM/(DI**7._EB/2._EB)
-         CNF(J) = SUM1
-      ENDDO
-      CNF = CNF/SUM1
    CASE DEFAULT ! Rosin-Rammler-Lognormal
       SUM1   = 0._EB
+      X1     = IERFC(2._EB*CDF_CUTOFF)
+      DMIN   = MAX(DM*EXP(-X1*SQRT(2._EB)*SIGMA),0._EB)
       ! Discretize range of PARTICLE diameters into NPT parts
-      DD1    = (-LOG(CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM/REAL(NPT,EB)
+      DD1    = (-LOG(CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
+      DD1    = (DD1-DMIN)/REAL(NPT,EB)
       GFAC   = LOG(2._EB)*GAMMA*DD1/(DM**GAMMA)
       SFAC   = DD1/(SQRT(TWOPI)*SIGMA)
     
