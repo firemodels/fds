@@ -49,7 +49,7 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
          DD=RM%SPAN/NDC
          DO I=1,NDC
                DI=RM%T_MIN+(I-0.5_EB)*DD
-               LPC%R_CDF(I) = 0.5_EB*DI
+               LPC%R_CDF(I) = 1E-6_EB*0.5_EB*DI
                LPC%CDF(I)   = EVALUATE_RAMP(DI,0._EB,LPC%CNF_RAMP_INDEX) 
          ENDDO
          LPC%CDF=LPC%CDF/LPC%CDF(NDC)
@@ -89,7 +89,7 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
          DD=RM%SPAN/NDC
          DO I=1,NDC
                DI=RM%T_MIN+(I-0.5_EB)*DD
-               LPC%BREAKUP_R_CDF(I) = 0.5_EB*DI
+               LPC%BREAKUP_R_CDF(I) = 1E-6_EB*0.5_EB*DI
                LPC%BREAKUP_CDF(I)   = EVALUATE_RAMP(DI,0._EB,LPC%BREAKUP_CNF_RAMP_INDEX) 
          ENDDO
          LPC%BREAKUP_CDF=LPC%BREAKUP_CDF/LPC%BREAKUP_CDF(NDC)
