@@ -550,19 +550,82 @@ Direct Numerical Simulation (DNS).
 
 \section{What's New in FDS 6?}
 
-Many of the changes in FDS~6 are improvements to the various sub-models that do not affect the basic structure or parameters of the input file. 
+Many of the changes in FDS~6 are improvements to the various sub-models that do not affect the basic structure or parameters of the input file. Most of the changes listed below do not require additional input parameters beyond those used in FDS~5.
 
-\begin{description}
-\item[Species Transport]
-The scalar transport solver has been overhauled to prevent the over or under-shooting of scalar values in the region of a steep gradient, for example, the base of the fire plume.
-\item[Turbulence]
-The default large eddy simulation framework now includes the Deardorff form of the modeled viscosity. Past versions of FDS used the constant coefficient Smagorinsky model. The change increases the dynamic range of the simulation, yielding improved plume dynamics on relatively coarse grids.
-\item[Particles]
-The functionality of Lagrangian particles has expanded to include the heat transfer and pyrolysis of solid walls. In other words, you can now assign a set of surface properties to planar, cylindrical, or spherical particles much like you would for a solid surface. Liquid droplets are treated in much the same way as past versions.
-\item[Pyrolysis] 
-The basic 1-D heat transfer and pyrolysis model for solid surfaces remains the same, but there has been a change in several of the input parameters to expand functiontionality and readability of the input file. 
-\item[HVAC] The functionality of the HVAC (Heating, Ventilation, Air Conditioning) has expanded to include more flexibility in specifying air coils, dampers, fans, louvers, and other devices. 
-\end{description}
+\vspace{\baselineskip}
+
+\noindent {\bf Hydrodynamics and Turbulence} 
+
+   \begin{itemize}
+   \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
+   \item Improved models for the turbulent viscosity are implemented: Deardorff (default), Dynamic Smagorinsky, and Vreman. These models provide more dynamic range to the flow field for coarse resolution and converge to the correct solution at fine resolution.
+   \item The conservative form of the sensible enthalpy equation is satisfied by construction in the FDS~6 formulation, eliminating temperature anomalies and energy conservation errors due to numerical mixing.
+   \item The baroclinic torque is included by default. 
+   \item Improvements are made to the wall functions for momentum and heat flux. An optional wall heat flux model accounts for variable Prandtl number fluids.
+   \item Jarrin's Synthetic Eddy Method (SEM) is implemented for turbulent boundary conditions at vents. 
+   \end{itemize}
+
+\noindent {\bf Species and Combustion}
+
+    \begin{itemize}
+    \item Custom species mixtures (``lumped species'') can be defined with the new input group SMIX. 
+    \item Turbulent combustion is handled with a new partially-stirred batch reactor model. At the subgrid level, species exist in one of two states: unmixed or mixed. The degree of mixing evolves over the FDS time step by the interaction by exchange with the mean (IEM) mixing model. Chemical kinetics may be considered infinitely fast or obey an Arrhenius rate law. 
+    \item It is now possible to transport, produce, and consume product species such as CO and soot. Chemical mechanisms must be provided by the user and may include reversible reactions.
+    \item It is now possible to deposit aerosol species onto surfaces. 
+    \item There are an increased number of predefined species that now include liquid properties. 
+    \end{itemize}
+    
+\noindent {\bf Lagrangian Particles}
+
+    \begin{itemize}
+    \item The functionality of Lagrangian particles has expanded to include the same heat transfer and pyrolysis models that apply to solid walls. In other words, you can now assign a set of surface properties to planar, cylindrical, or spherical particles much like you would for a solid surface.
+    \item Drag effects of thin porous media (i.e., window screens) can be simulated using planes of particles. 
+    \end{itemize}
+    
+\noindent {\bf Solid Phase Heat Transfer and Pyrolysis}
+
+    \begin{itemize}
+    \item The basic 1-D heat transfer and pyrolysis model for solid surfaces remains the same, but there has been a change in several of the input parameters to expand functionality and readability of the input file.
+    \item The pyrolysis model allows for the surface to shrink or swell, based on the specified material densities.
+    \end{itemize}
+    
+\noindent {\bf HVAC}
+
+   \begin{itemize}
+    \item Filters, louvered vents, and heating/cooling capability has been added for HVAC systems. 
+    \item HVAC is now functional with MPI. 
+    \end{itemize}
+    
+\noindent {\bf Radiation} 
+
+    \begin{itemize}
+    \item RadCal database has been extended to include additional fuel species. 
+    \item In cells with heat release, the emission term is based on a corrected $\sigma \, T^4$ such that when this term is integrated over the flame volume the specified radiative fraction (default 0.35) is recovered. This differs from FDS~5 and earlier where the radiative fraction times the heat release rate was applied locally as the emission term.
+    \end{itemize}
+    
+\noindent {\bf Multi-Mesh Computations} 
+
+    \begin{itemize}
+    \item By default, FDS now iterates pressure and velocity at mesh and solid boundaries. You can control the error tolerance and maximum number of iterations via parameters on the {\ct PRES} line.
+    \end{itemize}
+    
+\noindent {\bf Control Functions} 
+
+    \begin{itemize}
+    \item {\ct CTRL} functions have been extended to include math operations. 
+    \item The evaluation of {\ct RAMP}s and {\ct DEVC}s can be stopped, freezing their value, based upon the activation of a device or control function.
+    \end{itemize}
+    
+\noindent {\bf Devices and Output} 
+
+    \begin{itemize}
+    \item Multiple pipe networks can be specified for sprinklers for reduction of flow rate based on the number of operating heads. 
+    \item The numerical value of a control function can be output with a {\ct DEVC}. 
+    \item A line of devices can be specified using a number of {\ct POINTS} on one {\ct DEVC} line. 
+    \item Statistical outputs for RMS, covariance, and correlation coefficient are available. 
+    \end{itemize}
+    
+
 
 
 
@@ -1563,7 +1626,7 @@ heat the walls to steady-state can make the cost of the calculation prohibitive.
 of these materials roughly by 10. An example of an application where this parameter is handy is a validation experiment where a steady heat source
 warms up a compartment to a nearly equilibrium state at which point time-averaged flow quantities are measured.
 
-Note that when {\ct TIME\_SHRINK\_FACTOR} is used a device with {\ct QUANTITY='TIME'} or a device or control function with a {\ct DELAY} will have those values adjusted by the value of {\ct TIME\_SHRINK\_FACTOR}.  For example if a 10~s {\ct DELAY} is specified for a {\ct CTRL} input with a {\ct TIME\_SHRINK\_FACTOR} of 10, then FDS will adjust the {\ct DELAY} to 1~s.    
+Note that when {\ct TIME\_SHRINK\_FACTOR} is used a device with {\ct QUANTITY='TIME'} or a device or control function with a {\ct DELAY} will have those values adjusted by the value of {\ct TIME\_SHRINK\_FACTOR}.  For example if a 10~s {\ct DELAY} is specified for a {\ct CTRL} input with a {\ct TIME\_SHRINK\_FACTOR} of 10, then FDS will adjust the {\ct DELAY} to 1~s.
 
 \newpage
 
@@ -3372,7 +3435,7 @@ surface be adiabatic, that is, there is no net heat transfer
 (radiative and convective) from the gas to the solid. For this case,
 all that must be prescribed on the {\ct SURF} line is {\ct ADIABATIC=.TRUE.}, and nothing else.  FDS will compute a wall temperature
 so that the sum of the net convective and radiative heat flux is zero.  Specifying a surface as {\ct ADIABATIC} will
-result in FDS defining {\ct NET\_HEAT\_FLUX=0} and {\ct EMISSIVITY=1}. 
+result in FDS defining {\ct NET\_HEAT\_FLUX=0} and {\ct EMISSIVITY=1}.
 
 \begin{warning}
 No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
@@ -8071,7 +8134,7 @@ You must also define the range or ``deadband'' around the setpoint, and whether 
 increasing or decreasing temperature activates the system.  For the HVAC example, crossing the
 lower edge of the deadband activates heating; crossing the upper edge activates cooling.  These more complicated behaviors can be modeled in FDS using {\ct CTRL}s.  The following parameters dictate how a control function will behave:
 \begin{description}
-\item[{\ct ID}] A name for the control function that is unique over all control functions.  
+\item[{\ct ID}] A name for the control function that is unique over all control functions.
 \item[{\ct FUNCTION\_TYPE}] The type of control function.  The possible types are shown in~\ref{tab:funcvalues}.
 \item[{\ct INPUT\_ID}] A list of {\ct DEVC} or {\ct CTRL} {\ct ID}s that are the inputs to the control function.  Up to forty inputs can be specified.  If a {\ct DEVC} or {\ct CTRL} is being used as an {\ct INPUT\_ID} for a control function, then it must have a unique {\ct ID} over both devices and control functions.  Additionally, a control function cannot be used as an input for itself.
 \item[{\ct SETPOINT}] The value of the control function at which its state changes. This is only appropriate for functions that return numerical values.
@@ -8085,7 +8148,7 @@ is {\ct .FALSE.} For example, if an obstruction associated with the control func
 \end{description}
 
 For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} or {\ct VENT}), a {\ct CTRL\_ID} can be
-specified instead.  
+specified instead.
 
 \begin{table}[h!]
 \caption[Control function types]{Control function types.}
@@ -9005,7 +9068,7 @@ $C=8$ for a light-emitting sign and $C=3$ for a light-reflecting
 sign~\cite{SFPE:Mulholland}. Since $K$ varies from point to point in the
 domain, the visibility $S$ does as well.
 
-Three parameters control smoke production and visibility. 
+Three parameters control smoke production and visibility.
 The first is the {\ct SOOT\_YIELD} on the {\ct REAC} line, defined as the fraction of fuel mass that
 is converted to soot if the simple chemistry approach is being used. The second parameter,
 {\ct MASS\_EXTINCTION\_COEFFICIENT}, is the $K_m$ in Eq.~(\ref{mec}). It is defined on one or more of the {\ct SPEC} lines\footnote{When using the simple chemistry combustion model, you can change the default mass extinction coefficient by adding a line to the input file of the form: \tt{\footnotesize \&SPEC ID='SOOT', MASS\_EXTINCTION\_COEFFICIENT=..., SMIX\_COMPONENT\_ONLY=.TRUE. /} } for the various light absorbing gas species. Its default value is 8700~m$^2$/kg, a value
