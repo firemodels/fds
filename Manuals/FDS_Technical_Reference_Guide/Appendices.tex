@@ -299,7 +299,7 @@ The equivalence between (\ref{eqn_div_1}) and (\ref{eqn_div_2}) is apparent base
 
 \label{multi_env_edc}
 
-In the current formulation of the reactor model there are two environments: the mean species concentrations which FDS currently transports and the amount of mixing within a cell (unmixed fraction) which FDS models. Since FDS does not transport the mixing variable, at the start of a time step, the mixing environment is assumed to be in the unmixed state. We would like to extend the reactor model to more environments so that we can eventually construct PDFs of reactor concentration. The difficulty is how to construct/transport the necessary information to build the PDF.
+In the current formulation of the reactor model FDS does not transport the mixing variable. At the start of a time step, mixing is assumed to be in the unmixed state. We would like to extend the reactor model so that we can eventually construct PDFs of reactor concentration. The difficulty is how to construct/transport the necessary information to build the PDF.
 
 One efficient way to describe a PDF is to use moments; where a moment can be thought of a statistical descriptor of the distribution. The first moment of a distribution is the mean of the distribution, the second is the variance, etc. Therefore, the more moments we know, the better the description of the distribution we have. For a given PDF, p(y), the $k^{th}$ moment of $y$ of the distribution is:
 \begin{equation}\label{eq:int_moment}
@@ -386,18 +386,11 @@ concentrations at extinction ranging from 12~\% to 15~\%.
 
 \label{chemistry_integration}
 
-To solve the system of ordinary differential equations used for complex chemistry (e.g., multi-step reactions, reversible reactions), an integrator that is more robust than an explicit Euler scheme is needed. FDS uses a second-order Runge-Kutta (RK2) predictor-corrector scheme as the foundation for its numerical integrator. A common RK2 formulation is \cite{Moin:2001}:
-\begin{align}
-\label{RK2_moin}
-y^*_{n+1/2} &= y_n+\frac{h}{2}\,f(y_{n},t_{n}) \notag\\
-y_{n+1}     &= y_{n}+h\,f(y^*_{n+1/2},t_{n+1/2})
-\end{align}
-The implementation of RK2 in FDS is as follows:
+To solve the system of ordinary differential equations used for complex chemistry (e.g., multi-step reactions, reversible reactions), an integrator that is more robust than an explicit Euler scheme is needed. FDS uses a second-order Runge-Kutta (RK2) predictor-corrector scheme as the foundation for its numerical integrator. A common RK2 formulation \cite{Moin:2001} is used, where we let h be the integration timestep $\delta t$ and $Y$ be the mass fraction of $\alpha$ in the mixed zone, $\hat{Y}_{\alpha}$: 
 \begin{align}
 \label{RK2}
-y^*_{n+1} &= y_n+h\,f(y_{n},t_{n}) \notag\\
-y^*_{n+2} &= y^*_{n+1}+h\,f(y^*_{n+1},t_{n+1}) \notag\\
-y_{n+1}   &= \frac{1}{2}\,(y_{n}+y^*_{n+2})
+Y^* &= Y^n + hf(Y^n) \notag\\
+Y^{n+1}   &= \frac{1}{2}\,(Y^n + Y^* + hf(Y^*))
 \end{align}
 
 This second-order scheme is an improvement upon the first-order explicit scheme used for simple chemistry. However, to maintain stability in stiff problems, this mechanism requires such small integration time steps compared to the global FDS time step that the simulation can become intractable. To improve the capabilities of this integrator, Richardson extrapolation is used. Richardson extrapolation can increase the order of the error within a numerical scheme and provide the foundation for an error controller to be implemented. Consider a generic case where a function, $f(y,t)$, is integrated from $t^*$ to $t$ using two different time sub-intervals: $h$ and $\frac{h}{2}$. Taking a Taylor expansion at $h$ results in:
@@ -416,7 +409,7 @@ which results in a solution with a higher order of error. This same technique is
 \begin{equation}\label{eq:A4}
 A=\frac{4\,A_4-A_2}{3}  + \mathcal{O}(h^4)
 \end{equation}
-In addition to increasing the order of the error in the numerical scheme, Richardson extrapolation also provides an estimate of the error value. This estimate is calculated via a Taylor expansion:
+In Eq.~(\ref{eq:A4}), $A$, represents the time updated value of the species concentrations in the mixed mode, $\hat{Y}_{\alpha}(\delta t)$, as found in Eq.~(\ref{eq:final_comp}). In addition to increasing the order of the error in the numerical scheme, Richardson extrapolation also provides an estimate of the error value. This estimate is calculated via a Taylor expansion:
 \begin{equation}\label{eq:error}
 error \approx \frac{1}{15}\left(\frac{4\,A_4-A_2}{3} - \frac{4\,A_2-A_1}{3}\right)
 \end{equation}
