@@ -416,18 +416,18 @@ extern "C" void glui_labels_setup(int main_window){
 
   PANEL_gen3=glui_labels->add_panel_to_panel(ROLLOUT_label1,"",GLUI_PANEL_NONE);
 
-  CHECKBOX_label_1=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Fast blockage drawing"),&use_new_drawface,LABELS_drawface,Labels_CB);
-  CHECKBOX_label_2=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Sort transparent faces"),&sort_transparent_faces,LABELS_drawface,Labels_CB);
-  CHECKBOX_label_3=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Hide overlaps"),&hide_overlaps,LABELS_hide_overlaps,Labels_CB);
-  CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("hms time label"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
-
-  glui_labels->add_column_to_panel(PANEL_gen3,false);
-
   CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Flip background"),&background_flip,LABELS_flip,Labels_CB);
+  CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("hms time label"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
   SPINNER_linewidth=glui_labels->add_spinner_to_panel(PANEL_gen3,"blockage line width",GLUI_SPINNER_FLOAT,&linewidth);
   SPINNER_linewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
   SPINNER_gridlinewidth=glui_labels->add_spinner_to_panel(PANEL_gen3,"grid line width",GLUI_SPINNER_FLOAT,&gridlinewidth);
   SPINNER_gridlinewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
+
+  glui_labels->add_column_to_panel(PANEL_gen3,false);
+
+  CHECKBOX_label_1=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Fast blockage drawing"),&use_new_drawface,LABELS_drawface,Labels_CB);
+  CHECKBOX_label_2=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Sort transparent faces"),&sort_transparent_faces,LABELS_drawface,Labels_CB);
+  CHECKBOX_label_3=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Hide overlaps"),&hide_overlaps,LABELS_hide_overlaps,Labels_CB);
  
   if(nface_transparent>0){
     glui_labels->add_column_to_panel(PANEL_gen1,true);
@@ -468,7 +468,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   glui_labels->add_column_to_panel(xxPANEL_cb11,false);
 
-  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("color grey"),&setbw,LABELS_shade,Labels_CB);
+  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("color -> grey"),&setbw,LABELS_shade,Labels_CB);
   CHECKBOX_axislabels_smooth=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("Smooth colorbar label values"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
   CHECKBOX_transparentflag=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("Use transparency"),
     &use_transparency_data,DATA_transparent,Slice_CB);
