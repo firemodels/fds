@@ -315,12 +315,12 @@ area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g 
 
 The rate expression (on a fuel basis) for both infinitely fast chemistry and Arrhenius rate chemistry follow the same general form:
 \begin{equation}\label{eq:Arrheniusrateeqn}
-\frac{\mbox{d}[\hat{X}_F]}{\mbox{d}t} = -A \; \prod \left([\hat{X}_{\alpha}]^{a_{\alpha}} \right) T^n \; e^{-E/RT} 
+\frac{\mbox{d}[\hat{X}_F]}{\mbox{d}t} = -A \; \prod [\hat{X}_{\alpha}]^{a_{\alpha}} \; T^n \; e^{-E/RT} 
 \end{equation}
-Note that the rate expression can be dependent upon the local temperature as well as concentrations of species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species can participate as a collision species.  Therefore, rather than $\mbox{d}[X_\F]/\mbox{d}t$,  FDS solves for $\mbox{d}\hat{Y}_{\F}/\mbox{d}t$ (recall $\hat{Y}_{\F}$ is mass fraction of the fuel in the mixed zone of the reactor).  Additionally, since it is quicker to determine $\hat{Y}_{\alpha}$ rather than $\hat{X}_i$, the relation $[\hat{X}_i]=\hat{Y}_{\alpha} \rho/W_i$ is used.  Substituting $\hat{Y}_{\alpha}$ into Eq.~(\ref{eq:Arrheniusrateeqn}) and making the appropriate units change to $A$ results in a modified rate equation:
+Note that the rate expression can be dependent upon the local temperature as well as concentrations of species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species can participate as a collision species.  Therefore, rather than $\mbox{d}[X_F]/\mbox{d}t$,  FDS solves for $\mbox{d}\hat{Y}_{F}/\mbox{d}t$ (recall $\hat{Y}_{F}$ is mass fraction of the fuel in the mixed zone of the reactor).  Additionally, since it is quicker to determine $\hat{Y}_{\alpha}$ rather than $\hat{X}_i$, the relation $[\hat{X}_i]=\hat{Y}_{\alpha} \rho/W_i$ is used.  Substituting $\hat{Y}_{\alpha}$ into Eq.~(\ref{eq:Arrheniusrateeqn}) and making the appropriate units change to $A$ results in a modified rate equation:
 
 \begin{equation}\label{eq:Arrheniusratemode}
-\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(\hat{Y}_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT}; \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
+\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -A_{mod} \rho^{(\sum a_{\alpha}) -1} \; \prod \hat{Y}_{\alpha}^{a_{\alpha}} \; T^n \; e^{-E/RT}; \;\;\; A_{mod} = A \prod W_{\alpha}^{-a_{\alpha}}  
 \end{equation}
 
 \subsubsection{Infinitely Fast Reaction}
@@ -351,10 +351,10 @@ Consider the case where there are two, single step hydrocarbon oxidization react
 &\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
 &\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
 \end{align}
-The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, we know that the reactor is oxygen-limited. The first step is use Eq.~(\ref{eq:stoich_fuel}) to find the stoichiometric fuel concentration based on the limiting reactant:
+The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, we know that the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. To prevent the fuel from driving the oxygen concentration to a non-physical negative quantity, the first step is use Eq.~(\ref{eq:stoich_fuel}) to find the stoichiometric fuel concentration based on the limiting reactant:
 \begin{align}
-\hat{Y}_{F,lim}(1) = \min \left (0.30,-\frac{(0.30)(16.04246 ~(\mbox{kg/kmol}))}{(-2)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0752 \\
-\hat{Y}_{F,lim}(2) = \min \left (0.40,-\frac{(0.40)(44.09562 ~(\mbox{kg/kmol}))}{(-5)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0827
+\hat{Y}_{F,lim}(1) = \min \left (0.3000,-\frac{(0.3000)(16.04246 ~(\mbox{kg/kmol}))}{(-2)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0752 \\
+\hat{Y}_{F,lim}(2) = \min \left (0.4000,-\frac{(0.4000)(44.09562 ~(\mbox{kg/kmol}))}{(-5)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0827
 \end{align}
 Knowing, $\hat{Y}_{F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to find the weighting factors:
 \begin{align}
@@ -366,6 +366,12 @@ Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for the each
 \Delta \hat{Y}_{F}(1) =  (0.0752)(0.4763) = 0.0358 \\
 \Delta \hat{Y}_{F}(2) =  (0.0827)(0.5237) = 0.0433
 \end{align}
+The oxygen consumption for each reaction can be found using the change in fuel, the stoichiometric coefficients, and the ratio of molecular weights of oxygen and the fuel. The generic form of this equation which is applied to each of the $\alpha$ species in each reaction is discussed in Section~\ref{sec:reac_time_integration}, Eq.~(\ref{eq:change_alpha}). 
+\begin{align}
+\Delta \hat{Y}_{O_2}(1) =  \left(\frac{(-2)(31.9988)}{16.04246}\right)0.0358 = -0.1429 \\
+\Delta \hat{Y}_{O_2}(2) =  \left(\frac{(-5)(31.9988)}{44.09562}\right)0.0433 = -0.1571 \\
+\end{align}
+The total change in oxygen is -0.3000, equal in magnitude to the total amount of available oxygen. The fraction of the total oxygen consumed for each reaction is equal to the weight fraction for that reaction. Note that change in oxygen has negative sign which indicates that oxygen is consumed during the reaction. If we apply Eq.~(\ref{eq:explicit_euler}) with a $\delta t$ of 1 second, we see then that the final oxygen mass fraction is zero. The final mass fractions of methane and propane are 0.2642 and 0.3567, respectively.
 
 \subsubsection{Arrhenius Reaction}
 To determine the change in fuel in an Arrhenius reaction, Eq.~\ref{eq:Arrheniusratemode} is used. There are conditions under which the local temperature and species concentrations support the computation of the reaction rate.  One set of conditions is where the reacting regions of the flow can be considered a well-stirred reactor.  The other is during a DNS calculation.  In the first case rather than a reacting surface, there is a reacting volume.  In the second case, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
@@ -397,16 +403,16 @@ extinction based on the species and temperature present in the flame sheet.  The
 \item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
 
 \be \hat{Y}_{F}(n) = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$, in reaction $n$} \ee
-If fuel is the limiting reactant then $\Delta \hat{Y}_{\F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
+If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
 \item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
 \item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
 
-\be \Delta \hat{Y}_{air} = \min_{\alpha \; = \; non-fuel \; reactant} \left(\frac{\Delta \hat{Y}_{F} W_i \nu_i}{Z_i W_F} \right) \ee
+\be \Delta \hat{Y}_{air} = \min \left(\frac{\Delta \hat{Y}_{F} W_{\alpha} \nu_{\alpha}}{Z_{\alpha} W_F} \right); \quad \mbox{for all non fuel reactants, $\alpha$, in reaction $n$} \ee
 Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_{F}$.
 \item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature (LFT).
 \item Combustion is allowed if 
 
-\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta H_F \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{\F} h_F(T_{LFT}) \ee
+\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta H_F \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{F} h_F(T_{LFT}) \ee
 \item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
 \end{enumerate}
 
@@ -414,10 +420,11 @@ Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_
 \label{sec:reac_time_integration}
 
 \subsubsection{Single Step, Mixing-Controlled Reactions}
-For single-step chemical reactions with mixing-controlled reaction rates, an explicit Euler scheme is used to solve the system of ODEs that determine the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$. Using the stoichiometric change in fuel, the change in each $\alpha$ species can be found following:
+For single-step chemical reactions with mixing-controlled reaction rates, an explicit Euler scheme is used to solve the system of ODEs that determine the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$. Using the stoichiometric change in fuel, the change in each $\alpha$ species for $n$ reactions can be found following:
 \begin{equation}\label{eq:change_alpha}
-\Delta \hat{Y}_{\alpha} = \left(\frac{\nu_{\alpha}W_{\alpha}}{W_{F}}\right)\Delta \hat{Y}_{F}
+\Delta \hat{Y}_{\alpha} = \sum_n \,\left(\frac{\nu_{\alpha}(n)W_{\alpha}}{W_{F}(n)}\right)\Delta \hat{Y}_{F}(n)
 \end{equation}
+Note, that in Eq.~(\ref{eq:change_alpha}), $\Delta \hat{Y}_{F}(n)$ on the right hand side is a positive number. The stoichiometric coefficient of fuel in each reaction is normalized such that it is negative 1. Therefore, the change in fuel that is used as an input to the time integration scheme is negative, similar to all other reactants. Product species have positive stoichiometric coefficients, and maintain positive changes in concentration.
 An explicit Euler scheme is used to update the species concentrations in the mixed mode at a $\delta t$ timestep,
 \begin{equation}\label{eq:explicit_euler} 
 \hat{Y}_{\alpha}(\delta t) = \hat{Y}_{\alpha}(0) + \Delta \hat{Y}_{\alpha}\, \delta t
@@ -426,5 +433,5 @@ This is the default integration mechanism used in FDS. Time integration is halte
 
 \subsubsection{Complex Chemistry Models}
 
-For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the same procedure as a single-step mixing controlled reaction, with the difference being the numerical methods of integration. Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance. More information on the numerical methods of the integrators can be found in Appendix~\ref{chemistry_integration}.
+For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the same procedure as a single-step mixing controlled reaction, with the difference being Eq.~(\ref{eq:explicit_euler}) is replaced with a more sophisticated numerical method for integration. Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance. More information on the numerical methods of the integrators can be found in Appendix~\ref{chemistry_integration}.
 
