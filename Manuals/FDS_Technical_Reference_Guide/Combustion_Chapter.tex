@@ -83,8 +83,8 @@ To transform back to lumped species from primitive species we can use:
 
 The default reaction system in FDS is fuel plus oxidizer goes to products, where the products are carbon dioxide, water vapor, nitrogen, carbon monoxide, and soot. For a typical hydrocarbon fuel, the chemical reaction in FDS follows
 \begin{multline}\label{eq:full_lump}
-\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2 \upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2)}_\text{Background,~$Z_0$} \,\,+ \,\, \nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~$Z_1$} \quad \longrightarrow \\
-\nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~$Z_2$}
+\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2 +\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2 + \upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2)}_\text{Background,~$Z_0$} \,\,+ \,\, \nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~$Z_1$} \quad \longrightarrow \\
+\nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},2}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},2}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~$Z_2$}
 \end{multline}
 Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha\,i}$ and the stoichiometric coefficients for the lumped species $i$ are denoted by $\nu_{i}$.
 
@@ -125,10 +125,10 @@ There are cases where tracking a particular primitive species is needed, such as
 
 If we revisit Eq.~(\ref{eq:full_lump}) but decompose the reaction into all primitive species, we get:
 \begin{multline}\label{eq:prim}
-\nu_{\mathrm{O}_{2},0}\mathrm{O}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{CO}_{2},0}\mathrm{CO}_2+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{fuel},0}(\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b) \longrightarrow \\
-\nu_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\nu_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{N}_{2},0}\mathrm{N}_2+\nu_{\mathrm{CO},2}\mathrm{CO}+\nu_{\mathrm{S},2}\mathrm{S}
+\nu_{\mathrm{O}_{2},\mathrm{R}}\mathrm{O}_2+\nu_{\mathrm{N}_{2},\mathrm{R}}\mathrm{N}_2+\nu_{\mathrm{H}_{2}\mathrm{O},\mathrm{R}}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{CO}_{2},\mathrm{R}}\mathrm{CO}_2 + \nu_{\mathrm{Fuel},\mathrm{R}}(\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b) \longrightarrow \\
+\nu_{\mathrm{CO}_{2},\mathrm{P}}\mathrm{CO}_2+\nu_{\mathrm{H}_{2}\mathrm{O},\mathrm{P}}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{N}_{2},\mathrm{P}}\mathrm{N}_2+\nu_{\mathrm{CO},\mathrm{P}}\mathrm{CO}+\nu_{\mathrm{S},\mathrm{P}}\mathrm{S}
 \end{multline}
-In this formulation, we would have to solve transport equations for six species, as compared to two when the species are lumped. Note that in cases with all primitive species, $A$ becomes the identity matrix.
+Here, the subscript {\small R} indicates a ``reactant'' coefficient and the subscript {\small P} indicates a ``product''.  In this formulation, we would have to solve transport equations for six species, as compared to two when the species are lumped. Note that in cases with all primitive species, $A$ becomes the identity matrix.
 
 %\begin{center}
 %\begin{tabular}{|c|c|c|c|c|c|c|c|}
