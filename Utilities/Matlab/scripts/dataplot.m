@@ -230,10 +230,14 @@ for i=2:n_plots
                     X = M(indices,d1_Dep_Col)/Scale_Dep;
                     Y = M(indices,d1_Ind_Col)/Scale_Ind;
                 end
-                if Plot_Type=='linear'
+                if strcmp(Plot_Type,'linear')
                     K(j) = plot(X,Y,char(style(j))); hold on
-                elseif Plot_Type=='loglog'
+                elseif strcmp(Plot_Type,'loglog')
                     K(j) = loglog(X,Y,char(style(j))); hold on
+                elseif strcmp(Plot_Type,'semilogx')
+                    K(j) = semilogx(X,Y,char(style(j))); hold on
+                elseif strcmp(Plot_Type,'semilogy')
+                    K(j) = semilogy(X,Y,char(style(j))); hold on
                 end
             end
         catch
@@ -316,10 +320,14 @@ for i=2:n_plots
                     X = M(indices,d2_Dep_Col)/Scale_Dep;
                     Y = M(indices,d2_Ind_Col)/Scale_Ind;
                 end
-                if Plot_Type=='linear'
+                if strcmp(Plot_Type,'linear')
                     K(length(S1)+j) = plot(X,Y,char(style(j)));
-                elseif Plot_Type=='loglog'
+                elseif strcmp(Plot_Type,'loglog')
                     K(length(S1)+j) = loglog(X,Y,char(style(j)));
+                elseif strcmp(Plot_Type,'semilogx')
+                    K(length(S1)+j) = semilogx(X,Y,char(style(j)));
+                elseif strcmp(Plot_Type,'semilogy')
+                    K(length(S1)+j) = semilogy(X,Y,char(style(j)));
                 end
             end
         catch
@@ -331,17 +339,29 @@ for i=2:n_plots
         % Wrap entire plot/save routine in try loop
         % Skips case upon any Matlab error
         try
-            if Plot_Type=='linear' & strcmp(Flip_Axis,'no')
+            if strcmp(Plot_Type,'linear') & strcmp(Flip_Axis,'no')
                 X_Title_Position = Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind);
                 Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
-            elseif Plot_Type=='linear' & strcmp(Flip_Axis,'yes')
+            elseif strcmp(Plot_Type,'linear') & strcmp(Flip_Axis,'yes')
                 X_Title_Position = Min_Dep+Title_Position(1)*(Max_Dep-Min_Dep);
                 Y_Title_Position = Min_Ind+Title_Position(2)*(Max_Ind-Min_Ind);
-            elseif Plot_Type=='loglog' & strcmp(Flip_Axis,'no')
+            elseif strcmp(Plot_Type,'loglog') & strcmp(Flip_Axis,'no')
                 X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
                 Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Min_Dep)));
-            elseif Plot_Type=='loglog' & strcmp(Flip_Axis,'yes')
+            elseif strcmp(Plot_Type,'loglog') & strcmp(Flip_Axis,'yes')
                 X_Title_Position = 10^(log10(Min_Dep)+Title_Position(1)*(log10(Max_Dep)-log10(Min_Dep)));
+                Y_Title_Position = 10^(log10(Min_Ind)+Title_Position(2)*(log10(Max_Ind)-log10(Min_Ind)));
+            elseif strcmp(Plot_Type,'semilogx') & strcmp(Flip_Axis,'no')
+                X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
+                Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
+            elseif strcmp(Plot_Type,'semilogx') & strcmp(Flip_Axis,'yes')
+                X_Title_Position = 10^(log10(Min_Dep)+Title_Position(1)*(log10(Max_Dep)-log10(Min_Dep)));
+                Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
+            elseif strcmp(Plot_Type,'semilogy') & strcmp(Flip_Axis,'no')
+                X_Title_Position = Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind);
+                Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Min_Dep)));
+            elseif strcmp(Plot_Type,'semilogy') & strcmp(Flip_Axis,'yes')
+                X_Title_Position = Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind);
                 Y_Title_Position = 10^(log10(Min_Ind)+Title_Position(2)*(log10(Max_Ind)-log10(Min_Ind)));
             end
 
