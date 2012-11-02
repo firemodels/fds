@@ -293,38 +293,47 @@ The mathematical details of the submodels are as follows:
 \end{align}
 where $D_F$ is the diffusivity of the fuel species. Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is take from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=9.81$ m/s$^2$.
 
-\subsection{Heat Release Rate}
 
-Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
-\begin{equation}\label{eq:vol_heat_gen}
-\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime}_{\alpha} \Delta H_{f,\alpha}
+\subsection{Time Integration of Chemical Reactions}
+\label{sec:reac_time_integration}
+
+In this section, we discuss the numerical solution of Eq.~(\ref{eq:mixmass}).  The solution $m_\alpha(t)$ is used together with $M(t)$ in Eq.~(\ref{eq:mass_fraction_mixed}) to determine the evolution of the mass fraction in the mixed zone of the reactor, $\hat{Y}_\alpha(t)$.  Let $\Delta t$ represent a sub time step in the integration (not necessarily equal to the FDS time step $\delta t$).  The integration is time split, such that \emph{mixing is done first, followed by reaction}. A simple explicit update of Eq.~(\ref{eq:mixmass}) over the sub-time interval $t^k$ to $t^k + \Delta t^k$ is given by
+\begin{align}
+\label{eq:dmdt_1} m_\alpha^* &= m_{\alpha}(t^k) + \overline{Y}_{\alpha,0} \, U(t^k) \, [1 - \exp(-\Delta t^k/\tau_{mix})]  \\
+\label{eq:dmdt_2} m_\alpha(t^k + \Delta t^k) &= m_{\alpha}^* + M(t^k + \Delta t^k) \, \Delta \hat{Y}_\alpha^* 
+\end{align}
+The superscript $k$ is the subiteration index.  The superscript $^*$ indicates the post-mixing, pre-reaction value.  The first step, Eq.~(\ref{eq:dmdt_1}), is an analytical solution for the mixing step for the subinterval.  For a single step, mixing-controlled reaction, we take only one sub-step and $\Delta t = \delta t$.  This is discussed in more detail below.  The mixing time scale $\tau_{mix}$ is computed once per FDS time step and held constant during the reactor integration. The unmixed mass, $U(t^k)$, is evaluated using Eq.~(\ref{eq:mixunmix_2}), with $\zeta(t^k)$ obtained from Eq.~(\ref{eq:zeta_soln}).  The mixed mass, $M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using Eq.~(\ref{eq:mixunmix_3}), with $\zeta(t^k + \Delta t^k)$ obtained from Eq.~(\ref{eq:zeta_soln}).
+
+The method to determine $\Delta \hat{Y}_\alpha^*$ in Eq.~(\ref{eq:dmdt_2}) depends on the complexity of the reaction system.  Below we first discuss the simplest case of a single step, mixing-controlled reaction.  Then we discuss multiple fast reactions.  And finally, finite-rate chemistry.
+
+Once the mixed zone mass has been updated, the mixed zone mass fractions are computed by
+\begin{equation}
+\hat{Y}_\alpha(t^k + \Delta t^k) = \frac{m_\alpha(t^k + \Delta t^k)}{M(t^k + \Delta t^k)}
 \end{equation}
-There is a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
-this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
-is sometimes too coarse to work effectively.
-A scaling analysis of pool fires by Orloff and de Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
-heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses a less restrictive upper bound on the local heat release rate per unit volume:
-\begin{equation}\label{eq:q_bound} 
-\dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3 
-\end{equation}
-The value of 200~kW/m$^2$ is an upper bound on the heat release rate per unit area of flame sheet and $\delta x$ is the characteristic cell size (m). Typically, this bound only affects fires whose value of $Q^*$ is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the
-area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
+At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(\delta t)$, is combined with the unmixed mass in Eq.~(\ref{eq:final_comp}) to obtain the final cell composition.
+
+
+\subsubsection{Complex Chemistry Models}
+
+For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are used and $\Delta \hat{Y}_\alpha^*$ over the subinterval is usually obtained by integrating an Arrhenius rate law, as discussed below. More detail on the numerical methods of the integrator---including methods to combat stiff chemistry---can be found in Appendix~\ref{chemistry_integration}.
 
 \subsection{Reaction Rate} 
 \label{Reaction_Rate_Model}
 
-The rate expression (on a fuel basis) for both infinitely fast chemistry and Arrhenius rate chemistry follow the same general form:
+\subsubsection{Finite-Rate Chemistry (Arrhenius Reaction)}
+
+In FDS, the rate expression (on a fuel basis) for both infinitely fast and Arrhenius rate chemistry are coded with the same general form:
 \begin{equation}\label{eq:Arrheniusrateeqn}
-\frac{\mbox{d}[\hat{X}_F]}{\mbox{d}t} = -A \; \prod [\hat{X}_{\alpha}]^{a_{\alpha}} \; T^n \; e^{-E/RT} 
+\frac{\mbox{d}[\hat{X}_F]}{\mbox{d}t} = -A \; \prod \, [\hat{X}_{\alpha}]^{a_{\alpha}} \; T^n \; e^{-E/RT} 
 \end{equation}
 Note that the rate expression can be dependent upon the local temperature as well as concentrations of species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species can participate as a collision species.  Therefore, rather than $\mbox{d}[X_F]/\mbox{d}t$,  FDS solves for $\mbox{d}\hat{Y}_{F}/\mbox{d}t$ (recall $\hat{Y}_{F}$ is mass fraction of the fuel in the mixed zone of the reactor).  Additionally, since it is quicker to determine $\hat{Y}_{\alpha}$ rather than $\hat{X}_i$, the relation $[\hat{X}_i]=\hat{Y}_{\alpha} \rho/W_i$ is used.  Substituting $\hat{Y}_{\alpha}$ into Eq.~(\ref{eq:Arrheniusrateeqn}) and making the appropriate units change to $A$ results in a modified rate equation:
 
 \begin{equation}\label{eq:Arrheniusratemode}
-\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -A_{mod} \rho^{(\sum a_{\alpha}) -1} \; \prod \hat{Y}_{\alpha}^{a_{\alpha}} \; T^n \; e^{-E/RT}; \;\;\; A_{mod} = A \prod W_{\alpha}^{-a_{\alpha}}  
+\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -A_{mod} \rho^{(\sum a_{\alpha}) -1} \; \prod \, \hat{Y}_{\alpha}^{a_{\alpha}} \; T^n \; e^{-E/RT}; \;\;\; A_{mod} = A \prod W_{\alpha}^{-a_{\alpha}}  
 \end{equation}
 
-\subsubsection{Infinitely Fast Reaction}
-For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to $0$ which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_F/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite. The change in fuel is based on the limiting reactant: 
+\subsubsection{Infinitely Fast Reaction (Default)}
+For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to zero which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_F/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite. The change in fuel is based on the limiting reactant: 
 \begin{equation}\label{eq:stoich_fuel_single}
 \Delta \hat{Y}_{F} = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
@@ -345,39 +354,42 @@ The limiting change in fuel for the $n$th reaction becomes
 \Delta \hat{Y}_{F}(n) = \hat{Y}_{F,lim}(n)\,w(n)
 \end{equation}
 
-\paragraph{Example: Oxygen-limited, Premixed Methane-Propane Combustion}
-Consider the case where there are two, single step hydrocarbon oxidization reactions:
-\begin{align}
-&\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
-&\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
-\end{align}
-The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, we know that the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. To prevent the fuel from driving the oxygen concentration to a non-physical negative quantity, the first step is use Eq.~(\ref{eq:stoich_fuel}) to find the stoichiometric fuel concentration based on the limiting reactant:
-\begin{align}
-\hat{Y}_{F,lim}(1) = \min \left (0.3000,-\frac{(0.3000)(16.04246 ~(\mbox{kg/kmol}))}{(-2)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0752 \\
-\hat{Y}_{F,lim}(2) = \min \left (0.4000,-\frac{(0.4000)(44.09562 ~(\mbox{kg/kmol}))}{(-5)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0827
-\end{align}
-Knowing, $\hat{Y}_{F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to find the weighting factors:
-\begin{align}
-w(1) =  \frac{0.0752}{0.1579} = 0.4763 \\
-w(2) =  \frac{0.0827}{0.1579} = 0.5237
-\end{align}
-Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for the each reaction becomes:
-\begin{align}
-\Delta \hat{Y}_{F}(1) =  (0.0752)(0.4763) = 0.0358 \\
-\Delta \hat{Y}_{F}(2) =  (0.0827)(0.5237) = 0.0433
-\end{align}
-The oxygen consumption for each reaction can be found using the change in fuel, the stoichiometric coefficients, and the ratio of molecular weights of oxygen and the fuel. The generic form of this equation which is applied to each of the $\alpha$ species in each reaction is discussed in Section~\ref{sec:reac_time_integration}, Eq.~(\ref{eq:change_alpha}). 
-\begin{align}
-\Delta \hat{Y}_{O_2}(1) =  \left(\frac{(-2)(31.9988)}{16.04246}\right)0.0358 = -0.1429 \\
-\Delta \hat{Y}_{O_2}(2) =  \left(\frac{(-5)(31.9988)}{44.09562}\right)0.0433 = -0.1571 \\
-\end{align}
-The total change in oxygen is -0.3000, equal in magnitude to the total amount of available oxygen. The fraction of the total oxygen consumed for each reaction is equal to the weight fraction for that reaction. Note that change in oxygen has a negative sign which indicates that oxygen is consumed during the reaction. If we apply Eq.~(\ref{eq:explicit_euler}), we see then that the final oxygen mass fraction is zero. The final mass fractions of methane and propane are 0.2642 and 0.3567, respectively.
 
-\subsubsection{Arrhenius Reaction}
-To determine the change in fuel in an Arrhenius reaction, Eq.~\ref{eq:Arrheniusratemode} is used. There are conditions under which the local temperature and species concentrations support the computation of the reaction rate.  One set of conditions is where the reacting regions of the flow can be considered a well-stirred reactor.  The other is during a DNS calculation.  In the first case rather than a reacting surface, there is a reacting volume.  In the second case, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
-oxygen, and combustion products).  This allows the flame to be resolved in a DNS calculation.  Under conditions where the local gas
-temperatures can be used to determine the reaction kinetics, Arrhenius rates can be used.
+\subsubsection{Change in Species Compositions}
 
+Using the stoichiometric change in fuel concentration, the change in each $\alpha$ species for the $n$th reaction is given by
+\begin{equation}\label{eq:change_alpha}
+\Delta \hat{Y}_{\alpha} = \sum_n \,\left(\frac{\nu_{\alpha}(n)W_{\alpha}}{W_{F}(n)}\right)\Delta \hat{Y}_{F}(n)
+\end{equation}
+Note that in Eq.~(\ref{eq:change_alpha}), $\Delta \hat{Y}_{F}(n)$ is a positive number. The stoichiometric coefficient of fuel in each reaction is normalized to $-1$. Therefore, the change in fuel that is used as an input to the time integration scheme is negative, similar to all other reactants. Product species have positive stoichiometric coefficients, and maintain positive changes in concentration.
+
+%\paragraph{Example: Oxygen-limited, Premixed Methane-Propane Combustion}
+%Consider the case where there are two, single step hydrocarbon oxidization reactions:
+%\begin{align}
+%&\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
+%&\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
+%\end{align}
+%The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, we know that the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. To prevent the fuel from driving the oxygen concentration to a non-physical negative quantity, the first step is use Eq.~(\ref{eq:stoich_fuel}) to find the stoichiometric fuel concentration based on the limiting reactant:
+%\begin{align}
+%\hat{Y}_{F,lim}(1) = \min \left (0.3000,-\frac{(0.3000)(16.04246 ~(\mbox{kg/kmol}))}{(-2)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0752 \\
+%\hat{Y}_{F,lim}(2) = \min \left (0.4000,-\frac{(0.4000)(44.09562 ~(\mbox{kg/kmol}))}{(-5)(31.9988 ~(\mbox{kg/kmol}))} \right) = 0.0827
+%\end{align}
+%Knowing, $\hat{Y}_{F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to find the weighting factors:
+%\begin{align}
+%w(1) =  \frac{0.0752}{0.1579} = 0.4763 \\
+%w(2) =  \frac{0.0827}{0.1579} = 0.5237
+%\end{align}
+%Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for the each reaction becomes:
+%\begin{align}
+%\Delta \hat{Y}_{F}(1) =  (0.0752)(0.4763) = 0.0358 \\
+%\Delta \hat{Y}_{F}(2) =  (0.0827)(0.5237) = 0.0433
+%\end{align}
+%The oxygen consumption for each reaction can be found using the change in fuel, the stoichiometric coefficients, and the ratio of molecular weights of oxygen and the fuel. The generic form of this equation which is applied to each of the $\alpha$ species in each reaction is discussed in Section~\ref{sec:reac_time_integration}, Eq.~(\ref{eq:change_alpha}). 
+%\begin{align}
+%\Delta \hat{Y}_{O_2}(1) =  \left(\frac{(-2)(31.9988)}{16.04246}\right)0.0358 = -0.1429 \\
+%\Delta \hat{Y}_{O_2}(2) =  \left(\frac{(-5)(31.9988)}{44.09562}\right)0.0433 = -0.1571 \\
+%\end{align}
+%The total change in oxygen is -0.3000, equal in magnitude to the total amount of available oxygen. The fraction of the total oxygen consumed for each reaction is equal to the weight fraction for that reaction. Note that change in oxygen has a negative sign which indicates that oxygen is consumed during the reaction. If we apply Eq.~(\ref{eq:explicit_euler}), we see then that the final oxygen mass fraction is zero. The final mass fractions of methane and propane are 0.2642 and 0.3567, respectively.
 
 \subsection{Local Extinction}
 
@@ -416,22 +428,23 @@ Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_
 \item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
 \end{enumerate}
 
-\subsection{Time Integration of Chemical Reactions}
-\label{sec:reac_time_integration}
 
-\subsubsection{Single Step, Mixing-Controlled Reactions}
-For single-step chemical reactions with mixing-controlled reaction rates, an explicit Euler scheme is used to solve the system of ODEs that determine the chemical mass production rate, $\dot{m}^{\prime\prime\prime}_{\alpha}$. Using the stoichiometric change in fuel, the change in each $\alpha$ species for $n$ reactions can be found following:
-\begin{equation}\label{eq:change_alpha}
-\Delta \hat{Y}_{\alpha} = \sum_n \,\left(\frac{\nu_{\alpha}(n)W_{\alpha}}{W_{F}(n)}\right)\Delta \hat{Y}_{F}(n)
+\subsection{Heat Release Rate}
+
+Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
+\begin{equation}\label{eq:vol_heat_gen}
+\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime}_{\alpha} \Delta H_{f,\alpha}
 \end{equation}
-Note, that in Eq.~(\ref{eq:change_alpha}), $\Delta \hat{Y}_{F}(n)$ on the right hand side is a positive number. The stoichiometric coefficient of fuel in each reaction is normalized such that it is negative 1. Therefore, the change in fuel that is used as an input to the time integration scheme is negative, similar to all other reactants. Product species have positive stoichiometric coefficients, and maintain positive changes in concentration.
-An explicit Euler scheme is used to update the species concentrations in the mixed mode at a $\delta t$ timestep,
-\begin{equation}\label{eq:explicit_euler} 
-\hat{Y}_{\alpha}(\delta t) = \hat{Y}_{\alpha}(0) + \Delta \hat{Y}_{\alpha}
+
+\subsubsection{Heat Release Rate Limiter}
+
+There is a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
+this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
+is sometimes too coarse to work effectively.
+A scaling analysis of pool fires by Orloff and de Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
+heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses a less restrictive upper bound on the local heat release rate per unit volume:
+\begin{equation}\label{eq:q_bound} 
+\dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3 
 \end{equation}
-This is the default integration mechanism used in FDS. Time integration is halted if no reactants are present or if the local heat release rate exceeds maximum allowable values.
-
-\subsubsection{Complex Chemistry Models}
-
-For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the same procedure as a single-step mixing controlled reaction, with the difference being Eq.~(\ref{eq:explicit_euler}) is replaced with a more sophisticated numerical method for integration. Since chemical timescales are often fast with respect to the hydrodynamic timescales, the solver uses subtimesteps during time integration of the chemical reactions to maintain the specified error tolerance. More information on the numerical methods of the integrators can be found in Appendix~\ref{chemistry_integration}.
+The value of 200~kW/m$^2$ is an empirically derived upper bound on the heat release rate per unit area of flame sheet and $\delta x$ is the characteristic cell size (m). Typically, this bound only affects fires whose value of $Q^*$ is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
 
