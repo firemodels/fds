@@ -54,6 +54,13 @@ end
 
 plot_style
 
+set(gcf,'DefaultLineLineWidth',Line_Width)
+WPos = get(gcf,'Position');
+set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
+set(gca,'FontName',Font_Name)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+
 % read the configuration file
 
 A = importdata(cfil);
@@ -356,14 +363,14 @@ for i=2:n_plots
             end
             if size(Key_Position)>0
                 legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
-    %             if isequal(Key_Position,'EastOutside')
-    %                pos = get(legend_handle,'position');
-    %                set(legend_handle,'position',[Paper_Width pos(2:4)])
-    %             end
-    %             if isequal(Key_Position,'SouthEastOutside')
-    %                pos = get(legend_handle,'position');
-    %                set(legend_handle,'position',[Paper_Width 0.5 pos(3:4)])
-    %             end
+                if isequal(Key_Position,'EastOutside')
+                   pos = get(legend_handle,'position');
+                   set(legend_handle,'position',[Paper_Width pos(2:4)])
+                end
+                if isequal(Key_Position,'SouthEastOutside')
+                   pos = get(legend_handle,'position');
+                   set(legend_handle,'position',[Paper_Width 0.5 pos(3:4)])
+                end
                 set(legend_handle,'Interpreter',Font_Interpreter);
                 set(legend_handle,'Fontsize',Key_Font_Size);
                 set(legend_handle,'Box','on');
