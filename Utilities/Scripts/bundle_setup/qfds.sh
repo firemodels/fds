@@ -32,18 +32,18 @@ nprocesses_per_node=1
 
 if [ $# -lt $EXPECTED_ARGS ]
 then
-  echo "Usage: $progname [-f repository root] [-n processes per node] [-q queue]"
+  echo "Usage: $progname [-d directory] [-f repository root] [-n processes per node] [-q queue]"
   echo "               [-r] [-p nprocesses] [fds_command] casename.fds"
   echo ""
-  echo "This script runs a 64 bit serial or parallel FDS using a version specified"
-  echo "on the command line or from the respository if -r is specified. The parallel"
-  echo "FDS is invoked using -p to specify multiple processes. Other queues (vis,"
-  echo "fire60s or fire70s) may be specified using the -q option."
+  echo "This script runs 64 bit serial or parallel versions of FDS using an executable"
+  echo "specified on the command line or FDS from the respository if -r is specified."
+  echo "The parallel FDS is invoked by using -p to specifying multiple processes."
+  echo "Alternate queues (vis, fire60s or fire70s) are set using the -q option."
   echo ""
-  echo "Options:"
+  echo " -d directory [default: .]"
   echo " -n processes per node - maximum number of processes per node [default: "
-  echo "    (serial: 1, parallel: 8 for new cluster and fire70s nodes, 4 for "
-  echo "                          fire60s and vis nodes)]"
+  echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the fire60s" 
+  echo "                          and vis queues)]"
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis, fire60s and fire70s)"
@@ -63,12 +63,16 @@ use_repository=0
 FDSROOT=~/FDS-SMV
 MPIRUN=
 nprocesses_per_node_defined=0
+dir=.
 
 # read in parameters from command line
 
-while getopts 'f:n:p:q:r' OPTION
+while getopts 'd:f:n:p:q:r' OPTION
 do
 case $OPTION  in
+  d)
+  dir="$OPTARG"
+  ;;
   f)
    FDSROOT="$OPTARG"
    use_repository=1
@@ -124,18 +128,19 @@ infile=${in%.*}
 
 if [ $nprocesses -gt 1 ]
 then
-MPIRUN="mpirun -np $nprocesses"
-TITLE="$infile(MPI)"
+  MPIRUN="mpirun -np $nprocesses"
+  TITLE="$infile(MPI)"
 else
-TITLE="$infile"
+  TITLE="$infile"
 fi
 
 nnodes=$(echo "($nprocesses-1)/$nprocesses_per_node+1" | bc)
 if test $nnodes -le 0
 then
-nnodes=1
+  nnodes=1
 fi
 
+cd $dir
 fulldir=`pwd`
 
 out=$fulldir/$infile.err
