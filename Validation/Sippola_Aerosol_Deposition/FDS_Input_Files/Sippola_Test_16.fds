@@ -1,4 +1,4 @@
-&HEAD CHID='Sippola_Test_16s', TITLE='Validation of aerosol deposition in a square duct, 15 cm by 15 cm, SVN $Revision$'/
+&HEAD CHID='Sippola_Test_16', TITLE='Validation of aerosol deposition in a square duct, 15 cm by 15 cm, SVN $Revision$'/
 
 &MESH IJK=500,15,15, XB=-3.0,2.0,0.0,0.15,0.0,0.15 /
 
