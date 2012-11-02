@@ -2,7 +2,7 @@
 set scratchdir=$SVNROOT/Utilities/Scripts/tmp
 set dir=$1
 set infile=$2
-set host=bluesky.cfr.nist.gov
+set host=bluesky
 
 set fulldir=$BASEDIR/$dir
 set in=$infile.fds
