@@ -30,6 +30,7 @@ addpath 'scripts'
 flame_height
 cat_mccaffrey
 NIST_RSE
+sippola_aerosol_deposition
 
 % dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
 
