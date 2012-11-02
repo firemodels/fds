@@ -2,11 +2,11 @@
 \label{chapter:combustion}
 
 \label{combustionsection}
-The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in species concentration over a time step for a single grid cell to obtain the mean chemical source term,
+The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in cell average species concentration over a time step for a single grid cell to obtain the mean chemical source term,
 \begin{equation}\label{eq:m_tprime_alpha}
-\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{Y_\alpha(\delta t) - Y_\alpha(0)}{\delta t}
+\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\overline{Y}_\alpha(\delta t) - \overline{Y}_\alpha(0)}{\delta t}
 \end{equation}
-The integration of the mean chemical source term is time split from the integration of the transport equation such that each cell may be thought of as a partially-stirred batch reactor.  As we discuss below, given the chemical composition, cell temperature, and extent of mixing at the start of the time step, the final cell composition depends on the rates of chemical kinetics and turbulent mixing.
+Here the overbar is used to denote a cell average since later a subgrid distribution of composition is considered.  The integration of the mean chemical source term is time split from the integration of the transport equation such that each cell may be thought of as a partially-stirred batch reactor.  As we discuss below, given the chemical composition, cell temperature, and extent of mixing at the start of the time step, the final cell composition depends on the rates of chemical kinetics and turbulent mixing.
 
 The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and typically the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).  The heat release rate is found by summing the lumped species mass production rates times their respective heats of formation:
 \begin{equation}\label{eq:q_tprime}
