@@ -104,7 +104,7 @@ The equations governing the evolution of a low-Mach, variable density flows---fi
 
 In this appendix, starting from the conservative form of the sensible enthalpy transport equation, we derive a numerically consistent velocity divergence constraint for use in large-eddy simulation (LES) of low-Mach flows.  The result accounts for numerical transport of mass and energy, which is difficult to eliminate in relatively coarse, engineering LES calculations when total variation diminishing (TVD) scalar transport schemes are employed.  Without the correction terms derived here, unresolved (numerical) mixing of gas species with different heat capacities or molecular weights may lead to erroneous mixture temperatures and ultimately to an imbalance in the energy budget.
 
-\section{The Divergence Constraint}
+\section*{The Divergence Constraint}
 \label{div_constraint}
 
 As mentioned, the present work stems from attempts to understand and correct an energy budget imbalance which became evident after implementing both temperature-dependent specific heats and TVD scalar transport. One of the revelations of this work has been that the choice of starting point for deriving the divergence constraint naturally leads to two different forms of the divergence expression.  While these forms are mathematically equivalent, they lead to two completely different---and yet completely plausible---numerical formulations.
@@ -151,7 +151,7 @@ Notice the subtle differences between the first, second, and third lines of (\re
 %\rho h_s = \rho c_p T = \rho T \sum_\alpha Y_\alpha c_{p,\alpha} = \rho R T \left(\frac{\gamma}{\gamma-1}\right)\sum_\alpha \frac{Y_\alpha}{W_\alpha} = \rho \frac{R T}{\overline{W}} \left(\frac{\gamma}{\gamma-1}\right) = \bar{p}\left(\frac{\gamma}{\gamma-1}\right)
 %\end{align}
 
-\subsection{The Discrete Divergence}
+\subsection*{The Discrete Divergence}
 \label{discrete_divergence}
 
 The \emph{conservative form} of the sensible enthalpy transport equation---which derives its name from the flux divergence form of the mean transport term on the left-hand-side---is
@@ -171,7 +171,7 @@ The numerical details of $\overline{\mathbf{u}\cdot\nabla(\rho h_s)}$ are the ke
 Most of the complexity in the divergence expression is buried in the time derivative term, $\partial (\rho h_s)/\partial t$.  Using (\ref{eqn_rho})-(\ref{eqn_eos}), it can be shown that (\ref{eqn_discrete_divergence}) expands to yield (\ref{eqn_div_2}) (see Appendix \ref{app_time_derivative}).
 
 
-\section{Factoring the Discrete Flux Divergence}
+\section*{Factoring the Discrete Flux Divergence}
 \label{app_transport_decomposition}
 
 Below we show the numerical decomposition of the enthalpy flux divergence for cell $i$ in 1D.  The operator $\delta(\,\,\,)/\delta x$ denotes a central difference.  Density $\rho$ and sensible enthalpy $h_s$ are stored at cell centers indexed by $i$, $i+1$, etc.  Velocity $u$ is stored at the cell face and indexed by $i+\mhalf$, etc.  Here an overline applied to a face value ($i\pm\mhalf$ suffix) denotes a flux limiter, which is basically a special interpolation of the scalar field to the cell face.  The purpose of the flux limiter is to prevent spurious oscillations in the scalar solution.  Such oscillations must be avoided because they may lead to boundedness violations and instability.
@@ -227,7 +227,7 @@ The cell-average advection term therefore becomes
 The examples above are for illustration purposes only.  In general, we first compute the flux-limited face values and obtain the limited slopes from (\ref{eqn_slope_1}) and (\ref{eqn_slope_2}).  The cell-average advection term is then computed from the second underbrace in (\ref{eqn_flux_decomposition}).
 
 
-\section{Decomposing the Time Derivative}
+\section*{Decomposing the Time Derivative}
 \label{app_time_derivative}
 
 Using the ideal gas law, the time derivative of the enthalpy can be decomposed as follows:
@@ -278,7 +278,7 @@ Finally... (compare with (\ref{eqn_div_2}))
 &+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \bigg[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) + \dot{m}_\alpha^\tripleprime \bigg]
 \end{align}
 
-\section{Equivalence between Divergence Expressions}
+\section*{Equivalence between Divergence Expressions}
 \label{equivalence}
 
 The equivalence between (\ref{eqn_div_1}) and (\ref{eqn_div_2}) is apparent based on the following:
@@ -392,11 +392,11 @@ Our goal is to integrate the ODE
 \begin{equation}
 \frac{\d Y}{\d t} = f(Y)
 \end{equation}
-where $f(Y)$ represents a reaction rate law and $Y$ is a species mass fraction.  The total time interval is the FDS time step, $\delta t$, and the iteration substep is $h$. The RK2 scheme is given by 
+where $f(Y)$ represents a reaction rate law and $Y$ is a species mass fraction.  The total time interval is the FDS time step, $\delta t$, and the iteration substep is $\Delta t$. The RK2 scheme is given by 
 \begin{align}
 \label{RK2}
 Y^* &= Y^k + hf(Y^k) \notag\\
-Y^{k+1}   &= \frac{1}{2}\,(Y^k + Y^* + hf(Y^*))
+Y^{k+1}   &= \frac{1}{2}\,(Y^k + Y^* + \Delta t \, f(Y^*))
 \end{align}
 Here $k$ is the iteration index.  The number of sub-time intervals is determined by an error controller, as described below. This second-order scheme is an improvement upon the first-order explicit scheme used for simple chemistry. To maintain stability for stiff problems, however, an intractable number of time steps may be required.
 
@@ -421,6 +421,8 @@ This same technique is applied to the second-order Runge-Kutta scheme with three
 A=\frac{4\,A_4-A_2}{3}  + \mathcal{O}(h^4)
 \end{equation}
 In Eq.~(\ref{eq:A4}), $A$ represents the time updated value of the species concentrations in the mixed reactor zone, $\hat{Y}_{\alpha}$, as found in Eq.~(\ref{eq:mixed_mass_fraction_sub}).
+
+\subsection*{Error Control}
 
 In addition to increasing the order of the error in the numerical scheme, Richardson extrapolation also provides an estimate of the error value. This estimate is calculated via a Taylor expansion:
 \begin{equation}\label{eq:error}
@@ -1019,10 +1021,10 @@ Benzene \cite{Bertie:AS1993b}                             &  11.5-6200  & 123   
 
 
 
-\chapter{Solving the 1D heat conduction equation}
+\chapter{Solving the 1D Heat Conduction Equation}
 \label{discretization}
 
-\section{Discretization}
+\section*{Discretization}
 
 The 1-D heat conduction equation in Cartesian coordinates is:
 \begin{equation}
@@ -1069,7 +1071,7 @@ The temperature is integrated in time using a Crank-Nicolson scheme:
 
 
 
-\section{Boundary conditions}
+\section*{Boundary conditions}
 
 The temperatures at the front and back surface of a Cartesian slab (or center of a cylinder or sphere) are determined from the boundary conditions. The boundary condition at the front surface is always
 \begin{equation}
@@ -1141,7 +1143,7 @@ For insulated backing and cylindrical and spherical geometries, the boundary con
 This has been implemented by setting $\epsilon_B$, $\dot{q}_{r,B}'''$ and $h_B$ to 0 in Eq.~(\ref{TN+1}).
 
 
-\section{Tridiagonal solver}
+\section*{Tridiagonal solver}
 
 After re-arranging the terms, Eq.~(\ref{crank-nicolson}) becomes (using the nomenclature of the source code) for all wall cells \textit{i}
  \begin{equation}
