@@ -79,6 +79,7 @@ if $?INTELLIB then
 #cp $bundle_setup/README_LINUX.html $bundledir/bin/.
 echo copying $INTELLIB to $bundledir/bin/.
 cp -r $INTELLIB $bundledir/bin/.
+rm -rf $bundledir/bin/LIB*/.svn
 set SETLDPATH="LD_LIBRARY_PATH=$INTELLIB;" 
 else
 set SETLDPATH=
