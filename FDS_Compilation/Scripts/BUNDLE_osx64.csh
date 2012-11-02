@@ -5,8 +5,8 @@
 setenv fds_smvroot $1
 setenv bundlebase $2
 setenv runhost $3
-setenv smvhost bluesky.cfr.nist.gov
-setenv fdshost bluesky.cfr.nist.gov
+setenv smvhost bluesky
+setenv fdshost bluesky
 setenv OSXBUNDLE
 
 setenv manifest manifest_osx_64.html
