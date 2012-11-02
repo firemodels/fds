@@ -1,6 +1,6 @@
 #!/bin/csh -f
 set SVNROOT=~/FDS-SMV
-set MACHOST=bluesky.cfr.nist.gov
+set MACHOST=bluesky
 
 cd $SVNROOT
 echo updating LINUX  repository
