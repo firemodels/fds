@@ -23,7 +23,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       MATL_ID='Liq'
       HEAT_OF_REACTION=80.
       CONDUCTIVITY = 0.24
-      SPECIFIC_HEAT = 2.55 /
+      SPECIFIC_HEAT = 2.68 /
 	  
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=966.
@@ -36,7 +36,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       NU_SPEC=1.
       HEAT_OF_REACTION=1310.
       CONDUCTIVITY = 0.24
-      SPECIFIC_HEAT = 2.55 /
+      SPECIFIC_HEAT = 2.68 /
 	  
 &MATL ID='FOAMGLAS'
       CONDUCTIVITY = 0.08

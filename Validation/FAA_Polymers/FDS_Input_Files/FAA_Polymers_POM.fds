@@ -18,12 +18,11 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       E(1) = 0
       EMISSIVITY=0.95
       DENSITY=1425.
-      THRESHOLD_TEMPERATURE(1)=165.
       NU_MATL=1.
       MATL_ID='Liq'
       HEAT_OF_REACTION=141.
       CONDUCTIVITY = 0.28
-      SPECIFIC_HEAT = 1.90 /
+      SPECIFIC_HEAT = 1.88 /
 	  
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=3550.
@@ -36,7 +35,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       NU_SPEC=1.
       HEAT_OF_REACTION=1570.
       CONDUCTIVITY = 0.28
-      SPECIFIC_HEAT = 1.90 /
+      SPECIFIC_HEAT = 1.88 /
 
 &MATL ID='FOAMGLAS'
       CONDUCTIVITY = 0.08
