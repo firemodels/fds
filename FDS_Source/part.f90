@@ -2139,7 +2139,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                LP%ACCEL_Z = LP%ACCEL_Z + (LP%W - WBAR) * MOMENTUM_SINK_FACTOR
                IF (KINETIC_ENERGY_SOURCE) THEN
                   QREL = 0.5_EB*( (LP%U - UBAR)**2 + (LP%V - VBAR)**2 + (LP%W - WBAR)**2 )
-                  D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) + WGT*M_VAP*RVC/DT_SUBSTEP * QREL
+                  CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(II,JJ,KK))
+                  D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) &
+                                           + WGT*M_VAP*RVC/DT_SUBSTEP * QREL / (RHO(II,JJ,KK) * CP * TMP(II,JJ,KK))
                ENDIF
             ENDIF
 
@@ -2429,7 +2431,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          !DT_SUM = DT_SUM + DT_SUBSTEP
          !DT_SUBSTEP = MIN(DT-DT_SUM,DT_SUBSTEP * 1.5_EB)
          
-         !ENDDO TIME_ITERATION_LOOP	
+         !ENDDO TIME_ITERATION_LOOP 
 
       ENDDO PARTICLE_LOOP_3
 
