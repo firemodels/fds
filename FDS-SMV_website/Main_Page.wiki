@@ -93,7 +93,7 @@ Information on FDS-SMV development, third-party tools, and other resources.
 
  These manuals are generated automatically each night by the continuous integration testing process (Firebot), which is described in detail in the FDS Configuration Management Plan. You can view the status of recent nightly builds on the [http://code.google.com/p/fds-smv/wiki/Firebot_Build_Status Firebot Build Status] Wiki Page.
 
- <b>Important</b>: _The guides linked above are unofficial documentation and are subject to change during the FDS 6 beta testing period. Please include the "SVN Repository Revision" number of the guide when referring to the nightly manuals in posts to the Issue Tracker or Discussion Group._
+ <b>Important</b>: _The guides linked above are unofficial documentation and are subject to change during the FDS 6 beta testing period. Please include the *SVN repository revision number and date* of the guide when referring to the nightly manuals in posts to the Issue Tracker or Discussion Group._
 </font>
 
 <br>
