@@ -175,7 +175,7 @@ echo copying $fds2ascii from $fds2asciiroot on $fdshost
 scp -q $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/$fds2asciiout
 
 echo Copying documentation
-cp $bundle_setup/Overview.html $bundledir/Documentation/.
+cp $bundle_setup/Overview_linux_osx.html $bundledir/Documentation/Overview.html
 cp $mandir/FDS_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_Technical_Reference_Guide.pdf $bundledir/Documentation/.
