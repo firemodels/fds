@@ -801,6 +801,8 @@ SVEXTERN int output_slicedata;
 SVEXTERN f_units SVDECL(*unitclasses,NULL),SVDECL(*unitclasses_default,NULL),SVDECL(*unitclasses_ini,NULL);
 SVEXTERN int nunitclasses,nunitclasses_default,nunitclasses_ini;
 SVEXTERN mesh SVDECL(*meshinfo,NULL),SVDECL(*current_mesh,NULL), SVDECL(*mesh_save,NULL);
+SVEXTERN supermesh SVDECL(*supermeshinfo,NULL);
+SVEXTERN int SVDECL(nsupermeshinfo,0);
 SVEXTERN mesh SVDECL(*mesh_last,NULL), SVDECL(*loaded_isomesh,NULL);
 SVEXTERN float devicenorm_length;
 SVEXTERN int ndeviceinfo,nvdeviceinfo,ndeviceinfo_exp;

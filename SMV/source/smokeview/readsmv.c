@@ -1799,6 +1799,12 @@ void update_mesh_coords(void){
     meshi->boxmax[0]=xplt_orig[ibar];
     meshi->boxmax[1]=yplt_orig[jbar];
     meshi->boxmax[2]=zplt_orig[kbar];
+    meshi->dbox[0]=meshi->boxmax[0]-meshi->boxmin[0];
+    meshi->dbox[1]=meshi->boxmax[1]-meshi->boxmin[1];
+    meshi->dbox[2]=meshi->boxmax[2]-meshi->boxmin[2];
+    meshi->boxeps[0]=0.5*meshi->dbox[0]/(float)ibar;
+    meshi->boxeps[1]=0.5*meshi->dbox[1]/(float)jbar;
+    meshi->boxeps[2]=0.5*meshi->dbox[2]/(float)kbar;
     normalize_xyz(meshi->boxmin_scaled,meshi->boxmin);
     normalize_xyz(meshi->boxmax_scaled,meshi->boxmax);
     meshi->x0 = xplt[0];
@@ -3020,10 +3026,16 @@ int readsmv(char *file, char *file2){
   }
   FREEMEMORY(meshinfo);
   if(NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh))==0)return 2;
+  FREEMEMORY(supermeshinfo);
+  if(NewMemory((void **)&supermeshinfo,nmeshes*sizeof(supermesh))==0)return 2;
   meshinfo->plot3dfilenum=-1;
   update_current_mesh(meshinfo);
   for(n=0;n<nmeshes;n++){
     mesh *meshi;
+    supermesh *smeshi;
+
+    smeshi = supermeshinfo + i;
+    smeshi->nmeshes=0;
 
     meshi=meshinfo+n;
     meshi->ibar=0;
@@ -7659,6 +7671,13 @@ int Merge_Smoke(void){
 
 void initmesh(mesh *meshi){
 
+  meshi->super=NULL;
+  meshi->nabors[0]=NULL;
+  meshi->nabors[1]=NULL;
+  meshi->nabors[2]=NULL;
+  meshi->nabors[3]=NULL;
+  meshi->nabors[4]=NULL;
+  meshi->nabors[5]=NULL;
   meshi->ijk_offset[0]=-1;
   meshi->ijk_offset[1]=-1;
   meshi->ijk_offset[2]=-1;

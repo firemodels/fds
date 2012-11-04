@@ -492,7 +492,7 @@ typedef struct _mesh {
   float x0, x1, y0, y1, z0, z1;
   int drawsides[7];
   int inside;
-  float boxmin[3], boxmax[3];
+  float boxmin[3], boxmax[3], dbox[3], boxeps[3];
   float boxmin_scaled[3], boxmax_scaled[3];
   float *zcell;
   float xyz_bar0[3], xyz_bar[3];
@@ -563,6 +563,8 @@ typedef struct _mesh {
   contour **patch_contours;
   int *blockonpatch;
   struct _mesh **meshonpatch;
+  struct _mesh *nabors[6];
+  struct _supermesh *super;
   int *ptype;
   int *patchrow, *patchcol, *blockstart;
   unsigned int *zipoffset, *zipsize;
@@ -625,6 +627,13 @@ typedef struct _mesh {
   int gslice_nverts,gslice_triangles[4*3],gslice_ntriangles;
 
 } mesh;
+
+/* --------------------------  supermesh ------------------------------------ */
+
+typedef struct _supermesh {
+  int nmeshes;
+  mesh **meshes;
+} supermesh;
 
 /* --------------------------  volfacelistdata ------------------------------------ */
 

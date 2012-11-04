@@ -277,6 +277,12 @@ void init_volrender(void){
 #ifdef pp_MERGESMOKE
   can_merge_smoke=Merge_Smoke();
 #endif
+#ifdef pp_MERGEMESH
+  if(nvolrenderinfo>0){
+    init_supermesh();
+  }
+#endif
+
 
 }
 
@@ -1813,3 +1819,211 @@ void update_volsmoke_texture(int *ijk_offset, mesh *meshi, float *smokedata_loca
   glActiveTexture(GL_TEXTURE0);
 }
 #endif
+
+#define MLEFT 0
+#define MRIGHT 1
+#define MFRONT 2
+#define MBACK 3
+#define MDOWN 4
+#define MUP 5
+#define MEPS 0.1
+/* ------------------ mesh_connect ------------------------ */
+
+int mesh_connect(mesh *mesh_from, int val, mesh *mesh_to){
+  float *eps;
+
+  eps = mesh_from->boxeps;
+  switch (val){
+    case MLEFT:
+    case MRIGHT:
+      if(mesh_from->jbar!=mesh_to->jbar)return 0;
+      if(mesh_from->kbar!=mesh_to->kbar)return 0;
+      if( ABS(mesh_from->dbox[1]-mesh_to->dbox[1])>eps[1] )return 0;
+      if( ABS(mesh_from->dbox[2]-mesh_to->dbox[2])>eps[2] )return 0;
+      if( ABS(mesh_from->y0-mesh_to->y0)>eps[1] )return 0;
+      if( ABS(mesh_from->z0-mesh_to->z0)>eps[2] )return 0;
+      break;
+    case MFRONT:
+    case MBACK:
+      if(mesh_from->ibar!=mesh_to->ibar)return 0;
+      if(mesh_from->kbar!=mesh_to->kbar)return 0;
+      if( ABS(mesh_from->dbox[0]-mesh_to->dbox[0])>eps[0] )return 0;
+      if( ABS(mesh_from->dbox[2]-mesh_to->dbox[2])>eps[2] )return 0;
+      if( ABS(mesh_from->x0-mesh_to->x0)>eps[0] )return 0;
+      if( ABS(mesh_from->z0-mesh_to->z0)>eps[2] )return 0;
+      break;
+    case MDOWN:
+    case MUP:
+      if(mesh_from->ibar!=mesh_to->ibar)return 0;
+      if(mesh_from->jbar!=mesh_to->jbar)return 0;
+      if( ABS(mesh_from->dbox[0]-mesh_to->dbox[0])>eps[0] )return 0;
+      if( ABS(mesh_from->dbox[1]-mesh_to->dbox[1])>eps[1] )return 0;
+      if( ABS(mesh_from->x0-mesh_to->x0)>eps[0] )return 0;
+      if( ABS(mesh_from->y0-mesh_to->y0)>eps[1] )return 0;
+      break;
+  }
+  switch (val){
+    case MLEFT:
+      if( ABS(mesh_from->x1-mesh_to->x0)<eps[0] )return 1;
+      break;
+    case MRIGHT:
+      if( ABS(mesh_from->x0-mesh_to->x1) < eps[0])return 1;
+      break;
+    case MFRONT:
+      if( ABS(mesh_from->y1-mesh_to->y0) < eps[1])return 1;
+      break;
+    case MBACK:
+      if( ABS(mesh_from->y0-mesh_to->y1) < eps[1])return 1;
+      break;
+    case MDOWN:
+      if( ABS(mesh_from->z1-mesh_to->z0) < eps[2])return 1;
+      break;
+    case MUP:
+      if( ABS(mesh_from->z0-mesh_to->z1) < eps[2])return 1;
+      break;
+  }
+  return 0;
+}
+
+/* ------------------ init_meshnabors ------------------------ */
+
+mesh *get_minmesh(void){
+  int i;
+  float mindist=-1.0;
+  mesh *minmesh=NULL;
+  
+  // find mesh closes to origin that is not already in a supermesh
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    float dist2;
+
+    meshi = meshinfo + i;
+    if(meshi->super!=NULL)continue;
+    dist2 = meshi->x0*meshi->x0+meshi->y0*meshi->y0+meshi->z0*meshi->z0;
+    if(mindist<0.0||dist2<mindist){
+      mindist=dist2;
+      minmesh=meshi;
+    }
+  }
+  return minmesh;
+}
+
+/* ------------------ can_extend ------------------------ */
+
+int extend_mesh(supermesh *smesh, int direction){
+  int i;
+  int count=0,nbefore;
+
+  nbefore=smesh->nmeshes;
+  for(i=0;i<nbefore;i++){
+    mesh *nabor;
+
+    nabor = smesh->meshes[i]->nabors[direction];
+    if(nabor!=NULL&&nabor->super!=NULL)continue;
+    if(nabor==NULL)return 0;
+  }
+  for(i=0;i<nbefore;i++){
+    mesh *nabor;
+
+    nabor = smesh->meshes[i]->nabors[direction];
+    if(nabor->super!=NULL)continue;
+    smesh->meshes[nbefore+count]=nabor;
+    nabor->super=smesh;
+    count++;
+  }
+  if(count==0)return 0;
+  smesh->nmeshes=nbefore+count;
+  return 1;
+}
+
+/* ------------------ init_meshnabors ------------------------ */
+
+void make_smesh(supermesh *smesh, mesh *firstmesh){
+  mesh **meshptrs;
+
+  NewMemory((void **)&meshptrs,nmeshes*sizeof(mesh *));
+  smesh->meshes=meshptrs;
+
+  smesh->meshes[0]=firstmesh;
+  firstmesh->super=smesh;
+  smesh->nmeshes=1;
+  for(;;){
+    int return_val,again;
+
+    again=0;
+    return_val = extend_mesh(smesh,MLEFT);
+    again = MAX(again,return_val);
+    return_val = extend_mesh(smesh,MRIGHT);
+    again = MAX(again,return_val);
+    return_val = extend_mesh(smesh,MFRONT);
+    again = MAX(again,return_val);
+    return_val = extend_mesh(smesh,MBACK);
+    again = MAX(again,return_val);
+    return_val = extend_mesh(smesh,MUP);
+    again = MAX(again,return_val);
+    return_val = extend_mesh(smesh,MDOWN);
+    again = MAX(again,return_val);
+    if(again==0)break;
+  }
+}
+
+/* ------------------ init_meshnabors ------------------------ */
+
+void init_supermesh(void){
+  int i;
+  mesh *thismesh;
+  supermesh *smesh;
+
+  // determine mesh connectivity
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
+    meshi = meshinfo + i;
+    for(j=i+1;j<nmeshes;j++){
+      mesh *meshj;
+
+      meshj = meshinfo + j;
+
+      if(mesh_connect(meshi,MLEFT,meshj)==1){
+        meshi->nabors[MRIGHT]=meshj;
+        meshj->nabors[MLEFT]=meshi;
+        continue;
+      }
+      if(mesh_connect(meshi,MRIGHT,meshj)==1){
+        meshi->nabors[MLEFT]=meshj;
+        meshj->nabors[MRIGHT]=meshi;
+        continue;
+      }
+      if(mesh_connect(meshi,MFRONT,meshj)==1){
+        meshi->nabors[MBACK]=meshj;
+        meshj->nabors[MFRONT]=meshi;
+        continue;
+      }
+      if(mesh_connect(meshi,MBACK,meshj)==1){
+        meshi->nabors[MFRONT]=meshj;
+        meshj->nabors[MBACK]=meshi;
+        continue;
+      }
+      if(mesh_connect(meshi,MDOWN,meshj)==1){
+        meshi->nabors[MUP]=meshj;
+        meshj->nabors[MDOWN]=meshi;
+      }
+      if(mesh_connect(meshi,MUP,meshj)==1){
+        meshi->nabors[MDOWN]=meshj;
+        meshj->nabors[MUP]=meshi;
+      }
+    }
+  }
+
+  // merge connected meshes to form supermeshes
+
+  nsupermeshinfo=0;
+  thismesh = get_minmesh();
+  for(smesh=supermeshinfo,thismesh=get_minmesh();thismesh!=NULL;thismesh=get_minmesh(),smesh++){
+    make_smesh(smesh,thismesh);
+    nsupermeshinfo++;
+  }
+}
