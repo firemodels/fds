@@ -1754,6 +1754,7 @@ void update_mesh_coords(void){
     float *xplt_orig, *yplt_orig, *zplt_orig;
     float *xplt, *yplt, *zplt;
     int j,k;
+    float dx, dy, dz;
 
     meshi=meshinfo+igrid;
     ibar=meshi->ibar; 
@@ -1813,6 +1814,10 @@ void update_mesh_coords(void){
     meshi->y1 = yplt[jbar];
     meshi->z0 = zplt[0];
     meshi->z1 = zplt[kbar];
+    dx = xplt[1]-xplt[0];
+    dy = yplt[1]-yplt[0];
+    dz = zplt[1]-zplt[0];
+    meshi->dcell = sqrt(dx*dx+dy*dy+dz*dz);
 
     face_centers = meshi->face_centers;
     for(j=0;j<6;j++){
