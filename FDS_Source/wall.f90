@@ -2118,6 +2118,7 @@ SMIX_LOOP: DO N=1,N_TRACKED_SPECIES
       IF (GRAVITATIONAL_DEPOSITION) THEN
          U_GRAV = -GVEC(ABS(IOR))*SIGN(1,IOR)*MASS_P*(1._EB+1.25_EB*KN+0.41_EB*KN*EXP(-0.88_EB/KN))/ &
                                                      (3._EB*CHI_D*MUGAS*SM%MEAN_DIAMETER)
+         U_GRAV = MAX(0._EB,U_GRAV)
       ENDIF
       IF (TURBULENT_DEPOSITION) THEN
          U2 = 0.25_EB*(US(IIG,JJG,KKG)+US(IIG-1,JJG,KKG))**2
@@ -2133,15 +2134,15 @@ SMIX_LOOP: DO N=1,N_TRACKED_SPECIES
          END SELECT 
          VEL_W = SQRT(U2+V2+W2)   
          TAU_PLUS = TAU_PLUS_C/MUGAS**2*WC%U_TAU**2*RHOG
-         IF (TAU_PLUS < 0.2_EB) THEN !Diffusion regime            
+         IF (TAU_PLUS < 0.2_EB) THEN ! Diffusion regime            
             U_TURB = WC%U_TAU * 0.086_EB*(MUGAS/RHOG/D_Z( MIN(5000,INT(TGAS)),0))**(-0.7_EB)
-         ELSEIF (TAU_PLUS >= 0.2_EB .AND. TAU_PLUS < 22.0398_EB) THEN !Diffusion-impaction regime
+         ELSEIF (TAU_PLUS >= 0.2_EB .AND. TAU_PLUS < 22.0398_EB) THEN ! Diffusion-impaction regime
             U_TURB = WC%U_TAU * 3.5E-4_EB * TAU_PLUS**2
          ELSE ! Inertia regime
             U_TURB = WC%U_TAU * 0.17_EB
          ENDIF
       ENDIF
-      IF (U_THERM+U_TURB+U_GRAV < 0._EB) CYCLE WALL_CELL_LOOP   
+      IF (U_THERM+U_TURB+U_GRAV < 0._EB) CYCLE WALL_CELL_LOOP
       ZZ_GET = ZZ_GET * RHOG  
       Y_AEROSOL = ZZ_GET(N)   
       YDEP =Y_AEROSOL*MIN(1._EB,(U_THERM+U_TURB+U_GRAV)*DT*WC%RDN)
