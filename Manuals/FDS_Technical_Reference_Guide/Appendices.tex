@@ -392,11 +392,11 @@ Our goal is to integrate the ODE
 \begin{equation}
 \frac{\d Y}{\d t} = f(Y)
 \end{equation}
-where $f(Y)$ represents a reaction rate law and $Y$ is a species mass fraction.  The total time interval is the FDS time step, $\delta t$, and the iteration substep is $\Delta t$. The RK2 scheme is given by 
+where $f(Y)$ represents a reaction rate law and $Y$ is a species mass fraction (temperature dependence of the rate law is frozen at the initial condition).  The total time interval is the FDS time step, $\delta t$, and the iteration substep is $\Delta t$. The RK2 scheme is given by 
 \begin{align}
 \label{RK2}
-Y^* &= Y^k + hf(Y^k) \notag\\
-Y^{k+1}   &= \frac{1}{2}\,(Y^k + Y^* + \Delta t \, f(Y^*))
+Y^* &= Y^k + \Delta t^k \, f(Y^k) \notag\\
+Y^{k+1}   &= \frac{1}{2}\,(Y^k + Y^* + \Delta t^k \, f(Y^*))
 \end{align}
 Here $k$ is the iteration index.  The number of sub-time intervals is determined by an error controller, as described below. This second-order scheme is an improvement upon the first-order explicit scheme used for simple chemistry. To maintain stability for stiff problems, however, an intractable number of time steps may be required.
 
@@ -416,7 +416,7 @@ A=2\,A_2-A_1 = 2\,A\left(\frac{h}{2}\right) - A(h) + \underbrace{a_{2}\left(\fra
 \end{equation}
 which results in a solution with a higher order of error.
 
-This same technique is applied to the second-order Runge-Kutta scheme with three sub-intervals: $h$, $\frac{h}{2}$, and $\frac{h}{4}$. Because the RK2 scheme was initially second-order, the three-step Richardson extrapolation gives a fourth-order solution \cite{Moin:2001}:
+This same technique is applied to the second-order Runge-Kutta scheme with three sub-intervals: $h$, $h/2$, and $h/4$. Because the RK2 scheme was initially second-order, the three-step Richardson extrapolation gives a fourth-order solution \cite{Moin:2001}:
 \begin{equation}\label{eq:A4}
 A=\frac{4\,A_4-A_2}{3}  + \mathcal{O}(h^4)
 \end{equation}
@@ -432,30 +432,38 @@ The time step ($\Delta t_{new}$) required to maintain the specified/acceptable e
 \begin{equation}\label{eq:dt_new}
 \Delta t_{new}=\Delta t \left(\frac{err\_tol}{error}\right)^{1/4}
 \end{equation}
-Eq.~(\ref{eq:dt_new}) indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required. Additionally, by setting an error tolerance, the algorithm will select a new time step to satisfy that value, which bounds the solution.
+Eq.~(\ref{eq:dt_new}) indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required.
 
 \subsection*{A Total Variation Scheme for Stiff Chemistry}
 
-Although error control can bound the solution, it does not eliminate numerical fluctuations, which can occur in some cases such as those with reversible reactions. Only the value at the end of a time step is returned by the integrator. Therefore, if the values are fluctuating around a fixed point while also being bounded by the error tolerance, the integrator is doing extra work by continuing to calculate every fluctuation within a time step. To minimize the computational expense, a total variation (TV) scheme has been developed. This scheme examines the differences in species mass fractions at four consecutive sub-time steps. Within this four point stencil there are three differences for each species mass fraction. The TV scheme compares the absolute value of the sum of the differences to the sum of the absolute values of the differences.  The condition which corresponds to repeating fluctuations is
+The stiffness associated with a flame front is handled by the error controller and variable time stepping discussed above. The scheme discussed in this section automatically detects chemical equilibrium, the explicit integration of which is also a stiff problem.  Even with error control, the numerical solution may exhibit numerical fluctuations between the bounds of the error tolerance.  This is an undesirable condition which often occurs in cases with competing or reversible reactions.   
+
+If the values are fluctuating around a fixed value bounded by the error tolerance, the integrator is doing extra work by continuing to calculate every fluctuation within a time step. To minimize the computational expense, a total variation (TV) scheme has been developed. This scheme examines the differences in species mass fractions at four consecutive sub-time steps. Within this four point stencil there are three differences for each species mass fraction. The TV scheme compares the absolute value of the sum of the differences to the sum of the absolute values of the differences.  For a monotonic function, the following condition must hold:
+\begin{equation}\label{eq:monotone}
+\sum_{i=1}^{4}|Y(i+1)-Y(i)| = |\sum_{i=1}^{4}(Y(i+1)-Y(i))|
+\end{equation}
+The reader unfamiliar with the concept of ``data variation'' should stop and think about this for a moment.  It says that, regardless of other complexities, the monotonicity constraint (no fluctuations) is sufficient guarantee the condition stated in Eq.~(\ref{eq:monotone}).  The corollary is that if Eq.~(\ref{eq:monotone}) does not hold then we are guaranteed to have some level of fluctuation.
+
+The condition which corresponds to the extreme case of repeating fluctuations between the error tolerance bounds for our four point stencil is
 \begin{equation}\label{eq:TV}
 \sum_{i=1}^{4}|Y(i+1)-Y(i)| = 3 \, |\sum_{i=1}^{4}(Y(i+1)-Y(i))|
 \end{equation}
-Fig.~\ref{fig:TV} shows an example of a quantity fluctuating between 0 and 1 about a fixed point.
-\begin{figure}[h!]
+This is illustrated in Fig.~\ref{fig:TV}, which shows a quantity fluctuating between 0 and 1 about a fixed point.
+\begin{figure}
 \begin{center}
 \scalebox{0.45}{\includegraphics{FIGURES/total_variation}}
 \caption{\label{fig:TV} Illustration of a quantity fluctuating between 0 and 1 about a fixed value.}
 \end{center}
 \end{figure}
-We can compare the sum of the absolute value of the differences between the four points:
+We can compare the sum of the absolute value of the differences between the four points,
 \begin{equation}\label{eq:sum_abs_tv}
 \displaystyle \sum_{i=1}^{4}|Y(i+1)-Y(i)| = |1-0| + |0-1| + |1-0| = 3
 \end{equation}
-to the absolute value of the sum of the differences:
+to the absolute value of the sum of the differences,
 \begin{equation}\label{eq:abs_sum_tv}
 |\displaystyle \sum_{i=1}^{4}(Y(i+1)-Y(i))| = |(1-0)+(0-1)+(1-0)| = 1
 \end{equation}
-The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use 2.5 because floating point division might not return a value of exactly 3. If fluctuations have been identified, then the values at the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-time steps being taken by the integrator. Because the error controller is bounding the solution, any one of the values within the stencil is also within the error tolerance and therefore is an acceptable value.
+The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use 2.5 because floating point division might not return a value of exactly 3. If fluctuations have been identified, then the values at the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-time steps being taken by the integrator. Because the error controller is bounding the solution, any one of the values within the stencil is also within the error tolerance and is therefore acceptable.
 
 %\chapter{Derivation of the Werner Wengle Wall Model}
 %%\subsubsection{R. McDermott, BFRL}
