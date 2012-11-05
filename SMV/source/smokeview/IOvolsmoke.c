@@ -172,7 +172,7 @@ void init_volrender(void){
 
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
-    vr->rendermesh=meshi;
+    vr->rendermeshlabel=meshi->label;
     vr->fire=NULL;
     vr->smoke=NULL;
     vr->timeslist=NULL;
@@ -1344,7 +1344,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   FILE *volstream=NULL;
 
   if(framenum<0||framenum>=vr->ntimes)return;
-  meshlabel=vr->rendermesh->label;
+  meshlabel=vr->rendermeshlabel;
   smokeslice=vr->smoke;
   fireslice=vr->fire;
   framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
@@ -1545,7 +1545,7 @@ void unload_volsmoke_frame_allmeshes(int framenum){
 void unload_volsmoke_allframes(volrenderdata *vr){
   int i;
 
-  printf("Unloading smoke %s - ",vr->rendermesh->label);
+  printf("Unloading smoke %s - ",vr->rendermeshlabel);
   for(i=0;i<vr->ntimes;i++){
     FREEMEMORY(vr->firedataptrs[i]);
     FREEMEMORY(vr->smokedataptrs[i]);
@@ -2013,5 +2013,26 @@ void init_supermesh(void){
   for(smesh=supermeshinfo,thismesh=get_minmesh();thismesh!=NULL;thismesh=get_minmesh(),smesh++){
     make_smesh(smesh,thismesh);
     nsupermeshinfo++;
+  }
+
+  for(smesh = supermeshinfo;smesh!=supermeshinfo+nsupermeshinfo;smesh++){
+    smesh->x0=smesh->meshes[0]->x0;
+    smesh->y0=smesh->meshes[0]->y0;
+    smesh->z0=smesh->meshes[0]->z0;
+    smesh->x1=smesh->meshes[0]->x1;
+    smesh->y1=smesh->meshes[0]->y1;
+    smesh->z1=smesh->meshes[0]->z1;
+    for(i=1;i<smesh->nmeshes;i++){
+      smesh->x0=MIN(smesh->x0,smesh->meshes[i]->x0);
+      smesh->y0=MIN(smesh->y0,smesh->meshes[i]->y0);
+      smesh->z0=MIN(smesh->z0,smesh->meshes[i]->z0);
+      smesh->x1=MAX(smesh->x1,smesh->meshes[i]->x1);
+      smesh->y1=MAX(smesh->y1,smesh->meshes[i]->y1);
+      smesh->z1=MAX(smesh->z1,smesh->meshes[i]->z1);
+    }
+    smesh->xcen = (smesh->x0+smesh->x1)/2.0;
+    smesh->ycen = (smesh->y0+smesh->y1)/2.0;
+    smesh->zcen = (smesh->z0+smesh->z1)/2.0;
+    smesh->dcell = smesh->meshes[0]->dcell;
   }
 }

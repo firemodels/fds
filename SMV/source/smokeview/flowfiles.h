@@ -449,7 +449,7 @@ typedef struct {
 /* --------------------------  volrenderdata ------------------------------------ */
 
 typedef struct _volrenderdata {
-  struct _mesh *rendermesh;
+  char *rendermeshlabel;
   struct _slicedata *smoke, *fire;
   int is_compressed;
   unsigned char *c_smokedata_view, *c_firedata_view;
@@ -631,7 +631,11 @@ typedef struct _mesh {
 /* --------------------------  supermesh ------------------------------------ */
 
 typedef struct _supermesh {
+  float x0, x1, y0, y1, z0, z1;
+  float xcen, ycen, zcen;
   int nmeshes;
+  int inside, drawsides[7];
+  float dcell;
   mesh **meshes;
 } supermesh;
 

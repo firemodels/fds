@@ -546,20 +546,37 @@ void getvolsmokedir(float *mm){
   
   for(j=0;j<nmeshes;j++){
     mesh *meshj;
+    int *inside;
+    int *drawsides;
+    float x0, x1, y0, y1, z0, z1;
+    float xcen, ycen, zcen;
     
     meshj = meshinfo + j;
 
-    meshj->inside=0;
+    inside = &meshj->inside;
+    drawsides = meshj->drawsides;
+
+    x0 = meshj->x0;
+    x1 = meshj->x1;
+    y0 = meshj->y0;
+    y1 = meshj->y1;
+    z0 = meshj->z0;
+    z1 = meshj->z1;
+    xcen = meshj->xcen;
+    ycen = meshj->ycen;
+    zcen = meshj->zcen;
+
+    *inside=0;
     if(
-      xyzeyeorig[0]>meshj->x0&&xyzeyeorig[0]<meshj->x1&&
-      xyzeyeorig[1]>meshj->y0&&xyzeyeorig[1]<meshj->y1&&
-      xyzeyeorig[2]>meshj->z0&&xyzeyeorig[2]<meshj->z1
+      xyzeyeorig[0]>x0&&xyzeyeorig[0]<x1&&
+      xyzeyeorig[1]>y0&&xyzeyeorig[1]<y1&&
+      xyzeyeorig[2]>z0&&xyzeyeorig[2]<z1
       ){
       for(i=-3;i<=3;i++){
         if(i==0)continue;
-        meshj->drawsides[i+3]=1;
+        drawsides[i+3]=1;
       }
-      meshj->inside=1;
+      *inside=1;
       continue;
     }
 
@@ -574,37 +591,37 @@ void getvolsmokedir(float *mm){
       case 1:
         if(i<0){
           norm[0]=-1.0;
-          eyedir[0]=meshj->x0;
+          eyedir[0]=x0;
         }
         else{
           norm[0]=1.0;
-          eyedir[0]=meshj->x1;
+          eyedir[0]=x1;
         }
-        eyedir[1]=meshj->ycen;
-        eyedir[2]=meshj->zcen;
+        eyedir[1]=ycen;
+        eyedir[2]=zcen;
         break;
       case 2:
-        eyedir[0]=meshj->xcen;
+        eyedir[0]=xcen;
         if(i<0){
           norm[1]=-1.0;
-          eyedir[1]=meshj->y0;
+          eyedir[1]=y0;
         }
         else{
           norm[1]=1.0;
-          eyedir[1]=meshj->y1;
+          eyedir[1]=y1;
         }
-        eyedir[2]=meshj->zcen;
+        eyedir[2]=zcen;
         break;
       case 3:
-        eyedir[0]=meshj->xcen;
-        eyedir[1]=meshj->ycen;
+        eyedir[0]=xcen;
+        eyedir[1]=ycen;
         if(i<0){
           norm[2]=-1.0;
-          eyedir[2]=meshj->z0;
+          eyedir[2]=z0;
         }
         else{
           norm[2]=1.0;
-          eyedir[2]=meshj->z1;
+          eyedir[2]=z1;
         }
         break;
       default:
@@ -625,10 +642,10 @@ void getvolsmokedir(float *mm){
     for(i=-3;i<=3;i++){
       if(i==0)continue;
       if(angles[i+3]<90.0){
-        meshj->drawsides[i+3]=1;
+        drawsides[i+3]=1;
       }
       else{
-        meshj->drawsides[i+3]=0;
+        drawsides[i+3]=0;
       }
     }
   }
@@ -639,8 +656,13 @@ void getvolsmokedir(float *mm){
     mesh *meshi;
     int facemap[7]={12,6,0,0,3,9,15};
     volrenderdata *vr;
+    int *drawsides;
+
 
     meshi = meshinfo + i;
+
+    drawsides = meshi->drawsides;
+
     vr = &(meshi->volrenderinfo);
     if(vr->firedataptr==NULL&&vr->smokedataptr==NULL)continue;
     if(vr->loaded==0||vr->display==0)continue;
@@ -649,10 +671,11 @@ void getvolsmokedir(float *mm){
       float *xyz;
 
       if(j==0)continue;
-      if(meshi->drawsides[j+3]==0)continue;
+      if(drawsides[j+3]==0)continue;
       vi->facemesh=meshi;
       vi->iwall=j;
       xyz=meshi->face_centers+facemap[j+3];
+
       dx = xyz[0]-xyzeyeorig[0];
       dy = xyz[1]-xyzeyeorig[1];
       dz = xyz[2]-xyzeyeorig[2];
