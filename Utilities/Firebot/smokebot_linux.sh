@@ -307,7 +307,7 @@ run_verification_cases_short()
 check_verification_cases_short()
 {
    # Scan and report any errors in FDS verification cases
-   cd $FDS_SVNROOT/Verification
+   cd $FDS_SVNROOT/Verification/Visualization
 
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
@@ -396,7 +396,7 @@ run_verification_cases_long()
 check_verification_cases_long()
 {
    # Scan and report any errors in FDS verification cases
-   cd $FDS_SVNROOT/Verification
+   cd $FDS_SVNROOT/Verification/Visualization
 
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
@@ -750,9 +750,13 @@ email_build_status()
 {
    stop_time=`date`
    echo "-------------------------------" > $TIME_LOG
-   echo "host=$hostname " >> $TIME_LOG
-   echo start time=$start_time >> $TIME_LOG
-   echo stop time=$stop_time >> $TIME_LOG
+   echo "      host: $hostname " >> $TIME_LOG
+   echo "start time: $start_time" >> $TIME_LOG
+   echo " stop time: $stop_time" >> $TIME_LOG
+   echo "   results: http://blaze.nist.gov/smokebot" >> $TIME_LOG
+   if [ $MAKEMOVIES == "1" ]; then
+     echo "animations: http://blaze.nist.gov/smv_animations" >> $TIME_LOG
+   fi
    echo "-------------------------------" >> $TIME_LOG
    cd $FIREBOT_DIR
    # Check for warnings and errors
