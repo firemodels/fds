@@ -1770,10 +1770,8 @@ H_SOLID                = 300._EB    ! Heat transfer coefficient from solid surfa
 ! Empirical coefficients
 
 D_AIR                  = 2.6E-5_EB  ! Water Vapor - Air binary diffusion (m2/s at 25 C, Incropera & DeWitt, Table A.8) 
-SC_AIR                 = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
-PR_AIR                 = 0.7_EB     
-SC_AIR                 = SC
-PR_AIR                 = PR
+SC_AIR                 = SC         ! Can be set on MISC line, otherwise dependent on LES/DNS mode
+PR_AIR                 = PR         ! Can be set on MISC line, otherwise dependent on LES/DNS mode
 SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
 NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH        
 SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
@@ -2617,7 +2615,6 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
       DROP_RAD = 0._EB
       DROP_AREA = 0._EB
       DROP_DEN_ALL = 0._EB
-          
       PARTICLE_LOOP_2: DO I=1,NLP
 
          LP => LAGRANGIAN_PARTICLE(I)
