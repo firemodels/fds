@@ -6583,7 +6583,7 @@ the radiation transport equation is fully updated every 15 time steps.
 
 
 
-\section{Radiative Absorption}
+\section{Radiative Absorption and Scattering}
 
 By default FDS employs a gray gas model for the radiation absorption coefficient, a function
 of gas composition and temperature, which are
@@ -6623,7 +6623,9 @@ It is used in the spectral weighting during the computation of the mean scatteri
 {\ct NMIEANG} is the number of angles in the numerical integration of the Mie-phase function.
 Increasing {\ct NMIEANG} improves the accuracy of the radiative properties of water droplets. The cost
 of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for {\ct NMIEANG}
-is 15.
+is 15. For each class of particles, the Mie coefficients are calculated for a wide range of droplet diameters to ensure that the all possible run-time 
+situations can be covered. To speed up the initialization phase, the range of diameters can be limited by parameters {\ct MIE\_MINIMUM\_DIAMETER} and
+{\ct MIE\_MAXIMUM\_DIAMETER}. Also, the size of the Mie cofficient tables can be specified using {\ct MIE\_NDG} parameter.
 
 The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and
 soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is
@@ -10178,6 +10180,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
 \hline \hline
 \endhead
+{\ct ADA}                                       & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
 {\ct ADD}                                       & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
 {\ct ADT}                                       & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
@@ -10201,6 +10204,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
 {\ct PRESSURE ITERATIONS}                       & No. pressure iterations                           &                & D            \\ \hline
+{\ct QABS}                                      & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QSCA}                                      & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -11213,9 +11218,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         &  $\mu$m           &                   \\ \hline
 {\ct CH4\_BANDS          }          & Logical       & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
 {\ct KAPPA0                   }     & Real          & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
-{\ct MIE\_MINIMUM\_DIAMETER}        & Real          & Section~\ref{radiative_part_props}        & $\mu$m            & 0.5               \\ \hline
-{\ct MIE\_MAXIMUM\_DIAMETER}        & Real          & Section~\ref{radiative_part_props}        & $\mu$m            & 1.5$\times D$     \\ \hline
-{\ct MIE\_NDG}                      & Integer       & Section~\ref{radiative_part_props}        &                   & 50                \\ \hline
+{\ct MIE\_MINIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 0.5               \\ \hline
+{\ct MIE\_MAXIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 1.5$\times D$     \\ \hline
+{\ct MIE\_NDG}                      & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 50                \\ \hline
 {\ct NMIEANG                  }     & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
 {\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
