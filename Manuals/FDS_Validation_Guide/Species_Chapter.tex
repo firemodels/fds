@@ -293,4 +293,66 @@ from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.
 \label{NIST_RSE_1994}
 \end{figure}
 
+\clearpage
+
+\section{Sippola Aerosol Deposition Cases}
+
+A total of 16 aerosol deposition tests were conducted for 5 different particle sizes and
+three different air velocities. A summary of the 16 straight-duct tests is shown in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
+
+\begin{table}[h!]
+\caption{Summary of Sippola aerosol deposition experiments selected for model validation.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Test No.  &  Air Speed (m/s)  &  Particle Diameter ($\mu$m)  \\ \hline \hline
+1         &  2.2              &  1.0                         \\ \hline
+2         &  2.2              &  2.8                         \\ \hline
+3         &  2.1              &  5.2                         \\ \hline
+4         &  2.2              &  9.1                         \\ \hline
+5         &  2.2              &  16                          \\ \hline
+6         &  5.3              &  1.0                         \\ \hline
+7         &  5.2              &  1.0                         \\ \hline
+8         &  5.2              &  3.1                         \\ \hline
+9         &  5.4              &  5.2                         \\ \hline
+10        &  5.3              &  9.8                         \\ \hline
+11        &  5.3              &  16                          \\ \hline
+12        &  9.0              &  1.0                         \\ \hline
+13        &  9.0              &  3.1                         \\ \hline
+14        &  8.8              &  5.4                         \\ \hline
+15        &  9.2              &  8.7                         \\ \hline
+16        &  9.1              &  15                          \\ \hline
+\end{tabular}
+\end{center}
+\label{Sippola_Aerosol_Deposition_Summary}
+\end{table}
+
+The particle deposition velocity, $V_d$, was determined by
+
+\be V_d = \frac{J_1 + J_2 + J_3 + J_4}{4 C_{avg}} \ee
+
+where $J_1$ through $J_4$ are the deposition fluxes for duct panels 1 through 4 (kg/m$^2$-s)
+given by
+
+\be J_i = \frac{m_{d}}{A_d t} \ee
+
+where $m_d$ is the mass of particles on the duct panel (kg), $A_d$ is the area of the duct panel (m$^2$),
+and $t$ is the duration over which soot deposits on the plate (s). $C_{avg}$ is the average aerosol
+concentration in the duct test section (kg/m$^3$) and is given by
+
+\be C_{avg} = \frac{C_{up} + C_{down}}{2} \ee
+
+Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured versus predicted deposition velocities.
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{FIGURES/Sippola_Aerosol_Deposition/Sippola_Aerosol_Ceiling_Deposition} \\
+\includegraphics[height=2.2in]{FIGURES/Sippola_Aerosol_Deposition/Sippola_Aerosol_Wall_Deposition} \\
+\includegraphics[height=2.2in]{FIGURES/Sippola_Aerosol_Deposition/Sippola_Aerosol_Floor_Deposition}
+\end{tabular}
+\end{center}
+\caption[Summary of Sippola aerosol deposition cases]{Summary of Sippola aerosol deposition cases.}
+\label{Sippola_Aerosol_Deposition_Velocity}
+\end{figure}
 
