@@ -1399,3 +1399,10 @@ extern "C" void update_extreme_vals(void){
   if(xxSPINNER_up_green!=NULL)xxSPINNER_up_green->set_int_val(  (int)(rgb_local[1]));
   if(xxSPINNER_up_blue!=NULL)xxSPINNER_up_blue->set_int_val(  (int)(rgb_local[2]));
 }
+
+/* ------------------ update_camera_label ------------------------ */
+
+extern "C" void update_extreme(void){
+  if(xxCHECKBOX_usebounds!=NULL)xxCHECKBOX_usebounds->set_int_val(show_extremedata);
+  Extreme_CB(COLORBAR_EXTREME);
+}

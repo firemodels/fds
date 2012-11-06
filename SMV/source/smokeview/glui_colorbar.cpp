@@ -67,7 +67,6 @@ GLUI_Button *BUTTON_update=NULL;
 GLUI_Button *BUTTON_colorbar_save=NULL;
 GLUI_Button *BUTTON_colorbar_close=NULL;
 
-GLUI_Checkbox *CHECKBOX_usebounds=NULL;
 GLUI_Checkbox *CHECKBOX_hidesv=NULL;
 
 GLUI_EditText *EDITTEXT_colorbar_label=NULL;
@@ -106,14 +105,6 @@ void COLORBAR_CB(int var);
 extern "C" void update_colorbar_list(void){
   LISTBOX_colorbar->set_int_val(selectedcolorbar_index);
 }
-
-/* ------------------ update_camera_label ------------------------ */
-
-extern "C" void update_extreme(void){
-  CHECKBOX_usebounds->set_int_val(show_extremedata);
-  Extreme_CB(COLORBAR_EXTREME);
-}
-
 
 /* ------------------ update_camera_label ------------------------ */
 
