@@ -2091,6 +2091,13 @@ void init_supermesh(void){
     for(nab=smesh->meshes[0];nab->nabors[MUP]!=NULL;nab=nab->nabors[MUP]){
       smesh->nk++;
     }
+    for(i=1;i<smesh->nmeshes;i++){
+      mesh *meshi,*meshim1;
+
+      meshi = smesh->meshes[i];
+      meshim1 = smesh->meshes[i-1];
+      meshi->node_index0 = meshim1->node_index0 + meshim1->ibar*meshim1->jbar*meshim1->kbar;
+    }
   }
 }
 
@@ -2106,25 +2113,31 @@ void merge_volsmoke(void){
     char mergefile[1024];
     char *smoke_file;
     volrenderdata *vr;
-    float **fireptrs,**smokeptrs;
-    float *mergedata;
+    float *firesmokeptr;
 
     smesh = supermeshinfo + i;
     vr = &(smesh->meshes[0]->volrenderinfo);
     nframes = vr->ntimes;
 
-    NewMemory((void **)&fireptrs,smesh->nmeshes*sizeof(float *));
-    NewMemory((void **)&smokeptrs,smesh->nmeshes*sizeof(float *));
-
     for(iframe=0;i<nframes;iframe++){
+      int j;
+      volrenderdata *vrj;
+
       read_volsmoke_frame_allmeshes(iframe,smesh);
+      for(j=0;j<smesh->nmeshes;j++){
+        mesh *meshj;
+        float *fireptr, *smokeptr;
+
+        meshj = smesh->meshes[j];
+        vrj = &(meshj->volrenderinfo);
+        fireptr = vrj->firedataptr;
+        smokeptr = vrj->smokedataptr;
+
+      }
     }
     smoke_file = vr->smoke->reg_file;
     strcpy(mergefile,smoke_file);
     strcat(mergefile,".vs3d");
     stream_out=fopen(mergefile,"wb");
-
-    FREEMEMORY(fireptrs);
-    FREEMEMORY(smokeptrs);
   }
 }

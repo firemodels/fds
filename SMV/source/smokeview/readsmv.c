@@ -7676,6 +7676,7 @@ int Merge_Smoke(void){
 
 void initmesh(mesh *meshi){
 
+  meshi->node_index0=0;
   meshi->super=NULL;
   meshi->nabors[0]=NULL;
   meshi->nabors[1]=NULL;

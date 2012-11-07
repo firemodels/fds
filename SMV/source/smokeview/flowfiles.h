@@ -471,11 +471,18 @@ typedef struct _volrenderdata {
 /* --------------------------  mesh ------------------------------------ */
 
 typedef struct _mesh {
+  int ibar, jbar, kbar;
+  float cellsize;
+  int node_index0;
+  int nvents,ndummyvents;
+  int nbptrs;
+  int smokeloaded;
+  int is_bottom;
+
   int ijk_offset[3];
   int update_firehalfdepth;
   terraindata *terrain;
   int mesh_type;
-  int is_bottom;
 #ifdef pp_GPU
   GLuint smoke_texture_id,fire_texture_id,blockage_texture_id;
   float *smoke_texture_buffer,*fire_texture_buffer;
@@ -485,7 +492,6 @@ typedef struct _mesh {
   float meshrgb[3], *meshrgb_ptr;
   float mesh_offset[3], *mesh_offset_ptr;
   int blockvis;
-  float cellsize;
   float *xplt, *yplt, *zplt;
   float *xplt_cen, *yplt_cen, *zplt_cen;
   float *xplt_orig, *yplt_orig, *zplt_orig;
@@ -502,7 +508,6 @@ typedef struct _mesh {
   float xyzmaxdiff;
   float boxoffset;
   int plot3dfilenum,isofilenum,patchfilenum;
-  int ibar, jbar, kbar;
   int *iplotx_all, *iploty_all, *iplotz_all;
   int plotx, ploty, plotz;
   int slicedir;
@@ -516,8 +521,6 @@ typedef struct _mesh {
   blockagedata **blockageinfoptrs;
   int *obst_bysize;
   ventdata *ventinfo;
-  int nvents,ndummyvents;
-  int nbptrs;
   unsigned char *is_block_terrain;
   unsigned char *iqdata;
   float *qdata, *udata, *vdata, *wdata;
@@ -598,7 +601,6 @@ typedef struct _mesh {
   int nface_normals_single_DOWN_Y,nface_normals_single_UP_Y;
   int nface_normals_single_DOWN_Z,nface_normals_single_UP_Z;
 
-
   int itextureoffset;
 
   int mxpatch_frames;
@@ -608,7 +610,6 @@ typedef struct _mesh {
   unsigned char *merge_color,*merge_alpha;
 
   char *label;
-  int smokeloaded;
 
   int ncullgeominfo,nxyzgeomcull[3],nxyzskipgeomcull[3];
   struct _culldata *cullgeominfo;
