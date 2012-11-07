@@ -3270,7 +3270,7 @@ void UnLoadVolSmoke3DMenu(int value){
   int i;
 
   if(value==999)return;
-  read_vol_mesh=-2;
+  read_vol_mesh=VOL_UNLOAD;
   updatemenu=1;
   if(value<0){
     if(value==UNLOAD_ALL){
@@ -3301,7 +3301,7 @@ void UnLoadVolSmoke3DMenu(int value){
     }
   }
   updatemenu=1;  
-  read_vol_mesh=-3;
+  read_vol_mesh=VOL_READNONE;
   glutPostRedisplay();
 }
 
@@ -3325,7 +3325,7 @@ void LoadVolSmoke3DMenu(int value){
         fprintf(scriptoutstream,"LOADVOLSMOKE\n");
         fprintf(scriptoutstream," %i\n",value);
       }
-      if(read_vol_mesh==-3){
+      if(read_vol_mesh==VOL_READNONE){
         read_vol_mesh=value;
         read_volsmoke_allframes_allmeshes();
       }
@@ -3336,11 +3336,11 @@ void LoadVolSmoke3DMenu(int value){
     }
   }
   else if(value==UNLOAD_ALL){  // unload all
-    if(read_vol_mesh==-3){
+    if(read_vol_mesh==VOL_READNONE){
       UnLoadVolSmoke3DMenu(value);
     }
       else{
-        if(read_vol_mesh==-2){
+        if(read_vol_mesh==VOL_UNLOAD){
           fprintf(stderr,"*** Warning: data is currently being unloaded\n");
         }
         else{
@@ -3354,12 +3354,12 @@ void LoadVolSmoke3DMenu(int value){
       fprintf(scriptoutstream,"LOADVOLSMOKE\n");
       fprintf(scriptoutstream," -1\n");
     }
-    if(read_vol_mesh==-3){
-      read_vol_mesh=-1;
+    if(read_vol_mesh==VOL_READNONE){
+      read_vol_mesh=VOL_READALL;
       read_volsmoke_allframes_allmeshes();
     }
     else{
-      if(read_vol_mesh==-2){
+      if(read_vol_mesh==VOL_UNLOAD){
         fprintf(stderr,"*** Warning: data is currently being unloaded\n");
       }
       else{

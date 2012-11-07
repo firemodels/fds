@@ -382,5 +382,9 @@ void _Sniff_Errors(char *whereat);
 #define DRAW_OPAQUE 0
 #define DRAW_TRANSPARENT 1
 
+#define VOL_READALL -1
+#define VOL_UNLOAD -2
+#define VOL_READNONE -3
+
 #endif
 

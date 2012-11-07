@@ -637,6 +637,7 @@ typedef struct _supermesh {
   int inside, drawsides[7];
   float dcell;
   mesh **meshes;
+  int ni, nj, nk;
 } supermesh;
 
 /* --------------------------  volfacelistdata ------------------------------------ */

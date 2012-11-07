@@ -2225,7 +2225,6 @@ int readsmv(char *file, char *file2){
   int kv1, kv2;
   int colorindex, blocktype;
   int ventindex,venttype;
-  int roomnumber;
   float width,ventoffset,bottom,top;
   int igrid;
   int ioffset;
@@ -2245,7 +2244,6 @@ int readsmv(char *file, char *file2){
   int nn;
   int i, j, k;
   STRUCTSTAT statbuffer,statbuffer2;
-  int version;
   int slicefile_count=0;
   
   int nn_smoke3d=0;
@@ -5083,6 +5081,7 @@ int readsmv(char *file, char *file2){
   */
     if(match(buffer,"FIRE")==1){
       firedata *firei;
+      int roomnumber;
 
       ifire++;
       if(fgets(buffer,255,stream)==NULL){
@@ -6288,6 +6287,7 @@ typedef struct {
   */
     if(match(buffer,"BNDF") == 1||match(buffer,"BNDC") == 1||match(buffer,"BNDE") == 1){
       patchdata *patchi;
+      int version;
 
       nn_patch++;
 

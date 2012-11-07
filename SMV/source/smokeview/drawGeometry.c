@@ -1747,12 +1747,12 @@ void set_cull_vis(void){
 #endif
 }
 
-
 /* ------------------ comparesinglefaces ------------------------ */
 
 int comparesinglefaces0( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
   int dirs[6];
+
   facei = *(facedata **)arg1;
   facej = *(facedata **)arg2;
 
