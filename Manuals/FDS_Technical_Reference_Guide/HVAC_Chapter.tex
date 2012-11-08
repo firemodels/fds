@@ -1,13 +1,12 @@
 \chapter{Heating, Ventilation, and Air Conditioning (HVAC)}
 
-HVAC systems are found throughout the built environment.  During a fire, HVAC ducts can serve
-as a path for heat and combustion products to be moved through a building and the ducts can serve as a supply of fresh air.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts.
-HVAC systems may also serve as part of the fire protection system for a building when used to exhaust smoke or maintain stairwell pressurization.
+HVAC systems are found throughout the built environment.  During a fire, HVAC ducts can serve as a path for heat and combustion products to be moved through a building and the ducts can serve as a supply of fresh air.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts. HVAC systems may also serve as part of the fire protection system for a building when used to exhaust smoke or maintain stairwell pressurization.
 
-Previous versions of FDS, have only had the ability to specify either fixed flow boundary conditions (velocity or mass flux) or a simple pressure boundary condition.
-While these inputs could adequately represent very simple HVAC features, they could not model an entire multi-room system.
+Previous versions of FDS, have only had the ability to specify either fixed flow boundary conditions (velocity or mass flux) or a simple pressure boundary condition. While these inputs could adequately represent very simple HVAC features, they could not model an entire multi-room system.
 There was no coupling of the mass, momentum, and energy solutions amongst the multiple inlets and outlets comprising the HVAC network.
 To address this limitation, an HVAC network solver has been added to FDS.
+
+The reader may find it useful to review similar work in coupling CFD to a 1D nodal model for analysis of ventilation in tunnel fires \cite{Colella:2010, Colella:2011}.
 
 
 \section{HVAC Governing Equations}
