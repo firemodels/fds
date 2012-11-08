@@ -61,30 +61,30 @@ void update_framenumber(int changetime){
       for(imesh=0;imesh<nmeshes;imesh++){
         mesh *meshi;
         volrenderdata *vr;
-        slicedata *fire, *smoke;
+        slicedata *fireslice, *smokeslice;
         int j;
 
         meshi = meshinfo + imesh;
         vr = &(meshi->volrenderinfo);
-        fire=vr->fire;
-        smoke=vr->smoke;
+        fireslice=vr->fireslice;
+        smokeslice=vr->smokeslice;
         vr->smokedataptr=NULL;
         vr->firedataptr=NULL;
-        if(fire==NULL||smoke==NULL)continue;
+        if(fireslice==NULL||smokeslice==NULL)continue;
         if(vr->loaded==0||vr->display==0)continue;
         vr->itime = vr->timeslist[itimes];
         for(j=vr->itime;j>=0;j--){
           if(vr->dataready[j]==1)break;
         }
         vr->itime=j;
-        if(smoke!=NULL&&vr->itime>=0){
+        if(smokeslice!=NULL&&vr->itime>=0){
           if(vr->is_compressed==1||load_volcompressed==1){
             unsigned char *c_smokedata_compressed;
             uLongf framesize;
             float timeval;
 
             c_smokedata_compressed = vr->smokedataptrs[vr->itime];
-            framesize = smoke->nslicei*smoke->nslicej*smoke->nslicek;
+            framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
             uncompress_volsliceframe(c_smokedata_compressed,
                            vr->smokedata_view, framesize, &timeval,
                            vr->c_smokedata_view);
@@ -96,14 +96,14 @@ void update_framenumber(int changetime){
           }
           CheckMemory;
         }
-        if(fire!=NULL&&vr->itime>=0){
+        if(fireslice!=NULL&&vr->itime>=0){
           if(vr->is_compressed==1||load_volcompressed==1){
             unsigned char *c_firedata_compressed;
             uLongf framesize;
             float timeval;
 
             c_firedata_compressed = vr->firedataptrs[vr->itime];
-            framesize = fire->nslicei*fire->nslicej*fire->nslicek;
+            framesize = fireslice->nslicei*fireslice->nslicej*fireslice->nslicek;
             uncompress_volsliceframe(c_firedata_compressed,
                            vr->firedata_view, framesize, &timeval,
                            vr->c_firedata_view);
@@ -350,7 +350,7 @@ void updateShow(void){
 
       meshi = meshinfo + i;
       vr = &(meshi->volrenderinfo);
-      if(vr->fire==NULL||vr->smoke==NULL)continue;
+      if(vr->fireslice==NULL||vr->smokeslice==NULL)continue;
       if(vr->loaded==0||vr->display==0)continue;
       showvolrender=1;
       break;
@@ -808,7 +808,7 @@ void synctimes(void){
 
         meshi=meshinfo+igrid;
         vr = &meshi->volrenderinfo;
-        if(vr->smoke==NULL)continue;
+        if(vr->smokeslice==NULL)continue;
         if(vr->loaded==0||vr->display==0)continue;
         if(vr->times==NULL)continue;
         vr->timeslist[n]=get_itime(n,vr->timeslist,vr->times,vr->ntimes);
@@ -930,7 +930,7 @@ void updatetimes(void){
 
       meshi=meshinfo+i;
       vr = &meshi->volrenderinfo;
-      if(vr->fire==NULL||vr->smoke==NULL)continue;
+      if(vr->fireslice==NULL||vr->smokeslice==NULL)continue;
       if(vr->loaded==0||vr->display==0)continue;
       nglobal_times+=vr->ntimes;
     }
@@ -1103,7 +1103,7 @@ void updatetimes(void){
 
       meshi=meshinfo + i;
       vr = &meshi->volrenderinfo;
-      if(vr->smoke==NULL)continue;
+      if(vr->smokeslice==NULL)continue;
       if(vr->loaded==0||vr->display==0)continue;
       for(n=0;n<vr->ntimes;n++){
         float t_diff;
@@ -1280,7 +1280,7 @@ void updatetimes(void){
 
       meshi = meshinfo + i;
       vr = &(meshi->volrenderinfo);
-      if(vr->fire==NULL||vr->smoke==NULL)continue;
+      if(vr->fireslice==NULL||vr->smokeslice==NULL)continue;
       if(vr->loaded==0||vr->display==0)continue;
       FREEMEMORY(vr->timeslist);
       if(nglobal_times>0)NewMemory((void **)&vr->timeslist,nglobal_times*sizeof(int));
@@ -1586,7 +1586,7 @@ int getplotstate(int choice){
 
           meshi = meshinfo + i;
           vr = &(meshi->volrenderinfo);
-          if(vr->fire==NULL||vr->smoke==NULL)continue;
+          if(vr->fireslice==NULL||vr->smokeslice==NULL)continue;
           if(vr->loaded==0||vr->display==0)continue;
           return DYNAMIC_PLOTS;
         }

@@ -450,7 +450,7 @@ typedef struct {
 
 typedef struct _volrenderdata {
   char *rendermeshlabel;
-  struct _slicedata *smoke, *fire;
+  struct _slicedata *smokeslice, *fireslice;
   int is_compressed;
   unsigned char *c_smokedata_view, *c_firedata_view;
   float *smokedata_full, *firedata_full;
@@ -497,6 +497,7 @@ typedef struct _mesh {
   float *xplt_orig, *yplt_orig, *zplt_orig;
   float x0, x1, y0, y1, z0, z1;
   int drawsides[7];
+  int extsides[7]; // 1 if on exterior side of a supermesh, 0 otherwise
   int inside;
   float boxmin[3], boxmax[3], dbox[3], boxeps[3], dcell;
   float boxmin_scaled[3], boxmax_scaled[3];

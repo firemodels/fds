@@ -25,6 +25,11 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+#ifdef pp_MERGEMESH
+SVEXTERN int SVDECL(use_supermesh,1);
+#else
+SVEXTERN int SVDECL(use_supermesh,0);
+#endif
 SVEXTERN int colorbar_left_pos, colorbar_right_pos, colorbar_down_pos, colorbar_top_pos;
 SVEXTERN float scale_2d_x, scale_2d_y;
 SVEXTERN int SVDECL(colorbar_delta,35);

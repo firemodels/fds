@@ -650,6 +650,25 @@ void getvolsmokedir(float *mm){
     }
   }
 
+  // turn off drawing for mesh sides that are on the inside of a supermesh
+
+  if(use_supermesh==1){
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      int *drawsides,*extsides;
+      int j;
+
+      meshi = meshinfo + i;
+      drawsides = meshi->drawsides;
+      extsides = meshi->extsides;
+      for(j=0;j<7;j++){
+        if(extsides[j]==0){
+          drawsides[j]=0;
+        }
+      }
+    }
+  }
+
   vi = volfacelistinfo;
   nvolfacelistinfo=0;
   for(i=0;i<nmeshes;i++){
@@ -657,7 +676,6 @@ void getvolsmokedir(float *mm){
     int facemap[7]={12,6,0,0,3,9,15};
     volrenderdata *vr;
     int *drawsides;
-
 
     meshi = meshinfo + i;
 

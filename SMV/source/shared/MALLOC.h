@@ -73,6 +73,8 @@ MMEXTERN pthread_mutex_t mutexSLICE_BOUND,mutexPATCH_BOUND,mutexPART2ISO,mutexPR
 #define ResizeMemory(f,g) _ResizeMemory((f),(g),(#f),__FILE__,__LINE__)
 #endif
 
+#define NEWMEMORY(f,g) NewMemory((void **)&(f),(g))
+
 #ifdef pp_memstatus
 #ifdef WIN32
 void _memorystatus(unsigned int size,unsigned int *availmem, unsigned int *memused, unsigned int *totalmem);

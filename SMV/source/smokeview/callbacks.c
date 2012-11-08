@@ -1605,7 +1605,7 @@ void keyboard(unsigned char key, int flag){
 
                 meshi = meshinfo + i;
                 vr = &meshi->volrenderinfo;
-                if(vr->fire==NULL||vr->smoke==NULL)continue;
+                if(vr->fireslice==NULL||vr->smokeslice==NULL)continue;
                 if(vr->loaded==0||vr->display==0)continue;
                 timediffmin = ABS(timeval-vr->times[0]);
                 framenum=0;
