@@ -19,7 +19,7 @@
  HRRPUA=2930.0 
  RAMP_Q='FAST'/
 
-%%Radiative Fraction as established by report
+
 &RADI RADIATIVE_FRACTION=0.20/
 
 &REAC FUEL='METHANE'
