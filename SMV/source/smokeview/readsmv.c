@@ -2203,7 +2203,6 @@ int readsmv(char *file, char *file2){
   devicedata *devicecopy;
   int do_pass4=0;
   int roomdefined=0;
-  float *x1, *x2, *yy1, *yy2, *z1, *z2;
   float temp_ignition, emis, t_width, t_height;
   float s_color[4];
   int *ijk;
@@ -3863,12 +3862,6 @@ int readsmv(char *file, char *file2){
       }
       sscanf(buffer,"%i",&outlinei->nlines);
       if(outlinei->nlines>0){
-        x1=NULL;
-        x2=NULL;
-        yy1=NULL;
-        yy2=NULL;
-        z1=NULL;
-        z2=NULL;
         NewMemory((void **)&outlinei->x1,outlinei->nlines*sizeof(float));
         NewMemory((void **)&outlinei->y1,outlinei->nlines*sizeof(float));
         NewMemory((void **)&outlinei->z1,outlinei->nlines*sizeof(float));
