@@ -13,7 +13,7 @@ The reader may find it useful to review similar work in coupling CFD to a 1D nod
 
 The overall HVAC solver is based on the MELCOR~\cite{MELCOR} thermal hydraulic solver.  MELCOR is a computer code for simulating accidents in nuclear power plant containment buildings.
 The Fire and Smoke Simulator (FSSIM)~\cite{FSSIM}, a network fire model, has shown prior success in using the MELCOR solver to model fire spread and smoke movement
-in the presence of complex ventilation systems.
+in the presence of complex ventilation systems and the FDS implmentation of the MELCOR solver is largely based on the implementation found in FSSIM.  The coupling of the HVAC solver to the remainder of the FDS computation is in part based upon approaches taken in GOTHIC~\cite{GOTHIC}, another containment analysis code that couples CFD-like features for large containment volumens with a network model for piping and ventilation.
 
 The MELCOR solver uses an explicit conservation of mass and energy combined with an implicit solver for the conservation of momentum.
 An HVAC system is represented as network of nodes and ducts.  A node represents where a duct joins with the FDS computational domain or where multiple ducts are joined such as a tee.
