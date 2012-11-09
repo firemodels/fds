@@ -303,6 +303,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   char *blank_local;
   float pt_smoketran, *pt_smokecolor;
   float tauhat,alphahat;
+  mesh *xyz_mesh=NULL;
 
   if(use_supermesh==1){
     boxmin = meshi->super->boxmin_scaled;
@@ -435,9 +436,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
     xyz[2] = MIX(factor,vert_end[2],vert_beg[2]);
 
     if(use_supermesh==1){
-      mesh *xyz_mesh;
-
-      xyz_mesh = getmesh_in_smesh(meshi->super,xyz);
+      xyz_mesh = getmesh_in_smesh(xyz_mesh,meshi->super,xyz);
       if(xyz_mesh==NULL)break;
       if(block_volsmoke==1){
         blank_local=xyz_mesh->c_iblank_cell;

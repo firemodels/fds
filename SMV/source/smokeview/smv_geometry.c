@@ -1399,31 +1399,39 @@ int makeiblank(void){
 
 /* ------------------ getmesh_in_smesh ------------------------ */
 
-mesh *getmesh_in_smesh(supermesh *smesh, float *xyz){
+mesh *getmesh_in_smesh(mesh *mesh_guess, supermesh *smesh, float *xyz){
   int i;
+  float *smin, *smax;
 
-  for(i=0;i<smesh->nmeshes;i++){
+  smin = smesh->boxmin_scaled;
+  smax = smesh->boxmax_scaled;
+
+  if(xyz[0]<smin[0]||xyz[1]<smin[1]||xyz[2]<smin[2])return NULL;
+  if(xyz[0]>smax[0]||xyz[1]>smax[1]||xyz[2]>smax[2])return NULL;
+  for(i=-1;i<smesh->nmeshes;i++){
     mesh *meshi;
-    int ibar, jbar, kbar;
-    float *xplt, *yplt, *zplt;
+    float *bmin, *bmax;
 
-    meshi = smesh->meshes[i];
+    if(i==-1){
+      if(mesh_guess==NULL)continue;
+      meshi=mesh_guess;
+    }
+    else{
+      meshi = smesh->meshes[i];
+      if(meshi==mesh_guess)continue;
+    }
 
-    ibar = meshi->ibar;
-    jbar = meshi->jbar;
-    kbar = meshi->kbar;
-
-    xplt = meshi->xplt;
-    yplt = meshi->yplt;
-    zplt = meshi->zplt;
+    bmin = meshi->boxmin_scaled;
+    bmax = meshi->boxmax_scaled;
 
     if(
-      xplt[0]<=xyz[0]&&xyz[0]<=xplt[ibar]&&
-      yplt[0]<=xyz[1]&&xyz[1]<=yplt[jbar]&&
-      zplt[0]<=xyz[2]&&xyz[2]<=zplt[kbar]){
+      bmin[0]<=xyz[0]&&xyz[0]<=bmax[0]&&
+      bmin[1]<=xyz[1]&&xyz[1]<=bmax[1]&&
+      bmin[2]<=xyz[2]&&xyz[2]<=bmax[2]){
         return meshi;
     }
   }
+  ASSERT(0);
   return NULL;
 }
 
