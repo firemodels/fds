@@ -1397,3 +1397,33 @@ int makeiblank(void){
   return 0;
 }
 
+/* ------------------ getmesh_in_smesh ------------------------ */
+
+mesh *getmesh_in_smesh(supermesh *smesh, float *xyz){
+  int i;
+
+  for(i=0;i<smesh->nmeshes;i++){
+    mesh *meshi;
+    int ibar, jbar, kbar;
+    float *xplt, *yplt, *zplt;
+
+    meshi = smesh->meshes[i];
+
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+
+    xplt = meshi->xplt;
+    yplt = meshi->yplt;
+    zplt = meshi->zplt;
+
+    if(
+      xplt[0]<=xyz[0]&&xyz[0]<=xplt[ibar]&&
+      yplt[0]<=xyz[1]&&xyz[1]<=yplt[jbar]&&
+      zplt[0]<=xyz[2]&&xyz[2]<=zplt[kbar]){
+        return meshi;
+    }
+  }
+  return NULL;
+}
+

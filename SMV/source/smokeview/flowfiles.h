@@ -633,10 +633,8 @@ typedef struct _mesh {
 /* --------------------------  supermesh ------------------------------------ */
 
 typedef struct _supermesh {
-  float x0, x1, y0, y1, z0, z1;
-  float xcen, ycen, zcen;
+  float boxmin_scaled[3], boxmax_scaled[3];
   int nmeshes;
-  int inside, drawsides[7];
   float dcell;
   mesh **meshes;
   int ni, nj, nk;

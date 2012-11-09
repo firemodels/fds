@@ -304,8 +304,14 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   float pt_smoketran, *pt_smokecolor;
   float tauhat,alphahat;
 
-  boxmin = meshi->boxmin_scaled;
-  boxmax = meshi->boxmax_scaled;
+  if(use_supermesh==1){
+    boxmin = meshi->super->boxmin_scaled;
+    boxmax = meshi->super->boxmax_scaled;
+  }
+  else{
+    boxmin = meshi->boxmin_scaled;
+    boxmax = meshi->boxmax_scaled;
+  }
 
   // xyz(t) = xyzvert + t*(xyzvert - xyzeyeorig )
   // integrate from t=0 to t=t_intersect_min  (if outside mesh)
@@ -428,7 +434,22 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
     xyz[1] = MIX(factor,vert_end[1],vert_beg[1]);
     xyz[2] = MIX(factor,vert_end[2],vert_beg[2]);
 
-    get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank_local);
+    if(use_supermesh==1){
+      mesh *xyz_mesh;
+
+      xyz_mesh = getmesh_in_smesh(meshi->super,xyz);
+      if(xyz_mesh==NULL)break;
+      if(block_volsmoke==1){
+        blank_local=xyz_mesh->c_iblank_cell;
+      }
+      else{
+        blank_local=NULL;
+      }
+      get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, xyz_mesh, &inobst, blank_local);
+    }
+    else{
+      get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank_local);
+    }
     if(blank_local!=NULL&&inobst==1)break;
 
     alphai = 1.0 - pt_smoketran;
@@ -2046,24 +2067,29 @@ void init_supermesh(void){
 
   for(smesh = supermeshinfo;smesh!=supermeshinfo+nsupermeshinfo;smesh++){
     mesh *nab;
+    float *smin, *smax;
 
-    smesh->x0=smesh->meshes[0]->x0;
-    smesh->y0=smesh->meshes[0]->y0;
-    smesh->z0=smesh->meshes[0]->z0;
-    smesh->x1=smesh->meshes[0]->x1;
-    smesh->y1=smesh->meshes[0]->y1;
-    smesh->z1=smesh->meshes[0]->z1;
-    for(i=1;i<smesh->nmeshes;i++){
-      smesh->x0=MIN(smesh->x0,smesh->meshes[i]->x0);
-      smesh->y0=MIN(smesh->y0,smesh->meshes[i]->y0);
-      smesh->z0=MIN(smesh->z0,smesh->meshes[i]->z0);
-      smesh->x1=MAX(smesh->x1,smesh->meshes[i]->x1);
-      smesh->y1=MAX(smesh->y1,smesh->meshes[i]->y1);
-      smesh->z1=MAX(smesh->z1,smesh->meshes[i]->z1);
+    smin = smesh->boxmin_scaled;
+    smax = smesh->boxmax_scaled;
+
+    for(i=0;i<smesh->nmeshes;i++){
+      int j;
+      float *bmin, *bmax;
+
+      bmin = smesh->meshes[i]->boxmin_scaled;
+      bmax = smesh->meshes[i]->boxmax_scaled;
+      if(i==0){
+        memcpy(smin,bmin,3*sizeof(float));
+        memcpy(smax,bmax,3*sizeof(float));
+      }
+      else{
+        for(j=0;j<3;j++){
+          smin[j]=MIN(smin[j],bmin[j]);
+          smax[j]=MAX(smax[j],bmax[j]);
+        }
+      }
     }
-    smesh->xcen = (smesh->x0+smesh->x1)/2.0;
-    smesh->ycen = (smesh->y0+smesh->y1)/2.0;
-    smesh->zcen = (smesh->z0+smesh->z1)/2.0;
+
     smesh->dcell = smesh->meshes[0]->dcell;
 
     // sort meshes in supermesh from lower front left to upper back right

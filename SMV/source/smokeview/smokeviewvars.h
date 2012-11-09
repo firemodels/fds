@@ -934,6 +934,7 @@ SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
 
+SVEXTERN mesh *getmesh_in_smesh(supermesh *smesh, float *xyz);
 SVEXTERN float getmesh_zcell(mesh *meshi, float xval, float yval, int *valid);
 SVEXTERN int SVDECL(updatehiddenfaces,1),SVDECL(hide_overlaps,0);
 SVEXTERN int SVDECL(nsurfids,0);
