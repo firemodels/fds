@@ -2136,7 +2136,7 @@ SMIX_LOOP: DO N=1,N_TRACKED_SPECIES
          IF (TAU_PLUS < 0.2_EB) THEN ! Diffusion regime
             D_SOLID = K*TGAS*(1._EB+1.25_EB*KN+0.41_EB*KN*EXP(-0.88_EB/KN))/(3*PI*MUGAS*SM%MEAN_DIAMETER)
             U_TURB = WC%U_TAU * 0.086_EB*(MUGAS/RHOG/D_SOLID)**(-0.7_EB)
-         ELSEIF (TAU_PLUS >= 0.2_EB .AND. TAU_PLUS < 22.0398_EB) THEN ! Diffusion-impaction regime
+         ELSEIF (TAU_PLUS >= 0.2_EB .AND. TAU_PLUS < 22.9_EB) THEN ! Diffusion-impaction regime
             U_TURB = WC%U_TAU * 3.5E-4_EB * TAU_PLUS**2
          ELSE ! Inertia regime
             U_TURB = WC%U_TAU * 0.17_EB
