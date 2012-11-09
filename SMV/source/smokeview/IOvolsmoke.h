@@ -5,9 +5,17 @@
 #ifndef IOVOLSMOKE_H_DEFINED
 #define IOVOLSMOKE_H_DEFINED
 #define GPU_VOLframemax 3.0
+#define MLEFT 0
+#define MFRONT 1
+#define MDOWN 2
+#define MRIGHT 3
+#define MBACK 4
+#define MUP 5
+#define MEPS 0.1
+
 #ifdef pp_GPU
 void init_volsmoke_texture(mesh *meshi);
-void update_volsmoke_texture(int *ijk_offset, mesh *meshi, float *smokedata, float *firedata);
+void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata);
 #endif
 void init_supermesh(void);
 void unload_volsmoke_frame_allmeshes(int framenum);

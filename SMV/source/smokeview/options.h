@@ -61,7 +61,6 @@
 #define pp_OPEN
 #define pp_SHOWLIGHT
 //#define pp_MERGEMESH
-//#define pp_MERGESMOKE
 #endif
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

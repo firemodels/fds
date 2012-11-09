@@ -667,6 +667,23 @@ void getvolsmokedir(float *mm){
         }
       }
     }
+    for(i=0;i<nsupermeshinfo;i++){
+      supermesh *smesh;
+
+      smesh = supermeshinfo + i;
+      for(j=0;j<7;j++){
+        smesh->drawsides[j]=0;
+      }
+      for(j=0;j<smesh->nmeshes;j++){
+        mesh *meshj;
+        int k;
+
+        meshj = smesh->meshes[j];
+        for(k=0;k<7;k++){
+          if(meshj->extsides[k]==1&&meshj->drawsides[k]==1)smesh->drawsides[k]==1;
+        }
+      }
+    }
   }
 
   vi = volfacelistinfo;

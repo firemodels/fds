@@ -59,9 +59,6 @@ SVEXTERN int SVDECL(show_fed_area,1);
 SVEXTERN int SVDECL(*fed_areas,NULL);
 SVEXTERN FILE SVDECL(*LOGSTREAM,NULL);
 
-#ifdef pp_MERGESMOKE
-SVEXTERN int SVDECL(can_merge_smoke,0),SVDECL(merge_smoke,0);
-#endif
 SVEXTERN int SVDECL(*meshvisptr,NULL);
 SVEXTERN smoke3ddata SVDECL(**smoke3dinfo_sorted,NULL);
 SVEXTERN int SVDECL(from_commandline,0);

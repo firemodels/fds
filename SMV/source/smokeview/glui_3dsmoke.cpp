@@ -328,11 +328,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
       SMOKE_3D_CB(LOAD_COMPRESSED_DATA);
     }
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Display data as b/w"),&volbw);
-#ifdef pp_MERGESMOKE
-    if(can_merge_smoke==1){
-      glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Merge smoke meshes"),&merge_smoke);
-    }
-#endif
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Show data while moving scene"),&show_volsmoke_moving);
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Load data only at render times"),&load_at_rendertimes);
 

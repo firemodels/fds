@@ -7522,153 +7522,13 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
   strcpy(bc->label,blocklabel);
 }
 
-/* ------------------ Merge_Smoke ------------------------ */
-#ifdef pp_MERGESMOKE
-int Merge_Smoke(void){
-  int i;
-  float dx, dy, dz,eps=0.001;
-  float xmin, ymin, zmin;
-  float xmax, ymax, zmax;
-  int minindex,maxindex;
-  mesh *minmesh;
-  unsigned char *cells;
-  int nii, njj, nkk;
-  float maxsum, minsum;
-
-  if(nmeshes==1)return 0;
-  dx = meshinfo->xplt[1]-meshinfo->xplt[0];
-  dy = meshinfo->yplt[1]-meshinfo->yplt[0];
-  dz = meshinfo->zplt[1]-meshinfo->zplt[0];
-  
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    float *xp, *yp, *zp;
-    float dxi, dyi, dzi;
-    int j;
-
-    meshi = meshinfo + i;
-    xp = meshi->xplt;
-    yp = meshi->yplt;
-    zp = meshi->zplt;
-    for(j=0;j<meshi->ibar;j++){
-      dxi = xp[j+1]-xp[j];
-      if(ABS(dxi-dx)>eps)return 0;
-    }
-    for(j=0;j<meshi->jbar;j++){
-      dyi = yp[j+1]-yp[j];
-      if(ABS(dyi-dy)>eps)return 0;
-    }
-    for(j=0;j<meshi->kbar;j++){
-      dzi = zp[j+1]-zp[j];
-      if(ABS(dzi-dz)>eps)return 0;
-    }
-  }
-  xmin=1000000000.0;
-  ymin=1000000000.0;
-  zmin=1000000000.0;
-  xmax=-xmin;
-  ymax=-ymin;
-  zmax=-zmin;
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    float *boxmin, *boxmax;
-
-    meshi = meshinfo + i;
-    boxmin = meshi->boxmin;
-    boxmax = meshi->boxmax;
-    if(boxmin[0]<xmin)xmin=boxmin[0];
-    if(boxmin[1]<ymin)ymin=boxmin[1];
-    if(boxmin[2]<zmin)zmin=boxmin[2];
-  }
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    float *boxmin, *boxmax;
-    float dx2, dy2, dz2;
-    float sum;
-
-    meshi = meshinfo + i;
-    boxmin = meshi->boxmin;
-    dx2 = boxmin[0]-xmin;
-    dy2 = boxmin[1]-ymin;
-    dz2 = boxmin[2]-zmin;
-    sum = dx2*dx2+dy2*dy2+dz2*dz2;
-    if(i==0){
-      minsum=sum;
-      minindex=0;
-      maxsum=sum;
-      maxindex=0;
-    }
-    else{
-      if(sum<minsum){
-        minsum=sum;
-        minindex=i;
-      }
-      if(sum>maxsum){
-        maxsum=sum;
-        maxindex=i;
-      }
-    }
-  }
-  minmesh = meshinfo + minindex;
-  minmesh->ijk_offset[0]=0;
-  minmesh->ijk_offset[1]=0;
-  minmesh->ijk_offset[2]=0;
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    int *ijk_offset;
-
-    meshi = meshinfo + i;
-    if(meshi==minmesh)continue;
-    ijk_offset=meshi->ijk_offset;
-    ijk_offset[0] = (int)( (meshi->xplt[0]-minmesh->xplt[0])/dx+0.5);
-    if(ijk_offset[0]<0)return 0;
-    ijk_offset[1] = (int)( (meshi->yplt[0]-minmesh->yplt[0])/dy+0.5);
-    if(ijk_offset[1]<0)return 0;
-    ijk_offset[2] = (int)( (meshi->zplt[0]-minmesh->zplt[0])/dz+0.5);
-    if(ijk_offset[2]<0)return 0;
-  }
-  nii=meshinfo[maxindex].ibar+meshinfo[maxindex].ijk_offset[0];
-  njj=meshinfo[maxindex].jbar+meshinfo[maxindex].ijk_offset[1];
-  nkk=meshinfo[maxindex].kbar+meshinfo[maxindex].ijk_offset[2];
-  NewMemory((void **)&cells,nii*njj*nkk);
-  for(i=0;i<nii*njj*nkk;i++){
-    cells[i]=0;
-  }
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    int ijk0;
-    int *ijk_offset;
-    int ii, jj, kk;
-
-    meshi = meshinfo + i;
-    ijk_offset = meshi->ijk_offset;
-    ijk0 = ijk_offset[0] + ijk_offset[1]*nii + ijk_offset[2]*nii*njj;
-    for(ii=0;ii<meshi->ibar;ii++){
-    for(jj=0;jj<meshi->jbar;jj++){
-    for(kk=0;kk<meshi->kbar;kk++){
-      int ijk1;
-
-      ijk1 = ii + jj*nii + kk*nii*njj;
-      cells[ijk0+ijk1]=1;
-    }
-    }
-    }
-  }
-  for(i=0;i<nii*njj*nkk;i++){
-    if(cells[i]==0){
-      FREEMEMORY(cells);
-      return 0;
-    }
-  }
-  FREEMEMORY(cells);
-  return 1;
-}
-#endif
-
 /* ------------------ initmesh ------------------------ */
 
 void initmesh(mesh *meshi){
 
+  meshi->s_offset[0]=-1;
+  meshi->s_offset[1]=-1;
+  meshi->s_offset[2]=-1;
   meshi->node_index0=0;
   meshi->super=NULL;
   meshi->nabors[0]=NULL;
@@ -7677,9 +7537,6 @@ void initmesh(mesh *meshi){
   meshi->nabors[3]=NULL;
   meshi->nabors[4]=NULL;
   meshi->nabors[5]=NULL;
-  meshi->ijk_offset[0]=-1;
-  meshi->ijk_offset[1]=-1;
-  meshi->ijk_offset[2]=-1;
   meshi->update_firehalfdepth=0;
   meshi->iplotx_all=NULL;
   meshi->iploty_all=NULL;

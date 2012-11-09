@@ -479,7 +479,6 @@ typedef struct _mesh {
   int smokeloaded;
   int is_bottom;
 
-  int ijk_offset[3];
   int update_firehalfdepth;
   terraindata *terrain;
   int mesh_type;
@@ -627,17 +626,23 @@ typedef struct _mesh {
 
   float gslice_verts[6*3];
   int gslice_nverts,gslice_triangles[4*3],gslice_ntriangles;
-
+  int s_offset[3];
 } mesh;
 
 /* --------------------------  supermesh ------------------------------------ */
 
 typedef struct _supermesh {
+#ifdef pp_GPU
+  GLuint smoke_texture_id,fire_texture_id,blockage_texture_id;
+  float *smoke_texture_buffer,*fire_texture_buffer;
+#endif
+  float *f_iblank_cell;
   float boxmin_scaled[3], boxmax_scaled[3];
+  int drawsides[7];
   int nmeshes;
   float dcell;
   mesh **meshes;
-  int ni, nj, nk;
+  int ibar, jbar, kbar;
 } supermesh;
 
 /* --------------------------  volfacelistdata ------------------------------------ */
