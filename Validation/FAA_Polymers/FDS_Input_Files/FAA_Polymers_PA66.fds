@@ -41,12 +41,19 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 &MATL ID='FOAMGLAS'
       CONDUCTIVITY = 0.08
       SPECIFIC_HEAT = 0.84
-      DENSITY = 120. /
-
+      DENSITY = 120. 
+	  
+&MATL ID='FOIL'
+	CONDUCTIVITY=250.
+	SPECIFIC_HEAT=0.91
+	DENSITY=2700.0
+	EMISSIVITY=0.12
+	ABSORPTION_COEFFICIENT=50000/
+	 
 &SURF ID='PA66 SLAB'
       COLOR='BLACK'
-      MATL_ID='PA66','FOAMGLAS'
-      THICKNESS=0.0068,0.025
+      MATL_ID='PA66','FOIL','FOAMGLAS'
+      THICKNESS=0.0068,0.0000343,0.025
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.04,0.04,-0.04,0.04,0.0,0.0, SURF_ID = 'PA66 SLAB' /
