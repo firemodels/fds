@@ -1,17 +1,21 @@
 \chapter{Ceiling Jets and Device Activation}
 
-FDS is a computational fluid dynamics (CFD) model and has no explicit ceiling jet model.
-Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations.
-Nevertheless, temperature measurements near the ceiling can be used to evaluate the model's ability to predict the flow of
-hot gases across a relatively flat ceiling. Measurements for this category are available from the NIST/NRC and the FM/SNL series.
+FDS is a computational fluid dynamics (CFD) model and has no specific ceiling jet algorithm. Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations. Nevertheless, temperature measurements near the ceiling can be used to evaluate the model's ability to predict the activation times of sprinklers, smoke detectors, and other fire protection devices.
 
-\section{WTC Test Series}
+This chapter first presents comparisons of model predictions and temperature measurements near to the ceiling. Next, predicted sprinkler activation times and the total number of activations are compared with measurements. Finally, predicted smoke detector activation times are compared with measurements. 
 
-Aspirated thermocouples were positioned 3~m to the west (TTRW1) and 2~m to the east (TTRE1) of the fire pan, 18~cm below the ceiling.
+\section{Ceiling Jet Temperatures}
 
-\newpage
+The ceiling jet temperature measurements presented in this section were made for a variety of reasons. Most often, these measurements were simply the upper most thermocouple temperature in a vertical array. Sometimes, these measurements were designed to detect the activation time of a sprinkler. In any case, these measurements are used to evaluate the model's ability to predict the gas temperature at a single point, as opposed to the hot gas layer average. 
 
-\begin{figure}[p]
+\clearpage
+
+\subsection{WTC Experiments}
+
+In the WTC experiments, the compartment was 7~m long, 3.6~m wide and 3.8~m high. A 1~m by 2~m pan was positioned close to the center of the compartment. Aspirated thermocouples were positioned 3~m to the west (TTRW1) and 2~m to the east (TTRE1) of the fire pan, 18~cm below the ceiling.
+
+
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Ceiling_Jet} &
 \includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Ceiling_Jet} \\
@@ -25,16 +29,12 @@ Aspirated thermocouples were positioned 3~m to the west (TTRW1) and 2~m to the e
 
 \clearpage
 
-\section{NIST/NRC Test Series}
+\subsection{NIST/NRC Experiments}
 
-The thermocouple nearest the ceiling in Tree 7, located towards the back of the compartment,
-has been chosen as a surrogate for the ceiling jet temperature.
-Curiously, the difference between measured and predicted temperatures is noticeably greater for the open door tests.
-Certainly, the open door changes the flow pattern of the exhaust gases.
-However, the predicted HGL heights for the open door tests, shown in the previous section,
-do not show a noticeable difference from their closed door counterparts.
-The predicted HGL temperatures are only slightly less than those measured in the open door tests,
-due in large part to the contribution of Tree 7 in the layer reduction calculation.
+In the NIST/NRC experiments, seven vertical arrays of thermocouples were positioned throughout the compartment. 
+The thermocouple nearest the ceiling in Tree~7, located towards the back of the compartment away from the door,
+has been chosen to evaluate the ceiling jet temperature prediction.
+
 
 
 \begin{figure}[p]
@@ -69,11 +69,9 @@ due in large part to the contribution of Tree 7 in the layer reduction calculati
 
 \clearpage
 
-\section{FM/SNL Test Series}
+\subsection{FM/SNL Experiments}
 
-The near-ceiling thermocouples in Sectors 1 and 3 have been chosen as surrogates for the ceiling jet temperature.
-The results are shown below. The temperature evolution in each of these cases closely mimics the pattern of the HGL comparisons done for these tests.
-
+The near-ceiling thermocouples in Sectors 1 and 3 have been chosen to evaluate the ceiling jet temperature prediction. 
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -115,15 +113,13 @@ The results are shown below. The temperature evolution in each of these cases cl
 
 \clearpage
 
-\section{ATF Corridors Series}
+\subsection{ATF Corridors Experiment}
 
-This series of experiments involved two fairly long corridors connected by a staircase. The fire, a natural gas sand
-burner, was located on the first level at the end of the corridor away from the stairwell, which was located at the
-other end. The corridor was closed at the end where the fire was located, and open at the same position on the
+This series of experiments involved two fairly long corridors connected by a staircase. The fire, a natural gas sand burner, was located on the first level at the end of the corridor away from the stairwell. The corridor was closed at this end, and open at the same position on the
 second level. Two-way flow occurred on both levels because make-up air flowed from the opening on the second level down
 the stairs to the first. The only opening to the enclosure was the open end of the second-level corridor.
 
-Temperatures were measured with 7 thermocouple trees. Tree A was located fairly close to the fire on the first level. Tree~B
+Temperatures were measured with seven thermocouple trees. Tree A was located fairly close to the fire on the first level. Tree~B
 was located halfway down the first-level corridor. Tree~C was close to the stairwell entrance on the first level. Tree~D was located
 in the doorway of the stairwell on the first level. Tree~E was located roughly along the vertical centerline of the
 stairwell. Tree~F was located near the stairwell opening on the second level. Tree~G was located near the exit at the
@@ -196,244 +192,61 @@ the given fire sizes of 50~kW, 100~kW, 250~kW, 500~kW, and a mixed HRR ``pulsed'
 \end{figure}
 
 
-
-
-
-
-
-
 \clearpage
 
-\section{Arup Tunnel Experiments}
+\subsection{UL/NFPRF Series I Experiments}
 
-The plots below show the predicted and measured temperatures from a fire experiment conducted in a tunnel. Near-ceiling temperatures
-were measured at distances of 2~m, 4~m, 6~m and 8~m from the fire along the centerline of tunnel.
-
+The primary purpose of the UL/NFPRF experiments was to measure sprinkler activation times for a series of heptane spray burner fires. To determine activation times, thermocouples were affixed to each sprinkler, and a sudden drop in temperature indicated activation. These same thermocouple temperatures can be compared to ceiling jet temperature predictions. Referring to Fig.~\ref{layout}, the chosen measurement locations are 56, 68, 86, and 98, providing comparisons as close to, and as far away from, the fire as possible.
 
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_2_m} &
-\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_4_m} \\
-\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_6_m} &
-\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_8_m}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_01_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_02_jet} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_03_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_04_jet} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_05_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_06_jet}
 \end{tabular*}
-\label{Arup_Tunnel}
+\label{UL_NFPRF_jet_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_07_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_08_jet} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_09_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_10_jet} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_11_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_12_jet} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_13_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_14_jet} 
+\end{tabular*}
+\label{UL_NFPRF_jet_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_15_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_16_jet} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_17_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_18_jet} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_19_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_20_jet} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_21_jet} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_22_jet} 
+\end{tabular*}
+\label{UL_NFPRF_jet_3}
 \end{figure}
 
 
 \clearpage
 
-\section{Summary of Ceiling Jet Temperature Predictions}
-
-\begin{figure}[h!]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Ceiling_Jet_Temperature} \\
-\vspace{0.25in}
-\end{tabular}
-\end{center}
-\caption[Summary of ceiling jet temperature predictions.]
-{Summary of ceiling jet temperature predictions.}
-\end{figure}
-
-\clearpage
-
-\section{UL/NFPRF Sprinkler, Vent, and Draft Curtain Experiments}
-\label{UL_NFPRF:Results}
-
-The ceiling jet is an important fire phenomenon because of the presence of automatic fire protection devices at the ceiling, like
-sprinklers and smoke/heat vents. The results of the UL/NFPRF experiments provide useful data to assess the accuracy of FDS in predicting
-the velocity and temperature near the ceiling, and consequently the resulting activation of sprinklers.
-The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}.
-
-\begin{table}[h!]
-\begin{center}
-\begin{tabular}{|c||c|c|c|c|c|c|}
-\hline
-\multicolumn{7}{|c|}{\bf Heptane Spray Burner Test Series I}  \\ \hline \hline
-Test & Burner & Vent                    & First         & Total      & Draft    & Heat Release Rate \\
-No.  & Pos.   & Operation               & Actuation (s) & Actuations & Curtains & MW @ s \\
-\hline \hline
-I-1   & B  & Closed                     & 65            & 11        & Yes  & 4.4 @ 50  \\ \hline
-I-2   & B  & Manual (0:40)              & 66            & 12        & Yes  & 4.4 @ 50  \\ \hline
-I-3   & B  & Manual (1:30)              & 64            & 12        & Yes  & 4.4 @ 50  \\ \hline
-I-4   & C  & Closed                     & 60            & 10        & Yes  & 4.4 @ 50  \\ \hline
-I-5   & C  & Manual (0:40)              & 72            & 9         & Yes  & 4.4 @ 50  \\ \hline
-I-6   & C  & Manual (1:30)              & 62            & 8         & Yes  & 4.4 @ 50  \\ \hline
-I-7   & C  & 74$^\circ$C link (DNO)     & 70            & 10        & Yes  & 4.4 @ 50  \\ \hline
-I-8   & B  & 74$^\circ$C link (9:26)    & 60            & 11        & Yes  & 4.4 @ 50  \\ \hline
-I-9   & D  & 74$^\circ$C link (DNO)     & 70            & 12        & Yes  & 4.4 @ 50  \\ \hline
-I-10  & D  & Manual (0:40)              & 72            & 13        & Yes  & 4.4 @ 50  \\ \hline
-I-11  & D  & 74$^\circ$C link (4:48)    & N/A           & N/A       & Yes  & 4.4 @ 50  \\ \hline
-I-12  & A  & Closed                     & 68            & 14        & Yes  & 4.4 @ 50  \\ \hline
-I-13  & A  & 74$^\circ$C link (1:04)    & 69            & 5         & Yes  & 6.0 @ 60  \\ \hline
-I-14  & A  & Manual (0:40)              & 74            & 7         & Yes  & 5.8 @ 60  \\ \hline
-I-15  & A  & Manual (1:30)              & 64            & 5         & Yes  & 5.8 @ 60  \\ \hline
-I-16  & A  & 74$^\circ$C link (1:46)    & 106           & 4         & Yes  & 5.0 @ 110 \\ \hline \hline
-I-17  & B  & 100$^\circ$C link (DNO)    & 58            & 4         & No   & 4.6 @ 50 \\ \hline
-I-18  & C  & 100$^\circ$C link (DNO)    & 58            & 4         & No   & 3.7 @ 50 \\ \hline
-I-19  & A  & 100$^\circ$C link (10:00)  & 56            & 10        & No   & 4.6 @ 50 \\ \hline
-I-20  & A  & 74$^\circ$C link (1:20)    & 54            & 4         & No   & 4.2 @ 50 \\ \hline
-I-21  & C  & 74$^\circ$C link (7:00)    & 58            & 10        & No   & 4.6 @ 50 \\ \hline
-I-22  & D  & 100$^\circ$C link (DNO)    & 60            & 6         & No   & 4.6 @ 50 \\ \hline
-\end{tabular}
-\end{center}
-\caption[Results of the UL/NFPRF Experiments, Series~I]
-{Results of the UL/NFPRF Series~I Experiments. Note that DNO means
-``Did Not Open''. Also note, the fires grew at a rate proportional
-to the square of the time until a certain flow rate of fuel was achieved
-at which time the flow rate was held steady. Thus, the ``Heat Release Rate''
-was the size of the fire at the time when the fuel supply was leveled off.}
-\label{ULmatrix}
-\end{table}
-
-The figures on the following pages display the number of sprinklers actuated as a function of time.
-The results are then summarized in Fig.~\ref{UL_NFPRF}. Note that there are no experimental uncertainty bounds on the plot because it is difficult to estimate the
-combined uncertainty related to the various parameters that are input into the model. In Fig.~\ref{UL_NFPRF_Repeatability}, the results of three replicate experiments
-demonstrate that the total number of actuated sprinklers in each experiment is repeatable, even though individual actuation times may vary. Based on these
-three replicates, there is very little, if any, uncertainty in the total number of actuated sprinklers for each test. However, the test report~\cite{Sheppard:1} does not
-include uncertainty estimates for the heat release rate, thermal properties of the ceiling, sprinkler RTI, conductivity factor, actuation temperature,
-median droplet diameter, and various other parameters that have been input into the model. Consequently, it is not possible to estimate the uncertainty in the
-total number of actuated sprinklers due to the uncertainty in the reported parameters. The only sensitivity analysis conducted for this set of experiments was
-to change the median volumetric droplet size from 1000~$\mu$m to 750~$\mu$m, which led to a reduction of approximately 50~\% in the number of predicted sprinkler actuations.
-
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_01_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_02_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_03_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_04_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_05_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_06_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_07_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_08_Actuations} \\
-\end{tabular*}
-\label{UL_NFPRF_1}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_09_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_10_Actuations} \\
-%\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_11_Actuations} &
-&
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_12_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_13_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_14_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_15_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_16_Actuations} \\
-\end{tabular*}
-\label{UL_NFPRF_2}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_17_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_18_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_19_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_20_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_21_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_22_Actuations}
-\end{tabular*}
-\label{UL_NFPRF_3}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_01_08_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_04_07_Actuations}
-\end{tabular*}
-\begin{center}
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_09_10_Actuations}
-\end{center}
-\caption[The results of three replicate experiments from Series~I]
-{The results of three replicate experiments from Series~I.}
-\label{UL_NFPRF_Repeatability}
-\end{figure}
-
-\clearpage
-
-The UL/NFPRF test results (Series II) are summarized in Table~\ref{ULburnermatrixII}.
-
-\begin{table}[ht!]
-\begin{center}
-\begin{tabular}{|c||c|c|c|c|c|c|c|}
-\hline
-\multicolumn{8}{|c|}{\bf Heptane Spray Burner Test Series II (10 MW Fires)}\\ \hline \hline
-Test & Burner   & Vent      & Sprinklers & First      & Last      & \multicolumn{2}{|c|}{Avg.~Peak Temp.} \\ \cline{7-8}
-No.  & Position & Operation & Opened     & Activation & Activation & $^\circ$C & $^\circ$F   \\
-\hline \hline
-II-1  & D  & 74$^\circ$C link (DNO)  & 27 & 1:15 & 6:13 & 129.4 &264.9 \\ \hline
-II-2  & D  & All Open at Start       & 28 & 1:05 & 5:53 & 128.8 &263.8 \\ \hline
-II-3  & A  & 74$^\circ$C link (1:15) & 12 & 1:08 & 4:00 & 101.8 &215.2 \\ \hline
-II-4  & B  & 74$^\circ$C link (1:48) & 16 & 1:03 & 5:54 & 108.8 &227.8 \\ \hline
-II-5  & D  & 74$^\circ$C link (DNO)  & 28 & 1:10 & 7:07 & 130.0 &266.0 \\ \hline
-II-6  & D  & All Open at Start       & 27 & 1:10 & 5:21 & 127.5 &261.5 \\ \hline
-II-7  & A  & Closed                  & 18 & 1:09 & 4:11 & 117.2 &243.0 \\ \hline
-II-8  & B  & 74$^\circ$C link (1:12) & 13 & 1:10 & 3:34 & 107.7 &225.9 \\ \hline
-II-9  & E  & 74$^\circ$C link (DNO)  & 23 & 1:07 & 3:28 & 115.8 &240.4 \\ \hline
-II-10 & F  & 74$^\circ$C link (3:20) & 19+& 1:14 & 3:01 & 108.4 &227.1 \\ \hline
-II-11 & C  & 74$^\circ$C link (DNO)  & 23 & 1:02 & 3:56 & 123.4 &254.1 \\ \hline
-II-12 & C  & All Open at Start       & 23 & 0:58 & 4:55 & 119.0 &246.2 \\ \hline
-\end{tabular}
-\end{center}
-\caption[Results of the UL/NFPRF Experiments, Series~II]
-{Results of the heptane spray burner Series II. Note that all fires
-were ramped up to 10~MW in 75~s following a $t$-squared curve. Also, the
-plus sign appended to a value in the ``Sprinklers Opened''
-column indicates that the area of sprinkler activation spread to the
-edge of the adjustable height ceiling, thus more activations might have
-occurred had the ceiling extended further.}
-\label{ULburnermatrixII}
-\end{table}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_01_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_02_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_03_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_04_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_05_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_06_Actuations}
-\end{tabular*}
-\label{UL_NFPRF_2_1}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_07_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_08_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_09_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_10_Actuations} \\
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_11_Actuations} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_12_Actuations}
-\end{tabular*}
-\label{UL_NFPRF_2_2}
-\end{figure}
-
-\begin{figure}[p]
-\begin{center}
-\includegraphics[width=4in]{FIGURES/ScatterPlots/UL_NFPRF_Actuations}
-\end{center}
-\caption[Summary of sprinkler actuation predictions, UL/NFPRF Tests]
-{Above: Comparison of predicted and measured sprinkler activation times for the UL/NFPRF Test Series.}
-\label{UL_NFPRF}
-\end{figure}
-
-
-\clearpage
-
-\section{Vettori Sprinkler Experiments}
-
-The Vettori sprinkler experiments considered the effects of fire location, fire growth rate, ceiling slope and ceiling obstructions on the activation time of sprinklers. There were two test series; the first to assess fires under flat ceilings, the second sloped ceilings.
-
-\subsection{Flat Ceiling Series}
+\subsection{Vettori Flat Ceiling Experiments}
 \label{Vettori_Flat_Results}
 
-The following figures display the temperature of the ceiling jet at the location of the first two activating sprinklers for each of the 18 scenarios compared with the appropriate experimental data. The experiments consisted of either Smooth or Obstructed ceilings; Slow, Medium or Fast fires; and a burner in the Open, at the Wall, or in the Corner.
-The experiments performed included three replicates of each of the smooth ceiling configurations and two replicates of each of the obstructed ceiling configurations. 
+For these experiments, the measured and predicted thermocouple temperature at the location of the first two activating sprinklers are compared. The experiments consisted of either Smooth or Obstructed ceilings; Slow, Medium or Fast fires; and a burner in the Open, at the Wall, or in the Corner.
+The experiments included three replicates of each of the smooth ceiling configurations and two replicates of each of the obstructed ceiling configurations.
 
 
 \begin{figure}[p]
@@ -520,10 +333,10 @@ The experiments performed included three replicates of each of the smooth ceilin
 
 \clearpage
 
-\subsection{Sloped Ceiling Series}
+\subsection{Vettori Sloped Ceiling Experiments}
 \label{Vettori_Sloped_Results}
 
-The plots on the following pages display the temperature of the ceiling jet at the location of the first two activating sprinklers for each of the 36 scenarios in the Vettori Sloped Ceiling series. The replicate results are shown side by side. The experiments consisted of either Smooth or Obstructed ceilings; Slow or Fast fires; a burner that is Detached from the wall, at the Wall, or in the Corner, and a Flat, 13$^\circ$, or 24$^\circ$ sloped ceiling. 
+For these experiments, the measured and predicted thermocouple temperature at the location of the first two activating sprinklers are compared. The replicate results are shown side by side. The experiments consisted of either Smooth or Obstructed ceilings; Slow or Fast fires; a burner that is Detached from the wall, at the Wall, or in the Corner, and a Flat, 13$^\circ$, or 24$^\circ$ sloped ceiling.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -654,20 +467,247 @@ The plots on the following pages display the temperature of the ceiling jet at t
 
 \clearpage
 
-\subsection{Activation Times}
+\subsection{Arup Tunnel Experiments}
+
+The plots below show the predicted and measured temperatures from a fire experiment conducted in a tunnel. Near-ceiling temperatures
+were measured at distances of 2~m, 4~m, 6~m and 8~m from the fire along the centerline of tunnel.
+
+
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_2_m} &
+\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_4_m} \\
+\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_6_m} &
+\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_8_m}
+\end{tabular*}
+\label{Arup_Tunnel}
+\end{figure}
+
+
+\clearpage
+
+\subsection{Summary of Ceiling Jet Temperature Predictions}
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Ceiling_Jet_Temperature} \\
+\vspace{0.25in}
+\end{tabular}
+\end{center}
+\caption[Summary of ceiling jet temperature predictions.]
+{Summary of ceiling jet temperature predictions.}
+\end{figure}
+
+
+
+\clearpage
+
+\section{Sprinkler Activation Times}
+
+There are two ways to evaluate the model's ability to predict sprinkler activation. The first is to simply compare the total number of predicted versus observed activations. The second is to compare the time to first activation. Comparing the total number of activations indirectly indicates if the model accurately predicts the cooling of the hot gases by the water spray. Comparing time to first activation indirectly indicates if the model accurately predicts the velocity and temperature of the ceiling jet.
+
+\subsection{Time to First Sprinkler Activation}
+
+Figure~\ref{Sprinkler_Activation_Times} compares measured and predicted sprinkler activation times. For the UL/NFPRF Series I and II, only the time to first activation is compared because the resulting water spray sometimes delays the second activation substantially. While the model accounts for the cooling effect of the spray, the disruption of the activation sequence is somewhat random. A better way to check the accuracy of the model is to compare the predicted and measured total number of activation, which is discussed in the next section.
+
+For the Vettori experiments, the sprinklers did not flow water; thus, it is possible to consider the activation times of up to four sprinklers.
 
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=4in]{FIGURES/ScatterPlots/Activation_Time}
 \end{center}
 \caption[Activation times for the Vettori sprinkler experiments]{Predicted vs. measured activation times for the Vettori sprinkler experiments.}
-\label{Vettori_Activation}
+\label{Sprinkler_Activation_Times}
 \end{figure}
 
 
 \clearpage
 
-\section{NIST Dunes 2000 Experiments}
+\subsection{UL/NFPRF Series I and II; Number of Activations}
+\label{UL_NFPRF:Results}
+
+The UL/NFPRF experiments involve a substantial number of sprinkler activations and, thus, provide a way of indirectly assessing the model's ability to predict the cooling effect of the water spray. For these experiments, each sprinkler discharged water at a fixed rate of 227~L/min (60~gal/min). 
+The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}.
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{|c||c|c|c|c|c|c|}
+\hline
+\multicolumn{7}{|c|}{\bf Heptane Spray Burner Test Series I}  \\ \hline \hline
+Test & Burner & Vent                    & First         & Total      & Draft    & Heat Release Rate \\
+No.  & Pos.   & Operation               & Actuation (s) & Actuations & Curtains & MW @ s \\
+\hline \hline
+I-1   & B  & Closed                     & 65            & 11        & Yes  & 4.4 @ 50  \\ \hline
+I-2   & B  & Manual (0:40)              & 66            & 12        & Yes  & 4.4 @ 50  \\ \hline
+I-3   & B  & Manual (1:30)              & 64            & 12        & Yes  & 4.4 @ 50  \\ \hline
+I-4   & C  & Closed                     & 60            & 10        & Yes  & 4.4 @ 50  \\ \hline
+I-5   & C  & Manual (0:40)              & 72            & 9         & Yes  & 4.4 @ 50  \\ \hline
+I-6   & C  & Manual (1:30)              & 62            & 8         & Yes  & 4.4 @ 50  \\ \hline
+I-7   & C  & 74$^\circ$C link (DNO)     & 70            & 10        & Yes  & 4.4 @ 50  \\ \hline
+I-8   & B  & 74$^\circ$C link (9:26)    & 60            & 11        & Yes  & 4.4 @ 50  \\ \hline
+I-9   & D  & 74$^\circ$C link (DNO)     & 70            & 12        & Yes  & 4.4 @ 50  \\ \hline
+I-10  & D  & Manual (0:40)              & 72            & 13        & Yes  & 4.4 @ 50  \\ \hline
+I-11  & D  & 74$^\circ$C link (4:48)    & N/A           & N/A       & Yes  & 4.4 @ 50  \\ \hline
+I-12  & A  & Closed                     & 68            & 14        & Yes  & 4.4 @ 50  \\ \hline
+I-13  & A  & 74$^\circ$C link (1:04)    & 69            & 5         & Yes  & 6.0 @ 60  \\ \hline
+I-14  & A  & Manual (0:40)              & 74            & 7         & Yes  & 5.8 @ 60  \\ \hline
+I-15  & A  & Manual (1:30)              & 64            & 5         & Yes  & 5.8 @ 60  \\ \hline
+I-16  & A  & 74$^\circ$C link (1:46)    & 106           & 4         & Yes  & 5.0 @ 110 \\ \hline \hline
+I-17  & B  & 100$^\circ$C link (DNO)    & 58            & 4         & No   & 4.6 @ 50 \\ \hline
+I-18  & C  & 100$^\circ$C link (DNO)    & 58            & 4         & No   & 3.7 @ 50 \\ \hline
+I-19  & A  & 100$^\circ$C link (10:00)  & 56            & 10        & No   & 4.6 @ 50 \\ \hline
+I-20  & A  & 74$^\circ$C link (1:20)    & 54            & 4         & No   & 4.2 @ 50 \\ \hline
+I-21  & C  & 74$^\circ$C link (7:00)    & 58            & 10        & No   & 4.6 @ 50 \\ \hline
+I-22  & D  & 100$^\circ$C link (DNO)    & 60            & 6         & No   & 4.6 @ 50 \\ \hline
+\end{tabular}
+\end{center}
+\caption[Results of the UL/NFPRF Experiments, Series~I]
+{Results of the UL/NFPRF Series~I Experiments. Note that DNO means
+``Did Not Open''. Also note, the fires grew at a rate proportional
+to the square of the time until a certain flow rate of fuel was achieved
+at which time the flow rate was held steady. Thus, the ``Heat Release Rate''
+was the size of the fire at the time when the fuel supply was leveled off.}
+\label{ULmatrix}
+\end{table}
+
+The figures on the following pages display the number of sprinklers actuated as a function of time. The results are then summarized in Fig.~\ref{UL_NFPRF}. Note that there are no experimental uncertainty bounds on the plot because it is difficult to estimate the combined uncertainty related to the various parameters that are input into the model. In Fig.~\ref{UL_NFPRF_Repeatability}, the results of three replicate experiments
+demonstrate that the total number of actuated sprinklers in each experiment is repeatable, even though individual actuation times may vary. Based on these three replicates, there is very little, if any, uncertainty in the total number of actuated sprinklers for each test. However, the test report~\cite{Sheppard:1} does not include uncertainty estimates for the heat release rate, thermal properties of the ceiling, sprinkler RTI, conductivity factor, actuation temperature, median droplet diameter, and various other parameters that have been input into the model. Consequently, it is not possible to estimate the uncertainty in the total number of actuated sprinklers due to the uncertainty in the reported parameters. 
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_01_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_02_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_03_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_04_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_05_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_06_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_07_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_08_Actuations} \\
+\end{tabular*}
+\label{UL_NFPRF_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_09_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_10_Actuations} \\
+%\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_11_Actuations} &
+&
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_12_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_13_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_14_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_15_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_16_Actuations} \\
+\end{tabular*}
+\label{UL_NFPRF_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_17_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_18_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_19_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_20_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_21_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_22_Actuations}
+\end{tabular*}
+\label{UL_NFPRF_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_01_08_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_04_07_Actuations}
+\end{tabular*}
+\begin{center}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_09_10_Actuations}
+\end{center}
+\caption[The results of three replicate experiments from Series~I]
+{The results of three replicate experiments from Series~I.}
+\label{UL_NFPRF_Repeatability}
+\end{figure}
+
+\clearpage
+
+The UL/NFPRF test results (Series II) are summarized in Table~\ref{ULburnermatrixII}.
+
+\begin{table}[ht!]
+\begin{center}
+\begin{tabular}{|c||c|c|c|c|c|c|c|}
+\hline
+\multicolumn{8}{|c|}{\bf Heptane Spray Burner Test Series II (10 MW Fires)}\\ \hline \hline
+Test & Burner   & Vent      & Sprinklers & First      & Last      & \multicolumn{2}{|c|}{Avg.~Peak Temp.} \\ \cline{7-8}
+No.  & Position & Operation & Opened     & Activation & Activation & $^\circ$C & $^\circ$F   \\
+\hline \hline
+II-1  & D  & 74$^\circ$C link (DNO)  & 27 & 1:15 & 6:13 & 129.4 &264.9 \\ \hline
+II-2  & D  & All Open at Start       & 28 & 1:05 & 5:53 & 128.8 &263.8 \\ \hline
+II-3  & A  & 74$^\circ$C link (1:15) & 12 & 1:08 & 4:00 & 101.8 &215.2 \\ \hline
+II-4  & B  & 74$^\circ$C link (1:48) & 16 & 1:03 & 5:54 & 108.8 &227.8 \\ \hline
+II-5  & D  & 74$^\circ$C link (DNO)  & 28 & 1:10 & 7:07 & 130.0 &266.0 \\ \hline
+II-6  & D  & All Open at Start       & 27 & 1:10 & 5:21 & 127.5 &261.5 \\ \hline
+II-7  & A  & Closed                  & 18 & 1:09 & 4:11 & 117.2 &243.0 \\ \hline
+II-8  & B  & 74$^\circ$C link (1:12) & 13 & 1:10 & 3:34 & 107.7 &225.9 \\ \hline
+II-9  & E  & 74$^\circ$C link (DNO)  & 23 & 1:07 & 3:28 & 115.8 &240.4 \\ \hline
+II-10 & F  & 74$^\circ$C link (3:20) & 19+& 1:14 & 3:01 & 108.4 &227.1 \\ \hline
+II-11 & C  & 74$^\circ$C link (DNO)  & 23 & 1:02 & 3:56 & 123.4 &254.1 \\ \hline
+II-12 & C  & All Open at Start       & 23 & 0:58 & 4:55 & 119.0 &246.2 \\ \hline
+\end{tabular}
+\end{center}
+\caption[Results of the UL/NFPRF Experiments, Series~II]
+{Results of the heptane spray burner Series II. Note that all fires
+were ramped up to 10~MW in 75~s following a $t$-squared curve. Also, the
+plus sign appended to a value in the ``Sprinklers Opened''
+column indicates that the area of sprinkler activation spread to the
+edge of the adjustable height ceiling, thus more activations might have
+occurred had the ceiling extended further.}
+\label{ULburnermatrixII}
+\end{table}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_01_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_02_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_03_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_04_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_05_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_06_Actuations}
+\end{tabular*}
+\label{UL_NFPRF_2_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_07_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_08_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_09_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_10_Actuations} \\
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_11_Actuations} &
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_2_12_Actuations}
+\end{tabular*}
+\label{UL_NFPRF_2_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=4in]{FIGURES/ScatterPlots/UL_NFPRF_Actuations}
+\end{center}
+\caption[Summary of sprinkler actuation predictions, UL/NFPRF Tests]
+{Above: Comparison of predicted and measured sprinkler activation times for the UL/NFPRF Test Series.}
+\label{UL_NFPRF}
+\end{figure}
+
+
+
+
+
+
+
+\clearpage
+
+\section{NIST Dunes 2000 Smoke Detector Activation Times}
 
 The experiments that were conducted in the single-story manufactured home were selected for model validation.
 Only tests that used a flaming ignition source were considered; the smoldering and cooking ignition sources
