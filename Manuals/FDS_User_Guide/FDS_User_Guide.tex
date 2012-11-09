@@ -3778,16 +3778,12 @@ applies 500~kW/m$^2$ to any surface with the attribute
 {\ct SURF\_ID='FIRE'}. See the discussion of time-dependent quantities
 in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
 
-An alternative to {\ct HRRPUA} with the exact same functionality is
-{\ct MLRPUA}, except this parameter
+An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}, except this parameter
 specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
-{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
-the stoichiometry of the gas phase reaction is set by the simple chemistry input
-parameters on the {\ct REAC} line.
-If an Arrhenius-rate combustion model is desired instead of the default mixing controlled model, see Section~\ref{info:finite}.
+{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.  Neither of them can be used if the model contains multiple reactions.
 
 \begin{warning}
-Specifying {\ct HRRPUA} or {\ct MLRPUA} requires the use of the simple chemistry inputs for {\ct REAC}.
+Specifying {\ct HRRPUA} or {\ct MLRPUA} requires the use of the single, mixing-controlled reaction for combustion.
 \end{warning}
 
 
@@ -6138,7 +6134,7 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
       SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.1966,
       SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.7090 /
 
-&REAC FUEL='METHANE',SPEC_ID='METHANE','AIR','PRODUCTS',
+&REAC FUEL='METHANE',SMIX_ID='METHANE','AIR','PRODUCTS',
       NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
