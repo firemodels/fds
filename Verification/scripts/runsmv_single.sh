@@ -1,12 +1,13 @@
 #!/bin/bash
 
 function usage {
-echo "Make_SMV_Pictures.sh [-d -h -r -s size ]"
+echo "runsmv_single.sh [-d -h -r -s size ]"
 echo "Generates figures for Smokeview verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of smokeview"
 echo "-h - display this message"
+echo "-r - run-time directory"
 echo "-t - use test version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
 exit
@@ -22,8 +23,9 @@ fi
 SIZE=_64
 DEBUG=
 TEST=
+RUNOPTS=
 
-while getopts 'dhts:' OPTION
+while getopts 'dhtr:s:' OPTION
 do
 case $OPTION  in
   d)
@@ -31,6 +33,9 @@ case $OPTION  in
    ;;
   h)
    usage;
+   ;;
+  r)
+   RUNOPTS="$OPTARG"
    ;;
   t)
    TEST=_test
@@ -47,7 +52,9 @@ esac
 done
 shift $(($OPTIND-1))
 
-
+if [ "$RUNOPTS" != "" ]; then
+  RUNOPTS="-bindir $RUNOPTS"
+fi
 VERSION=$PLATFORM$TEST$SIZE$DEBUG
 VERSION2=$PLATFORM$SIZE$DEBUG
 
@@ -60,5 +67,6 @@ export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
 source $STARTX
-$SMV -runscript $1
+$SMV $RUNOPTS -runscript $1
+echo command used: $SMV $RUNOPTS -redirect -runscript $1
 source $STOPX
