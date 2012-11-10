@@ -473,7 +473,6 @@ typedef struct _volrenderdata {
 typedef struct _mesh {
   int ibar, jbar, kbar;
   float cellsize;
-  int node_index0;
   int nvents,ndummyvents;
   int nbptrs;
   int smokeloaded;

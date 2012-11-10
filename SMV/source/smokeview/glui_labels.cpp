@@ -204,7 +204,6 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define COLORBAR_SMOOTH 113
 
 #define COLORBAR_LIST2 112
-#define COLORBAR_EXTREME2 109
 #define DATA_transparent 26
 #define SORT_SURFACES 401
 #define SMOOTH_SURFACES 402
@@ -1331,6 +1330,8 @@ extern "C" void FileShow_CB(int var){
           break;
       }
       break;
+    default:
+      break;
   }
 }
 
@@ -1380,6 +1381,8 @@ extern "C" void Extreme_CB(int var){
       }
       remapcolorbar(cbi);
       updatecolors(-1);
+      break;
+    default:
       break;
   }
 }

@@ -23,7 +23,6 @@ char output_revision[]="$Revision$";
 void outputAxisLabels(){
   float x, y, z;
   float xx0, yy0;
-  char XX[1]={'X'}, YY[1]={'Y'}, ZZ[1]={'Z'};
   int ibar,jbar,kbar;
   float *xplt,*yplt,*zplt;
   int i;

@@ -7529,7 +7529,6 @@ void initmesh(mesh *meshi){
   meshi->s_offset[0]=-1;
   meshi->s_offset[1]=-1;
   meshi->s_offset[2]=-1;
-  meshi->node_index0=0;
   meshi->super=NULL;
   meshi->nabors[0]=NULL;
   meshi->nabors[1]=NULL;

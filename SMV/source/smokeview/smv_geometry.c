@@ -656,14 +656,14 @@ void getvolsmokedir(float *mm){
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
       int *drawsides,*extsides;
-      int j;
+      int jj;
 
       meshi = meshinfo + i;
       drawsides = meshi->drawsides;
       extsides = meshi->extsides;
-      for(j=0;j<7;j++){
-        if(extsides[j]==0){
-          drawsides[j]=0;
+      for(jj=0;jj<7;jj++){
+        if(extsides[jj]==0){
+          drawsides[jj]=0;
         }
       }
     }
@@ -680,7 +680,7 @@ void getvolsmokedir(float *mm){
 
         meshj = smesh->meshes[j];
         for(k=0;k<7;k++){
-          if(meshj->extsides[k]==1&&meshj->drawsides[k]==1)smesh->drawsides[k]==1;
+          if(meshj->extsides[k]==1&&meshj->drawsides[k]==1)smesh->drawsides[k]=1;
         }
       }
     }
