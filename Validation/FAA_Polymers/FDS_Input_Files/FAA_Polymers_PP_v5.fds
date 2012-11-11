@@ -71,13 +71,10 @@ The plastic properties and surface designation
 
 &SURF ID='PP SLAB'
       COLOR='BLACK'
-      TMP_BACK=20.
       MATL_ID(1,1)='PP'
       MATL_ID(2,1)='foil'
       MATL_ID(3,1)='foamglas'
-      STRETCH_FACTOR = 2.0 
-      CELL_SIZE_FACTOR = 0.06
-      REGRID_FACTOR=1.0
+      CELL_SIZE_FACTOR = 1.0
       THICKNESS=0.0061,.0000343,0.0254 
       H_FIXED=0.0
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
