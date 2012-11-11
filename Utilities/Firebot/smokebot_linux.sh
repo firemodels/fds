@@ -754,7 +754,8 @@ email_build_status()
    echo "start time: $start_time" >> $TIME_LOG
    echo " stop time: $stop_time" >> $TIME_LOG
    echo "   results: http://blaze.nist.gov/smokebot" >> $TIME_LOG
-   if [ "$MAKEMOVIES" == "1" ]; then
+   if [ "$MAKEMOVIES" == "1" ]
+   then
      echo "animations: http://blaze.nist.gov/smv_animations" >> $TIME_LOG
    fi
    echo "-------------------------------" >> $TIME_LOG
