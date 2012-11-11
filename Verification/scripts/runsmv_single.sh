@@ -23,7 +23,7 @@ fi
 SIZE=_64
 DEBUG=
 TEST=
-RUNOPTS=
+RUNDIR=
 
 while getopts 'dhtr:s:' OPTION
 do
@@ -35,7 +35,7 @@ case $OPTION  in
    usage;
    ;;
   r)
-   RUNOPTS="$OPTARG"
+   RUNDIR="$OPTARG"
    ;;
   t)
    TEST=_test
@@ -52,8 +52,8 @@ esac
 done
 shift $(($OPTIND-1))
 
-if [ "$RUNOPTS" != "" ]; then
-  RUNOPTS="-bindir $RUNOPTS"
+if [ "$RUNDIR" != "" ]; then
+  RUNDIR="-bindir $RUNDIR"
 fi
 VERSION=$PLATFORM$TEST$SIZE$DEBUG
 VERSION2=$PLATFORM$SIZE$DEBUG
@@ -62,11 +62,14 @@ export SVNROOT=~/FDS-SMV/
 
 export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
+if [ "$RUNDIR" != "" ]; then
+  SMVDIR="-bindir $RUNDIR"
+fi
 
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
 source $STARTX
-$SMV $RUNOPTS -runscript $1
-echo command used: $SMV $RUNOPTS -redirect -runscript $1
+$SMV $RUNDIR $SMVBINDIR -redirect -runscript $1
+echo command used: $SMV $SMVBINDIR -redirect -runscript $1
 source $STOPX

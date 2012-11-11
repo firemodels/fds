@@ -52,11 +52,12 @@ VERSION=$PLATFORM$TEST$SIZE$DEBUG
 VERSION2=$PLATFORM$SIZE
 IPLATFORM=intel64
 CURDIR=`pwd`
-cd ..
-export SVNROOT=`pwd`/..
+cd ../..
+export SVNROOT=`pwd`
+cd $CURDIR/..
 
 export SMV=$SVNROOT/SMV/Build/intel_$VERSION2$DEBUG/smokeview_$VERSION
-export SMVBINDIR="-bindir ../../SMV/for_bundle"
+export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 
 export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
 export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
