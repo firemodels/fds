@@ -651,7 +651,7 @@ void getvolsmokedir(float *mm){
   }
 
   // turn off drawing for mesh sides that are on the inside of a supermesh
-
+#ifdef pp_SUPERMESH
   if(use_supermesh==1){
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
@@ -685,6 +685,7 @@ void getvolsmokedir(float *mm){
       }
     }
   }
+#endif
 
   vi = volfacelistinfo;
   nvolfacelistinfo=0;

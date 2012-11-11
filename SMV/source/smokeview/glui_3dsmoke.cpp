@@ -88,7 +88,9 @@ GLUI_Spinner *SPINNER_extinct=NULL;
 GLUI_Spinner *SPINNER_smokedens=NULL;
 GLUI_Spinner *SPINNER_pathlength=NULL;
 
+#ifdef pp_SUPERMESH
 GLUI_Checkbox *CHECKBOX_use_supermesh=NULL;
+#endif
 #ifdef pp_CULL
 GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 #endif
@@ -354,7 +356,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,"block smoke",&block_volsmoke);
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,"debug",&smoke3dVoldebug);
 #endif
-#ifdef pp_MERGEMESH
+#ifdef pp_SUPERMESH
     CHECKBOX_use_supermesh=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Use super mesh"),&use_supermesh);
 #endif
   }
