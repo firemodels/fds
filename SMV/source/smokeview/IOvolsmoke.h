@@ -14,6 +14,7 @@
 #define MEPS 0.1
 
 #ifdef pp_GPU
+void init_volsmoke_supertexture(supermesh *smesh);
 void init_volsmoke_texture(mesh *meshi);
 void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata);
 #endif
