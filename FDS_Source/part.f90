@@ -989,7 +989,13 @@ ENDDO
 
 ! Return if there are no particles in this mesh
 
-IF (MESHES(NM)%NLP==0) RETURN
+IF (MESHES(NM)%NLP==0) THEN
+    IF (CORRECTOR .AND. CALC_D_LAGRANGIAN) THEN
+       D_LAGRANGIAN = 0._EB
+       CALC_D_LAGRANGIAN=.FALSE.
+    ENDIF
+   RETURN
+ENDIF
 
 ! Set the CPU timer and point to the current mesh variables
 
@@ -1000,6 +1006,7 @@ CALL POINT_TO_MESH(NM)
 
 IF (N_LP_ARRAY_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. CORRECTOR) THEN
    D_LAGRANGIAN = 0._EB
+   CALC_D_LAGRANGIAN=.FALSE.
 ENDIF
 
 ! Move the PARTICLEs/particles, then compute mass and energy transfer, then add PARTICLE momentum to gas
@@ -2120,7 +2127,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             DELTA_H_G = H_S_B - H_S
             D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) &
                                 + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
-
+            CALC_D_LAGRANGIAN = .TRUE.
+	    
             ! Add momentum source due to evaporation
 
             IF (EVAPORATION_DRAG) THEN
@@ -2138,6 +2146,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (KINETIC_ENERGY_SOURCE) THEN
                   QREL = 0.5_EB*( (LP%U - UBAR)**2 + (LP%V - VBAR)**2 + (LP%W - WBAR)**2 )
                   D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) + M_VAP * QREL / H_G_OLD * WGT / DT_SUBSTEP
+		  CALC_D_LAGRANGIAN = .TRUE.
                ENDIF
             ENDIF
 
@@ -2587,7 +2596,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                                 (MW_RATIO*MVAP_TOT(II,JJ,KK)/M_GAS + &
                                 MVAP_DELTAHG(II,JJ,KK)/H_G_OLD - &
                                 Q_CON_GAS_TOT(II,JJ,KK)/H_G_OLD)/DT_SUBSTEP
-
+                 CALC_D_LAGRANGIAN = .TRUE.
                ENDIF
             ENDDO
          ENDDO
