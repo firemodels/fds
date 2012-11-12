@@ -576,7 +576,7 @@ ENDIF
 
 ! Add contribution of evaporating particles
 
-IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) THEN
+IF (CALC_D_LAGRANGIAN) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
