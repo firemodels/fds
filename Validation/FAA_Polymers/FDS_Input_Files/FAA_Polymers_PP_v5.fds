@@ -8,7 +8,7 @@ demonstration purposes only!  They may or may not be
 representative of any particular material.
 
 
-&HEAD CHID='PP', TITLE='PP at 50 kW/m2, No Gas Phase Reaction' /
+&HEAD CHID='FAA_Polymers_PP_v5', TITLE='PP at 50 kW/m2, No Gas Phase Reaction' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
