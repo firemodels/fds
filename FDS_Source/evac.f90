@@ -6184,8 +6184,9 @@ CONTAINS
                 END IF
                 dens_fac = MAX(1.0_EB,DENS_INIT)
 
+                VOL2 = MAX(VOL2,0.08_EB)
                 IF (i_endless_loop >= 10*INT(dens_fac*(16.0_EB*MAX(1.0_EB,LOG10(2.5_EB*VOL2))) / &
-                     MAX(1.0_EB,LOG10((2.5_EB*VOL2)/(2.5_EB*VOL2-1)))) ) THEN
+                     MAX(1.0_EB,LOG10((2.5_EB*VOL2)/MAX(1.0_EB,2.5_EB*VOL2-1.0_EB)))) ) THEN
                    WRITE (LU_EVACOUT,fmt='(A,A,A,I4,A,I6)') ' ERROR: Initialize_Humans, EVAC line ', &
                         TRIM(EVAC_EVACS(IPC)%ID), ', Mesh ', NM, ', i_human ', n_humans
                    WRITE (LU_EVACOUT,fmt='(a)') '      x       y       z     Rd      Rt      Rs      ds  '
@@ -7937,7 +7938,7 @@ CONTAINS
              ! Note: Purser uses minutes, here DT is in seconds
              ! FED_DOSE = FED_LCO*FED_VCO2 + FED_LO
              IF (HR%IEL > 0) THEN  ! From an evac line
-                IF (EVAC_EVACS(HR%IEL)%T_START_FED >= T) THEN
+                IF (T >= EVAC_EVACS(HR%IEL)%T_START_FED) THEN
                    HR%INTDOSE = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + HR%INTDOSE
                 END IF
              ELSE ! From an entr line
