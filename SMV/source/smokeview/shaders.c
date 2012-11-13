@@ -275,10 +275,10 @@ int setVolSmokeShaders() {
     "uniform vec2 nearfar;"
 #endif
     "uniform sampler3D soot_density_texture,fire_texture,blockage_texture;"
-    "uniform int inside,havefire,volbw;"
+    "uniform int inside,havefire,volbw,slicetype;"
     "uniform float xyzmaxdiff,dcell,opacity_factor;"
     "uniform float temperature_min,temperature_cutoff,temperature_max;"
-    "uniform vec3 eyepos,boxmin,boxmax;"
+    "uniform vec3 eyepos,boxmin,boxmax,dcell3;"
     "uniform int drawsides[7];"
     "varying vec3 fragpos;"
     "uniform float mass_extinct;"
@@ -304,12 +304,12 @@ int setVolSmokeShaders() {
     "  vec2 uv = gl_FragCoord.st/screensize.xy;"
 #endif
     "  float d;"
-    "  vec3 dalphamin,dalphamax,fragmaxpos,position,color_val,color_cum,block_pos,block_pos2;"
+    "  vec3 dalphamin,dalphamax,fragmaxpos,position,position2,color_val,color_cum,block_pos,block_pos2;"
     "  float soot_val,block_val,block_val2;"
     "  float opacity,alpha_min,factor,factor2,pathdist;"
     "  float colorindex,tempval,gray;"
     "  float tauhat, alphahat, taui, tauterm;"
-    "  float dstep,onedn_iter,xi,offset;"
+    "  float dstep;"
     "  int i,n_iter;"
     "  int side;"
 
@@ -354,27 +354,42 @@ int setVolSmokeShaders() {
 #endif
     "  n_iter = 2*int(pathdist/dcell+0.5);"
     "  if(n_iter<1)n_iter=1;"
-    "  xi = (float)n_iter;"
-    "  onedn_iter=1.0/xi;"
     "  dstep = pathdist*xyzmaxdiff/(float)n_iter;"
     "  tauhat=1.0;"
     "  alphahat=0.0;"
     "  color_cum=vec3(0.0,0.0,0.0);"
-    "  offset=0.25+0.5*rand(vec2(fragpos.x,fragpos.y));"
     "  for(i=0;i<n_iter;i++){"
-    "    xi = (float)i;"
-    "    factor = (offset+xi+0.5)*onedn_iter;"
-    "    factor2 = (offset+xi+1.0)*onedn_iter;"
+    "    factor = ((float)i+0.5)/(float)n_iter;"
+    "    factor2 = ((float)i+1.5)/(float)n_iter;"
     "    position = (mix(fragpos,fragmaxpos,factor)-boxmin)/(boxmax-boxmin);"
-    "    soot_val = texture3D(soot_density_texture,position);"
+    "    if(slicetype!=1){"
+    //            boxmin+dcell3      position2     boxmax
+    // boxmin                       position       boxmax
+    // (position2-boxmin-dcell3)/(boxmax-boxmin-dcell3) = (position-boxmin)/(boxmax-boxmin)
+    //  solve for position2
+    "      position2=position+dcell3*(boxmax-position)/(boxmax-boxmin);"
+    "    }"
+    "    block_val=1.0;"
 #ifndef pp_GPUDEPTH
     "    block_pos = position;"
     "    block_val = texture3D(blockage_texture,block_pos);"
     "    block_pos2 = (mix(fragpos,fragmaxpos,factor2)-boxmin)/(boxmax-boxmin);"
     "    block_val2 = texture3D(blockage_texture,block_pos2);"
 #endif
+    "    if(slicetype==1){"
+    "      soot_val = texture3D(soot_density_texture,position);"
+    "    }"
+    "    else{"
+    "      soot_val = texture3D(soot_density_texture,position2);"
+    "    }"
+    "    if(block_val<0.5)soot_val=0.0;"
     "    if(havefire==1){"
-    "      tempval = texture3D(fire_texture,position);" 
+    "      if(slicetype==1){"
+    "        tempval = texture3D(fire_texture,position);" 
+    "      }"
+    "      else{"
+    "        tempval = texture3D(fire_texture,position2);" 
+    "      }"
     "      if(tempval>temperature_cutoff){"
     "        colorindex = 0.5+0.5*(tempval-temperature_cutoff)/(temperature_max-temperature_cutoff);"
     "      }"
@@ -480,6 +495,7 @@ int setVolSmokeShaders() {
   GPUvol_nearfar = glGetUniformLocation(p_volsmoke,"nearfar");
 #endif
   GPUvol_dcell = glGetUniformLocation(p_volsmoke,"dcell");
+  GPUvol_dcell3 = glGetUniformLocation(p_volsmoke,"dcell3");
   GPUvol_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
   GPUvol_opacity_factor = glGetUniformLocation(p_volsmoke,"opacity_factor");
   GPUvol_mass_extinct = glGetUniformLocation(p_volsmoke,"mass_extinct");

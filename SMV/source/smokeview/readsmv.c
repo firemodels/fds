@@ -1806,6 +1806,9 @@ void update_mesh_coords(void){
     meshi->boxeps[0]=0.5*meshi->dbox[0]/(float)ibar;
     meshi->boxeps[1]=0.5*meshi->dbox[1]/(float)jbar;
     meshi->boxeps[2]=0.5*meshi->dbox[2]/(float)kbar;
+    meshi->dcell3[0] = xplt[1]-xplt[0];
+    meshi->dcell3[1] = yplt[1]-yplt[0];
+    meshi->dcell3[2] = zplt[1]-zplt[0];
     normalize_xyz(meshi->boxmin_scaled,meshi->boxmin);
     normalize_xyz(meshi->boxmax_scaled,meshi->boxmax);
     meshi->x0 = xplt[0];

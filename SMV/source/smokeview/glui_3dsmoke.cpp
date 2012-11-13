@@ -464,9 +464,11 @@ extern "C" void Smoke3d_CB(int var){
   switch (var){
   float temp_min, temp_max;
 
+#ifdef pp_SUPERMESH
   case SUPERMESH:
     define_volsmoke_textures();
     break;
+#endif
   case TEMP_MIN:
     temp_min = 20.0;
     temp_max = (float)(10.0*(int)(temperature_cutoff/10.0)-10.0);
