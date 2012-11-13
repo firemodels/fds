@@ -2,21 +2,22 @@
 
 \label{HGL:Chapter}
 
-FDS, like any CFD model, does not perform a direct calculation of the HGL temperature or height. These are constructs unique to two-zone models. Nevertheless, FDS does make predictions of gas temperature at the same locations as the thermocouples in the experiments, and these values can be reduced in the same manner as the experimental measurements to produce an ``average'' HGL temperature and height.  Regardless of the validity of the reduction method, the FDS predictions of the HGL temperature and height ought to be representative of the accuracy of its predictions of the individual thermocouple measurements that are used in the HGL reduction. The temperature measurements from all six test series are used to compute an HGL temperature and height with which to compare to FDS.  The same layer reduction method is used for all the data presented in this chapter. 
+FDS, like any CFD model, does not perform a direct calculation of the HGL temperature or height. These are constructs unique to two-zone models. Nevertheless, FDS does make predictions of gas temperature at the same locations as the thermocouples in the experiments, and these values can be reduced in the same manner as the experimental measurements to produce an ``average'' HGL temperature and height.  Regardless of the validity of the reduction method, the FDS predictions of the HGL temperature and height ought to be representative of the accuracy of its predictions of the individual thermocouple measurements that are used in the HGL reduction. The temperature measurements from all six test series are used to compute an HGL temperature and height with which to compare to FDS.  The same layer reduction method is used for all the data presented in this chapter.
 
 
 \section{HGL Reduction Method}
+\label{HGL_Reduction}
 
 Fire protection engineers often need to estimate the location of the interface between the hot, smoke-laden upper layer and the cooler lower layer in a burning compartment.  Relatively simple fire models, often referred to as {\em two-zone models}, compute this quantity directly, along with the average temperature of the upper and lower layers.  In a computational fluid dynamics (CFD) model like FDS, there are not two distinct zones, but rather a continuous profile of temperature. Nevertheless, there are methods that have been developed to estimate layer height and average temperatures from a continuous vertical profile of temperature. One such method~\cite{Janssens:JFS1992} is as follows: Consider a continuous function $T(z)$ defining temperature $T$ as a function of height above the floor $z$, where $z=0$ is the floor and $z=H$ is the ceiling. Define $T_u$ as the upper layer temperature, $T_l$ as the lower layer temperature, and $z_{int}$ as the interface height. Compute the quantities:
 \begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; dz &=& I_1 \\
                   (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 \end{eqnarray*}
 Solve for $z_{int}$:
-\be 
-   z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} 
+\be
+   z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H}
 \ee
 Let $T_l$ be the temperature in the lowest mesh cell and, using Simpson's Rule, perform the numerical integration of $I_1$ and $I_2$. $T_u$ is defined as the average upper layer temperature via
-\be 
-   (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz 
+\be
+   (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz
 \ee
 Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
@@ -150,7 +151,7 @@ Nineteen tests from the FM/SNL test series were selected for comparison. The HGL
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_02_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_02_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_HGL_Height} 
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_HGL_Height}
 \end{tabular*}
 \end{figure}
 
@@ -164,7 +165,7 @@ Nineteen tests from the FM/SNL test series were selected for comparison. The HGL
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_HGL_Height} 
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_HGL_Height}
 \end{tabular*}
 \end{figure}
 
@@ -178,7 +179,7 @@ Nineteen tests from the FM/SNL test series were selected for comparison. The HGL
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_10_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_10_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_HGL_Height} 
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_HGL_Height}
 \end{tabular*}
 \end{figure}
 
@@ -214,19 +215,19 @@ Nineteen tests from the FM/SNL test series were selected for comparison. The HGL
 
 \section{NBS Multi-Room Test Series}
 
-This series of experiments consisted of two relatively small rooms connected by a long corridor. The fire was located in one of the rooms.  Eight vertical arrays of thermocouples were positioned throughout the test space: one in the burn room, one near the door of the burn room, three in the corridor, one in the exit to the outside at the far end of the corridor, one near the door of the other or ``target'' room, and one inside the target room.  Four of the eight arrays have been selected for comparison with model prediction: the array in the burn room (BR), the array in the middle of the corridor (18~ft from the BR), the array at the far end of the corridor (38~ft from the BR), and the array in the target room (TR).  In Tests 100A and 100O, the target room was closed, in which case the array in the exit (EXI) doorway was used. The test director reduced the layer information individually for the eight thermocouple arrays using an alternative method. These results were included in the original data sets. However, in this report the selected TC trees were reduced using the conventional method common to all the experiments considered. 
+This series of experiments was performed in two relatively small rooms connected by a long corridor. The fire was located in one of the rooms.  Eight vertical arrays of thermocouples were positioned throughout the test space: Tree~1 in the burn room, Tree~2 in the doorway of the burn room, Trees~3, 4, and 5 in the corridor, Tree~6 in the exit doorway to the outside at the far end of the corridor, Tree~7 in the doorway of the ``target'' room, and Tree~8 inside the target room.  Four trees have been selected for comparison with model prediction: Tree~1 in the burn room, the trees in the corridor, and Tree~8 in the target room in Test~100Z. In Tests~100A and 100O, the target room was closed. The test director reduced the layer information individually for the eight thermocouple arrays using an alternative method. These results were included in the original data sets. However, in this report the selected TC trees were reduced using the method described in Section~\ref{HGL_Reduction}.
 
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_1_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_1_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_3_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_3_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_4_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_4_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_5_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_5_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_6_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_6_HGL_Height}
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_5_HGL_Height}
 \end{tabular*}
 \end{figure}
 
@@ -234,12 +235,12 @@ This series of experiments consisted of two relatively small rooms connected by 
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_1_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_1_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_3_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_3_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_4_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_4_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_5_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_5_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_6_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_6_HGL_Height}
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_5_HGL_Height} 
 \end{tabular*}
 \end{figure}
 
@@ -247,8 +248,8 @@ This series of experiments consisted of two relatively small rooms connected by 
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_1_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_1_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_4_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_4_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_3_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_3_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_5_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_5_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_8_HGL_Temp} &
