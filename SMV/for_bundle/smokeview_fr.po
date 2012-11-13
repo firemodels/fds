@@ -301,7 +301,7 @@ msgid "Colorbar editor"
 msgstr "editeur de la legende"
 
 msgid "Colorbar type"
-msgstr ""
+msgstr "Farbauswahl Schattierung"
 
 msgid "Colorbars"
 msgstr ""
@@ -391,7 +391,7 @@ msgid "Custom Red/Custom Blue"
 msgstr "Rouge personnalise/Bleu personnalise"
 
 msgid "Customize colorbar...  ALT+C"
-msgstr ""
+msgstr "Personnaliser la legende ... ALT + C"
 
 msgid "cutoff"
 msgstr ""
@@ -457,7 +457,7 @@ msgid "Display"
 msgstr "Affichage"
 
 msgid "Display all"
-msgstr ""
+msgstr "Alle Anzeigen"
 
 msgid "Display data as b/w"
 msgstr ""
@@ -2108,3 +2108,4 @@ msgstr "Zoom"
 
 msgid "Zoom"
 msgstr "Zoom"
+
