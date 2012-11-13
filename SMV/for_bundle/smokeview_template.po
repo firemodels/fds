@@ -51,9 +51,6 @@ msgstr ""
 msgid "3D surface color"
 msgstr ""
 
-msgid "Abort"
-msgstr ""
-
 msgid "About"
 msgstr ""
 
@@ -73,12 +70,6 @@ msgid "Actual"
 msgstr ""
 
 msgid "Add"
-msgstr ""
-
-msgid "Additional errors have occurred"
-msgstr ""
-
-msgid "Additional warnings have occurred"
 msgstr ""
 
 msgid "adjust off-center"
@@ -114,9 +105,6 @@ msgstr ""
 msgid "also, toggles cell center display on/off"
 msgstr ""
 
-msgid "ALT horizontal/vertical: translate along z axis"
-msgstr ""
-
 msgid "ALT:left/right cursor: slide left/right"
 msgstr ""
 
@@ -124,6 +112,9 @@ msgid "ALT:   up/down cursor: slide up/down"
 msgstr ""
 
 msgid "ALT+u: toggle coarse slice display in embedded mesh"
+msgstr ""
+
+msgid "ALT vertical: translate along z axis"
 msgstr ""
 
 msgid "ALT+v: toggle projection  method (between perspective and size preserving"
@@ -159,6 +150,9 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
+msgid "Apply at startup"
+msgstr ""
+
 msgid "Apply Filter"
 msgstr ""
 
@@ -181,6 +175,9 @@ msgid "Average"
 msgstr ""
 
 msgid "Averaged slice data"
+msgstr ""
+
+msgid "axis"
 msgstr ""
 
 msgid "Axis"
@@ -207,6 +204,9 @@ msgstr ""
 msgid "Benchmark"
 msgstr ""
 
+msgid "bindir dir    - specify location of smokeview bin directory"
+msgstr ""
+
 msgid "blue"
 msgstr ""
 
@@ -214,6 +214,9 @@ msgid "both"
 msgstr ""
 
 msgid "Both eyes"
+msgstr ""
+
+msgid "Boundaries"
 msgstr ""
 
 msgid "Boundary file frame skip"
@@ -232,6 +235,9 @@ msgid "CAD geometry file: %s could not be opened"
 msgstr ""
 
 msgid "Cancel"
+msgstr ""
+
+msgid "Cancel script"
 msgstr ""
 
 msgid "casename       - project id (file names without the extension"
@@ -264,6 +270,9 @@ msgstr ""
 msgid "Clip upper"
 msgstr ""
 
+msgid "clock/counter clockwise: rotate about y axis (click near scene edge"
+msgstr ""
+
 msgid "Close"
 msgstr ""
 
@@ -279,7 +288,7 @@ msgstr ""
 msgid "Colorbars"
 msgstr ""
 
-msgid "Colorbar shade type"
+msgid "Colorbar type"
 msgstr ""
 
 msgid "Color/*BW"
@@ -288,10 +297,16 @@ msgstr ""
 msgid "Color/BW"
 msgstr ""
 
+msgid "color -> grey"
+msgstr ""
+
 msgid "colormap"
 msgstr ""
 
 msgid "Color with"
+msgstr ""
+
+msgid "Combine meshes"
 msgstr ""
 
 msgid "completed"
@@ -333,6 +348,9 @@ msgstr ""
 msgid "Constant speed"
 msgstr ""
 
+msgid "Continue"
+msgstr ""
+
 msgid "Continuous"
 msgstr ""
 
@@ -369,7 +387,7 @@ msgstr ""
 msgid "Custom"
 msgstr ""
 
-msgid "Customize colorbar...  ALT+c"
+msgid "Customize colorbar...  ALT+C"
 msgstr ""
 
 msgid "Custom Red/Custom Blue"
@@ -394,9 +412,6 @@ msgid "decay, p"
 msgstr ""
 
 msgid "decrement time step, 2D contour planes, 3D contour levels"
-msgstr ""
-
-msgid "Default"
 msgstr ""
 
 msgid "Defined in evac file"
@@ -441,7 +456,7 @@ msgstr ""
 msgid "Display"
 msgstr ""
 
-msgid "display all"
+msgid "Display all"
 msgstr ""
 
 msgid "Display...  ALT+d"
@@ -453,10 +468,10 @@ msgstr ""
 msgid "display FDS values in cell centered slices"
 msgstr ""
 
-msgid "Distance to zero parallax plane (m"
+msgid "Display settings"
 msgstr ""
 
-msgid "does not exist"
+msgid "Distance to zero parallax plane (m"
 msgstr ""
 
 msgid "double-click: rotate/translate 3D node-centered slice"
@@ -504,16 +519,10 @@ msgstr ""
 msgid "Erase compressed files"
 msgstr ""
 
-msgid "Error"
-msgstr ""
-
-msgid "error allocating render image"
-msgstr ""
-
 msgid "error: steplabel not defined"
 msgstr ""
 
-msgid "e: toggle between eye, world and world/level rotation motion"
+msgid "e: toggle between view rotation types: scene centered 2 axis, 1 axis, 3 axis and eye centered"
 msgstr ""
 
 msgid "Evacuation"
@@ -531,16 +540,10 @@ msgstr ""
 msgid "Every 20th frame"
 msgstr ""
 
-msgid "every 2nd"
-msgstr ""
-
 msgid "Every 2nd"
 msgstr ""
 
 msgid "Every 2nd frame"
-msgstr ""
-
-msgid "every 3rd"
 msgstr ""
 
 msgid "Every 3rd"
@@ -567,9 +570,6 @@ msgstr ""
 msgid "Exterior"
 msgstr ""
 
-msgid "Eye centered"
-msgstr ""
-
 msgid "Facets"
 msgstr ""
 
@@ -582,9 +582,6 @@ msgstr ""
 msgid "Fast blockage drawing"
 msgstr ""
 
-msgid "Fatal error"
-msgstr ""
-
 msgid "FDS generated ticks"
 msgstr ""
 
@@ -594,16 +591,22 @@ msgstr ""
 msgid "FDS/Smokeview website: http://fire.nist.gov/fds"
 msgstr ""
 
-msgid "FDS Ticks"
+msgid "FDS ticks"
 msgstr ""
 
-msgid "File/Bound/Script settings...  ALT+f"
+msgid "File bounds/Script...  ALT+f"
+msgstr ""
+
+msgid "File suffix"
 msgstr ""
 
 msgid "filter"
 msgstr ""
 
 msgid "fire color"
+msgstr ""
+
+msgid "fire half depth (m"
 msgstr ""
 
 msgid "Fire line"
@@ -618,12 +621,6 @@ msgstr ""
 msgid "Fire/Smoke colormap"
 msgstr ""
 
-msgid "first person"
-msgstr ""
-
-msgid "first person movement"
-msgstr ""
-
 msgid "Flip"
 msgstr ""
 
@@ -633,16 +630,16 @@ msgstr ""
 msgid "Flow vectors"
 msgstr ""
 
-msgid "Font size"
+msgid "Font"
 msgstr ""
 
 msgid "Frame label"
 msgstr ""
 
-msgid "Frame rate"
+msgid "Frame number"
 msgstr ""
 
-msgid "Frames"
+msgid "Frame rate"
 msgstr ""
 
 msgid "frame skip"
@@ -666,7 +663,7 @@ msgstr ""
 msgid "Front"
 msgstr ""
 
-msgid "general rotations"
+msgid "General"
 msgstr ""
 
 msgid "General Settings"
@@ -783,7 +780,16 @@ msgstr ""
 msgid "horizontally"
 msgstr ""
 
+msgid "horizontal: rotate about z axis"
+msgstr ""
+
+msgid "horizontal/vertical: rotate about user location"
+msgstr ""
+
 msgid "horizontal/vertical: rotate about z, x axis"
+msgstr ""
+
+msgid "horizontal/vertical: rotate about z, x axis (click near scene center"
 msgstr ""
 
 msgid "HRR label"
@@ -834,9 +840,6 @@ msgstr ""
 msgid "Initializing Smokeview graphics window"
 msgstr ""
 
-msgid "Input file"
-msgstr ""
-
 msgid "Insert"
 msgstr ""
 
@@ -870,10 +873,10 @@ msgstr ""
 msgid "Language code"
 msgstr ""
 
-msgid "Large"
+msgid "large"
 msgstr ""
 
-msgid "large font"
+msgid "Large"
 msgstr ""
 
 msgid "Layers"
@@ -891,10 +894,10 @@ msgstr ""
 msgid "left/right cursor: rotate left/right"
 msgstr ""
 
-msgid "level rotations"
+msgid "Levels"
 msgstr ""
 
-msgid "Levels"
+msgid "level the scene"
 msgstr ""
 
 msgid "Lighting"
@@ -981,9 +984,6 @@ msgstr ""
 msgid "Maximum level solid"
 msgstr ""
 
-msgid "memory allocation error"
-msgstr ""
-
 msgid "Memory Check"
 msgstr ""
 
@@ -1015,6 +1015,9 @@ msgid "Motion/View/Render"
 msgstr ""
 
 msgid "Motion/View/Render...  ALT+m"
+msgstr ""
+
+msgid "Mouse"
 msgstr ""
 
 msgid "Move"
@@ -1056,12 +1059,6 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
-msgid "not found"
-msgstr ""
-
-msgid "Number"
-msgstr ""
-
 msgid "Number of contours"
 msgstr ""
 
@@ -1095,7 +1092,7 @@ msgstr ""
 msgid "One"
 msgstr ""
 
-msgid "One Frame"
+msgid "One Frame (single part"
 msgstr ""
 
 msgid "Open"
@@ -1116,9 +1113,6 @@ msgstr ""
 msgid "Options"
 msgstr ""
 
-msgid "o: reset animation to the initial time"
-msgstr ""
-
 msgid "origin"
 msgstr ""
 
@@ -1126,6 +1120,12 @@ msgid "Other"
 msgstr ""
 
 msgid "Outline"
+msgstr ""
+
+msgid "Outline Added"
+msgstr ""
+
+msgid "Outline Only"
 msgstr ""
 
 msgid "Output data to file"
@@ -1200,6 +1200,9 @@ msgstr ""
 msgid "Planar terrain slice"
 msgstr ""
 
+msgid "Plot3d"
+msgstr ""
+
 msgid "Plot3D"
 msgstr ""
 
@@ -1227,22 +1230,19 @@ msgstr ""
 msgid "Press"
 msgstr ""
 
-msgid "Press OK to terminate Smokeview"
-msgstr ""
-
 msgid "Previous"
 msgstr ""
 
 msgid "Previous tour"
 msgstr ""
 
-msgid "problem reading Smokeview file"
-msgstr ""
-
 msgid "processing config file"
 msgstr ""
 
 msgid "processing smokeview file: %s\n"
+msgstr ""
+
+msgid "Properties"
 msgstr ""
 
 msgid "P: toggle cursor key mappings"
@@ -1326,6 +1326,15 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
+msgid "reset animation to the initial time"
+msgstr ""
+
+msgid "Resolution"
+msgstr ""
+
+msgid "Resolution multiplier"
+msgstr ""
+
 msgid "Right"
 msgstr ""
 
@@ -1338,10 +1347,10 @@ msgstr ""
 msgid "Rotate about"
 msgstr ""
 
-msgid "Rotation"
+msgid "rotation center"
 msgstr ""
 
-msgid "rotation center"
+msgid "Rotation type"
 msgstr ""
 
 msgid "r: render the current scene to an image file"
@@ -1375,6 +1384,12 @@ msgid "save settings (create casename.ini file"
 msgstr ""
 
 msgid "save settings to %s"
+msgstr ""
+
+msgid "scaled"
+msgstr ""
+
+msgid "Scaled"
 msgstr ""
 
 msgid "Scaled optical depth (SCD"
@@ -1413,9 +1428,6 @@ msgstr ""
 msgid "script scriptfile - run the script file scriptfile"
 msgstr ""
 
-msgid "See command shell for details"
-msgstr ""
-
 msgid "Segments"
 msgstr ""
 
@@ -1447,6 +1459,9 @@ msgid "Shades of grey"
 msgstr ""
 
 msgid "SHIFT: left/right cursor: rotate 90 degrees"
+msgstr ""
+
+msgid "Shortcuts"
 msgstr ""
 
 msgid "show"
@@ -1584,16 +1599,13 @@ msgstr ""
 msgid "Slice frame Skip"
 msgstr ""
 
-msgid "Slice Render Settings"
+msgid "Slice render settings"
 msgstr ""
 
 msgid "slices"
 msgstr ""
 
-msgid "Slices"
-msgstr ""
-
-msgid "small font"
+msgid "small"
 msgstr ""
 
 msgid "smoke albedo"
@@ -1623,7 +1635,7 @@ msgstr ""
 msgid "Smokeview menus"
 msgstr ""
 
-msgid "Smokeview was built with the following pre-processing directives set"
+msgid "Smokeview was built using the following pre-processing directives"
 msgstr ""
 
 msgid "Smooth"
@@ -1638,7 +1650,7 @@ msgstr ""
 msgid "Smooth blockages now"
 msgstr ""
 
-msgid "Smooth colorbar labels"
+msgid "Smooth colorbar label values"
 msgstr ""
 
 msgid "Smooth normal"
@@ -1650,7 +1662,7 @@ msgstr ""
 msgid "Snap"
 msgstr ""
 
-msgid "snap scene's view angles"
+msgid "snap scene to closest 45 degree orientation"
 msgstr ""
 
 msgid "Solid"
@@ -1686,7 +1698,7 @@ msgstr ""
 msgid "Spanish"
 msgstr ""
 
-msgid "Specify"
+msgid "Specify eye location"
 msgstr ""
 
 msgid "spheres"
@@ -1701,6 +1713,9 @@ msgstr ""
 msgid "Starting locations/velocities"
 msgstr ""
 
+msgid "Start rendering"
+msgstr ""
+
 msgid "start time"
 msgstr ""
 
@@ -1711,6 +1726,9 @@ msgid "Stepped"
 msgstr ""
 
 msgid "Step through script"
+msgstr ""
+
+msgid "Step (using"
 msgstr ""
 
 msgid "stereo        - activate stereo mode"
@@ -1794,13 +1812,10 @@ msgstr ""
 msgid "Textures"
 msgstr ""
 
-msgid "the file"
+msgid "Thermocouple norms"
 msgstr ""
 
 msgid "Thermocouples"
-msgstr ""
-
-msgid "The script file %s could not be opened for writing"
 msgstr ""
 
 msgid "Thickness"
@@ -1828,9 +1843,6 @@ msgid "Time label"
 msgstr ""
 
 msgid "Title"
-msgstr ""
-
-msgid "Titles"
 msgstr ""
 
 msgid "toggle line anti-aliasing (draw lines smoothly"
@@ -1896,9 +1908,6 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-msgid "unable to write to"
-msgstr ""
-
 msgid "Units"
 msgstr ""
 
@@ -1950,6 +1959,9 @@ msgstr ""
 msgid "u: reload files"
 msgstr ""
 
+msgid "Use Avatar"
+msgstr ""
+
 msgid "Use colormap"
 msgstr ""
 
@@ -1960,9 +1972,6 @@ msgid "Use level"
 msgstr ""
 
 msgid "User settable ticks"
-msgstr ""
-
-msgid "User title"
 msgstr ""
 
 msgid "Use transparency"
@@ -1998,10 +2007,7 @@ msgstr ""
 msgid "vertically"
 msgstr ""
 
-msgid "video hardware does not support stereo"
-msgstr ""
-
-msgid "view at startup"
+msgid "View"
 msgstr ""
 
 msgid "View Direction"
@@ -2019,9 +2025,6 @@ msgstr ""
 msgid "View Method"
 msgstr ""
 
-msgid "View name"
-msgstr ""
-
 msgid "Viewpoint"
 msgstr ""
 
@@ -2034,13 +2037,10 @@ msgstr ""
 msgid "Visualize fire/smoke flow simulations"
 msgstr ""
 
-msgid "Volume Render Settings"
+msgid "Volume render settings"
 msgstr ""
 
 msgid "v: toggle flow vector visiblity"
-msgstr ""
-
-msgid "Warning"
 msgstr ""
 
 msgid "water - all meshes"
@@ -2049,7 +2049,13 @@ msgstr ""
 msgid "Water - single mesh"
 msgstr ""
 
+msgid "Web"
+msgstr ""
+
 msgid "where"
+msgstr ""
+
+msgid "Which frames"
 msgstr ""
 
 msgid "width"
@@ -2062,12 +2068,6 @@ msgid "Window properties"
 msgstr ""
 
 msgid "world center"
-msgstr ""
-
-msgid "World centered"
-msgstr ""
-
-msgid "World centered, level rotation"
 msgstr ""
 
 msgid "wrap up completed"
@@ -2098,6 +2098,9 @@ msgid "yz plane"
 msgstr ""
 
 msgid "zero at boundaries"
+msgstr ""
+
+msgid "Zone"
 msgstr ""
 
 msgid "Zoom"
