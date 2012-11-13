@@ -1,46 +1,35 @@
 \chapter{Fire Plumes}
 
-For FDS simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the
-non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
+For fire plumes, a measure of how well the flow field is resolved is given by the non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
 fire diameter
-\be D^* = \left(
+\be 
+   D^* = \left(
      \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} }
-     \right)^\frac{2}{5}  \ee
-and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic
-fire diameter is related to the characteristic fire size via the
-relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the
-fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells
-spanning the characteristic (not necessarily the physical) diameter of the fire.
-The more cells spanning the fire, the better the resolution of the
-calculation. It is better to assess the quality of the mesh in terms
-of this non-dimensional parameter, rather than an absolute mesh cell size.
-For example, a cell size of 10~cm may be ``adequate,'' in some sense,
-for evaluating the spread of smoke and heat through a building from a
-sizable fire, but may not be appropriate to study a very small, smoldering source.
+     \right)^\frac{2}{5}  
+\ee
+and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic fire diameter is related to the characteristic fire size via the relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells spanning the characteristic (not necessarily the physical) diameter of the fire. The more cells spanning the fire, the better the resolution of the calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than an absolute mesh cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat through a building from a sizable fire, but may not be appropriate to study a very small, smoldering source.
 
-
+\clearpage
 
 \section{McCaffrey's Plume Correlation}
 
-The following pages show the results of simulations of McCaffrey's five fires at three grid resolutions, $D^*/\dx=[5,10,20]$ (note this resolution index is used to label the legend enties for the FDS results). The mesh cells are cubic and the spacing is uniform (no stretching).
+The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, $D^*/\dx=[5,10,20]$ (note this resolution index is used to label the legend entries). The mesh cells are cubic and the spacing is uniform (no stretching).
 
-\newpage
-
-
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_14_kW} &
 \includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_14_kW} \\
 \includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_22_kW} &
-\includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_22_kW} \\
-\includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_33_kW} &
-\includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_33_kW}
+\includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_22_kW} 
+
 \end{tabular*}
 \label{McCaffrey_Plume_1}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_33_kW} &
+\includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_33_kW} \\
 \includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_45_kW} &
 \includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_45_kW} \\
 \includegraphics[height=2.2in]{FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_57_kW} &
@@ -55,14 +44,15 @@ The following pages show the results of simulations of McCaffrey's five fires at
 \section{Heskestad's Flame Height Correlation}
 
 
-Table~\ref{Flame_Height_Parameters} lists the parameters for FDS simulations of fires in a 1~m by 1~m square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.}. Figure~\ref{Flame_Height_check_hrr} shows a verification of the heat release rate for each case, and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by \be D^* = (Q^*)^{2/5} \, D \ee
+Table~\ref{Flame_Height_Parameters} lists the parameters for FDS simulations of fires in a 1~m by 1~m square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.}. Figure~\ref{Flame_Height_check_hrr} shows a verification of the heat release rate for each case, and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by 
+\be 
+   D^* = (Q^*)^{2/5} \, D 
+\ee
 Given a grid cell size, $\dx$, the three resolutions can be characterized by the non-dimensional quantity, $D^*/\dx$, whose values in these cases are 5, 10 and 20.
 
-The flame height definition used in Fig.~\ref{Flame_Height} (99~\% fuel consumption) is admittedly arbitrary and is often questioned when FDS predictions of flame height are compared with experimental values, which are usually based on luminosity (effectively measuring radiation emission from soot).  Further, Heskestad's flame height correlation is one among many such correlations (\cite{SFPE:Heskestad,Steward:1970,Becker:1978,Cox:1985,Hasemi:1984,Cetegen:1984,Delichatsios:1984}), and the reported variation is significant, especially at low values of $Q^*$ where the details of the burner configuration (shape of the burner, etc.) become important.  To illustrate the uncertainty one can expect from FDS calculations and to test the sensitivity of the reported FDS results to the flame height definition, Fig.~\ref{Flame_Height2} shows two different FDS flame height predictions, one at 99~\% fuel consumption (as in Fig.~\ref{Flame_Height})---the red curve---and one using 95~\% fuel consumption---the blue curve.  Three different grid resolutions were run for each flame height definition.  For 99~\% fuel consumption, the red dashed line is the maximum flame height from the three resolutions.  For 95~\% fuel consumption, the blue dashed line is the minimum flame height from the three resolutions.  We also overlay several different flame height correlations (colored solid lines).  The disagreement between the correlations, which roughly mimics the difference in the FDS results, is $\pm 15$~\% at values values of $Q^* > 1$.  For lower values of $Q^*$ the disagreement is as high as $\pm 65$~\%.
+The flame height definition used in Fig.~\ref{Flame_Height} (99~\% fuel consumption) is admittedly arbitrary and is often questioned when FDS predictions of flame height are compared with experimental values, which are usually based on luminosity (effectively measuring radiation emission from soot).  Further, Heskestad's flame height correlation is one among many such correlations~\cite{SFPE:Heskestad,Steward:1970,Becker:1978,Cox:1985,Hasemi:1984,Cetegen:1984,Delichatsios:1984}, and the reported variation is significant, especially at low values of $Q^*$ where the details of the burner configuration (shape of the burner, etc.) become important.  To illustrate the uncertainty one can expect from FDS calculations and to test the sensitivity of the reported FDS results to the flame height definition, Fig.~\ref{Flame_Height2} shows two different FDS flame height predictions, one at 99~\% fuel consumption (as in Fig.~\ref{Flame_Height})---the red curve---and one using 95~\% fuel consumption---the blue curve.  Three different grid resolutions were run for each flame height definition.  For 99~\% fuel consumption, the red dashed line is the maximum flame height from the three resolutions.  For 95~\% fuel consumption, the blue dashed line is the minimum flame height from the three resolutions.  We also overlay several different flame height correlations (colored solid lines).
 
-Figure~\ref{Flame_Structure} includes comparisons of the predicted HRR as a function of the height of the burner for three different values of $Q^*$. The experimental
-measurements were performed by Tamanini at Factory Mutual~\cite{Tamanini:CF1983}. Both the HRR and height above the burner have been non-dimensionalized by the total HRR and
-the flame height, respectively. These results demonstrate that the predicted spatial distribution of the energy release improves as the numerical grid is refined.
+Figure~\ref{Flame_Structure} includes comparisons of the predicted HRR as a function of the height of the burner for three different values of $Q^*$. The experimental measurements were performed by Tamanini at Factory Mutual~\cite{Tamanini:CF1983}. Both the HRR and height above the burner have been non-dimensionalized by the total HRR and the flame height, respectively. These results demonstrate that the predicted spatial distribution of the energy release improves as the numerical grid is refined.
 
 \clearpage
 
@@ -95,7 +85,7 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=5.0in]{FIGURES/Heskestad/Flame_Height_check_hrr}
+\includegraphics[width=4.5in]{FIGURES/Heskestad/Flame_Height_check_hrr}
 \end{center}
 \caption[Verification of the heat release rate for Heskestad Flame Height cases]
 {Verification of the heat release rate for Heskestad Flame Height cases.}
@@ -106,7 +96,7 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[width=5.0in]{FIGURES/Heskestad/Flame_Height}
+\includegraphics[width=4.5in]{FIGURES/Heskestad/Flame_Height}
 \end{center}
 \caption[Summary of flame height predictions, Heskestad correlation]
 {Comparison of FDS predictions of flame height from a 1~m square pan fire for $Q^*$ values ranging from
@@ -121,7 +111,6 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 \label{Flame_Height2}
 \end{figure}
 
-\clearpage
 
 \begin{figure}[p]
 \begin{center}
@@ -144,14 +133,7 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 
 \label{VTT_plume}
 
-Plume temperature measurements are available from the VTT Large Hall and the FM/SNL series.
-For many of the other full-scale experiments, the temperature above the fire has not been reported, or the fire plume
-leans because of the flow pattern within the compartment, or the fire is positioned against a wall.
-Only for the VTT and the FM/SNL series are the plumes relatively free from perturbations.
-
-The VTT experiments consist of liquid fuel pan fires positioned in the middle of a large fire test hall.
-Plume temperatures are measured at two heights above the fire, 6~m and 12~m.
-The flames were observed to extend to about 4~m above the fire pan.
+The VTT experiments consisted of liquid fuel pan fires positioned in the middle of a large fire test hall. Plume temperatures were measured at two heights above the fire, 6~m and 12~m. The flames were observed to extend to about 4~m above the fire pan.
 
 
 \begin{figure}[h]
@@ -159,7 +141,7 @@ The flames were observed to extend to about 4~m above the fire pan.
 \begin{tabular}{c}
 \includegraphics[height=2.2in]{FIGURES/VTT/VTT_01_Plume_Temperature} \\
 \includegraphics[height=2.2in]{FIGURES/VTT/VTT_02_Plume_Temperature} \\
-\includegraphics[height=2.2in]{FIGURES/VTT/VTT_03_Plume_Temperature} 
+\includegraphics[height=2.2in]{FIGURES/VTT/VTT_03_Plume_Temperature}
 \end{tabular}
 \end{center}
 \label{VTT_Plume}
@@ -172,43 +154,42 @@ The flames were observed to extend to about 4~m above the fire pan.
 
 \label{FM/SNL_Plume}
 
-The FM/SNL tests consisted of propylene gas burners, heptane pools, methanol pools, PMMA solids, as well as qualified and unqualified cables, burned in a large room which, for the first 18 tests, was free of obstructions.
+The FM/SNL tests consisted of propylene gas burners, heptane pools, methanol pools, PMMA solids, as well as qualified and unqualified cables, burned in a large room which, for the first 18 tests, was free of obstructions. Plume Temperatures shown here were measured at approximately 6~m from the floor, or 0.98 times the total ceiling height. For Tests~1-5 and 7-9, the thermocouple station (Station~13) was centered above the fire pan. Tests~6 and 10-15 used an alternate fire location, centered along the south wall. Station~9 was not centered above these fires, but fell within the plume. Tests~16 and 17 had fires located in the south-west corner of the room, too remote from any stations to allow for plume measurements.
 
-Plume Temperatures shown here are recorded at approximately 6 m from the floor, or .98 times the total ceiling height. For Tests 1-5 and 7-9, the thermocouple station (Station 13) was centered above the fire pan. Tests 6 and 10-15 used an alternate fire location, centered along the South wall. Station 9 is not centered above these fires, but falls within the plume. Tests 16 and 17 had fires located in the South-West corner of the room, too remote from any stations to allow for plume measurements.
-
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_01_Plume_Temperature} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_02_Plume_Temperature} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_Plume_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_Plume_Temperature} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_05_Plume_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_Plume_Temperature} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_Plume_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_Plume_Temperature}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_Plume_Temperature} 
 \end{tabular*}
 \label{FM_SNL_Plume_1}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_05_Plume_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_Plume_Temperature} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_Plume_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_Plume_Temperature} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_09_Plume_Temperature} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_10_Plume_Temperature} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_Plume_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_12_Plume_Temperature} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_13_Plume_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_14_Plume_Temperature} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_15_Plume_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_Plume_Temperature}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_12_Plume_Temperature} 
 \end{tabular*}
 \label{FM_SNL_Plume_2}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_13_Plume_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_14_Plume_Temperature} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_15_Plume_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_Plume_Temperature} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_17_Plume_Temperature} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_21_Plume_Temperature} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_22_Plume_Temperature} &
+
 \end{tabular*}
 \label{FM_SNL_Plume_3}
 \end{figure}
@@ -221,25 +202,10 @@ Plume Temperatures shown here are recorded at approximately 6 m from the floor, 
 
 \label{USN_Plume}
 
-A large number of plume tempeature measurements are availible from both the Barber's Point, Hawaii test series as well as the Keflavik, Iceland test series. Although the drafty nature of the hangars caused some plume lean and disturbance the data lagely conforms to the Mcaffrey and Heskestad correlations given above.
+A large number of plume temperature measurements are available from the US Navy experiments conducted at Keflavik, Iceland, and Barber's Point, Hawaii. The hangars were very large in size (22~m in Iceland and 15~m in Hawaii) and the heat release rates varied from 100~kW to 33~MW. All experiments made use of a fuel pan filled with either JP-5 or JP-8 jet fuel, positioned in the center of the hangar.
 
-The hanagrs were very large in size (15 m and 22 m) and the fire heat release rate varied over a large range (100 kW to 33 MW). All validated tests consisted of a fuel pan filled with either JP-5 or JP-8 jet fuel, posistioned in the center of the hangar, lit and allowed to burn until extinguishment with a large plate covering of the pan.
 
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_01_1} &
-\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_02_1} \\
-\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_03_1} &
-\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_04_1} \\
-\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_05_1} &
-\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_06_1} \\
-\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_07_1} &
-\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_11_1}
-\end{tabular*}
-\label{USN_Plume_Hawaii}
-\end{figure}
-
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Iceland_Test_01_1} &
 \includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Iceland_Test_02_1} \\
@@ -275,6 +241,20 @@ The hanagrs were very large in size (15 m and 22 m) and the fire heat release ra
 \label{USN_Plume_Iceland_3}
 \end{figure}
 
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_01_1} &
+\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_02_1} \\
+\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_03_1} &
+\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_04_1} \\
+\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_05_1} &
+\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_06_1} \\
+\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_07_1} &
+\includegraphics[height=2.2in]{FIGURES/USN_Hangars/USN_Hawaii_Test_11_1}
+\end{tabular*}
+\label{USN_Plume_Hawaii}
+\end{figure}
+
 \clearpage
 
 
@@ -301,7 +281,7 @@ Figure~\ref{Plume_Summary} provides a summary of the plume temperature predictio
 \section{Harrison Spill Plumes}
 \label{Harrison_Spill_Plumes}
 
-In this series of reduced-scale spill plume experiments, the mass flow rate was measured at a series of heights by varying the flow through an exhaust hood to maintain a constant smoke layer depth.  The plot below shows measured and predicted mass flows rates at five different elevations for the fire scenarios labelled SE4 through SE21 in Ref.~\cite{Harrison:2009}. Two general configurations are considered -- one that is intended to mimic a balcony spill plume and one in which the plume adheres to a vertical wall above the compartment opening.
+In each of these reduced-scale spill plume experiments, the mass flow rate was measured at a series of heights by varying the flow through an exhaust hood to maintain a constant smoke layer depth.  Figure~\ref{Entrainment} compares measured and predicted mass flows rates at five different elevations for the fire scenarios labelled SE4 through SE21 in Ref.~\cite{Harrison:2009}. Two general configurations are considered -- one that is intended to mimic a balcony spill plume and one in which the plume adheres to a vertical wall above the compartment opening.
 
 \begin{figure}[h]
 \begin{center}
@@ -325,12 +305,12 @@ The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facil
 
 Calculations of the Sandia 1 m helium plume are run at three grid resolutions: 6 cm, 3 cm, and 1.5 cm.  To give the reader with a qualitative feel for the results, Fig.~\ref{Sandia_He_1m_image} provides a snapshot of density contours from the simulation. The calculations are run in parallel on 16 processors; the outlined blocks indicate the domain decomposition.  Data for vertical velocity, radial velocity, and helium mass fraction are recorded at three levels downstream from the base of the plume, $z = [0.2, 0.4, 0.6]$ m, corresponding to the experimental measurements of O'Hern et al.~\cite{OHern:2005}.  Results for the mean and root mean square (RMS) profiles are given in Figs.~\ref{Sandia_He_1m_velocity} - \ref{Sandia_He_1m_massfraction}.  The means are taken between $t=10$ and $t=20$ seconds in the simulation.
 
-The domain is 3 m $\times$ 3 m $\times$ 4 m. The boundary conditions are open on all sides with a smooth solid surface surrounding the 1 m diameter helium pool.  The ambient and helium mixture temperature is set to 12 $^\circ$C and the background pressure is set to 80900 Pa to correspond to the experimental conditions.  The helium/acetone/oxygen mixture molecular weight is set to 5.45 kg/kmol.  The turbulent Schmidt and Prandtl numbers are left at the FDS default value of 0.5.  The helium mixture mass flux is specified as 0.0605 kg/s/m$^2$.  One noteworthy difference between this calculation and previous work modeling the Sandia helium plume \cite{DesJardin:2004} is that here the pool is depressed by 6 cm (one cell thickness for the coarsest case) which allows for variation in the inlet velocity profile at the $z=0$ m plane, the plume baseline.  This modification is justified based on the $\pm 6$ \% flow variation reported in \cite{Blanchat:2001} and is significant to the results.  Further, the variation reported in \cite{Blanchat:2001} was based on hot wire probe measurements with air flowing through the honeycomb flow straighteners at the plume source.  The variation might be greater for helium flows due to the buoyant accelerations which were not present in the air/air test case (S. Tieszen, personal communication).
+The domain is 3~m by 3~m by 4~m. The boundary conditions are open on all sides with a smooth solid surface surrounding the 1~m diameter helium pool.  The ambient and helium mixture temperature is set to 12~$^\circ$C and the background pressure is set to 80900~Pa to correspond to the experimental conditions.  The helium/acetone/oxygen mixture molecular weight is set to 5.45~kg/kmol.  The turbulent Schmidt and Prandtl numbers are left at the FDS default value of 0.5.  The helium mixture mass flux is specified as 0.0605~kg/s/m$^2$.  One noteworthy difference between this calculation and previous work modeling the Sandia helium plume \cite{DesJardin:2004} is that here the pool is depressed by 6~cm (one cell thickness for the coarsest case) which allows for variation in the inlet velocity profile at the $z=0$ m plane, the plume baseline.  This modification is justified based on the $\pm 6$~\% flow variation reported in \cite{Blanchat:2001} and is significant to the results.  Further, the variation reported in \cite{Blanchat:2001} was based on hot wire probe measurements with air flowing through the honeycomb flow straighteners at the plume source.  The variation might be greater for helium flows due to the buoyant accelerations which were not present in the air/air test case (S. Tieszen, personal communication).
 
 \begin{figure}[h]
 \begin{center}
 \includegraphics[height=4in]{FIGURES/Sandia_Plumes/Sandia_He_1m_image}
-\caption[Sandia 1~m helium plume image.]{A snapshot of FDS results at 1.5 cm resolution for the Sandia 1 m helium plume showing density contours.  The rows of measurement devices are visible near the base.}
+\caption[Sandia 1~m helium plume image]{A snapshot of FDS results at 1.5 cm resolution for the Sandia 1 m helium plume showing density contours.  The rows of measurement devices are visible near the base.}
 \label{Sandia_He_1m_image}
 \end{center}
 \end{figure}
@@ -344,7 +324,7 @@ The domain is 3 m $\times$ 3 m $\times$ 4 m. The boundary conditions are open on
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_He_1m_W2} &
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_He_1m_Wrms_p2}
 \end{tabular*}
-\caption[Sandia 1~m helium plume vertical velocity profiles.]
+\caption[Sandia 1~m helium plume vertical velocity profiles]
 {FDS predictions of mean and root mean square (RMS) vertical velocity profiles for the Sandia 1~m helium plume experiment. Results are shown for 6 cm, 3 cm, and 1.5 cm grid resolutions. With $z$ being the streamwise coordinate, the bottom row is at $z=0.2$ m, the middle row is at $z=0.4$ m, and the top row is at $z=0.6$ m.}
 \label{Sandia_He_1m_velocity}
 \end{figure}
@@ -382,7 +362,7 @@ The domain is 3 m $\times$ 3 m $\times$ 4 m. The boundary conditions are open on
 \subsection{Sandia 1 m Methane Pool Fire}
 \label{Sandia_methane}
 
-The Sandia 1 m methane pool fire series provides data for three methane flow rates: Test 14 (low flow rate), Test 24 (medium flow rate), and Test 17 (high flow rate) \cite{Tieszen:2004}.  The experiments are simulated using three grid resolutions: 6 cm, 3 cm, and 1.5 cm.  Fig.~\ref{Sandia_CH4_1m_image} provides a snapshot of temperature contours from the 1.5 cm Test 17 simulation. The calculations are run in parallel on 16 processors---a similar computational set up as the helium case (the experiments were run in the same facility at Sandia).  Data for vertical velocity and radial velocity are recorded at three levels downstream from the base of the plume, $z = [0.3, 0.5, 0.9]$ m.  Results for the mean profiles (and turbulent kinetic energy for Test 24) are given in Figs.~\ref{Sandia_CH4_1m_Test14_velocity} - \ref{Sandia_CH4_1m_Test17_velocity}.  The means are taken between $t=10$ and $t=20$ seconds in the simulation.
+The Sandia 1 m methane pool fire series provides data for three methane flow rates: Test 14 (low flow rate), Test~24 (medium flow rate), and Test 17 (high flow rate) \cite{Tieszen:2004}.  The experiments are simulated using three grid resolutions: 6 cm, 3 cm, and 1.5 cm.  Fig.~\ref{Sandia_CH4_1m_image} provides a snapshot of temperature contours from the 1.5 cm Test 17 simulation. The calculations are run in parallel on 16 processors---a similar computational set up as the helium case (the experiments were run in the same facility at Sandia).  Data for vertical velocity and radial velocity are recorded at three levels downstream from the base of the plume, $z = [0.3, 0.5, 0.9]$ m.  Results for the mean profiles (and turbulent kinetic energy for Test 24) are given in Figs.~\ref{Sandia_CH4_1m_Test14_velocity} - \ref{Sandia_CH4_1m_Test17_velocity}.  The means are taken between $t=10$ and $t=20$ seconds in the simulation.
 
 For Test 17, we recorded the vertical velocity as a time series in four locations in the plume---at two positions along the centerline and at two positions on the edge.  The time series from our 1.5 cm simulation at $x=0$ m and $z=0.5$ m, corresponding to Fig.~6 in \cite{Tieszen:2002}, is shown in Fig.~\ref{Sandia_CH4_1m_Test17_spectrum} along with the power spectrum from the average of the four time series locations.  The FDS results compare well with the experimentally obtained puffing frequency of 1.65 Hz \cite{Tieszen:2002}.
 
@@ -403,7 +383,7 @@ For Test 17, we recorded the vertical velocity as a time series in four location
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test14_W_zp3} &
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test14_U_zp3}
 \end{tabular*}
-\caption[Sandia 1~m methane pool fire (Test 14) mean velocity profiles.]
+\caption[Sandia 1~m methane pool fire (Test 14) mean velocity profiles]
 {FDS predictions of mean velocity profiles for the Sandia 1~m methane pool fire experiment (Test 14 -- low flow rate). Results are shown for 6 cm, 3 cm, and 1.5 cm grid resolutions. The $z$ coordinate represents height above the methane pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
 \label{Sandia_CH4_1m_Test14_velocity}
 \end{figure}
@@ -417,7 +397,7 @@ For Test 17, we recorded the vertical velocity as a time series in four location
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test24_W_zp3} &
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test24_U_zp3}
 \end{tabular*}
-\caption[Sandia 1~m methane pool fire (Test 24) mean velocity profiles.]
+\caption[Sandia 1~m methane pool fire (Test 24) mean velocity profiles]
 {FDS predictions of mean velocity profiles for the Sandia 1~m methane pool fire experiment (Test 24 -- medium flow rate). Results are shown for 6 cm, 3 cm, and 1.5 cm grid resolutions. The $z$ coordinate represents height above the methane pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
 \label{Sandia_CH4_1m_Test24_velocity}
 \end{figure}
@@ -429,7 +409,7 @@ For Test 17, we recorded the vertical velocity as a time series in four location
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test24_TKE_p5} \\
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test24_TKE_p3}
 \end{tabular}
-\caption[Sandia 1~m methane pool fire (Test 24) turbulent kinetic energy.]
+\caption[Sandia 1~m methane pool fire (Test 24) turbulent kinetic energy]
 {FDS predictions of turbulent kinetic energy (TKE) profiles for the Sandia 1~m methane pool fire experiment (Test 24 -- medium flow rate). Results are shown for 6 cm, 3 cm, and 1.5 cm grid resolutions. The $z$ coordinate represents height above the methane pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
 \label{Sandia_CH4_1m_Test24_tke}
 \end{center}
@@ -444,7 +424,7 @@ For Test 17, we recorded the vertical velocity as a time series in four location
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_W_zp3} &
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_U_zp3}
 \end{tabular*}
-\caption[Sandia 1~m methane pool fire (Test 17) mean velocity profiles.]
+\caption[Sandia 1~m methane pool fire (Test 17) mean velocity profiles]
 {FDS predictions of mean velocity profiles for the Sandia 1~m methane pool fire experiment (Test 17). Results are shown for 3 cm and 1.5 cm grid resolutions. The $z$ coordinate represents height above the methane pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
 \label{Sandia_CH4_1m_Test17_velocity}
 \end{figure}
@@ -456,7 +436,7 @@ For Test 17, we recorded the vertical velocity as a time series in four location
 \includegraphics[height=3.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_dx1p5cm_powerspectrum}
 \end{tabular}
 \end{center}
-\caption[Sandia 1~m methane pool fire velocity signal and power spectrum.]
+\caption[Sandia 1~m methane pool fire velocity signal and power spectrum]
 {FDS velocity signal and power spectrum for the Sandia 1~m methane pool fire experiment (Test 17).  The vertical velocity signal (top plot) is output from FDS on the centerline at $z=0.5$ m downstream of the fuel source.  The power spectrum of vertical velocity is measured at four locations and averaged.  Two of the measurement locations are along the centerline, at $z=[0.5, 2.0]$ m, and two are along the edge of the plume, $x = 0.5$ m and $z=[0.5, 2.0]$ m.  The measured puffing frequency of the plume is 1.65 Hz \cite{Tieszen:2002}.  The temporal Nyquist limit of the simulation (the highest resolvable frequency due to the discrete time increment) is $1/(2\delta t) \approx$ 1000 Hz ($\delta t \approx 0.0005$).}
 \label{Sandia_CH4_1m_Test17_spectrum}
 \end{figure}
@@ -473,7 +453,7 @@ By examining movies of the simulation results we can see a qualitative differenc
 \begin{figure}[h]
 \begin{center}
 \includegraphics[height=4in]{FIGURES/Sandia_Plumes/Sandia_H2_1m_image}
-\caption[Sandia 1~m hydrogen pool fire instantaneous temperature contours.]{A snapshot of FDS results at 1.5 cm resolution for the Sandia 1 m hydrogen pool fire (Test 35) showing instantaneous contours of temperature.  The rows of measurement devices (green) are visible near the base.}
+\caption[Sandia 1~m hydrogen pool fire instantaneous temperature contours]{A snapshot of FDS results at 1.5 cm resolution for the Sandia 1 m hydrogen pool fire (Test 35) showing instantaneous contours of temperature.  The rows of measurement devices (green) are visible near the base.}
 \label{Sandia_H2_1m_image}
 \end{center}
 \end{figure}
@@ -487,7 +467,7 @@ By examining movies of the simulation results we can see a qualitative differenc
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_H2_1m_Test35_W_zp3} &
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_H2_1m_Test35_U_zp3}
 \end{tabular*}
-\caption[Sandia 1~m hydrogen pool fire (Test 35) mean velocity profiles.]
+\caption[Sandia 1~m hydrogen pool fire (Test 35) mean velocity profiles]
 {FDS predictions of mean velocity profiles for the Sandia 1~m hydrgoen pool fire experiment (Test 35). Results are shown for 6 cm, 3 cm, and 1.5 cm grid resolutions. The $z$ coordinate represents height above the pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
 \label{Sandia_H2_1m_Test35_velocity}
 \end{figure}
@@ -499,7 +479,7 @@ By examining movies of the simulation results we can see a qualitative differenc
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_H2_1m_Test35_TKE_p5} \\
 \includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_H2_1m_Test35_TKE_p3}
 \end{tabular}
-\caption[Sandia 1~m hydrogen pool fire (Test 25) turbulent kinetic energy.]
+\caption[Sandia 1~m hydrogen pool fire (Test 25) turbulent kinetic energy]
 {FDS predictions of turbulent kinetic energy (TKE) profiles for the Sandia 1~m hydrogen pool fire experiment (Test 35). Results are shown for 6 cm, 3 cm, and 1.5 cm grid resolutions. The $z$ coordinate represents height above the methane pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
 \label{Sandia_H2_1m_Test35_tke}
 \end{center}
