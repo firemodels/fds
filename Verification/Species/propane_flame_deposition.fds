@@ -1,4 +1,4 @@
-vPropane burner test case to check basic chemistry model and soot deposition
+Propane burner test case to check basic chemistry model and soot deposition
 
 &HEAD CHID='propane_flame_deposition', TITLE='Verification of simple chemistry flame with soot deposition, SVN $Revision$'/
 
