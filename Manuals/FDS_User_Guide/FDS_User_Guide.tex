@@ -5565,8 +5565,8 @@ Arrhenius reaction parameters are typically found for a particular range of equi
       A_RAMP = 'rampa'
       E = 167360
       E_RAMP = 'rampe'
-      SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-      SPEC_ID='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      SPEC_ID_NU = 'CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
+      SPEC_ID_N = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-0.5,1
       N_S = 0.25,1,0.5
       CRITICAL_FLAME_TEMPERATURE=1418. /
@@ -5810,19 +5810,26 @@ The following are all equivalent:
 \subsubsection{Two Gas Species with the Same Properties}
 \label{info:SPEC_advanced}
 
-In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by using the character string {\ct ALIAS} on the {\ct SPEC} line.  For example, the lines:
+In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by using the character string {\ct ALIAS} on the {\ct SPEC} line.  The {\ct ID} must exist on a previously given {\ct SPEC} input.  For example, the lines:
 
 \footnotesize
 \begin{verbatim}
+&SPEC ID='CARBON DIOXIDE',SMIX_COMPONENT_ONLY=.TRUE./
 &SPEC ID='CARBON DIOXIDE', ALIAS='CO2 1' /
 &SPEC ID='CARBON DIOXIDE', ALIAS='CO2 2' /
 &DEVC XYZ=...,QUANTITY='MASS FRACTION',SPEC_ID='CO2 1', ID='Device 1'/
 &DEVC XYZ=...,QUANTITY='MASS FRACTION',SPEC_ID='CO2 2', ID='Device 2'/
 \end{verbatim} \normalsize
 
-\noindent define two gases, both of which are {\ct 'CARBON DIOXIDE'}.  Both will use the built in property data for CO$_2$.  The {\ct ALIAS} for each species is then used in the remainder of the input file.
+\noindent define two gases, both of which are {\ct 'CARBON DIOXIDE'}.  Both will use the built in property data for CO$_2$.  The {\ct ALIAS} for each species is then used in the remainder of the input file.  The {\ct SMIX\_COMPNONENT\_ONLY} is given so that FDS only tracks {\ct 'CO2 1'} and {\ct 'CO2 2'} and not also {\ct 'CARBON DIOXIDE'}.  Note that the name you provide for {\ct ALIAS} should not match the name of any other {\ct SPEC} or {\ct SMIX}.  When using {\ct ALIAS}, species outputs that reference the {\ct ALIAS} will only output the {\ct ALAIS} species and use of the original species name will sum over all applicable species.  For example, if the output quantities in the example above are changed as shown below, then {\ct Device 1} would just output the mass fraction of {\ct CO2 1} and {\ct Device 2} would output the sum of both {
 
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=...,QUANTITY='MASS FRACTION',SPEC_ID='CO2 1', ID='Device 1'/
+&DEVC XYZ=...,QUANTITY='MASS FRACTION',SPEC_ID='CARBON MONOXIDE', ID='Device 2'/
+\end{verbatim} \normalsize
 
+\noindent 
 
 
 \clearpage
@@ -5865,7 +5872,7 @@ The logical parameter {\ct SMIX\_COMPONENT\_ONLY} denotes that the species is on
 
 \begin{description}
 \item[{\ct BACKGROUND}] Denotes that this lumped species is to be used as the background species.  The {\ct BACKGROUND} lumped species must be defined first.
-\item[{\ct ID}] Character string identifying the name of the species. You must provide this.
+\item[{\ct ID}] Character string identifying the name of the species. You must provide this.  This cannot be the same as an {\ct ID} or an {\ct ALIAS} on a {\ct SPEC} input.
 \item[{\ct SPEC\_ID}] Character array containing the names of the species that make up the lumped species.
 \item[{\ct MASS\_FRACTION}] The mass fractions of the components of the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1. Alternatively, {\ct VOLUME\_FRACTION} can be specified. Do not use both on an {\ct SMIX} line.
 \end{description}
@@ -6142,7 +6149,7 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
       SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.1966,
       SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.7090 /
 
-&REAC FUEL='METHANE',SMIX_ID='METHANE','AIR','PRODUCTS',
+&REAC FUEL='METHANE',SPEC_ID_NU='METHANE','AIR','PRODUCTS',
       NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
@@ -6279,13 +6286,13 @@ Once we have constructed the lumped species, we can define the {\ct REAC} lines.
 &REAC ID = 'plastic',
       FUEL = 'POLYURETHANE',
       HEAT_OF_COMBUSTION=26200,
-      SMIX_ID = 'POLYURETHANE','AIR','PRODUCTS_1'
+      SPEC_ID_NU = 'POLYURETHANE','AIR','PRODUCTS_1'
       NU=-1,-27.3274,1 /
 
 &REAC ID = 'wood'
       FUEL = 'WOOD',
       HEAT_OF_COMBUSTION=16400,
-      SMIX_ID = 'WOOD','AIR','PRODUCTS_2'
+      SPEC_ID_NU = 'WOOD','AIR','PRODUCTS_2'
       NU=-1,-1.02121,1 /
 \end{verbatim} \normalsize
 In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuels is unknown to FDS, so the {\ct HEAT\_OF\_COMBUSTION} is specified for each reaction. Typically, the heat release per unit area ({\ct HRRPUA}) parameter is used to specify the fire size on the {\ct SURF} line. The {\ct HRRPUA} parameter cannot currently be used when there is more than one fuel, so the mass flux of fuel must be specified for each fuel. In this example, we want both fuels to flow out of the same burner and ramp up to a 1200~kW fire after 60~s. First, we create a 1~m$^2$ burner by defining a {\ct VENT} line:
@@ -6404,14 +6411,14 @@ and the resulting {\ct REAC} line is:
       FUEL = 'PROPANE'
       A = 8.6e11
       E = 125520
-      SMIX_ID = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU = -1,-5,3,4
-      SPEC_ID = 'PROPANE','OXYGEN'
+      SPEC_ID_N = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65
 \end{verbatim} \normalsize
 
 \noindent
-In this example, the array {\ct SMIX\_ID} refers directly to the primitive species. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct SMIX\_COMPONONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:reac_rate}).  This array must contain only primitive species, i.e. no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
 \begin{align}\label{eq:propane_2step}
 \mathrm{C_3H_8+3.5 \, O_2}&\rightarrow  \mathrm{3\,CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
@@ -6424,27 +6431,27 @@ As before, we use primitive species rather than mixtures. A {\ct REAC} line is n
       FUEL = 'PROPANE'
       A = 1.0e12
       E = 125520
-      SMIX_ID='PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-3.5,3,4
-      SPEC_ID='PROPANE','OXYGEN'
+      SPEC_ID_N = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65 /
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
       A = 4e14
       E = 167360
-      SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
+      SPEC_ID_NU = 'CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU= -1,-0.5,1
-      SPEC_ID='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      SPEC_ID_N = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       N_S = 0.25,1,0.5 /
 
 &REAC ID = 'R3'
       FUEL = 'CARBON DIOXIDE'
       A = 5e8
       E = 167360
-      SMIX_ID= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
+      SPEC_ID_NU = 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
       NU= -1,0.5,1
-      SPEC_ID='CARBON DIOXIDE'
+      SPEC_ID_N = 'CARBON DIOXIDE'
       N_S = 1.0 /
 \end{verbatim} \normalsize
 
@@ -6496,7 +6503,7 @@ The heat of combustion for propane is found in the SFPE Handbook~\cite{SFPE:Tewa
 
 \footnotesize
 \begin{verbatim}
-&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715., SMIX_ID = 'PROPANE','AIR','PRODUCTS','SOOT',
+&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715., SPEC_ID_NU = 'PROPANE','AIR','PRODUCTS','SOOT',
       NU=-1.,-4.8164,1,0.1836/
 \end{verbatim} \normalsize
 
@@ -11315,10 +11322,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct ODE\_SOLVER}                         & Character   & Section~\ref??}                           &                   &       \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5    \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4    \\ \hline
-{\ct SMIX\_ID(:)}                         & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline
 {\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0    \\ \hline
-{\ct SPEC\_ID(:)}                         & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
+{\ct SPEC\_ID\_N(:)}                      & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
+{\ct SMIX\_ID\_NU(:)}                     & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
 {\ct SUPPRESSION}                         & Logical     & Section~\ref{info:extinction}             &                   & {\ct .TRUE.}      \\ \hline
 %{\ct TAU\_CHEM}                           & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
 %{\ct TAU\_FLAME}                          & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
