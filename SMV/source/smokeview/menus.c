@@ -6735,7 +6735,7 @@ updatemenu=0;
     }
   }
   if(nevac>0&&navatar_types>0){
-   // glutAddSubMenu("Use Avatar:",avatarevacmenu);
+   // glutAddSubMenu(_("Use Avatar:"),avatarevacmenu);
   }
 
   if(npart4loaded>0){
@@ -6821,12 +6821,12 @@ updatemenu=0;
   }
 
   if(ReadPlot3dFile==1){
-    glutAddSubMenu("Plot3d",plot3dshowmenu);
+    glutAddSubMenu(_("Plot3d"),plot3dshowmenu);
   }
   if(npatchloaded>0){
-    glutAddSubMenu("Boundaries",showpatchmenu);
+    glutAddSubMenu(_("Boundaries"),showpatchmenu);
   }
-  if(nzoneinfo>0&&(ReadZoneFile==1||nzvents>0))glutAddSubMenu("Zone",zoneshowmenu);
+  if(nzoneinfo>0&&(ReadZoneFile==1||nzvents>0))glutAddSubMenu(_("Zone"),zoneshowmenu);
   if(ReadTargFile==1){
     if(showtarget==1)glutAddMenuEntry(_("*Targets"),2);
     if(showtarget==0)glutAddMenuEntry(_("Targets"),2);
@@ -6835,7 +6835,7 @@ updatemenu=0;
     int num_activedevices=0;
 
     if(multiprop==1){
-     // glutAddSubMenu("Properties",propmenu);
+     // glutAddSubMenu(_("Properties"),propmenu);
     }
 
     for(i=0;i<nobject_defs;i++){
@@ -6848,7 +6848,7 @@ updatemenu=0;
     if(num_activedevices>0){
       /*
       if(isZoneFireModel==0||(isZoneFireModel==1&&num_activedevices>1)){
-        glutAddSubMenu("Objects",showobjectsmenu);
+        glutAddSubMenu(_("Objects"),showobjectsmenu);
       }
       */
     }
@@ -6883,8 +6883,8 @@ updatemenu=0;
       if(visSensor==1)glutAddMenuEntry(_("*Thermocouples"),9);
       if(visSensor==0)glutAddMenuEntry(_("Thermocouples"),9);
       if(hasSensorNorm==1){
-        if(visSensorNorm==1)glutAddMenuEntry("*Thermocouple norms",14);
-        if(visSensorNorm==0)glutAddMenuEntry("Thermocouple norms",14);
+        if(visSensorNorm==1)glutAddMenuEntry(_("*Thermocouple norms"),14);
+        if(visSensorNorm==0)glutAddMenuEntry(_("Thermocouple norms"),14);
       }
     }
   }
@@ -7036,14 +7036,14 @@ updatemenu=0;
 #endif
     }
 
-    glutAddMenuEntry("File suffix:",11000);
+    glutAddMenuEntry(_("File suffix:"),11000);
     if(renderfilelabel==0){
-      glutAddMenuEntry("  *Frame number",RenderLABELframenumber);
-      glutAddMenuEntry("  Time",RenderLABELtime);
+      glutAddMenuEntry(_("  *Frame number"),RenderLABELframenumber);
+      glutAddMenuEntry(_("  Time"),RenderLABELtime);
     }
     if(renderfilelabel==1){
-      glutAddMenuEntry("  Frame number",RenderLABELframenumber);
-      glutAddMenuEntry("  *Time",RenderLABELtime);
+      glutAddMenuEntry(_("  Frame number"),RenderLABELframenumber);
+      glutAddMenuEntry(_("  *Time"),RenderLABELtime);
     }
     
     glutAddSubMenu(_("Start rendering:"),startrenderingmenu);    
@@ -8826,12 +8826,12 @@ updatemenu=0;
     
     CREATEMENU(scriptmenu,ScriptMenu);
     if(nscripts>0){
-      glutAddSubMenu("Run",scriptlistmenu);
-      glutAddSubMenu("Step (using ^)",scriptsteplistmenu);
+      glutAddSubMenu(_("Run"),scriptlistmenu);
+      glutAddSubMenu(_("Step (using ^)"),scriptsteplistmenu);
       if(script_step==1)glutAddMenuEntry(_("Continue"),SCRIPT_CONTINUE);
       if(script_step==1||current_script_command!=NULL)glutAddMenuEntry(_("Cancel"),SCRIPT_CANCEL);
     }
-    glutAddSubMenu("Record",scriptrecordmenu);
+    glutAddSubMenu(_("Record"),scriptrecordmenu);
 
   /* --------------------------------loadunload menu -------------------------- */
     {
