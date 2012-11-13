@@ -391,7 +391,7 @@ msgid "Custom Red/Custom Blue"
 msgstr "Angepasstes Rot/Angepasstes Blau"
 
 msgid "Customize colorbar...  ALT+C"
-msgstr ""
+msgstr "Farbbalken anpassen ... ALT + C"
 
 msgid "cutoff"
 msgstr "Abschneiden"
@@ -457,7 +457,7 @@ msgid "Display"
 msgstr "Anzeige"
 
 msgid "Display all"
-msgstr ""
+msgstr "Alle Anzeigen"
 
 msgid "Display data as b/w"
 msgstr "Daten-Anzeige als s/w"
@@ -1600,7 +1600,7 @@ msgid "Slice frame Skip"
 msgstr "Slice Frame Skip (??)"
 
 msgid "Slice render settings"
-msgstr ""
+msgstr "Slice Render Einstellungen"
 
 msgid "slices"
 msgstr "Slices"
@@ -1636,7 +1636,7 @@ msgid "Smokeview menus"
 msgstr "Smokeview Menues"
 
 msgid "Smokeview was built using the following pre-processing directives"
-msgstr ""
+msgstr "Smokeview wurde mit den folgenden Pre-Prozessing Direktiven compiliert"
 
 msgid "Smooth"
 msgstr "glatt"
@@ -1651,7 +1651,7 @@ msgid "Smooth blockages now"
 msgstr "Glaette Objekte ab jetzt"
 
 msgid "Smooth colorbar label values"
-msgstr ""
+msgstr "Glaette Farbbalkenbeschriftung"
 
 msgid "Smooth normal"
 msgstr "Glaette normal"
@@ -2041,7 +2041,7 @@ msgid "Visualize fire/smoke flow simulations"
 msgstr "Visualisiere Feuer-/Rauchsimulationen"
 
 msgid "Volume render settings"
-msgstr ""
+msgstr "Volume Render Einstellungen"
 
 msgid "W: toggle clipping - use Options/Clip menu to specify clipping planes"
 msgstr ""
