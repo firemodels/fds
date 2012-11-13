@@ -32,7 +32,7 @@ Propane burner test case to check basic chemistry model and soot deposition
       VOLUME_FRACTION = 18.1188,2.8164,4.0000/
 
 &REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
-      SMIX_ID = 'PROPANE','AIR','PRODUCTS','SOOT',
+      SPEC_ID_NU= 'PROPANE','AIR','PRODUCTS','SOOT',
       NU=-1.,-4.8164,1,0.1836/
 
 &SLCF PBY = 0.5, QUANTITY = 'TEMPERATURE' /
