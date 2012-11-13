@@ -23,7 +23,7 @@ Test Case for Mixture Fraction Output of Lumped Species
 
 &REAC FUEL = 'METHANE'     
     HEAT_OF_COMBUSTION = 4667.17685
-    SMIX_ID = 'METHANE','AIR','PRODUCTS'
+    SPEC_ID_NU = 'METHANE','AIR','PRODUCTS'
     NU=-1.,-2,1
     HRRPUV_AVERAGE = 25000000
     SUPPRESSION=.FALSE./      
