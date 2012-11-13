@@ -1,4 +1,4 @@
-SPEC_ID_NU&HEAD CHID='Beyler_Hood_isopropanol_136_lr',TITLE='Beyler Hood Test 136 12.4 kW isopropanol, 22.6 cm burner, -1 cm seperation'/
+&HEAD CHID='Beyler_Hood_isopropanol_136_lr',TITLE='Beyler Hood Test 136 12.4 kW isopropanol, 22.6 cm burner, -1 cm seperation'/
 &MESH XB=-0.54,0.54,-0.54,0.54,-0.24,0.48,IJK=36,36,24/
 &TIME T_END=200./
 &DUMP NFRAMES=200/
