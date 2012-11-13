@@ -2,50 +2,30 @@
 
 \label{HGL:Chapter}
 
-FDS, like any CFD model, does not perform a direct calculation of the HGL temperature or height. These are constructs unique to two-zone models.
-Nevertheless, FDS does make predictions of gas temperature at the same locations as the thermocouples in the experiments, and these
-values can be reduced in the same manner as the experimental measurements to produce an ``average'' HGL temperature and height.  Regardless of the
-validity of the reduction method, the FDS predictions of the HGL temperature and height ought to be representative of the accuracy of its predictions
-of the individual thermocouple measurements that are used in the HGL reduction. The temperature measurements from all six test series are used to
-compute an HGL temperature and height with which to compare to FDS.  The same layer reduction method is used for five of the six test series. Only
-the NBS Multi-Room series uses another method.
-
-A brief description of each test series is included below, followed by graphs comparing the predicted and measured HGL temperature and layer height.
+FDS, like any CFD model, does not perform a direct calculation of the HGL temperature or height. These are constructs unique to two-zone models. Nevertheless, FDS does make predictions of gas temperature at the same locations as the thermocouples in the experiments, and these values can be reduced in the same manner as the experimental measurements to produce an ``average'' HGL temperature and height.  Regardless of the validity of the reduction method, the FDS predictions of the HGL temperature and height ought to be representative of the accuracy of its predictions of the individual thermocouple measurements that are used in the HGL reduction. The temperature measurements from all six test series are used to compute an HGL temperature and height with which to compare to FDS.  The same layer reduction method is used for all the data presented in this chapter. 
 
 
 \section{HGL Reduction Method}
 
-Fire protection engineers often need to estimate the location of the
-interface between the hot, smoke-laden upper layer and the cooler
-lower layer in a burning compartment.  Relatively simple fire models,
-often referred to as {\em two-zone models}, compute this quantity
-directly, along with the average temperature of the upper and lower
-layers.  In a computational fluid dynamics (CFD) model like FDS, there
-are not two distinct zones, but rather a continuous profile of
-temperature. Nevertheless, there are methods that have been developed
-to estimate layer height and average temperatures from a continuous
-vertical profile of temperature. One such
-method~\cite{Janssens:JFS1992} is as follows: Consider a continuous
-function $T(z)$ defining temperature $T$ as a function of height above
-the floor $z$, where $z=0$ is the floor and $z=H$ is the
-ceiling. Define $T_u$ as the upper layer temperature, $T_l$ as the
-lower layer temperature, and $z_{int}$ as the interface
-height. Compute the quantities:
+Fire protection engineers often need to estimate the location of the interface between the hot, smoke-laden upper layer and the cooler lower layer in a burning compartment.  Relatively simple fire models, often referred to as {\em two-zone models}, compute this quantity directly, along with the average temperature of the upper and lower layers.  In a computational fluid dynamics (CFD) model like FDS, there are not two distinct zones, but rather a continuous profile of temperature. Nevertheless, there are methods that have been developed to estimate layer height and average temperatures from a continuous vertical profile of temperature. One such method~\cite{Janssens:JFS1992} is as follows: Consider a continuous function $T(z)$ defining temperature $T$ as a function of height above the floor $z$, where $z=0$ is the floor and $z=H$ is the ceiling. Define $T_u$ as the upper layer temperature, $T_l$ as the lower layer temperature, and $z_{int}$ as the interface height. Compute the quantities:
 \begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; dz &=& I_1 \\
                   (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 \end{eqnarray*}
 Solve for $z_{int}$:
-\be z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} \ee
-Let $T_l$ be the temperature in the lowest mesh cell and, using
-Simpson's Rule, perform the numerical integration of $I_1$ and
-$I_2$. $T_u$ is defined as the average upper layer temperature via
-\be (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz \ee
+\be 
+   z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} 
+\ee
+Let $T_l$ be the temperature in the lowest mesh cell and, using Simpson's Rule, perform the numerical integration of $I_1$ and $I_2$. $T_u$ is defined as the average upper layer temperature via
+\be 
+   (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz 
+\ee
 Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
+\newpage
 
 \section{WTC Test Series}
 
 The HGL temperature and height for the WTC experiments were calculated from two TC trees, one that was approximately 3~m to the west and one
-2~m to the east of the fire pan. Each tree consisted of 15 thermocouples, the highest point being 5~cm below the ceiling.
+2~m to the east of the fire pan (see Fig.~\ref{WTC_Drawing}). Each tree consisted of 15 thermocouples, the highest point being 5~cm below the ceiling.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -74,8 +54,7 @@ The HGL temperature and height for the WTC experiments were calculated from two 
 
 \section{VTT Test Series}
 
-The HGL temperature and height are calculated from the (1~min) averaged gas temperatures from three vertical thermocouple arrays using the standard reduction
-method. There are 10 thermocouples in each vertical array, spaced 2~m apart in the lower two-thirds of the hall, and 1~m apart near the ceiling.
+The HGL temperature and height are calculated from the (1~min) averaged gas temperatures from three vertical thermocouple arrays using the standard reduction method. There are 10 thermocouples in each vertical array, spaced 2~m apart in the lower two-thirds of the hall, and 1~m apart near the ceiling.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -94,26 +73,13 @@ method. There are 10 thermocouples in each vertical array, spaced 2~m apart in t
 
 \section{NIST/NRC Test Series}
 
-The NIST/NRC series consisted of 15 liquid spray fire tests with different heat release rates, pan locations, and ventilation conditions.
-Gas temperatures were measured using seven floor-to-ceiling
-thermocouple arrays (or ``trees'') distributed throughout the compartment.  The average hot gas layer temperature and height are calculated using
-thermocouple Trees 1, 2, 3, 5, 6 and 7. Tree 4 was not used because one of its thermocouples (TC~4-9) malfunctioned during most of the experiments.
-
-A few observations about the simulations:
+The NIST/NRC series consisted of 15 heptane spray fire experiments with varying heat release rates, pan locations, and ventilation conditions.
+Gas temperatures were measured using seven floor-to-ceiling thermocouple arrays (or ``trees'') distributed throughout the compartment.  The average hot gas layer temperature and height are calculated using thermocouple Trees 1, 2, 3, 5, 6 and 7. Tree~4 was not used because one of its thermocouples (TC~4-9) malfunctioned during most of the experiments. A few observations about the simulations:
 \begin{itemize}
-\item During Tests 4, 5, 10 and 16 a fan blew air into the compartment through a vent in the south wall.
-The measured velocity profile of the fan is not uniform, with the bulk of the air blowing from the lower third of the duct towards the ceiling at a
-roughly 45$^\circ$ angle.  The exact flow pattern is difficult to replicate in the model, thus, the results for Tests 4, 5, 10 and 16 should be evaluated
-with this in mind. The effect of the fan on the hot gas layer is small, but it does have a some effect on target temperatures near the vent.
-\item For all of the tests involving a fan, the predicted HGL height rises after the fire is extinguished,
-while the measured HGL drops.  This appears to be a curious artifact of the layer reduction algorithm. It is not included in the calculation of the
-relative difference.
-\item In the closed door tests, the hot gas layer descends all the way to the floor.
-However, the reduction method, used on both the measured and predicted temperatures, does not account for the formation of a single layer, and
-therefore does not indicate that the layer drops all the way to the floor. This is neither a flaw in the measurements nor in FDS, but rather in the
-layer reduction method.
-\item The HGL reduction method produces spurious results in the first few minutes of each test because no clear layer has yet formed.
-These early times are not included in the relative difference calculation.
+\item During Tests~4, 5, 10 and 16 a fan blew air into the compartment through a vent in the south wall. The measured velocity profile of the fan was not uniform, with the bulk of the air blowing from the lower third of the duct towards the ceiling at a roughly 45$^\circ$ angle.  The exact flow pattern is difficult to replicate in the model, thus, the results for Tests~4, 5, 10 and 16 should be evaluated with this in mind. The effect of the fan on the hot gas layer is small, but it does have a some effect on target temperatures near the vent.
+\item For all of the tests involving a fan, the predicted HGL height increased after the fire was extinguished, while the measured HGL decreased.  This appears to be a curious artifact of the layer reduction algorithm. It is not included in the calculation of the relative difference.
+\item In the closed door tests, the hot gas layer descended all the way to the floor. However, the reduction method, used on both the measured and predicted temperatures, does not account for the formation of a single layer, and therefore does not indicate that the layer drops all the way to the floor. This is neither a flaw in the measurements nor in FDS, but rather in the layer reduction method.
+\item The HGL reduction method produces spurious results in the first few minutes of each test because no clear layer has yet formed. These early times are not included in the relative difference calculation.
 \end{itemize}
 
 \newpage
@@ -174,85 +140,72 @@ These early times are not included in the relative difference calculation.
 
 \section{FM/SNL Test Series}
 
-Nineteen tests from the FM/SNL test series were selected for comparison. The hot gas layer temperature and height are calculated using the
-standard method. The thermocouple arrays that are referred to as Sectors 1, 2 and 3 are averaged (with an equal weighting for each) for all tests excepting Tests 21 and 22. For Tests 21 and 22, only Sectors 1 and 3 are used, as Sector 2 falls within the smoke plume.
+Nineteen tests from the FM/SNL test series were selected for comparison. The HGL temperature and height are calculated using the standard method. The thermocouple arrays that were located in Sectors~1, 2 and 3 are averaged (with an equal weighting for each) for all tests except Tests~21 and 22. For these tests, only Sectors~1 and 3 are used, as Sector~2 falls within the smoke plume. Also, for all but the gas burner experiments, the time history of the HRR is estimated. Only the peak HRR is reported.
 
-Note the following:
-\begin{itemize}
-\item The HGL heights, both the measured and predicted, are somewhat noisy due to the effect of ventilation ducts in the upper layer. As a result the beginning and end of the HGL height data has been excluded from evaluation.
-\item It is unclear how the Methanol pool fires, Tests 11 and 14, behaved  near the end of their burn period. The discrepancy in the HGL temperatures of these tests after peak temperature follows from uncertainty of fire HRR. The HRR is presently assumed to ramp down with $ t^2$ behavior.
-\end{itemize}
 
-\newpage
-
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_01_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_01_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_02_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_02_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_HGL_Height} 
 \end{tabular*}
 \end{figure}
 
-\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_05_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_05_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_HGL_Height} 
 \end{tabular*}
 \end{figure}
 
-\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_09_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_09_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_10_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_10_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_12_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_12_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_HGL_Height} 
 \end{tabular*}
 \end{figure}
 
-\newpage
-
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_12_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_12_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_13_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_13_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_14_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_14_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_15_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_15_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_15_HGL_Height}
 \end{tabular*}
 \end{figure}
 
-\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_17_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_17_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_21_HGL_Temp} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_21_HGL_Height} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_22_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_22_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_22_HGL_Height}
 \end{tabular*}
 \end{figure}
 
@@ -261,15 +214,7 @@ Note the following:
 
 \section{NBS Multi-Room Test Series}
 
-This series of experiments consists of two relatively small rooms connected by a long corridor. The fire is located in one of the rooms.  Eight
-vertical arrays of thermocouples are positioned throughout the test space: one in the burn room, one near the door of the burn room, three in the
-corridor, one in the exit to the outside at the far end of the corridor, one near the door of the other or ``target'' room, and one inside the target
-room.  Four of the eight arrays have been selected for comparison with model prediction: the array in the burn room (BR), the array in the middle of
-the corridor (18 ft from the BR), the array at the far end of the corridor (38 ft from the BR), and the array in the target room (TR).  In Tests 100A
-and 100O, the target room is closed, in which case the array in the exit (EXI) doorway is used. The test director reduced the layer information
-individually for the eight thermocouple arrays using an alternative method. These results are included in the original data sets. However, for the
-current validation study, the selected TC trees were reduced using the conventional method common to all the experiments considered.  The results are
-presented below.
+This series of experiments consisted of two relatively small rooms connected by a long corridor. The fire was located in one of the rooms.  Eight vertical arrays of thermocouples were positioned throughout the test space: one in the burn room, one near the door of the burn room, three in the corridor, one in the exit to the outside at the far end of the corridor, one near the door of the other or ``target'' room, and one inside the target room.  Four of the eight arrays have been selected for comparison with model prediction: the array in the burn room (BR), the array in the middle of the corridor (18~ft from the BR), the array at the far end of the corridor (38~ft from the BR), and the array in the target room (TR).  In Tests 100A and 100O, the target room was closed, in which case the array in the exit (EXI) doorway was used. The test director reduced the layer information individually for the eight thermocouple arrays using an alternative method. These results were included in the original data sets. However, in this report the selected TC trees were reduced using the conventional method common to all the experiments considered. 
 
 
 \begin{figure}[p]
@@ -319,11 +264,7 @@ presented below.
 
 \section{Steckler Compartment Experiments}
 
-Steckler {\em et al.}~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window flows in 55 compartment fire experiments. The test matrix
-is presented in Table~\ref{Steckler_Table}. Shown on
-the following pages are the temperature profiles inside the compartment compared with model predictions.  The FDS
-simulations were uniformly gridded with cells of 5~cm on each side. To quantify the difference between prediction and measurement, the
-maximum temperatures were compared.
+Steckler {\em et al.}~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window flows in 55 compartment fire experiments. The test matrix is presented in Table~\ref{Steckler_Table}. Shown on the following pages are the temperature profiles inside the compartment compared with model predictions. To quantify the difference between prediction and measurement, the maximum temperatures were compared.
 
 
 
@@ -429,17 +370,9 @@ maximum temperatures were compared.
 
 \section{LLNL Enclosure Series}
 
-The plots on the following pages compare predicted and measured layer temperatures from the LLNL Enclosure test series.
-In the experiment, fifteen thermocouples are evenly spaced from floor to ceiling.
-The measured temperatures are reported as averages of the lower, middle, and upper five TCs.
-Some of the experiments were conducted with a separated plenum space in the top one-third of the overall compartment (Tests~17-60). In these cases, the
-upper five TCs are a measure of the average plenum temperature.
+The plots on the following pages compare predicted and measured layer temperatures from the LLNL Enclosure test series. In the experiments, fifteen thermocouples were evenly spaced from floor to ceiling on either side of the burner. The measured temperatures were reported as averages of the lower, middle, and upper five TCs. Some of the experiments were conducted with a separated plenum space in the top one-third of the overall compartment (Tests~17-60). In these cases, the upper five TCs are a measure of the average plenum temperature.
 
-In the figures on the following pages, the black circles represent the average of the five upper-most TC measurements. The lines represent the simulation.
-The red circles represent the average
-of the middle five TC measurements. For the plenum tests, these TCs are located immediately beneath the plenum and their average temperature is typically greater
-than that of the plenum. Note that in a number of tests, the fuel flow is stopped or the fire self-extinguishes. The simulations last only as long as the
-reported measurements.
+In the figures on the following pages, the black circles represent the average of the five upper-most TC measurements. The lines represent the simulation. The red circles represent the average of the middle five TC measurements. For the plenum tests, these TCs are located immediately beneath the plenum and their average temperature is typically greater than that of the plenum. Note that in a number of tests, the fuel flow was stopped or the fire self-extinguished. The simulations last only as long as the reported measurements.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
