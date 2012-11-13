@@ -2484,6 +2484,14 @@ time step, {\ct DT}, will not be adjusted.
 This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
 numerical instabilities if the initial time step is set too high.
 
+\subsection{Stability of the particle transporte}
+\label{info:PART_Stability}
+
+The movement of droplets and particles within a time step is calculated using an analytical solution and remains stable regardless of the time step. 
+In some cases with extremely fast droplets or particles, however, the stability of the overall flow behaviour may require setting an additional parameter
+that limits the time step according to the speed of the fastest particle in the simulation. Setting {\ct PARTICLE\_CFL = .TRUE.} on the {\ct MISC} line
+activates this constraint. The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} parameter. Value 1 means that the fastest moving
+particle can move a distance of one grid cell during the time step.
 
 \clearpage
 
@@ -10866,6 +10874,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+{\ct PARTICLE\_CFL}                             & Logical       & Section~\ref{info:PART_Stability}                     &               & {\ct .FALSE.}     \\ \hline
+{\ct PARTICLE\_CFL\_MAX}                        & Real          & Section~\ref{info:PART_Stability}                     &               & 1.0               \\ \hline
 %{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test               &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}                             & Logical       & Section~\ref{info:sprinklers}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
