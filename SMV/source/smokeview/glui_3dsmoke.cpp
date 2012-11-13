@@ -358,7 +358,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,"debug",&smoke3dVoldebug);
 #endif
 #ifdef pp_SUPERMESH
-    CHECKBOX_use_supermesh=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Use super mesh"),&use_supermesh,SUPERMESH,Smoke3d_CB);
+    CHECKBOX_use_supermesh=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Combine meshes"),&use_supermesh,SUPERMESH,Smoke3d_CB);
 #endif
   }
 

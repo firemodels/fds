@@ -7469,9 +7469,9 @@ updatemenu=0;
   /* --------------------------------help menu -------------------------- */
 
   CREATEMENU(helpmenu,HelpMenu);
-  glutAddSubMenu("Web",webhelpmenu);
-  glutAddSubMenu("Shortcuts",keyboardhelpmenu);
-  glutAddSubMenu("Mouse",mousehelpmenu);
+  glutAddSubMenu(_("Web"),webhelpmenu);
+  glutAddSubMenu(_("Shortcuts"),keyboardhelpmenu);
+  glutAddSubMenu(_("Mouse"),mousehelpmenu);
   glutAddSubMenu(_("About"),aboutmenu);
 
   /* -------------------------------- target menu -------------------------- */
