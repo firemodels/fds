@@ -1,27 +1,13 @@
 
 \chapter{Compartment Pressure}
 
-In FDS, the pressure is decomposed into a temporally-varying background pressure and a spatially-varying perturbation that drives the flow. The former can
-be thought of as the ``over-pressure,'' and it is essentially a check on global mass and energy balances; whereas the latter has most to do with momentum conservation.
-In real buildings, leakage and ventilation affect the compartment ``over-pressure'' along with the fire, which also affects the pressure perturbation.
+In FDS, the pressure is decomposed into a temporally-varying background pressure plus a temporally and spatially-varying perturbation that drives the flow. The former can be thought of as the ``over-pressure'' which increases if heat is introduced into a closed compartment. In real buildings, leakage and ventilation affect the compartment ``over-pressure'' along with the fire.
 
-\section{NIST/NRC Test Series}
+\section{NIST/NRC Experiments}
 
-Comparisons between measured and predicted pressures for the NIST/NRC Test Series are shown
-in on the following pages.
-For those tests in which the door to the compartment is
-open, the over-pressures are only a few Pascals, whereas when the door is closed, the over-pressures are several hundred Pascals.
-The pressure within the compartment was measured at a single point, near the floor.
-In the simulations of the closed door tests, the compartment was assumed to leak via a small uniform flow spread
-over the walls and ceiling.  The flow rate was calculated based on the assumption that the leakage rate is proportional
-to the measured leakage area times the square root of compartment over-pressure.
+Comparisons between measured and predicted pressures for the NIST/NRC series are shown on the following pages. For those tests in which the door to the compartment was open, the over-pressures were only a few Pascals, whereas when the door was closed, the over-pressures were several hundred Pascals. The pressure within the compartment was measured at a single point, near the floor. For the simulations of the closed door tests, the compartment is assumed to leak via a small uniform flow distributed over the walls and ceiling. The flow rate is calculated based on the assumption that the leakage rate is proportional to the measured leakage area times the square root of compartment over-pressure.
 
-Note that in the closed door tests, there is often a dramatic drop in the predicted compartment pressure.
-This is the result of the assumption in FDS that the heat release rate is decreased to zero in one second at the time
-in the experiment when the fuel flow was stopped for safety reasons.  In reality, the fire did not extinguish
-immediately because there was an excess of fuel in the pan following the flow stoppage.
-For the purpose of model comparison, the peak over-pressures are differenced in the closed door tests,
-and the peak (albeit small) under-pressures are compared in the open door tests.
+Note that for the closed door tests, there is often a dramatic drop in the predicted compartment pressure. This is the result of the assumption in FDS that the heat release rate is decreased to zero in one second at the time in the experiment when the fuel flow was stopped for safety reasons.  In reality, the fire did not extinguish immediately because there was an excess of fuel in the pan following the flow stoppage. For the purpose of model comparison, the peak over-pressures are compared in the closed door tests, and the peak (albeit small) under-pressures are compared in the open door tests.
 
 \newpage
 
@@ -55,21 +41,15 @@ and the peak (albeit small) under-pressures are compared in the open door tests.
 
 \clearpage
 
-\section{LLNL Enclosure Series}
+\section{LLNL Enclosure Experiments}
 
-The test report of the LLNL Enclosure experiments lists the mass flow rate, $\dot{m}$, through the exhaust duct at different times
-during the tests. It also lists the compartment pressures, $\Delta p$, at these same times. From the simple leak formula:
-\be \frac{\dot{m}}{\rho_0} = A \, \sqrt{\frac{2 \, \Delta p}{\rho_0}} \ee
-the leakage area, $A$, is estimated to be 0.018~m$^2$, based on the initial exhaust rate and pressure.
-For modeling purposes, the ``leakage area'' is assumed to be the sum of the
-inlet duct area plus any actual compartment leakage area. The mass flow rate through the exhaust duct is specified explicitly in
-the model. There is not enough details of the ventilation system to model the fan and filtration system within the exhaust duct.
+The test report of the LLNL Enclosure experiments lists the mass flow rate, $\dot{m}$, through the exhaust duct at different times during the tests. It also lists the compartment pressures, $\Delta p$, at these same times. From the simple leak formula:
+\be 
+   \frac{\dot{m}}{\rho_0} = A \, \sqrt{\frac{2 \, \Delta p}{\rho_0}} 
+\ee
+the leakage area, $A$, is estimated to be 0.018~m$^2$, based on the initial exhaust rate and pressure. For modeling purposes, the ``leakage area'' is assumed to be the sum of the inlet duct area plus any actual compartment leakage area. The mass flow rate through the exhaust duct is specified explicitly in the model. The test report does not provide enough information about the ventilation system to model the fan and filtration system within the exhaust duct.
 
-In the figures on the following pages, the open circles represent the measured pressure; the line represents the predicted pressure. The
-predicted pressures are time-averaged over a time interval that is one-tenth the total simulation time. In general, the short-duration pressure
-spike that is typical of fires within relatively tight compartments has been smoothed over in the reported test data. Depending on the simulation, it
-often appears in the simulation data. The comparison of measurement and prediction is based on the final few pressure points, not the
-initial spike.
+In the figures on the following pages, the open circles represent the measured pressure; the line represents the predicted pressure. The predicted pressures are time-averaged over a time interval that is one-tenth the total simulation time. In general, the short-duration pressure spike that is typical of fires within relatively tight compartments has been smoothed over in the reported test data. Depending on the simulation, it often appears in the simulation data. The comparison of measurement and prediction is based on the final few pressure points, not the initial spike.
 
 Only some of the 64 experiments are included. In some cases, the fan was turned off and there is not enough information in the test report to determine the pressure losses through the duct. In other cases, there are only two pressure measurements reported; one at the start of the test, the other either before or after extinction. In various other cases, either there is not enough data or the data is inconsistent with the reported conditions.
 
