@@ -7,55 +7,66 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
-&TIME T_END=800., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
+&TIME T_END=1000., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
 
 &REAC FUEL='METHANE', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
+
+&RAMP ID='c_ramp', T=0.0,  F=1.12  /
+&RAMP ID='c_ramp', T=165., F=2.47  /
+&RAMP ID='c_ramp', T=167., F=1.80  /
+&RAMP ID='c_ramp', T=800., F=3.56  /
+&RAMP ID='k_ramp', T=20.,  F=0.290 /
+&RAMP ID='k_ramp', T=220., F=0.290 /
+&RAMP ID='k_ramp', T=800., F=0.290 /
 
 &MATL ID='POM'
       ABSORPTION_COEFFICIENT=3550.
       N_REACTIONS=1
       A(1) = 1
       E(1) = 0
-      EMISSIVITY=0.95
+      EMISSIVITY=0.949
       DENSITY=1425.
+	  THRESHOLD_TEMPERATURE=165.
       NU_MATL=1.
       MATL_ID='Liq'
       HEAT_OF_REACTION=141.
-      CONDUCTIVITY = 0.28
-      SPECIFIC_HEAT = 1.88 /
+      SPECIFIC_HEAT_RAMP = 'c_ramp'
+      CONDUCTIVITY_RAMP = 'k_ramp'/
 	  
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=3550.
       N_REACTIONS=1
       A(1) = 3.7E10
       E(1) = 1.57E5
-      EMISSIVITY=0.95
+      EMISSIVITY=0.949
       DENSITY=1425.
       SPEC_ID='METHANE'
       NU_SPEC=1.
       HEAT_OF_REACTION=1570.
-      CONDUCTIVITY = 0.28
-      SPECIFIC_HEAT = 1.88 /
+      SPECIFIC_HEAT_RAMP = 'c_ramp'
+      CONDUCTIVITY_RAMP = 'k_ramp'/
+
+&MATL ID='FOIL'
+      CONDUCTIVITY=250.
+      SPECIFIC_HEAT=0.91
+      DENSITY=2700.0
+      EMISSIVITY=0.12
+      ABSORPTION_COEFFICIENT=50000/
 
 &MATL ID='FOAMGLAS'
-      CONDUCTIVITY = 0.08
-      SPECIFIC_HEAT = 0.84
-      DENSITY = 120. /
-	  
-&MATL ID='FOIL'
-	CONDUCTIVITY=250.
-	SPECIFIC_HEAT=0.91
-	DENSITY=2700.0
-	EMISSIVITY=0.12
-	ABSORPTION_COEFFICIENT=50000/
+      CONDUCTIVITY=.04
+      SPECIFIC_HEAT=0.84
+      DENSITY=120.0
+      EMISSIVITY=1
+      ABSORPTION_COEFFICIENT=50000/
 	
 &SURF ID='POMSLAB'
       COLOR='BLACK'
       MATL_ID='POM','FOIL','FOAMGLAS'
-      THICKNESS=0.0067,0.0000343,0.025
+      THICKNESS=0.0067,0.0000343,0.0254
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
-&VENT XB=-0.04,0.04,-0.04,0.04,0.0,0.0, SURF_ID = 'POMSLAB' /
+&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'POMSLAB' /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
