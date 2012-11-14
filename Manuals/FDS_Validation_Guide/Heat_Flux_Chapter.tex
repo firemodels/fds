@@ -1,37 +1,20 @@
 \chapter{Heat Flux}
 
-Radiative heat transfer is included in FDS via the solution of the radiation transport equation for a
-gray gas, and in some limited cases using a wide band
-model.  The equation is solved using a technique similar to finite
-volume methods for convective transport, thus the name given to it is
-the Finite Volume Method (FVM).  Using approximately 100 discrete
-angles, the finite volume solver requires about 20~\% of the total CPU
-time of a calculation, a modest cost given the complexity of radiation
-heat transfer. The absorption coefficients of the gas-soot mixtures
-are computed using RADCAL narrow-band model.  Liquid droplets can
-absorb and scatter thermal radiation. This is important in cases
-involving mist sprinklers, but also plays a role in all sprinkler
-cases.  The absorption and scattering coefficients are based on Mie
-theory.
+Radiative heat transfer is included in FDS via the solution of the radiation transport equation for a gray gas, and in some limited cases using a wide band model.  The equation is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is
+the Finite Volume Method (FVM).  Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer. The absorption coefficients of the gas-soot mixtures are computed using RADCAL narrow-band model.  Liquid droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases.  The absorption and scattering coefficients are based on Mie theory.
 
-This chapter contains a wide variety of heat flux measurements,
-ranging from less than a kW/m$^2$ from very small methane gas burners
-up to about 150~kW/m$^2$ in full-scale compartment fires.
+This chapter contains a wide variety of heat flux measurements, ranging from less than a kW/m$^2$ from very small methane gas burners up to about 150~kW/m$^2$ in full-scale compartment fires.
 
 
 \clearpage
 
 \section{Fleury Heat Flux Measurements}
 
-The plots on the following pages contain comparisons of predicted and measured heat fluxes from a series of propane burner fires.
-Heat flux gauges were mounted on moveable dollies that
-were placed in front of, and to the side of, burners with dimensions of 0.3~m by 0.3~m (1:1 burner), 0.6~m by 0.3~m (2:1 burner), and 0.9~m by 0.3~m (3:1 burner). The heat release
-rates were set to 100~kW, 150~kW, 200~kW, 250~kW, and 300~kW. The gauges were mounted at heights of 0~m, 0.5~m, 1.0~m, and 1.5~m relative to the top edge of the burner. Each page
-contains the results for a given HRR.
+The plots on the following pages contain comparisons of predicted and measured heat fluxes from a series of propane burner fires. Heat flux gauges were mounted on moveable dollies that were placed in front of, and to the side of, burners with dimensions of 0.3~m by 0.3~m (1:1 burner), 0.6~m by 0.3~m (2:1 burner), and 0.9~m by 0.3~m (3:1 burner). The heat release rates were set to 100~kW, 150~kW, 200~kW, 250~kW, and 300~kW. The gauges were mounted at heights of 0~m, 0.5~m, 1.0~m, and 1.5~m relative to the top edge of the burner. Each page contains the results for a given HRR.
 
 
 
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/Fleury_Heat_Flux/Fleury_1t1_100_kW_Front_Heat_Flux} &
 \includegraphics[height=2.2in]{FIGURES/Fleury_Heat_Flux/Fleury_1t1_100_kW_Side_Heat_Flux} \\
@@ -105,9 +88,7 @@ contains the results for a given HRR.
 
 \section{Hamins Methane Burner Heat Flux Measurements}
 
-Predicted and measured radial and vertical heat flux profiles from six experiments conducted by Anthony Hamins at NIST are shown on the following pages. The
-relevant information about the fires is included in Table~\ref{Hamins_Table}. These are challenging simulations because the neither the gray gas assumption
-nor the radiative fraction is assumed. Rather, the model is calculating the temperature and species concentrations necessary to predict the radiant energy from the fire.
+Predicted and measured radial and vertical heat flux profiles from six experiments conducted by Anthony Hamins at NIST are shown on the following pages. The relevant information about the fires is included in Table~\ref{Hamins_Table}. These are challenging simulations because the neither the gray gas assumption nor the radiative fraction is assumed. Rather, the model is calculating the temperature and species concentrations necessary to predict the radiant energy from the fire.
 
 \begin{table}[ht]
 \caption{Summary of Hamins methane burner experiments. }
@@ -162,10 +143,8 @@ F        & 19       & 1.0  & 162         &  206           & 0.14    \\ \hline
 
 \section{NRL/HAI Wall Heat Flux Measurements}
 
-Predicted and measured vertical heat flux profiles from 9 propane sand burner fires are shown on the following pages.
-The parameters for each
-experiment are listed in Table~\ref{NRL/HAI_Parameters} below. Note that all the FDS simulations were performed with
-a grid resolution such that
+Predicted and measured vertical heat flux profiles from 9 propane sand burner fires are shown on the following pages. The parameters for each
+experiment are listed in Table~\ref{NRL/HAI_Parameters} below. Note that all the FDS simulations were performed with a grid resolution such that
 $D^*/\dx=10$.
 
 \begin{table}[ht]
@@ -222,29 +201,9 @@ Number   & (m)     & (m)        & (kW)        &         & Height (m)      \\ \hl
 
 \section{Ulster SBI Heat Flux Measurements}
 
-Predicted and measured vertical heat flux profiles for three propane fire sizes in the
-single burning item (SBI) enclosure at the University of Ulster are shown on the following page.
-Measurements were made on two
-vertical panels that form a corner, at the base of which was a triangular-shaped burner with sides of
-length 25~cm. Three vertical profiles were measured on each panel at distances of 3.25~cm, 16.5~cm, and
-29~cm from the corner.
+Predicted and measured vertical heat flux profiles for three propane fire sizes in the single burning item (SBI) enclosure at the University of Ulster are shown on the following page. Measurements were made on two vertical panels that form a corner, at the base of which was a triangular-shaped burner with sides of length 25~cm. Three vertical profiles were measured on each panel at distances of 3.25~cm, 16.5~cm, and 29~cm from the corner.
 
-Note that all the FDS simulations were performed with a grid resolution of 2~cm, and note also that
-the parameter {\ct RADIATIVE\_FRACTION} has been set to zero, meaning that FDS is basing the source term
-of the radiation transport equation on the temperature rather than the heat release rate. In addition, the
-soot yield has been set to 0.05 as a crude way to represent the excess soot that is present in the flames but is
-eventually oxidized. The version of FDS used does not have a soot model to
-account for higher levels of soot in the flame region.
-
-\begin{warning}
-\noindent
-{\bf These results should be regarded as preliminary because FDS is being used in a way that one would
-ordinarily not use it.}
-\end{warning}
-
-\newpage
-
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_30_kW_Left_Heat_Flux} &
 \includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_30_kW_Right_Heat_Flux} \\
@@ -254,7 +213,7 @@ ordinarily not use it.}
 \includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_60_kW_Right_Heat_Flux}
 \end{tabular*}
 \label{Ulster_SBI}
-\caption[Corner heat flux predictions, Ulster SBI experiments.]
+\caption[Corner heat flux predictions, Ulster SBI experiments]
 {Comparison of predicted and measured heat fluxes to adjacent panels forming a corner in the single
 burning item (SBI) apparatus at the University of Ulster.}
 \end{figure}
@@ -263,21 +222,9 @@ burning item (SBI) apparatus at the University of Ulster.}
 
 \section{FM Parallel Panel Heat Flux Measurements}
 
-Predicted and measured vertical heat flux profiles for three propane and three propylene fires (30~kW, 60~kW, and
-100~kW) sandwiched between two 2.4~m high, 0.6~m wide panels are presented on the following page.
-Note that all the FDS simulations were performed with a grid resolution of 2~cm, and note also that
-the parameter {\ct RADIATIVE\_FRACTION} has been set to 0.37 for propylene and 0.29 for propane.  In addition, the
-soot yield has been set to 0.095 for propylene and 0.024 for propane. There is no soot growth or extinction model
-used.
+Predicted and measured vertical heat flux profiles for three propane and three propylene fires (30~kW, 60~kW, and 100~kW) sandwiched between two 2.4~m high, 0.6~m wide panels are presented below.
 
-\begin{warning}
-\noindent
-{\bf These results should be regarded as preliminary because features of the next major release (FDS 6) are used.}
-\end{warning}
-
-\newpage
-
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_1_Heat_Flux} &
 \includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_4_Heat_Flux} \\
@@ -287,7 +234,7 @@ used.
 \includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_6_Heat_Flux}
 \end{tabular*}
 \label{FM_Parallel_Panel}
-\caption[Side wall heat flux predictions, FM Parallel Panel experiments.]
+\caption[Side wall heat flux predictions, FM Parallel Panel experiments]
 {Comparison of predicted and measured heat fluxes to parallel panels.}
 \end{figure}
 
@@ -297,7 +244,7 @@ used.
 
 \section{WTC Heat Flux Measurements}
 
-There were a variety of heat flux gauges installed in the test compartment. Most were within 2~m of the fire. Their locations are orientations are listed in Table~\ref{WTC_Gauges}.
+There were a variety of heat flux gauges installed in the test compartment. Most were within 2~m of the fire. Their locations and orientations are listed in Table~\ref{WTC_Gauges}.
 
 \begin{table}[h!]
 \caption{Heat flux gauge positions relative to the center of the fire pan in the WTC series.}
@@ -532,9 +479,7 @@ Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray 
 
 \section{NRCC Facade Heat Flux Measurements}
 
-Figure~\ref{NRCC_Facade_Image} displays the simulation of a 10.3~MW fire inside and outside of a small
-enclosure. The purpose of the experiment was to measure the heat flux to the exterior facade. The
-FDS heat flux predictions are made at the location of the green points.
+Figure~\ref{NRCC_Facade_Image} displays the simulation of a 10.3~MW fire inside and outside of a small enclosure. The purpose of the experiment was to measure the heat flux to the exterior facade. The FDS heat flux predictions are made at the location of the green points.
 
 \begin{figure}[h!]
 \begin{center}
@@ -607,15 +552,15 @@ fire is 10.3~MW.}
 
 \clearpage
 
-\section{BRE Spray Tests, Attenuation of Thermal Radiation in Water Spray}
+\section{Attenuation of Thermal Radiation in Water Spray}
 
-Attenuation of thermal radiation in water sprays was measured using three full-cone type hydraulic nozzles and eight pressures for
-each nozzle. The initial droplet speeds were determined using a simple hydraulic relation $v = 0.9 \sqrt{2P/\rho}$. The median
-drop size distributions were determined by assuming $d_m \propto p^{-1/3}$ and finding the constant of proportionality by fitting to the
-experimental PDPA measurement 1.0 m below the nozzles.  For practical reasons, measured median diameters $d_{v50}$ are compared against mean
-diameters $d_{43}$. For the vertical velocity, arithmetic mean of the droplets is used. These results represent a validation of the boundary conditions.
-The actual validation of radiation attenuation is performed by comparing the experimental and measured attenuations at 4.0 m distance from the heat source.
-\begin{figure}[p]
+This section presents the results of simulations of spray experiments where the reduction of thermal radiation by a fine water spray was measured. 
+
+\subsection{BRE Spray Experiments}
+
+Attenuation of thermal radiation by a water spray was measured using three full-cone type hydraulic nozzles at eight different pressures. The initial droplet speeds were determined using a simple hydraulic relation, $v = 0.9 \sqrt{2P/\rho}$. The median drop size distributions were determined by assuming $d_m \propto p^{-1/3}$ and finding the constant of proportionality by fitting to the experimental PDPA measurement 1~m below the nozzles.  Measured median diameters, $d_{v50}$, are compared against mean diameters, $d_{43}$. The arithmetic mean of the droplets is used for vertical velocity. The comparison of predicted and measured attenuation, Fig.~\ref{BRE_Spray_Attenuation}, is made at a distance of 4~m from the heat source.
+
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=2.8in]{FIGURES/BRE_Spray/BRE_Spray_W} &
 \includegraphics[width=2.8in]{FIGURES/BRE_Spray/BRE_Spray_Diameter}
@@ -623,32 +568,29 @@ The actual validation of radiation attenuation is performed by comparing the exp
 \label{BRE_Spray_W_and_diam}
 \caption[Droplet speeds and mean diameters for the three nozzles]{Comparison of experimental and predicted droplet speeds and mean diameters for the three nozzles and different pressures.}
 \end{figure}
-\begin{figure}[p]
+
+\begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=4.0in]{FIGURES/BRE_Spray/BRE_Spray_Attenuation}
+\includegraphics[width=3.5in]{FIGURES/BRE_Spray/BRE_Spray_Attenuation}
 \end{tabular}
 \end{center}
 \label{BRE_Spray_Attenuation}
-\caption[Summary of radiation attenuation, BRE Spray test series]{Summary of radiation attenuation in the BRE Spray test series.}
+\caption[Comparison of radiation attenuation, BRE Spray experiments]{Comparison of predicted and measured radiation attenuation in the BRE Spray experiments.}
 \end{figure}
 
 
-\clearpage
 
-\section{LEMTA Spray Tests, Attenuation of Thermal Radiation in Water Spray}
+\subsection{LEMTA Spray Experiments}
 
-In this experiment, the attenuation of thermal radiation was measured at five heights in water sprays produced by seven full-elliptic type hydraulic nozzles.
-The operating pressure was 4~bar,
-the half ejection angles have been measured in a previous study. The initial speed was deduced from the water flow rate and the orifice diameter.
-The droplet size at the injection point was set by comparing the predicted and measured results at the PDPA measurement location 0.2~m below the nozzles.
-The actual validation of radiation attenuation is performed by comparing the experimental and measured attenuations at these five locations.
-\begin{figure}[p]
+The attenuation of thermal radiation was measured at five heights in water sprays produced by seven full-elliptic type hydraulic nozzles. The operating pressure was 4~bar. The initial speed was deduced from the water flow rate and the orifice diameter. The droplet size at the injection point was determined by comparing the predicted and measured results at the PDPA measurement location 0.2~m below the nozzles. The comparison of predicted and measured attenuations, Fig.~\ref{LEMTA_Spray_Attenuation}, is made at five locations.
+
+\begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=4.0in]{FIGURES/LEMTA_Spray/LEMTA_Spray_Attenuation}
+\includegraphics[width=3.5in]{FIGURES/LEMTA_Spray/LEMTA_Spray_Attenuation}
 \end{tabular}
 \end{center}
 \label{LEMTA_Spray_Attenuation}
-\caption[Summary of radiation attenuation, LEMTA Spray test series]{Summary of radiation attenuation in the LEMTA Spray test series.}
+\caption[Comparison of radiation attenuation, LEMTA Spray experiments]{Comparison of predicted and measured radiation attenuation in the LEMTA Spray experiments.}
 \end{figure}
