@@ -1,118 +1,113 @@
 \chapter{Gas Species and Smoke}
 
-For most applications, FDS uses a single step chemical reaction whose products are tracked via
-a two-parameter mixture fraction model.  The mixture fraction is a conserved
-scalar quantity that represents the mass fraction of one or more components of the gas at
-a given point in the flow field.  By default, two components of the mixture fraction are explicitly
-computed. The first is the mass fraction of unburned fuel and
-the second is the mass fraction of burned fuel (i.e., the mass of the combustion products
-that originated as fuel). When the default model is used, O$_2$, CO$_2$ and smoke concentrations are obtained
-from the explicitly computed mixture fraction variables. Their yields are specified by the user and do not
-change.
+For most applications, FDS uses a single step, mixing-controlled combustion model. The products of combustion are ``lumped'' together and tracked as a single gas mixture. These products include CO$_2$, H$_2$O, CO, and soot. However, in some cases, the combustion is incomplete due to a lack of oxygen. In others, a multiple-step reaction scheme is used to predict the production of CO. 
 
-FDS has an optional two-step chemical reaction with a three parameter
-mixture fraction decomposition with the first step being oxidation of fuel
-to carbon monoxide and the second step the oxidation of carbon monoxide to carbon dioxide.
-The three mixture fraction components for the two step reaction
-are unburned fuel, mass of fuel that has completed the first reaction step, and the mass
-of fuel that has completed the second reaction step.  The mass fractions of all of the major
-reactants and products can be derived from the mixture fraction parameters by means of
-``state relations.'' Examples of this more detailed model can be found later in this chapter.
+\section{Major Combustion Products, O$_2$ and CO$_2$}
+
+For any hydrocarbon fuel, the major combustion products are oxygen and carbon dioxide. Accurate predictions of these gases requires knowledge of the chemical composition of the fuel and an accurate transport algorithm for the combustion products.
 
 
+\clearpage
 
-
-\section{WTC and NIST/NRC Test Series, Oxygen and CO$_2$}
+\subsection{WTC Experiments}
 
 The following pages present comparisons of oxygen and carbon dioxide concentration predictions and measurements for the
-WTC and NIST/NRC series. In the WTC tests, there was only one measurement of each made near the ceiling of the compartment roughly 2~m from the
-seat of the fire. In the NIST/NRC tests, there were two oxygen measurements, one in the upper layer, one in the lower.  There was only one carbon
-dioxide measurement in the upper layer.
+WTC experiments. There was only one measurement of each made near the ceiling of the compartment roughly 2~m from the fire. 
 
-\newpage
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_CO2}
+\end{tabular*}
+\label{NIST_WTC_Oxygen_CO2_1}
+\end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Oxygen} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_CO2} \\
 \includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Oxygen}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_CO2}
 \end{tabular*}
-\label{NIST_WTC_Oxygen}
+\label{NIST_WTC_Oxygen_CO2_2}
 \end{figure}
 
+
+\clearpage
+
+\subsection{NIST/NRC Experiments}
+
+The following pages present comparisons of oxygen and carbon dioxide concentration predictions and measurements for the
+NIST/NRC series. There were two oxygen measurements, one in the upper layer, one in the lower.  There was only one carbon
+dioxide measurement in the upper layer.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_CO2} 
+\end{tabular*}
+\label{NIST_NRC_Gas_Open_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_CO2}
+\end{tabular*}
+\label{NIST_NRC_Gas_Open_2}
+\end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Oxygen}
-\end{tabular*}
-\label{NIST_NRC_Gas_Closed}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_Oxygen} &
- \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Oxygen}
-\end{tabular*}
-\label{NIST_NRC_Gas_Open}
-\end{figure}
-
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_CO2} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_CO2} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_CO2} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_CO2} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_CO2} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_CO2}
-\end{tabular*}
-\label{NIST_WTC_CO2}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_CO2} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Oxygen} &
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_CO2} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_CO2} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_CO2} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_CO2} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_CO2} 
+\end{tabular*}
+\label{NIST_NRC_Gas_Closed_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Oxygen} &
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_CO2} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_CO2} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Oxygen} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_CO2} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Oxygen} &
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_CO2}
 \end{tabular*}
+\label{NIST_NRC_Gas_Closed_2}
 \end{figure}
 
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_CO2} &
- \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_CO2} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_CO2} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_CO2} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_CO2} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_CO2} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_CO2}
-\end{tabular*}
-\end{figure}
+\clearpage
+
+\subsection{Summary of Major Combustion Products Predictions}
 
 
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[width=3.5in]{FIGURES/ScatterPlots/Carbon_Dioxide_Concentration} \\
@@ -126,11 +121,14 @@ dioxide measurement in the upper layer.
 \clearpage
 
 
-\section{NIST/NRC Test Series, Smoke}
+\section{Smoke}
 
-FDS treats smoke like all other combustion products, basically a tracer gas whose mass fraction is a function of the mixture fraction.
-To model smoke movement, the user need only prescribe the smoke yield, that is, the fraction of the fuel mass that is
-converted to smoke particulate.  For the simulations of the NIST/NRC tests, the smoke yield is specified as one of the test parameters.
+FDS treats smoke particulate in a similar way to other gaseous combustion products, basically a tracer gas whose production rate is a fixed fraction of the fuel consumption rate. However, there is an option in the model to allow smoke to deposit on solid surfaces, thus reducing its concentration in the product stream. By default, to model smoke movement it is only necessary to specify the soot yield, that is, the fraction of the fuel mass that is
+converted to soot. However, additional parameters can be added to account for soot deposition. 
+
+\subsection{NIST/NRC Experiments}
+
+For the simulations of the NIST/NRC tests, the smoke yield is specified as one of the test parameters.
 The figures on the following pages contain comparisons of measured and predicted smoke concentration at one measuring station in the upper layer.
 There are two obvious trends in the figures: first, the predicted concentrations are about 50~\% higher than the measured
 in the open door tests.  Second,
@@ -138,8 +136,6 @@ the predicted concentrations are roughly three times the measured concentrations
 As a contrast, Figure displays the time history of CO concentration for 6 of the NIST/NRC tests.
 Like smoke, the CO is specified in FDS via a fixed yield, measured along with smoke and reported in the test document.
 The large differences between model and measurement seen in the smoke data do not appear in the CO data.
-
-\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -167,9 +163,11 @@ The large differences between model and measurement seen in the smoke data do no
 \end{tabular*}
 \end{figure}
 
+\clearpage
 
+\subsection{Summary of Smoke Concentration Predictions}
 
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[width=4.0in]{FIGURES/ScatterPlots/Smoke_Concentration} \\
@@ -181,121 +179,9 @@ The large differences between model and measurement seen in the smoke data do no
 \end{figure}
 
 
-
 \clearpage
 
-\section{Smyth Slot Burner Experiment}
-
-The two-step, CO production model in FDS was used to simulate a methane/air slot burner diffusion flame.
-Figures~\ref{Smyth_Slot_Burner_7} through \ref{Smyth_Slot_Burner_11}
-show predicted and measured temperatures at three elevations above the burner.  The model predicts a flame that is slightly narrower
-and cooler than measured.  The model
-also predicts higher centerline temperatures.  These results are not surprising.  The two-step combustion model considers
-the first step, F~$\longrightarrow$~CO, to be infinitely fast, assuming that the local oxygen concentration satisfies a
-flammability criterion.  This is true in the vicinity of the lip of the burner.  In reality, the cold fuel and air
-streams do not react infinitely fast at this location and some oxygen penetrates the flame at the base, resulting in cooler
-gases being entrained into the core of the flame with a resulting drop in the centerline temperature.
-
-Figures~\ref{Smyth_Slot_Burner_7} through \ref{Smyth_Slot_Burner_11} also show predicted and
-measured values of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner along.
-Note that the test data shows a small quantity of oxygen along
-the burner centerline which is not captured in the simulation.  Along the centerline, the model predicts higher values of fuel and higher values of
-products than measured.  The species profiles are also slightly narrower than measured, consistent with the temperature prediction.
-The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Fuel} \\
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Dioxide} &
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Monoxide} &
-\end{tabular*}
-\caption[Temperature and gas species predictions 7~mm above burner, Smyth experiment]
-{Predicted and measured temperature and gas species 7~mm above a methane-air slot burner.}
-\label{Smyth_Slot_Burner_7}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Fuel} \\
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Carbon_Dioxide} &
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Carbon_Monoxide} &
-\end{tabular*}
-\caption[Temperature and gas species predictions 9~mm above burner, Smyth experiment]
-{Predicted and measured temperature and gas species 9~mm above a methane-air slot burner.}
-\label{Smyth_Slot_Burner_9}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Fuel} \\
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Carbon_Dioxide} &
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Oxygen} \\
-\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Carbon_Monoxide} &
-\end{tabular*}
-\caption[Temperature and gas species predictions 11~mm above burner, Smyth experiment]
-{Predicted and measured temperature and gas species 11~mm above a methane-air slot burner.}
-\label{Smyth_Slot_Burner_11}
-\end{figure}
-
-
-
-\clearpage
-
-\section{Beyler Hood Experiments}
-
-Fig.~\ref{Beyler_Species} shows species predictions made by the two-step model compared with measured data for a
-range of fire sizes and burner positions.  The
-model outputs are the time-averaged species concentration at the hood exhaust vent whereas the experiment is the time
-averaged species concentration downstream in the exhaust duct.
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=3.2in]{FIGURES/Beyler_Hood/Beyler_Hood_O2} &
-\includegraphics[height=3.2in]{FIGURES/Beyler_Hood/Beyler_Hood_CO2} \\
-\includegraphics[height=3.2in]{FIGURES/Beyler_Hood/Beyler_Hood_H2O} &
-\includegraphics[height=3.2in]{FIGURES/Beyler_Hood/Beyler_Hood_CO} \\
-\includegraphics[height=3.2in]{FIGURES/Beyler_Hood/Beyler_Hood_Soot} &
-\includegraphics[height=3.2in]{FIGURES/Beyler_Hood/Beyler_Hood_UHC} \\
-\end{tabular*}
-\caption[Summary of gas species predictions, Beyler hood experiments]
-{Comparison of measured and predicted species concentrations in the Beyler hood experiments}
-\label{Beyler_Species}
-\end{figure}
-
-\clearpage
-
-\section{NIST Reduced Scale Enclosure (RSE) Test Series, 1994}
-
-The RSE natural gas experiments were selected to assess the CO production capability rather than soot production.
-Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW,
-500~kW, and 600~kW.  The experiments were modeled using properties of the natural gas supplied to the test facility.
-The model geometry included the compartment interior along with a 0.6~m deep region outside the door.
-Figure~\ref{NIST_RSE_1994} shows the measured and predicted CO, CO$_2$ and O$_2$ concentrations.  The measured values are
-from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.
-
-\newpage
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Front} &
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Rear} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Front} &
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Rear} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Front} &
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear}
-\end{tabular*}
-\caption[Summary of NIST Reduced Scale Enclosure experiments]{Summary of NIST Reduced Scale Enclosure experiments.}
-\label{NIST_RSE_1994}
-\end{figure}
-
-\clearpage
-
-\section{Sippola Aerosol Deposition Cases}
+\subsection{Sippola Aerosol Deposition Experiments}
 
 A total of 16 aerosol deposition tests were conducted in a straight duct for 5 different
 particle sizes and 3 different air velocities. In these cases, the aerosol species is tracked
@@ -357,5 +243,104 @@ Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured versus pr
 \end{center}
 \caption[Summary of Sippola aerosol deposition cases]{Summary of Sippola aerosol deposition cases.}
 \label{Sippola_Aerosol_Deposition_Velocity}
+\end{figure}
+
+
+
+\clearpage
+
+\section{Products of Incomplete Combustion}
+
+Predicting the concentration of products of incomplete combustion is challenging because it requires information about the chemical composition of the fuel and the multiple reactions that convert fuel to products. FDS contains a fairly general framework by which users can specify the reaction mechanism, and the examples in the following subsections highlight some of the more commonly used schemes.
+
+\clearpage
+
+\subsection{Smyth Slot Burner Experiment}
+
+The two-step, CO production model in FDS was used to simulate a methane/air slot burner diffusion flame. Figures~\ref{Smyth_Slot_Burner_7} through \ref{Smyth_Slot_Burner_11} show predicted and measured temperatures at three elevations above the burner. Figures~\ref{Smyth_Slot_Burner_7} through \ref{Smyth_Slot_Burner_11} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at these same elevations. The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Fuel} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Dioxide} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Oxygen} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Monoxide} &
+\end{tabular*}
+\caption[Temperature and gas species predictions 7~mm above burner, Smyth experiment]
+{Predicted and measured temperature and gas species 7~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_7}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Fuel} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Carbon_Dioxide} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Oxygen} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Carbon_Monoxide} &
+\end{tabular*}
+\caption[Temperature and gas species predictions 9~mm above burner, Smyth experiment]
+{Predicted and measured temperature and gas species 9~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_9}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Fuel} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Carbon_Dioxide} &
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Oxygen} \\
+\includegraphics[height=2.2in]{FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Carbon_Monoxide} &
+\end{tabular*}
+\caption[Temperature and gas species predictions 11~mm above burner, Smyth experiment]
+{Predicted and measured temperature and gas species 11~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_11}
+\end{figure}
+
+
+
+\clearpage
+
+\subsection{Beyler Hood Experiments}
+
+Fig.~\ref{Beyler_Species} shows species predictions made by the two-step model compared with measured data for a range of fire sizes and burner positions.  The model outputs are the time-averaged species concentration at the hood exhaust vent whereas the experiment is the time-averaged species concentration downstream in the exhaust duct.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.5in]{FIGURES/Beyler_Hood/Beyler_Hood_O2} &
+\includegraphics[height=2.5in]{FIGURES/Beyler_Hood/Beyler_Hood_CO2} \\
+\includegraphics[height=2.5in]{FIGURES/Beyler_Hood/Beyler_Hood_H2O} &
+\includegraphics[height=2.5in]{FIGURES/Beyler_Hood/Beyler_Hood_CO} \\
+\includegraphics[height=2.5in]{FIGURES/Beyler_Hood/Beyler_Hood_Soot} &
+\includegraphics[height=2.5in]{FIGURES/Beyler_Hood/Beyler_Hood_UHC} \\
+\end{tabular*}
+\caption[Summary of gas species predictions, Beyler hood experiments]
+{Comparison of measured and predicted species concentrations in the Beyler hood experiments}
+\label{Beyler_Species}
+\end{figure}
+
+\clearpage
+
+\subsection{NIST Reduced Scale Enclosure (RSE) Test Series, 1994}
+
+The RSE natural gas experiments were selected to assess the CO production capability rather than soot production.
+Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW,
+500~kW, and 600~kW.  The experiments were modeled using properties of the natural gas supplied to the test facility.
+The model geometry included the compartment interior along with a 0.6~m deep region outside the door.
+Figure~\ref{NIST_RSE_1994} shows the measured and predicted CO, CO$_2$ and O$_2$ concentrations.  The measured values are
+from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Front} &
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Rear} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Front} &
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Rear} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Front} &
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear}
+\end{tabular*}
+\caption[Summary of NIST Reduced Scale Enclosure experiments]{Summary of NIST Reduced Scale Enclosure experiments.}
+\label{NIST_RSE_1994}
 \end{figure}
 

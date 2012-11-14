@@ -66,6 +66,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       MATL_ID(1,1)='PP'
       MATL_ID(2,1)='FOIL'
       MATL_ID(3,1)='FOAMGLAS'
+      HEAT_TRANSFER_COEFFICIENT=0.
       THICKNESS=0.0061,.0000343,0.0254
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
