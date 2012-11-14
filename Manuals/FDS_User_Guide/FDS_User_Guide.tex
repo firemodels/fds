@@ -554,79 +554,79 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 
 \vspace{\baselineskip}
 
-\noindent {\bf Hydrodynamics and Turbulence} 
+\noindent {\bf Hydrodynamics and Turbulence}
 
    \begin{itemize}
    \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
    \item Improved models for the turbulent viscosity are implemented: Deardorff (default), Dynamic Smagorinsky, and Vreman. These models provide more dynamic range to the flow field for coarse resolution and converge to the correct solution at fine resolution.
    \item The conservative form of the sensible enthalpy equation is satisfied by construction in the FDS~6 formulation, eliminating temperature anomalies and energy conservation errors due to numerical mixing.
-   \item The baroclinic torque is included by default. 
+   \item The baroclinic torque is included by default.
    \item Improvements are made to the wall functions for momentum and heat flux. An optional wall heat flux model accounts for variable Prandtl number fluids.
-   \item Jarrin's Synthetic Eddy Method (SEM) is implemented for turbulent boundary conditions at vents. 
+   \item Jarrin's Synthetic Eddy Method (SEM) is implemented for turbulent boundary conditions at vents.
    \end{itemize}
 
 \noindent {\bf Species and Combustion}
 
     \begin{itemize}
-    \item Custom species mixtures (``lumped species'') can be defined with the new input group SMIX. 
-    \item Turbulent combustion is handled with a new partially-stirred batch reactor model. At the subgrid level, species exist in one of two states: unmixed or mixed. The degree of mixing evolves over the FDS time step by the interaction by exchange with the mean (IEM) mixing model. Chemical kinetics may be considered infinitely fast or obey an Arrhenius rate law. 
+    \item Custom species mixtures (``lumped species'') can be defined with the new input group SMIX.
+    \item Turbulent combustion is handled with a new partially-stirred batch reactor model. At the subgrid level, species exist in one of two states: unmixed or mixed. The degree of mixing evolves over the FDS time step by the interaction by exchange with the mean (IEM) mixing model. Chemical kinetics may be considered infinitely fast or obey an Arrhenius rate law.
     \item It is now possible to transport, produce, and consume product species such as CO and soot. Chemical mechanisms must be provided by the user and may include reversible reactions.
-    \item It is now possible to deposit aerosol species onto surfaces. 
-    \item There are an increased number of predefined species that now include liquid properties. 
+    \item It is now possible to deposit aerosol species onto surfaces.
+    \item There are an increased number of predefined species that now include liquid properties.
     \end{itemize}
-    
+
 \noindent {\bf Lagrangian Particles}
 
     \begin{itemize}
     \item The functionality of Lagrangian particles has expanded to include the same heat transfer and pyrolysis models that apply to solid walls. In other words, you can now assign a set of surface properties to planar, cylindrical, or spherical particles much like you would for a solid surface.
     \item More alternatives and user-defined option are available for the liquid droplet size distribution.
-    \item The user can specify the radiative properties of the liquid droplets.
-    \item Drag effects of thin porous media (i.e., window screens) can be simulated using planes of particles. 
+    \item You can specify the radiative properties of the liquid droplets.
+    \item Drag effects of thin porous media (i.e., window screens) can be simulated using planes of particles.
     \end{itemize}
-    
+
 \noindent {\bf Solid Phase Heat Transfer and Pyrolysis}
 
     \begin{itemize}
     \item The basic 1-D heat transfer and pyrolysis model for solid surfaces remains the same, but there has been a change in several of the input parameters to expand functionality and readability of the input file.
     \item The pyrolysis model allows for the surface to shrink or swell, based on the specified material densities.
     \end{itemize}
-    
+
 \noindent {\bf HVAC}
 
    \begin{itemize}
-    \item Filters, louvered vents, and heating/cooling capability has been added for HVAC systems. 
-    \item HVAC is now functional with MPI. 
+    \item Filters, louvered vents, and heating/cooling capability has been added for HVAC systems.
+    \item HVAC is now functional with MPI.
     \end{itemize}
-    
-\noindent {\bf Radiation} 
+
+\noindent {\bf Radiation}
 
     \begin{itemize}
-    \item RadCal database has been extended to include additional fuel species. 
+    \item RadCal database has been extended to include additional fuel species.
     \item In cells with heat release, the emission term is based on a corrected $\sigma \, T^4$ such that when this term is integrated over the flame volume the specified radiative fraction (default 0.35) is recovered. This differs from FDS~5 and earlier where the radiative fraction times the heat release rate was applied locally as the emission term.
     \end{itemize}
-    
-\noindent {\bf Multi-Mesh Computations} 
+
+\noindent {\bf Multi-Mesh Computations}
 
     \begin{itemize}
     \item By default, FDS now iterates pressure and velocity at mesh and solid boundaries. You can control the error tolerance and maximum number of iterations via parameters on the {\ct PRES} line.
     \end{itemize}
-    
-\noindent {\bf Control Functions} 
+
+\noindent {\bf Control Functions}
 
     \begin{itemize}
-    \item {\ct CTRL} functions have been extended to include math operations. 
+    \item {\ct CTRL} functions have been extended to include math operations.
     \item The evaluation of {\ct RAMP}s and {\ct DEVC}s can be stopped, freezing their value, based upon the activation of a device or control function.
     \end{itemize}
-    
-\noindent {\bf Devices and Output} 
+
+\noindent {\bf Devices and Output}
 
     \begin{itemize}
-    \item Multiple pipe networks can be specified for sprinklers for reduction of flow rate based on the number of operating heads. 
-    \item The numerical value of a control function can be output with a {\ct DEVC}. 
-    \item A line of devices can be specified using a number of {\ct POINTS} on one {\ct DEVC} line. 
-    \item Statistical outputs for RMS, covariance, and correlation coefficient are available. 
+    \item Multiple pipe networks can be specified for sprinklers for reduction of flow rate based on the number of operating heads.
+    \item The numerical value of a control function can be output with a {\ct DEVC}.
+    \item A line of devices can be specified using a number of {\ct POINTS} on one {\ct DEVC} line.
+    \item Statistical outputs for RMS, covariance, and correlation coefficient are available.
     \end{itemize}
-    
+
 
 
 
@@ -718,6 +718,7 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 {\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                  & Section~\ref{info:visibility}       \\ \hline
 {\ct REAC}    & {\ct OXIDIZER}                      &              & New procedure                               & Section~\ref{info:REAC_Diagnostics}          \\ \hline
 {\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  &  {\ct VISIBILITY\_FACTOR}                   & Section~\ref{info:visibility}       \\ \hline
+{\ct SURF}    & {\ct H\_FIXED}                      &  {\ct SURF}  & {\ct HEAT\_TRANSFER\_COEFFICIENT}           & Section~\ref{info:convection}                   \\ \hline
 {\ct SURF}    & {\ct POROUS}                        &              & New procedure                               & Section~\ref{info:HVACfan}                   \\ \hline
 {\ct TIME}    & {\ct TWFIN}                         &  {\ct TIME}  & {\ct T\_END}                                & Section~\ref{info:TIME}                  \\ \hline
 {\ct VENT}    & {\ct MASS\_FRACTION}                &              & Eliminated                                  &                                              \\ \hline
@@ -800,7 +801,7 @@ released prior to Windows 2000.
 \item[{\bf Mac OS X}]
 An installation script is available for Intel architectures.
 Mac OS~X 10.4.x or better is recommended, versions of OS~X prior to 10.4.x are not
-officially supported. Users can always download the latest version of FDS source and
+officially supported. You can always download the latest version of FDS source and
 compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
 
 \item[{\bf Linux}]
@@ -940,9 +941,9 @@ need to use ``chmod~+x'' to make the file executable.
 
 Running FDS across a network using multiple processors and multiple
 banks of memory (RAM) is more complicated than running the single
-processor version.  More is required of the user to make the
+processor version.  More is required of you to make the
 connections between the machines as seamless as possible. This
-involves creating accounts for a given user on each machine, sharing
+involves creating accounts for yourself on each machine, sharing
 directories, increasing the speed of the network, making each machine
 aware of the others, etc.  Some of these details are handled by
 the parallel-processing software, others are not. Undoubtedly the
@@ -971,7 +972,7 @@ without the need for MPI message passing between themselves.
 
 Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers
 0, 1, 2, and so on. Thus, Mesh~1 is assigned to Process~0; Mesh~2 to Process~1, and so on.
-As a user, you do not explicitly number the meshes or the processes yourself, but
+You do not explicitly number the meshes or the processes yourself, but
 error statements from FDS or from MPI might refer to the meshes or processes by number.
 As an example, if a FDS case with five meshes is run in parallel, the first printout (usually to the screen unless
 otherwise directed) is:
@@ -1161,7 +1162,7 @@ size to decrease to a point\footnote{By default, the calculation is stopped when
 factor can be changed via the {\ct TIME} line by specifying the {\ct DT\_LIMITING\_RATIO}.} where logic in the code decides that the results are unphysical
 and stops the calculation with an error message in the file {\ct CHID.out}.
 In these cases, FDS ends by dumping out one final
-Plot3D file giving the user some means by which to see where the
+Plot3D file giving you a hint as to where the
 error is occurring within the computational domain. Usually, a numerical
 instability can be identified by fictitiously large velocity vectors emanating from
 a small region within the domain. Common causes of such instabilities are
@@ -1214,7 +1215,7 @@ This will prevent FDS from attempting to flush the contents of the internal buff
 in Smokeview during the FDS simulation. On some Windows machines, you might encounter
 security settings that prevent command line programs such as FDS from writing to system
 folders that contain program files. In this case, try to rerun the case in a non-system folder
-(i.e., a location within your home user directory).
+(i.e., a location within your home directory).
 
 \item[{\bf Poisson Initialization}:]
 Sometimes at the very start of a calculation, an error
@@ -1239,8 +1240,8 @@ the input file as much as possible so that the bug can be diagnosed
 Also, limit the bug reports to those features that clearly do not work.
 Physical problems such as fires that do not ignite, flames that do not
 spread, etc., may be related to the mesh resolution or scenario
-formulation and need to be investigated first by the user before being
-reported. If an error message originates from the operating system as
+formulation, and you need to investigate the problem first before
+reporting it. If an error message originates from the operating system as
 opposed to FDS, first investigate some of the more obvious possibilities,
 such as memory size, disk space, etc.
 
@@ -2112,9 +2113,9 @@ convenient to start the flow immediately, like in an outdoor simulation involvin
 \subsection{Special Topic: Mean Forcing and Data Assimilation}
 \label{info:mean_forcing}
 
-A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Usually, a user knows only that the mean wind is 10 m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
+A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Typically, you know only that the mean wind is 10~m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
 
-In FDS, the user may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to set a northeast wind at 10 m/s use
+In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to set a northeast wind at 10 m/s use
 
 \footnotesize
 \begin{verbatim}
@@ -2127,7 +2128,7 @@ In FDS, the user may invoke the most rudimentary of data assimilation techniques
 \subsection{Special Topic: Specified Force Field}
 \label{info:force_vector}
 
-Similar to the {\ct MEAN\_FORCING} feature, the user may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
+Similar to the {\ct MEAN\_FORCING} feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
 
 \begin{equation}
 \frac{\partial u_i}{\partial t} = -F_i/\rho
@@ -2236,7 +2237,7 @@ You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
 \end{verbatim}
 \normalsize
 
-\noindent If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.  It is recommended that the user also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
+\noindent If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.  It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
 
 \subsection{Special Topic: Defying Gravity}
@@ -2487,7 +2488,7 @@ numerical instabilities if the initial time step is set too high.
 \subsection{Stability of the particle transporte}
 \label{info:PART_Stability}
 
-The movement of droplets and particles within a time step is calculated using an analytical solution and remains stable regardless of the time step. 
+The movement of droplets and particles within a time step is calculated using an analytical solution and remains stable regardless of the time step.
 In some cases with extremely fast droplets or particles, however, the stability of the overall flow behaviour may require setting an additional parameter
 that limits the time step according to the speed of the fastest particle in the simulation. Setting {\ct PARTICLE\_CFL = .TRUE.} on the {\ct MISC} line
 activates this constraint. The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} parameter. Value 1 means that the fastest moving
@@ -2648,7 +2649,7 @@ of {\ct VELOCITY\_TOLERANCE}, the default value on the left and a tighter tolera
 
 The algorithms in FDS are designed to work within a certain range of values for the thermodynamic quantities density, temperature and mass fraction. To prevent unphysical results,
 there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range
-errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on user input, but it is not
+errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not
 possible in all cases to anticipate just how low or high a given value might be. Thus,
 on rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. Temperature and density bounds are input under the
 namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be
@@ -4165,7 +4166,7 @@ Both the fabric and the foam decompose into fuel gases via
 single-step reactions. The fuel gases from each have different
 composition and heats of combustion. FDS automatically adjusts
 the mass loss rate of each so that the ``effective'' fuel gas
-is that specified by the user on the {\ct REAC} line.
+is that which is specified on the {\ct REAC} line.
 
 The same couch model is included in a room-scale fire simulation, known as the
 {\ct room\_fire} test case. Figure~\ref{room_fire} shows the fire after 5~min.
@@ -4900,9 +4901,8 @@ Below are given sample inputs for the three types of fans supported by FDS.
 \item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model.
-\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user defined fan curve or is an
-optional table of time versus volumetric flow rates (m$^3$/s) for a constant volume fan.
-\item[{\ct TAU\_FAN}]  defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flow rate computed by any of the three types (constant flow, quadratic, or user defined ramp) of fans.
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user-defined fan curve or is an optional table of time versus volumetric flow rates (m$^3$/s) for a constant volume fan.
+\item[{\ct TAU\_FAN}]  defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flow rate computed by any of the three types (constant flow, quadratic, or user-defined ramp) of fans.
 \item[{\ct VOLUME\_FLOW}] is the fixed volumetric flow of the fan (m$^3$/s).
 \end{description}
 
@@ -4929,7 +4929,7 @@ pressure between the downstream compartment, or ``zone,'' and the upstream. The 
 The term, $\Delta p_{\hbox{\footnotesize max}}$, is the maximum
 pressure difference, {\ct MAX\_PRESSURE}, the fan can operate upon, and it is assumed to be a positive number.
 The flow through a fan will decrease from $\dot{V}_{\hbox{\footnotesize max}}$ at zero pressure difference to 0~m$^3$/s at $\Delta p_{\hbox{\footnotesize max}}$.
-If the pressure difference increases beyond this, air will be forced backwards through the fan.   If the downstream pressure becomes negative, then the volume flow through the fan will increase beyond {\ct MAX\_FLOW}. More complicated fan curves can be specified by defining a {\ct RAMP}.  In the example inputs below, one fan of each type is specified.  A constant volume flow fan with a {\ct VOLUME\_FLOW} of 10~m$^3$/s, a quadratic fan with {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}, and a user defined fan with the {\ct RAMP} set to the values of the quadratic fan in 200~Pa increments,
+If the pressure difference increases beyond this, air will be forced backwards through the fan.   If the downstream pressure becomes negative, then the volume flow through the fan will increase beyond {\ct MAX\_FLOW}. More complicated fan curves can be specified by defining a {\ct RAMP}.  In the example inputs below, one fan of each type is specified.  A constant volume flow fan with a {\ct VOLUME\_FLOW} of 10~m$^3$/s, a quadratic fan with {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}, and a user-defined fan with the {\ct RAMP} set to the values of the quadratic fan in 200~Pa increments,
 
 \footnotesize
 \begin{verbatim}
@@ -4956,7 +4956,7 @@ Figure~\ref{fig:Fan_Curve} displays the fan curves for the inputs shown above.  
 \begin{figure}[ht!]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/fan_curve}
-\caption[Example of fan curves]{Fan curves corresponding to a constant fan with {\ct VOLUME\_FLOW=10}, a quadratic fan with {\ct MAX\_FLOW=10} and {\ct MAX\_PRESSURE=500}, and a user defined {\ct RAMP} equivalent to the quadratic fan.}
+\caption[Example of fan curves]{Fan curves corresponding to a constant fan with {\ct VOLUME\_FLOW=10}, a quadratic fan with {\ct MAX\_FLOW=10} and {\ct MAX\_PRESSURE=500}, and a user-defined {\ct RAMP} equivalent to the quadratic fan.}
 \label{fig:Fan_Curve}
 \end{center}
 \end{figure}
@@ -5126,7 +5126,7 @@ of the zone boundaries {\em into} the solid obstruction separating the two zones
 gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
 which point the zones will merge and no longer have distinct background pressures.
 
-For the special case where a zone has periodic boundaries ({\ct SURF\_ID='PERIODIC'} on {\ct VENT}), the user must add {\ct PERIODIC=.TRUE.} on the {\ct ZONE} line.
+For the special case where a zone has periodic boundaries ({\ct SURF\_ID='PERIODIC'} on {\ct VENT}), you must add {\ct PERIODIC=.TRUE.} on the {\ct ZONE} line.
 
 
 \subsubsection{Example Case: Pressure Rise in a Compartment}
@@ -5829,7 +5829,7 @@ In general only one species for a given {\ct ID} can be defined; however, you ma
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CARBON MONOXIDE', ID='Device 2'/
 \end{verbatim} \normalsize
 
-\noindent 
+\noindent
 
 
 \clearpage
@@ -6001,7 +6001,7 @@ Section~\ref{info:heat_of_combustion} for more details on the heat of combustion
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
 
-The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpies of formation are known. For reactions with species that are not included in Table~\ref{tab:gasspecies}, there are several options to ensure that all of the enthalpies of formation are specified.
+The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpies of formation are known. For reactions with species that are not included in Table~\ref{tab:gasspecies}, there are several options to ensure that all of the enthalpies of formation are specified.
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
 You can specify unknown enthalpies on the {\ct SPEC} line in units of J/kmol:
@@ -6055,7 +6055,7 @@ The second approach to determining the heat of combustion is to burn a known mas
 rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=.FALSE.},
 the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct IDEAL=.FALSE.}
 
-Note: If you specify a heat of combustion on the {\ct REAC} line, FDS will calculate the enthalpy of formation of the fuel such that the user specified heat of combustion is maintained. This is important to recognize for cases where a heat of combustion is measured experimentally or if you want to model impurities in the fuel that would not be realized using the standard heat of formation of the fuel.
+Note: If you specify a heat of combustion on the {\ct REAC} line, FDS will calculate the enthalpy of formation of the fuel such that the user-specified heat of combustion is maintained. This is important to recognize for cases where a heat of combustion is measured experimentally or if you want to model impurities in the fuel that would not be realized using the standard heat of formation of the fuel.
 
 
 
@@ -6505,7 +6505,7 @@ The heat of combustion for propane is found in the SFPE Handbook~\cite{SFPE:Tewa
 
 \footnotesize
 \begin{verbatim}
-&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715., 
+&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
       SPEC_ID_NU = 'PROPANE','AIR','PRODUCTS','SOOT',
       NU=-1.,-4.8164,1,0.1836/
 \end{verbatim} \normalsize
@@ -6637,7 +6637,7 @@ It is used in the spectral weighting during the computation of the mean scatteri
 {\ct NMIEANG} is the number of angles in the numerical integration of the Mie-phase function.
 Increasing {\ct NMIEANG} improves the accuracy of the radiative properties of water droplets. The cost
 of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for {\ct NMIEANG}
-is 15. For each class of particles, the Mie coefficients are calculated for a wide range of droplet diameters to ensure that the all possible run-time 
+is 15. For each class of particles, the Mie coefficients are calculated for a wide range of droplet diameters to ensure that the all possible run-time
 situations can be covered. To speed up the initialization phase, the range of diameters can be limited by parameters {\ct MIE\_MINIMUM\_DIAMETER} and
 {\ct MIE\_MAXIMUM\_DIAMETER}. Also, the size of the Mie cofficient tables can be specified using {\ct MIE\_NDG} parameter.
 
@@ -6811,16 +6811,16 @@ For calculating the absorption of thermal radiation by particles, FDS uses a run
 \subsection{Size Distribution}
 \label{info:particle_size}
 
-For liquid droplets, particle sizes follow a given the Cumulative Volume Function (CVF) of droplet sizes. Distributions can be selected by setting the {\ct DISTRIBUTION} parameter on the PART line. The default is {\ct ROSIN-RAMMLER-LOGNORMAL}. Other choices are {\ct LOGNORMAL} and {\ct ROSIN-RAMMLER}. Note that the specified {\ct DIAMETER} (in units of $\mu$m) on the {\ct PART} line is the median volumetric diameter of the droplets or particles. 
+For liquid droplets, particle sizes follow a given the Cumulative Volume Function (CVF) of droplet sizes. Distributions can be selected by setting the {\ct DISTRIBUTION} parameter on the PART line. The default is {\ct ROSIN-RAMMLER-LOGNORMAL}. Other choices are {\ct LOGNORMAL} and {\ct ROSIN-RAMMLER}. Note that the specified {\ct DIAMETER} (in units of $\mu$m) on the {\ct PART} line is the median volumetric diameter of the droplets or particles.
 
-The {\ct LOGNORMAL} distribution is given by 
+The {\ct LOGNORMAL} distribution is given by
 \be
 \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^d} \, \frac{1}{\sigma\, d'} \,
    e^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}}.
 \ee
 The width of the distribution is controlled by the parameter {\ct SIGMA\_D} on the {\ct PART} line. The {\ct ROSIN-RAMMLER} distribution is given by
 \be
-   1 - e^{-0.693 \left(\frac{d}{d_m}\right)^\gamma. } 
+   1 - e^{-0.693 \left(\frac{d}{d_m}\right)^\gamma. }
 \ee
 The width of the distribution is controlled by the parameter {\ct GAMMA\_D}. And finally the {\ct ROSIN-RAMMLER-LOGNORMAL} distribution is given by
 \be F(d) = \left\{ \begin{array}{ll}
@@ -6833,7 +6833,7 @@ The width of the distribution is controlled by the parameter {\ct GAMMA\_D} (def
 $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$
 which ensures that the two functions are smoothly joined at $d=d_m$. You can also add a value for {\ct SIGMA\_D} to the {\ct PART} line if you want to
 over-ride this feature. The larger the value of $\gamma$, the narrower the droplet size is
-distributed about the median value. 
+distributed about the median value.
 
 The particle size distribution can also defined using the Cumulative Number Function of the distribution (CNF). This is done by setting the {\ct USER\_CNF\_RAMP} on the {\ct PART} line and including a {\ct RAMP} that gives the CNF. For example, particles with diameters following the normal distribution can be defined as follows.
 \begin{verbatim}
@@ -6845,9 +6845,9 @@ The particle size distribution can also defined using the Cumulative Number Func
 &RAMP ID="USER_CNF"   T= 200 F= 0.000003/
       ....
 &RAMP ID="USER_CNF"   T= 1800 F= 0.999968/
-&RAMP ID="USER_CNF"   T= 2000 F= 1.000000/ 
+&RAMP ID="USER_CNF"   T= 2000 F= 1.000000/
 \end{verbatim}
-Note that the {\ct RAMP} variable {\ct T} is given in micrometers. 
+Note that the {\ct RAMP} variable {\ct T} is given in micrometers.
 
  Note that you can prevent droplets or particles from
 exceeding {\ct MAXIMUM\_DIAMETER}, which is infinitely large by default. Also note that
@@ -6922,7 +6922,7 @@ Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved
 The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall
 reaction scheme. Thus, if other droplets or solid objects have different
 heats of combustion, the effective burning rates are adjusted so that the
-total heat release rate is that which the user expects. However, exercises
+total heat release rate is that which you expect. However, exercises
 like this ought to be conducted just to ensure that this is the case.
 The HRR curve for this example is given in Fig.~\ref{spray_burner}.
 
@@ -6987,8 +6987,7 @@ If the {\ct SURF} line that is associated with the particle class calls for it, 
 \label{info:particle_drag}
 
 For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere.
-To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable,
-the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}.
+To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}.
 The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
 \subsection{Splitting particles}
@@ -8779,7 +8778,7 @@ either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID},
    \overline{\phi} = \frac{ \sum_{i=1}^n \phi_i }{n}
 \ee
 where $n$ is the number of uniform output samples.
-\item[Root Mean Square] If the user sets {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
+\item[Root Mean Square] If you set {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
 \be
    \phi_{rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
 \ee
@@ -8788,7 +8787,7 @@ Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. I
 \be
    \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
 \ee
-To output this statistic the user must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}:
+To output this statistic you must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}:
 \footnotesize
 \begin{verbatim}
 &DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
@@ -9561,7 +9560,7 @@ depends upon the immediate concentrations of irritants. The overall irritant con
 \ee
 where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants
 expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in Table~\ref{tbl:FIC}.
-To include the irritant effect of a gas not listed in the table, the user should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION}
+To include the irritant effect of a gas not listed in the table, you should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION}
 property on the corresponding {\ct SPEC} line.
 
 Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
@@ -9734,7 +9733,7 @@ Thus, you can either paint values of $C_p$ at all surface points, or create a si
 \subsection{Near-wall Grid Resolution}
 \label{info:yplus}
 
-Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are the Werner-Wengle wall model \cite{Werner:1991} for smooth walls and a rough wall log law for rough walls \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, the user may add a boundary file output as follows:
+Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are the Werner-Wengle wall model \cite{Werner:1991} for smooth walls and a rough wall log law for rough walls \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
 
 \footnotesize
 \begin{verbatim}
@@ -9865,7 +9864,7 @@ Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
 
 \subsubsection{Measure of Turbulence Resolution}
 
-In FDS, the user may output a scalar quantity which we refer to as the \emph{measure of turbulence resolution}, defined locally as
+You may output a scalar quantity which is referred to as the \emph{measure of turbulence resolution}, defined locally as
 \begin{eqnarray}
 \mbox{MTR}(\mathbf{x},t) = \frac{k_{sgs}}{k_{res} + k_{sgs}}
 \end{eqnarray}
@@ -9875,7 +9874,7 @@ where
 k_{res} &=& \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i \\
 k_{sgs} &=& \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i)
 \end{eqnarray}
-Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  The model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored. The basic idea is to provide the user with an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, the user may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
+Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  The model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored. The basic idea is to provide an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, you may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
 \begin{figure}[ht]
 \centering
 \begin{tabular}{rl}
@@ -11920,7 +11919,7 @@ Time,HRR,Q_RADI,Q_CONV,Q_COND,...,BURN_RATE,ZONE_01,ZONE_02, ...
 Details of the integrated energy quantities can be found in Section~\ref{info:HRR}.
 {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, etc., are the background pressures of the various
 pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual
-material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by the user.
+material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by you.
 The background pressure is discussed in Section~\ref{info:ZONE}.
 
 
