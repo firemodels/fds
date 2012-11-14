@@ -421,7 +421,7 @@ void ColorBarMenu(int value){
   glutPostRedisplay();
   if(value<0){
     switch (value){
-    case -2:
+    case COLORBARFLIP:
       colorbarflip=1-colorbarflip;
       break;
     case -3:
@@ -6349,10 +6349,10 @@ updatemenu=0;
     glutAddMenuEntry(_("  Highlight extreme data"),-7);
   }
   if(colorbarflip==1){
-    glutAddMenuEntry(_("  *Flip"),-2);
+    glutAddMenuEntry(_("  *Flip"),COLORBARFLIP);
   }
   else{
-    glutAddMenuEntry(_("  Flip"),-2);
+    glutAddMenuEntry(_("  Flip"),COLORBARFLIP);
   }
   glutAddSubMenu("  Shade Type:",colorbarshademenu);
   if(use_transparency_data==1){

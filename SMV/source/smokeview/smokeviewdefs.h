@@ -96,6 +96,8 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_XSCENECLIP 108
 #define SCRIPT_YSCENECLIP 109
 #define SCRIPT_ZSCENECLIP 110
+#define SCRIPT_CBARFLIP 111
+#define SCRIPT_CBARNORMAL 112
 
 #define SCRIPT_LOADFILE 201
 #define SCRIPT_LOADVFILE 202
@@ -352,6 +354,8 @@ void _Sniff_Errors(char *whereat);
 #define DOWNwall 6
 
 #define offsetscale 100
+
+#define COLORBARFLIP -2
 
 #define NVECLENGTHS 7
 

@@ -356,6 +356,8 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"VOLSMOKERENDERALL") == 1)return SCRIPT_VOLSMOKERENDERALL;
   if(match_upper(keyword,"LOADFILE") == 1)return SCRIPT_LOADFILE;
   if(match_upper(keyword,"LOADINIFILE") == 1)return SCRIPT_LOADINIFILE;
+  if(match_upper(keyword,"CBARFLIP") == 1)return SCRIPT_CBARFLIP;
+  if(match_upper(keyword,"CBARNORMAL") == 1)return SCRIPT_CBARNORMAL;
   if(match_upper(keyword,"LOADVFILE") == 1)return SCRIPT_LOADVFILE;
   if(match_upper(keyword,"LOADBOUNDARY") == 1)return SCRIPT_LOADBOUNDARY;
   if(match_upper(keyword,"PARTCLASSCOLOR") == 1)return SCRIPT_PARTCLASSCOLOR;
@@ -473,6 +475,8 @@ int compile_script(char *scriptfile){
     switch (keyword_index){
       case SCRIPT_UNLOADALL:
       case SCRIPT_LOADPARTICLES:
+      case SCRIPT_CBARFLIP:
+      case SCRIPT_CBARNORMAL:
         break;
 
       case SCRIPT_RENDERDIR:
@@ -1490,6 +1494,14 @@ int run_script(void){
       break;
     case SCRIPT_SETVIEWPOINT:
       script_setviewpoint(scripti);
+      break;
+    case SCRIPT_CBARFLIP:
+      colorbarflip=0;
+      ColorBarMenu(COLORBARFLIP);
+      break;
+    case SCRIPT_CBARNORMAL:
+      colorbarflip=1;
+      ColorBarMenu(COLORBARFLIP);
       break;
     default:
       ASSERT(0);
