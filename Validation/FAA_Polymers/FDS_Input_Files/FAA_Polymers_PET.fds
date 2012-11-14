@@ -16,7 +16,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 &RAMP ID='c_ramp', T=165., F=2.52 /
 &RAMP ID='c_ramp', T=800., F=4.16 /
 
-&MATL ID='PP'
+&MATL ID='PET'
       ABSORPTION_COEFFICIENT=966.
       N_REACTIONS=1
       A(1) = 1
@@ -43,15 +43,24 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       CONDUCTIVITY = 0.24
       SPECIFIC_HEAT_RAMP = 'c_ramp' /
 	  
-&MATL ID='FOAMGLAS'
-      CONDUCTIVITY = 0.08
-      SPECIFIC_HEAT = 0.84
-      DENSITY = 120. /
+&MATL ID='FOIL'
+      CONDUCTIVITY=250.
+      SPECIFIC_HEAT=0.91
+      DENSITY=2700.0
+      EMISSIVITY=0.12
+      ABSORPTION_COEFFICIENT=50000/
 
-&SURF ID='PP SLAB'
+&MATL ID='FOAMGLAS'
+      CONDUCTIVITY=.04
+      SPECIFIC_HEAT=0.84
+      DENSITY=120.0
+      EMISSIVITY=1
+      ABSORPTION_COEFFICIENT=50000/
+
+&SURF ID='PET SLAB'
       COLOR='BLACK'
-      MATL_ID='PP','FOAMGLAS'
-      THICKNESS=0.0061,0.025
+      MATL_ID='PET','FOIL','FOAMGLAS'
+      THICKNESS=0.0061,.0000343,0.0254
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.04,0.04,-0.04,0.04,0.0,0.0, SURF_ID = 'PP SLAB' /

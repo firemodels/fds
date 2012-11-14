@@ -7,9 +7,17 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
-&TIME T_END=800., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
+&TIME T_END=750., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
 
 &REAC FUEL='METHANE', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
+
+&RAMP ID='c_ramp', T= 0., F=1.66 /
+&RAMP ID='c_ramp', T=262., F=3.16/
+&RAMP ID='c_ramp', T=264., F=2.562/
+&RAMP ID='c_ramp', T=800., F=2.85 /
+&RAMP ID='k_ramp', T=20.,  F=0.34 /
+&RAMP ID='k_ramp', T=220., F=0.340 /
+&RAMP ID='k_ramp', T=800., F=0.340 /
 
 &MATL ID='PA66'
       ABSORPTION_COEFFICIENT=3920.
@@ -22,41 +30,43 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       NU_MATL=1.
       MATL_ID='Liq'
       HEAT_OF_REACTION=55.
-      CONDUCTIVITY = 0.34
-      SPECIFIC_HEAT = 2.54 /
+      SPECIFIC_HEAT_RAMP = 'c_ramp'
+      CONDUCTIVITY_RAMP = 'k_ramp'/
 
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=3920.
       N_REACTIONS=1
       A(1) = 5.70E17
       E(1) = 2.74E5
-      EMISSIVITY=0.95
+      EMISSIVITY=0.954
       DENSITY=1150.
       SPEC_ID='METHANE'
       NU_SPEC=1.
       HEAT_OF_REACTION=1390.
-      CONDUCTIVITY = 0.34
-      SPECIFIC_HEAT = 2.54 /
-	  
-&MATL ID='FOAMGLAS'
-      CONDUCTIVITY = 0.08
-      SPECIFIC_HEAT = 0.84
-      DENSITY = 120. 
+      SPECIFIC_HEAT_RAMP = 'c_ramp'
+      CONDUCTIVITY_RAMP = 'k_ramp'/
 	  
 &MATL ID='FOIL'
-	CONDUCTIVITY=250.
-	SPECIFIC_HEAT=0.91
-	DENSITY=2700.0
-	EMISSIVITY=0.12
-	ABSORPTION_COEFFICIENT=50000/
+      CONDUCTIVITY=250.
+      SPECIFIC_HEAT=0.91
+      DENSITY=2700.0
+      EMISSIVITY=0.12
+      ABSORPTION_COEFFICIENT=50000/
+
+&MATL ID='FOAMGLAS'
+      CONDUCTIVITY=.04
+      SPECIFIC_HEAT=0.84
+      DENSITY=120.0
+      EMISSIVITY=1
+      ABSORPTION_COEFFICIENT=50000/
 	 
 &SURF ID='PA66 SLAB'
       COLOR='BLACK'
       MATL_ID='PA66','FOIL','FOAMGLAS'
-      THICKNESS=0.0068,0.0000343,0.025
+      THICKNESS=0.0068,0.0000343,0.0254
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
-&VENT XB=-0.04,0.04,-0.04,0.04,0.0,0.0, SURF_ID = 'PA66 SLAB' /
+&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PA66 SLAB' /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
