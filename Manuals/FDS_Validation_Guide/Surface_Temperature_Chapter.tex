@@ -1,19 +1,289 @@
 \chapter{Surface Temperature}
 
-All solid surfaces in an FDS model are assigned thermal boundary conditions.
-Heat and mass transfer to and from solid surfaces is
-usually handled with empirical correlations, although it is possible
-to compute directly the heat and mass transfer when performing a
-Direct Numerical Simulation (DNS). Heat conduction into a solid surface is calculated via a one-dimensional solution of
-the heat equation in either cartesian or cylindrical coordinates. The latter is useful for cables.
+All solid surfaces in an FDS model are assigned thermal boundary conditions. Heat and mass transfer to and from surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when performing a Direct Numerical Simulation (DNS). Heat conduction into a solid surface is calculated via a one-dimensional solution of the heat equation in cartesian, cylindrical, or spherical coordinates. The latter two are useful for predicting the thermal response of so-called ``targets,'' which include structural steel, electrical cables, sensitive equipment, or any type of intervening combustible.
 
-\section{WTC Test Series, Steel Structural Members and ``Slug'' Calorimeters}
+This chapter divides solid surfaces into two major categories -- compartment linings (i.e. walls, ceiling, floor) and targets (i.e. anything that is not a wall, ceiling, or floor). The reason for this distinction is that some models treat the two categories differently. In general, FDS does not.
 
-The compartment for the WTC experiments contained a hollow box column roughly 0.5~m from the fire pan, two trusses over the top
-of the pan, and one or two steel bars resting on the lower truss flanges. In Tests 1, 2 and 3, the steel was bare, and in Tests 4, 5 and 6, the
-steel was coated with various thicknesses of sprayed fire-resistive materials. The column was instrumented near its base (about 0.5~m from the floor, middle (1.5~m), and upper (2.5~m). Four measurements of steel (and insulation) temperatures were made at each location, for each of its four sides. These elements were modeled using thin sheet obstructions with a resolution of 10~cm.
 
-Five cylinders (``slugs'') of nickel 200 ($\ge$ 99~\% nickel), 25.4~cm long and 10.2~cm in diameter, were positioned 50~cm north of the centerline in the WTC experiments. Slugs 1 through 5 were 2.92~m, 1.82~m, 0.57~m, 0.05~m, and 1.56~m, respectively, from the longitudinal axis of the fire pan. All the slugs were 50~cm north of the lateral axis. The fire pan measured 2~m by 1~m. Four thermocouples were inserted into each slug at various locations. All four temperatures for each slug were virtually indistinguishable. Rectangular obstructions were used to model the slugs, but the one-dimensional heat conduction calculation was performed using cylindrical coordinates.
+\section{Wall, Ceiling and Floor Temperatures}
+
+
+\subsection{NIST/NRC Experiments}
+
+Thermocouples were positioned at various locations on all four walls of the test compartment, plus the ceiling and floor. Comparisons between measured and predicted surface temperatures are shown on the following pages for a selected number of locations. Over half of the measurement points were in roughly the same relative location to the fire and hence the measurements and predictions are similar. For this reason, data for the east and north walls are shown because the data from the south and west walls are comparable. Data from the south wall is used in cases where the corresponding instrument on the north wall failed, or in cases where the fire is positioned close to the south wall. For each test, eight locations are used for comparison, two on the long (mainly north) wall, two on the short (east) wall, two on the floor, and two on the ceiling. Of the two locations for each panel, one is considered in the far-field, relatively remote from the fire; one is in the near-field, relatively close to the fire.  How close or far varies from test to test. The two short wall locations are equally remote from the fire; thus, one location is in the lower layer, one in the upper. Table~\ref{NIST_NRC_Wall_Coords} lists the locations for each test.
+
+\begin{table}[ht]
+\caption[Wall thermocouple positions for the NIST/NRC series]
+{Wall thermocouple positions for the NIST/NRC series. The origin of the coordinate system at the floor in the southwest
+corner of the compartment.}
+\begin{center}
+\begin{tabular}{|l|c|c|c||l|c|c|c|}
+\hline
+Name              & $x$   & $y$  & $z$      & Name              & $x$   & $y$   & $z$       \\ \hline \hline
+TC North U-1-2    & 3.85  & 7.04 & 1.49     & TC Floor U-1-2    & 3.08  & 3.51  & 0         \\ \hline
+TC North U-2-2    & 3.86  & 7.04 & 3.71     & TC Floor U-2-2    & 9.08  & 1.94  & 0         \\ \hline
+TC North U-3-2    & 9.48  & 7.04 & 1.86     & TC Floor U-3-2    & 9.06  & 5.97  & 0         \\ \hline
+TC North U-4-2    & 12.07 & 7.04 & 1.88     & TC Floor U-4-2    & 10.86 & 2.38  & 0         \\ \hline
+TC North U-5-2    & 17.69 & 7.04 & 1.49     & TC Floor C-5-2    & 10.93 & 5.20  & 0.01      \\ \hline
+TC North U-6-2    & 17.69 & 7.04 & 3.69     & TC Floor U-6-2    & 13.13 & 1.99  & 0         \\ \hline
+TC South U-1-2    & 3.86  & 0    & 1.49     & TC Floor U-7-2    & 13.00 & 5.92  & 0         \\ \hline
+TC South U-2-2    & 3.86  & 0    & 3.82     & TC Floor U-8-2    & 18.63 & 3.54  & 0         \\ \hline
+TC South U-3-2    & 9.54  & 0    & 1.86     & TC Ceiling U-1-2  & 3.04  & 3.60  & 3.82      \\ \hline
+TC South U-4-2    & 12.08 & 0    & 1.86     & TC Ceiling C-2-2  & 8.99  & 2.00  & 3.82      \\ \hline
+TC South U-5-2    & 17.69 & 0    & 1.50     & TC Ceiling C-3-2  & 9.03  & 5.97  & 3.82      \\ \hline
+TC South U-6-2    & 17.74 & 0    & 3.70     & TC Ceiling C-4-2  & 10.79 & 2.38  & 3.82      \\ \hline
+TC East U-1-2     & 21.66 & 1.52 & 1.12     & TC Ceiling C-5-2  & 10.79 & 5.20  & 3.82      \\ \hline
+TC East U-2-2     & 21.66 & 1.52 & 2.40     & TC Ceiling C-6-2  & 13.00 & 2.07  & 3.82      \\ \hline
+TC East U-3-2     & 21.66 & 5.68 & 1.13     & TC Ceiling C-7-2  & 12.84 & 5.98  & 3.82      \\ \hline
+TC East U-4-2     & 21.66 & 5.70 & 2.42     & TC Ceiling U-8-2  & 18.71 & 3.54  & 3.82      \\ \hline
+\end{tabular}
+\end{center}
+\label{NIST_NRC_Wall_Coords}
+\end{table}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Long_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Long_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Long_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Long_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Long_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Long_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Long_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Long_Wall_Temp}
+\end{tabular*}
+\label{NIST_NRC_Long_Wall_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Long_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Long_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Long_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Long_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Long_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Long_Wall_Temp}
+\end{tabular*}
+\label{NIST_NRC_Long_Wall_Temp_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Short_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Short_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Short_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Short_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Short_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Short_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Short_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Short_Wall_Temp}
+\end{tabular*}
+\label{NIST_NRC_Short_Wall_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Short_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Short_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Short_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Short_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Short_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Short_Wall_Temp}
+\end{tabular*}
+\label{NIST_NRC_Short_Wall_Temp_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Ceiling_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Ceiling_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Ceiling_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Ceiling_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Ceiling_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Ceiling_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Ceiling_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Ceiling_Temp}
+\end{tabular*}
+\label{NIST_NRC_Ceiling_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Ceiling_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Ceiling_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Ceiling_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Ceiling_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Ceiling_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Ceiling_Temp}
+\end{tabular*}
+\label{NIST_NRC_Ceiling_Temp_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Floor_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Floor_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Floor_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Floor_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Floor_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Floor_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Floor_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Floor_Temp}
+\end{tabular*}
+\label{NIST_NRC_Floor_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Floor_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Floor_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Floor_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Floor_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Floor_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Floor_Temp}
+\end{tabular*}
+\label{NIST_NRC_Floor_Temp_Open}
+\end{figure}
+
+\clearpage
+
+
+\subsection{WTC Experiments}
+
+The following pages contain comparisons of predicted and measured ceiling temperatures, both at the surface and beneath a layer of marinite board. Table~\ref{WTC_Ceiling} below lists the coordinates of the measurement locations relative to the center of the fire pan. Names with ``IN'' appended are measurements made under the marinite board.
+
+
+\begin{table}[h!]
+\caption[Ceiling surface measurement locations for the WTC series]{Locations of ceiling surface temperature measurements relative to the fire pan in the WTC series.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Name                & $x$ (m)   & $y$ (m)   & $z$ (m)   \\ \hline \hline
+TCC                 & 0.62      & 0.07      & 3.82      \\ \hline
+TCN3                & 0.62      & 0.67      & 3.82      \\ \hline
+TCS3                & 0.62      & -0.53     & 3.82      \\ \hline
+TCE7                & 2.18      & 0.07      & 3.82      \\ \hline
+TCW7                & -1.15     & 0.07      & 3.82      \\ \hline \hline
+TCCIN               & 0.62      & 0.07      & 3.83      \\ \hline
+TCN3IN              & 0.62      & 0.67      & 3.83      \\ \hline
+TCS3IN              & 0.62      & -0.53     & 3.83      \\ \hline
+TCE4IN              & 1.28      & 0.07      & 3.83      \\ \hline
+TCW4IN              & 0.05      & 0.07      & 3.83      \\ \hline
+\end{tabular}
+\end{center}
+\label{WTC_Ceiling}
+\end{table}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Ceiling_Temp_NS} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Ceiling_Temp_NS} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Ceiling_Temp_NS} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Ceiling_Temp_NS} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Ceiling_Temp_NS} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Ceiling_Temp_NS}
+\end{tabular*}
+\label{NIST_WTC_Ceiling_NS}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Ceiling_Temp_EW} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Ceiling_Temp_EW} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Ceiling_Temp_EW} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Ceiling_Temp_EW} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Ceiling_Temp_EW} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Ceiling_Temp_EW}
+\end{tabular*}
+\label{NIST_WTC_Ceiling_EW}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Wall_Temp_98_100_102} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Wall_Temp_98_100_102} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Wall_Temp_98_100_102} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Wall_Temp_98_100_102} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Wall_Temp_98_100_102} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Wall_Temp_98_100_102}
+\end{tabular*}
+\label{NIST_WTC_Wall_98_100_102}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Wall_Temp_103_105_106} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Wall_Temp_103_105_106} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Wall_Temp_103_105_106} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Wall_Temp_103_105_106} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Wall_Temp_103_105_106} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Wall_Temp_103_105_106}
+\end{tabular*}
+\label{NIST_WTC_Wall_103_105_106}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Wall_Temp_107_109_110} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Wall_Temp_107_109_110} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Wall_Temp_107_109_110} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Wall_Temp_107_109_110} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Wall_Temp_107_109_110} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Wall_Temp_107_109_110}
+\end{tabular*}
+\label{NIST_WTC_Wall_107_109_110}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Inner_Ceiling_Temp_NS} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Inner_Ceiling_Temp_NS} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Inner_Ceiling_Temp_NS} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Inner_Ceiling_Temp_NS} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Inner_Ceiling_Temp_NS} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Inner_Ceiling_Temp_NS}
+\end{tabular*}
+\label{NIST_WTC_Inner_Ceiling_NS}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Inner_Ceiling_Temp_EW} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Inner_Ceiling_Temp_EW} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Inner_Ceiling_Temp_EW} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Inner_Ceiling_Temp_EW} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Inner_Ceiling_Temp_EW} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Inner_Ceiling_Temp_EW}
+\end{tabular*}
+\label{NIST_WTC_Inner_Ceiling_EW}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Inner_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Inner_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Inner_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Inner_Wall_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Inner_Wall_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Inner_Wall_Temp}
+\end{tabular*}
+\label{NIST_WTC_Inner_Wall}
+\end{figure}
+
+\clearpage
+
+
+\section{Structural Steel}
+
+
+
+\subsection{WTC Experiments}
+
+The compartment for the WTC experiments contained a hollow box column roughly 0.5~m from the fire pan, two trusses over the top of the pan, and one or two steel bars resting on the lower truss flanges. In Tests 1, 2 and 3, the steel was bare, and in Tests 4, 5 and 6, the steel was coated with various thicknesses of sprayed fire-resistive materials. The column was instrumented near its base (about 0.5~m from the floor, middle (1.5~m), and upper (2.5~m). Four measurements of steel (and insulation) temperatures were made at each location, for each of its four sides. These elements were modeled using thin sheet obstructions with a resolution of 10~cm.
 
 \newpage
 
@@ -138,75 +408,15 @@ Five cylinders (``slugs'') of nickel 200 ($\ge$ 99~\% nickel), 25.4~cm long and 
 \label{NIST_WTC_Bar_1_Steel_Temp}
 \end{figure}
 
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_1_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_1_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_1_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_1_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_1_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_1_Temp}
-\end{tabular*}
-\label{NIST_WTC_Slug_1_Temp}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_2_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_2_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_2_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_2_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_2_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_2_Temp}
-\end{tabular*}
-\label{NIST_WTC_Slug_2_Temp}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_3_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_3_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_3_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_3_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_3_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_3_Temp}
-\end{tabular*}
-\label{NIST_WTC_Slug_3_Temp}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_4_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_4_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_4_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_4_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_4_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_4_Temp}
-\end{tabular*}
-\label{NIST_WTC_Slug_4_Temp}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_5_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_5_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_5_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_5_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_5_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_5_Temp}
-\end{tabular*}
-\label{NIST_WTC_Slug_5_Temp}
-\end{figure}
-
 
 \clearpage
 
-\section{SP Adiabatic Surface Temperature Experiments}
+\subsection{SP Adiabatic Surface Temperature Experiments}
 
 Comparisons of FDS predictions of gas, plate thermometer, and steel temperatures for compartment and pool fire experiments conducted at SP, Sweden, are
 presented on the following pages.
 
-\subsection{Compartment Fire Experiments}
+\subsubsection{Compartment Fire Experiments}
 
 Three experiments were conducted in a standard compartment, 3.6~m long by 2.4~m wide by 2.4~m high, with a 0.8~m wide by
 2.0~m high door centered on the narrow wall. Each experiment used a constant 450~kW propane burner and a single beam suspended 20~cm below the ceiling
@@ -372,12 +582,14 @@ plate, not the insulation material.
 
 
 
-\subsection{Pool Fire Experiments}
+\subsubsection{Pool Fire Experiments}
 
 Three experiments were conducted at SP in 2011 in which a 6~m long, 20~cm diameter vertical column was positioned in the middle of 1.1~m and 1.9~m diesel fuel and 1.1~m heptane
 pool fires~\cite{Sjostrom:AST}. Gas, plate, and steel surface temperature measurements were made at heights of 1~m, 2~m, 3~m, 4~m, and 5~m above the pool surface. At heights of 1~m, 3~m, and 5~m, these measurements were made at only one angular position. However, at 2~m and 4~m, the measurements were made at four positions. At these heights, two conventional plates thermometers were positioned approximately 10~cm from the column surface, along with two special plate thermometers (SPT) that were installed flush with the column surface. Gas temperatures were measured with 0.25~mm and 0.50~mm bead thermocouples. The results were very similar and only the 0.25~mm values are used for comparison with FDS.
 
 At each height, comparable predictions were made with FDS, but at only one angular position because there is no predominant direction of leaning in the simulation. In the experiments, the fire was reported to lean in the direction of Position~1. Also, FDS assumes the column to be square in cross section (20~cm by 20~cm), rather than circular. The grid spacing is 10~cm.
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -454,21 +666,14 @@ At each height, comparable predictions were made with FDS, but at only one angul
 \clearpage
 
 
-\section{NIST/NRC Test Series, Cables}
+\section{Electrical Cables}
 
-Cables in various types (power and control), and configurations (horizontal, vertical, in trays or free-hanging), were installed in
-the test compartment.
-For each of the four cable targets considered, measurements of the local gas temperature, surface temperature, radiative heat flux,
-and total heat flux are available.  The following pages display comparisons of these quantities for
-Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray G.
-FDS does not have a detailed solid phase model that can account for the heat transfer within the bundled,
-cylindrical, non-homogenous cables.  For the bundled cables within horizontal and vertical trays (Targets D and G),
-FDS assumes them to be rectangular slabs of thickness comparable to the diameter of the individual cables.
-For the free-hanging cables B and F, FDS assumes them to be cylinders of uniform composition into which it
-computes the radial heat transfer as a function of the heat flux to a designated location.
-The superposition of gas temperature, heat flux and surface temperature in the figures on the following pages
-provides information about how cables heat up in fires.  Favorable or unfavorable predictions of cable surface
-temperatures can often be explained in terms of comparable errors in the prediction of the thermal environment in the vicinity of the cable.
+
+\subsection{NIST/NRC Experiments}
+
+Electrical cables of various types (power and control), and configurations (horizontal or vertical; in tray or free-hanging), were installed in the test compartment. For each of the four cable targets considered, measurements of the local gas temperature, surface temperature, radiative heat flux, and total heat flux are available.  The following pages display comparisons of surface temperature for Control Cable B, Horizontal Cable Tray D, Power Cable F, and Vertical Cable Tray G. For the bundled cables within horizontal and vertical trays (Targets D and G), FDS assumes them to be rectangular slabs of thickness comparable to the diameter of the individual cables. For the free-hanging cables B and F, FDS assumes them to be cylinders of uniform composition.
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -578,23 +783,13 @@ temperatures can often be explained in terms of comparable errors in the predict
 
 
 
-\section{CAROLFIRE Cable Temperatures}
+\subsection{CAROLFIRE Experiments}
 
-On the following pages are predictions of the THIEF (thermally-induced electrical failure) model compared to 35
-experiments conducted at Sandia National Laboratory~\cite{CAROLFIRE}. In these experiments, an instrumented electrical cable was run through a heated cylindrical ``shroud.'' The shroud temperature is an input for the model, and the cable temperature (and in some cases that of the steel conduit enclosing the cable) is predicted. Note that the cables generally fall into two categories -- thermoset and thermoplastic. Thermoset cables form a char layer when burned and typically
-fail electrically at temperatures near 400~$^\circ$C. Thermoplastic cables typically melt and then burn, leaving little residue
-behind except the conductors. These cables typically fail between 200~$^\circ$C and 250~$^\circ$C. Some cables, as in
-Tests~18 and 31, do not fall into either category. The thermoset cables were exposed to temperatures in the neighborhood of
-480~$^\circ$C, and the thermoplastics were exposed to temperatures near 300~$^\circ$C.
+On the following pages are predictions of the THIEF (thermally-induced electrical failure) model compared to 35 experiments conducted at Sandia National Laboratory~\cite{CAROLFIRE}. In these experiments, an instrumented electrical cable was run through a heated cylindrical ``shroud.'' The shroud temperature is an input for the model, and the cable temperature (and in some cases that of the steel conduit enclosing the cable) is predicted. Note that the cables generally fall into two categories -- thermoset and thermoplastic. Thermoset cables form a char layer when burned and typically fail electrically at temperatures near 400~$^\circ$C. Thermoplastic cables typically melt and then burn, leaving little residue behind except the conductors. These cables typically fail between 200~$^\circ$C and 250~$^\circ$C. Some cables, as in Tests~18 and 31, do not fall into either category. The thermoset cables were exposed to temperatures in the neighborhood of 480~$^\circ$C, and the thermoplastics were exposed to temperatures near 300~$^\circ$C.
 
-Note in the plots to follow that the objective of the calculation is to predict the cable temperature just inside of the
-jacket until the cable fails electrically. In some experiments, the short-circuiting of the cable led to ignition of the
-pyrolyzates. This behavior is not captured in the model, which is why some of the experimental data shows a rapid rise in
-temperature at a certain point in the test. In almost all cases, electrical failure occurred very shortly, or at about the
-same time, as ignition.
+Note in the plots to follow that the objective of the calculation is to predict the cable temperature just inside of the jacket until the cable fails electrically. In some experiments, the short-circuiting of the cable led to ignition of the pyrolyzates. This behavior is not captured in the model, which is why some of the experimental data shows a rapid rise in temperature at a certain point in the test. In almost all cases, electrical failure occurred very shortly, or at about the same time, as ignition.
 
-Figure~\ref{CAROLFIRE_Summary_Plot} compares the measured versus predicted time to a ``threshold'' temperature. The threshold temperature is
-400~$^\circ$C for thermoset cables and 200~$^\circ$C for thermoplastics.
+Figure~\ref{CAROLFIRE_Summary_Plot} compares the measured versus predicted time to a ``threshold'' temperature. The threshold temperature is 400~$^\circ$C for thermoset cables and 200~$^\circ$C for thermoplastics.
 
 \newpage
 
@@ -677,291 +872,76 @@ Figure~\ref{CAROLFIRE_Summary_Plot} compares the measured versus predicted time 
 
 \clearpage
 
-\section{WTC Ceiling and Wall Temperatures}
 
-The following pages contain comparisons of predicted and measured ceiling temperatures, both at the surface and beneath a layer of
-marinite board. Table~\ref{WTC_Ceiling} below lists the coordinates of the measurement locations relative to the center of the fire pan.
-Names with ``IN'' appended are measurements made under the marinite board.
-
-
-\begin{table}[h!]
-\caption[Ceiling surface measurement locations for the WTC series]{Locations of ceiling surface temperature measurements relative to the fire pan in the WTC series.}
-\begin{center}
-\begin{tabular}{|l|c|c|c|}
-\hline
-Name                & $x$ (m)   & $y$ (m)   & $z$ (m)   \\ \hline \hline
-TCC                 & 0.62      & 0.07      & 3.82      \\ \hline
-TCN3                & 0.62      & 0.67      & 3.82      \\ \hline
-TCS3                & 0.62      & -0.53     & 3.82      \\ \hline
-TCE7                & 2.18      & 0.07      & 3.82      \\ \hline
-TCW7                & -1.15     & 0.07      & 3.82      \\ \hline \hline
-TCCIN               & 0.62      & 0.07      & 3.83      \\ \hline
-TCN3IN              & 0.62      & 0.67      & 3.83      \\ \hline
-TCS3IN              & 0.62      & -0.53     & 3.83      \\ \hline
-TCE4IN              & 1.28      & 0.07      & 3.83      \\ \hline
-TCW4IN              & 0.05      & 0.07      & 3.83      \\ \hline
-\end{tabular}
-\end{center}
-\label{WTC_Ceiling}
-\end{table}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Ceiling_Temp_NS} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Ceiling_Temp_NS} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Ceiling_Temp_NS} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Ceiling_Temp_NS} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Ceiling_Temp_NS} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Ceiling_Temp_NS}
-\end{tabular*}
-\label{NIST_WTC_Ceiling_NS}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Ceiling_Temp_EW} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Ceiling_Temp_EW} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Ceiling_Temp_EW} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Ceiling_Temp_EW} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Ceiling_Temp_EW} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Ceiling_Temp_EW}
-\end{tabular*}
-\label{NIST_WTC_Ceiling_EW}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Wall_Temp_98_100_102} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Wall_Temp_98_100_102} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Wall_Temp_98_100_102} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Wall_Temp_98_100_102} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Wall_Temp_98_100_102} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Wall_Temp_98_100_102}
-\end{tabular*}
-\label{NIST_WTC_Wall_98_100_102}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Wall_Temp_103_105_106} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Wall_Temp_103_105_106} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Wall_Temp_103_105_106} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Wall_Temp_103_105_106} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Wall_Temp_103_105_106} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Wall_Temp_103_105_106}
-\end{tabular*}
-\label{NIST_WTC_Wall_103_105_106}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Wall_Temp_107_109_110} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Wall_Temp_107_109_110} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Wall_Temp_107_109_110} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Wall_Temp_107_109_110} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Wall_Temp_107_109_110} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Wall_Temp_107_109_110}
-\end{tabular*}
-\label{NIST_WTC_Wall_107_109_110}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Inner_Ceiling_Temp_NS} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Inner_Ceiling_Temp_NS} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Inner_Ceiling_Temp_NS} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Inner_Ceiling_Temp_NS} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Inner_Ceiling_Temp_NS} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Inner_Ceiling_Temp_NS}
-\end{tabular*}
-\label{NIST_WTC_Inner_Ceiling_NS}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Inner_Ceiling_Temp_EW} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Inner_Ceiling_Temp_EW} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Inner_Ceiling_Temp_EW} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Inner_Ceiling_Temp_EW} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Inner_Ceiling_Temp_EW} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Inner_Ceiling_Temp_EW}
-\end{tabular*}
-\label{NIST_WTC_Inner_Ceiling_EW}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Inner_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Inner_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Inner_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Inner_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Inner_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Inner_Wall_Temp}
-\end{tabular*}
-\label{NIST_WTC_Inner_Wall}
-\end{figure}
+\section{Miscellaneous Targets}
 
 \clearpage
 
+\subsection{WTC Experiments}
 
+Five cylinders (``slugs'') of nickel 200 ($\ge$ 99~\% nickel), 25.4~cm long and 10.2~cm in diameter, were positioned 50~cm north of the centerline in the WTC experiments. Slugs 1 through 5 were 2.92~m, 1.82~m, 0.57~m, 0.05~m, and 1.56~m, respectively, from the longitudinal axis of the fire pan. All the slugs were 50~cm north of the lateral axis. The fire pan measured 2~m by 1~m. Four thermocouples were inserted into each slug at various locations. All four temperatures for each slug were virtually indistinguishable. Rectangular obstructions were used to model the slugs, but the one-dimensional heat conduction calculation was performed using cylindrical coordinates.
 
-\section{NIST/NRC Test Series, Compartment Walls, Floor and Ceiling}
-
-Thirty-six heat flux gauges were positioned at various locations on all four walls of the compartment,
-plus the ceiling and floor.  Comparisons between measured and predicted heat fluxes and surface temperatures are shown
-on the following pages for a selected number of locations.
-Over half of the measurement points are in roughly the same relative location to the fire and hence
-the measurements and predictions are similar.  For this reason, data for the east and north walls are shown
-because the data from the south and west walls are comparable.  Data from the south wall is used in cases where
-the corresponding instrument on the north wall failed, or in cases where the fire is positioned close to the south wall.
-For each test, eight locations are used for comparison, two on the long (mainly north) wall,
-two on the short (east) wall, two on the floor, and two on the ceiling.  Of the two locations for each panel,
-one is considered in the far-field, relatively remote from the fire; one is in the near-field,
-relatively close to the fire.  How close or far varies from test to test.
-The two short wall locations are equally remote from the fire; thus, one location is in the lower layer, one in the upper.
-Table~\ref{NIST_NRC_Wall_Coords} lists the locations for each test.
-
-
-\vspace{\baselineskip}
-
-\begin{table}[h!]
-\caption[Wall thermocouple positions for the NIST/NRC series]
-{Wall thermocouple positions for the NIST/NRC series. The origin of the coordinate system at the floor in the southwest
-corner of the compartment.}
-\begin{center}
-\begin{tabular}{|l|c|c|c||l|c|c|c|}
-\hline
-Name              & $x$   & $y$  & $z$      & Name              & $x$   & $y$   & $z$       \\ \hline \hline
-TC North U-1-2    & 3.85  & 7.04 & 1.49     & TC Floor U-1-2    & 3.08  & 3.51  & 0         \\ \hline
-TC North U-2-2    & 3.86  & 7.04 & 3.71     & TC Floor U-2-2    & 9.08  & 1.94  & 0         \\ \hline
-TC North U-3-2    & 9.48  & 7.04 & 1.86     & TC Floor U-3-2    & 9.06  & 5.97  & 0         \\ \hline
-TC North U-4-2    & 12.07 & 7.04 & 1.88     & TC Floor U-4-2    & 10.86 & 2.38  & 0         \\ \hline
-TC North U-5-2    & 17.69 & 7.04 & 1.49     & TC Floor C-5-2    & 10.93 & 5.20  & 0.01      \\ \hline
-TC North U-6-2    & 17.69 & 7.04 & 3.69     & TC Floor U-6-2    & 13.13 & 1.99  & 0         \\ \hline
-TC South U-1-2    & 3.86  & 0    & 1.49     & TC Floor U-7-2    & 13.00 & 5.92  & 0         \\ \hline
-TC South U-2-2    & 3.86  & 0    & 3.82     & TC Floor U-8-2    & 18.63 & 3.54  & 0         \\ \hline
-TC South U-3-2    & 9.54  & 0    & 1.86     & TC Ceiling U-1-2  & 3.04  & 3.60  & 3.82      \\ \hline
-TC South U-4-2    & 12.08 & 0    & 1.86     & TC Ceiling C-2-2  & 8.99  & 2.00  & 3.82      \\ \hline
-TC South U-5-2    & 17.69 & 0    & 1.50     & TC Ceiling C-3-2  & 9.03  & 5.97  & 3.82      \\ \hline
-TC South U-6-2    & 17.74 & 0    & 3.70     & TC Ceiling C-4-2  & 10.79 & 2.38  & 3.82      \\ \hline
-TC East U-1-2     & 21.66 & 1.52 & 1.12     & TC Ceiling C-5-2  & 10.79 & 5.20  & 3.82      \\ \hline
-TC East U-2-2     & 21.66 & 1.52 & 2.40     & TC Ceiling C-6-2  & 13.00 & 2.07  & 3.82      \\ \hline
-TC East U-3-2     & 21.66 & 5.68 & 1.13     & TC Ceiling C-7-2  & 12.84 & 5.98  & 3.82      \\ \hline
-TC East U-4-2     & 21.66 & 5.70 & 2.42     & TC Ceiling U-8-2  & 18.71 & 3.54  & 3.82      \\ \hline
-\end{tabular}
-\end{center}
-\label{NIST_NRC_Wall_Coords}
-\end{table}
-
-\newpage
-
-
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Long_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Long_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Long_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Long_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Long_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Long_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Long_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Long_Wall_Temp}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_1_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_1_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_1_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_1_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_1_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_1_Temp}
 \end{tabular*}
-\label{NIST_NRC_Long_Wall_Temp_Closed}
+\label{NIST_WTC_Slug_1_Temp}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Long_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Long_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Long_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Long_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Long_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Long_Wall_Temp}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_2_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_2_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_2_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_2_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_2_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_2_Temp}
 \end{tabular*}
-\label{NIST_NRC_Long_Wall_Temp_Open}
+\label{NIST_WTC_Slug_2_Temp}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Short_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Short_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Short_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Short_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Short_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Short_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Short_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Short_Wall_Temp}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_3_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_3_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_3_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_3_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_3_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_3_Temp}
 \end{tabular*}
-\label{NIST_NRC_Short_Wall_Temp_Closed}
+\label{NIST_WTC_Slug_3_Temp}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Short_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Short_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Short_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Short_Wall_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Short_Wall_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Short_Wall_Temp}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_4_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_4_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_4_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_4_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_4_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_4_Temp}
 \end{tabular*}
-\label{NIST_NRC_Short_Wall_Temp_Open}
+\label{NIST_WTC_Slug_4_Temp}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Ceiling_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Ceiling_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Ceiling_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Ceiling_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Ceiling_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Ceiling_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Ceiling_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Ceiling_Temp}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Slug_5_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Slug_5_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Slug_5_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Slug_5_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Slug_5_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Slug_5_Temp}
 \end{tabular*}
-\label{NIST_NRC_Ceiling_Temp_Closed}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Ceiling_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Ceiling_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Ceiling_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Ceiling_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Ceiling_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Ceiling_Temp}
-\end{tabular*}
-\label{NIST_NRC_Ceiling_Temp_Open}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Floor_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Floor_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Floor_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Floor_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Floor_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Floor_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Floor_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Floor_Temp}
-\end{tabular*}
-\label{NIST_NRC_Floor_Temp_Closed}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Floor_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Floor_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Floor_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Floor_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Floor_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Floor_Temp}
-\end{tabular*}
-\label{NIST_NRC_Floor_Temp_Open}
+\label{NIST_WTC_Slug_5_Temp}
 \end{figure}
 
 \clearpage
-
 
 \section{Summary of Surface Temperature Predictions}
 
