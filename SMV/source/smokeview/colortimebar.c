@@ -461,11 +461,11 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[14]=0;
   cbi++;
 
-  // jet colorbar
+  // Rainbow 2 colorbar
 
   strcpy(cbi->label,"Rainbow 2");
   cbi->label_ptr=cbi->label;
-  cbi->nnodes=6;
+  cbi->nnodes=5;
   cbi->nodehilight=0;
 
   cbi->index_node[0]=0;
@@ -473,30 +473,25 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[1]=0;
   cbi->rgb_node[2]=143;
 
-  cbi->index_node[1]=32;
+  cbi->index_node[1]=64;
   cbi->rgb_node[3]=0;
   cbi->rgb_node[4]=0;
   cbi->rgb_node[5]=255;
 
-  cbi->index_node[2]=96;
+  cbi->index_node[2]=128;
   cbi->rgb_node[6]=0;
   cbi->rgb_node[7]=255;
   cbi->rgb_node[8]=255;
 
-  cbi->index_node[3]=160;
+  cbi->index_node[3]=192;
   cbi->rgb_node[9]=255;
   cbi->rgb_node[10]=255;
   cbi->rgb_node[11]=0;
 
-  cbi->index_node[4]=234;
+  cbi->index_node[4]=255;
   cbi->rgb_node[12]=255;
   cbi->rgb_node[13]=0;
   cbi->rgb_node[14]=0;
-
-  cbi->index_node[5]=255;
-  cbi->rgb_node[15]=128;
-  cbi->rgb_node[16]=0;
-  cbi->rgb_node[17]=0;
   cbi++;
   
   // yellow/red
