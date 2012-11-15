@@ -25,6 +25,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       MATL_ID='Liq'
       SPECIFIC_HEAT_RAMP = 'c_ramp'
       CONDUCTIVITY_RAMP = 'k_ramp'/
+	  
 &RAMP ID='c_ramp', T=0., F=1.466 /
 &RAMP ID='c_ramp', T=158., F=2.98 /
 &RAMP ID='c_ramp', T=165., F=2.52 /
