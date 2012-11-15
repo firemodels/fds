@@ -114,8 +114,8 @@ GLUI_Rollout *ROLLOUT_user_labels=NULL;
 GLUI_Rollout *ROLLOUT_user_tick=NULL;
 GLUI_Rollout *ROLLOUT_label1=NULL;
 
-GLUI_Panel *xxPANEL_extreme=NULL,*xxPANEL_cb9=NULL,*xxPANEL_cb8=NULL,*xxPANEL_cb7=NULL;
-GLUI_Panel *xxPANEL_cb11=NULL;
+GLUI_Panel *PANEL_extreme=NULL,*PANEL_cb9=NULL,*PANEL_cb8=NULL,*PANEL_cb7=NULL;
+GLUI_Panel *PANEL_cb11=NULL;
 GLUI_Panel *PANEL_contours=NULL;
 GLUI_Panel *PANEL_gen1=NULL, *PANEL_gen2=NULL, *PANEL_gen3=NULL;
 GLUI_Panel *PANEL_LB_panel1=NULL, *PANEL_LB_panel2=NULL, *PANEL_LB_panel3=NULL;
@@ -457,51 +457,51 @@ extern "C" void glui_labels_setup(int main_window){
     LIST_colorbar2->set_int_val(colorbartype);
   }
 
-  xxPANEL_cb11=glui_labels->add_panel_to_panel(ROLLOUT_scene,"",GLUI_PANEL_NONE);
+  PANEL_cb11=glui_labels->add_panel_to_panel(ROLLOUT_scene,"",GLUI_PANEL_NONE);
 
-  PANEL_contours = glui_labels->add_panel_to_panel(xxPANEL_cb11,_("Colorbar type:"));
+  PANEL_contours = glui_labels->add_panel_to_panel(PANEL_cb11,_("Colorbar type:"));
   RADIO2_plot3d_display=glui_labels->add_radiogroup_to_panel(PANEL_contours,&contour_type,UPDATEPLOT,PLOT3D_CB);
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Continuous"));
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Stepped"));
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Line"));
 
-  glui_labels->add_column_to_panel(xxPANEL_cb11,false);
+  glui_labels->add_column_to_panel(PANEL_cb11,false);
 
-  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("color -> grey"),&setbw,LABELS_shade,Labels_CB);
-  CHECKBOX_axislabels_smooth=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("Smooth colorbar label values"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
-  CHECKBOX_transparentflag=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("Use transparency"),
+  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("color -> grey"),&setbw,LABELS_shade,Labels_CB);
+  CHECKBOX_axislabels_smooth=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Smooth colorbar label values"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
+  CHECKBOX_transparentflag=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Use transparency"),
     &use_transparency_data,DATA_transparent,Slice_CB);
 #ifdef pp_BETA
-  CHECKBOX_sort=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("Sort transparent surfaces"),
+  CHECKBOX_sort=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Sort transparent surfaces"),
     &sort_iso_triangles,SORT_SURFACES,Slice_CB);
-  CHECKBOX_smooth=glui_labels->add_checkbox_to_panel(xxPANEL_cb11,_("Smooth surfaces"),
+  CHECKBOX_smooth=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Smooth surfaces"),
     &smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
 #endif
-  SPINNER_labels_transparency_data=glui_labels->add_spinner_to_panel(xxPANEL_cb11,_("transparency level"),
+  SPINNER_labels_transparency_data=glui_labels->add_spinner_to_panel(PANEL_cb11,_("transparency level"),
     GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
   SPINNER_labels_transparency_data->set_w(0);
   SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
 
-  xxPANEL_extreme = glui_labels->add_panel_to_panel(ROLLOUT_scene,"",GLUI_PANEL_NONE);
+  PANEL_extreme = glui_labels->add_panel_to_panel(ROLLOUT_scene,"",GLUI_PANEL_NONE);
 
-  CHECKBOX_usebounds=glui_labels->add_checkbox_to_panel(xxPANEL_extreme,_("Highlight extreme data"),&show_extremedata,
+  CHECKBOX_usebounds=glui_labels->add_checkbox_to_panel(PANEL_extreme,_("Highlight extreme data"),&show_extremedata,
     COLORBAR_EXTREME,Extreme_CB);
-  xxPANEL_cb9 = glui_labels->add_panel_to_panel(xxPANEL_extreme,"",GLUI_PANEL_NONE);
-  xxPANEL_cb8 = glui_labels->add_panel_to_panel(xxPANEL_cb9,_("Below specified min"));
-  SPINNER_down_red=  glui_labels->add_spinner_to_panel(xxPANEL_cb8,_("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
-  SPINNER_down_green=glui_labels->add_spinner_to_panel(xxPANEL_cb8,_("green"),GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
-  SPINNER_down_blue= glui_labels->add_spinner_to_panel(xxPANEL_cb8,_("blue"), GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
+  PANEL_cb9 = glui_labels->add_panel_to_panel(PANEL_extreme,"",GLUI_PANEL_NONE);
+  PANEL_cb8 = glui_labels->add_panel_to_panel(PANEL_cb9,_("Below specified min"));
+  SPINNER_down_red=  glui_labels->add_spinner_to_panel(PANEL_cb8,_("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
+  SPINNER_down_green=glui_labels->add_spinner_to_panel(PANEL_cb8,_("green"),GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
+  SPINNER_down_blue= glui_labels->add_spinner_to_panel(PANEL_cb8,_("blue"), GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
   SPINNER_down_red->set_int_limits(0,255);
   SPINNER_down_green->set_int_limits(0,255);
   SPINNER_down_blue->set_int_limits(0,255);
 
-  glui_labels->add_column_to_panel(xxPANEL_cb9,false);
+  glui_labels->add_column_to_panel(PANEL_cb9,false);
 
-  xxPANEL_cb7 = glui_labels->add_panel_to_panel(xxPANEL_cb9,_("Above specified max"));
-  SPINNER_up_red=  glui_labels->add_spinner_to_panel(xxPANEL_cb7,_("red"),  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
-  SPINNER_up_green=glui_labels->add_spinner_to_panel(xxPANEL_cb7,_("green"),GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
-  SPINNER_up_blue= glui_labels->add_spinner_to_panel(xxPANEL_cb7,_("blue"), GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
+  PANEL_cb7 = glui_labels->add_panel_to_panel(PANEL_cb9,_("Above specified max"));
+  SPINNER_up_red=  glui_labels->add_spinner_to_panel(PANEL_cb7,_("red"),  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
+  SPINNER_up_green=glui_labels->add_spinner_to_panel(PANEL_cb7,_("green"),GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
+  SPINNER_up_blue= glui_labels->add_spinner_to_panel(PANEL_cb7,_("blue"), GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
   SPINNER_up_red->set_int_limits(0,255);
   SPINNER_up_green->set_int_limits(0,255);
   SPINNER_up_blue->set_int_limits(0,255);

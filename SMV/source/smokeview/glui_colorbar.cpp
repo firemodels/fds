@@ -41,7 +41,6 @@ GLUI_Panel *PANEL_cb5b=NULL;
 GLUI_Panel *PANEL_cb6=NULL;
 GLUI_Panel *PANEL_cb7=NULL;
 GLUI_Panel *PANEL_cb8=NULL;
-GLUI_Panel *PANEL_cb9=NULL;
 GLUI_Panel *PANEL_cb10=NULL;
 
 GLUI_Listbox *LISTBOX_colorbar=NULL;
