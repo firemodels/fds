@@ -3343,6 +3343,10 @@ LOADVSLICE
  1/2/3 (int)  val (float)
 \end{verbatim}
 
+\hitem{LOADVOLSMOKE}
+
+\hitem{LOADVOLSMOKEFRAME}
+
 \hitem{UNLOADALL}Unload all data files currently loaded.
 Usage:
 \begin{verbatim}
@@ -3357,6 +3361,18 @@ UNLOADALL
 Usage:
 \begin{verbatim}
  EXIT
+\end{verbatim}
+
+\hitem{CBARFLIP} Display the color bar in the opposite orientation from which it was defined. 
+Usage:
+\begin{verbatim}
+ CBARFLIP
+\end{verbatim}
+
+\hitem{CBARNORMAL}
+Usage: Display the color bar in the same orientation as it was defined.
+\begin{verbatim}
+ CBARNORMAL
 \end{verbatim}
 
 \hitem{KEYBOARD}Passes a keyboard character to Smokeview
@@ -3397,6 +3413,30 @@ SETVIEWPOINT
 \hitem{UNLOADTOUR}Unload a tour.
 \begin{verbatim}
 UNLOADTOUR
+\end{verbatim}
+
+\hitem{XSCENECLIP} Sets clipping planes along the X axis.  Portions of the scene before {\tt xmin}\
+or after {\tt xmax}\ are hidden if setxmin or setxmax are set to 1 respectively.
+Usage:
+\begin{verbatim}
+XSCENECLIP
+  setxmin xmin setxmax xmax
+\end{verbatim}
+
+\hitem{YSCENECLIP} Sets clipping planes along the Y axis.  Portions of the scene before {\tt ymin}\
+or after {\tt ymax}\ are hidden if setymin or setymax are set to 1 respectively.
+Usage:
+\begin{verbatim}
+YSCENECLIP
+  setymin ymin setymax ymax
+\end{verbatim}
+
+\hitem{ZSCENECLIP} Sets clipping planes along the Z axis.  Portions of the scene before {\tt zmin}\
+or after {\tt zmax}\ are hidden if setzmin or setzmax are set to 1 respectively.
+Usage:
+\begin{verbatim}
+ZSCENECLIP
+  setzmin zmin setzmax zmax
 \end{verbatim}
 
 
@@ -3449,6 +3489,8 @@ RENDERALL
   skip (integer)
   file name base (char) (or blank to use smokeview default)
 \end{verbatim}
+
+\hitem{VOLSMOKERENDERALL}
 \elist
 
 %---------------------------------------------------------------------------------
