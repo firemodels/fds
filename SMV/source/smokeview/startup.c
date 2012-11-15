@@ -1141,6 +1141,8 @@ void init_texturedir(void){
 void initvars(void){
   int i;
   
+  strcpy(default_fed_colorbar,"FED");
+
   label_first_ptr = &label_first;
   label_last_ptr = &label_last;
 
@@ -1853,7 +1855,6 @@ void initvars(void){
 
   adjustalphaflag=3;
   colorband=1;
-  show_extremedata=0;
 
   highlight_block=-1, highlight_mesh=0, highlight_flag=2;
   updatesmoothblocks=1;

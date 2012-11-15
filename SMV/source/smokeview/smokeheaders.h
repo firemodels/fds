@@ -8,6 +8,7 @@
 #ifdef pp_SUPERMESH
 EXTERNCPP void define_volsmoke_textures(void);
 #endif
+EXTERNCPP void set_colorbar_list_index(int val);
 EXTERNCPP int get_colorbar_list_index(void);
 EXTERNCPP int get_colorbar_index(int flag, int x, int y);
 EXTERNCPP void Get_VP_info(void);
@@ -400,8 +401,7 @@ EXTERNCPP void bench_out(float frame_rate);
 EXTERNCPP void output_Slicedata(void);
 EXTERNCPP void init_Slicedata(void);
 EXTERNCPP void update_camera_label(void);
-EXTERNCPP void update_extreme(void);
-EXTERNCPP void update_extreme2(void);
+EXTERNCPP void update_extreme(int flag);
 EXTERNCPP void update_colorbar_type(void);
 EXTERNCPP void update_colorbar_label(void);
 EXTERNCPP void init_camera_list(void);

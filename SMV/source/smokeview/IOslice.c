@@ -719,6 +719,19 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   else{
     readiso_orig(fed_iso->file,file_index,flag,&error_local);
   }
+  {
+    colorbardata *cb;
+
+#define COLORBAR_LIST2 112
+
+    cb = getcolorbar(default_fed_colorbar);
+    if(cb!=NULL){
+      colorbartype=cb-colorbarinfo;
+      set_colorbar_list_index(colorbartype);
+      Slice_CB(COLORBAR_LIST2);
+      current_colorbar=cb;
+    }
+  }
   printf("completed\n");
 }
 

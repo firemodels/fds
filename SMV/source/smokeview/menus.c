@@ -434,7 +434,7 @@ void ColorBarMenu(int value){
       colorbarflip=0;
       contour_type=SHADED_CONTOURS;
       setbw=0;
-      update_extreme();
+      update_extreme(0);
       updatecolors(-1);
       break;
     case -5:
@@ -442,7 +442,7 @@ void ColorBarMenu(int value){
       break;
     case -7:
       show_extremedata=1-show_extremedata;
-      update_extreme();
+      update_extreme(0);
       updatecolors(-1);
       break;
     case -12:

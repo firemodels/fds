@@ -123,6 +123,10 @@ extern "C" void update_colorbar_label(void){
 extern "C" void hide_glui_colorbar(void){
   showcolorbar_dialog_save=showcolorbar_dialog;
   showcolorbar_dialog=0;
+  if(show_extremedata_save==1){
+    show_extremedata=1;
+    update_extreme(1);
+  }
   if(glui_colorbar!=NULL){
     copy_camera(camera_external,camera_external_save);
     Reshape_CB(screenWidth,screenHeight);
@@ -137,6 +141,11 @@ extern "C" void hide_glui_colorbar(void){
 extern "C" void show_glui_colorbar(void){
 // show colorbar dialog box and redefine initial view point
   showcolorbar_dialog=1;
+  show_extremedata_save = show_extremedata;
+  if(show_extremedata==1){
+    show_extremedata=0;
+    update_extreme(-1);
+  }
   if(glui_colorbar!=NULL){
     Reshape_CB(screenWidth,screenHeight);
     ResetView(RESTORE_EXTERIOR_VIEW);

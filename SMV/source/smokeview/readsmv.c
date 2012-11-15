@@ -8009,6 +8009,14 @@ int readini2(char *inifile, int localfile){
        continue;
      }
    }
+   if(match(buffer,"FEDCOLORBAR")==1){
+     char *fbuff;
+
+     fgets(buffer,255,stream);
+     trim(buffer);
+     fbuff=trim_front(buffer);
+     if(strlen(fbuff)>0)strcpy(default_fed_colorbar,fbuff);
+   }
    if(match(buffer,"FED")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&regenerate_fed);
@@ -10778,6 +10786,8 @@ void writeini(int flag){
   fprintf(fileout,"------------\n\n");
   fprintf(fileout,"FED\n");
   fprintf(fileout," %i\n",regenerate_fed);
+  fprintf(fileout,"FEDCOLORBAR\n");
+  fprintf(fileout," %s\n",default_fed_colorbar);
   fprintf(fileout,"SHOWFEDAREA\n");
   fprintf(fileout," %i\n",show_fed_area);
   fprintf(fileout,"NOPART\n");

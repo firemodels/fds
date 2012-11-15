@@ -1958,7 +1958,7 @@ extern "C" void Slice_CB(int var){
   }
 
   if(var==COLORBAR_EXTREME2){
-    update_extreme();
+    update_extreme(0);
     return;
   }
   if(var==COLORBAR_LIST2){
