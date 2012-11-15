@@ -11,7 +11,7 @@ addpath('../../Validation/BRE_Spray/FDS_Output_Files')
 
 % load experimental data and FDS prediction
 
-[exp_data] = csvread('BRE_Spray_Test.csv',2);
+exp_data(1:24,1:7) = csvread('BRE_Spray_Test.csv',2);
 exp_col_d = 6;
 exp_col_w = 7;
 exp_col_att = 4;
@@ -116,7 +116,6 @@ axis([xmin xmax ymin ymax])
   
 end
 
-
 % Format the plots
 
 % d-plot
@@ -144,8 +143,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/BRE_Spray/BRE_Spray_Diameter');
-
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/BRE_LEMTA_Spray/BRE_Spray_Diameter');
 
 % w-plot
 
@@ -173,37 +171,11 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/BRE_Spray/BRE_Spray_W');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/BRE_LEMTA_Spray/BRE_Spray_W');
 
-
-% Attenuation plot
-
-figure(hf(3))
-plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'FontName',Font_Name)
-Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
-Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
-set(hf(3),'DefaultLineLineWidth',Line_Width)
-xlabel('Exp. Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('FDS Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-hl(n) = legend(ha,'Nozzle A','Nozzle B','Nozzle D','Location','SouthEast');
-
-% print to pdf
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Height Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/BRE_Spray/BRE_Spray_Attenuation');
-
-%close all
 %EOF
 
-
-%add the LEMTA tests to the script
-close all
-clear all
+%add LEMTA data base to BRE data base
 
 addpath('../../Validation/LEMTA_Spray/Experimental_Data')
 addpath('../../Validation/LEMTA_Spray/FDS_Input_Files')
@@ -211,29 +183,21 @@ addpath('../../Validation/LEMTA_Spray/FDS_Output_Files')
 
 % load experimental data and FDS prediction
 
-[exp_data] = csvread('LEMTA_Spray_Test.csv',2);
-exp_col_d{1} = 1; % distance
-exp_col_att{1} = 2; % attenuation
+exp_data(25:29,1:4)=csvread('LEMTA_Spray_Test.csv',2,0,[2,0,6,3]);
+exp_data(25:29,8)=csvread('LEMTA_Spray_Test.csv',2,4); %distance
 
-amax = 30;
+exp_marker{4} = 'kv';
+exp_color{4} = 'k';
 
-exp_marker{1} = 'bd';
-exp_color{1} = 'b';
+w_leg_pos{4} = 'NorthWest';
+d_leg_pos{4} = 'NorthWest';
 
-w_leg_pos{1} = 'NorthWest';
-d_leg_pos{1} = 'NorthWest';
+exp_rows(4,1:5) = [25:29];
 
-exp_rows(1,:) = [1:5];
+%fds_marker{4} = 'kv--';
+%fds_color{4} = 'k';
 
-fds_marker{1} = 'bd--';
-fds_color{1} = 'w';
-
-wmin = 0;
-wmax = 6;
-dmin = 0;
-dmax = 800;
-
-n = 1;
+n=4;
 for p = 1:5
 
    FDS_File = ['LEMTA_Spray_' int2str(p) '_devc.csv'];
@@ -255,39 +219,32 @@ end
 
 % plot attenuation
 
-exp_data(exp_rows(n,:),2);
-FDS_Attenuation(n,:);
+exp_data(exp_rows(n,1:5),4);
+FDS_Attenuation(n,1:5);
 exp_marker{n};
-hf(4)=figure(4);
-ha(n,1) = plot(exp_data(exp_rows(n,:),2),FDS_Attenuation(n,:),exp_marker{n});
+
+hf(3)=figure(3);
+ha(n,1) = plot(exp_data(exp_rows(n,1:5),4),FDS_Attenuation(n,1:5),exp_marker{n});
 set(ha(n,1),'MarkerFaceColor',exp_color{n});
 hold on
 
-xmin = 0;
-ymin = 0;
-xmax = amax;
-ymax = amax;
-plot([xmin xmax],[ymin ymax],'k-.')
-axis([xmin xmax ymin ymax])
-
-% Format the plots
-
 % Attenuation plot
 
-figure(hf(4))
+figure(hf(3))
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
-set(hf(4),'DefaultLineLineWidth',Line_Width)
+set(hf(3),'DefaultLineLineWidth',Line_Width)
 xlabel('Exp. Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('FDS Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+hl(n) = legend(ha,'BRE (Nozzle A)','BRE (Nozzle B)','BRE (Nozzle D)','LEMTA','Location','SouthEast');
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/LEMTA_Spray/LEMTA_Spray_Attenuation');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/BRE_LEMTA_Spray/BRE_LEMTA_Spray_Attenuation');
