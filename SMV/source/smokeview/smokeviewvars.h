@@ -553,6 +553,8 @@ SVEXTERN int shooter_itime;
 SVEXTERN int showgluitrainer;
 SVEXTERN int colorbarcycle;
 SVEXTERN int colorbartype,colorbartype_ini,colorbartype_default;
+SVEXTERN char SVDECL(*colorbarname,NULL);
+SVEXTERN int SVDECL(update_colorbartype,0);
 SVEXTERN int colorbartype_save;
 SVEXTERN int colorbarpoint;
 SVEXTERN int vectorspresent;
@@ -1013,7 +1015,7 @@ SVEXTERN int smoketest,show_smoketest;
 #endif
 SVEXTERN int showall_textures;
 
-SVEXTERN int ncolorbars;
+SVEXTERN int SVDECL(ncolorbars,0);
 SVEXTERN int ndefaultcolorbars;
 SVEXTERN colorbardata SVDECL(*colorbarinfo,NULL),SVDECL(*current_colorbar,NULL);
 

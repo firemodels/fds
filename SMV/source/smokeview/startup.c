@@ -1877,7 +1877,6 @@ void initvars(void){
 #endif
   showall_textures=0;
 
-  ncolorbars=0;
   update_load_startup=0;
   do_threshold=0;
   updateindexcolors=0;

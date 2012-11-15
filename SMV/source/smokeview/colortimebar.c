@@ -335,6 +335,21 @@ void drawcolorbarpath(void){
   }
 }
 
+/* ------------------ getcolorbar ------------------------ */
+
+colorbardata *getcolorbar(char *label){
+  colorbardata *cb;
+  int i;
+
+  for(i=0;i<ncolorbars;i++){
+    colorbardata *cb;
+
+    cb = colorbarinfo + i;
+    if(strcmp(cb->label,label)==0)return cb;
+  }
+  return NULL;
+}
+
 /* ------------------ remapcolorbar ------------------------ */
 
 void remapcolorbar(colorbardata *cbi){

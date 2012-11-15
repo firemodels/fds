@@ -2750,6 +2750,18 @@ void Display_CB(void){
         break;
     }
   }
+  if(update_colorbartype==1){
+    if(colorbarname!=NULL){
+      colorbardata *cb;
+
+      cb = getcolorbar(colorbarname);
+      if(cb!=NULL){
+        colorbartype=cb-colorbarinfo;
+        current_colorbar=cb;
+      }
+    }
+    update_colorbartype=0;
+  }
   if(update_fire_line==1){
     WUI_CB(TERRAIN_FIRE_LINE_UPDATE);
     update_fire_line=0;

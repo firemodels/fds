@@ -214,6 +214,7 @@ EXTERNCPP void drawcolorbarpath(void);
 EXTERNCPP void update_colorbar_splits(colorbardata *cbi);
 EXTERNCPP void remapcolorbar(colorbardata *cbi);
 EXTERNCPP void adjust_colorbar_splits(colorbardata *cbi);
+EXTERNCPP colorbardata *getcolorbar(char *label);
 EXTERNCPP void freecolorbars(void);
 EXTERNCPP void Update_Glui_Stereo(void);
 EXTERNCPP void escape_blanks(char *dirfrom, int maxlen);

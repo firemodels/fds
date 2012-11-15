@@ -8300,12 +8300,31 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"COLORBARTYPE")==1){
+      char *label;
+
+      update_colorbartype=1;
+      FREEMEMORY(colorbarname);
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&colorbartype);
-      if(colorbartype!=colorbartype_default){
-        colorbartype_ini=colorbartype;
+      label = strchr(buffer,'%');
+      if(label!=NULL){
+        int lenlabel;
+
+        label++;
+        trim(label);
+        label=trim_front(label);
+        lenlabel=strlen(label);
+        if(lenlabel>0){
+          NEWMEMORY(colorbarname,lenlabel+1);
+          strcpy(colorbarname,label);
+        }
       }
-      if(colorbarinfo!=NULL)current_colorbar = colorbarinfo + colorbartype;
+      else{
+        sscanf(buffer,"%i",&colorbartype);
+        if(colorbartype!=colorbartype_default){
+          colorbartype_ini=colorbartype;
+        }
+        if(colorbarinfo!=NULL)current_colorbar = colorbarinfo + colorbartype;
+      }
       continue;
     }
     if(match(buffer,"FIRECOLORMAP")==1){
@@ -11296,8 +11315,6 @@ void writeini(int flag){
   fprintf(fileout,"FIREDEPTH\n");
   fprintf(fileout," %f\n",fire_halfdepth);
 
-  fprintf(fileout,"COLORBARTYPE\n");
-  fprintf(fileout," %i\n",colorbartype);
   fprintf(fileout,"VOLSMOKE\n");
   fprintf(fileout," %i %i %i %i %i\n",
     glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,show_volsmoke_moving);
@@ -11334,6 +11351,15 @@ void writeini(int flag){
         fprintf(fileout," %i %i %i %i\n",cbi->index_node[i],(int)rrgb[0],(int)rrgb[1],(int)rrgb[2]);
       }
     }
+  }
+  {
+    colorbardata *cb;
+    char percen[2];
+
+    cb = colorbarinfo + colorbartype;
+    strcpy(percen,"%");
+    fprintf(fileout,"COLORBARTYPE\n");
+    fprintf(fileout," %i %s %s \n",colorbartype,percen,cb->label);
   }
   fprintf(fileout,"\nTOUR INFO\n");
   fprintf(fileout,"---------\n\n");
