@@ -2603,7 +2603,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                                 (MW_RATIO*MVAP_TOT(II,JJ,KK)/M_GAS + &
                                 MVAP_DELTAHG(II,JJ,KK)/H_G_OLD - &
                                 Q_CON_GAS_TOT(II,JJ,KK)/H_G_OLD)/DT_SUBSTEP
-                 CALC_D_LAGRANGIAN = .TRUE.
+                  CALC_D_LAGRANGIAN = .TRUE.
                ENDIF
             ENDDO
          ENDDO
