@@ -3285,11 +3285,12 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    
    LPC => LAGRANGIAN_PARTICLE_CLASS(N)
    
-   ! Backward compatibility
-
    ! If the user specifically specifies SURF_ID
    
-   IF (SURF_ID/='null') VIRTUAL_PARTICLES = .TRUE.
+   IF (SURF_ID/='null') THEN
+       VIRTUAL_PARTICLES = .TRUE.
+       IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 1
+   ENDIF
 
    ! Miscellaneous consequences of input parameters
 

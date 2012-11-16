@@ -202,7 +202,7 @@ IF (PRESENT(WALL_INDEX)) THEN
    JJG = ONE_D%JJG
    KKG = ONE_D%KKG
    IOR = ONE_D%IOR   
-   TW  = ONE_D%T
+   TW  = ONE_D%T_IGN
 ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
    LP=>LAGRANGIAN_PARTICLE(PARTICLE_INDEX)
    ONE_D => LP%ONE_D
@@ -214,7 +214,7 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
    JJG = ONE_D%JJG
    KKG = ONE_D%KKG
    IOR = ONE_D%IOR  
-   TW  = ONE_D%T
+   TW  = ONE_D%T_IGN
 ELSE
    RETURN
 ENDIF
@@ -695,7 +695,7 @@ IF (N_TRACKED_SPECIES==0 .AND. SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .AND. AB
 
 ! Set a few common parameters
 
-TW  = ONE_D%T
+TW  = ONE_D%T_IGN
 AREA_ADJUST = ONE_D%AREA_ADJUST
 
 ! Check if suppression by water is to be applied and sum water on surface
@@ -766,9 +766,12 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%SPECIES_BC_INDEX)
    
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
    
+if (present(particle_index)) then
+   if (particle_index==1) write(0,*) t,tw,sf%mass_Flux(1)
+endif
       SUM_MASSFLUX_LOOP: DO N=0,N_TRACKED_SPECIES
          IF (SF%MASS_FLUX(N) > 0._EB) THEN  ! Use user-specified ramp-up of mass flux
-            IF (ABS(TW-T_BEGIN)< SPACING(ONE_D%T) .AND. SF%RAMP_INDEX(N)>=1) THEN
+            IF (ABS(TW-T_BEGIN)< SPACING(ONE_D%T_IGN) .AND. SF%RAMP_INDEX(N)>=1) THEN
                TSI = T + DT
             ELSE
                TSI = T + DT - TW
@@ -1243,7 +1246,7 @@ UNNPACK_WALL_PARTICLE: IF (PRESENT(WALL_INDEX)) THEN
    KK  = WC%ONE_D%KK
    TMP_F => ONE_D%TMP_F
    TMP_B => ONE_D%TMP_B
-   TW    => ONE_D%T
+   TW    => ONE_D%T_IGN
    I_OBST = WC%OBST_INDEX
    IWB = WC%BACK_INDEX
    RDN = WC%RDN
@@ -1278,7 +1281,7 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN UNNPACK_WALL_PARTICLE
    IOR = LP%ONE_D%IOR
    TMP_F => ONE_D%TMP_F
    TMP_B => ONE_D%TMP_B  
-   TW    => LP%ONE_D%T
+   TW    => LP%ONE_D%T_IGN
    I_OBST = 0
    IWB = -1
    IF (IOR==0) THEN
