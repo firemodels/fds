@@ -250,7 +250,7 @@ void COLORBAR_CB(int var){
       colorbar_global2local();
       update_colorbar_splits(current_colorbar);
       remapcolorbar(cbi);
-      updatecolors(-1);
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
     }
     break;
   case COLORBAR_UPDATE:
@@ -312,7 +312,7 @@ void COLORBAR_CB(int var){
     colorbar_global2local();
     update_colorbar_splits(current_colorbar);
     remapcolorbar(cbi);
-    updatecolors(-1);
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
 
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
     break;
@@ -336,7 +336,7 @@ void COLORBAR_CB(int var){
     //update_colorbar_splits(current_colorbar);
     update_colorbar_splits(cbi);
     remapcolorbar(cbi);
-    updatecolors(-1);
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
     break;
   case COLORBAR_RGB:
@@ -349,7 +349,7 @@ void COLORBAR_CB(int var){
       rgb_nodes[i]=cb_rgb[i];
     }
     remapcolorbar(cbi);
-    updatecolors(-1);
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
     break;
   case COLORBAR_LIST:
     {

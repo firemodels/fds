@@ -1379,7 +1379,7 @@ void initrgb(void){
 
 /* ------------------ updatecolors ------------------------ */
 
-void updatecolors(int changecolorindex){
+void UpdateRGBColors(int colorbar_index){
 
   int n,nn;
   int i,j;
@@ -1524,31 +1524,36 @@ void updatecolors(int changecolorindex){
       }
     }
   }
-  global_changecolorindex=changecolorindex;
-  if(changecolorindex>=0){
-    valindex = global_changecolorindex;
+  global_colorbar_index=colorbar_index;
+  if(colorbar_index>=0){
+    float highlight_black[3]={0.0,0.0,0.0},highlight_red[3]={1.0,0.0,0.0},*highlight_color;
+    int cbmin, cbmax;
+
+    valindex = global_colorbar_index;
     if(valindex<0)valindex=0;
     if(valindex>255)valindex=255;
-    cci = changecolorindex;
+    cci = colorbar_index;
     if(setbw==1){
-      for(n=-colorband;n<colorband+1;n++){
-        if(cci+n>255)break;
-        if(cci+n<0)continue;
-        rgb_full[cci+n][0]=1.;
-        rgb_full[cci+n][1]=0.;
-        rgb_full[cci+n][2]=0.;
-        rgb_full[cci+n][3]=transparent_level_local;
-      }
+      highlight_color=highlight_red;
     }
     else{
-      for(n=-colorband;n<colorband+1;n++){
-        if(cci+n>255)break;
-        if(cci+n<0)continue;
-        rgb_full[cci+n][0]=0.;
-        rgb_full[cci+n][1]=0.;
-        rgb_full[cci+n][2]=0.;
-        rgb_full[cci+n][3]=transparent_level_local;
-      }
+      highlight_color=highlight_black;
+    }
+    cbmin = cci-colorband;
+    cbmax = cci+colorband;
+    if(cbmin<0){
+      cbmax = cbmax - cbmin;
+      cbmin = 0;
+    }
+    if(cbmax>255){
+      cbmin = cbmin - (cbmax-255);
+      cbmax = 255;
+    }
+    for(n=cbmin;n<cbmax+1;n++){
+      rgb_full[n][0]=highlight_color[0];
+      rgb_full[n][1]=highlight_color[1];
+      rgb_full[n][2]=highlight_color[2];
+      rgb_full[n][3]=transparent_level_local;
     }
   }
   if(show_extremedata==1){
@@ -1565,7 +1570,7 @@ void updatecolors(int changecolorindex){
   else{
     rgb2ptr=&(rgb2[0][0]);
   }
-  if(changecolorindex!=0){
+  if(colorbar_index!=0){
     for(n=0;n<nrgb;n++){
       nn=n*(nrgb_full-1)/(nrgb-1);
       rgb[n][0] = rgb_full[nn][0];

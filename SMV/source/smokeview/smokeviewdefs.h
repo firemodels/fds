@@ -376,6 +376,7 @@ void _Sniff_Errors(char *whereat);
 #define BLOCKAGE_AS_INPUT 35
 #define BLOCKAGE_AS_INPUT2 36
 
+#define COLORBAR_INDEX_NONE -1
 
 #define BLUE 0
 #define GREEN 1

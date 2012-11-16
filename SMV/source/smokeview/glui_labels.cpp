@@ -32,6 +32,7 @@ GLUI *glui_labels=NULL;
 
 GLUI_EditText *EDIT_LB_label_string=NULL;
 
+GLUI_Spinner *SPINNER_colorband=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_data=NULL;
 #ifdef pp_BETA
 GLUI_Spinner *SPINNER_cullgeom_portsize=NULL;
@@ -202,6 +203,7 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define SAVE_SETTINGS 99
 
 #define COLORBAR_SMOOTH 113
+#define COLORBAND 115
 
 #define COLORBAR_LIST2 112
 #define DATA_transparent 26
@@ -464,6 +466,9 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Continuous"));
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Stepped"));
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Line"));
+
+  SPINNER_colorband=glui_labels->add_spinner_to_panel(PANEL_cb11,"Selection width:",GLUI_SPINNER_INT,&colorband,COLORBAND,Slice_CB);
+  SPINNER_colorband->set_int_limits(1,10);
 
   glui_labels->add_column_to_panel(PANEL_cb11,false);
 
@@ -1363,7 +1368,7 @@ extern "C" void Extreme_CB(int var){
       if(colorbartype<0||colorbartype>=ncolorbars)return;
       cbi = colorbarinfo + colorbartype;
       remapcolorbar(cbi);
-      updatecolors(-1);
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
       updatemenu=1;
       break;
     case COLORBAR_EXTREME_RGB:
@@ -1379,7 +1384,7 @@ extern "C" void Extreme_CB(int var){
         rgb_nodes[i]=cb_down_rgb[i];
       }
       remapcolorbar(cbi);
-      updatecolors(-1);
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
     default:
       break;

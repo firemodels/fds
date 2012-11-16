@@ -442,8 +442,8 @@ SVEXTERN int SVDECL(glui_screenWidth,640), SVDECL(glui_screenHeight,480);
 SVEXTERN int windowsize_pointer;
 SVEXTERN int sethazardcolor;
 SVEXTERN int mxframepoints;
-SVEXTERN int timedrag,colordrag,colorsplitdrag;
-SVEXTERN int global_changecolorindex;
+SVEXTERN int SVDECL(timebar_drag,0),SVDECL(colorbar_drag,0),SVDECL(colorbar_splitdrag,0);
+SVEXTERN int global_colorbar_index;
 SVEXTERN int fontindex;
 
 SVEXTERN float xcenGLOBAL, ycenGLOBAL, zcenGLOBAL;
@@ -990,7 +990,7 @@ SVEXTERN int cpuframe;
 
 SVEXTERN float xyzeyeorig[3],xeyedir[3], yeyedir[3], zeyedir[3];
 SVEXTERN int adjustalphaflag;
-SVEXTERN int colorband, SVDECL(show_extremedata,0),SVDECL(show_extremedata_save,0);
+SVEXTERN int SVDECL(colorband,5), SVDECL(show_extremedata,0),SVDECL(show_extremedata_save,0);
 SVEXTERN int show_extreme_above, show_extreme_below;
 
 SVEXTERN int use_iblank,arg_iblank;

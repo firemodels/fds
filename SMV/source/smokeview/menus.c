@@ -401,7 +401,7 @@ void SmokeColorBarMenu(int value){
   if(value>ncolorbars-1)value=ncolorbars-1;
   fire_colorbar_index=value;
   fire_colorbar = colorbarinfo + value;
-  updatecolors(-1);
+  UpdateRGBColors(COLORBAR_INDEX_NONE);
   if(FlowDir>0){
     keyboard('-',FROM_SMOKEVIEW);
     keyboard(' ',FROM_SMOKEVIEW);
@@ -435,7 +435,7 @@ void ColorBarMenu(int value){
       contour_type=SHADED_CONTOURS;
       setbw=0;
       update_extreme(0);
-      updatecolors(-1);
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
     case -5:
       viscolorbarpath=1-viscolorbarpath;
@@ -443,7 +443,7 @@ void ColorBarMenu(int value){
     case -7:
       show_extremedata=1-show_extremedata;
       update_extreme(0);
-      updatecolors(-1);
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
     case -12:
      setbw=1-setbw;
@@ -455,40 +455,41 @@ void ColorBarMenu(int value){
        colorbartype=colorbartype_save;
        ColorBarMenu(colorbartype);
      }
-     updatecolors(-1);
+     UpdateRGBColors(COLORBAR_INDEX_NONE);
      set_labels_controls();
      break;
    case -13:
      use_transparency_data=1-use_transparency_data;
-     updatecolors(-1);
+     UpdateRGBColors(COLORBAR_INDEX_NONE);
      set_labels_controls();
      update_transparency();
      break;
    case -14:
-     colorbarflip=1-colorbarflip;updatecolors(-1);
+     colorbarflip=1-colorbarflip;
+     UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
    case -15:
      colorbarcycle++;
      if(colorbarcycle>=nrgb)colorbarcycle=0;
-     updatecolors(-1);
+     UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
    case -16:
      colorbarcycle=0;
      background_flip=0;
      setbw=0;
-     updatecolors(-1);
+     UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
    case -17:
      contour_type=SHADED_CONTOURS;
-     updatecolors(-1);
+     UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
    case -18:
      contour_type=STEPPED_CONTOURS;
-     updatecolors(-1);
+     UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
    case -19:
      contour_type=LINE_CONTOURS;
-     updatecolors(-1);
+     UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
    default:
      ASSERT(FFALSE);
@@ -509,7 +510,7 @@ void ColorBarMenu(int value){
     }
   }
   if(value>-10){
-    updatecolors(-1);
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
   }
 }
 
@@ -914,7 +915,7 @@ void ShowHideMenu(int value){
 #endif
   case 15:
    background_flip = 1-background_flip;
-   updatecolors(-1);
+   UpdateRGBColors(COLORBAR_INDEX_NONE);
    set_labels_controls();
    break;
   case 13:
@@ -2128,7 +2129,7 @@ void SmokeviewiniMenu(int value){
   switch (value){
   case 1:
     readini(0);
-    updatecolors(-1);
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
     break;
   case 2:
     writeini(GLOBAL_INI);

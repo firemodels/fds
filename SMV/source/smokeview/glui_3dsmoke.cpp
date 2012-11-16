@@ -585,7 +585,7 @@ extern "C" void Smoke3d_CB(int var){
       rgb_node[10]=fire_green;
       rgb_node[11]=fire_blue;
       remapcolorbar(fire_custom_colorbar);
-      updatecolors(-1);
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
     }
     force_redisplay=1;
     Idle_CB();

@@ -137,7 +137,7 @@ void Init(void){
 
   /* define color bar */
 
-  updatecolors(-1);
+  UpdateRGBColors(COLORBAR_INDEX_NONE);
 
   block_ambient2[3] = 1.0;
   mat_ambient2[3] = 1.0;
@@ -1439,8 +1439,7 @@ void initvars(void){
 
   windowsize_pointer=0;
   sethazardcolor=0;
-  timedrag=0,colordrag=0,colorsplitdrag=0;
-  global_changecolorindex=-1;
+  global_colorbar_index=-1;
   fontindex=0;
 
   xcenGLOBAL=0.5, ycenGLOBAL=0.5, zcenGLOBAL=0.5;
@@ -1854,7 +1853,6 @@ void initvars(void){
   cpuframe=0;
 
   adjustalphaflag=3;
-  colorband=1;
 
   highlight_block=-1, highlight_mesh=0, highlight_flag=2;
   updatesmoothblocks=1;

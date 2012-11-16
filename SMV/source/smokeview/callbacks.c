@@ -486,7 +486,7 @@ void checktimebound(void){
   blockagedata *bc;
   partdata *parti;
 
-  if(timedrag==0&&itimes>nglobal_times-1||timedrag==1&&itimes<0){
+  if(timebar_drag==0&&itimes>nglobal_times-1||timebar_drag==1&&itimes<0){
     izone=0;
     itimes=0;
     iframe=iframebeg;
@@ -504,7 +504,7 @@ void checktimebound(void){
       meshi->iso_itime=0;
     }
   }
-  if(timedrag==0&&itimes<0||timedrag==1&&itimes>nglobal_times-1){
+  if(timebar_drag==0&&itimes<0||timebar_drag==1&&itimes>nglobal_times-1){
     izone=nzone_times-1;
     itimes=nglobal_times-1;
     for(i=0;i<npartinfo;i++){
@@ -537,42 +537,55 @@ void checktimebound(void){
   }
 }
 
+#define CB_SELECT_CONTINUE -2
+#define CB_SELECT_STOP -1
 /* ------------------ get_colorbar_index ------------------------ */
 
 int get_colorbar_index(int flag, int x, int y){
 
   if(flag==0||(colorbar_left_pos<=x&&x<=colorbar_right_pos)){
-      int index;
-  
-      index = CLAMP(255*(float)(screenHeight - y-colorbar_down_pos)/(float)(colorbar_top_pos - colorbar_down_pos),0,255);
-      return index;
+      y = screenHeight - y;
+      if(colorbar_down_pos<=y&&y<=colorbar_top_pos){
+        int index;
+        index = CLAMP(255*(float)(y-colorbar_down_pos)/(float)(colorbar_top_pos - colorbar_down_pos),0,255);
+        return index;
+      }
+      else{
+        return CB_SELECT_STOP;
+      }
   }
-  return -1;
+  return CB_SELECT_CONTINUE;
 }
 
 /* ------------------ colorbar_click ------------------------ */
 
 int colorbar_click(int x, int y){
-  int ifactor;
+  int colorbar_index;
 
-  ifactor = get_colorbar_index(1,x,y);
-  if(ifactor>=0){
+  colorbar_index = get_colorbar_index(1,x,y);
+  if(colorbar_index>=0){
     int state;
  
-    colorbar_select_index=ifactor;
+    colorbar_select_index=colorbar_index;
     state=glutGetModifiers();
     if(state==GLUT_ACTIVE_CTRL&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
-      colorsplitdrag=1;
+      colorbar_splitdrag=1;
     }
     else{
-      colordrag=1;
-      updatecolors(ifactor);
+      colorbar_drag=1;
+      UpdateRGBColors(colorbar_index);
     }
     return 1;
   }
+  else if(colorbar_index==CB_SELECT_CONTINUE){
+    return 0;
+  }
+  else if(colorbar_index==CB_SELECT_STOP){   
+    colorbar_drag=0;
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
+  }
   else{
-    colordrag=0;
-    updatecolors(-1);
+    ASSERT(0);
   }
   return 0;
 }
@@ -594,7 +607,7 @@ int timebar_click(int x, int y){
       itimes=0;
     }
     checktimebound();
-    timedrag=1;
+    timebar_drag=1;
     stept=0;
     Idle_CB();
     return 1;
@@ -782,9 +795,9 @@ void mouse_CB(int button, int state, int xm, int ym){
     eye_xyz0[1]=eye_xyz[1];
     eye_xyz0[2]=eye_xyz[2];
     update_translate();
-    timedrag=0;
-    colordrag=0;
-    colorsplitdrag=0;
+    timebar_drag=0;
+    colorbar_drag=0;
+    colorbar_splitdrag=0;
     glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     update_trainer_moves();
     return;
@@ -877,41 +890,41 @@ void mouse_CB(int button, int state, int xm, int ym){
   }
 }
 
-/* ------------------ colorbar_drag ------------------------ */
+/* ------------------ Colorbar_Drag ------------------------ */
 
-void colorbar_drag(int xm, int ym){
-  int ifactor;
+void Colorbar_Drag(int xm, int ym){
+  int colorbar_index;
 
-  ifactor = get_colorbar_index(0,xm,ym);
-  if(ifactor>=0){
-    colorbar_select_index=ifactor;
-    updatecolors(ifactor);
+  colorbar_index = get_colorbar_index(0,xm,ym);
+  if(colorbar_index>=0){
+    colorbar_select_index=colorbar_index;
+    UpdateRGBColors(colorbar_index);
   }
 }
 
 /* ------------------ drag_colorsplit ------------------------ */
 
-void colorbar_dragsplit(int xm, int ym){
-  int ifactor;
+void Colorbar_SplitDrag(int xm, int ym){
+  int colorbar_index;
 
-  ifactor = get_colorbar_index(0,xm,ym);
-  if(ifactor>=0){
+  colorbar_index = get_colorbar_index(0,xm,ym);
+  if(colorbar_index>=0){
     int ii;
 
-    if(ifactor>250)ifactor=250;
-    if(ifactor<5)ifactor=5;
+    if(colorbar_index>250)colorbar_index=250;
+    if(colorbar_index<5)colorbar_index=5;
     ii=current_colorbar->splits[0];
-    current_colorbar->index_node[ii]=ifactor;
-    current_colorbar->index_node[ii-1]=ifactor;
+    current_colorbar->index_node[ii]=colorbar_index;
+    current_colorbar->index_node[ii-1]=colorbar_index;
     remapcolorbar(current_colorbar);
-    updatecolors(-1);
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
     update_colorbar_splits(current_colorbar);
   }
 }
 
 /* ------------------ timebar_drag ------------------------ */
 
-void timebar_drag(int xm, int ym){
+void Timebar_Drag(int xm, int ym){
   if(nglobal_times>0){
     int left_label_width=7*VP_timebar.text_width;
     int right_label_width=10.5*VP_timebar.text_width;
@@ -926,7 +939,7 @@ void timebar_drag(int xm, int ym){
       itimes = (float)nglobal_times*(float)(xm-timebar_left_pos)/(float)(timebar_right_pos-timebar_left_pos);
     }
     checktimebound();
-    timedrag=1;
+    timebar_drag=1;
   }
   Idle_CB();
 }
@@ -1121,18 +1134,18 @@ void motion_CB(int xm, int ym){
   
   glutPostRedisplay();
 
-  if( colordrag==1&&(showtime==1 || showplot3d==1)){
-    colorbar_drag(xm,ym);
+  if( colorbar_drag==1&&(showtime==1 || showplot3d==1)){
+    Colorbar_Drag(xm,ym);
     return;
   }
   if(
-    colorsplitdrag==1&&
+    colorbar_splitdrag==1&&
     (showtime==1 || showplot3d==1)&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
-    colorbar_dragsplit(xm,ym);
+    Colorbar_SplitDrag(xm,ym);
     return;
   }
-  if(timedrag==1){
-    timebar_drag(xm,ym);
+  if(timebar_drag==1){
+    Timebar_Drag(xm,ym);
     return;
   }
   if(move_gslice==1){
@@ -1299,7 +1312,7 @@ void keyboard(unsigned char key, int flag){
           contour_type++;
           if(contour_type>2)contour_type=0;
           update_plot3d_display();
-          updatecolors(-1);
+          UpdateRGBColors(COLORBAR_INDEX_NONE);
         }
       }
       break;
@@ -1902,7 +1915,7 @@ void keyboard(unsigned char key, int flag){
   }
 
   if(plotstate==DYNAMIC_PLOTS){
-    if(timedrag==0)itimes += skip_global*FlowDir;
+    if(timebar_drag==0)itimes += skip_global*FlowDir;
     checktimebound();
     Idle_CB();
 
@@ -2336,7 +2349,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   char buffer[256];
   float elapsed_time;
 
-  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||RenderGif!=0||timedrag==1)){       /* ready for a new frame */
+  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||RenderGif!=0||timebar_drag==1)){       /* ready for a new frame */
     cputimes[cpuframe]=thistime/1000.;
     
     oldcpuframe=cpuframe-10;
@@ -2371,7 +2384,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     lasttime = thistime;
     if(nglobal_times>0){
       *changetime=1;
-      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timedrag==0 && RenderGif==0){
+      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && RenderGif==0){
         /*  skip frames here if displaying in real time and frame rate is too slow*/
         if(global_times!=NULL&&realtime_flag!=0&&FlowDir>0){
           elapsed_time = (float)thistime/1000.0 - reset_time;
@@ -2394,7 +2407,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
           }
         }
       }
-      if(stept==1&&timedrag==0&&RenderGif!=0){
+      if(stept==1&&timebar_drag==0&&RenderGif!=0){
         itimes+=RenderSkip*FlowDir;
       }
 
@@ -2790,7 +2803,7 @@ void Display_CB(void){
   }
   if(update_colorbar_select_index==1&&colorbar_select_index>=0&&colorbar_select_index<=255){
     update_colorbar_select_index=0;
-    updatecolors(colorbar_select_index);
+    UpdateRGBColors(colorbar_select_index);
   }
   if(updatemenu==1&&usemenu==1&&menustatus==GLUT_MENU_NOT_IN_USE){
     glutDetachMenu(GLUT_RIGHT_BUTTON);

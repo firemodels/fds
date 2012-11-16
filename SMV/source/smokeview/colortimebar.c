@@ -1301,7 +1301,7 @@ void drawColorBars(void){
     glPushMatrix();
     glTranslatef(colorbar_left_pos-colorbar_label_width,-VP_colorbar.text_height/2.0,0.0);
     glTranslatef(-leftiso*(colorbar_label_width+h_space),0.0,0.0);
-    if(global_changecolorindex!=-1){
+    if(global_colorbar_index!=-1){
       char isocolorlabel[256],isolabel[256];
       char *isocolorlabel_ptr=NULL;
       float vert_position;
@@ -1313,8 +1313,8 @@ void drawColorBars(void){
         scalefloat2string(tttval,isocolorlabel, isofactor, isorange);
         isocolorlabel_ptr=isocolorlabel;
       }
-      vert_position = MIX2(global_changecolorindex,255,colorbar_top_pos,colorbar_down_pos);
-      iposition = MIX2(global_changecolorindex,255,nrgb-1,0);
+      vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
+      iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
       outputBarText(0.0,vert_position,red_color,isocolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
@@ -1352,7 +1352,7 @@ void drawColorBars(void){
     glPushMatrix();
     glTranslatef(colorbar_left_pos-colorbar_label_width,-VP_colorbar.text_height/2.0,0.0);
     glTranslatef(-leftsmoke*(colorbar_label_width+h_space),0.0,0.0);
-    if(global_changecolorindex!=-1){
+    if(global_colorbar_index!=-1){
       char partcolorlabel[256],*partcolorlabel_ptr=NULL,partlabel[256];
       float vert_position;
 
@@ -1363,8 +1363,8 @@ void drawColorBars(void){
         scalefloat2string(tttval,partcolorlabel, partfactor, partrange);
         partcolorlabel_ptr=partcolorlabel;
       }
-      vert_position = MIX2(global_changecolorindex,255,colorbar_top_pos,colorbar_down_pos);
-      iposition = MIX2(global_changecolorindex,255,nrgb-1,0);
+      vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
+      iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
       outputBarText(0.0,vert_position,red_color,partcolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
@@ -1407,7 +1407,7 @@ void drawColorBars(void){
     glPushMatrix();
     glTranslatef(colorbar_left_pos-colorbar_label_width,-VP_colorbar.text_height/2.0,0.0);
     glTranslatef(-leftslice*(colorbar_label_width+h_space),0.0,0.0);
-    if(global_changecolorindex!=-1){
+    if(global_colorbar_index!=-1){
       char slicelabel[256], slicecolorlabel[256];
       char *slicecolorlabel_ptr=NULL;
       float vert_position;
@@ -1419,8 +1419,8 @@ void drawColorBars(void){
         scalefloat2string(tttval,slicecolorlabel, slicefactor, slicerange);
         slicecolorlabel_ptr=slicecolorlabel;
       }
-      vert_position = MIX2(global_changecolorindex,255,colorbar_top_pos,colorbar_down_pos);
-      iposition = MIX2(global_changecolorindex,255,nrgb-1,0);
+      vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
+      iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
       outputBarText(0.0,vert_position,red_color,slicecolorlabel_ptr);
     }
     if(fed_slice==1){
@@ -1470,7 +1470,7 @@ void drawColorBars(void){
     glPushMatrix();
     glTranslatef(colorbar_left_pos-colorbar_label_width,-VP_colorbar.text_height/2.0,0.0);
     glTranslatef(-leftpatch*(colorbar_label_width+h_space),0.0,0.0);
-    if(global_changecolorindex!=-1){
+    if(global_colorbar_index!=-1){
       char patchcolorlabel[256],boundarylabel[256],*patchcolorlabel_ptr=NULL;
       float vert_position;
 
@@ -1482,8 +1482,8 @@ void drawColorBars(void){
         scalefloat2string(tttval,patchcolorlabel, patchfactor, patchrange);
         patchcolorlabel_ptr=patchcolorlabel;
       }
-      vert_position = MIX2(global_changecolorindex,255,colorbar_top_pos,colorbar_down_pos);
-      iposition = MIX2(global_changecolorindex,255,nrgb-1,0);
+      vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
+      iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
       outputBarText(0.0,vert_position,red_color,patchcolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
@@ -1515,7 +1515,7 @@ void drawColorBars(void){
     glPushMatrix();
     glTranslatef(colorbar_left_pos-colorbar_label_width,-VP_colorbar.text_height/2.0,0.0);
     glTranslatef(-leftzone*(colorbar_label_width+h_space),0.0,0.0);
-    if(global_changecolorindex!=-1){
+    if(global_colorbar_index!=-1){
       char zonecolorlabel[256],*zonecolorlabel_ptr=NULL,zonelabel[256];
       float vert_position;
 
@@ -1526,8 +1526,8 @@ void drawColorBars(void){
         scalefloat2string(tttval,zonecolorlabel, zonefactor, zonerange);
         zonecolorlabel_ptr=zonecolorlabel;
       }
-      vert_position = MIX2(global_changecolorindex,255,colorbar_top_pos,colorbar_down_pos);
-      iposition = MIX2(global_changecolorindex,255,nrgb-1,0);
+      vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
+      iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
       outputBarText(0.0,vert_position,red_color,zonecolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
@@ -1559,7 +1559,7 @@ void drawColorBars(void){
     plot3drange = tttmax - tttmin;
     glPushMatrix();
     glTranslatef(colorbar_left_pos-colorbar_label_width,-VP_colorbar.text_height/2.0,0.0);
-    if(global_changecolorindex!=-1){
+    if(global_colorbar_index!=-1){
       char plot3dcolorlabel[256], p3dlabel[256], *plot3dcolorlabel_ptr=NULL;
       float vert_position;
 
@@ -1570,8 +1570,8 @@ void drawColorBars(void){
         scalefloat2string(tttval,plot3dcolorlabel, plot3dfactor, plot3drange);
         plot3dcolorlabel_ptr=plot3dcolorlabel;
       }
-      vert_position = MIX2(global_changecolorindex,255,colorbar_top_pos,colorbar_down_pos);
-      iposition = MIX2(global_changecolorindex,255,nrgb-1,0);
+      vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
+      iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
       outputBarText(0.0,vert_position,red_color,plot3dcolorlabel_ptr);
     }
     if(visiso==0){

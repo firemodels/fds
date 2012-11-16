@@ -7815,7 +7815,7 @@ int readini(int scriptconfigfile){
     }
     if(return_code==2)return 2;
     
-    updatecolors(-1);
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
     scriptinifilename2=NULL;
   }
   updateglui();

@@ -692,7 +692,7 @@ EXTERNCPP float color2bw(const float *color);
 EXTERNCPP float *getcolorptr(const float *color);
 EXTERNCPP void colorconvert(int flag);
 EXTERNCPP void initcadcolors(void);
-EXTERNCPP void updatecolors(int colorindex);
+EXTERNCPP void UpdateRGBColors(int colorindex);
 EXTERNCPP void initrgb(void);
 EXTERNCPP void updatechopcolors(void);
 EXTERNCPP void freelabels(flowlabels *label);

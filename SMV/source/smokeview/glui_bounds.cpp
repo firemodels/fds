@@ -123,6 +123,7 @@ GLUI_Rollout *ROLLOUT_slice_chop=NULL;
 #define COLORBAR_LIST2 112
 #define COLORBAR_SMOOTH 113
 #define RESEARCH_MODE 114
+#define COLORBAND 115
 
 #define UPDATE_VECTOR 101
 
@@ -1025,7 +1026,7 @@ extern "C" void PLOT3D_CB(int var){
     updatemenu=1;
     break;
   case UPDATEPLOT:
-    updatecolors(-1);
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
     updatemenu=1;
     glutPostRedisplay();
     break;
@@ -2041,6 +2042,9 @@ extern "C" void Slice_CB(int var){
       update_slice_menu_show();
       if(CHECKBOX_constant_coloring!=NULL)CHECKBOX_constant_coloring->set_int_val(constant_evac_coloring);
       break;
+    case COLORBAND:
+      UpdateRGBColors(colorbar_select_index);
+      break;
     case TRANSPARENTLEVEL:
       for(i=nsurfinfo;i<nsurfinfo+n_iso_ambient+1;i++){
         surfdata *surfi;
@@ -2048,7 +2052,7 @@ extern "C" void Slice_CB(int var){
         surfi = surfinfo + i;
         surfi->transparent_level=transparent_level;
       }
-      updatecolors(-1);
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
       SPINNER_transparent_level->set_float_val(transparent_level);
       if(SPINNER_labels_transparency_data2!=NULL)SPINNER_labels_transparency_data2->set_float_val(transparent_level);
       break;
