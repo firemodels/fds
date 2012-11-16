@@ -766,9 +766,6 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%SPECIES_BC_INDEX)
    
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
    
-if (present(particle_index)) then
-   if (particle_index==1) write(0,*) t,tw,sf%mass_Flux(1)
-endif
       SUM_MASSFLUX_LOOP: DO N=0,N_TRACKED_SPECIES
          IF (SF%MASS_FLUX(N) > 0._EB) THEN  ! Use user-specified ramp-up of mass flux
             IF (ABS(TW-T_BEGIN)< SPACING(ONE_D%T_IGN) .AND. SF%RAMP_INDEX(N)>=1) THEN
@@ -1274,14 +1271,14 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN UNNPACK_WALL_PARTICLE
    LP => LAGRANGIAN_PARTICLE(PARTICLE_INDEX)
    ONE_D => LP%ONE_D
    SF => SURFACE(LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%SURF_INDEX)
-   IIG = LP%ONE_D%IIG  
-   JJG = LP%ONE_D%JJG
-   KKG = LP%ONE_D%KKG  
-   KK  = LP%ONE_D%KKG  
-   IOR = LP%ONE_D%IOR
+   IIG = ONE_D%IIG  
+   JJG = ONE_D%JJG
+   KKG = ONE_D%KKG  
+   KK  = ONE_D%KKG  
+   IOR = ONE_D%IOR
    TMP_F => ONE_D%TMP_F
    TMP_B => ONE_D%TMP_B  
-   TW    => LP%ONE_D%T_IGN
+   TW    => ONE_D%T_IGN
    I_OBST = 0
    IWB = -1
    IF (IOR==0) THEN
