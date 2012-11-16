@@ -628,10 +628,10 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             SF => SURFACE(WC%SURF_INDEX)
             IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SF%SPECIES_BC_INDEX==INTERPOLATED_BC .OR. &
                  SF%SPECIES_BC_INDEX==HVAC_BOUNDARY .OR. ANY(SF%LEAK_PATH>0._EB)) CYCLE WALL_LOOP3
-            IF (ABS(WC%ONE_D%T-T_BEGIN) < SPACING(WC%ONE_D%T) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
+            IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) < SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T + DT
             ELSE
-               TSI = T + DT - WC%ONE_D%T
+               TSI = T + DT - WC%ONE_D%T_IGN
                IF (TSI<0._EB) THEN
                   WC%ONE_D%UWS = 0._EB
                   CYCLE WALL_LOOP3
@@ -2038,10 +2038,10 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             WC%ONE_D%UWS = 0._EB
          CASE (SOLID_BOUNDARY)
             SF => SURFACE(WC%SURF_INDEX)
-            IF (ABS(WC%ONE_D%T-T_BEGIN) < SPACING(WC%ONE_D%T) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
+            IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) < SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T + DT
             ELSE
-               TSI = T + DT - WC%ONE_D%T
+               TSI = T + DT - WC%ONE_D%T_IGN
                IF (TSI<0._EB) THEN
                   WC%ONE_D%UWS = 0._EB
                   CYCLE WALL_LOOP3

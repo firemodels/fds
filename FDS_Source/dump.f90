@@ -3215,7 +3215,7 @@ LAGRANGIAN_PARTICLE_CLASS_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
             CASE(438)  ! PARTICLE MASS
                QP(NPP,NN) = LP%MASS
             CASE(439)  ! PARTICLE AGE
-               QP(NPP,NN) = T-LP%ONE_D%T
+               QP(NPP,NN) = T-LP%ONE_D%T_IGN
             CASE(440)  ! PARTICLE WEIGHTING FACTOR
                QP(NPP,NN) = LP%PWT
          END SELECT

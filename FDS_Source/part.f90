@@ -274,7 +274,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
    
       ! Set PARTICLE properties
    
-      LP%ONE_D%T      = T                     
+      LP%ONE_D%T_IGN      = T                     
       IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
 
       ! Randomly choose particle direction angles, theta and phi
@@ -449,7 +449,7 @@ TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    WC => WALL(IW)
-   IF (T < WC%ONE_D%T)                         CYCLE WALL_INSERT_LOOP
+   IF (T < WC%ONE_D%T_IGN)                     CYCLE WALL_INSERT_LOOP
    IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_INSERT_LOOP
    SF  => SURFACE(WC%SURF_INDEX)
    ILPC =  SF%PART_INDEX
@@ -560,7 +560,7 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       ! Save the insertion time (TP) and scalar property (SP) for the particle
    
       IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.
-      LP%ONE_D%T   = T
+      LP%ONE_D%T_IGN = T
 
       CALL MAKE_PARTICLE
 
@@ -575,10 +575,10 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (MASS_SUM > 0._EB) THEN
       SF => SURFACE(WC%SURF_INDEX)
       IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
-         IF (ABS(WC%ONE_D%T-T_BEGIN)<=TWO_EPSILON_EB .AND. SF%RAMP_INDEX(TIME_PART)>=1) THEN
+         IF (ABS(WC%ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. SF%RAMP_INDEX(TIME_PART)>=1) THEN
             TSI = T
          ELSE
-            TSI = T - WC%ONE_D%T
+            TSI = T - WC%ONE_D%T_IGN
          ENDIF
          FLOW_RATE = EVALUATE_RAMP(TSI,SF%TAU(TIME_PART),SF%RAMP_INDEX(TIME_PART))*SF%PARTICLE_MASS_FLUX         
          DO I=1,SF%NPPC
@@ -848,7 +848,7 @@ CALL MAKE_PARTICLE
 
 LP=>LAGRANGIAN_PARTICLE(NLP)
       
-LP%ONE_D%T   = T                       
+LP%ONE_D%T_IGN   = T                       
 IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
    
 ! Process special particles that are associated with a particular SURFace type
@@ -1551,7 +1551,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
          IF (WE_G >= 12.0_EB)               T_BU_BAG   = 1.72_EB*B_1*SQRT(LPC%DENSITY*RDC/(2._EB*LPC%SURFACE_TENSION))
          IF (WE_G/SQRT(RE_WAKE) >= 1.0_EB)  T_BU_STRIP = B_1*(RD/WAKE_VEL)*SQRT(LPC%DENSITY/RHO_G)
          ! PARTICLE age is larger than smallest characteristic breakup time
-         AGE_IF: IF ((T-LP%ONE_D%T) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
+         AGE_IF: IF ((T-LP%ONE_D%T_IGN) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
             IF (LPC%MONODISPERSE) THEN
                RD    = THROHALF*RD
             ELSE
@@ -1564,7 +1564,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
             LP%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
             C_DRAG   = DRAG(LP%RE,LPC%DRAG_LAW)
             LP%PWT   = LP%PWT*RDC/RD**3
-            LP%ONE_D%T    = T
+            LP%ONE_D%T_IGN    = T
             LP%ONE_D%X(1) = RD
             RDS      = RD*RD
             RDC      = RD*RDS
@@ -2826,7 +2826,7 @@ PARTICLE_LOOP: DO I=1,NLP
    
       ! Remove particles that are too old
 
-      IF (T-LP%ONE_D%T>LPC%LIFETIME) THEN
+      IF (T-LP%ONE_D%T_IGN>LPC%LIFETIME) THEN
          CALL PARTICLE_ORPHANAGE
          CYCLE WEED_LOOP
       ENDIF

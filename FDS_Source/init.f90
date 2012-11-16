@@ -2134,17 +2134,17 @@ ENDIF
 ! Set ignition time of each boundary cell
  
 IF (T_ACTIVATE < T_BEGIN) THEN
-   WC%ONE_D%T = SF%T_IGN
+   WC%ONE_D%T_IGN = SF%T_IGN
 ELSE
-   WC%ONE_D%T = T_ACTIVATE
+   WC%ONE_D%T_IGN = T_ACTIVATE
 ENDIF
 
 ! Set correct initial value of temperature for RAMP_T
 
-IF (ABS(WC%ONE_D%T-T_BEGIN) <= SPACING(WC%ONE_D%T) .AND. SF%RAMP_INDEX(TIME_TEMP)>=1) THEN
+IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) <= SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_TEMP)>=1) THEN
    TSI = T
 ELSE
-   TSI = T - WC%ONE_D%T
+   TSI = T - WC%ONE_D%T_IGN
 ENDIF
 
 IF (SF%TMP_FRONT>0._EB) THEN
@@ -2363,7 +2363,7 @@ VENT_LOOP: DO N=1,N_VENT
 
    IF (.NOT.ACTIVATE_VENT .AND. .NOT.DEACTIVATE_VENT) CYCLE VENT_LOOP
 
-   ! Find the wall indices (IW) for the vent and set the activation time (TW) for each one
+   ! Find the wall indices (IW) for the vent and set the activation time (ONE_D%T_IGN) for each one
 
    DO KK=VT%K1+1,MAX(VT%K1+1,VT%K2)
       DO JJ=VT%J1+1,MAX(VT%J1+1,VT%J2)
@@ -2383,13 +2383,13 @@ VENT_LOOP: DO N=1,N_VENT
 
             IF (ACTIVATE_VENT) THEN
                IF (VT%X0>-1.E5_EB) THEN
-                  WALL(IW)%ONE_D%T = T + SQRT((WALL(IW)%XW-VT%X0)**2 +(WALL(IW)%YW-VT%Y0)**2 +&
+                  WALL(IW)%ONE_D%T_IGN = T + SQRT((WALL(IW)%XW-VT%X0)**2 +(WALL(IW)%YW-VT%Y0)**2 +&
                                               (WALL(IW)%ZW-VT%Z0)**2)/VT%FIRE_SPREAD_RATE
                ELSE
-                  WALL(IW)%ONE_D%T = T        
+                  WALL(IW)%ONE_D%T_IGN = T        
                ENDIF
             ELSE
-               WALL(IW)%ONE_D%T = 1000000._EB
+               WALL(IW)%ONE_D%T_IGN = 1000000._EB
             ENDIF
          ENDDO
       ENDDO
@@ -2590,7 +2590,7 @@ IF (CREATE) THEN
       WC%BOUNDARY_TYPE = NULL_BOUNDARY
    ELSE
       WC%BOUNDARY_TYPE = SOLID_BOUNDARY
-      IF (WC%ONE_D%T<T) WC%ONE_D%T = T
+      IF (WC%ONE_D%T_IGN<T) WC%ONE_D%T_IGN = T
    ENDIF
 ENDIF
 
@@ -2637,7 +2637,7 @@ IF (REMOVE .AND. SURFACE(WC%SURF_INDEX)%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED) TH
    END SELECT
    IW_OLD = WALL_INDEX(IC,-IOR)
    IF (IW_OLD>0) THEN
-      IF (WALL(IW_OLD)%SURF_INDEX==WC%SURF_INDEX) WC%ONE_D%T =  WALL(IW_OLD)%ONE_D%T
+      IF (WALL(IW_OLD)%SURF_INDEX==WC%SURF_INDEX) WC%ONE_D%T_IGN =  WALL(IW_OLD)%ONE_D%T_IGN
    ENDIF
 ENDIF
 
