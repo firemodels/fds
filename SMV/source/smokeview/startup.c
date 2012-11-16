@@ -1961,7 +1961,6 @@ void initvars(void){
   object_defs=NULL;
  
   showfiles=0;
-  smoke3d_external=0;
  
   fire_red=255, fire_green=128, fire_blue=0;
   fire_halfdepth=2.0;

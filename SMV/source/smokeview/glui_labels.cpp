@@ -75,6 +75,7 @@ GLUI_Spinner *SPINNER_scaled_font3d_thickness=NULL;
 GLUI_Spinner *SPINNER_scaled_font2d_thickness=NULL;
 
 GLUI_Checkbox *CHECKBOX_usebounds=NULL;
+GLUI_Checkbox *CHECKBOX_colorbarflip=NULL;
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
 #endif
@@ -161,6 +162,7 @@ GLUI_Button *BUTTON_label_4=NULL;
 
 #define COLORBAR_EXTREME_RGB 15
 #define COLORBAR_EXTREME 16
+#define FLIP 19
 
 #define LB_LIST 0
 #define LB_ADD 1
@@ -473,6 +475,7 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_column_to_panel(PANEL_cb11,false);
 
   CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("color -> grey"),&setbw,LABELS_shade,Labels_CB);
+  CHECKBOX_colorbarflip=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("flip"),&colorbarflip,FLIP,Labels_CB);
   CHECKBOX_axislabels_smooth=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Smooth colorbar label values"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
   CHECKBOX_transparentflag=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Use transparency"),
     &use_transparency_data,DATA_transparent,Slice_CB);
@@ -993,6 +996,10 @@ void Text_Labels_CB(int var){
 extern "C" void Labels_CB(int var){
   updatemenu=1;
   switch (var){
+    case FLIP:
+      colorbarflip = 1 - colorbarflip;
+      ColorBarMenu(COLORBARFLIP);
+      break;
   case LABELS_hide_overlaps:
     updatefacelists=1;
     updatehiddenfaces=1;
@@ -1124,6 +1131,12 @@ extern "C" void set_labels_controls(){
   if(CHECKBOX_labels_hms!=NULL)CHECKBOX_labels_hms->set_int_val(vishmsTimelabel);
   if(CHECKBOX_labels_gridloc!=NULL)CHECKBOX_labels_gridloc->set_int_val(visgridloc);
 
+}
+
+/* ------------------ update_colorbarflip ------------------------ */
+
+extern "C" void update_colorbarflip(void){
+  CHECKBOX_colorbarflip->set_int_val(colorbarflip);
 }
 
 /* ------------------ update_colorbar_list2 ------------------------ */

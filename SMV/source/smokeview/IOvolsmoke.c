@@ -473,6 +473,12 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
       get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, xyz_mesh, &inobst, blank_local);
     }
     else{
+      if(block_volsmoke==1){
+        blank_local=meshi->c_iblank_cell;
+      }
+      else{
+        blank_local=NULL;
+      }
       get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank_local);
     }
 #else
@@ -1257,6 +1263,8 @@ void drawsmoke3dGPUVOL(void){
   glUniform1f(GPUvol_temperature_min,temperature_min);
   glUniform1f(GPUvol_temperature_cutoff,temperature_cutoff);
   glUniform1f(GPUvol_temperature_max,temperature_max);
+  glUniform1i(GPUvol_block_volsmoke,block_volsmoke);
+ 
   SNIFF_ERRORS("after drawsmoke3dGPUVOL before loop");
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
@@ -2454,8 +2462,6 @@ void init_supermesh(void){
     }
   }
   for(i=0;i<nsupermeshinfo;i++){
-    supermesh *smesh;
-
     smesh = supermeshinfo + i;
     init_volsmoke_supertexture(smesh);
   }

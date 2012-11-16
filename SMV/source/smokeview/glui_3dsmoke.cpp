@@ -103,7 +103,6 @@ GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
 GLUI_Checkbox *CHECKBOX_smokeGPU=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
-GLUI_Checkbox *CHECKBOX_smoke3d_external=NULL;
 GLUI_Checkbox *CHECKBOX_zlib=NULL;
 GLUI_Checkbox **CHECKBOX_meshvisptr=NULL;
 GLUI_Checkbox *CHECKBOX_meshvis=NULL;
@@ -298,9 +297,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #endif    
   }
 
-#ifdef _DEBUG
-  CHECKBOX_smoke3d_external=glui_3dsmoke->add_checkbox_to_panel(PANEL_colormap,"View smoke externally (ONLY)",&smoke3d_external);
-#endif
   Smoke3d_CB(USE_FIRESMOKEMAP);
 
   glui_3dsmoke->add_column_to_panel(PANEL_overall,false);
@@ -535,7 +531,7 @@ extern "C" void Smoke3d_CB(int var){
       SPINNER_smoke3d_smoke_shade->enable();
       STATIC_hrrpuvcolor->enable();
       fire_colorbar_index_save=fire_colorbar_index;
-      SmokeColorBarMenu(fire_custom_colorbar-colorbarinfo);
+      SmokeColorBarMenu((int)(fire_custom_colorbar-colorbarinfo));
     }
     if(LISTBOX_smoke_colorbar->get_int_val()!=fire_colorbar_index){
       LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);

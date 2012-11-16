@@ -71,7 +71,7 @@ GLUI_EditText *EDITTEXT_colorbar_label=NULL;
 GLUI_StaticText *STATICTEXT_left=NULL, *STATICTEXT_right=NULL;
 
 
-int cb_rgb[3],xxcb_up_rgb[3],xxcb_down_rgb[3];
+int cb_rgb[3];
 int cb_usecolorbar_extreme;
 
 #define COLORBAR_LIST 0

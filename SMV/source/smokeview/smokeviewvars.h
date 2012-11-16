@@ -25,6 +25,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(update_smokecolorbar,0);
 #ifdef pp_SUPERMESH
 SVEXTERN int SVDECL(use_supermesh,1);
 #endif
@@ -213,6 +214,7 @@ SVEXTERN int GPU3dslice_valtexture,GPU3dslice_colormap;
 SVEXTERN int GPU3dslice_val_min,GPU3dslice_val_max;
 SVEXTERN int GPU3dslice_boxmin, GPU3dslice_boxmax;
 SVEXTERN int GPU3dslice_transparent_level;
+SVEXTERN int GPUvol_block_volsmoke;
 
 #ifdef pp_GPUDEPTH
 SVEXTERN int GPUvol_depthtexture, GPUvol_screensize,GPUvol_nearfar;
@@ -1126,8 +1128,6 @@ SVEXTERN int setp3min_temp, setp3max_temp;
 SVEXTERN int setp3chopmin_temp, setp3chopmax_temp;
 SVEXTERN float p3chopmin_temp, p3chopmax_temp;
 SVEXTERN float p3min_temp, p3max_temp;
-
-SVEXTERN int smoke3d_external;
 
 SVEXTERN smoke3ddata SVDECL(*smoke3dinfo,NULL);
 SVEXTERN int fire_red, fire_green, fire_blue;

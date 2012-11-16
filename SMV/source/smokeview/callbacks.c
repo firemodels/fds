@@ -2763,6 +2763,10 @@ void Display_CB(void){
         break;
     }
   }
+  if(update_smokecolorbar==1){
+    update_smokecolorbar=0;
+    SmokeColorBarMenu(fire_colorbar_index);
+  }
   if(update_colorbartype==1){
     if(colorbarname!=NULL){
       colorbardata *cb;

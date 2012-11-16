@@ -423,6 +423,7 @@ void ColorBarMenu(int value){
     switch (value){
     case COLORBARFLIP:
       colorbarflip=1-colorbarflip;
+      update_colorbarflip();
       break;
     case -3:
       colorbarcycle++;
@@ -3317,6 +3318,7 @@ void LoadVolSmoke3DMenu(int value){
     volrenderdata *vr;
     slicedata *fireslice, *smokeslice;
 
+    update_smokecolorbar=1;
     meshi = meshinfo + value;
     vr = &(meshi->volrenderinfo);
     fireslice = vr->fireslice;
@@ -3351,6 +3353,7 @@ void LoadVolSmoke3DMenu(int value){
       }
   }
   else if(value==LOAD_ALL){  // load all
+    update_smokecolorbar=1;
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADVOLSMOKE\n");
       fprintf(scriptoutstream," -1\n");
@@ -5587,10 +5590,10 @@ updatemenu=0;
 /* --------------------------------label menu -------------------------- */
 
   CREATEMENU(labelmenu,LabelMenu);
-  if(visColorbarLabels==1)glutAddMenuEntry(_("*Colorbars"),0);
-  if(visColorbarLabels==0)glutAddMenuEntry(_("Colorbars"),0);
-  if(visTimeLabels==1)glutAddMenuEntry(_("*Time bars"),1);
-  if(visTimeLabels==0)glutAddMenuEntry(_("Time bars"),1);
+  if(visColorbarLabels==1)glutAddMenuEntry(_("*Colorbar"),0);
+  if(visColorbarLabels==0)glutAddMenuEntry(_("Colorbar"),0);
+  if(visTimeLabels==1)glutAddMenuEntry(_("*Time bar"),1);
+  if(visTimeLabels==0)glutAddMenuEntry(_("Time bar"),1);
   if(nticks>0){
     if(visTicks==0)glutAddMenuEntry(_("FDS generated ticks"),12);
     if(visTicks==1)glutAddMenuEntry(_("*FDS generated ticks"),12);

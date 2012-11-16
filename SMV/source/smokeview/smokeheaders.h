@@ -102,6 +102,7 @@ EXTERNCPP void update_glui_set_view_xyz(float *xyz);
 EXTERNCPP void update_glui_filelabel(int var);
 EXTERNCPP void update_colorbar_list(void);
 EXTERNCPP void update_colorbar_list2(void);
+EXTERNCPP void update_colorbarflip(void);
 
 EXTERNCPP void script_loadvolsmokeframe2(void);
 EXTERNCPP void update_glui_plot3dtype(void);
