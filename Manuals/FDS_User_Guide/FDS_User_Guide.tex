@@ -5679,15 +5679,7 @@ If the initial mass fraction of the gas is something other than zero, then the p
 
 \subsubsection{Specifying Humidity}
 
-The default relative humidity of the background air species is 40\%.  This may be changed by setting {\ct HUMIDITY} (in units of \%) for the background species: 
-
-\footnotesize
-\begin{verbatim}
-&SPEC ID='AIR', HUMIDITY=20, BACKGROUND=.TRUE./
-\end{verbatim}
-\normalsize
-
-\noindent Note that {\ct 'AIR'} is the only predefined species mixture.  More on specifying mixtures can be found in Section \ref{info:SMIX}.
+{\ct HUMIDITY} can be specified for {\ct WATER VAPOR} in place of {\ct MASS\_FRACTION\_0}. {\ct HUMIDITY} is the relative humidity of water vapor in units of \%. It is 40 \% by default.
 
 \subsection{Specifying Gas and Liquid Species Properties}
 
