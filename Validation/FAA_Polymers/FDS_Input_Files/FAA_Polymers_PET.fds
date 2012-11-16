@@ -7,42 +7,42 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
-&TIME T_END=800., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
+&TIME T_END=1000., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
 
 &REAC FUEL='METHANE', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
 
 &MATL ID='PET'
-      ABSORPTION_COEFFICIENT=966.
+      ABSORPTION_COEFFICIENT=2937
       N_REACTIONS=1
       A(1) = 1
       E(1) = 0
-	  THRESHOLD_TEMPERATURE(1)=158.
-      EMISSIVITY=0.96
-      DENSITY=910.
+	  THRESHOLD_TEMPERATURE(1)=253.
+      EMISSIVITY=0.903
+      DENSITY=1380.
       NU_MATL=1.
       MATL_ID='Liq'
-      HEAT_OF_REACTION=80.
+      HEAT_OF_REACTION=37
       CONDUCTIVITY_RAMP = 'k_ramp'
       SPECIFIC_HEAT_RAMP = 'c_ramp' /
 
-&RAMP ID='k_ramp', T=2.,   F=0.24 /
-&RAMP ID='k_ramp', T=400., F=0.24 /
-&RAMP ID='k_ramp', T=800., F=0.24 /	  
-&RAMP ID='c_ramp', T=0.,   F=1.466 /
-&RAMP ID='c_ramp', T=158., F=2.98 /
-&RAMP ID='c_ramp', T=165., F=2.52 /
-&RAMP ID='c_ramp', T=800., F=4.16 /
+&RAMP ID='c_ramp', T=0., F=0.97 /
+&RAMP ID='c_ramp', T=253., F=2.12 /
+&RAMP ID='c_ramp', T=255., F=1.94/
+&RAMP ID='c_ramp', T=800., F=2.41 /
+&RAMP ID='k_ramp', T=20.,  F=0.290 /
+&RAMP ID='k_ramp', T=220., F=0.290 /
+&RAMP ID='k_ramp', T=800., F=0.290 /
 	  
 &MATL ID='Liq'
-      ABSORPTION_COEFFICIENT=966.
+      ABSORPTION_COEFFICIENT=2937
       N_REACTIONS=1
-      A(1) = 1.60E23
-      E(1) = 3.52E5
-      EMISSIVITY=0.96
-      DENSITY=910.
+      A(1) = 4.50E18
+      E(1) = 281000.
+      EMISSIVITY=0.903
+      DENSITY=1380.
       SPEC_ID='METHANE'
       NU_SPEC=1.
-      HEAT_OF_REACTION=1310.
+      HEAT_OF_REACTION=1800.
       CONDUCTIVITY_RAMP = 'k_ramp'
       SPECIFIC_HEAT_RAMP = 'c_ramp' /
 	  
