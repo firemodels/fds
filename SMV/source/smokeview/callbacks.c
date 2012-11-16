@@ -606,6 +606,7 @@ int timebar_click(int x, int y){
     else{
       itimes=0;
     }
+//    printf("ngt=%i xl=%i x=%i xr=%i\n",nglobal_times,timebar_left_pos,x,timebar_right_pos);
     checktimebound();
     timebar_drag=1;
     stept=0;
