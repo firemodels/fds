@@ -927,13 +927,11 @@ void Colorbar_SplitDrag(int xm, int ym){
 
 void Timebar_Drag(int xm, int ym){
   if(nglobal_times>0){
-    int left_label_width=7*VP_timebar.text_width;
-    int right_label_width=10.5*VP_timebar.text_width;
     int timebar_right_pos;
     int timebar_left_pos;
 
-    timebar_left_pos = VP_timebar.left+left_label_width;
-    timebar_right_pos=VP_timebar.right-right_label_width;
+    timebar_left_pos = VP_timebar.left+timebar_left_width;
+    timebar_right_pos=VP_timebar.right-timebar_right_width;
 
     itimes=0;
     if(timebar_right_pos>timebar_left_pos){
