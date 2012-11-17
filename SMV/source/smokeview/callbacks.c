@@ -2774,6 +2774,9 @@ void Display_CB(void){
       if(cb!=NULL){
         colorbartype=cb-colorbarinfo;
         current_colorbar=cb;
+        if(colorbartype!=colorbartype_default){
+          colorbartype_ini=colorbartype;
+        }
       }
     }
     update_colorbartype=0;

@@ -8311,27 +8311,19 @@ int readini2(char *inifile, int localfile){
       char *label;
 
       update_colorbartype=1;
-      FREEMEMORY(colorbarname);
       fgets(buffer,255,stream);
       label = strchr(buffer,'%');
-      if(label!=NULL){
+      if(label==NULL){
+        sscanf(buffer,"%i",&colorbartype);
+        remap_colorbartype(colorbartype,colorbarname);
+      }
+      else{
         int lenlabel;
 
         label++;
         trim(label);
         label=trim_front(label);
-        lenlabel=strlen(label);
-        if(lenlabel>0){
-          NEWMEMORY(colorbarname,lenlabel+1);
-          strcpy(colorbarname,label);
-        }
-      }
-      else{
-        sscanf(buffer,"%i",&colorbartype);
-        if(colorbartype!=colorbartype_default){
-          colorbartype_ini=colorbartype;
-        }
-        if(colorbarinfo!=NULL)current_colorbar = colorbarinfo + colorbartype;
+        strcpy(colorbarname,label);
       }
       continue;
     }

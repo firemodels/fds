@@ -556,7 +556,7 @@ SVEXTERN int shooter_itime;
 SVEXTERN int showgluitrainer;
 SVEXTERN int colorbarcycle;
 SVEXTERN int colorbartype,colorbartype_ini,colorbartype_default;
-SVEXTERN char SVDECL(*colorbarname,NULL);
+SVEXTERN char colorbarname[1024];
 SVEXTERN int SVDECL(update_colorbartype,0);
 SVEXTERN int colorbartype_save;
 SVEXTERN int colorbarpoint;

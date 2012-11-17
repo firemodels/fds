@@ -425,6 +425,63 @@ void remapcolorbar(colorbardata *cbi){
   CheckMemory;
 }
 
+/* ------------------ remap_colorbartype ------------------------ */
+
+void remap_colorbartype(int cb_oldtype, char *cb_newname){
+  switch (cb_oldtype){
+    case 0:
+      strcpy(cb_newname,"Rainbow");
+      break;
+    case 1:
+      strcpy(cb_newname,"Rainbow 2");
+      break;
+    case 2:
+      strcpy(cb_newname,"yellow->red");
+      break;
+    case 3:
+      strcpy(cb_newname,"blue->green->red");
+      break;
+    case 4:
+      strcpy(cb_newname,"blue->red split");
+      break;
+    case 5:
+      strcpy(cb_newname,"FED");
+      break;
+    case 6:
+      //strcpy(cb_newname,"fire (original)");
+      strcpy(cb_newname,"fire 2");
+      break;
+    case 7:
+     // strcpy(cb_newname,"fire (black->orange)");
+      strcpy(cb_newname,"fire 2");
+      break;
+    case 8:
+      //strcpy(cb_newname,"fire (new)");
+      strcpy(cb_newname,"fire 2");
+      break;
+    case 9:
+      //strcpy(cb_newname,"fire (new2)");
+      strcpy(cb_newname,"fire 2");
+      break;
+    case 10:
+      //strcpy(cb_newname,"fire (custom)");
+      strcpy(cb_newname,"fire 2");
+      break;
+    case 11:
+      strcpy(cb_newname,"fire line (level set)");
+      break;
+    case 12:
+      strcpy(cb_newname,"fire line (wall thickness)");
+      break;
+    case 13:
+      strcpy(cb_newname,"black->white");
+      break;
+    default:
+      strcpy(cb_newname,"Rainbow");
+      break;
+  }
+}
+
 /* ------------------ initdefaultcolorbars ------------------------ */
 
 void initdefaultcolorbars(void){
