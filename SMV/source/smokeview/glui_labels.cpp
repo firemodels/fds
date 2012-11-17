@@ -79,7 +79,7 @@ GLUI_Checkbox *CHECKBOX_colorbarflip=NULL;
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
 #endif
-GLUI_Checkbox *CHECKBOX_axislabels_smooth=NULL, *CHECKBOX_transparentflag=NULL, *CHECKBOX_sort=NULL, *CHECKBOX_smooth=NULL;
+GLUI_Checkbox *CHECKBOX_axislabels_smooth=NULL, *CHECKBOX_transparentflag=NULL;
 GLUI_Checkbox *CHECKBOX_LB_visLabels=NULL;
 GLUI_Checkbox *CHECKBOX_LB_label_use_foreground=NULL;
 GLUI_Checkbox *CHECKBOX_LB_label_show_always=NULL;
@@ -475,16 +475,10 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_column_to_panel(PANEL_cb11,false);
 
   CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("color -> grey"),&setbw,LABELS_shade,Labels_CB);
-  CHECKBOX_colorbarflip=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("flip"),&colorbarflip,FLIP,Labels_CB);
-  CHECKBOX_axislabels_smooth=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Smooth colorbar label values"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
+  CHECKBOX_colorbarflip=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("flip colorbar"),&colorbarflip,FLIP,Labels_CB);
+  CHECKBOX_axislabels_smooth=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Smooth colorbar labels"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
   CHECKBOX_transparentflag=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Use transparency"),
     &use_transparency_data,DATA_transparent,Slice_CB);
-#ifdef pp_BETA
-  CHECKBOX_sort=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Sort transparent surfaces"),
-    &sort_iso_triangles,SORT_SURFACES,Slice_CB);
-  CHECKBOX_smooth=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Smooth surfaces"),
-    &smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
-#endif
   SPINNER_labels_transparency_data=glui_labels->add_spinner_to_panel(PANEL_cb11,_("transparency level"),
     GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
   SPINNER_labels_transparency_data->set_w(0);
