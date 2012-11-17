@@ -338,7 +338,6 @@ void drawcolorbarpath(void){
 /* ------------------ getcolorbar ------------------------ */
 
 colorbardata *getcolorbar(char *label){
-  colorbardata *cb;
   int i;
 
   for(i=0;i<ncolorbars;i++){
