@@ -2767,16 +2767,14 @@ void Display_CB(void){
     SmokeColorBarMenu(fire_colorbar_index);
   }
   if(update_colorbartype==1){
-    if(colorbarname!=NULL){
-      colorbardata *cb;
+    colorbardata *cb;
 
-      cb = getcolorbar(colorbarname);
-      if(cb!=NULL){
-        colorbartype=cb-colorbarinfo;
-        current_colorbar=cb;
-        if(colorbartype!=colorbartype_default){
-          colorbartype_ini=colorbartype;
-        }
+    cb = getcolorbar(colorbarname);
+    if(cb!=NULL){
+      colorbartype=cb-colorbarinfo;
+      current_colorbar=cb;
+      if(colorbartype!=colorbartype_default){
+        colorbartype_ini=colorbartype;
       }
     }
     update_colorbartype=0;

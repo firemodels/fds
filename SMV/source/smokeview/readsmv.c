@@ -10074,11 +10074,13 @@ int readini2(char *inifile, int localfile){
         if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
 
         for(n=ndefaultcolorbars;n<ncolorbars;n++){
-          cbi = colorbarinfo + n;
+          char *cb_buffptr;
 
+          cbi = colorbarinfo + n;
           fgets(buffer,255,stream);
           trim(buffer);
-          strcpy(cbi->label,buffer);
+          cb_buffptr=trim_front(buffer);
+          strcpy(cbi->label,cb_buffptr);
 
           fgets(buffer,255,stream);
           sscanf(buffer,"%i %i",&cbi->nnodes,&cbi->nodehilight);
@@ -10100,7 +10102,6 @@ int readini2(char *inifile, int localfile){
             cbi->rgb_node[nn+1]=g1;
             cbi->rgb_node[nn+2]=b1;
           }
-
           remapcolorbar(cbi);
         }
     }
