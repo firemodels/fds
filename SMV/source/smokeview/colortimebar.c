@@ -477,7 +477,19 @@ void remap_colorbartype(int cb_oldtype, char *cb_newname){
       strcpy(cb_newname,"black->white");
       break;
     default:
-      strcpy(cb_newname,"Rainbow");
+#define NCOLORBARS_PREV 14
+      if(cb_oldtype>=NCOLORBARS_PREV){
+        cb_oldtype -= (NCOLORBARS_PREV-ndefaultcolorbars);
+      }
+      if(cb_oldtype>=0&&cb_oldtype<ncolorbars){
+        colorbardata *cb;
+
+        cb = colorbarinfo + cb_oldtype;
+        strcpy(cb_newname,cb->label);
+      }
+      else{
+        strcpy(cb_newname,"Rainbow");
+      }
       break;
   }
 }
