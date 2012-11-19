@@ -489,7 +489,8 @@ void checktimebound(void){
   if(timebar_drag==0&&itimes>nglobal_times-1||timebar_drag==1&&itimes<0){
     izone=0;
     itimes=0;
-    iframe=iframebeg;
+    if(render_state==RENDER_ON)RenderState(RENDER_OFF);
+    frame_index=first_frame_index;
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
       sd->itime=0;
@@ -2348,7 +2349,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   char buffer[256];
   float elapsed_time;
 
-  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||RenderGif!=0||timebar_drag==1)){       /* ready for a new frame */
+  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||render_state==1||timebar_drag==1)){       /* ready for a new frame */
     cputimes[cpuframe]=thistime/1000.;
     
     oldcpuframe=cpuframe-10;
@@ -2383,7 +2384,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     lasttime = thistime;
     if(nglobal_times>0){
       *changetime=1;
-      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && RenderGif==0){
+      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && render_state==0){
         /*  skip frames here if displaying in real time and frame rate is too slow*/
         if(global_times!=NULL&&realtime_flag!=0&&FlowDir>0){
           elapsed_time = (float)thistime/1000.0 - reset_time;
@@ -2406,7 +2407,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
           }
         }
       }
-      if(stept==1&&timebar_drag==0&&RenderGif!=0){
+      if(stept==1&&timebar_drag==0&&render_state==1){
         itimes+=RenderSkip*FlowDir;
       }
 
@@ -2685,7 +2686,7 @@ void DoScript(void){
         current_script_command->exit=0;
       }
     }
-    if(RenderGif==0){  // don't advance command if Smokeview is executing a RENDERALL command
+    if(render_state==0){  // don't advance command if Smokeview is executing a RENDERALL command
       current_script_command++;
       script_render_flag=run_script();
       if(runscript==2&&noexit==0&&current_script_command==NULL){
@@ -2708,6 +2709,12 @@ void DoScript(void){
       }
     }
     glutPostRedisplay();
+  }
+  else{
+    first_frame_index=0;
+    skip_render_frames=0;
+    script_frame_start=-1;
+    script_frame_skip=-1;
   }
 }
 
@@ -2890,11 +2897,13 @@ void Display_CB(void){
     }
   }
   if(touring == 1 ){
-    if(RenderGif != 0){
+    if(render_state==1){
       if(nglobal_times>0)angle_global += 2.0*PI/((float)nglobal_times/(float)RenderSkip);
       if(nglobal_times==0)angle_global += 2.0*PI/((float)maxtourframes/(float)RenderSkip);
     }
-    if(RenderGif == 0)angle_global += dang_global;
+    else{
+      angle_global += dang_global;
+    }
     if(angle_global>PI){angle_global -= -2.0f*PI;}
     if(rotation_type==ROTATION_2AXIS||rotation_type==ROTATION_1AXIS){
       camera_current->az_elev[0] = anglexy0 + angle_global*RAD2DEG;

@@ -698,7 +698,7 @@ char *which(char *progname){
 
 /* ------------------ get_slice_frame ------------------------ */
 
-size_t get_slice_frame(char *file, int iframe, int framesize, float *time_local, float *vals){
+size_t get_slice_frame(char *file, int frame_index_local, int framesize, float *time_local, float *vals){
   int skip_local;
   FILE *FORTSTREAM;
   int returncode;
@@ -708,8 +708,8 @@ size_t get_slice_frame(char *file, int iframe, int framesize, float *time_local,
   skip_local +=        (HEADER_SIZE +30                     +TRAILER_SIZE); // short label
   skip_local +=        (HEADER_SIZE +30                     +TRAILER_SIZE); // unit label
   skip_local +=        (HEADER_SIZE +6*sizeof(int)          +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
-  skip_local += iframe*(HEADER_SIZE +sizeof(float)          +TRAILER_SIZE); // framenum time's
-  skip_local += iframe*(HEADER_SIZE +framesize*sizeof(float)+TRAILER_SIZE); // framenum slice data's
+  skip_local += frame_index_local*(HEADER_SIZE +sizeof(float)          +TRAILER_SIZE); // framenum time's
+  skip_local += frame_index_local*(HEADER_SIZE +framesize*sizeof(float)+TRAILER_SIZE); // framenum slice data's
   FORTSTREAM=fopen(file,"r");
   if(FORTSTREAM==NULL)return 0;
   FSEEK(FORTSTREAM,skip_local,SEEK_SET); // skip from beginning of file

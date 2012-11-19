@@ -1460,11 +1460,10 @@ void initvars(void){
   slicefilenumber=0;
   exportdata=0;
   nspr=0;
-  RenderGif=0, RenderSkip=1;
+  RenderSkip=1;
   smoke3dframestep=1;
   smoke3dframeskip=0;
   vectorskip=1;
-  iframe=0, iframebeg=0, izone=0;
   rotation_type=ROTATION_2AXIS;
   eyeview_level=1;
   rotation_type_old=ROTATION_2AXIS,eyeview_SAVE=0,eyeview_last=0;

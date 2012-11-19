@@ -1339,7 +1339,7 @@ void updatetimes(void){
 
   // end pass 3
 
-  // reset render_fram array
+  // reset render_frame array
 
   if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
     if(current_script_command->first==1){
@@ -1383,7 +1383,7 @@ void updatetimes(void){
     sd = sliceinfo + i;
     sd->itime=0; 
   }
-  iframe=iframebeg; 
+  frame_index=first_frame_index; 
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
@@ -1654,7 +1654,7 @@ int isearch(float *list, int nlist, float key, int guess){
 
 void reset_itimes0(void){
   if(current_script_command==NULL||current_script_command->command!=SCRIPT_VOLSMOKERENDERALL){
-    itimes=0;
+    itimes=first_frame_index;
   }
 }
 

@@ -1369,10 +1369,10 @@ void ResetMenu(int value){
 /* ------------------ RenderState ------------------------ */
 
 void RenderState(int onoff){
+  render_state=onoff;
   if(onoff==RENDER_ON){
     saveW=screenWidth;
     saveH=screenHeight;
-    RenderGif=1;
     if(renderW==0||renderH==0){
       ResizeWindow(screenWidth,screenHeight);
     }
@@ -1389,7 +1389,6 @@ void RenderState(int onoff){
   else{
     render_multi=0;
     render_multi_state=0;
-    RenderGif=0;
     setScreenSize(&saveW,&saveH);
     ResizeWindow(screenWidth,screenHeight);
   }
@@ -1488,7 +1487,7 @@ void RenderMenu(int value){
       sd=sliceinfo+i;
       sd->itime=0;
     }
-    iframe=iframebeg;
+    frame_index=first_frame_index;
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
       meshi->patch_itime=0;
@@ -2190,6 +2189,10 @@ void ScriptMenu(int value){
     case SCRIPT_CANCEL:
       current_script_command=NULL;
       runscript=0;
+      first_frame_index=0;
+      skip_render_frames=0;
+      script_frame_start=-1;
+      script_frame_skip=-1;
       script_step=0;
       glui_script_enable();
       break;

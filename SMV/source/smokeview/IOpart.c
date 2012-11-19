@@ -27,7 +27,7 @@ char IOpart_revision[]="$Revision$";
 int tagscompare( const void *arg1, const void *arg2 );
 void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
 
-void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
+void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level);
 void update_all_partvis(partdata *parti);
 void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nclasses);
 int get_tagindex(const partdata *parti, part5data **data, int tagval);
@@ -52,7 +52,7 @@ if(returncode==READPASS){\
 void drawpart_frame(void){
   partdata *parti;
 
-  if(staticframe0==0||iframe!=0){
+  if(staticframe0==0||frame_index!=0){
     int i;
 
     for(i=0;i<npartinfo;i++){
@@ -1235,8 +1235,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   npartpoints2=npartpoints;
   npartframes2=npartframes;
-  iframebeg=0;
-  if(staticframe0==1)iframebeg=1;
+  if(staticframe0==1)first_frame_index=1;
   if(error!=0){
     fprintf(stderr,"*** Error: problem reading %s\n",file);
     return;

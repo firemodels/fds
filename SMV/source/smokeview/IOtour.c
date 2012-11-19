@@ -24,7 +24,7 @@ void drawcir(float *center, float rad, float *color);
 //void TourMenu(int val);
 float hermiteeye(float f1, int i, keyframe *kf1, keyframe *kf2, float *slope);
 float hermiteview(float t, int i, keyframe *kf1, keyframe *kf2, float *slope);
-void draw_SVOBJECT(sv_object *object, int iframe,propdata *prop,int recurse_level);
+void draw_SVOBJECT(sv_object *object, int frame_index_local,propdata *prop,int recurse_level);
 
 /* ------------------ freetour ------------------------ */
 

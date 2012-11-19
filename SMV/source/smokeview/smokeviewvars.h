@@ -25,6 +25,9 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(render_state,0);
+SVEXTERN int SVDECL(script_frame_start,-1), SVDECL(script_frame_skip,-1);
+SVEXTERN int SVDECL(skip_render_frames,0);
 SVEXTERN int SVDECL(update_smokecolorbar,0);
 #ifdef pp_SUPERMESH
 SVEXTERN int SVDECL(use_supermesh,1);
@@ -468,12 +471,12 @@ SVEXTERN int slicefilenumber;
 SVEXTERN int exportdata;
 SVEXTERN int SVDECL(frame_count,1), SVDECL(last_frame_count,1);
 SVEXTERN int nspr;
-SVEXTERN int RenderGif, RenderSkip;
+SVEXTERN int RenderSkip;
 SVEXTERN int SVDECL(isoframestep_global,1),SVDECL(isoframeskip_global,0);
 SVEXTERN int smoke3dframestep;
 SVEXTERN int smoke3dframeskip;
 SVEXTERN int vectorskip;
-SVEXTERN int iframe, iframebeg, izone;
+SVEXTERN int SVDECL(frame_index,0), SVDECL(first_frame_index,0), SVDECL(izone,0);
 SVEXTERN int rotation_type,eyeview_level;
 SVEXTERN int rotation_type_old,eyeview_SAVE,eyeview_last;
 SVEXTERN int frameratevalue;

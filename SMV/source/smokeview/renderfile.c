@@ -44,9 +44,7 @@ void Render(int view_mode){
       current_script_command->remove_frame=itimes;
     }
   }
-  if(RenderOnceNow==0&&RenderGif !=0
-    &&render_multi==0
-    ){
+  if(RenderOnceNow==0&&render_state==1&&render_multi==0){
     if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
      if(itimes>=0&&itimes<nglobal_times&&
        ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
@@ -157,7 +155,12 @@ void RenderFrame(int view_mode){
       image_num=seqnum;
     }
     else{
-      image_num=itimes/RenderSkip;
+      if(skip_render_frames==1){
+        image_num=itimes;
+      }
+      else{
+        image_num=itimes/RenderSkip;
+      }
     }
     if(renderfilelabel==0||RenderTime==0){
       float time_local;

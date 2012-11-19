@@ -798,12 +798,12 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       pathdata *pj;
 
       touri = tourinfo + selectedtour_index;
-      iframe = touri->timeslist[itimes];
+      frame_index = touri->timeslist[itimes];
       if(keyframe_snap==1&&selected_frame!=NULL){
         pj=&selected_frame->nodeval;
       }
       else{
-        pj = touri->pathnodes + iframe;
+        pj = touri->pathnodes + frame_index;
       }
 
       camera_current->eye[0]=pj->eye[0];
@@ -841,12 +841,12 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       pathdata *pj;
 
       touri = tourinfo + selectedtour_index;
-      iframe = touri->timeslist[itimes];
+      frame_index = touri->timeslist[itimes];
       if(keyframe_snap==1&&selected_frame!=NULL){
         pj=&selected_frame->nodeval;
       }
       else{
-        pj = touri->pathnodes + iframe;
+        pj = touri->pathnodes + frame_index;
       }
 
       aperture_temp=zoom2aperture(pj->zoom);
@@ -922,12 +922,12 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
         if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
           touri = tourinfo + selectedtour_index;
-          iframe = touri->timeslist[itimes];
+          frame_index = touri->timeslist[itimes];
           if(keyframe_snap==1&&selected_frame!=NULL){
             pj=&selected_frame->nodeval;
           }
           else{
-            pj = touri->pathnodes + iframe;
+            pj = touri->pathnodes + frame_index;
           }
 
           viewx = pj->oview[0]+StereoCameraOffset*cos_dv_sum;

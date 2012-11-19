@@ -270,7 +270,7 @@ void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
 void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
 void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
-void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
+void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level);
 void free_object(sv_object *object);
 void freecircle(void);
 void initcircle(unsigned int npoints);

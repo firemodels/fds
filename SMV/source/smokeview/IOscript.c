@@ -353,6 +353,7 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
   if(match_upper(keyword,"RENDERDOUBLEONCE") == 1)return SCRIPT_RENDERDOUBLEONCE;
   if(match_upper(keyword,"RENDERALL") == 1)return SCRIPT_RENDERALL;
+  if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
   if(match_upper(keyword,"VOLSMOKERENDERALL") == 1)return SCRIPT_VOLSMOKERENDERALL;
   if(match_upper(keyword,"LOADFILE") == 1)return SCRIPT_LOADFILE;
   if(match_upper(keyword,"LOADINIFILE") == 1)return SCRIPT_LOADINIFILE;
@@ -532,12 +533,20 @@ int compile_script(char *scriptfile){
         SETcval2;
         break;
 
+      case SCRIPT_RENDERSTART:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer2,"%i %i",&scripti->ival,&scripti->ival2);
+        break;
+
       case SCRIPT_RENDERALL:
         SETcval;
         cleanbuffer(buffer,buffer2);
-        sscanf(buffer,"%i",&scripti->ival);
+        scripti->ival3=0;  // first frame
+        sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival3);
         if(scripti->ival<1)scripti->ival=1;
         if(scripti->ival>20)scripti->ival=20;
+        first_frame_index=scripti->ival3;
 
         SETcval2;
         break;
@@ -545,12 +554,14 @@ int compile_script(char *scriptfile){
       case SCRIPT_VOLSMOKERENDERALL:
         SETcval;
         cleanbuffer(buffer,buffer2);
-        sscanf(buffer,"%i",&scripti->ival);
-        if(scripti->ival<1)scripti->ival=1;
+        scripti->ival3=0;  // first frame
+        sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival3); 
+        if(scripti->ival<1)scripti->ival=1; // skip
         if(scripti->ival>20)scripti->ival=20;
         scripti->exit=0;
         scripti->first=1;
         scripti->remove_frame=-1;
+        first_frame_index=scripti->ival3;
 
         SETcval2;
         break;
@@ -639,14 +650,25 @@ int compile_script(char *scriptfile){
   return return_val;
 }
 
+/* ------------------ run_renderstart ------------------------ */
+
+void script_renderstart(scriptdata *scripti){
+  script_frame_start=scripti->ival;
+  script_frame_skip=scripti->ival2;
+}
+
 /* ------------------ run_renderall ------------------------ */
 
 void script_renderall(scriptdata *scripti){
   int skip_local;
 
+
+  if(script_frame_start>0)scripti->ival=script_frame_start;
+  if(script_frame_skip>0)scripti->ival3=script_frame_skip;
   skip_local=scripti->ival;
   if(skip_local<1)skip_local=1;
   printf("script: Rendering every %i frames\n\n",skip_local);
+  skip_render_frames=1;
   RenderMenu(skip_local);
 }
 
@@ -656,9 +678,12 @@ void script_volsmokerenderall(scriptdata *scripti){
   int skip_local;
 
   script_loadvolsmokeframe2();
+  if(script_frame_start>0)scripti->ival=script_frame_start;
+  if(script_frame_skip>0)scripti->ival3=script_frame_skip;
   skip_local=scripti->ival;
   if(skip_local<1)skip_local=1;
-  printf("script: Rendering every %i frames\n\n",skip_local);
+  printf("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival2);
+  skip_render_frames=1;
   RenderMenu(skip_local);
 }
 
@@ -1421,6 +1446,9 @@ int run_script(void){
     case SCRIPT_RENDERDOUBLEONCE:
       keyboard('R',FROM_SMOKEVIEW);
       returnval=1;
+      break;
+    case SCRIPT_RENDERSTART:
+      script_renderstart(scripti);
       break;
     case SCRIPT_RENDERALL:
       script_renderall(scripti);

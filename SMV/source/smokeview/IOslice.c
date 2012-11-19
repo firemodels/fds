@@ -132,7 +132,7 @@ void out_slicefile(slicedata *sd){
 
 /* ------------------ Creadslice_frame ------------------------ */
 
-int Creadslice_frame(int frame_index,int sd_index,int flag){
+int Creadslice_frame(int frame_index_local,int sd_index,int flag){
   slicedata *sd;
   int slicefilelen;
   int headersize,framesize;
@@ -151,7 +151,7 @@ int Creadslice_frame(int frame_index,int sd_index,int flag){
     return 0;
   }
   slicefilelen = strlen(sd->file);
-  if(frame_index==0){
+  if(frame_index_local==first_frame_index){
     if(sd->compression_type==0){
 
       FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
@@ -174,8 +174,8 @@ int Creadslice_frame(int frame_index,int sd_index,int flag){
   skip_local +=          (HEADER_SIZE+6*4        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
   
   frame_size = sd->nslicei*sd->nslicej*sd->nslicek;
-  skip_local += frame_index*(HEADER_SIZE + 4 + TRAILER_SIZE); // 
-  skip_local += frame_index*(HEADER_SIZE + frame_size*4 + TRAILER_SIZE); // 
+  skip_local += frame_index_local*(HEADER_SIZE + 4 + TRAILER_SIZE); // 
+  skip_local += frame_index_local*(HEADER_SIZE + frame_size*4 + TRAILER_SIZE); // 
 
   SLICEFILE=fopen(sd->file,"rb");
   if(SLICEFILE==NULL){
@@ -184,14 +184,14 @@ int Creadslice_frame(int frame_index,int sd_index,int flag){
 
   returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
-  if(frame_index==0){
+  if(frame_index_local==first_frame_index){
     if(NewMemory((void **)&sd->qslicedata,2*frame_size*sizeof(float))==0||
        NewMemory((void **)&sd->times,sizeof(float))==0){
       return -1;
     }
   }
   slicevals=sd->qslicedata;
-  if(frame_index%2!=0){
+  if(frame_index_local%2!=0){
     slicevals+=frame_size;
   }
   time_local=sd->times;

@@ -1275,6 +1275,10 @@ extern "C"  void glui_script_disable(void){
     case SCRIPT_CANCEL_NOW:
       current_script_command=NULL;
       runscript=0;
+      first_frame_index=0;
+      skip_render_frames=0;
+      script_frame_start=-1;
+      script_frame_skip=-1;
       script_step=0;
       glui_script_enable();
       break;

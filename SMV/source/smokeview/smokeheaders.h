@@ -330,8 +330,8 @@ EXTERNCPP void free_skybox(void);
 EXTERNCPP void draw_skybox(void);
 EXTERNCPP void loadskytexture(char *filebase, texture *texti);
 #ifdef USE_ZLIB
-EXTERNCPP void uncompress_slicedataframe(slicedata *sd,int iframe);
-EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int iframe);
+EXTERNCPP void uncompress_slicedataframe(slicedata *sd,int frame_index);
+EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int frame_index);
 #endif
 EXTERNCPP void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata, 
                        float *times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes);
