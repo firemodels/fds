@@ -175,7 +175,7 @@ The derivation of LES models is very similar to that of the RANS models, albeit 
 
 To better understand the eddy viscosity model, the original Navier-Stokes equations are examined. An evolution equation for the kinetic energy of the gas is formed by taking the dot product of the momentum from Equation~\ref{eq:momcon} and the velocity vector $\mathbf{u}$:
 \begin{equation}
-\rho \frac{D \mathbf{u}}{Dt} \cdot \mathbf{u} \equiv \frac{D(|\mathbf{u}|^2/2)}{Dt} = \cdots - \epsilon
+\rho \frac{D \mathbf{u}}{Dt} \cdot \mathbf{u} \equiv \rho \frac{D(|\mathbf{u}|^2/2)}{Dt} = \cdots - \epsilon
 \label{eq:momdotu}
 \end{equation}
 A term emerges on the right-hand side known as the dissipation rate (see Appendix for details):
