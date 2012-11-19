@@ -2040,7 +2040,7 @@ SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECIES)
             ELSE
                Y_H2O_INFTY = 0._EB
             ENDIF
-         ENDIF	 
+         ENDIF
          IF (MASS_FRACTION_0<0._EB) THEN           
             IF (HUMIDITY < 0._EB) HUMIDITY = 40._EB
             SS%YY0 = WATER_VAPOR_MASS_FRACTION(HUMIDITY,TMPA)
