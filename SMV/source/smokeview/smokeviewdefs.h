@@ -11,6 +11,9 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define RENDER_ON 1
+#define RENDER_OFF 0
+
 #ifndef TYPE_SMV
 #define TYPE_SMV 0
 #endif

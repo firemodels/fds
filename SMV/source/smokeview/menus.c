@@ -1369,7 +1369,7 @@ void ResetMenu(int value){
 /* ------------------ RenderState ------------------------ */
 
 void RenderState(int onoff){
-  if(onoff==1){
+  if(onoff==RENDER_ON){
     saveW=screenWidth;
     saveH=screenHeight;
     RenderGif=1;
@@ -1453,7 +1453,7 @@ void RenderMenu(int value){
     render_multi_menu=0;
     render_multi=0;
     render_multi_state=0;
-    RenderState(0);
+    RenderState(RENDER_OFF);
     break;
   case RenderLABELframenumber:
     renderfilelabel=0;
@@ -1482,7 +1482,7 @@ void RenderMenu(int value){
     if(stept==0){
       keyboard('t',FROM_SMOKEVIEW);
     }
-    RenderState(1);
+    RenderState(RENDER_ON);
     reset_itimes0();
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
@@ -1733,7 +1733,7 @@ void FrameRateMenu(int value){
   }
   else{
     keyboard('t',FROM_SMOKEVIEW);
-    RenderState(0);
+    RenderState(RENDER_OFF);
     FlowDir=1;
   }
   frameratevalue=value;

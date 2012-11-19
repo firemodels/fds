@@ -56,7 +56,7 @@ void Render(int view_mode){
      }
      else{
        ASSERT(RenderSkip>0);
-       RenderState(0);
+       RenderState(RENDER_OFF);
        RenderSkip=1;
      }
     }
@@ -66,7 +66,7 @@ void Render(int view_mode){
       if(nglobal_times>0)tourangle_global += (float)(2.0*PI/((float)nglobal_times/(float)RenderSkip));
       if(nglobal_times==0)tourangle_global += (float)(2.0*PI/((float)maxtourframes/(float)RenderSkip));
       if(tourangle_global>2.0*PI){
-        RenderState(0);
+        RenderState(RENDER_OFF);
         RenderSkip=1;
         tourangle_global=0.0;
       }
@@ -83,7 +83,7 @@ void Render(int view_mode){
     if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
     if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
     if(RenderOnceNowR==0&&RenderOnceNowL==0){
-      RenderState(0);
+      RenderState(RENDER_OFF);
       RenderSkip=1;
     }
   }

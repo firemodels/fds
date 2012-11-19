@@ -1684,7 +1684,7 @@ void keyboard(unsigned char key, int flag){
           RenderOnceNowL=1;
           RenderOnceNowR=1;
         }
-        RenderState(1);
+        RenderState(RENDER_ON);
         render_from_menu=0;
       }
       break;
@@ -2677,10 +2677,10 @@ void DoScript(void){
     script_step_now=0;
     if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){\
       if(current_script_command->exit==0){
-        RenderState(1);
+        RenderState(RENDER_ON);
       }
       else{
-        RenderState(0);
+        RenderState(RENDER_OFF);
         current_script_command->first=1;
         current_script_command->exit=0;
       }
@@ -2883,7 +2883,7 @@ void Display_CB(void){
         }
         if(renderdoublenow==0||RenderOnceNow==1){
           ASSERT(RenderSkip>0);
-          RenderState(0);
+          RenderState(RENDER_OFF);
           RenderSkip=1;
         }
       }
