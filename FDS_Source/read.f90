@@ -2034,6 +2034,13 @@ SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECIES)
    SELECT CASE (ID)
       CASE('WATER VAPOR')
          H2O_INDEX = N
+         IF (SIMPLE_CHEMISTRY) THEN
+            IF (MASS_FRACTION_0 <0._EB .AND. HUMIDITY < 0._EB) THEN
+               MASS_FRACTION_0 = 0._EB
+            ELSE
+               Y_H2O_INFTY = 0._EB
+            ENDIF
+         ENDIF	 
          IF (MASS_FRACTION_0<0._EB) THEN           
             IF (HUMIDITY < 0._EB) HUMIDITY = 40._EB
             SS%YY0 = WATER_VAPOR_MASS_FRACTION(HUMIDITY,TMPA)
