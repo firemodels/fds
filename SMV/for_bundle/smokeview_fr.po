@@ -303,9 +303,6 @@ msgstr "editeur de la legende"
 msgid "Colorbar type"
 msgstr "Farbauswahl Schattierung"
 
-msgid "Colorbars"
-msgstr ""
-
 msgid "colormap"
 msgstr "Legende de couleurs"
 
@@ -626,6 +623,9 @@ msgstr "Inverser"
 
 msgid "Flip background"
 msgstr "Inverser l'arriere-plan"
+
+msgid "flip colorbar"
+msgstr ""
 
 msgid "Flow vectors"
 msgstr "Vecteurs de l'ecoulement"
@@ -1650,7 +1650,7 @@ msgstr "Lisser les obstacles affiches opaque"
 msgid "Smooth blockages now"
 msgstr "Lisser les obstacles maintenant"
 
-msgid "Smooth colorbar label values"
+msgid "Smooth colorbar labels"
 msgstr ""
 
 msgid "Smooth normal"
@@ -1838,9 +1838,6 @@ msgstr "Duree (h: m: s"
 
 msgid "Time bar"
 msgstr "echelle de temps"
-
-msgid "Time bars"
-msgstr "echelles de temps"
 
 msgid "Time interval"
 msgstr "Intervalle de temps"
@@ -2108,4 +2105,3 @@ msgstr "Zoom"
 
 msgid "Zoom"
 msgstr "Zoom"
-

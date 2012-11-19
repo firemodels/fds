@@ -303,9 +303,6 @@ msgstr "Farbbalken Editor"
 msgid "Colorbar type"
 msgstr ""
 
-msgid "Colorbars"
-msgstr "Farbauswahl"
-
 msgid "colormap"
 msgstr "Farbtabelle"
 
@@ -626,6 +623,9 @@ msgstr "Wechseln"
 
 msgid "Flip background"
 msgstr "Hintergrund wechseln"
+
+msgid "flip colorbar"
+msgstr ""
 
 msgid "Flow vectors"
 msgstr "Flussvektoren"
@@ -1650,8 +1650,8 @@ msgstr "Glaette Objekte als undurchsichtig"
 msgid "Smooth blockages now"
 msgstr "Glaette Objekte ab jetzt"
 
-msgid "Smooth colorbar label values"
-msgstr "Glaette Farbbalkenbeschriftung"
+msgid "Smooth colorbar labels"
+msgstr ""
 
 msgid "Smooth normal"
 msgstr "Glaette normal"
@@ -1838,9 +1838,6 @@ msgstr "Zeit (h:m:s"
 
 msgid "Time bar"
 msgstr "Zeitleiste"
-
-msgid "Time bars"
-msgstr "Zeitleisten"
 
 msgid "Time interval"
 msgstr "Zeitintervall"

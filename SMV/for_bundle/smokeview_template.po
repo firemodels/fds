@@ -285,9 +285,6 @@ msgstr ""
 msgid "Colorbar editor"
 msgstr ""
 
-msgid "Colorbars"
-msgstr ""
-
 msgid "Colorbar type"
 msgstr ""
 
@@ -625,6 +622,9 @@ msgid "Flip"
 msgstr ""
 
 msgid "Flip background"
+msgstr ""
+
+msgid "flip colorbar"
 msgstr ""
 
 msgid "Flow vectors"
@@ -1650,7 +1650,7 @@ msgstr ""
 msgid "Smooth blockages now"
 msgstr ""
 
-msgid "Smooth colorbar label values"
+msgid "Smooth colorbar labels"
 msgstr ""
 
 msgid "Smooth normal"
@@ -1828,9 +1828,6 @@ msgid "Time"
 msgstr ""
 
 msgid "Time bar"
-msgstr ""
-
-msgid "Time bars"
 msgstr ""
 
 msgid "time (h:m:s"
