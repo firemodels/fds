@@ -24,17 +24,9 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       NU_MATL=1.
       MATL_ID='Liq'
       HEAT_OF_REACTION=55.
-      SPECIFIC_HEAT_RAMP = 'c_ramp'
-      CONDUCTIVITY_RAMP = 'k_ramp'/
+      SPECIFIC_HEAT = 2.54 
+      CONDUCTIVITY = 0.34 /
 	  
-&RAMP ID='c_ramp', T= 0., F=1.66 /
-&RAMP ID='c_ramp', T=262., F=3.16/
-&RAMP ID='c_ramp', T=264., F=2.562/
-&RAMP ID='c_ramp', T=800., F=2.85 /
-&RAMP ID='k_ramp', T=20.,  F=0.340 /
-&RAMP ID='k_ramp', T=220., F=0.340 /
-&RAMP ID='k_ramp', T=800., F=0.340 /
-
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=3920.
       N_REACTIONS=1
@@ -45,8 +37,8 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       SPEC_ID='METHANE'
       NU_SPEC=1.
       HEAT_OF_REACTION=1390.
-      SPECIFIC_HEAT_RAMP = 'c_ramp'
-      CONDUCTIVITY_RAMP = 'k_ramp'/
+      SPECIFIC_HEAT = 2.54 
+      CONDUCTIVITY = 0.34 /
 	  
 &MATL ID='FOIL'
       CONDUCTIVITY=250.
