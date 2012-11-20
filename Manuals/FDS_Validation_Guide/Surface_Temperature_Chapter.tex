@@ -789,7 +789,7 @@ On the following pages are predictions of the THIEF (thermally-induced electrica
 
 Note in the plots to follow that the objective of the calculation is to predict the cable temperature just inside of the jacket until the cable fails electrically. In some experiments, the short-circuiting of the cable led to ignition of the pyrolyzates. This behavior is not captured in the model, which is why some of the experimental data shows a rapid rise in temperature at a certain point in the test. In almost all cases, electrical failure occurred very shortly, or at about the same time, as ignition.
 
-Figure~\ref{CAROLFIRE_Summary_Plot} compares the measured versus predicted time to a ``threshold'' temperature. The threshold temperature is 400~$^\circ$C for thermoset cables and 200~$^\circ$C for thermoplastics.
+Figure~\ref{Cable_Failure_Time_Summary_Plot} compares the measured versus predicted time to a ``threshold'' temperature. The threshold temperature is 400~$^\circ$C for thermoset cables and 200~$^\circ$C for thermoplastics.
 
 \newpage
 
@@ -843,7 +843,7 @@ Figure~\ref{CAROLFIRE_Summary_Plot} compares the measured versus predicted time 
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_29} \\
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_30} &
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_63} \\
-\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_65} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_65} 
 \end{tabular*}
 \label{CAROLFIRE_Thermoplastic_2}
 \end{figure}
@@ -858,15 +858,52 @@ Figure~\ref{CAROLFIRE_Summary_Plot} compares the measured versus predicted time 
 \label{CAROLFIRE_Special_1}
 \end{figure}
 
+
+\clearpage
+
+\subsection{PRISME Experiments}
+
+In several of the PRISME experiments, instrumented electrical cables were laid within trays at various heights in the test compartment. The gas temperature in the vicinity of the cables was measured and served as the exposing heat source for calculations using the THIEF (Thermally-Induced Electrical Failure) model~\cite{Dreisbach:Interflam}.
+
+Figure~\ref{Cable_Failure_Time_Summary_Plot} compares the measured versus predicted time to a ``threshold'' temperature. The threshold temperature is 200~$^\circ$C for all of the PRISME cable samples.
+
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_1_Lower} &
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_1_Upper} \\
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_2_Lower} &
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_2_Upper_A} \\
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_2_Upper_B} &
+
+\end{tabular*}
+\label{PRISME_1}
+\end{figure}
+
 \begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_3_A} &
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_3_B} \\
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_4_A} &
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_4_B} \\
+\includegraphics[height=2.2in]{FIGURES/PRISME/PRISME_LK_4_C} &
+\end{tabular*}
+\label{PRISME_2}
+\end{figure}
+
+\clearpage
+
+\subsection{Time to Failure}
+
+\begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Cable_Temperature}
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Cable_Temperature}
 \end{tabular}
 \end{center}
-\caption[Summary of time to threshold temperature, CAROLFIRE test series.]
-{Summary of time to threshold temperature for the CAROLFIRE test series.}
-\label{CAROLFIRE_Summary_Plot}
+\caption[Summary of time to failure predictions for electrical cables]
+{Summary of time to failure predictions for electrical cables.}
+\label{Cable_Failure_Time_Summary_Plot}
 \end{figure}
 
 

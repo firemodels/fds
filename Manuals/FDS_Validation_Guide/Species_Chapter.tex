@@ -1,6 +1,6 @@
 \chapter{Gas Species and Smoke}
 
-For most applications, FDS uses a single step, mixing-controlled combustion model. The products of combustion are ``lumped'' together and tracked as a single gas mixture. These products include CO$_2$, H$_2$O, CO, and soot. However, in some cases, the combustion is incomplete due to a lack of oxygen. In others, a multiple-step reaction scheme is used to predict the production of CO. 
+For most applications, FDS uses a single step, mixing-controlled combustion model. The products of combustion are ``lumped'' together and tracked as a single gas mixture. These products include CO$_2$, H$_2$O, CO, and soot. However, in some cases, the combustion is incomplete due to a lack of oxygen. In others, a multiple-step reaction scheme is used to predict the production of CO.
 
 \section{Major Combustion Products, O$_2$ and CO$_2$}
 
@@ -12,7 +12,7 @@ For any hydrocarbon fuel, the major combustion products are oxygen and carbon di
 \subsection{WTC Experiments}
 
 The following pages present comparisons of oxygen and carbon dioxide concentration predictions and measurements for the
-WTC experiments. There was only one measurement of each made near the ceiling of the compartment roughly 2~m from the fire. 
+WTC experiments. There was only one measurement of each made near the ceiling of the compartment roughly 2~m from the fire.
 
 
 \begin{figure}[h!]
@@ -55,7 +55,7 @@ dioxide measurement in the upper layer.
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Oxygen} &
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_CO2} \\
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_CO2} 
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_CO2}
 \end{tabular*}
 \label{NIST_NRC_Gas_Open_1}
 \end{figure}
@@ -83,7 +83,7 @@ dioxide measurement in the upper layer.
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Oxygen} &
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_CO2} \\
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Oxygen} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_CO2} 
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_CO2}
 \end{tabular*}
 \label{NIST_NRC_Gas_Closed_1}
 \end{figure}
@@ -124,7 +124,7 @@ dioxide measurement in the upper layer.
 \section{Smoke}
 
 FDS treats smoke particulate in a similar way to other gaseous combustion products, basically a tracer gas whose production rate is a fixed fraction of the fuel consumption rate. However, there is an option in the model to allow smoke to deposit on solid surfaces, thus reducing its concentration in the product stream. By default, to model smoke movement it is only necessary to specify the soot yield, that is, the fraction of the fuel mass that is
-converted to soot. However, additional parameters can be added to account for soot deposition. 
+converted to soot. However, additional parameters can be added to account for soot deposition.
 
 \subsection{NIST/NRC Experiments}
 
@@ -184,7 +184,7 @@ The large differences between model and measurement seen in the smoke data do no
 \subsection{Sippola Aerosol Deposition Experiments}
 
 A total of 16 aerosol deposition tests were conducted in a straight duct for 5 different
-particle sizes and 3 different air velocities. In these cases, the aerosol species is tracked
+particle sizes and 3 different air velocities. For the simulations, the aerosol species is tracked
 explicitly and the aerosol deposition routines are enabled (refer to the Aerosol Deposition section
 in the FDS User Guide~\cite{FDS_Users_Guide} and FDS Technical Reference Guide~\cite{FDS_Math_Guide}
 for more details). A summary of the 16 tests is shown in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
@@ -216,21 +216,20 @@ Test No.  &  Air Speed (m/s)  &  Particle Diameter ($\mu$m)  \\ \hline \hline
 \label{Sippola_Aerosol_Deposition_Summary}
 \end{table}
 
-The particle deposition velocity, $V_d$, was determined by
-
-\be V_d = \frac{J_1 + J_2 + J_3 + J_4}{4 C_{avg}} \ee
-
-where $J_1$ through $J_4$ are the deposition fluxes for duct panels 1 through 4 (kg/m$^2$-s)
-given by
-
-\be J_i = \frac{m_{d}}{A_d t} \ee
-
+The particle deposition velocity, $V_d$, is determined from
+\be 
+   V_d = \frac{J_1 + J_2 + J_3 + J_4}{4 \; C_{avg}} 
+\ee
+$J_1$ through $J_4$ are the deposition fluxes for duct panels 1 through 4 (kg/m$^2$/s) given by
+\be 
+   J = \frac{m_{d}}{A_d \; \Delta t} 
+\ee
 where $m_d$ is the mass of particles on the duct panel (kg), $A_d$ is the area of the duct panel (m$^2$),
-and $t$ is the duration over which soot deposits on the plate (s). $C_{avg}$ is the average aerosol
+and $Delta t$ is the duration over which soot deposits on the plate (s). $C_{avg}$ is the average aerosol
 concentration in the duct test section (kg/m$^3$) and is given by
-
-\be C_{avg} = \frac{C_{up} + C_{down}}{2} \ee
-
+\be 
+   C_{avg} = \frac{C_{up} + C_{down}}{2} 
+\ee
 Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured versus predicted deposition velocities.
 
 \begin{figure}[p]
@@ -328,7 +327,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW,
 500~kW, and 600~kW.  The experiments were modeled using properties of the natural gas supplied to the test facility.
 The model geometry included the compartment interior along with a 0.6~m deep region outside the door.
-Fig.~\ref{NIST_RSE_1994_spec} shows the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Fig.~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measured values are from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}. 
+Fig.~\ref{NIST_RSE_1994_spec} shows the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Fig.~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measured values are from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
