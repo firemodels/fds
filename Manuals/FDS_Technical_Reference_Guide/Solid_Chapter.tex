@@ -490,12 +490,14 @@ deposition but are not considered in FDS due to their relatively small contribut
 in compartment fire scenarios.
 
 The deposition velocity to surfaces is determined by assuming the phenomena are independent,
-computing a deposition velocity for each (respectively u$_{th}$, u$_g$, and u$_{dt}$,
+computing a deposition velocity for each (u$_{th}$, the thermophoretic velocity, and u$_{dt}$,
 a combined diffusion-turbulence velocity), and summing them~\cite{Bixler:1}. If the aerosol
-is located in a gas-phase cell adjacent to an upward-facing wall cell (i.e., a flat surface),
-then the aerosol is removed from the gas phase at a rate proportional to its deposition
-velocity and deposited on the flat surface. The accumulated surface density of deposited
-aerosols is tracked.
+is located in a gas-phase cell adjacent to a wall cell, then the aerosol is removed from
+the gas phase at a rate proportional to its deposition velocity and deposited onto the surface.
+If the aerosol is located in a gas-phase cell adjacent to an upward-facing wall cell
+(i.e., a floor), then the aerosol is removed from the gas phase at a rate proportional
+to its deposition velocity plus its gravitational settling velocity (u$_g$) and deposited onto the
+flat surface. The accumulated surface density of deposited aerosols is tracked.
 
 \subsection{Gravitational Settling}
 
@@ -505,8 +507,8 @@ The gravitational settling velocity is given by~\cite{Davies_Charles}
 u_g = g m_a \frac{\text{Cn}}{6 \pi \, \chi_d \, \mu \, r_a}
 \ee
 
-\noindent where $m_a$ is the particle mass, $\chi_d$ is a shape factor, $r_a$ is the particle radius,
-and Cn is the Cunningham slip factor given by~\cite{Cunningham:1}
+\noindent where $m_a$ is the particle mass, $\chi_d$ is a shape factor, $\mu$ is the dynamic viscosity of air,
+$r_a$ is the particle radius, and Cn is the Cunningham slip correction factor given by~\cite{Cunningham:1}
 
 \be
 \text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; \mathrm{e}^{-0.88/\text{Kn}}
@@ -517,14 +519,16 @@ to the particle radius. The mean free path of a gas is proportional to its tempe
 thus Kn is computed as~\cite{Sippola:1}
 
 \be
-\text{Kn} = \frac{0.0065}{r_a} \frac{T_g}{T_\infty}
+\text{Kn} = \frac{\lambda}{r_a} \frac{T_g}{T_\infty}
 \ee
+
+\noindent where $\lambda$ is the mean free path of gas molecules and is 0.065 $\mu$m at a temperature of 25 $^\circ$C and atmospheric pressure.
 
 For each aerosol species in the gas phase, a gravitational settling velocity is calculated
 and imposed on the convective term (in the z-direction) in the species transport
 equation~(Eq.~\ref{eqn_density_fl}). This approach is similar to the drift flux model
 for smoke transport described in Hu et al.~\cite{Hu:1}. The gravitational settling velocity
-is also used in the total deposition velocity to deposit aerosols onto flat surfaces,
+is also included in the total deposition velocity to deposit aerosols onto upward-facing flat surfaces,
 as described above.
 
 
@@ -567,8 +571,9 @@ u_{dt} = \left\{ \begin{array}{r@{\quad \quad}l}
          \end{array} \right.
 \ee
 
-\noindent where $u_{\tau}$ is the wall friction velocity computed by the wall model,
-and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
+\noindent where Sc is the particle Schmidt number, or the ratio of the kinematic viscosity to the
+Brownian diffusion coefficient of the particle ($\nu/D_B$), $u_{\tau}$ is the wall friction velocity
+computed by the wall model, and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
 
 \be
  \tau^+=\frac{\rho_a \, (2 r_a)^2}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_g
