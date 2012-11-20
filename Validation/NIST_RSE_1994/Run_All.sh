@@ -1,10 +1,26 @@
 #!/bin/bash -f
 
+queue=
+while getopts 'q:s' OPTION
+do
+case $OPTION in
+  q)
+   queue="$OPTARG"
+   ;;
+  s)
+   export STOPFDS=1
+   ;;
+esac
+done
+if [ "$queue" != "" ]; then
+   queue="-q $queue"
+fi
+
 export SVNROOT=`pwd`/../..
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
-export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
+export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 export BASEDIR=`pwd`
-export INDIR=Current_Results
+export INDIR=Current_Results_ex
 source ~/.bashrc_fds intel64
 
 # uncomment following line to stop all cases
