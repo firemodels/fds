@@ -264,6 +264,18 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);
   }
 
+  PANEL_colormap2 = glui_3dsmoke->add_panel_to_panel(PANEL_colormap,"Temp->Colormap");
+  SPINNER_temperature_min=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2,_("Min"),GLUI_SPINNER_FLOAT,
+    &temperature_min,TEMP_MIN,Smoke3d_CB);
+  SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2,_("cutoff"),GLUI_SPINNER_FLOAT,
+    &temperature_cutoff,TEMP_CUTOFF,Smoke3d_CB);
+  SPINNER_temperature_max=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2,_("Max"),GLUI_SPINNER_FLOAT,
+    &temperature_max,TEMP_MAX,Smoke3d_CB);
+  Smoke3d_CB(TEMP_MIN);
+  Smoke3d_CB(TEMP_CUTOFF);
+  Smoke3d_CB(TEMP_MAX);
+
+
   STATIC_hrrpuvcolor=glui_3dsmoke->add_statictext_to_panel(PANEL_colormap,_("fire color:"));
   SPINNER_smoke3d_fire_red=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap,_("red"),GLUI_SPINNER_INT,&fire_red,FIRE_RED,Smoke3d_CB);
   SPINNER_smoke3d_fire_red->set_int_limits(0,255);
@@ -329,17 +341,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Display data as b/w"),&volbw);
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Show data while moving scene"),&show_volsmoke_moving);
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Load data only at render times"),&load_at_rendertimes);
-
-    PANEL_colormap2 = glui_3dsmoke->add_panel_to_panel(PANEL_volume,"Temp->Colormap");
-    SPINNER_temperature_min=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2,_("Min"),GLUI_SPINNER_FLOAT,
-                          &temperature_min,TEMP_MIN,Smoke3d_CB);
-    SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2,_("cutoff"),GLUI_SPINNER_FLOAT,
-                          &temperature_cutoff,TEMP_CUTOFF,Smoke3d_CB);
-    SPINNER_temperature_max=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2,_("Max"),GLUI_SPINNER_FLOAT,
-                          &temperature_max,TEMP_MAX,Smoke3d_CB);
-    Smoke3d_CB(TEMP_MIN);
-    Smoke3d_CB(TEMP_CUTOFF);
-    Smoke3d_CB(TEMP_MAX);
 
     SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("Fire opacity multiplier"),GLUI_SPINNER_FLOAT,&opacity_factor);
     SPINNER_opacity_factor->set_float_limits(1.0,10.0);
@@ -431,8 +432,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
 #ifdef pp_GPU
   Smoke3d_CB(VOL_SMOKE);
-  Smoke3d_CB(SMOKE_OPTIONS);
 #endif
+  Smoke3d_CB(SMOKE_OPTIONS);
 }
 
 /* ------------------ hide_glui_3dsmoke ------------------------ */
@@ -495,7 +496,7 @@ extern "C" void Smoke3d_CB(int var){
       use_firesmokemap=use_firesmokemap_save;
       CHECKBOX_use_firesmokemap->set_int_val(use_firesmokemap);
       CHECKBOX_use_firesmokemap->enable();
-      Smoke3d_CB(USE_FIRESMOKEMAP);
+      SPINNER_smoke3d_fire_halfdepth->enable();
     }
     else{
       if(SPINNER_smoke3d_hrrpuv_cutoff!=NULL)SPINNER_smoke3d_hrrpuv_cutoff->disable();
@@ -504,8 +505,9 @@ extern "C" void Smoke3d_CB(int var){
       use_firesmokemap=1;
       CHECKBOX_use_firesmokemap->set_int_val(use_firesmokemap);
       CHECKBOX_use_firesmokemap->disable();
-      Smoke3d_CB(USE_FIRESMOKEMAP);
+      SPINNER_smoke3d_fire_halfdepth->disable();
     }
+    Smoke3d_CB(USE_FIRESMOKEMAP);
     Update_Smoke_Type();
     break;
   case USE_FIRESMOKEMAP:
@@ -515,6 +517,7 @@ extern "C" void Smoke3d_CB(int var){
       SPINNER_smoke3d_fire_green->disable();
       SPINNER_smoke3d_fire_blue->disable();
       SPINNER_smoke3d_smoke_shade->disable();
+      SPINNER_smoke3d_fire_halfdepth->disable();
       STATIC_hrrpuvcolor->disable();
       if(fire_colorbar_index_save!=-1){
         SmokeColorBarMenu(fire_colorbar_index_save);
@@ -529,6 +532,7 @@ extern "C" void Smoke3d_CB(int var){
       SPINNER_smoke3d_fire_green->enable();
       SPINNER_smoke3d_fire_blue->enable();
       SPINNER_smoke3d_smoke_shade->enable();
+      SPINNER_smoke3d_fire_halfdepth->enable();
       STATIC_hrrpuvcolor->enable();
       fire_colorbar_index_save=fire_colorbar_index;
       SmokeColorBarMenu((int)(fire_custom_colorbar-colorbarinfo));

@@ -119,6 +119,7 @@ extern "C" void update_colorbar_label(void){
 
 extern "C" void hide_glui_colorbar(void){
   showcolorbar_dialog_save=showcolorbar_dialog;
+  viscolorbarpath=0;
   showcolorbar_dialog=0;
   if(show_extremedata_save==1){
     show_extremedata=1;
@@ -138,6 +139,7 @@ extern "C" void hide_glui_colorbar(void){
 extern "C" void show_glui_colorbar(void){
 // show colorbar dialog box and redefine initial view point
   showcolorbar_dialog=1;
+  viscolorbarpath=1;
   show_extremedata_save = show_extremedata;
   if(show_extremedata==1){
     show_extremedata=0;
@@ -360,7 +362,6 @@ void COLORBAR_CB(int var){
     }
     break;
   case COLORBAR_CLOSE:
-    viscolorbarpath=0;
     hide_glui_colorbar();
     break;
   case COLORBAR_NEXT:

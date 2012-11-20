@@ -992,7 +992,7 @@ extern "C" void Labels_CB(int var){
   switch (var){
     case FLIP:
       colorbarflip = 1 - colorbarflip;
-      ColorBarMenu(COLORBARFLIP);
+      ColorBarMenu(COLORBAR_FLIP);
       break;
   case LABELS_hide_overlaps:
     updatefacelists=1;
@@ -1057,7 +1057,7 @@ extern "C" void Labels_CB(int var){
     break;
   case LABELS_shade:
     setbw = 1 - setbw;
-    ColorBarMenu(-12);
+    ColorBarMenu(COLORBAR_TOGGLE_BW);
     break;
   case LABELS_transparent:
     break;

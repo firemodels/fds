@@ -421,16 +421,11 @@ void ColorBarMenu(int value){
   glutPostRedisplay();
   if(value<0){
     switch (value){
-    case COLORBARFLIP:
+    case COLORBAR_FLIP:
       colorbarflip=1-colorbarflip;
       update_colorbarflip();
       break;
-    case -3:
-      colorbarcycle++;
-      if(colorbarcycle>=nrgb)colorbarcycle=0;
-      break;
-    case -4:
-      colorbarcycle=0;
+    case COLORBAR_RESET:
       show_extremedata=0;
       colorbarflip=0;
       contour_type=SHADED_CONTOURS;
@@ -438,15 +433,12 @@ void ColorBarMenu(int value){
       update_extreme(0);
       UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
-    case -5:
-      viscolorbarpath=1-viscolorbarpath;
-      break;
-    case -7:
+    case COLORBAR_HIGHLIGHT_EXTREME:
       show_extremedata=1-show_extremedata;
       update_extreme(0);
       UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
-    case -12:
+    case COLORBAR_TOGGLE_BW:
      setbw=1-setbw;
      if(setbw==1){
        colorbartype_save=colorbartype;
@@ -459,36 +451,21 @@ void ColorBarMenu(int value){
      UpdateRGBColors(COLORBAR_INDEX_NONE);
      set_labels_controls();
      break;
-   case -13:
+   case COLORBAR_TRANSPARENT:
      use_transparency_data=1-use_transparency_data;
      UpdateRGBColors(COLORBAR_INDEX_NONE);
      set_labels_controls();
      update_transparency();
      break;
-   case -14:
-     colorbarflip=1-colorbarflip;
-     UpdateRGBColors(COLORBAR_INDEX_NONE);
-     break;
-   case -15:
-     colorbarcycle++;
-     if(colorbarcycle>=nrgb)colorbarcycle=0;
-     UpdateRGBColors(COLORBAR_INDEX_NONE);
-     break;
-   case -16:
-     colorbarcycle=0;
-     background_flip=0;
-     setbw=0;
-     UpdateRGBColors(COLORBAR_INDEX_NONE);
-     break;
-   case -17:
+   case COLORBAR_CONTINUOUS:
      contour_type=SHADED_CONTOURS;
      UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
-   case -18:
+   case COLORBAR_STEPPED:
      contour_type=STEPPED_CONTOURS;
      UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
-   case -19:
+   case COLORBAR_LINES:
      contour_type=LINE_CONTOURS;
      UpdateRGBColors(COLORBAR_INDEX_NONE);
      break;
@@ -515,11 +492,6 @@ void ColorBarMenu(int value){
   }
 }
 
-/* ------------------ ShadeMenu ------------------------ */
-
-void ShadeMenu(int value){
-  ColorBarMenu(-10-value);
-}
 /* ------------------ Smoke3DShowMenu ------------------------ */
 
 void Smoke3DShowMenu(int value){
@@ -1074,11 +1046,9 @@ void DialogMenu(int value){
   case 23:
     showcolorbar_dialog=1-showcolorbar_dialog;
     if(showcolorbar_dialog==1){
-      viscolorbarpath=1;
       show_glui_colorbar();
     }
     if(showcolorbar_dialog==0){
-      viscolorbarpath=0;
       hide_glui_colorbar();
     }
     break;
@@ -6297,30 +6267,29 @@ updatemenu=0;
     }
   }
 
-
 /* -------------------------------- colorbarmenu -------------------------- */
 
   CREATEMENU(colorbarshademenu,ColorBarMenu);
   if(contour_type==SHADED_CONTOURS){
-    glutAddMenuEntry("*Continuous",-17);
-    glutAddMenuEntry("Stepped",-18);
-    glutAddMenuEntry("Lines",-19);
+    glutAddMenuEntry("*Continuous",COLORBAR_CONTINUOUS);
+    glutAddMenuEntry("Stepped",COLORBAR_STEPPED);
+    glutAddMenuEntry("Lines",COLORBAR_LINES);
   }
   else if(contour_type==STEPPED_CONTOURS){
-    glutAddMenuEntry("Continuous",-17);
-    glutAddMenuEntry("*Stepped",-18);
-    glutAddMenuEntry("Lines",-19);
+    glutAddMenuEntry("*Continuous",COLORBAR_CONTINUOUS);
+    glutAddMenuEntry("*Stepped",COLORBAR_STEPPED);
+    glutAddMenuEntry("Lines",COLORBAR_LINES);
   }else if(contour_type==LINE_CONTOURS){
-    glutAddMenuEntry("Continuous",-17);
-    glutAddMenuEntry("Stepped",-18);
-    glutAddMenuEntry("*Lines",-19);
+    glutAddMenuEntry("*Continuous",COLORBAR_CONTINUOUS);
+    glutAddMenuEntry("Stepped",COLORBAR_STEPPED);
+    glutAddMenuEntry("*Lines",COLORBAR_LINES);
   }
   glutAddMenuEntry("-",-999);
   if(setbw==0){
-    glutAddMenuEntry(_("*Color/BW"),-12);
+    glutAddMenuEntry(_("*Color/BW"),COLORBAR_TOGGLE_BW);
   }
   else{
-    glutAddMenuEntry(_("Color/*BW"),-12);
+    glutAddMenuEntry(_("Color/*BW"),COLORBAR_TOGGLE_BW);
   }
 
 
@@ -6350,25 +6319,25 @@ updatemenu=0;
   glutAddSubMenu("Colorbars",colorbarsmenu);
   glutAddMenuEntry(_("Variations:"),-999);
   if(show_extremedata==1){
-    glutAddMenuEntry(_("  *Highlight extreme data"),-7);
+    glutAddMenuEntry(_("  *Highlight extreme data"),COLORBAR_HIGHLIGHT_EXTREME);
   }
   else{
-    glutAddMenuEntry(_("  Highlight extreme data"),-7);
+    glutAddMenuEntry(_("  Highlight extreme data"),COLORBAR_HIGHLIGHT_EXTREME);
   }
   if(colorbarflip==1){
-    glutAddMenuEntry(_("  *Flip"),COLORBARFLIP);
+    glutAddMenuEntry(_("  *Flip"),COLORBAR_FLIP);
   }
   else{
-    glutAddMenuEntry(_("  Flip"),COLORBARFLIP);
+    glutAddMenuEntry(_("  Flip"),COLORBAR_FLIP);
   }
   glutAddSubMenu("  Shade Type:",colorbarshademenu);
   if(use_transparency_data==1){
-    glutAddMenuEntry(_("  *Transparent (data)"),-13);
+    glutAddMenuEntry(_("  *Transparent (data)"),COLORBAR_TRANSPARENT);
   }
   else{
-    glutAddMenuEntry(_("  Transparent (data)"),-13);
+    glutAddMenuEntry(_("  Transparent (data)"),COLORBAR_TRANSPARENT);
   }
-  glutAddMenuEntry(_("  Reset"),-4);
+  glutAddMenuEntry(_("  Reset"),COLORBAR_RESET);
 
 /* --------------------------------showVslice menu -------------------------- */
   if(nvsliceloaded==0){

@@ -247,7 +247,6 @@ EXTERNCPP void LoadUnloadMenu(int value);
 EXTERNCPP void TourMenu(int var);
 EXTERNCPP void ResetMenu(int var);
 EXTERNCPP void LabelMenu(int value);
-EXTERNCPP void ShadeMenu(int value);
 EXTERNCPP void FontMenu(int value);
 EXTERNCPP void ShowHideSliceMenu(int var);
 EXTERNCPP void EvacShowMenu(int value);

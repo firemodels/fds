@@ -9314,7 +9314,7 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i ",&background_flip);
       continue;
       }
-    if(match(buffer,"COLORBARFLIP")==1){
+    if(match(buffer,"COLORBAR_FLIP")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&colorbarflip);
       continue;
@@ -10567,7 +10567,7 @@ void writeini(int flag){
   fprintf(fileout," %f %f %f\n",timebarcolor[0],timebarcolor[1],timebarcolor[2]);
   fprintf(fileout,"SETBW\n");
   fprintf(fileout," %i\n",setbw);
-  fprintf(fileout,"COLORBARFLIP\n");
+  fprintf(fileout,"COLORBAR_FLIP\n");
   fprintf(fileout," %i\n",colorbarflip);
 
   fprintf(fileout,"\n LIGHTING\n");

@@ -56,14 +56,14 @@ extern "C" void Update_Glui_Stereo(void){
   if(showstereoOLD==3&&showstereo!=3){
     if(setbw!=setbwSAVE){
       setbw=1-setbwSAVE;
-      ShadeMenu(2);
+      ColorBarMenu(COLORBAR_TOGGLE_BW);
     }
   }
   else if(showstereoOLD!=3&&showstereo==3){
     setbwSAVE=setbw;
     if(setbw==0){
       setbwSAVE=setbw;
-      ShadeMenu(2);
+      ColorBarMenu(COLORBAR_TOGGLE_BW);
     }
   }
 }

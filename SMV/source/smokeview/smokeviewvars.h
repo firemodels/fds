@@ -557,7 +557,6 @@ SVEXTERN int SVDECL(*shooter_timeslist,NULL);
 SVEXTERN int shooter_itime;
 #endif
 SVEXTERN int showgluitrainer;
-SVEXTERN int colorbarcycle;
 SVEXTERN int colorbartype,colorbartype_ini,colorbartype_default;
 SVEXTERN char colorbarname[1024];
 SVEXTERN int SVDECL(update_colorbartype,0);
@@ -1066,7 +1065,7 @@ SVEXTERN int user_tick_nxyz[3], user_tick_sub, user_tick_option, vis_user_ticks,
 SVEXTERN int user_tick_show_x, user_tick_show_y, user_tick_show_z;
 SVEXTERN int visCadTextures, visTerrainTexture;
 SVEXTERN int bw_colorbar_index;
-SVEXTERN int viscolorbarpath;
+SVEXTERN int SVDECL(viscolorbarpath,0);
 SVEXTERN int SVDECL(*sortedblocklist,NULL),SVDECL(*changed_idlist,NULL),SVDECL(nchanged_idlist,0);
 SVEXTERN int nselectblocks;
 SVEXTERN surfdata SVDECL(*surfinfo,NULL),sdefault,v_surfacedefault,e_surfacedefault;

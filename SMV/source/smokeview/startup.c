@@ -1511,7 +1511,6 @@ void initvars(void){
   hrrpuv_iso_color[3]=1.0;
   showterrain=0;
   showgluitrainer=0;
-  colorbarcycle=0;
   colorbartype=0;
   colorbartype_ini=-1;
   current_colorbar=colorbarinfo;
@@ -1901,7 +1900,6 @@ void initvars(void){
   visCadTextures=1;
   visTerrainTexture=1;
   cb_hidesv=0;
-  viscolorbarpath=0;
   nselectblocks=0;
   show_extreme_above=0;
   show_extreme_below=0;

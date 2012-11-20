@@ -1336,8 +1336,7 @@ void Update_Texturebar(void){
 /* ------------------ initrgb ------------------------ */
 
 void initrgb(void){
-  float *rgb_ptr;
-  int n,nn;
+  int n;
   float transparent_level_local=1.0;
 
   if(use_transparency_data==1)transparent_level_local=transparent_level;
@@ -1346,21 +1345,18 @@ void initrgb(void){
     colorconvert(TO_COLOR);
     if(nrgb_ini !=0){
       nrgb = nrgb_ini;
-      rgb_ptr=rgb_ini;
       for(n=0;n<nrgb_ini;n++){
-        nn=(n+colorbarcycle)%nrgb_ini;
-        rgb[n][0] = rgb_ptr[nn*3];
-        rgb[n][1] = rgb_ptr[nn*3+1];
-        rgb[n][2] = rgb_ptr[nn*3+2];
+        rgb[n][0] = rgb_ini[n*3];
+        rgb[n][1] = rgb_ini[n*3+1];
+        rgb[n][2] = rgb_ini[n*3+2];
         rgb[n][3] = transparent_level_local;
       }
     }   
     else{
       for(n=0;n<nrgb;n++){
-        nn=(n+colorbarcycle)%nrgb;
-        rgb[n][0] = rgb_base[nn][0];
-        rgb[n][1] = rgb_base[nn][1];
-        rgb[n][2] = rgb_base[nn][2];
+        rgb[n][0] = rgb_base[n][0];
+        rgb[n][1] = rgb_base[n][1];
+        rgb[n][2] = rgb_base[n][2];
         rgb[n][3] = transparent_level_local;
       }
     }
@@ -1368,11 +1364,42 @@ void initrgb(void){
   else{
     colorconvert(TO_BW);
     for(n=0;n<nrgb;n++){
-      nn=(n+colorbarcycle)%nrgb;
-      rgb[n][0] = bw_base[nn][0];
-      rgb[n][1] = bw_base[nn][1];
-      rgb[n][2] = bw_base[nn][2];
+      rgb[n][0] = bw_base[n][0];
+      rgb[n][1] = bw_base[n][1];
+      rgb[n][2] = bw_base[n][2];
       rgb[n][3] = transparent_level_local;
+    }
+  }
+}
+
+/* ------------------ Update_Smokecolormap ------------------------ */
+
+void Update_Smokecolormap(void){
+  int n;
+  float transparent_level_local=1.0;
+  unsigned char *alpha;
+  colorbardata *cbi;
+  float *fire_cb;
+  
+  if(use_transparency_data==1)transparent_level_local=transparent_level;
+
+  cbi = colorbarinfo + colorbartype;
+
+  alpha = colorbarinfo[colorbartype].alpha;
+  fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
+
+  for(n=0;n<nrgb_full;n++){
+    int n2;
+
+    n2=CLAMP(n,1,nrgb_full-2);
+    rgb_smokecolormap[4*n]=fire_cb[3*n2];
+    rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
+    rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
+    if(alpha[n]==0){
+      rgb_smokecolormap[4*n+3]=0.0;
+    }
+    else{
+      rgb_smokecolormap[4*n+3]=transparent_level_local;
     }
   }
 }
@@ -1411,8 +1438,6 @@ void UpdateRGBColors(int colorbar_index){
     alpha = colorbarinfo[colorbartype].alpha;
     fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
     for(n=0;n<nrgb_full;n++){
-      int n2;
-
       rgb_full[n][0]=cbi->colorbar[3*n];
       rgb_full[n][1]=cbi->colorbar[3*n+1];
       rgb_full[n][2]=cbi->colorbar[3*n+2];
@@ -1422,17 +1447,8 @@ void UpdateRGBColors(int colorbar_index){
       else{
         rgb_full[n][3]=transparent_level_local;
       }
-      n2=CLAMP(n,1,nrgb_full-2);
-      rgb_smokecolormap[4*n]=fire_cb[3*n2];
-      rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
-      rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
-      if(alpha[n]==0){
-        rgb_smokecolormap[4*n+3]=0.0;
-      }
-      else{
-        rgb_smokecolormap[4*n+3]=transparent_level_local;
-      }
-    } 
+    }
+    Update_Smokecolormap();
   }
   else{
     for(n=0;n<nrgb_full;n++){
@@ -1441,26 +1457,6 @@ void UpdateRGBColors(int colorbar_index){
       rgb_full[n][2]=(float)n/(float)(nrgb_full);
       rgb_full[n][3]=transparent_level_local;
     } 
-  }
-  if(colorbarcycle!=0){
-    {
-      int icolor,nnn;
-
-      for(n=0;n<nrgb_full;n++){
-        rgb_full2[n][0]=rgb_full[n][0];
-        rgb_full2[n][1]=rgb_full[n][1];
-        rgb_full2[n][2]=rgb_full[n][2];
-        rgb_full2[n][3]=rgb_full[n][3];
-      }
-      icolor=colorbarcycle*nrgb_full/nrgb;
-      for(n=0;n<nrgb_full;n++){
-        nnn=(n+icolor)%nrgb_full;
-        rgb_full[nnn][0]=rgb_full2[n][0];
-        rgb_full[nnn][1]=rgb_full2[n][1];
-        rgb_full[nnn][2]=rgb_full2[n][2];
-        rgb_full[nnn][3]=rgb_full2[n][3];
-      }
-    }
   }
   if(contour_type==LINE_CONTOURS){
     for(n=0;n<nrgb_full;n++){
