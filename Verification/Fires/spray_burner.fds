@@ -63,7 +63,7 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
 BETE Fog Nozzle, Inc, Nozzle Number WL 1/2, 90 degree spray angle, 1.40 mm orifice, 
 Median Droplet Diameter was estimated from Weber number correlation
 
-&PROP ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=1.96, FLOW_RAMP='fuel',
+&PROP ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=1.97, FLOW_RAMP='fuel',
       PARTICLE_VELOCITY=21., SPRAY_ANGLE=0.,45., SMOKEVIEW_ID='nozzle'    /
 &RAMP ID='fuel', T= 0.0, F=0.0 /
 &RAMP ID='fuel', T=20.0, F=1.0 /
