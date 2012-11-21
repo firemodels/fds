@@ -209,8 +209,10 @@ GLUI_Button *BUTTON_label_4=NULL;
 
 #define COLORBAR_LIST2 112
 #define DATA_transparent 26
+#ifdef pp_BETA
 #define SORT_SURFACES 401
 #define SMOOTH_SURFACES 402
+#endif
 #define TRANSPARENTLEVEL 110
 
 

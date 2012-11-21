@@ -25,6 +25,9 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN float SVDECL(global_hrrpuv_min,0.0);
+SVEXTERN float SVDECL(global_hrrpuv_cutoff,200.0);
+SVEXTERN float SVDECL(global_hrrpuv_max,1200.0);
 SVEXTERN int SVDECL(render_state,0);
 SVEXTERN int SVDECL(script_frame_start,-1), SVDECL(script_frame_skip,-1);
 SVEXTERN int SVDECL(skip_render_frames,0);
@@ -1135,7 +1138,6 @@ SVEXTERN smoke3ddata SVDECL(*smoke3dinfo,NULL);
 SVEXTERN int fire_red, fire_green, fire_blue;
 SVEXTERN float SVDECL(smoke_shade,0.0);
 SVEXTERN float fire_halfdepth;
-SVEXTERN float SVDECL(global_hrrpuv_cutoff,200.0);
 
 SVEXTERN int SVDECL(use_firesmokemap,0),SVDECL(use_firesmokemap_save,0);
 SVEXTERN int smokecullflag;

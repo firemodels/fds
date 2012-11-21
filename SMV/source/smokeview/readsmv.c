@@ -8318,8 +8318,6 @@ int readini2(char *inifile, int localfile){
         remap_colorbartype(colorbartype,colorbarname);
       }
       else{
-        int lenlabel;
-
         label++;
         trim(label);
         label=trim_front(label);

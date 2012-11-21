@@ -2023,6 +2023,7 @@ extern "C" void Slice_CB(int var){
       update_axislabels_smooth();
       Slice_CB(FILEUPDATE);
       break;
+#ifdef pp_BETA
     case SMOOTH_SURFACES:
       CHECKBOX_smooth2->set_int_val(smoothtrinormal);
       break;
@@ -2036,6 +2037,7 @@ extern "C" void Slice_CB(int var){
       }
       CHECKBOX_sort2->set_int_val(sort_iso_triangles);
       break;
+#endif
     case SHOW_EVAC_SLICES:
       data_evac_coloring = 1-constant_evac_coloring;
       update_slice_menu_show();
