@@ -68,6 +68,8 @@ GLUI_RadioGroup *RADIO_smokesensors=NULL;
 GLUI_RadioGroup *RADIO_loadvol=NULL;
 GLUI_RadioGroup *RADIO_use_colormap=NULL;
 
+GLUI_RadioButton *RADIOBUTTON_direct=NULL,*RADIOBUTTON_constraint=NULL, *RADIOBUTTON_noconstraint=NULL;
+
 
 
 #ifdef pp_CULL
@@ -265,8 +267,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   PANEL_colormap = glui_3dsmoke->add_panel_to_panel(PANEL_overall,_("Fire/Smoke->color"));
 
   RADIO_use_colormap = glui_3dsmoke->add_radiogroup_to_panel(PANEL_colormap,&use_firesmokemap,USE_FIRESMOKEMAP,Smoke3d_CB);
-  glui_3dsmoke->add_radiobutton_to_group(RADIO_use_colormap,"Set color directly");
-  glui_3dsmoke->add_radiobutton_to_group(RADIO_use_colormap,"Set color using colormap (with contraints)");
+  RADIOBUTTON_direct=glui_3dsmoke->add_radiobutton_to_group(RADIO_use_colormap,"Set color directly");
+  RADIOBUTTON_constraint=glui_3dsmoke->add_radiobutton_to_group(RADIO_use_colormap,"Set color using colormap (with constraints)");
+  RADIOBUTTON_noconstraint=glui_3dsmoke->add_radiobutton_to_group(RADIO_use_colormap,"Set color using colormap (without constraints)");
 
   PANEL_colormap3 = glui_3dsmoke->add_panel_to_panel(PANEL_colormap,"fire color/opacity, smoke albedo");
   PANEL_colormap3a = glui_3dsmoke->add_panel_to_panel(PANEL_colormap3,"",GLUI_PANEL_NONE);
@@ -523,7 +526,7 @@ extern "C" void Smoke3d_CB(int var){
       if(PANEL_absorption!=NULL)PANEL_absorption->enable();
       use_firesmokemap=use_firesmokemap_save;
       RADIO_use_colormap->set_int_val(use_firesmokemap);
-      RADIO_use_colormap->enable();
+      RADIOBUTTON_direct->enable();
       SPINNER_smoke3d_fire_halfdepth->enable();
     }
     else{
@@ -535,14 +538,14 @@ extern "C" void Smoke3d_CB(int var){
       use_firesmokemap_save=use_firesmokemap;
       use_firesmokemap=1;
       RADIO_use_colormap->set_int_val(use_firesmokemap);
-      RADIO_use_colormap->disable();
+      RADIOBUTTON_direct->disable();
       SPINNER_smoke3d_fire_halfdepth->disable();
     }
     Smoke3d_CB(USE_FIRESMOKEMAP);
     Update_Smoke_Type();
     break;
   case USE_FIRESMOKEMAP:
-    if(use_firesmokemap==1){
+    if(use_firesmokemap==1||use_firesmokemap==2){
       LISTBOX_smoke_colorbar->enable();
       SPINNER_smoke3d_fire_red->disable();
       SPINNER_smoke3d_fire_green->disable();
