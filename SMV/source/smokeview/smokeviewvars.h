@@ -1139,7 +1139,7 @@ SVEXTERN int fire_red, fire_green, fire_blue;
 SVEXTERN float SVDECL(smoke_shade,0.0);
 SVEXTERN float fire_halfdepth;
 
-SVEXTERN int SVDECL(use_firesmokemap,0),SVDECL(use_firesmokemap_save,0);
+SVEXTERN int SVDECL(firecolormap_type,FIRECOLORMAP_DIRECT),SVDECL(firecolormap_type_save,FIRECOLORMAP_DIRECT);
 SVEXTERN int smokecullflag;
 SVEXTERN int smokedrawtest,smokedrawtest2;
 SVEXTERN int visMAINmenus;

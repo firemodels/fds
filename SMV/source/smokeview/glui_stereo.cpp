@@ -49,6 +49,8 @@ GLUI_Button *BUTTON_stereo_3=NULL;
 
 void STEREO_CB(int var);
 
+/* ------------------ Update_Glui_Stereo ------------------------ */
+
 extern "C" void Update_Glui_Stereo(void){
   if(RADIO_showstereo!=NULL){
     RADIO_showstereo->set_int_val(showstereo);

@@ -359,6 +359,13 @@ void _Sniff_Errors(char *whereat);
 
 #define offsetscale 100
 
+#define FIRECOLORMAP_DIRECT 0
+#define FIRECOLORMAP_CONSTRAINT 1
+#define FIRECOLORMAP_NOCONSTRAINT 2
+
+#define RENDER_SLICE 0
+#define RENDER_VOLUME 1
+
 #define COLORBAR_FLIP -2
 #define COLORBAR_TOGGLE_BW -12
 #define COLORBAR_CONTINUOUS -17

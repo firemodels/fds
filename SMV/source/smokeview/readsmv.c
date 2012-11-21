@@ -8327,7 +8327,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"FIRECOLORMAP")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&use_firesmokemap,&fire_colorbar_index_ini);
+      sscanf(buffer,"%i %i",&firecolormap_type,&fire_colorbar_index_ini);
       update_fire_colorbar_index=1;
       continue;
     }
@@ -11322,7 +11322,7 @@ void writeini(int flag){
   fprintf(fileout," %f %f %f %f %f\n",
     temperature_min,temperature_cutoff,temperature_max,opacity_factor,mass_extinct);
   fprintf(fileout,"FIRECOLORMAP\n");
-  fprintf(fileout," %i %i\n",use_firesmokemap,fire_colorbar_index);
+  fprintf(fileout," %i %i\n",firecolormap_type,fire_colorbar_index);
   fprintf(fileout,"SHOWEXTREMEDATA\n");
   fprintf(fileout," %i\n",show_extremedata);
   {
