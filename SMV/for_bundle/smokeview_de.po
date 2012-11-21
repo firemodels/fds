@@ -337,7 +337,7 @@ msgid "Compute tracks"
 msgstr "berechne Tracks"
 
 msgid "Config"
-msgstr "konfiguriere"
+msgstr "Konfiguration"
 
 msgid "Configuration files"
 msgstr "Konfigurationsdateien"
@@ -349,7 +349,7 @@ msgid "Constant speed"
 msgstr "konstante Geschwindigkeit"
 
 msgid "Continue"
-msgstr "fahre fort"
+msgstr "Weiter"
 
 msgid "Continuous"
 msgstr "kontinuierlich"
@@ -445,7 +445,7 @@ msgid "Direction vectors"
 msgstr "Richtungsvektoren"
 
 msgid "directory"
-msgstr "Directory"
+msgstr "Verzeichnis"
 
 msgid "Disclaimer"
 msgstr "Haftungsausschluss"
@@ -637,7 +637,7 @@ msgid "Frame label"
 msgstr "Bildbeschriftung"
 
 msgid "Frame number"
-msgstr "Rahmennummer"
+msgstr "Bild Nummer"
 
 msgid "Frame rate"
 msgstr "Bildfrequenz"
@@ -820,7 +820,7 @@ msgid "Image"
 msgstr "Bild"
 
 msgid "Immersed Solids"
-msgstr "Abgesenkte Solids"
+msgstr "Eingebettete Solids"
 
 msgid "ini           - output default smokeview parameters to smokeview.ini"
 msgstr "ini           - gebe Standard-Smokeview-Parameter in smokeview.ini aus"
@@ -1321,7 +1321,7 @@ msgid "Report a problem at http://code.google.com/p/fds-smv/issues"
 msgstr "Sende ein Problem an http://code.google.com/p/fds-smv/issues"
 
 msgid "Report problems"
-msgstr "Verfasse einen Problembericht"
+msgstr "Probleme melden"
 
 msgid "Requested"
 msgstr "Angeforderte"
