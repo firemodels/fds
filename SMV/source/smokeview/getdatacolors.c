@@ -1380,6 +1380,8 @@ void Update_Smokecolormap(void){
   unsigned char *alpha;
   colorbardata *cbi;
   float *fire_cb;
+  float val, valmin, valmax, valcut;
+  int xxx;
   
   if(use_transparency_data==1)transparent_level_local=transparent_level;
 
@@ -1388,23 +1390,90 @@ void Update_Smokecolormap(void){
   alpha = colorbarinfo[colorbartype].alpha;
   fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
 
-  for(n=0;n<nrgb_full;n++){
-    int n2;
+  xxx = FIRECOLORMAP_NOCONSTRAINT;
+  //switch (firecolormap_type){
+  switch (xxx){
+    case FIRECOLORMAP_DIRECT:
+      for(n=0;n<128;n++){
+        rgb_smokecolormap[4*n]=smoke_albedo;
+        rgb_smokecolormap[4*n+1]=smoke_albedo;;
+        rgb_smokecolormap[4*n+2]=smoke_albedo;;
+        if(alpha[n]==0){
+          rgb_smokecolormap[4*n+3]=0.0;
+        }
+        else{
+          rgb_smokecolormap[4*n+3]=transparent_level_local;
+        }
+      }
+      for(n=128;n<nrgb_full;n++){
+        rgb_smokecolormap[4*n]=fire_red;
+        rgb_smokecolormap[4*n+1]=fire_green;
+        rgb_smokecolormap[4*n+2]=fire_blue;
+        if(alpha[n]==0){
+          rgb_smokecolormap[4*n+3]=0.0;
+        }
+        else{
+          rgb_smokecolormap[4*n+3]=transparent_level_local;
+        }
+      }
+      break;
+    case FIRECOLORMAP_CONSTRAINT:
+      if(smoke_render_option==RENDER_SLICE){
+        valmin = 0.0;
+        valmax = hrrpuv_max_smv;
+        valcut = global_hrrpuv_cutoff;
+      }
+      else{
+        valmin = temperature_min;
+        valmax = temperature_max;
+        valcut = temperature_cutoff;
+      }
+      for(n=0;n<nrgb_full;n++){
+        int n2;
 
-    n2=CLAMP(n,1,nrgb_full-2);
-    rgb_smokecolormap[4*n]=fire_cb[3*n2];
-    rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
-    rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
-    if(alpha[n]==0){
-      rgb_smokecolormap[4*n+3]=0.0;
-    }
-    else{
-      rgb_smokecolormap[4*n+3]=transparent_level_local;
-    }
+        val = valmin + (float)n*(valmax-valmin)/(float)nrgb_full;
+        if(valmin<=val&&val<=valcut){
+          n2 = 128*(val-valmin)/(valcut-valmin);
+        }
+        else{
+          n2 = 128 + 128*(val-valcut)/(valmax-valcut);
+        }
+
+        n2=CLAMP(n,1,nrgb_full-2);
+        rgb_smokecolormap[4*n]=fire_cb[3*n2];
+        rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
+        rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
+        if(alpha[n]==0){
+          rgb_smokecolormap[4*n+3]=0.0;
+        }
+        else{
+          rgb_smokecolormap[4*n+3]=transparent_level_local;
+        }
+      }
+      break;
+    case FIRECOLORMAP_NOCONSTRAINT:
+      for(n=0;n<nrgb_full;n++){
+        int n2;
+
+        n2=CLAMP(n,1,nrgb_full-2);
+        rgb_smokecolormap[4*n]=fire_cb[3*n2];
+        rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
+        rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
+        if(alpha[n]==0){
+          rgb_smokecolormap[4*n+3]=0.0;
+        }
+        else{
+          rgb_smokecolormap[4*n+3]=transparent_level_local;
+        }
+      }
+      break;
+    default:
+      ASSERT(0);
+      break;
   }
 }
 
-/* ------------------ updatecolors ------------------------ */
+/* ------------------ UpdateRGBColors ------------------------ */
 
 void UpdateRGBColors(int colorbar_index){
 

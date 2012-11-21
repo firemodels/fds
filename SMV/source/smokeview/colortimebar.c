@@ -803,14 +803,14 @@ void initdefaultcolorbars(void){
   cbi->nodehilight=0;
 
   cbi->index_node[0]=0;
-  cbi->rgb_node[0]=smoke_shade*255;
-  cbi->rgb_node[1]=smoke_shade*255;
-  cbi->rgb_node[2]=smoke_shade*255;
+  cbi->rgb_node[0]=smoke_albedo*255;
+  cbi->rgb_node[1]=smoke_albedo*255;
+  cbi->rgb_node[2]=smoke_albedo*255;
 
   cbi->index_node[1]=126;
-  cbi->rgb_node[3]=smoke_shade*255;
-  cbi->rgb_node[4]=smoke_shade*255;
-  cbi->rgb_node[5]=smoke_shade*255;
+  cbi->rgb_node[3]=smoke_albedo*255;
+  cbi->rgb_node[4]=smoke_albedo*255;
+  cbi->rgb_node[5]=smoke_albedo*255;
 
   cbi->index_node[2]=131;
   cbi->rgb_node[6]=fire_red;
