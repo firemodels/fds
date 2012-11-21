@@ -6009,11 +6009,11 @@ Section~\ref{info:heat_of_combustion} for more details on the heat of combustion
 The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpies of formation are known. For reactions with species that are not included in Table~\ref{tab:gasspecies}, there are several options to ensure that all of the enthalpies of formation are specified.
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
-You can specify unknown enthalpies on the {\ct SPEC} line in units of J/kmol:
+You can specify unknown enthalpies on the {\ct SPEC} line in units of kJ/mol:
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID = 'GLUCOSE', FORMULA = 'C62H12O6', ENTHALPY_OF_FORMATION=-1.297E-9 /
+&SPEC ID = 'GLUCOSE', FORMULA = 'C62H12O6', ENTHALPY_OF_FORMATION=-1.297E3 /
 \end{verbatim}
 \normalsize
 
