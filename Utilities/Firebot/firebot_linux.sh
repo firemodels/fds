@@ -252,16 +252,16 @@ fix_svn_properties()
    cd $FDS_SVNROOT
 
    # Delete all svn:executable properties
-   svn propdel svn:executable --recursive
+   svn propdel svn:executable --recursive &> /dev/null
 
    # Restore local executable property to svn-fix-props.pl
-   chmod +x Utilities/Subversion/svn-fix-props.pl
+   chmod +x Utilities/Subversion/svn-fix-props.pl &> /dev/null
 
    # Run svn-fix-props.pl script (fixes all SVN properties)
-   Utilities/Subversion/svn-fix-props.pl ./
+   Utilities/Subversion/svn-fix-props.pl ./ &> /dev/null
 
    # Commit back results
-   svn commit -m 'Firebot: Fix SVN properties throughout repository'
+   svn commit -m 'Firebot: Fix SVN properties throughout repository' &> /dev/null
 }
 
 #  =============================
