@@ -2423,7 +2423,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
    IF (SS%H_F == -2.E23_EB) THEN
       WRITE(LU_OUTPUT,'(A,A)')    '   Enthalpy of Formation (J/kg)     ','not specified'
    ELSE
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'   Enthalpy of Formation (J/kg)       ',SS%H_F/SPECIES(N)%MW
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'   Enthalpy of Formation (J/kg)       ',SS%H_F*1.E6_EB/SPECIES(N)%MW
    ENDIF
 ENDDO SPEC_LOOP
 
@@ -2446,18 +2446,18 @@ DO N=0,N_TRACKED_SPECIES
    ENDDO
    ITMP = NINT(TMPA)
    WRITE(LU_OUTPUT,'(A)') ' '
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (293 K): ',MU_Z(ITMP,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ',MU_Z( 500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ',MU_Z(1000,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ',MU_Z(1500,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (293 K): ', MU_Z(ITMP,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_Z( 500,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_Z(1000,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_Z(1500,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient (293 K): ', K_Z(ITMP,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_Z( 500,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_Z(1000,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_Z(1500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient (293 K): ',CP_Z(ITMP,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ',CP_Z( 500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ',CP_Z(1000,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ',CP_Z(1500,N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient (293 K): ', CP_Z(ITMP,N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_Z(1500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient (293 K): ', D_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
