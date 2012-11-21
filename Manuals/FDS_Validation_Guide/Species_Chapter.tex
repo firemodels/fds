@@ -216,19 +216,19 @@ Test No.  &  Air Speed (m/s)  &  Particle Diameter ($\mu$m)  \\ \hline \hline
 \label{Sippola_Aerosol_Deposition_Summary}
 \end{table}
 
-The particle deposition velocity, $V_d$, is determined from
-\be 
-   V_d = \frac{J_1 + J_2 + J_3 + J_4}{4 \; C_{avg}} 
+\noindent The particle deposition velocity, $V_d$, is determined from
+\be
+   V_d = \frac{J_1 + J_2 + J_3 + J_4}{4 \; C_{avg}}
 \ee
-$J_1$ through $J_4$ are the deposition fluxes for duct panels 1 through 4 (kg/m$^2$/s) given by
-\be 
-   J = \frac{m_{d}}{A_d \; \Delta t} 
+$J_1$ through $J_4$ are the deposition fluxes (kg/m$^2$/s) for duct panels 1 through 4 given by
+\be
+   J = \frac{m_{d}}{A_d \; \Delta t}
 \ee
 where $m_d$ is the mass of particles on the duct panel (kg), $A_d$ is the area of the duct panel (m$^2$),
-and $Delta t$ is the duration over which soot deposits on the plate (s). $C_{avg}$ is the average aerosol
+and $\Delta t$ is the duration over which soot deposits on the plate (s). $C_{avg}$ is the average aerosol
 concentration in the duct test section (kg/m$^3$) and is given by
-\be 
-   C_{avg} = \frac{C_{up} + C_{down}}{2} 
+\be
+   C_{avg} = \frac{C_{up} + C_{down}}{2}
 \ee
 Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured versus predicted deposition velocities.
 
@@ -323,30 +323,28 @@ Fig.~\ref{Beyler_Species} shows species predictions made by the two-step model c
 
 \subsection{NIST Reduced Scale Enclosure (RSE) Test Series, 1994}
 
-The RSE natural gas experiments were selected to assess the CO production capability rather than soot production.
-Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW,
-500~kW, and 600~kW.  The experiments were modeled using properties of the natural gas supplied to the test facility.
-The model geometry included the compartment interior along with a 0.6~m deep region outside the door.
-Fig.~\ref{NIST_RSE_1994_spec} shows the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Fig.~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measured values are from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.
+The RSE natural gas experiments were selected to assess the CO production capability rather than soot production. Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW, 500~kW, and 600~kW. The experiments were modeled using properties of the natural gas supplied to the test facility. The model geometry included the compartment interior along with a 0.6~m deep region outside the door. Figures~\ref{NIST_RSE_1994_spec1} and \ref{NIST_RSE_1994_spec1} show the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Figure~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measured values are from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Front} &
 \includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Rear} \\
 \includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Front} &
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Rear} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Front} &
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Rear}
 \end{tabular*}
+\caption[Summary of species concentrations in NIST Reduced Scale Enclosure experiments]{Summary of species concentrations in NIST Reduced Scale Enclosure experiments.}
+\label{NIST_RSE_1994_spec1}
 \end{figure}
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Front} &
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear} \\
 \includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_H2O_Front} &
-\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_H2O_Rear} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_H2O_Rear}
 \end{tabular*}
 \caption[Summary of species concentrations in NIST Reduced Scale Enclosure experiments]{Summary of species concentrations in NIST Reduced Scale Enclosure experiments.}
-\label{NIST_RSE_1994_spec}
+\label{NIST_RSE_1994_spec2}
 \end{figure}
 
 \begin{figure}[h!]
