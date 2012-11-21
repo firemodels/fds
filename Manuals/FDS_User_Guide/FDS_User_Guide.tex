@@ -6910,7 +6910,7 @@ parameters are given here:
       DIAMETER=1000., HEAT_OF_COMBUSTION=44500., SAMPLING_FACTOR=1 /
 
 &PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets',
-      FLOW_RATE=1.96, FLOW_RAMP='fuel', PARTICLE_VELOCITY=10.,
+      FLOW_RATE=1.97, FLOW_RAMP='fuel', PARTICLE_VELOCITY=10.,
       SPRAY_ANGLE=0.,30.   /
 &RAMP ID='fuel', T= 0.0, F=0.0  /
 &RAMP ID='fuel', T=20.0, F=1.0  /
@@ -6921,7 +6921,7 @@ parameters are given here:
 
 \noindent
 Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved via 2 nozzles flowing heptane at 1.96~L/min each:
-\be 2 \times 1.96 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 688 \;
+\be 2 \times 1.97 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 684 \;
 \frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
 \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW} \ee
 The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall
