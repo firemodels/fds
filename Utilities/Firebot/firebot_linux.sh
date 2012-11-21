@@ -27,9 +27,38 @@ FIREBOT_HOME_DIR="`pwd`"
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
 FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
 CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
-SVN_REVISION=$1
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
+
+function usage {
+echo "firebot.sh [ -q queue_name -r revision_number ]"
+echo "Runs Firebot V&V testing script"
+echo ""
+echo "Options"
+echo "-q queue_name - run cases using the queue queue_name"
+echo "     default: firebot"
+echo "-r revision_number - run cases using a specific SVN revision number"
+echo "     default: (none, latest SVN HEAD)"
+exit
+}
+
+QUEUE=firebot
+SVN_REVISION=
+while getopts 'hq:r:' OPTION
+do
+case $OPTION in
+  h)
+   usage;
+   ;;
+  q)
+   QUEUE="$OPTARG"
+   ;;
+  r)
+   SVN_REVISION="$OPTARG"
+   ;;
+esac
+done
+shift $(($OPTIND-1))
 
 #  ====================
 #  = End user warning =
@@ -349,7 +378,7 @@ run_verification_cases_short()
 
    # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on firebot queue)
    echo 'Running FDS verification cases (serial):' > $FIREBOT_DIR/output/stage3
-   ./Run_FDS_Cases.sh -c serial -d -q firebot >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -c serial -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_short_start
 
    # Wait some additional time for all cases to start
@@ -370,7 +399,7 @@ run_verification_cases_short()
 
    # Submit FDS verification cases and wait for them to start (run MPI cases in debug mode on firebot queue)
    echo 'Running FDS verification cases (MPI):' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_FDS_Cases.sh -c mpi -d -q firebot >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -c mpi -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_short_start
 
    # Wait some additional time for all cases to start
@@ -391,7 +420,7 @@ run_verification_cases_short()
 
    # Submit SMV verification cases and wait for them to start (run SMV cases in debug mode on firebot queue)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh -d -q firebot >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_short_start
 
    # Wait some additional time for all cases to start
@@ -534,13 +563,13 @@ run_verification_cases_long()
    # Start running all FDS verification cases (run all cases on firebot queue)
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh -q firebot >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_FDS_Cases.sh -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Start running all SMV verification cases (run all cases on firebot queue)
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh -q firebot >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_long_end
