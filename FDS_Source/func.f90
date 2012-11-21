@@ -2231,7 +2231,7 @@ SELECT CASE(DISTRIBUTION)
       DO J=1,NPT
          DI    = DMIN + (J-0.5_EB)*DD1
          RR(J) = 0.5_EB*DI
-         CNF(J) =  ERF(LOG(DI/DM)/(SQRT(2._EB)*SIGMA)+3._EB*SIGMA/sqrt(2._EB))
+         CNF(J) =  EXP(9._EB*SIGMA**2/2._EB)/(2._EB*DM**3)*(ERF(LOG(DI/DM)/(SQRT(2._EB)*SIGMA)+3._EB*SIGMA/sqrt(2._EB))+1)
       ENDDO
       CNF = CNF/CNF(NPT)
    CASE('ROSIN-RAMMLER')
