@@ -177,6 +177,7 @@ void Update_Smoke_Type(void){
     case RENDER_VOLUME:
       if(PANEL_slices!=NULL)PANEL_slices->close();
       if(PANEL_volume!=NULL)PANEL_volume->open();
+      break;
     default:
       ASSERT(0);
       break;
