@@ -2392,10 +2392,10 @@ READ_SMIX_LOOP: DO N=0,N_TRACKED_SPECIES
       IF (SPECIES(NS)%FORMULA(1:5)=='SPEC_') SM%VALID_ATOMS = .FALSE.
       SM%ATOMS = SM%ATOMS + SM%VOLUME_FRACTION(NS)*SPECIES(NS)%ATOMS !! *SM%ADJUST_NU ::term for potential non-normalized inputs
    ENDDO     
-   IF(SM%H_F <= -1.E21) THEN ! Checking if H_F is defined for all species in mixture
+   IF(SM%H_F <= -1.E21_EB) THEN ! Checking if H_F is defined for all species in mixture
       SM%H_F = SM%H_F
    ELSE
-      SM%H_F = SM%H_F/SM%MW
+      SM%H_F = SM%H_F*1.E6_EB/SM%MW
    ENDIF   
    SM%RCON = R0/SM%MW
 

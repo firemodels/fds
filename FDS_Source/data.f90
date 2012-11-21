@@ -2280,21 +2280,21 @@ SELECT CASE(GAS_NAME)
       SIGMA = 4.6_EB
       EPSOK = 560.2
       FORMULA = "C3H6O"
-      H_F= -218.5E6 ! NIST webbook
+      H_F= -218.5_EB ! NIST webbook
       ABSORBING = .TRUE.   
       IF (RADCAL_NAME=='null') RADCAL_NAME='MMA'      
    CASE('ACETYLENE')
       SIGMA = 4.033_EB
       EPSOK = 231.8_EB 
       FORMULA = 'C2H2'
-      H_F = 226.731E6_EB  
+      H_F = 226.731_EB  
       ABSORBING = .TRUE. 
       IF (RADCAL_NAME=='null') RADCAL_NAME='PROPYLENE'
    CASE('ACROLEIN') !Isopropanol as surrogate             
       SIGMA = 4.549_EB
       EPSOK = 576.7_EB 
       FORMULA = 'C3H4O'
-      H_F = -272.8E6_EB
+      H_F = -272.8_EB
       ABSORBING = .TRUE. 
       IF (RADCAL_NAME=='null') RADCAL_NAME='MMA'  
    CASE('AIR')             
@@ -2313,61 +2313,61 @@ SELECT CASE(GAS_NAME)
       EPSOK = 412.3
       FORMULA = 'C6H6'
       ABSORBING = .TRUE.       
-      H_F = 82.9E6 ! NIST webbook 
+      H_F = 82.9_EB ! NIST webbook 
       IF (RADCAL_NAME=='null') RADCAL_NAME='TOLUENE'      
    CASE('BUTANE')
       SIGMA = 4.687_EB
       EPSOK = 531.4_EB 
       ABSORBING = .TRUE.
       FORMULA = 'C4H10'
-      H_F = -125.6E6_EB
+      H_F = -125.6_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
    CASE('CARBON DIOXIDE')  
       SIGMA = 3.941_EB 
       EPSOK = 195.2_EB  
       ABSORBING = .TRUE.      
       FORMULA = 'CO2'
-      H_F = -393.513E6_EB
+      H_F = -393.513_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='CARBON DIOXIDE'
    CASE('CARBON MONOXIDE') 
       SIGMA = 3.690_EB 
       EPSOK = 91.7_EB  
       ABSORBING = .TRUE.
       FORMULA = 'CO'
-      H_F = -110.523E6_EB
+      H_F = -110.523_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='CARBON MONOXIDE'
    CASE('DODECANE') ! N-Heptane as surrogate
       SIGMA = 4.701_EB
       EPSOK = 205.78_EB
       FORMULA = 'C7H16'
-      H_F = -187.8E6_EB
+      H_F = -187.8_EB
       ABSORBING=.TRUE.  
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'      
    CASE('ETHANE')
       SIGMA = 4.443_EB
       EPSOK = 215.7_EB 
       FORMULA = 'C2H6'
-      H_F = -84.E6_EB  
+      H_F = -84._EB  
       ABSORBING = .TRUE.  
       IF (RADCAL_NAME=='null') RADCAL_NAME='ETHANE'
    CASE('ETHANOL')
       SIGMA = 4.530_EB
       EPSOK = 362.6_EB
       FORMULA='C2H5OH'
-      H_F = -234.E6_EB  
+      H_F = -234._EB  
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('ETHYLENE')        
       SIGMA = 4.163_EB 
       EPSOK = 224.7_EB 
       FORMULA = 'C2H4'
-      H_F = 52.47E6_EB
+      H_F = 52.47_EB
       ABSORBING = .TRUE.
       IF (RADCAL_NAME=='null') RADCAL_NAME='ETHYLENE'
    CASE('FORMALDEHYDE')!Methanol as surrogate        
       SIGMA = 3.626_EB 
       EPSOK = 481.8_EB 
       FORMULA = 'CH2O'
-      H_F = -115.90E6_EB
+      H_F = -115.90_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('HELIUM')          
       SIGMA = 2.551_EB 
@@ -2383,72 +2383,72 @@ SELECT CASE(GAS_NAME)
       SIGMA = 3.353_EB
       EPSOK = 449._EB
       FORMULA = 'HBr'
-      H_F = -36.44E6_EB  
+      H_F = -36.44_EB  
    CASE('HYDROGEN CHLORIDE')   
       SIGMA = 3.339_EB
       EPSOK = 344.7_EB
       FORMULA = 'HCl'
-      H_F = -92.31E6_EB  
+      H_F = -92.31_EB  
    CASE('HYDROGEN CYANIDE')   
       SIGMA = 3.63_EB
       EPSOK = 569.1_EB
       FORMULA = 'HCN'
-      H_F = 135.14E6_EB  
+      H_F = 135.14_EB  
     CASE('HYDROGEN FLUORIDE')   
       SIGMA = 3.148_EB
       EPSOK = 330._EB
       FORMULA = 'HF'
-      H_F = -272.55E6_EB  
+      H_F = -272.55_EB  
    CASE('ISOPROPANOL')
       SIGMA = 4.549_EB
       EPSOK = 576.7_EB 
       FORMULA = 'C3H7OH'
-      H_F = -272.8E6_EB  
+      H_F = -272.8_EB  
       ABSORBING = .TRUE.
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('METHANE')         
       SIGMA = 3.758_EB 
       EPSOK = 148.6_EB  
       FORMULA = 'CH4'
-      H_F = -74.873E6_EB
+      H_F = -74.873_EB
       ABSORBING = .TRUE.
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANE'
    CASE('METHANOL')
       SIGMA = 3.626_EB
       EPSOK = 481.8_EB
       FORMULA = 'CH3OH'
-      H_F = -205.E6_EB  
+      H_F = -205._EB  
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('N-DECANE')
       SIGMA = 5.233_EB
       EPSOK = 226.46_EB
       FORMULA = 'C10H22'
-      H_F = -249.7E6_EB  
+      H_F = -249.7_EB  
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('N-HEPTANE')
       SIGMA = 4.701_EB
       EPSOK = 205.78_EB
       FORMULA = 'C7H16'
-      H_F = -187.8E6_EB
+      H_F = -187.8_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('N-HEXANE')
       SIGMA = 5.949_EB
       EPSOK = 399.3_EB 
       FORMULA = 'C6H14'
-      H_F = -167.1E6_EB  
+      H_F = -167.1_EB  
       ABSORBING = .TRUE.
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('N-OCTANE')
       SIGMA = 4.892_EB
       EPSOK = 231.16_EB
       FORMULA = 'C8H18'
-      H_F = -208.7E6_EB
+      H_F = -208.7_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('NITRIC OXIDE')        
       SIGMA = 3.492_EB 
       EPSOK = 116.7_EB  
       FORMULA = 'NO'
-      H_F = 90.29E6_EB
+      H_F = 90.29_EB
    CASE('NITROGEN')        
       SIGMA = 3.798_EB 
       EPSOK = 71.4_EB
@@ -2458,12 +2458,12 @@ SELECT CASE(GAS_NAME)
       SIGMA = 3.922_EB 
       EPSOK = 204.88_EB  
       FORMULA = 'NO2'
-      H_F = 33.10E6_EB      
+      H_F = 33.10_EB      
    CASE('NITROUS OXIDE')
       SIGMA = 3.828_EB 
       EPSOK = 232.4_EB  
       FORMULA = 'N2O'
-      H_F = 82.05E6_EB      
+      H_F = 82.05_EB      
    CASE('OXYGEN')          
       SIGMA = 3.467_EB 
       EPSOK = 106.7_EB
@@ -2473,14 +2473,14 @@ SELECT CASE(GAS_NAME)
       SIGMA = 5.118_EB
       EPSOK = 237.1_EB
       FORMULA = 'C3H8' 
-      H_F = -104.7E6_EB 
+      H_F = -104.7_EB 
       ABSORBING = .TRUE.
       IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
    CASE('PROPYLENE')
       SIGMA = 4.678_EB
       EPSOK = 298.9_EB 
       FORMULA = 'C3H6'
-      H_F = 20.41E6_EB  
+      H_F = 20.41_EB  
       ABSORBING = .TRUE.  
       IF (RADCAL_NAME=='null') RADCAL_NAME='PROPYLENE'
    CASE('SOOT')        
@@ -2494,23 +2494,23 @@ SELECT CASE(GAS_NAME)
       SIGMA = 4.112_EB
       EPSOK = 335.4_EB 
       FORMULA = 'SO2'
-      H_F = -296.84E6_EB             
+      H_F = -296.84_EB             
    CASE('SULFUR HEXAFLUORIDE')
       SIGMA = 5.128_EB
       EPSOK = 222.1_EB 
       FORMULA = 'SF6'
-      H_F = -1220.47E6_EB       
+      H_F = -1220.47_EB       
    CASE('TOLUENE')   
       SIGMA = 5.698_EB
       EPSOK = 480._EB !Estimated from BENZENE
       FORMULA = 'C6H5CH3'
-      H_F = 50.1E6_EB  
+      H_F = 50.1_EB  
       IF (RADCAL_NAME=='null') RADCAL_NAME='TOLUENE'
    CASE('WATER VAPOR')     
       SIGMA = 2.641_EB 
       EPSOK = 809.1_EB  
       FORMULA = 'H2O'
-      H_F = -241.826E6_EB
+      H_F = -241.826_EB
       ABSORBING = .TRUE. 
       IF (RADCAL_NAME=='null') RADCAL_NAME='WATER VAPOR'
    CASE DEFAULT            
