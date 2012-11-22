@@ -78,7 +78,7 @@ shift $(($OPTIND-1))
 #  = End user warning =
 #  ====================
 
-if [[ RUN_AS_ANOTHER_USER ]] ; then
+if [[ $RUN_AS_ANOTHER_USER ]] ; then
 # Continue along
 :
 else
