@@ -31,7 +31,7 @@ ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
 
 function usage {
-echo "firebot.sh [ -q queue_name -r revision_number ]"
+echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username ]"
 echo "Runs Firebot V&V testing script"
 echo ""
 echo "Options"
@@ -41,12 +41,15 @@ echo "-r revision_number - run cases using a specific SVN revision number"
 echo "     default: (none, latest SVN HEAD)"
 echo "-s - skip fixing SVN properties"
 echo "     default: SKIP_SVN_PROPS is undefined (false)"
+echo "-u - specify SVN username to use"
+echo "     default: fds.firebot"
 exit
 }
 
 QUEUE=firebot
 SVN_REVISION=
-while getopts 'hq:r:s' OPTION
+SVN_USERNAME=fds.firebot
+while getopts 'hq:r:su:y' OPTION
 do
 case $OPTION in
   h)
@@ -61,6 +64,12 @@ case $OPTION in
   s)
    SKIP_SVN_PROPS=true
    ;;
+  u)
+   SVN_USERNAME="$OPTARG"
+   ;;
+  y)
+   RUN_AS_ANOTHER_USER=true
+   ;;
 esac
 done
 shift $(($OPTIND-1))
@@ -69,17 +78,22 @@ shift $(($OPTIND-1))
 #  = End user warning =
 #  ====================
 
-# Warn if running as user other than firebot
-if [[ `whoami` == "$FIREBOT_USERNAME" ]];
-   then
-      # Continue along
-      :
-   else
-      echo "Warning: You are running the Firebot script as an end user."
-      echo "This script can modify and erase your repository."
-      echo "If you wish to continue, edit the script and remove this warning."
-      echo "Terminating script."
-      exit
+if [[ RUN_AS_ANOTHER_USER ]] ; then
+# Continue along
+:
+else
+   # Warn if running as user other than firebot
+   if [[ `whoami` == "$FIREBOT_USERNAME" ]];
+      then
+         # Continue along
+         :
+      else
+         echo "Warning: You are running the Firebot script as an end user."
+         echo "This script can modify and erase your repository."
+         echo "If you wish to continue, edit the script and remove this warning."
+         echo "Terminating script."
+         exit
+   fi
 fi
 
 #  =============================================
@@ -212,7 +226,7 @@ clean_svn_repo()
    else
       echo "Downloading FDS repository:" >> $FIREBOT_DIR/output/stage1 2>&1
       cd $FIREBOT_HOME_DIR
-      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV --username fds.firebot >> $FIREBOT_DIR/output/stage1 2>&1
+      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV --username $SVN_USERNAME >> $FIREBOT_DIR/output/stage1 2>&1
    fi
 }
 
