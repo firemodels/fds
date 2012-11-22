@@ -39,12 +39,14 @@ echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: firebot"
 echo "-r revision_number - run cases using a specific SVN revision number"
 echo "     default: (none, latest SVN HEAD)"
+echo "-s - skip fixing SVN properties"
+echo "     default: SKIP_SVN_PROPS is undefined (false)"
 exit
 }
 
 QUEUE=firebot
 SVN_REVISION=
-while getopts 'hq:r:' OPTION
+while getopts 'hq:r:s' OPTION
 do
 case $OPTION in
   h)
@@ -55,6 +57,9 @@ case $OPTION in
    ;;
   r)
    SVN_REVISION="$OPTARG"
+   ;;
+  s)
+   SKIP_SVN_PROPS=true
    ;;
 esac
 done
@@ -1141,7 +1146,9 @@ update_and_compile_cfast
 clean_svn_repo
 do_svn_checkout
 check_svn_checkout
-fix_svn_properties
+if [[ ! $SKIP_SVN_PROPS ]] ; then
+   fix_svn_properties
+fi
 
 ### Stage 2a ###
 compile_fds_db
