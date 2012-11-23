@@ -3800,16 +3800,7 @@ Specifying {\ct HRRPUA} or {\ct MLRPUA} requires the use of the single, mixing-c
 \subsection{Special Topic: A Radially-Spreading Fire}
 \label{info:spread}
 
-Sometimes it is desired that a fire spread radially at some specified
-rate. Rather than trying to design material properties
-to achieve this, you can alternatively use a {\ct VENT} or a {\ct SURF} line in a special way.
-First, you need to add a {\ct SURF} line with
-a specified heat release rate, {\ct HRRPUA}, and an optional
-time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q}. Then, you can also specify {\ct XYZ} and {\ct SPREAD\_RATE} on either the {\ct VENT} or {\ct SURF} line.
-The fire is directed to start at the point {\ct XYZ} and spread
-radially at a rate of {\ct SPREAD\_RATE} (m/s). The optional ramp-up of the HRR begins at
-the time when the fire arrives at a given point.
-For example, the lines
+Sometimes it is desired that a fire spread radially at some specified rate. Rather than trying to obtain material properties to directly model the ignition and spread of the fire, you can specify the fire spread rate directly. First, you need to add a {\ct SURF} line with a specified heat release rate, {\ct HRRPUA}, and an optional time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q}. Then, you must specify {\ct XYZ} and {\ct SPREAD\_RATE} on either a {\ct VENT} or the same {\ct SURF} line. The fire is directed to start at the point {\ct XYZ} and spread radially at a rate of {\ct SPREAD\_RATE} (m/s). The optional ramp-up of the HRR begins at the time when the fire arrives at a given point. For example, the lines
 
 \footnotesize
 \begin{verbatim}
@@ -3823,20 +3814,12 @@ For example, the lines
 \normalsize
 
 \noindent
-create a rectangular patch at $z=0$ on which the fire starts at the
-point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell
-burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used in this
-construct to turn the burning on and off to simulate the consumption of fuel as the fire spreads radially. It should not
-be used to mimic the ``$t$-squared'' curve -- the whole point of the exercise is to mimic this curve in a more natural way.
-Eventually, the fire goes out as the ring grows past the boundary of the rectangle.
-Some trial and error is probably required to find the {\ct SPREAD\_RATE} that
-leads to a desired time history of the heat release rate.
+create a rectangular area via the {\ct VENT} line on which the fire starts at the point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used to turn the burning on and off to simulate the consumption of fuel as the fire spreads radially. It should not be used to mimic the ``$t$-squared'' curve -- the whole point of the exercise is to mimic this curve in a more natural way. Eventually, the fire goes out as the ring grows past the boundary of the rectangle. Some trial and error is probably required to find the {\ct SPREAD\_RATE} that leads to a desired time history of the heat release rate.
+
+If you desire that the fire spread over an area that is not confined to a flat plane, specify {\ct XYZ} and {\ct SPREAD\_RATE} on the {\ct SURF} line directly and then apply that {\ct SURF} line to the obstructions or particles over which you want the fire to spread. This technique can be useful for simulating the spread of fire through a cluttered space when the detailed properties of the materials are unknown, or when the uncertainties associated with modeling the pyrolysis of the solid fuels directly are too great.
 
 \begin{warning}
-If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware that the default start time of the radially spreading
-fire is {\ct T\_BEGIN}, not zero. This is also true of {\ct TAU\_Q}, but it is not true of {\ct RAMP\_Q}. Because this might be
-confusing, if you start the calculation at a time other than zero, do a quick test to ensure that the ramps or fire spread behave as
-expected.
+If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware that the default start time of the radially spreading fire is {\ct T\_BEGIN}, not zero. This is also true of {\ct TAU\_Q}, but it is not true of {\ct RAMP\_Q}. Because this might be confusing, if you start the calculation at a time other than zero, do a quick test to ensure that the ramps or fire spread behave as expected.
 \end{warning}
 
 
