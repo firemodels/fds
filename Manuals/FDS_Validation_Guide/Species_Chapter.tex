@@ -184,7 +184,7 @@ The large differences between model and measurement seen in the smoke data do no
 \subsection{Sippola Aerosol Deposition Experiments}
 
 A total of 16 aerosol deposition tests were conducted in a straight duct for 5 different
-particle sizes and 3 different air velocities. For the simulations, the aerosol species is tracked
+particle sizes (1 $\mu$m, 3 $\mu$m, 5 $\mu$m, 9 $\mu$m, and 16 $\mu$m) and 3 different air velocities (2.2 m/s, 5.3 m/s, and 9.0 m/s). For the simulations, the aerosol species is tracked
 explicitly and the aerosol deposition routines are enabled (refer to the Aerosol Deposition section
 in the FDS User Guide~\cite{FDS_Users_Guide} and FDS Technical Reference Guide~\cite{FDS_Math_Guide}
 for more details). A summary of the 16 tests is shown in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
@@ -192,25 +192,25 @@ for more details). A summary of the 16 tests is shown in Table~\ref{Sippola_Aero
 \begin{table}[h!]
 \caption{Summary of Sippola aerosol deposition experiments selected for model validation.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|}
 \hline
-Test No.  &  Air Speed (m/s)  &  Particle Diameter ($\mu$m)  \\ \hline \hline
-1         &  2.2              &  1.0                         \\ \hline
-2         &  2.2              &  2.8                         \\ \hline
-3         &  2.1              &  5.2                         \\ \hline
-4         &  2.2              &  9.1                         \\ \hline
-5         &  2.2              &  16                          \\ \hline
-6         &  5.3              &  1.0                         \\ \hline
-7         &  5.2              &  1.0                         \\ \hline
-8         &  5.2              &  3.1                         \\ \hline
-9         &  5.4              &  5.2                         \\ \hline
-10        &  5.3              &  9.8                         \\ \hline
-11        &  5.3              &  16                          \\ \hline
-12        &  9.0              &  1.0                         \\ \hline
-13        &  9.0              &  3.1                         \\ \hline
-14        &  8.8              &  5.4                         \\ \hline
-15        &  9.2              &  8.7                         \\ \hline
-16        &  9.1              &  15                          \\ \hline
+Test No.  &  Air Speed (m/s)  &  Particle Diameter ($\mu$m) &  Particle Density (kg/m$^3$)  \\ \hline \hline
+1         &  2.2              &  1.0                        &  1,350                        \\ \hline
+2         &  2.2              &  2.8                        &  1,170                        \\ \hline
+3         &  2.1              &  5.2                        &  1,210                        \\ \hline
+4         &  2.2              &  9.1                        &  1,030                        \\ \hline
+5         &  2.2              &  16                         &  950                          \\ \hline
+6         &  5.3              &  1.0                        &  1,350                        \\ \hline
+7         &  5.2              &  1.0                        &  1,350                        \\ \hline
+8         &  5.2              &  3.1                        &  1,170                        \\ \hline
+9         &  5.4              &  5.2                        &  1,210                        \\ \hline
+10        &  5.3              &  9.8                        &  1,030                        \\ \hline
+11        &  5.3              &  16                         &  950                          \\ \hline
+12        &  9.0              &  1.0                        &  1,350                        \\ \hline
+13        &  9.0              &  3.1                        &  1,170                        \\ \hline
+14        &  8.8              &  5.4                        &  1,210                        \\ \hline
+15        &  9.2              &  8.7                        &  1,030                        \\ \hline
+16        &  9.1              &  15                         &  950                          \\ \hline
 \end{tabular}
 \end{center}
 \label{Sippola_Aerosol_Deposition_Summary}
@@ -220,7 +220,7 @@ Test No.  &  Air Speed (m/s)  &  Particle Diameter ($\mu$m)  \\ \hline \hline
 \be
    V_d = \frac{J_1 + J_2 + J_3 + J_4}{4 \; C_{avg}}
 \ee
-$J_1$ through $J_4$ are the deposition fluxes (kg/m$^2$/s) for duct panels 1 through 4 given by
+$J_1$ through $J_4$ are the deposition fluxes (kg/m$^2$-s) for duct panels 1 through 4 given by
 \be
    J = \frac{m_{d}}{A_d \; \Delta t}
 \ee
@@ -230,7 +230,7 @@ concentration in the duct test section (kg/m$^3$) and is given by
 \be
    C_{avg} = \frac{C_{up} + C_{down}}{2}
 \ee
-Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured versus predicted deposition velocities.
+Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted deposition velocities.
 
 \begin{figure}[p]
 \begin{center}
