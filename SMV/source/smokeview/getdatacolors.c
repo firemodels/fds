@@ -1440,15 +1440,18 @@ void Update_Smokecolormap(int option){
       for(n=0;n<icut;n++){
         float n2,factor;
         int nn2;
+        float *fire1, *fire2;
 
         val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
         n2 = 128*(val-valmin)/(valcut-valmin);
-        n2 = CLAMP(n2,0,255); // 1,253
+        n2 = CLAMP(n2,1,253); 
         nn2 = (int)n2;
+        fire1 = fire_cb + 3*nn2;
+        fire2 = fire1 + 3;
         factor = n2 - nn2;
-        rgb_colormap[4*n]  =(1.0-factor)*fire_cb[3*nn2]  +factor*fire_cb[3*(nn2+1)];
-        rgb_colormap[4*n+1]=(1.0-factor)*fire_cb[3*nn2+1]+factor*fire_cb[3*(nn2+1)+1];
-        rgb_colormap[4*n+2]=(1.0-factor)*fire_cb[3*nn2+2]+factor*fire_cb[3*(nn2+1)+2];
+        rgb_colormap[4*n]  =(1.0-factor)*fire1[0]+factor*fire2[0];
+        rgb_colormap[4*n+1]=(1.0-factor)*fire1[1]+factor*fire2[1];
+        rgb_colormap[4*n+2]=(1.0-factor)*fire1[2]+factor*fire2[2];
         if(alpha[n]==0){
           rgb_colormap[4*n+3]=0.0;
         }
@@ -1458,16 +1461,19 @@ void Update_Smokecolormap(int option){
       }
       for(n=icut;n<MAXSMOKERGB;n++){
         float n2,factor;
-        int nn2;
+        int nn2,nn2p1;
+        float *fire1, *fire2;
 
         val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
         n2 = 128 + 128*(val-valcut)/(valmax-valcut);
-        n2 = CLAMP(n2,0,255); // 1,253
+        n2 = CLAMP(n2,1,253);
         nn2 = (int)n2;
+        fire1 = fire_cb + 3*nn2;
+        fire2 = fire1 + 3;
         factor = n2 - nn2;
-        rgb_colormap[4*n]  =(1.0-factor)*fire_cb[3*nn2]  +factor*fire_cb[3*(nn2+1)];
-        rgb_colormap[4*n+1]=(1.0-factor)*fire_cb[3*nn2+1]+factor*fire_cb[3*(nn2+1)+1];
-        rgb_colormap[4*n+2]=(1.0-factor)*fire_cb[3*nn2+2]+factor*fire_cb[3*(nn2+1)+2];
+        rgb_colormap[4*n]  =(1.0-factor)*fire1[0]+factor*fire2[0];
+        rgb_colormap[4*n+1]=(1.0-factor)*fire1[1]+factor*fire2[1];
+        rgb_colormap[4*n+2]=(1.0-factor)*fire1[2]+factor*fire2[2];
         if(alpha[n]==0){
           rgb_colormap[4*n+3]=0.0;
         }
@@ -1480,15 +1486,18 @@ void Update_Smokecolormap(int option){
       for(n=0;n<MAXSMOKERGB;n++){
         float n2,factor;
         int nn2;
+        float *fire1, *fire2;
 
         val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
         n2 = 255*(val-valmin)/(valmax-valmin);
         n2 = CLAMP(n2,1,253);
         nn2 = (int)n2;
         factor = n2 - nn2;
-        rgb_colormap[4*n]  =(1.0-factor)*fire_cb[3*nn2]  +factor*fire_cb[3*(nn2+1)];
-        rgb_colormap[4*n+1]=(1.0-factor)*fire_cb[3*nn2+1]+factor*fire_cb[3*(nn2+1)+1];
-        rgb_colormap[4*n+2]=(1.0-factor)*fire_cb[3*nn2+2]+factor*fire_cb[3*(nn2+1)+2];
+        fire1 = fire_cb + 3*nn2;
+        fire2 = fire1 + 3;
+        rgb_colormap[4*n]  =(1.0-factor)*fire1[0]+factor*fire2[0];
+        rgb_colormap[4*n+1]=(1.0-factor)*fire1[1]+factor*fire2[1];
+        rgb_colormap[4*n+2]=(1.0-factor)*fire1[2]+factor*fire2[2];
         if(alpha[n]==0){
           rgb_colormap[4*n+3]=0.0;
         }
@@ -1530,12 +1539,10 @@ void UpdateRGBColors(int colorbar_index){
   if(colorbarinfo!=NULL){
     unsigned char *alpha;
     colorbardata *cbi;
-    float *fire_cb;
 
     cbi = colorbarinfo + colorbartype;
 
     alpha = colorbarinfo[colorbartype].alpha;
-    fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
     for(n=0;n<nrgb_full;n++){
       rgb_full[n][0]=cbi->colorbar[3*n];
       rgb_full[n][1]=cbi->colorbar[3*n+1];

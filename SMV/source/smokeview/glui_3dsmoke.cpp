@@ -30,8 +30,6 @@ extern "C" void Smoke3d_CB(int var);
 #define FIRE_GREEN 2
 #define FIRE_BLUE 3
 #define FIRE_HALFDEPTH 4
-#define FIRE_ALPHA 5
-#define FIRE_CUTOFF 6
 #define GLOBAL_FIRE_CUTOFF 15
 #define SMOKE_SHADE 7
 #define SMOKE_COLORBAR_LIST 16
@@ -613,6 +611,7 @@ extern "C" void Smoke3d_CB(int var){
     break;
   case SMOKE_COLORBAR_LIST:
     SmokeColorBarMenu(fire_colorbar_index);
+    Update_Smokecolormap(smoke_render_option);
     updatemenu=1;
     break;
   case SMOKETEST:
@@ -652,14 +651,9 @@ extern "C" void Smoke3d_CB(int var){
     }
     glutPostRedisplay();
     force_redisplay=1;
+    Update_Smokecolormap(smoke_render_option);
     Idle_CB();
    break;  
-  case FIRE_CUTOFF:
-  case FIRE_ALPHA:
-    glutPostRedisplay();
-    force_redisplay=1;
-    Idle_CB();
-    break;
 #ifdef pp_GPU
   case SMOKE_RTHICK:
   
