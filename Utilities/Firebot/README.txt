@@ -87,13 +87,13 @@ MAILTO=""
 #  = Firebot build script =
 #  ========================
 
-# Run svn update at 9:50 PM to get latest verison of Firebot
-50 21 * * * cd ~/firebot ; svn revert * ; svn up
+# Run svn update at 11:50 PM to get latest verison of Firebot
+50 23 * * * cd ~/firebot ; svn revert * ; svn up
 
-# Run Firebot at 9:56 PM every night
+# Run Firebot at 11:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
 # The run-once script maintains a lock to prevent the script from running twice
-56 21 * * * run-one bash -lc firebot_linux.sh
+56 23 * * * run-one bash -lc firebot_linux.sh
 
 # ============================
 # = DiskHog disk space alert =
