@@ -5,7 +5,7 @@
 % Generate scatter plots.  Must first run dataplot.m to generate
 % saved_data and drange.
 %
-% [] = scatplot(saved_data,drange,[qrange])
+% [] = scatplot(saved_data,drange,qfil,plotfil)
 %
 % Arguments:
 %    saved_data - cell array of packed data, may be obtained by running
@@ -13,17 +13,16 @@
 %
 %    drange - obtained from (or input to) function dataplot.m
 %
-%    [optional] qrange - specify the range of lines to read from the
-%    scatterplot configuration file
+%    qfil - file containing the scatterplot parameters
+%
+%    plotdir - directory where the output files are to go
+%
 %
 % Dependencies:
 %    ../scripts/define_qrow_variables.m
 %
-% Example:
-%    From the Matlab/functions/ directory, type
-%    >> scatplot(saved_data,drange,3:4)
 
-function [] = scatplot(saved_data,drange,varargin)
+function [] = scatplot(saved_data,drange,qfil,plotdir,varargin)
 
 % unpack data
 Save_Quantity         = saved_data{:,1};
@@ -38,11 +37,9 @@ Save_Dep_Title        = saved_data{:,9};
 Save_Error_Tolerance  = saved_data{:,10};
 Save_Metric_Type      = saved_data{:,11};
 
-qfil = varargin{1};
-
 % If a statistics output file is specified, then enable statistics throughout
-if length(varargin) >= 2
-    output_file = varargin{2};
+if length(varargin) >= 1
+    output_file = varargin{1};
     stats_output = 1;
 else
     stats_output = 0;
@@ -74,8 +71,7 @@ if stats_output == 1
     stat_line = 2;
 end
 
-for j=qrange
-    if j>length(Q); break; end
+for j=2:length(Q);
     
     define_qrow_variables
     
@@ -236,7 +232,7 @@ for j=qrange
         set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
         set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
         display(['Printing scatter plot ',num2str(j),'...'])
-        print(gcf,'-dpdf',[pwd,'/../../Manuals/',Plot_Filename])
+        print(gcf,'-dpdf',[plotdir,Plot_Filename])
         
     else
         display(['No data for scatter plot ',Scatter_Plot_Title])
@@ -246,6 +242,7 @@ for j=qrange
 end
 
 % Write all statistics from output_stats to csv output_file
+
 if stats_output == 1
     [rows, cols] = size(output_stats);
     fid = fopen(output_file, 'w');
