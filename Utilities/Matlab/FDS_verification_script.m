@@ -45,7 +45,7 @@ qfil = [pwd,'/FDS_verification_scatterplot_inputs.csv'];
 output_file = [pwd,'/FDS_verification_scatterplot_output.csv'];
 
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
-scatplot(saved_data,drange,qfil,output_file)
+scatplot(saved_data,drange,qfil,plotdir,output_file)
 
 % Special cases
  
