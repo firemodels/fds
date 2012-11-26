@@ -816,6 +816,8 @@ check_fds_pictures()
 #  = Stage 7 - Matlab =
 #  ====================
 
+# Functions to check for an available Matlab license
+
 run_matlab_license_test()
 {
    # Run simple test to see if Matlab license is available
