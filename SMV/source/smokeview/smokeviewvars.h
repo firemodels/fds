@@ -25,9 +25,6 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
-SVEXTERN float SVDECL(global_hrrpuv_min,0.0);
-SVEXTERN float SVDECL(global_hrrpuv_cutoff,200.0);
-SVEXTERN float SVDECL(global_hrrpuv_max,1200.0);
 SVEXTERN int SVDECL(render_state,0);
 SVEXTERN int SVDECL(script_frame_start,-1), SVDECL(script_frame_skip,-1);
 SVEXTERN int SVDECL(skip_render_frames,0);
@@ -1046,6 +1043,7 @@ SVEXTERN int ntexturestack;
 
 SVEXTERN float SVDECL(opacity_factor,3.0),SVDECL(mass_extinct,8700.0);
 SVEXTERN float SVDECL(temperature_min,20.0),SVDECL(temperature_cutoff,700.0),SVDECL(temperature_max,1200.0);
+SVEXTERN float SVDECL(global_hrrpuv_min,0.0),SVDECL(global_hrrpuv_cutoff,200.0),SVDECL(global_hrrpuv_max,1200.0);
 SVEXTERN int SVDECL(volbw,0);
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;

@@ -36,6 +36,7 @@ extern "C" void Smoke3d_CB(int var);
 #define SMOKE_SHADE 7
 #define SMOKE_COLORBAR_LIST 16
 #define FIRECOLORMAP_TYPE 17
+#define SHOW_FIRECOLORMAP 25
 #ifdef pp_GPU
 #define SMOKE_RTHICK 8
 #else
@@ -269,7 +270,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   PANEL_colormap = glui_3dsmoke->add_panel_to_panel(PANEL_overall,_("Color"));
 
-  glui_3dsmoke->add_checkbox_to_panel(PANEL_colormap,"Show colormap",&show_firecolormap);
+  glui_3dsmoke->add_checkbox_to_panel(PANEL_colormap,"Show colormap",&show_firecolormap,SHOW_FIRECOLORMAP,Smoke3d_CB);
   RADIO_use_colormap = glui_3dsmoke->add_radiogroup_to_panel(PANEL_colormap,&firecolormap_type,FIRECOLORMAP_TYPE,Smoke3d_CB);
   RADIOBUTTON_direct=glui_3dsmoke->add_radiobutton_to_group(RADIO_use_colormap,"Use specified color, opacity, albedo");
   RADIOBUTTON_constraint=glui_3dsmoke->add_radiobutton_to_group(RADIO_use_colormap,"Use colormap with constraints");
@@ -314,12 +315,12 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   SPINNER_hrrpuv_cutoff->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
 
   PANEL_colormap2a = glui_3dsmoke->add_rollout_to_panel(PANEL_colormap2,"Temperature (C)");
-  SPINNER_temperature_min=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2a,_("min"),GLUI_SPINNER_FLOAT,
-    &temperature_min,TEMP_MIN,Smoke3d_CB);
-  SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2a,_("cutoff"),GLUI_SPINNER_FLOAT,
-    &temperature_cutoff,TEMP_CUTOFF,Smoke3d_CB);
   SPINNER_temperature_max=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2a,_("max"),GLUI_SPINNER_FLOAT,
     &temperature_max,TEMP_MAX,Smoke3d_CB);
+  SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2a,_("cutoff"),GLUI_SPINNER_FLOAT,
+    &temperature_cutoff,TEMP_CUTOFF,Smoke3d_CB);
+  SPINNER_temperature_min=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2a,_("min"),GLUI_SPINNER_FLOAT,
+    &temperature_min,TEMP_MIN,Smoke3d_CB);
 
   Smoke3d_CB(TEMP_MIN);
   Smoke3d_CB(TEMP_CUTOFF);
@@ -492,20 +493,32 @@ extern "C" void Smoke3d_CB(int var){
     define_volsmoke_textures();
     break;
 #endif
+  case SHOW_FIRECOLORMAP:
+    Update_Smokecolormap();
+    if(show_firecolormap==1){
+      show_glui_colorbar();
+    }
+    else{
+      hide_glui_colorbar();
+    }
+    break;
   case TEMP_MIN:
     temp_min = 20.0;
     temp_max = (float)(10.0*(int)(temperature_cutoff/10.0)-10.0);
     SPINNER_temperature_min->set_float_limits(temp_min,temp_max);
+    Update_Smokecolormap();
     break;
   case TEMP_CUTOFF:
     temp_min = (float)(10*(int)(temperature_min/10.0) + 10.0);
     temp_max = (float)(10*(int)(temperature_max/10.0) - 10.0);
     SPINNER_temperature_cutoff->set_float_limits(temp_min,temp_max);
+    Update_Smokecolormap();
     break;
   case TEMP_MAX:
     temp_min = (float)(10*(int)(temperature_cutoff/10.0)+10.0);
     temp_max = 1800.0;
     SPINNER_temperature_max->set_float_limits(temp_min,temp_max);
+    Update_Smokecolormap();
     break;
   case LOAD_COMPRESSED_DATA:
     if(load_volcompressed==1){
@@ -591,11 +604,12 @@ extern "C" void Smoke3d_CB(int var){
       SPINNER_smoke3d_fire_halfdepth->enable();
 
       fire_colorbar_index_save=fire_colorbar_index;
-      SmokeColorBarMenu((int)(fire_custom_colorbar-colorbarinfo));
+      //SmokeColorBarMenu((int)(fire_custom_colorbar-colorbarinfo));
     }
     if(LISTBOX_smoke_colorbar->get_int_val()!=fire_colorbar_index){
       LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);
     }
+    Update_Smokecolormap();
     break;
   case SMOKE_COLORBAR_LIST:
     SmokeColorBarMenu(fire_colorbar_index);
@@ -618,13 +632,14 @@ extern "C" void Smoke3d_CB(int var){
     glutPostRedisplay();
     force_redisplay=1;
     Idle_CB();
+    Update_Smokecolormap();
     break;
   case FIRE_RED:
   case FIRE_GREEN:
   case FIRE_BLUE:
   case SMOKE_SHADE:
     glutPostRedisplay();
-    if(fire_custom_colorbar!=NULL){
+    /*if(fire_custom_colorbar!=NULL){
       unsigned char *rgb_node;
 
       rgb_node=fire_custom_colorbar->rgb_node;
@@ -642,8 +657,9 @@ extern "C" void Smoke3d_CB(int var){
       rgb_node[11]=fire_blue;
       remapcolorbar(fire_custom_colorbar);
       UpdateRGBColors(COLORBAR_INDEX_NONE);
-    }
+    }*/
     force_redisplay=1;
+    Update_Smokecolormap();
     Idle_CB();
     break;
   case FIRE_HALFDEPTH:

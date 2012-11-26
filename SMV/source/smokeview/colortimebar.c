@@ -190,6 +190,7 @@ void drawcolorbarpath(void){
   unsigned char *rrgb;
   colorbardata *cbi;
   unsigned char *rgbleft;
+  float vval_min, vval_cutoff, vval_max;
 
   cbi = colorbarinfo + colorbartype;
   glPointSize(5.0);
@@ -243,14 +244,14 @@ void drawcolorbarpath(void){
     glEnd();
   }
 
-
   {
-    float zbot, dzpoint, xdenorm, ydenorm, zdenorm;
+    float xdenorm, ydenorm, zdenorm;
 
     glPointSize(10.0);
     glBegin(GL_POINTS);
     for(i=0;i<cbi->nnodes;i++){
       float *rgbi;
+      float dzpoint;
 
       rgbi = cbi->colorbar+3*cbi->index_node[i];
       dzpoint = (float)cbi->index_node[i]/255.0;
@@ -267,6 +268,7 @@ void drawcolorbarpath(void){
     glTranslatef(-xbar0,-ybar0,-zbar0);
     for(i=0;i<cbi->nnodes;i++){
       char cbuff[1024];
+      float dzpoint;
 
       dzpoint = (float)cbi->index_node[i]/255.0;
       zdenorm = DENORMALIZE_Z(dzpoint);
@@ -277,6 +279,7 @@ void drawcolorbarpath(void){
     glLineWidth(5.0);
     if(colorbarpoint>=0&&colorbarpoint<cbi->nnodes){
       float *rgbi;
+      float dzpoint;
 
       glPointSize(20.0);
       glBegin(GL_POINTS);
@@ -286,50 +289,75 @@ void drawcolorbarpath(void){
       glVertex3f(1.5,0.0,dzpoint);
       glEnd();
     }
+    if(show_firecolormap==1){
+      char vvlabel[255];
 
-    glBegin(GL_QUAD_STRIP);
-    for(i=0;i<256;i++){
+      if(smoke_render_option==RENDER_SLICE){
+        vval_min=global_hrrpuv_min;
+        vval_cutoff=global_hrrpuv_cutoff;
+        vval_max=global_hrrpuv_max;
+      }
+      else{
+        vval_min=temperature_min;
+        vval_cutoff=temperature_cutoff;
+        vval_max=temperature_max;
+      }
+      sprintf(vvlabel,"%0.f",vval_min);
+      output3Text(foregroundcolor, 1.0,0.0,0.0,vvlabel);
+
+      sprintf(vvlabel,"%0.f",vval_cutoff);
+      output3Text(foregroundcolor, 1.0,0.0,(vval_cutoff-vval_min)/(vval_max-vval_min),vvlabel);
+
+      sprintf(vvlabel,"%0.f",vval_max);
+      output3Text(foregroundcolor, 1.0,0.0,1.0,vvlabel);
+    }
+
+    glBegin(GL_TRIANGLES);
+    for(i=1;i<255;i++){
       float *rgbi;
+      float zbot, ztop;
 
-      rgbi=cbi->colorbar+3*i;
+      if(show_firecolormap==1){
+        rgbi=rgb_smokecolormap+4*i;
+      }
+      else{
+        rgbi=cbi->colorbar+3*i;
+      }
       glColor3fv(rgbi);
       zbot=(float)i/255.0;
+      ztop=(float)(i+1)/255.0;
+
       glVertex3f(1.1,0.0,zbot);
       glVertex3f(1.3,0.0,zbot);
-    }
-    glEnd();
+      glVertex3f(1.3,0.0,ztop);
 
-    glBegin(GL_QUAD_STRIP);
-    for(i=0;i<256;i++){
-      float *rgbi;
-
-      rgbi=cbi->colorbar+3*i;
-      glColor3fv(rgbi);
-      zbot=(float)i/255.0;
-      glVertex3f(1.3,0.0,zbot);
       glVertex3f(1.1,0.0,zbot);
-    }
-    glEnd();
-    glBegin(GL_QUAD_STRIP);
-    for(i=0;i<256;i++){
-      float *rgbi;
+      glVertex3f(1.3,0.0,ztop);
+      glVertex3f(1.3,0.0,zbot);
 
-      rgbi=cbi->colorbar+3*i;
-      glColor3fv(rgbi);
-      zbot=(float)i/255.0;
+      glVertex3f(1.1,0.0,zbot);
+      glVertex3f(1.3,0.0,ztop);
+      glVertex3f(1.1,0.0,ztop);
+
+      glVertex3f(1.1,0.0,zbot);
+      glVertex3f(1.1,0.0,ztop);
+      glVertex3f(1.3,0.0,ztop);
+
       glVertex3f(1.2,-0.1,zbot);
       glVertex3f(1.2, 0.1,zbot);
-    }
-    glEnd();
-    glBegin(GL_QUAD_STRIP);
-    for(i=0;i<256;i++){
-      float *rgbi;
+      glVertex3f(1.2, 0.1,ztop);
 
-      rgbi=cbi->colorbar+3*i;
-      glColor3fv(rgbi);
-      zbot=(float)i/255.0;
-      glVertex3f(1.2, 0.1,zbot);
       glVertex3f(1.2,-0.1,zbot);
+      glVertex3f(1.2, 0.1,ztop);
+      glVertex3f(1.2, 0.1,zbot);
+
+      glVertex3f(1.2,-0.1,zbot);
+      glVertex3f(1.2, 0.1,ztop);
+      glVertex3f(1.2,-0.1,ztop);
+
+      glVertex3f(1.2,-0.1,zbot);
+      glVertex3f(1.2,-0.1,ztop);
+      glVertex3f(1.2, 0.1,ztop);
     }
     glEnd();
   }
