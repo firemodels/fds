@@ -324,6 +324,7 @@ void _Sniff_Errors(char *whereat);
 #define MAXFRAMES 5001
 #define PI 3.14159265359f
 #define MAXRGB 256
+#define MAXSMOKERGB 1024
 #define StepOn 10000
 #define RenderCancel 999
 #define RENDERONCE_SINGLE 998

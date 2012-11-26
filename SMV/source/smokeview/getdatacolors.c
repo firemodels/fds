@@ -1312,15 +1312,19 @@ void Update_Texturebar(void){
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_iso) ");
 
-  glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_smokecolormap) ");
+  glBindTexture(GL_TEXTURE_1D,slicesmoke_colormap_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_slicesmokecolormap);
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_slicesmokecolormap) ");
+
+  glBindTexture(GL_TEXTURE_1D,volsmoke_colormap_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_volsmokecolormap) ");
 
 #ifdef pp_GPU
   if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
     glActiveTexture(GL_TEXTURE2);
-    glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
-    SNIFF_ERRORS("Update_Texturebar - glTexSubImage1D (rgb_smokecolormap) ");
+    glTexSubImage1D(GL_TEXTURE_1D,0,0,MAXSMOKERGB,GL_RGBA,GL_FLOAT, rgb_volsmokecolormap);
+    SNIFF_ERRORS("Update_Texturebar - glTexSubImage1D (rgb_volsmokecolormap) ");
     glActiveTexture(GL_TEXTURE0);
   }
   if(gpuactive==1&&SHOW_gslice_data==1){
@@ -1374,7 +1378,7 @@ void initrgb(void){
 
 /* ------------------ Update_Smokecolormap ------------------------ */
 
-void Update_Smokecolormap(void){
+void Update_Smokecolormap(int option){
   int n;
   float transparent_level_local=1.0;
   unsigned char *alpha;
@@ -1383,19 +1387,22 @@ void Update_Smokecolormap(void){
   float val, valmin, valmax, valcut;
   int xxx;
   int icut;
+  float *rgb_colormap;
   
-  if(smoke_render_option==RENDER_SLICE){
+  if(option==RENDER_SLICE){
     valmin=global_hrrpuv_min;
     valcut=global_hrrpuv_cutoff;
     valmax=global_hrrpuv_max;
+    rgb_colormap = rgb_slicesmokecolormap;
   }
   else{
     valmin=temperature_min;
     valcut=temperature_cutoff;
     valmax=temperature_max;
+    rgb_colormap = rgb_volsmokecolormap;
   }
-  icut = 255*((valcut-valmin)/(valmax-valmin));
-  icut = CLAMP(icut,2,253);
+  icut = (MAXSMOKERGB-1)*((valcut-valmin)/(valmax-valmin));
+  icut = CLAMP(icut,2,(MAXSMOKERGB-3));
   
   if(use_transparency_data==1)transparent_level_local=transparent_level;
 
@@ -1407,75 +1414,86 @@ void Update_Smokecolormap(void){
   switch (firecolormap_type){
     case FIRECOLORMAP_DIRECT:
       for(n=0;n<icut;n++){
-        rgb_smokecolormap[4*n]=smoke_albedo;
-        rgb_smokecolormap[4*n+1]=smoke_albedo;;
-        rgb_smokecolormap[4*n+2]=smoke_albedo;;
+        rgb_colormap[4*n]=smoke_albedo;
+        rgb_colormap[4*n+1]=smoke_albedo;;
+        rgb_colormap[4*n+2]=smoke_albedo;;
         if(alpha[n]==0){
-          rgb_smokecolormap[4*n+3]=0.0;
+          rgb_colormap[4*n+3]=0.0;
         }
         else{
-          rgb_smokecolormap[4*n+3]=transparent_level_local;
+          rgb_colormap[4*n+3]=transparent_level_local;
         }
       }
-      for(n=icut;n<nrgb_full;n++){
-        rgb_smokecolormap[4*n]=(float)fire_red/255.0;
-        rgb_smokecolormap[4*n+1]=(float)fire_green/255.0;
-        rgb_smokecolormap[4*n+2]=(float)fire_blue/255.0;
+      for(n=icut;n<MAXSMOKERGB;n++){
+        rgb_colormap[4*n]=(float)fire_red/255.0;
+        rgb_colormap[4*n+1]=(float)fire_green/255.0;
+        rgb_colormap[4*n+2]=(float)fire_blue/255.0;
         if(alpha[n]==0){
-          rgb_smokecolormap[4*n+3]=0.0;
+          rgb_colormap[4*n+3]=0.0;
         }
         else{
-          rgb_smokecolormap[4*n+3]=transparent_level_local;
+          rgb_colormap[4*n+3]=transparent_level_local;
         }
       }
       break;
     case FIRECOLORMAP_CONSTRAINT:
       for(n=0;n<icut;n++){
-        int n2;
+        float n2,factor;
+        int nn2;
 
-        val = valmin + (float)n*(valmax-valmin)/255.0;
+        val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
         n2 = 128*(val-valmin)/(valcut-valmin);
-        n2 = CLAMP(n2,1,254);
-        rgb_smokecolormap[4*n]=fire_cb[3*n2];
-        rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
-        rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
+        n2 = CLAMP(n2,0,255); // 1,253
+        nn2 = (int)n2;
+        factor = n2 - nn2;
+        rgb_colormap[4*n]  =(1.0-factor)*fire_cb[3*nn2]  +factor*fire_cb[3*(nn2+1)];
+        rgb_colormap[4*n+1]=(1.0-factor)*fire_cb[3*nn2+1]+factor*fire_cb[3*(nn2+1)+1];
+        rgb_colormap[4*n+2]=(1.0-factor)*fire_cb[3*nn2+2]+factor*fire_cb[3*(nn2+1)+2];
         if(alpha[n]==0){
-          rgb_smokecolormap[4*n+3]=0.0;
+          rgb_colormap[4*n+3]=0.0;
         }
         else{
-          rgb_smokecolormap[4*n+3]=transparent_level_local;
+          rgb_colormap[4*n+3]=transparent_level_local;
         }
       }
-      for(n=icut;n<nrgb_full;n++){
-        int n2;
+      for(n=icut;n<MAXSMOKERGB;n++){
+        float n2,factor;
+        int nn2;
 
-        val = valmin + (float)n*(valmax-valmin)/255.0;
+        val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
         n2 = 128 + 128*(val-valcut)/(valmax-valcut);
-        n2 = CLAMP(n2,1,254);
-        rgb_smokecolormap[4*n]=fire_cb[3*n2];
-        rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
-        rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
+        n2 = CLAMP(n2,0,255); // 1,253
+        nn2 = (int)n2;
+        factor = n2 - nn2;
+        rgb_colormap[4*n]  =(1.0-factor)*fire_cb[3*nn2]  +factor*fire_cb[3*(nn2+1)];
+        rgb_colormap[4*n+1]=(1.0-factor)*fire_cb[3*nn2+1]+factor*fire_cb[3*(nn2+1)+1];
+        rgb_colormap[4*n+2]=(1.0-factor)*fire_cb[3*nn2+2]+factor*fire_cb[3*(nn2+1)+2];
         if(alpha[n]==0){
-          rgb_smokecolormap[4*n+3]=0.0;
+          rgb_colormap[4*n+3]=0.0;
         }
         else{
-          rgb_smokecolormap[4*n+3]=transparent_level_local;
+          rgb_colormap[4*n+3]=transparent_level_local;
         }
       }
       break;
     case FIRECOLORMAP_NOCONSTRAINT:
-      for(n=0;n<nrgb_full;n++){
-        int n2;
+      for(n=0;n<MAXSMOKERGB;n++){
+        float n2,factor;
+        int nn2;
 
-        n2=CLAMP(n,1,nrgb_full-2);
-        rgb_smokecolormap[4*n]=fire_cb[3*n2];
-        rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
-        rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
+        val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
+        n2 = 255*(val-valmin)/(valmax-valmin);
+        n2 = CLAMP(n2,1,253);
+        nn2 = (int)n2;
+        factor = n2 - nn2;
+        rgb_colormap[4*n]  =(1.0-factor)*fire_cb[3*nn2]  +factor*fire_cb[3*(nn2+1)];
+        rgb_colormap[4*n+1]=(1.0-factor)*fire_cb[3*nn2+1]+factor*fire_cb[3*(nn2+1)+1];
+        rgb_colormap[4*n+2]=(1.0-factor)*fire_cb[3*nn2+2]+factor*fire_cb[3*(nn2+1)+2];
         if(alpha[n]==0){
-          rgb_smokecolormap[4*n+3]=0.0;
+          rgb_colormap[4*n+3]=0.0;
         }
         else{
-          rgb_smokecolormap[4*n+3]=transparent_level_local;
+          rgb_colormap[4*n+3]=transparent_level_local;
         }
       }
       break;
@@ -1529,7 +1547,8 @@ void UpdateRGBColors(int colorbar_index){
         rgb_full[n][3]=transparent_level_local;
       }
     }
-    Update_Smokecolormap();
+    Update_Smokecolormap(RENDER_SLICE);
+    Update_Smokecolormap(RENDER_VOLUME);
   }
   else{
     for(n=0;n<nrgb_full;n++){

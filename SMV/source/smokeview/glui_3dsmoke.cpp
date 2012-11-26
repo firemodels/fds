@@ -494,7 +494,7 @@ extern "C" void Smoke3d_CB(int var){
     break;
 #endif
   case SHOW_FIRECOLORMAP:
-    Update_Smokecolormap();
+    Update_Smokecolormap(smoke_render_option);
     if(show_firecolormap==1){
       show_glui_colorbar();
     }
@@ -506,19 +506,19 @@ extern "C" void Smoke3d_CB(int var){
     temp_min = 20.0;
     temp_max = (float)(10.0*(int)(temperature_cutoff/10.0)-10.0);
     SPINNER_temperature_min->set_float_limits(temp_min,temp_max);
-    Update_Smokecolormap();
+    Update_Smokecolormap(smoke_render_option);
     break;
   case TEMP_CUTOFF:
     temp_min = (float)(10*(int)(temperature_min/10.0) + 10.0);
     temp_max = (float)(10*(int)(temperature_max/10.0) - 10.0);
     SPINNER_temperature_cutoff->set_float_limits(temp_min,temp_max);
-    Update_Smokecolormap();
+    Update_Smokecolormap(smoke_render_option);
     break;
   case TEMP_MAX:
     temp_min = (float)(10*(int)(temperature_cutoff/10.0)+10.0);
     temp_max = 1800.0;
     SPINNER_temperature_max->set_float_limits(temp_min,temp_max);
-    Update_Smokecolormap();
+    Update_Smokecolormap(smoke_render_option);
     break;
   case LOAD_COMPRESSED_DATA:
     if(load_volcompressed==1){
@@ -609,7 +609,7 @@ extern "C" void Smoke3d_CB(int var){
     if(LISTBOX_smoke_colorbar->get_int_val()!=fire_colorbar_index){
       LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);
     }
-    Update_Smokecolormap();
+    Update_Smokecolormap(smoke_render_option);
     break;
   case SMOKE_COLORBAR_LIST:
     SmokeColorBarMenu(fire_colorbar_index);
@@ -632,34 +632,15 @@ extern "C" void Smoke3d_CB(int var){
     glutPostRedisplay();
     force_redisplay=1;
     Idle_CB();
-    Update_Smokecolormap();
+    Update_Smokecolormap(smoke_render_option);
     break;
   case FIRE_RED:
   case FIRE_GREEN:
   case FIRE_BLUE:
   case SMOKE_SHADE:
     glutPostRedisplay();
-    /*if(fire_custom_colorbar!=NULL){
-      unsigned char *rgb_node;
-
-      rgb_node=fire_custom_colorbar->rgb_node;
-      rgb_node[0]=smoke_albedo*255;
-      rgb_node[1]=smoke_albedo*255;
-      rgb_node[2]=smoke_albedo*255;
-      rgb_node[3]=smoke_albedo*255;
-      rgb_node[4]=smoke_albedo*255;
-      rgb_node[5]=smoke_albedo*255;
-      rgb_node[6]=fire_red;
-      rgb_node[7]=fire_green;
-      rgb_node[8]=fire_blue;
-      rgb_node[9]=fire_red;
-      rgb_node[10]=fire_green;
-      rgb_node[11]=fire_blue;
-      remapcolorbar(fire_custom_colorbar);
-      UpdateRGBColors(COLORBAR_INDEX_NONE);
-    }*/
     force_redisplay=1;
-    Update_Smokecolormap();
+    Update_Smokecolormap(smoke_render_option);
     Idle_CB();
     break;
   case FIRE_HALFDEPTH:

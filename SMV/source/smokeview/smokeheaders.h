@@ -5,7 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
-EXTERNCPP void Update_Smokecolormap(void);
+EXTERNCPP void Update_Smokecolormap(int option);
 #ifdef pp_SUPERMESH
 EXTERNCPP void define_volsmoke_textures(void);
 #endif

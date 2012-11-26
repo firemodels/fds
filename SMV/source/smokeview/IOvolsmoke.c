@@ -131,17 +131,15 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
       temperature = *vv;
     }
     if(temperature<temperature_cutoff){
-      dtemp=(temperature_cutoff-temperature_min)/128;
-      GETINDEX(index,temperature,temperature_min,dtemp,128);
+      dtemp=(temperature_cutoff-temperature_min)/(MAXSMOKERGB/2);
+      GETINDEX(index,temperature,temperature_min,dtemp,(MAXSMOKERGB/2));
     }
     else{
-      dtemp=(temperature_max-temperature_cutoff)/128.0;
-      GETINDEX(index,temperature,temperature_cutoff,dtemp,128);
-      index+=128;
+      dtemp=(temperature_max-temperature_cutoff)/(MAXSMOKERGB/2);
+      GETINDEX(index,temperature,temperature_cutoff,dtemp,(MAXSMOKERGB/2));
+      index+=(MAXSMOKERGB/2);
     }
-//    dtemp=(1200.0-20.0)/256;
-//    GETINDEX(index,temperature,20.0,dtemp,256);
-    *smoke_color=rgb_smokecolormap+4*index;
+    *smoke_color=rgb_volsmokecolormap+4*index;
   }
   else{
     *smoke_color=getcolorptr(black);
@@ -176,7 +174,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
       vv = smokedata_local + IJKNODE(i+1,j+1,k+1);
       soot_density = *vv;
     }
-    if(firedata_local!=NULL&&index>128)soot_density*=5.0;
+    if(firedata_local!=NULL&&index>MAXSMOKERGB/2)soot_density*=5.0;
     *smoke_tran = exp(-kfactor*soot_density*dstep);
   }
 }
@@ -2077,11 +2075,10 @@ void init_volsmoke_texture(mesh *meshi){
     glActiveTexture(GL_TEXTURE2);
     glGenTextures(1,&volsmoke_colormap_id);
     glBindTexture(GL_TEXTURE_1D,volsmoke_colormap_id);
-    glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
+    glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
   }
 
 #ifndef pp_GPUDEPTH
@@ -2192,11 +2189,10 @@ void init_volsmoke_supertexture(supermesh *smesh){
     glActiveTexture(GL_TEXTURE2);
     glGenTextures(1,&volsmoke_colormap_id);
     glBindTexture(GL_TEXTURE_1D,volsmoke_colormap_id);
-    glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
+    glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
   }
 
 #ifndef pp_GPUDEPTH
