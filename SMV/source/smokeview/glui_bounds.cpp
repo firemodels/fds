@@ -19,7 +19,6 @@ extern "C" char glui_bounds_revision[]="$Revision$";
 
 #include "string_util.h"
 #include "smokeviewvars.h"
-#include "MALLOC.h"
 
 extern "C" void set_memcheck(int index);
 extern "C" void colorbar_global2local(void);

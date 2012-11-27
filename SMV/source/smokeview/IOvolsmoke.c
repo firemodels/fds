@@ -979,7 +979,7 @@ void drawsmoke3dVOL(void){
           yy=meshi->y1;
         }
         for(i=0;i<ibar;i++){
-          float xmid, zmid;
+          float xmid;
 
           x[0] = xplt[i];
           x[1] = xplt[i+1];

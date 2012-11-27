@@ -1385,7 +1385,6 @@ void Update_Smokecolormap(int option){
   colorbardata *cbi;
   float *fire_cb;
   float val, valmin, valmax, valcut;
-  int xxx;
   int icut;
   float *rgb_colormap;
   
@@ -1461,7 +1460,7 @@ void Update_Smokecolormap(int option){
       }
       for(n=icut;n<MAXSMOKERGB;n++){
         float n2,factor;
-        int nn2,nn2p1;
+        int nn2;
         float *fire1, *fire2;
 
         val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
