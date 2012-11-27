@@ -1,17 +1,17 @@
 One water droplet evaporates in a box until it reaches the saturation point.
 This case tests conservation of mass and energy.
 
-&HEAD CHID='water_evaporation_2', TITLE='Water Evaporation Test, SVN $Revision: 7540 $' / 
+&HEAD CHID='water_evaporation_2', TITLE='Water Evaporation Test, SVN $Revision$' / 
 
 &MESH IJK=4,4,4, XB=0.0,0.4,0.0,0.4,0.0,0.4 / 
 
 &TIME T_END=50000.0/ 
 
-&MISC TMPA=500., GVEC=0,0,0, STRATIFICATION=.FALSE./
+&MISC TMPA=500., GVEC=0,0,0, STRATIFICATION=.FALSE., HUMIDITY=0.0,Y_CO2_INFTY=0./
 
 &RADI RADIATION=.FALSE./
 
-&SPEC ID='WATER VAPOR', MASS_FRACTION_0=0.0/
+&SPEC ID='WATER VAPOR'/
 
 &SURF ID='WALL', ADIABATIC=.TRUE., COLOR='SILVER',DEFAULT=.TRUE. /
 
