@@ -31,7 +31,7 @@ ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
 
 function usage {
-echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username ]"
+echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -y ]"
 echo "Runs Firebot V&V testing script"
 echo ""
 echo "Options"
@@ -43,6 +43,8 @@ echo "-s - skip fixing SVN properties"
 echo "     default: SKIP_SVN_PROPS is undefined (false)"
 echo "-u - specify SVN username to use"
 echo "     default: fds.firebot"
+echo "-y - run Firebot as any user (warning!)"
+echo "     default: (none)"
 exit
 }
 
@@ -89,8 +91,8 @@ else
          :
       else
          echo "Warning: You are running the Firebot script as an end user."
-         echo "This script can modify and erase your repository."
-         echo "If you wish to continue, edit the script and remove this warning."
+         echo "This script will definitely modify and/or erase your repository."
+         echo "If you wish to continue, run Firebot with the -y option at your own risk."
          echo "Terminating script."
          exit
    fi
