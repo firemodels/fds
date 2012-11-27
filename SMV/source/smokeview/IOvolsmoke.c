@@ -545,7 +545,7 @@ void compute_all_smokecolors(void){
     dx = x[1] - x[0];
     dy = y[1] - y[0];
     dz = z[1] - z[0];
-    dstep = sqrt(dx*dx+dy*dy+dz*dz);
+    dstep = sqrt(dx*dx+dy*dy+dz*dz)/2.0;
     
     if(vr->smokeslice==NULL)continue;
     for(iwall=-3;iwall<=3;iwall++){
