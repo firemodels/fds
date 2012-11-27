@@ -884,41 +884,80 @@ void drawsmoke3dVOL(void){
         n10 = 4*(kbar+1);
         n11 = 4*(1 + kbar+1);
         for(i=0;i<jbar;i++){
+          float ymid;
+
           y[0] = yplt[i];
           y[1] = yplt[i+1];
+          ymid = (y[0]+y[1])/2.0;
           for(j=0;j<kbar;j++){
+            float zmid;
+            float colormid[4];
+
             z[0] = zplt[j];
             z[1] = zplt[j+1];
+            zmid = (z[0]+z[1])/2.0;
+            colormid[0] = (smokecolor[n00]+  smokecolor[n11]+  smokecolor[n10]+  smokecolor[n01])/4.0;
+            colormid[1] = (smokecolor[n00+1]+smokecolor[n11+1]+smokecolor[n10+1]+smokecolor[n01+1])/4.0;
+            colormid[2] = (smokecolor[n00+2]+smokecolor[n11+2]+smokecolor[n10+2]+smokecolor[n01+2])/4.0;
+            colormid[3] = (smokecolor[n00+3]+smokecolor[n11+3]+smokecolor[n10+3]+smokecolor[n01+3])/4.0;
 
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4fv(smokecolor+n00);
               glVertex3f(xx,y[0],z[0]);
-              glColor4fv(smokecolor+n10);
-              glVertex3f(xx,y[1],z[0]);
+              glColor4fv(colormid);
+              glVertex3f(xx,ymid,zmid);
+              glColor4fv(smokecolor+n01);
+              glVertex3f(xx,y[0],z[1]);
+
+              glColor4fv(smokecolor+n01);
+              glVertex3f(xx,y[0],z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xx,ymid,zmid);
               glColor4fv(smokecolor+n11);
               glVertex3f(xx,y[1],z[1]);
 
-              glColor4fv(smokecolor+n00);
-              glVertex3f(xx,y[0],z[0]);
               glColor4fv(smokecolor+n11);
               glVertex3f(xx,y[1],z[1]);
-              glColor4fv(smokecolor+n01);
-              glVertex3f(xx,y[0],z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xx,ymid,zmid);
+              glColor4fv(smokecolor+n10);
+              glVertex3f(xx,y[1],z[0]);
+
+              glColor4fv(smokecolor+n10);
+              glVertex3f(xx,y[1],z[0]);
+              glColor4fv(colormid);
+              glVertex3f(xx,ymid,zmid);
+              glColor4fv(smokecolor+n00);
+              glVertex3f(xx,y[0],z[0]);
             }
             else{
               glColor4fv(smokecolor+n00);
               glVertex3f(xx,y[0],z[0]);
-              glColor4fv(smokecolor+n11);
-              glVertex3f(xx,y[1],z[1]);
-              glColor4fv(smokecolor+n10);
-              glVertex3f(xx,y[1],z[0]);
+              glColor4fv(smokecolor+n01);
+              glVertex3f(xx,y[0],z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xx,ymid,zmid);
 
-              glColor4fv(smokecolor+n00);
-              glVertex3f(xx,y[0],z[0]);
               glColor4fv(smokecolor+n01);
               glVertex3f(xx,y[0],z[1]);
               glColor4fv(smokecolor+n11);
               glVertex3f(xx,y[1],z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xx,ymid,zmid);
+
+              glColor4fv(smokecolor+n11);
+              glVertex3f(xx,y[1],z[1]);
+              glColor4fv(smokecolor+n10);
+              glVertex3f(xx,y[1],z[0]);
+              glColor4fv(colormid);
+              glVertex3f(xx,ymid,zmid);
+
+              glColor4fv(smokecolor+n10);
+              glVertex3f(xx,y[1],z[0]);
+              glColor4fv(smokecolor+n00);
+              glVertex3f(xx,y[0],z[0]);
+              glColor4fv(colormid);
+              glVertex3f(xx,ymid,zmid);
             }
             smokecolor+=4;
           }
@@ -940,40 +979,79 @@ void drawsmoke3dVOL(void){
           yy=meshi->y1;
         }
         for(i=0;i<ibar;i++){
+          float xmid, zmid;
+
           x[0] = xplt[i];
           x[1] = xplt[i+1];
+          xmid = (x[0]+x[1])/2.0;
           for(j=0;j<kbar;j++){
+            float zmid;
+            float colormid[4];
+
             z[0] = zplt[j];
             z[1] = zplt[j+1];
+            zmid = (z[0]+z[1])/2.0;
+            colormid[0] = (smokecolor[n00]+  smokecolor[n11]+  smokecolor[n10]+  smokecolor[n01])/4.0;
+            colormid[1] = (smokecolor[n00+1]+smokecolor[n11+1]+smokecolor[n10+1]+smokecolor[n01+1])/4.0;
+            colormid[2] = (smokecolor[n00+2]+smokecolor[n11+2]+smokecolor[n10+2]+smokecolor[n01+2])/4.0;
+            colormid[3] = (smokecolor[n00+3]+smokecolor[n11+3]+smokecolor[n10+3]+smokecolor[n01+3])/4.0;
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4fv(smokecolor+n00);
               glVertex3f(x[0],yy,z[0]);
-              glColor4fv(smokecolor+n11);
-              glVertex3f(x[1],yy,z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xmid,yy,zmid);
               glColor4fv(smokecolor+n10);
               glVertex3f(x[1],yy,z[0]);
 
-              glColor4fv(smokecolor+n00);
-              glVertex3f(x[0],yy,z[0]);
-              glColor4fv(smokecolor+n01);
-              glVertex3f(x[0],yy,z[1]);
+              glColor4fv(smokecolor+n10);
+              glVertex3f(x[1],yy,z[0]);
+              glColor4fv(colormid);
+              glVertex3f(xmid,yy,zmid);
               glColor4fv(smokecolor+n11);
               glVertex3f(x[1],yy,z[1]);
+
+              glColor4fv(smokecolor+n11);
+              glVertex3f(x[1],yy,z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xmid,yy,zmid);
+              glColor4fv(smokecolor+n01);
+              glVertex3f(x[0],yy,z[1]);
+
+              glColor4fv(smokecolor+n01);
+              glVertex3f(x[0],yy,z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xmid,yy,zmid);
+              glColor4fv(smokecolor+n00);
+              glVertex3f(x[0],yy,z[0]);
             }
             else{
               glColor4fv(smokecolor+n00);
               glVertex3f(x[0],yy,z[0]);
               glColor4fv(smokecolor+n10);
               glVertex3f(x[1],yy,z[0]);
+              glColor4fv(colormid);
+              glVertex3f(xmid,yy,zmid);
+
+              glColor4fv(smokecolor+n10);
+              glVertex3f(x[1],yy,z[0]);
               glColor4fv(smokecolor+n11);
               glVertex3f(x[1],yy,z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xmid,yy,zmid);
 
-              glColor4fv(smokecolor+n00);
-              glVertex3f(x[0],yy,z[0]);
               glColor4fv(smokecolor+n11);
               glVertex3f(x[1],yy,z[1]);
               glColor4fv(smokecolor+n01);
               glVertex3f(x[0],yy,z[1]);
+              glColor4fv(colormid);
+              glVertex3f(xmid,yy,zmid);
+
+              glColor4fv(smokecolor+n01);
+              glVertex3f(x[0],yy,z[1]);
+              glColor4fv(smokecolor+n00);
+              glVertex3f(x[0],yy,z[0]);
+              glColor4fv(colormid);
+              glVertex3f(xmid,yy,zmid);
             }
             smokecolor+=4;
           }
@@ -995,40 +1073,82 @@ void drawsmoke3dVOL(void){
           zz=meshi->z1;
         }
         for(i=0;i<ibar;i++){
+          float xmid;
+
           x[0] = xplt[i];
           x[1] = xplt[i+1];
+          xmid = (x[0]+x[1])/2.0;
           for(j=0;j<jbar;j++){
+            float ymid;
+            float colormid[4];
+
             y[0] = yplt[j];
             y[1] = yplt[j+1];
+            ymid = (y[0]+y[1])/2.0;
+            colormid[0] = (smokecolor[n00]+  smokecolor[n11]+  smokecolor[n10]+  smokecolor[n01])/4.0;
+            colormid[1] = (smokecolor[n00+1]+smokecolor[n11+1]+smokecolor[n10+1]+smokecolor[n01+1])/4.0;
+            colormid[2] = (smokecolor[n00+2]+smokecolor[n11+2]+smokecolor[n10+2]+smokecolor[n01+2])/4.0;
+            colormid[3] = (smokecolor[n00+3]+smokecolor[n11+3]+smokecolor[n10+3]+smokecolor[n01+3])/4.0;
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4fv(smokecolor+n00);
               glVertex3f(x[0],y[0],zz);
               glColor4fv(smokecolor+n10);
               glVertex3f(x[1],y[0],zz);
+              glColor4fv(colormid);
+              glVertex3f(xmid,ymid,zz);
+
+
+              glColor4fv(smokecolor+n10);
+              glVertex3f(x[1],y[0],zz);
               glColor4fv(smokecolor+n11);
               glVertex3f(x[1],y[1],zz);
+              glColor4fv(colormid);
+              glVertex3f(xmid,ymid,zz);
 
-              glColor4fv(smokecolor+n00);
-              glVertex3f(x[0],y[0],zz);
               glColor4fv(smokecolor+n11);
               glVertex3f(x[1],y[1],zz);
               glColor4fv(smokecolor+n01);
               glVertex3f(x[0],y[1],zz);
+              glColor4fv(colormid);
+              glVertex3f(xmid,ymid,zz);
+
+              glColor4fv(smokecolor+n01);
+              glVertex3f(x[0],y[1],zz);
+              glColor4fv(smokecolor+n00);
+              glVertex3f(x[0],y[0],zz);
+              glColor4fv(colormid);
+              glVertex3f(xmid,ymid,zz);
             }
             else{
               glColor4fv(smokecolor+n00);
               glVertex3f(x[0],y[0],zz);
-              glColor4fv(smokecolor+n11);
-              glVertex3f(x[1],y[1],zz);
+              glColor4fv(colormid);
+              glVertex3f(xmid,ymid,zz);
               glColor4fv(smokecolor+n10);
               glVertex3f(x[1],y[0],zz);
 
-              glColor4fv(smokecolor+n00);
-              glVertex3f(x[0],y[0],zz);
-              glColor4fv(smokecolor+n01);
-              glVertex3f(x[0],y[1],zz);
+
+              glColor4fv(smokecolor+n10);
+              glVertex3f(x[1],y[0],zz);
+              glColor4fv(colormid);
+              glVertex3f(xmid,ymid,zz);
               glColor4fv(smokecolor+n11);
               glVertex3f(x[1],y[1],zz);
+
+              glColor4fv(smokecolor+n11);
+              glVertex3f(x[1],y[1],zz);
+              glColor4fv(colormid);
+              glVertex3f(xmid,ymid,zz);
+              glColor4fv(smokecolor+n01);
+              glVertex3f(x[0],y[1],zz);
+
+
+              glColor4fv(smokecolor+n01);
+              glVertex3f(x[0],y[1],zz);
+              glColor4fv(colormid);
+              glVertex3f(xmid,ymid,zz);
+              glColor4fv(smokecolor+n00);
+              glVertex3f(x[0],y[0],zz);
             }
             smokecolor+=4;
           }
