@@ -2467,6 +2467,7 @@ void Idle_CB(void){
 void setScreenSize(int *width, int *height){
   if(width!=NULL){
     screenWidth=*width;
+    if(screenWidth%2==1)screenWidth++;
   }
   if(height!=NULL){
     screenHeight=*height;
