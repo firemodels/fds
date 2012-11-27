@@ -1120,7 +1120,7 @@ The solution of Eq.~(\ref{BL_ODE}) is the Blasius solution (see \cite{Panton:1})
 
 The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform $\delta x = L/N_x$, $\delta z =H/N_z$ in each direction, and $N_x = 1.5 N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are {\ct OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ kg/m$^3$, $\mu = 0.001$ kg/m/s.
 
-Figure \ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. It is seen that the FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure \ref{blasius} (right) shows root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$ m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by 
+Figure \ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. It is seen that the FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure \ref{blasius} (right) shows root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$ m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by
 \begin{equation}
 \label{error_l2norm_bl}
 \varepsilon \equiv \sqrt{ \frac{1}{N_z} \sum_{k=1}^{N_z} \left[ u_{k} - u_{B,k} \right]^2 } \,\mbox{,}
@@ -1193,7 +1193,7 @@ In Figure \ref{fig_heated_channel}, FDS results are compared to DNS data for mea
 \label{eqn_friction_temperature}
 T_{\tau} \equiv \frac{\langle \dot{q}_w^{''} \rangle}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
 \end{equation}
-where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times. 
+where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times.
 
 As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the SGS scalar transport model.
 \begin{figure}[h]
@@ -1931,9 +1931,9 @@ The radiative heat flux is monitored on the wall that is opposite to the hot wal
 \item[Fuel] (heptane) droplets.
 \item[(Relatively) Opaque] particles with refractive index $\hbox{m} = 1.5+0.5 \,i$.
 \end{description}
-In addition, the different methods to specify the refractive index are tested: 
-For water and fuel, the FDS internal tables are used. For transparent droplets, 
-constant values are used. For opaque droplets, a radiative property table is used. 
+In addition, the different methods to specify the refractive index are tested:
+For water and fuel, the FDS internal tables are used. For transparent droplets,
+constant values are used. For opaque droplets, a radiative property table is used.
 In each case, 10~g of non-evaporating, monodisperse, 100~$\mu$m particles with 1,000~kg/m$^3$ density are placed inside the cube.  The resulting heat
 fluxes are plotted in the figure below. The transparent particles do not attenuate the radiation, and the relatively opaque particles
 give the highest attenuation. The heat fluxes through water and fuel droplets fall between the two extremes.
@@ -2070,13 +2070,13 @@ mass of the three combustion products. The figure compares the simple chemistry 
 This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. In the infinite-rate case, the rate becomes limited by the species concentrations of the reactants that have mixed. For finite-rate reactions, the rate is dependent on factors such as local species concentration and temperature:
 
 \begin{equation}\label{eq:Arrheniusratemode}
-\frac{\d \phi_\F}{\d t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)  
+\frac{\d \phi_\F}{\d t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)
 \end{equation}
 More detailed discussion on the combustion routines can be found in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 \subsection{Mixing-Controlled Reactions (\texorpdfstring{\bf reactionrate\_EDC}{reactionrate\_EDC})}
 
-The cases presented in the section are designed to examine species evolutions for reactions of varying complexity using the EDC model with infinitely fast chemistry. The first test case is a one-step methane reaction that occurs in a constant volume, adiabatic ``reactor'' with a fixed mixing time of $\tau_{mix}=0.125$~s. Each computational cell contains a stoichiometric mixture of fuel and air. In this problem ``air'' is defined to be 21\% oxygen and 79\% nitrogen by volume. 
+The cases presented in the section are designed to examine species evolutions for reactions of varying complexity using the EDC model with infinitely fast chemistry. The first test case is a one-step methane reaction that occurs in a constant volume, adiabatic ``reactor'' with a fixed mixing time of $\tau_{mix}=0.125$~s. Each computational cell contains a stoichiometric mixture of fuel and air. In this problem ``air'' is defined to be 21\% oxygen and 79\% nitrogen by volume.
 \begin{equation}\label{eq:1step_methane}
 \mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O}
 \end{equation}
@@ -2096,7 +2096,7 @@ In addition to species, we want to compare FDS predictions for temperature and p
 where $P$ represents the products, $R$ represents the reactants, and $\overline{u}_{\alpha}=\overline{h}_{\alpha}-\overline{R}T$. The total enthalpy, $\overline{h}_{\alpha}$, is defined as the sum of the enthalpy of formation ($\overline{h}_{f}^{\circ}$) and sensible enthalpy ($\Delta \overline{h}$) for each of the $\alpha$ species. Assuming the products behave like an ideal gas, the final pressure can be found using the equation of state for an ideal gas:
 \begin{equation}\label{eq:ideal_gas}
 PV = n\overline{R}T
-\end{equation}  
+\end{equation}
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_temp} &
@@ -2312,19 +2312,19 @@ The mixture fraction output quantity is valid for simple one-step reactions of t
 \begin{equation}\label{eq:methane_ex2}
 \underbrace{\mathrm{CH_4}}_{fuel} + \underbrace{\mathrm{2\,(O_2 + 3.76\,N_2)}}_{oxidizer} \rightarrow  \underbrace{\mathrm{CO_2 + 2\, H_2O + 7.52\,N_2}}_{products}
 \end{equation}
-The simulation results are compared to state relationships which govern temperature and species as a function of mixture fraction \cite{Turns:1996}. The species state relations are governed by two sets of equations based on whether the mixture fraction ($f$) falls inside the flame sheet (fuel rich) or outside the flame sheet (fuel lean).  For fuel rich combustion ($f_{stoic} < f \le 1$): 
+The simulation results are compared to state relationships which govern temperature and species as a function of mixture fraction \cite{Turns:1996}. The species state relations are governed by two sets of equations based on whether the mixture fraction ($f$) falls inside the flame sheet (fuel rich) or outside the flame sheet (fuel lean).  For fuel rich combustion ($f_{stoic} < f \le 1$):
 \begin{align}\label{eq:mix_relate_rich}
 Y_{fuel} &= \frac{f-f_{stoich}}{1-f_{stoich}} \\
 Y_{ox} &= 0 \\
 Y_{prod} &= \frac{1-f}{1-f_{stoich}}
 \end{align}
-For fuel lean combustion ($0 \le f < f_{stoich}$): 
+For fuel lean combustion ($0 \le f < f_{stoich}$):
 \begin{align}\label{eq:mix_relate_lean}
 Y_{fuel} &= 0 \\
 Y_{ox} &= 1- \frac{f}{f_{stoich}} \\
 Y_{prod} &= \frac{f}{f_{stoich}}
 \end{align}
-At stoichiometric conditions, the species mass fractions are the same whether approaching from fuel lean or fuel rich: $Y_{fuel} = 0$, $Y_{ox}=0$, and $Y_{prod}=1$. Fig.~\ref{fig:burke_schumann_spec} shows the comparison between the final FDS lumped species concentrations (fuel, oxidizer, and products) and state relation results as a function of mixture fraction. 
+At stoichiometric conditions, the species mass fractions are the same whether approaching from fuel lean or fuel rich: $Y_{fuel} = 0$, $Y_{ox}=0$, and $Y_{prod}=1$. Fig.~\ref{fig:burke_schumann_spec} shows the comparison between the final FDS lumped species concentrations (fuel, oxidizer, and products) and state relation results as a function of mixture fraction.
 
 \begin{figure}[h!]
 \begin{center}
@@ -2334,7 +2334,7 @@ At stoichiometric conditions, the species mass fractions are the same whether ap
 \label{fig:burke_schumann_spec}
 \end{figure}
 
-The state relationship for temperature is dependent upon the mixture fraction, the appropriate definition of $Y_{fuel}(f)$, the heat of combustion, and the specific heat. The specific heat, $c_p$, for each species is set to be a constant 1~kJ/kg\,K as defined by Turns \cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to 0, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) instead needs to be based on $c_v$. We use the  following relationship $c_v = c_p - R/MW$ to determine $c_v$. 
+The state relationship for temperature is dependent upon the mixture fraction, the appropriate definition of $Y_{fuel}(f)$, the heat of combustion, and the specific heat. The specific heat, $c_p$, for each species is set to be a constant 1~kJ/kg\,K as defined by Turns \cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to 0, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) instead needs to be based on $c_v$. We use the  following relationship $c_v = c_p - R/MW$ to determine $c_v$.
 \begin{equation}\label{eq:mix_relate_temp}
 T = (f-Y_{fuel})\frac{\Delta h_{c}}{c_{v}} + f(T_{fuel,i}-T_{ox,i}) + T_{ox,i}
 \end{equation}
@@ -2353,7 +2353,7 @@ The molecular weight of the species were not set to be uniform, so the average m
 \section{Extinction Model ({\bf extinction})}
 \label{Extinct}
 
-The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1600 K. 
+The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1600 K.
 
 Here, we examine a 10 $\times$ 10 array of cases: varying initial temperature from 300 K to 1875 K and initial fuel (methane) mass fraction from 0.05 to 0.95. The oxidizer is air which is assumed to be 23 \% oxygen  and 77 \% nitrogen by mass. A simple one-step methane reaction is used to govern combustion:
 \begin{equation}\label{eq:methane_ex}
@@ -2591,7 +2591,7 @@ devices.
 
 \clearpage
 
-\section{Simple Heat Conduction Through a Solid Slab (\texorpdfstring{{\bf heat\_conduction}}{heat\_conduction})}
+\section{Heat Conduction Through a Solid Slab (\texorpdfstring{{\bf heat\_conduction}}{heat\_conduction})}
 
 Analytical solutions of transient, one-dimensional heat conduction through a slab can be found in Refs.~\cite{Drysdale:1} and \cite{Carslaw:1}. Four
 cases are examined here. In each, a slab of thickness $L=0.1$~m is exposed on one face to an air temperature of $T_g=120$~$^\circ$C. The other face
@@ -2688,6 +2688,29 @@ flow conditions in different regions of the box and numerical error due to node 
 \caption[The {\bf thermocouples} test case]{Comparison of thermally thin and thick heat conduction into a small sphere.}
 \label{thermocouples}
 \end{figure}
+
+
+\clearpage
+
+\section{Heat Conduction through Insulated Steel (\texorpdfstring{{\bf insulated\_steel\_plate}}{insulated\_steel\_plate})}
+
+In this example, a 1~cm thick steel plate is coated on each side with 2~cm thick insulation material. The steel and insulation have constant thermal properties and the heat transfer coefficient is fixed at 10~W/m$^2$/K. One side of the plate is exposed to a 480~$^\circ$C gas while the other side is exposed to ambient temperature (20~$^\circ$C). The plate is heated for 10~h and the steady-state temperature profile is shown in Fig.~\ref{insulated_steel_plate}. The heat flux through the plate is given by:
+\be 
+   \dot{q}'' = \frac{ T_{\hbox{\tiny hot}} - T_{\hbox{\tiny cold}} }{ 2/h + \sum_{i=1}^3 L_i/k_i } 
+\ee
+where $h$ is the heat transfer coefficient, $L_i$ is the layer thickness, and $k_i$ is the thermal conductivity of the layer. 
+The heat flux through each layer is the same, and the steady-state solution can be obtained by solving for the temperature drop across each. Note that the position of the symbols in Fig.~\ref{insulated_steel_plate} indicates the default finite difference noding of the solid.
+
+\begin{figure}[ht]
+\noindent
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/insulated_steel_plate}
+\end{center}
+\caption[The {\bf insulated\_steel\_plate} test case]{Steady-state temperature profile within an insulated steel plate.}
+\label{insulated_steel_plate}
+\end{figure}
+
+
 
 
 
@@ -3724,7 +3747,7 @@ These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. Howeve
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_1}  &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_2} 
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_2}
    \end{tabular*}
    \caption[The {\bf HVAC\_tee\_loss} test cases]{Duct velocities with varied node loss. {\bf HVAC\_tee\_loss\_1} (left) and {\bf HVAC\_tee\_loss\_2} (right).}
    \label{fig_HVAC_node}
@@ -3833,18 +3856,18 @@ In the following examples, both leaks and fans are demonstrated.
 \subsection{Single Zone Leakage (\texorpdfstring{\bf leak\_test}{leak\_test})}
 \label{single_zone_leak}
 
-Two compartments (each 3.6~m by 2.4~m by 2.4~m) are connected by a small fan and a leak at the floor. The volume flow rate of the fan is given by the ``fan curve'' 
-\be 
+Two compartments (each 3.6~m by 2.4~m by 2.4~m) are connected by a small fan and a leak at the floor. The volume flow rate of the fan is given by the ``fan curve''
+\be
   \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
   U_{\hbox{\footnotesize max}} \;
    \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
-   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }
 \ee
-where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.1$~m$^2$, $U_{\hbox{\scriptsize max}}=0.6$~m/s, and $\Delta p_{\hbox{\scriptsize max}}=300$~Pa. The volume flow due to the leak is given by: 
-\be 
-   \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}} \sqrt{ \frac{ 2 \Delta p}{ \rho} } 
-\ee 
-where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho$ is the density at the discharge side. Equating the fan and leak volume flow rates, we can solve for $\Delta p$. The results are shown in Fig.~\ref{leak_test}.  
+where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.1$~m$^2$, $U_{\hbox{\scriptsize max}}=0.6$~m/s, and $\Delta p_{\hbox{\scriptsize max}}=300$~Pa. The volume flow due to the leak is given by:
+\be
+   \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}} \sqrt{ \frac{ 2 \Delta p}{ \rho} }
+\ee
+where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho$ is the density at the discharge side. Equating the fan and leak volume flow rates, we can solve for $\Delta p$. The results are shown in Fig.~\ref{leak_test}.
 
 \begin{figure}[ht]
    \begin{center}
@@ -3877,7 +3900,7 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=4.in]{FIGURES/ashrae_7} 
+\includegraphics[width=4.in]{FIGURES/ashrae_7}
 \end{center}
 \IfFileExists{SCRIPT_FIGURES/ashrae_7.tex}{\input{SCRIPT_FIGURES/ashrae_7.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ashrae_7.tex}}
 \caption[Results of {\bf ashrae\_7} test cases]{Schematic of ASHRAE Sample Problem 7, and tabulated pressure drops for a fixed flow fan curve, quadratic fan curve, and a table defined fan curve.}

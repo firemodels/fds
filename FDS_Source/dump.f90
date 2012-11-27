@@ -1143,13 +1143,15 @@ ENDIF PARTICLE_IF
  
 PROF_LOOP: DO N=1,N_PROF
    IF (PROFILE(N)%MESH /= NM) CYCLE PROF_LOOP
-   IF (APPEND) THEN
+   IF (APPEND .AND. PROFILE(N)%FORMAT_INDEX==1) THEN
       OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
    ELSE
       OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='REPLACE')
-      WRITE(LU_PROF(N),'(A)') PROFILE(N)%ID
-      WRITE(LU_PROF(N),'(A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x Value"
-      WRITE(LU_PROF(N),*) 
+      IF (PROFILE(N)%FORMAT_INDEX==1) THEN
+         WRITE(LU_PROF(N),'(A)') PROFILE(N)%ID
+         WRITE(LU_PROF(N),'(A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x Value"
+         WRITE(LU_PROF(N),*) 
+      ENDIF
    ENDIF
 ENDDO PROF_LOOP
 
@@ -5805,8 +5807,18 @@ PROF_LOOP: DO N=1,N_PROF
    ENDIF
    WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP+1,"(",FMT_R,",','),",FMT_R,")"
    IF (PF%QUANTITY == 'TEMPERATURE') THEN
-      WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),&
-                              (WC%ONE_D%TMP(I)+DX_WGT_S(I)*(WC%ONE_D%TMP(I+1)-WC%ONE_D%TMP(I))-TMPM,I=0,NWP)
+      IF (PF%FORMAT_INDEX==1) THEN
+         WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),&
+                                 (WC%ONE_D%TMP(I)+DX_WGT_S(I)*(WC%ONE_D%TMP(I+1)-WC%ONE_D%TMP(I))-TMPM,I=0,NWP)
+      ELSE
+         REWIND(LU_PROF(N))
+         WRITE(LU_PROF(N),'(A)') 'm,C'
+         WRITE(LU_PROF(N),'(A)') 'Depth,Temperature'
+         WRITE(TCFORM,'(5A)') "(" , FMT_R , ",','," , FMT_R , ")"
+         DO I=0,NWP
+            WRITE(LU_PROF(N),TCFORM) X_S_NEW(I),WC%ONE_D%TMP(I)+DX_WGT_S(I)*(WC%ONE_D%TMP(I+1)-WC%ONE_D%TMP(I))-TMPM
+         ENDDO
+      ENDIF
    ELSE
       RHO_S = 0._EB
       DO NN=1,SF%N_MATL
