@@ -1293,31 +1293,31 @@ void initcadcolors(void){
 void Update_Texturebar(void){
   if(use_graphics==0)return;
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_full);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_full) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_slice) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_patch) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_plot3d) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_iso) ");
 
   glBindTexture(GL_TEXTURE_1D,slicesmoke_colormap_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_slicesmokecolormap);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_slicesmokecolormap);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_slicesmokecolormap) ");
 
   glBindTexture(GL_TEXTURE_1D,volsmoke_colormap_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_volsmokecolormap) ");
 
 #ifdef pp_GPU
@@ -1443,7 +1443,7 @@ void Update_Smokecolormap(int option){
         float *fire1, *fire2;
 
         val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
-        n2 = 128*(val-valmin)/(valcut-valmin);
+        n2 = 1+127*(val-valmin)/(valcut-valmin);
         n2 = CLAMP(n2,1,253); 
         nn2 = (int)n2;
         fire1 = fire_cb + 3*nn2;
@@ -1465,9 +1465,11 @@ void Update_Smokecolormap(int option){
         float *fire1, *fire2;
 
         val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
-        n2 = 128 + 128*(val-valcut)/(valmax-valcut);
-        n2 = CLAMP(n2,1,253);
+        n2 = 128 + 126*(val-valcut)/(valmax-valcut);
         nn2 = (int)n2;
+        nn2 = CLAMP(nn2,1,253);
+        factor = n2 - nn2;
+        factor = CLAMP(factor,0.0,1.0);
         fire1 = fire_cb + 3*nn2;
         fire2 = fire1 + 3;
         factor = n2 - nn2;
@@ -1489,10 +1491,11 @@ void Update_Smokecolormap(int option){
         float *fire1, *fire2;
 
         val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
-        n2 = 255*(val-valmin)/(valmax-valmin);
-        n2 = CLAMP(n2,1,253);
+        n2 = 1+253*(val-valmin)/(valmax-valmin);
         nn2 = (int)n2;
+        nn2 = CLAMP(nn2,1,253);
         factor = n2 - nn2;
+        factor = CLAMP(factor,0.0,1.0);
         fire1 = fire_cb + 3*nn2;
         fire2 = fire1 + 3;
         rgb_colormap[4*n]  =(1.0-factor)*fire1[0]+factor*fire2[0];

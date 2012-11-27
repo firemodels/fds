@@ -1255,7 +1255,7 @@ void init_textures(void){
 #else
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 #endif
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_full);
 
   glGenTextures(1,&texture_slice_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -1266,7 +1266,7 @@ void init_textures(void){
 #else
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 #endif
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
 
   glGenTextures(1,&texture_patch_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
@@ -1277,7 +1277,7 @@ void init_textures(void){
 #else
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 #endif
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
 
   glGenTextures(1,&texture_plot3d_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
@@ -1288,7 +1288,7 @@ void init_textures(void){
 #else
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 #endif
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
 
   glGenTextures(1,&texture_iso_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
@@ -1299,7 +1299,7 @@ void init_textures(void){
 #else
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 #endif
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
 
   glGenTextures(1,&volsmoke_colormap_id);
   glBindTexture(GL_TEXTURE_1D,volsmoke_colormap_id);
@@ -1310,7 +1310,7 @@ void init_textures(void){
 #else
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 #endif
-  glTexImage1D(GL_TEXTURE_1D,0,4,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
 
   glGenTextures(1,&slicesmoke_colormap_id);
   glBindTexture(GL_TEXTURE_1D,slicesmoke_colormap_id);
@@ -1321,7 +1321,7 @@ void init_textures(void){
 #else
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 #endif
-  glTexImage1D(GL_TEXTURE_1D,0,4,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_slicesmokecolormap);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_slicesmokecolormap);
 
   CheckMemory;
 
