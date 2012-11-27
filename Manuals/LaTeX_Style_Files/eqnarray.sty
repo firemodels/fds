@@ -1,0 +1,99 @@
+%%% ====================================================================
+%%%  @LaTeX-style-file{
+%%%     author          = "David M. Jones",
+%%%     version         = "1.0",
+%%%     date            = "06 May 1992",
+%%%     time            = "16:30:57 EDT",
+%%%     filename        = "eqnarray.sty",
+%%%     address         = "MIT Laboratory for Computer Science
+%%%                        Room NE43-316
+%%%                        545 Technology Square
+%%%                        Cambridge, MA 02139
+%%%                        USA",
+%%%     telephone       = "(617) 253-5936",
+%%%     FAX             = "(617) 253-3480",
+%%%     checksum        = "36087 99 481 4448",
+%%%     email           = "dmjones@theory.lcs.mit.edu (Internet)",
+%%%     codetable       = "ISO/ASCII",
+%%%     keywords        = "LaTeX, eqnarray",
+%%%     supported       = "yes",
+%%%     docstring       = "This file reimplements the LaTeX eqnarray
+%%%                        environment to fix two problems: (1) the
+%%%                        standard definition places far too much
+%%%                        space around the second column (10 points
+%%%                        in the standard styles) and (2) the macro
+%%%                        \@eqnsel (see below) does not work as
+%%%                        documented in latex.tex.  If used in
+%%%                        conjunction with fleqn.sty, eqnarray must
+%%%                        appear after fleqn in the document-style
+%%%                        option list.
+%%%
+%%%                        I know of no bugs in this implementation,
+%%%                        but would be happy to hear of any problems
+%%%                        that arise with it.
+%%%
+%%%                        Oh, by the way, all of this would be
+%%%                        unnecessary if you used AMS-LaTeX.
+%%%
+%%%                        The checksum field above contains a CRC-16
+%%%                        checksum as the first value, followed by
+%%%                        the equivalent of the standard UNIX wc
+%%%                        (word count) utility output of lines,
+%%%                        words, and characters.  This is produced by
+%%%                        Robert Solovay's checksum utility.  This
+%%%                        program, as well as Nelson Beebe's proposal
+%%%                        for standard file headers, is available via
+%%%                        anonymous ftp from math.utah.edu.",
+%%%  }
+%%% ====================================================================
+
+%% The default is for left-hand side of equations to be flushright.
+%% To make them flushleft, \let\@eqnsel = \relax
+
+\let\@eqnsel\hfil
+
+%% There are two main modifications.  First, I removed the
+%% \hskip\@centering from the beginning of the preamble.  This \hskip
+%% was, as far as I can tell, superfluous and was crippling \@eqnsel.
+%% Second, I removed the two occurences of \hskip 2\arraycolsep and
+%% change the template for the second column to ${{}##{}}$.  This
+%% restores the proper amount of space around the second column of the
+%% eqnarray.  I also introduced the parameters \@eqnmar and \@eqnhook
+%% to provide support for the flush left equation style.
+
+\newskip\@eqnmar
+\@eqnmar\@centering
+
+\let\@eqnhook\relax
+
+\def\eqnarray{\stepcounter{equation}\let\@currentlabel=\theequation
+\global\@eqnswtrue
+\global\@eqcnt\z@\tabskip\@eqnmar\let\\=\@eqncr
+\@eqnhook
+$$\halign to \displaywidth\bgroup\@eqnsel
+  $\displaystyle\tabskip\z@{##}$&\global\@eqcnt\@ne
+  \hfil${{}##{}}$\hfil&\global\@eqcnt\tw@
+  $\displaystyle{##}$\hfil
+  \tabskip\@centering&\llap{##}\tabskip\z@\cr}
+
+%% Since we've removed the \arraycolsep's from \eqnarray, we have to
+%% redefine \lefteqn to put that space back in.  It seems unlikely
+%% that \arraycolsep is really what should be used here, but the
+%% following definition maintains compatibility with the old
+%% definition of eqnarray.
+
+\def\lefteqn#1{\hbox to 4\arraycolsep{$\displaystyle #1$\hss}}
+
+%% Finally, if fleqn.sty has been invoked earlier, we set
+%% \@eqnmar=\mathindent and redefine \@eqnhook to futz around with
+%% \abovedisplayskip and friends.  Hopefully no-one else will define
+%% \mathindent.
+
+\@ifundefined{mathindent}{}{\@eqnmar\mathindent
+    \def\@eqnhook{\abovedisplayskip\topsep
+    \ifvmode\advance\abovedisplayskip\partopsep\fi
+    \belowdisplayskip\abovedisplayskip
+    \belowdisplayshortskip\abovedisplayskip
+    \abovedisplayshortskip\abovedisplayskip}}
+
+\endinput
