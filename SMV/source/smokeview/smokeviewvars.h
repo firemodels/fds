@@ -149,7 +149,7 @@ SVEXTERN propdata SVDECL(*propinfo,NULL);
 SVEXTERN float right_green, right_blue;
 
 SVEXTERN int levelset_colorbar, wallthickness_colorbar;
-SVEXTERN colorbardata SVDECL(*fire_colorbar,NULL), SVDECL(*fire_custom_colorbar,NULL);
+SVEXTERN colorbardata SVDECL(*fire_colorbar,NULL);
 SVEXTERN float glui_time;
 SVEXTERN int show_mode;
 SVEXTERN int SVDECL(cellcenter_slice_active,0), SVDECL(cellcenter_bound_active,0);

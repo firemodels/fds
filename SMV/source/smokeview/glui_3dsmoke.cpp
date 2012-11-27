@@ -602,7 +602,6 @@ extern "C" void Smoke3d_CB(int var){
       SPINNER_smoke3d_fire_halfdepth->enable();
 
       fire_colorbar_index_save=fire_colorbar_index;
-      //SmokeColorBarMenu((int)(fire_custom_colorbar-colorbarinfo));
     }
     if(LISTBOX_smoke_colorbar->get_int_val()!=fire_colorbar_index){
       LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);

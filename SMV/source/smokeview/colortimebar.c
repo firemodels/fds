@@ -535,7 +535,7 @@ void initdefaultcolorbars(void){
   int i;
   colorbardata *cbi;
 
-  ndefaultcolorbars=12;
+  ndefaultcolorbars=11;
   
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
@@ -826,37 +826,6 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[27]=255;
   cbi->rgb_node[28]=255;
   cbi->rgb_node[29]=238;
-  cbi++;
-  
-  // fire (custom)
-
-  fire_custom_colorbar=cbi;
-  strcpy(cbi->label,"fire (custom)");
-  cbi->label_ptr=cbi->label;
-
-  cbi->nnodes=4;
-  cbi->nodehilight=0;
-
-  cbi->index_node[0]=0;
-  cbi->rgb_node[0]=smoke_albedo*255;
-  cbi->rgb_node[1]=smoke_albedo*255;
-  cbi->rgb_node[2]=smoke_albedo*255;
-
-  cbi->index_node[1]=126;
-  cbi->rgb_node[3]=smoke_albedo*255;
-  cbi->rgb_node[4]=smoke_albedo*255;
-  cbi->rgb_node[5]=smoke_albedo*255;
-
-  cbi->index_node[2]=131;
-  cbi->rgb_node[6]=fire_red;
-  cbi->rgb_node[7]=fire_green;
-  cbi->rgb_node[8]=fire_blue;
-
-  cbi->index_node[3]=255;
-  cbi->rgb_node[9]=fire_red;
-  cbi->rgb_node[10]=fire_green;
-  cbi->rgb_node[11]=fire_blue;
-
   cbi++;
 
   // fire line (level set)
