@@ -10,9 +10,9 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
 
 &RADI RADIATION=.FALSE. /
 
-&MISC TMPA = 24.9, P_INF = 98791.9/
+&MISC TMPA = 24.9, P_INF = 98791.9, HUMIDITY= 0,Y_CO2_INFTY=0./
 
-&SPEC ID ='WATER VAPOR', HUMIDITY= 0 /
+&SPEC ID ='WATER VAPOR' /
 
 &DUMP DT_DEVC = 2, MASS_FILE=.TRUE./
 
