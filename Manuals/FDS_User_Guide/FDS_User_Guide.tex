@@ -8798,15 +8798,7 @@ Here again you must add a {\ct QUANTITY2} to the device line.
 \section{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
-FDS uses a fine, non-uniform, one-dimensional mesh at each boundary
-cell to compute heat transfer within a solid. The parameters
-(Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to
-those used to specify a surface quantity in the {\ct DEVC} group. {\ct
-XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the
-physical quantity to monitor, {\ct IOR} the orientation,
-and {\ct ID} an identifying character string. Here is an example of
-how you would use this feature to get a time history of temperature
-profiles within a given solid obstruction:
+FDS uses a fine, non-uniform, one-dimensional mesh at each boundary cell to compute heat transfer within a solid. The parameters (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the physical quantity to monitor, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a given solid obstruction:
 
 \footnotesize
 \begin{verbatim}
@@ -8814,14 +8806,10 @@ profiles within a given solid obstruction:
 \end{verbatim} \normalsize
 
 \noindent
-Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of
-solid material components ({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the
-material.
+Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of solid material components 
+({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the material. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
-Each {\ct PROF} line creates a separate file. This may be more than is
-needed. Sometimes, all you want to know is the temperature at a
-certain depth. To get an inner wall temperature, you can also just use
-a device as follows:
+The full profile data may be more than is needed. Sometimes, all you want to know is the temperature at a certain depth. To get an inner wall temperature, you can also just use a device as follows:
 
 \footnotesize
 \begin{verbatim}
@@ -8829,15 +8817,8 @@ a device as follows:
 \end{verbatim} \normalsize
 
 \noindent
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface.
-Note that this {\ct QUANTITY} is allowed only as a {\ct DEVC}, not a
-{\ct BNDF}, output. Also note that if the wall thickness is decreasing
-over time due to the solid phase reactions, the distance is
-measured from the current surface, and the measurement point is
-moving towards the back side of the solid. Eventually, the
-measurement point may emerge from the solid, in which case it starts to
-show ambient temperature. If you just want to know the temperature of the back surface
-of the ``wall,'' then use
+The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. Note that this {\ct QUANTITY} is allowed only as a {\ct DEVC}, not a {\ct BNDF}, output. Also note that if the wall thickness is decreasing over time due to the solid phase reactions, the distance is measured from the current surface, and the measurement point is moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to
+show ambient temperature. If you just want to know the temperature of the back surface of the ``wall,'' then use
 
 \footnotesize
 \begin{verbatim}
@@ -8845,9 +8826,7 @@ of the ``wall,'' then use
 \end{verbatim} \normalsize
 
 \noindent
-Note that this quantity is only meaningful if the front or exposed surface of the ``wall'' has
-the attribute {\ct BACKING='EXPOSED'} on the {\ct SURF} line that defines it. The coordinates, {\ct XYZ}, and orientation, {\ct IOR}, refer to
-the front surface. To check that the heat conduction calculation is being done properly, you can add the additional line
+Note that this quantity is only meaningful if the front or exposed surface of the ``wall'' has the attribute {\ct BACKING='EXPOSED'} on the {\ct SURF} line that defines it. The coordinates, {\ct XYZ}, and orientation, {\ct IOR}, refer to the front surface. To check that the heat conduction calculation is being done properly, you can add the additional line
 
 \footnotesize
 \begin{verbatim}
@@ -11121,10 +11100,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
 \hline \hline
 \endhead
-{\ct ID}       & Character        & Section~\ref{info:PROF}      &            &     \\ \hline
-{\ct IOR}      & Real             & Section~\ref{info:PROF}      &            &     \\ \hline
-{\ct QUANTITY} & Character        & Section~\ref{info:PROF}      &            &     \\ \hline
-{\ct XYZ}      & Real Triplet     & Section~\ref{info:PROF}      & m          &     \\ \hline
+{\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct FORMAT\_INDEX}         & Integer           & Section~\ref{info:PROF}      &            & 1     \\ \hline
+{\ct IOR}                   & Real              & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct QUANTITY}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct XYZ}                   & Real Triplet      & Section~\ref{info:PROF}      & m          &       \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
