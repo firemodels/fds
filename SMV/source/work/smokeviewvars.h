@@ -1,6 +1,6 @@
-// $Date: 2012-11-21 15:09:52 -0500 (Wed, 21 Nov 2012) $ 
-// $Revision: 13879 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 #ifndef SMOKEVIEWVARS_H_DEFINED
 #define SMOKEVIEWVARS_H_DEFINED
 //#include <time.h>

@@ -1,6 +1,6 @@
-// $Date: 2012-11-20 15:48:19 -0500 (Tue, 20 Nov 2012) $ 
-// $Revision: 13856 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
