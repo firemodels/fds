@@ -1,3 +1,8 @@
+#!/bin/bash
+
+# Add LaTeX search path; Paths are ':' separated
+export TEXINPUTS=".:../LaTeX_Style_Files:"
+
 clean_build=1
 
 # Build FDS Verification Guide
