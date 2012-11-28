@@ -673,7 +673,6 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MISC}    & {\ct CONDUCTIVITY}                  &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct CO\_PRODUCTION}                &              & New procedure                               & Section~\ref{info:finite}                \\ \hline
 {\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Section~\ref{info:LES}                   \\ \hline
-{\ct MISC}    & {\ct HUMIDITY}                      &  {\ct SPEC}  & {\ct HUMIDITY}                              & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct ISOTHERMAL}                    &              & Eliminated                                  &                                          \\ \hline
 {\ct MISC}    & {\ct MW}                            &  {\ct SPEC}  & {\ct MW}                                    & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct PRESSURE\_CORRECTION}          &  {\ct PRES}  & {\ct VELOCITY\_TOLERANCE}                   & Section~\ref{info:PRES}                  \\ \hline
@@ -4481,7 +4480,7 @@ convective heat flux to the solid surface, you can set {\ct ASSUMED\_GAS\_TEMPER
 \item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.}
 on the {\ct MISC} line. This will also speed
 up the computations significantly. If the gas phase computations are
-needed, you may turn off combustion by creating a {\ct REAC} line with only
+needed, you may turn off combustion by creating a {\ct MISC} line with only
 {\ct Y\_O2\_INFTY=0.01}. This sets the background oxygen mass fraction
 to 0.01, too low to support any burning.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you
@@ -5659,6 +5658,7 @@ If the initial mass fraction of the gas is something other than zero, then the p
 \normalsize
 
 \subsubsection{Specifying Humidity}
+\label{info:humidity}
 
 If you are using the default background lumped species {\ct AIR}, then you can specify {\ct HUMIDITY} on {\ct MISC} to set the ambient mass fraction of water vapor. {\ct HUMIDITY} is the relative humidity of water vapor in units of \%. It is 40 \% by default.  
 
@@ -10843,7 +10843,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
-{\ct HUMIDITY}                                  & Real           & Section~\ref{info:simple_chemistry}                  & \%                & 40.               \\ \hline
+{\ct HUMIDITY}                                  & Real           & Section~\ref{info:humidity}                          & \%                & 40.               \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct INCOMPRESSIBLE}                            & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               & 1.0           &                   \\ \hline
