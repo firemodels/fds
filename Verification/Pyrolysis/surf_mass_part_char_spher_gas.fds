@@ -6,6 +6,7 @@
 
 &TIME T_END=100., DT = 0.01, WALL_INCREMENT = 1 / 
 &DUMP DT_HRR = 0.1, DT_DEVC = 0.1  /
+&MISC Y_O2_INFTY	=0.01/
 
 &REAC FUEL = 'WOOD'
 	SOOT_YIELD 	= 0.0
@@ -13,8 +14,7 @@
 	C 		= 3.4
 	H		=6.2
 	O 		=2.5
-	HEAT_OF_COMBUSTION = 12000.
-	Y_O2_INFTY	=0.01 /
+	HEAT_OF_COMBUSTION = 12000./
 
 &SURF ID                        = 'Wood'
       COLOR                     = 'IVORY BLACK'
