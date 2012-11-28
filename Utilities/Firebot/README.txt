@@ -7,6 +7,8 @@
 # Kristopher Overholt
 # 7/2/2012
 
+RUNNING FIREBOT: To run Firebot manually, use the run_firebot_linux.sh script.
+
 =========
 = About =
 =========
@@ -17,6 +19,11 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 =========================
 = Firebot files/scripts =
 =========================
+
+# run_firebot_linux.sh
+
+    This script can be used to start Firebot manually. First, the script performs an "svn update".
+    Then, the script runs Firebot using the run-one script and backgrounds Firebot.
 
 # firebot_linux.sh
 
