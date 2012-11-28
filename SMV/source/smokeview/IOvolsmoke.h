@@ -4,7 +4,7 @@
 
 #ifndef IOVOLSMOKE_H_DEFINED
 #define IOVOLSMOKE_H_DEFINED
-#define GPU_VOLframemax 3.0
+#define GPU_VOLframemax 1.5
 #define MLEFT 0
 #define MFRONT 1
 #define MDOWN 2

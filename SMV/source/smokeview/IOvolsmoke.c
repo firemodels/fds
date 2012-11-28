@@ -1490,7 +1490,7 @@ void drawsmoke3dGPUVOL(void){
       glUniform1i(GPUvol_smokecolormap,2);
       glUniform1i(GPUvol_blockage,3);
       if(mouse_down==1){
-        glUniform1f(GPUvol_dcell,4.0*dcell);
+        glUniform1f(GPUvol_dcell,8.0*dcell);
       }
       else{
         glUniform1f(GPUvol_dcell,dcell);
