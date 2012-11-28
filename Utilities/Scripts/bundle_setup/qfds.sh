@@ -145,6 +145,7 @@ fulldir=`pwd`
 
 out=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
+stopfile=$fulldir/$infile.stop
 
 # make sure files that are needed exist
 
@@ -164,6 +165,15 @@ fi
 if ! [ -e $fdsexe ]; then
   exit
 fi
+if [ $STOPFDS ]; then
+ echo "stopping case: $in"
+ touch $stopfile
+ exit
+fi
+if [ -e $stopfile ]; then
+ rm $stopfile
+fi
+
 
 scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
