@@ -1,15 +1,13 @@
 &HEAD CHID='pine_needles', TITLE='Test for burning vegetation mass conservation' /
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-&MISC HUMIDITY=0./
+&MISC HUMIDITY=0., Y_O2_INFTY = 0.01/
 &TIME T_END=10., DT=0.01, WALL_INCREMENT=1 / 
 
 &REAC FUEL = 'GLUCOSE'
       C = 6. 
       H = 12. 
-      O = 6. 
-      HUMIDITY = 0.
-      Y_O2_INFTY = 0.01 /
+      O = 6.  /
 
 &SPEC ID='WATER VAPOR' /
 
