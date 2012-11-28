@@ -6,9 +6,7 @@
 #define SMOKEHEADERS_H_DEFINED
 
 EXTERNCPP void Update_Smokecolormap(int option);
-#ifdef pp_SUPERMESH
 EXTERNCPP void define_volsmoke_textures(void);
-#endif
 EXTERNCPP void set_colorbar_list_index(int val);
 EXTERNCPP int get_colorbar_list_index(void);
 EXTERNCPP int get_colorbar_index(int flag, int x, int y);

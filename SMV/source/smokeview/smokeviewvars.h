@@ -29,9 +29,7 @@ SVEXTERN int SVDECL(render_state,0);
 SVEXTERN int SVDECL(script_frame_start,-1), SVDECL(script_frame_skip,-1);
 SVEXTERN int SVDECL(skip_render_frames,0);
 SVEXTERN int SVDECL(update_smokecolorbar,0);
-#ifdef pp_SUPERMESH
-SVEXTERN int SVDECL(use_supermesh,1);
-#endif
+SVEXTERN int SVDECL(combine_meshes,1);
 SVEXTERN int colorbar_left_pos, colorbar_right_pos, colorbar_down_pos, colorbar_top_pos;
 SVEXTERN float scale_2d_x, scale_2d_y;
 SVEXTERN int SVDECL(colorbar_delta,35);

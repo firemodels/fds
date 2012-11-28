@@ -18,9 +18,7 @@ void init_volsmoke_supertexture(supermesh *smesh);
 void init_volsmoke_texture(mesh *meshi);
 void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata);
 #endif
-#ifdef pp_SUPERMESH
 void init_supermesh(void);
-#endif
 void unload_volsmoke_frame_allmeshes(int framenum);
 void compute_all_smokecolors(void);
 void drawsmoke3dGPUVOL(void);
