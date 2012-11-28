@@ -3478,9 +3478,7 @@ void init_slice3d_texture(mesh *meshi){
   if(meshi->slice3d_c_buffer==NULL){
     NewMemory((void **)&meshi->slice3d_c_buffer,nx*ny*nz*sizeof(float));
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
-    GL_RED, GL_FLOAT, meshi->slice3d_texture_buffer);
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,nx, ny, nz, border_size,GL_RED, GL_FLOAT, meshi->slice3d_texture_buffer);
 
 
   if(slice3d_colormap_id_defined==-1){
