@@ -522,7 +522,12 @@ void InitOpenGL(void){
     err=1;
   }
   if(err==0){
-    err=init_shaders();
+    if(disable_gpu==1){
+      err=1;
+    }
+    else{
+      err=init_shaders();
+    }
 #ifdef _DEBUG
     if(err==0){
       printf("%s\n",_("   GPU shader initialization succeeded"));

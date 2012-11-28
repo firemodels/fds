@@ -25,6 +25,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(disable_gpu,0);
 SVEXTERN int SVDECL(render_state,0);
 SVEXTERN int SVDECL(script_frame_start,-1), SVDECL(script_frame_skip,-1);
 SVEXTERN int SVDECL(skip_render_frames,0);
