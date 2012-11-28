@@ -56,6 +56,7 @@ $RUNFDS Heat_Transfer heat_conduction_c
 $RUNFDS Heat_Transfer heat_conduction_d
 $RUNFDS Heat_Transfer heat_conduction_kc
 $RUNFDS Heat_Transfer insulated_steel_column
+$RUNFDS Heat_Transfer insulated_steel_plate
 
 $RUNFDS HVAC ashrae7_fixed_flow
 $RUNFDS HVAC ashrae7_quadratic
