@@ -13,8 +13,9 @@ representative of any particular material.
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
 &TIME TWFIN=700., WALL_INCREMENT=1, DT=0.1 /  Force FDS to do solid phase calc every time step
+&MISC  Y_O2_INFTY=0.01 /
 
-&REAC ID='NO REACTION', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
+&REAC ID='NO REACTION'/  No gas phase reaction with 1% O2 concentration
 
 &DUMP DT_PL3D=10000000. /  No Plot3D output
 
