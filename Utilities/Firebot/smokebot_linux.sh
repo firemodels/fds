@@ -650,6 +650,7 @@ check_guide()
    then
       if [ "$FIREBOT_USERNAME" == "gforney" ]; then
         cp $2 /var/www/html/smokebot/manuals/
+        cp $2 /var/www/html/firebot/manuals/
       fi
       cp $2 $GUIDE_DIR/.
    else
@@ -753,7 +754,8 @@ email_build_status()
    echo "      host: $hostname " >> $TIME_LOG
    echo "start time: $start_time" >> $TIME_LOG
    echo " stop time: $stop_time" >> $TIME_LOG
-   echo "   results: http://blaze.nist.gov/smokebot" >> $TIME_LOG
+   echo "   results (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
+   echo "   results (public): https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit" >> $TIME_LOG
    if [ "$MAKEMOVIES" == "1" ]
    then
      echo "animations: http://blaze.nist.gov/smv_animations" >> $TIME_LOG
