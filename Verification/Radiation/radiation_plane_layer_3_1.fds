@@ -5,7 +5,7 @@ from a homogenous, infinitelly wide layer of radiating material.
 
 &MESH IJK = 20,20,20, XB= 0.0,1.0,-10.0,10.0,-10.0,10.0 /
 
-&MISC TMPA = 1000.0 / 
+&MISC TMPA = 1000.0, Y_CO2_INFTY=0.,HUMIDITY=0./ 
 
 &TIME T_END=0.0001, DT = 0.0001  /
 

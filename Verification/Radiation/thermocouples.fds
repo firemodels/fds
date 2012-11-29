@@ -1,6 +1,7 @@
 &HEAD CHID='thermocouples', TITLE='Test of time-dependent TC model, SVN $Revision$'/
 
 &MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=20,20,20 /
+&MISC  Y_CO2_INFTY=0.,HUMIDITY=0./ 
 
 &TIME T_END=120. /
 

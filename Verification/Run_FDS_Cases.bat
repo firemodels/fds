@@ -7,7 +7,8 @@ set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 
 Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
 
-set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
+set FDSEXE=C:\Projects\NIST2821-000\6.0a\fds_win_32
+rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
 
 
 Rem Choose one of the following run options by commenting the line you don't want to use.
