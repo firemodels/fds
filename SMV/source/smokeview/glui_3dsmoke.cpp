@@ -54,7 +54,7 @@ extern "C" void Smoke3d_CB(int var);
 #define TEMP_MIN 21
 #define TEMP_CUTOFF 22
 #define TEMP_MAX 23
-#define SUPERMESH 24
+#define COMBINE_MESHES 24
 
 GLUI *glui_3dsmoke=NULL;
 
@@ -99,7 +99,7 @@ GLUI_Spinner *SPINNER_smokedens=NULL;
 GLUI_Spinner *SPINNER_pathlength=NULL;
 
 #ifdef pp_SUPERMESH
-GLUI_Checkbox *CHECKBOX_use_supermesh=NULL;
+GLUI_Checkbox *CHECKBOX_combine_meshes=NULL;
 #endif
 #ifdef pp_CULL
 GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
@@ -132,6 +132,14 @@ GLUI_Panel *PANEL_testsmoke=NULL;
 
 GLUI_StaticText *TEXT_smokealpha=NULL;
 GLUI_StaticText *TEXT_smokedepth=NULL;
+
+#ifdef pp_SUPERMESH
+/* ------------------ update_combine_meshes ------------------------ */
+
+extern "C" void update_combine_meshes(void){
+  if(CHECKBOX_combine_meshes!=NULL)CHECKBOX_combine_meshes->set_int_val(combine_meshes);
+}
+#endif
 
 /* ------------------ update_gpu ------------------------ */
 
@@ -380,7 +388,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,"debug",&smoke3dVoldebug);
 #endif
 #ifdef pp_SUPERMESH
-    CHECKBOX_use_supermesh=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Combine meshes"),&use_supermesh,SUPERMESH,Smoke3d_CB);
+    CHECKBOX_combine_meshes=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Combine meshes"),&combine_meshes,COMBINE_MESHES,Smoke3d_CB);
 #endif
   }
 
@@ -487,7 +495,7 @@ extern "C" void Smoke3d_CB(int var){
   float temp_min, temp_max;
 
 #ifdef pp_SUPERMESH
-  case SUPERMESH:
+  case COMBINE_MESHES:
     define_volsmoke_textures();
     break;
 #endif
@@ -680,6 +688,25 @@ extern "C" void Smoke3d_CB(int var){
     glutPostRedisplay();
     break;
   case VOL_SMOKE:
+#ifdef pp_SUPERMESH
+    {
+      volrenderdata *vr;
+
+      vr = &meshinfo->volrenderinfo;
+      if(vr!=NULL&&vr->smokeslice->slicetype==SLICE_CENTER){
+        if(usegpu==1&&combine_meshes==1){
+          combine_meshes=0;
+          update_combine_meshes();
+          Smoke3d_CB(COMBINE_MESHES);
+        }
+        if(usegpu==0&&combine_meshes==0){
+          combine_meshes=1;
+          update_combine_meshes();
+          Smoke3d_CB(COMBINE_MESHES);
+        }
+      }
+    }
+#endif
     if(smoke_render_option==RENDER_SLICE){
 #ifdef pp_GPU
       if(usegpu==1){
