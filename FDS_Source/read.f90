@@ -7502,6 +7502,10 @@ MESH_LOOP_1: DO NM=1,NMESHES
       ENDIF
  
       IF (MB/='null') THEN
+         IF (NMESHES>1 .AND. SURF_ID=='PERIODIC') THEN
+            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT',NN,' multi-mesh PERIODIC boundary'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
          XB(1) = XS
          XB(2) = XF
          XB(3) = YS
