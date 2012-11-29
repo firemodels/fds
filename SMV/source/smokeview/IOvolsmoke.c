@@ -293,9 +293,11 @@ void init_volrender(void){
     NewMemory((void **)&volfacelistinfo,6*nmeshes*sizeof(volfacelistdata));
     NewMemory((void **)&volfacelistinfoptrs,6*nmeshes*sizeof(volfacelistdata *));
   }
+#ifdef pp_SUPERMESH
   if(nvolrenderinfo>0){
     init_supermesh();
   }
+#endif
 
 
 }
@@ -317,9 +319,12 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   char *blank_local;
   float pt_smoketran, *pt_smokecolor;
   float tauhat,alphahat;
+  #ifdef pp_SUPERMESH
   mesh *xyz_mesh=NULL;
+  #endif
 
-  if(combine_meshes==1){
+#ifdef pp_SUPERMESH
+  if(use_supermesh==1){
     boxmin = meshi->super->boxmin_scaled;
     boxmax = meshi->super->boxmax_scaled;
   }
@@ -327,6 +332,10 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
     boxmin = meshi->boxmin_scaled;
     boxmax = meshi->boxmax_scaled;
   }
+#else
+  boxmin = meshi->boxmin_scaled;
+  boxmax = meshi->boxmax_scaled;
+#endif
 
   // xyz(t) = xyzvert + t*(xyzvert - xyzeyeorig )
   // integrate from t=0 to t=t_intersect_min  (if outside mesh)
@@ -449,7 +458,8 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
     xyz[1] = MIX(factor,vert_end[1],vert_beg[1]);
     xyz[2] = MIX(factor,vert_end[2],vert_beg[2]);
 
-    if(combine_meshes==1){
+#ifdef pp_SUPERMESH
+    if(use_supermesh==1){
       xyz_mesh = getmesh_in_smesh(xyz_mesh,meshi->super,xyz);
       if(xyz_mesh==NULL)break;
       if(block_volsmoke==1){
@@ -469,6 +479,9 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
       }
       get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank_local);
     }
+#else
+    get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank_local);
+#endif
     if(blank_local!=NULL&&inobst==1)break;
 
     alphai = 1.0 - pt_smoketran;
@@ -1411,7 +1424,8 @@ void drawsmoke3dGPUVOL(void){
     dcell = meshi->dcell;;
     inside = meshi->inside;
     newmesh=0;
-    if(combine_meshes==1){
+#ifdef pp_SUPERMESH
+    if(use_supermesh==1){
       if(meshold==NULL||meshi->super!=meshold->super)newmesh=1;
       drawsides=meshi->super->drawsides;
     }
@@ -1419,13 +1433,21 @@ void drawsmoke3dGPUVOL(void){
       if(meshi!=meshold)newmesh=1;
       drawsides=meshi->drawsides;
     }
+#else
+    if(meshi!=meshold)newmesh=1;
+    drawsides=meshi->drawsides;
+#endif
     if(newmesh==1){
-      if(combine_meshes==1){
+#ifdef pp_SUPERMESH
+      if(use_supermesh==1){
         update_volsmoke_supertexture(meshi->super);
       }
       else{
         update_volsmoke_texture(meshi,vr->smokedataptr,vr->firedataptr);
       }
+#else
+      update_volsmoke_texture(meshi,vr->smokedataptr,vr->firedataptr);
+#endif
     }
 
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1433,7 +1455,8 @@ void drawsmoke3dGPUVOL(void){
     
     if(newmesh==1){
       glUniform1i(GPUvol_inside,inside);
-      if(combine_meshes==1){
+#ifdef pp_SUPERMESH
+      if(use_supermesh==1){
         float *smin, *smax;
         int *sdrawsides;
 
@@ -1449,6 +1472,11 @@ void drawsmoke3dGPUVOL(void){
         glUniform3f(GPUvol_boxmax,x2,yy2,z2);
         glUniform1iv(GPUvol_drawsides,7,drawsides);
       }
+#else
+      glUniform3f(GPUvol_boxmin,x1,yy1,z1);
+      glUniform3f(GPUvol_boxmax,x2,yy2,z2);
+      glUniform1iv(GPUvol_drawsides,7,drawsides);
+#endif
       if(vr->firedataptr!=NULL){
         glUniform1i(GPUvol_havefire,1);
       }
@@ -1548,7 +1576,7 @@ void drawsmoke3dGPUVOL(void){
 
 #define HEADER_SIZE 4
 #define TRAILER_SIZE 4
-#define FORTVOLSLICEREAD(var,size) FSEEK(SLICEFILE,HEADER_SIZE,SEEK_CUR);\
+#define FORTSLICEREAD(var,size) FSEEK(SLICEFILE,HEADER_SIZE,SEEK_CUR);\
                            returncode=fread(var,4,size,SLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
                            FSEEK(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
@@ -1629,7 +1657,7 @@ float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
 
   returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
-  FORTVOLSLICEREAD(&time_local,1);
+  FORTSLICEREAD(&time_local,1);
   fclose(SLICEFILE);
   return time_local;
 }
@@ -1753,7 +1781,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 
     returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
-    FORTVOLSLICEREAD(&time_local,1);
+    FORTSLICEREAD(&time_local,1);
     if(global_times!=NULL&&global_times[itimes]>time_local)restart_time=1;
     if(*first==1){
       *first=0;
@@ -1767,7 +1795,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     }
 
     vr->times[framenum]=time_local;
-    FORTVOLSLICEREAD(smokeframe_data,framesize);
+    FORTSLICEREAD(smokeframe_data,framesize);
     CheckMemory;
     size_before+=sizeof(float)*framesize;
     if(vr->is_compressed==1){
@@ -1826,9 +1854,9 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       if(SLICEFILE!=NULL){
         returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
-        FORTVOLSLICEREAD(&time_local,1);
+        FORTSLICEREAD(&time_local,1);
         vr->times[framenum]=time_local;
-        FORTVOLSLICEREAD(fireframe_data,framesize);
+        FORTSLICEREAD(fireframe_data,framesize);
         CheckMemory;
         size_before+=sizeof(float)*framesize;
         if(vr->is_compressed==1){
@@ -2024,12 +2052,13 @@ void *read_volsmoke_allframes_allmeshes2(void *arg){
   return NULL;
 }
 
+#ifdef pp_SUPERMESH
 /* ------------------ define_volsmoke_textures ------------------------ */
 
 void define_volsmoke_textures(void){
   int i;
 
-  if(combine_meshes==1){
+  if(use_supermesh==1){
     for(i=0;i<nsupermeshinfo;i++){
       supermesh *smesh;
 
@@ -2047,6 +2076,7 @@ void define_volsmoke_textures(void){
   }
 }
 
+#endif
 /* ------------------ read_volsmoke_allframes_allmeshes ------------------------ */
 
 void read_volsmoke_allframes_allmeshes(void){
@@ -2066,12 +2096,16 @@ void read_volsmoke_allframes_allmeshes(void){
     vr->loaded=1;
     vr->display=1;
     if(gpuactive==1){
-      if(combine_meshes==1){
+#ifdef pp_SUPERMESH
+      if(use_supermesh==1){
         init_volsmoke_supertexture(meshi->super);
       }
       else{
         init_volsmoke_texture(meshi);
       }
+#else
+      init_volsmoke_texture(meshi);
+#endif
     }
   }
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -2188,6 +2222,7 @@ void init_volsmoke_texture(mesh *meshi){
   fflush(stdout);
 }
 
+#ifdef pp_SUPERMESH
 /* ------------------ unload_volsmoke_supertextures ------------------------ */
 
 void unload_volsmoke_supertextures(void){
@@ -2547,3 +2582,4 @@ void init_supermesh(void){
     init_volsmoke_supertexture(smesh);
   }
 }
+#endif

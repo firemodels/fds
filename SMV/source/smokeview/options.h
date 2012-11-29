@@ -60,6 +60,7 @@
 //#define pp_GPUDEPTH
 #define pp_OPEN
 #define pp_SHOWLIGHT
+#define pp_SUPERMESH
 #endif
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

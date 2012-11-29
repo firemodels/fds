@@ -526,9 +526,6 @@ void parse_commandline(int argc, char **argv){
       use_graphics=0;
       update_bounds=1;
     }
-    else if(strncmp(argv[i],"-nogpu",6)==0){
-      disable_gpu=1;
-    }
     else if(strncmp(argv[i],"-demo",5)==0){
        demo_option=1;
     }
