@@ -6661,13 +6661,13 @@ updatemenu=0;
       glutAddMenuEntry("-",MENU_DUMMY);
     }
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
-      if(trainer_mode==1&&strcmp(ca->name,"internal")==0)continue;
+      if(trainer_mode==1&&strcmp(ca->name,_("internal"))==0)continue;
       strcpy(line,"");
       if(ca->view_id==selected_view){
         strcat(line,"*");
       }
-      if(trainer_mode==1&&strcmp(ca->name,"external")==0){
-        strcat(line,"Outside");
+      if(trainer_mode==1&&strcmp(ca->name,_("external"))==0){
+        strcat(line,_("Outside"));
       }
       else{
         strcat(line,ca->name);
@@ -8834,7 +8834,7 @@ updatemenu=0;
         glutAddSubMenu(_("Terrain"),loadterrainmenu);
       }
       if(nsliceinfo>0&&nmultislices<nsliceinfo){
-        strcpy(loadmenulabel,"Multi-Slices");
+        strcpy(loadmenulabel,_("Multi-Slices"));
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
           strcat(loadmenulabel,steplabel);
@@ -8842,7 +8842,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,loadmultislicemenu);
       }
       if(nvsliceinfo>0&&nmultivslices<nvsliceinfo){
-        strcpy(loadmenulabel,"Multi-Vector Slices");
+        strcpy(loadmenulabel,_("Multi-Vector Slices"));
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
           strcat(loadmenulabel,steplabel);
@@ -8850,7 +8850,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,loadmultivslicemenu);
       }
       if(nsliceinfo>0){
-        strcpy(loadmenulabel,"Slice file");
+        strcpy(loadmenulabel,_("Slice file"));
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
           strcat(loadmenulabel,steplabel);
@@ -8858,7 +8858,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,loadslicemenu);
       }
       if(nvsliceinfo>0){
-        strcpy(loadmenulabel,"Vector slices");
+        strcpy(loadmenulabel,_("Vector slices"));
         if(sliceframestep>1){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
           strcat(loadmenulabel,steplabel);
@@ -8866,7 +8866,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,vslicemenu);
       }
       if(nisoinfo>0){
-        strcpy(loadmenulabel,"Isosurface file");
+        strcpy(loadmenulabel,_("Isosurface file"));
         if(isoframeskip_global>0){
           sprintf(steplabel,"/Skip %i",isoframeskip_global);
           strcat(loadmenulabel,steplabel);
@@ -8874,7 +8874,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,loadisomenu);
       }
       if(npatchinfo>0){
-        strcpy(loadmenulabel,"Boundary file");
+        strcpy(loadmenulabel,_("Boundary file"));
         if(boundframeskip>0){
           sprintf(steplabel,"/Skip %i",boundframeskip);
           strcat(loadmenulabel,steplabel);
@@ -8883,7 +8883,7 @@ updatemenu=0;
       }
       if(npartinfo>0){
         if(nevac!=npartinfo){
-          strcpy(loadmenulabel,"Particle file");
+          strcpy(loadmenulabel,_("Particle file"));
           if(partframeskip>0||partpointskip>0){
             if(partframeskip>0&&partpointskip>0){
               sprintf(steplabel,"/Skip Frame %i, Point %i",partframeskip,partpointskip);
@@ -8899,7 +8899,7 @@ updatemenu=0;
           glutAddSubMenu(loadmenulabel,particlemenu);
         }
         if(nevac>0){
-          strcpy(loadmenulabel,"Evacuation");
+          strcpy(loadmenulabel,_("Evacuation"));
           if(partframeskip>0||partpointskip>0){
             if(partframeskip>0&&partpointskip>0){
               sprintf(steplabel,"/Skip Frame %i, Point %i",partframeskip,partpointskip);
@@ -8917,11 +8917,11 @@ updatemenu=0;
       }
       if(nplot3dinfo>0)glutAddSubMenu("Plot3d file",loadplot3dmenu);
       if(ntarginfo>0){
-        strcpy(loadmenulabel,"Target file");
+        strcpy(loadmenulabel,_("Target file"));
         glutAddSubMenu(loadmenulabel,targetmenu);
       }
       if(nzoneinfo>0){
-        strcpy(loadmenulabel,"Zone fire file");
+        strcpy(loadmenulabel,_("Zone fire file"));
         glutAddSubMenu(loadmenulabel,zonemenu);
       }
       if(glui_active==1){      
