@@ -489,15 +489,33 @@ boundary layer). Other phenomena, such as electrical fields, can also result in
 deposition but are not considered in FDS due to their relatively small contribution
 in compartment fire scenarios.
 
-The deposition velocity to surfaces is determined by assuming the phenomena are independent,
-computing a deposition velocity for each (u$_{th}$, the thermophoretic velocity, and u$_{dt}$,
-a combined diffusion-turbulence velocity), and summing them~\cite{Bixler:1}. If the aerosol
-is located in a gas-phase cell adjacent to a wall cell, then the aerosol is removed from
-the gas phase at a rate proportional to its deposition velocity and deposited onto the surface.
-If the aerosol is located in a gas-phase cell adjacent to an upward-facing wall cell
-(i.e., a floor), then the aerosol is removed from the gas phase at a rate proportional
-to its deposition velocity plus its gravitational settling velocity (u$_g$) and deposited onto the
-flat surface. The accumulated surface density of deposited aerosols is tracked.
+The total aerosol deposition velocity to surfaces, $u_{dep}$, is determined by assuming the deposition
+phenomena are independent, computing a deposition velocity for each mechanism, and then summing
+them~\cite{Bixler:1}
+\be
+u_{dep} = u_g+u_{th}+u_{dt}
+\ee
+where u$_g$ is the gravitational settling velocity (for cells near upward-facing surfaces), u$_{th}$ is
+the thermophoretic velocity, and u$_{dt}$ is the combined diffusion-turbulence velocity. If the aerosol
+is located in a gas-phase cell adjacent to a wall, then the aerosol represented by species $\alpha$
+is removed from the gas-phase and deposited onto the wall surface by the amount calculated by
+\be
+\Delta \rho_{\alpha,dep} = \rho_{\alpha} u_{dep} \frac{\Delta t}{\Delta x}
+\ee
+where $\Delta \rho_{\alpha,dep}$ is the amount of aerosol deposited, $\rho_{\alpha}$ is the ambient density
+of the aerosol, $\Delta t$ is the size of the time step, and $\Delta x$ is the size of the grid cell.
+The accumulated aerosol density that deposits to surfaces,
+$m_{\alpha,dep}''$, is tracked by calculating
+\be
+m_{\alpha,dep}'' = m_{\alpha,dep}'' + \Delta \rho_{\alpha,dep} \Delta x
+\ee
+at each time step. Finally, the amount of aerosol that deposits to a surface is removed from
+the gas-phase cell by calculating
+\be
+Y_{\alpha} = Y_{\alpha} - Y_{\alpha,dep}
+\ee
+where $Y_{\alpha}$ is the aerosol mass fraction, and $Y_{\alpha,dep}$ is the mass fraction of aerosol
+that deposits in a given time step.
 
 \subsection{Gravitational Settling}
 
