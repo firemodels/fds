@@ -495,16 +495,16 @@ them~\cite{Bixler:1}
 \be
 u_{dep} = u_g+u_{th}+u_{dt}
 \ee
-where u$_g$ is the gravitational settling velocity (for cells near upward-facing surfaces), u$_{th}$ is
-the thermophoretic velocity, and u$_{dt}$ is the combined diffusion-turbulence velocity. If the aerosol
-is located in a gas-phase cell adjacent to a wall, then the aerosol represented by species $\alpha$
+where $u_g$ is the gravitational settling velocity (for cells near upward-facing surfaces), $u_{th}$ is
+the thermophoretic velocity, and $u_{dt}$ is the combined diffusion-turbulence velocity. If the aerosol
+is located in a gas-phase cell adjacent to a wall, then the aerosol (represented by the subscript $\alpha$)
 is removed from the gas-phase and deposited onto the wall surface by the amount calculated by
 \be
 \Delta \rho_{\alpha,dep} = \rho_{\alpha} u_{dep} \frac{\Delta t}{\Delta x}
 \ee
-where $\Delta \rho_{\alpha,dep}$ is the amount of aerosol deposited, $\rho_{\alpha}$ is the ambient density
-of the aerosol, $\Delta t$ is the size of the time step, and $\Delta x$ is the size of the grid cell.
-The accumulated aerosol density that deposits to surfaces,
+where $\Delta \rho_{\alpha,dep}$ is the change in aerosol density due to deposition, $\rho_{\alpha}$ is
+the ambient density of the aerosol, $\Delta t$ is the size of the time step, and $\Delta x$ is the size
+of the grid cell. The accumulated aerosol density that deposits to surfaces,
 $m_{\alpha,dep}''$, is tracked by calculating
 \be
 m_{\alpha,dep}'' = m_{\alpha,dep}'' + \Delta \rho_{\alpha,dep} \Delta x
