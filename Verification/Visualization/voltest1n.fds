@@ -1,4 +1,4 @@
-&HEAD CHID='voltest1c',TITLE='Plume whirl case SVN $Revision$' /
+&HEAD CHID='voltest1n',TITLE='Plume whirl case SVN $Revision$' /
 
 &MESH IJK=8,8,16, XB=0.0,0.8,0.0,0.8,0.0,1.6 /
 &MESH IJK=8,8,16, XB=0.8,1.6,0.0,0.8,0.0,1.6 /
