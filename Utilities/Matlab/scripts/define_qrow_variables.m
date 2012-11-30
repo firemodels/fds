@@ -18,6 +18,7 @@ Plot_Min            = str2num(char(parameters(find(strcmp(headers,'Plot_Min'))))
 Plot_Max            = str2num(char(parameters(find(strcmp(headers,'Plot_Max')))));
 Title_Position      = str2num(char(parameters(find(strcmp(headers,'Title_Position')))));
 Key_Position        = char(parameters(find(strcmp(headers,'Key_Position'))));
+Paper_Width_Factor  = str2num(char(parameters(find(strcmp(headers,'Paper_Width_Factor')))));
 Sigma_2_E           = str2num(char(parameters(find(strcmp(headers,'Sigma_2_E')))));
 Model_Error         = char(parameters(find(strcmp(headers,'Model_Error'))));
 Plot_Type           = char(parameters(find(strcmp(headers,'Plot_Type'))));
