@@ -9845,7 +9845,8 @@ The quality of a particular simulation is most directly tied to grid resolution.
 \item A model for the fraction of unresolved scalar energy fluctuations called the \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
 \item A \emph{wavelet-based error measure} \cite{McDermott:2010}, WEM
 \end{enumerate}
-Examples:
+
+\noindent Examples:
 
 \footnotesize
 \begin{verbatim}
@@ -9872,8 +9873,8 @@ Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test
 \begin{figure}[ht]
 \centering
 \begin{tabular}{rl}
-\includegraphics[width=0.4\linewidth]{FIGURES/mtr_resolved_signal} &
-\includegraphics[width=0.4\linewidth]{FIGURES/mtr_unresolved_signal}
+\includegraphics[width=3.2in]{FIGURES/mtr_resolved_signal} &
+\includegraphics[width=3.2in]{FIGURES/mtr_unresolved_signal}
 \end{tabular}
 \vskip-0.2cm
 \caption[Examples of the measure of turbulence resolution]{(Left) Resolved signal, MTR is small. (Right) Unresolved signal, MTR is close to unity.}
@@ -9929,7 +9930,6 @@ where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} 
 The decomposition of the signal shown in (\ref{eqn_wavelet_decomp}) may be repeated at ever coarser resolutions.  The result is a \emph{wavelet transform}. The procedure is entirely analogous to the Fourier transform, but with compact support.  If we look at a 1D signal with $2^m$ points, the repeated application of (\ref{eqn_wavelet_decomp}) results in an $m \times m$ matrix of averages $\mathbf{a}$ with components $a_{ij}$ and an $m \times m$ wavelet coefficient matrix $\mathbf{c}$ with components $c_{ij}$.  Each row $i$ of $\mathbf{a}$ may be reconstructed from the $i+1$ row of $\mathbf{a}$ and $\mathbf{c}$.  Because of this and because small values of the wavelet coefficient matrix may be discarded, dramatic compression of the signal may be obtained.
 
 Here we are interested in using the wavelet analysis to say something about the local level of error due to grid resolution.  Very simply, we ask what can be discerned from a sample of four data points along a line.  Roughly speaking we might expect to see one of the four scenarios depicted in Figure \ref{fig_wavelet_transforms}.  Within each plot window we also show the results of a Haar wavelet transform for that signal.  Looking first at the two top plots, on the left we have a step function and on the right we have a straight line.  Intuitively, we expect large error for the step function and small error for the line.  The following error measure achieves this goal:
-\vskip-.6cm
 \begin{eqnarray}
 \mbox{WEM}(\mathbf{x},t) = \max_{x,y,z}\left( \frac{|c_{11} + c_{12}| - |c_{21}|}{|a_{21}|} \right)
 \end{eqnarray}
@@ -9951,7 +9951,23 @@ Looking now at the two plots on the bottom of Figure \ref{fig_wavelet_transforms
 
 In \cite{McDermott:2010}, the time average of WEM was reported for LES of a nonreacting buoyant plume at three grid resolutions.  From this study, the best advice currently is to maintain average values of WEM less than 0.5.
 
+\subsubsection{Local Cell Reynolds Number}
 
+Additionally, we provide an estimate of the \emph{local cell Reynolds number} given by the ratio of the cell size (LES filter width, $\Delta$) to an estimate of the local Kolmogorov scale, $\eta$ (see \cite{Pope:2000}).  For a DNS, $\Delta/\eta$ should be less than or equal to one. The Kolmogorov scale is computed from its definition:
+\begin{equation}
+\eta \equiv \left(\frac{(\mu/\rho)^3}{\varepsilon}\right)^{1/4}
+\end{equation}
+where $\mu$ is the molecular dynamic viscosity, $\rho$ is the density, and $\varepsilon$ is the kinetic energy dissipation rate, which requires modeling.  In FDS, we assume the dissipation rate is locally equivalent to the production of subgrid-scale kinetic energy.  This implies
+\begin{equation}
+\varepsilon = (\mu_t/\rho)|\tilde{S}|^2
+\end{equation}
+where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strain invariant (see FDS Tech Guide).
+
+\footnotesize
+\begin{verbatim}
+&SLCF PBY=0, QUANTITY='CELL REYNOLDS NUMBER' /
+\end{verbatim}
+\normalsize
 
 \clearpage
 
@@ -10196,6 +10212,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
 {\ct CELL INDEX J}                              & Mesh cell index in y                              &                & D,S          \\ \hline
 {\ct CELL INDEX K}                              & Mesh cell index in z                              &                & D,S          \\ \hline
+{\ct CELL REYNOLDS NUMBER}                      & Section \ref{info:meshquality}                    &                & D,I,P,S      \\ \hline
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
@@ -10206,6 +10223,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
+{\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
 %{\ct LEAKAGE}                                   & Volume flow due to leaks                          & m$^3$/s        & D            \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           &                & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
@@ -10216,6 +10234,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QABS}                                      & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA}                                      & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
+{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
