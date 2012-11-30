@@ -1,6 +1,6 @@
 #!/bin/bash
 SVNROOT=~/FDS-SMV
-mailTo="gforney@gmail.com"
+mailTo="gforney@gmail.com koverholt@gmail.com"
 
 SVNSOURCE=$SVNROOT/SMV/source
 SVNFILE=$SVNROOT/svnversion
@@ -12,7 +12,6 @@ svn update
 THISSVN=`svn info | tail -3 | head -1 | awk '{print $4}'`
 LASTSVN=`cat $SVNFILE`
 if [ $THISSVN != $LASTSVN ] ; then
-  echo Smokebot run initiated
   echo $THISSVN>$SVNFILE
   echo -e "smokeview source has changed\n (Old revision: $LASTSVN, New revision: $THISSVN)\n Smokebot run initiated.\n" | mail -s "smokebot run initiated" $mailTo > /dev/null
   cd $SMOKEBOTDIR
