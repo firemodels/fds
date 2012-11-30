@@ -195,7 +195,7 @@ CONTAINS
 SUBROUTINE SETTLING_VELOCITY
 
 ! Experimental routine related to gravitational sedimentation in gas phase.
-! If gravitational deposition is enabled, transport depositing aerosol via 
+! If gravitational deposition is enabled, transport depositing aerosol via
 ! WW minus settling velocity. K. Overholt
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
