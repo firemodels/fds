@@ -87,11 +87,11 @@ run_auto()
   THIS_FDSAUTHOR=`svn info | tail -4 | head -1 | awk '{print $4}'`
   LAST_FDSSVN=`cat $SVN_FDSFILE`
 
-  rm -f $MESSAGE_FILE
   if [[ $THIS_SMVSVN == $LAST_SMVSVN && $THIS_FDSSVN == $LAST_FDSSVN ]] ; then
     exit
   fi
 
+  rm -f $MESSAGE_FILE
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     echo $THIS_SMVSVN>$SVN_SMVFILE
     echo -e "smokeview source has changed. $LAST_SMVSVN->$THIS_SMVSVN($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
@@ -841,10 +841,8 @@ email_build_status()
 #  = Primary script execution =
 #  ============================
 if [[ $RUNAUTO == "y" ]] ; then
-  echo running auto
   run_auto
 fi
-
 hostname=`hostname`
 start_time=`date`
 clean_firebot_history
