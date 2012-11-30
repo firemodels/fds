@@ -20,4 +20,5 @@ Title_Position      = str2num(char(parameters(find(strcmp(headers,'Title_Positio
 Key_Position        = char(parameters(find(strcmp(headers,'Key_Position'))));
 Sigma_2_E           = str2num(char(parameters(find(strcmp(headers,'Sigma_2_E')))));
 Model_Error         = char(parameters(find(strcmp(headers,'Model_Error'))));
+Plot_Type           = char(parameters(find(strcmp(headers,'Plot_Type'))));
 Plot_Filename       = char(parameters(find(strcmp(headers,'Plot_Filename'))));
