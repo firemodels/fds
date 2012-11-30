@@ -24,4 +24,4 @@ Smoke Alarm Activations,Measured Time to Activation (s),Predicted Time to Activa
 Fire Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1200,0.03 0.95,SouthEast,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Fire_Temperature
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.6,0.03 0.95,SouthEast,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Entrainment
 Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,20,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Activation_Time
-Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-006,1.00E-001,0.03 0.95,SouthEast,0,no,loglog,FDS_Validation_Guide/FIGURES/ScatterPlots/Aerosol_Deposition_Velocity
+Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-007,1.00E-001,0.03 0.95,SouthEast,0,no,loglog,FDS_Validation_Guide/FIGURES/ScatterPlots/Aerosol_Deposition_Velocity
