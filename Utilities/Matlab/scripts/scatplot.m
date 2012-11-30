@@ -263,10 +263,13 @@ for j=2:length(Q);
         hold off
         
         % print to pdf
+        
+        PDF_Paper_Width = Paper_Width_Factor * Scat_Paper_Width;
+
         set(gcf,'Visible','on');
         set(gcf,'PaperUnits','inches');
-        set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+        set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
         display(['Printing scatter plot ',num2str(j),'...'])
         print(gcf,'-dpdf',[plotdir,Plot_Filename])
         
