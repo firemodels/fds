@@ -183,9 +183,10 @@ The large differences between model and measurement seen in the smoke data do no
 
 \subsection{Sippola Aerosol Deposition Experiments}
 
-A total of 16 aerosol deposition tests were conducted in a straight duct for 5 different
-particle sizes (1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m) and 3 different air velocities (2.2~m/s, 5.3~m/s, and 9.0~m/s). For the simulations, the aerosol species is tracked
-explicitly and the aerosol deposition routines are enabled (refer to the Aerosol Deposition section
+A total of 16 aerosol deposition tests were conducted in a straight steel duct with smooth walls for 5
+different particle diameters (1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m) and 3 different air
+velocities (2.2~m/s, 5.3~m/s, and 9.0~m/s). In the simulations, the species that contains the aerosol is
+tracked explicitly, and the aerosol deposition routines are enabled (refer to the Aerosol Deposition section
 in the FDS User Guide~\cite{FDS_Users_Guide} and FDS Technical Reference Guide~\cite{FDS_Math_Guide}
 for more details). A summary of the 16 tests is shown in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
 
@@ -216,21 +217,22 @@ Test No.  &  Air Speed (m/s)  &  Particle Diameter ($\mu$m) &  Particle Density 
 \label{Sippola_Aerosol_Deposition_Summary}
 \end{table}
 
-\noindent The particle deposition velocity, $V_d$, is determined from
+\noindent The particle deposition velocity, $V_d$, is calculated by
 \be
    V_d = \frac{J_1 + J_2 + J_3 + J_4}{4 \; C_{avg}}
 \ee
-$J_1$ through $J_4$ are the deposition fluxes (kg/m$^2$/s) for duct panels 1 through 4 given by
+where $J_1$ through $J_4$ are the deposition fluxes (kg/m$^2$/s) for duct panels 1 through 4 given by
 \be
    J = \frac{m_{d}}{A_d \; \Delta t}
 \ee
 where $m_d$ is the mass of particles on the duct panel (kg), $A_d$ is the area of the duct panel (m$^2$),
-and $\Delta t$ is the duration over which soot deposits on the plate (s). $C_{avg}$ is the average aerosol
-concentration in the duct test section (kg/m$^3$) and is given by
+and $\Delta t$ is the duration over which the aerosol deposits onto the panel (s). $C_{avg}$ is the
+average aerosol concentration in the duct test section (kg/m$^3$) and is given by
 \be
-   C_{avg} = \frac{C_{up} + C_{down}}{2}
+   C_{avg} = \frac{C_{upstream} + C_{downstream}}{2}
 \ee
-Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities.
+Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities,
+and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the results.
 
 \begin{figure}[p]
 \begin{center}
@@ -252,8 +254,9 @@ Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predi
 \vspace{0.25in} \\
 \end{tabular}
 \end{center}
-\caption[Summary of Sippola aerosol deposition velocities]
-{Summary of Sippola aerosol deposition velocities.}
+\caption[Summary of aerosol deposition velocity predictions]
+{Summary of aerosol deposition velocity predictions.}
+\label{Summary_Aerosol_Deposition_Velocity}
 \end{figure}
 
 
