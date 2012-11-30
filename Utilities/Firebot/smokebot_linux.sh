@@ -13,9 +13,13 @@
 
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
-while getopts 'mq:' OPTION
+RUNAUTO=
+while getopts 'amq:' OPTION
 do
 case $OPTION in
+  a)
+   RUNAUTO="y"
+   ;;
   m)
    MAKEMOVIES="1"
    ;;
@@ -57,6 +61,48 @@ START_TIME=$(date +%s)
 # Set time limit (43,200 seconds = 12 hours)
 TIME_LIMIT=43200
 TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
+
+run_auto()
+{
+  SMV_SOURCE=$FDS_SVNROOT/SMV/source
+  SVN_SMVFILE=$FDS_SVNROOT/smv_revision
+
+  FDS_SOURCE=$FDS_SVNROOT/FDS_Source
+  SVN_FDSFILE=$FDS_SVNROOT/fds_revision
+
+  SMOKEBOTDIR=~/SMOKEBOT/
+  SMOKEBOTEXE=./run_smokebot.sh
+
+  MESSAGE_FILE=$FDS_SVNROOT/message
+
+  cd $SMV_SOURCE
+  svn update > /dev/null
+  THIS_SMVSVN=`svn info | tail -3 | head -1 | awk '{print $4}'`
+  THIS_SMVAUTHOR=`svn info | tail -4 | head -1 | awk '{print $4}'`
+  LAST_SMVSVN=`cat $SVN_SMVFILE`
+
+  cd $FDS_SOURCE
+  svn update > /dev/null
+  THIS_FDSSVN=`svn info | tail -3 | head -1 | awk '{print $4}'`
+  THIS_FDSAUTHOR=`svn info | tail -4 | head -1 | awk '{print $4}'`
+  LAST_FDSSVN=`cat $SVN_FDSFILE`
+
+  rm -f $MESSAGE_FILE
+  if [[ $THIS_SMVSVN == $LAST_SMVSVN && $THIS_FDSSVN == $LAST_FDSSVN ]] ; then
+    exit
+  fi
+
+  if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
+    echo -e "smokeview source has changed. $LAST_SMVSVN->$THIS_SMVSVN($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
+  fi
+  if [[ $THIS_FDSSVN != $LAST_FDSSVN ]] ; then
+    echo -e "FDS source has changed. $LAST_FDSSVN->$THIS_FDSSVN($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
+  fi
+  echo -e "Smokebot run initiated." >> $MESSAGE_FILE
+  echo $THIS_SMVSVN>$SVN_SMVFILE
+  echo $THIS_FDSSVN>$SVN_FDSFILE
+  cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
+}
 
 MKDIR ()
 {
@@ -794,6 +840,11 @@ email_build_status()
 #  ============================
 #  = Primary script execution =
 #  ============================
+if [[ $RUNAUTO == "y" ]] ; then
+  echo running auto
+  run_auto
+fi
+
 hostname=`hostname`
 start_time=`date`
 clean_firebot_history
