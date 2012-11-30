@@ -752,8 +752,8 @@ email_build_status()
    stop_time=`date`
    echo "-------------------------------" > $TIME_LOG
    echo "      host: $hostname " >> $TIME_LOG
-   echo "start time: $start_time" >> $TIME_LOG
-   echo " stop time: $stop_time" >> $TIME_LOG
+   echo "start time: $start_time " >> $TIME_LOG
+   echo " stop time: $stop_time " >> $TIME_LOG
    echo "   results (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
    echo "   results (public): https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit" >> $TIME_LOG
    if [ "$MAKEMOVIES" == "1" ]
