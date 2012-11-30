@@ -244,8 +244,21 @@ for j=2:length(Q);
         
         C = stripcell(Group_Key_Label);
         [B I] = unique(C);
-        legend(K(I),C(I),'Location',Key_Position,'FontSize',12','Interpreter',Font_Interpreter)
-        legend boxon
+        
+        if size(Key_Position)>0
+            legend_handle = legend(K(I),C(I),'Location',Key_Position,'FontSize',12','Interpreter',Font_Interpreter);
+            if isequal(Key_Position,'EastOutside')
+               pos = get(legend_handle,'position');
+               set(legend_handle,'position',[Scat_Paper_Width pos(2:4)])
+            end
+            if isequal(Key_Position,'SouthEastOutside')
+               pos = get(legend_handle,'position');
+               set(legend_handle,'position',[Scat_Paper_Width 0.5 pos(3:4)])
+            end
+            set(legend_handle,'Interpreter',Font_Interpreter);
+            set(legend_handle,'Fontsize',Key_Font_Size);
+            set(legend_handle,'Box','on');
+        end
         
         hold off
         
