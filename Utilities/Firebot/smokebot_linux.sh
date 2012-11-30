@@ -93,14 +93,14 @@ run_auto()
   fi
 
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
+    echo $THIS_SMVSVN>$SVN_SMVFILE
     echo -e "smokeview source has changed. $LAST_SMVSVN->$THIS_SMVSVN($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
   fi
   if [[ $THIS_FDSSVN != $LAST_FDSSVN ]] ; then
+    echo $THIS_FDSSVN>$SVN_FDSFILE
     echo -e "FDS source has changed. $LAST_FDSSVN->$THIS_FDSSVN($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
-  echo $THIS_SMVSVN>$SVN_SMVFILE
-  echo $THIS_FDSSVN>$SVN_FDSFILE
   cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
 }
 
