@@ -5822,7 +5822,7 @@ The following are all equivalent:
 \subsubsection{Two Gas Species with the Same Properties}
 \label{info:SPEC_advanced}
 
-In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by defining a lumped species, see Chapter~\ref{lumped}, with a single component.  For example, the lines:
+In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by defining a lumped species, see Chapter~\ref{info:lumped}, with a single component.  For example, the lines:
 
 \footnotesize
 \begin{verbatim}
@@ -11405,7 +11405,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_VAPORIZATION}        & Real        & Section~\ref{thermal_part_props}        & kJ/kg             &               \\ \hline
 {\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct ID }                           & Character   & Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
-{\ct LUMPED\_COMPONENT\_ONLY}       & Logical     & Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
+{\ct LUMPED\_COMPONENT\_ONLY}       & Logical     & Section~\ref{info:lumped}               &                   & {\ct .FALSE.} \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION(:)}             & Real Array  & Section~\ref{info:lumped}               &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
