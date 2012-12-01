@@ -66,9 +66,11 @@ run_auto()
 {
   SMV_SOURCE=$FDS_SVNROOT/SMV/source
   SVN_SMVFILE=$FDS_SVNROOT/smv_revision
+  SVN_SMVLOG=$FDS_SVNROOT/smv_log
 
   FDS_SOURCE=$FDS_SVNROOT/FDS_Source
   SVN_FDSFILE=$FDS_SVNROOT/fds_revision
+  SVN_FDSLOG=$FDS_SVNROOT/FDS_log
 
   SMOKEBOTDIR=~/SMOKEBOT/
   SMOKEBOTEXE=./run_smokebot.sh
@@ -80,12 +82,14 @@ run_auto()
   THIS_SMVSVN=`svn info | tail -3 | head -1 | awk '{print $4}'`
   THIS_SMVAUTHOR=`svn info | tail -4 | head -1 | awk '{print $4}'`
   LAST_SMVSVN=`cat $SVN_SMVFILE`
+  svn log -r $THIS_SMVSVN > $SVN_SMVLOG
 
   cd $FDS_SOURCE
   svn update > /dev/null
   THIS_FDSSVN=`svn info | tail -3 | head -1 | awk '{print $4}'`
   THIS_FDSAUTHOR=`svn info | tail -4 | head -1 | awk '{print $4}'`
   LAST_FDSSVN=`cat $SVN_FDSFILE`
+  svn log -r $THIS_FDSSVN > $SVN_FDSLOG
 
   if [[ $THIS_SMVSVN == $LAST_SMVSVN && $THIS_FDSSVN == $LAST_FDSSVN ]] ; then
     exit
@@ -95,10 +99,12 @@ run_auto()
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     echo $THIS_SMVSVN>$SVN_SMVFILE
     echo -e "smokeview source has changed. $LAST_SMVSVN->$THIS_SMVSVN($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
+    cat $SVN_SMVLOG >> $MESSAGE_FILE
   fi
   if [[ $THIS_FDSSVN != $LAST_FDSSVN ]] ; then
     echo $THIS_FDSSVN>$SVN_FDSFILE
     echo -e "FDS source has changed. $LAST_FDSSVN->$THIS_FDSSVN($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
+    cat $SVN_FDSLOG >> $MESSAGE_FILE
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
   cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
@@ -837,12 +843,17 @@ email_build_status()
    fi
 }
 
-#  ============================
-#  = Primary script execution =
-#  ============================
+# if -a option is invoked, only proceed running smokebot if the
+# smokeview or FDS source has changed
+
 if [[ $RUNAUTO == "y" ]] ; then
   run_auto
 fi
+
+#  ============================
+#  = Primary script execution =
+#  ============================
+
 hostname=`hostname`
 start_time=`date`
 clean_firebot_history
