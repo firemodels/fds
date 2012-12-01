@@ -1786,7 +1786,6 @@ void glui_edit_setup(int main_window);
 void glui_clip_setup(int main_window);
 void glui_device_setup(int main_window);
 void glui_labels_setup(int main_window);
-void glui_message_setup(int main_window);
 void glui_motion_setup(int main_window);
 void glui_shooter_setup(int main_window);
 void glui_trainer_setup(int main_window);

@@ -303,13 +303,13 @@ void drawcolorbarpath(void){
         vval_cutoff=temperature_cutoff;
         vval_max=temperature_max;
       }
-      sprintf(vvlabel,"%0.f",vval_min);
+      sprintf(vvlabel,"%4.0f",vval_min);
       output3Text(foregroundcolor, 1.0,0.0,0.0,vvlabel);
 
-      sprintf(vvlabel,"%0.f",vval_cutoff);
+      sprintf(vvlabel,"%4.0f",vval_cutoff);
       output3Text(foregroundcolor, 1.0,0.0,(vval_cutoff-vval_min)/(vval_max-vval_min),vvlabel);
 
-      sprintf(vvlabel,"%0.f",vval_max);
+      sprintf(vvlabel,"%4.0f",vval_max);
       output3Text(foregroundcolor, 1.0,0.0,1.0,vvlabel);
     }
 

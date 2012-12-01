@@ -87,7 +87,6 @@ int cb_usecolorbar_extreme;
 #define COLORBAR_UPDATE 11
 #define COLORBAR_COLORINDEX 12
 #define COLORBAR_DELETE 14
-#define COLORBAR_EXTREME_RGB 15
 #define COLORBAR_EXTREME 16
 
 extern "C" void update_extreme_vals(void);
