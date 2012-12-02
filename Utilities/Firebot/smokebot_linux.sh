@@ -31,6 +31,8 @@ done
 shift $(($OPTIND-1))
 
 mailTo="gforney@gmail.com, koverholt@gmail.com"
+mailToFDS="gforney@gmail.com, koverholt@gmail.com"
+#mailToFDS="gforney@gmail.com, koverholt@gmail.com, mcgratta@gmail.com, randy.mcdermott@gmail.com, CraigWeinschenk@gmail.com, jfloyd@haifire.com"
 
 FIREBOT_USERNAME="`whoami`"
 
@@ -279,6 +281,7 @@ check_compile_fds_db()
       echo "Errors from Stage 2a - Compile FDS DB:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
+      mail -s "FDS compilation errors and warnings on ${hostname}. Revision ${SVN_REVISION}." $mailToFDS < ${FIREBOT_DIR}/output/stage2a > /dev/null
    fi
 
    # Check for compiler warnings/remarks
@@ -900,16 +903,20 @@ compile_smv_db
 check_compile_smv_db
 
 ### Stage 6c ###
-make_smv_pictures_db
-check_smv_pictures_db
+if [[ $stage4a_success && $stage6b_success ]] ; then
+  make_smv_pictures_db
+  check_smv_pictures_db
+fi
 
 ### Stage 6d ###
 compile_smv
 check_compile_smv
 
 ### Stage 6e ###
-make_smv_pictures
-check_smv_pictures
+if [[ $stage4a_success && $stage6d_success ]] ; then
+  make_smv_pictures
+  check_smv_pictures
+fi
 
 ### Stage 6f ###
 if [ "$MAKEMOVIES" == "1" ]
@@ -919,13 +926,17 @@ then
 fi
 
 ### Stage 7 ###
-generate_timing_stats
-archive_timing_stats
+if [[ $stage4a_success ]] ; then
+  generate_timing_stats
+  archive_timing_stats
+fi
 
 ### Stage 8 ###
-make_smv_user_guide
-make_smv_technical_guide
-make_smv_verification_guide
+if [[ $stage4a_success && $stage6d_success ]] ; then
+  make_smv_user_guide
+  make_smv_technical_guide
+  make_smv_verification_guide
+fi
 # No stage dependencies
 
 ### Report results ###
