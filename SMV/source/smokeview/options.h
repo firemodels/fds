@@ -60,6 +60,9 @@
 //#define pp_GPUDEPTH
 #define pp_OPEN
 #define pp_SHOWLIGHT
+#ifdef WIN32
+#define pp_SUPERMESH
+#endif
 #endif
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -137,10 +140,6 @@
 #endif
 #ifdef pp_OSX
 #undef pp_LANG
-#endif
-
-#ifndef pp_LINUX
-#define pp_SUPERMESH
 #endif
 
 // VVVVVVVVVVVVVVVVVVVVVVVVV  set defines used by various headers VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
