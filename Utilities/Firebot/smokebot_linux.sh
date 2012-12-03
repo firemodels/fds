@@ -31,8 +31,7 @@ done
 shift $(($OPTIND-1))
 
 mailTo="gforney@gmail.com, koverholt@gmail.com"
-mailToFDS="gforney@gmail.com, koverholt@gmail.com"
-#mailToFDS="gforney@gmail.com, koverholt@gmail.com, mcgratta@gmail.com, randy.mcdermott@gmail.com, CraigWeinschenk@gmail.com, jfloyd@haifire.com"
+mailToFDS="gforney@gmail.com, koverholt@gmail.com, mcgratta@gmail.com, randy.mcdermott@gmail.com, CraigWeinschenk@gmail.com, jfloyd@haifire.com, Simo.Hostikka@vtt.fi"
 
 FIREBOT_USERNAME="`whoami`"
 
