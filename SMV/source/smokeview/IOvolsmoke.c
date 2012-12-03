@@ -2058,7 +2058,7 @@ void *read_volsmoke_allframes_allmeshes2(void *arg){
 void define_volsmoke_textures(void){
   int i;
 
-  if(combine_meshes==1){
+  if(combine_meshes==1&&gpuactive==1){
 #ifdef pp_GPU
     for(i=0;i<nsupermeshinfo;i++){
       supermesh *smesh;
@@ -2099,7 +2099,7 @@ void read_volsmoke_allframes_allmeshes(void){
     vr->display=1;
     if(gpuactive==1){
 #ifdef pp_SUPERMESH
-      if(combine_meshes==1){
+      if(combine_meshes==1&&gpuactive==1){
 #ifdef pp_GPU
         init_volsmoke_supertexture(meshi->super);
 #endif
@@ -2583,9 +2583,11 @@ void init_supermesh(void){
     }
   }
 #ifdef pp_GPU
-  for(i=0;i<nsupermeshinfo;i++){
-    smesh = supermeshinfo + i;
-    init_volsmoke_supertexture(smesh);
+  if(gpuactive==1){
+    for(i=0;i<nsupermeshinfo;i++){
+      smesh = supermeshinfo + i;
+      init_volsmoke_supertexture(smesh);
+    }
   }
 #endif
 }
