@@ -6256,12 +6256,12 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 \subsection{Multiple Chemical Reactions}
 \label{info:multi-reac}
-There may be times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_s$ = 0.01 and a CO yield of $y_{\mathrm{CO}}$= 0.131 \cite{SFPE:Tewarson} is:
+There may be times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_s$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
 1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.3274\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(19.7441\; CO_2 + 0.166587 \; CO + 21 \; H_2O + 5.0893\; C + 103.751 \; N_2)}}_\text{Products\_1}
 \end{multline}
-and the reaction for wood with a soot yield of $y_s$ = 0.01 and a CO yield of $y_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
+and the reaction for wood with a soot yield of $y_s$ = 0.015 and a CO yield of $y_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:wood_combust}
 1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.02121\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(0.964384\; CO_2 + 0.003655 \; CO + 0.85 \; H_2O + 0.031961\; C + 3.84076 \; N_2)}}_\text{Products\_2}
