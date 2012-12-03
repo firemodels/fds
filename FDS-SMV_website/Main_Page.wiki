@@ -59,6 +59,14 @@ Information on FDS-SMV development, third-party tools, and other resources.
 
 <br>
 
+== !YouTube Channel ==
+
+<font face="calibri,helvetica,arial,sans-serif" size="3">
+  Visit our [http://www.youtube.com/fdssmokeview FDS-SMV YouTube Channel] for tutorials and examples of FDS and Smokeview.
+</font>
+
+<br>
+
 == FDS Validation Test Reports ==
 
 <font face="calibri,helvetica,arial,sans-serif" size="3">
@@ -87,7 +95,7 @@ Information on FDS-SMV development, third-party tools, and other resources.
 
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 
- FDS 6 is currently under development, and the FDS 6 beta will be released soon for testing by early adopters.
+ FDS 6 is ready for beta testing. You can access the FDS-SMV release candidate [http://code.google.com/p/fds-smv/downloads/list here]. Note that the installation of FDS 6 is in a parallel folder to FDS 5. FDS 6 can be accessed by typing `fds` at the command prompt, whereas the currently installed version of FDS 5 can still be invoked with `fds5`.
 
  As part of the FDS 6 beta release, you can access [https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit nightly versions of the FDS-SMV documentation/manuals].
 
