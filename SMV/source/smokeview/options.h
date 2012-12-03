@@ -39,6 +39,7 @@
 #define pp_CULL
 #define pp_GPUTHROTTLE
 #endif
+
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB
@@ -48,6 +49,7 @@
 #define pp_SHOOTER
 #define pp_FREEZE_VOLSMOKE
 #define pp_LIGHT
+#define pp_SUPERMESH
 
 #define _CRT_SECURE_NO_DEPRECATE
 
@@ -60,9 +62,6 @@
 //#define pp_GPUDEPTH
 #define pp_OPEN
 #define pp_SHOWLIGHT
-#ifdef WIN32
-#define pp_SUPERMESH
-#endif
 #endif
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
