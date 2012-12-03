@@ -2059,12 +2059,14 @@ void define_volsmoke_textures(void){
   int i;
 
   if(combine_meshes==1){
+#ifdef pp_GPU
     for(i=0;i<nsupermeshinfo;i++){
       supermesh *smesh;
 
       smesh = supermeshinfo + i;
       init_volsmoke_supertexture(smesh);
     }
+#endif
   }
   else{
     for(i=0;i<nmeshes;i++){
@@ -2098,7 +2100,9 @@ void read_volsmoke_allframes_allmeshes(void){
     if(gpuactive==1){
 #ifdef pp_SUPERMESH
       if(combine_meshes==1){
+#ifdef pp_GPU
         init_volsmoke_supertexture(meshi->super);
+#endif
       }
       else{
         init_volsmoke_texture(meshi);
@@ -2251,7 +2255,7 @@ void unload_volsmoke_supertextures(void){
 }
 
 /* ------------------ init_volsmoke_supertexture ------------------------ */
-
+#ifdef pp_GPU
 void init_volsmoke_supertexture(supermesh *smesh){
   GLint border_size=0;
   int supermesh_index;
@@ -2333,6 +2337,7 @@ void init_volsmoke_supertexture(supermesh *smesh){
   printf("completed\n");
   fflush(stdout);
 }
+#endif
 
 /* ------------------ init_meshnabors ------------------------ */
 
@@ -2577,9 +2582,11 @@ void init_supermesh(void){
       smesh->f_iblank_cell[i]=1.0;
     }
   }
+#ifdef pp_GPU
   for(i=0;i<nsupermeshinfo;i++){
     smesh = supermeshinfo + i;
     init_volsmoke_supertexture(smesh);
   }
+#endif
 }
 #endif
