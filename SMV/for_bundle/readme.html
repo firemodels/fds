@@ -21,6 +21,23 @@
 
 <ul>
 
+<li>6.0.9 (build 14058) - December 4, 2012
+
+<ol>
+<li>enhancement: add option to draw non-GPU volume rendered smoke at arbitrary resolution
+<li>enhancement: add option to merge meshes when drawing volume rendered smoke
+<li>enhancement: modify script commands to allow one to specify a starting frame index as well as a number of frames to skip. This allows multiple smokeview's to run in parallel when making movies, each generating a subset of the required images (parallel process at the frame level)
+<li>enhancement: add script commands, CBARFLIP and CBARNORMAL, for setting colorbar orientation
+<li>usability: add several phrases to list of phrases being translated to other languages
+<li>usability: remove unused, unneeded colorbars
+<li>usability: improve controls in 3D smoke dialog box to specify the colorbar used to represent volume rendered smoke
+<li>usability: use colorbar names rather than indices when saving to a configuration (.ini) file 
+<li>fix: fix interpolation error that caused graphical artifacts when drawing volume rendered smoke
+<li>fix: fix timebar mouse selection
+<li>fix: fix problem with colorbar deselection.  Change behavior so that the colorbar stays selected when clicking in and moving the scene - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1775&can=1&sort=-id">Issue 1775</a>)
+</ol>
+
 <li>6.0.8 (build 13678) - November 6, 2012
 
 <ol>
