@@ -181,6 +181,86 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
 
 /* ------------------ init_volrender ------------------------ */
 
+void init_volrender_surface(int firstcall){
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int ii;
+    float dx, dy, dz;
+
+    meshi = meshinfo + i;
+    meshi->ivolbar=meshi->ibar*vol_factor;
+    meshi->jvolbar=meshi->jbar*vol_factor;
+    meshi->kvolbar=meshi->kbar*vol_factor;
+    FREEMEMORY(meshi->xvolplt);
+    FREEMEMORY(meshi->yvolplt);
+    FREEMEMORY(meshi->zvolplt);
+    NewMemory((void **)&meshi->xvolplt,(meshi->ivolbar+1)*sizeof(float));
+    NewMemory((void **)&meshi->yvolplt,(meshi->jvolbar+1)*sizeof(float));
+    NewMemory((void **)&meshi->zvolplt,(meshi->kvolbar+1)*sizeof(float));
+    dx=(meshi->xplt[meshi->ibar]-meshi->xplt[0])/(float)meshi->ivolbar;
+    dy=(meshi->yplt[meshi->jbar]-meshi->yplt[0])/(float)meshi->jvolbar;
+    dz=(meshi->zplt[meshi->kbar]-meshi->zplt[0])/(float)meshi->kvolbar;
+    for(ii=0;ii<=meshi->ivolbar;ii++){
+      meshi->xvolplt[ii]=meshi->xplt[0]+(float)ii*dx;
+    }
+    for(ii=0;ii<meshi->jvolbar;ii++){
+      meshi->yvolplt[ii]=meshi->yplt[0]+(float)ii*dy;
+    }
+    for(ii=0;ii<meshi->kvolbar;ii++){
+      meshi->zvolplt[ii]=meshi->zplt[0]+(float)ii*dz;
+    }
+  }
+  ijkbarmax=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    ijkbarmax=MAX(ijkbarmax,meshi->ivolbar);
+    ijkbarmax=MAX(ijkbarmax,meshi->jvolbar);
+    ijkbarmax=MAX(ijkbarmax,meshi->kvolbar);
+  }
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &(meshi->volrenderinfo);
+    if(firstcall==1){
+      vr->smokecolor_yz0=NULL;
+      vr->smokecolor_yz1=NULL;
+      vr->smokecolor_xz0=NULL;
+      vr->smokecolor_xz1=NULL;
+      vr->smokecolor_xy0=NULL;
+      vr->smokecolor_xy1=NULL;
+    }
+    else{
+      FREEMEMORY(vr->smokecolor_yz0);
+      FREEMEMORY(vr->smokecolor_yz1);
+      FREEMEMORY(vr->smokecolor_xz0);
+      FREEMEMORY(vr->smokecolor_xz1);
+      FREEMEMORY(vr->smokecolor_xy0);
+      FREEMEMORY(vr->smokecolor_xy1);
+    }
+    if(vr->smokeslice!=NULL){
+      int nx, ny, nz, j;
+
+      nx = ijkbarmax+1;
+      ny = ijkbarmax+1;
+      nz = ijkbarmax+1;
+      NewMemory((void **)&vr->smokecolor_yz0,4*ny*nz*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_yz1,4*ny*nz*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_xz0,4*nx*nz*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_xz1,4*nx*nz*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_xy0,4*nx*ny*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_xy1,4*nx*ny*sizeof(float));
+    }
+  }
+}
+
+/* ------------------ init_volrender ------------------------ */
+
 void init_volrender(void){
   int i;
 
@@ -228,15 +308,6 @@ void init_volrender(void){
       continue;
     }
   }
-  ijkbarmax=0;
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    if(meshi->ibar>ijkbarmax)ijkbarmax=meshi->ibar;
-    if(meshi->jbar>ijkbarmax)ijkbarmax=meshi->jbar;
-    if(meshi->kbar>ijkbarmax)ijkbarmax=meshi->kbar;
-  }
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -249,19 +320,10 @@ void init_volrender(void){
     vr->c_firedata_view=NULL;
     vr->c_smokedata_view=NULL;
     if(vr->smokeslice!=NULL){
-      int nx, ny, nz, j;
+      int j;
 
       nvolrenderinfo++;
       vr->ntimes=get_volsmoke_nframes(vr);
-      nx = ijkbarmax+1;
-      ny = ijkbarmax+1;
-      nz = ijkbarmax+1;
-      NewMemory((void **)&vr->smokecolor_yz0,4*ny*nz*sizeof(float));
-      NewMemory((void **)&vr->smokecolor_yz1,4*ny*nz*sizeof(float));
-      NewMemory((void **)&vr->smokecolor_xz0,4*nx*nz*sizeof(float));
-      NewMemory((void **)&vr->smokecolor_xz1,4*nx*nz*sizeof(float));
-      NewMemory((void **)&vr->smokecolor_xy0,4*nx*ny*sizeof(float));
-      NewMemory((void **)&vr->smokecolor_xy1,4*nx*ny*sizeof(float));
       if(vr->ntimes>0){
         NewMemory((void **)&vr->times,vr->ntimes*sizeof(float));
         NewMemory((void **)&vr->firepos,vr->ntimes*sizeof(LINT));
@@ -279,14 +341,6 @@ void init_volrender(void){
           vr->dataready[j]=0;
         }
       }
-    }
-    else{
-      vr->smokecolor_yz0=NULL;
-      vr->smokecolor_yz1=NULL;
-      vr->smokecolor_xz0=NULL;
-      vr->smokecolor_xz1=NULL;
-      vr->smokecolor_xy0=NULL;
-      vr->smokecolor_xy1=NULL;
     }
   }
   if(nvolrenderinfo>0){
@@ -536,12 +590,12 @@ void compute_all_smokecolors(void){
     vr = &(meshi->volrenderinfo);
     if(vr->loaded==0||vr->display==0)continue;
 
-    x = meshi->xplt;
-    y = meshi->yplt;
-    z = meshi->zplt;
-    ibar = meshi->ibar;
-    jbar = meshi->jbar;
-    kbar = meshi->kbar;
+    x = meshi->xvolplt;
+    y = meshi->yvolplt;
+    z = meshi->zvolplt;
+    ibar = meshi->ivolbar;
+    jbar = meshi->jvolbar;
+    kbar = meshi->kvolbar;
     dx = x[1] - x[0];
     dy = y[1] - y[0];
     dz = z[1] - z[0];
@@ -856,12 +910,12 @@ void drawsmoke3dVOL(void){
     iwall=vi->iwall;
     meshi = vi->facemesh;
     if(meshvisptr[meshi-meshinfo]==0)continue;
-    xplt = meshi->xplt;
-    yplt = meshi->yplt;
-    zplt = meshi->zplt;
-    ibar = meshi->ibar;
-    jbar = meshi->jbar;
-    kbar = meshi->kbar;
+    xplt = meshi->xvolplt;
+    yplt = meshi->yvolplt;
+    zplt = meshi->zvolplt;
+    ibar = meshi->ivolbar;
+    jbar = meshi->jvolbar;
+    kbar = meshi->kvolbar;
     vr = &(meshi->volrenderinfo);
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;

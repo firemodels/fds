@@ -6991,6 +6991,7 @@ typedef struct {
   }
 
   init_volrender();
+  init_volrender_surface(1);
 
 #ifdef pp_CULL
 
@@ -7681,6 +7682,9 @@ void initmesh(mesh *meshi){
   meshi->xplt=NULL;
   meshi->yplt=NULL;
   meshi->zplt=NULL;
+  meshi->xvolplt=NULL;
+  meshi->yvolplt=NULL;
+  meshi->zvolplt=NULL;
   meshi->xplt_cen=NULL;
   meshi->yplt_cen=NULL;
   meshi->zplt_cen=NULL;

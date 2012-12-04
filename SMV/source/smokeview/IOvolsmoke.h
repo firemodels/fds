@@ -32,6 +32,7 @@ void get_volsmoke_all_times(volrenderdata *vr);
 float get_volsmoke_frame_time(volrenderdata *vr, int framenum);
 int get_volsmoke_nframes(volrenderdata *vr);
 void init_volrender(void);
+void init_volrender_surface(int firstcall);
 void read_volsmoke_allframes(volrenderdata *vr);
 void read_volsmoke_allframes_allmeshes(void);
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first);

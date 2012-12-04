@@ -24,6 +24,7 @@ extern GLUI_Rollout *ROLLOUT_smoke3d;
 extern GLUI *glui_bounds;
 
 extern "C" void Smoke3d_CB(int var);
+extern "C" void init_volrender_surface(int firstcall);
 
 #define SMOKE_3D_CLOSE 0
 #define FIRE_RED 1
@@ -55,6 +56,7 @@ extern "C" void Smoke3d_CB(int var);
 #define TEMP_CUTOFF 22
 #define TEMP_MAX 23
 #define COMBINE_MESHES 24
+#define VOL_FACTOR 26
 
 GLUI *glui_3dsmoke=NULL;
 
@@ -75,6 +77,7 @@ GLUI_RadioButton *RADIOBUTTON_direct=NULL,*RADIOBUTTON_constraint=NULL, *RADIOBU
 GLUI_Spinner *SPINNER_cull_portsize=NULL;
 #endif
 GLUI_Spinner *SPINNER_hrrpuv_cutoff=NULL;
+GLUI_Spinner *SPINNER_volfactor=NULL;
 
 GLUI_Spinner *SPINNER_temperature_min=NULL;
 GLUI_Spinner *SPINNER_temperature_cutoff=NULL;
@@ -390,6 +393,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #ifdef pp_SUPERMESH
     CHECKBOX_combine_meshes=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Combine meshes"),&combine_meshes,COMBINE_MESHES,Smoke3d_CB);
 #endif
+    SPINNER_volfactor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("non-gpu grid multiplier"),GLUI_SPINNER_FLOAT,&vol_factor,VOL_FACTOR,Smoke3d_CB);
+    SPINNER_volfactor->set_float_limits(1.0,10.0);
   }
 
   // slice render dialog
@@ -493,7 +498,11 @@ extern "C" void Smoke3d_CB(int var){
   updatemenu=1;
   switch (var){
   float temp_min, temp_max;
+  int i;
 
+  case VOL_FACTOR:
+    init_volrender_surface(0);
+    break;
 #ifdef pp_SUPERMESH
   case COMBINE_MESHES:
     define_volsmoke_textures();

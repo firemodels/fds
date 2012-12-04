@@ -491,6 +491,8 @@ typedef struct _mesh {
   float mesh_offset[3], *mesh_offset_ptr;
   int blockvis;
   float *xplt, *yplt, *zplt;
+  int ivolbar, jvolbar, kvolbar;
+  float *xvolplt, *yvolplt, *zvolplt;
   float *xplt_cen, *yplt_cen, *zplt_cen;
   float *xplt_orig, *yplt_orig, *zplt_orig;
   float x0, x1, y0, y1, z0, z1;
