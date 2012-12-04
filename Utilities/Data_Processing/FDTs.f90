@@ -402,7 +402,7 @@ DO I=1,20
          CASE(2)
             Q_RAD(K) = (X(I)/R)*CHI_R*Q/(4.*PI*R**2)
          CASE(3)
-            Q_RAD(K) = (Z(I)/R)*CHI_R*Q/(4.*PI*R**2)
+            Q_RAD(K) = (Z(K)/R)*CHI_R*Q/(4.*PI*R**2)
       END SELECT
       IF (FLIP_AXIS) THEN
          WRITE(11,'(F6.2,A1,F6.2)') Z(K)*100,',',Q_RAD(K)
