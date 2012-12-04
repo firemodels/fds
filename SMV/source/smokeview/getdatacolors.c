@@ -1435,62 +1435,25 @@ void Update_Smokecolormap(int option){
         }
       }
       break;
-    case FIRECOLORMAP_CONSTRAINT:
-      for(n=0;n<icut;n++){
-        float n2,factor;
-        int nn2;
-        float *fire1, *fire2;
-
-        val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
-        n2 = 1+127*(val-valmin)/(valcut-valmin);
-        n2 = CLAMP(n2,1,253); 
-        nn2 = (int)n2;
-        fire1 = fire_cb + 3*nn2;
-        fire2 = fire1 + 3;
-        factor = n2 - nn2;
-        rgb_colormap[4*n]  =(1.0-factor)*fire1[0]+factor*fire2[0];
-        rgb_colormap[4*n+1]=(1.0-factor)*fire1[1]+factor*fire2[1];
-        rgb_colormap[4*n+2]=(1.0-factor)*fire1[2]+factor*fire2[2];
-        if(alpha[n]==0){
-          rgb_colormap[4*n+3]=0.0;
-        }
-        else{
-          rgb_colormap[4*n+3]=transparent_level_local;
-        }
-      }
-      for(n=icut;n<MAXSMOKERGB;n++){
-        float n2,factor;
-        int nn2;
-        float *fire1, *fire2;
-
-        val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
-        n2 = 128 + 126*(val-valcut)/(valmax-valcut);
-        nn2 = (int)n2;
-        nn2 = CLAMP(nn2,1,253);
-        factor = n2 - nn2;
-        factor = CLAMP(factor,0.0,1.0);
-        fire1 = fire_cb + 3*nn2;
-        fire2 = fire1 + 3;
-        factor = n2 - nn2;
-        rgb_colormap[4*n]  =(1.0-factor)*fire1[0]+factor*fire2[0];
-        rgb_colormap[4*n+1]=(1.0-factor)*fire1[1]+factor*fire2[1];
-        rgb_colormap[4*n+2]=(1.0-factor)*fire1[2]+factor*fire2[2];
-        if(alpha[n]==0){
-          rgb_colormap[4*n+3]=0.0;
-        }
-        else{
-          rgb_colormap[4*n+3]=transparent_level_local;
-        }
-      }
-      break;
     case FIRECOLORMAP_NOCONSTRAINT:
+    case FIRECOLORMAP_CONSTRAINT:
       for(n=0;n<MAXSMOKERGB;n++){
         float n2,factor;
         int nn2;
         float *fire1, *fire2;
 
         val = valmin + (float)n*(valmax-valmin)/(float)(MAXSMOKERGB-1);
-        n2 = 1+253*(val-valmin)/(valmax-valmin);
+        if(firecolormap_type==FIRECOLORMAP_CONSTRAINT){
+          if(val<=valcut){
+            n2 = 1+127*(val-valmin)/(valcut-valmin);
+          }
+          else{
+            n2 = 128 + 126*(val-valcut)/(valmax-valcut);
+          }
+        }
+        else{
+          n2 = 1.0+253.0*(val-valmin)/(valmax-valmin);
+        }
         nn2 = (int)n2;
         nn2 = CLAMP(nn2,1,253);
         factor = n2 - nn2;
