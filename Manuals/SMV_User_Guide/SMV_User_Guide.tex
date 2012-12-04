@@ -1768,18 +1768,26 @@ three different types of contour plots:  shaded, stepped and line
 contours.
 \section{3D Smoke Options}
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=3.15972222in]{FIGURES/fig3DSmoke}
-} \caption[Dialog Box for setting 3D smoke options] {Dialog box
-for setting 3D smoke options.   } \label{fig3DSmoke}
+\centerline{\includegraphics[width=3.291666667in]{FIGURES/fig3DSmoke}
+} \caption[Dialog Box for setting slice rendered 3D smoke options]
+{Dialog box for setting slice rendered 3D smoke options.   }
+\label{fig3DSmoke}
 \end{figure}
-Figure \ref{fig3DSmoke} allows one to override Smokeview's choice
-for several of the 3D smoke parameters.  The user may specify the
+\begin{figure}[\figoptions]
+\centerline{\includegraphics[width=3.6527777in]{FIGURES/fig3DSmokeB}
+} \caption[Dialog Box for setting volume rendered 3D smoke
+options] {Dialog box for setting volume rendered 3D smoke options.
+} \label{fig3DSmokeB}
+\end{figure}
+Figures \ref{fig3DSmoke} and \ref{fig3DsmokeB} show slice and
+volume rendered controls for overriding Smokeview's choice for
+several of the 3D smoke parameters.  The user may specify the
 color of the fire and the grey level of the smoke.  A grey level
 of $n$ where n ranges from 0 to 7 results in a color of
 $(2^n,2^n,2^n)$ where the three components represent red, green
 and blue contributions.  The {\bf hrrpuv cutoff} input refers to
 the heat release rate required at a node before Smokeview will
-color the node as fire rather than smoke.  The {\bf 50\% flame
+color the node as fire rather than smoke. The {\bf 50\% flame
 depth} allows one to specify the transparency or optical thickness
 of the fire (for visualization purposes only). A small value
 results in opaquely drawn fire while a large value results in a
@@ -3363,7 +3371,7 @@ Usage:
  EXIT
 \end{verbatim}
 
-\hitem{CBARFLIP} Display the color bar in the opposite orientation from which it was defined. 
+\hitem{CBARFLIP} Display the color bar in the opposite orientation from which it was defined.
 Usage:
 \begin{verbatim}
  CBARFLIP
