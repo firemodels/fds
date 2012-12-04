@@ -22,4 +22,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-copy %svn_root%\Manuals\SMV_Verification_Guide\SMV_Verification_Guide.pdf               %svn_root%\Manuals\All_PDF_Files\.
+copy %svn_root%\Manuals\SMV_Verification_Guide\SMV_Verification_Guide.pdf %svn_root%\..\FIRE-LOCAL\reports\fds_manuals\.
+pause
