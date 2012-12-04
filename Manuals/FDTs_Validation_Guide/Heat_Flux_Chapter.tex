@@ -5,8 +5,7 @@
 The point source model assumes that radiant energy is concentrated at a point located within the flame. Here the point source is located at a point one-third the height of the flame. The radiant heat flux at any distance $R$ from this point is given by
 
 \be
-\dot q_r'' = \cos\theta \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right) =
-\frac{x}{R} \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right)
+\dot q_r'' = \cos\theta \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right)
 \label{eq:point_source}
 \ee
 
@@ -32,9 +31,9 @@ D = \sqrt{\frac{4 A}{\pi}}
 \label{eq:point_source_D}
 \ee
 
-In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), the $\cos\theta$ (or $x/R$) term accounts for a target that is at an angle $\theta$ from the source, $x$ is the horizontal distance from the point source to the edge of the target~(m), $R$ is the radial distance from the point source to the edge of the target~(m), $\chi_r$ is the radiative fraction~(-), and $\dot Q$ is the HRR of the fire~(kW).
+In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), the $\cos\theta$ term (equal to $x/R$ for targets pointing sideways, or $z/R$ for gauges pointing upward or downward) accounts for a target that is at an angle $\theta$ from the source, $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(kW), and $R$ is the radial distance from the point source to the edge of the target~(m).
 
-In Eq.~\ref{eq:point_source_R}, $z$ is the height of the heat flux target~(m), and $L_f$ is the flame height given by Eq.~\ref{eq:point_source_Lf}~(m).
+In Eq.~\ref{eq:point_source_R}, $x$ is the horizontal distance from the point source to the edge of the target~(m), $z$ is the height of the heat flux target~(m), and $L_f$ is the flame height given by Eq.~\ref{eq:point_source_Lf}~(m).
 In Eq.~\ref{eq:point_source_Lf}, $D$ is the diameter of the fire source~(m), and $Q^*$ is the nondimensional HRR given by Eq.~\ref{eq:point_source_Qstar}. In Eq.~\ref{eq:point_source_Qstar}, $\rho_\infty$ is the ambient air density~(kg/m$^3$), $c_p$ is the specific heat of air~(kJ/kg-K), $T_\infty$ is the ambient air temperature~(K), and $g$ is the acceleration of gravity~(m/s$^2$). In Eq.~\ref{eq:point_source_D}, $A$ is the area of the fire source~(m$^2$).
 
 
