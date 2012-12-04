@@ -32,7 +32,7 @@ vdir = [pwd,'/../../Validation/'];
 plotdir = [pwd,'/../../Manuals/'];
 qfil = [pwd,'/FDTs_validation_scatterplot_inputs.csv'];
 
-[saved_data,drange] = dataplot(cfil,vdir,plotdir);
+[saved_data,drange] = dataplot(cfil,vdir,plotdir,275:348);
 scatplot(saved_data,drange,qfil,plotdir)
  
 display('validation scripts completed successfully!')
