@@ -205,10 +205,10 @@ void init_volrender_surface(int firstcall){
     for(ii=0;ii<=meshi->ivolbar;ii++){
       meshi->xvolplt[ii]=meshi->xplt[0]+(float)ii*dx;
     }
-    for(ii=0;ii<meshi->jvolbar;ii++){
+    for(ii=0;ii<=meshi->jvolbar;ii++){
       meshi->yvolplt[ii]=meshi->yplt[0]+(float)ii*dy;
     }
-    for(ii=0;ii<meshi->kvolbar;ii++){
+    for(ii=0;ii<=meshi->kvolbar;ii++){
       meshi->zvolplt[ii]=meshi->zplt[0]+(float)ii*dz;
     }
   }
