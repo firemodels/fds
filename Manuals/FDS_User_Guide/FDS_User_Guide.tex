@@ -5851,7 +5851,7 @@ In general only one species for a given {\ct ID} can be defined; however, you ma
 
 The {\ct SPEC} namelist group also allows you to define species mixtures to reduce the number of species transport equations.
 For example, consider air. Air is composed of nitrogen, oxygen, water vapor, and carbon dioxide. If we define the four component species of air, we will have four total species. One of these, say nitrogen, can be set to be the background species, leaving three transport equations to solve.
-Alternatively, we can define a ``lumped species'' that represents the air mixture and save on CPU time as FDS will the three trasnport equations would no longer be needed as the ``lumped'' air becomes the background species.
+Alternatively, we can define a ``lumped species'' that represents the air mixture and save on CPU time as FDS will the three transport equations would no longer be needed as the ``lumped'' air becomes the background species.
 
 The following inputs define equivalent initial mixtures. But in the first example three species are explicitly tracked and in the second example only a background mixture is specified.
 
