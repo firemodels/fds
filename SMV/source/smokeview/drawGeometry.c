@@ -213,7 +213,6 @@ void setventdirs(void){
   int iv;
   int dir;
   int i, j, k;
-  int index1,index2, index3;
   int nx, ny, nxy;
   char *c_iblank_x, *c_iblank_y, *c_iblank_z;
   int state1, state2, state3;
@@ -267,13 +266,10 @@ void setventdirs(void){
           breakloop=0;
           for(j=vi->jmin;j<=vi->jmax;j++){
             for(k=vi->kmin;k<=vi->kmax;k++){
-              index1=ijkcell(i-1,j,k);
-              index2=ijkcell(i,j,k);
-              index3=ijkcell(i,j,k);
               if(use_iblank==1){
-                state1=c_iblank_x[index1];
-                state2=c_iblank_x[index2];
-                state3=c_iblank_x[index3];
+                state1=c_iblank_x[ijkcell(i-1,j,k)];
+                state2=c_iblank_x[ijkcell(i,j,k)];
+                state3=c_iblank_x[ijkcell(i,j,k)];
               }
               else{
                 state1=2;
@@ -282,13 +278,8 @@ void setventdirs(void){
               }
               if(state1==2&&state3==2)continue; // air on both sides
               if(state1==0&&state3==0)continue; // solid on both sides
-              if(state2==1){
-                if(state1==2){
-                  orien=-1;
-                }
-                if(state3==2){
-                  orien=1;
-                }
+              if(state2==1&&state1!=0){
+                orien=-1;
               }
               breakloop=1;
               break;
@@ -325,13 +316,10 @@ void setventdirs(void){
           breakloop=0;
           for(i=vi->imin;i<=vi->imax;i++){
             for(k=vi->kmin;k<=vi->kmax;k++){
-              index1=ijkcell(i,j-1,k);
-              index2=ijkcell(i,j,k);
-              index3=ijkcell(i,j,k);
               if(use_iblank==1){
-                state1=c_iblank_y[index1];
-                state2=c_iblank_y[index2];
-                state3=c_iblank_y[index3];
+                state1=c_iblank_y[ijkcell(i,j-1,k)];
+                state2=c_iblank_y[ijkcell(i,j,k)];
+                state3=c_iblank_y[ijkcell(i,j,k)];
               }
               else{
                 state1=2;
@@ -340,13 +328,8 @@ void setventdirs(void){
               }
               if(state1==2&&state3==2)continue; // air on both sides
               if(state1==0&&state3==0)continue; // solid on both sides
-              if(state2==1){
-                if(state1==2){
-                  orien=-1;
-                }
-                if(state3==2){
-                  orien=1;
-                }
+              if(state2==1&&state1!=0){
+                orien=-1;
               }
               breakloop=1;
               break;
@@ -383,13 +366,10 @@ void setventdirs(void){
           breakloop=0;
           for(i=vi->imin;i<=vi->imax;i++){
             for(j=vi->jmin;j<=vi->jmax;j++){
-              index1=ijkcell(i,j,k-1);
-              index2=ijkcell(i,j,k);
-              index3=ijkcell(i,j,k);
               if(use_iblank==1){
-                state1=c_iblank_z[index1];
-                state2=c_iblank_z[index2];
-                state3=c_iblank_z[index3];
+                state1=c_iblank_z[ijkcell(i,j,k-1)];
+                state2=c_iblank_z[ijkcell(i,j,k)];
+                state3=c_iblank_z[ijkcell(i,j,k)];
               }
               else{
                 state1=2;
@@ -398,13 +378,8 @@ void setventdirs(void){
               }
               if(state1==2&&state3==2)continue; // air on both sides
               if(state1==0&&state3==0)continue; // solid on both sides
-              if(state2==1){
-                if(state1==2){
-                  orien=-1;
-                }
-                if(state3==2){
-                  orien=1;
-                }
+              if(state2==1&&!state1!=0){
+                orien=-1;
               }
               breakloop=1;
               break;
