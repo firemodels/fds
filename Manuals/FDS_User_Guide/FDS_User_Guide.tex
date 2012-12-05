@@ -2511,7 +2511,7 @@ numerical instabilities if the initial time step is set too high.
 \label{info:PART_Stability}
 
 The movement of droplets and particles within a time step is calculated using an analytical solution and remains stable regardless of the time step.
-In some cases with extremely fast droplets or particles, however, the stability of the overall flow behaviour may require setting an additional parameter
+In some cases with extremely fast droplets or particles, however, the stability of the overall flow behavior may require setting an additional parameter
 that limits the time step according to the speed of the fastest particle in the simulation. Setting {\ct PARTICLE\_CFL = .TRUE.} on the {\ct MISC} line
 activates this constraint. The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} parameter. Value 1 means that the fastest moving
 particle can move a distance of one grid cell during the time step.
@@ -5842,7 +5842,7 @@ In general only one species for a given {\ct ID} can be defined; however, you ma
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 2', ID='Device 2'/
 \end{verbatim} \normalsize
 
-\noindent define two lumped species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$.  The {\ct ID} for each species is then used in the remainder of the input file.  The {\ct LUMPED\_COMPNONENT\_ONLY} is given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not also {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for for a lumped species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  In this example the two {\ct DEVC} lines refer to the {\ct ID}s of the lumped species.  If instead the primitive species {\ct ID} was used, then the that output would sum the mass fractions over all species containing that primitive species.  For example, if the output quantities in the example above are changed as shown below, then {\ct Device 1} would just output the mass fraction of {\ct CO2 1} and {\ct Device 2} would output the sum of both.
+\noindent define two lumped species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$.  The {\ct ID} for each species is then used in the remainder of the input file.  The {\ct LUMPED\_COMPONENT\_ONLY} is given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not also {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for for a lumped species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  In this example the two {\ct DEVC} lines refer to the {\ct ID}s of the lumped species.  If instead the primitive species {\ct ID} was used, then the that output would sum the mass fractions over all species containing that primitive species.  For example, if the output quantities in the example above are changed as shown below, then {\ct Device 1} would just output the mass fraction of {\ct CO2 1} and {\ct Device 2} would output the sum of both.
 
 \footnotesize
 \begin{verbatim}
@@ -5903,7 +5903,7 @@ The logical parameter {\ct LUMPED\_COMPONENT\_ONLY} denotes that the species is 
 \end{description}
 
 \noindent The addition of lumped species to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs.  For {\ct INIT},
-{\ct MATL}, {\ct PART}, and {\ct SURF}, {\ct SPEC\_ID} refers to either a tracked primitve species or a lumped species.  For outputs and devices, {\ct DEVC}, that require a {\ct SPEC\_ID}, the {\ct SPEC\_ID} input can refer to either a tracked primitive species, a lumped species, or a lumped species component that is not tracked.  For {\ct REAC} see the discussion on specifying reactions in Chapter~\ref{info:REAC}.
+{\ct MATL}, {\ct PART}, and {\ct SURF}, {\ct SPEC\_ID} refers to either a tracked primitive species or a lumped species.  For outputs and devices, {\ct DEVC}, that require a {\ct SPEC\_ID}, the {\ct SPEC\_ID} input can refer to either a tracked primitive species, a lumped species, or a lumped species component that is not tracked.  For {\ct REAC} see the discussion on specifying reactions in Chapter~\ref{info:REAC}.
 
 
 
@@ -5980,7 +5980,7 @@ Note that this parameter is only appropriate when the simple chemistry model is 
 \item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
 \end{description}
 
-The ambient mass fractions for the consituents of air are specified on {\ct MISC} using the inputs:
+The ambient mass fractions for the constituents of air are specified on {\ct MISC} using the inputs:
 \begin{description}
 \item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
 \item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.0058)
@@ -6180,7 +6180,7 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
 \end{verbatim} \normalsize
 
 \noindent
-Note that the stoichiometry is specfied using the inputs {\ct NU} and {\ct SPEC\_ID\_NU}.  All species listed for {\ct NU} need to be tracked species (i.e. a species with {\ct LUMPED\_COMPONENT\_ONLY} cannot be specified for {\ct NU}). \footnote{There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry.
+Note that the stoichiometry is specified using the inputs {\ct NU} and {\ct SPEC\_ID\_NU}.  All species listed for {\ct NU} need to be tracked species (i.e. a species with {\ct LUMPED\_COMPONENT\_ONLY} cannot be specified for {\ct NU}). \footnote{There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry.
 \begin{description}
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will
 check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (Default {\ct .TRUE.})
@@ -6444,7 +6444,7 @@ and the resulting {\ct REAC} line is:
 \end{verbatim} \normalsize
 
 \noindent
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:reac_rate}).  This array must contain only primitive species, i.e. no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:reac_rate}).  This array must contain only primitive species, i.e. no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
 \begin{align}\label{eq:propane_2step}
 \mathrm{C_3H_8+3.5 \, O_2}&\rightarrow  \mathrm{3\,CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
@@ -6663,7 +6663,7 @@ Increasing {\ct NMIEANG} improves the accuracy of the radiative properties of wa
 of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for {\ct NMIEANG}
 is 15. For each class of particles, the Mie coefficients are calculated for a wide range of droplet diameters to ensure that the all possible run-time
 situations can be covered. To speed up the initialization phase, the range of diameters can be limited by parameters {\ct MIE\_MINIMUM\_DIAMETER} and
-{\ct MIE\_MAXIMUM\_DIAMETER}. Also, the size of the Mie cofficient tables can be specified using {\ct MIE\_NDG} parameter.
+{\ct MIE\_MAXIMUM\_DIAMETER}. Also, the size of the Mie coefficient tables can be specified using {\ct MIE\_NDG} parameter.
 
 The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and
 soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is
