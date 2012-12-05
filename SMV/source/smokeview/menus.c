@@ -6316,7 +6316,7 @@ updatemenu=0;
 /* -------------------------------- colorbarmenu -------------------------- */
 
   CREATEMENU(colorbarmenu,ColorBarMenu);
-  glutAddSubMenu("Colorbars",colorbarsmenu);
+  glutAddSubMenu(_("Colorbars"),colorbarsmenu);
   glutAddMenuEntry(_("Variations:"),-999);
   if(show_extremedata==1){
     glutAddMenuEntry(_("  *Highlight extreme data"),COLORBAR_HIGHLIGHT_EXTREME);
@@ -6330,7 +6330,7 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("  Flip"),COLORBAR_FLIP);
   }
-  glutAddSubMenu("  Shade Type:",colorbarshademenu);
+  glutAddSubMenu(_("  Shade type:"),colorbarshademenu);
   if(use_transparency_data==1){
     glutAddMenuEntry(_("  *Transparent (data)"),COLORBAR_TRANSPARENT);
   }
@@ -6985,7 +6985,7 @@ updatemenu=0;
     if(nrender_rows==10)glutAddMenuEntry("  *10",10005);
 
     CREATEMENU(rendermenu,RenderMenu);
-    glutAddMenuEntry("Resolution:",11000);
+    glutAddMenuEntry(_("Resolution:"),11000);
     glutAddMenuEntry(renderwindow,Render320);
     glutAddMenuEntry(renderwindow2,Render640);
     glutAddMenuEntry(renderwindow3,RenderWindow);
@@ -8718,7 +8718,7 @@ updatemenu=0;
     }
   }
 
-    glutAddMenuEntry(WRITEINIfile,2);
+    glutAddMenuEntry(_(WRITEINIfile),2);
 
     STRCPY(caselabel,_("Write"));
     STRCAT(caselabel," ");
@@ -8915,7 +8915,7 @@ updatemenu=0;
           glutAddSubMenu(loadmenulabel,evacmenu);
         }
       }
-      if(nplot3dinfo>0)glutAddSubMenu("Plot3d file",loadplot3dmenu);
+      if(nplot3dinfo>0)glutAddSubMenu(_("Plot3d file"),loadplot3dmenu);
       if(ntarginfo>0){
         strcpy(loadmenulabel,_("Target file"));
         glutAddSubMenu(loadmenulabel,targetmenu);
