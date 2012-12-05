@@ -8,26 +8,26 @@ treated as a homogeneous cylinder. The governing equation for the cable temperat
 $T(r,t)$, is given by
 
 \be
-\rho_s c_s \left( \frac{\partial T_s}{\partial t} \right) = \frac{1}{r} \frac{\partial}{\partial r} k_s r \left( \frac{\partial T_s}{\partial r} \right)
+\rho c \left( \frac{\partial T}{\partial t} \right) = \frac{1}{r} \frac{\partial}{\partial r} k r \left( \frac{\partial T}{\partial r} \right)
 \label{eq:cable_temp}
 \ee
 
 \noindent with the boundary condition
 
 \be
-\dot q'' = k_s \left( \frac{T_s}{r} \right) (R,t)
+\dot q'' = k \left( \frac{\partial T}{\partial r} \right) (R,t)
 \ee
 
 \noindent A finite difference approximation to Eq.~\ref{eq:cable_temp} is given by
 
 \be
-T_i^{n+1} = T_i^n + \frac{\delta t \alpha}{r_{avg} \delta r} + \frac{r_i (T_{i+1}^n - T_i^n)}{\delta r} + \frac{r_{i-1} (T_{i}^n - T_{i-1}^n)}{\delta r}
+\rho c \left[ \frac{T_i^{n+1} - T_i^n}{\delta t} \right] = \frac{2 k}{(r_{i+1} + r_i)} \frac{1}{2 \delta r} \left[ r_i \frac{T_{i+1}^n - T_i^n}{\delta r} - r_{i-1} \frac{T_{i}^n - T_{i-1}^n}{\delta r} + r_i \frac{T_{i+1}^{n+1} - T_i^{n+1}}{\delta r} - r_{i-1} \frac{T_{i}^{n+1} - T_{i-1}^{n+1}}{\delta r} \right]
 \ee
 
 \noindent where the time step $\delta t$ is given by
 
 \be
-\delta t = \frac{c_s \rho_s \delta r^2}{2 k_s}
+\delta t = \frac{c \rho \delta r^2}{2 k}
 \ee
 
 
