@@ -4910,8 +4910,6 @@ unsigned char adjustalpha(unsigned char alpha, float factor){
 
 /* ------------------ makeiblanksmoke3d ------------------------ */
 
-#define ijknode(i,j,k) ((i)+(j)*nx+(k)*nxy)
-
 void makeiblank_smoke3d(void){
   smoke3ddata *smoke3di;
   mesh *smokemesh;
@@ -4987,7 +4985,7 @@ void makeiblank_smoke3d(void){
     for(i=0;i<=smokemesh->ibar;i++){
     for(j=0;j<=smokemesh->jbar;j++){
     for(k=0;k<=smokemesh->kbar;k++){
-      ijk = ijknode(i,j,k);
+      ijk = IJKNODE(i,j,k);
       x = xplt[i];
       y = yplt[j];
       z = zplt[k];
@@ -5002,7 +5000,7 @@ void makeiblank_smoke3d(void){
       for(i=bc->ijk[IMIN];i<bc->ijk[IMAX];i++){
       for(j=bc->ijk[JMIN];j<bc->ijk[JMAX];j++){
       for(k=bc->ijk[KMIN];k<bc->ijk[KMAX];k++){
-        ijk = ijknode(i,j,k);
+        ijk = IJKNODE(i,j,k);
         iblank_smoke3d[ijk]=0;
       }
       }
@@ -5011,7 +5009,7 @@ void makeiblank_smoke3d(void){
 
     for(j=0;j<=jbar;j++){
     for(k=0;k<=kbar;k++){
-      ijk = ijknode(0,j,k);
+      ijk = IJKNODE(0,j,k);
       x = xplt[0];
       y = yplt[j];
       z = zplt[k];
@@ -5022,7 +5020,7 @@ void makeiblank_smoke3d(void){
         iblank_smoke3d[ijk]=1;
       }
 
-      ijk = ijknode(ibar,j,k);
+      ijk = IJKNODE(ibar,j,k);
       x = xplt[ibar];
       y = yplt[j];
       z = zplt[k];
@@ -5038,7 +5036,7 @@ void makeiblank_smoke3d(void){
 
     for(i=0;i<=ibar;i++){
     for(k=0;k<=kbar;k++){
-      ijk = ijknode(i,0,k);
+      ijk = IJKNODE(i,0,k);
       x = xplt[i];
       y = yplt[0];
       z = zplt[k];
@@ -5051,7 +5049,7 @@ void makeiblank_smoke3d(void){
 
 
 
-      ijk = ijknode(i,jbar,k);
+      ijk = IJKNODE(i,jbar,k);
       x = xplt[i];
       y = yplt[jbar];
       z = zplt[k];
@@ -5061,13 +5059,12 @@ void makeiblank_smoke3d(void){
       else{
         iblank_smoke3d[ijk]=1;
       }
-
-
     }
     }
+
     for(i=0;i<=ibar;i++){
     for(j=0;j<=jbar;j++){
-      ijk = ijknode(i,j,0);
+      ijk = IJKNODE(i,j,0);
       x = xplt[i];
       y = yplt[j];
       z = zplt[0];
@@ -5079,7 +5076,7 @@ void makeiblank_smoke3d(void){
       }
 
 
-      ijk = ijknode(i,j,kbar);
+      ijk = IJKNODE(i,j,kbar);
       x = xplt[i];
       y = yplt[j];
       z = zplt[kbar];
@@ -5089,11 +5086,9 @@ void makeiblank_smoke3d(void){
       else{
         iblank_smoke3d[ijk]=1;
       }
-
-
     }
     }
-    
+   
   }
 }
 
@@ -5101,11 +5096,7 @@ void makeiblank_smoke3d(void){
 
  int inmesh_smoke(float x, float y, float z, int nm, int flag){
   int i;
-  mesh *meshi;
   int n;
-  float xmin, ymin, zmin;
-  float xmax, ymax, zmax;
-  int ibar, jbar, kbar;
 
   if(flag==LOWERMESHES){
     n = nm;
@@ -5114,27 +5105,23 @@ void makeiblank_smoke3d(void){
     n = nmeshes;
   }
   for(i=0;i<n;i++){
+    mesh *meshi;
+    float xmin, ymin, zmin;
+    float xmax, ymax, zmax;
+
     meshi = meshinfo + i;
     if(flag==ALLMESHES&&i==nm)continue;
     if(meshi->smokeloaded==0)continue;
 
-    ibar=meshi->ibar;
-    jbar=meshi->jbar;
-    kbar=meshi->kbar;
     xmin=meshi->xplt[0];
     ymin=meshi->yplt[0];
     zmin=meshi->zplt[0];
-    xmax=meshi->xplt[ibar];
-    ymax=meshi->yplt[jbar];
-    zmax=meshi->zplt[kbar];
+    xmax=meshi->xplt[meshi->ibar];
+    ymax=meshi->yplt[meshi->jbar];
+    zmax=meshi->zplt[meshi->kbar];
 
-    if(x<xmin)continue;
-    if(y<ymin)continue;
-    if(z<zmin)continue;
-
-    if(x>xmax)continue;
-    if(y>ymax)continue;
-    if(z>zmax)continue;
+    if(x<xmin||y<ymin||z<zmin)continue;
+    if(x>xmax||y>ymax||z>zmax)continue;
     return i;
   }
   return -1;
