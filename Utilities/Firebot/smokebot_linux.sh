@@ -292,6 +292,10 @@ check_compile_fds_db()
       echo "Stage 2a warnings:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
+   # if the executable does not exist then an email has already been sent
+      if [ -e "fds_intel_linux_64_db" ] ; then
+        mail -s "FDS compilation errors and warnings on ${hostname}. Revision ${SVN_REVISION}." $mailToFDS < ${FIREBOT_DIR}/output/stage2a > /dev/null
+      fi
    fi
 }
 
