@@ -266,7 +266,6 @@ T_P = (RHO_S*C_S/K_S) * (DELTA/2.)**2
 A_V = H_V*W_V
 A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
-T_STEEL = 273
 
 IF (PROFILE) THEN
    WRITE(11,'(A)') 'Height, Temp, Immersed HGL Radiation Heat Flux (kW/m2)'
@@ -297,7 +296,7 @@ DO I=0,50
 
    IF (STEEL_UNPROTECTED) THEN
       DELTA_T = 1
-      T_STEEL = 293
+      T_STEEL = TMP_A
       DO J=2,T_END
          T_STEEL(J) = (F_V * (1/(RHO_STEEL*C_STEEL)) * ((H_C * ((TMP_G)-(T_STEEL(J-1)))) + ((SIGMA*1000) * EPSILON * ((TMP_G)**4 - (T_STEEL(J-1))**4))) * DELTA_T) + (T_STEEL(J-1))
       ENDDO
@@ -305,7 +304,7 @@ DO I=0,50
 
    IF (STEEL_PROTECTED) THEN
       DELTA_T = 1
-      T_STEEL = 293
+      T_STEEL = TMP_A
       DO J=2,T_END
          T_STEEL(J) = (((K_I/(C_STEEL*H*W_D + 0.5*C_I*RHO_I*H**2)) * ((TMP_G)-(T_STEEL(J-1)))) * DELTA_T) + (T_STEEL(J-1))
       ENDDO
@@ -776,7 +775,7 @@ DO I=1,9999
 
       IF (STEEL_UNPROTECTED) THEN
          DELTA_T = 1
-         T_STEEL = 293
+         T_STEEL = TMP_A
          DO M=2,TIME_RAMP(I)
             T_STEEL(M) = (F_V * (1/(RHO_STEEL*C_STEEL)) * ((H_C * ((T_PLUME(J))-(T_STEEL(M-1)))) + ((SIGMA*1000) * EPSILON * ((T_PLUME(J))**4 - (T_STEEL(M-1))**4))) * DELTA_T) + (T_STEEL(M-1))
          ENDDO
@@ -785,7 +784,7 @@ DO I=1,9999
 
       IF (STEEL_PROTECTED) THEN
          DELTA_T = 1
-         T_STEEL = 293
+         T_STEEL = TMP_A
          DO M=2,TIME_RAMP(I)
             T_STEEL(M) = (((K_I/(C_STEEL*H*W_D + 0.5*C_I*RHO_I*H**2)) * ((T_PLUME(J))-(T_STEEL(M-1)))) * DELTA_T) + (T_STEEL(M-1))
          ENDDO
