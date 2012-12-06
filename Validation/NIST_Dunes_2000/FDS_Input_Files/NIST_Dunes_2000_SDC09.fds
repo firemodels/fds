@@ -277,7 +277,7 @@
 &DEVC XYZ=1.0, 2.1, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.52 from ceil' /
 &DEVC XYZ=1.0, 2.1, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.82 from ceil' /
 # Optical Density
-&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.002 from ceil' /
+&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.02 from ceil' /
 &DEVC XYZ=1.0, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.9  from ceil' /
 
 # Point B
