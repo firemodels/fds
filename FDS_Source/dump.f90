@@ -3224,7 +3224,8 @@ LAGRANGIAN_PARTICLE_CLASS_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
             CASE(440)  ! PARTICLE WEIGHTING FACTOR
                QP(NPP,NN) = LP%PWT
             CASE(:-1)  ! Any solid phase quantity (assume Z_INDEX=-1 for now)
-               QP(NPP,NN) = SOLID_PHASE_OUTPUT(NM,ABS(LPC%QUANTITIES_INDEX(NN)),LPC%QUANTITIES_Z_INDEX(NN),N,OPT_LP_INDEX=I)
+               QP(NPP,NN) = SOLID_PHASE_OUTPUT(NM,ABS(LPC%QUANTITIES_INDEX(NN)),LPC%QUANTITIES_Y_INDEX(NN),&
+                                               LPC%QUANTITIES_Z_INDEX(NN),N,OPT_LP_INDEX=I)
          END SELECT
       ENDDO
    ENDDO LOAD_LOOP
@@ -3903,16 +3904,17 @@ DEVICE_LOOP: DO N=1,N_DEVC
             CASE('null','RMS','TIME MIN','TIME MAX') SOLID_STATS_SELECT
 
                IF (DV%WALL_INDEX>0) THEN
-                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=DV%WALL_INDEX)
+                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,&
+                                             OPT_WALL_INDEX=DV%WALL_INDEX)
                ELSEIF (DV%LP_TAG>0) THEN
-                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_LP_INDEX=LP_INDEX)
+                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,OPT_LP_INDEX=LP_INDEX)
                ELSEIF (DV%FACE_INDEX>0) THEN
                   VALUE = 1000._EB
                ENDIF
 
             CASE('TIME INTEGRAL') SOLID_STATS_SELECT
 
-               VALUE = DV%TI_VALUE + (T-DV%TI_T)*SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,&
+               VALUE = DV%TI_VALUE + (T-DV%TI_T)*SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,&
                                                                     DV%PART_INDEX,OPT_WALL_INDEX=DV%WALL_INDEX)
                DV%TI_VALUE = VALUE
                DV%TI_T = T
@@ -3927,7 +3929,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   SURF_INDEX = WALL(IW)%SURF_INDEX
                   IF (DV%SURF_ID=='null' .OR. SURFACE(SURF_INDEX)%ID==DV%SURF_ID) THEN
                      NOT_FOUND = .FALSE.
-                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=IW)
+                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=IW)
                      SELECT CASE(DV%STATISTICS)
                         CASE('MAX')
                            STAT_VALUE = MAX(STAT_VALUE,VALUE)
@@ -5074,15 +5076,15 @@ SELECT CASE(IND)
 END FUNCTION GAS_PHASE_OUTPUT
 
 
-REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,INDX,Z_INDEX,PART_INDEX,OPT_WALL_INDEX,OPT_LP_INDEX)
+REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,INDX,Y_INDEX,Z_INDEX,PART_INDEX,OPT_WALL_INDEX,OPT_LP_INDEX)
 
 ! Compute Solid Phase DEVICE Output Quantities
 
-USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY
+USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY,GET_MASS_FRACTION
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN), OPTIONAL :: OPT_WALL_INDEX,OPT_LP_INDEX
-INTEGER, INTENT(IN) :: INDX,Z_INDEX,PART_INDEX,NM
-REAL(EB) :: CONCORR,FLUX,DFLUXDT,SOLID_PHASE_OUTPUT_OLD,VOLSUM,C_S_ADJUST_UNITS,TF_MEAN
+INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
+REAL(EB) :: CONCORR,FLUX,DFLUXDT,SOLID_PHASE_OUTPUT_OLD,VOLSUM,C_S_ADJUST_UNITS,TF_MEAN,MFT,ZZ_GET(0:N_TRACKED_SPECIES),Y_SPECIES
 INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I
 LOGICAL :: T_ITERATIVE
 TYPE(WALL_TYPE), POINTER :: WC
@@ -5185,6 +5187,14 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
    CASE(20) ! MASS FLUX
       IF (Z_INDEX >=0) THEN
          SOLID_PHASE_OUTPUT = ONE_D%MASSFLUX(Z_INDEX)
+      ELSEIF (Y_INDEX > 0) THEN
+         SOLID_PHASE_OUTPUT = 0._EB
+         MFT = SUM(ONE_D%MASSFLUX)
+         IF (MFT>TWO_EPSILON_EB) THEN
+            ZZ_GET = ONE_D%MASSFLUX/MFT
+            CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES)   
+            SOLID_PHASE_OUTPUT = Y_SPECIES*MFT
+         ENDIF
       ELSE
          SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
@@ -6149,7 +6159,7 @@ FLOOP: DO NF=1,N_BNDF
                DO J=J1,J2
                   IC = CELL_INDEX(IG,J,K)
                   IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                  PP(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+                  PP(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
                   IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(IG,J,K))) IBK(J,K)=1
                ENDDO
             ENDDO
@@ -6164,7 +6174,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
                      ELSE
-                        PPN(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
+                        PPN(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
                      ENDIF
                   ENDDO
                ENDDO
@@ -6184,7 +6194,7 @@ FLOOP: DO NF=1,N_BNDF
                DO I=I1,I2
                   IC = CELL_INDEX(I,JG,K)
                   IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                  PP(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+                  PP(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
                   IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,JG,K))) IBK(I,K)=1
                ENDDO
             ENDDO
@@ -6199,7 +6209,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
                      ELSE
-                        PPN(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
+                        PPN(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
                      ENDIF
                   ENDDO
                ENDDO
@@ -6219,7 +6229,7 @@ FLOOP: DO NF=1,N_BNDF
                DO I=I1,I2
                   IC = CELL_INDEX(I,J,KG)
                   IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                  PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+                  PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
                   IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,J,KG))) IBK(I,J)=1
                ENDDO
             ENDDO
@@ -6234,7 +6244,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
                      ELSE
-                        PPN(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
+                        PPN(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
                      ENDIF
                   ENDDO
                ENDDO
@@ -6274,7 +6284,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO J=J1,J2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                     PP(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+                     PP(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
                      IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY) IBK(J,K)=1
                   ENDDO
                ENDDO
@@ -6289,7 +6299,7 @@ FLOOP: DO NF=1,N_BNDF
                         IF (ISUM>0) THEN
                            PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
                         ELSE
-                           PPN(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
+                           PPN(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
                         ENDIF
                      ENDDO
                   ENDDO
@@ -6305,7 +6315,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO I=I1,I2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                     PP(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+                     PP(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
                      IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY) IBK(I,K)=1
                   ENDDO
                ENDDO
@@ -6320,7 +6330,7 @@ FLOOP: DO NF=1,N_BNDF
                         IF (ISUM>0) THEN
                            PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
                         ELSE
-                           PPN(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
+                           PPN(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
                         ENDIF
                      ENDDO
                   ENDDO
@@ -6336,7 +6346,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO I=I1,I2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                     PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+                     PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
                      IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY) IBK(I,J)=1
                   ENDDO
                ENDDO
@@ -6351,7 +6361,7 @@ FLOOP: DO NF=1,N_BNDF
                         IF (ISUM>0) THEN
                            PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
                         ELSE
-                           PPN(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
+                           PPN(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
                         ENDIF
                      ENDDO
                   ENDDO
@@ -6458,7 +6468,7 @@ FLOOP: DO NF=1,N_BNDF
          DO I=1,IBAR
             IC = CELL_INDEX(I,J,KG)
             IW = WALL_INDEX(IC,-IOR)
-            PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+            PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
          ENDDO
       ENDDO
    ENDIF
@@ -6484,7 +6494,7 @@ FLOOP: DO NF=1,N_BNDF
             DO I=I1,I2
                IC = CELL_INDEX(I,J,K)
                IW = WALL_INDEX(IC,-IOR)
-               PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+               PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
             ENDDO
          ENDDO
       ENDIF
