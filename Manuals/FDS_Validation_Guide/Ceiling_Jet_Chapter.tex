@@ -1,8 +1,8 @@
 \chapter{Ceiling Jets and Device Activation}
 
-FDS is a computational fluid dynamics (CFD) model and has no specific ceiling jet algorithm. Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations. Nevertheless, temperature measurements near the ceiling can be used to evaluate the model's ability to predict the activation times of sprinklers, smoke detectors, and other fire protection devices.
+FDS is a computational fluid dynamics (CFD) model and has no specific ceiling jet algorithm. Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations. Nevertheless, temperature measurements near the ceiling can be used to evaluate the model's ability to predict the activation times of sprinklers, smoke alarms, and other fire protection devices.
 
-This chapter first presents comparisons of model predictions and temperature measurements near to the ceiling. Next, predicted sprinkler activation times and the total number of activations are compared with measurements. Finally, predicted smoke detector activation times are compared with measurements. 
+This chapter first presents comparisons of model predictions and temperature measurements near to the ceiling. Next, predicted sprinkler activation times and the total number of activations are compared with measurements. Finally, predicted smoke alarm activation times are compared with measurements. 
 
 \section{Ceiling Jet Temperatures}
 
@@ -352,7 +352,6 @@ For these experiments, the measured and predicted thermocouple temperature at th
 \label{Vettori_Sloped_1}
 \end{figure}
 
-
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/Vettori_Sloped_Ceiling/FSFC_v_Test_09} &
@@ -472,8 +471,6 @@ For these experiments, the measured and predicted thermocouple temperature at th
 The plots below show the predicted and measured temperatures from a fire experiment conducted in a tunnel. Near-ceiling temperatures
 were measured at distances of 2~m, 4~m, 6~m and 8~m from the fire along the centerline of tunnel.
 
-
-
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_2_m} &
@@ -482,6 +479,25 @@ were measured at distances of 2~m, 4~m, 6~m and 8~m from the fire along the cent
 \includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_8_m}
 \end{tabular*}
 \label{Arup_Tunnel}
+\end{figure}
+
+\clearpage
+
+\subsection{NIST Dunes 2000 Experiments}
+
+The primary purpose of the NIST Dunes 2000 experiments was to measure smoke alarm activation times in a single-story manufactured home. Thermocouple trees were located at each of the five smoke alarm measurement stations. The highest thermocouple can be compared to ceiling jet temperature predictions. The plots on the following page show the measured and predicted ceiling jet temperatures for the five measuring stations.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC02_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC05_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC07_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC10_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC33_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC35_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC39_Ceiling_Jet}
+\end{tabular*}
+\label{NIST_Dunes_2000_Ceiling_Jet}
 \end{figure}
 
 
@@ -704,7 +720,8 @@ occurred had the ceiling extended further.}
 
 \clearpage
 
-\section{NIST Dunes 2000 Smoke Detector Activation Times}
+\section{Smoke Alarm Activation Times}
+\subsection{NIST Dunes 2000 Experiments}
 
 The experiments that were conducted in the single-story manufactured home were selected for model validation.
 Only tests that used a flaming ignition source were considered; the smoldering and cooking ignition sources
@@ -726,9 +743,7 @@ of the highest thermocouple in the fire room. The offset is reported in Table~\r
 as the time to peak temperature from the experiment minus the time to peak temperature from FDS.
 
 A summary of the seven tests selected for model validation is shown in Table~\ref{NIST_Dunes_2000_Summary}.
-The figures on the following page compare the predicted and measured near-ceiling temperatures in the room
-where the fire was located. Figure~\ref{NIST_Dunes_2000_Scatterplot} compares the measured versus predicted
-smoke alarm activation times.
+Figure~\ref{NIST_Dunes_2000_Scatterplot} compares the measured versus predicted smoke alarm activation times.
 
 \begin{table}[h!]
 \caption{Summary of NIST Dunes 2000 experiments selected for model validation.}
@@ -747,19 +762,6 @@ SDC39     &  Mattress     &  Bedroom        &  40              \\ \hline
 \end{center}
 \label{NIST_Dunes_2000_Summary}
 \end{table}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC02_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC05_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC07_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC10_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC33_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC35_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC39_Ceiling_Jet}
-\end{tabular*}
-\label{NIST_Dunes_2000_Ceiling_Jet}
-\end{figure}
 
 \begin{figure}[p]
 \begin{center}
