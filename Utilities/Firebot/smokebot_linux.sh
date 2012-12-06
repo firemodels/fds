@@ -382,6 +382,7 @@ check_verification_cases_short()
       echo "Errors from Stage 3 - Run verification cases (short run):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
+      mail -s "Stage 3 FDS errors . Revision ${SVN_REVISION}." $mailToFDS < ${FIREBOT_DIR}/output/stage3_errors > /dev/null
    fi
 }
 
@@ -471,6 +472,7 @@ check_verification_cases_long()
       echo "Errors from Stage 5 - Run verification cases (long run):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
+      mail -s "Stage 5 FDS errors. Revision ${SVN_REVISION}." $mailToFDS < ${FIREBOT_DIR}/output/stage3_errors > /dev/null
    fi
 }
 
