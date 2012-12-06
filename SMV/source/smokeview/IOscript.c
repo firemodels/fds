@@ -542,6 +542,7 @@ int compile_script(char *scriptfile){
       case SCRIPT_RENDERALL:
         SETcval;
         cleanbuffer(buffer,buffer2);
+        scripti->ival=1;
         scripti->ival3=0;  // first frame
         sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival3);
         if(scripti->ival<1)scripti->ival=1;
@@ -555,6 +556,7 @@ int compile_script(char *scriptfile){
         SETcval;
         cleanbuffer(buffer,buffer2);
         scripti->ival3=0;  // first frame
+        scripti->ival=1;
         sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival3); 
         if(scripti->ival<1)scripti->ival=1; // skip
         if(scripti->ival>20)scripti->ival=20;
