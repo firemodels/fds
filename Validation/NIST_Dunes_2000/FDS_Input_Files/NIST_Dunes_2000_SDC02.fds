@@ -269,7 +269,7 @@
 
 # Point A
 # Temperature
-&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.002 from ceil' /
+&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.02 from ceil' /
 &DEVC XYZ=1.0, 2.1, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.3  from ceil' /
 &DEVC XYZ=1.0, 2.1, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.6  from ceil' /
 &DEVC XYZ=1.0, 2.1, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.9  from ceil' /
