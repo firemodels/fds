@@ -5,8 +5,6 @@ MODULE GLOBAL_CONSTANTS
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
-The brown cow jumped over the moon.
-
 CHARACTER(255), PARAMETER :: consid='$Id$'
 CHARACTER(255), PARAMETER :: consrev='$Revision$'
 CHARACTER(255), PARAMETER :: consdate='$Date$'
@@ -14,7 +12,7 @@ CHARACTER(255), PARAMETER :: consdate='$Date$'
 ! Indices for various modes of operation
 
 INTEGER, PARAMETER :: GAS_SPECIES=2,AEROSOL_SPECIES=3                                       ! For SPECIES%MODE
-INTEGER, PARAMETER :: EXPLICIT_EULER=1,RK2_RICHARDSON=2                                      ! For COMBUSTION_ODE
+INTEGER, PARAMETER :: EXPLICIT_EULER=1,RK2_RICHARDSON=2                                     ! For COMBUSTION_ODE
 INTEGER, PARAMETER :: EXTINCTION_1=1,EXTINCTION_2=2                                         ! For EXTINCT_MOD
 INTEGER, PARAMETER :: CONSMAG=1,DYNSMAG=2,DEARDORFF=3,VREMAN=4                              ! Turbulence model
 INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1,NET_FLUX_BC=0,SPECIFIED_TEMPERATURE=1,&
