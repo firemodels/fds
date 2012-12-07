@@ -8095,16 +8095,6 @@ INIT_LOOP: DO N=1,N_INIT_READ
    IF (IOS==1) EXIT INIT_LOOP
    READ(LU_INPUT,INIT) 
    
-   ! Make sure that all particles are inside of the domain, or else they'll be removed later
-   ! Periodic particles at the boundary will be removed and added back in an infinite loop, which is bad
-   
-   IF (    (XYZ(1)>=XF_MAX) .OR. (XYZ(1)<=XS_MIN) &
-      .OR. (XYZ(2)>=YF_MAX) .OR. (XYZ(2)<=YS_MIN) &
-      .OR. (XYZ(3)>=ZF_MAX) .OR. (XYZ(3)<=ZS_MIN)) THEN
-      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-   
    ! Transform XYZ into XB if necessary
    
    IF (ANY(XYZ>-100000._EB)) THEN
@@ -8276,6 +8266,23 @@ INIT_LOOP: DO N=1,N_INIT_READ
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                ENDIF
+            ENDIF
+
+            ! Make sure that all particles are inside of the domain
+   
+            IF ( LPC%PERIODIC_X .AND. (IN%X2>=XF_MAX .OR. IN%X1<=XS_MIN) ) THEN
+               WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+
+            IF ( LPC%PERIODIC_Y .AND. (IN%Y2>=YF_MAX .OR. IN%Y1<=YS_MIN) ) THEN
+               WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+
+            IF ( LPC%PERIODIC_Z .AND. (IN%Z2>=ZF_MAX .OR. IN%Z1<=ZS_MIN) ) THEN
+               WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
+               CALL SHUTDOWN(MESSAGE)
             ENDIF
 
             ! Initial velocity components
