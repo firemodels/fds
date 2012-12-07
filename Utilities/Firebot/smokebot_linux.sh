@@ -31,7 +31,8 @@ done
 shift $(($OPTIND-1))
 
 mailTo="gforney@gmail.com, koverholt@gmail.com"
-mailToFDS="gforney@gmail.com, koverholt@gmail.com, mcgratta@gmail.com, randy.mcdermott@gmail.com, CraigWeinschenk@gmail.com, jfloyd@haifire.com, Simo.Hostikka@vtt.fi"
+mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de"
+
 
 FIREBOT_USERNAME="`whoami`"
 
