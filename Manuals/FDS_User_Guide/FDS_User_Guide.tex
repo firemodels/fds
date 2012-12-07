@@ -5850,8 +5850,20 @@ In general only one species for a given {\ct ID} can be defined; however, you ma
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CARBON DIOXIDE', ID='Device 2'/
 \end{verbatim} \normalsize
 
-\noindent
+Another application of this would be if you wanted to track the water that evaporated from sprinklers, seperately from the water 
+that resulted from combustion.  The following inputs would allow you to do that:
+\footnotesize
+\begin{verbatim}
+&REAC FUEL='PROPANE',SOOT_YIELD=0.02,CO_YIELD=0.01/
+&SPEC ID='WATER VAPOR SPK', SPEC_ID='WATER VAPOR/
 
+&PART ID='Sprinkler Droplets',SPEC_ID='WATER VAPOR SPK'/
+
+&DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR SPK', ID='Sprinkler Water Vapor'/
+&DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR', ID='All Water Vapor'/
+\end{verbatim} \normalsize
+
+\noindent The above inputs create a species called {\ct WATER VAPOR SPK} that has all the same properties as {\ct WATER VAPOR}.  The first device will give only water that resulted from droplet evaproration, and the second device would give water that came from both sprinklers and combustion.
 
 \clearpage
 
