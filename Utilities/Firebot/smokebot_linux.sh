@@ -11,12 +11,12 @@
 #  = Input variables =
 #  ===================
 
+mailToSMV="gforney@gmail.com, koverholt@gmail.com"
+mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de"
+
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
-THIS_FDS_FAILED=0
-FDS_STATUS_FILE=$FDS_SVNROOT/FDS_status
-LAST_FDS_FAILED=`cat $FDS_STATUS_FILE`
 while getopts 'amq:' OPTION
 do
 case $OPTION in
@@ -33,13 +33,6 @@ esac
 done
 shift $(($OPTIND-1))
 
-mailToSMV="gforney@gmail.com, koverholt@gmail.com"
-mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de, ben.trettel@gmail.com"
-mailTo=$mailToSMV
-if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
-  mailTo=$mailToFDS
-fi
-
 FIREBOT_USERNAME="`whoami`"
 
 cd
@@ -51,6 +44,15 @@ ERROR_LOG=$FIREBOT_DIR/output/errors
 TIME_LOG=$FIREBOT_DIR/output/timings
 WARNING_LOG=$FIREBOT_DIR/output/warnings
 GUIDE_DIR=$FIREBOT_DIR/guides
+
+THIS_FDS_FAILED=0
+FDS_STATUS_FILE=$FDS_SVNROOT/FDS_status
+LAST_FDS_FAILED=`cat $FDS_STATUS_FILE`
+
+mailTo=$mailToSMV
+if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
+  mailTo=$mailToFDS
+fi
 
 export JOBPREFIX=SB_
 
