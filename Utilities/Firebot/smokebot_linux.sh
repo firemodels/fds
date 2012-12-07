@@ -708,10 +708,7 @@ check_guide()
    cd $FIREBOT_DIR
    if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
    then
-      if [ "$FIREBOT_USERNAME" == "gforney" ]; then
-        cp $2 /var/www/html/smokebot/manuals/
-        cp $2 /var/www/html/firebot/manuals/
-      fi
+      cp $2 /var/www/html/firebot/manuals/
       cp $2 $GUIDE_DIR/.
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
