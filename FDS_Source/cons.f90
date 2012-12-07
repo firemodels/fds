@@ -5,6 +5,8 @@ MODULE GLOBAL_CONSTANTS
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
+The brown cow jumped over the moon.
+
 CHARACTER(255), PARAMETER :: consid='$Id$'
 CHARACTER(255), PARAMETER :: consrev='$Revision$'
 CHARACTER(255), PARAMETER :: consdate='$Date$'
