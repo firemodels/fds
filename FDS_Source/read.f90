@@ -8246,7 +8246,8 @@ INIT_LOOP: DO N=1,N_INIT_READ
          
             ! Assign an index to identify the particle class
 
-            IF (PART_ID/='null') THEN
+            PART_ID_IF: IF (PART_ID/='null') THEN
+
                DO NS=1,N_LAGRANGIAN_CLASSES
                   IF (PART_ID==LAGRANGIAN_PARTICLE_CLASS(NS)%ID) THEN
                      IN%PART_INDEX = NS
@@ -8266,24 +8267,22 @@ INIT_LOOP: DO N=1,N_INIT_READ
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                ENDIF
-            ENDIF
 
-            ! Make sure that all particles are inside of the domain
-   
-            IF ( LPC%PERIODIC_X .AND. (IN%X2>=XF_MAX .OR. IN%X1<=XS_MIN) ) THEN
-               WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
-               CALL SHUTDOWN(MESSAGE)
-            ENDIF
+               ! Make sure that all particles are inside of the domain
+               IF ( LPC%PERIODIC_X .AND. (IN%X2>=XF_MAX .OR. IN%X1<=XS_MIN) ) THEN
+                  WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+               IF ( LPC%PERIODIC_Y .AND. (IN%Y2>=YF_MAX .OR. IN%Y1<=YS_MIN) ) THEN
+                  WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+               IF ( LPC%PERIODIC_Z .AND. (IN%Z2>=ZF_MAX .OR. IN%Z1<=ZS_MIN) ) THEN
+                  WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
 
-            IF ( LPC%PERIODIC_Y .AND. (IN%Y2>=YF_MAX .OR. IN%Y1<=YS_MIN) ) THEN
-               WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
-               CALL SHUTDOWN(MESSAGE)
-            ENDIF
-
-            IF ( LPC%PERIODIC_Z .AND. (IN%Z2>=ZF_MAX .OR. IN%Z1<=ZS_MIN) ) THEN
-               WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
-               CALL SHUTDOWN(MESSAGE)
-            ENDIF
+            ENDIF PART_ID_IF
 
             ! Initial velocity components
 
