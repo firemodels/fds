@@ -3240,16 +3240,12 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART SPEC_ID ',TRIM(LPC%SPEC_ID),' not found'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      DO NN=1,N_SPECIES
-         IF (SPECIES_MIXTURE(LPC%Z_INDEX)%MASS_FRACTION(NN)>0._EB) THEN
-            IF (LPC%Y_INDEX > 0) THEN
-               WRITE(MESSAGE,'(A,I3,A)') 'ERROR: PART line ',N,'.  Particles cannot evaporate to a lumped species.'
-               CALL SHUTDOWN(MESSAGE)            
-            ELSE
-               LPC%Y_INDEX = NN        
-            ENDIF
-         ENDIF
-      ENDDO
+      IF (SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX < 0) THEN
+         WRITE(MESSAGE,'(A,I3,A)') 'ERROR: PART line ',N,'.  Particles cannot evaporate to a lumped species.'
+         CALL SHUTDOWN(MESSAGE)                     
+      ELSE
+         LPC%Y_INDEX = SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX
+      ENDIF
       IF (SPECIES(LPC%Y_INDEX)%DENSITY_LIQUID > 0._EB) LPC%DENSITY=SPECIES(LPC%Y_INDEX)%DENSITY_LIQUID
    ENDIF
 
