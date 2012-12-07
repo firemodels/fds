@@ -601,12 +601,12 @@ DO I=0,50
    ENDDO
 
    IF (I==0) THEN
-         WRITE(FMT,'(A,I1.1,5A)') "(",N_PTS,"(","A",",','),","A",")"
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS,"(","A",",','),","A",")"
          WRITE(11,FMT) 'Time',(TRIM(LABEL(K)),K=1,N_PTS)
-         WRITE(FMT,'(A,I1.1,5A)') "(",N_PTS,"(","F7.2",",','),","F7.2",")"
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS,"(","F7.2",",','),","F7.2",")"
          WRITE(11,FMT) T, (T_JET(K)-273,K=1,N_PTS)
       ELSE
-         WRITE(FMT,'(A,I1.1,5A)') "(",N_PTS,"(","F7.2",",','),","F7.2",")"
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS,"(","F7.2",",','),","F7.2",")"
          WRITE(11,FMT) T, (T_JET(K)-273,K=1,N_PTS)
    ENDIF
 
