@@ -8094,9 +8094,19 @@ INIT_LOOP: DO N=1,N_INIT_READ
    CALL CHECKREAD('INIT',LU_INPUT,IOS)
    IF (IOS==1) EXIT INIT_LOOP
    READ(LU_INPUT,INIT) 
-
+   
+   ! Make sure that all particles are inside of the domain, or else they'll be removed later
+   ! Periodic particles at the boundary will be removed and added back in an infinite loop, which is bad
+   
+   IF (    (XYZ(1)>=XF_MAX) .OR. (XYZ(1)<=XS_MIN) &
+      .OR. (XYZ(2)>=YF_MAX) .OR. (XYZ(2)<=YS_MIN) &
+      .OR. (XYZ(3)>=ZF_MAX) .OR. (XYZ(3)<=ZS_MIN)) THEN
+      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle at boundary or outside of domain.'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+   
    ! Transform XYZ into XB if necessary
-
+   
    IF (ANY(XYZ>-100000._EB)) THEN
       XB(1:2) = XYZ(1)
       XB(3:4) = XYZ(2)
