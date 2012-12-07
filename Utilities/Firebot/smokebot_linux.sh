@@ -14,6 +14,9 @@
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
+THIS_FDS_FAILED=0
+FDS_STATUS_FILE=$FDS_SVNROOT/FDS_status
+LAST_FDS_FAILED=`cat $FDS_STATUS_FILE`
 while getopts 'amq:' OPTION
 do
 case $OPTION in
@@ -30,9 +33,12 @@ esac
 done
 shift $(($OPTIND-1))
 
-mailTo="gforney@gmail.com, koverholt@gmail.com"
+mailToSMV="gforney@gmail.com, koverholt@gmail.com"
 mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de"
-
+mailTo=$mailToSMV
+if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
+  mailTo=$mailToFDS
+fi
 
 FIREBOT_USERNAME="`whoami`"
 
@@ -281,7 +287,7 @@ check_compile_fds_db()
       echo "Errors from Stage 2a - Compile FDS DB:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
-      mail -s "FDS compilation errors and warnings on ${hostname}. Revision ${SVN_REVISION}." $mailToFDS < ${FIREBOT_DIR}/output/stage2a > /dev/null
+      THIS_FDS_FAILED=1
    fi
 
    # Check for compiler warnings/remarks
@@ -295,7 +301,7 @@ check_compile_fds_db()
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
       if [ -e "fds_intel_linux_64_db" ] ; then
-        mail -s "FDS compilation errors and warnings on ${hostname}. Revision ${SVN_REVISION}." $mailToFDS < ${FIREBOT_DIR}/output/stage2a > /dev/null
+        THIS_FDS_FAILED=1
       fi
    fi
 }
@@ -383,7 +389,7 @@ check_verification_cases_short()
       echo "Errors from Stage 3 - Run verification cases (short run):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
-      mail -s "Stage 3 FDS errors . Revision ${SVN_REVISION}." $mailToFDS < ${FIREBOT_DIR}/output/stage3_errors > /dev/null
+      THIS_FDS_FAILED=1
    fi
 }
 
@@ -473,7 +479,7 @@ check_verification_cases_long()
       echo "Errors from Stage 5 - Run verification cases (long run):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
-      mail -s "Stage 5 FDS errors. Revision ${SVN_REVISION}." $mailToFDS < ${FIREBOT_DIR}/output/stage3_errors > /dev/null
+      THIS_FDS_FAILED=1
    fi
 }
 
@@ -808,6 +814,10 @@ save_build_status()
 
 email_build_status()
 {
+   if [[ "$THIS_FDS_FAILED" == "1" ]] ; then
+     mailTo=$mailToFDS
+   fi
+   echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
    echo "-------------------------------" > $TIME_LOG
    echo "      host: $hostname " >> $TIME_LOG
