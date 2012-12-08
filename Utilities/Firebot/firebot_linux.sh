@@ -835,6 +835,8 @@ scan_matlab_license_test()
       # Continue along
       :
    else
+      TIME_LIMIT_STAGE="7"
+      check_time_limit
       # Wait 5 minutes until retry
       sleep 300
       check_matlab_license_server
