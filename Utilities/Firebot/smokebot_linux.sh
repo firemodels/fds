@@ -12,7 +12,7 @@
 #  ===================
 
 mailToSMV="gforney@gmail.com, koverholt@gmail.com"
-mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de"
+mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de, ben.trettel@gmail.com"
 
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
