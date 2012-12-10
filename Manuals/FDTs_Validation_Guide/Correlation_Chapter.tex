@@ -3,17 +3,20 @@
 
 \section{Arup Tunnel}
 
+\subsection*{Ceiling Jet (Alpert)}
+
 \begin{table}[h!]
-\caption{Summary of correlations and input parameters used for Arup Tunnel cases.}
+\caption{Summary of input parameters used for ATF Corridor cases, ceiling jet (Alpert).}
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|}
+\begin{tabular}{|l|l|}
 \hline
-                     &                      &                      &                &                &                                 \\
-\rb{Correlation}     &  \rb{$\dot Q$ (kW)}  &  \rb{$t_{end}$ (s)}  &  \rb{$R$ (m)}  &  \rb{$H$ (m)}  &  \rb{$T_{\infty}$ ($^\circ$C)}  \\ \hline \hline
-Ceiling Jet          &  5,344               &  500                 &  2             &  6.1           &  20                             \\
-(Alpert)             &                      &                      &  4             &                &                                 \\
-                     &                      &                      &  6             &                &                                 \\
-                     &                      &                      &  8             &                &                                 \\ \hline
+                          &                            \\
+\rb{Input parameter}      &  \rb{Value}                \\ \hline \hline
+$\dot Q$ (kW)             &  5,344                     \\ \hline
+$t_{end}$ (s)             &  500                       \\ \hline
+$R$ (m)                   &  2, 4, 6, 8                \\ \hline
+$H$ (m)                   &  6.1                       \\ \hline
+$T_{\infty}$ ($^\circ$C)  &  20                        \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -24,17 +27,32 @@ Ceiling Jet          &  5,344               &  500                 &  2         
 
 \section{ATF Corridors}
 
+\subsection*{Ceiling Jet (Alpert)}
+
 \begin{table}[h!]
-\caption{Summary of correlations and input parameters used for ATF Corridor cases.}
+\caption{Summary of input parameters used for ATF Corridor cases, ceiling jet (Alpert).}
+
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|}
+\begin{tabular}{|l|l|}
 \hline
-                     &                      &                      &                &                &                                 \\
-\rb{Correlation}     &  \rb{$\dot Q$ (kW)}  &  \rb{$t_{end}$ (s)}  &  \rb{$R$ (m)}  &  \rb{$H$ (m)}  &  \rb{$T_{\infty}$ ($^\circ$C)}  \\ \hline \hline
-Ceiling Jet          &  50                  &  900                 &  2             &  2.03          &  20                             \\
-(Alpert)             &  100                 &                      &  9             &                &                                 \\
-                     &  250                 &                      &  14.5          &                &                                 \\
-                     &  500                 &                      &                &                &                                 \\ \hline
+                          &                            \\
+\rb{Input parameter}      &  \rb{Value}                \\ \hline \hline
+$t_{end}$ (s)             &  900                       \\ \hline
+$R$ (m)                   &  2, 9, 14.5                \\ \hline
+$H$ (m)                   &  2.03                      \\ \hline
+$T_{\infty}$ ($^\circ$C)  &  20                        \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                      &                      \\
+\rb{Test}             &  \rb{$\dot Q$ (kW)}  \\ \hline \hline
+ATF Corridors 50 kW   &  50                  \\ \hline
+ATF Corridors 100 kW  &  100                 \\ \hline
+ATF Corridors 250 kW  &  250                 \\ \hline
+ATF Corridors 500 kW  &  500                 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -45,18 +63,43 @@ Ceiling Jet          &  50                  &  900                 &  2         
 
 \section{Fleury Heat Flux}
 
+\subsection*{Point Source Radiation Heat Flux}
+
 \begin{table}[h!]
-\caption{Summary of correlations and input parameters used for Fleury Heat Flux cases.}
+\caption{Summary of input parameters used for Fleury Heat Flux cases, point source radiation heat flux.}
+
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|}
+\begin{tabular}{|l|l|}
 \hline
-                     &                    &                           &                     &                &                &            \\
-\rb{Correlation}     &  \rb{$A$ (m$^2$)}  &  \rb{$\dot Q$ (kW)}       &  \rb{$\chi_r$ (-)}  &  \rb{$X$ (m)}  &  \rb{$Z$ (m)}  &  \rb{IOR}  \\ \hline \hline
-Point Source         &  0.09              &  100                      &  0.35               &  0.5           &  0.0           &  2         \\
-Radiation            &  0.18              &  150                      &                     &  0.75          &  0.5           &            \\
-Heat Flux            &  0.27              &  200                      &                     &  1.0           &  1.0           &            \\
-                     &                    &  250                      &                     &  1.5           &  1.5           &            \\
-                     &                    &  300                      &                     &  2.0           &                &            \\ \hline
+                      &                            \\
+\rb{Input parameter}  &  \rb{Value}                \\ \hline \hline
+$\chi_R$ (-)          &  0.35                      \\ \hline
+$X$ (m)               &  0.5, 0.75, 1.0, 1.5, 2.0  \\ \hline
+$Z$ (m)               &  0.0, 0.5, 1.0, 1.5        \\ \hline
+IOR (-)               &  2                         \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+                     &                    &                      \\
+\rb{Test}            &  \rb{$A$ (m$^2$)}  &  \rb{$\dot Q$ (kW)}  \\ \hline \hline
+100 kW, 1:1 Burner   &  0.09              &  100                 \\ \hline
+150 kW, 1:1 Burner   &  0.09              &  150                 \\ \hline
+200 kW, 1:1 Burner   &  0.09              &  200                 \\ \hline
+250 kW, 1:1 Burner   &  0.09              &  250                 \\ \hline
+300 kW, 1:1 Burner   &  0.09              &  300                 \\ \hline
+100 kW, 2:1 Burner   &  0.18              &  100                 \\ \hline
+150 kW, 2:1 Burner   &  0.18              &  150                 \\ \hline
+200 kW, 2:1 Burner   &  0.18              &  200                 \\ \hline
+250 kW, 2:1 Burner   &  0.18              &  250                 \\ \hline
+300 kW, 2:1 Burner   &  0.18              &  300                 \\ \hline
+100 kW, 3:1 Burner   &  0.27              &  100                 \\ \hline
+150 kW, 3:1 Burner   &  0.27              &  150                 \\ \hline
+200 kW, 3:1 Burner   &  0.27              &  200                 \\ \hline
+250 kW, 3:1 Burner   &  0.27              &  250                 \\ \hline
+300 kW, 3:1 Burner   &  0.27              &  300                 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
