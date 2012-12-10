@@ -34,6 +34,35 @@ run_fdts_program()
 #  = Stage 3 - Run Matlab validation script =
 #  ==========================================
 
+# Functions to check for an available Matlab license
+
+run_matlab_license_test()
+{
+   # Run simple test to see if Matlab license is available
+   cd $FDS_SVNROOT/Utilities/Matlab
+   matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> FDTsbot.log
+}
+
+scan_matlab_license_test()
+{
+   # Check for failed license
+   if [[ `grep "License checkout failed" FDTsbot.log` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      # Wait 5 minutes until retry
+      sleep 300
+      check_matlab_license_server
+   fi
+}
+
+check_matlab_license_server()
+{
+   run_matlab_license_test
+   scan_matlab_license_test
+}
+
 run_matlab_plotting()
 {
    echo ""
@@ -78,6 +107,7 @@ make_fdts_validation_guide()
 run_fdts_program
 
 ### Stage 3 ###
+check_matlab_license_server
 run_matlab_plotting
 
 ### Stage 4 ###
