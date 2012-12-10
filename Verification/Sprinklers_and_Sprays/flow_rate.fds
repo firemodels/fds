@@ -21,6 +21,7 @@
       PRESSURE_RAMP = 'PR'
       PARTICLE_VELOCITY=2., 
       SPRAY_ANGLE= 0.,60., 
+      PARTICLES_PER_SECOND = 1000
       SMOKEVIEW_ID='sprinkler_upright' /
 
 &RAMP ID='PR',   T= 1., F=16. /     1 x 2.5 x 4 =     10 l/min
@@ -93,5 +94,8 @@ Number of open nozzles
 
 &DEVC ID='Nozzles', XYZ=0.0,0.0,0.0, QUANTITY='OPEN NOZZLES' /
 
+Time step
+
+&DEVC ID='DT', XYZ=0.0,0.0,0.0, QUANTITY='TIME STEP' /
 
 &TAIL /
