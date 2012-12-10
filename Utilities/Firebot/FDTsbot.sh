@@ -39,7 +39,6 @@ run_fdts_program()
 run_matlab_license_test()
 {
    # Run simple test to see if Matlab license is available
-   cd $FDS_SVNROOT/Utilities/Matlab
    matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> FDTsbot.log
 }
 
@@ -52,6 +51,7 @@ scan_matlab_license_test()
       :
    else
       # Wait 5 minutes until retry
+      echo "No Matlab licenses available; will retry in 5 minutes."
       sleep 300
       check_matlab_license_server
    fi
