@@ -2692,21 +2692,29 @@ flow conditions in different regions of the box and numerical error due to node 
 
 \clearpage
 
-\section{Heat Conduction through Insulated Steel (\texorpdfstring{{\bf insulated\_steel\_plate}}{insulated\_steel\_plate})}
+\section{Heat Conduction through Insulated Steel (\texorpdfstring{{\bf insulated\_steel\_x}}{insulated\_steel\_x})}
 
-In this example, a 1~cm thick steel plate is coated on each side with 2~cm thick insulation material. The steel and insulation have constant thermal properties and the heat transfer coefficient is fixed at 10~W/m$^2$/K. One side of the plate is exposed to a 480~$^\circ$C gas while the other side is exposed to ambient temperature (20~$^\circ$C). The plate is heated for 10~h and the steady-state temperature profile is shown in Fig.~\ref{insulated_steel_plate}. The heat flux through the plate is given by:
-\be 
-   \dot{q}'' = \frac{ T_{\hbox{\tiny hot}} - T_{\hbox{\tiny cold}} }{ 2/h + \sum_{i=1}^3 L_i/k_i } 
+In these examples, a 1~cm thick steel plate and pipe are coated on each side with 2~cm thick insulation material. The steel and insulation material have constant thermal properties, and the heat transfer coefficient is 10~W/m$^2$/K. The outer surface of the composite is exposed to air at 480~$^\circ$C while the inner surface is exposed to air at 20~$^\circ$C. The assemblies are heated for 10~h and the steady-state temperature profiles are shown in Fig.~\ref{insulated_steel_plate}. Neglecting thermal radiation, the heat flux through the plate is given by~\cite{Incropera:1}:
+\be
+   \dot{q}'' = \frac{ T_{\hbox{\tiny hot}} - T_{\hbox{\tiny cold}} }{ \frac{1}{h} + \frac{L_{\hbox{\tiny ins}}}{k_{\hbox{\tiny ins}}} + \frac{L_{\hbox{\tiny steel}}}{k_{\hbox{\tiny steel}}} + \frac{L_{\hbox{\tiny ins}}}{k_{\hbox{\tiny ins}}} +\frac{1}{h}}
 \ee
-where $h$ is the heat transfer coefficient, $L_i$ is the layer thickness, and $k_i$ is the thermal conductivity of the layer. 
-The heat flux through each layer is the same, and the steady-state solution can be obtained by solving for the temperature drop across each. Note that the position of the symbols in Fig.~\ref{insulated_steel_plate} indicates the default finite difference noding of the solid.
+where $h$ is the heat transfer coefficient, $L$ is the layer thickness, and $k$ is the thermal conductivity of the layer material. The heat flux through the inner surface of the pipe, $r_1$, is given by:
+\be
+   \dot{q}'' = \frac{ T_{\hbox{\tiny hot}} - T_{\hbox{\tiny cold}} }{ \frac{1}{h} + \frac{r_1}{k_{\hbox{\tiny ins}}} \ln \frac{r_2}{r_1} + \frac{r_1}{k_{\hbox{\tiny steel}}} \ln \frac{r_3}{r_2} + \frac{r_1}{k_{\hbox{\tiny ins}}} \ln \frac{r_4}{r_3} + \frac{r_1}{r_4} \frac{1}{h} }
+\ee
+where $r_1$ is the inner radius of the inner layer of insulation, $r_2$ is the inner radius of the steel, $r_3$ is the outer radius of the steel, and $r_4$ is the outer radius of the outer layer of insulation. The heat flux through each layer is the same, and the steady-state solution can be obtained by solving for the temperature drop across each layer. The temperature gradient within each layer of the plate composite is linear. For the pipe, the temperature profile for each layer is:
+\be
+   T(r) = T_{s,i} + \frac{ T_{s,i-1} - T_{s,i} }{ \ln (r_{i-1}/r_i) } \ln \frac{r}{r_i} \quad \quad i=2,3,4
+\ee
+where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1 through 4. Note that the position of the symbols in Fig.~\ref{insulated_steel_plate} indicates the default finite difference nodes of the solid. Also note that the spatial coordinate refers to the distance from the outer (hot) surface of insulation.
 
 \begin{figure}[ht]
 \noindent
-\begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/insulated_steel_plate}
-\end{center}
-\caption[The {\bf insulated\_steel\_plate} test case]{Steady-state temperature profile within an insulated steel plate.}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/insulated_steel_plate} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/insulated_steel_pipe}
+\end{tabular*}
+\caption[The {\bf insulated\_steel} test cases]{Steady-state temperature profile within an insulated steel plate and pipe.}
 \label{insulated_steel_plate}
 \end{figure}
 
