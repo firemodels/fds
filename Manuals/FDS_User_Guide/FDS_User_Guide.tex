@@ -5850,7 +5850,7 @@ In general only one species for a given {\ct ID} can be defined; however, you ma
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CARBON DIOXIDE', ID='Device 2'/
 \end{verbatim} \normalsize
 
-Another application of this would be if you wanted to track the water that evaporated from sprinklers, separately from the water 
+Another application of this would be if you wanted to track the water that evaporated from sprinklers, separately from the water
 that resulted from combustion.  The following inputs would allow you to do that:
 \footnotesize
 \begin{verbatim}
@@ -6741,33 +6741,6 @@ The way to describe particles depends on the type.
 If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct PART} line. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets. For any other type of particle, such as particles that represent subgrid-scale objects, like office clutter or vegetation, you add a {\ct SURF\_ID} to the {\ct PART} line. All of these different types of particles are described below.
 
 
-\subsection{Output Quantities}
-\label{info:particle_quantities}
-
-The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which
-scalar quantities should be used to color the particles or droplets when viewed as an
-animation. The choices are \\
-{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
-{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
-{\ct 'PARTICLE VELOCITY'} (m/s) \\
-{\ct 'PARTICLE MASS'} (kg) \\
-{\ct 'PARTICLE AGE'} (s) \\
-For particles with a specified {\ct SURF\_ID}, you may also specify any of the solid phase output quantities. If the specified quantity is associated with a species, use the parameter {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
-
-By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
-Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
-{\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
-
-It is not unusual to include hundreds of thousands of particles in a simulation. Visualizing all of the particles in Smokeview can sometimes be impractical due to memory limitations. To limit the amount of particle amount, you can make use of the following parameters on the {\ct PART} line:
-\begin{description}
-\item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
-file {\ct CHID.prt5}. This parameter can be used to reduce the size
-of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview.
-The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{info:MASSLESS}.
-\item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when
-trying to reduce the number of droplets or particles in a simulation.
-\end{description}
-
 
 
 \section{Massless Particles}
@@ -6818,6 +6791,25 @@ then no further inputs are required. Otherwise, you must provide all of the foll
 \item[{\ct ENTHALPY\_OF\_FORMATION}] The heat of formation of the gas (kJ/kg).
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
 \end{description}
+
+
+\subsection{Output Options for Liquid Droplets}
+\label{info:particle_quantities}
+
+The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which scalar quantities should be used to color the droplets when viewed as an animation. The choices are \\
+{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
+{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
+{\ct 'PARTICLE VELOCITY'} (m/s) \\
+{\ct 'PARTICLE MASS'} (kg) \\
+{\ct 'PARTICLE AGE'} (s) \\
+By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
+
+It is not unusual to include hundreds of thousands of particles in a simulation. Visualizing all of the particles in Smokeview can sometimes be impractical due to memory limitations. To limit the amount of particle amount, you can make use of the following parameters on the {\ct PART} line:
+\begin{description}
+\item[{\ct SAMPLING\_FACTOR}] Sampling factor for the output file {\ct CHID.prt5}. This parameter can be used to reduce the size of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{info:MASSLESS}.
+\item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when trying to reduce the number of droplets or particles in a simulation.
+\end{description}
+
 
 
 \subsection{Radiative Properties}
@@ -6979,37 +6971,46 @@ may not burn. Proper resolution depends on the type of
 fuel and the amount of fuel being ejected from the
 nozzle. Always test your burner at the resolution of your overall simulation.
 
+
 \clearpage
 
 \section{Solid Particles}
 \label{info:PART_SURF}
 
-Lagrangian particles can represent a wide variety of subgrid-scale objects, like office clutter or vegetation. To create solid, non-liquid particles, you must add a {\ct SURF\_ID} to the {\ct PART} line. The specified {\ct SURF} line contains the parameters that describe the thermophysical properties and geometric parameters of the particle. These properties are the same as those you might apply to an {\ct OBST} or {\ct VENT}. FDS uses the same solid phase conduction and pyrolysis algorithm for particles as it does for solid walls.
+Lagrangian particles can represent a wide variety of subgrid-scale objects, from office clutter to vegetation. To create solid, non-liquid particles, you must add a {\ct SURF\_ID} to the {\ct PART} line. The specified {\ct SURF} line contains the parameters that describe the thermophysical properties and geometric parameters of the particle. These properties are the same as those you would apply to an {\ct OBST} or {\ct VENT}. FDS uses the same solid phase conduction and pyrolysis algorithm for particles as it does for solid walls.
 
-\subsection{Basics}
+If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. However, you can specify unique directions for the particle if the source of heating does not surround the particles. More about particle splitting is explained in Section~\ref{info:particle_split}.
+
+
+\subsection{Basic Geometry and Boundary Conditions}
+\label{info:PART_GEOMETRY}
 
 To demonstrate the basic syntax for solid particles, the following input lines create a collection of hot spheres:
 
 \footnotesize
 \begin{verbatim}
 &PART ID='spheres', SURF_ID='HOT', STATIC=.TRUE., PROP_ID='ball' /
-&SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL', SURFACE_DENSITY=13. /
+&SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL' /
 &PROP ID='ball', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
 &INIT PART_ID='spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, N_PARTICLES=10 /
 \end{verbatim}
 \normalsize
 
 \noindent
-The {\ct PART} line establishes a class of particles with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter indicating whether particles move or just serve as obstructions or clutter. The default value of {\ct STATIC} is {\ct .FALSE.} The {\ct PROP} line is used just to tell Smokeview that the particles are to be drawn as the appropriate sized spheres.
-The {\ct SURF} line establishes that the particles are hot spheres with a radius of 0.005~m and constant temperature of 500~$^\circ$C.
-The {\ct GEOMETRY} options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If
-{\ct 'SPHERICAL'}, provide the {\ct RADIUS}. If {\ct 'CYLINDRICAL'}, provide the {\ct RADIUS} and the {\ct LENGTH}. If {\ct 'CARTESIAN'}, provide
-the {\ct LENGTH}, {\ct WIDTH}, and {\ct THICKNESS} of the plate. Note that the heat conduction calculation will be done in the appropriate coordinate
-system.  The {\ct SURFACE\_DENSITY} gives the mass of the particle in kg/m$^2$ of surface area.  If the {\ct SURF} references a set of {\ct MATL} inputs, then the particle mass will be based upon the {\ct DENSITY} in the {\ct MATL} inputs.
-The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres.
+The {\ct PART} line establishes the class of particles. In this case, the presence of a {\ct SURF\_ID} indicates that the particles are solids with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter whose default is {\ct .FALSE.} that indicates if the particles are stationary. The {\ct PROP\_ID} references a {\ct PROP} (property) line that has additional information about this class of particles.
 
-The output quantities associated with complex particles are the same as those for solid walls. For example, to record the temperature of a given
-particle, use lines like the following:
+The {\ct SURF} line {\ct 'HOT'} describes the geometry and other boundary conditions of the particles. The {\ct GEOMETRY} options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If the particles are thermally-thick; that is, heat is to be conducted in depth, then provide one or more values of the layer {\ct THICKNESS} and corresponding {\ct MATL\_ID}'s. If the {\ct SURF} line includes a {\ct MATL\_ID}, then the particle mass will be based upon the value or values of {\ct DENSITY} of the referenced {\ct MATL} lines. By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you also need to provide a {\ct LENGTH} and {\ct WIDTH} of the rectangular plate of the given {\ct THICKNESS}. If there is to be no heat conduction calculation in depth, do not specify a {\ct THICKNESS} or {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT}, or the heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$). For {\ct 'CYLINDRICAL'} particles, specify the {\ct LENGTH}. For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} for thermally-thick materials, or just specify the {\ct RADIUS} otherwise. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is given by the {\ct THICKNESS} values unless you specify an {\ct INNER\_RADIUS} as well.
+
+The {\ct PROP} line, {\ct 'ball'}, just tells Smokeview that the particles are to be drawn as spheres of radius 0.01~m. See Section~\ref{info:SMOKEVIEW_PART} for details and options.
+
+The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres. See Section~\ref{info:initial_droplets} for details.
+
+\subsection{Output Options for Solid Particles}
+\label{info:solid_particle_quantities}
+
+Solid particles can be colored in Smokeview using the same {\ct QUANTITIES} that are listed in Section~\ref{info:particle_quantities}. For particles with a specified {\ct SURF\_ID}, you may also specify any of the solid phase output quantities listed in Table~\ref{tab:output}. If the specified quantity is associated with a species, use the parameter {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
+
+You may also use {\ct DEVC} (device) lines to output data for a given particle. For example, the lines:
 
 \footnotesize
 \begin{verbatim}
@@ -7019,7 +7020,8 @@ particle, use lines like the following:
 \normalsize
 
 \noindent
-If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. However, you can specify unique directions for the particle if the source of heating does not surround the particles. More about particle splitting is explained in Section~\ref{info:particle_split}.
+output the surface temperature of a single particle. 
+
 
 \subsection{Drag}
 \label{info:particle_drag}
@@ -7040,7 +7042,7 @@ If the radiation around the particle is not uniform, it may be useful to split t
 \normalsize
 
 \noindent
-specifies that half the particle is facing upwards and half is facing downwards.   Each orientation is modeled in practise by a separate particle that sees the radiation that is directed to a plane orthogonally to the orientation. The mass calculations and the surface that receives the radiation are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Figures~\ref{cart_split} -~\ref{sphere_split}. The orientation can naturally be any direction between the axis too. For cartesian particle only orientations that are perpendicular to the length-width -plane make physical sense.
+specifies that half the particle is facing upwards and half is facing downwards.   Each orientation is modeled in practice by a separate particle that sees the radiation that is directed to a plane normal to the orientation. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{cart_split} through Fig.~\ref{sphere_split}. The orientation direction does not have to align with the coordinate axes. For a cartesian particle (i.e. a plate), only the orientations that are perpendicular to the plate make physical sense.
 
 \begin{figure}[ht]
 \begin{center}
@@ -11514,9 +11516,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
+{\ct INNER\_RADIUS}                   & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   & 0.                      \\ \hline
 {\ct LAYER\_DIVIDE}                   & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
 {\ct LEAK\_PATH}                      & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
-{\ct LENGTH}                          & Real            & Section~\ref{info:PART_SURF}              & m                   &                         \\ \hline
+{\ct LENGTH}                          & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct MASS\_FLUX(:)}                   & Real Array      & Section~\ref{info:MASS_FLUX}              & kg/m$^2$ s          & 0.                      \\ \hline
 {\ct MASS\_FLUX\_TOTAL}               & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & kg/m$^2$ s          &                         \\ \hline
 {\ct MASS\_FRACTION(:)}               & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
@@ -11532,7 +11535,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PART\_ID}                        & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
 {\ct PLE}                             & Real            & Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
 {\ct PROFILE}                         & Character       & Section~\ref{info:stratification}         &                     &                         \\ \hline
-{\ct RADIUS}                          & Real            & Section~\ref{info:PART_SURF}              & m                   &                         \\ \hline
+{\ct RADIUS}                          & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct RAMP\_EF}                        & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_MF(:)}                     & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_PART}                      & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
@@ -11564,7 +11567,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct VEL\_GRAD}                       & Real            & Section~\ref{???}                         &                     &                         \\ \hline
 {\ct VEL\_T }                         & Real Pair       & Section~\ref{info:louvers}                & m/s                 & 0.                      \\ \hline
 {\ct VOLUME\_FLUX}                    & Real            & Section~\ref{info:Velocity_BC}            & m$^3$/s             & 0.                      \\ \hline
-{\ct WIDTH}                           & Real            & Section~\ref{info:PART_SURF}              & m                   &                         \\ \hline
+{\ct WIDTH}                           & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct XYZ(3)}                          & Real Triplet    & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 {\ct Z0 }                             & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
 \end{longtable}
