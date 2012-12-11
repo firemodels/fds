@@ -19,6 +19,9 @@ mailTo="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov
 # Firebot's username
 FIREBOT_USERNAME="firebot"
 
+# Hostname of machine
+hostname=`hostname`
+
 # Change to home directory
 cd
 FIREBOT_HOME_DIR="`pwd`"
@@ -126,7 +129,7 @@ check_time_limit()
 
       if [ $ELAPSED_TIME -gt $TIME_LIMIT ]
       then
-         echo -e "Firebot has been running for more than 12 hours in Stage ${TIME_LIMIT_STAGE}. \n\nPlease ensure that there are no problems. \n\nThis is a notification only and does not terminate Firebot." | mail -s "[Firebot@Blaze] Notice: Firebot has been running for more than 12 hours." $mailTo > /dev/null
+         echo -e "Firebot has been running for more than 12 hours in Stage ${TIME_LIMIT_STAGE}. \n\nPlease ensure that there are no problems. \n\nThis is a notification only and does not terminate Firebot." | mail -s "[Firebot@$hostname] Notice: Firebot has been running for more than 12 hours." $mailTo > /dev/null
          TIME_LIMIT_EMAIL_NOTIFICATION="sent"
       fi
    fi
@@ -1162,24 +1165,24 @@ email_build_status()
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "[Firebot@Blaze] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+     mail -s "[Firebot@$hostname] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       # Send email with failure message, body of email contains error log file
-      mail -s "[Firebot@Blaze] Build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+      mail -s "[Firebot@$hostname] Build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       # Send email with success message, include warnings
-      mail -s "[Firebot@Blaze] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
+      mail -s "[Firebot@$hostname] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
       # Send empty email with success message
-      mail -s "[Firebot@Blaze] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
+      mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
    fi
 }
 
