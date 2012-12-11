@@ -111,6 +111,157 @@ IOR (-)               &  2                         \\ \hline
 
 \section{FM/SNL}
 
+\subsection*{HGL Temperature}
+
+\begin{table}[h!]
+\caption{Summary of input parameters used for FM/SNL cases, HGL temperature.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &              \\
+\rb{Input parameter}  &  \rb{Value}  \\ \hline \hline
+$L$ (m)               &  18.3        \\ \hline
+$W$ (m)               &  12.2        \\ \hline
+$H$ (m)               &  6.1         \\ \hline
+$k$ (W/m/K)           &  0.23        \\ \hline
+$\rho$ (kg/m$^3$)     &  1000        \\ \hline
+$c$ (kJ/kg/K)         &  1.16        \\ \hline
+$\delta$ (m)          &  0.025       \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+           &                    &                 &                 &                    &                  \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
+           &                    &  \rb{(kW)}      &  \rb{(kg/s)}    &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
+Test 1     &  FPA, DB           &  516            &  4.5            &  15                &  600             \\ \hline
+Test 2     &  FPA, DB           &  516            &  4.5            &  14                &  600             \\ \hline
+Test 3     &  FPA, DB           &  2000           &  4.5            &  15                &  300             \\ \hline
+Test 4     &  FPA, DB           &  516            &  0.45           &  15                &  600             \\ \hline
+Test 5     &  FPA, DB           &  516            &  4.5            &  19                &  600             \\ \hline
+Test 6     &  FPA, DB           &  500            &  0.45           &  15                &  600             \\ \hline
+Test 7     &  FPA, DB           &  516            &  0.45           &  15                &  600             \\ \hline
+Test 8     &  FPA, DB           &  1000           &  0.45           &  21                &  720             \\ \hline
+Test 9     &  FPA, DB           &  1000           &  3.6            &  24                &  840             \\ \hline
+Test 10    &  FPA, DB           &  1000           &  2.0            &  18                &  600             \\ \hline
+Test 11    &  FPA, DB           &  500            &  2.0            &  16                &  600             \\ \hline
+Test 12    &  FPA, DB           &  2000           &  2.0            &  17                &  600             \\ \hline
+Test 13    &  FPA, DB           &  2000           &  3.6            &  21                &  600             \\ \hline
+Test 14    &  FPA, DB           &  500            &  0.45           &  15                &  600             \\ \hline
+Test 15    &  FPA, DB           &  1000           &  0.45           &  18                &  1380            \\ \hline
+Test 16    &  FPA, DB           &  500            &  0.45           &  18                &  720             \\ \hline
+Test 17    &  FPA, DB           &  500            &  4.5            &  10                &  1380            \\ \hline
+Test 21    &  FPA, DB           &  500            &  0.45           &  14                &  1200            \\ \hline
+Test 22    &  FPA, DB           &  1000           &  0.45           &  14                &  840             \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
+\subsection*{Plume Temperature (Heskestad)}
+
+\begin{table}[h!]
+\caption{Summary of input parameters used for FM/SNL cases, plume temperature (Heskestad).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                         &              \\
+\rb{Input parameter}     &  \rb{Value}  \\ \hline \hline
+$Z$ (m)                  &  5.98        \\ \hline
+$A$ (m$^2$)              &  0.64        \\ \hline
+$\rho_{air}$ (kg/m$^3$)  &  1.18        \\ \hline
+$\chi_r$ (-)             &  0.30        \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+           &                 &                    &                  \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
+           &  \rb{(kW)}      &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
+Test 1     &  516            &  15                &  600             \\ \hline
+Test 2     &  516            &  14                &  600             \\ \hline
+Test 3     &  2000           &  15                &  300             \\ \hline
+Test 4     &  516            &  15                &  600             \\ \hline
+Test 5     &  516            &  19                &  600             \\ \hline
+Test 6     &  500            &  15                &  600             \\ \hline
+Test 7     &  516            &  15                &  600             \\ \hline
+Test 8     &  1000           &  21                &  720             \\ \hline
+Test 9     &  1000           &  24                &  840             \\ \hline
+Test 10    &  1000           &  18                &  600             \\ \hline
+Test 11    &  500            &  16                &  600             \\ \hline
+Test 12    &  2000           &  17                &  600             \\ \hline
+Test 13    &  2000           &  21                &  600             \\ \hline
+Test 14    &  500            &  15                &  600             \\ \hline
+Test 15    &  1000           &  18                &  1380            \\ \hline
+Test 16    &  500            &  18                &  720             \\ \hline
+Test 17    &  500            &  10                &  1380            \\ \hline
+Test 21    &  500            &  14                &  1200            \\ \hline
+Test 22    &  1000           &  14                &  840             \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
+\subsection*{Ceiling Jet (Alpert)}
+
+\begin{table}[h!]
+\caption{Summary of input parameters used for FM/SNL cases, ceiling jet (Alpert).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &              \\
+\rb{Input parameter}  &  \rb{Value}  \\ \hline \hline
+$R$ (m)               &  3.05, 9.15  \\ \hline
+$H$ (m)               &  5.9         \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+           &                 &                    &                  \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
+           &  \rb{(kW)}      &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
+Test 1     &  516            &  15                &  600             \\ \hline
+Test 2     &  516            &  14                &  600             \\ \hline
+Test 3     &  2000           &  15                &  300             \\ \hline
+Test 4     &  516            &  15                &  600             \\ \hline
+Test 5     &  516            &  19                &  600             \\ \hline
+Test 6     &  500            &  15                &  600             \\ \hline
+Test 7     &  516            &  15                &  600             \\ \hline
+Test 8     &  1000           &  21                &  720             \\ \hline
+Test 9     &  1000           &  24                &  840             \\ \hline
+Test 10    &  1000           &  18                &  600             \\ \hline
+Test 11    &  500            &  16                &  600             \\ \hline
+Test 12    &  2000           &  17                &  600             \\ \hline
+Test 13    &  2000           &  21                &  600             \\ \hline
+Test 14    &  500            &  15                &  600             \\ \hline
+Test 15    &  1000           &  18                &  1380            \\ \hline
+Test 16    &  500            &  18                &  720             \\ \hline
+Test 17    &  500            &  10                &  1380            \\ \hline
+Test 21    &  500            &  14                &  1200            \\ \hline
+Test 22    &  1000           &  14                &  840             \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
 \section{Hamins Burner}
 
 
