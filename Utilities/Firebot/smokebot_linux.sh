@@ -47,7 +47,10 @@ GUIDE_DIR=$FIREBOT_DIR/guides
 
 THIS_FDS_FAILED=0
 FDS_STATUS_FILE=$FDS_SVNROOT/FDS_status
-LAST_FDS_FAILED=`cat $FDS_STATUS_FILE`
+LAST_FDS_FAILED=0
+if [ -e $FDS_STATUS_FILE ] ; then
+  LAST_FDS_FAILED=`cat $FDS_STATUS_FILE`
+fi
 
 mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
@@ -714,11 +717,17 @@ archive_timing_stats()
 check_guide()
 {
    # Scan and report any errors in build process for guides
+   SMOKEBOT_MANDIR=/var/www/html/smokebot/manuals/
+   FIREBOT_MANDIR=/var/www/html/firebot/manuals/
    cd $FIREBOT_DIR
    if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
    then
-      cp $2 /var/www/html/smokebot/manuals/
-      cp $2 /var/www/html/firebot/manuals/
+      if [ -d $SMOKEBOT_MANDIR ] ; then
+        cp $2 $SMOKEBOT_MANDIR/.
+      fi
+      if [ -d $FIREBOT_MANDIR ] ; then
+        cp $2 $FIREBOT_MANDIR/.
+      fi
       cp $2 $GUIDE_DIR/.
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
