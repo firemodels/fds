@@ -341,42 +341,44 @@ void init_scripti(scriptdata *scripti, int command,char *label){
 
 int get_script_keyword_index(char *keyword){
   if(keyword==NULL||strlen(keyword)==0)return SCRIPT_UNKNOWN;
-  if(match_upper(keyword,"UNLOADALL") == 1)return SCRIPT_UNLOADALL;
-  if(match_upper(keyword,"EXIT") == 1)return SCRIPT_EXIT;
-  if(match_upper(keyword,"KEYBOARD") == 1)return SCRIPT_KEYBOARD;
-  if(match_upper(keyword,"RENDERDIR") == 1)return SCRIPT_RENDERDIR;
-  if(match_upper(keyword,"SCENECLIP") == 1)return SCRIPT_SCENECLIP;
-  if(match_upper(keyword,"XSCENECLIP") == 1)return SCRIPT_XSCENECLIP;
-  if(match_upper(keyword,"YSCENECLIP") == 1)return SCRIPT_YSCENECLIP;
-  if(match_upper(keyword,"ZSCENECLIP") == 1)return SCRIPT_ZSCENECLIP;
-  if(match_upper(keyword,"RENDERCLIP") == 1)return SCRIPT_RENDERCLIP;
-  if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
-  if(match_upper(keyword,"RENDERDOUBLEONCE") == 1)return SCRIPT_RENDERDOUBLEONCE;
-  if(match_upper(keyword,"RENDERALL") == 1)return SCRIPT_RENDERALL;
-  if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
-  if(match_upper(keyword,"VOLSMOKERENDERALL") == 1)return SCRIPT_VOLSMOKERENDERALL;
-  if(match_upper(keyword,"LOADFILE") == 1)return SCRIPT_LOADFILE;
-  if(match_upper(keyword,"LOADINIFILE") == 1)return SCRIPT_LOADINIFILE;
+
   if(match_upper(keyword,"CBARFLIP") == 1)return SCRIPT_CBARFLIP;
   if(match_upper(keyword,"CBARNORMAL") == 1)return SCRIPT_CBARNORMAL;
-  if(match_upper(keyword,"LOADVFILE") == 1)return SCRIPT_LOADVFILE;
-  if(match_upper(keyword,"LOADBOUNDARY") == 1)return SCRIPT_LOADBOUNDARY;
-  if(match_upper(keyword,"PARTCLASSCOLOR") == 1)return SCRIPT_PARTCLASSCOLOR;
-  if(match_upper(keyword,"PARTCLASSTYPE") == 1)return SCRIPT_PARTCLASSTYPE;
-  if(match_upper(keyword,"SHOWPLOT3DDATA") == 1)return SCRIPT_SHOWPLOT3DDATA;
-  if(match_upper(keyword,"PLOT3DPROPS") == 1)return SCRIPT_PLOT3DPROPS;
-  if(match_upper(keyword,"LOADTOUR") == 1)return SCRIPT_LOADTOUR;
-  if(match_upper(keyword,"UNLOADTOUR") == 1)return SCRIPT_UNLOADTOUR;
+  if(match_upper(keyword,"EXIT") == 1)return SCRIPT_EXIT;
+  if(match_upper(keyword,"KEYBOARD") == 1)return SCRIPT_KEYBOARD;
   if(match_upper(keyword,"LOAD3DSMOKE") == 1)return SCRIPT_LOAD3DSMOKE;
-  if(match_upper(keyword,"LOADVOLSMOKE") == 1)return SCRIPT_LOADVOLSMOKE;
-  if(match_upper(keyword,"LOADVOLSMOKEFRAME") == 1)return SCRIPT_LOADVOLSMOKEFRAME;
-  if(match_upper(keyword,"LOADSLICE") == 1)return SCRIPT_LOADSLICE;
-  if(match_upper(keyword,"LOADVSLICE") == 1)return SCRIPT_LOADVSLICE;
+  if(match_upper(keyword,"LOADBOUNDARY") == 1)return SCRIPT_LOADBOUNDARY;
+  if(match_upper(keyword,"LOADFILE") == 1)return SCRIPT_LOADFILE;
+  if(match_upper(keyword,"LOADINIFILE") == 1)return SCRIPT_LOADINIFILE;
   if(match_upper(keyword,"LOADISO") == 1)return SCRIPT_LOADISO;
   if(match_upper(keyword,"LOADPARTICLES") == 1)return SCRIPT_LOADPARTICLES;
   if(match_upper(keyword,"LOADPLOT3D") == 1)return SCRIPT_LOADPLOT3D;
-  if(match_upper(keyword,"SETTIMEVAL") == 1)return SCRIPT_SETTIMEVAL;
+  if(match_upper(keyword,"LOADSLICE") == 1)return SCRIPT_LOADSLICE;
+  if(match_upper(keyword,"LOADTOUR") == 1)return SCRIPT_LOADTOUR;
+  if(match_upper(keyword,"LOADVOLSMOKE") == 1)return SCRIPT_LOADVOLSMOKE;
+  if(match_upper(keyword,"LOADVOLSMOKEFRAME") == 1)return SCRIPT_LOADVOLSMOKEFRAME;
+  if(match_upper(keyword,"LOADVFILE") == 1)return SCRIPT_LOADVFILE;
+  if(match_upper(keyword,"LOADVSLICE") == 1)return SCRIPT_LOADVSLICE;
+  if(match_upper(keyword,"PARTCLASSCOLOR") == 1)return SCRIPT_PARTCLASSCOLOR;
+  if(match_upper(keyword,"PARTCLASSTYPE") == 1)return SCRIPT_PARTCLASSTYPE;
+  if(match_upper(keyword,"PLOT3DPROPS") == 1)return SCRIPT_PLOT3DPROPS;
+  if(match_upper(keyword,"RENDERALL") == 1)return SCRIPT_RENDERALL;
+  if(match_upper(keyword,"RENDERCLIP") == 1)return SCRIPT_RENDERCLIP;
+  if(match_upper(keyword,"RENDERDIR") == 1)return SCRIPT_RENDERDIR;
+  if(match_upper(keyword,"RENDERDOUBLEONCE") == 1)return SCRIPT_RENDERDOUBLEONCE;
+  if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
+  if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
+  if(match_upper(keyword,"SCENECLIP") == 1)return SCRIPT_SCENECLIP;
   if(match_upper(keyword,"SETVIEWPOINT") == 1)return SCRIPT_SETVIEWPOINT;
+  if(match_upper(keyword,"SETTIMEVAL") == 1)return SCRIPT_SETTIMEVAL;
+  if(match_upper(keyword,"SHOWPLOT3DDATA") == 1)return SCRIPT_SHOWPLOT3DDATA;
+  if(match_upper(keyword,"UNLOADALL") == 1)return SCRIPT_UNLOADALL;
+  if(match_upper(keyword,"UNLOADTOUR") == 1)return SCRIPT_UNLOADTOUR;
+  if(match_upper(keyword,"VOLSMOKERENDERALL") == 1)return SCRIPT_VOLSMOKERENDERALL;
+  if(match_upper(keyword,"XSCENECLIP") == 1)return SCRIPT_XSCENECLIP;
+  if(match_upper(keyword,"YSCENECLIP") == 1)return SCRIPT_YSCENECLIP;
+  if(match_upper(keyword,"ZSCENECLIP") == 1)return SCRIPT_ZSCENECLIP;
+
   return SCRIPT_UNKNOWN;
 }
 
