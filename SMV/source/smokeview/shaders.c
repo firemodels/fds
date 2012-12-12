@@ -276,7 +276,7 @@ int setVolSmokeShaders() {
 #endif
     "uniform sampler3D soot_density_texture,fire_texture,blockage_texture;"
     "uniform int inside,havefire,volbw,slicetype,block_volsmoke;"
-    "uniform float xyzmaxdiff,dcell,opacity_factor;"
+    "uniform float xyzmaxdiff,dcell,fire_opacity_factor;"
     "uniform float temperature_min,temperature_cutoff,temperature_max;"
     "uniform vec3 eyepos,boxmin,boxmax,dcell3;"
     "uniform int drawsides[7];"
@@ -401,7 +401,7 @@ int setVolSmokeShaders() {
     "      colorindex = clamp(colorindex,0.0,1.0);"
     "      color_val = texture1D(smokecolormap,colorindex).rgb;"
     "      if(colorindex>0.5){"
-    "        soot_val *= opacity_factor;"
+    "        soot_val *= fire_opacity_factor;"
     "      };"
     "    }"
     "    else{"
@@ -500,7 +500,7 @@ int setVolSmokeShaders() {
   GPUvol_dcell = glGetUniformLocation(p_volsmoke,"dcell");
   GPUvol_dcell3 = glGetUniformLocation(p_volsmoke,"dcell3");
   GPUvol_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
-  GPUvol_opacity_factor = glGetUniformLocation(p_volsmoke,"opacity_factor");
+  GPUvol_fire_opacity_factor = glGetUniformLocation(p_volsmoke,"fire_opacity_factor");
   GPUvol_mass_extinct = glGetUniformLocation(p_volsmoke,"mass_extinct");
   GPUvol_volbw = glGetUniformLocation(p_volsmoke,"volbw");
   GPUvol_temperature_min = glGetUniformLocation(p_volsmoke,"temperature_min");

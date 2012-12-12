@@ -82,7 +82,7 @@ GLUI_Spinner *SPINNER_volfactor=NULL;
 GLUI_Spinner *SPINNER_temperature_min=NULL;
 GLUI_Spinner *SPINNER_temperature_cutoff=NULL;
 GLUI_Spinner *SPINNER_temperature_max=NULL;
-GLUI_Spinner *SPINNER_opacity_factor=NULL;
+GLUI_Spinner *SPINNER_fire_opacity_factor=NULL;
 GLUI_Spinner *SPINNER_mass_extinct=NULL;
 GLUI_Spinner *SPINNER_cvis=NULL;
 GLUI_Spinner *SPINNER_smokedrawtest_nummin=NULL;
@@ -378,8 +378,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Show data while moving scene"),&show_volsmoke_moving);
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Load data only at render times"),&load_at_rendertimes);
 
-    SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("Fire opacity multiplier"),GLUI_SPINNER_FLOAT,&opacity_factor);
-    SPINNER_opacity_factor->set_float_limits(1.0,10.0);
+    SPINNER_fire_opacity_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("Fire opacity multiplier"),GLUI_SPINNER_FLOAT,&fire_opacity_factor);
+    SPINNER_fire_opacity_factor->set_float_limits(1.0,10.0);
     SPINNER_mass_extinct=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("Mass extinction coeff"),GLUI_SPINNER_FLOAT,&mass_extinct);
     SPINNER_mass_extinct->set_float_limits(100.0,100000.0);
 #ifdef pp_FREEZE_VOLSMOKE

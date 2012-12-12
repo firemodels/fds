@@ -68,6 +68,9 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   dxbar = xplt[1]-xplt[0];
   dybar = yplt[1]-yplt[0];
   dzbar = zplt[1]-zplt[0];
+  xyz[0]+=dxbar/2.0;
+  xyz[1]+=dybar/2.0;
+  xyz[2]+=dzbar/2.0;
 
   nx = ibar + 1;
   ny = jbar + 1;
@@ -174,7 +177,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
       vv = smokedata_local + IJKNODE(i+1,j+1,k+1);
       soot_density = *vv;
     }
-    if(firedata_local!=NULL&&index>MAXSMOKERGB/2)soot_density*=5.0;
+    if(firedata_local!=NULL&&index>MAXSMOKERGB/2)soot_density*=fire_opacity_factor;
     *smoke_tran = exp(-kfactor*soot_density*dstep);
   }
 }
@@ -1429,7 +1432,7 @@ void drawsmoke3dGPUVOL(void){
 #endif
   glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
   glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
-  glUniform1f(GPUvol_opacity_factor,opacity_factor);
+  glUniform1f(GPUvol_fire_opacity_factor,fire_opacity_factor);
   glUniform1f(GPUvol_mass_extinct,mass_extinct);
   glUniform1i(GPUvol_volbw,volbw);
   glUniform1f(GPUvol_temperature_min,temperature_min);

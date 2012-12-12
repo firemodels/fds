@@ -210,7 +210,7 @@ SVEXTERN int GPUzone_odl, GPUzone_odu;
 
 SVEXTERN int GPUvol_inside, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_slicetype,GPUvol_dcell3;
 SVEXTERN int GPUvol_soot_density, GPUvol_fire, GPUvol_blockage;
-SVEXTERN int GPUvol_opacity_factor,GPUvol_volbw,GPUvol_mass_extinct;
+SVEXTERN int GPUvol_fire_opacity_factor,GPUvol_volbw,GPUvol_mass_extinct;
 SVEXTERN int GPUvol_temperature_min,GPUvol_temperature_cutoff,GPUvol_temperature_max;
 SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_drawsides;
 SVEXTERN int GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
@@ -1044,7 +1044,7 @@ SVEXTERN sv_object *avatar_defs_backup[2];
 SVEXTERN int device_sphere_segments;
 SVEXTERN int ntexturestack;
 
-SVEXTERN float SVDECL(opacity_factor,3.0),SVDECL(mass_extinct,8700.0);
+SVEXTERN float SVDECL(fire_opacity_factor,3.0),SVDECL(mass_extinct,8700.0);
 SVEXTERN float SVDECL(temperature_min,20.0),SVDECL(temperature_cutoff,700.0),SVDECL(temperature_max,1200.0);
 SVEXTERN float SVDECL(global_hrrpuv_min,0.0),SVDECL(global_hrrpuv_cutoff,200.0),SVDECL(global_hrrpuv_max,1200.0);
 SVEXTERN int SVDECL(volbw,0);

@@ -369,8 +369,8 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
   if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
   if(match_upper(keyword,"SCENECLIP") == 1)return SCRIPT_SCENECLIP;
-  if(match_upper(keyword,"SETVIEWPOINT") == 1)return SCRIPT_SETVIEWPOINT;
   if(match_upper(keyword,"SETTIMEVAL") == 1)return SCRIPT_SETTIMEVAL;
+  if(match_upper(keyword,"SETVIEWPOINT") == 1)return SCRIPT_SETVIEWPOINT;
   if(match_upper(keyword,"SHOWPLOT3DDATA") == 1)return SCRIPT_SHOWPLOT3DDATA;
   if(match_upper(keyword,"UNLOADALL") == 1)return SCRIPT_UNLOADALL;
   if(match_upper(keyword,"UNLOADTOUR") == 1)return SCRIPT_UNLOADTOUR;
