@@ -84,24 +84,25 @@ IOR (-)               &  2                         \\ \hline
 \begin{center}
 \begin{tabular}{|l|c|c|}
 \hline
-                     &                 &                \\
-\rb{Test}            &  \rb{$\dot Q$}  &  \rb{$A$}      \\
-                     &  \rb{(kW)}      &  \rb{(m$^2$)}  \\ \hline \hline
-100 kW, 1:1 Burner   &  100            &  0.09          \\ \hline
-150 kW, 1:1 Burner   &  150            &  0.09          \\ \hline
-200 kW, 1:1 Burner   &  200            &  0.09          \\ \hline
-250 kW, 1:1 Burner   &  250            &  0.09          \\ \hline
-300 kW, 1:1 Burner   &  300            &  0.09          \\ \hline
-100 kW, 2:1 Burner   &  100            &  0.18          \\ \hline
-150 kW, 2:1 Burner   &  150            &  0.18          \\ \hline
-200 kW, 2:1 Burner   &  200            &  0.18          \\ \hline
-250 kW, 2:1 Burner   &  250            &  0.18          \\ \hline
-300 kW, 2:1 Burner   &  300            &  0.18          \\ \hline
-100 kW, 3:1 Burner   &  100            &  0.27          \\ \hline
-150 kW, 3:1 Burner   &  150            &  0.27          \\ \hline
-200 kW, 3:1 Burner   &  200            &  0.27          \\ \hline
-250 kW, 3:1 Burner   &  250            &  0.27          \\ \hline
-300 kW, 3:1 Burner   &  300            &  0.27          \\ \hline\end{tabular}
+                    &                 &                \\
+\rb{Test}           &  \rb{$\dot Q$}  &  \rb{$A$}      \\
+                    &  \rb{(kW)}      &  \rb{(m$^2$)}  \\ \hline \hline
+100 kW, 1:1 Burner  &  100            &  0.09          \\ \hline
+150 kW, 1:1 Burner  &  150            &  0.09          \\ \hline
+200 kW, 1:1 Burner  &  200            &  0.09          \\ \hline
+250 kW, 1:1 Burner  &  250            &  0.09          \\ \hline
+300 kW, 1:1 Burner  &  300            &  0.09          \\ \hline
+100 kW, 2:1 Burner  &  100            &  0.18          \\ \hline
+150 kW, 2:1 Burner  &  150            &  0.18          \\ \hline
+200 kW, 2:1 Burner  &  200            &  0.18          \\ \hline
+250 kW, 2:1 Burner  &  250            &  0.18          \\ \hline
+300 kW, 2:1 Burner  &  300            &  0.18          \\ \hline
+100 kW, 3:1 Burner  &  100            &  0.27          \\ \hline
+150 kW, 3:1 Burner  &  150            &  0.27          \\ \hline
+200 kW, 3:1 Burner  &  200            &  0.27          \\ \hline
+250 kW, 3:1 Burner  &  250            &  0.27          \\ \hline
+300 kW, 3:1 Burner  &  300            &  0.27          \\ \hline
+\end{tabular}
 \end{center}
 \end{table}
 
@@ -264,6 +265,37 @@ Test 22    &  1000           &  14                &  840             \\ \hline
 
 \section{Hamins Burner}
 
+\subsection*{Point Source Radiation Heat Flux}
+
+\begin{table}[h!]
+\caption{Summary of input parameters used for Hamins Burner cases, point source radiation heat flux.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &                            \\
+\rb{Input parameter}  &  \rb{Value}                \\ \hline \hline
+$\chi_R$ (-)          &  0.30                      \\ \hline
+IOR (-)               &  -1                        \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|l|}
+\hline
+           &                 &                &            &                                                                          \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$A$}      &  \rb{$X$}  &  \rb{$Z$}                                                                \\
+           &  \rb{(kW)}      &  \rb{(m$^2$)}  &  \rb{(m)}  &  \rb{(m)}                                                                \\ \hline \hline
+Test 1     &  0.42           &  0.008         &  0.82      &  0.002, 0.088, 0.203, 0.393                                              \\ \hline
+Test 5     &  1.90           &  0.008         &  0.82      &  0.002, 0.088, 0.203, 0.393                                              \\ \hline
+Test 7     &  49             &  0.785         &  1.00      &  0.000, 0.122, 0.468, 0.768, 1.089, 1.457, 1.799, 2.508,                 \\ \hline
+Test 19    &  162            &  0.785         &  0.80      &  0.000, 0.129, 0.354, 0.619, 0.931, 1.317, 1.799, 2.215, 2.510           \\ \hline
+Test 21    &  33             &  0.113         &  0.732     &  0.027, 0.271, 0.497, 0.670, 1.145, 1.885                                \\ \hline
+Test 23    &  176            &  0.113         &  0.732     &  0.209, 0.284, 0.507, 0.683, 1.139, 1.882                                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
 
 \clearpage
 
@@ -379,6 +411,41 @@ Test 64    &  MQH               &  6.0       &  4.0       &  4.5       &  100   
 
 
 \section{NBS Multi-Room}
+
+\subsection*{HGL Temperature}
+
+\begin{table}[h!]
+\caption{Summary of input parameters used for NBS Multi-Room cases, HGL temperature.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &              \\
+\rb{Input parameter}  &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)         &  100         \\ \hline
+$L$ (m)               &  2.34        \\ \hline
+$W$ (m)               &  2.34        \\ \hline
+$H$ (m)               &  2.16        \\ \hline
+$k$ (W/m/K)           &  0.17        \\ \hline
+$\rho$ (kg/m$^3$)     &  128         \\ \hline
+$c$ (kJ/kg/K)         &  1.04        \\ \hline
+$\delta$ (m)          &  0.05        \\ \hline
+$t_{end}$ (s)         &  1200        \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+           &                    &                    \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$T_\infty$}   \\
+           &                    &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 100A  &  MQH               &  23                \\ \hline
+Test 100O  &  MQH               &  21                \\ \hline
+Test 100Z  &  MQH               &  22                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
 
 \clearpage
@@ -529,7 +596,79 @@ Test 18    &  1180           &  27                &  1380            \\ \hline
 
 \section{NRL/HAI}
 
+\subsection*{Immersed Plume Radiation Heat Flux}
+
+\begin{table}[h!]
+\caption{Summary of input parameters used for NRL/HAI cases, immersed plume radiation heat flux.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                        &              \\
+\rb{Input parameter}    &  \rb{Value}  \\ \hline \hline
+$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+$t_{end}$ (s)           &  600         \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|l|}
+\hline
+           &                 &                  &                                                          \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$t_{end}$}  &  \rb{$Z$}                                                \\
+           &  \rb{(kW)}      &  \rb{(s)}        &  \rb{(m)}                                                \\ \hline \hline
+Test 1     &  53             &  600             &  1.219, 1.067, 0.914, 0.762, 0.610, 0.457, 0.305, 0.152  \\ \hline
+Test 2     &  56             &  600             &  2.286, 1.981, 1.676, 1.372, 1.067, 0.762, 0.457, 0.152  \\ \hline
+Test 3     &  68             &  300             &  2.286, 1.981, 1.676, 1.372, 1.067, 0.762, 0.457, 0.152  \\ \hline
+Test 4     &  106            &  600             &  1.219, 1.067, 0.914, 0.762, 0.610, 0.457, 0.305, 0.152  \\ \hline
+Test 5     &  136            &  600             &  2.286, 1.981, 1.676, 1.372, 1.067, 0.762, 0.457, 0.152  \\ \hline
+Test 6     &  204            &  600             &  1.829, 1.676, 1.524, 1.372, 1.067, 0.762, 0.457, 0.152  \\ \hline
+Test 7     &  220            &  600             &  2.286, 1.981, 1.676, 1.372, 1.067, 0.762, 0.457, 0.152  \\ \hline
+Test 8     &  313            &  720             &  2.286, 1.981, 1.676, 1.372, 1.067, 0.762, 0.457, 0.152  \\ \hline
+Test 9     &  523            &  840             &  2.286, 1.981, 1.676, 1.372, 1.067, 0.762, 0.457, 0.152  \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
 \section{SP AST}
+
+\subsection*{HGL Temperature}
+
+\begin{table}[h!]
+\caption{Summary of input parameters used for SP AST cases, HGL temperature.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &              \\
+\rb{Input parameter}  &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)         &  450         \\ \hline
+$L$ (m)               &  3.6         \\ \hline
+$W$ (m)               &  2.4         \\ \hline
+$H$ (m)               &  2.4         \\ \hline
+$k$ (W/m/K)           &  0.12        \\ \hline
+$\rho$ (kg/m$^3$)     &  737         \\ \hline
+$c$ (kJ/kg/K)         &  0.9         \\ \hline
+$\delta$ (m)          &  0.0254      \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|l|c|c|c|c|}
+\hline
+           &                    &                  \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$t_{end}$}  \\
+           &                    &  \rb{(s)}        \\ \hline \hline
+Test 1     &  MQH               &  2400            \\ \hline
+Test 2     &  MQH               &  2400            \\ \hline
+Test 3     &  MQH               &  3600            \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
 
 \clearpage
