@@ -1475,6 +1475,7 @@ void Update_Smokecolormap(int option){
       ASSERT(0);
       break;
   }
+  Update_Texturebar();
 }
 
 /* ------------------ UpdateRGBColors ------------------------ */
