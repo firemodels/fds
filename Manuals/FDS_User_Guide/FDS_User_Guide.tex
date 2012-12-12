@@ -2413,8 +2413,7 @@ To return to the non-dynamic form of LES used in FDS versions 1-5, set {\ct TURB
 \subsection{Special Topic: Numerical Stability Parameters}
 \label{info:CFL}
 
-In FDS (which uses a explicit time advancement schemes), stability criteria may be understood in terms of using the time step to maintain physically realizable conditions.
-Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
+FDS uses an explicit time advancement scheme; thus, the time step plays an important role in maintaining numerical stability and accuracy. Below we examine the constraints on the time step necessary for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields. In addition, there are additional constraints that ensure accuracy of various algorithms.
 
 \subsubsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
 
@@ -2422,13 +2421,7 @@ The well-known CFL constraint given by
 \begin{equation}
 \mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} < 1
 \end{equation}
-places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} and {\ct CFL\_MAX} on {\ct MISC}.
-Physically, the constraint says that a fluid element should not traverse more than one cell within a time step.
-For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.
-In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.
-If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions
-would then be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if you want the simulation to run faster,
-a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
+places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} (default 0.8) and {\ct CFL\_MAX} (default 1) on {\ct MISC}. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other. In other words, in order to resolve an eddy of size $\delta x$, the time step needs to obey the CFL constraint. If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of using LES.  In most cases, if you want the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
 
 The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm.
 Three choices for velocity norm are available in FDS (set on {\ct MISC}):
@@ -2453,7 +2446,7 @@ The Von Neumann constraint is given by
 \begin{equation}
 \mbox{VN} \equiv  \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \sum_i \frac{1}{\delta x_i^2} < \frac{1}{2}
 \end{equation}
-The limits for VN may be adjusted using {\ct VN\_MIN} and {\ct VN\_MAX} on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.4) and {\ct VN\_MAX} (default 0.5) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
 
 We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
 \begin{equation}
@@ -2475,7 +2468,15 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
   = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
 Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1}
-as the basis for the time step restriction.
+as the basis for the time step restriction. To be clear, the CFL constraint is now given by
+\begin{equation}
+\mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
+\end{equation}
+
+\subsubsection{Stability of particle transport}
+\label{info:PART_Stability}
+
+The movement of Lagrangian particles within a time step is calculated using an analytical solution and remains stable regardless of the time step. In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step. Setting {\ct PARTICLE\_CFL = .FALSE.} on the {\ct MISC} line deactivates this constraint.
 
 \subsubsection{Heat Transfer Constraint}
 
@@ -2485,36 +2486,13 @@ Therefore, the heat transfer stability check loops over all wall cells to ensure
 This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
 
-\subsection{Adjusting the Time Step}
+\subsubsection{Adjusting the Time Step}
 
-In the call to {\ct CHECK\_STABILITY} both the CFL and VN numbers are compared with {\ct CFL\_MAX [1.0]}, {\ct CFL\_MIN [0.8]}, {\ct VN\_MAX [0.5]},
-and {\ct VN\_MIN [0.4]}, respectively (default values shown in brackets).  To be clear, the CFL constraint is now given by
-\begin{equation}
-\mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
-\end{equation}
-If either the current CFL (augmented for both heat transfer and gravity) or VN is too large then the new time step is set to 90\% of the allowable value.
-If both CFL and VN are below their minimum values then the current time step is increased by 10\%.
-
-\begin{warning}
-Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to
-simulations failing due to numerical instabilities.
-\end{warning}
-
-\noindent
-If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP=.TRUE.}
-on the {\ct TIME} line, in which case the specified
-time step, {\ct DT}, will not be adjusted.
-This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
+At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to simulations failing due to numerical instabilities. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified
+time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
 numerical instabilities if the initial time step is set too high.
 
-\subsection{Stability of particle transport}
-\label{info:PART_Stability}
 
-The movement of droplets and particles within a time step is calculated using an analytical solution and remains stable regardless of the time step.
-In some cases with extremely fast droplets or particles, however, the stability of the overall flow behavior may require setting an additional parameter
-that limits the time step according to the speed of the fastest particle in the simulation. Setting {\ct PARTICLE\_CFL = .TRUE.} on the {\ct MISC} line
-activates this constraint. The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} parameter. Value 1 means that the fastest moving
-particle can move a distance of one grid cell during the time step.
 
 \clearpage
 
@@ -7020,7 +6998,7 @@ You may also use {\ct DEVC} (device) lines to output data for a given particle. 
 \normalsize
 
 \noindent
-output the surface temperature of a single particle. 
+output the surface temperature of a single particle.
 
 
 \subsection{Drag}
@@ -10898,7 +10876,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CONSTANT\_SPECIFIC\_HEAT}                  & Real          & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}    \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}     \\ \hline
-%{\ct ENTHALPY\_TRANSPORT}                       & Logical       &                                                       &               & {\ct .TRUE.}      \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
@@ -10911,9 +10888,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
-{\ct HUMIDITY}                                  & Real           & Section~\ref{info:humidity}                          & \%                & 40.               \\ \hline
+{\ct HUMIDITY}                                  & Real           & Section~\ref{info:humidity}                          & \%                & 40.           \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
-%{\ct INCOMPRESSIBLE}                            & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               & 1.0           &                   \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
@@ -10965,7 +10941,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
-%Undocumented: NEW_EVAP_DROP
+
 
 
 \vspace{\baselineskip}
