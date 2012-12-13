@@ -25,8 +25,8 @@ set togoogle=%svn_root%\FDS_Compilation\to_google\%fdsroot%
 IF EXIST %togoogle% rmdir /S /Q %togoogle%
 mkdir %togoogle%
 
-copy intel_Win_32\fds_win_32.exe %togoogle%\.
-copy mpi_intel_Win_32\fds_mpi_win_32.exe %togoogle%\.
+copy intel_Win_32\fds_win_32.exe %togoogle%\fds.exe
+copy mpi_intel_Win_32\fds_mpi_win_32.exe %togoogle%\fds_mpi.exe
 
 echo.
 echo winzipping distribution directory
