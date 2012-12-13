@@ -193,9 +193,9 @@ void init_volrender_surface(int firstcall){
     float dx, dy, dz;
 
     meshi = meshinfo + i;
-    meshi->ivolbar=meshi->ibar*vol_factor;
-    meshi->jvolbar=meshi->jbar*vol_factor;
-    meshi->kvolbar=meshi->kbar*vol_factor;
+    meshi->ivolbar=meshi->ibar*nongpu_vol_factor;
+    meshi->jvolbar=meshi->jbar*nongpu_vol_factor;
+    meshi->kvolbar=meshi->kbar*nongpu_vol_factor;
     FREEMEMORY(meshi->xvolplt);
     FREEMEMORY(meshi->yvolplt);
     FREEMEMORY(meshi->zvolplt);
@@ -1432,6 +1432,7 @@ void drawsmoke3dGPUVOL(void){
 #endif
   glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
   glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
+  glUniform1f(GPUvol_gpu_vol_factor,gpu_vol_factor);
   glUniform1f(GPUvol_fire_opacity_factor,fire_opacity_factor);
   glUniform1f(GPUvol_mass_extinct,mass_extinct);
   glUniform1i(GPUvol_volbw,volbw);
@@ -2256,8 +2257,8 @@ void init_volsmoke_texture(mesh *meshi){
     glActiveTexture(GL_TEXTURE2);
     glGenTextures(1,&volsmoke_colormap_id);
     glBindTexture(GL_TEXTURE_1D,volsmoke_colormap_id);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
   }

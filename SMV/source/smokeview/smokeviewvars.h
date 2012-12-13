@@ -25,7 +25,8 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
-SVEXTERN float SVDECL(vol_factor,1.0);
+SVEXTERN float SVDECL(nongpu_vol_factor,1.0);
+SVEXTERN float SVDECL(gpu_vol_factor,1.0);
 SVEXTERN int SVDECL(disable_gpu,0);
 SVEXTERN int SVDECL(render_state,0);
 SVEXTERN int SVDECL(script_frame_start,-1), SVDECL(script_frame_skip,-1);
@@ -209,6 +210,7 @@ SVEXTERN int GPUzone_zlay;
 SVEXTERN int GPUzone_odl, GPUzone_odu;
 
 SVEXTERN int GPUvol_inside, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_slicetype,GPUvol_dcell3;
+SVEXTERN int GPUvol_gpu_vol_factor;
 SVEXTERN int GPUvol_soot_density, GPUvol_fire, GPUvol_blockage;
 SVEXTERN int GPUvol_fire_opacity_factor,GPUvol_volbw,GPUvol_mass_extinct;
 SVEXTERN int GPUvol_temperature_min,GPUvol_temperature_cutoff,GPUvol_temperature_max;
