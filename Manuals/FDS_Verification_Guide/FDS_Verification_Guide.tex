@@ -2533,7 +2533,8 @@ The calculations described in this section check the conservation of mass for th
 
 \footnotesize
 \begin{verbatim}
-&MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
+&MISC DRIFT_FLUX                = .TRUE.
+      GRAVITATIONAL_DEPOSITION  = .TRUE.
       THERMOPHORETIC_DEPOSITION = .FALSE.
       TURBULENT_DEPOSITION      = .FALSE. /
 \end{verbatim} \normalsize
@@ -2555,7 +2556,7 @@ where $C_0$ is the initial gas-phase soot concentration (100~mg/m$^3$). In this 
 \begin{figure}[ht]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/soot_gravitational_settling}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/soot_gravitational_settling}
 \end{tabular}
 \end{center}
 \caption[Soot mass concentration for {\bf soot\_gravitational\_settling} case]{Time evolution of soot mass concentration for the {\bf soot\_gravitational\_settling} case.}
