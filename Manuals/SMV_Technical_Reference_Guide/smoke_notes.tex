@@ -129,7 +129,7 @@ The approximate RTE solution given in (\ref{eq:rte_simp}) is discretized by conv
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=3.5in]{FIGURES/smoke_discrete_setup}
+\includegraphics[width=5.0in]{FIGURES/smoke_discrete_setup}
 \end{center}
 \caption[Setup for discretizing the equations used to model
 radiance within a column of 3D smoke data.]{Setup for discretizing the equations used to model
@@ -144,14 +144,17 @@ The optical depth, $\tau(a,b)$, defined in (\ref{eq:optdepth}) is discretized us
 &=&\prod_{j=i}^{N-1}\exp\left(-\sigma_t(s_j)\Delta s\right)=\prod_{j=i}^{N-1}\tau_j
 \end{eqnarray*}
 
-where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$ represents the transparency over one discretization interval.
-For~$i=N-1$~to~$0$, the optical depth $\htau{i}$ may be computed recursively using
+\noindent where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$
+represents the transparency over one discretization interval.
+For~$i=N-1$~to~$0$, the optical depth $\htau{i}$ may be computed
+recursively using
 \begin{eqnarray}
 \label{eq:tauhat_recurse}
 \htau{i}&=&\htau{i+1}\tau_i
 \end{eqnarray}
-where the recursion is initiated with $\htau{N}=1$.
-Substituting $1-\halpha{i}=\htau{i}$ and $1-\alpha_i=\tau_i$ into (\ref{eq:tauhat_recurse}) gives
+\noindent where the recursion is initiated with $\htau{N}=1$.
+Substituting $1-\halpha{i}=\htau{i}$ and $1-\alpha_i=\tau_i$ into
+(\ref{eq:tauhat_recurse}) gives
 \begin{eqnarray*}
 1-\halpha{i}=(1-\halpha{i+1})(1-\alpha_i)=1-\halpha{i+1} - \alpha_i + \halpha{i+1}\alpha_i
 \end{eqnarray*}
@@ -168,15 +171,24 @@ C_{N} = \htau{0}\,C_0 +
 \sum_{i=0}^{N-1}\htau{i}\,\sigai{i}\,\Lei{i}\,\Delta x
 \end{eqnarray*}
 
-where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$, $x_i=x_0+i\Delta x$ and $\Delta x=(x_N-x_0)/N$.
-This simplifies to
+\noindent where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$,
+$x_i=x_0+i\Delta x$ and $\Delta x=(x_N-x_0)/N$. This simplifies to
 
 \begin{equation}
 \label{eq:discrete_rte2}
 C_N = \htau{0}C_0 + \sum_{i=0}^{N-1}\htau{i}\,\Leii{i}
 \end{equation}
 
-where $\Leii{i}=\sigma_{a,i}C_{e,i}\Delta x$.  If $\Leii{i}$ is interpreted as the emitted color of the fire or heated gas at location $i$ and $C_0$ is interpreted as the color  of the light source {\em behind}\ the smoke, then (\ref{eq:discrete_rte2}) restated in words gives color seen by the observer computed as a weighted average of source and emitted colors where each weight is the optical depth from the observer to the corresponding color location.  These emitted colors can be determined from a black body temperature curve or from a colormap meant to show variations in temperature in terms of color.
+\noindent where $\Leii{i}=\sigma_{a,i}C_{e,i}\Delta x$.  If
+$\Leii{i}$ is interpreted as the emitted color of the fire or
+heated gas at location $i$ and $C_0$ is interpreted as the color
+of the light source {\em behind}\ the smoke, then
+(\ref{eq:discrete_rte2}) restated in words gives color seen by the
+observer computed as a weighted average of source and emitted
+colors where each weight is the optical depth from the observer to
+the corresponding color location.  These emitted colors can be
+determined from a black body temperature curve or from a colormap
+meant to show variations in temperature in terms of color.
 
 
 The terms in (\ref{eq:discrete_rte2}) are summed from back to front meaning that the location of the $i=0$ term is farthest from the observer, while the location of the $i=N-1$ term is closest.  We wish to perform this sum in reverse order, from front to back so that the sum may be terminated early if additional contributions would not significantly change the result.
@@ -570,5 +582,3 @@ A limitation of the volume rendering procedure is the large file sizes required 
 
 \section{Future Work}
 This \paper\ describes the algorithms Smokeview uses to display smoke and fire using physics based algorithms.  These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as carbon dioxide and water vapor are neglected.  The gray gas assumption may be relaxed by solving the RTE for several wavelength bands (as may be done by FDS) and combining the results.  The RTE line integration needs to terminate at the first solid object encountered (FDS OBST) rather than the far side of the data mesh.  The computational efficiency may be improved by implementing algorithms to skip over regions with little or no smoke.  Research on unstructured geometries for future incorporation into FDS may also lead to better visualization.  Finally, the transfer function relating temperature to color may be improved by using a physics based approach rather than an assumed color map.
-
-
