@@ -8,7 +8,7 @@ cd $CURDIR/..
 
 QFDS=/usr/local/bin/qfds.sh
 # uncomment following line to stop all cases
-export STOPFDS=1
+#export STOPFDS=1
 
 $QFDS -r -d Voltest plume8c.fds
 $QFDS -r -d Voltest plume8n.fds
