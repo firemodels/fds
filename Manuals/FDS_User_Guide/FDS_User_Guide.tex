@@ -6481,7 +6481,7 @@ As discussed previously (Section~\ref{info:heat_of_combustion}), energy release 
 \section{Special Topic: Aerosol Deposition}
 \label{info:deposition}
 
-It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}, but they can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION} on the {\ct MISC} line. The {\ct GRAVITATIONAL\_DEPOSITION} parameter involves the downward movement of aerosols in the gas phase as well as the deposition of aerosols to upward-facing surfaces due to gravitational settling.
+It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}, but they can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION} on the {\ct MISC} line. The {\ct GRAVITATIONAL\_DEPOSITION} parameter involves the downward movement of aerosols in the gas phase as well as the deposition of aerosols to upward-facing surfaces due to gravitational settling.  The deposition velocity at the wall can be outputted using {\ct QUANTITY='DEPOSITION VELOCITY'} for a wall cell {\ct DEVC} or with {\ct BNDF}.
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
@@ -10098,6 +10098,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct CPUA}$^{**}$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPU TIME}                                  & Elapsed CPU time                              & s              & D            \\ \hline
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
+{\ct DEPOSITION VELOCITY}                       & Section~\ref{{info:deposition}}               & m/s               & B,D           \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & s$^{-1}$       & D,I,P,S      \\ \hline
 {\ct ENTHALPY}                                  & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
