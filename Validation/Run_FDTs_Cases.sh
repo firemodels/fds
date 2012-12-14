@@ -38,11 +38,11 @@ $FDTs LLNL_FDTs_Inputs.txt
 cd $VDIR/NBS_Multi-Room/FDTs
 $FDTs NBS_Multi-Room_FDTs_Inputs.txt
 
-cd $VDIR/NIST_Dunes_2000/FDTs
-$FDTs NIST_Dunes_2000_FDTs_Inputs.txt
-
 cd $VDIR/NIST_NRC/FDTs
 $FDTs NIST_NRC_FDTs_Inputs.txt
+
+cd $VDIR/NIST_Dunes_2000/FDTs
+$FDTs NIST_Dunes_2000_FDTs_Inputs.txt
 
 cd $VDIR/NRL_HAI/FDTs
 $FDTs NRL_HAI_FDTs_Inputs.txt
