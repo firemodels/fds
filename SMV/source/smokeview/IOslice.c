@@ -2270,6 +2270,7 @@ void getsliceparams2(void){
 void update_fedinfo(void){
   int i;
   int nfediso=0,ifediso=0;
+  FILE *stream_fedsmv=NULL;
 
   nfedinfo=0;
   if(smokediff==1)return;
@@ -2358,6 +2359,9 @@ void update_fedinfo(void){
       }
     }
   }
+  if(nfedinfo>0&&fed_smvfilename!=NULL){
+    stream_fedsmv=fopen(fed_smvfilename,"w");
+  }
   for(i=0;i<nfedinfo;i++){ // define sliceinfo for fed slices
     slicedata *sd;
     int len;
@@ -2434,7 +2438,13 @@ void update_fedinfo(void){
     NewMemory((void **)&fedi->fed_slice->reg_file,len+1);
     strcpy(sd->reg_file,filename);
     sd->file=sd->reg_file;
-    
+    if(stream_fedsmv!=NULL){
+      fprintf(stream_fedsmv,"SLCF\n");
+      fprintf(stream_fedsmv," %s\n",sd->label.longlabel);
+      fprintf(stream_fedsmv," %s\n",sd->label.shortlabel);
+      fprintf(stream_fedsmv," %s\n",sd->label.unit);
+      fprintf(stream_fedsmv," %s\n",sd->reg_file);
+    }
     if(sd->volslice==1){
       isodata *isoi;
       int nn_iso,ii;
@@ -2481,6 +2491,13 @@ void update_fedinfo(void){
       NewMemory((void **)&isoi->reg_file,len+1);
       strcpy(isoi->reg_file,filename);
       isoi->file=isoi->reg_file;
+      if(stream_fedsmv!=NULL){
+        fprintf(stream_fedsmv,"ISOF\n");
+        fprintf(stream_fedsmv," %s\n",isoi->surface_label.longlabel);
+        fprintf(stream_fedsmv," %s\n",isoi->surface_label.shortlabel);
+        fprintf(stream_fedsmv," %s\n",isoi->surface_label.unit);
+        fprintf(stream_fedsmv," %s\n",isoi->reg_file);
+      }
 
       NewMemory((void **)&isoi->size_file,strlen(isoi->file)+3+1);
       STRCPY(isoi->size_file,isoi->file);
@@ -2489,6 +2506,7 @@ void update_fedinfo(void){
       ifediso++;
     }
   }
+  if(stream_fedsmv!=NULL)fclose(stream_fedsmv);
   if(nfediso>0)updateisomenulabels();
 
 }

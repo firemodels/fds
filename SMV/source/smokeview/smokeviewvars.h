@@ -904,7 +904,7 @@ SVEXTERN int SVDECL(read_smoothobst,0);
 SVEXTERN FILE SVDECL(*STREAM_SB,NULL);
 SVEXTERN time_t smv_modtime;
 SVEXTERN float temp_threshold;
-SVEXTERN char SVDECL(*smvfilename,NULL);
+SVEXTERN char SVDECL(*smvfilename,NULL),SVDECL(*fed_smvfilename,NULL);
 SVEXTERN char SVDECL(*sliceinfofilename,NULL);
 SVEXTERN char SVDECL(*databasefilename,NULL),SVDECL(*smokeview_bindir,NULL),SVDECL(*smvisofilename,NULL);
 SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, SVDECL(*default_script,NULL);

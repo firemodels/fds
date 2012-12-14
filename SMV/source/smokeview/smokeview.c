@@ -477,6 +477,11 @@ void parse_commandline(int argc, char **argv){
       FREEMEMORY(fds_filein);
     }
   }
+  if(fed_smvfilename==NULL){
+    NewMemory((void **)&fed_smvfilename,(unsigned int)(len+9));
+    STRCPY(fed_smvfilename,fdsprefix);
+    STRCAT(fed_smvfilename,".fed_smv");
+  }
   if(sliceinfofilename==NULL){
     NewMemory((void **)&sliceinfofilename,strlen(fdsprefix)+11+1);
     STRCPY(sliceinfofilename,fdsprefix);
