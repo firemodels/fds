@@ -52,7 +52,7 @@ void update_menu(void);
 // file name base (char) (or blank to use smokeview default)
 
 // VOLSMOKERENDERALL 
-//  skip (int)
+//  skip (int) start_frame (int)
 // file name base (char) (or blank to use smokeview default)
 
 // ---------- loading, unloading files -----------

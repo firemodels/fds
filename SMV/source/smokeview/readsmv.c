@@ -11034,9 +11034,10 @@ void writeini(int flag){
   fprintf(fileout,"SMOKESENSORS\n");
   fprintf(fileout," %i %i\n",show_smokesensors,test_smokesensors);
   fprintf(fileout,"VOLSMOKE\n");
-  fprintf(fileout," %i %i %i %i %f %f %f %f %f",
-        glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,
-        temperature_cutoff,fire_opacity_factor,mass_extinct,gpu_vol_factor,nongpu_vol_factor
+  fprintf(fileout," %i %i %i %i %i\n",
+        glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,show_volsmoke_moving);
+  fprintf(fileout," %f %f %f %f %f %f %f\n",
+        temperature_min,temperature_cutoff,temperature_max,fire_opacity_factor,mass_extinct,gpu_vol_factor,nongpu_vol_factor
         );
 
   fprintf(fileout,"\nMISC\n");
