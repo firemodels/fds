@@ -602,6 +602,83 @@ Test 18    &  1180           &  27                &  1380            \\ \hline
 
 \section{NIST Dunes 2000}
 
+\subsection*{Smoke Detector Activation Time (Milke)}
+
+The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
+After the time $t_{fire}$, the fire HRR was steady.
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for NIST Dunes 2000 cases, smoke detector activation time (Milke).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                          &              \\
+\rb{Input parameter}      &  \rb{Value}  \\ \hline \hline
+$\alpha$ (kW/s$^2$)       &  0.01172     \\ \hline
+$\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
+$\chi_r$ (-)              &  0.30        \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+            &                   &            \\
+\rb{Test}   &  \rb{$t_{fire}$}  &  \rb{$H$}  \\
+            &  \rb{(s)}         &  \rb{(m)}  \\ \hline \hline
+Test SDC02  &  194              &  2.1       \\ \hline
+Test SDC05  &  172              &  2.0       \\ \hline
+Test SDC07  &  251              &  2.0       \\ \hline
+Test SDC09  &  300              &  2.0       \\ \hline
+Test SDC10  &  220              &  2.1       \\ \hline
+Test SDC33  &  176              &  2.1       \\ \hline
+Test SDC35  &  174              &  2.1       \\ \hline
+Test SDC39  &  128              &  2.0       \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
+\subsection*{Smoke Detector Activation Time (Mowrer)}
+
+The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
+After the time $t_{fire}$, the fire HRR was steady.
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for NIST Dunes 2000 cases, smoke detector activation time (Mowrer).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &              \\
+\rb{Input parameter}  &  \rb{Value}  \\ \hline \hline
+$C_{pl}$ (-)          &  0.67        \\ \hline
+$C_{cj}$ (-)          &  1.2         \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+            &                   &            &            \\
+\rb{Test}   &  \rb{$t_{fire}$}  &  \rb{$H$}  &  \rb{$R$}  \\
+            &  \rb{(s)}         &  \rb{(m)}  &  \rb{(m)}  \\ \hline \hline
+Test SDC02  &  194              &  2.1       &  1.3       \\ \hline
+Test SDC05  &  172              &  2.0       &  1.8       \\ \hline
+Test SDC07  &  251              &  2.0       &  1.8       \\ \hline
+Test SDC09  &  300              &  2.0       &  1.8       \\ \hline
+Test SDC10  &  220              &  2.1       &  1.3       \\ \hline
+Test SDC33  &  176              &  2.1       &  1.3       \\ \hline
+Test SDC35  &  174              &  2.1       &  1.3       \\ \hline
+Test SDC39  &  128              &  2.0       &  1.8       \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
 
 \clearpage
 
@@ -619,7 +696,6 @@ Test 18    &  1180           &  27                &  1380            \\ \hline
                         &              \\
 \rb{Input parameter}    &  \rb{Value}  \\ \hline \hline
 $T_\infty$ ($^\circ$C)  &  22          \\ \hline
-$t_{end}$ (s)           &  600         \\ \hline
 \end{tabular}
 \end{center}
 
@@ -932,7 +1008,7 @@ I-22       &  4600           \\ \hline
 \subsection*{Sprinkler Activation Time}
 
 \begin{table}[!h]
-\caption{Summary of input parameters used for UL/NFPRF cases, sprinkler activation time.}
+\caption{Summary of input parameters used for UL/NFPRF cases, sprinkler response time.}
 
 The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
 After the time $t_{fire}$, the fire HRR was steady.
@@ -989,17 +1065,129 @@ I-22       &  51               &  2.12      &            &                   &  
 
 \section{Ulster SBI}
 
+\subsection*{Immersed Plume Radiation Heat Flux}
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for Ulster SBI cases, immersed plume radiation heat flux.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                        &                                     \\
+\rb{Input parameter}    &  \rb{Value}                         \\ \hline \hline
+$T_\infty$ ($^\circ$C)  &  20                                 \\ \hline
+$Z$ (m)                 &  0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4  \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+           &                 \\
+\rb{Test}  &  \rb{$\dot Q$}  \\
+           &  \rb{(kW)}      \\ \hline \hline
+30 kW      &  30             \\ \hline
+45 kW      &  45             \\ \hline
+60 kW      &  60             \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
 
 \clearpage
 
 
 \section{USN Hawaii}
 
+\subsection*{Plume Temperature (Heskestad)}
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for USN Hawaii cases, plume temperature (Heskestad).}
+
+The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
+After the time $t_{fire}$, the fire HRR was steady.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                         &                         \\
+\rb{Input parameter}     &  \rb{Value}             \\ \hline \hline
+$Z$ (m)                  &  8.7, 11.8, 13.3, 14.5  \\ \hline
+$\rho_{air}$ (kg/m$^3$)  &  1.18                   \\ \hline
+$\chi_r$ (-)             &  0.30                   \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+           &                   &                   &             &                &                    \\
+\rb{Test}  &  \rb{$\alpha$}    &  \rb{$t_{fire}$}  &  \rb{$Q$}   &  \rb{$A$}      &  \rb{$T_\infty$}   \\
+           &  \rb{(kw/s$^2$)}  &  \rb{(s)}         &  \rb{(kW)}  &  \rb{(m$^2$)}  &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 1     &  0.00694          &  120              &  100        &  0.09          &  27                \\ \hline
+Test 2     &  0.02222          &  150              &  500        &  0.36          &  28                \\ \hline
+Test 3     &  0.04889          &  150              &  1100       &  0.81          &  27                \\ \hline
+Test 4     &  0.09133          &  180              &  2959       &  1.69          &  27                \\ \hline
+Test 5     &  0.48597          &  120              &  6998       &  3.24          &  27                \\ \hline
+Test 6     &  0.33773          &  150              &  7599       &  4.84          &  25                \\ \hline
+Test 7     &  0.17799          &  180              &  5767       &  3.24          &  30                \\ \hline
+Test 11    &  0.00444          &  150              &  100        &  0.09          &  30                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
 
 \clearpage
 
 
 \section{USN Iceland}
+
+\subsection*{Plume Temperature (Heskestad)}
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for USN Hawaii cases, plume temperature (Heskestad).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                         &                                \\
+\rb{Input parameter}     &  \rb{Value}                    \\ \hline \hline
+$Z$ (m)                  &  15.7, 17.2, 18.8, 20.3, 21.5  \\ \hline
+$\rho_{air}$ (kg/m$^3$)  &  1.18                          \\ \hline
+$\chi_r$ (-)             &  0.30                          \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+           &             &                &                    \\
+\rb{Test}  &  \rb{$Q$}   &  \rb{$A$}      &  \rb{$T_\infty$}   \\
+           &  \rb{(kW)}  &  \rb{(m$^2$)}  &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 1     &  88         &  0.09          &  10                \\ \hline
+Test 2     &  60         &  0.09          &  10                \\ \hline
+Test 3     &  720        &  0.36          &  11                \\ \hline
+Test 4     &  684        &  0.36          &  14                \\ \hline
+Test 5     &  1134       &  0.81          &  17                \\ \hline
+Test 6     &  1296       &  0.81          &  16                \\ \hline
+Test 7     &  2736       &  1.44          &  16                \\ \hline
+Test 9     &  153        &  0.09          &  9                 \\ \hline
+Test 10    &  612        &  0.36          &  9                 \\ \hline
+Test 11    &  648        &  0.36          &  9                 \\ \hline
+Test 12    &  1512       &  0.36          &  9                 \\ \hline
+Test 13    &  2700       &  1.44          &  11                \\ \hline
+Test 14    &  7802       &  4.84          &  12                \\ \hline
+Test 15    &  15300      &  9.00          &  12                \\ \hline
+Test 17    &  15750      &  9.00          &  11                \\ \hline
+Test 18    &  4918       &  3.24          &  10                \\ \hline
+Test 19    &  8712       &  4.84          &  13                \\ \hline
+Test 20    &  14850      &  9.00          &  14                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
 
 \clearpage
