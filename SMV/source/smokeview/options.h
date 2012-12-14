@@ -8,7 +8,7 @@
 
 #define pp_release
 // comment following line when building an official release
-// #define pp_UNOFFICIAL_RELEASE
+#define pp_UNOFFICIAL_RELEASE
 
 //*** uncomment the following two lines to force all versions to be beta
 //#undef pp_BETA
