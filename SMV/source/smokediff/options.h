@@ -111,7 +111,7 @@
 #endif
 
 #ifdef pp_release
-#define PROGVERSION "1.0.5"
+#define PROGVERSION "1.0.6"
 #endif
 
 #ifdef CPP

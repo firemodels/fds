@@ -12,7 +12,7 @@
 #include "MALLOC.h"
 #include "file_util.h"
 
-//dummy change to bump version number to 1.0.5
+//dummy change to bump version number to 1.0.6
 //dummy change to force revision change
 
 // svn revision character string
