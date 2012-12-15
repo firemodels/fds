@@ -25,7 +25,11 @@ int main(int argc, char **argv){
   char *smv1=NULL, *smv2=NULL, *arg;
   char smv1_out[1024];
   char svdlogfile[1024];
-  char smoke1[1024], smoke2[1024], smv_out[1024];
+  char *smoke1, *smoke2, smv_out[1024];
+  char smoke1a[1024], smoke2a[1024];
+  char smoke1b[1024], smoke2b[1024];
+  char fed_smoke1[1024], fed_smoke2[1024];
+
   FILE *stream_out, *stream_in1, *stream_in2;
   int no_plot3d=0, no_slice=0, no_boundary=0;
   int i;
@@ -149,12 +153,40 @@ int main(int argc, char **argv){
   if(smv1!=NULL){
     strcat(smv1_out,smv1);
     strcat(smv1_out,".smv");
-    fullfile(smoke1,sourcedir1,smv1);
-    strcat(smoke1,".smv");
+    fullfile(smoke1a,sourcedir1,smv1);
+    
+    strcpy(fed_smoke1,smoke1a);
+    strcat(fed_smoke1,".fed_smv");
+    
+    strcpy(smoke1b,smoke1a);
+    strcat(smoke1b,".smvtmp");
+
+    strcat(smoke1a,".smv");
+    smoke1 = smoke1a;
+
+    if(file_exists(fed_smoke1)==1){
+      printf("before copy2\n");
+      copyfile2(smoke1b,smoke1a,0);
+      copyfile2(smoke1b,fed_smoke1,1);
+      smoke1=smoke1b;
+    }
   }
   if(smv2!=NULL){
-    fullfile(smoke2,sourcedir2,smv2);
-    strcat(smoke2,".smv");
+    fullfile(smoke2a,sourcedir2,smv2);
+    
+    strcpy(fed_smoke2,smoke2a);
+    strcat(fed_smoke2,".fed_smv");
+    
+    strcpy(smoke2b,smoke2a);
+    strcat(smoke2b,".smvtmp");
+    strcat(smoke2a,".smv");
+    smoke2 = smoke2a;
+
+    if(file_exists(fed_smoke2)==1){
+      copyfile2(smoke2b,smoke2a,0);
+      copyfile2(smoke2b,fed_smoke2,1);
+      smoke2=smoke2b;
+    }
   }
   // make sure smv file names exists
 

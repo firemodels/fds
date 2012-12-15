@@ -236,16 +236,16 @@ void diff_slices(FILE *stream_out){
       // ijk2 = k*nx2*ny2 + j*nx2 + i
 
       for(i=0;i<nqframe1;i++){
-        int i1, j1, k1;
+        int i1, jj1, k1;
         int i2, j2, k2;
         int ijk2;
 
         k1 = i/(nx1*ny1);
-        j1 = (i-k1*nx1*ny1)/nx1;
-        i1 = i-k1*nx1*ny1-j1*nx1;
+        jj1 = (i-k1*nx1*ny1)/nx1;
+        i1 = i-k1*nx1*ny1-jj1*nx1;
 
         k2=slice1->factor[2]*k1;
-        j2=slice1->factor[1]*j1;
+        j2=slice1->factor[1]*jj1;
         i2=slice1->factor[0]*i1;
         ijk2=k2*nx2*ny2+j2*nx2+i2;
 
