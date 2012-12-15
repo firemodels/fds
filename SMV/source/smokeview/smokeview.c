@@ -601,6 +601,20 @@ void parse_commandline(int argc, char **argv){
       from_commandline=1;
       runscript=1;
     }
+    else if(strncmp(argv[i],"-skipframe",10)==0){
+      from_commandline=1;
+      ++i;
+      if(i<argc){
+        sscanf(argv[i],"%i",&skipframe0);
+      }
+    }
+    else if(strncmp(argv[i],"-startframe",11)==0){
+      from_commandline=1;
+      ++i;
+      if(i<argc){
+        sscanf(argv[i],"%i",&startframe0);
+      }
+    }
     else if(strncmp(argv[i],"-script",7)==0){
       from_commandline=1;
       ++i;
@@ -718,6 +732,8 @@ void usage(char **argv){
   printf("%s\n",_(" -ng_ini        - No graphics version of -ini."));
   printf("%s\n",_(" -runscript     - run the script file casename.ssf"));
   printf("%s\n",_(" -script scriptfile - run the script file scriptfile"));
+  printf("%s\n",_(" -skipframe n   - render every n frames"));
+  printf("%s\n",_(" -startframe n  - start rendering at frame n"));
   printf("%s\n",_(" -stereo        - activate stereo mode"));
   printf("%s\n",_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
   printf("%s\n",_(" -version       - display version information"));

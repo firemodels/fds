@@ -2714,8 +2714,8 @@ void DoScript(void){
   else{
     first_frame_index=0;
     skip_render_frames=0;
-    script_frame_start=-1;
-    script_frame_skip=-1;
+    script_startframe=-1;
+    script_skipframe=-1;
   }
 }
 

@@ -657,8 +657,8 @@ int compile_script(char *scriptfile){
 /* ------------------ run_renderstart ------------------------ */
 
 void script_renderstart(scriptdata *scripti){
-  script_frame_start=scripti->ival;
-  script_frame_skip=scripti->ival2;
+  script_startframe=scripti->ival;
+  script_skipframe=scripti->ival2;
 }
 
 /* ------------------ run_renderall ------------------------ */
@@ -667,8 +667,10 @@ void script_renderall(scriptdata *scripti){
   int skip_local;
 
 
-  if(script_frame_start>0)scripti->ival=script_frame_start;
-  if(script_frame_skip>0)scripti->ival3=script_frame_skip;
+  if(script_startframe>0)scripti->ival=script_startframe;
+  if(startframe0>0)scripti->ival=startframe0;
+  if(script_skipframe>0)scripti->ival3=script_skipframe;
+  if(skipframe0>0)scripti->ival3=skipframe0;
   skip_local=scripti->ival;
   if(skip_local<1)skip_local=1;
   printf("script: Rendering every %i frames\n\n",skip_local);
@@ -682,8 +684,10 @@ void script_volsmokerenderall(scriptdata *scripti){
   int skip_local;
 
   script_loadvolsmokeframe2();
-  if(script_frame_start>0)scripti->ival=script_frame_start;
-  if(script_frame_skip>0)scripti->ival3=script_frame_skip;
+  if(script_startframe>0)scripti->ival=script_startframe;
+  if(startframe0>0)scripti->ival=startframe0;
+  if(script_skipframe>0)scripti->ival3=script_skipframe;
+  if(skipframe0>0)scripti->ival3=skipframe0;
   skip_local=scripti->ival;
   if(skip_local<1)skip_local=1;
   printf("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival2);

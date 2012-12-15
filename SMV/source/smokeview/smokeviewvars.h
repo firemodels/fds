@@ -29,7 +29,8 @@ SVEXTERN float SVDECL(nongpu_vol_factor,1.0);
 SVEXTERN float SVDECL(gpu_vol_factor,1.0);
 SVEXTERN int SVDECL(disable_gpu,0);
 SVEXTERN int SVDECL(render_state,0);
-SVEXTERN int SVDECL(script_frame_start,-1), SVDECL(script_frame_skip,-1);
+SVEXTERN int SVDECL(script_startframe,-1), SVDECL(script_skipframe,-1);
+SVEXTERN int SVDECL(startframe0,-1), SVDECL(skipframe0,-1);
 SVEXTERN int SVDECL(skip_render_frames,0);
 SVEXTERN int SVDECL(update_smokecolorbar,0);
 #ifdef pp_SUPERMESH
