@@ -2439,11 +2439,11 @@ void update_fedinfo(void){
     strcpy(sd->reg_file,filename);
     sd->file=sd->reg_file;
     if(stream_fedsmv!=NULL){
-      fprintf(stream_fedsmv,"SLCF\n");
+      fprintf(stream_fedsmv,"SLCF %i %s %i %i %i %i %i %i\n",sd->blocknumber+1,"%",sd->is1,sd->is2,sd->js1,sd->js2,sd->ks1,sd->ks2);
+      fprintf(stream_fedsmv," %s\n",sd->reg_file);
       fprintf(stream_fedsmv," %s\n",sd->label.longlabel);
       fprintf(stream_fedsmv," %s\n",sd->label.shortlabel);
       fprintf(stream_fedsmv," %s\n",sd->label.unit);
-      fprintf(stream_fedsmv," %s\n",sd->reg_file);
     }
     if(sd->volslice==1){
       isodata *isoi;
