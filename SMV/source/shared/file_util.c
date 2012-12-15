@@ -73,16 +73,20 @@ void filecopy(char *destdir, char *file_in, char *file_out){
 
 /* ------------------ copyfile ------------------------ */
 
-void copyfile(char *destfile, char *sourcefile){
+void copyfile2(char *destfile, char *sourcefile, int mode){
   char buffer[FILE_BUFFER];
-  FILE *streamin;
-  FILE *streamout;
+  FILE *streamin, *streamout;
   size_t chars_in;
 
   streamin=fopen(sourcefile,"rb");
   if(streamin==NULL)return;
 
-  streamout=fopen(destfile,"wb");
+  if(mode==0){
+    streamout=fopen(destfile,"wb");
+  }
+  else{
+    streamout=fopen(destfile,"ab");
+  }
   if(streamout==NULL){
     fclose(streamin);
     return;
