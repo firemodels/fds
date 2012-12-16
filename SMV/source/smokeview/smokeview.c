@@ -337,7 +337,7 @@ void ResetView(int option){
 /* ------------------ parse_commandline ------------------------ */
 
 void parse_commandline(int argc, char **argv){
-  int i, len;
+  int i, len_casename;
   int iarg;
   size_t len_memory;
   char *argi;
@@ -396,10 +396,10 @@ void parse_commandline(int argc, char **argv){
 #ifndef pp_OSX
   argi=lastname(argi);
 #endif
-  len = (int) strlen(argi);
+  len_casename = (int) strlen(argi);
   CheckMemory;
   FREEMEMORY(fdsprefix);
-  len_memory=len+strlen(part_ext)+100;
+  len_memory=len_casename+strlen(part_ext)+100;
   NewMemory((void **)&fdsprefix,(unsigned int)len_memory);
   STRCPY(fdsprefix,argi);
   FREEMEMORY(trainer_filename);
@@ -408,7 +408,7 @@ void parse_commandline(int argc, char **argv){
 
   strcpy(inputfilename_ext,"");
 
-  if(len>4){
+  if(len_casename>4){
     char *c_ext;
 
     c_ext=strrchr(argi,'.');
@@ -424,11 +424,11 @@ void parse_commandline(int argc, char **argv){
         c_ext[0]=0;
         STRCPY(fdsprefix,argi);
         FREEMEMORY(trainer_filename);
-        NewMemory((void **)&trainer_filename,(unsigned int)(len+7));
+        NewMemory((void **)&trainer_filename,(unsigned int)(len_casename+7));
         STRCPY(trainer_filename,argi);
         STRCAT(trainer_filename,".svd");
         FREEMEMORY(test_filename);
-        NewMemory((void **)&test_filename,(unsigned int)(len+7));
+        NewMemory((void **)&test_filename,(unsigned int)(len_casename+7));
         STRCPY(test_filename,argi);
         STRCAT(test_filename,".smt");
       }
@@ -436,24 +436,24 @@ void parse_commandline(int argc, char **argv){
   }
 
   FREEMEMORY(logfilename);
-  NewMemory((void **)&logfilename,len+7+1);
+  NewMemory((void **)&logfilename,len_casename+7+1);
   STRCPY(logfilename,fdsprefix);
   STRCAT(logfilename,".smvlog");
 
   FREEMEMORY(caseinifilename);
-  NewMemory((void **)&caseinifilename,len+strlen(ini_ext)+1);
+  NewMemory((void **)&caseinifilename,len_casename+strlen(ini_ext)+1);
   STRCPY(caseinifilename,fdsprefix);
   STRCAT(caseinifilename,ini_ext);
 
   FREEMEMORY(boundinifilename);
-  NewMemory((void **)&boundinifilename,len+5+1);
+  NewMemory((void **)&boundinifilename,len_casename+5+1);
   STRCPY(boundinifilename,fdsprefix);
   STRCAT(boundinifilename,".bini");
 
   if(smvfilename==NULL){
     STRUCTSTAT statbuffer;
 
-    NewMemory((void **)&smvfilename,(unsigned int)(len+6));
+    NewMemory((void **)&smvfilename,(unsigned int)(len_casename+6));
     STRCPY(smvfilename,fdsprefix);
     STRCAT(smvfilename,".smv");
     {
@@ -478,7 +478,7 @@ void parse_commandline(int argc, char **argv){
     }
   }
   if(fed_smvfilename==NULL){
-    NewMemory((void **)&fed_smvfilename,(unsigned int)(len+9));
+    NewMemory((void **)&fed_smvfilename,(unsigned int)(len_casename+9));
     STRCPY(fed_smvfilename,fdsprefix);
     STRCAT(fed_smvfilename,".fed_smv");
   }
@@ -494,7 +494,7 @@ void parse_commandline(int argc, char **argv){
   {
     FILE *stream_iso=NULL;
 
-    NewMemory((void **)&smvisofilename,len+7+1);
+    NewMemory((void **)&smvisofilename,len_casename+7+1);
     STRCPY(smvisofilename,fdsprefix);
     STRCAT(smvisofilename,".isosmv");
     stream_iso=fopen(smvisofilename,"r");
@@ -507,17 +507,17 @@ void parse_commandline(int argc, char **argv){
   }
 
   if(trainer_filename==NULL){
-    NewMemory((void **)&trainer_filename,(unsigned int)(len+6));
+    NewMemory((void **)&trainer_filename,(unsigned int)(len_casename+6));
     STRCPY(trainer_filename,fdsprefix);
     STRCAT(trainer_filename,".svd");
   }
   if(test_filename==NULL){
-    NewMemory((void **)&test_filename,(unsigned int)(len+6));
+    NewMemory((void **)&test_filename,(unsigned int)(len_casename+6));
     STRCPY(test_filename,fdsprefix);
     STRCAT(test_filename,".svd");
   }
   if(filename_sb==NULL){
-    NewMemory((void **)&filename_sb,(unsigned int)(len+6));
+    NewMemory((void **)&filename_sb,(unsigned int)(len_casename+6));
     STRCPY(filename_sb,fdsprefix);
     STRCAT(filename_sb,".sb");
   }
@@ -586,8 +586,7 @@ void parse_commandline(int argc, char **argv){
       use_iblank=1;
     }
     else if(
-      strncmp(argv[i],"-version",8)==0||
-      strncmp(argv[i],"-v",2)==0
+      strncmp(argv[i],"-volrender",10)!=0&&(strncmp(argv[i],"-version",8)==0||strncmp(argv[i],"-v",2)==0)
       ){
       display_version_info();
       exit(0);
@@ -614,6 +613,10 @@ void parse_commandline(int argc, char **argv){
       if(i<argc){
         sscanf(argv[i],"%i",&startframe0);
       }
+    }
+    else if(strncmp(argv[i],"-volrender",10)==0){
+      from_commandline=1;
+      make_volrender_script=1;
     }
     else if(strncmp(argv[i],"-script",7)==0){
       from_commandline=1;
@@ -651,6 +654,27 @@ void parse_commandline(int argc, char **argv){
       fprintf(stderr,"*** Error: unknown option: %s\n",argv[i]);
       usage(argv);
       exit(1);
+    }
+  }
+  if(make_volrender_script==1){
+    scriptfiledata *sfd;
+    FILE *script_stream;
+
+    NewMemory((void **)&volrender_scriptname,(unsigned int)(len_casename+14+1));
+    STRCPY(volrender_scriptname,fdsprefix);
+    STRCAT(volrender_scriptname,"_volrender.ssf");
+
+    sfd = insert_scriptfile(volrender_scriptname);
+    if(sfd!=NULL)default_script=sfd;
+    script_stream=fopen(volrender_scriptname,"w");
+    if(script_stream!=NULL){
+      fprintf(script_stream,"RENDERDIR\n");
+      fprintf(script_stream," .\n");
+      fprintf(script_stream,"VOLSMOKERENDERALL\n");
+      fprintf(script_stream," 1 0\n");
+      fprintf(script_stream," %s\n",fdsprefix);
+      runscript=1;
+      fclose(script_stream);
     }
   }
 }
@@ -737,6 +761,7 @@ void usage(char **argv){
   printf("%s\n",_(" -stereo        - activate stereo mode"));
   printf("%s\n",_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
   printf("%s\n",_(" -version       - display version information"));
+  printf("%s\n",_(" -volrender     - generate images of volume rendered smoke and fire"));
 
   if(showbuild==1){
     char label[1024],*labelptr;

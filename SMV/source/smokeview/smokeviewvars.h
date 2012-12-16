@@ -25,6 +25,8 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(make_volrender_script,0);
+SVEXTERN char SVDECL(*volrender_scriptname,NULL);
 SVEXTERN float SVDECL(nongpu_vol_factor,1.0);
 SVEXTERN float SVDECL(gpu_vol_factor,1.0);
 SVEXTERN int SVDECL(disable_gpu,0);
