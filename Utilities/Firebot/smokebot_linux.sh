@@ -840,6 +840,12 @@ email_build_status()
    then
      echo "animations: http://blaze.nist.gov/smv_animations" >> $TIME_LOG
    fi
+  if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
+    cat $SVN_SMVLOG >> $TIME_LOG
+  fi
+  if [[ $THIS_FDSSVN != $LAST_FDSSVN ]] ; then
+    cat $SVN_FDSLOG >> $TIME_LOG
+  fi
    echo "-------------------------------" >> $TIME_LOG
    cd $FIREBOT_DIR
    # Check for warnings and errors
