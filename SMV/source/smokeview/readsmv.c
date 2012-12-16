@@ -8072,6 +8072,7 @@ int readini2(char *inifile, int localfile){
       if(load_at_rendertimes!=0)load_at_rendertimes=1;
       fire_opacity_factor=CLAMP(fire_opacity_factor,1.0,10.0);
       mass_extinct=CLAMP(mass_extinct,100.0,100000.0);
+      init_volrender_surface(0);
       continue;
     }
     if(match(buffer,"MESHOFFSET")==1){
