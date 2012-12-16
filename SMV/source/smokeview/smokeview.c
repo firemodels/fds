@@ -379,6 +379,8 @@ void parse_commandline(int argc, char **argv){
         strncmp(argi,"-lang",5)==0||
 #endif        
         strncmp(argi,"-script",7)==0||
+        strncmp(argi,"-startframe",11)==0||
+        strncmp(argi,"-skipframe",10)==0||
         strncmp(argi,"-bindir",7)==0
         ){
         iarg++;
