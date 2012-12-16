@@ -666,15 +666,20 @@ void parse_commandline(int argc, char **argv){
 
     sfd = insert_scriptfile(volrender_scriptname);
     if(sfd!=NULL)default_script=sfd;
-    script_stream=fopen(volrender_scriptname,"w");
-    if(script_stream!=NULL){
-      fprintf(script_stream,"RENDERDIR\n");
-      fprintf(script_stream," .\n");
-      fprintf(script_stream,"VOLSMOKERENDERALL\n");
-      fprintf(script_stream," 1 0\n");
-      fprintf(script_stream," %s\n",fdsprefix);
+    if(file_exists(volrender_scriptname)==1){
       runscript=1;
-      fclose(script_stream);
+    }
+    else{
+      script_stream=fopen(volrender_scriptname,"w");
+      if(script_stream!=NULL){
+        fprintf(script_stream,"RENDERDIR\n");
+        fprintf(script_stream," .\n");
+        fprintf(script_stream,"VOLSMOKERENDERALL\n");
+        fprintf(script_stream," 1 0\n");
+        fprintf(script_stream," %s\n",fdsprefix);
+        runscript=1;
+        fclose(script_stream);
+      } 
     }
   }
 }
