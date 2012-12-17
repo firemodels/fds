@@ -39,7 +39,7 @@ void Render(int view_mode){
         return;
       }
     }
-    render_frame[itimes]++;
+  //  render_frame[itimes]++; //xxx check whether this is needed
     if( (render_frame[itimes]>0&&showstereo==0)||(render_frame[itimes]>1&&showstereo!=0) ){
       current_script_command->remove_frame=itimes;
     }

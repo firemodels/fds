@@ -488,8 +488,12 @@ void checktimebound(void){
 
   if(timebar_drag==0&&itimes>nglobal_times-1||timebar_drag==1&&itimes<0){
     izone=0;
-    itimes=0;
-    if(render_state==RENDER_ON)RenderState(RENDER_OFF);
+    itimes=first_frame_index;
+    if(render_state==RENDER_ON){
+      RenderMenu(RenderCancel);
+      // following exits render command, do this a better way
+      if(current_script_command!=NULL)current_script_command->exit=1;
+    }
     frame_index=first_frame_index;
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;

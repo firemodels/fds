@@ -479,7 +479,7 @@ SVEXTERN int slicefilenumber;
 SVEXTERN int exportdata;
 SVEXTERN int SVDECL(frame_count,1), SVDECL(last_frame_count,1);
 SVEXTERN int nspr;
-SVEXTERN int RenderSkip;
+SVEXTERN int SVDECL(RenderSkip,1);
 SVEXTERN int SVDECL(isoframestep_global,1),SVDECL(isoframeskip_global,0);
 SVEXTERN int smoke3dframestep;
 SVEXTERN int smoke3dframeskip;

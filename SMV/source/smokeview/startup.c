@@ -1465,7 +1465,6 @@ void initvars(void){
   slicefilenumber=0;
   exportdata=0;
   nspr=0;
-  RenderSkip=1;
   smoke3dframestep=1;
   smoke3dframeskip=0;
   vectorskip=1;

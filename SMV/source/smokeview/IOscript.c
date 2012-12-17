@@ -544,7 +544,7 @@ int compile_script(char *scriptfile){
       case SCRIPT_RENDERALL:
         SETcval;
         cleanbuffer(buffer,buffer2);
-        scripti->ival=1;
+        scripti->ival=1;   // skip
         scripti->ival3=0;  // first frame
         sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival3);
         if(scripti->ival<1)scripti->ival=1;
@@ -667,13 +667,16 @@ void script_renderall(scriptdata *scripti){
   int skip_local;
 
 
-  if(script_startframe>0)scripti->ival=script_startframe;
-  if(startframe0>0)scripti->ival=startframe0;
-  if(script_skipframe>0)scripti->ival3=script_skipframe;
-  if(skipframe0>0)scripti->ival3=skipframe0;
-  skip_local=scripti->ival;
-  if(skip_local<1)skip_local=1;
-  printf("script: Rendering every %i frames\n\n",skip_local);
+  if(script_startframe>0)scripti->ival3=script_startframe;
+  if(startframe0>0)scripti->ival3=startframe0;
+  first_frame_index=scripti->ival3;
+  itimes=first_frame_index;
+
+  if(script_skipframe>0)scripti->ival=script_skipframe;
+  if(skipframe0>0)scripti->ival=skipframe0;
+  skip_local=MAX(1,scripti->ival);
+
+  printf("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival3);
   skip_render_frames=1;
   RenderMenu(skip_local);
 }
@@ -684,14 +687,20 @@ void script_volsmokerenderall(scriptdata *scripti){
   int skip_local;
 
   script_loadvolsmokeframe2();
-  if(script_startframe>0)scripti->ival=script_startframe;
-  if(startframe0>0)scripti->ival=startframe0;
-  if(script_skipframe>0)scripti->ival3=script_skipframe;
-  if(skipframe0>0)scripti->ival3=skipframe0;
-  skip_local=scripti->ival;
-  if(skip_local<1)skip_local=1;
-  printf("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival2);
+  
+  if(script_startframe>0)scripti->ival3=script_startframe;
+  if(startframe0>0)scripti->ival3=startframe0;
+  // check first_frame_index
+  first_frame_index=scripti->ival3;
+  itimes=first_frame_index;
+  
+  if(script_skipframe>0)scripti->ival=script_skipframe;
+  if(skipframe0>0)scripti->ival=skipframe0;
+  skip_local=MAX(1,scripti->ival);
+  
+  printf("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival3);
   skip_render_frames=1;
+  scripti->ival=skip_local;
   RenderMenu(skip_local);
 }
 
@@ -817,6 +826,7 @@ void script_loadvolsmokeframe(scriptdata *scripti){
   update_framenumber(0);
   UpdateTimeLabels();
   keyboard('r',FROM_SMOKEVIEW);
+  RenderOnceNow=0;
 }
 
 /* ------------------ script_loadvolsmokeframe2 ------------------------ */
