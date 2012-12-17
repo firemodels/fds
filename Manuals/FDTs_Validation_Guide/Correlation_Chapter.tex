@@ -3,10 +3,10 @@
 
 \section{Arup Tunnel}
 
-\subsection*{Ceiling Jet (Alpert)}
+\subsection*{Ceiling Jet Temperature (Alpert)}
 
 \begin{table}[!h]
-\caption{Summary of input parameters used for Arup Tunnel case, ceiling jet (Alpert).}
+\caption{Summary of input parameters used for Arup Tunnel case, ceiling jet temperature (Alpert).}
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -27,10 +27,10 @@ $t_{end}$ (s)             &  500         \\ \hline
 
 \section{ATF Corridors}
 
-\subsection*{Ceiling Jet (Alpert)}
+\subsection*{Ceiling Jet Temperature (Alpert)}
 
 \begin{table}[!h]
-\caption{Summary of input parameters used for ATF Corridors cases, ceiling jet (Alpert).}
+\caption{Summary of input parameters used for ATF Corridors cases, ceiling jet temperature (Alpert).}
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -139,7 +139,7 @@ $\delta$ (m)          &  0.025       \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|c|}
 \hline
            &                    &                 &                 &                    &                  \\
 \rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
@@ -221,10 +221,10 @@ Test 22    &  1000           &  14                &  840             \\ \hline
 \clearpage
 
 
-\subsection*{Ceiling Jet (Alpert)}
+\subsection*{Ceiling Jet Temperature (Alpert)}
 
 \begin{table}[!h]
-\caption{Summary of input parameters used for FM/SNL cases, ceiling jet (Alpert).}
+\caption{Summary of input parameters used for FM/SNL cases, ceiling jet temperature (Alpert).}
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -328,7 +328,7 @@ $\delta$ (m)          &  0.0254      \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|c|c|c|c|}
 \hline
            &                    &            &            &            &                 &                 &                    &                  \\
 \rb{Test}  &  \rb{Correlation}  &  \rb{$L$}  &  \rb{$W$}  &  \rb{$H$}  &  \rb{$\dot Q$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
@@ -364,7 +364,7 @@ Test 25    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200   
 
 \begin{table}[!h]
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|c|c|c|c|}
 \hline
            &                    &            &            &            &                 &                 &                    &                  \\
 \rb{Test}  &  \rb{Correlation}  &  \rb{$L$}  &  \rb{$W$}  &  \rb{$H$}  &  \rb{$\dot Q$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
@@ -556,10 +556,10 @@ Test 18    &  1180           &  1.025         \\ \hline
 \clearpage
 
 
-\subsection*{Ceiling Jet (Alpert)}
+\subsection*{Ceiling Jet Temperature (Alpert)}
 
 \begin{table}[!h]
-\caption{Summary of input parameters used for NIST/NRC cases, ceiling jet (Alpert).}
+\caption{Summary of input parameters used for NIST/NRC cases, ceiling jet temperature (Alpert).}
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -1020,7 +1020,7 @@ After the time $t_{fire}$, the fire HRR was steady.
 \rb{Input parameter}     &  \rb{Value}  \\ \hline \hline
 $\alpha$ (kW/s$^2$)      &  1.778       \\ \hline
 Scaling factor (-)       &  1           \\ \hline
-RTI (m/s$^{1/2}$)        &  148         \\ \hline
+RTI ((m-s)$^{1/2}$)      &  148         \\ \hline
 $T_{act}$ ($^\circ$C)    &  74          \\ \hline
 $H$ (m)                  &  7.0         \\ \hline
 $T_\infty$ ($^\circ$C)   &  18          \\ \hline
@@ -1194,6 +1194,176 @@ Test 20    &  14850      &  9.00          &  14                \\ \hline
 
 
 \section{Vettori Flat}
+
+\subsection*{Ceiling Jet Temperature (Alpert)}
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for Vettori Flat cases, ceiling jet temperature (Alpert).}
+
+The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{end}$.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                         &              \\
+\rb{Input parameter}     &  \rb{Value}  \\ \hline \hline
+$H$ (m)                  &  2.075       \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|l|c|l|c|c|}
+\hline
+           &                &                   &            &                  &                    \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+           &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}  &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 1     &  Smooth        &  0.105            &  2.2, 2.2  &  50              &  16.6              \\ \hline
+Test 2     &  Smooth        &  0.105            &  2.2, 2.2  &  50              &  19.0              \\ \hline
+Test 3     &  Smooth        &  0.105            &  2.2, 2.2  &  50              &  20.8              \\ \hline
+Test 4     &  Obstructed    &  0.105            &  2.2, 2.2  &  70              &  21.1              \\ \hline
+Test 5     &  Obstructed    &  0.105            &  2.2, 2.2  &  70              &  20.2              \\ \hline
+Test 6     &  Smooth        &  0.017            &  2.2, 2.2  &  80              &  17.1              \\ \hline
+Test 7     &  Smooth        &  0.017            &  2.2, 2.2  &  80              &  21.6              \\ \hline
+Test 8     &  Smooth        &  0.017            &  2.2, 2.2  &  80              &  21.8              \\ \hline
+Test 9     &  Obstructed    &  0.017            &  2.2, 2.2  &  120             &  21.7              \\ \hline
+Test 10    &  Obstructed    &  0.017            &  2.2, 2.2  &  130             &  22.9              \\ \hline
+Test 11    &  Smooth        &  0.0041           &  2.2, 2.2  &  100             &  18.1              \\ \hline
+Test 12    &  Smooth        &  0.0041           &  2.2, 2.2  &  140             &  21.0              \\ \hline
+Test 13    &  Smooth        &  0.0041           &  2.2, 2.2  &  130             &  22.0              \\ \hline
+Test 14    &  Obstructed    &  0.0041           &  2.2, 2.2  &  190             &  22.3              \\ \hline
+Test 15    &  Obstructed    &  0.0041           &  2.2, 2.2  &  195             &  23.4              \\ \hline
+Test 16    &  Smooth        &  0.105            &  2.4, 2.4  &  45              &  20.7              \\ \hline
+Test 17    &  Smooth        &  0.105            &  2.4, 2.4  &  42              &  20.4              \\ \hline
+Test 18    &  Smooth        &  0.105            &  2.4, 2.4  &  35              &  20.3              \\ \hline
+Test 19    &  Obstructed    &  0.105            &  2.4, 2.4  &  80              &  20.6              \\ \hline
+Test 20    &  Obstructed    &  0.105            &  2.4, 2.4  &  75              &  27.3              \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[!h]
+\begin{center}
+\begin {tabular}{|l|l|c|l|c|c|}
+\hline 
+           &                &                   &             &                  &                    \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}   &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+           &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}   &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 21    &  Smooth        &  0.017            &  2.4, 2.4   &  70              &  21.1              \\ \hline
+Test 22    &  Smooth        &  0.017            &  2.4, 2.4   &  70              &  21.7              \\ \hline
+Test 23    &  Smooth        &  0.017            &  2.4, 2.4   &  70              &  21.8              \\ \hline
+Test 24    &  Obstructed    &  0.017            &  2.4, 2.4   &  150             &  24.1              \\ \hline
+Test 25    &  Obstructed    &  0.017            &  2.4, 2.4   &  125             &  28.5              \\ \hline
+Test 26    &  Smooth        &  0.0041           &  2.4, 2.4   &  130             &  21.5              \\ \hline
+Test 27    &  Smooth        &  0.0041           &  2.4, 2.4   &  130             &  22.5              \\ \hline
+Test 28    &  Smooth        &  0.0041           &  2.4, 2.4   &  120             &  22.7              \\ \hline
+Test 29    &  Obstructed    &  0.0041           &  2.4, 2.4   &  230             &  26.7              \\ \hline
+Test 30    &  Obstructed    &  0.0041           &  2.4, 2.4   &  230             &  27.8              \\ \hline
+Test 31    &  Smooth        &  0.105            &  2.1, 6.59  &  37              &  20.2              \\ \hline
+Test 32    &  Smooth        &  0.105            &  2.1, 6.59  &  30              &  21.9              \\ \hline
+Test 33    &  Smooth        &  0.105            &  2.1, 6.59  &  30              &  21.7              \\ \hline
+Test 34    &  Obstructed    &  0.105            &  2.1, 6.59  &  70              &  19.2              \\ \hline
+Test 35    &  Obstructed    &  0.105            &  2.1, 6.59  &  70              &  20.1              \\ \hline
+Test 36    &  Smooth        &  0.017            &  2.1, 6.59  &  50              &  22.3              \\ \hline
+Test 37    &  Smooth        &  0.017            &  2.1, 6.59  &  47              &  22.3              \\ \hline
+Test 38    &  Smooth        &  0.017            &  2.1, 6.59  &  50              &  21.7              \\ \hline
+Test 39    &  Obstructed    &  0.017            &  2.1, 6.59  &  130             &  19.7              \\ \hline
+Test 40    &  Obstructed    &  0.017            &  2.1, 6.59  &  115             &  22.7              \\ \hline
+Test 41    &  Smooth        &  0.0041           &  2.1, 6.59  &  100             &  21.6              \\ \hline
+Test 42    &  Smooth        &  0.0041           &  2.1, 6.59  &  85              &  22.4              \\ \hline
+Test 43    &  Smooth        &  0.0041           &  2.1, 6.59  &  85              &  21.6              \\ \hline
+Test 44    &  Obstructed    &  0.0041           &  2.1, 6.59  &  185             &  21.3              \\ \hline
+Test 45    &  Obstructed    &  0.0041           &  2.1, 6.59  &  185             &  20.9              \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
+\subsection*{Sprinkler Activation Time}
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for Vettori Flat cases, sprinkler activation time.}
+
+The fire growth was specified as $\dot Q = \alpha t^2$ up to the time of the first sprinkler activation.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                         &              \\
+\rb{Input parameter}     &  \rb{Value}  \\ \hline \hline
+RTI ((m-s)$^{1/2}$)      &  55          \\ \hline
+$T_{act}$ ($^\circ$C)    &  68          \\ \hline
+$H$ (m)                  &  2.09        \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|l|c|c|c|c|c|}
+\hline
+           &                &                   &            &                       &                  &                    \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}  &  \rb{Scaling}         &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+           &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}  &  \rb{factor}          &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 1     &  Smooth        &  0.105            &  2.2       &  1                    &  50              &  16.6              \\ \hline
+Test 2     &  Smooth        &  0.105            &  2.2       &  1                    &  50              &  19.0              \\ \hline
+Test 3     &  Smooth        &  0.105            &  2.2       &  1                    &  50              &  20.8              \\ \hline
+Test 4     &  Obstructed    &  0.105            &  2.2       &  1                    &  70              &  21.1              \\ \hline
+Test 5     &  Obstructed    &  0.105            &  2.2       &  1                    &  70              &  20.2              \\ \hline
+Test 6     &  Smooth        &  0.017            &  2.2       &  1                    &  80              &  17.1              \\ \hline
+Test 7     &  Smooth        &  0.017            &  2.2       &  1                    &  80              &  21.6              \\ \hline
+Test 8     &  Smooth        &  0.017            &  2.2       &  1                    &  80              &  21.8              \\ \hline
+Test 9     &  Obstructed    &  0.017            &  2.2       &  1                    &  120             &  21.7              \\ \hline
+Test 10    &  Obstructed    &  0.017            &  2.2       &  1                    &  130             &  22.9              \\ \hline
+Test 11    &  Smooth        &  0.0041           &  2.2       &  1                    &  100             &  18.1              \\ \hline
+Test 12    &  Smooth        &  0.0041           &  2.2       &  1                    &  140             &  21.0              \\ \hline
+Test 13    &  Smooth        &  0.0041           &  2.2       &  1                    &  130             &  22.0              \\ \hline
+Test 14    &  Obstructed    &  0.0041           &  2.2       &  1                    &  190             &  22.3              \\ \hline
+Test 15    &  Obstructed    &  0.0041           &  2.2       &  1                    &  195             &  23.4              \\ \hline
+Test 16    &  Smooth        &  0.105            &  2.4       &  2                    &  45              &  20.7              \\ \hline
+Test 17    &  Smooth        &  0.105            &  2.4       &  2                    &  42              &  20.4              \\ \hline
+Test 18    &  Smooth        &  0.105            &  2.4       &  2                    &  35              &  20.3              \\ \hline
+Test 19    &  Obstructed    &  0.105            &  2.4       &  2                    &  80              &  20.6              \\ \hline
+Test 20    &  Obstructed    &  0.105            &  2.4       &  2                    &  75              &  27.3              \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[!h]
+\begin{center}
+\begin {tabular}{|l|l|c|c|c|c|c|}
+\hline 
+           &                &                   &             &                       &                  &                    \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}   &  \rb{Scaling}         &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+           &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}   &  \rb{factor}          &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 21    &  Smooth        &  0.017            &  2.4        &  2                    &  70              &  21.1              \\ \hline
+Test 22    &  Smooth        &  0.017            &  2.4        &  2                    &  70              &  21.7              \\ \hline
+Test 23    &  Smooth        &  0.017            &  2.4        &  2                    &  70              &  21.8              \\ \hline
+Test 24    &  Obstructed    &  0.017            &  2.4        &  2                    &  150             &  24.1              \\ \hline
+Test 25    &  Obstructed    &  0.017            &  2.4        &  2                    &  125             &  28.5              \\ \hline
+Test 26    &  Smooth        &  0.0041           &  2.4        &  2                    &  130             &  21.5              \\ \hline
+Test 27    &  Smooth        &  0.0041           &  2.4        &  2                    &  130             &  22.5              \\ \hline
+Test 28    &  Smooth        &  0.0041           &  2.4        &  2                    &  120             &  22.7              \\ \hline
+Test 29    &  Obstructed    &  0.0041           &  2.4        &  2                    &  230             &  26.7              \\ \hline
+Test 30    &  Obstructed    &  0.0041           &  2.4        &  2                    &  230             &  27.8              \\ \hline
+Test 31    &  Smooth        &  0.105            &  2.1        &  4                    &  37              &  20.2              \\ \hline
+Test 32    &  Smooth        &  0.105            &  2.1        &  4                    &  30              &  21.9              \\ \hline
+Test 33    &  Smooth        &  0.105            &  2.1        &  4                    &  30              &  21.7              \\ \hline
+Test 34    &  Obstructed    &  0.105            &  2.1        &  4                    &  70              &  19.2              \\ \hline
+Test 35    &  Obstructed    &  0.105            &  4.2        &  4                    &  70              &  20.1              \\ \hline
+Test 36    &  Smooth        &  0.017            &  2.1        &  4                    &  50              &  22.3              \\ \hline
+Test 37    &  Smooth        &  0.017            &  2.1        &  4                    &  47              &  22.3              \\ \hline
+Test 38    &  Smooth        &  0.017            &  2.1        &  4                    &  50              &  21.7              \\ \hline
+Test 39    &  Obstructed    &  0.017            &  4.2        &  4                    &  130             &  19.7              \\ \hline
+Test 40    &  Obstructed    &  0.017            &  4.2        &  4                    &  115             &  22.7              \\ \hline
+Test 41    &  Smooth        &  0.0041           &  2.1        &  4                    &  100             &  21.6              \\ \hline
+Test 42    &  Smooth        &  0.0041           &  2.1        &  4                    &  85              &  22.4              \\ \hline
+Test 43    &  Smooth        &  0.0041           &  2.1        &  4                    &  85              &  21.6              \\ \hline
+Test 44    &  Obstructed    &  0.0041           &  4.2        &  4                    &  185             &  21.3              \\ \hline
+Test 45    &  Obstructed    &  0.0041           &  4.2        &  4                    &  185             &  20.9              \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
 
 \clearpage
