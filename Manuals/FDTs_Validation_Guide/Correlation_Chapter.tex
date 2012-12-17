@@ -13,6 +13,7 @@
                           &              \\
 \rb{Input parameter}      &  \rb{Value}  \\ \hline \hline
 $\dot Q$ (kW)             &  5344        \\ \hline
+Scaling factor (-)        &  1           \\ \hline
 $r$ (m)                   &  2, 4, 6, 8  \\ \hline
 $H$ (m)                   &  6.1         \\ \hline
 $T_{\infty}$ ($^\circ$C)  &  20          \\ \hline
@@ -37,6 +38,7 @@ $t_{end}$ (s)             &  500         \\ \hline
 \hline
                           &              \\
 \rb{Input parameter}      &  \rb{Value}  \\ \hline \hline
+Scaling factor (-)        &  1           \\ \hline
 $r$ (m)                   &  2, 9, 14.5  \\ \hline
 $H$ (m)                   &  2.03        \\ \hline
 $T_{\infty}$ ($^\circ$C)  &  20          \\ \hline
@@ -237,30 +239,30 @@ $H$ (m)               &  5.9         \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
-           &                 &                    &                  \\
-\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
-           &  \rb{(kW)}      &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
-Test 1     &  516            &  15                &  600             \\ \hline
-Test 2     &  516            &  14                &  600             \\ \hline
-Test 3     &  2000           &  15                &  300             \\ \hline
-Test 4     &  516            &  15                &  600             \\ \hline
-Test 5     &  516            &  19                &  600             \\ \hline
-Test 6     &  500            &  15                &  600             \\ \hline
-Test 7     &  516            &  15                &  600             \\ \hline
-Test 8     &  1000           &  21                &  720             \\ \hline
-Test 9     &  1000           &  24                &  840             \\ \hline
-Test 10    &  1000           &  18                &  600             \\ \hline
-Test 11    &  500            &  16                &  600             \\ \hline
-Test 12    &  2000           &  17                &  600             \\ \hline
-Test 13    &  2000           &  21                &  600             \\ \hline
-Test 14    &  500            &  15                &  600             \\ \hline
-Test 15    &  1000           &  18                &  1380            \\ \hline
-Test 16    &  500            &  18                &  720             \\ \hline
-Test 17    &  500            &  10                &  1380            \\ \hline
-Test 21    &  500            &  14                &  1200            \\ \hline
-Test 22    &  1000           &  14                &  840             \\ \hline
+           &                 &                &                    &                  \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{Scaling}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
+           &  \rb{(kW)}      &  \rb{factor}   &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
+Test 1     &  516            &  1             &  15                &  600             \\ \hline
+Test 2     &  516            &  1             &  14                &  600             \\ \hline
+Test 3     &  2000           &  1             &  15                &  300             \\ \hline
+Test 4     &  516            &  1             &  15                &  600             \\ \hline
+Test 5     &  516            &  1             &  19                &  600             \\ \hline
+Test 6     &  500            &  2             &  15                &  600             \\ \hline
+Test 7     &  516            &  1             &  15                &  600             \\ \hline
+Test 8     &  1000           &  1             &  21                &  720             \\ \hline
+Test 9     &  1000           &  1             &  24                &  840             \\ \hline
+Test 10    &  1000           &  2             &  18                &  600             \\ \hline
+Test 11    &  500            &  2             &  16                &  600             \\ \hline
+Test 12    &  2000           &  2             &  17                &  600             \\ \hline
+Test 13    &  2000           &  2             &  21                &  600             \\ \hline
+Test 14    &  500            &  2             &  15                &  600             \\ \hline
+Test 15    &  1000           &  2             &  18                &  1380            \\ \hline
+Test 16    &  500            &  4             &  18                &  720             \\ \hline
+Test 17    &  500            &  4             &  10                &  1380            \\ \hline
+Test 21    &  500            &  1             &  14                &  1200            \\ \hline
+Test 22    &  1000           &  1             &  14                &  840             \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -566,6 +568,7 @@ Test 18    &  1180           &  1.025         \\ \hline
 \hline
                       &              \\
 \rb{Input parameter}  &  \rb{Value}  \\ \hline \hline
+Scaling factor (-)    &  1           \\ \hline
 $r$ (m)               &  5.9         \\ \hline
 $H$ (m)               &  3.72        \\ \hline
 \end{tabular}
@@ -978,6 +981,7 @@ I-22       &  51               &            &                   \\ \hline
 \hline
                           &                                                                            \\
 \rb{Input parameter}      &  \rb{Value}                                                                \\ \hline \hline
+Scaling factor (-)        &  1                                                                         \\ \hline
 $r$ (m)                   &  2.12, 4.74, 6.36, 10.61, 12.90, 13.58, 14.23, 14.85, 17.10, 19.09, 21.32  \\ \hline
 $H$ (m)                   &  7.1                                                                       \\ \hline
 $T_{\infty}$ ($^\circ$C)  &  18                                                                        \\ \hline
@@ -1212,67 +1216,67 @@ $H$ (m)               &  2.075       \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|l|c|l|c|c|}
+\begin{tabular}{|l|l|c|l|c|c|c|}
 \hline
-           &                &                   &            &                  &                    \\
-\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
-           &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}  &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
-Test 1     &  Smooth        &  0.105            &  2.2, 2.2  &  50              &  16.6              \\ \hline
-Test 2     &  Smooth        &  0.105            &  2.2, 2.2  &  50              &  19.0              \\ \hline
-Test 3     &  Smooth        &  0.105            &  2.2, 2.2  &  50              &  20.8              \\ \hline
-Test 4     &  Obstructed    &  0.105            &  2.2, 2.2  &  70              &  21.1              \\ \hline
-Test 5     &  Obstructed    &  0.105            &  2.2, 2.2  &  70              &  20.2              \\ \hline
-Test 6     &  Smooth        &  0.017            &  2.2, 2.2  &  80              &  17.1              \\ \hline
-Test 7     &  Smooth        &  0.017            &  2.2, 2.2  &  80              &  21.6              \\ \hline
-Test 8     &  Smooth        &  0.017            &  2.2, 2.2  &  80              &  21.8              \\ \hline
-Test 9     &  Obstructed    &  0.017            &  2.2, 2.2  &  120             &  21.7              \\ \hline
-Test 10    &  Obstructed    &  0.017            &  2.2, 2.2  &  130             &  22.9              \\ \hline
-Test 11    &  Smooth        &  0.0041           &  2.2, 2.2  &  100             &  18.1              \\ \hline
-Test 12    &  Smooth        &  0.0041           &  2.2, 2.2  &  140             &  21.0              \\ \hline
-Test 13    &  Smooth        &  0.0041           &  2.2, 2.2  &  130             &  22.0              \\ \hline
-Test 14    &  Obstructed    &  0.0041           &  2.2, 2.2  &  190             &  22.3              \\ \hline
-Test 15    &  Obstructed    &  0.0041           &  2.2, 2.2  &  195             &  23.4              \\ \hline
-Test 16    &  Smooth        &  0.105            &  2.4, 2.4  &  45              &  20.7              \\ \hline
-Test 17    &  Smooth        &  0.105            &  2.4, 2.4  &  42              &  20.4              \\ \hline
-Test 18    &  Smooth        &  0.105            &  2.4, 2.4  &  35              &  20.3              \\ \hline
-Test 19    &  Obstructed    &  0.105            &  2.4, 2.4  &  80              &  20.6              \\ \hline
-Test 20    &  Obstructed    &  0.105            &  2.4, 2.4  &  75              &  27.3              \\ \hline
+           &                &                   &            &                &                  &                    \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}  &  \rb{Scaling}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+           &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}  &  \rb{factor}   &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 1     &  Smooth        &  0.105            &  2.2, 2.2  &  1             &  50              &  16.6              \\ \hline
+Test 2     &  Smooth        &  0.105            &  2.2, 2.2  &  1             &  50              &  19.0              \\ \hline
+Test 3     &  Smooth        &  0.105            &  2.2, 2.2  &  1             &  50              &  20.8              \\ \hline
+Test 4     &  Obstructed    &  0.105            &  2.2, 2.2  &  1             &  70              &  21.1              \\ \hline
+Test 5     &  Obstructed    &  0.105            &  2.2, 2.2  &  1             &  70              &  20.2              \\ \hline
+Test 6     &  Smooth        &  0.017            &  2.2, 2.2  &  1             &  80              &  17.1              \\ \hline
+Test 7     &  Smooth        &  0.017            &  2.2, 2.2  &  1             &  80              &  21.6              \\ \hline
+Test 8     &  Smooth        &  0.017            &  2.2, 2.2  &  1             &  80              &  21.8              \\ \hline
+Test 9     &  Obstructed    &  0.017            &  2.2, 2.2  &  1             &  120             &  21.7              \\ \hline
+Test 10    &  Obstructed    &  0.017            &  2.2, 2.2  &  1             &  130             &  22.9              \\ \hline
+Test 11    &  Smooth        &  0.0041           &  2.2, 2.2  &  1             &  100             &  18.1              \\ \hline
+Test 12    &  Smooth        &  0.0041           &  2.2, 2.2  &  1             &  140             &  21.0              \\ \hline
+Test 13    &  Smooth        &  0.0041           &  2.2, 2.2  &  1             &  130             &  22.0              \\ \hline
+Test 14    &  Obstructed    &  0.0041           &  2.2, 2.2  &  1             &  190             &  22.3              \\ \hline
+Test 15    &  Obstructed    &  0.0041           &  2.2, 2.2  &  1             &  195             &  23.4              \\ \hline
+Test 16    &  Smooth        &  0.105            &  2.4, 2.4  &  2             &  45              &  20.7              \\ \hline
+Test 17    &  Smooth        &  0.105            &  2.4, 2.4  &  2             &  42              &  20.4              \\ \hline
+Test 18    &  Smooth        &  0.105            &  2.4, 2.4  &  2             &  35              &  20.3              \\ \hline
+Test 19    &  Obstructed    &  0.105            &  2.4, 2.4  &  2             &  80              &  20.6              \\ \hline
+Test 20    &  Obstructed    &  0.105            &  2.4, 2.4  &  2             &  75              &  27.3              \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 
 \begin{table}[!h]
 \begin{center}
-\begin {tabular}{|l|l|c|l|c|c|}
+\begin {tabular}{|l|l|c|l|c|c|c|}
 \hline 
-           &                &                   &             &                  &                    \\
-\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}   &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
-           &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}   &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
-Test 21    &  Smooth        &  0.017            &  2.4, 2.4   &  70              &  21.1              \\ \hline
-Test 22    &  Smooth        &  0.017            &  2.4, 2.4   &  70              &  21.7              \\ \hline
-Test 23    &  Smooth        &  0.017            &  2.4, 2.4   &  70              &  21.8              \\ \hline
-Test 24    &  Obstructed    &  0.017            &  2.4, 2.4   &  150             &  24.1              \\ \hline
-Test 25    &  Obstructed    &  0.017            &  2.4, 2.4   &  125             &  28.5              \\ \hline
-Test 26    &  Smooth        &  0.0041           &  2.4, 2.4   &  130             &  21.5              \\ \hline
-Test 27    &  Smooth        &  0.0041           &  2.4, 2.4   &  130             &  22.5              \\ \hline
-Test 28    &  Smooth        &  0.0041           &  2.4, 2.4   &  120             &  22.7              \\ \hline
-Test 29    &  Obstructed    &  0.0041           &  2.4, 2.4   &  230             &  26.7              \\ \hline
-Test 30    &  Obstructed    &  0.0041           &  2.4, 2.4   &  230             &  27.8              \\ \hline
-Test 31    &  Smooth        &  0.105            &  2.1, 6.59  &  37              &  20.2              \\ \hline
-Test 32    &  Smooth        &  0.105            &  2.1, 6.59  &  30              &  21.9              \\ \hline
-Test 33    &  Smooth        &  0.105            &  2.1, 6.59  &  30              &  21.7              \\ \hline
-Test 34    &  Obstructed    &  0.105            &  2.1, 6.59  &  70              &  19.2              \\ \hline
-Test 35    &  Obstructed    &  0.105            &  2.1, 6.59  &  70              &  20.1              \\ \hline
-Test 36    &  Smooth        &  0.017            &  2.1, 6.59  &  50              &  22.3              \\ \hline
-Test 37    &  Smooth        &  0.017            &  2.1, 6.59  &  47              &  22.3              \\ \hline
-Test 38    &  Smooth        &  0.017            &  2.1, 6.59  &  50              &  21.7              \\ \hline
-Test 39    &  Obstructed    &  0.017            &  2.1, 6.59  &  130             &  19.7              \\ \hline
-Test 40    &  Obstructed    &  0.017            &  2.1, 6.59  &  115             &  22.7              \\ \hline
-Test 41    &  Smooth        &  0.0041           &  2.1, 6.59  &  100             &  21.6              \\ \hline
-Test 42    &  Smooth        &  0.0041           &  2.1, 6.59  &  85              &  22.4              \\ \hline
-Test 43    &  Smooth        &  0.0041           &  2.1, 6.59  &  85              &  21.6              \\ \hline
-Test 44    &  Obstructed    &  0.0041           &  2.1, 6.59  &  185             &  21.3              \\ \hline
-Test 45    &  Obstructed    &  0.0041           &  2.1, 6.59  &  185             &  20.9              \\ \hline
+           &                &                   &             &                &                  &                    \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}   &  \rb{Scaling}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+           &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}   &  \rb{factor}   &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 21    &  Smooth        &  0.017            &  2.4, 2.4   &  2             &  70              &  21.1              \\ \hline
+Test 22    &  Smooth        &  0.017            &  2.4, 2.4   &  2             &  70              &  21.7              \\ \hline
+Test 23    &  Smooth        &  0.017            &  2.4, 2.4   &  2             &  70              &  21.8              \\ \hline
+Test 24    &  Obstructed    &  0.017            &  2.4, 2.4   &  2             &  150             &  24.1              \\ \hline
+Test 25    &  Obstructed    &  0.017            &  2.4, 2.4   &  2             &  125             &  28.5              \\ \hline
+Test 26    &  Smooth        &  0.0041           &  2.4, 2.4   &  2             &  130             &  21.5              \\ \hline
+Test 27    &  Smooth        &  0.0041           &  2.4, 2.4   &  2             &  130             &  22.5              \\ \hline
+Test 28    &  Smooth        &  0.0041           &  2.4, 2.4   &  2             &  120             &  22.7              \\ \hline
+Test 29    &  Obstructed    &  0.0041           &  2.4, 2.4   &  2             &  230             &  26.7              \\ \hline
+Test 30    &  Obstructed    &  0.0041           &  2.4, 2.4   &  2             &  230             &  27.8              \\ \hline
+Test 31    &  Smooth        &  0.105            &  2.1, 6.59  &  4             &  37              &  20.2              \\ \hline
+Test 32    &  Smooth        &  0.105            &  2.1, 6.59  &  4             &  30              &  21.9              \\ \hline
+Test 33    &  Smooth        &  0.105            &  2.1, 6.59  &  4             &  30              &  21.7              \\ \hline
+Test 34    &  Obstructed    &  0.105            &  2.1, 6.59  &  4             &  70              &  19.2              \\ \hline
+Test 35    &  Obstructed    &  0.105            &  2.1, 6.59  &  4             &  70              &  20.1              \\ \hline
+Test 36    &  Smooth        &  0.017            &  2.1, 6.59  &  4             &  50              &  22.3              \\ \hline
+Test 37    &  Smooth        &  0.017            &  2.1, 6.59  &  4             &  47              &  22.3              \\ \hline
+Test 38    &  Smooth        &  0.017            &  2.1, 6.59  &  4             &  50              &  21.7              \\ \hline
+Test 39    &  Obstructed    &  0.017            &  2.1, 6.59  &  4             &  130             &  19.7              \\ \hline
+Test 40    &  Obstructed    &  0.017            &  2.1, 6.59  &  4             &  115             &  22.7              \\ \hline
+Test 41    &  Smooth        &  0.0041           &  2.1, 6.59  &  4             &  100             &  21.6              \\ \hline
+Test 42    &  Smooth        &  0.0041           &  2.1, 6.59  &  4             &  85              &  22.4              \\ \hline
+Test 43    &  Smooth        &  0.0041           &  2.1, 6.59  &  4             &  85              &  21.6              \\ \hline
+Test 44    &  Obstructed    &  0.0041           &  2.1, 6.59  &  4             &  185             &  21.3              \\ \hline
+Test 45    &  Obstructed    &  0.0041           &  2.1, 6.59  &  4             &  185             &  20.9              \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -1409,4 +1413,6 @@ Test 3     &  13, 63, 166, 256, 292, 330      &  2437, 3201, 3601, 3638, 3456, 2
 
 
 \section{WTC}
+
+% Scaling factor (-)       &  1           \\ \hline
 
