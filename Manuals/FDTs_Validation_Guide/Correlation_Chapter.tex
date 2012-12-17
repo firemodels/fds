@@ -1371,6 +1371,39 @@ Test 45    &  Obstructed    &  0.0041           &  4.2        &  4              
 
 \section{VTT Large Hall}
 
+\subsection*{Plume Temperature (Heskestad)}
+
+The fire ramp was specified as $\dot Q_{ramp}$ for a corresponding $t_{ramp}$.
+For example, a fire growing linearly over time 0~s to 100~s from 0~kW to 500~kW
+would be specified with a $t_{ramp}$ of [0, 100] and a $\dot Q_{ramp}$ of [0, 500].
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for VTT Large Hall cases, plume temperature (Heskestad).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                         &              \\
+\rb{Input parameter}     &  \rb{Value}  \\ \hline \hline
+$Z$ (m)                  &  6, 12       \\ \hline
+$\rho_{air}$ (kg/m$^3$)  &  1.18        \\ \hline
+$\chi_r$ (-)             &  0.30        \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|l|l|c|c|}
+\hline
+           &                                  &                                            &                &                    \\
+\rb{Test}  &  \rb{$t_{ramp}$}                 &  \rb{$\dot Q_{ramp}$}                      &  \rb{$A$}      &  \rb{$T_\infty$}   \\
+           &  \rb{(s)}                        &  \rb{(kW)}                                 &  \rb{(m$^2$)}  &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 1     &  13, 90, 288, 327, 409           &  1245, 1309, 1858, 1783, 1356              &  1.075         &  25                \\ \hline
+Test 2     &  14, 30, 91, 193, 282, 340, 372  &  2151, 2542, 3063, 3259, 3129, 2737, 2281  &  2.01          &  22                \\ \hline
+Test 3     &  13, 63, 166, 256, 292, 330      &  2437, 3201, 3601, 3638, 3456, 2656        &  2.01          &  22                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
 
 \clearpage
 
