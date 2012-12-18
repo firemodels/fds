@@ -2,10 +2,12 @@
 GETNEWPORT () 
 {
   display_port=`id -u`
-  nmatches=`ps a | grep Xvfb | grep $display_port | grep -v grep | wc | awk '{print $1}'`
+  nmatches=`ps a -e | grep Xvfb | grep $display_port | grep -v grep | wc | awk '{print $1}'`
+  echo display_port=$display_port nmatches=$nmatches 
   while [ $nmatches -ne 0 ] ; do
     display_port=`expr $display_port + 1`
-    nmatches=`ps a | grep Xvfb | grep $display_port | grep -v grep | wc | awk '{print $1}'`
+    nmatches=`ps a -e | grep Xvfb | grep $display_port | grep -v grep | wc | awk '{print $1}'`
+    echo display_port=$display_port nmatches=$nmatches 
   done
 }
 
