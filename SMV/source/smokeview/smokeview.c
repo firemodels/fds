@@ -21,8 +21,6 @@ char smokeview_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-/* dummy change to bump revision number to 5.1.5 */
-
 #ifdef WIN32
 #include <direct.h>
 #endif
