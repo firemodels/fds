@@ -66,6 +66,32 @@ The immersed plume radiation heat flux can be calculated by
 
 In Eq.~\ref{eq:immersed_plume_radiation}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), $\sigma$ is the Stefan-Boltzmann constant (W/m$^2$-K$^4$), and $T_p$ is the plume temperature (K) at a given height using the McCaffrey centerline plume temperature correlation described in Eq.~\ref{eq:McCaffrey}.
 
+The McCaffrey centerline plume temperature correlation is given by
+
+\be
+\Delta T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{Z}{\dot Q^{2/5}} \right)^{2 \eta - 1} \right] T_\infty
+\label{eq:McCaffrey}
+\ee
+
+In Eq.~\ref{eq:McCaffrey}, $\Delta T_p$ is the plume centerline temperature rise above ambient~($^\circ$C), $g$ is the acceleration of gravity~(m/s$^2$), $Z$ is the elevation above the fire source~(m), $\dot Q$ is the HRR~(kW), and $T_\infty$ is the ambient air temperature~($^\circ$C). The constants $\eta$ and $\kappa$ are a function of the height $Z$ within the plume and are listed in Table~\ref{tbl:McCaffrey_constants}.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{Constants used in McCaffrey plume correlation}
+\label{tbl:McCaffrey_constants}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Region & $z/\dot Q^{2/5}$      & $\eta$ & $\kappa$ \\
+\hline
+Continuous & < 0.08       & 1/2  & 6.8 \\
+Intermittent & < 0.08-0.2 & 0     & 1.9 \\
+Plume         & > 0.2         & -1/3 & 1.1 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
 \clearpage
 
 \section{Summary of Heat Flux Predictions}
