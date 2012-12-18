@@ -2081,15 +2081,15 @@ void IniSubMenu(int value){
     readini(0);
   }
   else{
-    char *inifilename;
+    char *ini_filename;
 
-    inifilename = get_inifilename(value);
-    if(inifilename==NULL||strlen(inifilename)==0)return;
-    scriptinifilename2=scriptinifilename;
-    strcpy(scriptinifilename,inifilename);
+    ini_filename = get_inifilename(value);
+    if(ini_filename==NULL||strlen(ini_filename)==0)return;
+    script_filename2=script_filename;
+    strcpy(script_filename,ini_filename);
     windowresized=0;
     readini(2);
-    scriptinifilename2=NULL;
+    script_filename2=NULL;
   }
 }
 
@@ -2294,15 +2294,15 @@ void LoadUnloadMenu(int value){
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"UNLOADALL\n");
     }
-    if(hrr_csvfilename!=NULL){
+    if(hrr_csv_filename!=NULL){
       readhrr(UNLOAD, &errorcode);
     }
 #ifdef pp_DEVICE
-    if(devc_csvfilename!=NULL){
-      read_device_data(devc_csvfilename,CSV_FDS,UNLOAD);
+    if(devc_csv_filename!=NULL){
+      read_device_data(devc_csv_filename,CSV_FDS,UNLOAD);
     }
-    if(exp_csvfilename!=NULL){
-      read_device_data(exp_csvfilename,CSV_EXP,UNLOAD);
+    if(exp_csv_filename!=NULL){
+      read_device_data(exp_csv_filename,CSV_EXP,UNLOAD);
     }
 #endif
     if(nvolrenderinfo>0){
@@ -2337,16 +2337,16 @@ void LoadUnloadMenu(int value){
   }
   if(value==RELOADALL){
     LOCK_COMPRESS
-    readsmv_dynamic(smvfilename);
-    if(hrr_csvfilename!=NULL){
+    readsmv_dynamic(smv_filename);
+    if(hrr_csv_filename!=NULL){
       readhrr(LOAD, &errorcode);
     }
 #ifdef pp_DEVICE
-    if(devc_csvfilename!=NULL||exp_csvfilename!=NULL){
+    if(devc_csv_filename!=NULL||exp_csv_filename!=NULL){
       read_device_data(NULL,CSV_FDS,UNLOAD);
-      if(devc_csvfilename!=NULL)read_device_data(devc_csvfilename,CSV_FDS,LOAD);
+      if(devc_csv_filename!=NULL)read_device_data(devc_csv_filename,CSV_FDS,LOAD);
       read_device_data(NULL,CSV_EXP,UNLOAD);
-      if(exp_csvfilename!=NULL)read_device_data(exp_csvfilename,CSV_EXP,LOAD);
+      if(exp_csv_filename!=NULL)read_device_data(exp_csv_filename,CSV_EXP,LOAD);
     }
 #endif
     islicetype_save=islicetype;
@@ -7391,10 +7391,10 @@ updatemenu=0;
   if(cellcenter_slice_active==1){
     glutAddMenuEntry(_("  ALT+y: if current slice is cell centered, toggle interpolation on/off"),2);
   }
-  if(caseinifilename!=NULL&&strlen(caseinifilename)>0){
+  if(caseini_filename!=NULL&&strlen(caseini_filename)>0){
     char inilabel[512];
 
-    sprintf(inilabel,_("  #: save settings to %s"),caseinifilename);
+    sprintf(inilabel,_("  #: save settings to %s"),caseini_filename);
     glutAddMenuEntry(inilabel,2);
   }
   else{
@@ -8682,8 +8682,8 @@ updatemenu=0;
     }
     if(n_inifiles>0){
       CREATEMENU(inisubmenu,IniSubMenu);
-      if(caseinifilename!=NULL&&file_exists(caseinifilename)==1){
-        glutAddMenuEntry(caseinifilename,-1);
+      if(caseini_filename!=NULL&&file_exists(caseini_filename)==1){
+        glutAddMenuEntry(caseini_filename,-1);
       }
       for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
         if(inifile->file!=NULL&&file_exists(inifile->file)==1){
@@ -8708,7 +8708,7 @@ updatemenu=0;
         n_inifiles++;
       }
     }
-    if( n_inifiles>0||file_exists(INIfile)==1||file_exists(caseinifilename)==1||file_exists(smokeviewini)==1){
+    if( n_inifiles>0||file_exists(INIfile)==1||file_exists(caseini_filename)==1||file_exists(smokeviewini)==1){
       if(n_inifiles==0){
         glutAddMenuEntry(_("Read ini files"),1);
       }
@@ -8722,7 +8722,7 @@ updatemenu=0;
 
     STRCPY(caselabel,_("Write"));
     STRCAT(caselabel," ");
-    STRCAT(caselabel,caseinifilename);
+    STRCAT(caselabel,caseini_filename);
 
     glutAddMenuEntry(caselabel,3);
 

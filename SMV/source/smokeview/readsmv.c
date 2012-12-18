@@ -1091,25 +1091,25 @@ int get_inpf(char *file, char *file2){
         }
       }
       if(chidfilebase!=NULL){
-        NewMemory((void **)&hrr_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
-        STRCPY(hrr_csvfilename,chidfilebase);
-        STRCAT(hrr_csvfilename,"_hrr.csv");
-        if(STAT(hrr_csvfilename,&statbuffer)!=0){
-          FREEMEMORY(hrr_csvfilename);
+        NewMemory((void **)&hrr_csv_filename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(hrr_csv_filename,chidfilebase);
+        STRCAT(hrr_csv_filename,"_hrr.csv");
+        if(STAT(hrr_csv_filename,&statbuffer)!=0){
+          FREEMEMORY(hrr_csv_filename);
         }
         
-        NewMemory((void **)&devc_csvfilename,(unsigned int)(strlen(chidfilebase)+9+1));
-        STRCPY(devc_csvfilename,chidfilebase);
-        STRCAT(devc_csvfilename,"_devc.csv");
-        if(STAT(devc_csvfilename,&statbuffer)!=0){
-          FREEMEMORY(devc_csvfilename);
+        NewMemory((void **)&devc_csv_filename,(unsigned int)(strlen(chidfilebase)+9+1));
+        STRCPY(devc_csv_filename,chidfilebase);
+        STRCAT(devc_csv_filename,"_devc.csv");
+        if(STAT(devc_csv_filename,&statbuffer)!=0){
+          FREEMEMORY(devc_csv_filename);
         }
 
-        NewMemory((void **)&exp_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
-        STRCPY(exp_csvfilename,chidfilebase);
-        STRCAT(exp_csvfilename,"_exp.csv");
-        if(STAT(exp_csvfilename,&statbuffer)!=0){
-          FREEMEMORY(exp_csvfilename);
+        NewMemory((void **)&exp_csv_filename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(exp_csv_filename,chidfilebase);
+        STRCAT(exp_csv_filename,"_exp.csv");
+        if(STAT(exp_csv_filename,&statbuffer)!=0){
+          FREEMEMORY(exp_csv_filename);
         }
       }
       continue;
@@ -2550,7 +2550,7 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(LESsystem);
   FREEMEMORY(LESendian);
 
-  FREEMEMORY(databasefilename);
+  FREEMEMORY(database_filename);
 
   FREEMEMORY(targinfo);
 
@@ -4372,7 +4372,7 @@ int readsmv(char *file, char *file2){
   printf("\n");
 
   CheckMemory;
-  parsedatabase(databasefilename);
+  parsedatabase(database_filename);
 
 
   if(setGRID==0){
@@ -5987,10 +5987,10 @@ typedef struct {
       targinfo[itarg].display=0;
       if(NewMemory((void **)&targinfo[itarg].file,(unsigned int)(len+1))==0)return 2;
       STRCPY(targinfo[itarg].file,buffer);
-      if(targfilename!=NULL){
-        FREEMEMORY(targfilename);
-        if(NewMemory((void **)&targfilename,(unsigned int)(len+1))==0)return 2;
-        STRCPY(targfilename,buffer);
+      if(target_filename!=NULL){
+        FREEMEMORY(target_filename);
+        if(NewMemory((void **)&target_filename,(unsigned int)(len+1))==0)return 2;
+        STRCPY(target_filename,buffer);
       }
       if(STAT(buffer,&statbuffer)==0){
         itarg++;
@@ -6040,9 +6040,9 @@ typedef struct {
       }
       bufferptr=trim_string(buffer);
       len=strlen(bufferptr);
-      NewMemory((void **)&endianfilename,(unsigned int)(len+1));
-      strcpy(endianfilename,bufferptr);
-      ENDIANfile = fopen(endianfilename,"rb");
+      NewMemory((void **)&endian_filename,(unsigned int)(len+1));
+      strcpy(endian_filename,bufferptr);
+      ENDIANfile = fopen(endian_filename,"rb");
       if(ENDIANfile!=NULL){
         endian_native = getendian();
         FSEEK(ENDIANfile,4,SEEK_SET);
@@ -6070,11 +6070,11 @@ typedef struct {
       STRCPY(chidfilebase,bufferptr);
 
       if(chidfilebase!=NULL){
-        NewMemory((void **)&hrr_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
-        STRCPY(hrr_csvfilename,chidfilebase);
-        STRCAT(hrr_csvfilename,"_hrr.csv");
-        if(STAT(hrr_csvfilename,&statbuffer)!=0){
-          FREEMEMORY(hrr_csvfilename);
+        NewMemory((void **)&hrr_csv_filename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(hrr_csv_filename,chidfilebase);
+        STRCAT(hrr_csv_filename,"_hrr.csv");
+        if(STAT(hrr_csv_filename,&statbuffer)!=0){
+          FREEMEMORY(hrr_csv_filename);
         }
       }
       continue;
@@ -6808,7 +6808,7 @@ typedef struct {
 
 // update csv data
 
-  if(hrr_csvfilename!=NULL)readhrr(LOAD, &errorcode);
+  if(hrr_csv_filename!=NULL)readhrr(LOAD, &errorcode);
   read_device_data(NULL,CSV_FDS,UNLOAD);
   read_device_data(NULL,CSV_EXP,UNLOAD);
   for(i=0;i<ncsvinfo;i++){
@@ -7785,11 +7785,11 @@ int readini(int scriptconfigfile){
   if(is_file_newer(smvprogini_ptr,INIfile)==1){
     printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
   }
-  if(is_file_newer(smvprogini_ptr,caseinifilename)==1){
-    printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseinifilename);
+  if(is_file_newer(smvprogini_ptr,caseini_filename)==1){
+    printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseini_filename);
   }
-  if(is_file_newer(INIfile,caseinifilename)==1){
-    printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",INIfile,caseinifilename);
+  if(is_file_newer(INIfile,caseini_filename)==1){
+    printf("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",INIfile,caseini_filename);
   }
 
   // read in config files if they exist
@@ -7809,29 +7809,29 @@ int readini(int scriptconfigfile){
 
   // read in casename.ini
 
-  if(caseinifilename!=NULL){
-    if(readini2(caseinifilename,1)==2)return 2;
+  if(caseini_filename!=NULL){
+    if(readini2(caseini_filename,1)==2)return 2;
   }
 
   // read in ini file specified in script
 
-  if(scriptinifilename2!=NULL&&scriptconfigfile==2){
+  if(script_filename2!=NULL&&scriptconfigfile==2){
     int return_code;
     
-    return_code = readini2(scriptinifilename2,1);
+    return_code = readini2(script_filename2,1);
 
     if(return_code==1||return_code==2){
-      if(scriptinifilename2==NULL){
+      if(script_filename2==NULL){
         fprintf(stderr,"*** Error: Unable to read .ini file\n");
       }
       else{
-        fprintf(stderr,"*** Error: Unable to read %s\n",scriptinifilename2);
+        fprintf(stderr,"*** Error: Unable to read %s\n",script_filename2);
       }
     }
     if(return_code==2)return 2;
     
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    scriptinifilename2=NULL;
+    script_filename2=NULL;
   }
   updateglui();
   if(showall_textures==1)TextureShowMenu(-1);
@@ -7849,14 +7849,14 @@ void readboundini(void){
   FILE *stream;
   char fullfilename[1024];
 
-  if(boundinifilename==NULL)return;
+  if(boundini_filename==NULL)return;
   strcpy(fullfilename,"");
   if(can_write_to_dir(NULL)==0){
     if(can_write_to_dir(smokeviewtempdir)==0)return;
     strcpy(fullfilename,smokeviewtempdir);
     strcat(fullfilename,dirseparator);
   }
-  strcat(fullfilename,boundinifilename);
+  strcat(fullfilename,boundini_filename);
   stream=fopen(fullfilename,"r");
   if(stream==NULL)return;
   printf("%s",_("reading: "));
@@ -7889,7 +7889,7 @@ void readboundini(void){
         if(lenbuffer2!=0&&
           strcmp(patchi->label.shortlabel,buffer2ptr)==0&&
           patchi->filetype==filetype&&
-          is_file_newer(boundinifilename,patchi->file)==1){
+          is_file_newer(boundini_filename,patchi->file)==1){
           bounddata *boundi;
 
           boundi = &patchi->bounds;
@@ -7913,16 +7913,16 @@ void writeboundini(void){
   char fullfilename[1024];
   int i;
 
-  if(boundinifilename==NULL)return;
+  if(boundini_filename==NULL)return;
   strcpy(fullfilename,"");
   if(can_write_to_dir(NULL)==0){
     if(can_write_to_dir(smokeviewtempdir)==0)return;
     strcpy(fullfilename,smokeviewtempdir);
     strcat(fullfilename,dirseparator);
   }
-  strcat(fullfilename,boundinifilename);
+  strcat(fullfilename,boundini_filename);
 
-  if(boundinifilename==NULL)return;
+  if(boundini_filename==NULL)return;
   for(i=0;i<npatchinfo;i++){
     bounddata *boundi;
     patchdata *patchi;
@@ -10493,12 +10493,12 @@ void writeini(int flag){
     fileout=stdout;
     break;
   case SCRIPT_INI:
-    fileout=fopen(scriptinifilename,"w");
-    outfilename=scriptinifilename;
+    fileout=fopen(script_filename,"w");
+    outfilename=script_filename;
     break;
   case LOCAL_INI:
-    fileout=fopen(caseinifilename,"w");
-    outfilename=caseinifilename;
+    fileout=fopen(caseini_filename,"w");
+    outfilename=caseini_filename;
     break;
   default:
     ASSERT(FFALSE);

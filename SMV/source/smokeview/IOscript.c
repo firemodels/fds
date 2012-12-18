@@ -1137,10 +1137,10 @@ void script_partclasstype(scriptdata *scripti){
 
 void script_loadinifile(scriptdata *scripti){
   printf("script: loading ini file %s\n\n",scripti->cval);
-  scriptinifilename2=scripti->cval;
+  script_filename2=scripti->cval;
   windowresized=0;
   readini(2);
-  scriptinifilename2=NULL;
+  script_filename2=NULL;
 
 }
 

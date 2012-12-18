@@ -406,22 +406,22 @@ void parse_commandline(int argc, char **argv){
   STRCPY(fdsprefix,argi);
   FREEMEMORY(trainer_filename);
   FREEMEMORY(test_filename);
-  FREEMEMORY(filename_sb);
+  FREEMEMORY(smoothblockage_filename);
 
-  strcpy(inputfilename_ext,"");
+  strcpy(input_filename_ext,"");
 
   if(len_casename>4){
     char *c_ext;
 
     c_ext=strrchr(argi,'.');
     if(c_ext!=NULL){
-      STRCPY(inputfilename_ext,c_ext);
-      to_lower(inputfilename_ext);
+      STRCPY(input_filename_ext,c_ext);
+      to_lower(input_filename_ext);
 
       if(c_ext!=NULL&&
-        (strcmp(inputfilename_ext,".smv")==0||
-         strcmp(inputfilename_ext,".svd")==0||
-         strcmp(inputfilename_ext,".smt")==0)
+        (strcmp(input_filename_ext,".smv")==0||
+         strcmp(input_filename_ext,".svd")==0||
+         strcmp(input_filename_ext,".smt")==0)
          ){
         c_ext[0]=0;
         STRCPY(fdsprefix,argi);
@@ -437,27 +437,27 @@ void parse_commandline(int argc, char **argv){
     }
   }
 
-  FREEMEMORY(logfilename);
-  NewMemory((void **)&logfilename,len_casename+7+1);
-  STRCPY(logfilename,fdsprefix);
-  STRCAT(logfilename,".smvlog");
+  FREEMEMORY(log_filename);
+  NewMemory((void **)&log_filename,len_casename+7+1);
+  STRCPY(log_filename,fdsprefix);
+  STRCAT(log_filename,".smvlog");
 
-  FREEMEMORY(caseinifilename);
-  NewMemory((void **)&caseinifilename,len_casename+strlen(ini_ext)+1);
-  STRCPY(caseinifilename,fdsprefix);
-  STRCAT(caseinifilename,ini_ext);
+  FREEMEMORY(caseini_filename);
+  NewMemory((void **)&caseini_filename,len_casename+strlen(ini_ext)+1);
+  STRCPY(caseini_filename,fdsprefix);
+  STRCAT(caseini_filename,ini_ext);
 
-  FREEMEMORY(boundinifilename);
-  NewMemory((void **)&boundinifilename,len_casename+5+1);
-  STRCPY(boundinifilename,fdsprefix);
-  STRCAT(boundinifilename,".bini");
+  FREEMEMORY(boundini_filename);
+  NewMemory((void **)&boundini_filename,len_casename+5+1);
+  STRCPY(boundini_filename,fdsprefix);
+  STRCAT(boundini_filename,".bini");
 
-  if(smvfilename==NULL){
+  if(smv_filename==NULL){
     STRUCTSTAT statbuffer;
 
-    NewMemory((void **)&smvfilename,(unsigned int)(len_casename+6));
-    STRCPY(smvfilename,fdsprefix);
-    STRCAT(smvfilename,".smv");
+    NewMemory((void **)&smv_filename,(unsigned int)(len_casename+6));
+    STRCPY(smv_filename,fdsprefix);
+    STRCAT(smv_filename,".smv");
     {
       char scriptbuffer[1024];
 
@@ -468,7 +468,7 @@ void parse_commandline(int argc, char **argv){
       }
     }
   }
-  if(smvfilename!=NULL){
+  if(smv_filename!=NULL){
     STRUCTSTAT statbuffer;
 
     FREEMEMORY(fds_filein);
@@ -479,15 +479,20 @@ void parse_commandline(int argc, char **argv){
       FREEMEMORY(fds_filein);
     }
   }
-  if(fed_smvfilename==NULL){
-    NewMemory((void **)&fed_smvfilename,(unsigned int)(len_casename+9));
-    STRCPY(fed_smvfilename,fdsprefix);
-    STRCAT(fed_smvfilename,".fed_smv");
+  if(fed_filename==NULL){
+    NewMemory((void **)&fed_filename,(unsigned int)(len_casename+9));
+    STRCPY(fed_filename,fdsprefix);
+    STRCAT(fed_filename,".fed_smv");
   }
-  if(sliceinfofilename==NULL){
-    NewMemory((void **)&sliceinfofilename,strlen(fdsprefix)+11+1);
-    STRCPY(sliceinfofilename,fdsprefix);
-    STRCAT(sliceinfofilename,"_slice.info");
+  if(stop_filename==NULL){
+    NewMemory((void **)&stop_filename,(unsigned int)(len_casename+6));
+    STRCPY(stop_filename,fdsprefix);
+    STRCAT(stop_filename,".stop");
+  }
+  if(sliceinfo_filename==NULL){
+    NewMemory((void **)&sliceinfo_filename,strlen(fdsprefix)+11+1);
+    STRCPY(sliceinfo_filename,fdsprefix);
+    STRCAT(sliceinfo_filename,"_slice.info");
   }
 
   // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file 
@@ -496,15 +501,15 @@ void parse_commandline(int argc, char **argv){
   {
     FILE *stream_iso=NULL;
 
-    NewMemory((void **)&smvisofilename,len_casename+7+1);
-    STRCPY(smvisofilename,fdsprefix);
-    STRCAT(smvisofilename,".isosmv");
-    stream_iso=fopen(smvisofilename,"r");
+    NewMemory((void **)&iso_filename,len_casename+7+1);
+    STRCPY(iso_filename,fdsprefix);
+    STRCAT(iso_filename,".isosmv");
+    stream_iso=fopen(iso_filename,"r");
     if(stream_iso!=NULL){
       fclose(stream_iso);
     }
     else{
-      FREEMEMORY(smvisofilename);
+      FREEMEMORY(iso_filename);
     }
   }
 
@@ -518,10 +523,10 @@ void parse_commandline(int argc, char **argv){
     STRCPY(test_filename,fdsprefix);
     STRCAT(test_filename,".svd");
   }
-  if(filename_sb==NULL){
-    NewMemory((void **)&filename_sb,(unsigned int)(len_casename+6));
-    STRCPY(filename_sb,fdsprefix);
-    STRCAT(filename_sb,".sb");
+  if(smoothblockage_filename==NULL){
+    NewMemory((void **)&smoothblockage_filename,(unsigned int)(len_casename+6));
+    STRCPY(smoothblockage_filename,fdsprefix);
+    STRCAT(smoothblockage_filename,".sb");
   }
 
   for (i=1;i<argc;i++){
@@ -596,7 +601,7 @@ void parse_commandline(int argc, char **argv){
     else if(
       strncmp(argv[i],"-redirect",9)==0
       ){
-        LOGSTREAM=freopen(logfilename,"w",stdout);
+        LOGSTREAM=freopen(log_filename,"w",stdout);
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
       from_commandline=1;

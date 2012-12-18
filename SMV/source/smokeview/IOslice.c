@@ -1914,13 +1914,13 @@ void getsliceparams(void){
   int build_cache=0;
   FILE *stream;
 
-  if(is_file_newer(sliceinfofilename,smvfilename)!=1){
+  if(is_file_newer(sliceinfo_filename,smv_filename)!=1){
     build_cache=1;
-    stream=fopen(sliceinfofilename,"w");
+    stream=fopen(sliceinfo_filename,"w");
   }
   else{
     build_cache=0;
-    stream=fopen(sliceinfofilename,"r");
+    stream=fopen(sliceinfo_filename,"r");
   }
 
   for(i=0;i<nsliceinfo;i++){
@@ -2359,8 +2359,8 @@ void update_fedinfo(void){
       }
     }
   }
-  if(nfedinfo>0&&fed_smvfilename!=NULL){
-    stream_fedsmv=fopen(fed_smvfilename,"w");
+  if(nfedinfo>0&&fed_filename!=NULL){
+    stream_fedsmv=fopen(fed_filename,"w");
   }
   for(i=0;i<nfedinfo;i++){ // define sliceinfo for fed slices
     slicedata *sd;

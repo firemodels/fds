@@ -188,7 +188,7 @@ void compress_svzip2(void){
     strcat(shellcommand," -auto ");
   }
   strcat(shellcommand," ");
-  strcat(shellcommand,smvfilename);
+  strcat(shellcommand,smv_filename);
 
   printf("Executing shell command: %s\n",shellcommand);
   system(shellcommand);

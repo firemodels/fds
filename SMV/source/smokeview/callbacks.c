@@ -2677,10 +2677,14 @@ void DoScript(void){
     runscript=2;
   }
   script_render_flag=0;
-  if(nscriptinfo>0&&current_script_command!=NULL&&
-    (script_step==0||(script_step==1&&script_step_now==1))
-    ){
+  if(nscriptinfo>0&&current_script_command!=NULL&&(script_step==0||(script_step==1&&script_step_now==1))){
     script_step_now=0;
+#ifndef WIN32    
+    if(file_exists(stop_filename)){
+      fprintf(stderr,"*** Warning: stop file found.  Remove before running smokeview script\n");
+      exit(0);
+    }
+#endif    
     if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){\
       if(current_script_command->exit==0){
         RenderState(RENDER_ON);

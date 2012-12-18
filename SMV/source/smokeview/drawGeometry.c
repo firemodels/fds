@@ -2957,12 +2957,12 @@ void update_smooth_blockages(void){
   blocktotal=0;
 
   if(menusmooth==0){
-    STREAM_SB=fopen(filename_sb,"rb");
+    STREAM_SB=fopen(smoothblockage_filename,"rb");
   }
   if(STREAM_SB!=NULL){
     time_t sb_modtime;
 
-    sb_modtime=file_modtime(filename_sb);
+    sb_modtime=file_modtime(smoothblockage_filename);
     if(sb_modtime!=0&&smv_modtime!=0&&smv_modtime>sb_modtime){
       fclose(STREAM_SB);
       STREAM_SB=NULL;
@@ -2980,7 +2980,7 @@ void update_smooth_blockages(void){
   }
   if(STREAM_SB==NULL){
     read_smoothobst=0;
-    STREAM_SB=fopen(filename_sb,"wb");
+    STREAM_SB=fopen(smoothblockage_filename,"wb");
   }
 
   for(i=0;i<nmeshes;i++){

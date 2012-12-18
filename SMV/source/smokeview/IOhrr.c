@@ -42,7 +42,7 @@ void readhrr(int flag, int *errorcode){
   if(flag==UNLOAD)return;
 
   NewMemory((void **)&hrrinfo,sizeof(hrrdata));
-  hrrinfo->file=hrr_csvfilename;
+  hrrinfo->file=hrr_csv_filename;
   hrrinfo->times_csv=NULL;
   hrrinfo->times=NULL;
   hrrinfo->timeslist=NULL;

@@ -1369,7 +1369,7 @@ extern "C"  void glui_script_disable(void){
       if(strlen(name)>0){
         inifiledata *inifile;
 
-        strcpy(scriptinifilename,name);
+        strcpy(script_filename,name);
         inifile=insert_inifile(name);
         writeini(SCRIPT_INI);
         if(inifile!=NULL&&LIST_ini_list!=NULL){
@@ -1380,24 +1380,24 @@ extern "C"  void glui_script_disable(void){
       break;
     case SCRIPT_LOADINI:
       {
-        char *inifilename;
+        char *ini_filename;
 
         id = LIST_ini_list->get_int_val();
-        inifilename = get_inifilename(id);
-        if(strcmp(inifilename,caseinifilename)==0){
+        ini_filename = get_inifilename(id);
+        if(strcmp(ini_filename,caseini_filename)==0){
           readini(0);
         }
         else if(id>=0){
-          if(inifilename==NULL||strlen(inifilename)==0)break;
-          scriptinifilename2=scriptinifilename;
-          strcpy(scriptinifilename,inifilename);
+          if(ini_filename==NULL||strlen(ini_filename)==0)break;
+          script_filename2=script_filename;
+          strcpy(script_filename,ini_filename);
           windowresized=0;
           readini(2);
-          scriptinifilename2=NULL;
+          script_filename2=NULL;
         }
         if(scriptoutstream!=NULL){
           fprintf(scriptoutstream,"LOADINIFILE\n");
-          fprintf(scriptoutstream," %s\n",inifilename);
+          fprintf(scriptoutstream," %s\n",ini_filename);
         }
       }
       break;

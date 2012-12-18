@@ -219,31 +219,31 @@ int setup_case(int argc, char **argv){
 
   /* 
   warning: the following line was commented out!! (perhaps it broke something)
-     this line is necessary in order to define smvfilename and trainer_filename
+     this line is necessary in order to define smv_filename and trainer_filename
   */
  // parse_commandlines(argc, argv); 
   return_code=-1;
-  if(strcmp(inputfilename_ext,".svd")==0||demo_option==1){
+  if(strcmp(input_filename_ext,".svd")==0||demo_option==1){
     trainer_mode=1;
     trainer_active=1;
-    if(strcmp(inputfilename_ext,".svd")==0){
+    if(strcmp(input_filename_ext,".svd")==0){
       input_file=trainer_filename;
     }
-    else if(strcmp(inputfilename_ext,".smt")==0){
+    else if(strcmp(input_filename_ext,".smt")==0){
       input_file=test_filename;
     }
     else{
-      input_file=smvfilename;
+      input_file=smv_filename;
     }
-    return_code=readsmv(input_file,smvisofilename);
+    return_code=readsmv(input_file,iso_filename);
     if(return_code==0){
       show_glui_trainer();
       show_glui_alert();
     }
   }
   else{
-    input_file=smvfilename;
-    return_code=readsmv(input_file,smvisofilename);
+    input_file=smv_filename;
+    return_code=readsmv(input_file,iso_filename);
   }
   switch (return_code){
     case 1:
