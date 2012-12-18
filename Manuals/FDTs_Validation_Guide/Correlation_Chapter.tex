@@ -749,7 +749,7 @@ $c_{wall}$ (kJ/kg/K)       &  0.9         \\ \hline
 $\delta_{wall}$ (m)        &  0.0254      \\ \hline
 $\rho_{steel}$ (kg/m$^3$)  &  7850        \\ \hline
 $c_{steel}$ (kJ/kg/K)      &  1.0         \\ \hline
-$\epsilon_{steel}$ (-)     &  0.7         \\ \hline
+$\epsilon$ (-)             &  0.7         \\ \hline
 $h_c$ (W/m$^2$/K)          &  25          \\ \hline
 \end{tabular}
 \end{center}
@@ -785,7 +785,7 @@ $Z$ (m)                    &  1, 2, 3, 4, 5  \\ \hline
 $F/V$ (m$^{-1}$)           &  205            \\ \hline
 $\rho_{steel}$ (kg/m$^3$)  &  7850           \\ \hline
 $c_{steel}$ (kJ/kg/K)      &  0.6            \\ \hline
-$\epsilon_{steel}$ (-)     &  0.7            \\ \hline
+$\epsilon$ (-)             &  0.7            \\ \hline
 $h_c$ (W/m$^2$/K)          &  25             \\ \hline
 $T_\infty$ ($^\circ$C)     &  20             \\ \hline
 \end{tabular}
@@ -1414,5 +1414,204 @@ Test 3     &  13, 63, 166, 256, 292, 330      &  2437, 3201, 3601, 3638, 3456, 2
 
 \section{WTC}
 
-% Scaling factor (-)       &  1           \\ \hline
+\subsection*{HGL Temperature}
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for WTC cases, HGL temperature.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &              \\
+\rb{Input parameter}  &  \rb{Value}  \\ \hline \hline
+$L$ (m)               &  7.04        \\ \hline
+$W$ (m)               &  3.60        \\ \hline
+$H$ (m)               &  3.82        \\ \hline
+$H_v$ (m)             &  2.82        \\ \hline
+$W_v$ (m)             &  2.4         \\ \hline
+$k$ (W/m/K)           &  0.12        \\ \hline
+$\rho$ (kg/m$^3$)     &  737         \\ \hline
+$c$ (kJ/kg/K)         &  0.9         \\ \hline
+$\delta$ (m)          &  0.0254      \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+           &                    &                 &                  &                    \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+           &                    &  \rb{(kW)}      &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 1     &  MQH               &  2000           &  870             &  24                \\ \hline
+Test 2     &  MQH               &  2400           &  380             &  25                \\ \hline
+Test 3     &  MQH               &  2000           &  990             &  20                \\ \hline
+Test 4     &  MQH               &  3200           &  840             &  20                \\ \hline
+Test 5     &  MQH               &  3000           &  3080            &  20                \\ \hline
+Test 6     &  MQH               &  3000           &  3030            &  20                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
+\subsection*{Steel Temperature (Unprotected)}
+
+The HGL temperatures from the MQH correlation were used as the input fire temperature $T_f$.
+The inputs for the MQH correlation are described in a previous section.
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for WTC cases, steel temperature (unprotected).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                           &              \\
+\rb{Input parameter}       &  \rb{Value}  \\ \hline \hline
+$\rho_{steel}$ (kg/m$^3$)  &  7860        \\ \hline
+$c_{steel}$ (kJ/kg/K)      &  0.450       \\ \hline
+$\epsilon$ (-)             &  0.7         \\ \hline
+$h_c$ (W/m$^2$/K)          &  25          \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|l|l|c|}
+\hline
+           &                    &                   &                   \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{Structural}  &  \rb{F/V}         \\
+           &  \rb{for $T_f$}    &  \rb{Element}     &  \rb{(m$^{-1}$)}  \\ \hline \hline
+Test 1     &  MQH               &  Bar              &  157              \\ \hline
+Test 2     &  MQH               &  Bar              &  157              \\ \hline
+Test 3     &  MQH               &  Bar              &  157              \\ \hline
+Test 1     &  MQH               &  Column           &  159              \\ \hline
+Test 2     &  MQH               &  Column           &  159              \\ \hline
+Test 3     &  MQH               &  Column           &  159              \\ \hline
+Test 1     &  MQH               &  Truss A          &  156              \\ \hline
+Test 2     &  MQH               &  Truss A          &  156              \\ \hline
+Test 3     &  MQH               &  Truss A          &  156              \\ \hline
+Test 1     &  MQH               &  Truss B          &  156              \\ \hline
+Test 2     &  MQH               &  Truss B          &  156              \\ \hline
+Test 3     &  MQH               &  Truss B          &  156              \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
+\subsection*{Steel Temperature (Protected)}
+
+The HGL temperatures from the MQH correlation were used as the input fire temperature $T_f$.
+The inputs for the MQH correlation are described in a previous section.
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for WTC cases, steel temperature (protected).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                       &              \\
+\rb{Input parameter}   &  \rb{Value}  \\ \hline \hline
+$c_{steel}$ (kJ/kg/K)  &  0.450       \\ \hline
+$k_{i}$ (W/m/K)        &  0.10        \\ \hline
+$\rho_{i}$ (kg/m$^3$)  &  208         \\ \hline
+$c_{i}$ (kJ/kg/K)      &  2.0         \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|l|l|c|c|}
+\hline
+           &                    &                   &              &                   \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{Structural}  &  \rb{$H_i$}  &  \rb{W/D}         \\
+           &  \rb{for $T_f$}    &  \rb{Element}     &  \rb{(m)}    &  \rb{(kg/$m^2$)}  \\ \hline \hline
+Test 4     &  MQH               &  Bar              &  0.0191      &  50.1             \\ \hline
+Test 5     &  MQH               &  Bar              &  0.0191      &  50.1             \\ \hline
+Test 6     &  MQH               &  Bar              &  0.0191      &  50.1             \\ \hline
+Test 4     &  MQH               &  Column           &  0.0381      &  49.4             \\ \hline
+Test 5     &  MQH               &  Column           &  0.0381      &  49.4             \\ \hline
+Test 6     &  MQH               &  Column           &  0.0381      &  49.4             \\ \hline
+Test 4     &  MQH               &  Truss A          &  0.0191      &  50.3             \\ \hline
+Test 5     &  MQH               &  Truss A          &  0.0191      &  50.3             \\ \hline
+Test 6     &  MQH               &  Truss A          &  0.0191      &  50.3             \\ \hline
+Test 4     &  MQH               &  Truss B          &  0.0381      &  50.3             \\ \hline
+Test 5     &  MQH               &  Truss B          &  0.0381      &  50.3             \\ \hline
+Test 6     &  MQH               &  Truss B          &  0.0381      &  50.3             \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
+\subsection*{Point Source Radiation Heat Flux}
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for WTC cases, point source radiation heat flux.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &                                                                                      \\
+\rb{Input parameter}  &  \rb{Value}                                                                          \\ \hline \hline
+$X$ (m)               &  0.90, 0.82, 0.71, 0.77, 1.23, 1.34, 1.23, 1.34, 1.07, 1.56, 0.57, 0.35, 0.87, 2.58  \\ \hline
+$Z$ (m)               &  3.3, 3.3, 3.15, 3.15, 3.46, 3.27, 0.92, 1.02, 0.13, 0.13, 3.82, 3.82, 3.82, 3.82    \\ \hline
+IOR (-)               &  3, 3, -3, -3, 1, 2, 1, 2, 3, 3, -3, -3, -3, -3                                      \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+           &                 &                 &                \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$\chi_r$}  &  \rb{$A$}      \\
+           &  \rb{(kW)}      &  \rb{(-)}       &  \rb{(m$^2$)}  \\ \hline \hline
+Test 1     &  2000           &  0.44           &  1.258         \\ \hline
+Test 2     &  2400           &  0.39           &  1.455         \\ \hline
+Test 3     &  2000           &  0.39           &  1.258         \\ \hline
+Test 4     &  3200           &  0.44           &  1.832         \\ \hline
+Test 5     &  3000           &  0.44           &  1.739         \\ \hline
+Test 6     &  3000           &  0.44           &  1.739         \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+\subsection*{Ceiling Jet Temperature (Alpert)}
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for WTC cases, ceiling jet temperature (Alpert).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &              \\
+\rb{Input parameter}  &  \rb{Value}  \\ \hline \hline
+Scaling factor (-)    &  1           \\ \hline
+$r$ (m)               &  2, 3        \\ \hline
+$H$ (m)               &  3.72        \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+           &                 &                    &                  \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
+           &  \rb{(kW)}      &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
+Test 1     &  2000           &  24                &  2660            \\ \hline
+Test 2     &  2400           &  25                &  2190            \\ \hline
+Test 3     &  2000           &  20                &  3420            \\ \hline
+Test 4     &  3200           &  20                &  3510            \\ \hline
+Test 5     &  3000           &  20                &  4950            \\ \hline
+Test 6     &  3000           &  20                &  6560            \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
