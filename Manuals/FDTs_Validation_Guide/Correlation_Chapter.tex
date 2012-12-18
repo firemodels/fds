@@ -770,7 +770,7 @@ $C_{cj}$ (-)          &  1.2         \\ \hline
 \begin{tabular}{|l|c|c|c|}
 \hline
             &                   &            &            \\
-\rb{Test}   &  \rb{$t_{fire}$}  &  \rb{$H$}  &  \rb{$R$}  \\
+\rb{Test}   &  \rb{$t_{fire}$}  &  \rb{$H$}  &  \rb{$r$}  \\
             &  \rb{(s)}         &  \rb{(m)}  &  \rb{(m)}  \\ \hline \hline
 Test SDC02  &  194              &  2.1       &  1.3       \\ \hline
 Test SDC05  &  172              &  2.0       &  1.8       \\ \hline
@@ -1017,11 +1017,11 @@ Test 166   &  MQH               &  62.9           &  1.83        &  0.74        
 
 \subsection*{Plume Temperature (Heskestad)}
 
-\begin{table}[!h]
-\caption{Summary of input parameters used for UL/NFPRF cases, plume temperature (Heskestad).}
-
 The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
 After the time $t_{fire}$, the fire HRR was steady.
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for UL/NFPRF cases, plume temperature (Heskestad).}
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -1113,11 +1113,11 @@ I-22       &  4600           \\ \hline
 
 \subsection*{Sprinkler Activation Time}
 
-\begin{table}[!h]
-\caption{Summary of input parameters used for UL/NFPRF cases, sprinkler activation time.}
-
 The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
 After the time $t_{fire}$, the fire HRR was steady.
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for UL/NFPRF cases, sprinkler activation time.}
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -1210,11 +1210,11 @@ $Z$ (m)                 &  0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4  \\ \hline
 
 \subsection*{Plume Temperature (Heskestad)}
 
-\begin{table}[!h]
-\caption{Summary of input parameters used for USN Hawaii cases, plume temperature (Heskestad).}
-
 The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
 After the time $t_{fire}$, the fire HRR was steady.
+
+\begin{table}[!h]
+\caption{Summary of input parameters used for USN Hawaii cases, plume temperature (Heskestad).}
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -1321,7 +1321,7 @@ $H$ (m)               &  2.075       \\ \hline
 \begin{tabular}{|l|l|c|l|c|c|c|}
 \hline
            &                &                   &            &                &                  &                    \\
-\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}  &  \rb{Scaling}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$r$}  &  \rb{Scaling}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
            &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}  &  \rb{factor}   &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
 Test 1     &  Smooth        &  0.105            &  2.2, 2.2  &  1             &  50              &  16.6              \\ \hline
 Test 2     &  Smooth        &  0.105            &  2.2, 2.2  &  1             &  50              &  19.0              \\ \hline
@@ -1352,7 +1352,7 @@ Test 20    &  Obstructed    &  0.105            &  2.4, 2.4  &  2             & 
 \begin {tabular}{|l|l|c|l|c|c|c|}
 \hline 
            &                &                   &             &                &                  &                    \\
-\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}   &  \rb{Scaling}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$r$}   &  \rb{Scaling}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
            &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}   &  \rb{factor}   &  \rb{(s)}        &  \rb{($^\circ$C)}  \\ \hline \hline
 Test 21    &  Smooth        &  0.017            &  2.4, 2.4   &  2             &  70              &  21.1              \\ \hline
 Test 22    &  Smooth        &  0.017            &  2.4, 2.4   &  2             &  70              &  21.7              \\ \hline
@@ -1389,10 +1389,10 @@ Test 45    &  Obstructed    &  0.0041           &  2.1, 6.59  &  4             &
 
 \subsection*{Sprinkler Activation Time}
 
+The fire growth was specified as $\dot Q = \alpha t^2$ up to the time of the first sprinkler activation.
+
 \begin{table}[!h]
 \caption{Summary of input parameters used for Vettori Flat cases, sprinkler activation time.}
-
-The fire growth was specified as $\dot Q = \alpha t^2$ up to the time of the first sprinkler activation.
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -1409,7 +1409,7 @@ $H$ (m)                &  2.09        \\ \hline
 \begin{tabular}{|l|l|c|c|c|c|}
 \hline
            &                &                   &            &                &                    \\
-\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}  &  \rb{Scaling}  &  \rb{$T_\infty$}   \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$r$}  &  \rb{Scaling}  &  \rb{$T_\infty$}   \\
            &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}  &  \rb{factor}   &  \rb{($^\circ$C)}  \\ \hline \hline
 Test 1     &  Smooth        &  0.105            &  2.2       &  1             &  16.6              \\ \hline
 Test 2     &  Smooth        &  0.105            &  2.2       &  1             &  19.0              \\ \hline
@@ -1440,7 +1440,7 @@ Test 20    &  Obstructed    &  0.105            &  2.4       &  2             & 
 \begin {tabular}{|l|l|c|c|c|c|}
 \hline 
            &                &                   &             &                &                    \\
-\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$R$}   &  \rb{Scaling}  &  \rb{$T_\infty$}   \\
+\rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$r$}   &  \rb{Scaling}  &  \rb{$T_\infty$}   \\
            &                &  \rb{(kW/s$^2$)}  &  \rb{(m)}   &  \rb{factor}   &  \rb{($^\circ$C)}  \\ \hline \hline
 Test 21    &  Smooth        &  0.017            &  2.4        &  2             &  21.1              \\ \hline
 Test 22    &  Smooth        &  0.017            &  2.4        &  2             &  21.7              \\ \hline
@@ -1628,8 +1628,8 @@ $c_{i}$ (kJ/kg/K)      &  2.0         \\ \hline
 \begin{tabular}{|l|l|l|c|c|}
 \hline
            &                    &                   &              &                   \\
-\rb{Test}  &  \rb{Correlation}  &  \rb{Structural}  &  \rb{$H_i$}  &  \rb{W/D}         \\
-           &  \rb{for $T_f$}    &  \rb{Element}     &  \rb{(m)}    &  \rb{(kg/$m^2$)}  \\ \hline \hline
+\rb{Test}  &  \rb{Correlation}  &  \rb{Structural}  &  \rb{$h_i$}  &  \rb{W/D}         \\
+           &  \rb{for $T_f$}    &  \rb{Element}     &  \rb{(m)}    &  \rb{(kg/m$^2$)}  \\ \hline \hline
 Test 4     &  MQH               &  Bar              &  0.0191      &  50.1             \\ \hline
 Test 5     &  MQH               &  Bar              &  0.0191      &  50.1             \\ \hline
 Test 6     &  MQH               &  Bar              &  0.0191      &  50.1             \\ \hline

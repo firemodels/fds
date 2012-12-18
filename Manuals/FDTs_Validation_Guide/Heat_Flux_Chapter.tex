@@ -3,7 +3,7 @@
 
 \section{Point Source Radiation Heat Flux}
 
-The point source model assumes that radiant energy is concentrated at a point located within the flame. Here the point source is located at a point one-third the height of the flame. The radiant heat flux at any distance $R$ from this point is given by
+The point source model assumes that radiative energy is concentrated at a point located within the flame. Here the point source is located at a point one-third the height of the flame. The radiative heat flux at any distance $R$ from this point is given by
 
 \be
 \dot q_r'' = \cos\theta \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right)
@@ -13,7 +13,7 @@ The point source model assumes that radiant energy is concentrated at a point lo
 \noindent where
 
 \be
-R = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
+R = \sqrt{X^2 + \left(Z - \frac{L_f}{3} \right)^2}
 \label{eq:point_source_R}
 \ee
 
@@ -32,10 +32,10 @@ D = \sqrt{\frac{4 A}{\pi}}
 \label{eq:point_source_D}
 \ee
 
-In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), the $\cos\theta$ term (equal to $x/R$ for targets pointing sideways, or $z/R$ for gauges pointing upward or downward) accounts for a target that is at an angle $\theta$ from the source, $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(kW), and $R$ is the radial distance from the point source to the edge of the target~(m).
+In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiative heat flux~(kW/m$^2$), the $\cos\theta$ term (equal to $X/R$ for targets pointing sideways, or $Z/R$ for gauges pointing upward or downward) accounts for a target that is at an angle $\theta$ from the source, $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(kW), and $R$ is the radial distance from the point source to the edge of the target~(m).
 
-In Eq.~\ref{eq:point_source_R}, $x$ is the horizontal distance from the point source to the edge of the target~(m), $z$ is the height of the heat flux target~(m), and $L_f$ is the flame height given by Eq.~\ref{eq:point_source_Lf}~(m).
-In Eq.~\ref{eq:point_source_Lf}, $D$ is the diameter of the fire source~(m), and $Q^*$ is the nondimensional HRR given by Eq.~\ref{eq:point_source_Qstar}. In Eq.~\ref{eq:point_source_Qstar}, $\rho_\infty$ is the ambient air density~(kg/m$^3$), $c_p$ is the specific heat of air~(kJ/kg-K), $T_\infty$ is the ambient air temperature~(K), and $g$ is the acceleration of gravity~(m/s$^2$). In Eq.~\ref{eq:point_source_D}, $A$ is the area of the fire source~(m$^2$).
+In Eq.~\ref{eq:point_source_R}, $X$ is the horizontal distance from the point source to the edge of the target~(m), $Z$ is the height of the heat flux target~(m), and $L_f$ is the flame height given by Eq.~\ref{eq:point_source_Lf}~(m).
+In Eq.~\ref{eq:point_source_Lf}, $D$ is the diameter of the fire source~(m), and $Q^*$ is the nondimensional HRR given by Eq.~\ref{eq:point_source_Qstar}. In Eq.~\ref{eq:point_source_Qstar}, $\rho_\infty$ is the ambient air density~(kg/m$^3$), $c_p$ is the specific heat of air~(kJ/kg/K), $T_\infty$ is the ambient air temperature~(K), and $g$ is the acceleration of gravity~(m/s$^2$). In Eq.~\ref{eq:point_source_D}, $A$ is the area of the fire source~(m$^2$).
 
 
 \clearpage
@@ -50,7 +50,7 @@ The immersed HGL radiation heat flux can be calculated by
 \label{eq:immersed_HGL_radiation}
 \ee
 
-In Eq.~\ref{eq:immersed_HGL_radiation}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), $\sigma$ is the Stefan-Boltzmann constant (W/m$^2$-K$^4$), $T_g$ is the hot gas layer temperature~(K) from the appropriate method described in Chapter~\ref{HGL_Chapter}, and $T_\infty$ is the ambient temperature (K).
+In Eq.~\ref{eq:immersed_HGL_radiation}, $\dot q_r''$ is the radiative heat flux~(kW/m$^2$), $\sigma$ is the Stefan-Boltzmann constant (W/m$^2$/K$^4$), $T_g$ is the hot gas layer temperature~(K) from the appropriate HGL temperature method correlation described in Chapter~\ref{HGL_Chapter}, and $T_\infty$ is the ambient temperature (K).
 
 % Note: The immersed HGL radiation heat flux method was found in some cases to underpredict the measured heat flux. This underprediction was because the HGL temperature is lower than the temperature near the heat flux gauges due to energy averaging of the HGL method.
 
@@ -64,7 +64,7 @@ The immersed plume radiation heat flux can be calculated by
 \label{eq:immersed_plume_radiation}
 \ee
 
-In Eq.~\ref{eq:immersed_plume_radiation}, $\dot q_r''$ is the radiant heat flux~(kW/m$^2$), $\sigma$ is the Stefan-Boltzmann constant (W/m$^2$-K$^4$), and $T_p$ is the plume temperature (K) at a given height using the McCaffrey centerline plume temperature correlation described in Eq.~\ref{eq:McCaffrey}.
+In Eq.~\ref{eq:immersed_plume_radiation}, $\dot q_r''$ is the radiative heat flux~(kW/m$^2$), $\sigma$ is the Stefan-Boltzmann constant (W/m$^2$/K$^4$), and $T_p$ is the plume temperature (K) at a given height using the McCaffrey centerline plume temperature correlation described in Eq.~\ref{eq:McCaffrey}.
 
 The McCaffrey centerline plume temperature correlation is given by
 
@@ -82,11 +82,11 @@ In Eq.~\ref{eq:McCaffrey}, $\Delta T_p$ is the plume centerline temperature rise
 \label{tbl:McCaffrey_constants}
 \begin{tabular}{|c|c|c|c|}
 \hline
-Region & $z/\dot Q^{2/5}$      & $\eta$ & $\kappa$ \\
+Region  &  $Z/\dot Q^{2/5}$  &  $\eta$  &  $\kappa$  \\
 \hline
-Continuous & < 0.08       & 1/2  & 6.8 \\
-Intermittent & < 0.08-0.2 & 0     & 1.9 \\
-Plume         & > 0.2         & -1/3 & 1.1 \\
+Continuous    &  < 0.08      & 1/2   & 6.8  \\
+Intermittent  &  < 0.08-0.2  & 0     & 1.9  \\
+Plume         &  > 0.2       & -1/3  & 1.1  \\
 \hline
 \end{tabular}
 \end{center}
