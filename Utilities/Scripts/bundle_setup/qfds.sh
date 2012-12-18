@@ -161,12 +161,14 @@ fi
 # if there is more than 1 process then use the mpirun command
 #  (which will never happen if smokeview is running)
 
-if [ $nprocesses -gt 1 ]
-then
+TITLE="$infile"
+
+if [ $nprocesses -gt 1 ] ; then
   MPIRUN="mpirun -np $nprocesses"
   TITLE="$infile(MPI)"
-else
-  TITLE="$infile"
+fi
+if [ "$USE_SMOKEVIEW" == "y" ] ; then
+  TITLE="$infile(SMV)"
 fi
 
 nnodes=$(echo "($nprocesses-1)/$nprocesses_per_node+1" | bc)
