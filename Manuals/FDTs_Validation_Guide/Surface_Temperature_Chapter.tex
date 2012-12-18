@@ -46,7 +46,7 @@ The temperature rise, $\Delta T_s$, above ambient ($T_s - T_\infty$) of an unpro
 
 In Eq.~\ref{eq:unprotected_steel}, $\Delta T_s$ is the temperature rise of the steel member above ambient~($^\circ$C), $F/V$ is the ratio of heated surface area to volume~(m$^{-1}$), $\rho_s$ is the density of steel~(kg/m$^3$), $c_s$ is the specific heat of steel~(J/kg-K), $h_c$ is the convective heat transfer coefficient~(W/m$^2$-K), $T_f$ is the exposing fire temperature~(K), $T_s$ is the steel temperature~(K), $\sigma$ is the Stefan-Boltzmann constant (W/m$^2$-K$^4$), $\epsilon$ is the emissivity~(-), and $\Delta t$ is the time step~(s).
 
-Note that the exposing fire temperature, $T_f$, can be replaced by the hot gas layer temperature, plume temperature, or other exposing temperature. In this validation study, this correlation is compared to experimental data that were collected for steel members immersed in a hot gas layer. Thus, $T_f$ is replaced by $T_g$, which is the hot gas layer temperature from the appropriate method described in Chapter~\ref{HGL_Chapter}.
+Note that the exposing fire temperature, $T_f$, can be replaced by the hot gas layer temperature, plume temperature, or other exposing temperature.
 
 
 \clearpage
@@ -58,39 +58,13 @@ Note that the exposing fire temperature, $T_f$, can be replaced by the hot gas l
 If the thermal capacity of the insulation layer is neglected, then the temperature rise, $\Delta T_s$, above ambient ($T_s - T_\infty$) of a structural steel element exposed to fire can be calculated using the following equation
 
 \be
-\Delta T_s = k_i \left( \frac{T_f - T_s}{c_s h \frac{W}{D} + \frac{1}{2} c_i \rho_i h^2} \right) \Delta t
+\Delta T_s = k_i \left( \frac{T_f - T_s}{c_s h \frac{W}{D} + \frac{1}{2} c_i \rho_i h_i^2} \right) \Delta t
 \label{eq:protected_steel}
 \ee
 
-In Eq.~\ref{eq:protected_steel}, $\Delta T_s$ is the temperature rise of the steel member above ambient~($^\circ$C), $k_i$ is the thermal conductivity of the insulation material~(W/m-K), $T_f$ is the exposing fire temperature~(K), $T_s$ is the steel temperature~(K), $c_s$ is the specific heat of steel~(J/kg-K), $h$ is the thickness of the insulation~(m), $W/D$ is the ratio of the weight of steel section per linear foot to the heated perimeter~(kg/m$^2$), $c_i$ is the specific heat of the insulation material~(J/kg-K), $\rho_i$ is the density of the insulating material~(kg/m$^3$), and $\Delta t$ is the time step~(s).
+In Eq.~\ref{eq:protected_steel}, $\Delta T_s$ is the temperature rise of the steel member above ambient~($^\circ$C), $k_i$ is the thermal conductivity of the insulation material~(W/m-K), $T_f$ is the exposing fire temperature~(K), $T_s$ is the steel temperature~(K), $c_s$ is the specific heat of steel~(J/kg-K), $h_i$ is the thickness of the insulation~(m), $W/D$ is the ratio of the weight of steel section per linear foot to the heated perimeter~(kg/m$^2$), $c_i$ is the specific heat of the insulation material~(J/kg-K), $\rho_i$ is the density of the insulating material~(kg/m$^3$), and $\Delta t$ is the time step~(s).
 
-Note that the exposing fire temperature, $T_f$, can be replaced by the hot gas layer temperature, plume temperature, or other exposing temperature. In this validation study, this correlation is compared to experimental data that were collected for steel members immersed in a fire plume. Thus, $T_f$ is replaced by $T_p$, which is the plume temperature~(K) at a given height using the McCaffrey centerline plume temperature correlation given in Eq.~\ref{eq:McCaffrey}.
-
-The McCaffrey centerline plume temperature correlation is given by
-
-\be
-\Delta T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{Z}{\dot Q^{2/5}} \right)^{2 \eta - 1} \right] T_\infty
-\label{eq:McCaffrey}
-\ee
-
-In Eq.~\ref{eq:McCaffrey}, $\Delta T_p$ is the plume centerline temperature rise above ambient~($^\circ$C), $g$ is the acceleration of gravity~(m/s$^2$), $Z$ is the elevation above the fire source~(m), $\dot Q$ is the HRR~(kW), and $T_\infty$ is the ambient air temperature~($^\circ$C). The constants $\eta$ and $\kappa$ are a function of the height $Z$ within the plume and are listed in Table~\ref{tbl:McCaffrey_constants}.
-
-\vspace{\baselineskip}
-\begin{table}[ht]
-\begin{center}
-\caption{Constants used in McCaffrey plume correlation}
-\label{tbl:McCaffrey_constants}
-\begin{tabular}{|c|c|c|c|}
-\hline
-Region & $z/\dot Q^{2/5}$      & $\eta$ & $\kappa$ \\
-\hline
-Continuous & < 0.08       & 1/2  & 6.8 \\
-Intermittent & < 0.08-0.2 & 0     & 1.9 \\
-Plume         & > 0.2         & -1/3 & 1.1 \\
-\hline
-\end{tabular}
-\end{center}
-\end{table}
+Note that the exposing fire temperature, $T_f$, can be replaced by the hot gas layer temperature, plume temperature, or other exposing temperature.
 
 \clearpage
 
