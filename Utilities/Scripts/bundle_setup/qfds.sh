@@ -5,32 +5,15 @@
 
 PROG=$0
 
-EXPECTED_ARGS=1
-
 # setup default queue name
 
 progname=qfds.sh
 queue=batch
-if [ "$PROG" == "/usr/local/bin/qfds7.sh" ]
-then
-progname=qfds7.sh
-queue=fire70s
-fi
-if [ "$PROG" == "/usr/local/bin/qfds6.sh" ]
-then
-progname=qfds6.sh
-queue=fire60s
-fi
-if [ "$PROG" == "/usr/local/bin/qfdsv.sh" ]
-then
-progname=qfdsv.sh
-queue=vis
-fi
 
 nprocesses=1
 nprocesses_per_node=1
 
-if [ $# -lt $EXPECTED_ARGS ]
+if [ $# -lt 1 ]
 then
   echo "Usage: $progname [-d directory] [-f repository root] [-n processes per node] [-q queue]"
   echo "               [-r] [-p nprocesses] [fds_command] casename.fds"
@@ -47,12 +30,12 @@ then
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis, fire60s and fire70s)"
-  echo " -r - use FDS located in repository"
+  echo " -r - use FDS (or Smokeview if -s is specified) located in repository"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
-  echo " fds_command - full path to fds command name (not used if either -f or -r"
+  echo " command - full path to command name (not used if either -f or -r"
   echo "    options are specified)"
-  echo "casename.fds - FDS input file"
+  echo "input_file - input file"
   echo ""
   exit
 fi
@@ -64,10 +47,17 @@ FDSROOT=~/FDS-SMV
 MPIRUN=
 nprocesses_per_node_defined=0
 dir=.
+# parameters used by Smokeview
+USE_SMOKEVIEW=
+VOLRENDER=
+SKIPFRAME=1
+STARTFRAME=0
+exe2=
+ABORTRUN=n
 
 # read in parameters from command line
 
-while getopts 'd:f:n:p:q:r' OPTION
+while getopts 'd:f:n:p:q:rsxy:z:' OPTION
 do
 case $OPTION  in
   d)
@@ -90,9 +80,33 @@ case $OPTION  in
   r)
    use_repository=1
   ;;
+  s)
+   USE_SMOKEVIEW="y"
+  ;;
+  x)
+   VOLRENDER=y
+   ;;
+  y)
+   STARTFRAME="$OPTARG"
+   ;;
+  z)
+   SKIPFRAME="$OPTARG"
+   ;;
+
 esac
 done
 shift $(($OPTIND-1))
+
+#  if smokeview is invoked then override various options that 
+#  may have been specified  (ie can't use batch queue, must use
+#  smokeview bash script in repository)
+
+if [ "$USE_SMOKEVIEW" == "y" ] ; then
+  use_repository=1
+  if [ "$queue" == "batch" ] ; then
+    queue=fire70s
+  fi
+fi
 
 # set number of processes per node  to 4 if the fire60s queue is being used
 # (the fire60s only have 4 cores)
@@ -108,23 +122,44 @@ fi
 if [ $use_repository -eq 0 ]
 then
 #set fds and the input file using the command line
-  fdsexe=$1
+  exe=$1
   in=$2
 else
  if [ $nprocesses -gt 1 ]
 # only set the input file using the command line, the fds exe is defined
 # using the repository (serial if nprocesses==1 parallel otherwise)
   then
-  fdsexe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
+  exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
  else
-  fdsexe=$FDSROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
+  if [ "$USE_SMOKEVIEW" == "y" ] ; then
+# for now only one instance of smokeview can occur per node
+    nprocesses_per_node=1
+    nprocesses=1
+    exe="$FDSROOT/Verification/scripts/runsmv_single.sh"
+    exe2="-x -y $STARTFRAME -z $SKIPFRAME"
+  else
+    exe=$FDSROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
+  fi
  fi
  in=$1
 fi
 
 infile=${in%.*}
 
+# define options used by smokeview (for computing volume rendering smoke frames) 
+
+if [[ "$USE_SMOKEVIEW" == "y" && "$VOLRENDER" == "y" ]] ; then
+  VOLRENDER="-volrender"
+  STARTFRAME="-startframe $STARTFRAME"
+  SKIPFRAME="-skipframe $SKIPFRAME"
+else
+  VOLRENDER=
+  STARTFRAME=
+  SKIPFRAME=
+fi
+
 # if there is more than 1 process then use the mpirun command
+#  (which will never happen if smokeview is running)
 
 if [ $nprocesses -gt 1 ]
 then
@@ -147,22 +182,28 @@ out=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
 
+
+if [ "$USE_SMOKEVIEW" = "y" ] ; then
+  in_full_file=$fulldir/$infile.smv
+else
+  in_full_file=$fulldir/$in
+fi
+
 # make sure files that are needed exist
 
-if ! [ -e $fulldir/$in ]; then
-  echo "The FDS input file, $fulldir/$in, does not exist. Run aborted."
+if ! [ -e $in_full_file ]; then
+  echo "The input file, $in_full_file, does not exist. Run aborted."
+  ABORTRUN=y
 fi
-if ! [ -e $fdsexe ]; then
-  echo "The FDS program name, $fdsexe, does not exist. Run aborted."
+if ! [ -e $exe ]; then
+  echo "The program name, $exe, does not exist. Run aborted."
+  ABORTRUN=y
 fi
 if [ -e $outlog ]; then
   echo "Removing log file: $outlog"
   rm $outlog
 fi
-if ! [ -e $fulldir/$in ]; then
-  exit
-fi
-if ! [ -e $fdsexe ]; then
+if [ "$ABORTRUN" == "y" ] ; then
   exit
 fi
 if [ $STOPFDS ]; then
@@ -173,7 +214,6 @@ fi
 if [ -e $stopfile ]; then
  rm $stopfile
 fi
-
 
 scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
@@ -191,10 +231,10 @@ cd $fulldir
 echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-$MPIRUN $fdsexe $in
+$MPIRUN $exe $exe2 $in
 EOF
 echo "        Input file:$in"
-echo "        Executable:$fdsexe"
+echo "        Executable:$exe"
 echo "             Queue:$queue"
 echo "         Processes:$nprocesses"
 if test $nprocesses -gt 1
