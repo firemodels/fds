@@ -199,7 +199,7 @@ STDCALLF FORToutsliceheader(int *file_unit,char *outfile,int *unit3,
                              int *error1,int len);
 STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, int len);
 STDCALLF FORTplot3dout(char *outfile,int *nx,int *ny,int *nz,float *qout,int *error3,int lenout);
-STDCALLF FORTendianout(char *endianfilename,int lenout);
+STDCALLF FORTendianout(char *endian_filename,int lenout);
 
 //************************** global variables ****************************************
 

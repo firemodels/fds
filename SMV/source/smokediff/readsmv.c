@@ -320,7 +320,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       continue;
     }
     if(match(buffer,"ENDF") == 1){
-      char endianfilename[1024];
+      char endian_filename[1024];
       FILE *ENDIANfile;
       int endian=0, endian_native, endian_data, len;
 
@@ -328,8 +328,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       len=strlen(buffer);
       buffer[len-1]='\0';
       trim(buffer);
-      fullfile(endianfilename,smvcase->dir,buffer);
-      ENDIANfile = fopen(endianfilename,"rb");
+      fullfile(endian_filename,smvcase->dir,buffer);
+      ENDIANfile = fopen(endian_filename,"rb");
       if(ENDIANfile!=NULL){
         endian_native = getendian();
         FSEEK(ENDIANfile,4,SEEK_SET);
@@ -342,11 +342,11 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       if(stream_out!=NULL){
         int lenout;
 
-        make_outfile(endianfilename, NULL, buffer, ".end");
-        fprintf(stream_out,"ENDF\n %s\n",endianfilename);
-        make_outfile(endianfilename, destdir, buffer, ".end");
-        lenout=strlen(endianfilename);
-        FORTendianout(endianfilename,lenout);
+        make_outfile(endian_filename, NULL, buffer, ".end");
+        fprintf(stream_out,"ENDF\n %s\n",endian_filename);
+        make_outfile(endian_filename, destdir, buffer, ".end");
+        lenout=strlen(endian_filename);
+        FORTendianout(endian_filename,lenout);
       }
       continue;
     }
