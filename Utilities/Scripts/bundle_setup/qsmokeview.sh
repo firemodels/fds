@@ -37,5 +37,6 @@ input=$1
 i=0
 while [ $i -lt $nprocesses ]; do
   qfds.sh -r -s -x -y $i -z $nprocesses -q fire70s $input
+  sleep 3
   let i=i+1
 done
