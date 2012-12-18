@@ -306,7 +306,7 @@ DO I=0,50
       DELTA_T = 1
       T_STEEL = TMP_A
       DO J=2,T_END
-         T_STEEL(J) = (((K_I/(C_STEEL*H*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((TMP_G)-(T_STEEL(J-1)))) * DELTA_T) + (T_STEEL(J-1))
+         T_STEEL(J) = (((K_I/(C_STEEL*H_I*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((TMP_G)-(T_STEEL(J-1)))) * DELTA_T) + (T_STEEL(J-1))
       ENDDO
    ENDIF
 
@@ -792,7 +792,7 @@ DO I=1,9999
          DELTA_T = 1
          T_STEEL = TMP_A
          DO M=2,TIME_RAMP(I)
-            T_STEEL(M) = (((K_I/(C_STEEL*H*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((T_PLUME(J))-(T_STEEL(M-1)))) * DELTA_T) + (T_STEEL(M-1))
+            T_STEEL(M) = (((K_I/(C_STEEL*H_I*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((T_PLUME(J))-(T_STEEL(M-1)))) * DELTA_T) + (T_STEEL(M-1))
          ENDDO
          MAX_STEEL_TEMP(J) = MAXVAL(T_STEEL)
       ENDIF
