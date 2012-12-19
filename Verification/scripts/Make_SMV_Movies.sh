@@ -27,7 +27,7 @@ fi
 export SVNROOT=`pwd`/..
 export SMV=$SVNROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
 export RUNSMV="$SVNROOT/Utilities/Scripts/runsmv.sh"
-export MAKEMOVIE=$SVNROOT/Utilities/Scripts/makemovie.sh
+export MAKEMOVIE=$SVNROOT/Utilities/Scripts/make_movie.sh
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
@@ -59,17 +59,17 @@ $RUNSMV -m Visualization plume5c
 cd $INDIR
 
 echo making plume5c_tslice movie
-$MAKEMOVIE plume5c_tslice $OUTDIR > /dev/null
+$MAKEMOVIE -d $OUTDIR plume5c_tslice  > /dev/null
 echo making plume5c_3dsmoke movie
-$MAKEMOVIE plume5c_3dsmoke $OUTDIR > /dev/null
+$MAKEMOVIE -d $OUTDIR plume5c_3dsmoke  > /dev/null
 echo making plume5c_vtslice movie
-$MAKEMOVIE plume5c_vtslice $OUTDIR > /dev/null
+$MAKEMOVIE -d $OUTDIR plume5c_vtslice > /dev/null
 echo making plume5c_iso movie
-$MAKEMOVIE plume5c_iso $OUTDIR > /dev/null
+$MAKEMOVIE -d $OUTDIR plume5c_iso  > /dev/null
 echo making plume5c_tbound movie
-$MAKEMOVIE plume5c_tbound $OUTDIR > /dev/null
+$MAKEMOVIE -d $OUTDIR plume5c_tbound  > /dev/null
 echo making plume5c_part movie
-$MAKEMOVIE plume5c_part $OUTDIR > /dev/null
+$MAKEMOVIE -d $OUTDIR plume5c_part  > /dev/null
 
 cd $VDIR
 
@@ -78,8 +78,8 @@ $RUNSMV -m Visualization thouse5
 cd $INDIR
 
 echo making thouse5_tslice movie
-$MAKEMOVIE thouse5_tslice $OUTDIR > /dev/null
+$MAKEMOVIE -d $OUTDIR thouse5_tslice  > /dev/null
 echo making thouse5_smoke3d movie
-$MAKEMOVIE thouse5_smoke3d $OUTDIR > /dev/null
+$MAKEMOVIE -d $OUTDIR thouse5_smoke3d  > /dev/null
 
 source $STOPX
