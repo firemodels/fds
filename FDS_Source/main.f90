@@ -355,7 +355,9 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
  
 ! Initialize Mesh Exchange Arrays (All Nodes)
 
-N_REQ=0  ! Counter for MPI requests
+N_REQ  = 0  ! Counters for MPI requests
+N_PREQ = 0
+
 CALL POST_RECEIVES(0)
 CALL MESH_EXCHANGE(0)
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
@@ -1015,20 +1017,14 @@ SUBROUTINE PRESSURE_ITERATION_SCHEME
 
 ! Iterate calls to pressure solver until velocity tolerance is satisfied
 
-PRESSURE_ITERATIONS = 0
-
-IF (USE_MPI .AND. ITERATE_PRESSURE) THEN
-   N_PREQ = 0
-   CALL POST_RECEIVES(2)
-   CALL MESH_EXCHANGE(2)
-ENDIF
-
 CALL MESH_EXCHANGE(5)
 
 DO NM=1,NMESHES
    IF (PROCESS(NM)==MYID .AND. ACTIVE_MESH(NM)) MESHES(NM)%WALL_WORK1 = 0._EB
    IF (PROCESS(NM)==MYID .AND. ACTIVE_MESH(NM)) CALL MATCH_VELOCITY_FLUX(NM)
 ENDDO
+
+PRESSURE_ITERATIONS = 0
 
 PRESSURE_ITERATION_LOOP: DO
 
@@ -1477,7 +1473,15 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
       N_REQ = MIN(N_REQ+1,SIZE(REQ))
       CALL MPI_IRECV(M3%IJKW(1,1),15*M4%N_EXTERNAL_WALL_CELLS,MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+
+      ! Set up persistent receive used in pressure iteration
  
+      IF (M3%NIC_S>0) THEN
+         N_PREQ = N_PREQ+1
+         CALL MPI_RECV_INIT(M3%REAL_RECV_PKG7(1),SIZE(M3%REAL_RECV_PKG7),MPI_DOUBLE_PRECISION,SNODE,NOM, &
+                            MPI_COMM_WORLD,PREQ(N_PREQ),IERR)
+      ENDIF
+
    ENDIF INITIALIZATION_IF
 
    ! First posting for density and mass fraction
@@ -1485,14 +1489,6 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (CODE==1 .AND. M3%NIC_S>0) THEN
       N_REQ = MIN(N_REQ+1,SIZE(REQ))
       CALL MPI_IRECV(M3%REAL_RECV_PKG1(1),SIZE(M3%REAL_RECV_PKG1),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
-   ENDIF
-
-   ! Set up persistent receive used in pressure iteration
- 
-   IF (CODE==2 .AND. M3%NIC_S>0) THEN
-      N_PREQ = N_PREQ+1
-      CALL MPI_RECV_INIT(M3%REAL_RECV_PKG7(1),SIZE(M3%REAL_RECV_PKG7),MPI_DOUBLE_PRECISION,SNODE,NOM, &
-                         MPI_COMM_WORLD,PREQ(N_PREQ),IERR)
    ENDIF
 
    ! First posting for pressure
@@ -1674,6 +1670,14 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
             M%OMESH(NOM)%IJKW = M4%OMESH(NOM)%IJKW(:,1:M4%N_EXTERNAL_WALL_CELLS)
          ENDIF
  
+         ! Initialize persistent send request for pressure iteration
+
+         IF (M3%NIC_R>0 .AND. RNODE/=SNODE) THEN
+            N_PREQ=N_PREQ+1
+            CALL MPI_SEND_INIT(M3%REAL_SEND_PKG7(1),SIZE(M3%REAL_SEND_PKG7),MPI_DOUBLE_PRECISION,SNODE,NM, &
+                            MPI_COMM_WORLD,PREQ(N_PREQ),IERR)
+         ENDIF
+
       ENDIF INITIALIZE_SEND_IF
 
       ! Exchange of density and species mass fractions following the PREDICTOR update
@@ -1708,12 +1712,6 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
       ENDIF
 
       ! Exchange velocity/pressure info for ITERATE_PRESSURE
-
-      IF (CODE==2 .AND. M3%NIC_R>0 .AND. RNODE/=SNODE) THEN
-         N_PREQ=N_PREQ+1
-         CALL MPI_SEND_INIT(M3%REAL_SEND_PKG7(1),SIZE(M3%REAL_SEND_PKG7),MPI_DOUBLE_PRECISION,SNODE,NM, &
-                            MPI_COMM_WORLD,PREQ(N_PREQ),IERR)
-      ENDIF
 
       IF (CODE==5 .AND. M3%NIC_R>0) THEN
          IF (PREDICTOR) HP => M%H
@@ -1963,14 +1961,12 @@ ENDDO
 
 ! Halt communications until all processes are ready to receive the data.
 
-IF (CODE==2) RETURN
-
 IF (USE_MPI .AND. CODE==5 .AND. N_PREQ>0) THEN
    CALL MPI_STARTALL(N_PREQ,PREQ(1:N_PREQ),IERR)
    CALL MPI_WAITALL(N_PREQ,PREQ(1:N_PREQ),MPI_STATUSES_IGNORE,IERR)
 ENDIF
 
-IF (USE_MPI .AND. CODE/=2 .AND. CODE/=5 .AND. N_REQ>0) CALL MPI_WAITALL(N_REQ,REQ(1:N_REQ),MPI_STATUSES_IGNORE,IERR)
+IF (USE_MPI .AND. CODE/=5 .AND. N_REQ>0) CALL MPI_WAITALL(N_REQ,REQ(1:N_REQ),MPI_STATUSES_IGNORE,IERR)
 
 
 ! Receive the information sent above into the appropriate arrays.
