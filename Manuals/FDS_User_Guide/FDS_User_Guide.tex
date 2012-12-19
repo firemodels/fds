@@ -4284,7 +4284,7 @@ $T_{thr,ij}$ is an optional ``threshold'' temperature that
 allows the definition of non-Arrhenius pyrolysis functions and
 ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
 $S_{thr,ij}$ is the ``threshold direction'' that allows the triggering of reaction
-when temperature gets ''above '' $T_{thr,ij}$ ($S_{thr,ij}=+1$) or ''below'' $T_{thr,ij}$ ($S_{thr,ij}=-1$).
+when temperature gets ``above'' $T_{thr,ij}$ ($S_{thr,ij}=+1$) or ``below'' $T_{thr,ij}$ ($S_{thr,ij}=-1$).
 $n_{t,j}$ is prescribed under the name {\ct N\_T(j)} and $S_{thr,ij}$ under {\ct THRESHOLD\_SIGN}.
 
 By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero and $S_{thr,ij}=+1$;
@@ -4914,7 +4914,7 @@ installed. A very simple ``fan curve'' is given by:
 \be \dot{V}_{\hbox{\footnotesize fan}} = \dot{V}_{\hbox{\footnotesize max}} \;
    \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
    \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \label{fan_curve} \ee
-This simple ''fan curve'' is the ''quadratic'' fan model as the pressure is proportional to the square of the volume flow rate.
+This simple ``fan curve'' is the ``quadratic'' fan model as the pressure is proportional to the square of the volume flow rate.
 
 The volume flow in the absence of a pressure difference, {\ct MAX\_FLOW}, is given by $\dot{V}_{\hbox{\footnotesize max}}$.  The pressure difference, $\Delta p=p_1-p_2$, indicates the difference in
 pressure between the downstream compartment, or ``zone,'' and the upstream. The subscript 1 indicates downstream and 2 indicates upstream.
@@ -7503,7 +7503,7 @@ is {\ct CHID\_devc.csv}. Note that FDS outputs the data stored for that cell wit
 Some devices have a particular orientation.
 The parameter {\ct IOR} (Index of Orientation) is required for any device that is
 placed on the surface of a solid. The values $\pm$1 or $\pm$2 or $\pm$3 indicate the direction
-that the device ``points''. For example, {\ct IOR=-1} means that the device is mounted on a wall that faces in the negative $x$ direction.
+that the device ``points.'' For example, {\ct IOR=-1} means that the device is mounted on a wall that faces in the negative $x$ direction.
 
 {\ct ORIENTATION} is used for devices that are not on a surface
 and require a directional specification, like a sprinkler. {\ct ORIENTATION} is specified with a
@@ -9232,7 +9232,7 @@ a heat flux gauge, as in the following example:
 \normalsize
 
 \noindent
-Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target''.
+Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''
 
 The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
 
