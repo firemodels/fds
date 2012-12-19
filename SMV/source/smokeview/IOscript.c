@@ -790,7 +790,7 @@ void script_loadvolsmoke(scriptdata *scripti){
 
 /* ------------------ script_loadvolsmokeframe ------------------------ */
 
-void script_loadvolsmokeframe(scriptdata *scripti){
+void script_loadvolsmokeframe(scriptdata *scripti, int flag){
   int framenum,index;
   volrenderdata *vr;
   mesh *meshi;
@@ -827,7 +827,7 @@ void script_loadvolsmokeframe(scriptdata *scripti){
   UpdateTimeLabels();
   keyboard('r',FROM_SMOKEVIEW);
   RenderOnceNow=0;
-  script_render=1;
+  if(flag==1)script_render=1;// called when only rendering a single frame
 }
 
 /* ------------------ script_loadvolsmokeframe2 ------------------------ */
@@ -837,7 +837,7 @@ void script_loadvolsmokeframe2(void){
 
   scripti.ival=-1;
   scripti.ival2=itimes;
-  script_loadvolsmokeframe(&scripti);
+  script_loadvolsmokeframe(&scripti,0);
 }
 
 /* ------------------ script_load3dsmoke ------------------------ */
@@ -1520,7 +1520,7 @@ int run_script(void){
       script_loadvolsmoke(scripti);
       break;
     case SCRIPT_LOADVOLSMOKEFRAME:
-      script_loadvolsmokeframe(scripti);
+      script_loadvolsmokeframe(scripti,1);
       returnval=1;
       break;
     case SCRIPT_LOADPARTICLES:
