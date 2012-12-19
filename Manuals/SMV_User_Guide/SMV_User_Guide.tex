@@ -3353,7 +3353,15 @@ LOADVSLICE
 
 \hitem{LOADVOLSMOKE}
 
-\hitem{LOADVOLSMOKEFRAME}
+\hitem{LOADVOLSMOKEFRAME} Load a volume rendered smoke frame.
+Usage:
+\begin{verbatim}
+LOADVOLSMOKEFRAME
+ mesh_index (int) frame_index (int)
+\end{verbatim}
+If the mesh\_index is positive then volume rendered smoke for that
+mesh index is loaded. If the mesh\_index is negative then volume
+rendered smoke for all meshes is loaded.
 
 \hitem{UNLOADALL}Unload all data files currently loaded.
 Usage:
