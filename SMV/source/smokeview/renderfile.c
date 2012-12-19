@@ -85,6 +85,10 @@ void Render(int view_mode){
       RenderSkip=1;
     }
   }
+  if(script_render==1){
+    script_render=0;
+    RenderState(RENDER_OFF);
+  }
 }
 
   /* ------------------ RenderFrame ------------------------ */

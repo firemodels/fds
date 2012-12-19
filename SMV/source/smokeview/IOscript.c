@@ -799,7 +799,7 @@ void script_loadvolsmokeframe(scriptdata *scripti){
 
   index = scripti->ival;
   framenum = scripti->ival2;
-  if(index>nmeshes-1)index=nmeshes-1;
+  if(index>nmeshes-1)index=-1;
   for(i=0;i<nmeshes;i++){
     if(index==i||index<0){
       meshi = meshinfo + i;
@@ -827,6 +827,7 @@ void script_loadvolsmokeframe(scriptdata *scripti){
   UpdateTimeLabels();
   keyboard('r',FROM_SMOKEVIEW);
   RenderOnceNow=0;
+  script_render=1;
 }
 
 /* ------------------ script_loadvolsmokeframe2 ------------------------ */
