@@ -13,7 +13,7 @@ The point source model assumes that radiative energy is concentrated at a point 
 \noindent where
 
 \be
-R = \sqrt{X^2 + \left(Z - \frac{L_f}{3} \right)^2}
+R = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
 \label{eq:point_source_R}
 \ee
 
@@ -32,9 +32,9 @@ D = \sqrt{\frac{4 A}{\pi}}
 \label{eq:point_source_D}
 \ee
 
-In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiative heat flux~(kW/m$^2$), the $\cos\theta$ term (equal to $X/R$ for targets pointing sideways, or $Z/R$ for gauges pointing upward or downward) accounts for a target that is at an angle $\theta$ from the source, $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(kW), and $R$ is the radial distance from the point source to the edge of the target~(m).
+In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiative heat flux~(kW/m$^2$), the $\cos\theta$ term (equal to $x/R$ for targets pointing sideways, or $z/R$ for gauges pointing upward or downward) accounts for a target that is at an angle $\theta$ from the source, $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(kW), and $R$ is the radial distance from the point source to the edge of the target~(m).
 
-In Eq.~\ref{eq:point_source_R}, $X$ is the horizontal distance from the point source to the edge of the target~(m), $Z$ is the height of the heat flux target~(m), and $L_f$ is the flame height given by Eq.~\ref{eq:point_source_Lf}~(m).
+In Eq.~\ref{eq:point_source_R}, $x$ is the horizontal distance from the point source to the edge of the target~(m), $z$ is the height of the heat flux target~(m), and $L_f$ is the flame height given by Eq.~\ref{eq:point_source_Lf}~(m).
 In Eq.~\ref{eq:point_source_Lf}, $D$ is the diameter of the fire source~(m), and $Q^*$ is the nondimensional HRR given by Eq.~\ref{eq:point_source_Qstar}. In Eq.~\ref{eq:point_source_Qstar}, $\rho_\infty$ is the ambient air density~(kg/m$^3$), $c_p$ is the specific heat of air~(kJ/kg/K), $T_\infty$ is the ambient air temperature~(K), and $g$ is the acceleration of gravity~(m/s$^2$). In Eq.~\ref{eq:point_source_D}, $A$ is the area of the fire source~(m$^2$).
 
 
@@ -69,11 +69,11 @@ In Eq.~\ref{eq:immersed_plume_radiation}, $\dot q_r''$ is the radiative heat flu
 The McCaffrey centerline plume temperature correlation is given by
 
 \be
-\Delta T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{Z}{\dot Q^{2/5}} \right)^{2 \eta - 1} \right] T_\infty
+\Delta T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{z}{\dot Q^{2/5}} \right)^{2 \eta - 1} \right] T_\infty
 \label{eq:McCaffrey}
 \ee
 
-In Eq.~\ref{eq:McCaffrey}, $\Delta T_p$ is the plume centerline temperature rise above ambient~($^\circ$C), $g$ is the acceleration of gravity~(m/s$^2$), $Z$ is the elevation above the fire source~(m), $\dot Q$ is the HRR~(kW), and $T_\infty$ is the ambient air temperature~($^\circ$C). The constants $\eta$ and $\kappa$ are a function of the height $Z$ within the plume and are listed in Table~\ref{tbl:McCaffrey_constants}.
+In Eq.~\ref{eq:McCaffrey}, $\Delta T_p$ is the plume centerline temperature rise above ambient~($^\circ$C), $g$ is the acceleration of gravity~(m/s$^2$), $z$ is the elevation above the fire source~(m), $\dot Q$ is the HRR~(kW), and $T_\infty$ is the ambient air temperature~($^\circ$C). The constants $\eta$ and $\kappa$ are a function of the height $z$ within the plume and are listed in Table~\ref{tbl:McCaffrey_constants}.
 
 \vspace{\baselineskip}
 \begin{table}[ht]
@@ -82,7 +82,7 @@ In Eq.~\ref{eq:McCaffrey}, $\Delta T_p$ is the plume centerline temperature rise
 \label{tbl:McCaffrey_constants}
 \begin{tabular}{|c|c|c|c|}
 \hline
-Region  &  $Z/\dot Q^{2/5}$  &  $\eta$  &  $\kappa$  \\
+Region  &  $z/\dot Q^{2/5}$  &  $\eta$  &  $\kappa$  \\
 \hline
 Continuous    &  < 0.08      & 1/2   & 6.8  \\
 Intermittent  &  < 0.08-0.2  & 0     & 1.9  \\
