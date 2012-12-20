@@ -36,7 +36,7 @@ as  heat transfer to  surfaces, pyrolysis, flame  spread, and suppression.  In g
 to perform because they require more detailed  information  about the  room  contents,  and  there is  much greater uncertainty in the total heat
 release rate as the fire spreads from object to object.
 
-Validation  studies  of FDS  to  date  have  focussed more  on  design applications   than  reconstructions.  The   reason  is   that  design
+Validation  studies  of FDS  to  date  have  focused more  on  design applications   than  reconstructions.  The   reason  is   that  design
 applications usually involve specified  fires and demand a minimum of thermophysical properties  of real materials.  Transport  of smoke and heat is
 the  primary  focus,  and measurements  can  be  limited  to well-placed thermocouples, a few  heat flux gauges, gas samplers, etc. Phenomena
 of importance in forensic reconstructions, like second item  ignition, flame  spread, vitiation  effects and  extinction, are more difficult  to
@@ -520,6 +520,27 @@ provided  by FDS.
 
 Zhang~{\em et al.}~\cite{Zhang:1} compared the experimental results of a  circular methane  gas burner  to predictions  computed by  FDS. The
 compartment was 2.8~m by 2.8~m  by 2.2~m high with natural ventilation from a  standard door.
+
+
+
+
+\subsection{Soot Deposition}
+
+Several studies have been conducted that indicate soot deposition is an important factor in compartment fires
+for the accurate prediction of smoke concentrations, smoke detector activations, and visibility.
+Gottuk~{\em et al.}~\cite{Gottuk:IAFSS2008} reported that smoke concentrations predicted by FDS near smoke alarms in a
+corridor were two to five times greater than measured smoke concentrations. Hamins~{\em et al.}~\cite{Hamins:SP1013-1}
+conducted full-scale compartment fire experiments for use in validation studies of various fire models, including FDS.
+The resulting validation cases indicated that predicted smoke concentrations were up to five times greater than measured
+smoke concentrations. Floyd and McDermott~\cite{Floyd:Interflam2010} implemented thermophoretic and turbulent diffusion soot
+deposition mechanisms in FDS and compared predicted soot densities and concentrations to measurements from small- and large-scale
+experiments. Cohan~\cite{Cohan:Masters} simulated two of the Hamins~{\em et al.}~\cite{Hamins:SP1013-1}~NRC experiments and the
+Gottuk~\cite{Gottuk:IAFSS2008} corridor tests with soot deposition and found better results for well-ventilated fires than
+closed compartment conditions. Riahi \cite{Riahi:2011} conducted bench-scale experiments to measure soot densities and soot
+deposition patterns on walls for various fuels. Riahi identified thermophoretic deposition as an important soot deposition
+mechanism in the hot gas layer. Overholt~and~Ezekoye~\cite{Overholt:1} implemented gravitational settling of soot in the gas-phase
+in FDS and quantified the effects of gravitational settling/deposition compared to thermophoretic and turbulent deposition in
+small- and large-scale validation cases.
 
 
 
