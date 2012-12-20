@@ -178,7 +178,7 @@ DO I=0,50
 
    T = I*T_END/50.
 
-   IF (T<T_P) THEN
+   IF (T<=T_P) THEN
       H_K = SQRT(K_S*RHO_S*C_S/(T+0.000000001))
    ELSE
       H_K = K_S/DELTA
@@ -279,7 +279,7 @@ DO I=0,50
 
    T = I*T_END/50.
 
-   IF (T<T_P) THEN
+   IF (T<=T_P) THEN
       H_K = SQRT(K_S*RHO_S*C_S/(T+0.000000001))
    ELSE
       H_K = K_S/DELTA
