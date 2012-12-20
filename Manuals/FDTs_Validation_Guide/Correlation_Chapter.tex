@@ -392,25 +392,25 @@ Test 22    &  1000           &  1             &  14                \\ \hline
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-                      &                            \\
-\rb{Input Parameter}  &  \rb{Value}                \\ \hline \hline
-$\chi_R$ (-)          &  0.30                      \\ \hline
-IOR (-)               &  -1                        \\ \hline
+                      &              \\
+\rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
+$\chi_R$ (-)          &  0.30        \\ \hline
+IOR (-)               &  -1          \\ \hline
 \end{tabular}
 \end{center}
 
 \begin{center}
 \begin{tabular}{|l|c|c|c|l|}
 \hline
-           &                 &                &            &                                                                          \\
-\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$A$}      &  \rb{$x$}  &  \rb{$z$}                                                                \\
-           &  \rb{(kW)}      &  \rb{(m$^2$)}  &  \rb{(m)}  &  \rb{(m)}                                                                \\ \hline \hline
-Test 1     &  0.42           &  0.008         &  0.82      &  0.002, 0.088, 0.203, 0.393                                              \\ \hline
-Test 5     &  1.90           &  0.008         &  0.82      &  0.002, 0.088, 0.203, 0.393                                              \\ \hline
-Test 7     &  49             &  0.785         &  1.00      &  0.000, 0.122, 0.468, 0.768, 1.089, 1.457, 1.799, 2.508                  \\ \hline
-Test 19    &  162            &  0.785         &  0.80      &  0.000, 0.129, 0.354, 0.619, 0.931, 1.317, 1.799, 2.215, 2.510           \\ \hline
-Test 21    &  33             &  0.113         &  0.732     &  0.027, 0.271, 0.497, 0.670, 1.145, 1.885                                \\ \hline
-Test 23    &  176            &  0.113         &  0.732     &  0.209, 0.284, 0.507, 0.683, 1.139, 1.882                                \\ \hline
+           &                 &                &            &                                                                 \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$A$}      &  \rb{$x$}  &  \rb{$z$}                                                       \\
+           &  \rb{(kW)}      &  \rb{(m$^2$)}  &  \rb{(m)}  &  \rb{(m)}                                                       \\ \hline \hline
+Test 1     &  0.42           &  0.008         &  0.82      &  0.002, 0.088, 0.203, 0.393                                     \\ \hline
+Test 5     &  1.90           &  0.008         &  0.82      &  0.002, 0.088, 0.203, 0.393                                     \\ \hline
+Test 7     &  49             &  0.785         &  1.00      &  0.000, 0.122, 0.468, 0.768, 1.089, 1.457, 1.799, 2.508         \\ \hline
+Test 19    &  162            &  0.785         &  0.80      &  0.000, 0.129, 0.354, 0.619, 0.931, 1.317, 1.799, 2.215, 2.510  \\ \hline
+Test 21    &  33             &  0.113         &  0.732     &  0.027, 0.271, 0.497, 0.670, 1.145, 1.885                       \\ \hline
+Test 23    &  176            &  0.113         &  0.732     &  0.209, 0.284, 0.507, 0.683, 1.139, 1.882                       \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -847,34 +847,37 @@ Test 9     &  523            &  2.286, 1.981, 1.676, 1.372, 1.067, 0.762, 0.457,
 
 \subsection*{Steel Temperature (Unprotected)}
 
+The HGL temperatures from the MQH HGL temperature correlation were used as the input fire temperature $T_f$.
+
 \begin{table}[!h]
 \caption[Input parameters for SP AST beam cases, steel temperature (unprotected).]
 {Summary of input parameters used for SP AST beam cases, steel temperature (unprotected).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|l|c|}
 \hline
-                           &              \\
-\rb{Input Parameter}       &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (kW)              &  450         \\ \hline
-$L$ (m)                    &  3.6         \\ \hline
-$W$ (m)                    &  2.4         \\ \hline
-$H$ (m)                    &  2.4         \\ \hline
-$H_v$ (m)                  &  2.0         \\ \hline
-$W_v$ (m)                  &  0.8         \\ \hline
-$k_{wall}$ (kW/m/K)        &  0.00012     \\ \hline
-$\rho_{wall}$ (kg/m$^3$)   &  737         \\ \hline
-$c_{wall}$ (kJ/kg/K)       &  0.9         \\ \hline
-$\delta_{wall}$ (m)        &  0.0254      \\ \hline
-$\rho_{steel}$ (kg/m$^3$)  &  7850        \\ \hline
-$c_{steel}$ (kJ/kg/K)      &  1.0         \\ \hline
-$\epsilon$ (-)             &  0.7         \\ \hline
-$h_c$ (W/m$^2$/K)          &  25          \\ \hline
+                        &                       &              \\
+\rb{Input Parameter}    &  \rb{Correlation}     &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  MQH                  &  450         \\ \hline
+$L$ (m)                 &  MQH                  &  3.6         \\ \hline
+$W$ (m)                 &  MQH                  &  2.4         \\ \hline
+$H$ (m)                 &  MQH                  &  2.4         \\ \hline
+$H_v$ (m)               &  MQH                  &  2.0         \\ \hline
+$W_v$ (m)               &  MQH                  &  0.8         \\ \hline
+$k$ (kW/m/K)            &  MQH                  &  0.00012     \\ \hline
+$\rho$ (kg/m$^3$)       &  MQH                  &  737         \\ \hline
+$c$ (kJ/kg/K)           &  MQH                  &  0.9         \\ \hline
+$\delta$ (m)            &  MQH                  &  0.0254      \\ \hline
+$T_\infty$ ($^\circ$C)  &  MQH                  &  20          \\ \hline
+$\rho_{s}$ (kg/m$^3$)   &  Steel (Unprotected)  &  7850        \\ \hline
+$c_{s}$ (kJ/kg/K)       &  Steel (Unprotected)  &  1.0         \\ \hline
+$\epsilon$ (-)          &  Steel (Unprotected)  &  0.7         \\ \hline
+$h_c$ (W/m$^2$/K)       &  Steel (Unprotected)  &  25          \\ \hline
 \end{tabular}
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|l|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|}
 \hline
            &                    &                   &                  \\
 \rb{Test}  &  \rb{Correlation}  &  \rb{F/V}         &  \rb{$t_{end}$}  \\
@@ -892,27 +895,29 @@ Test 3     &  MQH               &  157              &  3600            \\ \hline
 
 \subsection*{Steel Temperature (Unprotected)}
 
+The HGL temperatures from the McCaffrey plume temperature correlation were used as the input fire temperature $T_f$.
+
 \begin{table}[!h]
 \caption[Input parameters for SP AST column cases, steel temperature (unprotected).]
 {Summary of input parameters used for SP AST column cases, steel temperature (unprotected).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|l|l|}
 \hline
-                           &                 \\
-\rb{Input Parameter}       &  \rb{Value}     \\ \hline \hline
-$z$ (m)                    &  1, 2, 3, 4, 5  \\ \hline
-$F/V$ (m$^{-1}$)           &  205            \\ \hline
-$\rho_{steel}$ (kg/m$^3$)  &  7850           \\ \hline
-$c_{steel}$ (kJ/kg/K)      &  0.6            \\ \hline
-$\epsilon$ (-)             &  0.7            \\ \hline
-$h_c$ (W/m$^2$/K)          &  25             \\ \hline
-$T_\infty$ ($^\circ$C)     &  20             \\ \hline
+                        &                       &                 \\
+\rb{Input Parameter}    &  \rb{Correlation}     &  \rb{Value}     \\ \hline \hline
+$z$ (m)                 &  McCaffrey            &  1, 2, 3, 4, 5  \\ \hline
+$F/V$ (m$^{-1}$)        &  McCaffrey            &  205            \\ \hline
+$T_\infty$ ($^\circ$C)  &  McCaffrey            &  20             \\ \hline
+$\rho_{s}$ (kg/m$^3$)   &  Steel (Unprotected)  &  7850           \\ \hline
+$c_{s}$ (kJ/kg/K)       &  Steel (Unprotected)  &  0.6            \\ \hline
+$\epsilon$ (-)          &  Steel (Unprotected)  &  0.7            \\ \hline
+$h_c$ (W/m$^2$/K)       &  Steel (Unprotected)  &  25             \\ \hline
 \end{tabular}
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|l|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|}
 \hline
                 &                    &                 &                  \\
 \rb{Test}       &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$t_{end}$}  \\
@@ -953,7 +958,7 @@ $T_{\infty}$ ($^\circ$C)  &  22          \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|}
 \hline
            &                    &                 &              &              \\
 \rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$H_v$}  &  \rb{$W_v$}  \\
@@ -987,7 +992,7 @@ Test 410   &  MQH               &  62.9           &  1.83        &  0.74        
 
 \begin{table}[!h]
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|}
 \hline
            &                    &                 &              &              \\
 \rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$H_v$}  &  \rb{$W_v$}  \\
@@ -1344,7 +1349,7 @@ $H$ (m)               &  2.075       \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|l|c|l|c|c|c|}
+\begin{tabular}{|l|l|c|c|l|c|c|}
 \hline
            &                &                   &                   &            &                &                    \\
 \rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$t_{fire}$}  &  \rb{$r$}  &  \rb{Scaling}  &  \rb{$T_\infty$}   \\
@@ -1375,7 +1380,7 @@ Test 20    &  Obstructed    &  0.105            &  75               &  2.4, 2.4 
 
 \begin{table}[!h]
 \begin{center}
-\begin {tabular}{|l|l|c|l|c|c|c|}
+\begin {tabular}{|l|l|c|c|l|c|c|}
 \hline 
            &                &                   &                   &             &                &                    \\
 \rb{Test}  &  \rb{Ceiling}  &  \rb{$\alpha$}    &  \rb{$t_{fire}$}  &  \rb{$r$}   &  \rb{Scaling}  &  \rb{$T_\infty$}   \\
@@ -1589,8 +1594,8 @@ Test 6     &  MQH               &  3000           &  3030            &  20      
 
 \subsection*{Steel Temperature (Unprotected)}
 
-The HGL temperatures from the MQH correlation were used as the input fire temperature $T_f$.
-The inputs for the MQH correlation are described in a previous section.
+The HGL temperatures from the MQH HGL temperature correlation were used as the input fire temperature $T_f$.
+The inputs for the MQH correlation are described in the WTC HGL temperature section.
 
 \begin{table}[!h]
 \caption[Input parameters for WTC cases, steel temperature (unprotected).]
@@ -1601,8 +1606,8 @@ The inputs for the MQH correlation are described in a previous section.
 \hline
                            &              \\
 \rb{Input Parameter}       &  \rb{Value}  \\ \hline \hline
-$\rho_{steel}$ (kg/m$^3$)  &  7860        \\ \hline
-$c_{steel}$ (kJ/kg/K)      &  0.450       \\ \hline
+$\rho_{s}$ (kg/m$^3$)      &  7860        \\ \hline
+$c_{s}$ (kJ/kg/K)          &  0.450       \\ \hline
 $\epsilon$ (-)             &  0.7         \\ \hline
 $h_c$ (W/m$^2$/K)          &  25          \\ \hline
 \end{tabular}
@@ -1636,8 +1641,8 @@ Test 3     &  MQH               &  Truss B          &  156              \\ \hlin
 
 \subsection*{Steel Temperature (Protected)}
 
-The HGL temperatures from the MQH correlation were used as the input fire temperature $T_f$.
-The inputs for the MQH correlation are described in a previous section.
+The HGL temperatures from the MQH HGL temperature correlation were used as the input fire temperature $T_f$.
+The inputs for the MQH correlation are described in the WTC HGL temperature section.
 
 \begin{table}[!h]
 \caption[Input parameters for WTC cases, steel temperature (protected).]
@@ -1648,7 +1653,7 @@ The inputs for the MQH correlation are described in a previous section.
 \hline
                        &              \\
 \rb{Input Parameter}   &  \rb{Value}  \\ \hline \hline
-$c_{steel}$ (kJ/kg/K)  &  0.450       \\ \hline
+$c_{s}$ (kJ/kg/K)      &  0.450       \\ \hline
 $k_{i}$ (W/m/K)        &  0.10        \\ \hline
 $\rho_{i}$ (kg/m$^3$)  &  208         \\ \hline
 $c_{i}$ (kJ/kg/K)      &  2.0         \\ \hline
