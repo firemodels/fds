@@ -11,4 +11,6 @@ makemovie=/usr/local/bin/make_movie.sh
 
 cd $CURDIR/..
 
-$makemovie -i Voltest/frames -o movies mplume8n
+#$makemovie -i Voltest/frames -o movies mplume8n
+$makemovie -i Voltest/frames -o movies mplumeB8n
+#$makemovie -i Voltest/frames -o movies voltest2
