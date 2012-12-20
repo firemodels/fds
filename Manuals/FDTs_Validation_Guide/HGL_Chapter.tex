@@ -20,7 +20,7 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 \ee
 
 \be
-h_k = k / \delta \mathrm{\ for\ } t > t_p
+h_k = \frac{k}{\delta} \mathrm{\ for\ } t > t_p
 \label{eq:MQH_hk_gt}
 \ee
 
@@ -31,7 +31,7 @@ h_k = \left( \frac{k \rho c}{t} \right)^{1/2} \mathrm{\ for\ } t \le t_p
 
 In Eq.~\ref{eq:MQH}, $\Delta T_g$ is the upper gas temperature rise above ambient~($^\circ$C), $\dot Q$ is the heat release rate (HRR) of the fire~(kW), $A_v$ is the total area of the ventilation openings~(m$^2$), $H_v$ is the height of the ventilation opening~(m$^2$), $h_k$ is the heat transfer coefficient~(W/m$^2$/K), and $A_T$ is the total area of the compartment enclosing surfaces, excluding areas of vent openings~(m$^2$). 
 
-The parameter $t_p$ is the thermal penetration time of the wall lining material, which is given by Eq.~\ref{eq:MQH_tp}. If the burning time $t$ is greater than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:MQH_hk_gt}. In Eq.~\ref{eq:MQH_hk_gt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\delta$ is the thickness of the interior lining. If the burning time $t$ is less than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:MQH_hk_lt}. In Eq.~\ref{eq:MQH_hk_lt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\rho$ is the density of the interior lining~(kg/m$^3$), and $c$ is the specific heat of the interior lining~(kJ/kg/K).
+The parameter $t_p$ is the thermal penetration time of the wall lining material, which is given by Eq.~\ref{eq:MQH_tp}. If the burning time $t$ is greater than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:MQH_hk_gt}. In Eq.~\ref{eq:MQH_hk_gt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), and $\delta$ is the thickness of the interior lining. If the burning time $t$ is less than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:MQH_hk_lt}. In Eq.~\ref{eq:MQH_hk_lt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\rho$ is the density of the interior lining~(kg/m$^3$), and $c$ is the specific heat of the interior lining~(kJ/kg/K).
 
 %The smoke layer height can be determined by
 %
@@ -62,7 +62,29 @@ For a compartment with forced ventilation, the method of Foote, Pagni, and Alvar
 \label{eq:FPA}
 \ee
 
+\noindent where
+
+\be
+t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
+\label{eq:FPA_tp}
+\ee
+
+\be
+h_k = \frac{k}{\delta} \mathrm{\ for\ } t > t_p
+\label{eq:FPA_hk_gt}
+\ee
+
+\be
+h_k = \left( \frac{k \rho c}{t} \right)^{1/2} \mathrm{\ for\ } t \le t_p
+\label{eq:FPA_hk_lt}
+\ee
+
 In Eq.~\ref{eq:FPA}, $\Delta T_g$ is the hot gas layer temperature rise above ambient~($^\circ$C), $\dot Q$ is the HRR of the fire~(kW), $\dot m$ is the compartment ventilation mass flow rate~(kg/s), $c_p$ is the specific heat of air (kJ/kg/K), $T_\infty$ is the ambient air temperature~($^\circ$C), $h_k$ is the heat transfer coefficient~(kW/m$^2$/K), and $A_T$ is the total area of compartment enclosing surfaces~(m$^2$).
+
+The parameter $t_p$ is the thermal penetration time of the wall lining material, which is given by Eq.~\ref{eq:FPA_tp}. If the burning time $t$ is greater than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:FPA_hk_gt}. In Eq.~\ref{eq:FPA_hk_gt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), and $\delta$ is the thickness of the interior lining. If the burning time $t$ is less than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:FPA_hk_lt}. In Eq.~\ref{eq:FPA_hk_lt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\rho$ is the density of the interior lining~(kg/m$^3$), and $c$ is the specific heat of the interior lining~(kJ/kg/K).
+
+
+\clearpage
 
 
 \subsection{Deal and Beyler Method}
