@@ -22,8 +22,6 @@
 &SPEC ID='SOOT', MASS_FRACTION_0 = 0.0 /
 
 &REAC ID = 'R1'
-      A = 1e16
-      E = 0
       FUEL = 'TOLUENE'
       SPEC_ID_NU='TOLUENE','OXYGEN','CARBON MONOXIDE','WATER VAPOR','SOOT',
       NU= -1,-4.6545,5.309,4.,1.691
@@ -34,19 +32,31 @@
       A = 4e14
       E = 167360
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-      SPEC_ID_N='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      SPEC_ID_N_S='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-0.5,1
       N_S = 0.25,1,0.5
+      A_RAMP = 'rampa'
+      E_RAMP = 'rampe'
       CRITICAL_FLAME_TEMPERATURE=1418./
-      
+ 
+&RAMP ID='rampa',T = 0,       F = 1e6 /
+&RAMP ID='rampa',T = 1.00,    F = 1e6 /
+&RAMP ID='rampa',T = 1.00001, F = 1 /
+&RAMP ID='rampa',T = 100,     F = 1 /
+ 
+&RAMP ID='rampe',T = 0.,      F = 0 /
+&RAMP ID='rampe',T = 1.00,    F = 0 /
+&RAMP ID='rampe',T = 1.00001, F = 1 /
+&RAMP ID='rampe',T = 100.,    F = 1 /
+ 
 &REAC ID = 'R3'
       FUEL = 'CARBON DIOXIDE'
       A = 5e8
       E = 167360
       SPEC_ID_NU= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-      SPEC_ID_N='CARBON DIOXIDE'
+      SPEC_ID_N_S='CARBON DIOXIDE'
       NU= -1,0.5,1
-      N_S = 1.0 /
+      N_S = 1.0/
 
 &SLCF PBY=0.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBY=0.0,QUANTITY='HRRPUV' /
