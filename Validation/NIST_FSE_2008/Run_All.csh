@@ -1,37 +1,45 @@
-#!/bin/csh -f
-setenv SVNROOT ~/FDS-SMV
-setenv FDS $SVNROOT/FDS_Compilation/intel_linux_32/fds5_intel_linux_32
-set RUNFDS=$SVNROOT/Utilities/Scripts/runfds.csh
-setenv BASEDIR `pwd`
+#!/bin/bash -f
 
-$RUNFDS Current_Results ISOHept19     fire41 &
-$RUNFDS Current_Results ISOHept22     fire41 &
-$RUNFDS Current_Results ISOHept23     fire44 &
-$RUNFDS Current_Results ISOHept24     fire45 &
-$RUNFDS Current_Results ISOHept25     fire45 &
-$RUNFDS Current_Results ISOHept26     fire46 &
-$RUNFDS Current_Results ISOHept27     fire47 &
-$RUNFDS Current_Results ISOHept28     fire55 &
-$RUNFDS Current_Results ISOHept4      fire51 &
-$RUNFDS Current_Results ISOHept5      fire57 &
-$RUNFDS Current_Results ISOHept8      fire57 &
-$RUNFDS Current_Results ISOHept9      fire58 &
-$RUNFDS Current_Results ISOHeptD12    fire59 &
-$RUNFDS Current_Results ISOHeptD13    fire59 &
-$RUNFDS Current_Results ISONG1        fire62 &
-$RUNFDS Current_Results ISONG2        fire62 &
-$RUNFDS Current_Results ISONG32       fire62 &
-$RUNFDS Current_Results ISONG3        fire65 &
-$RUNFDS Current_Results ISONylon10    fire65 &
-$RUNFDS Current_Results ISOPP11       fire66 &
-$RUNFDS Current_Results ISOPP18       fire66 &
-$RUNFDS Current_Results ISOProp15     fire67 &
-$RUNFDS Current_Results ISOPropanol30 fire67 &
-$RUNFDS Current_Results ISOPropD14    fire68 &
-$RUNFDS Current_Results ISOStyrene16  fire68 &
-$RUNFDS Current_Results ISOStyrene17  fire70 &
-$RUNFDS Current_Results ISOStyrene21  fire70 &
-$RUNFDS Current_Results ISOToluene20  fire70 &
-$RUNFDS Current_Results ISOToluene29  fire71 &
+export SVNROOT=`pwd`/../..
+export QFDS=/usr/local/bin/qfds.sh
+export BASEDIR=`pwd`
+export INDIR=Current_Results
+#qq="-q fire80s"
+qq=
+source ~/.bashrc_fds intel64
+
+# uncomment following line to stop all cases
+# export STOPFDS=1
+
+/bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
+
+$QFDS -r $qq -d $INDIR ISOHept19.fds
+$QFDS -r $qq -d $INDIR ISOHept22.fds
+$QFDS -r $qq -d $INDIR ISOHept23.fds
+$QFDS -r $qq -d $INDIR ISOHept24.fds
+$QFDS -r $qq -d $INDIR ISOHept25.fds
+$QFDS -r $qq -d $INDIR ISOHept26.fds
+$QFDS -r $qq -d $INDIR ISOHept27.fds
+$QFDS -r $qq -d $INDIR ISOHept28.fds
+$QFDS -r $qq -d $INDIR ISOHept4.fds
+$QFDS -r $qq -d $INDIR ISOHept5.fds
+$QFDS -r $qq -d $INDIR ISOHept8.fds
+$QFDS -r $qq -d $INDIR ISOHept9.fds
+$QFDS -r $qq -d $INDIR ISOHeptD12.fds
+$QFDS -r $qq -d $INDIR ISOHeptD13.fds
+$QFDS -r $qq -d $INDIR ISONG1.fds
+$QFDS -r $qq -d $INDIR ISONG2.fds
+$QFDS -r $qq -d $INDIR ISONG32.fds
+$QFDS -r $qq -d $INDIR ISONG3.fds
+$QFDS -r $qq -d $INDIR ISONylon10.fds
+$QFDS -r $qq -d $INDIR ISOPP11.fds
+$QFDS -r $qq -d $INDIR ISOPP18.fds
+$QFDS -r $qq -d $INDIR ISOPropanol30.fds
+$QFDS -r $qq -d $INDIR ISOPropD14.fds
+$QFDS -r $qq -d $INDIR ISOStyrene16.fds
+$QFDS -r $qq -d $INDIR ISOStyrene17.fds
+$QFDS -r $qq -d $INDIR ISOStyrene21.fds
+$QFDS -r $qq -d $INDIR ISOToluene20.fds
+$QFDS -r $qq -d $INDIR ISOToluene29.fds
 
 echo FDS cases submitted
