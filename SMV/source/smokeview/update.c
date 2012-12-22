@@ -275,8 +275,8 @@ void updateShow(void){
   showzone=0; 
   showiso=0;
   showvolrender=0;
-  show_extreme_below=0;
-  show_extreme_above=0;
+  have_extreme_mindata=0;
+  have_extreme_maxdata=0;
 #ifdef pp_SHOOTER
   showshooter=0;
 #endif
@@ -391,7 +391,7 @@ void updateShow(void){
         break;
       }
     }
-    if(show_extreme_above==0){
+    if(have_extreme_maxdata==0){
       for(ii=0;ii<nslice_loaded;ii++){
         slicedata *sd;
 
@@ -399,12 +399,12 @@ void updateShow(void){
         sd = sliceinfo+i;
         if(sd->display==0||sd->type!=islicetype)continue;
         if(sd->extreme_max==1){
-          show_extreme_above=1;
+          have_extreme_maxdata=1;
           break;
         }
       }
     }
-    if(show_extreme_below==0){
+    if(have_extreme_mindata==0){
       for(ii=0;ii<nslice_loaded;ii++){
         slicedata *sd;
 
@@ -412,7 +412,7 @@ void updateShow(void){
         sd = sliceinfo+i;
         if(sd->display==0||sd->type!=islicetype)continue;
         if(sd->extreme_min==1){
-          show_extreme_below=1;
+          have_extreme_mindata=1;
           break;
         }
       }
@@ -472,7 +472,7 @@ void updateShow(void){
       patchi=patchinfo+i;
       if(patchi->display==0||patchi->type!=ipatchtype)continue;
       if(patchi->extreme_max==1){
-        show_extreme_above=1;
+        have_extreme_maxdata=1;
         break;
       }
     }
@@ -481,7 +481,7 @@ void updateShow(void){
       patchi=patchinfo+i;
       if(patchi->display==0||patchi->type!=ipatchtype)continue;
       if(patchi->extreme_min==1){
-        show_extreme_below=1;
+        have_extreme_mindata=1;
         break;
       }
     }
@@ -505,8 +505,8 @@ void updateShow(void){
       break;
     }
     if(current_property!=NULL){
-      if(current_property->extreme_max==1)show_extreme_above=1;
-      if(current_property->extreme_min==1)show_extreme_below=1;
+      if(current_property->extreme_max==1)have_extreme_maxdata=1;
+      if(current_property->extreme_min==1)have_extreme_mindata=1;
     }
   }
   evacflag=0;
@@ -593,7 +593,7 @@ void updateShow(void){
       if(ii==-1)continue;
       if(plot3dinfo[ii].loaded==0)continue;
       if(plot3dinfo[ii].display==0)continue;
-      if(plot3dinfo[ii].extreme_min[plotn-1]==1)show_extreme_below=1;
+      if(plot3dinfo[ii].extreme_min[plotn-1]==1)have_extreme_mindata=1;
     }
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
@@ -603,7 +603,7 @@ void updateShow(void){
       if(ii==-1)continue;
       if(plot3dinfo[ii].loaded==0)continue;
       if(plot3dinfo[ii].display==0)continue;
-      if(plot3dinfo[ii].extreme_max[plotn-1]==1)show_extreme_above=1;
+      if(plot3dinfo[ii].extreme_max[plotn-1]==1)have_extreme_maxdata=1;
     }
   }
 

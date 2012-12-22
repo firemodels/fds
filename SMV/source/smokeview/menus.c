@@ -426,16 +426,22 @@ void ColorBarMenu(int value){
       update_colorbarflip();
       break;
     case COLORBAR_RESET:
-      show_extremedata=0;
+      show_extreme_mindata=0;
+      show_extreme_maxdata=0;
       colorbarflip=0;
       contour_type=SHADED_CONTOURS;
       setbw=0;
-      update_extreme(0);
+      update_extreme();
       UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
-    case COLORBAR_HIGHLIGHT_EXTREME:
-      show_extremedata=1-show_extremedata;
-      update_extreme(0);
+    case COLORBAR_HIGHLIGHT_BELOW:
+      show_extreme_mindata=1-show_extreme_mindata;
+      update_extreme();
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
+      break;
+    case COLORBAR_HIGHLIGHT_ABOVE:
+      show_extreme_maxdata=1-show_extreme_maxdata;
+      update_extreme();
       UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
     case COLORBAR_TOGGLE_BW:
@@ -6318,11 +6324,17 @@ updatemenu=0;
   CREATEMENU(colorbarmenu,ColorBarMenu);
   glutAddSubMenu(_("Colorbars"),colorbarsmenu);
   glutAddMenuEntry(_("Variations:"),-999);
-  if(show_extremedata==1){
-    glutAddMenuEntry(_("  *Highlight extreme data"),COLORBAR_HIGHLIGHT_EXTREME);
+  if(show_extreme_maxdata==1){
+    glutAddMenuEntry(_("  *Highlight data above specified max"),COLORBAR_HIGHLIGHT_ABOVE);
   }
   else{
-    glutAddMenuEntry(_("  Highlight extreme data"),COLORBAR_HIGHLIGHT_EXTREME);
+    glutAddMenuEntry(_("  Highlight data above specified max"),COLORBAR_HIGHLIGHT_ABOVE);
+  }
+  if(show_extreme_mindata==1){
+    glutAddMenuEntry(_("  *Highlight data below specified min"),COLORBAR_HIGHLIGHT_BELOW);
+  }
+  else{
+    glutAddMenuEntry(_("  Highlight data below specified min"),COLORBAR_HIGHLIGHT_BELOW);
   }
   if(colorbarflip==1){
     glutAddMenuEntry(_("  *Flip"),COLORBAR_FLIP);

@@ -74,7 +74,8 @@ GLUI_Spinner *SPINNER_scaled_font3d_height2width=NULL;
 GLUI_Spinner *SPINNER_scaled_font3d_thickness=NULL;
 GLUI_Spinner *SPINNER_scaled_font2d_thickness=NULL;
 
-GLUI_Checkbox *CHECKBOX_usebounds=NULL;
+GLUI_Checkbox *CHECKBOX_show_extreme_mindata=NULL;
+GLUI_Checkbox *CHECKBOX_show_extreme_maxdata=NULL;
 GLUI_Checkbox *CHECKBOX_colorbarflip=NULL;
 #ifdef pp_BETA
 GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
@@ -116,7 +117,9 @@ GLUI_Rollout *ROLLOUT_user_labels=NULL;
 GLUI_Rollout *ROLLOUT_user_tick=NULL;
 GLUI_Rollout *ROLLOUT_label1=NULL;
 
-GLUI_Panel *PANEL_extreme=NULL,*PANEL_cb9=NULL,*PANEL_cb8=NULL,*PANEL_cb7=NULL;
+GLUI_Panel *PANEL_extreme=NULL,*PANEL_cb8=NULL,*PANEL_cb7=NULL;
+GLUI_Panel *PANEL_extreme_min=NULL, *PANEL_extreme_max=NULL;
+GLUI_Panel *PANEL_extreme2=NULL;
 GLUI_Panel *PANEL_cb11=NULL;
 GLUI_Panel *PANEL_contours=NULL;
 GLUI_Panel *PANEL_gen1=NULL, *PANEL_gen2=NULL, *PANEL_gen3=NULL;
@@ -484,23 +487,27 @@ extern "C" void glui_labels_setup(int main_window){
 
   PANEL_extreme = glui_labels->add_panel_to_panel(ROLLOUT_scene,"",GLUI_PANEL_NONE);
 
-  CHECKBOX_usebounds=glui_labels->add_checkbox_to_panel(PANEL_extreme,_("Highlight extreme data"),&show_extremedata,
-    COLORBAR_EXTREME,Extreme_CB);
-  PANEL_cb9 = glui_labels->add_panel_to_panel(PANEL_extreme,"",GLUI_PANEL_NONE);
-  PANEL_cb8 = glui_labels->add_panel_to_panel(PANEL_cb9,_("Below specified min"));
-  SPINNER_down_red=  glui_labels->add_spinner_to_panel(PANEL_cb8,_("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
-  SPINNER_down_green=glui_labels->add_spinner_to_panel(PANEL_cb8,_("green"),GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
-  SPINNER_down_blue= glui_labels->add_spinner_to_panel(PANEL_cb8,_("blue"), GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
+  PANEL_extreme2 = glui_labels->add_panel_to_panel(PANEL_extreme,"Highlight extreme data");
+
+  PANEL_extreme_min = glui_labels->add_panel_to_panel(PANEL_extreme2,"Minimum");
+  CHECKBOX_show_extreme_mindata=glui_labels->add_checkbox_to_panel(PANEL_extreme_min,_("Color below min"),&show_extreme_mindata,COLORBAR_EXTREME,Extreme_CB);
+  
+  SPINNER_down_red=  glui_labels->add_spinner_to_panel(PANEL_extreme_min,_("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
+  SPINNER_down_green=glui_labels->add_spinner_to_panel(PANEL_extreme_min,_("green"),GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
+  SPINNER_down_blue= glui_labels->add_spinner_to_panel(PANEL_extreme_min,_("blue"), GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
   SPINNER_down_red->set_int_limits(0,255);
   SPINNER_down_green->set_int_limits(0,255);
   SPINNER_down_blue->set_int_limits(0,255);
 
-  glui_labels->add_column_to_panel(PANEL_cb9,false);
+  glui_labels->add_column_to_panel(PANEL_extreme2,false);
 
-  PANEL_cb7 = glui_labels->add_panel_to_panel(PANEL_cb9,_("Above specified max"));
-  SPINNER_up_red=  glui_labels->add_spinner_to_panel(PANEL_cb7,_("red"),  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
-  SPINNER_up_green=glui_labels->add_spinner_to_panel(PANEL_cb7,_("green"),GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
-  SPINNER_up_blue= glui_labels->add_spinner_to_panel(PANEL_cb7,_("blue"), GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
+  PANEL_extreme_max = glui_labels->add_panel_to_panel(PANEL_extreme2,"Maximum");
+
+  CHECKBOX_show_extreme_maxdata=glui_labels->add_checkbox_to_panel(PANEL_extreme_max,_("Color above max"),&show_extreme_maxdata,COLORBAR_EXTREME,Extreme_CB);
+
+  SPINNER_up_red=  glui_labels->add_spinner_to_panel(PANEL_extreme_max,_("red"),  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
+  SPINNER_up_green=glui_labels->add_spinner_to_panel(PANEL_extreme_max,_("green"),GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
+  SPINNER_up_blue= glui_labels->add_spinner_to_panel(PANEL_extreme_max,_("blue"), GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
   SPINNER_up_red->set_int_limits(0,255);
   SPINNER_up_green->set_int_limits(0,255);
   SPINNER_up_blue->set_int_limits(0,255);
@@ -1353,18 +1360,22 @@ extern "C" void Extreme_CB(int var){
 
   switch (var){
     case COLORBAR_EXTREME:
-      if(show_extremedata==1){
+      if(show_extreme_mindata==1){
         if(SPINNER_down_red!=NULL)SPINNER_down_red->enable();
         if(SPINNER_down_green!=NULL)SPINNER_down_green->enable();
         if(SPINNER_down_blue!=NULL)SPINNER_down_blue->enable();
-        if(SPINNER_up_red!=NULL)SPINNER_up_red->enable();
-        if(SPINNER_up_green!=NULL)SPINNER_up_green->enable();
-        if(SPINNER_up_blue!=NULL)SPINNER_up_blue->enable();
       }
       else{
         if(SPINNER_down_red!=NULL)SPINNER_down_red->disable();
         if(SPINNER_down_green!=NULL)SPINNER_down_green->disable();
         if(SPINNER_down_blue!=NULL)SPINNER_down_blue->disable();
+      }
+      if(show_extreme_maxdata==1){
+        if(SPINNER_up_red!=NULL)SPINNER_up_red->enable();
+        if(SPINNER_up_green!=NULL)SPINNER_up_green->enable();
+        if(SPINNER_up_blue!=NULL)SPINNER_up_blue->enable();
+      }
+      else{
         if(SPINNER_up_red!=NULL)SPINNER_up_red->disable();
         if(SPINNER_up_green!=NULL)SPINNER_up_green->disable();
         if(SPINNER_up_blue!=NULL)SPINNER_up_blue->disable();
@@ -1413,11 +1424,12 @@ extern "C" void update_extreme_vals(void){
 
 /* ------------------ update_camera_label ------------------------ */
 
-extern "C" void update_extreme(int flag){
-  if(CHECKBOX_usebounds!=NULL){
-    CHECKBOX_usebounds->set_int_val(show_extremedata);
-    if(flag==-1)CHECKBOX_usebounds->disable();
-    if(flag==1)CHECKBOX_usebounds->enable();
+extern "C" void update_extreme(void){
+  if(CHECKBOX_show_extreme_mindata!=NULL){
+    CHECKBOX_show_extreme_mindata->set_int_val(show_extreme_mindata);
+  }
+  if(CHECKBOX_show_extreme_maxdata!=NULL){
+    CHECKBOX_show_extreme_maxdata->set_int_val(show_extreme_maxdata);
   }
   Extreme_CB(COLORBAR_EXTREME);
 }

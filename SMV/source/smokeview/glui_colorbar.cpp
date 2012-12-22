@@ -120,9 +120,13 @@ extern "C" void hide_glui_colorbar(void){
   showcolorbar_dialog_save=showcolorbar_dialog;
   viscolorbarpath=0;
   showcolorbar_dialog=0;
-  if(show_extremedata_save==1){
-    show_extremedata=1;
-    update_extreme(1);
+  if(show_extreme_mindata_save==1){
+    show_extreme_mindata=1;
+    update_extreme();
+  }
+  if(show_extreme_maxdata_save==1){
+    show_extreme_maxdata=1;
+    update_extreme();
   }
   if(glui_colorbar!=NULL){
     copy_camera(camera_external,camera_external_save);
@@ -139,10 +143,15 @@ extern "C" void show_glui_colorbar(void){
 // show colorbar dialog box and redefine initial view point
   showcolorbar_dialog=1;
   viscolorbarpath=1;
-  show_extremedata_save = show_extremedata;
-  if(show_extremedata==1){
-    show_extremedata=0;
-    update_extreme(-1);
+  show_extreme_mindata_save = show_extreme_mindata;
+  if(show_extreme_mindata==1){
+    show_extreme_mindata=0;
+    update_extreme();
+  }
+  show_extreme_maxdata_save = show_extreme_maxdata;
+  if(show_extreme_maxdata==1){
+    show_extreme_maxdata=0;
+    update_extreme();
   }
   if(glui_colorbar!=NULL){
     Reshape_CB(screenWidth,screenHeight);

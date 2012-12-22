@@ -1003,8 +1003,10 @@ SVEXTERN int cpuframe;
 
 SVEXTERN float xyzeyeorig[3],xeyedir[3], yeyedir[3], zeyedir[3];
 SVEXTERN int adjustalphaflag;
-SVEXTERN int SVDECL(colorband,5), SVDECL(show_extremedata,0),SVDECL(show_extremedata_save,0);
-SVEXTERN int show_extreme_above, show_extreme_below;
+SVEXTERN int SVDECL(colorband,5);
+SVEXTERN int SVDECL(have_extreme_mindata,0), SVDECL(have_extreme_maxdata,0);
+SVEXTERN int SVDECL(show_extreme_mindata,0), SVDECL(show_extreme_maxdata,0);
+SVEXTERN int SVDECL(show_extreme_mindata_save,0), SVDECL(show_extreme_maxdata_save,0);
 
 SVEXTERN int use_iblank,arg_iblank;
 

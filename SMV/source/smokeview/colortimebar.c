@@ -449,10 +449,12 @@ void remapcolorbar(colorbardata *cbi){
       alpha[i]=255;
     }
   }
-  if(show_extremedata==1){
+  if(show_extreme_mindata==1){
     colorbar[0]=rgb_below_min[0];
     colorbar[1]=rgb_below_min[1];
     colorbar[2]=rgb_below_min[2];
+  }
+  if(show_extreme_maxdata==1){
     colorbar[3*255]=rgb_above_max[0];
     colorbar[1+3*255]=rgb_above_max[1];
     colorbar[2+3*255]=rgb_above_max[2];
@@ -1023,7 +1025,7 @@ void drawColorBars(void){
         }
       }
       glEnd();
-      if(show_extremedata==1){
+      if(show_extreme_mindata==1||show_extreme_maxdata==1){
         float barmid;
         float *rgb_plot3d_local;
         float ybot, ytop;
@@ -1034,9 +1036,9 @@ void drawColorBars(void){
         ytop = MIX2(i+0.5,nrgb-3,colorbar_top_pos,colorbar_down_pos);
         ybot = MIX2(i+1,nrgb-3,colorbar_top_pos,colorbar_down_pos);
 
-        if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
+        if(have_extreme_mindata==1||have_extreme_maxdata==1)glEnable(GL_POLYGON_SMOOTH);
 
-        if(show_extreme_below==1&&rgb_plot3d_local[3]!=0.0){     
+        if(show_extreme_mindata==1&&have_extreme_mindata==1&&rgb_plot3d_local[3]!=0.0){     
           glBegin(GL_TRIANGLES);
           glColor4fv(rgb_plot3d_local);
 
@@ -1051,7 +1053,7 @@ void drawColorBars(void){
         ytop = MIX2(i+0.5,nrgb-3,colorbar_top_pos,colorbar_down_pos);
 
         rgb_plot3d_local = rgb_plot3d_contour[nrgb-1];
-        if(show_extreme_above==1&&rgb_plot3d_local[3]!=0.0){
+        if(show_extreme_maxdata==1&&have_extreme_maxdata==1&&rgb_plot3d_local[3]!=0.0){
           glBegin(GL_TRIANGLES);
           glColor4fv(rgb_plot3d_local);
           glVertex2f(colorbar_left_pos, ybot); 
@@ -1059,7 +1061,7 @@ void drawColorBars(void){
           glVertex2f(barmid, ytop);
           glEnd();
         }
-        if(show_extreme_below==1||show_extreme_above==1)glDisable(GL_POLYGON_SMOOTH);
+        if(have_extreme_mindata==1||have_extreme_maxdata==1)glDisable(GL_POLYGON_SMOOTH);
       }
     }
     else{
@@ -1119,14 +1121,14 @@ void drawColorBars(void){
       }
       glEnd();
     }
-    if(show_extremedata==1){
+    if(show_extreme_mindata==1||show_extreme_maxdata==1){
       float barmid;
 
       barmid=(colorbar_right_pos+colorbar_left_pos)/2.0;
 
-      if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
+      if(have_extreme_mindata==1||have_extreme_maxdata==1)glEnable(GL_POLYGON_SMOOTH);
 
-      if(show_extreme_below==1){
+      if(show_extreme_mindata==1&&have_extreme_mindata==1){
         glBegin(GL_TRIANGLES);
         glColor4fv(rgb_full[0]);
 
@@ -1136,7 +1138,7 @@ void drawColorBars(void){
         glEnd();
       }
 
-      if(show_extreme_above==1){
+      if(show_extreme_maxdata==1&&have_extreme_maxdata==1){
         glBegin(GL_TRIANGLES);
         glColor4fv(rgb_full[nrgb_full-1]);
         glVertex2f(colorbar_right_pos, colorbar_top_pos);
@@ -1144,7 +1146,7 @@ void drawColorBars(void){
         glVertex2f( colorbar_left_pos, colorbar_top_pos);
         glEnd();
       }
-      if(show_extreme_below==1||show_extreme_above==1)glDisable(GL_POLYGON_SMOOTH);
+      if(have_extreme_mindata==1||have_extreme_maxdata==1)glDisable(GL_POLYGON_SMOOTH);
     }
   }
 

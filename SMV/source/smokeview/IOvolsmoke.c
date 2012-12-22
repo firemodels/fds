@@ -247,7 +247,7 @@ void init_volrender_surface(int firstcall){
       FREEMEMORY(vr->smokecolor_xy1);
     }
     if(vr->smokeslice!=NULL){
-      int nx, ny, nz, j;
+      int nx, ny, nz;
 
       nx = ijkbarmax+1;
       ny = ijkbarmax+1;

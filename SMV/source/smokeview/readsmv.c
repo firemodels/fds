@@ -8348,9 +8348,29 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"SHOWEXTREMEDATA")==1){
+      int below=-1, above=-1, show_extremedata;
+
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_extremedata);
-      if(show_extremedata!=1)show_extremedata=0;
+      sscanf(buffer,"%i %i %i",&show_extremedata,&below,&above);
+      if(below==-1&&above==-1){
+        if(below==-1)below=0;
+        if(below!=0)below=1;
+        if(above==-1)above=0;
+        if(above!=0)above=1;
+      }
+      else{
+        if(show_extremedata!=1)show_extremedata=0;
+        if(show_extremedata==1){
+          below=1;
+          above=1;
+        }
+        else{
+          below=0;
+          above=0;
+        }
+      }
+      show_extreme_mindata=below;
+      show_extreme_maxdata=above;
       continue;
     }
     if(match(buffer,"EXTREMECOLORS") == 1){
@@ -11341,7 +11361,12 @@ void writeini(int flag){
   fprintf(fileout,"FIRECOLORMAP\n");
   fprintf(fileout," %i %i\n",firecolormap_type,fire_colorbar_index);
   fprintf(fileout,"SHOWEXTREMEDATA\n");
-  fprintf(fileout," %i\n",show_extremedata);
+  {
+    int show_extremedata=0;
+
+    if(show_extreme_mindata==1||show_extreme_maxdata==1)show_extremedata=1;
+    fprintf(fileout," %i %i %i\n",show_extremedata,show_extreme_mindata,show_extreme_maxdata);
+  }
   {
     int mmin[3],mmax[3];
     for(i=0;i<3;i++){

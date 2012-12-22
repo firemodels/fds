@@ -502,7 +502,6 @@ extern "C" void Smoke3d_CB(int var){
   updatemenu=1;
   switch (var){
   float temp_min, temp_max;
-  int i;
 
   case NONGPU_VOL_FACTOR:
     init_volrender_surface(0);
