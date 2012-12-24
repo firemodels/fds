@@ -476,6 +476,9 @@ check_verification_cases_short()
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
    then
+      # After successful Stage 3 run, delete all unversioned FDS output files before continuing
+      cd $FDS_SVNROOT/Verification
+      svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
       stage3_success=true
    else
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
