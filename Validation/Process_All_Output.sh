@@ -23,6 +23,7 @@ $VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
 $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/Moody_Chart/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
+$VDIR/NIST_Dunes_2000/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
 $VDIR/NRCC_Facade/FDS_Output_Files/Process_Output.csh
@@ -31,6 +32,7 @@ $VDIR/Pool_Fires/FDS_Output_Files/Process_Output.csh
 $VDIR/PRISME/FDS_Output_Files/Process_Output.csh
 $VDIR/Restivo_Experiment/FDS_Output_Files/Process_Output.csh
 $VDIR/Sandia_Plumes/FDS_Output_Files/Process_Output.csh
+$VDIR/Sippola_Aerosol_Deposition/FDS_Output_Files/Process_Output.csh
 $VDIR/Smyth_Slot_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/SP_AST/FDS_Output_Files/Process_Output.csh
 $VDIR/Steckler_Compartment/FDS_Output_Files/Process_Output.csh
