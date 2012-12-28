@@ -38,12 +38,14 @@ run_fdts_program()
 
 run_matlab_license_test()
 {
+   cd $SVNROOT/Utilities/Firebot
    # Run simple test to see if Matlab license is available
    matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> FDTsbot.log
 }
 
 scan_matlab_license_test()
 {
+   cd $SVNROOT/Utilities/Firebot
    # Check for failed license
    if [[ `grep "License checkout failed" FDTsbot.log` == "" ]]
    then
@@ -99,6 +101,16 @@ make_fdts_validation_guide()
    cp $SVNROOT/Manuals/FDTs_Validation_Guide/FDTs_Validation_Guide.pdf /var/www/html/firebot/fdts_manuals/
 }
 
+#  =================
+#  = Final cleanup =
+#  =================
+
+cleanup_logs()
+{
+   cd $SVNROOT/Utilities/Firebot
+   rm FDTsbot.log
+}
+
 #  ============================
 #  = Primary script execution =
 #  ============================
@@ -112,4 +124,7 @@ run_matlab_plotting
 
 ### Stage 4 ###
 make_fdts_validation_guide
+
+### Final cleanup ###
+cleanup_logs
 
