@@ -52,7 +52,6 @@ c Fuel nozzle
 &PART ID='heptane drops'
       SPEC_ID='N-HEPTANE'
       QUANTITIES(1:1)='PARTICLE DIAMETER'
-      DENSITY=668.
       HEAT_OF_COMBUSTION=43000.
       DIAMETER=300.
       SAMPLING_FACTOR=31
