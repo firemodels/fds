@@ -9,7 +9,7 @@
 &SURF ID='HOT', DEFAULT=.TRUE., TMP_FRONT=480., COLOR='GRAY', RAMP_T='shroud' / 
 &RAMP ID='shroud',T=   0.,F=0. /
 &RAMP ID='shroud',T=  70.,F=1.0 /
-&RAMP ID='shroud',T= 820.,F=1. /
+&RAMP ID='shroud',T= 780.,F=1. /
 &RAMP ID='shroud',T=1240.,F=0.62 /
 &RAMP ID='shroud',T=1600.,F=0.4 /
  
