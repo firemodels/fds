@@ -3,7 +3,7 @@
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
 &TIME T_END=800., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
-& MISC Y_O2_INFTY=0.01/
+&MISC Y_O2_INFTY=0.01/
 
 &REAC FUEL='METHANE' /  No gas phase reaction with 1% O2 concentration
 
