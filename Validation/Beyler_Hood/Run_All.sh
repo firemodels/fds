@@ -47,7 +47,7 @@ $RUNFDS $INDIR Beyler_Hood_propane_371_lr
 $RUNFDS $INDIR Beyler_Hood_propane_389_lr
 $RUNFDS $INDIR Beyler_Hood_propane_389_lr
 $RUNFDS $INDIR Beyler_Hood_propane_389_mr
-$RUNFDS $INDIR Beyler_Hood_propane_389_lh
+$RUNFDS $INDIR Beyler_Hood_propane_389_hr
 $RUNFDS $INDIR Beyler_Hood_propane_429_lr
 $RUNFDS $INDIR Beyler_Hood_propane_433_lr
 $RUNFDS $INDIR Beyler_Hood_propane_445_lr
