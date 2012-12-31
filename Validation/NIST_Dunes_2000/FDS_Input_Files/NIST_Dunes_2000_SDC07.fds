@@ -205,9 +205,8 @@
 &DEVC ID='Detector A Photo 1',   PROP_ID='P1',        XYZ=0.38, 1.63, 2.28 /
 &DEVC ID='Detector A Photo 2',   PROP_ID='P2',        XYZ=0.38, 1.63, 2.28 /
 
-&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='soot density', ID='Stat A soot'/
-&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='VELOCITY',     ID='Stat A velo'/
-&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat A temp'/
+&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat A Velocity' /
+&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat A Temperature' /
 
 =============
 = Station B =
@@ -219,9 +218,8 @@
 &DEVC ID='Detector B Photo 1',   PROP_ID='P1',        XYZ=17.9, 1.63, 2.28 /
 &DEVC ID='Detector B Photo 2',   PROP_ID='P2',        XYZ=17.9, 1.63, 2.28 /
 
-&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='soot density', ID='Stat B soot'/
-&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='VELOCITY',     ID='Stat B velo'/
-&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat B temp'/
+&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat B Velocity' /
+&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat B Temperature' /
 
 =============
 = Station C =
@@ -233,9 +231,8 @@
 &DEVC ID='Detector C Photo 1',   PROP_ID='P1',        XYZ=3.8, 2.51, 2.28 /
 &DEVC ID='Detector C Photo 2',   PROP_ID='P2',        XYZ=3.8, 2.51, 2.28 /
 
-&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='soot density', ID='Stat C soot'/
-&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='VELOCITY',     ID='Stat C velo'/
-&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat C temp'/
+&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='VELOCITY', ID='Stat C Velocity' /
+&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat C Temperature' /
 
 =============
 = Station D =
@@ -247,9 +244,8 @@
 &DEVC ID='Detector D Photo 1',   PROP_ID='P1',        XYZ=17.2, 0.9, 2.19 /
 &DEVC ID='Detector D Photo 2',   PROP_ID='P2',        XYZ=17.2, 0.9, 2.19 /
 
-&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='soot density', ID='Stat D soot'/
-&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='VELOCITY',     ID='Stat D velo'/
-&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='THERMOCOUPLE', ID='Stat D temp'/
+&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='VELOCITY', ID='Stat D Velocity' /
+&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='THERMOCOUPLE', ID='Stat D Temperature' /
 
 =============
 = Station E =
@@ -261,9 +257,8 @@
 &DEVC ID='Detector E Photo 1',   PROP_ID='P1',        XYZ=12.4, 1.63, 2.28 /
 &DEVC ID='Detector E Photo 2',   PROP_ID='P2',        XYZ=12.4, 1.63, 2.28 /
 
-&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='soot density', ID='Stat E soot'/
-&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='VELOCITY',     ID='Stat E velo'/
-&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat E temp'/
+&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat E Velocity' /
+&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat E Temperature' /
 
 ==============================
 = Additional instrumentation =
@@ -279,6 +274,7 @@
 &DEVC XYZ=1.0, 2.1, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.52 from ceil' /
 &DEVC XYZ=1.0, 2.1, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.82 from ceil' /
 # Optical Density
+&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='A optical density 0.02 from ceil' /
 &DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.02 from ceil' /
 &DEVC XYZ=1.0, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.9  from ceil' /
 
@@ -292,8 +288,9 @@
 &DEVC XYZ=18.7, 2.0, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree B 1.52 from ceil' /
 &DEVC XYZ=18.7, 2.0, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree B 1.82 from ceil' /
 # Optical Density
-&DEVC XYZ=18.7, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT',ID='B smoke 0.02 from ceil' /
-&DEVC XYZ=18.7, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT',ID='B smoke 0.9  from ceil' /
+&DEVC XYZ=18.7, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='B optical density 0.02 from ceil' /
+&DEVC XYZ=18.7, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='B smoke 0.02 from ceil' /
+&DEVC XYZ=18.7, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='B smoke 0.9  from ceil' /
 
 # Point C
 # Temperature
@@ -305,6 +302,7 @@
 &DEVC XYZ=5.0, 3.86, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree C 1.52 from ceil' /
 &DEVC XYZ=5.0, 3.86, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree C 1.82 from ceil' /
 # Optical Density
+&DEVC XYZ=5.0, 3.86, 2.08, QUANTITY='OPTICAL DENSITY',        ID='C optical density 0.02 from ceil' /
 &DEVC XYZ=5.0, 3.86, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='C smoke 0.02 from ceil' /
 &DEVC XYZ=5.0, 3.86, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='C smoke 0.9  from ceil' /
 
@@ -318,6 +316,7 @@
 &DEVC XYZ=17.2, 0.10, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree D 1.52 from ceil' /
 &DEVC XYZ=17.2, 0.10, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree D 1.82 from ceil' /
 # Optical Density
+&DEVC XYZ=17.2, 0.10, 2.08, QUANTITY='OPTICAL DENSITY',        ID='D optical density 0.02 from ceil' /
 &DEVC XYZ=17.2, 0.10, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='D smoke 0.02 from ceil' /
 &DEVC XYZ=17.2, 0.10, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='D smoke 0.9  from ceil' /
 
@@ -331,6 +330,7 @@
 &DEVC XYZ=12.55, 2.1, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree E 1.52 from ceil' /
 &DEVC XYZ=12.55, 2.1, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree E 1.82 from ceil' /
 # Optical Density
+&DEVC XYZ=12.55, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='E optical density 0.02 from ceil' /
 &DEVC XYZ=12.55, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='E smoke 0.02 from ceil' /
 &DEVC XYZ=12.55, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='E smoke 0.9 from ceil' /
 
@@ -344,6 +344,7 @@
 &DEVC XYZ=11.75, 0.38, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree F 1.52 from ceil' /
 &DEVC XYZ=11.75, 0.38, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree F 1.82 from ceil' /
 # Optical Density
+&DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='OPTICAL DENSITY',        ID='F optical density 0.02 from ceil' /
 &DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.02 from ceil' /
 &DEVC XYZ=11.75, 0.38, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.9 from ceil' /
 
