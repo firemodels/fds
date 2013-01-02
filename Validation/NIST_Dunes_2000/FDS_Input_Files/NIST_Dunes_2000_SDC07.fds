@@ -267,84 +267,84 @@
 # Point A
 # Temperature
 &DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.02 from ceil' /
-&DEVC XYZ=1.0, 2.1, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.3  from ceil' /
-&DEVC XYZ=1.0, 2.1, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.6  from ceil' /
-&DEVC XYZ=1.0, 2.1, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.9  from ceil' /
+&DEVC XYZ=1.0, 2.1, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.3 from ceil'  /
+&DEVC XYZ=1.0, 2.1, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.6 from ceil'  /
+&DEVC XYZ=1.0, 2.1, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree A 0.9 from ceil'  /
 &DEVC XYZ=1.0, 2.1, 1.18, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.22 from ceil' /
 &DEVC XYZ=1.0, 2.1, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.52 from ceil' /
 &DEVC XYZ=1.0, 2.1, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree A 1.82 from ceil' /
 # Optical Density
-&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='A optical density 0.02 from ceil' /
+&DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='A optical dens 0.02 from ceil' /
 &DEVC XYZ=1.0, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.02 from ceil' /
 &DEVC XYZ=1.0, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='A smoke 0.9  from ceil' /
 
 # Point B
 # Temperature
 &DEVC XYZ=18.7, 2.0, 2.38, QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.02 from ceil' /
-&DEVC XYZ=18.7, 2.0, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.3  from ceil' /
+&DEVC XYZ=18.7, 2.0, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.3 from ceil'  /
 &DEVC XYZ=18.7, 2.0, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.61 from ceil' /
-&DEVC XYZ=18.7, 2.0, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.9  from ceil' /
+&DEVC XYZ=18.7, 2.0, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree B 0.9 from ceil'  /
 &DEVC XYZ=18.7, 2.0, 1.18, QUANTITY='THERMOCOUPLE', ID='Temp tree B 1.22 from ceil' /
 &DEVC XYZ=18.7, 2.0, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree B 1.52 from ceil' /
 &DEVC XYZ=18.7, 2.0, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree B 1.82 from ceil' /
 # Optical Density
-&DEVC XYZ=18.7, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='B optical density 0.02 from ceil' /
+&DEVC XYZ=18.7, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='B optical dens 0.02 from ceil' /
 &DEVC XYZ=18.7, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='B smoke 0.02 from ceil' /
 &DEVC XYZ=18.7, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='B smoke 0.9  from ceil' /
 
 # Point C
 # Temperature
 &DEVC XYZ=5.0, 3.86, 2.08, QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.02 from ceil' /
-&DEVC XYZ=5.0, 3.86, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.3  from ceil' /
-&DEVC XYZ=5.0, 3.86, 1.49, QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.6  from ceil' /
-&DEVC XYZ=5.0, 3.86, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.9  from ceil' /
+&DEVC XYZ=5.0, 3.86, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.3 from ceil'  /
+&DEVC XYZ=5.0, 3.86, 1.49, QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.6 from ceil'  /
+&DEVC XYZ=5.0, 3.86, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree C 0.9 from ceil'  /
 &DEVC XYZ=5.0, 3.86, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree C 1.22 from ceil' /
 &DEVC XYZ=5.0, 3.86, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree C 1.52 from ceil' /
 &DEVC XYZ=5.0, 3.86, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree C 1.82 from ceil' /
 # Optical Density
-&DEVC XYZ=5.0, 3.86, 2.08, QUANTITY='OPTICAL DENSITY',        ID='C optical density 0.02 from ceil' /
+&DEVC XYZ=5.0, 3.86, 2.08, QUANTITY='OPTICAL DENSITY',        ID='C optical dens 0.02 from ceil' /
 &DEVC XYZ=5.0, 3.86, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='C smoke 0.02 from ceil' /
 &DEVC XYZ=5.0, 3.86, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='C smoke 0.9  from ceil' /
 
 # Point D
 # Temperature
 &DEVC XYZ=17.2, 0.10, 2.08, QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.02 from ceil' /
-&DEVC XYZ=17.2, 0.10, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.3  from ceil' /
+&DEVC XYZ=17.2, 0.10, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.3 from ceil'  /
 &DEVC XYZ=17.2, 0.10, 1.49, QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.61 from ceil' /
-&DEVC XYZ=17.2, 0.10, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.9  from ceil' /
+&DEVC XYZ=17.2, 0.10, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree D 0.9 from ceil'  /
 &DEVC XYZ=17.2, 0.10, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree D 1.22 from ceil' /
 &DEVC XYZ=17.2, 0.10, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree D 1.52 from ceil' /
 &DEVC XYZ=17.2, 0.10, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree D 1.82 from ceil' /
 # Optical Density
-&DEVC XYZ=17.2, 0.10, 2.08, QUANTITY='OPTICAL DENSITY',        ID='D optical density 0.02 from ceil' /
+&DEVC XYZ=17.2, 0.10, 2.08, QUANTITY='OPTICAL DENSITY',        ID='D optical dens 0.02 from ceil' /
 &DEVC XYZ=17.2, 0.10, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='D smoke 0.02 from ceil' /
 &DEVC XYZ=17.2, 0.10, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='D smoke 0.9  from ceil' /
 
 # Point E
 # Temperature
 &DEVC XYZ=12.55, 2.1, 2.38, QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.02 from ceil' /
-&DEVC XYZ=12.55, 2.1, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.3  from ceil' /
-&DEVC XYZ=12.55, 2.1, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.6  from ceil' /
-&DEVC XYZ=12.55, 2.1, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.9  from ceil' /
+&DEVC XYZ=12.55, 2.1, 2.1,  QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.3 from ceil'  /
+&DEVC XYZ=12.55, 2.1, 1.79, QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.6 from ceil'  /
+&DEVC XYZ=12.55, 2.1, 1.5,  QUANTITY='THERMOCOUPLE', ID='Temp tree E 0.9 from ceil'  /
 &DEVC XYZ=12.55, 2.1, 1.18, QUANTITY='THERMOCOUPLE', ID='Temp tree E 1.22 from ceil' /
 &DEVC XYZ=12.55, 2.1, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree E 1.52 from ceil' /
 &DEVC XYZ=12.55, 2.1, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree E 1.82 from ceil' /
 # Optical Density
-&DEVC XYZ=12.55, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='E optical density 0.02 from ceil' /
+&DEVC XYZ=12.55, 2.1, 2.38, QUANTITY='OPTICAL DENSITY',        ID='E optical dens 0.02 from ceil' /
 &DEVC XYZ=12.55, 2.1, 2.38, QUANTITY='EXTINCTION COEFFICIENT', ID='E smoke 0.02 from ceil' /
 &DEVC XYZ=12.55, 2.1, 1.5,  QUANTITY='EXTINCTION COEFFICIENT', ID='E smoke 0.9 from ceil' /
 
 # Point F
 # Temperature
 &DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.02 from ceil' /
-&DEVC XYZ=11.75, 0.38, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.3  from ceil' /
-&DEVC XYZ=11.75, 0.38, 1.49, QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.6  from ceil' /
-&DEVC XYZ=11.75, 0.38, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.9  from ceil' /
+&DEVC XYZ=11.75, 0.38, 1.8,  QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.3 from ceil'  /
+&DEVC XYZ=11.75, 0.38, 1.49, QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.6 from ceil'  /
+&DEVC XYZ=11.75, 0.38, 1.2,  QUANTITY='THERMOCOUPLE', ID='Temp tree F 0.9 from ceil'  /
 &DEVC XYZ=11.75, 0.38, 0.88, QUANTITY='THERMOCOUPLE', ID='Temp tree F 1.22 from ceil' /
 &DEVC XYZ=11.75, 0.38, 0.58, QUANTITY='THERMOCOUPLE', ID='Temp tree F 1.52 from ceil' /
 &DEVC XYZ=11.75, 0.38, 0.28, QUANTITY='THERMOCOUPLE', ID='Temp tree F 1.82 from ceil' /
 # Optical Density
-&DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='OPTICAL DENSITY',        ID='F optical density 0.02 from ceil' /
+&DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='OPTICAL DENSITY',        ID='F optical dens 0.02 from ceil' /
 &DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.02 from ceil' /
 &DEVC XYZ=11.75, 0.38, 1.2,  QUANTITY='EXTINCTION COEFFICIENT', ID='F smoke 0.9 from ceil' /
 
