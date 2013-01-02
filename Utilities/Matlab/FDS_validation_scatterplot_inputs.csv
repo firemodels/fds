@@ -8,6 +8,7 @@ Plume Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Ri
 Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,0.03 0.95,SouthEast,1,9,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Oxygen_Concentration
 Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.15,0.03 0.95,SouthEast,1,9,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Carbon_Dioxide_Concentration
 Smoke Concentration,Measured Density (mg/m$^3$),Predicted Density (mg/m$^3$),0,300,0.03 0.95,SouthEast,1,33,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Concentration
+Optical Density,Measured Optical Density (1/m),Predicted Optical Density (1/m),0,5,0.03 0.95,SouthEast,1,33,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Optical_Density
 Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.001,0.03 0.95,SouthEast,1,9,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Carbon_Monoxide_Concentration
 Compartment Over-Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,400,0.03 0.95,SouthEast,1,40,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Compartment_Pressure
 Open Compartment Over-Pressure,Measured Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,30,0.03 0.95,SouthEast,1,40,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Open_Compartment_Pressure
