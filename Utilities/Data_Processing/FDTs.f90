@@ -172,7 +172,7 @@ T_P = (RHO_S*C_S/K_S) * (DELTA/2.)**2
 A_T = 2.*L*W + 2.*L*H + 2.*W*H
 TMP_A = TMP_A + 273.
 
-WRITE(11,'(A)') 'Time, Temp, Immersed HGL Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time,Temp,Immersed HGL Radiation Heat Flux (kW/m2)'
 
 DO I=0,50
 
@@ -209,7 +209,7 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H
 V = L*W*H
 TMP_A = TMP_A + 273.
 
-WRITE(11,'(A)') 'Time, Temp, Pres, Immersed HGL Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time,Temp,Pres,Immersed HGL Radiation Heat Flux (kW/m2)'
 
 DT = 0.05
 P  = P_0
@@ -268,11 +268,11 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
 
 IF (PROFILE) THEN
-   WRITE(11,'(A)') 'Height, Temp, Immersed HGL Radiation Heat Flux (kW/m2)'
+   WRITE(11,'(A)') 'Height,Temp,Immersed HGL Radiation Heat Flux (kW/m2)'
 ELSEIF ((STEEL_UNPROTECTED == .TRUE.) .OR. (STEEL_PROTECTED == .TRUE.)) THEN
-   WRITE(11,'(A)') 'Time, Temp, Height, Immersed HGL Radiation Heat Flux (kW/m2),Steel Temperature (C)'
+   WRITE(11,'(A)') 'Time,Temp,Height,Immersed HGL Radiation Heat Flux (kW/m2),Steel Temperature (C)'
 ELSE
-   WRITE(11,'(A)') 'Time, Temp, Height, Immersed HGL Radiation Heat Flux (kW/m2)'
+   WRITE(11,'(A)') 'Time,Temp,Height,Immersed HGL Radiation Heat Flux (kW/m2)'
 ENDIF
 
 DO I=0,50
@@ -337,7 +337,7 @@ END SUBROUTINE COMPUTE_MQH
 
 SUBROUTINE COMPUTE_BEYLER
 
-REAL :: K1,K2,M,SIGMA,Q_RAD
+REAL :: K1,K2,M,SIGMA,Q_RAD,K,Z
 
 SIGMA = 5.67e-11
 
@@ -347,7 +347,7 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
 M = L*W*H*RHO_A
 
-WRITE(11,'(A)') 'Time, Temp, Immersed HGL Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time,Temp,HGL Depth (m),Immersed HGL Radiation Heat Flux (kW/m2)'
 
 DO I=0,50
 
@@ -360,7 +360,10 @@ DO I=0,50
 
    Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Q_RAD
+   K = 0.076/(353/TMP_G)
+   Z = (2*K*Q**(1./3.)*T/(3*L*W) + (1/H**(2./3.)))**(-3./2.)
+
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD
 
 ENDDO
 
