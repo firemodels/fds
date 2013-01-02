@@ -39,17 +39,17 @@ vdir = [pwd,'/../../Validation/'];
 plotdir = [pwd,'/../../Manuals/'];
 qfil = [pwd,'/FDS_validation_scatterplot_inputs.csv'];
 
-[saved_data,drange] = dataplot(cfil,vdir,plotdir);
+[saved_data,drange] = dataplot(cfil,vdir,plotdir,1104:1126);
 scatplot(saved_data,drange,qfil,plotdir)
 
 % Miscellaneous other scripts for special cases
 
-beyler_hood
-check_hrr
-sandia_helium_plume
-sandia_methane_fire
-spray_attenuation
-Cup_burner
-flame_height2
+% beyler_hood
+% check_hrr
+% sandia_helium_plume
+% sandia_methane_fire
+% spray_attenuation
+% Cup_burner
+% flame_height2
  
 display('validation scripts completed successfully!')
