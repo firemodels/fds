@@ -360,6 +360,7 @@ DO I=0,50
 
    Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
+   ! Calculate HGL height using Yamana and Tanaka correlation (1985)
    K = 0.076/(353/TMP_G)
    Z = (2*K*Q**(1./3.)*T/(3*L*W) + (1/H**(2./3.)))**(-3./2.)
 
