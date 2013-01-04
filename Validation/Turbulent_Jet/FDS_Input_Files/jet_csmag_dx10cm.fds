@@ -1,6 +1,6 @@
 &HEAD CHID='jet_csmag_dx10cm', TITLE='Centerline decay of a turbulent jet' /    
 
-&MESH IJK=100,16,16, XB=-5,0,-.4,.4,-.4,.4 /
+&MESH IJK=50,8,8, XB=-5,0,-.4,.4,-.4,.4 /
 &MESH IJK=200,48,48,  XB= 0.0,20.0,-2.4,2.4,-2.4,2.4 /
 
 &TIME T_END=100. /
