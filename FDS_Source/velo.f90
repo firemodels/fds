@@ -1828,6 +1828,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ! Decide whether or not to process edge using data interpolated from another mesh
    
          INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. &
+                   (BOUNDARY_TYPE_M==SOLID_BOUNDARY .OR. BOUNDARY_TYPE_P==SOLID_BOUNDARY) .OR. &
                    (BOUNDARY_TYPE_M/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE_P/=INTERPOLATED_BOUNDARY)) THEN
 
             ! Determine appropriate velocity BC by assessing each adjacent wall cell. If the BCs are different on each
@@ -2055,22 +2056,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   ENDIF
             END SELECT
 
-            ! Compute the velocity gradient for use in the computation of the vorticity or stress tensor component
-
-            IF (ICD==1) THEN
-               IF (IOR<0) UUP(2) = VEL_GHOST
-               IF (IOR>0) UUM(2) = VEL_GHOST
-               DUIDXJ(ICD_SGN)    = (UUP(2)-UUM(2))/DXX(1)
-               MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-            ELSE ! ICD=2
-               IF (IOR<0) UUP(1) = VEL_GHOST
-               IF (IOR>0) UUM(1) = VEL_GHOST
-               DUIDXJ(ICD_SGN)    = (UUP(1)-UUM(1))/DXX(2)
-               MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-            ENDIF
-
-            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-            
          ENDIF INTERPOLATION_IF
 
          ! Set ghost cell values at edge of computational domain
