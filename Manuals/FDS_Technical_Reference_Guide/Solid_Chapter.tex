@@ -522,27 +522,21 @@ that deposits in a given time step.
 \subsection{Gravitational Settling}
 
 The gravitational settling velocity is given by~\cite{Davies_Charles}
-
 \be
 u_g = g m_a \frac{\text{Cn}}{6 \pi \, \chi_d \, \mu \, r_a}
 \ee
-
-\noindent where $m_a$ is the particle mass, $\chi_d$ is a shape factor, $\mu$ is the dynamic viscosity of air,
+where $m_a$ is the particle mass, $\chi_d$ is a shape factor, $\mu$ is the dynamic viscosity of air,
 $r_a$ is the particle radius, and Cn is the Cunningham slip correction factor given by~\cite{Cunningham:1}
-
 \be
 \text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; \mathrm{e}^{-0.88/\text{Kn}}
 \ee
-
-\noindent where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas
+where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas
 to the particle radius. The mean free path of a gas is proportional to its temperature,
 thus Kn is computed as~\cite{Sippola:1}
-
 \be
 \text{Kn} = \frac{\lambda}{r_a} \frac{T_g}{T_\infty}
 \ee
-
-\noindent where $\lambda$ is the mean free path of gas molecules and is 0.065 $\mu$m at a temperature of 25 $^\circ$C and atmospheric pressure.
+where $\lambda$ is the mean free path of gas molecules and is 0.065 $\mu$m at a temperature of 25 $^\circ$C and atmospheric pressure.
 
 For each aerosol species in the gas phase, a gravitational settling velocity is calculated
 and imposed on the convective term (in the z-direction) in the species transport
@@ -555,25 +549,19 @@ as described above.
 \subsection{Thermophoretic Deposition}
 
 The thermophoretic velocity is computed as
-
 \be
 u_{th} = \frac{K_{th} \nu}{T_g} \; \frac{\d T}{\d x}
 \ee
-
-\noindent This requires the wall temperature gradient, which is only resolved in a DNS simulation.
+This requires the wall temperature gradient, which is only resolved in a DNS simulation.
 For an LES simulation, the temperature gradient is computed from the wall heat transfer coefficient.
-
 \be
  \frac{\d T}{\d x} = \frac{h \left( T_g - T_w \right)}{k_g}
 \ee
-
-\noindent $K_{th}$ is the thermophoretic velocity coefficient and is calculated using the following correlation~\cite{Brock:1}
-
+$K_{th}$ is the thermophoretic velocity coefficient and is calculated using the following correlation~\cite{Brock:1}
 \be
  K_{th} = \frac{2 \, C_s \left(\alpha + C_t \; \text{Kn} \right) \; \text{Cn}}{\left(1 + 3 \, C_m \; \text{Kn} \right) \left(1 + 2 \, \alpha + 2 \, C_t \, \text{Kn} \right) }
 \ee
-
-\noindent where $C_s=1.17$ is the thermal slip coefficient, $\alpha$ is the ratio of the gas
+where $C_s=1.17$ is the thermal slip coefficient, $\alpha$ is the ratio of the gas
 conductivity to the particle conductivity, $C_m=1.14$ is the momentum accommodation
 coefficient, and $C_t=2.18$ is the thermal accommodation coefficient.
 
@@ -582,7 +570,6 @@ coefficient, and $C_t=2.18$ is the thermal accommodation coefficient.
 The diffusion-turbulence deposition velocity depends upon the flow regime
 (diffusion, diffusion-impaction, or inertia-moderated). The deposition velocity
 for these regimes is given below~\cite{McCoy_Hanratty}.
-
 \be
 u_{dt} = \left\{ \begin{array}{r@{\quad \quad}l}
          0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
@@ -590,11 +577,9 @@ u_{dt} = \left\{ \begin{array}{r@{\quad \quad}l}
          0.17 \; u_{\tau}                             &  \tau^+ < 22.9
          \end{array} \right.
 \ee
-
-\noindent where Sc is the particle Schmidt number, or the ratio of the kinematic viscosity to the
+where Sc is the particle Schmidt number, or the ratio of the kinematic viscosity to the
 Brownian diffusion coefficient of the particle ($\nu/D_B$), $u_{\tau}$ is the wall friction velocity
 computed by the wall model, and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
-
 \be
  \tau^+=\frac{\rho_a \, (2 r_a)^2}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_g
 \ee
