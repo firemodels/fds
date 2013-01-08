@@ -6401,23 +6401,25 @@ In this case we explicitly define all primitive species:
 &SPEC ID='WATER VAPOR' /
 &SPEC ID='CARBON DIOXIDE' /
 \end{verbatim} \normalsize
-
-\noindent with a rate expression of the form:
-\begin{equation}\label{eq:reac_rate}
-k = A \; T^{N_{T}} \; e^{-E/RT} \; Y_{\alpha}^{N_S}
+If $\hat{C}_{\alpha}$ represents the concentration of species $\alpha$ that can react with a rate constant, $k$, then the rate expression for the fuel, $\mathrm{C_3H_8}$, is:
+\begin{equation}\label{eq:finite_rate}
+\frac{\mbox{d}\hat{C}_{\mathrm{C_3H_8}}}{\mbox{d}t}= -k\; \prod \hat{C}_{\alpha}\,^{N_S}
 \end{equation}
-where
+where the rate constant is defined as:
+\begin{equation}\label{eq:reac_rate}
+k = A \; T^{N_{T}} \; e^{-E/RT}
+\end{equation}
 \begin{description}
-\item[{\ct A}] is the pre-exponential factor in units of cm$^3$/mole/s,
-\item[{\ct E}] is the activation energy in units of kJ/kmol,
+\item[{\ct A}] is the pre-exponential factor in units of mol/cm$^3$/s,
+\item[{\ct E}] is the activation energy in units of J/mol,
 \item[{\ct N\_S}] is an array containing the concentration exponents (default 1),
 \item[{\ct N\_T}] is the temperature exponent (default is 0, meaning no temperature dependence).
 \end{description}
 Note that {\ct A} and {\ct E} can be defined using a {\ct RAMP} as a function of equivalence ratio as explained in Section~\ref{info:RAMP_Arrhenius}.
 
-If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), Eq.~(\ref{eq:reac_rate}) for the single-step propane reaction becomes:
+If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), the rate expression for the single-step propane reaction defined by Eq.~(\ref{eq:propane_1step}) becomes:
 \begin{equation}\label{eq:reac_rate2}
-k = 8.6 \times 10^{11} \; T^{0} \; e^{-125520/RT} \; (Y_{\mathrm{C_3H_8}})^{0.1} \; (Y_{\mathrm{O_2}})^{1.65}
+\frac{\mbox{d}\hat{C}_{\mathrm{C_3H_8}}}{\mbox{d}t} = -8.6 \times 10^{11} \; T^{0} \; e^{-125520/RT} \; \hat{C}_{\mathrm{C_3H_8}}\,^{0.1} \; \hat{C}_{\mathrm{O_2}}\,^{1.65}
 \end{equation}
 and the resulting {\ct REAC} line is:
 
