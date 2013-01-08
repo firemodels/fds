@@ -322,21 +322,40 @@ For reactions other than single step, mixing controlled chemistry, a fourth-orde
 
 \subsection{Reaction Rate} 
 \label{Reaction_Rate_Model}
+Consider a simple 1-step forward reaction:
+\begin{equation}\label{eq:generic_1step}
+a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
+\end{equation}
+The rate expression for species A with a concentration of $C_{A}$ in mol/liter and rate constant $k$ is:
+\begin{equation}\label{eq:generic_rate}
+\frac{\mbox{d}C_{A}}{\mbox{d}t}= -k\; C_{A}\,^{a}\; C_{B}\,^{b}
+\end{equation}
+The rate expression for both infinitely fast and Arrhenius rate chemistry follow the general form of Eq.~(\ref{eq:generic_rate}).
 
 \subsubsection{Finite-Rate Chemistry (Arrhenius Reaction)}
-
-In FDS, the rate expression (on a fuel basis) for both infinitely fast and Arrhenius rate chemistry are coded with the same general form:
-\begin{equation}\label{eq:Arrheniusrateeqn}
-\frac{\mbox{d}[\hat{X}_F]}{\mbox{d}t} = -A \; \prod \, [\hat{X}_{\alpha}]^{a_{\alpha}} \; T^n \; e^{-E/RT} 
+In FDS, the rate expression is on a fuel basis where only the concentrations of species in the mixed state ({\em hat} symbol) are allowed to react. For a reaction with fuel, $F$, and $\alpha$ species, Eq.~(\ref{eq:generic_rate}) becomes:
+\begin{equation}\label{eq:finite_rate}
+\frac{\mbox{d}\hat{C}_{F}}{\mbox{d}t}= -k\; \prod \hat{C}_{\alpha}\,^{a_{\alpha}}
 \end{equation}
-Note that the rate expression can be dependent upon the local temperature as well as concentrations of species that do not directly participate in the reaction. Since FDS solves for mass fractions of lumped species rather than mole fractions of individual species, the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of those lumped species can participate as a collision species.  Therefore, rather than $\mbox{d}[X_F]/\mbox{d}t$,  FDS solves for $\mbox{d}\hat{Y}_{F}/\mbox{d}t$ (recall $\hat{Y}_{F}$ is mass fraction of the fuel in the mixed zone of the reactor).  Additionally, since it is quicker to determine $\hat{Y}_{\alpha}$ rather than $\hat{X}_i$, the relation $[\hat{X}_i]=\hat{Y}_{\alpha} \rho/W_i$ is used.  Substituting $\hat{Y}_{\alpha}$ into Eq.~(\ref{eq:Arrheniusrateeqn}) and making the appropriate units change to $A$ results in a modified rate equation:
-
-\begin{equation}\label{eq:Arrheniusratemode}
-\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -A_{mod} \rho^{(\sum a_{\alpha}) -1} \; \prod \, \hat{Y}_{\alpha}^{a_{\alpha}} \; T^n \; e^{-E/RT}; \;\;\; A_{mod} = A \prod W_{\alpha}^{-a_{\alpha}}  
+For an Arrhenius reaction the rate constant, $k$, is a function of temperature ($T^n$), the pre-exponential ($A$), and the activation energy ($E$):
+\begin{equation}\label{eq:rate_cons}
+k = A\;T^n\;e^{-E/RT} 
+\end{equation}
+In FDS input files, $A$ has units of mol/cm$^3$/s and $E$ has units of J/mol.
+FDS solves for and transports mass fractions of lumped species rather for individual species; the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of the lumped species can participate as a collision species.  Therefore, rather than solve $\mbox{d}\hat{C}_F/\mbox{d}t$,  FDS computes $\mbox{d}\hat{Y}_{F}/\mbox{d}t$. Since it is quicker to determine $\hat{Y}_{\alpha}$ rather than $\hat{C}_{\alpha}$, the relation $\hat{C}_{\alpha}=\hat{Y}_{\alpha} \rho/W_{\alpha}$ is used.  Substituting for $\hat{C}_{\alpha}$ into Eq.~(\ref{eq:finite_rate}) and converting the appropriate units of $A$ (kg/m$^3$/s) yields:
+\begin{equation}\label{eq:finite_rate_unit}
+\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -\frac{1000}{\rho}k \; \prod \left(\frac{\hat{Y}_{\alpha}\rho}{W_{\alpha}}\right)^{a_{\alpha}} \end{equation}
+To simplify the calculations within FDS, density and molecular weight are pulled out of the product on the right hand side of Eq.~(\ref{eq:finite_rate_unit}) and calculated with the other constants to form $A^{\prime}$:
+\begin{equation}\label{eq:aprime}
+A^{\prime} = 1000\;A\;\rho^{\sum(a_{n}-1)}\prod W_{\alpha}\,^{-a_{\alpha}}
+\end{equation}
+Using $A^{\prime}$, the final form of the rate expression becomes:
+\begin{equation}\label{eq:finite_rate_fin}
+\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -A^{\prime}\;T^n\;e^{-E/RT}\;\prod \hat{Y}_{\alpha}\,^{a_{\alpha}} 
 \end{equation}
 
 \subsubsection{Infinitely Fast Reaction (Default)}
-For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:Arrheniusratemode}) are set to zero which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_F/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite. The change in fuel is based on the limiting reactant: 
+For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:finite_rate_fin}) are set to zero which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, in Eqs.~(\ref{eq:aprime}) and (\ref{eq:finite_rate_fin}) are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A^{\prime}$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_F/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite. The change in fuel is based on the limiting reactant: 
 \begin{equation}\label{eq:stoich_fuel_single}
 \Delta \hat{Y}_{F} = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
