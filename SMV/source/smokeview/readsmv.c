@@ -3956,10 +3956,10 @@ int readsmv(char *file, char *file2){
       size_t lenbuffer;
       float temp_val=-1.0;
       char *buffer_temp;
-      int filetype=0;
+      int filetype=C_GENERATED;
 
       if(match(buffer,"SMOKF3D") == 1||match(buffer,"VSMOKF3D") == 1){
-        filetype=1;
+        filetype=FORTRAN_GENERATED;
       }
 
       if(match(buffer,"VSMOKE3D") == 1||match(buffer,"VSMOKF3D") == 1){
