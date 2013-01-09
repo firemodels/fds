@@ -418,7 +418,7 @@ Figure \ref{figboundtest} presents images verifying the display of surface conto
 A series of boundary file images are drawn at 0.0~s, 10.0~s and 30.0~s seconds.  The temperature of the upper obstacle is initialized to 600~\degC\ hence the red colors for the $t=0.0$~s images.
 The first column of images colors data at cell nodes using temperatures averaged at surrounding cell centers.  The second column of images colors data using data values at cell centers.
 The FDS input file for this test is {\tt plume5c.fds}.
-The images for this test were created automatically by running the smokeview script, {\tt plume5c.ssf}.
+The images for this test were created automatically by running the Smokeview script, {\tt plume5c.ssf}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -452,7 +452,7 @@ The first column in Figure \ref{figisotest}\ presents the iso-surface using poin
 The third column in Figure \ref{figisotest}\ presents the iso-surface using a solid surface.
 Figure \ref{figisotest2} demonstrates color customization using the {\tt ISOCOLORS}\ .ini keyword.
 The FDS input file for this test is {\tt plume5c.fds}.
-The images for this test were created automatically by running the smokeview script, {\tt plume5c.ssf}.
+The images for this test were created automatically by running the Smokeview script, {\tt plume5c.ssf}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -566,7 +566,7 @@ Figure \ref{figparttest} presents images verifying the display of particles and 
 Images are drawn at 1.0~s, 10.0~s and 30.0~s.
 The first column shows particles while the second and third columns shows streaks with duration 0.5~s and 1.0~s.  Streaks are a good way of visualizing motion in a still image (i.e., on paper) since the streak shows a history of where the particle has been.
 The FDS input file for this test is {\tt plume5c.fds}.
-The images for this test were created automatically by running the smokeview script.
+The images for this test were created automatically by running the Smokeview script.
 
 \begin{figure}[\figopt
 ions]
@@ -624,7 +624,7 @@ These values result in FED's of 1.5 at 30~s, 3.0 at 60~s, 6.0 at 120~s and 12.0 
 Figure \ref{figgslicetest} presents images of 3D slices oriented
 in two different ways. Images are drawn at 0.0~s, 10.0~s and
 30.0~s.  The FDS input file for these tests is {\tt plume5c.fds}.
-All images were created automatically by running the smokeview
+All images were created automatically by running the Smokeview
 script, {\tt plume5c.ssf}.
 
 \begin{figure}[\figoptions]
@@ -768,7 +768,7 @@ $\mathrm{CO_2}$ and $\mathrm{O_2}$ data slices. }
 Figure \ref{figsmoketest} presents images verifying the display of 3D smoke and fire (heat release per unit volume).
 A series of 3D smoke images are drawn at 1.0~s, 10.0~s and 30.0~s.  The images contain semi-transparent slices derived from both soot density and heat release rate  per unit volume (HRRPUV) data.
 The FDS input file for this test is {\tt plume5c.fds}.
-The images for this test were created automatically by running the smokeview script, {\tt plume5c.ssf}.
+The images for this test were created automatically by running the Smokeview script, {\tt plume5c.ssf}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -790,7 +790,7 @@ The images for this test were created automatically by running the smokeview scr
 Figure \ref{figPLOT3Dtest} present images verifying the display of PLOT3D contours.
 Three types of contours are available for visualizing PLOT3D data: line, stepped and continuous.  This figure shows all three contour types.
 The FDS input file for this test is {\tt plume5c.fds}.
-The images for this test were created automatically by running the smokeview script, {\tt plume5c.ssf}.
+The images for this test were created automatically by running the Smokeview script, {\tt plume5c.ssf}.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
@@ -850,7 +850,7 @@ The images for this test were created automatically by running the smokeview scr
 %A fire line is used with wildland fire simulations as an efficient method for visualizing the motion of a fire across the simulation.
 %A fire line in the context of Smokeview is just a special case of a temperature slice file.  The fire line slice is formed by setting the min and max temperature bounds to 20\degC\ and 200\degC\ respectively and chopping data below 150\degC.   The fire line slice file can then be made very small using Smokezip to compress it.   Fire line images are drawn at 10.0~s, 20.0~s, 30.0~s and 40.0~s.  The fire lines conform to the hill going through the middle of the scene.
 %The FDS input file for this test is {\tt fire\_line.fds}.
-%The images for this test were created automatically by running the smokeview script, {\tt fire\_line.ssf}.
+%The images for this test were created automatically by running the Smokeview script, {\tt fire\_line.ssf}.
 
 %\begin{figure}[\figoptions]
 %\begin{center}
@@ -997,7 +997,7 @@ Comparing the Smokeview generated smoke levels with theoretical values one finds
 Figures \ref{figobsttest} and \ref{figtransparency} tests different methods for displaying obstacles.
 Figure \ref{figobsttest} shows obstacles drawn as solids, as outlines or hidden.
 Figure \ref{figtransparency} shows obstacles drawn transparently. The left view shows the opaque obstacle drawn in front (and blocking) a portion of the transparent obstacle behind.  The center view shows both obstacles unobscured.  The right view shows the transparent blockage drawn in front with the opaque blockage visible behind.
-The images for this test were created automatically by running the smokeview script,
+The images for this test were created automatically by running the Smokeview script,
 {\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}.
 
 \begin{figure}[\figoptions]
@@ -1033,7 +1033,7 @@ The images for this test were created automatically by running the smokeview scr
 
 \section{Devices}
 The case illustrated in Figure \ref{figsprinkmany} tests how good Smokeview can display many devices. This Figure shows a series of sprinklers with three different levels of detail.  Smokeview should be able to smoothly move this scene on computers with good video cards.
-The images for this test were created automatically by running the smokeview script,
+The images for this test were created automatically by running the Smokeview script,
 {\tt sprinkler\_many.ssf}\ (see Appendix \ref{SSFspinklermany}.
 
 \begin{figure}[\figoptions]
@@ -1052,7 +1052,7 @@ The images for this test were created automatically by running the smokeview scr
 
 \section{Vents}
 Figure \ref{figventtest} tests vent display.  This figure shows three different levels of vent visibility: all vents displayed, only non-open vents displayed and all vents hidden.
-The images for this test were created automatically by running the smokeview script,
+The images for this test were created automatically by running the Smokeview script,
 {\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}.
 
 \begin{figure}[\figoptions]
@@ -1082,10 +1082,10 @@ and $V_i$ is a data value to be converted.
 Figure \ref{figcolorconv} presents images verifying the conversion of data to colors.
 The input file, {\tt colorconv.fds}\ (see Appendix \ref{FDScolorconv}), for this test was set up so that
 initially the left half of the domain (it is a 2D case) is 20~\degC\ and the right half is 100~\degC.
-The images for this test were created automatically by running the smokeview script, {\tt colorconv.ssf}\ (see Appendix \ref{SSFcolorconv}).
+The images for this test were created automatically by running the Smokeview script, {\tt colorconv.ssf}\ (see Appendix \ref{SSFcolorconv}).
 
 A second color conversion test involves the use of the colorbar to highlight portions of the data.  The case was set up so that the vertical slice aligns with the colorbar.  The gas temperatures were defined to increase from 20~\degC\ to 100~\degC\ from the floor to the ceiling.  As a result, when one selects the colorbar, the selected region in the colorbar should match the selected region in the vertical slice.
-The images for this test were created automatically by running the smokeview script, {\tt colorbar.ssf}\ (see Appendix \ref{SSFcolorbar}).
+The images for this test were created automatically by running the Smokeview script, {\tt colorbar.ssf}\ (see Appendix \ref{SSFcolorbar}).
 
 \begin{figure}[\figoptions]
 \begin{center}
