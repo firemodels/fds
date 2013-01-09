@@ -3020,7 +3020,7 @@ the {\tt CHID} keyword defined in the \fds\ input data file.
 \centerline{
 \includegraphics[width=3.15972222in]{FIGURES/figSCRIPT}
 } \caption[{\em Script}\ dialog box.]{{\em Script}\ dialog box.
-The {\em Script}\ dialog box allows one to setup and run smokeview
+The {\em Script}\ dialog box allows one to setup and run \smokeview
 scripts. The {\em Script}\ dialog box is invoked by selecting the
 {\em Dialogs$>$File/Bounds} menu item. } \label{figSCRIPT}
 \end{figure}
@@ -3506,7 +3506,7 @@ frames. Usage:
 \begin{verbatim}
 RENDERALL
   skip first
-  file name base (char) (or blank to use smokeview default)
+  file name base (char) (or blank to use the Smokeview default)
 \end{verbatim}
 
 The command
@@ -3538,7 +3538,7 @@ Smokeview.
 \begin{verbatim}
 VOLRENDERALL
   skip first
-  file name base (char) (or blank to use smokeview default)
+  file name base (char) (or blank to use the Smokeview default)
 \end{verbatim}
 
 
@@ -4049,7 +4049,7 @@ a long list of FDS cases. Background runs a case whenever the CPU load is below 
 \caption[{\em Compress Files}\ and {\em Autoload}\ dialog box.] {{\em File/Bounds}\ dialog
 box showing compression and autoload options.  3D smoke,  boundary and slice
 files may be compressed using smokezip.  All currently loaded
-files may be loaded automatically when smokeview first starts by
+files may be loaded automatically when Smokeview first starts by
 selecting the autoload checkbox.} \label{figBOUNDScompress}
 \end{figure}
 
@@ -4102,7 +4102,7 @@ casename1.smv}\ and {\tt casename2.smv}\ one would use the command
 smokediff -smv casename1 casename2
 \end{verbatim}
 
-\noindent which opens smokeview to examine the differenced data
+\noindent which opens Smokeview to examine the differenced data
 after smokediff completes.  Smokediff subtracts the data
 referenced in casename1 from the data referenced in casename2.
 For slice files, smokediff allows the grid in casename2 to be
@@ -4462,7 +4462,7 @@ to the menu item is set or active.
 \subsection{Geometry Options}
 The \fbox{Geometry}\ menu is illustrated in Figure
 \ref{fig_geometrymenu}.  The geometry menu contains sub-menus
-for controlling the visibility of obstacles, smokeview objects,
+for controlling the visibility of obstacles, Smokeview objects,
 surfaces and the grid.
 \begin{figure}[\figoptions]
 \begin{center}
@@ -4803,7 +4803,7 @@ portions of the scene.
 \hitem{Customize colorbars}Dialog box for creating new and editing
 existing colorbars.
 
-\hitem{Device/Objects}Dialog box for scaling smokeview objects and
+\hitem{Device/Objects}Dialog box for scaling Smokeview objects and
 showing data values associated with FDS devices.
 
 \hitem{Display}Dialog box for setting various
@@ -5003,7 +5003,7 @@ when viewing vector centered slice files.
 
 \kitem{\#}Save configuration settings to the casename.ini file.
 
-\kitem{\%}Toggle single stepping mode.  If activated, smokeview
+\kitem{\%}Toggle single stepping mode.  If activated, Smokeview
 will execute a script one command at a time.
 
 \kitem{\^ \ } When single stepping mode is activated, this key
@@ -5397,7 +5397,7 @@ of Plot3D iso-surface particles.
 (default: $4.0$)
 
 \hitem{SENSORABSSIZE}Defines the sensor size drawn
-by smokeview using the same units as used to specify the grid coordinates.
+by Smokeview using the same units as used to specify the grid coordinates.
 (default: $0.038$)
 
 \hitem{SLICEOFFSET}Defines an offset
@@ -5409,7 +5409,7 @@ animated slices are drawn from adjacent solid surfaces.
 anti-aliasing  (default: {\tt 1}).
 
 \hitem{SPRINKLERABSSIZE}Defines the sprinkler size drawn
-by smokeview using the same units as used to specify the grid coordinates.
+by Smokeview using the same units as used to specify the grid coordinates.
 (default: $0.076$)
 
 \hitem{STREAKLINEWIDTH}Defines the width of a streak line.
@@ -6662,7 +6662,7 @@ case was run on a computer with a different {\em endian}\ format than the PC.
 
 \hitem{TITLE1/TITLE2}The {\tt TITLE1} and {\tt TITLE2} keywords allow one to specify
 extra information documenting a \smokeview\ case.  These keywords and associated labels are
-added by hand to the smokeview (\tt .smv) file using the format:
+added by hand to the Smokeview (\tt .smv) file using the format:
 \begin{verbatim}
 TITLE1
 first line of descriptive text
