@@ -7,9 +7,9 @@ SETTIMEVAL
 LOADINIFILE
  colorbar_low.ini
 SETVIEWPOINT
- view1
+ view 1
 SETVIEWPOINT
- view1
+ view 1
 RENDERONCE
  colorbar_low
 RENDERONCE
@@ -17,9 +17,9 @@ RENDERONCE
 LOADINIFILE
  colorbar_med.ini
 SETVIEWPOINT
- view1
+ view 1
 SETVIEWPOINT
- view1
+ view 1
 RENDERONCE
  colorbar_med
 RENDERONCE
@@ -27,9 +27,9 @@ RENDERONCE
 LOADINIFILE
  colorbar_high.ini
 SETVIEWPOINT
- view1
+ view 1
 SETVIEWPOINT
- view1
+ view 1
 RENDERONCE
  colorbar_high
 RENDERONCE
