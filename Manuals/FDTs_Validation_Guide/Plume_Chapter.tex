@@ -5,6 +5,8 @@
 
 \section{Plume Temperature}
 
+\subsection{Heskestad Method}
+
 Heskestad (1995) provided a simple correlation for estimating the increase in centerline temperature above ambient ($T_p$ - $T_\infty$) of a fire plume as a function of ceiling height and HRR
 
 \be
@@ -33,20 +35,55 @@ In Eq.~\ref{eq:Heskestad}, $\Delta T_p$ is the plume centerline temperature rise
 
 In Eq.~\ref{eq:Heskestad_Qc}, $\dot Q$ is the total HRR~(kW), and $\chi_r$ is the radiative fraction~(-). In Eq.~\ref{eq:Heskestad_z0}, $D$ is the diameter of the fire source~(m). In Eq.~\ref{eq:Heskestad_D}, $A$ is the area of the fire source~(m$^2$).
 
+
 \clearpage
+
+
+\subsection{McCaffrey Method}
+
+McCaffrey (1979) provided a simple correlation for estimating the increase in centerline temperature above ambient ($T_p$ - $T_\infty$) of a fire plume as a function of ceiling height and HRR
+
+\be
+\Delta T_p = \left[ \left( \frac{\kappa}{0.9 \sqrt{2 g}} \right)^2 \left( \frac{z}{\dot Q^{2/5}} \right)^{2 \eta - 1} \right] T_\infty
+\label{eq:McCaffrey}
+\ee
+
+In Eq.~\ref{eq:McCaffrey}, $\Delta T_p$ is the plume centerline temperature rise above ambient~($^\circ$C), $g$ is the acceleration of gravity~(m/s$^2$), $z$ is the elevation above the fire source~(m), $\dot Q$ is the HRR~(kW), and $T_\infty$ is the ambient air temperature~($^\circ$C). The constants $\eta$ and $\kappa$ are a function of the height $z$ within the plume and are listed in Table~\ref{tbl:McCaffrey_constants}.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{Constants used in McCaffrey plume correlation}
+\label{tbl:McCaffrey_constants}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Region  &  $z/\dot Q^{2/5}$  &  $\eta$  &  $\kappa$  \\
+\hline
+Continuous    &  < 0.08      & 1/2   & 6.8  \\
+Intermittent  &  < 0.08-0.2  & 0     & 1.9  \\
+Plume         &  > 0.2       & -1/3  & 1.1  \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
 
 \section{Summary of Plume Temperature Predictions}
 
 Summary scatter plots of the plume temperature predictions are shown on the following pages.
 
+
 \begin{figure}[ht]
 \begin{center}
 \begin{tabular}{l}
-\includegraphics[width=4.0in]{FIGURES/Scatterplots/Plume_Temperature}
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/Plume_Temperature_Heskestad} \\
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/Plume_Temperature_McCaffrey}
 \end{tabular}
 \end{center}
-\caption[Summary of plume temperature predictions.]
-{Summary of plume temperature predictions.}
-\label{Plume_Summary}
+\caption[Summary of plume temperature predictions using the Heskestad method.]
+{Summary of plume temperature predictions using the Heskestad (top) and McCaffrey (bottom) method.}
+\label{Plume_Temperature_Summary}
 \end{figure}
-
