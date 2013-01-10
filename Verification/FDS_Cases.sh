@@ -275,6 +275,7 @@ $RUNFDS Sprinklers_and_Sprays particle_drag_U150_N1600
 $RUNFDS Sprinklers_and_Sprays drag_dtp1
 $RUNFDS Sprinklers_and_Sprays drag_dtp01
 $RUNFDS Sprinklers_and_Sprays drag_dtp001
+$RUNFDS Sprinklers_and_Sprays e_coefficient
 $RUNFDS Sprinklers_and_Sprays particle_flux
 $RUNFDS Sprinklers_and_Sprays terminal_velocity_dt_1_0
 $RUNFDS Sprinklers_and_Sprays terminal_velocity_dt_0_1
