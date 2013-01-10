@@ -574,7 +574,7 @@ END SUBROUTINE COMPUTE_THIEF
 SUBROUTINE COMPUTE_ALPERT
 
 INTEGER :: I,J,K,N_PTS
-REAL, DIMENSION(20) :: T_JET
+REAL, DIMENSION(20) :: T_JET, U_JET
 CHARACTER(30) :: FMT
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
@@ -599,6 +599,14 @@ DO I=0,50
       R = R_VALUES(J)
       H = H_VALUES(J)
 
+      ! Compute ceiling jet velocity
+
+      IF (R/H<=0.15) THEN
+         U_JET(J) = 0.947 * (Q/H)**(1./3.)
+      ELSEIF (R/H>0.15) THEN
+         U_JET(J) = 0.197 * ((Q/H)**(1./3.)/(R/H)**(5./6.))
+      ENDIF
+
       ! Compute ceiling jet temperature
 
       IF (R/H<=0.18) THEN
@@ -609,13 +617,13 @@ DO I=0,50
    ENDDO
 
    IF (I==0) THEN
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS,"(","A",",','),","A",")"
-         WRITE(11,FMT) 'Time',(TRIM(LABEL(K)),K=1,N_PTS)
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) T, (T_JET(K)-273,K=1,N_PTS)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS*2,"(","A",",','),","A",")"
+         WRITE(11,FMT) 'Time',(TRIM(LABEL(K)),K=1,N_PTS),('Velocity '//(TRIM(LABEL(K))),K=1,N_PTS)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS*2,"(","F7.2",",','),","F7.2",")"
+         WRITE(11,FMT) T, (T_JET(K)-273,K=1,N_PTS),(U_JET(K),K=1,N_PTS)
       ELSE
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) T, (T_JET(K)-273,K=1,N_PTS)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_PTS*2,"(","F7.2",",','),","F7.2",")"
+         WRITE(11,FMT) T, (T_JET(K)-273,K=1,N_PTS),(U_JET(K),K=1,N_PTS)
    ENDIF
 
 ENDDO
