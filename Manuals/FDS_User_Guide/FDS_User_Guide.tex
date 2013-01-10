@@ -7442,7 +7442,22 @@ k(t) = \hbox{\ct E\_COEFFICIENT} \; m_w''(t) \quad          \hbox{s}^{-1}
 \ee
 The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and
 it is expressed in units of m$^2$/kg/s. Usually, this type of suppression
-algorithm is invoked when the fuel is complicated, like a cartoned commodity.
+algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinker is set to operate at 5 s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate.
+
+\footnotesize
+\begin{verbatim}
+&SURF ID = 	'FUEL', HRRPUA = 100., E_COEFFICIENT = 4. /
+\end{verbatim} \normalsize
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/e_coefficient_q} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/e_coefficient_br}
+\end{tabular*}
+\caption[Results of the {\ct e\_coefficient} test case]{Output of the  {\ct e\_coefficient} test case.}
+\label{e_coef_fig}
+\end{figure}
+
 
 
 
