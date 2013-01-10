@@ -333,31 +333,48 @@ The rate expression for species A with a concentration of $C_{A}$ in mol/liter a
 The rate expression for both infinitely fast and Arrhenius rate chemistry follow the general form of Eq.~(\ref{eq:generic_rate}).
 
 \subsubsection{Finite-Rate Chemistry (Arrhenius Reaction)}
-In FDS, the rate expression is on a fuel basis where only the concentrations of species in the mixed state ({\em hat} symbol) are allowed to react. For a reaction with fuel, $F$, and $\alpha$ species, Eq.~(\ref{eq:generic_rate}) becomes:
-\begin{equation}\label{eq:finite_rate}
-\frac{\mbox{d}\hat{C}_{F}}{\mbox{d}t}= -k\; \prod \hat{C}_{\alpha}\,^{a_{\alpha}}
+In FDS, the rate expression is on a fuel basis where only the concentrations of species in the mixed state ({\em hat} symbol) are allowed to react. Consider a set of $i$ reactions with fuel, $F$, and $\alpha$ species. The rate for the fuel of the $i\,^{th}$ reaction, $\hat{r}_{F,i}$ in mol/liter/s is:
+\begin{equation}\label{eq:rate_f}
+\hat{r}_{F,i}= -k_{i}\; \prod \hat{C}_{\alpha}\,^{a_{\alpha,i}}
 \end{equation}
-For an Arrhenius reaction the rate constant, $k$, is a function of temperature ($T^n$), the pre-exponential ($A$), and the activation energy ($E$):
+For an Arrhenius reaction, the rate constant, $k_{i}$, is a function of temperature ($T^{n,i}$), the pre-exponential ($A_{i}$), and the activation energy ($E_{n}$):
 \begin{equation}\label{eq:rate_cons}
-k = A\;T^n\;e^{-E/RT} 
+k_{i} = A_{i}\;T^{n,i}\;e^{-E_{i}/RT} 
 \end{equation}
-In FDS input files, $A$ has units of mol/cm$^3$/s and $E$ has units of J/mol.
-FDS solves for and transports mass fractions of lumped species rather for individual species; the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of the lumped species can participate as a collision species.  Therefore, rather than solve $\mbox{d}\hat{C}_F/\mbox{d}t$,  FDS computes $\mbox{d}\hat{Y}_{F}/\mbox{d}t$. Since it is quicker to determine $\hat{Y}_{\alpha}$ rather than $\hat{C}_{\alpha}$, the relation $\hat{C}_{\alpha}=\hat{Y}_{\alpha} \rho/W_{\alpha}$ is used.  Substituting for $\hat{C}_{\alpha}$ into Eq.~(\ref{eq:finite_rate}) and converting the appropriate units of $A$ (kg/m$^3$/s) yields:
+Note that the units of $E$ are J/mol and units of $A$ are dependent upon the order of the reaction and take the appropriate form to ensure the units of Eq.~(\ref{eq:rate_f}) are balanced.
+
+The rate for species $\alpha$ of the $i\,^{th}$ reaction is based on the ratio of stoichiometric coefficients:
+\begin{equation}\label{eq:rate_a}
+\hat{r}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}}{\nu_{F,i}}\right)\,\hat{r}_{F,i}
+\end{equation}
+The rate expression for species $\alpha$ is then:
+\begin{equation}\label{rate_expression}
+\frac{\mbox{d}\hat{C}_{\alpha}}{\mbox{d}t} = \sum_{i} \hat{r}_{\alpha,i}
+\end{equation}
+FDS solves for and transports mass fractions of lumped species rather for individual species; the only ``species'' that can be consumed or created are the lumped species.  However, any of the primitive species components of the lumped species can participate as a collision species.  Therefore, rather than solve $\mbox{d}\hat{C}_F/\mbox{d}t$,  FDS computes $\mbox{d}\hat{Y}_{F}/\mbox{d}t$. Since it is quicker to determine $\hat{Y}_{\alpha}$ rather than $\hat{C}_{\alpha}$, the relation $\hat{C}_{\alpha}=\hat{Y}_{\alpha} \rho/W_{\alpha}$ is used.  Substituting for $\hat{C}_{\alpha}$ and combining Eqs.~(\ref{eq:rate_f}) and (\ref{eq:rate_cons}) yields:
 \begin{equation}\label{eq:finite_rate_unit}
-\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -\frac{1000}{\rho}k \; \prod \left(\frac{\hat{Y}_{\alpha}\rho}{W_{\alpha}}\right)^{a_{\alpha}} \end{equation}
+\hat{r}^{\prime}_{F,i} = -\frac{1000}{\rho}k_{i} \; \prod \left(\frac{\hat{Y}_{\alpha}\rho}{W_{\alpha}}\right)^{a_{\alpha,i}} \end{equation}
 To simplify the calculations within FDS, density and molecular weight are pulled out of the product on the right hand side of Eq.~(\ref{eq:finite_rate_unit}) and calculated with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
-A^{\prime} = 1000\;A\;\rho^{\sum(a_{n}-1)}\prod W_{\alpha}\,^{-a_{\alpha}}
+A^{\prime}_{i} = 1000\;A_{i}\;\rho^{\sum(a_{n}-1)}\prod W_{\alpha}\,^{-a_{\alpha,i}}
 \end{equation}
-Using $A^{\prime}$, the final form of the rate expression becomes:
+Using $A^{\prime}$, the rate becomes:
 \begin{equation}\label{eq:finite_rate_fin}
-\frac{\mbox{d}\hat{Y}_{F}}{\mbox{d}t} = -A^{\prime}\;T^n\;e^{-E/RT}\;\prod \hat{Y}_{\alpha}\,^{a_{\alpha}} 
+\hat{r}^{\prime}_{F,i} = -A^{\prime}\;T^n\;e^{-E/RT}\;\prod \hat{Y}_{\alpha}\,^{a_{\alpha}} 
+\end{equation}
+Since the units have changed to mass fractions, rate for species $\alpha$ of the $i\,^{th}$ reaction is now:
+\begin{equation}\label{eq:rate_a_y}
+\hat{r}^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)\,\hat{r}^{\prime}_{F,i}
+\end{equation}
+Last, the rate expression for species $\alpha$ in terms of mass fraction becomes:
+\begin{equation}\label{rate_expression_y}
+\frac{\mbox{d}\hat{Y}_{\alpha}}{\mbox{d}t} = \sum_{i} \hat{r}^{\prime}_{\alpha,i}
 \end{equation}
 
 \subsubsection{Infinitely Fast Reaction (Default)}
 For fast chemistry reactions, $E$ and $n$ in Eq.~(\ref{eq:finite_rate_fin}) are set to zero which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, in Eqs.~(\ref{eq:aprime}) and (\ref{eq:finite_rate_fin}) are also set to zero to remove concentration dependence. Finally, the pre-exponential, $A^{\prime}$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_F/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite. The change in fuel is based on the limiting reactant: 
 \begin{equation}\label{eq:stoich_fuel_single}
-\Delta \hat{Y}_{F} = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
+\Delta \hat{Y}_{F} = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}\,W_{F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
 
 \subsubsection{Multiple Infinitely Fast Reactions}   
