@@ -114,11 +114,11 @@ MAILTO=""
 # = Torque job processing error alert =
 # =====================================
 
-# Run torque error checking script every four hours at      
-# XX:30 to check the torque log for processing errors.
+# Run torque error checking script once a day at
+# 23:55 to check the torque log for processing errors.
 # Sends email alert if any "post job processing errors"
 # are found in the daily torque log.
-30 0,4,8,12,16,20 * * * chktorque.sh
+55 23 * * * chktorque.sh
 
 ------------------------------------------------------------------------------------
 
