@@ -3345,7 +3345,14 @@ LOADVSLICE
  1/2/3 (int)  val (float)
 \end{verbatim}
 
-\hitem{LOADVOLSMOKE}
+\hitem{LOADVOLSMOKE} Load files needed to view volume rendered
+smoke.  One may either load files for all meshes or for one
+particular mesh.  Usage:
+\begin{verbatim}
+LOADVOLSMOKE
+ mesh number (-1 for all meshes) (int)
+ \end{verbatim}
+
 
 \hitem{LOADVOLSMOKEFRAME} Load a volume rendered smoke frame.
 Usage:
