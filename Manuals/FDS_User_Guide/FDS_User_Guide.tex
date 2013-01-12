@@ -5985,8 +5985,8 @@ A few sample {\ct REAC} lines are given here.
 &REAC FUEL = 'METHANE' /
 \end{verbatim}
 \normalsize
-\noindent Here, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL} is listed in Table~\ref{tab:gasspecies}. It is also assumed that the soot and CO
-yields are zero.
+\noindent In this case, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL}
+is listed in Table~\ref{tab:gasspecies}. It is assumed that the soot and CO yields are zero.
 
 \footnotesize
 \begin{verbatim}
@@ -5996,18 +5996,18 @@ yields are zero.
       HEAT_OF_COMBUSTION = 46460. /
 \end{verbatim}
 \normalsize
-\noindent Here, the {\ct FORMULA} is known, but the product yields are not. The heat of combustion is specified explicitly rather than calculated. See
-Section~\ref{info:heat_of_combustion} for more details on the heat of combustion.
+\noindent In this case, the heat of combustion is specified explicitly rather than calculated.
+The soot yield is specified as 0.01 and the CO yield is specified as 0.02.
+See Section~\ref{info:heat_of_combustion} for more details on the heat of combustion.
 
 \footnotesize
 \begin{verbatim}
 &REAC FUEL               = 'MY FUEL'
-      SOOT_YIELD         = 0.05
       FORMULA            = 'C3H8O3N4'
       HEAT_OF_COMBUSTION = 46124. /
 \end{verbatim}
 \normalsize
-\noindent Here, nothing is known or assumed.
+\noindent In this case, the {\ct FORMULA} and heat of combustion are known, but the product yields are not.
 
 
 
@@ -7968,7 +7968,7 @@ where $O_i$ is the FDS output for the beam detector of the $i$th path (note that
 \subsubsection{Example Case: A Beam Detector}
 
 A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of
-the lumped species variable, {\ct PRODUCTS}. The default soot yield is
+the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as
 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$.
 Using the default mass extinction coefficient of
 8700~m$^2$/kg, the optical depth is calculated to be 0.626~m$^{-1}$.  The
