@@ -2821,10 +2821,6 @@ void Display_CB(void){
     update_windowsizelist();
     ResizeWindow(screenWidthINI,screenHeightINI);
   }
-  if(update_colorbar_select_index==1&&colorbar_select_index>=0&&colorbar_select_index<=255){
-    update_colorbar_select_index=0;
-    UpdateRGBColors(colorbar_select_index);
-  }
   if(updatemenu==1&&usemenu==1&&menustatus==GLUT_MENU_NOT_IN_USE){
     glutDetachMenu(GLUT_RIGHT_BUTTON);
     InitMenus(LOAD);
@@ -2837,6 +2833,10 @@ void Display_CB(void){
   }
   if(showtime==0&&ntotal_smooth_blockages>0){
     update_smoothblockage_info();
+  }
+  if(update_colorbar_select_index==1&&colorbar_select_index>=0&&colorbar_select_index<=255){
+    update_colorbar_select_index=0;
+    UpdateRGBColors(colorbar_select_index);
   }
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   if(showstereo==0){
