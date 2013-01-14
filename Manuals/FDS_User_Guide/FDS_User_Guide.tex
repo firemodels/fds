@@ -2137,7 +2137,7 @@ convenient to start the flow immediately, like in an outdoor simulation involvin
 
 A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Typically, you know only that the mean wind is 10~m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
 
-In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to set a northeast wind at 10 m/s use
+In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s use
 
 \footnotesize
 \begin{verbatim}
@@ -2145,7 +2145,7 @@ In FDS, you may invoke the most rudimentary of data assimilation techniques, a m
 \end{verbatim}
 \normalsize
 
-\noindent For an outdoor flow, all other boundaries (except the ground ) should be set to {\ct OPEN}.
+\noindent For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}.
 
 \subsection{Special Topic: Specified Force Field}
 \label{info:force_vector}
@@ -3049,7 +3049,7 @@ There are three reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} --
 
 \subsubsection{Open Vents}
 
-The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To change this, use an {\ct OPEN} vent as if it were an open door or window. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries ({\ct MB}s).
+The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries. It is sometimes convenient to specify doors or windows that open out to the exterior of the computational domain by simply specifying it to be {\ct OPEN}. However, keep in mind that the pressure boundary condition on such an opening is imperfect, and it is recommended that if the flow through the doorway or window is important, you should extend the domain a few meters rather than use an {\ct OPEN} boundary. You would still have to use the {\ct OPEN} boundary to open up one or more sides of the computational domain, but these openings would be far enough away from the modeled door or window that they would not affect the flow pattern.
 
 By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
