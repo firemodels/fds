@@ -489,7 +489,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   PANEL_extreme2 = glui_labels->add_panel_to_panel(PANEL_extreme,"Highlight extreme data");
 
-  PANEL_extreme_min = glui_labels->add_panel_to_panel(PANEL_extreme2,"Minimum");
+  PANEL_extreme_min = glui_labels->add_panel_to_panel(PANEL_extreme2,"",GLUI_PANEL_NONE);
   CHECKBOX_show_extreme_mindata=glui_labels->add_checkbox_to_panel(PANEL_extreme_min,_("Color below min"),&show_extreme_mindata,COLORBAR_EXTREME,Extreme_CB);
   
   SPINNER_down_red=  glui_labels->add_spinner_to_panel(PANEL_extreme_min,_("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
@@ -501,7 +501,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   glui_labels->add_column_to_panel(PANEL_extreme2,false);
 
-  PANEL_extreme_max = glui_labels->add_panel_to_panel(PANEL_extreme2,"Maximum");
+  PANEL_extreme_max = glui_labels->add_panel_to_panel(PANEL_extreme2,"",GLUI_PANEL_NONE);
 
   CHECKBOX_show_extreme_maxdata=glui_labels->add_checkbox_to_panel(PANEL_extreme_max,_("Color above max"),&show_extreme_maxdata,COLORBAR_EXTREME,Extreme_CB);
 
