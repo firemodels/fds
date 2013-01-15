@@ -211,12 +211,6 @@ void IsoVariableMenu(int value){
 void LabelMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
-  ASSERTFLAG(visColorbarLabels);
-  ASSERTFLAG(visTimeLabels);
-  ASSERTFLAG(visTitle);
-  ASSERTFLAG(visFramerate);
-  ASSERTFLAG(visaxislabels);
-  ASSERTFLAG(vis_slice_average);
   switch (value){
    case 0:
     visColorbarLabels=1-visColorbarLabels;
@@ -360,8 +354,6 @@ void LabelMenu(int value){
 
 void LightingMenu(int value){
     if(value<0)return;
-    ASSERTFLAG(visLIGHT0);
-    ASSERTFLAG(visLIGHT1);
     switch (value){
       case 1: 
         visLIGHT0 = 1 - visLIGHT0; 
@@ -551,8 +543,6 @@ void IsoShowMenu(int value){
   nisolevels=loaded_isomesh->nisolevels;
   showlevels=loaded_isomesh->showlevels;
 
-  ASSERTFLAG(smoothtrinormal);
-  ASSERTFLAG(showtrinormal);
   switch (value){
    case  4:
     smoothtrinormal=1-smoothtrinormal;
@@ -644,7 +634,6 @@ void IsoShowMenu(int value){
     break;
    default:
     if(value>99&&value<999&&value-100<nisolevels){
-     ASSERTFLAG(showlevels[value-100]);
      showlevels[value-100] = 1 - showlevels[value-100];
     }
     else if(value>=1000&&value<=10000){      // we can only have 9900 isosurface files
@@ -725,7 +714,6 @@ void ShowVSliceMenu(int value){
     return;
   }
   vd = vsliceinfo + value;
-  ASSERTFLAG(vd->display);
   if(islicetype==sliceinfo[vd->ival].type){
     if(plotstate!=DYNAMIC_PLOTS){
       plotstate=DYNAMIC_PLOTS;
@@ -801,7 +789,6 @@ void ShowHideSliceMenu(int value){
     slicedata *sd;
 
     sd = sliceinfo + value;
-    ASSERTFLAG(sd->display);
     if(islicetype==sd->type){
       if(plotstate!=DYNAMIC_PLOTS){
         plotstate=DYNAMIC_PLOTS;
@@ -1492,7 +1479,6 @@ void EvacShowMenu(int value){
 
   if(nevac==0)return;
   if(value==999)return;
-  ASSERTFLAG(visEvac);
   if(value<0){
     value = -value;
     value--;
@@ -1555,11 +1541,6 @@ void ParticleShowMenu(int value){
 
   if(npartinfo==0)return;
   if(value==999)return;
-  ASSERTFLAG(visSmoke);
-  ASSERTFLAG(visEvac);
-  ASSERTFLAG(visSprinkPart);
-  ASSERTFLAG(visStaticSmoke);
-  ASSERTFLAG(visSprinkPart);
   if(value<0){
     value = -value;
     value--;
@@ -3971,7 +3952,6 @@ void ShowPatchMenu(int value){
       }
     }
     else if(value==INTERIORwallmenu){
-      ASSERTFLAG(allinterior);
       allinterior = 1 - allinterior;
       val = allinterior;
       visPatchType[INTERIORwall]=val;
@@ -3985,7 +3965,6 @@ void ShowPatchMenu(int value){
       value = -(value+2); /* map xxxwallmenu to xxxwall */
       for(n=0;n<meshi->npatches;n++){
         if(meshi->patchtype[n]==value){
-          ASSERTFLAG(meshi->visPatches[n]);
           meshi->visPatches[n] = 1 - meshi->visPatches[n];
           visPatchType[value]=meshi->visPatches[n];
         }
@@ -4254,7 +4233,6 @@ void RotateTypeMenu(int value){
 void TitleMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
-  ASSERTFLAG(visTitle);
   switch (value){
   case 0:
     visTitle = 1 - visTitle;
