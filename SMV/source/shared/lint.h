@@ -15,11 +15,13 @@
 /*lint -e539 */
 /*lint -e550 */
 /*lint -e570 */
+/*lint -e571 */
 /*lint -e613 */
 /*lint -e644 */
 /*lint -e645 */
 /*lint -e647 */
 /*lint -e713 */
+/*lint -e679 */
 /*lint -e715 */
 /*lint -e725 */
 /*lint -e732 */ 
@@ -31,6 +33,7 @@
 /*lint -e774 */
 /*lint -e785 */
 /*lint -e786 */
+/*lint -e790 */
 /*lint -e818 */
 /*lint -e830 */ 
 /*lint -e831 */ 
