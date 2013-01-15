@@ -675,7 +675,6 @@ extern "C" void glui_bounds_setup(int main_window){
     Slice_CB(FILETYPEINDEX);
   }
 
-  glui_bounds->add_separator();
   ROLLOUT_time = glui_bounds->add_rollout("Time",false);
   PANEL_time1a = glui_bounds->add_panel_to_panel(ROLLOUT_time,"",false);
   SPINNER_timebounds=glui_bounds->add_spinner_to_panel(PANEL_time1a,_("Time:"),GLUI_SPINNER_FLOAT,&glui_time);
@@ -686,12 +685,12 @@ extern "C" void glui_bounds_setup(int main_window){
   PANEL_time2 = glui_bounds->add_panel_to_panel(ROLLOUT_time,_("Data loading"),true);
 
   PANEL_time2a = glui_bounds->add_panel_to_panel(PANEL_time2,"",false);
-  SPINNER_tload_begin=glui_bounds->add_spinner_to_panel(PANEL_time2a,"tmin",GLUI_SPINNER_FLOAT,&tload_begin,TBOUNDS,Time_CB);
+  SPINNER_tload_begin=glui_bounds->add_spinner_to_panel(PANEL_time2a,"min time",GLUI_SPINNER_FLOAT,&tload_begin,TBOUNDS,Time_CB);
   glui_bounds->add_column_to_panel(PANEL_time2a,false);
   CHECKBOX_use_tload_begin=glui_bounds->add_checkbox_to_panel(PANEL_time2a,"",&use_tload_begin,TBOUNDS_USE,Time_CB);
 
   PANEL_time2b = glui_bounds->add_panel_to_panel(PANEL_time2,"",false);
-  SPINNER_tload_end=glui_bounds->add_spinner_to_panel(PANEL_time2b,"tmax",GLUI_SPINNER_FLOAT,&tload_end,TBOUNDS,Time_CB);
+  SPINNER_tload_end=glui_bounds->add_spinner_to_panel(PANEL_time2b,"max time",GLUI_SPINNER_FLOAT,&tload_end,TBOUNDS,Time_CB);
   glui_bounds->add_column_to_panel(PANEL_time2b,false);
   CHECKBOX_use_tload_end=glui_bounds->add_checkbox_to_panel(PANEL_time2b,"",&use_tload_end,TBOUNDS_USE,Time_CB);
 
@@ -708,7 +707,6 @@ extern "C" void glui_bounds_setup(int main_window){
 
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
-    glui_bounds->add_separator();
     ROLLOUT_compress=glui_bounds->add_rollout(_("Compress files (Smokezip)"),false);
     CHECKBOX_erase_all=glui_bounds->add_checkbox_to_panel(ROLLOUT_compress,_("Erase compressed files"),
       &erase_all,ERASE,Bound_CB);
@@ -722,7 +720,7 @@ extern "C" void glui_bounds_setup(int main_window){
       SPINNER_slicezipstep->set_int_limits(0,100);
     }
     if(nisoinfo>0){
-      SPINNER_isozipstep=glui_bounds->add_spinner_to_panel(ROLLOUT_compress,_("ISO frame skip"),GLUI_SPINNER_INT,&isozipskip,
+      SPINNER_isozipstep=glui_bounds->add_spinner_to_panel(ROLLOUT_compress,_("Compressed file frame skip"),GLUI_SPINNER_INT,&isozipskip,
         FRAMELOADING,Iso_CB);
       SPINNER_isozipstep->set_int_limits(0,100);
     }
@@ -740,7 +738,7 @@ extern "C" void glui_bounds_setup(int main_window){
   }
 #endif
 
-  ROLLOUT_script = glui_bounds->add_rollout("Scripts",false);
+  ROLLOUT_script = glui_bounds->add_rollout("Scripts/Config",false);
 
   PANEL_script1 = glui_bounds->add_panel_to_panel(ROLLOUT_script,_("Script files"),false);
   PANEL_record = glui_bounds->add_panel_to_panel(PANEL_script1,_("Record"),true);
