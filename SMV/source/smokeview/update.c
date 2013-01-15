@@ -37,7 +37,7 @@ int compare_float( const void *arg1, const void *arg2 ){
 
 /* ------------------ update_framenumber ------------------------ */
 
-void update_framenumber(int changetime){
+void Update_Framenumber(int changetime){
   int i,ii;
 
   if(force_redisplay==1||(itimeold!=itimes&&changetime==1)){
@@ -253,7 +253,7 @@ void update_framenumber(int changetime){
 
 /* ------------------ updateShow ------------------------ */
 
-void updateShow(void){
+void Update_Show(void){
   int i,evacflag,sliceflag,vsliceflag,partflag,patchflag,isoflag,smoke3dflag,tisoflag;
   int slicecolorbarflag;
 
@@ -651,9 +651,9 @@ int get_itime(int n, int *timeslist, float *times, int ntimes){
   return istart;
 }
 
-/* ------------------ synctimes ------------------------ */
+/* ------------------ Synch_Times ------------------------ */
 
-void synctimes(void){
+void Synch_Times(void){
   int n,i,istart;
   int j,igrid,jj;
 
@@ -826,7 +826,7 @@ void synctimes(void){
 
 /* ------------------ updatetimes ------------------------ */
 
-void updatetimes(void){
+void Update_Times(void){
   int n,n2,ntimes2;
   float *timescopy;
   int i,k;
@@ -845,7 +845,7 @@ void updatetimes(void){
 
   // pass 1 - determine ntimes
 
-  updateShow();  
+  Update_Show();  
   CheckMemory;
   nglobal_times = 0;
 
@@ -1465,7 +1465,7 @@ void updatetimes(void){
     }
   }
 
-  if(nglobal_times>0)synctimes();
+  if(nglobal_times>0)Synch_Times();
   updatefaces=1;
   if(nglobal_times>0){
     UpdateTimeLabels();
@@ -1661,7 +1661,7 @@ void reset_itimes0(void){
 
 /* ------------------ updateclipbounds ------------------------ */
 
-void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){ 
+void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){ 
 
   if(set_i0==0&&set_i1==0)return;
   if(set_i0==1&&set_i1==1){
@@ -1683,7 +1683,7 @@ void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){
 
 /* ------------------ updateclip ------------------------ */
 
-void updateclip(int slicedir){
+void Update_Clip(int slicedir){
   stepclip_x=0; stepclip_y=0; stepclip_z=0; 
   stepclip_X=0; stepclip_Y=0; stepclip_Z=0;
   switch (slicedir){
@@ -1731,7 +1731,7 @@ void updateclip(int slicedir){
 
 /* ------------------ update_glui_names ------------------------ */
 
-void update_glui_names(void){
+void Update_Glui_Names(void){
   update_glui_dialogs=1;
 
   hide_glui_colorbar();

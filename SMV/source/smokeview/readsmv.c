@@ -10459,7 +10459,7 @@ typedef struct {
             }
             updatetourmenulabels();
             createtourpaths();
-            updatetimes();
+            Update_Times();
             plotstate=getplotstate(DYNAMIC_PLOTS);
             selectedtour_index=-1;
             selected_frame=NULL;

@@ -550,7 +550,7 @@ void TOUR_CB(int var){
   case VIEW_times:
     ReallocTourMemory();
     createtourpaths();
-    updatetimes();
+    Update_Times();
     break;
   case KEYFRAME_viewXYZ:
     if(selected_frame!=NULL){
@@ -674,7 +674,7 @@ void TOUR_CB(int var){
   case CONSTANTTOURVEL:
     update_tourcontrols();
     createtourpaths();
-    updatetimes();
+    Update_Times();
     set_glui_keyframe();
     break;
   case KEYFRAME_INSERT:

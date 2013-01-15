@@ -253,7 +253,7 @@ void SHOOTER_CB(int var){
       break;
     case SHOOTER_SHOW:
       plotstate=getplotstate(DYNAMIC_PLOTS);
-      updatetimes();
+      Update_Times();
       break;
     case SHOOTER_TERMINAL_VEL:
       if(shooter_v_inf<0.0){
@@ -329,7 +329,7 @@ void SHOOTER_CB(int var){
       if(allocate_shooter()==0){
         solve_shooter_data();
         plotstate=getplotstate(DYNAMIC_PLOTS);
-        updatetimes();
+        Update_Times();
       }
       break;
     case SHOOTER_VEL_TYPE:

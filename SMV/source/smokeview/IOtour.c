@@ -1149,7 +1149,7 @@ tourdata *add_tour(char *label){
   
   updatetourmenulabels();
   createtourpaths();
-  updatetimes();
+  Update_Times();
   create_tourlist();
   return tourinfo + ntours-1;
 }
@@ -1200,7 +1200,7 @@ void delete_tour(int tour_index){
   }
   set_glui_keyframe();
   updatetourmenulabels();
-  updatetimes();
+  Update_Times();
   create_tourlist();
 
 }
@@ -1245,7 +1245,7 @@ void setup_tour(void){
     init_circulartour();
     updatetourmenulabels();
     createtourpaths();
-    updatetimes();
+    Update_Times();
     plotstate=getplotstate(DYNAMIC_PLOTS);
     selectedtour_index=-1;
     selectedtour_index=-1;

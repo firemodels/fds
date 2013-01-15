@@ -144,7 +144,7 @@ void Init(void){
   mat_specular2[3] = 1.0;
 
   reset_glui_view(startup_view_ini);
-  updateShow();
+  Update_Show();
 }
 
 /* ------------------ init_lang ------------------------ */
@@ -1112,7 +1112,7 @@ void InitOpenGL(void){
       if(patchi->autoload==1)readpatch(i,LOAD,&errorcode);
     }
     force_redisplay=1;
-    update_framenumber(0);
+    Update_Framenumber(0);
     updatemenu=1;
     update_load_startup=0;
     hide_glui_alert();

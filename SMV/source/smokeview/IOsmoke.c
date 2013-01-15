@@ -454,7 +454,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   if(flag==UNLOAD){
     plotstate=getplotstate(DYNAMIC_PLOTS);
-    updatetimes();
+    Update_Times();
     Read3DSmoke3DFile=0;
     setsmokecolorflags();
 
@@ -648,7 +648,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   Read3DSmoke3DFile=1;
   makeiblank_smoke3d();
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  updatetimes();
+  Update_Times();
 #ifdef pp_CULL
     if(cullactive==1)initcull(cullsmoke);
 #endif

@@ -131,7 +131,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   if(flag==UNLOAD){
     update_patchtype();
     update_unit_defs();
-    updatetimes();
+    Update_Times();
     meshi->npatches=0;
     {
       int enableflag=1;
@@ -910,7 +910,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   ShowPatchMenu(EXTERIORwallmenu);
   plotstate=getplotstate(DYNAMIC_PLOTS);
   if(patchinfo[ifile].compression_type==1)disable_boundary_glui();
-  updatetimes();
+  Update_Times();
   update_unit_defs();
   updatechopcolors();
 #ifdef _DEBUG

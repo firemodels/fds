@@ -163,7 +163,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     printf("After plot3d unload: ");
     PrintMemoryInfo;
 #endif
-    updatetimes();
+    Update_Times();
     update_unit_defs();
     update_glui_plot3d();
     return;
@@ -387,7 +387,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   printf("After plot3d load: ");
   PrintMemoryInfo;
 #endif
-  updatetimes();
+  Update_Times();
   update_unit_defs();
   Idle_CB();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
@@ -1775,7 +1775,7 @@ void updateshowstep(int val, int slicedir){
   }
   plotstate=getplotstate(STATIC_PLOTS);
   stept=0;
-  if(ReadVolSlice==0&&plotstate==DYNAMIC_PLOTS&&visGrid==0)updatetimes();
+  if(ReadVolSlice==0&&plotstate==DYNAMIC_PLOTS&&visGrid==0)Update_Times();
   {
     int i;
     float xmin, xmax;

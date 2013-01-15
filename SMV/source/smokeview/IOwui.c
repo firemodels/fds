@@ -799,7 +799,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
     free_terraincell(terri);
     terri->loaded=0;
     terri->display=0;
-    updatetimes();
+    Update_Times();
     return;
   }
 
@@ -842,7 +842,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   terri->loaded=1;
   visTerrainType=TERRAIN_3D;
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  updatetimes();
+  Update_Times();
 #ifdef _DEBUG
   printf("After terrain file load: ");
   PrintMemoryInfo;

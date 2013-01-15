@@ -61,7 +61,7 @@ void readtarget(const char *file, int ifile, int flag, int *errorcode){
     visTarg = 0;
     ReadTargFile=0;
     ntargets=0;
-    updatetimes();
+    Update_Times();
     updatemenu=1;
     return;
   }
@@ -170,7 +170,7 @@ void readtarget(const char *file, int ifile, int flag, int *errorcode){
   targinfo[ifile].loaded=1;
   targinfo[ifile].display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  updatetimes();
+  Update_Times();
   fclose(stream);
   Idle_CB();
 
@@ -212,7 +212,7 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
     visTarg = 0;
     ReadTargFile=0;
     ntargets=0;
-    updatetimes();
+    Update_Times();
     updatemenu=1;
     return;
   }
@@ -321,7 +321,7 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
   targinfo[ifile].loaded=1;
   targinfo[ifile].display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  updatetimes();
+  Update_Times();
   fclose(stream);
   Idle_CB();
 

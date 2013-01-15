@@ -247,7 +247,7 @@ void LabelMenu(int value){
     if(hrrinfo!=NULL){
       if(hrrinfo->display==0){
         hrrinfo->display=1;
-        updatetimes();
+        Update_Times();
       }
       hrrinfo->display=1;
     }
@@ -268,7 +268,7 @@ void LabelMenu(int value){
     if(hrrinfo!=NULL){
       if(hrrinfo->display==1){
         hrrinfo->display=0;
-        updatetimes();
+        Update_Times();
       }
       hrrinfo->display=0;
     }
@@ -296,7 +296,7 @@ void LabelMenu(int value){
        visHRRlabel=0;
        if(hrrinfo!=NULL){
          hrrinfo->display=visHRRlabel;
-         updatetimes();
+         Update_Times();
        }
      }
      break;
@@ -333,7 +333,7 @@ void LabelMenu(int value){
      if(visHRRlabel==1)visTimeLabels=1;
      if(hrrinfo!=NULL){
        hrrinfo->display=visHRRlabel;
-       updatetimes();
+       Update_Times();
      }
      break;
    case 17:
@@ -653,7 +653,7 @@ void IsoShowMenu(int value){
          iisotype=isoi->type;
        }
      }
-     updateShow();
+     Update_Show();
     }
     else if(value>=10001){
       if(value==10001){
@@ -667,7 +667,7 @@ void IsoShowMenu(int value){
           isoinfo[i].display=0;
         }
       }
-     updateShow();
+     Update_Show();
     }
   }
   update_iso_showlevels();
@@ -692,7 +692,7 @@ void ShowVSliceMenu(int value){
       vd->display=1;
     }
     show_all_slices=1;
-    updatetimes();
+    Update_Times();
     return;
   }
   if(value==HIDE_ALL){
@@ -702,7 +702,7 @@ void ShowVSliceMenu(int value){
       vd->display=0;
     }
     show_all_slices=0;
-    updatetimes();
+    Update_Times();
     return;
   }
   if(value==-11){
@@ -745,7 +745,7 @@ void ShowVSliceMenu(int value){
     vd->display=1;
   }
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  updateShow();
+  Update_Show();
 }
 
 /* ------------------ ShowHideSliceMenu ------------------------ */
@@ -809,7 +809,7 @@ void ShowHideSliceMenu(int value){
 
   updateglui();
   updateslicelistindex(slicefilenum);
-  updateShow();
+  Update_Show();
 }
 
 /* ------------------ ShowMultiSliceMenu ------------------------ */
@@ -865,7 +865,7 @@ void ShowMultiSliceMenu(int value){
 
   updateglui();
   updateslicelistindex(slicefilenum);
-  updateShow();
+  Update_Show();
 }
 
 /* ------------------ ShowHideMenu ------------------------ */
@@ -892,7 +892,7 @@ void ShowHideMenu(int value){
       plotstate=DYNAMIC_PLOTS;
       visEvac=1;
     }
-    updatetimes();
+    Update_Times();
     break;
   case 1:
     if(plotstate==DYNAMIC_PLOTS){
@@ -902,7 +902,7 @@ void ShowHideMenu(int value){
       plotstate=DYNAMIC_PLOTS;
       visSmoke=1;
     }
-    updatetimes();
+    Update_Times();
     break;
   case 2:
     visTarg=1-visTarg;
@@ -1181,7 +1181,7 @@ void LanguageMenu(int value){
     }
   }
   init_translate(smokeview_bindir,startup_lang_code);
-  update_glui_names();
+  Update_Glui_Names();
 }
 #endif
 /* ------------------ FontMenu ------------------------ */
@@ -1302,7 +1302,7 @@ void ResetMenu(int value){
     }
     break;
   case MENU_TIMEVIEW:
-    updatetimes();
+    Update_Times();
     break;
   case SAVE_VIEWPOINT:
     Get_Next_View_Label(view_label);
@@ -2519,7 +2519,7 @@ void TourMenu(int value){
   case -6:
     tour_constant_vel=1-tour_constant_vel;
     createtourpaths();
-    updatetimes();
+    Update_Times();
     break;
   case -1:
     for(i=0;i<ntours;i++){
@@ -2578,7 +2578,7 @@ void TourMenu(int value){
   create_tourlist();
   update_tourcontrols();
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  if(value!=-5&&value!=-4)updatetimes();
+  if(value!=-5&&value!=-4)Update_Times();
   callfrom_tourglui=0;
 
 }
@@ -2640,7 +2640,7 @@ void EvacMenu(int value){
       }
     }
     force_redisplay=1;
-    update_framenumber(0);
+    Update_Framenumber(0);
   }
   if(value>=0){
     ReadEvacFile=1;
@@ -2905,7 +2905,7 @@ void ParticleMenu(int value){
         }
       }
       force_redisplay=1;
-      update_framenumber(0);
+      Update_Framenumber(0);
     }
   }
   updatemenu=1;  
@@ -3878,7 +3878,7 @@ void LoadPatchMenu(int value){
       }
     }
     force_redisplay=1;
-    update_framenumber(0);
+    Update_Framenumber(0);
   }
   else if(value==-3){
     Update_All_Patch_Bounds();

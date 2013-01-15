@@ -11,15 +11,15 @@
 
 UPEXTERN void Show_Glui_Dialogs(void);
 UPEXTERN void Update_Glui_Dialogs(void);
-UPEXTERN void update_glui_names(void);
-UPEXTERN void updateclip(int slicedir);
-UPEXTERN void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int maxi);
+UPEXTERN void Update_Glui_Names(void);
+UPEXTERN void Update_Clip(int slicedir);
+UPEXTERN void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int maxi);
 UPEXTERN int compare_float( const void *arg1, const void *arg2 );
-UPEXTERN void update_framenumber(int changetime);
+UPEXTERN void Update_Framenumber(int changetime);
 UPEXTERN void reset_itimes0(void);
-UPEXTERN void updateShow(void);
-UPEXTERN void synctimes(void);
-UPEXTERN void updatetimes(void);
+UPEXTERN void Update_Show(void);
+UPEXTERN void Synch_Times(void);
+UPEXTERN void Update_Times(void);
 UPEXTERN int getplotstate(int choice);
 UPEXTERN int getindex(float key, const float *list, int nlist);
 UPEXTERN int isearch(float *list, int nlist, float key, int guess);

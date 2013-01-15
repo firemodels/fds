@@ -866,7 +866,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
   vd->loaded=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatemenu=1;
-  updatetimes();
+  Update_Times();
 
   valmax=-100000.0;
   valmin=100000.0;
@@ -1034,7 +1034,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
       updateglui();
       update_unit_defs();
-      updatetimes();
+      Update_Times();
 #ifdef pp_MEMDEBUG
       printf("After slice unload: ");
       PrintMemoryInfo;
@@ -1265,7 +1265,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   islicetype=getslicetype(sd);
   plotstate=getplotstate(DYNAMIC_PLOTS);
   update_unit_defs();
-  updatetimes();
+  Update_Times();
   CheckMemory;
 
   if(sd->compression_type==0){

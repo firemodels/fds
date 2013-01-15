@@ -1822,7 +1822,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case '0':
       if(plotstate==DYNAMIC_PLOTS){
-        updatetimes();
+        Update_Times();
         reset_time_flag=1;
         return;
       }
@@ -1902,9 +1902,9 @@ void keyboard(unsigned char key, int flag){
     if(stepclip_Y==1  )clip_J += skip_global*ClipDir;
     if(stepclip_Z==1  )clip_K += skip_global*ClipDir;
 
-    updateclipbounds(clip_x,&clip_i,clip_X,&clip_I,current_mesh->ibar);
-    updateclipbounds(clip_y,&clip_j,clip_Y,&clip_J,current_mesh->jbar);
-    updateclipbounds(clip_z,&clip_k,clip_Z,&clip_K,current_mesh->kbar);
+    Update_Clipbounds(clip_x,&clip_i,clip_X,&clip_I,current_mesh->ibar);
+    Update_Clipbounds(clip_y,&clip_j,clip_Y,&clip_J,current_mesh->jbar);
+    Update_Clipbounds(clip_z,&clip_k,clip_Z,&clip_K,current_mesh->kbar);
     return;
   }
 
@@ -2446,7 +2446,7 @@ void Idle_CB(void){
 
   CheckMemory;
   glutSetWindow(mainwindow_id);
-  updateShow();
+  Update_Show();
   thistime = glutGet(GLUT_ELAPSED_TIME);
   thisinterval = thistime - lasttime;
   frame_count++;
@@ -2460,7 +2460,7 @@ void Idle_CB(void){
     checktimebound();
     UpdateTimeLabels();
   }
-  update_framenumber(changetime);
+  Update_Framenumber(changetime);
   if(redisplay==1){
     glutPostRedisplay();
   }

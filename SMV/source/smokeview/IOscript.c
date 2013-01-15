@@ -736,7 +736,7 @@ void script_loadparticles(scriptdata *scripti){
   }
   if(count==0)fprintf(stderr,"*** Error: Particles files failed to load\n");
   force_redisplay=1;
-  update_framenumber(0);
+  Update_Framenumber(0);
   updatemenu=1;
 }
 
@@ -815,15 +815,15 @@ void script_loadvolsmokeframe(scriptdata *scripti, int flag){
   }
   plotstate=getplotstate(DYNAMIC_PLOTS);
   stept=1;
-  updatetimes();
+  Update_Times();
   force_redisplay=1;
-  update_framenumber(framenum);
+  Update_Framenumber(framenum);
   i = framenum;
   itimes=i;
   script_itime=i;
   stept=1;
   force_redisplay=1;
-  update_framenumber(0);
+  Update_Framenumber(0);
   UpdateTimeLabels();
   keyboard('r',FROM_SMOKEVIEW);
   RenderOnceNow=0;
@@ -977,7 +977,7 @@ void script_loadboundary(scriptdata *scripti){
   if(count==0)fprintf(stderr,"*** Error: Boundary files of type %s failed to load\n",scripti->cval);
   force_redisplay=1;
   updatemenu=1;
-  update_framenumber(0);
+  Update_Framenumber(0);
 
 }
 
@@ -1306,7 +1306,7 @@ void script_settimeval(scriptdata *scripti){
         script_itime=i;
         stept=0;
         force_redisplay=1;
-        update_framenumber(0);
+        Update_Framenumber(0);
         UpdateTimeLabels();
         break;
       }
@@ -1341,7 +1341,7 @@ void settimeval(float timeval){
         itimes=i;
         stept=1;
         force_redisplay=1;
-        update_framenumber(0);
+        Update_Framenumber(0);
         UpdateTimeLabels();
         keyboard('t',FROM_SMOKEVIEW);
         break;

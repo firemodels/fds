@@ -868,7 +868,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
     plotstate=getplotstate(DYNAMIC_PLOTS);
     update_patchtype();
     update_unit_defs();
-    updatetimes();
+    Update_Times();
     return;
   }
 
@@ -935,8 +935,8 @@ void read_geomdata(int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   update_patchtype();
   update_unit_defs();
-  updatetimes();
-  update_framenumber(1);
+  Update_Times();
+  Update_Framenumber(1);
 }
 
 /* ------------------ draw_geomdata ------------------------ */

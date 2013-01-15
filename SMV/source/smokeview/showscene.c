@@ -88,7 +88,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     ZoomMenu(-2);
   }
 
-  updateShow();
+  Update_Show();
   if(global_times!=NULL&&updateUpdateFrameRateMenu==1)FrameRateMenu(frameratevalue);
   if(updatefaces==1)update_faces();
   if(updatefacelists==1)update_facelists();

@@ -996,7 +996,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   }
 
   if(flag==UNLOAD){
-    updatetimes();
+    Update_Times();
     updatemenu=1;
     updatePart5extremes();
 #ifdef _DEBUG
@@ -1009,7 +1009,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   lenfile = strlen(file);
   if(lenfile==0){
     readpart("",ifile,UNLOAD,&error);
-    updatetimes();
+    Update_Times();
     return;
   }
   
@@ -1073,7 +1073,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   parti->loaded=1;
   parti->display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  updatetimes();
+  Update_Times();
   updatePart5extremes();
   updatemenu=1;
   Idle_CB();
@@ -1176,7 +1176,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   FREEMEMORY(parti->sprframe)
 
   if(flag==UNLOAD){
-    updatetimes();
+    Update_Times();
     updatemenu=1;
 #ifdef _DEBUG
     printf("After particle file unload: ");
@@ -1194,7 +1194,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   lenfile = strlen(file);
   if(lenfile==0){
     readpart("",ifile,UNLOAD,&error);
-    updatetimes();
+    Update_Times();
     return;
   }
   
@@ -1444,7 +1444,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   partinfo[ifile].loaded=1;
   partinfo[ifile].display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  updatetimes();
+  Update_Times();
   updatemenu=1;
   Idle_CB();
 

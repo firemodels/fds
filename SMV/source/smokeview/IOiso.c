@@ -237,7 +237,7 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
   update_triangles();
 
-  updatetimes();
+  Update_Times();
   get_faceinfo();
 #ifdef _DEBUG
   printf("After iso load: ");
@@ -292,7 +292,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   ib->loaded=0;
   ib->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  updatetimes();
+  Update_Times();
   *errorcode = 0;
 
 #ifdef _DEBUG
@@ -683,7 +683,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     CheckMemory;
   }
 
-  updatetimes();
+  Update_Times();
 #ifdef _DEBUG
   printf("After iso load: ");
   PrintMemoryInfo;
@@ -797,7 +797,7 @@ void unloadiso(mesh *meshi){
     ReadIsoFile=0;
   }
 
-  updatetimes();
+  Update_Times();
   updatemenu=1;
   Idle_CB();
 
