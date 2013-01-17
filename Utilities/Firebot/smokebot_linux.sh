@@ -670,6 +670,7 @@ make_smv_movies()
 {
    cd $FDS_SVNROOT/Verification
    scripts/Make_SMV_Movies.sh 2>&1  &> $FIREBOT_DIR/output/stage6f
+   rsync -avzu --exclude .svn ~/FDS-SMV/Manuals/SMV_Animations/ /var/www/html/smokebot/movies
 }
 
 check_smv_movies()
@@ -838,7 +839,7 @@ email_build_status()
    echo "   results (public): https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit" >> $TIME_LOG
    if [ "$MAKEMOVIES" == "1" ]
    then
-     echo "animations: http://blaze.nist.gov/smv_animations" >> $TIME_LOG
+     echo "animations: http://blaze.nist.gov/smokebot/movies" >> $TIME_LOG
    fi
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     cat $SVN_SMVLOG >> $TIME_LOG
