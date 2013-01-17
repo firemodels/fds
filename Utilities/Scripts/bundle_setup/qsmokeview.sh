@@ -59,6 +59,6 @@ fi
 i=0
 while [ $i -lt $nprocesses ]; do
   qfds.sh -d $dir -r -s -x -y $i -z $nprocesses -q $queue $input
-  sleep 3
+  sleep 5
   let i=i+1
 done
