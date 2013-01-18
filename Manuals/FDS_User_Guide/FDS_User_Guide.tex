@@ -7006,8 +7006,7 @@ output the surface temperature of a single particle.
 \subsection{Drag}
 \label{info:particle_drag}
 
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere.
-To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}.
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}.
 The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
 \subsection{Splitting particles}
@@ -7161,15 +7160,20 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
       SURF_ID='SCREEN', ORIENTATION(1:1,3)=1,0,0 /
 &SURF ID='SCREEN', THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
       LENGTH=5., CONVECTION_LENGTH_SCALE=0.0003, MATL_ID='ALUMINUM' /
-&MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=900. /
+&MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=0.9 /
 \end{verbatim}
 \normalsize
 
-\noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is located in each cell with the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles should be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example an aluminum screen with a 40~\% free area and an 0.0003 m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} on the {\ct SURF} line, when multiplied by the diameter, results in 60~\% of the cell area.  The pressure drop across the screen is given by
-\be \Delta P \; = \; \Delta x \; \left(\frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt {\hbox{K}}} u^2 \right)\ee
-where $\Delta x$ is the screen thickness and Y and K are empirical constants given by
-\be \hbox{K}= 3.44 \times 10^{-9} \; \hbox{\ct FREE\_AREA\_FRACTION}^{1.6}\ee
-\be \hbox{Y}= 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}\ee
+\noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles should be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} on the {\ct SURF} line, when multiplied by the diameter, results in 60~\% of the cell area. It represents the length of wire that makes up the section of the screen that spans a single grid cell. The pressure drop across the screen is given by
+\be 
+   \Delta p =  l \; \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
+\ee
+where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the viscosity of the gas, $u$ is the velocity normal to the screen, $\rho$ is the density of the gas, and $Y$ and $K$ are empirical constants given by
+\begin{eqnarray}
+   K &=& 3.44 \times 10^{-9} \; \hbox{\ct FREE\_AREA\_FRACTION}^{1.6} \; \; \hbox{m}^2 \\
+   Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
+\end{eqnarray}
+Note that the {\ct CONVECTION\_LENGTH\_SCALE}, which in this case is set equal to the wire diameter, is used in the convective heat transfer calculation. 
 
 
 \subsection{Electrical Cable Failure}
