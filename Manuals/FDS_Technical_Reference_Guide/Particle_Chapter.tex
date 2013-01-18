@@ -243,7 +243,7 @@ the gas. The film thickness, $\delta$, is given by
 \be
    \delta = \max \left( \delta_{\text min} , \sum \frac{4}{3} \pi r_d^3 / A \right)
 \ee
-where $A$ is the area of the wall cell to which the droplet is attached. 
+where $A$ is the area of the wall cell to which the droplet is attached.
 It is assumed that the minimum film thickness, $\delta_{\text min}$, is $1 \times 10^{-5}$~m. This prevents a very small amount of liquid from spreading across the entire cell width. It is also assumed that the liquid is opaque with regard to thermal radiation.
 
 \subsection{Reduction of Pyrolysis Rate due to Water}
@@ -308,21 +308,21 @@ The net radiative heat flux onto the surface of the particle is
 
 \subsection{Porous Media (Screens, Metal Meshes, and Similar Materials)}
 
-Catwalk grating, expanded metal mesh, window screens, and similar thin porous materials are commonly found in buildings.  For a
-typical calculation, the dimensions of the holes in the porous material and the material surrounding them are going to be much
-smaller than the grid size.  There is, therefore, no easy way to model these materials using the standard inputs for obstructions.
-Lagrangian particles can; however, be used to represent both the drag and the mass of these materials.  As discussed previously, particles can be assigned material properties for heat trasnfer.  In this manner, a plane of Lagrangian particles could be defined to represent the mass of a window screen.  Since the particles are not a solid obstruction, gas can flow through them.  By modifying the particle drag law, the particles can impose drag appropriate for a thin porous material.  The pressure drop across a screen is given by~\cite{Bartzanas:1}:
-\be \frac {\d p}{\d x} \; = \; \frac{K}{\mu} u \; + \; \rho \frac{Y}{\sqrt{K}}u^2\ee
-where $K$ is a permeability factor, $Y$ is an inertial factor, $u$ is the normal velocity to the screen, $\rho$ the density of the gas, and $\mu$ the viscosity of the gas.  K and Y are given as functions of $\varepsilon$, the screen porosity (free area/total area):
-\be K \; = \; 3.44 \times 10^{-9}\varepsilon^{1.6} \quad ; \quad Y \; = \; 4.30 \times 10^{-2}\varepsilon^{2.13} \ee
+Catwalk grating, expanded metal mesh, window screens, and similar thin porous materials are commonly found in buildings.  For a typical calculation, the dimensions of the holes in the porous material and the material surrounding them are going to be much smaller than the grid size.  There is, therefore, no easy way to model these materials using solid obstructions. Lagrangian particles can; however, be used to represent both the drag and the mass of these materials. Lagrangian particles arranged in a plane can represent a window screen, for example. By modifying the particle drag law, the particles can impose drag appropriate for a thin porous material.  The pressure drop across a screen of thickness $l$ is given by~\cite{Bartzanas:1}:
+\be 
+   \frac {\Delta p}{l} =  \frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} \, u^2
+\ee
+where $K$ is a permeability constant, $Y$ is an inertial constant, $u$ is the velocity normal to the screen, $\rho$ is the density, and $\mu$ is the viscosity of the gas.  K and Y are functions the screen porosity (free area/total area), $\varepsilon$:
+\be 
+   K = 3.44 \times 10^{-9} \; \varepsilon^{1.6} \; \; \hbox{m}^2 \quad ; \quad Y = 0.043 \, \varepsilon^{2.13} 
+\ee
+The force vector $\bof_b$ in Eq.~(\ref{momentum}) represents the momentum transferred from the screen to the gas:
+\be
+   \bof_b = l \; \left( \frac{\mu}{K} + \rho \frac{Y}{\sqrt{K}} |\bu| \right) \left( \frac{u}{\dx} , \frac{v}{\dy} , \frac{w}{\dz} \right)
+\ee
+This force term essentially spreads the pressure drop over the width of a grid cell.
 
-The acceleration of the gas is given by applying the pressure drop over the width of the screen and the mass of gas flowing through 
-it.  The acceleration, $a$, is the term used by FDS to account for the drag.  It is given by:
-\begin{eqnarray}
-a & = & \frac{F}{m} \; = \; \frac{p A}{m} \\
-a & = & \frac{\frac{\d p}{\d x} \Delta x_{screen} A_{cell}}{V_{cell} \rho} \\
-a & = & \left( \frac{K}{\mu} u \; + \; \rho \frac{Y}{\sqrt{K}}u^2 \right) \frac{\Delta x_{screen} A_{cell}}{V_{cell} \rho} 
-\end{eqnarray}
+
 
 
 \section{Turbulent Dispersion}
