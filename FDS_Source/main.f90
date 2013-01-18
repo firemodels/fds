@@ -101,6 +101,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Start wall clock timing
 
+INITIALIZATION_PHASE = .TRUE.
 WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
@@ -518,16 +519,20 @@ ENDDO
 
 WALL_CLOCK_START_ITERATIONS = WALL_CLOCK_TIME()
 
-!***********************************************************************************************************************************
-!                                                   MAIN TIMESTEPPING LOOP
-!***********************************************************************************************************************************
-
 ! Level Set model for firespread in vegetation (currently uses constant wind: does not need CFD computations).
 
 IF (VEG_LEVEL_SET) THEN
   CALL LEVEL_SET_FIRESPREAD(1)
   CALL END_FDS
 ENDIF
+
+! This ends the initialization part of the program
+
+INITIALIZATION_PHASE = .FALSE.
+
+!***********************************************************************************************************************************
+!                                                   MAIN TIMESTEPPING LOOP
+!***********************************************************************************************************************************
  
 MAIN_LOOP: DO  
    
