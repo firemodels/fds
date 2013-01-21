@@ -7413,20 +7413,19 @@ USE DEVICE_VARIABLES, ONLY : DEVICE, N_DEVC
 USE CONTROL_VARIABLES, ONLY : CONTROL, N_CTRL
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 
-INTEGER :: N,NN,NM,NNN,NVO,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY
-REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE, &
+INTEGER :: N,NN,NM,NNN,N_VENT_O,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,N_VENT_NEW,II,JJ,KK
+REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB1,XB2,XB3,XB4,XB5,XB6, &
             REYNOLDS_STRESS(3,3),L_EDDY,VEL_RMS,L_EDDY_IJ(3,3),UVW(3)
-CHARACTER(30) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP
+CHARACTER(30) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
+TYPE(MULTIPLIER_TYPE), POINTER :: MR
 LOGICAL :: REJECT_VENT,EVACUATION,OUTLINE,EVACUATION_VENT
-NAMELIST /VENT/ COLOR,CTRL_ID,DEVC_ID,DYNAMIC_PRESSURE,EVACUATION,FYI,ID,IOR,L_EDDY,L_EDDY_IJ,MB,MESH_ID,N_EDDY,OUTLINE,&
+NAMELIST /VENT/ COLOR,CTRL_ID,DEVC_ID,DYNAMIC_PRESSURE,EVACUATION,FYI,ID,IOR,L_EDDY,L_EDDY_IJ,MB,MESH_ID,MULT_ID,N_EDDY,OUTLINE,&
                 PBX,PBY,PBZ,PRESSURE_RAMP,REYNOLDS_STRESS,RGB,SPREAD_RATE,SURF_ID,TEXTURE_ORIGIN,TMP_EXTERIOR,TMP_EXTERIOR_RAMP,&
                 TRANSPARENCY,UVW,VEL_RMS,XB,XYZ
  
 MESH_LOOP_1: DO NM=1,NMESHES
-
-!  IF (PROCESS(NM)/=MYID) CYCLE MESH_LOOP_1
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
@@ -7436,8 +7435,16 @@ MESH_LOOP_1: DO NM=1,NMESHES
    COUNT_VENT_LOOP: DO
       CALL CHECKREAD('VENT',LU_INPUT,IOS) 
       IF (IOS==1) EXIT COUNT_VENT_LOOP
+      MULT_ID = 'null'
       READ(LU_INPUT,NML=VENT,END=3,ERR=4,IOSTAT=IOS)
-      N_VENT = N_VENT + 1
+      N_VENT_NEW = 1
+      IF (MULT_ID/='null') THEN
+         DO N=1,N_MULT
+            MR => MULTIPLIER(N)
+            IF (MULT_ID==MR%ID) N_VENT_NEW = MR%N_COPIES
+         ENDDO
+      ENDIF
+      N_VENT = N_VENT + N_VENT_NEW
       4 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with VENT ',N_VENT+1
          CALL SHUTDOWN(MESSAGE)
@@ -7455,13 +7462,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
    CALL ChkMemErr('READ','VENTS',IZERO)
    VENTS=>M%VENTS
  
-   NVO   = N_VENT
-   N     = 0
+   N_VENT_O = N_VENT
+   N        = 0
  
    REWIND(LU_INPUT)
-   READ_VENT_LOOP: DO NN=1,NVO
+   READ_VENT_LOOP: DO NN=1,N_VENT_O
  
-      N       = N + 1
       IOR     = 0
       MB      = 'null'
       PBX     = -1.E6_EB
@@ -7470,6 +7476,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
       SURF_ID = 'null'
       COLOR   = 'null'
       MESH_ID = 'null'
+      MULT_ID = 'null'
       ID      = 'null'
       RGB     =-1
       TRANSPARENCY = 1._EB
@@ -7492,11 +7499,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
       REYNOLDS_STRESS=0._EB
       UVW = -1.E12_EB
  
-      IF (NN==NVO-2 .AND. CYLINDRICAL .AND. XS<=TWO_EPSILON_EB) MB='XMIN'
-      IF (NN==NVO-1 .AND. TWO_D)                        MB='YMIN'
-      IF (NN==NVO   .AND. TWO_D)                        MB='YMAX'
-      IF (NN==NVO-1 .AND. EVACUATION_ONLY(NM))          MB='ZMIN'
-      IF (NN==NVO   .AND. EVACUATION_ONLY(NM))          MB='ZMAX'
+      IF (NN==N_VENT_O-2 .AND. CYLINDRICAL .AND. XS<=TWO_EPSILON_EB) MB='XMIN'
+      IF (NN==N_VENT_O-1 .AND. TWO_D)                        MB='YMIN'
+      IF (NN==N_VENT_O   .AND. TWO_D)                        MB='YMAX'
+      IF (NN==N_VENT_O-1 .AND. EVACUATION_ONLY(NM))          MB='ZMIN'
+      IF (NN==N_VENT_O   .AND. EVACUATION_ONLY(NM))          MB='ZMAX'
  
       IF (MB=='null') THEN
          EVACUATION_VENT = .FALSE.
@@ -7504,13 +7511,17 @@ MESH_LOOP_1: DO NM=1,NMESHES
          EVACUATION_VENTS: IF (.NOT. EVACUATION_VENT) THEN
             CALL CHECKREAD('VENT',LU_INPUT,IOS) 
             IF (IOS==1) EXIT READ_VENT_LOOP
-            READ(LU_INPUT,VENT,END=37,ERR=38)    ! Read in info for VENT N
+            READ(LU_INPUT,VENT,END=37)    ! Read in info for VENT N
          END IF EVACUATION_VENTS
       ELSE
          SURF_ID = 'MIRROR'
       ENDIF
  
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
+         IF (MULT_ID/='null') THEN
+            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: MULT_ID cannot be applied to VENT',NN,' because it uses PBX, PBY or PBZ.'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
          XB(1) = XS
          XB(2) = XF
          XB(3) = YS
@@ -7525,6 +7536,10 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (MB/='null') THEN
          IF (NMESHES>1 .AND. SURF_ID=='PERIODIC') THEN
             WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT',NN,' multi-mesh PERIODIC boundary'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+         IF (MULT_ID/='null') THEN
+            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: MULT_ID cannot be applied to VENT',NN,' because it uses MB.'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          XB(1) = XS
@@ -7556,7 +7571,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
  
       IF (MESH_ID/='null' .AND. MESH_ID/=MESH_NAME(NM))  REJECT_VENT = .TRUE.
  
-      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4))  .AND. TWO_D .AND. NN<NVO-1) THEN
+      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4))  .AND. TWO_D .AND. NN<N_VENT_O-1) THEN
          IF (ID=='null')WRITE(MESSAGE,'(A,I4,A)')'ERROR: VENT ',NN,      ' cannot be specified on a y boundary in a 2D calculation'
          IF (ID/='null')WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calculation'
          CALL SHUTDOWN(MESSAGE)
@@ -7574,197 +7589,231 @@ MESH_LOOP_1: DO NM=1,NMESHES
          DEVC_ID    = 'null'
          CTRL_ID    = 'null'
       END IF
-      
-      VT=>VENTS(N)
-      
-      IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) ) VT%TOTAL_INPUT_AREA = (XB(4)-XB(3))*(XB(6)-XB(5))
-      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4)) ) VT%TOTAL_INPUT_AREA = (XB(2)-XB(1))*(XB(6)-XB(5))
-      IF (ABS(XB(5)-XB(6))<=SPACING(XB(6)) ) VT%TOTAL_INPUT_AREA = (XB(2)-XB(1))*(XB(4)-XB(3))
 
-      XB(1) = MAX(XB(1),XS-DX(0))
-      XB(2) = MIN(XB(2),XF+DX(IBP1))
-      XB(3) = MAX(XB(3),YS-DY(0))
-      XB(4) = MIN(XB(4),YF+DY(JBP1))
-      XB(5) = MAX(XB(5),ZS-DZ(0))
-      XB(6) = MIN(XB(6),ZF+DZ(KBP1))
- 
-      IF (XB(1)>XF+DX(IBP1) .OR. XB(2)<XS-DX(0) .OR. &
-          XB(3)>YF+DY(JBP1) .OR. XB(4)<YS-DY(0) .OR. &
-          XB(5)>ZF+DZ(KBP1) .OR. XB(6)<ZS-DZ(0)) REJECT_VENT = .TRUE.
- 
-      VT%I1 = NINT( GINV(XB(1)-XS,1,NM)*RDXI   ) 
-      VT%I2 = NINT( GINV(XB(2)-XS,1,NM)*RDXI   )
-      VT%J1 = NINT( GINV(XB(3)-YS,2,NM)*RDETA  ) 
-      VT%J2 = NINT( GINV(XB(4)-YS,2,NM)*RDETA  )
-      VT%K1 = NINT( GINV(XB(5)-ZS,3,NM)*RDZETA )
-      VT%K2 = NINT( GINV(XB(6)-ZS,3,NM)*RDZETA )
- 
-      ! Thicken evacuation mesh vents in the z direction
+      ! Loop over all possible multiples of the OBST
 
-      IF (EVACUATION_ONLY(NM) .AND. EVACUATION .AND. VT%K1==VT%K2 .AND. .NOT.REJECT_VENT) THEN
-         VT%K1 = GINV(.5_EB*(XB(5)+XB(6))-ZS,3,NM)*RDZETA
-         VT%K2 = KBAR
-         XB(5) = ZS
-         XB(6) = ZF
-         IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4)) ) THEN
-            IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Evacuation VENT ',NN,      ' must be a vertical plane'
-            IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: Evacuation VENT ',TRIM(ID),' must be a vertical plane'
-            CALL SHUTDOWN(MESSAGE)
-         ENDIF
-      ENDIF
-
-      IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) ) THEN
-         IF (VT%J1==VT%J2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
-         IF (VT%I1>IBAR .OR. VT%I2<0)        REJECT_VENT=.TRUE.
-      ENDIF
-      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4)) ) THEN
-         IF (VT%I1==VT%I2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
-         IF (VT%J1>JBAR .OR. VT%J2<0)        REJECT_VENT=.TRUE.
-      ENDIF
-      IF (ABS(XB(5)-XB(6))<=SPACING(XB(6)) ) THEN
-         IF (VT%I1==VT%I2 .OR. VT%J1==VT%J2) REJECT_VENT=.TRUE.
-         IF (VT%K1>KBAR .OR. VT%K2<0)        REJECT_VENT=.TRUE.
-      ENDIF
-
-      ! Evacuation criteria
- 
-      IF (.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) REJECT_VENT=.TRUE.
-      IF (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM)) REJECT_VENT=.TRUE.
- 
-      IF (ALL(EVACUATION_ONLY)) THEN
-         DEVC_ID    = 'null'
-         CTRL_ID    = 'null'
-      END IF
-
-      ! If the VENT is to rejected
- 
-      IF (REJECT_VENT) THEN
-         N = N-1
-         N_VENT = N_VENT-1
-         CYCLE READ_VENT_LOOP
-      ENDIF
- 
-      ! Vent area
- 
-      VT%X1 = XB(1)
-      VT%X2 = XB(2)
-      VT%Y1 = XB(3)
-      VT%Y2 = XB(4)
-      VT%Z1 = XB(5)
-      VT%Z2 = XB(6)
- 
-      IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) ) VT%INPUT_AREA = (XB(4)-XB(3))*(XB(6)-XB(5))
-      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4)) ) VT%INPUT_AREA = (XB(2)-XB(1))*(XB(6)-XB(5))
-      IF (ABS(XB(5)-XB(6))<=SPACING(XB(6)) ) VT%INPUT_AREA = (XB(2)-XB(1))*(XB(4)-XB(3))
- 
-      ! Check the SURF_ID against the list of SURF's
-
-      CALL CHECK_SURF_NAME(SURF_ID,EX)
-      IF (.NOT.EX) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
-
-      ! Assign SURF_INDEX, Index of the Boundary Condition
-
-      VT%SURF_INDEX = DEFAULT_SURF_INDEX
-      DO NNN=0,N_SURF
-         IF (SURF_ID==SURFACE(NNN)%ID) VT%SURF_INDEX = NNN
+      MR => MULTIPLIER(0)
+      DO NNN=1,N_MULT
+         IF (MULT_ID==MULTIPLIER(NNN)%ID) MR => MULTIPLIER(NNN)
       ENDDO
 
-      IF (SURF_ID=='OPEN')                            VT%TYPE_INDICATOR =  2
-      IF (SURF_ID=='MIRROR' .OR. SURF_ID=='PERIODIC') VT%TYPE_INDICATOR = -2
-      IF ((MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) .AND. SURF_ID=='OPEN') VT%TYPE_INDICATOR = -2
- 
-      VT%BOUNDARY_TYPE = SOLID_BOUNDARY
-      IF (VT%SURF_INDEX==OPEN_SURF_INDEX)     VT%BOUNDARY_TYPE = OPEN_BOUNDARY
-      IF (VT%SURF_INDEX==MIRROR_SURF_INDEX)   VT%BOUNDARY_TYPE = MIRROR_BOUNDARY
-      IF (VT%SURF_INDEX==PERIODIC_SURF_INDEX) VT%BOUNDARY_TYPE = PERIODIC_BOUNDARY
-      IF (VT%SURF_INDEX==HVAC_SURF_INDEX)     VT%BOUNDARY_TYPE = HVAC_BOUNDARY
-      VT%IOR = IOR
-      VT%ORDINAL = NN
- 
-      ! Activate and Deactivate logic
+      K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
+         J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
+            I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
-      VT%ACTIVATED = .TRUE.
-      VT%DEVC_ID   = DEVC_ID
-      VT%CTRL_ID   = CTRL_ID
-      VT%ID        = ID      
-      CALL SEARCH_CONTROLLER('VENT',CTRL_ID,DEVC_ID,VT%DEVC_INDEX,VT%CTRL_INDEX,N)
-      IF (DEVC_ID /= 'null') THEN
-         IF (.NOT.DEVICE(VT%DEVC_INDEX)%INITIAL_STATE) VT%ACTIVATED = .FALSE.
-      ENDIF
-      IF (CTRL_ID /= 'null') THEN
-         IF (.NOT.CONTROL(VT%CTRL_INDEX)%INITIAL_STATE) VT%ACTIVATED = .FALSE.
-      ENDIF
+               IF (.NOT.MR%SEQUENTIAL) THEN
+                  XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  XB3 = XB(3) + MR%DY0 + JJ*MR%DXB(3)
+                  XB4 = XB(4) + MR%DY0 + JJ*MR%DXB(4)
+                  XB5 = XB(5) + MR%DZ0 + KK*MR%DXB(5)
+                  XB6 = XB(6) + MR%DZ0 + KK*MR%DXB(6)
+               ELSE
+                  XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  XB3 = XB(3) + MR%DY0 + II*MR%DXB(3)
+                  XB4 = XB(4) + MR%DY0 + II*MR%DXB(4)
+                  XB5 = XB(5) + MR%DZ0 + II*MR%DXB(5)
+                  XB6 = XB(6) + MR%DZ0 + II*MR%DXB(6)
+               ENDIF
 
-      IF ( (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) .AND. &
-           (VT%DEVC_ID /= 'null' .OR. VT%CTRL_ID /= 'null') ) THEN
-         IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,      ' cannot be controlled by a device'
-         IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' cannot be controlled by a device'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
+               ! Increase the VENT counter
 
-      ! Set the VENT color index
+               N = N + 1
 
-      SELECT CASE(COLOR)
-         CASE('INVISIBLE')
-            VT%COLOR_INDICATOR = 8
-            TRANSPARENCY = 0._EB
-         CASE('null')
-            VT%COLOR_INDICATOR = 99
-         CASE DEFAULT
-            VT%COLOR_INDICATOR = 99
-            CALL COLOR2RGB(RGB,COLOR)
-      END SELECT
-      IF (VT%COLOR_INDICATOR==8) VT%TYPE_INDICATOR = -2
-      IF (OUTLINE)               VT%TYPE_INDICATOR =  2
-      VT%RGB = RGB
-      VT%TRANSPARENCY = TRANSPARENCY 
-
-      ! Parameters for specified spread of a fire over a VENT
- 
-      VT%X0 = XYZ(1)
-      VT%Y0 = XYZ(2)
-      VT%Z0 = XYZ(3)
-      VT%FIRE_SPREAD_RATE = SPREAD_RATE / TIME_SHRINK_FACTOR
-
-      ! Dynamic Pressure
-
-      VT%DYNAMIC_PRESSURE = DYNAMIC_PRESSURE
-      IF (PRESSURE_RAMP/='null') CALL GET_RAMP_INDEX(PRESSURE_RAMP,'TIME',VT%PRESSURE_RAMP_INDEX)
+               VT=>VENTS(N)
       
-      ! Synthetic Eddy Method
-      
-      VT%N_EDDY = N_EDDY
-      IF (L_EDDY>0._EB) THEN
-         VT%SIGMA_IJ = L_EDDY
-      ELSE
-         VT%SIGMA_IJ = L_EDDY_IJ ! Modified SEM (Jarrin, Ch. 7)
-      ENDIF
-      IF (VEL_RMS>0._EB) THEN
-         VT%R_IJ=0._EB
-         VT%R_IJ(1,1)=VEL_RMS**2
-         VT%R_IJ(2,2)=VEL_RMS**2
-         VT%R_IJ(3,3)=VEL_RMS**2
-      ELSE
-         VT%R_IJ = REYNOLDS_STRESS
-      ENDIF
-      
-      ! Miscellaneous
- 
-      VT%TMP_EXTERIOR = TMP_EXTERIOR + TMPM
-      IF (VT%TMP_EXTERIOR>0._EB) TMPMIN = MIN(TMPMIN,VT%TMP_EXTERIOR) 
-      IF (TMP_EXTERIOR_RAMP/='null') CALL GET_RAMP_INDEX(TMP_EXTERIOR_RAMP,'TIME',VT%TMP_EXTERIOR_RAMP_INDEX)
+               IF (ABS(XB1-XB2)<=SPACING(XB2) ) VT%TOTAL_INPUT_AREA = (XB4-XB3)*(XB6-XB5)
+               IF (ABS(XB3-XB4)<=SPACING(XB4) ) VT%TOTAL_INPUT_AREA = (XB2-XB1)*(XB6-XB5)
+               IF (ABS(XB5-XB6)<=SPACING(XB6) ) VT%TOTAL_INPUT_AREA = (XB2-XB1)*(XB4-XB3)
 
-      VT%TEXTURE(:) = TEXTURE_ORIGIN(:)
-      
-      VT%UVW = UVW
-      IF (ALL(VT%UVW > -1.E12_EB)) THEN
-         VT%UVW = VT%UVW/SQRT(VT%UVW(1)**2+VT%UVW(2)**2+VT%UVW(3)**2)
-      ENDIF
+               XB1 = MAX(XB1,XS-DX(0))
+               XB2 = MIN(XB2,XF+DX(IBP1))
+               XB3 = MAX(XB3,YS-DY(0))
+               XB4 = MIN(XB4,YF+DY(JBP1))
+               XB5 = MAX(XB5,ZS-DZ(0))
+               XB6 = MIN(XB6,ZF+DZ(KBP1))
+          
+               IF (XB1>XF+DX(IBP1) .OR. XB2<XS-DX(0) .OR. &
+                   XB3>YF+DY(JBP1) .OR. XB4<YS-DY(0) .OR. &
+                   XB5>ZF+DZ(KBP1) .OR. XB6<ZS-DZ(0)) REJECT_VENT = .TRUE.
+          
+               VT%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   ) 
+               VT%I2 = NINT( GINV(XB2-XS,1,NM)*RDXI   )
+               VT%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  ) 
+               VT%J2 = NINT( GINV(XB4-YS,2,NM)*RDETA  )
+               VT%K1 = NINT( GINV(XB5-ZS,3,NM)*RDZETA )
+               VT%K2 = NINT( GINV(XB6-ZS,3,NM)*RDZETA )
+          
+               ! Thicken evacuation mesh vents in the z direction
+         
+               IF (EVACUATION_ONLY(NM) .AND. EVACUATION .AND. VT%K1==VT%K2 .AND. .NOT.REJECT_VENT) THEN
+                  VT%K1 = GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA
+                  VT%K2 = KBAR
+                  XB5 = ZS
+                  XB6 = ZF
+                  IF (ABS(XB1-XB2)>SPACING(XB2)  .AND. ABS(XB3-XB4)>SPACING(XB4) ) THEN
+                     IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Evacuation VENT ',NN,      ' must be a vertical plane'
+                     IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: Evacuation VENT ',TRIM(ID),' must be a vertical plane'
+                     CALL SHUTDOWN(MESSAGE)
+                  ENDIF
+               ENDIF
+         
+               IF (ABS(XB1-XB2)<=SPACING(XB2) ) THEN
+                  IF (VT%J1==VT%J2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
+                  IF (VT%I1>IBAR .OR. VT%I2<0)        REJECT_VENT=.TRUE.
+               ENDIF
+               IF (ABS(XB3-XB4)<=SPACING(XB4) ) THEN
+                  IF (VT%I1==VT%I2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
+                  IF (VT%J1>JBAR .OR. VT%J2<0)        REJECT_VENT=.TRUE.
+               ENDIF
+               IF (ABS(XB5-XB6)<=SPACING(XB6) ) THEN
+                  IF (VT%I1==VT%I2 .OR. VT%J1==VT%J2) REJECT_VENT=.TRUE.
+                  IF (VT%K1>KBAR .OR. VT%K2<0)        REJECT_VENT=.TRUE.
+               ENDIF
+         
+               ! Evacuation criteria
+          
+               IF (.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) REJECT_VENT=.TRUE.
+               IF (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM)) REJECT_VENT=.TRUE.
+          
+               IF (ALL(EVACUATION_ONLY)) THEN
+                  DEVC_ID    = 'null'
+                  CTRL_ID    = 'null'
+               END IF
+         
+               ! If the VENT is to rejected
+          
+               IF (REJECT_VENT) THEN
+                  N = N-1
+                  N_VENT = N_VENT-1
+                  CYCLE I_MULT_LOOP
+               ENDIF
+          
+               ! Vent area
+          
+               VT%X1 = XB1
+               VT%X2 = XB2
+               VT%Y1 = XB3
+               VT%Y2 = XB4
+               VT%Z1 = XB5
+               VT%Z2 = XB6
+          
+               IF (ABS(XB1-XB2)<=SPACING(XB2) ) VT%INPUT_AREA = (XB4-XB3)*(XB6-XB5)
+               IF (ABS(XB3-XB4)<=SPACING(XB4) ) VT%INPUT_AREA = (XB2-XB1)*(XB6-XB5)
+               IF (ABS(XB5-XB6)<=SPACING(XB6) ) VT%INPUT_AREA = (XB2-XB1)*(XB4-XB3)
+          
+               ! Check the SURF_ID against the list of SURF's
+         
+               CALL CHECK_SURF_NAME(SURF_ID,EX)
+               IF (.NOT.EX) THEN
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+         
+               ! Assign SURF_INDEX, Index of the Boundary Condition
+         
+               VT%SURF_INDEX = DEFAULT_SURF_INDEX
+               DO NNN=0,N_SURF
+                  IF (SURF_ID==SURFACE(NNN)%ID) VT%SURF_INDEX = NNN
+               ENDDO
+         
+               IF (SURF_ID=='OPEN')                            VT%TYPE_INDICATOR =  2
+               IF (SURF_ID=='MIRROR' .OR. SURF_ID=='PERIODIC') VT%TYPE_INDICATOR = -2
+               IF ((MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) .AND. SURF_ID=='OPEN') VT%TYPE_INDICATOR=-2
+          
+               VT%BOUNDARY_TYPE = SOLID_BOUNDARY
+               IF (VT%SURF_INDEX==OPEN_SURF_INDEX)     VT%BOUNDARY_TYPE = OPEN_BOUNDARY
+               IF (VT%SURF_INDEX==MIRROR_SURF_INDEX)   VT%BOUNDARY_TYPE = MIRROR_BOUNDARY
+               IF (VT%SURF_INDEX==PERIODIC_SURF_INDEX) VT%BOUNDARY_TYPE = PERIODIC_BOUNDARY
+               IF (VT%SURF_INDEX==HVAC_SURF_INDEX)     VT%BOUNDARY_TYPE = HVAC_BOUNDARY
+               VT%IOR = IOR
+               VT%ORDINAL = NN
+          
+               ! Activate and Deactivate logic
 
-38 CONTINUE
+               VT%ACTIVATED = .TRUE.
+               VT%DEVC_ID   = DEVC_ID
+               VT%CTRL_ID   = CTRL_ID
+               VT%ID        = ID      
+               CALL SEARCH_CONTROLLER('VENT',CTRL_ID,DEVC_ID,VT%DEVC_INDEX,VT%CTRL_INDEX,N)
+               IF (DEVC_ID /= 'null') THEN
+                  IF (.NOT.DEVICE(VT%DEVC_INDEX)%INITIAL_STATE) VT%ACTIVATED = .FALSE.
+               ENDIF
+               IF (CTRL_ID /= 'null') THEN
+                  IF (.NOT.CONTROL(VT%CTRL_INDEX)%INITIAL_STATE) VT%ACTIVATED = .FALSE.
+               ENDIF
+         
+               IF ( (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. &
+                     VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) .AND. (VT%DEVC_ID /= 'null' .OR. VT%CTRL_ID /= 'null') ) THEN
+                  IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,      ' cannot be controlled by a device'
+                  IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' cannot be controlled by a device'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+         
+               ! Set the VENT color index
+         
+               SELECT CASE(COLOR)
+                  CASE('INVISIBLE')
+                     VT%COLOR_INDICATOR = 8
+                     TRANSPARENCY = 0._EB
+                  CASE('null')
+                     VT%COLOR_INDICATOR = 99
+                  CASE DEFAULT
+                     VT%COLOR_INDICATOR = 99
+                     CALL COLOR2RGB(RGB,COLOR)
+               END SELECT
+               IF (VT%COLOR_INDICATOR==8) VT%TYPE_INDICATOR = -2
+               IF (OUTLINE)               VT%TYPE_INDICATOR =  2
+               VT%RGB = RGB
+               VT%TRANSPARENCY = TRANSPARENCY 
+         
+               ! Parameters for specified spread of a fire over a VENT
+          
+               VT%X0 = XYZ(1)
+               VT%Y0 = XYZ(2)
+               VT%Z0 = XYZ(3)
+               VT%FIRE_SPREAD_RATE = SPREAD_RATE / TIME_SHRINK_FACTOR
+         
+               ! Dynamic Pressure
+         
+               VT%DYNAMIC_PRESSURE = DYNAMIC_PRESSURE
+               IF (PRESSURE_RAMP/='null') CALL GET_RAMP_INDEX(PRESSURE_RAMP,'TIME',VT%PRESSURE_RAMP_INDEX)
+               
+               ! Synthetic Eddy Method
+               
+               VT%N_EDDY = N_EDDY
+               IF (L_EDDY>0._EB) THEN
+                  VT%SIGMA_IJ = L_EDDY
+               ELSE
+                  VT%SIGMA_IJ = L_EDDY_IJ ! Modified SEM (Jarrin, Ch. 7)
+               ENDIF
+               IF (VEL_RMS>0._EB) THEN
+                  VT%R_IJ=0._EB
+                  VT%R_IJ(1,1)=VEL_RMS**2
+                  VT%R_IJ(2,2)=VEL_RMS**2
+                  VT%R_IJ(3,3)=VEL_RMS**2
+               ELSE
+                  VT%R_IJ = REYNOLDS_STRESS
+               ENDIF
+               
+               ! Miscellaneous
+          
+               VT%TMP_EXTERIOR = TMP_EXTERIOR + TMPM
+               IF (VT%TMP_EXTERIOR>0._EB) TMPMIN = MIN(TMPMIN,VT%TMP_EXTERIOR) 
+               IF (TMP_EXTERIOR_RAMP/='null') CALL GET_RAMP_INDEX(TMP_EXTERIOR_RAMP,'TIME',VT%TMP_EXTERIOR_RAMP_INDEX)
+         
+               VT%TEXTURE(:) = TEXTURE_ORIGIN(:)
+               
+               VT%UVW = UVW
+               IF (ALL(VT%UVW > -1.E12_EB)) THEN
+                  VT%UVW = VT%UVW/SQRT(VT%UVW(1)**2+VT%UVW(2)**2+VT%UVW(3)**2)
+               ENDIF
+         
+            ENDDO I_MULT_LOOP
+         ENDDO J_MULT_LOOP
+      ENDDO K_MULT_LOOP
+
    ENDDO READ_VENT_LOOP
 37 REWIND(LU_INPUT)
 
