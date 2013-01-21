@@ -2715,8 +2715,7 @@ set {\ct DEFAULT=.TRUE.} on the {\ct SURF} line.
 \section{Creating Obstructions: The \texorpdfstring{{\tt OBST}}{OBST} Namelist Group (Table \ref{tbl:OBST})}
 \label{info:OBST}
 
-The namelist group {\ct OBST} contains parameters used to define obstructions. The entire geometry of the model is made up entirely
-of rectangular solids, each one introduced on a single line in the input file.
+The namelist group {\ct OBST} contains parameters used to define obstructions. The entire geometry of the model is made up entirely of rectangular solids, each one introduced on a single line in the input file.
 
 \subsection{Basics}
 \label{info:OBST_Basics}
@@ -2749,12 +2748,7 @@ For example:
 puts a fire on top of the obstruction. This is a simple way of
 prescribing a burner.
 
-\vspace{\baselineskip}
-\noindent
-Some additional features of obstructions are as follows:
-\begin{itemize}
-\item In addition to {\ct SURF\_ID} and {\ct SURF\_IDS}, you can also use
-the sextuplet {\ct SURF\_ID6} as follows:
+In addition to {\ct SURF\_ID} and {\ct SURF\_IDS}, you can also use the sextuplet {\ct SURF\_ID6} as follows:
 
 \footnotesize
 \begin{verbatim}
@@ -2764,11 +2758,14 @@ the sextuplet {\ct SURF\_ID6} as follows:
 \normalsize
 
 \noindent
-where the six surface descriptors refer to the planes $x=2.3$, $x=4.5$, $y=1.3$, $y=4.8$,
-$z=0.0$, and $z=9.2$, respectively.
-Note that {\ct SURF\_ID6} should not be used on the same {\ct OBST}
-line as {\ct SURF\_ID} or {\ct SURF\_IDS}.
-\item Obstructions can have zero thickness. Often, thin sheets, like a window, form a barrier,
+where the six surface descriptors refer to the planes $x=2.3$, $x=4.5$, $y=1.3$, $y=4.8$, $z=0.0$, and $z=9.2$, respectively. Note that {\ct SURF\_ID6} should not be used on the same {\ct OBST} line as {\ct SURF\_ID} or {\ct SURF\_IDS}.
+
+Obstructions may be created or removed during a simulation. See Section~\ref{info:create_remove} for details. 
+
+
+\subsection{Thin Obstructions}
+
+Obstructions can have zero thickness. Often, thin sheets, like a window, form a barrier,
 but if the numerical mesh is coarse relative to the thickness of the barrier, the obstruction
 might be unnecessarily large if it is assumed to be one layer of mesh cells thick. All faces
 of an obstruction are shifted to the closest mesh cell. If the obstruction is very thin, the two
@@ -2783,170 +2780,68 @@ be at least one mesh cell thick. Thin sheet obstructions
 work fine as flow barriers, but other features are fragile and should be used with
 caution. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the
 {\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
-\item If the faces of two obstructions overlap each other, FDS will choose the surface properties of the obstruction that is specified last. To prevent this from happening,
-add {\ct OVERLAY=.FALSE.} when specifying the obstruction that you do {\bf not} want to take precedence. The default value of {\ct OVERLAY} is {\ct .TRUE.}
-\item Obstructions that are
-too small relative to the underlying numerical mesh are rejected.
-Be careful when testing cases on coarse meshes.
-\item Obstructions may be created or removed during a simulation. See
-Section~\ref{info:create_remove} for details.
-\item If two obstructions overlap at one or more faces, the one listed last in the input file takes precedence over the one
-listed first, in the sense that the latter's surface properties will be applied to the overlapping face. Smokeview renders both obstructions
-independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A
-simple remedy for this is to ``shrink'' the first obstruction slightly by adjusting its coordinates ({\ct XB}) accordingly. Then, in
-Smokeview, toggle the ``q'' key to show the obstructions as you specified them, rather than as FDS rendered them.
-\item Obstructions can be protected from the {\ct HOLE} punching feature. Sometimes
-it is convenient to create a door or window using a {\ct HOLE}. For example, suppose a
-{\ct HOLE} is punched in a wall to represent a door or window. An obstruction can be
-defined to fill this hole (presumably to be removed or colored differently or whatever) so
-long as the phrase {\ct PERMIT\_HOLE=.FALSE.} is included on the {\ct OBST} line. In general,
-any obstruction can be made impenetrable to a {\ct HOLE} using this phrase. By default,
-{\ct PERMIT\_HOLE=.TRUE.}, meaning that an obstruction is assumed to be penetrable unless otherwise directed. Note that if an penetrable  obstruction
-and an impenetrable  obstruction overlap, the obstruction with {\ct PERMIT\_HOLE=.FALSE.} should be listed first.
-\item If the obstruction is not to be removed or rejected for any reason, set {\ct REMOVABLE=.FALSE.} This is sometimes needed to stop
+
+Obstructions that are too small relative to the underlying numerical mesh are rejected. Be careful when testing cases on coarse meshes.
+
+\subsection{Overlapping Obstructions}
+
+If the faces of two obstructions overlap each other, FDS will choose the surface properties of the obstruction that is specified first. Alternatively, add {\ct OVERLAY=.FALSE.} when specifying the obstruction that you do {\bf not} want to take precedence. The default value of {\ct OVERLAY} is {\ct .TRUE.}
+
+When obstructions overlap, Smokeview renders both obstructions independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A simple remedy for this is to ``shrink'' the first obstruction slightly by adjusting its coordinates ({\ct XB}) accordingly. Then, in Smokeview, toggle the ``q'' key to show the obstructions as you specified them, rather than as FDS rendered them.
+
+\subsection{Preventing Obstruction Removal}
+
+Obstructions can be protected from the {\ct HOLE} punching feature. Sometimes it is convenient to create a door or window using a {\ct HOLE}. For example, suppose a {\ct HOLE} is punched in a wall to represent a door or window. An obstruction can be defined to fill this hole (presumably to be removed or colored differently or whatever) so long as the phrase {\ct PERMIT\_HOLE=.FALSE.} is included on the {\ct OBST} line. In general, any obstruction can be made impenetrable to a {\ct HOLE} using this phrase. By default, {\ct PERMIT\_HOLE=.TRUE.}, meaning that an obstruction is assumed to be penetrable unless otherwise directed. Note that if an penetrable  obstruction and an impenetrable  obstruction overlap, the obstruction with {\ct PERMIT\_HOLE=.FALSE.} should be listed first.
+
+If the obstruction is not to be removed or rejected for any reason, set {\ct REMOVABLE=.FALSE.} This is sometimes needed to stop
 FDS from removing the obstruction if it is embedded within another, like a door within a wall.
-\item In rare cases, you might not want to allow a {\ct VENT} to be attached to a particular obstruction, in which case set
-{\ct ALLOW\_VENT=.FALSE.}
-\item Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on the {\ct OBST} line. This real parameter ranges from
-0 to 1, with 0 being fully transparent. The parameter should always be set along with either {\ct COLOR} or an {\ct RGB} triplet. It can
-also be specified on the appropriate {\ct SURF} line, along with a color indicator. If you want the obstruction to be invisible, set {\ct COLOR='INVISIBLE'}.
-\item Obstructions are drawn solid in Smokeview. To draw an outline representation, set {\ct OUTLINE=.TRUE.}
-\end{itemize}
 
+In rare cases, you might not want to allow a {\ct VENT} to be attached to a particular obstruction, in which case set {\ct ALLOW\_VENT=.FALSE.}
 
-\subsection{Repeated Obstructions: The \texorpdfstring{{\tt MULT}}{MULT} Namelist Group (Table \ref{tbl:MULT})}
-\label{info:MULT}
+\subsection{Transparent or Outlined Obstructions}
 
-Sometimes obstructions are repeated over and over in the input file. This can be tedious to create and make the input file hard to read. However,
-if a particular obstruction or set of obstructions repeats itself in a regular pattern, you can use a utility known as a multiplier. If you want to
-repeat an obstruction, create a line in the input file as follows:
+Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on the {\ct OBST} line. This real parameter ranges from 0 to 1, with 0 being fully transparent. The parameter should always be set along with either {\ct COLOR} or an {\ct RGB} triplet. It can also be specified on the appropriate {\ct SURF} line, along with a color indicator. If you want the obstruction to be invisible, set {\ct COLOR='INVISIBLE'}.
 
-\footnotesize
-\begin{verbatim}
-&MULT ID='m1', DX=1.2, DY=2.4, I_LOWER=-2, I_UPPER=3, J_LOWER=0, J_UPPER=5 /
-
-&OBST XB=..., MULT_ID='m1' /
-\end{verbatim}
-\normalsize
-
-\noindent
-This has the effect of making an array of obstructions according to the following formulae:
-\begin{eqnarray*}  x_i = x_0 + \dx_0 + i \, \dx  &;& \hbox{\ct I\_LOWER} \le i \le \hbox{\ct I\_UPPER} \\
-                   y_j = y_0 + \dy_0 + j \, \dy  &;& \hbox{\ct J\_LOWER} \le j \le \hbox{\ct J\_UPPER}
-\end{eqnarray*}
-Note that the same rules apply for the $z$ direction as well. In situations where the position of the obstruction needs shifting prior to the multiplication, use the
-parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
-
-\begin{figure}[t]
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/pyramid}
-\caption[An example of the multiplier function]{An example of the multiplier function.}
-\label{fig:mult}
-\end{figure}
-
-A generalization of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}.
-The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example,
-define the lower $y$ bound of the original obstruction by {\ct XB(3,0)}. The $n$th obstruction would be:
-
-\footnotesize
-\begin{verbatim}
-XB(3,N) = XB(3,0) + N*DXB(3)
-\end{verbatim}
-\normalsize
-
-\noindent
-Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct N}. This more flexible input scheme allows you to create, for example,
-a slanted roof in which the individual roof segments shorten as they ascend to the top.
-This feature is demonstrated by the following short input file that creates a hollowed out pyramid using the four perimeter obstructions that form the
-outline of its base:
-
-\footnotesize
-\begin{verbatim}
-&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function, SVN $Revision$' /
-&MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-&TIME T_END=0. /
-&MULT ID='south', DXB=0.01,-.01,0.01,0.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
-&MULT ID='north', DXB=0.01,-.01,-.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
-&MULT ID='east',  DXB=-.01,-.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
-&MULT ID='west',  DXB=0.01,0.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
-&OBST XB=0.10,0.90,0.10,0.11,0.10,0.11, MULT_ID='south', COLOR='RED' /
-&OBST XB=0.10,0.90,0.89,0.90,0.10,0.11, MULT_ID='north', COLOR='BLUE' /
-&OBST XB=0.10,0.11,0.11,0.89,0.10,0.11, MULT_ID='west',  COLOR='GREEN' /
-&OBST XB=0.89,0.90,0.11,0.89,0.10,0.11, MULT_ID='east',  COLOR='CYAN' /
-&MULT ID='holes', DX=0.15, DZ=0.1, I_UPPER=1, K_UPPER=1 /
-&HOLE XB=0.40,0.45,0.00,1.00,0.15,0.20, MULT_ID='holes' /
-&TAIL /
-\end{verbatim}
-\normalsize
-
-\noindent
-The end result of this input file is to create a pyramid by repeating long, rectangular obstructions at the base of each
-face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to
-repeat the obstructions in sequence rather than as an array.
-
-Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct HOLE}, and {\ct INIT} lines. For a {\ct MESH}, it only applies to the
-bounds ({\ct XB}) of the mesh, not the number of cells.
+Obstructions are typically drawn as solids in Smokeview. To draw an outline representation, set {\ct OUTLINE} equal to {\ct .TRUE.}
 
 
 
-\clearpage
-
-\section{Creating Voids: The \texorpdfstring{{\tt HOLE}}{HOLE} Namelist Group (Table \ref{tbl:HOLE})}
+\subsection{Creating Holes in Obstructions: The \texorpdfstring{{\tt HOLE}}{HOLE} Namelist Group (Table \ref{tbl:HOLE})}
 \label{info:HOLE}
 
-The {\ct HOLE} namelist group defines parameters that carve a hole
-out of an existing obstruction or set of obstructions. To do this, add lines of the form
+The {\ct HOLE} namelist group defines parameters that carve a hole out of an existing obstruction or set of obstructions. To do this, add lines of the form
 
 \footnotesize
 \begin{verbatim}
 &HOLE XB=2.0,4.5,1.9,4.8,0.0,9.2 /
 \end{verbatim}
 \normalsize
-Any solid mesh cells within the volume $2.0<x<4.5$, $1.9<y<4.8$,
-$0.0<z<9.2$ are removed. Obstructions intersecting the volume are
-broken up into smaller blocks.
 
-\begin{notebox}
-\noindent
-If the hole represents a door or window, a good rule of thumb is to punch more than enough to create the hole.
-This ensures that the hole is created through the entire obstruction.
-\end{notebox}
-
-\noindent
-For example, if the {\ct OBST} line denotes a wall 0.1 m thick:
+\noindent Any solid mesh cells within the volume $2.0<x<4.5$, $1.9<y<4.8$, $0.0<z<9.2$ are removed. Obstructions intersecting the volume are broken up into smaller blocks. If the hole represents a door or window, a good rule of thumb is to punch more than enough to create the hole. This ensures that the hole is created through the entire obstruction. For example, if the {\ct OBST} line denotes a wall 0.1~m thick:
 
 \footnotesize
 \begin{verbatim}
 &OBST XB=1.0,1.1,0.0,5.0,0.0,3.0 /
 \end{verbatim}
 \normalsize
-and you want to create a door, add this:
+
+\noindent and you want to create a door, add this:
 
 \footnotesize
 \begin{verbatim}
 &HOLE XB=0.99,1.11,2.0,3.0,0.0,2.0 /
 \end{verbatim}
 \normalsize
-The extra centimeter added to the $x$ coordinates of the hole make it clear
-that the hole is to punch through the entire obstruction.
 
-When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or
-created or removed at pre-determined times. See Section~\ref{info:create_remove} for details.
-To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID}
-parameter respectively, to the {\ct HOLE} line.
+\noindent The extra centimeter added to the $x$ coordinates of the hole make it clear that the hole is to punch through the entire obstruction.
 
-If you want the obstruction that is to be cut out to have a different color
-than the original obstruction, set the {\ct COLOR} or integer triplet
-{\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction to be invisible, set {\ct COLOR='INVISIBLE'}.
+When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or created or removed at pre-determined times. See Section~\ref{info:create_remove} for details. To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID} parameter respectively, to the {\ct HOLE} line.
 
-When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole.
-To make this obstruction transparent, the {\ct TRANSPARENCY} parameter should be specified by
-a real number from 0 to 1. Note that if {\ct TRANSPARENCY} is specified, then either a {\ct COLOR} or {\ct RGB} triplet ought to be specified as well.
-A {\ct TRANSPARENCY} value near, but not equal to, zero can be used to simulate a window when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.} When the {\ct DEVC} or {\ct CTRL}
-is activated and changes the state of the hole to {\ct .TRUE.}, the {\ct HOLE} is then open and completely transparent.
-See Section~\ref{info:create_remove} for an example.
+If you want the obstruction that is to be cut out to have a different color than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction to be invisible, set {\ct COLOR='INVISIBLE'}.
 
-If an obstruction is not to be punctured by a {\ct HOLE}, add
-{\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.
+When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole. To make this obstruction transparent, the {\ct TRANSPARENCY} parameter should be specified by a real number from 0 to 1. Note that if {\ct TRANSPARENCY} is specified, then either a {\ct COLOR} or {\ct RGB} triplet ought to be specified as well. A {\ct TRANSPARENCY} value near, but not equal to, zero can be used to simulate a window when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.} When the {\ct DEVC} or {\ct CTRL} is activated and changes the state of the hole to {\ct .TRUE.}, the {\ct HOLE} is then open and completely transparent. See Section~\ref{info:create_remove} for an example.
+
+If an obstruction is not to be punctured by a {\ct HOLE}, add {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.
 
 \begin{warning}
 \noindent
@@ -3041,7 +2936,7 @@ Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct O
 {\ct VENT} to be drawn as an outline in Smokeview.
 
 
-\subsection{Special \texorpdfstring{{\tt VENT}s}{VENTs}}
+\subsection{Special Vents}
 
 \label{info:Special_VENTS}
 
@@ -3093,12 +2988,12 @@ Periodic vents may not be used to connect offset vents or vents in different coo
 
 
 
-\subsection{\texorpdfstring{{Controlling {\tt VENT}s}}{Controlling VENTs}}
+\subsection{Controlling Vents}
 
 {\ct VENT} functionality can be controlled in some cases using ``devices'' and ``controls,'' specified via a {\ct DEVC\_ID} or a {\ct CTRL\_ID}.
 See Section~\ref{info:activate_deactivate} for details.
 
-\subsection{\texorpdfstring{{Trouble-Shooting {\tt VENT}s}}{Trouble-Shooting VENTs}}
+\subsection{Trouble-Shooting Vents}
 \label{info:VENT_Trouble}
 
 Unlike most of the entries in the input file, the order that you specify {\ct VENT}s can be important. There might be
@@ -3185,9 +3080,11 @@ To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin
 \section{Coloring Obstructions, Vents, Surfaces and Meshes}
 \label{info:colors}
 
-Colors for many items within FDS can be prescribed in two ways; a triplet of
-integer color values, {\ct RGB}, or a character string, {\ct COLOR}. The three {\ct RGB} integers range from 0 to 255, indicating the amount of Red, Green and Blue
-that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\em exactly} as it is listed in the color tables. Color parameters can be specified on a {\ct SURF} line, in which case all surfaces of that type will have that color, or color parameters can be applied directly to obstructions or vents. For example, the lines:
+It is useful when visualizing the results of a simulation to assign to objects a meaningful color or pattern. There are two ways to do this in FDS. You can either assign a single color, or you can assign a texture map, which is essentially an image of a your choosing.
+
+\subsection{Colors}
+
+Colors for many items within FDS can be prescribed in two ways; a triplet of integer color values, {\ct RGB}, or a character string, {\ct COLOR}. The three {\ct RGB} integers range from 0 to 255, indicating the amount of Red, Green and Blue that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\em exactly} as it is listed in the color tables. Color parameters can be specified on a {\ct SURF} line, in which case all surfaces of that type will have that color, or color parameters can be applied directly to obstructions or vents. For example, the lines:
 
 \footnotesize
 \begin{verbatim}
@@ -3255,7 +3152,7 @@ Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
 \end{table}
 
 
-\subsection{Texture Mapping}
+\subsection{Texture Maps}
 \label{info:texture_map}
 
 There are various ways of prescribing the color of various objects
@@ -3299,6 +3196,68 @@ at the point (1.0,3.0,5.0). The default value of {\ct TEXTURE\_ORIGIN}
 is (0,0,0), and the global default can be changed by added a
 {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
 
+
+\clearpage
+
+\section{Repeated Objects: The \texorpdfstring{{\tt MULT}}{MULT} Namelist Group (Table \ref{tbl:MULT})}
+\label{info:MULT}
+
+Sometimes obstructions, holes and vents are repeated over and over in the input file. This can be tedious to create and make the input file hard to read. However, if a particular set of objects repeats itself in a regular pattern, you can use a utility known as a multiplier. If you want to repeat an obstruction, for example, create a line in the input file as follows:
+
+\footnotesize
+\begin{verbatim}
+&MULT ID='m1', DX=1.2, DY=2.4, I_LOWER=-2, I_UPPER=3, J_LOWER=0, J_UPPER=5 /
+&OBST XB=..., MULT_ID='m1' /
+\end{verbatim}
+\normalsize
+
+\noindent
+This has the effect of making an array of obstructions according to the following formulae:
+\begin{eqnarray*}  x_i = x_0 + \dx_0 + i \, \dx  &;& \hbox{\ct I\_LOWER} \le i \le \hbox{\ct I\_UPPER} \\
+                   y_j = y_0 + \dy_0 + j \, \dy  &;& \hbox{\ct J\_LOWER} \le j \le \hbox{\ct J\_UPPER}
+\end{eqnarray*}
+Note that the same rules apply for the $z$ direction as well. In situations where the position of the obstruction needs shifting prior to the multiplication, use the parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
+
+\begin{figure}[t]
+\includegraphics[width=\textwidth]{SCRIPT_FIGURES/pyramid}
+\caption[An example of the multiplier function]{An example of the multiplier function.}
+\label{fig:mult}
+\end{figure}
+
+A generalization of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}. The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example, define the lower $y$ bound of the original obstruction by {\ct XB(3,0)}. The $n$th obstruction would be:
+
+\footnotesize
+\begin{verbatim}
+XB(3,N) = XB(3,0) + N*DXB(3)
+\end{verbatim}
+\normalsize
+
+\noindent
+Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct N}. This more flexible input scheme allows you to create, for example, a slanted roof in which the individual roof segments shorten as they ascend to the top. This feature is demonstrated by the following short input file that creates a hollowed out pyramid using the four perimeter obstructions that form the outline of its base:
+
+\footnotesize
+\begin{verbatim}
+&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function, SVN $Revision$' /
+&MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&TIME T_END=0. /
+&MULT ID='south', DXB=0.01,-.01,0.01,0.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='north', DXB=0.01,-.01,-.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='east',  DXB=-.01,-.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&MULT ID='west',  DXB=0.01,0.01,0.01,-.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
+&OBST XB=0.10,0.90,0.10,0.11,0.10,0.11, MULT_ID='south', COLOR='RED' /
+&OBST XB=0.10,0.90,0.89,0.90,0.10,0.11, MULT_ID='north', COLOR='BLUE' /
+&OBST XB=0.10,0.11,0.11,0.89,0.10,0.11, MULT_ID='west',  COLOR='GREEN' /
+&OBST XB=0.89,0.90,0.11,0.89,0.10,0.11, MULT_ID='east',  COLOR='CYAN' /
+&MULT ID='holes', DX=0.15, DZ=0.1, I_UPPER=1, K_UPPER=1 /
+&HOLE XB=0.40,0.45,0.00,1.00,0.15,0.20, MULT_ID='holes' /
+&TAIL /
+\end{verbatim}
+\normalsize
+
+\noindent
+The end result of this input file is to create a pyramid by repeating long, rectangular obstructions at the base of each face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to repeat the obstructions in sequence rather than as an array.
+
+Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct OBST}, {\ct HOLE}, {\ct VENT}, and {\ct INIT} lines. For a {\ct MESH}, it only applies to the bounds ({\ct XB}) of the mesh, not the number of cells.
 
 
 
@@ -7165,7 +7124,7 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 \normalsize
 
 \noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles should be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} on the {\ct SURF} line, when multiplied by the diameter, results in 60~\% of the cell area. It represents the length of wire that makes up the section of the screen that spans a single grid cell. The pressure drop across the screen is given by
-\be 
+\be
    \Delta p =  l \; \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
 where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the viscosity of the gas, $u$ is the velocity normal to the screen, $\rho$ is the density of the gas, and $Y$ and $K$ are empirical constants given by
@@ -7173,7 +7132,7 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
    K &=& 3.44 \times 10^{-9} \; \hbox{\ct FREE\_AREA\_FRACTION}^{1.6} \; \; \hbox{m}^2 \\
    Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
 \end{eqnarray}
-Note that the {\ct CONVECTION\_LENGTH\_SCALE}, which in this case is set equal to the wire diameter, is used in the convective heat transfer calculation. 
+Note that the {\ct CONVECTION\_LENGTH\_SCALE}, which in this case is set equal to the wire diameter, is used in the convective heat transfer calculation.
 
 
 \subsection{Electrical Cable Failure}
@@ -11692,6 +11651,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct L\_EDDY\_IJ(3,3)}      & Real Array        & Section~\ref{info:synthetic_turbulence}                   & m             & 0.                  \\ \hline
 {\ct MB    }                & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct MESH\_ID    }          & Character         & Reference~\cite{FDS_Evac_Users_Guide}                     &               &                     \\ \hline
+{\ct MULT\_ID    }          & Character         & Section~\ref{info:MULT}                                   &               &                     \\ \hline
 {\ct N\_EDDY}               & Integer           & Section~\ref{info:synthetic_turbulence}                   &               & 0                   \\ \hline
 {\ct OUTLINE}               & Logical           & Section~\ref{info:VENT_Basics}                            & {\ct .FALSE.} &                     \\ \hline
 {\ct PBX, PBY, PBZ  }       & Real              & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
