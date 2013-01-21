@@ -13,6 +13,7 @@ $RUNFDS Controls hrr_freeze
 
 $RUNFDS Detectors aspiration_detector
 $RUNFDS Detectors beam_detector
+$RUNFDS Detectors smoke_detector
 
 $RUNFDS Energy_Budget energy_budget_adiabatic_walls
 $RUNFDS Energy_Budget energy_budget_adiabatic_two_fuels
