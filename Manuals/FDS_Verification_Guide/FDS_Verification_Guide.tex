@@ -1046,7 +1046,7 @@ is determined from the steady-state mean velocity $\bar{u}$ which is output by F
 To verify the wall model for turbulent flow we perform 3D LES of a square duct with periodic boundaries in the streamwise direction and a constant and uniform mean pressure gradient driving the flow.  The problem set up is nearly identical to the laminar cases of the previous section except here we perform 3D calculations and maintain cubic cells as we refine the grid: we hold the ratio 8:1:1 between $N_x$\,:\,$N_y$\,:\,$N_z$ for all cases.  The cases shown below are identified by their grid resolution in the $z$ direction.  The velocity field is initially at rest and develops in time to a mean steady state driven by the specified mean pressure gradient.  The presence of a steady state is the result of a balance between the streamwise pressure drop and the integrated stress from the wall model.  FDS outputs the planar average velocity in the streamwise direction and once a steady state is reached this value is used to compute the Reynolds number and the friction factor.  Table \ref{tab_zplus} provides a case matrix: nine cases for three values of specified pressure drop and three grid resolutions.  The nominal Reynolds number (obtained post-run) is listed along with the friction factor from the most refined FDS case and the friction factor computed (iteratively) from the Colebrook equation,
 \begin{equation}
 \label{eqn_colebrook}
-\frac{1}{\sqrt{f}} = -2.0 \log_{\scriptsize 10} \left( \frac{s/H}{3.7} + \frac{2.51}{\mbox{Re}_H\sqrt{f}} \right) \,\mbox{,}
+\frac{1}{\sqrt{f}} = -2.0 \log_{10} \left( \frac{s/H}{3.7} + \frac{2.51}{\mbox{Re}_H\sqrt{f}} \right) \,\mbox{,}
 \end{equation}
 which is a fit to the turbulent range of the Moody chart (for example, see Ref.~\cite{MYO}).  The parameter $s/H$ is the relative
 roughness where $H$ is the hydraulic diameter of the pipe or channel and Re$_H$ is the Reynolds number based on $H$.
@@ -2523,7 +2523,7 @@ where $Y_e$ is the mass fraction of smoke in the free stream (kg/kg), $L$ is the
 \be
 Y_c(t) = Y_0 \left[ 1 - \exp \left(-\frac{t \bu}{L}\right) \right]
 \ee
-Figure~\ref{fig:soot_gravitational_settling} shows a comparison of the analytical and simulated results for the time evolution of the smoke detector chamber obscuration.
+Figure~\ref{fig:smoke_detector} shows a comparison of the analytical and simulated results for the time evolution of the smoke detector chamber obscuration.
 
 \begin{figure}[ht]
 \begin{center}
@@ -2532,7 +2532,7 @@ Figure~\ref{fig:soot_gravitational_settling} shows a comparison of the analytica
 \end{tabular}
 \end{center}
 \caption[Smoke detector chamber obscuration for {\bf smoke\_detector} case]{Time evolution of smoke detector chamber obscuration for {\bf smoke\_detector} case}
-\label{fig:soot_gravitational_settling}
+\label{fig:smoke_detector}
 \end{figure}
 
 \clearpage
