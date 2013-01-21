@@ -2503,7 +2503,39 @@ Figure~\ref{FED_FIC_SMIX_plot}.
 
 \clearpage
 
-\newpage
+\section{Smoke Detector Model (\texorpdfstring{{\bf smoke\_detector}}{smoke\_detector}) }
+\label{smoke_detector}
+
+The calculations described in this section check the smoke detector algorithm that computes the mass fraction of smoke in the sensing chamber of a detector. For this example, the initial soot concentration in a 1~m$^3$ box is set as 100~mg/m$^3$ via the {\ct INIT} line. A vent on the left side injects soot at a velocity of 0.25~m/s and a concentration of 100~mg/m$^3$, and the soot exhausts on the right side of the box via an open vent. By default, if a species is defined as an aerosol by setting {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, all deposition mechanisms are disabled by using the follows inputs on the {\ct MISC} line:
+
+\footnotesize
+\begin{verbatim}
+&MISC GRAVITATIONAL_DEPOSITION  = .FALSE.
+      THERMOPHORETIC_DEPOSITION = .FALSE.
+      TURBULENT_DEPOSITION      = .FALSE. /
+\end{verbatim} \normalsize
+
+\noindent The transient mass fraction of smoke in the sensing chamber of the detector $Y_c$ is given as~\cite{FDS_Tech_Guide}
+\be
+\frac{\d Y_c }{\d t} = \frac{Y_e(t) - Y_c(t)}{L/\bu} \label{eq:HYoeq}
+\ee
+where $Y_e$ is the mass fraction of smoke in the free stream (kg/kg), $L$ is the characteristic length of the detector geometry (m), and $\bu$ is the free stream velocity (m/s). For a constant mass fraction of smoke in the free stream $Y_0$, Eq.~\ref{eq:HYoeq} has an analytical solution of the form
+\be
+Y_c(t) = Y_0 \left[ 1 - \exp \left(-\frac{t \bu}{L}\right) \right]
+\ee
+Figure~\ref{fig:soot_gravitational_settling} shows a comparison of the analytical and simulated results for the time evolution of the smoke detector chamber obscuration.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/smoke_detector}
+\end{tabular}
+\end{center}
+\caption[Smoke detector chamber obscuration for {\bf smoke\_detector} case]{Time evolution of smoke detector chamber obscuration for {\bf smoke\_detector} case}
+\label{fig:soot_gravitational_settling}
+\end{figure}
+
+\clearpage
 
 \section{Aerosol Deposition}
 
@@ -2538,7 +2570,7 @@ The calculations described in this section check the conservation of mass for th
       TURBULENT_DEPOSITION      = .FALSE. /
 \end{verbatim} \normalsize
 
-In this example, the initial gas-phase soot concentration is specified, and the only active deposition mechanism (i.e., soot removal term) is gravitational deposition. A simple HVAC setup (one supply vent and one exhaust vent) is used to stir the air and create well-mixed conditions. The transient gas-phase soot concentration for a well-mixed compartment can then be represented as
+\noindent In this example, the initial gas-phase soot concentration is specified, and the only active deposition mechanism (i.e., soot removal term) is gravitational deposition. A simple HVAC setup (one supply vent and one exhaust vent) is used to stir the air and create well-mixed conditions. The transient gas-phase soot concentration for a well-mixed compartment can then be represented as
 \be
 \frac{\d C}{\d t} = -\frac{A}{V} (u_g C)
 \label{eq:gravitational_settling}
