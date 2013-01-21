@@ -136,7 +136,7 @@ With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps aroun
 
 \subsection{Boundary Conditions for the HVAC Solver}
 
-Prior to updating the HVAC solution, the inlet conditions ate each ductnode are determined by summing the mass and energy of the gas cells next to ductnode and averaging the pressure.  The total mass and energy along with the average pressure are then used to determine the average temperature.
+Prior to updating the HVAC solution, the inlet conditions at each duct node are determined by summing the mass and energy of the gas cells next to duct node and averaging the pressure.  The total mass and energy along with the average pressure are then used to determine the average temperature.
 
 
 \be \bar{\rho}_i = \frac{\sum\limits_{j} \rho_j \, A_j}{\sum\limits_{j} A_j}  \ee
@@ -144,7 +144,7 @@ Prior to updating the HVAC solution, the inlet conditions ate each ductnode are 
 \be \bar{P}_i = \frac{\sum\limits_{j} P_j \, A_j}{\sum\limits_{j} A_j}  \ee
 \be \bar{h}_i =  \frac{\sum\limits_{j} \rho_j \, A_j, c_p(T_j,Y_j)}{\sum\limits_{j}  \rho_j, A_j} \ee
 \be \bar{T}_i = \frac{\bar{h}_i}{ c_p (\bar{T}_i,\bar{Y}_i)} \ee
-where $i$ is a ductnode and $j$ are the gas cells adjacent to the node.
+where $i$ is a duct node and $j$ are the gas cells adjacent to the node.
 
 \subsection{Boundary Conditions for the FDS Hydrodynamic Solver}
 
