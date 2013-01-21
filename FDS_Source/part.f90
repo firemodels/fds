@@ -1674,10 +1674,10 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
             Y_SCREEN = 4.30E-2_EB*LPC%FREE_AREA_FRACTION**2.13_EB
             Y_SCREEN = Y_SCREEN * RHO_G /SQRT(K_SCREEN)*QREL
             K_SCREEN = MU_AIR/K_SCREEN
-            SFAC = 2._EB*LP%ONE_D%X(1)*RVC/RHO_G
+            SFAC = 2._EB*MAXVAL(LP%ONE_D%X(0:SF%N_CELLS_MAX))*RVC/RHO_G
             A_DRAG = DY(JJG)*DZ(KKG)
             C_DRAG = (K_SCREEN+Y_SCREEN)*ABS(LPC%ORIENTATION(1,1))*UBAR
-            LP%ACCEL_X = -C_DRAG*SFAC*A_DRAG
+            LP%ACCEL_X = -C_DRAG*SFAC*A_DRAG            
             A_DRAG = DX(IIG)*DZ(KKG)
             C_DRAG = (K_SCREEN+Y_SCREEN)*ABS(LPC%ORIENTATION(1,2))*VBAR
             LP%ACCEL_Y = -C_DRAG*SFAC*A_DRAG
