@@ -500,24 +500,12 @@ u_{dep} = u_g+u_{th}+u_{dt}
 where $u_g$ is the gravitational settling velocity (for cells near upward-facing surfaces), $u_{th}$ is
 the thermophoretic velocity, and $u_{dt}$ is the combined diffusion-turbulence velocity. If the aerosol
 is located in a gas-phase cell adjacent to a wall, then the aerosol (represented by the subscript $\alpha$)
-is removed from the gas-phase and deposited onto the wall surface by the amount calculated by
+is removed from the gas-phase and deposited onto the wall surface by imposing the following boundary condition
 \be
-\Delta \rho_{\alpha,dep} = \rho_{\alpha} u_{dep} \frac{\Delta t}{\Delta x}
+\dot m_{\alpha,dep}'' = \rho Y_\alpha u_{dep}
 \ee
-where $\Delta \rho_{\alpha,dep}$ is the change in aerosol density due to deposition, $\rho_{\alpha}$ is
-the ambient density of the aerosol, $\Delta t$ is the size of the time step, and $\Delta x$ is the size
-of the grid cell. The accumulated aerosol density that deposits to surfaces,
-$m_{\alpha,dep}''$, is tracked by calculating
-\be
-m_{\alpha,dep}'' = m_{\alpha,dep}'' + \Delta \rho_{\alpha,dep} \Delta x
-\ee
-at each time step. Finally, the amount of aerosol that deposits to a surface is removed from
-the gas-phase cell by calculating
-\be
-Y_{\alpha} = Y_{\alpha} - Y_{\alpha,dep}
-\ee
-where $Y_{\alpha}$ is the aerosol mass fraction, and $Y_{\alpha,dep}$ is the mass fraction of aerosol
-that deposits in a given time step.
+Using this boundary condition, the aerosol surface density that accumulates on surfaces is tracked, and the amount of aerosol that
+deposits to a surface is removed from the gas-phase cell.
 
 \subsection{Gravitational Settling}
 
