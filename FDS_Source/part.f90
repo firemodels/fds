@@ -755,12 +755,13 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                   LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
 
                   ! Get particle coordinates by randomly choosing within the designated volume
-                  XC1 = X(II-1)
-                  YC1 = Y(JJ-1)
-                  ZC1 = Z(KK-1)
-                  XC2 = X(II)
-                  YC2 = Y(JJ)
-                  ZC2 = Z(KK)
+
+                  XC1 = MAX(X1,X(II-1))
+                  YC1 = MAX(Y1,Y(JJ-1))
+                  ZC1 = MAX(Z1,Z(KK-1))
+                  XC2 = MIN(X2,X(II))
+                  YC2 = MIN(Y2,Y(JJ))
+                  ZC2 = MIN(Z2,Z(KK))
 
                   IF (IN%CELL_CENTERED) THEN
                      LP%X = 0.5_EB*(XC1+XC2)
