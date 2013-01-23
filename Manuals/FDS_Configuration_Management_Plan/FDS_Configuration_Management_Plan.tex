@@ -35,6 +35,7 @@
 \definecolor{linknavy}{rgb}{0,0,0.50196}
 \definecolor{linkred}{rgb}{1,0,0}
 \definecolor{linkblue}{rgb}{0,0,1}
+\usepackage{float}
 \usepackage{caption}
 \usepackage{graphpap}
 \usepackage{rotating}
@@ -46,7 +47,6 @@
 \usepackage{amssymb}
 \usepackage{makeidx} % Create index at end of document
 \usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
-\usepackage{float}
 \usepackage{lastpage} % Automatic last page number reference.
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
@@ -758,7 +758,7 @@ be changed to {\ct Verified}.  At this point the issue is closed.
 
 The FDS codebase undergoes an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot (\underline{F}DS automat\underline{I}c ve\underline{R}ification and validation t\underline{E}st \underline{BOT}). The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
 
-This automated built/test process runs on a regular schedule (nightly) to ensure that the FDS codebase is free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. For future reference, the results of a build/test process are archived and tagged with the SVN revision number that was used. 
+This automated built/test process runs on a regular schedule (nightly) to ensure that the FDS codebase is free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. For future reference, the results of a build/test process are archived and tagged with the SVN revision number that was used.
 
 Upon completion of the automated build/test process, the results of the build/test process are dispatched to the development team. In the event of a failure, the build/test process continues when possible, and the appropriate error logs are dispatched to the development team. The automated build/test process consists of eight build stages, which are described in the following sections.
 
