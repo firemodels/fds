@@ -137,7 +137,6 @@ LINUX_LIBDIR_64 = $(LIB_DIR)/lib_linux_intel_64
 LINUX_SMV_LIBS = -lglui -lglut -lgd -ljpeg -lpng -lz
 LINUX_INTEL_LIBS = -lifcore  -lintlc
 
-
 # ------------- intel_linux_32 ----------------
 
 intel_linux_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
@@ -193,7 +192,7 @@ intel_linux_64_profile : $(obj)
 
 # ------------- gcc_linux_32 ----------------
 
-gcc_linux_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
+gcc_linux_32 : FFLAGS    = -O2 -m32 -x f95-cpp-input -D pp_noappend -ffree-form
 gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
 gcc_linux_32 : LFLAGS    = -m32
 gcc_linux_32 : CC        = gcc
