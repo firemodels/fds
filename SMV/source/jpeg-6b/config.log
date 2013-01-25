@@ -1,0 +1,108 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:538: checking for gcc
+configure:615: checking whether the C compiler (gcc  ) works
+configure:629: gcc -o conftest    conftest.c  1>&5
+configure:649: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:654: checking whether we are using GNU C
+configure:663: gcc -E conftest.c
+configure:681: checking how to run the C preprocessor
+configure:702: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:742: checking for function prototypes
+configure:765: gcc -c -O2  conftest.c 1>&5
+configure:792: checking for stddef.h
+configure:802: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:828: checking for stdlib.h
+configure:838: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:864: checking for string.h
+configure:874: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:900: checking for size_t
+configure:923: gcc -c -O2  conftest.c 1>&5
+configure:994: checking for type unsigned char
+configure:1003: gcc -c -O2  conftest.c 1>&5
+configure:1018: checking for type unsigned short
+configure:1027: gcc -c -O2  conftest.c 1>&5
+configure:1042: checking for type void
+configure:1072: gcc -c -O2  conftest.c 1>&5
+configure:1088: checking for working const
+configure:1142: gcc -c -O2  conftest.c 1>&5
+configure:1163: checking for inline
+configure:1174: gcc -c -O2  conftest.c 1>&5
+configure:1224: checking for broken incomplete types
+configure:1233: gcc -c -O2  conftest.c 1>&5
+configure:1248: checking for short external names
+configure:1260: gcc -o conftest -O2   conftest.c  1>&5
+configure:1275: checking to see if char is signed
+configure:1306: gcc -o conftest -O2   conftest.c  1>&5
+configure: In function 'is_char_signed':
+configure:1295: warning: incompatible implicit declaration of built-in function 'printf'
+configure: In function 'main':
+configure:1302: warning: incompatible implicit declaration of built-in function 'exit'
+configure: failed program was:
+#line 1282 "configure"
+#include "confdefs.h"
+
+#ifdef HAVE_PROTOTYPES
+int is_char_signed (int arg)
+#else
+int is_char_signed (arg)
+     int arg;
+#endif
+{
+  if (arg == 189) {		/* expected result for unsigned char */
+    return 0;			/* type char is unsigned */
+  }
+  else if (arg != -67) {	/* expected result for signed char */
+    printf("Hmm, it seems 'char' is not eight bits wide on your machine.\n");
+    printf("I fear the JPEG software will not work at all.\n\n");
+  }
+  return 1;			/* assume char is signed otherwise */
+}
+char signed_char_check = (char) (-67);
+main() {
+  exit(is_char_signed((int) signed_char_check));
+}
+configure:1323: checking to see if right shift is signed
+configure:1358: gcc -o conftest -O2   conftest.c  1>&5
+configure: In function 'is_shifting_signed':
+configure:1349: warning: incompatible implicit declaration of built-in function 'printf'
+configure: In function 'main':
+configure:1354: warning: incompatible implicit declaration of built-in function 'exit'
+configure: failed program was:
+#line 1328 "configure"
+#include "confdefs.h"
+
+#ifdef HAVE_PROTOTYPES
+int is_shifting_signed (long arg)
+#else
+int is_shifting_signed (arg)
+     long arg;
+#endif
+/* See whether right-shift on a long is signed or not. */
+{
+  long res = arg >> 4;
+
+  if (res == -0x7F7E80CL) {	/* expected result for signed shift */
+    return 1;			/* right shift is signed */
+  }
+  /* see if unsigned-shift hack will fix it. */
+  /* we can't just test exact value since it depends on width of long... */
+  res |= (~0L) << (32-4);
+  if (res == -0x7F7E80CL) {	/* expected result now? */
+    return 0;			/* right shift is unsigned */
+  }
+  printf("Right shift isn't acting as I expect it to.\n");
+  printf("I fear the JPEG software will not work at all.\n\n");
+  return 0;			/* try it with unsigned anyway */
+}
+main() {
+  exit(is_shifting_signed(-0x7F7E80B1L));
+}
+configure:1375: checking to see if fopen accepts b spec
+configure:1390: gcc -o conftest -O2   conftest.c  1>&5
+configure: In function 'main':
+configure:1385: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1436: checking for a BSD compatible install
+configure:1488: checking for ranlib
+configure:1650: checking libjpeg version number
