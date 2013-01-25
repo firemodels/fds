@@ -5,14 +5,15 @@
 #Change the following two lines to reflect the locations
 # of the GLUT library (.a) and includes on your system
 
-#SIZE=-m32
-SIZE=-m64
+SIZE=-m32
+#SIZE=-m64
 
 #PLATFORM=-D pp_OSX
 PLATFORM=
 
 #OUTPUT_LIB=LINUX_32
-OUTPUT_LIB=LINUX_64
+#OUTPUT_LIB=LINUX_64
+OUTPUT_LIB=LINUX_GCC_32
 #OUTPUT_LIB=OSX_32
 #OUTPUT_LIB=OSX_64
 GLUT_INC_LOCATION=../include2
@@ -20,7 +21,8 @@ GLUT_INC_LOCATION=../include2
 CFLAGS = 
 
 
-CC=icc
+#CC=icc
+CC=gcc
 #CPPFLAGS=$(PLATFORM) -I${GLUT_INC_LOCATION} -I ../include ${SIZE}
 CPPFLAGS=$(PLATFORM) -I${GLUT_INC_LOCATION} -I ../include2/glut ${SIZE}
 LPATH=${GLUTPATH} 
