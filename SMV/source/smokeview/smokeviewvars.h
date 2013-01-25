@@ -1257,7 +1257,5 @@ SVEXTERN int SVDECL(hidepatchsurface,0);
   SVEXTERN float rgb2BASE[MAXRGB][3];
   SVEXTERN float rgbhazardBASE[MAXRGB][4];
 #endif
-
 #endif
-
 
