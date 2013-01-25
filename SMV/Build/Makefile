@@ -198,10 +198,10 @@ gcc_linux_32 : LFLAGS    = -m32
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : CPP       = g++
 gcc_linux_32 : FC        = gfortran
-gcc_linux_32 : exe       = smokeview_linux_$(SMV_TESTSTRING)32
+gcc_linux_32 : exe       = smokeview_gcc_$(SMV_TESTSTRING)32
 
 gcc_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(IMAGELIBDIR) -L $(LIB_DIR)/lib_linux_gcc_32 $(LINUX_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_intel_32 $(LINUX_SMV_LIBS) -L /opt/intel/lib/ia32 -lirc -limf  -lgfortran $(LINUX_SYSTEMLIBS)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
