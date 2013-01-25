@@ -295,8 +295,8 @@ public:
     parent_node= child_head = child_tail = next_sibling = prev_sibling = NULL;
   }; 
 
-  friend class struct GLUI_Rollout;
-  friend class struct GLUI_Main;
+  friend struct GLUI_Rollout;
+  friend struct GLUI_Main;
 };
 
 
