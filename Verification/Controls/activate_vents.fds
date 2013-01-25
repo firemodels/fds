@@ -35,7 +35,7 @@
 &DEVC XYZ=0.1,0.1,0.1, ID='timer 7',  QUANTITY='TIME', SETPOINT= 7.0  /
 &DEVC XYZ=0.1,0.1,0.1, ID='timer 7b', QUANTITY='TIME', SETPOINT=11.0  /
 
-&CTRL ID='controller 1', FUNCTION_TYPE='CUSTOM', INPUT_ID='clock 1', RAMP_ID='ramp 1', LATCH=.FALSE. /
+&CTRL ID='controller 1', FUNCTION_TYPE='CUSTOM', INPUT_ID='clock 1', RAMP_ID='ramp 1' /
 &RAMP ID='ramp 1', T= 0.00, F=-1. /
 &RAMP ID='ramp 1', T= 2.99, F=-1. /
 &RAMP ID='ramp 1', T= 3.01, F= 1. /
@@ -45,7 +45,7 @@
 &RAMP ID='ramp 1', T=12.01, F= 1. /
 
 &CTRL ID='controller 3', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='timer 2', DELAY=3. / 
-&CTRL ID='controller 4', FUNCTION_TYPE='ALL', INPUT_ID='controller 1','controller 3', LATCH=.FALSE. /  
+&CTRL ID='controller 4', FUNCTION_TYPE='ALL', INPUT_ID='controller 1','controller 3' /  
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
