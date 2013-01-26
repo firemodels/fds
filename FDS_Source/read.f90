@@ -5039,7 +5039,7 @@ CONTAINS
 SUBROUTINE SET_SURF_DEFAULTS
  
 ADIABATIC               = .FALSE.
-BACKING                 = 'EXPOSED'
+BACKING                 = 'VOID'
 BURN_AWAY               = .FALSE.
 CELL_SIZE_FACTOR        = 1.0
 COLOR                   = 'null'
