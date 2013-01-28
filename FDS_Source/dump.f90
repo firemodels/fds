@@ -4694,7 +4694,8 @@ SELECT CASE(IND)
          WW      = W(II,JJ,KK)
          VEL2    = UU**2+VV**2+WW**2
          RE_D    = RHO(II,JJ,KK)*SQRT(VEL2)*PY%BEAD_DIAMETER/MU_AIR_0
-         NUSSELT = 2._EB + C_FORCED_SPHERE*SQRT(RE_D)*PR_ONTH
+         ! Incropera and DeWitt
+         NUSSELT = 2._EB + 0.6_EB*SQRT(RE_D)*PR_ONTH
          H_TC    = NUSSELT*K_AIR_0/PY%BEAD_DIAMETER
       ELSE
          H_TC    = PY%BEAD_H_FIXED
