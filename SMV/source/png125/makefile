@@ -8,8 +8,9 @@ PNGMAJ = 0
 PNGMIN = 1.2.5
 PNGVER = $(PNGMAJ).$(PNGMIN)
 
-#CC=icc
-CC=gcc
+COMPILER=icc
+SIZE=-m32
+CC=$(COMPILER) $(SIZE)
 
 # where "make install" puts libpng12.a, libpng12.so*,
 # libpng12/png.h and libpng12/pngconf.h
