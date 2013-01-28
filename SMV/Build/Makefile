@@ -128,13 +128,13 @@ intel_win_64 : $(objwin)
 
 LINUX_SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 
-LINUX_FORT_LIBDIR_32  = $IFORT_COMPILER/lib/ia32
+LINUX_FORT_LIBDIR_32  = $(IFORT_COMPILER)/lib/ia32
 LINUX_LIBDIR_32 = $(LIB_DIR)/lib_linux_intel_32
 
-LINUX_FORT_LIBDIR_64  = $IFORT_COMPILER/lib/intel64
+LINUX_FORT_LIBDIR_64  = $(IFORT_COMPILER)/lib/intel64
 LINUX_LIBDIR_64 = $(LIB_DIR)/lib_linux_intel_64
 
-LINUX_SMV_LIBS = -lglui -lglut -lgd -ljpeg -lpng -lz
+LINUX_SMV_LIBS = -lglui -lgd -lglut -ljpeg -lpng -lz
 LINUX_INTEL_LIBS = -lifcore  -lintlc
 
 # ------------- intel_linux_32 ----------------
@@ -201,7 +201,7 @@ gcc_linux_32 : FC        = gfortran
 gcc_linux_32 : exe       = smokeview_gcc_$(SMV_TESTSTRING)32
 
 gcc_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_intel_32 $(LINUX_SMV_LIBS) -L /opt/intel/lib/ia32 -lirc -limf  -lgfortran $(LINUX_SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gcc_32 $(LINUX_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
