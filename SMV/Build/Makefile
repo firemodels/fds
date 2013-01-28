@@ -219,6 +219,8 @@ OSX_INTEL_LIBS_32 = $(OSX_FORT_LIBDIR_32)/libifcoremt.a $(OSX_FORT_LIBDIR_32)/li
 OSX_FORT_LIBDIR_64  = $(IFORT_COMPILER)/lib
 OSX_INTEL_LIBS_64 = $(OSX_FORT_LIBDIR_64)/libifcoremt.a $(OSX_FORT_LIBDIR_64)/libimf.a $(OSX_FORT_LIBDIR_64)/libirc.a $(OSX_FORT_LIBDIR_64)/libsvml.a
 
+SMV_LIBS = -lglui -lglut -lgd -ljpeg -lpng -lz
+
 # ------------- intel_osx_32 ----------------
 
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
@@ -244,6 +246,20 @@ intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING
 
 intel_osx_64 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)
+
+# ------------- gcc_osx_64 ----------------
+
+gcc_osx_64 : FFLAGS    = -O2 -m64 -x f95-cpp-input -D pp_noappend -ffree-form
+gcc_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX
+gcc_osx_64 : LFLAGS    = -m64
+gcc_osx_64 : CC        = gcc
+gcc_osx_64 : CPP       = g++
+gcc_osx_64 : FC        = gfortran
+gcc_osx_64 : exe       = smokeview_gcc_64
+
+gcc_osx_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_osx_gcc_64 $(SMV_LIBS) -lgfortran
+
 
 #-------------- Clean Target to remove Object and Module files -----------
 
