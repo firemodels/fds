@@ -1,11 +1,6 @@
 #!/bin/bash
 rm -f *.o
-
-#COMPILER=gcc
-COMPILER=icc
-
-#SIZE="-m32"
-SIZE="-m64"
+source ../setopts.sh $*
 
 rm -f *.o
 eval make COMPILER=${COMPILER} SIZE=${SIZE} libpng.a

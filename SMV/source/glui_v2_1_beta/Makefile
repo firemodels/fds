@@ -11,8 +11,6 @@ SIZE=-m64
 #PLATFORM=-D pp_OSX
 PLATFORM=
 
-OUTPUTDIR=LINUX_64
-OUTPUT_LIB=${OUTPUTDIR}
 GLUT_INC_LOCATION=../include2
 
 CFLAGS = 
@@ -35,7 +33,6 @@ GLUI_OBJS = glui_add_controls.o glui.o glui_bitmap_img_data.o glui_bitmaps.o glu
 libglui.a: $(GLUI_OBJS)
 	@echo "Creating library"
 	ar rcs libglui.a $(GLUI_OBJS)
-	cp libglui.a $(OUTPUT_LIB)/.
 
 .cpp.o:
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCS) $*.cpp
