@@ -2,7 +2,7 @@
 SIZE="-m64"
 COMPILER="icc"
 PLATFORM=""
-while getopts '36ghio' OPTION
+while getopts '36ghi' OPTION
 do
 case $OPTION in
   h)
@@ -11,7 +11,6 @@ case $OPTION in
   echo "-6 - build a 64 bit version"
   echo "-g - use the gcc compiler"
   echo "-i - use the Intel icc compiler"
-  echo "-o - built on an OSX platform"
   exit
   ;;
   3)
@@ -26,11 +25,11 @@ case $OPTION in
   i)
    COMPILER="icc"
   ;;
-  o)
-   PLATFORM="-D pp_OSX"
-  ;;
 esac
 done
+if [ "`uname`" == "Darwin" ]; then
+  PLATFORM="-D pp_OSX"
+fi
 export COMPILER
 export SIZE
 export PLATFORM

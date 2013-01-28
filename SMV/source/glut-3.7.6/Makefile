@@ -10,7 +10,7 @@ SIZE=-m32
 COMPILER=icc
 CC=$(COMPILER) $(SIZE)
 
-CFLAGS= -O2 $(STD_DEFINES) -I ../include
+CFLAGS= -O2 $(PLATFORM) $(STD_DEFINES) -I ../include
 
 RANLIB=ranlib
 
