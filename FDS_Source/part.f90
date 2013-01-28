@@ -868,7 +868,7 @@ END SUBROUTINE VOLUME_INIT_PARTICLE
 
 SUBROUTINE MAKE_PARTICLE
 
-REAL(EB) :: X1,X2
+REAL(EB) :: X1,X2,AREA,LENGTH
 INTEGER :: N
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D=>NULL()
 
@@ -879,54 +879,117 @@ ONE_D => LP%ONE_D
 IF (SF%USER_DEFINED) THEN
 
    LP%MASS = 0._EB
+   SCREEN_LPC: IF (LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%DRAG_LAW==SCREEN_DRAG) THEN
+      ! Compute cross-sectional area of particle
+      AREA = (ABS(LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%ORIENTATION(1,1))*DY(ONE_D%JJG)*DZ(ONE_D%KKG) + &
+              ABS(LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%ORIENTATION(1,2))*DX(ONE_D%IIG)*DZ(ONE_D%KKG) + &
+              ABS(LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%ORIENTATION(1,3))*DX(ONE_D%IIG)*DY(ONE_D%JJG)) * &
+              LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%FREE_AREA_FRACTION
+      SELECT CASE (SF%GEOMETRY)
+         CASE (SURF_CARTESIAN)
+            LP%ONE_D%AREA = AREA
+            IF (SF%THERMALLY_THICK) THEN
+               DO N=1,SF%N_LAYERS
+                  LP%MASS = LP%MASS + AREA*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
+               END DO
+            ELSE
+               ONE_D%X(1) = SF%THICKNESS
+               ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
+               IF (SF%SURFACE_DENSITY>0._EB) THEN
+                  ONE_D%RHO(1,1) = SF%SURFACE_DENSITY/SF%THICKNESS
+                  LP%MASS =  AREA*SF%SURFACE_DENSITY
+               ENDIF
+            ENDIF 
+         CASE (SURF_CYLINDRICAL)
+            LP%ONE_D%AREA = AREA*PI            
+            IF (SF%THERMALLY_THICK) THEN
+               X1 = SUM(SF%LAYER_THICKNESS)
+               LENGTH = AREA / (2._EB*X1)
+               DO N=SF%N_LAYERS,1,-1
+                  X2 = X1 - SF%LAYER_THICKNESS(N)
+                  LP%MASS = LP%MASS + LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
+                  X1 = X2
+               END DO      
+            ELSE
+               LENGTH = AREA / (2._EB*SF%RADIUS)
+               ONE_D%X(1) = SF%RADIUS
+               ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
+               IF (SF%SURFACE_DENSITY>0._EB) THEN
+                  ONE_D%RHO(1,1) = 2._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
+                  LP%MASS =  TWOPI*LENGTH*SF%RADIUS*SF%SURFACE_DENSITY
+               ENDIF
+            ENDIF
+         CASE (SURF_SPHERICAL)
+            LP%ONE_D%AREA = AREA*4._EB
+            IF (SF%THERMALLY_THICK) THEN
+               X1 = SUM(SF%LAYER_THICKNESS)               
+               LP%PWT = AREA/(PI*X1**2)
+               DO N=SF%N_LAYERS,1,-1
+                  X2 = X1 - SF%LAYER_THICKNESS(N)
+                  LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
+                  X1 = X2
+               END DO                     
+            ELSE
+               LP%PWT = AREA/(PI*SF%RADIUS**2)               
+               ONE_D%X(1) = SF%RADIUS
+               ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
+               IF (SF%SURFACE_DENSITY>0._EB) THEN
+                  ONE_D%RHO(1,1) = 3._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
+                  LP%MASS =  4._EB*PI*SF%RADIUS**2*SF%SURFACE_DENSITY
+               ENDIF
+            ENDIF            
+      END SELECT
+            
+   ELSE SCREEN_LPC
 
-   SELECT CASE (SF%GEOMETRY)
-      CASE (SURF_CARTESIAN)
-         IF (SF%THERMALLY_THICK) THEN
-            DO N=1,SF%N_LAYERS
-               LP%MASS = LP%MASS + SF%LENGTH*SF%WIDTH*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
-            END DO
-         ELSE
-            ONE_D%X(1) = SF%THICKNESS
-            ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
-            IF (SF%SURFACE_DENSITY>0._EB) THEN
-               ONE_D%RHO(1,1) = SF%SURFACE_DENSITY/SF%THICKNESS
-               LP%MASS =  SF%LENGTH*SF%WIDTH*SF%SURFACE_DENSITY
+      SELECT CASE (SF%GEOMETRY)
+         CASE (SURF_CARTESIAN)
+            IF (SF%THERMALLY_THICK) THEN
+               DO N=1,SF%N_LAYERS
+                  LP%MASS = LP%MASS + SF%LENGTH*SF%WIDTH*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
+               END DO
+            ELSE
+               ONE_D%X(1) = SF%THICKNESS
+               ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
+               IF (SF%SURFACE_DENSITY>0._EB) THEN
+                  ONE_D%RHO(1,1) = SF%SURFACE_DENSITY/SF%THICKNESS
+                  LP%MASS =  SF%LENGTH*SF%WIDTH*SF%SURFACE_DENSITY
+               ENDIF
+            ENDIF 
+         CASE (SURF_CYLINDRICAL)
+            IF (SF%THERMALLY_THICK) THEN
+               X1 = SUM(SF%LAYER_THICKNESS)
+               DO N=SF%N_LAYERS,1,-1
+                  X2 = X1 - SF%LAYER_THICKNESS(N)
+                  LP%MASS = LP%MASS + SF%LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
+                  X1 = X2
+               END DO      
+            ELSE
+               ONE_D%X(1) = SF%RADIUS
+               ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
+               IF (SF%SURFACE_DENSITY>0._EB) THEN
+                  ONE_D%RHO(1,1) = 2._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
+                  LP%MASS =  TWOPI*SF%LENGTH*SF%RADIUS*SF%SURFACE_DENSITY
+               ENDIF
             ENDIF
-         ENDIF 
-      CASE (SURF_CYLINDRICAL)
-         IF (SF%THERMALLY_THICK) THEN
-            X1 = SUM(SF%LAYER_THICKNESS)
-            DO N=SF%N_LAYERS,1,-1
-               X2 = X1 - SF%LAYER_THICKNESS(N)
-               LP%MASS = LP%MASS + SF%LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
-               X1 = X2
-            END DO      
-         ELSE
-            ONE_D%X(1) = SF%RADIUS
-            ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
-            IF (SF%SURFACE_DENSITY>0._EB) THEN
-               ONE_D%RHO(1,1) = 2._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
-               LP%MASS =  TWOPI*SF%LENGTH*SF%RADIUS*SF%SURFACE_DENSITY
+         CASE (SURF_SPHERICAL)
+            IF (SF%THERMALLY_THICK) THEN
+               X1 = SUM(SF%LAYER_THICKNESS)
+               DO N=SF%N_LAYERS,1,-1
+                  X2 = X1 - SF%LAYER_THICKNESS(N)
+                  LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
+                  X1 = X2
+               END DO      
+            ELSE
+               ONE_D%X(1) = SF%RADIUS
+               ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
+               IF (SF%SURFACE_DENSITY>0._EB) THEN
+                  ONE_D%RHO(1,1) = 3._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
+                  LP%MASS =  4._EB*PI*SF%RADIUS**2*SF%SURFACE_DENSITY
+               ENDIF
             ENDIF
-         ENDIF
-      CASE (SURF_SPHERICAL)
-         IF (SF%THERMALLY_THICK) THEN
-            X1 = SUM(SF%LAYER_THICKNESS)
-            DO N=SF%N_LAYERS,1,-1
-               X2 = X1 - SF%LAYER_THICKNESS(N)
-               LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
-               X1 = X2
-            END DO      
-         ELSE
-            ONE_D%X(1) = SF%RADIUS
-            ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
-            IF (SF%SURFACE_DENSITY>0._EB) THEN
-               ONE_D%RHO(1,1) = 3._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
-               LP%MASS =  4._EB*PI*SF%RADIUS**2*SF%SURFACE_DENSITY
-            ENDIF
-         ENDIF
-   END SELECT
+      END SELECT
+   ENDIF SCREEN_LPC   
 
 ELSEIF (LPC%SURF_INDEX==DROPLET_SURF_INDEX) THEN
 
@@ -1682,7 +1745,7 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
             A_DRAG = DX(IIG)*DZ(KKG)
             C_DRAG = (K_SCREEN+Y_SCREEN)*ABS(LPC%ORIENTATION(1,2))*VBAR
             LP%ACCEL_Y = -C_DRAG*SFAC*A_DRAG
-            A_DRAG = DX(IIG)*DY(KKG)
+            A_DRAG = DX(IIG)*DY(JJG)
             C_DRAG = (K_SCREEN+Y_SCREEN)*ABS(LPC%ORIENTATION(1,3))*WBAR
             LP%ACCEL_Z = -C_DRAG*SFAC*A_DRAG
          ELSE
