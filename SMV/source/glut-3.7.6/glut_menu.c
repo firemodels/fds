@@ -124,7 +124,7 @@ ifSunCreator(void)
       savedDisplayString = __glutDisplayString;
       __glutDisplayMode = GLUT_RGB | GLUT_SINGLE;
       __glutDisplayString = NULL;
-      window = __glutCreateWindow(NULL, 0, 0, 1, 1, 0);
+      window = __glutCreateWindow(NULL, 0, 0, 1, 1, 0,0);
     }
 
     glvendor = (char *) glGetString(GL_VENDOR);
