@@ -6,10 +6,9 @@
 LIBNAME = libglut
 STD_DEFINES = -Dlinux -D__i386__ -D_POSIX_SOURCE -D_BSD_SOURCE -D_GNU_SOURCE -DX_LOCALE
 
-
-
-#CC=icc
-CC=gcc
+SIZE=-m32
+COMPILER=icc
+CC=$(COMPILER) $(SIZE)
 
 CFLAGS= -O2 $(STD_DEFINES) -I ../include
 
