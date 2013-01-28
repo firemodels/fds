@@ -12,14 +12,11 @@
 # To install in $HOME instead of /usr/local, use:
 #    make install prefix=$HOME
 
-CC=gcc
-#CC=icc
+COMPILER=icc
+SIZE=-m64
+CC=$(COMPILER) $(SIZE)
 
-BASE=gcc_linux_32
-#BASE=intel_linux_32
-
-CFLAGS=-O -m32
-#CFLAGS=-O -m64
+CFLAGS=-O $(SIZE)
 #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
 #CFLAGS=-g -DDEBUG
 #CFLAGS=-O3 -Wall -Wwrite-strings -Wpointer-arith -Wconversion \
@@ -78,7 +75,6 @@ test: all
 libz.a: $(OBJS) $(OBJA)
 	$(AR) $@ $(OBJS) $(OBJA)
 	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
-	cp libz.a libz_$(BASE).a
 
 match.o: match.S
 	$(CPP) match.S > _match.s
