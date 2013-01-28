@@ -20,7 +20,9 @@ manext = 1
 mandir = $(prefix)/man/man$(manext)
 
 # The name of your C compiler:
-CC= icc
+COMPILER=icc
+SIZE=-m32
+CC=$(COMPILER) $(SIZE)
 
 # You may need to adjust these cc options:
 CFLAGS= -O2  -I$(srcdir)
