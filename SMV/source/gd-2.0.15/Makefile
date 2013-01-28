@@ -36,8 +36,10 @@ VERSION=2.0.4
 
 COMPILER=gcc -fPIC
 #COMPILER=icc
+#SIZE=-m32
+SIZE=-m64
 
-CC=$(COMPILER) $(INCLUDEDIRS)
+CC=$(COMPILER) $(SIZE) $(INCLUDEDIRS)
 LINK=$(CC) $(LIBDIRS) $(LIBS)
 
 PROGRAMS=pngtogd pngtogd2 gdtopng gd2topng gd2copypal gdparttopng webpng annotate $(TEST_PROGRAMS)
