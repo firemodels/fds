@@ -2,12 +2,13 @@
 SIZE="-m64"
 COMPILER="icc"
 PLATFORM=""
-while getopts '36ghi' OPTION
+while getopts '36ghit' OPTION
 do
 case $OPTION in
   h)
   echo "options:"
   echo "-3 - build a 32 bit version"
+  echo "-t - build a 32 bit version but don't use -m32 option"
   echo "-6 - build a 64 bit version"
   echo "-g - use the gcc compiler"
   echo "-i - use the Intel icc compiler"
@@ -24,6 +25,9 @@ case $OPTION in
   ;;
   i)
    COMPILER="icc"
+  ;;
+  t)
+   SIZE=""
   ;;
 esac
 done

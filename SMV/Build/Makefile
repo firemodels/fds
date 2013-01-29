@@ -12,6 +12,7 @@ SMV_TESTFLAG =
 SMV_TESTSTRING =
 SMV_PROFILEFLAG = 
 SMV_PROFILESTRING =
+SIZE=-m32
 
 # use FILTERC and FILTERF to customize smokeview builds (ie -D pp_BETA)
 
@@ -192,9 +193,9 @@ intel_linux_64_profile : $(obj)
 
 # ------------- gcc_linux_32 ----------------
 
-gcc_linux_32 : FFLAGS    = -O2 -m32 -x f95-cpp-input -D pp_noappend -ffree-form
-gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
-gcc_linux_32 : LFLAGS    = -m32
+gcc_linux_32 : FFLAGS    = -O2 ${SIZE} -x f95-cpp-input -D pp_noappend -ffree-form
+gcc_linux_32 : CFLAGS    = -O2 ${SIZE} -D pp_LINUX
+gcc_linux_32 : LFLAGS    = ${SIZE}
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : CPP       = g++
 gcc_linux_32 : FC        = gfortran

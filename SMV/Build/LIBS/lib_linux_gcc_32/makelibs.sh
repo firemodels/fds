@@ -1,4 +1,6 @@
 #!/bin/bash
+# use on systems that do not support -m32
+#OPTS="-g -t"
 OPTS="-g -3"
 LIBDIR=`pwd`
 SRCDIR=$LIBDIR/../../../source
