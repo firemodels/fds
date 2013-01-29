@@ -12,7 +12,6 @@ SMV_TESTFLAG =
 SMV_TESTSTRING =
 SMV_PROFILEFLAG = 
 SMV_PROFILESTRING =
-SIZE=-m32
 
 # use FILTERC and FILTERF to customize smokeview builds (ie -D pp_BETA)
 
@@ -193,9 +192,9 @@ intel_linux_64_profile : $(obj)
 
 # ------------- gcc_linux_32 ----------------
 
-gcc_linux_32 : FFLAGS    = -O2 ${SIZE} -x f95-cpp-input -D pp_noappend -ffree-form
-gcc_linux_32 : CFLAGS    = -O2 ${SIZE} -D pp_LINUX
-gcc_linux_32 : LFLAGS    = ${SIZE}
+gcc_linux_32 : FFLAGS    = -O2 -m32 -x f95-cpp-input -D pp_noappend -ffree-form
+gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
+gcc_linux_32 : LFLAGS    = -m32
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : CPP       = g++
 gcc_linux_32 : FC        = gfortran
@@ -203,6 +202,19 @@ gcc_linux_32 : exe       = smokeview_gcc_$(SMV_TESTSTRING)32
 
 gcc_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gcc_32 $(LINUX_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
+
+# ------------- gcc_linux ----------------
+
+gcc_linux : FFLAGS    = -O2 -x f95-cpp-input -D pp_noappend -ffree-form
+gcc_linux : CFLAGS    = -O2 -D pp_LINUX
+gcc_linux : LFLAGS    = 
+gcc_linux : CC        = gcc
+gcc_linux : CPP       = g++
+gcc_linux : FC        = gfortran
+gcc_linux : exe       = smokeview_gcc_$(SMV_TESTSTRING)32
+
+gcc_linux : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gcc $(LINUX_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
