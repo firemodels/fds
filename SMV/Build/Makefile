@@ -203,6 +203,19 @@ gcc_linux_32 : exe       = smokeview_gcc_$(SMV_TESTSTRING)32
 gcc_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gcc_32 $(LINUX_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
 
+# ------------- gcc_linux_64 ----------------
+
+gcc_linux_64 : FFLAGS    = -O2 -m64 -x f95-cpp-input -D pp_noappend -ffree-form
+gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX
+gcc_linux_64 : LFLAGS    = -m64
+gcc_linux_64 : CC        = gcc
+gcc_linux_64 : CPP       = g++
+gcc_linux_64 : FC        = gfortran
+gcc_linux_64 : exe       = smokeview_gcc_$(SMV_TESTSTRING)64
+
+gcc_linux_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gcc_64 $(LINUX_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
+
 # ------------- gcc_linux ----------------
 
 gcc_linux : FFLAGS    = -O2 -x f95-cpp-input -D pp_noappend -ffree-form
