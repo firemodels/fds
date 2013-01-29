@@ -245,7 +245,7 @@ OSX_INTEL_LIBS_32 = $(OSX_FORT_LIBDIR_32)/libifcoremt.a $(OSX_FORT_LIBDIR_32)/li
 OSX_FORT_LIBDIR_64  = $(IFORT_COMPILER)/lib
 OSX_INTEL_LIBS_64 = $(OSX_FORT_LIBDIR_64)/libifcoremt.a $(OSX_FORT_LIBDIR_64)/libimf.a $(OSX_FORT_LIBDIR_64)/libirc.a $(OSX_FORT_LIBDIR_64)/libsvml.a
 
-SMV_LIBS = -lglui -lglut -lgd -ljpeg -lpng -lz
+SMV_LIBS = -lglui -lgd -ljpeg -lpng -lz
 
 # ------------- intel_osx_32 ----------------
 
@@ -277,27 +277,27 @@ intel_osx_64 : $(obj)
 
 gcc_osx_32 : FFLAGS    = -O2 -m32 -x f95-cpp-input -D pp_noappend -ffree-form
 gcc_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX -Wno-write-strings
-gcc_osx_32 : LFLAGS    = -m64
+gcc_osx_32 : LFLAGS    = -m32 -framework OpenGL -framework GLUT
 gcc_osx_32 : CC        = gcc
 gcc_osx_32 : CPP       = g++
 gcc_osx_32 : FC        = gfortran
 gcc_osx_32 : exe       = smokeview_gcc_32
 
 gcc_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_osx_gcc_32 $(SMV_LIBS) -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gcc_32 $(SMV_LIBS) -L/usr/local/gfortran/lib/gcc/x86_64-apple-darwin10/4.6.2/i386 -lgfortran
 
 # ------------- gcc_osx_64 ----------------
 
 gcc_osx_64 : FFLAGS    = -O2 -m64 -x f95-cpp-input -D pp_noappend -ffree-form
 gcc_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX -Wno-write-strings
-gcc_osx_64 : LFLAGS    = -m64
+gcc_osx_64 : LFLAGS    = -m64 -framework OpenGL -framework GLUT
 gcc_osx_64 : CC        = gcc
 gcc_osx_64 : CPP       = g++
 gcc_osx_64 : FC        = gfortran
 gcc_osx_64 : exe       = smokeview_gcc_64
 
 gcc_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_osx_gcc_64 $(SMV_LIBS) -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gcc_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/gcc/x86_64-apple-darwin10/4.6.2 -lgfortran
 
 #-------------- Clean Target to remove Object and Module files -----------
 
