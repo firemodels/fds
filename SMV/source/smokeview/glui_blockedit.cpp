@@ -6,7 +6,9 @@
 #include "options.h"
 
 // svn revision character string
-extern "C" char glui_blockedit_revision[]="$Revision$";
+extern "C" char glui_blockedit_revision[];
+char glui_blockedit_revision[]="$Revision$";
+
 
 #include <stdio.h>
 #include <string.h>

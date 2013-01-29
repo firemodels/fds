@@ -7,6 +7,7 @@ char isobox_revision[]="$Revision$";
 
 #include "options.h"
 #include <stdlib.h>
+#include <string.h>
 #ifdef pp_DRAWISO
 #ifdef pp_OSX
 #include <GLUT/glut.h>

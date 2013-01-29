@@ -6,7 +6,8 @@
 #include "options.h"
 
 // svn revision character string
-extern "C" char glui_stereo_revision[]="$Revision$";
+extern "C" char glui_stereo_revision[];
+char glui_stereo_revision[]="$Revision$";
 
 #include <stdio.h>
 #include <string.h>

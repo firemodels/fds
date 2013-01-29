@@ -9,6 +9,7 @@ char IOvolsmoke_revision[]="$Revision$";
 #include "glew.h"
 #include <stdio.h>  
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <float.h>
 #ifdef pp_OSX

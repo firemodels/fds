@@ -6,7 +6,8 @@
 #include "options.h"
 
 // svn revision character string
-extern "C" char glui_motion_revision[]="$Revision$";
+extern "C" char glui_motion_revision[];
+char glui_motion_revision[]="$Revision$";
 
 #include <stdio.h>
 #include <string.h>
@@ -869,7 +870,7 @@ extern "C" void Motion_CB(int var){
         float diffangle;
         int intangle;
 
-        intangle = (int)((*azimuth+45)/90)*90.0;
+        intangle = (int)((*azimuth+45)/90)*90;
         diffangle = *azimuth-intangle;
         if(diffangle<0.0)diffangle = -diffangle;
         if(diffangle>1.0){

@@ -6,7 +6,8 @@
 #include "options.h"
 
 // svn revision character string
-extern "C" char glui_colorbar_revision[]="$Revision$";
+extern "C" char glui_colorbar_revision[];
+char glui_colorbar_revision[]="$Revision$";
 
 #include <stdio.h>
 #include <string.h>
@@ -309,9 +310,9 @@ void COLORBAR_CB(int var){
       rnew = cbi->rgb_node+3*colorbarpoint;
       rbef = rnew-3;
       raft = rnew+3;
-      rnew[0]=((float)rbef[0]+(float)raft[0])/2.0;
-      rnew[1]=((float)rbef[1]+(float)raft[1])/2.0;
-      rnew[2]=((float)rbef[2]+(float)raft[2])/2.0;
+      rnew[0]=(int)(((float)rbef[0]+(float)raft[0])/2.0);
+      rnew[1]=(int)(((float)rbef[1]+(float)raft[1])/2.0);
+      rnew[2]=(int)(((float)rbef[2]+(float)raft[2])/2.0);
 
       inew = cbi->index_node+colorbarpoint;
       ibef = inew-1;

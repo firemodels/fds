@@ -6,7 +6,8 @@
 #include "options.h"
 
 // svn revision character string
-extern "C" char glui_3dsmoke_revision[]="$Revision$";
+extern "C" char glui_3dsmoke_revision[];
+char glui_3dsmoke_revision[]="$Revision$";
 
 #include <stdio.h>
 #include <string.h>
@@ -205,7 +206,7 @@ void update_alpha(void){
   float factor;
 
   factor = 1.0 - exp(-smoke_extinct*smoke_dens*smoke_pathlength);
-  smoke_alpha = 255*factor;
+  smoke_alpha = (int)(255*factor);
   if(smoke_alpha<0)smoke_alpha=0;
   if(smoke_alpha>255)smoke_alpha=255;
   sprintf(label1,"%f",smoke_extinct);

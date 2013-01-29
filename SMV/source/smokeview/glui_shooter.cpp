@@ -6,7 +6,8 @@
 #include "options.h"
 
 // svn revision character string
-extern "C" char glui_shooter_revision[]="$Revision$";
+extern "C" char glui_shooter_revision[];
+char glui_shooter_revision[]="$Revision$";
 
 #include <stdio.h>
 #ifdef pp_SHOOTER
@@ -323,7 +324,7 @@ void SHOOTER_CB(int var){
       }
       break;
     case SHOOTER_APPLY:
-      nshooter_frames=shooter_duration*shooter_fps;
+      nshooter_frames=(int)(shooter_duration*shooter_fps);
       max_shooter_points=nshooter_frames*shooter_nparts;
 
       if(allocate_shooter()==0){
