@@ -30,8 +30,8 @@
 = Fire =
 ========
 
-&OBST XB=12.0,12.6,2.9,3.5,0.0,0.3 / Chair
-&VENT XB=12.0,12.6,2.9,3.5,0.3,0.3, SURF_ID='fire' /
+&OBST XB=12.6,13.2,2.9,3.5,0.0,0.3 / Chair
+&VENT XB=12.6,13.2,2.9,3.5,0.3,0.3, SURF_ID='fire' /
 &SURF ID='fire', HRRPUA=7857, RAMP_Q='fireramp', COLOR='RED' /
 
 &RAMP ID='fireramp', T=0.0, F=0.0 /
@@ -140,11 +140,16 @@
 &OBST XB=20.0,20.1,1.1,2.9,2.1,2.3 /
 &OBST XB=20.0,20.1,1.7,2.3,2.1,2.4 /
 
-&OBST XB=17.4,17.5,1.3,1.7,0.0,2.4 / Main bedroom wall
+&OBST XB=17.4,17.5,0.1,0.5,0.0,2.1 / Main bedroom wall
+&OBST XB=17.4,17.5,0.5,0.9,0.0,2.2 /
+&OBST XB=17.4,17.5,0.9,1.3,0.0,2.3 /
+&OBST XB=17.4,17.5,1.3,1.7,0.0,2.4 /
 &OBST XB=17.4,17.5,1.7,2.3,0.0,2.5 /
 &OBST XB=17.4,17.5,2.3,2.9,0.0,2.4 /
 &OBST XB=17.4,17.5,2.9,3.5,0.0,2.3 /
 &OBST XB=17.4,17.5,3.5,4.0,0.0,2.2 /
+
+&HOLE XB=17.4,17.5,0.4,1.0,0.0,2.0 / Main bedroom door
 
 &HOLE XB=17.4,17.5,1.5,2.5,0.0,2.0 / Main bedroom closet door
 
@@ -170,14 +175,16 @@
 &OBST XB=6.1,6.2,0.5,1.1,0.0,2.3 /
 &OBST XB=6.1,6.2,1.1,1.7,0.0,2.4 /
 &OBST XB=6.1,6.2,1.7,2.3,0.0,2.5 /
-&OBST XB=4.0,4.1,0.0,0.5,0.0,2.2 /
-&OBST XB=4.0,4.1,0.5,1.1,0.0,2.3 /
-&OBST XB=4.0,4.1,1.1,1.7,0.0,2.4 /
-&OBST XB=4.0,4.1,1.7,2.3,0.0,2.5 /
-&OBST XB=4.0,6.2,2.2,2.3,0.0,2.5 /
+&OBST XB=3.6,3.7,0.0,0.5,0.0,2.2 /
+&OBST XB=3.6,3.7,0.5,1.1,0.0,2.3 /
+&OBST XB=3.6,3.7,1.1,1.7,0.0,2.4 /
+&OBST XB=3.6,3.7,1.7,3.5,0.0,2.5 /
+&OBST XB=3.7,6.2,2.2,2.3,0.0,2.5 /
 
-&OBST XB=0.0,3.4,3.5,3.6,0.0,2.2 / Remote bedroom closet
-&OBST XB=3.4,3.5,3.5,4.0,0.0,2.2 /
+&HOLE XB=3.6,3.7,2.6,3.2,0.0,2.0 / Remote bedroom door
+
+&OBST XB=0.0,3.6,3.5,3.6,0.0,2.2 / Remote bedroom closet
+&OBST XB=3.6,3.7,3.5,4.0,0.0,2.2 /
 
 &HOLE XB=0.9,1.9,3.4,3.7,0.0,2.0 / Remote bedroom closet door
 
@@ -188,76 +195,64 @@
 = Smoke detectors =
 ===================
 
-&PROP ID='Heskestad', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION=3.24 /
-&PROP ID='I1', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=2.5, BETA_E=-0.7, ALPHA_C=0.8, BETA_C=-0.9, ACTIVATION_OBSCURATION=3.24 /
-&PROP ID='I2', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=1.8, BETA_E=-1.1, ALPHA_C=1.0, BETA_C=-0.8, ACTIVATION_OBSCURATION=3.24 /
-&PROP ID='P1', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=1.8, BETA_E=-1.0, ALPHA_C=1.0, BETA_C=-0.8, ACTIVATION_OBSCURATION=3.24 /
-&PROP ID='P2', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=1.8, BETA_E=-0.8, ALPHA_C=0.8, BETA_C=-0.8, ACTIVATION_OBSCURATION=3.24 /
+&PROP ID='I1', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=0.015, BETA_E=-1.9, ALPHA_C=0.15, BETA_C=-1.4, ACTIVATION_OBSCURATION=3.24 /
+&PROP ID='I3', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=0.015, BETA_E=-1.9, ALPHA_C=0.15, BETA_C=-1.4, ACTIVATION_OBSCURATION=3.24 /
+&PROP ID='P1', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=0.015, BETA_E=-1.9, ALPHA_C=0.15, BETA_C=-1.4, ACTIVATION_OBSCURATION=3.24 /
 
 =============
 = Station A =
 =============
 
-&DEVC ID='Detector A Heskestad', PROP_ID='Heskestad', XYZ=0.38, 1.63, 2.28 /
-&DEVC ID='Detector A Ion 1',     PROP_ID='I1',        XYZ=0.38, 1.63, 2.28 /
-&DEVC ID='Detector A Ion 2',     PROP_ID='I2',        XYZ=0.38, 1.63, 2.28 /
-&DEVC ID='Detector A Photo 1',   PROP_ID='P1',        XYZ=0.38, 1.63, 2.28 /
-&DEVC ID='Detector A Photo 2',   PROP_ID='P2',        XYZ=0.38, 1.63, 2.28 /
+&DEVC ID='Detector A Ion 1',   PROP_ID='I1', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Detector A Ion 3',   PROP_ID='I3', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Detector A Photo 1', PROP_ID='P1', XYZ=0.48, 1.63, 2.28 /
 
-&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat A Velocity' /
-&DEVC XYZ=19.63, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat A Temperature' /
+&DEVC XYZ=0.48, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat A Velocity' /
+&DEVC XYZ=0.48, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat A Temperature' /
 
 =============
 = Station B =
 =============
 
-&DEVC ID='Detector B Heskestad', PROP_ID='Heskestad', XYZ=17.9, 1.63, 2.28 /
-&DEVC ID='Detector B Ion 1',     PROP_ID='I1',        XYZ=17.9, 1.63, 2.28 /
-&DEVC ID='Detector B Ion 2',     PROP_ID='I2',        XYZ=17.9, 1.63, 2.28 /
-&DEVC ID='Detector B Photo 1',   PROP_ID='P1',        XYZ=17.9, 1.63, 2.28 /
-&DEVC ID='Detector B Photo 2',   PROP_ID='P2',        XYZ=17.9, 1.63, 2.28 /
+&DEVC ID='Detector B Ion 1',   PROP_ID='I1', XYZ=17.8, 1.63, 2.28 /
+&DEVC ID='Detector B Ion 3',   PROP_ID='I3', XYZ=17.8, 1.63, 2.28 /
+&DEVC ID='Detector B Photo 1', PROP_ID='P1', XYZ=17.8, 1.63, 2.28 /
 
-&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat B Velocity' /
-&DEVC XYZ=17.9, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat B Temperature' /
+&DEVC XYZ=17.8, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat B Velocity' /
+&DEVC XYZ=17.8, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat B Temperature' /
 
 =============
 = Station C =
 =============
 
-&DEVC ID='Detector C Heskestad', PROP_ID='Heskestad', XYZ=3.8, 2.51, 2.28 /
-&DEVC ID='Detector C Ion 1',     PROP_ID='I1',        XYZ=3.8, 2.51, 2.28 /
-&DEVC ID='Detector C Ion 2',     PROP_ID='I2',        XYZ=3.8, 2.51, 2.28 /
-&DEVC ID='Detector C Photo 1',   PROP_ID='P1',        XYZ=3.8, 2.51, 2.28 /
-&DEVC ID='Detector C Photo 2',   PROP_ID='P2',        XYZ=3.8, 2.51, 2.28 /
+&DEVC ID='Detector C Ion 1',   PROP_ID='I1', XYZ=4.1, 2.7, 2.28 /
+&DEVC ID='Detector C Ion 3',   PROP_ID='I3', XYZ=4.1, 2.7, 2.28 /
+&DEVC ID='Detector C Photo 1', PROP_ID='P1', XYZ=4.1, 2.7, 2.28 /
 
-&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='VELOCITY', ID='Stat C Velocity' /
-&DEVC XYZ=3.8, 2.51, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat C Temperature' /
+&DEVC XYZ=4.1, 2.7, 2.28, QUANTITY='VELOCITY', ID='Stat C Velocity' /
+&DEVC XYZ=4.1, 2.7, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat C Temperature' /
 
 =============
 = Station D =
 =============
 
-&DEVC ID='Detector D Heskestad', PROP_ID='Heskestad', XYZ=17.2, 0.9, 2.19 /
-&DEVC ID='Detector D Ion 1',     PROP_ID='I1',        XYZ=17.2, 0.9, 2.19 /
-&DEVC ID='Detector D Ion 2',     PROP_ID='I2',        XYZ=17.2, 0.9, 2.19 /
-&DEVC ID='Detector D Photo 1',   PROP_ID='P1',        XYZ=17.2, 0.9, 2.19 /
-&DEVC ID='Detector D Photo 2',   PROP_ID='P2',        XYZ=17.2, 0.9, 2.19 /
+&DEVC ID='Detector D Ion 1',   PROP_ID='I1', XYZ=17.1, 1.0, 2.19 /
+&DEVC ID='Detector D Ion 3',   PROP_ID='I3', XYZ=17.1, 1.0, 2.19 /
+&DEVC ID='Detector D Photo 1', PROP_ID='P1', XYZ=17.1, 1.0, 2.19 /
 
-&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='VELOCITY', ID='Stat D Velocity' /
-&DEVC XYZ=17.2, 0.9, 2.19, QUANTITY='THERMOCOUPLE', ID='Stat D Temperature' /
+&DEVC XYZ=17.1, 1.0, 2.19, QUANTITY='VELOCITY', ID='Stat D Velocity' /
+&DEVC XYZ=17.1, 1.0, 2.19, QUANTITY='THERMOCOUPLE', ID='Stat D Temperature' /
 
 =============
 = Station E =
 =============
 
-&DEVC ID='Detector E Heskestad', PROP_ID='Heskestad', XYZ=12.4, 1.63, 2.28 /
-&DEVC ID='Detector E Ion 1',     PROP_ID='I1',        XYZ=12.4, 1.63, 2.28 /
-&DEVC ID='Detector E Ion 2',     PROP_ID='I2',        XYZ=12.4, 1.63, 2.28 /
-&DEVC ID='Detector E Photo 1',   PROP_ID='P1',        XYZ=12.4, 1.63, 2.28 /
-&DEVC ID='Detector E Photo 2',   PROP_ID='P2',        XYZ=12.4, 1.63, 2.28 /
+&DEVC ID='Detector E Ion 1',   PROP_ID='I1', XYZ=13.0, 1.63, 2.28 /
+&DEVC ID='Detector E Ion 3',   PROP_ID='I3', XYZ=13.0, 1.63, 2.28 /
+&DEVC ID='Detector E Photo 1', PROP_ID='P1', XYZ=13.0, 1.63, 2.28 /
 
-&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat E Velocity' /
-&DEVC XYZ=12.4, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat E Temperature' /
+&DEVC XYZ=13.0, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat E Velocity' /
+&DEVC XYZ=13.0, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat E Temperature' /
 
 ==============================
 = Additional instrumentation =
@@ -323,28 +318,18 @@
 &DEVC XYZ=11.75, 0.38, 0.28, QUANTITY='THERMOCOUPLE', ID='TCF_7' /
 &DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='OPTICAL DENSITY', ID='SMF_1' /
 
-&CTRL ID='Det A Heskestad', INPUT_ID='Detector A Heskestad', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det A Ion 1',     INPUT_ID='Detector A Ion 1',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det A Ion 2',     INPUT_ID='Detector A Ion 2',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det A Photo 1',   INPUT_ID='Detector A Photo 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det A Photo 2',   INPUT_ID='Detector A Photo 2',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det B Heskestad', INPUT_ID='Detector B Heskestad', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det B Ion 1',     INPUT_ID='Detector B Ion 1',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det B Ion 2',     INPUT_ID='Detector B Ion 2',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det B Photo 1',   INPUT_ID='Detector B Photo 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det B Photo 2',   INPUT_ID='Detector B Photo 2',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det C Heskestad', INPUT_ID='Detector C Heskestad', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det C Ion 1',     INPUT_ID='Detector C Ion 1',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det C Ion 2',     INPUT_ID='Detector C Ion 2',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det C Photo 1',   INPUT_ID='Detector C Photo 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det C Photo 2',   INPUT_ID='Detector C Photo 2',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det D Heskestad', INPUT_ID='Detector D Heskestad', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det D Ion 1',     INPUT_ID='Detector D Ion 1',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det D Ion 2',     INPUT_ID='Detector D Ion 2',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det D Photo 1',   INPUT_ID='Detector D Photo 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det D Photo 2',   INPUT_ID='Detector D Photo 2',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det E Heskestad', INPUT_ID='Detector E Heskestad', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det E Ion 1',     INPUT_ID='Detector E Ion 1',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det E Ion 2',     INPUT_ID='Detector E Ion 2',     FUNCTION_TYPE='ANY' /
-&CTRL ID='Det E Photo 1',   INPUT_ID='Detector E Photo 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det E Photo 2',   INPUT_ID='Detector E Photo 2',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det A Ion 1',   INPUT_ID='Detector A Ion 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det A Ion 3',   INPUT_ID='Detector A Ion 3',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det A Photo 1', INPUT_ID='Detector A Photo 1', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det B Ion 1',   INPUT_ID='Detector B Ion 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det B Ion 3',   INPUT_ID='Detector B Ion 3',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det B Photo 1', INPUT_ID='Detector B Photo 1', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det C Ion 1',   INPUT_ID='Detector C Ion 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det C Ion 3',   INPUT_ID='Detector C Ion 3',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det C Photo 1', INPUT_ID='Detector C Photo 1', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det D Ion 1',   INPUT_ID='Detector D Ion 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det D Ion 3',   INPUT_ID='Detector D Ion 3',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det D Photo 1', INPUT_ID='Detector D Photo 1', FUNCTION_TYPE='ANY' /
+&CTRL ID='Det E Ion 1',   INPUT_ID='Detector E Ion 1',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det E Ion 3',   INPUT_ID='Detector E Ion 3',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Det E Photo 1', INPUT_ID='Detector E Photo 1', FUNCTION_TYPE='ANY' /
