@@ -125,42 +125,34 @@ these cases.
 
 For the calculation of the gray or band-mean absorption coefficients,
 $\kappa_n$, a narrow-band model, RADCAL~\cite{RadCal}, has been
-implemented in FDS. RADCAL computes the spectral properties of various 
-radiation participating species at different wavenumbers and temperatures, 
-and returns the band-mean absorption coefficients, which is the 
-Planck mean absorption coefficient, $\kappa_n$, computed
-for each spectral wide band, $n$, as described below:
+implemented in FDS. RADCAL computes the spectral properties of the
+radiation participating species at discrete values of wavenumber and temperature,
+and returns the Planck mean absorption coefficient, $\kappa_n$, for each spectral band, $n$:
 \begin{equation}
 \kappa_n(P,T) = \dfrac{\pi}{\sigma T^4}
 \displaystyle\int_{\nu_{\rm min}}^{\nu_{\rm max}}{I_b(\nu,T)
-\displaystyle\sum_{i}^{\rm species} \bar{\kappa}_i(\nu,T) P_i d\nu}, 
+\displaystyle\sum_{i}^{\rm species} \bar{\kappa}_i(\nu,T) \, P_i \; d\nu},
 \end{equation}
 where $\nu$ represents the wavenumber, usually in units of cm$^{\rm -1}$,
-$P_i$ is the partial pressure of the $i^{th}$ participating species,
-$\bar{\kappa}_i$ is the spectral absorptivity of the $i^{th}$ participating species 
-and is a function of both the wavenumber and temperature.
-Note that the temperature involved in the definition of the 
-Planck mean absorption coefficient $\kappa_n$ is
-the local gas temperature. Hence $\kappa_n$ is a function 
-of the gas-phase temperature and partial pressure, 
-and is independent of the pathlength.
-The Planck mean absorption coefficient is actually an 
-emission coefficient rather than an absorption coefficient.
-
-The value of the spectral absorption coefficient $\bar{\kappa}_i$
-was averaged over a narrow band whose spectral width, $\Delta \nu$, varies from
+$P_i$ is the partial pressure of the $i^{th}$ participating species, and
+$\bar{\kappa}_i$ is the spectral absorptivity of the $i^{th}$ participating species.
+Note that the temperature used in the calculation of $\kappa_n$ is
+the local gas temperature; thus, $\kappa_n$ is a function
+of the gas-phase temperature and partial pressure,
+and is independent of the pathlength. The value of the spectral absorption coefficient, $\bar{\kappa}_i$,
+is averaged over a narrow band whose spectral width, $\Delta \nu$, varies from
 5~cm$^{-1}$ for $\nu < $ 1100~cm$^{-1}$, to
 25~cm$^{-1}$ for 1100~cm$^{-1} \leq \nu < $ 5000~cm$^{\rm -1}$,
 and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \nu$.
 
 A combination of molecular models and data tables are used to compute the spectral radiative
 properties of the radiation participating species.
-The original RADCAL includes spectral properties of $\rm CO_2$, $\rm H_2O$, $\rm CO$, and 
+The original RADCAL includes spectral properties of $\rm CO_2$, $\rm H_2O$, $\rm CO$, and
 $\rm CH_4$ that are either modeled through quantitative molecular spectroscopy derivations
 or tabulated from the fitting of experimental data into appropriate statistical narrow band models.
 The original RADCAL data have been supplemented with new tabulated experimental data
- for the following fuels:
- \begin{itemize}
+for the following fuels:
+\begin{itemize}
   \item Ethylene:  $\rm C_2H_4$
   \item Ethane:    $\rm C_2H_6$
   \item Propylene: $\rm C_3H_6$
@@ -169,474 +161,284 @@ The original RADCAL data have been supplemented with new tabulated experimental 
   \item \textit{n}-Heptane: $\rm C_7H_{16}$
   \item Ethanol:   $\rm CH_3OH$
   \item Methyl Methacrylate: $\rm C_5H_8O_2$
- \end{itemize}
- These new data fuels have been obtained through FTIR measurements for
- wavenumbers comprised between 700~cm$\rm ^{-1}$ to 4000~cm$\rm ^{-1}$.
- A useful quantity to compare the relative importance of the 
- different IR bands is provided by the band
- integrated intensity, $\alpha$, defined as:
- \be
-  \alpha(T) = \displaystyle\int_{Band}\bar{\kappa}(T)d\nu,
- \ee
- whose units are $\rm {atm^{-1}.cm^{-2}}$.
- The subsections below briefly describe the molecular bands 
- for each of the gas-phase radiative species, and provide for most of them
- the integrated intensity of their most important bands
- at the indicated temperature.
- 
- At the start of a simulation, the absorption
- coefficient(s) are calculated using RADCAL and then 
- tabulated as a function of mixture fraction and
- temperature. During the simulation, the local absorption coefficient is
- found by table-lookup.
- 
- \subsubsection{Carbon Dioxide: $\rm CO_2$}
- 
-  Carbon Dioxide, $\rm CO_2$, is a linear molecule and has 4 vibrational modes,
-  but only 2 fundamental IR vibration frequencies.
-  It has 5 distinct bands that are included in RADCAL, see Table \ref{Table::CO2}.
-  \begin{table}[h p] 
-    \centering 
+\end{itemize}
+These new data have been obtained through FTIR measurements for wavenumbers between 700~cm$\rm ^{-1}$ and 4000~cm$\rm ^{-1}$. A useful quantity to compare the relative importance of the different IR bands is provided by the band integrated intensity, $\alpha$, defined as:
+\be
+  \alpha(T) = \displaystyle\int_{Band}\bar{\kappa}(T) \; d\nu,
+\ee
+whose units are $\rm {atm^{-1} cm^{-2}}$. The subsections below briefly describe the molecular bands for each of the gas-phase radiative species, and provide for most of them the integrated intensity of their most important bands at the indicated temperature.
+
+At the start of a simulation, the absorption coefficient are calculated using RADCAL and then tabulated as a function of mixture fraction and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values.
+
+\subsubsection{Carbon Dioxide: $\rm CO_2$}
+
+Carbon Dioxide, $\rm CO_2$, is a linear molecule and has four vibrational modes, but only two fundamental IR vibration frequencies. It has five distinct bands that are included in RADCAL, see Table \ref{Table::CO2}.
+\begin{table}[ht]
+    \centering
     \caption{Spectral bands of $\rm CO_2$ included in RADCAL.}
     \vspace{0.1in}
     \label{Table::CO2}
-    \begin{tabular}{|c|r@{-}l|c|} 
+    \begin{tabular}{|c|c|c|c|}
       \hline
       Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method \\
-      \cline{1-4}  
+      \cline{1-4}
       1 &  500 & 880  & tabulated \\
       2 &  880 & 1100 & modeled \\
       3 & 1975 & 2475 & modeled \\
       4 & 3050 & 3800 & modeled \\
       5 & 4550 & 5275 & modeled \\
       \hline
-    \end{tabular} 
-  \end{table}
- The strongest band in the $\rm CO_2$ spectrum is Band~3, $\left[1975-2475\right]$ cm$\rm ^{-1}$.
- At 300~K, it has an integrated intensity of $2963\;\rm {atm^{-1}.cm^{-2}}$.
- The tabulated data were obtained from experiments with
- temperatures ranging from 300~K to 2400~K 
- and considering the Goody statistical narrow band model.
+    \end{tabular}
+\end{table}
+The strongest band in the $\rm CO_2$ spectrum is Band~3. At 300~K, it has an integrated intensity of 2963~atm$^{-1}$cm$^{-2}$. The tabulated data were obtained from experiments with temperatures ranging from 300~K to 2400~K using the Goody statistical narrow band model.
 
 \subsubsection{Carbon Monoxide: $\rm CO$}
-  Carbon Monoxide, $\rm CO$, is a diatomic molecule and as such, it 
-  has only one vibrational mode. RADCAL includes one distinct
-  band, see Table \ref{Table::CO}.
-  \begin{table}[h p] 
-    \centering 
+
+Carbon Monoxide, $\rm CO$, is a diatomic molecule and as such, it has only one vibrational mode. RADCAL includes one distinct band, see Table \ref{Table::CO}.
+\begin{table}[h!]
+    \centering
     \caption{Spectral bands of $\rm CO$ included in RADCAL.}
     \vspace{0.1in}
     \label{Table::CO}
-    \begin{tabular}{|c|r@{-}l|c|} 
+    \begin{tabular}{|c|c|c|c|}
       \hline
       Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method \\
-      \cline{1-4}  
+      \cline{1-4}
       1 & 1600 & 2400 & modeled \\
       \hline
-    \end{tabular} 
-  \end{table}
-  It corresponds to the fundamental (centered at $ \nu \approx\;\rm {cm^{-1}}$) of
-  the stretching of the triple bond $\rm C \equiv O$. The first overtone (centered at $ \nu
-  \approx 4260\;\rm {cm^{-1}}$) is not accounted for; its band
-  integrated intensity is negligible at standard temperature and pressure.
-  At 295~K, the integrated intensity of Band~1 is $260\;\rm {atm^{-1}.cm^{-2}}$.
-  The statistical narrow band model associated with $\rm CO$ is the Goody model.
-  Recommended temperatures of use range from 295~K to 2500~K.
+    \end{tabular}
+\end{table}
+It corresponds to the stretching of the triple bond $\rm C \equiv O$. The first overtone (centered at $ \nu\approx 4260\;\rm {cm^{-1}}$) is not accounted for; its band-integrated intensity is negligible at standard temperature and pressure. At 295~K, the integrated intensity of Band~1 is $260\;\rm {atm^{-1}cm^{-2}}$.
+The statistical narrow band model associated with $\rm CO$ is the Goody model. Recommended temperatures of use range from 295~K to 2500~K.
 
 \subsubsection{Water Vapor: $\rm H_2O$}
 
-  Due to the non-linearity of its molecular structure, 
-  the IR spectrum of water vapor, $\rm H_2O$, is complex and broad.
-  In RADCAL, water vapor spectrum from 50~cm$\rm ^{-1}$ to 
-  9300~cm$\rm ^{-1}$ is considered. Data in RADCAL
-  are tabulated and provide from Ludwig \textit{et al.}~\cite{Ludwig:NASA}.
-  Experimental data have been fitted considering the statistical Goody narrow band model.
-  The strongest bands at standard temperature and pressure
-  are located in the ranges $\left[50-2100\right]$~cm$\rm ^{-1}$: $\alpha = 300\;\rm {atm^{-1}.cm^{-2}}$,
-  and $\left[3000-4000\right]$~cm$\rm ^{-1}$: $\alpha = 220\;\rm {atm^{-1}.cm^{-2}}$.
+Due to the non-linearity of its molecular structure, the IR spectrum of water vapor, $\rm H_2O$, is complex and broad. In RADCAL, water vapor spectrum from 50~cm$\rm ^{-1}$ to 9300~cm$\rm ^{-1}$ is considered. Data in RADCAL are tabulated and provide from Ludwig \textit{et al.}~\cite{Ludwig:NASA}. Experimental data have been fitted using the statistical Goody narrow band model. The strongest bands at standard temperature and pressure are located in the ranges $\left[50-2100\right]$~cm$\rm ^{-1}$: $\alpha = 300\;\rm {atm^{-1}cm^{-2}}$, and $\left[3000-4000\right]$~cm$\rm ^{-1}$: $\alpha = 220\;\rm {atm^{-1}cm^{-2}}$.
 
 \subsubsection{Methane: $\rm CH_4$}
-  
-  Methane, $\rm CH_4$, is a spherical top molecule of tetrahedral shape with the Carbon atom occupying
-  the center of the tetrahedron.
-  It belongs to the point group $T_d$. Methane IR spectrum
-  is the resultant of the Vibration-Rotation modes of
-  the $\rm C-H$ groups.
-  It has 9 vibrational modes, but due to its symmetry, this translates
-  into only 2 distincts IR active fundamental vibration frequencies.
-  In RADCAL, Methane IR spectrum is divided into 3 distinct bands
-  (fundamentals + degenerates), see Table \ref{Table::CH4}.
-  \begin{table}[h p] 
-      \centering 
+
+Methane, $\rm CH_4$, is a spherical top molecule of tetrahedral shape with the Carbon atom occupying the center of the tetrahedron. It belongs to the point group $T_d$. The methane IR spectrum is the result of the vibration-rotation modes of the $\rm C-H$ groups. It has nine vibrational modes, but due to its symmetry, this translates into only two distinct IR active fundamental vibration frequencies. In RADCAL, the methane IR spectrum is divided into three distinct bands (fundamentals + degenerates), see Table \ref{Table::CH4}.
+\begin{table}[ht]
+      \centering
       \caption{Spectral bands of $\rm CH_4$ included in RADCAL.}
       \vspace{0.1in}
       \label{Table::CH4}
-    \begin{tabular}{|c|r@{-}l|c|c|} 
+    \begin{tabular}{|c|c|c|c|c|}
     \hline
     Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-    \cline{1-5}  
+    \cline{1-5}
     1 & 1150 & 1600 & tabulated &  $\rm C-H$ Bend\\
     2 & 2700 & 3250 & tabulated &  $\rm C-H$ Stretch\\
     3 & 3400 & 5000 & modeled   &  $\rm C-H$ Stretch \\
     \hline
-   \end{tabular} 
-  \end{table}
-  The strongest bands are Bands~1 and 2, which at standard temperature and 
-  pressure, have an integrated intensity
-  of $237\;\rm {atm^{-1}.cm^{-2}}$ and 
-  $212\;\rm {atm^{-1}.cm^{-2}}$, respectively.
-  
-  The tabulated data were obtained from high resolution
-  FTIR experiments with temperatures varying from 300~K to 1400~K.
-  The spectral absorption coefficients were obtained 
-  assuming the FTIR measurements to be in the weak line
-  regime and applying the Beer-Lambert's Law to 
-  the experimental spectral transmissivity. 
+   \end{tabular}
+\end{table}
+The strongest bands are Bands~1 and 2 which at standard temperature and pressure have an integrated intensity of $237\;\rm {atm^{-1}cm^{-2}}$ and $212\;\rm {atm^{-1}cm^{-2}}$, respectively. The tabulated data were obtained from high resolution FTIR experiments with temperatures varying from 300~K to 1400~K. The spectral absorption coefficients were obtained assuming the FTIR measurements to be in the weak line regime and applying the Beer-Lambert Law to the experimental spectral transmissivity.
 
 \subsubsection{Ethylene: $\rm C_2H_4$}
 
-  Ethylene, $\rm C_2H_4$, is a molecule with a plane symmetrical form
-  and belongs to the point group $D_{2h}$. Ethylene IR spectrum
-  is the resultant of the Vibration-Rotation modes of
-  the $\rm C=C$, $\rm CH$, and $\rm CH_2$ groups.
-  It has 12 vibrational modes. In RADCAL, its IR spectrum is divided
-  into 4 distinct bands, see Table \ref{Table::C2H4}.
-  \begin{table}[h p] 
+Ethylene, $\rm C_2H_4$, is a molecule with a plane symmetrical form and belongs to the point group $D_{2h}$. The ethylene IR spectrum is the result of the vibration-rotation modes of the $\rm C=C$, $\rm CH$, and $\rm CH_2$ groups. It has 12 vibrational modes. In RADCAL, its IR spectrum is divided into four distinct bands, see Table \ref{Table::C2H4}.
+\begin{table}[ht]
     \centering
     \caption{Spectral bands of $\rm C_2H_4$ included in RADCAL.}
     \vspace{0.1in}
     \label{Table::C2H4}
-    \begin{tabular}{|c|r@{-}l|c|c|} 
+    \begin{tabular}{|c|c|c|c|c|}
       \hline
       Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-      \cline{1-5}  
+      \cline{1-5}
       1 & 780  & 1250 & tabulated &  $\rm CH_2$ Bend\\
       2 & 1300 & 1600 & tabulated &  $\rm CH_2$ Bend\\
       3 & 1750 & 2075 & tabulated &  $\rm C=C$  Stretch \\
       4 & 2800 & 3400 & tabulated &  $\rm C-H$  Stretch \\
       \hline
-    \end{tabular} 
-  \end{table}
-  Band~1, $\left[780-1250\right]$~cm$\rm ^{-1}$, is the strongest absorbing band with
-  an integrated intensity of $366\;\rm {atm^{-1}.cm^{-2}}$.
-  Band~4, $\left[2800-3400\right]$~cm$\rm ^{-1}$, has the second strongest 
-  integrated intensity: $\alpha = 183\;\rm {atm^{-1}.cm^{-2}}$.
-  
-  All the Ethylene IR spectral absorption data were obtained from high resolution
-  FTIR experiments with temperatures varying from 296~K to 801~K.
-  The spectral absorption coefficients were obtained by fitting the experimental
-  spectral transmissivity of a homogeneous column of isothermal Ethylene
-  with a total pressure of 1~atm using the Goody model. 
+    \end{tabular}
+\end{table}
+Band~1 is the strongest absorbing band with an integrated intensity of $366\;\rm {atm^{-1}cm^{-2}}$. Band~4 has the second strongest integrated intensity: $\alpha = 183\;\rm {atm^{-1}cm^{-2}}$.
+
+All the ethylene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 801~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal ethylene with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Ethane: $\rm C_2H_6$}
 
-  Ethane, $\rm C_2H_6$, has a three-fold axis of symmetry with a center of symmetry
-  and belongs to the point group $D_{3d}$. Ethane IR spectrum
-  is the resultant of the Vibration-Rotation modes of
-  the $\rm C-C$, $\rm CH$, and $\rm CH_2$ groups.
-  It has 18 vibrational modes; its IR spectrum is divided into 3
-  distinct bands, see Table \ref{Table::C2H6}. 
-   \begin{table} [h p]
+Ethane, $\rm C_2H_6$, has a three-fold axis of symmetry and belongs to the point group $D_{3d}$. The ethane IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm CH$, and $\rm CH_2$ groups. It has 18 vibrational modes; its IR spectrum is divided into three distinct bands, see Table~\ref{Table::C2H6}.
+\begin{table} [ht]
     \centering
     \caption{Spectral bands of $\rm C_2H_6$ included in RADCAL.}
     \vspace{0.1in}
     \label{Table::C2H6}
-    \begin{tabular}{|c|r@{-}l|c|c|} 
+    \begin{tabular}{|c|c|c|c|c|}
       \hline
       Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-      \cline{1-5}  
+      \cline{1-5}
       1 & 730  & 1095 & tabulated &  $\rm CH_3$ Rock\\
       2 & 1250 & 1700 & tabulated &  $\rm CH$  Bend\\
       3 & 2550 & 3375 & tabulated &  $\rm CH$  Stretch\\
       \hline
-    \end{tabular} 
-  \end{table}
-  Band~3, $\left[2550-3375\right]$~cm$\rm ^{-1}$, corresponds to the 
-  stretching of $\rm CH$ and is the strongest absorbing band. At standard temperature
-  and pressure, its integrated intensity is $\alpha = 760\;\rm {atm^{-1}.cm^{-2}}$.
-  This is more than 10 times the value of Band~2: $\alpha = 61\;\rm {atm^{-1}.cm^{-2}}$, and 
-  more than 20 times the value of Band~1: $\alpha = 28\;\rm {atm^{-1}.cm^{-2}}$.
-  
-  All the Ethane IR spectral absorption data were obtained from high resolution
-  FTIR experiments with temperatures varying from 296~K to 1000~K.
-  The spectral absorption coefficients were obtained by fitting the experimental
-  spectral transmissivity of a homogeneous column of isothermal Ethane
-  with a total pressure of 1~atm using the Elsasser model. 
+    \end{tabular}
+\end{table}
+Band~3 corresponds to the stretching of $\rm CH$ and is the strongest absorbing band. At standard temperature and pressure, its integrated intensity is $\alpha = 760\;\rm {atm^{-1}cm^{-2}}$. This is more than 10 times the value of Band~2: $\alpha = 61\;\rm {atm^{-1}cm^{-2}}$, and more than 20 times the value of Band~1: $\alpha = 28\;\rm {atm^{-1}cm^{-2}}$.
+
+All the ethane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 1000~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal ethane with a total pressure of 1~atm using the Elsasser model.
 
 \subsubsection{Propylene: $\rm C_3H_6$}
 
-  Propylene, $\rm C_3H_6$, has only one plane of symmetry 
-  and belongs to the point group $C_s$. Propylene IR spectrum
-  is the resultant of the Vibration-Rotation modes of
-  the $\rm C-C$, $\rm C=C$, $\rm CH$, $\rm CH_2$, and $\rm CH_3$ groups.
-  It has 21 vibrational modes; its IR spectrum is divided into 3 distinct bands,
-  see Table \ref{Table::C3H6}.
-  \begin{table}[h p] 
+Propylene, $\rm C_3H_6$, has only one plane of symmetry and belongs to the point group $C_s$. The propylene IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm C=C$, $\rm CH$, $\rm CH_2$, and $\rm CH_3$ groups. It has 21 vibrational modes; its IR spectrum is divided into three distinct bands, see Table \ref{Table::C3H6}.
+\begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm C_3H_6$ included in RADCAL.}
    \vspace{0.1in}
    \label{Table::C3H6}
-   \begin{tabular}{|c|r@{-}l|c|c|} 
+   \begin{tabular}{|c|c|c|c|c|}
     \hline
     Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-    \cline{1-5}  
+    \cline{1-5}
     1 & 775  & 1150 & tabulated &  $\rm C-C$ Stretch, $\rm CH_3$ Rock\\
     2 & 1225 & 1975 & tabulated &  $\rm C=C$ Stretch, $\rm CH$ Bend\\
     3 & 2650 & 3275 & tabulated &  $\rm CH$ Stretch\\
     \hline
-   \end{tabular} 
-  \end{table}
-  Band~3, $\left[2650-3275\right]$~cm$\rm ^{-1}$, corresponds to the 
-  stretching of $\rm CH$ and is the strongest of all Propylene absorbing bands.
-  At standard temperature and pressure, its integrated intensity 
-  is equal to $508\;\rm {atm^{-1}.cm^{-2}}$. Bands~1 and 2 have similar
-  lower integrated intensities: $296\;\rm {atm^{-1}.cm^{-2}}\;and\;
-  271\;\rm {atm^{-1}.cm^{-2}}$, respectively.
-  
-  All the Propylene IR spectral absorption data were obtained from high resolution
-  FTIR experiments with temperatures varying from 296~K to 1003~K.
-  The spectral absorption coefficients were obtained by fitting the experimental
-  spectral transmissivity of a homogeneous column of isothermal Propylene
-  with a total pressure of 1~atm using the Goody model. 
+   \end{tabular}
+\end{table}
+Band~3 corresponds to the stretching of $\rm CH$ and is the strongest of all Propylene absorbing bands. At standard temperature and pressure, its integrated intensity is equal to $508\;\rm {atm^{-1}.cm^{-2}}$. Bands~1 and 2 have similar lower integrated intensities: $296\;\rm {atm^{-1}cm^{-2}}\;and\; 271\;\rm {atm^{-1}cm^{-2}}$, respectively.
+
+All the propylene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 1003~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal propylene with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Propane: $\rm C_3H_8$}
 
-  Propane, $\rm C_3H_8$, has two planes of symmetry and two axes of rotation. 
-  It belongs to the point group $C_{2v}$. Propane IR spectrum
-  is the resultant of the Vibration-Rotation modes of
-  the $\rm C-C$, $\rm CH_2$, $\rm CH_3$ groups.
-  It has 27 vibrational modes; its IR spectrum is divided into 2 distinct bands,
-  see Table \ref{Table::C3H8}.
-  \begin{table}[h p] 
-   \centering 
+Propane, $\rm C_3H_8$, has two planes of symmetry and two axes of rotation. It belongs to the point group $C_{2v}$. The propane IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm CH_2$, $\rm CH_3$ groups. It has 27 vibrational modes; its IR spectrum is divided into two distinct bands, see Table \ref{Table::C3H8}.
+\begin{table}[ht]
+   \centering
    \caption{Spectral bands of $\rm C_3H_8$ included in RADCAL.}
    \vspace{0.1in}
    \label{Table::C3H8}
-   \begin{tabular}{|c|r@{-}l|c|c|} 
+   \begin{tabular}{|c|c|c|c|c|}
     \hline
     Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-    \cline{1-5}  
+    \cline{1-5}
     1 & 1175 & 1675 & tabulated &  $\rm CH_3$ Bending\\
     2 & 2550 & 3375 & tabulated &  $\rm CH_3, CH_2$ Stretch\\
     \hline
-   \end{tabular} 
-  \end{table}
-  Band~2, $\left[2550-3375\right]$~cm$\rm ^{-1}$, corresponds to the 
-  stretching of $\rm CH_3$ and $\rm CH_2$ and is the strongest of all Propane absorbing bands.
-  At standard temperature and pressure, its integrated intensity is $1185\;\rm {atm^{-1}.cm^{-2}}$.
-  For similar conditions, Band~1 has a much lower integrated intensity:
-  $\alpha = 121\;\rm {atm^{-1}.cm^{-2}}$.
-  
-  All the Propane IR spectral absorption data were obtained from high resolution
-  FTIR experiments with temperatures varying from 295~K to 1009~K.
-  The spectral absorption coefficients were obtained by fitting the experimental
-  spectral transmissivity of a homogeneous column of isothermal Propane
-  with a total pressure of 1~atm using the Goody model. 
+   \end{tabular}
+\end{table}
+Band~2 corresponds to the stretching of $\rm CH_3$ and $\rm CH_2$ and is the strongest of all propane absorbing bands. At standard temperature and pressure, its integrated intensity is $1185\;\rm {atm^{-1}cm^{-2}}$. For similar conditions, Band~1 has a much lower integrated intensity: $\alpha = 121\;\rm {atm^{-1}cm^{-2}}$.
+
+All the propane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 295~K to 1009~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal propane with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Toluene: $\rm C_7H_8$}
 
-  Toluene, $\rm C_7H_8$, has only one plane of symmetry. 
-  It belongs to the point group $C_{s}$. Toluene IR spectrum
-  is the resultant of the Vibration-Rotation modes of
-  the $\rm C=C$, $\rm CH$, and $\rm CH_3$ groups.
-  It has 39 vibrational modes. For ease of modeling using 
-  statistical narrow band models, its IR spectrum has been divided
-  into 5 distinct bands, see Table \ref{Table::C7H8}.
-  \begin{table}[h p] 
+Toluene, $\rm C_7H_8$, has only one plane of symmetry. It belongs to the point group $C_{s}$. The toluene IR spectrum is the result of the vibration-rotation modes of the $\rm C=C$, $\rm CH$, and $\rm CH_3$ groups. It has 39 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into five distinct bands, see Table \ref{Table::C7H8}.
+\begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm C_7H_8$ included in RADCAL.}
    \vspace{0.1in}
    \label{Table::C7H8}.
-   \begin{tabular}{|c|r@{-}l|c|c|} 
+   \begin{tabular}{|c|c|c|c|c|}
     \hline
     Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-    \cline{1-5}  
+    \cline{1-5}
     1 & 700  & 805  & tabulated &  $\rm CH$ Bending \\
     2 & 975  & 1175 & tabulated &  $\rm CH$ Bending \\
     3 & 1275 & 1650 & tabulated &  $\rm CH_3$ Bending \\
     4 & 1650 & 2075 & tabulated &  $\rm C=C$ Stretching \\
     5 & 2675 & 3225 & tabulated &  $\rm CH_3$, $\rm CH$  Stretching \\
     \hline
-   \end{tabular} 
-  \end{table}
-  Band~5, $\left[2675-3225\right]$~cm$\rm ^{-1}$, corresponds to the 
-  stretching of $\rm CH_3$ and $\rm CH$, and is the strongest absorbing bands.
-  At 300~K, its integrated intensity is $509\;\rm {atm^{-1}.cm^{-2}}$.
-  At similar conditions, Band~1 integrated intensity is less than half
-  of that of Band~5: $236\;\rm {atm^{-1}.cm^{-2}}$.
-  Bands~3, 4, and 2 have integrated intensities of 165$\;\rm {atm^{-1}.cm^{-2}}$,
-  101$\;\rm {atm^{-1}.cm^{-2}}$, and $40\;\rm {atm^{-1}.cm^{-2}}$, respectively.
-  
-  All the Toluene IR spectral absorption data were obtained from high resolution
-  FTIR experiments with temperatures varying from 300~K to 795~K.
-  The spectral absorption coefficients were obtained by fitting the experimental
-  spectral transmissivity of a homogeneous column of isothermal Toluene
-  with a total pressure of 1~atm using the Goody model. 
+   \end{tabular}
+\end{table}
+Band~5 corresponds to the stretching of $\rm CH_3$ and $\rm CH$, and it is the strongest absorbing band. At 300~K, its integrated intensity is $509\;\rm {atm^{-1}cm^{-2}}$. At similar conditions, the integrated intensity of Band~1 is less than half of that of Band~5: $236\;\rm {atm^{-1}cm^{-2}}$. Bands~3, 4, and 2 have integrated intensities of 165$\;\rm {atm^{-1}cm^{-2}}$, 101$\;\rm {atm^{-1}cm^{-2}}$, and $40\;\rm {atm^{-1}cm^{-2}}$, respectively.
+
+All the toluene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 300~K to 795~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal toluene with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{\textit{n}-Heptane: $\rm C_7H_{16}$}
 
-  \textit{n}-Heptane, $\rm C_7H_{16}$, has two planes of symmetry 
-  and two axes of rotation. It belongs to the point group 
-  $C_{2v}$. \textit{n}-Heptane IR spectrum results from the Vibration-Rotation
-  modes of the $\rm C-C$, $\rm CH_2$, and $\rm CH_3$ groups. It has
-  63 vibrational modes. For ease of modeling using 
-  statistical narrow band models, its IR spectrum has
-  been divided into 2 distinct bands, see Table \ref{Table::C7H16}.
-  \begin{table}[ht] 
-   \centering 
+\textit{n}-Heptane, $\rm C_7H_{16}$, has two planes of symmetry and two axes of rotation. It belongs to the point group $C_{2v}$. \textit{n}-Heptane IR spectrum results from the vibration-rotation modes of the $\rm C-C$, $\rm CH_2$, and $\rm CH_3$ groups. It has 63 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into two distinct bands, see Table \ref{Table::C7H16}.
+\begin{table}[ht]
+   \centering
    \caption{Spectral bands of $\rm C_7H_{16}$ included in RADCAL.}
    \vspace{0.1in}
    \label{Table::C7H16}
-   \begin{tabular}{|c|r@{-}l|c|c|} 
+   \begin{tabular}{|c|c|c|c|c|}
     \hline
     Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-    \cline{1-5}  
+    \cline{1-5}
     1 & 1100  & 1800 & tabulated &  $\rm CH_2, CH_3$ Bending   \\
     2 & 2250  & 3275 & tabulated &  $\rm CH_2, CH_3$ Stretching \\
     \hline
-   \end{tabular} 
-  \end{table}
-  Band~2, $\left[2250-3275\right]$~cm$\rm ^{-1}$, corresponds to the 
-  stretching of $\rm CH_3$ and $\rm CH_2$ groups, and is the strongest
-  \textit{n}-Heptane absorbing band.
-  At 293 K, its integrated intensity is equal to $3055\;\rm {atm^{-1}.cm^{-2}}$.
-  At similar conditions, Band~1 integrated intensity
-  is less than ten times that of Band~2: $\alpha = 298\;\rm {atm^{-1}.cm^{-2}}$.
-  
-  All the \textit{n}-Heptane IR spectral absorption data were obtained from high resolution
-  FTIR experiments with temperatures varying from 293~K to 794~K.
-  The spectral absorption coefficients were obtained by fitting the experimental
-  spectral transmissivity of a homogeneous column of isothermal \textit{n}-Heptane
-  with a total pressure of 1~atm using the Goody model. 
+   \end{tabular}
+\end{table}
+Band~2 corresponds to the stretching of $\rm CH_3$ and $\rm CH_2$ groups, and is the strongest absorbing band. At 293~K, its integrated intensity is equal to $3055\;\rm {atm^{-1}cm^{-2}}$. At similar conditions, the integrated intensity of Band~1 is less than ten times that of Band~2: $\alpha = 298\;\rm {atm^{-1}cm^{-2}}$.
+
+All the \textit{n}-Heptane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 293~K to 794~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal \textit{n}-Heptane with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Ethanol: $\rm CH_3OH$}
 
-  Ethanol, $\rm CH_3OH$, has only one plane of symmetry. 
-  It belongs to the point group $C_{s}$. 
-  Ethanol IR spectrum results from the Vibration-Rotation
-  modes of the $\rm C-O$, $\rm OH$, and $\rm CH_3$ groups. It has
-  12 vibrational modes. For ease of modeling using 
-  statistical narrow band models, its IR spectrum has
-  been divided into 4 distinct bands, see Table \ref{Table::CH3OH}. 
-  \begin{table}[ht] 
+Ethanol, $\rm CH_3OH$, has only one plane of symmetry. It belongs to the point group $C_{s}$. The ethanol IR spectrum results from the vibration-rotation modes of the $\rm C-O$, $\rm OH$, and $\rm CH_3$ groups. It has 12 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into four distinct bands, see Table \ref{Table::CH3OH}.
+\begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm CH_3OH$ included in RADCAL.}
    \vspace{0.1in}
    \label{Table::CH3OH}
-   \begin{tabular}{|c|r@{-}l|c|c|} 
+   \begin{tabular}{|c|c|c|c|c|}
     \hline
     Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-    \cline{1-5}  
+    \cline{1-5}
     1 & 825  & 1125 & tabulated & $\rm C-O$ Stretching   \\
     2 & 1125 & 1700 & tabulated & $\rm CH_3, OH$ Bending \\
-    3 & 2600 & 3225 & tabulated & $\rm CH_3$ Stretching \\ 
-    4 & 3525 & 3850 & tabulated & $\rm OH$ Stretching \\     
+    3 & 2600 & 3225 & tabulated & $\rm CH_3$ Stretching \\
+    4 & 3525 & 3850 & tabulated & $\rm OH$ Stretching \\
     \hline
-   \end{tabular} 
-  \end{table}
-  Band~3, $\left[2600-3225\right]$~cm$\rm ^{-1}$, corresponds to the 
-  stretching of the $\rm CH_3$ group and is the strongest 
-  absorbing band. At 293~K, its integrated intensity is
-  $683\;\rm {atm^{-1}.cm^{-2}}$. Second in intensity,
-  Band~1 corresponds to the stretching of the $\rm C-O$ group and has 
-  an integrated intensity of $592\;\rm {atm^{-1}.cm^{-2}}$.
-  Bands~2 and 4 have lesser integrated intensities, $197\;\rm {atm^{-1}.cm^{-2}}$
-  and $112\;\rm {atm^{-1}.cm^{-2}}$, respectively.
-  
-  All the Ethanol IR spectral absorption data were obtained from high resolution
-  FTIR experiments with temperatures varying from 293~K to 804~K.
-  The spectral absorption coefficients were obtained by fitting the experimental
-  spectral transmissivity of a homogeneous column of isothermal Ethanol
-  with a total pressure of 1~atm using the Goody model. 
+   \end{tabular}
+\end{table}
+Band~3 corresponds to the stretching of the $\rm CH_3$ group and is the strongest absorbing band. At 293~K, its integrated intensity is $683\;\rm {atm^{-1}cm^{-2}}$. Second in intensity, Band~1 corresponds to the stretching of the $\rm C-O$ group and has an integrated intensity of $592\;\rm {atm^{-1}cm^{-2}}$. Bands~2 and 4 have lesser integrated intensities, $197\;\rm {atm^{-1}cm^{-2}}$ and $112\;\rm {atm^{-1}cm^{-2}}$, respectively.
+
+All the ethanol IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 293~K to 804~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal ethanol with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Methyl Methacrylate: $\rm C_5H_8O_2$}
 
-  Methyl Methacrylate or MMA, $\rm C_5H_8O_2$, 
-  has the most complex IR spectrum of all the other 
-  fuels presented above. With 15 atoms, it has 39 vibrational modes.
-  MMA IR spectrum results from the Vibration-Rotation
-  modes of the $\rm C-O$, $\rm C=O$, $\rm C=C$, $\rm CH_2$, and $\rm CH_3$ groups.
-  For ease of modeling using statistical narrow band models, its IR spectrum has
-  been divided into 6 distinct bands, see Table \ref{Table::C5H8O2}.
-  \begin{table}[ht] 
+Methyl Methacrylate or MMA, $\rm C_5H_8O_2$, has the most complex IR spectrum of all the fuels presented above. With 15 atoms, it has 39 vibrational modes. The MMA IR spectrum results from the vibration-rotation modes of the $\rm C-O$, $\rm C=O$, $\rm C=C$, $\rm CH_2$, and $\rm CH_3$ groups. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into six distinct bands, see Table \ref{Table::C5H8O2}.
+\begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm C_5H_8O_2$ included in RADCAL.}
    \vspace{0.1in}
    \label{Table::C5H8O2}
-    \begin{tabular}{|c|r@{-}l|c|c|} 
+    \begin{tabular}{|c|c|c|c|c|}
     \hline
     Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-    \cline{1-5}  
+    \cline{1-5}
     1 & 750  & 875  & tabulated & $\rm CH_2$ Bending \\
     2 & 875  & 1050 & tabulated & $\rm CH_2$ Bending \\
-    3 & 1050 & 1250 & tabulated & $\rm C-O$ Stretching \\ 
-    4 & 1250 & 1550 & tabulated & $\rm CH_3$ Bending \\     
+    3 & 1050 & 1250 & tabulated & $\rm C-O$ Stretching \\
+    4 & 1250 & 1550 & tabulated & $\rm CH_3$ Bending \\
     5 & 1550 & 1975 & tabulated & $\rm C=C, C=O$ Stretching \\
     6 & 2650 & 3275 & tabulated & $\rm CH_2, CH_3$ Stretching \\
     \hline
-   \end{tabular} 
-  \end{table} 
-  Band~3, $\left[1050-1250\right]$ cm$\rm ^{-1}$, corresponds to the 
-  stretching of the $\rm C-O$ group and has the highest integrated intensity.
-  At 396~K, $\alpha = 799\;\rm {atm^{-1}.cm^{-2}}$.
-  Band~5 corresponds to the stretching of the $\rm C=O$ and $\rm C=C$ groups,
-  and has the second highest integrated intensity: $537\;\rm {atm^{-1}.cm^{-2}}$.
-  Band~4 has a slightly lower integrated intensity: $490\;\rm {atm^{-1}.cm^{-2}}$.
-  Finally, Bands~6, 2 and 1 have lower integrated intensities: $293\;\rm {atm^{-1}.cm^{-2}}$,
-  $131\;\rm {atm^{-1}.cm^{-2}}$, and $42\;\rm {atm^{-1}.cm^{-2}}$, respectively.  
+   \end{tabular}
+\end{table}
+Band~3 corresponds to the stretching of the $\rm C-O$ group and has the highest integrated intensity. At 396~K, $\alpha = 799\;\rm {atm^{-1}cm^{-2}}$. Band~5 corresponds to the stretching of the $\rm C=O$ and $\rm C=C$ groups, and has the second highest integrated intensity: $537\;\rm {atm^{-1}cm^{-2}}$. Band~4 has a slightly lower integrated intensity: $490\;\rm {atm^{-1}cm^{-2}}$. Finally, Bands~6, 2 and 1 have lower integrated intensities: $293\;\rm {atm^{-1}cm^{-2}}$,
+$131\;\rm {atm^{-1}cm^{-2}}$, and $42\;\rm {atm^{-1}cm^{-2}}$, respectively.
 
-  All the MMA IR spectral absorption data were obtained from high resolution
-  FTIR experiments with temperatures varying from 396~K to 803~K.
-  The spectral absorption coefficients were obtained by fitting the experimental
-  spectral transmissivity of a homogeneous column of isothermal MMA
-  with a total pressure of 1~atm using the Goody model.
+All the MMA IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 396~K to 803~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal MMA with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Statistical Narrow Band Models}
-  This section briefly describes the statistical models used 
-  to obtain most of the tabulated species IR spectral absorption coefficients
-  at different temperatures, $\bar{\kappa}(T)$.
-  Narrow band models are a category of mathematical approaches circumventing the intractability 
-  of using a line-by-line model to compute accurately the IR spectrum of radiating species 
-  when solving for the RTE in engineering applications.
-  In the narrow band approach, the whole spectrum is divided into small spectral bands (typically several $\rm cm^{-1}$),
-  and different statistical approaches are considered to compute the average radiative properties over these narrow bands.
-  Two main models are presented below: the Elsasser model and the Goody model. Both models
-  assume Lorentz lines.
- 
-  The Elsasser model assumes all the lines to have the same shape, same strength, and 
-  to be equally spaced from each other. In this model, the spectral transmissivity $\bar{\tau}_{\nu}$
-  of a homogeneous isothermal column of gas, with a total pressure $P_T$ and with an optical pathlength $U = P_i L$ 
-  ($L$ being the column physical length and $P_i$ the radiating species partial pressure),
-  is given by the relation:
-  \be\label{eq::Elsasser}
-    \bar{\tau}_{\nu} = 1- erf\left(\displaystyle\frac{\sqrt{\pi} \bar{
-    \kappa} U }{\sqrt{1 + \displaystyle\frac{\pi\bar{\kappa} U 
-    }{4 \bar{\gamma} P_T}}}  \right),
-   \ee
-  with $\bar{\gamma}$ being the spectral fine structure parameter of the narrow band
-  and $\bar{\kappa}$ is the spectral absorption coefficient of the narrow band.
 
-  The Goody model assumes all the lines to have the same
-  shape, but to be randomly spaced within the narrow band,
-  and their line strength follows an exponential distribution.
-  In this model, the spectral transmissivity $\bar{\tau}_{\nu}$
-  of a homogeneous isothermal column of gas, with a total pressure $P_T$ and with an optical pathlength $U = P_i L$ 
-  ($L$ being the column physical length and $P_i$ the radiating species partial pressure),
-  is given by the relation:
-  \be\label{eq::Goody}
+This section briefly describes the statistical models used to obtain most of the tabulated species IR spectral absorption coefficients at different temperatures, $\bar{\kappa}(T)$. Narrow band models are a category of mathematical approaches circumventing the intractability of using a line-by-line model to compute accurately the IR spectrum of radiating species when solving for the RTE in engineering applications. In the narrow band approach, the whole spectrum is divided into small spectral bands (typically several $\rm cm^{-1}$), and different statistical approaches are considered to compute the average radiative properties over these narrow bands. Two main models are presented below: the Elsasser model and the Goody model. Both models assume Lorentz lines.
+
+The Elsasser model assumes all the lines to have the same shape, same strength, and to be equally spaced from each other. In this model, the spectral transmissivity, $\bar{\tau}_{\nu}$, of a homogeneous isothermal column of gas, with a total pressure $P_T$ and with an optical pathlength $U = P_i L$ ($L$ being the column physical length and $P_i$ the radiating species partial pressure), is given by the relation:
+\be\label{eq::Elsasser}
+    \bar{\tau}_{\nu} = 1- \erf \left(\displaystyle\frac{\sqrt{\pi} \bar{
+    \kappa} U }{\sqrt{1 + \displaystyle\frac{\pi\bar{\kappa} U
+    }{4 \bar{\gamma} P_T}}}  \right),
+\ee
+with $\bar{\gamma}$ being the spectral fine structure parameter of the narrow band and $\bar{\kappa}$ is the spectral absorption coefficient of the narrow band.
+
+The Goody model assumes all the lines to have the same shape, but to be randomly spaced within the narrow band, and their line strength follows an exponential distribution. In this model, the spectral transmissivity, $\bar{\tau}_{\nu}$, of a homogeneous isothermal column of gas, with a total pressure $P_T$ and with an optical pathlength $U = P_i L$ ($L$ being the column physical length and $P_i$ the radiating species partial pressure), is given by the relation:
+\be\label{eq::Goody}
     \bar{\tau}_{\nu} = \exp\left(-\displaystyle\frac{\bar{\kappa} U}
     {\displaystyle\sqrt{1+\displaystyle\frac{\bar{\kappa} U}{4 P_T \bar{\gamma}}}}\right),
-  \ee
-  with $\bar{\gamma}$ being the spectral fine structure parameter of the narrow band
-  and $\bar{\kappa}$ is the spectral absorption coefficient of the narrow band.
+\ee
+with $\bar{\gamma}$ being the spectral fine structure parameter of the narrow band and $\bar{\kappa}$ is the spectral absorption coefficient of the narrow band.
 
-  For both models, the two narrow band spectral quantities ($\bar{\kappa} \,\&\, \bar{\gamma}$)
-  are obtained either from line-by-line calculations or by fitting experimental data.
+For both models, the two narrow band spectral quantities ($\bar{\kappa} \,\&\, \bar{\gamma}$) are obtained either from line-by-line calculations or by fitting experimental data.
 
-  \textbf{Note}: For all the tabulated data, a linear interpolation of $\bar{\kappa} \;\&\; \bar{\gamma}$ 
-  in temperature and/or in wavenumber is perfomed by RADCAL when necessary. 
-  If the temperature sought is out of the tabulated data range, 
-  then the data at the nearest temperature are used.
+\textbf{Note}: For all the tabulated data, a linear interpolation of $\bar{\kappa} \;\&\; \bar{\gamma}$ in temperature and/or in wavenumber is performed by RADCAL when necessary. If the temperature sought is out of the tabulated data range, then the data at the nearest temperature are used.
 
 \subsection{Radiation Contribution to Energy Equation}
 
