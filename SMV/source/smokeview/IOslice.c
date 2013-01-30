@@ -4083,14 +4083,10 @@ void drawvolslice_terrain(const slicedata *sd){
         float ymid, rmid;
         int n11, n31, n13, n33;
 
-        z11 = constval + znode[ijnode2(i,j)];
-        if(z11>zmax)z11=zmax;
-        z31 = constval + znode[ijnode2(i+1,j)];
-        if(z31>zmax)z31=zmax;
-        z13 = constval + znode[ijnode2(i,j+1)];
-        if(z13>zmax)z13=zmax;
-        z33 = constval + znode[ijnode2(i+1,j+1)];
-        if(z33>zmax)z33=zmax;
+        z11 = MIN(zmax,constval + znode[ijnode2(i,j)]);
+        z31 = MIN(zmax,constval + znode[ijnode2(i+1,j)]);
+        z13 = MIN(zmax,constval + znode[ijnode2(i,j+1)]);
+        z33 = MIN(zmax,constval + znode[ijnode2(i+1,j+1)]);
         zmid = (z11 + z31 + z13 + z33)/4.0;
 
         if(iblank_z[IJK(i,j,plotz)]!=2)continue;
@@ -4109,7 +4105,6 @@ void drawvolslice_terrain(const slicedata *sd){
         r33 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n33,z33)/255.0;
 
         rmid = (r11+r31+r13+r33)/4.0;
-
 
         yy1 = yplt[j];
         y3 = yplt[j+1];
