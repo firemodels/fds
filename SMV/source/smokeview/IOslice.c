@@ -4075,31 +4075,26 @@ void drawvolslice_terrain(const slicedata *sd){
         float ymid, rmid;
         int n11, n31, n13, n33;
 
-// original coding in case future bug requires it:
-//        z11 = MIN(zmax,constval + znode[IJ2(i,j)]);
-//        z31 = MIN(zmax,constval + znode[IJ2(i+1,j)]);
-//        z13 = MIN(zmax,constval + znode[IJ2(i,j+1)]);
-//        z33 = MIN(zmax,constval + znode[IJ2(i+1,j+1)]);
-        z11 = MIN(zmax,constval);
-        z31 = MIN(zmax,constval);
-        z13 = MIN(zmax,constval);
-        z33 = MIN(zmax,constval);
+        z11 = MIN(zmax,constval + znode[IJ2(i,j)]);
+        z31 = MIN(zmax,constval + znode[IJ2(i+1,j)]);
+        z13 = MIN(zmax,constval + znode[IJ2(i,j+1)]);
+        z33 = MIN(zmax,constval + znode[IJ2(i+1,j+1)]);
         zmid = (z11 + z31 + z13 + z33)/4.0;
 
         if(iblank_z[IJK(i,j,plotz)]!=2)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
 
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
-        r11 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n11,z11)/255.0;
+        r11 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n11,constval)/255.0;
 
         n31=n11 + sd->nslicej*sd->nslicek;
-        r31 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n31,z31)/255.0;
+        r31 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n31,constval)/255.0;
 
         n13=n11 + sd->nslicek;
-        r13 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n13,z13)/255.0;
+        r13 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n13,constval)/255.0;
 
         n33=n13 + sd->nslicej*sd->nslicek;
-        r33 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n33,z33)/255.0;
+        r33 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n33,constval)/255.0;
 
         rmid = (r11+r31+r13+r33)/4.0;
 
