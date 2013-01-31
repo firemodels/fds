@@ -39,10 +39,10 @@ The latest nightly versions of the documentation/manuals from Firebot [https://d
   * Stage 1:  SVN operations
   * Stage 2a: Compile FDS DB
   * Stage 2b: Compile FDS MPI DB
-  * Stage 3:  Run verification cases (short run)
+  * Stage 3:  Run verification cases (debug mode)
   * Stage 4a: Compile FDS release
   * Stage 4b: Compile FDS MPI release
-  * Stage 5:  Run verification cases (long run)
+  * Stage 5:  Run verification cases (release mode)
   * Stage 6a: Compile SMV utilities
   * Stage 6b: Compile SMV DB
   * Stage 6c: Make SMV pictures (debug mode)

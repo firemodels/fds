@@ -303,11 +303,11 @@ check_compile_fds_mpi()
    fi
 }
 
-#  ===============================================
-#  = Stage 5 - Run verification cases (long run) =
-#  ===============================================
+#  ===================================================
+#  = Stage 5 - Run verification cases (release mode) =
+#  ===================================================
 
-wait_verification_cases_long_end()
+wait_verification_cases_release_end()
 {
    # Scans processes and waits for verification cases to end
    while [[ `ps x | grep intel_osx_64 | wc -l` -gt 1 ]]; do
@@ -319,7 +319,7 @@ wait_verification_cases_long_end()
    done
 }
 
-run_verification_cases_long()
+run_verification_cases_release()
 {
    # Start running all FDS verification cases (run all cases on firebot queue)
    cd $FDS_SVNROOT/Verification
@@ -333,10 +333,10 @@ run_verification_cases_long()
    ./Run_SMV_Cases.sh -q none >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
-   wait_verification_cases_long_end
+   wait_verification_cases_release_end
 }
 
-check_verification_cases_long()
+check_verification_cases_release()
 {
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification
@@ -377,7 +377,7 @@ email_success_message()
       mail -s "[Firebot@$hostname] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output/warnings > /dev/null
    else
       # Send empty email with success message
-      echo -e "Build tests on $hostname include:\n\n Stage 1: SVN operations\n Stage 4a and 4b: FDS release compilation\n Stage 5: Run verification cases (long run)" | mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo > /dev/null
+      echo -e "Build tests on $hostname include:\n\n Stage 1: SVN operations\n Stage 4a and 4b: FDS release compilation\n Stage 5: Run verification cases (release mode)" | mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo > /dev/null
    fi
 }
 
@@ -439,8 +439,8 @@ compile_fds_mpi
 check_compile_fds_mpi
 
 ### Stage 5 ###
-run_verification_cases_long
-check_verification_cases_long
+run_verification_cases_release
+check_verification_cases_release
 
 ### Success! ###
 set_files_world_readable
