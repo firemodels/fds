@@ -51,7 +51,7 @@
       BURN_AWAY      = .FALSE.
       MATL_ID(1:2,1) = 'FABRIC','FOAM'
       THICKNESS(1:2) = 0.002,0.1 
-      TMP_INNER      = 600.0
+      TMP_FRONT      = 600.0
 /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
