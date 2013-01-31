@@ -1239,7 +1239,7 @@ void update_mesh_terrain(void){
       for(jj=0;jj<meshi->jbar;jj++){
         xyz[1]=y[jj];
         meshj = getmesh(xyz);
-        if(meshj==NULL)continue;
+        if(meshj==NULL||meshj==meshi)continue;
         meshi->is_bottom=0;
         break;
       }

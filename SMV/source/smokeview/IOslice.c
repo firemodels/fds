@@ -3644,11 +3644,6 @@ void drawgslice_data(slicedata *slicei){
   glPopMatrix();
 }
 
-/* ------------------ drawslice_terrain ------------------------ */
-
-#define ijnode2(i,j) ((nycell+1)*(i) + (j))
-
-
 /* ------------------ drawvolslice_texture ------------------------ */
 
 void drawvolslice_texture(const slicedata *sd){
@@ -4066,10 +4061,7 @@ void drawvolslice_terrain(const slicedata *sd){
     constval = zplt[plotz]+offset_slice*sd->sliceoffset-znode[0];
     zmax = zplt[meshi->kbar];
     glBegin(GL_TRIANGLES);
-    maxi = sd->is1+sd->nslicei-1;
-    if(sd->is1+1>maxi){
-      maxi=sd->is1+1;
-    }
+    maxi = MAX(sd->is1+sd->nslicei-1,sd->is1+1);
     for(i=sd->is1; i<maxi; i++){
       float xmid;
 
@@ -4083,10 +4075,15 @@ void drawvolslice_terrain(const slicedata *sd){
         float ymid, rmid;
         int n11, n31, n13, n33;
 
-        z11 = MIN(zmax,constval + znode[ijnode2(i,j)]);
-        z31 = MIN(zmax,constval + znode[ijnode2(i+1,j)]);
-        z13 = MIN(zmax,constval + znode[ijnode2(i,j+1)]);
-        z33 = MIN(zmax,constval + znode[ijnode2(i+1,j+1)]);
+// original coding in case future bug requires it:
+//        z11 = MIN(zmax,constval + znode[IJ2(i,j)]);
+//        z31 = MIN(zmax,constval + znode[IJ2(i+1,j)]);
+//        z13 = MIN(zmax,constval + znode[IJ2(i,j+1)]);
+//        z33 = MIN(zmax,constval + znode[IJ2(i+1,j+1)]);
+        z11 = MIN(zmax,constval);
+        z31 = MIN(zmax,constval);
+        z13 = MIN(zmax,constval);
+        z33 = MIN(zmax,constval);
         zmid = (z11 + z31 + z13 + z33)/4.0;
 
         if(iblank_z[IJK(i,j,plotz)]!=2)continue;
@@ -5531,7 +5528,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
         int ij2;
 
         n+=vectorskip*sd->nslicek; 
-        ij2 = ijnode2(i,j);
+        ij2 = IJ2(i,j);
         z11 = constval + znode[ij2];
         if(z11>zmax)z11=zmax;
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
@@ -5572,7 +5569,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
 
         n+=vectorskip*sd->nslicek; 
 
-        ij2 = ijnode2(i,j);
+        ij2 = IJ2(i,j);
         z11 = constval + znode[ij2];
         if(z11>zmax)z11=zmax;
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;

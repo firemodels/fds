@@ -96,6 +96,10 @@
 #define IJ(i,j) ((i)+(j)*nx)
 #endif
 
+#ifndef IJ2
+#define IJ2(i,j) ((nycell+1)*(i) + (j))
+#endif
+
 #ifndef MAXREV
 #define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 #endif

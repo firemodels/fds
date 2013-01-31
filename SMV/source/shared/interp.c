@@ -11,6 +11,7 @@ char interp_revision[]="$Revision$";
 #include <math.h>
 #include "MALLOC.h"
 #include "interp.h"
+#include "datadefs.h"
 
 /* ------------------ get_z_interp_factors ------------------------ */
 
@@ -43,18 +44,14 @@ int interp3dsliceindex(unsigned char *data, float *zplt, int nz, int n0, float z
 
   dz = zplt[1] - zplt[0];
 
-  k1 = (z-zplt[0])/dz;
-  if(k1<0)k1=0;
-  if(k1>nz-1)k1=nz-1;
+  k1=CLAMP((z-zplt[0])/dz,0,nz-1);
   k2 = k1 + 1;
 
   val1 = data[n0+k1];
   val2 = data[n0+k2];
   z1 = zplt[k1];
   z2 = zplt[k2];
-  ival = ((z-z1)*val2 + (z2-z)*val1)/dz;
-  if(ival<0)ival=0;
-  if(ival>255)ival=255;
+  ival = CLAMP(((z-z1)*val2 + (z2-z)*val1)/dz,0,255);
   return ival;
 }
 

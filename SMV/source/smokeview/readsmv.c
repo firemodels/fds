@@ -3406,6 +3406,8 @@ int readsmv(char *file, char *file2){
         else{
           is_block_terrain[nn]=0;
         }
+        // temporary work around for terrain display of slice files
+        if(autoterrain==1)is_block_terrain[nn]=1;
       }
       continue;
     }
@@ -6746,7 +6748,7 @@ typedef struct {
       for(iblock=0;iblock<n_blocks;iblock++){
         int ijk2[5],kmax;
         int ii, jj;
-        float zval;
+        float block_zmax;
 
         if(meshi->is_block_terrain!=NULL&&meshi->is_block_terrain[iblock]==0){
           fgets(buffer,255,stream);
@@ -6756,17 +6758,13 @@ typedef struct {
 
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i %i %i",ijk2,ijk2+1,ijk2+2,ijk2+3,ijk2+4,&kmax);
-        zval = meshi->zplt[kmax];
+        block_zmax = meshi->zplt[kmax];
         for(ii=ijk2[0];ii<ijk2[1];ii++){
           for(jj=ijk2[2];jj<ijk2[3];jj++){
             int ij;
-            float zcell;
 
             ij = IJCELL2(ii,jj);
-            zcell = meshi->zcell[ij];
-            if(zval>zcell){
-              meshi->zcell[ij]=zval;
-            }
+            meshi->zcell[ij]=MAX(meshi->zcell[ij],block_zmax);
           }
         }
       }
