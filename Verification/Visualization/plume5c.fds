@@ -49,8 +49,6 @@
       FYI            = 'Properties completely fabricated'
       RGB            = 151,96,88
       BURN_AWAY      = .FALSE.
-      MATL_ID(1:2,1) = 'FABRIC','FOAM'
-      THICKNESS(1:2) = 0.002,0.1 
       TMP_FRONT      = 600.0
 /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
