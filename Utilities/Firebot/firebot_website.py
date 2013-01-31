@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-import os, re, time
+import os
+import re
+import time
 
 #  ==========================
 #  = Firebot website status =
@@ -29,9 +31,9 @@ span.dropt:hover {text-decoration: none; background: #ffffff; z-index: 6; }
 span.dropt span {position: absolute; left: -9999px;
   margin: 20px 0 0 0px; padding: 3px 3px 3px 3px;
   border-style:solid; border-color:black; border-width:1px; z-index: 6;}
-span.dropt:hover span {left: 2%; background: #ffffff;} 
+span.dropt:hover span {left: 2%; background: #ffffff;}
 span.dropt span {position: absolute; left: -9999px;
-  margin: 4px 0 0 0px; padding: 3px 3px 3px 3px; 
+  margin: 4px 0 0 0px; padding: 3px 3px 3px 3px;
   border-style:solid; border-color:black; border-width:1px;}
 span.dropt:hover span {margin: 5px 0 0 170px; background: #ebf7f8; z-index:6;}
 
@@ -128,10 +130,10 @@ for rev in sorted(revision_list, reverse=True)[:30]:
     #  ====================
     if os.path.exists(firebot_history_dir + "/" + rev + "_errors.txt"):
         # Open error logs
-        f = open (firebot_history_dir + "/" + rev + "_errors.txt","r")
+        f = open(firebot_history_dir + "/" + rev + "_errors.txt", "r")
         error_log = f.readlines()
         f.close()
-        f_stage = open (firebot_history_dir + "/" + rev + ".txt","r")
+        f_stage = open(firebot_history_dir + "/" + rev + ".txt", "r")
         stage_log = f_stage.readlines()
         f_stage.close()
 
@@ -152,7 +154,7 @@ for rev in sorted(revision_list, reverse=True)[:30]:
     #  ======================================
     elif os.path.exists(firebot_history_dir + "/" + rev + "_warnings.txt"):
         # Open warning log
-        f = open (firebot_history_dir + "/" + rev + "_warnings.txt","r")
+        f = open(firebot_history_dir + "/" + rev + "_warnings.txt", "r")
         warning_log = f.readlines()
         f.close()
 
@@ -175,7 +177,7 @@ for rev in sorted(revision_list, reverse=True)[:30]:
         print "<a href='http://code.google.com/p/fds-smv/source/detail?r=" + rev + "'>Revision " + rev + "</a>: <font style='BACKGROUND-COLOR: lime'>[&#10003;]</font> Build success!<br/>"
 
     # Print time associated with history file
-    print "<font color='#B0B0B0'><i>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt"))  + "</i></font>"
+    print "<font color='#B0B0B0'><i>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt")) + "</i></font>"
     print "<br><br>"
 
 print "<hr align='left'><br>"
