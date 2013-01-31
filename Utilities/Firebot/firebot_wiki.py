@@ -1,7 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os, re, time
+import os
+import re
+import time
 
 #  =======================
 #  = Firebot wiki status =
@@ -78,10 +80,10 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     #  ====================
     if os.path.exists(firebot_history_dir + "/" + rev + "_errors.txt"):
         # Open error logs
-        f = open (firebot_history_dir + "/" + rev + "_errors.txt","r")
+        f = open(firebot_history_dir + "/" + rev + "_errors.txt", "r")
         error_log = f.readlines()
         f.close()
-        f_stage = open (firebot_history_dir + "/" + rev + ".txt","r")
+        f_stage = open(firebot_history_dir + "/" + rev + ".txt", "r")
         stage_log = f_stage.readlines()
         f_stage.close()
 
@@ -96,7 +98,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     #  ======================================
     elif os.path.exists(firebot_history_dir + "/" + rev + "_warnings.txt"):
         # Open warning log
-        f = open (firebot_history_dir + "/" + rev + "_warnings.txt","r")
+        f = open(firebot_history_dir + "/" + rev + "_warnings.txt", "r")
         warning_log = f.readlines()
         f.close()
 
