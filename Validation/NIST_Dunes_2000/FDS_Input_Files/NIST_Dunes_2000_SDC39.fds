@@ -203,56 +203,56 @@
 = Station A =
 =============
 
-&DEVC ID='Detector A Ion 1',   PROP_ID='I1', XYZ=0.48, 1.63, 2.28 /
-&DEVC ID='Detector A Ion 3',   PROP_ID='I3', XYZ=0.48, 1.63, 2.28 /
-&DEVC ID='Detector A Photo 1', PROP_ID='P1', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Ion1A',   PROP_ID='I1', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Ion3A',   PROP_ID='I3', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Photo1A', PROP_ID='P1', XYZ=0.48, 1.63, 2.28 /
 
-&DEVC XYZ=0.48, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat A Velocity' /
-&DEVC XYZ=0.48, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat A Temperature' /
+&DEVC XYZ=0.48, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat_A_Vel' /
+&DEVC XYZ=0.48, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat_A_Temp' /
 
 =============
 = Station B =
 =============
 
-&DEVC ID='Detector B Ion 1',   PROP_ID='I1', XYZ=17.8, 1.63, 2.28 /
-&DEVC ID='Detector B Ion 3',   PROP_ID='I3', XYZ=17.8, 1.63, 2.28 /
-&DEVC ID='Detector B Photo 1', PROP_ID='P1', XYZ=17.8, 1.63, 2.28 /
+&DEVC ID='Ion1B',   PROP_ID='I1', XYZ=17.8, 1.63, 2.28 /
+&DEVC ID='Ion3B',   PROP_ID='I3', XYZ=17.8, 1.63, 2.28 /
+&DEVC ID='Photo1B', PROP_ID='P1', XYZ=17.8, 1.63, 2.28 /
 
-&DEVC XYZ=17.8, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat B Velocity' /
-&DEVC XYZ=17.8, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat B Temperature' /
+&DEVC XYZ=17.8, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat_B_Vel' /
+&DEVC XYZ=17.8, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat_B_Temp' /
 
 =============
 = Station C =
 =============
 
-&DEVC ID='Detector C Ion 1',   PROP_ID='I1', XYZ=4.1, 2.7, 2.28 /
-&DEVC ID='Detector C Ion 3',   PROP_ID='I3', XYZ=4.1, 2.7, 2.28 /
-&DEVC ID='Detector C Photo 1', PROP_ID='P1', XYZ=4.1, 2.7, 2.28 /
+&DEVC ID='Ion1C',   PROP_ID='I1', XYZ=4.1, 2.7, 2.28 /
+&DEVC ID='Ion3C',   PROP_ID='I3', XYZ=4.1, 2.7, 2.28 /
+&DEVC ID='Photo1C', PROP_ID='P1', XYZ=4.1, 2.7, 2.28 /
 
-&DEVC XYZ=4.1, 2.7, 2.28, QUANTITY='VELOCITY', ID='Stat C Velocity' /
-&DEVC XYZ=4.1, 2.7, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat C Temperature' /
+&DEVC XYZ=4.1, 2.7, 2.28, QUANTITY='VELOCITY', ID='Stat_C_Vel' /
+&DEVC XYZ=4.1, 2.7, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat_C_Temp' /
 
 =============
 = Station D =
 =============
 
-&DEVC ID='Detector D Ion 1',   PROP_ID='I1', XYZ=17.1, 1.0, 2.19 /
-&DEVC ID='Detector D Ion 3',   PROP_ID='I3', XYZ=17.1, 1.0, 2.19 /
-&DEVC ID='Detector D Photo 1', PROP_ID='P1', XYZ=17.1, 1.0, 2.19 /
+&DEVC ID='Ion1D',   PROP_ID='I1', XYZ=17.1, 1.0, 2.19 /
+&DEVC ID='Ion3D',   PROP_ID='I3', XYZ=17.1, 1.0, 2.19 /
+&DEVC ID='Photo1D', PROP_ID='P1', XYZ=17.1, 1.0, 2.19 /
 
-&DEVC XYZ=17.1, 1.0, 2.19, QUANTITY='VELOCITY', ID='Stat D Velocity' /
-&DEVC XYZ=17.1, 1.0, 2.19, QUANTITY='THERMOCOUPLE', ID='Stat D Temperature' /
+&DEVC XYZ=17.1, 1.0, 2.19, QUANTITY='VELOCITY', ID='Stat_D_Vel' /
+&DEVC XYZ=17.1, 1.0, 2.19, QUANTITY='THERMOCOUPLE', ID='Stat_D_Temp' /
 
 =============
 = Station E =
 =============
 
-&DEVC ID='Detector E Ion 1',   PROP_ID='I1', XYZ=13.0, 1.63, 2.28 /
-&DEVC ID='Detector E Ion 3',   PROP_ID='I3', XYZ=13.0, 1.63, 2.28 /
-&DEVC ID='Detector E Photo 1', PROP_ID='P1', XYZ=13.0, 1.63, 2.28 /
+&DEVC ID='Ion1E',   PROP_ID='I1', XYZ=13.0, 1.63, 2.28 /
+&DEVC ID='Ion3E',   PROP_ID='I3', XYZ=13.0, 1.63, 2.28 /
+&DEVC ID='Photo1E', PROP_ID='P1', XYZ=13.0, 1.63, 2.28 /
 
-&DEVC XYZ=13.0, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat E Velocity' /
-&DEVC XYZ=13.0, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat E Temperature' /
+&DEVC XYZ=13.0, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat_E_Vel' /
+&DEVC XYZ=13.0, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat_E_Temp' /
 
 ==============================
 = Additional instrumentation =
@@ -318,18 +318,18 @@
 &DEVC XYZ=11.75, 0.38, 0.28, QUANTITY='THERMOCOUPLE', ID='TCF_7' /
 &DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='OPTICAL DENSITY', ID='SMF_1' /
 
-&CTRL ID='Det A Ion 1',   INPUT_ID='Detector A Ion 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det A Ion 3',   INPUT_ID='Detector A Ion 3',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det A Photo 1', INPUT_ID='Detector A Photo 1', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det B Ion 1',   INPUT_ID='Detector B Ion 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det B Ion 3',   INPUT_ID='Detector B Ion 3',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det B Photo 1', INPUT_ID='Detector B Photo 1', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det C Ion 1',   INPUT_ID='Detector C Ion 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det C Ion 3',   INPUT_ID='Detector C Ion 3',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det C Photo 1', INPUT_ID='Detector C Photo 1', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det D Ion 1',   INPUT_ID='Detector D Ion 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det D Ion 3',   INPUT_ID='Detector D Ion 3',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det D Photo 1', INPUT_ID='Detector D Photo 1', FUNCTION_TYPE='ANY' /
-&CTRL ID='Det E Ion 1',   INPUT_ID='Detector E Ion 1',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det E Ion 3',   INPUT_ID='Detector E Ion 3',   FUNCTION_TYPE='ANY' /
-&CTRL ID='Det E Photo 1', INPUT_ID='Detector E Photo 1', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1A_Act',   INPUT_ID='Ion1A',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3A_Act',   INPUT_ID='Ion3A',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1A_Act', INPUT_ID='Photo1A', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1B_Act',   INPUT_ID='Ion1B',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3B_Act',   INPUT_ID='Ion3B',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1B_Act', INPUT_ID='Photo1B', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1C_Act',   INPUT_ID='Ion1C',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3C_Act',   INPUT_ID='Ion3C',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1C_Act', INPUT_ID='Photo1C', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1D_Act',   INPUT_ID='Ion1D',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3D_Act',   INPUT_ID='Ion3D',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1D_Act', INPUT_ID='Photo1D', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1E_Act',   INPUT_ID='Ion1E',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3E_Act',   INPUT_ID='Ion3E',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1E_Act', INPUT_ID='Photo1E', FUNCTION_TYPE='ANY' /
