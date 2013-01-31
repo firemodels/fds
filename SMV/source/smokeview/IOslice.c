@@ -5529,10 +5529,9 @@ void drawvvolslice_terrain(const vslicedata *vd){
 
         n+=vectorskip*sd->nslicek; 
         ij2 = IJ2(i,j);
-        z11 = constval + znode[ij2];
-        if(z11>zmax)z11=zmax;
+        z11 = MIN(zmax,constval + znode[ij2]);
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
-        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,z11);
+        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,constval);
         if(rgb_ptr[3]>0.5){
           float f1, f2;
           int k1, k2;
@@ -5570,10 +5569,9 @@ void drawvvolslice_terrain(const vslicedata *vd){
         n+=vectorskip*sd->nslicek; 
 
         ij2 = IJ2(i,j);
-        z11 = constval + znode[ij2];
-        if(z11>zmax)z11=zmax;
+        z11 = MIN(constval + znode[ij2],zmax);
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
-        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,z11);
+        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,constval);
         if(rgb_ptr[3]>0.5){
           float f1, f2;
           int k1, k2;
