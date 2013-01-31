@@ -770,7 +770,7 @@ In the first stage, the newest version of the FDS-SMV codebase is retrieved from
 
 The serial and MPI versions of FDS are compiled with debugging flags enabled. This stage allows for errors in the source code to be identified and traced early in the build/test process. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
-\subsection*{Stage 3: Short run of verification suite}
+\subsection*{Stage 3: Run verification suite in debug mode}
 
 All of the cases in the verification suite are invoked using the FDS debug versions that were compiled in Stage~2. The verification cases are run for at least one time step to ensure that the cases start without errors. After all of the verification cases run for at least one time step, the cases are stopped using an FDS stop file. Then the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
@@ -778,7 +778,7 @@ All of the cases in the verification suite are invoked using the FDS debug versi
 
 The serial and MPI release versions of FDS are compiled. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
-\subsection*{Stage 5: Full run of FDS verification suite}
+\subsection*{Stage 5: Run verification suite in release mode}
 
 All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. After all of the verification cases run to completion, the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 

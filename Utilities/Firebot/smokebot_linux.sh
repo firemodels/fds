@@ -313,7 +313,7 @@ check_compile_fds_db()
 
 #  ================================================
 
-wait_verification_cases_short_start()
+wait_verification_cases_debug_start()
 {
    # Scans qstat and waits for verification cases to start
    while [[ `qstat -a | grep $(whoami) | grep Q` != '' ]]; do
@@ -325,7 +325,7 @@ wait_verification_cases_short_start()
    done
 }
 
-wait_verification_cases_short_end()
+wait_verification_cases_debug_end()
 {
    # Scans qstat and waits for verification cases to end
    while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
@@ -337,7 +337,7 @@ wait_verification_cases_short_end()
    done
 }
 
-run_verification_cases_short()
+run_verification_cases_debug()
 {
 
    #  =====================
@@ -349,7 +349,7 @@ run_verification_cases_short()
    # Submit SMV verification cases and wait for them to start (run SMV cases in debug mode on firebot queue)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
    ./Run_SMV_Cases.sh -d -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
-   wait_verification_cases_short_start
+   wait_verification_cases_debug_start
 
    # Wait some additional time for all cases to start
    sleep 30
@@ -359,7 +359,7 @@ run_verification_cases_short()
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for SMV verification cases to end
-   wait_verification_cases_short_end
+   wait_verification_cases_debug_end
 
    #  ======================
    #  = Remove .stop files =
@@ -374,7 +374,7 @@ run_verification_cases_short()
    find WUI -name '*.smv' -exec rm -f {} \;
 }
 
-check_verification_cases_short()
+check_verification_cases_debug()
 {
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification/Visualization
@@ -391,7 +391,7 @@ check_verification_cases_short()
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage3_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
       
-      echo "Errors from Stage 3 - Run verification cases (short run):" >> $ERROR_LOG
+      echo "Errors from Stage 3 - Run verification cases (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
@@ -437,11 +437,11 @@ check_compile_fds()
    fi
 }
 
-#  ===============================================
-#  = Stage 5 - Run verification cases (long run) =
-#  ===============================================
+#  ===================================================
+#  = Stage 5 - Run verification cases (release mode) =
+#  ===================================================
 
-wait_verification_cases_long_end()
+wait_verification_cases_release_end()
 {
    # Scans qstat and waits for verification cases to end
    while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
@@ -453,7 +453,7 @@ wait_verification_cases_long_end()
    done
 }
 
-run_verification_cases_long()
+run_verification_cases_release()
 {
    # Start running all SMV verification cases (run all cases on firebot queue)
    cd $FDS_SVNROOT/Verification/scripts
@@ -461,10 +461,10 @@ run_verification_cases_long()
    ./Run_SMV_Cases.sh -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
-   wait_verification_cases_long_end
+   wait_verification_cases_release_end
 }
 
-check_verification_cases_long()
+check_verification_cases_release()
 {
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification/Visualization
@@ -481,7 +481,7 @@ check_verification_cases_long()
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
       
-      echo "Errors from Stage 5 - Run verification cases (long run):" >> $ERROR_LOG
+      echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
@@ -569,9 +569,9 @@ check_compile_smv_db()
    fi
 }
 
-#  ==================================================
+#  =============================================
 #  = Stage 6c - Make SMV pictures (debug mode) =
-#  ==================================================
+#  =============================================
 
 make_smv_pictures_db()
 {
@@ -908,8 +908,8 @@ check_compile_fds_db
 
 ### Stage 3 ###
 if [[ $stage2a_success ]] ; then
-   run_verification_cases_short
-   check_verification_cases_short
+   run_verification_cases_debug
+   check_verification_cases_debug
 fi
 
 ### Stage 4a ###
@@ -920,8 +920,8 @@ fi
 
 ### Stage 5 ###
 if [[ $stage4a_success ]] ; then
-   run_verification_cases_long
-   check_verification_cases_long
+   run_verification_cases_release
+   check_verification_cases_release
 fi
 
 ### Stage 6a ###
