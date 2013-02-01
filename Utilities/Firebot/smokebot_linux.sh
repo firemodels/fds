@@ -14,8 +14,6 @@
 mailToSMV="gforney@gmail.com, koverholt@gmail.com"
 mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de, ben.trettel@gmail.com"
 
-export TEXINPUTS=".:../LaTeX_Style_Files:"
-
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
@@ -752,6 +750,8 @@ check_guide()
 
 make_smv_user_guide()
 {
+   export TEXINPUTS=".:../LaTeX_Style_Files:"
+
    # Build SMV User Guide
    cd $FDS_SVNROOT/Manuals/SMV_User_Guide
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
@@ -765,6 +765,8 @@ make_smv_user_guide()
 
 make_smv_technical_guide()
 {
+   export TEXINPUTS=".:../LaTeX_Style_Files:"
+
    # Build SMV Technical Guide
    cd $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
@@ -778,6 +780,8 @@ make_smv_technical_guide()
 
 make_smv_verification_guide()
 {
+   export TEXINPUTS=".:../LaTeX_Style_Files:"
+
    # Build SMV Verification Guide
    cd $FDS_SVNROOT/Manuals/SMV_Verification_Guide
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
