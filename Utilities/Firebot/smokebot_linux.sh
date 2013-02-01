@@ -750,10 +750,9 @@ check_guide()
 
 make_smv_user_guide()
 {
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
    # Build SMV User Guide
    cd $FDS_SVNROOT/Manuals/SMV_User_Guide
+   export TEXINPUTS=".:../LaTeX_Style_Files:"
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
    bibtex SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
@@ -765,10 +764,9 @@ make_smv_user_guide()
 
 make_smv_technical_guide()
 {
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
    # Build SMV Technical Guide
    cd $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide
+   export TEXINPUTS=".:../LaTeX_Style_Files:"
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
    bibtex SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
@@ -780,10 +778,9 @@ make_smv_technical_guide()
 
 make_smv_verification_guide()
 {
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
    # Build SMV Verification Guide
    cd $FDS_SVNROOT/Manuals/SMV_Verification_Guide
+   export TEXINPUTS=".:../LaTeX_Style_Files:"
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
    bibtex SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
