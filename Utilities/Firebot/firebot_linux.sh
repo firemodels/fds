@@ -33,6 +33,8 @@ CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
 
+export TEXINPUTS=".:../LaTeX_Style_Files:"
+
 function usage {
 echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -y ]"
 echo "Runs Firebot V&V testing script"
