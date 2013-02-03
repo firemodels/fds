@@ -77,6 +77,9 @@ WIN_LIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.
 WIN_LIBDIR_32 = $(LIB_DIR)/lib_win_intel_32
 SMV_LIBS_32 = $(WIN_LIBDIR_32)\pthreadVC.lib $(WIN_LIBDIR_32)\glui.lib $(WIN_LIBDIR_32)\glut32.lib $(WIN_LIBDIR_32)\gd.lib $(WIN_LIBDIR_32)\jpeg.lib $(WIN_LIBDIR_32)\png.lib $(WIN_LIBDIR_32)\zlib.lib
 
+WINGCC_LIBDIR_32 = $(LIB_DIR)/lib_win_gcc_32
+SMVGCC_LIBS_32 = $(WINGCC_LIBDIR_32)/libglui.a $(WINGCC_LIBDIR_32)/libglut.a $(WINGCC_LIBDIR_32)/libgd.a $(WINGCC_LIBDIR_32)/libjpeg.a $(WINGCC_LIBDIR_32)/libpng.a $(WINGCC_LIBDIR_32)/libz.a
+
 WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
 SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreadVC2_x64.lib
 
@@ -89,10 +92,10 @@ gcc_win_32 : CFLAGS    = -O2 -m32 -D WIN32 -D GLEW_STATIC
 gcc_win_32 : CC        = gcc
 gcc_win_32 : CPP       = g++
 gcc_win_32 : FC        = gfortran
-gcc_win_32 : exe       = smokeview_win_32
+gcc_win_32 : exe       = smokeview_gcc_win_32
 
 gcc_win_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(SMV_LIBS_32)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(SMVGCC_LIBS_32) -lpthread -lopengl32 -lglu32 -lgfortran
 
 # ------------- intel_win_32 ----------------
 
