@@ -31,6 +31,12 @@ CFLAGS= -O2  -I$(srcdir)
 # However, any special defines for ansi2knr.c may be included here:
 ANSI2KNRFLAGS= 
 
+.c.obj:
+	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
+.c.o:
+	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
+
+
 # Link-time cc options:
 LDFLAGS= 
 
