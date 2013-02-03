@@ -43,6 +43,12 @@ SIZE=-m64
 CC=$(COMPILER) $(SIZE) $(INCLUDEDIRS)
 LINK=$(CC) $(LIBDIRS) $(LIBS)
 
+.c.obj:
+	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
+.c.o:
+	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
+
+
 PROGRAMS=pngtogd pngtogd2 gdtopng gd2topng gd2copypal gdparttopng webpng annotate $(TEST_PROGRAMS)
 
 TEST_PROGRAMS=gdtest gddemo gd2time gdtestft testac fontwheeltest fontsizetest
