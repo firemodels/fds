@@ -1,3 +1,5 @@
 @echo off
 
-make COMPILER=gcc SIZE=-m32 libgd.a
+call ..\setopts %OPTS%
+erase *.o
+make COMPILER=%COMPILER% SIZE=%SIZE% libgd.a -f makefile_win

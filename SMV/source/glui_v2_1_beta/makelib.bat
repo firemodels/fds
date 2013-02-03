@@ -1,3 +1,5 @@
 @echo off
 
-make COMPILER=gcc COMPILER2=g++ SIZE=-m32 RM=erase libglui.a
+call ..\setopts %OPTS%
+erase *.o
+make COMPILER=%COMPILER% COMPILER2=%COMPILER2% SIZE=%SIZE% RM=erase libglui.a

@@ -1,5 +1,5 @@
 @echo off
 
+call ..\setopts %OPTS%
 erase *.o
-
-make libglutwin.a
+make COMPILER=%COMPILER% SIZE=%SIZE% RM=erase libglutwin.a

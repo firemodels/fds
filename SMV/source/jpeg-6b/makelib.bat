@@ -1,4 +1,5 @@
 @echo off
 
+call ..\setopts %OPTS%
 erase *.o
-make COMPILER=gcc RM=erase libjpeg.a
+make COMPILER=%COMPILER% SIZE=%SIZE% RM=erase libjpeg.a
