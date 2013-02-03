@@ -460,6 +460,7 @@ William J. Ferrante                     & Roosevelt Fire District, Hyde Park, Ne
 Emanuele Gissi                          & Corpo nazionale dei Vigili del Fuoco, Italy                               \\ \hline
 Timothy M. Groch                        & Engineering Planning and Management, Inc., Framingham, Massachusetts, USA \\ \hline
 Simon J. Ham                            & Fire Safety Engineering Consultants Limited, UK                           \\ \hline
+Chris Lautenberger                      & Reax Engineering, Berkeley, California, USA                               \\ \hline
 Tim McDonald                            & Endress Ingenieurgesellschaft mbH, Germany                                \\ \hline
 Dave McGill                             & Seneca College, Ontario, Canada                                           \\ \hline
 Adrian Milford                          & Sereca Fire Consulting Ltd., British Columbia, Canada                     \\ \hline
@@ -4427,8 +4428,11 @@ Real materials that can burn can be very complicated. Undoubtedly, the {\ct SURF
 input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know
 that the various property values and the associated thermo-physical model in FDS
 constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid
-phase routines. However, it is easy to perform a simple check of any set of surface properties by essentially turning off the gas phase -- no combustion and
-no convective heat transfer. There are several parameters that allow you do this, spread out over the various namelist groups.
+phase routines. However, it is easy to perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and benchscale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
+
+\subsection{Simulating the Cone Calorimeter}
+
+This section describes how to set up a simple model of the cone calorimeter or other similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
 
 \begin{enumerate}
 \item Create a trivially small mesh, just to let FDS run. Since the
@@ -4440,23 +4444,18 @@ to update the solid phase every time step (normally it does this every
 other time step), and set {\ct DT} to whatever value appropriate for
 the solid phase calculation. Since there is no gas phase calculation
 that will limit the time step, it is best to control this yourself.
-\item Put {\ct HEAT\_TRANSFER\_COEFFICIENT=0.} on the {\ct SURF} line. This turns off the
+\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=0} on the {\ct SURF} line. This turns off the
 convective heat flux from gas to surface and vice versa. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using
-either {\ct TAU\_EF} or {\ct RAMP\_EF}. See Section~\ref{info:RAMP} for more details.} (kW/m$^2$) on the
-{\ct SURF} line that is assigned to the solid surface. If you want to specify a particular
-convective heat flux to the solid surface, you can set {\ct ASSUMED\_GAS\_TEMPERATURE} on the
-{\ct MISC} line, along with a non-zero value of {\ct HEAT\_TRANSFER\_COEFFICIENT} on {\ct SURF} in units of W/m$^2$/K.
+either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.} (kW/m$^2$) on the
+{\ct SURF} line that is assigned to the solid surface. 
 \item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.}
 on the {\ct MISC} line. This will also speed
-up the computations significantly. If the gas phase computations are
-needed, you may turn off combustion by creating a {\ct MISC} line with only
-{\ct Y\_O2\_INFTY=0.01}. This sets the background oxygen mass fraction
-to 0.01, too low to support any burning.
+up the computations significantly. If a {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you
 normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF}
 line. This is simply a ``virtual'' source that heats the solid. Think
-of this as a perfect radiant panel or cone calorimeter.
+of this as a perfect radiant panel or conical heating unit.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
 of the computational domain. Create {\ct OPEN} vents on all other
 faces.
@@ -4488,7 +4487,9 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 
 &TIME T_END=600., WALL_INCREMENT=1, DT=0.01 /
 
-&REAC FUEL='METHANE', Y_O2_INFTY=0.01 /
+&MISC Y_O2_INFTY=0.01, SOLID_PHASE_ONLY=.TRUE. /
+
+&REAC FUEL='METHANE' /
 
 &MATL ID='BLACKPMMA'
       ABSORPTION_COEFFICIENT=2700.
@@ -4524,9 +4525,31 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 \end{verbatim} \normalsize
 
 
+\subsection{Simulating Benchscale Measurements like the TGA, DSC, and MCC}
 
+\label{info:TGA_DSC_MCC}
 
+There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. There is a way to mimic this process in FDS. It is similar to the approach taken in the preceding section, except now you create a very thin (like 0.01~mm) solid surface with an insulated back boundary condition ({\ct BACKING='INSULATED'}), linearly ramp up the gas temperature, and set a relatively large, constant convective heat transfer coefficient. In effect, what you are doing is simulating the heating of a tiny sample undergoing thermal-gravimetric analysis (TGA), differential scanning calorimetry (DSC), micro-combustion calorimetry (MCC), or similar measurements. 
 
+\begin{enumerate}
+\item Create a trivially small mesh, just to let FDS run. Since the
+gas phase calculation is essentially being shut off, you just need 4
+cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to
+function properly.
+\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS
+to update the solid phase every time step (normally it does this every
+other time step), and set {\ct DT} to whatever value appropriate for
+the solid phase calculation. Since there is no gas phase calculation
+that will limit the time step, it is best to control this yourself.
+\item Set {\ct RADIATION=.FALSE.} on the {\ct RADI} line. This simply eliminates the radiation transport calculation in the gas phase which might conflict with some of the assumptions being made.
+\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=1000} (W/m$^2$/K) on the {\ct SURF} line. There is nothing special about the value of 1000 -- the point is to force the sample temperature to follow the specified linear ramp closely.
+\item Ramp up the {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C) on the {\ct MISC} line using the ramp function \\ {\ct ASSUMED\_GAS\_TEMPERATURE\_RAMP}. See Section~\ref{info:RAMP_Time} for more details.
+\item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed up the computations significantly. If the {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
+\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
+of the computational domain. Create {\ct OPEN} vents on all other
+faces.
+\item Finally, add solid phase output devices to the solid surface. For example, {\ct 'HRRPUM'} (Heat Release Rate Per Unit Mass) in units of kW/kg is appropriate for MCC; and {\ct 'NORMALIZED HEAT FLOW'} in units of kW/kg is appropriate for DSC.
+\end{enumerate}
 
 
 
@@ -10091,6 +10114,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct NET HEAT FLUX}                             & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HRR}                                       & $\int \dq''' \; \d V$                         & kW             & D            \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
+{\ct HRRPUM}                                    & Section~\ref{info:TGA_DSC_MCC}                & kW/kg          & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:PROF}                       & $^\circ$C      & D            \\ \hline
@@ -10107,6 +10131,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct MPUA}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct MPUV}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
+{\ct NORMALIZED HEAT FLOW}                      & Section~\ref{info:TGA_DSC_MCC}                & kW/kg          & D            \\ \hline
 {\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s            & D,B          \\ \hline
 {\ct OPEN NOZZLES}                              & Number of open nozzles                        &                & D            \\ \hline
 {\ct OPTICAL DENSITY}                           & $K/2.3$ (Section~\ref{info:visibility})       & 1/m            & D,I,P,S      \\ \hline
@@ -10836,6 +10861,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}   & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .TRUE.}    \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES} & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .FALSE.}    \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
+{\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP}& Character  & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
 {\ct BAROCLINIC}                                & Logical       & Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}     \\ \hline
 {\ct BNDF\_DEFAULT}                             & Logical       & Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct CDF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.01               \\ \hline
