@@ -10,6 +10,7 @@ CFLAGS =
 
 RM=/bin/rm
 COMPILER=icc
+COMPILER2=icc
 CC=${COMPILER}
 CPP=${COMPILER2}
 CPPFLAGS=$(PLATFORM) -fpermissive -I${GLUT_INC_LOCATION} -I ../include2/glut ${SIZE}

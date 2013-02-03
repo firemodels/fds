@@ -22,9 +22,11 @@ case $OPTION in
   ;;
   g)
    COMPILER="gcc"
+   COMPILER2="g++"
   ;;
   i)
    COMPILER="icc"
+   COMPILER2="icc"
   ;;
   t)
    SIZE=""
