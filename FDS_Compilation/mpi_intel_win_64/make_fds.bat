@@ -1,3 +1,4 @@
+@echo off
 set intelbin="%IFORT_COMPILER12%\bin"
 
 IF "%SETUP_IFORT_COMPILER12%"=="1" GOTO envexist
