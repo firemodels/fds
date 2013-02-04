@@ -22,7 +22,7 @@ UL/NFPRF Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,Sout
 USCG/HAI Extinction,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,1,0,no,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/USCG_HAI_Extinction
 Burning Rate,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.1,0.03 0.95,SouthEast,1,0,no,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Pool_Fires_Burning_Rates
 Cable Failure Time,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Cable_Temperature
-Smoke Alarm Activations,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,33,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Alarm_Activations
+Smoke Detector Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,33,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Detector_Activation_Time
 Fire Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1200,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Fire_Temperature
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.6,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Entrainment
 Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,20,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Activation_Time
