@@ -8828,10 +8828,42 @@ Here again you must add a {\ct QUANTITY2} to the device line.
 
 \clearpage
 
-\section{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
+\section{Quantities within Solids}
+
+\subsection{Quantities at Certain Depth}
+\label{info:DEPTH}
+
+To record the temperature inside the surface, you can use a device as follows:
+
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
+\end{verbatim} \normalsize
+
+\noindent
+The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive the distance is measured from the front surface. If negative, it is measured from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose. 
+
+To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
+\end{verbatim} \normalsize
+
+\noindent
+This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath 
+the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the
+density represents the mass of {\ct 'wood'} per unit volume of the mixture. 
+
+To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}. These quantities do not need the {\ct MATL\_ID} keyword.
+
+Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, output. 
+
+
+\subsection{Profiles of Quantities: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
-FDS uses a fine, non-uniform, one-dimensional mesh at each boundary cell to compute heat transfer within a solid. The parameters (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the physical quantity to monitor, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a given solid obstruction:
+FDS uses a fine one-dimensional mesh at each boundary cell to compute heat transfer within a solid. Use the {\ct PROF} output to record the properties of the solid over the entire thickness. The parameters (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the physical quantity to monitor, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a given solid obstruction:
 
 \footnotesize
 \begin{verbatim}
@@ -8842,16 +8874,10 @@ FDS uses a fine, non-uniform, one-dimensional mesh at each boundary cell to comp
 Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of solid material components
 ({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the material. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
-The full profile data may be more than is needed. Sometimes, all you want to know is the temperature at a certain depth. To get an inner wall temperature, you can also just use a device as follows:
+\subsection{Back Surface Temperature}
+\label{info:BACK}
 
-\footnotesize
-\begin{verbatim}
-&DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
-\end{verbatim} \normalsize
-
-\noindent
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. Note that this {\ct QUANTITY} is allowed only as a {\ct DEVC}, not a {\ct BNDF}, output. Also note that if the wall thickness is decreasing over time due to the solid phase reactions, the distance is measured from the current surface, and the measurement point is moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to
-show ambient temperature. If you just want to know the temperature of the back surface of the ``wall,'' then use
+If you just want to know the temperature of the back surface of the ``wall,'' then use
 
 \footnotesize
 \begin{verbatim}
@@ -9467,19 +9493,6 @@ element. {\ct 'SURFACE DENSITY'} gives the overall mass per unit area for the
 solid surface element, computed as an integral of material density over wall
 thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}.
 
-To record the change in a material
-component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
-
-\footnotesize
-\begin{verbatim}
-&DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
-\end{verbatim} \normalsize
-
-\noindent
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density
-is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the
-density represents the mass of {\ct 'wood'} per unit volume of the mixture. Note also that {\ct 'SOLID DENSITY'} is only available as a
-{\ct DEVC} (device) quantity.
 
 \subsection{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC)}
 \label{info:FED}
@@ -10091,10 +10104,10 @@ remember that all output quantity names ought to be in single quotes.
 {\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%             & D            \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                    & Pa             & D,I,P,S      \\ \hline
-{\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:PROF}                       & $^\circ$C      & B,D          \\ \hline
+{\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
-{\ct CONDUCTIVITY}                              & $k$                                           & W/m/k          & D,I,P,S      \\ \hline
+{\ct CONDUCTIVITY}                              & $k$                                           & W/m/K          & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
@@ -10117,7 +10130,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct HRRPUM}                                    & Section~\ref{info:TGA_DSC_MCC}                & kW/kg          & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:PROF}                       & $^\circ$C      & D            \\ \hline
+{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C      & D            \\ \hline
 {\ct ITERATION}                                 & Current time step                             &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
@@ -10153,7 +10166,9 @@ remember that all output quantity names ought to be in single quotes.
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
 {\ct SCALAR RESOLUTION}$^{*****}$               & Section~\ref{info:meshquality}                &                & S            \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
-{\ct SOLID DENSITY}                             & Section~\ref{info:material_components}        & kg/m$^3$       & D            \\ \hline
+{\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & W/m/K          & D            \\ \hline
+{\ct SOLID DENSITY}                             & Section~\ref{info:DEPTH}                      & kg/m$^3$       & D            \\ \hline
+{\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & kJ/m/K         & D            \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
 {\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
