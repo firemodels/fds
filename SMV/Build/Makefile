@@ -95,7 +95,7 @@ gcc_win_32 : FC        = gfortran
 gcc_win_32 : exe       = smokeview_gcc_win_32
 
 gcc_win_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(SMVGCC_LIBS_32) -lpthread -lopengl32 -lglu32 -lgfortran
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(WINGCC_LIBDIR_32) -lglui -lglut -lgd -ljpeg -lpng -lz -LC:/MinGW/lib/ -lpthread -lglu32 -lopengl32  -lgfortran
 
 # ------------- intel_win_32 ----------------
 
