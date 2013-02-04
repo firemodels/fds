@@ -81,7 +81,9 @@ export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 
 export BASEDIR=`pwd`
 
-scripts/SMV_Cases.sh
+echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/FIGURES/fds.version
+
+#scripts/SMV_Cases.sh
 
 echo FDS cases submitted
 
