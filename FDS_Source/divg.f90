@@ -20,7 +20,7 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF,GET_SENSIBLE_ENTHALPY,&
                               GET_VISCOSITY
-USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL
+USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL,WANNIER_FLOW
 USE MASS, ONLY: SCALAR_FACE_VALUE
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 
@@ -257,8 +257,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             DO I=1,IBAR
 
                DIV_DIFF_HEAT_FLUX = (H_RHO_D_DZDX(I,J,K)-H_RHO_D_DZDX(I-1,J,K))*RDX(I) + &
-                    (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
-                    (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+                                    (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
+                                    (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
 
                DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
 
@@ -271,7 +271,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO I=1,IBAR
 
             DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                 (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+                                 (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
 
             DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
 
@@ -297,7 +297,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO I=1,IBAR
             DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K)-R(I-1)*RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                 (     RHO_D_DZDZ(I,J,K)-       RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+                                       (     RHO_D_DZDZ(I,J,K)-       RHO_D_DZDZ(I,J,K-1))*RDZ(K)
          ENDDO
       ENDDO
    END SELECT CYLINDER2
@@ -423,23 +423,6 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
 ENDDO CORRECTION_LOOP
 
-! Store KW for unstructured geometry
-
-DO NF=1,N_FACE
-   FACE=>FACET(NF)
-   CL=>FACE%CUTCELL_LIST
-   FACE%KW=0._EB
-   CUTCELL_LOOP_2: DO
-      IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
-      IC = CL%INDEX
-      IIG = I_CUTCELL(IC)
-      JJG = J_CUTCELL(IC)
-      KKG = K_CUTCELL(IC)
-      FACE%KW  = FACE%KW + CL%AREA*KP(IIG,KKG,JJG)
-      CL=>CL%NEXT ! point to the next index in the linked list
-   ENDDO CUTCELL_LOOP_2
-ENDDO
-
 ! Compute (q + del dot k del T) and add to the divergence
 
 CYLINDER3: SELECT CASE(CYLINDRICAL)
@@ -448,8 +431,8 @@ CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
       DO J=1,JBAR
          DO I=1,IBAR
             DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                 (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                 (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
+                       (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
+                       (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
             DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
@@ -585,6 +568,26 @@ ENDIF
 ! Add contribution of unstructured geometry
 
 IF (N_FACE>0) THEN
+
+   ! Store KW for unstructured geometry
+
+   DO NF=1,N_FACE
+      FACE=>FACET(NF)
+      CL=>FACE%CUTCELL_LIST
+      FACE%KW=0._EB
+      CUTCELL_LOOP_2: DO
+         IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
+         IC = CL%INDEX
+         IIG = I_CUTCELL(IC)
+         JJG = J_CUTCELL(IC)
+         KKG = K_CUTCELL(IC)
+         FACE%KW  = FACE%KW + CL%AREA*KP(IIG,KKG,JJG)
+         CL=>CL%NEXT ! point to the next index in the linked list
+         ! zero out DP in cut cells, add back using D_GEOMETRY (experimental)
+         DP(IIG,JJG,KKG) = 0._EB
+       ENDDO CUTCELL_LOOP_2
+   ENDDO
+
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -592,6 +595,7 @@ IF (N_FACE>0) THEN
          ENDDO
       ENDDO
    ENDDO
+
 ENDIF
 
 ! Atmospheric stratification term
@@ -670,7 +674,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                END SELECT
             ENDIF NEUMANN_IF
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
-            IF (WC%VENT_INDEX>0) THEN 
+            VENT_IF: IF (WC%VENT_INDEX>0) THEN 
                VT=>VENTS(WC%VENT_INDEX)
                IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
                   II = WC%ONE_D%II
@@ -691,7 +695,22 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                         WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                   END SELECT
                ENDIF
-            ENDIF
+               WANNIER_BC: IF (PERIODIC_TEST==5) THEN
+                  II = WC%ONE_D%II
+                  JJ = WC%ONE_D%JJ
+                  KK = WC%ONE_D%KK
+                  SELECT CASE(IOR)
+                     CASE( 1)
+                        WC%ONE_D%UWS = -WANNIER_FLOW(X(II),ZC(KK),1)
+                     CASE(-1)
+                        WC%ONE_D%UWS =  WANNIER_FLOW(X(II-1),ZC(KK),1)
+                     CASE( 3)
+                        WC%ONE_D%UWS = -WANNIER_FLOW(XC(II),Z(KK),2)
+                     CASE(-3)
+                        WC%ONE_D%UWS =  WANNIER_FLOW(XC(II),Z(KK-1),2)
+                  END SELECT
+               ENDIF WANNIER_BC
+            ENDIF VENT_IF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
             II = WC%ONE_D%II
             JJ = WC%ONE_D%JJ

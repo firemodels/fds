@@ -259,6 +259,7 @@ IF (SOLID_PHASE_ONLY) RETURN
 ! This is typical of the case where an initial velocity field is specified by the user.
 
 IF (PROJECTION .AND. ICYC<=1) RETURN
+IF (PERIODIC_TEST==5) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
