@@ -7072,7 +7072,7 @@ IF (PERIODIC_TEST/=2) WRITE(LU_UVW,'(A)') TRIM(S1)//','//TRIM(S2)//','//TRIM(S3)
 DO K=KMIN,KMAX
    DO J=JMIN,JMAX
       DO I=IMIN,IMAX
-         WRITE(LU_UVW,'(E15.8,A,E15.8,A,E15.8)') U(I,J,K),',',V(I,J,K),',',W(I,J,K)
+         WRITE(LU_UVW,'(E22.15,A,E22.15,A,E22.15)') U(I,J,K),',',V(I,J,K),',',W(I,J,K)
       ENDDO
    ENDDO
 ENDDO

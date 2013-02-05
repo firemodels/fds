@@ -391,13 +391,14 @@ END SUBROUTINE READ_VOLU
 
 SUBROUTINE INIT_IBM(T,NM)
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
+USE PHYSICAL_FUNCTIONS, ONLY: LES_FILTER_WIDTH_FUNCTION
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,IOR,IIG,JJG,KKG
 INTEGER :: NP,NXP,DUMMY_INTEGER,DUMMY_INTEGER2,DUMMY_INTEGER3,IZERO,LU,CUTCELL_COUNT
 TYPE (MESH_TYPE), POINTER :: M
-REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(60),V_POLYGON_CENTROID(3),VC,AREA_CHECK,DELTA,&
+REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(60),V_POLYGON_CENTROID(3),VC,AREA_CHECK,&
             X_MIN,X_MAX,Y_MIN,Y_MAX,Z_MIN,Z_MAX,PP(3),RP,XU(3),DP
 LOGICAL :: EX,OP
 CHARACTER(60) :: FN
@@ -441,9 +442,9 @@ GEOM_LOOP: DO N=1,N_GEOM
    G%Y = G%Y0 + G%V*T
    G%Z = G%Z0 + G%W*T
         
-   DELTA = 2._EB*MAX(M%DX(1),M%DY(1),M%DZ(1))
+   DELTA_IBM = LES_FILTER_WIDTH_FUNCTION(M%DX(1),M%DY(1),M%DZ(1))
    
-   IBM_UVWMAX = MAXVAL((/ABS(G%U),ABS(G%V),ABS(G%W)/))/DELTA
+   IBM_UVWMAX = MAXVAL((/ABS(G%U),ABS(G%V),ABS(G%W)/))/DELTA_IBM
 
    ! find bounding box
 
@@ -518,17 +519,17 @@ GEOM_LOOP: DO N=1,N_GEOM
    G%MIN_J(NM) = M%JBAR
    G%MIN_K(NM) = M%KBAR
 
-   IF (X_MIN>=M%XS .AND. X_MIN<=M%XF) G%MIN_I(NM) = MAX(0,FLOOR((X_MIN-DELTA-M%XS)/M%DX(1))-1)
-   IF (Y_MIN>=M%YS .AND. Y_MIN<=M%YF) G%MIN_J(NM) = MAX(0,FLOOR((Y_MIN-DELTA-M%YS)/M%DY(1))-1)
-   IF (Z_MIN>=M%ZS .AND. Z_MIN<=M%ZF) G%MIN_K(NM) = MAX(0,FLOOR((Z_MIN-DELTA-M%ZS)/M%DZ(1))-1)
+   IF (X_MIN>=M%XS .AND. X_MIN<=M%XF) G%MIN_I(NM) = MAX(0,FLOOR((X_MIN-DELTA_IBM-M%XS)/M%DX(1))-1)
+   IF (Y_MIN>=M%YS .AND. Y_MIN<=M%YF) G%MIN_J(NM) = MAX(0,FLOOR((Y_MIN-DELTA_IBM-M%YS)/M%DY(1))-1)
+   IF (Z_MIN>=M%ZS .AND. Z_MIN<=M%ZF) G%MIN_K(NM) = MAX(0,FLOOR((Z_MIN-DELTA_IBM-M%ZS)/M%DZ(1))-1)
    
    G%MAX_I(NM) = 0
    G%MAX_J(NM) = 0
    G%MAX_K(NM) = 0
 
-   IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) G%MAX_I(NM) = MIN(M%IBAR,CEILING((X_MAX+DELTA-M%XS)/M%DX(1))+1)
-   IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) G%MAX_J(NM) = MIN(M%JBAR,CEILING((Y_MAX+DELTA-M%YS)/M%DY(1))+1)
-   IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) G%MAX_K(NM) = MIN(M%KBAR,CEILING((Z_MAX+DELTA-M%ZS)/M%DZ(1))+1)
+   IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) G%MAX_I(NM) = MIN(M%IBAR,CEILING((X_MAX+DELTA_IBM-M%XS)/M%DX(1))+1)
+   IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) G%MAX_J(NM) = MIN(M%JBAR,CEILING((Y_MAX+DELTA_IBM-M%YS)/M%DY(1))+1)
+   IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) G%MAX_K(NM) = MIN(M%KBAR,CEILING((Z_MAX+DELTA_IBM-M%ZS)/M%DZ(1))+1)
    
    IF (TWO_D) THEN
       G%MIN_J(NM)=1
@@ -569,13 +570,13 @@ GEOM_LOOP: DO N=1,N_GEOM
                       ABS( M%Z(K)-G%Z)<G%HL(3)) M%W_MASK(I,J,K) = -1
                   
                   ! see if the point is in surface layer
-                  IF (X_MAX<M%X(I) .AND. M%X(I)<X_MAX+DELTA) M%U_MASK(I,J,K) = 0
-                  IF (Y_MAX<M%Y(J) .AND. M%Y(J)<Y_MAX+DELTA) M%V_MASK(I,J,K) = 0
-                  IF (Z_MAX<M%Z(K) .AND. M%Z(K)<Z_MAX+DELTA) M%W_MASK(I,J,K) = 0
+                  IF (X_MAX<M%X(I) .AND. M%X(I)<X_MAX+DELTA_IBM) M%U_MASK(I,J,K) = 0
+                  IF (Y_MAX<M%Y(J) .AND. M%Y(J)<Y_MAX+DELTA_IBM) M%V_MASK(I,J,K) = 0
+                  IF (Z_MAX<M%Z(K) .AND. M%Z(K)<Z_MAX+DELTA_IBM) M%W_MASK(I,J,K) = 0
                   
-                  IF (X_MIN-DELTA<M%X(I) .AND. M%X(I)<X_MIN) M%U_MASK(I,J,K) = 0
-                  IF (Y_MIN-DELTA<M%Y(J) .AND. M%Y(J)<Y_MIN) M%V_MASK(I,J,K) = 0
-                  IF (Z_MIN-DELTA<M%Z(K) .AND. M%Z(K)<Z_MIN) M%W_MASK(I,J,K) = 0
+                  IF (X_MIN-DELTA_IBM<M%X(I) .AND. M%X(I)<X_MIN) M%U_MASK(I,J,K) = 0
+                  IF (Y_MIN-DELTA_IBM<M%Y(J) .AND. M%Y(J)<Y_MIN) M%V_MASK(I,J,K) = 0
+                  IF (Z_MIN-DELTA_IBM<M%Z(K) .AND. M%Z(K)<Z_MIN) M%W_MASK(I,J,K) = 0
                   
                CASE(ISPHERE) MASK_SHAPE
                
@@ -585,19 +586,19 @@ GEOM_LOOP: DO N=1,N_GEOM
                   !M%P_MASK(I,J,K)=1
                
                   RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < DELTA_IBM) M%U_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < DELTA_IBM) M%V_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%Z(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < DELTA_IBM) M%W_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < DELTA_IBM) M%P_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
                   
                CASE(ICYLINDER) MASK_SHAPE
@@ -609,37 +610,37 @@ GEOM_LOOP: DO N=1,N_GEOM
                
                   CYLINDER_Y: IF (ABS(G%YOR-1._EB)<EPSILON_EB) THEN
                      RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                     IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < DELTA_IBM) M%U_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
                   
                      RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                     IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < DELTA_IBM) M%V_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
                   
                      RP = SQRT( (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2 )
-                     IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < DELTA_IBM) M%W_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
                   
                      RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                     IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < DELTA_IBM) M%P_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
                   ENDIF CYLINDER_Y
                   
                   CYLINDER_Z: IF (ABS(G%ZOR-1._EB)<EPSILON_EB) THEN
                      RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
-                     IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < DELTA_IBM) M%U_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
                   
                      RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2 )
-                     IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < DELTA_IBM) M%V_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
                   
                      RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
-                     IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < DELTA_IBM) M%W_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
                   
                      RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
-                     IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < DELTA_IBM) M%P_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
                      
                   ENDIF CYLINDER_Z
@@ -659,7 +660,7 @@ GEOM_LOOP: DO N=1,N_GEOM
                   ELSE
                      DP = DOT_PRODUCT(G%NN,XU-PP)        ! signed distance to plane
                   ENDIF
-                  IF (DP<DELTA) M%U_MASK(I,J,K) = 0
+                  IF (DP<DELTA_IBM) M%U_MASK(I,J,K) = 0
                   IF (DP<0._EB) M%U_MASK(I,J,K) = -1
                   
                   XU = (/M%XC(I),M%Y(J),M%ZC(K)/)
@@ -668,7 +669,7 @@ GEOM_LOOP: DO N=1,N_GEOM
                   ELSE
                      DP = DOT_PRODUCT(G%NN,XU-PP)
                   ENDIF
-                  IF (DP<DELTA) M%V_MASK(I,J,K) = 0
+                  IF (DP<DELTA_IBM) M%V_MASK(I,J,K) = 0
                   IF (DP<0._EB) M%V_MASK(I,J,K) = -1
                   
                   XU = (/M%XC(I),M%YC(J),M%Z(K)/)
@@ -677,7 +678,7 @@ GEOM_LOOP: DO N=1,N_GEOM
                   ELSE
                      DP = DOT_PRODUCT(G%NN,XU-PP)
                   ENDIF
-                  IF (DP<DELTA) M%W_MASK(I,J,K) = 0
+                  IF (DP<DELTA_IBM) M%W_MASK(I,J,K) = 0
                   IF (DP<0._EB) M%W_MASK(I,J,K) = -1
                   
             END SELECT MASK_SHAPE
@@ -1557,6 +1558,7 @@ REAL(EB) FUNCTION TRILINEAR(UU,DXI,LL)
 IMPLICIT NONE
 
 REAL(EB), INTENT(IN) :: UU(0:1,0:1,0:1),DXI(3),LL(3)
+REAL(EB) :: XX,YY,ZZ
 
 ! Comments:
 !
@@ -1580,29 +1582,32 @@ REAL(EB), INTENT(IN) :: UU(0:1,0:1,0:1),DXI(3),LL(3)
 !
 !===========================================================
 
-TRILINEAR = UU(0,0,0)*(LL(1)-DXI(1))*(LL(2)-DXI(2))*(LL(3)-DXI(3)) +    &
-            UU(1,0,0)*DXI(1)*(LL(2)-DXI(2))*(LL(3)-DXI(3)) +            &
-            UU(0,1,0)*(LL(1)-DXI(1))*DXI(2)*(LL(3)-DXI(3)) +            &
-            UU(0,0,1)*(LL(1)-DXI(1))*(LL(2)-DXI(2))*DXI(3) +            &
-            UU(1,0,1)*DXI(1)*(LL(2)-DXI(2))*DXI(3) +                    &
-            UU(0,1,1)*(LL(1)-DXI(1))*DXI(2)*DXI(3) +                    &
-            UU(1,1,0)*DXI(1)*DXI(2)*(LL(3)-DXI(3)) +                    &
-            UU(1,1,1)*DXI(1)*DXI(2)*DXI(3)
+XX = DXI(1)/LL(1)
+YY = DXI(2)/LL(2)
+ZZ = DXI(3)/LL(3)
 
-TRILINEAR = TRILINEAR/(LL(1)*LL(2)*LL(3))
+TRILINEAR = UU(0,0,0)*(1._EB-XX)*(1._EB-YY)*(1._EB-ZZ) + &
+            UU(1,0,0)*XX*(1._EB-YY)*(1._EB-ZZ) +         & 
+            UU(0,1,0)*(1._EB-XX)*YY*(1._EB-ZZ) +         &
+            UU(0,0,1)*(1._EB-XX)*(1._EB-YY)*ZZ +         &
+            UU(1,0,1)*XX*(1._EB-YY)*ZZ +                 &
+            UU(0,1,1)*(1._EB-XX)*YY*ZZ +                 &
+            UU(1,1,0)*XX*YY*(1._EB-ZZ) +                 & 
+            UU(1,1,1)*XX*YY*ZZ
 
 END FUNCTION TRILINEAR
 
 
-SUBROUTINE GETX(XI,XU,N)
+SUBROUTINE GETX(XI,XS,XU,N)
 IMPLICIT NONE
 
-REAL(EB), INTENT(OUT) :: XI(3)
+REAL(EB), INTENT(OUT) :: XI(3),XS(3)
 REAL(EB), INTENT(IN) :: XU(3)
 INTEGER, INTENT(IN) :: N
 TYPE(GEOMETRY_TYPE), POINTER :: G
 REAL(EB) :: PP(3),RU(3),RUMAG,DR,DP
 
+XS=0._EB
 G => GEOMETRY(N)
 SELECT CASE(G%ISHAPE)
    CASE(IBOX)
@@ -1617,7 +1622,8 @@ SELECT CASE(G%ISHAPE)
       RU     = XU-(/G%X,G%Y,G%Z/)
       RUMAG  = SQRT(DOT_PRODUCT(RU,RU))
       DR     = RUMAG-G%RADIUS
-      XI     = XU + DR*RU/RUMAG
+      XS     = XU - DR*RU/RUMAG
+      XI     = XS + DELTA_IBM*RU/RUMAG
    CASE(ICYLINDER)
       ! at the moment, cylinder must be aligned with an axis
       IF (ABS(G%XOR-1._EB)<EPSILON_EB) RU = (/0._EB,XU(2),XU(3)/)-(/0._EB,G%Y,G%Z/)
