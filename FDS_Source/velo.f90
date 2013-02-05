@@ -461,12 +461,15 @@ END SUBROUTINE COMPUTE_STRAIN_RATE
 
 SUBROUTINE VISCOSITY_BC(NM)
 
+USE TURBULENCE, ONLY: WANNIER_FLOW
+
 ! Specify ghost cell values of the viscosity array MU
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MU_OTHER,DP_OTHER,KRES_OTHER
 INTEGER :: II,JJ,KK,IW,IIO,JJO,KKO,NOM,N_INT_CELLS
 TYPE(WALL_TYPE),POINTER :: WC=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
 
 CALL POINT_TO_MESH(NM)
 
@@ -511,6 +514,37 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ENDIF
 ENDDO WALL_LOOP
 !$OMP END PARALLEL DO
+
+! Special boundary conditions for Wannier flow test case
+
+IF (PERIODIC_TEST==5) THEN
+   IF (PREDICTOR) THEN
+      UU => U
+      VV => V
+      WW => W
+   ELSE
+      UU => US
+      VV => VS
+      WW => WS
+   ENDIF
+   DO KK=0,KBP1
+      DO JJ=0,JBP1
+         DO II=0,IBP1
+            IF (KK>3 .AND. KK<KBAR-2 .AND. II>2 .AND. II<IBAR-2) CYCLE
+            UU(II,JJ,KK) = WANNIER_FLOW(X(II),ZC(KK),1)
+         ENDDO
+      ENDDO
+   ENDDO
+   DO KK=0,KBP1
+      DO JJ=0,JBP1
+         DO II=0,IBP1
+            IF (KK>2 .AND. KK<KBAR-2 .AND. II>3 .AND. II<IBAR-2) CYCLE
+            WW(II,JJ,KK) = WANNIER_FLOW(XC(II),Z(KK),2)
+         ENDDO
+      ENDDO
+   ENDDO
+   VV=0._EB
+ENDIF
     
 END SUBROUTINE VISCOSITY_BC
 
@@ -592,6 +626,15 @@ DO K=0,KBAR
    ENDDO
 ENDDO
 !$OMP END DO NOWAIT
+
+! Wannier Flow (Stokes flow) test case
+
+IF (PERIODIC_TEST==5) THEN
+   OMX=0._EB
+   OMY=0._EB
+   OMZ=0._EB
+   OME_E = -1.E6_EB
+ENDIF
 
 ! Compute gravity components
 
@@ -1515,14 +1558,14 @@ SUBROUTINE VELOCITY_BC(T,NM)
 ! Assert tangential velocity boundary conditions
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE TURBULENCE, ONLY: WALL_MODEL
+USE TURBULENCE, ONLY: WALL_MODEL,WANNIER_FLOW
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2
-INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
-            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN,&
-            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
+INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
+           VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
+           BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
 LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,SHARP_CORNER
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
@@ -1951,6 +1994,19 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                   CASE (NO_SLIP_BC) BOUNDARY_CONDITION
+
+                     WANNIER_BC: IF (PERIODIC_TEST==5) THEN
+                        SELECT CASE(IOR)
+                           CASE( 1)
+                              VEL_T = WANNIER_FLOW(X(II),Z(KK),2)
+                           CASE(-1)
+                              VEL_T = WANNIER_FLOW(X(II),Z(KK),2)
+                           CASE( 3)
+                              VEL_T = WANNIER_FLOW(X(II),Z(KK),1)
+                           CASE(-3)
+                              VEL_T = WANNIER_FLOW(X(II),Z(KK),1)
+                        END SELECT
+                     ENDIF WANNIER_BC
 
                      VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
@@ -2991,7 +3047,8 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 SUBROUTINE IBM_VELOCITY_FLUX(NM)
 
 USE COMPLEX_GEOMETRY, ONLY: TRILINEAR,GETX,GETU,GETGRAD,GET_VELO_IBM
-USE TURBULENCE, ONLY: VELTAN2D,VELTAN3D
+USE TURBULENCE, ONLY: VELTAN2D,VELTAN3D,WANNIER_FLOW
+USE PHYSICAL_FUNCTIONS, ONLY: LES_FILTER_WIDTH_FUNCTION
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,PP,HP, &
@@ -3001,10 +3058,11 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,PP,HP, &
                                        DWDX,DWDY,DWDZ
 REAL(EB) :: U_IBM,V_IBM,W_IBM,DN, &
             U_ROT,V_ROT,W_ROT, &
+            U_INT,V_INT,W_INT, &
             PE,PW,PN,PS,PT,PB, &
             U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3), &
             U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3), &
-            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,DELTA,WT,XV(3)
+            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,WT,XV(3),H1,H2,N1(3),N2(3)
 INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1,ITMP,TRI_INDEX,IERR,IC
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
 TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
@@ -3098,7 +3156,7 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
       ENDDO
    ENDDO
    
-   DELTA = MAX(DX(1),DY(1),DZ(1))
+   DELTA_IBM = LES_FILTER_WIDTH_FUNCTION(DX(1),DY(1),DZ(1))
    
 ENDIF
 
@@ -3123,7 +3181,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XEDGX = (/XC(I),Y(J),Z(K)/)
             XEDGY = (/X(I),YC(J),Z(K)/)
             XEDGZ = (/X(I),Y(J),ZC(K)/)
-            DXC   = (/DX(I),DY(J),DZ(K)/)
+            DXC   = (/DX(I),DYN(J),DZN(K)/)
             WT    = 0._EB
   
             SELECT CASE(U_MASK(I,J,K))
@@ -3136,11 +3194,16 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         CYCLE ! treat as gas phase cell
                      CASE(1)
                         U_ROT = (XVELO(3)-XGEOM(3))*G%OMEGA_Y - (XVELO(2)-XGEOM(2))*G%OMEGA_Z
-                        CALL GETX(XI,XVELO,NG)
+                        CALL GETX(XI,XSURF,XVELO,NG)
                         CALL GETU(U_DATA,DXI,XI,1,NM)
-                        U_IBM = TRILINEAR(U_DATA,DXI,DXC)
-                        IF (DNS) U_IBM = 0.5_EB*(U_IBM+(G%U+U_ROT)) ! linear profile
-                        IF (LES) U_IBM = 0.9_EB*(U_IBM+(G%U+U_ROT)) ! power law
+                        U_INT = TRILINEAR(U_DATA,DXI,DXC)
+                        N1 = XVELO-XSURF                                   ! vector from surface to velocity point
+                        N2 = XI-XVELO                                      ! vector from velocity to interpolation point
+                        H1 = SQRT(DOT_PRODUCT(N1,N1))                      ! distance from surface to velocity point
+                        H2 = SQRT(DOT_PRODUCT(N2,N2))                      ! distance from velocity to interpolation point
+                        IF (DNS) U_IBM = (H1*U_INT+H2*(G%U+U_ROT))/(H1+H2) ! linear profile
+                        IF (LES) U_IBM = 0.9_EB*(U_INT+(G%U+U_ROT))        ! power law
+                        !U_IBM = WANNIER_FLOW(XVELO(1),XVELO(3),1)          ! for debug purposes
                      CASE(2)
                         IP1 = MIN(I+1,IBP1)
                         JP1 = MIN(J+1,JBP1)
@@ -3149,7 +3212,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         JM1 = MAX(J-1,0)
                         KM1 = MAX(K-1,0)
  
-                        CALL GETX(XI,XVELO,NG)                  ! find interpolation point XI for tensors
+                        CALL GETX(XI,XSURF,XVELO,NG)                  ! find interpolation point XI for tensors
                         XSURF = XVELO-(XI-XVELO)                ! point on the surface of geometry
                         N_VEC = XVELO-XSURF                     ! normal from surface to velocity point
                         DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance from surface to velocity point
@@ -3232,7 +3295,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         !                  TAU_IJ(1:2,1:2),&
                         !                  DT,RRHO,MUA,I_VEL)
                         
-                        WT = MIN(1._EB,(DN/DELTA)**7._EB)
+                        WT = MIN(1._EB,(DN/DELTA_IBM)**7._EB)
                         
                         U_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU_WALL,I_VEL,G%ROUGHNESS,U_IBM)
                         
@@ -3260,7 +3323,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                XEDGX = (/XC(I),Y(J),Z(K)/)
                XEDGY = (/X(I),YC(J),Z(K)/)
                XEDGZ = (/X(I),Y(J),ZC(K)/)
-               DXC   = (/DX(I),DY(J),DZ(K)/)
+               DXC   = (/DXN(I),DY(J),DZN(K)/)
                WT    = 0._EB
          
                SELECT CASE(V_MASK(I,J,K))
@@ -3273,11 +3336,11 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            CYCLE
                         CASE(1)
                            V_ROT = (XVELO(1)-XGEOM(1))*G%OMEGA_Z - (XVELO(3)-XGEOM(3))*G%OMEGA_X
-                           CALL GETX(XI,XVELO,NG)
+                           CALL GETX(XI,XSURF,XVELO,NG)
                            CALL GETU(U_DATA,DXI,XI,2,NM)
-                           V_IBM = TRILINEAR(U_DATA,DXI,DXC)
-                           IF (DNS) V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
-                           IF (LES) V_IBM = 0.9_EB*(V_IBM+(G%V+V_ROT))
+                           V_INT = TRILINEAR(U_DATA,DXI,DXC)
+                           IF (DNS) V_IBM = 0.5_EB*(V_INT+(G%V+V_ROT))
+                           IF (LES) V_IBM = 0.9_EB*(V_INT+(G%V+V_ROT))
                         CASE(2)
                            IP1 = MIN(I+1,IBP1)
                            JP1 = MIN(J+1,JBP1)
@@ -3286,7 +3349,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            JM1 = MAX(J-1,0)
                            KM1 = MAX(K-1,0)
  
-                           CALL GETX(XI,XVELO,NG)                  ! find interpolation point XI for tensors
+                           CALL GETX(XI,XSURF,XVELO,NG)                  ! find interpolation point XI for tensors
                            XSURF = XVELO-(XI-XVELO)                ! point on the surface of geometry
                            N_VEC = XVELO-XSURF                     ! normal from surface to velocity point
                            DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance from surface to velocity point
@@ -3348,7 +3411,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            ITMP = MIN(5000,NINT(0.5_EB*(TMP(I,J,K)+TMP(I,JP1,K))))
                            MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
                            
-                           WT = MIN(1._EB,(DN/DELTA)**7._EB)
+                           WT = MIN(1._EB,(DN/DELTA_IBM)**7._EB)
                            
                            V_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU_WALL,I_VEL,G%ROUGHNESS,V_IBM)
                            
@@ -3376,7 +3439,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XEDGX = (/XC(I),Y(J),Z(K)/)
             XEDGY = (/X(I),YC(J),Z(K)/)
             XEDGZ = (/X(I),Y(J),ZC(K)/)
-            DXC   = (/DX(I),DY(J),DZ(K)/)
+            DXC   = (/DXN(I),DYN(J),DZ(K)/)
             WT    = 0._EB
             
             SELECT CASE(W_MASK(I,J,K))
@@ -3389,11 +3452,16 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         CYCLE
                      CASE(1)
                         W_ROT = (XVELO(2)-XGEOM(2))*G%OMEGA_X - (XVELO(1)-XGEOM(1))*G%OMEGA_Y
-                        CALL GETX(XI,XVELO,NG)
+                        CALL GETX(XI,XSURF,XVELO,NG)
                         CALL GETU(U_DATA,DXI,XI,3,NM)
-                        W_IBM = TRILINEAR(U_DATA,DXI,DXC)
-                        IF (DNS) W_IBM = 0.5_EB*(W_IBM+(G%W+W_ROT)) ! linear profile
-                        IF (LES) W_IBM = 0.9_EB*(W_IBM+(G%W+W_ROT)) ! power law
+                        W_INT = TRILINEAR(U_DATA,DXI,DXC)
+                        N1 = XVELO-XSURF                                   ! vector from surface to velocity point
+                        N2 = XI-XVELO                                      ! vector from velocity to interpolation point
+                        H1 = SQRT(DOT_PRODUCT(N1,N1))                      ! distance from surface to velocity point
+                        H2 = SQRT(DOT_PRODUCT(N2,N2))                      ! distance from velocity to interpolation point
+                        IF (DNS) W_IBM = (H1*W_INT+H2*(G%W+W_ROT))/(H1+H2) ! linear profile
+                        IF (LES) W_IBM = 0.9_EB*(W_INT+(G%W+W_ROT))        ! power law
+                        !W_IBM = WANNIER_FLOW(XVELO(1),XVELO(3),2)          ! for debug purposes
                      CASE(2)
                         IP1 = MIN(I+1,IBP1)
                         JP1 = MIN(J+1,JBP1)
@@ -3402,7 +3470,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         JM1 = MAX(J-1,0)
                         KM1 = MAX(K-1,0)
                                                 
-                        CALL GETX(XI,XVELO,NG)                  ! find interpolation point XI for tensors
+                        CALL GETX(XI,XSURF,XVELO,NG)                  ! find interpolation point XI for tensors
                         XSURF = XVELO-(XI-XVELO)                ! point on the surface of geometry
                         N_VEC = XVELO-XSURF                     ! normal from surface to velocity point
                         DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance from surface to velocity point
@@ -3485,7 +3553,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         !                  TAU_IJ(1:2,1:2),&
                         !                  DT,RRHO,MUA,I_VEL)
                         
-                        WT = MIN(1._EB,(DN/DELTA)**7._EB)
+                        WT = MIN(1._EB,(DN/DELTA_IBM)**7._EB)
                         
                         W_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU_WALL,I_VEL,G%ROUGHNESS,W_IBM)
                         
