@@ -530,7 +530,7 @@ topics such as image rendering and data compression are detailed.
 
 \chapter{Preliminaries}
 \label{visoverview}
-\section{Defining Objects} Smokeview defines object locations in terms of a right handed coordinate system with the x axis pointing to the right, the y axis pointing to the back and the z axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents, etc. are transformed internally within Smokeview to lie between 0.0 and 1.0.
+\section{Defining Objects} Smokeview defines object locations in terms of a right handed coordinate system with the $x$~axis pointing to the right, the $y$~axis pointing to the back and the $z$~axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents, etc. are transformed internally within Smokeview to lie between 0.0 and 1.0.
 All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
 \begin{figure}[\figoptions]
 \begin{center}
@@ -682,7 +682,7 @@ Smokeview uses {\tt glViewport()}\ to establish a window viewport.  In particula
 \begin{verbatim}
 glViewport(left,down,width,height);
 \end{verbatim}
-is used to setup the portion of the screen where 3D drawing occurs where {\tt left}\
+is used to set up the portion of the screen where 3D drawing occurs where {\tt left}\
 and {\tt down}\ are the bottom left screen coordinates of the viewport and {\tt width}\
 and {\tt height}\ are the width and height of the viewport.
 
@@ -929,7 +929,7 @@ and applies it to the modelview matrix.
 
 A rotation of $\theta$ degrees about the unit-vector axis, $(x,y,z)$,
 is performed using {\tt glRotatef($\theta$,x,y,z)}.  A rotation of
-$\theta$ degrees about the $x$ axis is performed using {\tt glRotate($\theta$,1.0,0.0,0.0)}.
+$\theta$ degrees about the $x$~axis is performed using {\tt glRotate($\theta$,1.0,0.0,0.0)}.
 This OpenGL call generates the matrix
 \begin{eqnarray}
 R=\left(%
@@ -947,7 +947,7 @@ It is of interest to rotate a scene between vectors $u$ and $v$ about an axis pe
 as illustrated in Figure \ref{figrotateuv}.
 The rotation axis is formed by generating the cross-product of u and v, namely $u\times v$.  The
 rotation amount $\theta$ is found using $cos(\theta)=u\cdot v/(||u||\cdot ||v||)$ .  For the special case that $u$ and $v$ are unit vectors
-and $u=(0,0,1)$, a vector along the z~axis, then $\theta$ and the rotation axis are given by
+and $u=(0,0,1)$, a vector along the $z$~axis, then $\theta$ and the rotation axis are given by
 \begin{eqnarray}
 \theta&=&\cos^{-1}(v_z)\\
 u\times v&=&(-v_y,v_x,0)
