@@ -321,7 +321,7 @@ void draw_geom(int flag, int frameflag){
       glEnd();
       glPopMatrix();
     }
-    if(showtripoints==1){
+    if(showtripoints==1&&geomlisti->npoints>0){
       glPushMatrix();
       glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
       glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -331,7 +331,7 @@ void draw_geom(int flag, int frameflag){
         point *pointi;
 
         pointi = geomlisti->points+j;
-        color = black;
+        color = pointi->triangles[0]->surf->color;
         glColor3fv(color);
         glVertex3fv(pointi->xyz);
       }

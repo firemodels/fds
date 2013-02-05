@@ -1063,16 +1063,6 @@ void drawiso(int tranflag){
   if(niso_opaques>0||niso_trans>0){
     drawiso_orig(tranflag);
   }
-  else{
-    int i;
-
-    for(i=0;i<nisoinfo;i++){
-      isodata *isoi;
-
-      isoi = isoinfo + i;
-      if(isoi->geomflag==0)continue;
-    }
-  }
 }
 
 /* ------------------ drawstaticiso ------------------------ */
