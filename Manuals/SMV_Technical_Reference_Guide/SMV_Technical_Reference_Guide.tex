@@ -811,11 +811,11 @@ color component of the object currently being drawn. A small alpha
 results in a small contribution from the currently drawn object
 color while a large alpha results in a large contribution.  More
 precisely:
-\begin{eqnarray*}
+\begin{eqnarray}
 \noindent\mbox{updated background color} = \alpha\times
 \mbox{fragment color} + (1-\alpha)\times \mbox{original background
 color}
-\end{eqnarray*}
+\end{eqnarray}
 This particular blending model is the most common (there are others) and is activated in Smokeview using the OpenGL call
 \begin{verbatim}
 glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -847,27 +847,27 @@ any portion of the scene behind the slice file is hidden. }
 Complications arise, however, because this blending model is not commutative.  The final color the user sees depends on the order in which the intermediate colors are drawn. To demonstrate this simply, consider two objects, one opaque and one semi-transparent.  An opaque object drawn second and in front of a semi-transparent object will totally obscure the semi-transparent object. A semi-transparent object drawn second and in front of an opaque object will blend with but not obscure the opaque object drawn previously.
 
 To be more precise, consider two objects with colors $c_1$ and $c_2$ and alpha values $\alpha_1$ and $\alpha_2$.   Let the background color be denoted $b_0$.  Then blending object 1 with the background results in a new background color, $b_1$, given by
-\begin{eqnarray*}
+\begin{eqnarray}
 b_1=(1-\alpha_1)b_0 + \alpha_1c_1
-\end{eqnarray*}
+\end{eqnarray}
 Blending the color $c_2$ with $b_1$ results in a new background color, $b_2$, given by
-\begin{eqnarray*}
+\begin{eqnarray}
 b_2&=&(1-\alpha_2)b_1 + \alpha_2c_2\\
 &=&(1-\alpha_2)((1-\alpha_1)b_0 + \alpha_1c_1)+\alpha_2c_2\\
 &=&(1-\alpha_2)(1-\alpha_1)b_0 + \alpha_1c_1 + \alpha_2c_2 - \alpha_2\alpha_1c_1
-\end{eqnarray*}
+\end{eqnarray}
 
 Now blend colors $c_1$ and $c_2$ to the original background in the opposite order.
 Blending the color $c_2$ to with the background color $b_0$ results in a new background color, $\hat{b}_1$, given by
-\begin{eqnarray*}
+\begin{eqnarray}
 \hat{b}_1=(1-\alpha_2)b_0 + \alpha_2c_2
-\end{eqnarray*}
+\end{eqnarray}
 Blending $c_1$ to the interim background color $\hat{b}_1$ results in a new background color, $\hat{b}_2$, given by
-\begin{eqnarray*}
+\begin{eqnarray}
 \hat{b_2}&=&(1-\alpha_1)\hat{b}_0+\alpha_1c_1\\
 \hat{b_2}&=&(1-\alpha_1)((1-\alpha_2)b_0 + \alpha_2c_2)+\alpha_1c_1\\
-\hat{b_2}&=&(1-\alpha_1)(1-\alpha_2)b_0 + \alpha_2c_2 + \alpha_1c_1 - \alpha_1\alpha_2c_2\\
-\end{eqnarray*}
+\hat{b_2}&=&(1-\alpha_1)(1-\alpha_2)b_0 + \alpha_2c_2 + \alpha_1c_1 - \alpha_1\alpha_2c_2
+\end{eqnarray}
 
 
 In general, $b_2-\hat{b}_2=\alpha_1\alpha_2(c_2-c_1)\ne 0$, unless $c_1=c_2$.  Of course $b_2=\hat{b}_2=0$ if $\alpha_1=0$ or $\alpha_2=0$ but this is a trivial case in which one of the two fragments is completely transparent.
@@ -915,7 +915,7 @@ particular form depends on whether it is a translation, a rotation or a scaling.
 
 A translation by $(x,y,z)$ is performed by using {\tt glTranslate3f(x,y,z)}.
 This OpenGL call generates the matrix
-\begin{eqnarray*}
+\begin{eqnarray}
 T=\left(%
 \begin{array}{cccc}
   1 & 0 & 0 & -x \\
@@ -924,14 +924,14 @@ T=\left(%
   0 & 0 & 0 & 1 \\
 \end{array}%
 \right)
-\end{eqnarray*}
+\end{eqnarray}
 and applies it to the modelview matrix.
 
 A rotation of $\theta$ degrees about the unit-vector axis, $(x,y,z)$,
 is performed using {\tt glRotatef($\theta$,x,y,z)}.  A rotation of
 $\theta$ degrees about the $x$ axis is performed using {\tt glRotate($\theta$,1.0,0.0,0.0)}.
 This OpenGL call generates the matrix
-\begin{eqnarray*}
+\begin{eqnarray}
 R=\left(%
 \begin{array}{cccc}
   1 & 0 & 0 & 0 \\
@@ -940,7 +940,7 @@ R=\left(%
   0 & 0 & 0 & 1 \\
 \end{array}%
 \right)
-\end{eqnarray*}
+\end{eqnarray}
 and applies it to the modelview matrix.
 
 It is of interest to rotate a scene between vectors $u$ and $v$ about an axis perpendicular to both vectors
@@ -948,10 +948,10 @@ as illustrated in Figure \ref{figrotateuv}.
 The rotation axis is formed by generating the cross-product of u and v, namely $u\times v$.  The
 rotation amount $\theta$ is found using $cos(\theta)=u\cdot v/(||u||\cdot ||v||)$ .  For the special case that $u$ and $v$ are unit vectors
 and $u=(0,0,1)$, a vector along the z~axis, then $\theta$ and the rotation axis are given by
-\begin{eqnarray*}
+\begin{eqnarray}
 \theta&=&\cos^{-1}(v_z)\\
 u\times v&=&(-v_y,v_x,0)
-\end{eqnarray*}
+\end{eqnarray}
 so that the OpenGL call to perform the desired rotation would be {\tt glRotatef}$(180\cos^{-1}(v_z)/\pi,-v_y,v_x,0)$.
 
 \begin{figure}[\figoptions]
@@ -971,7 +971,7 @@ $y$ components are scaled by $b$,
 and $z$ components are scaled by $c$
 is performed using {\tt glScale3f(a,b,c)}.
 This OpenGL call generates the matrix
-\begin{eqnarray*}
+\begin{eqnarray}
 R=\left(%
 \begin{array}{cccc}
   a & 0 & 0 & 0 \\
@@ -980,7 +980,7 @@ R=\left(%
   0 & 0 & 0 & 1 \\
 \end{array}%
 \right)
-\end{eqnarray*}
+\end{eqnarray}
 and applies it to the modelview matrix.
 Smokeview uses scaling to
 view cases with large aspect ratios, tunnel fires for example.
@@ -1006,11 +1006,11 @@ key (none, CTRL or ALT) is pressed. Smokeview translates and
 scales the coordinate system defined in an FDS scenario using
 \newcommand{\mmin}{\mbox{min}}
 \newcommand{\mmax}{\mbox{max}}
-\begin{eqnarray*}
+\begin{eqnarray}
 \hat{x}&=&(x-x_{\min})/(xyz_{\max}-xyz_{\min})\\
 \hat{y}&=&(y-y_{\min})/(xyz_{\max}-xyz_{\min})\\
 \hat{z}&=&(z-z_{\min})/(xyz_{\max}-xyz_{\min})
-\end{eqnarray*}
+\end{eqnarray}
 where $x_{\min}$ and $x_{\max}$ are the smallest and largest $x$
 coordinate considering all meshes.  $y_{\min}$, $y_{\max}$,
 $z_{\min}$ and $z_{\max}$ are defined similarly.
@@ -1106,7 +1106,7 @@ These steps are detailed in the following sections.   It is important to point o
 \subsection{Converting data to a color}
 An index into a color table of size 256 is computed using
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \mbox{color index}=\left\{
 \begin{array}{ll}
   0 & v < v_{min}\\
@@ -1114,7 +1114,7 @@ An index into a color table of size 256 is computed using
   255 & v > v_{max}
 \end{array}
 \right.
-\end{eqnarray*}
+\end{eqnarray}
 
 \noindent where $v_{min}$ and $v_{max}$ are specified data bounds.  Each table entry contains 4 components (red, green, blue and opacity).  Each component is scaled from 0.0 to 1.0.  The data in the colorbar data structure then defines colors (by default) as illustrated by the {\bf bold path}\ in Figure \ref{colorbarinfo}.  Other colorbars may be used, for example a color bar containing shades of grey from white to black.
 
@@ -1165,9 +1165,9 @@ in the colorbar.  In general, suppose that $ci_j$ is an integer
 index between 0 and 255 and that $f(ci_j)$ is the $ci_j$'th color
 in the colorbar.  Then the interpolated color between between the
 two colors $f(c_1)$ and $f(c_2)$ would be
-\begin{eqnarray*}
+\begin{eqnarray}
 \mbox{interpolated color}=(f(c_1)+f(c_2))/2
-\end{eqnarray*}
+\end{eqnarray}
 
 This is not a good method for displaying colors related to data
 since only data on the colorbar have physical meaning.  By using
@@ -1182,9 +1182,9 @@ texture map is defined using the desired colorbar.  A texture
 coordinate is assigned to each data vertex.    Color indices at
 pixels between vertices are interpolated using the texture
 coordinate.  In general, Smokeview uses the scheme,
-\begin{eqnarray*}
+\begin{eqnarray}
 \mbox{interpolated color}=f((c_1+c_2)/2)
-\end{eqnarray*}
+\end{eqnarray}
 where $c_1$ and $c_2$ are color indices as before.
 
 The following code segment sets up the use of 1D texture map.
@@ -1349,10 +1349,10 @@ show different ways of drawing isosurfaces.
 also has uncertainty.  Bounds for this uncertainty may be expressed in terms of data uncertainty and data variation (the smaller the variation the larger the uncertainty).
 The Smokeview verification guide~\cite{Smokeview_Verification_Guide} shows that the uncertainty in isosurface location, $\Delta x$, between two node, data value pairs $(x_1,T_1)$ and $(x_2,T_2)$  may be bounded using
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \left|\frac{\Delta x}{x_2-x_1}\right|\le
 \frac{\max(|\Delta T_1|,|\Delta T_2|)}{|T_2-T_1|}
-\end{eqnarray*}
+\end{eqnarray}
 
 \noindent where $\Delta T_1$ and $\Delta T_2$ are the uncertainty in $T_1$ and $T_2$ at $x_1$ and $x_2$ respectively.
 
@@ -1378,10 +1378,10 @@ Replace removed triangle vertices with a vertex with coordinates that are the av
 \end{enumerate}
 
 \paragraph{Vertex normals in 3D} An averaged normal vector, $V_i$, for vertex $i$ may then be determined by summing over all triangles $n$ connected to a vertex $i$ as in
-\begin{eqnarray*}
+\begin{eqnarray}
 V_{i}&=&\sum_n\frac{U_n}{A_n}/\sum_n\frac{1}{A_n}
 =\sum_n\frac{u_n\times v_n}{||u_n\times v_n||^2}/\sum_n\frac{1}{||u_n\times v_n||}
-\end{eqnarray*}
+\end{eqnarray}
 where for the $n$'th triangle, $u_n$ and $v_n$ are two sides, $A_n=||u_n\times v_n||$ is the triangle area and $U_n=u_n\times v_n/A_n$ is a unit vector normal to the triangle.
 
 
@@ -1445,33 +1445,33 @@ after decimation
 \end{figure}
 
 \paragraph{Vertex normals in 2D} The use of inverse area weights or harmonic averages to construct average normal vectors at isosurface vertices is justified by the following two dimensional example.  As illustrated in Figure \ref{figlinesmooth}, consider the quadratic $y(x)=A+Bx+Cx^2$ with $y(-\Delta x_2)=0$, $y(0)=1$ and $y(\Delta x_1)=0$ .  The slope at $x=0$ is given by $y'(0)=B$.  Likewise, the slope of the vector perpendicular to this curve at $x=0$ is $-1/B$.  The coefficient $B$ may be determined from the two simultaneous equations $y(\Delta x_1)=0$ and  $(y(-\Delta x_2)=0$ (note that $A=1$ since $y(0)=1$) or
-\begin{eqnarray*}
+\begin{eqnarray}
 1+B\Delta x_1 + C \Delta x_1^2 &= &0\\
 1-B\Delta x_2 + C \Delta x_2^2 &= &0
-\end{eqnarray*}
+\end{eqnarray}
 which has solution
-\begin{eqnarray*}
+\begin{eqnarray}
 B&=&\frac{\Delta x_1^2-\Delta x_2^2}{\Delta x_1\Delta x_2(\Delta x_1+\Delta x_2)}=
-\frac{\Delta x_1-\Delta x_2}{\Delta x_1\Delta x_2}\\
-\end{eqnarray*}
+\frac{\Delta x_1-\Delta x_2}{\Delta x_1\Delta x_2}
+\end{eqnarray}
 The slope $N$ of the normal at $x=0$ is then given by
-\begin{eqnarray*}
+\begin{eqnarray}
 N=-\frac{1}{B}&=&\frac{1}{1/\Delta x_1-1/\Delta x_2}
-\end{eqnarray*}
+\end{eqnarray}
 The slope $N_1$ of the normal to the line segment between $(0,1)$ and $(\Delta x_1,0)$ is $N_1=\Delta x_1$.
 The slope $N_2$ of the normal to the line segment between $(-\Delta x_2,0)$ and (0,1) is $N_2=-\Delta x_2$.
 Therefore the average slope $N$ may be expressed in terms of $N_1$ and $N_2$ as
-\begin{eqnarray*}
+\begin{eqnarray}
 N=\frac{1}{1/N_1+1/N_2}
-\end{eqnarray*}
+\end{eqnarray}
 
 \section{Particle Systems}
 \subsection{Massless Particles}
 FDS uses particles as tracer elements to allow one to visualize flow.  FDS
 also uses particles as droplets to model fire suppression.  Particle positions are determined in FDS using the differential equation
-\begin{eqnarray*}
+\begin{eqnarray}
 \frac{dx_p}{dt}=V(x_p,t)
-\end{eqnarray*}
+\end{eqnarray}
 where $x_p$ represents particle position and $V$ represents the velocity field.
 
 The assumption this model uses to compute particle flow is that the the drag force on the particle is large compared to $mg$, the force due to gravity.

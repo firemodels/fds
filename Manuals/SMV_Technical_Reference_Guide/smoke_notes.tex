@@ -69,30 +69,30 @@ The RTE may be simplified in several ways depending on which terms are included 
 
 Equation (\ref{eq:fullrte}) is then approximated by neglecting the integral term and using $\sigt=\siga+\sigs$ to obtain
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \dLdx&=&-\sigt C(x) + \siga C_e(x)\\
  C(x_0)&=&C_0
-\end{eqnarray*}
+\end{eqnarray}
 
 This equation may be solved by rearranging terms and applying the integrating factor $\exp(\int_{x_0}^x \sigts \dx{s})$ obtaining
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \intf{x_0}{x}\left(\dLdx+\sigt C(x)\right)&=&  \intf{x_0}{x}\siga \Le\\
 \ddx\left(\intf{x_0}{x} C(x)\right)&=& \intf{x_0}{x}\siga \Le
-\end{eqnarray*}
+\end{eqnarray}
 
 Integrating both sides and substituting the integration limits results in
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \left.\intf{x_0}{x} C(x)\right|_{x_0}^{x_N}&=& \int_{x_0}^{x_N}\intf{x_0}{x}\siga \Le \dx{x} \\
 \intf{x_0}{x_N} C(x_N)-C_0&=& \int_{x_0}^{x_N}\intf{x_0}{x}\siga \Le \dx{x}
-\end{eqnarray*}
+\end{eqnarray}
 
 Solving for $C(x_N)$ after noting that $\intff{x_0}{x}-\intff{x_0}{x_N}=-\intff{x}{x_N}$ results in
 
-\begin{eqnarray*}
+\begin{eqnarray}
 C(x_N)&=&\intmf{x_0}{x_N} C_0+ \int_{x_0}^{x_N}\intmf{x}{x_N}\siga \Le \dx{x}\\
-\end{eqnarray*}
+\end{eqnarray}
 
 \noindent which may be simplified to
 
@@ -109,9 +109,9 @@ C(x_N)&=&\intmf{x_0}{x_N} C_0+ \int_{x_0}^{x_N}\intmf{x}{x_N}\siga \Le \dx{x}\\
 \end{equation}
 which represents the optical depth between $a$ and $b$.  As noted earlier, if the emission term is neglected and $\sigma_t(x)=\sigma_t$ is constant over a path with length
 $L=x_N-x_0$, then (\ref{eq:rte_simp}) simplifies to
-\begin{eqnarray*}
+\begin{eqnarray}
  \frac{C(x_N)}{C_0}=\exp(-\sigma_tL)
-\end{eqnarray*}
+\end{eqnarray}
 which is the Beer-Lambert law.
 
 % -------------------  Discretizing the Radiation Transport Equation ------------------------
@@ -140,10 +140,10 @@ radiance within a column of 3D smoke data. The transparency across the interval 
 
 The optical depth, $\tau(a,b)$, defined in (\ref{eq:optdepth}) is discretized using a Riemann sum  after defining sample points $s_j=x_0+j\Delta s$ for $j=0$ to $N$ with spacing $\Delta s=(x_N-x_0)/N$ to obtain
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \htau{i}=\tau(x_i,x_N)&=&\exp\left(-\int_{x_i}^{x_N}\sigma_t(s)\dx{s}\right)\approx\exp\left(-\sum_{j=i}^{N-1}\sigma_t(s_j)\Delta s\right)\\
 &=&\prod_{j=i}^{N-1}\exp\left(-\sigma_t(s_j)\Delta s\right)=\prod_{j=i}^{N-1}\tau_j
-\end{eqnarray*}
+\end{eqnarray}
 
 \noindent where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$
 represents the transparency over one discretization interval.
@@ -156,9 +156,9 @@ recursively using
 \noindent where the recursion is initiated with $\htau{N}=1$.
 Substituting $1-\halpha{i}=\htau{i}$ and $1-\alpha_i=\tau_i$ into
 (\ref{eq:tauhat_recurse}) gives
-\begin{eqnarray*}
+\begin{eqnarray}
 1-\halpha{i}=(1-\halpha{i+1})(1-\alpha_i)=1-\halpha{i+1} - \alpha_i + \halpha{i+1}\alpha_i
-\end{eqnarray*}
+\end{eqnarray}
 which simplifies to
 \begin{eqnarray}
 \label{eq:alpha2}
@@ -167,10 +167,10 @@ which simplifies to
 
 Similarly, the radiance given by the RTE solution $C(x_N)$ in (\ref{eq:rtesoln}) may be discretized to obtain
 
-\begin{eqnarray*}
+\begin{eqnarray}
 C_{N} = \htau{0}\,C_0 +
 \sum_{i=0}^{N-1}\htau{i}\,\sigai{i}\,\Lei{i}\,\Delta x
-\end{eqnarray*}
+\end{eqnarray}
 
 \noindent where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$,
 $x_i=x_0+i\Delta x$ and $\Delta x=(x_N-x_0)/N$. This simplifies to
@@ -236,32 +236,32 @@ for the merger of these intervals.}
 Let $C$ be a radiance computed on $[x_0,x_N]$ and $C_1$ and $C_2$ be radiances computed on two sub-intervals of $[x_0,x_N]$.  Likewise, let $\tau$ be an optical depth computed on $[x_0,x_N]$ and $\tau_1$ and $\tau_2$ be optical depths computed on two sub-intervals of $[x_0,x_N]$.
 From (\ref{eq:rte_simp}) and (\ref{eq:optdepth}), the radiance $C$ and optical depth $\tau$ are given by
 
-\begin{eqnarray*}
+\begin{eqnarray}
 C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
 \tau&=&\tau(x_0,x_N)
-\end{eqnarray*}
+\end{eqnarray}
 
 Likewise, the radiances $C_1$ and $C_2$ and optical depths $\tau_1$ and $\tau_2$ for the intervals $[x_0,D]$ and $[D,x_N]$ are given by
 
-\begin{eqnarray*}
+\begin{eqnarray}
 C_1&=&\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)\dx{x}\\
 C_2&=&\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
 \tau_1&=&\tau(x_0,D)\\
 \tau_2&=&\tau(D,x_N)
-\end{eqnarray*}
+\end{eqnarray}
 
 The optical depth $\tau$ can be split into two parts giving
-\begin{eqnarray*}
+\begin{eqnarray}
 \tau&=&\tau(x_0,x_N)=\tau(x_0,D)\tau(D,x_N)=\tau_1\tau_2
-\end{eqnarray*}
+\end{eqnarray}
 since from (\ref{eq:optdepth}) it can be shown that for any $x$, $\tau(a,b)=\tau(a,x)\tau(x,b)$.
 The radiance $C$ can also be split into two parts giving
-\begin{eqnarray*}
+\begin{eqnarray}
 C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
 &=&\int_{x_0}^{D}\tau(x,x_N)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
 &=&\tau(D,x_N)\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
 &=&\tau_2C_1+C_2
-\end{eqnarray*}
+\end{eqnarray}
 
 Summarizing, full-interval values $C$ and $\alpha$ may be written in terms of sub-interval values $C_1$, $C_2$, $\alpha_1$ and $\alpha_2$ using
 
@@ -339,31 +339,31 @@ where $\Delta\hat{x}$ is the distance between planes along the line of site.  Eq
 
 after noting that
 
-\begin{eqnarray*}
+\begin{eqnarray}
 1-\hat{\alpha}=\exp(-\sigma_t\Delta\hat{x})=\exp(-\sigma_t\Delta
 x)^{\Delta\hat{x}/\Delta x}=(1-\alpha)^{\Delta\hat{x}/\Delta x}
-\end{eqnarray*}
+\end{eqnarray}
 
 The computation of (\ref{eq:alphahat}) is expensive because the exponential is computed at each grid node for every time step.  In addition, numerical cancellation may occur for small $\alpha$ leading to loss of significant digits. Both problems may be solved by expanding (\ref{eq:alphahat}) in a Taylor series and keeping only the first few terms:
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \hat{\alpha}\approx \alpha r -
 \frac{\alpha^2}{2}r(r-1)+\frac{\alpha^3}{6}r(r-1)(r-2)
-\end{eqnarray*}
+\end{eqnarray}
 
 where $r=\sec(\theta)=\Delta \hat{x}/\Delta x=||x_p-x_e||/n\cdot(x_p-x_e)$, $n$ is the unit vector normal to the current plane being drawn, $\theta$ is the angle between the view direction and $n$, $x_e$ is the observers position and $x_p$ is the vertex being drawn (along the view direction).  These terms are illustrated in Figure \ref{figray}.
 
 When planes are skipped, (\ref{eq:alphahat}) may be simplified.  In particular, when every 2nd plane is skipped, $\Delta\hat{x}/\Delta x=2$, so that (\ref{eq:alphahat}) simplifies to
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \hat{\alpha}=1-(1-\alpha)^2=2\alpha-\alpha^2
-\end{eqnarray*}
+\end{eqnarray}
 
 The video hardware uses $\alpha$ values contained in the smoke planes to obscure the background much like a camera uses a neutral density filter to darken a scene.  Extending the analogy, Smokeview uses one spatial/time varying {\em numerical}\ neutral density filter for each plane of smoke data.  On a node by node basis then, each smoke plane obscures the current image stored in  the OpenGL back buffer by the amount $(1-\alpha)$ to form a new back buffer image.  Figure \ref{figplume} illustrates this process showing several snapshots of a fire plume. The final image in the lower right is the most realistic. A simplistic description of one step of this process is given by
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \mbox{new buffer image} = (1-\alpha)\times \mbox{old buffer image}
-\end{eqnarray*}
+\end{eqnarray}
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -409,9 +409,9 @@ Smoke opacity data computed as described in the previous sections is stored in a
 
 Figure \ref{figDIRA} illustrates this process showing three view directions and the corresponding smoke plane orientations that would be used. Off-axis viewing is minimized by selecting the view planes orientation that minimizes the angle between the planes normal direction and the view direction. This angle, $\theta$, is illustrated in Figure \ref{figDIRB}, and is given by
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \cos(\theta)=\frac{n\cdot v_e}{||n||~||v_e||}
-\end{eqnarray*}
+\end{eqnarray}
 
 \noindent where $n$ is normal vector for the candidate smoke plane, and $v_e$ is the view direction vector.  In OpenGL, the view direction vector, $v_e$, is computed by simply obtaining the OpenGL modelview matrix, $M$ and multiplying it by the vector, $(0,0,1)^T$ or equivalently the third row of $M$.
 
@@ -471,9 +471,9 @@ As a result, opacity values are quantized.  Only values of 0, 1/255, $\cdots$, 2
 This can occur when more grid cells are used to resolve a solution domain, {\em i.e.}\ when $\Delta x$ is sufficiently small so that $\alpha<1/255$.
 
 For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha3}) gives $\sigma_t=-\ln(1/2)$.  Solving for $\Delta x$ using this value of $\sigma_t$ and $\alpha=1/255$ gives
-\begin{eqnarray*}
+\begin{eqnarray}
 \Delta x = \frac{\ln(254/255)}{\ln(1/2)}
-\end{eqnarray*}
+\end{eqnarray}
 Therefore, the opacity, $\alpha$, will truncate to zero (for this example) whenever $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$~.  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$, where $N$ is the number of grid planes in the 1~m column of smoke.  Smoke drawn in this situation will be {\em invisible}.
 
 To overcome this problem, the RTE needs to be solved across the full 3D data mesh where intermediate smoke opacities are stored using full precision arithmetic.  One such algorithm is discussed in the next section.
@@ -558,20 +558,19 @@ An algorithm for determining image opacities and colors using volume rendering i
 Combine the colors and opacities found in step 2 using recursions equations (\ref{eq:alpha2}) and (\ref{eq:color}).
 Initiate the recursion with $\hat{\alpha}_{N}=\hat{C}_{N}=0$. Continue the recursion for $i=N-1$ to $i=0$ by computing $\hat{\alpha}_i$ and $\hat{C}_i$ using:
 
-\begin{eqnarray*}
-\nonumber
+\begin{eqnarray}
 \hat{\alpha}_i&=&\hat{\alpha}_{i+1}+\left(1-\hat{\alpha}_{i+1}\right)\alpha_i\\
 \hat{C}_i&=&\hat{C}_{i+1}+\left(1-\hat{\alpha}_{i+1}\right)C_i
-\end{eqnarray*}
+\end{eqnarray}
 
 where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated from steps $N$ to $i$ while stepping through the 3D data set from front to back.  When data is mapped appropriately to color and opacity, this recursion is simply a numerical integration of the radiation transport equation.
 The values $C_i$ and $\alpha_i$ are the color and opacity at the $i$'th step.
 
 \item Mix the volume rendered color, $\hat{C}_N$, with the colors already rendered using equation (\ref{eq:C_summary}) re-written as
 
-\begin{eqnarray*}
+\begin{eqnarray}
 \noindent\mbox{updated background color} = (1-\hat{\alpha}_N)\times \mbox{original background color} + 1\times\hat{C}_N
-\end{eqnarray*}
+\end{eqnarray}
 
 The OpenGL call, {\tt   glBlendFunc(GL\_ONE,GL\_ONE\_MINUS\_SRC\_ALPHA); }, is used to implement this mixing mode in Smokeview.
 \end{enumerate}
