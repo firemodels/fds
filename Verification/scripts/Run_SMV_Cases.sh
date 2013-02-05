@@ -83,7 +83,7 @@ export BASEDIR=`pwd`
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/FIGURES/fds.version
 
-#scripts/SMV_Cases.sh
+scripts/SMV_Cases.sh
 
 echo FDS cases submitted
 
