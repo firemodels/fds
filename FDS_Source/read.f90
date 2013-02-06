@@ -4619,6 +4619,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SELECT CASE(GEOMETRY)
       CASE('CARTESIAN')
          SF%GEOMETRY       = SURF_CARTESIAN      
+         IF (SF%WIDTH>0._EB)                 SF%BACKING = INSULATED
       CASE('CYLINDRICAL')
          SF%GEOMETRY       = SURF_CYLINDRICAL
          IF (SF%INNER_RADIUS<TWO_EPSILON_EB) SF%BACKING = INSULATED
@@ -5173,11 +5174,15 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          
          SELECT CASE (SF%GEOMETRY)
             CASE(SURF_CARTESIAN)
-               IF (SF%LENGTH <0._EB) THEN
+               IF (SF%THICKNESS<=0._EB) THEN
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a THICKNESS'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+               IF (SF%LENGTH<=0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a LENGTH'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               IF (SF%WIDTH <0._EB) THEN
+               IF (SF%WIDTH<=0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a WIDTH'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF

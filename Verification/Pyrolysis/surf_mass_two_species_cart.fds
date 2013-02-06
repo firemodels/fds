@@ -22,7 +22,7 @@
 &SURF ID                        	= 'SAMPLE'
      	MATL_ID(1,1:2)            	= 'SOLID','MOISTURE'
      	MATL_MASS_FRACTION(1,1:2) 	= 0.8,0.2
-     	THICKNESS                 	= 0.0004
+     	THICKNESS                 	= 0.0002
     	GEOMETRY                  	= 'CARTESIAN'
 	LENGTH                    	= 0.001
 	WIDTH					= 0.001 /
