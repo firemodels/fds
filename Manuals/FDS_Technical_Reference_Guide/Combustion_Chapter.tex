@@ -482,7 +482,7 @@ extinction is still an area of active research in the combustion
 community.
 
 Simple empirical rules can be used to predict local
-extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two parts based on the critical flame temperature \cite{SFPE:Beyler}. The first, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second part the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur. If either criteria is failed, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. This is done in the following steps:
+extinction based on the species and temperature present in the flame sheet.  The default FDS extinction model consists of two parts based on the critical flame temperature \cite{SFPE:Beyler}. The first, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second part the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur. If either criteria is failed, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. This is done in the following steps:
 
 \begin{enumerate}
 \item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
@@ -501,6 +501,7 @@ Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_
 \item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
 \end{enumerate}
 
+In addition to the extinction model described above, there is the option in FDS to select a simpler extinction model based on the limiting oxygen concentration. Details of this model are discussed in Appendix \ref{o2_based_model}.
 
 \subsection{Heat Release Rate}
 
