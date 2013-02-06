@@ -17,7 +17,7 @@
 &SURF ID                        = 'Wood_1'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
-      THICKNESS                 = 0.01
+      THICKNESS                 = 0.005
 	GEOMETRY		= 'CARTESIAN'
 	LENGTH			= 0.04
 	WIDTH			= 0.04 /
@@ -25,7 +25,7 @@
 &SURF ID                        = 'Wood_2'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
-      THICKNESS                 = 0.01
+      THICKNESS                 = 0.005
 	GEOMETRY		= 'CARTESIAN'
 	LENGTH			= 0.05
 	WIDTH			= 0.05 /

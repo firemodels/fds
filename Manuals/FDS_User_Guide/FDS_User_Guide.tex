@@ -6956,13 +6956,16 @@ To demonstrate the basic syntax for solid particles, the following input lines c
 \normalsize
 
 \noindent
-The {\ct PART} line establishes the class of particles. In this case, the presence of a {\ct SURF\_ID} indicates that the particles are solids with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter whose default is {\ct .FALSE.} that indicates if the particles are stationary. The {\ct PROP\_ID} references a {\ct PROP} (property) line that has additional information about this class of particles.
+The {\ct PART} line establishes the class of particles. In this case, the presence of a {\ct SURF\_ID} indicates that the particles are solids with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter whose default is {\ct .FALSE.} that indicates if the particles are stationary. The {\ct PROP\_ID} references a {\ct PROP} (property) line that just tells Smokeview that the particles are to be drawn as spheres of diameter 0.01~m. See Section~\ref{info:SMOKEVIEW_PART} for details and options. The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres. See Section~\ref{info:initial_droplets} for details.
 
-The {\ct SURF} line {\ct 'HOT'} describes the geometry and other boundary conditions of the particles. The {\ct GEOMETRY} options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If the {\ct SURF} line includes a {\ct MATL\_ID}, then the particle mass will be based upon the value or values of {\ct DENSITY} of the referenced {\ct MATL} lines. By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you also need to provide a {\ct LENGTH} and {\ct WIDTH} of the rectangular plate of the given {\ct THICKNESS}. If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT}, or the heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$). For {\ct 'CYLINDRICAL'} particles, specify the {\ct LENGTH}. For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} of the individual layers. Alternatively, you can just specify the {\ct RADIUS} of a cylinder or sphere. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is given by the {\ct THICKNESS} values unless you specify an {\ct INNER\_RADIUS} as well.
+If the {\ct SURF} line includes a {\ct MATL\_ID}, the particle mass will be based upon the value or values of {\ct DENSITY} of the referenced {\ct MATL} lines. If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT} ($^\circ$C), heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$), or species {\ct MASS\_FLUX} (kg/m$^2$/s).
 
-The {\ct PROP} line, {\ct 'ball'}, just tells Smokeview that the particles are to be drawn as spheres of radius 0.01~m. See Section~\ref{info:SMOKEVIEW_PART} for details and options.
+The {\ct GEOMETRY} options for solid particles are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}.
+By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to provide the {\ct LENGTH} and {\ct WIDTH} of the rectangular plate. It is assumed that the plate is symmetric front and back. You need only specify the layers that make up the half-thickness. The array {\ct THICKNESS(N)} indicates the thickness(es) of each layer of the plate, not the total thickness of the plate itself. If the plate is composed of only one material component, the specified {\ct THICKNESS} is taken as the half-thickness of the plate.
 
-The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres. See Section~\ref{info:initial_droplets} for details.
+For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} of the individual layers. Alternatively, you can just specify the {\ct RADIUS} if the cylinder or sphere is solid and has only one material component. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is the sum of the {\ct THICKNESS} values. Remember that the layers are to be listed starting at the surface, not the center. For {\ct 'CYLINDRICAL'} particles, specify a {\ct LENGTH} as well.
+
+
 
 \subsection{Output Options for Solid Particles}
 \label{info:solid_particle_quantities}
@@ -7045,7 +7048,7 @@ Lagrangian particles can be used to generate gases at a specified rate. The synt
 &PART ID='tube',  SAMPLING_FACTOR=1, SURF_ID='tube bc',  STATIC=.TRUE. /
 &PART ID='ball',  SAMPLING_FACTOR=1, SURF_ID='ball bc',  STATIC=.TRUE. /
 
-&SURF ID='plate bc', LENGTH=0.05, WIDTH=0.05, SPEC_ID(1)='ARGON',
+&SURF ID='plate bc', THICKNESS=0.001, LENGTH=0.05, WIDTH=0.05, SPEC_ID(1)='ARGON',
       MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
 &SURF ID='tube bc',  GEOMETRY='CYLINDRICAL', LENGTH=0.05, RADIUS=0.01,
       SPEC_ID(1)='SULFUR DIOXIDE', MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
@@ -7054,7 +7057,7 @@ Lagrangian particles can be used to generate gases at a specified rate. The synt
 \end{verbatim}
 \normalsize
 
-\noindent In this case, there is no calculation of heat conduction in depth. Only the surface area is important. For the plate, the surface area is the length times the width. For the cylinder, the area is twice the radius times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
+\noindent In this case, there is no calculation of heat conduction in depth. Only the surface area is important. For the plate, the surface area is twice the length times the width. For the cylinder, the area is twice the radius times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
 
 \begin{figure}[ht]
 \begin{center}
