@@ -7,10 +7,9 @@
 &DUMP DT_HRR = 0.1, DT_DEVC = 0.1  /
 
 &SURF ID                        = 'Wood'
-      BACKING                   = 'INSULATED'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
-      THICKNESS                 = 0.01
+      THICKNESS                 = 0.005
       LENGTH			= 0.05
       WIDTH			= 0.05
       EXTERNAL_FLUX 		= 50. /
