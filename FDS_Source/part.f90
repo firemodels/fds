@@ -911,13 +911,9 @@ IF (SF%USER_DEFINED) THEN
                   X1 = X2
                END DO      
             ELSE
-               LENGTH = AREA / (2._EB*SF%RADIUS)
-               ONE_D%X(1) = SF%RADIUS
+               LENGTH = AREA / (2._EB*SF%THICKNESS)
+               ONE_D%X(1) = SF%THICKNESS
                ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
-               IF (SF%SURFACE_DENSITY>0._EB) THEN
-                  ONE_D%RHO(1,1) = 2._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
-                  LP%MASS =  TWOPI*LENGTH*SF%RADIUS*SF%SURFACE_DENSITY
-               ENDIF
             ENDIF
          CASE (SURF_SPHERICAL)
             LP%ONE_D%AREA = AREA*4._EB
@@ -930,13 +926,9 @@ IF (SF%USER_DEFINED) THEN
                   X1 = X2
                END DO                     
             ELSE
-               LP%PWT = AREA/(PI*SF%RADIUS**2)               
-               ONE_D%X(1) = SF%RADIUS
+               LP%PWT = AREA/(PI*SF%THICKNESS**2)               
+               ONE_D%X(1) = SF%THICKNESS
                ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
-               IF (SF%SURFACE_DENSITY>0._EB) THEN
-                  ONE_D%RHO(1,1) = 3._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
-                  LP%MASS =  4._EB*PI*SF%RADIUS**2*SF%SURFACE_DENSITY
-               ENDIF
             ENDIF            
       END SELECT
             
@@ -965,12 +957,8 @@ IF (SF%USER_DEFINED) THEN
                   X1 = X2
                END DO      
             ELSE
-               ONE_D%X(1) = SF%RADIUS
+               ONE_D%X(1) = SF%THICKNESS
                ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
-               IF (SF%SURFACE_DENSITY>0._EB) THEN
-                  ONE_D%RHO(1,1) = 2._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
-                  LP%MASS =  TWOPI*SF%LENGTH*SF%RADIUS*SF%SURFACE_DENSITY
-               ENDIF
             ENDIF
          CASE (SURF_SPHERICAL)
             IF (SF%THERMALLY_THICK) THEN
@@ -981,12 +969,8 @@ IF (SF%USER_DEFINED) THEN
                   X1 = X2
                END DO      
             ELSE
-               ONE_D%X(1) = SF%RADIUS
+               ONE_D%X(1) = SF%THICKNESS
                ONE_D%LAYER_THICKNESS(1) = ONE_D%X(1)
-               IF (SF%SURFACE_DENSITY>0._EB) THEN
-                  ONE_D%RHO(1,1) = 3._EB*SF%SURFACE_DENSITY/(PI*SF%RADIUS)
-                  LP%MASS =  4._EB*PI*SF%RADIUS**2*SF%SURFACE_DENSITY
-               ENDIF
             ENDIF
       END SELECT
    ENDIF SCREEN_LPC   

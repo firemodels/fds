@@ -4354,9 +4354,6 @@ either by the pyrolysis reactions or by the prescribed HRR.  The mass of each me
 surface density of the {\ct SURF} type.
 The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
-\item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses.
-This value can be over-ridden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR
-({\ct HRRPUA}), {\ct SURFACE\_DENSITY} parameter is the only way of defining the mass of the object.
 \item For surfaces with prescribed HRR ({\ct HRRPUA}) or prescribed mass loss rate ({\ct MLRPUA}) AND thermally thick heat conduction,
 the mass flux is affected by the heats of combustion defined for the gas phase reaction and the first listed material ({\ct MATL}) component.
 \item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant
@@ -4448,7 +4445,7 @@ that will limit the time step, it is best to control this yourself.
 convective heat flux from gas to surface and vice versa. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using
 either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.} (kW/m$^2$) on the
-{\ct SURF} line that is assigned to the solid surface. 
+{\ct SURF} line that is assigned to the solid surface.
 \item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.}
 on the {\ct MISC} line. This will also speed
 up the computations significantly. If a {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
@@ -4529,7 +4526,7 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 
 \label{info:TGA_DSC_MCC}
 
-There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. There is a way to mimic this process in FDS. It is similar to the approach taken in the preceding section, except now you create a very thin (like 0.01~mm) solid surface with an insulated back boundary condition ({\ct BACKING='INSULATED'}), linearly ramp up the gas temperature, and set a relatively large, constant convective heat transfer coefficient. In effect, what you are doing is simulating the heating of a tiny sample undergoing thermal-gravimetric analysis (TGA), differential scanning calorimetry (DSC), micro-combustion calorimetry (MCC), or similar measurements. 
+There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. There is a way to mimic this process in FDS. It is similar to the approach taken in the preceding section, except now you create a very thin (like 0.01~mm) solid surface with an insulated back boundary condition ({\ct BACKING='INSULATED'}), linearly ramp up the gas temperature, and set a relatively large, constant convective heat transfer coefficient. In effect, what you are doing is simulating the heating of a tiny sample undergoing thermal-gravimetric analysis (TGA), differential scanning calorimetry (DSC), micro-combustion calorimetry (MCC), or similar measurements.
 
 \begin{enumerate}
 \item Create a trivially small mesh, just to let FDS run. Since the
@@ -6961,7 +6958,7 @@ To demonstrate the basic syntax for solid particles, the following input lines c
 \noindent
 The {\ct PART} line establishes the class of particles. In this case, the presence of a {\ct SURF\_ID} indicates that the particles are solids with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter whose default is {\ct .FALSE.} that indicates if the particles are stationary. The {\ct PROP\_ID} references a {\ct PROP} (property) line that has additional information about this class of particles.
 
-The {\ct SURF} line {\ct 'HOT'} describes the geometry and other boundary conditions of the particles. The {\ct GEOMETRY} options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If the particles are thermally-thick; that is, heat is to be conducted in depth, then provide one or more values of the layer {\ct THICKNESS} and corresponding {\ct MATL\_ID}'s. If the {\ct SURF} line includes a {\ct MATL\_ID}, then the particle mass will be based upon the value or values of {\ct DENSITY} of the referenced {\ct MATL} lines. By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you also need to provide a {\ct LENGTH} and {\ct WIDTH} of the rectangular plate of the given {\ct THICKNESS}. If there is to be no heat conduction calculation in depth, do not specify a {\ct THICKNESS} or {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT}, or the heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$). For {\ct 'CYLINDRICAL'} particles, specify the {\ct LENGTH}. For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} for thermally-thick materials, or just specify the {\ct RADIUS} otherwise. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is given by the {\ct THICKNESS} values unless you specify an {\ct INNER\_RADIUS} as well.
+The {\ct SURF} line {\ct 'HOT'} describes the geometry and other boundary conditions of the particles. The {\ct GEOMETRY} options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If the {\ct SURF} line includes a {\ct MATL\_ID}, then the particle mass will be based upon the value or values of {\ct DENSITY} of the referenced {\ct MATL} lines. By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you also need to provide a {\ct LENGTH} and {\ct WIDTH} of the rectangular plate of the given {\ct THICKNESS}. If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT}, or the heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$). For {\ct 'CYLINDRICAL'} particles, specify the {\ct LENGTH}. For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} of the individual layers. Alternatively, you can just specify the {\ct RADIUS} of a cylinder or sphere. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is given by the {\ct THICKNESS} values unless you specify an {\ct INNER\_RADIUS} as well.
 
 The {\ct PROP} line, {\ct 'ball'}, just tells Smokeview that the particles are to be drawn as spheres of radius 0.01~m. See Section~\ref{info:SMOKEVIEW_PART} for details and options.
 
@@ -7057,7 +7054,7 @@ Lagrangian particles can be used to generate gases at a specified rate. The synt
 \end{verbatim}
 \normalsize
 
-\noindent Notice that the {\ct SURF} lines contain the necessary parameters to describe a plate, cylinder and sphere, but they do not contain the parameter {\ct THICKNESS}. The reason is that the particles have no mass. Only the surface area is important. For the plate, the surface area is the length times the width. For the cylinder, the area is twice the radius times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
+\noindent In this case, there is no calculation of heat conduction in depth. Only the surface area is important. For the plate, the surface area is the length times the width. For the cylinder, the area is twice the radius times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
 
 \begin{figure}[ht]
 \begin{center}
@@ -8841,7 +8838,7 @@ To record the temperature inside the surface, you can use a device as follows:
 \end{verbatim} \normalsize
 
 \noindent
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive the distance is measured from the front surface. If negative, it is measured from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose. 
+The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive the distance is measured from the front surface. If negative, it is measured from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
 
 To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
 
@@ -8851,13 +8848,13 @@ To record the material component's density with time, use the output quantity {\
 \end{verbatim} \normalsize
 
 \noindent
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath 
+This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath
 the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the
-density represents the mass of {\ct 'wood'} per unit volume of the mixture. 
+density represents the mass of {\ct 'wood'} per unit volume of the mixture.
 
 To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}. These quantities do not need the {\ct MATL\_ID} keyword.
 
-Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, output. 
+Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, output.
 
 
 \subsection{Profiles of Quantities: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
@@ -11547,7 +11544,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                        & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                    & Real            & Section~\ref{info:spread}                 & m/s                 & 0.                      \\ \hline
 {\ct STRETCH\_FACTOR(:) }             & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
-{\ct SURFACE\_DENSITY}                & Real            & Section~\ref{info:BURN_AWAY}              & kg/m$^2$            & 0.                      \\ \hline
 {\ct TAU\_EF}                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_MF(:)}                      & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_PART}                       & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline

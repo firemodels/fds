@@ -937,10 +937,9 @@ Benzene \cite{Bertie:AS1993b}                       &  11.5-6200                
 
 
 
-\chapter{Solving the 1D Heat Conduction Equation}
+\chapter{Solving the 1-D Heat Conduction Equation}
 \label{discretization}
 
-\section*{Discretization}
 
 The 1-D heat conduction equation in Cartesian coordinates is:
 \begin{equation}
@@ -952,54 +951,37 @@ In cylindrical and spherical coordinates, the equation becomes:
 \label{heat_cond_cyl2}
      \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} \left( r^I k_s \frac{\partial T_s}{\partial r} \right) + \dot{q}'''_s
 \end{equation}
-where $I$ is 1 for cylindrical and 2 for spherical coordinates. The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}.
+where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation. The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}.
 \begin{figure}[t]
     \centering
     \includegraphics[width=5.0in]{FIGURES/appendix_I_solid_nodes}
     \caption{Solid phase nodes and indexes. r is the radius from the back of the material.}
     \label{fig_solid_nodes}
 \end{figure}
-In Cartesian coordinates, the right hand side is centrally differenced:
-\begin{equation}
-\label{T_cart}
-    \frac{\partial}{\partial x} \left( k_s \frac{\partial T_s}{\partial x}  \right)
-    \approx \frac{1}{\delta x_i} \left( k_{s,i+\frac{1}{2}}\frac{T_{s,i+1}-T_{i}}{\delta x_{i+\frac{1}{2}}}-k_{s, i-\frac{1}{2}}\frac{T_{s,i}-T_{i-1}}{\delta x_{i+\frac{1}{2}}} \right)
-\end{equation}
-In cylindrical and spherical coordinates, it is:
-\begin{equation}
-\label{T_general}
-    \frac{1}{r^{I}}\frac{\partial}{\partial r} \left( r^{I} k_s \frac{\partial T_s}{\partial r}  \right)
-    \approx \frac{1}{r_{c,i}^I \, \delta r_i} \left(r_i^{I} \, k_{s,i+\frac{1}{2}}\frac{T_{s,i+1}-T_{s,i}}{\delta r_{i+\frac{1}{2}}}-r_{i-1}^{I} \, k_{s,i-\frac{1}{2}}\frac{T_{s,i}-T_{s,i-1}}{\delta r_{i-\frac{1}{2}}} \right)
-\end{equation}
-$T_i$ refers to the temperature at the center of the $i$th cell, $k_{i+\frac{1}{2}}$ is the thermal conductivity at the border of the cells $i$ and $i+1$, $\delta x_i$ or $\delta r_i$ is the width of cell $i$, and  $\delta x_{i+\frac{1}{2}}$ is the distance from cell $i$ center to the center of cell $i+1$. The radial coordinate, $r_{c,i}$, denotes the cell center:
-\begin{equation}
-r_{c,i} = \left\{
-\begin{array}{ll} (r_i^2 - r_{i-1}^2)/(2 \, \delta r_i) & \hbox{cylindrical} \\ [0.1in] \sqrt{ ( r_i^3 - r_{i-1}^3)/(3 \, \delta r_i) } & \hbox{spherical}
-\end{array} \right.
-\end{equation}
-The temperature is integrated in time using a Crank-Nicolson scheme:
+The temperature of the solid, $T_s$, is integrated in time using a Crank-Nicolson scheme:
 \begin{eqnarray}
 \label{crank-nicolson}
 (\rho_s \, c_s)_i \frac{T_{s,i}^{n+1}-T_{s,i}^{n}}{\delta t}
 & = & \frac{1}{2 \, r_{c,i}^I \, \delta r_i} \left( r_{i}^{I} \, k_{s,i+\frac{1}{2}} \frac{T_{s,i+1}^{n}-T_{s,i}^{n}}{\delta r_{i+\frac{1}{2}}} - r_{i-1}^{I} \, k_{s,i-\frac{1}{2}} \frac{T_{s,i}^{n}-T_{s,i-1}^{n}}{\delta r_{i-\frac{1}{2}}} \right) \nonumber \\ [0.1in]
 & & +\frac{1}{2 \, r_{c,i}^I \, \delta r_i} \left( r_{i}^{I} \, k_{s,i+\frac{1}{2}} \frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\delta r_{i+\frac{1}{2}}} - r_{i-1}^{I} \, k_{s,i-\frac{1}{2}} \frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\delta r_{i-\frac{1}{2}}} \right) + \dot{q}'''_s
 \end{eqnarray}
+$T_i$ refers to the temperature at the center of the $i$th cell, $k_{i+\frac{1}{2}}$ is the thermal conductivity at the border of the cells $i$ and $i+1$, $\delta r_i$ is the width of cell $i$, and  $\delta r_{i+\frac{1}{2}}$ is the distance from cell $i$ center to the center of cell $i+1$. The radial coordinate, $r_{c,i}$, denotes the cell center:
+\begin{equation}
+r_{c,i} = \left\{
+\begin{array}{ll} (r_i^2 - r_{i-1}^2)/(2 \, \delta r_i) & \hbox{cylindrical} \\ [0.1in] \sqrt{ ( r_i^3 - r_{i-1}^3)/(3 \, \delta r_i) } & \hbox{spherical}
+\end{array} \right.
+\end{equation}
 
-
-
-\section*{Boundary conditions}
-
-The temperatures at the front and back surface of a Cartesian slab (or center of a cylinder or sphere) are determined from the boundary conditions. The boundary condition at the front surface is always
+The temperatures at the front and back surface of a Cartesian slab (or center of a cylinder or sphere) are determined from the boundary conditions. In any of the coordinate systems, the boundary condition at the front surface is
 \begin{equation}
 \label{bc_front}
-  -k_s \frac{\partial T}{\partial x} (0,t)
-  = -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta x_{\frac{1}{2}}}
+ -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}}
   =  \dot{q}_{c}''+\dot{q}_{r}''
 \end{equation}
 The convective flux is
 \begin{equation}
 \label{conv}
-  \dot{q}_c''' = h \, \left( T_g - \frac{1}{2} \left( T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1} \right) \right)
+  \dot{q}_c'' = h \, \left( T_g - \frac{1}{2} \left( T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1} \right) \right)
 \end{equation}
 $(T^{n+1})^4$ can be approximated with Taylor series
 \begin{equation}
@@ -1009,8 +991,7 @@ $(T^{n+1})^4$ can be approximated with Taylor series
 which leads to approximation for the radiative flux
 \begin{equation}
 \label{radi}
-(\dot{q}_{r,net}''')^{n+1}
-  = \dot{q}_{r, in}''' - \epsilon \sigma \, (T_{s,\frac{1}{2}}^{n+1})^4
+\dot{q}_r'' = \dot{q}_{r, in}'' - \epsilon \sigma \, \left( T_{s,\frac{1}{2}}^{n+1} \right)^4
   \approx \dot{q}_{r, in}''' - \epsilon \sigma \, (T_{s,\frac{1}{2}}^n)^4 - 4 \, \epsilon\sigma \, (T_{s,\frac{1}{2}}^n)^3 \, \left( T_{s,\frac{1}{2}}^{n+1}-T_{s,\frac{1}{2}}^n \right)
 \end{equation}
 Now the front boundary condition is
@@ -1035,21 +1016,22 @@ The wall temperature is calculated as
 and therefore the boundary condition becomes
 \begin{equation}
 \label{bc_front_4}
-  -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta x_{\frac{1}{2}}} + \left( \frac{h}{2} + 4 \, \epsilon\sigma \, (T_{s,\frac{1}{2}}^n)^3 \right) \frac{T_{s,1}^{n+1}+T_{s,0}^{n+1}}{2}
+  -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta x_{\frac{1}{2}}} + \left( \frac{h}{2} + 4 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^3 \right) \frac{T_{s,1}^{n+1}+T_{s,0}^{n+1}}{2}
   \approx h\, \left( T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n \right) +
-  \dot{q}_{r, in}''' + 3 \, \epsilon\sigma \, (T_{s,\frac{1}{2}}^n)^4
+  \dot{q}_{r, in}''' + 3 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^4
 \end{equation}
 The temperature at node 0 becomes then
 \begin{equation}
 \label{T0}
-  T_{s,0}^{n+1} = \underbrace{\frac{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}-(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}+(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{RFACF2} T_1^{n+1}+
- \underbrace{\frac{h_F(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n)+\dot{q}_{r,F}^{'''}+4\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^4}}{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}+(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{QDXKF}.
+  T_{s,0}^{n+1} = \underbrace{\frac{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}-(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}} + (\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{\ct RFACF2} T_1^{n+1} +
+ \underbrace{\frac{h_F(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n)+\dot{q}_{r,F}'''+4\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^4}}{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}+(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{\ct QDXKF}
 \end{equation}
+Note that {\ct RFACF2} and similar names are used in the actual source code to represent these quantities.
 In case of non-insulated backing in Cartesian geometry, the temperature of virtual node \textit{N+1} is calculated similarly as
 \begin{equation}
 \label{TN+1}
-  T_{s,N+1}^{n+1} = \underbrace{\frac{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}-(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}}_{RFACB2} T_{N+1}^{n+1}+
- \underbrace{\frac{h_B(T_g-\frac{1}{2}T_{s,N+\frac{1}{2}}^n)+\dot{q}_{r,B}^{'''}+4\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^4}}{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}}_{QDXKB}.
+  T_{s,N+1}^{n+1} = \underbrace{\frac{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}-(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}}_{\ct RFACB2} T_{N+1}^{n+1}+
+ \underbrace{\frac{h_B(T_g-\frac{1}{2}T_{s,N+\frac{1}{2}}^n)+\dot{q}_{r,B}'''+4\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^4}}{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}}_{\ct QDXKB}.
 \end{equation}
 For insulated backing and cylindrical and spherical geometries, the boundary condition at $x_N$ ($r=0$) is
 \begin{equation}
@@ -1061,78 +1043,40 @@ This has been implemented by setting $\epsilon_B$, $\dot{q}_{r,B}'''$ and $h_B$ 
 
 \section*{Tridiagonal solver}
 
-After re-arranging the terms, Eq.~(\ref{crank-nicolson}) becomes (using the nomenclature of the source code) for all wall cells \textit{i}
+After re-arranging the terms, Eq.~(\ref{crank-nicolson}) becomes (using the nomenclature of the source code) for each wall cell $i$:
  \begin{equation}
 \label{tridiagonal_1}
-  B(i)T_{i-1}^{n+1} + D(i)T_{i}^{n+1} + A(i)T_{i+1}^{n+1} = C(i),
+  B(i) \, T_{i-1}^{n+1} + D(i) \, T_{i}^{n+1} + A(i) \, T_{i+1}^{n+1} = C(i) \quad i=1,...,N
 \end{equation}
-
 where
-
 \begin{equation}
 \label{tridiagonal_2}
 \begin{split}
-& A(i) = -\frac{k_{i+\frac{1}{2}}\delta t}{2(\rho_s c_s)_i}\frac{1}{r_{i-\frac{1}{2}}^I \delta r_i}\frac{r_{i}^I}{\delta r_{i+\frac{1}{2}}} \\
-& B(i) = -\frac{k_{i-\frac{1}{2}}\delta t}{2(\rho_s c_s)_i}\frac{1}{r_{i-\frac{1}{2}}^I \delta r_i}\frac{r_{i-1}^I}{\delta x_{i-\frac{1}{2}}}  \\
-& C(i) = T_{s,i}^{n}-A(i)(T_{i+1}^n-T_i^n) + B(i) (T_{i}^n-T_{i-1}^n) \\
-& D(i) = 1-A(i)-B(i).  \\
+& A(i) = -\frac{k_{i+\frac{1}{2}} \, \delta t}{2(\rho_s c_s)_i}\frac{1}{r_{c,i}^I \delta r_i}\frac{r_{i}^I}{\delta r_{i+\frac{1}{2}}}  \\
+& B(i) = -\frac{k_{i-\frac{1}{2}} \, \delta t}{2(\rho_s c_s)_i}\frac{1}{r_{c,i}^I \delta r_i}\frac{r_{i-1}^I}{\delta r_{i-\frac{1}{2}}}   \\
+& C(i) = T_{s,i}^{n}-A(i) \, (T_{i+1}^n-T_i^n) + B(i) \, (T_{i}^n-T_{i-1}^n)  \\
+& D(i) = 1-A(i)-B(i) 
 \end{split}
 \end{equation}
-
-These values are defined for each node from 1 to N. At the boundaries (N being the number of nodes) the values are
-
-\begin{equation}
-\label{x_bc}
-\begin{split}
-& \delta x(\frac{1}{2}) = x(1)-x(0)\\
-& \delta x(N+\frac{1}{2}) = x(N)-x(N-1). \\
-\end{split}
-\end{equation}
-
-At front the equation is
-
-\begin{equation}
-\label{CD_front}
-\begin{split}
-& B(1)T_0^{n+1}+D(1)T_1^{n+1}+A(1)T_2^{n+1} = C(1) \\
-& \Rightarrow T_1^{n+1}(1) = \frac{C(1)-B(1)T^{n+1}_0-A(1)T^{n+1}_2}{D(1)}
-\end{split}
-\end{equation}
-
-and at back
-
-\begin{equation}
-\label{CD_back}
-\begin{split}
-& B(N)T^{n+1}_{N-1}+D(N)T^{n+1}_N+A(N)T^{n+1}_{N+1} = C(N) \\
-& \Rightarrow T^{n+1}_N(1) = \frac{C(N)-B(N)T^{n+1}_{N-1}-A(N)T^{n+1}_{N+1}}{D(N)}.
-\end{split}
-\end{equation}
-
-To solve the eq. (\ref{tridiagonal_1}), tridiagonal matrix algorithm is used. The algorithm consists of two phases. The forward elimination phase for \textit{i} going from \textit{1} to \textit{N} is
-
+To solve Eq.~(\ref{tridiagonal_1}), a tri-diagonal matrix algorithm is used. The algorithm consists of two phases. The forward elimination phase for \textit{i} going from \textit{1} to \textit{N} is
 \begin{equation}
 \label{forward}
 \begin{split}
-& D'(1) = D(1)+B(1)\cdot RFACF2 \\
-& C'(1) = C(1)-B(1)\cdot QDXKF \\
+& D'(1) = D(1)+B(1)\cdot {\ct RFACF2} \\
+& C'(1) = C(1)-B(1)\cdot {\ct QDXKF} \\
 & \\
-& D'(i) = D(i)-\frac{B(i)A(i-1)}{D'(i-1)}, i = 2, ..., N-1 \\
-& C'(i) = C(i)-\frac{B(i)C'(i-1)}{D'(i-1)}, i = 2, ..., N-1\\
+& D'(i) = D(i)-\frac{B(i) \, A(i-1)}{D'(i-1)} \quad i = 2, ..., N-1 \\
+& C'(i) = C(i)-\frac{B(i) \, C'(i-1)}{D'(i-1)} \quad i = 2, ..., N-1\\
 & \\
-& D'(N) = D(N)+A(N)\cdot RFACB2-\frac{B(N)A(N-1)}{D'(N-1)}\\
-& C'(N) = C(N)-A(N)\cdot QDXKB-\frac{B(N)C'(N-1)}{D'(N-1)}.
+& D'(N) = D(N)+A(N)\cdot {\ct RFACB2}-\frac{B(N) \, A(N-1)}{D'(N-1)}\\
+& C'(N) = C(N)-A(N)\cdot {\ct QDXKB} -\frac{B(N) \, C'(N-1)}{D'(N-1)}
 \end{split}
 \end{equation}
-
-The values at front and back depend on the boundary conditions (eq.(\ref{T0}) and eq.(\ref{TN+1})).
-
-The backward substitution if tridiagonal solver is
-
+The values at front and back depend on the boundary conditions, Eqs.~(\ref{T0}) and (\ref{TN+1}). The backward substitution of the tri-diagonal solver is
 \begin{equation}
 \label{backward}
 \begin{split}
 & T^{n+1}_N = \frac{C'(N)}{D'(N)}\\
-& T^{n+1}_i = \frac{C'(i)-A(i)T^{n+1}_{i+1}}{D'(i)}, i = N-1,..., 1. \\
+& T^{n+1}_i = \frac{C'(i)-A(i) \, T^{n+1}_{i+1}}{D'(i)} \quad i = N-1,..., 1 \\
 \end{split}
 \end{equation}
