@@ -43,6 +43,33 @@
 \usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
 \usetocstyle{standard}
 
+\usepackage{listings}
+\usepackage{textcomp}
+\definecolor{lbcolor}{rgb}{0.96,0.96,0.96}
+\lstset{
+    backgroundcolor=\color{lbcolor},
+    tabsize=4,
+    rulecolor=,
+    language=Fortran,
+        basicstyle=\footnotesize\ttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        belowskip=2em,
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=true,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,0},
+        commentstyle=\color[rgb]{0,0,0},
+        stringstyle=\color[rgb]{0.133,0.545,0.133},
+}
+
 
 \setlength{\textwidth}{6.5in}
 \setlength{\textheight}{9.0in}
@@ -613,7 +640,7 @@ the thermal diffusion term in the $ijk$th cell of the three-dimensional grid:
               -k_{ij,k-\ha}\frac{T_{ijk}-T_{ij,k-1}}{\dz}\right]
 \end{eqnarray*}
 which is written as follows in the Fortran source code:
-\begin{verbatim}
+\begin{lstlisting}
       DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
       KDTDX(I,J,K) = .5*(KP(I+1,J,K)+KP(I,J,K))*DTDX
       DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
@@ -624,7 +651,7 @@ which is written as follows in the Fortran source code:
       DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) +
      .           (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) +
      .           (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
-\end{verbatim}
+\end{lstlisting}
 This is one of the simpler constructs because the pattern that emerges within the lines of code make it fairly easy to check. However, a mis-typing
 of an {\ct I} or a {\ct J}, a plus or a minus sign, or any of a hundred different mistakes can cause the code to fail, or worse produce the wrong
 answer. A simple way to eliminate many of these mistakes is to run simple scenarios that have perfectly symmetric initial and boundary conditions.
@@ -2508,12 +2535,11 @@ Figure~\ref{FED_FIC_SMIX_plot}.
 
 The calculations described in this section check the smoke detector algorithm that computes the smoke obscuration in the sensing chamber of a detector. For this example, the initial soot mass fraction in a 1~m$^3$ box is set as 100~mg/kg via the {\ct INIT} line. A vent on the left side injects soot at a velocity of 0.25~m/s and a mass fraction of 100~mg/kg, and the soot exhausts on the right side of the box via an open vent. By default, if a species is defined as an aerosol by setting {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, all deposition mechanisms are disabled by using the follows inputs on the {\ct MISC} line:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MISC GRAVITATIONAL_DEPOSITION  = .FALSE.
       THERMOPHORETIC_DEPOSITION = .FALSE.
       TURBULENT_DEPOSITION      = .FALSE. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent The transient mass fraction of smoke in the sensing chamber of the detector $Y_c$ is given as~\cite{FDS_Tech_Guide}
 \be
@@ -2569,12 +2595,11 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 
 The calculations described in this section check the conservation of mass for the gravitational settling algorithm. The gravitational settling algorithm involves both the settling of soot particles in the gas phase and the accumulation of soot on the condensed phase. For this example, the initial soot concentration in a 1~m$^3$ box is set as 100~mg/m$^3$ via the {\ct INIT} line, and the soot deposits to the bottom of the box via gravitational settling only. By default, if a species is defined as an aerosol by setting {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, gravitational deposition is enabled and the other deposition mechanisms are disabled by using the follows inputs on the {\ct MISC} line:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
       THERMOPHORETIC_DEPOSITION = .FALSE.
       TURBULENT_DEPOSITION      = .FALSE. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent In this example, the initial gas-phase soot concentration is specified, and the only active deposition mechanism (i.e., soot removal term) is gravitational deposition. A simple HVAC setup (one supply vent and one exhaust vent) is used to stir the air and create well-mixed conditions. The transient gas-phase soot concentration for a well-mixed compartment can then be represented as
 \be
@@ -2671,8 +2696,7 @@ following values: $k(0)=0.10$~W/m/K, $k(200)=0.20$~W/m/K, $c(0)=1.0$~kJ/kg/K, $c
 the sample is 0.01~m. In the Cartesian case, the back surface of the material is exposed to a gas at 0~$^\circ$C. In the figure below, the light colored solid
 lines are FDS results and the dark lines are the HEATING results. An example input with cylindrical geometry looks like:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID='MAT_1'
       EMISSIVITY = 0.0
       CONDUCTIVITY_RAMP='K_RAMP'
@@ -2691,7 +2715,7 @@ lines are FDS results and the dark lines are the HEATING results. An example inp
       GEOMETRY = 'CYLINDRICAL'
       MATL_ID='MAT_1'
       THICKNESS=0.01 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \begin{figure}[ht]
 \noindent
@@ -3252,8 +3276,7 @@ The dashed curves in Fig.~\ref{mcc_plots} are the results of numerically integra
 material component. A typical input line for FDS that describes a single material component undergoing a single
 reaction is given by:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID                    = 'Cable 11 Jacket Component A'
       EMISSIVITY            = ...
       DENSITY               = ...
@@ -3267,7 +3290,7 @@ reaction is given by:
       RESIDUE               = 'char'
       NU_FUEL               = 0.51
       HEAT_OF_REACTION      = ... /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent Only the relevant parameters are shown. The other parameters are not relevant in this
 exercise. Note that {\ct REFERENCE\_TEMPERATURE} is $T_{p,i}$, but in units of $^\circ$C. {\ct REFERENCE\_RATE} is actually
