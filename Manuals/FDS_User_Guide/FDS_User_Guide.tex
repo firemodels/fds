@@ -46,6 +46,33 @@
 \usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
 \usetocstyle{standard}
 
+\usepackage{listings}
+\usepackage{textcomp}
+\definecolor{lbcolor}{rgb}{0.96,0.96,0.96}
+\lstset{
+    backgroundcolor=\color{lbcolor},
+    tabsize=4,
+    rulecolor=,
+    language=Fortran,
+        basicstyle=\footnotesize\ttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        belowskip=2em,
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=true,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,0},
+        commentstyle=\color[rgb]{0,0,0},
+        stringstyle=\color[rgb]{0.133,0.545,0.133},
+}
+
 
 % The Following commented code makes the ``Draft'' watermark on each page.
 %\usepackage{eso-pic}
@@ -899,9 +926,9 @@ You can start FDS from a DOS or Linux/Unix command prompt as follows:
 
 Open up a Command Prompt window (click Start, then Run, then type ``cmd''), and change directories (``cd'') to where the
 input file for the case is located, then run the code by typing at the command prompt
-\begin{verbatim}
+\begin{lstlisting}
 fds job_name.fds
-\end{verbatim}
+\end{lstlisting}
 The character string {\ct job\_name} is usually designated within
 the input file as the {\ct CHID}. It is recommended that the name
 of the input file and the {\ct CHID} be the same so that all of
@@ -912,9 +939,9 @@ information is automatically written to a file {\ct CHID.out},
 where {\ct CHID} is a character string, usually the same as {\ct
 job\_name}, designated in the input file. Screen output can be
 redirected to a file via the alternative command:
-\small\begin{verbatim}
+\begin{lstlisting}
 fds job_name.fds > job_name.err
-\end{verbatim}\normalsize
+\end{lstlisting}
 Note that it is also possible to associate the ``.fds'' extension with the FDS executable directly, thereby making FDS run by
 double-clicking on the input file. If you do this, note that error messages will be written to the file called {\ct job\_name.out}. Also, if you
 associate the input file with the FDS executable, be careful not to accidentally double-click on the input file when trying to edit it.
@@ -928,15 +955,15 @@ The installer for Mac OS~X, Unix, and Linux versions of FDS sets
 the {\ct PATH}\ variable allowing one to invoke FDS without a full
 path reference to the executable.  To run FDS from the command
 line type:
-\small\begin{verbatim}
+\begin{lstlisting}
 fds job_name.fds
-\end{verbatim}\normalsize
+\end{lstlisting}
 The input parameters are read from the file {\ct job\_name.fds},
 and error statements and other diagnostics are written out to the
 screen. To run the job in the background:
-\small\begin{verbatim}
+\begin{lstlisting}
 fds job_name.fds >& job_name.err &
-\end{verbatim}\normalsize
+\end{lstlisting}
 Note that in the latter case, the screen output is stored in the
 file {\ct job\_name.err} and the detailed diagnostics are saved
 automatically in a file {\ct CHID.out}, where {\ct CHID} is a
@@ -944,13 +971,13 @@ character string, usually the same as {\ct job\_name}, designated
 in the input file. It is preferable to run jobs in the background
 so as to free the console for other uses. To see output while an
 FDS job is running type:
-\small\begin{verbatim}
+\begin{lstlisting}
 tail -f job_name.err
-\end{verbatim}\normalsize
+\end{lstlisting}
 or
-\small\begin{verbatim}
+\begin{lstlisting}
 tail -f job_name.out
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 The installer also defines aliases named {\ct fds6}\ and {\ct fds6\_mpi}\
 pointing to the executables. Other aliases may be defined by
@@ -1000,8 +1027,7 @@ You do not explicitly number the meshes or the processes yourself, but
 error statements from FDS or from MPI might refer to the meshes or processes by number.
 As an example, if a FDS case with five meshes is run in parallel, the first printout (usually to the screen unless
 otherwise directed) is:
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 Process  0 of  4 is running on fire61
 Process  1 of  4 is running on fire62
 Process  2 of  4 is running on fire63
@@ -1012,7 +1038,7 @@ Mesh   2 is assigned to Process   1
 Mesh   3 is assigned to Process   2
 Mesh   4 is assigned to Process   3
 Mesh   5 is assigned to Process   4
-\end{verbatim} \normalsize
+\end{lstlisting}
 This means that 5 processes (numbered 0 to 4) have started on the computers named fire61, fire62, etc., and that each mesh is being computed as an individual process on the
 individual computers. Each computer has its own memory (RAM), and MPI is the protocol by which information is passed from process to process during the calculation. Note that these
 computers may have multiple processors, and each processor may have multiple ``cores.'' You have control over how many processes get assigned to each computer, but you may or may not
@@ -1038,22 +1064,22 @@ from the command line or by using a Graphical User Interface
 (GUI). After the MPICH2 libraries are installed on each computer and
 the necessary directories are shared, FDS is run using the following command
 issued from one of the computers:
-\small\begin{verbatim}
+\begin{lstlisting}
 mpiexec -file config.txt
-\end{verbatim}\normalsize
+\end{lstlisting}
 where {\ct config.txt} is a text file containing the name and location
 of the FDS executable, name of the FDS input file, the working directory,
 and the names of the various computers that are to run the job. For
 example, the {\ct config.txt} file looks something like this:
 \small
-\begin{verbatim}
+\begin{lstlisting}
 exe \\host_1\FDS\fds_mpi.exe job_name.fds
 dir \\host_1\Projects\
 hosts
 host_1 2
 host_2 1
 host_3 2
-\end{verbatim}\normalsize
+\end{lstlisting}
 The numbers following the machine names represent the number of threads to run on that particular machine. In this
 example, 5 threads are run for an FDS calculation that has 5 meshes. The {\ct exe} and {\ct dir} directories need to be shared, with the
 latter having read and write permissions.
@@ -1064,14 +1090,14 @@ latter having read and write permissions.
 Both at VTT and NIST, we use Open MPI, an open source MPI-2 implementation that is developed and maintained by a consortium of academic,
 research, and industry partners.
 With Open~MPI, FDS is run using the command:
-\small\begin{verbatim}
+\begin{lstlisting}
 mpirun -np 5 fds_mpi job_name.fds
-\end{verbatim}\normalsize
+\end{lstlisting}
 where the 5 indicates that 5 processors are to be used. In this case, the executable {\ct fds\_mpi\_linux\_64} is located in the
 working directory, but you can invoke it by its full path name. To make the process run in the background, use the command:
-\small\begin{verbatim}
+\begin{lstlisting}
 mpirun -np 5 fds_mpi job_name.fds >& job_name.err &
-\end{verbatim}\normalsize
+\end{lstlisting}
 The file {\ct job\_name.err} contains what is normally printed out to the screen.
 
 
@@ -1229,10 +1255,9 @@ calculation responsible for the problem and helps in the debugging.
 
 \item[{\bf File Writing Errors}:]
 Occasionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 forrtl: severe (47): write to READONLY file, unit 8598, file C:\Users\...\
-\end{verbatim} \normalsize
+\end{lstlisting}
 The unit, in this case 8598, is just a number that FDS has associated with one of the output files. If this error occurs just after the start of
 the calculation, you can try adding the phrase \\ {\ct FLUSH\_FILE\_BUFFERS=.FALSE.} \\ on the {\ct DUMP} line of the input file (see Section~\ref{info:DUMP}).
 This will prevent FDS from attempting to flush the contents of the internal buffers, something it does to make it possible to view the FDS output
@@ -1326,10 +1351,9 @@ Parameters are specified within the input file by using {\em namelist} formatted
 Each namelist record begins with the ampersand character, {\ct \&}, followed
 immediately by the name of the namelist group, then a comma-delimited list of the input parameters, and
 finally a forward slash, {\ct /}. For example, the line
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DUMP NFRAMES=1800, DT_HRR=10., DT_DEVC=10., DT_PROF=30. /
-\end{verbatim}\normalsize
+\end{lstlisting}
 \noindent sets various values of parameters contained in the {\ct DUMP} namelist group. The meanings of these various parameters will
 be explained in subsequent chapters. The namelist records can span multiple lines in the input file, but just be sure to
 end the record with a slash or else the data will not be understood. Do not add anything to a namelist line other than the
@@ -1419,11 +1443,9 @@ With some text editors, it has been noticed that the last line of the file is of
 ``end of file'' character.
 To ensure that FDS reads the entire input file, add
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &TAIL /
-\end{verbatim}
-\normalsize \noindent
+\end{lstlisting} \noindent
 as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}. FDS does not even look for
 this last line. It just forces the ``end of file'' character past relevant input.
 
@@ -1436,8 +1458,7 @@ The general structure of an input file is shown below, with many
 lines of the original validation input file\footnote{The actual input file, WTC\_05.fds, is part of the FDS
 Validation Suite} removed for clarity.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
 &MESH IJK=90,36,38, XB=-1.0,8.0,-1.8,1.8,0.0,3.82 /
 &TIME T_END=5400. /
@@ -1468,8 +1489,7 @@ Validation Suite} removed for clarity.
 &DEVC XYZ=6.04,0.28,3.65, QUANTITY='OXYGEN', ID='EO2_FDS' /
 ...
 &TAIL / End of file.
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 It is recommended that when looking at a new scenario,
@@ -1551,11 +1571,9 @@ involves numerous simulations in which case the names of the individual
 simulations should be meaningful and help to organize the project.  The namelist group {\ct HEAD} contains
 two parameters, as in this example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \begin{description}
 \item {\ct CHID} is a string of 30 characters or less used to tag the output files.
@@ -1585,12 +1603,10 @@ duration of the simulation is required on this line, via the
 parameter {\ct T\_END}. The default is 1 s.
 For example, the following line will instruct FDS to run the simulation for 5400 seconds.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &TIME T_END=5400. /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent If {\ct T\_END} is set to zero, only the set-up work is performed,
 allowing you to quickly check the geometry in Smokeview.
 
@@ -1674,12 +1690,10 @@ and fifth values of the real number sextuplet, {\ct XB}, and the opposite
 corner is defined by the second, fourth and sixth values.
 For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MESH IJK=10,20,30, XB=0.0,1.0,0.0,2.0,0.0,3.0 /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent
 defines a mesh that spans the volume starting at the origin and extending 1~m in the positive
 $x$ direction, 2~m in the positive $y$ direction, and 3~m in the positive $z$ direction.
@@ -1712,16 +1726,14 @@ divisions to ensure that those that are ultimately used do not unduly slow down 
 Here is a list of numbers between 1 and 1024 that can be factored
 down to 2's, 3's and 5's:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
    2     3     4     5     6     8     9    10    12    15    16    18    20    24    25
   27    30    32    36    40    45    48    50    54    60    64    72    75    80    81
   90    96   100   108   120   125   128   135   144   150   160   162   180   192   200
  216   225   240   243   250   256   270   288   300   320   324   360   375   384   400
  405   432   450   480   486   500   512   540   576   600   625   640   648   675   720
  729   750   768   800   810   864   900   960   972  1000  1024
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 
 \subsection{Two-Dimensional and Axially-Symmetric Calculations}
@@ -1794,15 +1806,14 @@ this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then 
 Usually in a multi-mesh calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one
 mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MESH ID='mesh1', IJK=..., XB=..., MPI_PROCESS=0 /
 &MESH ID='mesh2', IJK=..., XB=..., MPI_PROCESS=1 /
 &MESH ID='mesh3', IJK=..., XB=..., MPI_PROCESS=1 /
 &MESH ID='mesh4', IJK=..., XB=..., MPI_PROCESS=2 /
 &MESH ID='mesh5', IJK=..., XB=..., MPI_PROCESS=3 /
 &MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered
@@ -1985,11 +1996,9 @@ strategies to see how much of a penalty you will pay.
 \noindent
 Here is an example of how to do a mesh transformation. Suppose your mesh is defined
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MESH IJK=15,10,20, XB=0.0,1.5,1.2,2.2,3.2,5.2 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 and you want to alter the uniform spacing in the $x$ direction.
@@ -2010,11 +2019,10 @@ along the horizontal axis are transformed into 15 non-uniformly spaced cells alo
 In this case, the function is made up of straight line segments
 connecting points ({\ct CC},{\ct PC}), in increasing order, as specified by the following lines in the input file:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
  &TRNX CC=0.30, PC=0.50, MESH_NUMBER=2 /
  &TRNX CC=1.20, PC=1.00, MESH_NUMBER=2 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located
@@ -2034,11 +2042,10 @@ $$ \frac{\d^n f(\hbox{\ct CC})}{\d\xi^n} = \hbox{\ct PC}   $$
 Figure~\ref{fig:grid1} gives an example of a polynomial transformation, for which
 the parameters are specified (assuming that this is the third mesh):
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &TRNX IDERIV=0, CC=0.75, PC=0.75, MESH_NUMBER=3 /
 &TRNX IDERIV=1, CC=0.75, PC=0.50, MESH_NUMBER=3 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 which correspond to the constraints
@@ -2106,11 +2113,9 @@ There are a number of special output quantities that provide local measures of g
 
 Only one {\ct MISC} line should be entered in the data file. For example, the input line
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MISC TMPA=25. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 sets the ambient temperature at 25 $^\circ$C.
@@ -2140,11 +2145,9 @@ A situation that occurs often in atmospheric flows is that initial and boundary 
 
 In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s use
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}.
 
@@ -2159,13 +2162,11 @@ Similar to the {\ct MEAN\_FORCING} feature, you may specify a constant and unifo
 
 \noindent This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MISC FORCE_VECTOR(1)=0.01 /
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \subsection{Special Topic: Stopping and Restarting Calculations}
 \label{info:restart}
@@ -2229,16 +2230,13 @@ restart.
 
 It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-delimited (.csv) file.  You have the option of creating the velocity file using FDS or creating their own.  To generate the a velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DUMP UVW_TIMER(1)=600 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent FDS will then write {\ct CHID\_uvw\_{\it nn}.csv} for each time index and mesh.  The format for this file is
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
   WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
   DO K=KMIN,KMAX
    DO J=JMIN,JMAX
@@ -2247,18 +2245,15 @@ It may be useful to start a calculation from an established flow field.  Usually
     ENDDO
    ENDDO
   ENDDO
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MISC PROJECTION=.TRUE. /
 &CSVF UVWFILE='my_velocity_field.csv' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.  It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
@@ -2285,8 +2280,7 @@ which gives you the flexibility to vary all three components. Next, designate ``
 {\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all of which are specified on the {\ct MISC} line. There is more discussion of
 {\ct RAMP}s in Section~\ref{info:RAMP}, but for now you can use the following as a simple template to follow:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MISC GVEC=1.,0.,1., RAMP_GX='x-ramp', RAMP_GZ='z-ramp' /
 
 &RAMP ID='x-ramp', X=  0., F=0.0 /
@@ -2298,7 +2292,7 @@ which gives you the flexibility to vary all three components. Next, designate ``
 &RAMP ID='z-ramp', X= 50., F=-9.81 /
 &RAMP ID='z-ramp', X= 51., F=-9.80 /
 &RAMP ID='z-ramp', X=100., F=-9.80 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the
@@ -2352,14 +2346,13 @@ cells in the $y$ direction to 1.
 An example of an axially-symmetric helium plume is shown in Figure~\ref{helium_plume}.
 
 \begin{figure}[ht]
-\scriptsize
 \noindent
 \begin{minipage}{1.1in}
 \includegraphics[height=2in]{SCRIPT_FIGURES/helium_2d}
 \end{minipage}
 \hfill
 \begin{minipage}{5.5in}
-\begin{verbatim}
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 &HEAD CHID='helium_2d',TITLE='Axisymmetric Helium Plume' /
 &MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
 &TIME T_END=5.0 /
@@ -2373,9 +2366,8 @@ An example of an axially-symmetric helium plume is shown in Figure~\ref{helium_p
 &SLCF PBY=0.000,QUANTITY='DENSITY', VECTOR=.TRUE. /
 &SLCF PBY=0.000,QUANTITY='HELIUM' /
 &TAIL /
-\end{verbatim}
+\end{lstlisting}
 \end{minipage}
-\normalsize
 \caption[Snapshot of the {\ct helium\_2d} test case]{Simulation of a helium plume.}
 \label{helium_plume}
 \end{figure}
@@ -2512,13 +2504,11 @@ rectangular region of the domain.
 Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.
 
@@ -2526,35 +2516,29 @@ Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) o
 
 To modify the local initial temperature, add lines of the form,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,, TEMPERATURE=60. /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and out. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
       TEMPERATURE=60. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \subsection*{Density}
 
 When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
       TEMPERATURE=60., DENSITY=1.13 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
@@ -2562,11 +2546,9 @@ When specifying an initial density it is important to recognize the order in whi
 
 The {\ct INIT} line may also be used to specify a volumetric heat source term. For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
 
@@ -2645,11 +2627,9 @@ of {\ct VELOCITY\_TOLERANCE}, the default value on the left and a tighter tolera
 
 In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By default, in order to handle the most general case of a periodic domain with multiple meshes (imagine a periodic channel divided into several meshes), FDS treats the pressure boundary condition as what we call an ``interpolated boundary.''  This means that the matrix for the pressure Poisson equation is arranged for Dirichlet boundary conditions (the value of the solution is specified at the boundary).  This can lead to small errors in the solution and sometimes it is desirable to use the true periodic matrix for the Poisson equation.  But with the current solver (Fishpak) this is only possible for a single mesh.  If you want to implement true periodic boundaries for a single mesh case, set the appropriate \verb=FISHPAK_BC= value to zero on the \verb=PRES= line.  For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PRES FISHPAK_BC(1:3)=0,0,0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \clearpage
 
@@ -2738,12 +2718,10 @@ However, if at least one of the surface conditions for an
 obstruction is the inert default, it can be referred to as {\ct 'INERT'}, but it does not have to be explicitly defined.
 For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=1000.0 /
 &OBST XB=2.3,4.5,1.3,4.8,0.0,9.2, SURF_IDS='FIRE','INERT','INERT' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 puts a fire on top of the obstruction. This is a simple way of
@@ -2751,12 +2729,10 @@ prescribing a burner.
 
 In addition to {\ct SURF\_ID} and {\ct SURF\_IDS}, you can also use the sextuplet {\ct SURF\_ID6} as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=2.3,4.5,1.3,4.8,0.0,9.2,
       SURF_ID6='FIRE','INERT','HOT','COLD','BLOW','INERT' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 where the six surface descriptors refer to the planes $x=2.3$, $x=4.5$, $y=1.3$, $y=4.8$, $z=0.0$, and $z=9.2$, respectively. Note that {\ct SURF\_ID6} should not be used on the same {\ct OBST} line as {\ct SURF\_ID} or {\ct SURF\_IDS}.
@@ -2812,27 +2788,21 @@ Obstructions are typically drawn as solids in Smokeview. To draw an outline repr
 
 The {\ct HOLE} namelist group defines parameters that carve a hole out of an existing obstruction or set of obstructions. To do this, add lines of the form
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HOLE XB=2.0,4.5,1.9,4.8,0.0,9.2 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent Any solid mesh cells within the volume $2.0<x<4.5$, $1.9<y<4.8$, $0.0<z<9.2$ are removed. Obstructions intersecting the volume are broken up into smaller blocks. If the hole represents a door or window, a good rule of thumb is to punch more than enough to create the hole. This ensures that the hole is created through the entire obstruction. For example, if the {\ct OBST} line denotes a wall 0.1~m thick:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=1.0,1.1,0.0,5.0,0.0,3.0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent and you want to create a door, add this:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HOLE XB=0.99,1.11,2.0,3.0,0.0,2.0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent The extra centimeter added to the $x$ coordinates of the hole make it clear that the hole is to punch through the entire obstruction.
 
@@ -2897,11 +2867,10 @@ somewhere on one of the faces of the solid with a {\ct SURF\_ID}
 with the characteristics of the thermal and combustion properties of the fuel.
 For example, the lines
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=0.0,5.0,2.0,3.0,0.0,4.0, SURF_ID='big block' /
 &VENT XB=1.0,2.0,2.0,2.0,1.0,3.0, SURF_ID='hot patch' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 specify a large obstruction (with the properties given elsewhere in the file under the name {\ct 'big block'}) with
@@ -2977,12 +2946,10 @@ A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Re
 
 A {\ct VENT} with {\ct SURF\_ID='PERIODIC'} may be used in combination with another periodic vent on the boundary of the domain in any of the three coordinate directions.  As an example, consider the following:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 In this example, the entire {\ct XMIN} boundary is periodic with the {\ct XMAX} boundary.
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
@@ -3044,20 +3011,18 @@ Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^
 If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
 For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='inlet', VEL=-10. /
 &VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.5, VEL_RMS=1. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent Note that if {\ct VEL\_RMS} is specified, this is equivalent to
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 REYNOLDS_STRESS(1,1) = VEL_RMS**2
 REYNOLDS_STRESS(2,2) = VEL_RMS**2
 REYNOLDS_STRESS(3,3) = VEL_RMS**2
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent and all other components of {\ct REYNOLDS\_STRESS} are zero.
 
@@ -3065,8 +3030,7 @@ In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified S
 This allows more realistic characterization of streamwise vortices in a turbulent boundary layer.
 To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &VENT XB=... , SURF_ID='WIND', N_EDDY=500,
       L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
       L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
@@ -3074,7 +3038,7 @@ To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin
       REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
       REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
       REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \clearpage
 
@@ -3087,12 +3051,10 @@ It is useful when visualizing the results of a simulation to assign to objects a
 
 Colors for many items within FDS can be prescribed in two ways; a triplet of integer color values, {\ct RGB}, or a character string, {\ct COLOR}. The three {\ct RGB} integers range from 0 to 255, indicating the amount of Red, Green and Blue that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\em exactly} as it is listed in the color tables. Color parameters can be specified on a {\ct SURF} line, in which case all surfaces of that type will have that color, or color parameters can be applied directly to obstructions or vents. For example, the lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='UPHOLSTERY', ..., RGB=0,255,0 /
 &OBST XB=..., COLOR='BLUE' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names
@@ -3164,12 +3126,10 @@ For example, to apply a wood paneling image to a wall,
 add to the {\ct SURF} line defining the physical properties of the
 paneling the text
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg', TEXTURE_WIDTH=1.,
       TEXTURE_HEIGHT=2. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 Assuming that a JPEG file called {\ct paneling.jpg} exists in the
 working directory, Smokeview should read it and display the image
 wherever the paneling is used.
@@ -3186,11 +3146,9 @@ direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to
 the {\ct VENT} or {\ct OBST} line to which a texture map
 should be applied. For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=1.0,2.0,3.0,4.0,5.0,7.0, SURF_ID='wood paneling', TEXTURE_ORIGIN=1.0,3.0,5.0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 applies paneling to an obstruction whose dimensions are 1 m by
 1 m by 2 m, such that the image of the paneling is positioned
 at the point (1.0,3.0,5.0). The default value of {\ct TEXTURE\_ORIGIN}
@@ -3205,12 +3163,10 @@ is (0,0,0), and the global default can be changed by added a
 
 Sometimes obstructions, holes and vents are repeated over and over in the input file. This can be tedious to create and make the input file hard to read. However, if a particular set of objects repeats itself in a regular pattern, you can use a utility known as a multiplier. If you want to repeat an obstruction, for example, create a line in the input file as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MULT ID='m1', DX=1.2, DY=2.4, I_LOWER=-2, I_UPPER=3, J_LOWER=0, J_UPPER=5 /
 &OBST XB=..., MULT_ID='m1' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 This has the effect of making an array of obstructions according to the following formulae:
@@ -3227,17 +3183,14 @@ Note that the same rules apply for the $z$ direction as well. In situations wher
 
 A generalization of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}. The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example, define the lower $y$ bound of the original obstruction by {\ct XB(3,0)}. The $n$th obstruction would be:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 XB(3,N) = XB(3,0) + N*DXB(3)
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct N}. This more flexible input scheme allows you to create, for example, a slanted roof in which the individual roof segments shorten as they ascend to the top. This feature is demonstrated by the following short input file that creates a hollowed out pyramid using the four perimeter obstructions that form the outline of its base:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HEAD CHID='pyramid', TITLE='Simple demo of multiplier function, SVN $Revision$' /
 &MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &TIME T_END=0. /
@@ -3252,8 +3205,7 @@ Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct
 &MULT ID='holes', DX=0.15, DZ=0.1, I_UPPER=1, K_UPPER=1 /
 &HOLE XB=0.40,0.45,0.00,1.00,0.15,0.20, MULT_ID='holes' /
 &TAIL /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The end result of this input file is to create a pyramid by repeating long, rectangular obstructions at the base of each face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to repeat the obstructions in sequence rather than as an array.
@@ -3294,13 +3246,11 @@ entry in the input file must have an {\ct ID}, or name, so that they
 may be associated with a particular {\ct SURF} via the parameter {\ct
 MATL\_ID}.  For example, the input file entries:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID='BRICK', CONDUCTIVITY=0.69, SPECIFIC_HEAT=0.84, DENSITY=1600. /
 &SURF ID='BRICK WALL', MATL_ID='BRICK', COLOR='RED', BACKING='EXPOSED', THICKNESS=0.20 /
 &OBST XB=0.1,5.0,1.0,1.2,0.0,1.0, SURF_ID='BRICK WALL' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. The thickness of the wall indicated by the {\ct OBST} line need not
@@ -3330,11 +3280,9 @@ the character string {\ct MATL\_ID}. However, sometimes it is convenient to
 specify a fixed temperature boundary condition, in which case set
 {\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='HOT WALL', COLOR='RED', TMP_FRONT=200. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Note that there is no need to specify a {\ct MATL\_ID} or {\ct THICKNESS}. Because the wall is to be maintained at the given temperature,
@@ -3473,8 +3421,7 @@ example, {\ct MATL\_ID(2,3)='BRICK'} indicates that the third material
 component of the second layer is {\ct BRICK}. In practice, the
 materials are often listed as in the following example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID             = 'INSULATOR'
       CONDUCTIVITY   = 0.041
       SPECIFIC_HEAT  = 2.09
@@ -3485,8 +3432,7 @@ materials are often listed as in the following example:
       COLOR     = 'RED'
       BACKING   = 'EXPOSED'
       THICKNESS = 0.20,0.10 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single material component.
@@ -3503,8 +3449,7 @@ the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same
 two indices as the {\ct MATL\_ID} keyword. For example, if the
 brick layer contains some additional water, the input could look like this:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID            = 'WATER'
       CONDUCTIVITY  = 0.60
       SPECIFIC_HEAT = 4.19
@@ -3517,8 +3462,7 @@ brick layer contains some additional water, the input could look like this:
       COLOR                     = 'RED'
       BACKING                   = 'EXPOSED'
       THICKNESS                 = 0.20,0.10 /  <--- for layers 1 and 2
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 \noindent
 In this example, the first layer of material, Layer~1, is composed of a mixture of
 brick and water. This is given by the {\ct MATL\_ID} array which specifies
@@ -3556,8 +3500,7 @@ temperature. {\ct DENSITY} and {\ct EMISSIVITY} cannot.
 Temperature-dependence is specified using the {\ct RAMP} convention.
 As an example, consider marinite, a wall material suitable for high temperature applications:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID                 = 'MARINITE'
       EMISSIVITY         = 0.8
       DENSITY            = 737.
@@ -3570,8 +3513,7 @@ As an example, consider marinite, a wall material suitable for high temperature 
 &RAMP ID='c_ramp', T=205., F=1.255 /
 &RAMP ID='c_ramp', T=316., F=1.339 /
 &RAMP ID='c_ramp', T=425., F=1.423 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 Notice that with temperature-dependent quantities, the {\ct RAMP} parameter
 {\ct T} means Temperature, and {\ct F} is the value of either
 the specific heat or conductivity. In this case, neither {\ct CONDUCTIVITY} nor {\ct SPECIFIC\_HEAT} is given on the
@@ -3648,8 +3590,7 @@ if the layering is not symmetric, you must create two separate {\ct SURF} lines 
 made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material,
 would have to be described with two {\ct SURF} lines like the following:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID                 = 'COLUMN EXTERIOR'
       COLOR              = 'ANTIQUE WHITE'
       BACKING            = 'EXPOSED'
@@ -3661,7 +3602,7 @@ would have to be described with two {\ct SURF} lines like the following:
       BACKING            = 'EXPOSED'
       MATL_ID(1:3,1)     = 'STEEL','INSULATION','PLASTIC'
       THICKNESS(1:3)     = 0.0063,0.036,0.002 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines,
@@ -3693,11 +3634,10 @@ flat. Even though these objects have to be represented in FDS as
 calculation as if the object were really cylindrical or spherical. For
 example, the input lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
 &SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 can be used to model a power cable that is 5~m long, cylindrical in
@@ -3769,11 +3709,9 @@ from a solid surface or vent. This is essentially a burner, with a
 specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of
 kW/m$^2$. For example
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=500. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 applies 500~kW/m$^2$ to any surface with the attribute
@@ -3795,16 +3733,14 @@ Specifying {\ct HRRPUA} or {\ct MLRPUA} requires the use of the single, mixing-c
 
 Sometimes it is desired that a fire spread radially at some specified rate. Rather than trying to obtain material properties to directly model the ignition and spread of the fire, you can specify the fire spread rate directly. First, you need to add a {\ct SURF} line with a specified heat release rate, {\ct HRRPUA}, and an optional time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q}. Then, you must specify {\ct XYZ} and {\ct SPREAD\_RATE} on either a {\ct VENT} or the same {\ct SURF} line. The fire is directed to start at the point {\ct XYZ} and spread radially at a rate of {\ct SPREAD\_RATE} (m/s). The optional ramp-up of the HRR begins at the time when the fire arrives at a given point. For example, the lines
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=500.0, RAMP_Q='fireramp' /
 &RAMP ID='fireramp', T= 0.0, F=0.0 /
 &RAMP ID='fireramp', T= 1.0, F=1.0 /
 &RAMP ID='fireramp', T=30.0, F=1.0 /
 &RAMP ID='fireramp', T=31.0, F=0.0 /
 &VENT XB=0.0,5.0,1.5,9.5,0.0,0.0, SURF_ID='FIRE', XYZ=1.5,4.0,0.0, SPREAD_RATE=0.03 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 create a rectangular area via the {\ct VENT} line on which the fire starts at the point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used to turn the burning on and off to simulate the consumption of fuel as the fire spreads radially. It should not be used to mimic the ``$t$-squared'' curve -- the whole point of the exercise is to mimic this curve in a more natural way. Eventually, the fire goes out as the ring grows past the boundary of the rectangle. Some trial and error is probably required to find the {\ct SPREAD\_RATE} that leads to a desired time history of the heat release rate.
@@ -3827,8 +3763,7 @@ bulk thermal properties, its ``ignition'' temperature, and its
 subsequent burning rate as a function of time from ignition. For
 this situation, add lines similar to the following:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID                   = 'stuff'
       CONDUCTIVITY         = 0.1
       SPECIFIC_HEAT        = 1.0
@@ -3846,7 +3781,7 @@ this situation, add lines similar to the following:
 &RAMP ID='fire_ramp', T= 10.0, F=1.0 /
 &RAMP ID='fire_ramp', T=310.0, F=1.0 /
 &RAMP ID='fire_ramp', T=320.0, F=0.0 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 An object with surface properties defined by {\ct 'my surface'} shall
@@ -3866,8 +3801,7 @@ specified for the surface. For example, when using the lines below,
 the net heat flux at the material surface is reduced by a factor
 1000~kJ/kg times the instantaneous burning rate.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID                   = 'my surface'
       COLOR                = 'GREEN'
       MATL_ID              = 'stuff'
@@ -3876,7 +3810,7 @@ the net heat flux at the material surface is reduced by a factor
       HEAT_OF_VAPORIZATION = 1000.
       RAMP_Q               = 'fire_ramp'
       THICKNESS            = 0.01 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the
@@ -3942,8 +3876,7 @@ all of the gas species (except for the background nitrogen) are explicitly defin
 needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the
 mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID = 'PYROLYZATE', MW=53.6 /
 &SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23 /
 &SPEC ID = 'WATER VAPOR' /
@@ -3964,7 +3897,7 @@ mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted t
       NU_SPEC(1:4,1)        = 0.82,0,0,0
       HEAT_OF_REACTION(1)   = 430.
       HEAT_OF_COMBUSTION(1) = 14500. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can
 be multiple reactions with corresponding kinetic parameters and products.
@@ -4050,7 +3983,7 @@ undergoing heating at a rate of 5~K/min. The green curve represents the reaction
 reaction rate, and residue yield of the single reaction. From these parameters, values of $A$ and $E$ can be estimated using
 the formulae in (\ref{AandE}). The full set of parameters for this case are listed in {\ct pyrolysis\_1.fds}.}
 \label{pyrolysis}
-\end{figure} \normalsize
+\end{figure}
 
 There are many cases where it is only possible to estimate the {\ct REFERENCE\_TEMPERATURE} ($T_p$) of a particular
 reaction because micro-scale calorimetry data is unavailable. In such cases,
@@ -4073,8 +4006,7 @@ Do not specify $A$ and $E$ if you specify {\ct REFERENCE\_TEMPERATURE}, and do n
 specify {\ct REFERENCE\_RATE}.
 For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} would have the form:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID                       = 'My Fuel'
       ...
       N_REACTIONS              = 1
@@ -4085,8 +4017,7 @@ For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} wou
       HEATING_RATE(1)          = 5.
       HEAT_OF_COMBUSTION(1)    = ...
       HEAT_OF_REACTION(1)      = ... /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Note that the indices have been added to the reaction parameters to
@@ -4122,8 +4053,7 @@ megawatts of energy and sometimes lead to compartment flashover. Modeling
 a couch fire requires a simplification of its structure and materials.
 At the very least, we want the upholstery to be modeled as a layer of fabric covering polyurethane foam. We need the thermal properties of each, along with estimates of the ``reference'' temperatures as described above. The foam might be described as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID                    = 'FOAM'
       SPECIFIC_HEAT         = 1.0
       CONDUCTIVITY          = 0.05
@@ -4134,7 +4064,7 @@ At the very least, we want the upholstery to be modeled as a layer of fabric cov
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Note that these properties are completely made up.
@@ -4309,8 +4239,7 @@ material, with a few exceptions. The evaporation rate of the fuel
 is governed by the mass transfer number (see FDS Technical Reference
 Guide for details). The properties of a liquid fuel are given on the {\ct MATL} line:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID                     = 'ETHANOL LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 0.97
@@ -4321,7 +4250,7 @@ Guide for details). The properties of a liquid fuel are given on the {\ct MATL} 
       DENSITY                = 789.
       BOILING_TEMPERATURE    = 78.5
       ABSORPTION_COEFFICIENT = 1534.3 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
@@ -4500,8 +4429,7 @@ shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The 
 details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 
 
-\scriptsize
-\begin{verbatim}
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
 &HEAD CHID='FAA_Polymers_PMMA', TITLE='Black PMMA at 50 kW/m2, No Gas Phase Reaction' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
@@ -4543,7 +4471,7 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 &DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',       ID='thick' /
 
 &TAIL /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 
 \subsection{Simulating Benchscale Measurements like the TGA, DSC, and MCC}
@@ -4600,12 +4528,10 @@ The normal component of velocity is usually specified directly via the parameter
 computational domain, i.e., a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the
 domain, i.e., an exhaust vent. For example, the lines
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='SUPPLY', VEL=-1.2, COLOR='BLUE' /
 &VENT XB=5.0,5.0,1.0,1.4,2.0,2.4, SURF_ID='SUPPLY' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an area of nominally 0.16~m$^2$, depending on the
@@ -4621,12 +4547,10 @@ with a {\ct VOLUME\_FLUX} prescribed can be invoked by either a
 velocity on the face or faces of the obstruction will be given by the specified
 {\ct VOLUME\_FLUX} divided by the area of that particular face. For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='SUPPLY', VOLUME_FLUX=-5.0, COLOR='GREEN' /
 &OBST XB=..., SURF_ID6='BRICK','SUPPLY','BRICK','BRICK','BRICK','BRICK' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 dictates that the forward $x$-facing surface of the obstruction is to have a velocity
@@ -4654,11 +4578,9 @@ for an outflow is adjusted based on the local density.
 
 You can create a simple heating vent by changing the temperature of the incoming air
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The {\ct VENT} with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
@@ -4682,11 +4604,9 @@ The normal component is specified with {\ct VEL} as described above. The tangent
 via a pair of real numbers {\ct VEL\_T} representing the desired tangential
 velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='LOUVER', VEL=-1.2, VEL_T=0.5,-0.3 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 is a boundary condition for a louvered vent that pushes air into the
@@ -4737,22 +4657,20 @@ units of kg/m$^2$/s.
 
 \subsection*{Mass Flux Example}
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='METHANE' /
 &SURF ID='METHANE_FLOW', SPEC_ID(1)='METHANE', MASS_FLUX(1)=0.025 /
 &OBST XB=0.4,0.6,0.4,0.6,0.00,0.2,SURF_IDS='METHANE_FLOW','INERT','INERT' /
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 
 \subsection*{Velocity Example}
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='METHANE' /
 &SURF ID='INFLOW', MASS_FRACTION(1)=1.0, SPEC_ID(1)='METHANE', VEL=-0.1 /
 &VENT XB=0.0,0.4,0.0,0.1,0.15,0.15, SURF_ID='INFLOW' /
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \noindent Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use {\ct MASS\_FLUX}.
 
@@ -4776,10 +4694,9 @@ The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in t
 An HVAC network is defined by providing inputs for the ducts; duct nodes; and any fans, dampers, filters, or heating and coiling coils present in the system.
 Additionally you must define the locations where the HVAC network joins the computational domain.  The basic syntax for an {\ct HVAC} component is:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HVAC TYPE_ID='componenttype', ID='componentname', ... /
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 
 \begin{description}
@@ -4795,11 +4712,10 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 
 A typical input line specifying a duct is as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \noindent where:
 
@@ -4839,27 +4755,25 @@ where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. For further details see the {\ct HVAC\_damper} example case, which is documented in the
 Verification Guide.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HVAC TYPE_ID='DUCT',ID='EXHAUST 2',NODE_ID='TEE','EXHAUST 2',AREA=0.01,
       LENGTH=1.0,LOSS=0,0,DAMPER=.TRUE.,DEVC_ID='TIMER'/
 &DEVC QUANTITY='TIME',ID='TIMER',SETPOINT=10,INITIAL_STATE=.TRUE.,XYZ=0,0,0/
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \subsection{HVAC Node Parameters}
 \label{info:HVACnode}
 
 Below are three example duct node inputs representing a typical tee-type connection (multiple ducts being joined), a connection to the FDS domain, and a connection to the ambient outside the FDS domain.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HVAC TYPE_ID='NODE', ID='tee', DUCT_ID='duct 1','duct 2',..'duct n',
       LOSS_ARRAY=lossarray, XYZ=x,y,z /
 &HVAC TYPE_ID='NODE', ID='FDS connection', DUCT_ID='duct 1', VENT_ID='vent',
       LOSS_ARRAY=enter,exit /
 &HVAC TYPE_ID='NODE', ID='ambient', DUCT_ID='duct 1', LOSS_ARRAY=enter,exit,
       XYZ=x,y,z /
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \noindent where:
 
@@ -4881,13 +4795,12 @@ A duct node must either have two or more ducts attached to it or it must have ei
 
 Below are given sample inputs for the three types of fans supported by FDS.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HVAC TYPE='FAN', ID='constant volume', DEVC_ID='device 1', VOLUME_FLOW=1.0, LOSS=2./
 &HVAC TYPE='FAN', ID='quadratic', DEVC_ID='device 1',
       MAX_FLOW=1., MAX_PRESSURE=1000., LOSS=2. /
 &HVAC TYPE='FAN', ID='user fan curve', RAMP_ID='fan curve',  DEVC_ID='device 1', LOSS=2. /
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \noindent where:
 
@@ -4926,8 +4839,7 @@ pressure difference, {\ct MAX\_PRESSURE}, the fan can operate upon, and it is as
 The flow through a fan will decrease from $\dot{V}_{\hbox{\footnotesize max}}$ at zero pressure difference to 0~m$^3$/s at $\Delta p_{\hbox{\footnotesize max}}$.
 If the pressure difference increases beyond this, air will be forced backwards through the fan.   If the downstream pressure becomes negative, then the volume flow through the fan will increase beyond {\ct MAX\_FLOW}. More complicated fan curves can be specified by defining a {\ct RAMP}.  In the example inputs below, one fan of each type is specified.  A constant volume flow fan with a {\ct VOLUME\_FLOW} of 10~m$^3$/s, a quadratic fan with {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}, and a user-defined fan with the {\ct RAMP} set to the values of the quadratic fan in 200~Pa increments,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HVAC TYPE='FAN', ID='constant volume', VOLUME_FLOW=10.0/
 
 &HVAC TYPE='FAN', ID='quadratic', MAX_FLOW=10., MAX_PRESSURE=500./
@@ -4944,7 +4856,7 @@ If the pressure difference increases beyond this, air will be forced backwards t
 &RAMP ID='fan curve',F=  600,T= -4.47/
 &RAMP ID='fan curve',F=  800,T= -7.75/
 &RAMP ID='fan curve',F= 1000,T=-10.00/
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 Figure~\ref{fig:Fan_Curve} displays the fan curves for the inputs shown above.  Additional examples can be found in the {\ct ashrae7} and {\ct fan\_test} example cases, which are documented in the Verification Guide.
 
@@ -4982,11 +4894,10 @@ a short passageway that draws gases in one side and expels them out the other. T
 
 A sample input for a filter is given by:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HVAC TYPE='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
       EFFICIENCY=0.99, LOADING_MULTIPLIER=1, CLEAN_LOSS=2., LOSS=100./
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \noindent where:
 
@@ -5004,13 +4915,12 @@ A sample input for a filter is given by:
 
 A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial flow loss of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter}, which is documented in the Verification Guide.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='PARTICULATE',MW=28.,MASS_FRACTION_0=0.001,SPECIFIC_HEAT=1./
 &HVAC TYPE_ID='NODE',ID='FILTER',DUCT_ID='DUCT1','DUCT2',XYZ(3)=0.55,FILTER_ID='FILTER'/
 &HVAC TYPE_ID='FILTER',ID='FILTER',CLEAN_LOSS=1.,SPEC_ID='PARTICULATE',EFFICIENCY=1.,
       LOSS=7732.446,LOADING_MULTIPLIER=1./
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 Note that a filter input refers to a class of filters and that multiple ducts can reference the same filter definition.
 
@@ -5019,11 +4929,10 @@ Note that a filter input refers to a class of filters and that multiple ducts ca
 
 An aircoil refers to a device that either adds or removes heat from air flowing through a duct.  In a typical HVAC system this is done by blowing the air over a heat exchanger (hence the term aircoil) containing a working fluid such as chilled water or a refrigerant.  A sample input is line is as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &HVAC TYPE='AIRCOIL', ID='aircoil 1', DEVC_ID='device 1', EFFICIENCY=0.5,
       COOLANT_SPECIFIC_HEAT=4.186, COOLANT_TEMPERATURE=10., COOLANT_MASS_FLOW=1./
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \noindent where:
 
@@ -5064,11 +4973,10 @@ The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoi
 
 The HVAC system being modeled may either have louvers that redirect the flow leaving a vent or the orientation of the real vent may not lie along one of the axes in FDS.  To define the flow direction for an HVAC outlet, you can use the keyword {\ct UVW} on {\ct VENT}.  {\ct UWV} is the vector indicating the direction of flow from the {\ct VENT}.  For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=1.0,2.0,0.0,1.0,0.0,1.0 /
 &VENT XB=1.0,1.0,0.0,1.0,0.0,1.0, SURF_ID='HVAC', ID='HVAC OUTLET', UVW=-1,0,1 /
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \noindent The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ direction.  The flow vector indicates that the flow from this vent is in the $-x$ direction with a 45 degree up angle (the $x$ and $z$ components are equal in size).  FDS will set the tangential velocity of the vent to obtain the specified direction indicated by {\ct UVW}.  This will only be done if the vent is inputting gas into the domain.
 
@@ -5094,11 +5002,9 @@ A pressure zone can by any region within the computational domain that is separa
 by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is
 necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s
@@ -5192,12 +5098,10 @@ A better way to handle leakage is by exploiting pressure zones. A pressure zone 
 entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. Leakage from one
 compartment to another is then designated on the input lines defining the individual pressure {\ct ZONE}s:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &ZONE XB=..., LEAK_AREA(0)=0.0001 /
 &ZONE XB=..., LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order
@@ -5216,11 +5120,9 @@ Within FDS, leakage flows are handled by the HVAC solver.  A leak between two zo
 {\ct LEAK\_PATH=1,0}, meaning that the leak between Zones~1 and 0 is uniformly distributed
 over solids defined with:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='whatever',..., LEAK_PATH=1,0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Likewise, the boundaries of Zone~1 and Zone~2 must include solids whose {\ct SURF} properties include the parameter {\ct LEAK\_PATH=1,2}, but these solids need not form a boundary between the two zones. The leakage is spread over the surfaces that have a specified {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
@@ -5298,15 +5200,13 @@ In some situations, it is more convenient to specify a pressure, rather than a v
 interior of a tunnel, and a wind is blowing at one of the portals that affects the overall flow within the tunnel. If (and only if) the portal is defined using an
 {\ct OPEN} vent, then the {\em dynamic pressure} at the boundary can be specified like this:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &VENT XB=..., SURF_ID='OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind' /
 &RAMP ID='wind', T= 0.0, F=1.0 /
 &RAMP ID='wind', T=30.0, F=0.5 /
             .
             .
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
@@ -5325,14 +5225,13 @@ a time-dependent pressure boundary at the end of a tunnel. The tunnel is 10~m lo
 with a fire in the middle and a pressure boundary imposed on the right side. The left side ({\ct XMIN}) is
 just an {\ct OPEN} boundary with no pressure specified. It is assumed to be at ambient pressure.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &VENT MB = 'XMIN' SURF_ID = 'OPEN' /
 &VENT MB = 'XMAX' SURF_ID = 'OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind_ramp' /
 &RAMP ID='wind_ramp', T= 0., F= 1. /
 &RAMP ID='wind_ramp', T=15., F= 1. /
 &RAMP ID='wind_ramp', T=16., F=-1. /
-\end{verbatim}\normalsize
+\end{lstlisting}
 
 \noindent
 Figure~\ref{pressure_boundary} shows two snapshots from Smokeview taken before and after the time when the positive pressure is
@@ -5434,13 +5333,11 @@ character string designating the ramp function to use for that
 particular surface type, then somewhere in the input file generate
 lines of the form:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
  &RAMP ID='rampname1', T= 0.0, F=0.0 /
  &RAMP ID='rampname1', T= 5.0, F=0.5 /
  &RAMP ID='rampname1', T=10.0, F=0.7 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Here, {\ct T} is the time, and {\ct F} indicates the fraction of the heat
@@ -5454,8 +5351,7 @@ Note also that the {\ct TAU}s and the {\ct RAMP}s are mutually exclusive. For a 
 surface quantity, both cannot be prescribed.
 As an example, a simple blowing vent can be controlled via the lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50., RAMP_V='BLOWER RAMP', RAMP_T='HEATER RAMP' /
 &RAMP ID='BLOWER RAMP', T= 0.0, F=0.0 /
 &RAMP ID='BLOWER RAMP', T=10.0, F=1.0 /
@@ -5465,8 +5361,7 @@ As an example, a simple blowing vent can be controlled via the lines:
 &RAMP ID='HEATER RAMP', T=20.0, F=1.0 /
 &RAMP ID='HEATER RAMP', T=30.0, F=1.0 /
 &RAMP ID='HEATER RAMP', T=40.0, F=0.0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Use {\ct TAU\_T} or {\ct RAMP\_T}
@@ -5482,12 +5377,10 @@ Use {\ct TAU\_MF(N)} or {\ct RAMP\_MF(N)}
 to control the ramp-ups for either the mass
 fraction or mass flux of species {\ct N}. Here, the $N$ refers to the $N$th species listed on the {\ct SURF} line. For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='...', MASS_FLUX(1:2)=0.1,0.3, SPEC_ID(1:2)='ARGON','NITROGEN',
       TAU_MF(1:2)=5.,10. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 indicates that argon and nitrogen are to be injected at rates of 0.1~kg/m$^2$/s and 0.3~kg/m$^2$/s over time periods of approximately 5~s and 10~s, respectively. It does not
@@ -5523,8 +5416,7 @@ Gravity             & {\ct MISC}        & {\ct GVEC(3)}                         
 Thermal properties like conductivity and specific heat can vary significantly with temperature. In such cases, use
 the {\ct RAMP} function like this:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID                 = 'STEEL'
       FYI                = 'A242 Steel'
       SPECIFIC_HEAT_RAMP = 'c_steel'
@@ -5537,8 +5429,7 @@ the {\ct RAMP} function like this:
 
 &RAMP ID='k_steel', T= 20., F=48.    /
 &RAMP ID='k_steel', T=677., F=30.    /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Note that for temperature ramps, as opposed to time ramps, the parameter {\ct F} is the actual physical quantity, not just
@@ -5552,8 +5443,7 @@ given range, FDS will assume a constant value equal to the first or last {\ct F}
 
 Arrhenius reaction parameters are typically found for a particular range of equivalence ratios; however, equivalence ratios within a simulation may exist in multiple ranges. For these cases, a piecewise definition of Arrhenius parameters based on equivalence ratio can be used to define the pre-exponential {\ct A} and activation energy {\ct E} using the {\ct RAMP} function with a defined chemical reaction as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC ID = 'CARBON MONOXIDE'
       FUEL = 'CARBON MONOXIDE'
       A = 4e14
@@ -5575,8 +5465,7 @@ Arrhenius reaction parameters are typically found for a particular range of equi
 &RAMP ID='rampe', T = 1.00,    F = 0 /
 &RAMP ID='rampe', T = 1.00001, F = 1 /
 &RAMP ID='rampe', T = 100.,    F = 1 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line to indicate that a {\ct RAMP} is being used. Unlike other {\ct RAMP} functions, {\ct T} is the equivalence ratio, {\em not} time or temperature. For Arrhenius ramps, {\ct F} is a fraction of the the quantity {\ct A} or {\ct E}. In this example, for equivalence ratios less than or equal to 1, the pre-exponential is large and the activation is energy is 0, which indicates that the reaction is fast. For equivalence ratios greater than 1, the reaction parameters are equal to those defined on the {\ct REAC} line.
 
@@ -5589,12 +5478,10 @@ Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line 
 Some input quantities, such as a sprinkler spray pattern, vary multi-dimensionally. In such cases, use
 the {\ct TABL} namelist group. The format of the {\ct TABL} lines is application-specific, but in general look like this:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &TABL ID='TABLE1', TABLE_DATA=40,50, 85, 95,10,0.5 /
 &TABL ID='TABLE1', TABLE_DATA=40,50,185,195,10,0.5 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 A detailed description of the various table entries is given in the sections that describe quantities that use such
@@ -5638,8 +5525,7 @@ Following is a very simple example of how a gas---in this case hydrogen---can be
 \vskip\baselineskip
 
 \noindent A simple input file called {\ct gas\_filling.fds} demonstrates how to add a gas species to your simulation. The relevant lines are as follows:
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='HYDROGEN' /
 &SURF ID='LEAK', SPEC_ID(1)='HYDROGEN', MASS_FLUX(1)=0.01667, RAMP_MF(1)='leak_ramp' /
 &RAMP ID='leak_ramp', T=  0., F=0.0 /
@@ -5648,8 +5534,7 @@ Following is a very simple example of how a gas---in this case hydrogen---can be
 &RAMP ID='leak_ramp', T=181., F=0.0 /
 &VENT XB=-0.6,0.4,-0.6,0.4,0.0,0.0, SURF_ID='LEAK', COLOR='RED' /
 &DUMP MASS_FILE=.TRUE. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~kg/m$^2$/s and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
@@ -5665,11 +5550,9 @@ The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~kg/m$^2$
 
 If the initial mass fraction of the gas is something other than zero, then the parameter {\ct MASS\_FRACTION\_0} is used to specify it. For example, if you want the initial concentration in the domain to be 90\% background (air) diluted with 10\% argon, use
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='ARGON', MASS_FRACTION_0=0.1 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \subsubsection{Specifying Humidity}
 \label{info:humidity}
@@ -5774,10 +5657,9 @@ species is not in the recognized list, then it will be assumed to be a fuel when
 
 There are only a small number of species with predefined RadCal absorptivities (see ~\ref{info:RadCal_fuelspecies}).  There are many other species which are absorbing.  For absorbing species not present in RadCal, {\ct RADCAL\_ID} can be used to identify a RadCal species to serve as a surrogate. For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='ETHANOL', RADCAL_ID='METHANOL' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}. Table~\ref{tab:gasspecies} lists the default RadCal surrogates for various gas species.
 For absorbing species not present in RadCal, it is recommended to choose a RadCal surrogate with similar molecular functional groups and molecular mass. The infrared spectrum is greatly affected by the species molecular functional groups.
@@ -5801,12 +5683,11 @@ Subgroups bracketed by parentheses can also be given.  The element name is given
 and Applied Chemistry} abbreviation (e.g., C for carbon, He for helium).
 The following are all equivalent:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='ETHYLENE GLYCOL', FORMULA='C2H6O2'/
 &SPEC ID='ETHYLENE GLYCOL', FORMULA='OHC2H4OH'/
 &SPEC ID='ETHYLENE GLYCOL', FORMULA='C2H4(OH)2'/
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 
 \subsubsection{Two Gas Species with the Same Properties}
@@ -5814,27 +5695,24 @@ The following are all equivalent:
 
 In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by defining a lumped species, see Chapter~\ref{info:lumped}, with a single component.  For example, the lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='CARBON DIOXIDE', LUMPED_COMPONENT_ONLY=.TRUE./
 &SPEC ID='CO2 1',SPEC_ID='CARBON DIOXIDE'/
 &SPEC ID='CO2 2',SPEC_ID='CARBON DIOXIDE'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 1', ID='Device 1'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 2', ID='Device 2'/
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent define two lumped species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$.  The {\ct ID} for each species is then used in the remainder of the input file.  The {\ct LUMPED\_COMPONENT\_ONLY} is given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not also {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for for a lumped species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  In this example the two {\ct DEVC} lines refer to the {\ct ID}s of the lumped species.  If instead the primitive species {\ct ID} was used, then the that output would sum the mass fractions over all species containing that primitive species.  For example, if the output quantities in the example above are changed as shown below, then {\ct Device 1} would just output the mass fraction of {\ct CO2 1} and {\ct Device 2} would output the sum of both.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 1', ID='Device 1'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CARBON DIOXIDE', ID='Device 2'/
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 Another application of this would be if you wanted to track the water that evaporated from sprinklers, separately from the water
 that resulted from combustion.  The following inputs would allow you to do that:
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL='PROPANE',SOOT_YIELD=0.02,CO_YIELD=0.01/
 &SPEC ID='WATER VAPOR SPK', SPEC_ID='WATER VAPOR/
 
@@ -5842,7 +5720,7 @@ that resulted from combustion.  The following inputs would allow you to do that:
 
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR SPK', ID='Sprinkler Water Vapor'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR', ID='All Water Vapor'/
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent The above inputs create a species called {\ct WATER VAPOR SPK} that has all the same properties as {\ct WATER VAPOR}.  The first device will give only water that resulted from droplet evaporation, and the second device would give water that came from both sprinklers and combustion.
 
@@ -5860,18 +5738,16 @@ The following inputs define equivalent initial mixtures. But in the first exampl
 \vskip\baselineskip
 \noindent{\bf Example 1: All primitive species}
 \vskip\baselineskip
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE. / Note: The background must be defined first.
 &SPEC ID='OXYGEN',         MASS_FRACTION_0=0.23054 /
 &SPEC ID='WATER VAPOR',    MASS_FRACTION_0=0.00626 /
 &SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0=0.00046 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent{\bf Example 2: Defining a background {\ct SPEC}}
 \vskip\baselineskip
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='NITROGEN',       LUMPED_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='OXYGEN',         LUMPED_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='WATER VAPOR',    LUMPED_COMPONENT_ONLY=.TRUE. /
@@ -5882,7 +5758,7 @@ The following inputs define equivalent initial mixtures. But in the first exampl
       SPEC_ID(2)='OXYGEN',         MASS_FRACTION(2)=0.23054,
       SPEC_ID(3)='WATER VAPOR',    MASS_FRACTION(3)=0.00626,
       SPEC_ID(4)='CARBON DIOXIDE', MASS_FRACTION(4)=0.00046 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 The logical parameter {\ct LUMPED\_COMPONENT\_ONLY} denotes that the species is only present as part of a lumped species. When {\ct .TRUE.}, FDS will not allocate space to track that species individually. The parameters to defined a lumped species are::
@@ -5983,33 +5859,27 @@ The ambient mass fractions for the constituents of air are specified on {\ct MIS
 \noindent
 A few sample {\ct REAC} lines are given here.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL = 'METHANE' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 \noindent In this case, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL}
 is listed in Table~\ref{tab:gasspecies}. It is assumed that the soot and CO yields are zero.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL               = 'PROPANE'
       SOOT_YIELD         = 0.01
       CO_YIELD           = 0.02
       HEAT_OF_COMBUSTION = 46460. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 \noindent In this case, the heat of combustion is specified explicitly rather than calculated.
 The soot yield is specified as 0.01 and the CO yield is specified as 0.02.
 See Section~\ref{info:heat_of_combustion} for more details on the heat of combustion.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL               = 'MY FUEL'
       FORMULA            = 'C3H8O3N4'
       HEAT_OF_COMBUSTION = 46124. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 \noindent In this case, the {\ct FORMULA} and heat of combustion are known, but the product yields are not.
 
 
@@ -6023,11 +5893,9 @@ The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction
 \subsubsection{Option 1: Specify Enthalpy of Formation}
 You can specify unknown enthalpies on the {\ct SPEC} line in units of kJ/mol:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID = 'GLUCOSE', FORMULA = 'C62H12O6', ENTHALPY_OF_FORMATION=-1.297E3 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \subsubsection{Option 2: Specify Heat of Combustion}
 For a given reaction, if the only species missing an enthalpy of formation is the fuel, the missing value can be found if the heat of combustion is specified on {\ct REAC}. Section~\ref{info:Complex_Fuel} provides an example for which the fuel, polyvinyl chloride, has an unspecified enthalpy of formation but a specified heat of combustion on the {\ct REAC} line.
@@ -6135,10 +6003,9 @@ The ``simple chemistry'' parameters described above can only be used when there 
 For any other situation, you must specify the reaction stoichiometry in greater detail. This means that you must explicitly specify the gas species, or species mixtures, along with
 the stoichiometry of the reaction. The easiest way to explain this is by way of example. Consider a single reaction involving methane. When you specify the {\ct REAC} line to be:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL='METHANE' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent FDS assumes the following reaction:
 \begin{multline}
@@ -6149,8 +6016,7 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
 
 \noindent By default, there are trace amounts of carbon dioxide and water vapor in the air, which, like the nitrogen, is carried along in the reaction. This is important, because the more complicated way to specify a single step reaction of methane is as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='NITROGEN',       LUMPED_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='OXYGEN',         LUMPED_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='WATER VAPOR',    LUMPED_COMPONENT_ONLY=.TRUE. /
@@ -6170,7 +6036,7 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
 
 &REAC FUEL='METHANE',SPEC_ID_NU='METHANE','AIR','PRODUCTS',
       NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Note that the stoichiometry is specified using the inputs {\ct NU} and {\ct SPEC\_ID\_NU}.  All species listed for {\ct NU} need to be tracked species (i.e. a species with {\ct LUMPED\_COMPONENT\_ONLY} cannot be specified for {\ct NU}). \footnote{There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry.
@@ -6201,8 +6067,7 @@ Since it is assumed that all of the Cl is converted to HCL, the remainder of the
 \end{multline}
 The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspecies}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the species' chemical formula. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not have an explicit transport equation is an {\ct LUMPED\_COMPONENT\_ONLY}.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID = 'PVC', FORMULA = 'C2H3Cl' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
@@ -6211,12 +6076,11 @@ The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspe
 &SPEC ID = 'CARBON MONOXIDE',   LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'SOOT',              LUMPED_COMPONENT_ONLY = .TRUE. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent For the oxidizer and products, which are both composed of multiple primitive species, {\ct SPEC} lines are needed to define the composition of the lumped species. You can define the {\ct SPEC} using either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. If Eq.~(\ref{eq:PVC_reac2}) is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='AIR', BACKGROUND=.TRUE.
       SPEC_ID(1)='OXYGEN',   VOLUME_FRACTION(1)=1.53,
       SPEC_ID(2)='NITROGEN', VOLUME_FRACTION(2)=5.76 /
@@ -6228,23 +6092,21 @@ The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspe
       SPEC_ID(4)='CARBON DIOXIDE',    VOLUME_FRACTION(4)=0.96,
       SPEC_ID(5)='SOOT',              VOLUME_FRACTION(5)=0.90,
       SPEC_ID(6)='NITROGEN',          VOLUME_FRACTION(6)=5.76 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions. To set the initial concentration of fuel, an {\ct INIT} line is used:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT MASS_FRACTION(1)=0.229, SPEC_ID(1)='PVC' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent Since this is not a simple chemistry problem, either the enthalpy of formation of PVC or the heat of combustion of the reaction should be specified. In this case, the heat of combustion for PVC is taken from the SFPE Handbook~\cite{SFPE:Tewarson}.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS', NU=-1,-1,1
       FIXED_MIX_TIME=0.1 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
@@ -6269,7 +6131,7 @@ and the reaction for wood with a soot yield of $y_s$ = 0.015 and a CO yield of $
 1\,\underbrace{\mathrm{(0.964384\; CO_2 + 0.003655 \; CO + 0.85 \; H_2O + 0.031961\; C + 3.84076 \; N_2)}}_\text{Products\_2}
 \end{multline}
 Similar to example in Section~\ref{info:Complex_Fuel}, we will use the lumped species approach to minimize the number of species that FDS needs to transport. Therefore, the species are defined in the following manner:
-\footnotesize \begin{verbatim}
+\begin{lstlisting}
 &SPEC ID = 'POLYURETHANE', FORMULA = 'C25H42O6N2' /
 &SPEC ID = 'WOOD', FORMULA = 'CH1.7O0.74N0.002' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
@@ -6278,9 +6140,9 @@ Similar to example in Section~\ref{info:Complex_Fuel}, we will use the lumped sp
 &SPEC ID = 'CARBON MONOXIDE',   LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'SOOT',              LUMPED_COMPONENT_ONLY = .TRUE. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 Examination of Eq.~(\ref{eq:pu_combust}) and Eq.~(\ref{eq:wood_combust}) shows that, while Products\_1 and Products\_2 are composed of the same species, the species do not exist in the same proportion. As a result, we must construct two separate product lumped species.
-\footnotesize \begin{verbatim}
+\begin{lstlisting}
 &SPEC ID = 'AIR',
       SPEC_ID(1) = 'OXYGEN',   VOLUME_FRACTION(1)=1,
       SPEC_ID(2) = 'NITROGEN', VOLUME_FRACTION(2)=3.76,
@@ -6299,9 +6161,9 @@ Examination of Eq.~(\ref{eq:pu_combust}) and Eq.~(\ref{eq:wood_combust}) shows t
       SPEC_ID(3) = 'WATER VAPOR',     VOLUME_FRACTION(3) = 0.85,
       SPEC_ID(4) = 'SOOT',            VOLUME_FRACTION(4) = 0.031961,
       SPEC_ID(5) = 'NITROGEN',        VOLUME_FRACTION(5) = 3.84076 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 Once we have constructed the lumped species, we can define the {\ct REAC} lines.
-\footnotesize \begin{verbatim}
+\begin{lstlisting}
 &REAC ID = 'plastic',
       FUEL = 'POLYURETHANE',
       HEAT_OF_COMBUSTION=26200,
@@ -6313,23 +6175,23 @@ Once we have constructed the lumped species, we can define the {\ct REAC} lines.
       HEAT_OF_COMBUSTION=16400,
       SPEC_ID_NU = 'WOOD','AIR','PRODUCTS_2'
       NU=-1,-1.02121,1 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuels is unknown to FDS, so the {\ct HEAT\_OF\_COMBUSTION} is specified for each reaction. Typically, the heat release per unit area ({\ct HRRPUA}) parameter is used to specify the fire size on the {\ct SURF} line. The {\ct HRRPUA} parameter cannot currently be used when there is more than one fuel, so the mass flux of fuel must be specified for each fuel. In this example, we want both fuels to flow out of the same burner and ramp up to a 1200~kW fire after 60~s. First, we create a 1~m$^2$ burner by defining a {\ct VENT} line:
-\footnotesize \begin{verbatim}
+\begin{lstlisting}
 &VENT XB=4.0,5.0,4.0,5.0,0.0,0.0, SURF_ID='FIRE1', COLOR='RED'/
-\end{verbatim} \normalsize
+\end{lstlisting}
 The {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using both fuels. The mass flux values for each fuel are determined by the desired heat release, the proportion of the total heat release rate each fuel contributes, the burner area, and the heat of combustion of each fuel. In this case we want a 1200~kW fire where each fuel contributes 50\% to the total heat release rate (600~kW).
 \begin{align}
 \dot{m}^{\prime \prime}_{poly} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{26200~\mathrm{kJ/kg}} = 0.022901~\mathrm{\frac{kg}{m^2\,s}}\\
 \dot{m}^{\prime \prime}_{wood} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{16400~\mathrm{kJ/kg}} = 0.036585~\mathrm{\frac{kg}{m^2\,s}}
 \end{align}
 
-\footnotesize \begin{verbatim}
+\begin{lstlisting}
 &SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) = 0.022901, RAMP_MF(1)='poly'
                     SPEC_ID(2)='WOOD',         MASS_FLUX(2) = 0.036585, RAMP_MF(2)='wood' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. We also want each fuel to follow a ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the remainder of a 600~s simulation.
-\footnotesize \begin{verbatim}
+\begin{lstlisting}
 &RAMP ID='poly'    T = 0  , F = 0.0  /
 &RAMP ID='poly'    T = 50 , F = 0.5  /
 &RAMP ID='poly'    T = 100, F = 1.0  /
@@ -6339,7 +6201,7 @@ Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to
 &RAMP ID='wood'    T = 50 , F = 0.5  /
 &RAMP ID='wood'    T = 100, F = 1.0  /
 &RAMP ID='wood'    T = 600, F = 1.0  /
-\end{verbatim} \normalsize
+\end{lstlisting}
 Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass flux specified on the {\ct SURF} line. Fig.~\ref{fig:hrr_two_fuels} compares the resulting FDS heat release rate (HRR) to the expected HRR from the defined ramp. Note that in this simulation, there is 10~s averaging on the FDS output HRR ({\ct \&DUMP DT\_HRR=10}) and the expected results account for this averaging.
 
 \begin{figure}[ht]
@@ -6364,8 +6226,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 
 \noindent For example, if the reaction defines the complete combustion of methane using primitive species, then the following would be equivalent:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL='METHANE', EQUATION ='METHANE+2*OXYGEN=CARBON DIOXIDE+2*WATER VAPOR',
       HEAT_OF_COMBUSTION=50000. /
 
@@ -6374,7 +6235,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 
 &REAC FUEL='METHANE', EQUATION ='METHANE+2*O2=CO2+2*H2O',
       HEAT_OF_COMBUSTION=50000. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 
 
@@ -6396,14 +6257,13 @@ Consider a single-step reaction mechanism for complete propane combustion:
 \end{equation}
 In this case we explicitly define all primitive species:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE./
 &SPEC ID='PROPANE' /
 &SPEC ID='OXYGEN' /
 &SPEC ID='WATER VAPOR' /
 &SPEC ID='CARBON DIOXIDE' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 If $\hat{C}_{\alpha}$ represents the concentration of species $\alpha$ that can react with a rate constant, $k$, then the rate expression for the fuel, $\mathrm{C_3H_8}$, is:
 \begin{equation}\label{eq:finite_rate}
 \frac{\mbox{d}\hat{C}_{\mathrm{C_3H_8}}}{\mbox{d}t}= -k\; \prod \hat{C}_{\alpha}\,^{N_S}
@@ -6426,8 +6286,7 @@ If we use Arrhenius parameters found from experiments or the literature (for thi
 \end{equation}
 and the resulting {\ct REAC} line is:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
       A = 8.6e11
@@ -6436,7 +6295,7 @@ and the resulting {\ct REAC} line is:
       NU = -1,-5,3,4
       SPEC_ID_N_S = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:reac_rate}).  This array must contain only primitive species, i.e. no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
@@ -6446,8 +6305,7 @@ The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating 
 \end{align}
 As before, we use primitive species rather than mixtures. A {\ct REAC} line is needed for each reaction including the reverse reaction. The Arrhenius parameters are again found from Westbrook and Dryer~\cite{Westbrook:1}:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
       A = 1.0e12
@@ -6474,7 +6332,7 @@ As before, we use primitive species rather than mixtures. A {\ct REAC} line is n
       NU= -1,0.5,1
       SPEC_ID_N_S = 'CARBON DIOXIDE'
       N_S = 1.0 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent For {\ct REAC ID='R2'}, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of {\ct N\_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, {\ct NU}.
 
@@ -6498,44 +6356,40 @@ The {\ct propane\_flame\_deposition} example shows how to define a reaction that
 \end{multline}
 This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID = 'PROPANE' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'SOOT',              AEROSOL = .TRUE. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 If Eq.~(\ref{eq:PROPANE_depo}) is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
       VOLUME_FRACTION = 3.7619,1., BACKGROUND = .TRUE. /
 &SPEC ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
       VOLUME_FRACTION = 18.1182,2.8164,4. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 The heat of combustion for propane is found in the SFPE Handbook~\cite{SFPE:Tewarson}.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
       SPEC_ID_NU = 'PROPANE','AIR','PRODUCTS','SOOT',
       NU=-1.,-4.8164,1,0.1836/
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{soot_deposition} shows the soot surface deposition on the wall.  This boundary quantity is given by the input below.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &BNDF QUANTITY='SURFACE DEPOSITION', SPEC_ID='SOOT' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \begin{figure}[ht]
 \centering
@@ -6710,12 +6564,10 @@ elsewhere in the input file via the parameter {\ct PART\_ID}. There are no reser
 For example, an input file may have several {\ct PART} lines that include the
 properties of different types of Lagrangian particles:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PART ID='my smoke',... /
 &PART ID='my water',... /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Particles are introduced into the calculation in several different ways: they may be introduced via a sprinkler or nozzle (liquid droplets are usually introduced this way), they may be introduced at a blowing vent or burning surface (mass tracer particles or particles representing embers are usually introduced this way), and they may be introduced randomly or at fixed points within a designated volume (solid particles that represent subgrid-scale objects are usually introduced this way). Details are found below.
@@ -6733,11 +6585,9 @@ The simplest use of Lagrangian particles is for visualization, in which case the
 particles are considered massless tracers. In this case, the particles are
 defined via the line
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PART ID='tracers', MASSLESS=.TRUE., ... /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
@@ -6808,14 +6658,12 @@ The real part of the refractive index should be a positive number. If it is grea
 The complex part should be a non-negative number. Values less than $10^{-6}$ are treated as non-absorbing.
 Below is an example of the use of spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PART ID='particles',..., RADIATIVE_PROPERTY_TABLE='table' /
 &TABL ID='table', TABLE_DATA= 1.0,1.33,0.0001 /
 &TABL ID='table', TABLE_DATA= 5.0,1.33,0.002  /
 &TABL ID='table', TABLE_DATA=10.0,1.33,0.001  /
-\end{verbatim} \normalsize
-\normalsize
+\end{lstlisting}
 
 \noindent
 For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The default averaging factor, {\ct RUN\_AVG\_FAC}, is set to 0.5.
@@ -6849,7 +6697,7 @@ over-ride this feature. The larger the value of $\gamma$, the narrower the dropl
 distributed about the median value.
 
 The particle size distribution can also defined using the Cumulative Number Function of the distribution (CNF). This is done by setting the {\ct USER\_CNF\_RAMP} on the {\ct PART} line and including a {\ct RAMP} that gives the CNF. For example, particles with diameters following the normal distribution can be defined as follows.
-\begin{verbatim}
+\begin{lstlisting}
 &PART ID='USER',
       CNF_RAMP_ID='USER_CNF',
       ..../
@@ -6859,7 +6707,7 @@ The particle size distribution can also defined using the Cumulative Number Func
       ....
 &RAMP ID="USER_CNF"   T= 1800 F= 0.999968/
 &RAMP ID="USER_CNF"   T= 2000 F= 1.000000/
-\end{verbatim}
+\end{lstlisting}
 Note that the {\ct RAMP} variable {\ct T} is given in micrometers.
 
  Note that you can prevent droplets or particles from
@@ -6906,8 +6754,7 @@ linearly so that the fire grows to 2~MW in 20 s, burns steadily for
 another 20 s, and then ramps down linearly in 20 s. The key input
 parameters are given here:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &REAC FUEL='N-HEPTANE',C=7,H=16,SOOT_YIELD=0.01,HEAT_OF_COMBUSTION=44500./
 
 &DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
@@ -6924,8 +6771,7 @@ parameters are given here:
 &RAMP ID='fuel', T=20.0, F=1.0  /
 &RAMP ID='fuel', T=40.0, F=1.0  /
 &RAMP ID='fuel', T=60.0, F=0.0  /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved via 2 nozzles flowing heptane at 1.96~L/min each:
@@ -6970,14 +6816,12 @@ If the {\ct SURF} line that is associated with the particle class calls for it, 
 
 To demonstrate the basic syntax for solid particles, the following input lines create a collection of hot spheres:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PART ID='spheres', SURF_ID='HOT', STATIC=.TRUE., PROP_ID='ball' /
 &SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL' /
 &PROP ID='ball', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
 &INIT PART_ID='spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, N_PARTICLES=10 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The {\ct PART} line establishes the class of particles. In this case, the presence of a {\ct SURF\_ID} indicates that the particles are solids with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter whose default is {\ct .FALSE.} that indicates if the particles are stationary. The {\ct PROP\_ID} references a {\ct PROP} (property) line that just tells Smokeview that the particles are to be drawn as spheres of diameter 0.01~m. See Section~\ref{info:SMOKEVIEW_PART} for details and options. The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres. See Section~\ref{info:initial_droplets} for details.
@@ -6998,12 +6842,10 @@ Solid particles can be colored in Smokeview using the same {\ct QUANTITIES} that
 
 You may also use {\ct DEVC} (device) lines to output data for a given particle. For example, the lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT ID='my particle', PART_ID='...', XB=..., N_PARTICLES=1 /
 &DEVC ID='...', INIT_ID='my particle', QUANTITY='WALL TEMPERATURE' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 output the surface temperature of a single particle.
@@ -7020,11 +6862,9 @@ The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
 If the radiation around the particle is not uniform, it may be useful to split the particle by orientations. This can be done by using the parameter {\ct ORIENTATION(1:N,1:3)} to specify {\ct N} unique directions for the particle. For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PART ..., ORIENTATION(1,3)=1., ORIENTATION(2,3)=-1. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 specifies that half the particle is facing upwards and half is facing downwards.   Each orientation is modeled in practice by a separate particle that sees the radiation that is directed to a plane normal to the orientation. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{cart_split} through Fig.~\ref{sphere_split}. The orientation direction does not have to align with the coordinate axes. For a cartesian particle (i.e. a plate), only the orientations that are perpendicular to the plate make physical sense.
@@ -7058,8 +6898,7 @@ specifies that half the particle is facing upwards and half is facing downwards.
 
 Lagrangian particles can be used to generate gases at a specified rate. The syntax is similar to that used for a solid wall. For example, the following input lines create three particles -- one shaped like a rectangular plate, one a cylinder, and one a sphere -- that generate argon, sulfur dioxide, and helium, respectively. The particles have no mass; they simply are used to generate the gases at a specified rate.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='ARGON' /
 &SPEC ID='SULFUR DIOXIDE' /
 &SPEC ID='HELIUM' /
@@ -7078,8 +6917,7 @@ Lagrangian particles can be used to generate gases at a specified rate. The synt
       SPEC_ID(1)='SULFUR DIOXIDE', MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
 &SURF ID='ball bc',  GEOMETRY='SPHERICAL', RADIUS=0.01, SPEC_ID(1)='HELIUM',
       MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent In this case, there is no calculation of heat conduction in depth. Only the surface area is important. For the plate, the surface area is twice the length times the width. For the cylinder, the area is twice the radius times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
 
@@ -7098,8 +6936,7 @@ Lagrangian particles can be used to generate gases at a specified rate. The synt
 
 Lagrangian particles can be used to represent different types of vegetation, like leaves, grass, and so on. The best way to explain how to use this feature is by way of example. Suppose we want to describe a collection of wet pine needles that occupy a certain volume. The following lines have been extracted from the sample file {\ct WUI/pine\_needles.fds}. Note that all of the values have been chosen simply to demonstrate the technique. These values should not be used for a real calculation.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
       PROP_ID='needle image', STATIC=.TRUE. /
 &INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000, MASS_PER_VOLUME=1. /
@@ -7138,8 +6975,7 @@ Lagrangian particles can be used to represent different types of vegetation, lik
       DENSITY = 200.
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
 
@@ -7158,8 +6994,7 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 
 A 2-D array of particles can be used to represent the drag exerted by a window screen, as in the following example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., PART_ID='SCREEN',
       XB=1.01,1.02,0.0,1.0,0.0,1.0/
 &PART ID='SCREEN', DRAG_LAW='SCREEN', FREE_AREA_FRACTION=0.4, STATIC=.TRUE.,
@@ -7167,8 +7002,7 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 &SURF ID='SCREEN', THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
       MATL_ID='ALUMINUM' /
 &MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=0.9 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles are be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen, and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} parameter on the {\ct SURF} line will be computed automatically so the fraction of the grid cell flow area occupied by the screen matches be given by 1 - {\ct FREE\_AREA\_FRACTION}. The pressure drop across the screen is given by
 \be
@@ -7234,8 +7068,7 @@ likely to occur first.
 
 To use the THIEF model in FDS, add lines similar to the following to the input file:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &MATL ID='plastic', DENSITY=2535., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
 &SURF ID='cylinder', THICKNESS=0.00815, LENGTH=0.1, MATL_ID='plastic',
       GEOMETRY='CYLINDRICAL' /
@@ -7244,8 +7077,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 &INIT ID='Cable', XB=0.01,0.01,0.,0.,0.,0., N_PARTICLES=1, PART_ID='Cable Segment' /
 &DEVC XYZ=0.01,0.00,0.000, ID='Cable Temp', INIT_ID='Cable',
       QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.00152 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~W/m/K and a specific heat of 1.5~kJ/kg/K. If you change these
@@ -7278,12 +7110,11 @@ The number of particles inserted at each solid cell every
 {\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
 value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PART ID='particles', ... /
 &SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 creates an obstruction that ejects particles out of its sides at a rate
@@ -7339,12 +7170,11 @@ For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of wate
 The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}.
 The format for {\ct XB} is the same as that used on the {\ct OBST} line. Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Examples of typical {\ct INIT} lines are:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT PART_ID='droplets', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
 &INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE',
       N_PARTICLES=..., MASS_PER_VOLUME=... /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved.
@@ -7360,10 +7190,9 @@ When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed 
 If you introduce
 only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}. You can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &INIT PART_ID='target',  XYZ=1.2,3.4,5.6, N_PARTICLES=10, DX=0.1 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 creates a line of 10 particles starting at the point (1.2,3.4,5.6) separated by 0.1~m. This is handy for creating arrays of devices, like heat flux gauges. See Section~\ref{info:heat_flux} for more details.
@@ -7453,10 +7282,9 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and
 it is expressed in units of m$^2$/kg/s. Usually, this type of suppression
 algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinker is set to operate at 5 s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID = 	'FUEL', HRRPUA = 100., E_COEFFICIENT = 4. /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -7498,11 +7326,9 @@ via additional namelist groups called {\ct CTRL} (Control) and
 Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
 over a span of the domain, like a beam smoke detector. For example, a sprinkler is sited within the domain with a line like:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=3.0,5.6,2.3, PROP_ID='Acme Sprinkler 123', ID='Spk_39' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The physical coordinates of the
@@ -7516,11 +7342,9 @@ device in the output files, and if any action is tied to its activation.
 Not all devices need to be associated with a particular set of properties via the {\ct PROP\_ID}. For example, pointwise
 output quantities are specified with a single {\ct DEVC} line, like
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='TC-23', XYZ=3.0,5.6,2.3, QUANTITY='TEMPERATURE'  /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 which tells FDS to record the temperature at the given point as a function of time. The {\ct ID} is a label in the output file whose name
@@ -7538,11 +7362,9 @@ The default value of {\ct ORIENTATION} is (0,0,-1).
 For example, a default downward-directed sprinkler spray can be redirected in other direction.
 If you were to specify
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=3.0,5.6,2.3, PROP_ID='...', ID='...', ORIENTATION=0.707,0.707,0.0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 the sprinkler would point in the direction halfway between the positive $x$ and $y$ directions.
@@ -7600,15 +7422,14 @@ The best way to describe the {\ct PROP} group is to list the various special dev
 
 Here is a very simple example of sprinkler:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
       ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
       PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
 
 &DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
 &DEVC ID='Spr_61', XYZ=22.88,21.76,7.46, PROP_ID='K-11' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties
@@ -7673,10 +7494,9 @@ If a more complex spray pattern is desired than one characterized by a {\ct SPRA
 namelist group.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE} on the {\ct PROP} line, the name of the spray pattern using
 {\ct SPRAY\_PATTERN\_TABLE} and then one or more {\ct TABL} lines of the format:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &TABL ID='table_id', TABLE_DATA=LAT1,LAT2,LON1,LON2,VELO,FRAC /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 where each {\ct TABL} line for a given {\ct 'table\_id'} provides information about the spherical distribution of the spray pattern
@@ -7693,16 +7513,14 @@ In the test case called {\ct bucket\_test\_2}, the spray pattern is defined as t
 of 60~L/min. The first jet contains 0.2 of the total flow, the second, 0.8 of the total.
 The jets are centered at points 30$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10,
       PART_ID='water_drops', FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1',
       SMOKEVIEW_ID='sprinkler_upright', PARTICLE_VELOCITY=10. /
 
 &TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
 &TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,0.8/
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note that
 the {\ct TABL} lines can be specified in any order.
@@ -7718,8 +7536,7 @@ the pressure is higher than the design value when the first sprinkler activates,
 droplet velocity and droplet size distribution. In FDS, the varying pipe pressure can be specified on a {\ct PROP} line using {\ct PRESSURE\_RAMP}. On each {\ct RAMP} line,
 the number of open sprinklers or nozzles is associated with certain pipe pressure (bar). For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='My nozzle'
       OFFSET=0.1
       PART_ID='water drops'
@@ -7732,8 +7549,7 @@ the number of open sprinklers or nozzles is associated with certain pipe pressur
 &RAMP ID = 'PR1' T = 1, F = 16. /
 &RAMP ID = 'PR1' T = 2, F = 10. /
 &RAMP ID = 'PR1' T = 3, F = 8. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 \noindent
 These lines would indicate that the pressure is 16~bar when the first sprinkler activates, 10~bar when two sprinklers are active, and 8~bar when three or more sprinklers are active. When counting the number of active sprinklers, FDS accounts for all active sprinklers or nozzles with a given {\ct PART\_ID}.
 
@@ -7747,14 +7563,12 @@ and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} on the corresponding {\c
 
 For some simulations there may be groups of independent sprinklers or nozzles.  For example one might have one set of nozzles for a fuel spray and a second set for water spray.  In this case the flow of water would not be impacted by how many fuel spray nozzles are open.  To have the {\ct PRESSURE\_RAMP} only count a subset of sprinklers or nozzles, the keyword {\ct PIPE\_INDEX} can be used on the {\ct DEVC} line. For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='Spr_1',  XYZ=2.00,2.00,8.00, PROP_ID='My nozzle',  PIPE_INDEX=1 /
 &DEVC ID='Spr_2',  XYZ=1.00,1.00,8.00, PROP_ID='My nozzle',  PIPE_INDEX=1 /
 &DEVC ID='Fuel_1', XYZ=2.00,2.00,1.00, PROP_ID='Fuel Spray', PIPE_INDEX=2 /
 &DEVC ID='Fuel_2', XYZ=1.00,1.00,1.00, PROP_ID='Fuel Spray', PIPE_INDEX=2 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent These lines indicate that the fuel spray nozzles are a separate pipe network from the water sprinklers.  With these
 inputs, a {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.  See the example case
@@ -7768,16 +7582,14 @@ To simulate a nozzle that activates at a given time,
 specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line.
 The following lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=23.91,21.28,0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME',
       SETPOINT=0., ID='noz_1' /
 &DEVC XYZ=26.91,21.28,0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME',
       SETPOINT=5., ID='noz_2' /
 &PROP ID='nozzle', PART_ID='heptane drops', FLOW_RATE=2.132,
       FLOW_TAU=-50., PARTICLE_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 designate two nozzles of the same type, one which activates at time zero, the other at 5~s. Note that nozzles must have a designated
@@ -7796,8 +7608,7 @@ p = \left( \frac{10 \;\hbox{L/min}}{n K}\right)^2
 \ee
 where $n$ is the number of open nozzles. The corresponding nozzle and pressure ramp definitions are
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='Head', OFFSET=0.10, PART_ID='water drops', K_FACTOR=2.5, OPERATING_PRESSURE=1.,
       PRESSURE_RAMP='PR', PARTICLE_VELOCITY=2., SPRAY_ANGLE= 0.,60. /
 
@@ -7805,8 +7616,7 @@ where $n$ is the number of open nozzles. The corresponding nozzle and pressure r
 &RAMP ID='PR',   T= 2., F=4. /
 &RAMP ID='PR',   T= 3., F=1.778 /
 &RAMP ID='PR',   T= 4., F=1. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent The water is tracked using a device measuring the accumulated mass per unit area, integrated over the total floor area. The total mass of water should increase from zero to 10~kg in 60~s. A comparison of the FDS prediction and this analytical result is shown in Fig.~\ref{flow_rate}. The slight delay of the FDS result is caused by the time it takes from the droplets to fall down on the floor.
 
@@ -7828,14 +7638,12 @@ u_k(\mathbf{r}) = \underbrace{(u_k)_0}_{\mbox{\ct P0}} \,\,+\,\, r_i \underbrace
 \end{equation}
 The vector $\mathbf{r}$ is the position of the velocity storage location relative to the point {\ct XYZ}.  The specific velocity component is specified on {\ct PROP} by the integer {\ct VELOCITY\_COMPONENT}.  Below we provide an example set of {\ct PROP} and {\ct DEVC} lines to specify a parabolic profile for the vertical component of velocity.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='p1', VELOCITY_COMPONENT=3, P0=-1,PXX(1,1)=5,PXX(2,2)=5 /
 &DEVC XB=-.1,.1,-.1,.1,.9,.95, QUANTITY='VELOCITY PATCH',PROP_ID='p1', DEVC_ID='t1'/
 &DEVC ID='t1', XYZ=0,0,.9, QUANTITY='TIME', SETPOINT=10/
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent
 In this example, a velocity patch is activated at 10 s in the simulation.  Any $w$ components of velocity with staggered storage locations within the box {\ct XB=-.1,.1,-.1,.1,.9,.95} will be driven toward the value specified by the polynomial profile {\ct 'p1'}.  You must ensure that the device box encompasses the staggered storage locations (see the theory manual \cite{FDS_Math_Guide} for a discussion on the face-centered velocity storage locations).
 
@@ -7844,13 +7652,11 @@ In this example, a velocity patch is activated at 10 s in the simulation.  Any $
 
 {\ct QUANTITY='LINK TEMPERATURE'} defines a heat detector, which uses essentially the same activation algorithm as a sprinkler, without the water spray.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='HD_66', PROP_ID='Acme Heat', XYZ=2.3,4.6,3.4 /
 &PROP ID='Acme Heat', QUANTITY='LINK TEMPERATURE', RTI=132., ACTIVATION_TEMPERATURE=74. /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent
 Like a sprinkler, {\ct RTI} is the Response Time Index in units of
 $\sqrt{\hbox{m}\cdot \hbox{s}}$.
@@ -7864,25 +7670,21 @@ $\sqrt{\hbox{m}\cdot \hbox{s}}$.
 
 A smoke detector is defined in the input file with an entry similar to:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='SD_29', PROP_ID='Acme Smoke Detector', XYZ=2.3,4.6,3.4 /
 &PROP ID='Acme Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8,
       ACTIVATION_OBSCURATION=3.24 /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent
 for the single parameter Heskestad model. Note that a {\ct PROP} line is mandatory for a smoke detector, in which case the
 {\ct DEVC QUANTITY} can be specified on the {\ct PROP} line. For the four parameter Cleary model, use a {\ct PROP} line like:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='Acme Smoke Detector I2', QUANTITY='CHAMBER OBSCURATION',
       ALPHA_E=1.8, BETA_E=-1.1, ALPHA_C=1.0, BETA_C=-0.8,
       ACTIVATION_OBSCURATION=3.24 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 where the two characteristic filling or ``lag'' times are of the form:
@@ -7927,8 +7729,7 @@ the HRR (or even in lieu of an actual fire, like a smoldering source). You might
 smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using
 the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &SURF ID='SMOLDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
 &VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='SMOLDER' /
@@ -7937,8 +7738,7 @@ the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
 &DEVC XYZ=1.00,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_1' /
 
 &DUMP SMOKE3D_QUANTITY='MY SMOKE' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The same smoke detector model is used that was described above. Only now, the mass fraction of your species {\ct 'MY SMOKE'} is used in the
@@ -7960,11 +7760,9 @@ cells lie along the linear path defined by the two endpoints.  The beam detector
 where $i$ is a mesh cell along the path of the beam, $\rho_{soot,i}$ is the soot density of the mesh cell, $ \Delta x_i$
 is the distance within the mesh cell that is traversed by the beam, and $K_m$ is the mass extinction coefficient. The line in the input file has the form:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='PATH OBSCURATION', ID='beam1', SETPOINT=33.0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Since a single linear path cannot span more than one mesh, having a beam detector that crosses multiple meshes will require post processing.
@@ -8016,8 +7814,7 @@ sampling flow rates, the transport time from each sampling location, and if an a
 ``setpoint.''  One or more {\ct DEVC} inputs are used to specify details of the sampling locations, and one additional input is
 used to specify the central detector:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='soot1', DEVC_ID='asp1',
       FLOWRATE=0.1, DELAY=20 /
 &DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='soot2', DEVC_ID='asp1',
@@ -8027,8 +7824,7 @@ used to specify the central detector:
       FLOWRATE=0.3, DELAY=30 /
 
 &DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 where the {\ct DEVC\_ID} is used at each sampling point to reference the central detector, {\ct FLOWRATE} is the gas
@@ -8097,11 +7893,9 @@ by the use of a single device and its setpoint, control functions can be specifi
 See Section \ref{info:CTRL} for more on {\ct CTRL} functions.
 The simplest example of a device is just a timer:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=1.2,3.4,5.6, ID='my clock', QUANTITY='TIME', SETPOINT=30. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}, will change its state at 30~s. For example,
@@ -8132,12 +7926,10 @@ a {\ct DEVC} {\ct ID} on the {\ct OBST} line that is to be created or removed.  
 FDS to remove or create the obstruction when
 the device changes state to {\ct .FALSE.} or {\ct .TRUE.}, respectively. For example, the lines
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=..., DEVC_ID='det2' /
 &DEVC XYZ=..., ID='det2', INITIAL_STATE=.TRUE. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 will cause the given obstruction to be removed when the specified {\ct DEVC} changes state.
@@ -8146,8 +7938,7 @@ Creation or removal at a predetermined time can be performed using a {\ct DEVC} 
 its measured quantity. For example, the following instructions will cause the specified {\ct HOLE}s and {\ct OBST}structions to
 appear/disappear at the various designated times. These lines are part of the simple test case called {\ct create\_remove.fds}.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=0.3,0.4,0.1,0.9,0.1,0.9, COLOR='PURPLE' /
 &HOLE XB=0.2,0.4,0.2,0.3,0.2,0.3, COLOR='RED',     DEVC_ID='timer1' /
 &HOLE XB=0.2,0.4,0.7,0.8,0.7,0.8, COLOR='GREEN',   DEVC_ID='timer2' /
@@ -8165,8 +7956,7 @@ appear/disappear at the various designated times. These lines are part of the si
 &DEVC XYZ=0.2,0.1,0.1, ID='timer6', SETPOINT=6., QUANTITY='TIME', INITIAL_STATE=.TRUE.  /
 &DEVC XYZ=0.2,0.1,0.1, ID='timer7', SETPOINT=6., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
 
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 At the start, the purple obstruction is present with a red block in it (this is a {\ct HOLE} initial state is false, i.e., the hole is filled) and a hole present in it.  Also at the start the pink obstruction is visible.  At 1~s the red block disappears.  At 2~s the initially present hole in the purple obstruction is filled with a green block.  This {\ct HOLE} was initially true meaning the hole was there at the start.  The blue obstruction appears at 3~s because its initial state is false, meaning that it does not exist initially. The pink obstruction disappears at 4~s because it does exist initially. At 5~s a yellow obstruction appears with one hole in it and one black block in it.  At 6~s the black block disappears as it was a hole that was initially false and therefore was created as a block when its parent obstruction (yellow) was created.  Also at 6~s the hole originally present in the yellow obstruction is filled with a gray block as it was a hole that was initially true and therefore is filled when its {\ct DEVC} changes state.  {\em You should always try a simple example first before embarking on a complicated creation/removal scheme for obstructions and holes.}
@@ -8181,13 +7971,11 @@ To learn how to create and remove obstructions multiple times, see Section~\ref{
 When a device or control function is applied to a {\ct VENT}, the purpose is to either activate or deactivate any time ramp associated with
 the {\ct VENT} via its {\ct SURF\_ID}. For example, to control a fan, do the following:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='FAN', VOLUME_FLUX=5. /
 &VENT XB=..., SURF_ID='FAN', DEVC_ID='det2' /
 &DEVC ID='det2', XYZ=..., QUANTITY='TIME', SETPOINT=30., INITIAL_STATE=.FALSE. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Note that at 30~s, the ``state'' of the {\ct 'FAN'} changes from {\ct .FALSE.} to {\ct .TRUE.}, or more simply, the {\ct 'FAN'} turns on. Since there
@@ -8278,8 +8066,7 @@ The output value of numerical control function is defined by a {\ct DEVC} line w
 Suppose you want an obstruction to be removed (a door is opened, for example) after any
 of four smoke detectors in a room has activated. Use input lines of the form:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=..., SURF_ID='...', CTRL_ID='SD' /
 
 &DEVC XYZ=1,1,3, PROP_ID='Acme Smoker', ID='SD_1' /
@@ -8288,8 +8075,7 @@ of four smoke detectors in a room has activated. Use input lines of the form:
 &DEVC XYZ=4,4,3, PROP_ID='Acme Smoker', ID='SD_4' /
 &CTRL ID='SD', FUNCTION_TYPE='ANY', INPUT_ID='SD_1','SD_2','SD_3','SD_4',
       INITIAL_STATE=.TRUE. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The {\ct INITIAL\_STATE} of the control function {\ct SD} is {\ct .TRUE.},
@@ -8300,33 +8086,27 @@ of the control function {\ct SD} is {\ct .FALSE.}, meaning that the obstruction 
 Suppose that now you want the obstruction to be created (a door is closed, for example) after all
 four smoke detectors in a room have activated. Use a control line of the form:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &CTRL ID='SD', FUNCTION_TYPE='ALL', INPUT_ID='SD_1','SD_2','SD_3','SD_4' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The control functions {\ct AT\_LEAST} and {\ct ONLY} are generalizations of {\ct ANY} and {\ct ALL}. For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &CTRL ID='SD', FUNCTION_TYPE='AT_LEAST', N=3, INPUT_ID='SD_1','SD_2','SD_3','SD_4' /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent
 changes the state from {\ct .FALSE.} to {\ct .TRUE.} when \underline{at least}
 3 detectors activate. Note that in this example, and the example below, the parameter {\ct N} is used to
 specify the number of activated devices required for the conditions
 of the control function to be satisfied. The control function,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &CTRL ID='SD', FUNCTION_TYPE='ONLY', N=3, INPUT_ID='SD_1','SD_2','SD_3','SD_4' /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent
 changes the state from {\ct .FALSE.} to {\ct .TRUE.} when 3,
 and \underline{only} 3, detectors activate.
@@ -8338,15 +8118,13 @@ and \underline{only} 3, detectors activate.
 
 There is often a time delay between when a device activates and when some other action occurs, like in a dry pipe sprinkler system.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler_link', QUANTITY='LINK TEMPERATURE',
       ID='Spk_29_link', CTRL_ID='dry pipe' /
 &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler', QUANTITY='CONTROL', ID='Spk_29',
       CTRL_ID='dry pipe' /
 &CTRL ID='dry pipe', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='Spk_29_link', DELAY=30. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 This relationship between a sprinkler and its pipes means that the sprinkler spray is controlled (in this case delayed) by the
@@ -8366,14 +8144,13 @@ The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e., a cooling system.
 
 For an HVAC system, the following lines of input would set up a simple thermostat:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='FAN', TMP_FRONT=40., VOLUME_FLUX=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='thermostat' /
 &DEVC ID='TC', XYZ=2.4,5.7,3.6, QUANTITY='TEMPERATURE' /
 &CTRL ID='thermostat', FUNCTION_TYPE='DEADBAND', INPUT_ID='TC',
       ON_BOUND='LOWER', SETPOINT=23.,27., LATCH=.FALSE./
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Here, we want to control the {\ct VENT} that simulates the {\ct FAN}, which blows hot air
@@ -8401,14 +8178,13 @@ the various permutations (providing of course that the usual
 restrictions on the use of restart files are followed).
 For example, the lines
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='temp', QUANTITY='TEMPERATURE', SETPOINT=1000., XYZ=4.5,6.7,3.6 /
 &DEVC ID='velo', QUANTITY='VELOCITY', SETPOINT=10., XYZ=4.5,6.7,3.6 /
 
 &CTRL ID='kill', FUNCTION_TYPE='KILL', INPUT_ID='temp' /
 &CTRL ID='restart', FUNCTION_TYPE='RESTART', INPUT_ID='velo' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 will kill the job and output restart files when the temperature at the given point rises above
@@ -8442,8 +8218,7 @@ same {\ct ID} for both a control function and a device.
 \noindent
 You can make a fan operate on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='FAN', TMP_FRONT=40., VOLUME_FLUX=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='cycling timer' /
 &DEVC ID='TIMER', XYZ=2.4,5.7,3.6, QUANTITY='TIME' /
@@ -8452,15 +8227,14 @@ You can make a fan operate on a fixed cycle by using a {\ct CUSTOM} control func
 &RAMP ID='cycle', T= 61, F= 1 /
 &RAMP ID='cycle', T=119, F= 1 /
 &RAMP ID='cycle', T=121, F=-1 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 In the above example the fan will be off initially, turn on at 60~s and then turn off at 120~s.
 
 You can make an obstruction appear and disappear multiple times by using the following lines
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &OBST XB=..., SURF_ID='whatever', CTRL_ID='cycling timer' /
 &DEVC ID='TIMER', XYZ=..., QUANTITY='TIME' /
 &CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='cycle' /
@@ -8469,9 +8243,8 @@ You can make an obstruction appear and disappear multiple times by using the fol
 &RAMP ID='cycle', T= 61, F= 1 /
 &RAMP ID='cycle', T=119, F= 1 /
 &RAMP ID='cycle', T=121, F=-1 /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent
 The above will have the obstacle initially removed, then added at 60 s, and removed again at 120 s.
 
@@ -8483,13 +8256,12 @@ case before trying a case to make sure that FDS indeed is doing what is intended
 
 The control functions that perform simple math operations ({\ct SUM},  {\ct SUBTRACT},  {\ct MULTIPLY},  {\ct DIVIDE}, and  {\ct POWER}) can have a constant value specified as one of their inputs.  This is done by specifying one of the {\ct INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input {\ct CONSTANT}. For example, the inputs below represent a control function whose state changes when the square of the velocity exceeds 10 (see Section~\ref{info:basic_control} for an explanation of {\ct TRIP\_DIRECTION}).
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='SPEED SENSOR', XYZ=..., QUANTITY='VELOCITY' /
 &CTRL ID='multiplier', FUNCTION_TYPE='POWER',
       INPUT_ID='SPEED SENSOR','CONSTANT', CONSTANT=2., SETPOINT=10.,
       TRIP_DIRECTION=1 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 
 \subsection{Control Function: PID Control Function}
@@ -8509,8 +8281,7 @@ The nozzle is a {\ct DEVC} named {\ct 'NOZZLE 1'} controlled by the {\ct CTRL} n
 The nozzle activates when both detection \underline{and} the time delay have occurred.  Note that the {\ct DEVC} is
 specified with {\ct QUANTITY='CONTROL'}.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=1,1,3, PROP_ID='Acme Smoker', ID='SD_1' /
 &DEVC XYZ=1,4,3, PROP_ID='Acme Smoker', ID='SD_2' /
 &DEVC XYZ=4,1,3, PROP_ID='Acme Smoker', ID='SD_3' /
@@ -8521,8 +8292,7 @@ specified with {\ct QUANTITY='CONTROL'}.
 &CTRL ID='nozzle trigger', FUNCTION_TYPE='ALL', INPUT_ID='smokey','delay' /
 &CTRL ID='delay', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='smokey', DELAY=30. /
 &CTRL ID='smokey', FUNCTION_TYPE='AT_LEAST', N=2, INPUT_ID='SD_1','SD_2','SD_3','SD_4' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \subsubsection{Example Case: control\_test\_2 }
 
@@ -8537,8 +8307,7 @@ The {\ct control\_test\_2} example demonstrates the use of the mathematical and 
 \item Use the time as input to a PID function with a target value of 5 and $K_p$=-0.5, $K_i$=0.001, and $K_d$=1
 \end{itemize}
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &CTRL ID='Add',FUNCTION_TYPE='SUM',INPUT_ID='LHS Temp','RHS Temp'/
 &CTRL ID='Subtract',FUNCTION_TYPE='SUBTRACT',INPUT_ID='RHS Temp','LHS Temp'/
 &CTRL ID='Multiply',FUNCTION_TYPE='MULTIPLY',INPUT_ID='LHS Temp','CONSTANT',CONSTANT=0.5/
@@ -8546,8 +8315,7 @@ The {\ct control\_test\_2} example demonstrates the use of the mathematical and 
 &CTRL ID='Power',FUNCTION_TYPE='POWER',INPUT_ID='RHS Temp','CONSTANT',CONSTANT=0.5/
 &CTRL ID='PID',FUNCTION_TYPE='PID',INPUT_ID='Time',TARGET_VALUE=5.,
           PROPORTIONAL_GAIN=-0.5,INTEGRAL_GAIN=0.001,DIFFERENTIAL_GAIN=1./
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent Results are shown in Figure~\ref{control_test_2_fig}.
 \begin{figure}[ht]
@@ -8568,8 +8336,7 @@ has activated.  The sequence of events required for operation is first {\ct ANY}
 starts the 30~s {\ct TIME\_DELAY}.  Once the 30~s delay has occurred, each nozzle with an active link, the {\ct ALL}
 control functions, will then flow water.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler Link', ID='LINK 1' /
 &DEVC XYZ=2,3,3, PROP_ID='Acme Sprinkler Link', ID='LINK 2' /
 
@@ -8585,8 +8352,7 @@ control functions, will then flow water.
 &CTRL ID='delay', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='check links', DELAY=30. /
 &CTRL ID='nozzle 1 trigger', FUNCTION_TYPE='ALL', INPUT_ID='delay','LINK 1'/
 &CTRL ID='nozzle 2 trigger', FUNCTION_TYPE='ALL', INPUT_ID='delay','LINK 2'/
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 
 \subsection{Example Case: activate\_vents}
@@ -8616,23 +8382,20 @@ This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} inp
 In the following example a blower is ramped from 0~\% flow at 20~$^\circ$C, to 50~\% flow when the temperature exceeds 100~$^\circ$C, and to 100~\% flow when the temperature exceeds 200~$^\circ$C.
 This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='BLOWER', VEL=-2, RAMP_V='BLOWER RAMP' /
 &DEVC XYZ=2,3,3, QUANTITY='TEMPERATURE', ID='TEMP DEVC' /
 &RAMP ID='BLOWER RAMP', T= 20,F=0.0, DEVC_ID='TEMP DEVC' /
 &RAMP ID='BLOWER RAMP', T=100,F=0.5 /
 &RAMP ID='BLOWER RAMP', T=200,F=1.0 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \subsection{Freezing the Output Value, Example Case: hrr\_freeze}
 \label{info:freeze_device}
 
 There are occasions where you may want the value of a {\ct RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the {\ct RAMP} to a {\ct DEVC}, see the previous section, and then giving that {\ct DEVC} either a {\ct NO\_UPDATE\_DEVC\_ID} or a {\ct NO\_UPDATE\_CTRL\_ID}.  When the specified controller changes its state to {\ct .TRUE.} it will cause the {\ct DEVC} to stop updating its value.  Since the {\ct DEVC} is being used as the independent variable to a {\ct RAMP}, the {\ct RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear {\ct RAMP} from 0 to 1000~kW/m$^2$ over 50~s. Rather than using the simulation time, the {\ct RAMP} uses a {\ct DEVC} for the time.  The timer is set to freeze when another {\ct DEVC} measuring time reaches 200~$^\circ$C.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case {\ct hrr\_freeze} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~$^\circ$C.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SURF ID='FIRE',HRRPUA=1000.,RAMP_Q='FRAMP',COLOR='ORANGE'/
 
 &RAMP ID='FRAMP',T=0,F=0,DEVC_ID='FREEZE TIME'/
@@ -8640,8 +8403,7 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 
 &DEVC XYZ=0.5,0.5,0.8,QUANTITY='TEMPERATURE',SETPOINT=200.,INITIAL_STATE=.FALSE.,ID='TEMP'/
 &DEVC XYZ=0.5,0.5,0.8,QUANTITY='TIME',NO_UPDATE_DEVC_ID='TEMP',ID='FREEZE TIME'/
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lll}
@@ -8727,11 +8489,9 @@ Every device {\ct DEVC} contains a {\ct QUANTITY} that it monitors. Usually this
 
 If you just want to record the time history of the temperature at a given point, add the line:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=6.7,2.9,2.1, QUANTITY='TEMPERATURE', ID='T-1' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 and a column will be added to the output file {\ct CHID\_devc.csv} under the label {\ct 'T-1'}. In this case, the {\ct ID} has no other role than as a column label in the output file.
@@ -8750,11 +8510,9 @@ If the orientation of the solid surface is in the
 positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions.
 For example, the line
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='...' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 designates the surface temperature of a wall facing the negative $y$
@@ -8770,11 +8528,9 @@ to report integrated quantities (See Table~\ref{tab:output}).
 For example, you may want to know the mass flow out of a door or window.
 To report this, add the line
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XB=0.3,0.5,2.1,2.5,3.0,3.0, QUANTITY='MASS FLOW', ID='whatever' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Note that in this case, a plane is specified rather than
@@ -8797,11 +8553,9 @@ the centroid of the designated plane or volume.
 You can use a single {\ct DEVC} line to specify a linear array of devices. By adding the parameter {\ct POINTS} and using the
 sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devices from $(x_1,y_1,z_1)$ to $(x_2,y_2,z_2)$ as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='TEMPERATURE', ID='TC Tree', POINTS=20 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent This feature is convenient for recording time-averaged profiles.
 In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is
@@ -8832,12 +8586,10 @@ Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. I
    \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
 \ee
 To output this statistic you must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}:
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
       STATISTICS='COV', ID='wT-cov', POINTS=20 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 \item[Correlation Coefficient] Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} given by
 \be
    \rho_{uv} = \frac{ \overline{u\, v} }{ u_{rms} \,v_{rms} }
@@ -8858,20 +8610,18 @@ Here again you must add a {\ct QUANTITY2} to the device line.
 
 To record the temperature inside the surface, you can use a device as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive the distance is measured from the front surface. If negative, it is measured from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
 
 To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath
@@ -8888,10 +8638,9 @@ Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, o
 
 FDS uses a fine one-dimensional mesh at each boundary cell to compute heat transfer within a solid. Use the {\ct PROF} output to record the properties of the solid over the entire thickness. The parameters (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the physical quantity to monitor, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a given solid obstruction:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROF XYZ=..., QUANTITY='TEMPERATURE', ID='T-1', IOR=3 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of solid material components
@@ -8902,18 +8651,16 @@ Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DE
 
 If you just want to know the temperature of the back surface of the ``wall,'' then use
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='BACK WALL TEMPERATURE', ID='Temp_b', IOR=3 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 Note that this quantity is only meaningful if the front or exposed surface of the ``wall'' has the attribute {\ct BACKING='EXPOSED'} on the {\ct SURF} line that defines it. The coordinates, {\ct XYZ}, and orientation, {\ct IOR}, refer to the front surface. To check that the heat conduction calculation is being done properly, you can add the additional line
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='WALL TEMPERATURE', ID='Temp_f', IOR=-3 /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of the back side of the wall. These two wall temperatures ought to be
@@ -9002,11 +8749,9 @@ For example, a 300~$^\circ$C temperature isosurface shows where the gas temperat
 300~$^\circ$C.
 Three different values of the temperature can be saved via the line:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &ISOF QUANTITY='TEMPERATURE', VALUE(1)=50., VALUE(2)=200., VALUE(3)=500. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 where the values are in $^\circ$C. Note that the isosurface output
@@ -9035,12 +8780,10 @@ temperature.
 
 Five quantities are written out to a file at one instant in time. The default specification is:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DUMP ..., PLOT3D_QUANTITY(1:5)='TEMPERATURE',
       'U-VELOCITY','V-VELOCITY','W-VELOCITY','HRRPUV' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 It's best to leave the velocity components as is, because Smokeview
@@ -9071,13 +8814,11 @@ If the specified quantity requires the additional specification of a particular 
 use {\ct SMOKE3D\_SPEC\_ID} to provide the {\ct SPEC\_ID}.
 Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &DUMP SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='MY SMOKE' /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 \noindent
 The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
@@ -9216,11 +8957,9 @@ The quantities {\ct 'LAYER HEIGHT'}, {\ct 'UPPER TEMPERATURE'} and {\ct
 'LOWER TEMPERATURE'} can be designated via {\ct DEVC} lines
 in the input file. For example, the line:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XB=2.0,2.0,3.0,3.0,0.0,3.0, QUANTITY='LAYER HEIGHT', ID='whatever' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 produces a time history of the smoke layer height at $x=2$ and $y=3$ between $z=0$ and $z=3$.
@@ -9274,26 +9013,22 @@ output quantity for heat flux means heat is being transferred into the surface.
 All of the above heat flux output quantities are defined at a solid surface. To record the heat flux away from a solid surface, use a Lagrangian particle as a surrogate for
 a heat flux gauge, as in the following example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
 &INIT ID='f1', XYZ=0.45,0.0,0.3, N_PARTICLES=1, PART_ID='rad gauge' /
 &PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1,1:3)=-1,0,0, SURF_ID='target' /
 &SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''
 
 The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', POINTS=34, QUANTITY='RADIATIVE HEAT FLUX', X_ID='x' /
 &INIT ID='f1', XYZ=0.45,0.0,0.3, N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 For more information about specifying arrays of devices via the parameter {\ct POINTS}, see Section~\ref{info:line_file}. Note also the parameter {\ct DX} on the {\ct INIT} line that creates a line of particles starting at the point {\ct XYZ} and repeating every 0.05~m.
@@ -9431,8 +9166,7 @@ As the spray simulation may contain some initial transient phase, it may be usef
 
 \noindent The following example is used to measure the Sauter mean diameter, $D_{32}$, of the particle type {\ct 'water drops'}, starting from
 time 5~s.
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='pdpa_d32'
       PART_ID='water drops'
       PDPA_M=3
@@ -9441,12 +9175,10 @@ time 5~s.
       PDPA_START=5. /
 
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d32' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent The following example is used to write out a histogram of droplet size using 20 equally sized bins between 0 and 2000 $\mu$m.
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='pdpa_d'
       PART_ID='water drops'
       QUANTITY="DIAMETER"
@@ -9458,9 +9190,8 @@ time 5~s.
       PDPA_HISTOGRAM_LIMITS=0,2000E-6 /
 
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d' /
-\end{verbatim}
+\end{lstlisting}
 
-\normalsize
 
 
 
@@ -9608,11 +9339,9 @@ measurement.
 
 A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XB=2.3,4.5,2.8,6.7,3.6,7.8, QUANTITY='TEMPERATURE', ID='maxT', STATISTICS='MAX' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it
@@ -9707,11 +9436,9 @@ fluxes are appropriate output quantities.
 The net flow of mass and energy into or out of compartments can be useful for many applications. There are several outputs that address these. All are prescribed via
 the device ({\ct DEVC}) namelist group only. For example:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XB=0.3,0.5,2.1,2.5,3.0,3.0, QUANTITY='MASS FLOW', ID='whatever' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 outputs the net integrated mass flux through the given planar area, oriented in the positive $z$ direction, in this case. The three flows -- {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'},
@@ -9755,13 +9482,11 @@ $\rho_\infty$ is the ambient density.  The parameter $U$ is the
 free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the
 {\ct PROP} line
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &BNDF QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
 &DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
 &PROP ID='U', CHARACTERISTIC_VELOCITY=3.4 /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
@@ -9771,11 +9496,9 @@ Thus, you can either paint values of $C_p$ at all surface points, or create a si
 
 Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are the Werner-Wengle wall model \cite{Werner:1991} for smooth walls and a rough wall log law for rough walls \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &BNDF QUANTITY='YPLUS' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the local viscous length scale, $\delta_\nu$ \cite{Pope:2000}:
@@ -9783,11 +9506,9 @@ The value of $y^+$ reported is half (since the velocity lives at the cell face c
 y^+ = \frac{1}{2} \frac{\delta n}{\delta_\nu} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
 \ee
 where $\tau_w = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_w$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.  The friction velocity may also be output in a boundary file or via a device attached to a wall.  For example:
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC XYZ=1,0,0, QUANTITY='FRICTION VELOCITY', IOR=3, ID='u_tau' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent Wall functions for LES are still under development, but as a general guideline it is recommended that the first grid cell fall within the log layer: a value $y^+=30$ would be considered highly resolved, the upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
 
@@ -9800,26 +9521,22 @@ you can specify the logical parameter {\ct DRY} on a {\ct DEVC} line that report
 {\ct 'VOLUME FRACTION'} of a species.  For example, the first line reports
 the actual volume fraction of CO, and the second line reports the output of a gas analyzer in a typical experiment.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE'/
 &DEVC ID='dry CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE',
       DRY=.TRUE. /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \subsection{Aerosol and Soot Concentration}
 \label{info:soot}
 
 Currently there are three different device options for outputting aerosol concentration (e.g., soot concentration) from FDS. It is important to recognize what each device is outputting so that the proper selection can be made.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='MF_SOOT', XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='SOOT'/
 &DEVC ID='VF_SOOT', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='SOOT'/
 &DEVC ID='SOOT_VF', XYZ=..., QUANTITY='AEROSOL VOLUME FRACTION', SPEC_ID='SOOT'/
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot in the gas phase treating the soot as if it were an ideal gas. The quantity {\ct 'AEROSOL VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot as if it were a solid particle in the computational cell based on the following equation,
 
@@ -9869,9 +9586,9 @@ associated with the normal component of velocity at solid or interpolated bounda
 There are several different output files that have the format of a comma-delimited spreadsheet (.csv). These files consist of real numbers in columns separated by
 commas. By default, the real numbers are formatted
 
-\begin{verbatim}
+\begin{lstlisting}
 -1.2345678E+123
-\end{verbatim}
+\end{lstlisting}
 
 \noindent
 To change the precision of the numbers, use {\ct SIG\_FIGS} on the {\ct DUMP} line to indicate the number of significant figures in the mantissa (default is 8). Use
@@ -9890,12 +9607,11 @@ The quality of a particular simulation is most directly tied to grid resolution.
 
 \noindent Examples:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SLCF PBY=0, QUANTITY='TURBULENCE RESOLUTION' /
 &SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', QUANTITY2='MASS FRACTION', SPEC_ID='HELIUM' /
 &SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 Note that an additional scalar {\ct QUANTITY2} is required for MSR and WEM.  {\ct QUANTITY2} may be any output quantity appropriate for {\ct SLCF}.
 Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
 
@@ -10005,11 +9721,9 @@ where $\mu$ is the molecular dynamic viscosity, $\rho$ is the density, and $\var
 \end{equation}
 where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strain invariant (see FDS Tech Guide).
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &SLCF PBY=0, QUANTITY='CELL REYNOLDS NUMBER' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \clearpage
 
@@ -10021,16 +9735,15 @@ Often it is desired to present results of calculations in some form other
 than those offered by Smokeview. In this case, there is a short
 Fortran 90 program called {\ct fds2ascii.f90}, with a PC compiled version
 called {\ct fds2ascii.exe}. To run the program, just type
-\begin{verbatim}
+\begin{lstlisting}
 fds2ascii
-\end{verbatim}
+\end{lstlisting}
 at the command prompt. You will be asked a series of questions
 about which type of output file to process, what time interval to
 time average the data, and so forth. A single file is produced
 with the name {\ct CHID\_fds2ascii.csv}. A typical command line session looks like this:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 >> fds2ascii
   Enter Job ID string (CHID):
 bucket_test
@@ -10058,9 +9771,8 @@ y
  Enter output file name:
 bucket_test_fds2ascii.csv
   Writing to file...      bucket_test_fds2ascii.csv
-\end{verbatim}
-
-\normalsize \noindent
+\end{lstlisting}
+ \noindent
 These commands tell {\ct fds2ascii} that you want to convert (binary)
 boundary file data into a text file. You want to sample
 every data point within the specified volume, you want only those surfaces that point
@@ -10086,12 +9798,10 @@ specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'} and {\ct 'SOOT'} 
 the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide
 through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z', SPEC_ID='CARBON MONOXIDE',
       STATISTICS='AREA INTEGRAL' /
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 Here, the {\ct ID} is just a label in the output file.
@@ -11891,8 +11601,7 @@ parameters, and an accounting of various important quantities, including
 CPU usage. Typically, diagnostic information is printed out every
 100 time steps
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
                             .
                             .
 
@@ -11917,8 +11626,7 @@ CPU usage. Typically, diagnostic information is printed out every
 
                             .
                             .
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 The Iteration number indicates how many time steps the code has run, whereas the
 Cycle number for a given mesh indicates how many time steps have been taken on that
 mesh. The date and time (wall clock time) are on the line starting with the word
@@ -11945,8 +11653,7 @@ most of the computational effort is being placed.
 The heat release rate of the fire, plus other global energy-related quantities, are automatically written into a text file
 called {\ct CHID\_hrr.csv}. The format of the file is as follows
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 s,kW,kW,kW,kW,...,kg/s,Pa,Pa, ...
 Time,HRR,Q_RADI,Q_CONV,Q_COND,...,BURN_RATE,ZONE_01,ZONE_02, ...
  0.0000000E+000, 0.0000000E+000, ...
@@ -11954,8 +11661,7 @@ Time,HRR,Q_RADI,Q_CONV,Q_COND,...,BURN_RATE,ZONE_01,ZONE_02, ...
  .
  .
  .
- \end{verbatim}
-\normalsize
+ \end{lstlisting}
 
 \noindent
 Details of the integrated energy quantities can be found in Section~\ref{info:HRR}.
@@ -11976,8 +11682,7 @@ specified in the input file under the namelist
 group {\ct DEVC} is output in comma delimited format in a file called
 {\ct CHID\_devc.csv}. The format of the file is as follows
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 s        , UNITS(1) , UNITS(2) , ... , UNITS(N_DEVC)
 FDS Time , ID(1)    , ID(2)    , ... , ID(N_DEVC)
 T(1)     , VAL(1,1) , VAL(2,1) , ... , VAL(N_DEVC,1)
@@ -11985,8 +11690,7 @@ T(2)     , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
                       .
                       .
                       .
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined
 ID of the {\ct I}th device,
 {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
@@ -12002,8 +11706,7 @@ Data associated with particular control functions specified in the input file un
 namelist group {\ct CTRL} is output in comma delimited format in a file called
 {\ct CHID\_ctrl.csv}. The format of the file is as follows
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 s,status,status,status,status
 FDS Time,ID(1),ID(2),...,ID(N_CTRL)
  0.00000E+000,-001, 001, ...
@@ -12012,8 +11715,7 @@ FDS Time,ID(1),ID(2),...,ID(N_CTRL)
             .
             .
 
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the
@@ -12042,8 +11744,7 @@ named {\ct CHID\_$n$.sf} ($n$=01,02...),
 and are written out unformatted, unless otherwise directed.
 These files are written out from {\ct dump.f90} with the following lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
       WRITE(LUSF) QUANTITY
       WRITE(LUSF) SHORT_NAME
       WRITE(LUSF) UNITS
@@ -12055,8 +11756,7 @@ These files are written out from {\ct dump.f90} with the following lines:
               .
       WRITE(LUSF) TIME
       WRITE(LUSF) (((QQ(I,J,K),I=I1,I2),J=J1,J2),K=K1,K2)
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 {\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are
 character strings of length 30.
 The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) denotes the bounding mesh cell
@@ -12088,15 +11788,13 @@ blocked out data points are not plotted.
 If the statement {\ct WRITE\_XYZ=.TRUE.} is included on the {\ct DUMP}
 line, then the mesh data is written out to a file called {\ct CHID.xyz}
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
       WRITE(LU13) IBAR+1,JBAR+1,KBAR+1
       WRITE(LU13) (((X(I),I=0,IBAR),J=0,JBAR),K=0,KBAR),
      .            (((Y(J),I=0,IBAR),J=0,JBAR),K=0,KBAR),
      .            (((Z(K),I=0,IBAR),J=0,JBAR),K=0,KBAR),
      .     (((IBLK(I,J,K),I=0,IBAR),J=0,JBAR),K=0,KBAR)
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 where {\ct X, Y} and {\ct Z} are the coordinates of the cell corners,
@@ -12109,13 +11807,11 @@ The flow variables are written to a file called {\ct CHID\_****\_**.q},
 where the stars indicate a time at which the data is output.
 The file is written with the lines
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
       WRITE(LU14) IBAR+1,JBAR+1,KBAR+1
       WRITE(LU14) ZERO,ZERO,ZERO,ZERO
       WRITE(LU14) ((((QQ(I,J,K,N),I=0,IBAR),J=0,JBAR),K=0,KBAR),N=1,5)
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 The five channels {\ct N=1,5} are by default the temperature
 ($^\circ$C), the $u$, $v$ and
 $w$ components of the velocity (m/s), and the heat release rate
@@ -12139,8 +11835,7 @@ named {\ct CHID\_$n$.bf} ($n$=0001,0002...),
 and are written out unformatted.
 These files are written out from {\ct dump.f90} with the following lines:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
       WRITE(LUBF) QUANTITY
       WRITE(LUBF) SHORT_NAME
       WRITE(LUBF) UNITS
@@ -12162,8 +11857,7 @@ These files are written out from {\ct dump.f90} with the following lines:
               .
               .
               .
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 {\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character
 strings of lengths 60, 30 and 30, respectively.
 {\ct NPATCH} is the number of planes (or ``patches'') that make up the
@@ -12187,8 +11881,7 @@ The file consists of some header material, followed by particle data output ever
 {\ct DUMP} line. It is {\ct T\_END/NFRAMES} by default.
 The header materials is written by the following FORTRAN code in the file called {\ct dump.f90}.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 WRITE(LUPF) ONE_INTEGER          ! Integer 1 to check Endian-ness
 WRITE(LUPF) NINT(VERSION*100.)   ! FDS version number
 WRITE(LUPF) N_PART               ! Number of PARTicle classes
@@ -12200,8 +11893,7 @@ DO N=1,N_PART
       WRITE(LUPF) UDATA(PC%QUANTITIES_INDEX(NN))  ! 30 character output units
    ENDDO
 ENDDO
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 Note that the initial printout of the number 1 is used by Smokeview to determine the
 Endian-ness of the file. The Endian-ness has to do with the particular way real numbers are written into a binary file.
 The version number is used to distinguish new versus old file formats.
@@ -12209,8 +11901,7 @@ The parameter {\ct N\_PART} is not the number of particles, but rather the numbe
 particle classes corresponding to the {\ct PART} namelist groups in the input file.
 Every {\ct DT\_PART} seconds the coordinates of the particles and droplets are output as 4 byte reals:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 WRITE(LUPF) REAL(T,FB)  ! Write out the time T as a 4 byte real
 DO N=1,N_PART
    WRITE(LUPF) NPLIM    ! Number of particles in the PART class
@@ -12218,8 +11909,7 @@ DO N=1,N_PART
    WRITE(LUPF) (TA(I),I=1,NPLIM)  ! Integer "tag" for each particle
    IF (PC%N_QUANTITIES > 0) WRITE(LUPF) ((QP(I,NN),I=1,NPLIM),NN=1,PC%N_QUANTITIES)
 ENDDO
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 The particle ``tag'' is used by Smokeview to keep track of individual particles and droplets for the purpose of drawing
 streamlines. It is also useful when parsing the file. The quantity data, {\ct QP(I,NN)}, is used by Smokeview to color
 the particles and droplets. Note that it is now possible with the new format to color the particles and droplets with
@@ -12232,11 +11922,9 @@ The profile files defined under the namelist group {\ct PROF} are
 named {\ct CHID\_prof\_$nn$.csv} ($nn$=01,02...),
 and are written out formatted. These files are written out from {\ct dump.f90} with the following line:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 WRITE(LU_PROF) T,NWP+1,(X_S(I),I=0,NWP),(Q(I),I=0,NWP)
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 After the time {\ct T}, the number of node points is given and then
 the node coordinates. These are written out at every time step because
 the wall thickness and the local solid phase mesh may change over time
@@ -12253,8 +11941,7 @@ FDS outputs 3-D smoke data at fixed time
 intervals.  A {\em pseudo-code} representation of the 3-D
 smoke file is given by:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 
 ! header
 
@@ -12267,8 +11954,7 @@ smoke file is given by:
   WRITE(LU_SMOKE3D)NCHARS_IN,NCHARS_OUT
   IF (NCHARS_OUT > 0)WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
 
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 
 \noindent
 The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to
@@ -12294,8 +11980,7 @@ or in terms of a translation and two rotations (azimuthal and elevation) of dyna
 in the first time step.
 These files are written out from {\ct dump.f90} using lines equivalent to the following:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 ! header
 
   WRITE(LU_GEOM) ONE
@@ -12328,8 +12013,7 @@ These files are written out from {\ct dump.f90} using lines equivalent to the fo
               .
               .
               .
-\end{verbatim}
-\normalsize
+\end{lstlisting}
 \begin{itemize}
 \item {\ct ONE}\ has the value 1.
 Smokeview uses this number to
@@ -12367,8 +12051,7 @@ The data written out to a geometry data file MUST correspond to the geometry wri
 in the corresponding geometry file.
 Geometry data files are written out from {\ct dump.f90} with the lines equivalent to the following:
 
-\scriptsize
-\begin{verbatim}
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
   WRITE(LU_GEOM_DATA) ONE
   WRITE(LU_GEOM_DATA) VERSION
   WRITE(LU_GEOM_DATA) STIME
@@ -12380,9 +12063,8 @@ Geometry data files are written out from {\ct dump.f90} with the lines equivalen
               .
               .
               .
-\end{verbatim}
+\end{lstlisting}
 The data values written out in this file correspond to the geometry written out in the geometry file.
-\normalsize
 \begin{itemize}
 \item {\ct ONE}\ has the value 1.
 Smokeview uses this number to
