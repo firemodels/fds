@@ -133,7 +133,7 @@ void Get_VP_info(void){
   doit=0;
   if(
     (visTimeLabels==1&&showtime==1)||
-    (showtime==1&&(visFramerate==1||benchmark==1||(vis_slice_average==1&&show_slice_average&&slice_average_flag==1))||
+    (showtime==1&&(visFramerate==1||(vis_slice_average==1&&show_slice_average&&slice_average_flag==1))||
     (hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
     )
 #ifdef pp_memstatus
@@ -678,18 +678,8 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
     drawTimeBar(timebar_left_pos,timebar_right_pos,v_space+VP_timebar.down,v_space+(VP_timebar.down+20));
   }
 
-  if((benchmark==1||visFramerate==1)&&showtime==1){
-    if(benchmark==0){
-      sprintf(frameratelabel," Frame rate:%4.1f",framerate);
-    }
-    else{
-      if(framerate<0.0){
-        strcpy(frameratelabel," *Frame rate:");
-      }
-      else{
-        sprintf(frameratelabel," *Frame rate:%4.1f",framerate);
-      }
-    }
+  if(visFramerate==1&&showtime==1){
+    sprintf(frameratelabel," Frame rate:%4.1f",framerate);
     outputText(right_label_pos,v_space,frameratelabel);
   }
   if(show_slice_average==1&&vis_slice_average==1&&slice_average_flag==1){
@@ -717,7 +707,7 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   if(visAvailmemory==1){
     MEMSTATUS(0,&availmemory,NULL,NULL);
     sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
-    if((benchmark==1||visFramerate==1)&&showtime==1){
+    if(visFramerate==1&&showtime==1){
       outputText(right_label_pos,2*v_space+VP_timebar.text_height,frameratelabel);
     }
     else{
@@ -734,7 +724,7 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
       char MEMlabel[128];
 
       getMemusage(MMtotalmemory,MEMlabel);
-      if((benchmark==1||visFramerate==1)&&showtime==1){
+      if(visFramerate==1&&showtime==1){
         outputText(right_label_pos,2*v_space+VP_timebar.text_height,MEMlabel);
       }
       else{

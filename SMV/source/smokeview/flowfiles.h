@@ -1030,7 +1030,7 @@ typedef struct _slicedata {
   float *constant_color;
   float qval256[256];
   char slicedir[50];
-  int loaded, display, benchvis;
+  int loaded, display;
   int loaded_save, display_save;
   int num_memblocks;
   float position_orig;

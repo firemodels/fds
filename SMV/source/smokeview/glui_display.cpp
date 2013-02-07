@@ -158,7 +158,6 @@ GLUI_Button *BUTTON_PLOT3D=NULL;
 GLUI_Button *BUTTON_3DSMOKE=NULL;
 GLUI_Button *BUTTON_BOUNDARY=NULL;
 GLUI_Button *BUTTON_ISO=NULL;
-GLUI_Button *BUTTON_BENCHMARK=NULL;
 GLUI_Button *BUTTON_label_1=NULL;
 GLUI_Button *BUTTON_label_2=NULL;
 GLUI_Button *BUTTON_label_3=NULL;
@@ -204,7 +203,6 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define FILESHOW_isosurface  15
 #define FILESHOW_evac 19
 #define FILESHOW_plot3d 16
-#define LABELS_BENCHMARK 17
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
 
@@ -365,7 +363,6 @@ extern "C" void glui_labels_rename(void){
 //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show Only"));
 //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Hide"));
 
-  BUTTON_BENCHMARK->set_name(_("Benchmark"));
   BUTTON_label_3->set_name(_("Save settings"));
   BUTTON_label_4->set_name(_("Close"));
 }
@@ -687,7 +684,6 @@ extern "C" void glui_labels_setup(int main_window){
   Text_Labels_CB(LB_LIST);
 
   PANEL_label2 = glui_labels->add_panel("",false);
-  BUTTON_BENCHMARK=glui_labels->add_button_to_panel(PANEL_label2,_("Benchmark"),LABELS_BENCHMARK,Labels_CB);
   glui_labels->add_column_to_panel(PANEL_label2,false);
 
   BUTTON_label_3=glui_labels->add_button_to_panel(PANEL_label2,_("Save"),SAVE_SETTINGS,Labels_CB);
@@ -1031,24 +1027,6 @@ extern "C" void Labels_CB(int var){
     writeini(LOCAL_INI);
     break;
   case LABELS_HMS:
-    break;
-  case LABELS_BENCHMARK:
-    if(showtime==1){
-      ResetMenu(1);        // change to external view
-      ResetMenu(-103);     // reset time to 0
-      TourMenu(-2);        // hide all tours
-      FrameRateMenu(1000); // set frame rate to unlimited
-      visFramerate=0;
-      LabelMenu(3);        // show frame rate label
-      benchmark_flag=1;
-      printf("\n*** benchmarking started\n");
-      printf(  "    SINGLE rather than DOUBLE buffering is used during the benchmark\n");
-      printf(  "    for more accurate results.  The \"flashing\" that occurs is normal.\n");
-    }
-    else{
-      fprintf(stderr,"\n*** Error: a file needs to be loaded before benchmarking\n");
-      fprintf(stderr,"           can be performed\n");
-    }
     break;
   case LABELS_showall:
     LabelMenu(4);

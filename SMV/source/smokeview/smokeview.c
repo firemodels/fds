@@ -543,21 +543,9 @@ void parse_commandline(int argc, char **argv){
        demo_option=1;
     }
     else if(strncmp(argv[i],"-stereo",7)==0){
-      if(benchmark==0){
-        stereoactive=1;
-        showstereo=1;
-        printf("stereo option activated\n");
-      }
-    }
-    else if(strncmp(argv[i],"-benchmark",10)==0){
-      benchmark=1;
-      buffertype=SINGLE_BUFFER;
-      printf("benchmark option activated\n");
-      if(stereoactive==1){
-        stereoactive=0;
-        showstereo=0;
-        printf("stereo option deactivated\n");
-      }
+      stereoactive=1;
+      showstereo=1;
+      printf("stereo option activated\n");
     }
 #ifdef pp_LANG
     else if(strncmp(argv[i],"-lang",5)==0){
@@ -778,9 +766,6 @@ void usage(char **argv){
 
     labelptr=label+2;
     strcpy(label,"");
-#ifdef pp_BENCHMARK
-    strcat(label,", pp_BENCHMARK");
-#endif
 #ifdef pp_COMPRESS
     strcat(label,", pp_COMPRESS");
 #endif

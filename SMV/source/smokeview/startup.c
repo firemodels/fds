@@ -1978,11 +1978,9 @@ void initvars(void){
   blockage_as_input=0;
   blockage_snapped=1;
   show_cad_and_grid=0;
-  benchmark_flag=0;
   nplot3dtimelist=0;
 
   buffertype=DOUBLE_BUFFER;
-  benchmark=0;
   opengldefined=0;
 
   {

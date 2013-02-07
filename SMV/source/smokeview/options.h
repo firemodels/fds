@@ -58,7 +58,6 @@
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options that are being tested VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef pp_BETA
-// #define pp_BENCHMARK
 //#define pp_GPUDEPTH
 #define pp_OPEN
 #define pp_SHOWLIGHT

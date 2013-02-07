@@ -2349,7 +2349,6 @@ float gmod(float x, float y){
 void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   int oldcpuframe;
   float totalcpu;
-  int ibenchrate;
   char buffer[256];
   float elapsed_time;
 
@@ -2359,26 +2358,11 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     oldcpuframe=cpuframe-10;
     if(oldcpuframe<0)oldcpuframe+=20;
     totalcpu=cputimes[cpuframe]-cputimes[oldcpuframe];
-    if(benchmark==0){
-      if(totalcpu==0.0){
-   		  framerate=0.0;
-      }
-      else{
-	      framerate=10.0/totalcpu;
-      }
+    if(totalcpu==0.0){
+ 		  framerate=0.0;
     }
-    if(benchmark==1||benchmark_flag==1){
-      if(itimes==0)bench_starttime=thistime/1000.0;
-      if(itimes==nglobal_times-1){
-        bench_stoptime=thistime/1000.0;
-        ibenchrate=10*((float)nglobal_times/(bench_stoptime-bench_starttime))+0.5;
-        framerate=(float)ibenchrate/10.0;
-        sprintf(buffer,"%f",framerate);
-        trim(buffer);
-        trimzeros(buffer);
-        printf("   frame rate=%s\n",buffer);
-        if(benchmark_flag==1)bench_out(framerate);
-      }
+    else{
+     framerate=10.0/totalcpu;
     }
     cpuframe++;
     if(cpuframe>=20)cpuframe=0;
@@ -2549,7 +2533,7 @@ int DoStereo(void){
     if(showstereo_frame==1||showstereo_frame==2){
       ShowScene(RENDER,VIEW_RIGHT,0,0,0);
     }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=1;
   }
   else if(showstereo==2){             // left/right stereo
@@ -2571,7 +2555,7 @@ int DoStereo(void){
       ShowScene(RENDER,VIEW_RIGHT,0,screenWidth,0);
       screenWidth=screenWidth_save;
     }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=2;
   }
   else if(showstereo==3){             // red/blue stereo
@@ -2594,7 +2578,7 @@ int DoStereo(void){
       ShowScene(RENDER,VIEW_RIGHT,0,0,0);
       glFlush();
     }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=3;
   }
   else if(showstereo==4){             // red/cyan stereo
@@ -2617,7 +2601,7 @@ int DoStereo(void){
       ShowScene(RENDER,VIEW_RIGHT,0,0,0);
       glFlush();
     }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=4;
   }
   else if(showstereo==5){             // custom red/blue stereo
@@ -2659,7 +2643,7 @@ int DoStereo(void){
 
       glFlush();
     }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_DITHER);
@@ -2846,62 +2830,55 @@ void Display_CB(void){
     dostereo=DoStereo();
   }
   if(dostereo==0){
-    if(benchmark_flag==1){
-      glDrawBuffer(GL_FRONT);
+    if(render_multi==0){
+      glDrawBuffer(GL_BACK);
       ShowScene(RENDER,VIEW_CENTER,0,0,0);
+      if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     }
     else{
-      if(render_multi==0){
-        glDrawBuffer(GL_BACK);
-        ShowScene(RENDER,VIEW_CENTER,0,0,0);
-        if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
+      if(RenderOnceNow==1){
+        renderdoublenow=1;
       }
-      else{
-        if(RenderOnceNow==1){
+    
+      if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
+        if(itimes>=0&&itimes<nglobal_times&&
+          ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
+          ){
+          render_frame[itimes]++;
           renderdoublenow=1;
         }
-    
-        if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
-          if(itimes>=0&&itimes<nglobal_times&&
-            ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
-            ){
-            render_frame[itimes]++;
-            renderdoublenow=1;
+      }
+      if(renderdoublenow==1){
+        int nrender_cols;
+        int i,ibuffer=0;
+        GLubyte **screenbuffers;
+
+        NewMemory((void **)&screenbuffers,nrender_rows*nrender_rows*sizeof(GLubyte *));
+
+        glDrawBuffer(GL_BACK);
+
+        nrender_cols=nrender_rows;
+        for(i=0;i<nrender_rows;i++){
+          int j;
+
+          for(j=0;j<nrender_cols;j++){
+            ShowScene(RENDER,VIEW_CENTER,1,j*screenWidth,i*screenHeight);
+            screenbuffers[ibuffer++]=getscreenbuffer();
+            if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
           }
         }
 
-        if(renderdoublenow==1){
-          int nrender_cols;
-          int i,ibuffer=0;
-          GLubyte **screenbuffers;
+        mergescreenbuffers(nrender_rows,screenbuffers);
 
-          NewMemory((void **)&screenbuffers,nrender_rows*nrender_rows*sizeof(GLubyte *));
-
-          glDrawBuffer(GL_BACK);
-
-          nrender_cols=nrender_rows;
-          for(i=0;i<nrender_rows;i++){
-            int j;
-
-            for(j=0;j<nrender_cols;j++){
-              ShowScene(RENDER,VIEW_CENTER,1,j*screenWidth,i*screenHeight);
-              screenbuffers[ibuffer++]=getscreenbuffer();
-              if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
-            }
-          }
-
-          mergescreenbuffers(nrender_rows,screenbuffers);
-
-          for(i=0;i<nrender_rows*nrender_cols;i++){
-            FREEMEMORY(screenbuffers[i]);
-          }
-          FREEMEMORY(screenbuffers);
+        for(i=0;i<nrender_rows*nrender_cols;i++){
+          FREEMEMORY(screenbuffers[i]);
         }
-        if(renderdoublenow==0||RenderOnceNow==1){
-          ASSERT(RenderSkip>0);
-          RenderState(RENDER_OFF);
-          RenderSkip=1;
-        }
+        FREEMEMORY(screenbuffers);
+      }
+      if(renderdoublenow==0||RenderOnceNow==1){
+        ASSERT(RenderSkip>0);
+        RenderState(RENDER_OFF);
+        RenderSkip=1;
       }
     }
   }

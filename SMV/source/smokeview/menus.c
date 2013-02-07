@@ -1245,9 +1245,6 @@ void OptionMenu(int value){
   if(value==999)return;
   updatemenu=1;  
   glutPostRedisplay();
-  if(value==1){
-    Labels_CB(17); // run the benchmark
-  }
   if(value==2){
     trainer_mode=1;
     if(showtrainer_dialog==0){
@@ -7215,9 +7212,6 @@ updatemenu=0;
   glutAddSubMenu(_("Render"),rendermenu);
   glutAddSubMenu(_("Tours"),tourmenu);
   if(showfontmenu==1)glutAddSubMenu(_("Font"),fontmenu);
-#ifdef pp_BENCHMARK
-  glutAddMenuEntry("Benchmark",1);
-#endif
   if(trainer_active==1)glutAddMenuEntry(_("Trainer menu"),2);
 #ifdef pp_LANG
   if(show_lang_menu==1&&nlanglistinfo>0)glutAddSubMenu(_("Language"),languagemenu);

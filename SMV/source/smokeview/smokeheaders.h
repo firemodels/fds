@@ -399,7 +399,6 @@ EXTERNCPP void drawsmoke3dCULL(void);
 EXTERNCPP void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent);
 EXTERNCPP void updatesmoke3dmenulabels(void);
 EXTERNCPP void Labels_CB(int value);
-EXTERNCPP void bench_out(float frame_rate);
 EXTERNCPP void output_Slicedata(void);
 EXTERNCPP void init_Slicedata(void);
 EXTERNCPP void update_camera_label(void);
