@@ -39,11 +39,10 @@ The {\ct SMOKEVIEW\_ID} keyword found on the {\ct PROP} line is used to associat
 The following FDS input file lines
 were used to display the target device in Table~\ref{tab:devices_static}.
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='target' SMOKEVIEW_ID='target' /
 &DEVC XYZ=0.5,0.8,0.6, QUANTITY='TEMPERATURE' PROP_ID='target' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \newpage
 
@@ -93,12 +92,11 @@ file.  Objects may also be customized using data stored in a particle file.  Thi
 The {\ct SMOKEVIEW\_PARAMETERS} keyword on the {\ct PROP}
 namelist statement is used to customize the appearance of Smokeview objects.  For example, the {\ct \&DEVC}\ and {\ct \&PROP}\ statements:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 &PROP ID='sphere' SMOKEVIEW_PARAMETERS(1:4)='R=0','G=255','B=0',
                    'D=0.5' SMOKEVIEW_ID='sphere' /
 &DEVC XYZ=0.5,0.8,1.5, QUANTITY='TEMPERATURE' PROP_ID='sphere' /
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent
 create an FDS device drawn as a sphere colored green with diameter 0.5~m. Each parameter specified using the
@@ -107,14 +105,13 @@ is a text string enclosed in single quotes.  The text string is of the form {\ct
 keywords are found in the {\ct objects.svo} file (labels beginning with `:').  For example, {\ct R}, {\ct G},
 {\ct B} and {\ct D} may be used as keywords to customize the following {\ct sphere} object:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 OBJECTDEF // object for particle file sphere
  sphere
  :R=0 :G=0 :B=0 :D=0.1
  $R $G $B setrgb
  $D drawsphere
-\end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent Another, Smokeview object, the {\ct tsphere}, uses a texture map or picture to alter the appearance of the object.
 The texture map is specified using {\ct SMOKEVIEW\_PARAMETERS} keyword by placing the characters {\ct t\%}
@@ -231,12 +228,11 @@ quantity names that correspond to the full names {\ct U-VELOCITY}, {\ct V-VELOCI
 
 The first three lines of the {\ct velegg}\ object definition are:
 
-\footnotesize
-\begin{verbatim}
+\begin{lstlisting}
 OBJECTDEF // color with FDS quantity, stretch with velocity
  velegg
  :R=0 :G=0 :B=0 :D :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0
- \end{verbatim} \normalsize
+\end{lstlisting}
 
 \noindent The variables {\ct U-VEL}, {\ct V-VEL}, and {\ct W-VEL} in the above line are also particle file quantities (shortened version) that may be
 selected in an FDS input file.  If they are selected, then the {\ct velegg} object may be used to display
