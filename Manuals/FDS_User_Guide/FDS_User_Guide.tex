@@ -3362,18 +3362,42 @@ convection correlations
     \hbox{W/m$^2$/K} \ee
 where $\Delta T$ is the difference between the wall and the gas temperature,
 $C$ is the coefficient for natural convection (1.52 for a horizontal surface
-and 1.31 for a vertical surface, by default). The Nusselt number, Nu, depends on the shape of the obstruction~\cite{Holman:1}:
+and 1.31 for a vertical surface, by default). The Nusselt number, Nu, depends on the shape of the obstruction~\cite{Holman:1}, ~\cite{Incropera:1}:
 \be \NU = \left\{ \begin{array}{ll} 0.037 \; \RE^\fofi \; \PR^\ot & \hbox{Cartesian} \\
-                                    0.664 \; \RE^\ha \; \PR^\ot & \hbox{Cylindrical} \\
-                                    2 + 0.6 \; \RE^\ha \; \PR^\ot & \hbox{Spherical} \end{array} \right. \ee
+                                    C_{cyl}\; \RE^{n_{cyl}} \; \PR^\ot & \hbox{Cylindrical} \\
+                                    2 + 0.6 \; \RE^\ha \; \PR^\ot & \hbox{Spherical}  \\
+                                    C_1 + C_2 \; \RE^{C_3} \; \PR^{C_4} & \hbox{Custom} \end{array} \right. \ee
+
+where $C_{cyl}$ and $n_{cyl}$ are given in Table~\ref{tbl:cylheat}.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{Cylinder Heat Trasnfer Constants}
+\label{tbl:cylheat}
+\begin{tabular}{|c|c|c|}
+\hline
+$C_{cyl}$ & $n_{cyl}$ & Range  \\ \hline
+0.989  & 0.330 & $ \RE < 4$ \\ \hline
+0.911  & 0.385 & $4 \leq \RE < 40$ \\ \hline
+0.683  & 0.466 & $40 \leq \RE < 4000$ \\ \hline
+0.193  & 0.618 & $4000 \leq \RE < 40000$ \\ \hline
+0.0266 & 0.805 & $40000 \leq \RE $\\ \hline
+
+\end{tabular}
+\end{center}
+\end{table}
+
 $L$ is a characteristic length related to the size of the physical
 obstruction; $k$ is the thermal conductivity of the
 gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the
 gas flowing past the obstruction. Since the Reynolds number is proportional to the
 characteristic length, $L$, the heat transfer coefficient is weakly
 related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, $L$ is taken to be 1~m for most
-calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ and
-{\ct C\_FORCED}, {\ct C\_FORCED\_CYLINDER}, or {\ct C\_FORCED\_SPHERE} for the constant in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
+calculations. You can change the empirical coefficients for the natural convection model by using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ which are 
+input on the {\ct SURF} line.  You can change the empirical coefficients for the forced convection model by using
+{\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and {\ct C\_FORCED\_PR\_EXP}
+for the constants $C_1$ through $C_4$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
 
 \subsubsection{Logarithmic Law of the Wall}
 
@@ -7141,12 +7165,12 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 &PART ID='SCREEN', DRAG_LAW='SCREEN', FREE_AREA_FRACTION=0.4, STATIC=.TRUE.,
       SURF_ID='SCREEN', ORIENTATION(1:1,3)=1,0,0 /
 &SURF ID='SCREEN', THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
-      LENGTH=5., CONVECTION_LENGTH_SCALE=0.0003, MATL_ID='ALUMINUM' /
+      MATL_ID='ALUMINUM' /
 &MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=0.9 /
 \end{verbatim}
 \normalsize
 
-\noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles should be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} on the {\ct SURF} line, when multiplied by the diameter, results in 60~\% of the cell area. It represents the length of wire that makes up the section of the screen that spans a single grid cell. The pressure drop across the screen is given by
+\noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles are be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen, and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} parameter on the {\ct SURF} line will be computed automatically so the fraction of the grid cell flow area occupied by the screen matches be given by 1 - {\ct FREE\_AREA\_FRACTION}. The pressure drop across the screen is given by
 \be
    \Delta p =  l \; \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
@@ -7155,7 +7179,6 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
    K &=& 3.44 \times 10^{-9} \; \hbox{\ct FREE\_AREA\_FRACTION}^{1.6} \; \; \hbox{m}^2 \\
    Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
 \end{eqnarray}
-Note that the {\ct CONVECTION\_LENGTH\_SCALE}, which in this case is set equal to the wire diameter, is used in the convective heat transfer calculation.
 
 
 \subsection{Electrical Cable Failure}
@@ -10889,12 +10912,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
-{\ct C\_FORCED}                                 & Real          & Section~\ref{info:convection}                         &               & 0.037             \\ \hline
-{\ct C\_FORCED\_CYLINDER}                       & Real          & Section~\ref{info:convection}                         &               & 0.664             \\ \hline
-{\ct C\_FORCED\_SPHERE }                        & Real          & Section~\ref{info:convection}                         &               & 0.600             \\ \hline
 {\ct C\_G}                                      & Real          & Section~\ref{info:LES}                                &               & 0.04              \\ \hline
-{\ct C\_HORIZONTAL}                             & Real          & Section~\ref{info:convection}                         &               & 1.52             \\ \hline
-{\ct C\_VERTICAL}                               & Real          & Section~\ref{info:convection}                         &               & 1.31             \\ \hline
 %{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT}                  & Real          & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}    \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
@@ -11497,6 +11515,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BACKING}                         & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'VOID'}            \\ \hline
 {\ct BURN\_AWAY}                      & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}              & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
+{\ct C\_FORCED\_CONSTANT}             & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_FORCED\_RE}                   & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_FORCED\_RE\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_FORCED\_PR\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_HORIZONTAL}                   & Real            & Section~\ref{info:convection}             &                     & 1.52             \\ \hline
+{\ct C\_VERTICAL}                     & Real            & Section~\ref{info:convection}             &                     & 1.31             \\ \hline
 {\ct COLOR    }                       & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}       & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
