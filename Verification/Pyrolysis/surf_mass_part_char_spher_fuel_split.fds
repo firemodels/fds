@@ -14,7 +14,7 @@
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
 
-&TIME T_END=100., DT = 0.01,  / WALL_INCREMENT = 1
+&TIME T_END=100., DT = 0.01, WALL_INCREMENT = 1 /
 &DUMP DT_HRR = 0.1 DT_DEVC = 0.1  /
 
 &SURF ID                        = 'Wood_1'
