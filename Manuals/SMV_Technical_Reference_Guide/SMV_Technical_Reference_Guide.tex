@@ -31,6 +31,32 @@
 
 \usepackage{color}
 
+\usepackage{listings}
+\usepackage{textcomp}
+\definecolor{lbcolor}{rgb}{0.96,0.96,0.96}
+\lstset{
+    backgroundcolor=\color{lbcolor},
+    tabsize=4,
+    rulecolor=,
+    language=Fortran,
+        basicstyle=\footnotesize\ttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        belowskip=2em,
+        columns=fixed,
+        extendedchars=true,
+        breaklines=true,
+        breakatwhitespace=true,
+        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,0},
+        commentstyle=\color[rgb]{0,0,0},
+        stringstyle=\color[rgb]{0,0,0},
+}
+
 \pagestyle{plain}
 
 \setlength{\textwidth}{6.5in}
@@ -544,10 +570,10 @@ An OpenGL vertex has the same meaning as in geometry, a location.
 Vertices are specified in Smokeview using either {\bf glVertex3f(x,y,z)}\ or {\bf glVertex3fv(xv)}.  The suffix for glVertex indicates the number and type of data value to be passed.  For example, {\em 3f}\ is used when passing 3 scalar floating points.  The suffix {\em 3fv}\ is used to when passing a pointer (or equivalently a memory address) to 3 floating point  values.
 
 To illustrate, suppose that {\tt xyz}\ is a floating point array of size 3 containing a 3D coordinate.  One could then use either of the two OpenGL calls:
-\begin{verbatim}
+\begin{lstlisting}
 glVertex3fv(xyz);
 glVertex3f(xyz[0],xyz[1],xyz[2]);
-\end{verbatim}
+\end{lstlisting}
 to represent the vertex location.
 
 Groups of vertices may be {\em built up}\ to form more complex geometric objects.
@@ -555,13 +581,13 @@ Several objects are illustrated in Figure \ref{figshapes}.  They are formed by g
 and surrounding them with calls to {\tt glBegin()}\ and {\tt
 glEnd()}. The argument passed to {\tt glBegin()}\ determines which higher level object is drawn.
 To draw a shaded triangle one would use
-\begin{verbatim}
+\begin{lstlisting}
 glBegin(GL_TRIANGLE);
 glVertex3f(0.0,0.0,0.0);
 glVertex3f(0.0,1.0,0.0);
 glVertex3f(1.0,0.0,0.0);
 glEnd();
-\end{verbatim}
+\end{lstlisting}
 Similarly, to draw points or to connect the vertices with lines (also shown
 in Figure \ref{figshapes}) one would replace {\tt GL\_TRIANGLE}\ above
 with {\tt GL\_POINTS}\ or {\tt GL\_LINES}\ respectively.
@@ -610,19 +636,19 @@ same sized object drawn in the foreground.  Both projection
 methods are available in Smokeview.
 
 Smokeview uses {\tt glFrustum}\ to perform perspective projections
-\begin{verbatim}
+\begin{lstlisting}
       glFrustum(
         (double)fleft,(double)fright,
         (double)fdown,(double)fup,
         (double)fnear,(double)ffar);
-\end{verbatim}
+\end{lstlisting}
 and {\tt glOrtho}\ to perform orthographic projections
-\begin{verbatim}
+\begin{lstlisting}
       glOrtho(
         (double)fleft,(double)fright,
         (double)fdown,(double)fup,
         (double)fnear,(double)ffar);
-\end{verbatim}
+\end{lstlisting}
 
 \noindent where {\tt fleft}, {\tt fright}, {\tt fdown}, {\tt fup}, {\tt
 fnear}, {\tt ffar} are six clipping planes bounding the view
@@ -679,9 +705,9 @@ Smokeview.
 \end{figure}
 
 Smokeview uses {\tt glViewport()}\ to establish a window viewport.  In particular, the call
-\begin{verbatim}
+\begin{lstlisting}
 glViewport(left,down,width,height);
-\end{verbatim}
+\end{lstlisting}
 is used to set up the portion of the screen where 3D drawing occurs where {\tt left}\
 and {\tt down}\ are the bottom left screen coordinates of the viewport and {\tt width}\
 and {\tt height}\ are the width and height of the viewport.
@@ -817,9 +843,9 @@ precisely:
 color}
 \end{eqnarray}
 This particular blending model is the most common (there are others) and is activated in Smokeview using the OpenGL call
-\begin{verbatim}
+\begin{lstlisting}
 glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-\end{verbatim}
+\end{lstlisting}
 
 Choosing an alpha less than one allows one to {\em see through}\
 objects. Smokeview uses this feature to implement partially
@@ -1027,12 +1053,12 @@ rotation angle about the vertical axis is called an azimuth angle.
 These two angles and the translation amount are used by Smokeview
 to control the orientation of the scene.   Rotations are then
 implemented in Smokeview using
-\begin{verbatim}
+\begin{lstlisting}
     glTranslatef(xcen,ycen,zcen);
     glRotatef(YZ_AXIS_angle,cos(az_angle),-sin(az_angle),1.0);
     glRotatef(XY_AXIS_angle,0.0,0.0,1.0);
     glTranslatef(-xcen,-ycen,-zcen);
-\end{verbatim}
+\end{lstlisting}
 where {\tt xcen, ycen, zcen}\ are the coordinates of the scene center, YZ\_AXIS\_angle is the elevation angle, and XY\_AXIS\_angle is the azimuth angle.  The scene center (center of rotation) is translated to the origin, requested rotations are implemented, then the scene is translated back to its original location.
 
 %
@@ -1134,7 +1160,7 @@ along the {\bf bold path} from blue to cyan to green to yellow to red.  Colors i
 \subsection{Interpolating Colors}
 
 Consider the following code segment for drawing a shaded triangle with red, green and blue vertices:
-\begin{verbatim}
+\begin{lstlisting}
 glBegin(GL_TRIANGLE);
 glColor3f(1.0,0.0,0.0);
 glVertex3f(0.0,0.0,0.0);
@@ -1145,7 +1171,7 @@ glVertex3f(0.0,1.0,0.0);
 glColor3f(0.0,0.0,1.0);
 glVertex3f(1.0,0.0,0.0);
 glEnd();
-\end{verbatim}
+\end{lstlisting}
 
 OpenGL interpolates colors between the vertices and interior to
 the triangle using the color cube as in Figure \ref{colorbarinfo}.
@@ -1189,15 +1215,15 @@ where $c_1$ and $c_2$ are color indices as before.
 
 The following code segment sets up the use of 1D texture map.
 
-\begin{verbatim}
+\begin{lstlisting}
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
-\end{verbatim}
+\end{lstlisting}
 
 The following code segments (simplified) shows an example of drawing a slice in a YZ plane.
 
-\begin{verbatim}
+\begin{lstlisting}
    for(j=jmin; j<jmax; j++){
      for(k=kmin; k<kmax; k++){
        glTexCoord1f( r11); glVertex3f(xplane, yy1,  z1);
@@ -1218,7 +1244,7 @@ The following code segments (simplified) shows an example of drawing a slice in 
      }
    }
    glEnd();
-\end{verbatim}
+\end{lstlisting}
 
 
 
@@ -1483,9 +1509,9 @@ A particle streak visualizes where a particle is located over a period of time. 
 Static particle images are not effective at displaying motion.  For example, the particle image in Figure \ref{figpart}a does not show particle motion.  Streak lines, however, in Figure \ref{figpart}b shows curved motion due to interior obstructions.
 Particle size is
 specified using
-\begin{verbatim}
+\begin{lstlisting}
 glPointSize(partpointsize);
-\end{verbatim}
+\end{lstlisting}
 The floating point value of {\tt partpointsize}\ is specified using the {\tt File/Bounds}
 dialog box.  Streak line length is specified in terms of time, a certain number of seconds before the current display time.  Streak length is also specified in the {\tt File/Bounds}\ dialog box.
 
@@ -1880,21 +1906,21 @@ color, a depth buffer and double buffering by passing the OpenGL
 keywords {\tt GLUT\_RGB}, {\tt GLUT\_DEPTH} and {\tt GLUT\_DOUBLE}
 to {\tt glutInitDisplayMode} as in
 
-\begin{verbatim}
+\begin{lstlisting}
   glutInitDisplayMode(GLUT_RGB|GLUT_DEPTH|GLUT_DOUBLE);
-\end{verbatim}
+\end{lstlisting}
 
 Smokeview creates a window with width {\tt windW}\ and height {\tt
 windH} using the GLUT calls
 
-\begin{verbatim}
+\begin{lstlisting}
   glutInitWindowSize(windW, windH);
   glutCreateWindow("");
-\end{verbatim}
+\end{lstlisting}
 
 and defines callbacks with
 
-\begin{verbatim}
+\begin{lstlisting}
   glutSpecialUpFunc(specialkeyboard_up);
   glutKeyboardUpFunc(keyboard_up);
   glutKeyboardFunc(keyboard);
@@ -1903,7 +1929,7 @@ and defines callbacks with
   glutMotionFunc(motion);
   glutReshapeFunc(Reshape);
   glutDisplayFunc(Display);
-\end{verbatim}
+\end{lstlisting}
 
 A callback is a routine that is called when a particular event
 occurs.  For Smokeview these events would be when a keyboard key
@@ -1932,24 +1958,24 @@ GD routine to convert the image into the desired image format.
 A summary of the steps in more detail are:
 \begin{enumerate}
 \item Allocate memory buffers and file pointers
-\begin{verbatim}
+\begin{lstlisting}
   RENDERfile = fopen(RENDERfilename, "wb");
   pixels = (GLubyte *) malloc(width * height * sizeof(GLubyte) * 3);
-\end{verbatim}
+\end{lstlisting}
 
 \item Read pixel data from the back buffer
-\begin{verbatim}
+\begin{lstlisting}
 
   glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, OpenGLimage);
-\end{verbatim}
+\end{lstlisting}
 \item Allocate the gd data structures used to hold image data
-\begin{verbatim}
+\begin{lstlisting}
   RENDERimage = gdImageCreateTrueColor(width,height);
-\end{verbatim}
+\end{lstlisting}
 
 \item Set pixel data
 
-\begin{verbatim}
+\begin{lstlisting}
   for (i = height-1 ; i>=0; i--) {
     for(j=0;j<width;j++){
       r=*p++; g=*p++; b=*p++;
@@ -1958,21 +1984,21 @@ A summary of the steps in more detail are:
 
     }
   }
-\end{verbatim}
+\end{lstlisting}
 
 \item Write out data to a JPEG image file
 
-\begin{verbatim}
+\begin{lstlisting}
     gdImageJpeg(RENDERimage,RENDERfile,-1);
-\end{verbatim}
+\end{lstlisting}
 
 \item deallocate memory buffers and free file pointer
 
-\begin{verbatim}
+\begin{lstlisting}
   fclose(RENDERfile);
   gdImageDestroy(RENDERimage);
   free(OpenGLimage);
-\end{verbatim}
+\end{lstlisting}
 
 \end{enumerate}
 

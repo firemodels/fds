@@ -30,6 +30,32 @@
 %\usepackage{eso-pic}
 \usepackage{color}
 
+\usepackage{listings}
+\usepackage{textcomp}
+\definecolor{lbcolor}{rgb}{0.96,0.96,0.96}
+\lstset{
+    backgroundcolor=\color{lbcolor},
+    tabsize=4,
+    rulecolor=,
+    language=Fortran,
+        basicstyle=\footnotesize\ttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        belowskip=2em,
+        columns=fixed,
+        extendedchars=true,
+        breaklines=true,
+        breakatwhitespace=true,
+        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,0},
+        commentstyle=\color[rgb]{0,0,0},
+        stringstyle=\color[rgb]{0,0,0},
+}
+
 %\makeatletter
 %   \AddToShipoutPicture{%
 %     \setlength{\@tempdimb}{.5\paperwidth}%
@@ -394,16 +420,10 @@ Guide~\cite{Smokeview_Tech_Guide}.
 
 The FDS version used to run the cases illustrated  in this document
 is
-{
-%\scriptsize
-\verbatiminput{../SMV_User_Guide/FIGURES/fds.version}
-}
+\lstinputlisting{../SMV_User_Guide/FIGURES/fds.version}
 
 The Smokeview version used to generate the verification figures in this document is
-{
-%\scriptsize
-\verbatiminput{SCRIPT_FIGURES/smokeview.version}
-}
+\lstinputlisting{SCRIPT_FIGURES/smokeview.version}
 
 FDS generated data is presumed to be correct.  FDS has its own set
 of verification cases to test the correctness of the data. The
