@@ -94,11 +94,11 @@ An analytical solution for Eq.~(\ref{Yoeq}) can be found, but it is more conveni
 as is done for sprinklers and heat detectors. Then, the predicted mass fraction of smoke in the sensing chamber
 $Y_c(t)$ can be converted into an expression for the percent obscuration per unit length by computing:
 \be
-\left( 1 - e^{-\kappa \rho Y_c l} \right) \times 100
+   \hbox{Obscuration}  = \left( 1 - e^{-K_m \rho Y_c l} \right) \times 100 \; \; \hbox{\% per length} \; l
 \ee
-where $\kappa$ is the mass extinction coefficient, $\rho$ is the density of the external gases in the ceiling jet,
-and $l$ is the preferred unit of length (typically 1~m or 1~ft).
-For most flaming fuels, a suggested value for $\kappa$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
+where $K_m$ is the mass extinction coefficient, $\rho$ is the density of the external gases in the ceiling jet,
+and $l$ is the unit of length over which the light in attenuated\footnote{Typically, the activation criterion for a spot-type smoke detector is listed as a percent obscuration per foot or per meter. For the former, $l=0.3048$~m and for the latter, $l=1$~m.}.
+For most flaming fuels, a suggested value for $K_m$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
 wavelength of 633~nm~\cite{Mulholland:F+M}.
 
 The SFPE Handbook~\cite{SFPE} has references to various works on smoke detection and suggested values for the
@@ -116,8 +116,14 @@ user to pick these various parameters, and in doing so, pick whichever model the
 Additionally, FDS can model the behavior of beam and aspiration smoke detectors.  For a beam detector, the user
 specifies the emitter and receiver positions and the total obscuration at which the detector will alarm.  FDS will then
 integrate the obscuration over the path length using the predicted soot concentration in each grid cell along
-the path.  For an aspiration detector, the user specifies the sampling locations, the flow rate at each location, the
+the path:  
+\be
+  \hbox{Obscuration}  = \left(1 - e^{-K_m \int \rho Y_s \, \d l }  \right) \times 100  \; \; \hbox{\%}
+\ee
+where the integration is carried out over the path of the beam.
+
+For an aspiration detector, the user specifies the sampling locations, the flow rate at each location, the
 transport time from each sampling point to the detector, the flow rate of any bypass flow, and the total obscuration at which the
 detector will alarm.  FDS will compute the soot concentration at the detector by weighting the predicted soot concentrations
-at the sampling locations with their flow rates after applying the appropriate time delay.
+at the sampling locations with their flow rates after applying the appropriate time delay. See the FDS User's Guide~\cite{FDS_Users_Guide} for details.
 
