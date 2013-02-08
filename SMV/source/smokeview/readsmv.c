@@ -8865,7 +8865,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"OUTLINEMODE")==1){
 	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&highlight_flag);
+	    sscanf(buffer,"%i %i",&highlight_flag,&outline_color_flag);
       if(nmeshes<2&&highlight_flag!=0)highlight_flag=1;
       continue;
     }
@@ -11117,7 +11117,7 @@ void writeini(int flag){
   fprintf(fileout,"SHOWCADANDGRID\n");
   fprintf(fileout," %i\n",show_cad_and_grid);
   fprintf(fileout,"OUTLINEMODE\n");
-  fprintf(fileout," %i\n",highlight_flag);
+  fprintf(fileout," %i %i\n",highlight_flag,outline_color_flag);
   fprintf(fileout,"TITLESAFE\n");
   fprintf(fileout," %i\n",titlesafe_offset);
   fprintf(fileout,"FONTSIZE\n");
