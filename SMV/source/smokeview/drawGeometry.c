@@ -1340,7 +1340,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
         ASSERT(FFALSE);
         break;
       }
-      if(visBlocks==visBLOCKSolidOutline){
+      if(outline_color_flag==1){
         faceptr->linecolor=foregroundcolor;
       }
       else{

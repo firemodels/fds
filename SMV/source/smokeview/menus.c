@@ -4085,6 +4085,10 @@ void BlockageMenu(int value){
   if(solid_state<0)solid_state=visBlocks;
   if(outline_state<0)outline_state=OUTLINE_NONE;
   switch (value){
+    case visBLOCKOutlineColor:
+      outline_color_flag = 1 - outline_color_flag;
+      updatefaces=1;
+      break;
     case visBLOCKOnlyOutline:
       if(outline_state!=OUTLINE_ONLY){
         outline_state=OUTLINE_ONLY;
@@ -4154,6 +4158,8 @@ void BlockageMenu(int value){
   }
 
   switch (value){
+   case visBLOCKOutlineColor:
+     break;
    case visBLOCKAsInputOutline:
    case visBLOCKAsInput:
      visBlocks=value;
@@ -4974,6 +4980,16 @@ updatemenu=0;
   }
   else{
     glutAddMenuEntry(_("   Hidden"),visBLOCKHide);
+  }
+  glutAddMenuEntry("-",999);
+  glutAddMenuEntry(_(" Outline color:"),999);
+  if(outline_color_flag==1){
+    glutAddMenuEntry(_("   use blockage"),visBLOCKOutlineColor);
+    glutAddMenuEntry(_("   *use foreground"),visBLOCKOutlineColor);
+  }
+  else{
+    glutAddMenuEntry(_("   *use blockage"),visBLOCKOutlineColor);
+    glutAddMenuEntry(_("   use foreground"),visBLOCKOutlineColor);
   }
   {
     int nblockprop=0;

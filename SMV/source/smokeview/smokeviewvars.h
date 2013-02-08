@@ -651,6 +651,7 @@ SVEXTERN int SVDECL(visOpenVentsAsOutline,0);
 SVEXTERN int SVDECL(visSmoke,1), SVDECL(visZone,0);
 SVEXTERN int SVDECL(visEvac,1);
 SVEXTERN int visBlocks;
+SVEXTERN int SVDECL(outline_color_flag,0);
 SVEXTERN int SVDECL(solid_state,-1),SVDECL(outline_state,-1);
 SVEXTERN int SVDECL(smooth_block_solid,0);
 SVEXTERN int visSmoothAsNormal,visTransparentBlockage;
