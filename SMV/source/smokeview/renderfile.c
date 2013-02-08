@@ -81,8 +81,10 @@ void Render(int view_mode){
     if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
     if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
     if(RenderOnceNowR==0&&RenderOnceNowL==0){
-      RenderState(RENDER_OFF);
-      RenderSkip=1;
+      if(render_multi==0){
+        RenderState(RENDER_OFF);
+        RenderSkip=1;
+      }
     }
   }
   if(script_render==1){
