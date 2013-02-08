@@ -640,10 +640,10 @@ c) rainbow
 
 \subsection{Implementation}
 Data required to volume render smoke is made available to Smokeview by adding lines to an FDS input file specifying 3D slice files for temperature and soot density such as
-\begin{verbatim}
+\begin{lstlisting}
 &SLCF XB=xmin,xmax,ymin,ymax,zmin,zmax, QUANTITY='TEMPERATURE' /
 &SLCF XB=xmin,xmax,ymin,ymax,zmin,zmax, QUANTITY='DENSITY',SPEC_ID='SOOT' /
-\end{verbatim}
+\end{lstlisting}
 where xmin,~$\cdots$,~zmax represent the domain boundary.
 
 An algorithm for determining image opacities and colors using volume rendering is detailed below.
