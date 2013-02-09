@@ -108,7 +108,8 @@ for i_plot=1:2
             end
             FDS = csvread('pyrolysis_2_devc.csv',2,0);
         end
-        h=plot(FDS(:,3),FDS(:,2)/FDS(1,2),'b--');
+        h=plot(FDS(:,4),FDS(:,2),'b--');
+        h=plot(FDS(:,4),FDS(:,3)*500,'g--'); % Multiply by 500 for right axis
     end
 
     % Plot attributes
@@ -158,8 +159,8 @@ for i_plot=1:2
     
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'PaperUnits',Paper_Units);
-    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    set(gcf,'PaperSize',[Paper_Width*1.1 Paper_Height]);
+    set(gcf,'PaperPosition',[0 0 Paper_Width*1.1 Paper_Height]);
     if i_plot==1
         print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/pyrolysis_1')
     else
