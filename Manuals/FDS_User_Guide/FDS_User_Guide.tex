@@ -8901,9 +8901,7 @@ Three parameters control smoke production and visibility.
 The first is the {\ct SOOT\_YIELD} on the {\ct REAC} line, defined as the fraction of fuel mass that
 is converted to soot if the simple chemistry approach is being used. The second parameter,
 {\ct MASS\_EXTINCTION\_COEFFICIENT}, is the $K_m$ in Eq.~(\ref{mec}). It is defined on one or more of the {\ct SPEC} lines\footnote{When using the simple chemistry combustion model, you can change the default mass extinction coefficient by adding a line to the input file of the form: \tt{\footnotesize \&SPEC ID='SOOT', MASS\_EXTINCTION\_COEFFICIENT=..., LUMPED\_COMPONENT\_ONLY=.TRUE. /} } for the various light absorbing gas species. Its default value is 8700~m$^2$/kg, a value
-suggested for flaming combustion of wood and plastics\footnote{For most flaming fuels, a suggested value for $K_m$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
-wavelength of 633~nm~\cite{Mulholland:F+M}}.
-The third parameter, {\ct VISIBILITY\_FACTOR} on the {\ct MISC} line, is the
+suggested for flaming combustion of wood and plastics\footnote{For most flaming fuels, a suggested value for $K_m$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a wavelength of 633~nm~\cite{Mulholland:F+M}}. The third parameter, {\ct VISIBILITY\_FACTOR} on the {\ct MISC} line, is the
 constant $C$ in Eq.~(\ref{vis}). It is 3 by default.
 
 The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar quantity is the
