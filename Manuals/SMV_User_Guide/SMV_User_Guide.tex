@@ -25,13 +25,13 @@
 
 \usepackage{listings}
 \usepackage{textcomp}
-\definecolor{lbcolor}{rgb}{0.96,0.96,0.96}
+\definecolor{lbcolor}{rgb}{1.0,1.0,1.0}
 \lstset{
     backgroundcolor=\color{lbcolor},
     tabsize=4,
     rulecolor=,
     language=Fortran,
-        basicstyle=\footnotesize\ttfamily,
+        basicstyle=\ttfamily,
         upquote=true,
         aboveskip={1.5\baselineskip},
         belowskip=2em,
@@ -39,7 +39,7 @@
         extendedchars=true,
         breaklines=true,
         breakatwhitespace=true,
-        frame=single,
+        frame=none,
         showtabs=false,
         showspaces=false,
         showstringspaces=false,
@@ -1157,7 +1157,7 @@ input file. }
 
 \indent To specify in FDS a vertical slice 1.5~m from the $y=0$
 boundary colored by temperature, use the line:
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+\begin{lstlisting}[basicstyle=\ttfamily]
 &SLCF PBY=1.5 QUANTITY='TEMPERATURE' /
 \end{lstlisting}
 A more complete list of output quantities may be found in
@@ -2117,8 +2117,8 @@ conditions and the second for when the object has activated.
 
 \begin{figure}[\figoptions]
 {\small
-\begin{lstlisting}[frame=single,rulecolor=\color{blue},
-framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+\begin{lstlisting}[frame=single,rulecolor=\color{yellow},
+framerule=1pt,framesep=1pc,fillcolor=\color{yellow}]
 // ************ object file format ********************
 
 //  1. comments and blank lines may be placed anywhere
@@ -2169,8 +2169,8 @@ transformations are used.
 
 \begin{figure}[\figoptions]
 {\small
-\begin{lstlisting}[frame=single,rulecolor=\color{blue},
-framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+\begin{lstlisting}[frame=single,rulecolor=\color{yellow},
+framerule=1pt,framesep=1pc,fillcolor=\color{yellow}]
 OBJECTDEF
  sensor
  1.0 1.0 0.0  setcolor
@@ -2198,8 +2198,8 @@ detector has activated.) states.
 \begin{figure}[\figoptions]
 {\bf Heat detector Instructions}\\
 {\small
-\begin{lstlisting}[frame=single,rulecolor=\color{blue},
-framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+\begin{lstlisting}[frame=single,rulecolor=\color{yellow},
+framerule=1pt,framesep=1pc,fillcolor=\color{yellow}]
 OBJECTDEF
  heat_detector         // label, name of object
 
@@ -2244,8 +2244,8 @@ specified on the {\tt SMOKEVIEW\_PARAMETERS}\ keyword in the FDS input file.
 
 \begin{figure}[\figoptions]
 {\small
-\begin{lstlisting}[frame=single,rulecolor=\color{blue},
-framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+\begin{lstlisting}[frame=single,rulecolor=\color{yellow},
+framerule=1pt,framesep=1pc,fillcolor=\color{yellow}]
 OBJECTDEF // object for a general ball
  ball
  :R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1
@@ -2260,8 +2260,8 @@ OBJECTDEF // object for a general ball
 \end{lstlisting}
 }
 {\small
-\begin{lstlisting}[frame=single,rulecolor=\color{blue},
-framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+\begin{lstlisting}[frame=single,rulecolor=\color{yellow},
+framerule=1pt,framesep=1pc,fillcolor=\color{yellow}]
 FDS input lines to create ball
 
 The data labels (:R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1) in the object file
