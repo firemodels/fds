@@ -29,7 +29,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP,CP, &
           RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM, &
-          U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,U_DOT_DEL_RHO,RHO_Z_P,U_DOT_DEL_RHO_Z,MU_DNS,RHO_D_TURB
+          U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,U_DOT_DEL_RHO,RHO_Z_P,U_DOT_DEL_RHO_Z,MU_DNS,RHO_D_TURB,R_H_G
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
@@ -199,17 +199,17 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       DO J=0,JBAR
          DO I=0,IBAR
             ! H_RHO_D_DZDX
-            TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
+            TMP_G = 0.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
             CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
             H_RHO_D_DZDX(I,J,K) = HDIFF*RHO_D_DZDX(I,J,K)
 
             ! H_RHO_D_DZDY
-            TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
+            TMP_G = 0.5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
             CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
             H_RHO_D_DZDY(I,J,K) = HDIFF*RHO_D_DZDY(I,J,K)
 
             ! H_RHO_D_DZDZ
-            TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
+            TMP_G = 0.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
             CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
             H_RHO_D_DZDZ(I,J,K) = HDIFF*RHO_D_DZDZ(I,J,K)
          ENDDO
@@ -307,6 +307,7 @@ ENDDO SPECIES_LOOP
 ! Get the specific heat
 
 CP => WORK5
+R_H_G=> WORK9
 
 IF (N_TRACKED_SPECIES>0) THEN
    DO K=1,KBAR
@@ -315,6 +316,7 @@ IF (N_TRACKED_SPECIES>0) THEN
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
+            R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
          ENDDO
       ENDDO
    ENDDO
@@ -325,6 +327,7 @@ ELSE
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
+            R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
          ENDDO
       ENDDO
    ENDDO
@@ -502,7 +505,7 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
+         RTRM(I,J,K) = R_H_G(I,J,K)/RHOP(I,J,K)
          DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
       ENDDO
    ENDDO
@@ -519,7 +522,7 @@ DO K=1,KBAR
          IF (CONSTANT_SPECIFIC_HEAT)   CYCLE
          ZZ_GET = 0._EB
          CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-         DP(I,J,K) = DP(I,J,K) - ( SM0%RCON/RSUM(I,J,K) - H_S/(CP(I,J,K)*TMP(I,J,K)) )* &
+         DP(I,J,K) = DP(I,J,K) - ( SM0%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K))* &
               ( U_DOT_DEL_RHO(I,J,K) )/RHOP(I,J,K)
       ENDDO
    ENDDO
@@ -533,8 +536,8 @@ DO N=1,N_TRACKED_SPECIES
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IF (CONSTANT_SPECIFIC_HEAT)   CYCLE
-            CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
-            DP(I,J,K) = DP(I,J,K) + (RCON_DIFF/RSUM(I,J,K) - HDIFF/(CP(I,J,K)*TMP(I,J,K)) )* &
+            CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)            
+            DP(I,J,K) = DP(I,J,K) + (RCON_DIFF/RSUM(I,J,K) - HDIFF*R_H_G(I,J,K))* &
                  ( DEL_RHO_D_DEL_Z(I,J,K,N) - U_DOT_DEL_RHO_Z(I,J,K) )/RHOP(I,J,K)
          ENDDO
       ENDDO
@@ -785,9 +788,9 @@ SUBROUTINE ENTHALPY_ADVECTION
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HX=>NULL(),HY=>NULL(),HZ=>NULL(),DV=>NULL()
 REAL(EB) :: DR,B
 
-HX=>WORK2; HX=0._EB
-HY=>WORK3; HY=0._EB
-HZ=>WORK4; HZ=0._EB
+HX=>WORK2!; HX=1.E20_EB
+HY=>WORK3!; HY=1.E20_EB
+HZ=>WORK4!; HZ=1.E20_EB
 U_DOT_DEL_RHO_H_S=>WORK6; U_DOT_DEL_RHO_H_S=0._EB
 
 LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
@@ -798,7 +801,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value x
 
-      DV = 0._EB
+      !DV = 1.E20_EB
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
@@ -831,7 +834,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value in y
 
-      DV = 0._EB
+      !DV = 1.E20_EB
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
@@ -864,7 +867,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value in z
 
-      DV = 0._EB
+      !DV = 1.E20_EB
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -1060,9 +1063,9 @@ SUBROUTINE DENSITY_ADVECTION
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DV=>NULL()
 REAL(EB) :: DR,B
 
-FX(:,:,:,0)=0._EB
-FY(:,:,:,0)=0._EB
-FZ(:,:,:,0)=0._EB
+!FX(:,:,:,0)=1.E20_EB
+!FY(:,:,:,0)=1.E20_EB
+!FZ(:,:,:,0)=1.E20_EB
 U_DOT_DEL_RHO=>WORK8; U_DOT_DEL_RHO=0._EB
 
 LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
@@ -1073,7 +1076,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value x
 
-      DV = 0._EB
+      !DV = 1.E20_EB
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
@@ -1106,7 +1109,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value y
 
-      DV = 0._EB
+      !DV = 1.E20_EB
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
@@ -1139,7 +1142,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value z
 
-      DV = 0._EB
+      !DV = 1.E20_EB
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -1334,7 +1337,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: DV=>NULL()
 REAL(EB) :: DR,B
 
 RHO_Z_P=>WORK6
-RHO_Z_P=0._EB
+!RHO_Z_P=1.E20_EB
 
 DO K=0,KBP1
    DO J=0,JBP1
@@ -1344,9 +1347,9 @@ DO K=0,KBP1
    ENDDO
 ENDDO
 
-FX(:,:,:,N)=0._EB
-FY(:,:,:,N)=0._EB
-FZ(:,:,:,N)=0._EB
+FX(:,:,:,N)=1.E20_EB
+FY(:,:,:,N)=1.E20_EB
+FZ(:,:,:,N)=1.E20_EB
 U_DOT_DEL_RHO_Z=>WORK7; U_DOT_DEL_RHO_Z=0._EB
 
 LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
@@ -1357,7 +1360,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value x
 
-      DV = 0._EB
+      !DV = 1.E20_EB
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
@@ -1390,7 +1393,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value y
 
-      DV = 0._EB
+     ! DV = 1.E20_EB
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
@@ -1423,7 +1426,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value z
 
-      DV = 0._EB
+      !DV = 1.E20_EB
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
