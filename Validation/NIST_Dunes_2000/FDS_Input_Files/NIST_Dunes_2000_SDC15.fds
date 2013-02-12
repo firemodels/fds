@@ -1,10 +1,13 @@
-&HEAD CHID='NIST_Dunes_2000_SDC38_Calibration', TITLE='NIST Dunes 2000 Test SDC38 (Mattress Specimen 108856)' /
+&HEAD CHID='NIST_Dunes_2000_SDC15', TITLE='NIST Dunes 2000 Test SDC15 (Chair Specimen 108858)' /
 
-&MESH IJK=220,60,28, XB=-1,21,-1,5,0,2.8 /
+&MESH IJK=55,60,28, XB=-1.00,4.50,-1,5,0,2.8 /
+&MESH IJK=55,60,28, XB= 4.50,10.0,-1,5,0,2.8 /
+&MESH IJK=55,60,28, XB= 10.0,15.5,-1,5,0,2.8 /
+&MESH IJK=55,60,28, XB= 15.5,21.0,-1,5,0,2.8 /
 
-&TIME T_END=180.0 /
+&TIME T_END=400.0 /
 
-&MISC TMPA=25. /
+&MISC TMPA=29. /
 
 &DUMP DT_CTRL=0.5, DT_HRR=1., DT_DEVC=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
@@ -30,9 +33,145 @@
 = Fire =
 ========
 
-&OBST XB=17.8,19.7,2.8,3.8,0.0,0.3 / Mattress
-&VENT XB=17.8,18.4,2.8,3.4,0.3,0.3, SURF_ID='fire' /
-&SURF ID='fire', HRRPUA=500, TAU_Q=-180, COLOR='RED' /
+&OBST XB=12.6,13.2,2.9,3.5,0.0,0.3 / Chair
+&VENT XB=12.6,13.2,2.9,3.5,0.3,0.3, SURF_ID='fire' /
+&SURF ID='fire', HRRPUA=633, RAMP_Q='fireramp', COLOR='RED' /
+
+&RAMP ID='fireramp', T=0.0, F=0.000 /
+&RAMP ID='fireramp', T=3.0, F=0.000 /
+&RAMP ID='fireramp', T=6.0, F=0.000 /
+&RAMP ID='fireramp', T=9.0, F=0.000 /
+&RAMP ID='fireramp', T=12.0, F=0.000 /
+&RAMP ID='fireramp', T=15.0, F=0.000 /
+&RAMP ID='fireramp', T=18.0, F=0.000 /
+&RAMP ID='fireramp', T=21.0, F=0.000 /
+&RAMP ID='fireramp', T=24.0, F=0.000 /
+&RAMP ID='fireramp', T=27.0, F=0.000 /
+&RAMP ID='fireramp', T=30.0, F=0.000 /
+&RAMP ID='fireramp', T=33.0, F=0.000 /
+&RAMP ID='fireramp', T=36.0, F=0.000 /
+&RAMP ID='fireramp', T=39.0, F=0.000 /
+&RAMP ID='fireramp', T=42.0, F=0.000 /
+&RAMP ID='fireramp', T=45.0, F=0.000 /
+&RAMP ID='fireramp', T=48.0, F=0.000 /
+&RAMP ID='fireramp', T=51.0, F=0.000 /
+&RAMP ID='fireramp', T=54.0, F=0.000 /
+&RAMP ID='fireramp', T=57.0, F=0.000 /
+&RAMP ID='fireramp', T=60.0, F=0.000 /
+&RAMP ID='fireramp', T=63.0, F=0.000 /
+&RAMP ID='fireramp', T=66.0, F=0.000 /
+&RAMP ID='fireramp', T=69.0, F=0.000 /
+&RAMP ID='fireramp', T=72.0, F=0.000 /
+&RAMP ID='fireramp', T=75.0, F=0.000 /
+&RAMP ID='fireramp', T=78.0, F=0.000 /
+&RAMP ID='fireramp', T=81.0, F=0.000 /
+&RAMP ID='fireramp', T=84.0, F=0.000 /
+&RAMP ID='fireramp', T=87.0, F=0.000 /
+&RAMP ID='fireramp', T=90.0, F=0.000 /
+&RAMP ID='fireramp', T=93.0, F=0.000 /
+&RAMP ID='fireramp', T=96.0, F=0.000 /
+&RAMP ID='fireramp', T=99.0, F=0.000 /
+&RAMP ID='fireramp', T=102.0, F=0.000 /
+&RAMP ID='fireramp', T=105.0, F=0.000 /
+&RAMP ID='fireramp', T=108.0, F=0.000 /
+&RAMP ID='fireramp', T=111.0, F=0.000 /
+&RAMP ID='fireramp', T=114.0, F=0.000 /
+&RAMP ID='fireramp', T=117.0, F=0.000 /
+&RAMP ID='fireramp', T=120.0, F=0.000 /
+&RAMP ID='fireramp', T=123.0, F=0.000 /
+&RAMP ID='fireramp', T=126.0, F=0.000 /
+&RAMP ID='fireramp', T=129.0, F=0.000 /
+&RAMP ID='fireramp', T=132.0, F=0.000 /
+&RAMP ID='fireramp', T=135.0, F=0.000 /
+&RAMP ID='fireramp', T=138.0, F=0.000 /
+&RAMP ID='fireramp', T=141.0, F=0.000 /
+&RAMP ID='fireramp', T=144.0, F=0.000 /
+&RAMP ID='fireramp', T=147.0, F=0.000 /
+&RAMP ID='fireramp', T=150.0, F=0.000 /
+&RAMP ID='fireramp', T=153.0, F=0.000 /
+&RAMP ID='fireramp', T=156.0, F=0.000 /
+&RAMP ID='fireramp', T=159.0, F=0.000 /
+&RAMP ID='fireramp', T=162.0, F=0.000 /
+&RAMP ID='fireramp', T=165.0, F=0.000 /
+&RAMP ID='fireramp', T=168.0, F=0.000 /
+&RAMP ID='fireramp', T=171.0, F=0.013 /
+&RAMP ID='fireramp', T=174.0, F=0.013 /
+&RAMP ID='fireramp', T=177.0, F=0.013 /
+&RAMP ID='fireramp', T=180.0, F=0.013 /
+&RAMP ID='fireramp', T=183.0, F=0.013 /
+&RAMP ID='fireramp', T=186.0, F=0.013 /
+&RAMP ID='fireramp', T=189.0, F=0.014 /
+&RAMP ID='fireramp', T=192.0, F=0.014 /
+&RAMP ID='fireramp', T=195.0, F=0.015 /
+&RAMP ID='fireramp', T=198.0, F=0.015 /
+&RAMP ID='fireramp', T=201.0, F=0.016 /
+&RAMP ID='fireramp', T=204.0, F=0.017 /
+&RAMP ID='fireramp', T=207.0, F=0.018 /
+&RAMP ID='fireramp', T=210.0, F=0.019 /
+&RAMP ID='fireramp', T=213.0, F=0.020 /
+&RAMP ID='fireramp', T=216.0, F=0.021 /
+&RAMP ID='fireramp', T=219.0, F=0.023 /
+&RAMP ID='fireramp', T=222.0, F=0.024 /
+&RAMP ID='fireramp', T=225.0, F=0.026 /
+&RAMP ID='fireramp', T=228.0, F=0.028 /
+&RAMP ID='fireramp', T=231.0, F=0.029 /
+&RAMP ID='fireramp', T=234.0, F=0.031 /
+&RAMP ID='fireramp', T=237.0, F=0.033 /
+&RAMP ID='fireramp', T=240.0, F=0.036 /
+&RAMP ID='fireramp', T=243.0, F=0.038 /
+&RAMP ID='fireramp', T=246.0, F=0.040 /
+&RAMP ID='fireramp', T=249.0, F=0.043 /
+&RAMP ID='fireramp', T=252.0, F=0.046 /
+&RAMP ID='fireramp', T=255.0, F=0.048 /
+&RAMP ID='fireramp', T=258.0, F=0.051 /
+&RAMP ID='fireramp', T=261.0, F=0.054 /
+&RAMP ID='fireramp', T=264.0, F=0.057 /
+&RAMP ID='fireramp', T=267.0, F=0.060 /
+&RAMP ID='fireramp', T=270.0, F=0.064 /
+&RAMP ID='fireramp', T=273.0, F=0.067 /
+&RAMP ID='fireramp', T=276.0, F=0.071 /
+&RAMP ID='fireramp', T=279.0, F=0.074 /
+&RAMP ID='fireramp', T=282.0, F=0.078 /
+&RAMP ID='fireramp', T=285.0, F=0.082 /
+&RAMP ID='fireramp', T=288.0, F=0.086 /
+&RAMP ID='fireramp', T=291.0, F=0.090 /
+&RAMP ID='fireramp', T=294.0, F=0.094 /
+&RAMP ID='fireramp', T=297.0, F=0.099 /
+&RAMP ID='fireramp', T=300.0, F=0.103 /
+&RAMP ID='fireramp', T=303.0, F=0.108 /
+&RAMP ID='fireramp', T=306.0, F=0.112 /
+&RAMP ID='fireramp', T=309.0, F=0.117 /
+&RAMP ID='fireramp', T=312.0, F=0.122 /
+&RAMP ID='fireramp', T=315.0, F=0.127 /
+&RAMP ID='fireramp', T=318.0, F=0.132 /
+&RAMP ID='fireramp', T=321.0, F=0.137 /
+&RAMP ID='fireramp', T=324.0, F=0.143 /
+&RAMP ID='fireramp', T=327.0, F=0.148 /
+&RAMP ID='fireramp', T=330.0, F=0.154 /
+&RAMP ID='fireramp', T=333.0, F=0.159 /
+&RAMP ID='fireramp', T=336.0, F=0.165 /
+&RAMP ID='fireramp', T=339.0, F=0.171 /
+&RAMP ID='fireramp', T=342.0, F=0.177 /
+&RAMP ID='fireramp', T=345.0, F=0.183 /
+&RAMP ID='fireramp', T=348.0, F=0.190 /
+&RAMP ID='fireramp', T=351.0, F=0.196 /
+&RAMP ID='fireramp', T=354.0, F=0.202 /
+&RAMP ID='fireramp', T=357.0, F=0.209 /
+&RAMP ID='fireramp', T=360.0, F=0.216 /
+&RAMP ID='fireramp', T=363.0, F=0.222 /
+&RAMP ID='fireramp', T=366.0, F=0.229 /
+&RAMP ID='fireramp', T=369.0, F=0.236 /
+&RAMP ID='fireramp', T=372.0, F=0.244 /
+&RAMP ID='fireramp', T=375.0, F=0.251 /
+&RAMP ID='fireramp', T=378.0, F=0.258 /
+&RAMP ID='fireramp', T=381.0, F=0.266 /
+&RAMP ID='fireramp', T=384.0, F=0.273 /
+&RAMP ID='fireramp', T=387.0, F=0.281 /
+&RAMP ID='fireramp', T=390.0, F=0.289 /
+&RAMP ID='fireramp', T=393.0, F=0.297 /
+&RAMP ID='fireramp', T=396.0, F=0.305 /
+&RAMP ID='fireramp', T=399.0, F=0.313 /
+&RAMP ID='fireramp', T=402.0, F=0.321 /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
@@ -141,9 +280,9 @@
 = Station A =
 =============
 
-&DEVC ID='Ion1A', PROP_ID='I1', XYZ=0.48, 1.63, 2.28 /
-&DEVC ID='Ion3A', PROP_ID='I3', XYZ=0.48, 1.63, 2.28 /
-&DEVC ID='Pho1A', PROP_ID='P1', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Ion1A',   PROP_ID='I1', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Ion3A',   PROP_ID='I3', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Photo1A', PROP_ID='P1', XYZ=0.48, 1.63, 2.28 /
 
 &DEVC XYZ=0.48, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat_A_Vel' /
 &DEVC XYZ=0.48, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat_A_Temp' /
@@ -152,9 +291,9 @@
 = Station B =
 =============
 
-&DEVC ID='Ion1B', PROP_ID='I1', XYZ=17.8, 1.63, 2.28 /
-&DEVC ID='Ion3B', PROP_ID='I3', XYZ=17.8, 1.63, 2.28 /
-&DEVC ID='Pho1B', PROP_ID='P1', XYZ=17.8, 1.63, 2.28 /
+&DEVC ID='Ion1B',   PROP_ID='I1', XYZ=17.8, 1.63, 2.28 /
+&DEVC ID='Ion3B',   PROP_ID='I3', XYZ=17.8, 1.63, 2.28 /
+&DEVC ID='Photo1B', PROP_ID='P1', XYZ=17.8, 1.63, 2.28 /
 
 &DEVC XYZ=17.8, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat_B_Vel' /
 &DEVC XYZ=17.8, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat_B_Temp' /
@@ -163,9 +302,9 @@
 = Station C =
 =============
 
-&DEVC ID='Ion1C', PROP_ID='I1', XYZ=4.1, 2.7, 2.28 /
-&DEVC ID='Ion3C', PROP_ID='I3', XYZ=4.1, 2.7, 2.28 /
-&DEVC ID='Pho1C', PROP_ID='P1', XYZ=4.1, 2.7, 2.28 /
+&DEVC ID='Ion1C',   PROP_ID='I1', XYZ=4.1, 2.7, 2.28 /
+&DEVC ID='Ion3C',   PROP_ID='I3', XYZ=4.1, 2.7, 2.28 /
+&DEVC ID='Photo1C', PROP_ID='P1', XYZ=4.1, 2.7, 2.28 /
 
 &DEVC XYZ=4.1, 2.7, 2.28, QUANTITY='VELOCITY', ID='Stat_C_Vel' /
 &DEVC XYZ=4.1, 2.7, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat_C_Temp' /
@@ -174,9 +313,9 @@
 = Station D =
 =============
 
-&DEVC ID='Ion1D', PROP_ID='I1', XYZ=17.1, 1.0, 2.19 /
-&DEVC ID='Ion3D', PROP_ID='I3', XYZ=17.1, 1.0, 2.19 /
-&DEVC ID='Pho1D', PROP_ID='P1', XYZ=17.1, 1.0, 2.19 /
+&DEVC ID='Ion1D',   PROP_ID='I1', XYZ=17.1, 1.0, 2.19 /
+&DEVC ID='Ion3D',   PROP_ID='I3', XYZ=17.1, 1.0, 2.19 /
+&DEVC ID='Photo1D', PROP_ID='P1', XYZ=17.1, 1.0, 2.19 /
 
 &DEVC XYZ=17.1, 1.0, 2.19, QUANTITY='VELOCITY', ID='Stat_D_Vel' /
 &DEVC XYZ=17.1, 1.0, 2.19, QUANTITY='THERMOCOUPLE', ID='Stat_D_Temp' /
@@ -185,9 +324,9 @@
 = Station E =
 =============
 
-&DEVC ID='Ion1E', PROP_ID='I1', XYZ=13.0, 1.63, 2.28 /
-&DEVC ID='Ion3E', PROP_ID='I3', XYZ=13.0, 1.63, 2.28 /
-&DEVC ID='Pho1E', PROP_ID='P1', XYZ=13.0, 1.63, 2.28 /
+&DEVC ID='Ion1E',   PROP_ID='I1', XYZ=13.0, 1.63, 2.28 /
+&DEVC ID='Ion3E',   PROP_ID='I3', XYZ=13.0, 1.63, 2.28 /
+&DEVC ID='Photo1E', PROP_ID='P1', XYZ=13.0, 1.63, 2.28 /
 
 &DEVC XYZ=13.0, 1.63, 2.28, QUANTITY='VELOCITY', ID='Stat_E_Vel' /
 &DEVC XYZ=13.0, 1.63, 2.28, QUANTITY='THERMOCOUPLE', ID='Stat_E_Temp' /
@@ -256,18 +395,18 @@
 &DEVC XYZ=11.75, 0.38, 0.28, QUANTITY='THERMOCOUPLE', ID='TCF_7' /
 &DEVC XYZ=11.75, 0.38, 2.08, QUANTITY='OPTICAL DENSITY', ID='SMF_1' /
 
-&CTRL ID='Ion1A_Act', INPUT_ID='Ion1A', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion3A_Act', INPUT_ID='Ion3A', FUNCTION_TYPE='ANY' /
-&CTRL ID='Pho1A_Act', INPUT_ID='Pho1A', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion1B_Act', INPUT_ID='Ion1B', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion3B_Act', INPUT_ID='Ion3B', FUNCTION_TYPE='ANY' /
-&CTRL ID='Pho1B_Act', INPUT_ID='Pho1B', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion1C_Act', INPUT_ID='Ion1C', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion3C_Act', INPUT_ID='Ion3C', FUNCTION_TYPE='ANY' /
-&CTRL ID='Pho1C_Act', INPUT_ID='Pho1C', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion1D_Act', INPUT_ID='Ion1D', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion3D_Act', INPUT_ID='Ion3D', FUNCTION_TYPE='ANY' /
-&CTRL ID='Pho1D_Act', INPUT_ID='Pho1D', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion1E_Act', INPUT_ID='Ion1E', FUNCTION_TYPE='ANY' /
-&CTRL ID='Ion3E_Act', INPUT_ID='Ion3E', FUNCTION_TYPE='ANY' /
-&CTRL ID='Pho1E_Act', INPUT_ID='Pho1E', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1A_Act',   INPUT_ID='Ion1A',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3A_Act',   INPUT_ID='Ion3A',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1A_Act', INPUT_ID='Photo1A', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1B_Act',   INPUT_ID='Ion1B',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3B_Act',   INPUT_ID='Ion3B',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1B_Act', INPUT_ID='Photo1B', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1C_Act',   INPUT_ID='Ion1C',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3C_Act',   INPUT_ID='Ion3C',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1C_Act', INPUT_ID='Photo1C', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1D_Act',   INPUT_ID='Ion1D',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3D_Act',   INPUT_ID='Ion3D',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1D_Act', INPUT_ID='Photo1D', FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion1E_Act',   INPUT_ID='Ion1E',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Ion3E_Act',   INPUT_ID='Ion3E',   FUNCTION_TYPE='ANY' /
+&CTRL ID='Photo1E_Act', INPUT_ID='Photo1E', FUNCTION_TYPE='ANY' /
