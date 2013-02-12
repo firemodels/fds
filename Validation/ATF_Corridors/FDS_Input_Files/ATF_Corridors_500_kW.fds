@@ -13,7 +13,7 @@
       FYI='Methane, C H_4'
       C=1.
       H=4.
-      SOOT_YIELD=0.01 /
+      SOOT_YIELD=0.0 /
 
 &MATL ID            = 'GYPSUM'
       FYI           = 'NBSIR 88-3752'
