@@ -3120,7 +3120,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    DEVC_ID                  = 'null'
    INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
    HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
-   DIAMETER                 = 500._EB      ! microns
+   DIAMETER                 = -1._EB       !         
    MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, meant to be infinitely large and not used
    MINIMUM_DIAMETER         = -1._EB       ! microns, below which the PARTICLE evaporates in one time step
    MONODISPERSE             = .FALSE.
@@ -3171,7 +3171,11 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    
    IF (SURF_ID/='null') THEN
        VIRTUAL_PARTICLES = .TRUE.
-       IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 1
+      IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 1
+      IF (DIAMETER>0._EB) THEN
+         WRITE(MESSAGE,'(A,I2,A)') 'ERROR: PART ',N,' cannot have both a specified DIAMETER and a SURF_ID.'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
    ENDIF
 
    ! Miscellaneous consequences of input parameters
@@ -3179,6 +3183,10 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    IF (SPEC_ID/='null') THEN
       SURF_ID = 'DROPLET'
       IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 10
+      IF (DIAMETER<=0._EB) THEN
+         WRITE(MESSAGE,'(A,I2,A)') 'ERROR: PART ',N,' requires a specified DIAMETER.'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
    ENDIF
 
    IF (MASSLESS) THEN 
