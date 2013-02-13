@@ -198,7 +198,7 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
     if(returncode==0)goto wrapup;
     *numtypescopy++=numtypes_temp[0];
     *numtypescopy++=numtypes_temp[1];
-    skip_local = 2*(numtypes_temp[0]+numtypes_temp[1])*(8 + 30);
+    skip_local = 2*(numtypes_temp[0]+numtypes_temp[1])*(8 + fds_labellen);
     returncode=FSEEK(PART5FILE,skip_local,SEEK_CUR);
     if(returncode!=0)goto wrapup;
   }
@@ -706,11 +706,11 @@ int getpart5nframes(partdata *parti){
         lensize=strlen(size_file);
         if(parti->evac==1){
           angle_flag=1;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag,  &error FDSLABELLEN, lenreg,lensize);
         }
         else{
           angle_flag=0;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error FDSLABELLEN, lenreg,lensize);
         }
       }
   }
@@ -801,11 +801,11 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
         lensize=strlen(size_file);
         if(parti->evac==1){
           angle_flag=1;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag,  &error FDSLABELLEN, lenreg,lensize);
         }
         else{
           angle_flag=0;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag,  &error FDSLABELLEN, lenreg,lensize);
         }
       }
   }

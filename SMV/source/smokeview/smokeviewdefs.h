@@ -24,6 +24,12 @@ void _Sniff_Errors(char *whereat);
 #define TYPE_INI 1
 #endif
 
+#ifdef pp_LABELLEN
+#define FDSLABELLEN ,&fds_labellen
+#else
+#define FDSLABELLEN
+#endif
+
 #define XXX 0
 #define YYY 1
 #define ZZZ 2

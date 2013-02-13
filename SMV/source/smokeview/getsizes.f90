@@ -109,7 +109,11 @@ end function endian_open
 
 !  ------------------ fcreate_part5sizefile ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, error, labellen)
+#else
 subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, error)
+#endif
 #ifdef pp_cvf
 #ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@24' :: fcreate_part5sizefile
@@ -123,7 +127,12 @@ integer, intent(out) :: error
 integer :: lu20, lu21, version, nclasses
 logical :: isopen, exists
 integer, allocatable, dimension(:) :: numtypes, numpoints
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: dummy
+#else
 character(len=30) :: dummy
+#endif
 integer :: i, j,one,idummy
 real :: rdummy,time
 integer :: endian
@@ -219,10 +228,18 @@ end subroutine fcreate_part5sizefile
 
 !  ------------------ getisosize ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine getisosize(isofilename,endian,nisopoints,nisotriangles,nisolevels,nisosteps,error,labellen)
+#else
 subroutine getisosize(isofilename,endian,nisopoints,nisotriangles,nisolevels,nisosteps,error)
+#endif
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_getisosize@36' :: getisosize
+#else
 !DEC$ ATTRIBUTES ALIAS:'_getisosize@32' :: getisosize
+#endif
 #endif
 #endif
 implicit none
@@ -232,7 +249,12 @@ integer, intent(out) :: nisopoints, nisotriangles, nisolevels, nisosteps, error
 
 integer :: endian2, lu20
 logical :: isopen,exists
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: label
+#else
 character(len=30) :: label
+#endif
 integer :: version,i,j, nisopoints_i, nisotriangles_i
 real :: dummy
 integer :: idummy,finish
@@ -381,8 +403,13 @@ end subroutine getzonesize
 
 !  ------------------ getpatchsizes1 ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine getpatchsizes1(file_unit,patchfilename,patchlonglabel,patchshortlabel,patchunit, &
+       endian,npatch,headersize,error,labellen)
+#else
 subroutine getpatchsizes1(file_unit,patchfilename,patchlonglabel,patchshortlabel,patchunit, &
        endian,npatch,headersize,error)
+#endif       
 #ifdef pp_cvf
 #ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getpatchsizes1@52' :: getpatchsizes1
@@ -399,7 +426,15 @@ integer, intent(out) :: error
 integer :: lu15, lenshort, lenunits
 logical :: exists
 logical :: isopen
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+#else
+integer :: labellen
+#endif
 
+#ifndef pp_LABELLEN
+labellen=30
+#endif
 error=0
 lu15 = file_unit
 inquire(unit=lu15,opened=isopen)
@@ -426,7 +461,11 @@ if(error.eq.0)read(lu15,iostat=error)patchlonglabel
 if(error.eq.0)read(lu15,iostat=error)patchshortlabel
 if(error.eq.0)read(lu15,iostat=error)patchunit
 if(error.eq.0)read(lu15,iostat=error)npatch
-headersize = 3*(30+8) + 4 + 8 
+#ifdef pp_LABELLEN
+headersize = 3*(4+labellen+4) + 4 + 8
+#else
+headersize = 3*(4+30+4) + 4 + 8
+#endif
 
 patchlonglabel=trim(patchlonglabel)//char(0)
 lenshort = min(len_trim(patchshortlabel),6)
@@ -698,11 +737,19 @@ end subroutine getsizes2
 
 !  ------------------ getsliceparms ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error, labellen)
+#else
 subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error)
+#endif
 
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_getsliceparms@60' :: getsliceparms
+#else
 !DEC$ ATTRIBUTES ALIAS:'_getsliceparms@56' :: getsliceparms
+#endif
 #endif
 #endif
 
@@ -714,10 +761,17 @@ logical :: exists
 integer, intent(inout) :: ip1, ip2, jp1, jp2, kp1, kp2
 integer, intent(out) :: ni, nj, nk, slice3d, error
 integer, intent(in) :: endian
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+#endif
 
 integer :: idir, joff, koff
 logical :: connected
+#ifdef pp_LABELLEN
+character(len=labellen) :: longlbl, shortlbl, unitlbl
+#else
 character(len=30) :: longlbl, shortlbl, unitlbl
+#endif
 
 
 integer :: lu11
@@ -772,9 +826,13 @@ return
 end subroutine getsliceparms
 
 !  ------------------ getslicesizes ------------------------ 
-
+#ifdef pp_LABELLEN
+subroutine getslicesizes(slicefilename, nslicei, nslicej, nslicek, nsteps, sliceframestep,&
+   endian, error, settmin_s, settmax_s, tmin_s, tmax_s, headersize, framesize, labellen)
+#else
 subroutine getslicesizes(slicefilename, nslicei, nslicej, nslicek, nsteps, sliceframestep,&
    endian, error, settmin_s, settmax_s, tmin_s, tmax_s, headersize, framesize)
+#endif
 
 #ifdef pp_cvf
 #ifndef X64
@@ -792,6 +850,9 @@ integer, intent(in) :: endian
 integer, intent(in) :: settmin_s, settmax_s, sliceframestep
 integer, intent(out) :: headersize, framesize
 real, intent(in) :: tmin_s, tmax_s
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+#endif
 
 integer :: ip1, ip2, jp1, jp2, kp1, kp2
 integer :: nxsp, nysp, nzsp
@@ -800,7 +861,11 @@ integer :: i, j, k
 integer :: lu11
 real :: time, time_max
 real, dimension(:,:,:), pointer :: qq
+#ifdef pp_LABELLEN
+character(len=labellen) :: longlbl, shortlbl, unitlbl
+#else
 character(len=30) :: longlbl, shortlbl, unitlbl
+#endif
 logical :: connected, load
 integer :: idir, joff, koff
 integer :: count
@@ -970,7 +1035,11 @@ end subroutine openfortranfile
 
 !  ------------------ openslice ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine openslice(slicefilename, unitnum, endian, is1, is2, js1, js2, ks1, ks2, error, labellen)
+#else
 subroutine openslice(slicefilename, unitnum, endian, is1, is2, js1, js2, ks1, ks2, error)
+#endif
 
 #ifdef pp_cvf
 #ifndef X64
@@ -987,8 +1056,15 @@ integer, intent(in) :: endian
 integer, intent(inout) :: unitnum
 integer, intent(out) :: is1, is2, js1, js2, ks1, ks2
 integer, intent(out) :: error
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+#endif
 logical :: connected
+#ifdef pp_LABELLEN
+character(len=labellen) :: longlbl, shortlbl, unitlbl
+#else
 character(len=30) :: longlbl, shortlbl, unitlbl
+#endif
 integer :: funit
 integer :: len1
 
@@ -1043,11 +1119,18 @@ end subroutine closefortranfile
 
 
 !  ------------------ getboundaryheader1 ------------------------ 
-
+#ifdef pp_LABELLEN
+subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,endian,npatch,error,labellen)
+#else
 subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,endian,npatch,error)
+#endif
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_getboundaryheader1@28' :: getboundaryheader1
+#else
 !DEC$ ATTRIBUTES ALIAS:'_getboundaryheader1@24' :: getboundaryheader1
+#endif
 #endif
 #endif
 implicit none
@@ -1056,8 +1139,12 @@ character(len=*), intent(in) :: boundaryfilename
 integer, intent(in) :: endian
 integer, intent(inout) :: boundaryunitnumber
 integer, intent(out) :: npatch, error
-
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: patchlonglabel, patchshortlabel, patchunit
+#else
 character(len=30) :: patchlonglabel, patchshortlabel, patchunit
+#endif
 
 integer :: lu15, lenshort, lenunits
 logical :: exists
@@ -1132,10 +1219,18 @@ end subroutine getboundaryheader2
 
 !  ------------------ openboundary ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine openboundary(boundaryfilename,boundaryunitnumber,endian,version,error,labellen)
+#else
 subroutine openboundary(boundaryfilename,boundaryunitnumber,endian,version,error)
+#endif
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_openboundary@28' :: openboundary
+#else
 !DEC$ ATTRIBUTES ALIAS:'_openboundary@24' :: openboundary
+#endif
 #endif
 #endif
 implicit none
@@ -1144,7 +1239,12 @@ character(len=*), intent(in) :: boundaryfilename
 integer, intent(in) :: boundaryunitnumber, endian,version
 integer, intent(out) :: error
 
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: patchlonglabel, patchshortlabel, patchunit
+#else
 character(len=30) :: patchlonglabel, patchshortlabel, patchunit
+#endif
 
 integer :: lu15, lenshort, lenunits
 logical :: exists
@@ -1219,10 +1319,18 @@ end subroutine getpartheader1
 
 !  ------------------ getpartheader2 ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine getpartheader2(unit,nclasses,nquantities,size,labellen)
+#else
 subroutine getpartheader2(unit,nclasses,nquantities,size)
+#endif
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_getpartheader2@20' :: getpartheader2
+#else
 !DEC$ ATTRIBUTES ALIAS:'_getpartheader2@16' :: getpartheader2
+#endif
 #endif
 #endif
 implicit none
@@ -1231,14 +1339,23 @@ integer, intent(in) :: unit,nclasses
 integer, intent(out), dimension(nclasses) :: nquantities
 integer, intent(out) :: size
 
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: clabel
+#else
+integer :: labellen
 character(len=30) :: clabel
+#endif
 integer :: i, j, dummy
 
+#ifndef pp_LABELLEN
+labellen=30
+#endif
 size=0
 
 do i = 1, nclasses
   read(unit)nquantities(i),dummy
-  size=size+4+2*nquantities(i)*(4+30+4)
+  size=size+4+2*nquantities(i)*(4+labellen+4)
   do j=1, nquantities(i)
     read(unit)clabel
     read(unit)clabel

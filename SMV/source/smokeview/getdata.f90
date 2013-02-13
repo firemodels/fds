@@ -562,10 +562,18 @@ end subroutine getdirval
 
 !  ------------------ writeslicedata ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine writeslicedata(file_unit,slicefilename,is1,is2,js1,js2,ks1,ks2,qdata,times,ntimes,labellen)
+#else
 subroutine writeslicedata(file_unit,slicefilename,is1,is2,js1,js2,ks1,ks2,qdata,times,ntimes)
+#endif
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_writeslicedata@52' :: writeslicedata
+#else
 !DEC$ ATTRIBUTES ALIAS:'_writeslicedata@48' :: writeslicedata
+#endif
 #endif
 #endif
 
@@ -581,7 +589,12 @@ integer, intent(in) :: ntimes
 
 logical :: connected
 integer :: error
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: longlbl, shortlbl, unitlbl
+#else
 character(len=30) :: longlbl, shortlbl, unitlbl
+#endif
 integer :: ibeg, iend, nframe
 integer :: nxsp, nysp, nzsp
 integer :: i,ii,jj,kk
@@ -618,13 +631,22 @@ return
 end subroutine writeslicedata
 
 !  ------------------ getslicedata ------------------------ 
-
+#ifdef pp_LABELLEN
+subroutine getslicedata(file_unit,slicefilename,longlabel,shortlabel,units,&
+            is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
+			endian,settmin_s,settmax_s,tmin_s,tmax_s,labellen)
+#else
 subroutine getslicedata(file_unit,slicefilename,longlabel,shortlabel,units,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
 			endian,settmin_s,settmax_s,tmin_s,tmax_s)
+#endif
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_getslicedata@112' :: getslicedata
+#else
 !DEC$ ATTRIBUTES ALIAS:'_getslicedata@108' :: getslicedata
+#endif
 #endif
 #endif
 
@@ -652,7 +674,12 @@ integer :: ip1, ip2, jp1, jp2, kp1, kp2
 integer :: nxsp, nysp, nzsp
 integer :: error, istart, irowstart
 real :: time, time_max
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: longlbl, shortlbl, unitlbl
+#else
 character(len=30) :: longlbl, shortlbl, unitlbl
+#endif
 integer :: lenshort, lenunits
 character(len=3) :: blank
 logical :: connected, load
@@ -870,10 +897,18 @@ end subroutine endianout
 
 !  ------------------ outsliceheader ------------------------ 
 
+#ifdef pp_LABELLEN
+subroutine outsliceheader(file_unit,slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error, labellen)
+#else
 subroutine outsliceheader(file_unit,slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
+#endif
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_outsliceheader@48' :: outsliceheader
+#else
 !DEC$ ATTRIBUTES ALIAS:'_outsliceheader@44' :: outsliceheader
+#endif
 #endif
 #endif
 
@@ -885,7 +920,12 @@ integer, intent(in) :: unit
 integer, intent(in) :: ip1, ip2, jp1, jp2, kp1, kp2
 integer, intent(out) :: error
 
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: longlbl, shortlbl, unitlbl
+#else
 character(len=30) :: longlbl, shortlbl, unitlbl
+#endif
 integer :: lu11
 logical :: connected
 
@@ -939,11 +979,18 @@ return
 end subroutine outsliceframe
 
 !  ------------------ outboundaryheader ------------------------ 
-
+#ifdef pp_LABELLEN
+subroutine outboundaryheader(boundaryfilename,boundaryunitnumber,npatches,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,error,labellen)
+#else
 subroutine outboundaryheader(boundaryfilename,boundaryunitnumber,npatches,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,error)
+#endif
 #ifdef pp_cvf
 #ifndef X64
+#ifdef pp_LABELLEN
+!DEC$ ATTRIBUTES ALIAS:'_outboundaryheader@52' :: outboundaryheader
+#else
 !DEC$ ATTRIBUTES ALIAS:'_outboundaryheader@48' :: outboundaryheader
+#endif
 #endif
 #endif
 implicit none
@@ -953,7 +1000,12 @@ integer, intent(in) :: boundaryunitnumber, npatches
 integer, intent(in), dimension(npatches) :: pi1, pi2, pj1, pj2, pk1, pk2, patchdir
 integer, intent(out) :: error
 
+#ifdef pp_LABELLEN
+integer, intent(in) :: labellen
+character(len=labellen) :: blank
+#else
 character(len=30) :: blank
+#endif
 integer :: n, lu15
 
 error=0

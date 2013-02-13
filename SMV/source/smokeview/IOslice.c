@@ -127,7 +127,7 @@ void out_slicefile(slicedata *sd){
   slicefilelen=strlen(sd->file);
   FORTwriteslicedata(&file_unit,sd->file,
     &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,
-    sd->qslicedata,sd->times,&sd->ntimes,slicefilelen);
+    sd->qslicedata,sd->times,&sd->ntimes FDSLABELLEN, slicefilelen);
 }
 
 /* ------------------ Creadslice_frame ------------------------ */
@@ -155,7 +155,7 @@ int Creadslice_frame(int frame_index_local,int sd_index,int flag){
     if(sd->compression_type==0){
 
       FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
-        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize,
+        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize  FDSLABELLEN,
         slicefilelen);
     }
     else if(sd->compression_type==1){
@@ -1049,7 +1049,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     slicefilelen = strlen(file);
     if(sd->compression_type==0){
       FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
-        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize,
+        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize  FDSLABELLEN,
         slicefilelen);
     }
     else if(sd->compression_type==1){
@@ -1120,7 +1120,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       FORTgetslicedata(&file_unit,file,slicelonglabels,sliceshortlabels,sliceunits,
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
                    &qmin,&qmax,sd->qslicedata,sd->times,&sd->ntimes,&sliceframestep, &endian_smv,
-                   &settmin_s,&settmax_s,&tmin_s,&tmax_s,
+                   &settmin_s,&settmax_s,&tmin_s,&tmax_s FDSLABELLEN,
                    slicefilelen,labellen,labellen,labellen);
 #ifdef pp_MEMDEBUG                   
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
@@ -1967,7 +1967,7 @@ void getsliceparams(void){
         ks1=sd->ks1;
         ks2=sd->ks2;
         FORTgetsliceparms(file,&endian_smv,
-          &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
+          &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice, &error FDSLABELLEN,lenfile);
         if(stream!=NULL&&doit_anyway==0)fprintf(stream,"%i %i %i %i %i %i %i %i %i %i %i\n",sd->seq_id,is1,is2,js1,js2,ks1,ks2,ni,nj,nk,sd->volslice);
       }
     }

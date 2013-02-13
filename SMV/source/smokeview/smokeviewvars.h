@@ -25,6 +25,11 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+#ifdef pp_LABELLEN
+SVEXTERN int SVDECL(fds_labellen,35);
+#else
+SVEXTERN int SVDECL(fds_labellen,30);
+#endif
 SVEXTERN int SVDECL(script_render,0);
 SVEXTERN int SVDECL(make_volrender_script,0);
 SVEXTERN char SVDECL(*volrender_scriptname,NULL);

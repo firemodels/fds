@@ -191,7 +191,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   if(patchinfo[ifile].compression_type==0){
     FILE_SIZE labellen=LABELLEN;
 
-    FORTgetpatchsizes1(&file_unit,file,patchlonglabel,patchshortlabel,patchunit,&endian_smv,&meshi->npatches,&headersize,&error,
+    FORTgetpatchsizes1(&file_unit,file,patchlonglabel,patchshortlabel,patchunit,&endian_smv,&meshi->npatches,&headersize, &error FDSLABELLEN,
                        lenfile,labellen,labellen,labellen);
     if(error!=0){
       readpatch(ifile,UNLOAD,&error);
@@ -3787,7 +3787,7 @@ int update_patch_hist(patchdata *patchj){
     lenfile=strlen(patchi->file);
 
     FORTget_file_unit(&unit1,&patchi->unit_start);
-    FORTgetboundaryheader1(patchi->file,&unit1,&endian_local, &npatches, &error, lenfile);
+    FORTgetboundaryheader1(patchi->file,&unit1,&endian_local, &npatches, &error FDSLABELLEN , lenfile);
     if(npatches==0){
       FORTclosefortranfile(&unit1);
       continue;
@@ -3815,7 +3815,7 @@ int update_patch_hist(patchdata *patchj){
     }
     
     FORTget_file_unit(&unit1,&patchi->unit_start);
-    FORTopenboundary(patchi->file,&unit1,&endiandata,&patchi->version,&error1,lenfile);
+    FORTopenboundary(patchi->file,&unit1,&endiandata,&patchi->version,&error1 FDSLABELLEN,lenfile);
 
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
     init_histogram(patchi->histogram);
