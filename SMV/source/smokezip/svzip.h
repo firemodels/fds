@@ -33,12 +33,6 @@
 #define rgb_black 19
 #endif
 
-#ifdef pp_LABELLEN
-#define FDSLABELLEN ,&fds_labellen
-#else
-#define FDSLABELLEN
-#endif
-
 #ifndef MAX
 #define MAX(a,b)  ((a)>(b) ? (a) : (b))
 #define MIN(a,b)  ((a)<(b) ? (a) : (b))
@@ -343,46 +337,26 @@ void getsliceparms_c(char *file, int *ni, int *nj, int *nk);
 STDCALLF FORTget_file_unit(int *file_unit,int *file_unit_start);
 STDCALLF FORTopenpart(char *partfilename, int *unit, int *endian, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetpartheader1(int *unit, int *nclasses, int *fdsversion, int *size);
-#ifdef pp_LABEL
-STDCALLF FORTgetpartheader2(int *unit, int *nclasses, int *nquantities, int *size, int *fds_labellen);
-#else
 STDCALLF FORTgetpartheader2(int *unit, int *nclasses, int *nquantities, int *size);
-#endif
 STDCALLF FORTgetpartdataframe(int *unit, int *nclasses, int *nquantities, int *npoints, float *time, int *tagdata, float *pdata, int *size, int *error);
 
 STDCALLF FORTclosefortranfile(int *lunit);
 
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *ndummy, int *error);
-#ifdef pp_LABELLEN
-STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
-                          int *endian, int *version, int *error, int *fds_labellen, FILE_SIZE len);
-#else
 STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
                          int *endian, int *version, int *error, FILE_SIZE len);
-#endif
-#ifdef pp_LABEL
-STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
-                                int *endian, int *npatch, int *fdslabellen, int *error, FILE_SIZE lenfile);
-#else
 STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
                                int *endian, int *npatch, int *error, FILE_SIZE lenfile);
-#endif
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
 
 STDCALLF FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                           float *time,float *qframe,int *slicetest, int *error);
-#ifdef pp_LABELLEN
-STDCALLF FORTopenslice(char *slicefilename, int *unit, int *endian, 
-                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2, 
-                       int *error, int *fds_labellen,FILE_SIZE lenfile);
-#else
 STDCALLF FORTopenslice(char *slicefilename, int *unit, int *endian, 
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
-#endif
 
 
 

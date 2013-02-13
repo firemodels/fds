@@ -16,11 +16,6 @@
 
 #include "string_util.h"
 
-#ifdef pp_LABELLEN
-#define FDSLABELLEN ,&fds_labellen
-#else
-#define FDSLABELLEN
-#endif
 
 #ifdef WIN32
 #define STDCALLF extern void _stdcall
@@ -174,69 +169,34 @@ STDCALLF FORTget_file_unit(int *file_unit, int *file_unit_start);
 STDCALLF FORToutpatchframe(int *lunit, int *npatch,
                           int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2,
                           float *patchtime, float *pqq, int *error);
-#ifdef pp_LABEL
 STDCALLF FORToutboundaryheader(char *outfile, int *unit3, int *npatches,
                               int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2,
-                              int *patchdir, int *error1, int *fds_labellen, FILE_SIZE len);
-#else
-STDCALLF FORToutboundaryheader(char *outfile, int *unit3, int *npatches,
-                               int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2,
-                               int *patchdir, int *error1, FILE_SIZE len);
-#endif
+                              int *patchdir, int *error1, FILE_SIZE len);
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *npqq, int *error);
-#ifdef pp_LABELLEN
-STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
-                          int *endian, int *version, int *error, int *fds_labellen, FILE_SIZE len);
-#else
 STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
                          int *endian, int *version, int *error, FILE_SIZE len);
-#endif
-#ifdef pp_LABELLEN
-STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
-                                int *endian, int *npatch, int *error, int *fds_labellen, FILE_SIZE lenfile);
-#else
 STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
                                int *endian, int *npatch, int *error, FILE_SIZE lenfile);
-#endif
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
 STDCALLF FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                           float *time,float *qframe,int *slicetest, int *error);
-#ifdef pp_LABELLEN
-STDCALLF FORTgetsliceparms(char *file,int *endian,
-                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,
-                           int *ni, int *nj, int *nk,
-                           int *slice3d, int *error,int *fds_labellen, FILE_SIZE lenfile);
-#else
 STDCALLF FORTgetsliceparms(char *file,int *endian,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,
                           int *ni, int *nj, int *nk,
                           int *slice3d, int *error,FILE_SIZE lenfile);
-#endif
-#ifdef pp_LABELLEN
-STDCALLF FORTopenslice(char *slicefilename, int *unit, int *endian, 
-                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
-                       int *error, int *fds_labellen, FILE_SIZE lenfile);
-#else
 STDCALLF FORTopenslice(char *slicefilename, int *unit, int *endian, 
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
-#endif
 STDCALLF FORTclosefortranfile(int *unit);
 STDCALLF FORToutsliceframe(int *unit3,
                           int *is1a,int *is1b,int *js1a,int *js1b,int *ks1a,int *ks1b,
                           float *time1,float *qframeout, int *error);
-#ifdef pp_LABELLEN
-STDCALLF FORToutsliceheader(int *file_unit,char *outfile,int *unit3,
-                            int *is1a,int *is2a,int *js1a,int *js2a,int *ks1a,int *ks2a,
-                            int *error1,int *fds_labellen,int len);
-#else
 STDCALLF FORToutsliceheader(int *file_unit,char *outfile,int *unit3,
                              int *is1a,int *is2a,int *js1a,int *js2a,int *ks1a,int *ks2a,
                              int *error1,int len);
-#endif
 STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, int len);
 STDCALLF FORTplot3dout(char *outfile,int *nx,int *ny,int *nz,float *qout,int *error3,int lenout);
 STDCALLF FORTendianout(char *endian_filename,int lenout);

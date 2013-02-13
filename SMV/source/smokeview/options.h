@@ -40,7 +40,6 @@
 #define pp_GPUTHROTTLE
 #endif
 
-// #define pp_LABELLEN
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB

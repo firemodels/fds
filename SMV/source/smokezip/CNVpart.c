@@ -376,7 +376,7 @@ void convert_part(part *parti, int *thread_index){
   NewMemory((void **)&npoints,nclasses*sizeof(int));
   sizebefore+=size;
 
-  FORTgetpartheader2(&unit,&nclasses,nquantities,&size FDSLABELLEN);
+  FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
   sizebefore+=size;
 
   fwrite(&one,4,1,partstream);           // write out a 1 to determine "endianness" when file is read in later
@@ -593,7 +593,7 @@ void Get_Part_Bounds(void){
     NewMemory((void **)&nquantities,nclasses*sizeof(int));
     NewMemory((void **)&npoints,nclasses*sizeof(int));
 
-    FORTgetpartheader2(&unit,&nclasses,nquantities,&size FDSLABELLEN);
+    FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
     nquantities_total=0;
     for(j=0;j<nclasses;j++){
       nquantities_total+=nquantities[j];
@@ -729,7 +729,7 @@ void part2iso(part *parti, int *thread_index){
   NewMemory((void **)&nquantities,nclasses*sizeof(int));
   NewMemory((void **)&npoints,nclasses*sizeof(int));
 
-  FORTgetpartheader2(&unit,&nclasses,nquantities,&size FDSLABELLEN);
+  FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
 
   partmesh = parti->partmesh;
 
