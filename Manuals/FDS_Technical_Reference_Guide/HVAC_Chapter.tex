@@ -55,14 +55,14 @@ Since the two models are not fully coupled, the extrapolated pressure is an esti
 
 The extrapolated pressure for a compartment can be determined by using Eq.~(\ref{concon2}) and correcting the integral over velocity for the current solution of
 all interdependent HVAC flows into or out of an FDS pressure zone:
-\be \tilde{P}^n_i=P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, dV}\right)\Delta t^n
+\be \tilde{P}^n_i  = P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, dV}\right)\Delta t^n = \tilde{P^*}^n_i - \frac{\sum_j u^n_j A^n_j}{\int_{\Omega_m} {\cal P} \, dV})\Delta t^n
    \label{HVACextrapolatedpressure} \ee
-If the summation term for the velocities being predicted in this time step is removed from $\tilde{P}^n_i$ and placed on the left hand side of Eq.~(\ref{HVACdiscretemomentum}) and the remaining terms of Eq.~(\ref{HVACextrapolatedpressure}) are placed on the right hand side we obtain the following:
+If the summation term for the velocities being predicted in this timestep is removed from Eq.~(\ref{HVACextrapolatedpressure}) and placed on the left hand side of Eq.~(\ref{HVACdiscretemomentum}) and the remaining terms of Eq.~(\ref{HVACextrapolatedpressure}) are placed on the right hand side we obtain the following:
 \begin{eqnarray}
    u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j+u^{n+}_j \right| \right) &-&
     \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} {\cal P} \, dV}}= \nonumber \\
   & & u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j}
-  \left(\tilde{P}^n_i-\tilde{P}^n_k +  (\rho g \Delta z)_j + \Delta P_j \right) +
+  \left(\tilde{P^*}^n_i-\tilde{P^*}^n_k +  (\rho g \Delta z)_j + \Delta P_j \right) +
   \frac{K_j}{2 L_j}\left|u^{n+}_j\right| \left|u^{n-}_j\right| \label{HVACfullexpansion}
 \end{eqnarray}
 If node $i$ or node $k$ for duct $j$ in Eq.~(\ref{HVACfullexpansion}) is an internal duct node, then extrapolated pressures are not computed and the actual node pressure is solved for.
