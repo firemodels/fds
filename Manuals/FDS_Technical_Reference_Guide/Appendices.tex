@@ -105,12 +105,12 @@ The equations governing the evolution of a low-Mach, variable density fluid---fi
 \end{gather}
 In this appendix, starting from the conservative form of the sensible enthalpy transport equation, we derive a numerically consistent velocity divergence constraint for use in large-eddy simulation (LES) of low-Mach flows.  The result accounts for numerical transport of mass and energy, which is difficult to eliminate in relatively coarse, engineering LES calculations when total variation diminishing (TVD) scalar transport schemes are employed.  Without the correction terms derived here, unresolved (numerical) mixing of gas species with different heat capacities and molecular weights may lead to erroneous mixture temperatures and ultimately to an imbalance in the energy budget.
 
-\section*{The Divergence Constraint}
+\section{The Divergence Constraint}
 \label{div_constraint}
 
 As mentioned, the present work stems from attempts to understand and correct an energy budget imbalance that became evident after implementing both temperature-dependent specific heats and TVD scalar transport. One of the revelations of this work has been that the choice of starting point for deriving the divergence constraint naturally leads to two different forms of the divergence expression.  While these forms are mathematically equivalent, they lead to two completely different---and yet completely plausible---numerical formulations.
 
-\subsection*{From Continuity}
+\subsection{From Continuity}
 Starting from the continuity equation, we can factor out the velocity divergence leaving the material derivative of the density:
 \begin{align}
 \Div\mathbf{u} &= -\frac{1}{\rho}\frac{\D\rho}{\D t}
@@ -123,7 +123,7 @@ Using the ideal gas law and differentiating the equation of state leads to
 &+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \big[ \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime \big]
 \end{align}
 
-\subsection*{From Sensible Enthalpy}
+\subsection{From Sensible Enthalpy}
 Alternatively, we may factor the velocity divergence from the sensible enthalpy transport equation:
 \begin{align}
 \label{eqn_div_new}
@@ -137,7 +137,7 @@ From this starting point, (arguably) the natural result for the divergence expre
 &+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \big[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) + \dot{m}_\alpha^\tripleprime \big]
 \end{align}
 
-\subsection*{Comparison}
+\subsection{Comparison}
 Notice the subtle differences between the first, second, and third lines of (\ref{eqn_div_1}) and (\ref{eqn_div_2}).  The first lines differ by $\displaystyle (\mathbf{u}\cdot\nabla \bar{p})/\bar{p}$. In (\ref{eqn_div_2}), the second and third lines each contain an extra term accounting for advection of enthalpy and mass, respectively, $\mathbf{u} \cdot\nabla (\rho h_s)$ and $\mathbf{u} \cdot \nabla (\rho Y_\alpha)$.  Using (\ref{eqn_rho})-(\ref{eqn_eos}), it can be shown that (\ref{eqn_div_1}) and (\ref{eqn_div_2}) are mathematically equivalent (see Section \ref{equivalence}).
 
 
@@ -152,7 +152,7 @@ Notice the subtle differences between the first, second, and third lines of (\re
 %\rho h_s = \rho c_p T = \rho T \sum_\alpha Y_\alpha c_{p,\alpha} = \rho R T \left(\frac{\gamma}{\gamma-1}\right)\sum_\alpha \frac{Y_\alpha}{W_\alpha} = \rho \frac{R T}{\overline{W}} \left(\frac{\gamma}{\gamma-1}\right) = \bar{p}\left(\frac{\gamma}{\gamma-1}\right)
 %\end{align}
 
-\subsection*{The Discrete Divergence}
+\subsection{The Discrete Divergence}
 \label{discrete_divergence}
 
 The \emph{conservative form} of the sensible enthalpy transport equation---which derives its name from the flux divergence form of the mean transport term on the left hand side---is
@@ -172,7 +172,7 @@ The numerical details of $\overline{\mathbf{u}\cdot\nabla(\rho h_s)}$ are the ke
 Most of the complexity in the divergence expression is buried in the time derivative term, $\partial (\rho h_s)/\partial t$.  Using (\ref{eqn_rho})-(\ref{eqn_eos}), it can be shown that (\ref{eqn_discrete_divergence}) expands to yield (\ref{eqn_div_2}) (see Appendix \ref{app_time_derivative}).
 
 
-\section*{Factoring the Discrete Flux Divergence}
+\section{Factoring the Discrete Flux Divergence}
 \label{app_transport_decomposition}
 
 Below we show the numerical decomposition of the enthalpy flux divergence for cell $i$ in 1D.  The operator $\delta(\,\,\,)/\delta x$ denotes a central difference.  Density $\rho$ and sensible enthalpy $h_s$ are stored at cell centers indexed by $i$, $i+1$, etc.  Velocity $u$ is stored at the cell face and indexed by $i+\mhalf$, etc.  Here an overline applied to a face value ($i\pm\mhalf$ suffix) denotes a flux limiter, which is basically a special interpolation of the scalar field to the cell face.  The purpose of the flux limiter is to prevent spurious oscillations in the scalar solution.  Such oscillations must be avoided because they may lead to boundedness violations and instability.
@@ -191,7 +191,7 @@ Here $\Delta_{i+\thalf}$ represents a limited slope of the scalar data ($\rho h_
 
 Note that while scalar face values are unique to the face $\left[\overline{(\rho h_s)}_{i+\thalf} = \overline{(\rho h_s)}_{i+1-\thalf}\right]$, the limited slopes are not ($\Delta_{i+\thalf} \ne \Delta_{i+1-\thalf}$).
 
-\subsection*{Example: Pure Upwinding}
+\subsection{Example: Pure Upwinding}
 Suppose all $u>0$ in 1D, a wind from left to right.  For Godunov's scheme (first-order upwinding) the limited slopes would be computed as follows:
 \begin{align}
 \Delta_{i+\thalf} &= \overline{(\rho h_s)}_{i+\thalf} - (\rho h_s)_i \notag\\
@@ -207,7 +207,7 @@ The cell-average advection term therefore becomes
 \overline{\mathbf{u}\cdot\nabla(\rho h_s)} &= u_{i-\thalf} \left[ \frac{(\rho h_s)_i - (\rho h_s)_{i-1}}{\delta x} \right]
 \end{align}
 
-\subsection*{Example: Central Differencing}
+\subsection{Example: Central Differencing}
 For central differencing the limited slopes would be computed as follows:
 \begin{align}
 \Delta_{i+\thalf} &= \overline{(\rho h_s)}_{i+\thalf} - (\rho h_s)_i \notag\\
@@ -224,11 +224,11 @@ The cell-average advection term therefore becomes
 \overline{\mathbf{u}\cdot\nabla(\rho h_s)} &= \frac{1}{2}  u_{i+\thalf} \left[ \frac{(\rho h_s)_{i+1} - (\rho h_s)_i}{\delta x} \right] + \frac{1}{2} u_{i-\thalf} \left[ \frac{(\rho h_s)_i - (\rho h_s)_{i-1}}{\delta x} \right]
 \end{align}
 
-\subsection*{General Implementation: Using Flux Limiters}
+\subsection{General Implementation: Using Flux Limiters}
 The examples above are for illustration purposes only.  In general, we first compute the flux-limited face values and obtain the limited slopes from (\ref{eqn_slope_1}) and (\ref{eqn_slope_2}).  The cell-average advection term is then computed from the second underbrace in (\ref{eqn_flux_decomposition}).
 
 
-\section*{Decomposing the Time Derivative}
+\section{Decomposing the Time Derivative}
 \label{app_time_derivative}
 
 Using the ideal gas law, the time derivative of the enthalpy can be decomposed as follows:
@@ -279,7 +279,7 @@ Finally... (compare with (\ref{eqn_div_2}))
 &+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \bigg[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) + \dot{m}_\alpha^\tripleprime \bigg]
 \end{align}
 
-\section*{Equivalence between Divergence Expressions}
+\section{Equivalence between Divergence Expressions}
 \label{equivalence}
 
 The equivalence between (\ref{eqn_div_1}) and (\ref{eqn_div_2}) is apparent based on the following:
