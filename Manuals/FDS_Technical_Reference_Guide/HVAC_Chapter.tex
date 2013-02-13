@@ -58,8 +58,7 @@ all interdependent HVAC flows into or out of an FDS pressure zone:
 \be \tilde{P}^n_i=P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, dV}\right)\Delta t^n
    \label{HVACextrapolatedpressure} \ee
 
-If we separate the HVAC solved velocities into a pressure zone from the FDS solved velocities into a pressure zone and then substitute Eq.~\ref{HVACextrapolatedpressure} into
-Eq.~(\ref{HVACdiscretemomentum}) we obtain the following:
+If the summation term for the velocities being predicted in this timestep is removed from $\tilde{P}^n_i$ and placed on the left hand side of Eq.~(\ref{HVACHVACdiscretemomentum}) and the remaining terms of Eq.~(\ref{HVACextrapolatedpress}) are placed on the right hand side we obtain the following:
 \begin{eqnarray}
    u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j+u^{n+}_j \right| \right) &-&
     \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} {\cal P} \, dV}}= \nonumber \\
@@ -91,7 +90,7 @@ where $j$ is a species being filtered and $E_j$ is its removal efficiency.
 
 \subsection{Node Losses}
 
-As seen in Eq.~(\ref{HVACfullexpansion}), flow loss terms appear only in the equations for a duct.  This means that losses that occur in a duct node must be expressed in terms of losses in the ducts attached to the node.  The losses need to be applied in a manner that represents the flow conditions within the node.  For example if a tee has flow in one leg and out two legs, it would not make sense to apply the loss to the upstream leg as there would be no way to distinguish losses due to changing of the flow splitting in the downstream legs.  Loss terms are applied as follows:
+Some nodes in the modeled HVAC system will represent items such as tees.  Flow through those nodes will have a flow loss associated with the node.  However, as seen in Eq.~(\ref{HVACfullexpansion}), flow loss terms appear only in the equations for a duct.  This means that losses that are physically assocaited with the duct node must be expressed numerically as equivalent losses in the ducts attached to the node.  The losses also need to be applied in a manner that represents the flow conditions within the node.  For example if a tee has flow in one leg and out two legs, it would not make sense to apply the loss to the upstream leg as there would be no way to distinguish losses due to changing of the flow splitting in the downstream legs.  Loss terms are applied as follows:
 
 \begin{enumerate}
 \item If there is no flow at the node, then each duct connected to the node is assigned the average of all the losses for flows to the duct from all other ducts.
