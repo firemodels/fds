@@ -235,7 +235,7 @@ void diff_boundaryes(FILE *stream_out){
       len3=strlen(outfile);
       size_sofar=0;
       FORToutboundaryheader(outfile,&unit3,&boundary1->npatches,
-        p3i1,p3i2,p3j1,p3j2,p3k1,p3k2,patchdir3,FDSLABELEN &error1,len3);
+        p3i1,p3i2,p3j1,p3j2,p3k1,p3k2,patchdir3,FDSLABELLEN &error1,len3);
       printf("  Progress: ");
       fflush(stdout);
       percent_complete=0;

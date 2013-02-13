@@ -170,7 +170,7 @@ void diff_slices(FILE *stream_out){
     len=strlen(outfile);
     unit3=13;
     FORTget_file_unit(&unit3,&unit3);
-    FORToutsliceheader(&unit3,outfile,&unit3,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,FDSLABELEN &error1,len);
+    FORToutsliceheader(&unit3,outfile,&unit3,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,FDSLABELLEN &error1,len);
     if(error1!=0){
       FORTclosefortranfile(&unit1);
       FORTclosefortranfile(&unit2);
