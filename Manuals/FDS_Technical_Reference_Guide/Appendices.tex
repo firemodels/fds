@@ -297,29 +297,31 @@ The equivalence between (\ref{eqn_div_1}) and (\ref{eqn_div_2}) is apparent base
 &= -\frac{1}{\bar{p}} \mathbf{u}\cdot \nabla \bar{p}
 \end{align}
 
-\chapter{Multi-environment Extension of Reactor Model}
 
-\label{multi_env_edc}
 
-In the current formulation of the reactor model FDS does not transport the mixing variable. At the start of a time step, mixing is assumed to be in the unmixed state. We would like to extend the reactor model so that we can eventually construct PDFs of reactor concentration. The difficulty is how to construct/transport the necessary information to build the PDF.
-
-One efficient way to describe a PDF is to use moments; where a moment can be thought of a statistical descriptor of the distribution. The first moment of a distribution is the mean of the distribution, the second is the variance, etc. Therefore, the more moments we know, the better the description of the distribution we have. For a given PDF, p(y), the $k^{th}$ moment of $y$ of the distribution is:
-\begin{equation}\label{eq:int_moment}
-_{y}M_{k} = \int y^{k}p(y)\mathrm{d}y
-\end{equation}
-Solving this integral equation can become difficult as it requires the function form of the PDF. An alternative way to compute moments is to use Gaussian-quadrature, which represents the moment integral in Eq.~\ref{eq:int_moment} as an n-point sum \cite{mcgraw:1997}:
-\begin{equation}\label{eq:qmom}
-_{y}M_{k}=\displaystyle \sum_{i=1}^{n} \hat y_{i}^{k} w_{i}
-\end{equation}
-This technique is known as the quadrature method of moments (QMOM) where  $\hat y_i^k$ is known at the $i^{th}$ quadrature point, $w_i$ is known as the $i^{th}$ quadrature weight, and $n$ is the number of quadrature points. If we consider the unmixed fraction as a weight describing the amount of mixing, the steps to obtain higher order statistics about the batch reactor composition begin to take shape. The unmixed fraction, $\zeta$, exists in two probabilistic states: $p1$ and $p2$, where $p2 = 1-p1$. State 1 ($p1$) describes the amount of the cell that is mixed while state 2 ($p2$) describes the unmixed portion. If we know the mass fractions of species in both mixing states (quadrature points) and the corresponding weights to those states, then we can use QMOM to construct the reactor distribution.
-
-In this case, the quadrature weights become the unmixed fraction, $\zeta_{i}$, and the quadrature points become the mass fractions $\phi_{\alpha,i}$. Applying Eq.~\ref{eq:qmom}, the moments of the distribution in the reactor are:
-\begin{eqnarray}\label{eq:moments}
-M_{0} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \\
-\nonumber M_{1} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \phi_{\alpha,i} \\
-\nonumber M_{2} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \phi_{\alpha,i}^2
-\end{eqnarray}
-The mean of the distribution becomes $M_{1}$ and the centered variance becomes $M_{2}-M_{1}^{2}$. To implement subgrid statistics in FDS, we would either need to transport the unmixed fraction or develop a model for the subgrid variance. Since scalar transport is expensive, a first approach is to develop a model to approximate the subgrid variance. If the variance is known, QMOM can then be used to solve for the initial unmixed fraction.
+%\chapter{Multi-environment Extension of Reactor Model}
+%
+%\label{multi_env_edc}
+%
+%In the current formulation of the reactor model FDS does not transport the mixing variable. At the start of a time step, mixing is assumed to be in the unmixed state. We would like to extend the reactor model so that we can eventually construct PDFs of reactor concentration. The difficulty is how to construct/transport the necessary information to build the PDF.
+%
+%One efficient way to describe a PDF is to use moments; where a moment can be thought of a statistical descriptor of the distribution. The first moment of a distribution is the mean of the distribution, the second is the variance, etc. Therefore, the more moments we know, the better the description of the distribution we have. For a given PDF, p(y), the $k^{th}$ moment of $y$ of the distribution is:
+%\begin{equation}\label{eq:int_moment}
+%_{y}M_{k} = \int y^{k}p(y)\mathrm{d}y
+%\end{equation}
+%Solving this integral equation can become difficult as it requires the function form of the PDF. An alternative way to compute moments is to use Gaussian-quadrature, which represents the moment integral in Eq.~\ref{eq:int_moment} as an n-point sum \cite{mcgraw:1997}:
+%\begin{equation}\label{eq:qmom}
+%_{y}M_{k}=\displaystyle \sum_{i=1}^{n} \hat y_{i}^{k} w_{i}
+%\end{equation}
+%This technique is known as the quadrature method of moments (QMOM) where  $\hat y_i^k$ is known at the $i^{th}$ quadrature point, $w_i$ is known as the $i^{th}$ quadrature weight, and $n$ is the number of quadrature points. If we consider the unmixed fraction as a weight describing the amount of mixing, the steps to obtain higher order statistics about the batch reactor composition begin to take shape. The unmixed fraction, $\zeta$, exists in two probabilistic states: $p1$ and $p2$, where $p2 = 1-p1$. State 1 ($p1$) describes the amount of the cell that is mixed while state 2 ($p2$) describes the unmixed portion. If we know the mass fractions of species in both mixing states (quadrature points) and the corresponding weights to those states, then we can use QMOM to construct the reactor distribution.
+%
+%In this case, the quadrature weights become the unmixed fraction, $\zeta_{i}$, and the quadrature points become the mass fractions $\phi_{\alpha,i}$. Applying Eq.~\ref{eq:qmom}, the moments of the distribution in the reactor are:
+%\begin{eqnarray}\label{eq:moments}
+%M_{0} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \\
+%\nonumber M_{1} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \phi_{\alpha,i} \\
+%\nonumber M_{2} &=& \displaystyle \sum_{i=1}^{n} \zeta_{i} \phi_{\alpha,i}^2
+%\end{eqnarray}
+%The mean of the distribution becomes $M_{1}$ and the centered variance becomes $M_{2}-M_{1}^{2}$. To implement subgrid statistics in FDS, we would either need to transport the unmixed fraction or develop a model for the subgrid variance. Since scalar transport is expensive, a first approach is to develop a model to approximate the subgrid variance. If the variance is known, QMOM can then be used to solve for the initial unmixed fraction.
 
 
 \chapter{A Simple Model of Flame Extinction}
@@ -643,131 +645,131 @@ The correction terms that guarantee mass conservation ($V_c \, \rho_c \, \delta 
 
 
 
-\chapter{The Dynamic Smagorinsky Model}
-%\subsubsection{R. McDermott}
-\label{app_dynsmag}
-
-The ``subgrid-scale'' (SGS) stress, which accounts for momentum transport by unresolved eddies, emerges from decomposition of the advection term when deriving the LES equations.  It is defined as
-\begin{equation}
-\label{eqn_tau_sgs}
-\tau_{ij}^{sgs} \equiv \bar{\rho}(\widetilde{u_i u_j} - \tilde{u}_i \tilde{u}_j) \,\mbox{.}
-\end{equation}
-The deviatoric (trace free) part of the SGS stress is modeled by gradient diffusion in analogy with the viscous stress,
-\begin{equation}
-\label{eqn_tau_sgs_deviatoric}
-\tau_{ij}^{sgs} - \frac{1}{3}\tau_{kk}^{sgs} \equiv \tau_{ij}^{sgs,dev} = -2 \mu_t \left(\tilde{S}_{ij} - \frac{1}{3}\tilde{S}_{kk}\delta_{ij}\right) =  -2 \mu_t \left(\tilde{S}_{ij} - \frac{1}{3} (\nabla\!\cdot\tilde{\mathbf{u}}) \delta_{ij}\right) \,\mbox{.}
-\end{equation}
-In FDS, the turbulent viscosity is obtained from the Smagorinsky model,
-\begin{equation}
-\label{eqn_mu_turb}
-\mu_t = \bar{\rho}(C_s \Delta)^2 |\tilde{S}| \,\mbox{,}
-\end{equation}
-where $C_s$ is the model constant and $\Delta$ is the filter width taken as the geometric average of the local mesh spacing; for example, in 3D, $\Delta = (\delta x \,\delta y \,\delta z)^{1/3}$.  Note that the quantity $(C_s \Delta)$ is the local ``mixing length'' and that $|\tilde{S}|$ provides the time scale for turbulent diffusion.
-
-In preparation for the dynamic procedure, we rewrite the model for the deviatoric SGS stress as
-\begin{equation}
-\label{eqn_tau_sgs_deviatoric2}
-\tau_{ij}^{sgs,dev} = -2 (C_s \Delta)^2 \beta_{ij} \,\mbox{,}
-\end{equation}
-defining
-\begin{equation}
-\label{eqn_beta}
-\beta_{ij} = \bar{\rho} |\tilde{S}| \left(\tilde{S}_{ij} - \frac{1}{3} \tilde{S}_{kk} \delta_{ij} \right)  \,\mbox{.}
-\end{equation}
-
-
-\subsubsection{The Dynamic Procedure}
-
-We will now discuss the dynamic procedure for determining $C_s$, the Smagorinsky constant.  The procedure itself is a series of explicit filtering operations leading to a simple algebraic relationship for $C_s(\mathbf{x},t)$ (see Eq.~(\ref{eqn_lengthscale}) below).  The FDS implementation basically follows the works of Germano et al. \cite{Germano:1991}, Moin et al. \cite{Moin:1991}, and Pino Martin et al. \cite{PinoMartin:2000}.
-
-To derive the procedure, first, we apply a ``test'' filter of width $\hat{\Delta}>\Delta$ to the LES equations to obtain
-\begin{equation}
-\label{eqn_testfiltns}
-\frac{\partial \widehat{\overline{\rho u_i}}}{\partial t} + \frac{\partial \widehat{\overline{\rho u_i u_j}}}{\partial x_j} = -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} \,\mbox{,}
-\end{equation}
-where $\sigma_{ij}$ is the total stress tensor. The $\,\,\breve{}\,\,$ is adopted from Pino Martin et al.~\cite{PinoMartin:2000} for the Favre test filter, $\widehat{\overline{\rho}} \breve{\widetilde{u}} \equiv \widehat{ \overline{ \rho u }}$, allowing us to rewrite Eq.~(\ref{eqn_testfiltns}) as
-\begin{eqnarray}
-\label{eqn_testfavrefiltns}
-\frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i}{\partial t} + \frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u_i u_j}}}{\partial x_j} &=& -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} \,\mbox{,} \nonumber\\
-\frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i}{\partial t} + \frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j}{\partial x_j} &=& -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} - \frac{\partial T_{ij}}{\partial x_j}\,\mbox{,}
-\end{eqnarray}
-where the ``subtest'' stress is defined as
-\begin{equation}
-\label{eqn_subteststress}
-T_{ij} \equiv \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) \,\mbox{.}
-\end{equation}
-
-The deviatoric part of the subtest stress is modeled as,
-\begin{equation}
-\label{eqn_devtest}
-T_{ij} - \frac{1}{3}T_{kk}\delta_{ij} \equiv T_{ij}^{dev} = -2 \left( C_s \widehat{\Delta} \right)^2 \widehat{\overline{\rho}} |\breve{\widetilde{S}}|\left(\breve{\widetilde{S}}_{ij} - \frac{1}{3} \breve{\widetilde{S}}_{kk}\delta_{ij}\right)  \,\mbox{.}
-\end{equation}
-By applying the Germano identity \cite{Germano:1991}, we obtain the Leonard stress,
-\begin{eqnarray}
-L_{ij} = T_{ij} - \widehat{\tau_{ij}^{sgs}} &=& \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) - \widehat{ \overline{\rho} \left( \widetilde{u_i u_j} - \widetilde{u}_i \widetilde{u}_j \right)} \,\mbox{,} \nonumber\\
-&=&  \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) - \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}_i \widetilde{u}_j} \right) \,\mbox{,} \nonumber \\
-\label{eqn_germano} &=&  \widehat{\overline{\rho}} \left( \breve{\widetilde{u}_i \widetilde{u}_j} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) \,\mbox{.}
-\end{eqnarray}
-Using the Favre definitions, Eq.~(\ref{eqn_germano}) may be rearranged to the form typically seen in the literature,
-\begin{eqnarray}
-L_{ij} &=&  \widehat{\overline{\rho} \frac{\overline{\rho u_i}}{\overline{\rho}} \frac{\overline{\rho u_j}}{\overline{\rho}}} - \widehat{\overline{\rho}} \frac{ \widehat{\overline{\rho u_i}}}{\widehat{\overline{\rho}}} \frac{\widehat{\overline{\rho u_j}}}{\widehat{\overline{\rho}}} \,\mbox{,} \nonumber \\
-&=& \widehat{\frac{\overline{\rho u_i}\, \overline{\rho u_j}}{\overline{\rho}}} - \frac{ \widehat{\overline{\rho u_i}} \,\widehat{\overline{\rho u_j}}}{\widehat{\overline{\rho}}} \,\mbox{,} \nonumber \\
-\label{eqn_leonard} &=& \widehat{\overline{\rho} \widetilde{u}_i \widetilde{u}}_j - \frac{ \widehat{\overline{\rho} \widetilde{u}}_i \widehat{\overline{\rho} \widetilde{u}}_j }{ \widehat{\overline{\rho}} } \,\mbox{.}
-\end{eqnarray}
-\LaTeX\,has a hard time covering the entire term with the ``wide'' version of the hat, but please note that the entire first term of Equation \ref{eqn_leonard} is test filtered. The Leonard term is computable from resolved LES values.
-
-If we now look at the \emph{model} for the Germano identity (the deviatoric part) we have,
-\begin{equation}
-\label{eqn_germanomodel}
-L_{ij}^{dev} = T_{ij}^{dev} - \widehat{\tau_{ij}^{sgs,dev}} \approx - 2\left(C_s \widehat{\Delta}\right)^2 \widehat{\overline{\rho}} |\breve{\widetilde{S}}| \left( \breve{\widetilde{S}}_{ij} - \frac{1}{3} \breve{\widetilde{S}}_{kk} \delta_{ij} \right) +  2 \left(C_s \Delta \right)^2 \widehat{\beta}_{ij} \,\mbox{.}
-\end{equation}
-Note that the entire last term should be test filtered, since $C_s$ is not necessarily uniform.  However, without pulling the length scale out of the filter operation it is difficult to compute a value for $C_s$.
-
-We now rearrange (\ref{eqn_germanomodel}) to facilitate coding,
-\begin{equation}
-\label{eqn_codemodel}
-L_{ij}^{dev} = \left(C_s \Delta\right)^2 M_{ij}^{dev} \,\mbox{,}
-\end{equation}
-where,
-\begin{equation}
-\label{eqn_Mij}
-M_{ij}^{dev} = 2\left(\widehat{\beta}_{ij} - \alpha \widehat{\overline{\rho}} |\breve{\widetilde{S}}| \left( \breve{\widetilde{S}}_{ij} - \frac{1}{3}\breve{\widetilde{S}}_{kk} \delta_{ij} \right) \right) \,\mbox{,}
-\end{equation}
-and $\alpha = (\widehat{\Delta}/\Delta)^2$.  For a test filter two times the grid width it appears we should have $\alpha = 4$.  However, as discussed by Lund \cite{Lund:1997}, the method of discrete quadrature significantly affects the results. If using the trapezoid rule, as we do in FDS, then $\alpha = 6$.
-
-We can now compute $L_{ij}$ and $M_{ij}^{dev}$ from known LES quantities.  If we right multiply Eq.~(\ref{eqn_codemodel}) by $M_{ij}^{dev}$, we obtain our desired result:
-\begin{equation}
-\label{eqn_lengthscale}
-\left(C_s \Delta\right)^2 = \frac{ L_{ij}^{dev} M_{ij}^{dev} }{ M_{ij}^{dev} M_{ij}^{dev} } \,\mbox{.}
-\end{equation}
-
-\subsubsection{Notes on implementation}
-
-\begin{enumerate}
-\item
-It is unnecessary to compute the deviatoric part of the Leonard term.  This is because, fortunately, $L_{ij} M_{ij}^{dev} = L_{ij}^{dev} M_{ij}^{dev}$.  Here's the proof (thanks to Stas Borodai of Reaction Engineering International):
-\begin{eqnarray}
-L_{ij} M_{ij}^{dev} &=& L_{ij} \left( M_{ij} - \frac{1}{3}M_{kk}\delta_{ij} \right) \,\mbox{,} \nonumber \\
-&=& L_{ij} M_{ij} - \frac{1}{3} L_{ij}\delta_{ij} M_{kk} \,\mbox{,} \nonumber \\
-\label{eqn_LMD} &=& L_{ij} M_{ij} - \frac{1}{3} L_{qq} M_{kk} \,\mbox{.}
-\end{eqnarray}
-\begin{eqnarray}
-L_{ij}^{dev} M_{ij}^{dev} &=& \left( L_{ij} - \frac{1}{3}L_{qq}\delta_{ij} \right) \left( M_{ij} - \frac{1}{3}M_{kk}\delta_{ij} \right) \,\mbox{,} \nonumber \\
-&=& L_{ij} M_{ij} - \frac{1}{3} L_{ij}\delta_{ij} M_{kk} - \frac{1}{3} M_{ij}\delta_{ij} L_{qq} + \frac{1}{9} \delta_{ij} \delta_{ij} L_{qq} M_{kk} \,\mbox{,} \nonumber \\
-&=& L_{ij} M_{ij} - \frac{1}{3} M_{kk} L_{qq} - \frac{1}{3} L_{qq} M_{kk} + \frac{1}{3} M_{kk} L_{qq} \,\mbox{,} \nonumber \\
-\label{eqn_LDMD} &=& L_{ij} M_{ij} - \frac{1}{3} L_{qq} M_{kk} \,\mbox{.}
-\end{eqnarray}
-Equations (\ref{eqn_LMD}) and (\ref{eqn_LDMD}) are equal and so there is no need to go to the trouble of subtracting the isotropic part out of $L_{ij}$.
-\item
-The length scale should be averaged over some homogeneous region to maintain stability,
-\begin{equation}
-\label{eqn_finallengthscale}
-\left(C_s \Delta\right)^2 = \frac{ \langle L_{ij} M_{ij}^{dev} \rangle}{ \langle M_{ij}^{dev} M_{ij}^{dev} \rangle } \,\mbox{.}
-\end{equation}
-In FDS, the brackets denote a spatial average over the test filter width.  If the denominator is zero, the constant is set to zero.
-\item
-It is common practice to ``clip'' the eddy viscosity.  In theory, a negative value of the eddy viscosity produces backscatter of energy from unresolved to resolved motions.  If this sounds dangerous from a stability perspective, it is.  The simple solution is to set $C_s = 0$, if $\langle L_{ij}M_{ij}^{dev} \rangle < 0$.
-\end{enumerate}
+%\chapter{The Dynamic Smagorinsky Model}
+%%\subsubsection{R. McDermott}
+%\label{app_dynsmag}
+%
+%The ``subgrid-scale'' (SGS) stress, which accounts for momentum transport by unresolved eddies, emerges from decomposition of the advection term when deriving the LES equations.  It is defined as
+%\begin{equation}
+%\label{eqn_tau_sgs}
+%\tau_{ij}^{sgs} \equiv \bar{\rho}(\widetilde{u_i u_j} - \tilde{u}_i \tilde{u}_j) \,\mbox{.}
+%\end{equation}
+%The deviatoric (trace free) part of the SGS stress is modeled by gradient diffusion in analogy with the viscous stress,
+%\begin{equation}
+%\label{eqn_tau_sgs_deviatoric}
+%\tau_{ij}^{sgs} - \frac{1}{3}\tau_{kk}^{sgs} \equiv \tau_{ij}^{sgs,dev} = -2 \mu_t \left(\tilde{S}_{ij} - \frac{1}{3}\tilde{S}_{kk}\delta_{ij}\right) =  -2 \mu_t \left(\tilde{S}_{ij} - \frac{1}{3} (\nabla\!\cdot\tilde{\mathbf{u}}) \delta_{ij}\right) \,\mbox{.}
+%\end{equation}
+%In FDS, the turbulent viscosity is obtained from the Smagorinsky model,
+%\begin{equation}
+%\label{eqn_mu_turb}
+%\mu_t = \bar{\rho}(C_s \Delta)^2 |\tilde{S}| \,\mbox{,}
+%\end{equation}
+%where $C_s$ is the model constant and $\Delta$ is the filter width taken as the geometric average of the local mesh spacing; for example, in 3D, $\Delta = (\delta x \,\delta y \,\delta z)^{1/3}$.  Note that the quantity $(C_s \Delta)$ is the local ``mixing length'' and that $|\tilde{S}|$ provides the time scale for turbulent diffusion.
+%
+%In preparation for the dynamic procedure, we rewrite the model for the deviatoric SGS stress as
+%\begin{equation}
+%\label{eqn_tau_sgs_deviatoric2}
+%\tau_{ij}^{sgs,dev} = -2 (C_s \Delta)^2 \beta_{ij} \,\mbox{,}
+%\end{equation}
+%defining
+%\begin{equation}
+%\label{eqn_beta}
+%\beta_{ij} = \bar{\rho} |\tilde{S}| \left(\tilde{S}_{ij} - \frac{1}{3} \tilde{S}_{kk} \delta_{ij} \right)  \,\mbox{.}
+%\end{equation}
+%
+%
+%\subsubsection{The Dynamic Procedure}
+%
+%We will now discuss the dynamic procedure for determining $C_s$, the Smagorinsky constant.  The procedure itself is a series of explicit filtering operations leading to a simple algebraic relationship for $C_s(\mathbf{x},t)$ (see Eq.~(\ref{eqn_lengthscale}) below).  The FDS implementation basically follows the works of Germano et al. \cite{Germano:1991}, Moin et al. \cite{Moin:1991}, and Pino Martin et al. \cite{PinoMartin:2000}.
+%
+%To derive the procedure, first, we apply a ``test'' filter of width $\hat{\Delta}>\Delta$ to the LES equations to obtain
+%\begin{equation}
+%\label{eqn_testfiltns}
+%\frac{\partial \widehat{\overline{\rho u_i}}}{\partial t} + \frac{\partial \widehat{\overline{\rho u_i u_j}}}{\partial x_j} = -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} \,\mbox{,}
+%\end{equation}
+%where $\sigma_{ij}$ is the total stress tensor. The $\,\,\breve{}\,\,$ is adopted from Pino Martin et al.~\cite{PinoMartin:2000} for the Favre test filter, $\widehat{\overline{\rho}} \breve{\widetilde{u}} \equiv \widehat{ \overline{ \rho u }}$, allowing us to rewrite Eq.~(\ref{eqn_testfiltns}) as
+%\begin{eqnarray}
+%\label{eqn_testfavrefiltns}
+%\frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i}{\partial t} + \frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u_i u_j}}}{\partial x_j} &=& -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} \,\mbox{,} \nonumber\\
+%\frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i}{\partial t} + \frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j}{\partial x_j} &=& -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} - \frac{\partial T_{ij}}{\partial x_j}\,\mbox{,}
+%\end{eqnarray}
+%where the ``subtest'' stress is defined as
+%\begin{equation}
+%\label{eqn_subteststress}
+%T_{ij} \equiv \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) \,\mbox{.}
+%\end{equation}
+%
+%The deviatoric part of the subtest stress is modeled as,
+%\begin{equation}
+%\label{eqn_devtest}
+%T_{ij} - \frac{1}{3}T_{kk}\delta_{ij} \equiv T_{ij}^{dev} = -2 \left( C_s \widehat{\Delta} \right)^2 \widehat{\overline{\rho}} |\breve{\widetilde{S}}|\left(\breve{\widetilde{S}}_{ij} - \frac{1}{3} \breve{\widetilde{S}}_{kk}\delta_{ij}\right)  \,\mbox{.}
+%\end{equation}
+%By applying the Germano identity \cite{Germano:1991}, we obtain the Leonard stress,
+%\begin{eqnarray}
+%L_{ij} = T_{ij} - \widehat{\tau_{ij}^{sgs}} &=& \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) - \widehat{ \overline{\rho} \left( \widetilde{u_i u_j} - \widetilde{u}_i \widetilde{u}_j \right)} \,\mbox{,} \nonumber\\
+%&=&  \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) - \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}_i \widetilde{u}_j} \right) \,\mbox{,} \nonumber \\
+%\label{eqn_germano} &=&  \widehat{\overline{\rho}} \left( \breve{\widetilde{u}_i \widetilde{u}_j} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) \,\mbox{.}
+%\end{eqnarray}
+%Using the Favre definitions, Eq.~(\ref{eqn_germano}) may be rearranged to the form typically seen in the literature,
+%\begin{eqnarray}
+%L_{ij} &=&  \widehat{\overline{\rho} \frac{\overline{\rho u_i}}{\overline{\rho}} \frac{\overline{\rho u_j}}{\overline{\rho}}} - \widehat{\overline{\rho}} \frac{ \widehat{\overline{\rho u_i}}}{\widehat{\overline{\rho}}} \frac{\widehat{\overline{\rho u_j}}}{\widehat{\overline{\rho}}} \,\mbox{,} \nonumber \\
+%&=& \widehat{\frac{\overline{\rho u_i}\, \overline{\rho u_j}}{\overline{\rho}}} - \frac{ \widehat{\overline{\rho u_i}} \,\widehat{\overline{\rho u_j}}}{\widehat{\overline{\rho}}} \,\mbox{,} \nonumber \\
+%\label{eqn_leonard} &=& \widehat{\overline{\rho} \widetilde{u}_i \widetilde{u}}_j - \frac{ \widehat{\overline{\rho} \widetilde{u}}_i \widehat{\overline{\rho} \widetilde{u}}_j }{ \widehat{\overline{\rho}} } \,\mbox{.}
+%\end{eqnarray}
+%\LaTeX\,has a hard time covering the entire term with the ``wide'' version of the hat, but please note that the entire first term of Equation \ref{eqn_leonard} is test filtered. The Leonard term is computable from resolved LES values.
+%
+%If we now look at the \emph{model} for the Germano identity (the deviatoric part) we have,
+%\begin{equation}
+%\label{eqn_germanomodel}
+%L_{ij}^{dev} = T_{ij}^{dev} - \widehat{\tau_{ij}^{sgs,dev}} \approx - 2\left(C_s \widehat{\Delta}\right)^2 \widehat{\overline{\rho}} |\breve{\widetilde{S}}| \left( \breve{\widetilde{S}}_{ij} - \frac{1}{3} \breve{\widetilde{S}}_{kk} \delta_{ij} \right) +  2 \left(C_s \Delta \right)^2 \widehat{\beta}_{ij} \,\mbox{.}
+%\end{equation}
+%Note that the entire last term should be test filtered, since $C_s$ is not necessarily uniform.  However, without pulling the length scale out of the filter operation it is difficult to compute a value for $C_s$.
+%
+%We now rearrange (\ref{eqn_germanomodel}) to facilitate coding,
+%\begin{equation}
+%\label{eqn_codemodel}
+%L_{ij}^{dev} = \left(C_s \Delta\right)^2 M_{ij}^{dev} \,\mbox{,}
+%\end{equation}
+%where,
+%\begin{equation}
+%\label{eqn_Mij}
+%M_{ij}^{dev} = 2\left(\widehat{\beta}_{ij} - \alpha \widehat{\overline{\rho}} |\breve{\widetilde{S}}| \left( \breve{\widetilde{S}}_{ij} - \frac{1}{3}\breve{\widetilde{S}}_{kk} \delta_{ij} \right) \right) \,\mbox{,}
+%\end{equation}
+%and $\alpha = (\widehat{\Delta}/\Delta)^2$.  For a test filter two times the grid width it appears we should have $\alpha = 4$.  However, as discussed by Lund \cite{Lund:1997}, the method of discrete quadrature significantly affects the results. If using the trapezoid rule, as we do in FDS, then $\alpha = 6$.
+%
+%We can now compute $L_{ij}$ and $M_{ij}^{dev}$ from known LES quantities.  If we right multiply Eq.~(\ref{eqn_codemodel}) by $M_{ij}^{dev}$, we obtain our desired result:
+%\begin{equation}
+%\label{eqn_lengthscale}
+%\left(C_s \Delta\right)^2 = \frac{ L_{ij}^{dev} M_{ij}^{dev} }{ M_{ij}^{dev} M_{ij}^{dev} } \,\mbox{.}
+%\end{equation}
+%
+%\subsubsection{Notes on implementation}
+%
+%\begin{enumerate}
+%\item
+%It is unnecessary to compute the deviatoric part of the Leonard term.  This is because, fortunately, $L_{ij} M_{ij}^{dev} = L_{ij}^{dev} M_{ij}^{dev}$.  Here's the proof (thanks to Stas Borodai of Reaction Engineering International):
+%\begin{eqnarray}
+%L_{ij} M_{ij}^{dev} &=& L_{ij} \left( M_{ij} - \frac{1}{3}M_{kk}\delta_{ij} \right) \,\mbox{,} \nonumber \\
+%&=& L_{ij} M_{ij} - \frac{1}{3} L_{ij}\delta_{ij} M_{kk} \,\mbox{,} \nonumber \\
+%\label{eqn_LMD} &=& L_{ij} M_{ij} - \frac{1}{3} L_{qq} M_{kk} \,\mbox{.}
+%\end{eqnarray}
+%\begin{eqnarray}
+%L_{ij}^{dev} M_{ij}^{dev} &=& \left( L_{ij} - \frac{1}{3}L_{qq}\delta_{ij} \right) \left( M_{ij} - \frac{1}{3}M_{kk}\delta_{ij} \right) \,\mbox{,} \nonumber \\
+%&=& L_{ij} M_{ij} - \frac{1}{3} L_{ij}\delta_{ij} M_{kk} - \frac{1}{3} M_{ij}\delta_{ij} L_{qq} + \frac{1}{9} \delta_{ij} \delta_{ij} L_{qq} M_{kk} \,\mbox{,} \nonumber \\
+%&=& L_{ij} M_{ij} - \frac{1}{3} M_{kk} L_{qq} - \frac{1}{3} L_{qq} M_{kk} + \frac{1}{3} M_{kk} L_{qq} \,\mbox{,} \nonumber \\
+%\label{eqn_LDMD} &=& L_{ij} M_{ij} - \frac{1}{3} L_{qq} M_{kk} \,\mbox{.}
+%\end{eqnarray}
+%Equations (\ref{eqn_LMD}) and (\ref{eqn_LDMD}) are equal and so there is no need to go to the trouble of subtracting the isotropic part out of $L_{ij}$.
+%\item
+%The length scale should be averaged over some homogeneous region to maintain stability,
+%\begin{equation}
+%\label{eqn_finallengthscale}
+%\left(C_s \Delta\right)^2 = \frac{ \langle L_{ij} M_{ij}^{dev} \rangle}{ \langle M_{ij}^{dev} M_{ij}^{dev} \rangle } \,\mbox{.}
+%\end{equation}
+%In FDS, the brackets denote a spatial average over the test filter width.  If the denominator is zero, the constant is set to zero.
+%\item
+%It is common practice to ``clip'' the eddy viscosity.  In theory, a negative value of the eddy viscosity produces backscatter of energy from unresolved to resolved motions.  If this sounds dangerous from a stability perspective, it is.  The simple solution is to set $C_s = 0$, if $\langle L_{ij}M_{ij}^{dev} \rangle < 0$.
+%\end{enumerate}
 
 
 
@@ -950,7 +952,7 @@ The 1-D heat conduction equation in Cartesian coordinates is:
 In cylindrical and spherical coordinates, the equation becomes:
 \begin{equation}
 \label{heat_cond_cyl2}
-     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} \left( r^I k_s \frac{\partial T_s}{\partial r} \right) + \dot{q}'''_s 
+     \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} \left( r^I k_s \frac{\partial T_s}{\partial r} \right) + \dot{q}'''_s
 \end{equation}
 where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation~(\ref{heat_cond_cyl2}). The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}.
 \begin{figure}[t]
@@ -969,17 +971,17 @@ The temperature at the center of each solid cell, $T_{s,i}$, is updated in time 
 $k_{i+\frac{1}{2}}$ is the thermal conductivity at the border of the cells $i$ and $i+1$, $\delta r_i$ is the width of cell $i$, and  $\delta r_{i+\frac{1}{2}}$ is the distance from the center of cell $i$ to the center of cell $i+1$. The radial coordinate, $r_{c,i}$, denotes the cell center:
 \begin{equation}
 r_{c,i}^I = \left\{
-\begin{array}{ll} (r_i^2 - r_{i-1}^2)/(2 \, \delta r_i)            & I=1 \quad \hbox{(cylindrical)} \\ [0.1in] 
+\begin{array}{ll} (r_i^2 - r_{i-1}^2)/(2 \, \delta r_i)            & I=1 \quad \hbox{(cylindrical)} \\ [0.1in]
                    \sqrt{ ( r_i^3 - r_{i-1}^3)/(3 \, \delta r_i) } & I=2 \quad \hbox{(spherical)}
 \end{array} \right.
 \end{equation}
 The temperatures at the front and back surface of a Cartesian slab (or center of a cylinder or sphere) are determined from the boundary conditions. In any of the coordinate systems, the boundary condition at the front surface is
 \begin{equation}
 \label{bc_front}
- -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}}
+ -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}}
   =  \dot{q}_{c}''+\dot{q}_{r}''
 \end{equation}
-Note that $T_{s,0}$ does not represent the gas temperature, but rather it is used to establish the temperature gradient at the surface. The convective heat flux is
+Note that $T_{s,0}$ does not represent the gas temperature, but rather it is used to establish the temperature gradient at the surface. Note also that the thermal conductivity is that of the first node. The convective heat flux is
 \begin{equation}
 \label{conv}
   \dot{q}_c'' = h \, \left( T_g - \frac{1}{2} \left( T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1} \right) \right)
@@ -999,7 +1001,7 @@ which leads to approximation for the radiative flux
 Now the front boundary condition is
 \begin{equation}
 \label{bc_front_2}
-  -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}}
+  -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}}
   \approx h \, \left( T_g - \frac{1}{2} \left( T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1} \right) \right) +
   \dot{q}_{r, in}'' - 4 \, \epsilon\sigma \, \left(T_{s,\frac{1}{2}}^n \right)^3 \, T_{s,\frac{1}{2}}^{n+1} + 3 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^4
 \end{equation}
@@ -1011,67 +1013,50 @@ The wall surface temperature is calculated defined:
 and therefore the boundary condition becomes
 \begin{equation}
 \label{bc_front_4}
-  -k_s \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}} + \left( \frac{h}{2} + 4 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^3 \right) \frac{T_{s,1}^{n+1}+T_{s,0}^{n+1}}{2}
+  -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}} + \left( \frac{h}{2} + 4 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^3 \right) \frac{T_{s,1}^{n+1}+T_{s,0}^{n+1}}{2}
   \approx h\, \left( T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n \right) +
   \dot{q}_{r, in}'' + 3 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^4
 \end{equation}
-The temperature at node 0 becomes then
+Rearranging terms, the temperature at node 0 becomes:
 \begin{equation}
 \label{T0}
-  T_{s,0}^{n+1} = \underbrace{\frac{\frac{k_{s,0}}{\delta r_{\frac{1}{2}}}- \left(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3}\right)}{\frac{k_{s,0}}{\delta r_{\frac{1}{2}}} + \left(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3}\right)}}_{\ct RFACF2} T_1^{n+1} +
- \underbrace{\frac{h_F \left(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n\right)+\dot{q}_{r,F}''+4\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^4}}{\frac{k_{s,0}}{\delta r_{\frac{1}{2}}}+\left(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3}\right)}}_{\ct QDXKF}
+  T_{s,0}^{n+1} = \underbrace{\frac{\frac{k_{s,1}}{\delta r_{\frac{1}{2}}}- \left(\frac{1}{4}h+2\epsilon \sigma \left(T_{s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{s,1}}{\delta r_{\frac{1}{2}}} + \left(\frac{1}{4}h+2\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^3 \right)}}_{\ct RFACF2} T_{s,1}^{n+1} +
+ \underbrace{\frac{h \left(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n\right)+\dot{q}_{r,in}''+3\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^4}{\frac{k_{s,1}}{\delta r_{\frac{1}{2}}}+\left(\frac{1}{4}h+2\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^3 \right)}}_{\ct QDXKF}
 \end{equation}
 Note that {\ct RFACF2} and similar names are used in the actual source code to represent these quantities.
-In case of non-insulated backing in Cartesian geometry, the temperature of virtual node \textit{N+1} is calculated similarly as
-\begin{equation}
-\label{TN+1}
-  T_{s,N+1}^{n+1} = \underbrace{\frac{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}-(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}}_{\ct RFACB2} T_{N+1}^{n+1}+
- \underbrace{\frac{h_B(T_g-\frac{1}{2}T_{s,N+\frac{1}{2}}^n)+\dot{q}_{r,B}'''+4\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^4}}{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}}_{\ct QDXKB}.
-\end{equation}
-For insulated backing and cylindrical and spherical geometries, the boundary condition at $x_N$ ($r=0$) is
-\begin{equation}
-\label{bc_back}
-  -k_s \frac{\partial T}{\partial x} (x_N,t) = 0.
-\end{equation}
-This has been implemented by setting $\epsilon_B$, $\dot{q}_{r,B}'''$ and $h_B$ to 0 in Eq.~(\ref{TN+1}).
-
-
-\section*{Tridiagonal solver}
+In case of non-insulated backing in Cartesian geometry, the temperature of virtual node $N+1$ is calculated the same way.
+For a Cartesian geometry with an insulated backing or for cylindrical and spherical geometries, $\epsilon$, $\dot{q}_{r,in}''$, and $h$ are set to 0.
 
 After re-arranging the terms, Eq.~(\ref{crank-nicolson}) becomes (using the nomenclature of the source code) for each wall cell $i$:
  \begin{equation}
 \label{tridiagonal_1}
-  B(i) \, T_{i-1}^{n+1} + D(i) \, T_{i}^{n+1} + A(i) \, T_{i+1}^{n+1} = C(i) \quad i=1,...,N
+  B_i \; T_{i-1}^{n+1} + D_i \; T_{i}^{n+1} + A_i \; T_{i+1}^{n+1} = C_i \quad i=1,...,N
 \end{equation}
 where
 \begin{equation}
 \label{tridiagonal_2}
 \begin{split}
-& A(i) = -\frac{k_{i+\frac{1}{2}} \, \delta t}{2(\rho_s c_s)_i}\frac{1}{r_{c,i}^I \delta r_i}\frac{r_{i}^I}{\delta r_{i+\frac{1}{2}}}  \\
-& B(i) = -\frac{k_{i-\frac{1}{2}} \, \delta t}{2(\rho_s c_s)_i}\frac{1}{r_{c,i}^I \delta r_i}\frac{r_{i-1}^I}{\delta r_{i-\frac{1}{2}}}   \\
-& C(i) = T_{s,i}^{n}-A(i) \, (T_{i+1}^n-T_i^n) + B(i) \, (T_{i}^n-T_{i-1}^n)  \\
-& D(i) = 1-A(i)-B(i)
+& A_i = -\frac{k_{i+\frac{1}{2}} \, \delta t}{2(\rho_s c_s)_i} \; \frac{1}{r_{c,i}^I \delta r_i} \; \frac{r_{i}^I}{\delta r_{i+\frac{1}{2}}}  \\ 
+& B_i = -\frac{k_{i-\frac{1}{2}} \, \delta t}{2(\rho_s c_s)_i} \; \frac{1}{r_{c,i}^I \delta r_i} \; \frac{r_{i-1}^I}{\delta r_{i-\frac{1}{2}}}   \\ 
+& C_i = T_{s,i}^{n}-A_i \, (T_{i+1}^n-T_i^n) + B_i \, (T_{i}^n-T_{i-1}^n)  \\ 
+& D_i = 1-A_i-B_i
 \end{split}
 \end{equation}
-To solve Eq.~(\ref{tridiagonal_1}), a tri-diagonal matrix algorithm is used. The algorithm consists of two phases. The forward elimination phase for \textit{i} going from \textit{1} to \textit{N} is
+To solve Eq.~(\ref{tridiagonal_1}), a tri-diagonal linear solver is used:
 \begin{equation}
-\label{forward}
 \begin{split}
-& D'(1) = D(1)+B(1)\cdot {\ct RFACF2} \\
-& C'(1) = C(1)-B(1)\cdot {\ct QDXKF} \\
+& C_1 = C_1 - B_1 \cdot {\ct QDXKF} \\
+& C_N = C_N - A_N \cdot {\ct QDXKB} \\
 & \\
-& D'(i) = D(i)-\frac{B(i) \, A(i-1)}{D'(i-1)} \quad i = 2, ..., N-1 \\
-& C'(i) = C(i)-\frac{B(i) \, C'(i-1)}{D'(i-1)} \quad i = 2, ..., N-1\\
+& D_1 = D_1 + B_1 \cdot {\ct RFACF2} \\
+& D_N = D_N + A_N \cdot {\ct RFACB2} \\
 & \\
-& D'(N) = D(N)+A(N)\cdot {\ct RFACB2}-\frac{B(N) \, A(N-1)}{D'(N-1)}\\
-& C'(N) = C(N)-A(N)\cdot {\ct QDXKB} -\frac{B(N) \, C'(N-1)}{D'(N-1)}
-\end{split}
-\end{equation}
-The values at front and back depend on the boundary conditions, Eqs.~(\ref{T0}) and (\ref{TN+1}). The backward substitution of the tri-diagonal solver is
-\begin{equation}
-\label{backward}
-\begin{split}
-& T^{n+1}_N = \frac{C'(N)}{D'(N)}\\
-& T^{n+1}_i = \frac{C'(i)-A(i) \, T^{n+1}_{i+1}}{D'(i)} \quad i = N-1,..., 1 \\
+& D_i = D_i - \frac{B_i \; A_{i-1}}{D_{i-1}} \quad i = 2, ..., N-1 \\
+& C_i = C_i - \frac{B_i \; C_{i-1}}{D_{i-1}} \quad i = 2, ..., N-1\\
+& \\
+& C_N = \frac{C_N}{D_N} \\
+& \\
+& T^{n+1}_{s,N} = C_N \\
+& T^{n+1}_{s,i} = \frac{C_i - A_i \; C_{i+1}}{D_i} \quad i = N-1,..., 1 
 \end{split}
 \end{equation}
