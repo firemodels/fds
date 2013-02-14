@@ -731,7 +731,7 @@ DO I=1,30
       WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","A",",','),","A",")"
       WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K)),K=1,N_Z)
    ENDIF
-   WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
+   WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","F8.2",",','),","F8.2",")"
    WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z)
 ENDDO
 
@@ -825,7 +825,7 @@ DO I=1,9999
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","F7.2",",','),","F7.2",")"
          WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z), (MAX_STEEL_TEMP(K)-273,K=1,N_Z)
       ELSEIF (.NOT. PROFILE) THEN
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","F7.2",",','),","F7.2",")"
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","F8.2",",','),","F8.2",")"
          WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z), (MAX_STEEL_TEMP(K)-273,K=1,N_Z)
       ENDIF
    ELSE
