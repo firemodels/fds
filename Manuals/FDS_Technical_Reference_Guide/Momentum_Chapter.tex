@@ -12,7 +12,7 @@ discretization of the flux terms, and the solution of an elliptic partial differ
 In this section, we temporarily return to formal LES filter notation and adopt Cartesian tensor index notation (repeated suffixes imply summation) in order to precisely define modeled terms. The LES equations are derived by applying a low-pass filter of width $\Delta$ to the DNS equations. The kernel usually associated with finite volume LES is a box filter---grid resolved quantities are physically interpreted as cell means.  This interpretation is somewhat misleading (see \cite{McDermott:2005b}), but a thorough discussion of filtering is beyond our scope, so the cell mean interpretation will suffice.  In FDS, the filter width is taken to be the cube root of the cell volume, $\Delta = V_c^{1/3}$, $V_c = \delta x \,\delta y\, \delta z$.  Then for any scalar, $\phi$, a filtered field is defined as
 \begin{equation}
 \label{eqn_box_filter}
-\overline{\phi}(x,y,z,t) \equiv \frac{1}{V_c} \int_{x - \delta x/2}^{x + \delta x/2}\int_{y - \delta y/2}^{y + \delta y/2}\int_{z - \delta z/2}^{z + \delta z/2} \phi(x',y',z',t) \,\mbox{d} x' \,\mbox{d} y' \,\mbox{d} z' 
+\overline{\phi}(x,y,z,t) \equiv \frac{1}{V_c} \int_{x - \delta x/2}^{x + \delta x/2}\int_{y - \delta y/2}^{y + \delta y/2}\int_{z - \delta z/2}^{z + \delta z/2} \phi(x',y',z',t) \,\mbox{d} x' \,\mbox{d} y' \,\mbox{d} z'
 \end{equation}
 It is also conventional to define a mass-weighted or Favre filter such that $\overline{\rho}\,\widetilde{\phi} \equiv \overline{\rho \phi}$.
 
@@ -134,14 +134,14 @@ where $C_s=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{
 
 \subsection{Dynamic Smagorinsky Model}
 
-For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_s$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions. Details of the procedure are found in Appendix~\ref{app_dynsmag}.
+For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_s$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions. 
 
 \subsection{Deardorff's Model}
 \label{sec:deardorff}
 
 By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1}:
-\be 
-  \mu_t = \rho \, C_\nu \, \Delta \, \sqrt{k_{\hbox{\tiny sgs}} } \quad ; \quad  
+\be
+  \mu_t = \rho \, C_\nu \, \Delta \, \sqrt{k_{\hbox{\tiny sgs}} } \quad ; \quad
   k_{\hbox{\tiny sgs}} = \ha \left( (\overline{u}-\hat{u})^2 + (\overline{v}-\hat{v})^2 + (\overline{w}-\hat{w})^2 \right)  \label{Deardorff_LES}
 \ee
 where $\overline{u}$ is the average value of $u$ at the grid cell center and $\hat{u}$ is a weighted average of $u$ over the adjacent cells:
