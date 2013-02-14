@@ -189,7 +189,7 @@ Penlight Test 65  &  0, 65, 540, 780               &  24, 325, 325, 230         
 \hline
                       &                            \\
 \rb{Input Parameter}  &  \rb{Value}                \\ \hline \hline
-$\chi_R$ (-)          &  0.35                      \\ \hline
+$\chi_r$ (-)          &  0.35                      \\ \hline
 $x$ (m)               &  0.5, 0.75, 1.0, 1.5, 2.0  \\ \hline
 $z$ (m)               &  0.0, 0.5, 1.0, 1.5        \\ \hline
 IOR (-)               &  2                         \\ \hline
@@ -294,7 +294,7 @@ Test 22    &  FPA, DB           &  1000           &  0.45           &  14       
 \rb{Input Parameter}   &  \rb{Value}  \\ \hline \hline
 $z$ (m)                &  5.98        \\ \hline
 $A$ (m$^2$)            &  0.64        \\ \hline
-$\chi_r$ (-)           &  0.30        \\ \hline
+$\chi_r$ (-)           &  0.35        \\ \hline
 $\rho_{a}$ (kg/m$^3$)  &  1.18        \\ \hline
 \end{tabular}
 \end{center}
@@ -394,7 +394,7 @@ Test 22    &  1000           &  1             &  14                \\ \hline
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
-$\chi_R$ (-)          &  0.30        \\ \hline
+$\chi_r$ (-)          &  0.35        \\ \hline
 IOR (-)               &  -1          \\ \hline
 \end{tabular}
 \end{center}
@@ -637,7 +637,6 @@ Test 18    &  MQH               &  1180           &  -              &  27       
 \hline
                       &                                \\
 \rb{Input Parameter}  &  \rb{Value}                    \\ \hline \hline
-$\chi_R$ (-)          &  0.35                          \\ \hline
 $x$ (m)               &  3.14, 2.33, 2.18, 1.58, 3.27  \\ \hline
 $z$ (m)               &  2.05, 2.52, 2.54, 3.04, 1.76  \\ \hline
 IOR (-)               &  -3, -3, 2, -3, -2             \\ \hline
@@ -645,26 +644,26 @@ IOR (-)               &  -3, -3, 2, -3, -2             \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|c|c|}
+\begin{tabular}{|l|c|c|c|}
 \hline
-           &                 &                \\
-\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$A$}      \\
-           &  \rb{(kW)}      &  \rb{(m$^2$)}  \\ \hline \hline
-Test 1     &  410            &  0.671         \\ \hline
-Test 2     &  1190           &  1.028         \\ \hline
-Test 3     &  1190           &  1.028         \\ \hline
-Test 4     &  1200           &  1.032         \\ \hline
-Test 5     &  1190           &  1.028         \\ \hline
-Test 7     &  400            &  0.665         \\ \hline
-Test 8     &  1190           &  1.028         \\ \hline
-Test 9     &  1170           &  1.021         \\ \hline
-Test 10    &  1190           &  1.028         \\ \hline
-Test 13    &  2330           &  1.345         \\ \hline
-Test 14    &  1180           &  1.025         \\ \hline
-Test 15    &  1180           &  1.025         \\ \hline
-Test 16    &  2300           &  1.338         \\ \hline
-Test 17    &  1160           &  1.018         \\ \hline
-Test 18    &  1180           &  1.025         \\ \hline
+           &                 &                 &                \\
+\rb{Test}  &  \rb{$\dot Q$}  &  \rb{$\chi_r$}  &  \rb{$A$}      \\
+           &  \rb{(kW)}      &  \rb{(-)}         &  \rb{(m$^2$)}  \\ \hline \hline
+Test 1     &  410            &  0.44           &  0.671         \\ \hline
+Test 2     &  1190           &  0.44           &  1.028         \\ \hline
+Test 3     &  1190           &  0.44           &  1.028         \\ \hline
+Test 4     &  1200           &  0.44           &  1.032         \\ \hline
+Test 5     &  1190           &  0.44           &  1.028         \\ \hline
+Test 7     &  400            &  0.44           &  0.665         \\ \hline
+Test 8     &  1190           &  0.44           &  1.028         \\ \hline
+Test 9     &  1170           &  0.44           &  1.021         \\ \hline
+Test 10    &  1190           &  0.44           &  1.028         \\ \hline
+Test 13    &  2330           &  0.44           &  1.345         \\ \hline
+Test 14    &  1180           &  0.44           &  1.025         \\ \hline
+Test 15    &  1180           &  0.44           &  1.025         \\ \hline
+Test 16    &  2300           &  0.44           &  1.338         \\ \hline
+Test 17    &  1160           &  0.40           &  1.018         \\ \hline
+Test 18    &  1180           &  0.44           &  1.025         \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -915,7 +914,7 @@ $T_\infty$ ($^\circ$C)  &  20             \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|}
 \hline
                 &                  &                \\
 \rb{Test}       &  \rb{$\dot Q$}   &  \rb{$A$}      \\
@@ -940,7 +939,7 @@ The HGL temperatures from the McCaffrey plume temperature correlation were used 
 {Summary of input parameters used for SP AST Column cases, steel temperature (unprotected).}
 
 \begin{center}
-\begin{tabular}{|l|l|l|}
+\begin{tabular}{|l|l|}
 \hline
                        &             \\
 \rb{Input Parameter}   &  \rb{Value} \\ \hline \hline
@@ -1283,7 +1282,7 @@ After the time $t_{fire}$, the fire HRR was steady.
                        &                         \\
 \rb{Input Parameter}   &  \rb{Value}             \\ \hline \hline
 $z$ (m)                &  8.7, 11.8, 13.3, 14.5  \\ \hline
-$\chi_r$ (-)           &  0.30                   \\ \hline
+$\chi_r$ (-)           &  0.35                   \\ \hline
 $\rho_{a}$ (kg/m$^3$)  &  1.18                   \\ \hline
 \end{tabular}
 \end{center}
@@ -1324,7 +1323,7 @@ Test 11    &  0.00444          &  150              &  100             &  0.09   
                        &                                \\
 \rb{Input Parameter}   &  \rb{Value}                    \\ \hline \hline
 $z$ (m)                &  15.7, 17.2, 18.8, 20.3, 21.5  \\ \hline
-$\chi_r$ (-)           &  0.30                          \\ \hline
+$\chi_r$ (-)           &  0.35                          \\ \hline
 $\rho_{a}$ (kg/m$^3$)  &  1.18                          \\ \hline
 \end{tabular}
 \end{center}
@@ -1558,7 +1557,7 @@ would be specified with a $t_{ramp}$ of [0, 100] and a $\dot Q_{ramp}$ of [0, 50
                        &              \\
 \rb{Input Parameter}   &  \rb{Value}  \\ \hline \hline
 $z$ (m)                &  6, 12       \\ \hline
-$\chi_r$ (-)           &  0.30        \\ \hline
+$\chi_r$ (-)           &  0.40        \\ \hline
 $\rho_{a}$ (kg/m$^3$)  &  1.18        \\ \hline
 \end{tabular}
 \end{center}
