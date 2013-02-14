@@ -6467,7 +6467,7 @@ the radiation transport equation is fully updated every 15 time steps.
 
 
 \section{Radiative Absorption and Scattering}
-\label{info:RADI_Absorption}
+\label{info:RADI_RADCAL_Absorption}
 
 By default FDS employs a gray gas model for the radiation absorption coefficient, a function
 of gas composition and temperature, which are
@@ -9254,7 +9254,7 @@ Thermogravimetric Analysis or TGA is a bench-scale measurement in which a very s
 
 Micro-Combustion Calorimetry or MCC is similar to TGA, except the vaporized gas is burned. The result is a normalized heat release rate:
 \begin{equation*}
-   \hbox{\ct 'NORMALIZED HEAT RELEASE RATE'} =  \dot{m}''_f (t) \, \Delta H \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(W/g)} 
+   \hbox{\ct 'NORMALIZED HEAT RELEASE RATE'} =  \dot{m}''_f (t) \, \Delta H \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(W/g)}
 \end{equation*}
 Note that $\dot{m}''_f$ is the mass flux of fuel and $\Delta H$ is the heat of combustion.
 
@@ -9269,7 +9269,7 @@ Note that it is assumed that the sample is heated purely by convection, in which
 
 
 
-   
+
 
 
 
@@ -9856,7 +9856,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
 \hline \hline
 \endhead
-{\ct ABSORPTION COEFFICIENT}                    & Section~\ref{info:RADI_Absorption}            & 1/m            & D,I,P,S      \\ \hline
+{\ct ABSORPTION COEFFICIENT}                    & Section~\ref{info:RADI_RADCAL_Absorption}     & 1/m            & D,I,P,S      \\ \hline
 {\ct ACTUATED SPRINKLERS}                       & Number of actuated sprinklers                 &                & D            \\ \hline
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
 {\ct AEROSOL VOLUME FRACTION}$^*$               & Section~\ref{info:soot}                       & mol/mol        & D,I,P,S      \\ \hline
