@@ -108,7 +108,7 @@ The transport equation for the resolved kinetic energy per unit mass, $K\equiv \
 \overline{\rho} \,\DoD{K}{t} &= -\widetilde{u}_i\frac{\partial \bar{p}}{\partial x_i} - \widetilde{u}_i\frac{\partial \tau_{ij}^{dev}}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i \notag \\
 \overline{\rho} \,\DoD{K}{t} + \frac{\partial}{\partial x_j} ([\bar{p}\delta_{ij} + \tau_{ij}^{dev}]\widetilde{u}_i) &=  \bar{p} \frac{\partial \widetilde{u}_i}{\partial x_i} + \tau_{ij}^{dev}\frac{\partial \widetilde{u}_i}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i
 \end{align}
-The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence).
+The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence, e.g., the Rayleigh-Taylor instability).
 
 Most simple LES subgrid closures take production of subgrid kinetic energy to be equal to the dissipation of total kinetic energy.  Using gradient diffusion for SGS closure, this assumption implies the following:
 \begin{align}
@@ -221,7 +221,7 @@ The viscosity of the species $\alpha$ is given by
 \be \mu_\alpha = \frac{26.69\times 10^{-7} (W_\alpha \, T)^\ha}{\sigma_\alpha^2 \, \Omega_v}
 \quad [=] \quad \frac{\hbox{kg}}{\hbox{m s}} \ee
 where $\sigma_\alpha$ is the Lennard-Jones
-hard-sphere diameter ($\AA$) and $\Omega_v$ is the
+hard-sphere diameter ($\text{\AA}$) and $\Omega_v$ is the
 collision integral, an empirical function of the
 temperature $T$. The thermal conductivity of species $\alpha$ is given by
 \be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad [=] \quad \frac{\hbox{W}}{\hbox{m K}}  \ee
@@ -415,7 +415,7 @@ Generally, this requires an iterative procedure since $\tau_w$ is needed to defi
 \subsection{Wall Damping of the Turbulent Viscosity}
 \label{sec:wall_damping}
 
-The turbulent viscosity $\nu_t = \mu_t/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{mix} = C_s \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the kinematic viscosity has units of length$^2$/time.
+The turbulent viscosity $\nu_t = \mu_t/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{mix} = C_s \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
 
 To achieve the correct decay of the Reynolds stresses near a wall, Van Driest (see \cite{Wilcox:1}) proposed the following modification:
 \begin{equation}
