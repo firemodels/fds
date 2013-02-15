@@ -446,12 +446,10 @@ The change in concentration for species $\alpha$ within the mixed reactor zone i
 \end{equation}
 FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
 
-It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentration (mol/L) and mass fractions (kg/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/W_{\alpha}$.  Substituting for $C_{\alpha}$ and combining Eqs.~(\ref{eq:rate_f}) and (\ref{eq:rate_cons}) yields:
-\begin{equation}\label{eq:finite_rate_unit}
-r^{\prime}_{F,i} = -\frac{1000}{\rho}k_{i} \; \prod \left(\frac{Y_{\alpha}\,\rho}{W_{\alpha}}\right)^{a_{\alpha,i}} \end{equation}
-To simplify the calculations within FDS, density and molecular weight are pulled out of the product on the right hand side of Eq.~(\ref{eq:finite_rate_unit}) and calculated with the other constants to form $A^{\prime}$:
+It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentration (mol/L) and mass fractions (kg/kg) are related by $C_{\alpha}=1000\,Y_{\alpha} \rho/W_{\alpha}$.
+To simplify the calculations within FDS, density and molecular weight are pulled out of the product of the concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and calculated with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
-A^{\prime}_{i} = 1000\;A_{i}\;\rho^{\sum(a_{n}-1)}\prod W_{\alpha}\,^{-a_{\alpha,i}}
+A^{\prime}_{i} = 1000\;A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}\,^{-a_{\alpha,i}}
 \end{equation}
 Using $A_i^{\prime}$, the rate becomes:
 \begin{equation}\label{eq:finite_rate_fin}
@@ -461,9 +459,9 @@ The reaction rate on a mass basis for species $\alpha$ in the $i$th reaction is:
 \begin{equation}\label{eq:rate_a_y}
 r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)\,r^{\prime}_{F,i}
 \end{equation}
-Last, the rate of change in composition for species $\alpha$ in the mixed reactor zone becomes:
+Last, the rate of change in composition for species $\alpha$ (kg/m$^3$/s) in the mixed reactor zone becomes:
 \begin{equation}\label{rate_expression_y}
-\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t} = \sum_{i} r^{\prime}_{\alpha,i}
+\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
 \end{equation}
 
 
