@@ -19,7 +19,7 @@
       FYI           = 'NBSIR 88-3752'
       CONDUCTIVITY  = 0.17
       SPECIFIC_HEAT = 1.09
-      DENSITY       =  930. /
+      DENSITY       =  650. /
 
 &MATL ID            = 'YELLOW PINE'
       FYI           = 'Holman, 7th ed.'
@@ -62,7 +62,7 @@
       THICKNESS = 0.005 /
 
 # Fire
-&SURF ID='burner', HRRPUA=3125.0, RAMP_Q='pulseprofile', COLOR='RED' /
+&SURF ID='burner', NO_SLIP=.TRUE., HRRPUA=3125.0, RAMP_Q='pulseprofile', COLOR='RED' /
 &RAMP ID='pulseprofile', T=   0.0, F=0.024 /
 &RAMP ID='pulseprofile', T=  60.0, F=0.097 /
 &RAMP ID='pulseprofile', T= 179.5, F=0.097 /
@@ -137,6 +137,8 @@
 
 # Second Floor Opening
 &VENT XB= 17.00, 17.00, 0.00, 1.75, 2.60, 4.60, SURF_ID='OPEN', COLOR='BEIGE' / Opening at the east end of top hallway
+
+&VENT XB= 17.00, 17.00, 0.80, 0.95, 0.00, 0.10, SURF_ID='OPEN', COLOR='BEIGE' / Leakage near door of lower hallway
 
 # Output Information
 
