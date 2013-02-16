@@ -39,7 +39,7 @@ gettimeofday(struct timeval* tp, void* tzp)
       tp->tv_sec = t.QuadPart/f.QuadPart;
       // following two lines added by gpf
       // tp->tv_usec = ((float)t.QuadPart/f.QuadPart*1000*1000) - (tp->tv_sec*1000*1000);
-      tp->tv_usec = 1000*1000*(((float)t.QuadPart/f.QuadPart) - (tp->tv_sec));
+      tp->tv_usec = 1000*1000*(((double)t.QuadPart/f.QuadPart) - (tp->tv_sec));
 
   } else {
       /* hardware doesn't support a performance counter,
