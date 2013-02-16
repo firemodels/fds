@@ -971,6 +971,9 @@ extern "C" void PLOT3D_CB(int var){
       SPINNER_vectorlinewidth->set_float_val(vectorlinewidth);
       SPINNER_vectorlinelength->set_float_val(vecfactor);
     }
+    updateplotslice(1);
+    updateplotslice(2);
+    updateplotslice(3);
     break;
   case CHOPUPDATE:
     updatechopcolors();
