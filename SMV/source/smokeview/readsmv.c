@@ -8160,9 +8160,16 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"VECLENGTH")==1){
+      float vf=-1.0;
+
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&iveclengths);
-      vecfactor = get_vecfactor(&iveclengths);
+      sscanf(buffer,"%i %f",&iveclengths,&vf);
+      if(vf<0.0){
+        vecfactor = get_vecfactor(&iveclengths);
+      }
+      else{
+        vecfactor = vf;
+      }
       continue;
     }
     if(match(buffer,"VECTORLENGTH")==1){
@@ -10624,7 +10631,7 @@ void writeini(int flag){
   fprintf(fileout,"VECTORLINEWIDTH\n");
   fprintf(fileout," %f\n",vectorlinewidth);
   fprintf(fileout,"VECLENGTH\n");
-  fprintf(fileout," %i\n",iveclengths);
+  fprintf(fileout," %i %f\n",iveclengths,vecfactor);
   fprintf(fileout,"VECTORLENGTH\n");
   fprintf(fileout," %f\n",vecfactor);
   fprintf(fileout,"VECTORPOINTSIZE\n");
