@@ -6273,11 +6273,11 @@ updatemenu=0;
     glutAddMenuEntry("Lines",COLORBAR_LINES);
   }
   else if(contour_type==STEPPED_CONTOURS){
-    glutAddMenuEntry("*Continuous",COLORBAR_CONTINUOUS);
+    glutAddMenuEntry("Continuous",COLORBAR_CONTINUOUS);
     glutAddMenuEntry("*Stepped",COLORBAR_STEPPED);
     glutAddMenuEntry("Lines",COLORBAR_LINES);
   }else if(contour_type==LINE_CONTOURS){
-    glutAddMenuEntry("*Continuous",COLORBAR_CONTINUOUS);
+    glutAddMenuEntry("Continuous",COLORBAR_CONTINUOUS);
     glutAddMenuEntry("Stepped",COLORBAR_STEPPED);
     glutAddMenuEntry("*Lines",COLORBAR_LINES);
   }
