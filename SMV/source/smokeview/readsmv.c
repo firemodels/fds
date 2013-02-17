@@ -8172,11 +8172,6 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
-    if(match(buffer,"VECTORLENGTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f",&vecfactor);
-      continue;
-      }
     if(match(buffer,"ISOTRAN2")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&transparent_state);
@@ -10632,8 +10627,6 @@ void writeini(int flag){
   fprintf(fileout," %f\n",vectorlinewidth);
   fprintf(fileout,"VECLENGTH\n");
   fprintf(fileout," %i %f\n",iveclengths,vecfactor);
-  fprintf(fileout,"VECTORLENGTH\n");
-  fprintf(fileout," %f\n",vecfactor);
   fprintf(fileout,"VECTORPOINTSIZE\n");
   fprintf(fileout," %f\n",vectorpointsize);
   fprintf(fileout,"PARTPOINTSIZE\n");

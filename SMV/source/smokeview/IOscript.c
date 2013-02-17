@@ -603,7 +603,17 @@ int compile_script(char *scriptfile){
       case SCRIPT_PLOT3DPROPS:
         SETcval;
         cleanbuffer(buffer,buffer2);
-        sscanf(buffer2,"%i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4);
+        {
+          float fv=-1;
+
+          sscanf(buffer2,"%i %i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&fv);
+          if(scripti->ival3<0&&fv>=0.0){
+            scripti->fval=fv;
+          }
+          else{
+            scripti->fval=-1.0;
+          }
+        }
         break;
 
       case SCRIPT_SHOWPLOT3DDATA:
@@ -1013,8 +1023,6 @@ void script_plot3dprops(scriptdata *scripti){
   visVector = scripti->ival2;
   if(visVector!=1)visVector=0;
 
-  iveclengths = scripti->ival3;
-
   plotn = p_index;
   if(plotn<1){
     plotn=numplot3dvars;
@@ -1026,7 +1034,16 @@ void script_plot3dprops(scriptdata *scripti){
   if(visiso==1)updatesurface();
   updateplot3dlistindex();
 
-  vecfactor = get_vecfactor(&iveclengths);
+  iveclengths = scripti->ival3;
+  if(iveclengths>=0){
+    vecfactor = get_vecfactor(&iveclengths);
+  }
+  else{
+    if(scripti->fval>=0.0){
+      vecfactor=scripti->fval;
+    }
+    iveclengths=0;
+  }
   update_vector_widgets();
 
   printf("script: iveclengths=%i\n",iveclengths);
