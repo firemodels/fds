@@ -1051,20 +1051,19 @@ To record smoke grey levels, Smokeview makes use of a special FDS sensor or devi
 This device behaves like other FDS devices but has the additional property that when used by Smokeview, it displays the grey level as viewed by the observer.  This grey level is displayed as a number between 0 and 255.  The grey level is simply Smokeview's computation of the integrated {\em smoke thickness}\ along a path between the sensor location and the eye.  These computations are performed by the video card using OpenGL, the graphics library used by Smokeview to visualize FDS scenarios.  The user places a device of type {\tt smoke\_sensor}\ at a particular $(x, y, z)$ location.
 Smokeview displays the sensor as a white disk with color (255,255,255) always oriented towards the observer. When drawing smoke that resides between the sensor and the observer (your eye) the smoke sensor is partially obscured by the smoke.  Smokeview then alters the smoke sensor color according to how much and how thick the intervening smoke is.  It does this by blending each smoke plane one plane at a time using the color and opacity levels of that plane.
 
-Figure \ref{figsmokesensor} illustrates an initial test of this process.  It verifies that Smokeview correctly {\em knows}\ where the sensor is located and can correctly record its grey level even when surrounded by other objects of different colors.  In this case, the smoke sensor is white and there is no intervening smoke.  The background is a neutral grey with grey level of 128.  The value displayed over the sensor then should always be 255 no matter how the scene is oriented.  The figure shows two extreme orientations of the box containing the sensor. %KEVIN -- I don't understand this figure. The red dot confuses things, and the white dot is too small.
+Figure \ref{figsmokesensor} illustrates an initial test of this process.  It verifies that Smokeview correctly {\em knows}\ where the sensor is located and can correctly record its grey level even when surrounded by other objects of different colors.  In this case, the smoke sensor is white and there is no intervening smoke.  The background is a neutral grey with grey level of 128.  The value displayed over the sensor then should always be 255 no matter how the scene is oriented.  %KEVIN -- I don't understand this figure. The red dot confuses things, and the white dot is too small.
 
 \begin{figure}[\figoptions]
 \begin{center}
  \centering
 \begin{tabular}{cc}
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/smoke_sensor_r}&
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/smoke_sensor_l}\\
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/smoke_sensor}&
  \end{tabular}
 \end{center}
 \caption[A test verifying that the Smokeview smokesensor object is working properly]
 {A test verifying that the Smokeview smokesensor object is working properly.
 A small white (255,255,255) smokesensor appears in front of a grey (128,128,128) obstacle.
-The red dot indicates where the smoke opacity is recorded.
+The value displayed should be 255, the value recorded by Smokeview.
 }
 \label{figsmokesensor}%
 \end{figure}
