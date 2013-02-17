@@ -3,9 +3,5 @@ RENDERDIR
 SETVIEWPOINT
  view 1
 RENDERONCE
- smoke_sensor_l
-SETVIEWPOINT
- view 2
-RENDERONCE
- smoke_sensor_r
+ smoke_sensor
 
