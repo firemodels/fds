@@ -63,7 +63,6 @@ low_flux_hot_gas_filling
 terminal_velocity_convergence
 flat_fire_comparison
 fluid_part
-scarc2d
 extinction
 fan_curve
 mesh_transformation
