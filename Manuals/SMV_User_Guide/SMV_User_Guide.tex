@@ -3318,14 +3318,15 @@ LOADPLOT3D
 Usage:
 \begin{lstlisting}
 PLOT3DPROPS
-  Plot3D type (int) showvector (0/1) (int) vector length index (int) Plot3D display type (int)
+  variable_index (int) showvector (0/1) (int) vector_length_index (int) display_type (int) vector_length (float)
 \end{lstlisting}
 where
 \begin{itemize}
-\item Plot3D type - is an integer from 1 to the number of Plot3D file components (usually 5),
+\item variable\_index - is an integer from 1 to the number of Plot3D file components (usually 5),
 \item showvector - is 1 to draw vectors, 0 otherwise
-\item vector length index, is an integer index from 0 to 6 pointing to an internal Smokeview array used to determine vector size.
-\item Plot3D display type - is 0 for stepped contours, 1 for line contours and 2 for continuous contours
+\item vector\_length\_index, is an integer index from 0 to 6 pointing to an internal Smokeview array used to determine vector length.
+\item display\_type - is 0 for stepped contours, 1 for line contours and 2 for continuous contours
+\item vector\_length - if vector\_length\_index is negative then Smokeview uses vector\_length set the PLOT3D vector length
 \end{itemize}
 
 \hitem{SHOWPLOT3DDATA}Specifies a particular Plot3D plot to be displayed (mesh number, whether visible or not, orientation and position)
