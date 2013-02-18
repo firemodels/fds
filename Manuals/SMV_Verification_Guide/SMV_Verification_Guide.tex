@@ -1041,25 +1041,30 @@ PLOT3D iso-surfaces for 50~\degC, 230~\degC, 410~\degC\ and
 
 \chapter{Smoke Visualization Tests}
 
-Proper smoke visualization requires that smoke flow be both computed and drawn correctly.
-The FDS Verification Guide~\cite{FDS_Verification_Guide} addresses the question of correct
-computation in terms of soot/smoke production, transport, etc.  In this chapter, it is presumed that the FDS component of verification is correct and considers the question, ``Is the smoke drawn correctly?''.  More precisely, given a known density and distribution of soot does the 3D smoke drawn by Smokeview match how {\em theory}\ suggests it should look.  Presently, the main interest is in how smoke obscures objects in the background.  Visualization effects due to light scattering are not modeled except to consider the smoke albedo when drawing its grey level.
+Correct visualization of smoke requires that smoke flow be both computed and drawn correctly.
+The FDS Verification Guide~\cite{FDS_Verification_Guide} addresses computation in terms of soot/smoke production, transport, etc.  
+A verification of how smoke is drawn is addressed in this chapter.
+More precisely, given a known density and distribution of soot does the 3D smoke drawn by Smokeview match how {\em theory}\ predicts it should look.  Presently, the main interest is in how smoke obscures objects in the background.  Visualization effects due to light scattering are not modeled except to consider the smoke albedo when drawing its grey level.
 
-The smoke drawing verification problem can be broken down into two steps.
+The smoke drawing verification problem is partitioned into two steps.
 The first step, documented in Section \ref{sect:record_smoke}, is to verify that Smokeview can record the correct grey level of smoke as it is drawn on the screen.
+This step is necessary because screen colors, in this case the smoke obscuration levels to be verified, are not directly accessible to Smokeview. They must be retrieved from the video card buffers.  
 The second step, documented in Section \ref{sect:verify_smoke}, is to verify that Smokeview can draw the correct shade of grey given a known soot density level
-within the scene.
-
+within the scene.  
 \section{Recording Smoke Levels}
 \label{sect:record_smoke}
 
 Smokeview does not have direct access to colors that are drawn on the screen.  Smokeview passes vertex colors to the video driver. The video
-driver in turn fills in interpolated colors within these vertices.  
-To obtain these colors, Smokeview must `read' them back in after they are drawn.  
+driver in turn fills in interpolated colors within these vertices.
+To obtain these colors, Smokeview must `read' them back in after they are drawn.  A further complication is that smoke is drawn in Smokeview 
+using a physical coordinate system.
+The smoke opacity levels are retrieved using the screen coordinate system, ie. at particular pixel locations. It is this transformation process from physical to screen coordinates that is being verified
+in this step.
+
 In the case of 3D smoke visualization, these colors
 represent smoke opacity levels.  To obtain these levels and thereby verifying that they are correct, Smokeview makes use of a special FDS sensor or device named {\em smoke\_sensor}\ which Smokeview uses to
 obtain color values at the sensor location.
-This device behaves like other FDS devices but has the additional property that when used by Smokeview, it displays the grey level as viewed by the observer.  This grey level is displayed as a number between 0 and 255.  
+This device behaves like other FDS devices but has the additional property that when used by Smokeview, it displays the grey level as viewed by the observer.  This grey level is displayed as a number between 0 and 255.
 
 The user places a device of type {\tt smoke\_sensor}\ at a particular $(x, y, z)$ location.
 Smokeview displays the sensor as a white disk with color (255,255,255) always oriented towards the observer. When drawing smoke that resides between the sensor and the observer (your eye), the smoke sensor is partially obscured by the smoke.  Smokeview then alters the smoke sensor color according to how much and how thick the intervening smoke is.  It does this by blending each smoke plane one plane at a time using the color and opacity levels of that plane.
@@ -1077,11 +1082,11 @@ Figure \ref{figsmokesensor} illustrates an initial test of this process.  It ver
 \includegraphics[width=3.0in]{SCRIPT_FIGURES/smoke_sensor}&
  \end{tabular}
 \end{center}
-\caption[A test verifying that the Smokeview smokesensor object is working properly]
-{A test verifying that Smokeview can correctly transform the smokesensor physical location to screen coordinates 
-and obtain the correct color found there.
+\caption[A test verifying that the Smokeview smoke\_sensor object is working properly]
+{A test verifying that Smokeview can correctly transform the physical $(x,y,z)$ location of a smoke\_sensor to its equivalent screen coordinates
+where the underlying smoke obscuration level is retrieved.
 A small white (255,255,255) smoke\_sensor appears in front of a grey (128,128,128) obstacle.
-The value displayed should be 255,  the value recorded by Smokeview.
+The value displayed should be 255,  the value recorded by Smokeview.  If the physical to screen transformation is performed incorrectly a value of 128 will be displayed (since it will pick up a color elsewhere).
 }
 \label{figsmokesensor}%
 \end{figure}
