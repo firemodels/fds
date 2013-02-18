@@ -8302,6 +8302,10 @@ INIT_LOOP: DO N=1,N_INIT_READ
             ALLOCATE(IN%PARTICLE_INSERT_CLOCK(NMESHES),STAT=IZERO)
             CALL ChkMemErr('READ','PARTICLE_INSERT_CLOCK',IZERO)
             IN%PARTICLE_INSERT_CLOCK = T_BEGIN
+            
+            ALLOCATE(IN%ALREADY_INSERTED(NMESHES),STAT=IZERO)
+            CALL ChkMemErr('READ','ALREADY_INSERTED',IZERO)
+            IN%ALREADY_INSERTED = .FALSE.
          
             ! Assign an index to identify the particle class
 
