@@ -71,6 +71,8 @@
 \newcommand{\ct}{\tt\small}
 \usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
 \usetocstyle{standard}
+\usepackage{siunitx}
+\sisetup{inter-unit-product = \ensuremath{{}\cdot{}}, per-mode = fraction}
 
 \floatstyle{boxed}
 \newfloat{notebox}{H}{lon}
@@ -153,12 +155,12 @@ Particle_Chapter, Device_Chapter, HVAC_Chapter, Appendices}
 \newcommand{\dQ}{\dot{Q}}
 \newcommand{\dq}{\dot{q}}
 \newcommand{\dbq}{\dot{\bf q}}
-\newcommand{\dm}{\dot{m}}
+\renewcommand{\dm}{\dot{m}}
 \newcommand{\ha}{\frac{1}{2}}
 \newcommand{\ft}{\frac{4}{3}}
 \newcommand{\ot}{\frac{1}{3}}
 \newcommand{\fofi}{\frac{4}{5}}
-\newcommand{\of}{\frac{1}{4}}
+\renewcommand{\of}{\frac{1}{4}}
 \newcommand{\twth}{\frac{2}{3}}
 \newcommand{\R}{{\cal R}}
 \newcommand{\be}{\begin{equation}}
@@ -176,7 +178,7 @@ Particle_Chapter, Device_Chapter, HVAC_Chapter, Appendices}
 \newcommand{\OTWO}{{\tiny \hbox{O}_2}}
 \newcommand{\NTWO}{{\tiny \hbox{N}_2}}
 \newcommand{\CO}{{\tiny \hbox{CO}}}
-\newcommand{\F}{{\tiny \hbox{F}}}
+\renewcommand{\F}{{\tiny \hbox{F}}}
 \newcommand{\C}{{\tiny \hbox{C}}}
 \newcommand{\Hy}{{\tiny \hbox{H}}}
 \newcommand{\So}{{\tiny \hbox{S}}}

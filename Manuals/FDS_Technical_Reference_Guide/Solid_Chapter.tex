@@ -103,7 +103,7 @@ The boundary condition is discretized
 The convective flux at the next time step is computed as
 \be
 \dq''_c{}^{(n+1)} = h\left( T_{g} -
- 	0.5 \left(T_{s,\ha}^n + T_{s,\ha}^{n+1}\right) \right)
+   0.5 \left(T_{s,\ha}^n + T_{s,\ha}^{n+1}\right) \right)
 \ee
 and the radiative flux at the next time step is approximated with a
 linearized form
@@ -193,7 +193,7 @@ $n$ is the spatial coordinate pointing into the solid, $\dn$ is the normal
 grid spacing, $T_g$ is the gas temperature in the center of the first gas phase cell, and
 $T_w$ is the wall surface temperature.
 
-In an LES calculation, the convective heat flux to the surface is
+In a LES calculation, the convective heat flux to the surface is
 obtained from a combination of natural and forced
 convection correlations
 \be \dq_c'' = h (T_g - T_w)
@@ -201,7 +201,7 @@ convection correlations
     \max \; \left[ \; C\, |T_g-T_w|^\ot \; , \;
             \frac{k}{L} \; 0.037 \; \RE^\fofi \; \PR^\ot \;
             \right]  \quad
-    \hbox{W/(m$^2$\rmcdot K)} \ee
+    \si{W/(m.K)} \ee
 where $C$ is the coefficient for natural convection (1.52 for a horizontal surface
 and 1.31 for a vertical surface)~\cite{Holman:1},
 $L$ is a characteristic length related to the size of the physical
@@ -363,7 +363,7 @@ r_{\alpha \beta} =
     \left( \frac{\rho_{s,\alpha}}{\rho_{s0}}\right)^{n_{s,\alpha\beta}}
     A_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_s}\right)
     \; \max \big[0,S_{thr,\alpha,\beta}(T_s-T_{thr,\alpha \beta}) \big]^{n_{t,\alpha\beta}}
-	\label{Arrhenius}
+   \label{Arrhenius}
 \ee
 where $T_{thr,\alpha \beta}$ is a threshold temperature that can be
 used to dictate that the reaction must not occur below
@@ -458,8 +458,8 @@ the size of each condenced phase cell is multiplied by the following factor $\de
 \be
 \delta = 
    \begin{cases}
- 	\max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) & \text{if }\max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) \geq 1 \\
- 	\sum_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) & \text{if }\max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) < 1 
+   \max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) & \text{if }\max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) \geq 1 \\
+   \sum_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) & \text{if }\max_{\alpha}\left(\frac{\rho_{s,\alpha}}{\rho_\alpha}\right) < 1 
    \end{cases}
 \ee
 Correspondingly, the densities are divided by the factor $\delta$ to conserve mass.
