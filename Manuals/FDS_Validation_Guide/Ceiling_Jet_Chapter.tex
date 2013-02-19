@@ -726,44 +726,53 @@ occurred had the ceiling extended further.}
 
 \subsection{NIST Dunes 2000 Experiments}
 
-The experiments that were conducted in the single-story manufactured home were selected for model validation.
-Only tests that used a flaming ignition source were considered; the smoldering and cooking ignition sources
-were not considered.
+% The mass loss rates of the upholstered chair and mattress were measured at Omega Point
+% Laboratories\footnote{Project Nos.~15638-108858 (upholstered chair) and 15638-108856 (mattress).}.
+% The upholstered chair was tested in accordance with California Bureau of Home Furnishings Technical
+% Bulletin 133~\cite{CALTB133} (with a modified ignition source). The mattress was tested in accordance
+% with California Bureau of Home Furnishings Technical Bulletin 129~\cite{CALTB129} (with a modified ignition source).
 
-The mass loss rates of the upholstered chair and mattress were measured at Omega Point
-Laboratories\footnote{Project Nos.~15638-108858 (upholstered chair) and 15638-108856 (mattress).}.
-The upholstered chair was tested in accordance with California Bureau of Home Furnishings Technical
-Bulletin 133~\cite{CALTB133} (with a modified ignition source). The mattress was tested in accordance
-with California Bureau of Home Furnishings Technical Bulletin 129~\cite{CALTB129} (with a modified ignition source).
-The HRR was then calculated by multiplying the mass loss rate of the fuel specimen by a heat of combustion of
-30,000~kJ/kg for the upholstered chair and 21,000~kJ/kg for the mattress. The resulting transient HRR was
-input into FDS as a fire ramp.
+Nine experiments that were conducted in the single-story manufactured home were selected for model validation.
+Only tests that used a flaming ignition source with a couch or mattress fuel package were considered;
+the cooking oil fires and tests that used a smoldering ignition source were not considered.
 
-Because the fuel characterization tests were conducted independent of the
-smoke detector activation tests, there is a time difference in the burning behavior due to the small ignition
-source. To correct for this time shift, the HRR ramp was offset in FDS by aligning the peak temperatures
-of the highest thermocouple in the fire room. The offset is reported in Table~\ref{NIST_Dunes_2000_Summary}
-as the time to peak temperature from the experiment minus the time to peak temperature from FDS.
+Although a load cell was used in the experiments to measure the mass loss rate of the fuel package, the mass loss data
+were not reliable enough to reconstruct the HRR curves for each test. Instead, the HRR curves were determined by approximating
+the fire growth using a $t^2$ ramp, as in Eq.~(\ref{eq:t_squared}). The parameters for the $t^2$ ramp were calibrated in FDS
+by using the temperature measured at the highest thermocouple in the tree (2~cm below the ceiling) in the fire room.
+\be
+\dot Q = \dot Q_0 \left( \frac{t}{\tau} \right)^2
+\label{eq:t_squared}
+\ee
+A time offset was used to align the predicted ceiling thermocouple temperatures with the measured temperatures.
+This offset is reported as the time at which the $t^2$ ramp begins.
+The t-squared calibration parameters and time offsets for the HRR ramps are shown in Table~\ref{tab:NIST_Dunes_2000_Summary}.
+Additionally, the ignition source had a small effect on the measured ceiling thermocouple temperatures. Therefore,
+the size of the ignition source was approximated as either 3~kW or 7~kW, and the time offset of the ignition source was
+also calibrated by using the measured ceiling thermocouple temperatures.
+The resulting HRR curve was input into FDS as a fire ramp.
 
-A summary of the seven tests selected for model validation is shown in Table~\ref{NIST_Dunes_2000_Summary}.
+A summary of the nine tests selected for model validation is shown in Table~\ref{tab:NIST_Dunes_2000_Summary}.
 Figure~\ref{NIST_Dunes_2000_Scatterplot} compares the measured versus predicted smoke detector activation times.
 
 \begin{table}[h!]
 \caption{Summary of NIST Dunes 2000 experiments selected for model validation.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|}
 \hline
-Test No.  &  Fire Source  &  Fire Location  &  HRR Offset (s)  \\ \hline \hline
-SDC02     &  Chair        &  Living Room    &  38              \\ \hline
-SDC05     &  Mattress     &  Bedroom        &  37              \\ \hline
-SDC07     &  Mattress     &  Bedroom        &  53              \\ \hline
-SDC10     &  Chair        &  Living Room    &  20              \\ \hline
-SDC33     &  Chair        &  Living Room    &  42              \\ \hline
-SDC35     &  Chair        &  Living Room    &  66              \\ \hline
-SDC39     &  Mattress     &  Bedroom        &  40              \\ \hline
+Test No.  &  Fire Source  &  Fire Location  &  $\dot Q_0$ (kW)  &  $\tau$ (s)  &  Time Offset (s)  \\ \hline \hline
+SDC02     &  Chair        &  Living Room    &  150              &  180        &  20               \\ \hline
+SDC05     &  Mattress     &  Bedroom        &  200              &  180        &  20               \\ \hline
+SDC07     &  Mattress     &  Bedroom        &  350              &  180        &  50               \\ \hline
+SDC10     &  Chair        &  Living Room    &  150              &  180        &  40               \\ \hline
+SDC15     &  Chair        &  Living Room    &  225              &  400        &  180              \\ \hline
+SDC33     &  Chair        &  Living Room    &  100              &  180        &  10               \\ \hline
+SDC35     &  Chair        &  Living Room    &  100              &  180        &  10               \\ \hline
+SDC38     &  Mattress     &  Bedroom        &  120              &  180        &  25               \\ \hline
+SDC39     &  Mattress     &  Bedroom        &  200              &  180        &  25               \\ \hline
 \end{tabular}
 \end{center}
-\label{NIST_Dunes_2000_Summary}
+\label{tab:NIST_Dunes_2000_Summary}
 \end{table}
 
 \begin{figure}[p]
