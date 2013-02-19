@@ -69,17 +69,14 @@ The (temperature-dependent) thermal conductivity of the solid
 at the center of the $i$th cell is denoted $k_{s,i}$.
 The temperatures are updated in time using an implicit
 Crank-Nicolson scheme
-\begin{eqnarray}
-    \frac{T_{s,i}^{n+1}-T_{s,i}^n}{\dt} = \frac{1}{2 (\rho_s c_s)_i \dx_{i} }
-& & \left(
-    k_{s,i+\ha}\frac{T_{s,i+1}^n-T_{s,i}^n}{\dx_{s,i+\ha}} - \right.
-    k_{s,i-\ha}\frac{T_{s,i}^n-T_{s,i-1}^n}{\dx_{s,i-\ha}} +  \nonumber \\
-& & k_{s,i+\ha}\frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\dx_{i+\ha}} -
-    \left.
-    k_{s,i-\ha}\frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\dx_{i-\ha}}
-     \right)
-    + \frac{\dq_s'''}{\rho_s c_s}
-\end{eqnarray}
+\begin{align}
+    \frac{T_{s,i}^{n+1}-T_{s,i}^n}{\dt} &= \frac{1}{2 (\rho_s c_s)_i \dx_{i} }
+ \Bigg(
+     &&k_{s,i+\ha}\frac{T_{s,i+1}^n-T_{s,i}^n}{\dx_{s,i+\ha}}  &-&&& k_{s,i-\ha}\frac{T_{s,i}^n-T_{s,i-1}^n}{\dx_{s,i-\ha}} &&+ && &&\notag\\
+    &&&k_{s,i+\ha}\frac{T_{s,i+1}^{n+1} - T_{s,i}^{n+1}}{\dx_{i+\ha}} &-&&& k_{s,i-\ha}\frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\dx_{i-\ha}} &&
+ \Bigg)&&
+    + && \frac{\dq_s'''}{\rho_s c_s}
+\end{align}
 for $1 \le i \le N$. The width of each cell is $\dx_i$. The distance
 from the center of cell $i$ to the center of cell $i+1$ is
 $\dx_{i+\ha}$. However, the material properties $k_s$, $c_s$, $\rho_s$
@@ -134,7 +131,7 @@ obstruction, then the net radiative heat flux is the sum of incoming and outgoin
 components, $\dq_r'' = \dq_{r,in}'' - \dq_{r,out}''$, where:
 \begin{eqnarray}
  \dq_{r,in}'' &=& \epsilon\,
- \int_{\bs'\cdot \bn_w < 0} I_w(\bs')\; |\bs'\cdot \bn_w | \; d\bO
+ \int_{\bs'\cdot \bn_w < 0} I_w(\bs')\; |\bs'\cdot \bn_w | \; \d\bO
  \label{RFluxIn1} \\
  \dq_{r,out}'' &=& \epsilon\,\sigma\,T_w^4
  \label{RFluxOut1}
@@ -149,7 +146,7 @@ intensity is constant inside the ``forward'' and ``backward''
 hemispheres. The transport equation for the intensity in the ``forward''
 direction is
 \be
- \frac{1}{2}\frac{dI^+(x)}{dx}=\kappa_s\,\left(I_b-I^+(x)\right)
+ \frac{1}{2}\frac{\d I^+(x)}{\d x}=\kappa_s\,\left(I_b-I^+(x)\right)
  \label{RInForward}
 \ee
 where $x$ is the distance from the material surface and $\kappa_s$ is
@@ -161,14 +158,14 @@ A corresponding formula can be given for
 the ``backward'' direction. Multiplying Eq.~\ref{RInForward} by $\pi$
 gives us the ``forward'' radiative heat flux into the solid
 \be
- \frac{1}{2}\frac{{d\dq^+_r(x)} }{dx}=\kappa_s\,
+ \frac{1}{2}\frac{{\d\dq^+_r(x)} }{\d x}=\kappa_s\,
        \left(\sigma\,T_s^4-\dq_r^+(x)\right)
  \label{RFluxForward}
 \ee
 The radiative source term in the heat conduction equation is a sum of the
 ``forward'' and ``backward'' flux gradients
 \be
-  \dq_{s,r}'''(x) = \frac{d\dq_r^+(x)}{dx}+\frac{d\dq_r^-(x)}{dx}
+  \dq_{s,r}'''(x) = \frac{\d\dq_r^+(x)}{\d x}+\frac{\d\dq_r^-(x)}{\d x}
 \ee
 The boundary condition for Eq.~\ref{RFluxForward} at the solid (or liquid)
 surface is given by
@@ -204,7 +201,7 @@ convection correlations
     \max \; \left[ \; C\, |T_g-T_w|^\ot \; , \;
             \frac{k}{L} \; 0.037 \; \RE^\fofi \; \PR^\ot \;
             \right]  \quad
-    \hbox{W/m$^2$/K} \ee
+    \hbox{W/(m$^2$ K)} \ee
 where $C$ is the coefficient for natural convection (1.52 for a horizontal surface
 and 1.31 for a vertical surface)~\cite{Holman:1},
 $L$ is a characteristic length related to the size of the physical
@@ -314,8 +311,8 @@ words, the heat release rate is a user input, not something the model
 predicts. In these instances, the desired HRR is translated into a
 mass flux for fuel at a given solid surface, which can be thought of
 as the surface of a burner: \be \dm_f'' = \frac{ f(t) \;
-\dq_{\hbox{user}}''}{\Delta H} \ee Usually, the user specifies a
-desired heat release rate per unit area, $\dq_{\hbox{user}}''$, plus a
+\dq_{\hbox{\scriptsize user}}''}{\Delta H} \ee Usually, the user specifies a
+desired heat release rate per unit area, $\dq_{\hbox{\scriptsize user}}''$, plus a
 time ramp, $f(t)$, and the mass loss rate is computed accordingly.
 
 \subsection{Solid Fuels}
@@ -392,12 +389,12 @@ It is assumed that the gases are transported instantaneously to the surface, whe
 mass fluxes are given by:
 \footnote{In cylindrical and spherical coordinates, the mass fluxes are
 \be
-   \dm_\gamma'' =\frac{1}{R} \int_0^R \dm_\gamma'''(x) \,r dr \;\; ; \;\;
-   \dm_\gamma'' =\frac{1}{R^2} \int_0^R \dm_\gamma'''(x) \,r^2 dr \;\;
+   \dm_\gamma'' =\frac{1}{R} \int_0^R \dm_\gamma'''(x) \,r \d r \;\; ; \;\;
+   \dm_\gamma'' =\frac{1}{R^2} \int_0^R \dm_\gamma'''(x) \,r^2 \d r \;\;
 \ee}
 
 \be
-   \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \, dx
+   \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \,\d x
 \ee
 where $L$ is the thickness of the surface. The chemical source term of
 the heat conduction equation consists of the heats of reaction

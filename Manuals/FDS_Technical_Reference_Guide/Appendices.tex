@@ -786,25 +786,25 @@ Let $m_p$ denote the particle mass, $\mathbf{u}_p$ the particle velocity, $A_p$ 
 The equations of motion of the particles and fluid are formulated as follows from Newton's second law,
 \begin{align}
     \label{particle_eom}
-    m_p \frac{\text{d} \mathbf{u}_p}{\text{d} t} &= - \frac{1}{2} \rho_\text{a} C_{\text{d},p} A_p (\mathbf{u}_p - \mathbf{U}_p) |\mathbf{u}_p - \mathbf{U}_p| + m_p \mathbf{g} \\
+    m_p \frac{\d \mathbf{u}_p}{\d t} &= - \frac{1}{2} \rho_\text{a} C_{\text{d},p} A_p (\mathbf{u}_p - \mathbf{U}_p) |\mathbf{u}_p - \mathbf{U}_p| + m_p \mathbf{g} \\
     \label{fluid_eom}
-    M_p \frac{\text{d} \mathbf{U}_p}{\text{d} t} &= \frac{1}{2} \rho_\text{a} C_{\text{d},p} A_p (\mathbf{u}_p - \mathbf{U}_p) |\mathbf{u}_p - \mathbf{U}_p| \,.
+    M_p \frac{\d \mathbf{U}_p}{\d t} &= \frac{1}{2} \rho_\text{a} C_{\text{d},p} A_p (\mathbf{u}_p - \mathbf{U}_p) |\mathbf{u}_p - \mathbf{U}_p| \,.
 \end{align}
 Note that the fluid Eq. (\ref{fluid_eom}) does not include a gravity term. This gravity term is included in the Navier-Stokes equations; including it here would be redundant. Also note that lift is not included here.
 
 If we define $\mathbf{u}_\text{r} \equiv \mathbf{u}_p - \mathbf{U}_p$ as the relative velocity between the fluid and the particle, we can find a single equation for the relative velocity by dividing both equations by their respective masses (i.e., $m_p$ and $M_p$) and then subtracting the second from the first. This result is
 \begin{align}
-    \frac{\text{d} \mathbf{u}_\text{r}}{\text{d} t} = -\frac{1}{2} \rho_\text{a} C_{\text{d},p} A_p \left(\frac{1}{m_p} + \frac{1}{M_p} \right) \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \,.
+    \frac{\d \mathbf{u}_\text{r}}{\d t} = -\frac{1}{2} \rho_\text{a} C_{\text{d},p} A_p \left(\frac{1}{m_p} + \frac{1}{M_p} \right) \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \,.
 \end{align}
 The equation above can be written in short as
 \begin{align}
-    \frac{\text{d} \mathbf{u}_\text{r}}{\text{d} t} = -K_p \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \quad ; \quad K_p \equiv \frac{1}{2} \rho_\text{a} C_{d_p} A_p \left(\frac{1}{m_p} + \frac{1}{M_p} \right) \,.
+    \frac{\d \mathbf{u}_\text{r}}{\d t} = -K_p \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \quad ; \quad K_p \equiv \frac{1}{2} \rho_\text{a} C_{d_p} A_p \left(\frac{1}{m_p} + \frac{1}{M_p} \right) \,.
 \end{align}
 Note that the $p$ subscripts have been dropped in $\mathbf{u}_\text{r}$ terms for convenience. The $p$ subscript also will be dropped from some other variables later as convenient.
 
 This is the drag equation, which has no solution in terms of elementary functions. Our solution approach first finds a solution neglecting gravity and then adds in a series for the gravity terms. $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ is the decomposition of $\mathbf{u}_\text{r}$. $\mathbf{u}_\text{r}$ and $\mathbf{u}_\text{d}$ both have the same initial condition, $\mathbf{u}_\text{r}(0) \equiv \mathbf{u}_p(0) - \mathbf{U}_p(0) = \mathbf{u}_{p,0} - \mathbf{U}_{p,0}$. $\mathbf{u}_\text{d}$ satisfies the drag equation without gravity, specifically
 \begin{align}
-    \frac{\text{d} \mathbf{u}_\text{d}}{\text{d} t} = -K_p \mathbf{u}_\text{d} |\mathbf{u}_\text{d}| \,.
+    \frac{\d \mathbf{u}_\text{d}}{\d t} = -K_p \mathbf{u}_\text{d} |\mathbf{u}_\text{d}| \,.
 \end{align}
 The solution subject to these initial conditions is
 \begin{align}
@@ -813,37 +813,37 @@ The solution subject to these initial conditions is
 \end{align}
 We decompose can $u_\text{r}$ to find a series solution for $\mathbf{u}_\text{g}$ with Taylor series. The function $\mathbf{u}_\text{g}$ can be written $\mathbf{u_g} = \mathbf{u}_\text{r} - \mathbf{u}_\text{d}$ so the differential equation for $\mathbf{u}_\text{g}$ is
 \begin{align}
-    \frac{\text{d} \mathbf{u}_\text{g}}{\text{d} t} = -K_p (\mathbf{u}_\text{r} |\mathbf{u}_\text{r}| - \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|) + \mathbf{g} \quad ; \quad \mathbf{u}_\text{g}(0) = \mathbf{u}_\text{r}(0) - \mathbf{u}_\text{d}(0) = 0 \,.
+    \frac{\d \mathbf{u}_\text{g}}{\d t} = -K_p (\mathbf{u}_\text{r} |\mathbf{u}_\text{r}| - \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|) + \mathbf{g} \quad ; \quad \mathbf{u}_\text{g}(0) = \mathbf{u}_\text{r}(0) - \mathbf{u}_\text{d}(0) = 0 \,.
 \end{align}
 The Taylor series for $\mathbf{u}_\text{g}$ about $t = 0$ is
 \begin{align}
-    \mathbf{u}_\text{g}(t) = \mathbf{u}_\text{g}(0) + t \frac{\text{d} \mathbf{u}_\text{g}}{\text{d} t}(0) + \frac{t^2}{2} \frac{\text{d}^2 \mathbf{u}_\text{g}}{\text{d} t^2}(0) + \frac{t^3}{6} \frac{\text{d}^3 \mathbf{u}_\text{g}}{\text{d} t^3}(0) + \cdots \,.
+    \mathbf{u}_\text{g}(t) = \mathbf{u}_\text{g}(0) + t \frac{\d \mathbf{u}_\text{g}}{\d t}(0) + \frac{t^2}{2} \frac{\d^2 \mathbf{u}_\text{g}}{\d t^2}(0) + \frac{t^3}{6} \frac{\d^3 \mathbf{u}_\text{g}}{\d t^3}(0) + \cdots \,.
 \end{align}
-The task now is to find the derivatives of $\mathbf{u}_\text{g}$ at $t = 0$. The first derivative, $\text{d} \mathbf{u}_\text{g} / \text{d} t(0)$, can be seen to be $\mathbf{g}$ by inspection, as we would expect from the solution without drag. The second derivative is more complicated, and we find that
+The task now is to find the derivatives of $\mathbf{u}_\text{g}$ at $t = 0$. The first derivative, $\d \mathbf{u}_\text{g} / \d t(0)$, can be seen to be $\mathbf{g}$ by inspection, as we would expect from the solution without drag. The second derivative is more complicated, and we find that
 \begin{align*}
-    \frac{\text{d}^2 \mathbf{u}_\text{g}}{\text{d}^2 t} = -K_p \frac{\text{d}}{\text{d} t}(\mathbf{u}_\text{r} |\mathbf{u}_\text{r}| - \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|) + \frac{\text{d} \mathbf{g}}{\text{d} t} = -K_p \left(|\mathbf{u}_\text{r}| \frac{\text{d} \mathbf{u}_\text{r}}{\text{d} t} + \mathbf{u}_\text{r} \frac{\text{d} |\mathbf{u}_\text{r}|}{\text{d} t} - |\mathbf{u}_\text{d}| \frac{\text{d} \mathbf{u}_\text{d}}{\text{d} t} - \mathbf{u}_\text{d} \frac{\text{d} |\mathbf{u}_\text{d}|}{\text{d} t}\right) \,,
+    \frac{\d^2 \mathbf{u}_\text{g}}{\d^2 t} = -K_p \frac{\d}{\d t}(\mathbf{u}_\text{r} |\mathbf{u}_\text{r}| - \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|) + \frac{\d \mathbf{g}}{\d t} = -K_p \left(|\mathbf{u}_\text{r}| \frac{\d \mathbf{u}_\text{r}}{\d t} + \mathbf{u}_\text{r} \frac{\d |\mathbf{u}_\text{r}|}{\d t} - |\mathbf{u}_\text{d}| \frac{\d \mathbf{u}_\text{d}}{\d t} - \mathbf{u}_\text{d} \frac{\d |\mathbf{u}_\text{d}|}{\d t}\right) \,,
 \end{align*}
 \begin{align}
-    \frac{\text{d}^2 \mathbf{u}_\text{g}}{\text{d}^2 t}(0) = -K_p \left(|\mathbf{u}_\text{r}(0)| \frac{\text{d} \mathbf{u}_\text{r}}{\text{d} t}(0) + \mathbf{u}_\text{r}(0) \frac{\text{d} |\mathbf{u}_\text{r}|}{\text{d} t}(0) - |\mathbf{u}_\text{d}(0)| \frac{\text{d} \mathbf{u}_\text{d}}{\text{d} t}(0) - \mathbf{u}_\text{d}(0) \frac{\text{d} |\mathbf{u}_\text{d}|}{\text{d} t}(0)\right) \,.
+    \frac{\d^2 \mathbf{u}_\text{g}}{\d^2 t}(0) = -K_p \left(|\mathbf{u}_\text{r}(0)| \frac{\d \mathbf{u}_\text{r}}{\d t}(0) + \mathbf{u}_\text{r}(0) \frac{\d |\mathbf{u}_\text{r}|}{\d t}(0) - |\mathbf{u}_\text{d}(0)| \frac{\d \mathbf{u}_\text{d}}{\d t}(0) - \mathbf{u}_\text{d}(0) \frac{\d |\mathbf{u}_\text{d}|}{\d t}(0)\right) \,.
 \end{align}
-The values of $\text{d} \mathbf{u}_\text{r} / \text{d} t(0)$ and $\text{d} \mathbf{u}_\text{d} / \text{d} t(0)$ are
+The values of $\d \mathbf{u}_\text{r} / \d t(0)$ and $\d \mathbf{u}_\text{d} / \d t(0)$ are
 \begin{align*}
-    \frac{\text{d} \mathbf{u}_\text{r}}{\text{d} t}(0) &= -K_p \mathbf{u}_{\text{r},0} |\mathbf{u}_{\text{r},0}| + \mathbf{g} \,, \\
-    \frac{\text{d} \mathbf{u}_\text{d}}{\text{d} t}(0) &= -K_p \mathbf{u}_{\text{r},0} |\mathbf{u}_{\text{r},0}| \,.
+    \frac{\d \mathbf{u}_\text{r}}{\d t}(0) &= -K_p \mathbf{u}_{\text{r},0} |\mathbf{u}_{\text{r},0}| + \mathbf{g} \,, \\
+    \frac{\d \mathbf{u}_\text{d}}{\d t}(0) &= -K_p \mathbf{u}_{\text{r},0} |\mathbf{u}_{\text{r},0}| \,.
 \end{align*}
-% = -K_p \left(\frac{\text{d} \mathbf{u} |\mathbf{u}|}{\text{d} t} - \frac{\text{d} \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|}{\text{d} t} \right)
+% = -K_p \left(\frac{\d \mathbf{u} |\mathbf{u}|}{\d t} - \frac{\d \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|}{\d t} \right)
 The derivative of the L$_2$ norm must now be found. It can be shown that for an arbitrary vector $\mathbf{a}$,
 \begin{align*}
-    \frac{\text{d} |\mathbf{a}|}{\text{d} t} = \left(\frac{\mathbf{a}}{|\mathbf{a}|}\right) \cdot \frac{\text{d} \mathbf{a}}{\text{d} t} \,.
+    \frac{\d |\mathbf{a}|}{\d t} = \left(\frac{\mathbf{a}}{|\mathbf{a}|}\right) \cdot \frac{\d \mathbf{a}}{\d t} \,.
 \end{align*}
 The derivatives of the vector norms can be written as
 \begin{align}
-    \frac{\text{d} |\mathbf{u}_\text{r}|}{\text{d} t} &= \left(\frac{\mathbf{u}_\text{r}}{|\mathbf{u}_\text{r}|}\right) \cdot \frac{\text{d} \mathbf{u}_\text{r}}{\text{d} t} = \left(\frac{\mathbf{u}_{\text{r},0}}{|\mathbf{u}_{\text{r},0}|}\right) \cdot (-K_p \mathbf{u}_{\text{r},0} |\mathbf{u}_{\text{r},0}| + \mathbf{g}) \,,  \\
-    \frac{\text{d} |\mathbf{u}_\text{d}|}{\text{d} t} &= \left(\frac{\mathbf{u}_\text{d}}{|\mathbf{u}_\text{d}|}\right) \cdot \frac{\text{d} \mathbf{u}_\text{d}}{\text{d} t} = \left(\frac{\mathbf{u}_{\text{r},0}}{|\mathbf{u}_{\text{r},0}|}\right) \cdot (-K_p \mathbf{u}_{\text{r},0} |\mathbf{u}_{\text{r},0}|) \,.
+    \frac{\d |\mathbf{u}_\text{r}|}{\d t} &= \left(\frac{\mathbf{u}_\text{r}}{|\mathbf{u}_\text{r}|}\right) \cdot \frac{\d \mathbf{u}_\text{r}}{\d t} = \left(\frac{\mathbf{u}_{\text{r},0}}{|\mathbf{u}_{\text{r},0}|}\right) \cdot (-K_p \mathbf{u}_{\text{r},0} |\mathbf{u}_{\text{r},0}| + \mathbf{g}) \,,  \\
+    \frac{\d |\mathbf{u}_\text{d}|}{\d t} &= \left(\frac{\mathbf{u}_\text{d}}{|\mathbf{u}_\text{d}|}\right) \cdot \frac{\d \mathbf{u}_\text{d}}{\d t} = \left(\frac{\mathbf{u}_{\text{r},0}}{|\mathbf{u}_{\text{r},0}|}\right) \cdot (-K_p \mathbf{u}_{\text{r},0} |\mathbf{u}_{\text{r},0}|) \,.
 \end{align}
 Once all of this is written out and expanded, the second derivative of $\mathbf{u}_\text{g}$ at $t = 0$ is
 \begin{align}
-    \frac{\text{d}^2 \mathbf{u}_\text{g}}{\text{d}^2 t}(0) = -K_p \left[\mathbf{u}_{\text{r},0} \left(\frac{\mathbf{u}_{\text{r},0} \cdot \mathbf{g}}{|\mathbf{u}_{\text{r},0}|}\right) + \mathbf{g} |\mathbf{u}_{\text{r},0}|\right] = - \beta_p \left[\mathbf{u}_{\text{r},0} \left(\frac{\mathbf{u}_{\text{r},0} \cdot \mathbf{g}}{|\mathbf{u}_{\text{r},0}|^2}\right) + \mathbf{g}\right] \,.
+    \frac{\d^2 \mathbf{u}_\text{g}}{\d^2 t}(0) = -K_p \left[\mathbf{u}_{\text{r},0} \left(\frac{\mathbf{u}_{\text{r},0} \cdot \mathbf{g}}{|\mathbf{u}_{\text{r},0}|}\right) + \mathbf{g} |\mathbf{u}_{\text{r},0}|\right] = - \beta_p \left[\mathbf{u}_{\text{r},0} \left(\frac{\mathbf{u}_{\text{r},0} \cdot \mathbf{g}}{|\mathbf{u}_{\text{r},0}|^2}\right) + \mathbf{g}\right] \,.
 \end{align}
 This has a term parallel to the initial relative velocity and a term parallel to the gravitational acceleration vector.
 
