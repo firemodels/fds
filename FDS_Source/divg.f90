@@ -44,12 +44,17 @@ TYPE(FACET_TYPE), POINTER :: FACE=>NULL()
 TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
 REAL(EB), PARAMETER :: ADVECTION_EPS=1.E-6_EB
  
+! Check whether to skip this routine
+
 IF (SOLID_PHASE_ONLY) RETURN
 
 IF (EVACUATION_ONLY(NM)) THEN
    CALL DIVERGENCE_PART_1_EVAC(T,NM)
    RETURN
 ENDIF
+
+! Start the clock and set the pointers
+
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
  
@@ -453,30 +458,36 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
    ENDDO
 END SELECT CYLINDER3
 
-! New form of divergence expression starts here
+! Compute and store rho*h_s
 
-RHO_H_S_P=>WORK1
-IF (N_TRACKED_SPECIES > 0) THEN
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
+IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+
+   RHO_H_S_P=>WORK1
+   IF (N_TRACKED_SPECIES > 0) THEN
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+               RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-ELSE
-   ZZ_GET = 0._EB
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
+   ELSE
+      ZZ_GET = 0._EB
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+               RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDIF
+
 ENDIF
+
+! Point to the appropriate velocity components
 
 IF (PREDICTOR) THEN
    UU=>U
@@ -488,16 +499,22 @@ ELSE
    WW=>WS
 ENDIF
 
-CALL ENTHALPY_ADVECTION ! computes U_DOT_DEL_RHO_H_S (contained below)
+! Compute U_DOT_DEL_RHO_H_S and add to other enthalpy equation source terms
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DP(I,J,K) = DP(I,J,K) - U_DOT_DEL_RHO_H_S(I,J,K)
+IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+
+   CALL ENTHALPY_ADVECTION 
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            DP(I,J,K) = DP(I,J,K) - U_DOT_DEL_RHO_H_S(I,J,K)
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
+
+ENDIF
 
 ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
 
@@ -511,31 +528,35 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
+! Compute mass flux for density equation, U dot grad rho
 
-CALL DENSITY_ADVECTION ! compute mass flux for density equation
-SM0 => SPECIES_MIXTURE(0)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         IF (CONSTANT_SPECIFIC_HEAT)   CYCLE
-         ZZ_GET = 0._EB
-         CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-         DP(I,J,K) = DP(I,J,K) - ( SM0%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K))* &
-              ( U_DOT_DEL_RHO(I,J,K) )/RHOP(I,J,K)
+CALL DENSITY_ADVECTION
+
+! Compute (1/rho) * Sum( (Wbar/W_alpha-h_s,alpha/cp*T) (del dot rho*D del Z_n - u dot del rho*Z_n)
+
+IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+   SM0 => SPECIES_MIXTURE(0)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ZZ_GET = 0._EB
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+            DP(I,J,K) = DP(I,J,K) - ( SM0%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K))*( U_DOT_DEL_RHO(I,J,K) )/RHOP(I,J,K)
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
+ENDIF
+
 DO N=1,N_TRACKED_SPECIES
    CALL SPECIES_ADVECTION ! compute mass flux for species transport equation
+   IF (CONSTANT_SPECIFIC_HEAT) CYCLE
    SM  => SPECIES_MIXTURE(N)
    RCON_DIFF = SM%RCON-SM0%RCON
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (CONSTANT_SPECIFIC_HEAT)   CYCLE
             CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)            
             DP(I,J,K) = DP(I,J,K) + (RCON_DIFF/RSUM(I,J,K) - HDIFF*R_H_G(I,J,K))* &
                  ( DEL_RHO_D_DEL_Z(I,J,K,N) - U_DOT_DEL_RHO_Z(I,J,K) )/RHOP(I,J,K)
@@ -784,7 +805,9 @@ TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 
 CONTAINS
 
+
 SUBROUTINE ENTHALPY_ADVECTION
+
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HX=>NULL(),HY=>NULL(),HZ=>NULL(),DV=>NULL()
 REAL(EB) :: DR,B
 
@@ -1059,14 +1082,20 @@ ENDDO
 
 END SUBROUTINE ENTHALPY_ADVECTION
 
+
 SUBROUTINE DENSITY_ADVECTION
+
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DV=>NULL()
 REAL(EB) :: DR,B
 
 !FX(:,:,:,0)=1.E20_EB
 !FY(:,:,:,0)=1.E20_EB
 !FZ(:,:,:,0)=1.E20_EB
-U_DOT_DEL_RHO=>WORK8; U_DOT_DEL_RHO=0._EB
+
+IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+   U_DOT_DEL_RHO=>WORK8 
+   U_DOT_DEL_RHO=0._EB
+ENDIF
 
 LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
@@ -1263,76 +1292,97 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    SELECT CASE(IOR)
       CASE( 1)
-         UN = UU(II,JJ,KK)
-      CASE(-1)
-         UN = UU(II-1,JJ,KK)
-      CASE( 2)
-         UN = VV(II,JJ,KK)
-      CASE(-2)
-         UN = VV(II,JJ-1,KK)
-      CASE( 3)
-         UN = WW(II,JJ,KK)
-      CASE(-3)
-         UN = WW(II,JJ,KK-1)
-   END SELECT
-
-   ! In case of interpolated boundary, use the original velocity, not the averaged value
-
-   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
-
-   SELECT CASE(IOR)
-      CASE( 1)
          FX(II,JJ,KK,0)   = RHOP(IIG,JJG,KKG) ! zero out DU at wall
-         DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
       CASE(-1)
          FX(II-1,JJ,KK,0) = RHOP(IIG,JJG,KKG)
-         DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
       CASE( 2)
          FY(II,JJ,KK,0)   = RHOP(IIG,JJG,KKG)
-         DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
       CASE(-2)
          FY(II,JJ-1,KK,0) = RHOP(IIG,JJG,KKG)
-         DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
       CASE( 3)
          FZ(II,JJ,KK,0)   = RHOP(IIG,JJG,KKG)
-         DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
       CASE(-3)
          FZ(II,JJ,KK-1,0) = RHOP(IIG,JJG,KKG)
-         DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
    END SELECT
+
+   ! Correct U_DOT_DEL_RHO at the boundaries
+
+   IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+
+      SELECT CASE(IOR)
+         CASE( 1)
+            UN = UU(II,JJ,KK)
+         CASE(-1)
+            UN = UU(II-1,JJ,KK)
+         CASE( 2)
+            UN = VV(II,JJ,KK)
+         CASE(-2)
+            UN = VV(II,JJ-1,KK)
+         CASE( 3)
+            UN = WW(II,JJ,KK)
+         CASE(-3)
+            UN = WW(II,JJ,KK-1)
+      END SELECT
+   
+      ! In case of interpolated boundary, use the original velocity, not the averaged value
+   
+      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+   
+      SELECT CASE(IOR)
+         CASE( 1)
+            DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         CASE(-1)
+            DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+         CASE( 2)
+            DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         CASE(-2)
+            DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+         CASE( 3)
+            DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         CASE(-3)
+            DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+      END SELECT
+
+   ENDIF
       
 ENDDO WALL_LOOP
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+! Compute U_DOT_DEL_RHO at internal cells
 
-         DU_P = (FX(I,J,K,0)   - RHOP(I,J,K))*UU(I,J,K)
-         DU_M = (FX(I-1,J,K,0) - RHOP(I,J,K))*UU(I-1,J,K)
-         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDX(I)
-
-         DU_P = (FY(I,J,K,0)   - RHOP(I,J,K))*VV(I,J,K)
-         DU_M = (FY(I,J-1,K,0) - RHOP(I,J,K))*VV(I,J-1,K)
-         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDY(J)
-
-         DU_P = (FZ(I,J,K,0)   - RHOP(I,J,K))*WW(I,J,K)
-         DU_M = (FZ(I,J,K-1,0) - RHOP(I,J,K))*WW(I,J,K-1)
-         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDZ(K)
-
-      ENDDO
-   ENDDO 
-ENDDO
+IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+   
+            DU_P = (FX(I,J,K,0)   - RHOP(I,J,K))*UU(I,J,K)
+            DU_M = (FX(I-1,J,K,0) - RHOP(I,J,K))*UU(I-1,J,K)
+            U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDX(I)
+   
+            DU_P = (FY(I,J,K,0)   - RHOP(I,J,K))*VV(I,J,K)
+            DU_M = (FY(I,J-1,K,0) - RHOP(I,J,K))*VV(I,J-1,K)
+            U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDY(J)
+   
+            DU_P = (FZ(I,J,K,0)   - RHOP(I,J,K))*WW(I,J,K)
+            DU_M = (FZ(I,J,K-1,0) - RHOP(I,J,K))*WW(I,J,K-1)
+            U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDZ(K)
+   
+         ENDDO
+      ENDDO 
+   ENDDO
+ENDIF
 
 END SUBROUTINE DENSITY_ADVECTION
 
+
 SUBROUTINE SPECIES_ADVECTION
+
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DV=>NULL()
 REAL(EB) :: DR,B
 
@@ -1350,7 +1400,11 @@ ENDDO
 FX(:,:,:,N)=1.E20_EB
 FY(:,:,:,N)=1.E20_EB
 FZ(:,:,:,N)=1.E20_EB
-U_DOT_DEL_RHO_Z=>WORK7; U_DOT_DEL_RHO_Z=0._EB
+
+IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+   U_DOT_DEL_RHO_Z=>WORK7 
+   U_DOT_DEL_RHO_Z=0._EB
+ENDIF
 
 LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
@@ -1547,72 +1601,89 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    SELECT CASE(IOR)
       CASE( 1)
-         UN = UU(II,JJ,KK)
-      CASE(-1)
-         UN = UU(II-1,JJ,KK)
-      CASE( 2)
-         UN = VV(II,JJ,KK)
-      CASE(-2)
-         UN = VV(II,JJ-1,KK)
-      CASE( 3)
-         UN = WW(II,JJ,KK)
-      CASE(-3)
-         UN = WW(II,JJ,KK-1)
-   END SELECT
-
-   ! In case of interpolated boundary, use the original velocity, not the averaged value
-
-   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
-
-   SELECT CASE(IOR)
-      CASE( 1)
          FX(II,JJ,KK,N)   = RHO_Z_P(IIG,JJG,KKG) ! zero out DU at wall
-         DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
       CASE(-1)
          FX(II-1,JJ,KK,N) = RHO_Z_P(IIG,JJG,KKG)
-         DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
       CASE( 2)
          FY(II,JJ,KK,N)   = RHO_Z_P(IIG,JJG,KKG)
-         DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
       CASE(-2)
          FY(II,JJ-1,KK,N) = RHO_Z_P(IIG,JJG,KKG)
-         DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
       CASE( 3)
          FZ(II,JJ,KK,N)   = RHO_Z_P(IIG,JJG,KKG)
-         DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
       CASE(-3)
          FZ(II,JJ,KK-1,N) = RHO_Z_P(IIG,JJG,KKG)
-         DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
    END SELECT
+
+   ! Correct U_DOT_DEL_RHO_Z at the boundary
+
+   IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+
+      SELECT CASE(IOR)
+         CASE( 1)
+            UN = UU(II,JJ,KK)
+         CASE(-1)
+            UN = UU(II-1,JJ,KK)
+         CASE( 2)
+            UN = VV(II,JJ,KK)
+         CASE(-2)
+            UN = VV(II,JJ-1,KK)
+         CASE( 3)
+            UN = WW(II,JJ,KK)
+         CASE(-3)
+            UN = WW(II,JJ,KK-1)
+      END SELECT
+   
+      ! In case of interpolated boundary, use the original velocity, not the averaged value
+   
+      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+   
+      SELECT CASE(IOR)
+         CASE( 1)
+            DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         CASE(-1)
+            DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+         CASE( 2)
+            DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         CASE(-2)
+            DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+         CASE( 3)
+            DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         CASE(-3)
+            DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+      END SELECT
+
+   ENDIF
       
 ENDDO WALL_LOOP
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-
-         DU_P = (FX(I,J,K,N)   - RHO_Z_P(I,J,K))*UU(I,J,K)
-         DU_M = (FX(I-1,J,K,N) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
-         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDX(I)
-
-         DU_P = (FY(I,J,K,N)   - RHO_Z_P(I,J,K))*VV(I,J,K)
-         DU_M = (FY(I,J-1,K,N) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
-         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDY(J)
-
-         DU_P = (FZ(I,J,K,N)   - RHO_Z_P(I,J,K))*WW(I,J,K)
-         DU_M = (FZ(I,J,K-1,N) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
-         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDZ(K)
-
-      ENDDO
-   ENDDO 
-ENDDO
+IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+   
+            DU_P = (FX(I,J,K,N)   - RHO_Z_P(I,J,K))*UU(I,J,K)
+            DU_M = (FX(I-1,J,K,N) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
+            U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDX(I)
+   
+            DU_P = (FY(I,J,K,N)   - RHO_Z_P(I,J,K))*VV(I,J,K)
+            DU_M = (FY(I,J-1,K,N) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
+            U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDY(J)
+   
+            DU_P = (FZ(I,J,K,N)   - RHO_Z_P(I,J,K))*WW(I,J,K)
+            DU_M = (FZ(I,J,K-1,N) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
+            U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDZ(K)
+   
+         ENDDO
+      ENDDO 
+   ENDDO
+ENDIF
 
 END SUBROUTINE SPECIES_ADVECTION
 

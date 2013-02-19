@@ -4758,7 +4758,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       CALL SHUTDOWN(MESSAGE)
    ENDIF   
    
-   IF (ANY(MASS_FLUX>0._EB) .OR. ANY(MASS_FRACTION>0._EB)) THEN
+   IF (ANY(MASS_FLUX/=0._EB) .OR. ANY(MASS_FRACTION>0._EB)) THEN
       IF (SPEC_ID(1)=='null') THEN
          WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF:',TRIM(SF%ID),&
                                    '. Must define SPEC_ID when using MASS_FLUX or MASS_FRACTION'
