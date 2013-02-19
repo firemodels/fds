@@ -4,13 +4,13 @@
 \label{chapter:combustion}
 
 \label{combustionsection}
-The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$ in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in cell average species concentration over a time step for a single grid cell to obtain the mean chemical source term,
+The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in cell average species concentration over a time step for a single grid cell to obtain the mean chemical source term,
 \begin{equation}\label{eq:m_tprime_alpha}
 \dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\overline{Y}_\alpha(\delta t) - \overline{Y}_\alpha(0)}{\delta t}
 \end{equation}
 Here the overbar is used to denote a cell average since later a subgrid distribution of composition is considered.  The integration of the mean chemical source term is time split from the integration of the transport equation such that each cell may be thought of as a partially-stirred batch reactor.  As we discuss below, given the chemical composition, cell temperature, and extent of mixing at the start of the time step, the final cell composition depends on the rates of chemical kinetics and turbulent mixing.
 
-The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and typically the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).  The heat release rate is found by summing the lumped species mass production rates times their respective heats of formation:
+The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and, typically, the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).  The heat release rate is found by summing the lumped species mass production rates times their respective heats of formation:
 \begin{equation}\label{eq:q_tprime}
 \dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}_\alpha^{\prime\prime\prime} \Delta H_{f,\alpha}
 \end{equation}
@@ -219,7 +219,7 @@ The simplest possible mixing model is the interaction by exchange with the mean 
 \begin{equation}\label{eq:iem}
 \frac{\d Y_\alpha}{\d t} = \frac{1}{\tau_{mix}}(\overline{Y}_\alpha - Y_\alpha)
 \end{equation}
-where $\tau_{mix}$ is the characteristic mixing time for the cell.  This time scale is discussed below in Section \ref{sec:reac_time_scale}.  For now, simply note that small values of $\tau_{mix}$ correspond to high turbulence intensity (fast mixing) and visa versa.
+where $\tau_{mix}$ is the characteristic mixing time for the cell.  This time scale is discussed below in Section \ref{sec:reac_time_scale}.  For now, simply note that small values of $\tau_{mix}$ correspond to high turbulence intensity (fast mixing) and vice versa.
 
 \subsubsection{A Simplified Mixing Environment}
 
@@ -487,7 +487,7 @@ extinction is still an area of active research in the combustion
 community.
 
 Simple empirical rules can be used to predict local
-extinction based on the species and temperature present in the flame sheet.  The default FDS extinction model consists of two parts based on the critical flame temperature \cite{SFPE:Beyler}. The first, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second part the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur. If either criteria is failed, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. This is done in the following steps:
+extinction based on the species and temperature present in the flame sheet.  The default FDS extinction model consists of two parts based on the critical flame temperature \cite{SFPE:Beyler}. The first, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second part is the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur. If either criteria is failed, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. This is done in the following steps for the limiting flame temperature:
 
 \begin{enumerate}
 \item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
