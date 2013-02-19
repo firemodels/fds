@@ -135,8 +135,8 @@ and returns the Planck mean absorption coefficient, $\kappa_n$, for each spectra
 \displaystyle\sum_{i}^{\rm species} \bar{\kappa}_i(\om,T) \, P_i \; d\om}
 \end{equation}
 where $\om$ represents the wavenumber, in units of cm$^{\rm -1}$,
-$P_i$ is the partial pressure of the $i^{th}$ participating species, in units of ${\rm atm}$, and
-$\bar{\kappa}_i$ is the spectral absorption coefficient of the $i^{th}$ participating species, in units of
+$P_i$ is the partial pressure of the $i$th participating species, in units of ${\rm atm}$, and
+$\bar{\kappa}_i$ is the spectral absorption coefficient of the $i$th participating species, in units of
 ${\rm atm^{-1}cm^{-2}}$. The Planck function, $I^o_{b,\om}(T)$, represents the
 intensity of blackbody radiation at temperature, $T$, and wavenumber, $\om$:
 \be
@@ -172,7 +172,7 @@ for the following fuels:
 \end{itemize}
 These new data have been obtained through FTIR measurements for wavenumbers between 700~cm$\rm ^{-1}$ and 4000~cm$\rm ^{-1}$.
 A useful quantity to compare the relative importance of the different IR bands is provided by the integrated band intensity,
-$\alpha_i$, defined for the $i^{th}$ participating species as:
+$\alpha_i$, defined for the $i$th participating species as:
 \be
   \alpha_i(T) = \displaystyle\int_{\om_{\min}}^{\om_{\max}} \bar{\kappa}_i(T) \; d\om
 \ee
@@ -333,7 +333,7 @@ Toluene has only one plane of symmetry. It belongs to the point group $C_{s}$. T
    \centering
    \caption{Spectral bands of $\rm C_7H_8$ included in RADCAL.}
    \vspace{0.1in}
-   \label{Table::C7H8}.
+   \label{Table::C7H8}
    \begin{tabular}{|c|c|c|c|c|c|}
     \hline
     Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=300 \; {\rm K})$\\
@@ -427,7 +427,7 @@ and to be equally spaced from each other. In this model, the spectral
 transmissivity, $\bar{\tau}_{\om}$, of a homogeneous isothermal column filled
 with only some gas of species $i$,
 at a total pressure $P_T$ and with an optical pathlength $U = P_i L$ ($L$
-being the column physical length and $P_i$ the $i^{th}$ participating radiating
+being the column physical length and $P_i$ the $i$th participating radiating
 species partial pressure), is given by the expression:
 \be\label{eq::Elsasser}
     \bar{\tau}_{\om} = 1- \erf \left( \frac{\sqrt{\pi} \, \bar{\kappa}_i \, U }{\displaystyle \sqrt{1 + \frac{\pi \, \bar{\kappa}_i \, U}{4 \, \bar{\gamma}_i \, P_T}}}  \right)
@@ -440,7 +440,7 @@ distribution. For this model, the spectral transmissivity is given by the expres
 \be\label{eq::Goody}
     \bar{\tau}_{\om} = \exp\left(-\frac{\bar{\kappa}_i \, U} {\displaystyle \sqrt{1+\frac{\bar{\kappa}_i \, U}{4 \, \bar{\gamma}_i \, P_T}}}\right)
 \ee
-For both models, the two narrow band spectral quantities of the $i^{th}$ species ($\bar{\kappa}_i$ and
+For both models, the two narrow band spectral quantities of the $i$th species ($\bar{\kappa}_i$ and
 $\bar{\gamma}_i$) are obtained either from line-by-line calculations or by fitting
 experimental data.
 
