@@ -5948,7 +5948,7 @@ Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate
 fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within
 a given mesh cell at a given time step. Each computational cell can be thought of as a batch reactor where only the mixed composition can react. The variable, $\zeta(t)$, denotes the unmixed fraction, ranging from zero to one and governed by the equation:
 \begin{equation}
-\frac{\mbox{d}\zeta}{\mbox{d}t}=\frac{-\zeta}{\tau_{mix}}
+\frac{\d \zeta}{\d t}=\frac{-\zeta}{\tau_{mix}}
 \label{eq:edc_mix}
 \end{equation}
 Here, $\tau_{mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta=1$ by default, and the combustion is considered non-premixed. If the cell is initially mixed, $\zeta=0$, and the combustion is considered premixed. You can set the amount of mixing in each cell at the beginning of every time step using the parameter {\ct INITIAL\_UNMIXED\_FRACTION} on the {\ct MISC} line.
@@ -6262,7 +6262,7 @@ In this case we explicitly define all primitive species:
 \end{lstlisting}
 If $\hat{C}_{\alpha}$ represents the concentration of species $\alpha$ that can react with a rate constant, $k$, then the rate expression for the fuel, $\mathrm{C_3H_8}$, is:
 \begin{equation}\label{eq:finite_rate}
-\frac{\mbox{d}\hat{C}_{\mathrm{C_3H_8}}}{\mbox{d}t}= -k\; \prod \hat{C}_{\alpha}\,^{N_S}
+\frac{\d \hat{C}_{\mathrm{C_3H_8}}}{\d t}= -k\; \prod \hat{C}_{\alpha}\,^{N_S}
 \end{equation}
 where the rate constant is defined as:
 \begin{equation}\label{eq:reac_rate}
@@ -6278,7 +6278,7 @@ Note that {\ct A} and {\ct E} can be defined using a {\ct RAMP} as a function of
 
 If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), the rate expression for the single-step propane reaction defined by Eq.~(\ref{eq:propane_1step}) becomes:
 \begin{equation}\label{eq:reac_rate2}
-\frac{\mbox{d}\hat{C}_{\mathrm{C_3H_8}}}{\mbox{d}t} = -8.6 \times 10^{11} \; T^{0} \; e^{-125520/RT} \; \hat{C}_{\mathrm{C_3H_8}}\,^{0.1} \; \hat{C}_{\mathrm{O_2}}\,^{1.65}
+\frac{\d \hat{C}_{\mathrm{C_3H_8}}}{\d t} = -8.6 \times 10^{11} \; T^{0} \; e^{-125520/RT} \; \hat{C}_{\mathrm{C_3H_8}}\,^{0.1} \; \hat{C}_{\mathrm{O_2}}\,^{1.65}
 \end{equation}
 and the resulting {\ct REAC} line is:
 
