@@ -450,10 +450,10 @@ The change in concentration for species $\alpha$ within the mixed reactor zone i
 \end{equation}
 FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
 
-It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentration (mol/L) and mass fractions (kg/kg) are related by $C_{\alpha}=1000\,Y_{\alpha} \rho/W_{\alpha}$.
+It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentration (mol/L) and mass fractions (kg/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/W_{\alpha}$.
 To simplify the calculations within FDS, density and molecular weight are pulled out of the product of the concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and calculated with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
-A^{\prime}_{i} = 1000\;A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}\,^{-a_{\alpha,i}}
+A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}\,^{-a_{\alpha,i}}
 \end{equation}
 Using $A_i^{\prime}$, the rate becomes:
 \begin{equation}\label{eq:finite_rate_fin}
