@@ -2093,12 +2093,7 @@ mass of the three combustion products. The figure compares the simple chemistry 
 
 \section{Reaction Rates (\texorpdfstring{\bf reactionrate}{reactionrate})}
 
-This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. In the infinite-rate case, the rate becomes limited by the species concentrations of the reactants that have mixed. For finite-rate reactions, the rate is dependent on factors such as local species concentration and temperature:
-
-\begin{equation}\label{eq:Arrheniusratemode}
-\frac{\d \phi_\F}{\d t} = -A_{mod} \rho^{\sum (a_{\alpha}) -1} \; \prod \left(Y_{\alpha}^{a_{\alpha}} \right) T^n \; e^{-E/RT} \;\;\; A_{mod} = A \prod \left(W_{\alpha}^{-a_{\alpha}} \right)
-\end{equation}
-More detailed discussion on the combustion routines can be found in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
+This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. For an infinite-rate reaction, the rate is limited by the minimum reactant concentration. For a finite-rate reaction, the rate is dependent on factors such as local species concentration and temperature. Detailed discussion on the combustion routines can be found in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 \subsection{Mixing-Controlled Reactions (\texorpdfstring{\bf reactionrate\_EDC}{reactionrate\_EDC})}
 
