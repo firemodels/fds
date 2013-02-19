@@ -15,7 +15,7 @@ The combustion routine also returns the heat release for per unit volume, $\dot{
 \dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}_\alpha^{\prime\prime\prime} \Delta H_{f,\alpha}
 \end{equation}
 
-The remainder of this chapter consists of three main topics.  The first is a discussion of our ``lumped species'' approach, which aims to reduce the computational burden of the full chemical system by combining species into groups that transport and react together.  Next, we discuss our approach to describing the chemical mixing process.  We treat each computational cell as a partially-stirred batch reactor with a characteristic mixing time.  The model for the mixing time is discussed.  Once reactants are mixed, the reaction rate depends on kinetics.  The last part of this chapter discusses available kinetic mechanisms within FDS, from infinitely fast chemistry (default) to Arrhenius rate laws and reversible reactions.
+The remainder of this chapter consists of three main topics.  The first is a discussion of our \emph{lumped species} approach, which aims to reduce the computational burden of the full chemical system by combining species into groups that transport and react together.  Next, we discuss our approach to describing the chemical mixing process.  We treat each computational cell as a partially-stirred batch reactor with a characteristic mixing time.  The model for the mixing time is discussed.  Once reactants are mixed, the reaction rate depends on kinetics.  The last part of this chapter discusses available kinetic mechanisms within FDS, from infinitely fast chemistry (default) to Arrhenius rate laws and reversible reactions.
 
 \section{Lumped Species Approach}
 In the typical FDS problem we consider the simple reaction:
@@ -28,7 +28,7 @@ In a simple hydrocarbon reaction, the reactants are the fuel, oxygen, and nitrog
 \begin{equation}\label{eq:prim_vector}
 \mathbf{Y} = [Y_{\mathrm{CH}_4}\, \, Y_{\mathrm{O}_2}\, \, Y_{\mathrm{N}_2}\, \, Y_{\mathrm{CO}_2}\, \, Y_{\mathrm{H}_2\mathrm{O}}]^T
 \end{equation}
-Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, ``Air'' can be assumed to be a lumped species composed of 21\% O$_2$ and 79\% N$_2$ by volume. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together.
+Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, Air can be assumed to be a lumped species composed of 21\% O$_2$ and 79\% N$_2$ by volume. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together.
 
 In terms of primitive species for a one-step methane reaction, Eq.~(\ref{eq:simple}) may be written as
 \begin{equation}\label{eq:lumped_methane}
@@ -38,7 +38,7 @@ This is equivalent to
 \begin{equation}\label{eq:lumped_expand}
 \mathrm{9.52\underbrace{(0.21\,\mbox{O}_2+.79\,\mbox{N}_2)}_\text{Background,~$Z_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~$Z_1$} \rightarrow 10.52\underbrace{(0.095\,\mbox{CO}_2+0.19\,\mbox{H}_2\mbox{O}+0.715\,\mbox{N}_2)}_\text{Products,~$Z_2$}}
 \end{equation}
-In Eq.~(\ref{eq:lumped_expand}), 9.52 moles of the lumped species ``Background'' react with 1 mole of lumped species ``Fuel'', to produce 10.52 moles of lumped species ``Products''.  Notice that the primitive species have been grouped by volume fraction into lumped species and the lumped species stoichiometric coefficients are the sum of the primitive species coefficients from Eq.~(\ref{eq:lumped_methane}).
+In Eq.~(\ref{eq:lumped_expand}), 9.52 moles of the lumped species Background react with 1 mole of lumped species Fuel, to produce 10.52 moles of lumped species Products.  Notice that the primitive species have been grouped by volume fraction into lumped species and the lumped species stoichiometric coefficients are the sum of the primitive species coefficients from Eq.~(\ref{eq:lumped_methane}).
 
 \paragraph{Remark}
 In Eq.~(\ref{eq:lumped_expand}), 9.52 $\times$ 0.21 is only approximately equal to 2. In practice the atom balance requires machine precision. To alleviate this issue, FDS internally normalizes the lumped species volume fractions and makes any necessary adjustments to the specified lumped stoichiometric coefficients.
@@ -492,7 +492,7 @@ extinction based on the species and temperature present in the flame sheet.  The
 \begin{enumerate}
 \item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
 
-\be \hat{Y}_{F}(n) = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$, in reaction $n$} \ee
+\be \Delta \hat{Y}_{F}(n) = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$, in reaction $n$} \ee
 If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
 \item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
 \item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
@@ -526,4 +526,6 @@ heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses a less rest
 \dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3
 \end{equation}
 The value of 200~kW/m$^2$ is an empirically derived upper bound on the heat release rate per unit area of flame sheet and $\delta x$ is the characteristic cell size (m). Typically, this bound only affects fires whose value of $Q^*$ is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
+
+The upper limit on the heat release rate per unit volume inherently places a limiter on the time integration. If the local heat release rate per unit volume reaches or exceeds the limiting value in a time step, the heat release rate per unit volume is set to the limiting value. This freezes the chemical reactions. The change in species is then scaled based on the ratio of the limiting value to the calculated heat release rate per unit volume. The new values for heat release rate per unit volume and species concentrations are set at their respective limits for the remainder of the time step. 
 
