@@ -770,7 +770,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%SPECIES_BC_INDEX)
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
    
       SUM_MASSFLUX_LOOP: DO N=0,N_TRACKED_SPECIES
-         IF (SF%MASS_FLUX(N) > 0._EB) THEN  ! Use user-specified ramp-up of mass flux
+         IF (ABS(SF%MASS_FLUX(N)) > TWO_EPSILON_EB) THEN  ! Use user-specified ramp-up of mass flux
             IF (ABS(T_IGN-T_BEGIN)< SPACING(ONE_D%T_IGN) .AND. SF%RAMP_INDEX(N)>=1) THEN
                TSI = T + DT
             ELSE
