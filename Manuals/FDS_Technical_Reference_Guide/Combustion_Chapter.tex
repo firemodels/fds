@@ -217,7 +217,7 @@ FDS employs a \emph{time splitting} scheme (see Sections \ref{sec:solution_proce
 
 The simplest possible mixing model is the interaction by exchange with the mean (IEM) model.  IEM states that, in the abscense of chemical reaction, the local mass fractions obey the following ODE:
 \begin{equation}\label{eq:iem}
-\frac{\mbox{d}Y_\alpha}{\mbox{d}t} = \frac{1}{\tau_{mix}}(\overline{Y}_\alpha - Y_\alpha)
+\frac{\d Y_\alpha}{\d t} = \frac{1}{\tau_{mix}}(\overline{Y}_\alpha - Y_\alpha)
 \end{equation}
 where $\tau_{mix}$ is the characteristic mixing time for the cell.  This time scale is discussed below in Section \ref{sec:reac_time_scale}.  For now, simply note that small values of $\tau_{mix}$ correspond to high turbulence intensity (fast mixing) and visa versa.
 
@@ -244,7 +244,7 @@ As shown by Pope \cite{Pope:2000}, the PDF evolves by the Fokker-Planck equation
 \end{equation}
 The term on the right in angled brackets is a conditional diffusion term which requires closure.  Using IEM, Eq.~(\ref{eq:iem}), as the model for this term, Eq.~(\ref{eq:fokker-planck}) implies that the unmixed fraction, $\zeta$, is governed by the following simple ODE\footnote{This is a good exercise for the reader.  Hint: Just consider the evolution of the second term in Eq.~(\ref{eq:pdf}) and utilize Appendix C in Pope \cite{Pope:2000}.}:
 \begin{equation}\label{eq:zeta}
-\frac{\mbox{d}\zeta}{\mbox{d}t}=-\frac{\zeta}{\tau_{mix}}
+\frac{\d \zeta}{\d t}=-\frac{\zeta}{\tau_{mix}}
 \end{equation}
 with the solution
 \begin{equation}\label{eq:zeta_soln}
@@ -427,7 +427,7 @@ a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
 \end{equation}
 The rate expression for species A with a concentration of $C_{\mbox{\scriptsize A}}$ in mol/L and rate constant $k$ is:
 \begin{equation}\label{eq:generic_rate}
-\frac{\mbox{d}C_{\mbox{\scriptsize A}}}{\mbox{d}t}= -k\; C_{\mbox{\scriptsize A}}\,^{a}\; C_{\mbox{\scriptsize B}}\,^{b}
+\frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}\,^{a}\; C_{\mbox{\scriptsize B}}\,^{b}
 \end{equation}
 
 In this section, it is understood that only the mixed reactor zone compositions participate in the rate expressions (thus $\hat{\,}$ notation is suppressed). Consider a set of $N_r$ reactions with fuel $F$. The reaction rate (mol/L/s) for $F$ in the $i$th reaction is:
@@ -436,7 +436,7 @@ r_{F,i}= -k_{i}\; \prod C_{\alpha}\,^{a_{\alpha,i}}
 \end{equation}
 For the $i$th Arrhenius reaction, the rate constant, $k_i$, depends on the temperature, $T$, the temperature exponent, $n_i$, the pre-exponential factor, $A_i$, and the activation energy, $E_i$:
 \begin{equation}\label{eq:rate_cons}
-k_i = A_i\;T^{n_i}\;e^{-E_i/RT}
+k_i = A_i\;T^{n_i}\;\mathrm{e}^{-E_i/RT}
 \end{equation}
 Note that the units of $E$ are J/mol and units of $A$ are dependent upon the order of the reaction and take the appropriate form to ensure the units of Eq.~(\ref{eq:rate_f}) are correct.
 
@@ -446,7 +446,7 @@ r_{\alpha,i}= \left(\frac{\nu_{\alpha,i}}{\nu_{F,i}}\right)\,r_{F,i}
 \end{equation}
 The change in concentration for species $\alpha$ within the mixed reactor zone is then:
 \begin{equation}\label{rate_expression}
-\frac{\mbox{d} C_{\alpha}}{\mbox{d}t} = \sum_{i} r_{\alpha,i}
+\frac{\d C_{\alpha}}{\d t} = \sum_{i} r_{\alpha,i}
 \end{equation}
 FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
 
@@ -457,7 +457,7 @@ A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}\,^{-a_{\alpha,i}}
 \end{equation}
 Using $A_i^{\prime}$, the rate becomes:
 \begin{equation}\label{eq:finite_rate_fin}
-r^{\prime}_{F,i} = -A_i^{\prime}\;T^{n_i}\;e^{-E_i/RT}\;\prod Y_{\alpha}\,^{a_{\alpha,i}}
+r^{\prime}_{F,i} = -A_i^{\prime}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}\,^{a_{\alpha,i}}
 \end{equation}
 The reaction rate on a mass basis for species $\alpha$ in the $i$th reaction is:
 \begin{equation}\label{eq:rate_a_y}
@@ -465,7 +465,7 @@ r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}
 \end{equation}
 Last, the rate of change in composition for species $\alpha$ (kg/m$^3$/s) in the mixed reactor zone becomes:
 \begin{equation}\label{rate_expression_y}
-\frac{\mbox{d}Y_{\alpha}}{\mbox{d}t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
+\frac{\d Y_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
 \end{equation}
 
 

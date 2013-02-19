@@ -50,8 +50,8 @@ suggested that the CVF for a sprinkler may be represented by a combination of lo
 Rosin-Rammler distributions~\cite{Chan:1}
 \be F(d) = \left\{ \begin{array}{ll}
    \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^d} \, \frac{1}{\sigma\, d'} \,
-   e^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}} \; \mbox{d}d'       & (d \le d_m) \\ [0.2in]
-   1 - e^{-0.693 \left(\frac{d}{d_m}\right)^\gamma }  & (d_m < d)
+   \mathrm{e}^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}} \; \d d'    & (d \le d_m) \\ [0.2in]
+   1 - \mathrm{e}^{-0.693 \left(\frac{d}{d_m}\right)^\gamma }  & (d_m < d)
    \end{array} \right.  \ee
 where $d_m$ is the median droplet diameter (i.e., half the mass
 is carried by droplets with diameters of $d_m$ or less), and $\gamma$ and
@@ -98,7 +98,7 @@ the size of the droplets are chosen to mimic the
 Rosin-Rammler/log-normal distribution. A Probability Density Function (PDF)
 for the droplet diameter is defined
 \be f(d) = \frac{F'(d)}{d^3}  \left/ \int_0^\infty \, \frac{F'(d')}{d'^3}
-     \, \mbox{d}d' \right. \quad ; \quad F' \equiv \frac{\mbox{d}F}{\mbox{d}d}   \ee
+     \, \d d' \right. \quad ; \quad F' \equiv \frac{\d F}{\d d}   \ee
 Droplet diameters are randomly selected by equating the Cumulative
 Number Fraction of the droplet distribution with a uniformly
 distributed random variable $U$
@@ -256,7 +256,7 @@ application rates, and characterize the suppression rates in terms of
 a few global parameters. Their analysis yields an
 expression for the total heat release rate from a rack storage fire
 after sprinkler activation
-\be \dQ = \dQ_0 \; e^{-k (t-t_0)}  \label{fmexting} \ee
+\be \dQ = \dQ_0 \; \mathrm{e}^{-k (t-t_0)}  \label{fmexting} \ee
 where $\dQ_0$ is the total heat release rate at the time of application
 $t_0$, and $k$ is a fuel-dependent constant.
 For the FMRC Standard Plastic commodity $k$ is given as
@@ -277,7 +277,7 @@ global suppression rule.
 However, the exponential nature of suppression by water is observed
 both locally and globally, thus it is assumed that the local burning rate
 of the fuel can be expressed in the form~\cite{Hamins:1,Hamins:IAFSS2002}
-\be \dm_f''(t) = \dm_{f,0}''(t) \; e^{-\int k(t) \, dt}
+\be \dm_f''(t) = \dm_{f,0}''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
 \label{nistexting} \ee
 Here $\dm_{f,0}''(t)$ is the burning rate per unit area of the fuel
 when no water is applied and $k(t)$ is a linear function of the local water

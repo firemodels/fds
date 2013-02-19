@@ -94,7 +94,7 @@ An analytical solution for Eq.~(\ref{Yoeq}) can be found, but it is more conveni
 as is done for sprinklers and heat detectors. Then, the predicted mass fraction of smoke in the sensing chamber
 $Y_c(t)$ can be converted into an expression for the percent obscuration per unit length by computing:
 \be
-   \hbox{Obscuration}  = \left( 1 - e^{-K_m \rho Y_c l} \right) \times 100 \; \; \hbox{\% per length} \; l
+   \hbox{Obscuration}  = \left( 1 - \mathrm{e}^{-K_m \rho Y_c l} \right) \times 100 \; \; \hbox{\% per length} \; l
 \ee
 where $K_m$ is the mass extinction coefficient, $\rho$ is the density of the external gases in the ceiling jet,
 and $l$ is the unit of length over which the light in attenuated\footnote{Typically, the activation criterion for a spot-type smoke detector is listed as a percent obscuration per foot or per meter. For the former, $l=0.3048$~m and for the latter, $l=1$~m.}.
@@ -118,7 +118,7 @@ specifies the emitter and receiver positions and the total obscuration at which 
 integrate the obscuration over the path length using the predicted soot concentration in each grid cell along
 the path:  
 \be
-  \hbox{Obscuration}  = \left(1 - e^{-K_m \int \rho Y_s \, \d l }  \right) \times 100  \; \; \hbox{\%}
+  \hbox{Obscuration}  = \left(1 - \mathrm{e}^{-K_m \int \rho Y_s \, \d l }  \right) \times 100  \; \; \hbox{\%}
 \ee
 where the integration is carried out over the path of the beam.
 

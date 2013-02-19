@@ -174,7 +174,7 @@ These new data have been obtained through FTIR measurements for wavenumbers betw
 A useful quantity to compare the relative importance of the different IR bands is provided by the integrated band intensity,
 $\alpha_i$, defined for the $i$th participating species as:
 \be
-  \alpha_i(T) = \displaystyle\int_{\om_{\min}}^{\om_{\max}} \bar{\kappa}_i(T) \; d\om
+  \alpha_i(T) = \displaystyle\int_{\om_{\min}}^{\om_{\max}} \bar{\kappa}_i(T) \; \d \om
 \ee
 whose units are $\rm {atm^{-1} cm^{-2}}$. The subsections below briefly describe the molecular bands for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature.
 
@@ -453,11 +453,11 @@ tabulated data range, then the data at the nearest temperature are used.
 \subsection{Radiation Contribution to Energy Equation}
 
 The radiant heat flux vector $\dbq_r''$ is defined
-\be \dbq_r''(\bx) = \int_{4\pi} \; \bs' \, I(\bx,\bs') \; d\bs'   \ee
+\be \dbq_r''(\bx) = \int_{4\pi} \; \bs' \, I(\bx,\bs') \; \d \bs'   \ee
 The gas phase contribution to the radiative loss term in the energy equation is
 \be -\nabla\!\cdot \dbq_r''(\bx)(\mbox{gas}) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_b(\bx) \right]  \quad ; \quad
-    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'  \label{net_emission}
+    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, \d \bs'  \label{net_emission}
 \ee
 In words, the net radiant energy gained by a grid cell is the
 difference between that which is absorbed and that which is emitted.
@@ -473,7 +473,7 @@ the source term must be modeled in those grid cells where combustion occurs. Els
 It is assumed that this ``flaming region'' is where the local heat release rate is non-zero, $\dq'''>0$. In this region, we
 multiply the emission source term by a corrective factor, $C$:
 \be I_{b,f}(\bx) = C \, \frac{\sigma \, T(\bx)^4}{\pi}   \quad ; \quad
-    C = \frac{\sum_{\dq'''_{ijk}>0} \left( \chi_r \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, dV}{\sum_{\dq'''_{ijk}>0} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, dV} \label{corrected_emission_source_term}
+    C = \frac{\sum_{\dq'''_{ijk}>0} \left( \chi_r \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, \d V}{\sum_{\dq'''_{ijk}>0} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, \d V} \label{corrected_emission_source_term}
 \ee
 When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is
 substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate.
@@ -578,7 +578,7 @@ angle $\delta \Omega^l$, to obtain
   \int_{\delta \Omega^l} \int_{V_{ijk}}
    \bs' \cdot \nabla I(\bx',\bs') d\bx' d\bs' =
    \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx') \;
-    \left[ I_{b}(\bx') - I(\bx',\bs') \right] d\bx' d\bs'
+    \left[ I_{b}(\bx') - I(\bx',\bs') \right] \d \bx' \d \bs'
 \ee
 The volume integral on the left hand side is replaced by a surface
 integral over the cell faces using the divergence theorem. Note that
@@ -591,7 +591,7 @@ over the cell faces.  Assuming further that $I(\bx,\bs)$ is constant
 within the volume $V_{ijk}$ and over the angle $\delta \bO^l$ we
 obtain
 \be  \sum_{m=1}^6 A_m \; I_m^l \;
-      \int_{\Omega^l}(\bs' \cdot \bn_m) d\bs'
+      \int_{\Omega^l}(\bs' \cdot \bn_m) \d \bs'
    = \kappa_{ijk} \,
      \left[ I_{b,ijk} - I_{ijk}^l \right] \; V_{ijk} \,
      \delta \Omega^l   \label{RTEdiscrete2}
@@ -660,18 +660,18 @@ where
 \end{eqnarray}
 
 \begin{eqnarray}
-   D_x^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf i}) \, d\Omega = \int_{\dph}\int_{\dth} (\bs^l\cdot{\bf i}) \sin\theta \; d\theta d\phi = \int_{\dph}\int_{\dth} \cos\phi\sin\theta\sin\theta\; d\theta d\phi \nonumber \\
+   D_x^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf i}) \, \d\Omega = \int_{\dph}\int_{\dth} (\bs^l\cdot{\bf i}) \sin\theta \; \d \theta d\phi = \int_{\dph}\int_{\dth} \cos\phi\sin\theta\sin\theta\; \d\theta \d\phi \nonumber \\
          & = & \frac{1}{2}\left( \sin\phi^+ - \sin\phi^- \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
-   D_y^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf j}) \, d\Omega  =  \int_{\dph}\int_{\dth} \sin\phi\sin\theta\sin\theta\; d\theta d\phi \nonumber \\
+   D_y^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf j}) \, \d\Omega  =  \int_{\dph}\int_{\dth} \sin\phi\sin\theta\sin\theta\; \d\theta \d\phi \nonumber \\
          & = & \frac{1}{2}\left( \cos\phi^- - \cos\phi^+ \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
-   D_z^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf k})d\Omega = \int_{\dph}\int_{\dth} \cos\theta\sin\theta\;  d\theta d\phi \nonumber \\
+   D_z^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf k}) \d \Omega = \int_{\dph}\int_{\dth} \cos\theta\sin\theta\;  \d\theta \d\phi \nonumber \\
          & = & \frac{1}{2}\Delta\phi \left[\left(\sin\theta^+\right)^2 - \left(\sin\theta^-\right)^2\right] 
 \end{eqnarray}
 
 \begin{eqnarray}
   b_{ijk}^l & = &  \kappa_{ijk} \; I_{b,ijk} \; V_{ijk} \; \delta\Omega^l \\
   \nonumber \\
-  \delta \Omega^l & = & \int_{\Omega^l}d\Omega = \int_{\dph}\int_{\dth} \sin\theta \; d\theta \; d\phi
+  \delta \Omega^l & = & \int_{\Omega^l}d\Omega = \int_{\dph}\int_{\dth} \sin\theta \; \d\theta \d\phi
 \end{eqnarray}
 
 \noindent
@@ -697,7 +697,7 @@ made.
 The boundary condition for the radiation intensity leaving
 a gray diffuse wall is given as
 \be I_w(\bs) = \frac{\epsilon \, \sigma \, T_w^4}{\pi} + \frac{1-\epsilon}{\pi}
- \int_{\bs'\cdot \bn_w < 0} I_w(\bs')\; |\bs'\cdot \bn_w | \; d\bs'
+ \int_{\bs'\cdot \bn_w < 0} I_w(\bs')\; |\bs'\cdot \bn_w | \; \d\bs'
  \label{RTEbc} \ee
 where $I_w(\bs)$ is the intensity at the wall, $\epsilon$ is the
 emissivity, and $T_{w}$ is the wall surface temperature.
@@ -737,7 +737,7 @@ equation becomes
 \be \bs \cdot \nabla I_{\la}(\bx,\bs) = -\left[\kappa_d(\bx,\la) + \sigma_d(\bx,\la)\right]
 I_{\la}(\bx,\bs) +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la) +
 \frac{\sigma_d(\bx,\la)}{4\pi}
-\int_{4\pi}\Phi(\bs',\bs) \; I_{\la}(\bx,\bs') \; d\bs'
+\int_{4\pi}\Phi(\bs',\bs) \; I_{\la}(\bx,\bs') \; \d\bs'
 \label{RTEspray} \ee
 where $\kappa_d$ is the particle absorption coefficient, $\sigma_d$ is the
 particle scattering coefficient and $I_{b,d}$ is the emission
@@ -749,8 +749,8 @@ that gives the scattered intensity fraction from direction $\bs'$ to $\bs$.\\
 The local absorption and scattering coefficients within a spray/particle cloud can be calculated
 from the local droplet number density and size distribution
 \begin{align}
-\kappa_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_a(r,\la) \; \pi r^2 \; dr \\ %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_a(r,\la) \; dr \\
-\sigma_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_s(r,\la) \; \pi r^2 \; dr%N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_s(r,\la) \; dr
+\kappa_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_a(r,\la) \; \pi r^2 \; \d r \\ %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_a(r,\la) \; dr \\
+\sigma_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_s(r,\la) \; \pi r^2 \; \d r    %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_s(r,\la) \; dr
 \end{align}
 where $r$ is the particle radius and $Q_a$ and $Q_s$ are absorption and
 scattering efficiencies, respectively.  For the computation of the spray/particle cloud radiative properties,
@@ -785,7 +785,7 @@ where $U(\bx)$ is the total intensity integrated over the unit sphere. The in-sc
 integral can now be written as
 \begin{align}
 \frac{\sigma_d(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
-  \; d\Omega'
+  \; \d\Omega'
   &=
 \sigma_d(\bx,\la)~ \left( \chi_f I_{\la}(\bx,\bs) ~+~\frac{1}{\delta\Omega^{*}}~\left(1-\chi_f\right)~
 \int\limits_{\delta\Omega^{*}} I_{\la}(\bx,\bs') \; \textrm{d} \Omega' \right)\\
@@ -803,7 +803,7 @@ Defining an effective scattering coefficient section
 \be
 \overline{\sigma_d}(\bx,\la) =
 \frac{4\pi N(\bx)}{4\pi-\delta\Omega^l}
-\int_0^\infty(1-\chi_f) \; C_s(r,\la) \; dr
+\int_0^\infty(1-\chi_f) \; C_s(r,\la) \; \d r
 \ee
 the spray RTE becomes
 \be
@@ -841,7 +841,7 @@ $\chi_f$ becomes
 \int_0^{\mu^l}\int_0^{\mu^l}\int_{\mu_{d,0}}^{\mu_{d,\pi}}
 \frac{P_0(\theta_d)}
 {\left[(1-\mu^2)(1-\mu'^2)-(\mu_d-\mu\mu')^2\right]^{1/2}}
-\; d\mu_d \, d\mu \, d\mu'
+\; \d\mu_d \, \d\mu \, \d\mu'
 \ee
 where $\mu_d$ is a cosine of the scattering angle $\theta_d$ and
 $P_0(\theta_d)$ is a single droplet scattering phase function

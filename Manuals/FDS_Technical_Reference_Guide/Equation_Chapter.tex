@@ -114,11 +114,11 @@ described in terms of the differences in the background pressures, eliminating t
 The second consequence of the low Mach number approximation is that it eliminates the need to solve the energy transport
 equation explicitly.
 The energy conservation equation is written in terms of the {\em sensible enthalpy}, $h_s$:
-\be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \frac{\mbox{D}\bp}{\mbox{D}t}  + \dq''' - \dq_b'''
+\be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \DoD{\bp}{t} + \dq''' - \dq_b'''
         - \nabla\!\cdot \dbq'' \label{energy} \ee
 Note that the material derivative of the thermodynamic pressure is simplified because of the low Mach number approximation:
 \be
-   \frac{\mbox{D}p}{\mbox{D}t} \equiv \frac{\partial p}{\partial t} + \bu \cdot \nabla p \approx
+   \DoD{p}{t} \equiv \frac{\partial p}{\partial t} + \bu \cdot \nabla p \approx
    \frac{\partial \bp}{\partial t} + w \dod{\bp}{z}
 \ee
 The term
@@ -131,7 +131,7 @@ where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of speci
 As mentioned above, we do not solve Eq.~(\ref{energy}) explicitly. Instead, we factor out the divergence as follows:
 \be
 \label{eqn_simplediv1}
-\Div\mathbf{u} = \frac{1}{\rho h_s} \left[ \frac{\mbox{D}}{\mbox{D} t}(\bp-\rho h_s) + \dq^\ppp + \dq_r^\ppp - \dq_b^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
+\Div\mathbf{u} = \frac{1}{\rho h_s} \left[ \DoD{}{t} (\bp-\rho h_s) + \dq^\ppp + \dq_r^\ppp - \dq_b^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
 \ee
 Expanding the material derivatives on the right hand side of this equation produces a fairly complicated expression for
 the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations.
