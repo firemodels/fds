@@ -57,6 +57,16 @@
 
 \usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
 \usetocstyle{standard}
+\usepackage{siunitx}
+\sisetup{
+    detect-all = true,
+    input-decimal-markers = {.},
+    input-ignore = {,},
+    inter-unit-product = \ensuremath{{}\cdot{}},
+    multi-part-units = repeat,
+    number-unit-product = \text{~},
+    per-mode = fraction,
+}
 
 \usepackage{listings}
 \usepackage{textcomp}

@@ -51,6 +51,16 @@
 \usepackage{array}
 \usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
 \usetocstyle{standard}
+\usepackage{siunitx}
+\sisetup{
+    detect-all = true,
+    input-decimal-markers = {.},
+    input-ignore = {,},
+    inter-unit-product = \ensuremath{{}\cdot{}},
+    multi-part-units = repeat,
+    number-unit-product = \text{~},
+    per-mode = fraction,
+}
 
 \newcommand{\ct}{\tt\small}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
@@ -130,12 +140,12 @@
 \newcommand{\tp}{\tilde{p}}
 \newcommand{\dQ}{\dot{Q}}
 \newcommand{\dq}{\dot{q}}
-\newcommand{\dm}{\dot{m}}
+\renewcommand{\dm}{\dot{m}}
 \newcommand{\ha}{\frac{1}{2}}
 \newcommand{\ft}{\frac{4}{3}}
 \newcommand{\ot}{\frac{1}{3}}
 \newcommand{\fofi}{\frac{4}{5}}
-\newcommand{\of}{\frac{1}{4}}
+\renewcommand{\of}{\frac{1}{4}}
 \newcommand{\twth}{\frac{2}{3}}
 \newcommand{\R}{{\cal R}}
 \newcommand{\be}{\begin{equation}}
@@ -151,7 +161,7 @@
 \newcommand{\COTWO}{{\tiny \hbox{CO}_2}}
 \newcommand{\OTWO}{{\tiny \hbox{O}_2}}
 \newcommand{\CO}{{\tiny \hbox{CO}}}
-\newcommand{\F}{{\tiny \hbox{F}}}
+\renewcommand{\F}{{\tiny \hbox{F}}}
 \newcommand{\rb}[1]{\raisebox{1.5ex}[0pt]{#1}}
 
 \floatstyle{boxed}
