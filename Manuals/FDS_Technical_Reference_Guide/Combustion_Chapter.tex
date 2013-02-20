@@ -52,7 +52,7 @@ The linear transformation from lumped species to primitive species is given by
 \end{equation}
 where $A$ is the transformation matrix ($N_{y}$ rows $\times$ $(N_{z}+1)$ columns).  Each column of $A$ represents a different lumped species.  The elements of $A$ are the mass fractions for each primitive species in a given lumped species:
 \begin{equation}\label{eq:A_def}
-A_{\alpha\,i} = \frac{\upsilon_{\alpha\,i}W_{\alpha}}{\displaystyle \sum_{\alpha}\upsilon_{\alpha i}W_{\alpha}}
+a_{\alpha\,i} = \frac{\upsilon_{\alpha\,i}W_{\alpha}}{\displaystyle \sum_{\alpha}\upsilon_{\alpha i}W_{\alpha}}
 \end{equation}
 where $\upsilon_{\alpha\,i}$ are the volume fractions of primitive species $\alpha$ in lumped species $i$.
 
@@ -331,7 +331,7 @@ The mathematical details of the submodels are as follows:
 \label{eq:tau_sgs}  \tau_{u} &= \frac{\Delta}{\sqrt{2k_{sgs}}} \\
 \label{eqn_tau_grav}\tau_{g} &= \sqrt{ 2\Delta/g }
 \end{align}
-where $D_F$ is the diffusivity of the fuel species. Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=9.81$ m/s$^2$.
+where $D_F$ is the diffusivity of the fuel species. Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=9.81$ \si{m/s^2}.
 
 
 \subsection{Time Integration of Chemical Reactions}
@@ -427,12 +427,12 @@ a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
 \end{equation}
 The rate expression for species A with a concentration of $C_{\mbox{\scriptsize A}}$ in mol/L and rate constant $k$ is:
 \begin{equation}\label{eq:generic_rate}
-\frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}\,^{a}\; C_{\mbox{\scriptsize B}}\,^{b}
+\frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}^{\,a}\; C_{\mbox{\scriptsize B}}^{\,b}
 \end{equation}
 
 In this section, it is understood that only the mixed reactor zone compositions participate in the rate expressions (thus $\hat{\,}$ notation is suppressed). Consider a set of $N_r$ reactions with fuel $F$. The reaction rate (mol/L/s) for $F$ in the $i$th reaction is:
 \begin{equation}\label{eq:rate_f}
-r_{F,i}= -k_{i}\; \prod C_{\alpha}\,^{a_{\alpha,i}}
+r_{F,i}= -k_{i}\; \prod C_{\alpha}^{\,a_{\alpha,i}}
 \end{equation}
 For the $i$th Arrhenius reaction, the rate constant, $k_i$, depends on the temperature, $T$, the temperature exponent, $n_i$, the pre-exponential factor, $A_i$, and the activation energy, $E_i$:
 \begin{equation}\label{eq:rate_cons}
@@ -453,17 +453,17 @@ FDS only transports lumped species and only lumped species can be consumed or cr
 It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentration (mol/L) and mass fractions (kg/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/W_{\alpha}$.
 To simplify the calculations within FDS, density and molecular weight are pulled out of the product of the concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and calculated with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
-A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}\,^{-a_{\alpha,i}}
+A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}^{\,-a_{\alpha,i}}
 \end{equation}
 Using $A_i^{\prime}$, the rate becomes:
 \begin{equation}\label{eq:finite_rate_fin}
-r^{\prime}_{F,i} = -A_i^{\prime}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}\,^{a_{\alpha,i}}
+r^{\prime}_{F,i} = -A_i^{\prime}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}}
 \end{equation}
 The reaction rate on a mass basis for species $\alpha$ in the $i$th reaction is:
 \begin{equation}\label{eq:rate_a_y}
 r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)\,r^{\prime}_{F,i}
 \end{equation}
-Last, the rate of change in composition for species $\alpha$ (kg/m$^3$/s) in the mixed reactor zone becomes:
+Last, the rate of change in composition for species $\alpha$ (\si{kg/(m^3.s)}) in the mixed reactor zone becomes:
 \begin{equation}\label{rate_expression_y}
 \frac{\d Y_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
 \end{equation}
@@ -473,26 +473,15 @@ Last, the rate of change in composition for species $\alpha$ (kg/m$^3$/s) in the
 
 \label{extinction}
 
-The physical limitation of the mixing-controlled reaction model described in the previous section is that it assumes that fuel and oxygen burn instantaneously when mixed. For large-scale, well-ventilated
-fires, this is a good assumption. However, if a fire is in an
-under-ventilated compartment, or if a suppression agent like water
-mist or CO$_2$ is introduced, or if the shear layer between fuel and oxidizing streams
-has a sufficiently large local strain rate,
-fuel and oxygen may mix but may not burn.
-The physical mechanisms underlying these phenomena are complex, and
-even simplified models still rely on an accurate prediction
-of the flame temperature and local strain rate.
-Subgrid-scale modeling of gas phase suppression and
-extinction is still an area of active research in the combustion
-community.
+Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research in the combustion community. The physical mechanisms underlying these phenomena are complex, and even simplified models still rely on an accurate prediction of the flame temperature and local strain rate, neither of which is readily available in an LES calculation.
 
-Simple empirical rules can be used to predict local
-extinction based on the species and temperature present in the flame sheet.  The default FDS extinction model consists of two parts based on the critical flame temperature \cite{SFPE:Beyler}. The first, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second part is the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur. If either criteria is failed, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. This is done in the following steps for the limiting flame temperature:
+A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react, regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur. 
+
+At present, simple empirical rules---which ignore strain---are used to predict local extinction (within a certain grid cell) based on local resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. First, we check to see if the cell temperature is above the auto-ignition temperature for the fuel.  If the temperature is too low, then combustion is suppressed.  Note that this temperature is set to absolute zero by default so that typical users do not need to specify an ignition source.  Next, if the potential combustion heat release cannot raise the local temperature above the limiting flame temperature, then combustion is suppressed. If either criterion fails, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. The limiting flame temperature extinction algorithm is outlined below.
 
 \begin{enumerate}
 \item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
-
-\be \Delta \hat{Y}_{F}(n) = \min \left (\hat{Y}_F,-\frac{\hat{Y}_{\alpha}W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$, in reaction $n$} \ee
+\be \Delta \hat{Y}_{F}(n) = \min \left (\hat{Y}_F,-\hat{Y}_{\alpha}\frac{W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$, in reaction $n$} \ee
 If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
 \item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
 \item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
