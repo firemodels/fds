@@ -1,8 +1,7 @@
-&HEAD CHID='fft_4x4x4_64cell_medium', TITLE='Simple Test Case' /
+&HEAD CHID='scarc3d_fft_4x4x4_64cell', TITLE='Simple Test Case' /
 
 &MESH IJK=16,16,16, XB=0.0,0.20,0.0,0.20,0.0,0.20, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.20, DY=0.20, DZ=0.20, I_UPPER=3, J_UPPER=3, K_UPPER=3 /
-
 
 &MISC NOISE = .FALSE.
       DNS   = .TRUE. /
