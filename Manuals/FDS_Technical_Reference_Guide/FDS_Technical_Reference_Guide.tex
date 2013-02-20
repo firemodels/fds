@@ -72,7 +72,15 @@
 \usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
 \usetocstyle{standard}
 \usepackage{siunitx}
-\sisetup{inter-unit-product = \ensuremath{{}\cdot{}}, per-mode = fraction}
+\sisetup{
+    detect-all = true,
+    input-decimal-markers = {.},
+    input-ignore = {,},
+    inter-unit-product = \ensuremath{{}\cdot{}},
+    multi-part-units = repeat,
+    number-unit-product = \text{~},
+    per-mode = fraction,
+}
 
 \floatstyle{boxed}
 \newfloat{notebox}{H}{lon}
