@@ -12,7 +12,7 @@ Here the overbar is used to denote a cell average since later a subgrid distribu
 
 The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and, typically, the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).  The heat release rate is found by summing the lumped species mass production rates times their respective heats of formation:
 \begin{equation}\label{eq:q_tprime}
-\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}_\alpha^{\prime\prime\prime} \Delta H_{f,\alpha}
+\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}_\alpha^{\prime\prime\prime} \Delta h_{f,\alpha}
 \end{equation}
 
 The remainder of this chapter consists of three main topics.  The first is a discussion of our \emph{lumped species} approach, which aims to reduce the computational burden of the full chemical system by combining species into groups that transport and react together.  Next, we discuss our approach to describing the chemical mixing process.  We treat each computational cell as a partially-stirred batch reactor with a characteristic mixing time.  The model for the mixing time is discussed.  Once reactants are mixed, the reaction rate depends on kinetics.  The last part of this chapter discusses available kinetic mechanisms within FDS, from infinitely fast chemistry (default) to Arrhenius rate laws and reversible reactions.
@@ -475,13 +475,15 @@ Last, the rate of change in composition for species $\alpha$ (\si{kg/(m^3.s)}) i
 
 Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research in the combustion community. The physical mechanisms underlying these phenomena are complex, and even simplified models still rely on an accurate prediction of the flame temperature and local strain rate, neither of which is readily available in an LES calculation.
 
-A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react, regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur. 
+A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur. 
 
-At present, simple empirical rules---which ignore strain---are used to predict local extinction (within a certain grid cell) based on local resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. First, we check to see if the cell temperature is above the auto-ignition temperature for the fuel.  If the temperature is too low, then combustion is suppressed.  Note that this temperature is set to absolute zero by default so that typical users do not need to specify an ignition source.  Next, if the potential combustion heat release cannot raise the local temperature above the limiting flame temperature, then combustion is suppressed. If either criterion fails, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. The limiting flame temperature extinction algorithm is outlined below.
+At present, simple empirical rules---which ignore strain---are used to predict local extinction (within a certain grid cell) based on local resolved species concentrations and the local cell temperature.  The default FDS extinction model consists of two parts based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. First, we check to see if the cell temperature is above the auto-ignition temperature for the fuel.  If the temperature is too low, then combustion is suppressed.  Note that this temperature is set to absolute zero by default so that typical users do not need to specify an ignition source.  Next, if the potential combustion heat release cannot raise the local temperature above the limiting flame temperature, then combustion is suppressed. If either criterion fails, then there is no chemical reaction and $\dot{m}^{\prime\prime\prime}_{\alpha}=0$. The limiting flame temperature extinction algorithm is outlined below.
 
 \begin{enumerate}
 \item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
-\be \Delta \hat{Y}_{F}(n) = \min \left (\hat{Y}_F,-\hat{Y}_{\alpha}\frac{W_{F}}{\nu_{\alpha} W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$, in reaction $n$} \ee
+\be
+\Delta \hat{Y}_{F} = - \min \left( \hat{Y}_F, \hat{Y}_{\alpha} \,\frac{\nu_{F}\,W_{F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
+\ee
 If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
 \item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
 \item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
@@ -491,7 +493,7 @@ Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_
 \item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature (LFT).
 \item Combustion is allowed if
 
-\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta H_F \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{F} h_F(T_{LFT}) \ee
+\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta h_{c,F} \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{F} h_F(T_{LFT}) \ee
 \item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
 \end{enumerate}
 
@@ -501,7 +503,7 @@ In addition to the extinction model described above, there is the option in FDS 
 
 Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
 \begin{equation}\label{eq:vol_heat_gen}
-\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime}_{\alpha} \Delta H_{f,\alpha}
+\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime}_{\alpha} \Delta h_{f,\alpha}
 \end{equation}
 
 \subsubsection{Heat Release Rate Limiter}

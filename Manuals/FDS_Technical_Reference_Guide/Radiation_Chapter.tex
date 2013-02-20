@@ -132,7 +132,7 @@ and returns the Planck mean absorption coefficient, $\kappa_n$, for each spectra
 \begin{equation}
 \kappa_n(P,T) = \dfrac{\pi}{\sigma T^4}
 \displaystyle\int_{\om_{\min}}^{\om_{\max}}{I^o_{b,\om}(T)
-\displaystyle\sum_{i}^{\rm species} \bar{\kappa}_i(\om,T) \, P_i \; d\om}
+\displaystyle\sum_{i}^{\rm species} \bar{\kappa}_i(\om,T) \, P_i \; \d\om}
 \end{equation}
 where $\om$ represents the wavenumber, in units of cm$^{\rm -1}$,
 $P_i$ is the partial pressure of the $i$th participating species, in units of ${\rm atm}$, and
@@ -576,7 +576,7 @@ Eq.~(\ref{bandRTE}) over the volume of cell $ijk$ and the control
 angle $\delta \Omega^l$, to obtain
 \be
   \int_{\delta \Omega^l} \int_{V_{ijk}}
-   \bs' \cdot \nabla I(\bx',\bs') d\bx' d\bs' =
+   \bs' \cdot \nabla I(\bx',\bs') \d\bx' \d\bs' =
    \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx') \;
     \left[ I_{b}(\bx') - I(\bx',\bs') \right] \d \bx' \d \bs'
 \ee
@@ -660,7 +660,7 @@ where
 \end{eqnarray}
 
 \begin{eqnarray}
-   D_x^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf i}) \, \d\Omega = \int_{\dph}\int_{\dth} (\bs^l\cdot{\bf i}) \sin\theta \; \d \theta d\phi = \int_{\dph}\int_{\dth} \cos\phi\sin\theta\sin\theta\; \d\theta \d\phi \nonumber \\
+   D_x^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf i}) \, \d\Omega = \int_{\dph}\int_{\dth} (\bs^l\cdot{\bf i}) \sin\theta \; \d \theta \d\phi = \int_{\dph}\int_{\dth} \cos\phi\sin\theta\sin\theta\; \d\theta \d\phi \nonumber \\
          & = & \frac{1}{2}\left( \sin\phi^+ - \sin\phi^- \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
    D_y^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf j}) \, \d\Omega  =  \int_{\dph}\int_{\dth} \sin\phi\sin\theta\sin\theta\; \d\theta \d\phi \nonumber \\
          & = & \frac{1}{2}\left( \cos\phi^- - \cos\phi^+ \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
@@ -703,11 +703,11 @@ where $I_w(\bs)$ is the intensity at the wall, $\epsilon$ is the
 emissivity, and $T_{w}$ is the wall surface temperature.
 In discretized form, the boundary condition on a solid wall is given as
 \be I_w^l = \frac{\epsilon \, \sigma \, T_w^4}{\pi} + \frac{1-\epsilon}{\pi} \sum_{D_w^{l'}<0} I_w^{l'}\; |D_w^{l'} |  \ee
-where $D_w^{l'}= \int_{\Omega^{l'}}(\bs\cdot \bn_w)d\Omega$.
+where $D_w^{l'}= \int_{\Omega^{l'}}(\bs\cdot \bn_w)\d\Omega$.
 The constraint $D_w^{l'}<0$ means that only the ``incoming'' directions
 are taken into account when calculating the reflection.
 The {\em net} radiative heat flux on the wall is
-\be \dq_r'' = \sum_{l=1}^{N_{\Omega}} I_w^l \int_{\delta \Omega^l} (\bs' \cdot \bn_w) \, d\bs'
+\be \dq_r'' = \sum_{l=1}^{N_{\Omega}} I_w^l \int_{\delta \Omega^l} (\bs' \cdot \bn_w) \, \d\bs'
      = \sum_{l=1}^{N_{\Omega}} I_w^l D_n^l \label{qrdef} \ee
 where the coefficients $D_n^l$ are equal to $\pm D_x^l$, $\pm D_y^l$ or
 $\pm D_z^l$, and can be calculated for each wall element at the start of the
