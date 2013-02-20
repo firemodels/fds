@@ -1,12 +1,13 @@
-&HEAD CHID='scarc3d_cg_4x4x4_64cell', TITLE='Simple Test Case' /
+&HEAD CHID='scarc3d_bicg_4x4x4_64cell', TITLE='Simple Test Case' /
 
 &MESH IJK=16,16,16, XB=0.0,0.20,0.0,0.20,0.0,0.20, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.20, DY=0.20, DZ=0.20, I_UPPER=3, J_UPPER=3, K_UPPER=3 /
 
-&PRES SCARC_METHOD            = 'KRYLOV'    
-      SCARC_KRYLOV            = 'CG'        
-      SCARC_KRYLOV_ACCURACY   = 1E-8            
-      SCARC_SYSTEM            = 'COMPACT'   
+&PRES SCARC_METHOD             = 'KRYLOV'
+      SCARC_KRYLOV             = 'BICG'
+      SCARC_KRYLOV_ACCURACY    =  1E-8
+      SCARC_PRECON             = 'SSOR'
+      SCARC_SYSTEM             = 'COMPACT' /
 
 &MISC NOISE = .FALSE.
       DNS   = .TRUE. /
