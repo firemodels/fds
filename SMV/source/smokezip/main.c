@@ -373,10 +373,11 @@ int main(int argc, char **argv){
       strcpy(smzlogfile,GLOBsourcedir);
       strcat(smzlogfile,filebase);
     }
-    strcat(smvfile,".smv");
-    strcat(smzlogfile,".smzlog");
-    freopen(smzlogfile,"w",stdout);
   }
+
+  strcat(smvfile,".smv");
+  strcat(smzlogfile,".smzlog");
+  freopen(smzlogfile,"w",stdout);
   
   // construct ini file name
 
