@@ -64,10 +64,16 @@ cd %SCRIPT_DIR%
 %SH2BAT% SMV_Cases.sh SMV_Pictures_Cases.bat
 %SH2BAT% SMV_DIFF_Cases.sh SMV_DIFF_Pictures_Cases.bat
 
+echo.
+echo converting plume5c particles to an isosurface
 cd %SVNROOT%\Verification\Visualization
 %SMOKEZIP% -f -part2iso plumeiso
 
+echo.
+echo differencing plume5c and plume5cdelta
 %SMOKEDIFF% plume5c plume5cdelta
+echo.
+echo differencing thouse5 and thouse5delta
 %SMOKEDIFF% thouse5 thouse5delta
 
 echo.
