@@ -669,7 +669,7 @@ DO WHILE (ITER)
            U_JET = 0.195 * Q**(1./3.) * H**(1./2.) / R**(5./6.)
    ENDIF
 
-   ! Compute sprinkler activation time
+   ! Compute sprinkler or detector activation time
 
    t_activation = (RTI / SQRT(U_JET)) * LOG((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))
 

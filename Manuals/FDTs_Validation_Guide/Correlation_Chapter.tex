@@ -720,7 +720,50 @@ Test 18    &  1180           &  27                \\ \hline
 
 \section{NIST Dunes 2000}
 
+\subsection*{Smoke Detector Activation Time (Alpert)}
+
+The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
+After the time $t_{fire}$, the fire HRR was steady.
+
+\begin{table}[!ht]
+\caption[Input parameters for NIST Dunes 2000 cases, smoke detector activation time (Alpert)]
+{Summary of input parameters used for NIST Dunes 2000 cases, smoke detector activation time (Alpert).}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                          &              \\
+\rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
+Scaling factor (-)        &  1           \\ \hline
+$t_{fire}$ (s)            &  300         \\ \hline
+$\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
+RTI ((m-s)$^{1/2}$)       &  5           \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+            &                   &            &            &                    \\
+\rb{Test}   &  \rb{$\alpha$}    &  \rb{$r$}  &  \rb{$H$}  &  \rb{$T_\infty$}   \\
+            &  \rb{(kW/s$^2$)}  &  \rb{(m)}  &  \rb{(m)}  &  \rb{($^\circ$C)}  \\ \hline \hline
+Test SDC02  &  0.00463          &  1.3       &  2.1       &  21                \\ \hline
+Test SDC05  &  0.00617          &  1.8       &  2.0       &  22                \\ \hline
+Test SDC07  &  0.01080          &  1.8       &  2.0       &  24                \\ \hline
+Test SDC10  &  0.00463          &  1.3       &  2.1       &  26                \\ \hline
+Test SDC33  &  0.00309          &  1.3       &  2.1       &  26                \\ \hline
+Test SDC35  &  0.00309          &  1.3       &  2.1       &  26                \\ \hline
+Test SDC39  &  0.00617          &  1.8       &  2.0       &  25                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
 \subsection*{Smoke Detector Activation Time (Milke)}
+
 
 The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t_{fire}$.
 After the time $t_{fire}$, the fire HRR was steady.
@@ -734,7 +777,7 @@ After the time $t_{fire}$, the fire HRR was steady.
 \hline
                           &              \\
 \rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
-$\alpha$ (kW/s$^2$)       &  0.01172     \\ \hline
+$t_{fire}$ (s)            &  300         \\ \hline
 $\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
 \end{tabular}
 \end{center}
@@ -743,15 +786,15 @@ $\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
 \begin{tabular}{|l|c|c|}
 \hline
             &                   &            \\
-\rb{Test}   &  \rb{$t_{fire}$}  &  \rb{$H$}  \\
-            &  \rb{(s)}         &  \rb{(m)}  \\ \hline \hline
-Test SDC02  &  194              &  2.1       \\ \hline
-Test SDC05  &  172              &  2.0       \\ \hline
-Test SDC07  &  251              &  2.0       \\ \hline
-Test SDC10  &  220              &  2.1       \\ \hline
-Test SDC33  &  176              &  2.1       \\ \hline
-Test SDC35  &  174              &  2.1       \\ \hline
-Test SDC39  &  128              &  2.0       \\ \hline
+\rb{Test}   &  \rb{$\alpha$}    &  \rb{$H$}  \\
+            &  \rb{(kW/s$^2$)}  &  \rb{(m)}  \\ \hline \hline
+Test SDC02  &  0.00463          &  2.1       \\ \hline
+Test SDC05  &  0.00617          &  2.0       \\ \hline
+Test SDC07  &  0.01080          &  2.0       \\ \hline
+Test SDC10  &  0.00463          &  2.1       \\ \hline
+Test SDC33  &  0.00309          &  2.1       \\ \hline
+Test SDC35  &  0.00309          &  2.1       \\ \hline
+Test SDC39  &  0.00617          &  2.0       \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -774,6 +817,7 @@ After the time $t_{fire}$, the fire HRR was steady.
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
+$t_{fire}$ (s)        &  300         \\ \hline
 $C_{pl}$ (-)          &  0.67        \\ \hline
 $C_{cj}$ (-)          &  1.2         \\ \hline
 \end{tabular}
@@ -783,15 +827,15 @@ $C_{cj}$ (-)          &  1.2         \\ \hline
 \begin{tabular}{|l|c|c|c|}
 \hline
             &                   &            &            \\
-\rb{Test}   &  \rb{$t_{fire}$}  &  \rb{$H$}  &  \rb{$r$}  \\
-            &  \rb{(s)}         &  \rb{(m)}  &  \rb{(m)}  \\ \hline \hline
-Test SDC02  &  194              &  2.1       &  1.3       \\ \hline
-Test SDC05  &  172              &  2.0       &  1.8       \\ \hline
-Test SDC07  &  251              &  2.0       &  1.8       \\ \hline
-Test SDC10  &  220              &  2.1       &  1.3       \\ \hline
-Test SDC33  &  176              &  2.1       &  1.3       \\ \hline
-Test SDC35  &  174              &  2.1       &  1.3       \\ \hline
-Test SDC39  &  128              &  2.0       &  1.8       \\ \hline
+\rb{Test}   &  \rb{$\alpha$}    &  \rb{$r$}  &  \rb{$H$}  \\
+            &  \rb{(kW/s$^2$)}  &  \rb{(m)}  &  \rb{(m)}  \\ \hline \hline
+Test SDC02  &  0.00463          &  1.3       &  2.1       \\ \hline
+Test SDC05  &  0.00617          &  1.8       &  2.0       \\ \hline
+Test SDC07  &  0.01080          &  1.8       &  2.0       \\ \hline
+Test SDC10  &  0.00463          &  1.3       &  2.1       \\ \hline
+Test SDC33  &  0.00309          &  1.3       &  2.1       \\ \hline
+Test SDC35  &  0.00309          &  1.3       &  2.1       \\ \hline
+Test SDC39  &  0.00617          &  1.8       &  2.0       \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
