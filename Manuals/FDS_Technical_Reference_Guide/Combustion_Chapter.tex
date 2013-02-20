@@ -217,9 +217,9 @@ FDS employs a \emph{time splitting} scheme (see Sections \ref{sec:solution_proce
 
 The simplest possible mixing model is the interaction by exchange with the mean (IEM) model.  IEM states that, in the abscense of chemical reaction, the local mass fractions obey the following ODE:
 \begin{equation}\label{eq:iem}
-\frac{\d Y_\alpha}{\d t} = \frac{1}{\tau_{mix}}(\overline{Y}_\alpha - Y_\alpha)
+\frac{\d Y_\alpha}{\d t} = \frac{1}{\tau_{\rm mix}}(\overline{Y}_\alpha - Y_\alpha)
 \end{equation}
-where $\tau_{mix}$ is the characteristic mixing time for the cell.  This time scale is discussed below in Section \ref{sec:reac_time_scale}.  For now, simply note that small values of $\tau_{mix}$ correspond to high turbulence intensity (fast mixing) and vice versa.
+where $\tau_{\rm mix}$ is the characteristic mixing time for the cell.  This time scale is discussed below in Section \ref{sec:reac_time_scale}.  For now, simply note that small values of $\tau_{\rm mix}$ correspond to high turbulence intensity (fast mixing) and vice versa.
 
 \subsubsection{A Simplified Mixing Environment}
 
@@ -244,11 +244,11 @@ As shown by Pope \cite{Pope:2000}, the PDF evolves by the Fokker-Planck equation
 \end{equation}
 The term on the right in angled brackets is a conditional diffusion term which requires closure.  Using IEM, Eq.~(\ref{eq:iem}), as the model for this term, Eq.~(\ref{eq:fokker-planck}) implies that the unmixed fraction, $\zeta$, is governed by the following simple ODE\footnote{This is a good exercise for the reader.  Hint: Just consider the evolution of the second term in Eq.~(\ref{eq:pdf}) and utilize Appendix C in Pope \cite{Pope:2000}.}:
 \begin{equation}\label{eq:zeta}
-\frac{\d \zeta}{\d t}=-\frac{\zeta}{\tau_{mix}}
+\frac{\d \zeta}{\d t}=-\frac{\zeta}{\tau_{\rm mix}}
 \end{equation}
 with the solution
 \begin{equation}\label{eq:zeta_soln}
-\zeta(t) = \zeta_0 \exp(-t/\tau_{mix})
+\zeta(t) = \zeta_0 \exp(-t/\tau_{\rm mix})
 \end{equation}
 
 We may think of an initial unmixed fraction of $\zeta_0=1$ (default) as representing a diffusion flame and $\zeta_0=0$ as a premixed flame.
@@ -281,7 +281,7 @@ The ODE governing the mixed species mass is
 The first term on the RHS represents chemical kinetics.  The second term accounts for mixing.  Note that in the second step we have utilized the fact that the ummixed composition remains constant (at the initial cell mean) throughout the time step. Using Eqs.~(\ref{eq:zeta}) and (\ref{eq:mixunmix_2}), the second term becomes
 \begin{align}
 \label{eq:mixingstep}
--\overline{Y}_{\alpha,0} \frac{\d U}{\d t} &= \frac{\overline{Y}_{\alpha,0} \, U(t) }{\tau_{mix}}
+-\overline{Y}_{\alpha,0} \frac{\d U}{\d t} &= \frac{\overline{Y}_{\alpha,0} \, U(t) }{\tau_{\rm mix}}
 \end{align}
 
 The rate of reaction, $\d \hat{Y}_\alpha/\d t$, is discussed in Section \ref{Reaction_Rate_Model}. The reaction rate may be ``fast'' (default) or based on an Arrhenius rate law.  The integration of Eq.~(\ref{eq:mixmass}) for these special cases is discussed in Section \ref{sec:reac_time_integration}.
@@ -306,9 +306,9 @@ For the special case where the initial unmixed fraction is set to unity and the 
 
 In this section we provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale.
 
-It is important to consider the behavior of a model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{chem}$, which, though usually small, is finite. At a slightly larger scale we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_d$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_u$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
+It is important to consider the behavior of a model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which, though usually small, is finite. At a slightly larger scale we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
 
-Now let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires--which are generally buoyancy-driven flows--we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_g$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{flame}$, since all fuel must be consumed within a single cell.
+Now let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires--which are generally buoyancy-driven flows--we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
 
 \begin{figure}
 \centering
@@ -318,20 +318,20 @@ Now let us imagine what should happen to the mixing time as the filter width inc
 \label{fig_reaction_time_scale}
 \end{figure}
 
-Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak the $\tau_g$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_u$ line.  Or, for highly turbulent jet flames $\tau_{flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_u$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
+Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak the $\tau_{\rm g}$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_{\rm u}$ line.  Or, for highly turbulent jet flames $\tau_{\rm flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_{\rm u}$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
 
 The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically represented by
 \begin{equation}
 \label{eqn_tau_mix}
-\tau_{mix} = \max(\tau_{chem},\min(\tau_d,\tau_u,\tau_g,\tau_{flame}))
+\tau_{\rm mix} = \max(\tau_{\rm chem},\min(\tau_{\rm d},\tau_{\rm u},\tau_{\rm g},\tau_{\rm flame}))
 \end{equation}
 The mathematical details of the submodels are as follows:
 \begin{align}
-\label{eq:tau_diff} \tau_{d} &= \frac{\Delta^2}{D_F} \\
-\label{eq:tau_sgs}  \tau_{u} &= \frac{\Delta}{\sqrt{2k_{sgs}}} \\
-\label{eqn_tau_grav}\tau_{g} &= \sqrt{ 2\Delta/g }
+\label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_F} \\
+\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\Delta}{\sqrt{2k_{sgs}}} \\
+\label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
 \end{align}
-where $D_F$ is the diffusivity of the fuel species. Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
+where $D_F$ is the diffusivity of the fuel species. Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
 
 
 \subsection{Time Integration of Chemical Reactions}
