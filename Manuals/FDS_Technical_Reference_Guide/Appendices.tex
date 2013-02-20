@@ -956,12 +956,45 @@ In cylindrical and spherical coordinates, the equation becomes:
      \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} \left( r^I k_s \frac{\partial T_s}{\partial r} \right) + \dot{q}'''_s
 \end{equation}
 where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation~(\ref{heat_cond_cyl2}). The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}.
+
 \begin{figure}[t]
     \centering
-    \includegraphics[width=5.0in]{FIGURES/appendix_I_solid_nodes}
+	\begin{tikzpicture}[font = \large]
+    \node at (-2.0,2.5) [label=above:Front] {};
+    \node at (4.5,2.5) [label=above:Back] {};
+    
+    \node at (-2.5,0) [label=below:$x(0)$] {};
+    \node at (0,0) [label=below:$x(1)$] {};
+    \node at (2.5,0) [label=below:$x(N-1)$] {};
+    \node at (5,0) [label=below:$x(N)$] {};
+    
+    \node at (-3.75,0) [label={above:$i = 0$}] {};
+    \node at (-1.25,0) [label={above:$i = 1$}] {};
+    \node at (1.25,0) [label=above:...] {};
+    \node at (3.75,0) [label={above:$i = N$}] {};
+    \node at (6.25,0) [label={above:$i = N+1$}] {};
+    
+    \node at (1.25,3.5) [label=above: Virtual Nodes] {};
+    \draw [<-,line width=2pt] (6.25,2.75) arc (0:30:25 and 2.5);
+    \draw [<-,line width=2pt] (-3.75,2.75) arc (180:150:25 and 2.5);
+        
+    \draw [dashed, line width=1.5pt] (-2.5,0) -- (-5,0);
+    \draw [dashed, line width=1.5pt] (-5,0) -- (-5,2.5);
+    \draw [dashed, line width=1.5pt] (-2.5,2.5) -- (-5,2.5);
+	\draw [line width=1.5pt] (-2.5,0) rectangle (0,2.5);
+	\draw [line width=1.5pt] (0,0) rectangle (2.5,2.5);
+    \draw [line width=1.5pt] (2.5,0) rectangle (5,2.5);
+    \draw [dashed, line width=1.5pt] (5,0) -- (7.5,0);
+    \draw [dashed, line width=1.5pt] (7.5,0) -- (7.5,2.5);
+    \draw [dashed, line width=1.5pt] (5,2.5) -- (7.5,2.5);
+    
+    \draw [->,line width=2pt] (5,-1.1) -- (1.25,-1.1);
+    \node at (2.5,-1.1) [label=below:$r_{i}$] {};
+	\end{tikzpicture}
     \caption{Solid phase nodes and indexes. r is the radius from the back of the material.}
     \label{fig_solid_nodes}
 \end{figure}
+
 The temperature at the center of each solid cell, $T_{s,i}$, is updated in time using a Crank-Nicolson scheme:
 \begin{eqnarray}
 \label{crank-nicolson}
