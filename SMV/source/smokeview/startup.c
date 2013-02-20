@@ -2004,7 +2004,7 @@ void initvars(void){
     strcat(TITLEBASE,svn_version);
     strcat(TITLEBASE,")");
 #else
-#ifdef pp_UNOFFICIAL_RELEASE
+#ifndef pp_OFFICIAL_RELEASE
     strcat(TITLEBASE," (");
     strcat(TITLEBASE,svn_version);
     strcat(TITLEBASE,")");
