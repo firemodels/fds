@@ -31,6 +31,7 @@ For the reasons stated above, two scatter plot comparisons are shown in Fig.~\re
 
 
 \section{Sprinkler Activation Time}
+\label{sec:sprinkler_alpert}
 
 For steady-state fire, the method for estimating the response of a smoke detector is based on the correlations developed by Alpert (1972) for activation of a sprinkler and is given by the following equation (Budnick, Evans, and Nelson, 1997)
 
@@ -75,6 +76,14 @@ For cases in which the fire was located against a wall or corner, these correlat
 
 
 \section{Smoke Detector Activation Time}
+
+\subsection{Method of Alpert}
+
+In this method, smoke detector activation is identical to that for a heat detector (as described in Section~\ref{sec:sprinkler_alpert}), with the exception of the response of smoke detectors to a modest rise in the ceiling jet temperature. Heskestad and Delichatsios (1977) correlated a smoke temperature change of 10~$^\circ$C (18~$^\circ$F) from typical fuels. For the purpose of calculating smoke detector response time, it is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5$).
+
+
+\clearpage
+
 
 \subsection{Method of Milke}
 
@@ -170,12 +179,23 @@ Summary scatter plots of the device activation time predictions are shown on the
 \begin{figure}[p]
 \begin{center}
 \begin{tabular}{l}
+\includegraphics[width=4.0in]{FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Alpert}
+\end{tabular}
+\end{center}
+\caption[Summary of smoke detector activation time predictions]
+{Summary of smoke detector activation time predictions using the method of Alpert.}
+\label{Smoke_Detector_Activation_Summary_Alpert}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{l}
 \includegraphics[width=4.0in]{FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Milke} \\
 \includegraphics[width=4.0in]{FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Mowrer}
 \end{tabular}
 \end{center}
 \caption[Summary of smoke detector activation time predictions]
 {Summary of smoke detector activation time predictions using the method of Milke (top) and Mowrer (bottom).}
-\label{Smoke_Detector_Activation_Summary}
+\label{Smoke_Detector_Activation_Summary_Milke_Mowrer}
 \end{figure}
 
