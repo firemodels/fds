@@ -328,10 +328,9 @@ The examples above are for illustration purposes only.  In general, we first com
 
 
 \chapter{A Simple Model of Flame Extinction}
-
-\subsubsection{Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
-
 \label{o2_based_model}
+
+\subsubsection*{Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
 
 
 A diffusion flame immersed in a vitiated atmosphere will extinguish before consuming all the
@@ -549,7 +548,7 @@ Second-order central differencing of the advection term in the scalar transport 
 
 By default, FDS employs a TVD transport scheme (Superbee \cite{Roe:1986} for LES and CHARM \cite{Zhou:1995} for DNS). These TVD schemes are applied during the transport step and each can be shown to be TVD in one dimension under certain CFL constraints.  However, except for Godunov's scheme, the TVD proofs do not extend to three dimensions~\cite{Toro}.  Still, these schemes do a much better job than pure central differencing at mitigating dispersion error.  Note that even though TVD schemes are applied, FDS still checks for boundedness in case any small violations are not prevented by the flux limiter.
 
-\subsubsection{A simple case}
+\subsubsection*{A simple case}
 
 For simplicity we start by considering a minimum boundedness violation for density in 1-D.  That is, somewhere we have $\rho < \rho_{\min}$.  Let $\rho_i^*$ denote the resulting density from the explicit transport step for cell $i$ with volume $V_i$.  Our goal is to find a correction $\delta \rho_i$ which:
 \begin{enumerate}[{(}a{)}]
@@ -585,7 +584,7 @@ In this case the sum of the mass corrections is zero, as desired:
 &=& 0 \nonumber
 \end{eqnarray}
 
-\subsubsection{Realistic cases}
+\subsubsection*{Realistic cases}
 
 The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Consider a grid cell whose
 density is outside the specified range. Denote this cell with a ``$c$'' for center. Its volume is $V_c$ and density is $\rho_c^*$, obtained from the transport scheme.  Let the subscript ``$n$'' denote any of the six neighboring cells (in other words, only include cells which share a face with cell $c$).  We want to correct any boundedness violations for the  cell $c$ by shifting mass to or from its neighboring cells $n$:
@@ -780,7 +779,7 @@ The trajectories of Lagrangian particles in FDS could be calculated with forward
 
 Two effects are neglected in this formulation. The first is the effect of the change in droplet mass between  time steps. The droplet's evaporation is not coupled to this model. This is justified because the change in droplet mass per time step is small. The second neglected effect is the change in drag coefficient between time steps. This is justified because of the large uncertainties in the drag coefficients. Modeling the time derivative of the drag coefficient will not improve accuracy beyond these uncertainties, but it will slow down the simulation.
 
-\subsubsection{Relative velocities}
+\subsubsection*{Relative velocities}
 Let $m_p$ denote the particle mass, $\mathbf{u}_p$ the particle velocity, $A_p$ the particle cross-sectional area, $C_{\text{d},p}$ the particle drag coefficient, $\rho_\text{a}$ the fluid mass density, $\mathbf{U}_p$ the fluid velocity around the particle, $V_\text{g}$ is the volume occupied by the fluid in a cell, and $M \equiv \rho_\text{a} V_\text{g}$ the fluid mass of a cell, $n_\text{p}$ is the number of particles in a cell, $M_\text{p} \equiv M/n_\text{p}$ is the average fluid mass per particle in a cell, and $\mathbf{g}$ is the gravitational acceleration vector.
 
 The equations of motion of the particles and fluid are formulated as follows from Newton's second law,
@@ -860,7 +859,7 @@ Assembling Eqs. (\ref{ud_exact}) and (\ref{ug_second_order}), the solution for $
     %\mathbf{u}_p - \mathbf{U}_p &= \frac{\mathbf{u}_{p,0} - \mathbf{U}_{p,0}}{1 + \beta_p t} + \mathbf{g} t - \frac{\beta_p t^2}{2} \left[(\mathbf{u}_{p,0} - \mathbf{U}_{p,0}) \left(\frac{(\mathbf{u}_{p,0} - \mathbf{U}_{p,0}) \cdot \mathbf{g}}{|\mathbf{u}_{p,0} - \mathbf{U}_{p,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \quad ; \quad \beta_p \equiv K_p |\mathbf{u}_{p,0} - \mathbf{U}_{p,0}|
 \end{align}
 
-\subsubsection{Particle velocities and positions}
+\subsubsection*{Particle velocities and positions}
 
 The results of the previous section are not directly useful unless $\mathbf{U}_p(t)$ is known. $\mathbf{U}_p(t)$ can be found via the conservation of momentum and this leads to a solution for the particle velocities and positions.
 
@@ -895,13 +894,13 @@ Integrating Eq. (\ref{mom_u_p_full}) leads to an equation for the particle posit
     \mathbf{x}_p = \mathbf{x}_{p,0} + \left(\frac{\mathbf{u}_{p,0} + \alpha_p \mathbf{U}_{p,0}}{1 + \alpha_p}\right) t - \frac{\alpha_p (\mathbf{u}_{p,0} - \mathbf{U}_{p,0})}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p t + 1) + \frac{\mathbf{g} t^2}{2} - \frac{\alpha_p \beta_p t^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_{\text{r},0} \left(\frac{\mathbf{u}_{\text{r},0} \cdot \mathbf{g}}{|\mathbf{u}_{\text{r},0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^4) \,.
 \end{align}
 
-\subsubsection{Implementation in FDS}
+\subsubsection*{Implementation in FDS}
 
 The following solutions are used to advance the particle positions forward in time by $\delta t$ much like a normal finite-difference scheme. The exact solution is used for the case without drag.
 \begin{align}
     \mathbf{u}_p^{n+1} &= \frac{\mathbf{u}_p^n}{1 + \beta_p \delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \delta t}{(1 + \beta_p \delta t)(1 + \alpha_p)} + \mathbf{g} \delta t - \frac{\alpha_p \beta_p (\delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_\text{r}^n \left(\frac{\mathbf{u}_\text{r}^n \cdot \mathbf{g}}{|\mathbf{u}_\text{r}^n|^2}\right) + \mathbf{g}\right] \\
     & \notag \\
-    \mathbf{x}_p^{n+1} &= \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\delta t)^2}{2}
+    \mathbf{x}_p^{n+1} &= \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \delta t + 1) + \frac{\mathbf{g} (\delta t)^2}{2}
 \end{align}
 At first glance, the theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$, Eq.~(\ref{mom_x_p_full}), appears to be $\mathcal{O}(\delta t^3)$. But computation reveals it is actually $\mathcal{O}(\delta t^2)$. This is due to the velocity error reducing the overall accuracy of the position solution. The $\delta t^3$ term, therefore, may be dropped from Eq.~(\ref{mom_x_p_full}) without loss of accuracy. More details about this are available in the Lagrangian Particles chapter in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
