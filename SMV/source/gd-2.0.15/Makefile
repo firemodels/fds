@@ -1,29 +1,10 @@
-
-#Command for building a shared library. This varies depending on the OS.
-
-LINK_SHARED_HEAD=ld -shared
-LINK_SHARED_TAIL=
-
 #If the ar command fails on your system, consult the ar manpage
 #for your system. 
 AR=ar
 
-#CFLAGS=-g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBFREETYPE -DHAVE_LIBXPM -DHAVE_LIBX11
 CFLAGS=-g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11
 
-#LIBS=-lgd  -lpng -lz -ljpeg -lfreetype -lXpm -lX11 -lm
-
-#INCLUDEDIRS=-I. -I/usr/include/freetype2 -I/usr/local/include/freetype2 -I/usr/include/X11 -I/usr/X11R6/include/X11 -I/usr/local/include
-#INCLUDEDIRS=-I. -I../png125 -I/usr/include/X11 -I/usr/X11R6/include/X11 -I/usr/local/include
-INCLUDEDIRS=-I. -I../png125 -I../jpeg-6b -I/usr/include/X11 -I/usr/X11R6/include/X11
-
-LIBDIRS=-L/usr/lib/X11 -L/usr/X11R6/lib -L/usr/local/lib
-
-INSTALL_LIB=/usr/lib
-
-INSTALL_INCLUDE=/usr/include
-
-INSTALL_BIN=/usr/bin
+INCLUDEDIRS=-I. -I../png125 -I../jpeg-6b
 
 #
 #
@@ -42,104 +23,11 @@ COMPILER=gcc -fPIC
 SIZE=-m64
 
 CC=$(COMPILER) $(SIZE) $(INCLUDEDIRS)
-LINK=$(CC) $(LIBDIRS) $(LIBS)
 
 .c.obj:
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
 .c.o:
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
-
-
-PROGRAMS=pngtogd pngtogd2 gdtopng gd2topng gd2copypal gdparttopng webpng annotate $(TEST_PROGRAMS)
-
-TEST_PROGRAMS=gdtest gddemo gd2time gdtestft testac fontwheeltest fontsizetest
-
-default: instructions
-
-instructions:
-	@echo Edit this Makefile if you wish. The configure script makes
-	@echo reasonable guesses, but as of this writing \(2.0.2\) has not
-	@echo been field-tested on a lot of systems.
-	@echo
-	@echo Second, type \'make install\' as root.
-	@echo
-	@echo This installs the GD ${VERSION} shared library,
-	@echo which is required in order to use the included
-	@echo utility programs, and also includes the utility
-	@echo programs such as webpng, pngtogd, etc.
-	@echo 
-	@echo OPTIONAL third step: type \'make test\' to build 
-	@echo the optional test programs. Type \'make install\' FIRST.
-	@echo
-	@echo IF SHARED LIBRARIES WON\'T WORK FOR YOU: 
-	@echo Type \'make libgd.a\' to produce a static library,
-	@echo which you can install manually in /usr/lib.
-
-test: $(TEST_PROGRAMS)
-
-install: libgd.so.${VERSION} pngtogd pngtogd2 gdtopng gd2topng gd2copypal gdparttopng webpng annotate
-	sh ./install-item 755 pngtogd $(INSTALL_BIN)/pngtogd
-	sh ./install-item 755 pngtogd2 $(INSTALL_BIN)/pngtogd2
-	sh ./install-item 755 gdtopng $(INSTALL_BIN)/gdtopng
-	sh ./install-item 755 gd2topng $(INSTALL_BIN)/gd2topng
-	sh ./install-item 755 gd2copypal $(INSTALL_BIN)/gd2copypal
-	sh ./install-item 755 gdparttopng $(INSTALL_BIN)/gdparttopng
-	sh ./install-item 755 webpng $(INSTALL_BIN)/webpng
-	sh ./install-item 755 annotate $(INSTALL_BIN)/annotate
-	sh ./install-item 755 bdftogd $(INSTALL_BIN)/bdftogd
-	sh ./install-item 644 gd.h $(INSTALL_INCLUDE)/gd.h
-	sh ./install-item 644 gdcache.h $(INSTALL_INCLUDE)/gdcache.h
-	sh ./install-item 644 gd_io.h $(INSTALL_INCLUDE)/gd_io.h
-	sh ./install-item 644 gdfontg.h $(INSTALL_INCLUDE)/gdfontg.h
-	sh ./install-item 644 gdfontl.h $(INSTALL_INCLUDE)/gdfontl.h
-	sh ./install-item 644 gdfontmb.h $(INSTALL_INCLUDE)/gdfontmb.h
-	sh ./install-item 644 gdfonts.h $(INSTALL_INCLUDE)/gdfonts.h
-	sh ./install-item 644 gdfontt.h $(INSTALL_INCLUDE)/gdfontt.h
-
-gddemo: gddemo.o
-	$(CC) gddemo.o -o gddemo	$(LIBDIRS) $(LIBS)
-
-testac: testac.o
-	$(CC) testac.o -o testac	$(LIBDIRS) $(LIBS)
-
-pngtogd: pngtogd.o
-	$(CC) pngtogd.o -o pngtogd	$(LIBDIRS) $(LIBS) 
-
-webpng: webpng.o
-	$(CC) webpng.o -o webpng	$(LIBDIRS) $(LIBS)
-
-annotate: annotate.o
-	$(CC) annotate.o -o annotate	$(LIBDIRS) $(LIBS)
-
-pngtogd2: pngtogd2.o
-	$(CC) pngtogd2.o -o pngtogd2	$(LIBDIRS) $(LIBS)
-
-gdtopng: gdtopng.o
-	$(CC) gdtopng.o -o gdtopng	$(LIBDIRS) $(LIBS)
-
-gd2topng: gd2topng.o
-	$(CC) gd2topng.o -o gd2topng	$(LIBDIRS) $(LIBS)
-
-gd2copypal: gd2copypal.o
-	$(CC) gd2copypal.o -o gd2copypal	$(LIBDIRS) $(LIBS)
-
-gdparttopng: gdparttopng.o
-	$(CC) gdparttopng.o -o gdparttopng	$(LIBDIRS) $(LIBS)
-
-gdtest: gdtest.o
-	$(CC) gdtest.o -o gdtest	$(LIBDIRS) $(LIBS)
-
-gd2time: gd2time.o
-	$(CC) gd2time.o -o gd2time	$(LIBDIRS) $(LIBS)
-
-gdtestft: gdtestft.o
-	$(CC) --verbose gdtestft.o -o gdtestft $(LIBDIRS) $(LIBS)
-
-fontwheeltest: fontwheeltest.o
-	$(CC) --verbose fontwheeltest.o -o fontwheeltest $(LIBDIRS) $(LIBS)
-
-fontsizetest: fontsizetest.o
-	$(CC) --verbose fontsizetest.o -o fontsizetest $(LIBDIRS) $(LIBS)
 
 LIBOBJS=gd.o gd_gd.o gd_gd2.o gd_io.o gd_io_dp.o \
 		gd_io_file.o gd_ss.o gd_io_ss.o gd_png.o gd_jpeg.o gdxpm.o \
@@ -147,30 +35,8 @@ LIBOBJS=gd.o gd_gd.o gd_gd2.o gd_io.o gd_io_dp.o \
 		gdtables.o gdft.o gdcache.o gdkanji.o wbmp.o \
 		gd_wbmp.o gdhelpers.o gd_topal.o 
 
-#Shared library. This should work fine on any ELF platform (Linux, etc.) with
-#GNU ld or something similarly intelligent. To avoid the chicken-and-egg
-#problem, this target also installs the library so that applications can
-#actually find it.
-
-libgd.so.${VERSION}: ${LIBOBJS}
-	-rm -f libgd.so.${VERSION} 2>/dev/null
-	${LINK_SHARED_HEAD} -o libgd.so.${VERSION} ${LIBOBJS} 
-	sh ./install-item 644 libgd.so.${VERSION} \
-		$(INSTALL_LIB)/libgd.so.${VERSION}
-	-rm $(INSTALL_LIB)/libgd.so.${MAJOR_VERSION} 2>/dev/null
-	ln -s $(INSTALL_LIB)/libgd.so.${VERSION} \
-		$(INSTALL_LIB)/libgd.so.${MAJOR_VERSION}	
-	-rm $(INSTALL_LIB)/libgd.so 2>/dev/null
-	ln -s $(INSTALL_LIB)/libgd.so.${VERSION} \
-		$(INSTALL_LIB)/libgd.so	
-
 #Static library, if you really need one for some reason.
 libgd.a: ${LIBOBJS}
 	rm -f libgd.a
 	$(AR) rc libgd.a ${LIBOBJS}
 	-ranlib libgd.a
-
-clean:
-	rm -f *.o *.a *.so *.so.* ${PROGRAMS} test/gdtest.jpg test/gdtest.wbmp test/fttest.png test/fttest.jpg *test.errors font*test?.png
-veryclean: clean
-	rm Makefile
