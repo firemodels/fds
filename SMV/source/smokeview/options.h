@@ -133,9 +133,9 @@
 #endif
 #endif
 
-#ifndef pp_OSX
+//#ifndef pp_OSX
 #define pp_JPEG
-#endif
+//#endif
 #ifdef pp_OSX
 #undef pp_LANG
 #endif
