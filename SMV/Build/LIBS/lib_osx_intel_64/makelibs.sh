@@ -16,9 +16,10 @@ cd $SRCDIR/glui_v2_1_beta
 cp libglui.a $LIBDIR/.
 
 # GLUT
-cd $SRCDIR/glut-3.7.6
-./makelib.sh $OPTS
-cp libglut.a $LIBDIR/.
+# use OSX provided glut library for now
+#cd $SRCDIR/glut-3.7.6
+#./makelib.sh $OPTS
+#cp libglut.a $LIBDIR/.
 
 # JPEG
 cd $SRCDIR/jpeg-6b
