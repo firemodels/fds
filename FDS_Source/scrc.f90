@@ -248,10 +248,11 @@ INTEGER, PARAMETER :: NSCARC_DEBUG_NONE             = -1, &      ! no debugging 
                       NSCARC_DEBUG_NCELL            = 13, &      ! show NOM_CELL
                       NSCARC_DEBUG_SUBDIVISION      = 14, &      ! show SUBDIVISION
                       NSCARC_DEBUG_MEASURE          = 15, &      ! show MEASURE
-                      NSCARC_DEBUG_CELLTYPE         = 16, &      ! show CELLTYPE
-                      NSCARC_DEBUG_COARSE           = 17, &      ! show coarse grid
-                      NSCARC_DEBUG_PROLONGATION     = 18, &      ! show prolongation matrix
-                      NSCARC_DEBUG_RESTRICTION      = 19         ! show restriction matrix 
+                      NSCARC_DEBUG_MEASURE2         = 16, &      ! show MEASURE
+                      NSCARC_DEBUG_CELLTYPE         = 17, &      ! show CELLTYPE
+                      NSCARC_DEBUG_COARSE           = 18, &      ! show coarse grid
+                      NSCARC_DEBUG_PROLONGATION     = 19, &      ! show prolongation matrix
+                      NSCARC_DEBUG_RESTRICTION      = 20         ! show restriction matrix 
 
 INTEGER, PARAMETER :: NSCARC_COARSENING_NONE        = -1, &
                       NSCARC_COARSENING_BASIC       =  1, &      ! basic coarsening
@@ -332,7 +333,9 @@ INTEGER, PARAMETER :: NSCARC_CELLTYPE_NONE          =  0, &
                       NSCARC_CELLTYPE_FINE2         = -4, &      ! special fine-grid cell
                       NSCARC_CELLTYPE_SFINE         = -2, &      ! strongly coupled fine-grid cell
                       NSCARC_CELLTYPE_WFINE         = -3, &      ! weakly   coupled fine-grid cell
-                      NSCARC_CELLTYPE_ZPOINT        = -4         ! special z-point
+                      NSCARC_CELLTYPE_ZPNT          = -4, &      ! special z-point
+                      NSCARC_CELLTYPE_FPNT          = -5, &      ! special f-point
+                      NSCARC_CELLTYPE_CPNT          = -6         ! special c-point
 
 INTEGER, PARAMETER :: NSCARC_INTERPOL_NONE          =  0, &
                       NSCARC_INTERPOL_STANDARD      =  1, &      ! standard interpolation
@@ -501,7 +504,7 @@ INTEGER :: NCC , NCF, NCE, NPE, NRE, NGE, NCCI
 INTEGER :: NCC0, NCF0, NCE0, NP0, NR0, NA0, NW0
 INTEGER :: IG, IG0, IG1=0
 INTEGER , POINTER, DIMENSION (:) :: GHOST_PTR, WALL_PTR, NOM_PTR, EXT_PTR, CELLTYPE, A_SIZE, AUX, GRAPH
-REAL(EB), POINTER, DIMENSION (:) :: MEASURE
+REAL(EB), POINTER, DIMENSION (:) :: MEASURE, MEASURE2
 REAL(EB), POINTER, DIMENSION (:) :: A , P , R, X
 INTEGER,   POINTER, DIMENSION (:):: A_ROW, A_COL     
 INTEGER,   POINTER, DIMENSION (:):: P_ROW, P_COL    
@@ -555,7 +558,7 @@ INTEGER :: SUBDIVISION(3,-3:3)
 INTEGER,   POINTER, DIMENSION (:)    :: INTERNAL_BDRY_CELL
 INTEGER,   POINTER, DIMENSION (:, :) :: WALL_INDEX, P_PTR, W_PTR
 INTEGER,   POINTER, DIMENSION (:)    :: CELLTYPE, GHOST_PTR, WALL_PTR, EXT_PTR, GRAPH
-REAL(EB),  POINTER, DIMENSION (:)    :: MEASURE
+REAL(EB),  POINTER, DIMENSION (:)    :: MEASURE, MEASURE2
 INTEGER,   POINTER, DIMENSION (:)    :: A_ROW, A_COL      ! row and column pointers for system matrix A
 INTEGER,   POINTER, DIMENSION (:)    :: S_ROW, S_COL      ! row and column pointers for strength matrix S
 INTEGER,   POINTER, DIMENSION (:)    :: ST_ROW, ST_COL    ! row and column pointers for transpose of strength matrix S
@@ -5522,6 +5525,10 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%MEASURE', IERR)
       SCF%MEASURE = NSCARC_MEASURE_NONE
 
+      ALLOCATE (SCF%MEASURE2(1:SCF%NCE), STAT=IERR)
+      CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%MEASURE2', IERR)
+      SCF%MEASURE2 = NSCARC_MEASURE_NONE
+
       ALLOCATE (SCF%CELLTYPE(1:SCF%NCE), STAT=IERR)
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%CELLTYPE', IERR)
       SCF%CELLTYPE = NSCARC_CELLTYPE_NONE
@@ -6324,7 +6331,7 @@ END FUNCTION STRONGLY_COUPLED
 SUBROUTINE SCARC_SETUP_STRENGTH_MATRIX(NTYPE, NL)
 INTEGER, PARAMETER  :: NCOUPLINGS = 20
 INTEGER, INTENT(IN) :: NTYPE, NL
-INTEGER  :: NM, IC, ICOL, IDIAG, IP, IS, IPOS
+INTEGER  :: NM, IC, ICOL, IDIAG, IP, IS !, IPOS
 REAL(EB) :: ADIAG, ACOL, ROW_SCALE, ROW_SUM, MAX_ROW_SUM = 0.9_EB, THRESHOLD = 0.25_EB
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
 
@@ -6378,7 +6385,7 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
    ENDDO STRENGTH_CELL_LOOP
 
    IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-      WRITE(SCARC_LU,*) '---------------------- S_ROW:', SC%NC
+      WRITE(SCARC_LU,*) 'A: ---------------------- S_ROW:', SC%NC
       WRITE(SCARC_LU,'(4i9)') (SC%S_ROW(IC), IC=1,SC%NC+1)
       WRITE(SCARC_LU,*) '---------------------- S_COL:'
       DO IC = 1, SC%NC
@@ -6394,55 +6401,52 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
    IS = 1
    STRENGTH_CELL_LOOP2: DO IC = 1, SC%NC
       SC%S_ROW(IC) = IS
-      DO ICOL = SC%A_ROW(IC)+1, SC%A_ROW(IC+1)-1
+      DO ICOL = SC%A_ROW(IC), SC%A_ROW(IC+1)-1
          IF (SC%S_COL(ICOL) > -1) THEN
             SC%S_COL(IS) = SC%S_COL(ICOL)
+            WRITE(SCARC_LU,*) 'S_COL(',IS,')=',SC%S_COL(ICOL)
             IS = IS + 1
          ENDIF
-         SC%S_ROW(SC%NC+1) = IS
       ENDDO
    ENDDO STRENGTH_CELL_LOOP2
+   SC%S_ROW(SC%NC+1) = IS
    
    IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-      WRITE(SCARC_LU,*) '---------------------- S_ROW:', SC%NC
+      WRITE(SCARC_LU,*) 'B: ---------------------- S_ROW:', SC%NC
       WRITE(SCARC_LU,'(4i9)') (SC%S_ROW(IC), IC=1,SC%NC+1)
       WRITE(SCARC_LU,*) '---------------------- S_COL:'
       DO IC = 1, SC%NC
          WRITE(SCARC_LU,'(i5,a,20i9)') IC,':',(SC%S_COL(IP),IP=SC%S_ROW(IC),SC%S_ROW(IC+1)-1)
       ENDDO
-      WRITE(SCARC_LU,*) '---------------------- S:'
-      DO IC = 1, SC%NC
-         WRITE(SCARC_LU,'(i5,a,20f9.2)') IC,':',(SC%S(IP),IP=SC%S_ROW(IC),SC%S_ROW(IC+1)-1)
-      ENDDO
    ENDIF
 
-   IS = SC%S_ROW(SC%NC)
-   DO ICOL = 1, IS
-      SC%ST_ROW(SC%S_COL(ICOL)+1) = SC%ST_ROW(SC%S_COL(ICOL)+1) + 1
-   ENDDO 
-   DO IC = 1, SC%NC
-      SC%ST_ROW(IC+1)= SC%ST_ROW(IC+1) + SC%ST_ROW(IC) 
-   ENDDO 
-   DO IC = 1, SC%NC
-      DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
-         IPOS = SC%S_COL(ICOL)
-         SC%ST_COL(SC%ST_ROW(IPOS)) = IC
-         SC%ST_ROW(IPOS) = SC%ST_ROW(IPOS) + 1
-      ENDDO
-   ENDDO 
-   DO IC = SC%NC, 1, -1
-      SC%ST_ROW(IC) = SC%ST_ROW(IC-1)
-   ENDDO
-   SC%ST_ROW(1) = 1
-
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-      WRITE(SCARC_LU,*) '---------------------- ST_ROW:', SC%NC
-      WRITE(SCARC_LU,'(4i9)') (SC%ST_ROW(IC), IC=1,SC%NC+1)
-      WRITE(SCARC_LU,*) '---------------------- ST_COL:'
-      DO IC = 1, SC%NC
-         WRITE(SCARC_LU,'(i5,a,20i9)') IC,':',(SC%ST_COL(IP),IP=SC%ST_ROW(IC),SC%ST_ROW(IC+1)-1)
-      ENDDO
-   ENDIF
+!   IS = SC%S_ROW(SC%NC)
+!   DO ICOL = 1, IS
+!      SC%ST_ROW(SC%S_COL(ICOL)+1) = SC%ST_ROW(SC%S_COL(ICOL)+1) + 1
+!   ENDDO 
+!   DO IC = 1, SC%NC
+!      SC%ST_ROW(IC+1)= SC%ST_ROW(IC+1) + SC%ST_ROW(IC) 
+!   ENDDO 
+!   DO IC = 1, SC%NC
+!      DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+!         IPOS = SC%S_COL(ICOL)
+!         SC%ST_COL(SC%ST_ROW(IPOS)) = IC
+!         SC%ST_ROW(IPOS) = SC%ST_ROW(IPOS) + 1
+!      ENDDO
+!   ENDDO 
+!   DO IC = SC%NC, 1, -1
+!      SC%ST_ROW(IC) = SC%ST_ROW(IC-1)
+!   ENDDO
+!   SC%ST_ROW(1) = 1
+!
+!   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+!      WRITE(SCARC_LU,*) '---------------------- ST_ROW:', SC%NC
+!      WRITE(SCARC_LU,'(4i9)') (SC%ST_ROW(IC), IC=1,SC%NC+1)
+!      WRITE(SCARC_LU,*) '---------------------- ST_COL:'
+!      DO IC = 1, SC%NC
+!         WRITE(SCARC_LU,'(i5,a,20i9)') IC,':',(SC%ST_COL(IP),IP=SC%ST_ROW(IC),SC%ST_ROW(IC+1)-1)
+!      ENDDO
+!   ENDIF
 
 ENDDO STRENGTH_MESHES_LOOP
 
@@ -6455,9 +6459,9 @@ END SUBROUTINE SCARC_SETUP_STRENGTH_MATRIX
 SUBROUTINE SCARC_SETUP_MEASURES(NTYPE, NL)
 INTEGER, PARAMETER  :: NCOUPLINGS = 20
 INTEGER, INTENT(IN) :: NTYPE, NL
-INTEGER  :: NM, IC, ICOL, IRAND, CELLS_LEFT
-INTEGER  :: SELECTED_FINE_CELL=-3, SELECTED_COARSE_CELL=3, NONSELECTED_CELL=0
-REAL(EB) :: RAND_NUM, MEASURE
+INTEGER :: NM, IC, JC, ICOL, IRAND, NUM_REMAINING
+INTEGER :: FCELL = -1, ZCELL =-2
+REAL(EB) :: RAND_NUM, MEASURE, NEW_MEASURE
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
 
 
@@ -6476,36 +6480,62 @@ SELECT CASE (NTYPE)
       
          SC => SCARC(NM)%COMPACT(NL)            
 
-         CELLS_LEFT = 0
-         SC%MEASURE = NSCARC_MEASURE_NONE
+         NUM_REMAINING = 0
+
+         RS3_MEASURE_LOOP0: DO IC = 1, SC%NC
+            SC%MEASURE(IC) = SC%S_ROW(IC+1)-SC%S_ROW(IC) 
+         ENDDO RS3_MEASURE_LOOP0
 
          RS3_MEASURE_LOOP1: DO IC = 1, SC%NC
             IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'RS3_LOOP1  IC=',IC
+            
             IF (SC%S_ROW(IC+1)-SC%S_ROW(IC) == 0) THEN
-               SC%CELLTYPE(IC) = SELECTED_FINE_CELL
+               SC%CELLTYPE(IC) = NSCARC_CELLTYPE_FINE
                SC%MEASURE(IC) = 0.0_EB
-               ! IF (AGGRESSIVE2) SC%CELLTYPE(IC) = SELECTED_COARSE_CELL 
+               ! IF (AGGRESSIVE2) SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE 
             ELSE
-               SC%CELLTYPE(IC) = NONSELECTED_CELL
-               CELLS_LEFT = CELLS_LEFT + 1
+               SC%CELLTYPE(IC) = NSCARC_CELLTYPE_NONE
+               NUM_REMAINING   = NUM_REMAINING + 1
             ENDIF
          ENDDO RS3_MEASURE_LOOP1
 
          RS3_MEASURE_LOOP2: DO IC = 1, SC%NC
             IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'RS3_LOOP2  IC=',IC
             MEASURE = SC%MEASURE(IC)
-            IF (SC%CELLTYPE(IC) /= SELECTED_FINE_CELL .AND. SC%CELLTYPE(IC) /= SELECTED_COARSE_CELL) THEN
-               IF (MEASURE > 0.0) THEN
+            IF (SC%CELLTYPE(IC) /= NSCARC_CELLTYPE_FINE .AND. SC%CELLTYPE(IC) /= NSCARC_CELLTYPE_COARSE) THEN
+               IF (SC%MEASURE(IC) > 0.0_EB) THEN
+                  SC%MEASURE2(IC) = SC%MEASURE(IC) 
+               ELSE
+                  IF (SC%MEASURE(IC) < 0.0_EB) WRITE(*,*) 'SCARC_SETUP_MEASURE: Negative measure !!'
+                  SC%CELLTYPE(IC) = FCELL
+                  DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+                     JC = SC%S_COL(ICOL)
+                     IF (SC%CELLTYPE(JC) /= NSCARC_CELLTYPE_COARSE .AND. SC%CELLTYPE(JC) /= NSCARC_CELLTYPE_FINE) THEN
+                        IF (JC < IC) THEN
+                           NEW_MEASURE = SC%MEASURE(JC)
+                           IF (NEW_MEASURE > 0.0_EB) SC%MEASURE2(JC) = 0.0_EB
+                           NEW_MEASURE = SC%MEASURE(JC)+1
+                           SC%MEASURE2(JC) = NEW_MEASURE
+                        ELSE
+                           NEW_MEASURE = SC%MEASURE(JC)+1
+                          
+                        ENDIF
+                     ENDIF
+                  ENDDO
+                  NUM_REMAINING = NUM_REMAINING - 1
                ENDIF
             ENDIF
          ENDDO RS3_MEASURE_LOOP2
 
+
 CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_MEASURES', 'MEASURE AFTER FIRST RS3 LOOP ')
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE2, NL, 'SETUP_MEASURES', 'MEASURE2 AFTER FIRST RS3 LOOP ')
       
       ENDDO RS3_LOOP
 
    CASE (NSCARC_COARSENING_FALGOUT)
 
+      FCELL = ZCELL
       FALGOUT_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
 
          SC => SCARC(NM)%COMPACT(NL)
@@ -9029,6 +9059,9 @@ END SELECT
 END SUBROUTINE SCARC_VECTOR_SUM
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Copy one integer array to another (possible scaled)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_COPY_INTEGER(X, Y, SCAL, NLEN)
 INTEGER,  INTENT(IN) , DIMENSION(:) :: X
 INTEGER,  INTENT(OUT), DIMENSION(:) :: Y
@@ -9051,6 +9084,10 @@ ENDIF
 
 END SUBROUTINE SCARC_COPY_INTEGER
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Copy one real array to another (possible scaled)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_COPY_REAL(X, Y, SCAL, NLEN)
 REAL(EB), INTENT(IN) , DIMENSION(:) :: X
 REAL(EB), INTENT(OUT), DIMENSION(:) :: Y
@@ -14445,6 +14482,28 @@ SELECT CASE (NTYPE)
          ENDIF
       ENDDO
    
+   !!!----------------------------------------------------------------------------------------------------
+   !!! Debug MEASURE
+   !!!----------------------------------------------------------------------------------------------------
+   CASE (NSCARC_DEBUG_MEASURE2)
+
+      WRITE(SCARC_LU,1000) CROUTINE, CNAME, 1, NL
+      IF (NMESHES==4.AND.SCARC(1)%COMPACT(NL)%NX==4) THEN
+      SC1 => SCARC(1)%COMPACT(NL)
+      SC2 => SCARC(2)%COMPACT(NL)
+      SC3 => SCARC(3)%COMPACT(NL)
+      SC4 => SCARC(4)%COMPACT(NL)
+      WRITE(SCARC_LU,'(5f6.2,6X,5f6.2)') SC3%MEASURE2(13:16),SC4%MEASURE2(13:16)
+      WRITE(SCARC_LU,'(5f6.2,6X,5f6.2)') SC3%MEASURE2( 9:12),SC4%MEASURE2( 9:12)
+      WRITE(SCARC_LU,'(5f6.2,6X,5f6.2)') SC3%MEASURE2( 5: 8),SC4%MEASURE2( 5: 8)
+      WRITE(SCARC_LU,'(5f6.2,6X,5f6.2)') SC3%MEASURE2( 1: 4),SC4%MEASURE2( 1: 4)
+      WRITE(SCARC_LU,*)
+      WRITE(SCARC_LU,'(5f6.2,6X,5f6.2)') SC1%MEASURE2(13:16),SC2%MEASURE2(13:16)
+      WRITE(SCARC_LU,'(5f6.2,6X,5f6.2)') SC1%MEASURE2( 9:12),SC2%MEASURE2( 9:12)
+      WRITE(SCARC_LU,'(5f6.2,6X,5f6.2)') SC1%MEASURE2( 5: 8),SC2%MEASURE2( 5: 8)
+      WRITE(SCARC_LU,'(5f6.2,6X,5f6.2)') SC1%MEASURE2( 1: 4),SC2%MEASURE2( 1: 4)
+      ENDIF
+
    !!!----------------------------------------------------------------------------------------------------
    !!! Debug MEASURE
    !!!----------------------------------------------------------------------------------------------------
