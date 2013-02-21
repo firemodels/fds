@@ -439,9 +439,7 @@ extern "C" void glui_motion_setup(int main_window){
   PANEL_file_type=glui_motion->add_panel_to_panel(ROLLOUT_render,"file type:",true);
   RADIO_render_type=glui_motion->add_radiogroup_to_panel(PANEL_file_type,&renderfiletype,RENDER_TYPE,Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type,"PNG");
-#ifdef pp_JPEG
   glui_motion->add_radiobutton_to_group(RADIO_render_type,"JPEG");
-#endif
 
   PANEL_file_suffix=glui_motion->add_panel_to_panel(ROLLOUT_render,"file suffix:",true);
   RADIO_render_label=glui_motion->add_radiogroup_to_panel(PANEL_file_suffix,&renderfilelabel,RENDER_LABEL,Render_CB);

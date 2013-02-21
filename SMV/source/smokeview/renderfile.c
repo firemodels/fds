@@ -23,9 +23,7 @@ char renderfile_revision[]="$Revision$";
 #include "gd.h"
 
 #define PNG 0
-#ifdef pp_JPEG
 #define JPEG 1
-#endif
 
 /* ------------------ Render ------------------------ */
 
@@ -226,11 +224,9 @@ void RenderFrame(int view_mode){
   case 0:
     renderfile_ext=ext_png;
     break;
-#ifdef pp_JPEG
   case 1:
     renderfile_ext=ext_jpg;
     break;
-#endif
   default:
     renderfiletype=2;
     renderfile_ext=ext_png;
@@ -300,11 +296,9 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   case PNG:
     ext=ext_png;
     break;
-#ifdef pp_JPEG
   case JPEG:
     ext=ext_jpg;
     break;
-#endif
   default:
     renderfiletype=0;
     ext=ext_png;
@@ -371,11 +365,9 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
     break;
-#ifdef pp_JPEG
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
-#endif
   default:
     ASSERT(0);
     break;
@@ -486,11 +478,9 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
     break;
-#ifdef pp_JPEG
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
-#endif
   default:
     ASSERT(0);
     break;
@@ -555,18 +545,12 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
   
   if(printflag==1)printf("Loading texture:%s ",filebuffer);
   ext = filebuffer + strlen(filebuffer) - 4;
-#ifdef pp_JPEG
   if(strncmp(ext,".jpg",4)==0||strncmp(ext,".JPG",4)==0){
     returncode = readjpeg(filebuffer,width,height,pixel_skip);
   }
   else if(strncmp(ext,".png",4)==0||strncmp(ext,".PNG",4)==0){
     returncode = readpng(filebuffer,width,height);
   }
-#else
-  if(strncmp(ext,".png",4)==0||strncmp(ext,".PNG",4)==0){
-    returncode = readpng(filebuffer,width,height);
-  }
-#endif
   else{
     if(allocated==1){
       FREEMEMORY(filebuffer);
@@ -589,7 +573,6 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
 
 }
 
-#ifdef pp_JPEG
 /* ------------------ readjpeg ------------------------ */
 
 unsigned char *readjpeg(const char *filename,int *width, int *height, int skip_local){
@@ -636,7 +619,6 @@ unsigned char *readjpeg(const char *filename,int *width, int *height, int skip_l
   return dataptr;
 
 }
-#endif
 
 /* ------------------ readpng ------------------------ */
 

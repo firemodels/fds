@@ -333,9 +333,7 @@ void _Sniff_Errors(char *whereat);
 #define RenderCancel 999
 #define RENDERONCE_SINGLE 998
 #define RENDERONCE_MULTIPLE 978
-#ifdef pp_JPEG
 #define RenderJPEG 997
-#endif
 #define RenderPNG 996
 #define Render320 995
 #define Render640 994

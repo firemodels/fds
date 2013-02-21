@@ -478,9 +478,7 @@ EXTERNCPP void handle_rotation_type(int flag);
 EXTERNCPP void init_texturedir(void);
 EXTERNCPP void getrgb(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb);
 EXTERNCPP unsigned char *readpicture(char *filename, int *width, int *height, int printflag);
-#ifdef pp_JPEG
 EXTERNCPP unsigned char *readjpeg(const char *filename,int *width, int *height, int skip);
-#endif
 EXTERNCPP unsigned char *readpng(const char *filename,int *width, int *height);
 
 EXTERNCPP void update_whichface(int which_face);

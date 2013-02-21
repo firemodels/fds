@@ -85,11 +85,6 @@
 #define STAT stat
 #endif
 
-#ifndef pp_OSX
-#define pp_JPEG
-#endif
-
-
 #define EGZ
 #define USE_ZLIB
 

@@ -1426,12 +1426,10 @@ void RenderMenu(int value){
      renderfiletype=0;
      updatemenu=1;  
      break;
-#ifdef pp_JPEG
   case RenderJPEG:
      renderfiletype=1;
      updatemenu=1;  
      break;
-#endif
   default:
     if(RenderTime==0&&touring==0)return;
     if(touring==1){
@@ -6998,21 +6996,15 @@ updatemenu=0;
     glutAddMenuEntry(_("Type:"),11000);
     if(renderfiletype==0){
       glutAddMenuEntry("  *PNG",RenderPNG);
-#ifdef pp_JPEG
       glutAddMenuEntry("  JPEG",RenderJPEG);
-#endif
     }
     if(renderfiletype==1){
       glutAddMenuEntry("  PNG",RenderPNG);
-#ifdef pp_JPEG
       glutAddMenuEntry("  *JPEG",RenderJPEG);
-#endif
     }
     if(renderfiletype==2){
       glutAddMenuEntry("  PNG",RenderPNG);
-#ifdef pp_JPEG
       glutAddMenuEntry("  JPEG",RenderJPEG);
-#endif
     }
 
     glutAddMenuEntry(_("File suffix:"),11000);

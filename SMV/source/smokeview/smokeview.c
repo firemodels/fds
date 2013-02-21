@@ -790,9 +790,6 @@ void usage(char **argv){
 #ifdef ISO_DEBUG
     strcat(label,", ISO_DEBUG");
 #endif
-#ifdef pp_JPEG
-    strcat(label,", pp_JPEG");
-#endif
 #ifdef pp_LIGHT
     strcat(label,", pp_LIGHT");
 #endif

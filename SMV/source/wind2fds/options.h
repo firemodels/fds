@@ -85,10 +85,6 @@
 #define STAT stat
 #endif
 
-#ifndef pp_OSX
-#define pp_JPEG
-#endif
-
 // VVVVVVVVVVVVVVVVVVVVVVVVV  set defines used by various headers VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 #ifdef CPP
 #define CCC "C"
