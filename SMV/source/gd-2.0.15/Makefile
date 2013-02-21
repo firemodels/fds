@@ -14,7 +14,8 @@ CFLAGS=-g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11
 #LIBS=-lgd  -lpng -lz -ljpeg -lfreetype -lXpm -lX11 -lm
 
 #INCLUDEDIRS=-I. -I/usr/include/freetype2 -I/usr/local/include/freetype2 -I/usr/include/X11 -I/usr/X11R6/include/X11 -I/usr/local/include
-INCLUDEDIRS=-I. -I../png125 -I/usr/include/X11 -I/usr/X11R6/include/X11 -I/usr/local/include
+#INCLUDEDIRS=-I. -I../png125 -I/usr/include/X11 -I/usr/X11R6/include/X11 -I/usr/local/include
+INCLUDEDIRS=-I. -I../png125 -I../jpeg-6b -I/usr/include/X11 -I/usr/X11R6/include/X11
 
 LIBDIRS=-L/usr/lib/X11 -L/usr/X11R6/lib -L/usr/local/lib
 
