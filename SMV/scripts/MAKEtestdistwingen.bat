@@ -68,9 +68,6 @@ echo copying sh2bat.exe
 copy %sh2bat%\sh2bat.exe %smvdir%\.
 
 
-echo copying note.txt
-copy note.txt %smvdir%\.
-
 echo copying wrapup_smv_install_%platform%.bat
 copy wrapup_smv_install_%platform%.bat "%smvdir%\wrapup_smv_install.bat
 

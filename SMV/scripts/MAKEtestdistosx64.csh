@@ -16,7 +16,6 @@ cd $FORBUNDLE
 rm -rf $OSXDIR
 mkdir -p $OSXDIR
 mkdir -p $OSXDIR/Documentation
-cp note.txt $OSXDIR/Documentation/.
 
 cp $FORBUNDLE/objects.svo $OSXDIR/.
 cp $FORBUNDLE/*.po $OSXDIR/.

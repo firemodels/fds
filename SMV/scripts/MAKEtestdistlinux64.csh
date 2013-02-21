@@ -14,7 +14,6 @@ cd $FORBUNDLE
 rm -rf $LINUXDIR
 mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/Documentation
-cp note.txt $LINUXDIR/Documentation/.
 cp $FORBUNDLE/objects.svo $LINUXDIR/.
 cp $FORBUNDLE/*.po $LINUXDIR/.
 cp $BACKGROUNDDIR/background $LINUXDIR/.
