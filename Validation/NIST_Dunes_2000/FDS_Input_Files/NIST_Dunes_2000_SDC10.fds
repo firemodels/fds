@@ -205,9 +205,9 @@
 = Station A =
 =============
 
-&DEVC ID='Ion1A',   PROP_ID='I1', XYZ=0.48, 1.63, 2.28 /
-&DEVC ID='Ion3A',   PROP_ID='I3', XYZ=0.48, 1.63, 2.28 /
-&DEVC ID='Ion4A',   PROP_ID='I4', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Ion1A', PROP_ID='I1', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Ion3A', PROP_ID='I3', XYZ=0.48, 1.63, 2.28 /
+&DEVC ID='Ion4A', PROP_ID='I4', XYZ=0.48, 1.63, 2.28 /
 &DEVC ID='Pho1A', PROP_ID='P1', XYZ=0.48, 1.63, 2.28 /
 &DEVC ID='Pho3A', PROP_ID='P3', XYZ=0.48, 1.63, 2.28 /
 
