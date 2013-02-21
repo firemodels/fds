@@ -1202,6 +1202,32 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          ENDDO
       ENDDO
 
+   CASE (CENTRAL_LIMITER) LIMITER_SELECT
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+               FX(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I+1,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+               FY(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I,J+1,K))
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1
+         DO J=1,JBAR
+            DO I=1,IBAR
+               FZ(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I,J,K+1))
+            ENDDO
+         ENDDO
+      ENDDO
+
    CASE DEFAULT LIMITER_SELECT
 
       DO K=1,KBAR
@@ -1831,7 +1857,7 @@ BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             CASE(-3)
                DP(II,JJ,KK) = DP(II,JJ,KK) - WC%ONE_D%UWS*RDZ(KK)
          END SELECT
-      CASE (OPEN_BOUNDARY,MIRROR_BOUNDARY,INTERPOLATED_BOUNDARY)
+      CASE (OPEN_BOUNDARY,MIRROR_BOUNDARY,INTERPOLATED_BOUNDARY) ! should INTERPOLATED_BOUNDARY be here?
          IIG = WC%ONE_D%IIG
          JJG = WC%ONE_D%JJG
          KKG = WC%ONE_D%KKG

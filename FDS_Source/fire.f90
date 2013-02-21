@@ -706,8 +706,8 @@ IF (TMP_0 < RN%AUTO_IGNITION_TEMPERATURE) THEN
 ELSE
    DZ_FUEL = 1._EB
    DZ_AIR = 0._EB
-   !Search reactants to find limiting reactant and express it as fuel mass.  This is the amount of fuel
-   !that can burn
+   
+   !Search reactants to find limiting reactant and express it as fuel mass. This is the amount of fuel that can burn.
    DO NS = 0,N_TRACKED_SPECIES
       IF (RN%NU(NS)<-TWO_EPSILON_EB) &
          DZ_FUEL = MIN(DZ_FUEL,-ZZ_MIXED_IN(NS)/RN%NU_MW_O_MW_F(NS))
@@ -727,15 +727,15 @@ ELSE
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_0,TMP_0) 
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_N,RN%CRIT_FLAME_TMP)
    
-   !Loop over non-fuel reactants and find the mininum.  Determine how much "air" is needed to provide the limting reactant
+   !Loop over non-fuel reactants and find the mininum.  Determine how much "air" is needed to provide the limting reactant.
    DO NS = 0,N_TRACKED_SPECIES
-            IF (RN%NU(NS)<-TWO_EPSILON_EB .AND. NS/=RN%FUEL_SMIX_INDEX) &
-              DZ_AIR = MAX(DZ_AIR, -DZ_FUEL*RN%NU_MW_O_MW_F(NS)/ZZ_GET(NS))
+      IF (RN%NU(NS)<-TWO_EPSILON_EB .AND. NS/=RN%FUEL_SMIX_INDEX) &
+         DZ_AIR = MAX(DZ_AIR, -DZ_FUEL*RN%NU_MW_O_MW_F(NS)/ZZ_GET(NS))
    ENDDO
    
-   !See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp   
+   !See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.   
    IF ( (DZ_FUEL*CPBAR_F_0 + DZ_AIR*CPBAR_G_0)*TMP_0 + DZ_FUEL*RN%HEAT_OF_COMBUSTION < &
-         (DZ_FUEL*CPBAR_F_N + DZ_AIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) EXTINCT_2 = .TRUE.
+        (DZ_FUEL*CPBAR_F_N + DZ_AIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) EXTINCT_2 = .TRUE.
 
 ENDIF
 
