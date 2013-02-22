@@ -29,13 +29,10 @@ WARNMORE=-Wwrite-strings -Wpointer-arith -Wshadow \
 	-Wmissing-declarations -Wtraditional -Wcast-align \
 	-Wstrict-prototypes -Wmissing-prototypes #-Wconversion
 
-# for pgcc version 2.95.1, -O3 is buggy; don't use it.
-
 CFLAGS=-I$(ZLIBINC) -Wall -O3 -funroll-loops \
 	$(ALIGN) # $(WARNMORE) -g -DPNG_DEBUG=5
 
-LDFLAGS=-L. -Wl,-rpath,. -L$(ZLIBLIB) -Wl,-rpath,$(ZLIBLIB) -lpng12 -lz -lm
-LDFLAGS_A=-L$(ZLIBLIB) -Wl,-rpath,$(ZLIBLIB) libpng.a -lz -lm
+.SUFFIXES:      .c .o .obj
 
 .c.obj:
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
@@ -47,17 +44,13 @@ RM=/bin/rm -f
 OBJS = png.o pngset.o pngget.o pngrutil.o pngtrans.o pngwutil.o \
 	pngread.o pngrio.o pngwio.o pngwrite.o pngrtran.o \
 	pngwtran.o pngmem.o pngerror.o pngpread.o
+OBJSWIN = $(OBJS:.o=.obj)
 
-.SUFFIXES:      .c .o .pic.o
-
-.c.pic.o:
-	$(CC) -c $(CFLAGS) -fPIC -o $@ $*.c
-
-all: libpng.a $(LIBNAME).so pngtest pngtest-static libpng.pc libpng-config
 
 libpng.a: $(OBJS)
 	ar rc $@ $(OBJS)
 	$(RANLIB) $@
 
-clean:
-	$(RM) *.o libpng.a
+libpng.lib: $(OBJSWIN)
+	ar rc $@ $(OBJSWIN)
+	$(RANLIB) $@

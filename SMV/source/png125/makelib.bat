@@ -1,5 +1,6 @@
 @echo off
-
 call ..\setopts %OPTS%
-erase *.o
-make COMPILER=%COMPILER% SIZE=%SIZE% RM=erase -f ./makefile_win libpng.lib
+erase *.o *.obj libpng.a libpng.lib
+set target=libpng.lib
+if %COMPILER% == gcc set target=libpng.a
+make COMPILER=%COMPILER% SIZE=%SIZE% RM=erase -f ./makefile %target%
