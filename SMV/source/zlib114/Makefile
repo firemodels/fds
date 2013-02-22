@@ -39,5 +39,4 @@ libz.a: $(OBJS)
 	$(RANLIB) $@
 
 libz.lib: $(OBJSWIN)
-	ar rc $@ $(OBJSWIN)
-	$(RANLIB) $@
+	lib $(OBJSWIN) -OUT:$@ 

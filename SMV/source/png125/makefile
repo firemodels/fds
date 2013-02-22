@@ -52,5 +52,4 @@ libpng.a: $(OBJS)
 	$(RANLIB) $@
 
 libpng.lib: $(OBJSWIN)
-	ar rc $@ $(OBJSWIN)
-	$(RANLIB) $@
+	lib $(OBJSWIN) -OUT:$@

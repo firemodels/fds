@@ -77,6 +77,4 @@ libjpeg.a:  $(LIBOBJECTS)
 	$(AR2) libjpeg.a
 
 libjpeg.lib:  $(LIBOBJECTSWIN)
-	$(RM) libjpeg.lib
-	$(AR) libjpeg.lib  $(LIBOBJECTSWIN)
-	$(AR2) libjpeg.lib
+	lib   $(LIBOBJECTSWIN) -OUT:libjpeg.lib

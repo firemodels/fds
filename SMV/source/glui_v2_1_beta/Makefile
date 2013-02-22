@@ -40,5 +40,4 @@ libglui.a: $(GLUI_OBJS)
 	ar rcs libglui.a $(GLUI_OBJS)
 
 libglui.lib: $(GLUI_OBJSWIN)
-	@echo "Creating library"
-	ar rcs libglui.lib $(GLUI_OBJSWIN)
+	lib $(GLUI_OBJSWIN) -OUT:libglui.lib 

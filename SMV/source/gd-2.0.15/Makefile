@@ -45,6 +45,4 @@ libgd.a: ${LIBOBJS}
 	-ranlib libgd.a
 
 libgd.lib: ${LIBOBJSWIN}
-	$(RM) libgd.lib
-	$(AR) rc libgd.lib ${LIBOBJSWIN}
-	-ranlib libgd.lib
+	lib ${LIBOBJSWIN} -OUT:libgd.lib 
