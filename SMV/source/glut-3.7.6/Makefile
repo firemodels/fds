@@ -34,6 +34,8 @@ glut_joy.o glut_key.o glut_keyctrl.o glut_keyup.o glut_modifier.o glut_mroman.o 
 glut_shapes.o glut_space.o glut_stroke.o   glut_swap.o glut_swidth.o glut_tablet.o glut_teapot.o glut_tr10.o glut_tr24.o glut_util.o \
 glut_win.o glut_winmisc.o glut_mesa.o glut_warp.o glut_vidresize.o win32_glx.o win32_menu.o win32_util.o win32_x11.o
 
+OBJWINSWIN = $(OBJWINS:.o=.obj)
+
 .SUFFIXES:      .c .o .obj .pic.o
 
 libglut.a: $(OBJS)
@@ -44,6 +46,6 @@ libglutwin.a: $(OBJWINS)
 	ar rc $@ $(OBJWINS)
 	$(RANLIB) $@
 
-#libglut.lib: $(OBJWINS)
-#	ar rc $@ $(OBJWINS)
-#	$(RANLIB) $@
+libglutwin.lib: $(OBJWINSWIN)
+	ar rc $@ $(OBJWINSWIN)
+	$(RANLIB) $@
