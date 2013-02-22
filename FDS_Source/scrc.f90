@@ -5537,7 +5537,7 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%S', IERR)
       CALL SCARC_COPY_REAL(SCF%A, SCF%S, 1.0_EB, SCF%NA)
 
-      ALLOCATE (SCF%S_COL(SCF%NA+1), STAT=IERR)
+      ALLOCATE (SCF%S_COL(SCF%NA), STAT=IERR)
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%S_COL', IERR)
       CALL SCARC_COPY_INTEGER(SCF%A_COL, SCF%S_COL, 1, SCF%NA)
 
@@ -5545,11 +5545,11 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%S_ROW', IERR)
       CALL SCARC_COPY_INTEGER(SCF%A_ROW, SCF%S_ROW, 1, SCF%NC+1)
 
-      ALLOCATE (SCF%ST_COL(SCF%NAE+1), STAT=IERR)
+      ALLOCATE (SCF%ST_COL(SCF%NA+1), STAT=IERR)
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%ST_COL', IERR)
       SCF%ST_COL = 0
 
-      ALLOCATE (SCF%ST_ROW(SCF%NCE+1), STAT=IERR)
+      ALLOCATE (SCF%ST_ROW(SCF%NC+1), STAT=IERR)
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%ST_ROW', IERR)
       SCF%ST_ROW = 0
 
@@ -5590,7 +5590,7 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
       CASE (NSCARC_COARSENING_GMG)
          CALL SCARC_SETUP_CELLTYPES (NSCARC_COARSENING_GMG, NL)
       CASE (NSCARC_COARSENING_RS3)
-         CALL SCARC_SETUP_MEASURES  (NSCARC_COARSENING_RS3, NL)
+         CALL SCARC_SETUP_COLORING  (NSCARC_COARSENING_RS3, NL)
          !CALL SCARC_SETUP_CELLTYPES (NSCARC_COARSENING_RS3, NL)
       CASE (NSCARC_COARSENING_FALGOUT)
          !CALL SCARC_SETUP_MEASURES  (NSCARC_COARSENING_RS3, NL)
@@ -6456,13 +6456,17 @@ END SUBROUTINE SCARC_SETUP_STRENGTH_MATRIX
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Determine measure of cells corresponding to requested coarsening type
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_SETUP_MEASURES(NTYPE, NL)
+SUBROUTINE SCARC_SETUP_COLORING(NTYPE, NL)
 INTEGER, PARAMETER  :: NCOUPLINGS = 20
 INTEGER, INTENT(IN) :: NTYPE, NL
-INTEGER :: NM, IC, JC, ICOL, IRAND, NUM_REMAINING
+INTEGER :: NM, IC, JC, KC, ICOL, JCOL, IRAND, REMAINING_CELLS
 INTEGER :: FCELL = -1, ZCELL =-2
 REAL(EB) :: RAND_NUM, MEASURE, NEW_MEASURE
+REAL(EB) :: MEASURE_MAX, EPS
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
+
+EPS = 1.0E-12
+MEASURE_MAX = 0.0_EB
 
 
 !!! Select coarsening strategy
@@ -6476,35 +6480,39 @@ SELECT CASE (NTYPE)
    !!!-------------------------------------------------------------------------------------------------
    CASE (NSCARC_COARSENING_RS3)
 
-      RS3_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      RS3_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
       
          SC => SCARC(NM)%COMPACT(NL)            
 
-         NUM_REMAINING = 0
+         REMAINING_CELLS = 0
 
          RS3_MEASURE_LOOP0: DO IC = 1, SC%NC
             SC%MEASURE(IC) = SC%S_ROW(IC+1)-SC%S_ROW(IC) 
          ENDDO RS3_MEASURE_LOOP0
 
          RS3_MEASURE_LOOP1: DO IC = 1, SC%NC
-            IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'RS3_LOOP1  IC=',IC
             
             IF (SC%S_ROW(IC+1)-SC%S_ROW(IC) == 0) THEN
                SC%CELLTYPE(IC) = NSCARC_CELLTYPE_FINE
                SC%MEASURE(IC) = 0.0_EB
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'A: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE(',IC,')=',SC%MEASURE(IC)
                ! IF (AGGRESSIVE2) SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE 
             ELSE
                SC%CELLTYPE(IC) = NSCARC_CELLTYPE_NONE
-               NUM_REMAINING   = NUM_REMAINING + 1
+               REMAINING_CELLS   = REMAINING_CELLS + 1
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'B:CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE(',IC,')=',SC%MEASURE(IC)
             ENDIF
          ENDDO RS3_MEASURE_LOOP1
 
          RS3_MEASURE_LOOP2: DO IC = 1, SC%NC
-            IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'RS3_LOOP2  IC=',IC
             MEASURE = SC%MEASURE(IC)
             IF (SC%CELLTYPE(IC) /= NSCARC_CELLTYPE_FINE .AND. SC%CELLTYPE(IC) /= NSCARC_CELLTYPE_COARSE) THEN
                IF (SC%MEASURE(IC) > 0.0_EB) THEN
                   SC%MEASURE2(IC) = SC%MEASURE(IC) 
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'C: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC)
                ELSE
                   IF (SC%MEASURE(IC) < 0.0_EB) WRITE(*,*) 'SCARC_SETUP_MEASURE: Negative measure !!'
                   SC%CELLTYPE(IC) = FCELL
@@ -6516,22 +6524,127 @@ SELECT CASE (NTYPE)
                            IF (NEW_MEASURE > 0.0_EB) SC%MEASURE2(JC) = 0.0_EB
                            NEW_MEASURE = SC%MEASURE(JC)+1
                            SC%MEASURE2(JC) = NEW_MEASURE
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'D: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC)
                         ELSE
                            NEW_MEASURE = SC%MEASURE(JC)+1
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'E: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC)
                           
                         ENDIF
                      ENDIF
                   ENDDO
-                  NUM_REMAINING = NUM_REMAINING - 1
+                  REMAINING_CELLS = REMAINING_CELLS - 1
                ENDIF
             ENDIF
          ENDDO RS3_MEASURE_LOOP2
 
 
-CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_MEASURES', 'MEASURE AFTER FIRST RS3 LOOP ')
-CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE2, NL, 'SETUP_MEASURES', 'MEASURE2 AFTER FIRST RS3 LOOP ')
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER FIRST RS3 LOOP ')
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE2, NL, 'SETUP_COLORING', 'MEASURE2 AFTER FIRST RS3 LOOP ')
       
-      ENDDO RS3_LOOP
+         RS3_CYCLE_LOOP: DO WHILE (REMAINING_CELLS > 0)
+         
+
+            !!! get maximum (remaining) measure for all cells
+            MEASURE_MAX = MAXVAL(SC%MEASURE(1:SC%NC))
+            IF (MEASURE_MAX <= EPS) EXIT RS3_CYCLE_LOOP
+         
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MEASURE_MAX=',MEASURE_MAX
+
+            RS3_CELL_LOOP: DO IC = 1, SC%NC
+         
+               !!! Take first cell with maximum measure as next coarse cell
+               IF (MATCH(MEASURE_MAX, SC%MEASURE(IC))) THEN
+         
+                  SC%MEASURE(IC)  = NSCARC_MEASURE_NONE
+                  SC%MEASURE2(IC) = NSCARC_MEASURE_NONE
+                  SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
+                  REMAINING_CELLS = REMAINING_CELLS - 1
+         
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'F: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC)
+
+                  !!! Determine set of fine cells 
+                  DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+
+                     !!! IF JC hasn't been marked yet, set it to be a fine cell which is no longer measured
+                     JC = SC%S_COL(ICOL)
+                     IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_NONE) THEN
+
+                        SC%MEASURE(JC)  = NSCARC_MEASURE_NONE
+                        SC%MEASURE2(JC) = NSCARC_MEASURE_NONE
+                        SC%CELLTYPE(JC) = NSCARC_CELLTYPE_FINE
+                        REMAINING_CELLS = REMAINING_CELLS - 1
+      
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'G: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC)
+
+                        IF (JC <= SC%NC) THEN
+                        !!!  increase measures of cells KC adjacent to fine cells JC based on strong couplings
+                           DO JCOL = SC%S_ROW(JC), SC%S_ROW(JC+1)-1
+                              KC = SC%S_COL(JCOL)
+                              IF (SC%CELLTYPE(KC)==NSCARC_CELLTYPE_NONE) THEN
+                                 SC%MEASURE(KC)  = SC%MEASURE(KC) + 1.0_EB
+                                 SC%MEASURE2(KC) = SC%MEASURE(KC) + 1.0_EB
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'H: CELLTYPE(',KC,') =',SC%CELLTYPE(KC),': MEASURE2(',KC,')=',SC%MEASURE2(KC)
+   
+                              ENDIF
+                           ENDDO 
+                        ENDIF
+
+                     ENDIF
+                  ENDDO 
+WRITE(SCARC_LU,*) '====================== REMAINING_CELLS = ', REMAINING_CELLS
+!CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE , NL, 'SETUP_CELLTYPE', 'RS3_MEASURE ')
+!CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPE', 'RS3_CELLTYPE ')
+!WRITE(SCARC_LU,*) '====================== REMAINING_CELLS = ', REMAINING_CELLS
+                  EXIT RS3_CELL_LOOP
+               ENDIF
+            ENDDO RS3_CELL_LOOP
+
+            DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+               JC = SC%S_COL(ICOL)
+               IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_NONE) THEN
+                  MEASURE = SC%MEASURE(JC) - 1
+                  SC%MEASURE(JC) = MEASURE 
+                  IF (MEASURE > 0.0_EB) THEN
+                     SC%MEASURE2(JC) = MEASURE
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'I: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC)
+                  ELSE
+                     SC%CELLTYPE(JC) = NSCARC_CELLTYPE_FINE
+                     REMAINING_CELLS = REMAINING_CELLS - 1 
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'J: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC)
+                     IF (JC <= SC%NC) THEN
+                        DO JCOL = SC%S_ROW(JC), SC%S_ROW(JC+1)-1
+                           KC = SC%S_COL(JCOL)
+                           IF (SC%CELLTYPE(KC)==NSCARC_CELLTYPE_NONE) THEN
+                              SC%MEASURE(KC)  = SC%MEASURE(KC) + 1.0_EB
+                              SC%MEASURE2(KC) = SC%MEASURE(KC) + 1.0_EB
+                              MEASURE_MAX = MAX(MEASURE_MAX, SC%MEASURE(KC))
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
+         'K: CELLTYPE(',KC,') =',SC%CELLTYPE(KC),': MEASURE2(',KC,')=',SC%MEASURE2(KC)
+                           ENDIF
+                        ENDDO 
+                     ENDIF
+                  ENDIF
+
+               ENDIF
+            ENDDO
+
+         ENDDO RS3_CYCLE_LOOP
+         SC%NCW = 0 
+
+         DO IC = 1, SC%NC
+            IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_COARSE) SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
+         ENDDO
+
+      ENDDO RS3_MESH_LOOP
+
+
 
    CASE (NSCARC_COARSENING_FALGOUT)
 
@@ -6555,7 +6668,7 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE2, NL, 'SETUP_MEASURES', 'MEASURE2
             ENDDO
          ENDDO FALGOUT_MEASURE_LOOP
 
-CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_MEASURES', 'MEASURE AFTER FIRST FALGOUT LOOP ')
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER FIRST FALGOUT LOOP ')
       ENDDO FALGOUT_LOOP
 
 
@@ -6576,15 +6689,15 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_MEASURES', 'MEASURE A
 !            ENDIF
 !            SC%MEASURE(IC) = NSCARC_MEASURE_NONE
 !         ENDDO RS3_MEASURE_BDRY_LOOP
-!CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_MEASURES', 'MEASURE AFTER BDRY  RS3 ')
+!CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER BDRY  RS3 ')
 
 END SELECT
 
-CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_MEASURES', 'MEASURE BEFORE EXCHANGE')
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE BEFORE EXCHANGE')
 IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MEASURE, NL)
-CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_MEASURES', 'MEASURE AFTER  EXCHANGE')
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER  EXCHANGE')
 
-END SUBROUTINE SCARC_SETUP_MEASURES
+END SUBROUTINE SCARC_SETUP_COLORING
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -14488,7 +14601,14 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_DEBUG_MEASURE2)
 
       WRITE(SCARC_LU,1000) CROUTINE, CNAME, 1, NL
-      IF (NMESHES==4.AND.SCARC(1)%COMPACT(NL)%NX==4) THEN
+      IF (NMESHES==4) THEN
+      DO NM = NMESHES_MIN, NMESHES_MAX
+         SC => SCARC(NM)%COMPACT(NL)
+         DO K = SC%NZ, 1, -1
+            WRITE(SCARC_LU, '(10f11.5)') (SC%MEASURE((K-1)*SC%NX*SC%NY+I), I=1, SC%NX)
+         ENDDO
+      ENDDO
+      ELSE IF (NMESHES==17.AND.SCARC(1)%COMPACT(NL)%NX==4) THEN
       SC1 => SCARC(1)%COMPACT(NL)
       SC2 => SCARC(2)%COMPACT(NL)
       SC3 => SCARC(3)%COMPACT(NL)
@@ -14510,7 +14630,7 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_DEBUG_MEASURE)
 
       WRITE(SCARC_LU,1000) CROUTINE, CNAME, 1, NL
-      IF (NMESHES == 1.OR.NL>100) THEN                !!! only temporarily
+      IF (NMESHES == 4) THEN                !!! only temporarily
       DO NM = NMESHES_MIN, NMESHES_MAX
          SC  => SCARC(NM)%COMPACT(NL)
          IF (NL == 1) THEN
@@ -14521,7 +14641,7 @@ SELECT CASE (NTYPE)
             WRITE(SCARC_LU, '(4f11.5)') (SC%MEASURE(IC), IC=1, SC%NC)
          ENDIF
       ENDDO
-      ELSE IF (NMESHES==4.AND.SCARC(1)%COMPACT(NL)%NX==4) THEN
+      ELSE IF (NMESHES==17.AND.SCARC(1)%COMPACT(NL)%NX==4) THEN
       SC1 => SCARC(1)%COMPACT(NL)
       SC2 => SCARC(2)%COMPACT(NL)
       SC3 => SCARC(3)%COMPACT(NL)
