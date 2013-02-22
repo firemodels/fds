@@ -24,6 +24,8 @@ SIZE=-m64
 
 CC=$(COMPILER) $(SIZE) $(INCLUDEDIRS)
 
+.SUFFIXES:      .c .o .obj
+
 .c.obj:
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
 .c.o:
