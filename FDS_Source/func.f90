@@ -1473,17 +1473,22 @@ END SELECT
 END FUNCTION EVALUATE_RAMP
 
 
+
 REAL(EB) FUNCTION ERF(X)
+
+! Error function
+
 REAL(EB),INTENT(IN)::X
 
-   ERF=1._EB-ERFC(X)
+ERF = 1._EB-ERFC(X)
    
 END FUNCTION ERF
 
 
+
 REAL(EB) FUNCTION ERFC(X)
  
-! Complimentary ERF function
+! Complimentary error function
  
 REAL(EB), INTENT(IN) :: X
 REAL(EB) ERFCS(13), ERFCCS(24), ERC2CS(23),XSML,XMAX,SQEPS,Y
@@ -1576,8 +1581,11 @@ RETURN
 END FUNCTION ERFC
  
  
+
 REAL(EB) FUNCTION IERFC(Y)
-!Inverse of ERFC(Y)
+
+! Inverse of ERFC(Y)
+
 REAL(EB), INTENT(IN) :: Y
 REAL(EB) :: QA,QB,QC,QD,Q0,Q1,Q2,Q3,Q4,PA,PB,P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10, &
             P11,P12,P13,P14,P15,P16,P17,P18,P19,P20,P21,P22,X,S,T,U,W,Z
@@ -2199,77 +2207,54 @@ ENDIF
 END FUNCTION SURFACE_DENSITY
 
 
-SUBROUTINE PARTICLE_SIZE_DISTRIBUTION(DM,RR,CNF,NPT,GAMMA,SIGMA,DISTRIBUTION)
-USE MATH_FUNCTIONS, ONLY :IERFC,ERF
-! Compute PARTICLE Cumulative Number Fraction (CNF)
+SUBROUTINE PARTICLE_SIZE_DISTRIBUTION(DM,RR,CNF,CVF,NPT,GAMMA,SIGMA,DISTRIBUTION)
 
-! CNF(d) = (3/(4*pi))*int_0^d(f(d')*(d'/2)^-3)dd', where f(d') is the PDF of size distribution.
-! CNF(di) \approx C * sum_0^i(f(d')*di^-3*ddi)
+! Compute particle Cumulative Number Fraction (CNF) and Cumulative Volume Fraction (CVF)
+
+USE MATH_FUNCTIONS, ONLY: IERFC,ERF
 CHARACTER(30), INTENT(IN) :: DISTRIBUTION
 REAL(EB), INTENT(IN) :: DM,GAMMA,SIGMA
 INTEGER, INTENT(IN) :: NPT
-REAL(EB) :: SUM1,DD1,DI,ETRM,GFAC,SFAC,DMIN,X1
+REAL(EB) :: SUM1,SUM2,DD1,DI,ETRM,GFAC,SFAC,DMIN,X1
 INTEGER  :: J
-REAL(EB), INTENT(OUT) :: RR(0:NPT),CNF(0:NPT)
+REAL(EB), INTENT(OUT) :: RR(0:NPT),CNF(0:NPT),CVF(0:NPT)
 
 RR(0)  = 0._EB
 CNF(0) = 0._EB
-SUM1=0._EB
+SUM1   = 0._EB
+SUM2   = 0._EB
 
-SELECT CASE(DISTRIBUTION)
-   CASE('LOG-NORMAL')
-      X1     = IERFC(2._EB*CDF_CUTOFF)
-      DD1    = DM*EXP(X1*SQRT(2._EB)*SIGMA)
-      DMIN   = MAX(DM*EXP(-X1*SQRT(2._EB)*SIGMA),0._EB)
-      DD1    =(DD1-DMIN)/REAL(NPT,EB)
-      !       sqrt(%pi)*s*exp(9.d+0*s**2/2.d+0)*erf(log(x/mu)/(sqrt(2)*s)+3*s/sqrt(2))/(mu**3*sqrt(pi))/2.d+0
-      DO J=1,NPT
-         DI    = DMIN + (J-0.5_EB)*DD1
-         RR(J) = 0.5_EB*DI
-         CNF(J) =  EXP(9._EB*SIGMA**2/2._EB)/(2._EB*DM**3)*(ERF(LOG(DI/DM)/(SQRT(2._EB)*SIGMA)+3._EB*SIGMA/sqrt(2._EB))+1)
-      ENDDO
-      CNF = CNF/CNF(NPT)
-   CASE('ROSIN-RAMMLER')
-      DD1    = (-LOG(CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
-      DMIN   = (-LOG(1._EB-CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
-      DD1    = (DD1-DMIN)/REAL(NPT,EB)
-      GFAC   = LOG(2._EB)*GAMMA*DD1/(DM**GAMMA)
-      DO J=1,NPT
-         DI     = DMIN + (J-0.5_EB)*DD1
-         RR(J)  = 0.5_EB*DI
-         ETRM = EXP(-LOG(2._EB)*(DI/DM)**GAMMA)         
-         SUM1 = SUM1 + GFAC*DI**(GAMMA-4._EB)*ETRM
-         CNF(J) = SUM1
-      ENDDO
-      CNF = CNF/SUM1
-   CASE DEFAULT ! Rosin-Rammler-Lognormal
-      SUM1   = 0._EB
-      X1     = IERFC(2._EB*CDF_CUTOFF)
-      DMIN   = MAX(DM*EXP(-X1*SQRT(2._EB)*SIGMA),0._EB)
-      ! Discretize range of PARTICLE diameters into NPT parts
-      DD1    = (-LOG(CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
-      DD1    = (DD1-DMIN)/REAL(NPT,EB)
-      GFAC   = LOG(2._EB)*GAMMA*DD1/(DM**GAMMA)
-      SFAC   = DD1/(SQRT(TWOPI)*SIGMA)
+X1     = IERFC(2._EB*CNF_CUTOFF)
+DMIN   = MAX(DM*EXP(-X1*SQRT(2._EB)*SIGMA),0._EB)
+DD1    = (-LOG(CNF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
+DD1    = (DD1-DMIN)/REAL(NPT,EB)
+GFAC   = LOG(2._EB)*GAMMA*DD1/(DM**GAMMA)
+SFAC   = DD1/(SQRT(TWOPI)*SIGMA)
     
-      INTLOOP: DO J=1,NPT
-         DI = (J-0.5_EB)*DD1
-         RR(J) = 0.5_EB*DI
-         IF (DI<=DM) THEN
-            ETRM = EXP(-(LOG(DI/DM))**2/(2._EB*SIGMA**2))
-            SUM1 = SUM1 + (SFAC/DI**4)*ETRM
-         ELSE
-            ETRM = EXP(-LOG(2._EB)*(DI/DM)**GAMMA)
-            SUM1 = SUM1 + GFAC*DI**(GAMMA-4._EB)*ETRM
-         ENDIF
-         CNF(J) = SUM1
-      ENDDO INTLOOP
-      CNF = CNF/SUM1
-END SELECT
+INTLOOP: DO J=1,NPT
+   DI = (J-0.5_EB)*DD1
+   RR(J) = 0.5_EB*DI
+   IF ((DI<=DM .OR. DISTRIBUTION=='LOGNORMAL') .AND. DISTRIBUTION/='ROSIN-RAMMLER') THEN
+      ETRM = EXP(-(LOG(DI/DM))**2/(2._EB*SIGMA**2))
+      SUM1 = SUM1 + (SFAC/DI**4)*ETRM
+      SUM2 = SUM2 + (SFAC/DI)*ETRM
+   ELSE
+      ETRM = EXP(-LOG(2._EB)*(DI/DM)**GAMMA)
+      SUM1 = SUM1 + GFAC*DI**(GAMMA-4._EB)*ETRM
+      SUM2 = 1._EB - ETRM
+   ENDIF
+   CNF(J) = SUM1
+   CVF(J) = SUM2
+ENDDO INTLOOP
+
+CNF = CNF/SUM1
+
 END SUBROUTINE PARTICLE_SIZE_DISTRIBUTION
 
 
+
 SUBROUTINE SPRAY_ANGLE_DISTRIBUTION(LON,LAT,LON_CDF,LAT_CDF,BETA,MU,SPRAY_ANGLE,DISTRIBUTION_TYPE,NPT)
+
 INTEGER,INTENT(IN) :: NPT
 REAL(EB),INTENT(OUT) :: LON_CDF(0:NPT),LON(0:NPT),LAT(0:NPT),LAT_CDF(0:NPT,0:NPT)
 REAL(EB),INTENT(IN) :: BETA,MU,SPRAY_ANGLE(2,2)
