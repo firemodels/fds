@@ -4,7 +4,7 @@ AR=ar
 
 CFLAGS=-g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11
 
-INCLUDEDIRS=-I. -I../png125 -I../jpeg-6b
+INCLUDEDIRS=-I. -I../png125 -I../jpeg-6b -I../zlib114
 
 #
 #
@@ -34,9 +34,15 @@ LIBOBJS=gd.o gd_gd.o gd_gd2.o gd_io.o gd_io_dp.o \
 		gdfontt.o gdfonts.o gdfontmb.o gdfontl.o gdfontg.o \
 		gdtables.o gdft.o gdcache.o gdkanji.o wbmp.o \
 		gd_wbmp.o gdhelpers.o gd_topal.o 
+LIBOBJSWIN = $(LIBOBJS:.o=.obj)
 
 #Static library, if you really need one for some reason.
 libgd.a: ${LIBOBJS}
-	rm -f libgd.a
+	$(RM) libgd.a
 	$(AR) rc libgd.a ${LIBOBJS}
 	-ranlib libgd.a
+
+libgd.lib: ${LIBOBJSWIN}
+	$(RM) libgd.lib
+	$(AR) rc libgd.lib ${LIBOBJSWIN}
+	-ranlib libgd.lib
