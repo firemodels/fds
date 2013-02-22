@@ -9,6 +9,7 @@ IF "%1" NEQ "g" SET COMPILER=icl
 IF "%2" NEQ "3" SET SIZE=-m64
 IF "%2" NEQ "3" SET SIZE2=intel64
 
+IF "%COMPILER%" == "icl" SET SIZE=
 IF "%COMPILER%" NEQ "icl" GOTO label1
 
 IF "%SETUP_IFORT_COMPILER12%" == "1" GOTO envexist

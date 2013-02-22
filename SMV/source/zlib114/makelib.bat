@@ -1,5 +1,6 @@
 @echo off
-
 call ..\setopts %OPTS%
-erase *.o
-make COMPILER=%COMPILER% SIZE=%SIZE% RM=erase libz.a
+erase *.o *.obj libz.a libz.lib
+set target=libz.lib
+if %COMPILER% == gcc set target=libz.a
+make COMPILER=%COMPILER% SIZE=%SIZE% -f ./makefile %target%
