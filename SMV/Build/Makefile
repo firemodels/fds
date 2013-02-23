@@ -5,7 +5,6 @@
 #*** Smokeview, VMakefile ***
 
 #To use this Makefile cd to a sub-directory and type make_smv.sh or make_smv.bat
-# depending on what platform you are using
 
 SOURCE_DIR = ../../source/
 SMV_TESTFLAG = 
@@ -126,11 +125,7 @@ intel_win_64 : $(objwin)
 
 LINUX_SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 
-LINUX_FORT_LIBDIR_32  = $(IFORT_COMPILER)/lib/ia32
-LINUX_LIBDIR_32 = $(LIB_DIR)/lib_linux_intel_32
-
-LINUX_FORT_LIBDIR_64  = $(IFORT_COMPILER)/lib/intel64
-LINUX_LIBDIR_64 = $(LIB_DIR)/lib_linux_intel_64
+LINUX_FORT_LIBDIR  = $(IFORT_COMPILER)/lib
 
 LINUX_SMV_LIBS = -lglui -lgd -lglut -ljpeg -lpng -lz
 LINUX_INTEL_LIBS = -lifcore  -lintlc
@@ -146,7 +141,7 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokeview_linux_$(SMV_TESTSTRING)32$(SMV_PROFILESTRING)
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_32 -L $(LINUX_FORT_LIBDIR)/ia32 $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_64 ----------------
 
@@ -159,7 +154,7 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64$(SMV_PROFILESTRING)
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 -L $(LINUX_FORT_LIBDIR)/intel64 $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_64_db ----------------
 
@@ -172,7 +167,7 @@ intel_linux_64_db : FC        = ifort
 intel_linux_64_db : exe       = smokeview_linux_64_db$(SMV_PROFILESTRING)
 
 intel_linux_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 -L $(LINUX_FORT_LIBDIR)/intel64 $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
 
 
 # ------------- intel_linux_64_profile ----------------
@@ -186,7 +181,7 @@ intel_linux_64_profile : FC        = ifort
 intel_linux_64_profile : exe       = smokeview_linux_64p
 
 intel_linux_64_profile : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS) -p
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 -L $(LINUX_FORT_LIBDIR)/intel64 $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS) -p
 
 # ------------- gcc_linux_32 ----------------
 
