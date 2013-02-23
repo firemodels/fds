@@ -365,6 +365,7 @@ int main(int argc, char **argv){
     strcat(GLOBsmvisofile,".isosmv");
   }
 
+  strcat(smvfile,".smv");
   if(redirect==1){
     if(GLOBsourcedir==NULL){
       strcpy(smzlogfile,filebase);
@@ -373,11 +374,9 @@ int main(int argc, char **argv){
       strcpy(smzlogfile,GLOBsourcedir);
       strcat(smzlogfile,filebase);
     }
+    strcat(smzlogfile,".smzlog");
+    freopen(smzlogfile,"w",stdout);
   }
-
-  strcat(smvfile,".smv");
-  strcat(smzlogfile,".smzlog");
-  freopen(smzlogfile,"w",stdout);
   
   // construct ini file name
 
