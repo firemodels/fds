@@ -226,19 +226,9 @@ gcc_linux : $(obj)
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-OSX_INTEL_LIBDIR_32 = $(LIB_DIR)/lib_osx_intel_32
-OSX_SMV_LIBS_32 = -lz $(OSX_INTEL_LIBDIR_32)/libpng.a $(OSX_INTEL_LIBDIR_32)/libgd.a $(OSX_INTEL_LIBDIR_32)/libglui.a $(OSX_INTEL_LIBDIR_32)/libjpeg.a
-
-OSX_INTEL_LIBDIR_64 = $(LIB_DIR)/lib_osx_intel_64
-OSX_SMV_LIBS_64 = -lz $(OSX_INTEL_LIBDIR_64)/libpng.a $(OSX_INTEL_LIBDIR_64)/libgd.a $(OSX_INTEL_LIBDIR_64)/libglui.a $(OSX_INTEL_LIBDIR_64)/libjpeg.a
-
-OSX_FORT_LIBDIR_32  = $(IFORT_COMPILER)/lib
-OSX_INTEL_LIBS_32 = $(OSX_FORT_LIBDIR_32)/libifcoremt.a $(OSX_FORT_LIBDIR_32)/libimf.a $(OSX_FORT_LIBDIR_32)/libirc.a $(OSX_FORT_LIBDIR_32)/libsvml.a
-
-OSX_FORT_LIBDIR_64  = $(IFORT_COMPILER)/lib
-OSX_INTEL_LIBS_64 = $(OSX_FORT_LIBDIR_64)/libifcoremt.a $(OSX_FORT_LIBDIR_64)/libimf.a $(OSX_FORT_LIBDIR_64)/libirc.a $(OSX_FORT_LIBDIR_64)/libsvml.a
-
 SMV_LIBS = -lglui -lgd -ljpeg -lpng -lz
+OSX_FORT_LIBDIR  = $(IFORT_COMPILER)/lib
+OSX_INTEL_LIBS = -lifcoremt -limf -lirc -lsvml
 
 # ------------- intel_osx_32 ----------------
 
@@ -251,7 +241,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokeview_osx_$(SMV_TESTSTRING)32$(SMV_PROFILESTRING)
 
 intel_osx_32 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_32) $(OSX_INTEL_LIBS_32)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) -L $(LIB_DIR)/lib_osx_intel_32 $(SMV_LIBS) -L $(OSX_FORT_LIBDIR) $(OSX_INTEL_LIBS)
 
 # ------------- intel_osx_64 ----------------
 
@@ -264,7 +254,7 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING)
 
 intel_osx_64 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) -L $(OSX_FORT_LIBDIR) $(OSX_INTEL_LIBS)
 
 # ------------- gcc_osx_32 ----------------
 
