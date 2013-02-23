@@ -34,4 +34,9 @@ cd %SRCDIR%\zlib114
 call makelib %OPTS%
 copy libz.lib %LIBDIR%\zlib.lib
 
+Rem pthreads
+cd %SRCDIR%\pthreads
+call makelib %OPTS%
+copy libpthreads.lib %LIBDIR%\pthreads.lib
+
 cd %LIBDIR%

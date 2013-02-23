@@ -75,13 +75,13 @@ no_target:
 WIN_LIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 
 WIN_LIBDIR_32 = $(LIB_DIR)/lib_win_intel_32
-SMV_LIBS_32 = $(WIN_LIBDIR_32)\pthreadVC.lib $(WIN_LIBDIR_32)\glui.lib $(WIN_LIBDIR_32)\glut32.lib $(WIN_LIBDIR_32)\gd.lib $(WIN_LIBDIR_32)\jpeg.lib $(WIN_LIBDIR_32)\png.lib $(WIN_LIBDIR_32)\zlib.lib
+SMV_LIBS_32 = $(WIN_LIBDIR_32)\pthreads.lib $(WIN_LIBDIR_32)\glui.lib $(WIN_LIBDIR_32)\glut32.lib $(WIN_LIBDIR_32)\gd.lib $(WIN_LIBDIR_32)\jpeg.lib $(WIN_LIBDIR_32)\png.lib $(WIN_LIBDIR_32)\zlib.lib
 
 WINGCC_LIBDIR_32 = $(LIB_DIR)/lib_win_gcc_32
 SMVGCC_LIBS_32 = $(WINGCC_LIBDIR_32)/libglui.a $(WINGCC_LIBDIR_32)/libglut.a $(WINGCC_LIBDIR_32)/libgd.a $(WINGCC_LIBDIR_32)/libjpeg.a $(WINGCC_LIBDIR_32)/libpng.a $(WINGCC_LIBDIR_32)/libz.a
 
 WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
-SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreadVC2_x64.lib
+SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreads.lib
 
 
 # ------------- gcc_win_32 ----------------
@@ -101,7 +101,7 @@ gcc_win_32 : $(obj)
 
 intel_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref /arch:IA32
-intel_win_32 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE  -D GLEW_STATIC $(SMV_TESTFLAG) /arch:IA32
+intel_win_32 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE  -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG) /arch:IA32
 intel_win_32 : LFLAGS    = /F32768000 
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
@@ -115,7 +115,7 @@ intel_win_32 : $(objwin)
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
-intel_win_64 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC $(SMV_TESTFLAG)
+intel_win_64 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
 intel_win_64 : LFLAGS    = /F32768000 
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
