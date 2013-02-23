@@ -49,7 +49,7 @@ no_target:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL -Wall
+intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D PTW32_STATIC_LIB
 intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
@@ -57,10 +57,10 @@ intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smokezip_win_32.exe
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib $(LIB_DIR)/lib_win_intel_32/pthreadVC.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/pthreads.lib $(LIB_DIR)/lib_win_intel_32/zlib.lib
 
 
-intel_win_64 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D X64 -D pp_WIN_INTEL
+intel_win_64 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D PTW32_STATIC_LIB -D X64 -D pp_WIN_INTEL
 intel_win_64 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
@@ -68,7 +68,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokezip_win_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/zlib.lib $(LIB_DIR)/lib_win_intel_64/pthreadVC2_x64.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/zlib.lib $(LIB_DIR)/lib_win_intel_64/pthreads.lib
 
 # ------------- Linux 32 profile ----------------
 #  32 bit linux
