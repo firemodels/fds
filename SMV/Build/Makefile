@@ -13,11 +13,6 @@ SMV_TESTSTRING =
 SMV_PROFILEFLAG = 
 SMV_PROFILESTRING =
 
-# use FILTERC and FILTERF to customize smokeview builds (ie -D pp_BETA)
-
-FILTERC =
-FILTERF =
-
 #----------------------------------------------------------------------------
 # Should not need to edit lines below except to add or 'debug' target entries
 
@@ -50,21 +45,21 @@ no_target:
 .SUFFIXES: .F90 .c .obj .o .f90 .cpp
 
 .c.obj:
-	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
+	$(CC) -c $(CFLAGS) $(INC) $<
 .c.o:
-	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
+	$(CC) -c $(CFLAGS) $(INC) $<
 
 .cpp.obj:
-	$(CPP) -c $(CFLAGS) $(INC) $(FILTERC) $<
+	$(CPP) -c $(CFLAGS) $(INC) $<
 .cpp.o:
-	$(CPP) -c $(CFLAGS) $(INC) $(FILTERC) $<
+	$(CPP) -c $(CFLAGS) $(INC) $<
 
 .F90.o:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
+	$(FC) -c $(FFLAGS) $<
 .f90.obj:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
+	$(FC) -c $(FFLAGS) $<
 .f90.o:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
+	$(FC) -c $(FFLAGS) $<
 
 # ********  rules for each platform supported *************
 
