@@ -9,11 +9,7 @@ FILTERF =
 VPATH = $(SOURCE_DIR)/smokezip $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
 bin = .
 
-#LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
-LINUX32FORTLIBDIR = /opt/intel/composerxe/lib/ia32
-LINUX64FORTLIBDIR = /opt/intel/composerxe/lib/intel64
-OSX32FORTLIBDIR = /opt/intel/composerxe/lib
-OSX64FORTLIBDIR = /opt/intel/composerxe/lib
+FORTLIBDIR = /opt/intel/composerxe/lib
 
 # Definition of the object variables
 
@@ -117,31 +113,23 @@ intel_linux_64 : $(obj)
 
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
 intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
-intel_osx_32 : FORTLIBDIR = $(OSX32FORTLIBDIR)
 intel_osx_32 : CC        = icc
 intel_osx_32 : CPP       = icc
 intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokezip_osx_32
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 $(obj)  -mmacosx-version-min=10.4 $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a $(LIB_DIR)/lib_osx_intel_32/libz.a -lpthread
+	$(CPP) -o $(bin)/$(exe) -m32 $(obj)  -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml -L $(LIB_DIR)/lib_osx_intel_32 -lz -lpthread
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
 intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64
 intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64
-intel_osx_64 : FORTLIBDIR = $(OSX32FORTLIBDIR)
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokezip_osx_64
 
 intel_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m64 $(obj)  -mmacosx-version-min=10.4 $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a $(LIB_DIR)/lib_osx_intel_64/libz.a -lpthread
-
-#-------------- Clean Target to remove Object and Module files -----------
-
-.PHONY : clean
-clean:
-	rm *.o
+	$(CPP) -o $(bin)/$(exe) -m64 $(obj)  -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml -L $(LIB_DIR)/lib_osx_intel_64 -lz -lpthread
