@@ -4,73 +4,67 @@
 \label{chapter:lagrangian_particles}
 
 Lagrangian particles are used to represent a wide variety of objects that cannot be resolved on
-the numerical grid. Some are solid; some are liquid. This chapter outlines the treatment of the transport, size
-distribution, and mass, momentum and energy transfer of the droplets or particles.
+the numerical grid. Liquid droplets are the most common example. This chapter outlines the treatment of the transport, size
+distribution, and mass, momentum and energy transfer to and from Lagrangian particles.
 
-\section{Droplet/Particle Transport in the Gas Phase}
+\section{Particle Transport in the Gas Phase}
 
-For a spray, the force term $\bof_b$ in Eq.~(\ref{momentum})
-represents the momentum transferred from the droplets to the gas.
-It is obtained by summing the force transferred from each droplet
-in a grid cell and dividing by the cell volume
+For a spray, the force term $\bof_{\rm b}$ in Eq.~(\ref{momentum})
+represents the momentum transferred from particles to the gas.
+It is obtained by summing the force transferred from each particle
+in a grid cell and dividing by the cell volume, $V$:
 \be
-    {\bof_b} = \frac{1}{V} \sum_{d\in V} \left[ \ha \rho C_D \pi  r_d^2 (\bu_d-\bu) |\bu_d-\bu| - \frac{\d m_d}{\d t}(\bu_d-\bu) \right]
+    {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, \pi \, r_{\rm p}^2 \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right]
 \ee
-where $C_D$ is the drag coefficient, $r_d$ is the droplet radius,
-$\bu_d$ is the velocity of the droplet, $\bu$ is the
-velocity of the gas, $\rho$ is the density of the gas,
-and $V = \dx \, \dy \, \dz$ is the volume of the grid cell.
-The acceleration of an individual droplet is governed by the equation
+where $C_{\rm d}$ is the drag coefficient, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $\bu$ is the
+gas velocity, and $\rho$ is the gas density. The particle acceleration is given by
 \be
-    \frac{\d \bu_d}{\d t} = \bg - \ha \frac{\rho\,C_D \, \pi  r_d^2}{m_d} \,
-    (\bu_d-\bu) |\bu_d-\bu|
+    \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, \pi  r_{\rm p}^2}{m_{\rm p}} \,
+    (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|
 \ee
-where $m_d$ is the mass of the droplet.  The trajectory of the droplet is governed by the equation
+where $m_{\rm p}$ is the particle mass.  The particle position, $\bx_{\rm p}$, is determined from the equation
 \be
-    \frac{\d \bx_d}{\d t} = \bu_d
+    \frac{\d \bx_{\rm p}}{\d t} = \bu_{\rm p}
 \ee
-The drag coefficient (default based on a sphere) is a function of the local Reynolds number (based on droplet diameter)
+The drag coefficient (default based on a sphere) is a function of the local Reynolds number that is based on the particle diameter, $D$
 \begin{eqnarray}
- C_D &=& \left\{ \begin{array}{ll}
-     24/\RE_d                                       & \RE_d < 1    \\
-     24\left(0.85+0.15 \, \RE_d^{0.687} \right)/\RE_d  & 1 < \RE_d < 1000 \\
-     0.44                                           & 1000 < \RE_d
-     \end{array} \right.  \\ [0.1in]
-\RE_d &=& \frac{\rho \, |\bu_d-\bu| \, 2 r_d}{\mu(T)} \end{eqnarray}
+ C_{\rm d} &=& \left\{ \begin{array}{ll}
+     24/\RE_D                                          & \RE_D < 1    \\ [0.1in]
+     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \\ [0.1in]
+     0.44                                              & 1000 < \RE_D
+     \end{array} \right.  \\ [0.2in]
+\RE_D &=& \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{eqnarray}
 where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
 
 
-\section{Droplet Size Distribution}
+\section{Liquid Droplet Size Distribution}
 
-A spray consists of a sampled set of spherical droplets. The size distribution is
+A spray consists of a sampled set of spherical liquid droplets. The size distribution is
 expressed in terms of its Cumulative Volume Fraction (CVF), a function
 that relates the fraction of the liquid volume (mass) transported by
 droplets less than a given diameter. Researchers at Factory Mutual have
-suggested that the CVF for a sprinkler may be represented by a combination of log-normal and
+suggested that the CVF for a sprinkler may be represented by a combination of lognormal and
 Rosin-Rammler distributions~\cite{Chan:1}
-\be F(d) = \left\{ \begin{array}{ll}
-   \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^d} \, \frac{1}{\sigma\, d'} \,
-   \mathrm{e}^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}} \; \d d'    & (d \le d_m) \\ [0.2in]
-   1 - \mathrm{e}^{-0.693 \left(\frac{d}{d_m}\right)^\gamma }  & (d_m < d)
+\be F_v(D) = \left\{ \begin{array}{ll}
+   \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^D} \, \frac{1}{\sigma\, D'} \,
+   \exp \left( -\frac{[\ln(D'/D_{\rm v,0.5})]^2}{2\sigma^2} \right) \; \d D'            & (D \le D_{\rm v,0.5}) \\ [0.2in]
+   1 - \exp \left( -0.693 \left(\frac{D}{D_{\rm v,0.5}}\right)^\gamma \right)           & (D_{\rm v,0.5} < D)
    \end{array} \right.  \ee
-where $d_m$ is the median droplet diameter (i.e., half the mass
-is carried by droplets with diameters of $d_m$ or less), and $\gamma$ and
-$\sigma$ are empirical constants equal to about 2.4 and 0.6, respectively.\footnote{The Rosin-Rammler and
-log-normal distributions are smoothly
-joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .}
+where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass
+is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and
+$\sigma$ are empirical constants equal to approximately 2.4 and 0.6, respectively.\footnote{The Rosin-Rammler and
+lognormal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .}
 The median droplet diameter is a function of the sprinkler orifice
 diameter, operating pressure, and geometry. Research at Factory Mutual
 has yielded a correlation for the median droplet diameter~\cite{Yu:2}
-\be \frac{d_m}{D} \propto \WE^{-\ot}  \label{dropcor} \ee
-where $D$ is the orifice diameter of the sprinkler.
+\be \frac{D_{\rm v,0.5}}{d} \propto \WE^{-\ot}  \label{dropcor} \ee
+where $d$ is the orifice diameter of the nozzle.
 The Weber number, the ratio of inertial forces
 to surface tension forces, is given by
-\be \WE = \frac{\rho_d u_d^2 D}{\sigma_d}  \label{Weber} \ee
-where $\rho_d$ is the density of liquid, $u_d$ is the discharge
-velocity, and $\sigma_d$ is the liquid surface tension ($72.8 \times 10^{-3}$
-N/m at 20~$^\circ$C for water). The discharge velocity can be computed from the
-mass flow rate, a function of the sprinkler's
-operating pressure and orifice coefficient known as the ``K-Factor.''
+\be \WE = \frac{\rho_{\rm p} \, u_{\rm p}^2 \, d}{\sigma}  \label{Weber} \ee
+where $\rho_{\rm p}$ is the liquid density, $u_{\rm p}$ is the discharge
+velocity, and $\sigma$ is the liquid surface tension ($72.8 \times 10^{-3}$~N/m at 20~$^\circ$C for water). The discharge velocity can be computed from the
+mass flow rate, a function of the operating pressure and orifice coefficient known as the K-factor.
 FM reports that the constant of proportionality in Eq.~(\ref{dropcor})
 appears to be independent of flow
 rate and operating pressure. Three different sprinklers were tested in
@@ -85,32 +79,23 @@ decreases when more and more sprinkler heads are activated. The pipe pressure ha
 flow rate, droplet velocity and droplet size distribution. FDS tries
 not to predict the variation of pipe pressure; it should be specified
 by the user; but the following dependencies are used to update the
-droplet boundary conditions for mass flow $\dot{m}$, droplet speed
-$u_d$ and median diameter $d_m$
-\begin{eqnarray}
-    \dot{m} & \propto & \sqrt{p} \\
-    u_d & \propto & \sqrt{p} \\
-    d_m & \propto & p^{-1/3}
-\end{eqnarray}
-
-In the numerical algorithm,
-the size of the droplets are chosen to mimic the
-Rosin-Rammler/log-normal distribution. A Probability Density Function (PDF)
-for the droplet diameter is defined
-\be f(d) = \frac{F'(d)}{d^3}  \left/ \int_0^\infty \, \frac{F'(d')}{d'^3}
-     \, \d d' \right. \quad ; \quad F' \equiv \frac{\d F}{\d d}   \ee
-Droplet diameters are randomly selected by equating the Cumulative
-Number Fraction of the droplet distribution with a uniformly
-distributed random variable $U$
-\be U(d) = \int_0^d \, f(d') \, \mbox{d}d'  \label{Ud}  \ee
-Figure~\ref{rosin} displays typical Cumulative Volume Fraction and
-Cumulative Number Fraction functions.
+droplet boundary conditions for mass flow, droplet speed, and median diameter:
+\be
+    \dot{m}_{\rm p} \propto p^{1/2} \quad ; \quad u_{\rm p} \propto p^{1/2} \quad ; \quad D_{\rm v,0.5}  \propto  p^{-1/3}
+\ee
+The droplet diameters are randomly chosen to mimic the
+Rosin-Rammler/lognormal distribution. The cumulative number fraction (CNF), $F_n$, is determined from the cumulative volume fraction, $F_v$, as follows
+\be F_n(D) = \int_0^D \frac{F'_v(D')}{D'^3} \, \d D'  \left/ \int_0^\infty \, \frac{F'_v(D')}{D'^3}
+     \, \d D' \right. \quad ; \quad F_v' \equiv \frac{\d F_v}{\d D}   \ee
+Droplet diameters are randomly selected from the inverse of the CNF acting on the uniform random variable, ${\cal U}(0,1)$
+\be D = F^{-1}_n({\cal U}(0,1)) \label{Ud}  \ee
+Figure~\ref{rosin} displays the Rosin-Rammler/lognormal function and the resulting cumulative number fraction.
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=4.5in]{FIGURES/rosin}
 \caption[Liquid droplet size distribution]{Cumulative Volume Fraction and Cumulative Number
 Fraction functions of the droplet size distribution from
-a typical industrial-scale sprinkler. The median diameter $d_m$ is
+a typical industrial-scale sprinkler. The median volumetric diameter, $D_{\rm v,0.5}$, is
 1~mm, $\sigma=0.6$ and $\gamma=2.4$.}
 \label{rosin}
 \end{center}
@@ -122,58 +107,36 @@ Suppose the mass flow rate of the liquid is $\dm$.
 Suppose also that the time interval for droplet insertion
 into the numerical simulation is $\dt$, and the number of droplets
 inserted each time interval is $N$. Choose $N$ uniformly distributed random
-numbers between 0 and 1, call them $U_i$,
-obtain $N$ droplet diameters $d_i$ based on the
-given droplet size distribution, Eq.~(\ref{Ud}), and then compute
+numbers between 0 and 1 and calculate $N$ random droplet diameters, $D_i$, from Eq.~(\ref{Ud}), and then compute
 a weighting constant C from the mass balance
-\be \dm \; \dt = C \, \sum_{i=1}^N \;  \frac{4}{3} \pi \rho_w
-      \left( \frac{d_i}{2} \right)^3 \ee
+\be \dm \; \dt = C \, \sum_{i=1}^N \;  \frac{4}{3} \pi \rho_{\rm p}
+      \left( \frac{D_i}{2} \right)^3 \ee
 The mass and heat transferred from each droplet will be multiplied by
 the weighting factor $C$.
 
-\newpage
+
 \section{Heating and Evaporation of Liquid Droplets}
 
-Liquid ``droplets'' are represented either as discrete airborne spheres propelled through the gas,
-or as rectangular blocks that collectively form a thin liquid film on solid objects.
-These ``droplets'' are still individually tracked as
-lagrangian particles, but the heat and mass transfer coefficients are different.
-In the discussion to follow, the term ``droplets'' will be used to describe either form.
+Liquid droplets are represented either as discrete airborne spheres or as elements of the thin liquid film that forms on wetted solids. These film ``droplets'' are still individually tracked as Lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
 
-Over the course of a time step of the gas phase solver, the droplets in a
-given grid cell evaporate as a function of
-the liquid equilibrium vapor mass fraction, $Y_l$,
-the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) liquid temperature, $T_l$,
-and the local gas temperature, $T_g$. If the droplet is attached to a surface, $T_s$ is the solid temperature.
-The mass and energy transfer between the gas and the liquid can be described by the
-following set of equations~\cite{Cheremisinoff:1}
+Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate as a function of the liquid equilibrium vapor mass fraction, $Y_{\rm l}$, the local gas phase vapor mass fraction, $Y_{\rm g}$, the (assumed uniform) liquid temperature, $T_{\rm l}$, and the local gas temperature, $T_{\rm g}$. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
-\frac{\d m_l}{\d t}               & =  - A \; h_m \, \rho \, (Y_l - Y_g) \\
-m_l \; c_l \; \frac{\d T_l}{\d t} & =    A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{\d m_l}{\d t} \; h_v  \label{droplet_temp}   \end{align}
-Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the
-film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
-$\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_s$ is the heat transfer coefficient between the liquid and the
-solid surface, $\dq_r$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the
-liquid. The vapor mass fraction of the gas, $Y_g$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction
-is obtained from the Clausius-Clapeyron equation
-\be X_l = \exp \left[ \frac{h_v \, W_l}{\cal R}
-      \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]  \quad ; \quad
-      Y_l = \frac{X_l}{X_l \, (1-W_a/W_l) + W_a/W_l}  \label{clausius_clapeyron} \ee
-where $X_d$ is the equilibrium vapor {\em volume} fraction, $W_l$ is the molecular weight
-of the evaporated liquid, $W_a$ is the molecular weight of air,
-$\cal R$ is the universal gas constant, and $T_b$ is the boiling temperature
-of the liquid.
+\frac{\d m_{\rm l}}{\d t}               & =  - A \; h_m \, \rho \, (Y_{\rm l} - Y_{\rm g}) \\
+m_{\rm l} \; c_{\rm l} \; \frac{\d T_{\rm l}}{\d t} & =    A \, h  \, (T_{\rm g}-T_{\rm l}) + A \, h_s \, (T_{\rm s}-T_{\rm l}) + \dq_{\rm r} + \frac{\d m_{\rm l}}{\d t} \; h_v  \label{droplet_temp}   \end{align}
+Here, $m_{\rm l}$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
+$\rho$ is the gas density, $c_{\rm l}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_{\rm s}$ is the heat transfer coefficient between the liquid and the solid surface, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm g}$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
+\be X_{\rm l} = \exp \left[ \frac{h_v \, W_{\rm l}}{\cal R}
+      \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]  \quad ; \quad
+      Y_{\rm l} = \frac{X_{\rm l}}{X_{\rm l} \, (1-W_{\rm a}/W_{\rm l}) + W_{\rm a}/W_{\rm l}}  \label{clausius_clapeyron} \ee
+where $X_{\rm l}$ is the equilibrium vapor {\em volume} fraction, $W_{\rm l}$ is the molecular weight of the evaporated liquid, $W_{\rm a}$ is the molecular weight of air, $\cal R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid.
 
 Mass and heat transfer between liquid and gas are described with analogous empirical correlations.
 The mass transfer coefficient, $h_m$, is described by the empirical relationships~\cite{Incropera:1}:
 \be
-   h_m = \frac{\SH \; D_{lg}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
+   h_m = \frac{\SH \; D_{\rm lg}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
                                                                                  0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
 \ee
-$\SH$ is the Sherwood number, $D_{lg}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or
-1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity),
-$\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number
-($\nu/D_{lg}$, assumed 0.6 for all cases).
+$\SH$ is the Sherwood number, $D_{\rm lg}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or 1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity), $\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number ($\nu/D_{\rm lg}$, assumed 0.6 for all cases).
 
 An analogous relationship exists for the heat transfer coefficient:
 \be
@@ -191,30 +154,30 @@ gas temperature is reduced slightly based on the energy lost to the droplet.
 Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows.
 Note that a few terms have been left out to make the algorithm more clear.
 \be
-   \frac{T_l^{n+1}-T_l^n}{\dt} = \frac{1}{m_l \, c_l} \left[ A \, h \, \left( T_g-\frac{T_l^{n+1}+T_l^n}{2} \right) -
-   A \, h_m \, \rho \left( \frac{Y_l^{n+1}+Y_l^n}{2} - Y_g \right) h_v  \right]
+   \frac{T_{\rm l}^{n+1}-T_{\rm l}^n}{\dt} = \frac{1}{m_{\rm l} \, c_{\rm l}} \left[ A \, h \, \left( T_{\rm g}-\frac{T_{\rm l}^{n+1}+T_{\rm l}^n}{2} \right) -
+   A \, h_m \, \rho \left( \frac{Y_{\rm l}^{n+1}+Y_{\rm l}^n}{2} - Y_{\rm g} \right) h_v  \right]
 \ee
-The equilibrium vapor mass fraction, $Y_l^n$, is a function of $T_l^n$ via
+The equilibrium vapor mass fraction, $Y_{\rm l}^n$, is a function of $T_{\rm l}^n$ via
 Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
 \be
-   Y_l^{n+1} \approx Y_l^n + \left( \frac{\d Y_l}{\d T_l} \right)^n \; \Big( T_l^{n+1}-T_l^n \Big)
+   Y_{\rm l}^{n+1} \approx Y_{\rm l}^n + \left( \frac{\d Y_{\rm l}}{\d T_{\rm l}} \right)^n \; \Big( T_{\rm l}^{n+1}-T_{\rm l}^n \Big)
 \ee
-where the derivative of $Y_l$ with respect to temperature is obtained via the chain rule:
+where the derivative of $Y_{\rm l}$ with respect to temperature is obtained via the chain rule:
 \be
-   \frac{\d Y_l}{\d T_l} = \frac{\d Y_l}{\d X_l} \, \frac{\d X_l}{\d T_l}  = \frac{W_a/W_l}{ (X_l (1-W_a/W_l) + W_a/W_l)^2 } \;
-     \frac{h_v W_l}{{\cal R} \, T_l^2} \, \exp \left[ \frac{h_v \, W_l}{\cal R} \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]
+   \frac{\d Y_{\rm l}}{\d T_{\rm l}} = \frac{\d Y_{\rm l}}{\d X_{\rm l}} \, \frac{\d X_{\rm l}}{\d T_{\rm l}}  = \frac{W_{\rm a}/W_{\rm l}}{ (X_{\rm l} (1-W_{\rm a}/W_{\rm l}) + W_{\rm a}/W_{\rm l})^2 } \;
+     \frac{h_v W_{\rm l}}{{\cal R} \, T_{\rm l}^2} \, \exp \left[ \frac{h_v \, W_{\rm l}}{\cal R} \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]
 \ee
 The amount of evaporated liquid is given by
 \be
-   \delta m_l = -\dt \, A \, h_m \, \rho  \left[  Y_l^n + \ha \left( \frac{\d Y_l}{\d T_l} \right)^n \;
-   \Big( T_l^{n+1}-T_l^n \Big)  - Y_g \right]
+   \delta m_{\rm l} = -\dt \, A \, h_m \, \rho  \left[  Y_{\rm l}^n + \ha \left( \frac{\d Y_{\rm l}}{\d T_{\rm l}} \right)^n \;
+   \Big( T_{\rm l}^{n+1}-T_{\rm l}^n \Big)  - Y_{\rm g} \right]
 \ee
 The amount of heat extracted from the gas is
 \be
-   \delta q = \dt \, A \, h \, \left( T_g - \frac{T_l^n+T_l^{n+1}}{2} \right)
+   \delta q = \dt \, A \, h \, \left( T_{\rm g} - \frac{T_{\rm l}^n+T_{\rm l}^{n+1}}{2} \right)
 \ee
 
-\newpage
+
 \section{Fire Suppression by Water}
 
 The previous sections describe heat transfer from a liquid droplet to a gas, a solid, or both. Although there is some
@@ -241,10 +204,9 @@ While attached to a surface, the ``droplet'' is assumed to form a thin film of l
 transfers heat to the solid, and heat and mass to
 the gas. The film thickness, $\delta$, is given by
 \be
-   \delta = \max \left( \delta_{\text min} , \sum \frac{4}{3} \pi r_d^3 / A \right)
+   \delta = \max \left( \delta_{\min} , \sum \frac{4}{3} \, \frac{\pi \, r_{\rm p}^3}{A} \right)
 \ee
-where $A$ is the area of the wall cell to which the droplet is attached.
-It is assumed that the minimum film thickness, $\delta_{\text min}$, is $1 \times 10^{-5}$~m. This prevents a very small amount of liquid from spreading across the entire cell width. It is also assumed that the liquid is opaque with regard to thermal radiation.
+where $A$ is the area of the wall cell to which the droplet is attached. It is assumed that the minimum film thickness, $\delta_{\min}$, is $1 \times 10^{-5}$~m. This prevents a very small amount of liquid from spreading across the entire cell width. It is also assumed that the liquid is opaque with regard to thermal radiation.
 
 \subsection{Reduction of Pyrolysis Rate due to Water}
 
@@ -260,13 +222,12 @@ after sprinkler activation
 where $\dQ_0$ is the total heat release rate at the time of application
 $t_0$, and $k$ is a fuel-dependent constant.
 For the FMRC Standard Plastic commodity $k$ is given as
-\be k = 0.716 \; \dot{m}_w'' - 0.0131 \quad  \hbox{s}^{-1} \ee
-where $\dot{m}_w''$ is the flow rate of water impinging on the
+\be k = 0.716 \; \dot{m}_{\rm w}'' - 0.0131 \quad  \hbox{s}^{-1} \ee
+where $\dot{m}_{\rm w}''$ is the flow rate of water impinging on the
 box tops, divided by the area of exposed surface (top and sides). It is
-expressed in units of kg/m$^2$/s. For the Class II commodity, $k$ is
+expressed in units of kg/(m$^2 \cdot$s). For the Class II commodity, $k$ is
 given as
-\be k = 0.536 \; \dot{m}_w'' - 0.0040 \quad  \hbox{s}^{-1} \ee
-
+\be k = 0.536 \; \dot{m}_{\rm w}'' - 0.0040 \quad  \hbox{s}^{-1} \ee
 Unfortunately, this analysis is based on global water flow and
 burning rates. Equation~(\ref{fmexting})
 accounts for both the cooling of non-burning surfaces as well as the
@@ -277,12 +238,12 @@ global suppression rule.
 However, the exponential nature of suppression by water is observed
 both locally and globally, thus it is assumed that the local burning rate
 of the fuel can be expressed in the form~\cite{Hamins:1,Hamins:IAFSS2002}
-\be \dm_f''(t) = \dm_{f,0}''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
+\be \dm_{\rm f}''(t) = \dm_{\rm f,0}''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
 \label{nistexting} \ee
-Here $\dm_{f,0}''(t)$ is the burning rate per unit area of the fuel
+Here $\dm_{\rm f,0}''(t)$ is the burning rate per unit area of the fuel
 when no water is applied and $k(t)$ is a linear function of the local water
-mass per unit area, $m_w''$, expressed in units of kg/m$^2$,
-\be k(t) = a \; m_w''(t) \quad   \hbox{s}^{-1} \ee
+mass per unit area, $m_{\rm w}''$, expressed in units of kg/m$^2$,
+\be k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1} \ee
 Note that $a$ is an empirical constant.
 
 
@@ -299,26 +260,26 @@ a cylindrical, spherical or cartesian coordinate system.
 
 It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation
 equation. For a grid cell with indices $ijk$, the source term is:
-\be \dq_{r,ijk}^\ppp \equiv (-\nabla\!\cdot \dot{\bq}_r'')_{ijk} = \sum \left[ \kappa_p \left( U_{ijk} - 4 \sigma \, T_p^4 \right) \right] \ee
+\be \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right) \ee
 where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
-\be \kappa_p = \frac{A}{4 \, \dx \dy \dz} \ee
-where $A$ is the surface area of the particle and $\dx \dy \dz$ is the volume of the cell.
+\be \kappa_{\rm p} = \frac{A}{4 \, \dx \, \dy \, \dz} \ee
+where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the volume of the cell.
 The net radiative heat flux onto the surface of the particle is
-\be \dq_{r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_p^4 \right) \ee
+\be \dq_{\rm r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right) \ee
 
 \subsection{Porous Media (Screens, Metal Meshes, and Similar Materials)}
 
 Catwalk grating, expanded metal mesh, window screens, and similar thin porous materials are commonly found in buildings.  For a typical calculation, the dimensions of the holes in the porous material and the material surrounding them are going to be much smaller than the grid size.  There is, therefore, no easy way to model these materials using solid obstructions. Lagrangian particles can; however, be used to represent both the drag and the mass of these materials. Lagrangian particles arranged in a plane can represent a window screen, for example. By modifying the particle drag law, the particles can impose drag appropriate for a thin porous material.  The pressure drop across a screen of thickness $l$ is given by~\cite{Bartzanas:1}:
-\be 
+\be
    \frac {\Delta p}{l} =  \frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} \, u^2
 \ee
-where $K$ is a permeability constant, $Y$ is an inertial constant, $u$ is the velocity normal to the screen, $\rho$ is the density, and $\mu$ is the viscosity of the gas.  K and Y are functions the screen porosity (free area/total area), $\varepsilon$:
-\be 
-   K = 3.44 \times 10^{-9} \; \varepsilon^{1.6} \; \; \hbox{m}^2 \quad ; \quad Y = 0.043 \, \varepsilon^{2.13} 
-\ee
-The force vector $\bof_b$ in Eq.~(\ref{momentum}) represents the momentum transferred from the screen to the gas:
+where $K$ is a permeability constant, $Y$ is an inertial constant, $u$ is the velocity normal to the screen, $\rho$ is the density, and $\mu$ is the viscosity of the gas.  $K$ and $Y$ are functions the screen porosity (free area/total area), $\varepsilon$:
 \be
-   \bof_b = l \; \left( \frac{\mu}{K} + \rho \frac{Y}{\sqrt{K}} |\bu| \right) \left( \frac{u}{\dx} , \frac{v}{\dy} , \frac{w}{\dz} \right)
+   K = 3.44 \times 10^{-9} \; \varepsilon^{1.6} \; \; \hbox{m}^2 \quad ; \quad Y = 0.043 \, \varepsilon^{2.13}
+\ee
+The force vector $\bof_{\rm b}$ in Eq.~(\ref{momentum}) represents the momentum transferred from the screen to the gas:
+\be
+   \bof_{\rm b} = l \; \left( \frac{\mu}{K} + \rho \frac{Y}{\sqrt{K}} |\bu| \right) \left( \frac{u}{\dx} , \frac{v}{\dy} , \frac{w}{\dz} \right)
 \ee
 This force term essentially spreads the pressure drop over the width of a grid cell.
 
