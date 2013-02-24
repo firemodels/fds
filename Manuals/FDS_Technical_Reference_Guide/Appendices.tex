@@ -4,33 +4,33 @@
 \label{nomenclature}
 
 \begin{tabbing}
-$A_s$ \hspace{1in}        \= droplet surface area \\
-$A_{\alpha\beta}$          \> pre-exponential factor for solid phase Arrhenius reaction \\
+$A_{\rm p}$ \hspace{1in}  \= droplet surface area \\
+$A_{\alpha\beta}$         \> pre-exponential factor for solid phase Arrhenius reaction \\
 $B$                       \> pre-exponential factor for gas phase Arrhenius reaction \\
-$C$                       \> Sprinkler C-Factor \\
-$C_D$                     \> drag coefficient \\
+$C$                       \> sprinkler C-factor \\
+$C_{\rm d}$               \> drag coefficient \\
 $C_s$                     \> Smagorinsky constant (LES)  \\
-$c_s$                     \> Solid material specific heat \\
+$c$                       \> solid material specific heat \\
 $c_p$                     \> constant pressure specific heat \\
-$D$                       \> diffusion coefficient   \\
-$d_m$                     \> median volumetric droplet diameter \\
+$D$                       \> diffusion coefficient; droplet/particle diameter   \\
+$D_{\rm v,0.5}$           \> median volumetric droplet diameter \\
 $E$                       \> activation energy \\
-$\bof_b$                  \> external force vector (excluding gravity) \\
+$\bof_{\rm b}$            \> external force vector (excluding gravity) \\
 $g$                       \> acceleration of gravity \\
 $\bg$                     \> gravity vector, normally $(0,0,-g)$ \\
 $\cal H$                  \> total pressure divided by the density \\
-$H_{r,\alpha\beta}$       \> heat of reaction for a solid phase reaction \\
+$H_{{\rm r},\alpha\beta}$ \> heat of reaction for a solid phase reaction \\
 $h$                       \> enthalpy; heat transfer coefficient   \\
 $h_\alpha$                \> enthalpy of species $\alpha$   \\
 $h_\alpha^0$              \> heat of formation of species $\alpha$   \\
 $I$                       \> radiation intensity   \\
-$I_b$                     \> radiation blackbody intensity   \\
+$I_{\rm b}$               \> radiation blackbody intensity   \\
 $k$                       \> thermal conductivity; suppression decay factor \\
-$\dm_{b,\alpha}'''$       \> mass production rate of species $\alpha$ by evaporating droplets/particles \\
-$\dm_f''$                 \> fuel mass flux \\
+$\dm_{{\rm b},\alpha}'''$ \> mass production rate of species $\alpha$ by evaporating droplets/particles \\
+$\dm_{\rm f}''$           \> fuel mass flux \\
 $\dm_\alpha'''$           \> mass production rate of species $\alpha$ per unit volume \\
-$\dm_w''$                 \> water mass flux  \\
-$m_w''$                   \> water mass per unit area \\
+$\dm_{\rm w}''$           \> water mass flux  \\
+$m_{\rm w}''$             \> water mass per unit area \\
 $\NU$                     \> Nusselt number \\
 $\PR$                     \> Prandtl number \\
 $p$                       \> pressure \\
@@ -39,13 +39,13 @@ $\bp_m$                   \> background pressure of $m$th pressure zone \\
 $\tp$                     \> pressure perturbation \\
 $\dbq''$                  \> heat flux vector \\
 $\dq'''$                  \> heat release rate per unit volume \\
-$\dq_r''$                 \> radiative flux to a solid surface \\
-$\dq_c''$                 \> convective flux to a solid surface \\
+$\dq_{\rm r}''$           \> radiative flux to a solid surface \\
+$\dq_{\rm c}''$           \> convective flux to a solid surface \\
 $\dQ$                     \> total heat release rate \\
-$Q^*$                     \> characteristic fire size \\
+$\dQ^*$                   \> fire Froude number \\
 $\R$                      \> universal gas constant \\
 $\RE$                     \> Reynolds number \\
-$r_d$                     \> droplet radius \\
+$r_{\rm p}$               \> particle/droplet radius \\
 $r_{\alpha\beta}$         \> solid phase reaction rate \\
 $\hbox{RTI}$              \> Response Time Index of sprinkler \\
 $\bs$                     \> unit vector in direction of radiation intensity\\
@@ -66,9 +66,8 @@ $\bar{Y}_\alpha$          \> mean mass fraction of species $\alpha$   \\
 $\hat{Y}_\alpha$          \> mass fraction of species $\alpha$ in mixed zone of a computation cell   \\
 $Y_\OTWO^\infty$          \> mass fraction of oxygen in the ambient   \\
 $Y_\F^I$                  \> mass fraction of fuel in the fuel stream   \\
-$y_s$                     \> soot yield \\
+$y_{\rm s}$               \> soot yield \\
 $Z$                       \> mixture fraction   \\
-$Z_f$                     \> stoichiometric value of the mixture fraction   \\
 $\gamma$                  \> ratio of specific heats; Rosin-Rammler exponent \\
 $\Delta H$                \> heat of combustion \\
 $\Delta H_\OTWO$          \> energy released per unit mass oxygen consumed \\
@@ -77,14 +76,14 @@ $\epsilon$                \> dissipation rate \\
 $\kappa$                  \> absorption coefficient \\
 $\mu$                     \> dynamic viscosity \\
 $\nu_\alpha$              \> stoichiometric coefficient, species $\alpha$ \\
-$\nu_s$                   \> yield of solid residue in solid phase reaction \\
-$\nu_g,\gamma$            \> yield of gaseous species $\gamma$ in solid phase reaction \\
+$\nu_{\rm s}$             \> yield of solid residue in solid phase reaction \\
+$\nu_{{\rm g},\gamma}$    \> yield of gaseous species $\gamma$ in solid phase reaction \\
 $\rho$                    \> density \\
 $\btau_{ij}$              \> viscous stress tensor \\
-$\chi_r$                  \> radiative loss fraction \\
+$\chi_{\rm r}$            \> radiative loss fraction \\
 $\sigma$                  \> Stefan-Boltzmann constant; constant in droplet size distribution; surface tension \\
-$\sigma_d$                \> droplet scattering coefficient \\
-$\sigma_s$                \> scattering coefficient \\
+$\sigma_{\rm d}$          \> droplet scattering coefficient \\
+$\sigma_{\rm s}$          \> scattering coefficient \\
 $\bo=(\omx,\omy,\omz)$    \> vorticity vector \\
 \end{tabbing}
 
@@ -961,22 +960,22 @@ where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$,
 	\begin{tikzpicture}[font = \large]
     \node at (-2.0,2.5) [label=above:Front] {};
     \node at (4.5,2.5) [label=above:Back] {};
-    
+
     \node at (-2.5,0) [label=below:$x(0)$] {};
     \node at (0,0) [label=below:$x(1)$] {};
     \node at (2.5,0) [label=below:$x(N-1)$] {};
     \node at (5,0) [label=below:$x(N)$] {};
-    
+
     \node at (-3.75,0) [label={above:$i = 0$}] {};
     \node at (-1.25,0) [label={above:$i = 1$}] {};
     \node at (1.25,0) [label=above:...] {};
     \node at (3.75,0) [label={above:$i = N$}] {};
     \node at (6.25,0) [label={above:$i = N+1$}] {};
-    
+
     \node at (1.25,3.5) [label=above: Virtual Nodes] {};
     \draw [<-,line width=2pt] (6.25,2.75) arc (0:30:25 and 2.5);
     \draw [<-,line width=2pt] (-3.75,2.75) arc (180:150:25 and 2.5);
-        
+
     \draw [dashed, line width=1.5pt] (-2.5,0) -- (-5,0);
     \draw [dashed, line width=1.5pt] (-5,0) -- (-5,2.5);
     \draw [dashed, line width=1.5pt] (-2.5,2.5) -- (-5,2.5);
@@ -986,7 +985,7 @@ where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$,
     \draw [dashed, line width=1.5pt] (5,0) -- (7.5,0);
     \draw [dashed, line width=1.5pt] (7.5,0) -- (7.5,2.5);
     \draw [dashed, line width=1.5pt] (5,2.5) -- (7.5,2.5);
-    
+
     \draw [->,line width=2pt] (5,-1.1) -- (1.25,-1.1);
     \node at (2.5,-1.1) [label=below:$r_{i}$] {};
 	\end{tikzpicture}
