@@ -7,7 +7,6 @@ IF "%SETUP_IFORT_COMPILER12%"=="1" GOTO envexist
 set SETUP_IFORT_COMPILER12=1
 
 echo Setting up compiler environment
-call "%IFORT_COMPILER12%\bin\ifortvars" intel64
 call "%IFORT_COMPILER12%\bin\iclvars" intel64
 :envexist
 
