@@ -53,7 +53,7 @@ gcc_linux_32 : CC        = gcc
 gcc_linux_32 : exe       = background
 
 gcc_linux_32 : $(obj)
-	$(CC) -o $(bin)/$(exe) $(obj) 
+	$(CC) -m32 -o $(bin)/$(exe) $(obj) -lm
 
 
 # ------------- OSX 32 ----------------
