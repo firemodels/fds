@@ -64,49 +64,46 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokezip_win_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/zlib.lib $(LIB_DIR)/lib_win_intel_64/pthreads.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreads.lib $(LIB_DIR)/lib_win_intel_64/zlib.lib
 
 # ------------- Linux 32 profile ----------------
 #  32 bit linux
 
 intel_linux_32p : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
 intel_linux_32p : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX -p
-intel_linux_32p : FORTLIBDIR = $(LINUX32FORTLIBDIR)
 intel_linux_32p : CC        = icc
 intel_linux_32p : CPP       = icc
 intel_linux_32p : FC        = ifort
 intel_linux_32p : exe       = smokezip_linux_32p
 
 intel_linux_32p : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -p -lifcore -L $(FORTLIBDIR) $(LIB_DIR)/lib_linux_intel_32/libz.a
+	$(CPP) -o $(bin)/$(exe) $(obj) -p -L $(FORTLIBDIR)/ia32 -lifcore -L $(LIB_DIR)/lib_linux_intel_32 -lz
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
 
 intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
 intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX 
-intel_linux_32 : FORTLIBDIR = $(LINUX32FORTLIBDIR)
 intel_linux_32 : CC        = icc
 intel_linux_32 : CPP       = icc
 intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokezip_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) $(LIB_DIR)/lib_linux_intel_32/libz.a -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) -L $(FORTLIBDIR)/ia32 -lifcore -L $(LIB_DIR)/lib_linux_intel_32 -lz -lpthread
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
 intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -D pp_LINUX64
 intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
-intel_linux_64 : FORTLIBDIR = $(LINUX64FORTLIBDIR)
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokezip_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) $(LIB_DIR)/lib_linux_intel_64/libz.a -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) -L $(FORTLIBDIR)/intel64 -lifcore -L $(LIB_DIR)/lib_linux_intel_64 -lz -lpthread
 
 # ------------- OSX 32 ----------------
 #  32 bit OSX
@@ -119,7 +116,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokezip_osx_32
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 $(obj)  -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml -L $(LIB_DIR)/lib_osx_intel_32 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) -m32 $(obj) -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml -L $(LIB_DIR)/lib_osx_intel_32 -lz -lpthread
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
