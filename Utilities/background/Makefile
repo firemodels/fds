@@ -65,3 +65,12 @@ intel_osx_32 : exe       = background
 
 intel_osx_32 : $(obj)
 	$(CC) -o $(bin)/$(exe) -m32 $(obj) 
+
+# ------------- gcc OSX 32 ----------------
+
+gcc_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX
+gcc_osx_32 : CC        = gcc
+gcc_osx_32 : exe       = background
+
+gcc_osx_32 : $(obj)
+	$(CC) -m32 -o $(bin)/$(exe) $(obj) -lm
