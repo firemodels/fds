@@ -1,4 +1,4 @@
-SOURCE_DIR = ../../../SMV/source/
+SOURCE_DIR = ../../../SMV/source
 INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/background
 FILTERC =
 FILTERF =
@@ -8,8 +8,8 @@ bin = .
 
 # Definition of the object variables
 
-objwin = main.obj string_util.obj dmalloc.obj
 obj = main.o string_util.o dmalloc.o
+objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
 
@@ -46,6 +46,16 @@ intel_linux_32 : exe       = background
 intel_linux_32 : $(obj)
 	$(CC) -o $(bin)/$(exe) $(obj) 
 
+# ------------- gcc Linux 32 ----------------
+
+gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
+gcc_linux_32 : CC        = gcc
+gcc_linux_32 : exe       = background
+
+gcc_linux_32 : $(obj)
+	$(CC) -o $(bin)/$(exe) $(obj) 
+
+
 # ------------- OSX 32 ----------------
 #  32 bit osx
 
@@ -55,10 +65,3 @@ intel_osx_32 : exe       = background
 
 intel_osx_32 : $(obj)
 	$(CC) -o $(bin)/$(exe) -m32 $(obj) 
-
-
-#-------------- Clean Target to remove Object and Module files -----------
-
-.PHONY : clean
-clean:
-	rm *.o
