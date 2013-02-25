@@ -2366,7 +2366,7 @@ three dimensional Cartesian coordinate system. However,
 a two dimensional Cartesian or two dimensional cylindrical
 (axially-symmetric) calculation can be performed by setting the number of
 cells in the $y$ direction to 1.
-An example of an axially-symmetric helium plume is shown in Figure~\ref{helium_plume}.
+An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plume}.
 
 \begin{figure}[ht]
 \noindent
@@ -4977,7 +4977,7 @@ Second, the actual heat exchanged is computed using the {\ct EFFICIENCY}.
 \noindent
 Note that an aircoil input refers to a class of aircoils and that multiple ducts can reference the same aircoil definition.
 
-The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28~g/mol with a specific heat of 1~kJ/kg/K) from the floor and injects in through the ceiling at a volume flow rate of 1~$m^3/s$.  An aircoil is defined with a working fluid flowing at 10~kg/s and 100~$^\circ$C with a specific heat of 4~kJ/kg/K.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2~kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Figure~\ref{fig_aircoil}.
+The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28~g/mol with a specific heat of 1~kJ/kg/K) from the floor and injects in through the ceiling at a volume flow rate of 1~$m^3/s$.  An aircoil is defined with a working fluid flowing at 10~kg/s and 100~$^\circ$C with a specific heat of 4~kJ/kg/K.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2~kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Fig.~\ref{fig_aircoil}.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -5198,7 +5198,7 @@ The pressure difference across the building's wall is computed from
 \be
    \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right)
 \ee
-where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Figure~\ref{fig_stack_effect}.
+where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Fig.~\ref{fig_stack_effect}.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -8020,7 +8020,7 @@ increasing or decreasing temperature activates the system.  For the HVAC example
 lower edge of the deadband activates heating; crossing the upper edge activates cooling.  These more complicated behaviors can be modeled in FDS using {\ct CTRL}s.  The following parameters dictate how a control function will behave:
 \begin{description}
 \item[{\ct ID}] A name for the control function that is unique over all control functions.
-\item[{\ct FUNCTION\_TYPE}] The type of control function.  The possible types are shown in~\ref{tab:funcvalues}.
+\item[{\ct FUNCTION\_TYPE}] The type of control function.  The possible types are shown in Table~\ref{tab:funcvalues}.
 \item[{\ct INPUT\_ID}] A list of {\ct DEVC} or {\ct CTRL} {\ct ID}s that are the inputs to the control function.  Up to forty inputs can be specified.  If a {\ct DEVC} or {\ct CTRL} is being used as an {\ct INPUT\_ID} for a control function, then it must have a unique {\ct ID} over both devices and control functions.  Additionally, a control function cannot be used as an input for itself.
 \item[{\ct SETPOINT}] The value of the control function at which its state changes. This is only appropriate for functions that return numerical values.
 \item[{\ct TRIP\_DIRECTION}] A positive integer means the control function will change state when its value increases
@@ -8330,7 +8330,7 @@ The {\ct control\_test\_2} example demonstrates the use of the mathematical and 
           PROPORTIONAL_GAIN=-0.5,INTEGRAL_GAIN=0.001,DIFFERENTIAL_GAIN=1./
 \end{lstlisting}
 
-\noindent Results are shown in Figure~\ref{control_test_2_fig}.
+\noindent Results are shown in Fig.~\ref{control_test_2_fig}.
 \begin{figure}[ht]
 \centering
 \includegraphics[scale=0.55]{SCRIPT_FIGURES/control_test_2}
@@ -9681,7 +9681,7 @@ Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test
 \label{fig_mtr}
 \end{figure}
 
-For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in \cite{McDermott:2010}, maintaining mean values of MTR near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in nonreacting, buoyant plumes.
+For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in Ref.~\cite{McDermott:2010}, maintaining mean values of MTR near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in nonreacting, buoyant plumes.
 
 \subsubsection{Measure of Scalar Resolution}
 \label{mtr}
@@ -9727,7 +9727,7 @@ where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} 
 \label{fig_haar_mother}
 \end{figure}
 
-The decomposition of the signal shown in (\ref{eqn_wavelet_decomp}) may be repeated at ever coarser resolutions.  The result is a \emph{wavelet transform}. The procedure is entirely analogous to the Fourier transform, but with compact support.  If we look at a 1D signal with $2^m$ points, the repeated application of (\ref{eqn_wavelet_decomp}) results in an $m \times m$ matrix of averages $\mathbf{a}$ with components $a_{ij}$ and an $m \times m$ wavelet coefficient matrix $\mathbf{c}$ with components $c_{ij}$.  Each row $i$ of $\mathbf{a}$ may be reconstructed from the $i+1$ row of $\mathbf{a}$ and $\mathbf{c}$.  Because of this and because small values of the wavelet coefficient matrix may be discarded, dramatic compression of the signal may be obtained.
+The decomposition of the signal shown in Eq.~(\ref{eqn_wavelet_decomp}) may be repeated at ever coarser resolutions.  The result is a \emph{wavelet transform}. The procedure is entirely analogous to the Fourier transform, but with compact support.  If we look at a 1D signal with $2^m$ points, the repeated application of (\ref{eqn_wavelet_decomp}) results in an $m \times m$ matrix of averages $\mathbf{a}$ with components $a_{ij}$ and an $m \times m$ wavelet coefficient matrix $\mathbf{c}$ with components $c_{ij}$.  Each row $i$ of $\mathbf{a}$ may be reconstructed from the $i+1$ row of $\mathbf{a}$ and $\mathbf{c}$.  Because of this and because small values of the wavelet coefficient matrix may be discarded, dramatic compression of the signal may be obtained.
 
 Here we are interested in using the wavelet analysis to say something about the local level of error due to grid resolution.  Very simply, we ask what can be discerned from a sample of four data points along a line.  Roughly speaking we might expect to see one of the four scenarios depicted in Figure \ref{fig_wavelet_transforms}.  Within each plot window we also show the results of a Haar wavelet transform for that signal.  Looking first at the two top plots, on the left we have a step function and on the right we have a straight line.  Intuitively, we expect large error for the step function and small error for the line.  The following error measure achieves this goal:
 \begin{eqnarray}
