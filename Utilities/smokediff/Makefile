@@ -1,4 +1,4 @@
-SOURCE_DIR = ../../../SMV/source/
+SOURCE_DIR = ../../../SMV/source
 INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokediff
 FILTERC =
 FILTERF =
@@ -6,11 +6,7 @@ FILTERF =
 VPATH = $(SOURCE_DIR)/smokediff $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview
 bin = .
 
-#LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
-LINUX32FORTLIBDIR = /opt/intel/composerxe/lib/ia32
-LINUX64FORTLIBDIR = /opt/intel/composerxe/lib/intel64
-OSX32FORTLIBDIR = /opt/intel/composerxe/lib/
-OSX64FORTLIBDIR = /opt/intel/composerxe/lib/
+FORTLIBDIR = /opt/intel/composerxe/lib
 
 # Definition of the object variables
 
@@ -71,14 +67,13 @@ intel_win_64 : $(objwin)
 
 intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
 intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
-intel_linux_32 : FORTLIBDIR = $(LINUX32FORTLIBDIR)
 intel_linux_32 : CC        = icc
 intel_linux_32 : CPP       = icc
 intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokediff_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR)
+	$(CPP) -o $(bin)/$(exe) $(obj) -L $(FORTLIBDIR)/ia32 -lifcore
 
 
 # ------------- Linux 64 ----------------
@@ -86,45 +81,36 @@ intel_linux_32 : $(obj)
 
 intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -D pp_LINUX64
 intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
-intel_linux_64 : FORTLIBDIR = $(LINUX64FORTLIBDIR)
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokediff_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR)
+	$(CPP) -o $(bin)/$(exe) $(obj) -L $(FORTLIBDIR)/intel64 -lifcore
 
 # ------------- OSX 32 ----------------
 #  32 bit OSX
 
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
 intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
-intel_osx_32 : FORTLIBDIR = $(OSX32FORTLIBDIR)
 intel_osx_32 : CC        = icc
 intel_osx_32 : CPP       = icc
 intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokediff_osx_32
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 $(obj)  -mmacosx-version-min=10.4 $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	$(CPP) -o $(bin)/$(exe) -m32 $(obj) -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
 intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64
 intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64
-intel_osx_64 : FORTLIBDIR = $(OSX64FORTLIBDIR)
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokediff_osx_64
 
 intel_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m64 $(obj)  -mmacosx-version-min=10.4 $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
-
-#-------------- Clean Target to remove Object and Module files -----------
-
-.PHONY : clean
-clean:
-	rm *.o
+	$(CPP) -o $(bin)/$(exe) -m64 $(obj) -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml
