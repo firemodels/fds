@@ -8130,7 +8130,7 @@ There is often a time delay between when a device activates and when some other 
 
 \begin{lstlisting}
 &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler_link', QUANTITY='LINK TEMPERATURE',
-      ID='Spk_29_link', CTRL_ID='dry pipe' /
+      ID='Spk_29_link' /
 &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler', QUANTITY='CONTROL', ID='Spk_29',
       CTRL_ID='dry pipe' /
 &CTRL ID='dry pipe', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='Spk_29_link', DELAY=30. /
@@ -8232,7 +8232,7 @@ You can make a fan operate on a fixed cycle by using a {\ct CUSTOM} control func
 &SURF ID='FAN', TMP_FRONT=40., VOLUME_FLUX=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='cycling timer' /
 &DEVC ID='TIMER', XYZ=2.4,5.7,3.6, QUANTITY='TIME' /
-&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM, INPUT_ID='TIMER', RAMP_ID='cycle' /
+&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='cycle' /
 &RAMP ID='cycle', T= 59, F=-1 /
 &RAMP ID='cycle', T= 61, F= 1 /
 &RAMP ID='cycle', T=119, F= 1 /
@@ -8388,7 +8388,7 @@ multiply-colored vents that activate at different times, depending on the partic
 \label{info:RAMPDEVC}
 
 For any user-defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.
-This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} is used as the independent variable for the {\ct RAMP}.  A {\ct CTRL\_ID} can also be specified as long as the control function outputs a numerical value (i.e., is a mathematical function (Section~\ref{info:CONTROL_MATH}) or a PID function (Section~\ref{info:CONTROL_PID}).
+This is done by specifying the input {\ct DEVC\_ID} on one of the {\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} is used as the independent variable for the {\ct RAMP}.  A {\ct CTRL\_ID} can also be specified as long as the control function outputs a numerical value (i.e., is a mathematical function (Section~\ref{info:CONTROL_MATH}) or a PID function (Section~\ref{info:CONTROL_PID}).
 In the following example a blower is ramped from 0~\% flow at 20~$^\circ$C, to 50~\% flow when the temperature exceeds 100~$^\circ$C, and to 100~\% flow when the temperature exceeds 200~$^\circ$C.
 This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
 
