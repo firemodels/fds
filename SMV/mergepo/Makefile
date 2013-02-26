@@ -42,41 +42,37 @@ no_target:
 #  64 bit windows
 
 intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D X64 -D WIN32
-intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
+intel_win_64 : LFLAGS    = ../../Build/LIBS/lib_win_intel_64/pthreads.lib
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
-intel_win_64 : FC        = ifort
-intel_win_64 : exe       = mergepo_win_64.exe ../../Build/LIBS/lib_win_intel_64/pthreadVC2_x64.lib
+intel_win_64 : exe       = mergepo_win_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin)
+	$(CPP) -o $(bin)/$(exe) -l $(LFLAGS) $(objwin)
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -D pp_LINUX64
 intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
-intel_linux_64 : FORTLIBDIR = $(LINUX64FORTLIBDIR)
+intel_linux_64 : LFLAGS    = -lpthread
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
-intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = mergepo_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) 
 
 # ------------- gcc Linux 64 ----------------
 #  64 bit linux
 
-gcc_linux_64 : FFLAGS    = -O2 -m64 -fpp -D pp_noappend -D pp_LINUX64
 gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
+gcc_linux_64 : LFLAGS    = -lpthreads
 gcc_linux_64 : CC        = icc
 gcc_linux_64 : CPP       = icc
-gcc_linux_64 : FC        = ifort
 gcc_linux_64 : exe       = mergepo_linux_64
 
 gcc_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS)
 
 
 #-------------- Clean Target to remove Object and Module files -----------
