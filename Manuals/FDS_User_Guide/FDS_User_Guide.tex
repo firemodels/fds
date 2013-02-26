@@ -4802,7 +4802,7 @@ Below are three example duct node inputs representing a typical tee-type connect
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
 \item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter can only have two connected ducts.
 \item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
-\item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.  No two {\vt VENTs} should be defined with the same {\ct VENT\_ID}.
+\item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.  No two {\ct VENTs} should be defined with the same {\ct VENT\_ID}.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}. Note that if you do not specify an {\ct XYZ} for an interior node, then FDS will use the default value of 0,0,0.
 \end{description}
@@ -5908,7 +5908,7 @@ See Section~\ref{info:heat_of_combustion} for more details on the heat of combus
 \subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
 
-The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpies of formation are known. For reactions with species that are not included in Table~\ref{tab:gasspecies}, there are several options to ensure that all of the enthalpies of formation are specified.
+The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpies of formation are known. These values can be found in the FDS source code in data.f90. For reactions with species that are not included in Table~\ref{tab:gasspecies}, there are several options to ensure that all of the enthalpies of formation are specified.
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
 You can specify unknown enthalpies on the {\ct SPEC} line in units of kJ/mol:
@@ -5962,6 +5962,7 @@ the measured value of the heat release rate includes the effects of any CO or so
 
 Note: If you specify a heat of combustion on the {\ct REAC} line, FDS will calculate the enthalpy of formation of the fuel such that the user-specified heat of combustion is maintained. This is important to recognize for cases where a heat of combustion is measured experimentally or if you want to model impurities in the fuel that would not be realized using the standard heat of formation of the fuel.
 
+If the reaction is under defined, FDS will return an error at the start of the calculation.
 
 
 \subsection{Special Topic: Turbulent Combustion}
