@@ -598,7 +598,7 @@ msgid "File bounds/Script...  ALT+f"
 msgstr "Liens/Script de fichier... Alt+f"
 
 msgid "File suffix"
-"msgstr "Suffixe du fichier"
+msgstr "Suffixe du fichier"
 
 msgid "filter"
 msgstr "filtre"

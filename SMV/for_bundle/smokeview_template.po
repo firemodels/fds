@@ -1,5 +1,5 @@
-// Translate phrases following msgid and place them 
-// on the following line containing msgstr as in:
+// Translate the phrase after each msgid and place
+// it on the following line after msgstr, as in:
 // msgid "original phrase"
 // msgstr "translated phrase"
 // 
@@ -7,13 +7,12 @@
 // to ask.  It is also OK to leave troublesome terms
 // untranslated, they will be output in English
 // 
-// Suggested translation priority
+// Suggested translation priorities:
 // 1.  translate terms in menus, e.g. Load/Unload, 
 //     Show/Hide etc.
 // 2.  translate terms in dialog boxes.
 // 3.  Now go through the following list and translate terms.
 //     that are left.  
-// Terms that are not translated will remain in English when displayed
 // 
 msgid "2D contours"
 msgstr ""
@@ -55,9 +54,6 @@ msgid "About"
 msgstr ""
 
 msgid "Above"
-msgstr ""
-
-msgid "Above specified max"
 msgstr ""
 
 msgid "Absorption adjustments"
@@ -198,12 +194,6 @@ msgstr ""
 msgid "Below"
 msgstr ""
 
-msgid "Below specified min"
-msgstr ""
-
-msgid "Benchmark"
-msgstr ""
-
 msgid "bindir dir    - specify location of smokeview bin directory"
 msgstr ""
 
@@ -217,6 +207,9 @@ msgid "Both eyes"
 msgstr ""
 
 msgid "Boundaries"
+msgstr ""
+
+msgid "Boundary file"
 msgstr ""
 
 msgid "Boundary file frame skip"
@@ -279,13 +272,25 @@ msgstr ""
 msgid "Close all dialogs  ALT+x"
 msgstr ""
 
+msgid "Color"
+msgstr ""
+
+msgid "Color above max"
+msgstr ""
+
 msgid "Colorbar"
 msgstr ""
 
 msgid "Colorbar editor"
 msgstr ""
 
+msgid "Colorbars"
+msgstr ""
+
 msgid "Colorbar type"
+msgstr ""
+
+msgid "Color below min"
 msgstr ""
 
 msgid "Color/*BW"
@@ -310,6 +315,9 @@ msgid "completed"
 msgstr ""
 
 msgid "Compress data while loading"
+msgstr ""
+
+msgid "Compressed file frame skip"
 msgstr ""
 
 msgid "Compress files (Smokezip"
@@ -567,6 +575,9 @@ msgstr ""
 msgid "Exterior"
 msgstr ""
 
+msgid "external"
+msgstr ""
+
 msgid "Facets"
 msgstr ""
 
@@ -600,9 +611,6 @@ msgstr ""
 msgid "filter"
 msgstr ""
 
-msgid "fire color"
-msgstr ""
-
 msgid "fire half depth (m"
 msgstr ""
 
@@ -613,9 +621,6 @@ msgid "Fire opacity multiplier"
 msgstr ""
 
 msgid "Fires"
-msgstr ""
-
-msgid "Fire/Smoke colormap"
 msgstr ""
 
 msgid "Flip"
@@ -699,6 +704,9 @@ msgstr ""
 msgid "GPU available but not in use. (Press G to activate"
 msgstr ""
 
+msgid "gpu grid multiplier"
+msgstr ""
+
 msgid "GPU not available"
 msgstr ""
 
@@ -765,7 +773,10 @@ msgstr ""
 msgid "Hide scene"
 msgstr ""
 
-msgid "Highlight extreme data"
+msgid "Highlight data above specified max"
+msgstr ""
+
+msgid "Highlight data below specified min"
 msgstr ""
 
 msgid "Hilight skinny triangles"
@@ -799,9 +810,6 @@ msgid "HRRPUV - all meshes"
 msgstr ""
 
 msgid "HRRPUV cutoff"
-msgstr ""
-
-msgid "HRRPUV cutoff (kW/m"
 msgstr ""
 
 msgid "HRRPUV - single mesh"
@@ -849,7 +857,10 @@ msgstr ""
 msgid "Interior"
 msgstr ""
 
-msgid "ISO frame skip"
+msgid "internal"
+msgstr ""
+
+msgid "Isosurface file"
 msgstr ""
 
 msgid "isosurfaces"
@@ -975,6 +986,9 @@ msgstr ""
 msgid "Mass extinction coeff (m2/g"
 msgstr ""
 
+msgid "max"
+msgstr ""
+
 msgid "Max"
 msgstr ""
 
@@ -999,6 +1013,9 @@ msgstr ""
 msgid "Mesh label"
 msgstr ""
 
+msgid "min"
+msgstr ""
+
 msgid "Min"
 msgstr ""
 
@@ -1021,6 +1038,12 @@ msgid "Mouse"
 msgstr ""
 
 msgid "Move"
+msgstr ""
+
+msgid "Multi-Slices"
+msgstr ""
+
+msgid "Multi-Vector Slices"
 msgstr ""
 
 msgid "Near depth"
@@ -1051,6 +1074,9 @@ msgid "node index"
 msgstr ""
 
 msgid "None"
+msgstr ""
+
+msgid "non-gpu grid multiplier"
 msgstr ""
 
 msgid "normal"
@@ -1125,10 +1151,16 @@ msgstr ""
 msgid "Outline Added"
 msgstr ""
 
+msgid "Outline color"
+msgstr ""
+
 msgid "Outline Only"
 msgstr ""
 
 msgid "Output data to file"
+msgstr ""
+
+msgid "Outside"
 msgstr ""
 
 msgid "Overwrite compressed files"
@@ -1141,6 +1173,9 @@ msgid "oxygen VOLUME FRACTION"
 msgstr ""
 
 msgid "Parameters"
+msgstr ""
+
+msgid "Particle file"
 msgstr ""
 
 msgid "Particle head"
@@ -1204,6 +1239,9 @@ msgid "Plot3d"
 msgstr ""
 
 msgid "Plot3D"
+msgstr ""
+
+msgid "Plot3d file"
 msgstr ""
 
 msgid "points"
@@ -1458,6 +1496,9 @@ msgstr ""
 msgid "Shades of grey"
 msgstr ""
 
+msgid "Shade type"
+msgstr ""
+
 msgid "SHIFT: left/right cursor: rotate 90 degrees"
 msgstr ""
 
@@ -1593,7 +1634,13 @@ msgstr ""
 msgid "Skip coarse sub-slice"
 msgstr ""
 
+msgid "skipframe n   - render every n frames"
+msgstr ""
+
 msgid "Slice average"
+msgstr ""
+
+msgid "Slice file"
 msgstr ""
 
 msgid "Slice frame Skip"
@@ -1710,6 +1757,9 @@ msgstr ""
 msgid "Start (disable file loading"
 msgstr ""
 
+msgid "startframe n  - start rendering at frame n"
+msgstr ""
+
 msgid "Starting locations/velocities"
 msgstr ""
 
@@ -1780,6 +1830,9 @@ msgid "Switch to perspective view       ALT+v"
 msgstr ""
 
 msgid "Switch to size preserving view   ALT+v"
+msgstr ""
+
+msgid "Target file"
 msgstr ""
 
 msgid "Target orientation"
@@ -1959,7 +2012,10 @@ msgstr ""
 msgid "Use Avatar"
 msgstr ""
 
-msgid "Use colormap"
+msgid "use blockage"
+msgstr ""
+
+msgid "use foreground"
 msgstr ""
 
 msgid "Use GPU"
@@ -1984,6 +2040,9 @@ msgid "Vector"
 msgstr ""
 
 msgid "vector slices"
+msgstr ""
+
+msgid "Vector slices"
 msgstr ""
 
 msgid "Velocities"
@@ -2032,6 +2091,9 @@ msgid "Visibility"
 msgstr ""
 
 msgid "Visualize fire/smoke flow simulations"
+msgstr ""
+
+msgid "volrender     - generate images of volume rendered smoke and fire"
 msgstr ""
 
 msgid "Volume render settings"
@@ -2098,6 +2160,9 @@ msgid "zero at boundaries"
 msgstr ""
 
 msgid "Zone"
+msgstr ""
+
+msgid "Zone fire file"
 msgstr ""
 
 msgid "Zoom"
