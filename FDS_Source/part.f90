@@ -41,11 +41,12 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
    
    ! If particles/PARTICLEs have a size distribution, initialize here
  
-   IF_SIZE_DISTRIBUTION: IF (.NOT.LPC%MONODISPERSE .AND. (LPC%DIAMETER > 0._EB)) THEN
+   IF_SIZE_DISTRIBUTION: IF (.NOT.LPC%MONODISPERSE .AND. (LPC%DIAMETER > 0._EB) .OR. LPC%CNF_RAMP_INDEX>=0) THEN
       IF (LPC%CNF_RAMP_INDEX<0) THEN
          CALL PARTICLE_SIZE_DISTRIBUTION(LPC%DIAMETER,LPC%R_CNF(:),LPC%CNF(:),LPC%CVF(:),NDC,LPC%GAMMA,LPC%SIGMA,LPC%DISTRIBUTION)
       ELSE
          RM=>RAMPS(LPC%CNF_RAMP_INDEX)
+         LPC%DIAMETER=RM%SPAN*0.5_EB ! This isn't actually used, but some routines might expect it to be set.
          DD=RM%SPAN/NDC
          DO I=1,NDC
                DI=RM%T_MIN+(I-0.5_EB)*DD
@@ -57,7 +58,7 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
                   LPC%CVF(I)   = (1.E-6_EB*DI)**3*(CNF_U-CNF_L)
                ELSE
                   LPC%CVF(I)   = LPC%CVF(I-1) + (1.E-6_EB*DI)**3*(CNF_U-CNF_L)
-               ENDIF
+               ENDIF  
          ENDDO
          LPC%CNF=LPC%CNF/LPC%CNF(NDC)
          LPC%CVF=LPC%CVF/LPC%CVF(NDC)
