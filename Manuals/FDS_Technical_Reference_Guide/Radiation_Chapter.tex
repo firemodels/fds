@@ -137,12 +137,14 @@ and returns the Planck mean absorption coefficient, $\kappa_n$, for each spectra
 where $\om$ represents the wavenumber, in units of cm$^{\rm -1}$,
 $P_i$ is the partial pressure of the $i$th participating species, in units of ${\rm atm}$, and
 $\bar{\kappa}_i$ is the spectral absorption coefficient of the $i$th participating species, in units of
-${\rm atm^{-1}cm^{-2}}$. The Planck function, $I^o_{b,\om}(T)$, represents the
+${\rm atm^{-1}cm^{-1}}$. The Planck function, $I^o_{b,\om}(T)$, represents the
 intensity of blackbody radiation at temperature, $T$, and wavenumber, $\om$:
 \be
 I^o_{b,\om}(T) = \dfrac{2 \, h \, c^2 \, \om^3}{\exp\left(\dfrac{h \, c \, \om}{k_B \, T}\right)-1}
 \ee
-Here, $h$ is the Planck constant, $c$ is the speed of light in vacuum, and $k_B$ is the Boltzmann constant.
+Here, $h$ is the Planck constant ($h$ = 6.626 10$^{\rm -34}$~J.s),
+$c$ is the speed of light in vacuum ($c$ = 2.998 10$^{\rm 10}$~cm.s$^{\rm -1}$),
+and $k_B$ is the Boltzmann constant ($k_B$ = 1.381 10$^{\rm -23}$~J.K$^{\rm -1}$).
 Note that the temperature used in the calculation of $\kappa_n$ is
 the local gas temperature; thus, $\kappa_n$ is a function
 of the gas-phase temperature and partial pressure,
@@ -233,13 +235,13 @@ Methane is a spherical top molecule of tetrahedral shape with the carbon atom oc
       \caption{Spectral bands of $\rm CH_4$ included in RADCAL.}
       \vspace{0.1in}
       \label{Table::CH4}
-    \begin{tabular}{|c|c|c|c|c|}
+    \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment \\
-    \cline{1-5}
-    1 & 1150 & 1600 & tabulated &  $\rm C-H$ Bend\\
-    2 & 2700 & 3250 & tabulated &  $\rm C-H$ Stretch\\
-    3 & 3400 & 5000 & modeled   &  $\rm C-H$ Stretch \\
+    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K})$\ \\
+    \cline{1-6}
+    1 & 1150 & 1600 & tabulated &  $\rm C-H$ Bend    & 237  \\
+    2 & 2700 & 3250 & tabulated &  $\rm C-H$ Stretch & 212  \\
+    3 & 3400 & 5000 & modeled   &  $\rm C-H$ Stretch &   \\
     \hline
    \end{tabular}
 \end{table}
