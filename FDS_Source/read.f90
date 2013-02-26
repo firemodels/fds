@@ -2957,12 +2957,12 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ! Heat of Combustion calculation
    IF (RN%HEAT_OF_COMBUSTION > -1.E21) THEN ! User specified heat of combustion
+      HF_COUNT = 0
       DO NS = 0,N_TRACKED_SPECIES
-         HF_COUNT = 0
          IF (RN%NU(NS) /= 0._EB) THEN
             IF (SPECIES_MIXTURE(NS)%H_F <= -1.E21) HF_COUNT = HF_COUNT +1
             IF (HF_COUNT > 1) THEN
-               WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing more than 1 heat of formation or combustion.'
+               WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Missing more than 1 species heat of formation.'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
          ENDIF
