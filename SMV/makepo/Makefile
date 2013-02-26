@@ -51,7 +51,6 @@ intel_win_64 : exe       = makepo_win_64.exe ../../Build/LIBS/lib_win_intel_64/p
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) 
 
-
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
@@ -65,6 +64,20 @@ intel_linux_64 : exe       = makepo_linux_64
 
 intel_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR)
+
+# ------------- gcc Linux 64 ----------------
+#  64 bit linux
+
+gcc_linux_64 : FFLAGS    = -O2 -m64 -fpp -D pp_noappend -D pp_LINUX64
+gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
+gcc_linux_64 : CC        = gcc
+gcc_linux_64 : CPP       = g++
+gcc_linux_64 : FC        = ifort
+gcc_linux_64 : exe       = makepo_linux_64
+
+gcc_linux_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) 
+
 
 #-------------- Clean Target to remove Object and Module files -----------
 

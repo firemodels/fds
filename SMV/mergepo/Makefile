@@ -65,6 +65,20 @@ intel_linux_64 : exe       = mergepo_linux_64
 intel_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR)
 
+# ------------- gcc Linux 64 ----------------
+#  64 bit linux
+
+gcc_linux_64 : FFLAGS    = -O2 -m64 -fpp -D pp_noappend -D pp_LINUX64
+gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
+gcc_linux_64 : CC        = icc
+gcc_linux_64 : CPP       = icc
+gcc_linux_64 : FC        = ifort
+gcc_linux_64 : exe       = mergepo_linux_64
+
+gcc_linux_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj)
+
+
 #-------------- Clean Target to remove Object and Module files -----------
 
 .PHONY : clean
