@@ -209,9 +209,6 @@ msgstr ""
 msgid "Boundaries"
 msgstr ""
 
-msgid "Boundary file"
-msgstr ""
-
 msgid "Boundary file frame skip"
 msgstr ""
 
@@ -860,9 +857,6 @@ msgstr ""
 msgid "internal"
 msgstr ""
 
-msgid "Isosurface file"
-msgstr ""
-
 msgid "isosurfaces"
 msgstr ""
 
@@ -1175,9 +1169,6 @@ msgstr ""
 msgid "Parameters"
 msgstr ""
 
-msgid "Particle file"
-msgstr ""
-
 msgid "Particle head"
 msgstr ""
 
@@ -1239,9 +1230,6 @@ msgid "Plot3d"
 msgstr ""
 
 msgid "Plot3D"
-msgstr ""
-
-msgid "Plot3d file"
 msgstr ""
 
 msgid "points"
@@ -1640,9 +1628,6 @@ msgstr ""
 msgid "Slice average"
 msgstr ""
 
-msgid "Slice file"
-msgstr ""
-
 msgid "Slice frame Skip"
 msgstr ""
 
@@ -1830,9 +1815,6 @@ msgid "Switch to perspective view       ALT+v"
 msgstr ""
 
 msgid "Switch to size preserving view   ALT+v"
-msgstr ""
-
-msgid "Target file"
 msgstr ""
 
 msgid "Target orientation"
@@ -2162,12 +2144,5 @@ msgstr ""
 msgid "Zone"
 msgstr ""
 
-msgid "Zone fire file"
-msgstr ""
-
 msgid "Zoom"
 msgstr ""
-
-msgid "Zoom"
-msgstr ""
-

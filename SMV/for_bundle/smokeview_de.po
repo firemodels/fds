@@ -36,8 +36,8 @@ msgstr "3D Konturen"
 msgid "3D smoke"
 msgstr "3D Rauch"
 
-msgid "3D smoke (volume rendered)"
-msgstr "3D Rauch (Volumen gerendert)"
+msgid "3D smoke (volume rendered"
+msgstr ""
 
 msgid "3D smoke frame skip"
 msgstr "3D Rauch-Rahmen ueberspringen"
@@ -59,9 +59,6 @@ msgstr "Ueber"
 
 msgid "Above"
 msgstr "Oberhalb"
-
-msgid "Above specified max"
-msgstr "Oberhalb des angegebenen max"
 
 msgid "Absorption adjustments"
 msgstr "Anpassung der Absorption"
@@ -198,12 +195,6 @@ msgstr "Beginn der Datenaufbereitung"
 msgid "Below"
 msgstr "Unter"
 
-msgid "Below specified min"
-msgstr "Unter angegebenenem min"
-
-msgid "Benchmark"
-msgstr "Benchmark"
-
 msgid "bindir dir    - specify location of smokeview bin directory"
 msgstr "bindir dir - gib die Position des Smokeview bin-Directories an"
 
@@ -282,8 +273,17 @@ msgstr "Schliessen"
 msgid "Close all dialogs  ALT+x"
 msgstr "Alle Dialoge (Fenster) ALT + x"
 
+msgid "Color"
+msgstr ""
+
 msgid "color -> grey"
 msgstr "Farbe -> grau"
+
+msgid "Color above max"
+msgstr ""
+
+msgid "Color below min"
+msgstr ""
 
 msgid "Color with"
 msgstr "faerbe ein mit"
@@ -302,6 +302,9 @@ msgstr "Farbbalken Editor"
 
 msgid "Colorbar type"
 msgstr "Farbbalken Typ"
+
+msgid "Colorbars"
+msgstr ""
 
 msgid "colormap"
 msgstr "Farbtabelle"
@@ -323,6 +326,9 @@ msgstr "jetzt Komprimieren"
 
 msgid "Compress only autoloaded files"
 msgstr "komprimiere nur automatisch geladene Dateien"
+
+msgid "Compressed file frame skip"
+msgstr ""
 
 msgid "Compression"
 msgstr "Komprimierung"
@@ -496,7 +502,7 @@ msgid "Duration/Points (all tours"
 msgstr "Dauer/Punkte (alle Touren"
 
 msgid "e: toggle between view rotation types: scene centered 2 axis, 1 axis, 3 axis and eye centered"
-msgstr "e: schalte um zwischen Rotationsansichten: Szenen-zentriert 2 Achsen, 1 Achse, 3 Achsen und Auge-Zentr  "
+msgstr "e: schalte um zwischen Rotationsansichten: Szenen-zentriert 2 Achsen, 1 Achse, 3 Achsen und Auge-Zentr"
 
 msgid "Edit"
 msgstr "Editiere"
@@ -567,6 +573,9 @@ msgstr "Untersuchen Geometrie ... ALT + e"
 msgid "Exterior"
 msgstr "Aussenansicht"
 
+msgid "external"
+msgstr ""
+
 msgid "Facets"
 msgstr "Facetten"
 
@@ -600,9 +609,6 @@ msgstr "File-Endung"
 msgid "filter"
 msgstr "Filter"
 
-msgid "fire color"
-msgstr "Farbe des Feuers"
-
 msgid "fire half depth (m"
 msgstr "halbe Tiefe fuer Feuer (m"
 
@@ -611,9 +617,6 @@ msgstr "Feuerlinie"
 
 msgid "Fire opacity multiplier"
 msgstr "Feuertransparenz-Multiplikator"
-
-msgid "Fire/Smoke colormap"
-msgstr "Feuer/Rauch Farbauswahl"
 
 msgid "Fires"
 msgstr "Feuer"
@@ -702,6 +705,9 @@ msgstr "GPU aktiviert. (G druecken um zu deaktivieren)"
 msgid "GPU available but not in use. (Press G to activate"
 msgstr "GPU verfuegbar, aber nicht in Gebrauch. (G druecken um zu aktivieren)"
 
+msgid "gpu grid multiplier"
+msgstr ""
+
 msgid "GPU not available"
 msgstr "GPU nicht verfuegbar"
 
@@ -765,8 +771,11 @@ msgstr "Ueberlappungsbereiche verbergen"
 msgid "Hide scene"
 msgstr "Szene verbergen"
 
-msgid "Highlight extreme data"
-msgstr "extreme Daten hervorheben"
+msgid "Highlight data above specified max"
+msgstr ""
+
+msgid "Highlight data below specified min"
+msgstr ""
 
 msgid "Hilight skinny triangles"
 msgstr "Schmale Dreiecke hervorheben"
@@ -803,9 +812,6 @@ msgstr "HRRPUV - einzelnes Gitter"
 
 msgid "HRRPUV cutoff"
 msgstr "HRRPUV Cutoff"
-
-msgid "HRRPUV cutoff (kW/m"
-msgstr "HRRPUV cutoff (kW/m)"
 
 msgid "Humans"
 msgstr "Personen"
@@ -852,8 +858,8 @@ msgstr "Einfuegen/Pos1/Bild nach oben: Neigung vor/zurueck /schraeg stellen"
 msgid "Interior"
 msgstr "Innen"
 
-msgid "ISO frame skip"
-msgstr "ISO Frame ueberspringen"
+msgid "internal"
+msgstr ""
 
 msgid "isosurfaces"
 msgstr "Isoflaechen"
@@ -978,6 +984,9 @@ msgstr "Massenextinktionskoeffizient (m2/g"
 msgid "Max"
 msgstr "Max"
 
+msgid "max"
+msgstr "max"
+
 msgid "Max frame rate"
 msgstr "Max. Framerate"
 
@@ -1002,6 +1011,9 @@ msgstr "Mesh-Bezeichnung"
 msgid "Min"
 msgstr "Min"
 
+msgid "min"
+msgstr "min"
+
 msgid "Minimum level solid"
 msgstr "Unterste Ebene als Solid"
 
@@ -1022,6 +1034,12 @@ msgstr "Maus"
 
 msgid "Move"
 msgstr "Bewege"
+
+msgid "Multi-Slices"
+msgstr ""
+
+msgid "Multi-Vector Slices"
+msgstr ""
 
 msgid "Near depth"
 msgstr "nahe Tiefe"
@@ -1049,6 +1067,9 @@ msgstr "Knoten"
 
 msgid "node index"
 msgstr "Knotenindex"
+
+msgid "non-gpu grid multiplier"
+msgstr ""
 
 msgid "None"
 msgstr "Keine"
@@ -1125,11 +1146,17 @@ msgstr "Gliederung"
 msgid "Outline Added"
 msgstr "Umriss hinzugefuegt"
 
+msgid "Outline color"
+msgstr ""
+
 msgid "Outline Only"
 msgstr "nur Umrisse"
 
 msgid "Output data to file"
 msgstr "Schreibe Daten in Datei"
+
+msgid "Outside"
+msgstr ""
 
 msgid "Overwrite compressed files"
 msgstr "Ueberschreibe komprimierte Dateien"
@@ -1455,6 +1482,9 @@ msgstr "Setze max"
 msgid "set min"
 msgstr "Setze min"
 
+msgid "Shade type"
+msgstr ""
+
 msgid "Shades of grey"
 msgstr "Grauschattierungen"
 
@@ -1593,6 +1623,9 @@ msgstr "groessenerhaltend"
 msgid "Skip coarse sub-slice"
 msgstr "Ueberspringe grobes Sub-Slice"
 
+msgid "skipframe n   - render every n frames"
+msgstr ""
+
 msgid "Slice average"
 msgstr "Slice-Durchschnitt"
 
@@ -1715,6 +1748,9 @@ msgstr "Starte Rendern"
 
 msgid "start time"
 msgstr "Startzeit"
+
+msgid "startframe n  - start rendering at frame n"
+msgstr ""
 
 msgid "Starting locations/velocities"
 msgstr "Starte Positionen/Geschwindigkeiten (??)"
@@ -1959,8 +1995,11 @@ msgstr "update_bounds - berechne Grenzen der Boundary-Files und speichere in cas
 msgid "Use Avatar"
 msgstr "Benutze Avatar"
 
-msgid "Use colormap"
-msgstr "Verwende Farbtabelle"
+msgid "use blockage"
+msgstr ""
+
+msgid "use foreground"
+msgstr ""
 
 msgid "Use GPU"
 msgstr "Verwende GPU"
@@ -1985,6 +2024,9 @@ msgstr "Variationen"
 
 msgid "Vector"
 msgstr "Vektor"
+
+msgid "Vector slices"
+msgstr ""
 
 msgid "vector slices"
 msgstr "Vektor-Slices"
@@ -2036,6 +2078,9 @@ msgstr "Sichtweite"
 
 msgid "Visualize fire/smoke flow simulations"
 msgstr "Visualisiere Feuer-/Rauchsimulationen"
+
+msgid "volrender     - generate images of volume rendered smoke and fire"
+msgstr ""
 
 msgid "Volume render settings"
 msgstr "Volume Render Einstellungen"
@@ -2099,9 +2144,6 @@ msgstr "Null an Grenzen"
 
 msgid "Zone"
 msgstr "Zone"
-
-msgid "Zoom"
-msgstr "Zoom"
 
 msgid "Zoom"
 msgstr "Zoom"

@@ -60,9 +60,6 @@ msgstr "A propos de"
 msgid "Above"
 msgstr "Au-dessus"
 
-msgid "Above specified max"
-msgstr "Au dessus de la valeur maximale specifiee"
-
 msgid "Absorption adjustments"
 msgstr "Ajustements d'absorption"
 
@@ -106,7 +103,7 @@ msgid "also, toggles cell center display on/off"
 msgstr "Egalement, active/desactive l'affichage au centre des cellules"
 
 msgid "ALT vertical: translate along z axis"
-msgstr "ALT+deplacement vertical: translation selon l'axe Oz "
+msgstr "ALT+deplacement vertical: translation selon l'axe Oz"
 
 msgid "ALT+u: toggle coarse slice display in embedded mesh"
 msgstr "ALT+u: Afficher un aperçu du champ"
@@ -198,12 +195,6 @@ msgstr "commencement de l'habillage"
 msgid "Below"
 msgstr "En dessous"
 
-msgid "Below specified min"
-msgstr "Au-dessous de la valeur minimale specifiee"
-
-msgid "Benchmark"
-msgstr "Benchmark"
-
 msgid "bindir dir    - specify location of smokeview bin directory"
 msgstr "bindir dir    - specifier l'emplacement du repertoire smokeview/bin"
 
@@ -282,8 +273,17 @@ msgstr "Fermer"
 msgid "Close all dialogs  ALT+x"
 msgstr "Fermer toutes les boîtes de dialogue ALT+x"
 
+msgid "Color"
+msgstr ""
+
 msgid "color -> grey"
 msgstr "Couleur -> Gris"
+
+msgid "Color above max"
+msgstr ""
+
+msgid "Color below min"
+msgstr ""
 
 msgid "Color with"
 msgstr "Couleur avec"
@@ -326,6 +326,9 @@ msgstr "Compresser maintenant"
 
 msgid "Compress only autoloaded files"
 msgstr "Compresser seulement les fichiers charges automatiquement"
+
+msgid "Compressed file frame skip"
+msgstr ""
 
 msgid "Compression"
 msgstr "Compression"
@@ -570,6 +573,9 @@ msgstr "Examiner les obstructions ... ALT+e"
 msgid "Exterior"
 msgstr "Exterieur"
 
+msgid "external"
+msgstr ""
+
 msgid "Facets"
 msgstr "Facettes"
 
@@ -603,9 +609,6 @@ msgstr "Suffixe du fichier"
 msgid "filter"
 msgstr "filtre"
 
-msgid "fire color"
-msgstr "Couleurs des flammes"
-
 msgid "fire half depth (m"
 msgstr "Demi-profondeur de la flamme (m"
 
@@ -615,9 +618,6 @@ msgstr "Contours des flammes"
 msgid "Fire opacity multiplier"
 msgstr "Facteur d'opacification du feu"
 
-msgid "Fire/Smoke colormap"
-msgstr "Legende de couleur pour feu/fumee"
-
 msgid "Fires"
 msgstr "Foyers"
 
@@ -626,6 +626,9 @@ msgstr "Inverser"
 
 msgid "Flip background"
 msgstr "Inverser les couleurs en arriere-plan"
+
+msgid "flip colorbar"
+msgstr ""
 
 msgid "Flow vectors"
 msgstr "Vecteurs de l'ecoulement"
@@ -702,6 +705,9 @@ msgstr "GPU actif. (Tapez sur G pour desactiver"
 msgid "GPU available but not in use. (Press G to activate"
 msgstr "GPU disponible mais non utilise. (Tapez sur G pour activer"
 
+msgid "gpu grid multiplier"
+msgstr ""
+
 msgid "GPU not available"
 msgstr "GPU non disponible"
 
@@ -765,8 +771,11 @@ msgstr "Masquer les recouvrements"
 msgid "Hide scene"
 msgstr "Masquer la scene"
 
-msgid "Highlight extreme data"
-msgstr "Mettre en evidence les extrema"
+msgid "Highlight data above specified max"
+msgstr ""
+
+msgid "Highlight data below specified min"
+msgstr ""
 
 msgid "Hilight skinny triangles"
 msgstr ""
@@ -803,9 +812,6 @@ msgstr "HRRPUV - un seul bloc de maillage"
 
 msgid "HRRPUV cutoff"
 msgstr "Seuil d'affichage HRRPUV"
-
-msgid "HRRPUV cutoff (kW/m"
-msgstr "Seuil d'affichage HRRPUV (kW/m"
 
 msgid "Humans"
 msgstr "Personnes"
@@ -852,8 +858,8 @@ msgstr "INSERT/HOME/PageUp: inclinaison bas/reinitialisation/contre-plongee"
 msgid "Interior"
 msgstr "Interieur"
 
-msgid "ISO frame skip"
-msgstr "Intervalle de representation pour ISO"
+msgid "internal"
+msgstr ""
 
 msgid "isosurfaces"
 msgstr "isosurfaces"
@@ -978,6 +984,9 @@ msgstr "Coefficient d'extinction massique (m2/g"
 msgid "Max"
 msgstr "Max"
 
+msgid "max"
+msgstr "max"
+
 msgid "Max frame rate"
 msgstr "Frequence max d'images"
 
@@ -1002,6 +1011,9 @@ msgstr "Etiquette du bloc de maillage"
 msgid "Min"
 msgstr "Min"
 
+msgid "min"
+msgstr "min"
+
 msgid "Minimum level solid"
 msgstr ""
 
@@ -1022,6 +1034,12 @@ msgstr "Controle a la souris"
 
 msgid "Move"
 msgstr "Deplacer"
+
+msgid "Multi-Slices"
+msgstr ""
+
+msgid "Multi-Vector Slices"
+msgstr ""
 
 msgid "Near depth"
 msgstr ""
@@ -1049,6 +1067,9 @@ msgstr "Noeud"
 
 msgid "node index"
 msgstr "indice du noeud"
+
+msgid "non-gpu grid multiplier"
+msgstr ""
 
 msgid "None"
 msgstr "Aucun"
@@ -1125,11 +1146,17 @@ msgstr "Contours"
 msgid "Outline Added"
 msgstr "Afficher egalement les contours"
 
+msgid "Outline color"
+msgstr ""
+
 msgid "Outline Only"
 msgstr "Afficher seulement les contours"
 
 msgid "Output data to file"
 msgstr "Ecrire les donnees dans un fichier"
+
+msgid "Outside"
+msgstr ""
 
 msgid "Overwrite compressed files"
 msgstr "Ecraser les fichiers compresses"
@@ -1455,6 +1482,9 @@ msgstr "definir le max"
 msgid "set min"
 msgstr "definir le min"
 
+msgid "Shade type"
+msgstr ""
+
 msgid "Shades of grey"
 msgstr "Nuances de gris"
 
@@ -1593,6 +1623,9 @@ msgstr "Avec conservation de dimension"
 msgid "Skip coarse sub-slice"
 msgstr "Skip coarse sub-slice"
 
+msgid "skipframe n   - render every n frames"
+msgstr ""
+
 msgid "Slice average"
 msgstr "Champ moyenne"
 
@@ -1650,8 +1683,8 @@ msgstr "Afficher les obstructions lissees comme opaques"
 msgid "Smooth blockages now"
 msgstr "Lisser les obstructions maintenant"
 
-msgid "Smooth colorbar label values"
-msgstr "Arrondir les valeurs des etiquettes de l'echelle de couleur"
+msgid "Smooth colorbar labels"
+msgstr ""
 
 msgid "Smooth normal"
 msgstr ""
@@ -1715,6 +1748,9 @@ msgstr "Commencer la capture d'image(s)"
 
 msgid "start time"
 msgstr "instant de debut"
+
+msgid "startframe n  - start rendering at frame n"
+msgstr ""
 
 msgid "Starting locations/velocities"
 msgstr "Positions/vitesses"
@@ -1839,9 +1875,6 @@ msgstr "Temps (h: m: s"
 msgid "Time bar"
 msgstr "Echelle de temps"
 
-msgid "Time bars"
-msgstr "Echelles de temps"
-
 msgid "Time interval"
 msgstr "Intervalle de temps"
 
@@ -1962,8 +1995,11 @@ msgstr "update_bounds - Calcule les bornes du fichier de conditions aux limites 
 msgid "Use Avatar"
 msgstr "Utiliser l'avatar"
 
-msgid "Use colormap"
-msgstr "Utiliser la legende de couleurs"
+msgid "use blockage"
+msgstr ""
+
+msgid "use foreground"
+msgstr ""
 
 msgid "Use GPU"
 msgstr "Utiliser GPU"
@@ -1988,6 +2024,9 @@ msgstr "Options"
 
 msgid "Vector"
 msgstr "Vecteur"
+
+msgid "Vector slices"
+msgstr ""
 
 msgid "vector slices"
 msgstr "champs de vecteur"
@@ -2040,8 +2079,11 @@ msgstr "Visibilite"
 msgid "Visualize fire/smoke flow simulations"
 msgstr "Visualiser le foyer et la fumee"
 
+msgid "volrender     - generate images of volume rendered smoke and fire"
+msgstr ""
+
 msgid "Volume render settings"
-msgstr "Reglages pour le rendu de volume "
+msgstr "Reglages pour le rendu de volume"
 
 msgid "W: toggle clipping - use Options/Clip menu to specify clipping planes"
 msgstr "W: Activer/desactiver la troncature - utilisez le menu 'Boîte de dialogue/Tronquer la geometrie' pour definir la troncature"
@@ -2108,4 +2150,3 @@ msgstr "Zoom"
 
 msgid "Zoom"
 msgstr "Zoom"
-

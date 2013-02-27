@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-MAKEPO=../makepo/gcc_linux_64/makepo_linux_64
+MAKEPO=../makepo/intel_linux_64/makepo_linux_64
 SMVDIR=../source/smokeview
 SHAREDDIR=../source/shared
 
