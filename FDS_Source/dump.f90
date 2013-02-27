@@ -5738,7 +5738,7 @@ IF (N_PDPA_HISTOGRAM>0) THEN
                ELSE
                   CUMSUM(NN)=DV%PDPA_HISTOGRAM_COUNTS(I)
                ENDIF
-               WRITE(LU_HISTOGRAM,TCFORM,ADVANCE="NO") DI,CUMSUM(NN)/CONST(NN)/DD
+               WRITE(LU_HISTOGRAM,TCFORM,ADVANCE="NO") DI*1E6_EB,CUMSUM(NN)/CONST(NN)/DD
             ELSE
                IF(NN>1) THEN
                   WRITE(LU_HISTOGRAM,"(A)",ADVANCE="NO") ",,"
