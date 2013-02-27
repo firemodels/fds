@@ -65,7 +65,6 @@ intel_linux_64 : $(obj)
 # ------------- gcc Linux 64 ----------------
 #  64 bit linux
 
-gcc_linux_64 : FFLAGS    = -O2 -m64 -fpp -D pp_noappend -D pp_LINUX64
 gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
 gcc_linux_64 : CC        = gcc
 gcc_linux_64 : CPP       = g++
