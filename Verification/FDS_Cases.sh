@@ -32,6 +32,8 @@ $RUNFDS Fires box_burn_away1
 $RUNFDS Fires box_burn_away2
 $RUNFDS Fires box_burn_away3
 $RUNFDS Fires box_burn_away4
+$RUNFDS Fires box_burn_away_2D
+$RUNFDS Fires box_burn_away_2D_residue
 $RUNFDS Fires couch
 $RUNFDS Fires fire_whirl_pool
 $RUNFDS Fires room_fire
