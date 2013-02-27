@@ -4373,12 +4373,15 @@ the ratio of heats of combustion
 \be
 0.75\times 1.28 \hbox{kg}\; = 0.96\; \hbox{kg}
 \ee
+The same case is tested in 2D ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter only half of the mass is converted to fuel, yielding 50 \% residue. The box is made burn away by setting {\ct BULK\_DENSITY = 10}.
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away1} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away2} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away3} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away4}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away4} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away_2D} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away_2D_residue} \\
 \end{tabular*}
 \caption[Results of the {\ct box\_burn\_away} test cases]{Output of {\ct box\_burn\_away} test cases.}
 \label{box_burn_away}
