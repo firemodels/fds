@@ -37,7 +37,7 @@ msgid "3D smoke"
 msgstr "3D Rauch"
 
 msgid "3D smoke (volume rendered"
-msgstr ""
+msgstr "3D Rauch (Volumen gerendert"
 
 msgid "3D smoke frame skip"
 msgstr "3D Rauch-Rahmen ueberspringen"
@@ -274,16 +274,16 @@ msgid "Close all dialogs  ALT+x"
 msgstr "Alle Dialoge (Fenster) ALT + x"
 
 msgid "Color"
-msgstr ""
+msgstr "Farbe"
 
 msgid "color -> grey"
 msgstr "Farbe -> grau"
 
 msgid "Color above max"
-msgstr ""
+msgstr "Farbe fuer ueber max."
 
 msgid "Color below min"
-msgstr ""
+msgstr "Farbe fuer unter min."
 
 msgid "Color with"
 msgstr "faerbe ein mit"
@@ -304,7 +304,7 @@ msgid "Colorbar type"
 msgstr "Farbbalken Typ"
 
 msgid "Colorbars"
-msgstr ""
+msgstr "Farbbalken"
 
 msgid "colormap"
 msgstr "Farbtabelle"
@@ -328,7 +328,7 @@ msgid "Compress only autoloaded files"
 msgstr "komprimiere nur automatisch geladene Dateien"
 
 msgid "Compressed file frame skip"
-msgstr ""
+msgstr "Ueberspringe komprimierte Datei"
 
 msgid "Compression"
 msgstr "Komprimierung"
@@ -574,7 +574,7 @@ msgid "Exterior"
 msgstr "Aussenansicht"
 
 msgid "external"
-msgstr ""
+msgstr "extern"
 
 msgid "Facets"
 msgstr "Facetten"
@@ -706,7 +706,7 @@ msgid "GPU available but not in use. (Press G to activate"
 msgstr "GPU verfuegbar, aber nicht in Gebrauch. (G druecken um zu aktivieren)"
 
 msgid "gpu grid multiplier"
-msgstr ""
+msgstr "GPU Gitter-Multiplikator"
 
 msgid "GPU not available"
 msgstr "GPU nicht verfuegbar"
@@ -772,10 +772,10 @@ msgid "Hide scene"
 msgstr "Szene verbergen"
 
 msgid "Highlight data above specified max"
-msgstr ""
+msgstr "Daten ueber dem ausgewaehlten max. hervorheben"
 
 msgid "Highlight data below specified min"
-msgstr ""
+msgstr "Daten unter dem ausgewaehlten min. hervorheben"
 
 msgid "Hilight skinny triangles"
 msgstr "Schmale Dreiecke hervorheben"
@@ -859,7 +859,7 @@ msgid "Interior"
 msgstr "Innen"
 
 msgid "internal"
-msgstr ""
+msgstr "intern"
 
 msgid "isosurfaces"
 msgstr "Isoflaechen"
@@ -1036,10 +1036,10 @@ msgid "Move"
 msgstr "Bewege"
 
 msgid "Multi-Slices"
-msgstr ""
+msgstr "Multi-Slice"
 
 msgid "Multi-Vector Slices"
-msgstr ""
+msgstr "Multi-Vektor-Slice"
 
 msgid "Near depth"
 msgstr "nahe Tiefe"
@@ -1069,7 +1069,7 @@ msgid "node index"
 msgstr "Knotenindex"
 
 msgid "non-gpu grid multiplier"
-msgstr ""
+msgstr "Non-GPU Gitter-Multiplikator"
 
 msgid "None"
 msgstr "Keine"
@@ -1147,7 +1147,7 @@ msgid "Outline Added"
 msgstr "Umriss hinzugefuegt"
 
 msgid "Outline color"
-msgstr ""
+msgstr "Umrissfarbe"
 
 msgid "Outline Only"
 msgstr "nur Umrisse"
@@ -1156,7 +1156,7 @@ msgid "Output data to file"
 msgstr "Schreibe Daten in Datei"
 
 msgid "Outside"
-msgstr ""
+msgstr "Ausserhalb"
 
 msgid "Overwrite compressed files"
 msgstr "Ueberschreibe komprimierte Dateien"
@@ -1483,7 +1483,7 @@ msgid "set min"
 msgstr "Setze min"
 
 msgid "Shade type"
-msgstr ""
+msgstr "Art der Schattierung"
 
 msgid "Shades of grey"
 msgstr "Grauschattierungen"
@@ -1624,7 +1624,7 @@ msgid "Skip coarse sub-slice"
 msgstr "Ueberspringe grobes Sub-Slice"
 
 msgid "skipframe n   - render every n frames"
-msgstr ""
+msgstr "skipframe n   - rendere alle n Frames"
 
 msgid "Slice average"
 msgstr "Slice-Durchschnitt"
@@ -1750,7 +1750,7 @@ msgid "start time"
 msgstr "Startzeit"
 
 msgid "startframe n  - start rendering at frame n"
-msgstr ""
+msgstr "startframe n  - starte Rendern bei Frame n"
 
 msgid "Starting locations/velocities"
 msgstr "Starte Positionen/Geschwindigkeiten (??)"
@@ -1996,10 +1996,10 @@ msgid "Use Avatar"
 msgstr "Benutze Avatar"
 
 msgid "use blockage"
-msgstr ""
+msgstr "nutze Ueberdeckung"
 
 msgid "use foreground"
-msgstr ""
+msgstr "nutze Vordergrund"
 
 msgid "Use GPU"
 msgstr "Verwende GPU"
@@ -2026,7 +2026,7 @@ msgid "Vector"
 msgstr "Vektor"
 
 msgid "Vector slices"
-msgstr ""
+msgstr "Vektor-Slices"
 
 msgid "vector slices"
 msgstr "Vektor-Slices"
@@ -2080,7 +2080,7 @@ msgid "Visualize fire/smoke flow simulations"
 msgstr "Visualisiere Feuer-/Rauchsimulationen"
 
 msgid "volrender     - generate images of volume rendered smoke and fire"
-msgstr ""
+msgstr "volrender     - erzeuge Bilder von volumengerendertem Rauch und Feuer"
 
 msgid "Volume render settings"
 msgstr "Volume Render Einstellungen"
