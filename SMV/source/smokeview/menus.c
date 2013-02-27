@@ -8842,7 +8842,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,loadmultivslicemenu);
       }
       if(nsliceinfo>0){
-        strcpy(loadmenulabel,_("Slice file"));
+        strcpy(loadmenulabel,"Slice file");
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
           strcat(loadmenulabel,steplabel);
@@ -8858,7 +8858,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,vslicemenu);
       }
       if(nisoinfo>0){
-        strcpy(loadmenulabel,_("Isosurface file"));
+        strcpy(loadmenulabel,"Isosurface file");
         if(isoframeskip_global>0){
           sprintf(steplabel,"/Skip %i",isoframeskip_global);
           strcat(loadmenulabel,steplabel);
@@ -8866,7 +8866,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,loadisomenu);
       }
       if(npatchinfo>0){
-        strcpy(loadmenulabel,_("Boundary file"));
+        strcpy(loadmenulabel,"Boundary file");
         if(boundframeskip>0){
           sprintf(steplabel,"/Skip %i",boundframeskip);
           strcat(loadmenulabel,steplabel);
@@ -8875,7 +8875,7 @@ updatemenu=0;
       }
       if(npartinfo>0){
         if(nevac!=npartinfo){
-          strcpy(loadmenulabel,_("Particle file"));
+          strcpy(loadmenulabel,"Particle file");
           if(partframeskip>0||partpointskip>0){
             if(partframeskip>0&&partpointskip>0){
               sprintf(steplabel,"/Skip Frame %i, Point %i",partframeskip,partpointskip);
@@ -8907,13 +8907,13 @@ updatemenu=0;
           glutAddSubMenu(loadmenulabel,evacmenu);
         }
       }
-      if(nplot3dinfo>0)glutAddSubMenu(_("Plot3d file"),loadplot3dmenu);
+      if(nplot3dinfo>0)glutAddSubMenu("Plot3d file",loadplot3dmenu);
       if(ntarginfo>0){
-        strcpy(loadmenulabel,_("Target file"));
+        strcpy(loadmenulabel,"Target file");
         glutAddSubMenu(loadmenulabel,targetmenu);
       }
       if(nzoneinfo>0){
-        strcpy(loadmenulabel,_("Zone fire file"));
+        strcpy(loadmenulabel,"Zone fire file");
         glutAddSubMenu(loadmenulabel,zonemenu);
       }
       if(glui_active==1){      
