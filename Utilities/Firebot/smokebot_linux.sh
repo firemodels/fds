@@ -12,7 +12,8 @@
 #  ===================
 
 mailToSMV="gforney@gmail.com, koverholt@gmail.com"
-mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de, ben.trettel@gmail.com"
+mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
+
 
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
@@ -60,12 +61,12 @@ fi
 export JOBPREFIX=SB_
 
 #  =============================================
-#  = Firebot timing and notification mechanism =
+#  = Smokebot timing and notification mechanism =
 #  =============================================
 
-# This routine checks the elapsed time of Firebot.
-# If Firebot runs more than 12 hours, an email notification is sent.
-# This is a notification only and does not terminate Firebot.
+# This routine checks the elapsed time of Smokebot.
+# If Smokebot runs more than 12 hours, an email notification is sent.
+# This is a notification only and does not terminate Smokebot.
 # This check runs during Stages 3 and 5.
 
 # Start firebot timer
@@ -164,7 +165,7 @@ set_files_world_readable()
 clean_firebot_history()
 {
    
-   # Clean Firebot metafiles
+   # Clean Smokebot metafiles
    MKDIR $FIREBOT_DIR
    cd $FIREBOT_DIR
    MKDIR guides
@@ -175,7 +176,7 @@ clean_firebot_history()
 
 #  ========================
 #  ========================
-#  = Firebot Build Stages =
+#  = Smokebot Build Stages =
 #  ========================
 #  ========================
 
@@ -346,7 +347,7 @@ run_verification_cases_debug()
 
    cd $FDS_SVNROOT/Verification/scripts
 
-   # Submit SMV verification cases and wait for them to start (run SMV cases in debug mode on firebot queue)
+   # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
    ./Run_SMV_Cases.sh -d -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_debug_start
@@ -455,7 +456,7 @@ wait_verification_cases_release_end()
 
 run_verification_cases_release()
 {
-   # Start running all SMV verification cases (run all cases on firebot queue)
+   # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
    ./Run_SMV_Cases.sh -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
