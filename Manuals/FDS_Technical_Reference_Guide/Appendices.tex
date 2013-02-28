@@ -7,12 +7,17 @@
 $A_{\rm p}$ \hspace{1in}  \= droplet surface area \\
 $A_{\alpha\beta}$         \> pre-exponential factor for solid phase Arrhenius reaction \\
 $B$                       \> pre-exponential factor for gas phase Arrhenius reaction \\
-$C$                       \> sprinkler C-factor \\
+$B_T$                     \> function of molecular the Prandtl constant \\
+$C$                       \> sprinkler C-factor; coefficient of natural convection \\
 $C_{\rm d}$               \> drag coefficient \\
-$C_s$                     \> Smagorinsky constant (LES)  \\
+$C_m$                     \> momentum accommodation coefficient \\
+$C_n$                     \> Cunningham slip factor \\
+$C_s$                     \> Smagorinsky constant (LES); thermal slip coefficient  \\
+$C_t$                     \> thermal accommodation coefficient \\
 $c$                       \> solid material specific heat \\
 $c_p$                     \> constant pressure specific heat \\
 $D$                       \> diffusion coefficient; droplet/particle diameter   \\
+$D_B$                     \> Brownian diffusion coefficient \\
 $D_{\rm v,0.5}$           \> median volumetric droplet diameter \\
 $E$                       \> activation energy \\
 $\bof_{\rm b}$            \> external force vector (excluding gravity) \\
@@ -26,11 +31,16 @@ $h_\alpha^0$              \> heat of formation of species $\alpha$   \\
 $I$                       \> radiation intensity   \\
 $I_{\rm b}$               \> radiation blackbody intensity   \\
 $k$                       \> thermal conductivity; suppression decay factor \\
+$Kn$                      \> Knudsen number \\
+$K_{th}$                  \> thermophoretic velocity coefficient \\
+$L$                       \> characteristic length; surface thickness \\
 $\dm_{{\rm b},\alpha}'''$ \> mass production rate of species $\alpha$ by evaporating droplets/particles \\
 $\dm_{\rm f}''$           \> fuel mass flux \\
 $\dm_\alpha'''$           \> mass production rate of species $\alpha$ per unit volume \\
 $\dm_{\rm w}''$           \> water mass flux  \\
 $m_{\rm w}''$             \> water mass per unit area \\
+$n$                       \> spatial coordinate \\
+$n_s$                     \> reaction order \\
 $\NU$                     \> Nusselt number \\
 $\PR$                     \> Prandtl number \\
 $p$                       \> pressure \\
@@ -56,6 +66,7 @@ $T$                       \> temperature \\
 $t$                       \> time           \\
 $U$                       \> integrated radiant intensity \\
 $\bu=(u,v,w)$             \> velocity vector  \\
+$\dot{V}_i''$             \> initial vapor volume flux \\
 $W_\alpha$                \> molecular weight of gas species $\alpha$ \\
 $\bW$                     \> molecular weight of the gas mixture \\
 $\WE$                     \> Weber number \\
@@ -63,28 +74,34 @@ $\bx=(x,y,z)$             \> position vector  \\
 $X_\alpha$                \> volume fraction of species $\alpha$   \\
 $Y_\alpha$                \> mass fraction of species $\alpha$   \\
 $\bar{Y}_\alpha$          \> mean mass fraction of species $\alpha$   \\
-$\hat{Y}_\alpha$          \> mass fraction of species $\alpha$ in mixed zone of a computation cell   \\
+$\hat{Y}_\alpha$          \> mass fraction of species $\alpha$ in mixed zone of a computation cell \\
 $Y_\OTWO^\infty$          \> mass fraction of oxygen in the ambient   \\
 $Y_\F^I$                  \> mass fraction of fuel in the fuel stream   \\
 $y_{\rm s}$               \> soot yield \\
 $Z$                       \> mixture fraction   \\
+$\alpha$                  \> index of material component; ratio of gas conductivity to the particle conductivity \\
+$\beta$                   \> index of reaction \\
 $\gamma$                  \> ratio of specific heats; Rosin-Rammler exponent \\
 $\Delta H$                \> heat of combustion \\
 $\Delta H_\OTWO$          \> energy released per unit mass oxygen consumed \\
-$\delta$                  \> wall thickness \\
-$\epsilon$                \> dissipation rate \\
-$\kappa$                  \> absorption coefficient \\
+$\delta$                  \> film thickness; scaling factor of thickness and density \\
+$\epsilon$                \> dissipation rate; emissivity \\
+$\kappa$                  \> absorption coefficient; von Karman constant \\
+$\lambda$                 \> mean free path of gas molecules \\
 $\mu$                     \> dynamic viscosity \\
 $\nu_\alpha$              \> stoichiometric coefficient, species $\alpha$ \\
 $\nu_{\rm s}$             \> yield of solid residue in solid phase reaction \\
 $\nu_{{\rm g},\gamma}$    \> yield of gaseous species $\gamma$ in solid phase reaction \\
 $\rho$                    \> density \\
 $\btau_{ij}$              \> viscous stress tensor \\
+$\chi$                    \> shape factor \\
 $\chi_{\rm r}$            \> radiative loss fraction \\
 $\sigma$                  \> Stefan-Boltzmann constant; constant in droplet size distribution; surface tension \\
 $\sigma_{\rm d}$          \> droplet scattering coefficient \\
 $\sigma_{\rm s}$          \> scattering coefficient \\
+$\tau^+$                  \> dimensionless stopping distance \\
 $\bo=(\omx,\omy,\omz)$    \> vorticity vector \\
+$\Omega$                  \> solid angle \\
 \end{tabbing}
 
 
