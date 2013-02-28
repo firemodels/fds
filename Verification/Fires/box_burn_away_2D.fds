@@ -1,4 +1,4 @@
-&HEAD CHID='box_burn_away_2D', TITLE='Test BURN_AWAY feature, SVN $Revision: 12143 $' / 
+&HEAD CHID='box_burn_away_2D', TITLE='Test BURN_AWAY feature, SVN $Revision$' / 
 
 The FOAM box is evaporated away by the high thermal radiation
 from HOT surfaces. The mass of the box is 1 * 0.4^2 m3 * 20 kg/m3 = 3.2 kg.
