@@ -327,12 +327,12 @@ REAL(EB), PARAMETER:: NSCARC_GRAPH_NONE             =  0
 
 INTEGER, PARAMETER :: NSCARC_CELLTYPE_NONE          =  0, &
                       NSCARC_CELLTYPE_COARSE        =  1, &      ! coarse-grid cell
-                      NSCARC_CELLTYPE_COARSE2       =  2, &      ! special coarse-grid cell
+                      NSCARC_CELLTYPE_COARSE0       =  3, &      ! special coarse-grid cell
                       NSCARC_CELLTYPE_COMMON        =  3, &      ! common cell
-                      NSCARC_CELLTYPE_FINE          = -2, &      ! fine-grid cell
-                      NSCARC_CELLTYPE_FINE2         = -4, &      ! special fine-grid cell
-                      NSCARC_CELLTYPE_SFINE         = -2, &      ! strongly coupled fine-grid cell
-                      NSCARC_CELLTYPE_WFINE         = -3, &      ! weakly   coupled fine-grid cell
+                      NSCARC_CELLTYPE_FINE          = -1, &      ! fine-grid cell
+                      NSCARC_CELLTYPE_FINE0         = -3, &      ! special fine-grid cell
+                      NSCARC_CELLTYPE_SFINE         = -1, &      ! strongly coupled fine-grid cell
+                      NSCARC_CELLTYPE_WFINE         = -2, &      ! weakly   coupled fine-grid cell
                       NSCARC_CELLTYPE_ZPNT          = -4, &      ! special z-point
                       NSCARC_CELLTYPE_FPNT          = -5, &      ! special f-point
                       NSCARC_CELLTYPE_CPNT          = -6         ! special c-point
@@ -6460,7 +6460,8 @@ SUBROUTINE SCARC_SETUP_COLORING(NTYPE, NL)
 INTEGER, PARAMETER  :: NCOUPLINGS = 20
 INTEGER, INTENT(IN) :: NTYPE, NL
 INTEGER :: NM, IC, JC, KC, ICOL, JCOL, IRAND, REMAINING_CELLS
-INTEGER :: FCELL = -1, ZCELL =-2
+INTEGER :: FCELL = -1, ZCELL =-2, CI_TILDE2 = -1, CI_TILDE
+LOGICAL :: BEMPTY, BNONEMPTY
 REAL(EB) :: RAND_NUM, MEASURE, NEW_MEASURE
 REAL(EB) :: MEASURE_MAX, EPS
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
@@ -6493,43 +6494,43 @@ SELECT CASE (NTYPE)
          RS3_MEASURE_LOOP1: DO IC = 1, SC%NC
             
             IF (SC%S_ROW(IC+1)-SC%S_ROW(IC) == 0) THEN
-               SC%CELLTYPE(IC) = NSCARC_CELLTYPE_FINE
+               SC%CELLTYPE(IC) = NSCARC_CELLTYPE_FINE0
                SC%MEASURE(IC) = 0.0_EB
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'A: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE(',IC,')=',SC%MEASURE(IC)
-               ! IF (AGGRESSIVE2) SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE 
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'A: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC),': Remaining cells=',REMAINING_CELLS
+               ! IF (AGGRESSIVE2) SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE0
             ELSE
                SC%CELLTYPE(IC) = NSCARC_CELLTYPE_NONE
                REMAINING_CELLS   = REMAINING_CELLS + 1
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'B:CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE(',IC,')=',SC%MEASURE(IC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'B: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC),': Remaining cells=',REMAINING_CELLS
             ENDIF
          ENDDO RS3_MEASURE_LOOP1
 
          RS3_MEASURE_LOOP2: DO IC = 1, SC%NC
             MEASURE = SC%MEASURE(IC)
-            IF (SC%CELLTYPE(IC) /= NSCARC_CELLTYPE_FINE .AND. SC%CELLTYPE(IC) /= NSCARC_CELLTYPE_COARSE) THEN
+            IF (SC%CELLTYPE(IC) /= NSCARC_CELLTYPE_FINE0 .AND. SC%CELLTYPE(IC) /= NSCARC_CELLTYPE_COARSE0) THEN
                IF (SC%MEASURE(IC) > 0.0_EB) THEN
                   SC%MEASURE2(IC) = SC%MEASURE(IC) 
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'C: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'C: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC),': Remaining cells=',REMAINING_CELLS
                ELSE
                   IF (SC%MEASURE(IC) < 0.0_EB) WRITE(*,*) 'SCARC_SETUP_MEASURE: Negative measure !!'
-                  SC%CELLTYPE(IC) = FCELL
+                  SC%CELLTYPE(IC) = NSCARC_CELLTYPE_FINE
                   DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
                      JC = SC%S_COL(ICOL)
-                     IF (SC%CELLTYPE(JC) /= NSCARC_CELLTYPE_COARSE .AND. SC%CELLTYPE(JC) /= NSCARC_CELLTYPE_FINE) THEN
+                     IF (SC%CELLTYPE(JC) /= NSCARC_CELLTYPE_COARSE0 .AND. SC%CELLTYPE(JC) /= NSCARC_CELLTYPE_FINE0) THEN
                         IF (JC < IC) THEN
                            NEW_MEASURE = SC%MEASURE(JC)
                            IF (NEW_MEASURE > 0.0_EB) SC%MEASURE2(JC) = 0.0_EB
                            NEW_MEASURE = SC%MEASURE(JC)+1
                            SC%MEASURE2(JC) = NEW_MEASURE
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'D: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'D: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC),': Remaining cells=',REMAINING_CELLS
                         ELSE
                            NEW_MEASURE = SC%MEASURE(JC)+1
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'E: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'E: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC),': Remaining cells=',REMAINING_CELLS
                           
                         ENDIF
                      ENDIF
@@ -6562,14 +6563,16 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MEASURE_MAX=',MEASURE_MAX
                   SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
                   REMAINING_CELLS = REMAINING_CELLS - 1
          
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'F: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'F: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE2(',IC,')=',SC%MEASURE2(IC),': Remaining cells=',REMAINING_CELLS
 
                   !!! Determine set of fine cells 
                   DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
 
                      !!! IF JC hasn't been marked yet, set it to be a fine cell which is no longer measured
                      JC = SC%S_COL(ICOL)
+
+                     IF (JC <= SC%NC) THEN
                      IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_NONE) THEN
 
                         SC%MEASURE(JC)  = NSCARC_MEASURE_NONE
@@ -6577,18 +6580,17 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MEASURE_MAX=',MEASURE_MAX
                         SC%CELLTYPE(JC) = NSCARC_CELLTYPE_FINE
                         REMAINING_CELLS = REMAINING_CELLS - 1
       
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'G: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'G: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC),': Remaining cells=',REMAINING_CELLS
 
-                        IF (JC <= SC%NC) THEN
                         !!!  increase measures of cells KC adjacent to fine cells JC based on strong couplings
                            DO JCOL = SC%S_ROW(JC), SC%S_ROW(JC+1)-1
                               KC = SC%S_COL(JCOL)
                               IF (SC%CELLTYPE(KC)==NSCARC_CELLTYPE_NONE) THEN
                                  SC%MEASURE(KC)  = SC%MEASURE(KC) + 1.0_EB
                                  SC%MEASURE2(KC) = SC%MEASURE(KC) + 1.0_EB
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'H: CELLTYPE(',KC,') =',SC%CELLTYPE(KC),': MEASURE2(',KC,')=',SC%MEASURE2(KC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'H: CELLTYPE(',KC,') =',SC%CELLTYPE(KC),': MEASURE2(',KC,')=',SC%MEASURE2(KC),': Remaining cells=',REMAINING_CELLS
    
                               ENDIF
                            ENDDO 
@@ -6600,33 +6602,35 @@ WRITE(SCARC_LU,*) '====================== REMAINING_CELLS = ', REMAINING_CELLS
 !CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE , NL, 'SETUP_CELLTYPE', 'RS3_MEASURE ')
 !CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPE', 'RS3_CELLTYPE ')
 !WRITE(SCARC_LU,*) '====================== REMAINING_CELLS = ', REMAINING_CELLS
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER SECOND RS3 LOOP ')
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE AFTER SECOND RS3 LOOP ')
                   EXIT RS3_CELL_LOOP
                ENDIF
             ENDDO RS3_CELL_LOOP
 
             DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
                JC = SC%S_COL(ICOL)
+               IF (JC <= SC%NC) THEN
                IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_NONE) THEN
                   MEASURE = SC%MEASURE(JC) - 1
                   SC%MEASURE(JC) = MEASURE 
                   IF (MEASURE > 0.0_EB) THEN
                      SC%MEASURE2(JC) = MEASURE
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'I: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'I: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC),': Remaining cells=',REMAINING_CELLS
                   ELSE
                      SC%CELLTYPE(JC) = NSCARC_CELLTYPE_FINE
                      REMAINING_CELLS = REMAINING_CELLS - 1 
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'J: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC)
-                     IF (JC <= SC%NC) THEN
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'J: CELLTYPE(',JC,') =',SC%CELLTYPE(JC),': MEASURE2(',JC,')=',SC%MEASURE2(JC),': Remaining cells=',REMAINING_CELLS
                         DO JCOL = SC%S_ROW(JC), SC%S_ROW(JC+1)-1
                            KC = SC%S_COL(JCOL)
                            IF (SC%CELLTYPE(KC)==NSCARC_CELLTYPE_NONE) THEN
                               SC%MEASURE(KC)  = SC%MEASURE(KC) + 1.0_EB
                               SC%MEASURE2(KC) = SC%MEASURE(KC) + 1.0_EB
                               MEASURE_MAX = MAX(MEASURE_MAX, SC%MEASURE(KC))
-   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6)') &
-         'K: CELLTYPE(',KC,') =',SC%CELLTYPE(KC),': MEASURE2(',KC,')=',SC%MEASURE2(KC)
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i6,a,i3,a,f12.6,a,i3)') &
+         'K: CELLTYPE(',KC,') =',SC%CELLTYPE(KC),': MEASURE2(',KC,')=',SC%MEASURE2(KC),': Remaining cells=',REMAINING_CELLS
                            ENDIF
                         ENDDO 
                      ENDIF
@@ -6634,14 +6638,78 @@ WRITE(SCARC_LU,*) '====================== REMAINING_CELLS = ', REMAINING_CELLS
 
                ENDIF
             ENDDO
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER THIRD RS3 LOOP ')
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE AFTER THIRD RS3 LOOP ')
 
          ENDDO RS3_CYCLE_LOOP
          SC%NCW = 0 
 
          DO IC = 1, SC%NC
-            IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_COARSE) SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
+            IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_COARSE0) SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
          ENDDO
 
+         !!! Second pass: inter-processor exchange
+         DO IC = 1, SC%NC
+            SC%GRAPH(IC) = -1
+         ENDDO
+         DO IC = 1, SC%NC
+     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '=============== IC =',IC 
+            IF (CI_TILDE2 /= IC) CI_TILDE = -1
+            IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_FINE) THEN
+               DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+                  JC = SC%S_COL(ICOL)
+                  IF (JC <= SC%NC) THEN
+                  IF (SC%CELLTYPE(JC) > 0) THEN
+                     SC%GRAPH(JC) = IC
+     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH(',JC,')=',SC%GRAPH(JC)
+                  ENDIF
+                  ENDIF
+               ENDDO
+               DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+                  JC = SC%S_COL(ICOL)
+                  IF (JC <= SC%NC) THEN
+                  IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_FINE) THEN
+     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'HALLOOOOO: CELLTYPE(',JC,')=',SC%CELLTYPE(JC)
+                     BEMPTY = .TRUE.
+                     DO JCOL = SC%S_ROW(JC), SC%S_ROW(JC+1)-1
+                        KC = SC%S_COL(JCOL)
+                        IF (SC%GRAPH(KC) == IC) THEN
+                           BEMPTY = .FALSE.
+                           EXIT
+                        ENDIF
+                        IF (BEMPTY) THEN
+                           IF (BNONEMPTY) THEN
+                              SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
+     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'CELLTYPE(',IC,')=',SC%CELLTYPE(IC)
+                              IF (CI_TILDE > -1) THEN
+                                 SC%CELLTYPE(CI_TILDE) = NSCARC_CELLTYPE_FINE
+     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'CELLTYPE(',CI_TILDE,')=',SC%CELLTYPE(CI_TILDE)
+                                 CI_TILDE = -1
+                              ENDIF
+                              BNONEMPTY = .FALSE.
+                              EXIT
+                           ELSE
+                              CI_TILDE = JC
+                              CI_TILDE2 = IC
+                              SC%CELLTYPE(JC) = NSCARC_CELLTYPE_COARSE
+     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'CELLTYPE(',JC,')=',SC%CELLTYPE(JC)
+                              BNONEMPTY = .FALSE.
+                              EXIT
+                           ENDIF
+                        ENDIF
+                     ENDDO
+                  ENDIF
+                  ENDIF
+               ENDDO
+            ENDIF
+         ENDDO
+
+         DO IC = 1, SC%NC
+     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SUSI: GRAPH(',IC,')=',SC%GRAPH(IC)
+         ENDDO
+         DO IC = 1, SC%NC
+     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SUSI: CELLTYPE(',IC,')=',SC%CELLTYPE(IC)
+         ENDDO
       ENDDO RS3_MESH_LOOP
 
 
@@ -6863,7 +6931,7 @@ WRITE(SCARC_LU,*) 'C:  SC%GRAPH(',ICOUNT,')=',SC%GRAPH(ICOUNT)
                   SC%CELLTYPE(IC)  = NSCARC_CELLTYPE_FINE
 WRITE(SCARC_LU,*) 'D: SC%CELLTYPE(',IC,')=',SC%CELLTYPE(IC)
                ENDIF
-            ELSEIF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_FINE2) THEN
+            ELSEIF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_FINE0) THEN
                SC%MEASURE(IC) = NSCARC_MEASURE_NONE
             ELSE
                SC%GRAPH(ICOUNT) = IC
@@ -6991,7 +7059,7 @@ WRITE(SCARC_LU,*) 'C5: SC%S_COL(',IROW,')=',SC%S_COL(IROW)
                            SC%CELLTYPE(JC)    = NSCARC_CELLTYPE_COMMON     ! temporarily set CELLTYPE to common
 WRITE(SCARC_LU,*) 'C6: SC%CELLTYPE(',JC,')=',SC%CELLTYPE(JC)
                         ENDIF
-                     ELSEIF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_FINE2) THEN
+                     ELSEIF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_FINE0) THEN
                         IF (SC%S_COL(IROW) > -1) THEN
                            SC%S_COL(IROW) = -SC%S_COL(IROW) -1     ! remove edge
 WRITE(SCARC_LU,*) 'C7: SC%S_COL(',IROW,')=',SC%S_COL(IROW)
@@ -14728,7 +14796,7 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_DEBUG_CELLTYPE)
 
       IF (TYPE_DEBUG >= NSCARC_DEBUG_MEDIUM) THEN
-       IF (NMESHES == 1.OR.NL>100) THEN                !!! only temporarily
+       IF (NMESHES == 4) THEN                !!! only temporarily
          DO NM = NMESHES_MIN, NMESHES_MAX
            SC  => SCARC(NM)%COMPACT(NL)
            IF (NL == 1) THEN
