@@ -227,13 +227,12 @@ gcc_linux : $(obj)
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-OSX_FORT_LIBDIR  = $(IFORT_COMPILER)/lib
-OSX_INTEL_LIBS = -lifcoremt -limf -lirc -lsvml
+OSX_INTEL_LIBS = $(IFORT_COMPILER)/lib/libifcoremt.a $(IFORT_COMPILER)/lib/libimf.a $(IFORT_COMPILER)/lib/libirc.a $(IFORT_COMPILER)/lib/libsvml.a
 
 # ------------- intel_osx_32 ----------------
 
-intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_osx_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_OSX
+intel_osx_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_OSX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
 intel_osx_32 : LFLAGS    = -m32 -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
 intel_osx_32 : CC        = icc 
 intel_osx_32 : CPP       = icpc
@@ -241,12 +240,12 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokeview_osx_$(SMV_TESTSTRING)32$(SMV_PROFILESTRING)
 
 intel_osx_32 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) -L $(LIB_DIR)/lib_osx_intel_32 $(SMV_LIBS) -L $(OSX_FORT_LIBDIR) $(OSX_INTEL_LIBS)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) -L $(LIB_DIR)/lib_osx_intel_32 $(SMV_LIBS) $(OSX_INTEL_LIBS)
 
 # ------------- intel_osx_64 ----------------
 
-intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_osx_64 : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_OSX64 -mmacosx-version-min=10.4
+intel_osx_64 : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
 intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
@@ -254,7 +253,7 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING)
 
 intel_osx_64 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) -L $(OSX_FORT_LIBDIR) $(OSX_INTEL_LIBS)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
 
 # ------------- gcc_osx_32 ----------------
 
