@@ -1036,10 +1036,10 @@ msgid "Move"
 msgstr "Bewege"
 
 msgid "Multi-Slices"
-msgstr "Multi-Slice"
+msgstr "Multi-Slices"
 
 msgid "Multi-Vector Slices"
-msgstr "Multi-Vektor-Slice"
+msgstr "Multi-Vektor-Slices"
 
 msgid "Near depth"
 msgstr "nahe Tiefe"
