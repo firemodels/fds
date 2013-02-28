@@ -5862,6 +5862,18 @@ typedef struct {
       if(NewMemory((void **)&parti->size_file,(unsigned int)(len+1+3))==0)return 2;
       STRCPY(parti->size_file,bufferptr);
       STRCAT(parti->size_file,".sz");
+      
+      // parti->size_file can't be written to, then put it in a world writeable temp directory
+      
+      if(file_exists(parti->size_file)==0&&can_write_to_dir(".")==0&&smokeviewtempdir!=NULL){
+        len = strlen(smokeviewtempdir)+strlen(bufferptr)+1+3+1;
+        FREEMEMORY(parti->size_file);
+        if(NewMemory((void **)&parti->size_file,(unsigned int)len)==0)return 2;
+        STRCPY(parti->size_file,smokeviewtempdir);
+        STRCAT(parti->size_file,dirseparator);
+        STRCAT(parti->size_file,bufferptr);
+        STRCAT(parti->size_file,".sz");
+      }
 
       parti->comp_file=NULL;
       if(NewMemory((void **)&parti->comp_file,(unsigned int)(len+1+4))==0)return 2;
