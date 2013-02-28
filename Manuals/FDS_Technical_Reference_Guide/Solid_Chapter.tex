@@ -51,76 +51,18 @@ $\dq_{s,r}'''$, the radiative absorption and emission in depth.
 Section~\ref{conflux} describes the convective heat transfer to the
 solid surface.
 
-\subsection{Numerical Model}
-
-A one dimensional heat transfer calculation is performed at each solid
-boundary cell for which the user has prescribed thermal
-properties. The solid can consist of multiple layers of materials.
-Each layer is partitioned into non-uniform cells, clustered near the
-front and back faces.  The smallest cells are chosen based on the
-criteria
-\be \dx < S_s\sqrt{\frac{k_s}{\rho_s c_s}} \ee
-where $S_s$ is a cell size factor defined by the user. By default,
-$S_s$ is 1.0.  Interior cells increase in size by a user-defined
-stretch factor when moving inwards from the surfaces. By default, the
-stretch factor is 2.0. The cell boundaries are located at points
-$x_i$. The temperature at the center of the $i$th cell is denoted $T_{s,i}$.
-The (temperature-dependent) thermal conductivity of the solid
-at the center of the $i$th cell is denoted $k_{s,i}$.
-The temperatures are updated in time using an implicit
-Crank-Nicolson scheme
-\begin{align}
-    \frac{T_{s,i}^{n+1}-T_{s,i}^n}{\dt} &= \frac{1}{2 (\rho_s c_s)_i \dx_{i} }
- \Bigg(
-     &&k_{s,i+\ha}\frac{T_{s,i+1}^n-T_{s,i}^n}{\dx_{s,i+\ha}}  &-&&& k_{s,i-\ha}\frac{T_{s,i}^n-T_{s,i-1}^n}{\dx_{s,i-\ha}} &&+ && &&\notag\\
-    &&&k_{s,i+\ha}\frac{T_{s,i+1}^{n+1} - T_{s,i}^{n+1}}{\dx_{i+\ha}} &-&&& k_{s,i-\ha}\frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\dx_{i-\ha}} &&
- \Bigg)&&
-    + && \frac{\dq_s'''}{\rho_s c_s}
-\end{align}
-for $1 \le i \le N$. The width of each cell is $\dx_i$. The distance
-from the center of cell $i$ to the center of cell $i+1$ is
-$\dx_{i+\ha}$. However, the material properties $k_s$, $c_s$, $\rho_s$
-and source terms $\dq_s'''$ are updated in an explicit manner, using
-the temperature information from time step $n$.
-
-
 The boundary condition on the front surface is
-\be  -k_s \dod{T_s}{x}(0,t) =  \dq''_c + \dq''_r \ee
-If the internal radiation is solved for a solid, the radiation
-boundary condition $\dq''_r$ is not used.
-
-On the back surface, two possible boundary condition types may be
-specified by the user. (1) If the back surface is assumed to be open
-either to an ambient
-void or to another part of the computational domain,
-the back side boundary condition is similar to that of
-the front side. (2) If the back side is assumed to be perfectly insulated,
-an adiabatic boundary condition is used
-\be  k_s \dod{T_s}{x} =  0 \ee
-
-The boundary condition is discretized
-\be -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\dx_{\ha}} = \dq''_c{}^{(n+1)} + \dq''_r{}^{(n+1)} \ee
-The convective flux at the next time step is computed as
 \be
-\dq''_c{}^{(n+1)} = h\left( T_{g} -
-   0.5 \left(T_{s,\ha}^n + T_{s,\ha}^{n+1}\right) \right)
+ -k_s\frac{\partial T_s}{\partial x}(0,t) = \dot{q}_c''+ \dot{q}_r''
 \ee
-and the radiative flux at the next time step is approximated with a
-linearized form
+where $\dot{q}_c''$ is the convective and $\dot{q}_r''$ the radiative flux. If the internal radiation is solved for a solid, the radiation boundary condition $\dot{q}_r''$ is not used.
+
+On the back surface, two possible boundary condition types may be specified by the user. (1) If the back surface is assumed to be open either to ambient void or to another part of the computational domain, the back side boundary condition is similar to that of the front side. (2) If the back side is assumed to be perfectly insulated, and adiabatic condition is used
 \be
-\dq''_r{}^{(n+1)} \approx \dq''_r{}^n - 4 \; \epsilon \; \sigma \; T_{s,\ha}^{n^3} \left(
-  T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)
+ -k_s\frac{\partial T_s}{\partial x}(L,t) = 0.
 \ee
-The wall temperature is defined $T_w \equiv T_{s,\ha}=(T_{s,0}+T_{s,1})/2$.
 
-
-The size and number of solid phase cells
-can change during the course of a calculation as solid material is converted to gas. The size of each cell is reduced such that the cell density remains
-equal to the density of the virgin material.
-If the cell size gets below a pre-defined threshold (1~$\mu$m), the cell is completely removed.
-Following cell shrinking or cell removal, the solid phase mesh is re-gridded and the mass and enthalpy values are interpolated from the old mesh to the new mesh.
-
-
+The numerical model is presented in detail in Appendix~\ref{discretization}.
 
 \subsection{Radiation Heat Transfer to Solids}
 \label{inradsection}
@@ -237,7 +179,7 @@ T_{\tau} \equiv \frac{\dot{q}_w^{''}}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
 \end{equation}
 where $\dot{q}_w^{''}$, $\rho$, and $c_p$ are the heat flux at the wall, the density, and the specific heat, respectively.
 
-The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a function of the molecular Prandtl number and can be determined from experimentally. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall. FDS uses the experimental correlation proposed by Kader \cite{Kader:1981}
+The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a function of the molecular Prandtl number and can be determined from experimentally. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall. FDS uses the experimental correlation proposed by Kader~\cite{Kader:1981}
 \begin{align}
 \label{eqn_t_bt}
 B_T =(3.85 \,\mbox{Pr}^{1/3}-1.3)^2 + 2.12 \,\ln\mbox{Pr}.
@@ -255,7 +197,7 @@ B_{\mbox{\tiny\emph{T,buffer}}} &= 5 \,\mbox{Pr} - 1.61 \,(\mbox{Pr}_T /\kappa)_
 \end{align}
 To obtain a consistent convective heat transfer coefficient in all regions, $T^+$ is adjusted to $\max(T^+,T^+ (y^+ = 5))$ for the buffer and log layer ($y^+ \ge 5$).
 
-The convective heat transfer coefficient($h$) is obtained from the definition of $h$ and $T^+$:
+The convective heat transfer coefficient ($h$) is obtained from the definition of $h$ and $T^+$:
 \begin{align}
 \label{eqn_h_model}
 h = \frac{\dot{q}_w^{''}}{(T_g - T_w)}= \frac{{\rho}{c_p}{u_{\tau}}}{T^+}.
