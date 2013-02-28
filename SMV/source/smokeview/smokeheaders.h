@@ -839,6 +839,5 @@ EXTERNCPP void update_triangles(void);
 #ifndef CPP
 #include "smokefortheaders.h"
 #endif
-#include "message.h"
 
 #endif
