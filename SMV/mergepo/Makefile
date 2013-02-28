@@ -54,29 +54,21 @@ intel_win_64 : $(objwin)
 #  64 bit linux
 
 intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
-intel_linux_64 : LFLAGS    = -lpthread
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : exe       = mergepo_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) 
+	$(CPP) -o $(bin)/$(exe) $(obj)
 
-# ------------- gcc Linux 64 ----------------
-#  64 bit linux
+# ------------- Linux 64 debug ----------------
+#  64 bit linux debug
 
-gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
-gcc_linux_64 : LFLAGS    = -lpthreads
-gcc_linux_64 : CC        = icc
-gcc_linux_64 : CPP       = icc
-gcc_linux_64 : exe       = mergepo_linux_64
+intel_linux_64_db : CFLAGS    = -O0 -g -traceback -check-uninit -ftrapuv -m64 -vec_report0 -D pp_LINUX64
+intel_linux_64_db : LFLAGS    = -traceback
+intel_linux_64_db : CC        = icc
+intel_linux_64_db : CPP       = icc
+intel_linux_64_db : exe       = mergepo_linux_64_db
 
-gcc_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS)
-
-
-#-------------- Clean Target to remove Object and Module files -----------
-
-.PHONY : clean
-clean:
-	rm *.o
+intel_linux_64_db : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(obj)
