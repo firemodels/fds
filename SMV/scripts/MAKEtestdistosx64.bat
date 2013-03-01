@@ -23,7 +23,7 @@ call %envfile%
 cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle
+set bundledir=FDS-SMV/SMV/for_bundle/to_google
 
 echo making OSX test distribution archive
 plink %svn_logon% %scriptdir%/MAKEtestdistosx64.csh %smv_revision% %osx_hostname%

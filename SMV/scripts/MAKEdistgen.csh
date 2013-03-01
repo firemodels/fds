@@ -13,7 +13,7 @@ set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_$platformsize
 set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 set DIR=smv_${version}_$platform$size
 
-cd $FORBUNDLE
+cd $FORBUNDLE/to_google
 
 rm -rf $DIR
 mkdir -p $DIR
