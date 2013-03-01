@@ -206,7 +206,7 @@ int Creadslice_frame(int frame_index_local,int sd_index,int flag){
 
 void output_mfed_csv(multislicedata *mslicei){
   FILE *AREA_STREAM=NULL;
-  char fed_area_file[1024],*ext;
+  char *fed_area_file=NULL,fed_area_file_base[1024],*ext;
   slicedata *slice0;
   int nslices;
   float *areas;
@@ -221,12 +221,16 @@ void output_mfed_csv(multislicedata *mslicei){
 
   slice0 = sliceinfo + mslicei->islices[0];
 
-  strcpy(fed_area_file,slice0->file);
-  ext=strrchr(fed_area_file,'.');
+  strcpy(fed_area_file_base,slice0->file);
+  ext=strrchr(fed_area_file_base,'.');
   if(ext!=NULL){
     *ext=0;
-    strcat(fed_area_file,"_marea.csv");
-    AREA_STREAM=fopen(fed_area_file,"w");
+    strcat(fed_area_file_base,"_marea.csv");
+    fed_area_file=get_fileout(smokeviewtempdir,fed_area_file_base);
+    if(fed_area_file!=NULL){
+      AREA_STREAM=fopen(fed_area_file,"w");
+      FREEMEMORY(fed_area_file);
+    }
   }
   if(AREA_STREAM==NULL)return;
 
@@ -403,7 +407,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     float *co2_frame1,*co2_frame2;
     float *co_frame1,*co_frame2;
     float *times;
-    char fed_area_file[1024],*ext;
+    char *fed_area_file=NULL,fed_area_file_base[1024],*ext;
     FILE *AREA_STREAM=NULL;
     float area_factor;
     float *contour_areas,*mslice_contour_areas;
@@ -442,12 +446,16 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     }
     printf("\n");
     printf("generating FED slice data\n");
-    strcpy(fed_area_file,fed_slice->file);
-    ext=strrchr(fed_area_file,'.');
+    strcpy(fed_area_file_base,fed_slice->file);
+    ext=strrchr(fed_area_file_base,'.');
     if(ext!=NULL){
       *ext=0;
-      strcat(fed_area_file,"_area.csv");
-      AREA_STREAM=fopen(fed_area_file,"w");
+      strcat(fed_area_file_base,"_area.csv");
+      fed_area_file=get_fileout(smokeviewtempdir,fed_area_file_base);
+      if(fed_area_file!=NULL){
+        AREA_STREAM=fopen(fed_area_file,"w");
+        FREEMEMORY(fed_area_file);
+      }
       area_factor=xyzmaxdiff*xyzmaxdiff;
     }
     if(Creadslice_frame(0,fedi->o2_index,LOAD)<0||
@@ -2368,7 +2376,7 @@ void update_fedinfo(void){
     slicedata *co2;
     int nn_slice;
     feddata *fedi;
-    char filename[256],*ext;
+    char *filename,filename_base[1024],*ext;
 
     sd = sliceinfo + nsliceinfo + (i- nfedinfo);
     fedi = fedinfo + i;
@@ -2430,13 +2438,15 @@ void update_fedinfo(void){
     sd->constant_color=NULL;
     sd->mesh_type=co2->mesh_type;
 
-    strcpy(filename,fedi->co->file);
-    ext=strrchr(filename,'.');
+    strcpy(filename_base,fedi->co->file);
+    ext=strrchr(filename_base,'.');
     *ext=0;
-    strcat(filename,"_fed.sf");
+    strcat(filename_base,"_fed.sf");
+    filename=get_fileout(smokeviewtempdir,filename_base);
     len=strlen(filename);
     NewMemory((void **)&fedi->fed_slice->reg_file,len+1);
     strcpy(sd->reg_file,filename);
+    FREEMEMORY(filename);
     sd->file=sd->reg_file;
     if(stream_fedsmv!=NULL){
       fprintf(stream_fedsmv,"SLCF %i %s %i %i %i %i %i %i\n",sd->blocknumber+1,"%",sd->is1,sd->is2,sd->js1,sd->js2,sd->ks1,sd->ks2);
@@ -2483,13 +2493,15 @@ void update_fedinfo(void){
       isoi->color_label.unit=NULL;
       isoi->geominfo=NULL;
 
-      strcpy(filename,fedi->co->file);
-      ext=strrchr(filename,'.');
+      strcpy(filename_base,fedi->co->file);
+      ext=strrchr(filename_base,'.');
       *ext=0;
-      strcat(filename,"_fed.iso");
+      strcat(filename_base,"_fed.iso");
+      filename=get_fileout(smokeviewtempdir,filename_base);
       len=strlen(filename);
       NewMemory((void **)&isoi->reg_file,len+1);
       strcpy(isoi->reg_file,filename);
+      FREEMEMORY(filename);
       isoi->file=isoi->reg_file;
       if(stream_fedsmv!=NULL){
         fprintf(stream_fedsmv,"ISOF\n");

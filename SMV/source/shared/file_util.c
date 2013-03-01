@@ -161,6 +161,30 @@ char *setdir(char *argdir){
 
 /* ------------------ fullfile ------------------------ */
 
+char *get_fileout(char *temp_dir, char *file){
+  char *file2;
+  char *file_out=NULL;
+  FILE *stream=NULL;
+
+  trim(file);
+  file2=trim_front(file);
+  if(can_write_to_dir(".")==1){
+    NewMemory((void **)&file_out,strlen(file)+1);
+    strcpy(file_out,file);
+  }
+  if(file_out==NULL&&temp_dir!=NULL&&can_write_to_dir(temp_dir)==1){
+    NewMemory((void **)&file_out,strlen(temp_dir)+1+strlen(file)+1);
+    strcpy(file_out,"");
+    strcat(file_out,temp_dir);
+    strcat(file_out,dirseparator);
+    strcat(file_out,file);
+  }
+  return file_out;
+}
+
+
+/* ------------------ fullfile ------------------------ */
+
 void fullfile(char *file_out, char *dir, char *file){
   char *file2;
 
