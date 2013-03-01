@@ -61,6 +61,9 @@ intel_win_64 : exe       = smokediff_win_64.exe
 
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
+	
+LINUXFORTLIBS_32=$(FORTLIBDIR)/ia32/libifcore.a
+LINUXFORTLIBS_64=$(FORTLIBDIR)/intel64/libifcore.a
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
@@ -73,7 +76,7 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokediff_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -L $(FORTLIBDIR)/ia32 -lifcore
+	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_32)
 
 
 # ------------- Linux 64 ----------------
@@ -87,7 +90,10 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokediff_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -L $(FORTLIBDIR)/intel64 -lifcore
+	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_64)
+	
+
+MACFORTLIBS=$(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 # ------------- OSX 32 ----------------
 #  32 bit OSX
@@ -100,7 +106,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokediff_osx_32
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 $(obj) -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml
+	$(CPP) -o $(bin)/$(exe) -m32 -static-intel $(obj) -mmacosx-version-min=10.4 $(MACFORTLIBS)
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
@@ -113,4 +119,4 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokediff_osx_64
 
 intel_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m64 $(obj) -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml
+	$(CPP) -o $(bin)/$(exe) -m64 -static-intel $(obj) -mmacosx-version-min=10.4 $(MACFORTLIBS)
