@@ -13770,7 +13770,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'PACK_SEND_SUBDIAG: IC=',I
                ENDIF
             ENDDO
             SEND_REAL(LL+1) = REAL(NCOL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'PACK_SEND_STENCIL1: IC=',IC,': SEND_REAL(',LL+1,')=', SEND_REAL(LL+1)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6)') &
+                                   'PACK_SEND_STENCIL1: IC=',IC,': SEND_REAL(',LL+1,')=', SEND_REAL(LL+1)
 
             LL = LL + 2
          ENDDO 
@@ -13793,7 +13794,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'PACK_SEND_STENCIL1: IC=',
                   ENDIF
                ENDDO
                SEND_REAL(LL+1) = REAL(NCOL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'PACK_SEND_STENCIL2: IC=',IC,': SEND_REAL(',LL+1,')=', SEND_REAL(LL+1)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6)') &
+                                    'PACK_SEND_STENCIL2: IC=',IC,': SEND_REAL(',LL+1,')=', SEND_REAL(LL+1)
    
                LL = LL + 2
             ENDDO
@@ -13830,13 +13832,16 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'PACK_SEND_STENCIL2: IC=',
                   IW0 = SC%WALL_PTR(JC)
                   IF (SC%WALL(IW0)%NOM /= NOM) CYCLE MATRIX_COLUMN_LOOP
                   SEND_REAL(LL) = - REAL(SC%WALL_PTR(JC),EB)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'PACK_SEND_SYSTEM1: IC=',IC,': SEND_REAL(',LL,')=', SEND_REAL(LL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6)') &
+                                   'PACK_SEND_SYSTEM1: IC=',IC,': SEND_REAL(',LL,')=', SEND_REAL(LL)
                ELSE
                   SEND_REAL(LL) =   REAL(JC,EB)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'PACK_SEND_SYSTEM2: IC=',IC,': SEND_REAL(',LL,')=', SEND_REAL(LL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6)') &
+                                   'PACK_SEND_SYSTEM2: IC=',IC,': SEND_REAL(',LL,')=', SEND_REAL(LL)
                ENDIF
                SEND_REAL(LL+1) = SC%A(ICOL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'PACK_SEND_SYSTEM2: IC=',IC,': SEND_REAL(',LL+1,')=', SEND_REAL(LL+1)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6)') &
+                                   'PACK_SEND_SYSTEM2: IC=',IC,': SEND_REAL(',LL+1,')=', SEND_REAL(LL+1)
                LL = LL + 2
             ENDDO MATRIX_COLUMN_LOOP
 
@@ -14027,8 +14032,8 @@ SELECT CASE (NTYPE)
             IF (IW == -SC%A_COL(ICOL)) THEN
                SC%A(ICOL)     = ZSUM/REAL(WALL(IW)%NCPL,EB)
                SC%A_COL(ICOL) = SC%WALL(IW)%ICE(1)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_SUBDIAG1: NM=',NM,': NOM=',NOM, &
-                                                      ': A_COL(',ICOL,')=',JC,' A(',ICOL,')=',SC%A(ICOL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3,a,f12.6)') &
+        'UNPACK_MATRIX_SUBDIAG1: NM=',NM,': NOM=',NOM,': A_COL(',ICOL,')=', SC%A_COL(ICOL),' A(',ICOL,')=',SC%A(ICOL)
             ENDIF
          ENDDO
       
@@ -14051,8 +14056,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_SUBDIAG1: N
                IF (IW == -SC%A_COL(ICOL)) THEN
                   SC%A(ICOL)     = ZSUM/REAL(WALL(IW)%NCPL,EB)
                   SC%A_COL(ICOL) = SC%WALL(IW)%ICE(1)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_SUBDIAG2: NM=',NM,': NOM=',NOM,&
-                                                      ': A_COL(',ICOL,')=',JC,' A(',ICOL,')=',SC%A(ICOL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3,a,f12.6)')& 
+        'UNPACK_MATRIX_SUBDIAG1: NM=',NM,': NOM=',NOM,': A_COL(',ICOL,')=', SC%A_COL(ICOL),' A(',ICOL,')=',SC%A(ICOL)
                ENDIF
             ENDDO
          
@@ -14079,8 +14084,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_SUBDIAG2: N
          !!! ------------------------  First layer  ---------------------------------------------
          ICG = SC%WALL(IW)%ICG(1)
          OSC%A_SIZE(ICG) = NINT(RECV_REAL(LL+1))
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_STENCIL1: NM=',NM,': NOM=',NOM,&
-                                   ': A_SIZE(',ICG,')=',OSC%A_SIZE(ICG)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3)') &
+       'UNPACK_MATRIX_STENCIL1: NM=',NM,': NOM=',NOM,': A_SIZE(',ICG,')=',OSC%A_SIZE(ICG)
 
          LL = LL + 2
 
@@ -14091,8 +14096,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_STENCIL1: N
              !!! Unpack second cell layer if requested
              ICG = SC%WALL(IW)%ICG2(1)
              OSC%A_SIZE(ICG) = NINT(RECV_REAL(LL+1))
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_STENCIL2: NM=',NM,': NOM=',NOM,&
-                                                      ': A_SIZE(',ICG,')=',OSC%A_SIZE(ICG)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3)') &
+       'UNPACK_MATRIX_STENCIL2: NM=',NM,': NOM=',NOM,': A_SIZE(',ICG,')=',OSC%A_SIZE(ICG)
              LL = LL + 2
           ENDIF
 
@@ -14126,8 +14131,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_STENCIL2: N
             ENDIF
             SC%A_COL(ICOL)= JC
             SC%A(ICOL)    = RECV_REAL(LL+1)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_SYSTEM1: NM=',NM,': NOM=',NOM,&
-                                                      ': A_COL(',ICOL,')=',JC,' A(',ICOL,')=',SC%A(ICOL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3,a,f12.6)') &
+     'UNPACK_MATRIX_SYSTEM1: NM=',NM,': NOM=',NOM,': A_COL(',ICOL,')=',JC,' A(',ICOL,')=',SC%A(ICOL)
             LL = LL + 2
          ENDDO 
 
@@ -14137,8 +14142,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_SYSTEM1: NM
             DO ICOL = SC%A_ROW(ICE), SC%A_ROW(ICE+1)-1
                SC%A_COL(ICOL)= - NINT(RECV_REAL(LL))
                SC%A(ICOL)    = RECV_REAL(LL+1)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'UNPACK_MATRIX_SYSTEM2: NM=',NM,': NOM=',NOM,&
-                                                      ': A_COL(',ICOL,')=',JC, ' A(',ICOL,')=',SC%A(ICOL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3,a,f12.6)') &
+     'UNPACK_MATRIX_SYSTEM2: NM=',NM,': NOM=',NOM,': A_COL(',ICOL,')=',JC,' A(',ICOL,')=',SC%A(ICOL)
                LL = LL + 2
             ENDDO 
           ENDIF
