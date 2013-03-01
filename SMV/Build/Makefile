@@ -167,7 +167,7 @@ intel_linux_64_db : FC        = ifort
 intel_linux_64_db : exe       = smokeview_linux_64_db$(SMV_PROFILESTRING)
 
 intel_linux_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 -L $(FULL_SMV_LIBS) $(LINUX_INTEL_LIBS_64) $(LINUX_SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(FULL_SMV_LIBS) $(LINUX_INTEL_LIBS_64) $(LINUX_SYSTEMLIBS)
 
 
 # ------------- intel_linux_64_profile ----------------
