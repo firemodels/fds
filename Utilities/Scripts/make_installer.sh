@@ -288,7 +288,7 @@ endif
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-setenv $LDLIBPATH \\\$MPIDIST/lib
+setenv $LDLIBPATH \\\$MPIDIST/lib:\\\$$LDLIBPATH
 set path=(\\\$FDSBINDIR \\\$MPIDIST/bin ~/bin \\\$path)
 
 # if compilers are present then pre-define environment for their use
@@ -352,7 +352,7 @@ esac
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-export $LDLIBPATH=\\\$MPIDIST/lib
+export $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
 export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$MPIDIST/bin:\\\$PATH
 
 # if compilers are present then pre-define environment for their use
