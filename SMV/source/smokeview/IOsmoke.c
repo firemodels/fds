@@ -768,9 +768,9 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
                       int **nchars_smoke_compressed_found,
                       int **nchars_smoke_compressed_full,
                       int *ntimes_found,int *ntimes_full, int *have_light){
-  char textfilename[1024],textfilename2[1024],buffer[255];
+  char smoke_sizefilename[1024],smoke_sizefilename2[1024],buffer[255];
   char *textptr;
-  FILE *TEXTFILE=NULL;
+  FILE *SMOKE_SIZE=NULL;
   EGZ_FILE *SMOKE3DFILE;
   int nframes_found;
   float time_local,time_max,*time_found=NULL;
@@ -789,36 +789,36 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
 
   *have_light=0;
   // try .sz
-  strcpy(textfilename,smokefile);
-  lentext=strlen(textfilename);
+  strcpy(smoke_sizefilename,smokefile);
+  lentext=strlen(smoke_sizefilename);
   if(lentext>4){
-    textptr=textfilename + lentext - 4;
+    textptr=smoke_sizefilename + lentext - 4;
     if(strcmp(textptr,".svz")==0){
-      textfilename[lentext-4]=0;
+      smoke_sizefilename[lentext-4]=0;
     }
   }
-  strcat(textfilename,".szz");
-  TEXTFILE=fopen(textfilename,"r");
+  strcat(smoke_sizefilename,".szz");
+  SMOKE_SIZE=fopen(smoke_sizefilename,"r");
 
-  if(TEXTFILE==NULL){
+  if(SMOKE_SIZE==NULL){
     // not .szz so try .sz
-    strcpy(textfilename,smokefile);
-    strcat(textfilename,".sz");
-    TEXTFILE=fopen(textfilename,"r");
+    strcpy(smoke_sizefilename,smokefile);
+    strcat(smoke_sizefilename,".sz");
+    SMOKE_SIZE=fopen(smoke_sizefilename,"r");
   }
 
-  if(TEXTFILE==NULL){
+  if(SMOKE_SIZE==NULL){
     // neither .sz or .szz so try in tempdir
-    strcpy(textfilename,smokefile);
-    strcat(textfilename,".sz");
-    TEXTFILE=fopen(textfilename,"w");
-    if(TEXTFILE==NULL&&smokeviewtempdir!=NULL){
-      strcpy(textfilename2,smokeviewtempdir);
-      strcat(textfilename2,textfilename);
-      strcpy(textfilename,textfilename2);
-      TEXTFILE=fopen(textfilename,"w");
+    strcpy(smoke_sizefilename,smokefile);
+    strcat(smoke_sizefilename,".sz");
+    SMOKE_SIZE=fopen(smoke_sizefilename,"w");
+    if(SMOKE_SIZE==NULL&&smokeviewtempdir!=NULL){
+      strcpy(smoke_sizefilename2,smokeviewtempdir);
+      strcat(smoke_sizefilename2,smoke_sizefilename);
+      strcpy(smoke_sizefilename,smoke_sizefilename2);
+      SMOKE_SIZE=fopen(smoke_sizefilename,"w");
     }
-    if(TEXTFILE==NULL)return 1;  // can't write size file in temp directory so give up
+    if(SMOKE_SIZE==NULL)return 1;  // can't write size file in temp directory so give up
 #ifdef EGZ
     if(fortran_skip==0){
       SMOKE3DFILE=EGZ_FOPEN(smokefile,"rb",0,2);
@@ -836,14 +836,14 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
     }
 #endif
     if(SMOKE3DFILE==NULL){
-      fclose(TEXTFILE);
+      fclose(SMOKE_SIZE);
       return 1;
     }
 
     SKIP;EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);SKIP;
 
     if(version!=1)version=0;
-    fprintf(TEXTFILE,"%i\n",version);
+    fprintf(SMOKE_SIZE,"%i\n",version);
 
     time_max=-1000000.0;
     for(;;){
@@ -853,7 +853,7 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
       if(EGZ_FEOF(SMOKE3DFILE)!=0)break;
       SKIP;EGZ_FREAD(nchars,4,2,SMOKE3DFILE);SKIP;
       if(version==0){ // uncompressed data
-        fprintf(TEXTFILE,"%f %i %i\n",time_local,nchars[0],nchars[1]);
+        fprintf(SMOKE_SIZE,"%f %i %i\n",time_local,nchars[0],nchars[1]);
       }
       else{  // compressed data
         int nlightdata;
@@ -864,12 +864,12 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
         if(nchars[1]<0){  // light data present
           nframeboth = nchars[0];
           nlightdata = -nchars[0]/2;
-          fprintf(TEXTFILE,"%f %i %i %i %i \n",time_local,nframeboth,-1,nchars[1],nlightdata);
+          fprintf(SMOKE_SIZE,"%f %i %i %i %i \n",time_local,nframeboth,-1,nchars[1],nlightdata);
         }
         else{
           nframeboth = nchars[0];
           nlightdata = 0;
-          fprintf(TEXTFILE,"%f %i %i %i %i \n",time_local,nframeboth,-1,nchars[1],nlightdata);
+          fprintf(SMOKE_SIZE,"%f %i %i %i %i \n",time_local,nframeboth,-1,nchars[1],nlightdata);
         }
       }
       skip_local = ABS(nchars[1]);
@@ -877,18 +877,18 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
     }
 
     EGZ_FCLOSE(SMOKE3DFILE);
-    fclose(TEXTFILE);
-    TEXTFILE=fopen(textfilename,"r");
+    fclose(SMOKE_SIZE);
+    SMOKE_SIZE=fopen(smoke_sizefilename,"r");
   }
-  if(TEXTFILE==NULL)return 1;
+  if(SMOKE_SIZE==NULL)return 1;
 
   nframes_found=0;
   iframe_local=-1;
   time_max=-1000000.0;
-  fgets(buffer,255,TEXTFILE);
+  fgets(buffer,255,SMOKE_SIZE);
   iii=0;
-  while(!feof(TEXTFILE)){
-    if(fgets(buffer,255,TEXTFILE)==NULL)break;
+  while(!feof(SMOKE_SIZE)){
+    if(fgets(buffer,255,SMOKE_SIZE)==NULL)break;
     sscanf(buffer,"%f",&time_local);
     iframe_local++;
     if(time_local<=time_max)continue;
@@ -899,11 +899,11 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
     }
     iii++;
   }
-  rewind(TEXTFILE);
+  rewind(SMOKE_SIZE);
   if(nframes_found<=0){
     *ntimes_found=0;
     *ntimes_full=0;
-    fclose(TEXTFILE);
+    fclose(SMOKE_SIZE);
     return 1;
   }
   *ntimes_found=nframes_found;
@@ -919,14 +919,14 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
   *nchars_smoke_compressed_full=nch_smoke_compressed_full;
   *nchars_smoke_compressed_found=nch_smoke_compressed_found;
 
-  fgets(buffer,255,TEXTFILE);
+  fgets(buffer,255,SMOKE_SIZE);
   ntimes_full2=0;
   time_max=-1000000.0;
   iii=0;
-  while(!feof(TEXTFILE)){
+  while(!feof(SMOKE_SIZE)){
     int nch_light;
 
-    if(fgets(buffer,255,TEXTFILE)==NULL)break;
+    if(fgets(buffer,255,SMOKE_SIZE)==NULL)break;
     ntimes_full2++;
     if(ntimes_full2>*ntimes_full)break;
     if(version==0){
@@ -957,7 +957,7 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
     iii++;
   }
   *nchars_smoke_uncompressed=nch_uncompressed;
-  fclose(TEXTFILE);
+  fclose(SMOKE_SIZE);
   return 0;
 }
 
