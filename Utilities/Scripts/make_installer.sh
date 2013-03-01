@@ -278,27 +278,17 @@ set MPIDIST64=/shared/openmpi_64
 
 if ( "\\\$platform" == "intel64" ) then
 setenv MPIDIST \\\$MPIDIST64
-set FORTLIB=\\\$FDSBINDIR/LIB64
 endif
 
 # environment for 32 bit gigabit ethernet
 
 if ( "\\\$platform" == "ia32" ) then
 setenv MPIDIST \\\$MPIDIST32
-set FORTLIB=\\\$FDSBINDIR/LIB32
-endif
-
-if ( "\\\$platform" == "intel64" ) then
-setenv $LDLIBPATH \\\`pwd\\\`/bin/LIB64
-endif
-
-if ( "\\\$platform" == "ia32" ) then
-setenv $LDLIBPATH \\\`pwd\\\`/bin/LIB32
 endif
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-setenv $LDLIBPATH \\\$MPIDIST/lib:\\\${FORTLIB}:\\\$$LDLIBPATH
+setenv $LDLIBPATH \\\$MPIDIST/lib
 set path=(\\\$FDSBINDIR \\\$MPIDIST/bin ~/bin \\\$path)
 
 # if compilers are present then pre-define environment for their use
@@ -354,17 +344,15 @@ MPIDIST64=/shared/openmpi_64
 case "\\\$platform" in
   "intel64" )
     export MPIDIST=\\\$MPIDIST64
-    FORTLIB=\\\$FDSBINDIR/LIB64
   ;;
   "ia32" )
     export MPIDIST=\\\$MPIDIST32
-    FORTLIB=\\\$FDSBINDIR/LIB32
   ;;
 esac
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-export $LDLIBPATH=\\\$MPIDIST/lib:\\\$FORTLIB:\\\$$LDLIBPATH
+export $LDLIBPATH=\\\$MPIDIST/lib
 export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$MPIDIST/bin:\\\$PATH
 
 # if compilers are present then pre-define environment for their use
