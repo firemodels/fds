@@ -78,6 +78,9 @@ intel_linux_32p : exe       = smokezip_linux_32p
 
 intel_linux_32p : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) -p -L $(FORTLIBDIR)/ia32 -lifcore -L $(LIB_DIR)/lib_linux_intel_32 -lz
+	
+LINUXFORTLIBS_32=$(FORTLIBDIR)/ia32/libifcore.a
+LINUXFORTLIBS_64=$(FORTLIBDIR)/intel64/libifcore.a
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
@@ -90,7 +93,7 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokezip_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -L $(FORTLIBDIR)/ia32 -lifcore -L $(LIB_DIR)/lib_linux_intel_32 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_32) -L $(LIB_DIR)/lib_linux_intel_32 -lz -lpthread
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
@@ -103,7 +106,9 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokezip_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -L $(FORTLIBDIR)/intel64 -lifcore -L $(LIB_DIR)/lib_linux_intel_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_64) -L $(LIB_DIR)/lib_linux_intel_64 -lz -lpthread
+	
+OSXFORTLIBS=$(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 # ------------- OSX 32 ----------------
 #  32 bit OSX
@@ -116,7 +121,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokezip_osx_32
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 $(obj) -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml -L $(LIB_DIR)/lib_osx_intel_32 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) -m32 -static-intel $(obj) -mmacosx-version-min=10.4 $(OSXFORTLIBS) -L $(LIB_DIR)/lib_osx_intel_32 -lz -lpthread
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
@@ -129,4 +134,4 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokezip_osx_64
 
 intel_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m64 $(obj)  -mmacosx-version-min=10.4 -L $(FORTLIBDIR) -lifcoremt -limf -lirc -lsvml -L $(LIB_DIR)/lib_osx_intel_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) -m64 -static-intel $(obj)  -mmacosx-version-min=10.4 $(OSXFORTLIBS) -L $(LIB_DIR)/lib_osx_intel_64 -lz -lpthread
