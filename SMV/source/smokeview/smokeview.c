@@ -480,7 +480,7 @@ void parse_commandline(int argc, char **argv){
   if(fed_filename==NULL){
     STRCPY(fed_filename_base,fdsprefix);
     STRCAT(fed_filename_base,".fed_smv");
-    fed_filename=get_fileout(smokeviewtempdir,fed_filename_base);
+    fed_filename=get_filename(smokeviewtempdir,fed_filename_base);
   }
   if(stop_filename==NULL){
     NewMemory((void **)&stop_filename,(unsigned int)(len_casename+6));

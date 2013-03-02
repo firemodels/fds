@@ -226,7 +226,7 @@ void output_mfed_csv(multislicedata *mslicei){
   if(ext!=NULL){
     *ext=0;
     strcat(fed_area_file_base,"_marea.csv");
-    fed_area_file=get_fileout(smokeviewtempdir,fed_area_file_base);
+    fed_area_file=get_filename(smokeviewtempdir,fed_area_file_base);
     if(fed_area_file!=NULL){
       AREA_STREAM=fopen(fed_area_file,"w");
       FREEMEMORY(fed_area_file);
@@ -451,7 +451,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     if(ext!=NULL){
       *ext=0;
       strcat(fed_area_file_base,"_area.csv");
-      fed_area_file=get_fileout(smokeviewtempdir,fed_area_file_base);
+      fed_area_file=get_filename(smokeviewtempdir,fed_area_file_base);
       if(fed_area_file!=NULL){
         AREA_STREAM=fopen(fed_area_file,"w");
         FREEMEMORY(fed_area_file);
@@ -2442,7 +2442,7 @@ void update_fedinfo(void){
     ext=strrchr(filename_base,'.');
     *ext=0;
     strcat(filename_base,"_fed.sf");
-    filename=get_fileout(smokeviewtempdir,filename_base);
+    filename=get_filename(smokeviewtempdir,filename_base);
     len=strlen(filename);
     NewMemory((void **)&fedi->fed_slice->reg_file,len+1);
     strcpy(sd->reg_file,filename);
@@ -2497,7 +2497,7 @@ void update_fedinfo(void){
       ext=strrchr(filename_base,'.');
       *ext=0;
       strcat(filename_base,"_fed.iso");
-      filename=get_fileout(smokeviewtempdir,filename_base);
+      filename=get_filename(smokeviewtempdir,filename_base);
       len=strlen(filename);
       NewMemory((void **)&isoi->reg_file,len+1);
       strcpy(isoi->reg_file,filename);
