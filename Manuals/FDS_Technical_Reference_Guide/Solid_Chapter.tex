@@ -317,9 +317,9 @@ Using this boundary condition, the aerosol surface density that accumulates on s
 
 The gravitational settling velocity is given by~\cite{Davies_Charles}
 \be
-u_{\rm g} = g m_a \frac{\text{Cn}}{6 \pi \, \chi_d \, \mu \, r_a}
+u_{\rm g} = g m_{\rm a} \frac{\text{Cn}}{6 \pi \, \chi_{\rm d} \, \mu \, r_{\rm a}}
 \ee
-where $m_a$ is the particle mass, $\chi_d$ is a shape factor, $\mu$ is the dynamic viscosity of air,
+where $m_{\rm a}$ is the particle mass, $\chi_{\rm d}$ is a shape factor, $\mu$ is the dynamic viscosity of air,
 $r_a$ is the particle radius, and Cn is the Cunningham slip correction factor given by~\cite{Cunningham:1}
 \be
 \text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; \mathrm{e}^{-0.88/\text{Kn}}
@@ -328,7 +328,7 @@ where Kn is the particle Knudsen number given by the ratio of the mean free path
 to the particle radius. The mean free path of a gas is proportional to its temperature,
 thus Kn is computed as~\cite{Sippola:1}
 \be
-\text{Kn} = \frac{\lambda}{r_a} \frac{T_{\rm g}}{T_\infty}
+\text{Kn} = \frac{\lambda}{r_{\rm a}} \frac{T_{\rm g}}{T_\infty}
 \ee
 where $\lambda$ is the mean free path of gas molecules and is 0.065 $\mu$m at a temperature of 25 $^\circ$C and atmospheric pressure.
 
@@ -375,6 +375,6 @@ where Sc is the particle Schmidt number, or the ratio of the kinematic viscosity
 Brownian diffusion coefficient of the particle ($\nu/D_{\rm B}$), $u_{\tau}$ is the wall friction velocity
 computed by the wall model, and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
 \be
- \tau^+=\frac{\rho_a \, (2 r_a)^2}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_{\rm g}
+ \tau^+=\frac{\rho_{\rm a} \, (2 r_{\rm a})^2}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_{\rm g}
 \ee
 
