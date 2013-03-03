@@ -280,10 +280,9 @@ GLubyte *getscreenbuffer(void){
 
 int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
-  char renderfile[1024];
-  char renderfile2[1024];
+  char *renderfile,renderfile_base[1024],renderfile2[1024];
   char *ext;
-  FILE *RENDERfile;
+  FILE *RENDERfile=NULL;
   GLubyte *p;
   gdImagePtr RENDERimage;
   unsigned int r, g, b;
@@ -312,32 +311,23 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
     strcpy(renderfile2,fdsprefix);
   }
   if(RenderTime==1){
-      sprintf(renderfile,"%s_%04i",renderfile2,itimes/RenderSkip);
+      sprintf(renderfile_base,"%s_%04i",renderfile2,itimes/RenderSkip);
   }
   if(RenderTime==0){
-      sprintf(renderfile,"%s_s%04i",renderfile2,seqnum);
+      sprintf(renderfile_base,"%s_s%04i",renderfile2,seqnum);
       seqnum++;
   }
-  strcat(renderfile,ext);
-
-  // if there is a tempdir see if we need to use it
-
-  if(smokeviewtempdir!=NULL){
-    FILE *stream;
-
-    stream=fopen(renderfile,"wb");
-    if(stream==NULL){
-      strcpy(renderfile2,smokeviewtempdir);
-      strcat(renderfile2,renderfile);
-      stream=fopen(renderfile2,"wb");
-      if(stream!=NULL)strcpy(renderfile,renderfile2);
-    }
-    if(stream!=NULL)fclose(stream);
+  strcat(renderfile_base,ext);
+  renderfile=get_filename(smokeviewtempdir,renderfile_base);
+  if(renderfile==NULL){
+    fprintf(stderr,"*** Error: unable to write to %s",renderfile_base);
+    return 1;
   }
-  printf("Rendering to: %s .",renderfile);
   RENDERfile = fopen(renderfile, "wb");
+  printf("Rendering to: %s .",renderfile);
   if (RENDERfile == NULL) {
     fprintf(stderr,"*** Error: unable to write to %s",renderfile);
+    FREEMEMORY(renderfile);
     return 1;
   }
   RENDERimage = gdImageCreateTrueColor(nscreen_cols*screenWidth,nscreen_rows*screenHeight);
@@ -377,6 +367,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   /* free up memory used by both OpenGL and GIF images */
 
   gdImageDestroy(RENDERimage);
+  FREEMEMORY(renderfile);
   printf(" Completed\n");
   return 0;
 }
@@ -388,6 +379,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   FILE *RENDERfile;
+  char *renderfile=NULL;
   GLubyte *OpenGLimage, *p;
   gdImagePtr RENDERimage;
   unsigned int r, g, b;
@@ -408,17 +400,22 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   width2 = width_end-width_beg;
   height2 = height_end-height_beg;
 
-  RENDERfile = fopen(RENDERfilename, "wb");
-  if (RENDERfile == NULL) {
+  renderfile=get_filename(smokeviewtempdir,RENDERfilename);
+  if (renderfile == NULL) {
     fprintf(stderr,"*** Error: Unable to write to %s\n",RENDERfilename);
+    return 1;
+  }
+  RENDERfile = fopen(renderfile, "wb");
+  if (RENDERfile == NULL) {
+    fprintf(stderr,"*** Error: Unable to write to %s\n",renderfile);
     return 1;
   }
   NewMemory((void **)&OpenGLimage,width2 * height2 * sizeof(GLubyte) * 3);
   if(OpenGLimage == NULL){
-    fprintf(stderr,"*** Error allocating render image: %s\n",RENDERfilename);
+    fprintf(stderr,"*** Error allocating memory buffer for render file:%s\n",renderfile);
     return 1;
   }
-  printf("Rendering to: %s .",RENDERfilename);
+  printf("Rendering to: %s .",renderfile);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
   /* get the image from the OpenGL frame buffer */
@@ -489,6 +486,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   /* free up memory used by both OpenGL and GIF images */
 
   fclose(RENDERfile);
+  FREEMEMORY(renderfile);
 
   gdImageDestroy(RENDERimage);
   FREEMEMORY(OpenGLimage);
