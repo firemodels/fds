@@ -539,15 +539,28 @@ this angle.} \label{figDIRB}
 
 \subsection{Compressing Slice Plane Data}
 
-The opacity parameters are computed at each slice plane node for all time steps. The space required to store these values can easily become quite large. Compression techniques are required to reduce storage requirements.
+The opacity parameters are computed at each slice plane node for
+all time steps. The space required to store these values can
+easily become quite large. Compression techniques are required to
+reduce storage requirements.
 
-Storage reduction occurs in two steps.  First, four byte floating point soot densities are converted to one byte smoke opacities using the Beer-Lambert law.  Video cards presently use only one byte to represent opacity. Next, the sequence of opacity values are compressed using run-length encoding, a compression scheme where repeated ``runs'' of data are replaced with a number (number of repeats), and the value repeated.  In more detail,
+Storage reduction occurs in two steps.  First, four byte floating
+point soot densities are converted to one byte smoke opacities
+using the Beer-Lambert law.  Video cards presently use only one
+byte to represent opacity. Next, the sequence of opacity values
+are compressed using run-length encoding, a compression scheme
+where repeated ``runs'' of data are replaced with a number (number
+of repeats), and the value repeated.  In more detail,
 
 
 \begin{enumerate}
-\item Represent four or more consecutive identical characters as $\# n c$ where $\#$ is a special character denoting the beginning
-of a repeated sequence, $n$ is the number of repeats and $c$ is the character repeated.  $n$ can be up to 254 (255 is used to
-represent the {\em special}\ character). \item Represent characters not repeated four or more times as is.
+\item Represent four or more consecutive identical characters as
+$\# n c$ where $\#$ is a special character denoting the beginning
+of a repeated sequence, $n$ is the number of repeats and $c$ is
+the character repeated.  $n$ can be up to 254 (255 is used to
+represent the {\em special}\ character).
+\item Represent
+characters not repeated four or more times as is.
 \end{enumerate}
 
 The character string {\tt aaaaaabbbbcc}\ would then be encoded as {\tt \#6a\#4bcc}.
