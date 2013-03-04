@@ -5650,6 +5650,10 @@ Species &   Mol.~Wgt.           & Formula          & $\sigma$ & $\epsilon/k$   &
 
 If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermophysical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of air will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of J/kmol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermophysical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below.
 
+\subsubsection{Conductivity}
+
+Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (W/(m K)) with optional temperature dependence by using {\ct RAMP\_K}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR} on {\ct MISC}, and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
+
 \subsubsection{Diffusivity}
 
 Diffusivity, assumed to be the binary diffusion coefficient between the given species and the background species, can be specified in one of two ways.  First, it can be explicitly defined using {\ct DIFFUSIVITY} (m$^2$/s) with optional temperature dependence by using of {\ct RAMP\_D}.  Second, it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using {\ct MW} and the Lennard-Jones parameters for air.
@@ -6635,15 +6639,14 @@ the radiation absorption properties of water, and will be colored blue in Smokev
 \subsection{Thermal Properties}
 \label{thermal_part_props}
 
-The following parameters should be
-included on the {\ct SPEC} line to control the evaporation. If the liquid properties of the {\ct SPEC\_ID} are included in Table~\ref{tab:gasspecies},
-then no further inputs are required. Otherwise, you must provide all of the following properties of the liquid:
+The following parameters should be specified to control the evaporation.  The {\ct INITIAL\_TEMPERATURE} of liquid droplet; assumed ambient, {\ct TMPA} ($^\circ$C) is specified on {\ct PART} input.  If the fluid given by the {\ct SPEC\_ID} is included in Table~\ref{tab:gasspecies},
+then no further inputs are required. Otherwise, you must provide all of the following properties of the liquid on the {\ct SPEC} input:
 \begin{description}
 \item[{\ct DENSITY\_LIQUID}] The density of the liquid or solid droplet/particle (kg/m$^3$).
-\item[{\ct SPECIFIC\_HEAT\_LIQUID}] Specific heat of liquid or solid droplet/particle (kJ/kg/K).
+\item[{\ct SPECIFIC\_HEAT\_LIQUID}] Specific heat of liquid or solid droplet/particle (kJ/(kg K)).
+\item[{\ct RAMP\_CP\_L}] Ramp of temperature vs. specific heat for the solid droplet/particle.
 \item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet ($^\circ$C).
 \item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet ($^\circ$C).
-\item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet; assumed ambient, {\ct TMPA} ($^\circ$C).
 \item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet (kJ/kg).
 \item[{\ct ENTHALPY\_OF\_FORMATION}] The heat of formation of the gas (kJ/kg).
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
@@ -10448,7 +10451,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline
 {\ct REVERSE}                   & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
 {\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            & 0.0            \\ \hline
-{\ct SPEC\_ID}                  & Character         & Section ~\ref{info:HVACfilter}                                                &               &                \\ \hline
+{\ct SPEC\_ID}                  & Character Array   & Section ~\ref{info:HVACfilter}                                                &               &                \\ \hline
 {\ct TAU\_AC}                   & Real              & Section ~\ref{info:HVACaircoil}                                               & s             & 1.0            \\ \hline
 {\ct TAU\_FAN}                  & Real              & Section ~\ref{info:HVACfan}                                                   & s             & 1.0            \\ \hline
 {\ct TAU\_VF}                   & Real              & Section~\ref{info:HVACduct}                                                   & s             & 1.0            \\ \hline
