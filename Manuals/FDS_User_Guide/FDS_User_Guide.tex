@@ -11992,7 +11992,7 @@ smoke file is given by:
 
   WRITE(LU_SMOKE3D) ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
 
-! time depended data
+! time dependent data
 
   WRITE(LU_SMOKE3D_SIZE,*)TIME,NCHARS_IN,NCHARS_OUT
   WRITE(LU_SMOKE3D)TIME
@@ -12007,9 +12007,10 @@ smoke file and the computer viewing the 3-D smoke file use the
 same or different byte swap (endian) conventions for storing
 floating point numbers.  The opacity data is converted from 4 byte
 float point numbers to one byte integers then compressed using
-run-length encoding (RLE). Run-length encoding is a compression
-scheme where repeated ``runs'' of data are replaced with a number
-(number of repeats), and the value repeated.  In more detail,
+run-length encoding (RLE). The compressed data is contained in
+{\ct BUFFER\_OUT}.  Run-length encoding is a compression scheme
+where repeated ``runs'' of data are replaced with a number (number
+of repeats), and the value repeated.  In more detail,
 
 
 \begin{enumerate}
@@ -12022,8 +12023,8 @@ represent the {\em special}\ character).
 characters not repeated four or more times as is.
 \end{enumerate}
 
-The character string {\tt aaaaaabbbbcc}\ would then be encoded as
-{\tt \#6a\#4bcc}.
+The character string {\tt aaaaaabbbbbcc}\ would then be encoded as
+{\tt \#6a\#5bcc}.
 
 
 
