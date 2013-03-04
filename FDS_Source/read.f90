@@ -2957,6 +2957,13 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ! Heat of Combustion calculation
    IF (RN%HEAT_OF_COMBUSTION > -1.E21) THEN ! User specified heat of combustion
+      IF (SIMPLE_CHEMISTRY .AND. IDEAL) THEN
+         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION*SPECIES(FUEL_INDEX)%MW*0.001 !J/kg -> J/mol
+         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU_CO*(CO2_HEAT_OF_FORMATION - CO_HEAT_OF_FORMATION) &
+                                                         - RN%NU_SOOT*CO2_HEAT_OF_FORMATION*(1._EB-RN%SOOT_H_FRACTION) &
+                                                         - RN%NU_SOOT*H2O_HEAT_OF_FORMATION*RN%SOOT_H_FRACTION*0.5_EB
+         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES(FUEL_INDEX)%MW*1000._EB !J/mol->J/kg
+      ENDIF       
       HF_COUNT = 0
       DO NS = 0,N_TRACKED_SPECIES
          IF (RN%NU(NS) /= 0._EB) THEN
@@ -2978,7 +2985,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                                                       + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
          ENDDO
          SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
-                                                   (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
+                                                   (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)        
    ELSE ! Heat of combustion not specified
       IF (SIMPLE_CHEMISTRY) THEN ! Calculate heat of combustion based oxygen consumption
          IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
