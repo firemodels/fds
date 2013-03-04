@@ -2495,7 +2495,7 @@ The movement of Lagrangian particles within a time step is calculated using an a
 
 \subsubsection{Heat Transfer Constraint}
 
-Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.
+Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.
 Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.
 Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.
 This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
@@ -3329,7 +3329,7 @@ convection correlations
     \max \; \left[ \; C \, |\Delta T|^\ot \; , \;
             \frac{k}{L} \; \NU
             \right]  \quad
-    \hbox{W/m$^2$/K} \ee
+    \si{W/(m^2.K)} \ee
 where $\Delta T$ is the difference between the wall and the gas temperature,
 $C$ is the coefficient for natural convection (1.52 for a horizontal surface
 and 1.31 for a vertical surface, by default). The Nusselt number, Nu, depends on the shape of the obstruction~\cite{Holman:1}, ~\cite{Incropera:1}:
@@ -3383,7 +3383,7 @@ surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SUR
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
 If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of W/m$^2$/K.
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
@@ -3515,8 +3515,8 @@ brick.
 \label{info:thermal_properties}
 
 For any solid material, specify its thermal
-{\ct CONDUCTIVITY} (W/m$\cdot$K), {\ct DENSITY} (kg/m$^3$),
-{\ct SPECIFIC\_HEAT} (kJ/kg/K), and {\ct EMISSIVITY} (0.9 by default).
+{\ct CONDUCTIVITY} (\si{W/(m.K)}), {\ct DENSITY} (kg/m$^3$),
+{\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}), and {\ct EMISSIVITY} (0.9 by default).
 Both {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} can be functions of
 temperature. {\ct DENSITY} and {\ct EMISSIVITY} cannot.
 Temperature-dependence is specified using the {\ct RAMP} convention.
@@ -3741,7 +3741,7 @@ applies 500~kW/m$^2$ to any surface with the attribute
 in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
 
 An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}, except this parameter
-specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
+specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.  Neither of them can be used if the model contains multiple reactions.
 
 \begin{warning}
@@ -3947,7 +3947,7 @@ $n_{s,ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, an
 If the value of $n_s$ is not known, it is a good starting point to assume $n_s=1$.
 
 The pre-exponential factor, $A_{ij}$, is prescribed under the name
-{\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy,
+{\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of 1/s. $E_{ij}$, the activation energy,
 is prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal
 is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
@@ -3975,7 +3975,7 @@ do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MAT
    A = \frac{e \, r_p}{Y_0} \, e^{E/R \, T_p} \label{AandE}
 \ee
 where $T_p$ and $r_p/Y_0$ are the reference temperature and rate, respectively. The
-{\ct REFERENCE\_RATE} is the reaction rate, in units of s$^{-1}$, at the given {\ct REFERENCE\_TEMPERATURE} divided by
+{\ct REFERENCE\_RATE} is the reaction rate, in units of 1/s, at the given {\ct REFERENCE\_TEMPERATURE} divided by
 the mass fraction, $Y_0$, of material in the original sample undergoing the reaction. For a single component, single
 reaction material, $Y_0=1$. The {\ct HEATING\_RATE} ($\dot{T}$) is
 the rate at which the temperature of the TGA (or equivalent) test
@@ -3995,7 +3995,7 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
 \end{equation*}
 \begin{align*}
    T_p &= 300 \; ^\circ\mathrm{C}  \\
-   r_p &= 0.002   \; \mathrm{s}^{-1}  \\
+   r_p &= 0.002   \; \si{1/s}  \\
    \dot{T} &= 5 \; \mathrm{K/min} \\
    \nu_s &= 0 \\
 \end{align*}
@@ -4171,7 +4171,7 @@ neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a
 \end{align*}
 \begin{align*}
    T_{p,1,1} &= 100+273 \; \mathrm{K}        & T_{p,2,1}   &= 300+273 \; \mathrm{K} \\
-   r_{p,1,1} &= 0.0016 \; \mathrm{s}^{-1}    & r_{p,2,1}   &= 0.0012 \; \mathrm{s}^{-1} \\
+   r_{p,1,1} &= 0.0016 \; \si{1/s}           & r_{p,2,1}   &= 0.0012 \;\si{1/s} \\
    \nu_{s,1,1} &= 0                          & \nu_{s,2,1} &= 0.2 \\
    \dot{T} &= 5 \; \mathrm{K/min} & &
 \end{align*}
@@ -4236,7 +4236,7 @@ in the reaction rate formula
   \label{rr3}
 \ee
 This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=.TRUE.}. The pre-exponental
-factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (kJ/kgK) of the material mixture at
+factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (\si{kJ/(kg.K)}) of the material mixture at
 phase change temperature.
 
 The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``threshold'' temperature. A small amount of liquid water at 10~$^\circ$C is cooled down to -10$^\circ$C in 10~min, and then heated up again to 10$^\circ$C. The mass fraction of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by the blue line and heating phase by the red line.
@@ -4513,7 +4513,7 @@ other time step), and set {\ct DT} to whatever value appropriate for
 the solid phase calculation. Since there is no gas phase calculation
 that will limit the time step, it is best to control this yourself.
 \item Set {\ct RADIATION=.FALSE.} on the {\ct RADI} line. This simply eliminates the radiation transport calculation in the gas phase which might conflict with some of the assumptions being made.
-\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=1000} (W/m$^2$/K) on the {\ct SURF} line. There is nothing special about the value of 1000 -- the point is to force the sample temperature to follow the specified linear ramp closely.
+\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=1000} (\si{W/(m$^2$.K)}) on the {\ct SURF} line. There is nothing special about the value of 1000 -- the point is to force the sample temperature to follow the specified linear ramp closely.
 \item Ramp up the {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C) on the {\ct MISC} line using the ramp function \\ {\ct ASSUMED\_GAS\_TEMPERATURE\_RAMP}. See Section~\ref{info:RAMP_Time} for more details.
 \item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed up the computations significantly. If the {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
@@ -4591,7 +4591,7 @@ given vent, or whether the given volume flux is desired.
 \label{info:MASS_FLUX_TOTAL}
 
 Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at
-a solid surface. However, you may wish to control the total mass flow rate per unit area (kg/m$^2$/s) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
+a solid surface. However, you may wish to control the total mass flow rate per unit area (\si{kg/(m$^2$.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
 {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
 for an outflow is adjusted based on the local density.
 
@@ -4675,7 +4675,7 @@ is set, no {\ct VEL} should be set. It is automatically
 calculated based on the mass flux.
 The inputs {\ct MASS\_FLUX(:)} (and typically {\ct MASS\_FRACTION(:)}) should only be used
 for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with
-units of kg/m$^2$/s.
+units of \si{kg/(m$^2$.s)}.
 
 \subsection*{Mass Flux Example}
 
@@ -4960,7 +4960,7 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 
 \begin{description}
 \item[{\ct COOLANT\_MASS\_FLOW}] is the flow rate of the working fluid (kg/s).
-\item[{\ct COOLANT\_SPECIFIC\_HEAT}] is the specific heat (kJ/kg/K) of the working fluid.
+\item[{\ct COOLANT\_SPECIFIC\_HEAT}] is the specific heat (\si{kJ/(kg.K)}) of the working fluid.
 \item[{\ct COOLANT\_TEMPERATURE}] is the inlet temperature of the working fluid ($^\circ$C).
 \item[{\ct DEVC\_ID}] is the name of a device controlling the operation of the aircoil. A {\ct CTRL\_ID} can be used as an alternative.
 \item[{\ct EFFICIENCY}] is the heat exchanger efficiency, $\eta$, from 0 to 1.  A value of 1 indicates the exit temperatures on both sides of the heat exchanger will be equal.
@@ -4979,7 +4979,7 @@ Second, the actual heat exchanged is computed using the {\ct EFFICIENCY}.
 \noindent
 Note that an aircoil input refers to a class of aircoils and that multiple ducts can reference the same aircoil definition.
 
-The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28~g/mol with a specific heat of 1~kJ/kg/K) from the floor and injects in through the ceiling at a volume flow rate of 1~$m^3/s$.  An aircoil is defined with a working fluid flowing at 10~kg/s and 100~$^\circ$C with a specific heat of 4~kJ/kg/K.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2~kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Fig.~\ref{fig_aircoil}.
+The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28~g/mol with a specific heat of 1~\si{kJ/(kg.K)}) from the floor and injects in through the ceiling at a volume flow rate of 1~$m^3/s$.  An aircoil is defined with a working fluid flowing at 10~kg/s and 100~$^\circ$C with a specific heat of 4~\si{kJ/(kg.K)}.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2~kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Fig.~\ref{fig_aircoil}.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -5405,7 +5405,7 @@ fraction or mass flux of species {\ct N}. Here, the $N$ refers to the $N$th spec
 \end{lstlisting}
 
 \noindent
-indicates that argon and nitrogen are to be injected at rates of 0.1~kg/m$^2$/s and 0.3~kg/m$^2$/s over time periods of approximately 5~s and 10~s, respectively. It does not
+indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^2$.s)} and 0.3~\si{kg/(m$^2$.s)} over time periods of approximately 5~s and 10~s, respectively. It does not
 matter in what order the {\ct SPEC} lines are listed in the input file.
 
 
@@ -5559,7 +5559,7 @@ Following is a very simple example of how a gas---in this case hydrogen---can be
 \end{lstlisting}
 
 \noindent
-The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~kg/m$^2$/s and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
+The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\si{kg/(m$^2$.s)} and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/gas_filling_mass}
@@ -5652,7 +5652,7 @@ If the gas species is not included in Table~\ref{tab:gasspecies}, then you must 
 
 \subsubsection{Conductivity}
 
-Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (W/(m K)) with optional temperature dependence by using {\ct RAMP\_K}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR} on {\ct MISC}, and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
+Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (\si{W/(m.K)}) with optional temperature dependence by using {\ct RAMP\_K}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR} on {\ct MISC}, and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
 
 \subsubsection{Diffusivity}
 
@@ -5664,7 +5664,7 @@ It is assumed that the enthalpy of the gas species is given by the following for
 \be
    h(T) = h(T_{ref}) + \int_{T_{ref}}^T c_p(T) \, dT
 \ee
-where $c_p$ is the {\ct SPECIFIC\_HEAT} (kJ/kg) with optional temperature dependence using {\ct RAMP\_CP}.  The (optional) {\ct REFERENCE\_TEMPERATURE}, $T_{ref}$ ($^\circ$C), is the temperature that corresponds to
+where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperature dependence using {\ct RAMP\_CP}.  The (optional) {\ct REFERENCE\_TEMPERATURE}, $T_{ref}$ ($^\circ$C), is the temperature that corresponds to
 the {\ct REFERENCE\_ENTHALPY}, $h(T_{ref})$ (kJ/kg).  The default value of the  {\ct REFERENCE\_TEMPERATURE} is 25~$^\circ$C.  If {\ct SPECIFIC\_HEAT} is specified and the {\ct REFERENCE\_ENTHALPY} is not, the {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{ref})=c_p T_{ref}$.
 
 If no inputs for enthalpy are provided, then the specific heat of the gas will be calculated from its molecular weight using the relation:
@@ -6209,8 +6209,8 @@ In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuel
 \end{lstlisting}
 The {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using both fuels. The mass flux values for each fuel are determined by the desired heat release, the proportion of the total heat release rate each fuel contributes, the burner area, and the heat of combustion of each fuel. In this case we want a 1200~kW fire where each fuel contributes 50\% to the total heat release rate (600~kW).
 \begin{align}
-\dot{m}^{\prime \prime}_{poly} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{26200~\mathrm{kJ/kg}} = 0.022901~\mathrm{\frac{kg}{m^2\,s}}\\
-\dot{m}^{\prime \prime}_{wood} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{16400~\mathrm{kJ/kg}} = 0.036585~\mathrm{\frac{kg}{m^2\,s}}
+\dot{m}^{\prime \prime}_{poly} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{26200~\si{kJ/kg}} = 0.022901~\si{kg/(m^2.s)}\\
+\dot{m}^{\prime \prime}_{wood} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{16400~\si{kJ/kg}} = 0.036585~\si{kg/(m^2.s)}
 \end{align}
 
 \begin{lstlisting}
@@ -6300,7 +6300,7 @@ where the rate constant is defined as:
 k = A \; T^{N_{T}} \; e^{-E/RT}
 \end{equation}
 \begin{description}
-\item[{\ct A}] is the pre-exponential factor in units of mol/cm$^3$/s,
+\item[{\ct A}] is the pre-exponential factor in units of \si{mol/(cm$^3$.s)},
 \item[{\ct E}] is the activation energy in units of J/mol,
 \item[{\ct N\_S}] is an array containing the concentration exponents (default 1),
 \item[{\ct N\_T}] is the temperature exponent (default is 0, meaning no temperature dependence).
@@ -6643,7 +6643,7 @@ The following parameters should be specified to control the evaporation.  The {\
 then no further inputs are required. Otherwise, you must provide all of the following properties of the liquid on the {\ct SPEC} input:
 \begin{description}
 \item[{\ct DENSITY\_LIQUID}] The density of the liquid or solid droplet/particle (kg/m$^3$).
-\item[{\ct SPECIFIC\_HEAT\_LIQUID}] Specific heat of liquid or solid droplet/particle (kJ/(kg K)).
+\item[{\ct SPECIFIC\_HEAT\_LIQUID}] Specific heat of liquid or solid droplet/particle (\si{kJ/(kg.K})).
 \item[{\ct RAMP\_CP\_L}] Ramp of temperature vs. specific heat for the solid droplet/particle.
 \item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet ($^\circ$C).
 \item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet ($^\circ$C).
@@ -6845,7 +6845,7 @@ To demonstrate the basic syntax for solid particles, the following input lines c
 \noindent
 The {\ct PART} line establishes the class of particles. In this case, the presence of a {\ct SURF\_ID} indicates that the particles are solids with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter whose default is {\ct .FALSE.} that indicates if the particles are stationary. The {\ct PROP\_ID} references a {\ct PROP} (property) line that just tells Smokeview that the particles are to be drawn as spheres of diameter 0.01~m. See Section~\ref{info:SMOKEVIEW_PART} for details and options. The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres. See Section~\ref{info:initial_droplets} for details.
 
-If the {\ct SURF} line includes a {\ct MATL\_ID}, the particle mass will be based upon the value or values of {\ct DENSITY} of the referenced {\ct MATL} lines. If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT} ($^\circ$C), heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$), or species {\ct MASS\_FLUX} (kg/m$^2$/s).
+If the {\ct SURF} line includes a {\ct MATL\_ID}, the particle mass will be based upon the value or values of {\ct DENSITY} of the referenced {\ct MATL} lines. If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT} ($^\circ$C), heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$), or species {\ct MASS\_FLUX} (\si{kg/(m$^2$.s)}).
 
 The {\ct GEOMETRY} options for solid particles are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}.
 By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to provide the {\ct LENGTH} and {\ct WIDTH} of the rectangular plate. It is assumed that the plate is symmetric front and back. You need only specify the layers that make up the half-thickness. The array {\ct THICKNESS(N)} indicates the thickness(es) of each layer of the plate, not the total thickness of the plate itself. If the plate is composed of only one material component, the specified {\ct THICKNESS} is taken as the half-thickness of the plate.
@@ -7096,7 +7096,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 \end{lstlisting}
 
 \noindent
-The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~W/m/K and a specific heat of 1.5~kJ/kg/K. If you change these
+The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these
 values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area.
 The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed
 by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell.
@@ -7134,7 +7134,7 @@ value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the foll
 
 \noindent
 creates an obstruction that ejects particles out of its sides at a rate
-of 0.1~kg/m$^2$/s and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface).
+of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface).
 FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The
 {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the
 computational domain. This happens automatically if the surface is burning, but must be specified
@@ -7294,9 +7294,9 @@ Here $\dm_{\rm f,0}''(t)$ is the user-specified burning rate per unit
 area when no water is applied and $k$ is a function of the local water
 mass per unit area, $m_{\rm w}''$, expressed in units of kg/m$^2$.
 \be
-k(t) = \hbox{\ct E\_COEFFICIENT} \; m_{\rm w}''(t) \quad          \hbox{s}^{-1}
+k(t) = \hbox{\ct E\_COEFFICIENT} \; m_{\rm w}''(t) \quad          \si{1/s}
 \ee
-The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of m$^2$/(kg$\cdot$s). Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinker is set to operate at 5~s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate.
+The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinker is set to operate at 5~s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate.
 
 \begin{lstlisting}
 &SURF ID='FUEL', HRRPUA=100., E_COEFFICIENT=4. /
@@ -7456,12 +7456,12 @@ the device using the standard RTI algorithm. The various sprinkler properties wi
 
 Properties associated with sprinklers included in the {\ct PROP} group are:
 \begin{description}
-\item[{\ct RTI}] Response Time Index in units of $\sqrt{\hbox{m}\cdot \hbox{s}}$. (Default 100.)
+\item[{\ct RTI}] Response Time Index in units of $\sqrt{\si{m.s}}$. (Default 100.)
 \item[{\ct C\_FACTOR}] in units of $\sqrt{\hbox{m/s}}$. (Default 0.)
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
 \item[{\ct FLOW\_RATE} or {\ct MASS\_FLOW\_RATE}] in units of L/min or kg/s.
-An alternative is to provide the {\ct K\_FACTOR} in units of L/min/bar$^\ha$ and the
+An alternative is to provide the {\ct K\_FACTOR} in units of $\si{L/(min.bar^{\ha})}$ and the
 {\ct OPERATING\_PRESSURE} in units of bar.
 The flow rate is then given by $K \sqrt{p}$. Note that 1 bar is equivalent to
 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is
@@ -7794,7 +7794,7 @@ A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, rep
 the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as
 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$.
 Using the default mass extinction coefficient of
-8700~m$^2$/kg, the optical depth is calculated to be 0.626~m$^{-1}$.  The
+8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{1/m}.  The
 compartment has a series of obstructions located at increasing distance from the front in increments of
 1~m.  The correlation for the output quantity
 {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m.
@@ -7804,7 +7804,7 @@ If this is the case, Smokeview is properly displaying the obscuration of the
 smoke.  Three beam detectors are also
 placed in the compartment.  These all have a path length of 10~m,
 but are at different orientations within the compartment.
-Using the optical depth of 0.626~m$^{-1}$ and the path length of
+Using the optical depth of 0.626~\si{1/m} and the path length of
 10~m, the expected total obscuration is 99.81~\%, which is the
 result computed by FDS for each of the three detectors.
 
@@ -9146,12 +9146,12 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 {\ct 'DIAMETER'} (default)  & 1                                                                     & $f_1$  & $\mu$m \\
 {\ct 'ENTHALPY'}            & $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$     & $f_2$  & kJ/m$^3$ \\
 {\ct 'PARTICLE FLUX X'}     & $(4/3)\rho_i r_i^3 u_i$                                               & $f_2$  & kg/m$^2$s \\
-{\ct 'PARTICLE FLUX Y'}     & $(4/3)\rho_i r_i^3 v_i$                                               & $f_2$  & kg/m$^2$s \\
-{\ct 'PARTICLE FLUX Z'}     & $(4/3)\rho_i r_i^3 w_i$                                               & $f_2$  & kg/m$^2$s \\
+{\ct 'PARTICLE FLUX Y'}     & $(4/3)\rho_i r_i^3 v_i$                                               & $f_2$  & \si{kg/(m$^2$.s)} \\
+{\ct 'PARTICLE FLUX Z'}     & $(4/3)\rho_i r_i^3 w_i$                                               & $f_2$  & \si{kg/(m$^2$.s)} \\
 {\ct 'U-VELOCITY'}          & $u_i$                                                                 & $f_1$  & m/s \\
 {\ct 'V-VELOCITY'}          & $v_i$                                                                 & $f_1$  & m/s \\
 {\ct 'W-VELOCITY'}          & $w_i$                                                                 & $f_1$  & m/s \\
-{\ct 'VELOCITY'}            & $(u_i^2+v_i^2+w_i^2)^{1/2}$                                           & $f_1$  & m/s \\
+{\ct 'VELOCITY'}            & $(u_i^2+v_i^2+w_i^2)^{\ha}$                                           & $f_1$  & m/s \\
 {\ct 'TEMPERATURE'}         & $T_i$                                                                 & $f_1$  & ${}^\circ$C \\
 {\ct 'MASS CONCENTRATION'}  & $(4/3)\rho r_i^3 $                                                    & $f_2$  & kg/m$^3$ \\
 {\ct 'NUMBER CONCENTRATION'}& 1                                                                     & $f_2$  & \\
@@ -9266,7 +9266,7 @@ thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}.
 Thermogravimetric Analysis or TGA is a bench-scale measurement in which a very small solid material sample is heated up at a constant rate. The results of a TGA measurement are presented in the form of a normalized mass and normalized mass loss rate. Analogous quantities can be output from FDS:
 \begin{eqnarray*}
    \hbox{\ct 'NORMALIZED MASS'} &=& \sum_\alpha  m''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(dimensionless)} \\
-   \hbox{\ct 'NORMALIZED MASS LOSS RATE'} &=& \sum_\alpha  \dot{m}''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0)  \quad \quad \left( \hbox{s}^{-1} \right)
+   \hbox{\ct 'NORMALIZED MASS LOSS RATE'} &=& \sum_\alpha  \dot{m}''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0)  \quad \quad \left( \si{1/s} \right)
 \end{eqnarray*}
 
 \subsubsection{Micro-Combustion Calorimetry (MCC) Output}
@@ -9883,9 +9883,9 @@ remember that all output quantity names ought to be in single quotes.
 {\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%             & D            \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                    & Pa             & D,I,P,S      \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C      & B,D          \\ \hline
-{\ct BURNING RATE}                              & Mass loss rate of fuel                        & kg/m$^2$/s     & B,D          \\ \hline
+{\ct BURNING RATE}                              & Mass loss rate of fuel                        & \si{kg/(m$^2$.s)} & B,D          \\ \hline
 {\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
-{\ct CONDUCTIVITY}                              & Thermal conductivity                          & W/m/K          & D,I,P,S      \\ \hline
+{\ct CONDUCTIVITY}                              & Thermal conductivity                          & \si{W/(m.K)}   & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
@@ -9893,7 +9893,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct CPU TIME}                                  & Elapsed CPU time                              & s              & D            \\ \hline
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s            & B,D          \\ \hline
-{\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & s$^{-1}$       & D,I,P,S      \\ \hline
+{\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
 {\ct ENTHALPY}                                  & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
@@ -9912,10 +9912,10 @@ remember that all output quantity names ought to be in single quotes.
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct MASS FLOW}                                 & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
-{\ct MASS FLUX}$^*$                             & Mass flux at solid surface                    & kg/m$^2$/s     & B,D          \\ \hline
-{\ct MASS FLUX X}$^*$                           & $\rho u Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
-{\ct MASS FLUX Y}$^*$                           & $\rho v Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
-{\ct MASS FLUX Z}$^*$                           & $\rho w Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
+{\ct MASS FLUX}$^*$                             & Mass flux at solid surface                    & \si{kg/(m$^2$.s)} & B,D          \\ \hline
+{\ct MASS FLUX X}$^*$                           & $\rho u Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
+{\ct MASS FLUX Y}$^*$                           & $\rho v Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
+{\ct MASS FLUX Z}$^*$                           & $\rho w Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S      \\ \hline
 {\ct MASS FRACTION}$^*$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct MPUA}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
@@ -9926,9 +9926,9 @@ remember that all output quantity names ought to be in single quotes.
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
 {\ct PARTICLE AGE}                              & Section~\ref{info:particle_quantities}        & s              & PA           \\ \hline
 {\ct PARTICLE DIAMETER}                         & Section~\ref{info:particle_quantities}        & $\mu$m         & PA           \\ \hline
-{\ct PARTICLE FLUX X}$^{**}$                    & Section~\ref{info:part_output}                & kg/m$^2$/s     & P,S          \\ \hline
-{\ct PARTICLE FLUX Y}$^{**}$                    & Section~\ref{info:part_output}                & kg/m$^2$/s     & P,S          \\ \hline
-{\ct PARTICLE FLUX Z}$^{**}$                    & Section~\ref{info:part_output}                & kg/m$^2$/s     & P,S          \\ \hline
+{\ct PARTICLE FLUX X}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX Y}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S          \\ \hline
+{\ct PARTICLE FLUX Z}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S          \\ \hline
 {\ct PARTICLE MASS}                             & Section~\ref{info:particle_quantities}        & kg             & PA           \\ \hline
 {\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:particle_quantities}        & $^\circ$C      & PA           \\ \hline
 {\ct PARTICLE VELOCITY}                         & Section~\ref{info:particle_quantities}        & m/s            & PA           \\ \hline
@@ -9940,11 +9940,11 @@ remember that all output quantity names ought to be in single quotes.
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
 {\ct SCALAR RESOLUTION}$^{*****}$               & Section~\ref{info:meshquality}                &                & S            \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
-{\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & W/m/K          & D            \\ \hline
+{\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}   & D            \\ \hline
 {\ct SOLID DENSITY}                             & Section~\ref{info:DEPTH}                      & kg/m$^3$       & D            \\ \hline
-{\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & kJ/m/K         & D            \\ \hline
+{\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(m.K)}  & D            \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
-{\ct SPECIFIC HEAT}                             & $c_p$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
+{\ct SPECIFIC HEAT}                             & $c_p$                                         & \si{kJ/(kg.K)} & D,I,P,S      \\ \hline
 {\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}                 & $^\circ$C      & D            \\ \hline
 {\ct SURFACE DENSITY}                           & Section~\ref{info:material_components}        & kg/m$^2$       & B,D          \\ \hline
@@ -9959,7 +9959,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct W-VELOCITY}                                & Gas velocity component in $z$ direction       & m/s            & D,I,P,S      \\ \hline
 {\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct VELOCITY}$^{***}$                          & Gas velocity                                  & m/s            & D,I,P,S      \\ \hline
-{\ct VISCOSITY}                                 & $\mu$                                         & kg/m/s         & D,I,P,S      \\ \hline
+{\ct VISCOSITY}                                 & $\mu$                                         & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FRACTION}$^{****}$                  & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
@@ -10019,7 +10019,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
 {\ct H}                                         & ${\cal H}=|\bu|^2/2 + \tp/\rho_0$                 & (m/s)$^2$      & D,I,P,S      \\ \hline
-{\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & W/m$^2$/K      & B,D          \\ \hline
+{\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m$^2$.K)} & B,D          \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
@@ -10045,7 +10045,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
-{\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & kg/m/s         & B,D          \\ \hline
+{\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
 \end{longtable}
 
 
@@ -10428,7 +10428,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct AREA}                      & Real              & Section~\ref{info:HVACduct}                                                   & m$^2$         &                \\ \hline
 {\ct CLEAN\_LOSS}               & Real              & Section~\ref{info:HVACfilter}                                                 &               &                \\ \hline
 {\ct COOLANT\_MASS\_FLOW}       & Real              & Section~\ref{info:HVACaircoil}                                                & kg/s          &                \\ \hline
-{\ct COOLANT\_SPECIFIC\_HEAT}   & Real              & Section~\ref{info:HVACaircoil}                                                & kJ/kg/K       &                \\ \hline
+{\ct COOLANT\_SPECIFIC\_HEAT}   & Real              & Section~\ref{info:HVACaircoil}                                                & \si{kJ/(kg.K)} &                \\ \hline
 {\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C     &                \\ \hline
 {\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}       &               &                \\ \hline
 {\ct DAMPER}                    & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
@@ -10565,7 +10565,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ALLOW\_SHRINKING}              & Logical       & Section~\ref{info:shrink_swell}       &                   & {\ct.TRUE.} \\ \hline
 {\ct ALLOW\_SWELLING}               & Logical       & Section~\ref{info:shrink_swell}       &                   & {\ct.TRUE.} \\ \hline
 {\ct BOILING\_TEMPERATURE}          & Real          & Section~\ref{info:liquid_fuels}       & $^\circ$C         & 5000.  \\ \hline
-{\ct CONDUCTIVITY}                  & Real          & Section~\ref{info:thermal_properties} & W/m/K             & 0.     \\ \hline
+{\ct CONDUCTIVITY}                  & Real          & Section~\ref{info:thermal_properties} & \si{W/(m.K)}      & 0.     \\ \hline
 {\ct CONDUCTIVITY\_RAMP}            & Character     & Section~\ref{info:thermal_properties} &                   &        \\ \hline
 {\ct DENSITY}                       & Real          & Section~\ref{info:thermal_properties} & kg/m$^3$          & 0.     \\ \hline
 {\ct E(:)}                          & Real array    & Section~\ref{info:solid_pyrolysis}    & kJ/kmol           &        \\ \hline
@@ -10585,7 +10585,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PYROLYSIS\_RANGE(:)}           & Real array    & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
 {\ct REFERENCE\_RATE(:)}            & Real array    & Section~\ref{info:solid_pyrolysis}    & 1/s               &        \\ \hline
 {\ct REFERENCE\_TEMPERATURE(:)}     & Real array    & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real          & Section~\ref{info:thermal_properties} & kJ/kg/K           & 0.     \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real          & Section~\ref{info:thermal_properties} & \si{kJ/(kg.K)}    & 0.     \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}          & Character     & Section~\ref{info:thermal_properties} &                   &        \\ \hline
 {\ct SPEC\_ID(:,:)}                 & Character     & Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
 {\ct THRESHOLD\_SIGN(:)}            & Real array    & Section~\ref{info:solid_pyrolysis}    &                   & 1.0    \\ \hline
@@ -10982,8 +10982,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BEAD\_DENSITY}                     & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.     \\ \hline
 {\ct BEAD\_DIAMETER}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001     \\ \hline
 {\ct BEAD\_EMISSIVITY}                  & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85      \\ \hline
-{\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} & Real          & Section~\ref{info:THERMOCOUPLE}           & W/m$^2$/K             &           \\ \hline
-{\ct BEAD\_SPECIFIC\_HEAT}              & Real          & Section~\ref{info:THERMOCOUPLE}           & kJ/kg/K               & 0.44      \\ \hline
+{\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &           \\ \hline
+{\ct BEAD\_SPECIFIC\_HEAT}              & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44      \\ \hline
 {\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:wind}                   & m/s                   & 1.       \\ \hline
@@ -10994,7 +10994,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &           \\ \hline
 {\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}\\ \hline
-{\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & L/min/bar$^{1/2}$     & 1.        \\ \hline
+{\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & $\si{L/(min.bar^{\ha})}$ & 1.        \\ \hline
 {\ct LENGTH}                            & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8       \\ \hline
 {\ct MASS\_FLOW\_RATE}                  & Real          & Section~\ref{info:sprinklers}             & kg/s                  &           \\ \hline
 {\ct OFFSET}                            & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05      \\ \hline
@@ -11015,7 +11015,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.        \\ \hline
 {\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
-{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
+{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$   & 100.      \\ \hline
 {\ct SMOKEVIEW\_ID}                     & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &           \\ \hline
 {\ct SMOKEVIEW\_PARAMETERS}             & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &           \\ \hline
 {\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &           \\ \hline
@@ -11111,7 +11111,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
 \hline \hline
 \endhead
-{\ct A}                                   & Real        & Section~\ref{info:finite}                 &   cm$^3$/mol/s    &     \\ \hline
+{\ct A}                                   & Real        & Section~\ref{info:finite}                 & \si{cm$^3$/(mol.s)} &     \\ \hline
 {\ct A\_RAMP}                             & Character   & Section~\ref{info:RAMP_Arrhenius}         &                   &     \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:extinction}             &   K               &  0  \\ \hline
 {\ct BETA\_EDC}                           & Real        & Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
@@ -11210,8 +11210,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct AEROSOL}                       & Logical     & Section~\ref{info:deposition}           &                   & {\ct .FALSE.} \\ \hline
 {\ct ALIAS}                         & Character   & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
 {\ct BACKGROUND}                    & Logical     & Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
-{\ct CONDUCTIVITY}                  & Real        & Section~\ref{gas_species_props}         & W/m/K             &               \\ \hline
-{\ct CONDUCTIVITY\_SOLID}           & Real        & Section~\ref{info:deposition}           & W/m/K             &  0.26         \\ \hline
+{\ct CONDUCTIVITY}                  & Real        & Section~\ref{gas_species_props}         & \si{W/(m.K)}      &               \\ \hline
+{\ct CONDUCTIVITY\_SOLID}           & Real        & Section~\ref{info:deposition}           & \si{W/(m.K)}      &  0.26         \\ \hline
 {\ct DENSITY\_LIQUID}               & Real        & Section~\ref{thermal_part_props}        & kg/m$^3$          &               \\ \hline
 {\ct DENSITY\_SOLID}                & Real        & Section~\ref{info:deposition}           & kg/m$^3$          &  1800.        \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
@@ -11240,10 +11240,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REFERENCE\_TEMPERATURE}        & Real        & Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
 {\ct SIGMALJ}                       & Real        & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct SPEC\_ID(:)}                   & Character Array   & Section~\ref{info:lumped}             &                   &               \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real        & Section~\ref{gas_species_props}         & kJ/kg/K           &               \\ \hline
-{\ct SPECIFIC\_HEAT\_LIQUID}        & Real        & Section~\ref{thermal_part_props}        & kJ/kg/K           &               \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real        & Section~\ref{gas_species_props}         & \si{kJ/(kg.K)}    &               \\ \hline
+{\ct SPECIFIC\_HEAT\_LIQUID}        & Real        & Section~\ref{thermal_part_props}        & \si{kJ/(kg.K)}    &               \\ \hline
 {\ct VAPORIZATION\_TEMPERATURE}     & Real        & Section~\ref{thermal_part_props}        & K                 &               \\ \hline
-{\ct VISCOSITY}                     & Real        & Section~\ref{gas_species_props}         & kg/m/s            &               \\ \hline
+{\ct VISCOSITY}                     & Real        & Section~\ref{gas_species_props}         & \si{kg/(m.s)}     &               \\ \hline
 {\ct VOLUME\_FRACTION(:)}           & Real Array        & Section~\ref{info:lumped}             &                   &               \\ \hline
 \end{longtable}
 
@@ -11285,11 +11285,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMISSIVITY\_BACK}                & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                   & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct .FALSE.}           \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Section~\ref{solid_phase_verification}    & kW/m$^2$            & 0.                      \\ \hline
-{\ct E\_COEFFICIENT}                  & Real            & Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
+{\ct E\_COEFFICIENT}                  & Real            & Section~\ref{info:suppression}            & \si{m$^2$/(kg.s)}   & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}          & Real            & Section~\ref{info:specified_burning}      & kJ/kg               & 0.                      \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & W/m$^2$/K           &                         \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & \si{W/(m$^2$.K)}    &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}           & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
@@ -11298,8 +11298,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LAYER\_DIVIDE}                   & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
 {\ct LEAK\_PATH}                      & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
 {\ct LENGTH}                          & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
-{\ct MASS\_FLUX(:)}                   & Real Array      & Section~\ref{info:MASS_FLUX}              & kg/m$^2$ s          & 0.                      \\ \hline
-{\ct MASS\_FLUX\_TOTAL}               & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & kg/m$^2$ s          &                         \\ \hline
+{\ct MASS\_FLUX(:)}                   & Real Array      & Section~\ref{info:MASS_FLUX}              & \si{kg/(m$^2$.s)}   & 0.                      \\ \hline
+{\ct MASS\_FLUX\_TOTAL}               & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \si{kg/(m$^2$.s)}   &                         \\ \hline
 {\ct MASS\_FRACTION(:)}               & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct MASS\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct MATL\_ID(NL,NC)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
