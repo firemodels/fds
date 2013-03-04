@@ -1071,7 +1071,7 @@ SVEXTERN int rotation_index_OLD;
 SVEXTERN selectdata SVDECL(*selectfaceinfo,NULL);
 SVEXTERN blockagedata SVDECL(**selectblockinfo,NULL);
 SVEXTERN tickdata SVDECL(*tickinfo,NULL);
-SVEXTERN int nticks,ntickssmv;
+SVEXTERN int SVDECL(ntickinfo,0),SVDECL(ntickinfo_smv,0);
 SVEXTERN int visTicks;
 SVEXTERN float user_tick_origin[3], user_tick_max[3], user_tick_min[3], user_tick_step[3], user_tick_length, user_tick_width;
 SVEXTERN int user_tick_nxyz[3], user_tick_sub, user_tick_option, vis_user_ticks, auto_user_tick_placement;

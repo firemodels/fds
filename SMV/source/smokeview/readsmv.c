@@ -2319,8 +2319,8 @@ int readsmv(char *file, char *file2){
   }
 
   FREEMEMORY(tickinfo);
-  nticks=0;
-  ntickssmv=0;
+  ntickinfo=0;
+  ntickinfo_smv=0;
 
   FREEMEMORY(camera_external);
   if(file!=NULL)NewMemory((void **)&camera_external,sizeof(camera));
@@ -2816,8 +2816,8 @@ int readsmv(char *file, char *file2){
       continue;
     }
     if(match(buffer,"TICKS") == 1){
-      nticks++;
-      ntickssmv++;
+      ntickinfo++;
+      ntickinfo_smv++;
       continue;
     }
     if(match(buffer,"TRNX") == 1){
@@ -3196,10 +3196,10 @@ int readsmv(char *file, char *file2){
       outlinei->z2=NULL;
     }
   }
-  if(nticks>0){
-    if(NewMemory((void **)&tickinfo,nticks*sizeof(tickdata))==0)return 2;
-    nticks=0;
-    ntickssmv=0;
+  if(ntickinfo>0){
+    if(NewMemory((void **)&tickinfo,ntickinfo*sizeof(tickdata))==0)return 2;
+    ntickinfo=0;
+    ntickinfo_smv=0;
   }
 
   if(npropinfo>0){
@@ -3770,8 +3770,8 @@ int readsmv(char *file, char *file2){
   */
 
     if(match(buffer,"TICKS") == 1){
-      nticks++;
-      ntickssmv++;
+      ntickinfo++;
+      ntickinfo_smv++;
       {
         tickdata *ticki;
         float *begt, *endt;
@@ -3781,7 +3781,7 @@ int readsmv(char *file, char *file2){
         float *dxyz;
         float sum;
 
-        ticki = tickinfo + nticks - 1;
+        ticki = tickinfo + ntickinfo - 1;
         begt = ticki->begin;
         endt = ticki->end;
         nbarst=&ticki->nbars;
@@ -7777,7 +7777,7 @@ int readini(int scriptconfigfile){
   char smvprogini[1024];
   char *smvprogini_ptr=NULL;
 
-  nticks=ntickssmv;
+  ntickinfo=ntickinfo_smv;
   strcpy(smvprogini,"");
   if(smokeview_bindir!=NULL)strcat(smvprogini,smokeview_bindir);
   strcat(smvprogini,"smokeview.ini");
@@ -10254,8 +10254,8 @@ typedef struct {
 */
 
     if(localfile==1&&match(buffer,"TICKS") == 1){
-      nticks++;
-      ResizeMemory((void **)&tickinfo,(nticks)*sizeof(tickdata));
+      ntickinfo++;
+      ResizeMemory((void **)&tickinfo,(ntickinfo)*sizeof(tickdata));
 
       {
         tickdata *ticki;
@@ -10266,7 +10266,7 @@ typedef struct {
         float *dxyz;
         float sum;
 
-        ticki = tickinfo + nticks - 1;
+        ticki = tickinfo + ntickinfo - 1;
         begt = ticki->begin;
         endt = ticki->end;
         nbarst=&ticki->nbars;
@@ -11215,7 +11215,7 @@ void writeini(int flag){
       fprintf(fileout," %s\n",labeli->name);
     }
 
-    for(i=ntickssmv;i<nticks;i++){
+    for(i=ntickinfo_smv;i<ntickinfo;i++){
       float *begt;
       float *endt;
       float *rgbtemp;

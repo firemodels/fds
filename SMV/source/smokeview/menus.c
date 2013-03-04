@@ -239,7 +239,7 @@ void LabelMenu(int value){
     visLabels=1;
     visBlocklabel=1;
     vis_slice_average=1;
-    if(nticks>0)visTicks=1;
+    if(ntickinfo>0)visTicks=1;
     visgridloc=1;
     visHRRlabel=1;
     show_hrrcutoff=1;
@@ -272,7 +272,7 @@ void LabelMenu(int value){
       }
       hrrinfo->display=0;
     }
-    if(nticks>0)visTicks=0;
+    if(ntickinfo>0)visTicks=0;
     visgridloc=0;
     vis_slice_average=0;
 #ifdef pp_memstatus
@@ -5562,7 +5562,7 @@ updatemenu=0;
   if(visColorbarLabels==0)glutAddMenuEntry(_("Colorbar"),0);
   if(visTimeLabels==1)glutAddMenuEntry(_("*Time bar"),1);
   if(visTimeLabels==0)glutAddMenuEntry(_("Time bar"),1);
-  if(nticks>0){
+  if(ntickinfo>0){
     if(visTicks==0)glutAddMenuEntry(_("FDS generated ticks"),12);
     if(visTicks==1)glutAddMenuEntry(_("*FDS generated ticks"),12);
   }

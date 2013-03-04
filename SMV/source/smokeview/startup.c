@@ -1899,7 +1899,6 @@ void initvars(void){
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;
   tour_usecurrent=0;
   rotation_index_OLD=-1;
-  nticks=0,ntickssmv=0;
   visTicks=0;
   visCadTextures=1;
   visTerrainTexture=1;
