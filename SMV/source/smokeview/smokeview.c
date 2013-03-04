@@ -522,9 +522,11 @@ void parse_commandline(int argc, char **argv){
     STRCAT(test_filename,".svd");
   }
   if(smoothblockage_filename==NULL){
-    NewMemory((void **)&smoothblockage_filename,(unsigned int)(len_casename+6));
-    STRCPY(smoothblockage_filename,fdsprefix);
-    STRCAT(smoothblockage_filename,".sb");
+    char filename_base[1024];
+
+    STRCPY(filename_base,fdsprefix);
+    STRCAT(filename_base,".sb");
+    smoothblockage_filename=get_filename(smokeviewtempdir,filename_base);
   }
 
   for (i=1;i<argc;i++){

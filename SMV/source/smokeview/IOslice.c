@@ -2372,7 +2372,6 @@ void update_fedinfo(void){
   }
   for(i=0;i<nfedinfo;i++){ // define sliceinfo for fed slices
     slicedata *sd;
-    int len;
     slicedata *co2;
     int nn_slice;
     feddata *fedi;
@@ -2443,8 +2442,7 @@ void update_fedinfo(void){
     *ext=0;
     strcat(filename_base,"_fed.sf");
     filename=get_filename(smokeviewtempdir,filename_base);
-    len=strlen(filename);
-    NewMemory((void **)&fedi->fed_slice->reg_file,len+1);
+    NewMemory((void **)&fedi->fed_slice->reg_file,strlen(filename)+1);
     strcpy(sd->reg_file,filename);
     FREEMEMORY(filename);
     sd->file=sd->reg_file;
@@ -2498,8 +2496,7 @@ void update_fedinfo(void){
       *ext=0;
       strcat(filename_base,"_fed.iso");
       filename=get_filename(smokeviewtempdir,filename_base);
-      len=strlen(filename);
-      NewMemory((void **)&isoi->reg_file,len+1);
+      NewMemory((void **)&isoi->reg_file,strlen(filename)+1);
       strcpy(isoi->reg_file,filename);
       FREEMEMORY(filename);
       isoi->file=isoi->reg_file;

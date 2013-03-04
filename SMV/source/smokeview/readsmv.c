@@ -7856,19 +7856,17 @@ int readini(int scriptconfigfile){
 /* ------------------ readbounini ------------------------ */
 
 void readboundini(void){
-  FILE *stream;
-  char fullfilename[1024];
+  FILE *stream=NULL;
+  char *fullfilename=NULL;
 
   if(boundini_filename==NULL)return;
-  strcpy(fullfilename,"");
-  if(can_write_to_dir(NULL)==0){
-    if(can_write_to_dir(smokeviewtempdir)==0)return;
-    strcpy(fullfilename,smokeviewtempdir);
-    strcat(fullfilename,dirseparator);
+  fullfilename=get_filename(smokeviewtempdir,boundini_filename);
+  if(fullfilename!=NULL)stream=fopen(fullfilename,"r");
+  if(stream==NULL||is_file_newer(smv_filename,fullfilename)==1){
+    if(stream!=NULL)fclose(stream);
+    FREEMEMORY(fullfilename);
+    return;
   }
-  strcat(fullfilename,boundini_filename);
-  stream=fopen(fullfilename,"r");
-  if(stream==NULL)return;
   printf("%s",_("reading: "));
   printf("%s\n",fullfilename);
 
@@ -7913,6 +7911,7 @@ void readboundini(void){
       continue;
     }
   }
+  FREEMEMORY(fullfilename);
   return;
 }
 
@@ -7920,19 +7919,14 @@ void readboundini(void){
 
 void writeboundini(void){
   FILE *stream=NULL;
-  char fullfilename[1024];
+  char *fullfilename=NULL;
   int i;
 
   if(boundini_filename==NULL)return;
-  strcpy(fullfilename,"");
-  if(can_write_to_dir(NULL)==0){
-    if(can_write_to_dir(smokeviewtempdir)==0)return;
-    strcpy(fullfilename,smokeviewtempdir);
-    strcat(fullfilename,dirseparator);
-  }
-  strcat(fullfilename,boundini_filename);
+  fullfilename=get_filename(smokeviewtempdir,boundini_filename);
 
-  if(boundini_filename==NULL)return;
+  if(fullfilename==NULL)return;
+  
   for(i=0;i<npatchinfo;i++){
     bounddata *boundi;
     patchdata *patchi;
@@ -7956,12 +7950,16 @@ void writeboundini(void){
     boundi = &patchi->bounds;
     if(stream==NULL){
       stream=fopen(fullfilename,"w");
-      if(stream==NULL)return;
+      if(stream==NULL){
+        FREEMEMORY(fullfilename);
+        return;
+      }
     }
     fprintf(stream,"B_BOUNDARY\n");
     fprintf(stream," %f %f %f %f %i %s\n",boundi->global_min,boundi->percentile_min,boundi->percentile_max,boundi->global_max,patchi->filetype,patchi->label.shortlabel);
   }
   if(stream!=NULL)fclose(stream);
+  FREEMEMORY(fullfilename);
 }
 
 /* ------------------ readini2 ------------------------ */

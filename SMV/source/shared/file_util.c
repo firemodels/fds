@@ -278,17 +278,19 @@ int can_write_to_dir(char *dir){
   char file_name[256], *file_name_ptr;
   FILE *stream;
   int len;
+  int return_val=0;
 
+  if(dir==NULL||strlen(dir)==0)return 0;
+  
   file_name_ptr=randstr(file_name,20);
   if(file_name_ptr==NULL)return 0;
 
-  len = 20 + 1 + 1;
-  if(dir!=NULL)len+=strlen(dir);
+  len = strlen(dir) + 20 + 1 + 1;
 
   NewMemory((void **)&full_name,len);
 
   strcpy(full_name,"");
-  if(dir!=NULL&&strcmp(dir,".")!=0&&strlen(dir)>0){
+  if(strcmp(dir,".")!=0&&strlen(dir)>0){
     strcat(full_name,dir);
     strcat(full_name,dirseparator);
   }
@@ -296,17 +298,13 @@ int can_write_to_dir(char *dir){
   strcat(full_name,file_name_ptr);
   
   stream=fopen(full_name,"wb");
-  if(stream==NULL){
-    unlink(full_name);
-    FREEMEMORY(full_name);
-    return 0;
-  }
-  else{
+  if(stream!=NULL){
     fclose(stream);
-    unlink(full_name);
-    FREEMEMORY(full_name);
+    return_val=1;
   }
-  return 1;
+  unlink(full_name);
+  FREEMEMORY(full_name);
+  return return_val;
 }
 
 /* ------------------ is_file_newer ------------------------ */
