@@ -234,7 +234,7 @@ IOR (-)               &  2                         \\ \hline
 {Summary of input parameters used for FM/SNL cases, HGL temperature.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -288,7 +288,7 @@ Test 22    &  FPA, DB           &  1000           &  0.45           &  14       
 {Summary of input parameters used for FM/SNL cases, plume temperature (Heskestad and McCaffrey).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                        &              \\
 \rb{Input Parameter}   &  \rb{Value}  \\ \hline \hline
@@ -390,7 +390,7 @@ Test 22    &  1000           &  1             &  14                \\ \hline
 {Summary of input parameters used for Hamins Burner cases, point source radiation heat flux.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -430,7 +430,7 @@ For the cases with natural ventilation (MQH), the door size was 2.06 m high by 0
 {Summary of input parameters used for LLNL Enclosure cases, HGL temperature.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -539,7 +539,7 @@ Test 64    &  MQH               &  6.0       &  4.0       &  4.5       &  100   
 {Summary of input parameters used for NBS Multi-Room cases, HGL temperature.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -556,7 +556,7 @@ $t_{end}$ (s)         &  1200        \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|c|c|}
+\begin{tabular}{|l|l|c|}
 \hline
            &                    &                    \\
 \rb{Test}  &  \rb{Correlation}  &  \rb{$T_\infty$}   \\
@@ -583,7 +583,7 @@ For the cases with natural ventilation (MQH), the door size was 2.0 m high by 2.
 {Summary of input parameters used for NIST/NRC cases, HGL temperature.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -679,7 +679,7 @@ Test 18    &  1180           &  0.44           &  1.025         \\ \hline
 {Summary of input parameters used for NIST/NRC cases, ceiling jet temperature (Alpert).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -727,7 +727,7 @@ Test 18    &  1180           &  27                \\ \hline
 {Summary of input parameters used for NIST Dunes 2000 cases, ceiling jet temperature (Alpert).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                           &              \\
 \rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
@@ -769,14 +769,14 @@ After the time $t_{fire}$, the fire HRR was steady.
 {Summary of input parameters used for NIST Dunes 2000 cases, smoke detector activation time (Alpert).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                           &              \\
 \rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
 Scaling factor (-)        &  1           \\ \hline
 $t_{fire}$ (s)            &  300         \\ \hline
 $\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
-RTI ((m-s)$^{1/2}$)       &  5           \\ \hline
+RTI (m-s)$^{1/2}$         &  5           \\ \hline
 \end{tabular}
 \end{center}
 
@@ -813,7 +813,7 @@ After the time $t_{fire}$, the fire HRR was steady.
 {Summary of input parameters used for NIST Dunes 2000 cases, smoke detector activation time (Milke).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                           &              \\
 \rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
@@ -854,7 +854,7 @@ After the time $t_{fire}$, the fire HRR was steady.
 {Summary of input parameters used for NIST Dunes 2000 cases, smoke detector activation time (Mowrer).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -928,6 +928,48 @@ Test SDC39  &  0.00617          &  1.8       &  2.0       \\ \hline
 
 \section{SP AST}
 
+\subsection*{HGL Temperature}
+
+\begin{table}[!ht]
+\caption[Input parameters for SP AST cases, HGL temperature]
+{Summary of input parameters used for SP AST cases, HGL temperature.}
+
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  450         \\ \hline
+$L$ (m)                 &  3.6         \\ \hline
+$W$ (m)                 &  3.6         \\ \hline
+$H$ (m)                 &  2.4         \\ \hline
+$H_v$ (m)               &  2.0         \\ \hline
+$W_v$ (m)               &  0.8         \\ \hline
+$k$ (kW/m/K)            &  0.00012     \\ \hline
+$\rho$ (kg/m$^3$)       &  737         \\ \hline
+$c$ (kJ/kg/K)           &  0.9         \\ \hline
+$\delta$ (m)            &  0.0254      \\ \hline
+$T_\infty$ ($^\circ$C)  &  20          \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|l|l|c|}
+\hline
+           &                    &                  \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$t_{end}$}  \\
+           &                    &  \rb{(s)}        \\ \hline \hline
+Test 1     &  MQH               &  2400            \\ \hline
+Test 2     &  MQH               &  2400            \\ \hline
+Test 3     &  MQH               &  3600            \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\clearpage
+
+
 \subsection*{Steel Temperature (Unprotected)}
 
 The HGL temperatures from the MQH HGL temperature correlation were used as the input fire temperature $T_f$.
@@ -937,37 +979,26 @@ The HGL temperatures from the MQH HGL temperature correlation were used as the i
 {Summary of input parameters used for SP AST cases, steel temperature (unprotected).}
 
 \begin{center}
-\begin{tabular}{|l|l|c|}
+\begin{tabular}{|l|c|}
 \hline
-                        &                       &              \\
-\rb{Input Parameter}    &  \rb{Correlation}     &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (kW)           &  MQH                  &  450         \\ \hline
-$L$ (m)                 &  MQH                  &  3.6         \\ \hline
-$W$ (m)                 &  MQH                  &  2.4         \\ \hline
-$H$ (m)                 &  MQH                  &  2.4         \\ \hline
-$H_v$ (m)               &  MQH                  &  2.0         \\ \hline
-$W_v$ (m)               &  MQH                  &  0.8         \\ \hline
-$k$ (kW/m/K)            &  MQH                  &  0.00012     \\ \hline
-$\rho$ (kg/m$^3$)       &  MQH                  &  737         \\ \hline
-$c$ (kJ/kg/K)           &  MQH                  &  0.9         \\ \hline
-$\delta$ (m)            &  MQH                  &  0.0254      \\ \hline
-$T_\infty$ ($^\circ$C)  &  MQH                  &  20          \\ \hline
-$\rho_{s}$ (kg/m$^3$)   &  Steel (Unprotected)  &  7850        \\ \hline
-$c_{s}$ (kJ/kg/K)       &  Steel (Unprotected)  &  1.0         \\ \hline
-$\epsilon$ (-)          &  Steel (Unprotected)  &  0.7         \\ \hline
-$h_c$ (W/m$^2$/K)       &  Steel (Unprotected)  &  25          \\ \hline
+                       &              \\
+\rb{Input Parameter}   &  \rb{Value}  \\ \hline \hline
+$\rho_{s}$ (kg/m$^3$)  &  7850        \\ \hline
+$c_{s}$ (kJ/kg/K)      &  1.0         \\ \hline
+$\epsilon$ (-)         &  0.7         \\ \hline
+$h_c$ (W/m$^2$/K)      &  25          \\ \hline
 \end{tabular}
 \end{center}
 
 \begin{center}
 \begin{tabular}{|l|l|c|c|}
 \hline
-           &                    &                   &                  \\
-\rb{Test}  &  \rb{Correlation}  &  \rb{F/V}         &  \rb{$t_{end}$}  \\
-           &  \rb{for $T_f$}    &  \rb{(m$^{-1}$)}  &  \rb{(s)}        \\ \hline \hline
-Test 1     &  MQH               &  125              &  2400            \\ \hline
-Test 2     &  MQH               &  157              &  2400            \\ \hline
-Test 3     &  MQH               &  157              &  3600            \\ \hline
+           &                    &              &                  \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{F/V}    &  \rb{$t_{end}$}  \\
+           &  \rb{for $T_f$}    &  \rb{(1/m)}  &  \rb{(s)}        \\ \hline \hline
+Test 1     &  MQH               &  125         &  2400            \\ \hline
+Test 2     &  MQH               &  157         &  2400            \\ \hline
+Test 3     &  MQH               &  157         &  3600            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -980,7 +1011,7 @@ Test 3     &  MQH               &  157              &  3600            \\ \hline
 
 \subsection*{Plume Temperature (Heskestad and McCaffrey)}
 
-Note that the Heskestad correlation used did not use heights of 1 m and 2 m because
+Note that the Heskestad correlation did not use heights of 1 m and 2 m because
 it is valid only above the flame region.
 
 \begin{table}[!ht]
@@ -1025,11 +1056,11 @@ The HGL temperatures from the McCaffrey plume temperature correlation were used 
 {Summary of input parameters used for SP AST Column cases, steel temperature (unprotected).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                        &             \\
 \rb{Input Parameter}   &  \rb{Value} \\ \hline \hline
-$F/V$ (m$^{-1}$)       &  205        \\ \hline
+$F/V$ (1/m)            &  205        \\ \hline
 $\rho_{s}$ (kg/m$^3$)  &  7850       \\ \hline
 $c_{s}$ (kJ/kg/K)      &  0.6        \\ \hline
 $\epsilon$ (-)         &  0.7        \\ \hline
@@ -1063,7 +1094,7 @@ Heptane, 1.1 m  &  McCaffrey         &  2275           &  900             \\ \hl
 {Summary of input parameters used for Steckler cases, HGL temperature.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                           &              \\
 \rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
@@ -1267,13 +1298,13 @@ After the time $t_{fire}$, the fire HRR was steady.
 {Summary of input parameters used for UL/NFPRF cases, sprinkler activation time.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                               &              \\
 \rb{Input Parameter}          &  \rb{Value}  \\ \hline \hline
 $\alpha$ (kW/s$^2$)           &  1.778       \\ \hline
 Scaling factor (-)            &  1           \\ \hline
-RTI ((m-s)$^{1/2}$)           &  148         \\ \hline
+RTI (m-s)$^{1/2}$             &  148         \\ \hline
 $T_{activation}$ ($^\circ$C)  &  74          \\ \hline
 $H$ (m)                       &  7.0         \\ \hline
 $T_\infty$ ($^\circ$C)        &  18          \\ \hline
@@ -1458,7 +1489,7 @@ The fire growth was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t
 After the time $t_{fire}$, the fire HRR was steady.
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -1545,11 +1576,11 @@ The fire growth was specified as $\dot Q = \alpha t^2$ up to the time of the fir
 {Summary of input parameters used for Vettori Flat cases, sprinkler activation time.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                               &              \\
 \rb{Input Parameter}          &  \rb{Value}  \\ \hline \hline
-RTI ((m-s)$^{1/2}$)           &  55          \\ \hline
+RTI (m-s)$^{1/2}$             &  55          \\ \hline
 $T_{activation}$ ($^\circ$C)  &  68          \\ \hline
 $H$ (m)                       &  2.09        \\ \hline
 \end{tabular}
@@ -1674,7 +1705,7 @@ Test 3     &  13, 63, 166, 256, 292, 330      &  2437, 3201, 3601, 3638, 3456, 2
 {Summary of input parameters used for WTC cases, HGL temperature.}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
@@ -1691,7 +1722,7 @@ $\delta$ (m)          &  0.0254      \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|}
 \hline
            &                    &                 &                  &                    \\
 \rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$t_{end}$}  &  \rb{$T_\infty$}   \\
@@ -1720,7 +1751,7 @@ The inputs for the MQH correlation are described in the WTC HGL temperature sect
 {Summary of input parameters used for WTC cases, steel temperature (unprotected).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                            &              \\
 \rb{Input Parameter}       &  \rb{Value}  \\ \hline \hline
@@ -1734,21 +1765,21 @@ $h_c$ (W/m$^2$/K)          &  25          \\ \hline
 \begin{center}
 \begin{tabular}{|l|l|l|c|}
 \hline
-           &                    &                   &                   \\
-\rb{Test}  &  \rb{Correlation}  &  \rb{Structural}  &  \rb{F/V}         \\
-           &  \rb{for $T_f$}    &  \rb{Element}     &  \rb{(m$^{-1}$)}  \\ \hline \hline
-Test 1     &  MQH               &  Bar              &  157              \\ \hline
-Test 2     &  MQH               &  Bar              &  157              \\ \hline
-Test 3     &  MQH               &  Bar              &  157              \\ \hline
-Test 1     &  MQH               &  Column           &  159              \\ \hline
-Test 2     &  MQH               &  Column           &  159              \\ \hline
-Test 3     &  MQH               &  Column           &  159              \\ \hline
-Test 1     &  MQH               &  Truss A          &  156              \\ \hline
-Test 2     &  MQH               &  Truss A          &  156              \\ \hline
-Test 3     &  MQH               &  Truss A          &  156              \\ \hline
-Test 1     &  MQH               &  Truss B          &  156              \\ \hline
-Test 2     &  MQH               &  Truss B          &  156              \\ \hline
-Test 3     &  MQH               &  Truss B          &  156              \\ \hline
+           &                    &                   &              \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{Structural}  &  \rb{F/V}    \\
+           &  \rb{for $T_f$}    &  \rb{Element}     &  \rb{(1/m)}  \\ \hline \hline
+Test 1     &  MQH               &  Bar              &  157         \\ \hline
+Test 2     &  MQH               &  Bar              &  157         \\ \hline
+Test 3     &  MQH               &  Bar              &  157         \\ \hline
+Test 1     &  MQH               &  Column           &  159         \\ \hline
+Test 2     &  MQH               &  Column           &  159         \\ \hline
+Test 3     &  MQH               &  Column           &  159         \\ \hline
+Test 1     &  MQH               &  Truss A          &  156         \\ \hline
+Test 2     &  MQH               &  Truss A          &  156         \\ \hline
+Test 3     &  MQH               &  Truss A          &  156         \\ \hline
+Test 1     &  MQH               &  Truss B          &  156         \\ \hline
+Test 2     &  MQH               &  Truss B          &  156         \\ \hline
+Test 3     &  MQH               &  Truss B          &  156         \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -1767,7 +1798,7 @@ The inputs for the MQH correlation are described in the WTC HGL temperature sect
 {Summary of input parameters used for WTC cases, steel temperature (protected).}
 
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|}
 \hline
                        &              \\
 \rb{Input Parameter}   &  \rb{Value}  \\ \hline \hline
