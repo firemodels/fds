@@ -2602,7 +2602,7 @@ can reduce it by making more than the default number of calls to the pressure so
 To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid
 boundary or the largest error at a mesh interface. It is in units of m/s.
 If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
-desired tolerance. The default value is $\dx/10$, where $\dx$ is the characteristic grid cell size.
+desired tolerance. The default value is $\dx/2$, where $\dx$ is the characteristic grid cell size.
 The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
 The maximum number of iterations for each half of the time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10.
 
