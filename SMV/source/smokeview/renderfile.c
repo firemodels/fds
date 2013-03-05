@@ -235,14 +235,7 @@ void RenderFrame(int view_mode){
 
   // form full filename from parts
 
-  strcpy(renderfile_full,"");
-  if(strlen(renderfile_dir)>0){
-    strcat(renderfile_full,renderfile_dir);
-    if(renderfile_dir[strlen(renderfile_dir)-1]!=dirseparator[0]){
-      strcat(renderfile_full,dirseparator);
-    }
-  }
-  strcat(renderfile_full,renderfile_name);
+  strcpy(renderfile_full,renderfile_name);
   if(strlen(renderfile_suffix)>0)strcat(renderfile_full,renderfile_suffix);
   strcat(renderfile_full,renderfile_ext);
 
@@ -318,7 +311,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
       seqnum++;
   }
   strcat(renderfile_base,ext);
-  renderfile=get_filename(smokeviewtempdir,renderfile_base);
+  renderfile=get_filename(smokeviewtempdir,renderfile_base,tempdir_flag);
   if(renderfile==NULL){
     fprintf(stderr,"*** Error: unable to write to %s",renderfile_base);
     return 1;
@@ -400,7 +393,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   width2 = width_end-width_beg;
   height2 = height_end-height_beg;
 
-  renderfile=get_filename(smokeviewtempdir,RENDERfilename);
+  renderfile=get_filename(smokeviewtempdir,RENDERfilename,tempdir_flag);
   if (renderfile == NULL) {
     fprintf(stderr,"*** Error: Unable to write to %s\n",RENDERfilename);
     return 1;

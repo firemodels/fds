@@ -480,7 +480,7 @@ void parse_commandline(int argc, char **argv){
   if(fed_filename==NULL){
     STRCPY(fed_filename_base,fdsprefix);
     STRCAT(fed_filename_base,".fed_smv");
-    fed_filename=get_filename(smokeviewtempdir,fed_filename_base);
+    fed_filename=get_filename(smokeviewtempdir,fed_filename_base,tempdir_flag);
   }
   if(stop_filename==NULL){
     NewMemory((void **)&stop_filename,(unsigned int)(len_casename+6));
@@ -526,7 +526,7 @@ void parse_commandline(int argc, char **argv){
 
     STRCPY(filename_base,fdsprefix);
     STRCAT(filename_base,".sb");
-    smoothblockage_filename=get_filename(smokeviewtempdir,filename_base);
+    smoothblockage_filename=get_filename(smokeviewtempdir,filename_base,tempdir_flag);
   }
 
   for (i=1;i<argc;i++){
@@ -568,6 +568,11 @@ void parse_commandline(int argc, char **argv){
     else if(strncmp(argv[i],"-isotest",8)==0){
       isotest=1;
     }
+#ifdef _DEBUG
+    else if(strncmp(argv[i],"-tempdir",8)==0){
+      tempdir_flag=1;
+    }
+#endif
     else if(strncmp(argv[i],"-h",2)==0){
       usage(argv);
       exit(0);
@@ -759,6 +764,7 @@ void usage(char **argv){
   printf("%s\n",_(" -skipframe n   - render every n frames"));
   printf("%s\n",_(" -startframe n  - start rendering at frame n"));
   printf("%s\n",_(" -stereo        - activate stereo mode"));
+  printf("%s\n",_(" -tempdir       - forces output files to be written to the temporary directory"));
   printf("%s\n",_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
   printf("%s\n",_(" -version       - display version information"));
   printf("%s\n",_(" -volrender     - generate images of volume rendered smoke and fire"));

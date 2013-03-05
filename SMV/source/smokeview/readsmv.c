@@ -7860,7 +7860,7 @@ void readboundini(void){
   char *fullfilename=NULL;
 
   if(boundini_filename==NULL)return;
-  fullfilename=get_filename(smokeviewtempdir,boundini_filename);
+  fullfilename=get_filename(smokeviewtempdir,boundini_filename,tempdir_flag);
   if(fullfilename!=NULL)stream=fopen(fullfilename,"r");
   if(stream==NULL||is_file_newer(smv_filename,fullfilename)==1){
     if(stream!=NULL)fclose(stream);
@@ -7923,7 +7923,7 @@ void writeboundini(void){
   int i;
 
   if(boundini_filename==NULL)return;
-  fullfilename=get_filename(smokeviewtempdir,boundini_filename);
+  fullfilename=get_filename(smokeviewtempdir,boundini_filename,tempdir_flag);
 
   if(fullfilename==NULL)return;
   
