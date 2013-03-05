@@ -38,6 +38,8 @@ $RUNFDS Fires couch
 $RUNFDS Fires fire_whirl_pool
 $RUNFDS Fires room_fire
 $RUNFDS Fires spray_burner
+$RUNFDS Fires HoC_Ideal
+$RUNFDS Fires HoC_NonIdeal
 
 $RUNFDS Flowfields divergence_test
 $RUNFDS Flowfields gas_filling
