@@ -95,6 +95,7 @@ void Render(int view_mode){
 
 void RenderFrame(int view_mode){
   char renderfile_name[1024], renderfile_dir[1024], renderfile_full[1024], renderfile_suffix[1024], *renderfile_ext;
+  char *renderfile_dir_ptr=NULL;
   int use_scriptfile;
 
   if(view_mode==VIEW_LEFT&&(showstereo==2||showstereo==3))return;
@@ -129,6 +130,7 @@ void RenderFrame(int view_mode){
       }
       else{
         strcpy(renderfile_dir,script_dir_path);
+        renderfile_dir_ptr=renderfile_dir;
       }
     }
   }
@@ -241,7 +243,7 @@ void RenderFrame(int view_mode){
 
   // render image
 
-  SVimage2file(renderfile_full,renderfiletype,screenWidth,screenHeight);
+  SVimage2file(renderfile_dir_ptr,renderfile_full,renderfiletype,screenWidth,screenHeight);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
@@ -369,7 +371,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
 /* ------------------ SVimage2file ------------------------ */
 
-int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
+int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int width, int height){
 
   FILE *RENDERfile;
   char *renderfile=NULL;
@@ -393,7 +395,12 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   width2 = width_end-width_beg;
   height2 = height_end-height_beg;
 
-  renderfile=get_filename(smokeviewtempdir,RENDERfilename,tempdir_flag);
+  if(directory==NULL){
+    renderfile=get_filename(smokeviewtempdir,RENDERfilename,tempdir_flag);
+  }
+  else{
+    renderfile=get_filename(directory,RENDERfilename,1);
+  }
   if (renderfile == NULL) {
     fprintf(stderr,"*** Error: Unable to write to %s\n",RENDERfilename);
     return 1;
