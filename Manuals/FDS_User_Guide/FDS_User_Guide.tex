@@ -2786,7 +2786,7 @@ Obstructions that are too small relative to the underlying numerical mesh are re
 
 If the faces of two obstructions overlap each other, FDS will choose the surface properties of the obstruction that is specified first. Alternatively, add {\ct OVERLAY=.FALSE.} when specifying the obstruction that you do {\bf not} want to take precedence. The default value of {\ct OVERLAY} is {\ct .TRUE.}
 
-When obstructions overlap, Smokeview renders both obstructions independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A simple remedy for this is to ``shrink'' the first obstruction slightly by adjusting its coordinates ({\ct XB}) accordingly. Then, in Smokeview, toggle the ``q'' key to show the obstructions as you specified them, rather than as FDS rendered them.
+When obstructions overlap, Smokeview renders both obstructions independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A simple remedy for this is to ``shrink'' the obstruction you do not wish to take precedence by slightly by adjusting its coordinates ({\ct XB}) accordingly. Then, in Smokeview, toggle the ``q'' key to show the obstructions as you specified them, rather than as FDS rendered them.
 
 \subsection{Preventing Obstruction Removal}
 
@@ -2830,7 +2830,7 @@ The {\ct HOLE} namelist group defines parameters that carve a hole out of an exi
 
 When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or created or removed at pre-determined times. See Section~\ref{info:create_remove} for details. To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID} parameter respectively, to the {\ct HOLE} line.
 
-If you want the obstruction that is to be cut out to have a different color than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction to be invisible, set {\ct COLOR='INVISIBLE'}.
+If you want the obstruction that is present when the {\ct HOLE} is in a {\ct .FALSE.} state to have a different color than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction to be invisible, set {\ct COLOR='INVISIBLE'}.
 
 When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole. To make this obstruction transparent, the {\ct TRANSPARENCY} parameter should be specified by a real number from 0 to 1. Note that if {\ct TRANSPARENCY} is specified, then either a {\ct COLOR} or {\ct RGB} triplet ought to be specified as well. A {\ct TRANSPARENCY} value near, but not equal to, zero can be used to simulate a window when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.} When the {\ct DEVC} or {\ct CTRL} is activated and changes the state of the hole to {\ct .TRUE.}, the {\ct HOLE} is then open and completely transparent. See Section~\ref{info:create_remove} for an example.
 
@@ -5092,7 +5092,7 @@ of a door to the outside. Figure~\ref{zone_break} displays the pressure within e
 figure on the right uses 1~s, the default.}
 \label{zone_break}
 \end{figure}
-Notice that the pressures do not come to equilibrium instantaneously. Rather, the ({\ct PRESSURE\_RELAX\_TIME} on the {\ct PRES} line) is applied to bring the zones
+Notice that the pressures do not come to equilibrium instantaneously. Rather, the {\ct PRESSURE\_RELAX\_TIME} (on the {\ct PRES} line) is applied to bring the zones
 into equilibrium over a specified period of time. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
 a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
 Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
