@@ -413,12 +413,15 @@ DO I=1,20
    ENDDO
 
    IF ((I==1) .AND. (.NOT. FLIP_AXIS)) THEN
-      WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","A",",','),","A",")"
-      WRITE(11,FMT) 'x',(TRIM(Z_LABEL(K)),K=1,N_Z)
       IF (TIME_OUTPUT) THEN
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","A",",','),","A",")"
+         WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K)),K=1,N_Z)
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
          WRITE(11,FMT) 0.,(Q_RAD(K),K=1,N_Z)
          WRITE(11,FMT) 9999.,(Q_RAD(K),K=1,N_Z)
+      ELSE
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","A",",','),","A",")"
+         WRITE(11,FMT) 'x',(TRIM(Z_LABEL(K)),K=1,N_Z)
       ENDIF
    ENDIF
    
