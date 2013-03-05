@@ -2001,6 +2001,7 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
   for(ii=0;ii<partclassi->nvars_dep;ii++){
     prop->vars_dep_index[ii]=partclassi->vars_dep_index[ii];
   }
+  prop->tag_number = datacopy->tags[j];
 }
 
 /* ------------------ drawPart ------------------------ */

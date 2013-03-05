@@ -53,6 +53,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEEYE 135
 #define SV_INCLUDE 136
 #define SV_INCLUDEF 137
+#define SV_RANDXY 138
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -91,6 +92,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEEYE_NUMARGS 0
 #define SV_INCLUDE_NUMARGS 1
 #define SV_INCLUDEF_NUMARGS 2
+#define SV_RANDXY_NUMARGS 1
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -129,7 +131,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEEYE_NUMOUTARGS 0
 #define SV_INCLUDE_NUMOUTARGS 0
 #define SV_INCLUDEF_NUMOUTARGS 0
-
+#define SV_RANDXY_NUMOUTARGS 0
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -893,9 +895,11 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
   int ii;
   sv_object *object;
   int use_material;
+  int tag_number=0;
 
   if(prop!=NULL){
     object=prop->smv_object;
+    tag_number=prop->tag_number;
   }
   else{
     object=object_dev;
@@ -1064,6 +1068,8 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
 
         *argptr=val_result;
       }
+      break;
+    case SV_RANDXY:
       break;
    	case SV_INCLUDE:
 	  case SV_INCLUDEF:
@@ -4173,6 +4179,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_INCLUDE;
     num_op=SV_INCLUDE_NUMARGS;
     num_outop=SV_INCLUDE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"randxy")==0){
+    op=SV_RANDXY;
+    num_op=SV_RANDXY_NUMARGS;
+    num_outop=SV_RANDXY_NUMOUTARGS;
   }
   else if(STRCMP(token,"includef")==0){
     op=SV_INCLUDEF;

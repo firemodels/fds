@@ -85,6 +85,7 @@ typedef struct {
   int nvars_indep,      nvars_dep,                   nvars_evac;
   float *fvals, fvars_evac[PROPVARMAX], fvars_dep[PROPVARMAX];
   int draw_evac;
+  int tag_number;
 } propdata;
 
 #ifdef pp_SHOOTER

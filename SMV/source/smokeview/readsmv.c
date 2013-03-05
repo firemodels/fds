@@ -214,6 +214,7 @@ void init_prop(propdata *propi, int nsmokeview_ids, char *label){
   propi->rotate_angle=0.0;
   propi->fvals=NULL;
   propi->vars_indep_index=NULL;
+  propi->tag_number=0;
 }
 
 /* ------------------ readsmv_dynamic ------------------------ */
