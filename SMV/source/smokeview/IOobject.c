@@ -56,6 +56,9 @@ char IOobject_revision[]="$Revision$";
 #define SV_RANDXY 138
 #define SV_RANDXZ 139
 #define SV_RANDYZ 140
+#define SV_ORIENX 141
+#define SV_ORIENY 142
+#define SV_ORIENZ 143
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -97,6 +100,9 @@ char IOobject_revision[]="$Revision$";
 #define SV_RANDXY_NUMARGS 1
 #define SV_RANDXZ_NUMARGS 1
 #define SV_RANDYZ_NUMARGS 1
+#define SV_ORIENX_NUMARGS 3
+#define SV_ORIENY_NUMARGS 3
+#define SV_ORIENZ_NUMARGS 3
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -138,6 +144,9 @@ char IOobject_revision[]="$Revision$";
 #define SV_RANDXY_NUMOUTARGS 0
 #define SV_RANDXZ_NUMOUTARGS 0
 #define SV_RANDYZ_NUMOUTARGS 0
+#define SV_ORIENX_NUMOUTARGS 0
+#define SV_ORIENY_NUMOUTARGS 0
+#define SV_ORIENZ_NUMOUTARGS 0
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -1073,6 +1082,21 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         val_result=val1+val2;
 
         *argptr=val_result;
+      }
+      break;
+    case SV_ORIENX:
+    case SV_ORIENY:
+    case SV_ORIENZ:
+      if(arg[2]<10.0){
+        float u[3]={0.0,0.0,0.0};
+        float axis[3], angle;
+
+        if(toki->command==SV_ORIENX)u[0]=1.0;
+        if(toki->command==SV_ORIENY)u[1]=1.0;
+        if(toki->command==SV_ORIENZ)u[2]=1.0;
+        rotateu2v(u, arg, axis, &angle);
+        glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
+
       }
       break;
     case SV_RANDXY:
@@ -4195,6 +4219,21 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_INCLUDE;
     num_op=SV_INCLUDE_NUMARGS;
     num_outop=SV_INCLUDE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"orienx")==0){
+    op=SV_ORIENX;
+    num_op=SV_ORIENX_NUMARGS;
+    num_outop=SV_ORIENX_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"orieny")==0){
+    op=SV_ORIENY;
+    num_op=SV_ORIENY_NUMARGS;
+    num_outop=SV_ORIENY_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"orienz")==0){
+    op=SV_ORIENZ;
+    num_op=SV_ORIENZ_NUMARGS;
+    num_outop=SV_ORIENZ_NUMOUTARGS;
   }
   else if(STRCMP(token,"randxy")==0){
     op=SV_RANDXY;
