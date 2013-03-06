@@ -13,6 +13,7 @@
 
 \usepackage{times,mathptm}
 \usepackage[pdftex]{graphicx}
+\usepackage{tabularx}
 \usepackage[pdftex,
         colorlinks=true,
         urlcolor=linkblue,     % \href{...}{...} external (URL)
@@ -831,7 +832,7 @@ Detailed instructions on how to download executables, manuals, source-code and r
 can be found on the FDS-SMV Website
 \href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}}.
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive,
-which is available for MS Windows, Mac~OS~X, and Linux. 
+which is available for MS Windows, Mac~OS~X, and Linux.
 
 If you ever want to keep an older version of FDS and Smokeview, copy the installation directory to some other
 place so that it is not overwritten during the updated installation.
@@ -863,33 +864,12 @@ practicing fire protection engineers to perform fairly sophisticated
 fire simulations at a reasonable cost. Thus, FDS and Smokeview have been
 designed for computers running Microsoft Windows, Mac OS~X, and various
 implementations of Unix/Linux.
-
 \begin{description}
-\item[{\bf MS Windows}]
-An installation package is available for Windows operating system.
-It is not recommended to run FDS/Smokeview under any version of MS Windows
-released prior to Windows 2000.
-
-\item[{\bf Mac OS X}]
-An installation script is available for Intel architectures.
-Mac OS~X 10.4.x or better is recommended, versions of OS~X prior to 10.4.x are not
-officially supported. You can always download the latest version of FDS source and
-compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
-
-\item[{\bf Linux}]
-Pre-compiled executables are installed in an appropriate directory via an installation script.
-If the pre-compiled FDS executable does not work (usually because of library
-incompatibilities), the FDS Fortran source code can be downloaded and compiled
-(See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation,
-you can use the Windows version to view FDS output.
-
-\item[{\bf Unix}]
-There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies
-equally as well to Unix.
-
-\item[{\bf FDS in Parallel}] For those wishing to use multiple computers to run a single FDS calculation,
-MPI (Message Passing Interface) must be installed on each of the
-computers within the network that will be used for FDS computations.
+\item[{\bf MS Windows}] An installation package is available for Windows operating system. It is not recommended to run FDS/Smokeview under any version of MS Windows released prior to Windows 2000.
+\item[{\bf Mac OS X}] An installation script is available for Intel architectures. Mac OS~X 10.4.x or better is recommended, versions of OS~X prior to 10.4.x are not officially supported. You can always download the latest version of FDS source and compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
+\item[{\bf Linux}] Pre-compiled executables are installed in an appropriate directory via an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
+\item[{\bf Unix}] There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies equally as well to Unix.
+ \item[{\bf FDS in Parallel}] For those wishing to use multiple computers to run a single FDS calculation, MPI (Message Passing Interface) must be installed on each of the computers within the network that will be used for FDS computations.
 \end{description}
 
 
@@ -997,7 +977,6 @@ or
 \begin{lstlisting}
 tail -f job_name.out
 \end{lstlisting}
-
 The installer also defines aliases named {\ct fds6}\ and {\ct fds6\_mpi}\
 pointing to the executables. Other aliases may be defined by
 adding entries to the shell start-up script. Note, do not use
@@ -1125,7 +1104,7 @@ that parallel processing is a relatively new area of computer science,
 and there are bound to be painful growth spurts in the years ahead.
 
 
-\newpage
+
 
 \section{Monitoring Progress}
 
@@ -1149,6 +1128,8 @@ file was saved.
 
 It is also possible to control the stop time and the dumping of restart files by using
 control functions as described in Section~\ref{info:CTRL}.
+
+
 
 
 
@@ -1377,64 +1358,18 @@ commas or line breaks, and never use tab stops. Some machines do not recognize t
 Comments and notes can be written into the file so long as nothing comes
 before the ampersand except a space and nothing comes between the ampersand
 and the slash except appropriate parameters corresponding
-to that particular namelist group.
+to that particular namelist group. 
 
-\noindent
-The parameters in the input file can be integers:
-
-{\ct T\_END=5400}
-
-\noindent
-real numbers:
-
-{\ct CO\_YIELD=0.008}
-
-\noindent
-groups of real numbers or integers:
-
-{\ct XYZ=6.04,0.28,3.65}
-
-{\ct IJK=90,36,38}
-
-\noindent
-character strings:
-
-{\ct CHID='WTC\_05\_v5'}
-
-\noindent
-groups of character strings:
-
-{\ct SURF\_IDS='burner','STEEL','BRICK'}
-
-\noindent
-or logical parameters:
-
-{\ct POROUS\_FLOOR=.FALSE.}
-
-\noindent
-A logical parameter is either
-{\ct .TRUE.} or {\ct .FALSE.} -- the periods are a
-Fortran convention. Character strings that are listed in
-this User's Manual must be copied exactly as written -- the code
-is case sensitive and underscores {\em do} matter.
-
-Most of the input parameters are simply real or integer scalars, like {\ct DT=0.02}, but sometimes the inputs are
-multidimensional arrays. For example, when describing a particular solid surface, you need to express the mass
-fractions of multiple materials that are to be found in multiple layers. The input array {\ct MATL\_MASS\_FRACTION(IL,IC)} is
-intended to convey to FDS the mass fraction of component {\ct IC} of layer {\ct IL}. For example, if the mass fraction of the
-second material of the third layer is 0.5, then write
-
-{\ct MATL\_MASS\_FRACTION(3,2)=0.5}
-
-\noindent
-To enter more than one mass fraction, use
-this notation:
-
-{\ct MATL\_MASS\_FRACTION(1,1:3)=0.5,0.4,0.1}
-
-\noindent
-which means that the first three materials of layer 1 have
-mass fractions of 0.5, 0.4, and 0.1, respectively. The notation {\ct 1:3} means array element 1 through 3, inclusive.
+The parameters in the input file can be integers, reals, character strings, or logical parameters. A logical parameter is either {\ct .TRUE.} or {\ct .FALSE.} -- the periods are a Fortran convention. Character strings that are listed in this User's Manual must be copied exactly as written -- the code is case sensitive and underscores {\em do} matter. Most of the input parameters are simply real or integer scalars, like {\ct DT=0.02}, but sometimes the inputs are
+multidimensional arrays. For example, when describing a particular solid surface, you need to express the mass fractions of multiple materials that are to be found in multiple layers. The input array {\ct MATL\_MASS\_FRACTION(IL,IC)} is intended to convey to FDS the mass fraction of component {\ct IC} of layer {\ct IL}. For example, if the mass fraction of the second material of the third layer is 0.5, then write 
+\begin{lstlisting}
+MATL_MASS_FRACTION(3,2)=0.5
+\end{lstlisting}
+To enter more than one mass fraction, use this notation:
+\begin{lstlisting}
+MATL_MASS_FRACTION(1,1:3)=0.5,0.4,0.1
+\end{lstlisting}
+which means that the first three materials of layer 1 have mass fractions of 0.5, 0.4, and 0.1, respectively. The notation {\ct 1:3} means array element 1 through 3, inclusive.
 
 Note that character strings can be enclosed either by apostrophes or quotation marks.
 Be careful not to create the input file by pasting text from something other than a
@@ -1455,10 +1390,9 @@ obstructions, devices, and so on, are listed below. FDS scans the entire input f
 With some text editors, it has been noticed that the last line of the file is often not read by FDS because of the presence of an
 ``end of file'' character.
 To ensure that FDS reads the entire input file, add
-
 \begin{lstlisting}
 &TAIL /
-\end{lstlisting} \noindent
+\end{lstlisting} 
 as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}. FDS does not even look for
 this last line. It just forces the ``end of file'' character past relevant input.
 
@@ -1503,8 +1437,6 @@ Validation Suite} removed for clarity.
 ...
 &TAIL / End of file.
 \end{lstlisting}
-
-\noindent
 It is recommended that when looking at a new scenario,
 first select a pre-written input file that resembles the case,
 make the necessary changes, then run the case at fairly low
@@ -1583,21 +1515,12 @@ job a name.  The name of the job is important because often a project
 involves numerous simulations in which case the names of the individual
 simulations should be meaningful and help to organize the project.  The namelist group {\ct HEAD} contains
 two parameters, as in this example:
-
 \begin{lstlisting}
 &HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
 \end{lstlisting}
-
 \begin{description}
-\item {\ct CHID} is a string of 30 characters or less used to tag the output files.
-If, for example, {\ct CHID='WTC\_05'}, it is convenient to
-name the input data file {\ct WTC\_05.fds} so that the input file
-can be associated with the output files. No periods or spaces are allowed in
-{\ct CHID} because the output files are tagged with suffixes that
-are meaningful to certain computer operating systems.  If {\ct CHID} is not
-specified, then it will be set to the name of the input file minus everything at and beyond the first period.
-\item {\ct TITLE} is a string of 60 characters or less that describes the
-simulation. It is simply descriptive text that is passed to various output files.
+\item {\ct CHID} is a string of 30 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
+\item {\ct TITLE} is a string of 60 characters or less that describes the simulation. It is simply descriptive text that is passed to various output files.
 \end{description}
 
 
@@ -1615,12 +1538,10 @@ Usually, only the
 duration of the simulation is required on this line, via the
 parameter {\ct T\_END}. The default is 1 s.
 For example, the following line will instruct FDS to run the simulation for 5400 seconds.
-
 \begin{lstlisting}
 &TIME T_END=5400. /
 \end{lstlisting}
-
-\noindent If {\ct T\_END} is set to zero, only the set-up work is performed,
+If {\ct T\_END} is set to zero, only the set-up work is performed,
 allowing you to quickly check the geometry in Smokeview.
 
 If you want the time line to start at a number other than zero, you can use the parameter
@@ -1698,12 +1619,9 @@ The origin point of a mesh is defined by the first, third
 and fifth values of the real number sextuplet, {\ct XB}, and the opposite
 corner is defined by the second, fourth and sixth values.
 For example,
-
 \begin{lstlisting}
 &MESH IJK=10,20,30, XB=0.0,1.0,0.0,2.0,0.0,3.0 /
 \end{lstlisting}
-
-\noindent
 defines a mesh that spans the volume starting at the origin and extending 1~m in the positive
 $x$ direction, 2~m in the positive $y$ direction, and 3~m in the positive $z$ direction.
 The mesh is subdivided into uniform cells via the parameter
@@ -1729,7 +1647,6 @@ divisions to ensure that those that are ultimately used do not unduly slow down 
 
 Here is a list of numbers between 1 and 1024 that can be factored
 down to 2's, 3's and 5's:
-
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
    2     3     4     5     6     8     9    10    12    15    16    18    20    24    25
   27    30    32    36    40    45    48    50    54    60    64    72    75    80    81
@@ -1809,7 +1726,6 @@ this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then 
 
 Usually in a multi-mesh calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one
 mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes:
-
 \begin{lstlisting}
 &MESH ID='mesh1', IJK=..., XB=..., MPI_PROCESS=0 /
 &MESH ID='mesh2', IJK=..., XB=..., MPI_PROCESS=1 /
@@ -1818,8 +1734,6 @@ mesh to a single process, and it is possible to assign more than one process to 
 &MESH ID='mesh5', IJK=..., XB=..., MPI_PROCESS=3 /
 &MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
 \end{lstlisting}
-
-\noindent
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered
 0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this?
 Suppose you only have four processors available for this
@@ -1993,12 +1907,9 @@ than a transformation in one coordinate direction. Experiment with different mes
 strategies to see how much of a penalty you will pay.
 
 Here is an example of how to do a mesh transformation. Suppose your mesh is defined
-
 \begin{lstlisting}
 &MESH IJK=15,10,20, XB=0.0,1.5,1.2,2.2,3.2,5.2 /
 \end{lstlisting}
-
-\noindent
 and you want to alter the uniform spacing in the $x$ direction.
 First, refer to the figures above.
 You need to define a function $x = f(\xi)$ that maps the uniformly-spaced
@@ -2016,13 +1927,10 @@ The graph indicates how 15 uniformly spaced mesh cells
 along the horizontal axis are transformed into 15 non-uniformly spaced cells along the vertical axis.
 In this case, the function is made up of straight line segments
 connecting points ({\ct CC},{\ct PC}), in increasing order, as specified by the following lines in the input file:
-
 \begin{lstlisting}
- &TRNX CC=0.30, PC=0.50, MESH_NUMBER=2 /
- &TRNX CC=1.20, PC=1.00, MESH_NUMBER=2 /
+&TRNX CC=0.30, PC=0.50, MESH_NUMBER=2 /
+&TRNX CC=1.20, PC=1.00, MESH_NUMBER=2 /
 \end{lstlisting}
-
-\noindent
 The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located
 on the horizontal axis; {\ct PC} is the Physical Coordinate, $x$, located on
 the vertical axis.  The slopes of the
@@ -2039,13 +1947,10 @@ a polynomial function whose constraints are of the form
 $$ \frac{\d^n f(\hbox{\ct CC})}{\d\xi^n} = \hbox{\ct PC}   $$
 Figure~\ref{fig:grid1} gives an example of a polynomial transformation, for which
 the parameters are specified (assuming that this is the third mesh):
-
 \begin{lstlisting}
 &TRNX IDERIV=0, CC=0.75, PC=0.75, MESH_NUMBER=3 /
 &TRNX IDERIV=1, CC=0.75, PC=0.50, MESH_NUMBER=3 /
 \end{lstlisting}
-
-\noindent
 which correspond to the constraints
 $f(0.75)=0.75$ and $\frac{\d f}{\d \xi}(0.75) = 0.5$, or, in words, the
 function maps 0.75 into 0.75 and the slope of the function at
@@ -2104,21 +2009,13 @@ There are a number of special output quantities that provide local measures of g
 {\ct MISC} is the namelist group of global miscellaneous input parameters. It contains parameters that do not logically fit into any other category.
 
 \subsection{Basics}
-
 \label{info:MISC_Basics}
 
 Only one {\ct MISC} line should be entered in the data file. For example, the input line
-
 \begin{lstlisting}
 &MISC TMPA=25. /
 \end{lstlisting}
-
-\noindent
-sets the ambient temperature at 25 $^\circ$C.
-
-The {\ct MISC} parameters vary in scope and degree of importance. Here is a partial list of {\ct MISC}ellaneous parameters. Others are described where necessary throughout this
-guide.
-
+sets the ambient temperature at 25 $^\circ$C. The {\ct MISC} parameters vary in scope and degree of importance. Here is a partial list of {\ct MISC}ellaneous parameters. Others are described where necessary throughout this guide.
 \begin{description}
 \item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation,
 as opposed to the default Large Eddy Simulation (LES). This feature is appropriate only for simulations that use mesh cells that are
@@ -2140,24 +2037,19 @@ convenient to start the flow immediately, like in an outdoor simulation involvin
 A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Typically, you know only that the mean wind is 10~m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
 
 In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s use
-
 \begin{lstlisting}
 &MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07 /
 \end{lstlisting}
-
-\noindent For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}.
+For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}.
 
 \subsection{Special Topic: Specified Force Field}
 \label{info:force_vector}
 
 Similar to the {\ct MEAN\_FORCING} feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
-
 \begin{equation}
 \frac{\partial u_i}{\partial t} = -F_i/\rho
 \end{equation}
-
-\noindent This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
-
+This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
 \begin{lstlisting}
 &MISC FORCE_VECTOR(1)=0.01 /
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
@@ -2225,13 +2117,10 @@ restart.
 \label{info:CSVF}
 
 It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-delimited (.csv) file.  You have the option of creating the velocity file using FDS or creating their own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
-
 \begin{lstlisting}
 &DUMP UVW_TIMER(1)=600 /
 \end{lstlisting}
-
-\noindent FDS will then write {\ct CHID\_uvw\_{\it nn}.csv} for each time index and mesh.  The format for this file is
-
+FDS will then write {\ct CHID\_uvw\_{\it nn}.csv} for each time index and mesh.  The format for this file is
 \begin{lstlisting}
   WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
   DO K=KMIN,KMAX
@@ -2242,16 +2131,12 @@ It may be useful to start a calculation from an established flow field.  Usually
    ENDDO
   ENDDO
 \end{lstlisting}
-
-\noindent
 You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
-
 \begin{lstlisting}
 &MISC PROJECTION=.TRUE. /
 &CSVF UVWFILE='my_velocity_field.csv' /
 \end{lstlisting}
-
-\noindent If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.  It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
+If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.  It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
 
 \subsection{Special Topic: Defying Gravity}
@@ -2275,7 +2160,6 @@ For either a spatially or temporally varying direction and/or magnitude of gravi
 which gives you the flexibility to vary all three components. Next, designate ``ramps'' for the individual components, {\ct RAMP\_GX},
 {\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all of which are specified on the {\ct MISC} line. There is more discussion of
 {\ct RAMP}s in Section~\ref{info:RAMP}, but for now you can use the following as a simple template to follow:
-
 \begin{lstlisting}
 &MISC GVEC=1.,0.,1., RAMP_GX='x-ramp', RAMP_GZ='z-ramp' /
 
@@ -2289,8 +2173,6 @@ which gives you the flexibility to vary all three components. Next, designate ``
 &RAMP ID='z-ramp', X= 51., F=-9.80 /
 &RAMP ID='z-ramp', X=100., F=-9.80 /
 \end{lstlisting}
-
-\noindent
 Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the
 $x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why
 using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly.
@@ -2302,13 +2184,6 @@ Notice in this case that the $y$ direction has been left out because there is no
 
 To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
 lines with a {\ct T}.
-
-
-
-
-
-
-
 
 
 
@@ -2371,29 +2246,35 @@ An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plu
 \subsection{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
 
-By default FDS uses the Deardorff \cite{Deardorff:1980,Pope:2000} turbulent viscosity,
+By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent viscosity,
 \begin{equation}
-(\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{sgs}}
+(\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{\rm sgs}}
 \end{equation}
 where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the maximum cell dimension, $\Delta = \max(\delta x,\delta y,\delta z)$.  This selection is intended to promote the use of cubic grid cells, which are optimal for isotropic turbulent flows typical of thermally-driven fire plumes.  Alternatively, you may invoke the geometric mean definition of the filter width, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$, by setting {\ct LES\_FILTER\_WIDTH='MEAN'} on {\ct MISC}.
 
-Options for the turbulent viscosity model are (set {\ct TURBULENCE\_MODEL} on {\ct MISC}):
+Options for the {\ct TURBULENCE\_MODEL} on the {\ct MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1-5 is {\ct 'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
+\be 
+   k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_{\rm t}}
+   \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_{\rm t}} 
+\ee
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_{\rm t}=0.5$, and $\SC_{\rm t}=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+
+\begin{table}[ht]
+\caption[Turbulence model options]{Turbulence model options.}
+\label{turb_table}
 \begin{center}
 \begin{tabular}{|lll|}
 \hline
-{\ct TURBULENCE\_MODEL}         & Description                                                   & Coefficient           \\ \hline
+{\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                         & Coefficient   \hfill  \\ \hline
 {\ct 'CONSTANT SMAGORINSKY'}    & Constant coefficient Smagorinsky model \cite{Smagorinsky:1}   & {\ct C\_SMAGORINSKY}  \\
 {\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky model \cite{Germano:1991,Moin:1991}       & None                  \\
 {\ct 'DEARDORFF'}               & Deardorff model \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
 {\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\ \hline
 \end{tabular}
 \end{center}
-The form of LES used in FDS versions 1-5 is 'CONSTANT SMAGORINSKY'.
+\end{table}
 
-The thermal conductivity and material diffusivity are related to the turbulent viscosity by
-\be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
-\quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+
 
 
 
@@ -2434,7 +2315,7 @@ Three choices for velocity norm are available in FDS (set on {\ct MISC}):
 
 The Von Neumann constraint is given by
 \begin{equation}
-\mbox{VN} \equiv  \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \sum_i \frac{1}{\delta x_i^2} < \frac{1}{2}
+\mbox{VN} \equiv  \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < \frac{1}{2}
 \end{equation}
 The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.4) and {\ct VN\_MAX} (default 0.5) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
 
@@ -2466,7 +2347,7 @@ as the basis for the time step restriction. To be clear, the CFL constraint is n
 \subsubsection{Stability of particle transport}
 \label{info:PART_Stability}
 
-The movement of Lagrangian particles within a time step is calculated using an analytical solution and remains stable regardless of the time step. In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step. Setting {\ct PARTICLE\_CFL = .FALSE.} on the {\ct MISC} line deactivates this constraint.
+The movement of Lagrangian particles within a time step is calculated using an analytical solution and remains stable regardless of the time step. In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step. Setting {\ct PARTICLE\_CFL} to {\ct .FALSE.} on the {\ct MISC} line deactivates this constraint.
 
 \subsubsection{Heat Transfer Constraint}
 
@@ -2500,25 +2381,20 @@ rectangular region of the domain.
 
 Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
-
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE' /
 \end{lstlisting}
-
-\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.
+Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.
 
 \subsection*{Temperature}
 
 To modify the local initial temperature, add lines of the form,
-
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,, TEMPERATURE=60. /
 \end{lstlisting}
-
-\noindent This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and out. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
-
+This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and out. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
@@ -2529,25 +2405,21 @@ To modify the local initial temperature, add lines of the form,
 \subsection*{Density}
 
 When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
-
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
       TEMPERATURE=60., DENSITY=1.13 /
 \end{lstlisting}
-
-\noindent This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
+This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
 \subsection*{Heat Release Rate Per Unit Volume (HRRPUV)}
 
 The {\ct INIT} line may also be used to specify a volumetric heat source term. For example,
-
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000. /
 \end{lstlisting}
-
-\noindent indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
+indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
 
 
 
@@ -2628,7 +2500,7 @@ In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By de
 &PRES FISHPAK_BC(1:3)=0,0,0 /
 \end{lstlisting}
 
-\clearpage
+
 
 \section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
 \label{info:CLIP}
@@ -2714,24 +2586,18 @@ boundary condition is desired, then {\ct SURF\_ID} or {\ct SURF\_IDS} need not b
 However, if at least one of the surface conditions for an
 obstruction is the inert default, it can be referred to as {\ct 'INERT'}, but it does not have to be explicitly defined.
 For example:
-
 \begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=1000.0 /
 &OBST XB=2.3,4.5,1.3,4.8,0.0,9.2, SURF_IDS='FIRE','INERT','INERT' /
 \end{lstlisting}
-
-\noindent
 puts a fire on top of the obstruction. This is a simple way of
 prescribing a burner.
 
 In addition to {\ct SURF\_ID} and {\ct SURF\_IDS}, you can also use the sextuplet {\ct SURF\_ID6} as follows:
-
 \begin{lstlisting}
 &OBST XB=2.3,4.5,1.3,4.8,0.0,9.2,
       SURF_ID6='FIRE','INERT','HOT','COLD','BLOW','INERT' /
 \end{lstlisting}
-
-\noindent
 where the six surface descriptors refer to the planes $x=2.3$, $x=4.5$, $y=1.3$, $y=4.8$, $z=0.0$, and $z=9.2$, respectively. Note that {\ct SURF\_ID6} should not be used on the same {\ct OBST} line as {\ct SURF\_ID} or {\ct SURF\_IDS}.
 
 Obstructions may be created or removed during a simulation. See Section~\ref{info:create_remove} for details.
@@ -2784,36 +2650,29 @@ Obstructions are typically drawn as solids in Smokeview. To draw an outline repr
 \label{info:HOLE}
 
 The {\ct HOLE} namelist group defines parameters that carve a hole out of an existing obstruction or set of obstructions. To do this, add lines of the form
-
 \begin{lstlisting}
 &HOLE XB=2.0,4.5,1.9,4.8,0.0,9.2 /
 \end{lstlisting}
-
-\noindent Any solid mesh cells within the volume $2.0<x<4.5$, $1.9<y<4.8$, $0.0<z<9.2$ are removed. Obstructions intersecting the volume are broken up into smaller blocks. If the hole represents a door or window, a good rule of thumb is to punch more than enough to create the hole. This ensures that the hole is created through the entire obstruction. For example, if the {\ct OBST} line denotes a wall 0.1~m thick:
-
+Any solid mesh cells within the volume $2.0<x<4.5$, $1.9<y<4.8$, $0.0<z<9.2$ are removed. Obstructions intersecting the volume are broken up into smaller blocks. If the hole represents a door or window, a good rule of thumb is to punch more than enough to create the hole. This ensures that the hole is created through the entire obstruction. For example, if the {\ct OBST} line denotes a wall 0.1~m thick:
 \begin{lstlisting}
 &OBST XB=1.0,1.1,0.0,5.0,0.0,3.0 /
 \end{lstlisting}
-
-\noindent and you want to create a door, add this:
-
+and you want to create a door, add this:
 \begin{lstlisting}
 &HOLE XB=0.99,1.11,2.0,3.0,0.0,2.0 /
 \end{lstlisting}
-
-\noindent The extra centimeter added to the $x$ coordinates of the hole make it clear that the hole is to punch through the entire obstruction.
+The extra centimeter added to the $x$ coordinates of the hole make it clear that the hole is to punch through the entire obstruction.
 
 When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or created or removed at pre-determined times. See Section~\ref{info:create_remove} for details. To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID} parameter respectively, to the {\ct HOLE} line.  When the state of the {\ct HOLE} evaluates to {\ct .FALSE.}, an obstruction will be placed in the {\ct HOLE}.  By default the obstruction filling the {\ct HOLE} will take the color of the surrounding {\ct OBST} that the {\ct HOLE} was punched through.  To make the obstruction filling the {\ct HOLE} a different color than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction filling the {\ct HOLE} to be invisible, then set {\ct COLOR='INVISIBLE'}.  Additionally, you may use the keyword {\ct TRANSPARENCY}, real number from 0 to 1, to make the obstruction filling the {\ct HOLE} transparent. See Section~\ref{info:create_remove} for an example.
 
-If an obstruction is not to be punctured by a {\ct HOLE}, add {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.
-
+If an obstruction is not to be punctured by a {\ct HOLE}, add {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line. Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only applies to {\ct OBST}structions.
 
 It is a good idea to inspect the geometry by running either a setup job
 ({\ct T\_END=0} on the {\ct TIME} line) or a short-time job to test the operation of devices and control functions.
 
 
 
-Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only applies to {\ct OBST}structions.
+
 
 
 \newpage
@@ -3021,18 +2880,12 @@ It is useful when visualizing the results of a simulation to assign to objects a
 \subsection{Colors}
 
 Colors for many items within FDS can be prescribed in two ways; a triplet of integer color values, {\ct RGB}, or a character string, {\ct COLOR}. The three {\ct RGB} integers range from 0 to 255, indicating the amount of Red, Green and Blue that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\em exactly} as it is listed in the color tables. Color parameters can be specified on a {\ct SURF} line, in which case all surfaces of that type will have that color, or color parameters can be applied directly to obstructions or vents. For example, the lines:
-
 \begin{lstlisting}
 &SURF ID='UPHOLSTERY', ..., RGB=0,255,0 /
 &OBST XB=..., COLOR='BLUE' /
 \end{lstlisting}
-
-\noindent
-will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names
-for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
-It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line because as
-the geometries of FDS simulations become more complex, it is very useful
-to use color as a spot check to determine if the desired surface properties have been assigned throughout the room or building under study.
+will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
+It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line because as the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the room or building under study.
 
 Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview.
 
@@ -3095,8 +2948,7 @@ images onto the obstructions for the purpose of making the Smokeview
 images more realistic. This technique is known as ``texture mapping.''
 For example, to apply a wood paneling image to a wall,
 add to the {\ct SURF} line defining the physical properties of the
-paneling the text
-
+paneling the line:
 \begin{lstlisting}
 &SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg', TEXTURE_WIDTH=1.,
       TEXTURE_HEIGHT=2. /
@@ -3118,13 +2970,9 @@ the {\ct VENT} or {\ct OBST} line to which a texture map
 should be applied. For example,
 
 \begin{lstlisting}
-&OBST XB=1.0,2.0,3.0,4.0,5.0,7.0, SURF_ID='wood paneling', TEXTURE_ORIGIN=1.0,3.0,5.0 /
+&OBST XB=1.,2.,3.,4.,5.,7., SURF_ID='wood paneling', TEXTURE_ORIGIN=1.,3.,5. /
 \end{lstlisting}
-applies paneling to an obstruction whose dimensions are 1 m by
-1 m by 2 m, such that the image of the paneling is positioned
-at the point (1.0,3.0,5.0). The default value of {\ct TEXTURE\_ORIGIN}
-is (0,0,0), and the global default can be changed by added a
-{\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
+applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
 
 
 \clearpage
@@ -3133,13 +2981,10 @@ is (0,0,0), and the global default can be changed by added a
 \label{info:MULT}
 
 Sometimes obstructions, holes and vents are repeated over and over in the input file. This can be tedious to create and make the input file hard to read. However, if a particular set of objects repeats itself in a regular pattern, you can use a utility known as a multiplier. If you want to repeat an obstruction, for example, create a line in the input file as follows:
-
-\begin{lstlisting}
+ \begin{lstlisting}
 &MULT ID='m1', DX=1.2, DY=2.4, I_LOWER=-2, I_UPPER=3, J_LOWER=0, J_UPPER=5 /
 &OBST XB=..., MULT_ID='m1' /
 \end{lstlisting}
-
-\noindent
 This has the effect of making an array of obstructions according to the following formulae:
 \begin{eqnarray*}  x_i = x_0 + \dx_0 + i \, \dx  &;& \hbox{\ct I\_LOWER} \le i \le \hbox{\ct I\_UPPER} \\
                    y_j = y_0 + \dy_0 + j \, \dy  &;& \hbox{\ct J\_LOWER} \le j \le \hbox{\ct J\_UPPER}
@@ -3153,16 +2998,12 @@ Note that the same rules apply for the $z$ direction as well. In situations wher
 \end{figure}
 
 A generalization of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}. The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example, define the lower $y$ bound of the original obstruction by {\ct XB(3,0)}. The $n$th obstruction would be:
-
 \begin{lstlisting}
 XB(3,N) = XB(3,0) + N*DXB(3)
 \end{lstlisting}
-
-\noindent
 Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct N}. This more flexible input scheme allows you to create, for example, a slanted roof in which the individual roof segments shorten as they ascend to the top. This feature is demonstrated by the following short input file that creates a hollowed out pyramid using the four perimeter obstructions that form the outline of its base:
-
 \begin{lstlisting}
-&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function, SVN $Revision$' /
+&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function' /
 &MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &TIME T_END=0. /
 &MULT ID='south', DXB=0.01,-.01,0.01,0.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
@@ -3177,8 +3018,6 @@ Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct
 &HOLE XB=0.40,0.45,0.00,1.00,0.15,0.20, MULT_ID='holes' /
 &TAIL /
 \end{lstlisting}
-
-\noindent
 The end result of this input file is to create a pyramid by repeating long, rectangular obstructions at the base of each face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to repeat the obstructions in sequence rather than as an array.
 
 Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct OBST}, {\ct HOLE}, {\ct VENT}, and {\ct INIT} lines. For a {\ct MESH}, it only applies to the bounds ({\ct XB}) of the mesh, not the number of cells.
@@ -3219,7 +3058,8 @@ MATL\_ID}.  For example, the input file entries:
 
 \begin{lstlisting}
 &MATL ID='BRICK', CONDUCTIVITY=0.69, SPECIFIC_HEAT=0.84, DENSITY=1600. /
-&SURF ID='BRICK WALL', MATL_ID='BRICK', COLOR='RED', BACKING='EXPOSED', THICKNESS=0.20 /
+&SURF ID='BRICK WALL', MATL_ID='BRICK', COLOR='RED', BACKING='EXPOSED', 
+      THICKNESS=0.20 /
 &OBST XB=0.1,5.0,1.0,1.2,0.0,1.0, SURF_ID='BRICK WALL' /
 \end{lstlisting}
 
@@ -3270,61 +3110,44 @@ describes some options.
 
 \subsubsection{Default Convective Heat Transfer Model}
 
-By default in an LES calculation, the convective heat flux to the surface is
-obtained from a combination of natural and forced
-convection correlations
+By default in an LES calculation, the convective heat flux to the surface is obtained from a combination of natural and forced convection correlations:
 \be \dq_c'' = h \; \Delta T
     \quad \hbox{W/m}^2 \quad ; \quad h =
     \max \; \left[ \; C \, |\Delta T|^\ot \; , \;
             \frac{k}{L} \; \NU
             \right]  \quad
     \si{W/(m^2.K)} \ee
-where $\Delta T$ is the difference between the wall and the gas temperature,
-$C$ is the coefficient for natural convection (1.52 for a horizontal surface
+where $\Delta T$ is the difference between the wall and the gas temperature, $C$ is the coefficient for natural convection (1.52 for a horizontal surface
 and 1.31 for a vertical surface, by default). The Nusselt number, Nu, depends on the shape of the obstruction~\cite{Holman:1}, ~\cite{Incropera:1}:
 \be \NU = \left\{ \begin{array}{ll} 0.037 \; \RE^\fofi \; \PR^\ot & \hbox{Cartesian} \\
-                                    C_{cyl}\; \RE^{n_{cyl}} \; \PR^\ot & \hbox{Cylindrical} \\
+                                    C_{\rm cyl}\; \RE^{n_{\rm cyl}} \; \PR^\ot & \hbox{Cylindrical} \\
                                     2 + 0.6 \; \RE^\ha \; \PR^\ot & \hbox{Spherical}  \\
                                     C_1 + C_2 \; \RE^{C_3} \; \PR^{C_4} & \hbox{Custom} \end{array} \right. \ee
-
-where $C_{cyl}$ and $n_{cyl}$ are given in Table~\ref{tbl:cylheat}.
-
-\vspace{\baselineskip}
+where $C_{\rm cyl}$ and $n_{\rm cyl}$ are given in Table~\ref{tbl:cylheat}.
 \begin{table}[ht]
 \begin{center}
-\caption{Cylinder Heat Trasnfer Constants}
+\caption{Cylinder Heat Transfer Constants}
 \label{tbl:cylheat}
 \begin{tabular}{|c|c|c|}
 \hline
-$C_{cyl}$ & $n_{cyl}$ & Range  \\ \hline
+$C_{\rm cyl}$ & $n_{\rm cyl}$ & Range  \\ \hline
 0.989  & 0.330 & $ \RE < 4$ \\ \hline
 0.911  & 0.385 & $4 \leq \RE < 40$ \\ \hline
 0.683  & 0.466 & $40 \leq \RE < 4000$ \\ \hline
 0.193  & 0.618 & $4000 \leq \RE < 40000$ \\ \hline
-0.0266 & 0.805 & $40000 \leq \RE $\\ \hline
-
+0.0266 & 0.805 & $40000 \leq \RE $ \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-$L$ is a characteristic length related to the size of the physical
-obstruction; $k$ is the thermal conductivity of the
-gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the
-gas flowing past the obstruction. Since the Reynolds number is proportional to the
-characteristic length, $L$, the heat transfer coefficient is weakly
-related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, $L$ is taken to be 1~m for most
-calculations. You can change the empirical coefficients for the natural convection model by using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ which are
-input on the {\ct SURF} line.  You can change the empirical coefficients for the forced convection model by using
-{\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and {\ct C\_FORCED\_PR\_EXP}
-for the constants $C_1$ through $C_4$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
+$L$ is a characteristic length related to the size of the physical obstruction; $k$ is the thermal conductivity of the gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the gas flowing past the obstruction. Since the Reynolds number is proportional to the characteristic length, $L$, the heat transfer coefficient is weakly related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, $L$ is taken to be 1~m for most calculations. You can change the empirical coefficients for the natural convection model by using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ which are input on the {\ct SURF} line.  You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and {\ct C\_FORCED\_PR\_EXP} for the constants $C_1$ through $C_4$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
 
 \subsubsection{Logarithmic Law of the Wall}
 
 \noindent Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity, $u^+$. In FDS, $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
 
-By analogy, we define the non-dimensional temperature $T^+ \equiv (T_g-T_w)/T_\tau$, where $T_g$ is the temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}^{''}_w$, as $T_\tau = \dot{q}^{''}_w/\rho_w u_\tau c_p$. The local heat transfer coefficient is then obtained from
+By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{\rm w})/T_\tau$, where $T_{\rm g}$ is the gas temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}''_{\rm w}$, as $T_\tau = \dot{q}''_{\rm w}/\rho_{\rm w} u_\tau c_p$. The local heat transfer coefficient is then obtained from
 \begin{equation}
-h = \frac{\dot{q}^{''}_w}{\Delta T} = \frac{\rho_w c_p u_\tau}{T^+}
+h = \frac{\dot{q}''_{\rm w}}{\Delta T} = \frac{\rho_{\rm w} \, c_p \, u_\tau}{T^+}
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular
 surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
@@ -3390,7 +3213,6 @@ argument {\ct IC} is an integer indicating the component index. For
 example, {\ct MATL\_ID(2,3)='BRICK'} indicates that the third material
 component of the second layer is {\ct BRICK}. In practice, the
 materials are often listed as in the following example:
-
 \begin{lstlisting}
 &MATL ID             = 'INSULATOR'
       CONDUCTIVITY   = 0.041
@@ -3403,8 +3225,6 @@ materials are often listed as in the following example:
       BACKING   = 'EXPOSED'
       THICKNESS = 0.20,0.10 /
 \end{lstlisting}
-
-\noindent
 Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single material component.
 
 When a {\ct SURF} line is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} is at the face of the {\ct OBST}, with the
@@ -3418,7 +3238,6 @@ Mixtures of solid materials within the same layer can be defined using
 the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same
 two indices as the {\ct MATL\_ID} keyword. For example, if the
 brick layer contains some additional water, the input could look like this:
-
 \begin{lstlisting}
 &MATL ID            = 'WATER'
       CONDUCTIVITY  = 0.60
@@ -3433,7 +3252,6 @@ brick layer contains some additional water, the input could look like this:
       BACKING                   = 'EXPOSED'
       THICKNESS                 = 0.20,0.10 /  <--- for layers 1 and 2
 \end{lstlisting}
-\noindent
 In this example, the first layer of material, Layer~1, is composed of a mixture of
 brick and water. This is given by the {\ct MATL\_ID} array which specifies
 Component~1 of Layer~1 to be brick, and Component~2 of
@@ -3528,7 +3346,6 @@ The back side emissivity of the surface can be controlled by specifying {\ct EMI
 emissivity will be calculated during the simulations as a mass-weighted sum of the {\ct MATL} emissivities.
 
 \subsection{Initial and Back Side Temperature}
-
 \label{info:TMP_INNER}
 
 By default, the initial temperature of the solid material is set to
@@ -3558,7 +3375,6 @@ careful how you specify multiple layers. If the layering is symmetric, the same 
 if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is
 made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material,
 would have to be described with two {\ct SURF} lines like the following:
-
 \begin{lstlisting}
 &SURF ID                 = 'COLUMN EXTERIOR'
       COLOR              = 'ANTIQUE WHITE'
@@ -3572,8 +3388,6 @@ would have to be described with two {\ct SURF} lines like the following:
       MATL_ID(1:3,1)     = 'STEEL','INSULATION','PLASTIC'
       THICKNESS(1:3)     = 0.0063,0.036,0.002 /
 \end{lstlisting}
-
-\noindent
 If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines,
 then you need to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
 {\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labeled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the
@@ -3584,11 +3398,6 @@ vapors are to driven into the interior of the column. In fact, values from 0.0 t
 
 By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of
 layers for other surfaces.
-
-
-
-
-
 
 
 \subsection{Special Topic: Non-Planar Walls and Targets}
@@ -3602,13 +3411,10 @@ flat. Even though these objects have to be represented in FDS as
 ``boxes,'' you can still perform the internal heat transfer
 calculation as if the object were really cylindrical or spherical. For
 example, the input lines:
-
 \begin{lstlisting}
 &OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
 &SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
 \end{lstlisting}
-
-\noindent
 can be used to model a power cable that is 5~m long, cylindrical in
 cross section, 2~cm in diameter. The heat transfer calculation is
 still one-dimensional; that is, it is assumed that there is a uniform
@@ -3639,14 +3445,9 @@ makes the temperatures and burning rate fluctuate. Adjustments may also be neede
 extremely transient heat transfer situations. The numerical accuracy and stability of the solid phase solution may be improved by
 one of the following methods:
 \begin{description}
-\item[Make the mesh density more uniform ] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.}
-on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. (This happens automatically if the layer
-contains one or more reacting materials.) Values between 1 and 2 give different levels of stretching.
-Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers.
-\item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1.0. For example, a value of 0.5 makes the
-mesh cells half the size. The scaling always applies to all layers.
-\item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the
-{\ct TIME} line. This forces the solid phase temperatures to be solved on every time step.
+\item[Make the mesh density more uniform ] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. (This happens automatically if the layer contains one or more reacting materials.) Values between 1 and 2 give different levels of stretching. Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers.
+\item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1.0. For example, a value of 0.5 makes the mesh cells half the size. The scaling always applies to all layers.
+\item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase temperatures to be solved on every time step.
 \end{description}
 If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
 the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets
@@ -3677,12 +3478,9 @@ basically modeled as the ejection of gaseous fuel
 from a solid surface or vent. This is essentially a burner, with a
 specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of
 kW/m$^2$. For example
-
 \begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=500. /
 \end{lstlisting}
-
-\noindent
 applies 500~kW/m$^2$ to any surface with the attribute
 {\ct SURF\_ID='FIRE'}. See the discussion of time-dependent quantities
 in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
@@ -3701,7 +3499,6 @@ specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do 
 \label{info:spread}
 
 Sometimes it is desired that a fire spread radially at some specified rate. Rather than trying to obtain material properties to directly model the ignition and spread of the fire, you can specify the fire spread rate directly. First, you need to add a {\ct SURF} line with a specified heat release rate, {\ct HRRPUA}, and an optional time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q}. Then, you must specify {\ct XYZ} and {\ct SPREAD\_RATE} on either a {\ct VENT} or the same {\ct SURF} line. The fire is directed to start at the point {\ct XYZ} and spread radially at a rate of {\ct SPREAD\_RATE} (m/s). The optional ramp-up of the HRR begins at the time when the fire arrives at a given point. For example, the lines
-
 \begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=500.0, RAMP_Q='fireramp' /
 &RAMP ID='fireramp', T= 0.0, F=0.0 /
@@ -3710,8 +3507,6 @@ Sometimes it is desired that a fire spread radially at some specified rate. Rath
 &RAMP ID='fireramp', T=31.0, F=0.0 /
 &VENT XB=0.0,5.0,1.5,9.5,0.0,0.0, SURF_ID='FIRE', XYZ=1.5,4.0,0.0, SPREAD_RATE=0.03 /
 \end{lstlisting}
-
-\noindent
 create a rectangular area via the {\ct VENT} line on which the fire starts at the point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used to turn the burning on and off to simulate the consumption of fuel as the fire spreads radially. It should not be used to mimic the ``$t$-squared'' curve -- the whole point of the exercise is to mimic this curve in a more natural way. Eventually, the fire goes out as the ring grows past the boundary of the rectangle. Some trial and error is probably required to find the {\ct SPREAD\_RATE} that leads to a desired time history of the heat release rate.
 
 If you desire that the fire spread over an area that is not confined to a flat plane, specify {\ct XYZ} and {\ct SPREAD\_RATE} on the {\ct SURF} line directly and then apply that {\ct SURF} line to the obstructions or particles over which you want the fire to spread. This technique can be useful for simulating the spread of fire through a cluttered space when the detailed properties of the materials are unknown, or when the uncertainties associated with modeling the pyrolysis of the solid fuels directly are too great.
@@ -3722,7 +3517,6 @@ If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware th
 
 
 \subsection{Solid Fuels that Burn at a Specified Rate}
-
 \label{info:specified_burning}
 
 Real objects, like furnishings, office equipment, and so on, are
@@ -3731,7 +3525,6 @@ parameters. Sometimes the only information about a given object is its
 bulk thermal properties, its ``ignition'' temperature, and its
 subsequent burning rate as a function of time from ignition. For
 this situation, add lines similar to the following:
-
 \begin{lstlisting}
 &MATL ID                   = 'stuff'
       CONDUCTIVITY         = 0.1
@@ -3751,8 +3544,6 @@ this situation, add lines similar to the following:
 &RAMP ID='fire_ramp', T=310.0, F=1.0 /
 &RAMP ID='fire_ramp', T=320.0, F=0.0 /
 \end{lstlisting}
-
-\noindent
 An object with surface properties defined by {\ct 'my surface'} shall
 burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s
 following its ``ignition'' when its surface temperature reaches
@@ -3769,7 +3560,6 @@ vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be
 specified for the surface. For example, when using the lines below,
 the net heat flux at the material surface is reduced by a factor
 1000~kJ/kg times the instantaneous burning rate.
-
 \begin{lstlisting}
 &SURF ID                   = 'my surface'
       COLOR                = 'GREEN'
@@ -3780,8 +3570,6 @@ the net heat flux at the material surface is reduced by a factor
       RAMP_Q               = 'fire_ramp'
       THICKNESS            = 0.01 /
 \end{lstlisting}
-
-\noindent
 The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the
 burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they
 are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of
@@ -3844,7 +3632,6 @@ a finite-rate reaction instead of the default mixing-controlled model. Notice in
 all of the gas species (except for the background nitrogen) are explicitly defined, and as a result, FDS
 needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the
 mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
-
 \begin{lstlisting}
 &SPEC ID = 'PYROLYZATE', MW=53.6 /
 &SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23 /
@@ -3867,8 +3654,7 @@ mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted t
       HEAT_OF_REACTION(1)   = 430.
       HEAT_OF_COMBUSTION(1) = 14500. /
 \end{lstlisting}
-
-\noindent Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can
+Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can
 be multiple reactions with corresponding kinetic parameters and products.
 
 \subsection{Reaction Rates}
@@ -3876,25 +3662,25 @@ be multiple reactions with corresponding kinetic parameters and products.
 For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for
 a material undergoing one or more reactions is:
 \be
-  \dod{Y_{s,i}}{t} = - \sum_{j=1}^{N_{r,i}} r_{ij} + \sum_{i'=1}^{N_m} \sum_{j=1}^{N_{r,i'}} \nu_{s,i'j} \; r_{i'j} \quad (i' \neq i)  \quad ; \quad
-  r_{ij} = A_{ij} \; Y_{s,i}^{n_{s,ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_s} \right) \quad ; \quad Y_{s,i} = \left( \frac{\rho_{s,i}}{\rho_{s0}} \right)
+  \dod{Y_{{\rm s},i}}{t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i)  \quad ; \quad
+  r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) \quad ; \quad Y_{{\rm s},i} = \left( \frac{\rho_{{\rm s},i}}{\rho_{\rm s}(0)} \right)
   % \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
   \label{rr}
 \ee
-The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_s$, of the $i$th material undergoing its $j$th reaction.
+The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction.
 The second term on the right of the equation represents the contributions of other materials producing the $i$th material as a residue with a yield
-of $\nu_{s,i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line.
-$\rho_{s,i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component
-divided by the volume of the layer.  $\rho_{s0}$ is the initial
-density of the layer. Thus, $Y_{s,i}=\rho_{s,i}/\rho_{s0}$ is a quantity that
+of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line.
+$\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component
+divided by the volume of the layer.  $\rho_{\rm s}(0)$ is the initial
+density of the layer. Thus, $Y_{{\rm s},i}=\rho_{{\rm s},i}/\rho_{\rm s}(0)$ is a quantity that
 increases if the $i$th material component is produced as a residue of some other
 reaction, or decreases if the $i$th component decomposes.  If the
-layer is composed of only one material, then $\rho_{s,i}/\rho_{s0}$ is initially 1.
-$n_{s,ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default.
-If the value of $n_s$ is not known, it is a good starting point to assume $n_s=1$.
+layer is composed of only one material, then $\rho_{{\rm s},i}/\rho_{\rm s}(0)$ is initially 1.
+$n_{{\rm s},ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default.
+If the value of $n_{\rm s}$ is not known, it is a good starting point to assume it is 1.
 
 The pre-exponential factor, $A_{ij}$, is prescribed under the name
-{\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of 1/s. $E_{ij}$, the activation energy,
+{\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy,
 is prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal
 is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
@@ -3914,15 +3700,13 @@ backward compatibility with earlier versions of
 FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily
 the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material
 decreases at its maximum rate within the context of a TGA or similar experimental apparatus. The
-kinetic constants for the reaction are found from the formulae\footnote{These formulas have been derived from an analysis that considers a first-order reaction.
-When using the proposed method,
-do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}:
+kinetic constants for the reaction are found from the formulae\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method, do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}:
 \be
-   E = \frac{e \, r_p}{Y_0} \, \frac{R \, T_p^2}{\dot{T}} \quad ; \quad
-   A = \frac{e \, r_p}{Y_0} \, e^{E/R \, T_p} \label{AandE}
+   E = \frac{{\rm e} \, r_{\rm p}}{Y_0} \, \frac{R \, T_{\rm p}^2}{\dot{T}} \quad ; \quad
+   A = \frac{{\rm e} \, r_{\rm p}}{Y_0} \, {\rm e}^{E/R \, T_{\rm p}} \label{AandE}
 \ee
-where $T_p$ and $r_p/Y_0$ are the reference temperature and rate, respectively. The
-{\ct REFERENCE\_RATE} is the reaction rate, in units of 1/s, at the given {\ct REFERENCE\_TEMPERATURE} divided by
+where $T_{\rm p}$ and $r_{\rm p}/Y_0$ are the reference temperature and rate, respectively. The
+{\ct REFERENCE\_RATE} is the reaction rate, in units of s$^{-1}$, at the given {\ct REFERENCE\_TEMPERATURE} divided by
 the mass fraction, $Y_0$, of material in the original sample undergoing the reaction. For a single component, single
 reaction material, $Y_0=1$. The {\ct HEATING\_RATE} ($\dot{T}$) is
 the rate at which the temperature of the TGA (or equivalent) test
@@ -3941,39 +3725,27 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
    \frac{\d Y}{\d t} = -A \, Y \, \exp(-E/RT)   \quad \; \quad    Y(0) =1
 \end{equation*}
 \begin{align*}
-   T_p &= 300 \; ^\circ\mathrm{C}  \\
-   r_p &= 0.002   \; \si{1/s}  \\
+   T_{\rm p} &= 300 \; ^\circ\mathrm{C}  \\
+   r_{\rm p} &= 0.002   \; \si{1/s}  \\
    \dot{T} &= 5 \; \mathrm{K/min} \\
    \nu_s &= 0 \\
 \end{align*}
 \end{minipage}
-\caption[Simple demonstration of the pyrolysis model]{The blue curve represents the normalized mass, $Y=\rho_s/\rho_{s0}$, of a solid material
-undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-\d Y/\d t$. The system of ordinary differential equations that describe the transformation is shown at right. Note that the parameters $T_p$, $r_p$, and $\nu_s$ represent the ``reference'' temperature,
+\caption[Simple demonstration of the pyrolysis model]{The blue curve represents the normalized mass, $Y=\rho_{\rm s}/\rho_{\rm s}(0)$, of a solid material
+undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-\d Y/\d t$. The system of ordinary differential equations that describe the transformation is shown at right. Note that the parameters $T_{\rm p}$, $r_{\rm p}$, and $\nu_{\rm s}$ represent the ``reference'' temperature,
 reaction rate, and residue yield of the single reaction. From these parameters, values of $A$ and $E$ can be estimated using
 the formulae in (\ref{AandE}). The full set of parameters for this case are listed in {\ct pyrolysis\_1.fds}.}
 \label{pyrolysis}
 \end{figure}
 
-There are many cases where it is only possible to estimate the {\ct REFERENCE\_TEMPERATURE} ($T_p$) of a particular
-reaction because micro-scale calorimetry data is unavailable. In such cases,
-an additional parameter can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_p$) to help fine tune the shape of the
-reaction rate curve, assuming some sort of measurement or estimate has been made to indicate at what temperature, and over what
-temperature range, the
-reaction takes place. The {\ct PYROLYSIS\_RANGE} ($\Delta T$) is the
-approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value is
-80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, with which $E$, then $A$,
-are calculated.
+There are many cases where it is only possible to estimate the {\ct REFERENCE\_TEMPERATURE} ($T_{\rm p}$) of a particular reaction because micro-scale calorimetry data is unavailable. In such cases, an additional parameter can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_{\rm p}$) to help fine tune the shape of the reaction rate curve, assuming some sort of measurement or estimate has been made to indicate at what temperature, and over what
+temperature range, the reaction takes place. The {\ct PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_{\rm p}$, with which $E$, then $A$, are calculated.
 \be
-   \frac{r_p}{Y_0} = \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_s) \label{r_p}
+   \frac{r_{\rm p}}{Y_0} = \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_{\rm s}) \label{r_p}
 \ee
-The parameter, $\nu_r$, is the yield of solid residue.
+The parameter, $\nu_{\rm s}$, is the yield of solid residue.
 
-When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}.
-Note that FDS will automatically calculate $A$ and $E$ using the above formulae.
-Do not specify $A$ and $E$ if you specify the \linebreak[3] {\ct REFERENCE\_TEMPERATURE}, and do not specify {\ct PYROLYSIS\_RANGE} if you
-specify {\ct REFERENCE\_RATE}.
-For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} would have the form:
-
+When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}. Note that FDS will automatically calculate $A$ and $E$ using the above formulae. Do not specify $A$ and $E$ if you specify the \linebreak[3] {\ct REFERENCE\_TEMPERATURE}, and do not specify {\ct PYROLYSIS\_RANGE} if you specify {\ct REFERENCE\_RATE}. For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} would have the form:
 \begin{lstlisting}
 &MATL ID                       = 'My Fuel'
       ...
@@ -3986,8 +3758,6 @@ For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} wou
       HEAT_OF_COMBUSTION(1)    = ...
       HEAT_OF_REACTION(1)      = ... /
 \end{lstlisting}
-
-\noindent
 Note that the indices have been added to the reaction parameters to
 emphasize the fact that these parameters are stored in arrays of
 length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
@@ -4059,29 +3829,24 @@ along the couch.
 
 Many practical materials change in thickness during the thermal reactions. For example:
 \begin{itemize}
-\item Non-charring materials will shrink as material is removed from the condensed
-phase to the gas phase.
+\item Non-charring materials will shrink as material is removed from the condensed phase to the gas phase.
 \item Porous materials like foams would shrink when the material melts and forms a non-porous layer.
 \item Some charring materials swell, i.e., get thicker, when a porous char layer is formed.
 \item Intumescent fire protection materials would swell significantly, creating an insulating layer.
 \end{itemize}
 In FDS, the layer thickness is updated according to the ratio of the instantaneous material density and the density of the material in its pure form, i.e.,
-the {\ct DENSITY} on the {\ct MATL-line}. In case of several material components, the amount of swelling and shrinking is determined by the maximum and sum
-of these ratios, respectively. In mathematical terms, this means that in each time step,
-the size of each condensed phase cell is changed according to the ratio $\delta$
+the {\ct DENSITY} on the {\ct MATL} line. In cases involving several material components, the amount of swelling and shrinking is determined by the maximum and sum of these ratios, respectively. In mathematical terms, this means that in each time step the size of each condensed phase cell is changed according to the ratio $\delta$
 \be
 \delta =
    \begin{cases}
-   \max_i\left(\frac{\rho_{s,i}}{\rho_i}\right) & \text{if }\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right)\geq 1 \\
-   \sum_i\left(\frac{\rho_{s,i}}{\rho_i}\right) & \text{if }\max_i\left(\frac{\rho_{s,i}}{\rho_i}\right)<1
+   \max_i\left(\frac{\rho_{{\rm s},i}}{\rho_i}\right) & \text{if } \max_i \left(\frac{\rho_{{\rm s},i}}{\rho_i}\right)\geq 1 \\ 
+   \sum_i\left(\frac{\rho_{{\rm s},i}}{\rho_i}\right) & \text{if } \max_i \left(\frac{\rho_{{\rm s},i}}{\rho_i}\right)<1
    \end{cases}
 \ee
-For example, if the original material with {\ct DENSITY = 500.} is completely converted into a residue with {\ct DENSITY = 1000.}, the thickness
-of the material layer will be half of the original.
+For example, if the original material with a {\ct DENSITY} of 500~kg/m$^3$ is completely converted into a residue with a {\ct DENSITY} of 1000~kg/m$^3$, the thickness of the material layer will be half of the original.
 
-You can prevent shrinking by specifying {\ct ALLOW\_SHRINKING = .FALSE.} on the {\ct MATL} line. You can prevent swelling by specifying
-{\ct ALLOW\_SWELLING = .FALSE.}. By default, these flags are true. Shrinking/swelling does not take place if any of the materials with non-zero density
-has the corresponding flag set to false.
+You can prevent shrinking by setting {\ct ALLOW\_SHRINKING} to {\ct .FALSE.} on the {\ct MATL} line. You can prevent swelling by specifying
+{\ct ALLOW\_SWELLING} to {\ct .FALSE.} on the {\ct MATL} line.  By default, these flags are true. Shrinking/swelling does not take place if any of the materials with non-zero density has the corresponding flag set to false.
 
 
 
@@ -4111,25 +3876,17 @@ neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a
 \begin{align*}
    \frac{\d Y_1}{\d t} &= -A_{1,1} \, Y_1 \, \exp(-E_{1,1}/RT)                  & Y_1(0) &=0.1 \\
    \frac{\d Y_2}{\d t} &= -A_{2,1} \, Y_2 \, \exp(-E_{2,1}/RT)                  & Y_2(0) &=0.9 \\
-   \frac{\d Y_3}{\d t} &= -\nu_{s,2,1} \frac{dY_2}{dt}                          & Y_3(0) &=0.0
+   \frac{\d Y_3}{\d t} &= -\nu_{{\rm s},2,1} \frac{dY_2}{dt}                          & Y_3(0) &=0.0
 \end{align*}
 \begin{align*}
-   T_{p,1,1} &= 100+273 \; \mathrm{K}        & T_{p,2,1}   &= 300+273 \; \mathrm{K} \\
-   r_{p,1,1} &= 0.0016 \; \si{1/s}           & r_{p,2,1}   &= 0.0012 \;\si{1/s} \\
-   \nu_{s,1,1} &= 0                          & \nu_{s,2,1} &= 0.2 \\
+   T_{{\rm p},1,1} &= 100+273 \; \mathrm{K}        & T_{{\rm p},2,1}   &= 300+273 \; \mathrm{K} \\
+   r_{{\rm p},1,1} &= 0.0016 \; \si{1/s}           & r_{{\rm p},2,1}   &= 0.0012 \;\si{1/s} \\
+   \nu_{{\rm s},1,1} &= 0                          & \nu_{{\rm s},2,1} &= 0.2 \\
    \dot{T} &= 5 \; \mathrm{K/min} & &
 \end{align*}
 \end{minipage} \normalsize
-\caption[A more complicated demonstration of the pyrolysis model]{The blue curve represents the combined mass fraction,
-$\sum Y_i$, and the green curve the net reaction rate, $-\d/\!\d t(\sum Y_i)$, for a material that contains
-10~\% water (by mass) that evaporates at a temperature of 100~$^\circ$C,
-and 90~\% solid material that pyrolyzes at 300~$^\circ$C, leaving a 20~\% (by mass) residue behind.
-Note that the numbered subscripts refer
-to the material component and the reaction, respectively. In this case, there are three material components,
-and the first two each undergo a single
-reaction. The third material component is formed as a residue of the reaction of the second material.
-The system of ordinary differential equations that governs
-the transformation of the materials is shown at right.}
+\caption[A more complicated demonstration of the pyrolysis model]{The blue curve represents the combined mass fraction, $\sum Y_i$, and the green curve the net reaction rate, $-\d/\!\d t(\sum Y_i)$, for a material that contains 10~\% water (by mass) that evaporates at a temperature of 100~$^\circ$C, and 90~\% solid material that pyrolyzes at 300~$^\circ$C, leaving a 20~\% (by mass) residue behind. Note that the numbered subscripts refer to the material component and the reaction, respectively. In this case, there are three material components, and the first two each undergo a single reaction. The third material component is formed as a residue of the reaction of the second material.
+The system of ordinary differential equations that governs the transformation of the materials is shown at right.}
 \label{pyrolysis_2}
 \end{figure}
 
@@ -4155,35 +3912,20 @@ be determined empirically.
 
 In FDS, the reaction rate expression in Eq.~(\ref{rr}) includes an optional term:
 \be
-  r_{ij} = A_{ij} \; Y_{s,i}^{n_{s,ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_s} \right) \;
-  \max\left[0,S_{thr,ij}(T_s-T_{thr,ij})\right]^{n_{t,ij}}
+  r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) \;
+  \max\left[0,S_{{\rm thr},ij}(T_{\rm s}-T_{{\rm thr},ij})\right]^{n_{{\rm t},ij}}
   \label{rr2}
 \ee
-$T_{thr,ij}$ is an optional ``threshold'' temperature that
-allows the definition of non-Arrhenius pyrolysis functions and
-ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
-$S_{thr,ij}$ is the ``threshold direction'' that allows the triggering of reaction
-when temperature gets ``above'' $T_{thr,ij}$ ($S_{thr,ij}=+1$) or ``below'' $T_{thr,ij}$ ($S_{thr,ij}=-1$).
-$n_{t,j}$ is prescribed under the name {\ct N\_T(j)} and $S_{thr,ij}$ under {\ct THRESHOLD\_SIGN}.
+$T_{{\rm thr},ij}$ is an optional ``threshold'' temperature that allows the definition of non-Arrhenius pyrolysis functions and ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}. $S_{{\rm thr},ij}$ is the ``threshold direction'' that allows the triggering of reaction when temperature gets ``above'' $T_{{\rm thr},ij}$ ($S_{{\rm thr},ij}=+1$) or ``below'' $T_{{\rm thr},ij}$ ($S_{{\rm thr},ij}=-1$). $n_{{\rm t},j}$ is prescribed under the name {\ct N\_T(j)} and $S_{{\rm thr},ij}$ under {\ct THRESHOLD\_SIGN}. By default, $T_{{\rm thr},ij}$ is -273.15 degrees Celsius, $n_{{\rm t},j}$ is zero and $S_{{\rm thr},ij}=+1$; thus, the last term of Equation~\ref{rr2} does not affect the pyrolysis rate. The term can be used to describe a threshold temperature for the pyrolysis reaction by setting $T_{{\rm thr},ij}$ and $n_{{\rm t},j}$ = 0. Then the term is equal to 0 at temperatures below $T_{{\rm thr},ij}$ and 1 at temperatures above.
 
-By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero and $S_{thr,ij}=+1$;
-thus, the last term of Equation~\ref{rr2} does not affect the pyrolysis rate.
-The term can be used to describe a threshold temperature for the pyrolysis
-reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
-is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
-
-The threshold temperature can be used to simulate simple phase change reactions, such as melting and freezing.
-To make the reaction rate controlled by available energy, i.e., {\em not} kinetics, another optional term should be included
-in the reaction rate formula
+The threshold temperature can be used to simulate simple phase change reactions, such as melting and freezing. To make the reaction rate controlled by available energy, i.e., {\em not} kinetics, another optional term should be included in the reaction rate formula
 \be
-  r_{ij} = A_{ij}\frac{1}{H_{r,\alpha\beta}\Delta t} \max\left[0,S_{thr,ij}(T_s-T_{thr,ij})\right]^{n_{t,ij}}
+  r_{ij} = A_{ij}\frac{1}{H_{{\rm r},ij}\Delta t} \max\left[0,S_{{\rm thr},ij}(T_{\rm s}-T_{{\rm thr},ij})\right]^{n_{{\rm t},ij}}
   \label{rr3}
 \ee
-This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=.TRUE.}. The pre-exponental
-factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (\si{kJ/(kg.K)}) of the material mixture at
-phase change temperature.
+This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=.TRUE.}. The pre-exponental factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (\si{kJ/(kg.K)}) of the material mixture at phase change temperature.
 
-The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``threshold'' temperature. A small amount of liquid water at 10~$^\circ$C is cooled down to -10$^\circ$C in 10~min, and then heated up again to 10$^\circ$C. The mass fraction of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by the blue line and heating phase by the red line.
+The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``threshold'' temperature. A small amount of liquid water at 10~$^\circ$C is cooled down to -10~$^\circ$C in 10~min, and then heated up again to 10~$^\circ$C. The mass fraction of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by the blue line and heating phase by the red line.
 
 \begin{figure}[ht]
 \begin{center}
@@ -4203,7 +3945,6 @@ For a liquid fuel, the thermal properties are similar to those of a solid
 material, with a few exceptions. The evaporation rate of the fuel
 is governed by the mass transfer number (see FDS Technical Reference
 Guide for details). The properties of a liquid fuel are given on the {\ct MATL} line:
-
 \begin{lstlisting}
 &MATL ID                     = 'ETHANOL LIQUID'
       EMISSIVITY             = 1.
@@ -4216,8 +3957,6 @@ Guide for details). The properties of a liquid fuel are given on the {\ct MATL} 
       BOILING_TEMPERATURE    = 78.5
       ABSORPTION_COEFFICIENT = 1534.3 /
 \end{lstlisting}
-
-\noindent
 The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
 pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
 phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
@@ -4238,9 +3977,9 @@ near the surface. Its effect on the burning rate is significant.
 \subsection{Fuel Burnout}
 
 The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the
-burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_s$, and the
-layer thickness, $\delta_s$:
-\be t_b = \frac{\rho_s \, \delta_s}{\dm''} \ee
+burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_{\rm s}$, and the
+layer thickness, $\delta_{\rm s}$:
+\be t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s}}{\dm''} \ee
 However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be
 highlighted in the individual sections below.
 
@@ -4249,10 +3988,9 @@ highlighted in the individual sections below.
 If a heat release rate {\ct RAMP} function is not included for a solid fuel that burns at a specified rate, the surface will continue to
 burn at the specified rate indefinitely with no fuel burnout.  If detailed heat release rate versus time data is not available, you
 can estimate the burnout time for a surface using the heat of combustion, $\Delta H$,
-material density, $\rho_s$, material thickness, $\delta_s$, and {\ct HRRPUA}, $\dq_f''$:
-\be t_{b} = \frac{\rho_s \, \delta_s \, \Delta H}{\dq''_f} \ee
+material density, $\rho_{\rm s}$, material thickness, $\delta_{\rm s}$, and {\ct HRRPUA}, $\dq_{\rm f}''$:
+\be t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s} \, \Delta H}{\dq''_{\rm f}} \ee
 Use the {\ct RAMP} function to stop the burning once the calculated burnout time is reached.
-
 
 The burnout time of a reacting solid fuel is calculated automatically by FDS based on the
 layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
@@ -4314,7 +4052,7 @@ the end of the 30~s calculation ought to be:
 except for the fourth case, where the amount of released gas is affected by
 the ratio of heats of combustion
 \be
-0.75\times 1.28 \hbox{kg}\; = 0.96\; \hbox{kg}
+0.75 \times 1.28 \; \hbox{kg}\; = 0.96 \; \hbox{kg}
 \ee
 The same case is tested in 2D ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter only half of the mass is converted to fuel, yielding 50 \% residue. The box is made burn away by setting {\ct BULK\_DENSITY = 10}.
 \begin{figure}[ht]
@@ -5107,8 +4845,8 @@ The initial density stratification inside and outside the building can be calcul
 where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
 
 Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
-\be 
-   \frac{\Delta H }{H_{\rm n}} = 1 + \frac{T_{\rm b}}{T_\infty} 
+\be
+   \frac{\Delta H }{H_{\rm n}} = 1 + \frac{T_{\rm b}}{T_\infty}
 \ee
 where $H_{\rm n}$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points.  This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building.  Note that this is close to the midpoint value of 50~m above the bottom of the building. The pressure difference across the building's wall is computed from
 \be
@@ -5273,7 +5011,6 @@ be listed with monotonically increasing {\ct T}.
 Note also that the {\ct TAU}s and the {\ct RAMP}s are mutually exclusive. For a given
 surface quantity, both cannot be prescribed.
 As an example, a simple blowing vent can be controlled via the lines:
-
 \begin{lstlisting}
 &SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50., RAMP_V='BLOWER RAMP', RAMP_T='HEATER RAMP' /
 &RAMP ID='BLOWER RAMP', T= 0.0, F=0.0 /
@@ -5285,8 +5022,6 @@ As an example, a simple blowing vent can be controlled via the lines:
 &RAMP ID='HEATER RAMP', T=30.0, F=1.0 /
 &RAMP ID='HEATER RAMP', T=40.0, F=0.0 /
 \end{lstlisting}
-
-\noindent
 Use {\ct TAU\_T} or {\ct RAMP\_T}
 to control the ramp-ups for surface temperature.
 The surface temperature will be computed as
