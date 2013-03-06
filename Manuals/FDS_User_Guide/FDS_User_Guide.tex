@@ -72,19 +72,19 @@
 \usepackage{textcomp}
 \definecolor{lbcolor}{rgb}{0.96,0.96,0.96}
 \lstset{
-    backgroundcolor=\color{lbcolor},
+    %backgroundcolor=\color{lbcolor},
     tabsize=4,
     rulecolor=,
     language=Fortran,
         basicstyle=\footnotesize\ttfamily,
         upquote=true,
-        aboveskip={1.5\baselineskip},
-        belowskip=2em,
+        aboveskip={\baselineskip},
+        belowskip={\baselineskip},
         columns=fixed,
         extendedchars=true,
         breaklines=true,
         breakatwhitespace=true,
-        frame=single,
+        frame=none,
         showtabs=false,
         showspaces=false,
         showstringspaces=false,
@@ -826,18 +826,16 @@ FDS and Smokeview can be found at the web site.
 
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
+
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
 can be found on the FDS-SMV Website
 \href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}}.
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive,
-which is available for MS Windows, Mac~OS~X, and Linux.
-For other operating systems, consult the web site.
+which is available for MS Windows, Mac~OS~X, and Linux. 
 
-\begin{warning}
-\noindent
 If you ever want to keep an older version of FDS and Smokeview, copy the installation directory to some other
 place so that it is not overwritten during the updated installation.
-\end{warning}
+
 
 \section{Computer Hardware Requirements}
 
@@ -928,12 +926,10 @@ below.  Batch files (Windows) or aliases (Linux or OS~X) may be
 defined to distinguish executables if you wish to install multiple
 versions of FDS.
 
-\begin{warning}
-\noindent
 Note that the input file is the same for both single and parallel versions of FDS.
 In fact, it is recommended that before embarking on parallel processing, you should run your input
 file in serial mode to ensure that it is properly set up.
-\end{warning}
+
 
 
 \subsection{Starting an FDS Calculation (Single Processor Version)}
@@ -1122,15 +1118,12 @@ mpirun -np 5 fds_mpi job_name.fds >& job_name.err &
 \end{lstlisting}
 The file {\ct job\_name.err} contains what is normally printed out to the screen.
 
-
-\begin{warning}
-\noindent
 Note that there are several other implementations of MPI, some free, some not.
 Support for the software varies, thus FDS has been designed to run under any of the
 more popular versions without too much user intervention. However, keep in mind
 that parallel processing is a relatively new area of computer science,
 and there are bound to be painful growth spurts in the years ahead.
-\end{warning}
+
 
 \newpage
 
@@ -1322,11 +1315,9 @@ as much as possible so that the bug occurs early in the calculation.
 Attach the simplified input file if necessary, following the instructions provided at the web site.
 In this way, the developers can quickly run the problematic input file and hopefully diagnose the problem.
 
-\begin{warning}
-\noindent
 Note: Reports of specific bugs, problems, feature requests, and enhancements
 should be posted to the Issue Tracker and not the Discussion Group.
-\end{warning}
+
 
 
 
@@ -1636,14 +1627,13 @@ If you want the time line to start at a number other than zero, you can use the 
 {\ct T\_BEGIN} to specify the time written to file for the first time step.
 This would be useful for matching time lines of experimental data or video recordings.
 
-\begin{warning}
 Time-based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as
 {\ct T\_BEGIN}; otherwise, they are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are
 setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately
 linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate.
 For example if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP},
 {\ct T\_BEGIN} should be set slightly less than 10~s.
-\end{warning}
+
 
 \subsection{Special Topic: Controlling the Time Step}
 \label{info:TIME_Control}
@@ -1658,15 +1648,12 @@ cell, $H$ is the height of the computational domain, and $g$ is the acceleration
 time step is never allowed to increase above its initial value. To allow this to happen, set
 {\ct RESTRICT\_TIME\_STEP=.FALSE.}
 
-\begin{warning}
 If something sudden is to happen right at the start of a simulation,
 like a sprinkler activation, it is a good idea to set the initial time step
 to avoid a numerical instability caused by too large a time step.
 Experiment with different values of {\ct DT} by monitoring the initial time step sizes
 recorded in the output file {\ct job\_name.out}.
-\end{warning}
 
-\noindent
 One additional parameter in the {\ct TIME} group is {\ct SYNCHRONIZE}, a
 logical flag ({\ct .TRUE.} or {\ct .FALSE.}) indicating that in a
 multi-mesh computation the time step for each mesh should be the same, thus
@@ -1720,7 +1707,8 @@ For example,
 defines a mesh that spans the volume starting at the origin and extending 1~m in the positive
 $x$ direction, 2~m in the positive $y$ direction, and 3~m in the positive $z$ direction.
 The mesh is subdivided into uniform cells via the parameter
-{\ct IJK}. In this example, the mesh is divided into 10~cm cubes.
+{\ct IJK}. In this example, the mesh is divided into 10~cm cubes. It is best if the mesh cells resemble cubes; that is, the
+length, width and height of the cells ought to be roughly the same.
 If it is desired that the mesh cells in a particular direction not be uniform in size,
 then the namelist groups {\ct TRNX}, {\ct TRNY} and/or {\ct TRNZ} may be used to alter the
 uniformity of the mesh (See Section~\ref{info:TRNX}).
@@ -1729,13 +1717,7 @@ Any obstructions or vents that extend beyond the boundary of the mesh
 are cut off at the boundary. There is no penalty for defining objects
 outside of the mesh, and these objects will not appear in Smokeview.
 
-\begin{warning}
-\noindent
-Note that it is best if the mesh cells resemble cubes, that is, the
-length, width and height of the cells ought to be roughly the same.
-\end{warning}
 
-\noindent
 Because an important part of the calculation uses a Poisson solver based on
 Fast Fourier Transforms (FFTs) in the $y$ and $z$ directions, the second and third dimensions
 of the mesh should each be of the form $2^l \, 3^m \, 5^n$, where
@@ -2005,17 +1987,11 @@ assumption that the numerical mesh should be fine enough to allow the formation
 of eddies that are responsible for the mixing. In general, eddy formation
 is limited by the largest dimension of a mesh cell, thus shrinking the
 mesh resolution in one or two directions may not necessarily lead to a better
-simulation if the third dimension is large.
-
-\begin{warning}
-\noindent
-Transformations, in general, reduce the efficiency of the computation,
+simulation if the third dimension is large. Transformations, in general, reduce the efficiency of the computation,
 with two coordinate transformations impairing efficiency more
 than a transformation in one coordinate direction. Experiment with different meshing
 strategies to see how much of a penalty you will pay.
-\end{warning}
 
-\noindent
 Here is an example of how to do a mesh transformation. Suppose your mesh is defined
 
 \begin{lstlisting}
@@ -2082,11 +2058,10 @@ to non-monotonic functions.
 The monotonicity of the function is checked by the
 program and an error message is produced if it is not monotonic.
 
-\begin{warning}
-\noindent
+
 Do not specify either linear transformation points or {\ct IDERIV=0} points at coordinate values corresponding to
-the mesh boundaries.
-\end{warning}
+the mesh boundaries. This is done automatically by FDS.
+
 
 \subsection{Mesh Resolution}
 
@@ -2116,10 +2091,9 @@ for evaluating the spread of smoke and heat through a building from a
 sizable fire, but may not be appropriate to study a very small, smoldering source\footnote{For the validation study sponsored by the
 U.S. Nuclear Regulatory Commission~\cite{NUREG_1824}, the $D^*/\dx$ values ranged from 4 to 16.}.
 
-\begin{warning}
-\noindent
+
 There are a number of special output quantities that provide local measures of grid resolution. See Section~\ref{info:meshquality} for details.
-\end{warning}
+
 
 
 
@@ -2414,15 +2388,16 @@ Options for the turbulent viscosity model are (set {\ct TURBULENCE\_MODEL} on {\
 {\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\ \hline
 \end{tabular}
 \end{center}
-The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
+The form of LES used in FDS versions 1-5 is 'CONSTANT SMAGORINSKY'.
+
+The thermal conductivity and material diffusivity are related to the turbulent viscosity by
 \be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
 \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
 The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
-\begin{warning}
-\noindent
-To return to the non-dynamic form of LES used in FDS versions 1-5, set {\ct TURBULENCE\_MODEL='CONSTANT SMAGORINSKY'} on the {\ct MISC} line.
-\end{warning}
+
+
+
 
 
 \subsection{Special Topic: Numerical Stability Parameters}
@@ -2832,16 +2807,13 @@ When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, o
 
 If an obstruction is not to be punctured by a {\ct HOLE}, add {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.
 
-\begin{warning}
-\noindent
+
 It is a good idea to inspect the geometry by running either a setup job
 ({\ct T\_END=0} on the {\ct TIME} line) or a short-time job to test the operation of devices and control functions.
-\end{warning}
 
-\begin{warning}
-\noindent
+
+
 Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only applies to {\ct OBST}structions.
-\end{warning}
 
 
 \newpage
@@ -2858,19 +2830,9 @@ evolved well beyond its initial role as simply allowing for air to be blown into
 
 \label{info:VENT_Basics}
 
-The vents are chosen in a
-similar manner to the obstructions, with the sextuplet {\ct XB}
-denoting a plane abutting a solid surface. Two of the six coordinates must
-be the same, denoting a plane as opposed to a solid.
+The vents are chosen in a similar manner to the obstructions, with the sextuplet {\ct XB} denoting a plane abutting a solid surface. Two of the six coordinates must be the same, denoting a plane as opposed to a solid. Note that only one {\ct VENT} may be specified for any given wall cell.  If additional {\ct VENT} lines are specified for a given wall cell, FDS will output a warning message and ignore redundant {\ct VENT} lines.
 
-\begin{warning}
-\noindent
-Note that only one {\ct VENT} may be specified for any given wall cell.  If additional {\ct VENT} lines are specified for a
-given wall cell, FDS will output a warning message and ignore the subsequent lines (i.e., only the first vent
-will be applied)
-\end{warning}
-
-\noindent The term ``{\ct VENT}'' is somewhat misleading. Taken literally, a
+The term ``{\ct VENT}'' is somewhat misleading. Taken literally, a
 {\ct VENT} can be used to model components of the ventilation system in
 a building, like a diffuser or a return.
 In these cases, the {\ct VENT} coordinates form a plane on a
@@ -2897,12 +2859,9 @@ surface property need not actually be a ``vent,'' like a supply or return duct, 
 conditions than those assumed for the obstruction. Note that the surface properties of a {\ct VENT} over-ride those of the
 underlying obstruction.
 
-\begin{warning}
 A {\ct VENT} must always be attached to a solid obstruction. See
 Section~\ref{info:Velocity_BC} for instructions on specifying different types of fans that allow gases to flow through.
-\end{warning}
 
-\noindent
 An easy way to specify an entire external wall is to replace {\ct XB} with
 {\ct MB} (Mesh Boundary), a character string whose value is one of the following:
 {\ct 'XMAX'}, {\ct 'XMIN'}, {\ct 'YMAX'}, {\ct 'YMIN'}, {\ct 'ZMAX'} or
@@ -2938,25 +2897,19 @@ By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} 
 
 The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:mean_forcing} for an alternative approach.
 
-\begin{warning}
+
 Vents to the outside of the computational domain ({\ct OPEN} vents)
 {\em  can} be opened or closed during a simulation. It is best done by creating or removing a thin obstruction that covers the {\ct OPEN VENT}.
 See Section~\ref{info:activate_deactivate} for details.
-\end{warning}
+
 
 \subsubsection{Mirror Vents}
 
 A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane. Usually, a {\ct MIRROR} spans an entire face of the computational
 domain, essentially doubling the size of the domain with the {\ct MIRROR} acting as a plane of symmetry. The flow on the opposite side of the
-{\ct MIRROR} is exactly reversed. From a numerical point of view, a {\ct MIRROR} is a no-flux, free-slip boundary. As with {\ct OPEN}, a {\ct MIRROR} can only be prescribed at an exterior boundary of the computational domain. Often, {\ct OPEN} or {\ct MIRROR} {\ct VENT}s are prescribed along an
+{\ct MIRROR} is exactly reversed\footnote{Note that the mirror image of a scene is {\em not} shown in Smokeview.}. From a numerical point of view, a {\ct MIRROR} is a no-flux, free-slip boundary. As with {\ct OPEN}, a {\ct MIRROR} can only be prescribed at an exterior boundary of the computational domain. Often, {\ct OPEN} or {\ct MIRROR} {\ct VENT}s are prescribed along an
 entire side of the computational domain, in which case the ``{\ct MB}'' notation is handy.
 
-\begin{warning}
-\noindent
-Note that the mirror image of a scene is {\em not} shown in Smokeview.
-\end{warning}
-
-\noindent
 A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because that is what you would expect if you time-averaged the actual flow field over a sufficient amount of time. Thus, for a RANS model, a symmetry boundary along the plume centerline is appropriate. In an LES model, however, there is no time-averaging built into the equations, and there is no time-averaged, symmetric solution. Putting a {\ct MIRROR} boundary along the centerline of a fire plume will change its dynamics entirely. It will produce something very much like the flow field of a fire that is adjacent to a vertical wall. For this reason, a {\ct MIRROR} boundary condition is not recommended along the centerline of a turbulent fire plume. If the fire or burner is very small, and the flow is laminar, then the {\ct MIRROR} boundary condition makes sense. In fact, in 2-D calculations, {\ct MIRROR} boundary conditions are employed in the third coordinate direction (this is done automatically, you need not specify it explicitly).
 
 \subsubsection{Periodic Vents}
@@ -3407,9 +3360,8 @@ all that must be prescribed on the {\ct SURF} line is {\ct ADIABATIC=.TRUE.}, an
 so that the sum of the net convective and radiative heat flux is zero.  Specifying a surface as {\ct ADIABATIC} will
 result in FDS defining {\ct NET\_HEAT\_FLUX=0} and {\ct EMISSIVITY=1}.
 
-\begin{warning}
+
 No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
-\end{warning}
 
 
 
@@ -3589,11 +3541,10 @@ but rather the gas temperature to which the back side surface is exposed. This
 parameter has no meaning for surfaces with {\ct BACKING='EXPOSED'} or
 {\ct BACKING='INSULATED'}.
 
-\begin{warning}
-\noindent
+
 Note that the parameters {\ct TMP\_INNER} and {\ct TMP\_BACK} are only meaningful for solids with specified {\ct THICKNESS} and material
 properties (via the {\ct MATL\_ID} keyword).
-\end{warning}
+
 
 
 
@@ -3740,9 +3691,9 @@ An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}
 specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.  Neither of them can be used if the model contains multiple reactions.
 
-\begin{warning}
-Specifying {\ct HRRPUA} or {\ct MLRPUA} requires the use of the single, mixing-controlled reaction for combustion.
-\end{warning}
+
+
+
 
 
 
@@ -3765,9 +3716,9 @@ create a rectangular area via the {\ct VENT} line on which the fire starts at th
 
 If you desire that the fire spread over an area that is not confined to a flat plane, specify {\ct XYZ} and {\ct SPREAD\_RATE} on the {\ct SURF} line directly and then apply that {\ct SURF} line to the obstructions or particles over which you want the fire to spread. This technique can be useful for simulating the spread of fire through a cluttered space when the detailed properties of the materials are unknown, or when the uncertainties associated with modeling the pyrolysis of the solid fuels directly are too great.
 
-\begin{warning}
+
 If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware that the default start time of the radially spreading fire is {\ct T\_BEGIN}, not zero. This is also true of {\ct TAU\_Q}, but it is not true of {\ct RAMP\_Q}. Because this might be confusing, if you start the calculation at a time other than zero, do a quick test to ensure that the ramps or fire spread behave as expected.
-\end{warning}
+
 
 
 \subsection{Solid Fuels that Burn at a Specified Rate}
@@ -4132,10 +4083,7 @@ You can prevent shrinking by specifying {\ct ALLOW\_SHRINKING = .FALSE.} on the 
 {\ct ALLOW\_SWELLING = .FALSE.}. By default, these flags are true. Shrinking/swelling does not take place if any of the materials with non-zero density
 has the corresponding flag set to false.
 
-\begin{warning}
-Prior to FDS version 6, the densities of the charring products (residues) did not have much significance. Now they they do as they directly
-influence the shrinking/swelling.
-\end{warning}
+
 
 \subsection{Multiple Solid Phase Reactions}
 
@@ -4575,12 +4523,11 @@ dictates that the forward $x$-facing surface of the obstruction is to have a vel
 equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the
 computational domain.
 
-\begin{warning}
-\noindent
+
 Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
 not both.  The choice depends on whether an exact velocity is desired at a
 given vent, or whether the given volume flux is desired.
-\end{warning}
+
 
 \subsection{Total Mass Flux}
 
@@ -4645,11 +4592,11 @@ If the louvered vent is part of an HVAC system, see \ref{info:HVAClouvers} for d
 
 The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.
 In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value.
-In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
+In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition\footnote{Prior to version 6 of FDS, a logical parameter called {\ct SAWTOOTH} was used to ``smooth out'' the stair-stepped rendering of curved geometries. This functionality is replicated by setting {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line that defines the properties of the obstructions. This parameter removes friction at the surface.}, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
 
-\begin{warning}
-Prior to version 6 of FDS, a logical parameter called {\ct SAWTOOTH} was used to ``smooth out'' the stair-stepped rendering of curved geometries. This functionality is replicated by setting {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line that defines the properties of the obstructions. This parameter removes friction at the surface.
-\end{warning}
+
+
+
 
 
 \subsection{Species and Species Mass Flux Boundary Conditions}
@@ -4911,14 +4858,11 @@ a short passageway that draws gases in one side and expels them out the other. T
 \label{info:HVACfilter}
 
 A sample input for a filter is given by:
-
 \begin{lstlisting}
 &HVAC TYPE='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
       EFFICIENCY=0.99, LOADING_MULTIPLIER=1, CLEAN_LOSS=2., LOSS=100./
 \end{lstlisting}
-
-\noindent where:
-
+where:
 \begin{description}
 \item[{\ct CLEAN\_LOSS}] is the flow loss through the filter when it is new (zero loading).
 \item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.  The species are identified using {\ct SPEC\_ID}.
@@ -4928,9 +4872,6 @@ A sample input for a filter is given by:
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (see summation in {\ct LOSS}.   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct LOADING\_MULTIPLIER} and {\ct LOADING}.
 \end{description}
-
-\noindent
-
 A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial flow loss of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter}, which is documented in the Verification Guide.
 
 \begin{lstlisting}
@@ -4966,10 +4907,10 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 
 \noindent
 Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the latter case, the heat exchange is computed as a two step process.  First, the outlet temperature is determined assuming 100 \% efficient (i.e., both fluids exit at the same temperature):
-\be T_{fluid,out}=\frac{c_{p,gas} u_{duct} A_{duct} \rho_{duct} T_{duct,in} + c_{p,fluid} \dm_{fluid} T_{fluid,in}}{c_{p,gas} u_{duct} A_{duct} \rho_{duct} + c_{p,fluid} \dm_{fluid}}
+\be T_{\rm fluid,out}=\frac{c_{p,{\rm gas}} u_{\rm duct} A_{\rm duct} \rho_{\rm duct} T_{\rm duct,in} + c_{p,{\rm fluid}} \dm_{\rm fluid} T_{\rm fluid,in}}{c_{p,{\rm gas}} u_{\rm duct} A_{\rm duct} \rho_{\rm duct} + c_{p,{\rm fluid}} \dm_{\rm fluid}}
 \ee
 Second, the actual heat exchanged is computed using the {\ct EFFICIENCY}.
-\be \dq_{coil}=\eta  c_{p,fluid} \dm_{fluid} \left( T_{fluid,in} - T_{fluid,out} \right)
+\be \dq_{\rm coil}=\eta  c_{p,{\rm fluid}} \dm_{\rm fluid} \left( T_{\rm fluid,in} - T_{\rm fluid,out} \right)
 \ee
 
 \noindent
@@ -4990,13 +4931,11 @@ The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoi
 \label{info:HVAClouvers}
 
 The HVAC system being modeled may either have louvers that redirect the flow leaving a vent or the orientation of the real vent may not lie along one of the axes in FDS.  To define the flow direction for an HVAC outlet, you can use the keyword {\ct UVW} on {\ct VENT}.  {\ct UWV} is the vector indicating the direction of flow from the {\ct VENT}.  For example:
-
 \begin{lstlisting}
 &OBST XB=1.0,2.0,0.0,1.0,0.0,1.0 /
 &VENT XB=1.0,1.0,0.0,1.0,0.0,1.0, SURF_ID='HVAC', ID='HVAC OUTLET', UVW=-1,0,1 /
 \end{lstlisting}
-
-\noindent The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ direction.  The flow vector indicates that the flow from this vent is in the $-x$ direction with a 45 degree up angle (the $x$ and $z$ components are equal in size).  FDS will set the tangential velocity of the vent to obtain the specified direction indicated by {\ct UVW}.  This will only be done if the vent is inputting gas into the domain.
+The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ direction.  The flow vector indicates that the flow from this vent is in the $-x$ direction with a 45 degree up angle (the $x$ and $z$ components are equal in size).  FDS will set the tangential velocity of the vent to obtain the specified direction indicated by {\ct UVW}.  This will only be done if the vent is inputting gas into the domain.
 
 
 
@@ -5019,12 +4958,9 @@ flow rates are tied to the pressure of the adjacent zones.
 A pressure zone can by any region within the computational domain that is separated from the rest of the domain, or the exterior,
 by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is
 necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
-
 \begin{lstlisting}
 &ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
 \end{lstlisting}
-
-\noindent
 This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s
 declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file.
 By default, the exterior of the computational
@@ -5073,14 +5009,9 @@ the ideal values.
 
 
 \subsubsection{Example Case: Breaking Pressure Zones}
-
 \label{zone_break_example}
 
-In this example, three simple compartments are initially isolated from each other and from the ambient environment outside. Each compartment is a separate pressure zone. Air
-is blown into Zone~1 at a constant rate of 0.1~kg/s, increasing its pressure approximately 2000~Pa by 10~s, at which time Zone~1 is opened to Zone~2, decreasing the
-overall pressure in the two zones to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled.
-At 15~s, the pressure is further decreased by opening a door to Zone~3, and, finally, at 20~s the pressure returns to ambient following the opening
-of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
+In this example, three simple compartments are initially isolated from each other and from the ambient environment outside. Each compartment is a separate pressure zone. Air is blown into Zone~1 at a constant rate of 0.1~kg/s, increasing its pressure approximately 2000~Pa by 10~s, at which time Zone~1 is opened to Zone~2, decreasing the overall pressure in the two zones to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled. At 15~s, the pressure is further decreased by opening a door to Zone~3, and, finally, at 20~s the pressure returns to ambient following the opening of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
 \begin{figure}[ht]
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break_fast}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break_slow}
@@ -5096,11 +5027,9 @@ use a low Mach number approximation. To maintain numerical stability, FDS gradua
 
 Since pressure zones are defined using {\ct XB}, it might not be possible to define a complexly shaped set of pressure zones using just the {\ct ZONE} inputs.  A work around for this is to define the complex zone as a series of zones in the same manner you would divide a domain into multiple meshes.  The check for merged pressure zones only works if two zones were initially isolated at the start of the calculation (there must have been a wall that was removed). Therefore, define an obstruction at the boundary of the zones that is removed after the first time step.
 
-\begin{warning}
-\noindent Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
-are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm)
-between compartments. Real buildings cannot withstand substantially larger pressures anyway.
-\end{warning}
+Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
+are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm) between compartments. Real buildings cannot withstand substantially larger pressures anyway.
+
 
 \subsection{Leaks}
 \label{info:Leaks}
@@ -5115,21 +5044,14 @@ flow speeds through the hole can be large and cause numerical instabilities.
 A better way to handle leakage is by exploiting pressure zones. A pressure zone is a user-specified volume within the computational domain that is
 entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. Leakage from one
 compartment to another is then designated on the input lines defining the individual pressure {\ct ZONE}s:
-
 \begin{lstlisting}
 &ZONE XB=..., LEAK_AREA(0)=0.0001 /
 &ZONE XB=..., LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
 \end{lstlisting}
-
-\noindent
-The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order
-implicitly defines Zone~1, Zone~2, etc.
-Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak
-is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa)
-with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur.
+The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur.
 
 The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
-\be  \dot{V}_{\hbox{\footnotesize leak}} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
+\be  \dot{V}_{\rm leak} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
 where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
 $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
 to be 1.
@@ -5137,12 +5059,9 @@ to be 1.
 Within FDS, leakage flows are handled by the HVAC solver.  A leak between two zones is considered to be a pair of HVAC {\ct VENT}s connected by a duct with a loss coefficient of 1.  To specify a leak between two zones, a solid surface in each of the zones must be given the attribute {\ct LEAK\_PATH}.  Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}.  In the above example, the leakage from Zone~1 to Zone~0 requires the attribute
 {\ct LEAK\_PATH=1,0}, meaning that the leak between Zones~1 and 0 is uniformly distributed
 over solids defined with:
-
 \begin{lstlisting}
 &SURF ID='whatever',..., LEAK_PATH=1,0 /
 \end{lstlisting}
-
-\noindent
 Likewise, the boundaries of Zone~1 and Zone~2 must include solids whose {\ct SURF} properties include the parameter {\ct LEAK\_PATH=1,2}, but these solids need not form a boundary between the two zones. The leakage is spread over the surfaces that have a specified {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
 
 The HVAC output quantities can be used to determine the leakage flows.  FDS give the duct connecting Zone~A with Zone~B the name {\ct 'LEAK A B'} and the duct nodes will be named {\ct 'LEAK A B'} for the Zone A side of the leak and {\ct 'LEAK B A'} for the Zone B side of the leak.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
@@ -5178,23 +5097,22 @@ For the case where the stack flow is through small leakage paths, divide the bui
 \subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
 
 The {\em stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only.  Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
-The interior air temperature, $T_b$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
-10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
+The interior air temperature, $T_{\rm b}$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
+10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_{\rm b}$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
 
 The initial density stratification inside and outside the building can be calculated using the relation:
 \be
    \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{{\cal R} T_0} z \right)
 \ee
-where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature.
-Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
+where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
 
 Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
-\be \frac{\Delta H }{H_n} = 1 + \frac{T_b}{T_\infty} \ee
-where $H_n$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points.  This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building.  Note that this is close to the midpoint value of 50~m above the bottom of the building.
-
-The pressure difference across the building's wall is computed from
+\be 
+   \frac{\Delta H }{H_{\rm n}} = 1 + \frac{T_{\rm b}}{T_\infty} 
+\ee
+where $H_{\rm n}$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points.  This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building.  Note that this is close to the midpoint value of 50~m above the bottom of the building. The pressure difference across the building's wall is computed from
 \be
-   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right)
+   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
 \ee
 where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Fig.~\ref{fig_stack_effect}.
 
@@ -5215,9 +5133,7 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 \label{info:pressure_boundary}
 
 In some situations, it is more convenient to specify a pressure, rather than a velocity, at a boundary. Suppose, for example, that you are modeling the
-interior of a tunnel, and a wind is blowing at one of the portals that affects the overall flow within the tunnel. If (and only if) the portal is defined using an
-{\ct OPEN} vent, then the {\em dynamic pressure} at the boundary can be specified like this:
-
+interior of a tunnel, and a wind is blowing at one of the portals that affects the overall flow within the tunnel. If (and only if) the portal is defined using an {\ct OPEN} vent, then the {\em dynamic pressure} at the boundary can be specified like this:
 \begin{lstlisting}
 &VENT XB=..., SURF_ID='OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind' /
 &RAMP ID='wind', T= 0.0, F=1.0 /
@@ -5225,8 +5141,6 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
             .
             .
 \end{lstlisting}
-
-\noindent
 The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
 \begin{eqnarray}
 {\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
@@ -5242,7 +5156,6 @@ The following lines, taken from the sample case, {\ct pressure\_boundary}, demon
 a time-dependent pressure boundary at the end of a tunnel. The tunnel is 10~m long, 1~m wide, 1~m tall
 with a fire in the middle and a pressure boundary imposed on the right side. The left side ({\ct XMIN}) is
 just an {\ct OPEN} boundary with no pressure specified. It is assumed to be at ambient pressure.
-
 \begin{lstlisting}
 &VENT MB = 'XMIN' SURF_ID = 'OPEN' /
 &VENT MB = 'XMAX' SURF_ID = 'OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind_ramp' /
@@ -5250,12 +5163,7 @@ just an {\ct OPEN} boundary with no pressure specified. It is assumed to be at a
 &RAMP ID='wind_ramp', T=15., F= 1. /
 &RAMP ID='wind_ramp', T=16., F=-1. /
 \end{lstlisting}
-
-\noindent
-Figure~\ref{pressure_boundary} shows two snapshots from Smokeview taken before and after the time when the positive pressure is
-imposed at the right portal of a tunnel. The fire leans to the
-left because of the preferential flow in that direction. It leans back to the right when the positive pressure
-is directed to become negative.
+Figure~\ref{pressure_boundary} shows two snapshots from Smokeview taken before and after the time when the positive pressure is imposed at the right portal of a tunnel. The fire leans to the left because of the preferential flow in that direction. It leans back to the right when the positive pressure is directed to become negative.
 
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/pressure_boundary_left}
@@ -5350,14 +5258,11 @@ do this, set {\ct RAMP\_Q}, {\ct RAMP\_T} or {\ct RAMP\_V} equal to a
 character string designating the ramp function to use for that
 particular surface type, then somewhere in the input file generate
 lines of the form:
-
 \begin{lstlisting}
  &RAMP ID='rampname1', T= 0.0, F=0.0 /
  &RAMP ID='rampname1', T= 5.0, F=0.5 /
  &RAMP ID='rampname1', T=10.0, F=0.7 /
 \end{lstlisting}
-
-\noindent
 Here, {\ct T} is the time, and {\ct F} indicates the fraction of the heat
 release rate, wall temperature, velocity, mass fraction, etc., to apply.
 Linear interpolation\footnote{By default, FDS uses a linear interpolation routine to find time or temperature-dependent values between user-specified points.
@@ -7231,7 +7136,8 @@ Modeling fire suppression by water has three principal components: transporting 
 \subsection{Velocity on Solid Surfaces}
 \label{info:surface_droplets}
 
-When a droplet strikes a solid surface, it sticks and is reassigned a new speed and direction. If the surface is
+When a droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=.FALSE.} on the
+{\ct MISC} line. It is normally {\ct .TRUE.}}, it sticks and is reassigned a new speed and direction. If the surface is
 horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
 The rate at which the droplets move over the horizontal and vertical surfaces is difficult to
 quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line
@@ -7241,13 +7147,8 @@ allow you to control the rate at which droplets move horizontally or vertically 
 There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally
 along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and
 absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the
-{\ct MISC} line. It is normally false.
+{\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
 
-\begin{warning}
-Be aware that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
-\end{warning}
-
-\noindent
 A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct cascade.fds}. Figure~\ref{cascade} shows a stream
 of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
 
@@ -7263,10 +7164,8 @@ of water droplets impinging on the top of a box followed by the cascading of wat
 \label{cascade}
 \end{figure}
 
-\begin{warning}
-\noindent If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.FALSE.} on the
-{\ct MISC} line. It is normally true.
-\end{warning}
+
+
 
 \subsection{Reduction of the Burning Rate}
 
@@ -7408,12 +7307,12 @@ You can change the values of the output by multiplying by {\ct CONVERSION\_FACTO
 If you do not want the {\ct DEVC} {\ct QUANTITY} to be included in the output file, set {\ct OUTPUT=.FALSE.} on the {\ct DEVC} line. Sometimes, devices are just used as clocks or control devices. In these cases, you might want to prevent its output from cluttering the output file. If the {\ct DEVC} {\ct QUANTITY='TIME'}, then {\ct OUTPUT} is set to {\ct .FALSE.} automatically.
 
 
-\begin{warning}
+
 All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~\ref{info:PROP}) have their {\ct QUANTITY}
 specified on a {\ct PROP} line.
 A {\ct QUANTITY} specified on a {\ct PROP} line associated with a {\ct DEVC} line will override a {\ct QUANTITY}
 specified on the {\ct DEVC} line.
-\end{warning}
+
 
 
 \newpage
@@ -7996,11 +7895,11 @@ time functions to be delayed until the device {\ct SETPOINT} is reached. ``Deact
 that the parameters on the {\ct SURF} line are all nullified, so it is a good idea to check the functionality with a simple example.
 
 
-\begin{warning}
+
 A {\ct 'MIRROR'} or {\ct 'OPEN'} {\ct VENT} should not be activated or deactivated.
 You can, however, place an obstruction in front of an {\ct 'OPEN'} {\ct VENT} and then create it or remove it to model the closing or opening of a door or
 window.
-\end{warning}
+
 
 
 
@@ -8171,9 +8070,9 @@ The {\ct thermostat} uses a {\ct SETPOINT} to turn on the
 {\ct FAN} when the temperature falls below 23~$^\circ$C ({\ct ON\_BOUND='LOWER'})
 and it turns off when the temperature rises above 27~$^\circ$C.
 
-\begin{warning}
+
 Note that a deadband controller needs to have {\ct LATCH} set to {\ct .FALSE.}
-\end{warning}
+
 
 \subsection{Control Function: \texorpdfstring{{\tt RESTART} and {\tt KILL}} {RESTARTKILL} }
 
@@ -8221,13 +8120,11 @@ In this case, the control would start false and would switch to
 true when the timer reaches 60~s.  It would then stay in a true
 state until the timer reaches 120~s and would then change back to false.
 
-\begin{warning}
+
 Note that when using control functions the {\ct ID}s assigned to both the
 {\ct CTRL} and the {\ct DEVC} inputs must be unique across both sets of inputs, i.e., you cannot use the
 same {\ct ID} for both a control function and a device.
-\end{warning}
 
-\noindent
 You can make a fan operate on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 
 \begin{lstlisting}
@@ -9397,11 +9294,9 @@ account for the fact that the solid surface might shift to conform to the underl
 volume that extends beyond a single mesh. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using
 a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
 
-\begin{warning}
-\noindent
-Use the {\ct STATISTICS} feature with caution because
-it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
-\end{warning}
+
+Use the {\ct STATISTICS} feature with caution because it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
+
 
 \subsubsection{Minimum or Maximum Value}
 
@@ -9494,9 +9389,9 @@ only. In other words, if you want to know the mass flow out of a
 compartment, use {\ct 'MASS FLOW +'} or {\ct 'MASS FLOW -'}, depending
 on the orientation of the door.
 
-\begin{warning}
+
 The quantities {\ct 'MASS FLOW'} and {\ct 'HEAT FLOW'} should not be applied at a solid boundary.
-\end{warning}
+
 
 \subsection{Temporally-Integrated Outputs}
 \label{info:time_integral}
@@ -9848,12 +9743,13 @@ through a horizontal plane, like the total amount entrained in a fire plume. Use
 Here, the {\ct ID} is just a label in the output file.
 
 
-\begin{warning}
+
 When an output
 quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or
 {\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just
 remember that all output quantity names ought to be in single quotes.
-\end{warning}
+
+
 
 \clearpage
 
