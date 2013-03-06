@@ -2483,6 +2483,11 @@ objects drawn afterwards by y along the y axis.
 \hitem{OFFSETZ} The command, {\tt z offsetz}, translates
 objects drawn afterwards by z along the z axis.
 
+\hitem{ORIENX,ORIENY,ORIENZ} The command, {\tt x y z orienx}, rotates the 
+the  scene so that the vector $u=(1,0,0)$ in the original scene maps to $w=(x,y,z)$.
+The commands {\tt orieny} and {\tt orienz} are similar to {\tt orienx} mapping $(0,1,0)$ and $(0,0,1)$ to $(x,y,z)$ 
+instead.
+
 \hitem{POP} The command, {\tt pop}, restores the origin and axis
 orientation saved using a previous {\tt pop}\ command.  The total
 number of {\tt pop}\ and {\tt push}\ commands must be equal,
@@ -2493,6 +2498,10 @@ object.
 \hitem{PUSH} The command, {\tt push}, saves the origin and axis
 orientation. (see above comment about number of {\tt push}\ and
 {\tt pop}\ commands).
+
+\hitem{RANDXY,RANDXZ,RANDYZ} The command {\tt flag randxy} performs a random rotation about the z axis (in the xy plane)
+if {\tt flag} is 1.  If {\tt flag} is anything else this command has no effect.  The commands {\tt randxz} and {\tt randyz} are similar, rotating within the
+xz and yz planes instead of the xy plane.
 
 \hitem{ROTATEAXIS} The command, {\tt angle x y z rotateaxis}, rotates objects
 drawn afterwards by {\tt angle} degrees about an axis defined by the vector $(x,y,z)$.
