@@ -22,6 +22,13 @@ char string_util_revision[]="$Revision$";
 #include "datadefs.h"
 #include "string_util.h"
 
+/* ----------------------- randomab ----------------------------- */
+
+float randomab(int seed, float minval, float maxval){
+  srand(seed);
+  return  minval + (maxval-minval)*(float)rand()/RAND_MAX;
+}
+
 /* ----------------------- fparsecsv ----------------------------- */
 
 void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens){

@@ -19,6 +19,7 @@ typedef struct {
   char *longlabel, *shortlabel, *unit;
 } flowlabels;
 
+EXTERNCPP float randomab(int seed, float minval, float maxval);
 EXTERNCPP void to_lower(char *string);
 EXTERNCPP char *STRCHRR(char *strbeg, char *searchbeg, int c);
 EXTERNCPP unsigned int diffdate(char *token, char *tokenbase);
