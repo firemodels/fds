@@ -3,14 +3,14 @@
 \chapter{Thermal Radiation}
 \label{chapter:radiation}
 
+\section{Radiation Transport Equation}
+
 Energy transport consists of convection, conduction and
 radiation. Convection of heat is accomplished via the solution of the
 basic conservation equations. Gains and losses of heat via gas phase conduction
 and radiation are represented by the divergence of the heat flux
 vector in the energy equation, $\nabla\!\cdot \dbq''$. This section
 describes the equations associated with the radiative part, $\dbq''_r$.
-
-\section{Radiation Transport Equation}
 
 The Radiative Transport Equation (RTE) for an absorbing, emitting, and scattering medium is
 \begin{eqnarray}
@@ -27,27 +27,78 @@ where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength,
 $\la$, $\bs$ is the direction vector of the intensity, and
 $\kappa(\bx,\la)$ and $\sigma_s(\bx,\la)$ are the local absorption
 and scattering coefficients,
-respectively. $B(\bx,\la)$ is the emission source term.
-The integral on the
-right hand side describes the in-scattering from other directions. The in-scattering and scattering terms are detailed in section~\ref{droplet-radiation}.
+respectively. $B(\bx,\la)$ is the emission source term, describing how much heat is emitted by the local mixture of gas, soot and droplets/particles.
+The integral on the right hand side describes the in-scattering from other directions. The in-scattering and scattering terms are detailed in section~\ref{droplet-radiation}.
 
 In practical simulations, the spectral ($\la$) dependence of the RTE cannot be resolved
-accurately. Instead, the radiation spectrum is divided into
-a relatively small number of bands and a separate RTE is derived for
+accurately. Instead, the radiation spectrum is divided into a relatively small number of bands and a separate RTE is derived for
 each band. For instance, the band specific RTE for a non-scattering gas is
-\be   \bs \cdot \nabla I_n(\bx,\bs) = \kappa_n(\bx) \;
-        \left[ I_{b,n}(\bx) - I_n(\bx,\bs) \right],\;\; n = 1...N
+\be   \bs \cdot \nabla I_n(\bx,\bs) = B_n(\bx)- \kappa_n(\bx) I_n(\bx,\bs),\;\; n = 1...N
 \label{bandRTE} \ee
 where $I_n$ is the intensity integrated over the band $n$, and $\kappa_n$
-is the appropriate mean absorption coefficient for the band.
-The limits of the bands are selected to give an accurate
-representation of the most important radiation bands of $\rm CO_2$ and
-water vapor. If the absorption of the fuel is known to be important,
-separate bands can be reserved for fuel, and the total number of
-bands, $N$, is increased from six to nine.
+is the appropriate mean absorption coefficient for the band. When the intensities corresponding to the bands are known, the total
+intensity is calculated by summing over all the bands
+\be
+   I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
+\ee
+Similarly, the total values of other radiation quantities can be calculated as sums of their band-specific values.
+
+\section{Radiation in absorming and emitting media}
+
+\subsection{Emission Source Term}
+
+The emission term is a function of the refractive index, $n_r$, absorption coefficient, $\kappa$, and a source term, $I_{b,\la}$:
+\be
+B(\bx,\la) = n_r(\bx,\la) \kappa(\bx,\la) I_{b,\la}(\bx)
+\ee
+In most fire applications the radiation is emitted to air and we can assume $n_r(\bx,\la)=1$. 
+
+The source term $I_{b,\la}(\bx)$ is the {\em Planck function} that represents the
+intensity of blackbody radiation at temperature, $T=T(\bx)$, and wavelength, $\la$
+\be
+I_{b,\la}(T) = \dfrac{2 \, h \, c^2 }{\la^5 \left[\exp\left(\dfrac{h \, c }{\la \, k_B \, T}\right)-1\right]}
+\ee
+Here, $h$ is the Planck constant ($h$ = 6.626 10$^{\rm -34}$~J.s),
+$c$ is the speed of light in vacuum ($c$ = 2.998$\cdot$10$^{\rm 8}$~m.s$^{\rm -1}$),
+and $k_B$ is the Boltzmann constant ($k_B$ = 1.381 10$^{\rm -23}$~J.K$^{\rm -1}$).
+The Planck function can also be written in terms of wavenumber, $\om=1/\la$,
+\be
+I_{b,\om}(T) = \dfrac{2 \, h \, c^2 \, \om^3}{\exp\left(\dfrac{h \, c \, \om}{k_B \, T}\right)-1}
+\ee
+
+The emission source term for radiation band $n$ is
+\be
+B_n(\bx) = \kappa_n(\bx) I_{b,n}(T(\bx))
+\ee
+where $I_{b,n}$ is can be calculated as a fraction of the blackbody radiation at temperature $T(\bx)$
+\be I_{b,n} = F_n(\la_{\rm min},\la_{\rm max}) \; \sigma \; T^4/\pi \ee
+where $\sigma$ is the Stefan-Boltzmann constant.
+The calculation of factors $F_n$ is explained in Ref.~\cite{Siegel:1}.
+
+\subsection{Limits of the radiation bands}
+
+Even with a reasonably small number of bands, solving multiple RTEs is very time consuming. Fortunately, in most large-scale fire
+scenarios soot is the most important combustion product controlling the thermal radiation from the fire and hot smoke. As the radiation spectrum of
+soot is continuous, it is possible to assume that the gas behaves as a gray medium.  The spectral dependence is then lumped into one
+absorption coefficient ($N=1$) and the source term is given by the
+black body radiation intensity
+\be 
+I_b(\bx) = \frac{\sigma \, T(\bx)^4}{\pi} \label{emission_source_term} 
+\ee
+This is the default mode of FDS and appropriate for most problems of fire engineering. 
+
+In optically thin flames, where the amount of soot is small compared to the amount of $\rm CO_2$ and water vapor, the gray gas
+assumption may produce significant over-predictions of the emitted radiation. 
+From a series of numerical experiments using methane as the fuel, it has been found
+that six bands ($N=6$) are usually enough to improve the accuracy in these cases. The limits of the bands are selected to give an accurate
+representation of the most important radiation bands of $\rm CO_2$ and water vapor. 
 The limits of the bands for methane are shown in Table~\ref{banditos}.
 
+If the absorption of the fuel is known to be important, separate bands can be reserved for fuel, increasing the total number of bands, $N$. The number of 
+additional bands depends on the fuel, as discussed in section~\ref{gas_spectra}.
+
 \begin{table}[ht]
+%To BE UPDATED
 \caption{Limits of the spectral bands.}
 \vspace{0.1in}
 \label{banditos}
@@ -85,75 +136,46 @@ The limits of the bands for methane are shown in Table~\ref{banditos}.
 \end{table}
 \normalsize
 
-
-\subsection{Emission Source Term}
-
-For each spectral band, $n$, the emission term is a function of the refractive index, $n_n$, absorption coefficient, $\kappa_n$, and a source term, $I_{b,n}$:
-\be
-B(\bx,\la) =
-n_{n} \kappa_n(\bx) I_{b,n}(\bx) =
-\kappa_n(\bx) I_{b,n}(\bx)
-\ee
-The source term can be written as a fraction of the black body radiation
-\be I_{b,n} = F_n(\la_{\rm min},\la_{\rm max}) \; \sigma \; T^4/\pi \ee
-where $\sigma$ is the Stefan-Boltzmann constant.
-The calculation of factors $F_n$ is explained in Ref.~\cite{Siegel:1}.
-When the intensities corresponding to the bands are known, the total
-intensity is calculated by summing over all the bands
-\be
-   I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
-\ee
-Even with a reasonably small number of bands, solving multiple
-RTEs is very time consuming. Fortunately, in most large-scale fire
-scenarios soot is the most important combustion product controlling the
-thermal radiation from the fire and hot smoke. As the radiation spectrum of
-soot is continuous, it is possible to assume that the gas behaves as a
-gray medium.  The spectral dependence is then lumped into one
-absorption coefficient ($N=1$) and the source term is given by the
-black body radiation intensity
-\be I_b(\bx) = \frac{\sigma \, T(\bx)^4}{\pi} \label{emission_source_term} \ee
-This is the default mode of FDS and appropriate for most problems of
-fire engineering. In optically thin flames, where the amount of soot
-is small compared to the amount of $\rm CO_2$ and water vapor, the gray gas
-assumption may produce significant over-predictions of the emitted
-radiation. From a series of numerical experiments using methane as the fuel, it has been found
-that six bands ($N=6$) are usually enough to improve the accuracy in
-these cases.
-
-
-
 \subsection{Absorption Coefficients}
 
-For the calculation of the gray or band-mean absorption coefficients,
-$\kappa_n$, a narrow-band model, RADCAL~\cite{RadCal}, has been
-implemented in FDS. RADCAL computes the spectral properties of the
-radiation participating species at discrete values of wavenumber and temperature,
-and returns the Planck mean absorption coefficient, $\kappa_n$, for each spectral band, $n$:
+For the calculation of the gray or band-mean absorption coefficients, $\kappa_n$, a narrow-band model, RADCAL~\cite{RadCal}, has been
+implemented in FDS. RADCAL computes the spectral properties of the radiation participating species at discrete values of wavenumber and temperature,
+and returns two alternative mean absorption coefficients for each spectral band, $n$. The first coefficient is the Planck mean coefficient
 \begin{equation}
 \kappa_n(P,T) = \dfrac{\pi}{\sigma T^4}
-\displaystyle\int_{\om_{\min}}^{\om_{\max}}{I^o_{b,\om}(T)
+\displaystyle\int_{\om_{\min}}^{\om_{\max}}{I_{b,\om}(T)
 \displaystyle\sum_{i}^{\rm species} \bar{\kappa}_i(\om,T) \, P_i \; \d\om}
 \end{equation}
-where $\om$ represents the wavenumber, in units of cm$^{\rm -1}$,
+where $\om$ is the wavenumber, in units of cm$^{\rm -1}$,
 $P_i$ is the partial pressure of the $i$th participating species, in units of ${\rm atm}$, and
 $\bar{\kappa}_i$ is the spectral absorption coefficient of the $i$th participating species, in units of
-${\rm atm^{-1}cm^{-1}}$. The Planck function, $I^o_{b,\om}(T)$, represents the
-intensity of blackbody radiation at temperature, $T$, and wavenumber, $\om$:
+${\rm atm^{-1}cm^{-1}}$. 
+Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function
+of the gas-phase temperature and partial pressure, and is independent of the pathlength. Its units are in cm$^{\rm -1}$.
+
+The second coefficient is so-called {\em path mean} or {\em effective} absorption coefficient,$\kappa_n(e,T)$ which is defined according to the following
+equation
 \be
-I^o_{b,\om}(T) = \dfrac{2 \, h \, c^2 \, \om^3}{\exp\left(\dfrac{h \, c \, \om}{k_B \, T}\right)-1}
+\int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad})d\la = \frac{\sigma}{\pi}
+       \left[\left(1-e^{-\kappa_n(e,T)L}\right)T^4 + e^{-\kappa_n(e,T)L} T_{\rm rad}^4\right]
 \ee
-Here, $h$ is the Planck constant ($h$ = 6.626 10$^{\rm -34}$~J.s),
-$c$ is the speed of light in vacuum ($c$ = 2.998 10$^{\rm 10}$~cm.s$^{\rm -1}$),
-and $k_B$ is the Boltzmann constant ($k_B$ = 1.381 10$^{\rm -23}$~J.K$^{\rm -1}$).
-Note that the temperature used in the calculation of $\kappa_n$ is
-the local gas temperature; thus, $\kappa_n$ is a function
-of the gas-phase temperature and partial pressure,
-and is independent of the pathlength. Its units are in cm$^{\rm -1}$.
-The value of the spectral absorption coefficient, $\bar{\kappa}_i$,
-is averaged over a narrow band whose spectral width, $\Delta \om$, varies from
-5~cm$^{-1}$ for $\om < $ 1100~cm$^{-1}$, to
-25~cm$^{-1}$ for 1100~cm$^{-1} \leq \om < $ 5000~cm$^{\rm -1}$,
-and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \om$.
+where $L$ is the path lenght and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left-hand-side 
+integral by calculating the intensity leaving a uniform gas layer of thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for 
+a large number of narrow spectral bands.  By default, path length $L$ 
+is five times the characteristic cell size of the simulation, limited by value $L = $ 10 m from above. It can also be set by the user. 
+
+In cases with only one band ($N$=1), the smaller of the two absorption coefficients is used:
+\be \kappa_n=\min(\kappa_n(P,T),\kappa_n(e,T))
+\ee
+If $N>1$ or $L=0$, $\kappa_n=\kappa_n(P,T)$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, 
+fuel or combustion products, regardless of the number of radiation bands $N$. 
+
+\subsection{Spectral data for gases}
+\label{gas_spectra}
+
+The value of the spectral absorption coefficient, $\bar{\kappa}_i$, is averaged over a narrow band whose spectral width, $\Delta \om$, varies from
+5~cm$^{-1}$ for $\om < $ 1100~cm$^{-1}$, to 25~cm$^{-1}$ for 1100~cm$^{-1} \leq \om < $ 5000~cm$^{\rm -1}$,
+and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \om$. 
 
 A combination of molecular models and data tables are used to compute the spectral radiative
 properties of the radiation participating species.
@@ -748,14 +770,17 @@ that gives the scattered intensity fraction from direction $\bs'$ to $\bs$.\\
 
 \subsection{Absorption and scattering coefficients}
 
-The local absorption and scattering coefficients within a spray/particle cloud can be calculated
-from the local droplet number density and size distribution
+The capability of an individual droplet or particle to absorb and scatter radiation depends on its cross sectional area and radiative material 
+properties. For simplicity, we next assume that the particles are spherical in shape, in which case the cross sectional area of a particle
+is $\pi r^2$, where $r$ is the particle radius. If the local number density distribution of droplets or particles at location $\bx$ is 
+denoted by $n(r(\bx))$, the local absorption and scattering coefficients within a spray/particle cloud can be calculated
+from 
 \begin{align}
 \kappa_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_a(r,\la) \; \pi r^2 \; \d r \\ %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_a(r,\la) \; dr \\
 \sigma_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_s(r,\la) \; \pi r^2 \; \d r    %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_s(r,\la) \; dr
 \end{align}
-where $r$ is the particle radius and $Q_a$ and $Q_s$ are absorption and
-scattering efficiencies, respectively.  For the computation of the spray/particle cloud radiative properties,
+where $Q_a$ and $Q_s$ are the absorption and scattering efficiencies, respectively.  
+For the computation of the spray/particle cloud radiative properties,
 spherical particles are assumed and the radiative properties of the individual particles
 are computed using Mie theory.
 
@@ -797,17 +822,14 @@ integral can now be written as
 \end{align}
 where $\chi_f = \chi_f(r,\la)$ is a fraction of the total intensity
 originally within the solid angle $\delta\Omega^l$ that is scattered
-into the same angle $\delta\Omega^l$.
+into the same angle $\delta\Omega^l$. The calculation of $chi_f$ is discussed in section~\ref{forward_fraction}.
 
-\subsection{Solution Procedure}
-
-Defining an effective scattering coefficient section
+An effective scattering coefficient is defined
 \be
-\overline{\sigma_d}(\bx,\la) =
-\frac{4\pi N(\bx)}{4\pi-\delta\Omega^l}
-\int_0^\infty(1-\chi_f) \; C_s(r,\la) \; \d r
+\overline{\sigma_d}(\bx,\la) = A_d(\bx) \frac{4\pi}{4\pi-\delta\Omega^l} (1-\chi_f) \; Q_s(r_{32},\la) 
 \ee
-the spray RTE becomes
+gives
+%SIMO is going HERE
 \be
 \bs \cdot \nabla I_{\la}(\bx,\bs) =
 -\left[\kappa_d(\bx,\la) + \overline{\sigma_d}(\bx,\la)\right]
@@ -828,13 +850,16 @@ becomes
 where the source function is based on the average particle temperature within a cell.
 
 Before the actual simulation, both $\kappa_d$ and $\overline{\sigma_d}$ are averaged over the
-infrared wavelengths (1-200 $\mu$m).  A constant ``radiation'' temperature, $T_{rad}$, is used
-in the wavelength weighting.  $T_{rad}$ should be selected to
+infrared wavelengths (1-200 $\mu$m).  A constant ``radiation'' temperature, $T_{\rm rad}$, is used
+in the wavelength weighting.  $T_{\rm rad}$ should be selected to
 represent a typical radiating flame temperature. A value of 1173~K is
 used by default.  The averaged quantities, now functions of the
 droplet mean diameter only, are stored in one-dimensional arrays.
 During the simulation, the local properties are found by table
 look-up using the local Sauter mean droplet diameter.
+
+\subsection{Forward fraction of scattering}
+\label{forward_fraction}
 
 The computation of $\chi_f$ for a similar but simpler situation has been derived in Ref.~\cite{Yang:3}. It can be shown that here
 $\chi_f$ becomes
