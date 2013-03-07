@@ -25,7 +25,7 @@ char string_util_revision[]="$Revision$";
 /* ----------------------- randomab ----------------------------- */
 
 float randomab(int seed, float minval, float maxval){
-  srand(seed);
+  if(seed>=0)srand(seed);
   return  minval + (maxval-minval)*(float)rand()/RAND_MAX;
 }
 
