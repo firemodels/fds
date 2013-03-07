@@ -5018,7 +5018,7 @@ where $f(t)$ is the result of evaluating the {\ct RAMP\_T} at time $t$, $T_0$ is
 &SURF ID='...', MASS_FLUX(1:2)=0.1,0.3, SPEC_ID(1:2)='ARGON','NITROGEN',
       TAU_MF(1:2)=5.,10. /
 \end{lstlisting}
-indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^2$.s)} and 0.3~\si{kg/(m$^2$.s)} over time periods of approximately 5~s and 10~s, respectively. 
+indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^2$.s)} and 0.3~\si{kg/(m$^2$.s)} over time periods of approximately 5~s and 10~s, respectively.
 
 
 \begin{table}[ht]
@@ -5594,8 +5594,8 @@ Note that if this parameter is used, then some form of heat/ignition source must
 At certain critical points in a calculation, like the moment of ignition, the local reaction rate can be very large due to limitations in the models, long time
 steps, or both. To prevent fictitiously high values of the reaction rate that can lead to numerical instabilities, a limiting value of the heat release rate
 per unit volume is used:
-\be 
-   \dq'''_{\hbox{\tiny max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE} 
+\be
+   \dq'''_{\hbox{\tiny max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE}
 \ee
 where the default values of {\ct HRRPUA\_SHEET} and {\ct HRRPUV\_AVERAGE} are 200 kW/m$^2$ and 2500 kW/m$^3$, respectively. The use of these limiting values comes from a scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium}.
 
@@ -5652,7 +5652,7 @@ The reaction stoichiometry is specified using the stoichiometric coefficients, {
 \item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (Default {\ct .TRUE.})
 \item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 0.00001)
 \item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass balance check.  (Default 0.0001)
-\end{description} 
+\end{description}
 
 
 
@@ -5701,7 +5701,7 @@ To set the initial concentration of fuel, an {\ct INIT} line is used:
 \end{lstlisting}
 Since this is not a simple chemistry problem, either the enthalpy of formation of PVC or the heat of combustion of the reaction should be specified. In this case, the heat of combustion for PVC is taken from the SFPE Handbook~\cite{SFPE:Tewarson}.
 \begin{lstlisting}
-&REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS', 
+&REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS',
       NU=-1,-1,1, FIXED_MIX_TIME=0.1 /
 \end{lstlisting}
 Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
@@ -6524,9 +6524,9 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 \begin{lstlisting}
 &PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
       PROP_ID='needle image', STATIC=.TRUE. /
-&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000, 
+&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000,
       MASS_PER_VOLUME=1. /
-&PROP ID='needle image', SMOKEVIEW_ID='TUBE', 
+&PROP ID='needle image', SMOKEVIEW_ID='TUBE',
       SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
 
 &SURF ID = 'wet vegetation'
@@ -8457,11 +8457,11 @@ combustion. The most useful quantity for assessing visibility in a
 space is the {\em light extinction coefficient},
 $K$~\cite{SFPE:Mulholland}. The intensity of monochromatic light
 passing a distance $L$ through smoke is attenuated according to
-\be I/I_0 = e^{-KL} \ee
+\be I/I_0 = {\rm e}^{-KL} \ee
 The light extinction coefficient, $K$, is a product of the
-density of smoke particulate, $\rho Y_s$, and a mass specific
+density of smoke particulate, $\rho Y_{\rm S}$, and a mass specific
 extinction coefficient that is fuel dependent
-\be K = K_m \; \rho \, Y_s \label{mec} \ee
+\be K = K_{\rm m} \; \rho \, Y_{\rm S} \label{mec} \ee
 Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct QUANTITY} of {\ct 'ASPIRATION'}, {\ct 'CHAMBER OBSCURATION'} (smoke
 detector), or {\ct 'PATH OBSCURATION'} (beam detector) are discussed
 respectively in Section~\ref{info:aspiration_detector},
@@ -8479,13 +8479,13 @@ domain, the visibility $S$ does as well.
 Three parameters control smoke production and visibility.
 The first is the {\ct SOOT\_YIELD} on the {\ct REAC} line, defined as the fraction of fuel mass that
 is converted to soot if the simple chemistry approach is being used. The second parameter,
-{\ct MASS\_EXTINCTION\_COEFFICIENT}, is the $K_m$ in Eq.~(\ref{mec}). It is defined on one or more of the {\ct SPEC} lines\footnote{When using the simple chemistry combustion model, you can change the default mass extinction coefficient by adding a line to the input file of the form: \tt{\footnotesize \&SPEC ID='SOOT', MASS\_EXTINCTION\_COEFFICIENT=..., LUMPED\_COMPONENT\_ONLY=.TRUE. /} } for the various light absorbing gas species. Its default value is 8700~m$^2$/kg, a value
-suggested for flaming combustion of wood and plastics\footnote{For most flaming fuels, a suggested value for $K_m$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a wavelength of 633~nm~\cite{Mulholland:F+M}}. The third parameter, {\ct VISIBILITY\_FACTOR} on the {\ct MISC} line, is the
+{\ct MASS\_EXTINCTION\_COEFFICIENT}, is the $K_{\rm m}$ in Eq.~(\ref{mec}). It is defined on one or more of the {\ct SPEC} lines\footnote{When using the simple chemistry combustion model, you can change the default mass extinction coefficient by adding a line to the input file of the form: \tt{\footnotesize \&SPEC ID='SOOT', MASS\_EXTINCTION\_COEFFICIENT=..., LUMPED\_COMPONENT\_ONLY=.TRUE. /} } for the various light absorbing gas species. Its default value is 8700~m$^2$/kg, a value
+suggested for flaming combustion of wood and plastics\footnote{For most flaming fuels, a suggested value for $K_{\rm m}$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a wavelength of 633~nm~\cite{Mulholland:F+M}}. The third parameter, {\ct VISIBILITY\_FACTOR} on the {\ct MISC} line, is the
 constant $C$ in Eq.~(\ref{vis}). It is 3 by default.
 
 The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar quantity is the
 {\ct 'OPTICAL DENSITY'}, $K/2.3$, the result of using $\log_{10}$ in the definition
-\be D \equiv - \frac{1}{L} \, \log_{10} \left( \frac{I}{I_0} \right) = K \, \log_{10} e   \ee
+\be D \equiv - \frac{1}{L} \, \log_{10} \left( \frac{I}{I_0} \right) = K \, \log_{10} {\rm e}   \ee
 The visibility $S$ is output via the {\ct QUANTITY} called {\ct 'VISIBILITY'}. Note
 that, by default, the visibility is associated with the smoke that is implicitly defined by the simple chemistry
 model. However, this quantity can also be associated with an
@@ -8522,14 +8522,14 @@ height. Compute the quantities:
                   (H-z_{\rm int})\; \frac{1}{T_{\rm u}} + z_{\rm int} \; \frac{1}{T_{\rm l}} = \int_0^H \; \frac{1}{T(z)} \; \d z &=& I_2
 \end{eqnarray*}
 Solve for $z_{\rm int}$:
-\be 
-   z_{\rm int} = \frac{ T_{\rm l} \, (I_1 \, I_2 - H^2)}{I_1+I_2 \, T_{\rm l}^2 - 2\, T_{\rm l} \, H} 
+\be
+   z_{\rm int} = \frac{ T_{\rm l} \, (I_1 \, I_2 - H^2)}{I_1+I_2 \, T_{\rm l}^2 - 2\, T_{\rm l} \, H}
 \ee
 Let $T_{\rm l}$ be the temperature in the lowest mesh cell and, using
 Simpson's Rule, perform the numerical integration of $I_1$ and
 $I_2$. $T_{\rm u}$ is defined as the average upper layer temperature via
-\be 
-   (H-z_{\rm int})\; T_{\rm u} = \int_{z_{\rm int}}^H \; T(z) \; \d z 
+\be
+   (H-z_{\rm int})\; T_{\rm u} = \int_{z_{\rm int}}^H \; T(z) \; \d z
 \ee
 Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
@@ -8574,7 +8574,7 @@ If the heat flux gauge used in an experiment has a temperature other
 than ambient, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm G}$) on the {\ct PROP} line
 associated with the device.  When comparing against a radiometer
 measurement, use {\ct RADIOMETER}:
-\be 
+\be
    \dq_{\rm radiometer}'' = \dq_{\rm r}''/\epsilon + \sigma (T_{\rm w}^4-T_\infty^4)
 \ee
 For diagnostic purposes it is sometimes convenient to output the {\ct 'INCIDENT HEAT FLUX'}:
@@ -8823,16 +8823,16 @@ Micro-Combustion Calorimetry or MCC is similar to TGA, except the vaporized gas 
 \begin{equation*}
    \hbox{\ct 'NORMALIZED HEAT RELEASE RATE'} =  \dot{m}''_f (t) \, \Delta H \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(W/g)}
 \end{equation*}
-Note that $\dot{m}''_f$ is the mass flux of fuel and $\Delta H$ is the heat of combustion.
+Note that $\dot{m}''_{\rm F}$ is the mass flux of fuel and $\Delta H$ is the heat of combustion.
 
 
 \subsubsection{Differential Scanning Calorimetry (DSC) Output}
 
 Differential Scanning Calorimetry or DSC is a measurement of the rate of heat absorption by a small material sample under constant heating. The result is a normalized heat absorption rate:
 \begin{equation*}
-   \hbox{\ct 'NORMALIZED HEATING RATE'} =  \dot{q}''_c (t) \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(W/g)}
+   \hbox{\ct 'NORMALIZED HEATING RATE'} =  \dot{q}''_{\rm c} (t) \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(W/g)}
 \end{equation*}
-Note that it is assumed that the sample is heated purely by convection, in which case $\dot{q}_c''$ is the convective heat flux.
+Note that it is assumed that the sample is heated purely by convection, in which case $\dot{q}_{\rm c}''$ is the convective heat flux.
 
 
 
@@ -8931,12 +8931,9 @@ measurement.
 \label{info:statistics}
 
 A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
-
 \begin{lstlisting}
-&DEVC XB=2.3,4.5,2.8,6.7,3.6,7.8, QUANTITY='TEMPERATURE', ID='maxT', STATISTICS='MAX' /
+&DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', STATISTICS='MAX' /
 \end{lstlisting}
-
-\noindent
 causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it
 does not compute the maximum over the entire computational domain, just the specified volume, and this volume must lie within a single mesh.
 Other {\ct STATISTICS} are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase,
@@ -8948,7 +8945,6 @@ sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for su
 account for the fact that the solid surface might shift to conform to the underlying numerical grid. Also, be careful not to specify a
 volume that extends beyond a single mesh. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using
 a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
-
 
 Use the {\ct STATISTICS} feature with caution because it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
 
@@ -9096,7 +9092,7 @@ The value of $y^+$ reported is half (since the velocity lives at the cell face c
 \be
 y^+ = \frac{1}{2} \frac{\delta n}{\delta_\nu} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
 \ee
-where $\tau_w = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_w$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.  The friction velocity may also be output in a boundary file or via a device attached to a wall.  For example:
+where $\tau_{\rm w} = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_{\rm w}$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.  The friction velocity may also be output in a boundary file or via a device attached to a wall.  For example:
 \begin{lstlisting}
 &DEVC XYZ=1,0,0, QUANTITY='FRICTION VELOCITY', IOR=3, ID='u_tau' /
 \end{lstlisting}
@@ -9132,9 +9128,9 @@ Currently there are three different device options for outputting aerosol concen
 \noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot in the gas phase treating the soot as if it were an ideal gas. The quantity {\ct 'AEROSOL VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot as if it were a solid particle in the computational cell based on the following equation,
 
 \begin{equation}\label{eq:soot_volume_fraction}
-f_v = \rho Y_{a} / \rho_{a}
+f_v = \rho Y_{\rm a} / \rho_{\rm a}
 \end{equation}
-\noindent where $\rho$ is the local density, $Y_{a}$ is the local mass fraction of the aerosol, and $\rho_{a}$ is density of the aerosol defined using the {\ct SPEC} input {\ct DENSITY\_SOLID}, which defaults to 1800~(kg/m$^3$) for soot.
+\noindent where $\rho$ is the local density, $Y_{\rm a}$ is the local mass fraction of the aerosol, and $\rho_{\rm a}$ is density of the aerosol defined using the {\ct SPEC} input {\ct DENSITY\_SOLID}, which defaults to 1800~(kg/m$^3$) for soot.
 
 \subsection{Gas Velocity}
 \label{info:velocity}
@@ -9151,10 +9147,9 @@ with measurements. For Plot3D files, add {\ct PLOT3D\_VELO\_INDEX(N)=...} to the
 
 There are several outputs that report the enthalpy of the gas mixture. First, the {\ct 'SPECIFIC ENTHALPY'} and the {\ct 'SPECIFIC SENSIBLE ENTHALPY'} are defined:
 \be
-   h = h^0 + \int_0^{T'} c_p \, \d T'  \quad ; \quad h_s = \int_0^{T'} c_p \, \d T'
+   h = h^0 + \int_0^{T'} c_p \, \d T'  \quad ; \quad h_{\rm s} = \int_0^{T'} c_p \, \d T'
 \ee
-Both have units of kJ/kg.
-The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTHALPY'} are $H=\rho h$ and $H_s=\rho h_s$, respectively, in units of kJ/m$^3$.
+Both have units of kJ/kg. The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTHALPY'} are $H=\rho h$ and $H_{\rm s}=\rho h_{\rm s}$, respectively, in units of kJ/m$^3$.
 
 
 \subsection{Computer Performance}
@@ -9388,21 +9383,12 @@ combustion model are {\ct 'OXYGEN'}, {\ct 'NITROGEN'}, {\ct 'WATER VAPOR'}, and 
 specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'} and {\ct 'SOOT'} are included as output species. The fuel species can be output via
 the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide
 through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
-
 \begin{lstlisting}
-&DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z', SPEC_ID='CARBON MONOXIDE',
-      STATISTICS='AREA INTEGRAL' /
+&DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z', 
+      SPEC_ID='CARBON MONOXIDE', STATISTICS='AREA INTEGRAL' /
 \end{lstlisting}
-
-\noindent
-Here, the {\ct ID} is just a label in the output file.
-
-
-
-When an output
-quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or
-{\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just
-remember that all output quantity names ought to be in single quotes.
+Here, the {\ct ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or
+{\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just remember that all output quantity names ought to be in single quotes.
 
 
 
@@ -9501,9 +9487,9 @@ remember that all output quantity names ought to be in single quotes.
 {\ct TIME}                                      & Section~\ref{info:DEVC}                       & s              & D            \\ \hline
 {\ct TIME STEP}                                 & $\delta t$, Numerical time step               & s              & D            \\ \hline
 {\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                &                & D,S          \\ \hline
-{\ct U-VELOCITY}                                & Gas velocity component in $x$ direction       & m/s            & D,I,P,S      \\ \hline
-{\ct V-VELOCITY}                                & Gas velocity component in $y$ direction       & m/s            & D,I,P,S      \\ \hline
-{\ct W-VELOCITY}                                & Gas velocity component in $z$ direction       & m/s            & D,I,P,S      \\ \hline
+{\ct U-VELOCITY}                                & Gas velocity component, $u$                   & m/s            & D,I,P,S      \\ \hline
+{\ct V-VELOCITY}                                & Gas velocity component, $v$                   & m/s            & D,I,P,S      \\ \hline
+{\ct W-VELOCITY}                                & Gas velocity component, $w$                   & m/s            & D,I,P,S      \\ \hline
 {\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct VELOCITY}$^{***}$                          & Gas velocity                                  & m/s            & D,I,P,S      \\ \hline
 {\ct VISCOSITY}                                 & $\mu$                                         & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
