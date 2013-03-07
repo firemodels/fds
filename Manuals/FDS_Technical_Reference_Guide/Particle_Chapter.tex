@@ -125,10 +125,10 @@ Over the course of a time step of the gas phase solver, the droplets in a given 
 m_{\rm l} \; c_{\rm l} \; \frac{\d T_{\rm l}}{\d t} & =    A \, h  \, (T_{\rm g}-T_{\rm l}) + A \, h_s \, (T_{\rm s}-T_{\rm l}) + \dq_{\rm r} + \frac{\d m_{\rm l}}{\d t} \; h_v  \label{droplet_temp}   \end{align}
 Here, $m_{\rm l}$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
 $\rho$ is the gas density, $c_{\rm l}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_{\rm s}$ is the heat transfer coefficient between the liquid and the solid surface, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm g}$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
-\be X_{\rm l} = \exp \left[ \frac{h_v \, W_{\rm l}}{\cal R}
+\be X_{\rm l} = \frac{p_{\rm 1 \; atm}}{\bp_m} \exp \left[ \frac{h_v \, W_{\rm l}}{\cal R}
       \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]  \quad ; \quad
       Y_{\rm l} = \frac{X_{\rm l}}{X_{\rm l} \, (1-W_{\rm a}/W_{\rm l}) + W_{\rm a}/W_{\rm l}}  \label{clausius_clapeyron} \ee
-where $X_{\rm l}$ is the equilibrium vapor {\em volume} fraction, $W_{\rm l}$ is the molecular weight of the evaporated liquid, $W_{\rm a}$ is the molecular weight of air, $\cal R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid.
+where $X_{\rm l}$ is the equilibrium vapor {\em volume} fraction, $W_{\rm l}$ is the molecular weight of the evaporated liquid, $W_{\rm a}$ is the molecular weight of air, $\cal R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid at standard atmospheric pressure.
 
 Mass and heat transfer between liquid and gas are described with analogous empirical correlations.
 The mass transfer coefficient, $h_m$, is described by the empirical relationships~\cite{Incropera:1}:
@@ -165,7 +165,7 @@ Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approxima
 where the derivative of $Y_{\rm l}$ with respect to temperature is obtained via the chain rule:
 \be
    \frac{\d Y_{\rm l}}{\d T_{\rm l}} = \frac{\d Y_{\rm l}}{\d X_{\rm l}} \, \frac{\d X_{\rm l}}{\d T_{\rm l}}  = \frac{W_{\rm a}/W_{\rm l}}{ (X_{\rm l} (1-W_{\rm a}/W_{\rm l}) + W_{\rm a}/W_{\rm l})^2 } \;
-     \frac{h_v W_{\rm l}}{{\cal R} \, T_{\rm l}^2} \, \exp \left[ \frac{h_v \, W_{\rm l}}{\cal R} \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]
+     \frac{p_{\rm 1 \; atm}}{\bp_m} \frac{h_v W_{\rm l}}{{\cal R} \, T_{\rm l}^2} \, \exp \left[ \frac{h_v \, W_{\rm l}}{\cal R} \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]
 \ee
 The amount of evaporated liquid is given by
 \be
