@@ -82,6 +82,7 @@ The boundary condition for Eq.~\ref{RFluxForward} at the solid (or liquid) surfa
 \ee
 where $\dq_{\rm r}^-(0)$ is the ``backward'' radiative heat flux at the surface. In this formulation, the surface emissivity and the internal absorption are assumed to be independent properties of the material.
 
+The two-flux model has not been adapted for cylidrical or spherical geometry. 
 
 \subsection{Convective Heat Transfer to Solids}
 \label{conflux}
@@ -121,7 +122,7 @@ T^+ = \frac{T_{\rm g} - T_{\rm w}}{T_\tau}
 \end{equation}
 where $T_{\rm g}$ is the first off-wall gas-phase cell temperature.  The model profile is given by
 \begin{align}
-\label{eqn_t_visclayer} T^+ &= \mbox{Pr}\,y^+                            && \mbox{for} \quad y^+ \le 5 \\
+\label{eqn_t_visclayer} T^+ &= \mbox{Pr}\;y^+                            && \mbox{for} \quad y^+ \le 5 \\
 \label{eqn_t_loglaw}    T^+ &= \frac{\mbox{Pr}_t}{\kappa} \ln y^+ + B_T  && \mbox{for} \quad y^+ \ge 30
 \end{align}
 where Pr and Pr$_t$ are a molecular and turbulent Prandtl numbers  (Pr$_t=0.5$ by default in FDS), and $\kappa = 0.41$ is the von K\'arm\'an constant.  The temperature scale, $T_{\tau}$, is defined by
@@ -129,9 +130,9 @@ where Pr and Pr$_t$ are a molecular and turbulent Prandtl numbers  (Pr$_t=0.5$ b
 \label{eqn_friction_temperature}
 T_{\tau} \equiv \frac{\dot{q}_{\rm c}''}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
 \end{equation}
-where $\dot{q}_{\rm c}''$, $\rho$, and $c_p$ are the heat flux at the wall, the density, and the specific heat, respectively.
+where $\dot{q}_{\rm c}''$, $\rho$, and $c_p$ are the convective heat flux at the wall, the gas density, and the specific heat, respectively.
 
-The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a function of the molecular Prandtl number and can be determined from experimentally. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall. FDS uses the experimental correlation proposed by Kader~\cite{Kader:1981}
+The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a function of the molecular Prandtl number and can be determined experimentally. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall. FDS uses the experimental correlation proposed by Kader~\cite{Kader:1981}
 \begin{align}
 \label{eqn_t_bt}
 B_T =(3.85 \,\mbox{Pr}^{1/3}-1.3)^2 + 2.12 \,\ln\mbox{Pr}.
@@ -143,8 +144,8 @@ T^+ &= (\mbox{Pr}_t /\kappa)_{\rm buffer} \,\ln y^+ + B_{T,{\rm buffer}}  && \mb
 \end{align}
 where
 \begin{align}
-(\mbox{Pr}_T /\kappa)_{\rm buffer} &= 1.79\,(B_T + 3.40 \,\mbox{Pr}_T - 5 \,\mbox{Pr}) \\
-B_{T,{\rm buffer}} &= 5 \,\mbox{Pr} - 1.61 \,(\mbox{Pr}_T /\kappa)_{\rm buffer}
+(\mbox{Pr}_t /\kappa)_{\rm buffer} &= 1.79\,(B_T + 3.40 \,\mbox{Pr}_t - 5 \,\mbox{Pr}) \\
+B_{T,{\rm buffer}} &= 5 \,\mbox{Pr} - 1.61 \,(\mbox{Pr}_t /\kappa)_{\rm buffer}
 \end{align}
 To obtain a consistent convective heat transfer coefficient in all regions, $T^+$ is adjusted to $\max(T^+,T^+ (y^+ = 5))$ for the buffer and log layer ($y^+ \ge 5$). The convective heat transfer coefficient ($h$) is obtained from the definition of $h$ and $T^+$:
 \begin{align}
@@ -177,6 +178,10 @@ $X_\alpha$ is the volume fraction of component $\alpha$
   \label{volfrac}
 \ee
 where $\rho_\alpha$ is the density of material $\alpha$ in its pure form. Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$, of the individual components of the composite.
+
+\subsection{Numerical solution}
+
+The numerical solution of the solid phase heat conduction equation is explained in Appendix~\ref{solid-phase-discretization}.
 
 \newpage
 \section{Pyrolysis Models}
@@ -236,8 +241,8 @@ The volumetric production rate of each gas species, $\gamma$, is
 It is assumed that the gases are transported instantaneously to the surface, where the
 mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the mass fluxes are
 \be
-   \dm_\gamma'' =\frac{1}{R} \int_0^R \dm_\gamma'''(x) \,r \d r \;\; ; \;\;
-   \dm_\gamma'' =\frac{1}{R^2} \int_0^R \dm_\gamma'''(x) \,r^2 \d r \;\;
+   \dm_\gamma'' =\frac{1}{R_{\rm out}}   \int_{R_{\rm in}}^{R_{\rm out}} \dm_\gamma'''(x) \,r \d r \;\; ; \;\;
+   \dm_\gamma'' =\frac{1}{R_{\rm out}^2} \int_{R_{\rm in}}^{R_{\rm out}} \dm_\gamma'''(x) \,r^2 \d r \;\;
 \ee}
 \be
    \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \,\d x
@@ -294,6 +299,7 @@ The layer thickness is updated according to the ratio of the instantaneous mater
    \end{cases}
 \ee
 Correspondingly, the densities are divided by the factor $\delta$ to conserve mass.
+
 
 \newpage
 \section{Aerosol Deposition}
