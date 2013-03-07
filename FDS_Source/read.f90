@@ -4616,7 +4616,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
          WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' is ADIABATIC and cannot have a MATL_ID'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      IF (THICKNESS(IL)<0._EB .AND. MATL_ID(IL,1)/='null') THEN
+      IF (THICKNESS(IL)<=0._EB .AND. MATL_ID(IL,1)/='null') THEN
          WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SF%ID)// ' must have a specified THICKNESS for Layer ',IL
          CALL SHUTDOWN(MESSAGE)
       ENDIF
