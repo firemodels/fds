@@ -2826,20 +2826,10 @@ the direction in which the {\ct VENT} is facing.
 \subsection{Special Topic: Synthetic Turbulence Inflow Boundary Conditions}
 \label{info:synthetic_turbulence}
 
-Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree).
-Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant
-and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description.
-In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary
-equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale.
-The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution.
-The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
+Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
 
 Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
-velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.
-Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component).
-Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass.
-If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
-For example,
+velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line. Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress.
 
 \begin{lstlisting}
 &SURF ID='inlet', VEL=-10. /
@@ -2854,20 +2844,18 @@ REYNOLDS_STRESS(2,2) = VEL_RMS**2
 REYNOLDS_STRESS(3,3) = VEL_RMS**2
 \end{lstlisting}
 
-\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero.
+\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
 
-In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic.
-This allows more realistic characterization of streamwise vortices in a turbulent boundary layer.
-To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  For example,
+In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic. This allows more realistic characterization of streamwise vortices in a turbulent boundary layer. To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  Here is an example with random values for the eddy length scales and Reynolds stress components:
 
 \begin{lstlisting}
 &VENT XB=... , SURF_ID='WIND', N_EDDY=500,
-      L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
-      L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
-      L_EDDY_IJ(3,1)=5.42, L_EDDY_IJ(3,2)=0.78, L_EDDY_IJ(3,3)=1.01
-      REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
-      REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
-      REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
+   L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
+   L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
+   L_EDDY_IJ(3,1)=5.42, L_EDDY_IJ(3,2)=0.78, L_EDDY_IJ(3,3)=1.01
+   REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
+   REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
+   REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
 \end{lstlisting}
 
 \clearpage
@@ -3143,7 +3131,7 @@ $L$ is a characteristic length related to the size of the physical obstruction; 
 
 \subsubsection{Logarithmic Law of the Wall}
 
-\noindent Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity, $u^+$. In FDS, $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
+\noindent Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
 
 By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{\rm w})/T_\tau$, where $T_{\rm g}$ is the gas temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}''_{\rm w}$, as $T_\tau = \dot{q}''_{\rm w}/\rho_{\rm w} u_\tau c_p$. The local heat transfer coefficient is then obtained from
 \begin{equation}
