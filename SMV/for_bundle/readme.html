@@ -21,10 +21,25 @@
 
 <ul>
 
+<li>6.0.13 (build xxxx) - March yy, 2013 (revisions up to 15017)
+<ol>
+<li>enhancement: implement <tt>orienx</tt>, <tt>orieny</tt> and <tt>orienc</tt> object keywords for setting the orientation of smokeview objects
+<li>enhancement: implement <tt>randxy</tt>, <tt>randxz</tt> and <tt>randyz</tt> object keywords to generate random particle 
+orientations (when drawn as the tube smokeview object)
+<li>enhancement: add JPEG support back to OSX versions of Smokeview
+<li>usability: write out FED slice and the particle size files to a temporary (<em>i.e.</em> writeable) directory if ouput to the local directory fails - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1699&can=1&sort=-id">Issue 1847</a>)
+<li>fix: fix typo introduced in revision 14082 that was causing problems with vent visibility  -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1699&can=1&sort=-id">Issue 1699</a>)
+<li>fix: fix problem with file name formation when rendering smokeview images
+<li>fix: fix problem with file formation which was showing up with FED area calculations - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1699&can=1&sort=-id">Issue 1847</a>)
+</ol>
+
 <li>6.0.12 (build 14788) - February 20, 2013
 <ol>
 
-<li>enhancement: add option to toggle blockage outline color between foreground color and blockage color - addresses issue  1833
+<li>enhancement: add option to toggle blockage outline color between foreground color and blockage color - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1833&can=1&sort=-id">Issue 1833</a>)
 <li>enhancment: add option to highlight min and max extreme data independently - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1796&can=1&sort=-id">Issue 1796</a>)
@@ -126,12 +141,12 @@ This option is set within the render dialog box. Using scaled fonts with this op
 <li>enhancement: add option to display FED area percents in color bar
 <li>usability: improve user interface for editing viewpoints
 <li>usability: add error checking to smokeview scripting
-<li>usability: customize colorbar labels for fed data
+<li>usability: customize colorbar labels for FED data
 <li>usability: add command line option (-redirect) to redirect smokeview output (stdout) to a log file
 <li>usability: consolidate per mesh hrrpuv_cutoff variables into one
 <li>fix: fix window resizing bug occuring on Mac
 smokeview source: consolidate screen size intialization to one routine
-<li>fix: adust fed contour levels to be consistent with quantized values available on the colorbar
+<li>fix: adust FED contour levels to be consistent with quantized values available on the colorbar
 <li>fix: correct problem with getmesh routine that was causing firebot to crash
 <li>fix: fix area computation (for one mesh, full slice) and use of blanking arrays when computing FEDs - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1728&can=1&sort=-id">Issue 1728</a>)
@@ -160,8 +175,8 @@ smokeview source: consolidate screen size intialization to one routine
 <li>usability: scale the sensor to be 1/4th the smallest grid dimension - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1658&can=1&sort=-id">Issue 1658</a>)
 <li>usability: output texture directory path at startup
-<li>usability: calculate fed's for cell centered slices,
-corrections to fed calculation, save fed regenerate flag to .ini file
+<li>usability: calculate FED's for cell centered slices,
+corrections to FED calculation, save FED regenerate flag to .ini file
 <li>usability: output cell indices for min and max slice valies - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1688&can=1&sort=-id">Issue 1688</a>)
 <li>fix: fix option to display slice files and vector slices within blockages - 
