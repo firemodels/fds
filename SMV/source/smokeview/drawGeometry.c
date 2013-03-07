@@ -378,7 +378,7 @@ void setventdirs(void){
               }
               if(state1==2&&state3==2)continue; // air on both sides
               if(state1==0&&state3==0)continue; // solid on both sides
-              if(state2==1&&!state1!=0){
+              if(state2==1&&state1!=0){
                 orien=-1;
               }
               breakloop=1;
