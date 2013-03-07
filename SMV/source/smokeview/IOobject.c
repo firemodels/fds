@@ -56,9 +56,10 @@ char IOobject_revision[]="$Revision$";
 #define SV_RANDXY 138
 #define SV_RANDXZ 139
 #define SV_RANDYZ 140
-#define SV_ORIENX 141
-#define SV_ORIENY 142
-#define SV_ORIENZ 143
+#define SV_RANDXYZ 141
+#define SV_ORIENX 142
+#define SV_ORIENY 143
+#define SV_ORIENZ 144
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -100,6 +101,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_RANDXY_NUMARGS 1
 #define SV_RANDXZ_NUMARGS 1
 #define SV_RANDYZ_NUMARGS 1
+#define SV_RANDXYZ_NUMARGS 1
 #define SV_ORIENX_NUMARGS 3
 #define SV_ORIENY_NUMARGS 3
 #define SV_ORIENZ_NUMARGS 3
@@ -144,6 +146,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_RANDXY_NUMOUTARGS 0
 #define SV_RANDXZ_NUMOUTARGS 0
 #define SV_RANDYZ_NUMOUTARGS 0
+#define SV_RANDXYZ_NUMOUTARGS 0
 #define SV_ORIENX_NUMOUTARGS 0
 #define SV_ORIENY_NUMOUTARGS 0
 #define SV_ORIENZ_NUMOUTARGS 0
@@ -1109,6 +1112,23 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         if(toki->command==SV_RANDXY)glRotatef(random_angle,0.0,0.0,1.0);
         if(toki->command==SV_RANDXZ)glRotatef(random_angle,0.0,1.0,0.0);
         if(toki->command==SV_RANDYZ)glRotatef(random_angle,1.0,0.0,0.0);
+      }
+      break;
+    case SV_RANDXYZ:
+      if(ABS(arg[0]-1.0)<0.01){
+        float urand1, urand2, olddir[3], newdir[3], axis[3], angle;
+
+        urand1 = randomab(prop->tag_number,0.0,2.0*PI);
+        urand2 = randomab(-1,-1.0,1.0);
+        urand2 = acos(urand2);
+        olddir[0]=0.0;
+        olddir[1]=1.0;
+        olddir[2]=0.0;
+        newdir[0]=cos(urand1)*cos(urand2);
+        newdir[1]=sin(urand1)*cos(urand2);
+        newdir[2]=sin(urand2);
+        rotateu2v(olddir, newdir, axis, &angle);
+        glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
       }
       break;
    	case SV_INCLUDE:
@@ -4249,6 +4269,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_RANDYZ;
     num_op=SV_RANDYZ_NUMARGS;
     num_outop=SV_RANDYZ_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"randxyz")==0){
+    op=SV_RANDXYZ;
+    num_op=SV_RANDXYZ_NUMARGS;
+    num_outop=SV_RANDXYZ_NUMOUTARGS;
   }
   else if(STRCMP(token,"includef")==0){
     op=SV_INCLUDEF;
