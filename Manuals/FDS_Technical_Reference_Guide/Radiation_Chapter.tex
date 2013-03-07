@@ -758,11 +758,13 @@ field and for the particle energy balance.
 
 If the gas phase absorption and emission in Eq.~(\ref{RTEbasic}) are temporarily neglected for simplicity, the radiative transport
 equation becomes
-\be \bs \cdot \nabla I_{\la}(\bx,\bs) = -\left[\kappa_d(\bx,\la) + \sigma_d(\bx,\la)\right]
+\be 
+\bs \cdot \nabla I_{\la}(\bx,\bs) = -\left[\kappa_d(\bx,\la) + \sigma_d(\bx,\la)\right]
 I_{\la}(\bx,\bs) +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la) +
 \frac{\sigma_d(\bx,\la)}{4\pi}
 \int_{4\pi}\Phi(\bs',\bs) \; I_{\la}(\bx,\bs') \; \d\bs'
-\label{RTEspray} \ee
+\label{RTEspray} 
+\ee
 where $\kappa_d$ is the particle absorption coefficient, $\sigma_d$ is the
 particle scattering coefficient and $I_{b,d}$ is the emission
 term of the particles. $\Phi(\bs',\bs)$ is a scattering phase function
@@ -794,69 +796,59 @@ This assumption leads to a simplified expression of the radiative coefficients
 These expressions are functions of the total cross sectional area per unit volume of the droplets $A_d$. $A_d$ is computed simply by summing the cross sectional areas of all the droplets within a cell and divided by the cell volume. For practical reasons, a relaxation factor of 0.5 is
 used to smooth slightly the temporal variation of $A_d$.
 
-\subsection{In-scattering term}
+\subsection{Approximating the in-scattering integral}
 
-An accurate computation of the in-scattering integral on the right
-hand side of Eq.~(\ref{RTEspray}) would be extremely time
-consuming. It is here approximated by dividing the total $4\pi$ solid
-angle to a ``forward angle'' $\delta\Omega^l$ and ``ambient angle''
-$\delta\Omega^*=4\pi - \delta\Omega^l$.  For compatibility with the
-FVM solver, $\delta\Omega^l$ is set equal to the control angle given
-by the angular discretization.  However, it is assumed to be symmetric
-around the center of the control angle.  Within $\delta\Omega^l$ the
+An accurate computation of the in-scattering integral on the right hand side of Eq.~(\ref{RTEspray}) would be extremely time
+consuming and require a lot of memory as the individual intensitities in each location would have to be maintained in the computer memory. 
+The in-scattering interal is here approximated by dividing the total $4\pi$ solid angle to a ``forward angle'' $\delta\Omega^l$ and ``ambient angle''
+$\delta\Omega^*=4\pi - \delta\Omega^l$.  For compatibility with the FVM solver, $\delta\Omega^l$ is set equal to the control angle given
+by the angular discretization.  However, it is assumed to be symmetric around the center of the control angle.  Within $\delta\Omega^l$ the
 intensity is $I_{\la}(\bx,\bs)$ and elsewhere it is approximated as
 \be
+\label{Ustar}
 U^*(\bx,\la) = \frac{U(\bx,\la) - \delta\Omega^l \, I_{\la}(\bx,\bs)}{\delta\Omega^*}
 \ee
 where $U(\bx)$ is the total intensity integrated over the unit sphere. The in-scattering
-integral can now be written as
+integral can now be approximated as
 \begin{align}
 \frac{\sigma_d(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
   \; \d\Omega'
-  &=
+  &\approx
 \sigma_d(\bx,\la)~ \left( \chi_f I_{\la}(\bx,\bs) ~+~\frac{1}{\delta\Omega^{*}}~\left(1-\chi_f\right)~
 \int\limits_{\delta\Omega^{*}} I_{\la}(\bx,\bs') \; \textrm{d} \Omega' \right)\\
   &=
 \sigma_d(\bx,\la)~ \left( \chi_f \; I_{\la}(\bx,\bs) ~+~
 (1-\chi_f)U^*(\bx,\la) \right)
+\label{SprayRTE_RHS}
 \end{align}
-where $\chi_f = \chi_f(r,\la)$ is a fraction of the total intensity
-originally within the solid angle $\delta\Omega^l$ that is scattered
-into the same angle $\delta\Omega^l$. The calculation of $chi_f$ is discussed in section~\ref{forward_fraction}.
+where $\chi_f = \chi_f(r,\la)=\chi_f(\bx,\la)$ is a fraction of the total intensity originally within the solid angle $\delta\Omega^l$ that is scattered
+into the same angle $\delta\Omega^l$. The calculation of $\chi_f$ is discussed in section~\ref{forward_fraction}.
 
-An effective scattering coefficient is defined
+An effective scattering coefficient is next defined
 \be
-\overline{\sigma_d}(\bx,\la) = A_d(\bx) \frac{4\pi}{4\pi-\delta\Omega^l} (1-\chi_f) \; Q_s(r_{32},\la) 
+\label{effective_sigma_d}
+\overline{\sigma}_d(\bx,\la) = \frac{4\pi}{4\pi-\delta\Omega^l} \left(1-\chi_f(\bx,\la)\right) \; \sigma_d(\bx,\la) 
 \ee
-gives
-%SIMO is going HERE
+Substituting definitions \ref{Ustar} and \ref{effective_sigma_d} and approximation \ref{SprayRTE_RHS} to \ref{RTEspray} gives a simplified form of 
+the RTE in droplet/particle ladden medium
 \be
 \bs \cdot \nabla I_{\la}(\bx,\bs) =
--\left[\kappa_d(\bx,\la) + \overline{\sigma_d}(\bx,\la)\right]
+-\left[\kappa_d(\bx,\la) + \overline{\sigma}_d(\bx,\la)\right]
 I_{\la}(\bx,\bs)
 +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la)
-+\frac{\overline{\sigma_d}(\bx,\la)}{4\pi}U(\bx,\la)
++\frac{\overline{\sigma}_d(\bx,\la)}{4\pi}U(\bx,\la)
 \ee
-This equation can be integrated over the spectrum to get the band
-specific RTE's. The procedure is exactly the same as that used for the
+This equation can be integrated over the spectrum to get the band specific RTE's. The procedure is exactly the same as that used for the
 gas phase RTE. After the band integrations, the spray RTE for band $n$
 becomes
 \be
 \bs \cdot \nabla I_{n}(\bx,\bs) =
--\left[\kappa_{d,n}(\bx) + \overline{\sigma_{d,n}}(\bx)\right] I_n(\bx,\bs)
+-\left[\kappa_{d,n}(\bx) + \overline{\sigma}_{d,n}(\bx)\right] I_n(\bx,\bs)
 +\kappa_{d,n}(\bx) \; I_{b,d,n}(\bx)
-+\frac{\overline{\sigma_d}(\bx,\la)}{4\pi}U_n(\bx)
++\frac{\overline{\sigma}_d(\bx,\la)}{4\pi}U_n(\bx)
 \ee
 where the source function is based on the average particle temperature within a cell.
 
-Before the actual simulation, both $\kappa_d$ and $\overline{\sigma_d}$ are averaged over the
-infrared wavelengths (1-200 $\mu$m).  A constant ``radiation'' temperature, $T_{\rm rad}$, is used
-in the wavelength weighting.  $T_{\rm rad}$ should be selected to
-represent a typical radiating flame temperature. A value of 1173~K is
-used by default.  The averaged quantities, now functions of the
-droplet mean diameter only, are stored in one-dimensional arrays.
-During the simulation, the local properties are found by table
-look-up using the local Sauter mean droplet diameter.
 
 \subsection{Forward fraction of scattering}
 \label{forward_fraction}
@@ -864,17 +856,17 @@ look-up using the local Sauter mean droplet diameter.
 The computation of $\chi_f$ for a similar but simpler situation has been derived in Ref.~\cite{Yang:3}. It can be shown that here
 $\chi_f$ becomes
 \be
-\chi_f = \frac{1}{\delta\Omega^l}
+\chi_f(r,\la) = \frac{1}{\delta\Omega^l}
 \int_0^{\mu^l}\int_0^{\mu^l}\int_{\mu_{d,0}}^{\mu_{d,\pi}}
-\frac{P_0(\theta_d)}
+\frac{P_0(\theta_d,\la)}
 {\left[(1-\mu^2)(1-\mu'^2)-(\mu_d-\mu\mu')^2\right]^{1/2}}
 \; \d\mu_d \, \d\mu \, \d\mu'
 \ee
 where $\mu_d$ is a cosine of the scattering angle $\theta_d$ and
-$P_0(\theta_d)$ is a single droplet scattering phase function
+$P_0(\theta_d,\la)$ is a single droplet scattering phase function
 \be
-P_0(\theta_d) =
-\frac{\la^2\left(|S_1(\theta_d)|^2+|S_2(\theta_d)|^2\right)}{2 \, C_s(r,\la)}
+P_0(\theta_d,\la) =
+\frac{\la^2\left(|S_1(\theta_d)|^2+|S_2(\theta_d)|^2\right)}{2 \, Q_s(r,\la) \pi r^2}
 \ee
 $S_1(\theta_d)$ and $S_2(\theta_d)$ are the scattering amplitudes, given by
 Mie-theory. The integration limit $\mu^l$ is a cosine of the polar angle
@@ -887,15 +879,21 @@ The limits of the innermost integral are
 \mu_{d,0}   = \mu\mu' + \sqrt{1-\mu^2}\sqrt{1-\mu'^2}  \quad ; \quad
 \mu_{d,\pi} = \mu\mu' - \sqrt{1-\mu^2}\sqrt{1-\mu'^2}
 \ee
-When $\chi_f$ is integrated over the particle size distribution to get
-an averaged value, it is multiplied by $C_s(r,\la)$. It is therefore
-$|S_1|^2+|S_2|^2$, not $P_0(\theta_d)$, that is integrated. Physically,
-this means that intensities are added, not
-probabilities~\cite{Wiscombe}.\\
 
 
-The absorption and scattering efficiencies and the scattering phase
-function are calculated using the MieV code developed by Wiscombe~\cite{Wiscombe}.
+\subsection{Solution procedure}
+
+The absorption and scattering coefficients, $\kappa_d$ and $\overline{\sigma}_d$ are not calculated during the simulation again and again. Instead, they
+are tabulated in the beginning of the simulation for each band and a range of different mean particle radii $r_{32}$.  
+The averaged quantities, now functions of $r_{32}$ only, are stored in one-dimensional arrays.
+During the simulation, the local properties are found by table look-up using the local Sauter mean droplet diameter, $r_{32}(\bx)$.
+
+In the band integration of $\kappa_d$ and $\overline{\sigma}_d$, a constant ``radiation'' temperature, $T_{\rm rad}$, is used
+to provide the wavelength weighting (Planck function).  $T_{\rm rad}$ should be selected to represent a typical radiating flame 
+temperature. A value of 1173~K is used by default.  
+
+The absorption and scattering efficiencies $Q_a$ and $Q_s$, and the scattering phase
+function $P_0(\theta_d,\la)$ are calculated using the MieV code developed by Wiscombe~\cite{Wiscombe}.
 The spectral properties of the particles can be specified in terms of wavelength dependent complex refractive index.
 Pre-compiled data are included for water and a generic hydrocarbon fuel based on diesel and heptane properties.
 In case of water, the values of the imaginary part of the complex refractive index (related to absorption coefficient) are taken from
@@ -904,7 +902,6 @@ For fuel, the droplet spectral properties are taken from~\cite{Dombrovsky:1}, wh
 of a diesel fuel and compared the values with those of heptane. The diesel properties are used for the real part of the refractive index. For the complex
 part, the heptane properties are used to avoid the uncertainty associated with different types of diesel oils. Usually, the radiative properties
 of the particle cloud are much more sensitive to the particle size and concentration than to values of the refractive index.
-
 
 
 
