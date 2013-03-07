@@ -1358,10 +1358,10 @@ commas or line breaks, and never use tab stops. Some machines do not recognize t
 Comments and notes can be written into the file so long as nothing comes
 before the ampersand except a space and nothing comes between the ampersand
 and the slash except appropriate parameters corresponding
-to that particular namelist group. 
+to that particular namelist group.
 
 The parameters in the input file can be integers, reals, character strings, or logical parameters. A logical parameter is either {\ct .TRUE.} or {\ct .FALSE.} -- the periods are a Fortran convention. Character strings that are listed in this User's Manual must be copied exactly as written -- the code is case sensitive and underscores {\em do} matter. Most of the input parameters are simply real or integer scalars, like {\ct DT=0.02}, but sometimes the inputs are
-multidimensional arrays. For example, when describing a particular solid surface, you need to express the mass fractions of multiple materials that are to be found in multiple layers. The input array {\ct MATL\_MASS\_FRACTION(IL,IC)} is intended to convey to FDS the mass fraction of component {\ct IC} of layer {\ct IL}. For example, if the mass fraction of the second material of the third layer is 0.5, then write 
+multidimensional arrays. For example, when describing a particular solid surface, you need to express the mass fractions of multiple materials that are to be found in multiple layers. The input array {\ct MATL\_MASS\_FRACTION(IL,IC)} is intended to convey to FDS the mass fraction of component {\ct IC} of layer {\ct IL}. For example, if the mass fraction of the second material of the third layer is 0.5, then write
 \begin{lstlisting}
 MATL_MASS_FRACTION(3,2)=0.5
 \end{lstlisting}
@@ -1392,7 +1392,7 @@ With some text editors, it has been noticed that the last line of the file is of
 To ensure that FDS reads the entire input file, add
 \begin{lstlisting}
 &TAIL /
-\end{lstlisting} 
+\end{lstlisting}
 as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}. FDS does not even look for
 this last line. It just forces the ``end of file'' character past relevant input.
 
@@ -2253,9 +2253,9 @@ By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent visc
 where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the maximum cell dimension, $\Delta = \max(\delta x,\delta y,\delta z)$.  This selection is intended to promote the use of cubic grid cells, which are optimal for isotropic turbulent flows typical of thermally-driven fire plumes.  Alternatively, you may invoke the geometric mean definition of the filter width, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$, by setting {\ct LES\_FILTER\_WIDTH='MEAN'} on {\ct MISC}.
 
 Options for the {\ct TURBULENCE\_MODEL} on the {\ct MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1-5 is {\ct 'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
-\be 
+\be
    k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_{\rm t}}
-   \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_{\rm t}} 
+   \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_{\rm t}}
 \ee
 The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_{\rm t}=0.5$, and $\SC_{\rm t}=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
@@ -3058,7 +3058,7 @@ MATL\_ID}.  For example, the input file entries:
 
 \begin{lstlisting}
 &MATL ID='BRICK', CONDUCTIVITY=0.69, SPECIFIC_HEAT=0.84, DENSITY=1600. /
-&SURF ID='BRICK WALL', MATL_ID='BRICK', COLOR='RED', BACKING='EXPOSED', 
+&SURF ID='BRICK WALL', MATL_ID='BRICK', COLOR='RED', BACKING='EXPOSED',
       THICKNESS=0.20 /
 &OBST XB=0.1,5.0,1.0,1.2,0.0,1.0, SURF_ID='BRICK WALL' /
 \end{lstlisting}
@@ -3839,7 +3839,7 @@ the {\ct DENSITY} on the {\ct MATL} line. In cases involving several material co
 \be
 \delta =
    \begin{cases}
-   \max_i\left(\frac{\rho_{{\rm s},i}}{\rho_i}\right) & \text{if } \max_i \left(\frac{\rho_{{\rm s},i}}{\rho_i}\right)\geq 1 \\ 
+   \max_i\left(\frac{\rho_{{\rm s},i}}{\rho_i}\right) & \text{if } \max_i \left(\frac{\rho_{{\rm s},i}}{\rho_i}\right)\geq 1 \\
    \sum_i\left(\frac{\rho_{{\rm s},i}}{\rho_i}\right) & \text{if } \max_i \left(\frac{\rho_{{\rm s},i}}{\rho_i}\right)<1
    \end{cases}
 \ee
@@ -4644,11 +4644,11 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 \end{description}
 
 \noindent
-Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the latter case, the heat exchange is computed as a two step process.  First, the outlet temperature is determined assuming 100 \% efficient (i.e., both fluids exit at the same temperature):
-\be T_{\rm fluid,out}=\frac{c_{p,{\rm gas}} u_{\rm duct} A_{\rm duct} \rho_{\rm duct} T_{\rm duct,in} + c_{p,{\rm fluid}} \dm_{\rm fluid} T_{\rm fluid,in}}{c_{p,{\rm gas}} u_{\rm duct} A_{\rm duct} \rho_{\rm duct} + c_{p,{\rm fluid}} \dm_{\rm fluid}}
+Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, \linebreak[4]{\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the latter case, the heat exchange is computed as a two step process.  First, the outlet temperature is determined assuming 100 \% efficient (i.e., both fluids exit at the same temperature):
+\be T_{\rm fluid,out}=\frac{c_{p,{\rm gas}} \, u_{\rm duct} \, A_{\rm duct} \, \rho_{\rm duct} \, T_{\rm duct,in} + c_{p,{\rm fluid}} \, \dm_{\rm fluid} \, T_{\rm fluid,in}}{c_{p,{\rm gas}} \, u_{\rm duct} \, A_{\rm duct} \, \rho_{\rm duct} + c_{p,{\rm fluid}} \, \dm_{\rm fluid}}
 \ee
 Second, the actual heat exchanged is computed using the {\ct EFFICIENCY}.
-\be \dq_{\rm coil}=\eta  c_{p,{\rm fluid}} \dm_{\rm fluid} \left( T_{\rm fluid,in} - T_{\rm fluid,out} \right)
+\be \dq_{\rm coil}=\eta \, c_{p,{\rm fluid}} \, \dm_{\rm fluid} \left( T_{\rm fluid,in} - T_{\rm fluid,out} \right)
 \ee
 
 \noindent
@@ -4969,7 +4969,6 @@ dependent variables (such as a sprinkler flow rate and droplet speed).
 
 
 \section{Time-Dependent Functions}
-
 \label{info:RAMP_Time}
 
 At the start of any calculation, the temperature is ambient
@@ -5022,58 +5021,48 @@ As an example, a simple blowing vent can be controlled via the lines:
 &RAMP ID='HEATER RAMP', T=30.0, F=1.0 /
 &RAMP ID='HEATER RAMP', T=40.0, F=0.0 /
 \end{lstlisting}
-Use {\ct TAU\_T} or {\ct RAMP\_T}
-to control the ramp-ups for surface temperature.
-The surface temperature will be computed as
+Use {\ct TAU\_T} or {\ct RAMP\_T} to control the ramp-ups for surface temperature. The surface temperature at time $t$, $T_{\rm w}(t)$, is
 \be
-   T(t) = T_0 + f(t) \left( T_f - T_0 \right)
+   T_{\rm w}(t) = T_0 + f(t) \left( {\ct TMP\_FRONT} - T_0 \right)
 \ee
-where $T(t)$ is the desired surface temperature, $f(t)$ is the result of evaluating the
-{\ct RAMP\_T} at time $t$, $T_0$ is the ambient temperature, and $T_f$ is {\ct TMP\_FRONT}, specified on the same {\ct SURF} line as {\ct RAMP\_T}.
-
-Use {\ct TAU\_MF(N)} or {\ct RAMP\_MF(N)}
-to control the ramp-ups for either the mass
-fraction or mass flux of species {\ct N}. Here, the $N$ refers to the $N$th species listed on the {\ct SURF} line. For example:
-
+where $f(t)$ is the result of evaluating the {\ct RAMP\_T} at time $t$, $T_0$ is the ambient temperature, and {\ct TMP\_FRONT} is specified on the same {\ct SURF} line as {\ct RAMP\_T}. Use {\ct TAU\_MF(N)} or {\ct RAMP\_MF(N)} to control the ramp-ups for either the mass fraction or mass flux of species {\ct N}. For example:
 \begin{lstlisting}
 &SURF ID='...', MASS_FLUX(1:2)=0.1,0.3, SPEC_ID(1:2)='ARGON','NITROGEN',
       TAU_MF(1:2)=5.,10. /
 \end{lstlisting}
-
-\noindent
-indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^2$.s)} and 0.3~\si{kg/(m$^2$.s)} over time periods of approximately 5~s and 10~s, respectively. It does not
-matter in what order the {\ct SPEC} lines are listed in the input file.
+indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^2$.s)} and 0.3~\si{kg/(m$^2$.s)} over time periods of approximately 5~s and 10~s, respectively. 
 
 
 \begin{table}[ht]
 \label{tau_table}
 \caption[Parameters used to control time-dependence]{Parameters for controlling the time-dependence of given quantities.}
+\begin{center}
 \begin{tabular}{|l|l|l|l|l|}
 \hline
-Quantity            & Group             & Input Parameter(s)                                            & {\ct TAU}                         & {\ct RAMP ID}              \\ \hline \hline
-Heat Release Rate   & {\ct SURF}        & {\ct HRRPUA}                                                  & {\ct TAU\_Q}                      & {\ct RAMP\_Q}              \\ \hline
-Temperature         & {\ct SURF}        & {\ct TMP\_FRONT}                                              & {\ct TAU\_T}                      & {\ct RAMP\_T}              \\ \hline
-Velocity            & {\ct SURF}        & {\ct VEL}, {\ct VOLUME\_FLUX}, {\ct MASS\_FLUX\_TOTAL}        & {\ct TAU\_V}                      & {\ct RAMP\_V}              \\ \hline
-Mass Fraction/Flux  & {\ct SURF}        & {\ct MASS\_FRACTION(N)}, {\ct MASS\_FLUX(N)}                  & {\ct TAU\_MF(N)}                  & {\ct RAMP\_MF(N)}          \\ \hline
-Particle Mass Flux  & {\ct SURF}        & {\ct PARTICLE\_MASS\_FLUX}                                    & {\ct TAU\_PART}                   & {\ct RAMP\_PART}           \\ \hline
-External Heat Flux  & {\ct SURF}        & {\ct EXTERNAL\_FLUX}                                          & {\ct TAU\_EF}                     & {\ct RAMP\_EF}             \\ \hline
-Pressure            & {\ct VENT}        & {\ct DYNAMIC\_PRESSURE}                                       &                                   & {\ct PRESSURE\_RAMP}       \\ \hline
-Flow                & {\ct PROP}        & {\ct FLOW\_RATE}                                              & {\ct FLOW\_TAU}                   & {\ct FLOW\_RAMP}           \\ \hline
-Gravity             & {\ct MISC}        & {\ct GVEC(1)}                                                 &                                   & {\ct RAMP\_GX}             \\ \hline
-Gravity             & {\ct MISC}        & {\ct GVEC(2)}                                                 &                                   & {\ct RAMP\_GY}             \\ \hline
-Gravity             & {\ct MISC}        & {\ct GVEC(3)}                                                 &                                   & {\ct RAMP\_GZ}             \\ \hline
+Quantity            & Group       & Input Parameter(s)                                      & {\ct TAU}           & {\ct RAMP ID}       \\ \hline \hline
+Heat Release Rate   & {\ct SURF}  & {\ct HRRPUA}                                            & {\ct TAU\_Q}        & {\ct RAMP\_Q}       \\ \hline
+Temperature         & {\ct SURF}  & {\ct TMP\_FRONT}                                        & {\ct TAU\_T}        & {\ct RAMP\_T}       \\ \hline
+Velocity            & {\ct SURF}  & {\ct VEL}                                               & {\ct TAU\_V}        & {\ct RAMP\_V}       \\ \hline
+Volume Flux         & {\ct SURF}  & {\ct VOLUME\_FLUX}                                      & {\ct TAU\_V}        & {\ct RAMP\_V}       \\ \hline
+Mass Flux           & {\ct SURF}  & {\ct MASS\_FLUX\_TOTAL}                                 & {\ct TAU\_V}        & {\ct RAMP\_V}       \\ \hline
+Mass Fraction       & {\ct SURF}  & {\ct MASS\_FRACTION(N)}                                 & {\ct TAU\_MF(N)}    & {\ct RAMP\_MF(N)}   \\ \hline
+Mass Flux           & {\ct SURF}  & {\ct MASS\_FLUX(N)}                                     & {\ct TAU\_MF(N)}    & {\ct RAMP\_MF(N)}   \\ \hline
+Particle Mass Flux  & {\ct SURF}  & {\ct PARTICLE\_MASS\_FLUX}                              & {\ct TAU\_PART}     & {\ct RAMP\_PART}    \\ \hline
+External Heat Flux  & {\ct SURF}  & {\ct EXTERNAL\_FLUX}                                    & {\ct TAU\_EF}       & {\ct RAMP\_EF}      \\ \hline
+Pressure            & {\ct VENT}  & {\ct DYNAMIC\_PRESSURE}                                 &                     & {\ct PRESSURE\_RAMP}\\ \hline
+Flow                & {\ct PROP}  & {\ct FLOW\_RATE}                                        & {\ct FLOW\_TAU}     & {\ct FLOW\_RAMP}    \\ \hline
+Gravity             & {\ct MISC}  & {\ct GVEC(1)}                                           &                     & {\ct RAMP\_GX}      \\ \hline
+Gravity             & {\ct MISC}  & {\ct GVEC(2)}                                           &                     & {\ct RAMP\_GY}      \\ \hline
+Gravity             & {\ct MISC}  & {\ct GVEC(3)}                                           &                     & {\ct RAMP\_GZ}      \\ \hline
 \end{tabular}
+\end{center}
 \end{table}
 
-\newpage
-
 \section{Temperature-Dependent Functions}
-
 \label{info:RAMP_Temperature}
 
 Thermal properties like conductivity and specific heat can vary significantly with temperature. In such cases, use
 the {\ct RAMP} function like this:
-
 \begin{lstlisting}
 &MATL ID                 = 'STEEL'
       FYI                = 'A242 Steel'
@@ -5088,15 +5077,12 @@ the {\ct RAMP} function like this:
 &RAMP ID='k_steel', T= 20., F=48.    /
 &RAMP ID='k_steel', T=677., F=30.    /
 \end{lstlisting}
-
-\noindent
 Note that for temperature ramps, as opposed to time ramps, the parameter {\ct F} is the actual physical quantity, not just
 a fraction of some other quantity. Thus, if {\ct CONDUCTIVITY\_RAMP} is used, there should be no
 value of {\ct CONDUCTIVITY} given. Note also that for values of temperature, {\ct T}, below and above the
 given range, FDS will assume a constant value equal to the first or last {\ct F} specified.
 
 \section{Arrhenius Parameter Functions}
-
 \label{info:RAMP_Arrhenius}
 
 Arrhenius reaction parameters are typically found for a particular range of equivalence ratios; however, equivalence ratios within a simulation may exist in multiple ranges. For these cases, a piecewise definition of Arrhenius parameters based on equivalence ratio can be used to define the pre-exponential {\ct A} and activation energy {\ct E} using the {\ct RAMP} function with a defined chemical reaction as follows:
@@ -5109,7 +5095,7 @@ Arrhenius reaction parameters are typically found for a particular range of equi
       E = 167360
       E_RAMP = 'rampe'
       SPEC_ID_NU = 'CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-      SPEC_ID_N = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      SPEC_ID_N_S = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-0.5,1
       N_S = 0.25,1,0.5
       CRITICAL_FLAME_TEMPERATURE=1418. /
@@ -5124,24 +5110,19 @@ Arrhenius reaction parameters are typically found for a particular range of equi
 &RAMP ID='rampe', T = 1.00001, F = 1 /
 &RAMP ID='rampe', T = 100.,    F = 1 /
 \end{lstlisting}
-
 Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line to indicate that a {\ct RAMP} is being used. Unlike other {\ct RAMP} functions, {\ct T} is the equivalence ratio, {\em not} time or temperature. For Arrhenius ramps, {\ct F} is a fraction of the the quantity {\ct A} or {\ct E}. In this example, for equivalence ratios less than or equal to 1, the pre-exponential is large and the activation is energy is 0, which indicates that the reaction is fast. For equivalence ratios greater than 1, the reaction parameters are equal to those defined on the {\ct REAC} line.
 
 
 
 \section{Tabular Functions}
-
 \label{info:TABL}
 
 Some input quantities, such as a sprinkler spray pattern, vary multi-dimensionally. In such cases, use
 the {\ct TABL} namelist group. The format of the {\ct TABL} lines is application-specific, but in general look like this:
-
 \begin{lstlisting}
 &TABL ID='TABLE1', TABLE_DATA=40,50, 85, 95,10,0.5 /
 &TABL ID='TABLE1', TABLE_DATA=40,50,185,195,10,0.5 /
 \end{lstlisting}
-
-\noindent
 A detailed description of the various table entries is given in the sections that describe quantities that use such
 tables. Currently, only sprinklers and nozzles use this group of parameters to define a complex spray pattern.
 Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Specific requirements on ordering the lines
@@ -5296,12 +5277,11 @@ Diffusivity, assumed to be the binary diffusion coefficient between the given sp
 
 \subsubsection{Enthalpy}
 
-It is assumed that the enthalpy of the gas species is given by the following formula:
+The enthalpy of the gas mixture is given by the following formula:
 \be
-   h(T) = h(T_{ref}) + \int_{T_{ref}}^T c_p(T) \, dT
+   h(T) = h(T_{\rm ref}) + \int_{T_{\rm ref}}^T c_p(T') \, \d T'
 \ee
-where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperature dependence using {\ct RAMP\_CP}.  The (optional) {\ct REFERENCE\_TEMPERATURE}, $T_{ref}$ ($^\circ$C), is the temperature that corresponds to
-the {\ct REFERENCE\_ENTHALPY}, $h(T_{ref})$ (kJ/kg).  The default value of the  {\ct REFERENCE\_TEMPERATURE} is 25~$^\circ$C.  If {\ct SPECIFIC\_HEAT} is specified and the {\ct REFERENCE\_ENTHALPY} is not, the {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{ref})=c_p T_{ref}$.
+where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperature dependence using {\ct RAMP\_CP}.  The (optional) {\ct REFERENCE\_TEMPERATURE}, $T_{\rm ref}$ ($^\circ$C), is the temperature that corresponds to the \linebreak[4] {\ct REFERENCE\_ENTHALPY}, $h(T_{\rm ref})$ (kJ/kg).  The default value of the  {\ct REFERENCE\_TEMPERATURE} is 25~$^\circ$C.  If {\ct SPECIFIC\_HEAT} is specified and the {\ct REFERENCE\_ENTHALPY} is not, the {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{\rm ref})=c_p T_{\rm ref}$.
 
 If no inputs for enthalpy are provided, then the specific heat of the gas will be calculated from its molecular weight using the relation:
 \be
@@ -5332,7 +5312,7 @@ If the absorbing species is not present in RadCal and no RadCal surrogate is pro
 
 If the species listed in Table~\ref{tab:gasspecies} includes liquid properties, it can be applied to liquid droplets, in which case the following relationship should hold:
 \be
-   h_{gas}(T_{boil}) = h_{liquid}(T_{boil}) + h_v
+   h_{\rm gas}(T_{\rm boil}) = h_{\rm liquid}(T_{\rm boil}) + h_{\rm v}
 \ee
 More detail is included in Chapter~\ref{info:PART}.
 
@@ -5356,7 +5336,6 @@ The following are all equivalent:
 \label{info:SPEC_advanced}
 
 In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by defining a lumped species, see Chapter~\ref{info:lumped}, with a single component.  For example, the lines:
-
 \begin{lstlisting}
 &SPEC ID='CARBON DIOXIDE', LUMPED_COMPONENT_ONLY=.TRUE./
 &SPEC ID='CO2 1',SPEC_ID='CARBON DIOXIDE'/
@@ -5364,42 +5343,33 @@ In general only one species for a given {\ct ID} can be defined; however, you ma
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 1', ID='Device 1'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 2', ID='Device 2'/
 \end{lstlisting}
-
-\noindent define two lumped species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$.  The {\ct ID} for each species is then used in the remainder of the input file.  The {\ct LUMPED\_COMPONENT\_ONLY} is given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not also {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for for a lumped species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  In this example the two {\ct DEVC} lines refer to the {\ct ID}s of the lumped species.  If instead the primitive species {\ct ID} was used, then the that output would sum the mass fractions over all species containing that primitive species.  For example, if the output quantities in the example above are changed as shown below, then {\ct Device 1} would just output the mass fraction of {\ct CO2 1} and {\ct Device 2} would output the sum of both.
-
+define two lumped species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$.  The {\ct ID} for each species is then used in the remainder of the input file.  The {\ct LUMPED\_COMPONENT\_ONLY} is given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not also {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for for a lumped species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  In this example the two {\ct DEVC} lines refer to the {\ct ID}s of the lumped species.  If instead the primitive species {\ct ID} was used, then the that output would sum the mass fractions over all species containing that primitive species.  For example, if the output quantities in the example above are changed as shown below, then {\ct Device 1} would just output the mass fraction of {\ct CO2 1} and {\ct Device 2} would output the sum of both.
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 1', ID='Device 1'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CARBON DIOXIDE', ID='Device 2'/
 \end{lstlisting}
-
 Another application of this would be if you wanted to track the water that evaporated from sprinklers, separately from the water
 that resulted from combustion.  The following inputs would allow you to do that:
 \begin{lstlisting}
-&REAC FUEL='PROPANE',SOOT_YIELD=0.02,CO_YIELD=0.01/
-&SPEC ID='WATER VAPOR SPK', SPEC_ID='WATER VAPOR/
-
+&REAC FUEL='PROPANE', ... /
+&SPEC ID='WATER VAPOR SPK', SPEC_ID='WATER VAPOR' /
 &PART ID='Sprinkler Droplets',SPEC_ID='WATER VAPOR SPK'/
-
-&DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR SPK', ID='Sprinkler Water Vapor'/
-&DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR', ID='All Water Vapor'/
+&DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR SPK', ID='Spr H2O'/
+&DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR', ID='All H2O'/
 \end{lstlisting}
-
-\noindent The above inputs create a species called {\ct WATER VAPOR SPK} that has all the same properties as {\ct WATER VAPOR}.  The first device will give only water that resulted from droplet evaporation, and the second device would give water that came from both sprinklers and combustion.
+The gas species called {\ct 'WATER VAPOR SPK'} has the same properties as {\ct 'WATER VAPOR'}. The first device records only water that results from droplet evaporation, and the second device records water that originates from both sprinklers and combustion.
 
 \clearpage
 
 \section{Specifying Lumped Species (Mixtures of Primitive Species)}
 \label{info:lumped}
 
-The {\ct SPEC} namelist group also allows you to define species mixtures to reduce the number of species transport equations.
-For example, consider air. Air is composed of nitrogen, oxygen, water vapor, and carbon dioxide. If we define the four component species of air, we will have four total species. One of these, say nitrogen, can be set to be the background species, leaving three transport equations to solve.
-Alternatively, we can define a ``lumped species'' that represents the air mixture and save on CPU time as FDS will the three transport equations would no longer be needed as the ``lumped'' air becomes the background species.
+The {\ct SPEC} namelist group also allows you to define species mixtures. The purpose of a species mixture is to reduce the number of species transport equations that are explicitly solved. For example, consider air. Air is composed of nitrogen, oxygen, water vapor, and carbon dioxide. If we define the four component species of air, we will have four total species. One of these, say nitrogen, can be set to be the background species, leaving three transport equations to solve. Alternatively, we can define a ``lumped species'' that represents the air mixture and save on CPU time because the three transport equations are no longer needed and the ``lumped'' air becomes the background species.
 
 The following inputs define equivalent initial mixtures. But in the first example three species are explicitly tracked and in the second example only a background mixture is specified.
 
-\vskip\baselineskip
-\noindent{\bf Example 1: All primitive species}
-\vskip\baselineskip
+\subsubsection{Example 1: All primitive species}
+
 \begin{lstlisting}
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE. / Note: The background must be defined first.
 &SPEC ID='OXYGEN',         MASS_FRACTION_0=0.23054 /
@@ -5407,8 +5377,8 @@ The following inputs define equivalent initial mixtures. But in the first exampl
 &SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0=0.00046 /
 \end{lstlisting}
 
-\noindent{\bf Example 2: Defining a background {\ct SPEC}}
-\vskip\baselineskip
+\subsubsection{Example 2: Defining a background species}
+
 \begin{lstlisting}
 &SPEC ID='NITROGEN',       LUMPED_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='OXYGEN',         LUMPED_COMPONENT_ONLY=.TRUE. /
@@ -5421,10 +5391,7 @@ The following inputs define equivalent initial mixtures. But in the first exampl
       SPEC_ID(3)='WATER VAPOR',    MASS_FRACTION(3)=0.00626,
       SPEC_ID(4)='CARBON DIOXIDE', MASS_FRACTION(4)=0.00046 /
 \end{lstlisting}
-
-\noindent
-The logical parameter {\ct LUMPED\_COMPONENT\_ONLY} denotes that the species is only present as part of a lumped species. When {\ct .TRUE.}, FDS will not allocate space to track that species individually. The parameters to define a lumped species are:
-
+The logical parameter {\ct LUMPED\_COMPONENT\_ONLY} indicates that the species is only present as part of a lumped species. When {\ct .TRUE.}, FDS will not allocate space to track that species individually. The parameters to define a lumped species are:
 \begin{description}
 \item[{\ct BACKGROUND}] Denotes that this lumped species is to be used as the background species.
 \item[{\ct ID}] Character string identifying the name of the species. You must provide this.  This cannot be the same as an {\ct ID} of another {\ct SPEC} input.
@@ -5432,8 +5399,7 @@ The logical parameter {\ct LUMPED\_COMPONENT\_ONLY} denotes that the species is 
 \item[{\ct MASS\_FRACTION}] The mass fractions of the components of the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1. Alternatively, {\ct VOLUME\_FRACTION} can be specified. Do not use both on an {\ct SPEC} line.
 \item[{\ct MASS\_FRACTION\_0}] The initial mass fractions of lumped species.
 \end{description}
-
-\noindent When defining a lumped species, either {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION} must be used to define the component species. The addition of lumped species to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs.  For {\ct INIT},
+When defining a lumped species, either {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION} must be used to define the component species. The addition of lumped species to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs.  For {\ct INIT},
 {\ct MATL}, {\ct PART}, and {\ct SURF}, {\ct SPEC\_ID} refers to either a tracked primitive species or a lumped species.  For outputs and devices, {\ct DEVC}, that require a {\ct SPEC\_ID}, the {\ct SPEC\_ID} input can refer to either a tracked primitive species, a lumped species, or a lumped species component that is not tracked.  For {\ct REAC} see the discussion on specifying reactions in Chapter~\ref{info:REAC}.
 
 
@@ -5469,21 +5435,19 @@ This approach to combustion, referred to below as the ``simple chemistry'' combu
 For the simple chemistry model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_v} + \nu_{\OTWO} \; \mathrm{O_2} \rightarrow
     \nu_{\COTWO} \; \mathrm{CO_2} + \nu_{\HTWOO} \; \mathrm{H_2O} +
-    \nu_{\CO}   \; \mathrm{CO}   + \nu_s \; \mathrm{Soot} + \nu_{\NTWO} \; \mathrm{N_2} \ee
-You need only specify the chemical formula of the fuel along with
-the yields of CO and soot, and the volume fraction of hydrogen in the soot, $X_\Hy$.
+    \nu_{\CO}   \; \mathrm{CO}   + \nu_{\rm S} \; \mathrm{Soot} + \nu_{\NTWO} \; \mathrm{N_2} \ee
+You need only specify the chemical formula of the fuel along with the yields of CO and soot, and the volume fraction of hydrogen in the soot, $X_\Hy$.
 FDS will use that information internally to determine the amount of combustion products that are formed:
 \begin{eqnarray*}
 \nu_{\OTWO}    &=& \nu_{\COTWO} + \frac{\nu_{\CO}}{2} + \frac{\nu_{\HTWOO}}{2} - \frac{\hbox{z}}{2}   \\
-\nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - (1-X_\Hy) \, \nu_s \\
-\nu_{\HTWOO}   &=& \frac{\hbox{y}}{2} - \frac{X_\Hy}{2} \, \nu_s \\
-\nu_{\CO}      &=& \frac{W_f}{W_{\CO}} \, y_{\CO}  \\
-\nu_s          &=& \frac{W_f}{W_s} \, y_s  \\
-\nu_{\NTWO}    &=& \frac{\hbox{v}}{2}  \\
+\nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - (1-X_\Hy) \, \nu_{\rm S} \\
+\nu_{\HTWOO}   &=& \frac{\hbox{y}}{2} - \frac{X_\Hy}{2} \, \nu_{\rm S} \\
+\nu_{\CO}      &=& \frac{W_{\rm F}}{W_{\CO}} \, y_{\CO}  \\
+\nu_s          &=& \frac{W_{\rm F}}{W_{\rm S}} \, y_{\rm S}  \\
+\nu_{\NTWO}    &=& \frac{\rm v}{2}  \\
 W_s            &=& X_\Hy \, W_\Hy + (1-X_\Hy) \, W_\C
 \end{eqnarray*}
-
-\noindent The following parameters may be prescribed on the {\ct REAC} line when using the simple chemistry model.
+The following parameters may be prescribed on the {\ct REAC} line when using the simple chemistry model.
 Note that the various {\ct YIELD}s are for well-ventilated, post-flame conditions. There are options to
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
@@ -5510,39 +5474,31 @@ Note that this parameter is only appropriate when the simple chemistry model is 
 (Default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
 \item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
 \end{description}
-
 The ambient mass fractions for the constituents of air are specified on {\ct MISC} using the inputs:
 \begin{description}
 \item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
 \item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.0058)
 \item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
 \end{description}
-
-\noindent
 A few sample {\ct REAC} lines are given here.
-
 \begin{lstlisting}
 &REAC FUEL = 'METHANE' /
 \end{lstlisting}
-\noindent In this case, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL}
-is listed in Table~\ref{tab:gasspecies}. It is assumed that the soot and CO yields are zero.
-
+In this case, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL} is listed in Table~\ref{tab:gasspecies}. It is assumed that the soot and CO yields are zero.
 \begin{lstlisting}
 &REAC FUEL               = 'PROPANE'
       SOOT_YIELD         = 0.01
       CO_YIELD           = 0.02
       HEAT_OF_COMBUSTION = 46460. /
 \end{lstlisting}
-\noindent In this case, the heat of combustion is specified explicitly rather than calculated.
-The soot yield is specified as 0.01 and the CO yield is specified as 0.02.
+In this case, the heat of combustion is specified explicitly rather than calculated. The soot yield is specified as 0.01 and the CO yield is specified as 0.02.
 See Section~\ref{info:heat_of_combustion} for more details on the heat of combustion.
-
 \begin{lstlisting}
 &REAC FUEL               = 'MY FUEL'
       FORMULA            = 'C3H8O3N4'
       HEAT_OF_COMBUSTION = 46124. /
 \end{lstlisting}
-\noindent In this case, the {\ct FORMULA} and heat of combustion are known, but the product yields are not.
+In this case, the {\ct FORMULA} and heat of combustion are known, but the product yields are not.
 
 
 
@@ -5554,7 +5510,6 @@ The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
 You can specify unknown enthalpies on the {\ct SPEC} line in units of kJ/mol:
-
 \begin{lstlisting}
 &SPEC ID = 'GLUCOSE', FORMULA = 'C62H12O6', ENTHALPY_OF_FORMATION=-1.297E3 /
 \end{lstlisting}
@@ -5565,13 +5520,13 @@ For a given reaction, if the only species missing an enthalpy of formation is th
 \subsubsection{Option 3: Use of EPUMO2 (Simple Chemistry)}
 If the enthalpy of formation of the fuel and heat of combustion are not specified, for simple chemistry cases only, the heat of combustion is assumed to be
 \begin{equation}
-\Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { \nu_{f} W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}
+\Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { \nu_{\rm F} W_{\rm F} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}
 \label{EPUMO2}
 \end{equation}
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
 Its default is 13,100~kJ/kg. Typically, a chemical reaction is balanced by setting
-the stoichiometric coefficient of the fuel $\nu_{f}$ to 1. In FDS, the stoichiometric coefficients of
-the chemical reaction are normalized by the  stoichiometric coefficient of the fuel, effectively setting $\nu_{f}$ to 1.
+the stoichiometric coefficient of the fuel $\nu_{\rm F}$ to 1. In FDS, the stoichiometric coefficients of
+the chemical reaction are normalized by the  stoichiometric coefficient of the fuel, effectively setting $\nu_{\rm F}$ to 1.
 Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are specified that FDS will ignore
 the value for {\ct EPUMO2}. From the {\ct HEAT\_OF\_COMBUSTION}, FDS solves for the enthalpy of formation of the fuel.
 
@@ -5615,10 +5570,10 @@ Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate
 fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within
 a given mesh cell at a given time step. Each computational cell can be thought of as a batch reactor where only the mixed composition can react. The variable, $\zeta(t)$, denotes the unmixed fraction, ranging from zero to one and governed by the equation:
 \begin{equation}
-\frac{\d \zeta}{\d t}=\frac{-\zeta}{\tau_{mix}}
+\frac{\d \zeta}{\d t}=\frac{-\zeta}{\tau_{\rm mix}}
 \label{eq:edc_mix}
 \end{equation}
-Here, $\tau_{mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta=1$ by default, and the combustion is considered non-premixed. If the cell is initially mixed, $\zeta=0$, and the combustion is considered premixed. You can set the amount of mixing in each cell at the beginning of every time step using the parameter {\ct INITIAL\_UNMIXED\_FRACTION} on the {\ct MISC} line.
+Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta=1$ by default, and the combustion is considered non-premixed. If the cell is initially mixed, $\zeta=0$, and the combustion is considered premixed. You can set the amount of mixing in each cell at the beginning of every time step using the parameter {\ct INITIAL\_UNMIXED\_FRACTION} on the {\ct MISC} line.
 
 The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed information about the turbulent combustion model.
 
@@ -5651,7 +5606,9 @@ Note that if this parameter is used, then some form of heat/ignition source must
 At certain critical points in a calculation, like the moment of ignition, the local reaction rate can be very large due to limitations in the models, long time
 steps, or both. To prevent fictitiously high values of the reaction rate that can lead to numerical instabilities, a limiting value of the heat release rate
 per unit volume is used:
-\be \dq'''_{\hbox{\tiny max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE} \ee
+\be 
+   \dq'''_{\hbox{\tiny max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE} 
+\ee
 where the default values of {\ct HRRPUA\_SHEET} and {\ct HRRPUV\_AVERAGE} are 200 kW/m$^2$ and 2500 kW/m$^3$, respectively. The use of these limiting values comes from a scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium}.
 
 
@@ -5697,21 +5654,18 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
       SPEC_ID(2)='WATER VAPOR',    VOLUME_FRACTION(2)=0.1966,
       SPEC_ID(3)='NITROGEN',       VOLUME_FRACTION(3)=0.7090 /
 
-&REAC FUEL='METHANE',SPEC_ID_NU='METHANE','AIR','PRODUCTS',
+&REAC FUEL='METHANE', SPEC_ID_NU='METHANE','AIR','PRODUCTS',
       NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
 \end{lstlisting}
 
 \noindent
-Note that the stoichiometry is specified using the inputs {\ct NU} and {\ct SPEC\_ID\_NU}.  All species listed for {\ct NU} need to be tracked species (i.e. a species with {\ct LUMPED\_COMPONENT\_ONLY} cannot be specified for {\ct NU}). \footnote{There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry.
+The reaction stoichiometry is specified using the stoichiometric coefficients, {\ct NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which {\ct LUMPED\_COMPONENT\_ONLY} is {\ct .FALSE.}} species, {\ct SPEC\_ID\_NU(N)}. There are several parameters on the {\ct REAC} line that control the specification of the stoichiometry:
 \begin{description}
-\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will
-check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (Default {\ct .TRUE.})
+\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (Default {\ct .TRUE.})
 \item[{\ct REAC\_ATOM\_ERROR}] Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 0.00001)
-\item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products)
-for the reaction stoichiometry mass balance check.  (Default 0.0001)
-\end{description}} pertains to the species mixtures, and not the primitive species.
+\item[{\ct REAC\_MASS\_ERROR}] Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass balance check.  (Default 0.0001)
+\end{description} 
 
-Obviously, for this example, the first {\ct REAC} line is preferable to the second. However, there are many situations where you cannot use the simple chemistry model and must resort to the second formulation.
 
 
 \subsection{Complex Fuel Molecules}
@@ -5721,15 +5675,14 @@ Obviously, for this example, the first {\ct REAC} line is preferable to the seco
 Fires often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
 of its propensity to form the acid gas HCl, you may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. Assuming that all of the Cl in the fuel is converted into HCl, you can derive a single-step reaction mechanism using appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook~\cite{SFPE:Tewarson} is used to find soot and CO yields for PVC; 0.172 and 0.063, respectively. For a given species, $\alpha$, its stoichiometric coefficient, $\nu_\alpha$, can be found from its yield, $y_\alpha$, according to the formula:
 \begin{equation}\label{eq:stoic_yield}
-\nu_\alpha = \frac{W_{f}}{W_\alpha} \; y_\alpha
+\nu_\alpha = \frac{W_{\rm F}}{W_\alpha} \; y_\alpha
 \end{equation}
 Since it is assumed that all of the Cl is converted to HCL, the remainder of the stoichiometric coefficients come from an atom balance. An equation can now be written to include the appropriate numerical values for the stoichiometric coefficients.
 \begin{multline}\label{eq:PVC_reac2}
 1\,\underbrace{\mathrm{(C_2H_3Cl)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(1.53 \; O_2 + 1.53 \;(3.76) \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(HCl +  H_2O + 0.14 \; CO + 0.96 \; CO_2 + 0.90\; C + 1.53\; (3.76) \, N_2)}}_\text{Products}
 \end{multline}
-The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspecies}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the species' chemical formula. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not have an explicit transport equation is an {\ct LUMPED\_COMPONENT\_ONLY}.
-
+The choice of fuel in this example, PVC, is not defined in Table~\ref{tab:gasspecies}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the species' chemical formula. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not have an explicit transport equation is a {\ct LUMPED\_COMPONENT\_ONLY}.
 \begin{lstlisting}
 &SPEC ID = 'PVC', FORMULA = 'C2H3Cl' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
@@ -5740,9 +5693,7 @@ The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspe
 &SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'SOOT',              LUMPED_COMPONENT_ONLY = .TRUE. /
 \end{lstlisting}
-
-\noindent For the oxidizer and products, which are both composed of multiple primitive species, {\ct SPEC} lines are needed to define the composition of the lumped species. You can define the {\ct SPEC} using either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. If Eq.~(\ref{eq:PVC_reac2}) is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
-
+For the oxidizer and products, which are both composed of multiple primitive species, {\ct SPEC} lines are needed to define the composition of the lumped species. You can define the {\ct SPEC} using either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. If Eq.~(\ref{eq:PVC_reac2}) is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
 \begin{lstlisting}
 &SPEC ID='AIR', BACKGROUND=.TRUE.
       SPEC_ID(1)='OXYGEN',   VOLUME_FRACTION(1)=1.53,
@@ -5756,23 +5707,16 @@ The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspe
       SPEC_ID(5)='SOOT',              VOLUME_FRACTION(5)=0.90,
       SPEC_ID(6)='NITROGEN',          VOLUME_FRACTION(6)=5.76 /
 \end{lstlisting}
-
-\noindent
-Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions. To set the initial concentration of fuel, an {\ct INIT} line is used:
-
+To set the initial concentration of fuel, an {\ct INIT} line is used:
 \begin{lstlisting}
 &INIT MASS_FRACTION(1)=0.229, SPEC_ID(1)='PVC' /
 \end{lstlisting}
-
-\noindent Since this is not a simple chemistry problem, either the enthalpy of formation of PVC or the heat of combustion of the reaction should be specified. In this case, the heat of combustion for PVC is taken from the SFPE Handbook~\cite{SFPE:Tewarson}.
-
+Since this is not a simple chemistry problem, either the enthalpy of formation of PVC or the heat of combustion of the reaction should be specified. In this case, the heat of combustion for PVC is taken from the SFPE Handbook~\cite{SFPE:Tewarson}.
 \begin{lstlisting}
-&REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS', NU=-1,-1,1
-      FIXED_MIX_TIME=0.1 /
+&REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS', 
+      NU=-1,-1,1, FIXED_MIX_TIME=0.1 /
 \end{lstlisting}
-
-\noindent
-Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
+Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
 
 
 \begin{figure}[ht]
@@ -5783,6 +5727,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 \subsection{Multiple Chemical Reactions}
 \label{info:multi-reac}
+
 There may be times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_s$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
 1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.3274\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
@@ -5845,13 +5790,13 @@ In both of these reactions, the {\ct ENTHALPY\_OF\_FORMATION} of the chosen fuel
 \end{lstlisting}
 The {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using both fuels. The mass flux values for each fuel are determined by the desired heat release, the proportion of the total heat release rate each fuel contributes, the burner area, and the heat of combustion of each fuel. In this case we want a 1200~kW fire where each fuel contributes 50\% to the total heat release rate (600~kW).
 \begin{align}
-\dot{m}^{\prime \prime}_{poly} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{26200~\si{kJ/kg}} = 0.022901~\si{kg/(m^2.s)}\\
-\dot{m}^{\prime \prime}_{wood} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{16400~\si{kJ/kg}} = 0.036585~\si{kg/(m^2.s)}
+\dot{m}''_{\rm poly} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{26200~\si{kJ/kg}} = 0.022901~\si{kg/(m^2.s)}\\
+\dot{m}''_{\rm wood} &= \frac{600~\mathrm{kW}}{1~\mathrm{m^2}}\frac{1}{16400~\si{kJ/kg}} = 0.036585~\si{kg/(m^2.s)}
 \end{align}
 
 \begin{lstlisting}
-&SURF ID = 'FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1) = 0.022901, RAMP_MF(1)='poly'
-                    SPEC_ID(2)='WOOD',         MASS_FLUX(2) = 0.036585, RAMP_MF(2)='wood' /
+&SURF ID='FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1)=0.022901, RAMP_MF(1)='poly'
+                  SPEC_ID(2)='WOOD',         MASS_FLUX(2)=0.036585, RAMP_MF(2)='wood' /
 \end{lstlisting}
 Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. We also want each fuel to follow a ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the remainder of a 600~s simulation.
 \begin{lstlisting}
@@ -6384,7 +6329,7 @@ If you set {\ct CHECK\_DISTRIBUTION=.TRUE.} on the {\ct PART} line, FDS will wri
 
 If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup.
 In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the Sauter mean diameters,
-{\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters {\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
+{\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
 
 
 \subsection{Fuel Droplets}
@@ -6591,8 +6536,10 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 \begin{lstlisting}
 &PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
       PROP_ID='needle image', STATIC=.TRUE. /
-&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000, MASS_PER_VOLUME=1. /
-&PROP ID='needle image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
+&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000, 
+      MASS_PER_VOLUME=1. /
+&PROP ID='needle image', SMOKEVIEW_ID='TUBE', 
+      SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
 
 &SURF ID = 'wet vegetation'
       MATL_ID(1,1:2) = 'PINE','MOISTURE'
@@ -6628,8 +6575,7 @@ Lagrangian particles can be used to represent different types of vegetation, lik
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
-
-\noindent In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
+In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
 
 \begin{figure}[ht]
 \begin{center}
@@ -7136,7 +7082,7 @@ Technical Reference Guide~\cite{FDS_Math_Guide}.
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
 \label{info:spraypattern}
 
-If a more complex spray pattern is desired than one characterized by a {\ct SPRAY\_ANGLE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL})
+If a more complex spray pattern is desired than one characterized by a {\ct SPRAY\_ANGLE}, then a \linebreak[4]{\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL})
 namelist group.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE} on the {\ct PROP} line, the name of the spray pattern using
 {\ct SPRAY\_PATTERN\_TABLE} and then one or more {\ct TABL} lines of the format:
 
@@ -7555,7 +7501,7 @@ When using a {\ct DEVC} output to control FDS, the instantaneous value of the th
 \ee
 
 \noindent
-where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The {\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is performed.
+where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]{\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is performed.
 
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
@@ -7662,7 +7608,7 @@ when its value decreases past the setpoint.  The default value is +1.
 \item[{\ct LATCH}] If this logical value is set to {\ct .TRUE.} the control function will only change state once.
 The default value is {\ct .TRUE.}.
 \item[{\ct INITIAL\_STATE}] This logical value is the initial state of the control function. The default value
-is {\ct .FALSE.} For example, if an obstruction associated with the control function is to disappear, set {\ct INITIAL\_STATE=.TRUE.}
+is {\ct .FALSE.} For example, if an obstruction associated with the control function is to disappear, set {\ct INITIAL\_STATE} to {\ct .TRUE.}
 \end{description}
 
 For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} or {\ct VENT}), a {\ct CTRL\_ID} can be
@@ -7912,9 +7858,9 @@ The control functions that perform simple math operations ({\ct SUM},  {\ct SUBT
 \label{info:CONTROL_PID}
 
 A PID (Proportional Integral Derivative) control function is a commonly used feedback controller for controlling electrical and mechanical systems.  The function computes an error between a process variable and a desired setpoint.  The goal of the PID function is to minimize the error.  A PID control function is computed as
-\be u(t) \; = \; K_p e(t) \; + \; \; K_i \int_0^t \! e(t) \, \d t   \; + \; K_d \frac{\d e(t)}{\d t}\ee
-where $K_p$, $K_i$, and $K_d$ are respectively the {\ct PROPORTIONAL\_GAIN}, the {\ct INTEGRAL\_GAIN}, and the
-{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subtracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.
+\be u(t) \; = \; K_{\rm p} \, e(t) \; + \; \; K_{\rm i} \int_0^t \! e(t) \, \d t   \; + \; K_{\rm d} \frac{\d e(t)}{\d t}\ee
+where $K_{\rm p}$, $K_{\rm i}$, and $K_{\rm d}$ are respectively the {\ct PROPORTIONAL\_GAIN}, the {\ct INTEGRAL\_GAIN}, and the
+\linebreak[4]{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subtracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
 
@@ -8581,29 +8527,30 @@ vertical profile of temperature. One such
 method~\cite{Janssens:JFS1992} is as follows: Consider a continuous
 function $T(z)$ defining temperature $T$ as a function of height above
 the floor $z$, where $z=0$ is the floor and $z=H$ is the
-ceiling. Define $T_u$ as the upper layer temperature, $T_l$ as the
-lower layer temperature, and $z_{int}$ as the interface
+ceiling. Define $T_{\rm u}$ as the upper layer temperature, $T_{\rm l}$ as the
+lower layer temperature, and $z_{\rm int}$ as the interface
 height. Compute the quantities:
-\begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; \d z &=& I_1 \\ [0.1in]
-                  (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; \d z &=& I_2
+\begin{eqnarray*} (H-z_{\rm int})\; T_{\rm u} + z_{\rm int} \; T_{\rm l} = \int_0^H \; T(z) \; \d z &=& I_1 \\ [0.1in]
+                  (H-z_{\rm int})\; \frac{1}{T_{\rm u}} + z_{\rm int} \; \frac{1}{T_{\rm l}} = \int_0^H \; \frac{1}{T(z)} \; \d z &=& I_2
 \end{eqnarray*}
-Solve for $z_{int}$:
-\be z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H} \ee
-Let $T_l$ be the temperature in the lowest mesh cell and, using
+Solve for $z_{\rm int}$:
+\be 
+   z_{\rm int} = \frac{ T_{\rm l} \, (I_1 \, I_2 - H^2)}{I_1+I_2 \, T_{\rm l}^2 - 2\, T_{\rm l} \, H} 
+\ee
+Let $T_{\rm l}$ be the temperature in the lowest mesh cell and, using
 Simpson's Rule, perform the numerical integration of $I_1$ and
-$I_2$. $T_u$ is defined as the average upper layer temperature via
-\be (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; \d z \ee
+$I_2$. $T_{\rm u}$ is defined as the average upper layer temperature via
+\be 
+   (H-z_{\rm int})\; T_{\rm u} = \int_{z_{\rm int}}^H \; T(z) \; \d z 
+\ee
 Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
 The quantities {\ct 'LAYER HEIGHT'}, {\ct 'UPPER TEMPERATURE'} and {\ct
 'LOWER TEMPERATURE'} can be designated via {\ct DEVC} lines
 in the input file. For example, the line:
-
 \begin{lstlisting}
 &DEVC XB=2.0,2.0,3.0,3.0,0.0,3.0, QUANTITY='LAYER HEIGHT', ID='whatever' /
 \end{lstlisting}
-
-\noindent
 produces a time history of the smoke layer height at $x=2$ and $y=3$ between $z=0$ and $z=3$.
 If multiple meshes are being used, the vertical path {\em cannot} cross mesh boundaries.
 
@@ -8612,22 +8559,13 @@ If multiple meshes are being used, the vertical path {\em cannot} cross mesh bou
 \subsection{Thermocouples}
 \label{info:THERMOCOUPLE}
 
-The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocouple. The thermocouple temperature lags the true gas temperature by an amount determined mainly
-by its bead size. It is found by solving the following equation for the thermocouple temperature, $T_{\hbox{\tiny TC}}$~\cite{Welsh:1}
+The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocouple. The thermocouple temperature lags the true gas temperature by an amount determined mainly by its bead size. It is found by solving the following equation for the thermocouple temperature, $T_{\rm TC}$~\cite{Welsh:1}
 \be
-   \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, \frac{\d T_{\hbox{\tiny TC}}}{\d t} = \epsilon_{\hbox{\tiny TC}} \, (U/4 - \sigma T_{\hbox{\tiny TC}}^4) + h(T_g - T_{\hbox{\tiny TC}}) = 0
+   \rho_{\rm TC} \, c_{\rm TC} \, \frac{\d T_{\rm TC}}{\d t} = \epsilon_{\rm TC} \, (U/4 - \sigma T_{\rm TC}^4) + h(T_{\rm g} - T_{\rm TC}) = 0
    \label{TC}
 \ee
-where $\epsilon_{\hbox{\tiny TC}}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_g$ is the true gas temperature, and
-$h$ is the heat transfer coefficient to a small sphere,
-$h=k \, \NU / d_{\hbox{\tiny TC}}$.
-The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the
-calculated value of the heat transfer coefficient, set {\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (W/m$^2$/K).
-The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and
-0.44~kJ/kg/K, respectively.
-See the discussion on heat transfer to a water
-droplet in the Technical Reference Guide for details of the convective
-heat transfer to a small sphere.
+where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and
+$h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (W/(m$^2\cdot$K)). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
 
 
 \subsection{Heat Fluxes and Thermal Radiation}
@@ -8635,44 +8573,42 @@ heat transfer to a small sphere.
 
 There are various ways of recording the heat flux at a solid
 boundary. If you want to record the {\em net} heat flux to the
-surface, $\dq_c'' + \dq_r''$, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and
+surface, $\dq_{\rm c}'' + \dq_{\rm r}''$, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and
 radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively. If you want to compare predicted heat
 flux with a measurement, you often need to use {\ct 'GAUGE HEAT FLUX'}.
 The difference between {\ct 'NET HEAT FLUX'} and {\ct 'GAUGE HEAT FLUX'} is that
 the former is the rate at which energy is absorbed by the solid surface;
-the latter is the amount of energy that would be absorbed if the surface were cold (or some specified temperature $T_G$):
-$$\dq_r''/\epsilon +\dq_c'' + h(T_w-T_G) + \sigma (T_w^4-T_G^4)$$
+the latter is the amount of energy that would be absorbed if the surface were cold (or some specified temperature $T_{\rm G}$):
+\be
+   \dq_{\rm gauge}'' = \dq_{\rm r}''/\epsilon + \dq_{\rm c}'' + h(T_{\rm w}-T_{\rm G}) + \sigma (T_{\rm w}^4-T_{\rm G}^4)
+\ee
 If the heat flux gauge used in an experiment has a temperature other
-than ambient, set {\ct GAUGE\_TEMPERATURE} ($T_G$) on the {\ct PROP} line
+than ambient, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm G}$) on the {\ct PROP} line
 associated with the device.  When comparing against a radiometer
 measurement, use {\ct RADIOMETER}:
-$$\dq_r''/\epsilon + \sigma (T_w^4-T_\infty^4) $$
+\be 
+   \dq_{\rm radiometer}'' = \dq_{\rm r}''/\epsilon + \sigma (T_{\rm w}^4-T_\infty^4)
+\ee
 For diagnostic purposes it is sometimes convenient to output the {\ct 'INCIDENT HEAT FLUX'}:
-$$ \dq_r''/\epsilon + \sigma T_w^4 +\dq_c'' $$
-Note that the sign of the output of heat flux is different than the sign of the input of a heat flux.  A positive
-output quantity for heat flux means heat is being transferred into the surface.
+\be
+   \dq_{\rm inc}'' = \dq_{\rm r}''/\epsilon + \sigma T_{\rm w}^4 +\dq_{\rm c}''
+\ee
+Note that the sign of the output of heat flux is different than the sign of the input of a heat flux.  A positive output quantity for heat flux means heat is being transferred into the surface.
 
-All of the above heat flux output quantities are defined at a solid surface. To record the heat flux away from a solid surface, use a Lagrangian particle as a surrogate for
-a heat flux gauge, as in the following example:
-
+All of the above heat flux output quantities are defined at a solid surface. To record the heat flux away from a solid surface, use a Lagrangian particle as a surrogate for a heat flux gauge, as in the following example:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
 &INIT ID='f1', XYZ=0.45,0.0,0.3, N_PARTICLES=1, PART_ID='rad gauge' /
 &PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1,1:3)=-1,0,0, SURF_ID='target' /
 &SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL' /
 \end{lstlisting}
-
-\noindent
 Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''
 
 The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
-
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', POINTS=34, QUANTITY='RADIATIVE HEAT FLUX', X_ID='x' /
 &INIT ID='f1', XYZ=0.45,0.0,0.3, N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
 \end{lstlisting}
-
-\noindent
 For more information about specifying arrays of devices via the parameter {\ct POINTS}, see Section~\ref{info:line_file}. Note also the parameter {\ct DX} on the {\ct INIT} line that creates a line of particles starting at the point {\ct XYZ} and repeating every 0.05~m.
 
 
@@ -8738,7 +8674,7 @@ distributions, but only various mean properties.
 
 By default, the PDPA device output at time $t$ is computed as a time integral
 \be
-F(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} f(t) \, \d t
+F(t) = \frac{1}{\min(t,t_{\rm e})-t_{\rm s}} \int_{t_{\rm s}}^{\min(t,t_{\rm e})} f(t) \, \d t
 \ee
 but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE} equal to {\ct .FALSE.} on the corresponding {\ct PROP} line, in which case
 \be
@@ -8746,10 +8682,10 @@ F(t) = f(t)
 \ee
 The function $f(t)$ has two forms:
 \be
-f_1(t) =  \frac{\sum_i n_i d_i^m \, \phi}{\sum_i n_i d_i^n}  \quad ; \quad
+f_1(t) =  \frac{\sum_i n_i D_i^m \, \phi}{\sum_i n_i D_i^n}  \quad ; \quad
 f_2(t) = \frac{\sum_i n_i \, \phi}{V}
 \ee
-where $n_i$ is the number of real particles represented by the single simulated particle, $d_i$
+where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$
 is the particle diameter, and $\phi$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere
 with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}.
 
@@ -8759,7 +8695,7 @@ associated properties defined using the following keywords on the {\ct PROP} lin
 \item[{\ct PDPA\_M}] $m$, exponent $m$ of diameter.
 \item[{\ct PDPA\_N}] $n$, exponent $n$ of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
 \end{description}
-\noindent The second form ($f_2(t)$) is used for the computation of mass and energy related variables that do not include the diameter weighting.
+The second form ($f_2(t)$) is used for the computation of mass and energy related variables that do not include the diameter weighting.
 The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}.
 The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}.
 A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
@@ -8770,44 +8706,41 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
-{\ct QUANTITY}              & $\phi$                                                                & $f$    & Unit \\ \hline
-{\ct 'DIAMETER'} (default)  & 1                                                                     & $f_1$  & $\mu$m \\
-{\ct 'ENTHALPY'}            & $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$     & $f_2$  & kJ/m$^3$ \\
-{\ct 'PARTICLE FLUX X'}     & $(4/3)\rho_i r_i^3 u_i$                                               & $f_2$  & kg/m$^2$s \\
-{\ct 'PARTICLE FLUX Y'}     & $(4/3)\rho_i r_i^3 v_i$                                               & $f_2$  & \si{kg/(m$^2$.s)} \\
-{\ct 'PARTICLE FLUX Z'}     & $(4/3)\rho_i r_i^3 w_i$                                               & $f_2$  & \si{kg/(m$^2$.s)} \\
-{\ct 'U-VELOCITY'}          & $u_i$                                                                 & $f_1$  & m/s \\
-{\ct 'V-VELOCITY'}          & $v_i$                                                                 & $f_1$  & m/s \\
-{\ct 'W-VELOCITY'}          & $w_i$                                                                 & $f_1$  & m/s \\
-{\ct 'VELOCITY'}            & $(u_i^2+v_i^2+w_i^2)^{\ha}$                                           & $f_1$  & m/s \\
-{\ct 'TEMPERATURE'}         & $T_i$                                                                 & $f_1$  & ${}^\circ$C \\
-{\ct 'MASS CONCENTRATION'}  & $(4/3)\rho r_i^3 $                                                    & $f_2$  & kg/m$^3$ \\
-{\ct 'NUMBER CONCENTRATION'}& 1                                                                     & $f_2$  & \\
+{\ct QUANTITY}              & $\phi$                                                                            & $f$    & Unit \\ \hline
+{\ct 'DIAMETER'} (default)  & 1                                                                                 & $f_1$  & $\mu$m \\
+{\ct 'ENTHALPY'}            & $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_{\rm m})T_{\rm m} \right)$     & $f_2$  & kJ/m$^3$ \\
+{\ct 'PARTICLE FLUX X'}     & $(4/3)\rho_i r_i^3 u_i$                                                           & $f_2$  & kg/m$^2$s \\
+{\ct 'PARTICLE FLUX Y'}     & $(4/3)\rho_i r_i^3 v_i$                                                           & $f_2$  & \si{kg/(m$^2$.s)} \\
+{\ct 'PARTICLE FLUX Z'}     & $(4/3)\rho_i r_i^3 w_i$                                                           & $f_2$  & \si{kg/(m$^2$.s)} \\
+{\ct 'U-VELOCITY'}          & $u_i$                                                                             & $f_1$  & m/s \\
+{\ct 'V-VELOCITY'}          & $v_i$                                                                             & $f_1$  & m/s \\
+{\ct 'W-VELOCITY'}          & $w_i$                                                                             & $f_1$  & m/s \\
+{\ct 'VELOCITY'}            & $(u_i^2+v_i^2+w_i^2)^{\ha}$                                                       & $f_1$  & m/s \\
+{\ct 'TEMPERATURE'}         & $T_i$                                                                             & $f_1$  & ${}^\circ$C \\
+{\ct 'MASS CONCENTRATION'}  & $(4/3)\rho r_i^3 $                                                                & $f_2$  & kg/m$^3$ \\
+{\ct 'NUMBER CONCENTRATION'}& 1                                                                                 & $f_2$  & \\
  \hline
 \end{tabular}
 \end{center}
-${}^*$ $T_m$ is the melting temperature of the associated species.
+${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} normalized histogram bin counts  are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $d_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
+It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} normalized histogram bin counts  are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
 
 The output file contains two-columns for each device giving an histogram output. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram is thought consist of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_M} parameter on the {\ct PROP} line  to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation.
 
 The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
-\item[{\ct PDPA\_START}] $t_s$, starting time of time integration in seconds. PDPA output is always a running average over time.
-As the spray simulation may contain some initial transient phase, it may be useful to specify the starting time of data collection.
-\item[{\ct PDPA\_END}] $t_e$, ending time of time integration in seconds.
+\item[{\ct PDPA\_START}] $t_{\rm s}$, starting time of time integration in seconds. PDPA output is always a running average over time. As the spray simulation may contain some initial transient phase, it may be useful to specify the starting time of data collection.
+\item[{\ct PDPA\_END}] $t_{\rm e}$, ending time of time integration in seconds.
 \item[{\ct PDPA\_INTEGRATE}] A logical parameter for choosing between time integrated or instantaneous values. {\ct .TRUE.} by default.
 \item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
 \item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
 \item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $\phi$.
 \item[{\ct PDPA\_HISTOGRAM\_NBINS}] Number of bins used for the histogram.
 \end{description}
-
-\noindent The following example is used to measure the Sauter mean diameter, $D_{32}$, of the particle type {\ct 'water drops'}, starting from
-time 5~s.
+The following example is used to measure the Sauter mean diameter, $D_{32}$, of the particle type {\ct 'water drops'}, starting from time 5~s.
 \begin{lstlisting}
 &PROP ID='pdpa_d32'
       PART_ID='water drops'
@@ -8818,8 +8751,7 @@ time 5~s.
 
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d32' /
 \end{lstlisting}
-
-\noindent The following example is used to write out a histogram of droplet size using 20 equally sized bins between 0 and 2000 $\mu$m.
+The following example is used to write out a histogram of droplet size using 20 equally sized bins between 0 and 2000 $\mu$m.
 \begin{lstlisting}
 &PROP ID='pdpa_d'
       PART_ID='water drops'
@@ -8853,10 +8785,10 @@ representative of the heat flux to a solid surface. Following the idea
 proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, the
 following equation can be solved via a simple iterative technique to
 determine an effective gas temperature, $T_{\hbox{\tiny AST}}$:
-\be \dot{q}_r'' + \dot{q}_c'' = \epsilon \sigma \, \left(
-T_{\hbox{\tiny AST}}^4 - T_w^4 \right) + h (T_{\hbox{\tiny AST}} - T_w)  \ee
-The sum $\dot{q}_r'' + \dot{q}_c''$ is the {\em net} heat flux onto
-the solid surface, whose temperature is $T_w$. The heat fluxes and
+\be \dot{q}_{\rm r}'' + \dot{q}_{\rm c}'' = \epsilon \sigma \, \left(
+T_{\hbox{\tiny AST}}^4 - T_{\rm w}^4 \right) + h (T_{\hbox{\tiny AST}} - T_{\rm w})  \ee
+The sum $\dot{q}_{\rm r}'' + \dot{q}_{\rm c}''$ is the {\em net} heat flux onto
+the solid surface, whose temperature is $T_{\rm w}$. The heat fluxes and
 surface temperature are computed in FDS, and they are
 inter-dependent. The computed wall temperature affects the net heat
 flux and vice versa. However, because FDS only computes the solution
@@ -8866,8 +8798,8 @@ significant. Thus, in some scenarios neither the FDS-predicted heat
 fluxes or the surface temperature can be used as an accurate indicator
 of the thermal insult from the hot, smokey gases onto solid objects.
 
-Of course, both the heat fluxes, $\dot{q}_r''$ and $\dot{q}_c''$, and
-the surface temperature, $T_w$ can be passed from FDS to the other
+Of course, both the heat fluxes, $\dot{q}_{\rm r}''$ and $\dot{q}_{\rm c}''$, and
+the surface temperature, $T_{\rm w}$ can be passed from FDS to the other
 model, and suitable corrections can be made based on a presumably more
 accurate prediction of the solid temperature.  Alternatively, the
 single quantity, $T_{\hbox{\tiny AST}}$, can be transferred, as this
@@ -9290,13 +9222,13 @@ Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
 
 You may output a scalar quantity which is referred to as the \emph{measure of turbulence resolution}, defined locally as
 \begin{eqnarray}
-\mbox{MTR}(\mathbf{x},t) = \frac{k_{sgs}}{k_{res} + k_{sgs}}
+\mbox{MTR}(\mathbf{x},t) = \frac{k_{\rm sgs}}{k_{\rm res} + k_{\rm sgs}}
 \end{eqnarray}
 where
 \vskip-.6cm
 \begin{eqnarray}
-k_{res} &=& \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i \\
-k_{sgs} &=& \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i)
+k_{\rm res} &=& \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i \\
+k_{\rm sgs} &=& \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i)
 \end{eqnarray}
 Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  The model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored. The basic idea is to provide an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, you may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
 \begin{figure}[ht]
@@ -9316,13 +9248,13 @@ For the canonical case of isotropic turbulence Pope actually defines LES such th
 \label{mtr}
 The \emph{measure of scalar resolution} is defined locally as
 \begin{eqnarray}
-\mbox{MSR}(\mathbf{x},t) = \frac{T_{sgs}}{T_{res} + T_{sgs}}
+\mbox{MSR}(\mathbf{x},t) = \frac{T_{\rm sgs}}{T_{\rm res} + T_{\rm sgs}}
 \end{eqnarray}
 where
 \vskip-.6cm
 \begin{eqnarray}
-T_{res} &=& \tilde{\varphi}^2 \\
-T_{sgs} &=& (\tilde{\varphi} - \hat{\tilde{\varphi}})^2
+T_{\rm res} &=& \tilde{\varphi}^2 \\
+T_{\rm sgs} &=& (\tilde{\varphi} - \hat{\tilde{\varphi}})^2
 \end{eqnarray}
 Here again the model for the SGS scalar energy fluctuations is taken from scale similarity \cite{Bardina:1980}.  The field $\hat{\tilde{\varphi}}$ is test filtered at a scale $2\Delta$.  The cross-term energy (i.e., $\langle 2 \tilde{\varphi}\varphi^{\prime} \rangle$, where $\varphi^\prime = \varphi - \tilde{\varphi}$) is ignored, but this does not affect the bounds of the measure.  Further, it can be shown that this term is small if sufficient resolution is used. There is evidence to suggest that the requirements for scalar resolution may be somewhat more stringent than for the velocity field \cite{Vervisch:2010}.  Therefore, currently the best advice is to keep the mean value of MSR less than 0.2.
 
