@@ -4070,7 +4070,7 @@ Real materials that can burn can be very complicated. Undoubtedly, the {\ct SURF
 input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know
 that the various property values and the associated thermo-physical model in FDS
 constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid
-phase routines. However, it is easy to perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and benchscale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
+phase routines. However, it is easy to perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
 
 \subsection{Simulating the Cone Calorimeter}
 
@@ -4166,7 +4166,7 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 \end{lstlisting}
 
 
-\subsection{Simulating Benchscale Measurements like the TGA, DSC, and MCC}
+\subsection{Simulating Bench-scale Measurements like the TGA, DSC, and MCC}
 
 \label{info:TGA_DSC_MCC}
 
@@ -6860,7 +6860,7 @@ mass per unit area, $m_{\rm w}''$, expressed in units of kg/m$^2$.
 \be
 k(t) = \hbox{\ct E\_COEFFICIENT} \; m_{\rm w}''(t) \quad          \si{1/s}
 \ee
-The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinker is set to operate at 5~s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate.
+The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinkler is set to operate at 5~s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate.
 
 \begin{lstlisting}
 &SURF ID='FUEL', HRRPUA=100., E_COEFFICIENT=4. /
@@ -8553,7 +8553,7 @@ The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocou
    \label{TC}
 \ee
 where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and
-$h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (W/(m$^2\cdot$K)). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+$h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
 
 
 \subsection{Heat Fluxes and Thermal Radiation}
