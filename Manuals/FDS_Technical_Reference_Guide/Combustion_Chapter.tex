@@ -4,32 +4,17 @@
 \label{chapter:combustion}
 
 \label{combustionsection}
-The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in the species transport equation, Eq.~(\ref{species}).  In the typical FDS problem the primitive species are lumped into reacting groups (more on this below) and we consider the simple reaction
-\begin{equation}\label{eq:simple}
-\mathrm{Fuel + Air \rightarrow Products}
-\end{equation}
-For the vast majority of FDS applications, the ``mixed is burnt'' approximation is adequate and the chemical source term for Fuel may be modeled by the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager \cite{Magnussen:1,Poinsot:TNC}:
-\begin{equation}
-\label{eq:edc}
-\dot{m}_F^{\prime\prime\prime} = -\rho \frac{\min(Z_F, s\,Z_A)}{\tau_{\rm mix}}
-\end{equation}
-Here, $Z_F$ and $Z_A$ are the mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.  The quantity $\tau_{\rm mix}$ is a time scale for mixing.  The EDC model therefore states that the rate of fuel consumption is proportional to both the local limiting reactant concentration and the local rate of mixing.  A model for the mixing time is discussed in Section \ref{sec:reac_time_scale}.  With the mass production (consumption) rate of Fuel known, the production rates for all other species in the system (e.g., \si{CO_2}, \si{H_2O}) may be found from stoichiometry.  Specifics for the default reaction system are given in Sections \ref{sec:simplechemistry} (Simple Chemistry) and \ref{sec:yield} (Specified CO and Soot Yield).
-
-%In this chapter, we integrate the change in cell average species concentration over a time step for a single grid cell to obtain the mean chemical source term,
-%\begin{equation}\label{eq:m_tprime_alpha}
-%\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\overline{Y}_\alpha(\delta t) - \overline{Y}_\alpha(0)}{\delta t}
-%\end{equation}
-%Here the overbar is used to denote a cell average since later a subgrid distribution of composition is considered.  The integration of the mean chemical source term is time split from the integration of the transport equation such that each cell may be thought of as a partially-stirred batch reactor.  As we discuss below, given the chemical composition, cell temperature, and extent of mixing at the start of the time step, the final cell composition depends on the rates of chemical kinetics and turbulent mixing.
-
-The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and typically the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).  The heat release rate is found by summing the species mass production rates times their respective heats of formation:
-\begin{equation}\label{eq:q_tprime}
-\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}_\alpha^{\prime\prime\prime} \Delta h_{f,\alpha}
-\end{equation}
+The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in the species transport equation, Eq.~(\ref{species}). The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and typically the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).
 
 The remainder of this chapter describes our generalized combustion model, of which EDC is a limiting case. First, we discuss of our \emph{lumped species} approach, which reduces the computational burden of the full chemical system by combining species into groups that transport and react together.  We then discuss our approach to describing the chemical mixing process---we treat each computational cell as a partially-stirred batch reactor with a characteristic mixing time.  The model for the mixing time is discussed next.  Once reactants are mixed, the reaction rate depends on kinetics.  The last part of this chapter discusses available kinetic mechanisms within FDS, from infinitely fast chemistry (default) to Arrhenius rate laws and reversible reactions.
 
 \section{Lumped Species Approach}
+\label{sec:lumpedspecies}
 
+In the typical FDS problem the primitive species are lumped into reacting groups and we consider the simple reaction
+\begin{equation}\label{eq:simple}
+\mathrm{Fuel + Air \rightarrow Products}
+\end{equation}
 We refer to the Fuel, Air, and Products in Eq.~(\ref{eq:simple}) as \emph{lumped species}.  The lumped species approach is a simplified reaction progress variable approach \cite{fox2003} in which all the progress variables are mass fractions. This avoids any complications related to boundedness and ill-defined initial and boundary conditions.
 
 In a simple hydrocarbon reaction, the reactants are the fuel, oxygen, and nitrogen and the products are carbon dioxide, water vapor, and nitrogen. The primitive species mass fractions are given by the composition vector
@@ -173,15 +158,109 @@ In the case where all primitive species are treated as individual lumped species
 %\end{center}
 Note that tracking all primitive species could be very expensive.  Chemical mechanisms in combustion may require 10 to 100 species or more and each transport equation adds roughly 5\% to the computational cost.
 
-
 \newpage
 \section{Turbulent Combustion}
 
-Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation. To address these difficulties, FDS employs a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to the Eddy Dissipation Concept (EDC) \cite{Magnussen:1,Poinsot:TNC}. But the method is not limited to diffusion flames---each computational cell is thought of as a partially stirred batch reactor. At the start of an FDS time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence. Section \ref{sec:EDC} discusses the model that couples mixing and chemical reactions. The mixing time, $\tau_{mix}$, is discussed in Section \ref{sec:reac_time_scale}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}).
+\subsection{Mixing-Controlled Fast Chemistry (Default)}
+\label{sec:fastchemistry}
+
+For the vast majority of FDS applications, the ``mixed is burnt'' approximation is adequate to describe combustion chemistry and the chemical source term for Fuel may be modeled by the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager \cite{Magnussen:1,Poinsot:TNC}:
+\begin{equation}
+\label{eq:edc}
+\dot{m}_F^{\prime\prime\prime} = -\rho \frac{\min(Z_F, s\,Z_A)}{\tau_{\rm mix}}
+\end{equation}
+Here, $Z_F$ and $Z_A$ are the lumped mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.  The quantity $\tau_{\rm mix}$ is a time scale for mixing which must be modeled (see Section \ref{sec:reac_time_scale}).  The EDC model therefore states that the rate of fuel consumption is proportional to both the local limiting reactant concentration and the local rate of mixing. As we will see below, the EDC model is a limiting case of a generalized partially-stirred batch reactor model in which all the reactants are initially unmixed and the rate of chemical kinetics is infinite.
+
+\subsection{Extinction}
+
+\label{extinction}
+
+Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research in the combustion community. The physical mechanisms underlying these phenomena are complex, and even simplified models still rely on an accurate prediction of the flame temperature and local strain rate, neither of which is readily available in an LES calculation.
+
+A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur. 
+
+At present, simple empirical rules---which ignore strain---are used to predict local extinction (within a certain grid cell) based on local resolved species concentrations and the local cell temperature.  The default FDS extinction model consists of two parts based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. First, if the cell temperature is below the auto-ignition temperature for the fuel then combustion is suppressed. The auto-ignition temperature is zero by default so that the typical user does not need to specify an ignition source.  Next, if the potential combustion heat release cannot raise the local subgrid temperature above an empirically determined limiting flame temperature, then combustion is suppressed. If either criterion fails, then there is no chemical reaction and $\dot{q}^{\prime\prime\prime}=0$. The limiting flame temperature extinction algorithm is outlined below.
+
+%\begin{enumerate}
+%\item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
+%\be
+%\Delta \hat{Y}_{F} = - \min \left( \hat{Y}_F, \hat{Y}_{\alpha} \,\frac{\nu_{F}\,W_{F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
+%\ee
+%If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
+%\item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
+%\item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
+%
+%\be \Delta \hat{Y}_{air} = \min \left(\frac{\Delta \hat{Y}_{F} W_{\alpha} \nu_{\alpha}}{Z_{\alpha} W_F} \right); \quad \mbox{for all non fuel reactants, $\alpha$, in reaction $n$} \ee
+%Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_{F}$.
+%\item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature (LFT).
+%\item Combustion is allowed if
+%
+%\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta h_{c,F} \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{F} h_F(T_{LFT}) \ee
+%\item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
+%\end{enumerate}
+%
+%In addition to the extinction model described above, there is the option in FDS to select a simpler extinction model based on the limiting oxygen concentration. Details of this model are discussed in Appendix \ref{o2_based_model}.
+
+\subsection{Heat Release Rate}
+
+Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
+\begin{equation}\label{eq:vol_heat_gen}
+\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime}_{\alpha} \Delta h_{f,\alpha}
+\end{equation}
+
+\subsubsection{Heat Release Rate Limiter}
+
+There is a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
+this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
+is sometimes too coarse to work effectively.
+A scaling analysis of pool fires by Orloff and de Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
+heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses a less restrictive upper bound on the local heat release rate per unit volume:
+\begin{equation}\label{eq:q_bound}
+\dq_{\max}''' = 200/\dx + 2500 \quad \si{kW/m^3}
+\end{equation}
+The value of 200~kW/m$^2$ is an empirically derived upper bound on the heat release rate per unit area of flame sheet and $\delta x$ is the characteristic cell size (m). Typically, this bound only affects fires whose value of $Q^*$ is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
+
+The upper limit on the heat release rate per unit volume inherently places a limiter on the time integration. If the local heat release rate per unit volume reaches or exceeds the limiting value in a time step, the heat release rate per unit volume is set to the limiting value. This freezes the chemical reactions. The change in species is then scaled based on the ratio of the limiting value to the calculated heat release rate per unit volume. The new values for heat release rate per unit volume and species concentrations are set at their respective limits for the remainder of the time step. 
+
+
+\subsection{Reaction Time Scale Model}
+\label{sec:reac_time_scale}
+
+In this section we provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale.
+
+It is important to consider the behavior of a model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which, though usually small, is finite. At a slightly larger scale we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
+
+Now let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires--which are generally buoyancy-driven flows--we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in]{FIGURES/reaction_time_scale.pdf}
+\vskip-.2cm
+\caption{Reaction time scale model.}
+\label{fig_reaction_time_scale}
+\end{figure}
+
+Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak the $\tau_{\rm g}$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_{\rm u}$ line.  Or, for highly turbulent jet flames $\tau_{\rm flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_{\rm u}$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
+
+The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically represented by
+\begin{equation}
+\label{eqn_tau_mix}
+\tau_{\rm mix} = \max(\tau_{\rm chem},\min(\tau_{\rm d},\tau_{\rm u},\tau_{\rm g},\tau_{\rm flame}))
+\end{equation}
+The mathematical details of the submodels are as follows:
+\begin{align}
+\label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_F} \\
+\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\Delta}{\sqrt{2k_{sgs}}} \\
+\label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
+\end{align}
+where $D_F$ is the diffusivity of the fuel species. Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
+
 
 
 \subsection{Partially-Stirred Batch Reactor Model}
-\label{sec:EDC}
+\label{sec:batchreactormodel}
+
+Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation. To address these difficulties, FDS employs a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to the Eddy Dissipation Concept (EDC) \cite{Magnussen:1,Poinsot:TNC}. But the method is not limited to diffusion flames---each computational cell is thought of as a partially stirred batch reactor. At the start of an FDS time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence. Section \ref{sec:batchreactormodel} discusses the model that couples mixing and chemical reactions. The mixing time, $\tau_{mix}$, is discussed in Section \ref{sec:reac_time_scale}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}).
 
 At the start of the integration of the reactor model, the species transport equations have been solved and we know the mean cell concentrations of all reactants in our chemical system.  In this section, we will work in terms of primitive species mass fractions.  The cell mean mass fraction of $\alpha$, a function of time, is denoted $\overline{Y}_\alpha(t)$.
 
@@ -191,7 +270,7 @@ In turbulent combustion, \emph{transport} and \emph{mixing} may be easily confus
 
 FDS employs a \emph{time splitting} scheme (see Sections \ref{sec:solution_procedure} and \ref{sec_time_splitting}) to solve the species equations in which we first compute transport (both advective and diffusive) and then we compute mixing.  Note that transport due to turbulent diffusion does not mix the chemical species.  This is illustrated in Fig.~\ref{fig_transport_vs_mixing}.  On the far left, we show a hypothetical computational cell at the end of the transport step and the beginning of the mixing and reaction step in our algorithm.  Notice that there is a subgrid distribution of the species mass fraction.  Locally in space the mass fraction may be pure fuel or pure oxidizer.  In this image, where there are already various shades of gray, it may be noted that  the initial condition of the cell may not be purely unmixed.  As we proceed to the right in our image sequence, the local cell composition is relaxing toward the mean value of 0.5.
 
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
 \begin{tikzpicture}
 \begin{axis}[
@@ -263,9 +342,6 @@ with the solution
 
 We may think of an initial unmixed fraction of $\zeta_0=1$ (default) as representing a diffusion flame and $\zeta_0=0$ as a premixed flame.
 
-%\begin{equation}\label{eq:zeta_def}
-%\zeta \equiv \frac{\displaystyle \sum_{\alpha}(\psi_{\alpha}- \langle \psi_{\alpha} \rangle )}{n_{\alpha} - 1}
-%\end{equation}
 
 \subsubsection{Evolution of the Composition in the Mixed Reactor Zone}
 
@@ -308,40 +384,6 @@ Finally, the mean chemical source term needed in Eq.~(\ref{eq:mass_source_terms}
 \subsubsection{A Limiting Case: The Eddy Dissipation Concept}
 
 For the special case where the initial unmixed fraction is set to unity and the chemical kinetics are taken to be infinitely fast, our model reduces to the Eddy Dissipation Concept (EDC) model shown by Eq.~(\ref{eq:edc}) \cite{Magnussen:1,Poinsot:TNC}.
-
-
-
-\subsection{Reaction Time Scale Model}
-\label{sec:reac_time_scale}
-
-In this section we provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale.
-
-It is important to consider the behavior of a model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which, though usually small, is finite. At a slightly larger scale we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
-
-Now let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires--which are generally buoyancy-driven flows--we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in]{FIGURES/reaction_time_scale.pdf}
-\vskip-.2cm
-\caption{Reaction time scale model.}
-\label{fig_reaction_time_scale}
-\end{figure}
-
-Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak the $\tau_{\rm g}$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_{\rm u}$ line.  Or, for highly turbulent jet flames $\tau_{\rm flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_{\rm u}$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
-
-The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically represented by
-\begin{equation}
-\label{eqn_tau_mix}
-\tau_{\rm mix} = \max(\tau_{\rm chem},\min(\tau_{\rm d},\tau_{\rm u},\tau_{\rm g},\tau_{\rm flame}))
-\end{equation}
-The mathematical details of the submodels are as follows:
-\begin{align}
-\label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_F} \\
-\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\Delta}{\sqrt{2k_{sgs}}} \\
-\label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
-\end{align}
-where $D_F$ is the diffusivity of the fuel species. Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
 
 
 \subsection{Time Integration of Chemical Reactions}
@@ -478,55 +520,4 @@ Last, the rate of change in composition for species $\alpha$ (\si{kg/(m^3.s)}) i
 \frac{\d Y_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
 \end{equation}
 
-
-\subsection{Extinction}
-
-\label{extinction}
-
-Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research in the combustion community. The physical mechanisms underlying these phenomena are complex, and even simplified models still rely on an accurate prediction of the flame temperature and local strain rate, neither of which is readily available in an LES calculation.
-
-A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur. 
-
-At present, simple empirical rules---which ignore strain---are used to predict local extinction (within a certain grid cell) based on local resolved species concentrations and the local cell temperature.  The default FDS extinction model consists of two parts based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. First, if the cell temperature is below the auto-ignition temperature for the fuel then combustion is suppressed. The auto-ignition temperature is zero by default so that the typical user does not need to specify an ignition source.  Next, if the potential combustion heat release cannot raise the local subgrid temperature above an empirically determined limiting flame temperature, then combustion is suppressed. If either criterion fails, then there is no chemical reaction and $\dot{q}^{\prime\prime\prime}=0$. The limiting flame temperature extinction algorithm is outlined below.
-
-\begin{enumerate}
-\item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
-\be
-\Delta \hat{Y}_{F} = - \min \left( \hat{Y}_F, \hat{Y}_{\alpha} \,\frac{\nu_{F}\,W_{F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
-\ee
-If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
-\item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
-\item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
-
-\be \Delta \hat{Y}_{air} = \min \left(\frac{\Delta \hat{Y}_{F} W_{\alpha} \nu_{\alpha}}{Z_{\alpha} W_F} \right); \quad \mbox{for all non fuel reactants, $\alpha$, in reaction $n$} \ee
-Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_{F}$.
-\item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature (LFT).
-\item Combustion is allowed if
-
-\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta h_{c,F} \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{F} h_F(T_{LFT}) \ee
-\item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
-\end{enumerate}
-
-In addition to the extinction model described above, there is the option in FDS to select a simpler extinction model based on the limiting oxygen concentration. Details of this model are discussed in Appendix \ref{o2_based_model}.
-
-\subsection{Heat Release Rate}
-
-Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
-\begin{equation}\label{eq:vol_heat_gen}
-\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime}_{\alpha} \Delta h_{f,\alpha}
-\end{equation}
-
-\subsubsection{Heat Release Rate Limiter}
-
-There is a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
-this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
-is sometimes too coarse to work effectively.
-A scaling analysis of pool fires by Orloff and de Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
-heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses a less restrictive upper bound on the local heat release rate per unit volume:
-\begin{equation}\label{eq:q_bound}
-\dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3
-\end{equation}
-The value of 200~kW/m$^2$ is an empirically derived upper bound on the heat release rate per unit area of flame sheet and $\delta x$ is the characteristic cell size (m). Typically, this bound only affects fires whose value of $Q^*$ is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
-
-The upper limit on the heat release rate per unit volume inherently places a limiter on the time integration. If the local heat release rate per unit volume reaches or exceeds the limiting value in a time step, the heat release rate per unit volume is set to the limiting value. This freezes the chemical reactions. The change in species is then scaled based on the ratio of the limiting value to the calculated heat release rate per unit volume. The new values for heat release rate per unit volume and species concentrations are set at their respective limits for the remainder of the time step. 
 
