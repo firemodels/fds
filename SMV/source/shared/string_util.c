@@ -22,7 +22,7 @@ char string_util_revision[]="$Revision$";
 #include "datadefs.h"
 #include "string_util.h"
 
-int *random_ints, nrandom_ints;
+unsigned int *random_ints, nrandom_ints;
 
 /* ----------------------- init_rand_ab ----------------------------- */
 
@@ -30,7 +30,7 @@ void init_rand_ab(int size){
   int i;
 
   nrandom_ints=size;
-  NewMemory((void **)&random_ints,nrandom_ints*sizeof(int));
+  NewMemory((void **)&random_ints,nrandom_ints*sizeof(unsigned int));
   for(i=0;i<nrandom_ints;i++){
     random_ints[i]=rand();
   }
@@ -39,13 +39,11 @@ void init_rand_ab(int size){
 /* ----------------------- rand_ab ----------------------------- */
 
 float rand_ab(int seed, float minval, float maxval){
-  int irand;
-
   if(seed<0)seed=-seed;
   seed++;
   seed % nrandom_ints;
-  irand=random_ints[seed];
-  return  minval + (maxval-minval)*(float)irand/(float)RAND_MAX;
+  irand=;
+  return  minval + (maxval-minval)*(float)random_ints[seed]/(float)RAND_MAX;
 }
 
 /* ----------------------- fparsecsv ----------------------------- */
