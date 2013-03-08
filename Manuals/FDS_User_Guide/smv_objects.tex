@@ -83,37 +83,24 @@ were used to display the target device in Table~\ref{tab:devices_static}.
 \end{longtable}
 
 
-\subsection{Dynamic Smokeview Objects - Customized Using \&PROP Parameters}
+\subsection{Dynamic Smokeview Objects}
 \label{info:SMOKEVIEW_PARAMETERS}
 
-The appearance of several Smokeview objects may be modified using data specified on the {\ct \&PROP} line in an FDS input
-file.  Objects may also be customized using data stored in a particle file.  This is discussed in the next section.
-
-The {\ct SMOKEVIEW\_PARAMETERS} keyword on the {\ct PROP}
-namelist statement is used to customize the appearance of Smokeview objects.  For example, the {\ct \&DEVC}\ and {\ct \&PROP}\ statements:
-
+The appearance of various Smokeview objects may be modified using data specified on the {\ct PROP} line in an FDS input file. Objects may also be customized using data stored in a particle file.  This is discussed in the next section. The {\ct SMOKEVIEW\_PARAMETERS} keyword on the {\ct PROP} line is used to customize the appearance of Smokeview objects.  For example,
 \begin{lstlisting}
-&PROP ID='sphere' SMOKEVIEW_PARAMETERS(1:4)='R=0','G=255','B=0',
-                   'D=0.5' SMOKEVIEW_ID='sphere' /
-&DEVC XYZ=0.5,0.8,1.5, QUANTITY='TEMPERATURE' PROP_ID='sphere' /
+&PROP ID='sphere' SMOKEVIEW_PARAMETERS(1:4)='R=0','G=255','B=0','D=0.5',
+      SMOKEVIEW_ID='sphere' /
+&DEVC XYZ=0.5,0.8,1.5, QUANTITY='TEMPERATURE', PROP_ID='sphere' /
 \end{lstlisting}
-
-\noindent
-create an FDS device drawn as a sphere colored green with diameter 0.5~m. Each parameter specified using the
-{\ct SMOKEVIEW\_PARAMETERS} keyword
-is a text string enclosed in single quotes.  The text string is of the form {\ct 'keyword=value'} where possible
-keywords are found in the {\ct objects.svo} file (labels beginning with `:').  For example, {\ct R}, {\ct G},
-{\ct B} and {\ct D} may be used as keywords to customize the following {\ct sphere} object:
-
+create an FDS device drawn as a sphere colored green with diameter 0.5~m. Each parameter specified using the {\ct SMOKEVIEW\_PARAMETERS} keyword is a text string enclosed in single quotes.  The text string is of the form {\ct 'keyword=value'} where possible keywords are found in the {\ct objects.svo} file.  For example, {\ct R}, {\ct G}, {\ct B} and {\ct D} describe the following {\ct sphere} object:
 \begin{lstlisting}
-OBJECTDEF // object for particle file sphere
+OBJECTDEF // object for particle file sphere 
  sphere
  :R=0 :G=0 :B=0 :D=0.1
  $R $G $B setrgb
  $D drawsphere
 \end{lstlisting}
-
-\noindent Another, Smokeview object, the {\ct tsphere}, uses a texture map or picture to alter the appearance of the object.
+Another, Smokeview object, the {\ct tsphere}, uses a texture map or picture to alter the appearance of the object.
 The texture map is specified using {\ct SMOKEVIEW\_PARAMETERS} keyword by placing the characters {\ct t\%}
 before the texture file name ({\em e.g.}\ {\ct t\%texturefile.jpg}).
 
@@ -137,8 +124,8 @@ Each entry shows an image of the object and the parameters used to customize its
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=128','G=192','B=255',}\\
 {\ct 'DX=0.5','DY=.75','DZ=1.0'}\\  \\
-R, G, B - color components (0 to 255) \\
-DX, DY, DZ - amount ball is stretched along x, y, z axis (m) \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct DX, DY, DZ} - amount ball is stretched along x, y, z axis (m) \\
 \hspace{1in} } &
 \incgraphics{SCRIPT_FIGURES/ball} \\ \hline
 
@@ -148,8 +135,8 @@ DX, DY, DZ - amount ball is stretched along x, y, z axis (m) \\
 {\ct SMOKEVIEW\_PARAMETERS(1:5)=}\\
 {\ct 'R=128','G=255','B=192',}\\
 {\ct 'D=0.4','H=0.6'}\\ \\
-R, G, B - color components ranging (0 to 255) \\
-D, H - diameter and height (m) \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct D, H} - diameter and height (m) \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/cone} \\ \hline
@@ -163,10 +150,10 @@ D, H - diameter and height (m) \\
 {\ct 'BLADE\_R=128','BLADE\_G=64',}\\
 {\ct 'BLADE\_B=32','BLADE\_ANGLE=60.0',}\\
 {\ct 'BLADE\_D=0.5','BLADE\_H=0.09'}\\  \\
-HUB\_R, HUB\_G, HUB\_B - color components of fan hub (0 to 255) \\
-HUB\_D, HUB\_L - diameter and length of fan hub (m) \\
-BLADE\_R, BLADE\_G, BLADE\_B - color components of fan blades (0 to 255) \\
-BLADE\_ANGLE, BLADE\_D, BLADE\_H - angle, diameter and height of a fan blade \\
+{\ct HUB\_R, HUB\_G, HUB\_B} - color components of fan hub (0 to 255) \\
+{\ct HUB\_D, HUB\_L} - diameter and length of fan hub (m) \\
+{\ct BLADE\_R, BLADE\_G, BLADE\_B} - color components of fan blades (0 to 255) \\
+{\ct BLADE\_ANGLE, BLADE\_D, BLADE\_H} - angle, diameter and height of a fan blade \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/fan} \\ \hline
@@ -180,11 +167,11 @@ BLADE\_ANGLE, BLADE\_D, BLADE\_H - angle, diameter and height of a fan blade \\
     {\ct 'ROT0=0.0','ROTATION\_RATE=10.0',}\\
     {\ct 'D=1.0',}\\
     {\ct 'tfile="t\%sphere\_cover\_04.png"'}\\ \\
-R, G, B - color components (0 to 255) \\
-AX0, ELEV0, ROT0 - initial azimuth, elevation and rotation angle (deg) \\
-ROTATION\_RATE - rotation rate about z axis (deg/s) \\
-D - diameter (m) \\
-tfile - name of texture map file \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct AX0, ELEV0, ROT0} - initial azimuth, elevation and rotation angle (deg) \\
+{\ct ROTATION\_RATE} - rotation rate about z axis (deg/s) \\
+{\ct D} - diameter (m) \\
+{\ct tfile} - name of texture map file \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/tsphere} \\ \hline
@@ -195,9 +182,9 @@ tfile - name of texture map file \\
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=192','G=192','B=128',}\\
 {\ct 'W=0.5','H=1.0', 'ROT=90.0'}\\ \\
-R, G, B - color components (0 to 255) \\
-W, H - width and height (m) \\
-ROT - rotation angle (deg) \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct W, H} - width and height (m) \\
+{\ct ROT} - rotation angle (deg) \\
 \hspace{1in}
 } &
 \parbox[c]{\devicewidth}{
@@ -212,12 +199,12 @@ active vent\\
 \\ \hline
 \end{longtable}
 
-\subsection{Dynamic Smokeview Objects - Customized Using \&PROP Parameters and Particle File Data}
+
+\subsection{Objects that Represent Lagrangian Particles}
 \label{info:SMOKEVIEW_PART}
 
-
 Particle file data may be used to customize the appearance of Smokeview objects.  Any objects that have color
-labels named {\ct R}, {\ct G}, {\ct B} (including those objects in Table \ref{tab:devices_dynamic}) may be
+labels named {\ct R}, {\ct G}, {\ct B} (including those objects in Table~\ref{tab:devices_dynamic}) may be
 colored using particle file data.  In addition, objects that use variable names that match shortened
 particle file quantity names\footnote{Short forms of particle file quantity names appear in the Smokeview colorbar label
 and in the Smokeview File/Bounds dialog box.}
@@ -227,20 +214,18 @@ quantity names that correspond to the full names {\ct U-VELOCITY}, {\ct V-VELOCI
 {\ct TEMPERATURE}.  These full names are documented in Table~\ref{tab:output} in this guide.
 
 The first three lines of the {\ct velegg}\ object definition are:
-
 \begin{lstlisting}
 OBJECTDEF // color with FDS quantity, stretch with velocity
  velegg
  :R=0 :G=0 :B=0 :D :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0
 \end{lstlisting}
-
-\noindent The variables {\ct U-VEL}, {\ct V-VEL}, and {\ct W-VEL} in the above line are also particle file quantities (shortened version) that may be
+The variables {\ct U-VEL}, {\ct V-VEL}, and {\ct W-VEL} in the above line are also particle file quantities (shortened version) that may be
 selected in an FDS input file.  If they are selected, then the {\ct velegg} object may be used to display
 particle file information. This  object colors the sphere using the currently selected Smokeview particle
 variable and stretches a sphere in the x, y and z directions using the {\ct U-VEL}, {\ct V-VEL}, and {\ct W-VEL}
 velocity particle data respectively.
 
-Table \ref{tab:devices_dynamic2} documents those objects that can be customized
+Table~\ref{tab:devices_dynamic2} documents those objects that can be customized
 using particle file data.  These objects may be customized as before using data specified with the {\ct SMOKEVIEW\_PARAMETERS}
 keyword or using particle file data.
 
@@ -261,8 +246,8 @@ keyword or using particle file data.
 {\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=192','G=255','B=128',}\\
 {\ct 'DX=0.25','DY=.5','DZ=0.125'}\\  \\
-R, G, B - color components (0 to 255) \\
-DX, DY, DZ - amount box is stretched along x, y, z axis \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct DX, DY, DZ} - amount box is stretched along axes \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/box} \\ \hline
@@ -270,11 +255,16 @@ DX, DY, DZ - amount box is stretched along x, y, z axis \\
 {\ct tube} &
 \parbox[c]{\boxwidth}{
 \hspace{1in} \\
-{\ct SMOKEVIEW\_PARAMETERS(1:5)=}\\
+{\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\ct 'R=255','G=0','B=0',}\\
-{\ct 'D=0.2','L=0.6'}\\ \\
-R, G, B - color components (0 to 255) \\
-D, L - diameter and length (m) \\
+{\ct 'D=0.2','L=0.6','RANDXY=1'}\\ \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct D, L} - diameter and length (m) \\
+{\ct RANDXY} - randomly orient in x-y plane \\
+{\ct RANDXZ} - randomly orient in x-z plane \\
+{\ct RANDYZ} - randomly orient in y-z plane \\
+{\ct RANDXYZ} - random orientation \\
+{\ct DIRX, DIRY, DIRZ} - orient along axis \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/tube} \\ \hline
@@ -286,10 +276,10 @@ D, L - diameter and length (m) \\
 {\ct 'R=0', 'G=0', 'B=0'} \\
 {\ct 'U-VEL=1.', 'V-VEL=1.', 'W-VEL=1.'}  \\
 {\ct 'VELMIN=0.01', 'VELMAX=0.2', 'D=1.0'} \\  \\
-R, G, B - color components (0 to 255) \\
-U-VEL, V-VEL, W-VEL - velocity components (m/s) \\
-VELMIN, VELMAX - minimum and maximum velocity\\
-D - diameter of egg at maximum velocity (m) \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct U-VEL, V-VEL, W-VEL} - velocity components (m/s) \\
+{\ct VELMIN, VELMAX} - minimum and maximum velocity\\
+{\ct D} - diameter of egg at maximum velocity (m) \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/velegg} \\ \hline
@@ -301,10 +291,10 @@ D - diameter of egg at maximum velocity (m) \\
 {\ct 'R=0', 'G=0',  'B=0'} \\
 {\ct 'U-VEL=1.', 'V-VEL=1.', 'W-VEL=1.' }  \\
 {\ct 'VELMIN=0.01', 'VELMAX=0.2', 'D=0.1'} \\  \\
-R, G, B - color components (0 to 255) \\
-U-VEL, V-VEL, W-VEL - velocity components (m/s) \\
-VELMIN, VELMAX - minimum and maximum velocity \\
-D - diameter of tube at VELMAX (m) \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct U-VEL, V-VEL, W-VEL} - velocity components (m/s) \\
+{\ct VELMIN, VELMAX} - minimum and maximum velocity \\
+{\ct D} - diameter of tube at {\ct VELMAX} (m) \\
 \hspace{1in}
 } &
 \incgraphics{SCRIPT_FIGURES/veltube} \\ \hline
