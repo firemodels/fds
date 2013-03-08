@@ -39,9 +39,7 @@ void init_rand_ab(int size){
 /* ----------------------- rand_ab ----------------------------- */
 
 float rand_ab(int seed, float minval, float maxval){
-  if(seed<0)seed=-seed;
-  seed++;
-  seed % nrandom_ints;
+  seed = (1 + ABS(seed)) % nrandom_ints;
   return  minval + (maxval-minval)*(float)random_ints[seed]/(float)RAND_MAX;
 }
 
