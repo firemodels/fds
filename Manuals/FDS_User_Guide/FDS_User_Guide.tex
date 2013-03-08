@@ -3052,7 +3052,7 @@ MATL\_ID}.  For example, the input file entries:
 \end{lstlisting}
 
 \noindent
-define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. Note that the thickness of the wall indicated by the {\ct OBST} line is indepentdent of the {\ct THICKNESS} specified by the {\ct SURF} line.  The {\ct OBST} line defines the geometry of the obstruction (i.e. how the obstruction is seen by the flow solver).  The {\ct SURF} line defines the heat transfer characterstics of the the obstruction (i.e. how the obstruction is seen by the 1D solid phase solver).  This allows an obstruction to snap to the local grid but still have the heat trasnfer solution reflect the actual thickness.
+define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. Note that the thickness of the wall indicated by the {\ct OBST} line is independent of the {\ct THICKNESS} specified by the {\ct SURF} line.  The {\ct OBST} line defines the geometry of the obstruction (i.e., how the obstruction is seen by the flow solver).  The {\ct SURF} line defines the heat transfer characteristics of the the obstruction (i.e., how the obstruction is seen by the 1D solid phase solver).  This allows an obstruction to snap to the local grid but still have the heat transfer solution reflect the actual thickness.
 
 \clearpage
 
@@ -3094,7 +3094,7 @@ describes some options.
 By default in an LES calculation, the convective heat flux to a surface or a particle is obtained from a combination of natural and forced convection correlations.
 
 The natural convection correlation used is:
-\be \dq_c'' = h \; \Delta T
+\be \dq_{\rm c}'' = h \; \Delta T
     \quad \hbox{W/m}^2 \quad ; \quad h =
     \max \; \left[ \; C \, |\Delta T|^\ot \; , \;
             \frac{k}{L} \; \NU
@@ -3103,7 +3103,7 @@ The natural convection correlation used is:
 where $\Delta T$ is the difference between the wall and the gas temperature, $C$ is the coefficient for natural convection (1.52 for a horizontal surface
 and 1.31 for a vertical surface, by default).  You can change the empirical coefficients for the natural convection model by using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ which are input on the {\ct SURF} line.
 
-Forced convection uses a Nusselt number correlation using a Reynolds number, $\RE$, computed using the local gas conditons and the characteristic length of the surface or particle.  The Nusselt number, $\NU$, depends on the shape of the obstruction~\cite{Holman:1}, ~\cite{Incropera:1}:
+Forced convection uses a Nusselt number correlation using a Reynolds number, $\RE$, computed using the local gas conditions and the characteristic length of the surface or particle.  The Nusselt number, $\NU$, depends on the shape of the obstruction~\cite{Holman:1, Incropera:1}:
 \be \NU = \left\{ \begin{array}{ll} 0.037 \; \RE^\fofi \; \PR^\ot & \hbox{Cartesian} \\
                                     C_{\rm cyl}\; \RE^{n_{\rm cyl}} \; \PR^\ot & \hbox{Cylindrical} \\
                                     2 + 0.6 \; \RE^\ha \; \PR^\ot & \hbox{Spherical}  \\
@@ -3124,15 +3124,15 @@ $C_{\rm cyl}$ & $n_{\rm cyl}$ & Range  \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-$L$ is a characteristic length related to the size of the physical obstruction; $k$ is the thermal conductivity of the gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the gas flowing past the obstruction (i.e. for a wall cell the conditions in gas cell immeadiately adjacent to the wall and for a particle the gas cell containing the particle). Since the Reynolds number is proportional to the characteristic length, $L$, the heat transfer coefficient is weakly related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, for a wall cell $L$ is taken to be 1~m for most calculations.  For cylindrical or spherical objects $L$ is take to be the diameter. The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and {\ct C\_FORCED\_PR\_EXP} for the constants $C_1$ through $C_4$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  
+$L$ is a characteristic length related to the size of the physical obstruction; $k$ is the thermal conductivity of the gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the gas flowing past the obstruction (i.e., for a wall cell, the conditions in gas cell immediately adjacent to the wall, and for a particle, the gas cell containing the particle). Since the Reynolds number is proportional to the characteristic length, $L$, the heat transfer coefficient is weakly related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, for a wall cell $L$ is taken to be 1~m for most calculations.  For cylindrical or spherical objects $L$ is take to be the diameter. The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and {\ct C\_FORCED\_PR\_EXP} for the constants $C_1$ through $C_4$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  
 
 \subsubsection{Logarithmic Law of the Wall}
 
 \noindent Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
 
-By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{\rm w})/T_\tau$, where $T_{\rm g}$ is the gas temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}''_{\rm w}$, as $T_\tau = \dot{q}''_{\rm w}/\rho_{\rm w} u_\tau c_p$. The local heat transfer coefficient is then obtained from
+By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{\rm w})/T_\tau$, where $T_{\rm g}$ is the gas temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}''_{\rm w}$, as $T_\tau = \dot{q}''_{\rm w}/\rho_{\rm w} u_\tau c_{\rm p}$. The local heat transfer coefficient is then obtained from
 \begin{equation}
-h = \frac{\dot{q}''_{\rm w}}{\Delta T} = \frac{\rho_{\rm w} \, c_p \, u_\tau}{T^+}
+h = \frac{\dot{q}''_{\rm w}}{\Delta T} = \frac{\rho_{\rm w} \, c_{\rm p} \, u_\tau}{T^+}
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular
 surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
@@ -3353,7 +3353,7 @@ properties (via the {\ct MATL\_ID} keyword).
 \subsection{Walls with Different Materials Front and Back}
 \label{info:EXPOSED}
 
-If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i.e. the obstruction is not at the edge of the domain) and you apply the attribute {\ct BACKING='EXPOSED'}, then FDS calculates the heat conduction through the entire {\ct THICKNESS} and it uses the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction.  FDS always applies a {\ct SURF} to an obstruction by having the first layer be the exposed surface of the face and the last layer as the opposite face.  Take for example the {\ct SURF} defintion below and assume the the grid spacing is 10 cm.  On the -x side of the {\ct OBST} layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be the last {\ct MATERIAL A}.  On the +x side the {\ct SURF} will be applied in the same manner.
+If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i.e., the obstruction is not at the edge of the domain) and you apply the attribute {\ct BACKING='EXPOSED'}, then FDS calculates the heat conduction through the entire {\ct THICKNESS}, and it uses the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction.  FDS always applies a {\ct SURF} to an obstruction by having the first layer be the exposed surface of the face and the last layer as the opposite face.  Take for example the {\ct SURF} definition below and assume the the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be the last {\ct MATERIAL A}.  On the +x side the {\ct SURF} will be applied in the same manner.
 
 \begin{lstlisting}
 &OBST XB=0.1,0.2,...., SURF_ID='SYMMETRIC'/
@@ -3364,7 +3364,7 @@ If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i
       THICKNESS(1:3)     = 0.1,0.2,0.1 /
 \end{lstlisting}
 
-Now for example take the  {\ct SURF} defintion below and assume the the grid spacing is 10 cm.  On the -x side of the {\ct OBST} layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  On the +x side the {\ct SURF} will be applied in the same manner, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  This means that both sides of the {\ct OBST} will compute heat transfer assuming {\ct MATERIAL A} is the first layer.
+For example, take the {\ct SURF} definition below and assume the the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  On the +x side, the {\ct SURF} will be applied in the same manner, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  This means that both sides of the {\ct OBST} will compute heat transfer assuming {\ct MATERIAL A} is the first layer.
 
 \begin{lstlisting}
 &OBST XB=0.1,0.2,...., SURF_ID='NON-SYMMETRIC'/
@@ -3376,11 +3376,10 @@ Now for example take the  {\ct SURF} defintion below and assume the the grid spa
 \end{lstlisting}
  
 Therefore, if you apply the attribute {\ct BACKING='EXPOSED'} on a {\ct SURF} line that is applied to a zero or one-cell thick
-obstruction, you must 
-careful how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can be applied to both sides. However,
-if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is
-made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material,
-would have to be described with two {\ct SURF} lines like the following:
+obstruction, you should be careful of how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can
+be applied to both sides. However, if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply
+one to each side. For example, a hollow box column that is made of steel and covered on the outside by a layer of insulation
+material and a layer of plastic on top of the insulation material, would have to be described with two {\ct SURF} lines like the following:
 \begin{lstlisting}
 &SURF ID                 = 'COLUMN EXTERIOR'
       COLOR              = 'ANTIQUE WHITE'
@@ -5912,7 +5911,7 @@ and the resulting {\ct REAC} line is:
 \end{lstlisting}
 
 \noindent
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:reac_rate}).  This array must contain only primitive species, i.e. no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:reac_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
 \begin{align}\label{eq:propane_2step}
 \mathrm{C_3H_8+3.5 \, O_2}&\rightarrow  \mathrm{3\,CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
@@ -6470,7 +6469,7 @@ If the radiation around the particle is not uniform, it may be useful to split t
 \end{lstlisting}
 
 \noindent
-specifies that half the particle is facing upwards and half is facing downwards.   Each orientation is modeled in practice by a separate particle that sees the radiation that is directed to a plane normal to the orientation. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{cart_split} through Fig.~\ref{sphere_split}. The orientation direction does not have to align with the coordinate axes. For a cartesian particle (i.e. a plate), only the orientations that are perpendicular to the plate make physical sense.
+specifies that half the particle is facing upwards and half is facing downwards.   Each orientation is modeled in practice by a separate particle that sees the radiation that is directed to a plane normal to the orientation. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{cart_split} through Fig.~\ref{sphere_split}. The orientation direction does not have to align with the coordinate axes. For a Cartesian particle (i.e., a plate), only the orientations that are perpendicular to the plate make physical sense.
 
 \begin{figure}[ht]
 \begin{center}
