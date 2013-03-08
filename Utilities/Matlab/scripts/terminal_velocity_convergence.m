@@ -37,7 +37,8 @@ end
 g = 9.8;
 Cd = 1;
 %rhoa = 1.19926615231088;
-rhoa = 1.19576426682682;
+%rhoa = 1.19576426682682;
+rhoa = 1.19576554603369;
 rhod = 1000;
 D = 10e-3;
 
@@ -72,6 +73,14 @@ Linf(4) = norm(ZP' - zexact(STIME), Inf);
 errvec(5) = abs(abs(QP(length(QP))) - vtexact);
 Linf(5) = norm(ZP' - zexact(STIME), Inf);
 %errtvec(6) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
+
+if errvec(5) > 1e-6
+   display(['Error: The velocity in the terminal_velocity* cases is out of tolerance.'])
+end
+
+if Linf(5) > 1e-6
+   display(['Error: The position in the terminal_velocity* cases is out of tolerance.'])
+end
 
 figure(1)
 
