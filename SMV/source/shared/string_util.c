@@ -42,7 +42,6 @@ float rand_ab(int seed, float minval, float maxval){
   if(seed<0)seed=-seed;
   seed++;
   seed % nrandom_ints;
-  irand=;
   return  minval + (maxval-minval)*(float)random_ints[seed]/(float)RAND_MAX;
 }
 
