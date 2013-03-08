@@ -4,25 +4,33 @@
 \label{chapter:combustion}
 
 \label{combustionsection}
-The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in the species transport equation, Eq.~(\ref{species}). In this chapter, we integrate the change in cell average species concentration over a time step for a single grid cell to obtain the mean chemical source term,
-\begin{equation}\label{eq:m_tprime_alpha}
-\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\overline{Y}_\alpha(\delta t) - \overline{Y}_\alpha(0)}{\delta t}
+The combustion routine is responsible for determining the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in the species transport equation, Eq.~(\ref{species}).  In the typical FDS problem the primitive species are lumped into reacting groups (more on this below) and we consider the simple reaction
+\begin{equation}\label{eq:simple}
+\mathrm{Fuel + Air \rightarrow Products}
 \end{equation}
-Here the overbar is used to denote a cell average since later a subgrid distribution of composition is considered.  The integration of the mean chemical source term is time split from the integration of the transport equation such that each cell may be thought of as a partially-stirred batch reactor.  As we discuss below, given the chemical composition, cell temperature, and extent of mixing at the start of the time step, the final cell composition depends on the rates of chemical kinetics and turbulent mixing.
+For the vast majority of FDS applications, the ``mixed is burnt'' approximation is adequate and the chemical source term for Fuel may be modeled by the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager \cite{Magnussen:1,Poinsot:TNC}:
+\begin{equation}
+\label{eq:edc}
+\dot{m}_F^{\prime\prime\prime} = -\rho \frac{\min(Z_F, s\,Z_A)}{\tau_{\rm mix}}
+\end{equation}
+Here, $Z_F$ and $Z_A$ are the mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.  The quantity $\tau_{\rm mix}$ is a time scale for mixing.  The EDC model therefore states that the rate of fuel consumption is proportional to both the local limiting reactant concentration and the local rate of mixing.  A model for the mixing time is discussed in Section \ref{sec:reac_time_scale}.  With the mass production (consumption) rate of Fuel known, the production rates for all other species in the system (e.g., \si{CO_2}, \si{H_2O}) may be found from stoichiometry.  Specifics for the default reaction system are given in Sections \ref{sec:simplechemistry} (Simple Chemistry) and \ref{sec:yield} (Specified CO and Soot Yield).
 
-The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and, typically, the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).  The heat release rate is found by summing the lumped species mass production rates times their respective heats of formation:
+%In this chapter, we integrate the change in cell average species concentration over a time step for a single grid cell to obtain the mean chemical source term,
+%\begin{equation}\label{eq:m_tprime_alpha}
+%\dot{m}^{\prime\prime\prime}_{\alpha}=\rho \,\frac{\overline{Y}_\alpha(\delta t) - \overline{Y}_\alpha(0)}{\delta t}
+%\end{equation}
+%Here the overbar is used to denote a cell average since later a subgrid distribution of composition is considered.  The integration of the mean chemical source term is time split from the integration of the transport equation such that each cell may be thought of as a partially-stirred batch reactor.  As we discuss below, given the chemical composition, cell temperature, and extent of mixing at the start of the time step, the final cell composition depends on the rates of chemical kinetics and turbulent mixing.
+
+The combustion routine also returns the heat release for per unit volume, $\dot{q}^{\prime\prime\prime}$, a quantity of fundamental importance in fire dynamics and typically the largest contribution to the flow divergence, Eq.~(\ref{eqn_fdsD1}).  The heat release rate is found by summing the species mass production rates times their respective heats of formation:
 \begin{equation}\label{eq:q_tprime}
 \dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}_\alpha^{\prime\prime\prime} \Delta h_{f,\alpha}
 \end{equation}
 
-The remainder of this chapter consists of three main topics.  The first is a discussion of our \emph{lumped species} approach, which aims to reduce the computational burden of the full chemical system by combining species into groups that transport and react together.  Next, we discuss our approach to describing the chemical mixing process.  We treat each computational cell as a partially-stirred batch reactor with a characteristic mixing time.  The model for the mixing time is discussed.  Once reactants are mixed, the reaction rate depends on kinetics.  The last part of this chapter discusses available kinetic mechanisms within FDS, from infinitely fast chemistry (default) to Arrhenius rate laws and reversible reactions.
+The remainder of this chapter describes our generalized combustion model, of which EDC is a limiting case. First, we discuss of our \emph{lumped species} approach, which reduces the computational burden of the full chemical system by combining species into groups that transport and react together.  We then discuss our approach to describing the chemical mixing process---we treat each computational cell as a partially-stirred batch reactor with a characteristic mixing time.  The model for the mixing time is discussed next.  Once reactants are mixed, the reaction rate depends on kinetics.  The last part of this chapter discusses available kinetic mechanisms within FDS, from infinitely fast chemistry (default) to Arrhenius rate laws and reversible reactions.
 
 \section{Lumped Species Approach}
-In the typical FDS problem we consider the simple reaction:
-\begin{equation}\label{eq:simple}
-\mathrm{Fuel + Air \rightarrow Products}
-\end{equation}
-We refer to the Fuel, Air, and Products as \emph{lumped species}.  The lumped species approach is a simplified reaction progress variable approach \cite{fox2003} in which all the progress variables behave as mass fractions. This avoids any complications related to boundedness and ill-defined initial and boundary conditions.
+
+We refer to the Fuel, Air, and Products in Eq.~(\ref{eq:simple}) as \emph{lumped species}.  The lumped species approach is a simplified reaction progress variable approach \cite{fox2003} in which all the progress variables are mass fractions. This avoids any complications related to boundedness and ill-defined initial and boundary conditions.
 
 In a simple hydrocarbon reaction, the reactants are the fuel, oxygen, and nitrogen and the products are carbon dioxide, water vapor, and nitrogen. The primitive species mass fractions are given by the composition vector
 \begin{equation}\label{eq:prim_vector}
@@ -30,7 +38,7 @@ In a simple hydrocarbon reaction, the reactants are the fuel, oxygen, and nitrog
 \end{equation}
 Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, Air can be assumed to be a lumped species composed of 21\% O$_2$ and 79\% N$_2$ by volume. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together.
 
-In terms of primitive species for a one-step methane reaction, Eq.~(\ref{eq:simple}) may be written as
+In terms of primitive species, a one-step methane reaction, Eq.~(\ref{eq:simple}) may be written as
 \begin{equation}\label{eq:lumped_methane}
 \mbox{CH}_4 + 2\, \mbox{O}_2+7.52\,\mbox{N}_2 \rightarrow \mbox{CO}_2+2\,\mbox{H}_2\mbox{O}+7.52\,\mbox{N}_2
 \end{equation}
@@ -44,7 +52,7 @@ In Eq.~(\ref{eq:lumped_expand}), 9.52 moles of the lumped species Background rea
 In Eq.~(\ref{eq:lumped_expand}), 9.52 $\times$ 0.21 is only approximately equal to 2. In practice the atom balance requires machine precision. To alleviate this issue, FDS internally normalizes the lumped species volume fractions and makes any necessary adjustments to the specified lumped stoichiometric coefficients.
 
 \vskip\baselineskip
-In FDS, the species Background is not transported.  It is found from $\sum_i Z_i = 1$.  In the FDS code, the lumped species vector $\textbf{Z}$ is indexed from $0\!:\!N_{z}$. Thus, $N_{z}$ transport equations are solved. In the case of Eq.~(\ref{eq:lumped_expand}), two transport equations are solved (Fuel and Products) which is the same number solved in the mixture-fraction--progress-variable approach.
+In FDS, the species Background is not transported.  It is found from $\sum_i Z_i = 1$.  In the FDS code, the lumped species vector $\textbf{Z}$ is indexed from $0$ to $N_z$. Thus, $N_z$ transport equations are solved. In the case of Eq.~(\ref{eq:lumped_expand}), two transport equations are solved (Fuel and Products), same number as in the mixture-fraction--progress-variable approach.
 
 The linear transformation from lumped species to primitive species is given by
 \begin{equation}\label{eq:transform}
@@ -93,6 +101,7 @@ To transform back to lumped species from primitive species we can use:
 provided $A$ has full rank and $\mathbf{Y}$ is realizable (i.e., the forward transformation is also possible).
 
 \subsection{Simple Chemistry}
+\label{sec:simplechemistry}
 
 The default reaction system in FDS is Fuel plus Background (oxidizer) goes to Products, where Products contains carbon dioxide, water vapor, nitrogen, carbon monoxide, and soot. For a typical hydrocarbon fuel, the chemical reaction is
 \begin{multline}\label{eq:full_lump}
@@ -102,6 +111,7 @@ The default reaction system in FDS is Fuel plus Background (oxidizer) goes to Pr
 Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha\,i}$ and the stoichiometric coefficients for the lumped species $i$ are denoted by $\nu_{i}$.
 
 \subsection{Specified CO and Soot Yield}
+\label{sec:yield}
 
 Carbon monoxide and soot yields are zero by default. The user can specify the CO and soot yields ($y_{\mathrm{CO}}$ and $y_{\mathrm{S}}$ respectively) on the {\ct REAC} line; this determines the composition of the products. The CO yield, and similarly for soot, is the mass of CO produced per mass of fuel reacted:
 \begin{equation}\label{eq:y_co}
@@ -297,7 +307,7 @@ Finally, the mean chemical source term needed in Eq.~(\ref{eq:mass_source_terms}
 
 \subsubsection{A Limiting Case: The Eddy Dissipation Concept}
 
-For the special case where the initial unmixed fraction is set to unity and the chemical kinetics are taken to be infinitely fast, our model reduces to the Eddy Dissipation Concept (EDC) model \cite{Magnussen:1,Poinsot:TNC}.
+For the special case where the initial unmixed fraction is set to unity and the chemical kinetics are taken to be infinitely fast, our model reduces to the Eddy Dissipation Concept (EDC) model shown by Eq.~(\ref{eq:edc}) \cite{Magnussen:1,Poinsot:TNC}.
 
 
 
