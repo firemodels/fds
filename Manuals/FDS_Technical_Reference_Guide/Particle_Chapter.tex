@@ -41,13 +41,13 @@ where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. Additional co
 A liquid spray consists of a sampled set of spherical liquid droplets. The size distribution is
 expressed in terms of its Cumulative Volume Fraction (CVF), a function
 that relates the fraction of the liquid volume (mass) transported by
-droplets less than a given diameter. Size distribution is used to specify the initial distribution of droplets that are introduced to the 
+droplets less than a given diameter. Size distribution is used to specify the initial distribution of droplets that are introduced to the
 computational domain from a nozzle or surface, or that are initially present in the simulation.
 
-In FDS, the the size distributions can be described using analytical distributions, such as the lognormal and Rosin-Rammler distribution. 
+In FDS, the the size distributions can be described using analytical distributions, such as the lognormal and Rosin-Rammler distribution.
 Researchers at Factory Mutual have suggested that the CVF for a sprinkler may be represented by a combination of lognormal and
 Rosin-Rammler distributions~\cite{Chan:1}
-\be F_v(D) = \left\{ \begin{array}{ll}
+\be F_{\rm v}(D) = \left\{ \begin{array}{ll}
    \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^D} \, \frac{1}{\sigma\, D'} \,
    \exp \left( -\frac{[\ln(D'/D_{\rm v,0.5})]^2}{2\sigma^2} \right) \; \d D'            & (D \le D_{\rm v,0.5}) \\ [0.2in]
    1 - \exp \left( -0.693 \left(\frac{D}{D_{\rm v,0.5}}\right)^\gamma \right)           & (D_{\rm v,0.5} < D)
@@ -65,7 +65,7 @@ where $d$ is the orifice diameter of the nozzle.
 The orifice Weber number, the ratio of inertial forces to surface tension forces, is given by
 \be \WE = \frac{\rho_{\rm p} \, u_{\rm p}^2 \, d}{\sigma}  \label{Weber} \ee
 where $\rho_{\rm p}$ is the liquid density, $u_{\rm p}$ is the discharge
-velocity, and $\sigma$ is the liquid surface tension ($72.8 \times 10^{-3}$~N/m at 20~$^\circ$C for water). 
+velocity, and $\sigma$ is the liquid surface tension ($72.8 \times 10^{-3}$~N/m at 20~$^\circ$C for water).
 The discharge velocity can be computed from the mass flow rate, a function of the operating pressure and orifice coefficient known as the K-factor.
 FM reports that the constant of proportionality in Eq.~(\ref{dropcor}) appears to be independent of flow
 rate and operating pressure. Three different sprinklers were tested in
@@ -85,19 +85,19 @@ droplet boundary conditions for mass flow, droplet speed, and median diameter:
     \dot{m}_{\rm p} \propto p^{1/2} \quad ; \quad u_{\rm p} \propto p^{1/2} \quad ; \quad D_{\rm v,0.5}  \propto  p^{-1/3}
 \ee
 The droplet diameters are randomly chosen from the given size distribution.
-The cumulative number fraction (CNF), $F_n$, is determined from the cumulative volume fraction, $F_v$, as follows
-\be F_n(D) = \int_0^D \frac{F'_v(D')}{D'^3} \, \d D'  \left/ \int_0^\infty \, \frac{F'_v(D')}{D'^3}
-     \, \d D' \right. \quad ; \quad F_v' \equiv \frac{\d F_v}{\d D}   \ee
+The cumulative number fraction (CNF), $F_{\rm n}$, is determined from the cumulative volume fraction, $F_{\rm v}$, as follows
+\be F_{\rm n}(D) = \int_0^D \frac{F'_{\rm v}(D')}{D'^3} \, \d D'  \left/ \int_0^\infty \, \frac{F'_{\rm v}(D')}{D'^3}
+     \, \d D' \right. \quad ; \quad F_{\rm v}' \equiv \frac{\d F_{\rm v}}{\d D}   \ee
 Figure~\ref{rosin} displays the Rosin-Rammler/lognormal function and the resulting cumulative number fraction.
 
-The selection of droplet diameters is performed using a stratified sampling technique. First, the diameter range is divided 
-into $N_{\rm s}$ bins of equal width $\Delta D_{\rm s}= D_{\rm max}/N_{\rm s}$ where $D_{\rm max}$ is the maximum diameter considered. 
-The upper and lower bound of the $n_{\rm s}$'th bin are denoted by $F_{n,0}(n_{\rm s})$ and $F_{n,1}(n_{\rm s})$, respectively.
-The diameter is then chosen from the inverse of the CNF acting on the uniform random variable, ${\cal U}(0,1)$ inside a random bin
-\be D = F^{-1}_n\left(F_{n,0}(n_{\rm s}) + {\cal U}(0,1)\left(F_{n,1}(n_{\rm s})-F_{n,0}(n_{\rm s})\right)\right) \label{Ud_strat}  \ee
-The purpose of the the stratified sampling is to ensure that droplets are 
-chosen from all parts of the size distribution, even with small number of statistical samples. The
-default number of $N_{\rm s}$ is 7. Without the stratification, the tails of the distribution could be poorly represented.
+The selection of droplet diameters is performed using a stratified sampling technique. First, the diameter range is divided
+into $N_{\rm s}$ bins of equal width $\Delta D_{\rm s}= D_{\rm max}/N_{\rm s}$ where $D_{\rm max}$ is the maximum diameter considered.
+The upper and lower bounds of bin $n_{\rm s}$ are denoted by $F_{\rm n,0}(n_{\rm s})$ and $F_{\rm n,1}(n_{\rm s})$, respectively.
+The diameter is then chosen from the inverse of the CNF acting on the uniform random variable, ${\cal U}(0,1)$, inside a random bin
+\be 
+   D = F^{-1}_{\rm n} \Big[ F_{\rm n,0}(n_{\rm s}) + {\cal U}(0,1)\left(F_{\rm n,1}(n_{\rm s})-F_{\rm n,0}(n_{\rm s})\right) \Big] \label{Ud_strat}  
+\ee
+The purpose of the the stratified sampling is to ensure that droplets are chosen from all parts of the size distribution, even with a small number of statistical samples. The default number of $N_{\rm s}$ is 7. Without the stratification, the tails of the distribution could be poorly represented.
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=4.5in]{FIGURES/rosin}
@@ -108,20 +108,17 @@ a typical industrial-scale sprinkler. The median volumetric diameter, $D_{\rm v,
 \label{rosin}
 \end{center}
 \end{figure}
-
-In most cases, a sampled set of the droplets or particles is explicitly tracked in the model.
-The procedure for selecting droplet sizes is as follows: 
+In most cases, a sampled set of the droplets or particles is explicitly tracked in the model. The procedure for selecting droplet sizes is as follows:
 \begin{enumerate}
-\item Suppose the mass flow rate of the liquid is $\dm$.
-Suppose also that the time interval for droplet insertion into the numerical simulation is $\dt$, and the number of droplets
-inserted each time interval is $N$. Suppose that the number of size distribution bins is $N_{\rm s}$. 
+\item Suppose the mass flow rate of the liquid is $\dm$. Suppose also that the time interval for droplet insertion into the numerical simulation is $\dt$, and the number of droplets inserted each time interval is $N$. Suppose that the number of size distribution bins is $N_{\rm s}$.
 \item Choose $N$ uniformly distributed random integers $n_{\rm s}$ between 1 and $N_{\rm s}$.
 \item Choose $N$ uniformly distributed random numbers between 0 and 1 and calculate $N$ random droplet diameters, $D_i$, from Eq.~(\ref{Ud_strat}).
-\item Compute weighting constants $C_{\rm i} = F_{n,1}(n_{\rm s}) - F_{n,0}(n_{\rm s})$.
+\item Compute weighting constants $C_i = F_{\rm n,1}(n_{\rm s}) - F_{\rm n,0}(n_{\rm s})$.
 \item Compute a weighting constant C from the mass balance
-\be \dm \; \dt = C \, \sum_{i=1}^N \; C_i \; \frac{4}{3} \pi \rho_{\rm p}
-      \left( \frac{D_i}{2} \right)^3 \ee
-The mass and heat transferred from each droplet will be multiplied by the weighting factor $C$.
+    \be \dm \; \dt = C \, \sum_{i=1}^N \; C_i \; \frac{4}{3} \pi \rho_{\rm p}
+      \left( \frac{D_i}{2} \right)^3 
+    \ee
+    The mass and heat transferred from each droplet will be multiplied by the weighting factor $C$.
 \end{enumerate}
 
 
@@ -132,10 +129,10 @@ Liquid droplets are represented either as discrete airborne spheres or as elemen
 Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate as a function of the liquid equilibrium vapor mass fraction, $Y_{\rm l}$, the local gas phase vapor mass fraction, $Y_{\rm g}$, the (assumed uniform) liquid temperature, $T_{\rm l}$, and the local gas temperature, $T_{\rm g}$. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
 \frac{\d m_{\rm l}}{\d t}               & =  - A \; h_m \, \rho \, (Y_{\rm l} - Y_{\rm g}) \\
-m_{\rm l} \; c_{\rm l} \; \frac{\d T_{\rm l}}{\d t} & =    A \, h  \, (T_{\rm g}-T_{\rm l}) + A \, h_s \, (T_{\rm s}-T_{\rm l}) + \dq_{\rm r} + \frac{\d m_{\rm l}}{\d t} \; h_v  \label{droplet_temp}   \end{align}
+m_{\rm l} \; c_{\rm l} \; \frac{\d T_{\rm l}}{\d t} & =    A \, h  \, (T_{\rm g}-T_{\rm l}) + A \, h_s \, (T_{\rm s}-T_{\rm l}) + \dq_{\rm r} + \frac{\d m_{\rm l}}{\d t} \; h_{\rm v}  \label{droplet_temp}   \end{align}
 Here, $m_{\rm l}$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
-$\rho$ is the gas density, $c_{\rm l}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_{\rm s}$ is the heat transfer coefficient between the liquid and the solid surface, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm g}$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
-\be X_{\rm l} = \frac{p_{\rm 1 \; atm}}{\bp_m} \exp \left[ \frac{h_v \, W_{\rm l}}{\cal R}
+$\rho$ is the gas density, $c_{\rm l}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_{\rm s}$ is the heat transfer coefficient between the liquid and the solid surface, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm g}$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
+\be X_{\rm l} = \frac{p_{\rm 1 \; atm}}{\bp_m} \exp \left[ \frac{h_{\rm v} \, W_{\rm l}}{\cal R}
       \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]  \quad ; \quad
       Y_{\rm l} = \frac{X_{\rm l}}{X_{\rm l} \, (1-W_{\rm a}/W_{\rm l}) + W_{\rm a}/W_{\rm l}}  \label{clausius_clapeyron} \ee
 where $X_{\rm l}$ is the equilibrium vapor {\em volume} fraction, $W_{\rm l}$ is the molecular weight of the evaporated liquid, $W_{\rm a}$ is the molecular weight of air, $\cal R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid at standard atmospheric pressure.
@@ -165,7 +162,7 @@ Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas
 Note that a few terms have been left out to make the algorithm more clear.
 \be
    \frac{T_{\rm l}^{n+1}-T_{\rm l}^n}{\dt} = \frac{1}{m_{\rm l} \, c_{\rm l}} \left[ A \, h \, \left( T_{\rm g}-\frac{T_{\rm l}^{n+1}+T_{\rm l}^n}{2} \right) -
-   A \, h_m \, \rho \left( \frac{Y_{\rm l}^{n+1}+Y_{\rm l}^n}{2} - Y_{\rm g} \right) h_v  \right]
+   A \, h_m \, \rho \left( \frac{Y_{\rm l}^{n+1}+Y_{\rm l}^n}{2} - Y_{\rm g} \right) h_{\rm v}  \right]
 \ee
 The equilibrium vapor mass fraction, $Y_{\rm l}^n$, is a function of $T_{\rm l}^n$ via
 Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
@@ -175,7 +172,7 @@ Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approxima
 where the derivative of $Y_{\rm l}$ with respect to temperature is obtained via the chain rule:
 \be
    \frac{\d Y_{\rm l}}{\d T_{\rm l}} = \frac{\d Y_{\rm l}}{\d X_{\rm l}} \, \frac{\d X_{\rm l}}{\d T_{\rm l}}  = \frac{W_{\rm a}/W_{\rm l}}{ (X_{\rm l} (1-W_{\rm a}/W_{\rm l}) + W_{\rm a}/W_{\rm l})^2 } \;
-     \frac{p_{\rm 1 \; atm}}{\bp_m} \frac{h_v W_{\rm l}}{{\cal R} \, T_{\rm l}^2} \, \exp \left[ \frac{h_v \, W_{\rm l}}{\cal R} \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]
+     \frac{p_{\rm 1 \; atm}}{\bp_m} \frac{h_{\rm v} W_{\rm l}}{{\cal R} \, T_{\rm l}^2} \, \exp \left[ \frac{h_{\rm v} \, W_{\rm l}}{\cal R} \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]
 \ee
 The amount of evaporated liquid is given by
 \be
