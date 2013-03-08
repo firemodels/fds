@@ -721,7 +721,7 @@ ELSE
    ZZ_GET = ZZ_MIXED_IN
    ZZ_GET(RN%FUEL_SMIX_INDEX) = ZZ_GET(RN%FUEL_SMIX_INDEX) - DZ_FUEL
    
-   ZZ_GET = ZZ_GET/SUM(ZZ_GET)      
+   ZZ_GET = ZZ_GET/(SUM(ZZ_GET)+TWO_EPSILON_EB)
   
    !Get the specific heat for the "air"
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_0,TMP_0) 
@@ -730,7 +730,7 @@ ELSE
    !Loop over non-fuel reactants and find the mininum.  Determine how much "air" is needed to provide the limting reactant.
    DO NS = 0,N_TRACKED_SPECIES
       IF (RN%NU(NS)<-TWO_EPSILON_EB .AND. NS/=RN%FUEL_SMIX_INDEX) &
-         DZ_AIR = MAX(DZ_AIR, -DZ_FUEL*RN%NU_MW_O_MW_F(NS)/ZZ_GET(NS))
+         DZ_AIR = MAX(DZ_AIR, -DZ_FUEL*RN%NU_MW_O_MW_F(NS)/(ZZ_GET(NS)+TWO_EPSILON_EB))
    ENDDO
    
    !See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.   
