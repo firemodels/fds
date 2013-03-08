@@ -30,6 +30,7 @@ int main(int argc, char **argv){
   char *progname;
 
   initMALLOC();
+  init_rand_ab(1000000);
   initvars();
   if(argc==1)display_version_info();
   copy_args(&argc, argv, &argv_sv);

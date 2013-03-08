@@ -331,9 +331,9 @@ OBJECTDEF
 
 OBJECTDEF // object for particle file tube
  tube
- :R=0 :G=0 :B=0 :D=0.1 :L=0.1 :RANDXY=0.0 :DIRX=0.0 :DIRY=0.0 :DIRZ=0.0
+ :R=0 :G=0 :B=0 :D=0.1 :L=0.1 :RANDXY=0.0 :RANDXYZ=0.0 :DIRX=0.0 :DIRY=0.0 :DIRZ=0.0
  $R $G $B setrgb
- $RANDXY randxy $DIRX $DIRY $DIRZ orienx 90.0 rotatey $D $L drawcdisk
+ $RANDXY randxy $RANDXYZ randxyz $DIRX $DIRY $DIRZ orienx 90.0 rotatey $D $L drawcdisk
 
 OBJECTDEF // object for particle file tube
  cylinder

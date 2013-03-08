@@ -1108,7 +1108,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       if(ABS(arg[0]-1.0)<0.01){
         float random_angle=0.0;
 
-        random_angle=randomab(prop->tag_number,0.0,360.0);
+        random_angle=rand_ab(prop->tag_number,0.0,360.0);
         if(toki->command==SV_RANDXY)glRotatef(random_angle,0.0,0.0,1.0);
         if(toki->command==SV_RANDXZ)glRotatef(random_angle,0.0,1.0,0.0);
         if(toki->command==SV_RANDYZ)glRotatef(random_angle,1.0,0.0,0.0);
@@ -1116,17 +1116,25 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       break;
     case SV_RANDXYZ:
       if(ABS(arg[0]-1.0)<0.01){
-        float urand1, urand2, olddir[3], newdir[3], axis[3], angle;
+        float zz, tt, rr, xx, yy, olddir[3], newdir[3], axis[3], angle;
 
-        urand1 = randomab(prop->tag_number,0.0,2.0*PI);
-        urand2 = randomab(-1,-1.0,1.0);
-        urand2 = acos(urand2);
-        olddir[0]=0.0;
-        olddir[1]=1.0;
+//    Choose z uniformly distributed in [-1,1].
+//    Choose t uniformly distributed on [0, 2*pi).
+//    Let r = sqrt(1-z^2).
+//    Let x = r * cos(t).
+//    Let y = r * sin(t).
+
+        zz = rand_ab(2*prop->tag_number-1,-1.0,1.0);
+        tt = rand_ab(2*prop->tag_number,0.0,2.0*PI);
+        rr = sqrt(ABS(1.0-zz*zz));
+        xx = rr*cos(tt);
+        yy = rr*sin(tt);
+        olddir[0]=1.0;
+        olddir[1]=0.0;
         olddir[2]=0.0;
-        newdir[0]=cos(urand1)*cos(urand2);
-        newdir[1]=sin(urand1)*cos(urand2);
-        newdir[2]=sin(urand2);
+        newdir[0]=xx;
+        newdir[1]=yy;
+        newdir[2]=zz;
         rotateu2v(olddir, newdir, axis, &angle);
         glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
       }
