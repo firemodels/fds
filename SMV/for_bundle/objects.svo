@@ -331,9 +331,9 @@ OBJECTDEF
 
 OBJECTDEF // object for particle file tube
  tube
- :R=0 :G=0 :B=0 :D=0.1 :L=0.1 :RANDXY=0.0 :RANDXYZ=0.0 :DIRX=0.0 :DIRY=0.0 :DIRZ=0.0
+ :R=0 :G=0 :B=0 :D=0.1 :L=0.1 :RANDXY=0.0 :RANDXZ=0 :RANDYZ=0 :RANDXYZ=0.0 :DIRX=0.0 :DIRY=0.0 :DIRZ=0.0
  $R $G $B setrgb
- $RANDXY randxy $RANDXYZ randxyz $DIRX $DIRY $DIRZ orienx 90.0 rotatey $D $L drawcdisk
+ $RANDXY randxy $RANDXZ randxz $RANDYZ randyz $RANDXYZ randxyz $DIRX $DIRY $DIRZ orienx 90.0 rotatey $D $L drawcdisk
 
 OBJECTDEF // object for particle file tube
  cylinder
@@ -377,40 +377,6 @@ OBJECTDEF
  $R $G $B setrgb
  $DX $DY $DZ scalexyz 1.0 drawcubec
 
-OBJECTDEF
- cablerack
- :R=105 :G=105 :B=105 :D=0.1016 :DX=1.8292 :DY=1.21920 :DZ=0.3048
- $R $G $B setrgb
- 0.057 offsetx
- push 0.0760 1.4478 0.6096 translate 1.8288 0.0762 0.0762 scalexyz 1.0 drawcubec pop
- push 0.0760 1.4478 2.1844 translate 1.8288 0.0762 0.0762 scalexyz 1.0 drawcubec pop
- push 0.0760 1.4478 3.4036 translate 1.8288 0.0762 0.0762 scalexyz 1.0 drawcubec pop
- push 0.0 1.2192 0.0 translate 0.1016 0.3048 3.6576 scalexyz 1.0 drawcubec pop
- push $DX 1.2192 0.0 translate 0.1016 0.3048 3.6576 scalexyz 1.0 drawcubec pop
- push -.057 0.0 0.0 translate 0.2286 1.6256 0.3048 scalexyz 1.0 drawcubec pop
- push 1.771 0.0 0.0 translate 0.2286 1.6256 0.3048 scalexyz 1.0 drawcubec pop
- 0.4064 offsetz
- push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
- push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
- $DZ offsetz
- push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
- push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
- $DZ offsetz
- push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
- push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
- $DZ offsetz
- push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
- push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
- $DZ offsetz
- push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
- push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
- $DZ offsetz
- push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
- push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
- $DZ offsetz
- push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
- push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
-
 OBJECTDEF // object for a general ball
  ball
  :R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1
@@ -429,23 +395,6 @@ OBJECTDEF
  $R $G $B setrgb
  rotateeye $W $H 1.0 scalexyz 1.0 drawsquare
 
-OBJECTDEF // object for dynamic textured sphere
- movingsphere2
- :R=0 :G=0 :B=0  // sphere color
- :X0 :Y0 :Z0     // origin
- :VX :VY :VZ     // velocity
- :axis_x=0.0 :axis_y=0.0 :axis_z=1.0 // axis of rotation
- :ROTATE_RATE    // rotation rate
- :D=0.1          // sphere diameter
- :tfile          // texture file
- $R $G $B setrgb
- $VX $X0 :vvx multiaddt
- $VY $Y0 :vvy multiaddt
- $VZ $Z0 :vvz multiaddt
- $vvx $vvy $vvz gtranslate $ROTATE_RATE 0.0 :rotz multiaddt 
-   $rotz $axis_x $axis_y $axis_z rotateaxis 180.0 rotatey $tfile :textureindex gettextureindex $textureindex $D drawtsphere
-   push 255 0 0 setrgb 0.0 0.0 -1.0 translate 0.1 2.0 drawdisk pop
-   
 OBJECTDEF // object for dynamic textured sphere
  movingsphere
  :R=0 :G=0 :B=0  // sphere color
