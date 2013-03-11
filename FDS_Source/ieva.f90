@@ -8206,7 +8206,7 @@ Contains
     Real ( kind = 8 ) zxhi
     Real ( kind = 8 ) zxlo
 
-    Save
+ !  Save ! Gnu compiler says that this Save is redundant
     !Timo: Statement function ftol converted to an internal function
     !Timo: ftol(zx) = 0.5D+00 * Max ( abstol, reltol * Abs ( zx ) )
 
