@@ -12,6 +12,7 @@ char IOobject_revision[]="$Revision$";
 #include <string.h>
 
 #include "string_util.h"
+#include "datadefs.h"
 #include "smokeviewvars.h"
 
 #define CIRCLE_SEGS 12
@@ -1253,63 +1254,45 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         float val, valmin, valmax;
 
         val=arg[0];
-
         valmin=arg[1];
-
         valmax=arg[2];
 
-        if(val<valmin)val=valmin;
-        if(val>valmax)val=valmax;
-        
-        *argptr=val;
+        *argptr=CLAMP(val,valmin,valmax);
       }
       break;
     case SV_MIRRORCLIP:
       {
         float val, valmin, valmax;
-        float val2, valmax2;
-        float val_result;
+        float val_rel, valmax_rel;
 
         val=arg[0];
-
         valmin=arg[1];
-
         valmax=arg[2];
 
-        val2=val-valmin;
-        valmax2=valmax-valmin;
+        valmax_rel=valmax-valmin;
+        val_rel=fmod(val-valmin,2.0*valmax_rel);
+        if(val_rel<0.0)val_rel+=2.0*valmax_rel;
+        if(val_rel>valmax_rel)val_rel=2.0*valmax_rel-val_rel;
 
-        val2=fmod(val2,2.0*valmax2);
-        if(val2<0.0)val2+=2.0*valmax2;
-
-        if(val2>valmax2)val2=2.0*valmax2-val2;
-
-        val_result = val2 + valmin;
-
-        *argptr=val_result;
+        *argptr = val_rel + valmin;
       }
       break;
     case SV_PERIODICCLIP:
       {
         float val, valmin, valmax;
-        float val2, valmax2;
-        float val_result;
+        float val_rel, valmax_rel;
 
         val=arg[0];
-
         valmin=arg[1];
-
         valmax=arg[2];
 
-        val2=val-valmin;
-        valmax2=valmax-valmin;
+        val_rel=val-valmin;
+        valmax_rel=valmax-valmin;
 
-        val2=fmod(val2,valmax2);
-        if(val2<0.0)val+=valmax2;
+        val_rel=fmod(val_rel,valmax_rel);
+        if(val_rel<0.0)val+=valmax_rel;
 
-        val_result = val2 + valmin;
-
-        *argptr=val_result;
+        *argptr = val_rel + valmin;
       }
       break;
     case SV_GTRANSLATE:
