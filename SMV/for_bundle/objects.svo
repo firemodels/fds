@@ -424,13 +424,18 @@ OBJECTDEF // object for a moving box
 
 OBJECTDEF // object for dynamic textured sphere
  demosphere
- :R=0 :G=0 :B=0 :X0 :Y0 :Z0 :VX :VY :VZ :ROTATE_RATE :D=0.1 :XMAX :YMAX :ZMAX :tfile
+ :R=0 :G=0 :B=0 // sphere color
+ :X0 :Y0 :Z0    // sphere origin
+ :VX :VY :VZ    // sphere velocity
+ :ROTATE_RATE :D=0.1 :XMAX :YMAX :ZMAX :tfile
  $R $G $B setrgb
  $VX $X0 :vvx multiaddt $vvx  0.0 $XMAX :CLIPX mirrorclip 
  $VY $Y0 :vvy multiaddt $vvy  0.0 $YMAX :CLIPY mirrorclip
  $VZ $Z0 :vvz multiaddt $vvz  0.0 $ZMAX :CLIPZ mirrorclip
- $CLIPX $CLIPY $CLIPZ translate $ROTATE_RATE 0.0 :rotz multiaddt 
-   $rotz rotatez 180.0 rotatey $tfile :textureindex gettextureindex $textureindex $D drawtsphere
+ 0.0 $CLIPX :CLIPX2 sub
+ 0.0 $CLIPZ :CLIPZ2 sub
+ $CLIPX2 $CLIPY $CLIPZ2 translate $ROTATE_RATE 0.0 :rotz multiaddt 
+   $rotz rotatez $tfile :textureindex gettextureindex $textureindex $D drawtsphere
 
 OBJECTDEF // object for dynamic textured sphere
  ttest
