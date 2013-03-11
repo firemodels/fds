@@ -279,19 +279,18 @@ This reaction can be implemented by setting $T_{\rm thr,\alpha\beta} = T_{\rm f}
 \subsection{Liquid Fuels}
 
 The rate at which liquid fuel evaporates when burning is a function of the liquid temperature and the concentration of fuel vapor above the pool surface. According to the Clausius-Clapeyron relation, the volume fraction of the fuel vapor above the surface is a function of the liquid boiling temperature
-\be X_{\rm f} = \exp \left[ -\frac{ h_{\rm v} W_{\rm f}}{\cal R} \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
+\be X_{\rm l} = \exp \left[ -\frac{ h_{\rm v} W_{\rm f}}{\cal R} \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
 \label{CC_liquid}
 \ee
 where $h_{\rm v}$ is the heat of vaporization, $W_{\rm f}$ is the molecular weight of the fuel gas, $T_{\rm s}$ is the surface temperature, and $T_{\rm b}$ is the boiling temperature of the fuel~\cite{Prasad:1}. The mass flux from the pool surface is given by  
 \be
-\dot{m}'' =h_{\rm m} \rho_{f,g} log\left(\frac{X_{\rm g}-1}{X_{\rm f}-1}\right).
+\dot{m}'' =h_{\rm m} \rho_{g} log\left(\frac{X_{\rm g}-1}{X_{\rm l}-1}\right).
 \ee
-Here $h_{\rm m}=Sh\mu_{\rm g}/Sc\Delta~x$ is the mass transfer coefficient and $\rho_{f,g}$ and $X_{\rm g}$ are the density of the fuel vapor and the volume fraction of fuel vapor in the grid cell adjacent to the pool surface. The Schmidt number of air $Sc$ is $0.6$ and the Sherwood numer is given by
+Here $h_{\rm m}=\SH\mu_{\rm g}/\SC \Delta~x$ is the mass transfer coefficient and $\rho_{g}$ and $X_{\rm g}$ are the density of the fuel vapor and the volume fraction of fuel vapor in the grid cell adjacent to the pool surface. The Schmidt number of air $\SC$ is $0.6$ and the Sherwood numer is given by
 \be
-Sh=0.037~Sc^{\frac{1}{3}} Re^{\frac{4}{5}} .
+\SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} .
 \ee
-The Reynolds number $Re=\rho_{\rm g} v_{\rm g}/L~x\mu_{\rm g}$ is calculated based on conditions in the cell adjacent to the surface. The length scale used in calculating the Reynolds number is 1 unless otherwise specified and is the same length scale used for convective heat transfer calculation.
-
+The Reynolds number $\RE=\rho~v~L/\mu$ is calculated based on conditions in the cell adjacent to the surface. The length scale used in calculating the Reynolds number is 1 unless otherwise specified and is the same length scale used for convective heat transfer calculation.
 
 For simplicity, the liquid fuel itself is treated like a thermally-thick
 solid for the purpose of computing the heat conduction. There is no
