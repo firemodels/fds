@@ -1500,7 +1500,7 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
                   W2 = 0._EB
                END SELECT 
                VELCON = SQRT(U2+V2+W2)
-               RE_L     = MAX(5.E5_EB,RHO_G*VELCON/(SF%CONV_LENGTH*MU_AIR))
+               RE_L     = MAX(5.E5_EB,RHO_G*VELCON*SF%CONV_LENGTH/MU_AIR)
                SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
                H_MASS = SHERWOOD*MU_AIR/(SC*SF%CONV_LENGTH)
             ENDIF
