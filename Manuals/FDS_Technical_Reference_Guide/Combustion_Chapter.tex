@@ -250,10 +250,45 @@ where $T$ is the initial mean cell temperature and $\Delta h_{\rm c,F}$ is the h
 In addition to the extinction model described above, there is the option in FDS to select a simpler extinction model based on the limiting oxygen concentration. Details of this model are discussed in Appendix \ref{o2_based_model}.
 
 
+\subsection{Reaction Time Scale Model}
+\label{sec:reac_time_scale}
+
+In this section we provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale.
+
+It is important to consider the behavior of a model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which, though usually small, is finite. At a slightly larger scale we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
+
+Now let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires--which are generally buoyancy-driven flows--we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in]{FIGURES/reaction_time_scale.pdf}
+\vskip-.2cm
+\caption{Reaction time scale model.}
+\label{fig_reaction_time_scale}
+\end{figure}
+
+Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak the $\tau_{\rm g}$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_{\rm u}$ line.  Or, for highly turbulent jet flames $\tau_{\rm flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_{\rm u}$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
+
+The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically represented by
+\begin{equation}
+\label{eqn_tau_mix}
+\tau_{\rm mix} = \max(\tau_{\rm chem},\min(\tau_{\rm d},\tau_{\rm u},\tau_{\rm g},\tau_{\rm flame}))
+\end{equation}
+The mathematical details of the submodels are as follows:
+\begin{align}
+\label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_F} \\
+\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\Delta}{\sqrt{2k_{\rm sgs}}} \\
+\label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
+\end{align}
+where $D_F$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
+
+
 \subsection{Partially-Stirred Batch Reactor Model}
 \label{sec:batchreactormodel}
 
-Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation. To address these difficulties, FDS employs a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to the Eddy Dissipation Concept (EDC) \cite{Magnussen:1,Poinsot:TNC}. But the method is not limited to diffusion flames---each computational cell is thought of as a partially stirred batch reactor. At the start of an FDS time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence. Section \ref{sec:batchreactormodel} discusses the model that couples mixing and chemical reactions. The mixing time, $\tau_{mix}$, is discussed in Section \ref{sec:reac_time_scale}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}).
+Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation.  When the fuel and oxidizer are initially unmixed (diffusion flame) and the kinetics are fast compared with mixing, the simple Eddy Dissipation Concept (EDC) model \cite{Magnussen:1,Poinsot:TNC} is sufficient.  However, for more complex chemically reacting flows---such as carbon monoxide and soot formation---where reaction and mixing time scales may overlap, we require a more generalized approach.
+
+To this end, we have developed a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to EDC, but the method is not limited to diffusion flames.  Each computational cell is thought of as a partially stirred batch reactor. At the start of a time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence. The mixing time, $\tau_{\rm mix}$, was discussed in Section \ref{sec:reac_time_scale}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}).
 
 At the start of the integration of the reactor model, the species transport equations have been solved and we know the mean cell concentrations of all reactants in our chemical system.  In this section, we will work in terms of primitive species mass fractions.  The cell mean mass fraction of $\alpha$, a function of time, is denoted $\overline{Y}_\alpha(t)$.
 
@@ -301,7 +336,7 @@ The simplest possible mixing model is the interaction by exchange with the mean 
 \begin{equation}\label{eq:iem}
 \frac{\d Y_\alpha}{\d t} = \frac{1}{\tau_{\rm mix}}(\overline{Y}_\alpha - Y_\alpha)
 \end{equation}
-where $\tau_{\rm mix}$ is the characteristic mixing time for the cell.  This time scale is discussed below in Section \ref{sec:reac_time_scale}.  For now, simply note that small values of $\tau_{\rm mix}$ correspond to high turbulence intensity (fast mixing) and vice versa.
+where $\tau_{\rm mix}$ is the characteristic mixing time for the cell (see Section \ref{sec:reac_time_scale}).  For this discussion, the details of the mixing time are unimportant; simply note that small values of $\tau_{\rm mix}$ correspond to high turbulence intensity (fast mixing) and vice versa.
 
 \subsubsection{A Simplified Mixing Environment}
 
@@ -340,7 +375,7 @@ We may think of an initial unmixed fraction of $\zeta_0=1$ (default) as represen
 
 \subsubsection{Evolution of the Composition in the Mixed Reactor Zone}
 
-As just discussed, the present reactor model partitions the cell into two zones: an unmixed zone and a mixed zone.  Only the mixed zone may react chemically.  Our goal in this section is to describe the rate of change of the composition within the mixed zone.  This composition changes by two processes: mixing (mass is transfered from the unmixed zone to the mixed zone) and chemical reaction.  The mixed zone composition evolves in time over an FDS time step, $\delta t$.  At the end of the time step, the mixed and unmixed zones are then recombined to yield the final cell mean composition, $\overline{Y}_\alpha(\delta t)$.
+As just discussed, the present reactor model partitions the cell into two zones: an unmixed zone and a mixed zone.  Only the mixed zone may react chemically.  Our goal in this section is to describe the rate of change of the composition within the mixed zone.  This composition changes by two processes: mixing (mass is transfered from the unmixed zone to the mixed zone) and chemical reaction.  The mixed zone composition evolves in time over an FDS time step, $\delta t$.  At the end of the time step, the mixed and unmixed zones are recombined to yield the final cell mean composition, $\overline{Y}_\alpha(\delta t)$.
 
 The total mass within the reactor (computational cell) is constant over the time step.  We denote this mass by $\rho V$, where $\rho$ is the initial cell mass density and $V$ is the cell volume.  The unmixed mass is denoted $U(t)$ and the mixed mass is denoted $M(t)$.  Given Eq.~(\ref{eq:zeta_soln}), the following equations describe the cell mass evolution:
 \begin{eqnarray}
@@ -365,7 +400,7 @@ The first term on the RHS represents chemical kinetics.  The second term account
 -\overline{Y}_{\alpha,0} \frac{\d U}{\d t} &= \frac{\overline{Y}_{\alpha,0} \, U(t) }{\tau_{\rm mix}}
 \end{align}
 
-The rate of reaction, $\d \hat{Y}_\alpha/\d t$, is discussed in Section \ref{Reaction_Rate_Model}. The reaction rate may be ``fast'' (default) or based on an Arrhenius rate law.  The integration of Eq.~(\ref{eq:mixmass}) for these special cases is discussed in Section \ref{sec:reac_time_integration}.
+The rate of reaction, $\d \hat{Y}_\alpha/\d t$, is discussed in Section \ref{Reaction_Rate_Model}. The reaction rate may be ``fast'' (default) or based on an Arrhenius rate law.  The integration of Eq.~(\ref{eq:mixmass}) for these special cases is discussed in Section \ref{sec:reac_time_integration}. 
 
 Once the final mixed zone mass is known, the composition of the computational cell is found by recombining the unmixed and mixed portions:
 \begin{equation}
@@ -380,7 +415,7 @@ Finally, the mean chemical source term needed in Eq.~(\ref{eq:mass_source_terms}
 
 \subsubsection{A Limiting Case: The Eddy Dissipation Concept}
 
-When the initial unmixed fraction is one and the chemical kinetics are taken to be infinitely fast, our model reduces to the EDC model shown by Eq.~(\ref{eq:edc}).
+When the reactants are initially unmixed ($\zeta_0=1$) and the chemical kinetics are taken to be infinitely fast, our model reduces to the EDC model shown by Eq.~(\ref{eq:edc}).
 
 {Proof:} Consider Eq.~(\ref{mass_prod_rate}) evaluated for an infinitesimal time increment $\Delta t$ with $\alpha={\rm F}$.  Utilizing Eq.~(\ref{eq:final_comp}) we have
 \begin{align}
@@ -389,7 +424,7 @@ When the initial unmixed fraction is one and the chemical kinetics are taken to 
 %&=\rho \, \frac{[\zeta(\Delta t) \, \overline{Y}_{\rm F,0} + (1-\zeta(\Delta t)) \, \hat{Y}_{\rm F}(\Delta t)] - \overline{Y}_{\rm F,0}}{\Delta t} \notag\\
 &=\rho \, \frac{1-\zeta(\Delta t)}{\Delta t} \, [\hat{Y}_{\rm F}(\Delta t) - \overline{Y}_{\rm F,0}] 
 \end{align}
-Next, note that in the case where the reactants are unmixed ($\zeta_0=1$) the fuel mass fraction in the mixed reactor zone at $\Delta t$ is $\overline{Y}_{\rm F,0} + \Delta \hat{Y}_{\rm F}$.  Further, using Eq.~(\ref{eq:zeta_soln}), to leading order we obtain
+Next, note that in the case where the reactants are unmixed, the fuel mass fraction in the mixed reactor zone at $\Delta t$ is $\overline{Y}_{\rm F,0} + \Delta \hat{Y}_{\rm F}$.  Further, using Eq.~(\ref{eq:zeta_soln}), to leading order we obtain
 \begin{align}
 \dot{m}^{\prime\prime\prime}_{\rm F}
 &= \rho \, \frac{1-\zeta_0 \, {\rm e}^{-\Delta t/\tau_{\rm mix}}}{\Delta t} \, \Delta \hat{Y}_{\rm F} \notag \\
@@ -400,37 +435,54 @@ Next, note that in the case where the reactants are unmixed ($\zeta_0=1$) the fu
 which corresponds to Eq.~(\ref{eq:edc}) with the mass fractions written in terms of the mixed zone composition.
 
 
-\subsection{Reaction Time Scale Model}
-\label{sec:reac_time_scale}
-
-In this section we provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale.
-
-It is important to consider the behavior of a model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which, though usually small, is finite. At a slightly larger scale we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
-
-Now let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires--which are generally buoyancy-driven flows--we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in]{FIGURES/reaction_time_scale.pdf}
-\vskip-.2cm
-\caption{Reaction time scale model.}
-\label{fig_reaction_time_scale}
-\end{figure}
-
-Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak the $\tau_{\rm g}$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_{\rm u}$ line.  Or, for highly turbulent jet flames $\tau_{\rm flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_{\rm u}$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
-
-The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically represented by
-\begin{equation}
-\label{eqn_tau_mix}
-\tau_{\rm mix} = \max(\tau_{\rm chem},\min(\tau_{\rm d},\tau_{\rm u},\tau_{\rm g},\tau_{\rm flame}))
+\subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
+\label{Reaction_Rate_Model}
+Consider a simple one-step forward reaction:
+\begin{equation}\label{eq:generic_1step}
+a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
 \end{equation}
-The mathematical details of the submodels are as follows:
-\begin{align}
-\label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_F} \\
-\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\Delta}{\sqrt{2k_{sgs}}} \\
-\label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
-\end{align}
-where $D_F$ is the diffusivity of the fuel species. Note that $k_{sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
+The rate expression for species A with a mixed zone concentration of $C_{\mbox{\scriptsize A}}$ in mol/L and rate constant $k$ is:
+\begin{equation}\label{eq:generic_rate}
+\frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}^{\,a}\; C_{\mbox{\scriptsize B}}^{\,b}
+\end{equation}
+
+Consider a set of $N_r$ reactions with fuel F. The reaction rate (mol/L/s) for F in the $i$th reaction is:
+\begin{equation}\label{eq:rate_f}
+r_{\si{F},i}= -k_{i}\; \prod C_{\alpha}^{\,a_{\alpha,i}}
+\end{equation}
+For the $i$th Arrhenius reaction, the rate constant, $k_i$, depends on the temperature, $T$, the temperature exponent, $n_i$, the pre-exponential factor, $A_i$, and the activation energy, $E_i$:
+\begin{equation}\label{eq:rate_cons}
+k_i = A_i\;T^{n_i}\;\mathrm{e}^{-E_i/RT}
+\end{equation}
+Note that the units of $E$ are J/mol and units of $A$ are dependent upon the order of the reaction and take the appropriate form to ensure the units of Eq.~(\ref{eq:rate_f}) are correct.
+
+The reaction rate for species $\alpha$ of the $i$th reaction is based on the ratio of stoichiometric coefficients:
+\begin{equation}\label{eq:rate_a}
+r_{\alpha,i}= \left(\frac{\nu_{\alpha,i}}{\nu_{F,i}}\right)\,r_{\si{F},i}
+\end{equation}
+The change in concentration for species $\alpha$ within the mixed reactor zone is then:
+\begin{equation}\label{rate_expression}
+\frac{\d C_{\alpha}}{\d t} = \sum_{i} r_{\alpha,i}
+\end{equation}
+FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
+
+It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentration (mol/L) and mass fractions (kg $\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/W_{\alpha}$.
+To simplify the calculations within FDS, density and molecular weight are pulled out of the product of the concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and calculated with the other constants to form $A^{\prime}$:
+\begin{equation}\label{eq:aprime}
+A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}^{\,-a_{\alpha,i}}
+\end{equation}
+Using $A_i^{\prime}$, the rate becomes:
+\begin{equation}\label{eq:finite_rate_fin}
+r^{\prime}_{F,i} = -A_i^{\prime}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}}
+\end{equation}
+The reaction rate on a mass basis for species $\alpha$ in the $i$th reaction is:
+\begin{equation}\label{eq:rate_a_y}
+r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)\,r^{\prime}_{F,i}
+\end{equation}
+Last, the rate of change in composition for species $\alpha$ (\si{kg/(m^3.s)}) in the mixed reactor zone becomes:
+\begin{equation}\label{rate_expression_y}
+\frac{\d \hat{Y}_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
+\end{equation}
 
 
 
@@ -444,7 +496,7 @@ Let $\Delta t^k$ represent the $k$th sub-time step in the integration (not neces
 \label{eq:dmdt_1} m_\alpha^* &= m_{\alpha}(t^k) + [ \zeta(t^k) - \zeta(t^k+\Delta t^k) ] \, \rho V \, \overline{Y}_{\alpha,0}  \\
 \label{eq:dmdt_2} m_\alpha(t^k + \Delta t^k) &= m_{\alpha}^* + M(t^k + \Delta t^k) \, \Delta \hat{Y}_\alpha^*
 \end{align}
-The superscript $^*$ indicates the post-mixing, pre-reaction value.  The first step, Eq.~(\ref{eq:dmdt_1}), is an analytical solution for the mixing step (second term in Eq.~(\ref{eq:mixmass})) over the subinterval, obtained using Eqs.~(\ref{eq:mixingstep}), (\ref{eq:mixunmix_2}), and (\ref{eq:zeta_soln}).  The unmixed fractions $\zeta(t^k)$ and $\zeta(t^k + \Delta t^k)$ are obtained from Eq.~(\ref{eq:zeta_soln}). The mixing time scale $\tau_{mix}$ needed in Eq.~(\ref{eq:zeta_soln}) is computed once per FDS time step and held constant during the reactor integration. The mixed mass, $M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using Eq.~(\ref{eq:mixunmix_3}). For a single step, mixing-controlled reaction, we take only one sub-step and $\Delta t = \delta t$.  This is discussed in more detail below.  
+The superscript $^*$ indicates the post-mixing, pre-reaction value.  The first step, Eq.~(\ref{eq:dmdt_1}), is an analytical solution for the mixing step (second term in Eq.~(\ref{eq:mixmass})) over the subinterval, obtained using Eqs.~(\ref{eq:mixingstep}), (\ref{eq:mixunmix_2}), and (\ref{eq:zeta_soln}).  The unmixed fractions $\zeta(t^k)$ and $\zeta(t^k + \Delta t^k)$ are obtained from Eq.~(\ref{eq:zeta_soln}). The mixing time scale $\tau_{\rm mix}$ needed in Eq.~(\ref{eq:zeta_soln}) is computed once per FDS time step and held constant during the reactor integration. The mixed mass, $M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using Eq.~(\ref{eq:mixunmix_3}). For a single step, mixing-controlled reaction, we take only one sub-step and $\Delta t = \delta t$.  This is discussed in more detail below.  
 
 The method to determine $\Delta \hat{Y}_\alpha^*$ (the change in mass fraction of $\alpha$ due to chemical reaction) in Eq.~(\ref{eq:dmdt_2}) depends on the complexity of the reaction system.  Below we first discuss the simplest (default) case of a single step, mixing-controlled (infinitely fast) reaction.  Then we discuss multiple fast reactions.  And finally, finite-rate chemistry.
 
@@ -518,54 +570,5 @@ As should be the case, the total change in oxygen, $-0.3$, is equal to the amoun
 \subsubsection{Complex Chemistry Models}
 
 For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed and the change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator---including a method to combat stiff chemistry---can be found in Appendix~\ref{chemistry_integration}.
-
-\subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
-\label{Reaction_Rate_Model}
-Consider a simple one-step forward reaction:
-\begin{equation}\label{eq:generic_1step}
-a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
-\end{equation}
-The rate expression for species A with a concentration of $C_{\mbox{\scriptsize A}}$ in mol/L and rate constant $k$ is:
-\begin{equation}\label{eq:generic_rate}
-\frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}^{\,a}\; C_{\mbox{\scriptsize B}}^{\,b}
-\end{equation}
-
-In this section, it is understood that only the mixed reactor zone compositions participate in the rate expressions (thus $\hat{\,}$ notation is suppressed). Consider a set of $N_r$ reactions with fuel F. The reaction rate (mol/L/s) for F in the $i$th reaction is:
-\begin{equation}\label{eq:rate_f}
-r_{\si{F},i}= -k_{i}\; \prod C_{\alpha}^{\,a_{\alpha,i}}
-\end{equation}
-For the $i$th Arrhenius reaction, the rate constant, $k_i$, depends on the temperature, $T$, the temperature exponent, $n_i$, the pre-exponential factor, $A_i$, and the activation energy, $E_i$:
-\begin{equation}\label{eq:rate_cons}
-k_i = A_i\;T^{n_i}\;\mathrm{e}^{-E_i/RT}
-\end{equation}
-Note that the units of $E$ are J/mol and units of $A$ are dependent upon the order of the reaction and take the appropriate form to ensure the units of Eq.~(\ref{eq:rate_f}) are correct.
-
-The reaction rate for species $\alpha$ of the $i$th reaction is based on the ratio of stoichiometric coefficients:
-\begin{equation}\label{eq:rate_a}
-r_{\alpha,i}= \left(\frac{\nu_{\alpha,i}}{\nu_{F,i}}\right)\,r_{\si{F},i}
-\end{equation}
-The change in concentration for species $\alpha$ within the mixed reactor zone is then:
-\begin{equation}\label{rate_expression}
-\frac{\d C_{\alpha}}{\d t} = \sum_{i} r_{\alpha,i}
-\end{equation}
-FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
-
-It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentration (mol/L) and mass fractions (kg $\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/W_{\alpha}$.
-To simplify the calculations within FDS, density and molecular weight are pulled out of the product of the concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and calculated with the other constants to form $A^{\prime}$:
-\begin{equation}\label{eq:aprime}
-A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}^{\,-a_{\alpha,i}}
-\end{equation}
-Using $A_i^{\prime}$, the rate becomes:
-\begin{equation}\label{eq:finite_rate_fin}
-r^{\prime}_{F,i} = -A_i^{\prime}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}}
-\end{equation}
-The reaction rate on a mass basis for species $\alpha$ in the $i$th reaction is:
-\begin{equation}\label{eq:rate_a_y}
-r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)\,r^{\prime}_{F,i}
-\end{equation}
-Last, the rate of change in composition for species $\alpha$ (\si{kg/(m^3.s)}) in the mixed reactor zone becomes:
-\begin{equation}\label{rate_expression_y}
-\frac{\d Y_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
-\end{equation}
 
 
