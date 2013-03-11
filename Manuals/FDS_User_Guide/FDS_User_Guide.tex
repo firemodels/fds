@@ -506,6 +506,7 @@ to test all of the various features of the model.
 \begin{longtable}{|l|l|}
 \hline
 \multicolumn{2}{|c|}{\bf FDS 6 Beta Testers} \\ \hline \hline
+Mohammed Assal                          & CFD Algeria                                                               \\ \hline
 Choon-Bum Choi                          & Building and Tunnel Technologies Inc. (BNTTEK), Korea                     \\ \hline
 William J. Ferrante                     & Roosevelt Fire District, Hyde Park, New York, USA                         \\ \hline
 Emanuele Gissi                          & Corpo nazionale dei Vigili del Fuoco, Italy                               \\ \hline
@@ -519,6 +520,8 @@ Luca Nassi                              & National Fire Department, Italy       
 Natalie Ong                             & Arup Fire Singapore                                                       \\ \hline
 Joakim Sandstr\"{o}m                    & LTU/Brandskyddslaget, Sweden                                              \\ \hline
 Julio Cesar Silva                       & Federal University of Rio de Janeiro, Brazil                              \\ \hline
+Boris Stock                             & BFT Cognos GmbH, Aachen, Germany                                          \\ \hline
+Csaba Szilagyi                          & OPTOMM Ltd., Budapest, Hungary                                            \\ \hline
 Giacomo Villi                           & Universit\`{a} di Padova, Italy                                           \\ \hline
 Andreas Vischer                         & Wijnveld//Ingenieure, Osnabr\"{u}ck, Germany                              \\ \hline
 \end{longtable}
@@ -3124,7 +3127,7 @@ $C_{\rm cyl}$ & $n_{\rm cyl}$ & Range  \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-$L$ is a characteristic length related to the size of the physical obstruction; $k$ is the thermal conductivity of the gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the gas flowing past the obstruction (i.e., for a wall cell, the conditions in gas cell immediately adjacent to the wall, and for a particle, the gas cell containing the particle). Since the Reynolds number is proportional to the characteristic length, $L$, the heat transfer coefficient is weakly related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, for a wall cell $L$ is taken to be 1~m for most calculations.  For cylindrical or spherical objects $L$ is take to be the diameter. The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and {\ct C\_FORCED\_PR\_EXP} for the constants $C_1$ through $C_4$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  
+$L$ is a characteristic length related to the size of the physical obstruction; $k$ is the thermal conductivity of the gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the gas flowing past the obstruction (i.e., for a wall cell, the conditions in gas cell immediately adjacent to the wall, and for a particle, the gas cell containing the particle). Since the Reynolds number is proportional to the characteristic length, $L$, the heat transfer coefficient is weakly related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, for a wall cell $L$ is taken to be 1~m for most calculations.  For cylindrical or spherical objects $L$ is take to be the diameter. The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and {\ct C\_FORCED\_PR\_EXP} for the constants $C_1$ through $C_4$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.
 
 \subsubsection{Logarithmic Law of the Wall}
 
@@ -3374,7 +3377,7 @@ For example, take the {\ct SURF} definition below and assume the the grid spacin
       MATL_ID(1:3,1)     = 'MATERIAL A','MATERIAL B','MATERIAL C'
       THICKNESS(1:3)     = 0.1,0.2,0.1 /
 \end{lstlisting}
- 
+
 Therefore, if you apply the attribute {\ct BACKING='EXPOSED'} on a {\ct SURF} line that is applied to a zero or one-cell thick
 obstruction, you should be careful of how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can
 be applied to both sides. However, if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply
@@ -4276,10 +4279,7 @@ given vent, or whether the given volume flux is desired.
 
 \label{info:MASS_FLUX_TOTAL}
 
-Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at
-a solid surface. However, you may wish to control the total mass flow rate per unit area (\si{kg/(m$^2$.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
-{\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
-for an outflow is adjusted based on the local density.
+Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at a solid surface. However, you may wish to control the total mass flow rate per unit area (\si{kg/(m$^2$.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value for an outflow is adjusted based on the local density.
 
 
 \subsection{Heaters}
@@ -4343,44 +4343,23 @@ In most practical simulations, it is not possible to resolve this boundary layer
 
 
 \subsection{Species and Species Mass Flux Boundary Conditions}
-
 \label{info:MASS_FLUX}
 
-There are two species boundary conditions that can be specified
-(see Section~\ref{info:SPEC} for details on inputting and using species).
-These boundary conditions are {\ct MASS\_FLUX(:)} and {\ct MASS\_FRACTION(:)}
-If a simple no-flux condition is desired at a solid wall, do not set
-anything. If the mass fraction of the species is to be some
-value at a forced flow boundary ({\ct VEL} or {\ct MASS\_FLUX\_TOTAL}) set
-{\ct MASS\_FRACTION(:)} equal to the desired mass fraction on the appropriate
-{\ct SURF} line.
-If the mass flux of the species is desired, set
-{\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}.
-If {\ct MASS\_FLUX(:)}
-is set, no {\ct VEL} should be set. It is automatically
-calculated based on the mass flux.
-The inputs {\ct MASS\_FLUX(:)} (and typically {\ct MASS\_FRACTION(:)}) should only be used
-for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with
-units of \si{kg/(m$^2$.s)}.
+There are two types of species boundary conditions (see Chapter~\ref{info:SPEC} for a general discussion of gas species). By default, gas species do not penetrate solid surfaces and you need not specify anything if this is all you need. If the mass fraction of the species is to be some value at a forced flow boundary where {\ct VEL}, {\ct VOLUME\_FLUX}, or {\ct MASS\_FLUX\_TOTAL} is specified, set {\ct MASS\_FRACTION(:)} equal to the desired species mass fractions on the appropriate {\ct SURF} line. If the mass flux of the species is desired, set {\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}. If {\ct MASS\_FLUX(:)} is set, do not specify {\ct VEL}, {\ct VOLUME\_FLUX}, or \linebreak[4]{\ct MASS\_FLUX\_TOTAL}. These are automatically calculated based on the specified mass flux. The inputs {\ct MASS\_FLUX(:)} (and typically {\ct MASS\_FRACTION(:)}) should only be used for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with units of \si{kg/(m$^2$.s)}.
 
-\subsection*{Mass Flux Example}
-
+Here is an example of how to specify a surface that generates methane at a rate of 0.025~\si{kg/(m$^2$.s)}:
 \begin{lstlisting}
 &SPEC ID='METHANE' /
-&SURF ID='METHANE_FLOW', SPEC_ID(1)='METHANE', MASS_FLUX(1)=0.025 /
-&OBST XB=0.4,0.6,0.4,0.6,0.00,0.2,SURF_IDS='METHANE_FLOW','INERT','INERT' /
+&SURF ID='METHANE BURNER', SPEC_ID(1)='METHANE', MASS_FLUX(1)=0.025 /
+&VENT XB=..., SURF_ID='METHANE BURNER' /
 \end{lstlisting}
-
-
-\subsection*{Velocity Example}
-
+Here is example of how to specify a surface that blows methane with a velocity of 0.1~m/s:
 \begin{lstlisting}
 &SPEC ID='METHANE' /
-&SURF ID='INFLOW', MASS_FRACTION(1)=1.0, SPEC_ID(1)='METHANE', VEL=-0.1 /
-&VENT XB=0.0,0.4,0.0,0.1,0.15,0.15, SURF_ID='INFLOW' /
+&SURF ID='METHANE BLOWER', MASS_FRACTION(1)=1.0, SPEC_ID(1)='METHANE', VEL=-0.1 /
+&VENT XB=..., SURF_ID='METHANE BLOWER' /
 \end{lstlisting}
-
-\noindent Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use {\ct MASS\_FLUX}.
+Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use {\ct MASS\_FLUX}.
 
 
 
@@ -9401,7 +9380,7 @@ specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'} and {\ct 'SOOT'} 
 the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide
 through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
 \begin{lstlisting}
-&DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z', 
+&DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z',
       SPEC_ID='CARBON MONOXIDE', STATISTICS='AREA INTEGRAL' /
 \end{lstlisting}
 Here, the {\ct ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or
