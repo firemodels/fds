@@ -397,9 +397,9 @@ OBJECTDEF
 
 OBJECTDEF // object for dynamic textured sphere
  movingsphere
- :R=0 :G=0 :B=0  // sphere color
- :X0 :Y0 :Z0     // origin
- :VX :VY :VZ     // velocity
+ :R=0 :G=0 :B=0 // sphere color
+ :X0 :Y0 :Z0    // sphere origin
+ :VX :VY :VZ    // sphere velocity
  :ROTATE_RATE    // rotation rate
  :D=0.1          // sphere diameter
  :tfile          // texture file
@@ -412,22 +412,28 @@ OBJECTDEF // object for dynamic textured sphere
 
 OBJECTDEF // object for a moving box
  movingbox
- :R=0 :G=0 :B=0 // box color
+ :R=255 :G=0 :B=0 // box color
  :X0 :Y0 :Z0    // lower left front box corner
  :VX :VY :VZ    // box velocity
  :DX :DY :DZ    // box size
+ :XMAX :YMAX :ZMAX
  $R $G $B setrgb
- $VX $X0 :vvx multiaddt
- $VY $Y0 :vvy multiaddt
- $VZ $Z0 :vvz multiaddt
- $vvx $vvy $vvz gtranslate $DX $DY $DZ scalexyz 0.0 0.0 0.5 gtranslate 1.0 drawcube
+ $VX $X0 :vvx multiaddt $vvx 0.0 $XMAX :CLIPX mirrorclip
+ $VY $Y0 :vvy multiaddt $vvy 0.0 $YMAX :CLIPY mirrorclip
+ $VZ $Z0 :vvz multiaddt $vvz 0.0 $ZMAX :CLIPZ mirrorclip
+ 0.0 $CLIPX :CLIPX2 sub
+ 0.0 $CLIPZ :CLIPZ2 sub
+ $CLIPX2 $CLIPY $CLIPZ2 translate $DX $DY $DZ scalexyz 1.0 drawcube
 
 OBJECTDEF // object for dynamic textured sphere
  demosphere
  :R=0 :G=0 :B=0 // sphere color
  :X0 :Y0 :Z0    // sphere origin
  :VX :VY :VZ    // sphere velocity
- :ROTATE_RATE :D=0.1 :XMAX :YMAX :ZMAX :tfile
+ :ROTATE_RATE    // rotation rate
+ :D=0.1          // sphere diameter
+ :tfile          // texture file
+ :XMAX :YMAX :ZMAX // box bounds
  $R $G $B setrgb
  $VX $X0 :vvx multiaddt $vvx  0.0 $XMAX :CLIPX mirrorclip 
  $VY $Y0 :vvy multiaddt $vvy  0.0 $YMAX :CLIPY mirrorclip
