@@ -2578,6 +2578,10 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (kJ/kmol): ',ML%E(NR)/1000.
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR)/1000.
       WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
+      IF (ML%N_O2(NR)>0._EB) THEN
+      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2       : ',ML%N_O2(NR)
+      WRITE(LU_OUTPUT,'(A,F8.4)') '        Gas diffusion depth (m): ',ML%GAS_DIFFUSION_DEPTH(NR)
+      ENDIF
       IF (ML%TMP_THR(NR)>0._EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Threshold temperature (C): ',ML%TMP_THR(NR)-TMPM
       WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NR)
