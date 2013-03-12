@@ -23,4 +23,4 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\SMV\for_bundle
-start wordpad objects.svo 
+start notepad objects.svo 
