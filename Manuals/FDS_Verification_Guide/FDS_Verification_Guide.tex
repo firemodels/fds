@@ -543,17 +543,17 @@ because  the time  step is not  limited by the  large flow speeds in a fire plum
 FDS  uses the  Smagorinsky form  of  the Large  Eddy Simulation  (LES) technique.  This  means  that   instead  of  using  the  actual  fluid
 viscosity, the model uses a viscosity of the form
 \be
-  \mu_{\hbox{\tiny LES}} =  \rho \,  (C_s\, \Delta)^2  \, |S|
+  \mu_{\hbox{\tiny LES}} =  \rho \,  (C_{\rm s}\, \Delta)^2  \, |S|
 \ee
-where $C_s$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is
+where $C_{\rm s}$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is
 related  to  the Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Math_Guide} for details). Related to the ``turbulent  viscosity'' are  comparable
 expressions  for  the thermal conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  = \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR_t}
 \quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}  \ee  where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively.
-Thus, $C_s$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
+Thus, $C_{\rm s}$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
 simply use  the default values  of (0.2,0.5,0.5), but some have  explored their effect on the solution of the equations.
 
 In an effort  to validate FDS with some  simple room temperature data, Zhang~{\em et al.}~\cite{Zhang:2}  tried different combinations of the
-Smagorinsky parameters,  and suggested the current  default values. Of the  three parameters,  the  Smagorinsky constant  $C_s$  is the  most
+Smagorinsky parameters,  and suggested the current  default values. Of the  three parameters,  the  Smagorinsky constant  $C_{\rm s}$  is the  most
 sensitive.   Smagorinsky~\cite{Smagorinsky:1}  originally  proposed  a value of 0.23,  but researchers over the past  three decades have used values
 ranging  from 0.1  to 0.23. There  are also refinements  of the original  Smagorinsky  model~\cite{Deardorff:1,Germano:1,Lilly:1} that do  not
 require the  user  to  prescribe  the constants,  but  rather generate them automatically as part of the numerical scheme.
@@ -923,7 +923,7 @@ To provide the reader with a qualitative sense of the flow, Figure \ref{fig_cbc_
 
 \subsection{Constant Smagorinsky (\texorpdfstring{{\bf csmag}}{csmag})}
 
-Because the viscous scales are unresolved, a subgrid stress model is required. Here the stress is closed using the gradient diffusion hypothesis and the eddy viscosity is modeled by the constant coefficient Smagorinsky model with the coefficient taken to be $C_s = 0.2$ (see the Technical Reference Guide for further details).
+Because the viscous scales are unresolved, a subgrid stress model is required. Here the stress is closed using the gradient diffusion hypothesis and the eddy viscosity is modeled by the constant coefficient Smagorinsky model with the coefficient taken to be $C_{\rm s} = 0.2$ (see the Technical Reference Guide for further details).
 
 The decay curves for two grid resolutions are shown plotted on the left in Figure \ref{fig_cbc_energy}.  For an LES code such as FDS which uses a physically-based subgrid model, an important verification test is to run this periodic isotropic turbulence simulation in the absence of both molecular and turbulent viscosity.  For so-called ``energy-conserving'' explicit numerics the integrated energy will remain nearly constant in time.  This is demonstrated by the dash-dot line in the top-left plot in Figure \ref{fig_cbc_energy}.  The deviations from identical energy conservation (to machine precision) are due solely to the time discretization (the spatial terms are conservative as discussed in \cite{Morinishi}) and converge to zero as the time step goes to the zero.  Note that strict energy conservation requires implicit time integration \cite{Ham,McDermott:2007b} and, as shown by the red curve on the same plot where only molecular viscosity is present in the simulation, this cost is unwarranted given that the molecular dissipation rate clearly overshadows the relatively insignificant amount of numerical dissipation caused by the explicit method.  The FDS result using the Smagorinsky eddy viscosity (the black solid line) matches the CBC data (red open circles) well for the $32^3$ case (top-left).  However, the FDS results are slightly too dissipative in the $64^3$ case (bottom-left).  This is due to a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased.
 \begin{figure}[t]
@@ -935,7 +935,7 @@ The decay curves for two grid resolutions are shown plotted on the left in Figur
    \label{fig_cbc_smv}
 \end{figure}
 
-To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corresponding spectral data comparison.  The three black solid lines are the CBC spectral data for the points in time corresponding to dimensional times of $t = 0.00$, $0.28$, and $0.66$ seconds in our simulations.  As described above, the initial FDS velocity field (represented by the black dots) is specified to match the CBC data up to the grid Nyquist limit.  From there the spectral energy decays rapidly as discussed in \cite{McDermott:2005b}.  For each of the spectral plots on the right, the results of interest are the values of the red and blue dots and how well these match up with the corresponding CBC data.  For the $32^3$ case (top-right) the results are remarkably good.  Interestingly, the results for the more highly resolved $64^3$ case are not as good.  This is because the viscous scales are rather well-resolved at the later times in the experiment and, as mentioned, the constant coefficient Smagorinsky model is too dissipative under such conditions. (The choice of the model constant also affects these results---better agreement with the $64^3$ case could be achieved with a lower value of $C_s$, but the agreement in the $32^3$ case would then be worse.)
+To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corresponding spectral data comparison.  The three black solid lines are the CBC spectral data for the points in time corresponding to dimensional times of $t = 0.00$, $0.28$, and $0.66$ seconds in our simulations.  As described above, the initial FDS velocity field (represented by the black dots) is specified to match the CBC data up to the grid Nyquist limit.  From there the spectral energy decays rapidly as discussed in \cite{McDermott:2005b}.  For each of the spectral plots on the right, the results of interest are the values of the red and blue dots and how well these match up with the corresponding CBC data.  For the $32^3$ case (top-right) the results are remarkably good.  Interestingly, the results for the more highly resolved $64^3$ case are not as good.  This is because the viscous scales are rather well-resolved at the later times in the experiment and, as mentioned, the constant coefficient Smagorinsky model is too dissipative under such conditions. (The choice of the model constant also affects these results---better agreement with the $64^3$ case could be achieved with a lower value of $C_{\rm s}$, but the agreement in the $32^3$ case would then be worse.)
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -957,9 +957,9 @@ Overall, the agreement between the FDS simulations and the CBC data is satisfact
 \subsection{Dynamic Smagorinsky (\texorpdfstring{{\bf dsmag}}{dsmag})}
 \label{dynamic_smagorinsky_model}
 
-In the previous section, all calculations were performed with a constant and uniform Smagorinsky coefficient, $C_s = 0.2$.  For the canonical case of homogeneous decaying isotropic turbulence -- \emph{at sufficiently high Reynolds number} -- this model is sufficient.  However, we noticed that even for the isotropic turbulence problem when the grid Reynolds number is low (i.e., the flow is well-resolved) the constant coefficient model tends to over predict the dissipation of kinetic energy (see Figure \ref{fig_cbc_energy}).  This is because the eddy viscosity does not converge to zero at the proper rate; so long as strain is present in the flow (the magnitude of the stain rate tensor is nonzero), the eddy viscosity will be nonzero.  This violates a guiding principle in LES development: that the method should converge to a DNS if the flow field is sufficiently resolved.
+In the previous section, all calculations were performed with a constant and uniform Smagorinsky coefficient, $C_{\rm s} = 0.2$.  For the canonical case of homogeneous decaying isotropic turbulence -- \emph{at sufficiently high Reynolds number} -- this model is sufficient.  However, we noticed that even for the isotropic turbulence problem when the grid Reynolds number is low (i.e., the flow is well-resolved) the constant coefficient model tends to over predict the dissipation of kinetic energy (see Figure \ref{fig_cbc_energy}).  This is because the eddy viscosity does not converge to zero at the proper rate; so long as strain is present in the flow (the magnitude of the stain rate tensor is nonzero), the eddy viscosity will be nonzero.  This violates a guiding principle in LES development: that the method should converge to a DNS if the flow field is sufficiently resolved.
 
-The dynamic procedure for calculating the model coefficient (set {\ct TURBULENCE\_MODEL=`DYNAMIC \\ \ct SMAGORINSKY'} on {\ct MISC}) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,FDS_Math_Guide}.  Here we present results for the implementation of the dynamic model in FDS.  In Figure~\ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_s(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.
+The dynamic procedure for calculating the model coefficient (set {\ct TURBULENCE\_MODEL=`DYNAMIC \\ \ct SMAGORINSKY'} on {\ct MISC}) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,FDS_Math_Guide}.  Here we present results for the implementation of the dynamic model in FDS.  In Figure~\ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_{\rm s}(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.
 
 \begin{figure}[t]
    \begin{center}
@@ -1561,9 +1561,9 @@ In the test case, we inject propane into a cube with 1 m$^2$ vents on all six fa
 FDS does not explicitly solve the energy conservation equation. Instead, mass transport equations are solved for the density and the $n-1$ independent gas species. Source terms from the energy equation are incorporated in the velocity  divergence, $\nabla \cdot \bu$, which is factored out of the sensible enthalpy transport equation, i.e.,
 \be
 \label{eqn_new_div}
-\nabla\cdot\mathbf{u} = \frac{1}{\rho h_s} \left[ \frac{\mbox{D}}{\mbox{D} t}(\bar{p}-\rho h_s) + \dot{q}^{\prime\prime\prime} + \nabla\cdot(k \nabla T) - \nabla\cdot\sum_\alpha h_{s,\alpha} \mathbf{J}_\alpha - \nabla\cdot\dot{\mathbf{q}}_r^{\prime\prime} + \dot{q}_b^{\prime\prime\prime} \right] \,\mbox{.}
+\nabla\cdot\mathbf{u} = \frac{1}{\rho h_{\rm s}} \left[ \frac{\mbox{D}}{\mbox{D} t}(\bar{p}-\rho h_{\rm s}) + \dot{q}^{\prime\prime\prime} + \nabla\cdot(k \nabla T) - \nabla\cdot\sum_\alpha h_{s,\alpha} \mathbf{J}_\alpha - \nabla\cdot\dot{\mathbf{q}}_r^{\prime\prime} + \dot{q}_b^{\prime\prime\prime} \right] \,\mbox{.}
 \ee
-Here $\rho$ is the mass density, $h_s$ is the sensible enthalpy, $\bar{p}$ is the thermodynamic pressure, $\dot{q}^{\prime\prime\prime}$ is the chemical heat release, $k$ is thermal conductivity, $\mathbf{J}_\alpha$ is the diffusion flux vector, $\dot{\mathbf{q}}_r^{\prime\prime}$ is the radiant heat flux vector, and $\dot{q}_b^{\prime\prime\prime}$ is the bulk heat source due to convective heat transfer to Lagrangian particles and the heat associated with mass sources. The divergence is a fairly complicated expression, and it is important that it is computed properly to ensure global energy conservation. The examples in this section check that mass and energy are conserved for relatively simple configurations.
+Here $\rho$ is the mass density, $h_{\rm s}$ is the sensible enthalpy, $\bar{p}$ is the thermodynamic pressure, $\dot{q}^{\prime\prime\prime}$ is the chemical heat release, $k$ is thermal conductivity, $\mathbf{J}_\alpha$ is the diffusion flux vector, $\dot{\mathbf{q}}_r^{\prime\prime}$ is the radiant heat flux vector, and $\dot{q}_b^{\prime\prime\prime}$ is the bulk heat source due to convective heat transfer to Lagrangian particles and the heat associated with mass sources. The divergence is a fairly complicated expression, and it is important that it is computed properly to ensure global energy conservation. The examples in this section check that mass and energy are conserved for relatively simple configurations.
 
 \subsection{The Heat from a Fire (\texorpdfstring{{\bf energy\_budget}}{energy\_budget})}
 
@@ -1645,7 +1645,7 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 \subsection{Mixing Gases (\texorpdfstring{{\bf energy\_budget\_dns}}{energy\_budget\_dns})}
 
 In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The cross sectional areas of all the ducts are the same. Gas~1 has an initial temperature of 606.3~$^\circ$C and a constant specific heat of 1~kJ/kg/K. Gas~2 has an initial temperature of 20~$^\circ$C and a constant specific heat of 10~kJ/kg/K. Both gases have a molecular weight of 29~g/mol and a mass flow of $1 \times 10^{-8}$~kg/s. Typically gases of the same molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. In steady state, it is expected that the convection and diffusion of enthalpy at the boundaries will be equal:
-\be \int h_s \, \rho \bu \cdot d\bS = \sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Z_\alpha \cdot d\bS \ee
+\be \int h_{\rm s} \, \rho \bu \cdot d\bS = \sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Z_\alpha \cdot d\bS \ee
 The plot at left in Fig.~\ref{energy_budget_dns} shows the convective and diffusive enthalpy fluxes at steady state. The quantities are of opposite sign because both quantities are evaluated as source terms in the energy budget.
 
 Because of the large difference in specific heats, the average velocity of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. In fact, in order to have the proper enthalpy flow at the outlet, the volume integral of the divergence should be:
@@ -1748,13 +1748,13 @@ Because of the low Mach number approximation, an initially divergence free flow 
 The Radiative Transport Equation (RTE) for an absorbing/emitting
 and scattering medium is
 \be \bs \cdot \nabla I_{\la}(\bx,\bs) =
- -\Big[ \kappa(\bx,\la) + \sigma_s(\bx,\la) \Big] \;
-I_\la(\bx,\bs) +B(\bx,\la) + \frac{\sigma_s(\bx,\la)}{4\pi}
+ -\Big[ \kappa(\bx,\la) + \sigma_{\rm s}(\bx,\la) \Big] \;
+I_\la(\bx,\bs) +B(\bx,\la) + \frac{\sigma_{\rm s}(\bx,\la)}{4\pi}
 \int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs') \; d\bs'
 \label{RTEbasic} \ee
 where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength
 $\la$, $\bs$ is the direction vector of the intensity,
-$\kappa(\bx,\la)$ and $\sigma_s(\bx,\la)$ are the local absorption
+$\kappa(\bx,\la)$ and $\sigma_{\rm s}(\bx,\la)$ are the local absorption
 and scattering coefficients,
 respectively, and $B(\bx,\la)$ is the emission source term.
 The integral on the
@@ -2005,14 +2005,14 @@ The thermocouple heats up according to the equation:
 \be
 \label{eq: rad}
   \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}} \frac{\d T_{\hbox{\tiny TC}}}{\d t}=\epsilon_{\hbox{\tiny TC}} \, \sigma \, A_{\hbox{\tiny TC}}
-  \left(T_s^{4}-T_{\hbox{\tiny TC}}^4 \right)
+  \left(T_{\rm s}^{4}-T_{\hbox{\tiny TC}}^4 \right)
 \ee
 whose analytical solution is:
 \be
 \label{eq: rad_sol}
-t=\left.\frac{\ln(x+1) - \ln(1-x) + 2 \tan^{-1}(x)}{4 \, \beta \, T_s^3}\right|_{T_{\hbox{\tiny TC}}(0)}^{T_{\hbox{\tiny TC}}(t)}
+t=\left.\frac{\ln(x+1) - \ln(1-x) + 2 \tan^{-1}(x)}{4 \, \beta \, T_{\rm s}^3}\right|_{T_{\hbox{\tiny TC}}(0)}^{T_{\hbox{\tiny TC}}(t)}
 \quad ; \quad \beta=\frac{\epsilon_{\hbox{\tiny TC}} \, \sigma A_{\hbox{\tiny TC}}}{\rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}}} \quad ; \quad
-  x=\frac{T_{\hbox{\tiny TC}}}{T_s}
+  x=\frac{T_{\hbox{\tiny TC}}}{T_{\rm s}}
 \ee
 Figure~\ref{TC_heating_plot} displays the thermocouple response compared to the analytical solution.
 \noindent
@@ -2115,9 +2115,9 @@ mass of the three combustion products. The figure compares the simple chemistry 
 
 \section{Reaction Rates (\texorpdfstring{\bf reactionrate}{reactionrate})}
 
-This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. For an infinite-rate reaction, the rate is limited by the minimum reactant concentration. For $i$ finite-rate reactions, the rate of species $\alpha$ is dependent on factors such as local species concentration ($Y_{\alpha}$), temperature ($T$), and Arrhenius parameters ($E,A,a$): 
+This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. For an infinite-rate reaction, the rate is limited by the minimum reactant concentration. For $i$ finite-rate reactions, the rate of species $\alpha$ is dependent on factors such as local species concentration ($Y_{\alpha}$), temperature ($T$), and Arrhenius parameters ($E,A,a$):
 \begin{equation}\label{eq:finite_rate1}
-\frac{\d Y_{\alpha}}{\d t} = -\frac{1}{\rho}\sum_{i} \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)A_i^{\prime}\;T^{n_i}\;e^{-E_i/RT}\;\prod Y_{\alpha}\,^{a_{\alpha,i}} \;\;\; \text{where} \;\;\; A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}\,^{-a_{\alpha,i}} 
+\frac{\d Y_{\alpha}}{\d t} = -\frac{1}{\rho}\sum_{i} \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)A_i^{\prime}\;T^{n_i}\;e^{-E_i/RT}\;\prod Y_{\alpha}\,^{a_{\alpha,i}} \;\;\; \text{where} \;\;\; A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}\,^{-a_{\alpha,i}}
 \end{equation}
 
 Detailed discussion on the combustion routines can be found in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
@@ -2664,19 +2664,19 @@ where $C_0$ is the initial gas-phase soot concentration (100~mg/m$^3$). In this 
 
 This chapter contains examples that test the one-dimensional heat conduction solver in FDS.
 A one-dimensional heat conduction equation for the solid phase
-temperature $T_s(x,t)$ is applied in the direction $x$ pointing into
+temperature $T_{\rm s}(x,t)$ is applied in the direction $x$ pointing into
 the solid (the point $x = 0$ represents the surface)
 \be
-  \rho_s c_s \; \dod{T_s}{t} = \dod{}{x} k_s \dod{T_s}{x} + \dq_s'''
+  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x} k_{\rm s} \dod{T_{\rm s}}{x} + \dq_{\rm s}'''
   \label{1dheat}
 \ee
 In cylindrical and spherical coordinates, the heat conduction equation is written
 \be
-  \rho_s c_s \; \dod{T_s}{t} = \frac{1}{r} \, \dod{}{r}
-  \left(rk_s \dod{T_s}{r} \right)+\dq_s'''
+  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \frac{1}{r} \, \dod{}{r}
+  \left(rk_{\rm s} \dod{T_{\rm s}}{r} \right)+\dq_{\rm s}'''
   \label{1dheatcyl} \quad ; \quad
-  \rho_s c_s \; \dod{T_s}{t} = \frac{1}{r^2} \, \dod{}{r}
-  \left(r^2k_s \dod{T_s}{r} \right)+\dq_s'''
+  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \frac{1}{r^2} \, \dod{}{r}
+  \left(r^2k_{\rm s} \dod{T_{\rm s}}{r} \right)+\dq_{\rm s}'''
 \ee
 FDS offers the user these options, with the assumption that the
 obstruction is not actually rectilinear, but rather cylindrical or
@@ -2692,7 +2692,7 @@ devices.
 
 Analytical solutions of transient, one-dimensional heat conduction through a slab can be found in Refs.~\cite{Drysdale:1} and \cite{Carslaw:1}. Four
 cases are examined here. In each, a slab of thickness $L=0.1$~m is exposed on one face to an air temperature of $T_g=120$~$^\circ$C. The other face
-is insulated (adiabatic). The convective heat transfer from the gas to the slab is $\dq_c'' = h \, (T_g - T_s)$, where $h$ is constant, and $T_s$ is
+is insulated (adiabatic). The convective heat transfer from the gas to the slab is $\dq_c'' = h \, (T_g - T_{\rm s})$, where $h$ is constant, and $T_{\rm s}$ is
 the slab face temperature. No thermal radiation is included.
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
@@ -3044,7 +3044,7 @@ thicknesses over the time of the simulation.
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|}
 \hline
 Case     & \multicolumn{2}{|c|}{Reactant}  &  \multicolumn{3}{|c|}{Inert} & Product & \multicolumn{4}{|c|}{Layer} \\ \hline
-         & $\rho_1$  & $Y_1$ & $\rho_2$  & $Y_2$ & Allow        & $\rho_3$  & $\rho_s$(0) & $\rho_s$(end) & $\Delta$(0) & $\Delta$(end) \\
+         & $\rho_1$  & $Y_1$ & $\rho_2$  & $Y_2$ & Allow        & $\rho_3$  & $\rho_{\rm s}$(0) & $\rho_{\rm s}$(end) & $\Delta$(0) & $\Delta$(end) \\
          & (kg/m$^3$)&       & (kg/m$^3$)&       & shrink/swell & (kg/m$^3$)& (kg/m$^3$)  & (kg/m$^3$)    & (m)         & (m) \\ \hline
 
 Shrink 1	& 500	& 1	& 0	& 0	& T	& 1000	& 500	& 1000	& 0.001	& 0.0005 \\
@@ -3076,14 +3076,14 @@ Swell 3	        & 1000	&0.9	&1000	&0.1	&F	&450	&1000	&1000	&0.001	&0.001 \\ \hli
 Consider a thin plate of conductive material that is exposed on one side to an elevated temperature heat source and exposed on the
 other to an ambient temperature void. In the thermally thin limit, the temperature of the slab is governed by the following equation
 \be
-   \frac{\d T_s}{\d t} = \frac{\dq_{\hbox{\tiny front}}'' + \dq_{\hbox{\tiny back}}''}{c_s \, \rho_s \, \delta}
+   \frac{\d T_{\rm s}}{\d t} = \frac{\dq_{\hbox{\tiny front}}'' + \dq_{\hbox{\tiny back}}''}{c_{\rm s} \, \rho_{\rm s} \, \delta}
 \ee
 In this example, the initial exposure to the front side of the slab is
 3~kW/m$^2$. The original material A undergoes a reaction to form material B.  The reaction rate is constant, 0.2~s$^{-1}$, which in this
-case means that material A disappears in exactly 5~s. This is achieved by setting $n_s$ and $E$ to 0 and $A$ to 0.2 in the reaction rate term:
+case means that material A disappears in exactly 5~s. This is achieved by setting $n_{\rm s}$ and $E$ to 0 and $A$ to 0.2 in the reaction rate term:
 \be
     r = \left( \frac{\rho_{s,A}}{\rho_{s0}}\right)^{n_{s}}
-    A \; \exp \left(-\frac{E}{RT_s}\right)
+    A \; \exp \left(-\frac{E}{RT_{\rm s}}\right)
 \ee
 The density and conductivity of both materials are
 30~kg/m$^3$ and 10~W/m/K, respectively. The emissivity of the front and back is 1.  The specific heat of material A changes from
@@ -3112,22 +3112,22 @@ is cooled by setting the surface, $x=0$, to a constant temperature, $T_0$,
 below the freezing temperature, $T_f$. Initially, the liquid is at temperature $T_i > T_f$. The position of the boundary between frozen and liquid layers
 is denoted by $x_f$. The heat conduction equations for the two regions are
 \begin{eqnarray}
-\dod{T_s}{t} & = & \alpha_s \dsods{T_s}{x} \quad \quad (0 < x < x_f) \\ [0.2in]
-\dod{T_s}{t} & = & \alpha_l \dsods{T_s}{x} \quad \quad (x > x_f)
+\dod{T_{\rm s}}{t} & = & \alpha_{\rm s} \dsods{T_{\rm s}}{x} \quad \quad (0 < x < x_f) \\ [0.2in]
+\dod{T_{\rm s}}{t} & = & \alpha_l \dsods{T_{\rm s}}{x} \quad \quad (x > x_f)
 \end{eqnarray}
 with boundary conditions
 \begin{eqnarray}
-T_s(x,0)   &= & T_i \nonumber \\
-T_s(0,t)   &= & T_0 \nonumber \\
-T_s(x_f,t) &= & T_f \nonumber
+T_{\rm s}(x,0)   &= & T_i \nonumber \\
+T_{\rm s}(0,t)   &= & T_0 \nonumber \\
+T_{\rm s}(x_f,t) &= & T_f \nonumber
 \end{eqnarray}
 The analytical solutions for the phase interface location and temperature are \cite{Carslaw:1}
 \be
 x_f(t) = 2 \lambda \sqrt{\alpha_l t}
 \ee
 \begin{eqnarray}
-\frac{T_s(x,t)-T_0}{T_f - T_0} &=& \frac{\erf(x/2\sqrt{\alpha t})} {\erf (x_f/2\sqrt{\alpha t})} \quad \quad (0 < x < x_f) \\ [0.2in]
-\frac{T_i-T_s(x,t)}{T_i - T_f} &=& \frac{\erfc(x/2\sqrt{\alpha t})}{\erfc(x_f/2\sqrt{\alpha t})} \quad \quad (x > x_f)
+\frac{T_{\rm s}(x,t)-T_0}{T_f - T_0} &=& \frac{\erf(x/2\sqrt{\alpha t})} {\erf (x_f/2\sqrt{\alpha t})} \quad \quad (0 < x < x_f) \\ [0.2in]
+\frac{T_i-T_{\rm s}(x,t)}{T_i - T_f} &=& \frac{\erfc(x/2\sqrt{\alpha t})}{\erfc(x_f/2\sqrt{\alpha t})} \quad \quad (x > x_f)
 \end{eqnarray}
 where $\lambda = x_f /2\sqrt{\alpha t}$ is obtained as a root of the (complicated)
 transcendental equation, given in \cite{Carslaw:1}.
@@ -3135,17 +3135,17 @@ transcendental equation, given in \cite{Carslaw:1}.
 In the test case, the thickness of the liquid layer cannot be infinite. For practical purposes, a 50 cm thick layer was found to be sufficient.
 The fixed-temperature boundary condition, which is formally not available for the condensed-phase heat transfer solver in FDS,
 is implemented by assuming that the gas temperature is $T_0$ with a very high heat convection coefficient.
-For material properties, we choose $\rho_s = \rho_l =1,000$~kg/m$^3$,
-$k_s = k_l = 2$~W/m/K, $c_s = c_l = 2$~kJ/kg/K, $H_{r,\alpha\beta}=300$~kJ/kg, $T_f = 0$~$^\circ$C, $T_i = +15$~$^\circ$C,
+For material properties, we choose $\rho_{\rm s} = \rho_l =1,000$~kg/m$^3$,
+$k_{\rm s} = k_l = 2$~W/m/K, $c_{\rm s} = c_l = 2$~kJ/kg/K, $H_{r,\alpha\beta}=300$~kJ/kg, $T_f = 0$~$^\circ$C, $T_i = +15$~$^\circ$C,
 and $T_0 = -15$~$^\circ$C, which leads to a {\em Stefan number}
 \be
-\hbox{St}=\frac{c_s\left(T_i - T_0\right)}{H_{r,\alpha\beta}} = 0.1
+\hbox{St}=\frac{c_{\rm s}\left(T_i - T_0\right)}{H_{r,\alpha\beta}} = 0.1
 \ee
 and $\lambda = 0.189$.
 
 Analytical and simulated results are compared in Fig.~\ref{pcm_slab}. The plot on the left shows the position of the phase boundary.
 From the FDS results, two estimates of $x_f$ are determined because in the numerical solution, the boundary of the two phases is not perfectly sharp.
-``FDS min'' is the largest value of $x$ for which $\rho_s > 990$~kg/m$^3$ and ``FDS max'' is the largest $x$ for which $\rho_s > 0$~kg/m$^3$. The plot on the right
+``FDS min'' is the largest value of $x$ for which $\rho_{\rm s} > 990$~kg/m$^3$ and ``FDS max'' is the largest $x$ for which $\rho_{\rm s} > 0$~kg/m$^3$. The plot on the right
 shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
 \begin{figure}[ht!]
 \noindent

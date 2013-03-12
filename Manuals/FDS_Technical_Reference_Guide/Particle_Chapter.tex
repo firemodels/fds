@@ -94,8 +94,8 @@ The selection of droplet diameters is performed using a stratified sampling tech
 into $N_{\rm s}$ bins of equal width $\Delta D_{\rm s}= D_{\rm max}/N_{\rm s}$ where $D_{\rm max}$ is the maximum diameter considered.
 The upper and lower bounds of bin $n_{\rm s}$ are denoted by $F_{\rm n,0}(n_{\rm s})$ and $F_{\rm n,1}(n_{\rm s})$, respectively.
 The diameter is then chosen from the inverse of the CNF acting on the uniform random variable, ${\cal U}(0,1)$, inside a random bin
-\be 
-   D = F^{-1}_{\rm n} \Big[ F_{\rm n,0}(n_{\rm s}) + {\cal U}(0,1)\left(F_{\rm n,1}(n_{\rm s})-F_{\rm n,0}(n_{\rm s})\right) \Big] \label{Ud_strat}  
+\be
+   D = F^{-1}_{\rm n} \Big[ F_{\rm n,0}(n_{\rm s}) + {\cal U}(0,1)\left(F_{\rm n,1}(n_{\rm s})-F_{\rm n,0}(n_{\rm s})\right) \Big] \label{Ud_strat}
 \ee
 The purpose of the the stratified sampling is to ensure that droplets are chosen from all parts of the size distribution, even with a small number of statistical samples. The default number of $N_{\rm s}$ is 7. Without the stratification, the tails of the distribution could be poorly represented.
 \begin{figure}[t]
@@ -116,7 +116,7 @@ In most cases, a sampled set of the droplets or particles is explicitly tracked 
 \item Compute weighting constants $C_i = F_{\rm n,1}(n_{\rm s}) - F_{\rm n,0}(n_{\rm s})$.
 \item Compute a weighting constant C from the mass balance
     \be \dm \; \dt = C \, \sum_{i=1}^N \; C_i \; \frac{4}{3} \pi \rho_{\rm p}
-      \left( \frac{D_i}{2} \right)^3 
+      \left( \frac{D_i}{2} \right)^3
     \ee
     The mass and heat transferred from each droplet will be multiplied by the weighting factor $C$.
 \end{enumerate}
@@ -126,62 +126,56 @@ In most cases, a sampled set of the droplets or particles is explicitly tracked 
 
 Liquid droplets are represented either as discrete airborne spheres or as elements of the thin liquid film that forms on wetted solids. These film ``droplets'' are still individually tracked as Lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
 
-Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate as a function of the liquid equilibrium vapor mass fraction, $Y_{\rm l}$, the local gas phase vapor mass fraction, $Y_{\rm g}$, the (assumed uniform) liquid temperature, $T_{\rm l}$, and the local gas temperature, $T_{\rm g}$. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
-\begin{align}
-\frac{\d m_{\rm l}}{\d t}               & =  - A \; h_m \, \rho \, (Y_{\rm l} - Y_{\rm g}) \\
-m_{\rm l} \; c_{\rm l} \; \frac{\d T_{\rm l}}{\d t} & =    A \, h  \, (T_{\rm g}-T_{\rm l}) + A \, h_s \, (T_{\rm s}-T_{\rm l}) + \dq_{\rm r} + \frac{\d m_{\rm l}}{\d t} \; h_{\rm v}  \label{droplet_temp}   \end{align}
-Here, $m_{\rm l}$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
-$\rho$ is the gas density, $c_{\rm l}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_{\rm s}$ is the heat transfer coefficient between the liquid and the solid surface, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm g}$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
-\be X_{\rm l} = \frac{p_{\rm 1 \; atm}}{\bp_m} \exp \left[ \frac{h_{\rm v} \, W_{\rm l}}{\cal R}
-      \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]  \quad ; \quad
-      Y_{\rm l} = \frac{X_{\rm l}}{X_{\rm l} \, (1-W_{\rm a}/W_{\rm l}) + W_{\rm a}/W_{\rm l}}  \label{clausius_clapeyron} \ee
-where $X_{\rm l}$ is the equilibrium vapor {\em volume} fraction, $W_{\rm l}$ is the molecular weight of the evaporated liquid, $W_{\rm a}$ is the molecular weight of air, $\cal R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid at standard atmospheric pressure.
+Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
+\begin{eqnarray}
+\frac{\d m_{\rm p}}{\d t} & = & - A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\ [0.2in]
+\frac{\d T_{\rm p}}{\d t} & = & \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ A_{\rm p} \, h  \, (T_{\rm g}-T_{\rm p}) + \dq_{\rm r} + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
+\end{eqnarray}
+Here, $m_{\rm p}$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
+\be X_{\rm \alpha,\ell} = \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}{\cal R}
+      \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]  \quad ; \quad
+      Y_{\rm \alpha,\ell} = \frac{X_{\rm \alpha,\ell}}{X_{\rm \alpha,\ell} \, (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha}}  \label{clausius_clapeyron} \ee
+where $X_{\alpha,\ell}$ is the equilibrium vapor {\em volume} fraction, $W_{\alpha}$ is the molecular weight of the gaseous species $\alpha$, $W_{\rm a}$ is the molecular weight of air, $\cal R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid at standard atmospheric pressure.
 
-Mass and heat transfer between liquid and gas are described with analogous empirical correlations.
-The mass transfer coefficient, $h_m$, is described by the empirical relationships~\cite{Incropera:1}:
+Mass and heat transfer between liquid and gas are described with analogous empirical correlations. The mass transfer coefficient, $h_{\rm m}$, is described by the empirical relationships~\cite{Incropera:1}:
 \be
-   h_m = \frac{\SH \; D_{\rm lg}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
+   h_{\rm m} = \frac{\SH \; D_{\rm \ell g}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
                                                                                  0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
 \ee
-$\SH$ is the Sherwood number, $D_{\rm lg}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or 1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity), $\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number ($\nu/D_{\rm lg}$, assumed 0.6 for all cases).
+$\SH$ is the Sherwood number, $D_{\rm \ell g}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or 1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity), $\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number ($\nu/D_{\rm \ell g}$, assumed 0.6 for all cases).
 
 An analogous relationship exists for the heat transfer coefficient:
 \be
-   h  = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{droplet} \\ [0.1in]
-                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{film}     \end{array} \right.
+   h = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{gas-droplet} \\ [0.1in]
+                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{gas-film}     \end{array} \right.
 \ee
-$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases).
+$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases). In cases where the droplet is actually a portion of the liquid film attached to a solid surface, half of the droplet mass is heated or cooled by the solid surface and half is heated or cooled by the gas.
 
+The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
+appropriate amount of vaporized liquid is added to the given mesh cell, and the cell gas temperature is reduced slightly based on the energy lost to the droplet.
 
-The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet.
-After the temperature of each droplet is computed, the
-appropriate amount of vaporized liquid is added to the given mesh cell, and the cell
-gas temperature is reduced slightly based on the energy lost to the droplet.
-
-Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows.
-Note that a few terms have been left out to make the algorithm more clear.
+Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows. Note that a few terms have been left out to make the algorithm more clear.
 \be
-   \frac{T_{\rm l}^{n+1}-T_{\rm l}^n}{\dt} = \frac{1}{m_{\rm l} \, c_{\rm l}} \left[ A \, h \, \left( T_{\rm g}-\frac{T_{\rm l}^{n+1}+T_{\rm l}^n}{2} \right) -
-   A \, h_m \, \rho \left( \frac{Y_{\rm l}^{n+1}+Y_{\rm l}^n}{2} - Y_{\rm g} \right) h_{\rm v}  \right]
+   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ A_{\rm p} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
+   A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
 \ee
-The equilibrium vapor mass fraction, $Y_{\rm l}^n$, is a function of $T_{\rm l}^n$ via
-Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
+The equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}^n$, is computed using $T_{\rm p}^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
 \be
-   Y_{\rm l}^{n+1} \approx Y_{\rm l}^n + \left( \frac{\d Y_{\rm l}}{\d T_{\rm l}} \right)^n \; \Big( T_{\rm l}^{n+1}-T_{\rm l}^n \Big)
+   Y_{\rm \alpha,\ell}^{n+1} \approx Y_{\rm \alpha,\ell}^n + \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \; \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)
 \ee
-where the derivative of $Y_{\rm l}$ with respect to temperature is obtained via the chain rule:
+where the derivative of $Y_{\rm \alpha,\ell}$ with respect to temperature is obtained via the chain rule:
 \be
-   \frac{\d Y_{\rm l}}{\d T_{\rm l}} = \frac{\d Y_{\rm l}}{\d X_{\rm l}} \, \frac{\d X_{\rm l}}{\d T_{\rm l}}  = \frac{W_{\rm a}/W_{\rm l}}{ (X_{\rm l} (1-W_{\rm a}/W_{\rm l}) + W_{\rm a}/W_{\rm l})^2 } \;
-     \frac{p_{\rm 1 \; atm}}{\bp_m} \frac{h_{\rm v} W_{\rm l}}{{\cal R} \, T_{\rm l}^2} \, \exp \left[ \frac{h_{\rm v} \, W_{\rm l}}{\cal R} \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm l}} \right) \right]
+   \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} = \frac{\d Y_{\rm \alpha,\ell}}{\d X_{\rm \alpha,\ell}} \, \frac{\d X_{\rm \alpha,\ell}}{\d T_{\rm p}}  = \frac{W_{\rm a}/W_{\alpha}}{ (X_{\rm \alpha,\ell} (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha})^2 } \;
+   \frac{h_{\rm v} W_{\alpha}}{{\cal R} \, T_{\rm p}^2} \, \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}{\cal R} \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]
 \ee
 The amount of evaporated liquid is given by
 \be
-   \delta m_{\rm l} = -\dt \, A \, h_m \, \rho  \left[  Y_{\rm l}^n + \ha \left( \frac{\d Y_{\rm l}}{\d T_{\rm l}} \right)^n \;
-   \Big( T_{\rm l}^{n+1}-T_{\rm l}^n \Big)  - Y_{\rm g} \right]
+   \delta m_{\rm p} = -\dt \, A_{\rm p} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
+   \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)  - Y_{\rm \alpha, g} \right]
 \ee
 The amount of heat extracted from the gas is
 \be
-   \delta q = \dt \, A \, h \, \left( T_{\rm g} - \frac{T_{\rm l}^n+T_{\rm l}^{n+1}}{2} \right)
+   \delta q = \dt \, A_{\rm p} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
 \ee
 
 
@@ -217,40 +211,18 @@ where $A$ is the area of the wall cell to which the droplet is attached. It is a
 
 \subsection{Reduction of Pyrolysis Rate due to Water}
 
-To date, most of the work in this area has been
-performed at Factory Mutual. An important paper on the subject is
-by Yu {\em et al.}~\cite{Yu:1}. The authors consider dozens of
-rack storage commodity fires of different geometries and water
-application rates, and characterize the suppression rates in terms of
-a few global parameters. Their analysis yields an
-expression for the total heat release rate from a rack storage fire
-after sprinkler activation
-\be \dQ = \dQ_0 \; \mathrm{e}^{-k (t-t_0)}  \label{fmexting} \ee
-where $\dQ_0$ is the total heat release rate at the time of application
-$t_0$, and $k$ is a fuel-dependent constant.
-For the FMRC Standard Plastic commodity $k$ is given as
-\be k = 0.716 \; \dot{m}_{\rm w}'' - 0.0131 \quad  \hbox{s}^{-1} \ee
-where $\dot{m}_{\rm w}''$ is the flow rate of water impinging on the
-box tops, divided by the area of exposed surface (top and sides). It is
-expressed in units of kg/(m$^2 \cdot$s). For the Class II commodity, $k$ is
-given as
-\be k = 0.536 \; \dot{m}_{\rm w}'' - 0.0040 \quad  \hbox{s}^{-1} \ee
-Unfortunately, this analysis is based on global water flow and
-burning rates. Equation~(\ref{fmexting})
-accounts for both the cooling of non-burning surfaces as well as the
-decrease in heat release rate of burning surfaces. In the FDS model,
-the cooling of unburned surfaces and the reduction in the heat
-release rate are computed locally. Thus, it is awkward to apply a
-global suppression rule.
-However, the exponential nature of suppression by water is observed
-both locally and globally, thus it is assumed that the local burning rate
-of the fuel can be expressed in the form~\cite{Hamins:1,Hamins:IAFSS2002}
-\be \dm_{\rm f}''(t) = \dm_{\rm f,0}''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
+To date, most of the work in this area has been performed at Factory Mutual. An important paper on the subject is by Yu {\em et al.}~\cite{Yu:1}. The authors consider dozens of rack storage commodity fires of different geometries and water application rates, and characterize the suppression rates in terms of a few global parameters. Their analysis yields an expression for the total heat release rate from a rack storage fire after sprinkler activation
+\be 
+   \dQ = \dQ_0 \; \mathrm{e}^{-k (t-t_0)}  \label{fmexting}
+\ee
+where $\dQ_0$ is the total heat release rate at the time of application $t_0$, and $k$ is a fuel-dependent constant. This analysis is based on global water flow and burning rates. Equation~(\ref{fmexting}) accounts for both the cooling of non-burning surfaces as well as the decrease in heat release rate of burning surfaces. In the FDS model, the cooling of unburned surfaces and the reduction in the heat release rate are computed locally. Thus, it is awkward to apply a global suppression rule. However, the exponential nature of suppression by water is observed both locally and globally, thus it is assumed that the local heat release rate per unit area can be expressed in the form~\cite{Hamins:1,Hamins:IAFSS2002}
+\be 
+   \dq''(t) = \dq_0''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
 \label{nistexting} \ee
-Here $\dm_{\rm f,0}''(t)$ is the burning rate per unit area of the fuel
-when no water is applied and $k(t)$ is a linear function of the local water
-mass per unit area, $m_{\rm w}''$, expressed in units of kg/m$^2$,
-\be k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1} \ee
+where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water is applied and $k(t)$ is a linear function of the local water mass per unit area, $m_{\rm w}''$, expressed in units of kg/m$^2$,
+\be 
+   k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1} 
+\ee
 Note that $a$ is an empirical constant.
 
 

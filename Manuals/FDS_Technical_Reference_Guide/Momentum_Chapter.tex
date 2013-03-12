@@ -129,13 +129,13 @@ In LES, the ``turbulence model'' refers to the closure for SGS flux terms.  In F
 
 Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity is modeled by
 \be
-\mu_t = \rho \, (C_s\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
+\mu_t = \rho \, (C_{\rm s}\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
 \ee
-where $C_s=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width.
+where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width.
 
 \subsection{Dynamic Smagorinsky Model}
 
-For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_s$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions. 
+For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_{\rm s}$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions.
 
 \subsection{Deardorff's Model}
 \label{sec:deardorff}
@@ -167,7 +167,7 @@ B_\beta     &= \beta_{11}\beta_{22} - \beta_{12}^2 + \beta_{11}\beta_{33} - \bet
 
 The basic idea behind Vreman's model is to expand the velocity field in a Taylor series and to test filter this field analytically, thus avoiding the expensive explicit test filtering operations necessary in the dynamic model.  Therefore, this model is inexpensive.  Unlike constant coefficient Smagorinsky, however, Vreman's model is convergent, making it applicable to highly resolved LES calculations.
 
-The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_s^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_s = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS Verification Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
+The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_{\rm s}^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_{\rm s} = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS Verification Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
 
 \subsection{Thermal Conduction and Gas Species Diffusion}
 
@@ -181,8 +181,8 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 \subsection{Numerical Implementation}
 
 In the discretized form of the momentum equation, the modeled viscosity is defined at cell centers. For example, the constant coefficient Smagorinsky model takes on the following form:
-\be \mu_{ijk} = \rho_{ijk} \, (C_s\, \Delta)^2 \, |S|   \ee
-where $C_s$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
+\be \mu_{ijk} = \rho_{ijk} \, (C_{\rm s}\, \Delta)^2 \, |S|   \ee
+where $C_{\rm s}$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
 \be |S|^2 = 2\left(\dod{u}{x}\right)^2 + 2\left(\dod{v}{y}\right)^2+
   2\left( \dod{w}{z}\right)^2
        + \left( \dod{u}{y} + \dod{v}{x} \right)^2
@@ -203,7 +203,7 @@ diffusivity of the fluid are related to the viscosity by
 where $\PR_t$ is the turbulent Prandtl number and $\SC_t$ is the turbulent Schmidt number, both
 assumed constant. Note that the specific heat $c_{p,0}$ is that of the
 dominant species of the mixture. Based on simulations of smoke plumes,
-$C_s$ is 0.20, $\PR_t$ and $\SC_t$ are 0.5. There are no rigorous justifications
+$C_{\rm s}$ is 0.20, $\PR_t$ and $\SC_t$ are 0.5. There are no rigorous justifications
 for these choices other than through comparison with
 experimental data~\cite{Zhang:1}.
 
@@ -416,16 +416,16 @@ Generally, this requires an iterative procedure since $\tau_w$ is needed to defi
 \subsection{Wall Damping of the Turbulent Viscosity}
 \label{sec:wall_damping}
 
-The turbulent viscosity $\nu_t = \mu_t/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{mix} = C_s \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
+The turbulent viscosity $\nu_t = \mu_t/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{mix} = C_{\rm s} \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
 
 To achieve the correct decay of the Reynolds stresses near a wall, Van Driest (see \cite{Wilcox:1}) proposed the following modification:
 \begin{equation}
 \label{eqn_vdf}
-\ell_{mix} = C_s \Delta \left[ 1 - \mathrm{e}^{-y^+/A} \right]
+\ell_{mix} = C_{\rm s} \Delta \left[ 1 - \mathrm{e}^{-y^+/A} \right]
 \end{equation}
 where $A=26$.  The additional factor (in brackets) we refer to as the Van Driest damping function.
 
-In FDS, due to difficulties defining a consistent test filter (for use with either Deardorff or the dynamic model) near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagroinsky model with Van Driest damping of the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_s = 0.2$.  The viscosity is then given by\begin{equation}
+In FDS, due to difficulties defining a consistent test filter (for use with either Deardorff or the dynamic model) near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagroinsky model with Van Driest damping of the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_{\rm s} = 0.2$.  The viscosity is then given by\begin{equation}
 \label{eqn_nearwall_viscosity}
 \nu_t = \ell_{mix}^{\,2}\,|S|
 \end{equation}
