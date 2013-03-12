@@ -2336,21 +2336,21 @@ the command sequence {\tt 0.3 drawsphere} draws a sphere with diameter 0.3 (all 
 }
 %\infigr{circle}{0.5 drawcircle}
 \infigr{drawarcdisk}{60.0 0.25 0.50 drawarcdisk}
-\paragraph{DRAWARCDISK} The command, {\tt a d h drawarcdisk},
+\paragraph{drawarcdisk} The command, {\tt a d h drawarcdisk},
 draws a portion of circular disk with angle a, diameter d and height h. The origin is
 located at the center of the disk's base.\vspace{0.25in}
 
-\paragraph{DRAWCIRCLE} The command, {\tt d drawcircle },
+\paragraph{drawcircle} The command, {\tt d drawcircle },
 draws a circle with diameter d.  The origin is located at the center of the circle.
 
 \infigl{drawcone}{0.50 0.30 drawcone}
-\paragraph{DRAWCONE}
+\paragraph{drawcone}
 The command, {\tt d h drawcone}, draws a right circular cone where
 d is the diameter of the base and h is the height. The origin is
 located at the center of the cone's base.
 
 \infigr{drawcube}{0.25 drawcube}
-\paragraph{DRAWCUBE} The command, {\tt s drawcube},
+\paragraph{drawcube} The command, {\tt s drawcube},
 draws a cube where s is the length of the side.  The origin is
 located at the center of the cube.  An oblong box, a box with
 different length sides, may be drawn by using {\tt scale}\ along
@@ -2358,30 +2358,30 @@ with {\tt drawcube}.  For example, {\tt 1.0 2.0 4.0 scale 1.0
 drawcube}\ creates a box with dimensions $1\times 2\times 4$.
 
 \infigl{drawcube}{0.25 drawcubec}
-\paragraph{DRAWCUBEC} The command, {\tt s drawcubec}, is the same as {\tt s drawcube}\
+\paragraph{drawcubec} The command, {\tt s drawcubec}, is the same as {\tt s drawcube}\
 except that the origin is located at the front, left, bottom corner of the cube rather
 than at the cube center.  An oblong box, a box with different length sides, may be drawn
 by using {\tt scale}\ along with {\tt drawcubec}.  For example, {\tt 1.0 2.0 4.0 scale 1.0
 drawcube}\ creates a box with dimensions $1\times 2\times 4$.
 
 \infigr{drawdisk}{0.25 0.50 drawdisk}
-\paragraph{DRAWDISK} The command, {\tt d h drawdisk},
+\paragraph{drawdisk} The command, {\tt d h drawdisk},
 draws a circular disk with diameter d and height h. The origin is
 located at the center of the disk's base.\vspace{0.25in}
 
 \infigl{drawcdisk}{0.25 0.50 drawcdisk}
-\paragraph{DRAWCDISK} The command, {\tt d h drawcdisk},
+\paragraph{drawcdisk} The command, {\tt d h drawcdisk},
 draws a circular disk with diameter d and height h. The origin is
 located at the center of the disk. This command is a shortcut
 for {\tt h 2.0 :hd2 div \$hd2 offsetz d h drawdisk}.\vspace{0.25in}
 
 \infigr{drawhexdisk}{0.5 0.25 drawhexdisk}
-\paragraph{DRAWHEXDISK} The command, {\tt d h drawhexdisk},
+\paragraph{drawhexdisk} The command, {\tt d h drawhexdisk},
 draws a hexagonal disk with diameter d and height h.  The origin
 is located at the center of the hexagon's base.\vspace{0.25in}
 
 %\infigr{line}{0.0 0.0 -0.5 0.0 0.0 0.5}
-\paragraph{DRAWLINE} The
+\paragraph{drawline} The
 command, {\tt x1 y1 z1 x2 y2 z2 drawline}, draws a line between
 the points $(x_1,y_1,z_1)$ and $(x_2,y_2,z_2)$.\vspace{0.25in}
 
@@ -2393,7 +2393,7 @@ the points $(x_1,y_1,z_1)$ and $(x_2,y_2,z_2)$.\vspace{0.25in}
 {\tiny\tt 0.5 0.1 0.2 -1 drawnotchplate}
 \end{tabular}
 }
-\paragraph{DRAWNOTCHPLATE} The command, {\tt d h nh dir drawnotchplate},
+\paragraph{drawnotchplate} The command, {\tt d h nh dir drawnotchplate},
 draws a  notched plate.  This object is used to represent a
 portion of a sprinkler where d is the plate diameter, h is the
 plate height (not including notches), nh is the height of the
@@ -2401,24 +2401,24 @@ notches and dir indicates the notch orientation (1 for vertical,
 -1 for horizontal).  The origin is located at the center of the
 plate's base.
 
-\paragraph{DRAWPOINT} The command, {\tt drawpoint}, draws a point
+\paragraph{drawpoint} The command, {\tt drawpoint}, draws a point
 (small square).  The command, {\tt s setpointsize}\ may be used to
 change the size of the point.  The default size is 1.0 .
 
 \infigl{drawpolydisk}{5 0.35 0.15 drawpolydisk}
-\paragraph{DRAWPOLYDISK} The command, {\tt n d h drawpolydisk},
+\paragraph{drawpolydisk} The command, {\tt n d h drawpolydisk},
 draws an n-sided polygonal disk with diameter d and height h.  The
 origin is located at the center of the polygonal disk's base.  The
 example to the left is a pentagonal disk.
 
 \infigr{drawring}{0.3 0.5 0.1 drawring}
-\paragraph{DRAWRING} The command, {\tt di do h drawring},
+\paragraph{drawring} The command, {\tt di do h drawring},
 draws a ring where {\tt di}\ and {\tt do}\ are the inner and outer
 ring diameters and h is the height of the ring. The origin is
 located at the center of the ring's base.
 
 \infigl{drawsphere}{0.25 drawsphere}
-\paragraph{DRAWSPHERE} The command, {\tt d drawsphere},
+\paragraph{drawsphere} The command, {\tt d drawsphere},
 draws a sphere with diameter d.  The origin is located at the
 center of the sphere. As with an oblong box, an ellipsoid may be
 drawn by using {\tt scale}\ along with {\tt drawsphere}. For
@@ -2427,7 +2427,7 @@ ellipsoid with semi-major axes of length 1, 2 and 4. This is how
 the ball at the bottom of the heat detector in Figure \ref{figsprinkler}a is drawn.
 
 \infigr{drawtrunccone}{0.5 0.2 0.4 drawtrunccone}
-\paragraph{DRAWTRUNCCONE} The command, {\tt d1 d2 h drawtrunccone},
+\paragraph{drawtrunccone} The command, {\tt d1 d2 h drawtrunccone},
 draws a right circular truncated cone where d1 is the diameter of
 the base, d2 is the diameter of the truncated portion of the cone
 and h is the height or distance between the lower and upper
@@ -2458,105 +2458,110 @@ used to save the origin or axis orientation while the POP command
 is used to restore the origin and axis orientation.
 
 \blist
-\hitem{GETTEXTUREINDEX} The command
+\hitem{gettextureindex} The command
 \begin{lstlisting}
-"texture_file" :texture_index GETTEXTUREINDEX
+"texture_file" :texture_index gettextureindex
 \end{lstlisting}
 finds the index in an internal Smokeview table containing the
 entry texture\_file (a file containing a texture map image).
 This index is used by other object drawing routines
 that support texture mapping (presently drawtsphere).
 
-\hitem{GTRANSLATE} The command, {\tt x y z gtranslate}, translates
+\hitem{gtranslate} The command, {\tt x y z gtranslate}, translates
 objects in a global reference frame, the same reference frame used
-to define FDS geometry.  Objects drawn after the gtranslate command
-are moved by x, y and z along the x, y and z Cartesian axes
-respectively.  Equivalently, one can think of think of {\tt x y z
-gtranslate}\ as translating the origin by (-x,-y,-z).
+to define FDS geometry.  Objects drawn after the gtranslate
+command are moved by x, y and z along the x, y and z Cartesian
+axes respectively.  Equivalently, one can think of think of {\tt x
+y z gtranslate}\ as translating the origin by (-x,-y,-z).
 
-\hitem{OFFSETX} The command, {\tt x offsetx}, translates
-objects drawn afterwards by x along the x axis.
+\hitem{offsetx} The command, {\tt x offsetx}, translates objects
+drawn afterwards by x along the x axis.
 
-\hitem{OFFSETY} The command, {\tt y offsety}, translates
-objects drawn afterwards by y along the y axis.
+\hitem{offsety} The command, {\tt y offsety}, translates objects
+drawn afterwards by y along the y axis.
 
-\hitem{OFFSETZ} The command, {\tt z offsetz}, translates
-objects drawn afterwards by z along the z axis.
+\hitem{offsetz} The command, {\tt z offsetz}, translates objects
+drawn afterwards by z along the z axis.
 
-\hitem{ORIENX,ORIENY,ORIENZ} The command, {\tt x y z orienx}, rotates the
-the  scene so that the vector $u=(1,0,0)$ in the original scene maps to $w=(x,y,z)$.
-The commands {\tt orieny} and {\tt orienz} are similar to {\tt orienx} mapping $(0,1,0)$ and $(0,0,1)$ to $(x,y,z)$
-instead.
+\hitem{orienx, orieny, orienz} The command, {\tt x y z orienx},
+rotates the the scene so that the vector $u=(1,0,0)$ in the
+original scene maps to $w=(x,y,z)$. The commands {\tt orieny} and
+{\tt orienz} are similar to {\tt orienx} mapping $(0,1,0)$ and
+$(0,0,1)$ to $(x,y,z)$ instead.
 
-\hitem{POP} The command, {\tt pop}, restores the origin and axis
+\hitem{pop} The command, {\tt pop}, restores the origin and axis
 orientation saved using a previous {\tt pop}\ command.  The total
 number of {\tt pop}\ and {\tt push}\ commands must be equal,
 otherwise a fatal error will occur.  Smokeview detects this
 problem and draws a red sphere instead of the errantly defined
 object.
 
-\hitem{PUSH} The command, {\tt push}, saves the origin and axis
+\hitem{push} The command, {\tt push}, saves the origin and axis
 orientation. (see above comment about number of {\tt push}\ and
 {\tt pop}\ commands).
 
-\hitem{RANDXY,RANDXZ,RANDYZ} The command {\tt flag randxy} performs a random rotation about the z axis (in the xy plane)
-if {\tt flag} is 1.  If {\tt flag} is anything else this command has no effect.  The commands {\tt randxz} and {\tt randyz} are similar, rotating within the
-xz and yz planes instead of the xy plane.
+\hitem{randxy, randxz, randyz} The command {\tt flag randxy}
+performs a random rotation about the z axis (in the xy plane) if
+{\tt flag} is 1. If {\tt flag} is anything else this command has
+no effect. The commands {\tt randxz} and {\tt randyz} are similar,
+rotating within the xz and yz planes instead of the xy plane.
 
-\hitem{ROTATEAXIS} The command, {\tt angle x y z rotateaxis}, rotates objects
-drawn afterwards by {\tt angle} degrees about an axis defined by the vector $(x,y,z)$.
+\hitem{rotateaxis} The command, {\tt angle x y z rotateaxis},
+rotates objects drawn afterwards by {\tt angle} degrees about an
+axis defined by the vector $(x,y,z)$.
 
-\hitem{ROTATEXYZ} The command, {\tt x y z rotatexyz}, rotates objects
-from the vector $(0,0,1)$ to the vector $(x,y,z)$ .  The axis of rotation computed internally by Smokeview is
-$(0,0,1)\times (x,y,z)=(-y,x,0)$ (a vector perpendicular to the plane formed by vectors $(0,0,1)$ and $(x,y,z)$) . The cosine of the angle of rotation is
-$z/\sqrt{x^2+y^2+z^2}$
+\hitem{rotatexyz} The command, {\tt x y z rotatexyz}, rotates
+objects from the vector $(0,0,1)$ to the vector $(x,y,z)$ .  The
+axis of rotation computed internally by Smokeview is
+$(0,0,1)\times (x,y,z)=(-y,x,0)$ (a vector perpendicular to the
+plane formed by vectors $(0,0,1)$ and $(x,y,z)$) . The cosine of
+the angle of rotation is $z/\sqrt{x^2+y^2+z^2}$
 
-\hitem{ROTATEX} The command, {\tt r rotatex}, rotates objects
+\hitem{rotatex} The command, {\tt r rotatex}, rotates objects
 drawn afterwards {\tt r} degrees about the x axis.
 
-\hitem{ROTATEY} The command, {\tt r rotatey}, rotates objects
+\hitem{rotatey} The command, {\tt r rotatey}, rotates objects
 drawn afterwards {\tt r} degrees about the y axis.
 
-\hitem{ROTATEZ} The command, {\tt r rotatez}, rotates objects
+\hitem{rotatez} The command, {\tt r rotatez}, rotates objects
 drawn afterwards {\tt r} degrees about the z axis.  A cone or any
 object for that matter may be drawn upside down by adding a {\tt
 rotatez}\ command as in {\tt 180 rotatez 1.0 0.5 drawcone}.
 
-\hitem{SCALEXYZ} The command, {\tt x y z scalexyz}, stretches
+\hitem{scalexyz} The command, {\tt x y z scalexyz}, stretches
 objects drawn afterwards by x, y and z respectively along the x, y
 and z axes. The {\tt scalexyz}\ along with the {\tt drawsphere}\
 commands would be used to draw an ellipsoid by stretching a sphere
 along one of the axes.
 
-\hitem{SCALE} The command, {\tt xyz scale}, stretches objects
+\hitem{scale} The command, {\tt xyz scale}, stretches objects
 drawn afterwards xyz along each of the x, y and z axes (equivalent
 to {\tt xyz xyz xyz scalexyz} ).
 
-\hitem{SETBW} The command, {\tt grey setbw}, sets the red, green
+\hitem{setbw} The command, {\tt grey setbw}, sets the red, green
 and blue components of color to grey (equivalent to grey grey grey
 setcolor ).  As with the {\tt setcolor}\ command, {\tt setbw}\ is
 only required when the grey level changes, not for each object
 drawn.
 
-\hitem{SETCOLOR} The command, {\tt ``color name'' setcolor},
-obtains sets the color to the red,
-green and blue components of the FDS standard color {\tt color~name}.
+\hitem{setcolor} The command, {\tt ``color name'' setcolor},
+obtains sets the color to the red, green and blue components of
+the FDS standard color {\tt color~name}.
 
-\hitem{SETLINEWIDTH} The command, {\tt w setlinewidth}\, sets the
+\hitem{setlinewidth} The command, {\tt w setlinewidth}\, sets the
 width of lines drawn with the {\tt drawline}\ and {\tt
 drawcircle}\ commands.
 
-\hitem{SETPOINTSIZE} The command, {\tt s setpointsize}, sets the
+\hitem{setpointsize} The command, {\tt s setpointsize}, sets the
 size of points drawn with the {\tt drawpoint}\ command.
 
-\hitem{SETRGB} The command, {\tt r g b setrgb},
-sets the red,
-green and blue components of the current color.  Any objects
-drawn afterwards will be drawn with this color.
-This command is not required for each object part drawn.
-The color component values range from 0 to 255.
+\hitem{setrgb} The command, {\tt r g b setrgb}, sets the red,
+green and blue components of the current color.  Any objects drawn
+afterwards will be drawn with this color. This command is not
+required for each object part drawn. The color component values
+range from 0 to 255.
 
-\hitem{TRANSLATE} The command, {\tt x y z translate}, translates
+\hitem{translate} The command, {\tt x y z translate}, translates
 objects drawn afterwards by x, y and z along x, y and z axes
 respectively relative to the current (local) reference frame.
 
@@ -2577,7 +2582,7 @@ These commands transform data to change the inputs of
 subsequent object commands.
 
 \blist
-\hitem{ADD}
+\hitem{add}
 The command, \\
 \\
 {\tt a b :val add}, \\
@@ -2585,7 +2590,7 @@ The command, \\
 is used to compute the value, $val=a+b$, where $a$ and $b$ are either numerical constants or references to previously defined data.  The result, $val$ is placed
 in the label {\tt :val}\ accessible later in the definition file using \$val.
 
-\hitem{CLIP}
+\hitem{clip}
 The command, \\
 \\
 \valin\ \valmin\ \valmax\ :\valclipped\ {\tt clip}, \\
@@ -2599,7 +2604,7 @@ is used to clip a value \valin\ between \valmin\ and
 \noindent The inputs, \valin, \valmin\ and \valmax\ are either numerical constants or references to previously defined data.  The clipped result is placed
 in the label :\valclipped\ accessible later in the definition file using \$\valclipped.
 
-\hitem{DIV}
+\hitem{div}
 The command, \\
 \\
 {\tt a b :val div}, \\
@@ -2608,14 +2613,14 @@ is used to compute the value, $val=a/b$, where $a$ and $b$ are either numerical 
 and is placed
 in the label {\tt :val}\ accessible later in the definition file using \$val.
 
-\hitem{EQ}
+\hitem{eq}
 The command, \\
 \\
 {\tt a b eq}, \\
 \\
 is used to copy data from the label b to a, {\em ie}\ performs the operation a=b.
 
-\hitem{GETT}
+\hitem{gett}
 The command, \\
 \\
 {\tt :time gett}, \\
@@ -2624,7 +2629,7 @@ is used to obtain the current simulation time.  The simulation time
 is placed
 in the label {\tt :time}\ accessible later in the definition file using \$time.
 
-\hitem{MIRRORCLIP}
+\hitem{mirrorclip}
 The command, \\
 \\
 \valin\ \valmin\ \valmax\ :\valclipped\ mirrorclip, \\
@@ -2641,7 +2646,7 @@ and \valmax\ using
 \right.
 \end{eqnarray*}
 
-\hitem{MULT}
+\hitem{mult}
 The command, \\
 \\
 {\tt a b :val mult}, \\
@@ -2652,7 +2657,7 @@ in the label {\tt :val}\ accessible later in the definition file using \$val.
 \noindent The inputs, \valin, \valmin\ and \valmax\ are either numerical constants or references to previously defined data.  The clipped result is placed
 in the label :\valclipped\ accessible later in the definition file using \$\valclipped.
 
-\hitem{MULTIADDT}
+\hitem{multiaddt}
 The command, \\
 \\
 {\tt a b :val multiaddt}, \\
@@ -2668,7 +2673,7 @@ The command, {\tt a b :val multiaddt}, is a shortcut for\\
 \\
 
 
-\hitem{PERIODICCLIP}
+\hitem{periodicclip}
 The command, \\
 \\
 \valin\ \valmin\ \valmax\ :\valclipped\ {\tt periodicclip}, \\
@@ -2682,7 +2687,7 @@ and \valmax\ using
 \noindent The inputs, \valin, \valmin\ and \valmax\ are either numerical constants or references to previously defined data.  The clipped result is placed
 in the label :\valclipped\ accessible later in the definition file using \$\valclipped.
 
-\hitem{SUB}
+\hitem{sub}
 The command, \\
 \\
 {\tt a b :val sub}, \\
@@ -2698,28 +2703,28 @@ test.  Logical operators return 1 if the test is true and 0 if the test
 is false.
 
 \blist
-\hitem{AND}  The command\\
+\hitem{and}  The command\\
 \\
 {\tt a b :val AND}\\
 \\
 returns 1 in :val if both a
 and b are true (any value other than 0), otherwise it returns 0.
 
-\hitem{GT}  The command\\
+\hitem{gt}  The command\\
 \\
 {\tt a b :val GT}\\
 \\
 returns 1 in :val if a is
 greater than b, otherwise it returns 0.
 
-\hitem{GE}  The command\\
+\hitem{ge}  The command\\
 \\
 {\tt a b :val GE}\\
 \\
 returns 1 in :val if a is
 greater than or equal to b, otherwise it returns 0.
 
-\hitem{IF,ELSE,ENDIF} Consider the object command sequence
+\hitem{if,else,endif} Consider the object command sequence
  \begin{lstlisting}
  $val IF
   arg1 arg2 command1 arg1 arg2 command2 ....
@@ -2732,21 +2737,21 @@ operation ({\em ie} with {\tt GE, LT}, etc.).  The commands between the {\tt IF}
  if {\tt \$val}\ is not 0 otherwise the commands between {\tt ELSE}\ and
  {\tt ENDIF}\ are executed.  The {\tt ELSE}\ operator is optional.
 
-\hitem{LT}  The command\\
+\hitem{lt}  The command\\
 \\
 {\tt a b :val LT}\\
 \\
 returns 1 in :val if a is less
 than b, otherwise it returns 0.
 
-\hitem{LE}  The command\\
+\hitem{le}  The command\\
 \\
 {\tt a b :val LE}\\
 \\
 in :val if a is less
 than or equal to b, otherwise it returns 0.
 
-\hitem{OR}  The command\\
+\hitem{or}  The command\\
 \\
 {\tt a b :val OR}\\
 \\
