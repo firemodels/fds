@@ -27,7 +27,7 @@ test device that uses IF, GE and AND operators
             'X0=7.0','Y0=0.8','Z=0.8','VX=-1.0',
             'AXIS_X=0.0','AXIS_Y=0.0','AXIS_Z=1.0','ROTATE_RATE=100.0' 
             'D=1.0','tfile="t%day2.jpg"'
-            SMOKEVIEW_ID='movingsphere2' /
+            SMOKEVIEW_ID='movingsphere' /
 &DEVC XYZ=0.0,0.0,0.0, ORIENTATION=0.36,0.0,.92 QUANTITY='TEMPERATURE' PROP_ID='movingbox_props' /
 
 &TAIL /
