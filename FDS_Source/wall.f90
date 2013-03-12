@@ -1550,8 +1550,10 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
                   ! Get oxygen mass fraction
                   ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
                   CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_G)
-                  ! Calculate oxygen volume fraction
+                  ! Calculate oxygen volume fraction in the gas cell
                   X_G = SPECIES(O2_INDEX)%RCON*Y_G/RSUM(IIG,JJG,KKG)
+                  ! Calculate oxygen concentration inside the material, assuming decay function
+                  X_G = X_G * EXP(-ONE_D%X(I-1)/(EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
                   REACTION_RATE = REACTION_RATE * X_G**ML%N_O2(J)
                ENDIF
                ! Reaction rate in kg/(m3s)
