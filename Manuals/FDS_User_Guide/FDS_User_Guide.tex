@@ -3670,14 +3670,19 @@ be multiple reactions with corresponding kinetic parameters and products.
 For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for
 a material undergoing one or more reactions is:
 \be
-  \dod{Y_{{\rm s},i}}{t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i)  \quad ; \quad
-  r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) \quad ; \quad Y_{{\rm s},i} = \left( \frac{\rho_{{\rm s},i}}{\rho_{\rm s}(0)} \right)
+  \dod{Y_{{\rm s},i}}{t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i) 
+\label{rr_tot}
+\ee
+where
+\be
+  r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2,g}^{n_{{\rm O_2},ij}}
+  \quad ; \quad Y_{{\rm s},i} = \left( \frac{\rho_{{\rm s},i}}{\rho_{\rm s}(0)} \right)
   % \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
   \label{rr}
 \ee
 The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction.
-The second term on the right of the equation represents the contributions of other materials producing the $i$th material as a residue with a yield
-of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line.
+The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material 
+as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line.
 $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component
 divided by the volume of the layer.  $\rho_{\rm s}(0)$ is the initial
 density of the layer. Thus, $Y_{{\rm s},i}=\rho_{{\rm s},i}/\rho_{\rm s}(0)$ is a quantity that
@@ -3693,6 +3698,11 @@ is prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal
 is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
 experiments, like TGA (Thermo-Gravimetric Analysis).
+
+The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions. $X_{\rm O_2,g}$ is the oxygen volume 
+fraction in the gas phase. If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected 
+by the presence of oxygen in the first gas phase cell next to the solid surface. $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the 
+{\ct MATL} line of the $i$th material. It is zero by default.
 
 It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known,
 there are several parameters that can be used by FDS to derive effective values. The most important parameter to
@@ -10108,6 +10118,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NU\_MATL(:,:)}                 & Real array    & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
 {\ct NU\_SPEC(:,:)}                 & Real array    & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
 {\ct N\_REACTIONS}                  & Integer       & Section~\ref{info:solid_pyrolysis}    &                   & 0      \\ \hline
+{\ct N\_O2(:)}                      & Real array    & Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
 {\ct N\_S(:)}                       & Real array    & Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
 {\ct N\_T(:)}                       & Real array    & Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
 {\ct PCR(:)}                        & Logical array & Section~\ref{info:solid_pyrolysis}    &                   & {\ct.FALSE.}\\ \hline
