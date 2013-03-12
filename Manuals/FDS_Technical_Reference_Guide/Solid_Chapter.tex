@@ -231,12 +231,12 @@ The first term describes the dependence of the reaction rate on the concentratio
 the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the
 dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.
 The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}$ and the heterogeneous reaction
-order, $n_{\rm O_2,\alpha\beta}$. The local oxygen volume fraction at depth $x$ is calculated from the gas phase 
+order, $n_{\rm O_2,\alpha\beta}$. The local oxygen volume fraction at depth $x$ is calculated from the gas phase
 (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g,\alpha\beta})
 \ee
-where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. The actual diffusion process is thus not simulated. 
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. The actual diffusion process is thus not simulated.
 Instead, it is assumed that the diffusion and oxygen consuption processes are in equilibrium and there is an exponential profile of
 oxygen concentration inside the material.
 
@@ -290,13 +290,13 @@ The rate at which liquid fuel evaporates when burning is a function of the liqui
 \be X_{\rm F,\ell} = \exp \left[ -\frac{ h_{\rm v} W_{\rm F}}{\cal R} \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
 \label{CC_liquid}
 \ee
-where $h_{\rm v}$ is the heat of vaporization, $W_{\rm F}$ is the molecular weight of the fuel gas, $T_{\rm s}$ is the surface temperature, and $T_{\rm b}$ is the boiling temperature of the fuel~\cite{Prasad:1}. The mass flux from the pool surface is given by
+where $h_{\rm v}$ is the heat of vaporization, $W_{\rm F}$ is the molecular weight of the fuel gas, $T_{\rm s}$ is the surface temperature, and $T_{\rm b}$ is the boiling temperature of the fuel~\cite{Prasad:1}. The evaporation rate of the fuel is governed by Stefan diffusion~\cite{Taylor&Krishna}:
 \be
-\dot{m}'' =h_{\rm m} \, \rho_{F,g} \ln \left(\frac{X_{\rm F,g}-1}{X_{\rm F,\ell}-1}\right) \quad ; \quad h_{\rm m}= \frac{\SH \, D_{\rm \ell,g}}{L}
+\dot{m}'' = h_{\rm m} \; \frac{\bp_m W_{\rm F}}{{\cal R} T_{\rm g}} \; \ln \left(\frac{X_{\rm F,g}-1}{X_{\rm F,\ell}-1}\right) \quad ; \quad h_{\rm m}= \frac{\SH \, D_{\rm \ell,g}}{L}
 \ee
-where $\rho_{\rm F,g}$ and $X_{\rm F,g}$ are the density and the volume fraction of fuel vapor in the grid cell adjacent to the pool surface. The Sherwood number is given by
+where $\bp_m$ is the pressure, $T_{\rm g}$ is the temperature, and $X_{\rm F,g}$ is the volume fraction of fuel vapor in the grid cell adjacent to the pool surface. The Sherwood number is given by
 \be
-\SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \quad ; \quad {\rm Sc}=0.7 \quad ; \quad \RE= \frac{\rho~||\bu||~L}{\mu}
+\SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \quad ; \quad {\rm Sc}=0.6 \quad ; \quad \RE= \frac{\rho~||\bu||~L}{\mu}
 \ee
 The Reynolds number is calculated based on conditions in the cell adjacent to the surface. The length scale, $L$, used in calculating the Reynolds number is 1~m unless otherwise specified and is the same length scale used for convective heat transfer calculation.
 
