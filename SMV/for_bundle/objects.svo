@@ -421,9 +421,7 @@ OBJECTDEF // object for a moving box
  $VX $X0 :vvx multiaddt $vvx 0.0 $XMAX :CLIPX mirrorclip
  $VY $Y0 :vvy multiaddt $vvy 0.0 $YMAX :CLIPY mirrorclip
  $VZ $Z0 :vvz multiaddt $vvz 0.0 $ZMAX :CLIPZ mirrorclip
- 0.0 $CLIPX :CLIPX2 sub
- 0.0 $CLIPZ :CLIPZ2 sub
- $CLIPX2 $CLIPY $CLIPZ2 translate $DX $DY $DZ scalexyz 1.0 drawcube
+ $CLIPX $CLIPY $CLIPZ gtranslate $DX $DY $DZ scalexyz 1.0 drawcube
 
 OBJECTDEF // object for dynamic textured sphere
  demosphere
@@ -438,9 +436,7 @@ OBJECTDEF // object for dynamic textured sphere
  $VX $X0 :vvx multiaddt $vvx  0.0 $XMAX :CLIPX mirrorclip 
  $VY $Y0 :vvy multiaddt $vvy  0.0 $YMAX :CLIPY mirrorclip
  $VZ $Z0 :vvz multiaddt $vvz  0.0 $ZMAX :CLIPZ mirrorclip
- 0.0 $CLIPX :CLIPX2 sub
- 0.0 $CLIPZ :CLIPZ2 sub
- $CLIPX2 $CLIPY $CLIPZ2 translate $ROTATE_RATE 0.0 :rotz multiaddt 
+ $CLIPX $CLIPY $CLIPZ gtranslate $ROTATE_RATE 0.0 :rotz multiaddt 
    $rotz rotatez $tfile :textureindex gettextureindex $textureindex $D drawtsphere
 
 OBJECTDEF // object for dynamic textured sphere
