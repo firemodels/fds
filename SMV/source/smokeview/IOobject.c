@@ -752,7 +752,6 @@ void draw_devices(void){
     int save_use_displaylist;
     propdata *prop;
     int j;
-    int doit;
     float dpsi;
     float *xyz;
 
@@ -793,7 +792,7 @@ void draw_devices(void){
     glPushMatrix();
     glTranslatef(xyz[0],xyz[1],xyz[2]);
 
-    doit=0;
+    dpsi=0.0;
     if((active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0)||
       STRCMP(devicei->object->label,"thermocouple")==0
       ){
@@ -805,16 +804,14 @@ void draw_devices(void){
       xyznorm[2]=world_eyepos[2]-devicei->xyz[2];
 
       get_elevaz(xyznorm,&devicei->dtheta,devicei->rotate_axis, &dpsi);
-      doit=1;
     }
     {
       float *axis;
 
       axis = devicei->rotate_axis;
+      // the statement below causes problems in objects.svo definitions
       glRotatef(devicei->dtheta,axis[0],axis[1],axis[2]);
-      if(doit==1){
-          glRotatef(-dpsi,0.0,0.0,1.0);
-      }
+      glRotatef(-dpsi,0.0,0.0,1.0);
     }
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
@@ -1637,10 +1634,7 @@ void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
     texti = textureinfo + texture_index;
     if(texti->loaded==0||texti->display==0)texti=NULL;
   }
-  if(texti==NULL||object_outlines!=0){
-    drawsphere(diameter,rgbcolor);
-  }
-  else{
+  if(texti!=NULL&&object_outlines==0){
     int i,j;
 
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
@@ -1701,6 +1695,9 @@ void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
     if(texti!=NULL){
       glDisable(GL_TEXTURE_2D);
     }
+  }
+  else{
+    drawsphere(diameter,rgbcolor);
   }
 }
 
