@@ -230,9 +230,17 @@ r_{\alpha \beta} =
 The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being
 the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the
 dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.
-The third term can be used to describe the dependence on the local oxygen concentration.
-$X_{\rm O_2}$ is the gas phase oxygen volume fraction and $n_{\rm O_2,\alpha\beta}$ is the heterogeneous reaction order. The fourth term is the power
-function where $T_{\rm thr,\alpha \beta}$ is a threshold temperature that can be used to dictate that the reaction must not occur below ($S_{\rm thr,\alpha,\beta}=+1$)  or above ($S_{\rm thr,\alpha,\beta}=-1$) a user-specified temperature. By default, the fourth term is deactivated ($S_{\rm thr,\alpha,\beta}=+1, T_{\rm thr,\alpha\beta}=0$ K).
+The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}$ and the heterogeneous reaction
+order, $n_{\rm O_2,\alpha\beta}$. The local oxygen volume fraction at depth $x$ is calculated from the gas phase 
+(first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
+\be
+X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g,\alpha\beta})
+\ee
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. The actual diffusion process is thus not simulated. 
+Instead, it is assumed that the diffusion and oxygen consuption processes are in equilibrium and there is an exponential profile of
+oxygen concentration inside the material.
+
+The fourth term is the power function where $T_{\rm thr,\alpha \beta}$ is a threshold temperature that can be used to dictate that the reaction must not occur below ($S_{\rm thr,\alpha,\beta}=+1$)  or above ($S_{\rm thr,\alpha,\beta}=-1$) a user-specified temperature. By default, the fourth term is deactivated ($S_{\rm thr,\alpha,\beta}=+1, T_{\rm thr,\alpha\beta}=0$ K).
 
 The production term $S_\alpha$ is the sum over all the reactions where the solid residue is material $\alpha$
 \be
