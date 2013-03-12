@@ -3675,7 +3675,7 @@ a material undergoing one or more reactions is:
 \ee
 where
 \be
-  r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2,g}^{n_{{\rm O_2},ij}}
+  r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2}^{n_{{\rm O_2},ij}}
   \quad ; \quad Y_{{\rm s},i} = \left( \frac{\rho_{{\rm s},i}}{\rho_{\rm s}(0)} \right)
   % \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
   \label{rr}
@@ -3699,10 +3699,17 @@ is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify 
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
 experiments, like TGA (Thermo-Gravimetric Analysis).
 
-The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions. $X_{\rm O_2,g}$ is the oxygen volume 
-fraction in the gas phase. If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected 
-by the presence of oxygen in the first gas phase cell next to the solid surface. $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the 
-{\ct MATL} line of the $i$th material. It is zero by default.
+The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions.  
+If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected 
+by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume 
+fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and 
+consumption so that the concentration profile is in equilibrium, and the concentration at depth $x$ is given by 
+\be
+X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g})
+\ee
+where $L_{\rm g}$ is the gas diffusion length scale. 
+$n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default.
+$L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
 
 It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known,
 there are several parameters that can be used by FDS to derive effective values. The most important parameter to
@@ -10109,6 +10116,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DENSITY}                       & Real          & Section~\ref{info:thermal_properties} & kg/m$^3$          & 0.     \\ \hline
 {\ct E(:)}                          & Real array    & Section~\ref{info:solid_pyrolysis}    & kJ/kmol           &        \\ \hline
 {\ct EMISSIVITY    }                & Real          & Section~\ref{info:thermal_properties} &                   & 0.9    \\ \hline
+{\ct GAS\_DIFFUSION\_DEPTH(:) }     & Real array    & Section~\ref{info:solid_pyrolysis}    & m                 & 0.001  \\ \hline
 {\ct HEATING\_RATE(:)}              & Real array    & Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
 {\ct HEAT\_OF\_COMBUSTION(:)}       & Real array    & Section~\ref{info:solid_pyrolysis}    & kJ/kg             &        \\ \hline
 {\ct HEAT\_OF\_REACTION(:)}         & Real array    & Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.     \\ \hline
