@@ -33,7 +33,6 @@ The equations for large-eddy simulation (LES) are derived by applying a low-pass
 \label{eqn_filtered_density}
 \bar{\rho}(x,t) = \frac{1}{\Delta}\int_{x-\Delta/2}^{x+\Delta/2} \rho(r,t) \d r \mbox{.}
 \end{equation}
-
 In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x$ and is a key parameter in the submodels for the turbulent viscosity and the reaction time scale discussed later.  The practice of taking $\Delta = \delta x$ is called implicit filtering.  It is important to appreciate, however, that implicit filtering does not imply dissipative numerics.  FDS employs kinetic-energy-conserving central difference schemes for momentum with physically-based closures for the turbulent stress.  In what follows, the filter formalism is relaxed (the overline notation is suppressed for clarity) since no explicit filtering operations are performed in the algorithm.  A detailed derivation of the formal LES equations is presented in Chapter \ref{momentum_chapter}.
 
 \section{Numerical Grid}
@@ -80,13 +79,13 @@ and the primitive species can be recovered from the lumped species via
 0.00 & 0.00 & 0.15 \\
 0.00 & 0.00 & 0.12  \end{array}
 \right]
-\left[ \begin{array} {c} Z_A \\ Z_F \\ Z_P \end{array} \right] =
+\left[ \begin{array} {c} Z_{\rm A} \\ Z_{\rm F} \\ Z_{\rm P} \end{array} \right] =
 \left[ \begin{array} {c} Y_\NTWO \\ Y_\OTWO \\ Y_{\scriptscriptstyle \mathrm{CH_4}} \\ Y_\COTWO \\ Y_{\scriptscriptstyle \mathrm{H_2O}} \end{array} \right]
  \ee
 Notice that the columns of the matrix are the mass fractions of the primitive species within a given lumped species.
 
 The lumped species approach does not change the basic mass transport equations. The equation for total mass is written:
-\be \dod{\rho}{t} + \nabla\!\cdot (\rho \bu)  =  \dm_b'''  \label{mass} \ee
+\be \dod{\rho}{t} + \nabla\!\cdot (\rho \bu)  =  \dm_{\rm b}'''  \label{mass} \ee
 Note that the source term on the right hand side represents the addition of mass from evaporating droplets or other subgrid-scale
 particles that represent sprinkler and fuel sprays, vegetation, and any other type of small, unresolvable object. These
 objects are assumed to occupy no volume; thus they are seen by the governing equations as point sources of mass, momentum, and energy. It is important to
@@ -95,10 +94,10 @@ combustion, but it is also formed by evaporating sprinkler droplets. In cases su
 vapor to distinguish between that which is formed by combustion and that which is evaporated from the droplets.
 
 The transport equation for each of the lumped species minus one (usually air) has the same form as the transport equation for a single species:
-\be \dod{ }{t}(\rho Z_\alpha) + \nabla\!\cdot (\rho Z_\alpha \bu) = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha) + \dm_\alpha''' + \dm_{b,\alpha}''' \label{species} \ee
-Here $\dm_b'''=\sum_\alpha \dm_{b,\alpha}'''$ is the production rate of species by evaporating droplets or particles.
+\be \dod{ }{t}(\rho Z_\alpha) + \nabla\!\cdot (\rho Z_\alpha \bu) = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha) + \dm_\alpha''' + \dm_{\rm b,\alpha}''' \label{species} \ee
+Here $\dm_{\rm b}'''=\sum_\alpha \dm_{\rm b,\alpha}'''$ is the production rate of species by evaporating droplets or particles.
 Summing these equations over all species yields the original mass conservation equation because
-$\sum Z_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{b,\alpha}'''=\dm_b'''$, by definition, and because it is assumed
+$\sum Z_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{\rm b,\alpha}'''=\dm_{\rm b}'''$, by definition, and because it is assumed
 that $\sum \rho D_\alpha \nabla Z_\alpha = 0$. This last assertion is not true, in general.
 However, transport equations are solved for total
 mass and all but one of the species, implying that the diffusion coefficient of the implicit species is
@@ -113,8 +112,8 @@ described in terms of the differences in the background pressures, eliminating t
 
 The second consequence of the low Mach number approximation is that it eliminates the need to solve the energy transport
 equation explicitly.
-The energy conservation equation is written in terms of the {\em sensible enthalpy}, $h_s$:
-\be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \DoD{\bp}{t} + \dq''' - \dq_b'''
+The energy conservation equation is written in terms of the {\em sensible enthalpy}, $h_{\rm s}$:
+\be \dod{ }{t}(\rho h_{\rm s}) + \nabla\!\cdot (\rho h_{\rm s} \bu) = \DoD{\bp}{t} + \dq''' - \dq_{\rm b}'''
         - \nabla\!\cdot \dbq'' \label{energy} \ee
 Note that the material derivative of the thermodynamic pressure is simplified because of the low Mach number approximation:
 \be
@@ -123,15 +122,17 @@ Note that the material derivative of the thermodynamic pressure is simplified be
 \ee
 The term
 $\dq'''$ is the heat release rate per unit volume from a chemical reaction.
-The term $\dq_b'''$ is the energy transferred to subgrid-scale droplets and particles.
+The term $\dq_{\rm b}'''$ is the energy transferred to subgrid-scale droplets and particles.
 The term $\dbq''$ represents the conductive, diffusive, and radiative heat fluxes:
-\be \dbq'' = -k \nabla T - \sum_\alpha h_{s,\alpha} \rho D_\alpha \nabla Z_\alpha + \dbq_r'' \ee
+\be 
+   \dbq'' = -k \nabla T - \sum_\alpha h_{\rm s,\alpha} \, \rho \, D_\alpha \nabla Z_\alpha + \dbq_{\rm r}'' 
+\ee
 where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of species $\alpha$.
 
 As mentioned above, we do not solve Eq.~(\ref{energy}) explicitly. Instead, we factor out the divergence as follows:
 \be
 \label{eqn_simplediv1}
-\Div\mathbf{u} = \frac{1}{\rho h_s} \left[ \DoD{}{t} (\bp-\rho h_s) + \dq^\ppp + \dq_r^\ppp - \dq_b^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
+\Div\mathbf{u} = \frac{1}{\rho h_{\rm s}} \left[ \DoD{}{t} (\bp-\rho h_{\rm s}) + \dq''' + \dq_{\rm r}''' - \dq_{\rm b}^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
 \ee
 Expanding the material derivatives on the right hand side of this equation produces a fairly complicated expression for
 the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations.
@@ -146,8 +147,9 @@ the thermodynamic variables.
 \section{Momentum Transport}
 
 Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
-\be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg
-+ \bof_b + \nabla\!\cdot \btau \Big]  \ee
+\be 
+   \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big]  
+\ee
 The term, $\bof_b$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}.
 
 It is convenient to write this equation in the form:
@@ -170,29 +172,29 @@ expression for the divergence.
 \subsection{Combustion}
 
 For most applications, FDS uses a combustion model based on the mixing-limited, infinitely fast reaction of lumped species.
-Lumped species are reacting scalar quantities that represent a mixture of species.  For example, ``air'' is a lumped species which is a mixture of
+Lumped species are reacting scalar quantities that represent a mixture of species.  For example, air is a lumped species which is a mixture of
 nitrogen, oxygen, water vapor, and carbon dioxide.  The reaction of fuel and oxygen is not necessarily instantaneous and
 complete, and there are several optional schemes that are designed to predict the extent of combustion in under-ventilated spaces.
 
 For an infinitely-fast reaction, reactant species in a given grid cell are converted to product species at a rate determined by a
 characteristic mixing time, $\tau_{mix}$. The heat release rate per unit volume is defined by summing the lumped species mass production rates times their respective heats of formation
 \be
-   \dq''' \equiv -\sum_\alpha \dm_\alpha''' \, \Delta H_{f,\alpha} \label{EDC1}
+   \dq''' = -\sum_\alpha \dm_\alpha''' \, \Delta h_{\rm f,\alpha} \label{EDC1}
 \ee  %Y rather than Z is correct in this equation
-Details of $\tau_{mix}$ and $\dm_\alpha'''$ are discussed in Chapter \ref{combustionsection}.
+Details of $\tau_{\rm mix}$ and $\dm_\alpha'''$ are discussed in Chapter \ref{combustionsection}.
 
 \subsection{Radiation}
 
 The net contribution from thermal radiation in the energy equation is defined by:
 \be
     \dq_r^\ppp \equiv -\nabla\!\cdot \dbq_r''(\bx) =
-    \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_b(\bx) \right]  \quad ; \quad
+    \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_{\rm b}(\bx) \right]  \quad ; \quad
     U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'
 \ee
 where $\kappa(\bx)$ is the absorption coefficient,
 $I_b(\bx)$ is the source term, and $I(\bx,\bs)$ is the solution of the radiation transport equation (RTE) for
 a non-scattering gray gas:
-\be   \bs \cdot \nabla I(\bx,\bs) = \kappa(\bx) \; \left[ I_{b}(\bx) - I(\bx,\bs) \right]
+\be   \bs \cdot \nabla I(\bx,\bs) = \kappa(\bx) \; \left[ I_{\rm b}(\bx) - I(\bx,\bs) \right]
 \label{bandRTE1} \ee
 In practical simulations, the spectral dependence of $I$, $I_b$, and $\kappa$ cannot be resolved
 accurately, nor do we have reliable data for non-ideal fuels typical of real fires.
@@ -203,19 +205,19 @@ thermal radiation and is not particulary sensitive to wavelength.
 The mean absorption coefficient, $\kappa$, is a function of species composition and temperature.
 Its values are obtained by table look-up using a narrow-band model, RadCal~\cite{RadCal}.
 
-The source term, $I_b$, requires special treatment because of the limited resolution of the underlying numerical
+The source term, $I_{\rm b}$, requires special treatment because of the limited resolution of the underlying numerical
 grid in the vicinity of flames. In large scale fire simulations, grid cells are typically on the order of
 tens of centimeters. Relatively thin flame sheets cannot be resolved, in which case the resolved temperature field
 will not reflect the true temperatures one would expect to find in the reaction zone. Consequently, the
 source term is approximated in grid cells where fuel and oxygen react.
 Elsewhere, the subgrid temperature field is homogeneous
 and the source term can be computed directly:
-\be \kappa \; I_b = \left\{ \begin{array}{cll}
+\be \kappa \; I_{\rm b} = \left\{ \begin{array}{cll}
     \kappa \, \sigma \, T^4/\pi      & \hbox{Outside flame zone}, & \dot{q}'''=0  \\ [0.1in]
     C\, \kappa \, \sigma \, T^4/\pi  & \hbox{Inside flame zone}, & \dot{q}'''>0
     \end{array} \right.  \label{radapprox1}
 \ee
-The constant $C$ is adjusted dynamically such that the integrated quantity $\chi_r \,\dot{q}'''$ is satisfied for each mesh. Here, $\chi_r$ is an empirical estimate of the {\em global} fraction of that energy emitted as thermal radiation. Typically, a sooty fire radiates approximately one-third of the total combustion energy.
+The constant $C$ is adjusted dynamically such that the integrated quantity $\chi_{\rm r} \,\dot{q}'''$ is satisfied for each mesh. Here, $\chi_{\rm r}$ is an empirical estimate of the {\em global} fraction of that energy emitted as thermal radiation. Typically, a sooty fire radiates approximately one-third of the total combustion energy.
 
 The radiation equation is solved using a technique similar to a finite
 volume method for convective transport, thus the name given to it is

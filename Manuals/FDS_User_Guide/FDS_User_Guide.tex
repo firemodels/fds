@@ -3670,18 +3670,18 @@ be multiple reactions with corresponding kinetic parameters and products.
 For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for
 a material undergoing one or more reactions is:
 \be
-  \dod{Y_{{\rm s},i}}{t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i) 
+  \dod{Y_{{\rm s},i}}{t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i)
 \label{rr_tot}
 \ee
 where
 \be
   r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2}^{n_{{\rm O_2},ij}}
   \quad ; \quad Y_{{\rm s},i} = \left( \frac{\rho_{{\rm s},i}}{\rho_{\rm s}(0)} \right)
-  % \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
+  % \max\left[0,T_{\rm s}-T_{thr,ij}\right]^{n_{t,ij}}
   \label{rr}
 \ee
 The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction.
-The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material 
+The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material
 as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line.
 $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component
 divided by the volume of the layer.  $\rho_{\rm s}(0)$ is the initial
@@ -3699,15 +3699,15 @@ is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify 
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
 experiments, like TGA (Thermo-Gravimetric Analysis).
 
-The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions.  
-If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected 
-by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume 
-fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and 
-consumption so that the concentration profile is in equilibrium, and the concentration at depth $x$ is given by 
+The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions.
+If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected
+by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume
+fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and
+consumption so that the concentration profile is in equilibrium, and the concentration at depth $x$ is given by
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g})
 \ee
-where $L_{\rm g}$ is the gas diffusion length scale. 
+where $L_{\rm g}$ is the gas diffusion length scale.
 $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default.
 $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
 
@@ -3753,7 +3753,7 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
    T_{\rm p} &= 300 \; ^\circ\mathrm{C}  \\
    r_{\rm p} &= 0.002   \; \si{1/s}  \\
    \dot{T} &= 5 \; \mathrm{K/min} \\
-   \nu_s &= 0 \\
+   \nu_{\rm s} &= 0 \\
 \end{align*}
 \end{minipage}
 \caption[Simple demonstration of the pyrolysis model]{The blue curve represents the normalized mass, $Y=\rho_{\rm s}/\rho_{\rm s}(0)$, of a solid material
@@ -5445,9 +5445,9 @@ FDS will use that information internally to determine the amount of combustion p
 \nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - (1-X_\Hy) \, \nu_{\rm S} \\
 \nu_{\HTWOO}   &=& \frac{\hbox{y}}{2} - \frac{X_\Hy}{2} \, \nu_{\rm S} \\
 \nu_{\CO}      &=& \frac{W_{\rm F}}{W_{\CO}} \, y_{\CO}  \\
-\nu_s          &=& \frac{W_{\rm F}}{W_{\rm S}} \, y_{\rm S}  \\
+\nu_{\rm s}          &=& \frac{W_{\rm F}}{W_{\rm S}} \, y_{\rm S}  \\
 \nu_{\NTWO}    &=& \frac{\rm v}{2}  \\
-W_s            &=& X_\Hy \, W_\Hy + (1-X_\Hy) \, W_\C
+W_{\rm s}            &=& X_\Hy \, W_\Hy + (1-X_\Hy) \, W_\C
 \end{eqnarray*}
 The following parameters may be prescribed on the {\ct REAC} line when using the simple chemistry model.
 Note that the various {\ct YIELD}s are for well-ventilated, post-flame conditions. There are options to
@@ -5468,7 +5468,7 @@ label the {\ct REAC} line if more than one reactions are specified.
 This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is in Table~\ref{tab:gasspecies}.
 \item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon monoxide, $y_{\CO}$. Note that this parameter is only appropriate when the
 simple chemistry model is applied. (Default 0.)
-\item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
+\item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_{\rm s}$.
 Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
 \item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.
 For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided.
@@ -5730,12 +5730,12 @@ Note that the sign of {\ct NU} corresponds to whether that species is consumed (
 \subsection{Multiple Chemical Reactions}
 \label{info:multi-reac}
 
-There may be times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_s$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
+There may be times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
 1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.3274\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(19.7441\; CO_2 + 0.166587 \; CO + 21 \; H_2O + 5.0893\; C + 103.751 \; N_2)}}_\text{Products\_1}
 \end{multline}
-and the reaction for wood with a soot yield of $y_s$ = 0.015 and a CO yield of $y_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
+and the reaction for wood with a soot yield of $y_{\rm s}$ = 0.015 and a CO yield of $y_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:wood_combust}
 1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.02121\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(0.964384\; CO_2 + 0.003655 \; CO + 0.85 \; H_2O + 0.031961\; C + 3.84076 \; N_2)}}_\text{Products\_2}
@@ -8438,7 +8438,7 @@ The columns are defined as follows:
 \begin{eqnarray}
 \label{eqn_enthalpytransport}
 \underbrace{\frac{\partial}{\partial t} \int \rho h_s \, \d V }_{\hbox{\ct Q\_ENTH}} &=&
-\underbrace{\dm_b h_{s,b} - \int \rho \bu h_s \cdot \d {\bf S}}_{\hbox{\ct Q\_CONV}}
+\underbrace{\dm_b h_{s,b} - \int \rho \bu h_{\rm s} \cdot \d {\bf S}}_{\hbox{\ct Q\_CONV}}
 \; + \; \underbrace{\dq_{b,w} + \int k \nabla T \cdot \d {\bf S}}_{\hbox{\ct Q\_COND}}
 \; + \; \underbrace{\sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \d {\bf S}}_{\hbox{\ct Q\_DIFF}}  \nonumber \\
 &&
