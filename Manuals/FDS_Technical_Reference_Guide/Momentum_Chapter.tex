@@ -195,7 +195,7 @@ The divergence is described in Section~\ref{div_discret}.
 
 The thermal conductivity and material diffusivity of the fluid are related to the viscosity by
 \be k_{ijk} = \frac{c_{p,0} \, \mu_{ijk}}{\PR_{\rm t}}  \quad ; \quad
-   (\rho D)_{ijk} = \frac{\mu_{ijk}}{\SC_{\rm t}}  
+   (\rho D)_{ijk} = \frac{\mu_{ijk}}{\SC_{\rm t}}
 \ee
 where $\PR_{\rm t}$ is the turbulent Prandtl number and $\SC_{\rm t}$ is the turbulent Schmidt number, both assumed constant. Note that the specific heat $c_{p,0}$ is that of the dominant species of the mixture. Based on simulations of smoke plumes, $C_{\rm s}$ is 0.20, $\PR_{\rm t}$ and $\SC_{\rm t}$ are 0.5. There are no rigorous justifications for these choices other than through comparison with experimental data~\cite{Zhang:1}.
 
@@ -464,7 +464,7 @@ We can also think of VN in terms of a total variation diminishing (TVD) constrai
 \begin{equation}
 u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} \left( u_{i-1}^n - 2u_i^n + u_{i+1}^n \right)
 \end{equation}
-Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms. Note that by default, VN is not checked in LES mode.  
+Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms. Note that by default, VN is not checked in LES mode.
 
 \subsection{Realizable Mass Density Constraint}
 
@@ -546,21 +546,13 @@ given in Eq.~(\ref{eqn_divfromeos}).
 
 \subsection{Open Boundary Conditions}
 
-An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradients. The outflow condition is quite simple. It is assumed that ${\cal H} = \frac{1}{2}q^2 + \tilde{p}/\rho$ remains constant along streamlines, and $q \equiv |\mathbf{u}|$. The pressure perturbation, $\tilde{p}=\tilde{p}_{\rm ext}$, is user specified. It is zero by default. When fluid enters the domain at an open boundary, a similar Bernoulli argument is made (i.e., inviscid, steady, incompressible flow), and that the fluid element on the boundary has accelerated from the state \{$\tilde{p}_1,\rho_1,q_1$\} along a streamline:
-\begin{equation}
-\tilde{p}_1 + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \tilde{p}_2 + \mbox{$\frac{1}{2}$}\rho_2 q_2^2
-\end{equation}
-Let's say the fluid has kinetic energy $\frac{1}{2}\rho_1 q_1^2$ at point 1 with ambient pressure $\tilde{p}_1 = \tilde{p}_{\rm ext}$ and accelerates to $q_2$ at point 2 which is on an inflow boundary. Substituting the definition of ${\cal H}$ for point 2 we obtain
-\begin{equation}
-\tilde{p}_{\rm ext} + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \rho_2({\cal H}_2 - \mbox{$\frac{1}{2}$} q_2^2) +
-\mbox{$\frac{1}{2}$} \rho_2 q_2^2
-\end{equation}
-which rearranges to
-\begin{equation}
-{\cal H}_2 = \frac{\tilde{p}_{\rm ext}}{\rho_2} + \underbrace{\frac{1}{2}q_1^2 \frac{\rho_1}{\rho_2}}_{{\cal H}_0}
-\end{equation}
-The density $\rho_2$ is taken as the average density between the gas-phase and ghost cells adjacent to the boundary. In practice, the second term is specified by the user, ${\cal H}_0 = \frac{1}{2}(u_0^2 + v_0^2 + w_0^2)$, by setting the initial velocity components on the {\tt MISC} line.  It is assumed that the initial velocity also applies outside the domain at point 1 along the streamline.
-
+An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradient. The boundary condition for the pressure depends on whether the local flow is incoming or outgoing. In either case, it is assumed that the quantity, ${\cal H} = \tilde{p}/\rho + q^2/2$, remains constant along a streamline. It is also assumed that the pressure perturbation at the boundary is a user-specified input, $\tilde{p}_{\rm ext}$, that is zero by default. The Poisson solver for the quantity, $\cH$, requires a Dirichlet condition at an open boundary; that is, its value is specified at the border of the computational domain. As an example, consider the boundary, $x=x_{\min}$. The boundary value of $\cH$ is given by the following expressions depending on the direction of the flow across the external cell face:
+\be \cH_{\ha,jk} = \left\{ \begin{array}{ll}
+          \frac{\tp_{\rm ext}}{\rho_{1,jk}} + \ha \left( \bar{u}_{1.jk}^2 + \bar{v}_{1,jk}^2 + \bar{w}_{1,jk}^2 \right)  & {\rm outgoing} \\ [0.2in]
+          \frac{\tp_{\rm ext}}{\rho_\infty} + \ha \left( u_\infty^2 + v_\infty^2 + w_\infty^2 \right)  & {\rm incoming}
+          \end{array} \right.
+\ee
+The bar over the velocity components indicates an average over the respective faces of the grid cell adjacent to the boundary. The subscript $\infty$ denotes user-specified far field velocity and density values. Typically, the far field velocity is zero, but for simulations involving an external wind, these values can be specified accordingly.
 
 
 \subsection{Solid Boundary Conditions}
