@@ -11,7 +11,7 @@
 
 \section{Visualizing FDS Devices Using Smokeview Objects}
 
-Smokeview generates visual representations of FDS devices using instructions found in a data file named {\ct objects.svo}.  This file is located in the same directory where Smokeview is installed.  The instructions in this file correspond to OpenGL library calls, the same type of calls Smokeview uses to visualize FDS cases.  This section gives an overview of Smokeview objects detailing what objects are available and how to customize them.  Further documentation giving underlying technical details may be found in the Smokeview User's Guide~\cite{Smokeview_Users_Guide}.
+Smokeview generates visual representations of FDS devices using instructions found in a data file named {\ct objects.svo}.  This file is located in the same directory where Smokeview is installed.  The instructions in this file correspond to OpenGL library calls, the same type of calls Smokeview uses to visualize FDS cases.  This section gives an overview of Smokeview objects detailing what objects are available and how to customize the way they appear. Further documentation giving underlying technical details may be found in the Smokeview User's Guide~\cite{Smokeview_Users_Guide}.
 
 Smokeview objects may be static or dynamic.  A static object is defined entirely in terms of data and instructions found in the {\ct objects.svo}\ file.  Its appearance remains the same regardless of how an FDS input file is set up.  A dynamic object is also defined using instructions found in {\ct objects.svo}, but in addition uses data specified on the {\ct PROP}  line in the FDS input file and/or data contained in a particle file.  As a result, the appearance of dynamic objects depends on the particular FDS case that is run.
 
@@ -27,13 +27,14 @@ frame.  Tables~\ref{tab:devices_static} and \ref{tab:devices_mstatic} give a lis
 an image of the object in its normal or inactive state and in its active state if it has one.
 
 The {\ct SMOKEVIEW\_ID} keyword found on the {\ct PROP} line is used to associate an FDS device with a Smokeview object.
-The following FDS input file lines
-were used to display the target device in Table~\ref{tab:devices_static}.
+The following FDS input file lines were used to display the {\tt target}\ device
 
 \begin{lstlisting}
 &PROP ID='target' SMOKEVIEW_ID='target' /
 &DEVC XYZ=0.5,0.8,0.6, QUANTITY='TEMPERATURE' PROP_ID='target' /
 \end{lstlisting}
+
+To display a different object, substitute a {\tt SMOKEVIEW\_ID}\ entry found in Table~\ref{tab:devices_static} for {\tt target}.
 
 \newpage
 
@@ -77,15 +78,16 @@ were used to display the target device in Table~\ref{tab:devices_static}.
 \subsection{Dynamic Smokeview Objects}
 \label{info:SMOKEVIEW_PARAMETERS}
 
-The appearance of Smokeview objects may be modified using data specified on the {\ct PROP} line in an FDS input file. Objects may also be customized using data stored in a particle file (see Section \ref{info:SMOKEVIEW_PART}) The {\ct SMOKEVIEW\_PARAMETERS} keyword on the {\ct PROP} line is used to customize the appearance of Smokeview objects.  For example,
-\begin{lstlisting}
-&PROP ID='sphere' SMOKEVIEW_PARAMETERS(1:4)='R=0','G=255','B=0','D=0.5',
-      SMOKEVIEW_ID='sphere' /
+The appearance of Smokeview objects may be modified using data specified on the {\ct PROP} line in an FDS input file. Objects may
+also be customized using data stored in a particle file (see Section \ref{info:SMOKEVIEW_PART}) The {\ct SMOKEVIEW\_PARAMETERS}
+keyword on the {\ct PROP} line is used to customize the appearance of Smokeview objects.  For example,
+\begin{lstlisting} 
+&PROP ID='sphere' SMOKEVIEW_PARAMETERS(1:4)='R=0','G=255','B=0','D=0.5', SMOKEVIEW_ID='sphere' /
 &DEVC XYZ=0.5,0.8,1.5, QUANTITY='TEMPERATURE', PROP_ID='sphere' /
 \end{lstlisting}
 create an FDS device drawn as a sphere colored green with diameter 0.5~m. Each parameter specified using the {\ct SMOKEVIEW\_PARAMETERS} keyword is a text string enclosed in single quotes.  The text string is of the form {\ct 'keyword=value'} where possible keywords are found in the {\ct objects.svo} file.
 
-The {\ct tsphere} object uses a texture map or imabe to alter its appearance. The texture map is specified using {\ct SMOKEVIEW\_PARAMETERS} keyword by placing the characters {\ct t\%} before the texture file name ({\em e.g.}\ {\ct t\%texturefile.jpg}). Table~\ref{tab:devices_dynamic} gives a list of dynamic objects and the keyword/parameter pairs used to specify them. Each entry shows an image of the object and the parameters used to customize its appearance.
+The {\ct tsphere} object uses a texture map or image to alter its appearance. The texture map is specified using {\ct SMOKEVIEW\_PARAMETERS} keyword by placing the characters {\ct t\%} before the texture file name ({\em e.g.}\ {\ct t\%texturefile.jpg}). Table~\ref{tab:devices_dynamic} gives a list of dynamic objects and the keyword/parameter pairs used to specify them. Each entry shows an image of the object and the parameters used to customize its appearance.
 
 \begin{longtable}[ht]{|l|l|c|}
 \caption{Dynamic Smokeview objects}
@@ -185,9 +187,7 @@ active vent\\
 
 Particle file data may be used to customize the appearance of Smokeview objects. Objects such as those listed in Tables~\ref{tab:devices_dynamic} and \ref{tab:devices_dynamic2} that have color labels named {\ct R}, {\ct G}, {\ct B} defined may be colored using particle file data.  In addition, objects such as those listed in Table \ref{tab:devices_dynamic2} that use variable names that match shortened particle file quantity names\footnote{Short forms of particle file quantity names appear in the Smokeview colorbar label and in the Smokeview File/Bounds dialog box.} may be customized.  This data may be used to alter the shape or size using particle file data.  For example, the names {\ct U-VEL}, {\ct V-VEL}, and {\ct W-VEL} are both particle file quantities (shortened version) and variable names for the {\ct velegg}\ Smokeview object. These variable names are used to alter the shape of the {\ct velegg}\ object by stretching it according to the U, V and W velocity components for that particle found in the particle file.
 
-Table~\ref{tab:devices_dynamic2} documents those objects that can be customized
-using particle file data.  These objects may be customized as before using data specified with the {\ct SMOKEVIEW\_PARAMETERS}
-keyword or using particle file data.
+Table~\ref{tab:devices_dynamic2} documents those objects that can be customized using particle file data.  These objects may be customized as before using data specified with the {\ct SMOKEVIEW\_PARAMETERS} keyword or using particle file data.
 
 \begin{longtable}[ht]{|l|l|c|}
 \caption{Dynamic Smokeview objects for Lagrangian particles}
