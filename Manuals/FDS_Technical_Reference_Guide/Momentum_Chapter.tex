@@ -193,16 +193,11 @@ averaged at cell centers. For example
 \dod{u}{y} &\approx& \frac{1}{2} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy_{j+\ha}} + \frac{u_{ijk}-u_{i,j-1,k}}{\dy_{j-\ha}} \right) \end{eqnarray}
 The divergence is described in Section~\ref{div_discret}.
 
-The thermal conductivity and material
-diffusivity of the fluid are related to the viscosity by
-\be k_{ijk} = \frac{c_{p,0} \, \mu_{ijk}}{\PR_t}  \quad ; \quad
-   (\rho D)_{ijk} = \frac{\mu_{ijk}}{\SC_t}  \ee
-where $\PR_t$ is the turbulent Prandtl number and $\SC_t$ is the turbulent Schmidt number, both
-assumed constant. Note that the specific heat $c_{p,0}$ is that of the
-dominant species of the mixture. Based on simulations of smoke plumes,
-$C_{\rm s}$ is 0.20, $\PR_t$ and $\SC_t$ are 0.5. There are no rigorous justifications
-for these choices other than through comparison with
-experimental data~\cite{Zhang:1}.
+The thermal conductivity and material diffusivity of the fluid are related to the viscosity by
+\be k_{ijk} = \frac{c_{p,0} \, \mu_{ijk}}{\PR_{\rm t}}  \quad ; \quad
+   (\rho D)_{ijk} = \frac{\mu_{ijk}}{\SC_{\rm t}}  
+\ee
+where $\PR_{\rm t}$ is the turbulent Prandtl number and $\SC_{\rm t}$ is the turbulent Schmidt number, both assumed constant. Note that the specific heat $c_{p,0}$ is that of the dominant species of the mixture. Based on simulations of smoke plumes, $C_{\rm s}$ is 0.20, $\PR_{\rm t}$ and $\SC_{\rm t}$ are 0.5. There are no rigorous justifications for these choices other than through comparison with experimental data~\cite{Zhang:1}.
 
 
 \subsection{Transport Coefficients for Direct Numerical Simulation (DNS)}
@@ -258,7 +253,7 @@ $\nabla p=\rho_n \bg + \nabla \tp$.
 \end{enumerate}
 Now the momentum equation can be written
 \be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg
-+ \bof_b + \nabla\!\cdot \btau_{ij} \Big]  \label{momeq} \ee
++ \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]  \label{momeq} \ee
 It is convenient to write this equation in the form:
 \be \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation} \ee
 The vector $\bF$ is referred to collectively as the momentum flux terms, and the term $\nabla \cH$ is referred to as the
@@ -394,13 +389,13 @@ For rough walls FDS employs the log law presented in Pope \cite{Pope:2000},
 \label{eqn_roughwallloglaw}
 u^+ = \frac{1}{\kappa} \ln \left(\frac{y}{s}\right) + \tilde{B}(s^+)
 \end{equation}
-where $s^+ = s/\delta_\nu$ is the roughness length in viscous units and $s$ is the dimensional roughness (prescribed by setting {\ct ROUGHNESS} [in meters] on the {\ct SURF} line). The distance to the wall, $y$, is taken as $\delta y/2$ for the first off-wall grid cell.  The parameter $\tilde{B}$ varies with $s^+$ but attains a constant value $B_2=8.5$ in the fully rough limit.  In FDS, we implement $\tilde{B}$ as the following piece-wise function:
+where $s^+ = s/\delta_\nu$ is the roughness length in viscous units and $s$ is the dimensional roughness. The distance to the wall, $y$, is taken as $\delta y/2$ for the first off-wall grid cell.  The parameter $\tilde{B}$ varies with $s^+$ but attains a constant value $B_2=8.5$ in the fully rough limit.  In FDS, we implement $\tilde{B}$ as the following piece-wise function:
 \begin{equation}
 \tilde{B} = \left\{ \begin{array}{lll} B + (1/\kappa)\ln(s^+)  & \mbox{for} &          s^+ < 5.83 \\
-                                       \tilde{B}_{max}         & \mbox{for} & 5.83 \le s^+ < 30.0 \\
+                                       \tilde{B}_{\rm max}     & \mbox{for} & 5.83 \le s^+ < 30.0 \\
                                        B_2                     & \mbox{for} &          s^+ \ge 30.0 \end{array} \right.
 \end{equation}
-where $\tilde{B}_{max} = 9.5$.
+where $\tilde{B}_{\rm max} = 9.5$.
 
 \subsection{Wall Model Implementation}
 Once $u^+$ has been determined from the model profile, the stress may be obtained from (the definition of $u^+$)
@@ -413,18 +408,18 @@ Generally, this requires an iterative procedure since $\tau_w$ is needed to defi
 \subsection{Wall Damping of the Turbulent Viscosity}
 \label{sec:wall_damping}
 
-The turbulent viscosity $\nu_t = \mu_t/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{mix} = C_{\rm s} \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
+The turbulent viscosity $\nu_{\rm t} = \mu_{\rm t}/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{\rm mix} = C_{\rm s} \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
 
 To achieve the correct decay of the Reynolds stresses near a wall, Van Driest (see \cite{Wilcox:1}) proposed the following modification:
 \begin{equation}
 \label{eqn_vdf}
-\ell_{mix} = C_{\rm s} \Delta \left[ 1 - \mathrm{e}^{-y^+/A} \right]
+\ell_{\rm mix} = C_{\rm s} \Delta \left[ 1 - \mathrm{e}^{-y^+/A} \right]
 \end{equation}
 where $A=26$.  The additional factor (in brackets) we refer to as the Van Driest damping function.
 
 In FDS, due to difficulties defining a consistent test filter (for use with either Deardorff or the dynamic model) near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagroinsky model with Van Driest damping of the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_{\rm s} = 0.2$.  The viscosity is then given by\begin{equation}
 \label{eqn_nearwall_viscosity}
-\nu_t = \ell_{mix}^{\,2}\,|S|
+\nu_{\rm t} = \ell_{\rm mix}^{\,2}\,|S|
 \end{equation}
 
 \newpage
@@ -461,17 +456,15 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
 
 The Von Neumann constraint is given by
 \begin{equation}
-\mbox{VN} = \delta t \max[(\mu/\rho),D_\alpha] \sum_i \frac{1}{\delta x_i^2} < \frac{1}{2}
+\mbox{VN} = \delta t \max \big[(\mu/\rho),D_\alpha \big] \; \sum_i \frac{1}{\delta x_i^2} < \frac{1}{2}
 \end{equation}
 We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} = -D_\alpha \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
 
 We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious wiggles that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
 \begin{equation}
-u_i^{n+1} = u_i^n + \frac{\delta t \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
+u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} \left( u_{i-1}^n - 2u_i^n + u_{i+1}^n \right)
 \end{equation}
-Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
-
-Note that by default VN is not checked in LES mode.  To turn on this check, set {\ct CHECK\_VN=.TRUE.} on {\ct MISC}.
+Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms. Note that by default, VN is not checked in LES mode.  
 
 \subsection{Realizable Mass Density Constraint}
 
@@ -481,26 +474,23 @@ In an explicit Euler update of the continuity equation, if the time increment is
 \delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
 \end{equation}
 We can argue that the case we are most concerned with is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes (time location suppressed, summation over $i$ is implied)
-\begin{eqnarray}
+\be
 \label{eqn_divstability}
-\delta t &<& \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} \nonumber\\
-&<& \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
-\end{eqnarray}
+\delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
+\ee
 Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
 
 \subsection{Heat Transfer Constraint}
 
-Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check may be added by setting {\ct CHECK\_HT=.TRUE.} on {\ct MISC}.
+Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check is an option. It is not done by default.
 
 \subsection{Adjusting the Time Step}
 
-In the default LES mode of operation, the CFL is compared with {\ct CFL\_MAX \![1.0]} and {\ct CFL\_MIN \![0.8]} (default values shown in brackets).  To be clear, the CFL constraint is now given by
+In the default LES mode of operation, the CFL is increased or decreased to remain between 0.8 and 1.  To be clear, the CFL constraint is now given by
 \begin{equation}
 \mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
 \end{equation}
-In DNS mode, VN is also checked by default ({\ct VN\_MAX \![0.5]}, {\ct VN\_MIN \![0.4]}).
-
-If either the current CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  The initial time step may be set and locked on the {\tt TIME} line of the FDS input file.  See the User's Guide for details.
+In DNS mode, the time step is also adjusted to maintain VN between 0.4 and 0.5. If either the CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  See the User's Guide~\cite{FDS_Users_Guide} for details.
 
 \newpage
 \section{The Equation for Pressure (Poisson Equation)}
@@ -510,7 +500,7 @@ taking the divergence of the momentum equation
 \be \nabla^2 {\cal H} =
      -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot \bF
     \quad ; \quad \bF = - \bu\times\bo - \tp \, \nabla \! \left( \frac{1}{\rho} \right) - \frac{1}{\rho}
-    \Big( (\rho-\rho_0) \bg + \bof_b + \nabla\!\cdot \btau_{ij} \Big)
+    \Big( (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big)
    \label{pe}\ee
 Note that the perturbation pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The
 pressure on the right hand side is taken from the previous time step of the
@@ -556,29 +546,18 @@ given in Eq.~(\ref{eqn_divfromeos}).
 
 \subsection{Open Boundary Conditions}
 
-% BEN -- Something about the velocity BCs at open boundaries should be added.
-
-Outflow: The outflow condition is quite simple.
-Let $q \equiv |\mathbf{u}|$. By definition, ${\cal H} = \frac{1}{2}q^2 + \tilde{p}/\rho$.
-The pressure $\tilde{p}$ is set to $\tilde{p}_{ext}$ by the user ({\ct DYNAMIC\_PRESSURE}, 0 by default).
-\\
-\\
-Inflow: When fluid is entering the domain at an {\tt OPEN} vent we make the assumption that
-Bernoulli holds (i.e., inviscid, steady, incompressible) and that the fluid element on the boundary has
-accelerated from the state \{$\tilde{p}_1,\rho_1,q_1$\} along a streamline:
+An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradients. The outflow condition is quite simple. It is assumed that ${\cal H} = \frac{1}{2}q^2 + \tilde{p}/\rho$ remains constant along streamlines, and $q \equiv |\mathbf{u}|$. The pressure perturbation, $\tilde{p}=\tilde{p}_{\rm ext}$, is user specified. It is zero by default. When fluid enters the domain at an open boundary, a similar Bernoulli argument is made (i.e., inviscid, steady, incompressible flow), and that the fluid element on the boundary has accelerated from the state \{$\tilde{p}_1,\rho_1,q_1$\} along a streamline:
 \begin{equation}
 \tilde{p}_1 + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \tilde{p}_2 + \mbox{$\frac{1}{2}$}\rho_2 q_2^2
 \end{equation}
-Let's say the fluid has kinetic energy $\frac{1}{2}\rho_1 q_1^2$ at point 1 with
-ambient pressure $\tilde{p}_1 = \tilde{p}_{ext}$ and accelerates to $q_2$ at point 2 which is on an inflow boundary.
-Substituting the definition of ${\cal H}$ for point 2 we obtain
+Let's say the fluid has kinetic energy $\frac{1}{2}\rho_1 q_1^2$ at point 1 with ambient pressure $\tilde{p}_1 = \tilde{p}_{\rm ext}$ and accelerates to $q_2$ at point 2 which is on an inflow boundary. Substituting the definition of ${\cal H}$ for point 2 we obtain
 \begin{equation}
-\tilde{p}_{ext} + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \rho_2({\cal H}_2 - \mbox{$\frac{1}{2}$} q_2^2) +
+\tilde{p}_{\rm ext} + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \rho_2({\cal H}_2 - \mbox{$\frac{1}{2}$} q_2^2) +
 \mbox{$\frac{1}{2}$} \rho_2 q_2^2
 \end{equation}
 which rearranges to
 \begin{equation}
-{\cal H}_2 = \frac{\tilde{p}_{ext}}{\rho_2} + \underbrace{\frac{1}{2}q_1^2 \frac{\rho_1}{\rho_2}}_{{\cal H}_0}
+{\cal H}_2 = \frac{\tilde{p}_{\rm ext}}{\rho_2} + \underbrace{\frac{1}{2}q_1^2 \frac{\rho_1}{\rho_2}}_{{\cal H}_0}
 \end{equation}
 The density $\rho_2$ is taken as the average density between the gas-phase and ghost cells adjacent to the boundary. In practice, the second term is specified by the user, ${\cal H}_0 = \frac{1}{2}(u_0^2 + v_0^2 + w_0^2)$, by setting the initial velocity components on the {\tt MISC} line.  It is assumed that the initial velocity also applies outside the domain at point 1 along the streamline.
 
@@ -698,22 +677,22 @@ Equation~(\ref{eqn_poisson_stg1}) corrects the error in the divergence resulting
 updated velocity components will be equal. To drive the two normal components of velocity closer together, we use the
 following iterative scheme in the predictor step, again using the $x$ direction interface boundary as an example:
 \begin{enumerate}
-\item Define the pressure term at the mesh interface, $\cH_B$, consistent with a Dirichlet boundary condition. Note that the superscript \emph{``old''} refers to the fact that at this point, the Poisson equation for pressure has not been solved:
+\item Define the pressure term at the mesh interface, $\cH_B$, consistent with a Dirichlet boundary condition. Note that the superscript ``old'' refers to the fact that at this point, the Poisson equation for pressure has not been solved:
 \be
-   \cH_B = \frac{\cH_I^{old} + \cH_1^{old} }{2} + \frac{\dx}{4\, \dt} \left( u_I^{*,\,old}-u_0^{*,\,old} \right)
+   \cH_B = \frac{\cH_I^{\rm old} + \cH_1^{\rm old} }{2} + \frac{\dx}{4\, \dt} \left( u_I^{*,\,{\rm old}}-u_0^{*,\,{\rm old}} \right)
 \ee
 Note also that $\cH$ is cell-centered; thus, $\cH_I$ is at the center of the $I$th grid cell of the left hand mesh, and $\cH_1$ is at the center of the first grid cell of the right hand mesh.
 \item Solve the Poisson equation in each mesh separately and exchange values of $\cH_I$ and $\cH_1$.
 \item Predict the normal component of velocity at the next time step. Note that the boundary condition for interface pressure term effectively yields the following:
 \begin{eqnarray}
-   u_I^* &=& \bar{u}_I^n - \frac{u_I^{*,\, old}-u_0^{*,\, old}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{old}+\cH_1^{old})/2 - {\cal H}_I }{ \dx/2} \right) \label{uI} \\
-   u_0^* &=& \bar{u}_0^n + \frac{u_I^{*,\, old}-u_0^{*,\, old}}{2} - \dt \left( F_{x,0}^{n} + \frac{ {\cal H}_1 - (\cH_I^{old}+\cH_1^{old})/2 }{ \dx/2} \right) \label{u0}
+   u_I^* &=& \bar{u}_I^n - \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{\rm old}+\cH_1^{\rm old})/2 - {\cal H}_I }{ \dx/2} \right) \label{uI} \\
+   u_0^* &=& \bar{u}_0^n + \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,0}^{n} + \frac{ {\cal H}_1 - (\cH_I^{\rm old}+\cH_1^{\rm old})/2 }{ \dx/2} \right) \label{u0}
 \end{eqnarray}
 \item Repeat this process until $\left| u_I^* - u_0^* \right|$ falls below a specified tolerance.
 \end{enumerate}
 For the corrector step, the procedure is the same, except the boundary condition for the pressure term is:
 \be
-   \cH_B = \frac{\cH_I^{old} + \cH_1^{old} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,\,old}-u_0^{n+1,\,old} \right)
+   \cH_B = \frac{\cH_I^{\rm old} + \cH_1^{\rm old} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,\,{\rm old}}-u_0^{n+1,\,{\rm old}} \right)
 \ee
 
 \paragraph{Velocity Tolerance} The default velocity tolerance is $\left| u_I^* - u_0^* \right| < 0.5 \, \delta x$ and the default maximum number of pressure iterations is 10.  Both of these parameters may be changed on the {\ct PRES} line.
