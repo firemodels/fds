@@ -16,7 +16,6 @@ This chapter presents the governing equations of FDS and an outline of the gener
 \item Eddy dissipation concept (fast chemistry) for single-step reaction between fuel and oxidizer
 \item Gray gas radiation with finite volume solution to the radiation transport equation
 \end{itemize}
-
 The model, however, is not limited to these simple algorithms. For example, the user may specify multiple reactions, finite-rate chemistry, a wide-band radiation model, and a variety of other special features. The more detailed physics incur increased computational cost and it is incumbent on the user to justify the added expense in terms of improved accuracy.  The default model options have been selected based on results from a wide variety of full-scale validation experiments \cite{FDS_Validation_Guide}.
 
 The algorithm outlined below has evolved over roughly three decades. Initially, it was designed to study buoyant plumes in the
@@ -124,8 +123,8 @@ The term
 $\dq'''$ is the heat release rate per unit volume from a chemical reaction.
 The term $\dq_{\rm b}'''$ is the energy transferred to subgrid-scale droplets and particles.
 The term $\dbq''$ represents the conductive, diffusive, and radiative heat fluxes:
-\be 
-   \dbq'' = -k \nabla T - \sum_\alpha h_{\rm s,\alpha} \, \rho \, D_\alpha \nabla Z_\alpha + \dbq_{\rm r}'' 
+\be
+   \dbq'' = -k \nabla T - \sum_\alpha h_{\rm s,\alpha} \, \rho \, D_\alpha \nabla Z_\alpha + \dbq_{\rm r}''
 \ee
 where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of species $\alpha$.
 
@@ -147,8 +146,8 @@ the thermodynamic variables.
 \section{Momentum Transport}
 
 Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
-\be 
-   \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big]  
+\be
+   \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big]
 \ee
 The term, $\bof_b$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}.
 
@@ -165,7 +164,7 @@ turbulent combustion of gaseous fuel and oxygen, the transport of thermal radiat
 thermal decomposition of real materials, the activation of sprinklers and smoke detectors, the transport of water and liquid fuel
 droplets, and a variety of other features that describe fires inside and outside of buildings.
 
-Combustion and radiation are introduced into the governing equations via the source terms, $\dq^\ppp$ and $\dq_r^\ppp$,
+Combustion and radiation are introduced into the governing equations via the source terms, $\dq^\ppp$ and $\dq_{\rm r}^\ppp$,
 in the energy transport equation. Since the energy equation is not solved explicitly, these terms find their way into the
 expression for the divergence.
 
@@ -177,7 +176,7 @@ nitrogen, oxygen, water vapor, and carbon dioxide.  The reaction of fuel and oxy
 complete, and there are several optional schemes that are designed to predict the extent of combustion in under-ventilated spaces.
 
 For an infinitely-fast reaction, reactant species in a given grid cell are converted to product species at a rate determined by a
-characteristic mixing time, $\tau_{mix}$. The heat release rate per unit volume is defined by summing the lumped species mass production rates times their respective heats of formation
+characteristic mixing time, $\tau_{\rm mix}$. The heat release rate per unit volume is defined by summing the lumped species mass production rates times their respective heats of formation
 \be
    \dq''' = -\sum_\alpha \dm_\alpha''' \, \Delta h_{\rm f,\alpha} \label{EDC1}
 \ee  %Y rather than Z is correct in this equation
@@ -187,7 +186,7 @@ Details of $\tau_{\rm mix}$ and $\dm_\alpha'''$ are discussed in Chapter \ref{co
 
 The net contribution from thermal radiation in the energy equation is defined by:
 \be
-    \dq_r^\ppp \equiv -\nabla\!\cdot \dbq_r''(\bx) =
+    \dq_r^\ppp \equiv -\nabla\!\cdot \dbq_{\rm r}''(\bx) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_{\rm b}(\bx) \right]  \quad ; \quad
     U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'
 \ee
