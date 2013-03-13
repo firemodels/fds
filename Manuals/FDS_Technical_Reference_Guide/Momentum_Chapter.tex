@@ -9,10 +9,10 @@ discretization of the flux terms, and the solution of an elliptic partial differ
 \section{Large Eddy Simulation (LES)}
 \label{LES}
 
-In this section, we temporarily return to formal LES filter notation and adopt Cartesian tensor index notation (repeated suffixes imply summation) in order to precisely define modeled terms. The LES equations are derived by applying a low-pass filter of width $\Delta$ to the DNS equations. The kernel usually associated with finite volume LES is a box filter---grid resolved quantities are physically interpreted as cell means.  This interpretation is somewhat misleading (see \cite{McDermott:2005b}), but a thorough discussion of filtering is beyond our scope, so the cell mean interpretation will suffice.  In FDS, the filter width is taken to be the cube root of the cell volume, $\Delta = V_c^{1/3}$, $V_c = \delta x \,\delta y\, \delta z$.  Then for any scalar, $\phi$, a filtered field is defined as
+In this section, we temporarily return to formal LES filter notation and adopt Cartesian tensor index notation (repeated suffixes imply summation) in order to precisely define modeled terms. The LES equations are derived by applying a low-pass filter of width $\Delta$ to the DNS equations. The kernel usually associated with finite volume LES is a box filter---grid resolved quantities are physically interpreted as cell means.  This interpretation is somewhat misleading (see \cite{McDermott:2005b}), but a thorough discussion of filtering is beyond our scope, so the cell mean interpretation will suffice.  In FDS, the filter width is taken to be the cube root of the cell volume, $\Delta = V_{\rm c}^{1/3}$, $V_{\rm c} = \delta x \,\delta y\, \delta z$.  Then for any scalar, $\phi$, a filtered field is defined as
 \begin{equation}
 \label{eqn_box_filter}
-\overline{\phi}(x,y,z,t) \equiv \frac{1}{V_c} \int_{x - \delta x/2}^{x + \delta x/2}\int_{y - \delta y/2}^{y + \delta y/2}\int_{z - \delta z/2}^{z + \delta z/2} \phi(x',y',z',t) \,\mbox{d} x' \,\mbox{d} y' \,\mbox{d} z'
+\overline{\phi}(x,y,z,t) \equiv \frac{1}{V_{\rm c}} \int_{x - \delta x/2}^{x + \delta x/2}\int_{y - \delta y/2}^{y + \delta y/2}\int_{z - \delta z/2}^{z + \delta z/2} \phi(x',y',z',t) \,\mbox{d} x' \,\mbox{d} y' \,\mbox{d} z'
 \end{equation}
 It is also conventional to define a mass-weighted or Favre filter such that $\overline{\rho}\,\widetilde{\phi} \equiv \overline{\rho \phi}$.
 
@@ -21,7 +21,7 @@ It is also conventional to define a mass-weighted or Favre filter such that $\ov
 In conservative form, the DNS momentum equation for the $i$th component of velocity is
 \begin{equation}
 \label{eqn_dns_conservative}
-\frac{\partial \rho u_i}{\partial t} + \frac{\partial}{\partial x_j} (\rho u_i u_j) = -\frac{\partial p}{\partial x_i} - \frac{\partial \tau_{ij}}{\partial x_j} + \rho g_i + f_{d,i} + \dot{m}_b^\ppp u_{b,i}
+\frac{\partial \rho u_i}{\partial t} + \frac{\partial}{\partial x_j} (\rho u_i u_j) = -\frac{\partial p}{\partial x_i} - \frac{\partial \tau_{ij}}{\partial x_j} + \rho g_i + f_{{\rm d},i} + \dot{m}_{\rm b}^\ppp u_{{\rm b},i}
 \end{equation}
 In our two-phase formulation, $f_{d,i}$ represents the drag force due to unresolved Lagrangian particles.  The bulk source term, $\dot{m}_b^\ppp u_{b,i}$, accounts for the effects of evaporation or pyrolysis. For Eq.~(\ref{eqn_dns_conservative}) to be applicable, the grid resolution should be smaller than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies \cite{Pope:2000},
 \begin{equation}
@@ -40,34 +40,33 @@ In fire scenarios, $\eta$ is usually on the order of one millimeter.  DNS is the
 With engineering domains ranging in size from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
 \begin{equation}
 \label{eqn_LES_1}
-\frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} + \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{d,i} + \overline{\dot{m}_b^\ppp u_{b,i}}
+\frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} + \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp u_{{\rm b},i}}
 \end{equation}
 Simple enough, we just put lines over everything.  The dilemma we now face is that the cell mean value $\overline{\rho u_i u_j}$ is not itself a primitive variable in the calculation---we have no way of computing the stuff under the bars to advance Eq.~(\ref{eqn_LES_1}) in time.  We must, therefore, decompose the terms, and this leads to closure problems.
 
 The next step is simply to apply the Favre filter,
 \begin{equation}
 \label{eqn_LES_2}
-\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{d,i} + \overline{\dot{m}_b^\ppp} \, \widetilde{u}_{b,i}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp} \, \widetilde{u}_{{\rm b},i}
 \end{equation}
 The first term is now separable, provided we have a solution for $\overline{\rho}$. But we still have no way to compute the correlation $\widetilde{u_i u_j}$ on the grid. We cannot simply use $\widetilde{u}_i \widetilde{u}_j$ as a substitute (this is the old problem of ``the mean of the square does not equal the square of the mean''). Instead, we define the subgrid-scale (SGS) stress:
 \begin{equation}
 \label{eqn_sgs_stress}
-\tau_{ij}^{sgs} \equiv \overline{\rho} ( \widetilde{u_i u_j} - \widetilde{u}_i \widetilde{u}_j )
+\tau_{ij}^{\rm sgs} \equiv \overline{\rho} ( \widetilde{u_i u_j} - \widetilde{u}_i \widetilde{u}_j )
 \end{equation}
 Substituting Eq.~(\ref{eqn_sgs_stress}) into Eq.~(\ref{eqn_LES_2}) yields
 \begin{equation}
 \label{eqn_LES_3}
-\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} - \frac{\partial \tau_{ij}^{sgs}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{d,i} + \overline{\dot{m}_b^\ppp} \, \widetilde{u}_{b,i}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} - \frac{\partial \tau_{ij}^{\rm sgs}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp} \, \widetilde{u}_{{\rm b},i}
 \end{equation}
-
-Equation (\ref{eqn_LES_3}) is what is typically referred to as the LES momentum equation (analogous to the Cauchy equation---constitutive models have not been applied).  All variables are primitive or computable once we find a suitable closure for the subgrid scale stress, $\tau_{ij}^{sgs}$.
+Equation (\ref{eqn_LES_3}) is what is typically referred to as the LES momentum equation (analogous to the Cauchy equation---constitutive models have not been applied).  All variables are primitive or computable once we find a suitable closure for the subgrid scale stress, $\tau_{ij}^{\rm sgs}$.
 
 \subsubsection*{Constitutive Relationship}
 
 There are a few more modifications we need to make in order to get Eq.~(\ref{eqn_LES_3}) into shape for FDS.  The first is to decompose the SGS stress and apply Newton's law of viscosity as the constitutive relationship for the deviatoric part.  Note that $\overline{\tau}_{ij}$ is already the deviatoric part of the viscous stress.  We model the total deviatoric stress as
 \begin{equation}
 \label{eqn_newtons_law_sgs}
-\tau_{ij}^{dev} \equiv \overline{\tau}_{ij} + \tau_{ij}^{sgs} - \frac{1}{3}\tau_{kk}^{sgs}\delta_{ij} = - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right)
+\tau_{ij}^{\rm dev} \equiv \overline{\tau}_{ij} + \tau_{ij}^{\rm sgs} - \frac{1}{3}\tau_{kk}^{\rm sgs}\delta_{ij} = - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right)
 \end{equation}
 Note that $\delta_{ij}$ is the Kronecker delta ($\delta_{ij}=1$ if $i=j$, $\delta_{ij}=0$ if $i\ne j$).  The turbulent viscosity, $\mu_t$, requires modeling, as discussed below.
 
@@ -76,46 +75,45 @@ Note that $\delta_{ij}$ is the Kronecker delta ($\delta_{ij}=1$ if $i=j$, $\delt
 In LES of low-Mach flows, the isotropic part of the SGS stress must be absorbed by the pressure term.  Define the subgrid kinetic energy as half the trace of the SGS stress,
 \begin{equation}
 \label{eqn_ksgs_2}
-k_{sgs} \equiv \frac{1}{2} \tau_{kk}^{sgs}
+k_{\rm sgs} \equiv \frac{1}{2} \tau_{kk}^{\rm sgs}
 \end{equation}
 and define the modified filtered pressure \cite{Pope:2000} as
 \begin{equation}
 \label{eqn_modified_pressure}
-\bar{p} \equiv \overline{p} + \frac{2}{3}k_{sgs}
+\bar{p} \equiv \overline{p} + \frac{2}{3}k_{\rm sgs}
 \end{equation}
 Upon substitution of Eqs.~(\ref{eqn_newtons_law_sgs}) and (\ref{eqn_modified_pressure}) into Eq.~(\ref{eqn_LES_3}), we have
 \begin{equation}
 \label{eqn_LES_4}
-\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \bar{p}}{\partial x_i} - \frac{\partial \tau_{ij}^{dev}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{d,i} + \overline{\dot{m}_b^\ppp} \, \widetilde{u}_{b,i}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \bar{p}}{\partial x_i} - \frac{\partial \tau_{ij}^{\rm dev}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp} \, \widetilde{u}_{{\rm b},i}
 \end{equation}
-
-Notice that Eq.~(\ref{eqn_LES_4}) closely resembles the DNS momentum equation, Eq.~(\ref{eqn_dns_conservative}).  For this reason, we may relax the filter formalism as we discuss the numerical details of the algorithm.  The user should simply understand that in the LES context when we write $\tau_{ij}$ we mean precisely $\tau_{ij}^{dev}$, and similarly for pressure in LES $p$ refers to $\bar{p}$.
+Notice that Eq.~(\ref{eqn_LES_4}) closely resembles the DNS momentum equation, Eq.~(\ref{eqn_dns_conservative}).  For this reason, we may relax the filter formalism as we discuss the numerical details of the algorithm.  The user should simply understand that in the LES context when we write $\tau_{ij}$ we mean precisely $\tau_{ij}^{\rm dev}$, and similarly for pressure in LES $p$ refers to $\bar{p}$.
 
 \subsubsection*{Bulk Mass Source Term}
 
 When writing the momentum equation in non-conservative form, which we will do below, we must account for the introduction of mass from subgrid particles (evaporation of water droplets, for example).  Using the continuity equation, Eq.~(\ref{mass}), we can rewrite Eq.~(\ref{eqn_LES_4}) as follows:
 \begin{equation}
 \label{eqn_LES_5}
-\overline{\rho} \,\DoD{\widetilde{u}_i}{t} = -\frac{\partial \bar{p}}{\partial x_i} - \frac{\partial \tau_{ij}^{dev}}{\partial x_j} + \overline{\rho} g_i + \underbrace{\bar{f}_{d,i} + \overline{\dot{m}_b^{\ppp}} (\widetilde{u}_{b,i} - \widetilde{u}_i)}_{\displaystyle\bar{f}_{b,i}}
+\overline{\rho} \,\DoD{\widetilde{u}_i}{t} = -\frac{\partial \bar{p}}{\partial x_i} - \frac{\partial \tau_{ij}^{\rm dev}}{\partial x_j} + \overline{\rho} g_i + \underbrace{\bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^{\ppp}} (\widetilde{u}_{{\rm b},i} - \widetilde{u}_i)}_{\displaystyle\bar{f}_{{\rm b},i}}
 \end{equation}
-The last term in Eq.~(\ref{eqn_LES_5}) is absorbed into the bulk subgrid force term, $\bar{f}_{b,i}$, which also accounts for drag, as discussed in Chapter \ref{chapter:lagrangian_particles} on Lagrangian Particles.
+The last term in Eq.~(\ref{eqn_LES_5}) is absorbed into the bulk subgrid force term, $\bar{f}_{{\rm b},i}$, which also accounts for drag, as discussed in Chapter \ref{chapter:lagrangian_particles} on Lagrangian Particles.
 
 \subsection{Production of Subgrid Kinetic Energy}
 
 The transport equation for the resolved kinetic energy per unit mass, $K\equiv \mhalf \widetilde{u}_i\widetilde{u}_i$, is derived by dotting the LES momentum equation with the resolved velocity vector.  The result is
 \begin{align}
 \label{eqn_LES_KE}
-\overline{\rho} \,\DoD{K}{t} &= -\widetilde{u}_i\frac{\partial \bar{p}}{\partial x_i} - \widetilde{u}_i\frac{\partial \tau_{ij}^{dev}}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i \notag \\
-\overline{\rho} \,\DoD{K}{t} + \frac{\partial}{\partial x_j} ([\bar{p}\delta_{ij} + \tau_{ij}^{dev}]\widetilde{u}_i) &=  \bar{p} \frac{\partial \widetilde{u}_i}{\partial x_i} + \tau_{ij}^{dev}\frac{\partial \widetilde{u}_i}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i
+\overline{\rho} \,\DoD{K}{t} &= -\widetilde{u}_i\frac{\partial \bar{p}}{\partial x_i} - \widetilde{u}_i\frac{\partial \tau_{ij}^{\rm dev}}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i \notag \\
+\overline{\rho} \,\DoD{K}{t} + \frac{\partial}{\partial x_j} ([\bar{p}\delta_{ij} + \tau_{ij}^{\rm dev}]\widetilde{u}_i) &=  \bar{p} \frac{\partial \widetilde{u}_i}{\partial x_i} + \tau_{ij}^{\rm dev}\frac{\partial \widetilde{u}_i}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{{\rm b},i}) \widetilde{u}_i
 \end{align}
 The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence, e.g., the Rayleigh-Taylor instability).
 
 Most simple LES subgrid closures take production of subgrid kinetic energy to be equal to the dissipation of total kinetic energy.  Using gradient diffusion for SGS closure, this assumption implies the following:
 \begin{align}
 \label{eqn_ke_dissipation}
-\tau_{ij}^{dev}\frac{\partial \widetilde{u}_i}{\partial x_j} &= - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \frac{\partial \widetilde{u}_i}{\partial x_j} && \notag\\
-&= - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \widetilde{S}_{ij} && \notag \\
-&= - 2 (\mu + \mu_t) \left(\widetilde{S}_{ij}\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}})^2 \right) && = -2\mu \left(S_{ij}S_{ij} - \frac{1}{3}(\Div \mathbf{u})^2 \right) \equiv \varepsilon
+\tau_{ij}^{\rm dev}\frac{\partial \widetilde{u}_i}{\partial x_j} &= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \frac{\partial \widetilde{u}_i}{\partial x_j} && \notag\\
+&= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \widetilde{S}_{ij} && \notag \\
+&= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij}\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}})^2 \right) = -2\mu \left(S_{ij}S_{ij} - \frac{1}{3}(\Div \mathbf{u})^2 \right) \equiv \varepsilon
 \end{align}
 Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.
 
@@ -142,8 +140,8 @@ For the dynamic Smagorinsky model~\cite{Germano:1}, the coefficient $C_{\rm s}$ 
 
 By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1}:
 \be
-  \mu_t = \rho \, C_\nu \, \Delta \, \sqrt{k_{\hbox{\tiny sgs}} } \quad ; \quad
-  k_{\hbox{\tiny sgs}} = \ha \left( (\overline{u}-\hat{u})^2 + (\overline{v}-\hat{v})^2 + (\overline{w}-\hat{w})^2 \right)  \label{Deardorff_LES}
+  \mu_{\rm t} = \rho \, C_\nu \, \Delta \, \sqrt{ k_{\rm sgs} } \quad ; \quad
+  k_{\rm sgs} = \ha \left( (\overline{u}-\hat{u})^2 + (\overline{v}-\hat{v})^2 + (\overline{w}-\hat{w})^2 \right)  \label{Deardorff_LES}
 \ee
 where $\overline{u}$ is the average value of $u$ at the grid cell center and $\hat{u}$ is a weighted average of $u$ over the adjacent cells:
 \be
@@ -157,14 +155,13 @@ The terms $\hat{v}$ and $\hat{w}$ are defined similarly.  The model constant is 
 Vreman's eddy viscosity model \cite{vreman:2004} is given by
 \begin{equation}
 \label{eqn_mu_vreman}
-\mu_t = \rho \, c \, \sqrt{ \frac{B_\beta}{\alpha_{ij}\alpha_{ij}} }
+\mu_{\rm t} = \rho \, c \, \sqrt{ \frac{B_\beta}{\alpha_{ij}\alpha_{ij}} }
 \end{equation}
 where
 \begin{align}
 B_\beta     &= \beta_{11}\beta_{22} - \beta_{12}^2 + \beta_{11}\beta_{33} - \beta_{13}^2 + \beta_{22}\beta_{33} - \beta_{23}^2 \quad ; \quad \beta_{ij} = \Delta_m^2 \alpha_{mi} \alpha_{mj} \\
 \alpha_{ij} &= \frac{\partial u_j}{\partial x_i}
 \end{align}
-
 The basic idea behind Vreman's model is to expand the velocity field in a Taylor series and to test filter this field analytically, thus avoiding the expensive explicit test filtering operations necessary in the dynamic model.  Therefore, this model is inexpensive.  Unlike constant coefficient Smagorinsky, however, Vreman's model is convergent, making it applicable to highly resolved LES calculations.
 
 The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_{\rm s}^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_{\rm s} = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS Verification Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
@@ -173,10 +170,10 @@ The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \,
 
 The other diffusive parameters,
 the thermal conductivity and mass diffusivity, are related to the turbulent viscosity by
-\be k_t = \frac{\mu_t \, c_p}{\PR_t}
+\be k_{\rm t} = \frac{\mu_{\rm t} \, c_p}{\PR_{\rm t}}
 \quad ; \quad
- (\rho D)_t =\frac{\mu_t}{\SC_t} \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario.  The default value is 0.5 for both.
+ (\rho D)_{\rm t} =\frac{\mu_{\rm t}}{\SC_{\rm t}} \ee
+The turbulent Prandtl number $\PR_{\rm t}$ and the turbulent Schmidt number $\SC_{\rm t}$ are assumed to be constant for a given scenario.  The default value is 0.5 for both.
 
 \subsection{Numerical Implementation}
 
