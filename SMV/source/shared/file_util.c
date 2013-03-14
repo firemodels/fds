@@ -73,7 +73,7 @@ void filecopy(char *destdir, char *file_in, char *file_out){
 
 /* ------------------ copyfile ------------------------ */
 
-void copyfile2(char *destfile, char *sourcefile, int mode){
+void copy_file(char *destfile, char *sourcefile, int mode){
   char buffer[FILE_BUFFER];
   FILE *streamin, *streamout;
   size_t chars_in;
