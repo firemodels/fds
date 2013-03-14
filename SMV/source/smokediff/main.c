@@ -165,7 +165,6 @@ int main(int argc, char **argv){
     smoke1 = smoke1a;
 
     if(file_exists(fed_smoke1)==1){
-      printf("before copy2\n");
       copyfile2(smoke1b,smoke1a,0);
       copyfile2(smoke1b,fed_smoke1,1);
       smoke1=smoke1b;
