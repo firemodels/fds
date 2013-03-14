@@ -169,7 +169,7 @@ Note that tracking all primitive species could be very expensive.  Chemical mech
 For the vast majority of FDS applications, the ``mixed is burnt'' approximation is adequate to describe combustion chemistry and the chemical source term for Fuel may be modeled by the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager \cite{Magnussen:1,Poinsot:TNC}:
 \begin{equation}
 \label{eq:edc}
-\dot{m}_F^{\prime\prime\prime} = -\rho \frac{\min(Z_F, s\,Z_A)}{\tau_{\rm mix}}
+\dot{m}_F^{\prime\prime\prime} = -\rho \frac{\min(Z_F, Z_A/s)}{\tau_{\rm mix}}
 \end{equation}
 Here, $Z_F$ and $Z_A$ are the lumped mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.  The quantity $\tau_{\rm mix}$ is a time scale for mixing which must be modeled (see Section \ref{sec:reac_time_scale}).  The EDC model therefore states that the rate of fuel consumption is proportional to both the local limiting reactant concentration and the local rate of mixing. As we will see below, the EDC model is a limiting case of a generalized partially-stirred batch reactor model in which all the reactants are initially unmixed and the rate of chemical kinetics is infinite.
 
@@ -215,9 +215,10 @@ FDS uses simple empirical rules---which ignore strain---to predict local extinct
 \item If the cell temperature is below the auto-ignition temperature for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default so that the typical user does not need to specify an ignition source.
 \item If the potential combustion heat release from a local pocket of stoichimetric fuel-air-product mixture cannot raise the temperature of that mixture above an empirically determined limiting flame temperature, $T_{\rm LFT}$, then combustion is suppressed.  Let $Z_{\rm F}$, $Z_{\rm A}$, and $Z_{\rm P}$ denote the resolved lumped species mass fractions of Fuel\footnote{If multiple fuels are present, all are temporarily grouped into one lumped species for the purposes of the extinction model.}, Air, and Products\footnote{Here Products accounts for product species from previous time steps and for all other diluents in the system.} at the beginning of the combustion time step.  The mass stoichiometric coefficients for Air is $s$.  Based on the limiting reactant, the masses in the local pocket of stoichiometric mixture are defined to be
 \begin{align}
-\label{eq:dzf}  \Delta Z_{\rm F} &= \min(Z_{\rm F},s\,Z_{\rm A})                 \\
-\label{eq:dza}  \Delta Z_{\rm A} &= s \Delta Z_{\rm F}                           \\
-\label{eq:dznf} \Delta Z_{\rm NF} &= \Delta Z_{\rm A} + (\Delta Z_{\rm A}/Z_{\rm A}) Z_{\rm P}\,\mbox{,} \quad \mbox{NF = ``Non-Fuel''}
+\label{eq:dzf}  \Delta Z_{\rm BF} &= \min(Z_{\rm F},Z_{\rm A}/s)\,\mbox{,} \quad \mbox{BF = ``Burning-Fuel''}
+                 \\
+\label{eq:dza}  \Delta Z_{\rm A} &= s \Delta Z_{\rm BF}                           \\
+\label{eq:dznf} \Delta Z_{\rm NF} &= \Delta Z_{\rm A} + (\Delta Z_{\rm A}/Z_{\rm A}) (Z_{\rm P}+(Z_{\rm F}-\Delta Z_{\rm BF}))\,\mbox{,} \quad \mbox{NF = ``Non-Fuel''}
 \end{align}
 The extinction criterion is then given by
 \begin{equation}
@@ -431,7 +432,7 @@ Next, note that in the case where the reactants are unmixed, the fuel mass fract
 &= \rho \, \frac{1-\zeta_0 \, {\rm e}^{-\Delta t/\tau_{\rm mix}}}{\Delta t} \, \Delta \hat{Y}_{\rm F} \notag \\
 &= \rho \, \frac{1-\zeta_0 (1 - \frac{\Delta t}{\tau_{\rm mix}})}{\Delta t} \, \Delta \hat{Y}_{\rm F} \notag \\
 &= \rho \, \frac{\Delta \hat{Y}_{\rm F}}{\tau_{\rm mix}} \notag \\
-&= - \rho \, \frac{ \min(\hat{Y}_{\rm F}, s \, \hat{Y}_{\rm A}) }{ \tau_{\rm mix} }
+&= - \rho \, \frac{ \min(\hat{Y}_{\rm F}, \hat{Y}_{\rm A}/s) }{ \tau_{\rm mix} }
 \end{align}
 which corresponds to Eq.~(\ref{eq:edc}) with the mass fractions written in terms of the mixed zone composition.
 
