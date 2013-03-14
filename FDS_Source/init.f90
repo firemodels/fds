@@ -1978,6 +1978,7 @@ WC%RDN    = RDN
 WC%AW     = AW
 IF (WC%AW>0._EB) WC%RAW = 1._EB/WC%AW
 WC%ONE_D%UW     = UW
+WC%ONE_D%UWS    = UW
 
 WC%NOM       = NOM_FOUND
 WC%NOM_IB(:) = NOM_IB(:)
