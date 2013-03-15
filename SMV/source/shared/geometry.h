@@ -7,6 +7,11 @@
 #define GEOM_EXTERIOR 1
 #define GEOM_COMPLEX 2
 
+float vec_dot(float *x, float *y);
+void vec_cross(float *x, float *y, float *xy);
+float vol_tetra(float *a, float *b, float *c, float *d);
+float vol_pentaa(float *a, float *b, float *c, float *d, float *e, float *f);
+
 /* --------------------------  vertdata ------------------------------------ */
 
 typedef struct _vertdata {
