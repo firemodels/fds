@@ -595,6 +595,9 @@ void parse_commandline(int argc, char **argv){
       strncmp(argv[i],"-redirect",9)==0
       ){
         LOGSTREAM=freopen(log_filename,"w",stdout);
+        if(LOGSTREAM!=NULL){
+          fclose(stdout);
+        }
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
       from_commandline=1;
