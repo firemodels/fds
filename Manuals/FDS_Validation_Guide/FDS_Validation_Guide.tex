@@ -173,12 +173,12 @@
 \begin{minipage}[t][9in][s]{6.5in}
 
 \huge
-\flushright{NIST Special Publication 1018}
+\flushright{\bf NIST Special Publication 1018 \\ \Large Sixth Edition}
 
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator  \\
+\flushright{\bf Fire Dynamics Simulator  \\
 Technical Reference Guide \\ \LARGE Volume 3: Validation}
 
 \normalsize
@@ -202,12 +202,12 @@ VTT Technical Research Centre of Finland \\ [.3in]
 \begin{minipage}[t][9in][s]{6.5in}
 
 \huge
-\flushright{NIST Special Publication 1018}
+\flushright{\bf NIST Special Publication 1018 \\ \Large Sixth Edition}
 
 \vspace{1.in}
 
 \Huge
-\flushright{Fire Dynamics Simulator  \\
+\flushright{\bf Fire Dynamics Simulator  \\
 Technical Reference Guide \\ \LARGE Volume 3: Validation }
 
 \vspace{.5in}
@@ -268,79 +268,30 @@ forms of evaluation, both at NIST and beyond. This volume provides a survey of v
 
 
 \chapter{Acknowledgments}
-
 \label{acksection}
 
-FDS is supported financially via internal funding at both NIST and
-VTT, Finland. In addition, support is provided by other agencies of
-the US Federal Government:
+The following individuals and organizations played a role in the validation process of FDS.
 \begin{itemize}
-\item The US Nuclear Regulatory Commission Office of Research has funded key
-validation experiments, the preparation of the FDS manuals, and the
-development of various sub-models that are of importance in the area
-of nuclear power plant safety. Special thanks to Mark Salley, David Stroup, and Jason
-Dreisbach for their efforts and support.  The Office of Nuclear
-Material Safety and Safeguards, another branch of the US NRC, has
-supported modeling studies of tunnel fires under the direction of
-Chris Bajwa and Allen Hansen.
-\item The Micro-Gravity Combustion Program of the National Aeronautics and Space
-Administration (NASA) has supported several projects that directly or indirectly benefited FDS development.
-\item The US Forest Service has supported the development of sub-models in FDS designed to simulate the spread of
-fire in the Wildland Urban Interface (WUI). Special thanks to Mark Finney and Tony Bova for their support.
-\item The Minerals Management Service of the US Department of the Interior funded research at NIST aimed at
-characterizing the burning behavior of oil spilled on the open sea or ice. Part of this research led to the development
-of the ALOFT (A Large Outdoor Fire plume Trajectory) model, a forerunner of FDS. Special thanks to Joe Mullin for his
-encouragement of the modeling efforts.
-\end{itemize}
-\noindent The following individuals and organizations played a role in the validation process of FDS.
-\begin{itemize}
-\item Anthony Hamins directed the NIST/NRC and WTC experiments, conducted smaller methane burner
-measurements, and quantified the experimental uncertainty of these and other
-experiments used in this study. Alex Maranghides was the Director of the Large Fire Laboratory at NIST at
-the time these tests were conducted, and he helped to design the
-experiments. Therese McAllister oversaw the instrumentation of the structural steel during the WTC experiments.
-\item Anthony Hamins developed the technique of evaluating experimental uncertainty that is used throughout this Guide.
-Blaza Toman of the Statistical Engineering Division of NIST developed the method of quantifying the
-model error.
-\item Rick Peacock of NIST assisted in the interpretation of results from
-the ``NBS Multi-Room Test Series,'' a set of three room
-fire experiments conducted at the National Bureau of Standards (now
-NIST) in the mid-1980's.
-\item Bryan Klein, currently employed at Thunderhead Engineering, Inc., assisted in the development of techniques to automatically generate the plots that
-are found throughout this Guide.
-\item Bill Pitts, Nelson Bryner, and Erik Johnsson of NIST contributed and interpreted test data for the
-``NIST Reduced Scale Enclosure Experiments.''
-\item David Sheppard, currently of the Bureau of Alcohol, Tobacco and Firearms (ATF), conducted the
-experiments referred to as the ``UL/NFPRF Test Series'' on behalf of the Fire Protection Research Foundation (then known as
-the National Fire Protection Research Foundation) while working at Underwriters Labs in Northbrook, Illinois.
-Sheppard, along with Bryan Klein, currently employed at Thunderhead Engineering, Inc., conducted the experiments referred to as the ``ATF Corridors'' series in 2008.
-\item Jerry Back, Craig Beyler and Phil DiNenno of Hughes Associates and Pat Tatem of
-the Naval Research Laboratory contributed
-experimental data for the ``HAI/NRL Wall Fire'' series. Thanks also to Craig Beyler for assistance with the data
-for the ``Beyler Hood Experiments.''
+\item The US Nuclear Regulatory Commission Office of Research has funded key validation experiments, the preparation of the FDS manuals, and the development of various sub-models that are of importance in the area of nuclear power plant safety. Special thanks to Mark Salley, David Stroup, and Jason Dreisbach for their efforts and support.
+\item Anthony Hamins directed the NIST/NRC and WTC experiments, conducted smaller methane burner measurements, and quantified the experimental uncertainty of these and other experiments used in this study. Alex Maranghides was the Director of the Large Fire Laboratory at NIST at the time these tests were conducted, and he helped to design the experiments. Therese McAllister oversaw the instrumentation of the structural steel during the WTC experiments.
+\item Anthony Hamins developed the technique of evaluating experimental uncertainty that is used throughout this Guide. Blaza Toman of the Statistical Engineering Division of NIST developed the method of quantifying the model uncertainty.
+\item Rick Peacock of NIST assisted in the interpretation of results from the ``NBS Multi-Room Test Series,'' a set of three room fire experiments conducted at the National Bureau of Standards (now NIST) in the mid-1980's.
+\item Bryan Klein, currently employed at Thunderhead Engineering, Inc., assisted in the development of techniques to automatically generate the plots that are found throughout this Guide.
+\item Bill Pitts, Nelson Bryner, and Erik Johnsson of NIST contributed and interpreted test data for the ``NIST Reduced Scale Enclosure Experiments.''
+\item David Sheppard, currently of the Bureau of Alcohol, Tobacco and Firearms (ATF), conducted the experiments referred to as the ``UL/NFPRF Test Series'' on behalf of the Fire Protection Research Foundation (then known as the National Fire Protection Research Foundation) while working at Underwriters Labs in Northbrook, Illinois. Sheppard, along with Bryan Klein, currently employed at Thunderhead Engineering, Inc., conducted the experiments referred to as the ``ATF Corridors'' series in 2008.
+\item Jerry Back, Craig Beyler and Phil DiNenno of Hughes Associates and Pat Tatem of the Naval Research Laboratory contributed experimental data for the ``HAI/NRL Wall Fire'' series. Thanks also to Craig Beyler for assistance with the data for the ``Beyler Hood Experiments.''
 \item Ken Steckler provided details about the ``Steckler Compartment Experiments'' of 1979.
 \item Jianping Zhang at the University of Ulster contributed heat flux measurements from the SBI apparatus.
-\item At the University of Maryland, Professor Fred~Mowrer and Phil Friday
-were the first to apply FDS to the NRC-sponsored experiments referred
-to in this document as the ``FM/SNL Test Series'' (Factory Mutual and
-Sandia National Laboratories conducted these experiments).
+\item At the University of Maryland, Professor Fred~Mowrer and Phil Friday were the first to apply FDS to the NRC-sponsored experiments referred to in this document as the ``FM/SNL Test Series'' (Factory Mutual and Sandia National Laboratories conducted these experiments).
 \item Jukka Vaari of VTT, Finland, contributed the Cup Burner test cases.
 \item Steve Nowlen of Sandia National Laboratory provided valuable information about the FM/SNL series, and he also conducted the CAROLFIRE experiments.
-\item Ulf Wickstr\"{o}m of SP, Sweden, contributed experimental data from a series of experiments (SP AST) that were designed to
-evaluate the feasibility of using plate thermometer measurements as boundary conditions for a heat conduction calculation within several types of
-steel beams. The adiabatic surface temperature concept was tested in both the experiments and model.
+\item Ulf Wickstr\"{o}m of SP, Sweden, contributed experimental data from a series of experiments (SP AST) that were designed to evaluate the feasibility of using plate thermometer measurements as boundary conditions for a heat conduction calculation within several types of steel beams. The adiabatic surface temperature concept was tested in both the experiments and model.
 \item Jeremy Thornock at the University of Utah provided data on the Sandia helium plume.
 \item Sheldon Teiszen at Sandia National Laboratories, Albuquerque, provided detailed statistics for the helium plume and pool fire experiments conducted in the Sandia FLAME facility.
-\item Taylor Myers, a student at the University of Maryland and a Summer Undergraduate Research Fellow (SURF) at NIST, analyzed the
-Vettori Flat and Sloped Ceiling sprinkler experiments. Thanks also to Bob Vettori of the U.S. Nuclear Regulatory Commission and formerly of NIST for his
-help in locating the original test data and laboratory notebooks.
-\item Hans la Cour-Harbo, a masters degree student at the Technical University of Denmark, provided guidance and insight on the NRCC Facade experiments. Scott Bareham of
-NIST provided the technical drawing of the test enclosure.
-\item Prof.~Stanislav Stoliarov and graduate students Mark McKinnon and Jing Li of the University of Maryland provided the properties of several polymers for the
-FAA Polymers example.
-\item Michael Spearpoint and masters degree students Roger Harrison and Rob Fleury of the University of Canterbury, New Zealand,
-supplied measurements of mass entrainment rates into spill plumes (Harrison Spill Plumes)
-and heat flux measurements from propane burner fires (Fleury Heat Flux).
+\item Taylor Myers, a student at the University of Maryland and a Summer Undergraduate Research Fellow (SURF) at NIST, analyzed the Vettori Flat and Sloped Ceiling sprinkler experiments. Thanks also to Bob Vettori of the U.S. Nuclear Regulatory Commission and formerly of NIST for his help in locating the original test data and laboratory notebooks.
+\item Hans la Cour-Harbo, a masters degree student at the Technical University of Denmark, provided guidance and insight on the NRCC Facade experiments. Scott Bareham of NIST provided the technical drawing of the test enclosure.
+\item Prof.~Stanislav Stoliarov and graduate students Mark McKinnon and Jing Li of the University of Maryland provided the properties of several polymers for the FAA Polymers example.
+\item Michael Spearpoint and masters degree students Roger Harrison and Rob Fleury of the University of Canterbury, New Zealand, supplied measurements of mass entrainment rates into spill plumes (Harrison Spill Plumes) and heat flux measurements from propane burner fires (Fleury Heat Flux).
 \end{itemize}
 
 
