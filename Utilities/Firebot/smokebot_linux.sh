@@ -526,6 +526,10 @@ check_verification_cases_release()
 
 compile_smv_utilities()
 {  
+   # smokeview libraries
+   cd $FDS_SVNROOT/SMV/Build/LIBS/lib_linux_intel_64
+   echo 'Building Smokeview libraries:' > $FIREBOT_DIR/output/stage6a 2>&1
+   ./makelibs.sh >> $FIREBOT_DIR/output/stage6a 2>&1
    # smokezip:
    cd $FDS_SVNROOT/Utilities/smokezip/intel_linux_64
    rm -f *.o smokezip_linux_64
