@@ -34,7 +34,7 @@ int readsmv(char *smvfile){
   ipdim=0;
   streamsmv=fopen(smvfile,"r");
   if(streamsmv==NULL){
-    printf("The file: %s could not be opened\n",smvfile);
+    fprintf(alt_stdout,"The file: %s could not be opened\n",smvfile);
     return 1;
   }
 
@@ -266,11 +266,11 @@ int readsmv(char *smvfile){
   ismoke3d_seq=0;
   rewind(streamsmv);
 #ifndef pp_THREAD
-  if(GLOBcleanfiles==0)printf("Compressing .bf, .iso, .s3d, and .sf data files referenced in %s\n\n",smvfile);
+  if(GLOBcleanfiles==0)fprintf(alt_stdout,"Compressing .bf, .iso, .s3d, and .sf data files referenced in %s\n\n",smvfile);
 #endif
   if(GLOBcleanfiles==1){
-    printf("Removing compressed .bf, .iso, .s3d and .sf data files referenced in %s\n",smvfile);
-    printf("   (Each removal occurs only if the corresponding uncompressed file exists)\n\n");
+    fprintf(alt_stdout,"Removing compressed .bf, .iso, .s3d and .sf data files referenced in %s\n",smvfile);
+    fprintf(alt_stdout,"   (Each removal occurs only if the corresponding uncompressed file exists)\n\n");
   }
   while(!feof(streamsmv)){
     patch *patchi;

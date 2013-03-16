@@ -240,7 +240,7 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   Update_Times();
   get_faceinfo();
 #ifdef _DEBUG
-  printf("After iso load: ");
+  fprintf(alt_stdout,"After iso load: ");
   PrintMemoryInfo;
 #endif
   Idle_CB();
@@ -297,7 +297,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
 #ifdef _DEBUG
   if(flag==UNLOAD){
-    printf("After iso unload: ");
+    fprintf(alt_stdout,"After iso unload: ");
     PrintAllMemoryInfo;
   }
 #endif
@@ -407,7 +407,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     if(iitime%isoframestep_global!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)||skip_frame==1){
     }
     else{
-      printf("isosurface time=%f\n",time_local);
+      fprintf(alt_stdout,"isosurface time=%f\n",time_local);
     }
     ntri_total=0;
     for(ilevel=0;ilevel<meshi->nisolevels;ilevel++){
@@ -653,8 +653,8 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     }
   }
 #ifdef _DEBUG
-  printf("nverts=%i ntris=%i\n",ntotal_isoverts,ntotal_isotris);
-  printf("size verts=%i tris=%i\n",(int)(ntotal_isoverts*sizeof(isovert)),(int)(ntotal_isotris*sizeof(isotri)/3));
+  fprintf(alt_stdout,"nverts=%i ntris=%i\n",ntotal_isoverts,ntotal_isotris);
+  fprintf(alt_stdout,"size verts=%i tris=%i\n",(int)(ntotal_isoverts*sizeof(isovert)),(int)(ntotal_isotris*sizeof(isotri)/3));
 #endif
 
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
@@ -685,7 +685,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
   Update_Times();
 #ifdef _DEBUG
-  printf("After iso load: ");
+  fprintf(alt_stdout,"After iso load: ");
   PrintMemoryInfo;
 #endif
   Idle_CB();
@@ -697,11 +697,11 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     float loadrate;
 
     loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
-    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    fprintf(alt_stdout," %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
     (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
   }
   else{
-    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    fprintf(alt_stdout," %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
 
@@ -1491,7 +1491,7 @@ void setisolabels(float smin, float smax,
 
 
   *errorcode=0;
-  printf("setting up iso labels \n");
+  fprintf(alt_stdout,"setting up iso labels \n");
   scale=sb->scale;
   getIsoLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,sb->levels256);

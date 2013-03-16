@@ -592,7 +592,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     }
     if(use_tload_begin==1&&time_local<tload_begin)smoke3di->use_smokeframe[i]=0;
     if(smoke3di->use_smokeframe[i]==1){
-      printf("3D smoke/fire time=%.2f",time_local);
+      fprintf(alt_stdout,"3D smoke/fire time=%.2f",time_local);
     }
     SKIP;EGZ_FREAD(nchars,4,2,SMOKE3DFILE);SKIP;
     if(EGZ_FEOF(SMOKE3DFILE)!=0){
@@ -620,7 +620,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       sprintf(compstring," compression ratio: %.1f",complevel);
       trim(compstring);
       trimzeros(compstring);
-      printf("%s\n",compstring);
+      fprintf(alt_stdout,"%s\n",compstring);
     }
     else{
       SKIP;EGZ_FSEEK(SMOKE3DFILE,smoke3di->nchars_compressed_smoke_full[i],SEEK_CUR);SKIP;
@@ -660,11 +660,11 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     float loadrate;
 
     loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
-    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    fprintf(alt_stdout," %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
     (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
   }
   else{
-    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    fprintf(alt_stdout," %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
   PrintMemoryInfo;
@@ -2973,7 +2973,7 @@ void drawsmoke3d(smoke3ddata *smoke3di){
   }
   transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
-//  printf("majorcull=%i minorcull=%i\n",majorcull,minorcull);
+//  fprintf(alt_stdout,"majorcull=%i minorcull=%i\n",majorcull,minorcull);
 }
 
 #ifdef pp_GPU
@@ -4132,8 +4132,8 @@ int init_cull_exts(void){
   }
   else{
     trim(version_label);
-    printf("Smokeview is running on a system using OpenGL %s\n",version_label2);
-    printf("Smoke culling is not not supported, it requires OpenGL 2.0 or later.\n");
+    fprintf(alt_stdout,"Smokeview is running on a system using OpenGL %s\n",version_label2);
+    fprintf(alt_stdout,"Smoke culling is not not supported, it requires OpenGL 2.0 or later.\n");
     cullsmoke=0;
     err=1;
   }
@@ -4850,7 +4850,7 @@ void updatesmoke3dmenulabels(void){
   smoke3ddata *smoke3di;
   char meshlabel[128];
 
-  printf("  updating smoke3d menu labels\n");
+  fprintf(alt_stdout,"  updating smoke3d menu labels\n");
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     STRCPY(smoke3di->menulabel,smoke3di->label.longlabel);
@@ -4882,7 +4882,7 @@ void updatesmoke3dmenulabels(void){
       STRCAT(smoke3di->menulabel,meshlabel);
     }
   } 
-  printf("  update completed\n");
+  fprintf(alt_stdout,"  update completed\n");
 }
 
 /* ------------------ adjustalpha ------------------------ */
@@ -5195,7 +5195,7 @@ void initcullplane(int cullflag){
   float dx, dy, dz, factor;
 
 #ifdef _DEBUG
-  printf("updating initcullplane %i\n",cull_count++);
+  fprintf(alt_stdout,"updating initcullplane %i\n",cull_count++);
 #endif
   update_initcullplane=0; 
   cp = cullplaneinfo;
@@ -6061,7 +6061,7 @@ void getPixelCount(void){
     }
   }
 #ifdef _DEBUG
-  if(update_initcullplane==1)printf("pixel count has changed - 1\n");
+  if(update_initcullplane==1)fprintf(alt_stdout,"pixel count has changed - 1\n");
 #endif
 }
 #endif

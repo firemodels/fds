@@ -547,7 +547,7 @@ void parse_commandline(int argc, char **argv){
     else if(strncmp(argv[i],"-stereo",7)==0){
       stereoactive=1;
       showstereo=1;
-      printf("stereo option activated\n");
+      fprintf(alt_stdout,"stereo option activated\n");
     }
 #ifdef pp_LANG
     else if(strncmp(argv[i],"-lang",5)==0){
@@ -594,10 +594,10 @@ void parse_commandline(int argc, char **argv){
     else if(
       strncmp(argv[i],"-redirect",9)==0
       ){
-        LOGSTREAM=freopen(log_filename,"w",stdout);
-      //  if(LOGSTREAM!=NULL){
-      //    fclose(stdout);
-      //  }
+        LOGSTREAM=fopen(log_filename,"w");
+        if(LOGSTREAM!=NULL){
+          set_outstream(LOGSTREAM);
+        }
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
       from_commandline=1;
@@ -695,82 +695,82 @@ void display_version_info(void){
 
     getPROGversion(version);
     svn_num=getmaxrevision();    // get svn revision number
-    printf("\n");
-    printf("%s\n\n",TITLERELEASE);
-    printf("Version: %s\n",version);
+    fprintf(alt_stdout,"\n");
+    fprintf(alt_stdout,"%s\n\n",TITLERELEASE);
+    fprintf(alt_stdout,"Version: %s\n",version);
 #ifdef BIT64
-    printf("Smokeview (64 bit) Revision Number: %i\n",svn_num);
+    fprintf(alt_stdout,"Smokeview (64 bit) Revision Number: %i\n",svn_num);
 #else
-    printf("Smokeview (32 bit) Revision Number: %i\n",svn_num);
+    fprintf(alt_stdout,"Smokeview (32 bit) Revision Number: %i\n",svn_num);
 #endif
 #ifdef WIN32
 #ifdef X64
-    printf("Platform: WIN64 ");
+    fprintf(alt_stdout,"Platform: WIN64 ");
 #else
-    printf("Platform: WIN32 ");
+    fprintf(alt_stdout,"Platform: WIN32 ");
 #endif
 #ifdef pp_INTEL
-    printf(" (Intel C/C++)\n");
+    fprintf(alt_stdout," (Intel C/C++)\n");
 #else
 #ifdef WIN32
-    printf(" (MSVS C/C++)\n");
+    fprintf(alt_stdout," (MSVS C/C++)\n");
 #endif
 #endif
 #endif
 #ifndef pp_OSX64
 #ifdef pp_OSX
-    printf("Platform: OSX\n");
+    fprintf(alt_stdout,"Platform: OSX\n");
 #endif
 #endif
 #ifdef pp_OSX64
-    printf("Platform: OSX64\n");
+    fprintf(alt_stdout,"Platform: OSX64\n");
 #endif
 #ifndef pp_LINUX64
 #ifdef pp_LINUX
-    printf("Platform: LINUX\n");
+    fprintf(alt_stdout,"Platform: LINUX\n");
 #endif
 #endif
 #ifdef pp_LINUX64
-    printf("Platform: LINUX64\n");
+    fprintf(alt_stdout,"Platform: LINUX64\n");
 #endif
-    printf("Build Date: %s\n",__DATE__);
+    fprintf(alt_stdout,"Build Date: %s\n",__DATE__);
     if(revision_fds>0){
-      printf("FDS Revision Number: %i\n",revision_fds);
+      fprintf(alt_stdout,"FDS Revision Number: %i\n",revision_fds);
     }
     if(smokeviewpath!=NULL){
-      printf("Smokeview path: %s\n",smokeviewpath);
+      fprintf(alt_stdout,"Smokeview path: %s\n",smokeviewpath);
     }
     if(smokezippath!=NULL){
-      printf("Smokezip path: %s\n",smokezippath);
+      fprintf(alt_stdout,"Smokezip path: %s\n",smokezippath);
     }
     if(texturedir!=NULL){
-      printf("Texture directory path: %s\n",texturedir);
+      fprintf(alt_stdout,"Texture directory path: %s\n",texturedir);
     }
 }
 
 /* ------------------ usage ------------------------ */
 
 void usage(char **argv){
-  printf("%s\n",TITLERELEASE);
-  printf("%s\n\n",_("Visualize fire/smoke flow simulations."));
-  printf("Usage: %s [options] casename",argv[0]);
-  printf("%s\n\n",_("where "));
-  printf("%s\n",_(" casename       - project id (file names without the extension)"));
-  printf("%s\n",_(" -bindir dir    - specify location of smokeview bin directory"));
-  printf("%s\n",_(" -build         - show directives used in this build of Smokeview"));
-  printf("%s\n",_(" -demo          - use demonstrator mode of Smokeview"));
-  printf("%s\n",_(" -help          - display this message"));
-  printf("%s\n",_(" -ini           - output default smokeview parameters to smokeview.ini"));
-  printf("%s\n",_(" -ng_ini        - No graphics version of -ini."));
-  printf("%s\n",_(" -runscript     - run the script file casename.ssf"));
-  printf("%s\n",_(" -script scriptfile - run the script file scriptfile"));
-  printf("%s\n",_(" -skipframe n   - render every n frames"));
-  printf("%s\n",_(" -startframe n  - start rendering at frame n"));
-  printf("%s\n",_(" -stereo        - activate stereo mode"));
-  printf("%s\n",_(" -tempdir       - forces output files to be written to the temporary directory"));
-  printf("%s\n",_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
-  printf("%s\n",_(" -version       - display version information"));
-  printf("%s\n",_(" -volrender     - generate images of volume rendered smoke and fire"));
+  fprintf(alt_stdout,"%s\n",TITLERELEASE);
+  fprintf(alt_stdout,"%s\n\n",_("Visualize fire/smoke flow simulations."));
+  fprintf(alt_stdout,"Usage: %s [options] casename",argv[0]);
+  fprintf(alt_stdout,"%s\n\n",_("where "));
+  fprintf(alt_stdout,"%s\n",_(" casename       - project id (file names without the extension)"));
+  fprintf(alt_stdout,"%s\n",_(" -bindir dir    - specify location of smokeview bin directory"));
+  fprintf(alt_stdout,"%s\n",_(" -build         - show directives used in this build of Smokeview"));
+  fprintf(alt_stdout,"%s\n",_(" -demo          - use demonstrator mode of Smokeview"));
+  fprintf(alt_stdout,"%s\n",_(" -help          - display this message"));
+  fprintf(alt_stdout,"%s\n",_(" -ini           - output default smokeview parameters to smokeview.ini"));
+  fprintf(alt_stdout,"%s\n",_(" -ng_ini        - No graphics version of -ini."));
+  fprintf(alt_stdout,"%s\n",_(" -runscript     - run the script file casename.ssf"));
+  fprintf(alt_stdout,"%s\n",_(" -script scriptfile - run the script file scriptfile"));
+  fprintf(alt_stdout,"%s\n",_(" -skipframe n   - render every n frames"));
+  fprintf(alt_stdout,"%s\n",_(" -startframe n  - start rendering at frame n"));
+  fprintf(alt_stdout,"%s\n",_(" -stereo        - activate stereo mode"));
+  fprintf(alt_stdout,"%s\n",_(" -tempdir       - forces output files to be written to the temporary directory"));
+  fprintf(alt_stdout,"%s\n",_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
+  fprintf(alt_stdout,"%s\n",_(" -version       - display version information"));
+  fprintf(alt_stdout,"%s\n",_(" -volrender     - generate images of volume rendered smoke and fire"));
 
   if(showbuild==1){
     char label[1024],*labelptr;
@@ -849,8 +849,8 @@ void usage(char **argv){
 #ifdef WIN32
     strcat(label,", WIN32");
 #endif
-    printf("  \n");
-    printf("%s\n\n",_("  Smokeview was built using the following pre-processing directives:"));
-    printf("%s \n",labelptr);
+    fprintf(alt_stdout,"  \n");
+    fprintf(alt_stdout,"%s\n\n",_("  Smokeview was built using the following pre-processing directives:"));
+    fprintf(alt_stdout,"%s \n",labelptr);
   }
 }

@@ -397,7 +397,7 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
     ci->nlines[n]=nlinepts;
     ci->polysize[n]=polysize;
   }
-  /* printf("polygon count=%i\n",npolystotal); */
+  /* fprintf(alt_stdout,"polygon count=%i\n",npolystotal); */
   if(cellflag==GET_NODE_AREAS)GetContourAreas(ci);
 
 }

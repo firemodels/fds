@@ -360,8 +360,8 @@ void setup_glut(int argc, char **argv){
       if(strncmp(smokeviewtempdir+lensmoketempdir-1,dirseparator,1)!=0){
         STRCAT(smokeviewtempdir,dirseparator);
       }
-      printf("%s",_("Scratch directory:"));
-      printf(" %s\n",smokeviewtempdir);
+      fprintf(alt_stdout,"%s",_("Scratch directory:"));
+      fprintf(alt_stdout," %s\n",smokeviewtempdir);
     }
   }
 #ifdef pp_BETA
@@ -372,10 +372,10 @@ void setup_glut(int argc, char **argv){
   getcwd(workingdir,1000);
 #endif
   if(use_graphics==1){
-    printf("\n");
-    printf("%s",_("Initializing Glut\n"));
+    fprintf(alt_stdout,"\n");
+    fprintf(alt_stdout,"%s",_("Initializing Glut\n"));
     glutInit(&argc, argv);
-    printf("%s\n",_("Glut initialization completed\n"));
+    fprintf(alt_stdout,"%s\n",_("Glut initialization completed\n"));
   }
 #ifdef pp_OSX
   chdir(workingdir);
@@ -383,11 +383,11 @@ void setup_glut(int argc, char **argv){
 
   if(use_graphics==1){
 #ifdef _DEBUG
-    printf("%s",_("Initializing Smokeview graphics window - "));
+    fprintf(alt_stdout,"%s",_("Initializing Smokeview graphics window - "));
 #endif
     glutInitWindowSize(screenWidth, screenHeight);
 #ifdef _DEBUG
-    printf("%s\n",_("initialized"));
+    fprintf(alt_stdout,"%s\n",_("initialized"));
 #endif
 
     max_screenWidth = glutGet(GLUT_SCREEN_WIDTH);
@@ -435,7 +435,7 @@ int get_opengl_version(char *version_label){
   
   version_string=glGetString(GL_VERSION);
   if(version_string==NULL){
-    printf("*** Warning: GL_VERSION string is NULL\n");
+    fprintf(alt_stdout,"*** Warning: GL_VERSION string is NULL\n");
     return -1;
   }
   strcpy(version_label2,(char *)version_string);
@@ -453,7 +453,7 @@ void InitOpenGL(void){
   int type;
   int err;
 
-  printf("%s",_("Initializing OpenGL\n"));
+  fprintf(alt_stdout,"%s",_("Initializing OpenGL\n"));
   
   type = GLUT_RGB|GLUT_DEPTH;
   if(buffertype==GLUT_DOUBLE){
@@ -476,24 +476,24 @@ void InitOpenGL(void){
   }
 
 #ifdef _DEBUG
-  printf("%s",_("   Initializing Glut display mode - "));
+  fprintf(alt_stdout,"%s",_("   Initializing Glut display mode - "));
 #endif
   glutInitDisplayMode(type);
 #ifdef _DEBUG
-  printf("%s\n",_("initialized"));
+  fprintf(alt_stdout,"%s\n",_("initialized"));
 #endif
 
   CheckMemory;
 #ifdef _DEBUG
-  printf("%s\n",_("   creating window"));
+  fprintf(alt_stdout,"%s\n",_("   creating window"));
 #endif
   mainwindow_id=glutCreateWindow("");
 #ifdef _DEBUG
-  printf("%s\n",_("   window created"));
+  fprintf(alt_stdout,"%s\n",_("   window created"));
 #endif
 
 #ifdef _DEBUG
-  printf("%s",_("   Initializing callbacks - "));
+  fprintf(alt_stdout,"%s",_("   Initializing callbacks - "));
 #endif
   glutSpecialUpFunc(specialkeyboard_up_CB);
   glutKeyboardUpFunc(keyboard_up_CB);
@@ -506,7 +506,7 @@ void InitOpenGL(void){
   glutVisibilityFunc(NULL);
   glutMenuStatusFunc(MenuStatus_CB);
 #ifdef _DEBUG
-  printf("%s\n",_("initialized"));
+  fprintf(alt_stdout,"%s\n",_("initialized"));
 #endif
 
   opengl_version = get_opengl_version(opengl_version_label);
@@ -518,7 +518,7 @@ void InitOpenGL(void){
     err=0;
   }
   else{
-    printf("   GLEW initialization failed\n");
+    fprintf(alt_stdout,"   GLEW initialization failed\n");
     err=1;
   }
   if(err==0){
@@ -530,11 +530,11 @@ void InitOpenGL(void){
     }
 #ifdef _DEBUG
     if(err==0){
-      printf("%s\n",_("   GPU shader initialization succeeded"));
+      fprintf(alt_stdout,"%s\n",_("   GPU shader initialization succeeded"));
     }
 #endif
     if(err!=0){
-      printf("%s\n",_("   GPU shader initialization failed"));
+      fprintf(alt_stdout,"%s\n",_("   GPU shader initialization failed"));
     }
   }
 #endif
@@ -543,11 +543,11 @@ void InitOpenGL(void){
     err=init_cull_exts();
 #ifdef _DEBUG
     if(err==0){
-      printf("%s\n",_("   Culling extension initialization succeeded"));
+      fprintf(alt_stdout,"%s\n",_("   Culling extension initialization succeeded"));
     }
 #endif
     if(err!=0){
-      printf("%s\n",_("   Culling extension initialization failed"));
+      fprintf(alt_stdout,"%s\n",_("   Culling extension initialization failed"));
     }
   }
 #endif
@@ -579,7 +579,7 @@ void InitOpenGL(void){
     if(nblueshift<0)nblueshift=0;
   }
   opengldefined=1;
-  printf("%s",_("OpenGL initialization completed\n\n"));
+  fprintf(alt_stdout,"%s",_("OpenGL initialization completed\n\n"));
 }
 
 /* ------------------ set_3dsmoke_startup ------------------------ */

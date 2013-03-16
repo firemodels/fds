@@ -36,6 +36,7 @@ int main(int argc, char **argv){
   int open_smokeview=0;
   int redirect=0;
 
+  set_outstream(stdout);
   initMALLOC();
 #ifdef WIN32
   strcpy(dirseparator,"\\");
@@ -61,11 +62,8 @@ int main(int argc, char **argv){
 
 /* -e{850} loop index i is modified within loop */
   for(i=1;i<argc;i++){
-    int lenarg;
-
     arg=argv[i];
-    lenarg=strlen(arg);
-    if(arg[0]=='-'&&lenarg>1){
+    if(arg[0]=='-'&&strlen(arg)>1){
       char *key;
 
       key = arg+1;
@@ -194,7 +192,10 @@ int main(int argc, char **argv){
     if(destdir!=NULL)strcat(svdlogfile,destdir);
     strcat(svdlogfile,smv1);
     strcat(svdlogfile,"_diff.svdlog");
-    LOGSTREAM=freopen(svdlogfile,"w",stdout);
+    LOGSTREAM=fopen(svdlogfile,"w");
+    if(LOGSTREAM!=NULL){
+      set_outstream(LOGSTREAM);
+    }
   }
   if(getfileinfo(smoke1,NULL,NULL)!=0||getfileinfo(smoke2,NULL,NULL)!=0){
     if(getfileinfo(smoke1,NULL,NULL)!=0){
@@ -226,12 +227,12 @@ int main(int argc, char **argv){
   caseinfo[1].dir=sourcedir2;
   caseinfo[1].endian=0;
 
-  printf("reading %s\n",smoke1);
+  fprintf(alt_stdout,"reading %s\n",smoke1);
   fflush(stdout);
   readsmv(stream_in1, stream_out, caseinfo);
   fclose(stream_in1);
 
-  printf("reading %s\n",smoke2);
+  fprintf(alt_stdout,"reading %s\n",smoke2);
   fflush(stdout);
   readsmv(stream_in2, NULL, caseinfo+1);
   fclose(stream_in2);
@@ -270,31 +271,31 @@ void usage(void){
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
 
-  printf("\n");
-  printf("  smokediff [options] smv_case1 smv_case2\n");
-  printf("    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);
+  fprintf(alt_stdout,"\n");
+  fprintf(alt_stdout,"  smokediff [options] smv_case1 smv_case2\n");
+  fprintf(alt_stdout,"    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);
 
-  printf("  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from\n");
-  printf("  corresponding data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3d\n");
-  printf("  and boundary files are supported.  Differenced results may be viewed by opening\n"); 
-  printf("  smv_case1_diff.smv in Smokeview or by using the -smv option when running smokediff.\n\n");
+  fprintf(alt_stdout,"  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from\n");
+  fprintf(alt_stdout,"  corresponding data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3d\n");
+  fprintf(alt_stdout,"  and boundary files are supported.  Differenced results may be viewed by opening\n"); 
+  fprintf(alt_stdout,"  smv_case1_diff.smv in Smokeview or by using the -smv option when running smokediff.\n\n");
 
-  printf("  Mesh bounds must be identical for corresponsing meshes.  Mesh resolutions must be\n");
-  printf("  identical when differencing boundary or PLOT3D files.  The x, y, and/or z mesh\n");
-  printf("  resolution in smv_case1 must be an integer multiple of the corresponding x, y, z mesh\n");
-  printf("  resolution in smv_case2 when differencing slice files.\n\n");
+  fprintf(alt_stdout,"  Mesh bounds must be identical for corresponsing meshes.  Mesh resolutions must be\n");
+  fprintf(alt_stdout,"  identical when differencing boundary or PLOT3D files.  The x, y, and/or z mesh\n");
+  fprintf(alt_stdout,"  resolution in smv_case1 must be an integer multiple of the corresponding x, y, z mesh\n");
+  fprintf(alt_stdout,"  resolution in smv_case2 when differencing slice files.\n\n");
 
-  printf("  -h  - display this message\n");
-  printf("  -v  - display version information\n");
-  printf("  -s1 dir1 - directory containing case smv_case1.smv\n");
-  printf("  -s2 dir2 - directory containing case smv_case2.smv\n");
-  printf("  -d  dir  - directory containing created differenced files\n");
-  printf("  -nb      - do not difference boundary files\n");
-  printf("  -np      - do not difference Plot3d files\n");
-  printf("  -ns      - do not difference slice files\n");
-  printf("  -smv     - view case in smokeview when differencing is complete\n");
-  printf("  -type label - difference only data of type label (in boundary and slice files)\n");
-  printf("  smv_case1,smv_case2 - Two smokeview cases to compare.\n");
+  fprintf(alt_stdout,"  -h  - display this message\n");
+  fprintf(alt_stdout,"  -v  - display version information\n");
+  fprintf(alt_stdout,"  -s1 dir1 - directory containing case smv_case1.smv\n");
+  fprintf(alt_stdout,"  -s2 dir2 - directory containing case smv_case2.smv\n");
+  fprintf(alt_stdout,"  -d  dir  - directory containing created differenced files\n");
+  fprintf(alt_stdout,"  -nb      - do not difference boundary files\n");
+  fprintf(alt_stdout,"  -np      - do not difference Plot3d files\n");
+  fprintf(alt_stdout,"  -ns      - do not difference slice files\n");
+  fprintf(alt_stdout,"  -smv     - view case in smokeview when differencing is complete\n");
+  fprintf(alt_stdout,"  -type label - difference only data of type label (in boundary and slice files)\n");
+  fprintf(alt_stdout,"  smv_case1,smv_case2 - Two smokeview cases to compare.\n");
 }
 
 

@@ -686,7 +686,7 @@ void script_renderall(scriptdata *scripti){
   if(skipframe0>0)scripti->ival=skipframe0;
   skip_local=MAX(1,scripti->ival);
 
-  printf("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival3);
+  fprintf(alt_stdout,"script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival3);
   skip_render_frames=1;
   RenderMenu(skip_local);
 }
@@ -708,7 +708,7 @@ void script_volsmokerenderall(scriptdata *scripti){
   if(skipframe0>0)scripti->ival=skipframe0;
   skip_local=MAX(1,scripti->ival);
   
-  printf("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival3);
+  fprintf(alt_stdout,"script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival3);
   skip_render_frames=1;
   scripti->ival=skip_local;
   RenderMenu(skip_local);
@@ -721,7 +721,7 @@ void script_loadparticles(scriptdata *scripti){
   int errorcode;
   int count=0;
 
-  printf("script: loading particles files\n\n");
+  fprintf(alt_stdout,"script: loading particles files\n\n");
 
   npartframes_max=get_min_partframes();
   for(i=0;i<npartinfo;i++){
@@ -757,7 +757,7 @@ void script_loadiso(scriptdata *scripti){
   int errorcode;
   int count=0;
 
-  printf("script: loading isosurface files of type: %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"script: loading isosurface files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nisoinfo;i++){
     isodata *isoi;
@@ -857,7 +857,7 @@ void script_load3dsmoke(scriptdata *scripti){
   int errorcode;
   int count=0;
 
-  printf("script: loading smoke3d files of type: %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"script: loading smoke3d files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3ddata *smoke3di;
@@ -880,7 +880,7 @@ void script_loadslice(scriptdata *scripti){
   int i;
   int count=0;
 
-  printf("script: loading slice files of type: %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"script: loading slice files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nmultislices;i++){
     multislicedata *mslicei;
@@ -913,7 +913,7 @@ void script_loadvslice(scriptdata *scripti){
   float delta_orig;
   int count=0;
 
-  printf("script: loading vector slice files of type: %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"script: loading vector slice files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nmultivslices;i++){
     multivslicedata *mvslicei;
@@ -944,7 +944,7 @@ void script_loadtour(scriptdata *scripti){
   int i;
   int count=0;
 
-  printf("script: loading tour %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"script: loading tour %s\n\n",scripti->cval);
   
   for(i=0;i<ntours;i++){
     tourdata *touri;
@@ -971,7 +971,7 @@ void script_loadboundary(scriptdata *scripti){
   int errorcode;
   int count=0;
 
-  printf("Script: loading boundary files of type: %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"Script: loading boundary files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<npatchinfo;i++){
     patchdata *patchi;
@@ -1046,7 +1046,7 @@ void script_plot3dprops(scriptdata *scripti){
   }
   update_vector_widgets();
 
-  printf("script: iveclengths=%i\n",iveclengths);
+  fprintf(alt_stdout,"script: iveclengths=%i\n",iveclengths);
 
   contour_type=CLAMP(scripti->ival4,0,2);
   update_plot3d_display();
@@ -1154,7 +1154,7 @@ void script_partclasstype(scriptdata *scripti){
 /* ------------------ script_loadinifile ------------------------ */
 
 void script_loadinifile(scriptdata *scripti){
-  printf("script: loading ini file %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"script: loading ini file %s\n\n",scripti->cval);
   script_filename2=scripti->cval;
   windowresized=0;
   readini(2);
@@ -1168,7 +1168,7 @@ void script_loadfile(scriptdata *scripti){
   int i;
   int errorcode;
 
-  printf("script: loading file %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"script: loading file %s\n\n",scripti->cval);
   for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
 
@@ -1277,7 +1277,7 @@ void script_loadplot3d(scriptdata *scripti){
 void script_loadvfile(scriptdata *scripti){
   int i;
 
-  printf("script: loading vector slice file %s\n\n",scripti->cval);
+  fprintf(alt_stdout,"script: loading vector slice file %s\n\n",scripti->cval);
   for(i=0;i<nvsliceinfo;i++){
     slicedata *val;
     vslicedata *vslicei;
@@ -1301,7 +1301,7 @@ void script_settimeval(scriptdata *scripti){
   int i;
 
   timeval = scripti->fval;
-  printf("script: setting time to %f\n\n",timeval);
+  fprintf(alt_stdout,"script: setting time to %f\n\n",timeval);
   if(global_times!=NULL&&nglobal_times>0){
     if(timeval<global_times[0]){
       timeval=global_times[0];
@@ -1375,7 +1375,7 @@ void script_setviewpoint(scriptdata *scripti){
   int count=0;
 
   viewpoint = scripti->cval;
-  printf("script: set viewpoint to %s\n\n",viewpoint);
+  fprintf(alt_stdout,"script: set viewpoint to %s\n\n",viewpoint);
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(strcmp(scripti->cval,ca->name)==0){
       ResetMenu(ca->view_id);
@@ -1403,15 +1403,15 @@ int run_script(void){
     return returnval;
   }
   scripti = current_script_command;
-  printf("\n");
-  printf("script: %s\n",scripti->command_label);
+  fprintf(alt_stdout,"\n");
+  fprintf(alt_stdout,"script: %s\n",scripti->command_label);
   if(scripti->cval!=NULL){
-    printf("script:  %s\n",scripti->cval);
+    fprintf(alt_stdout,"script:  %s\n",scripti->cval);
   }
   if(scripti->cval2!=NULL){
-    printf("script:  %s\n",scripti->cval2);
+    fprintf(alt_stdout,"script:  %s\n",scripti->cval2);
   }
-  printf("\n");
+  fprintf(alt_stdout,"\n");
   switch (scripti->command){
     case SCRIPT_UNLOADALL:
       LoadUnloadMenu(UNLOADALL);
@@ -1422,7 +1422,7 @@ int run_script(void){
         if(can_write_to_dir(script_dir_path)==0){
           fprintf(stderr,"*** Error: Cannot write to the RENDERDIR directory: %s\n",script_dir_path);
         }
-        printf("script: setting render path to %s\n",script_dir_path);
+        fprintf(alt_stdout,"script: setting render path to %s\n",script_dir_path);
       }
       else{
         script_dir_path=NULL;

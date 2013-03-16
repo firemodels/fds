@@ -402,7 +402,7 @@ void LABEL_print(void){
 
   for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
     xyz = thislabel->xyz;
-    printf("label: %s position: %f %f %f\n",thislabel->name,xyz[0],xyz[1],xyz[2]);
+    fprintf(alt_stdout,"label: %s position: %f %f %f\n",thislabel->name,xyz[0],xyz[1],xyz[2]);
   }
 }
 

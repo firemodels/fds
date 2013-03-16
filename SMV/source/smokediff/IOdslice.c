@@ -177,7 +177,7 @@ void diff_slices(FILE *stream_out){
       fprintf(stderr,"*** problem writing out header for %s\n",fullfile1);
       continue;
     }
-    printf("Subtracting %s from %s\n",fullfile2,fullfile1);
+    fprintf(alt_stdout,"Subtracting %s from %s\n",fullfile2,fullfile1);
     error1=1;
     error2a=1;
     error2b=1;
@@ -196,7 +196,7 @@ void diff_slices(FILE *stream_out){
       continue;
     }
     update_histogram(qframe1, nqframe1, slice1->histogram);
-    printf("  Progress: ");
+    fprintf(alt_stdout,"  Progress: ");
     fflush(stdout);
 
     percent_complete=0;
@@ -209,7 +209,7 @@ void diff_slices(FILE *stream_out){
       fraction_complete=(float)size_sofar/(float)slice1->filesize;
       if((int)(fraction_complete*100)>percent_complete+10){
         if(percent_complete<100)percent_complete+=10;
-        printf("%i%s ",percent_complete,pp);
+        fprintf(alt_stdout,"%i%s ",percent_complete,pp);
         fflush(stdout);
       }
       while(time1>time2b){
@@ -259,7 +259,7 @@ void diff_slices(FILE *stream_out){
       if(error1!=0)break;
       update_histogram(qframe1, nqframe1, slice1->histogram);
     }
-    printf("\n");
+    fprintf(alt_stdout,"\n");
     fflush(stdout);
 
     valmin_percentile = get_histogram_value(slice1->histogram, 0.01);

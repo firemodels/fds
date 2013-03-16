@@ -5,6 +5,8 @@
 // svn revision character string
 char file_util_revision[]="$Revision$";
 
+#define IN_FILE
+
 #include "options.h"
 #include <stdio.h> 
 #include <string.h>
@@ -23,6 +25,12 @@ char file_util_revision[]="$Revision$";
 #include "string_util.h"
 #include "file_util.h"
 #include "smv_endian.h"
+
+/* ------------------ set_file ------------------------ */
+
+void set_outstream(FILE *stream){
+  alt_stdout=stream;
+}
 
 /* ------------------ filecopy ------------------------ */
 
@@ -91,7 +99,7 @@ void copy_file(char *destfile, char *sourcefile, int mode){
     fclose(streamin);
     return;
   }
-  printf("  Copying %s to %s\n",sourcefile,destfile);
+  fprintf(alt_stdout,"  Copying %s to %s\n",sourcefile,destfile);
   for(;;){
     int end_of_file;
        
@@ -707,7 +715,7 @@ char *which(char *progname){
       strcpy(returndir,dir);
       strcat(returndir,dirsep);
 #ifdef pp_BETA
-      printf("Using %s in %s\n\n",prog,dir);
+      fprintf(alt_stdout,"Using %s in %s\n\n",prog,dir);
 #endif
       return returndir;
     }

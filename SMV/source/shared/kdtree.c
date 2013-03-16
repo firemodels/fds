@@ -42,7 +42,7 @@ void test_kd(void){
     pointers[i] = points2 + i;
   }
   kdtree = setup_kdtree(points,NKDPOINTS, NULL);
-  printf("ntotal=%i nsort=%i\n",ntotal,nsort);
+  fprintf(alt_stdout,"ntotal=%i nsort=%i\n",ntotal,nsort);
   xyztest[0] = 0.25;
   xyztest[1] = 0.25;
   xyztest[2] = 0.25;
@@ -60,9 +60,9 @@ void test_kd(void){
     best = bests[i];
     xyz = best->median->xyz;
     xyzp = pointers[i]->xyz;
-    printf("x1=%f y1=%f z1=%f dist=%f\n",xyz[0],xyz[1],xyz[2],best->median->dist2);
-    printf("x2=%f y2=%f z2=%f dist=%f\n",xyzp[0],xyzp[1],xyzp[2],pointers[i]->dist2);
-    printf("\n");
+    fprintf(alt_stdout,"x1=%f y1=%f z1=%f dist=%f\n",xyz[0],xyz[1],xyz[2],best->median->dist2);
+    fprintf(alt_stdout,"x2=%f y2=%f z2=%f dist=%f\n",xyzp[0],xyzp[1],xyzp[2],pointers[i]->dist2);
+    fprintf(alt_stdout,"\n");
   }
 }
 

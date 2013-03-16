@@ -1416,7 +1416,7 @@ void drawsmoke3dGPUVOL(void){
 #ifdef pp_GPUTHROTTLE
   thisGPUtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
   if(thisGPUtime>lastGPUtime+0.25){
-    printf("CPU->GPU %4.1f Mbytes/s\n",4.0*GPUnframes/(thisGPUtime-lastGPUtime)/(1024.0*1024.0));
+    fprintf(alt_stdout,"CPU->GPU %4.1f Mbytes/s\n",4.0*GPUnframes/(thisGPUtime-lastGPUtime)/(1024.0*1024.0));
     lastGPUtime=thisGPUtime;
     GPUnframes=0;
   }
@@ -1844,13 +1844,13 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     if(global_times!=NULL&&global_times[itimes]>time_local)restart_time=1;
     if(*first==1){
       *first=0;
-      printf("time=%.2f %s: ",time_local,meshlabel);
+      fprintf(alt_stdout,"time=%.2f %s: ",time_local,meshlabel);
     }
     else{
-      if(time_local>=10.0)printf(" ");
-      if(time_local>=100.0)printf(" ");
-      if(time_local>=1000.0)printf(" ");
-      printf("          %s: ",meshlabel);
+      if(time_local>=10.0)fprintf(alt_stdout," ");
+      if(time_local>=100.0)fprintf(alt_stdout," ");
+      if(time_local>=1000.0)fprintf(alt_stdout," ");
+      fprintf(alt_stdout,"          %s: ",meshlabel);
     }
 
     vr->times[framenum]=time_local;
@@ -1870,7 +1870,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       vr->smokedataptrs[framenum]=smokeframe_data;
     }
     CheckMemory;
-    printf("smoke");
+    fprintf(alt_stdout,"smoke");
     fclose(SLICEFILE);
   }
   else{
@@ -1890,13 +1890,13 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 
     if(*first==1){
       *first=0;
-      printf("time=%.2f %s: ",time_local,meshlabel);
+      fprintf(alt_stdout,"time=%.2f %s: ",time_local,meshlabel);
     }
     else{
-      if(time_local>=10.0)printf(" ");
-      if(time_local>=100.0)printf(" ");
-      if(time_local>=1000.0)printf(" ");
-      printf("          %s: ",meshlabel);
+      if(time_local>=10.0)fprintf(alt_stdout," ");
+      if(time_local>=100.0)fprintf(alt_stdout," ");
+      if(time_local>=1000.0)fprintf(alt_stdout," ");
+      fprintf(alt_stdout,"          %s: ",meshlabel);
     }
 
     vr->times[framenum]=time_local;
@@ -1930,7 +1930,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
         else{
           vr->firedataptrs[framenum]=fireframe_data;
         }
-        printf(", fire");
+        fprintf(alt_stdout,", fire");
         fclose(SLICEFILE);
       }
     }
@@ -1950,7 +1950,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       vr->firedataptrs[framenum]=c_firedata_compressed;
 
       vr->times[framenum]=time_local;
-      printf(", fire");
+      fprintf(alt_stdout,", fire");
       fclose(volstream);
       volstream=NULL;
     }
@@ -1958,9 +1958,9 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   CheckMemory;
   vr->dataready[framenum]=1;
   if(vr->is_compressed==1&&load_volcompressed==0){
-    printf(" (%4.1f%s reduction)",(float)size_before/(float)size_after,"X");
+    fprintf(alt_stdout," (%4.1f%s reduction)",(float)size_before/(float)size_after,"X");
   }
-  printf("\n");
+  fprintf(alt_stdout,"\n");
 }
 
 /* ------------------ unload_volsmoke_allframes ------------------------ */
@@ -1968,7 +1968,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 void unload_volsmoke_frame_allmeshes(int framenum){
   int i;
 
-  printf("Unloading smoke frame: %i\n",framenum);
+  fprintf(alt_stdout,"Unloading smoke frame: %i\n",framenum);
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -1989,7 +1989,7 @@ void unload_volsmoke_frame_allmeshes(int framenum){
 void unload_volsmoke_allframes(volrenderdata *vr){
   int i;
 
-  printf("Unloading smoke %s - ",vr->rendermeshlabel);
+  fprintf(alt_stdout,"Unloading smoke %s - ",vr->rendermeshlabel);
   for(i=0;i<vr->ntimes;i++){
     FREEMEMORY(vr->firedataptrs[i]);
     FREEMEMORY(vr->smokedataptrs[i]);
@@ -1999,7 +1999,7 @@ void unload_volsmoke_allframes(volrenderdata *vr){
   vr->display=0;
   plotstate = getplotstate(DYNAMIC_PLOTS);
   Update_Times();
-  printf("completed\n");
+  fprintf(alt_stdout,"completed\n");
 }
 
 /* ------------------ read_volsmoke_allframes ------------------------ */
@@ -2191,7 +2191,7 @@ void read_volsmoke_allframes_allmeshes(void){
 void unload_volsmoke_textures(void){
   int  i;
 
-  printf("Unloading smoke and fire textures for each mesh\n");
+  fprintf(alt_stdout,"Unloading smoke and fire textures for each mesh\n");
   fflush(stdout);
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
@@ -2210,7 +2210,7 @@ void init_volsmoke_texture(mesh *meshi){
   int i;
 
   //unload_volsmoke_supertextures();
-  printf("Defining smoke and fire textures for %s ...",meshi->label);
+  fprintf(alt_stdout,"Defining smoke and fire textures for %s ...",meshi->label);
   fflush(stdout);
 
   nx = meshi->ibar+1;
@@ -2281,7 +2281,7 @@ void init_volsmoke_texture(mesh *meshi){
 #endif
 
   glActiveTexture(GL_TEXTURE0);
-  printf("completed\n");
+  fprintf(alt_stdout,"completed\n");
   fflush(stdout);
 }
 
@@ -2302,7 +2302,7 @@ void unload_volsmoke_supertextures(void){
     }
   }
   if(doit==0)return;
-  printf("Unloading smoke and fire textures for each supermesh\n");
+  fprintf(alt_stdout,"Unloading smoke and fire textures for each supermesh\n");
   for(i=0;i<nsupermeshinfo;i++){
     supermesh *smesh;
 
@@ -2310,7 +2310,7 @@ void unload_volsmoke_supertextures(void){
     FREEMEMORY(smesh->fire_texture_buffer);
     FREEMEMORY(smesh->smoke_texture_buffer);
   }
-  printf("complete\n");
+  fprintf(alt_stdout,"complete\n");
 }
 
 /* ------------------ init_volsmoke_supertexture ------------------------ */
@@ -2328,7 +2328,7 @@ void init_volsmoke_supertexture(supermesh *smesh){
   supermesh_index = smesh - supermeshinfo;
   supermesh_index++;
 
-  printf("Defining smoke and fire textures for supermesh %i ",supermesh_index);
+  fprintf(alt_stdout,"Defining smoke and fire textures for supermesh %i ",supermesh_index);
   fflush(stdout);
 
   glActiveTexture(GL_TEXTURE0);
@@ -2393,7 +2393,7 @@ void init_volsmoke_supertexture(supermesh *smesh){
   glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, nx, ny, nz, border_size, GL_RED, GL_FLOAT, smesh->f_iblank_cell);
 #endif
   glActiveTexture(GL_TEXTURE0);
-  printf("completed\n");
+  fprintf(alt_stdout,"completed\n");
   fflush(stdout);
 }
 #endif

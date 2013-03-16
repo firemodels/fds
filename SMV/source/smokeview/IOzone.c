@@ -522,7 +522,7 @@ void readzone(int ifile, int flag, int *errorcode){
   }
   CheckMemory;
 
-  printf("Loading zone data: %s\n",file);
+  fprintf(alt_stdout,"Loading zone data: %s\n",file);
 
   ntotal = nrooms*nzone_times;
 
@@ -627,7 +627,7 @@ void readzone(int ifile, int flag, int *errorcode){
     }
   }
 
-  printf("computing zone color levels \n");
+  fprintf(alt_stdout,"computing zone color levels \n");
 
   // allocate memory for temperature labels
 
@@ -663,7 +663,7 @@ void readzone(int ifile, int flag, int *errorcode){
   updatemenu=1;
   activezone = zoneinfo + ifile;
   if(nzhvents>0||nzvvents>0){
-    printf("computing vent bounds\n");
+    fprintf(alt_stdout,"computing vent bounds\n");
     getzoneventbounds();
   }
   Idle_CB();

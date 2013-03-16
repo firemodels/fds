@@ -833,7 +833,7 @@ extern "C" void Motion_CB(int var){
     if(fps>GPU_VOLframemax)return;
     MOTIONnframes++;
     if(thisMOTIONtime>lastMOTIONtime+0.25){
-      printf("MOTION: %4.1f fps\n",fps);
+      fprintf(alt_stdout,"MOTION: %4.1f fps\n",fps);
       lastMOTIONtime=thisMOTIONtime;
       MOTIONnframes=0;
     }
@@ -889,7 +889,7 @@ extern "C" void Motion_CB(int var){
         az_elev = camera_current->az_elev;
         az_elev[0] = ROTATE_2axis->get_x();
         az_elev[1] = -ROTATE_2axis->get_y();
-        printf("x=%f y=%f\n",az_elev[0],az_elev[1]);
+        fprintf(alt_stdout,"x=%f y=%f\n",az_elev[0],az_elev[1]);
       }
       break;
     case WINDOWSIZE_LIST:

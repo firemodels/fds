@@ -844,7 +844,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   Update_Times();
 #ifdef _DEBUG
-  printf("After terrain file load: ");
+  fprintf(alt_stdout,"After terrain file load: ");
   PrintMemoryInfo;
 #endif
   Idle_CB();
@@ -949,7 +949,7 @@ int getterrain_data(char *file,terraindata *terri){
   for(nt=0;nt<terri->ntimes;nt++){
     
     FORTWUIREAD(&time_local,1);
-    printf("terrain time=%f\n",time_local);
+    fprintf(alt_stdout,"terrain time=%f\n",time_local);
     if(returncode==0)break;
     *times_local++ = time_local;
 

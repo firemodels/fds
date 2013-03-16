@@ -957,7 +957,7 @@ void getsmokedir(float *mm){
       meshj->smokedir_old=meshj->smokedir;
       update_initcullplane=1;
 #ifdef _DEBUG
-      printf("mesh dir has changed\n");
+      fprintf(alt_stdout,"mesh dir has changed\n");
 #endif
     }
 #endif
@@ -1311,7 +1311,7 @@ int makeiblank(void){
   float *fblank_cell=NULL;
   char *iblank_node=NULL,*iblank_cell=NULL,*c_iblank_x=NULL,*c_iblank_y=NULL,*c_iblank_z=NULL;
 
-  printf("  initializing blanking array\n");
+  fprintf(alt_stdout,"  initializing blanking array\n");
   if(use_iblank==0)return 0;
   for(ig=0;ig<nmeshes;ig++){
     meshi = meshinfo+ig;
@@ -1411,7 +1411,7 @@ int makeiblank(void){
     }
   }
   init_blockage_distance();
-  printf("  blanking array initialization completed\n");
+  fprintf(alt_stdout,"  blanking array initialization completed\n");
   return 0;
 }
 

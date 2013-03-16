@@ -145,20 +145,20 @@ void diff_plot3ds(FILE *stream_out){
     len2=strlen(fullfile2);
     lenout=strlen(outfile);
     isotest=0;
-    printf("Subtracting %s from %s\n",fullfile2,fullfile1);
+    fprintf(alt_stdout,"Subtracting %s from %s\n",fullfile2,fullfile1);
     fflush(stdout);
 
     if(test_mode==1)isotest=1;
-    printf("  Progress: reading %s,",fullfile1);
+    fprintf(alt_stdout,"  Progress: reading %s,",fullfile1);
     fflush(stdout);
 
     FORTgetplot3dq(fullfile1,&nx,&ny,&nz,qframe1,&error1,&endian,&isotest,len1);
     if(test_mode==1)isotest=2;
-    printf(" reading %s,",fullfile2);
+    fprintf(alt_stdout," reading %s,",fullfile2);
     fflush(stdout);
 
     FORTgetplot3dq(fullfile2,&nx,&ny,&nz,qframe2,&error2,&endian,&isotest,len2);
-    printf(" differencing data,");
+    fprintf(alt_stdout," differencing data,");
     fflush(stdout);
 
     valmin=1000000000.0;
@@ -192,7 +192,7 @@ void diff_plot3ds(FILE *stream_out){
     }
 
     FORTplot3dout(outfile,&nx,&ny,&nz,qout,&error3,lenout);
-    printf(" completed.\n");
+    fprintf(alt_stdout," completed.\n");
     fflush(stdout);
 
     FREEMEMORY(qframe1);

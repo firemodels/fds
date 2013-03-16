@@ -708,22 +708,22 @@ void readcad2geom(cadgeom *cd){
       unsigned char *floortex;
 
       if(have_textures==0){
-        printf("     Loading CAD textures\n");
+        fprintf(alt_stdout,"     Loading CAD textures\n");
         have_textures=1;
       }
-      printf("       Loading texture: %s",texti->file);
+      fprintf(alt_stdout,"       Loading texture: %s",texti->file);
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);
       floortex=readpicture(texti->file,&texwid,&texht,0);
       if(floortex==NULL){
-        printf(" - failed\n");
+        fprintf(alt_stdout," - failed\n");
         fprintf(stderr,"*** Error: Texture file %s failed to load\n",texti->file);
         continue;
       }
       errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
       if(errorcode!=0){
         FREEMEMORY(floortex);
-        printf(" - failed\n");
+        fprintf(alt_stdout," - failed\n");
         continue;
       }
       FREEMEMORY(floortex);
@@ -732,7 +732,7 @@ void readcad2geom(cadgeom *cd){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       texti->loaded=1;
-      printf(" - completed\n");
+      fprintf(alt_stdout," - completed\n");
     }
   }
 
@@ -787,7 +787,7 @@ void readcad2geom(cadgeom *cd){
   qsort(cd->order,(size_t)cd->nquads,sizeof(int),quadcompare);
   fclose(stream);
   if(have_textures==1){
-    printf("     CAD textures loading completed\n");
+    fprintf(alt_stdout,"     CAD textures loading completed\n");
   }
 }
 
@@ -1718,7 +1718,7 @@ void set_cull_vis(void){
     }
   }
 #ifdef pp_GEOMPRINT
-  printf("ports=%i ports visible=%i\n",ntotal,nports); 
+  fprintf(alt_stdout,"ports=%i ports visible=%i\n",ntotal,nports); 
 #endif
 }
 
@@ -2061,7 +2061,7 @@ void update_facelists(void){
        case BLOCK_hidden:
          break;
        default:
-         printf("facej->type=%i\n",facej->type);
+         fprintf(alt_stdout,"facej->type=%i\n",facej->type);
          ASSERT(FFALSE);
          break;
       }
@@ -2126,7 +2126,7 @@ void update_facelists(void){
         meshi->nface_normals_single=n_normals_single;
       }
 #ifdef pp_GEOMPRINT
-      printf("faces removed=%i\n",nhidden);
+      fprintf(alt_stdout,"faces removed=%i\n",nhidden);
 #endif      
 
       qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),comparesinglefaces);
@@ -2357,7 +2357,7 @@ void draw_faces(){
     glDisable(GL_LIGHTING);
   }
 #ifdef pp_GEOMPRINT
-  printf("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
+  fprintf(alt_stdout,"faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
 #endif  
   if(nface_normals_double>0){
     glEnable(GL_LIGHTING);
@@ -2709,7 +2709,7 @@ void UpdateHiddenFaces(){
 
 
   updatehiddenfaces=0;
-  if(hide_overlaps!=0)printf("  identifying hidden faces -");
+  if(hide_overlaps!=0)fprintf(alt_stdout,"  identifying hidden faces -");
   for(i=0;i<nmeshes;i++){
     int j;
     mesh *meshi;
@@ -2744,7 +2744,7 @@ void UpdateHiddenFaces(){
       }
     }
   }
-  if(hide_overlaps!=0)printf(" complete\n");
+  if(hide_overlaps!=0)fprintf(alt_stdout," complete\n");
 }
 
 /* ------------------ allocate_faces ------------------------ */
@@ -2831,7 +2831,7 @@ void allocate_faces(){
     }
     fprintf(stderr,"*** Error: memory allocation error\n");
   }
-  printf("\n");
+  fprintf(alt_stdout,"\n");
 }
 
 /* ------------------ blockcompare ------------------------ */
@@ -2988,16 +2988,16 @@ void update_smooth_blockages(void){
     blocktotal += meshi->nbptrs;
   }
   if(blocktotal>0){
-    printf("Initializing smooth blockage data - ");
+    fprintf(alt_stdout,"Initializing smooth blockage data - ");
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
 
       for(j=0;j<meshi->nsmoothblockages_list;j++){
         if(read_smoothobst==1){
-          printf("Reading smooth blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
+          fprintf(alt_stdout,"Reading smooth blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
         }
         else{
-          printf("Smoothing blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
+          fprintf(alt_stdout,"Smoothing blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
         }
         sb=meshi->smoothblockages_list+j;
 
@@ -3005,7 +3005,7 @@ void update_smooth_blockages(void){
         MakeIsoBlockages(meshi,sb);
       }
     }
-    printf(" - completed \n");
+    fprintf(alt_stdout," - completed \n");
   }
   fclose(STREAM_SB);
   STREAM_SB=NULL;
@@ -4592,7 +4592,7 @@ void draw_facesOLD(){
     glDisable(GL_LIGHTING);
   }
 #ifdef pp_GEOMPRINT
-  printf("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
+  fprintf(alt_stdout,"faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
 #endif
   if(nface_normals_double>0){
     glEnable(GL_LIGHTING);

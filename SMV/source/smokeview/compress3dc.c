@@ -168,7 +168,7 @@ void CCsmoke3dtofile(char *file, float *smoke_time, float *dx, int *type, float 
 void compress_svzip2(void){
   char shellcommand[1024];
 
-  printf("Compressing...\n");
+  fprintf(alt_stdout,"Compressing...\n");
   compress_onoff(0);
 
   writeini(LOCAL_INI);
@@ -190,11 +190,11 @@ void compress_svzip2(void){
   strcat(shellcommand," ");
   strcat(shellcommand,smv_filename);
 
-  printf("Executing shell command: %s\n",shellcommand);
+  fprintf(alt_stdout,"Executing shell command: %s\n",shellcommand);
   system(shellcommand);
   updatesmoke3dmenulabels();
   updatepatchmenulabels();
   compress_onoff(1);
   updatemenu=1;
-  printf("Compression completed\n");
+  fprintf(alt_stdout,"Compression completed\n");
 }

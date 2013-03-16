@@ -411,7 +411,7 @@ void num2string(char *string, float tval,float range){
 
     /*sprintf(string,"%1.1e",tval); */
   }
-  if(strlen(string)>9)printf("ut oh - overwriting string\n");
+  if(strlen(string)>9)fprintf(alt_stdout,"ut oh - overwriting string\n");
 
 
 }

@@ -12,6 +12,8 @@
 #include <malloc.h>
 #endif
 #include "ASSERT.h"
+#include "string_util.h"
+#include "file_util.h"
 #define memGarbage 0xA3
 
 typedef int mallocflag;

@@ -132,25 +132,25 @@ int setZoneSmokeShaders() {
   glLinkProgram(p_zonesmoke);
   glGetObjectParameterivARB(p_zonesmoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
-  printf("  Zone Smoke shader completion code:");
+  fprintf(alt_stdout,"  Zone Smoke shader completion code:");
   switch (error_code){
   case GL_INVALID_VALUE:
-    printf(" INVALID VALUE\n");
+    fprintf(alt_stdout," INVALID VALUE\n");
     break;
   case GL_INVALID_OPERATION:
-    printf(" INVALID OPERATION\n");
+    fprintf(alt_stdout," INVALID OPERATION\n");
     break;
   case GL_INVALID_ENUM:
-    printf(" INVALID ENUM\n");
+    fprintf(alt_stdout," INVALID ENUM\n");
     break;
   case 0:
-    printf(" Link failed\n");
+    fprintf(alt_stdout," Link failed\n");
     break;
   case 1:
-    printf(" Link succeeded\n");
+    fprintf(alt_stdout," Link succeeded\n");
     break;
   default:
-    printf(" unknown error\n");
+    fprintf(alt_stdout," unknown error\n");
     break;
   }
   printInfoLog(p_zonesmoke);
@@ -225,25 +225,25 @@ int set3DSliceShaders(void){
   glLinkProgram(p_3dslice);
   glGetObjectParameterivARB(p_3dslice,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
-  printf("  3D Slice shader completion code:");
+  fprintf(alt_stdout,"  3D Slice shader completion code:");
   switch (error_code){
   case GL_INVALID_VALUE:
-    printf(" INVALID VALUE\n");
+    fprintf(alt_stdout," INVALID VALUE\n");
     break;
   case GL_INVALID_OPERATION:
-    printf(" INVALID OPERATION\n");
+    fprintf(alt_stdout," INVALID OPERATION\n");
     break;
   case GL_INVALID_ENUM:
-    printf(" INVALID ENUM\n");
+    fprintf(alt_stdout," INVALID ENUM\n");
     break;
   case 0:
-    printf(" Link failed\n");
+    fprintf(alt_stdout," Link failed\n");
     break;
   case 1:
-    printf(" Link succeeded\n");
+    fprintf(alt_stdout," Link succeeded\n");
     break;
   default:
-    printf(" unknown error\n");
+    fprintf(alt_stdout," unknown error\n");
     break;
   }
   printInfoLog(p_3dslice);
@@ -460,25 +460,25 @@ int setVolSmokeShaders() {
   glLinkProgram(p_volsmoke);
   glGetObjectParameterivARB(p_volsmoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
-  printf("  Volume Smoke shader completion code:");
+  fprintf(alt_stdout,"  Volume Smoke shader completion code:");
   switch (error_code){
   case GL_INVALID_VALUE:
-    printf(" INVALID VALUE\n");
+    fprintf(alt_stdout," INVALID VALUE\n");
     break;
   case GL_INVALID_OPERATION:
-    printf(" INVALID OPERATION\n");
+    fprintf(alt_stdout," INVALID OPERATION\n");
     break;
   case GL_INVALID_ENUM:
-    printf(" INVALID ENUM\n");
+    fprintf(alt_stdout," INVALID ENUM\n");
     break;
   case 0:
-    printf(" Link failed\n");
+    fprintf(alt_stdout," Link failed\n");
     break;
   case 1:
-    printf(" Link succeeded\n");
+    fprintf(alt_stdout," Link succeeded\n");
     break;
   default:
-    printf(" unknown error\n");
+    fprintf(alt_stdout," unknown error\n");
     break;
   }
   printInfoLog(p_volsmoke);
@@ -600,25 +600,25 @@ int setSmokeShaders() {
   glLinkProgram(p_smoke);
   glGetObjectParameterivARB(p_smoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
-  printf("  Smoke shader completion code:");
+  fprintf(alt_stdout,"  Smoke shader completion code:");
   switch (error_code){
   case GL_INVALID_VALUE:
-    printf(" INVALID VALUE\n");
+    fprintf(alt_stdout," INVALID VALUE\n");
     break;
   case GL_INVALID_OPERATION:
-    printf(" INVALID OPERATION\n");
+    fprintf(alt_stdout," INVALID OPERATION\n");
     break;
   case GL_INVALID_ENUM:
-    printf(" INVALID ENUM\n");
+    fprintf(alt_stdout," INVALID ENUM\n");
     break;
   case 0:
-    printf(" Link failed\n");
+    fprintf(alt_stdout," Link failed\n");
     break;
   case 1:
-    printf(" Link succeeded\n");
+    fprintf(alt_stdout," Link succeeded\n");
     break;
   default:
-    printf(" unknown error\n");
+    fprintf(alt_stdout," unknown error\n");
     break;
   }
   printInfoLog(p_smoke);
@@ -677,66 +677,66 @@ int init_shaders(void){
   gpuactive=0;
   usegpu=0;
   if(opengl_version<200){
-    printf("   Smokeview is running on a system using OpenGL %s\n",opengl_version_label);
-    printf("   OpenGL 2.0 or later is required to use the GPU.\n");
-    printf("   GPU smoke shader not supported.\n");
+    fprintf(alt_stdout,"   Smokeview is running on a system using OpenGL %s\n",opengl_version_label);
+    fprintf(alt_stdout,"   OpenGL 2.0 or later is required to use the GPU.\n");
+    fprintf(alt_stdout,"   GPU smoke shader not supported.\n");
     return 1;
   }
 
   if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader){
     if(setSmokeShaders()==1){
 #ifdef _DEBUG
-  		printf("   GPU smoke shader successfully compiled, linked and loaded.\n");
+  		fprintf(alt_stdout,"   GPU smoke shader successfully compiled, linked and loaded.\n");
 #endif
       gpuactive=1;
       err=0;
     }
     else{
-      printf("   *** GPU smoke shader failed to load.\n");
+      fprintf(alt_stdout,"   *** GPU smoke shader failed to load.\n");
       usegpu=0;
       err=1;
     }
     if(setVolSmokeShaders()==1){
 #ifdef _DEBUG
-  		printf("   GPU smoke Volume shader successfully compiled, linked and loaded.\n");
+  		fprintf(alt_stdout,"   GPU smoke Volume shader successfully compiled, linked and loaded.\n");
 #endif
       gpuactive=1;
       err=0;
     }
     else{
-      printf("   *** GPU smoke volume shader failed to load.\n");
+      fprintf(alt_stdout,"   *** GPU smoke volume shader failed to load.\n");
       usegpu=0;
       err=1;
     }
     if(set3DSliceShaders()==1){
 #ifdef _DEBUG
-  		printf("   GPU 3d slice shader successfully compiled, linked and loaded.\n");
+  		fprintf(alt_stdout,"   GPU 3d slice shader successfully compiled, linked and loaded.\n");
 #endif
       gpuactive=1;
       err=0;
     }
     else{
-      printf("   *** GPU 3d slice shader failed to load.\n");
+      fprintf(alt_stdout,"   *** GPU 3d slice shader failed to load.\n");
       usegpu=0;
       err=1;
     }
     if(err==0){
       if(setZoneSmokeShaders()==1){
 #ifdef _DEBUG
-  		printf("   GPU zone smoke shader successfully compiled, linked and loaded.\n");
+  		fprintf(alt_stdout,"   GPU zone smoke shader successfully compiled, linked and loaded.\n");
 #endif
         gpuactive=1;
         err=0;
       }
       else{
-        printf("   *** GPU zone smoke shader failed to load.\n");
+        fprintf(alt_stdout,"   *** GPU zone smoke shader failed to load.\n");
         usegpu=0;
         err=1;
       }
     }
   }
   else {
-    printf("   *** GPU smoke shader not supported.\n");
+    fprintf(alt_stdout,"   *** GPU smoke shader not supported.\n");
     usegpu=0;
     err=1;
   }
@@ -788,7 +788,7 @@ void printInfoLog(GLhandleARB obj){
   if (infologLength > 0){
     NewMemory((void **)&infoLog,infologLength);
     glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
-    printf("%s\n",infoLog);
+    fprintf(alt_stdout,"%s\n",infoLog);
     FREEMEMORY(infoLog);
   }
 }

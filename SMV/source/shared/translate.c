@@ -14,6 +14,7 @@ char translate_revision[]="$Revision$";
 #include "MALLOC.h"
 #include "translate.h"
 #include "string_util.h"
+#include "file_util.h"
 
 /* ------------------ compare_trdata ------------------------ */
 
@@ -164,8 +165,8 @@ void init_translate(char *bindir, char *tr_name){
     }
     tr_otherlang=parse_lang(smokeview_lang,&trinfo,&ntrinfo);
     if(tr_otherlang==1){
-      printf("Using translation file: %s",smokeview_lang);
-      printf("\n");
+      fprintf(alt_stdout,"Using translation file: %s",smokeview_lang);
+      fprintf(alt_stdout,"\n");
     }
     else{
       fprintf(stderr,"*** Warning: Failed to parse translation file: %s",smokeview_lang);

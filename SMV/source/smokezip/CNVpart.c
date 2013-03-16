@@ -109,7 +109,7 @@ void *convert_parts2iso(void *arg){
       stream=fopen(GLOBsmvisofile,"rb");
       if(stream!=NULL){
         fclose(stream);
-        printf("  Removing %s.\n",GLOBsmvisofile);
+        fprintf(alt_stdout,"  Removing %s.\n",GLOBsmvisofile);
         UNLINK(GLOBsmvisofile);
         LOCK_COMPRESS;
         GLOBfilesremoved++;
@@ -135,7 +135,7 @@ void *convert_parts2iso(void *arg){
           stream=fopen(isofilename,"rb");
           if(stream!=NULL){
             fclose(stream);
-            printf("  Removing %s.\n",isofilename);
+            fprintf(alt_stdout,"  Removing %s.\n",isofilename);
             UNLINK(isofilename);
             LOCK_COMPRESS;
             GLOBfilesremoved++;
@@ -327,7 +327,7 @@ void convert_part(part *parti, int *thread_index){
     partstream=fopen(partfile_svz,"rb");
     if(partstream!=NULL){
       fclose(partstream);
-      printf("  Removing %s.\n",partfile_svz);
+      fprintf(alt_stdout,"  Removing %s.\n",partfile_svz);
       UNLINK(partfile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;
@@ -336,7 +336,7 @@ void convert_part(part *parti, int *thread_index){
     partsizestream=fopen(partsizefile_svz,"rb");
     if(partsizestream!=NULL){
       fclose(partsizestream);
-      printf("  Removing %s.\n",partsizefile_svz);
+      fprintf(alt_stdout,"  Removing %s.\n",partsizefile_svz);
       UNLINK(partsizefile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;
@@ -355,7 +355,7 @@ void convert_part(part *parti, int *thread_index){
     }
   }
 
-  printf("  Compressing %s\n\n",parti->file);
+  fprintf(alt_stdout,"  Compressing %s\n\n",parti->file);
 
 #define BUFFER_SIZE 1000000
   NewMemory((void **)&pdata,BUFFER_SIZE*sizeof(float));
@@ -505,7 +505,7 @@ void convert_part(part *parti, int *thread_index){
     data_loc=sizebefore;
     percent_done=100.0*(float)data_loc/(float)parti->filesize;
     if(percent_done>percent_next){
-      printf(" %i%s",percent_next,GLOBpp);
+      fprintf(alt_stdout," %i%s",percent_next,GLOBpp);
       LOCK_COMPRESS;
       fflush(stdout);
       UNLOCK_COMPRESS;
@@ -514,7 +514,7 @@ void convert_part(part *parti, int *thread_index){
     count++;
   }
 
-  printf(" 100%s completed\n",GLOBpp);
+  fprintf(alt_stdout," 100%s completed\n",GLOBpp);
   FREEMEMORY(nquantities);
   FREEMEMORY(npoints);
   FREEMEMORY(pdata);
@@ -534,9 +534,9 @@ void convert_part(part *parti, int *thread_index){
 
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
-    printf("    records=%i, ",count);
-    printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
+    fprintf(alt_stdout,"    records=%i, ",count);
+    fprintf(alt_stdout,"Sizes: original=%s, ",before_label);
+    fprintf(alt_stdout,"compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
   }
 
 }
@@ -553,7 +553,7 @@ void Get_Part_Bounds(void){
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
-  printf("Determining particle file bounds\n");
+  fprintf(alt_stdout,"Determining particle file bounds\n");
 
   for(i=0;i<npart5propinfo;i++){
     part5prop *propi;
@@ -581,7 +581,7 @@ void Get_Part_Bounds(void){
     int j;
 
     parti = partinfo + i;
-    printf("  Examining %s\n",parti->file);
+    fprintf(alt_stdout,"  Examining %s\n",parti->file);
     lenfile=strlen(parti->file);
     LOCK_COMPRESS;
     unit=15;
@@ -656,7 +656,7 @@ void Get_Part_Bounds(void){
     propi->valmin=get_histogram_value(propi->histogram,0.01);
     propi->setvalmax=1;
     propi->setvalmin=1;
-    printf(" %s min: %f max: %f\n",propi->label.shortlabel,propi->valmin,propi->valmax);
+    fprintf(alt_stdout," %s min: %f max: %f\n",propi->label.shortlabel,propi->valmin,propi->valmax);
     FREEMEMORY(propi->histogram);
   }
 }
@@ -709,7 +709,7 @@ void part2iso(part *parti, int *thread_index){
     sprintf(threadinfo[*thread_index].label,"prt2iso %i",fileindex);
   }
 #else
-  printf("Converting %s to\n",parti->file);
+  fprintf(alt_stdout,"Converting %s to\n",parti->file);
 #endif
 
   endiandata=getendian();
@@ -820,7 +820,7 @@ void part2iso(part *parti, int *thread_index){
   fprintf(SMVISOFILE,"\n");
 
 #ifndef pp_THREAD
-  printf("  %s\n",isofile);
+  fprintf(alt_stdout,"  %s\n",isofile);
 #endif
 
   for(i=0;i<npart5propinfo;i++){
@@ -838,7 +838,7 @@ void part2iso(part *parti, int *thread_index){
     strcat(propi->isofilename,".tiso");
     CCtisoheader(propi->isofilename, labels->longlabel, labels->shortlabel, labels->unit, levels, &nlevels, &error);
 #ifndef pp_THREAD
-    printf("  %s\n",propi->isofilename);
+    fprintf(alt_stdout,"  %s\n",propi->isofilename);
 #endif
 
     fprintf(SMVISOFILE,"TISOF %i\n",blocknumber);
@@ -855,7 +855,7 @@ void part2iso(part *parti, int *thread_index){
   UNLOCK_PART2ISO;
 
 #ifndef pp_THREAD
-  printf(" ");
+  fprintf(alt_stdout," ");
 #endif
   error=0;
   file_size=0.0;
@@ -878,7 +878,7 @@ void part2iso(part *parti, int *thread_index){
     }
 #else
     if(percent_done>percent_next){
-      printf(" %i%s",percent_next,GLOBpp);
+      fprintf(alt_stdout," %i%s",percent_next,GLOBpp);
       fflush(stdout);
       percent_next+=10;
     }
@@ -995,7 +995,7 @@ void part2iso(part *parti, int *thread_index){
     threadinfo[*thread_index].stat=-1;
   }
 #else
-  printf(" 100%s completed\n",GLOBpp);
+  fprintf(alt_stdout," 100%s completed\n",GLOBpp);
 #endif
 
   FREEMEMORY(nquantities);

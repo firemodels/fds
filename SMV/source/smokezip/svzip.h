@@ -371,6 +371,7 @@ EXTERN int GLOBdoit_particle;
 #endif
 
 EXTERN int GLOBdoit_lighting;
+EXTERN FILE *SMZLOG_STREAM;
 
 EXTERN int GLOBfirst_initsphere,GLOBfirst_slice,GLOBfirst_patch,GLOBfirst_plot3d,GLOBfirst_part2iso,GLOBfirst_part2iso_smvopen;
 EXTERN int GLOBframeskip;

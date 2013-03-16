@@ -238,7 +238,7 @@ void next_zindex(int inc,int flag){
 /* ------------------ WindowStatus ------------------------ */
 
 void WindowStatus(int state){
-  printf("state=%i\n",state);
+  fprintf(alt_stdout,"state=%i\n",state);
   switch (state){
   case GLUT_HIDDEN:
   case GLUT_FULLY_COVERED:
@@ -430,10 +430,10 @@ void mouse_select_device(int button, int state, int x, int y){
     xyz = devicei->xyz;
 
     if(devicei->labelptr!=NULL&&strcmp(devicei->labelptr,"null")!=0){
-      printf("Selected Device: index=%i location:(%f,%f,%f) label:%s\n",val,xyz[0],xyz[1],xyz[2],devicei->labelptr);
+      fprintf(alt_stdout,"Selected Device: index=%i location:(%f,%f,%f) label:%s\n",val,xyz[0],xyz[1],xyz[2],devicei->labelptr);
     }
     else{
-      printf("Selected Device: index=%i location:(%f,%f,%f)\n",val,xyz[0],xyz[1],xyz[2]);
+      fprintf(alt_stdout,"Selected Device: index=%i location:(%f,%f,%f)\n",val,xyz[0],xyz[1],xyz[2]);
     }
     glShadeModel(GL_SMOOTH);
     glEnable(GL_BLEND);
@@ -611,7 +611,7 @@ int timebar_click(int x, int y){
     else{
       itimes=0;
     }
-//    printf("ngt=%i xl=%i x=%i xr=%i\n",nglobal_times,timebar_left_pos,x,timebar_right_pos);
+//    fprintf(alt_stdout,"ngt=%i xl=%i x=%i xr=%i\n",nglobal_times,timebar_left_pos,x,timebar_right_pos);
     checktimebound();
     timebar_drag=1;
     stept=0;
@@ -754,10 +754,10 @@ void update_mouseinfo(int flag, int xm, int ym){
 
     denom = sqrt(1.0-quat_general[0]*quat_general[0]);
     if(denom>0.0){
-      printf("angle= %f axis=(%f,%f,%f)\n",2.0*RAD2DEG*acos(quat_general[0]),quat_general[1]/denom,quat_general[2]/denom,quat_general[3]/denom);
+      fprintf(alt_stdout,"angle= %f axis=(%f,%f,%f)\n",2.0*RAD2DEG*acos(quat_general[0]),quat_general[1]/denom,quat_general[2]/denom,quat_general[3]/denom);
     }
     else{
-      printf("angle= %f axis=(*,*,*)\n",2.0*RAD2DEG*acos(quat_general[0]));
+      fprintf(alt_stdout,"angle= %f axis=(*,*,*)\n",2.0*RAD2DEG*acos(quat_general[0]));
     }
   }
 #endif
@@ -1118,7 +1118,7 @@ int throttle_gpu(void){
   if(fps>GPU_VOLframemax)return 1;
   MOTIONnframes++;
   if(thisMOTIONtime>lastMOTIONtime+0.25){
-    printf("MOTION: %4.1f fps\n",fps);
+    fprintf(alt_stdout,"MOTION: %4.1f fps\n",fps);
     lastMOTIONtime=thisMOTIONtime;
     MOTIONnframes=0;
   }
@@ -1214,12 +1214,12 @@ void print_gpu_cull_state(void){
   else{
     strcpy(gpu_label,"GPU not available.");
   }
-  printf("%s ",gpu_label);
+  fprintf(alt_stdout,"%s ",gpu_label);
 #endif
 #ifdef pp_CULL
-  printf("%s",cull_label);
+  fprintf(alt_stdout,"%s",cull_label);
 #endif
-  printf("\n");
+  fprintf(alt_stdout,"\n");
 }
 #endif
 
@@ -1279,7 +1279,7 @@ void keyboard(unsigned char key, int flag){
               }
             }
           }
-          printf("iveclengths=%i\n",iveclengths);
+          fprintf(alt_stdout,"iveclengths=%i\n",iveclengths);
           if(visVector==1&&ReadPlot3dFile==1){
             gbsave=current_mesh;
             for(i=0;i<nmeshes;i++){
@@ -1310,7 +1310,7 @@ void keyboard(unsigned char key, int flag){
         if(nrooms>0){
           zone_highlight_room++;
           if(zone_highlight_room>=nrooms)zone_highlight_room=0;
-          printf("room %i\n",zone_highlight_room+1);
+          fprintf(alt_stdout,"room %i\n",zone_highlight_room+1);
         }
         else{
           contour_type++;
@@ -1330,7 +1330,7 @@ void keyboard(unsigned char key, int flag){
           if(nrooms>0){
             zone_highlight = 1 - zone_highlight;
             if(zone_highlight==1){
-              printf("room %i\n",zone_highlight_room+1);
+              fprintf(alt_stdout,"room %i\n",zone_highlight_room+1);
             }
           }
 #ifdef pp_CULL
@@ -1495,8 +1495,8 @@ void keyboard(unsigned char key, int flag){
     case 'k':
     case 'K':
       visTimeLabels = 1 - visTimeLabels;
-      if(visTimeLabels==0)printf("Time bar hidden\n");
-      if(visTimeLabels==1)printf("Time bar visible\n");
+      if(visTimeLabels==0)fprintf(alt_stdout,"Time bar hidden\n");
+      if(visTimeLabels==1)fprintf(alt_stdout,"Time bar visible\n");
       break;
 #ifdef _DEBUG 
     case 'l':
@@ -1505,7 +1505,7 @@ void keyboard(unsigned char key, int flag){
         if(smokecullflag==0){
           smokedrawtest=1-smokedrawtest;
         }
-        printf("smokecullflag=%i\n smokedrawtest=%i\n",smokecullflag,smokedrawtest);
+        fprintf(alt_stdout,"smokecullflag=%i\n smokedrawtest=%i\n",smokecullflag,smokedrawtest);
         update_smoke3dflags();
         return;
       }
@@ -1535,7 +1535,7 @@ void keyboard(unsigned char key, int flag){
       if(nsmoke3dinfo>0){
         adjustalphaflag++;
         if(adjustalphaflag>3)adjustalphaflag=0;
-        printf("adjustalphaflag=%i\n",adjustalphaflag);
+        fprintf(alt_stdout,"adjustalphaflag=%i\n",adjustalphaflag);
         update_smoke3dflags();
         return;
       }
@@ -1546,7 +1546,7 @@ void keyboard(unsigned char key, int flag){
       highlight_flag++;
       if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
       if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
-      printf("outline mode=%i\n",highlight_flag);
+      fprintf(alt_stdout,"outline mode=%i\n",highlight_flag);
       break;
     case 'p':
       plotn += FlowDir;
@@ -1740,7 +1740,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'T':
       usetexturebar=1-usetexturebar;
-      printf("usetexturebar=%i\n",usetexturebar);
+      fprintf(alt_stdout,"usetexturebar=%i\n",usetexturebar);
       break;
     case 'u':
     case 'U':
@@ -1843,12 +1843,12 @@ void keyboard(unsigned char key, int flag){
     case '$':
       trainer_active=1-trainer_active;
       if(trainer_active==1){
-        printf("Trainer mode active\n");
+        fprintf(alt_stdout,"Trainer mode active\n");
         trainer_mode=1;
         show_glui_trainer();
       }
       if(trainer_active==0){
-        printf("Trainer mode inactive\n");
+        fprintf(alt_stdout,"Trainer mode inactive\n");
         trainer_mode=0;
         hide_glui_trainer();
       }
@@ -1861,7 +1861,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case '&':
       antialiasflag=1-antialiasflag;
-      printf("antialiasflag=%i\n",antialiasflag);
+      fprintf(alt_stdout,"antialiasflag=%i\n",antialiasflag);
       break;
     case '*':
       visx_all=0;
@@ -1966,13 +1966,13 @@ void handle_rotation_type(int flag){
   updatemenu=1;
   switch (rotation_type){
   case ROTATION_3AXIS:
-      if(trainer_mode==0)printf("Scene centered (3 axis rotation)\n");
+      if(trainer_mode==0)fprintf(alt_stdout,"Scene centered (3 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case ROTATION_2AXIS:
-      if(trainer_mode==0)printf("Scene centered (2 axis rotation)\n");
+      if(trainer_mode==0)fprintf(alt_stdout,"Scene centered (2 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
@@ -1982,11 +1982,11 @@ void handle_rotation_type(int flag){
        if(showtrainer_dialog==0&&flag==0&&rotation_type_old!=EYE_CENTERED){
          ResetView(RESTORE_EXTERIOR_VIEW);
        }
-      if(trainer_mode==0)printf("eye centered\n");
+      if(trainer_mode==0)fprintf(alt_stdout,"eye centered\n");
       break;
   case ROTATION_1AXIS:
     az_elev[1]=0.0;
-    if(trainer_mode==0)printf("Scene centered (level rotation)\n");
+    if(trainer_mode==0)fprintf(alt_stdout,"Scene centered (level rotation)\n");
     if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }
@@ -2005,9 +2005,9 @@ void handle_rotation_type(int flag){
 void update_clipplanes(void){
   if(trainer_mode==0){
     if(xyz_clipplane!=xyz_clipplane_last){
-      if(xyz_clipplane==0)printf("clipping off\n");
-      if(xyz_clipplane==1)printf("clipping blockages + data\n");
-      if(xyz_clipplane==2)printf("clipping blockages\n");
+      if(xyz_clipplane==0)fprintf(alt_stdout,"clipping off\n");
+      if(xyz_clipplane==1)fprintf(alt_stdout,"clipping blockages + data\n");
+      if(xyz_clipplane==2)fprintf(alt_stdout,"clipping blockages\n");
       xyz_clipplane_last=xyz_clipplane;
     }
   }

@@ -156,12 +156,12 @@ void get_faceinfo(void){
       for(j=0;j<geomlisti->npoints;j++){
         if(points[j]->nused>0)nused++;
       }
-      printf("Face/Vertex Summary\n");
-      printf("      Faces: %i\n",geomlisti->ntriangles);
-      printf(" slim faces: %i\n",nskinny);
-      printf("   Vertices: %i\n",geomlisti->npoints);
-      printf("     unused: %i\n",geomlisti->npoints-nused);
-      printf(" duplicates: %i\n\n",ndups);
+      fprintf(alt_stdout,"Face/Vertex Summary\n");
+      fprintf(alt_stdout,"      Faces: %i\n",geomlisti->ntriangles);
+      fprintf(alt_stdout," slim faces: %i\n",nskinny);
+      fprintf(alt_stdout,"   Vertices: %i\n",geomlisti->npoints);
+      fprintf(alt_stdout,"     unused: %i\n",geomlisti->npoints-nused);
+      fprintf(alt_stdout," duplicates: %i\n\n",ndups);
       FREEMEMORY(points);
     }
   }
@@ -767,14 +767,14 @@ void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
       nverts=nvertfaces[0];
       ntris=nvertfaces[1];
       if(i>=0){
-        printf("time=%.2f triangles: %i\n",times_local[0],ntris);
+        fprintf(alt_stdout,"time=%.2f triangles: %i\n",times_local[0],ntris);
       }
       else{
       }
       if(nverts>0){
         int ii;
 
-        if(i<0)printf("static geometry\n");
+        if(i<0)fprintf(alt_stdout,"static geometry\n");
         NewMemory((void **)&xyz,3*nverts*sizeof(float));
         NewMemory((void **)&points,nverts*sizeof(point));
         geomlisti->points=points;
@@ -823,7 +823,7 @@ void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
       memcpy(geomlisti->translate,tran_rot,3*sizeof(float));
       memcpy(geomlisti->rot0,tran_rot+3,3*sizeof(float));
       memcpy(geomlisti->rot,tran_rot+6,2*sizeof(float));
-      if(i>=0)printf("time=%.2f",times_local[0]);
+      if(i>=0)fprintf(alt_stdout,"time=%.2f",times_local[0]);
     }
   }
   geomi->loaded=1;

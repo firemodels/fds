@@ -226,7 +226,7 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
 
     if(returncode==0)break;
     if(doit==1){
-      printf("particle time=%.2f",time_local);
+      fprintf(alt_stdout,"particle time=%.2f",time_local);
       parti->times[count2]=time_local;
     }
     for(i=0;i<nclasses;i++){
@@ -340,7 +340,7 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
     }
     CheckMemory;
     if(first_frame==1)first_frame=0;
-    if(doit==1)printf(" completed\n");
+    if(doit==1)fprintf(alt_stdout," completed\n");
 
   }
 wrapup:
@@ -363,10 +363,10 @@ void print_part5prop(void){
     part5prop *propi;
 
     propi = part5propinfo + i;
-    printf("label=%s min=%f max=%f\n",propi->label->longlabel,propi->valmin,propi->valmax);
-    printf("   glbmin=%f glbmax=%f\n",propi->global_min,propi->global_max);
-    printf("   permin=%f permax=%f\n",propi->percentile_min,propi->percentile_max);
-    printf("\n");
+    fprintf(alt_stdout,"label=%s min=%f max=%f\n",propi->label->longlabel,propi->valmin,propi->valmax);
+    fprintf(alt_stdout,"   glbmin=%f glbmax=%f\n",propi->global_min,propi->global_max);
+    fprintf(alt_stdout,"   permin=%f permax=%f\n",propi->percentile_min,propi->percentile_max);
+    fprintf(alt_stdout,"\n");
   }
 }
 
@@ -1000,7 +1000,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
     updatemenu=1;
     updatePart5extremes();
 #ifdef _DEBUG
-    printf("After particle file unload: ");
+    fprintf(alt_stdout,"After particle file unload: ");
     PrintMemoryInfo;
 #endif
     return;
@@ -1013,15 +1013,15 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
     return;
   }
   
-  printf("Sizing particle data: %s\n",file);
+  fprintf(alt_stdout,"Sizing particle data: %s\n",file);
   getpart5header(parti, partframestep, &nf_all);
 
-  printf("Loading particle data: %s\n",file);
+  fprintf(alt_stdout,"Loading particle data: %s\n",file);
   getpart5data(parti,partframestep,partpointstep, nf_all, &delta_time, &file_size);
   updateglui();
 
 #ifdef _DEBUG
-  printf("After particle file load: ");
+  fprintf(alt_stdout,"After particle file load: ");
   PrintMemoryInfo;
 #endif
   if(parti->evac==0){
@@ -1038,7 +1038,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   }
   /* convert particle temperatures into integers pointing to an rgb color table */
 
-  printf("computing particle color levels \n");
+  fprintf(alt_stdout,"computing particle color levels \n");
 
   adjustpart5bounds(parti);
   NewMemory((void **)&colorlabelpart,MAXRGB*sizeof(char *));
@@ -1055,7 +1055,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   getPart5Colors(parti,nrgb);
   updateglui();
 #ifdef _DEBUG
-  printf("After particle file load: ");
+  fprintf(alt_stdout,"After particle file load: ");
   PrintMemoryInfo;
 #endif
   if(parti->evac==0){
@@ -1085,14 +1085,14 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
     float loadrate;
 
     loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
-    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s",
+    fprintf(alt_stdout," %.1f MB loaded in %.2f s - rate: %.1f Mb/s",
     (float)file_size/1000000.,delta_time,loadrate);
   }
   else{
-    printf(" %.1f MB downloaded in %.2f s",
+    fprintf(alt_stdout," %.1f MB downloaded in %.2f s",
     (float)file_size/1000000.,delta_time);
   }
-  printf(" (overhead: %.2f s)\n",delta_time0-delta_time);
+  fprintf(alt_stdout," (overhead: %.2f s)\n",delta_time0-delta_time);
 
   glutPostRedisplay();
 }
@@ -1179,14 +1179,14 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     Update_Times();
     updatemenu=1;
 #ifdef _DEBUG
-    printf("After particle file unload: ");
+    fprintf(alt_stdout,"After particle file unload: ");
     PrintMemoryInfo;
 #endif
     return;
   }
 
   if(colorlabelpart!=NULL){
-    printf("freeing colorlabelpart\n");
+    fprintf(alt_stdout,"freeing colorlabelpart\n");
     for(n=0;n<MAXRGB;n++){FREEMEMORY(colorlabelpart[n]);}
     FREEMEMORY(colorlabelpart);
   }
@@ -1198,7 +1198,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     return;
   }
   
-  printf("Sizing particle data: %s\n",file);
+  fprintf(alt_stdout,"Sizing particle data: %s\n",file);
   file_unit=15;
   FORTget_file_unit(&file_unit,&file_unit);
   FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian_smv,&staticframe0,&error,lenfile);
@@ -1298,7 +1298,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
 
 
-  printf("Loading particle data: %s\n",file);
+  fprintf(alt_stdout,"Loading particle data: %s\n",file);
   FORTgetdata1(&file_unit,&parttype,&error);
   if(partfilenum>=0&&partfilenum<npartinfo){
     partshortlabel=partinfo[partfilenum].label.shortlabel;
@@ -1336,7 +1336,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   
   nmax = parti->bframe[parti->ntimes-1]+parti->sframe[parti->ntimes-1];
-  printf("loaded: points=%i, size=%i KBytes, frames=%i\n",nmax,nmax*bytesperpoint/1024,parti->ntimes);
+  fprintf(alt_stdout,"loaded: points=%i, size=%i KBytes, frames=%i\n",nmax,nmax*bytesperpoint/1024,parti->ntimes);
 
   if(parttype==-1||parttype==-3){
     parti->particle_type=1;  /*  only color temperature */
@@ -1373,7 +1373,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   /* convert particle temperatures into integers pointing to an rgb color table */
 
-  printf("computing particle color levels \n");
+  fprintf(alt_stdout,"computing particle color levels \n");
   if(parti->particle_type!=0||parti->droplet_type!=0){
     adjustpartbounds(parti->tpart,parti->particle_type,parti->droplet_type,parti->isprink,
       skip_local,nmax,setpartmin,&tmin_global,setpartmax,&tmax_global);
@@ -1426,7 +1426,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   updateglui();
 
 #ifdef _DEBUG
-  printf("After particle file load: ");
+  fprintf(alt_stdout,"After particle file load: ");
   PrintMemoryInfo;
 #endif
   if(partinfo[ifile].evac==0){

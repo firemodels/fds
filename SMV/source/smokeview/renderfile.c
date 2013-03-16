@@ -319,7 +319,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
     return 1;
   }
   RENDERfile = fopen(renderfile, "wb");
-  printf("Rendering to: %s .",renderfile);
+  fprintf(alt_stdout,"Rendering to: %s .",renderfile);
   if (RENDERfile == NULL) {
     fprintf(stderr,"*** Error: unable to write to %s",renderfile);
     FREEMEMORY(renderfile);
@@ -363,7 +363,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
   gdImageDestroy(RENDERimage);
   FREEMEMORY(renderfile);
-  printf(" Completed\n");
+  fprintf(alt_stdout," Completed\n");
   return 0;
 }
 
@@ -415,7 +415,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int widt
     fprintf(stderr,"*** Error allocating memory buffer for render file:%s\n",renderfile);
     return 1;
   }
-  printf("Rendering to: %s .",renderfile);
+  fprintf(alt_stdout,"Rendering to: %s .",renderfile);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
   /* get the image from the OpenGL frame buffer */
@@ -490,7 +490,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int widt
 
   gdImageDestroy(RENDERimage);
   FREEMEMORY(OpenGLimage);
-  printf(" Completed.\n");
+  fprintf(alt_stdout," Completed.\n");
   return 0;
 }
 
@@ -541,7 +541,7 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
   }
 
   
-  if(printflag==1)printf("Loading texture:%s ",filebuffer);
+  if(printflag==1)fprintf(alt_stdout,"Loading texture:%s ",filebuffer);
   ext = filebuffer + strlen(filebuffer) - 4;
   if(strncmp(ext,".jpg",4)==0||strncmp(ext,".JPG",4)==0){
     returncode = readjpeg(filebuffer,width,height,pixel_skip);
@@ -560,10 +560,10 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
   }
   if(printflag==1){
     if(returncode!=NULL){
-      printf(" - completed\n");
+      fprintf(alt_stdout," - completed\n");
     }
     else{
-      printf(" - failed\n");
+      fprintf(alt_stdout," - failed\n");
       fprintf(stderr,"*** Error: attempt to input %s failed\n",filename);
     }
   }

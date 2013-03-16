@@ -149,7 +149,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
     updatemenu=1;
 #ifdef _DEBUG
-    printf("After boundary file unload: ");
+    fprintf(alt_stdout,"After boundary file unload: ");
     PrintMemoryInfo;
 #endif
     return;
@@ -804,11 +804,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
     if(loadpatchbysteps==0||loadpatchbysteps==1){
       if(!(settmin_b!=0&&*meshi->patch_timesi<tmin_b)){
-        printf("boundary time=%.2f\n",*meshi->patch_timesi);
+        fprintf(alt_stdout,"boundary time=%.2f\n",*meshi->patch_timesi);
 
         meshi->npatch_times++;
         if(meshi->npatch_times + 1 > mxpatch_frames){
-          printf("reallocating memory\n");
+          fprintf(alt_stdout,"reallocating memory\n");
           mxpatch_frames = meshi->npatch_times + 50; /* this + 50 must match - 50 below */
           meshi->mxpatch_frames=mxpatch_frames;
           if(
@@ -843,7 +843,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
   }
 
-  printf("computing boundary color levels \n");
+  fprintf(alt_stdout,"computing boundary color levels \n");
   if(NewMemory((void **)&colorlabelpatch,MAXRGB*sizeof(char *))==0){
     *errorcode=1;
     if(loadpatchbysteps!=2){
@@ -914,7 +914,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   update_unit_defs();
   updatechopcolors();
 #ifdef _DEBUG
-  printf("After boundary file load: ");
+  fprintf(alt_stdout,"After boundary file load: ");
   PrintMemoryInfo;
 #endif
   Idle_CB();
@@ -926,11 +926,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     float loadrate;
 
     loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
-    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    fprintf(alt_stdout," %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
     (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
   }
   else{
-    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    fprintf(alt_stdout," %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
 
@@ -3683,7 +3683,7 @@ void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata,
     if(skip_frame==1||local_count%boundframestep!=0)continue;
     i++;
     if(i>=ntimes_local)break;
-    printf("boundary time=%.2f\n",local_time);
+    fprintf(alt_stdout,"boundary time=%.2f\n",local_time);
     ASSERT(i<ntimes_local);
     local_times[i]=local_time;
     zipoffset[i]=offset;
@@ -3742,10 +3742,10 @@ void Update_All_Patch_Bounds_st(void){
     update_patch_bounds(patchi);
   }
   if(total==0){
-    printf("Boundary file bounds already computed.\n");
+    fprintf(alt_stdout,"Boundary file bounds already computed.\n");
   }
   else{
-    printf("Bounds for %i boundary files computed\n",total);
+    fprintf(alt_stdout,"Bounds for %i boundary files computed\n",total);
   }
   UNLOCK_COMPRESS;
 }
@@ -3779,10 +3779,10 @@ int update_patch_hist(patchdata *patchj){
     patchi->inuse_getbounds=1;
 
     if(first==1){
-      printf("Determining %s percentile and global data bounds\n",patchi->label.longlabel);
+      fprintf(alt_stdout,"Determining %s percentile and global data bounds\n",patchi->label.longlabel);
       first=0;
     }
-    printf("  Examining %s\n",patchi->file);
+    fprintf(alt_stdout,"  Examining %s\n",patchi->file);
     sum++;
     lenfile=strlen(patchi->file);
 
