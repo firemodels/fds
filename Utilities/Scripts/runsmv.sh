@@ -49,4 +49,4 @@ fi
 source ~/.bashrc_fds intel64
 cd $fulldir
 echo $SMV $SMVBINDIR $RUNSCRIPT $in
-$SMV $SMVBINDIR $RUNSCRIPT $in
+$SMV $SMVBINDIR -redirect $RUNSCRIPT $in
