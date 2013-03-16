@@ -62,3 +62,5 @@
 #define EXTERNCPP
 #endif
 
+#define FILE_SIZE unsigned int
+
