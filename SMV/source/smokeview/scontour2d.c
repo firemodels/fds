@@ -7,9 +7,7 @@ char scontour2d_revision[]="$Revision$";
 
 #include "options.h"
 #include <stdlib.h>
-#ifdef _DEBUG
 #include <stdio.h>
-#endif
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
