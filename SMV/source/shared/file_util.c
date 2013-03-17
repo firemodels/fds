@@ -36,9 +36,9 @@ int FFLUSH(void){
   return fflush(alt_stdout);
 }
 
-/* ------------------ filecopy ------------------------ */
+/* ------------------ PRINTF ------------------------ */
 
-int PRINTF (const char * format, ...){
+int PRINTF(const char * format, ...){
   va_list args;
   int return_val;
 
@@ -48,7 +48,6 @@ int PRINTF (const char * format, ...){
   va_end (args);
   return return_val;
 }
-
 
 /* ------------------ set_file ------------------------ */
 
