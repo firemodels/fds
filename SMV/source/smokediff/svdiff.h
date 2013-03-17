@@ -208,6 +208,6 @@ EXTERN casedata *caseinfo;
 EXTERN char *sourcedir1, *sourcedir2, *destdir;
 EXTERN int test_mode;
 EXTERN char type_label[1024];
-EXTERN FILE *LOGSTREAM;
+EXTERN FILE *LOG_FILENAME;
 
 #endif

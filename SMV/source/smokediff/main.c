@@ -192,9 +192,9 @@ int main(int argc, char **argv){
     if(destdir!=NULL)strcat(svdlogfile,destdir);
     strcat(svdlogfile,smv1);
     strcat(svdlogfile,"_diff.svdlog");
-    LOGSTREAM=fopen(svdlogfile,"w");
-    if(LOGSTREAM!=NULL){
-      set_outstream(LOGSTREAM);
+    LOG_FILENAME=fopen(svdlogfile,"w");
+    if(LOG_FILENAME!=NULL){
+      set_outstream(LOG_FILENAME);
     }
   }
   if(getfileinfo(smoke1,NULL,NULL)!=0||getfileinfo(smoke2,NULL,NULL)!=0){
