@@ -594,9 +594,10 @@ void parse_commandline(int argc, char **argv){
     else if(
       strncmp(argv[i],"-redirect",9)==0
       ){
-        LOGSTREAM=fopen(log_filename,"w");
-        if(LOGSTREAM!=NULL){
-          set_outstream(LOGSTREAM);
+        LOG_FILENAME=fopen(log_filename,"w");
+        if(LOG_FILENAME!=NULL){
+          redirect=1;
+          set_outstream(LOG_FILENAME);
         }
     }
     else if(strncmp(argv[i],"-runscript",10)==0){

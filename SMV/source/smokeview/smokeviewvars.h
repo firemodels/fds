@@ -25,6 +25,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(redirect,0);
 SVEXTERN int SVDECL(tempdir_flag,0);
 SVEXTERN int SVDECL(script_render,0);
 SVEXTERN int SVDECL(make_volrender_script,0);
@@ -68,7 +69,6 @@ SVEXTERN int SVDECL(use_glui_rotate,0);
 SVEXTERN int SVDECL(show_fed_area,1);
 SVEXTERN int SVDECL(*fed_areas,NULL);
 SVEXTERN char default_fed_colorbar[255];
-SVEXTERN FILE SVDECL(*LOGSTREAM,NULL);
 
 SVEXTERN int SVDECL(*meshvisptr,NULL);
 SVEXTERN smoke3ddata SVDECL(**smoke3dinfo_sorted,NULL);
@@ -923,6 +923,7 @@ SVEXTERN int SVDECL(script_multislice,0), SVDECL(script_multivslice,0), SVDECL(s
 SVEXTERN FILE SVDECL(*scriptoutstream,NULL);
 SVEXTERN char SVDECL(*script_filename2,NULL);
 SVEXTERN char SVDECL(*log_filename,NULL);
+SVEXTERN FILE SVDECL(*LOG_FILENAME,NULL);
 SVEXTERN char SVDECL(*flushfile,NULL), SVDECL(*chidfilebase,NULL);
 SVEXTERN char SVDECL(*hrr_csv_filename,NULL),SVDECL(*devc_csv_filename,NULL),SVDECL(*exp_csv_filename,NULL);
 SVEXTERN hrrdata SVDECL(*hrrinfo,NULL);

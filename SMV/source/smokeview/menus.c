@@ -2416,6 +2416,25 @@ void LoadUnloadMenu(int value){
     updatetourmenulabels();
     updateplot3dmenulabels();
   }
+  if(value==REDIRECT){
+    updatemenu=1;
+    glutPostRedisplay();
+    redirect=1-redirect;
+    if(LOG_FILENAME!=NULL){
+      fclose(LOG_FILENAME);
+      LOG_FILENAME=NULL;
+    }
+    if(redirect==1){
+      LOG_FILENAME=fopen(log_filename,"w");
+      if(LOG_FILENAME==NULL)redirect=0;
+    }
+    if(redirect==1){
+      set_outstream(LOG_FILENAME);
+    }
+    else{
+      set_outstream(stdout);
+    }
+  }
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 }
 
@@ -8928,6 +8947,13 @@ updatemenu=0;
 #endif
       if(showfiles==1)glutAddMenuEntry(_("*Show file names"),SHOWFILES);
       if(showfiles==0)glutAddMenuEntry(_("Show file names"),SHOWFILES);
+
+      strcpy(menulabel,"");
+      if(redirect==1)strcat(menulabel,"*");
+      strcat(menulabel,"Redirect messages to ");
+      strcat(menulabel,log_filename);
+      glutAddMenuEntry(menulabel,REDIRECT);
+
       glutAddSubMenu(_("Reload"),reloadmenu);
       glutAddMenuEntry(_("Unload all"),UNLOADALL);
     }

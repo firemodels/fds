@@ -288,6 +288,7 @@ void _Sniff_Errors(char *whereat);
 #define RELOADALL 4
 #define UNLOADALL 1
 #define SHOWFILES 5
+#define REDIRECT 6
 
 #define SCRIPT_START_RECORDING2 -6
 #define SCRIPT_START_RECORDING -2
