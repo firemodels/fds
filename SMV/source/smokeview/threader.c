@@ -55,7 +55,7 @@ void compress_svzip(void){
 void *mt_update_smooth_blockages(void *arg){
 
   if(ifsmoothblock()==1){
-    fprintf(alt_stdout,"Smoothing blockages in the background\n");
+    PRINTF("Smoothing blockages in the background\n");
     update_smooth_blockages();
     updatefacelists=1;
   }

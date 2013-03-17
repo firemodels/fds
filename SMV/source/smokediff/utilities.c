@@ -44,34 +44,34 @@ void version(void){
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
     svn_num=getmaxrevision();    // get svn revision number
-    fprintf(alt_stdout,"\n");
-    fprintf(alt_stdout,"Smokediff\n\n");
-    fprintf(alt_stdout,"Version: %s\n",smv_version);
-    fprintf(alt_stdout,"SVN Revision Number: %i\n",svn_num);
-    fprintf(alt_stdout,"Compile Date: %s\n",__DATE__);
+    PRINTF("\n");
+    PRINTF("Smokediff\n\n");
+    PRINTF("Version: %s\n",smv_version);
+    PRINTF("SVN Revision Number: %i\n",svn_num);
+    PRINTF("Compile Date: %s\n",__DATE__);
 #ifdef X64
-    fprintf(alt_stdout,"Platform: WIN64\n");
+    PRINTF("Platform: WIN64\n");
 #endif
 #ifdef WIN32
 #ifndef X64
-    fprintf(alt_stdout,"Platform: WIN32\n");
+    PRINTF("Platform: WIN32\n");
 #endif
 #endif
 #ifndef pp_OSX64
 #ifdef pp_OSX
-    fprintf(alt_stdout,"Platform: OSX\n");
+    PRINTF("Platform: OSX\n");
 #endif
 #endif
 #ifdef pp_OSX64
-    fprintf(alt_stdout,"Platform: OSX64\n");
+    PRINTF("Platform: OSX64\n");
 #endif
 #ifndef pp_LINUX64
 #ifdef pp_LINUX
-    fprintf(alt_stdout,"Platform: LINUX\n");
+    PRINTF("Platform: LINUX\n");
 #endif
 #endif
 #ifdef pp_LINUX64
-    fprintf(alt_stdout,"Platform: LINUX64\n");
+    PRINTF("Platform: LINUX64\n");
 #endif
 
 

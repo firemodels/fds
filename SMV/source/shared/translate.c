@@ -165,8 +165,8 @@ void init_translate(char *bindir, char *tr_name){
     }
     tr_otherlang=parse_lang(smokeview_lang,&trinfo,&ntrinfo);
     if(tr_otherlang==1){
-      fprintf(alt_stdout,"Using translation file: %s",smokeview_lang);
-      fprintf(alt_stdout,"\n");
+      PRINTF("Using translation file: %s",smokeview_lang);
+      PRINTF("\n");
     }
     else{
       fprintf(stderr,"*** Warning: Failed to parse translation file: %s",smokeview_lang);

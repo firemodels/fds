@@ -193,7 +193,7 @@ void diff_boundaryes(FILE *stream_out){
     fclose(stream);
     make_outfile(outfile2,NULL,boundary1->file,".bf");
 
-    fprintf(alt_stdout,"Subtracting %s from %s\n",fullfile2,fullfile1);
+    PRINTF("Subtracting %s from %s\n",fullfile2,fullfile1);
 
     unit1=11;
     FORTget_file_unit(&unit1,&unit1);
@@ -236,8 +236,8 @@ void diff_boundaryes(FILE *stream_out){
       size_sofar=0;
       FORToutboundaryheader(outfile,&unit3,&boundary1->npatches,
         p3i1,p3i2,p3j1,p3j2,p3k1,p3k2,patchdir3,&error1,len3);
-      fprintf(alt_stdout,"  Progress: ");
-      fflush(stdout);
+      PRINTF("  Progress: ");
+      FFLUSH();
       percent_complete=0;
       valmin=1000000000.0;
       valmax=-valmin;
@@ -301,15 +301,15 @@ void diff_boundaryes(FILE *stream_out){
         fraction_complete=(float)size_sofar/(float)boundary1->filesize;
         if((int)(fraction_complete*100)>percent_complete+10){
           if(percent_complete<100)percent_complete+=10;
-          fprintf(alt_stdout,"%i%s ",percent_complete,pp);
-          fflush(stdout);
+          PRINTF("%i%s ",percent_complete,pp);
+          FFLUSH();
         }
 
         FORTgetpatchdata(&unit1, &boundary1->npatches, 
           p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &npqq1, &error1);
       }
-      fprintf(alt_stdout,"\n");
-      fflush(stdout);
+      PRINTF("\n");
+      FFLUSH();
       valmin_percentile = get_histogram_value(boundary1->histogram, 0.01);
       valmax_percentile = get_histogram_value(boundary1->histogram, 0.99);
 

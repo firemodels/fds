@@ -440,10 +440,10 @@ int main(int argc, char **argv){
   }
 
   if(getendian()==1){
-      fprintf(alt_stdout,"Smokezip running on a big endian computer.\n");
+      PRINTF("Smokezip running on a big endian computer.\n");
   }
   else{
-      fprintf(alt_stdout,"Smokezip running on a little endian computer.\n");
+      PRINTF("Smokezip running on a little endian computer.\n");
   }
   if(GLOBendf==0&&GLOBsyst==0){
     fprintf(stderr,"Warning: casename.end file is missing.  Endianness of\n");
@@ -462,10 +462,10 @@ int main(int argc, char **argv){
     endian_fds=getendian()+endianswitch;
     if(endian_fds==2)endian_fds=0;
     if(endian_fds==1){
-      fprintf(alt_stdout,"FDS was run on a big endian computer. \n\n");
+      PRINTF("FDS was run on a big endian computer. \n\n");
     }
     else{
-      fprintf(alt_stdout,"FDS was run on a little endian computer.\n\n");
+      PRINTF("FDS was run on a little endian computer.\n\n");
     }
   }
   if(endian_info==1)return 0;
@@ -479,13 +479,13 @@ int main(int argc, char **argv){
 #endif
 
   if(GLOBcleanfiles==0&&GLOBdestdir!=NULL){
-    fprintf(alt_stdout,"Copying .smv, .ini and .end files to %s directory\n",GLOBdestdir);
+    PRINTF("Copying .smv, .ini and .end files to %s directory\n",GLOBdestdir);
     filecopy(GLOBdestdir,smvfile,smvfilebase);
     filecopy(GLOBdestdir,inifile,inifilebase);
     filecopy(GLOBdestdir,GLOBendianfile,GLOBendianfilebase);
   }
   if(GLOBcleanfiles==1&&GLOBfilesremoved==0){
-    fprintf(alt_stdout,"No compressed files were removed\n");
+    PRINTF("No compressed files were removed\n");
   }
   if(GLOBmake_demo==1){
     makesvd(GLOBdestdir,smvfile);
@@ -572,66 +572,66 @@ void usage(char *prog){
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
 
-  fprintf(alt_stdout,"\n");
-  fprintf(alt_stdout,"  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
-  fprintf(alt_stdout,"  Compress FDS data files\n\n");
-  fprintf(alt_stdout,"  %s [options] casename\n\n",prog);
-  fprintf(alt_stdout,"  casename - Smokeview .smv file for case to be compressed\n\n");
-  fprintf(alt_stdout,"options:\n");
-  fprintf(alt_stdout,"  -c  - cleans or removes all compressed files\n");
+  PRINTF("\n");
+  PRINTF("  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
+  PRINTF("  Compress FDS data files\n\n");
+  PRINTF("  %s [options] casename\n\n",prog);
+  PRINTF("  casename - Smokeview .smv file for case to be compressed\n\n");
+  PRINTF("options:\n");
+  PRINTF("  -c  - cleans or removes all compressed files\n");
 #ifdef pp_THREAD
-  fprintf(alt_stdout,"  -t nthread - Compress nthread files at a time (up to %i)\n",NTHREADS_MAX);
+  PRINTF("  -t nthread - Compress nthread files at a time (up to %i)\n",NTHREADS_MAX);
 #endif
-  fprintf(alt_stdout,"overwrite options:\n");
-  fprintf(alt_stdout,"  -f  - overwrites all compressed files\n");
-  fprintf(alt_stdout,"  -2  - overwrites 2d slice compressed files\n");
-  fprintf(alt_stdout,"  -3  - overwrites 3d smoke files\n");
-  fprintf(alt_stdout,"  -b  - overwrites boundary compressed files\n");
+  PRINTF("overwrite options:\n");
+  PRINTF("  -f  - overwrites all compressed files\n");
+  PRINTF("  -2  - overwrites 2d slice compressed files\n");
+  PRINTF("  -3  - overwrites 3d smoke files\n");
+  PRINTF("  -b  - overwrites boundary compressed files\n");
 #ifdef pp_PLOT3D
-  fprintf(alt_stdout,"  -p  - overwrites PLOT3D files\n");
+  PRINTF("  -p  - overwrites PLOT3D files\n");
 #endif
 #ifdef pp_PART2
-  fprintf(alt_stdout,"  -P  - overwrites particle files\n");
+  PRINTF("  -P  - overwrites particle files\n");
 #endif
 #ifdef pp_PART
-  fprintf(alt_stdout,"  -part2iso - generate isosurfaces from particle data\n");
+  PRINTF("  -part2iso - generate isosurfaces from particle data\n");
 #endif
-  fprintf(alt_stdout,"bound options:\n");
-  fprintf(alt_stdout,"  -bounds - estimate data bounds for all file types\n");
-  fprintf(alt_stdout,"  -bb - estimate data bounds for boundary files\n");
-  fprintf(alt_stdout,"  -bs - estimate data bounds for slice files\n");
-  fprintf(alt_stdout,"  -no_chop - do not chop or truncate slice data.  Smokezip compresses\n");
-  fprintf(alt_stdout,"        slice data truncating data above and below chop values\n");
-  fprintf(alt_stdout,"        specified in the .ini file\n");
+  PRINTF("bound options:\n");
+  PRINTF("  -bounds - estimate data bounds for all file types\n");
+  PRINTF("  -bb - estimate data bounds for boundary files\n");
+  PRINTF("  -bs - estimate data bounds for slice files\n");
+  PRINTF("  -no_chop - do not chop or truncate slice data.  Smokezip compresses\n");
+  PRINTF("        slice data truncating data above and below chop values\n");
+  PRINTF("        specified in the .ini file\n");
 #ifdef pp_PLOT3D
-  fprintf(alt_stdout,"  -bp - estimate data bounds for plot3d files\n");
+  PRINTF("  -bp - estimate data bounds for plot3d files\n");
 #endif
 #ifdef pp_PART2
-  fprintf(alt_stdout,"  -bP - estimate data bounds for particle files\n");
+  PRINTF("  -bP - estimate data bounds for particle files\n");
 #endif
-  fprintf(alt_stdout,"compress options:\n");
-  fprintf(alt_stdout,"  -n3 - do not compress 3d smoke files\n");
-  fprintf(alt_stdout,"  -nb - do not compress boundary files\n");
+  PRINTF("compress options:\n");
+  PRINTF("  -n3 - do not compress 3d smoke files\n");
+  PRINTF("  -nb - do not compress boundary files\n");
 #ifdef pp_PLOT3D
-  fprintf(alt_stdout,"  -np - do not compress PLOT3D files\n");
+  PRINTF("  -np - do not compress PLOT3D files\n");
 #endif
-  fprintf(alt_stdout,"  -ns - do not compress slice files\n");
+  PRINTF("  -ns - do not compress slice files\n");
 #ifdef pp_PART2
-  fprintf(alt_stdout,"  -nP - do not compress particle files\n");
-  fprintf(alt_stdout,"  -yP - compress particle files\n");
+  PRINTF("  -nP - do not compress particle files\n");
+  PRINTF("  -yP - compress particle files\n");
 #endif
-  fprintf(alt_stdout,"output options:\n");
-  fprintf(alt_stdout,"  -auto - compress only files that are auto-loaded by Smokeview\n");
-  fprintf(alt_stdout,"  -d destdir - copies compressed files (and files needed by Smokeview\n");
-  fprintf(alt_stdout,"        to view the case) to the directory destdir\n"); 
-  fprintf(alt_stdout,"  -s GLOBsourcedir - specifies directory containing source files\n");
-  fprintf(alt_stdout,"  -demo - Creates the files (compressed and .svd ) needed by the\n");
-  fprintf(alt_stdout,"        Smokeview demonstrator mode.  Compresses files that are autoloaded, \n");
-  fprintf(alt_stdout,"        uses (20.0,620.0) and (0.0,0.23) for temperature and oxygen bounds\n");
-  fprintf(alt_stdout,"        and creates the .svd file which activates the Smokeview demonstrator\n");
-  fprintf(alt_stdout,"        mode.\n");
-  fprintf(alt_stdout,"  -skip skipval - skip frames when compressing files\n\n");
-  fprintf(alt_stdout,"  -h  - display this message\n\n");
+  PRINTF("output options:\n");
+  PRINTF("  -auto - compress only files that are auto-loaded by Smokeview\n");
+  PRINTF("  -d destdir - copies compressed files (and files needed by Smokeview\n");
+  PRINTF("        to view the case) to the directory destdir\n"); 
+  PRINTF("  -s GLOBsourcedir - specifies directory containing source files\n");
+  PRINTF("  -demo - Creates the files (compressed and .svd ) needed by the\n");
+  PRINTF("        Smokeview demonstrator mode.  Compresses files that are autoloaded, \n");
+  PRINTF("        uses (20.0,620.0) and (0.0,0.23) for temperature and oxygen bounds\n");
+  PRINTF("        and creates the .svd file which activates the Smokeview demonstrator\n");
+  PRINTF("        mode.\n");
+  PRINTF("  -skip skipval - skip frames when compressing files\n\n");
+  PRINTF("  -h  - display this message\n\n");
 }
        
 /* ------------------ usage ------------------------ */
@@ -640,7 +640,7 @@ void print_summary(void){
   int i;
   int nsum;
 
-  fprintf(alt_stdout,"\n");
+  PRINTF("\n");
   nsum=0;
   for(i=0;i<nsliceinfo;i++){
     slice *slicei;
@@ -656,8 +656,8 @@ void print_summary(void){
       slicei = sliceinfo + i;
       if(slicei->compressed==0)continue;
       label=&slicei->label;
-      fprintf(alt_stdout,"%s (%s)\n  %s\n",slicei->file,label->longlabel,slicei->summary);
-      fprintf(alt_stdout,"  using: min=%f %s, max=%f %s \n\n",slicei->valmin,label->unit,slicei->valmax,label->unit);
+      PRINTF("%s (%s)\n  %s\n",slicei->file,label->longlabel,slicei->summary);
+      PRINTF("  using: min=%f %s, max=%f %s \n\n",slicei->valmin,label->unit,slicei->valmax,label->unit);
     }
   }
 
@@ -676,7 +676,7 @@ void print_summary(void){
       slicei = sliceinfo + i;
       if(slicei->vol_compressed==0)continue;
       label=&slicei->label;
-      fprintf(alt_stdout,"%s (%s)\n  %s\n",slicei->file,label->longlabel,slicei->volsummary);
+      PRINTF("%s (%s)\n  %s\n",slicei->file,label->longlabel,slicei->volsummary);
     }
   }
 
@@ -693,7 +693,7 @@ void print_summary(void){
 
       smoke3di = smoke3dinfo + i;
       if(smoke3di->compressed==0)continue;
-      fprintf(alt_stdout,"%s\n  %s\n\n",smoke3di->file,smoke3di->summary);
+      PRINTF("%s\n  %s\n\n",smoke3di->file,smoke3di->summary);
     }
   }
 
@@ -712,8 +712,8 @@ void print_summary(void){
       patchi = patchinfo + i;
       if(patchi->compressed==0)continue;
       label=&patchi->label;
-      fprintf(alt_stdout,"%s (%s)\n  %s\n",patchi->file,label->longlabel,patchi->summary);
-      fprintf(alt_stdout,"  using: min=%f %s, max=%f %s \n\n",patchi->valmin,label->unit,patchi->valmax,label->unit);
+      PRINTF("%s (%s)\n  %s\n",patchi->file,label->longlabel,patchi->summary);
+      PRINTF("  using: min=%f %s, max=%f %s \n\n",patchi->valmin,label->unit,patchi->valmax,label->unit);
     }
   }
 
@@ -732,11 +732,11 @@ void print_summary(void){
       parti = partinfo + i;
       if(parti->compressed2==0)continue;
  
-      fprintf(alt_stdout,"%s converted to:\n",parti->file);
+      PRINTF("%s converted to:\n",parti->file);
       for(j=0;j<parti->nsummaries;j++){
-        fprintf(alt_stdout,"  %s\n",parti->summaries[j]);
+        PRINTF("  %s\n",parti->summaries[j]);
       }
-      fprintf(alt_stdout,"\n");
+      PRINTF("\n");
     }
   }
 

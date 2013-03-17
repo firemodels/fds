@@ -441,8 +441,8 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         ASSERT(0);
         break;
     }
-    fprintf(alt_stdout,"\n");
-    fprintf(alt_stdout,"generating FED slice data\n");
+    PRINTF("\n");
+    PRINTF("generating FED slice data\n");
     strcpy(fed_area_file_base,fed_slice->file);
     ext=strrchr(fed_area_file_base,'.');
     if(ext!=NULL){
@@ -583,7 +583,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       }
 
       times[i]=co2->times[0];
-      fprintf(alt_stdout,"generating FED time=%.2f\n",times[i]);
+      PRINTF("generating FED time=%.2f\n",times[i]);
       dt = (times[i]-times[i-1]); 
 
       fed_framem1=fed_frame;
@@ -693,12 +693,12 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       iblank_cell = meshi->c_iblank_cell;
   
       CCisoheader(isofile,longlabel,shortlabel,unitlabel,fed_iso->levels,&fed_iso->nlevels,&error_local2);
-      fprintf(alt_stdout,"generating FED isosurface\n");
+      PRINTF("generating FED isosurface\n");
       for(i=0;i<fed_slice->ntimes;i++){
         float *vals;
 
         vals = fed_slice->qslicedata + i*frame_size;
-        fprintf(alt_stdout,"outputting isotime time=%.2f\n",times[i]);
+        PRINTF("outputting isotime time=%.2f\n",times[i]);
 
 //    C_val(i,j,k) = i*nj*nk + j*nk + k
 // Fort_val(i,j,k) = i + j*ni + k*ni*nj
@@ -734,7 +734,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       current_colorbar=cb;
     }
   }
-  fprintf(alt_stdout,"completed\n");
+  PRINTF("completed\n");
 }
 
 /* ------------------ readvslice ------------------------ */
@@ -895,7 +895,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
   push_vslice_loadstack(ivslice);
   
 #ifdef _DEBUG
-  fprintf(alt_stdout,"After vslice load: ");
+  PRINTF("After vslice load: ");
   PrintMemoryInfo;
 #endif
   Idle_CB();
@@ -1038,7 +1038,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       update_unit_defs();
       Update_Times();
 #ifdef pp_MEMDEBUG
-      fprintf(alt_stdout,"After slice unload: ");
+      PRINTF("After slice unload: ");
       PrintMemoryInfo;
       CountMemoryBlocks(num_memblocks_unload,num_memblocks_load);
 #endif
@@ -1082,7 +1082,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       *errorcode=1;
       return;
     }
-    fprintf(alt_stdout,"Loading slice data: %s\n",file);
+    PRINTF("Loading slice data: %s\n",file);
     MEMSTATUS(1,&availmemory,NULL,NULL);
     local_starttime = glutGet(GLUT_ELAPSED_TIME);
     if(sd->compression_type==1){
@@ -1294,7 +1294,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
   }
   CheckMemory;
-  fprintf(alt_stdout,"After slice file load: ");
+  PRINTF("After slice file load: ");
   CountMemoryBlocks(sd->num_memblocks,num_memblocks_load);
   PrintMemoryInfo;
 #endif
@@ -1313,11 +1313,11 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       float loadrate;
 
       loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
-      fprintf(alt_stdout," %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+      PRINTF(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
       (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
     }
     else{
-      fprintf(alt_stdout," %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+      PRINTF(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
       (float)file_size/1000000.,delta_time,delta_time0-delta_time);
     }
   }
@@ -1359,20 +1359,20 @@ void outputslicebounds(void){
 
   for(i=0;i<nslice;i++){
     sd = sliceinfo +i;
-    fprintf(alt_stdout,"i=%i %i %f %i %f \n",
+    PRINTF("i=%i %i %f %i %f \n",
       i,sd->setvalmin,sd->valmin,
         sd->setvalmax,sd->valmax);
   }
-  fprintf(alt_stdout,"\n");
+  PRINTF("\n");
   for(i=0;i<nslice2;i++){
     db = slicebounds +i;
-    fprintf(alt_stdout,"i=%i %i %f %i %f \n",
+    PRINTF("i=%i %i %f %i %f \n",
       i,db->setvalmin,db->valmin,
         db->setvalmax,db->valmax);
   }
-  fprintf(alt_stdout,"slicefilenum=%i\n",slicefilenum);
-  fprintf(alt_stdout,"list_slice_index=%i\n",list_slice_index);
-  fprintf(alt_stdout,"setslicemin=%i slicemin=%f setslicemax=%i slicemax=%f\n",
+  PRINTF("slicefilenum=%i\n",slicefilenum);
+  PRINTF("list_slice_index=%i\n",list_slice_index);
+  PRINTF("setslicemin=%i slicemin=%f setslicemax=%i slicemax=%f\n",
     setslicemin,slicemin,setslicemax,slicemax);
 }
 */
@@ -1934,10 +1934,10 @@ void getsliceparams(void){
 
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
       if(i==10){
-        fprintf(alt_stdout,"    obtaining parameters from %i'th slice file\n",i+1);
+        PRINTF("    obtaining parameters from %i'th slice file\n",i+1);
       }
       else{
-        fprintf(alt_stdout,"    obtaining parameters from %i'st slice file\n",i+1);
+        PRINTF("    obtaining parameters from %i'st slice file\n",i+1);
       }
     }
 
@@ -2519,7 +2519,7 @@ void update_fedinfo(void){
 void updatevslices(void){
   int i;
 
-  fprintf(alt_stdout,"  updating vector slices\n");
+  PRINTF("  updating vector slices\n");
   getsliceparams();
 
   /* update vector slices */
@@ -2550,10 +2550,10 @@ void updatevslices(void){
 
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
       if(i==10){
-        fprintf(alt_stdout,"    examining %i'th slice file for vectors\n",i+1);
+        PRINTF("    examining %i'th slice file for vectors\n",i+1);
       }
       else{
-        fprintf(alt_stdout,"    examining %i'st slice file for vectors\n",i+1);
+        PRINTF("    examining %i'st slice file for vectors\n",i+1);
       }
     }
     vd = vsliceinfo + nvsliceinfo;
@@ -2600,7 +2600,7 @@ void updatevslices(void){
       nvsliceinfo++;
     }
   }
-  fprintf(alt_stdout,"    %i vector slices found\n",nvsliceinfo);
+  PRINTF("    %i vector slices found\n",nvsliceinfo);
   if(nvsliceinfo>0){
     vslicedata *vsd;
     multivslicedata *mvslicei;
@@ -2664,9 +2664,9 @@ void updatevslices(void){
       vslicei->autoload=0;
     }
   }
-  if(nvsliceinfo>0)fprintf(alt_stdout,"    updating vector slice menus\n");
+  if(nvsliceinfo>0)PRINTF("    updating vector slice menus\n");
   updatevslicemenulabels();
-  fprintf(alt_stdout,"  vector slices update completed\n\n");
+  PRINTF("  vector slices update completed\n\n");
   
 }
 
@@ -2718,7 +2718,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
       fprintf(stderr,"*** Error: data not available from %s to generate contours\n",sd->reg_file);
       continue;
     }
-    fprintf(alt_stdout,"generating contours for %s\n",sd->file);
+    PRINTF("generating contours for %s\n",sd->file);
     contours_gen=1;
 
     for(i=0;i<nline_values;i++){
@@ -2914,7 +2914,7 @@ void setslicecolors(float smin, float smax,
 
 
   *errorcode=0;
-  fprintf(alt_stdout,"computing slice color levels \n");
+  PRINTF("computing slice color levels \n");
   scale=sb->scale;
   if(sd->qslicedata==NULL)return;
   getSliceColors(sd->qslicedata,sd->nslicetotal,sd->slicelevel,
@@ -2938,7 +2938,7 @@ void setslicelabels(float smin, float smax,
   sb->label=&(sd->label);
 
   *errorcode=0;
-  fprintf(alt_stdout,"setting up slice labels \n");
+  PRINTF("setting up slice labels \n");
   scale=sb->scale;
   getSliceLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,&sb->fscale,sb->levels256);
@@ -3054,12 +3054,12 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
     }
   }
   if(sd->slicetype==SLICE_CENTER){
-    fprintf(alt_stdout," global min (slice file): %f cell=(%i,%i,%i)\n",*pmin,iimin,jjmin,kkmin);
-    fprintf(alt_stdout," global max (slice file): %f cell=(%i,%i,%i)\n",*pmax,iimax,jjmax,kkmax);
+    PRINTF(" global min (slice file): %f cell=(%i,%i,%i)\n",*pmin,iimin,jjmin,kkmin);
+    PRINTF(" global max (slice file): %f cell=(%i,%i,%i)\n",*pmax,iimax,jjmax,kkmax);
   }
   else{
-    fprintf(alt_stdout," global min (slice file): %f node=(%i,%i,%i)\n",*pmin,iimin,jjmin,kkmin);
-    fprintf(alt_stdout," global max (slice file): %f node=(%i,%i,%i)\n",*pmax,iimax,jjmax,kkmax);
+    PRINTF(" global min (slice file): %f node=(%i,%i,%i)\n",*pmin,iimin,jjmin,kkmin);
+    PRINTF(" global max (slice file): %f node=(%i,%i,%i)\n",*pmax,iimax,jjmax,kkmax);
   }
 }
 
@@ -3466,8 +3466,8 @@ void init_slice3d_texture(mesh *meshi){
   GLint border_size=0;
   GLsizei nx, ny, nz;
 
-  fprintf(alt_stdout,"Defining 3d slice textures for %s ...",meshi->label);
-  fflush(stdout);
+  PRINTF("Defining 3d slice textures for %s ...",meshi->label);
+  FFLUSH();
 
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1,&meshi->slice3d_texture_id);
@@ -3506,8 +3506,8 @@ void init_slice3d_texture(mesh *meshi){
   }
 
   glActiveTexture(GL_TEXTURE0);
-  fprintf(alt_stdout,"completed\n");
-  fflush(stdout);
+  PRINTF("completed\n");
+  FFLUSH();
 }
 #endif
 
@@ -5613,7 +5613,7 @@ void output_Slicedata(void){
     if(sd->times[0]>global_times[itimes])continue;
 
     if(sd->qslicedata==NULL){
-      fprintf(alt_stdout,"  Slice data unavailble for output\n");
+      PRINTF("  Slice data unavailble for output\n");
       continue;
     }
     data = sd->qslicedata + sd->itime*sd->nsliceii;
@@ -5791,7 +5791,7 @@ int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_
     datatemp[i]=0.0;
   }
   for(i=0;i<ntimes_local;i++){
-    fprintf(alt_stdout,"averaging time=%.2f\n",times_local[i]);
+    PRINTF("averaging time=%.2f\n",times_local[i]);
     below=0;
     for(j=i-1;j>=0;j--){
       if(times_local[i]-times_local[j]>average_timed2){
@@ -6001,7 +6001,7 @@ int getslicezlibdata(char *file,
     compindex[ns].offset=compindex[ns-1].offset+nncomp;
     compindex[ns-1].size=nncomp;
 
-    fprintf(alt_stdout,"slice time=%.2f\n",ttime);
+    PRINTF("slice time=%.2f\n",ttime);
     fread(cd,1,nncomp,stream);
     cd+=nncomp;
     if(ns>=nsliceframes||cd-compressed_data>=ncompressed)break;

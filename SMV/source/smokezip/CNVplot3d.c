@@ -90,7 +90,7 @@ int convert_plot3d(plot3d *plot3di){
     plot3dstream=fopen(plot3dfile_svz,"rb");
     if(plot3dstream!=NULL){
       fclose(plot3dstream);
-      fprintf(alt_stdout,"  Removing %s.\n",plot3dfile_svz);
+      PRINTF("  Removing %s.\n",plot3dfile_svz);
       UNLINK(plot3dfile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;
@@ -221,11 +221,11 @@ int convert_plot3d(plot3d *plot3di){
     getfilesizelabel(sizeafter,after_label);
 #ifdef pp_THREAD
     LOCK_PRINT;
-    fprintf(alt_stdout,"\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",plot3di->file,before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
+    PRINTF("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",plot3di->file,before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
     UNLOCK_PRINT;
 #else
-    fprintf(alt_stdout,"Sizes: original=%s, ",before_label);
-    fprintf(alt_stdout,"compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
+    PRINTF("Sizes: original=%s, ",before_label);
+    PRINTF("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
 #endif
   }
 
@@ -296,8 +296,8 @@ void *compress_plot3ds(void *arg){
     }
     else{
       if(GLOBcleanfiles==0){
-        fprintf(alt_stdout,"%s not compressed\n",plot3di->file);
-        fprintf(alt_stdout,"  Min and Max for %s not set in .ini file\n",plot3di->labels[0].shortlabel);
+        PRINTF("%s not compressed\n",plot3di->file);
+        PRINTF("  Min and Max for %s not set in .ini file\n",plot3di->labels[0].shortlabel);
       }
     }
   }

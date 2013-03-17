@@ -160,7 +160,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     }
     updatemenu=1;
 #ifdef _DEBUG
-    fprintf(alt_stdout,"After plot3d unload: ");
+    PRINTF("After plot3d unload: ");
     PrintMemoryInfo;
 #endif
     Update_Times();
@@ -218,7 +218,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
 
   file_size=get_filesize(file);
   plot3dfilelen = strlen(file);
-  fprintf(alt_stdout,"Loading plot3d data: %s\n",file);
+  PRINTF("Loading plot3d data: %s\n",file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   if(p->compression_type==0){
     FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&endian_smv,&isotest,plot3dfilelen);
@@ -384,7 +384,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   STRCAT(FULLTITLE,file);
   updateplot3dlistindex();
 #ifdef _DEBUG
-  fprintf(alt_stdout,"After plot3d load: ");
+  PRINTF("After plot3d load: ");
   PrintMemoryInfo;
 #endif
   Update_Times();
@@ -397,11 +397,11 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     float loadrate;
 
     loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
-    fprintf(alt_stdout," %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    PRINTF(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
     (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
   }
   else{
-    fprintf(alt_stdout," %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    PRINTF(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
   if(p->compression_type==1||unload_qdata==1){

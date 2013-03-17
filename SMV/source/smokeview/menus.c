@@ -84,7 +84,7 @@ void OpenSMVFile(char *filebuffer,int filebufferlength,int *openfile){
     STRCPY(smv_directory,"");
     strncat(smv_directory,filebuffer,fileinfo.nFileOffset);
     if( _chdir( smv_directory )   ){
-      fprintf(alt_stdout, "Unable to locate the directory: %s\n", smv_directory );
+      PRINTF( "Unable to locate the directory: %s\n", smv_directory );
     }
     else{
       *openfile=1;
@@ -2162,7 +2162,7 @@ void ScriptMenu(int value){
       script_recording = insert_scriptfile(newscriptfilename);
       scriptoutstream=fopen(newscriptfilename,"w");
       if(scriptoutstream!=NULL){
-        fprintf(alt_stdout,"Script recorder on\n");
+        PRINTF("Script recorder on\n");
         script_recording->recording=1;
         {
           char *renderdir;
@@ -2203,7 +2203,7 @@ void ScriptMenu(int value){
         fclose(scriptoutstream);
         scriptoutstream=NULL;
         //writeini(SCRIPT_INI);
-        fprintf(alt_stdout,"Script recorder off\n");
+        PRINTF("Script recorder off\n");
       }
       update_script_stop();
       break;
@@ -3185,7 +3185,7 @@ void ShowVolSmoke3DMenu(int value){
     if(vr->fireslice!=NULL||vr->smokeslice!=NULL){
       if(vr->loaded==1){
         vr->display=1-vr->display;
-        fprintf(alt_stdout,"%s vis state:%i\n",meshi->label,vr->display);
+        PRINTF("%s vis state:%i\n",meshi->label,vr->display);
       }
     }
   }
@@ -3199,7 +3199,7 @@ void ShowVolSmoke3DMenu(int value){
       if(vr->fireslice==NULL||vr->smokeslice==NULL)continue;
       if(vr->loaded==1){
         vr->display=0;
-        fprintf(alt_stdout,"%s vis state:%i\n",meshi->label,vr->display);
+        PRINTF("%s vis state:%i\n",meshi->label,vr->display);
       }
     }
   }
@@ -3213,7 +3213,7 @@ void ShowVolSmoke3DMenu(int value){
       if(vr->fireslice==NULL||vr->smokeslice==NULL)continue;
       if(vr->loaded==1){
         vr->display=1;
-        fprintf(alt_stdout,"%s vis state:%i\n",meshi->label,vr->display);
+        PRINTF("%s vis state:%i\n",meshi->label,vr->display);
       }
     }
   }
@@ -4590,7 +4590,7 @@ static int in_menu=0;
 
 updatemenu=0;
 #ifdef _DEBUG
-  fprintf(alt_stdout,"Updating Menus %i In menu %i\n",menu_count++,in_menu);
+  PRINTF("Updating Menus %i In menu %i\n",menu_count++,in_menu);
   in_menu=1;
 #endif
   update_showhidebuttons();

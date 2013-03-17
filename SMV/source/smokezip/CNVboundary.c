@@ -71,7 +71,7 @@ int clean_boundary(patch *patchi){
   boundarystream=fopen(boundaryfile_svz,"rb");
   if(boundarystream!=NULL){
     fclose(boundarystream);
-    fprintf(alt_stdout,"  Removing %s.\n",boundaryfile_svz);
+    PRINTF("  Removing %s.\n",boundaryfile_svz);
     UNLINK(boundaryfile_svz);
     LOCK_COMPRESS;
     GLOBfilesremoved++;
@@ -80,7 +80,7 @@ int clean_boundary(patch *patchi){
   boundarysizestream=fopen(boundarysizefile_svz,"rb");
   if(boundarysizestream!=NULL){
     fclose(boundarysizestream);
-    fprintf(alt_stdout,"  Removing %s.\n",boundarysizefile_svz);
+    PRINTF("  Removing %s.\n",boundarysizefile_svz);
     UNLINK(boundarysizefile_svz);
     LOCK_COMPRESS;
     GLOBfilesremoved++;
@@ -208,7 +208,7 @@ int convert_boundary(patch *patchi, int *thread_index){
 
   // read and write boundary header
 #ifndef pp_THREAD
-  fprintf(alt_stdout,"Compressing %s (%s)\n",boundary_file,filetype);
+  PRINTF("Compressing %s (%s)\n",boundary_file,filetype);
 #endif
 
   strcpy(units,"");
@@ -218,12 +218,12 @@ int convert_boundary(patch *patchi, int *thread_index){
   sprintf(cval,"%f",patchi->valmin);
   trimzeros(cval);
 #ifndef pp_THREAD
-  fprintf(alt_stdout,"  using min=%s %s",cval,units);
+  PRINTF("  using min=%s %s",cval,units);
 #endif
   sprintf(cval,"%f",patchi->valmax);
   trimzeros(cval);
 #ifndef pp_THREAD
-  fprintf(alt_stdout," max=%s %s\n",cval,units);
+  PRINTF(" max=%s %s\n",cval,units);
 #endif
 
 
@@ -306,7 +306,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     if(NewMemory((void **)&full_boundarybuffer,npatchfull)==0)goto wrapup;
     if(NewMemory((void **)&compressed_boundarybuffer,ncompressed_zlibSAVE)==0)goto wrapup;
 #ifndef pp_THREAD
-    fprintf(alt_stdout," ");
+    PRINTF(" ");
 #endif
     time_max=-1000000.0;
     while(feof(BOUNDARYFILE)==0){
@@ -366,7 +366,7 @@ int convert_boundary(patch *patchi, int *thread_index){
       if(returncode!=0){
         fprintf(stderr,"*** Error: compress returncode=%i\n",returncode);
       }
-//      fprintf(alt_stdout,"time=%f before %i after=%i\n",time_local,npatchfull,ncompressed_zlib);
+//      PRINTF("time=%f before %i after=%i\n",time_local,npatchfull,ncompressed_zlib);
 
       fprintf(boundarysizestream,"%f %i %i\n",time_local,(int)npatchfull,(int)ncompressed_zlib);
       fwrite(&time_local,4,1,boundarystream);                                       // write out time_local
@@ -386,15 +386,15 @@ int convert_boundary(patch *patchi, int *thread_index){
       }
 #else
       if(percent_done>percent_next){
-        fprintf(alt_stdout," %i%s",percent_next,GLOBpp);
-        fflush(stdout);
+        PRINTF(" %i%s",percent_next,GLOBpp);
+        FFLUSH();
         percent_next+=10;
       }
 #endif
     }
 wrapup:
 #ifndef pp_THREAD
-    fprintf(alt_stdout," 100%s completed\n",GLOBpp);
+    PRINTF(" 100%s completed\n",GLOBpp);
 #endif
     FREEMEMORY(ijks);
     FREEMEMORY(patchvals);
@@ -416,9 +416,9 @@ wrapup:
     sprintf(patchi->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
     threadinfo[*thread_index].stat=-1;
 #else
-    fprintf(alt_stdout,"  records=%i, ",count);
-    fprintf(alt_stdout,"Sizes: original=%s, ",before_label);
-    fprintf(alt_stdout,"compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
+    PRINTF("  records=%i, ",count);
+    PRINTF("Sizes: original=%s, ",before_label);
+    PRINTF("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
 #endif
   }
 
@@ -534,8 +534,8 @@ void *compress_patches(void *arg){
       convert_boundary(patchi,thread_index);
     }
     else{
-      fprintf(alt_stdout,"%s not compressed\n",patchi->file);
-      fprintf(alt_stdout,"  Min and Max for %s not set in .ini file\n",patchi->label.shortlabel);
+      PRINTF("%s not compressed\n",patchi->file);
+      PRINTF("  Min and Max for %s not set in .ini file\n",patchi->label.shortlabel);
     }
   }
   return NULL;
@@ -569,7 +569,7 @@ void update_patch_hist(void){
     patchi->inuse_getbounds=1;
     UNLOCK_PATCH_BOUND;
 
-    fprintf(alt_stdout,"  Examining %s\n",patchi->file);
+    PRINTF("  Examining %s\n",patchi->file);
     lenfile=strlen(patchi->file);
     pi1 = patchi->pi1;
     pi2 = patchi->pi2;
@@ -602,7 +602,7 @@ void update_patch_hist(void){
     FREEMEMORY(patchframe);
   }
 #ifndef pp_THREAD
-  fprintf(alt_stdout,"\n");
+  PRINTF("\n");
 #endif
 }
 
@@ -643,7 +643,7 @@ void Get_Boundary_Bounds(void){
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
-  fprintf(alt_stdout,"Determining boundary file bounds\n");
+  PRINTF("Determining boundary file bounds\n");
   for(i=0;i<npatchinfo;i++){
     patch *patchi;
 

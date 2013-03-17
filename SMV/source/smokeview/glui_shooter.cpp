@@ -244,7 +244,7 @@ void SHOOTER_CB(int var){
   }
   switch (var){
     case SHOOTER_LOADPLOT3D:
-      fprintf(alt_stdout,"Loading PLOT3D data at time: %f\n",plot3dtimelist[shooter_itime]);
+      PRINTF("Loading PLOT3D data at time: %f\n",plot3dtimelist[shooter_itime]);
       Plot3DListMenu(shooter_itime);
       SHOOTER_CB(SHOOTER_APPLY);
       break;

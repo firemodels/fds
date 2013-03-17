@@ -31,9 +31,9 @@ int  allocate_shooter(void){
   mem_points=max_shooter_points*sizeof(shootpointdata);
   mem_frames=nshooter_frames*sizeof(shoottimedata);
 
-  fprintf(alt_stdout,"shooter point memory requirements\n");
-  fprintf(alt_stdout,"max_shooter_points=%i mem=%i\n",max_shooter_points,mem_points);
-  fprintf(alt_stdout,"nshooter_frames=%i mem=%i\n",nshooter_frames,mem_frames);
+  PRINTF("shooter point memory requirements\n");
+  PRINTF("max_shooter_points=%i mem=%i\n",max_shooter_points,mem_points);
+  PRINTF("nshooter_frames=%i mem=%i\n",nshooter_frames,mem_frames);
 
   if(  mem_points<=0||mem_frames<=0||
 #ifdef _DEBUG
@@ -44,7 +44,7 @@ int  allocate_shooter(void){
     FREEMEMORY(shootpointinfo);
     FREEMEMORY(shoottimeinfo);
     shooter_active=0;
-    fprintf(alt_stdout,"shooter point memory allocation failed\n");
+    PRINTF("shooter point memory allocation failed\n");
     return 1;
   }
   return 0;

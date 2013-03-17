@@ -50,11 +50,11 @@ void print_thread_stats(void){
 
       ti = threadinfo+i;
       if(ti->stat>0){
-        fprintf(alt_stdout," %s(%i%s)",ti->label,ti->stat,GLOBpp);
-        if(lastthread!=i)fprintf(alt_stdout,",");
+        PRINTF(" %s(%i%s)",ti->label,ti->stat,GLOBpp);
+        if(lastthread!=i)PRINTF(",");
       }
     }
-    fprintf(alt_stdout,"\n");
+    PRINTF("\n");
   }
 #endif
 }

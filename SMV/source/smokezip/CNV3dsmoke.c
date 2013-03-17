@@ -57,7 +57,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     fileindex = smoke3di + 1 - smoke3dinfo;
     sprintf(threadinfo[*thread_index].label,"s3d %i",fileindex);
 #else
-    fprintf(alt_stdout,"Compressing 3D smokefile %s\n",smoke3dfile);
+    PRINTF("Compressing 3D smokefile %s\n",smoke3dfile);
 #endif
   }
 
@@ -99,7 +99,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     smoke3dstream=fopen(smoke3dfile_svz,"rb");
     if(smoke3dstream!=NULL){
       fclose(smoke3dstream);
-      fprintf(alt_stdout,"  Removing %s.\n",smoke3dfile_svz);
+      PRINTF("  Removing %s.\n",smoke3dfile_svz);
       UNLINK(smoke3dfile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;
@@ -108,7 +108,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     smoke3dsizestream=fopen(smoke3dsizefile_svz,"r");
     if(smoke3dsizestream!=NULL){
       fclose(smoke3dsizestream);
-      fprintf(alt_stdout,"  Removing %s.\n",smoke3dsizefile_svz);
+      PRINTF("  Removing %s.\n",smoke3dsizefile_svz);
       UNLINK(smoke3dsizefile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;
@@ -148,7 +148,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   nxyz[0] = 1;
   version_local = nxyz[1];
   if(version_local==1){
-    fprintf(alt_stdout,"  already compressed\n");
+    PRINTF("  already compressed\n");
     EGZ_FCLOSE(SMOKE3DFILE);
     fclose(smoke3dstream);
     fclose(smoke3dsizestream);
@@ -255,8 +255,8 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     }
 #else
     if(percent_done>percent_next){
-      fprintf(alt_stdout," %i%s",percent_next,GLOBpp);
-      fflush(stdout);
+      PRINTF(" %i%s",percent_next,GLOBpp);
+      FFLUSH();
       percent_next+=10;
     }
 #endif
@@ -288,22 +288,22 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     getfilesizelabel(sizeafter,after_label);
     smoke3di->compressed=1;
     sprintf(smoke3di->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
-    fflush(stdout);
+    FFLUSH();
     threadinfo[*thread_index].stat=-1;
   }
 #else
-  fprintf(alt_stdout," 100%s completed\n",GLOBpp);
-  fprintf(alt_stdout,"  records=%i, ",count);
+  PRINTF(" 100%s completed\n",GLOBpp);
+  PRINTF("  records=%i, ",count);
   {
     char before_label[256],after_label[256];
   
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
 
-    fprintf(alt_stdout,"Sizes: original=%s, ",before_label);
+    PRINTF("Sizes: original=%s, ",before_label);
 
-    fprintf(alt_stdout,"compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
-    fflush(stdout);
+    PRINTF("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
+    FFLUSH();
   }
 #endif
 

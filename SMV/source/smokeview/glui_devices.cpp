@@ -187,7 +187,7 @@ void Open_CB(int var){
       }
       break;
     case OPEN_FILEINDEX:
-      fprintf(alt_stdout,"in OPEN_FILEINDEX\n");
+      PRINTF("in OPEN_FILEINDEX\n");
       if(gluiopen_filelist==NULL)break;
       filei = gluiopen_filelist + gluiopen_file_index;
       if(filei->type==1){
@@ -206,7 +206,7 @@ void Open_CB(int var){
         Open_CB(OPEN_UPDATE_LIST);
       }
       else{
-        fprintf(alt_stdout,"opening file: %s\n",filei->file);
+        PRINTF("opening file: %s\n",filei->file);
       }
       break;
     case OPEN_CANCEL:

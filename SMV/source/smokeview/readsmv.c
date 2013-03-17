@@ -1126,7 +1126,7 @@ void init_textures(void){
   // get texture filename from SURF and device info
   int i;
 
-  fprintf(alt_stdout,"     Loading surface textures\n");
+  PRINTF("     Loading surface textures\n");
   ntextures = 0;
   for(i=0;i<nsurfinfo;i++){
     surfdata *surfi;
@@ -1205,20 +1205,20 @@ void init_textures(void){
       else{
         filename=texti->file;
       }
-      fprintf(alt_stdout,"       Loading texture: %s",filename);
+      PRINTF("       Loading texture: %s",filename);
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);
       floortex=readpicture(texti->file,&texwid,&texht,0);
       if(floortex==NULL){
-         fprintf(alt_stdout,"%s",_(" - failed"));
-         fprintf(alt_stdout,"\n");
+         PRINTF("%s",_(" - failed"));
+         PRINTF("\n");
          continue;
       }
       errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
       if(errorcode!=0){
         FREEMEMORY(floortex);
-         fprintf(alt_stdout,"%s",_(" - failed"));
-         fprintf(alt_stdout,"\n");
+         PRINTF("%s",_(" - failed"));
+         PRINTF("\n");
         continue;
       }
       FREEMEMORY(floortex);
@@ -1227,8 +1227,8 @@ void init_textures(void){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       texti->loaded=1;
-      fprintf(alt_stdout,"%s",_(" - completed"));
-      fprintf(alt_stdout,"\n");
+      PRINTF("%s",_(" - completed"));
+      PRINTF("\n");
     }
   }
   
@@ -1239,7 +1239,7 @@ void init_textures(void){
 
   // define colobar textures
 
-  fprintf(alt_stdout,"%s",_("       Loading colorbar texture"));
+  PRINTF("%s",_("       Loading colorbar texture"));
 
  // glActiveTexture(GL_TEXTURE0);
   glGenTextures(1,&texture_colorbar_id);
@@ -1326,7 +1326,7 @@ void init_textures(void){
 
   CheckMemory;
 
-  fprintf(alt_stdout,"%s"," - completed\n");
+  PRINTF("%s"," - completed\n");
 #ifdef pp_GPU
 #ifdef pp_GPUDEPTH
   if(use_graphics==1){
@@ -1345,21 +1345,21 @@ void init_textures(void){
     tt->loaded=0;
     tt->used=0;
     tt->display=0;
-    fprintf(alt_stdout,"%s","     Loading terrain texture");
+    PRINTF("%s","     Loading terrain texture");
 
     glGenTextures(1,&tt->name);
     glBindTexture(GL_TEXTURE_2D,tt->name);
     floortex=NULL;
     errorcode=1;
     if(tt->file!=NULL){
-      fprintf(alt_stdout,": %s",tt->file);
+      PRINTF(": %s",tt->file);
       floortex=readpicture(tt->file,&texwid,&texht,0);
     }
     if(floortex!=NULL){
       errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
     }
     if(errorcode!=0){
-      fprintf(alt_stdout,"%s"," - failed\n");
+      PRINTF("%s"," - failed\n");
     }
     FREEMEMORY(floortex);
     if(errorcode==0){
@@ -1368,11 +1368,11 @@ void init_textures(void){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       tt->loaded=1;
-      fprintf(alt_stdout,"%s"," - completed\n");
+      PRINTF("%s"," - completed\n");
     }
 
   }
-  fprintf(alt_stdout,"     Surface texture loading completed\n");
+  PRINTF("     Surface texture loading completed\n");
 }
 
 /* ------------------ update_bounds ------------------------ */
@@ -2599,7 +2599,7 @@ int readsmv(char *file, char *file2){
 
   smv_modtime=file_modtime(file);
   
-  fprintf(alt_stdout,_("processing smokeview file: %s\n"),file);
+  PRINTF(_("processing smokeview file: %s\n"),file);
 
 /* 
    ************************************************************************
@@ -2613,8 +2613,8 @@ int readsmv(char *file, char *file2){
   ntc_total=0;
   nspr_total=0;
   nheat_total=0;
-  fprintf(alt_stdout,"%s",_("   pass 1 started"));
-  fprintf(alt_stdout,"\n");
+  PRINTF("%s",_("   pass 1 started"));
+  PRINTF("\n");
   for(;;){
     if(feof(stream)!=0){
       BREAK;
@@ -3226,11 +3226,11 @@ int readsmv(char *file, char *file2){
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  fprintf(alt_stdout,"%s",_("   pass 1"));
-  fprintf(alt_stdout,"%s",_(" completed"));
-  fprintf(alt_stdout,"\n");
-  fprintf(alt_stdout,"%s",_("   pass 2 started"));
-  fprintf(alt_stdout,"\n");
+  PRINTF("%s",_("   pass 1"));
+  PRINTF("%s",_(" completed"));
+  PRINTF("\n");
+  PRINTF("%s",_("   pass 2 started"));
+  PRINTF("\n");
   for(;;){
     if(feof(stream)!=0){
       BREAK;
@@ -3912,15 +3912,15 @@ int readsmv(char *file, char *file2){
       if(STAT(bufferptr,&statbuffer)==0){
         if(NewMemory((void **)&cadgeominfo[ncadgeom].file,(unsigned int)(len+1))==0)return 2;
         STRCPY(cadgeominfo[ncadgeom].file,bufferptr);
-        fprintf(alt_stdout,"%s %s",_("     reading cad file: "),bufferptr);
-        fprintf(alt_stdout,"%s\n",bufferptr);
+        PRINTF("%s %s",_("     reading cad file: "),bufferptr);
+        PRINTF("%s\n",bufferptr);
         readcadgeom(cadgeominfo+ncadgeom);
-        fprintf(alt_stdout,"     CAD file reading completed\n");
+        PRINTF("     CAD file reading completed\n");
         ncadgeom++;
       }
       else{
-        fprintf(alt_stdout,_("   CAD geometry file: %s could not be opened"),bufferptr);
-        fprintf(alt_stdout,"\n");
+        PRINTF(_("   CAD geometry file: %s could not be opened"),bufferptr);
+        PRINTF("\n");
       }
       continue;
     }
@@ -3998,10 +3998,10 @@ int readsmv(char *file, char *file2){
     
         if(nsmoke3dinfo>50&&(ismoke3d%10==0||ismoke3d==nsmoke3dinfo-1)){
           if(ismoke3dcount==11){
-            fprintf(alt_stdout,"     examining %i'th 3D smoke file\n",ismoke3dcount);
+            PRINTF("     examining %i'th 3D smoke file\n",ismoke3dcount);
           }
           else{
-            fprintf(alt_stdout,"     examining %i'st 3D smoke file\n",ismoke3dcount);
+            PRINTF("     examining %i'st 3D smoke file\n",ismoke3dcount);
           }
         }
         ismoke3dcount++;
@@ -4370,9 +4370,9 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
-  fprintf(alt_stdout,"%s",_("   pass 2 "));
-  fprintf(alt_stdout,"%s",_("completed"));
-  fprintf(alt_stdout,"\n");
+  PRINTF("%s",_("   pass 2 "));
+  PRINTF("%s",_("completed"));
+  PRINTF("\n");
 
   CheckMemory;
   parsedatabase(database_filename);
@@ -4447,8 +4447,8 @@ int readsmv(char *file, char *file2){
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  fprintf(alt_stdout,"%s",_("   pass 3 started"));
-  fprintf(alt_stdout,"\n");
+  PRINTF("%s",_("   pass 3 started"));
+  PRINTF("\n");
 
   /* 
    ************************************************************************
@@ -4873,11 +4873,11 @@ int readsmv(char *file, char *file2){
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  fprintf(alt_stdout,"%s",_("   pass 3 "));
-  fprintf(alt_stdout,"%s",_("completed"));
-  fprintf(alt_stdout,"\n");
-  fprintf(alt_stdout,"%s",_("   pass 4 started"));
-  fprintf(alt_stdout,"\n");
+  PRINTF("%s",_("   pass 3 "));
+  PRINTF("%s",_("completed"));
+  PRINTF("\n");
+  PRINTF("%s",_("   pass 4 started"));
+  PRINTF("\n");
   startpass=1;
   slicefile_count=0;
   CheckMemory;
@@ -6177,7 +6177,7 @@ typedef struct {
       }
 
       if(nslicefiles>100&&(islicecount%100==1||nslicefiles==islicecount)){
-        fprintf(alt_stdout,"     examining %i'th slice file\n",islicecount);
+        PRINTF("     examining %i'th slice file\n",islicecount);
       }
       islicecount++;
       strcpy(buffer2,bufferptr);
@@ -6666,12 +6666,12 @@ typedef struct {
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  fprintf(alt_stdout,"%s",_("   pass 4 "));
-  fprintf(alt_stdout,"%s",_("completed"));
-  fprintf(alt_stdout,"\n");
+  PRINTF("%s",_("   pass 4 "));
+  PRINTF("%s",_("completed"));
+  PRINTF("\n");
   if(do_pass4==1||autoterrain==1){
-    fprintf(alt_stdout,"%s",_("   pass 5 started"));
-    fprintf(alt_stdout,"\n");
+    PRINTF("%s",_("   pass 5 started"));
+    PRINTF("\n");
   }
 
   while((autoterrain==1||do_pass4==1)){
@@ -6787,15 +6787,15 @@ typedef struct {
   }
 
   if(do_pass4==1||autoterrain==1){
-    fprintf(alt_stdout,"%s",_("   pass 5 "));
-    fprintf(alt_stdout,"%s",_("completed"));
-    fprintf(alt_stdout,"\n");
+    PRINTF("%s",_("   pass 5 "));
+    PRINTF("%s",_("completed"));
+    PRINTF("\n");
   }
 
-  fprintf(alt_stdout,"%s processing completed\n",file);
-  fprintf(alt_stdout,"\n");
-  fprintf(alt_stdout,"%s",_("beginning wrap up "));
-  fprintf(alt_stdout,"\n");
+  PRINTF("%s processing completed\n",file);
+  PRINTF("\n");
+  PRINTF("%s",_("beginning wrap up "));
+  PRINTF("\n");
 #ifdef _DEBUG
   PrintMemoryInfo;
 #endif
@@ -7018,8 +7018,8 @@ typedef struct {
   update_triangles();
   get_faceinfo();
 
-  fprintf(alt_stdout,"%s",_("wrap up completed"));
-  fprintf(alt_stdout,"\n\n");
+  PRINTF("%s",_("wrap up completed"));
+  PRINTF("\n\n");
 #ifdef _DEBUG
   PrintMemoryInfo;
 #endif
@@ -7794,13 +7794,13 @@ int readini(int scriptconfigfile){
   // check if config files read in earlier were modifed later
 
   if(is_file_newer(smvprogini_ptr,INIfile)==1){
-    fprintf(alt_stdout,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
+    PRINTF("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
   }
   if(is_file_newer(smvprogini_ptr,caseini_filename)==1){
-    fprintf(alt_stdout,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseini_filename);
+    PRINTF("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseini_filename);
   }
   if(is_file_newer(INIfile,caseini_filename)==1){
-    fprintf(alt_stdout,"*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",INIfile,caseini_filename);
+    PRINTF("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",INIfile,caseini_filename);
   }
 
   // read in config files if they exist
@@ -7868,8 +7868,8 @@ void readboundini(void){
     FREEMEMORY(fullfilename);
     return;
   }
-  fprintf(alt_stdout,"%s",_("reading: "));
-  fprintf(alt_stdout,"%s\n",fullfilename);
+  PRINTF("%s",_("reading: "));
+  PRINTF("%s\n",fullfilename);
 
   while(!feof(stream)){
     char buffer[255], buffer2[255];
@@ -7996,8 +7996,8 @@ int readini2(char *inifile, int localfile){
     update_inilist();
   }
 
-  fprintf(alt_stdout,"%s",_("processing config file: "));
-  fprintf(alt_stdout,"%s\n",inifile);
+  PRINTF("%s",_("processing config file: "));
+  PRINTF("%s\n",inifile);
   if(localfile==1){
     update_selectedtour_index=0;
   }
@@ -11558,11 +11558,11 @@ void writeini(int flag){
 #endif
 #ifndef pp_OSX64
 #ifdef pp_OSX
-    fprintf(alt_stdout,"Platform: OSX\n");
+    PRINTF("Platform: OSX\n");
 #endif
 #endif
 #ifdef pp_OSX64
-    fprintf(alt_stdout,"Platform: OSX64\n");
+    PRINTF("Platform: OSX64\n");
 #endif
 #ifndef pp_LINUX64
 #ifdef pp_LINUX

@@ -9,6 +9,7 @@ char file_util_revision[]="$Revision$";
 
 #include "options.h"
 #include <stdio.h> 
+#include <stdarg.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
@@ -25,6 +26,29 @@ char file_util_revision[]="$Revision$";
 #include "string_util.h"
 #include "file_util.h"
 #include "smv_endian.h"
+
+FILE *alt_stdout=NULL;
+
+/* ------------------ FFLUSH ------------------------ */
+
+int FFLUSH(void){
+  if(alt_stdout==NULL)alt_stdout=stdout;
+  return fflush(alt_stdout);
+}
+
+/* ------------------ filecopy ------------------------ */
+
+int PRINTF (const char * format, ...){
+  va_list args;
+  int return_val;
+
+  if(alt_stdout==NULL)alt_stdout=stdout;
+  va_start (args, format);
+  return_val=vfprintf (alt_stdout, format, args);
+  va_end (args);
+  return return_val;
+}
+
 
 /* ------------------ set_file ------------------------ */
 
@@ -99,7 +123,7 @@ void copy_file(char *destfile, char *sourcefile, int mode){
     fclose(streamin);
     return;
   }
-  fprintf(alt_stdout,"  Copying %s to %s\n",sourcefile,destfile);
+  PRINTF("  Copying %s to %s\n",sourcefile,destfile);
   for(;;){
     int end_of_file;
        
@@ -715,7 +739,7 @@ char *which(char *progname){
       strcpy(returndir,dir);
       strcat(returndir,dirsep);
 #ifdef pp_BETA
-      fprintf(alt_stdout,"Using %s in %s\n\n",prog,dir);
+      PRINTF("Using %s in %s\n\n",prog,dir);
 #endif
       return returndir;
     }

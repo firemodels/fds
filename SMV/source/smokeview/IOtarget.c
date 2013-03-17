@@ -164,7 +164,7 @@ void readtarget(const char *file, int ifile, int flag, int *errorcode){
       }
     }
   }
-  fprintf(alt_stdout,"min=%f max=%f\n",ttargmin,ttargmax);
+  PRINTF("min=%f max=%f\n",ttargmin,ttargmax);
   ReadTargFile=1;
   visTarg=1;
   targinfo[ifile].loaded=1;
@@ -298,10 +298,10 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
     if(vals[i]<valmin)valmin=vals[i];
     if(vals[i]>valmax)valmax=vals[i];
   }
-  fprintf(alt_stdout,"data bounds: min=%f max=%f\n",valmin,valmax);
+  PRINTF("data bounds: min=%f max=%f\n",valmin,valmax);
   if(settargetmin==1)valmin=targetmin;
   if(settargetmax==1)valmax=targetmax;
-  fprintf(alt_stdout,"applied bounds: min=%f max=%f\n",valmin,valmax);
+  PRINTF("applied bounds: min=%f max=%f\n",valmin,valmax);
 
   target_positions[n].valmin=valmin;
   target_positions[n].valmax=valmax;

@@ -1354,7 +1354,7 @@ extern "C"  void glui_script_disable(void){
       break;
     case SCRIPT_RUNSCRIPT:
       name = 5+BUTTON_script_runscript->name;
-      fprintf(alt_stdout,"running script: %s\n",name);
+      PRINTF("running script: %s\n",name);
       ScriptMenu(LIST_scriptlist->get_int_val());
       break;
     case SCRIPT_LIST:
@@ -2004,7 +2004,7 @@ extern "C" void Slice_CB(int var){
         slicemax_save=slicemax;
         setslicemax=GLOBAL_MAX;
         Slice_CB(SETVALMAX);
-        fprintf(alt_stdout,"resarch mode on\n");
+        PRINTF("resarch mode on\n");
       }
       else{
         axislabels_smooth=axislabels_smooth_save;
@@ -2019,7 +2019,7 @@ extern "C" void Slice_CB(int var){
         Slice_CB(SETVALMAX);
         slicemax=slicemax_save;
         Slice_CB(VALMAX);
-        fprintf(alt_stdout,"resarch mode off\n");
+        PRINTF("resarch mode off\n");
       }
       update_axislabels_smooth();
       Slice_CB(FILEUPDATE);
@@ -2354,7 +2354,7 @@ void Bounds_DLG_CB(int var){
     writeini(LOCAL_INI);
     break;
   case COMPRESS_FILES:
-    fprintf(alt_stdout,"compressing\n");
+    PRINTF("compressing\n");
     break;
   default:
     ASSERT(0);

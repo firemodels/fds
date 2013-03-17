@@ -22,6 +22,8 @@ typedef struct {
 #define FSEEK(a,b,c) fseek(a,b,c)
 #endif
 
+EXTERNCPP int FFLUSH(void);
+EXTERNCPP int PRINTF(const char * format, ...);
 EXTERNCPP void set_outstream(FILE *stream);
 EXTERNCPP void getfilesizelabel(int size, char *sizelabel);
 EXTERNCPP void filecopy(char *destdir, char *file, char *filebase);
@@ -55,12 +57,6 @@ STREXTERN char STRDECL(dirseparator[],"\\");
 #else
 STREXTERN char STRDECL(dirseparator[],"/");
 #endif
-#endif
-
-#ifdef IN_FILE
-FILE *alt_stdout;
-#else
-extern CCC FILE *alt_stdout;
 #endif
 
 #endif
