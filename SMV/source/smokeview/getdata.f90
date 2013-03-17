@@ -51,15 +51,15 @@ close(LU_GEOM)
 end subroutine geomout
 !  ------------------ getembeddata ------------------------ 
 
-subroutine getembeddata(filename,endian,ntimes,nvals,times,nstatics,ndynamics,vals,error)
+subroutine getembeddata(filename,endian,ntimes,nvals,times,nstatics,ndynamics,vals,redirect_flag,error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getembeddata@40' :: getembeddata
+!DEC$ ATTRIBUTES ALIAS:'_getembeddata@44' :: getembeddata
 #endif
 #endif
 implicit none
 character(len=*), intent(in) :: filename
-integer, intent(in) :: endian, ntimes, nvals
+integer, intent(in) :: endian, ntimes, nvals, redirect_flag
 integer, intent(out) :: error
 real, intent(out), dimension(:) :: times(ntimes), vals(nvals)
 integer, intent(out), dimension(:) :: nstatics(ntimes), ndynamics(ntimes)
@@ -104,7 +104,7 @@ valmin = 1000000000000.0;
 valmax = -valmin
 do itime=1, ntimes
   read(lu20,iostat=finish)times(itime)
-  write(6,10)times(itime)
+  if(redirect_flag.eq.0)write(6,10)times(itime)
 10 format("boundary element time=",f9.2)  
   if(finish.eq.0)read(lu20,iostat=finish)nvert_s, ntri_s, nvert_d, ntri_d
   nstatics(itime)=ntri_s
@@ -123,7 +123,7 @@ do itime=1, ntimes
   if(finish.ne.0)return
   nvars = nvars + ntri_s + ntri_d
 end do
-write(6,*)"nvars=",nvars,"valmin=",valmin," valmax=",valmax
+if(redirect_flag.eq.0)write(6,*)"nvars=",nvars,"valmin=",valmin," valmax=",valmax
 
 end subroutine getembeddata
 
@@ -324,12 +324,12 @@ subroutine getdata2(file_unit,xs,ys,zs,&
                     sprinkflag,isprink,tspr,bframe,sframe,sprframe,stimes,nspr,nmax,mxframes,nframes,&
                     settmin_p,settmax_p,tmin_p,tmax_p,frameloadstep,partpointstep, &
               			xbox0, xbox, ybox0, ybox, zbox0, zbox, &
-                    offset_x, offset_y, offset_z, &
+                    offset_x, offset_y, offset_z, redirect_flag, &
       	    				error)
                    
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getdata2@132' :: getdata2
+!DEC$ ATTRIBUTES ALIAS:'_getdata2@136' :: getdata2
 #endif
 #endif
 
@@ -340,7 +340,7 @@ integer(2), dimension(*) :: xs, ys, zs
 integer, dimension(*) :: bframe, sframe, sprframe
 character(len=1), dimension(*) :: isprink
 real, dimension(*) ::  stimes,tspr
-integer, intent(in) :: file_unit,nspr,nmax, mxframes
+integer, intent(in) :: file_unit,nspr,nmax, mxframes, redirect_flag
 integer, intent(out) :: nframes,error
 integer, intent(in) :: settmin_p, settmax_p, frameloadstep, partpointstep
 integer, intent(out) :: sprinkflag
@@ -500,11 +500,13 @@ do
     sprframe(nframes) = npp2a
     if(nframes+1.le.mxframes)bframe(nframes+1) = bframe(nframes) + sframe(nframes)
     if(npp2.eq.0)then
-  	  write(6,10)stime
+  	  if(redirect_flag.eq.0)write(6,10)stime
 10    format("particle time=",f9.2)
   	 else
-      write(6,*)"particle time=",stime,"particles",npp1,"droplets",npp2
-      write(6,20)stime,npp2
+      if(redirect_flag.eq.0)then
+        write(6,*)"particle time=",stime,"particles",npp1,"droplets",npp2
+        write(6,20)stime,npp2
+      endif
 20    format("particle time=",f9.2," particles",i9," droplets",i9)      
     endif
   endif
@@ -562,10 +564,10 @@ end subroutine getdirval
 
 !  ------------------ writeslicedata ------------------------ 
 
-subroutine writeslicedata(file_unit,slicefilename,is1,is2,js1,js2,ks1,ks2,qdata,times,ntimes)
+subroutine writeslicedata(file_unit,slicefilename,is1,is2,js1,js2,ks1,ks2,qdata,times,ntimes,redirect_flag)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_writeslicedata@48' :: writeslicedata
+!DEC$ ATTRIBUTES ALIAS:'_writeslicedata@52' :: writeslicedata
 #endif
 #endif
 
@@ -574,7 +576,7 @@ implicit none
 
 integer, intent(in) :: file_unit
 character(len=*),intent(in) :: slicefilename
-integer, intent(in) :: is1, is2, js1, js2, ks1, ks2
+integer, intent(in) :: is1, is2, js1, js2, ks1, ks2, redirect_flag
 real, intent(in), dimension(*) :: qdata
 real, intent(in), dimension(*) :: times
 integer, intent(in) :: ntimes
@@ -605,7 +607,7 @@ nzsp = ks2 + 1 - ks1
 nframe=nxsp*nysp*nzsp
 do i = 1, ntimes
   write(file_unit)times(i)
-  write(6,10)times(i)
+  if(redirect_flag.eq.0)write(6,10)times(i)
 10 format("outputting slice time=",f10.2)
   ibeg=1+(i-1)*nframe
   iend=i*nframe
@@ -621,10 +623,10 @@ end subroutine writeslicedata
 
 subroutine getslicedata(file_unit,slicefilename,longlabel,shortlabel,units,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
-			endian,settmin_s,settmax_s,tmin_s,tmax_s)
+			endian,settmin_s,settmax_s,tmin_s,tmax_s,redirect_flag)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getslicedata@108' :: getslicedata
+!DEC$ ATTRIBUTES ALIAS:'_getslicedata@112' :: getslicedata
 #endif
 #endif
 
@@ -638,7 +640,7 @@ real, intent(out), dimension(*) :: qdata
 real, intent(out), dimension(*) :: times
 integer, intent(out) :: idir
 integer, intent(out) :: is1, is2, js1, js2, ks1, ks2
-integer, intent(in) :: endian
+integer, intent(in) :: endian, redirect_flag
 integer, intent(inout) :: nstepsmax
 integer, intent(in) :: settmin_s, settmax_s, sliceframestep
 real, intent(in) :: tmin_s, tmax_s
@@ -747,7 +749,7 @@ do
   if(.not.load)cycle
   nsteps = nsteps + 1
   times(nsteps) = time
-  write(6,10)time
+  if(redirect_flag.eq.0)write(6,10)time
 10 format("slice time=",f9.2)  
   if(idir.eq.3)then
     istart = (nsteps-1)*nxsp*nysp

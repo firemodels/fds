@@ -109,15 +109,15 @@ end function endian_open
 
 !  ------------------ fcreate_part5sizefile ------------------------ 
 
-subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, error)
+subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, redirect_flag, error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@24' :: fcreate_part5sizefile
+!DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@28' :: fcreate_part5sizefile
 #endif
 #endif
 implicit none
 character(len=*), intent(in) :: part5file, part5sizefile
-integer, intent(in) :: angle_flag
+integer, intent(in) :: angle_flag, redirect_flag
 integer, intent(out) :: error
 
 integer :: lu20, lu21, version, nclasses
@@ -166,7 +166,7 @@ do i = 1, nclasses
 end do
 do
   read(lu20,iostat=error)time
-  write(6,10)time
+  if(redirect_flag.eq.0)write(6,10)time
 10    format("sizing particle time=",f9.2)
   if(error.ne.0)go to 999
   do i = 1, nclasses

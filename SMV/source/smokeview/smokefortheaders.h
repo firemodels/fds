@@ -47,7 +47,7 @@
 STDCALLF FORTgeomout(float *verts, int *nverts, int *faces, int *nfaces);
 STDCALLF FORTgetembeddatasize(char *filename, int *endian, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetembeddata(char *filename, int *endian, int *ntimes, int *nvals, float *times, int *nstatics, int *ndynamics,
-                         float *vals, int *error, FILE_SIZE lenfile);
+                         float *vals, int *redirect, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
                                int *endian, int *npatch, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
@@ -58,7 +58,7 @@ STDCALLF FORTclosefortranfile(int *lunit);
 STDCALLF FORTget_file_unit(int *funit, int *first_unit);
 STDCALLF FORTcolor2rgb(int *rgb, char *color, FILE_SIZE colorsize);
 
-STDCALLF FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int *angle_flag, int *error,
+STDCALLF FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int *angle_flag, int *redirect_flag, int *error,
                                   FILE_SIZE lenpart5file, FILE_SIZE lenpart5sizefile);
 
 STDCALLF FORTgetsliceparms(char *file,int *endian,
@@ -84,7 +84,7 @@ STDCALLF FORTgetdata2(int *file_unit,
                      float *times,int *nspr,int *nmax,int *mxframes,int *nframes,
                      int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p, int *partframestep, int *partpointstep, 
                      float *xbox0, float *xbox, float *ybox0, float *ybox, float *zbox0, float *zbox, 
-                     float *offset_x, float *offset_y, float *offset_z,
+                     float *offset_x, float *offset_y, float *offset_z, int *redirect,
                      int *error,
                      FILE_SIZE lenisprink);
 
@@ -99,12 +99,12 @@ STDCALLF FORTgetslicesizes(char *slicefilename, int *nslicei, int *nslicej, int 
                           int *headersize, int *framesize,FILE_SIZE slicefilelen);
 STDCALLF FORTwriteslicedata(int *file_unit,char *slicefilename, 
                             int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
-                            float *qdata,float *times,int *ntimes,FILE_SIZE slicefilelen);
+                            float *qdata,float *times,int *ntimes, int *redirect,FILE_SIZE slicefilelen);
 STDCALLF FORTgetslicedata(int *file_unit,char *slicefilename, char *longlabels, char *shortlabels, 
                          char *units, int *is1,int *is2,int *js1,int *js2, int *ks1,int *ks2,
                          int *idir, float *qslicemin,float *qslicemax,
                          float *qslicedata,float *times, int *nsteps, int *sliceframestep, int *endian,
-                         int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p,
+                         int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p, int *redirect,
                          FILE_SIZE slicefilelen, FILE_SIZE longlableslen, FILE_SIZE shortlabelslen, FILE_SIZE unitslen);
 STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, FILE_SIZE filelen);
 #endif

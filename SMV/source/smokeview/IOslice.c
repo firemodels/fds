@@ -127,7 +127,7 @@ void out_slicefile(slicedata *sd){
   slicefilelen=strlen(sd->file);
   FORTwriteslicedata(&file_unit,sd->file,
     &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,
-    sd->qslicedata,sd->times,&sd->ntimes,slicefilelen);
+    sd->qslicedata,sd->times,&sd->ntimes, &redirect,slicefilelen);
 }
 
 /* ------------------ Creadslice_frame ------------------------ */
@@ -1122,7 +1122,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       FORTgetslicedata(&file_unit,file,slicelonglabels,sliceshortlabels,sliceunits,
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
                    &qmin,&qmax,sd->qslicedata,sd->times,&sd->ntimes,&sliceframestep, &endian_smv,
-                   &settmin_s,&settmax_s,&tmin_s,&tmax_s,
+                   &settmin_s,&settmax_s,&tmin_s,&tmax_s, &redirect,
                    slicefilelen,labellen,labellen,labellen);
 #ifdef pp_MEMDEBUG                   
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));

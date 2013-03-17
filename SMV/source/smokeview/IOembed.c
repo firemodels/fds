@@ -888,7 +888,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
     NewMemory((void **)&patchi->geom_ivals,nvals*sizeof(char));
   }
   FORTgetembeddata(file, &endian_smv, &ntimes_local, &nvals, patchi->geom_times, 
-    patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &error, lenfile);
+    patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &redirect, &error, lenfile);
 
   init_histogram(patchi->histogram);
 

@@ -706,11 +706,11 @@ int getpart5nframes(partdata *parti){
         lensize=strlen(size_file);
         if(parti->evac==1){
           angle_flag=1;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
         }
         else{
           angle_flag=0;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
         }
       }
   }
@@ -801,11 +801,11 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
         lensize=strlen(size_file);
         if(parti->evac==1){
           angle_flag=1;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
         }
         else{
           angle_flag=0;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &error, lenreg,lensize);
+          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
         }
       }
   }
@@ -1326,7 +1326,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     tspr,parti->bframe,parti->sframe,parti->sprframe,parti->times,&nspr,&npartpoints,&npartframes,&parti->ntimes,
     &settmin_p,&settmax_p,&tmin_p,&tmax_p,&partframestep,&partpointstep, 
     &xbar0, &xbox, &ybar0, &ybox, &zbar0, &zbox,
-    &offset_x, &offset_y, &offset_z,
+    &offset_x, &offset_y, &offset_z, &redirect,
     &error,1);
   if(error!=0||parti->ntimes==0){
     if(error!=0)fprintf(stderr,"*** Error: problem reading %s\n",file);
