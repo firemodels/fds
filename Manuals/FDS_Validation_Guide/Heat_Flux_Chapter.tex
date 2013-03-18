@@ -11,6 +11,27 @@ This chapter contains a wide variety of heat flux measurements, ranging from les
 
 \section{Heat Flux to Walls}
 
+\subsection{FM Parallel Panel Experiments}
+
+Predicted and measured vertical heat flux profiles for three propane and three propylene fires (30~kW, 60~kW, and 100~kW) sandwiched between two 2.4~m high, 0.6~m wide panels are presented below.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_1_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_4_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_2_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_5_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_3_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_6_Heat_Flux}
+\end{tabular*}
+\label{FM_Parallel_Panel}
+\caption[Side wall heat flux predictions, FM Parallel Panel experiments]
+{Comparison of predicted and measured heat fluxes to parallel panels.}
+\end{figure}
+
+
+\clearpage
+
 \subsection{NIST/NRC Experiments}
 
 Heat flux gauges and thermocouples were positioned at various locations on the walls, floor, and ceiling of the compartment. The locations are given in Table~\ref{NIST_NRC_Wall_Coords}. The heat flux gauges were not water cooled; thus, they measured the {\em net} rather than the {\em gauge} heat flux. However, the net heat flux is a function of the temperature of the heat flux gauge itself, which is not something that is modeled. To better compare model and measurement, the measured net heat flux is converted into a gauge heat flux using the following formula:
@@ -172,6 +193,152 @@ Also, over the course of 15 experiments, numerous heat flux gauges failed, most 
 
 \clearpage
 
+\subsection{NRCC Facade Experiments}
+
+Figure~\ref{NRCC_Facade_Image} displays the simulation of a 10.3~MW fire inside and outside of a small enclosure. The purpose of the experiment was to measure the heat flux to the exterior facade. The FDS heat flux predictions are made at the location of the green points.
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=5.0in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_10_MW_0467}
+\end{tabular}
+\end{center}
+\caption[Smokeview rendering of NRCC Facade experiment]
+{Smokeview rendering of one of the NRCC Facade experiments. The door is
+0.94~m by 2.70~m tall (referred to as ``Window 2'' in the comparison plots). The
+fire is 10.3~MW.}
+\label{NRCC_Facade_Image}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_08_MW} &
+  \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_08_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_10_MW}
+\end{tabular*}
+\label{NRCC_Facade_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_08_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_10_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_08_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_10_MW}
+\end{tabular*}
+\label{NRCC_Facade_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_08_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_10_MW}
+\end{tabular*}
+\label{NRCC_Facade_3}
+\end{figure}
+
+
+\clearpage
+
+
+
+\subsection{NRL/HAI Experiments}
+
+Predicted and measured vertical heat flux profiles from 9 propane sand burner fires are shown on the following pages. The parameters for each
+experiment are listed in Table~\ref{NRL/HAI_Parameters} below. Note that all the FDS simulations were performed with a grid resolution such that
+$D^*/\dx=10$.
+
+\begin{table}[ht]
+\caption{Summary of the NRL/HAI Wall Heat Flux Measurements. }
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Test     & $D$     & $D^*$      & $\dot{Q}$   & $Q^*$   & Observed  Flame \\
+Number   & (m)     & (m)        & (kW)        &         & Height (m)      \\ \hline \hline
+1        & 0.28    & 0.30       &  53         & 0.85    & 0.79            \\ \hline
+2        & 0.70    & 0.30       &  56         & 0.09    & 0.36            \\ \hline
+3        & 0.48    & 0.33       &  68         & 0.28    & 0.60            \\ \hline
+4        & 0.37    & 0.39       &  106        & 0.84    & 1.00            \\ \hline
+5        & 0.48    & 0.43       &  136        & 0.57    & 0.87            \\ \hline
+6        & 0.48    & 0.51       &  204        & 0.85    & 1.45            \\ \hline
+7        & 0.70    & 0.52       &  220        & 0.36    & 1.20            \\ \hline
+8        & 0.57    & 0.60       &  313        & 0.85    & 2.20            \\ \hline
+9        & 0.70    & 0.74       &  523        & 0.85    & 2.9 (based on 500~$^\circ$C)       \\ \hline
+\end{tabular}
+\end{center}
+\label{NRL/HAI_Parameters}
+\end{table}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_1_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_2_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_3_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_4_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_5_Heat_Flux} &
+\end{tabular*}
+\label{NRL_HAI_1}
+\caption[Wall heat flux predictions, NRL/HAI experiments.]
+{Comparison of predicted and measured heat fluxes to the wall from an adjacent propane sand burner, NRL/HAI experiments.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_6_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_7_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_8_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_9_Heat_Flux}
+\end{tabular*}
+\label{NRL_HAI_2}
+\caption[Wall heat flux predictions, NRL/HAI experiments.]
+{Comparison of predicted and measured heat fluxes to the wall from an adjacent propane sand burner, NRL/HAI experiments.}
+\end{figure}
+
+
+
+\clearpage
+
+
+
+
+
+\subsection{Ulster SBI Experiments}
+
+Predicted and measured vertical heat flux profiles for three propane fire sizes in the single burning item (SBI) enclosure at the University of Ulster are shown on the following page. Measurements were made on two vertical panels that form a corner, at the base of which was a triangular-shaped burner with sides of length 25~cm. Three vertical profiles were measured on each panel at distances of 3.25~cm, 16.5~cm, and 29~cm from the corner.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_30_kW_Left_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_30_kW_Right_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_45_kW_Left_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_45_kW_Right_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_60_kW_Left_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_60_kW_Right_Heat_Flux}
+\end{tabular*}
+\label{Ulster_SBI}
+\caption[Corner heat flux predictions, Ulster SBI experiments]
+{Comparison of predicted and measured heat fluxes to adjacent panels forming a corner in the single
+burning item (SBI) apparatus at the University of Ulster.}
+\end{figure}
+
+\clearpage
+
+
 \subsection{WTC Experiments}
 
 There were a variety of heat flux gauges installed in the test compartment. Most were within 2~m of the fire. Their locations and orientations are listed in Table~\ref{WTC_Gauges}. This section contains the measurements at the floor and ceiling.
@@ -243,173 +410,11 @@ HCe4    &  2.56     & 0.35    & 3.82      &     $-z$     & Ceiling          \\ \
 
 \clearpage
 
-\subsection{NRL/HAI Experiments}
-
-Predicted and measured vertical heat flux profiles from 9 propane sand burner fires are shown on the following pages. The parameters for each
-experiment are listed in Table~\ref{NRL/HAI_Parameters} below. Note that all the FDS simulations were performed with a grid resolution such that
-$D^*/\dx=10$.
-
-\begin{table}[ht]
-\caption{Summary of the NRL/HAI Wall Heat Flux Measurements. }
-\begin{center}
-\begin{tabular}{|c|c|c|c|c|c|}
-\hline
-Test     & $D$     & $D^*$      & $\dot{Q}$   & $Q^*$   & Observed  Flame \\
-Number   & (m)     & (m)        & (kW)        &         & Height (m)      \\ \hline \hline
-1        & 0.28    & 0.30       &  53         & 0.85    & 0.79            \\ \hline
-2        & 0.70    & 0.30       &  56         & 0.09    & 0.36            \\ \hline
-3        & 0.48    & 0.33       &  68         & 0.28    & 0.60            \\ \hline
-4        & 0.37    & 0.39       &  106        & 0.84    & 1.00            \\ \hline
-5        & 0.48    & 0.43       &  136        & 0.57    & 0.87            \\ \hline
-6        & 0.48    & 0.51       &  204        & 0.85    & 1.45            \\ \hline
-7        & 0.70    & 0.52       &  220        & 0.36    & 1.20            \\ \hline
-8        & 0.57    & 0.60       &  313        & 0.85    & 2.20            \\ \hline
-9        & 0.70    & 0.74       &  523        & 0.85    & 2.9 (based on 500~$^\circ$C)       \\ \hline
-\end{tabular}
-\end{center}
-\label{NRL/HAI_Parameters}
-\end{table}
-
-\newpage
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_1_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_2_Heat_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_3_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_4_Heat_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_5_Heat_Flux} &
-\end{tabular*}
-\label{NRL_HAI_1}
-\caption[Wall heat flux predictions, NRL/HAI experiments.]
-{Comparison of predicted and measured heat fluxes to the wall from an adjacent propane sand burner, NRL/HAI experiments.}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_6_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_7_Heat_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_8_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/NRL_HAI/NRL_HAI_9_Heat_Flux}
-\end{tabular*}
-\label{NRL_HAI_2}
-\caption[Wall heat flux predictions, NRL/HAI experiments.]
-{Comparison of predicted and measured heat fluxes to the wall from an adjacent propane sand burner, NRL/HAI experiments.}
-\end{figure}
-
-
-
-\clearpage
-
-\subsection{Ulster SBI Experiments}
-
-Predicted and measured vertical heat flux profiles for three propane fire sizes in the single burning item (SBI) enclosure at the University of Ulster are shown on the following page. Measurements were made on two vertical panels that form a corner, at the base of which was a triangular-shaped burner with sides of length 25~cm. Three vertical profiles were measured on each panel at distances of 3.25~cm, 16.5~cm, and 29~cm from the corner.
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_30_kW_Left_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_30_kW_Right_Heat_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_45_kW_Left_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_45_kW_Right_Heat_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_60_kW_Left_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/Ulster_SBI/Ulster_SBI_60_kW_Right_Heat_Flux}
-\end{tabular*}
-\label{Ulster_SBI}
-\caption[Corner heat flux predictions, Ulster SBI experiments]
-{Comparison of predicted and measured heat fluxes to adjacent panels forming a corner in the single
-burning item (SBI) apparatus at the University of Ulster.}
-\end{figure}
-
-\clearpage
-
-\subsection{FM Parallel Panel Experiments}
-
-Predicted and measured vertical heat flux profiles for three propane and three propylene fires (30~kW, 60~kW, and 100~kW) sandwiched between two 2.4~m high, 0.6~m wide panels are presented below.
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_1_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_4_Heat_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_2_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_5_Heat_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_3_Heat_Flux} &
-\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_6_Heat_Flux}
-\end{tabular*}
-\label{FM_Parallel_Panel}
-\caption[Side wall heat flux predictions, FM Parallel Panel experiments]
-{Comparison of predicted and measured heat fluxes to parallel panels.}
-\end{figure}
-
-
-\clearpage
-
-\subsection{NRCC Facade Experiments}
-
-Figure~\ref{NRCC_Facade_Image} displays the simulation of a 10.3~MW fire inside and outside of a small enclosure. The purpose of the experiment was to measure the heat flux to the exterior facade. The FDS heat flux predictions are made at the location of the green points.
-
-\begin{figure}[h!]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_10_MW_0467}
-\end{tabular}
-\end{center}
-\caption[Smokeview rendering of NRCC Facade experiment]
-{Smokeview rendering of one of the NRCC Facade experiments. The door is
-0.94~m by 2.70~m tall (referred to as ``Window 2'' in the comparison plots). The
-fire is 10.3~MW.}
-\label{NRCC_Facade_Image}
-\end{figure}
-
-\newpage
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_05_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_06_MW} \\
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_08_MW} &
-  \\
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_05_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_06_MW} \\
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_08_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_10_MW}
-\end{tabular*}
-\label{NRCC_Facade_1}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_05_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_06_MW} \\
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_08_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_10_MW} \\
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_05_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_06_MW} \\
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_08_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_10_MW}
-\end{tabular*}
-\label{NRCC_Facade_2}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_05_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_06_MW} \\
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_08_MW} &
-\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_10_MW}
-\end{tabular*}
-\label{NRCC_Facade_3}
-\end{figure}
-
-
-\clearpage
-
 \section{Heat Flux to Targets}
 
 \subsection{Fleury Experiments}
 
 The plots on the following pages contain comparisons of predicted and measured heat fluxes from a series of propane burner fires. Heat flux gauges were mounted on moveable dollies that were placed in front of, and to the side of, burners with dimensions of 0.3~m by 0.3~m (1:1 burner), 0.6~m by 0.3~m (2:1 burner), and 0.9~m by 0.3~m (3:1 burner). The heat release rates were set to 100~kW, 150~kW, 200~kW, 250~kW, and 300~kW. The gauges were mounted at heights of 0~m, 0.5~m, 1.0~m, and 1.5~m relative to the top edge of the burner. Each page contains the results for a given HRR.
-
-
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -424,6 +429,8 @@ The plots on the following pages contain comparisons of predicted and measured h
 \caption[Fleury Heat Flux, 100 kW fires.]
 {Comparison of predicted (lines) and measured (circles) heat flux for the 100~kW Fleury fires.}
 \end{figure}
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -539,65 +546,8 @@ F        & 19       & 1.0  & 162         &  206           & 0.14    \\ \hline
 
 \clearpage
 
-\subsection{WTC Experiments}
 
-There were a variety of heat flux gauges installed in the test compartment. Most were within 2~m of the fire. Their locations and orientations are listed in Table~\ref{WTC_Gauges}.
-
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Station_2_Flux_High} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Station_2_Flux_High} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Station_2_Flux_High} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Station_2_Flux_High} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Station_2_Flux_High} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Station_2_Flux_High}
-\end{tabular*}
-\label{NIST_WTC_Station_2_Flux_High}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Station_2_Flux_Low} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Station_2_Flux_Low} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Station_2_Flux_Low} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Station_2_Flux_Low} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Station_2_Flux_Low} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Station_2_Flux_Low}
-\end{tabular*}
-\label{NIST_WTC_Station_2_Flux_Low}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Upper_Column_Flux} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Upper_Column_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Upper_Column_Flux} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Upper_Column_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Upper_Column_Flux} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Upper_Column_Flux}
-\end{tabular*}
-\label{NIST_WTC_Upper_Column_Flux}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Lower_Column_Flux} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Lower_Column_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Lower_Column_Flux} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Lower_Column_Flux} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Lower_Column_Flux} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Lower_Column_Flux}
-\end{tabular*}
-\label{NIST_WTC_Lower_Column_Flux}
-\end{figure}
-
-
-
-
-\clearpage
-
-\subsection{NIST/NRC Experiments, Cables}
+\subsection{NIST/NRC Experiments}
 
 Cables in various types (power and control), and configurations (horizontal, vertical, in trays or free-hanging), were installed in
 the test compartment. For each of the four cable targets considered, measurements of the radiative and total heat flux were made with
@@ -709,6 +659,60 @@ Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray 
 \label{NIST_NRC_Cable_G_Flux_Open}
 \end{figure}
 
+\subsection{WTC Experiments}
+
+There were a variety of heat flux gauges installed in the test compartment. Most were within 2~m of the fire. Their locations and orientations are listed in Table~\ref{WTC_Gauges}.
+
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Station_2_Flux_High} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Station_2_Flux_High} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Station_2_Flux_High} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Station_2_Flux_High} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Station_2_Flux_High} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Station_2_Flux_High}
+\end{tabular*}
+\label{NIST_WTC_Station_2_Flux_High}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Station_2_Flux_Low} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Station_2_Flux_Low} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Station_2_Flux_Low} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Station_2_Flux_Low} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Station_2_Flux_Low} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Station_2_Flux_Low}
+\end{tabular*}
+\label{NIST_WTC_Station_2_Flux_Low}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Upper_Column_Flux} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Upper_Column_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Upper_Column_Flux} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Upper_Column_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Upper_Column_Flux} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Upper_Column_Flux}
+\end{tabular*}
+\label{NIST_WTC_Upper_Column_Flux}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Lower_Column_Flux} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Lower_Column_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Lower_Column_Flux} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Lower_Column_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Lower_Column_Flux} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Lower_Column_Flux}
+\end{tabular*}
+\label{NIST_WTC_Lower_Column_Flux}
+\end{figure}
 
 
 \clearpage
