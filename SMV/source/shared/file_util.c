@@ -159,20 +159,6 @@ char *get_smokezippath(char *progdir){
 
   strcat(zip_path,"smokezip");
 #ifdef WIN32
-  strcat(zip_path,"_win");
-#endif
-#ifdef pp_LINUX
-  strcat(zip_path,"_linux");
-#endif
-#ifdef pp_OSX
-  strcat(zip_path,"_osx");
-#endif
-#ifdef BIT64
-  strcat(zip_path,"_64");
-#else
-  strcat(zip_path,"_32");
-#endif
-#ifdef WIN32
   strcat(zip_path,".exe");
 #endif
   if(STAT(zip_path,&statbuffer)==0)return zip_path;
