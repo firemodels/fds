@@ -10,136 +10,74 @@ FDS, like any CFD model, does not perform a direct calculation of the HGL temper
 \section{HGL Reduction Method}
 \label{HGL_Reduction}
 
-Fire protection engineers often need to estimate the location of the interface between the hot, smoke-laden upper layer and the cooler lower layer in a burning compartment.  Relatively simple fire models, often referred to as {\em two-zone models}, compute this quantity directly, along with the average temperature of the upper and lower layers.  In a computational fluid dynamics (CFD) model like FDS, there are not two distinct zones, but rather a continuous profile of temperature. Nevertheless, there are methods that have been developed to estimate layer height and average temperatures from a continuous vertical profile of temperature. One such method~\cite{Janssens:JFS1992} is as follows: Consider a continuous function $T(z)$ defining temperature $T$ as a function of height above the floor $z$, where $z=0$ is the floor and $z=H$ is the ceiling. Define $T_u$ as the upper layer temperature, $T_l$ as the lower layer temperature, and $z_{int}$ as the interface height. Compute the quantities:
-\begin{eqnarray*} (H-z_{int})\; T_u + z_{int} \; T_l = \int_0^H \; T(z) \; dz &=& I_1 \\
-                  (H-z_{int})\; \frac{1}{T_u} + z_{int} \; \frac{1}{T_l} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 \end{eqnarray*}
-Solve for $z_{int}$:
+Fire protection engineers often need to estimate the location of the interface between the hot, smoke-laden upper layer and the cooler lower layer in a burning compartment.  Relatively simple fire models, often referred to as {\em two-zone models}, compute this quantity directly, along with the average temperature of the upper and lower layers.  In a computational fluid dynamics (CFD) model like FDS, there are not two distinct zones, but rather a continuous profile of temperature. Nevertheless, there are methods that have been developed to estimate layer height and average temperatures from a continuous vertical profile of temperature. One such method~\cite{Janssens:JFS1992} is as follows: Consider a continuous function $T(z)$ defining temperature $T$ as a function of height above the floor $z$, where $z=0$ is the floor and $z=H$ is the ceiling. Define $T_{\rm u}$ as the upper layer temperature, $T_{\rm \ell}$ as the lower layer temperature, and $z_{\rm int}$ as the interface height. Compute the quantities:
+\begin{eqnarray*} (H-z_{\rm int})\; T_{\rm u} + z_{\rm int} \; T_{\rm \ell} = \int_0^H \; T(z) \; dz &=& I_1 \\
+                  (H-z_{\rm int})\; \frac{1}{T_{\rm u}} + z_{\rm int} \; \frac{1}{T_{\rm \ell}} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 \end{eqnarray*}
+Solve for $z_{\rm int}$:
 \be
-   z_{int} = \frac{ T_l(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_l^2 - 2\, T_l \, H}
+   z_{\rm int} = \frac{ T_{\rm \ell}(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_{\rm \ell}^2 - 2\, T_{\rm \ell} \, H}
 \ee
-Let $T_l$ be the temperature in the lowest mesh cell and, using Simpson's Rule, perform the numerical integration of $I_1$ and $I_2$. $T_u$ is defined as the average upper layer temperature via
+Let $T_{\rm \ell}$ be the temperature in the lowest mesh cell and, using Simpson's Rule, perform the numerical integration of $I_1$ and $I_2$. $T_{\rm u}$ is defined as the average upper layer temperature via
 \be
-   (H-z_{int})\; T_u = \int_{z_{int}}^H \; T(z) \; dz
+   (H-z_{\rm int})\; T_{\rm u} = \int_{z_{\rm int}}^H \; T(z) \; dz
 \ee
 Further discussion of similar procedures can be found in Ref.~\cite{He:1}.
 
 \newpage
 
-\section{WTC Test Series}
 
-The HGL temperature and height for the WTC experiments were calculated from two TC trees, one that was approximately 3~m to the west and one
-2~m to the east of the fire pan (see Fig.~\ref{WTC_Drawing}). Each tree consisted of 15 thermocouples, the highest point being 5~cm below the ceiling.
+\section{ATF Corridors}
 
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_HGL_Height}
-\end{tabular*}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_HGL_Height}
-\end{tabular*}
-\end{figure}
-
-\clearpage
-
-
-\section{VTT Test Series}
-
-The HGL temperature and height are calculated from the (1~min) averaged gas temperatures from three vertical thermocouple arrays using the standard reduction method. There are 10 thermocouples in each vertical array, spaced 2~m apart in the lower two-thirds of the hall, and 1~m apart near the ceiling.
+The ATF Corridors experiments consisted of two corridors one on top of the other and connected by a stairwell. HGL temperature and depth reductions were carried out using three arrays of thermocouples in the lower corridor (Trees~A, B, and C) and two arrays in the upper corridor (Trees~G and H).
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/VTT/VTT_01_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/VTT/VTT_01_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/VTT/VTT_02_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/VTT/VTT_02_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/VTT/VTT_03_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/VTT/VTT_03_HGL_Height}
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_1_050_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_1_050_kW} \\
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_1_100_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_1_100_kW} \\
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_1_240_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_1_240_kW} 
 \end{tabular*}
 \end{figure}
-
-
-
-\clearpage
-
-\section{NIST/NRC Test Series}
-
-The NIST/NRC series consisted of 15 heptane spray fire experiments with varying heat release rates, pan locations, and ventilation conditions.
-Gas temperatures were measured using seven floor-to-ceiling thermocouple arrays (or ``trees'') distributed throughout the compartment.  The average hot gas layer temperature and height are calculated using thermocouple Trees 1, 2, 3, 5, 6 and 7. Tree~4 was not used because one of its thermocouples (TC~4-9) malfunctioned during most of the experiments. A few observations about the simulations:
-\begin{itemize}
-\item During Tests~4, 5, 10 and 16 a fan blew air into the compartment through a vent in the south wall. The measured velocity profile of the fan was not uniform, with the bulk of the air blowing from the lower third of the duct towards the ceiling at a roughly 45$^\circ$ angle.  The exact flow pattern is difficult to replicate in the model, thus, the results for Tests~4, 5, 10 and 16 should be evaluated with this in mind. The effect of the fan on the hot gas layer is small, but it does have a some effect on target temperatures near the vent.
-\item For all of the tests involving a fan, the predicted HGL height increased after the fire was extinguished, while the measured HGL decreased.  This appears to be a curious artifact of the layer reduction algorithm. It is not included in the calculation of the relative difference.
-\item In the closed door tests, the hot gas layer descended all the way to the floor. However, the reduction method, used on both the measured and predicted temperatures, does not account for the formation of a single layer, and therefore does not indicate that the layer drops all the way to the floor. This is neither a flaw in the measurements nor in FDS, but rather in the layer reduction method.
-\item The HGL reduction method produces spurious results in the first few minutes of each test because no clear layer has yet formed. These early times are not included in the relative difference calculation.
-\end{itemize}
 
 \newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_HGL_Height}
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_1_250_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_1_250_kW} \\
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_1_500_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_1_500_kW} \\
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_1_Mix_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_1_Mix_kW}
 \end{tabular*}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_HGL_Height}
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_2_050_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_2_050_kW} \\
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_2_100_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_2_100_kW} \\
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_2_240_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_2_240_kW}
 \end{tabular*}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_HGL_Height} \\ [1.in]
-\multicolumn{2}{c}{Open door tests to follow} \\ [1.in]
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_HGL_Height}
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_2_250_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_2_250_kW} \\
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_2_500_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_2_500_kW} \\
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Temp_2_Mix_kW} &
+\includegraphics[height=2.2in]{FIGURES/ATF_Corridors/ATF_Corridors_HGL_Height_2_Mix_kW}
 \end{tabular*}
 \end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_HGL_Height}
-\end{tabular*}
-\end{figure}
-
 
 \clearpage
+
 
 \section{FM/SNL Test Series}
 
@@ -157,6 +95,7 @@ Nineteen tests from the FM/SNL test series were selected for comparison. The HGL
 \end{tabular*}
 \end{figure}
 
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -170,7 +109,6 @@ Nineteen tests from the FM/SNL test series were selected for comparison. The HGL
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_HGL_Height}
 \end{tabular*}
 \end{figure}
-
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -215,167 +153,13 @@ Nineteen tests from the FM/SNL test series were selected for comparison. The HGL
 \clearpage
 
 
-\section{NBS Multi-Room Test Series}
-
-This series of experiments was performed in two relatively small rooms connected by a long corridor. The fire was located in one of the rooms.  Eight vertical arrays of thermocouples were positioned throughout the test space: Tree~1 in the burn room, Tree~2 in the doorway of the burn room, Trees~3, 4, and 5 in the corridor, Tree~6 in the exit doorway to the outside at the far end of the corridor, Tree~7 in the doorway of the ``target'' room, and Tree~8 inside the target room.  Four trees have been selected for comparison with model prediction: Tree~1 in the burn room, the trees in the corridor, and Tree~8 in the target room in Test~100Z. In Tests~100A and 100O, the target room was closed. The test director reduced the layer information individually for the eight thermocouple arrays using an alternative method. These results were included in the original data sets. However, in this report the selected TC trees were reduced using the method described in Section~\ref{HGL_Reduction}.
-
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_1_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_1_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_3_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_3_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_4_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_4_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_5_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_5_HGL_Height}
-\end{tabular*}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_1_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_1_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_3_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_3_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_4_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_4_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_5_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_5_HGL_Height} 
-\end{tabular*}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_1_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_1_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_3_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_3_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_5_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_5_HGL_Height} \\
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_8_HGL_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_8_HGL_Height}
-\end{tabular*}
-\end{figure}
-
-\clearpage
-
-
-
-
-
-\section{Steckler Compartment Experiments}
-
-Steckler {\em et al.}~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window flows in 55 compartment fire experiments. The test matrix is presented in Table~\ref{Steckler_Table}. Shown on the following pages are the temperature profiles inside the compartment compared with model predictions. To quantify the difference between prediction and measurement, the maximum temperatures were compared.
-
-
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_010_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_011_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_012_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_612_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_013_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_014_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_018_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_710_Temp}
-\end{tabular*}
-\label{Steckler_Temp_1}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_810_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_016_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_017_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_022_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_023_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_030_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_041_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_019_Temp}
-\end{tabular*}
-\label{Steckler_Temp_2}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_020_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_021_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_114_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_144_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_212_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_242_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_410_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_210_Temp}
-\end{tabular*}
-\label{Steckler_Temp_3}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_310_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_240_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_116_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_122_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_224_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_324_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_220_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_221_Temp}
-\end{tabular*}
-\label{Steckler_Temp_4}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_514_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_544_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_512_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_542_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_610_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_510_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_540_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_517_Temp}
-\end{tabular*}
-\label{Steckler_Temp_5}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_622_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_522_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_524_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_541_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_520_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_521_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_513_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_160_Temp}
-\end{tabular*}
-\label{Steckler_Temp_6}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_163_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_164_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_165_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_162_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_167_Temp} &
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_161_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_166_Temp} &
-\end{tabular*}
-\label{Steckler_Temp_7}
-\end{figure}
-
-\clearpage
-
-
 \section{LLNL Enclosure Series}
 
 The plots on the following pages compare predicted and measured layer temperatures from the LLNL Enclosure test series. In the experiments, fifteen thermocouples were evenly spaced from floor to ceiling on either side of the burner. The measured temperatures were reported as averages of the lower, middle, and upper five TCs. Some of the experiments were conducted with a separated plenum space in the top one-third of the overall compartment (Tests~17-60). In these cases, the upper five TCs are a measure of the average plenum temperature.
 
 In the figures on the following pages, the black circles represent the average of the five upper-most TC measurements. The lines represent the simulation. The red circles represent the average of the middle five TC measurements. For the plenum tests, these TCs are located immediately beneath the plenum and their average temperature is typically greater than that of the plenum. Note that in a number of tests, the fuel flow was stopped or the fire self-extinguished. The simulations last only as long as the reported measurements.
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -492,6 +276,279 @@ In the figures on the following pages, the black circles represent the average o
 \clearpage
 
 
+\section{NBS Multi-Room Test Series}
+
+This series of experiments was performed in two relatively small rooms connected by a long corridor. The fire was located in one of the rooms.  Eight vertical arrays of thermocouples were positioned throughout the test space: Tree~1 in the burn room, Tree~2 in the doorway of the burn room, Trees~3, 4, and 5 in the corridor, Tree~6 in the exit doorway to the outside at the far end of the corridor, Tree~7 in the doorway of the ``target'' room, and Tree~8 inside the target room.  Four trees have been selected for comparison with model prediction: Tree~1 in the burn room, the trees in the corridor, and Tree~8 in the target room in Test~100Z. In Tests~100A and 100O, the target room was closed. The test director reduced the layer information individually for the eight thermocouple arrays using an alternative method. These results were included in the original data sets. However, in this report the selected TC trees were reduced using the method described in Section~\ref{HGL_Reduction}.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_1_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_1_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_3_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_3_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_4_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_4_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_5_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100A_Tree_5_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_1_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_1_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_3_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_3_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_4_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_4_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_5_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100O_Tree_5_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_1_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_1_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_3_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_3_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_5_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_5_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_8_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NBS/NBS_100Z_Tree_8_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+\clearpage
+
+\section{NIST/NRC Test Series}
+
+The NIST/NRC series consisted of 15 heptane spray fire experiments with varying heat release rates, pan locations, and ventilation conditions.
+Gas temperatures were measured using seven floor-to-ceiling thermocouple arrays (or ``trees'') distributed throughout the compartment.  The average hot gas layer temperature and height are calculated using thermocouple Trees 1, 2, 3, 5, 6 and 7. Tree~4 was not used because one of its thermocouples (TC~4-9) malfunctioned during most of the experiments. A few observations about the simulations:
+\begin{itemize}
+\item During Tests~4, 5, 10 and 16 a fan blew air into the compartment through a vent in the south wall. The measured velocity profile of the fan was not uniform, with the bulk of the air blowing from the lower third of the duct towards the ceiling at a roughly 45$^\circ$ angle.  The exact flow pattern is difficult to replicate in the model, thus, the results for Tests~4, 5, 10 and 16 should be evaluated with this in mind. The effect of the fan on the hot gas layer is small, but it does have a some effect on target temperatures near the vent.
+\item For all of the tests involving a fan, the predicted HGL height increased after the fire was extinguished, while the measured HGL decreased.  This appears to be a curious artifact of the layer reduction algorithm. It is not included in the calculation of the relative difference.
+\item In the closed door tests, the hot gas layer descended all the way to the floor. However, the reduction method, used on both the measured and predicted temperatures, does not account for the formation of a single layer, and therefore does not indicate that the layer drops all the way to the floor. This is neither a flaw in the measurements nor in FDS, but rather in the layer reduction method.
+\item The HGL reduction method produces spurious results in the first few minutes of each test because no clear layer has yet formed. These early times are not included in the relative difference calculation.
+\end{itemize}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_HGL_Height} \\ [1.in]
+\multicolumn{2}{c}{Open door tests to follow} \\ [1.in]
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+
+\clearpage
+
+
+\section{Steckler Compartment Experiments}
+
+Steckler {\em et al.}~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window flows in 55 compartment fire experiments. The test matrix is presented in Table~\ref{Steckler_Table}. Shown on the following pages are the temperature profiles inside the compartment compared with model predictions. To quantify the difference between prediction and measurement, the maximum temperatures were compared.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_010_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_011_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_012_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_612_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_013_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_014_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_018_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_710_Temp}
+\end{tabular*}
+\label{Steckler_Temp_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_810_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_016_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_017_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_022_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_023_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_030_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_041_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_019_Temp}
+\end{tabular*}
+\label{Steckler_Temp_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_020_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_021_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_114_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_144_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_212_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_242_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_410_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_210_Temp}
+\end{tabular*}
+\label{Steckler_Temp_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_310_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_240_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_116_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_122_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_224_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_324_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_220_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_221_Temp}
+\end{tabular*}
+\label{Steckler_Temp_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_514_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_544_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_512_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_542_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_610_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_510_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_540_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_517_Temp}
+\end{tabular*}
+\label{Steckler_Temp_5}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_622_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_522_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_524_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_541_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_520_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_521_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_513_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_160_Temp}
+\end{tabular*}
+\label{Steckler_Temp_6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_163_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_164_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_165_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_162_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_167_Temp} &
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_161_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/Steckler_Compartment/Steckler_166_Temp} &
+\end{tabular*}
+\label{Steckler_Temp_7}
+\end{figure}
+
+\clearpage
+
+\section{VTT Test Series}
+
+The HGL temperature and height are calculated from the (1~min) averaged gas temperatures from three vertical thermocouple arrays using the standard reduction method. There are 10 thermocouples in each vertical array, spaced 2~m apart in the lower two-thirds of the hall, and 1~m apart near the ceiling.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/VTT/VTT_01_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/VTT/VTT_01_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/VTT/VTT_02_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/VTT/VTT_02_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/VTT/VTT_03_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/VTT/VTT_03_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+
+
+\clearpage
+
+
+
+\section{WTC Test Series}
+
+The HGL temperature and height for the WTC experiments were calculated from two TC trees, one that was approximately 3~m to the west and one
+2~m to the east of the fire pan (see Fig.~\ref{WTC_Drawing}). Each tree consisted of 15 thermocouples, the highest point being 5~cm below the ceiling.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_HGL_Height} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_HGL_Temp} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_HGL_Height}
+\end{tabular*}
+\end{figure}
+
+\clearpage
+
+
 \section{Summary of Hot Gas Layer Temperature and Height}
 
 
@@ -506,6 +563,8 @@ In the figures on the following pages, the black circles represent the average o
 {Summary of the HGL temperature predictions for natural and forced ventilation.}
 \label{HGL_Summary_1}
 \end{figure}
+
+\newpage
 
 \begin{figure}[p]
 \begin{center}

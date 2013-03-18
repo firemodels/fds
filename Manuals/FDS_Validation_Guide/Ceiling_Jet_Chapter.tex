@@ -4,114 +4,11 @@
 
 FDS is a computational fluid dynamics (CFD) model and has no specific ceiling jet algorithm. Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations. Nevertheless, temperature measurements near the ceiling can be used to evaluate the model's ability to predict the activation times of sprinklers, smoke detectors, and other fire protection devices.
 
-This chapter first presents comparisons of model predictions and temperature measurements near to the ceiling. Next, predicted sprinkler activation times and the total number of activations are compared with measurements. Finally, predicted smoke detector activation times are compared with measurements. 
+This chapter first presents comparisons of model predictions and temperature measurements near to the ceiling. Next, predicted sprinkler activation times and the total number of activations are compared with measurements. Finally, predicted smoke detector activation times are compared with measurements.
 
 \section{Ceiling Jet Temperatures}
 
-The ceiling jet temperature measurements presented in this section were made for a variety of reasons. Most often, these measurements were simply the upper most thermocouple temperature in a vertical array. Sometimes, these measurements were designed to detect the activation time of a sprinkler. In any case, these measurements are used to evaluate the model's ability to predict the gas temperature at a single point, as opposed to the hot gas layer average. 
-
-\clearpage
-
-\subsection{WTC Experiments}
-
-In the WTC experiments, the compartment was 7~m long, 3.6~m wide and 3.8~m high. A 1~m by 2~m pan was positioned close to the center of the compartment. Aspirated thermocouples were positioned 3~m to the west (TTRW1) and 2~m to the east (TTRE1) of the fire pan, 18~cm below the ceiling.
-
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Ceiling_Jet}
-\end{tabular*}
-\label{WTC_Jet}
-\end{figure}
-
-\clearpage
-
-\subsection{NIST/NRC Experiments}
-
-In the NIST/NRC experiments, seven vertical arrays of thermocouples were positioned throughout the compartment. 
-The thermocouple nearest the ceiling in Tree~7, located towards the back of the compartment away from the door,
-has been chosen to evaluate the ceiling jet temperature prediction.
-
-
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Ceiling_Jet}
-\end{tabular*}
-\label{NIST_NRC_Jet_Closed}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_Ceiling_Jet} &
- \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Ceiling_Jet}
-\end{tabular*}
-\label{NIST_NRC_Jet_Open}
-\end{figure}
-
-
-
-\clearpage
-
-\subsection{FM/SNL Experiments}
-
-The near-ceiling thermocouples in Sectors 1 and 3 have been chosen to evaluate the ceiling jet temperature prediction. 
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_01_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_02_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_05_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_Ceiling_Jet} \\
-\end{tabular*}
-\label{FM_SNL_Ceiling_Jet_1}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_09_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_10_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_12_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_13_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_14_Ceiling_Jet} \\
-\end{tabular*}
-\label{FM_SNL_Ceiling_Jet_2}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_15_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_17_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_21_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_22_Ceiling_Jet} \\
-\end{tabular*}
-\label{FM_SNL_Ceiling_Jet_3}
-\end{figure}
-
+The ceiling jet temperature measurements presented in this section were made for a variety of reasons. Most often, these measurements were simply the upper most thermocouple temperature in a vertical array. Sometimes, these measurements were designed to detect the activation time of a sprinkler. In any case, these measurements are used to evaluate the model's ability to predict the gas temperature at a single point, as opposed to the hot gas layer average.
 
 \clearpage
 
@@ -127,6 +24,8 @@ in the doorway of the stairwell on the first level. Tree~E was located roughly a
 stairwell. Tree~F was located near the stairwell opening on the second level. Tree~G was located near the exit at the
 other end of the second-level corridor. The graphs on the following pages show the top and bottom TC from each tree for
 the given fire sizes of 50~kW, 100~kW, 250~kW, 500~kW, and a mixed HRR ``pulsed'' fire.
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -196,6 +95,132 @@ the given fire sizes of 50~kW, 100~kW, 250~kW, 500~kW, and a mixed HRR ``pulsed'
 
 \clearpage
 
+\subsection{Arup Tunnel Experiments}
+
+The plots below show the predicted and measured temperatures from a fire experiment conducted in a tunnel. Near-ceiling temperatures
+were measured at distances of 2~m, 4~m, 6~m and 8~m from the fire along the centerline of tunnel.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_2_m} &
+\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_4_m} \\
+\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_6_m} &
+\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_8_m}
+\end{tabular*}
+\label{Arup_Tunnel}
+\end{figure}
+
+\clearpage
+
+
+
+\subsection{FM/SNL Experiments}
+
+The near-ceiling thermocouples in Sectors 1 and 3 have been chosen to evaluate the ceiling jet temperature prediction.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_01_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_02_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_03_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_04_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_05_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_Ceiling_Jet} \\
+\end{tabular*}
+\label{FM_SNL_Ceiling_Jet_1}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_09_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_10_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_11_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_12_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_13_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_14_Ceiling_Jet} \\
+\end{tabular*}
+\label{FM_SNL_Ceiling_Jet_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_15_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_17_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_21_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_22_Ceiling_Jet} \\
+\end{tabular*}
+\label{FM_SNL_Ceiling_Jet_3}
+\end{figure}
+
+
+\clearpage
+
+\subsection{NIST Dunes 2000 Experiments}
+
+The primary purpose of the NIST Dunes 2000 experiments was to measure smoke detector activation times in residential settings. In the single-story manufactured home tests that were selected for validation, five smoke detector measurement stations (Station A through Station E) were located in different areas of the manufactured home. Thermocouple trees were also located at each measurement station. The highest thermocouple in the tree can be compared to ceiling jet temperature predictions. The plots on the following page show the measured and predicted ceiling jet temperatures for the five measurement stations in each test.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC02_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC05_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC07_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC10_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC33_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC35_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC38_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC39_Ceiling_Jet}
+\end{tabular*}
+\label{NIST_Dunes_2000_Ceiling_Jet}
+\end{figure}
+
+
+\clearpage
+
+\subsection{NIST/NRC Experiments}
+
+In the NIST/NRC experiments, seven vertical arrays of thermocouples were positioned throughout the compartment.
+The thermocouple nearest the ceiling in Tree~7, located towards the back of the compartment away from the door,
+has been chosen to evaluate the ceiling jet temperature prediction.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Ceiling_Jet}
+\end{tabular*}
+\label{NIST_NRC_Jet_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_17_Ceiling_Jet} &
+ \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Ceiling_Jet}
+\end{tabular*}
+\label{NIST_NRC_Jet_Open}
+\end{figure}
+
+
+
+\clearpage
+
 \subsection{UL/NFPRF Series I Experiments}
 
 The primary purpose of the UL/NFPRF experiments was to measure sprinkler activation times for a series of heptane spray burner fires. To determine activation times, thermocouples were affixed to each sprinkler, and a sudden drop in temperature indicated activation. These same thermocouple temperatures can be compared to ceiling jet temperature predictions. Referring to Fig.~\ref{layout}, the chosen measurement locations are 56, 68, 86, and 98, providing comparisons as close to, and as far away from, the fire as possible.
@@ -213,6 +238,8 @@ The primary purpose of the UL/NFPRF experiments was to measure sprinkler activat
 \label{UL_NFPRF_jet_1}
 \end{figure}
 
+\newpage
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_07_jet} &
@@ -222,7 +249,7 @@ The primary purpose of the UL/NFPRF experiments was to measure sprinkler activat
 \includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_11_jet} &
 \includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_12_jet} \\
 \includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_13_jet} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_14_jet} 
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_14_jet}
 \end{tabular*}
 \label{UL_NFPRF_jet_2}
 \end{figure}
@@ -236,7 +263,7 @@ The primary purpose of the UL/NFPRF experiments was to measure sprinkler activat
 \includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_19_jet} &
 \includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_20_jet} \\
 \includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_21_jet} &
-\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_22_jet} 
+\includegraphics[height=2.2in]{FIGURES/UL_NFPRF/UL_NFPRF_1_22_jet}
 \end{tabular*}
 \label{UL_NFPRF_jet_3}
 \end{figure}
@@ -250,6 +277,7 @@ The primary purpose of the UL/NFPRF experiments was to measure sprinkler activat
 For these experiments, the measured and predicted thermocouple temperature at the location of the first two activating sprinklers are compared. The experiments consisted of either Smooth or Obstructed ceilings; Slow, Medium or Fast fires; and a burner in the Open, at the Wall, or in the Corner.
 The experiments included three replicates of each of the smooth ceiling configurations and two replicates of each of the obstructed ceiling configurations.
 
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -339,6 +367,8 @@ The experiments included three replicates of each of the smooth ceiling configur
 \label{Vettori_Sloped_Results}
 
 For these experiments, the measured and predicted thermocouple temperature at the location of the first two activating sprinklers are compared. The replicate results are shown side by side. The experiments consisted of either Smooth or Obstructed ceilings; Slow or Fast fires; a burner that is Detached from the wall, at the Wall, or in the Corner, and a Flat, 13$^\circ$, or 24$^\circ$ sloped ceiling.
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -468,41 +498,25 @@ For these experiments, the measured and predicted thermocouple temperature at th
 
 \clearpage
 
-\subsection{Arup Tunnel Experiments}
 
-The plots below show the predicted and measured temperatures from a fire experiment conducted in a tunnel. Near-ceiling temperatures
-were measured at distances of 2~m, 4~m, 6~m and 8~m from the fire along the centerline of tunnel.
 
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_2_m} &
-\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_4_m} \\
-\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_6_m} &
-\includegraphics[height=2.2in]{FIGURES/Arup_Tunnel/Arup_Tunnel_8_m}
-\end{tabular*}
-\label{Arup_Tunnel}
-\end{figure}
 
-\clearpage
+\subsection{WTC Experiments}
 
-\subsection{NIST Dunes 2000 Experiments}
+In the WTC experiments, the compartment was 7~m long, 3.6~m wide and 3.8~m high. A 1~m by 2~m pan was positioned close to the center of the compartment. Aspirated thermocouples were positioned 3~m to the west (TTRW1) and 2~m to the east (TTRE1) of the fire pan, 18~cm below the ceiling.
 
-The primary purpose of the NIST Dunes 2000 experiments was to measure smoke detector activation times in residential settings. In the single-story manufactured home tests that were selected for validation, five smoke detector measurement stations (Station A through Station E) were located in different areas of the manufactured home. Thermocouple trees were also located at each measurement station. The highest thermocouple in the tree can be compared to ceiling jet temperature predictions. The plots on the following page show the measured and predicted ceiling jet temperatures for the five measurement stations in each test.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC02_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC05_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC07_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC10_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC33_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC35_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC38_Ceiling_Jet} &
-\includegraphics[height=2.2in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC39_Ceiling_Jet}
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_01_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_02_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_03_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_04_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_05_Ceiling_Jet} &
+\includegraphics[height=2.2in]{FIGURES/WTC/WTC_06_Ceiling_Jet}
 \end{tabular*}
-\label{NIST_Dunes_2000_Ceiling_Jet}
+\label{WTC_Jet}
 \end{figure}
-
 
 \clearpage
 
@@ -547,7 +561,7 @@ For the Vettori experiments, the sprinklers did not flow water; thus, it is poss
 \subsection{UL/NFPRF Series I and II; Number of Activations}
 \label{UL_NFPRF:Results}
 
-The UL/NFPRF experiments involve a substantial number of sprinkler activations and, thus, provide a way of indirectly assessing the model's ability to predict the cooling effect of the water spray. For these experiments, each sprinkler discharged water at a fixed rate of 227~L/min (60~gal/min). 
+The UL/NFPRF experiments involve a substantial number of sprinkler activations and, thus, provide a way of indirectly assessing the model's ability to predict the cooling effect of the water spray. For these experiments, each sprinkler discharged water at a fixed rate of 227~L/min (60~gal/min).
 The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}.
 
 \begin{table}[h!]
@@ -592,8 +606,9 @@ was the size of the fire at the time when the fuel supply was leveled off.}
 \end{table}
 
 The figures on the following pages display the number of sprinklers actuated as a function of time. The results are then summarized in Fig.~\ref{UL_NFPRF}. Note that there are no experimental uncertainty bounds on the plot because it is difficult to estimate the combined uncertainty related to the various parameters that are input into the model. In Fig.~\ref{UL_NFPRF_Repeatability}, the results of three replicate experiments
-demonstrate that the total number of actuated sprinklers in each experiment is repeatable, even though individual actuation times may vary. Based on these three replicates, there is very little, if any, uncertainty in the total number of actuated sprinklers for each test. However, the test report~\cite{Sheppard:1} does not include uncertainty estimates for the heat release rate, thermal properties of the ceiling, sprinkler RTI, conductivity factor, actuation temperature, median droplet diameter, and various other parameters that have been input into the model. Consequently, it is not possible to estimate the uncertainty in the total number of actuated sprinklers due to the uncertainty in the reported parameters. 
+demonstrate that the total number of actuated sprinklers in each experiment is repeatable, even though individual actuation times may vary. Based on these three replicates, there is very little, if any, uncertainty in the total number of actuated sprinklers for each test. However, the test report~\cite{Sheppard:1} does not include uncertainty estimates for the heat release rate, thermal properties of the ceiling, sprinkler RTI, conductivity factor, actuation temperature, median droplet diameter, and various other parameters that have been input into the model. Consequently, it is not possible to estimate the uncertainty in the total number of actuated sprinklers due to the uncertainty in the reported parameters.
 
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -684,6 +699,8 @@ edge of the adjustable height ceiling, thus more activations might have
 occurred had the ceiling extended further.}
 \label{ULburnermatrixII}
 \end{table}
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
