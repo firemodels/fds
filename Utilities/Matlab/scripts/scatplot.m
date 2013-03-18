@@ -350,11 +350,11 @@ if stats_output == 1
     fprintf(fid, '%s\n', '\tiny');
     fprintf(fid, '%s\n', '\begin{longtable}{|c|c|c|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within   \\');
+    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within    \\');
     fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within   \\');
+    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within    \\');
     fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
     fprintf(fid, '%s\n', '\hline');
@@ -403,11 +403,11 @@ if stats_output == 2
     fprintf(fid, '%s\n', '\begin{longtable}{|c|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Quantity & Number of & Number of & $2\widetilde{\sigma}_E$ & $2\widetilde{\sigma}_M$ & Bias \\');
-    fprintf(fid, '%s\n', '         & Datasets  & Points    &          &          &      \\ \hline \hline');
+    fprintf(fid, '%s\n', '         & Datasets  & Points    &                         &                         &      \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Quantity & Number of & Number of & $2\widetilde{\sigma}_E$ & $2\widetilde{\sigma}_M$ & Bias \\');
-    fprintf(fid, '%s\n', '         & Datasets  & Points    &          &          &      \\ \hline \hline');
+    fprintf(fid, '%s\n', '         & Datasets  & Points    &                         &                         &      \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
     [rows, cols] = size(output_stats);
     for i_row = 2:rows
