@@ -43,7 +43,7 @@ int main(int argc, char **argv){
   int endian_info;
   int redirect=0;
 
-  set_outstream(stdout);
+  set_stdout(stdout);
   initMALLOC();
   GLOBdoit_lighting=0;
   GLOBdoit_smoke3d=1;
@@ -378,7 +378,7 @@ int main(int argc, char **argv){
     strcat(smzlogfile,".smzlog");
     SMZLOG_STREAM=fopen(smzlogfile,"w");
     if(SMZLOG_STREAM!=NULL){
-      set_outstream(SMZLOG_STREAM);
+      set_stdout(SMZLOG_STREAM);
     }
   }
   

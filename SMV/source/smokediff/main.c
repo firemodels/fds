@@ -36,7 +36,7 @@ int main(int argc, char **argv){
   int open_smokeview=0;
   int redirect=0;
 
-  set_outstream(stdout);
+  set_stdout(stdout);
   initMALLOC();
 #ifdef WIN32
   strcpy(dirseparator,"\\");
@@ -194,7 +194,7 @@ int main(int argc, char **argv){
     strcat(svdlogfile,"_diff.svdlog");
     LOG_FILENAME=fopen(svdlogfile,"w");
     if(LOG_FILENAME!=NULL){
-      set_outstream(LOG_FILENAME);
+      set_stdout(LOG_FILENAME);
     }
   }
   if(getfileinfo(smoke1,NULL,NULL)!=0||getfileinfo(smoke2,NULL,NULL)!=0){

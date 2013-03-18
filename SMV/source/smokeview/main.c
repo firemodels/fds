@@ -29,7 +29,7 @@ int main(int argc, char **argv){
   int return_code;
   char *progname;
 
-  set_outstream(stdout);
+  set_stdout(stdout);
   initMALLOC();
   init_rand_ab(1000000);
   initvars();

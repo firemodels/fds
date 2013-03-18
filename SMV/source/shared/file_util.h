@@ -24,7 +24,7 @@ typedef struct {
 
 EXTERNCPP int FFLUSH(void);
 EXTERNCPP int PRINTF(const char * format, ...);
-EXTERNCPP void set_outstream(FILE *stream);
+EXTERNCPP void set_stdout(FILE *stream);
 EXTERNCPP void getfilesizelabel(int size, char *sizelabel);
 EXTERNCPP void filecopy(char *destdir, char *file, char *filebase);
 EXTERNCPP void copy_file(char *destfile, char *sourcefile, int mode);
@@ -58,5 +58,7 @@ STREXTERN char STRDECL(dirseparator[],"\\");
 STREXTERN char STRDECL(dirseparator[],"/");
 #endif
 #endif
+
+#define DPRINTF(_fmt, ...)  fprintf(stderr, "[file %s, line %d]: " _fmt, __FILE__, __LINE__, __VA_ARGS__)
 
 #endif

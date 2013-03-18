@@ -597,7 +597,7 @@ void parse_commandline(int argc, char **argv){
         LOG_FILENAME=fopen(log_filename,"w");
         if(LOG_FILENAME!=NULL){
           redirect=1;
-          set_outstream(LOG_FILENAME);
+          set_stdout(LOG_FILENAME);
         }
     }
     else if(strncmp(argv[i],"-runscript",10)==0){

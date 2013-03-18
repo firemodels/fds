@@ -32,26 +32,31 @@ FILE *alt_stdout=NULL;
 /* ------------------ FFLUSH ------------------------ */
 
 int FFLUSH(void){
-  if(alt_stdout==NULL)alt_stdout=stdout;
-  return fflush(alt_stdout);
+  int return_val=0;
+
+  if(alt_stdout!=NULL){
+    return_val = fflush(alt_stdout);
+  }
+  return return_val;
 }
 
 /* ------------------ PRINTF ------------------------ */
 
 int PRINTF(const char * format, ...){
   va_list args;
-  int return_val;
+  int return_val=0;
 
-  if(alt_stdout==NULL)alt_stdout=stdout;
-  va_start (args, format);
-  return_val=vfprintf (alt_stdout, format, args);
-  va_end (args);
+  if(alt_stdout!=NULL){
+    va_start(args, format);
+    return_val=vfprintf(alt_stdout, format, args);
+    va_end(args);
+  }
   return return_val;
 }
 
 /* ------------------ set_file ------------------------ */
 
-void set_outstream(FILE *stream){
+void set_stdout(FILE *stream){
   alt_stdout=stream;
 }
 
