@@ -38,9 +38,18 @@ Save_Error_Tolerance  = saved_data{:,10};
 Save_Metric_Type      = saved_data{:,11};
 
 % If a statistics output file is specified, then enable statistics throughout
+% stats_outputs = 0: No output statistics
+% stats_outputs = 1: FDS verification statistics
+% stats_outputs = 2: FDS validation statistics
 if length(varargin) >= 1
     output_file = varargin{1};
-    stats_output = 1;
+    % Check if FDS verification plot, set appropriate flag
+    if strfind(output_file, 'FDS_verification_scatterplot_output')
+        stats_output = 1;
+    % Check if FDS validation plot, set appropriate flag
+    elseif strfind(output_file, 'FDS_validation_scatterplot_output')
+        stats_output = 2;
+    end
 else
     stats_output = 0;
 end
@@ -53,7 +62,7 @@ Q = importdata(qfil);
 H = textscan(Q{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
-% Generate header information for output_stats
+% Generate header information for verification output_stats
 if stats_output == 1
     output_stats = {};
     output_stats{1,1} = 'Dataplot Line Number';
@@ -68,6 +77,18 @@ if stats_output == 1
     output_stats{1,10} = 'Error Tolerance';
     output_stats{1,11} = 'Within Specified Error Tolerance';
     output_stats{1,12} = 'Plot Filename';
+    stat_line = 2;
+end
+
+% Generate header information for validation output_stats
+if stats_output == 2
+    output_stats = {};
+    output_stats{1,1} = 'Quantity';
+    output_stats{1,2} = 'Number of Datasets';
+    output_stats{1,3} = 'Number of Points';
+    output_stats{1,4} = '2*Sigma_Experiment';
+    output_stats{1,5} = '2*Sigma_Model';
+    output_stats{1,6} = 'Bias';
     stat_line = 2;
 end
 
@@ -113,6 +134,7 @@ for j=2:length(Q);
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             end
             
+            % Perform this code block for FDS verification scatterplot output
             if stats_output == 1
                 single_measured_metric = nonzeros(Measured_Metric(k,:,:));
                 single_predicted_metric = nonzeros(Predicted_Metric(k,:,:));
@@ -198,11 +220,11 @@ for j=2:length(Q);
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--') 
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
        
-         if strcmp(Model_Error,'yes') 
-             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
-             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
-             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
-         end
+        if strcmp(Model_Error,'yes') 
+            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
+            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
+        end
         
         % format the legend and axis labels
         xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
@@ -273,6 +295,18 @@ for j=2:length(Q);
         display(['Printing scatter plot ',num2str(j),'...'])
         print(gcf,'-dpdf',[plotdir,Plot_Filename])
         
+        % Perform this code block for FDS validation scatterplot output
+        if stats_output == 2
+            % Write descriptive statistics to output_stats cell
+            output_stats{stat_line,1} = Scatter_Plot_Title; % Quantity
+            output_stats{stat_line,2} = size(B, 2); % Number of data sets
+            output_stats{stat_line,3} = size(Predicted_Values, 1); % Number of data points
+            output_stats{stat_line,4} = sprintf('%0.2f', 2*Sigma_E); % 2*Sigma_E
+            output_stats{stat_line,5} = sprintf('%0.2f', 2*Sigma_M); % 2*Sigma_M
+            output_stats{stat_line,6} = sprintf('%0.2f', delta); % Bias
+            stat_line = stat_line + 1;
+        end
+        
     else
         display(['No data for scatter plot ',Scatter_Plot_Title])
     end
@@ -280,9 +314,8 @@ for j=2:length(Q);
     clear Measured_Metric Predicted_Metric Group_Key_Label K
 end
 
-% Write all statistics from output_stats to csv output_file
-
-if stats_output == 1
+% Write all verification or validation statistics from output_stats to csv output_file
+if (stats_output ~= 0)
     [rows, cols] = size(output_stats);
     fid = fopen(output_file, 'w');
     for i_row = 1:rows
@@ -291,6 +324,8 @@ if stats_output == 1
             contents = output_stats{i_row, i_col};
             if isnumeric(contents)
                 contents = num2str(contents);
+            elseif isstr(contents)
+                contents = strcat('"', contents, '"');
             elseif isempty(contents)
                 contents = '';
             end
@@ -302,8 +337,8 @@ if stats_output == 1
         end
         count = fprintf(fid, '%s\n', file_line);
     end
-    st = fclose(fid);
-end    
+    fclose(fid);
+end
 
 % Write statistics information to a LaTeX table for inclusion in the
 % FDS Verification Guide (SCRIPT_FIGURES/verification_statistics.tex)
@@ -311,20 +346,20 @@ if stats_output == 1
     filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/verification_statistics.tex';
     fid = fopen(filename, 'wt');
     % Generate table header information in .tex file
-    fprintf(fid,'%s\n','\begin{center}');
-    fprintf(fid,'%s\n','\tiny');
-    fprintf(fid,'%s\n','\begin{longtable}{|c|c|c|c|c|c|c|c|}');
-    fprintf(fid,'%s\n','\hline');
+    fprintf(fid, '%s\n', '\begin{center}');
+    fprintf(fid, '%s\n', '\tiny');
+    fprintf(fid, '%s\n', '\begin{longtable}{|c|c|c|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within   \\');
-    fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline');
+    fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within   \\');
-    fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline');
+    fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
-    fprintf(fid, '%s\n',  '\hline');
+    fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', '\endfoot');
-    fprintf(fid, '%s\n',  '\hline');
+    fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', '\endlastfoot');
     [rows, cols] = size(output_stats);
     for i_row = 2:rows
@@ -345,14 +380,53 @@ if stats_output == 1
         within_tolerance = m{i_row, 11};
         
         % Write out all columns to .tex file
-        fprintf(fid, '%s',   case_name, ' & ');
-        fprintf(fid, '%s',   num2str(expected_value, '%1.2e'), ' & ');
-        fprintf(fid, '%s',   num2str(predicted_value, '%1.2e'), ' & ');
-        fprintf(fid, '%s',   dependent_variable, ' & ');
-        fprintf(fid, '%s',   error_type, ' & ');
-        fprintf(fid, '%s',   num2str(error_val, '%1.2e'), ' & ');
-        fprintf(fid, '%s',   num2str(tol, '%1.2e'), ' & ');
+        fprintf(fid, '%s', case_name, ' & ');
+        fprintf(fid, '%s', num2str(expected_value, '%1.2e'), ' & ');
+        fprintf(fid, '%s', num2str(predicted_value, '%1.2e'), ' & ');
+        fprintf(fid, '%s', dependent_variable, ' & ');
+        fprintf(fid, '%s', error_type, ' & ');
+        fprintf(fid, '%s', num2str(error_val, '%1.2e'), ' & ');
+        fprintf(fid, '%s', num2str(tol, '%1.2e'), ' & ');
         fprintf(fid, '%s%s\n', within_tolerance, ' \\');
+    end
+    fprintf(fid,'%s\n','\end{longtable}');
+    fprintf(fid,'%s\n','\end{center}');
+end
+
+% Write statistics information to a LaTeX table for inclusion in the
+% FDS Validation Guide (SCRIPT_FIGURES/validation_statistics.tex)
+if stats_output == 2
+    filename = '../../Manuals/FDS_Validation_Guide/FIGURES/ScatterPlots/validation_statistics.tex';
+    fid = fopen(filename, 'wt');
+    % Generate table header information in .tex file
+    fprintf(fid, '%s\n', '\begin{center}');
+    fprintf(fid, '%s\n', '\begin{longtable}{|c|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\hline');
+    fprintf(fid, '%s\n', 'Quantity & Number of & Number of & $2\widetilde{\sigma}_E$ & $2\widetilde{\sigma}_M$ & Bias \\');
+    fprintf(fid, '%s\n', '         & Datasets  & Points    &          &          &      \\ \hline \hline');
+    fprintf(fid, '%s\n', '\endfirsthead');
+    fprintf(fid, '%s\n', '\hline');
+    fprintf(fid, '%s\n', 'Quantity & Number of & Number of & $2\widetilde{\sigma}_E$ & $2\widetilde{\sigma}_M$ & Bias \\');
+    fprintf(fid, '%s\n', '         & Datasets  & Points    &          &          &      \\ \hline \hline');
+    fprintf(fid, '%s\n', '\endhead');
+    [rows, cols] = size(output_stats);
+    for i_row = 2:rows
+        % Format strings for various columns in table (and add short names)
+        m = output_stats;
+        quantity = m{i_row, 1};
+        number_datasets = m{i_row, 2};
+        number_points= m{i_row, 3};
+        sigma_e = m{i_row, 4};
+        sigma_m = m{i_row, 5};
+        bias = m{i_row, 6};
+        
+        % Write out all columns to .tex file
+        fprintf(fid, '%s', quantity, ' & ');
+        fprintf(fid, '%s', num2str(number_datasets), ' & ');
+        fprintf(fid, '%s', num2str(number_points), ' & ');
+        fprintf(fid, '%s', num2str(sigma_e, '%0.2f'), ' & ');
+        fprintf(fid, '%s', num2str(sigma_m, '%0.2f'), ' & ');
+        fprintf(fid, '%s%s\n', num2str(bias, '%0.2f'), ' \\ \hline');
     end
     fprintf(fid,'%s\n','\end{longtable}');
     fprintf(fid,'%s\n','\end{center}');

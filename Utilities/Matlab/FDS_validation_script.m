@@ -38,9 +38,10 @@ cfil = [pwd,'/FDS_validation_dataplot_inputs.csv'];
 vdir = [pwd,'/../../Validation/'];
 plotdir = [pwd,'/../../Manuals/'];
 qfil = [pwd,'/FDS_validation_scatterplot_inputs.csv'];
+output_file = [pwd,'/FDS_validation_scatterplot_output.csv'];
 
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
-scatplot(saved_data,drange,qfil,plotdir)
+scatplot(saved_data,drange,qfil,plotdir,output_file)
 
 % Miscellaneous other scripts for special cases
 
