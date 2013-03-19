@@ -402,10 +402,10 @@ the FDS Verification Guide~\cite{FDS_Verification_Guide}, describes the verifica
 FDS.  One set of scripts is used to run FDS cases and a second set
 of scripts is used by Smokeview to generate images.  The
 verification process then becomes much easier to accomplish since
-the use of scripts (i.e., a non manual methods) guarantees that
+the use of scripts (i.e., non-manual methods) guarantees that
 consistent figures (same view points, same time points, same data
 files loaded, etc.) are produced as new versions of this
-verification document are generated using updated version of FDS
+verification document are generated using updated versions of FDS
 and/or Smokeview.  Another way of looking at this verification
 process is to consider this document and the FDS Verification
 Guide~\cite{FDS_Verification_Guide} as being a {\em live}\ (not
@@ -430,7 +430,7 @@ The Smokeview version used to generate the verification figures in this document
 FDS generated data is presumed to be correct.  FDS has its own set
 of verification cases to test the correctness of the data. The
 purpose of the cases used here is to confirm that data is drawn or
-visualized correctly. In particular these cases confirm that
+visualized correctly. In particular, these cases confirm that
 correct files are loaded, data is scaled and drawn correctly,
 geometry is drawn correctly, etc.   Three types of verification
 cases are presented. The first set are the most important. Those
@@ -523,29 +523,17 @@ cell averaged  data&chopped data&cell centered data\\
 \end{center}
 \caption[Boundary file test of shaded and chopped
 contours]{Boundary file test of shaded and chopped contours. The
-upper obstacle is initialized to 600.0~\degC\ and should be red
+upper obstacle is initialized to 600~\degC\ and should be red
 for the $t\approx 2.0$~s images. For the chopped contours, the
 color near the chop boundary should match the color near
-140.0~\degC\ in the colorbar.}
+140~\degC\ in the colorbar.}
 \label{figboundtest}%
 \end{figure}
 
 \clearpage
 
 \section{Iso-surfaces}
-An isosurface is a three-dimensional surface that defines constant
-values of a dependent variable. Figures \ref{figisotest} and
-\ref{figisotest2} present images verifying the display of
-isosurfaces. A series of temperature isosurfaces are drawn at
-0~s, 10~s and 30~s.  A portion of the interior gas
-temperature is initialized to 600~\degC\ hence the rectangular
-block that appears in the first row of images. The first column in
-Figure \ref{figisotest}\ presents the iso-surface using points.
-The second column presents the iso-surface using triangulated
-outlines. The third column presents
-the iso-surface using a solid surface. Figure \ref{figisotest2}
-demonstrates color customization using the {\tt ISOCOLORS}\ .ini
-keyword.
+An isosurface is a three-dimensional surface that defines constant values of a dependent variable. Figures \ref{figisotest} and \ref{figisotest2} present images verifying the display of isosurfaces. A series of temperature isosurfaces are drawn at 0~s, 10~s and 30~s.  A portion of the interior gas temperature is initialized to 600~\degC, hence.  This is the reason that the rectangular block appears in the first row of images. The first column in Figure \ref{figisotest}\ presents the iso-surface using points. The second column presents the iso-surface using triangulated outlines. The third column presents the iso-surface using a solid surface. Figure \ref{figisotest2} demonstrates color customization using the {\tt ISOCOLORS}\ .ini keyword.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -770,7 +758,7 @@ Difference contours from these slice files are displayed at 0~s,
 &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_20_620}}\\
  \end{tabular}
 \end{center}
- \caption[A test showing shaded and chopped contours of node centered slice file data]{A test showing shaded and chopped contours of node centered slice file data.  A portion of the interior gas temperature is initialized to 600.0~\degC.  The slice file in this region should be red for the $t=0.0$~s images.  For the chopped contours, the color near the chop boundary should match the color near 140.0~\degC\ in the colorbar.}
+ \caption[A test showing shaded and chopped contours of node centered slice file data]{A test showing shaded and chopped contours of node centered slice file data.  A portion of the interior gas temperature is initialized to 600~\degC.  The slice file in this region should be red for the $t=0.0$~s images.  For the chopped contours, the color near the chop boundary should match the color near 140~\degC\ in the colorbar.}
 \label{fignodeslicetest}%
 \end{figure}
 
@@ -790,7 +778,7 @@ Difference contours from these slice files are displayed at 0~s,
  &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_20_620}}\\
  \end{tabular}
 \end{center}
- \caption[A test showing shaded and chopped contours of cell centered slice file data]{A test showing shaded and chopped contours of cell centered slice file data.  A portion of the interior gas temperature is initialized to 600.0~\degC.  The slice file in this region should be red for the $t=0.0$~s images.  For the chopped contours, the color near the chop boundary should match the color near 140.0~\degC\ in the colorbar.}
+ \caption[A test showing shaded and chopped contours of cell centered slice file data]{A test showing shaded and chopped contours of cell centered slice file data.  A portion of the interior gas temperature is initialized to 600~\degC.  The slice file in this region should be red for the $t=0.0$~s images.  For the chopped contours, the color near the chop boundary should match the color near 140~\degC\ in the colorbar.}
 \label{figcellaslicetest}%
 \end{figure}
 
@@ -836,7 +824,7 @@ Difference contours from these slice files are displayed at 0~s,
 
  \end{tabular}
 \end{center}
- \caption[A test showing vector slice file data] {Vector slice file test. A portion of the interior gas temperature is initialized to 600.0~\degC.  The vectors in this region should be red for the $t=0.0$~s images. For the chopped contours, the color near the chop boundary should match the color near 140.0~\degC\ in the colorbar.}
+ \caption[A test showing vector slice file data] {Vector slice file test. A portion of the interior gas temperature is initialized to 600~\degC.  The vectors in this region should be red for the $t=0.0$~s images. For the chopped contours, the color near the chop boundary should match the color near 140~\degC\ in the colorbar.}
 \label{figvslicetest}%
 \end{figure}
 
@@ -1042,21 +1030,21 @@ PLOT3D iso-surfaces for 50~\degC, 230~\degC, 410~\degC\ and
 \chapter{Smoke Visualization Tests}
 
 Correct visualization of smoke requires that smoke flow be both computed and drawn correctly.
-The FDS Verification Guide~\cite{FDS_Verification_Guide} addresses computation in terms of soot/smoke production, transport, etc.  
+The FDS Verification Guide~\cite{FDS_Verification_Guide} addresses computation in terms of soot/smoke production, transport, etc.
 A verification of how smoke is drawn is addressed in this chapter.
-More precisely, given a known density and distribution of soot does the 3D smoke drawn by Smokeview match how {\em theory}\ predicts it should look.  Presently, the main interest is in how smoke obscures objects in the background.  Visualization effects due to light scattering are not modeled except to consider the smoke albedo when drawing its grey level.
+More precisely, given a known density and distribution of soot, does the 3D smoke drawn by Smokeview match how {\em theory}\ predicts it should look.  Presently, the main interest is in how smoke obscures objects in the background.  Visualization effects due to light scattering are not modeled except to consider the smoke albedo when drawing its grey level.
 
 The smoke drawing verification problem is partitioned into two steps.
 The first step, documented in Section \ref{sect:record_smoke}, is to verify that Smokeview can record the correct grey level of smoke as it is drawn on the screen.
-This step is necessary because screen colors, in this case the smoke obscuration levels to be verified, are not directly accessible to Smokeview. They must be retrieved from the video card buffers.  
+This step is necessary because screen colors, in this case the smoke obscuration levels to be verified, are not directly accessible to Smokeview. They must be retrieved from the video card buffers.
 The second step, documented in Section \ref{sect:verify_smoke}, is to verify that Smokeview can draw the correct shade of grey given a known soot density level
-within the scene.  
+within the scene.
 \section{Recording Smoke Levels}
 \label{sect:record_smoke}
 
 Smokeview does not have direct access to colors that are drawn on the screen.  Smokeview passes vertex colors to the video driver. The video
 driver in turn fills in interpolated colors within these vertices.
-To obtain these colors, Smokeview must `read' them back in after they are drawn.  A further complication is that smoke is drawn in Smokeview 
+To obtain these colors, Smokeview must `read' them back in after they are drawn.  A further complication is that smoke is drawn in Smokeview
 using a physical coordinate system.
 The smoke opacity levels are retrieved using the screen coordinate system, ie. at particular pixel locations. It is this transformation process from physical to screen coordinates that is being verified
 in this step.
@@ -1083,7 +1071,7 @@ Figure \ref{figsmokesensor} illustrates an initial test of this process.  It ver
  \end{tabular}
 \end{center}
 \caption[A test verifying that the Smokeview smoke\_sensor object is working properly]
-{A test verifying that Smokeview can correctly transform the physical $(x,y,z)$ location of a smoke\_sensor to its equivalent screen coordinates
+{A test verifying that Smokeview can correctly transform the physical $(x,y,z)$ location of the smoke\_sensor object to its equivalent screen coordinates
 where the underlying smoke obscuration level is retrieved.
 A small white (255,255,255) smoke\_sensor appears in front of a grey (128,128,128) obstacle.
 The value displayed should be 255,  the value recorded by Smokeview.  If the physical to screen transformation is performed incorrectly a value of 128 will be displayed (since it will pick up a color elsewhere).
@@ -1120,10 +1108,10 @@ The strategy for verifying smoke levels in Smokeview is to set up an FDS case wi
 \label{Beers}
 \end{equation}
 is used to relate these predetermined opacities to path length where $\alpha$ is a scaled opacity (from 0 to 255 rather than the usual 0 to 1),
-$K$ is the mass extinction coefficient\footnote{For most flaming fuels, a suggested value for $K$ is
+$K$ is the mass extinction coefficient\footnote{For most hydrocarbon flames, a suggested value for $K$ is
 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
 wavelength of 633~nm~\cite{Mulholland:F+M}},
-$S$ is the soot density and $\Delta x$ is the path length.  For the verification case it is assumed that $S$ is constant enabling $\alpha$ to be computed simply.
+$S$ is the soot density and $\Delta x$ is the path length.  For the verification case, it is assumed that $S$ is constant, enabling $\alpha$ to be computed simply.
 
 Figure \ref{figsmoketestgeom} shows a side view of the numerical smoke box used to perform this test.  In addition to the walls surrounding the box, this box consists of  six parallel walls within the box spaced 1.0~m apart.  The widths increase from one wall to the next (from front to back) so that when looking at the box from the front a different distance or path length occurs between the observer and the portion of the wall that is visible.
 Again, the spacing between the walls, the distance between the walls and the observer and the initial soot densities is chosen so that the computed smoke obscurations work out to {\em nice}\ values.
@@ -1139,13 +1127,13 @@ Again, the spacing between the walls, the distance between the walls and the obs
 \label{figsmoketestgeom}%
 \end{figure}
 
-Figure \ref{figsmoketest2} shows quantitative tests of the smoke opacity calculation performed in Smokeview for two different FDS grid resolutions and three different skip levels.\footnote{Smokeview allows one to skip grid planes when visualizing smoke.  The smoke opacity is adjusted by Smokeview to account for the skips.} This figure also gives the predicted shades of grey based upon the specified soot densities, mass extinction coefficient and path lengths.  The smoke visualization algorithm is verified then if the shades of grey in the Smokeview visualizations match the corresponding predicted shades of grey.  Each shaded
+Figure \ref{figsmoketest2} shows quantitative tests of the smoke opacity calculation performed in Smokeview for two different FDS grid resolutions and three different skip levels\footnote{Smokeview allows one to skip grid planes when visualizing smoke.  The smoke opacity is adjusted by Smokeview to account for the skips.}. This figure also gives the predicted shades of grey based upon the specified soot densities, mass extinction coefficient and path lengths.  The smoke visualization algorithm is verified then if the shades of grey in the Smokeview visualizations match the corresponding predicted shades of grey.  Each shaded
 rectangle is accompanied by a numerical value that can also be used to judge whether the visualization is verified.
 
 The numbers displayed in this Figure \ref{figsmoketest2} represent the shade of the underlying rectangle.  These numbers may be verified by using a program such as Adobe Photoshop to examine the pixel values of this rectangular region.  The numbers are verified when they match the pixel values as reported by Photoshop or any other program that can report image values.
 
 When soot densities are constant, smoke grey level or opacity, $\alpha$ may be computed by using Eq.~(\ref{Beers})
-with $K=8700$~m$^2$/kg and $S=80$~mg/m$^3$.  Solving Eq.~(\ref{Beers}) for $\Delta x$ gives
+with $K=8700$~m$^2$/kg and $S=79.67$~mg/m$^3$.  Solving Eq.~(\ref{Beers}) for $\Delta x$ gives
 \begin{eqnarray}
 \label{eq:deltaX}
 \Delta x = -\frac{\ln(\alpha/255)}{K \, S}
