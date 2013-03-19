@@ -2826,41 +2826,6 @@ the problem, but it is more likely that if there is an error message about orien
 the {\ct VENT} is buried within a solid obstruction, in which case the program cannot determine
 the direction in which the {\ct VENT} is facing.
 
-\subsection{Special Topic: Synthetic Turbulence Inflow Boundary Conditions}
-\label{info:synthetic_turbulence}
-
-Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
-
-Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
-velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line. Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress.
-
-\begin{lstlisting}
-&SURF ID='inlet', VEL=-10. /
-&VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.5, VEL_RMS=1. /
-\end{lstlisting}
-
-\noindent Note that if {\ct VEL\_RMS} is specified, this is equivalent to
-
-\begin{lstlisting}
-REYNOLDS_STRESS(1,1) = VEL_RMS**2
-REYNOLDS_STRESS(2,2) = VEL_RMS**2
-REYNOLDS_STRESS(3,3) = VEL_RMS**2
-\end{lstlisting}
-
-\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
-
-In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic. This allows more realistic characterization of streamwise vortices in a turbulent boundary layer. To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  Here is an example with random values for the eddy length scales and Reynolds stress components:
-
-\begin{lstlisting}
-&VENT XB=... , SURF_ID='WIND', N_EDDY=500,
-   L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
-   L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
-   L_EDDY_IJ(3,1)=5.42, L_EDDY_IJ(3,2)=0.78, L_EDDY_IJ(3,3)=1.01
-   REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
-   REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
-   REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
-\end{lstlisting}
-
 \clearpage
 
 \section{Coloring Obstructions, Vents, Surfaces and Meshes}
@@ -4220,7 +4185,7 @@ other time step), and set {\ct DT} to whatever value appropriate for
 the solid phase calculation. Since there is no gas phase calculation
 that will limit the time step, it is best to control this yourself.
 \item Set {\ct RADIATION=.FALSE.} on the {\ct RADI} line. This simply eliminates the radiation transport calculation in the gas phase which might conflict with some of the assumptions being made.
-\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=1000} (\si{W/(m$^2$.K)}) on the {\ct SURF} line. There is nothing special about the value of 1000 -- the point is to force the sample temperature to follow the specified linear ramp closely.
+\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=1000} (\si{W/(m^2.K)}) on the {\ct SURF} line. There is nothing special about the value of 1000 -- the point is to force the sample temperature to follow the specified linear ramp closely.
 \item Ramp up the {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C) on the {\ct MISC} line using the ramp function \\ {\ct ASSUMED\_GAS\_TEMPERATURE\_RAMP}. See Section~\ref{info:RAMP_Time} for more details.
 \item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed up the computations significantly. If the {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
@@ -4347,16 +4312,16 @@ directions.
 
 If the louvered vent is part of an HVAC system, see \ref{info:HVAClouvers} for details on how to specify the louver.
 
-\subsection{Special Topic: Tangential Velocity Boundary Conditions at Solid Surfaces}
-\label{info:WALL_MODEL}
 
-The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.
-In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value.
-In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition\footnote{Prior to version 6 of FDS, a logical parameter called {\ct SAWTOOTH} was used to ``smooth out'' the stair-stepped rendering of curved geometries. This functionality is replicated by setting {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line that defines the properties of the obstructions. This parameter removes friction at the surface.}, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
+\subsection{Specified Normal Velocity Gradient}
+\label{info:vel_grad}
 
+It is sometimes desirable to specify a Neumann boundary condition (specified gradient) for the velocity in the direction normal to the boundary.  For example, the following allows inflow and outflow along the top of the domain, but $\partial w/\partial z = 0$.  Note that {\ct FREE\_SLIP=.TRUE.} only sets $\partial u/\partial z=0$ and $\partial v/\partial z=0$.
 
-
-
+\begin{lstlisting}
+&SURF ID = 'sky', COLOR = 'INVISIBLE', VEL_GRAD=0., FREE_SLIP=.TRUE. /
+&VENT MB='ZMAX', SURF_ID='sky' /
+\end{lstlisting}
 
 
 \subsection{Species and Species Mass Flux Boundary Conditions}
@@ -4379,6 +4344,48 @@ Here is example of how to specify a surface that blows methane with a velocity o
 Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use {\ct MASS\_FLUX}.
 
 
+\subsection{Special Topic: Tangential Velocity Boundary Conditions at Solid Surfaces}
+\label{info:WALL_MODEL}
+
+The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.
+In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value.
+In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition\footnote{Prior to version 6 of FDS, a logical parameter called {\ct SAWTOOTH} was used to ``smooth out'' the stair-stepped rendering of curved geometries. This functionality is replicated by setting {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line that defines the properties of the obstructions. This parameter removes friction at the surface.}, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
+
+
+\subsection{Special Topic: Synthetic Turbulence Inflow Boundary Conditions}
+\label{info:synthetic_turbulence}
+
+Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
+
+Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
+velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line. Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress.
+
+\begin{lstlisting}
+&SURF ID='inlet', VEL=-10. /
+&VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.5, VEL_RMS=1. /
+\end{lstlisting}
+
+\noindent Note that if {\ct VEL\_RMS} is specified, this is equivalent to
+
+\begin{lstlisting}
+REYNOLDS_STRESS(1,1) = VEL_RMS**2
+REYNOLDS_STRESS(2,2) = VEL_RMS**2
+REYNOLDS_STRESS(3,3) = VEL_RMS**2
+\end{lstlisting}
+
+\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
+
+In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic. This allows more realistic characterization of streamwise vortices in a turbulent boundary layer. To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  Here is an example with random values for the eddy length scales and Reynolds stress components:
+
+\begin{lstlisting}
+&VENT XB=... , SURF_ID='WIND', N_EDDY=500,
+   L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
+   L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
+   L_EDDY_IJ(3,1)=5.42, L_EDDY_IJ(3,2)=0.78, L_EDDY_IJ(3,3)=1.01
+   REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
+   REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
+   REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
+\end{lstlisting}
 
 
 
@@ -10820,42 +10827,42 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_FORCED\_RE}                   & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
 {\ct C\_FORCED\_RE\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
 {\ct C\_FORCED\_PR\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_HORIZONTAL}                   & Real            & Section~\ref{info:convection}             &                     & 1.52             \\ \hline
-{\ct C\_VERTICAL}                     & Real            & Section~\ref{info:convection}             &                     & 1.31             \\ \hline
+{\ct C\_HORIZONTAL}                   & Real            & Section~\ref{info:convection}             &                     & 1.52                    \\ \hline
+{\ct C\_VERTICAL}                     & Real            & Section~\ref{info:convection}             &                     & 1.31                    \\ \hline
 {\ct COLOR    }                       & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}       & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
-{\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         & 0.                      \\ \hline
 {\ct DEFAULT}                         & Logical         & Section~\ref{info:SURF}                   &                     & {\ct .FALSE.}           \\ \hline
 {\ct DT\_INSERT}                      & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct EMISSIVITY}                      & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                   & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct .FALSE.}           \\ \hline
-{\ct EXTERNAL\_FLUX}                  & Real            & Section~\ref{solid_phase_verification}    & kW/m$^2$            & 0.                      \\ \hline
-{\ct E\_COEFFICIENT}                  & Real            & Section~\ref{info:suppression}            & \si{m$^2$/(kg.s)}   & 0.                      \\ \hline
+{\ct EXTERNAL\_FLUX}                  & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         & 0.                      \\ \hline
+{\ct E\_COEFFICIENT}                  & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}          & Real            & Section~\ref{info:specified_burning}      & kJ/kg               & 0.                      \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & \si{W/(m$^2$.K)}    &                         \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}           & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
-{\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         & 0.                      \\ \hline
 {\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
 {\ct INNER\_RADIUS}                   & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   & 0.                      \\ \hline
 {\ct LAYER\_DIVIDE}                   & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
 {\ct LEAK\_PATH}                      & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
 {\ct LENGTH}                          & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
-{\ct MASS\_FLUX(:)}                   & Real Array      & Section~\ref{info:MASS_FLUX}              & \si{kg/(m$^2$.s)}   & 0.                      \\ \hline
-{\ct MASS\_FLUX\_TOTAL}               & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \si{kg/(m$^2$.s)}   &                         \\ \hline
+{\ct MASS\_FLUX(:)}                   & Real Array      & Section~\ref{info:MASS_FLUX}              & \si{kg/(m^2.s)}     & 0.                      \\ \hline
+{\ct MASS\_FLUX\_TOTAL}               & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MASS\_FRACTION(:)}               & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct MASS\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct MATL\_ID(NL,NC)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION(NL,NC)}     & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}       & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
-{\ct MLRPUA }                         & Real            & Section~\ref{info:gas_burner}             & kg/m$^2$s           & 0.                      \\ \hline
+{\ct MLRPUA }                         & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     & 0.                      \\ \hline
 {\ct NET\_HEAT\_FLUX}                 & Real            & Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
 {\ct NO\_SLIP}                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                            & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
-{\ct PARTICLE\_MASS\_FLUX}            & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$ s          & 0.                      \\ \hline
+{\ct PARTICLE\_MASS\_FLUX}            & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     & 0.                      \\ \hline
 {\ct PART\_ID}                        & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
 {\ct PLE}                             & Real            & Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
 {\ct PROFILE}                         & Character       & Section~\ref{info:stratification}         &                     &                         \\ \hline
@@ -10887,9 +10894,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_INNER(:)}                   & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                    & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VEL    }                         & Real            & Section~\ref{info:Velocity_BC}            & m/s                 & 0.                      \\ \hline
-%{\ct VEL\_GRAD}                       & Real            & Section~\ref{???}                         &                     &                         \\ \hline
+{\ct VEL\_GRAD}                       & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
 {\ct VEL\_T }                         & Real Pair       & Section~\ref{info:louvers}                & m/s                 & 0.                      \\ \hline
-{\ct VOLUME\_FLUX}                    & Real            & Section~\ref{info:Velocity_BC}            & m$^3$/s             & 0.                      \\ \hline
+{\ct VOLUME\_FLUX}                    & Real            & Section~\ref{info:Velocity_BC}            & \si{m^3/s}          & 0.                      \\ \hline
 {\ct WIDTH}                           & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct XYZ(3)}                          & Real Triplet    & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 {\ct Z0 }                             & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
