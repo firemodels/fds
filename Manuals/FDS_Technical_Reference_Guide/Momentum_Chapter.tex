@@ -480,6 +480,31 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \ee
 Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
 
+\subsection{Realizable Fluid Volume Constraint}
+
+Mass conservation tells us that the time rate of change of a fluid element with mass $\rho V$ does not change:
+\begin{equation}
+\label{eq:fluidelement}
+\frac{\d (\rho V)}{\d t} = 0 \,\mbox{.}
+\end{equation}
+Using continuity, Eq.~(\ref{eq:fluidelement}) rearranges to
+\begin{equation}
+\label{eq:dvoldt}
+\nabla\cdot\mathbf{u} = \frac{1}{V} \frac{\d V}{\d t} \,\mbox{,}
+\end{equation}
+where $V(t)$ is the time-dependent volume of the fluid element.  If $\nabla\cdot\mathbf{u}<0$, the fluid element is under compression.  In fire dynamics this usually occurs due to cooling (heat loss by radiation, for example).  Equation (\ref{eq:dvoldt}) highlights the physical interpretation of the velocity divergence as the rate of volumetric expansion of the fluid \emph{per unit volume}.
+
+Equation (\ref{eq:dvoldt}) also implies a time step constraint.  Consider an explicit update of Eq.~(\ref{eq:dvoldt}) for the fluid volume:
+\begin{equation}
+V^{n+1} = V^n + \Delta t \, V^n (\nabla\cdot\mathbf{u})^{\!n} \,\mbox{.}
+\end{equation}
+If the fluid element is in compression (the divergence is negative), positivity of the fluid volume requires the time step to be limited by
+\begin{equation}
+\label{eq:volumedtrestriction}
+\Delta t < -(\nabla\cdot\mathbf{u})^{\!-1} \,\mbox{.}
+\end{equation}
+Note that this is the analog of the positive mass density constraint when the divergence is positive and provides the rationale for using the absolute value of the divergence $|\nabla\cdot\mathbf{u}|$ in the final version of the CFL constraint shown below.
+
 \subsection{Heat Transfer Constraint}
 
 Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check is an option. It is not done by default.
