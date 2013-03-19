@@ -2032,13 +2032,13 @@ the data.
 \label{chap:devices} Smokeview visualizes FDS devices such as heat and smoke detectors using instructions found in a file named {\tt objects.svo}. Smokeview also uses these instructions to represent people (avatars) in FDS-EVAC simulations and to represent trees and shrubs in FDS WUI simulations. The
 Smokeview implementation of FDS devices is referred to as objects in this chapter.
 
-The object instruction file is located in the Smokeview installation directory.\footnote{The current objects.svo file containing documentation and a listing of object definitions is listed in Appendix \ref{section:objects}}. The instructions correspond to OpenGL library calls, the same type of calls Smokeview uses to visualize FDS cases. Smokeview then acts as an interpreter executing OpenGL commands as specified in the object definition file. Efficiency is attained by compiling these instructions into display lists, terminology for an OpenGL construct for storing and efficiently drawing collections of OpenGL commands.  New objects may be designed and drawn without requiring modifications to Smokeview and more importantly may be created by someone other than the Smokeview developer.
+The instruction file is located in the Smokeview installation directory\footnote{The current objects.svo file containing documentation and a listing of object definitions is listed in Appendix \ref{section:objects}}. The instructions correspond to OpenGL library calls, the same type of calls Smokeview uses to visualize FDS cases. Smokeview then acts as an interpreter executing OpenGL commands as specified in the object definition file. Efficiency is attained by compiling these instructions into display lists, terminology for an OpenGL construct for storing and efficiently drawing collections of OpenGL commands.  New objects may be designed and drawn without requiring modifications to Smokeview and more importantly may be created by someone other than the Smokeview developer.
 
 An object's appearance may be fixed or it may be altered based upon data specified in an FDS input file.  The {\tt sensor}\ object is drawn as a small green sphere with a fixed diameter.  Its appearance is the same regardless of how an FDS input file is set up. The appearance of the {\tt tsphere}\ object (t for texture) depends on data specified in the FDS input file.  One may specify the diameter of the sphere and an image to cover it with ( the image is known as a texture map).
 
-As with preference or {\tt .ini}\ files, Smokeview looks for object definition files in three locations: in a file named {\tt objects.svo}\ in the Smokeview installation directory, in a file named {\tt objects.svo}\ in the casename directory and in a file named {\tt casename.svo} also located in the casename directory where {\tt casename}\ is the name of the case being visualized.
+As with preference or {\tt .ini}\ files, Smokeview looks for object definition files in three locations: in a file named {\tt objects.svo}\ located in the Smokeview installation directory, in a file named {\tt objects.svo}\ located in the casename directory and in a file named {\tt casename.svo} also located in the casename directory where {\tt casename}\ is the name of the case being visualized.
 
-This section describes how to create new objects. Though all of the examples are given for drawing FDS devices, the intent of this procedure is to be more general allowing Smokeview to draw other types of objects such as people walking.
+This chapter describes how to create new objects. Though all of the examples are given for drawing FDS devices, the intent of this procedure is to be more general allowing Smokeview to draw other types of objects such as people walking.
 
 \section{Object File Format}
 The first statement in an object definition is the keyword {\tt OBJECTDEF} (or {\tt AVATARDEF}\ when defining a {\em person}). The next statement is the name or label for the object. Following this are the instructions used for creating the object. Each instruction consist of zero or more data values followed by a command. Comments may be placed anywhere in the object definition file by adding text after a double slash `//`.
@@ -2206,7 +2206,7 @@ though the order may be different.
 \includegraphics[height=1.7in]{SCRIPT_FIGURES/#1}
 }
 
-Figure \ref{figdevices} gives Smokeview views for several objects defined in the {\tt objects.svo}\ file. A more complete list is found in the FDS User's Guide~\cite{FDS_Users_Guide}. 
+Figure \ref{figdevices} gives Smokeview views for several objects defined in the {\tt objects.svo}\ file. A more complete list is found in the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -2233,7 +2233,7 @@ objects.svo file. }
 \parpic[r]{
 \begin{tabular}{c}
 \includegraphics[height=\infigheight]{SCRIPT_FIGURES/#1}\\
-{\tiny\tt #2}
+{\small\tt #2}
 \end{tabular}
 }
 }
@@ -2241,7 +2241,7 @@ objects.svo file. }
 \parpic[l]{
 \begin{tabular}{c}
 \includegraphics[height=\infigheight]{SCRIPT_FIGURES/#1}\\
-{\tiny\tt #2}
+{\small\tt #2}
 \end{tabular}
 }
 }
@@ -2352,7 +2352,7 @@ to {\tt xyz xyz xyz scalexyz} ).
 setcolor ).  As with the {\tt setcolor}\ command, {\tt setbw}\ is only required when the grey level changes, not for each object drawn.
 
 \hitem{setcolor} The command, {\tt ``color name'' setcolor}, obtains sets the color to the red, green and blue components of
-the FDS standard color {\tt color~name}.  
+the FDS standard color {\tt color~name}.
 
 \hitem{setlinewidth} The command, {\tt w setlinewidth}\, sets the width of lines drawn with the {\tt drawline}\ and {\tt drawcircle}\ commands.
 
