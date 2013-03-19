@@ -5112,7 +5112,7 @@ Arrhenius reaction parameters are typically found for a particular range of equi
 &RAMP ID='rampe', T = 1.00001, F = 1 /
 &RAMP ID='rampe', T = 100.,    F = 1 /
 \end{lstlisting}
-Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line to indicate that a {\ct RAMP} is being used. Unlike other {\ct RAMP} functions, {\ct T} is the equivalence ratio, {\em not} time or temperature. For Arrhenius ramps, {\ct F} is a fraction of the the quantity {\ct A} or {\ct E}. In this example, for equivalence ratios less than or equal to 1, the pre-exponential is large and the activation is energy is 0, which indicates that the reaction is fast. For equivalence ratios greater than 1, the reaction parameters are equal to those defined on the {\ct REAC} line.
+Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line to indicate that a {\ct RAMP} is being used. Unlike other {\ct RAMP} functions, {\ct T} is the equivalence ratio, {\em not} time or temperature. For Arrhenius ramps, {\ct F} is a fraction of the the quantity {\ct A} or {\ct E}. In this example, for equivalence ratios less than or equal to 1 the pre-exponential is large and the activation energy is 0. These parameters indicate that the reaction is fast. For equivalence ratios greater than 1, the reaction parameters are equal to those defined on the {\ct REAC} line.
 
 
 
