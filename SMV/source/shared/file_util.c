@@ -555,13 +555,8 @@ char *getprogdir(char *progname, char **svpath){
       \brief returns the directory containing the file progname
   */
   char *progpath, *lastsep, *smokeviewpath2;
-#ifdef WIN32
-  char cdirsep='\\';
-#else
-  char cdirsep='/';
-#endif
 
-  lastsep=strrchr(progname,cdirsep);
+  lastsep=strrchr(progname,dirseparator[0]);
   if(lastsep==NULL){
     char *dir;
 
@@ -577,7 +572,7 @@ char *getprogdir(char *progname, char **svpath){
       lendir=strlen(dir);
       NewMemory((void **)&progpath,(unsigned int)(lendir+2));
       strcpy(progpath,dir);
-      if(progpath[lendir-1]!=cdirsep)strcat(progpath,dirseparator);
+      if(progpath[lendir-1]!=dirseparator[0])strcat(progpath,dirseparator);
     }
     NewMemory((void **)&smokeviewpath2,(unsigned int)(strlen(progpath)+strlen(progname)+1));
     strcpy(smokeviewpath2,progpath);
