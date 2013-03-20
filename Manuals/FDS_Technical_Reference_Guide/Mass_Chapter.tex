@@ -166,8 +166,8 @@ When necessary, the boundary value is linearly extrapolated one half of a grid c
 \subsubsection{Solid Boundaries}
 
 At a solid boundary, the surface temperature, $T_{\rm w}$, is either specified or computed as described in Chapter~\ref{chapter:solid_phase}. For an LES calculation, the convective heat flux at the surface is determined via an empirical heat transfer coefficient, $h$, and the convective heat flux at the boundary is written:
-\be 
-   k \frac{T_{\rm g} - T_{\rm w}}{\dn/2} = h \; (T_{\rm g}-T_{\rm w})  \label{ebal} 
+\be
+   k \frac{T_{\rm g} - T_{\rm w}}{\dn/2} = h \; (T_{\rm g}-T_{\rm w})  \label{ebal}
 \ee
 where $\dn/2$ is the distance between the center of the gas cell and the surface. The convective heat transfer coefficient, $h$, is described in Section~\ref{conflux}. For a DNS calculation, the convective heat transfer is determined directly from the computed or specified surface temperature.
 
@@ -322,9 +322,9 @@ The second term on the left forces the pressure in the $m$th pressure zone towar
 The constant, $\tau$, is a characteristic time for the pressure to come into equilibrium. Its default value is on the order of 1~s. In reality, room pressures typically
 come into equilibrium very rapidly, but air movements associated with rapid changes in pressure can cause numerical instabilities.
 
-\begin{warning}
-Because of the low Mach number assumption, FDS should not be used for rapid discharge of pressure vessels.
-\end{warning}
+
+{\bf Note:} Because of the low Mach number assumption, FDS should not be used for rapid discharge of pressure vessels.
+
 
 
 
