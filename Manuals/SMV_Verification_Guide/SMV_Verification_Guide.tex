@@ -16,7 +16,7 @@
         pdfsubject={Verification Guide},
         pdfkeywords={FDS, Fire Model, NIST, EL},
         pdfproducer={pdflatex},
-        pagebackref,
+        pagebackref=UseNone,
         pdfpagemode=UseNone,
         bookmarksopen=true,
         plainpages=false]{hyperref}
@@ -654,7 +654,7 @@ Figure \ref{figdiffslicetest} presents images from data differenced by Smokediff
 \end{tabular}
 \end{center}
  \caption[A test to demonstrate that cell centered slice file
- data is transferred from FDS to Smokeview properly.]{A test to demonstrate that cell centered slice file  data is transferred from FDS to Smokeview properly.  Cell values are initialized in FDS to $100*i + 10*j + k$ where $1\le i \le 3$, $1\le j \le 4$ and $1\le k \le 5$.  Cell values displayed by Smokeview should match the $(i,j,k)$ grid cell indices.  The three plots in the 3D view correspond to the plan, elevation and side view plots.}
+ data is transferred from FDS to Smokeview properly.]{A test to demonstrate that cell centered slice file  data is transferred to Smokeview properly.  Cell values are initialized in FDS to $100*i + 10*j + k$ where $1\le i \le 3$, $1\le j \le 4$ and $1\le k \le 5$.  Cell values displayed should match the $(i,j,k)$ grid cell indices.  The three plots in the 3D view correspond to the plan, elevation and side view plots.}
 \label{figcellbslicetest}%
 \end{figure}
 
