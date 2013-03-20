@@ -3,14 +3,6 @@
 % plot_style.m
 %
 % Preferred style for FDS and Smokeview plots 
-%
-% Some things you might want to set in your script...
-%
-% set(gca,'Units',Plot_Units)
-% set(gca,'FontName',Font_Name)
-% set(gca,'FontSize',Title_Font_Size)
-% set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-% set(gcf,'DefaultLineLineWidth',Line_Width)
 
 % font properties
 Font_Name       = 'Times';
@@ -49,3 +41,15 @@ Figure_Visibility = 'on';
 % svn text position
 SVN_Scale_X = 0.80;
 SVN_Scale_Y = 1.05;
+
+% set default figure properties
+set(0,'DefaultAxesUnits',Plot_Units)
+set(0,'DefaultAxesPosition',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(0,'DefaultTextInterpreter',Font_Interpreter)
+set(0,'DefaultAxesFontName',Font_Name)
+set(0,'DefaultLineLineWidth',Line_Width)
+set(0,'DefaultAxesFontSize',Label_Font_Size)
+set(0,'DefaultTextFontSize',Label_Font_Size)
+set(0,'DefaultFigurePaperUnits',Paper_Units);
+set(0,'DefaultFigurePaperSize',[Paper_Width Paper_Height]);
+set(0,'DefaultFigurePaperPosition',[0 0 Paper_Width Paper_Height]);
