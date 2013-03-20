@@ -22,6 +22,16 @@
         pdfpagemode=UseNone,
         bookmarksopen=true,
         plainpages=false]{hyperref}
+\usepackage{siunitx}
+\sisetup{
+    detect-all = true,
+    input-decimal-markers = {.},
+    input-ignore = {,},
+    inter-unit-product = \ensuremath{{}\cdot{}},
+    multi-part-units = repeat,
+    number-unit-product = \text{~},
+    per-mode = fraction,
+}
 \definecolor{linknavy}{rgb}{0,0,0.50196}
 \definecolor{linkred}{rgb}{1,0,0}
 \definecolor{linkblue}{rgb}{0,0,1}

@@ -51,15 +51,15 @@ This \paper\ is organized as follows.  A model for visualizing smoke and fire is
 The model used here to visualize smoke is the radiation transport
 equation (RTE)~\cite{Siegel:2001}.  This equation uses radiance to
 represent smoke appearance.  Radiance has units of Watts per
-square meter per unit solid angle~(W/(sr$\cdot$m$^2$)).  The solid
+square meter per unit solid angle~\si{W/(sr.m^2)}.  The solid
 angle accounts for the fact that a light source appears brighter
 if it emits a given amount of light through a smaller
 cross-sectional area.  This has the interesting implication,
 ignoring atmospheric effects and as pointed out in
 Ref.~\cite{dutre:2002}, that the sun's radiance appears the same
 observed from Earth as from Mars.  The diminished heat flux
-$(W/\mbox{m}^2)$ on Mars due to the increased distance from the
-sun is exactly offset by the reduced solid angle ($sr$) that the
+\si{(W/m^2} on Mars due to the increased distance from the
+sun is exactly offset by the reduced solid angle (\si{sr}) that the
 sun's disk subtends.  From a visualization perspective, this
 implies that image radiance does not depend on distance from the
 observer unless  a participating medium is present to absorb or
@@ -106,8 +106,8 @@ fraction of light moving along direction $\omega'$ scattered along
 direction $\omega$. Absorption and out-scattering cause radiance
 to decrease while emission and in-scattering cause radiance to
 increase. The radiance terms $C$, $C_e$ and $C_i$ have units of
-W/(m$^2$~sr). The coefficients $\sigma_a$ and $\sigma_s$ have
-units of 1/m and specify the time and location dependent change
+\si{W/(m^2.sr)}. The coefficients $\sigma_a$ and $\sigma_s$ have
+units of \si{1/m} and specify the time and location dependent change
 per unit length to the radiance term to which they are applied.
 
 \begin{figure}[\figoptions]
