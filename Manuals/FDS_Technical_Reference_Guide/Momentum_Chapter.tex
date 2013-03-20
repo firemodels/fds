@@ -458,7 +458,7 @@ The Von Neumann constraint is given by
 \begin{equation}
 \mbox{VN} = \delta t \max \big[(\mu/\rho),D_\alpha \big] \; \sum_i \frac{1}{\delta x_i^2} < \frac{1}{2}
 \end{equation}
-We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} = -D_\alpha \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i}Y_\alpha = -D_\alpha \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
 
 We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious wiggles that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
 \begin{equation}
