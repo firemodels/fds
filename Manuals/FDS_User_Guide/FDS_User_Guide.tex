@@ -4023,12 +4023,23 @@ In most practical simulations, it is not possible to resolve this boundary layer
 Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
 
 Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
-velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line. Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress.
+velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  In Fig.~\ref{fig:sem_profiles} we show examples using SEM for flat, parabolic, and atmospheric profiles with 10 \% turbulence intensity.  The input lines for the atmospheric case are
 
 \begin{lstlisting}
-&SURF ID='inlet', VEL=-10. /
-&VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.5, VEL_RMS=1. /
+&SURF ID='inlet', VEL=-1, PROFILE='ATMOSPHERIC', Z0=0.5, PLE=0.3 /
+&VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.2, VEL_RMS=.1 /
 \end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3in]{SCRIPT_FIGURES/sem_flat_leddy_p2.pdf}
+\includegraphics[width=3in]{SCRIPT_FIGURES/sem_par_leddy_p2.pdf}
+\includegraphics[width=3in]{SCRIPT_FIGURES/sem_atm_leddy_p2.pdf}
+\caption[Synthetic Eddy Method vent profiles]{Synthetic Eddy Method vent profiles: flat (upper left), parabolic (upper right), and atmospheric.}
+\label{fig:sem_profiles}
+\end{figure}
+
+Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress.
 
 \noindent Note that if {\ct VEL\_RMS} is specified, this is equivalent to
 
@@ -4051,7 +4062,6 @@ In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified S
    REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
    REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
 \end{lstlisting}
-
 
 
 \clearpage
