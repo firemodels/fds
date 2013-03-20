@@ -66,5 +66,6 @@ fluid_part
 extinction
 fan_curve
 mesh_transformation
+synthetic_eddy_method
 
 display('verification scripts completed successfully!')
