@@ -635,6 +635,7 @@ compile_smv_utilities()
    cd $FDS_SVNROOT/SMV/Build/LIBS/lib_linux_intel_64
    echo 'Building Smokeview libraries:' > $FIREBOT_DIR/output/stage6a 2>&1
    ./makelibs.sh >> $FIREBOT_DIR/output/stage6a 2>&1
+
    # smokezip:
    cd $FDS_SVNROOT/Utilities/smokezip/intel_linux_64
    echo 'Compiling smokezip:' >> $FIREBOT_DIR/output/stage6a 2>&1
@@ -916,6 +917,7 @@ check_verification_stats()
    fi
 
    # Scan and report warnings for any verification cases that are outside of their specified error tolerance
+   cd $FDS_SVNROOT/Utilities/Matlab
    if [[ `grep ",No," FDS_verification_scatterplot_output.csv` == "" ]]
    then
       # Continue along
@@ -924,6 +926,18 @@ check_verification_stats()
       echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
       echo "The following cases are outside of their specified error tolerance:" >> $WARNING_LOG
       grep ",No," FDS_verification_scatterplot_output.csv >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+
+   # Scan and report any case warnings in Matlab scripts
+   cd $FIREBOT_DIR
+   if [[ `grep "Warning" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
+      grep "Warning" $FIREBOT_DIR/output/stage7a_verification >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
