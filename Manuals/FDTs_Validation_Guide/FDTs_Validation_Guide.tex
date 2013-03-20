@@ -1,142 +1,144 @@
 \documentclass[11pt]{book}
-\usepackage{mathptm,times}
-\usepackage[pdftex]{graphicx}
-%%%\usepackage{hyperref}
 
-\usepackage{pdfsync}
-\usepackage[pdftex,
-        colorlinks=true,
-        urlcolor=linkblue,     % \href{...}{...} external (URL)
-        citecolor=linkred,     % citation number colors
-        linkcolor=linknavy,    % \ref{...} and \pageref{...}
-        pdftitle={Verification and Validation of Selected Fire Models for Nuclear Power Plant Applications},
-        pdfauthor={Kevin McGrattan, Kristopher Overholt},
-        pdfsubject={Validation Guide},
-        pdfkeywords={NIST, NRC, Fire Dynamics Tools},
-        pdfproducer={pdflatex},
-        pagebackref,
-        pdfpagemode=UseNone,
-        bookmarksopen=true,
-        plainpages=false]{hyperref}
-\usepackage{color}
-\definecolor{linknavy}{rgb}{0,0,0.50196}
-\definecolor{linkred}{rgb}{1,0,0}
-\definecolor{linkblue}{rgb}{0,0,1}
-\usepackage{float}
-\usepackage{caption}
-\usepackage{graphpap}
-\usepackage{rotating}
-\usepackage{epsfig,psfrag}
-\usepackage{geometry}
-%\usepackage{tabularx}
-\usepackage{longtable}
-\usepackage{lscape}
-\usepackage{amssymb}
-\usepackage{makeidx} % Create index at end of document
-\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
-\usepackage{lastpage} % Automatic last page number reference.
-\usepackage[T1]{fontenc}
-\usepackage{upquote}
-\usepackage{array}
-\usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
-\usetocstyle{standard}
+\input{../Bibliography/commoncommands}
 
-\newcommand{\ct}{\tt\small}
-\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
-
-\setlength{\textwidth}{6.5in}
-\setlength{\textheight}{9.0in}
-\setlength{\topmargin}{0.in}
-\setlength{\headheight}{0.in}
-\setlength{\headsep}{0.in}
-\setlength{\parindent}{0.25in}
-\setlength{\oddsidemargin}{0.0in}
-\setlength{\evensidemargin}{0.0in}
+%\usepackage{mathptm,times}
+%\usepackage[pdftex]{graphicx}
+%%%%\usepackage{hyperref}
+%
+%\usepackage{pdfsync}
+%\usepackage[pdftex,
+%        colorlinks=true,
+%        urlcolor=linkblue,     % \href{...}{...} external (URL)
+%        citecolor=linkred,     % citation number colors
+%        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+%        pdftitle={Verification and Validation of Selected Fire Models for Nuclear Power Plant Applications},
+%        pdfauthor={Kevin McGrattan, Kristopher Overholt},
+%        pdfsubject={Validation Guide},
+%        pdfkeywords={NIST, NRC, Fire Dynamics Tools},
+%        pdfproducer={pdflatex},
+%        pagebackref,
+%        pdfpagemode=UseNone,
+%        bookmarksopen=true,
+%        plainpages=false]{hyperref}
+%\usepackage{color}
+%\definecolor{linknavy}{rgb}{0,0,0.50196}
+%\definecolor{linkred}{rgb}{1,0,0}
+%\definecolor{linkblue}{rgb}{0,0,1}
+%\usepackage{float}
+%\usepackage{caption}
+%\usepackage{graphpap}
+%\usepackage{rotating}
+%\usepackage{epsfig,psfrag}
+%\usepackage{geometry}
+%%\usepackage{tabularx}
+%\usepackage{longtable}
+%\usepackage{lscape}
+%\usepackage{amssymb}
+%\usepackage{makeidx} % Create index at end of document
+%\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
+%\usepackage{lastpage} % Automatic last page number reference.
+%\usepackage[T1]{fontenc}
+%\usepackage{upquote}
+%\usepackage{array}
+%\usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
+%\usetocstyle{standard}
+%
+%\newcommand{\ct}{\tt\small}
+%\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
+%
+%\setlength{\textwidth}{6.5in}
+%\setlength{\textheight}{9.0in}
+%\setlength{\topmargin}{0.in}
+%\setlength{\headheight}{0.in}
+%\setlength{\headsep}{0.in}
+%\setlength{\parindent}{0.25in}
+%\setlength{\oddsidemargin}{0.0in}
+%\setlength{\evensidemargin}{0.0in}
 
 \begin{document}
 
 \bibliographystyle{unsrt}
 
-% include commands for bios, titles etc used in multiple documents
-\input{../Bibliography/commoncommands}
 
-\newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
-\newcommand{\DoD}[2]{\frac{D #1}{D #2}}
-\newcommand{\dsods}[2]{\frac{\partial^2 #1}{\partial #2^2}}
-\newcommand{\dx}{\delta x}
-\newcommand{\dy}{\delta y}
-\newcommand{\dz}{\delta z}
-\newcommand{\x}{x}
-\newcommand{\y}{y}
-\newcommand{\z}{z}
-\newcommand{\dt}{\delta t}
-\newcommand{\dn}{\delta n}
-\newcommand{\cH}{{\cal H}}
-\newcommand{\hu}{u}
-\newcommand{\hv}{v}
-\newcommand{\hw}{w}
-\newcommand{\la}{\lambda}
-%\newcommand{\bO}{\mbox{\boldmath $\Omega$}}
-\newcommand{\bO}{{\Omega}}
-\newcommand{\bo}{{\bf \omega}}
-%\newcommand{\btau}{\mbox{\boldmath $\tau$}}
-\newcommand{\btau}{{\bf \tau}}
-\newcommand{\bdelta}{{\bf \delta}}
-\newcommand{\sumym}{\sum (Y_i/W_i)}
-\newcommand{\oW}{\overline{W}}
-\newcommand{\om}{\omega}
-\newcommand{\omx}{\omega_x}
-\newcommand{\omy}{\omega_y}
-\newcommand{\omz}{\omega_z}
-\newcommand{\erf}{\hbox{erf}}
-\newcommand{\bF}{{\bf F}}
-\newcommand{\bof}{{\bf f}}
-\newcommand{\bq}{{\bf q}}
-\newcommand{\br}{{\bf r}}
-\newcommand{\bu}{{\bf u}}
-\newcommand{\bx}{{\bf x}}
-\newcommand{\bk}{{\bf k}}
-\newcommand{\bv}{{\bf v}}
-\newcommand{\bg}{{\bf g}}
-\newcommand{\bn}{{\bf n}}
-\newcommand{\bS}{{\bf S}}
-\newcommand{\dS}{d{\bf S}}
-\newcommand{\bs}{{\bf s}}
-\newcommand{\bI}{{\bf I}}
-\newcommand{\hp}{{\cal H}}
-\newcommand{\trho}{\tilde{\rho}}
-\newcommand{\dph}{{\delta\phi}}
-\newcommand{\dth}{{\delta\theta}}
-\newcommand{\tp}{\tilde{p}}
-\newcommand{\dQ}{\dot{Q}}
-\newcommand{\dq}{\dot{q}}
-\newcommand{\dm}{\dot{m}}
-\newcommand{\ha}{\frac{1}{2}}
-\newcommand{\ft}{\frac{4}{3}}
-\newcommand{\ot}{\frac{1}{3}}
-\newcommand{\fofi}{\frac{4}{5}}
-\newcommand{\of}{\frac{1}{4}}
-\newcommand{\twth}{\frac{2}{3}}
-\newcommand{\R}{{\cal R}}
-\newcommand{\be}{\begin{equation}}
-\newcommand{\ee}{\end{equation}}
-\newcommand{\RE}{\hbox{Re}}
-\newcommand{\LE}{\hbox{Le}}
-\newcommand{\PR}{\hbox{Pr}}
-\newcommand{\PE}{\hbox{Pe}}
-\newcommand{\NU}{\hbox{Nu}}
-\newcommand{\SC}{\hbox{Sc}}
-\newcommand{\SH}{\hbox{Sh}}
-\newcommand{\WE}{\hbox{We}}
-\newcommand{\COTWO}{{\tiny \hbox{CO}_2}}
-\newcommand{\OTWO}{{\tiny \hbox{O}_2}}
-\newcommand{\CO}{{\tiny \hbox{CO}}}
-\newcommand{\F}{{\tiny \hbox{F}}}
-\newcommand{\rb}[1]{\raisebox{1.5ex}[0pt]{#1}}
 
-\floatstyle{boxed}
-\newfloat{notebox}{H}{lon}
-\newfloat{warning}{H}{low}
+%\newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
+%\newcommand{\DoD}[2]{\frac{D #1}{D #2}}
+%\newcommand{\dsods}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+%\newcommand{\dx}{\delta x}
+%\newcommand{\dy}{\delta y}
+%\newcommand{\dz}{\delta z}
+%\newcommand{\x}{x}
+%\newcommand{\y}{y}
+%\newcommand{\z}{z}
+%\newcommand{\dt}{\delta t}
+%\newcommand{\dn}{\delta n}
+%\newcommand{\cH}{{\cal H}}
+%\newcommand{\hu}{u}
+%\newcommand{\hv}{v}
+%\newcommand{\hw}{w}
+%\newcommand{\la}{\lambda}
+%%\newcommand{\bO}{\mbox{\boldmath $\Omega$}}
+%\newcommand{\bO}{{\Omega}}
+%\newcommand{\bo}{{\bf \omega}}
+%%\newcommand{\btau}{\mbox{\boldmath $\tau$}}
+%\newcommand{\btau}{{\bf \tau}}
+%\newcommand{\bdelta}{{\bf \delta}}
+%\newcommand{\sumym}{\sum (Y_i/W_i)}
+%\newcommand{\oW}{\overline{W}}
+%\newcommand{\om}{\omega}
+%\newcommand{\omx}{\omega_x}
+%\newcommand{\omy}{\omega_y}
+%\newcommand{\omz}{\omega_z}
+%\newcommand{\erf}{\hbox{erf}}
+%\newcommand{\bF}{{\bf F}}
+%\newcommand{\bof}{{\bf f}}
+%\newcommand{\bq}{{\bf q}}
+%\newcommand{\br}{{\bf r}}
+%\newcommand{\bu}{{\bf u}}
+%\newcommand{\bx}{{\bf x}}
+%\newcommand{\bk}{{\bf k}}
+%\newcommand{\bv}{{\bf v}}
+%\newcommand{\bg}{{\bf g}}
+%\newcommand{\bn}{{\bf n}}
+%\newcommand{\bS}{{\bf S}}
+%\newcommand{\dS}{d{\bf S}}
+%\newcommand{\bs}{{\bf s}}
+%\newcommand{\bI}{{\bf I}}
+%\newcommand{\hp}{{\cal H}}
+%\newcommand{\trho}{\tilde{\rho}}
+%\newcommand{\dph}{{\delta\phi}}
+%\newcommand{\dth}{{\delta\theta}}
+%\newcommand{\tp}{\tilde{p}}
+%\newcommand{\dQ}{\dot{Q}}
+%\newcommand{\dq}{\dot{q}}
+%\newcommand{\dm}{\dot{m}}
+%\newcommand{\ha}{\frac{1}{2}}
+%\newcommand{\ft}{\frac{4}{3}}
+%\newcommand{\ot}{\frac{1}{3}}
+%\newcommand{\fofi}{\frac{4}{5}}
+%\newcommand{\of}{\frac{1}{4}}
+%\newcommand{\twth}{\frac{2}{3}}
+%\newcommand{\R}{{\cal R}}
+%\newcommand{\be}{\begin{equation}}
+%\newcommand{\ee}{\end{equation}}
+%\newcommand{\RE}{\hbox{Re}}
+%\newcommand{\LE}{\hbox{Le}}
+%\newcommand{\PR}{\hbox{Pr}}
+%\newcommand{\PE}{\hbox{Pe}}
+%\newcommand{\NU}{\hbox{Nu}}
+%\newcommand{\SC}{\hbox{Sc}}
+%\newcommand{\SH}{\hbox{Sh}}
+%\newcommand{\WE}{\hbox{We}}
+%\newcommand{\COTWO}{{\tiny \hbox{CO}_2}}
+%\newcommand{\OTWO}{{\tiny \hbox{O}_2}}
+%\newcommand{\CO}{{\tiny \hbox{CO}}}
+%\newcommand{\F}{{\tiny \hbox{F}}}
+%\newcommand{\rb}[1]{\raisebox{1.5ex}[0pt]{#1}}
+%
+%\floatstyle{boxed}
+%\newfloat{notebox}{H}{lon}
+%\newfloat{warning}{H}{low}
 
 \pagestyle{empty}
 
@@ -173,8 +175,11 @@ Nuclear Power Plant \\ Applications \\ \LARGE Volume 3: Fire Dynamics Tools (FDT
 
 %\input{../Bibliography/authors}
 
+\cleardoublepage
 \tableofcontents
+\cleardoublepage
 \listoffigures
+\cleardoublepage
 \listoftables
 
 \mainmatter
