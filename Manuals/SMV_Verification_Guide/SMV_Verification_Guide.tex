@@ -26,6 +26,17 @@
 \pdfcompresslevel=9
 \DeclareGraphicsExtensions{.jpg,.pdf,.png}
 \usepackage{setspace,moreverb}
+\usepackage{siunitx}
+\sisetup{
+    detect-all = true,
+    input-decimal-markers = {.},
+    input-ignore = {,},
+    inter-unit-product = \ensuremath{{}\cdot{}},
+    multi-part-units = repeat,
+    number-unit-product = \text{~},
+    per-mode = fraction,
+}
+
 
 %\usepackage{eso-pic}
 \usepackage{color}
@@ -498,9 +509,9 @@ verification process to be ongoing.
 \section{Surface contours (Boundary Files)}
 Figure \ref{figboundtest} presents images verifying the display of
 surface contours or boundary file data. A series of boundary file
-images are drawn at 2.0~s (approximately), 10.0~s and 30.0~s
+images are drawn at \SI{2.0}{s}\ (approximately), \SI{10.0}{s}\ and \SI{30.0}{s}\
 seconds. The temperature of the upper obstacle is initialized to
-600~\degC\ hence the red colors for the $t=0.0$~s images. The
+\SI{600}{\degC}\ hence the red colors for the $t=\SI{0.0}{s}$ images. The
 first column of images colors data at cell nodes using
 temperatures averaged at surrounding cell centers.  The second
 column of images colors data using data values at cell centers.
@@ -1029,34 +1040,18 @@ PLOT3D iso-surfaces for 50~\degC, 230~\degC, 410~\degC\ and
 
 \chapter{Smoke Visualization Tests}
 
-Correct visualization of smoke requires that smoke flow be both computed and drawn correctly.
-The FDS Verification Guide~\cite{FDS_Verification_Guide} addresses computation in terms of soot/smoke production, transport, etc.
-A verification of how smoke is drawn is addressed in this chapter.
-More precisely, given a known density and distribution of soot, does the 3D smoke drawn by Smokeview match how {\em theory}\ predicts it should look.  Presently, the main interest is in how smoke obscures objects in the background.  Visualization effects due to light scattering are not modeled except to consider the smoke albedo when drawing its grey level.
+Correct smoke visualization requires that smoke flow be both computed and drawn correctly. The FDS Verification Guide~\cite{FDS_Verification_Guide} addresses computation in terms of soot/smoke production, transport, etc. A verification of how smoke is drawn is addressed in this chapter. More precisely, given a known density and distribution of soot, does the smoke drawn by Smokeview match how {\em theory}\ predicts it should appear.  Presently, the main interest is in how smoke obscures objects in the background.  Visualization effects due to light scattering are not modeled except to consider the smoke albedo when drawing its grey level.
 
-The smoke drawing verification problem is partitioned into two steps.
-The first step, documented in Section \ref{sect:record_smoke}, is to verify that Smokeview can record the correct grey level of smoke as it is drawn on the screen.
-This step is necessary because screen colors, in this case the smoke obscuration levels to be verified, are not directly accessible to Smokeview. They must be retrieved from the video card buffers.
-The second step, documented in Section \ref{sect:verify_smoke}, is to verify that Smokeview can draw the correct shade of grey given a known soot density level
+The smoke drawing verification problem is partitioned into two steps. The first step, documented in Section \ref{sect:record_smoke}, is to verify that Smokeview can record the correct grey level of smoke as it is drawn on the screen. This step is necessary because screen colors, in this case the smoke obscuration levels to be verified, are not directly accessible to Smokeview. They must be retrieved from the video card buffers. The second step, documented in Section \ref{sect:verify_smoke}, is to verify that Smokeview can draw the correct shade of grey given a known soot density level
 within the scene.
 \section{Recording Smoke Levels}
 \label{sect:record_smoke}
 
-Smokeview does not have direct access to colors that are drawn on the screen.  Smokeview passes vertex colors to the video driver. The video
-driver in turn fills in interpolated colors within these vertices.
-To obtain these colors, Smokeview must `read' them back in after they are drawn.  A further complication is that smoke is drawn in Smokeview
-using a physical coordinate system.
-The smoke opacity levels are retrieved using the screen coordinate system, ie. at particular pixel locations. It is this transformation process from physical to screen coordinates that is being verified
-in this step.
+Smokeview does not have direct access to colors drawn on the screen.  Smokeview passes vertex colors to the video driver. The video driver in turn fills in interpolated colors within these vertices. To obtain these colors, Smokeview must `read' them back in after they are drawn.  A further complication is that smoke is drawn in Smokeview using a physical coordinate system. The smoke opacity levels are retrieved using the screen coordinate system, ie. at particular pixel locations. It is this transformation process, from physical to screen coordinates, that is verified in this step.
 
-In the case of 3D smoke visualization, these colors
-represent smoke opacity levels.  To obtain these levels and thereby verifying that they are correct, Smokeview makes use of a special FDS sensor or device named {\em smoke\_sensor}\ which Smokeview uses to
-obtain color values at the sensor location.
-This device behaves like other FDS devices but has the additional property that when used by Smokeview, it displays the grey level as viewed by the observer.  This grey level is displayed as a number between 0 and 255.
+In the case of 3D smoke visualization, these colors represent smoke opacity levels.  To obtain these levels and thereby verifying that they are correct, Smokeview makes use of a special sensor or device named {\em smoke\_sensor}\ which Smokeview uses to obtain color values at the sensor location. This device behaves like other FDS devices but has the additional property that when used by Smokeview, it displays the grey level as viewed by the observer.  This grey level is displayed as a number between 0 and 255.
 
-The user places a device of type {\tt smoke\_sensor}\ at a particular $(x, y, z)$ location.
-Smokeview displays the sensor as a white disk with color (255,255,255) always oriented towards the observer. When drawing smoke that resides between the sensor and the observer (your eye), the smoke sensor is partially obscured by the smoke.  Smokeview then alters the smoke sensor color according to how much and how thick the intervening smoke is.  It does this by blending each smoke plane one plane at a time using the color and opacity levels of that plane.
-The grey level is simply Smokeview's computation of the integrated {\em smoke thickness}\ along a path between the sensor location and the eye.  The colors displayed are the result computations performed by the video card using OpenGL, the graphics library used by Smokeview to visualize FDS scenarios.
+The user places a device of type {\tt smoke\_sensor}\ at a particular $(x, y, z)$ location. Smokeview displays the sensor as a white disk with color (255,255,255) always oriented towards the observer. When drawing smoke that resides between the sensor and the observer (your eye), the smoke sensor is partially obscured by the smoke.  Smokeview then alters the smoke sensor color according to how much and how thick the intervening smoke is.  It does this by blending each smoke plane one plane at a time using the color and opacity levels of that plane. The grey level is simply Smokeview's computation of the integrated {\em smoke thickness}\ along a path between the sensor location and the eye.  The colors displayed are the result computations performed by the video card using OpenGL, the graphics library used by Smokeview to visualize FDS scenarios.
 
 Figure \ref{figsmokesensor} illustrates an initial test of this process.  It verifies that Smokeview can transform the sensor location from physical `FDS' coordinates to screen coordinates (pixel locations) and further can correctly record the grey level at those screen coordinates even when surrounded by other objects with different colors.  In this case, the smoke sensor is white and there is no intervening smoke.  The background is a neutral grey with grey level of 128.  The value displayed over the sensor then should always be 255 not 128 no matter how the scene is oriented.  If Smokeview made an error determining the sensor screen coordinates the grey level displayed would be 128 (grey level of the the adjacent grey background) not 255 (grey level of the sensor).
 
@@ -1102,16 +1097,12 @@ near-white shades, the other shows black and near black shades.  This figure ill
 \section{Verifying Smoke Levels}
 \label{sect:verify_smoke}
 
-The strategy for verifying smoke levels in Smokeview is to set up an FDS case with constant smoke density throughout the domain.  The smoke density and the mass extinction coefficient are chosen in concert to generate a predetermined opacity for a given path length.   These predetermined opacities or grey levels are 8, 16, 32, 64, 128 and 192.  Beer's law in the form of
+Smoke levels are verified in Smokeview by setting up an FDS case with a constant smoke density throughout the domain.  A smoke density $S=\SI{79.67}{mg/m^3}$ and mass extinction coefficient $K=\SI{8700}{m^2}$ are chosen in Eq. \ref{eq:Beers} to generate opacity levels 192, 128, 64, 32, 16 and 8 at path lengths $\Delta x = \SI{0.4}{m}, \SI{1}{m}, \SI{2}{m}, \SI{3}{m}, \SI{4}{m} , \SI{5}{m}$
 \begin{equation}
 \alpha = 255 \; \exp(-K \, S \, \Delta x)
-\label{Beers}
+\label{eq:Beers}
 \end{equation}
-is used to relate these predetermined opacities to path length where $\alpha$ is a scaled opacity (from 0 to 255 rather than the usual 0 to 1),
-$K$ is the mass extinction coefficient\footnote{For most hydrocarbon flames, a suggested value for $K$ is
-8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
-wavelength of 633~nm~\cite{Mulholland:F+M}},
-$S$ is the soot density and $\Delta x$ is the path length.  For the verification case, it is assumed that $S$ is constant, enabling $\alpha$ to be computed simply.
+where $\alpha$ is a scaled opacity (from 0 to 255 rather than the usual 0 to 1).
 
 Figure \ref{figsmoketestgeom} shows a side view of the numerical smoke box used to perform this test.  In addition to the walls surrounding the box, this box consists of  six parallel walls within the box spaced 1.0~m apart.  The widths increase from one wall to the next (from front to back) so that when looking at the box from the front a different distance or path length occurs between the observer and the portion of the wall that is visible.
 Again, the spacing between the walls, the distance between the walls and the observer and the initial soot densities is chosen so that the computed smoke obscurations work out to {\em nice}\ values.
@@ -1123,7 +1114,7 @@ Again, the spacing between the walls, the distance between the walls and the obs
  \includegraphics[height=4.0in]{SCRIPT_FIGURES/smoke_test_side}
  \end{tabular}
 \end{center}
- \caption[Side view of numerical smoke test compartment.]{Side view of the numerical smoke test compartment.  Walls are placed at 0.4~m, 1.0~m, 2.0~m, 3.0~m, 4.0~m and 5.0~m from the front to make the theoretical grey levels work out to 8, 16, 32, 64, 128 and 192 .}
+ \caption[Side view of numerical smoke test compartment.]{Side view of the numerical smoke test compartment.  Walls are placed at \SI{0.4}{m}, \SI{1}{m}, \SI{2}{m}, \SI{3}{m}, \SI{4}{m} , \SI{5}{m} from the front to make the theoretical grey levels work out to 192, 128, 64, 32, 16 and 8.}
 \label{figsmoketestgeom}%
 \end{figure}
 
@@ -1132,8 +1123,7 @@ rectangle is accompanied by a numerical value that can also be used to judge whe
 
 The numbers displayed in this Figure \ref{figsmoketest2} represent the shade of the underlying rectangle.  These numbers may be verified by using a program such as Adobe Photoshop to examine the pixel values of this rectangular region.  The numbers are verified when they match the pixel values as reported by Photoshop or any other program that can report image values.
 
-When soot densities are constant, smoke grey level or opacity, $\alpha$ may be computed by using Eq.~(\ref{Beers})
-with $K=8700$~m$^2$/kg and $S=79.67$~mg/m$^3$.  Solving Eq.~(\ref{Beers}) for $\Delta x$ gives
+When soot densities are constant, smoke grey level or opacity, $\alpha$ may be computed by using Eq.~(\ref{eq:Beers}).  Solving Eq.~(\ref{eq:Beers}) for $\Delta x$ gives
 \begin{eqnarray}
 \label{eq:deltaX}
 \Delta x = -\frac{\ln(\alpha/255)}{K \, S}
