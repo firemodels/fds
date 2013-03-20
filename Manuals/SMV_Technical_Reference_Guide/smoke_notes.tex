@@ -41,7 +41,7 @@ observer unless  a participating medium is present to absorb or
 scatter  light.  The radiation transport equation discussed in
 this section models the change in radiance due to these factors.
 
-\newcommand{\dx}[1]{\,\mbox{d}#1}
+\renewcommand{\dx}[1]{\,\mbox{d}#1}
 \newcommand{\siga}{ \sigma_a(x) }
 \newcommand{\sigt}{ \sigma_t(x) }
 \newcommand{\sigs}{ \sigma_s(x) }
@@ -133,7 +133,6 @@ C(x_N)&=&\intmf{x_0}{x_N} C_0+ \int_{x_0}^{x_N}\intmf{x}{x_N}\siga
 \noindent which may be simplified to
 
 \begin{equation}
-\label{eq:rte_simp}
 \label{eq:rtesoln}
  C(x_N)=\tau(x_0,x_N)C_0 + \int_{x_0}^{x_N}\tau(x,x_N)\siga\Le \dx{x}
 \end{equation}
@@ -144,7 +143,7 @@ C(x_N)&=&\intmf{x_0}{x_N} C_0+ \int_{x_0}^{x_N}\intmf{x}{x_N}\siga
 \tau(a,b)=\intmf{a}{b}
 \end{equation}
 which represents the optical depth between $a$ and $b$.  As noted earlier, if the emission term is neglected and $\sigma_t(x)=\sigma_t$ is constant over a path with length
-$L=x_N-x_0$, then (\ref{eq:rte_simp}) simplifies to
+$L=x_N-x_0$, then (\ref{eq:rtesoln}) simplifies to
 \begin{eqnarray}
  \frac{C(x_N)}{C_0}=\exp(-\sigma_tL)
 \end{eqnarray}
@@ -162,7 +161,7 @@ which is the Beer-Lambert law.
 \newcommand{\Chatjj}[1]{\hat{C}_{#1}^N}
 \newcommand{\Leii}[1]{\hat{C}_{e,#1}}
 
-The approximate RTE solution given in (\ref{eq:rte_simp}) is
+The approximate RTE solution given in (\ref{eq:rtesoln}) is
 discretized by converting integral terms into Riemann sums. Figure
 \ref{fig:smokediscretesetup}\ illustrates the terms used to
 perform these discretizations.  The path is split into $N$ parts
@@ -278,7 +277,7 @@ for the merger of these intervals.}
 \end{figure}
 
 Let $C$ be a radiance computed on $[x_0,x_N]$ and $C_1$ and $C_2$ be radiances computed on two sub-intervals of $[x_0,x_N]$.  Likewise, let $\tau$ be an optical depth computed on $[x_0,x_N]$ and $\tau_1$ and $\tau_2$ be optical depths computed on two sub-intervals of $[x_0,x_N]$.
-From (\ref{eq:rte_simp}) and (\ref{eq:optdepth}), the radiance $C$ and optical depth $\tau$ are given by
+From (\ref{eq:rtesoln}) and (\ref{eq:optdepth}), the radiance $C$ and optical depth $\tau$ are given by
 
 \begin{eqnarray}
 C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)\dx{x}\\
