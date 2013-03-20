@@ -34,7 +34,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN,RCON_DIFF
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN,RCON_DIFF,PROFILE_FACTOR
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ,NF,IC
@@ -704,19 +704,24 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   II = WC%ONE_D%II
                   JJ = WC%ONE_D%JJ
                   KK = WC%ONE_D%KK
+                  IF (SF%PROFILE/=0 .AND. ABS(SF%VEL)>TWO_EPSILON_EB) THEN
+                     PROFILE_FACTOR = ABS(WC%ONE_D%UWS/SF%VEL)
+                  ELSE
+                     PROFILE_FACTOR = 1._EB
+                  ENDIF
                   SELECT CASE(IOR)
                      CASE( 1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
                      CASE(-1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
                      CASE( 2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
                      CASE(-2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
                      CASE( 3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
                      CASE(-3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
                   END SELECT
                ENDIF
                WANNIER_BC: IF (PERIODIC_TEST==5) THEN
