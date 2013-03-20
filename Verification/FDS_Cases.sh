@@ -359,6 +359,9 @@ $RUNFDS Turbulence channel_flow_Re_tau_590_32
 $RUNFDS Turbulence ribbed_channel_20
 $RUNFDS Turbulence ribbed_channel_40
 $RUNFDS Turbulence ribbed_channel_80
+$RUNFDS Turbulence sem_flat_leddy_p2
+$RUNFDS Turbulence sem_par_leddy_p2
+$RUNFDS Turbulence sem_atm_leddy_p2
 
 $RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization objects_static
