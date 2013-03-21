@@ -1750,24 +1750,18 @@ of loosely and densely packed radiating spheres.}
 
 \clearpage
 
-\section{Radiation Absorbed by Particles (\texorpdfstring{{\bf droplet\_absorption}}{droplet\_absorption}) }
+\section{Radiation Absorbed by Liquid Droplets (\texorpdfstring{{\bf droplet\_absorption}}{droplet\_absorption}) }
 \label{droplet_absorption}
 
-This case tests the conservation of energy that is absorbed by liquid droplets. We want to make sure that the
-absorbed thermal radiation is accurately converted into internal energy of the droplets. The average droplet temperature $\overline{T_d}$ is
-increased by the radiation energy absorbed by all the droplets, $\dot{Q}_r$, according to the following equation:
+These cases check that energy is conserved when radiation is absorbed by liquid droplets. We want to make sure that the absorbed thermal radiation is accurately converted into internal energy of the droplets. The rate of increase of the average droplet temperature, $\overline{T_{\rm p}}$, is related to the rate of radiation absorption of all the droplets, $\dot{Q}_{\rm r}$, according to the following equation:
 \be
-m \, c_p \frac{\d \overline{T_d}}{\d t} = \dot{Q}_r
+m \, c_p \frac{\d \overline{T_{\rm p}}}{\d t} = \dot{Q}_{\rm r}
 \ee
-where $m$ and $c_p$ are the total mass and specific heat of the droplets, respectively. The convective heat transfer between the
-gas and droplets is small because the gas phase Prandtl number has been set to an artificially high value.
-If the radiative intensity remains constant during the time step, the average droplet temperature over a time period, $\Delta t$, should be:
+where $m$ and $c_p$ are the total mass and specific heat of the droplets, respectively. The convective heat transfer between the gas and the droplets is small because the gas phase Prandtl number has been set to an artificially high value. If the radiative intensity remains constant during the time step, the average droplet temperature over a time period, $\Delta t$, should be:
 \be
-\overline{T_d} = T_0 + \frac{\Delta t \, \dot{Q}_r }{m \, c_p}
+\overline{T_{\rm p}} = T_0 + \frac{\Delta t \, \dot{Q}_{\rm r} }{m \, c_p}
 \ee
-By setting $T_0=0$~$^\circ$C, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/kg, the final value of $\overline{T_d}$ should equal
-$\dot{Q}_r$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in Cartesian and cylindrical
-coordinate systems.
+By setting $T_0=0$~$^\circ$C, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/(kg$\cdot$K), the final value of $\overline{T_{\rm p}}$ should equal $\dot{Q}_{\rm r}$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in Cartesian and cylindrical coordinate systems.
 
 \begin{figure}[h]
 \noindent
@@ -1779,7 +1773,13 @@ coordinate systems.
 \label{droplet_absorption_figures}
 \end{figure}
 
-Similar test for droplets with surface in different geometries is tested. All the previously used values are the same, except the mass ($m_{cartesian} = 6.26\cdot 10^{-4}$~kg, $m_{cylindrical} = 1.96\cdot 10^{-3}$~kg, $m_{spherical} = 6.54\cdot 10^{-4}$~kg). It is also necessary to define a high thermal conductivity $k = 1\cdot 10^{9}$~W/m/K for the surface. Figure~\ref{droplet_absorption_surface_figures} shows comparisons of the predicted average droplet temperature and the expected value in Cartesian coordinate system. The droplets have surface either in Cartesian, cylindrical or spherical geometries. Splitting the radiation angles has been tested in x-, y- and z- directions (except for Cartesian particles only in z-direction).
+
+\clearpage
+
+\section{Radiation Absorbed by Solid Particles (\texorpdfstring{{\bf particle\_absorption}}{particle\_absorption}) }
+\label{particle_absorption}
+
+Tests similar to those in Section~\ref{droplet_absorption} are performed for solid particles with Cartesian, cylindrical and spherical shapes. All the properties are the same, except the particle mass ($m_{\rm cart} = 6.26\times 10^{-4}$~kg, $m_{\rm cyl} = 1.96\times 10^{-3}$~kg, $m_{\rm sph} = 6.54\times 10^{-4}$~kg). It is also necessary to define a high thermal conductivity $k = 1\times 10^{9}$~W/(m$\cdot$K) because the particles are not assumed to be thermally-thin like liquid droplets. Figure~\ref{droplet_absorption_surface_figures} shows comparisons of the predicted average droplet temperature and the expected value. By default, the radiation is expressed in terms of an integrated average (0 angles), but there is an option to ``split'' the particles into multiple parts that absorb radiation impinging from different directions. In this case, radiation is split into opposite $x$, $y$ and $z$ directions (except for Cartesian particles; it is only in the $z$ direction).
 
 \begin{figure}[h]
 \noindent
@@ -1788,7 +1788,7 @@ Similar test for droplets with surface in different geometries is tested. All th
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_cyl}\\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_sph}
 \end{tabular*}
-\caption[Radiation absorbed by surface particles]{Transfer of absorbed thermal radiation energy into increased average droplet temperature with surface droplets.}
+\caption[Radiation absorbed by solid particles]{Temperature increase of solid particles due to absorbed radiation.}
 \label{droplet_absorption_surface_figures}
 \end{figure}
 
@@ -2184,42 +2184,40 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \section{Mixture Fraction ({\bf burke\_schumann})}
 \label{Mix_Frac}
 
-The mixture fraction output quantity is valid for simple one-step reactions of the form A + B $\rightarrow$ C. To test that mixture fraction is correctly implemented we consider a series of test reactors that have been initialized with equivalence ratios from $\phi=0$ to $\phi=1$ to simulate the range of equivalence ratios that exist across a flame sheet. A simple one-step methane reaction is used to govern the combustion:
+For simple one-step reactions of the form F + O $\rightarrow$ P, there is an optional output quantity called the mixture fraction. To test that this output is correctly implemented we consider a set of methane-air mixtures in a test chamber that span the entire range of equivalence ratio. The complete combustion of methane is given by:
 \begin{equation}\label{eq:methane_ex2}
-\underbrace{\mathrm{CH_4}}_{fuel} + \underbrace{\mathrm{2\,(O_2 + 3.76\,N_2)}}_{oxidizer} \rightarrow  \underbrace{\mathrm{CO_2 + 2\, H_2O + 7.52\,N_2}}_{products}
+\underbrace{\mathrm{CH_4}}_{\rm Fuel} + \underbrace{\mathrm{2\,(O_2 + 3.76\,N_2)}}_{\rm Oxidizer} \rightarrow  \underbrace{\mathrm{CO_2 + 2\, H_2O + 7.52\,N_2}}_{\rm Products}
 \end{equation}
-The simulation results are compared to state relationships which govern temperature and species as a function of mixture fraction \cite{Turns:1996}. The species state relations are governed by two sets of equations based on whether the mixture fraction ($f$) falls inside the flame sheet (fuel rich) or outside the flame sheet (fuel lean).  For fuel rich combustion ($f_{stoic} < f \le 1$):
+The simulation results are compared to state relationships that express temperature and species as a function of the mixture fraction, $f$~\cite{Turns:1996}. For fuel rich mixtures ($f_{\rm stoic} < f \le 1$), the expected species mass fractions are:
 \begin{align}\label{eq:mix_relate_rich}
-Y_{fuel} &= \frac{f-f_{stoich}}{1-f_{stoich}} \\
-Y_{ox} &= 0 \\
-Y_{prod} &= \frac{1-f}{1-f_{stoich}}
+Y_{\rm F} &= \frac{f-f_{\rm stoich}}{1-f_{\rm stoich}} \\
+Y_{\rm O} &= 0 \\
+Y_{\rm P} &= \frac{1-f}{1-f_{\rm stoich}}
 \end{align}
-For fuel lean combustion ($0 \le f < f_{stoich}$):
+For fuel lean mixtures ($0 \le f < f_{\rm stoich}$):
 \begin{align}\label{eq:mix_relate_lean}
-Y_{fuel} &= 0 \\
-Y_{ox} &= 1- \frac{f}{f_{stoich}} \\
-Y_{prod} &= \frac{f}{f_{stoich}}
+Y_{\rm F} &= 0 \\
+Y_{\rm O} &= 1- \frac{f}{f_{\rm stoich}} \\
+Y_{\rm P} &= \frac{f}{f_{\rm stoich}}
 \end{align}
-At stoichiometric conditions, the species mass fractions are the same whether approaching from fuel lean or fuel rich: $Y_{fuel} = 0$, $Y_{ox}=0$, and $Y_{prod}=1$. Fig.~\ref{fig:burke_schumann_spec} shows the comparison between the final FDS lumped species concentrations (fuel, oxidizer, and products) and state relation results as a function of mixture fraction.
-
+Fig.~\ref{fig:burke_schumann_spec} demonstrates that the predicted final fuel, oxidizer, and product mass fractions obey the ideal state relations.
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
 \end{center}
-\caption[Mixture fraction state relation for species ({\bf burke\_schumann})]{Lumped species mass fractions variation as function of mixture fraction.}
+\caption[Mixture fraction state relations for species ({\bf burke\_schumann})]{Lumped species mass fractions as a function of mixture fraction.}
 \label{fig:burke_schumann_spec}
 \end{figure}
-
-The state relationship for temperature is dependent upon the mixture fraction, the appropriate definition of $Y_{fuel}(f)$, the heat of combustion, and the specific heat. The specific heat, $c_p$, for each species is set to be a constant 1~kJ/kg\,K as defined by Turns \cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to 0, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) instead needs to be based on $c_v$. We use the  following relationship $c_v = c_p - R/MW$ to determine $c_v$.
+The state relation for temperature is given by:
 \begin{equation}\label{eq:mix_relate_temp}
-T = (f-Y_{fuel})\frac{\Delta h_{c}}{c_{v}} + f(T_{fuel,i}-T_{ox,i}) + T_{ox,i}
-\end{equation}
-The molecular weight of the species were not set to be uniform, so the average molecular weight and $c_v$ will change as a function of the mixture fraction. As a result, the traditional linear temperature profile is not expected.
+T = T_{{\rm O,I}} +  (T_{{\rm F,I}}-T_{{\rm O,I}}) \,f + (f-Y_{\rm F}(f)) \, \frac{\Delta h_{\rm c}}{c_{v}}
+\end{equation} 
+where the subscript I refers to the inlet condition. The specific heat, $c_p$, for each species is set to 1~kJ/(kg$\cdot$K) as in the analysis by Turns~\cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to zero, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) is based on $c_v$ rather than $c_p$. We use the  following relationship $c_v = c_p - R/W$ to determine $c_v$. The molecular weight of the species were not assumed to be uniform; thus, the average molecular weight and $c_v$ vary with the mixture fraction. As a result, the traditional linear temperature profile is not expected.
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_temp}
 \end{center}
-\caption[Mixture fraction state relation for temperature ({\bf burke\_schumann})]{Temperature variation as function of mixture fraction.}
+\caption[Mixture fraction state relation for temperature ({\bf burke\_schumann})]{Non-dimensional temperature as a function of the mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
 
@@ -2450,7 +2448,7 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 \includegraphics[width=3.0in]{SCRIPT_FIGURES/propane_flame_deposition_total}
 \end{tabular}
 \end{center}
-\caption[Soot mass conservation for {\bf propane\_flame\_deposition} case]{Time evolution of soot mass components for {\bf propane\_flame\_deposition} cases. \\ (Top left) Mass of soot in gas phase. (Top right) Mass of soot deposited on walls. \\ (Bottom) Total mass of soot in gas phase and deposited on walls.}
+\caption[Soot mass conservation for {\bf propane\_flame\_deposition} case]{Time evolution of soot mass components for {\bf propane\_flame\_deposition} cases. (Top left) Mass of soot in gas phase. (Top right) Mass of soot deposited on walls. (Bottom) Total mass of soot in gas phase and deposited on walls.}
 \label{fig:deposition_mass}
 \end{figure}
 
@@ -3631,10 +3629,10 @@ In this test case four sprinklers are placed in a room.  The first three sprinkl
 \section{Turbulent Dispersion (\texorpdfstring{{\textbf{random\_walk}}}{random\_walk}) }
 \label{turbulent_dispersion}
 
-Two cases are set up to test the turbulent dispersion of tracer particles.  Tracer particles are injected into a channel with a steady laminar flow with mean velocity 1 m/s.  In the first case ({\bf random\_walk\_1}), the diffusivity is set to $D=0.0834$ m$^2$/s (this value results from setting the dynamic viscosity to $\mu = 0.1$ kg/m/s with an ambient density of $\rho=1.199$ kg/m$^3$ and a Schmidt number of unity).  In the second case ({\bf random\_walk\_2}), the diffusivity is set to $D=0.00834$ m$^2$/s.  The results are compared with Einstein's classic result for Brownian motion \cite{Gardiner:2004}:
+Two cases are set up to test the turbulent dispersion of tracer particles.  Tracer particles are injected into a channel with a steady laminar flow with mean velocity 1 m/s.  In the first case ({\bf random\_walk\_1}), the diffusivity is set to $D=0.0834$~m$^2$/s (this value results from setting the dynamic viscosity to $\mu = 0.1$~kg/(m$\cdot$s) with an ambient density of $\rho=1.199$~kg/m$^3$ and a Schmidt number of unity).  In the second case ({\bf random\_walk\_2}), the diffusivity is set to $D=0.00834$ m$^2$/s.  The results are compared with Einstein's classic result for Brownian motion \cite{Gardiner:2004}:
 \begin{equation}
 \label{eqn_number_density}
-f(z,t) = \frac{n}{4\pi D} \frac{e^{-z^2/4Dt}}{\sqrt{t}}
+f(z,t) = \frac{n}{4\pi D} \frac{\exp \left( -z^2/4Dt \right)}{\sqrt{t}}
 \end{equation}
 where $f(z,t)$ is the particle number density at lateral distance $z$ from the source at time $t$, $n$ is the total number of particles in the system.  A phase doppler particle analyzer (PDPA) is set up to measure the number concentration at the outlet of the channel as a function of height, $z$.  The outlet is 15 m downstream of the point source of tracer particles.  With a mean velocity of 1 m/s, the time is taken as $t = 15$ s.  The FDS results are compared with Eq.~(\ref{eqn_number_density}) in Fig.~\ref{random_walk}.
 
@@ -3723,11 +3721,13 @@ The second duct is placed in the upper half of the compartment and is assigned a
 \label{fig_HVAC_e_p}
 \end{figure}
 
+\clearpage
+
 \section{HVAC Dampers (\texorpdfstring{\bf HVAC\_damper}{HVAC\_damper})}
 
 The {\ct HVAC\_damper} example case is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a {\ct DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
 
-\begin{figure}[ht!]
+\begin{figure}[h!]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/HVAC_damper}
 \caption[Example case {\ct HVAC\_damper}]{Simple duct network with a damper, case {\ct HVAC\_damper}.}
@@ -3735,11 +3735,14 @@ The {\ct HVAC\_damper} example case is a simple duct network of three ducts conn
 \end{center}
 \end{figure}
 
+
+\clearpage
+
 \section{HVAC Dampers (\texorpdfstring{\bf HVAC\_filter}{HVAC\_filter})}
 
 The sample case {\ct HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~kg$^{-1}$ (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~m$^3$/s takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Figure~\ref{fig_filter}.
 
-\begin{figure}[t]
+\begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_p} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_t} } \\
@@ -3749,6 +3752,8 @@ The sample case {\ct HVAC\_filter} demonstrates the use of the filter input.  A 
    \caption[Results for the {\ct HVAC\_filter} sample case]{Compartment pressure (upper left), compartment temperature (upper right), duct velocity (lower left), and particulate mass in the compartment and on the filter (lower right).}
    \label{fig_filter}
 \end{figure}
+
+\clearpage
 
 \section{HVAC Fans (\texorpdfstring{\bf fan\_test}{fan\_test})}
 
