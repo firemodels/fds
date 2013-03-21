@@ -769,6 +769,7 @@ check_guide()
       cp $2 $GUIDE_DIR/.
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
+      echo $3 >> $ERROR_LOG
       grep "! LaTeX Error:" -I $1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -796,7 +797,7 @@ make_smv_user_guide()
    pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf 'SMV User Guide'
 }
 
 make_smv_technical_guide()
@@ -810,7 +811,7 @@ make_smv_technical_guide()
    pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf 'SMV Technical Reference Guide'
 }
 
 make_smv_verification_guide()
@@ -824,7 +825,7 @@ make_smv_verification_guide()
    pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
+   check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
 }
 
 #  =====================================================
