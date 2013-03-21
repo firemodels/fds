@@ -781,6 +781,7 @@ check_guide()
       :
    else
       echo "Stage 8 warnings:" >> $WARNING_LOG
+      echo $3 >> $WARNING_LOG
       grep -E "undefined|multiply defined|multiply-defined" -I $1 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
