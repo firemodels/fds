@@ -3020,7 +3020,7 @@ REAL(EB), INTENT(IN) :: ATOM_COUNT(118),ERR
 LOGICAL :: EX
 
 WRITE(LU_ERR,'(/A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
-WRITE(LU_ERR,'(/A)') 'The following elements are unblanced:'
+WRITE(LU_ERR,'(/A)') 'The following elements are unbalanced:'
 WRITE(LU_ERR,'(/A)') 'Element  Atom Error'
 
 DO I=1,118
@@ -3032,7 +3032,7 @@ INQUIRE(FILE=FN_OUTPUT,EXIST=EX)
 IF (.NOT.EX) OPEN(LU_OUTPUT,FILE=TRIM(CHID)//'.out',STATUS='REPLACE',FORM='FORMATTED')
 
 WRITE(LU_OUTPUT,'(/A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
-WRITE(LU_OUTPUT,'(/A)') 'The following elements are unblanced:'
+WRITE(LU_OUTPUT,'(/A)') 'The following elements are unbalanced:'
 WRITE(LU_OUTPUT,'(/A)') 'Element  Atom Error'
 DO I=1,118
    IF (ABS(ATOM_COUNT(I)) > ERR) WRITE(LU_OUTPUT,'(2X,A,4X,E10.3)') ELEMENT(I)%ABBREVIATION,ATOM_COUNT(I)
