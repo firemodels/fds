@@ -1,143 +1,15 @@
 \documentclass[11pt,twoside]{book}
-%\usepackage{times,mathptm,multirow,fancyvrb,color,array}
-%\usepackage{picins}
-%
-%% dummy change to for revision update for 5.4.8 release
-%
-%%\usepackage{wrapfig}
-%\usepackage[pdftex]{graphicx}
-%\usepackage[pdftex,
-%        colorlinks=true,
-%        urlcolor=linkblue,     % \href{...}{...} external (URL)
-%        citecolor=linkred,     % citation number colors
-%        linkcolor=linknavy,    % \ref{...} and \pageref{...}
-%        pdftitle={Smokeview (Version 6) Verification Guide},
-%        pdfauthor={Glenn Forney},
-%        pdfsubject={Verification Guide},
-%        pdfkeywords={FDS, Fire Model, NIST, EL},
-%        pdfproducer={pdflatex},
-%        pagebackref=UseNone,
-%        pdfpagemode=UseNone,
-%        bookmarksopen=true,
-%        plainpages=false]{hyperref}
-%\definecolor{linknavy}{rgb}{0,0,0.50196}
-%\definecolor{linkred}{rgb}{1,0,0}
-%\definecolor{linkblue}{rgb}{0,0,1}
-%\pdfcompresslevel=9
-%\DeclareGraphicsExtensions{.jpg,.pdf,.png}
-%\usepackage{setspace,moreverb}
-%\usepackage{siunitx}
-%\sisetup{
-%    detect-all = true,
-%    input-decimal-markers = {.},
-%    input-ignore = {,},
-%    inter-unit-product = \ensuremath{{}\cdot{}},
-%    multi-part-units = repeat,
-%    number-unit-product = \text{~},
-%    per-mode = fraction,
-%}
-%
-%
-%%\usepackage{eso-pic}
-%\usepackage{color}
-%
-%\usepackage{listings}
-%\usepackage{textcomp}
-%\definecolor{lbcolor}{rgb}{1.0,1.0,1.0}
-%\lstset{
-%    backgroundcolor=\color{lbcolor},
-%    tabsize=4,
-%    rulecolor=,
-%    language=Fortran,
-%        basicstyle=\ttfamily,
-%        upquote=true,
-%        aboveskip={1.5\baselineskip},
-%        belowskip=2em,
-%        columns=fixed,
-%        extendedchars=true,
-%        breaklines=true,
-%        breakatwhitespace=true,
-%        frame=none,
-%        showtabs=false,
-%        showspaces=false,
-%        showstringspaces=false,
-%        identifierstyle=\ttfamily,
-%        keywordstyle=\color[rgb]{0,0,0},
-%        commentstyle=\color[rgb]{0,0,0},
-%        stringstyle=\color[rgb]{0,0,0},
-%}
-%
-%%\makeatletter
-%%   \AddToShipoutPicture{%
-%%     \setlength{\@tempdimb}{.5\paperwidth}%
-%%     \setlength{\@tempdimc}{.5\paperheight}%
-%%     \setlength{\unitlength}{1pt}%
-%%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){
-%%
-%%\makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}{8cm}\selectfont{DRAFT
-%%}}}}
-%%    }
-%% }
-%%\makeatother
-%
 \pagestyle{empty}
-%
-%\setlength{\textwidth}{6.5in}
-%\setlength{\oddsidemargin}{0.00in}
-%\setlength{\evensidemargin}{0.0in}
-%
-%
-%
-%\setlength{\textheight}{9.0in}
-%\setlength{\topmargin}{0.00in}
-%\setlength{\parindent}{0.2in}
-%
-%\setlength{\headheight}{0.00in}
-%\setlength{\headsep}{0.0in}
-%\setlength{\paperheight}{11.0in}
-%\setlength{\paperwidth}{8.5in}
-%%
-%% new commands for this paper
-%%
 %% include commands for bios, titles etc used in multiple documents
 \input{../Bibliography/commoncommands}
+
 \newcommand{\pxtone}{ \frac{\partial x_m}{\partial T_1} }
 \newcommand{\pxttwo}{ \frac{\partial x_m}{\partial T_2} }
 \newcommand{\pxalpha}{ \frac{\partial x_m}{\partial \alpha} }
 \newcommand{\palphatone}{ \frac{\partial \alpha}{\partial T_1} }
 \newcommand{\palphattwo}{ \frac{\partial \alpha}{\partial T_2} }
-%
-\newcommand{\fdsinput}[1]{
-{
-\scriptsize
 
-\verbatiminput{../../Verification/Visualization/#1}
-}
-}
-%
-\newcommand{\svini}{{\tt smokeview.ini}\ }
-\newcommand{\bverb}{
-\begin{Verbatim}[frame=single,rulecolor=\color{blue},
-framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-}
-\newcommand{\everb}{
-\end{Verbatim}
-}
 \newcommand{\figoptions}{hbp}
-\newcommand{\hhref}[1]{\href{#1}{{\tt #1}
-}}
-%\newcommand{\figheight}{1.5in}
-\newcommand{\infigheight}{0.75in}
-\newcommand{\figheightA}{2.5in}
-\newcommand{\figheightAbar}{2.2in}
-\newcommand{\figheightC}{2.5in}
-%\newcommand{\figwidth}{3.333333in}
-%\newcommand{\figwidthb}{2.0in}
-%\newcommand{\parma}{.75}
-%\newcommand{\parmb}{.5}
-%\newcommand{\parmc}{0.25}
-%\newcommand{\bold}[1]{{\bf #1}}
-%\newcommand{\via}{{via\ }}
 
 
 \bibliographystyle{unsrt}
