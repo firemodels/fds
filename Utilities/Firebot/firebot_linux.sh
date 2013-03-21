@@ -937,7 +937,7 @@ check_verification_stats()
       :
    else
       echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
-      grep "Warning" $FIREBOT_DIR/output/stage7a_verification >> $WARNING_LOG
+      grep "Matlab Warning" $FIREBOT_DIR/output/stage7a_verification >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
