@@ -7,6 +7,53 @@
 %% include commands for bios, titles etc used in multiple documents
 \input{../Bibliography/commoncommands}
 
+%% commands only used by this guide
+
+\newcommand{\svini}{{\tt smokeview.ini}\ }
+\newcommand{\infigheight}{0.85in}
+\newcommand{\figheightAbar}{2.2in}
+\newcommand{\figheightC}{2.5in}
+\newcommand{\infigr}[2]{
+\parpic[r]{
+\begin{tabular}{c}
+\includegraphics[height=\infigheight]{SCRIPT_FIGURES/#1}\\
+{\small\tt #2}
+\end{tabular}
+}
+}
+\newcommand{\infigl}[2]{
+\parpic[l]{
+\begin{tabular}{c}
+\includegraphics[height=\infigheight]{SCRIPT_FIGURES/#1}\\
+{\small\tt #2}
+\end{tabular}
+}
+}
+\newcommand{\frameit}[1]{\fbox{\tt #1}}
+\newcommand{\kitem}[1]{\item[{\bf {\tt #1 \  }} \hfill]}
+\newcommand{\figheight}{1.5in}
+\newcommand{\figheightA}{2.5in}
+\newcommand{\figwidth}{3.333333in}
+\newcommand{\figwidthb}{2.0in}
+\newcommand{\parma}{.75}
+\newcommand{\parmb}{.5}
+\newcommand{\parmc}{0.25}
+\newcommand{\blist}{
+\begin{list}
+{}{
+\setlength{\leftmargin}{\parma in}
+\setlength{\labelwidth}{\parmb in}
+\setlength{\labelsep}{\parmc in}
+\setlength{\listparindent}{0.3in}
+\setlength{\topsep}{.3in}
+\setlength{\parsep}{.0in}
+}}
+\newcommand{\elist}{\end{list}}
+\newcommand{\loadmenu}{\fbox{\ct Load/Unload}}
+\newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
+
+
+
 %\doublespace
 \begin{document}
 
@@ -4783,7 +4830,7 @@ The \svini\ file may be created by typing:
 smokeview -ini
 \end{lstlisting}
 \noindent from the command line or by selecting the \svini\ menu item. The \fbox{\tt casename.ini}
-preference file can be created \via\ the menus or by copying a
+preference file can be created {\em via}\ the menus or by copying a
 previously created \svini\ file.
 
 Smokeview reads the global \svini\ file first (step 1. above),
