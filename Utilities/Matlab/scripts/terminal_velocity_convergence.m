@@ -75,11 +75,11 @@ Linf(5) = norm(ZP' - zexact(STIME), Inf);
 %errtvec(6) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
 
 if errvec(5) > 1e-6
-   display(['Error: The velocity in the terminal_velocity* cases is out of tolerance.'])
+   display(['Matlab Warning: The velocity in the terminal_velocity* cases is out of tolerance.'])
 end
 
 if Linf(5) > 1e-6
-   display(['Error: The position in the terminal_velocity* cases is out of tolerance.'])
+   display(['Matlab Warning: The position in the terminal_velocity* cases is out of tolerance.'])
 end
 
 figure(1)
