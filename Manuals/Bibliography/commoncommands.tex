@@ -52,6 +52,9 @@
 \usepackage[T1]{fontenc}
 \usepackage{enumerate}
 \usepackage{upquote}
+\usepackage{picins}
+\usepackage{moreverb}
+
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small}
@@ -270,6 +273,36 @@ Fire Dynamics Simulation data.
 }}
 \newcommand{\elist}{\end{list}}
 \newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
+\newcommand{\infigr}[2]{
+\parpic[r]{
+\begin{tabular}{c}
+\includegraphics[height=\infigheight]{SCRIPT_FIGURES/#1}\\
+{\small\tt #2}
+\end{tabular}
+}
+}
+\newcommand{\infigl}[2]{
+\parpic[l]{
+\begin{tabular}{c}
+\includegraphics[height=\infigheight]{SCRIPT_FIGURES/#1}\\
+{\small\tt #2}
+\end{tabular}
+}
+}
+\newcommand{\hhref}[1]{\href{#1}{{\tt #1}}}
+\newcommand{\svini}{{\tt smokeview.ini}\ }
+\newcommand{\infigheight}{0.85in}
+\newcommand{\figheightAbar}{2.2in}
+\newcommand{\figheightC}{2.5in}
+%\newcommand{\bold}[1]{{\bf #1}}
+\newcommand{\frameit}[1]{\fbox{\tt #1}}
+\newcommand{\kitem}[1]{\item[{\bf {\tt #1 \  }} \hfill]}
+\newcommand{\fdsinput}[1]{
+{
+\scriptsize
+\verbatiminput{../../Verification/Visualization/#1}
+}
+}
 
 \definecolor{AQUAMARINE}{rgb}{0.49804,1.00000,0.83137}
 \definecolor{ANTIQUE WHITE}{rgb}{0.98039,0.92157,0.84314}

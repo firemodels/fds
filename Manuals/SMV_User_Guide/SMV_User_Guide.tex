@@ -1,144 +1,7 @@
 \documentclass[11pt,twoside]{book}
-\usepackage{times,mathptm,multirow,fancyvrb,color,array}
-\usepackage{picins}
-% dummy change to for revision update for 5.4.8 release
 
-%\usepackage{wrapfig}
-\usepackage[pdftex]{graphicx}
-\usepackage[pdftex,
-        colorlinks=true,
-        urlcolor=linkblue,     % \href{...}{...} external (URL)
-        citecolor=linkred,     % citation number colors
-        linkcolor=linknavy,    % \ref{...} and \pageref{...}
-        pdftitle={User's Guide for Smokeview Version 6 - A Tool for Visualizing Fire Dynamics Simulation Data},
-        pdfauthor={Glenn Forney},
-        pdfsubject={User Guide},
-        pdfkeywords={Smokeview, Fire Model, NIST, EL},
-        pdfproducer={pdflatex},
-        pagebackref=UseNone,
-        pdfpagemode=UseNone,
-        bookmarksopen=true,
-        plainpages=false]{hyperref}
-\definecolor{linknavy}{rgb}{0,0,0.50196}
-\definecolor{linkred}{rgb}{1,0,0}
-\definecolor{linkblue}{rgb}{0,0,1}
-
-\usepackage{listings}
-\usepackage{textcomp}
-\definecolor{lbcolor}{rgb}{1.0,1.0,1.0}
-\lstset{
-    backgroundcolor=\color{lbcolor},
-    tabsize=4,
-    rulecolor=,
-    language=Fortran,
-        basicstyle=\ttfamily,
-        upquote=true,
-        aboveskip={1.5\baselineskip},
-        belowskip=2em,
-        columns=fixed,
-        extendedchars=true,
-        breaklines=true,
-        breakatwhitespace=true,
-        frame=none,
-        showtabs=false,
-        showspaces=false,
-        showstringspaces=false,
-        identifierstyle=\ttfamily,
-        keywordstyle=\color[rgb]{0,0,0},
-        commentstyle=\color[rgb]{0,0,0},
-        stringstyle=\color[rgb]{0,0,0},
-}
-
-
-\pdfcompresslevel=9
-\DeclareGraphicsExtensions{.jpg,.pdf,.png}
-\usepackage{setspace,moreverb}
-%dummy change to bump revision number for 5.3.10
-%\usepackage{eso-pic}
-\usepackage{color}
-
-%\makeatletter
-%   \AddToShipoutPicture{%
-%     \setlength{\@tempdimb}{.5\paperwidth}%
-%     \setlength{\@tempdimc}{.5\paperheight}%
-%     \setlength{\unitlength}{1pt}%
-%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){
-%
-%\makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}{8cm}\selectfont{DRAFT
-%}}}}
-%    }
-% }
-%\makeatother
-
-\pagestyle{empty}
-
-\setlength{\textwidth}{6.5in}
-\setlength{\oddsidemargin}{0.00in}
-\setlength{\evensidemargin}{0.0in}
-
-
-
-\setlength{\textheight}{9.0in}
-\setlength{\topmargin}{0.00in}
-\setlength{\parindent}{0.2in}
-
-\setlength{\headheight}{0.00in}
-\setlength{\headsep}{0.0in}
-\setlength{\paperheight}{11.0in}
-\setlength{\paperwidth}{8.5in}
-%
-% new commands for this paper
-%
-% include commands for bios, titles etc used in multiple documents
 \input{../Bibliography/commoncommands}
-\newcommand{\fdsinput}[1]{
-{
-\scriptsize
-\verbatiminput{../../Verification/Visualization/#1}
-}
-}
-
-\newcommand{\svini}{{\tt smokeview.ini}\ }
-\newcommand{\bverb}{
-\begin{lstlisting}[frame=single,rulecolor=\color{blue},
-framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-}
-\newcommand{\everb}{
-\end{lstlisting}
-}
-\newcommand{\be}{\begin{equation}}
-\newcommand{\ee}{\end{equation}}
-\newcommand{\degC}{$^\circ$C}
-\newcommand{\figoptions}{hbp}
-\newcommand{\hhref}[1]{\href{#1}{{\tt #1}
-}}
-\newcommand{\figheight}{1.5in}
-\newcommand{\infigheight}{0.85in}
 \newcommand{\figheightA}{2.5in}
-\newcommand{\figheightAbar}{2.2in}
-\newcommand{\figheightC}{2.5in}
-\newcommand{\figwidth}{3.333333in}
-\newcommand{\figwidthb}{2.0in}
-\newcommand{\parma}{.75}
-\newcommand{\parmb}{.5}
-\newcommand{\parmc}{0.25}
-\newcommand{\bold}[1]{{\bf #1}}
-\newcommand{\via}{{via\ }}
-\newcommand{\frameit}[1]{\fbox{\tt #1}}
-\newcommand{\blist}{
-\begin{list}
-{}{
-\setlength{\leftmargin}{\parma in}
-\setlength{\labelwidth}{\parmb in}
-\setlength{\labelsep}{\parmc in}
-\setlength{\listparindent}{0.3in}
-\setlength{\topsep}{.3in}
-\setlength{\parsep}{.0in}
-}}
-\newcommand{\elist}{\end{list}}
-\newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
-\newcommand{\kitem}[1]{\item[{\bf {\tt #1 \  }} \hfill]}
-
 \bibliographystyle{unsrt}
 %\doublespace
 \begin{document}
@@ -405,43 +268,10 @@ Feedback is encouraged and may be sent to glenn.forney@nist.gov .
 
 \pagenumbering{arabic}
 
-%
-% .............. new section ..............................
-%
-%\pagestyle{fancy}
-%\newcounter{picno}
-%\setcounter{picno}{24}
-%\newcounter{picnoe}
-%\setcounter{picnoe}{24}
-%\fancyhead{} \fancyfoot[RO] {
-% \setlength{\unitlength}{1mm}
-% %\stepcounter{picno}
-% \addtocounter{picno}{-1}
-% \begin{picture}(0,0)
-%   \put(-15,0){
-%     \epsfig{height=1.125in,figure=figures/movies/tankfarm_\number\value{picno}.eps}
-%   }
-% \end{picture}
-%}
-%
-%\fancyfoot[LE]
-%{
-%  \setlength{\unitlength}{1mm}
-%  %\stepcounter{picnoe}{-1}
-%  \addtocounter{picnoe}{-1}
-%  \begin{picture}(0,0)
-%    \put(-15,0){
-%      \epsfig{height=1.25in,figure=figures/movies/townhouse3_\number\value{picnoe}.eps}
-%    }
-%  \end{picture}
-%}
-%\renewcommand{\headrulewidth}{0.0pt}
-%\renewcommand{\footrulewidth}{0.0pt}
-%\renewcommand{\footskip}{1.5in}
-
 %---------------------------------------------------------------------------------
 %------------------------ Introduction ----------------------------------------
 %---------------------------------------------------------------------------------
+
 \part{Using Smokeview}
 \chapter{Introduction}
 \section{Overview}
@@ -2229,22 +2059,6 @@ objects.svo file. }
 \section{Elementary Geometric Objects}
 \label{svocommands} The objects described in this section are the building blocks used to construct more complex objects. Each command used to draw an elementary geometric object consists of one or more arguments followed by the command, for example, the command sequence {\tt 0.3 drawsphere} draws a sphere with diameter 0.3 (all units as with FDS are in meters).
 
-\newcommand{\infigr}[2]{
-\parpic[r]{
-\begin{tabular}{c}
-\includegraphics[height=\infigheight]{SCRIPT_FIGURES/#1}\\
-{\small\tt #2}
-\end{tabular}
-}
-}
-\newcommand{\infigl}[2]{
-\parpic[l]{
-\begin{tabular}{c}
-\includegraphics[height=\infigheight]{SCRIPT_FIGURES/#1}\\
-{\small\tt #2}
-\end{tabular}
-}
-}
 %\infigr{circle}{0.5 drawcircle}
 \infigr{drawarcdisk}{60.0 0.25 0.50 drawarcdisk}
 \paragraph{drawarcdisk} The command, {\tt a d h drawarcdisk}, draws a portion of circular disk with angle a, diameter d and height h. The origin is located at the center of the disk's base.\vspace{0.25in}
