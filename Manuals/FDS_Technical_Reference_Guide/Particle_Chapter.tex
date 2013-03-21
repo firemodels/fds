@@ -121,6 +121,37 @@ In most cases, a sampled set of the droplets or particles is explicitly tracked 
     The mass and heat transferred from each droplet will be multiplied by the weighting factor $C$.
 \end{enumerate}
 
+\section{Spray boundary condition}
+
+Sprays described as a droplet inlet boundary condition. The droplets are
+injected to the simulation on a section of a spherical surface at distance
+$l$ from the nozzle. The section of the surface where droplets are launched is
+determined by the spray angle parameter. 
+
+It is assumed that all the atomization processes are over at the 
+position of boundary condition. It is easy to prescribe the flow rate and speed of droplets so that correct amount of liquid phase momentum is introduced into the simulation. However the concentration and velocity profiles on the boundary require more thought. 
+
+The initial position of a particle is picked randomly within the conical
+section described previously. A variable flux density within the spray is
+implemented by defining a probability density function for the initial
+position that depends on the latitude $\theta$ but not longitude $\varphi$.
+The joint probability of the initial latitude and longitude is
+\begin{equation}
+  p \left( \theta, \varphi \right) = p \left( \theta \right) p \left( \varphi
+  \right) = \frac{1}{2 \pi} \sin \theta f \left( \theta \right) .
+\end{equation}
+Here the longitude is assumed independent of the latitude. If the function $f \left( \theta \right)$ is taken to be unity, the resulting mass flux is
+uniform. The exponential shape of the mass flux is implemented by using the probability density function
+\begin{equation}
+  f \left( \theta \right) = \exp \left[ - \beta \left( \frac{\theta -
+   \theta_{\min}}{\theta_{\max} - \theta_{\min}} \right)^2 \right]
+\end{equation}
+The spread parameter $\beta = 5$ is used by default. All the droplets are given the same initial speed in the direction of the surface normal. 
+
+%\begin{figure}[h]
+%   %\resizebox{0.9\columnwidth}{!}{}
+%  \caption{Illustration of the spray boundary condition.\label{fig:SprayBC}}
+%\end{figure}
 
 \section{Heating and Evaporation of Liquid Droplets}
 
@@ -178,6 +209,54 @@ The amount of heat extracted from the gas is
    \delta q = \dt \, A_{\rm p} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
 \ee
 
+\subsection{Three-way coupling between droplets and gas}
+\label{sec:threeway}
+Typically Lagrangian particle models only consider two-way coupling of the gas phase and the dispersed phase. This means that each particle interacts with the carrier fluid individually. Momentum lost from a particle is added to the fluid and vice versa. 
+
+If the spray is dense enough, the individual droplets start to influence each
+other through aerodynamic interactions. These effects cannot be captured by the current Eulerian-Lagrangian model for two reasons: First, the Lagrangian particles have no volume in the Eulerian space, preventing the model from seeing effects that take place in the length scale of the droplet diameter. Secondly, the effects of this length scale would be sub-grid scale in most practical simulations. 
+These aerodynamic interactions may
+start to have an effect when the average droplet spacing is less than 10 \cite{Prahl:1,Prahl:2}
+droplet diameters. This corresponds approximately to a droplet volume fraction
+$\alpha = 0.01$. Volume fractions as high as this can sometimes be achieved
+inside water mist sprays. If the spray was even more dense, particle-particle collisions or four-way coupling would need to be considered. 
+T
+
+In a configuration where two particles with the same diameter are directly in
+line, the reduction of the hydrodynamic forces to the second (trailing) sphere due
+to the wake effect was studied in \cite{Ramirez:1}. They developed the following analytical
+formula for the hydrodynamic force to the second sphere. In our work, this
+formula is used to compute a reduction factor for drag coefficient
+\be
+  C_D = C_{D_0} \frac{F}{F_0} \label{eq:dragred}
+\ee
+where $C_{D_0}$ is the single droplet drag coefficient and $F / F_0$ is the
+hydrodynamic force ratio of trailing droplet to single droplet:
+\be
+  \frac{F}{F_0} = W \left[ 1 + \frac{\RE}{16} \frac{1}{\left( L / d - 1
+  / 2 \right)^2} \exp \left( - \frac{\RE}{16} \frac{1}{\left( L / d - 1
+  / 2 \right)^{}} \right) \right] \label{eq:dragredfact}
+\ee
+where Re is the single droplet-Reynolds number, L is the distance between the
+droplets and W is the non-dimensional, non-disturbed wake velocity at the
+center of the trailing droplet
+\be
+  W = 1 - \frac{C_{D_0}}{2} \left[ 1 - \exp \left( - \frac{\RE}{16}
+  \frac{1}{\left( L / d - 1 / 2 \right)} \right) \right] \label{eq:Wake-Vel}
+\ee
+This model assumes that the spheres are traveling directly in-line with each
+other. As such, this provides an upper bound for the strength of the
+aerodynamic interactions between two particles of the same size. The separation distance $L/d$ between droplet centers is calculated from the local droplet volume fraction and local average droplet diameter $\bar{d}$
+\be
+  L/d = \bar{d} \left(\pi/6\alpha \right)^{\frac{1}{3}}
+\ee
+Here local quantities are taken as average over a single computational cell. 
+
+In reality, the spray is of course not monodisperse and the separation distance between the interacting particles varies. However seeking for each the closest particle to interact with would be very time consuming. In the simulations, the drag reduction factor in Eq.
+\ref{eq:dragred} is only used, when the local droplet volume fraction exceeds
+$10^{- 5}$. This drag reduction model is turned on by default.
+
+An alternative data on drag reduction was provided by Prahl et al. \cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above correlation underestimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axisymmetric wake behind a axisymmetric body is used in developing the drag reduction correction in Eqs. \ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold. 
 
 \section{Fire Suppression by Water}
 
@@ -224,6 +303,7 @@ where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water i
    k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1} 
 \ee
 Note that $a$ is an empirical constant.
+
 
 
 \section{Using Lagrangian Particles to Model Complex Objects}
