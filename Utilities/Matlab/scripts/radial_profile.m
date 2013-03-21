@@ -281,10 +281,6 @@ yt = ymin + .84*(ymax-ymin);
 text(xt,yt,text_label,'FontSize',14,'Interpreter',Font_Interpreter)
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
 
 xlabel(xaxis_label)
 ylabel(yaxis_label)
@@ -317,8 +313,5 @@ if exist(svn_file,'file')
 end
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,plot_file])
 
