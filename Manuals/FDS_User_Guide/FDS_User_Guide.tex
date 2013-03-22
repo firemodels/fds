@@ -461,6 +461,7 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 {\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                  & Section~\ref{info:visibility}       \\ \hline
 {\ct REAC}    & {\ct OXIDIZER}                      &              & New procedure                               & Section~\ref{info:REAC_Diagnostics}          \\ \hline
 {\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  &  {\ct VISIBILITY\_FACTOR}                   & Section~\ref{info:visibility}       \\ \hline
+{\ct SPEC}    & {\ct ABSORBING}                     &  {\ct SPEC}  &  {\ct RADCAL\_ID }                          & Section~\ref{info:radiative_spec_props}  \\ \hline
 {\ct SURF}    & {\ct H\_FIXED}                      &  {\ct SURF}  & {\ct HEAT\_TRANSFER\_COEFFICIENT}           & Section~\ref{info:convection}                   \\ \hline
 {\ct SURF}    & {\ct POROUS}                        &              & New procedure                               & Section~\ref{info:HVACfan}                   \\ \hline
 {\ct TIME}    & {\ct TWFIN}                         &  {\ct TIME}  & {\ct T\_END}                                & Section~\ref{info:TIME}                  \\ \hline
@@ -4977,20 +4978,17 @@ The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed o
 Viscosity of the gas species can either be specified with {\ct VISCOSITY} (with {\ct RAMP\_MU} for temperature dependence), or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for air.
 
 \subsubsection{Radiative Properties}
+\label{info:radiative_spec_props}
 
-Species that can absorb and emit thermal radiation are defined via the logical parameter {\ct ABSORBING} on the {\ct SPEC} line.  If {\ct .TRUE.} and the
-species is not in the recognized list, then it will be assumed to be a fuel when invoking RadCal to compute its absorptivity.
-
-There are only a small number of species with predefined RadCal absorptivities (see ~\ref{info:RadCal_fuelspecies}).  There are many other species which are absorbing.  For absorbing species not present in RadCal, {\ct RADCAL\_ID} can be used to identify a RadCal species to serve as a surrogate. For example:
+Species that can absorb and emit thermal radiation are defined via the parameter {\ct RADCAL\_ID} on the {\ct SPEC} line.  Some of the predefined species have this parameter already defined as shown in Table~\ref{tab:gasspecies}.  There are, however, many other species which are absorbing.  For absorbing species not listed in Table~\ref{tab:gasspecies}, {\ct RADCAL\_ID} can be used to identify a RadCal species to serve as a surrogate. For example:
 
 \begin{lstlisting}
 &SPEC ID='ETHANOL', RADCAL_ID='METHANOL' /
 \end{lstlisting}
 
-\noindent would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}. Table~\ref{tab:gasspecies} lists the default RadCal surrogates for various gas species.
+\noindent would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}. 
 For absorbing species not present in RadCal, it is recommended to choose a RadCal surrogate with similar molecular functional groups and molecular mass. The infrared spectrum is greatly affected by the species molecular functional groups.
- Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.
-If the absorbing species is not present in RadCal and no RadCal surrogate is provided, then the radiative properties of {\ct METHANE} are used.
+ Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Table~\ref{tab:gasspecies} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
 
 \subsubsection{Liquids}
 
