@@ -26,7 +26,7 @@ link by the mount is indicated by the ``C-Factor'', $C$. The RTI and
 C-Factor are determined experimentally. The constant
 $C_2$ has been empirically determined by DiMarzo and
 co-workers~\cite{Ruffino:1,Ruffino:2,Gavelli:1} to
-be \SI{6e6]{K/(m/s)^0.5}, and its value is relatively constant
+be \SI{6e6}{K/(m/s)^0.5}, and its value is relatively constant
 for different types of sprinklers.
 
 The algorithm for heat detector activation is exactly the same as for
@@ -116,7 +116,7 @@ user to pick these various parameters, and in doing so, pick whichever model the
 Additionally, FDS can model the behavior of beam and aspiration smoke detectors.  For a beam detector, the user
 specifies the emitter and receiver positions and the total obscuration at which the detector will alarm.  FDS will then
 integrate the obscuration over the path length using the predicted soot concentration in each grid cell along
-the path:  
+the path:
 \be
   \hbox{Obscuration}  = \left(1 - \mathrm{e}^{-K_m \int \rho Y_s \, \d l }  \right) \times 100  \; \; \hbox{\%}
 \ee
