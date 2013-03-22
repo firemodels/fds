@@ -515,7 +515,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
         SPINNER_partstreaklength=glui_bounds->add_spinner_to_panel(ROLLOUT_part,_("Streak length (s)"),GLUI_SPINNER_FLOAT,
           &float_streak5value,STREAKLENGTH,PART_CB);
-        SPINNER_partstreaklength->set_float_limits(0.0,10.0);
+        SPINNER_partstreaklength->set_float_limits(0.0,MAX(view_tstop,16.0));
         
         CHECKBOX_showtracer=glui_bounds->add_checkbox_to_panel(ROLLOUT_part,_("Always show tracers"),&show_tracers_always,
           TRACERS,PART_CB);
