@@ -931,7 +931,7 @@ check_verification_stats()
 
    # Scan and report any case warnings in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `grep "Warning" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
+   if [[ `grep "Matlab Warning" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
    then
       # Continue along
       :
