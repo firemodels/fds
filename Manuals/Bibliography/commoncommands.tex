@@ -13,6 +13,14 @@
 %                                                                                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Packages which force the use of better TeX coding:
+% Mostly from http://tex.stackexchange.com/q/19264
+\RequirePackage[l2tabu, orthodox]{nag}
+\usepackage{fixltx2e}
+\usepackage{isomath}
+\usepackage[all,warning]{onlyamsmath}
+\usepackage{strict}
+
 \usepackage{times,mathptm}
 \usepackage[pdftex]{graphicx}
 \usepackage{tabularx}
@@ -29,7 +37,8 @@
         pagebackref,
         pdfpagemode=UseNone,
         bookmarksopen=true,
-        plainpages=false]{hyperref}
+        plainpages=false,
+        verbose]{hyperref}
 \usepackage{multirow}
 \usepackage{pdfsync}
 \usepackage{tikz}

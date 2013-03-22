@@ -678,13 +678,13 @@ w (x,z) &\equiv& - \frac{\partial}{\partial x} \Psi_{0} = \frac{\Gamma \ x}{R_{c
 where $u$ and $w$ refer to velocity in the $x$ and $z$-directions, respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the $u$-component of velocity.
 
 We define the computational domain as a two-dimensional square region, $L=0.3112$~m on a side, with periodic boundary conditions. The domain is discretized for a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. For the purposes of this test, we set the flow parameters as
-$$
+\[
 \begin{array}{lll}
 U_{0} &&= 35 \ \mathrm{m/s} \\
 R_{c} &= L / 20 &= 0.01556 \ \mathrm{m} \\
 \Gamma &= 0.04 \ U_{0} \ R_{c} \ \sqrt{e} &= 0.0359157
 \end{array}
-$$
+\]
 The constant flow field and periodic boundary conditions cause the vortex to repeatedly pass through the computational domain. The ``pass-through'' time, $t_{f}$, is defined as the time period required for the stable vortex to return to its original position,
 \begin{equation*}
 t_{f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}.
@@ -704,7 +704,7 @@ To ensure that the numerical solution converges to the analytical solution, we s
 A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays these plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most passes through the computational domain while the green lines represent the vortex in the initial phase. The broken black line represents the analytical solution. As the vortex undergoes more passes through the computational domain, its velocity profile diverges further and further from the analytical profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
 
 \begin{figure}[h!]
-	\centering
+   \centering
     \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_error}
     \caption[Two-dimensional vortex convergence study]{RMS error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
     \label{fig_vort2d_error}
@@ -2873,12 +2873,12 @@ Case     & \multicolumn{2}{|c|}{Reactant}  &  \multicolumn{3}{|c|}{Inert} & Prod
          & $\rho_1$  & $Y_1$ & $\rho_2$  & $Y_2$ & Allow        & $\rho_3$  & $\rho_{\rm s}$(0) & $\rho_{\rm s}$(end) & $\Delta$(0) & $\Delta$(end) \\
          & (kg/m$^3$)&       & (kg/m$^3$)&       & shrink/swell & (kg/m$^3$)& (kg/m$^3$)  & (kg/m$^3$)    & (m)         & (m) \\ \hline
 
-Shrink 1	& 500	& 1	& 0	& 0	& T	& 1000	& 500	& 1000	& 0.001	& 0.0005 \\
-Shrink 2	& 500	&0.9	&500	&0.1	&T	&1125	&500	&1000	&0.001	&0.0005 \\
-Shrink 3	& 500	&0.9	&500	&0.1	&F	&1125	&500	&500	&0.001	&0.001 \\
-Swell 1	        & 1000	&1	&90	&0	&T	&500	&1000	&500	&0.001	&0.002 \\
-Swell 2	        & 1000	&0.9	&1000	&0.1	&T	&450	&1000	&500	&0.001	&0.002 \\
-Swell 3	        & 1000	&0.9	&1000	&0.1	&F	&450	&1000	&1000	&0.001	&0.001 \\ \hline
+Shrink 1 & 500 & 1   & 0   & 0   & T   & 1000   & 500 & 1000   & 0.001  & 0.0005 \\
+Shrink 2 & 500 &0.9  &500  &0.1  &T &1125 &500  &1000 &0.001   &0.0005 \\
+Shrink 3 & 500 &0.9  &500  &0.1  &F &1125 &500  &500  &0.001   &0.001 \\
+Swell 1          & 1000 &1 &90   &0 &T &500  &1000 &500  &0.001   &0.002 \\
+Swell 2          & 1000 &0.9  &1000 &0.1  &T &450  &1000 &500  &0.001   &0.002 \\
+Swell 3          & 1000 &0.9  &1000 &0.1  &F &450  &1000 &1000 &0.001   &0.001 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
