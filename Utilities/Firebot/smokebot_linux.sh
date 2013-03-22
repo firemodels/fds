@@ -100,6 +100,9 @@ get_fds_email()
   if [[ $THIS_FDSAUTHOR == mrctkg@gmail.com ]] ; then
     THIS_FDSEMAIL=mrctkg@gmail.com
   fi
+  if [[ $THIS_FDSAUTHOR == kiliansusan@gmail.com ]] ; then
+    THIS_FDSEMAIL=kiliansusan@gmail.com
+  fi
   if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
     THIS_FDSEMAIL=
   fi
