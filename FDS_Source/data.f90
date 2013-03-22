@@ -2295,7 +2295,7 @@ SUBROUTINE GAS_PROPS(GAS_NAME,SIGMA,EPSOK,MW,ABSORBING,FORMULA,LISTED,ATOM_COUNT
 
 ! Molecular weight (g/mol) and Lennard-Jones properties
 ! Brodkey, R. and Hershey, H. Transport Phenomena: A Unified Approach. McGraw-Hill. 1988
-! Heat of Formation (H_F) has units of J/kmol
+! Heat of Formation (H_F) has units of kJ/mol
 USE GLOBAL_CONSTANTS, ONLY: MW_AIR 
 REAL(EB) :: SIGMA,EPSOK,MW,SIGMAIN,EPSOKIN,MWIN,ATOM_COUNTS(118),H_F,H_FIN
 CHARACTER(30) :: GAS_NAME,RADCAL_NAME
