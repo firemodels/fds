@@ -26,7 +26,7 @@ link by the mount is indicated by the ``C-Factor'', $C$. The RTI and
 C-Factor are determined experimentally. The constant
 $C_2$ has been empirically determined by DiMarzo and
 co-workers~\cite{Ruffino:1,Ruffino:2,Gavelli:1} to
-be $6\times 10^6$~K/(m/s)$^\ha$, and its value is relatively constant
+be \SI{6e6]{K/(m/s)^0.5}, and its value is relatively constant
 for different types of sprinklers.
 
 The algorithm for heat detector activation is exactly the same as for
@@ -109,7 +109,7 @@ specified. Equation~(\ref{Yoeq})
 is still used, with $\alpha_e=0$ and $\beta_e=\beta_c=-1$.
 Proponents of the four-parameter model claim that the two filling times are needed to
 better capture the behavior of detectors in a very
-slow free-stream ($u<0.5$~m/s). Rather than declaring one model better than another,
+slow free-stream ($u<\SI{0.5}{m/s}$). Rather than declaring one model better than another,
 the algorithm included in FDS allows the
 user to pick these various parameters, and in doing so, pick whichever model the user feels is appropriate~\cite{CSE_GCR}.
 

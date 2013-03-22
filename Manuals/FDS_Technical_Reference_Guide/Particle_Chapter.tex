@@ -65,11 +65,11 @@ where $d$ is the orifice diameter of the nozzle.
 The orifice Weber number, the ratio of inertial forces to surface tension forces, is given by
 \be \WE = \frac{\rho_{\rm p} \, u_{\rm p}^2 \, d}{\sigma}  \label{Weber} \ee
 where $\rho_{\rm p}$ is the liquid density, $u_{\rm p}$ is the discharge
-velocity, and $\sigma$ is the liquid surface tension ($72.8 \times 10^{-3}$~N/m at 20~$^\circ$C for water).
+velocity, and $\sigma$ is the liquid surface tension (\SI{72.8e-3}{N/m} at \SI{20}{\degreeCelsius} for water).
 The discharge velocity can be computed from the mass flow rate, a function of the operating pressure and orifice coefficient known as the K-factor.
 FM reports that the constant of proportionality in Eq.~(\ref{dropcor}) appears to be independent of flow
 rate and operating pressure. Three different sprinklers were tested in
-their study with orifice diameters of 16.3~mm, 13.5~mm, 12.7~mm and
+their study with orifice diameters of \SI{16.3}{\milli m}, \SI{13.5}{\milli m}, \SI{12.7}{\milli m} and
 the constants were approximately 4.3, 2.9, 2.3, respectively. The strike
 plates of the two smaller sprinklers were notched, while that of the
 largest sprinkler was not~\cite{Yu:2}.
@@ -268,7 +268,7 @@ the gas. The film thickness, $\delta$, is given by
 \be
    \delta = \max \left( \delta_{\min} , \sum \frac{4}{3} \, \frac{\pi \, r_{\rm p}^3}{A} \right)
 \ee
-where $A$ is the area of the wall cell to which the droplet is attached. It is assumed that the minimum film thickness, $\delta_{\min}$, is $1 \times 10^{-5}$~m. This prevents a very small amount of liquid from spreading across the entire cell width. It is also assumed that the liquid is opaque with regard to thermal radiation.
+where $A$ is the area of the wall cell to which the droplet is attached. It is assumed that the minimum film thickness, $\delta_{\min}$, is \SI{1e-5}{m}. This prevents a very small amount of liquid from spreading across the entire cell width. It is also assumed that the liquid is opaque with regard to thermal radiation.
 
 \subsection{Reduction of Pyrolysis Rate due to Water}
 
@@ -280,7 +280,7 @@ where $\dQ_0$ is the total heat release rate at the time of application $t_0$, a
 \be 
    \dq''(t) = \dq_0''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
 \label{nistexting} \ee
-where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water is applied and $k(t)$ is a linear function of the local water mass per unit area, $m_{\rm w}''$, expressed in units of kg/m$^2$,
+where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water is applied and $k(t)$ is a linear function of the local water mass per unit area, $m_{\rm w}''$, expressed in units of \si{kg/m^2},
 \be 
    k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1} 
 \ee
@@ -336,25 +336,3 @@ The effect of subgrid-scale turbulent fluid motion on the velocity and position 
 where $\mathbf{x}^*$ denotes the particle position (an asterisk signifies a particle property), $\tilde{\mathbf{u}}$ is the resolved LES velocity, $D_t$ is the turbulent diffusivity (taken from an eddy viscosity model, for example), and $\mbox{\textbf{W}}$ is an independent Wiener process.  Notice that if no turbulent diffusion exists the particle follows the resolved flow.  The term added to the resolved velocity accounts for the deterministic mean drift and the random walk term (Wiener process) accounts for the reorientation effect of unresolved turbulent motion.
 
 For those unfamiliar with stochastic differential equations, the Wiener process may be understood numerically as $\mbox{dW}(t) = (\delta t)^{1/2} \, \zeta(t)$ in the limit $\delta t \rightarrow 0$, where $\zeta(t)$ is an independent standardized Gaussian random variable \cite{Pope:2000}.  In FDS, $\zeta(t)$ are generated from a Box-Muller transform \cite{Box-Muller:1958}.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

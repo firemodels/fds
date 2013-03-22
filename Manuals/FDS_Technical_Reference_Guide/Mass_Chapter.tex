@@ -13,9 +13,9 @@ flow speeds (relative to the speed of sound) for which it is designed. High
 speed flow codes involve compressibility effects and shock waves. Low speed
 solvers, however, explicitly eliminate compressibility effects that give rise
 to acoustic (sound) waves. The Navier-Stokes equations describe the
-propagation of information at speeds comparable to that of the fluid flow (for fire, approximately 10~m/s),
+propagation of information at speeds comparable to that of the fluid flow (for fire, approximately \SI{10}{m/s}),
 but also at speeds comparable to that of sound waves (for still air,
-300~m/s). Solving a discretized form of these equations would require extremely small
+\SI{300}{m/s}). Solving a discretized form of these equations would require extremely small
 time steps in order to account for information traveling at the speed of sound, making
 practical simulations difficult.
 
@@ -45,11 +45,11 @@ explicitly solved; rather, its source terms are included in the expression for t
 
 The stratification of the atmosphere is derived from the relation
 \be \frac{\d \bp_0}{\d z} = - \rho_0(z) \, g  \ee
-where $\rho_0$ is the background density and $g=9.8$ m/s$^2$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
+where $\rho_0$ is the background density and $g=\SI{9.8}{m/s}$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
 \be \bp_0(z) = p_\infty \; \exp \, \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0(z')} \d z' \right)  \label{pstrat} \ee
 where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may be
 specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $T_\infty$ is the temperature at the ground and
-$\Gamma$ is the lapse rate (e.g., $\Gamma = -0.0098$~K/m is the {\em adiabatic lapse rate}).
+$\Gamma$ is the lapse rate (e.g., $\Gamma = -\SI{0.0098}{K/m}$ is the {\em adiabatic lapse rate}).
 In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.
 It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 \be
@@ -110,15 +110,15 @@ Consider face $i+\frac{1}{2}$ between cells $i$ and $i+1$ and let $\phi$ denote 
 The limiter function $B(r)$ depends on the upstream-to-local data ratio, $r=\delta \phi_{\rm up}/\delta \phi_{\rm loc}$. In FDS, options for the limiter function include \cite{Toro}:
 \begin{table}[H]
 \begin{center}
-\begin{tabular}{lcc}
-Flux Limiter          && $B(r)$ \\
+\begin{tabular}{lc}
+Flux Limiter                           & $B(r)$                         \\
 \hline
-Central Difference       && 1      \\
-Godunov                  && 0      \\
-MINMOD                   && $\max(0,\min(1,r))$ \\
-Superbee \cite{Roe:1986} (LES default) && $\max(0,\min(2r,1),\min(r,2))$ \\
-CHARM \cite{Zhou:1995} (DNS default)   && $s(3s+1)/(s+1)^2$; $s=1/r$ \\
-MP5 \cite{Suresh:1997}   && see below
+Central Difference                     & 1                              \\
+Godunov                                & 0                              \\
+MINMOD                                 & $\max(0,\min(1,r))$            \\
+Superbee \cite{Roe:1986} (LES default) & $\max(0,\min(2r,1),\min(r,2))$ \\
+CHARM \cite{Zhou:1995} (DNS default)   & $s(3s+1)/(s+1)^2$; $s=1/r$     \\
+MP5 \cite{Suresh:1997}                 & see below
 \end{tabular}
 \end{center}
 \end{table}
