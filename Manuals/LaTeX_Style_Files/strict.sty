@@ -1,0 +1,102 @@
+%% $Header: /cvsroot-fuse/texd/latex/sty/strict.sty,v 1.2 2007/10/02 19:18:49 jfine Exp $
+%% Copyright 2007 Jonathan Fine
+%% Licensed under the Apache License, Version 2.0
+
+% Like Perl's "use strict", this package places conditions on a
+% document, for it to process without error.  To use it, place
+% "\usepackage{strict}" in the document preamble.
+
+% The purpose of the package is to help the user keep to the straight
+% and narrow.
+
+% So far, only one condition, which is on environment names.
+
+% The LaTeX macros all 'environments' such as \begin{alpha}
+% ... \end{alpha}, simply because \alpha is defined.  This package
+% redefines \begin{xxx} and \end{xxx} to produce an error and do nothing
+% unless both \xxx and \endxxx are defined.  However, if \xxx and
+% \endxxx are both defined, then \begin{xxx} and \end{xxx} work just as
+% before.
+
+% Although the name of the package is 'strict', the license is not.
+% If you want to add a feature to 'strict.sty', you're welcome to modify
+% your local copy (carefully).  When you're done, I'd like to have a
+% copy of your changes.
+
+% http://texd.cvs.sourceforge.net/texd/latex/sty/strict.sty?revision=1.2&view=markup
+
+% TODO:  Allow \begin{em} ... \end{em} and so forth.
+
+
+% Copied from /usr/share/texmf/tex/latex/base/latex.ltx
+\def\begin#1{%
+  \@ifundefined{#1}%
+    {\def\reserved@a{\@latex@error{Environment #1 undefined}\@eha}}%
+    {\def\reserved@a{\def\@currenvir{#1}%
+     \edef\@currenvline{\on@line}%
+     \csname #1\endcsname}}%
+ \@ignorefalse \begingroup\@endpefalse\reserved@a}
+
+\def\end#1{%
+  \csname end#1\endcsname\@checkend{#1}%
+  \expandafter\endgroup\if@endpe\@doendpe\fi
+  \if@ignore\@ignorefalse\ignorespaces\fi}
+
+
+% New values.  If \#1 and \end#1 are both defined, continue 
+% as above.  If not, do nothing other than produce an undefined 
+% environment error.
+\def\begin#1{%
+  \strict@ifenvironment{#1}%
+    {%
+      \@ignorefalse
+      \begingroup
+        \@endpefalse
+        \def\@currenvir{#1}%
+        \edef\@currenvline{\on@line}%
+        \csname #1\endcsname
+    }%
+    {\@latex@error{Environment #1 undefined}\@eha}%
+  }
+
+\def\end#1{%
+  \strict@ifenvironment{#1}%
+    {%
+      \csname end#1\endcsname\@checkend{#1}%
+      \expandafter\endgroup\if@endpe\@doendpe\fi
+      \if@ignore\@ignorefalse\ignorespaces\fi
+    }%
+    {\@latex@error{Environment #1 undefined}\@eha}%
+  }
+
+
+% True only if \#1 and \end#1 are defined.
+\def\strict@ifenvironment #1%
+{%
+  \begingroup
+    \expandafter
+  \endgroup
+  \expandafter
+  \strict@ifenvironmentA
+    \csname #1\expandafter\endcsname
+    \csname end#1\endcsname
+  }
+
+\def\strict@ifenvironmentA #1#2%
+{%
+  \ifcase
+    \ifx #1\undefined\@ne\fi
+    \ifx #2\undefined\@ne\fi
+    \z@
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+
+% Self-test, and \ddt if the test fails.
+\strict@ifenvironment{itemize}{}{\ddt}
+\strict@ifenvironment{xxx}{\ddt}{}
+\strict@ifenvironment{alpha}{\ddt}{}
+
+\ProvidesPackage{strict}
