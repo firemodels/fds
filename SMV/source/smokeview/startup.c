@@ -1931,7 +1931,8 @@ void initvars(void){
   streak_rvalue[4]=4.0;
   streak_rvalue[5]=8.0;
   streak_rvalue[6]=16.0;
-  nstreak_value=7;
+  streak_rvalue[7]=32.0;
+  nstreak_rvalue=8;
   streak_index=-1;
   float_streak5value=0.0;
   if(streak_index>=0)float_streak5value=streak_rvalue[streak_index];

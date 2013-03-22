@@ -515,7 +515,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
         SPINNER_partstreaklength=glui_bounds->add_spinner_to_panel(ROLLOUT_part,_("Streak length (s)"),GLUI_SPINNER_FLOAT,
           &float_streak5value,STREAKLENGTH,PART_CB);
-        SPINNER_partstreaklength->set_float_limits(0.0,MAX(view_tstop,16.0));
+        SPINNER_partstreaklength->set_float_limits(0.0,tmax_part);
         
         CHECKBOX_showtracer=glui_bounds->add_checkbox_to_panel(ROLLOUT_part,_("Always show tracers"),&show_tracers_always,
           TRACERS,PART_CB);
@@ -1707,7 +1707,10 @@ extern "C" void updatepatchlistindex2(char *label){
 
 extern "C" void update_glui_streakvalue(float rvalue){
   float_streak5value=rvalue;
-  if(SPINNER_partstreaklength!=NULL)SPINNER_partstreaklength->set_float_val(rvalue);
+  if(SPINNER_partstreaklength!=NULL){
+    SPINNER_partstreaklength->set_float_val(rvalue);
+    SPINNER_partstreaklength->set_float_limits(0.0,tmax_part);
+  }
 }
 
 /* ------------------ PART_CB ------------------------ */
@@ -1771,7 +1774,7 @@ void PART_CB(int var){
 
     break;
   case STREAKLENGTH:
-    update_streakvalue(float_streak5value);
+    update_streakvalue(float_streak5value-0.001);
     if(float_streak5value==0.0){
       streak5show=0;
     }

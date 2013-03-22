@@ -1018,6 +1018,7 @@ void Update_Times(void){
     }
   }
 
+  tmax_part=0.0;
   for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
@@ -1030,6 +1031,7 @@ void Update_Times(void){
         dt_MIN=t_diff;
       }
     }
+    tmax_part=MAX(parti->times[parti->ntimes-1],tmax_part);
   }
 
   for(i=0;i<nsliceinfo;i++){

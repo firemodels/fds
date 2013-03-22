@@ -25,6 +25,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN float SVDECL(tmax_part,16.0);
 SVEXTERN int SVDECL(redirect,0);
 SVEXTERN int SVDECL(tempdir_flag,0);
 SVEXTERN int SVDECL(script_render,0);
@@ -1114,9 +1115,8 @@ SVEXTERN partdata SVDECL(*partinfo,NULL);
 SVEXTERN int SVDECL(update_screensize,0);
 SVEXTERN int part5show;
 SVEXTERN int streak5show,streak5value, streak5step, showstreakhead;
-SVEXTERN int nstreak_value; // 5
-SVEXTERN char *streak_values[5]; // "1","2","4","8","16"
-SVEXTERN float streak_rvalue[7]; // 1.0, 2.0 4.0, 8.0, 16.0 
+SVEXTERN int nstreak_rvalue; // 5
+SVEXTERN float streak_rvalue[8]; // 1.0, 2.0 4.0, 8.0, 16.0 twfin
 SVEXTERN int streak_index, update_streaks;       // 0
 SVEXTERN float float_streak5value;// 1.0
 SVEXTERN part5class SVDECL(*partclassinfo,NULL);

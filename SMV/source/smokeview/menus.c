@@ -2687,13 +2687,8 @@ void update_streakvalue(float value){
   int i;
 
   streak_index=-1;
-  for(i=0;i<nstreak_value;i++){
-    float absdiff;
-
-    absdiff = value-streak_rvalue[i];
-    if(absdiff<0.0)absdiff=-absdiff;
-
-    if(absdiff<0.01){
+  for(i=0;i<nstreak_rvalue;i++){
+    if(ABS(value-streak_rvalue[i])<0.01){
       streak_index=i;
       float_streak5value=streak_rvalue[i];
       break;
@@ -2729,7 +2724,7 @@ void ParticleStreakShowMenu(int value){
     streak5show=1;
     streak5step=0;
     rvalue=streak_rvalue[value];
-    update_streakvalue(rvalue);
+    update_streakvalue(rvalue-0.001);
     update_glui_streakvalue(rvalue);
 
   }
@@ -5763,7 +5758,8 @@ updatemenu=0;
       int iii;
       char streaklabel[1024];
 
-      for(iii=0;iii<nstreak_value;iii++){
+      streak_rvalue[nstreak_rvalue-1]=tmax_part;
+      for(iii=0;iii<nstreak_rvalue;iii++){
         if(iii==streak_index){
           sprintf(streaklabel,"*%f",streak_rvalue[iii]);
         }

@@ -1883,7 +1883,7 @@ void drawPart5(const partdata *parti){
 
       // draw the streak line
 
-      get_evacpart_color(&colorptr,datacopy,show_default,j,itype);
+      get_evacpart_color(&colorptr,datacopy,show_default,0,itype);
       glColor4fv(colorptr);
 
       glLineWidth(streaklinewidth);
