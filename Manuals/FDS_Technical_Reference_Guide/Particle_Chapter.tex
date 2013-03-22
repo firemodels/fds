@@ -26,13 +26,13 @@ where $m_{\rm p}$ is the particle mass.  The particle position, $\bx_{\rm p}$, i
     \frac{\d \bx_{\rm p}}{\d t} = \bu_{\rm p}
 \ee
 The drag coefficient (default based on a sphere) is a function of the local Reynolds number that is based on the particle diameter, $D$
-\begin{eqnarray}
- C_{\rm d} &=& \left\{ \begin{array}{ll}
-     24/\RE_D                                          & \RE_D < 1    \\ [0.1in]
-     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \\ [0.1in]
+\begin{align}
+ C_{\rm d} &= \left\{ \begin{array}{ll}
+     24/\RE_D                                          & \RE_D < 1    \\[0.1in]
+     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \\[0.1in]
      0.44                                              & 1000 < \RE_D
-     \end{array} \right.  \\ [0.2in]
-\RE_D &=& \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{eqnarray}
+     \end{array} \right.  \\[0.2in]
+\RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
 where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
 
 
