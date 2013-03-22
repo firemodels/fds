@@ -4949,7 +4949,7 @@ Species &   Mol.~Wgt.           & Formula          & $\sigma$ & $\epsilon/k$   &
 
 \subsubsection{Option 2: User-Specified Properties}
 
-If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermophysical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of air will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of J/kmol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermophysical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below.
+If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermophysical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of air will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of kJ/mol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermophysical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below.
 
 \subsubsection{Conductivity}
 
@@ -5913,7 +5913,7 @@ then no further inputs are required. Otherwise, you must provide all of the foll
 \item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet ($^\circ$C).
 \item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet ($^\circ$C).
 \item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet (kJ/kg).
-\item[{\ct ENTHALPY\_OF\_FORMATION}] The heat of formation of the gas (kJ/kg).
+\item[{\ct ENTHALPY\_OF\_FORMATION}] The heat of formation of the gas (kJ/mol).
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
 \end{description}
 
@@ -10443,7 +10443,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DENSITY\_LIQUID}               & Real        & Section~\ref{thermal_part_props}        & kg/m$^3$          &               \\ \hline
 {\ct DENSITY\_SOLID}                & Real        & Section~\ref{info:deposition}           & kg/m$^3$          &  1800.        \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
-{\ct ENTHALPY\_OF\_FORMATION}       & Real        & Section~\ref{thermal_part_props}        & kJ/kg             &               \\ \hline
+{\ct ENTHALPY\_OF\_FORMATION}       & Real        & Section~\ref{thermal_part_props}        & kJ/mol            &               \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct FIC\_CONCENTRATION}            & Real        & Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
 {\ct FLD\_LETHAL\_DOSE}             & Real        & Section~\ref{info:FED}                  & ppm$\times$min    & 0.            \\ \hline
