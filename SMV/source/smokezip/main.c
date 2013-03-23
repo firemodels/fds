@@ -493,34 +493,6 @@ int main(int argc, char **argv){
   return 0;
 }
 
-/* ------------------ mt_compress_all ------------------------ */
-#ifdef pp_THREAD
-void mt_compress_all(void){
-  int i;
-  pthread_t *thread_ids;
-  int *index;
-
-  NewMemory((void **)&thread_ids,mt_nthreads*sizeof(pthread_t));
-  NewMemory((void **)&index,mt_nthreads*sizeof(int));
-  NewMemory((void **)&threadinfo,mt_nthreads*sizeof(threaddata));
-
-  for(i=0;i<mt_nthreads;i++){
-    index[i]=i;
-    pthread_create(&thread_ids[i],NULL,compress_all,&index[i]);
-    threadinfo[i].stat=-1;
-  }
-
-  for(i=0;i<mt_nthreads;i++){
-    pthread_join(thread_ids[i],NULL);
-  }
-
-  print_summary();
-  FREEMEMORY(thread_ids);
-  FREEMEMORY(index);
-  FREEMEMORY(threadinfo);
-}
-#endif
-
 /* ------------------ compress_all ------------------------ */
 
 void *compress_all(void *arg){

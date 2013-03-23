@@ -5,11 +5,41 @@
 #include "options.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "MALLOC.h"
 #include "zlib.h"
 #include "svzip.h"
 
 // svn revision character string
 char threader_revision[]="$Revision$";
+
+
+/* ------------------ mt_compress_all ------------------------ */
+#ifdef pp_THREAD
+void mt_compress_all(void){
+  int i;
+  pthread_t *thread_ids;
+  int *index;
+
+  NewMemory((void **)&thread_ids,mt_nthreads*sizeof(pthread_t));
+  NewMemory((void **)&index,mt_nthreads*sizeof(int));
+  NewMemory((void **)&threadinfo,mt_nthreads*sizeof(threaddata));
+
+  for(i=0;i<mt_nthreads;i++){
+    index[i]=i;
+    pthread_create(&thread_ids[i],NULL,compress_all,&index[i]);
+    threadinfo[i].stat=-1;
+  }
+
+  for(i=0;i<mt_nthreads;i++){
+    pthread_join(thread_ids[i],NULL);
+  }
+
+  print_summary();
+  FREEMEMORY(thread_ids);
+  FREEMEMORY(index);
+  FREEMEMORY(threadinfo);
+}
+#endif
 
 /* ------------------ init_all_threads ------------------------ */
 
