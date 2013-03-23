@@ -19,6 +19,8 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\smv\for_bundle\to_google
 
+set level=Release-3_Maintenance
+
 Rem --------------- 32 bit Windows ----------------
 
 set glabels=Type-Installer,OpSys-Windows,%level%
