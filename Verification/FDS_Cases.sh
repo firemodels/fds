@@ -55,6 +55,7 @@ $RUNFDS Flowfields blasius_64
 $RUNFDS Flowfields sealed_box
 
 $RUNFDS Heat_Transfer adiabatic_net_flux
+$RUNFDS Heat_Transfer convective_cooling
 $RUNFDS Heat_Transfer heat_conduction_a
 $RUNFDS Heat_Transfer heat_conduction_b
 $RUNFDS Heat_Transfer heat_conduction_c
