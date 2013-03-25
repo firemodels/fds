@@ -2211,7 +2211,7 @@ Fig.~\ref{fig:burke_schumann_spec} demonstrates that the predicted final fuel, o
 The state relation for temperature is given by:
 \begin{equation}\label{eq:mix_relate_temp}
 T = T_{{\rm O,I}} +  (T_{{\rm F,I}}-T_{{\rm O,I}}) \,f + (f-Y_{\rm F}(f)) \, \frac{\Delta h_{\rm c}}{c_{v}}
-\end{equation} 
+\end{equation}
 where the subscript I refers to the inlet condition. The specific heat, $c_p$, for each species is set to 1~kJ/(kg$\cdot$K) as in the analysis by Turns~\cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to zero, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) is based on $c_v$ rather than $c_p$. We use the  following relationship $c_v = c_p - R/W$ to determine $c_v$. The molecular weight of the species were not assumed to be uniform; thus, the average molecular weight and $c_v$ vary with the mixture fraction. As a result, the traditional linear temperature profile is not expected.
 \begin{figure}[h!]
 \begin{center}
@@ -2588,6 +2588,21 @@ lines are FDS results and the dark lines are the HEATING results. An example inp
 \end{tabular*}
 \caption[The {\bf heat\_conduction\_kc} test case]{Comparison of heat conduction calculations with a finite-element model.}
 \label{heat_conduction_kc}
+\end{figure}
+
+\clearpage
+
+\section{Convective Cooling (\texorpdfstring{{\bf convective\_cooling}}{convective\_cooling})}
+
+This example tests the convective cooling algorithm. A 1~m thick solid slab that is initially at 1000~$^\circ$C is suddenly exposed to air at 0~$^\circ$C. The back of the slab is insulated. Its density is 1000~kg/m$^3$, its specific heat is 0.001~kJ/(kg$\cdot$K), its conductivity is 1~W/(m$\cdot$K), and its emissivity is zero, meaning there is no radiative loss from the surface. The convective heat transfer coefficient is 1~W/(m$^2\cdot$K). The predicted and exact temperature at the back side of the slab are displayed in Fig.~\ref{convective_cooling}.
+
+\begin{figure}[ht]
+\noindent
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/convective_cooling}
+\end{center}
+\caption[The {\bf convective\_cooling} test case]{Predicted vs.~exact back side temperatures of a thick slab cooled by convection alone.}
+\label{convective_cooling}
 \end{figure}
 
 
