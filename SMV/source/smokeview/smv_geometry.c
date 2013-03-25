@@ -258,6 +258,36 @@ mesh *getmesh(float *xyz){
       xplt[0]<=xyz[0]&&xyz[0]<xplt[ibar]&&
       yplt[0]<=xyz[1]&&xyz[1]<yplt[jbar]&&
       zplt[0]<=xyz[2]&&xyz[2]<zplt[kbar]){
+        return meshi;
+    }
+  }
+  return NULL;
+}
+
+/* ------------------ getmesh_nofail ------------------------ */
+
+mesh *getmesh_nofail(float *xyz){
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int ibar, jbar, kbar;
+    float *xplt, *yplt, *zplt;
+
+    meshi = meshinfo+i;
+
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+
+    xplt = meshi->xplt_orig;
+    yplt = meshi->yplt_orig;
+    zplt = meshi->zplt_orig;
+
+    if(
+      xplt[0]<=xyz[0]&&xyz[0]<xplt[ibar]&&
+      yplt[0]<=xyz[1]&&xyz[1]<yplt[jbar]&&
+      zplt[0]<=xyz[2]&&xyz[2]<zplt[kbar]){
       return meshi;
     }
   }

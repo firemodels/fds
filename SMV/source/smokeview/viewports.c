@@ -533,7 +533,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
     xyz[0]=DENORMALIZE_X(plotx_all[iplotx_all]);
     xyz[1]=DENORMALIZE_Y(ploty_all[iploty_all]);
     xyz[2]=DENORMALIZE_Z(plotz_all[iplotz_all]);
-    mesh_xyz=getmesh(xyz);
+    mesh_xyz=getmesh_nofail(xyz);
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visx_all==1)||visGrid==noGridProbe||visGrid==GridProbe){
     float plotval;

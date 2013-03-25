@@ -6916,7 +6916,7 @@ typedef struct {
     char *label;
 
     devicei = deviceinfo + i;
-    devicei->device_mesh=getmesh(devicei->xyz);
+    devicei->device_mesh=getmesh_nofail(devicei->xyz);
     label = devicei->object->label;
     if(strcmp(label,"smokesensor")==0){
       active_smokesensors=1;

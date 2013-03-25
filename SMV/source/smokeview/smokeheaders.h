@@ -281,6 +281,7 @@ EXTERNCPP void hide_glui_alert(void);
 EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 EXTERNCPP mesh *getmesh(float *xyz);
+EXTERNCPP mesh *getmesh_nofail(float *xyz);
 
 EXTERNCPP sv_object *get_object(char *label);
 EXTERNCPP void get_labels(char *buffer, int type, char **label1, char **label2, char prop_buffer[255]);
