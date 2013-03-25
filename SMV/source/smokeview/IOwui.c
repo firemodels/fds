@@ -568,6 +568,8 @@ void drawterrain(terraindata *terri, int only_geom){
 
 #define ZOFFSET 0.001
 
+//xxx is_bottom is not defined correctly
+//    comment out following line to show all meshes
   if(terri->terrain_mesh->is_bottom==0)return;
 
   terrain_color[0]=0.47843;
