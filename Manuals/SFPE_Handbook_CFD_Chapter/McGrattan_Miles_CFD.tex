@@ -89,7 +89,7 @@ The conservation equation for energy is
 \end{equation}
 As in the mass conservation equation, the sensible enthalpy, $h$, at a given point changes according to the net energy flux across the boundary of a small control volume surrounding the point. Now, however, there are additional source terms on the right-hand side of the equation related to the pressure, combustion heat release rate, radiation and conduction, and kinetic energy dissipation, respectively. For fire applications, the contributions from the pressure term and the dissipation term are negligible, except in situations where the compartment of interest is sealed and the pressure rises substantially.
 
-Equations~\ref{eq:masscon} through \ref{eq:encon} constitute a set of partial differential equations for the density (or component mass fractions), velocity, pressure, and sensible enthalpy of the fluid. The momentum equation is actually three equations for the three components of velocity: $u$, $v$, and $w$ making five equations for six unknowns. To close the system, an {\em equation of state} is needed to relate the thermodynamic variables, $p$, and
+Equations~\ref{eq:masscon} through \ref{eq:encon} constitute a set of partial differential equations for the density (or component mass fractions), velocity, pressure, and sensible enthalpy of the fluid. The momentum equation is actually three equations for the three components of velocity: $u$, $v$, and $w$ making five equations for six unknowns. To close the system, an {\em equation of state} is needed to relate the pressure, $p$, and sensible enthalpy, $h$. The latter is a function of the specific heat and temperature of the fluid:
 \begin{equation}
 h = \int_{T_0}^T c_p \, dT
 \label{eq:hdef}
@@ -404,7 +404,7 @@ This trend to realism is more than superficial. In both design and forensic appl
 
 \section{Verification and Validation}
 
-The use of fire models currently extends beyond the fire research laboratories and into the engineering, fire service, and legal communities. Sufficient evaluation of the models is necessary to ensure that users can judge the adequacy of its technical basis, appropriateness of its use, and confidence level of its predictions. The model evaluation process consists of two main components: verification and validation~\cite{ASTM:E1355}. Verification is a process to check the correctness of the solution of the governing equations. Verification does not imply that the governing equations are appropriate, only that the equations are being solved correctly. Validation is a process to determine the appropriateness of the governing equations as a mathematical model of the physical phenomena of interest. Typically, validation involves comparing model results with experimental measurement. Differences that cannot be attributed to uncertainty in the experimental measurements are attributed to the assumptions and simplifications of the physical model.
+The use of fire models currently extends beyond the fire research laboratories and into the engineering, fire service, and legal communities. Sufficient evaluation of the models is necessary to ensure that users can judge the adequacy of its technical basis, appropriateness of its use, and confidence level of its predictions. The model evaluation process consists of two main components: verification and validation~\cite{SFPE_G.06}. Verification is a process to check the correctness of the solution of the governing equations. Verification does not imply that the governing equations are appropriate, only that the equations are being solved correctly. Validation is a process to determine the appropriateness of the governing equations as a mathematical model of the physical phenomena of interest. Typically, validation involves comparing model results with experimental measurement. Differences that cannot be attributed to uncertainty in the experimental measurements are attributed to the assumptions and simplifications of the physical model.
 
 It is commonly assumed by model users, particularly those who have purchased expensive CFD software, that verification and validation is the responsibility of the model developers. Certainly, CFD developers do a considerable amount of this type of work, in particular verification, but it is impossible to ensure that the model is ``validated'' for every conceivable application. Indeed, the very point of numerical modeling is to predict the outcome of fire scenarios that have not, or cannot be, replicated in a controlled laboratory environment. Thus, the burden of verification and validation must be shared by the model developer and user. The benefit to the user is twofold: first, it confirms that the user can use the software properly, at least for the given application; and second, it assures the user that the model can address the given fire scenario, even providing the user with some estimate of its accuracy.
 
@@ -430,7 +430,7 @@ A convenient way to express the heat release rate of the fire relative to its ba
  Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} \; D^2}
 \end{equation}
 where $\dot{Q}$ is the peak heat release rate of the fire and $D$ is the equivalent diameter of the base of the fire.
-The Fire Froude Number is a useful quantity for plume correlations and flame height estimates. A large value of $\dot{Q}^*$ describes a fire for which the energy output is relatively large compared to its physical diameter, like an oil well blowout fire.  A low value describes a fire for which the energy output is relatively small compared to its diameter, like a brush fire.  Most common accidental fire scenarios have $\dot{Q}^*$ values on the order of 1.
+The Fire Froude Number is a useful quantity for plume correlations and flame height estimates. A large value ($\dot{Q}^* \gg 1$) describes a fire for which the energy output is relatively large compared to its physical diameter, like an oil well blowout fire.  A low value ($\dot{Q}^* \ll 1$) describes a fire for which the energy output is relatively small compared to its diameter, like a brush fire.
 
 \item {\em Flame Height relative to Ceiling Height, $L_{\hbox{\tiny f}}/H$:}
 This ratio is a convenient way to express the physical size of the fire relative to the size of the room. A value greater than
@@ -441,16 +441,14 @@ The Flame Height, $L_{\hbox{\tiny f}}$, is the height of the visible flame, base
 \end{equation}
 
 \item {\em Global Equivalence Ratio, $\phi$:}
-The equivalence ratio is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio. A convenient way to express this ratio for fire applications is as follows:
+A convenient way to determine whether a compartment fire is limited by fuel or oxygen is to estimate the ratio of the fuel supply rate, $\dot{m}_f$, to the oxygen supply rate, $\dot{m}_{\hbox{\tiny O$_2$}}$, divided by the stoichiometric ratio, $r$:
 \begin{equation}
-   \phi = \frac{\dot{Q}}{\Delta H_{\hbox{\tiny O$_2$}} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
+   \phi = \frac{\dot{m}_f/\dot{m}_{\hbox{\tiny O$_2$}}}{r} = \frac{\dot{Q}}{\Delta h_{\hbox{\tiny O$_2$}} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
    \begin{array}{r@{\quad \quad}l}
-      \frac{1}{2} \, 0.23 \, A_0 \sqrt{H_0} & \hbox{Natural Ventilation} \\ [0.1in]
-      0.23 \, \rho \, \dot{V}       & \hbox{Mechanical Ventilation} \end{array} \right.
+      \frac{1}{2} \, 0.23 \, A_0 \sqrt{H_0} & \hbox{Natural} \\ [0.1in]
+      0.23 \, \rho \, \dot{V}       & \hbox{Mechanical} \end{array} \right.
 \end{equation}
-Here, $\dot{Q}$ is the peak heat release rate of the fire, $\Delta H_{\hbox{\tiny O$_2$}}$ is the heat of combustion per unit mass oxygen consumed, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the
-volume flow of air into the compartment. The factor 0.23 is the mass fraction of oxygen in air. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
-In general, under-ventilated fire scenarios are more challenging for the models because the combustion physics are more complicated.
+Here, $\Delta h$ is the heat of combustion, $\dot{Q}=\dot{m}_f \, \Delta h$ is the peak heat release rate of the fire, $\Delta h_{\hbox{\tiny O$_2$}}=r \, \Delta h$ is the heat of combustion per unit mass oxygen consumed, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the volume flow of air into the compartment due to a ventilation system. The factor 0.23 is the mass fraction of oxygen in air. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.'' In general, under-ventilated fire scenarios are more challenging for the models because the combustion physics are more complicated.
 
 \item {\em Relative Distance along the Ceiling, $r_{\hbox{\tiny cj}}/H$:}
 This ratio indicates the distance from the fire plume of a sprinkler, smoke detector, {\em etc.}, relative to the
@@ -524,7 +522,7 @@ It must be emphasized that this estimated probability of failure is based only o
 
 \section{Applications}
 
-This section presents examples of how CFD fire models are used in practice. These applications can be divided into three general categories -- research, design, and forensic. For research, the models can help explain basic fire phenomena. For design, the models are used to predict the spread of smoke and heat from a hypothetical fire in a real or planned building. For forensics, the models aid in the reconstruction of an actual fire. For a design application, the fire is usually specified; that is, the ignition, growth, and eventual decay of the fire are not predicted by the model but rather specified by the code enforcing authority. For a reconstruction, the model is usually used to explain how a small fire grew and spread to cause serious damage or injury. Rarely are fire models of the type described in this chapter used to show how a fire was actually ignited, as the physical mechanism of this event (electrical short, arcing fault, arson, etc.) is usually not included in the model.
+This section presents examples of how CFD fire models are used in practice. These applications can be divided into three general categories -- research, design, and forensic. For research, the models can help explain basic fire phenomena. For design, the models are used to predict the spread of smoke and heat from a hypothetical fire in a real or planned building. For forensics, the models aid in the reconstruction of an actual fire. For a design application, the fire is usually specified; that is, the ignition, growth, and eventual decay of the fire are not predicted by the model but rather specified by the design engineer and reviewed by the code enforcing authority. For a reconstruction, the model is usually used to explain how a small fire grew and spread to cause serious damage or injury. Rarely are fire models of the type described in this chapter used to show how a fire was actually ignited, as the physical mechanism of this event (electrical short, arcing fault, arson, etc.) is usually not included in the model.
 
 \subsection{Fundamental Fire Dynamics}
 
