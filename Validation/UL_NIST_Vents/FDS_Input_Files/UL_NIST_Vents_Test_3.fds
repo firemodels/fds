@@ -46,15 +46,15 @@
       COLOR     = 'BLACK'
       THICKNESS = 0.005 /
 
-&SURF ID='burner', NO_SLIP=.TRUE., HRRPUA=2040.8, RAMP_Q='burner ramp', COLOR='RED' / 
+&SURF ID='burner',  HRRPUA=1562.5, RAMP_Q='burner ramp', COLOR='RED' / 
 &RAMP ID='burner ramp', T=   0., F=0.000 /
 &RAMP ID='burner ramp', T=  10., F=0.476 /
 &RAMP ID='burner ramp', T=1155., F=0.476 /
-&RAMP ID='burner ramp', T=1200., F=1.002 /
+&RAMP ID='burner ramp', T=1300., F=1.002 /
 &RAMP ID='burner ramp', T=2235., F=1.002 /
-&RAMP ID='burner ramp', T=2400., F=0.000 /
+&RAMP ID='burner ramp', T=2240., F=0.000 /
 
-&OBST XB=0.00,0.70, 3.60,4.30,0.00,0.40, SURF_IDS='burner','STEEL PLATE','STEEL PLATE' /
+&OBST XB=0.00,0.80, 3.50,4.30,0.00,0.40, SURF_IDS='burner','STEEL PLATE','STEEL PLATE' /
 
 &VENT MB='ZMIN', SURF_ID='CONCRETE FLOOR' /
 &VENT MB='YMIN', SURF_ID='OPEN' /
