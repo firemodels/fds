@@ -22,20 +22,168 @@ char isobox_revision[]="$Revision$";
 #include "isodefs.h"
 #include "datadefs.h"
 
+/* ------------------ vec_dot ------------------------ */
+
+float vec_dot(float *x, float *y){
+  return x[0]*y[0]+x[1]*y[1]+x[2]*y[2];
+}
+
+/* ------------------ vec_cross ------------------------ */
+
+void vec_cross(float *x, float *y, float *xy){
+  //   i    j    k
+  // x[0] x[1] x[2]
+  // y[0] y[1] y[2]
+
+  xy[0] = x[1]*y[2] - y[1]*x[2];
+  xy[1] = x[2]*y[0] - y[2]*x[0];
+  xy[2] = x[0]*y[1] - y[0]*x[1];
+}
+
+/* ------------------ vol_tetra ------------------------ */
+
+float vol_tetra(float *a, float *b, float *c, float *d){
+  float axb[3],arel[3],brel[3],crel[3],drel[3],volume;
+  int i;
+
+  // vol = | ((b-a)x(c-a)) . (d-a) |
+
+  for(i=0;i<3;i++){
+    brel[i] = b[i]-a[i];
+    crel[i] = c[i]-a[i];
+    drel[i] = d[i]-a[i];
+  }
+  vec_cross(brel,crel,axb);
+  volume = vec_dot(drel,axb);
+  return ABS(volume);
+}
+
+/* ------------------ vol_hexa ------------------------ */
+
+float vol_penta(float *a, float *b, float *c, float *d, float *e, float *f){
+  float vol1, vol2, vol3;
+
+  vol1 = vol_tetra(b,c,e,d);
+  vol2 = vol_tetra(b,e,f,d);
+  vol3 = vol_tetra(b,d,f,a);
+  return ABS(vol1) + ABS(vol2) + ABS(vol3);
+}
+
+/* ------------------ GetTetraVol ------------------------ */
+
+float GetTetraVol(float *verts[4], float vals[4], float level){
+
+//             3
+//           /  \  \
+//          /    \    \5
+//         /      \      \
+//       3/       4\         \
+//       /          \   .     2
+//      /     2 .    \      /
+//     / .            \   / 1 
+//    0 -------------- 1/
+//           0   
+
+  int state[4]={0,0,0,0},i,index,p2=1;
+  float volfactors[6],volverts[18],*volargs[6];
+  float full_volume;
+  float vol_above_level;
+  int ncase;
+  int edge2vertex[6][2]={
+    {0,1},{1,2},{0,2},{0,3},{1,3},{2,3}
+  };
+
+  int cases[16][7]={
+    {0},
+    {4,0,2,3,0},
+    {4,0,1,4,1},
+    {6,2,1,4,3,0,1},
+
+    {4,1,5,2,2},
+    {6,3,5,1,0,0,2},
+    {6,5,4,0,2,2,1},
+    {-4,3,4,5,3},
+
+    {4,3,4,5,3},
+    {6,0,4,5,2,0,3},
+    {6,3,0,1,5,3,1},
+    {-4,1,2,5,2},
+
+    {6,4,1,2,3,3,2},
+    {-4,0,1,4,1},
+    {-4,0,2,3,0},
+    {0},
+  };
+
+  for(i=0;i<4;i++){
+    if(vals[i]>level){
+      state[i]=1;
+      index+=state[i]*p2;
+    }
+    p2*=2;
+  }
+  ncase = cases[index][0];
+  if(ncase<0||ncase==15)full_volume = vol_tetra(verts[0],verts[1],verts[2],verts[3]);
+  if(index==0)return 0.0;
+  if(index==15)return full_volume;
+
+  for(i=0;i<6;i++){
+    int i1, i2;
+    float val1, val2;
+    float *vert1, *vert2;
+
+    i1 = edge2vertex[i][0];
+    i2 = edge2vertex[i][1];
+    val1 = vals[i1];
+    val2 = vals[i2];
+    vert1 = verts[i1];
+    vert2 = verts[i2];
+    if((val1<=level&&level<=val2||val2<=level&&level<=val1)&&ABS(val1-val2)>0.0){
+      volfactors[i] = (level-val1)/(val2-val1);
+    }
+    else{
+      volfactors[i]=0.0;
+    }
+    volverts[6*i+0]=MIX(volfactors[i],vert1[0],vert2[0]);
+    volverts[6*i+1]=MIX(volfactors[i],vert1[1],vert2[1]);
+    volverts[6*i+2]=MIX(volfactors[i],vert1[2],vert2[2]);
+  }
+
+  if(ABS(ncase)==4){
+    volargs[0]=volverts + 3*cases[index][1];
+    volargs[1]=volverts + 3*cases[index][2];
+    volargs[2]=volverts + 3*cases[index][3];
+    volargs[3]=verts[cases[index][4]];
+    vol_above_level = vol_tetra(volargs[0],volargs[1],volargs[2],volargs[3]);
+    if(ncase<0)vol_above_level = full_volume-vol_above_level;
+  }
+  else{
+    ASSERT(ncase==6);
+    volargs[0]=volverts + 3*cases[index][1];
+    volargs[1]=volverts + 3*cases[index][2];
+    volargs[2]=volverts + 3*cases[index][3];
+    volargs[3]=volverts + 3*cases[index][4];
+    volargs[4]=verts[cases[index][5]];
+    volargs[5]=verts[cases[index][6]];
+    vol_above_level = vol_penta(volargs[0],volargs[1],volargs[2],volargs[3],volargs[4],volargs[5]);
+  }
+  return vol_above_level;
+}
+
 /* ------------------ getisobox ------------------------ */
 
 void getisobox(float x[2], float y[2], float z[3], float *vals, float level, 
                float *xyzverts, int *nvert, int *triangles, int *ntriangles){
-  int nodeindexes[8]={0,1,2,3,4,5,6,7};
-  float xvert[6], yvert[6], zvert[6];
-  int i;
+                 int nodeindexes[8]={0,1,2,3,4,5,6,7};
+                 float xvert[6], yvert[6], zvert[6];
+                 int i;
 
-  GetIsobox(x,y,z,vals,NULL,nodeindexes,level,xvert,yvert,zvert,NULL,NULL,nvert,triangles,ntriangles);
-  for(i=0;i<*nvert;i++){
-    xyzverts[3*i]=xvert[i];
-    xyzverts[3*i+1]=yvert[i];
-    xyzverts[3*i+2]=zvert[i];
-  }
+                 GetIsobox(x,y,z,vals,NULL,nodeindexes,level,xvert,yvert,zvert,NULL,NULL,nvert,triangles,ntriangles);
+                 for(i=0;i<*nvert;i++){
+                   xyzverts[3*i]=xvert[i];
+                   xyzverts[3*i+1]=yvert[i];
+                   xyzverts[3*i+2]=zvert[i];
+                 }
 }
 
 /* ------------------ GetIsobox ------------------------ */
