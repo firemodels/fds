@@ -587,7 +587,7 @@ Figure \ref{figsmoketest} presents images verifying the display of 3D smoke and 
 
 \section{Plot3D}
 
-Figure \ref{figPLOT3Dtest} presents images verifying the display of PLOT3D contours. Three types of contours are available for visualizing PLOT3D data: line, stepped and continuous.  This figure shows all three contour types. Figure \ref{figPLOT3Dtestvalue} shows images of PLOT3D stepped contours in a vertical plane at four positions front to back. Figure \ref{figPLOT3Dtestline} shows images of PLOT3D line contours in a vertical plane at four positions front to back. Figure \ref{figPLOT3Dtestvector} shows images of PLOT3D vectors in a vertical plane at the same four positions as in Figure \ref{figPLOT3Dtestvalue}. Figure \ref{figPLOT3Dtestiso} shows PLOT3D iso-surfaces for \SI{50}{\degreeCelsius}, \SI{230}{\degreeCelsius}, \SI{410}{\degreeCelsius} and \SI{590}{\degreeCelsius}.
+Figure \ref{figPLOT3Dtest} presents images verifying the display of PLOT3D contours. Three types of contours are available for visualizing PLOT3D data: stepped, continuous and narrow band.  This figure shows stepped and continuous contours. Figure \ref{figPLOT3Dtestvalue} shows stepped contours in at four positions along the y axis. Figure \ref{figPLOT3Dtestline} shows narrow band contours at four positions front to back. Figure \ref{figPLOT3Dtestvector} shows velocity vectors at the same four positions as in Figure \ref{figPLOT3Dtestvalue}. Figure \ref{figPLOT3Dtestiso} shows PLOT3D iso-surfaces for \SI{50}{\degreeCelsius}, \SI{230}{\degreeCelsius}, \SI{410}{\degreeCelsius} and \SI{590}{\degreeCelsius}.
 
 %(KEVIN -- I don't see the line contours)
 %GLENN I added a line contour figure (technically not a line contour, I changed how smokeview draws line contours, I take a regular color contour and make portions of it transparent except for a series of solid equally spaced lines)
@@ -620,7 +620,7 @@ Figure \ref{figPLOT3Dtest} presents images verifying the display of PLOT3D conto
  \includegraphics[height=\figheightH]{SCRIPT_FIGURES/plume5c_plot3d_y4}\\
  \end{tabular}
 \end{center}
- \caption{A test showing PLOT3D stepped contours in a vertical plane at four positions along the y axis.}
+ \caption{A test showing PLOT3D stepped contours at four positions along the y axis.}
 \label{figPLOT3Dtestvalue}%
 \end{figure}
 
@@ -633,7 +633,7 @@ Figure \ref{figPLOT3Dtest} presents images verifying the display of PLOT3D conto
  \includegraphics[height=\figheightH]{SCRIPT_FIGURES/plume5c_plot3d_l4}\\
  \end{tabular}
 \end{center}
- \caption{A test showing PLOT3D line contours in a vertical plane at four positions along the y axis.}
+ \caption{A test showing PLOT3D narrow band contours at four positions along the y axis.}
 \label{figPLOT3Dtestline}%
 \end{figure}
 
@@ -646,7 +646,7 @@ Figure \ref{figPLOT3Dtest} presents images verifying the display of PLOT3D conto
  \includegraphics[height=\figheightH]{SCRIPT_FIGURES/plume5c_plot3d_v4}\\
  \end{tabular}
 \end{center}
- \caption{A test showing PLOT3D velocity vectors shaded by temperature in a vertical plane at four positions along the y axis.}
+ \caption{A test showing PLOT3D vectors shaded by temperature at four positions along the y axis.}
 \label{figPLOT3Dtestvector}%
 \end{figure}
 
@@ -937,7 +937,7 @@ A second color conversion test involves the use of the colorbar to highlight por
 
 \section{GPU Test}
 
-Figure \ref{figgputest} tests whether Smokeview produces identical images when using the GPU and CPU for drawing 3D smoke.  The first column shows CPU generated images at \SI{5}{s}, \SI{10}{s} and \SI{30}{s} while the second column shows GPU generated images at the same times.  The corresponding images in each column should be identical.
+Figure \ref{figgputest} tests whether Smokeview produces similar images when using the GPU and CPU for drawing 3D smoke.  The first column shows CPU generated images at \SI{5}{s}, \SI{10}{s} and \SI{30}{s} while the second column shows GPU generated images at the same times.  The corresponding images in each column should be similar.
 
 \begin{figure}[\figoptions]
 \begin{center}
