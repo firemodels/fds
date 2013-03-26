@@ -19,7 +19,7 @@ RENDERONCE
  smoke_test_every3
 UNLOADALL
 LOADINIFILE
- smoke_test.ini
+ smoke_test_geom.ini
 SETVIEWPOINT
  view 1
 RENDERONCE
