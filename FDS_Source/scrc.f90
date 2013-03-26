@@ -5716,12 +5716,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER Allocation
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL+1, 'SETUP_SYSTEM', 'WALLINFO')
    ELSE
       CALL SCARC_SETUP_PROLONGATION(NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER setup_prolongation '
       CALL SCARC_SETUP_OVERLAPS (NSCARC_MATRIX_PROLONGATION, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER setup_overlaps '
-      CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_PROLONGATION', 'CELLTYPE AFTER SETUP_OVERLAPS')
-      CALL SCARC_SETUP_RESTRICTION(NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER setup_restriction '
+      !CALL SCARC_SETUP_RESTRICTION(NL)
    ENDIF
 
    !!! Print latex information if requested (only temporarily for debugging purposes)
@@ -5802,7 +5798,8 @@ WRITE(*,*) 'PRINTING LATEX_MATRIX'
    ENDIF
 
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_SUBDIVISION  , NL+1, 'SETUP_SYSTEM', 'SUBDIVISION new level')
-   CALL SCARC_TRANSFER_MATRIX (NL)
+   !CALL SCARC_TRANSFER_MATRIX (NL)
+   CALL SCARC_SETUP_SYSTEM_AMG (NL)
 
    TYPE_MATRIX = NSCARC_MATRIX_SUBDIAG
    CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MATRIX, NL+1)
@@ -6176,7 +6173,7 @@ ENDDO
 
 CLOSE(MMATRIX)
 
-1000 FORMAT(40f8.2)
+1000 FORMAT(40f7.2)
 END SUBROUTINE SCARC_LATEX_MATRIX2
 
 
@@ -7870,7 +7867,17 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3, a,i3,a,i3,a,i3,a,i3,a
          
       ENDDO MESHES_LOOP_CLASSICAL2
 
+      WRITE(SCARC_LU,*) 'SIZE(P)=',SIZE(SC%P)
+      WRITE(SCARC_LU,*) 'SIZE(P_ROW)=',SIZE(SC%P_ROW)
+      WRITE(SCARC_LU,*) 'SIZE(P_COL)=',SIZE(SC%P_COL)
+      WRITE(SCARC_LU,*) 'SIZE(R)=',SIZE(SC%R)
+      WRITE(SCARC_LU,*) 'SIZE(R_ROW)=',SIZE(SC%R_ROW)
+      WRITE(SCARC_LU,*) 'SIZE(R_COL)=',SIZE(SC%R_COL)
+
+      CALL SCARC_CMATRIX_TRANSPOSE(SC%P, SC%P_ROW, SC%P_COL, SC%R, SC%R_ROW, SC%R_COL, SC%NC, SC%NCC)
+
       CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_PROLONGATION, NL, 'SETUP_PROLONGATION', 'TYPE2: final prolongation ')
+      CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_RESTRICTION, NL, 'SETUP_PROLONGATION', 'TYPE2: final restriction ')
 
       IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_PROLONGATION, NL)
 
@@ -8350,7 +8357,82 @@ ENDDO
 
 END SUBROUTINE SCARC_PATCH_WEIGHTS
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Build transpose R of prolongation matrix P
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE SCARC_CMATRIX_TRANSPOSE(M, M_ROW, M_COL, MT, MT_ROW, MT_COL, NC, NCC)
+INTEGER,  DIMENSION(:)  , INTENT(IN)  :: M_ROW , M_COL
+INTEGER,  DIMENSION(:)  , INTENT(OUT) :: MT_ROW, MT_COL
+REAL(EB), DIMENSION(:)  , INTENT(IN)  :: M
+REAL(EB), DIMENSION(:)  , INTENT(OUT) :: MT
+INTEGER, INTENT(IN)  :: NC, NCC
+INTEGER :: IC, JC, ICOL, JCOL
 
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+   WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'NC=',NC
+   WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'NCC=',NCC
+   WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'M_ROW'
+   WRITE(SCARC_LU,'(8i5)') (M_ROW(IC), IC=1, NC+1)
+   WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'M_COL'
+   WRITE(SCARC_LU,'(8i5)') (M_COL(IC), IC=1, 32)
+ENDIF
+
+!!! identify the number of non-zero entries in every column of M (corresponds to a row in MT) 
+!!! and store it in the MT_ROW-array
+MT_ROW(1) = 1
+DO ICOL = 1, M_ROW(NC+1)-1
+   IC = M_COL(ICOL)
+   MT_ROW(IC+1) = MT_ROW(IC+1) + 1
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,i3)') 'ICOL=',ICOL, ': MT_ROW(',IC,')=',MT_ROW(IC)
+ENDDO
+
+DO IC = 2, NCC+1
+   MT_ROW(IC) = MT_ROW(IC) + MT_ROW(IC-1)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,i3,i3)') 'MT_ROW(',IC,')=',MT_ROW(IC), MT_ROW(IC-1)
+ENDDO
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+   WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'MT_ROW'
+   WRITE(SCARC_LU,'(8i5)') (MT_ROW(IC), IC=1, NCC+1)
+ENDIF
+
+DO IC = 1, NC
+   DO ICOL = M_ROW(IC), M_ROW(IC+1)-1
+      JC   = M_COL(ICOL)
+      JCOL = MT_ROW(JC)
+      MT_COL(JCOL) = IC
+      MT(JCOL)     = M(ICOL) 
+      MT_ROW(JC)   = MT_ROW(JC) + 1
+!IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,3i3,f12.6)') &
+!          'IC=',IC, ': ICOL=',ICOL,': JC=',JC,': JCOL=',JCOL,MT_COL(JCOL), MT_ROW(JC), MT(JCOL)
+   ENDDO
+ENDDO
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'IC=',NCC+1, ': MT_ROW(',NCC+1,')=',MT_ROW(NCC+1)
+DO IC = NCC, 2, -1
+   MT_ROW(IC) = MT_ROW(IC-1)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'IC=',IC, ': MT_ROW(',IC,')=',MT_ROW(IC)
+ENDDO
+MT_ROW(1)=1
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'IC=',1, ': MT_ROW(',1,')=',MT_ROW(1)
+
+
+END SUBROUTINE SCARC_CMATRIX_TRANSPOSE
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Build transpose R of prolongation matrix P
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE SCARC_SETUP_SYSTEM_AMG(NL)
+INTEGER, INTENT(IN) :: NL
+INTEGER :: NM
+TYPE (SCARC_COMPACT_TYPE) , POINTER :: SC
+
+MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
+   SC => SCARC(NM)%COMPACT(NL)
+
+ENDDO MESHES_LOOP_SYSTEM_AMG
+
+END SUBROUTINE SCARC_SETUP_SYSTEM_AMG
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Define restriction matrix R (currently transpose of prolongation matrix P)
@@ -8553,6 +8635,17 @@ SELECT CASE (TYPE_INTERPOL)
 
       ENDDO MESHES_LOOP_GMG3
 CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPES', 'CELLTYPE FINAL3')
+
+
+   !!! ----------------------------------------------------------------------------------------------
+   !!! DEFAULT
+   !!! ----------------------------------------------------------------------------------------------
+   CASE (NSCARC_INTERPOL_CLASSICAL2)
+
+      MESHES_LOOP_CLASSICAL2: DO NM = NMESHES_MIN, NMESHES_MAX
+         SC => SCARC(NM)%COMPACT(NL)
+         CALL SCARC_CMATRIX_TRANSPOSE(SC%P, SC%P_ROW, SC%P_COL, SC%R, SC%R_ROW, SC%R_COL, SC%NC, SC%NCC)
+      ENDDO MESHES_LOOP_CLASSICAL2
 
 
    !!! ----------------------------------------------------------------------------------------------
@@ -14926,7 +15019,7 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_DEBUG_MEASURE)
 
       WRITE(SCARC_LU,1000) CROUTINE, CNAME, 1, NL
-      IF (NMESHES == 4) THEN                !!! only temporarily
+      IF (NMESHES == 4 .OR. NMESHES==1) THEN                !!! only temporarily
       DO NM = NMESHES_MIN, NMESHES_MAX
          SC  => SCARC(NM)%COMPACT(NL)
          IF (NL == 1) THEN
@@ -15024,13 +15117,13 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_DEBUG_CELLTYPE)
 
       IF (TYPE_DEBUG >= NSCARC_DEBUG_MEDIUM) THEN
-       IF (NMESHES == 4) THEN                !!! only temporarily
+       IF (NMESHES == 4 .OR. NMESHES==1) THEN                !!! only temporarily
          DO NM = NMESHES_MIN, NMESHES_MAX
            WRITE(SCARC_LU,1000) CROUTINE, CNAME, NM, NL
            SC  => SCARC(NM)%COMPACT(NL)
            IF (NL == 1) THEN
               DO K = SC%NZ, 1, -1
-                 WRITE(SCARC_LU, '(4i6)') (SC%CELLTYPE((K-1)*SC%NX*SC%NY+I), I=1, SC%NX)
+                 WRITE(SCARC_LU, '(8i6)') (SC%CELLTYPE((K-1)*SC%NX*SC%NY+I), I=1, SC%NX)
               ENDDO
            ENDIF
          ENDDO
