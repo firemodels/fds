@@ -794,9 +794,9 @@ The {\em zoom}\ and {\em aperture} edit boxes allow one to change
 the magnification of the scene or equivalently the angle of view
 across the scene.  The relation between these two parameters is
 given by
-\begin{eqnarray*}
+\begin{eqnarray}
 \mbox{zoom}=\tan(45^\circ/2)/\tan(\mbox{aperture}/2)
-\end{eqnarray*}
+\end{eqnarray}
 A default aperture of $45^\circ$ is chosen so that Smokeview
 scenes have a normal perspective.
 
@@ -1513,9 +1513,9 @@ heights, upper layer temperature and vent flow. Vent flow is
 computed internally in Smokeview using the same equations and data
 as used by CFAST.   For a given room, pressures , $P_i$, are
 computed at a number of elevations, $h_i$ using
-\begin{eqnarray*}
+\begin{eqnarray}
 P_i=P_f - \rho_L g \min(h_i,y_L) - \rho_U g \max(h_i-y_L,0)
-\end{eqnarray*}
+\end{eqnarray}
 where $P_f$ is the pressure at the floor (relative to ambient),
 $\rho_L$ and $\rho_U$ are the lower and upper layer densities
 computed from layer temperatures using the ideal gas law and $g$
@@ -2259,9 +2259,9 @@ The command, \\
 \\
 is used to clip a value \valin\ between \valmin\ and
 \valmax\ using
-\begin{eqnarray*}
+\begin{eqnarray}
 \valclipped=\max(\valmin,\min(\valin,\valmax))
-\end{eqnarray*}
+\end{eqnarray}
 
 \noindent The inputs, \valin, \valmin\ and \valmax\ are either numerical constants or references to previously defined data.  The clipped result is placed in the label :\valclipped\ accessible later in the definition file using \$\valclipped.
 
@@ -2293,7 +2293,7 @@ The command, \\
 \\
 is used to clip a value \valin\ between \valmin\
 and \valmax\ using
-\begin{eqnarray*}
+\begin{eqnarray}
 \valone&=&\mbox{mod}( \valin-\valmin,2(\valmax-\valmin) )\\
 \valclipped&=&\left\{
 \begin{array}{cc}
@@ -2301,7 +2301,7 @@ and \valmax\ using
   \valmax-\valone & \valone> \valmax-\valmin
 \end{array}
 \right.
-\end{eqnarray*}
+\end{eqnarray}
 
 \hitem{mult}
 The command, \\
@@ -2332,9 +2332,9 @@ The command, \\
 \\
 is used to clip a value \valin\ between \valmin
 and \valmax\ using
-\begin{eqnarray*}
+\begin{eqnarray}
 \valclipped&=&\valmin+\mbox{mod}( \valin-\valmin,\valmax-\valmin )\\
-\end{eqnarray*}
+\end{eqnarray}
 
 \noindent The inputs, \valin, \valmin\ and \valmax\ are either numerical constants or references to previously defined data.  The clipped result is placed
 in the label :\valclipped\ accessible later in the definition file using \$\valclipped.
