@@ -8033,6 +8033,11 @@ int readini2(char *inifile, int localfile){
        continue;
      }
    }
+   if(match(buffer,"SCALEDFONT")==1){
+     fgets(buffer,255,stream);
+     sscanf(buffer,"%i %f %i",&scaled_font2d_height,&scaled_font2d_height2width,&scaled_font2d_thickness);
+     sscanf(buffer,"%i %f %i",&scaled_font3d_height,&scaled_font3d_height2width,&scaled_font3d_thickness);
+   }
    if(match(buffer,"FEDCOLORBAR")==1){
      char *fbuff;
 
@@ -11127,6 +11132,9 @@ void writeini(int flag){
   fprintf(fileout," %i\n",titlesafe_offset);
   fprintf(fileout,"FONTSIZE\n");
   fprintf(fileout," %i\n",fontindex);
+  fprintf(fileout,"SCALEDFONT\n");
+  fprintf(fileout," %i %f %i\n",scaled_font2d_height,scaled_font2d_height2width,scaled_font2d_thickness);
+  fprintf(fileout," %i %f %i\n",scaled_font3d_height,scaled_font3d_height2width,scaled_font3d_thickness);
   fprintf(fileout,"ZOOM\n");
   fprintf(fileout," %i %f\n",zoomindex,zoom);
   fprintf(fileout,"APERTURE\n");
