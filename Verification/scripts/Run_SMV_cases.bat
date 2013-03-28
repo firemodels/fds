@@ -63,7 +63,7 @@ Rem create a text file containing the FDS5 version used to run these tests.
 Rem This file is included in the smokeview user's guide
 
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide\"
-echo | %FDSEXE% 2> "%smvug%\figures\fds.version"
+echo | %FDSEXE% 2> "%smvug%\SCRIPT_FIGURES\fds.version"
 
 call %SCRIPT_DIR%\SMV_Cases.bat
 
