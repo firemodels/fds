@@ -223,7 +223,7 @@ void outputBarText(float x, float y, const GLfloat *color, char *string){
   else{
     glRasterPos2f(x, y);
     for (c=string; *c!='\0'; c++){
-      glutBitmapCharacter(small_font,*c);
+      glutBitmapCharacter(small_font,(unsigned char)(*c));
     }
   }
 }

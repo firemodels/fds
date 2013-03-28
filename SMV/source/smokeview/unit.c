@@ -45,6 +45,13 @@ int unit_type_match(char *unit, f_units *unit_class){
   return 0;
 }
 
+/* ------------------ is_unit_present ------------------------ */
+
+int is_unit_present(char *label, char *unit){
+  if(strlen(label)!=strlen(unit)||STRCMP(label,unit)!=0)return 0;
+  return 1;
+}
+
 /* ------------------ set_unit_vis ------------------------ */
 
 void set_unit_vis(void){
@@ -61,10 +68,10 @@ void set_unit_vis(void){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
-      if(strlen(slicej->label.unit)!=strlen(uci->units->unit))continue;
-      if(STRCMP(slicej->label.unit,uci->units->unit)!=0)continue;
-      uci->visible=1;
-      break;
+      if(is_unit_present(slicej->label.unit,uci->units->unit)==1){
+        uci->visible=1;
+        break;
+      }
     }
     if(uci->visible==1)continue;
   
@@ -72,10 +79,10 @@ void set_unit_vis(void){
       patchdata *patchj;
       
       patchj = patchinfo + j;
-      if(strlen(patchj->label.unit)!=strlen(uci->units->unit))continue;
-      if(STRCMP(patchj->label.unit,uci->units->unit)!=0)continue;
-      uci->visible=1;
-      break;
+      if(is_unit_present(patchj->label.unit,uci->units->unit)==1){
+        uci->visible=1;
+        break;
+      }
     }
     if(uci->visible==1)continue;
 
@@ -85,10 +92,10 @@ void set_unit_vis(void){
       
       plot3dj = plot3dinfo + j;
       for(n=0;n<5;n++){
-        if(strlen(plot3dj->label[n].unit)!=strlen(uci->units->unit))continue;
-        if(STRCMP(plot3dj->label[n].unit,uci->units->unit)!=0)continue;
-        uci->visible=1;
-        break;
+        if(is_unit_present(plot3dj->label[n].unit,uci->units->unit)==1){
+          uci->visible=1;
+          break;
+        }
       }
       if(uci->visible==1)break;
     }
@@ -320,7 +327,7 @@ void InitUnits(void){
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
   units=ut->units;
-  strcpy(units[0].unit,"C");
+  strcpy(units[0].unit,degC);
   units[0].scale[0]=1.0;
   units[0].scale[1]=0.0;
   strcpy(units[1].unit,"F");

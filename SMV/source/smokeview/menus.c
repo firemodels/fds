@@ -7226,7 +7226,7 @@ updatemenu=0;
 /* --------------------------------option menu -------------------------- */
 
   CREATEMENU(optionmenu,OptionMenu);
-  if(nunitclasses>0)glutAddSubMenu(_("Units"),unitsmenu);
+  if(nunitclasses>0)glutAddSubMenu(_("Display Units"),unitsmenu);
 #ifdef pp_SHOWLIGHT
   if(showlightmenu==1)glutAddSubMenu(_("Lighting"),lightingmenu);
 #endif

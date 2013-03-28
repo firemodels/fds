@@ -1145,6 +1145,10 @@ void init_texturedir(void){
 
 void initvars(void){
   int i;
+
+  degC[0]=176; // deg symbol (small superscript 0)
+  degC[1]='C';
+  degC[2]=0;
   
   strcpy(default_fed_colorbar,"FED");
 

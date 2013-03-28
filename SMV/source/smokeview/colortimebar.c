@@ -1192,7 +1192,7 @@ void drawColorBars(void){
     }
     if(parttype==-1){
       strcpy(partshortlabel2,"temp");
-      strcpy(partunitlabel2,"C");
+      strcpy(partunitlabel2,degC);
     }
     else if(parttype==-2){
       strcpy(partshortlabel2,"HRRPUV");
@@ -1341,7 +1341,7 @@ void drawColorBars(void){
   if(showzone==1&&sethazardcolor==0){
     char unitlabel[256];
 
-    strcpy(unitlabel,"C");
+    strcpy(unitlabel,degC);
     getunitinfo(unitlabel,&zoneunitclass,&zoneunittype);
     if(zoneunitclass>=0&&zoneunitclass<nunitclasses){
       if(zoneunittype>0){

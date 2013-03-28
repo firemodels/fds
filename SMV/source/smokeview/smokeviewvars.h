@@ -25,6 +25,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN char degC[3];
 SVEXTERN float SVDECL(tmax_part,16.0);
 SVEXTERN int SVDECL(redirect,0);
 SVEXTERN int SVDECL(tempdir_flag,0);
