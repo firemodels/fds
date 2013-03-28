@@ -6714,13 +6714,13 @@ the device using the standard RTI algorithm. The various sprinkler properties wi
 
 Properties associated with sprinklers included in the {\ct PROP} group are:
 \begin{description}
-\item[{\ct RTI}] Response Time Index in units of $\sqrt{\si{m.s}}$. (Default 100.)
-\item[{\ct C\_FACTOR}] in units of $\sqrt{\hbox{m/s}}$. (Default 0.)
+\item[{\ct RTI}] Response Time Index in units of $\si{m^\ha.s^\ha}$. (Default 100. $\si{m^\ha.s^\ha}$)
+\item[{\ct C\_FACTOR}] in units of $\si{m^\ha/s^\ha}$. (Default 0. $\si{m^\ha/s^\ha}$)
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
 \item[{\ct FLOW\_RATE} or {\ct MASS\_FLOW\_RATE}] in units of L/min or kg/s.
 An alternative is to provide the {\ct K\_FACTOR} in units of $\si{L/(min.bar^{\ha})}$ and the
-{\ct OPERATING\_PRESSURE} in units of bar.
+{\ct OPERATING\_PRESSURE}, the gauge pressure at the sprinkler, in units of bar.
 The flow rate is then given by $K \sqrt{p}$. Note that 1 bar is equivalent to
 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is
 equivalent to 14.41~L/min/bar$^\ha$.  If {\ct MASS\_FLOW\_RATE} is given then {\ct PARTICLE\_VELOCITY} must also be defined.
@@ -6830,8 +6830,8 @@ These lines would indicate that the pressure is 16~bar when the first sprinkler 
 When pressure ramps are used, both {\ct FLOW\_RATE} and {\ct PARTICLE\_VELOCITY} are dependent on the
 {\ct OPERATING\_PRESSURE}. Specify either the {\ct FLOW\_RATE}, or the
 {\ct K\_FACTOR} and {\ct OPERATING\_PRESSURE}. In the latter case, the flow rate is given by $K \sqrt{p}$ and the droplet velocity
-by $C \sqrt{p}$.  If spray pattern table is used, the coefficient $C$ is determined separately for each line of the
-table. The median diameter of the particle size distribution is scaled as
+by using the liquid density and the {\ct ORIFICE\_DIAMETER}.  If spray pattern table is used, the droplet velocity is determined separately for each line of the
+table by applying $K\sqrt{p}$ and the {\ct ORIFICE\_DIAMETER}. The median diameter of the particle size distribution is scaled as
 $d_m(p) = d_m(p_o)(p_o/p)^{1/3}$, where $p_o$ is the {\ct OPERATING\_PRESSURE}
 and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} on the corresponding {\ct PART} line.
 
