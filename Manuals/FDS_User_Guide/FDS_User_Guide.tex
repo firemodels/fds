@@ -7005,7 +7005,7 @@ the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
 
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
-&SURF ID='SMOLDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, COLOR='RED' /
+&SURF ID='SMOLDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, SPEC_ID='MY SMOKE', COLOR='RED' /
 &VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='SMOLDER' /
 
 &PROP ID='Acme Smoke', QUANTITY='CHAMBER OBSCURATION', SPEC_ID='MY SMOKE' /
@@ -10222,7 +10222,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &           \\ \hline
 {\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & $\si{L/(min.bar^{\ha})}$ & 1.        \\ \hline
-{\ct LENGTH}                            & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8       \\ \hline
+{\ct LENGTH}                            & Real          & Section~\ref{info:smoke_detector}         & m                     & 1.8       \\ \hline
 {\ct MASS\_FLOW\_RATE}                  & Real          & Section~\ref{info:sprinklers}             & kg/s                  &           \\ \hline
 {\ct OFFSET}                            & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05      \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & Section~\ref{info:sprinklers}             & bar                   & 1.        \\ \hline
@@ -10401,7 +10401,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MESH\_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MINIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct PART\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
-{\ct PBX, PBY, PBZ}     & Real              & Section~\ref{info:SLCF}                   &           &                   \\ \hline
+{\ct PBX, PBY, PBZ}     & Real              & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 {\ct QUANTITY}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct QUANTITY2}         & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct SPEC\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
@@ -10432,7 +10432,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
 \hline \hline
 \endhead
-{\ct ABSORBING}                     & Logical     & Section~\ref{gas_species_props}         &                   & {\ct .FALSE.} \\ \hline
 {\ct AEROSOL}                       & Logical     & Section~\ref{info:deposition}           &                   & {\ct .FALSE.} \\ \hline
 {\ct ALIAS}                         & Character   & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
 {\ct BACKGROUND}                    & Logical     & Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
