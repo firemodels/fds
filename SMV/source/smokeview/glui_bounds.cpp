@@ -42,6 +42,7 @@ void boundmenu(GLUI_Rollout **ROLLOUT_bound, GLUI_Rollout **ROLLOUT_chop, GLUI_P
           GLUI_RadioGroup **RADIO_con_setmin,GLUI_RadioGroup **RADIO_con_setmax,
           GLUI_Checkbox **CHECKBOX_con_setchopmin, GLUI_Checkbox **CHECKBOX_con_setchopmax,
           GLUI_EditText **EDIT_con_chopmin, GLUI_EditText **EDIT_con_chopmax,
+          GLUI_StaticText **STATIC_con_min_unit,GLUI_StaticText **STATIC_con_max_unit,
           int *setminval, int *setmaxval,
           float *minval, float *maxval,
           int *setchopminval, int *setchopmaxval,
@@ -284,6 +285,15 @@ GLUI_RadioGroup *RADIO_p3_setmin=NULL, *RADIO_p3_setmax=NULL;
 
 GLUI_RadioButton *RADIOBUTTON_plot3d_iso_hidden=NULL;
 
+GLUI_StaticText *STATIC_bound_min_unit=NULL;
+GLUI_StaticText *STATIC_bound_max_unit=NULL;
+GLUI_StaticText *STATIC_slice_min_unit=NULL;
+GLUI_StaticText *STATIC_slice_max_unit=NULL;
+GLUI_StaticText *STATIC_part_min_unit=NULL;
+GLUI_StaticText *STATIC_part_max_unit=NULL;
+GLUI_StaticText *STATIC_plot3d_min_unit=NULL;
+GLUI_StaticText *STATIC_plot3d_max_unit=NULL;
+
 
 /* ------------------ update_research_mode ------------------------ */
 
@@ -407,6 +417,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &EDIT_patch_min,&EDIT_patch_max,&RADIO_patch_setmin,&RADIO_patch_setmax,
       &CHECKBOX_patch_setchopmin, &CHECKBOX_patch_setchopmax,
       &EDIT_patch_chopmin, &EDIT_patch_chopmax,
+      &STATIC_bound_min_unit,&STATIC_bound_max_unit,
       &setpatchmin,&setpatchmax,&patchmin,&patchmax,
       &setpatchchopmin, &setpatchchopmax,
       &patchchopmin, &patchchopmax,
@@ -497,6 +508,7 @@ extern "C" void glui_bounds_setup(int main_window){
         &EDIT_part_min,&EDIT_part_max,&RADIO_part_setmin,&RADIO_part_setmax,
         &CHECKBOX_part_setchopmin, &CHECKBOX_part_setchopmax,
         editcon, &EDIT_part_chopmax,
+        NULL,NULL,
         &setpartmin,&setpartmax,&partmin,&partmax,
         &setpartchopmin,&setpartchopmax,&partchopmin,&partchopmax,
         DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
@@ -587,6 +599,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &EDIT_p3_min,&EDIT_p3_max,&RADIO_p3_setmin,&RADIO_p3_setmax,
       &CHECKBOX_p3_setchopmin, &CHECKBOX_p3_setchopmax,
       &EDIT_p3_chopmin, &EDIT_p3_chopmax,
+      &STATIC_plot3d_min_unit,&STATIC_plot3d_max_unit,
       &setp3min_temp,&setp3max_temp,&p3min_temp,&p3max_temp,
       &setp3chopmin_temp, &setp3chopmax_temp,&p3chopmin_temp,&p3chopmax_temp,
       DONT_UPDATEBOUNDS,TRUNCATEBOUNDS,
@@ -624,6 +637,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &EDIT_slice_min,&EDIT_slice_max,&RADIO_slice_setmin,&RADIO_slice_setmax,
       &CHECKBOX_slice_setchopmin, &CHECKBOX_slice_setchopmax,
       &EDIT_slice_chopmin, &EDIT_slice_chopmax,
+      &STATIC_slice_min_unit,&STATIC_slice_max_unit,
       &setslicemin,&setslicemax,&slicemin,&slicemax,
       &setslicechopmin, &setslicechopmax,
       &slicechopmin, &slicechopmax,
@@ -869,6 +883,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
           GLUI_RadioGroup **RADIO_con_setmin,GLUI_RadioGroup **RADIO_con_setmax,
           GLUI_Checkbox **CHECKBOX_con_setchopmin, GLUI_Checkbox **CHECKBOX_con_setchopmax,
           GLUI_EditText **EDIT_con_chopmin, GLUI_EditText **EDIT_con_chopmax,
+          GLUI_StaticText **STATIC_con_min_unit,GLUI_StaticText **STATIC_con_max_unit,
 
           int *setminval, int *setmaxval,
           float *minval, float *maxval,
@@ -884,6 +899,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
 
   PANEL_g = glui_bounds->add_rollout_to_panel(PANEL_panel,_("Bound data"),false);
   if(bound_rollout!=NULL)*bound_rollout=PANEL_g;
+
   PANEL_a = glui_bounds->add_panel_to_panel(PANEL_g,"",GLUI_PANEL_NONE);
 
   *EDIT_con_min = glui_bounds->add_edittext_to_panel(PANEL_a,"",GLUI_EDITTEXT_FLOAT,minval,VALMIN,FILE_CB);
@@ -891,10 +907,18 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
     (*EDIT_con_min)->disable();
   }
   glui_bounds->add_column_to_panel(PANEL_a,false);
+  
+  if(STATIC_con_min_unit!=NULL){
+    *STATIC_con_min_unit=glui_bounds->add_statictext_to_panel(PANEL_a,"xx");
+    glui_bounds->add_column_to_panel(PANEL_a,false);
+    (*STATIC_con_min_unit)->set_w(10);
+  }
+
   *RADIO_con_setmin = glui_bounds->add_radiogroup_to_panel(PANEL_a,setminval,SETVALMIN,FILE_CB);
   glui_bounds->add_radiobutton_to_group(*RADIO_con_setmin,_("percentile min"));
   glui_bounds->add_radiobutton_to_group(*RADIO_con_setmin,_("set min"));
   glui_bounds->add_radiobutton_to_group(*RADIO_con_setmin,_("global min"));
+  
   PANEL_b = glui_bounds->add_panel_to_panel(PANEL_g,"",GLUI_PANEL_NONE);
 
   *EDIT_con_max = glui_bounds->add_edittext_to_panel(PANEL_b,"",GLUI_EDITTEXT_FLOAT,maxval,VALMAX,FILE_CB);
@@ -902,10 +926,17 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
     (*EDIT_con_max)->disable();
   }
   glui_bounds->add_column_to_panel(PANEL_b,false);
-    *RADIO_con_setmax = glui_bounds->add_radiogroup_to_panel(PANEL_b,setmaxval,SETVALMAX,FILE_CB);
-    glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("percentile max"));
-    glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("set max"));
-    glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("global max"));
+
+  if(STATIC_con_max_unit!=NULL){
+    *STATIC_con_max_unit=glui_bounds->add_statictext_to_panel(PANEL_b,"yy");
+    glui_bounds->add_column_to_panel(PANEL_b,false);
+    (*STATIC_con_max_unit)->set_w(10);
+  }
+
+  *RADIO_con_setmax = glui_bounds->add_radiogroup_to_panel(PANEL_b,setmaxval,SETVALMAX,FILE_CB);
+  glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("percentile max"));
+  glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("set max"));
+  glui_bounds->add_radiobutton_to_group(*RADIO_con_setmax,_("global max"));
 
   PANEL_c = glui_bounds->add_panel_to_panel(PANEL_g,"",GLUI_PANEL_NONE);
   
