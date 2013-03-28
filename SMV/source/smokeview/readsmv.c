@@ -8036,6 +8036,7 @@ int readini2(char *inifile, int localfile){
    if(match(buffer,"SCALEDFONT")==1){
      fgets(buffer,255,stream);
      sscanf(buffer,"%i %f %i",&scaled_font2d_height,&scaled_font2d_height2width,&scaled_font2d_thickness);
+     fgets(buffer,255,stream);
      sscanf(buffer,"%i %f %i",&scaled_font3d_height,&scaled_font3d_height2width,&scaled_font3d_thickness);
    }
    if(match(buffer,"FEDCOLORBAR")==1){
