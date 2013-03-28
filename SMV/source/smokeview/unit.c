@@ -382,7 +382,7 @@ void InitUnits(void){
   strcpy(units[1].unit,"mph");
   units[1].scale[0]=2.236931818;
   units[1].scale[1]=0.0;
-  strcpy(units[2].unit,"f/s");
+  strcpy(units[2].unit,"ft/s");
   units[2].scale[0]=3.2808333333;
   units[2].scale[1]=0.0;
 #ifdef pp_SMOKEDIFF
@@ -419,7 +419,7 @@ void InitUnits(void){
   strcpy(units[0].unit,"m");
   units[0].scale[0]=1.0;
   units[0].scale[1]=0.0;
-  strcpy(units[1].unit,"f");
+  strcpy(units[1].unit,"ft");
   units[1].scale[0]=3.280833333;
   units[1].scale[1]=0.0;
 #ifdef pp_SMOKEDIFF
