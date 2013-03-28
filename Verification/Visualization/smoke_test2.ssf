@@ -7,13 +7,19 @@ SETTIMEVAL
  0.159000
 LOADINIFILE
  smoke_test2_all.ini
+RENDERCLIP
+ 1 30 30 125 125
 RENDERONCE
  smoke_test2_all
 LOADINIFILE
  smoke_test2_every2.ini
+RENDERCLIP
+ 1 30 30 125 125
 RENDERONCE
  smoke_test2_every2
 LOADINIFILE
  smoke_test2_every3.ini
+RENDERCLIP
+ 1 30 30 125 125
 RENDERONCE
  smoke_test2_every3
