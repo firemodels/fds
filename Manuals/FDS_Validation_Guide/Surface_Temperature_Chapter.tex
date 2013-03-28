@@ -393,8 +393,147 @@ TCW4IN              & 0.05      & 0.07      & 3.83      \\ \hline
 
 \clearpage
 
+\subsection{Summary of Wall, Ceiling, and Floor Temperature Predictions}
 
-\section{Structural Steel}
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.5in]{FIGURES/ScatterPlots/Wall_Temperature} \\
+\includegraphics[width=3.5in]{FIGURES/ScatterPlots/Ceiling_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of wall and ceiling temperature predictions]
+{Summary of wall and ceiling temperature predictions.}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.5in]{FIGURES/ScatterPlots/Floor_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of floor temperature predictions]
+{Summary of floor temperature predictions.}
+\end{figure}
+
+\clearpage
+
+\section{Target Temperature}
+
+A ``target'' refers to any object that is not a wall, ceiling, or floor. In the sections to follow, the targets consist of structural steel members, electrical cables, and various other objects.
+
+\subsection{NIST/NRC Experiments}
+
+Electrical cables of various types (power and control), and configurations (horizontal or vertical; in tray or free-hanging), were installed in the test compartment. For each of the four cable targets considered, measurements of the local gas temperature, surface temperature, radiative heat flux, and total heat flux are available.  The following pages display comparisons of surface temperature for Control Cable B, Horizontal Cable Tray D, Power Cable F, and Vertical Cable Tray G. For the bundled cables within horizontal and vertical trays (Targets D and G), FDS assumes them to be rectangular slabs of thickness comparable to the diameter of the individual cables. For the free-hanging cables B and F, FDS assumes them to be cylinders of uniform composition.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Cable_B_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Cable_B_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Cable_B_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Cable_B_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Cable_B_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Cable_B_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Cable_B_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Cable_B_Temp}
+\end{tabular*}
+\label{NIST_NRC_Cable_B_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Cable_B_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Cable_B_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Cable_B_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Cable_B_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Cable_B_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Cable_B_Temp}
+\end{tabular*}
+\label{NIST_NRC_Cable_B_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Cable_D_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Cable_D_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Cable_D_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Cable_D_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Cable_D_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Cable_D_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Cable_D_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Cable_D_Temp}
+\end{tabular*}
+\label{NIST_NRC_Cable_D_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Cable_D_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Cable_D_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Cable_D_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Cable_D_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Cable_D_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Cable_D_Temp}
+\end{tabular*}
+\label{NIST_NRC_Cable_D_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Cable_F_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Cable_F_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Cable_F_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Cable_F_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Cable_F_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Cable_F_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Cable_F_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Cable_F_Temp}
+\end{tabular*}
+\label{NIST_NRC_Cable_F_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Cable_F_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Cable_F_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Cable_F_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Cable_F_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Cable_F_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Cable_F_Temp}
+\end{tabular*}
+\label{NIST_NRC_Cable_F_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Cable_G_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Cable_G_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Cable_G_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Cable_G_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Cable_G_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Cable_G_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Cable_G_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Cable_G_Temp}
+\end{tabular*}
+\label{NIST_NRC_Cable_G_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Cable_G_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Cable_G_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Cable_G_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Cable_G_Temp} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Cable_G_Temp} &
+\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Cable_G_Temp}
+\end{tabular*}
+\label{NIST_NRC_Cable_G_Open}
+\end{figure}
+
+\clearpage
 
 \subsection{SP Adiabatic Surface Temperature Experiments}
 
@@ -792,11 +931,23 @@ In addition to the steel structural elments, five cylinders (``slugs'') of nicke
 
 \clearpage
 
+\subsection{Summary of Target Temperature Predictions}
 
 
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.5in]{FIGURES/ScatterPlots/Target_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of target temperature predictions]
+{Summary of target temperature predictions.}
+\end{figure}
+
+\clearpage
 
 
-\section{Electrical Cables}
+\section{THIEF Model}
 
 A common ``target'' in industrial fire simulations are electrical cables because often these cables supply power or control fire protection or other safety related equipment. Often the objective of the simulation is to determine the time to electrical failure, which involves computing the time at which the inner temperature of the cable reaches an experimentally determined ``failure'' temperature where the cable is no longer able to conduct current as designed. The model does not distinguish between various modes of failure. It is purely a thermal model.
 
@@ -879,117 +1030,7 @@ Figure~\ref{Cable_Failure_Time_Summary_Plot} compares the measured versus predic
 
 \clearpage
 
-\subsection{NIST/NRC Experiments}
 
-Electrical cables of various types (power and control), and configurations (horizontal or vertical; in tray or free-hanging), were installed in the test compartment. For each of the four cable targets considered, measurements of the local gas temperature, surface temperature, radiative heat flux, and total heat flux are available.  The following pages display comparisons of surface temperature for Control Cable B, Horizontal Cable Tray D, Power Cable F, and Vertical Cable Tray G. For the bundled cables within horizontal and vertical trays (Targets D and G), FDS assumes them to be rectangular slabs of thickness comparable to the diameter of the individual cables. For the free-hanging cables B and F, FDS assumes them to be cylinders of uniform composition.
-
-\newpage
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Cable_B_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Cable_B_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Cable_B_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Cable_B_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Cable_B_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Cable_B_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Cable_B_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Cable_B_Temp}
-\end{tabular*}
-\label{NIST_NRC_Cable_B_Closed}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Cable_B_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Cable_B_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Cable_B_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Cable_B_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Cable_B_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Cable_B_Temp}
-\end{tabular*}
-\label{NIST_NRC_Cable_B_Open}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Cable_D_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Cable_D_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Cable_D_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Cable_D_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Cable_D_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Cable_D_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Cable_D_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Cable_D_Temp}
-\end{tabular*}
-\label{NIST_NRC_Cable_D_Closed}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Cable_D_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Cable_D_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Cable_D_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Cable_D_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Cable_D_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Cable_D_Temp}
-\end{tabular*}
-\label{NIST_NRC_Cable_D_Open}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Cable_F_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Cable_F_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Cable_F_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Cable_F_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Cable_F_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Cable_F_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Cable_F_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Cable_F_Temp}
-\end{tabular*}
-\label{NIST_NRC_Cable_F_Closed}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Cable_F_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Cable_F_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Cable_F_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Cable_F_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Cable_F_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Cable_F_Temp}
-\end{tabular*}
-\label{NIST_NRC_Cable_F_Open}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_Cable_G_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_07_Cable_G_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_02_Cable_G_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_08_Cable_G_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_04_Cable_G_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_10_Cable_G_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_13_Cable_G_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_16_Cable_G_Temp}
-\end{tabular*}
-\label{NIST_NRC_Cable_G_Closed}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_03_Cable_G_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_09_Cable_G_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_05_Cable_G_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_14_Cable_G_Temp} \\
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_15_Cable_G_Temp} &
-\includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_18_Cable_G_Temp}
-\end{tabular*}
-\label{NIST_NRC_Cable_G_Open}
-\end{figure}
-
-\clearpage
 
 
 \subsection{PRISME Experiments}
@@ -1026,9 +1067,24 @@ Figure~\ref{Cable_Failure_Time_Summary_Plot} compares the measured versus predic
 
 \clearpage
 
+\subsection{Summary of THIEF Cable Temperature Predictions}
+
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.5in]{FIGURES/ScatterPlots/THIEF_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of THIEF cable temperature predictions]
+{Summary of THIEF cable temperature predictions.}
+\end{figure}
+
+\clearpage
+
 \subsection{Time to Failure}
 
-In addition to comparing the peak temperature predictions and measurements for electrical cables, it is also useful to consider the uncertainty in predicting the time to cable failure. Obviously, the two quantities are related, but from a practical standpoint, it is the time to failure that is of interest in these types of analyses. Figure~\ref{Cable_Failure_Time_Summary_Plot} displays results for both the CAROLFIRE and PRISME experiments. 
+In addition to comparing the peak temperature predictions and measurements for electrical cables, it is also useful to consider the uncertainty in predicting the time to cable failure. Obviously, the two quantities are related, but from a practical standpoint, it is the time to failure that is of interest in these types of analyses. Figure~\ref{Cable_Failure_Time_Summary_Plot} displays results for both the CAROLFIRE and PRISME experiments.
 
 \begin{figure}[h!]
 \begin{center}
@@ -1042,21 +1098,9 @@ In addition to comparing the peak temperature predictions and measurements for e
 \end{figure}
 
 
-\clearpage
 
 
 
 
-\section{Summary of Surface Temperature Predictions}
 
 
-\begin{figure}[h!]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=3.5in]{FIGURES/ScatterPlots/Target_Temperature} \\
-\includegraphics[width=3.5in]{FIGURES/ScatterPlots/Wall_Temperature}
-\end{tabular}
-\end{center}
-\caption[Summary of target and wall temperature predictions]
-{Summary of target and wall temperature predictions.}
-\end{figure}
