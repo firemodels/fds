@@ -1012,7 +1012,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
 
   GLUI_Panel *PANEL_a,*PANEL_b,*PANEL_c;
   GLUI_Rollout *PANEL_e=NULL,*PANEL_g=NULL;
-  GLUI_Panel *PANEL_f=NULL;
+  GLUI_Panel *PANEL_f=NULL, *PANEL_h=NULL;
 
   PANEL_g = glui_bounds->add_rollout_to_panel(PANEL_panel,_("Bound data"),false);
   if(bound_rollout!=NULL)*bound_rollout=PANEL_g;
@@ -1071,24 +1071,29 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
     PANEL_f = glui_bounds->add_panel_to_panel(PANEL_e,"",GLUI_PANEL_NONE);
 
     *EDIT_con_chopmin = glui_bounds->add_edittext_to_panel(PANEL_f,"",GLUI_EDITTEXT_FLOAT,chopminval,CHOPVALMIN,FILE_CB);
-    *EDIT_con_chopmax = glui_bounds->add_edittext_to_panel(PANEL_f,"",GLUI_EDITTEXT_FLOAT,chopmaxval,CHOPVALMAX,FILE_CB);
     glui_bounds->add_column_to_panel(PANEL_f,false);
 
-    if(STATIC_con_cmin_unit!=NULL&&STATIC_con_cmax_unit!=NULL){
+    if(STATIC_con_cmin_unit!=NULL){
       *STATIC_con_cmin_unit=glui_bounds->add_statictext_to_panel(PANEL_f,"xx");
       (*STATIC_con_cmin_unit)->set_w(10);
-      *STATIC_con_cmax_unit=glui_bounds->add_statictext_to_panel(PANEL_f,"xx");
       glui_bounds->add_column_to_panel(PANEL_f,false);
-      (*STATIC_con_cmax_unit)->set_w(10);
     }
     *CHECKBOX_con_setchopmin=glui_bounds->add_checkbox_to_panel(PANEL_f,_("Below"),setchopminval,SETCHOPMINVAL,FILE_CB);
-    *CHECKBOX_con_setchopmax=glui_bounds->add_checkbox_to_panel(PANEL_f,_("Above"),setchopmaxval,SETCHOPMAXVAL,FILE_CB);
-//  FILE_CB(SETCHOPMINVAL);
-//ERROR    FILE_CB(SETCHOPMAXVAL);
+
+    PANEL_h = glui_bounds->add_panel_to_panel(PANEL_e,"",GLUI_PANEL_NONE);
+
+    *EDIT_con_chopmax = glui_bounds->add_edittext_to_panel(PANEL_h,"",GLUI_EDITTEXT_FLOAT,chopmaxval,CHOPVALMAX,FILE_CB);
+    glui_bounds->add_column_to_panel(PANEL_h,false);
+
+    if(STATIC_con_cmax_unit!=NULL){
+      *STATIC_con_cmax_unit=glui_bounds->add_statictext_to_panel(PANEL_h,"xx");
+      glui_bounds->add_column_to_panel(PANEL_h,false);
+      (*STATIC_con_cmax_unit)->set_w(10);
+    }
+    *CHECKBOX_con_setchopmax=glui_bounds->add_checkbox_to_panel(PANEL_h,_("Above"),setchopmaxval,SETCHOPMAXVAL,FILE_CB);
+
     glui_bounds->add_button_to_panel(PANEL_e,_("Update"),CHOPUPDATE,FILE_CB);
   }
-
-//  PANEL_d = glui_bounds->add_panel_to_panel(PANEL_panel,"",GLUI_PANEL_NONE);
 
 }
 
