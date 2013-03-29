@@ -33,3 +33,4 @@ Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Chang
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.6,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Entrainment
 Extinction Time,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,1,0,no,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/USCG_HAI_Extinction
 Species Concentration,Measured Change in Volume Fraction (\%),Predicted Change in Volume Fraction (\%),0,100,0.03 0.95,SouthEast,1,5,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Species_Concentration
+Detector Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,30,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Detector_Temperature
