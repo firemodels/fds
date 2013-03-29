@@ -1150,6 +1150,10 @@ void initvars(void){
   degC[1]='C';
   degC[2]=0;
   
+  degF[0]=176; // deg symbol (small superscript 0)
+  degF[1]='F';
+  degF[2]=0;
+
   strcpy(default_fed_colorbar,"FED");
 
   label_first_ptr = &label_first;

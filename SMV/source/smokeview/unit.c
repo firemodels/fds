@@ -330,7 +330,7 @@ void InitUnits(void){
   strcpy(units[0].unit,degC);
   units[0].scale[0]=1.0;
   units[0].scale[1]=0.0;
-  strcpy(units[1].unit,"F");
+  strcpy(units[1].unit,degF);
   units[1].scale[0]=1.8;
 #ifdef pp_SMOKEDIFF
   if(smokediff==1){
