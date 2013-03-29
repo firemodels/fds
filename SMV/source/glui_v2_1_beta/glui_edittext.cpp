@@ -549,7 +549,7 @@ void    GLUI_EditText::draw_text( int x, int y )
       
     glRasterPos2i( text_x, 13);
     for( i=substring_start; i<=substring_end; i++ ) {
-      glutBitmapCharacter( get_font(), this->text[i] );
+      glutBitmapCharacter( get_font(), (unsigned char)this->text[i] );
     }
   }
   else {                          /* There is a selection */
@@ -558,12 +558,12 @@ void    GLUI_EditText::draw_text( int x, int y )
       if ( IN_BOUNDS( i, sel_lo, sel_hi-1)) { /* This character is selected */
 	glColor3f( 1., 1., 1. );
 	glRasterPos2i( x, 13);
-	glutBitmapCharacter( get_font(), this->text[i] );
+	glutBitmapCharacter( get_font(), (unsigned char)this->text[i] );
       }
       else {
 	glColor3f( 0., 0., 0. );
 	glRasterPos2i( x, 13);
-	glutBitmapCharacter( get_font(), this->text[i] );
+	glutBitmapCharacter( get_font(), (unsigned char)this->text[i] );
       }
       
       x += char_width( text[i] );

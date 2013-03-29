@@ -562,7 +562,7 @@ void _glutBitmapString( void *font, char *s )
   char *p = s;
 
   while( *p != '\0' )  {
-    glutBitmapCharacter( font, *p );
+    glutBitmapCharacter( font, (unsigned char)*p );
     p++;
   }
 }

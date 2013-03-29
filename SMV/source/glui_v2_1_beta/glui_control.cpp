@@ -352,7 +352,7 @@ void   GLUI_Control::draw_string( char *text )
 
 void         GLUI_Control::draw_char( char c )
 {
-  glutBitmapCharacter( get_font(), c );
+  glutBitmapCharacter( get_font(), (unsigned char)c );
 }
 
 
