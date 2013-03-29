@@ -43,6 +43,7 @@ void boundmenu(GLUI_Rollout **ROLLOUT_bound, GLUI_Rollout **ROLLOUT_chop, GLUI_P
           GLUI_Checkbox **CHECKBOX_con_setchopmin, GLUI_Checkbox **CHECKBOX_con_setchopmax,
           GLUI_EditText **EDIT_con_chopmin, GLUI_EditText **EDIT_con_chopmax,
           GLUI_StaticText **STATIC_con_min_unit,GLUI_StaticText **STATIC_con_max_unit,
+          GLUI_StaticText **STATIC_con_cmin_unit,GLUI_StaticText **STATIC_con_cmax_unit,
           int *setminval, int *setmaxval,
           float *minval, float *maxval,
           int *setchopminval, int *setchopmaxval,
@@ -293,6 +294,52 @@ GLUI_StaticText *STATIC_part_min_unit=NULL;
 GLUI_StaticText *STATIC_part_max_unit=NULL;
 GLUI_StaticText *STATIC_plot3d_min_unit=NULL;
 GLUI_StaticText *STATIC_plot3d_max_unit=NULL;
+GLUI_StaticText *STATIC_bound_cmin_unit=NULL;
+GLUI_StaticText *STATIC_bound_cmax_unit=NULL;
+GLUI_StaticText *STATIC_slice_cmin_unit=NULL;
+GLUI_StaticText *STATIC_slice_cmax_unit=NULL;
+GLUI_StaticText *STATIC_part_cmin_unit=NULL;
+GLUI_StaticText *STATIC_part_cmax_unit=NULL;
+GLUI_StaticText *STATIC_plot3d_cmin_unit=NULL;
+GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
+
+
+/* ------------------ update_glui_part_units ------------------------ */
+
+extern "C" void update_glui_part_units(void){
+  if(STATIC_part_min_unit!=NULL){
+    if(partmin_unit!=NULL){
+      STATIC_part_min_unit->set_name((char *)partmin_unit);
+    }
+    else{
+      STATIC_part_min_unit->set_name((char *)"");
+    }
+  }
+  if(STATIC_part_cmin_unit!=NULL){
+    if(partmin_unit!=NULL){
+      STATIC_part_cmin_unit->set_name((char *)partmin_unit);
+    }
+    else{
+      STATIC_part_cmin_unit->set_name((char *)"");
+    }
+  }
+  if(STATIC_part_max_unit!=NULL){
+    if(partmax_unit!=NULL){
+      STATIC_part_max_unit->set_name((char *)partmax_unit);
+    }
+    else{
+      STATIC_part_max_unit->set_name((char *)"");
+    }
+  }
+  if(STATIC_part_cmax_unit!=NULL){
+    if(partmax_unit!=NULL){
+      STATIC_part_cmax_unit->set_name((char *)partmax_unit);
+    }
+    else{
+      STATIC_part_cmax_unit->set_name((char *)"");
+    }
+  }
+}
 
 /* ------------------ update_glui_plot3d_units ------------------------ */
 
@@ -302,6 +349,12 @@ extern "C" void update_glui_plot3d_units(void){
   }
   if(STATIC_plot3d_max_unit!=NULL&&plot3dmax_unit!=NULL){
     STATIC_plot3d_max_unit->set_name((char *)plot3dmax_unit);
+  }
+  if(STATIC_plot3d_cmin_unit!=NULL&&plot3dmin_unit!=NULL){
+    STATIC_plot3d_cmin_unit->set_name((char *)plot3dmin_unit);
+  }
+  if(STATIC_plot3d_cmax_unit!=NULL&&plot3dmax_unit!=NULL){
+    STATIC_plot3d_cmax_unit->set_name((char *)plot3dmax_unit);
   }
 }
 
@@ -314,6 +367,12 @@ extern "C" void update_glui_slice_units(void){
   if(STATIC_slice_max_unit!=NULL&&slicemax_unit!=NULL){
     STATIC_slice_max_unit->set_name((char *)slicemax_unit);
   }
+  if(STATIC_slice_cmin_unit!=NULL&&slicemin_unit!=NULL){
+    STATIC_slice_cmin_unit->set_name((char *)slicemin_unit);
+  }
+  if(STATIC_slice_cmax_unit!=NULL&&slicemax_unit!=NULL){
+    STATIC_slice_cmax_unit->set_name((char *)slicemax_unit);
+  }
 }
 
 /* ------------------ update_glui_patch_units ------------------------ */
@@ -324,6 +383,12 @@ extern "C" void update_glui_patch_units(void){
   }
   if(STATIC_bound_max_unit!=NULL&&patchmax_unit!=NULL){
     STATIC_bound_max_unit->set_name((char *)patchmax_unit);
+  }
+  if(STATIC_bound_cmin_unit!=NULL&&patchmin_unit!=NULL){
+    STATIC_bound_cmin_unit->set_name((char *)patchmin_unit);
+  }
+  if(STATIC_bound_cmax_unit!=NULL&&patchmax_unit!=NULL){
+    STATIC_bound_cmax_unit->set_name((char *)patchmax_unit);
   }
 }
 
@@ -430,8 +495,14 @@ extern "C" void glui_bounds_setup(int main_window){
         glui_bounds->add_separator_to_panel(ROLLOUT_bound);
         CHECKBOX_showchar=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Show temp threshold"),&vis_threshold,SHOWCHAR,Bound_CB);
         CHECKBOX_showonlychar=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Show only temp threshold"),&vis_onlythreshold,SHOWCHAR,Bound_CB);
-        glui_bounds->add_spinner_to_panel(ROLLOUT_bound,_("temp threshold (C)"),GLUI_SPINNER_FLOAT,
-          &temp_threshold);
+        {
+          char label[256];
+
+          strcpy(label,"Temperature threshold (");
+          strcat(label,degC);
+          strcat(label,") ");
+          glui_bounds->add_spinner_to_panel(ROLLOUT_bound,label,GLUI_SPINNER_FLOAT,&temp_threshold);
+        }
         Bound_CB(SHOWCHAR);
       }
       glui_bounds->add_column_to_panel(ROLLOUT_bound,false);
@@ -440,7 +511,14 @@ extern "C" void glui_bounds_setup(int main_window){
       if(activate_threshold==1){
         CHECKBOX_showchar=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Show temp threshold"),&vis_threshold,SHOWCHAR,Bound_CB);
         CHECKBOX_showonlychar=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Show only threshold"),&vis_onlythreshold,SHOWCHAR,Bound_CB);
-        glui_bounds->add_spinner_to_panel(ROLLOUT_bound,_("temp threshold (C)"),GLUI_SPINNER_FLOAT,&temp_threshold);
+        {
+          char label[256];
+
+          strcpy(label,"Temperature (");
+          strcat(label,degC);
+          strcat(label,") ");
+          glui_bounds->add_spinner_to_panel(ROLLOUT_bound,label,GLUI_SPINNER_FLOAT,&temp_threshold);
+        }
         Bound_CB(SHOWCHAR);
       }
     }
@@ -450,6 +528,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &CHECKBOX_patch_setchopmin, &CHECKBOX_patch_setchopmax,
       &EDIT_patch_chopmin, &EDIT_patch_chopmax,
       &STATIC_bound_min_unit,&STATIC_bound_max_unit,
+      &STATIC_bound_cmin_unit,&STATIC_bound_cmax_unit,
       &setpatchmin,&setpatchmax,&patchmin,&patchmax,
       &setpatchchopmin, &setpatchchopmax,
       &patchchopmin, &patchchopmax,
@@ -540,11 +619,13 @@ extern "C" void glui_bounds_setup(int main_window){
         &EDIT_part_min,&EDIT_part_max,&RADIO_part_setmin,&RADIO_part_setmax,
         &CHECKBOX_part_setchopmin, &CHECKBOX_part_setchopmax,
         editcon, &EDIT_part_chopmax,
+        &STATIC_part_min_unit,&STATIC_part_max_unit,
         NULL,NULL,
         &setpartmin,&setpartmax,&partmin,&partmax,
         &setpartchopmin,&setpartchopmax,&partchopmin,&partchopmax,
         DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
         PART_CB);
+        PART_CB(FILETYPEINDEX);
         if(partinfo!=NULL&&partinfo->version==0){
           SPINNER_partpointstep=glui_bounds->add_spinner_to_panel(ROLLOUT_part,_("Point skip"),GLUI_SPINNER_INT,
             &partpointskip,FRAMELOADING,PART_CB);
@@ -632,6 +713,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &CHECKBOX_p3_setchopmin, &CHECKBOX_p3_setchopmax,
       &EDIT_p3_chopmin, &EDIT_p3_chopmax,
       &STATIC_plot3d_min_unit,&STATIC_plot3d_max_unit,
+      &STATIC_plot3d_cmin_unit,&STATIC_plot3d_cmax_unit,
       &setp3min_temp,&setp3max_temp,&p3min_temp,&p3max_temp,
       &setp3chopmin_temp, &setp3chopmax_temp,&p3chopmin_temp,&p3chopmax_temp,
       DONT_UPDATEBOUNDS,TRUNCATEBOUNDS,
@@ -671,6 +753,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &CHECKBOX_slice_setchopmin, &CHECKBOX_slice_setchopmax,
       &EDIT_slice_chopmin, &EDIT_slice_chopmax,
       &STATIC_slice_min_unit,&STATIC_slice_max_unit,
+      &STATIC_slice_cmin_unit,&STATIC_slice_cmax_unit,
       &setslicemin,&setslicemax,&slicemin,&slicemax,
       &setslicechopmin, &setslicechopmax,
       &slicechopmin, &slicechopmax,
@@ -917,6 +1000,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
           GLUI_Checkbox **CHECKBOX_con_setchopmin, GLUI_Checkbox **CHECKBOX_con_setchopmax,
           GLUI_EditText **EDIT_con_chopmin, GLUI_EditText **EDIT_con_chopmax,
           GLUI_StaticText **STATIC_con_min_unit,GLUI_StaticText **STATIC_con_max_unit,
+          GLUI_StaticText **STATIC_con_cmin_unit,GLUI_StaticText **STATIC_con_cmax_unit,
 
           int *setminval, int *setmaxval,
           float *minval, float *maxval,
@@ -983,10 +1067,20 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
   if(EDIT_con_chopmin!=NULL&&EDIT_con_chopmax!=NULL&&CHECKBOX_con_setchopmin!=NULL&&CHECKBOX_con_setchopmax!=NULL){
     PANEL_e = glui_bounds->add_rollout_to_panel(PANEL_panel,_("Truncate data"),false);
     if(chop_rollout!=NULL)*chop_rollout=PANEL_e;
+
     PANEL_f = glui_bounds->add_panel_to_panel(PANEL_e,"",GLUI_PANEL_NONE);
+
     *EDIT_con_chopmin = glui_bounds->add_edittext_to_panel(PANEL_f,"",GLUI_EDITTEXT_FLOAT,chopminval,CHOPVALMIN,FILE_CB);
     *EDIT_con_chopmax = glui_bounds->add_edittext_to_panel(PANEL_f,"",GLUI_EDITTEXT_FLOAT,chopmaxval,CHOPVALMAX,FILE_CB);
     glui_bounds->add_column_to_panel(PANEL_f,false);
+
+    if(STATIC_con_cmin_unit!=NULL&&STATIC_con_cmax_unit!=NULL){
+      *STATIC_con_cmin_unit=glui_bounds->add_statictext_to_panel(PANEL_f,"xx");
+      (*STATIC_con_cmin_unit)->set_w(10);
+      *STATIC_con_cmax_unit=glui_bounds->add_statictext_to_panel(PANEL_f,"xx");
+      glui_bounds->add_column_to_panel(PANEL_f,false);
+      (*STATIC_con_cmax_unit)->set_w(10);
+    }
     *CHECKBOX_con_setchopmin=glui_bounds->add_checkbox_to_panel(PANEL_f,_("Below"),setchopminval,SETCHOPMINVAL,FILE_CB);
     *CHECKBOX_con_setchopmax=glui_bounds->add_checkbox_to_panel(PANEL_f,_("Above"),setchopmaxval,SETCHOPMAXVAL,FILE_CB);
 //  FILE_CB(SETCHOPMINVAL);
@@ -1821,6 +1915,10 @@ void PART_CB(int var){
     setpartchopmax=propi->setchopmax;
     partchopmin=propi->chopmin;
     partchopmax=propi->chopmax;
+
+    partmin_unit = (unsigned char *)propi->label->unit;
+    partmax_unit = partmin_unit;
+    update_glui_part_units();
 
     // update controls
 

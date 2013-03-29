@@ -326,7 +326,14 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   SPINNER_hrrpuv_cutoff->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
 
-  PANEL_colormap2a = glui_3dsmoke->add_rollout_to_panel(PANEL_colormap2,"Temperature (C)");
+  {
+    char label[256];
+
+    strcpy(label,"Temperature (");
+    strcat(label,degC);
+    strcat(label,")");
+    PANEL_colormap2a = glui_3dsmoke->add_rollout_to_panel(PANEL_colormap2,label);
+  }
   SPINNER_temperature_min=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2a,_("min"),GLUI_SPINNER_FLOAT,
     &temperature_min,TEMP_MIN,Smoke3d_CB);
   SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap2a,_("cutoff"),GLUI_SPINNER_FLOAT,

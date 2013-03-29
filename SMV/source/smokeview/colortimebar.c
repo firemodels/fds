@@ -1196,7 +1196,7 @@ void drawColorBars(void){
     }
     else if(parttype==-2){
       strcpy(partshortlabel2,"HRRPUV");
-      strcpy(partunitlabel2,"kW/m^3");
+      strcpy(partunitlabel2,"kW/m3");
     }
     else{
       if(partshortlabel!=NULL)strcpy(partshortlabel2,partshortlabel);
