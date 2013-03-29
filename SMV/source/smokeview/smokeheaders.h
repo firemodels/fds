@@ -5,6 +5,9 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void update_glui_patch_units(void);
+EXTERNCPP void update_glui_slice_units(void);
+EXTERNCPP void update_glui_plot3d_units(void);
 EXTERNCPP void Update_Smokecolormap(int option);
 #ifdef pp_SUPERMESH
 EXTERNCPP void define_volsmoke_textures(void);

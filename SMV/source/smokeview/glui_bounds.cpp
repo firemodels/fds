@@ -294,6 +294,38 @@ GLUI_StaticText *STATIC_part_max_unit=NULL;
 GLUI_StaticText *STATIC_plot3d_min_unit=NULL;
 GLUI_StaticText *STATIC_plot3d_max_unit=NULL;
 
+/* ------------------ update_glui_plot3d_units ------------------------ */
+
+extern "C" void update_glui_plot3d_units(void){
+  if(STATIC_plot3d_min_unit!=NULL&&plot3dmin_unit!=NULL){
+    STATIC_plot3d_min_unit->set_name((char *)plot3dmin_unit);
+  }
+  if(STATIC_plot3d_max_unit!=NULL&&plot3dmax_unit!=NULL){
+    STATIC_plot3d_max_unit->set_name((char *)plot3dmax_unit);
+  }
+}
+
+/* ------------------ update_glui_slice_units ------------------------ */
+
+extern "C" void update_glui_slice_units(void){
+  if(STATIC_slice_min_unit!=NULL&&slicemin_unit!=NULL){
+    STATIC_slice_min_unit->set_name((char *)slicemin_unit);
+  }
+  if(STATIC_slice_max_unit!=NULL&&slicemax_unit!=NULL){
+    STATIC_slice_max_unit->set_name((char *)slicemax_unit);
+  }
+}
+
+/* ------------------ update_glui_patch_units ------------------------ */
+
+extern "C" void update_glui_patch_units(void){
+  if(STATIC_bound_min_unit!=NULL&&patchmin_unit!=NULL){
+    STATIC_bound_min_unit->set_name((char *)patchmin_unit);
+  }
+  if(STATIC_bound_max_unit!=NULL&&patchmax_unit!=NULL){
+    STATIC_bound_max_unit->set_name((char *)patchmax_unit);
+  }
+}
 
 /* ------------------ update_research_mode ------------------------ */
 
@@ -604,6 +636,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &setp3chopmin_temp, &setp3chopmax_temp,&p3chopmin_temp,&p3chopmax_temp,
       DONT_UPDATEBOUNDS,TRUNCATEBOUNDS,
       PLOT3D_CB);
+    PLOT3D_CB(FILETYPEINDEX);
     PLOT3D_CB(UNLOAD_QDATA);
   }
 
@@ -1072,7 +1105,6 @@ extern "C" void PLOT3D_CB(int var){
    setp3chopmin[list_p3_index_old]=setp3chopmin_temp;
    setp3chopmax[list_p3_index_old]=setp3chopmax_temp;
 
-
    p3min_temp=p3min[list_p3_index];
    p3max_temp=p3max[list_p3_index];
    setp3min_temp=setp3min[list_p3_index];
@@ -1081,13 +1113,16 @@ extern "C" void PLOT3D_CB(int var){
    p3chopmax_temp=p3chopmax[list_p3_index];
    setp3chopmin_temp=setp3chopmin[list_p3_index];
    setp3chopmax_temp=setp3chopmax[list_p3_index];
-
+   if(plot3dinfo!=NULL){
+     plot3dmin_unit = (unsigned char *)plot3dinfo->label[list_p3_index].unit;
+     plot3dmax_unit = plot3dmin_unit;
+     update_glui_plot3d_units();
+   }
 
    EDIT_p3_min->set_float_val(p3min_temp);
    EDIT_p3_max->set_float_val(p3max_temp);
    EDIT_p3_chopmin->set_float_val(p3chopmin_temp);
    EDIT_p3_chopmax->set_float_val(p3chopmax_temp);
-
 
    list_p3_index_old=list_p3_index;
    RADIO_p3_setmin->set_int_val(setp3min_temp);

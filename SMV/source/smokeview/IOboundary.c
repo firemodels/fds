@@ -1253,6 +1253,9 @@ void global2localpatchbounds(const char *key){
       patchchopmax=patchinfo[i].chopmax;
       setpatchchopmin=patchinfo[i].setchopmin;
       setpatchchopmax=patchinfo[i].setchopmax;
+      patchmin_unit = (unsigned char *)patchinfo[i].label.unit;
+      patchmax_unit = patchmin_unit;
+      update_glui_patch_units();
       update_hidepatchsurface();
       
       local2globalpatchbounds(key);

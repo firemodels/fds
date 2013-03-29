@@ -1235,6 +1235,9 @@ void UnitsMenu(int value){
     set_labels_controls();
 
   }
+  else if(value==-3){
+    show_all_units = 1 - show_all_units;
+  }
   updatemenu=1;  
   glutPostRedisplay();
 }
@@ -7149,11 +7152,16 @@ updatemenu=0;
       f_units *uci;
 
       uci = unitclasses + i;
-      if(uci->visible==0)continue;
-      glutAddSubMenu(uci->unitclass,uci->submenuid);
+      if(uci->visible==1||show_all_units==1){
+        glutAddSubMenu(uci->unitclass,uci->submenuid);
+      }
     }
     if(vishmsTimelabel==0)glutAddMenuEntry(_("time (h:m:s)"),-2);
     if(vishmsTimelabel==1)glutAddMenuEntry(_("*time (h:m:s)"),-2);
+#ifdef pp_BETA
+    if(show_all_units==1)glutAddMenuEntry("*show all units",-3);
+    if(show_all_units==0)glutAddMenuEntry("show all units",-3);
+#endif
     glutAddMenuEntry(_("Reset"),-1);
   }
 

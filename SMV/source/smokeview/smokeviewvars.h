@@ -25,6 +25,14 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+#ifdef pp_BETA
+SVEXTERN int SVDECL(show_all_units,1);
+#else
+SVEXTERN int SVDECL(show_all_units,0);
+#endif
+SVEXTERN unsigned char SVDECL(*patchmin_unit,NULL),SVDECL(*patchmax_unit,NULL);
+SVEXTERN unsigned char SVDECL(*slicemin_unit,NULL),SVDECL(*slicemax_unit,NULL);
+SVEXTERN unsigned char SVDECL(*plot3dmin_unit,NULL),SVDECL(*plot3dmax_unit,NULL);
 SVEXTERN char degC[3];
 SVEXTERN float SVDECL(tmax_part,16.0);
 SVEXTERN int SVDECL(redirect,0);

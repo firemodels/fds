@@ -2961,6 +2961,9 @@ void setslicebounds(int slicetype){
     slicechopmax=slicebounds[slicetype].chopmax;
     setslicechopmin=slicebounds[slicetype].setchopmin;
     setslicechopmax=slicebounds[slicetype].setchopmax;
+    slicemin_unit = (unsigned char *)slicebounds[slicetype].label->unit;
+    slicemax_unit = slicemin_unit;
+    update_glui_slice_units();
   }
 }
 
