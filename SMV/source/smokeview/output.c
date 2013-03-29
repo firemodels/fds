@@ -170,7 +170,7 @@ void output3Text(float *color, float x, float y, float z, char *string){
   else{
     glRasterPos3f(x, y, z);
     for (c=string; *c!='\0'; c++){
-      glutBitmapCharacter(large_font,*c);
+      glutBitmapCharacter(large_font,(unsigned char)*c);
     }
   }
 }
@@ -184,7 +184,7 @@ void outputLargeText(float x, float y, char *string){
   glColor3fv(foregroundcolor);
   glRasterPos2f(x, y);
   for (c=string; *c!='\0'; c++){
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,*c);
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,(unsigned char)*c);
   }
 }
 
@@ -203,7 +203,7 @@ void outputText(float x, float y, char *string){
   else{
     glRasterPos2f(x, y);
     for (c=string; *c!='\0'; c++){
-      glutBitmapCharacter(large_font,*c);
+      glutBitmapCharacter(large_font,(unsigned char)*c);
     }  
   }
 }
