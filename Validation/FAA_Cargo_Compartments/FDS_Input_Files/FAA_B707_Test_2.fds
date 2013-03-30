@@ -1,6 +1,6 @@
 &HEAD CHID='FAA_B707_Test_2', TITLE='FAA Cargo Compartment Fire Tests - B707 setup' /
 
-&MESH IJK=32,72,15, XB=-1.5873, 1.5873, 0.0, 6.731, 0.0, 1.3716 /
+&MESH IJK=64,144,30, XB=-1.5873, 1.5873, 0.0, 6.731, 0.0, 1.3716 /
 
 &TIME T_END=300. /
 
