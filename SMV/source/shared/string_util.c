@@ -842,12 +842,12 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
   if(strlen(buffer)==1&&strcmp(buffer,"C")==0){
-    char *unit;
+    unsigned char *unit;
 
-    unit=flowlabel->unit;
+    unit=(unsigned char *)flowlabel->unit;
     unit[0]=176;
     unit[1]='C';
-    unit[2]=0;
+    unit[2]='\0';
   }
   else{
     STRCPY(flowlabel->unit,buffer);
@@ -897,12 +897,12 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
   if(strlen(buffer)==1&&strcmp(buffer,"C")==0){
-    char *unit;
+    unsigned char *unit;
 
-    unit=flowlabel->unit;
+    unit=(unsigned char *)flowlabel->unit;
     unit[0]=176;
     unit[1]='C';
-    unit[2]=0;
+    unit[2]='\0';
   }
   else{
     STRCPY(flowlabel->unit,buffer);
@@ -952,12 +952,12 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
   if(strlen(buffer)==1&&strcmp(buffer,"C")==0){
-    char *unit;
+    unsigned char *unit;
 
-    unit=flowlabel->unit;
+    unit=(unsigned char *)flowlabel->unit;
     unit[0]=176;
     unit[1]='C';
-    unit[2]=0;
+    unit[2]='\0';
   }
   else{
     STRCPY(flowlabel->unit,buffer);
