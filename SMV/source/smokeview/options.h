@@ -134,7 +134,7 @@
 #endif
 #endif
 
-//*** turn off featurs on the Mac that don't work there
+//*** turn off features on the Mac that don't work there
 
 #ifdef pp_OSX
 #undef pp_LANG (alternate languages)
