@@ -4529,24 +4529,15 @@ void MENU_vslice(int vec_type){
 /* ------------------ InitMenus ------------------------ */
 
 void InitMenus(int unload){
-  int nscripts;
-  int n,i;
-  int nsliceloaded;
-  int nevacloaded;
-  int nsmoke3dloaded;
-  int nvolsmoke3dloaded;
-  int nvsliceloaded2,nvsliceloaded;
-  int nmultisliceloaded;
-  int npartloaded;
-  int npart5loaded;
-  int npart4loaded;
+  int i;
+  int nsmoke3dloaded,nvolsmoke3dloaded;
+  int nsliceloaded,nvsliceloaded2,nvsliceloaded,nmultisliceloaded;
+  int nvslice0, nvslice1, nvslice2,nvsliceloaded0,nvsliceloaded1;
+  int npartloaded,npart5loaded,npart4loaded,nevacloaded;
   int npatchloaded;
   int nplot3dloaded;
   int nisoloaded;
-  int nvslice0, nvslice1, nvslice2;
-  int nvsliceloaded0;
-  int nvsliceloaded1;
-
+  
 static int labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
 static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0, resolutionmultipliermenu=0;
@@ -5114,6 +5105,8 @@ updatemenu=0;
 /* --------------------------------static variable menu -------------------------- */
 
   if(nplot3dinfo>0){
+    int n;
+
     CREATEMENU(staticvariablemenu,StaticVariableMenu);
     for(n=0;n<numplot3dvars;n++){
       char *p3label;
@@ -5135,6 +5128,8 @@ updatemenu=0;
 /* --------------------------------iso variable menu -------------------------- */
 
   if(nplot3dinfo>0){
+    int n;
+
     CREATEMENU(isovariablemenu,IsoVariableMenu);
     for(n=0;n<numplot3dvars;n++){
       char *p3label;
@@ -8762,6 +8757,7 @@ updatemenu=0;
       for(i=0;i<nzoneinfo;i++){
         zonedata *zonei;
         char menulabel[1024];
+        int n;
 
         zonei = zoneinfo + i;
         if(zonefilenum==i){
@@ -8882,30 +8878,17 @@ updatemenu=0;
     glutAddMenuEntry(_("Stop Rendering"),-1);
 
 
-    nscripts=0;
-    if(script_recording==NULL){
-      scriptfiledata *scriptfile;
-      STRUCTSTAT statbuffer;
+    {
+      int nscripts;
 
-      for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
-        char *file;
-        int len;
+      nscripts=0;
+      if(script_recording==NULL){
+        scriptfiledata *scriptfile;
+        STRUCTSTAT statbuffer;
 
-        file=scriptfile->file;
-        if(file==NULL)continue;
-        len = strlen(file);
-        if(len<=0)continue;
-        if(STAT(file,&statbuffer)!=0)continue;
-
-        nscripts++;
-      }
-
-      if(nscripts>0){
-        CREATEMENU(scriptlistmenu,ScriptMenu);
         for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
           char *file;
           int len;
-          char menulabel[1024];
 
           file=scriptfile->file;
           if(file==NULL)continue;
@@ -8913,43 +8896,60 @@ updatemenu=0;
           if(len<=0)continue;
           if(STAT(file,&statbuffer)!=0)continue;
 
-          strcpy(menulabel,"  ");
-          strcat(menulabel,file);
-          glutAddMenuEntry(menulabel,scriptfile->id);
+          nscripts++;
         }
-        CREATEMENU(scriptsteplistmenu,ScriptMenu2);
-        for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
-          char *file;
-          int len;
-          char menulabel[1024];
 
-          file=scriptfile->file;
-          if(file==NULL)continue;
-          len = strlen(file);
-          if(len<=0)continue;
-          if(STAT(file,&statbuffer)!=0)continue;
+        if(nscripts>0){
+          CREATEMENU(scriptlistmenu,ScriptMenu);
+          for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+            char *file;
+            int len;
+            char menulabel[1024];
 
-          strcpy(menulabel,"  ");
-          strcat(menulabel,file);
-          glutAddMenuEntry(menulabel,scriptfile->id);
+            file=scriptfile->file;
+            if(file==NULL)continue;
+            len = strlen(file);
+            if(len<=0)continue;
+            if(STAT(file,&statbuffer)!=0)continue;
+
+            strcpy(menulabel,"  ");
+            strcat(menulabel,file);
+            glutAddMenuEntry(menulabel,scriptfile->id);
+          }
+          CREATEMENU(scriptsteplistmenu,ScriptMenu2);
+          for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+            char *file;
+            int len;
+            char menulabel[1024];
+
+            file=scriptfile->file;
+            if(file==NULL)continue;
+            len = strlen(file);
+            if(len<=0)continue;
+            if(STAT(file,&statbuffer)!=0)continue;
+
+            strcpy(menulabel,"  ");
+            strcat(menulabel,file);
+            glutAddMenuEntry(menulabel,scriptfile->id);
+          }
         }
       }
-    }
-    CREATEMENU(scriptrecordmenu,ScriptMenu);
-    if(script_recording==NULL){
-      glutAddMenuEntry(_("Start"),SCRIPT_START_RECORDING);
-      glutAddMenuEntry(_("Start (disable file loading)"),SCRIPT_START_RECORDING2);
-    }
-    glutAddMenuEntry(_("Stop"),SCRIPT_STOP_RECORDING);
+      CREATEMENU(scriptrecordmenu,ScriptMenu);
+      if(script_recording==NULL){
+        glutAddMenuEntry(_("Start"),SCRIPT_START_RECORDING);
+        glutAddMenuEntry(_("Start (disable file loading)"),SCRIPT_START_RECORDING2);
+      }
+      glutAddMenuEntry(_("Stop"),SCRIPT_STOP_RECORDING);
     
-    CREATEMENU(scriptmenu,ScriptMenu);
-    if(nscripts>0){
-      glutAddSubMenu(_("Run"),scriptlistmenu);
-      glutAddSubMenu(_("Step (using ^)"),scriptsteplistmenu);
-      if(script_step==1)glutAddMenuEntry(_("Continue"),SCRIPT_CONTINUE);
-      if(script_step==1||current_script_command!=NULL)glutAddMenuEntry(_("Cancel"),SCRIPT_CANCEL);
+      CREATEMENU(scriptmenu,ScriptMenu);
+      if(nscripts>0){
+        glutAddSubMenu(_("Run"),scriptlistmenu);
+        glutAddSubMenu(_("Step (using ^)"),scriptsteplistmenu);
+        if(script_step==1)glutAddMenuEntry(_("Continue"),SCRIPT_CONTINUE);
+        if(script_step==1||current_script_command!=NULL)glutAddMenuEntry(_("Cancel"),SCRIPT_CANCEL);
+      }
+      glutAddSubMenu(_("Record"),scriptrecordmenu);
     }
-    glutAddSubMenu(_("Record"),scriptrecordmenu);
 
   /* --------------------------------loadunload menu -------------------------- */
     {
