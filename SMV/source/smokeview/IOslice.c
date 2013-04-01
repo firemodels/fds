@@ -3463,7 +3463,7 @@ void drawgslice_outline(void){
 
 #ifdef pp_GPU
 
-/* ------------------ init_volsmoke_texture ------------------------ */
+/* ------------------ init_slice3d_texture ------------------------ */
 
 void init_slice3d_texture(mesh *meshi){
   GLint border_size=0;
