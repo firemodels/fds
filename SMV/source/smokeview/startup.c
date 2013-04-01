@@ -1146,13 +1146,21 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+#ifdef pp_DEG
   degC[0]=176; // deg symbol (small superscript 0)
   degC[1]='C';
   degC[2]='\0';
+#else
+  strcpy(degC,"C");
+#endif
   
+#ifdef pp_DEG
   degF[0]=176; // deg symbol (small superscript 0)
   degF[1]='F';
   degF[2]='\0';
+#else
+  strcpy(degF,"F");
+#endif
 
   strcpy(default_fed_colorbar,"FED");
 

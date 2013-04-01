@@ -50,6 +50,7 @@
 #define pp_FREEZE_VOLSMOKE
 #define pp_LIGHT
 #define pp_SUPERMESH
+#define pp_DEG
 
 #define _CRT_SECURE_NO_DEPRECATE
 
@@ -133,8 +134,11 @@
 #endif
 #endif
 
+//*** turn off featurs on the Mac that don't work there
+
 #ifdef pp_OSX
-#undef pp_LANG
+#undef pp_LANG (alternate languages)
+#undef pp_DEG  (degree symbol)
 #endif
 
 // VVVVVVVVVVVVVVVVVVVVVVVVV  set defines used by various headers VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
