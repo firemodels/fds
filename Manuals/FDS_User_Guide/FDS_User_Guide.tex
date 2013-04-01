@@ -7411,9 +7411,9 @@ before water can flow out of the head.
 
 This control function behaves like an HVAC thermostat.  It can operate in one of two modes analogous to heating or cooling.
 The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function,
-a {\ct DEADBAND}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'},
+an upper and lower {\ct SETPOINT}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'},
 the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops
-below the lower value in {\ct DEADBAND} and reverts when it increases past the upper value, i.e., like a heating system.
+below the lower value in {\ct SETPOINT} and reverts when it increases past the upper value, i.e., like a heating system.
 The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e., a cooling system.
 
 For an HVAC system, the following lines of input would set up a simple thermostat:
