@@ -3408,7 +3408,7 @@ int readsmv(char *file, char *file2){
           is_block_terrain[nn]=0;
         }
         // temporary work around for terrain display of slice files
-        if(autoterrain==1)is_block_terrain[nn]=1;
+       // if(autoterrain==1)is_block_terrain[nn]=1;
       }
       continue;
     }
