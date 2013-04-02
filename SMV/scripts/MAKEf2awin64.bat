@@ -19,7 +19,7 @@ goto:eof
 call %envfile%
 
 echo Building 64 bit Windows versions of fds2ascii
-pause
+
 %svn_drive%
 cd %svn_root%\Utilities\fds2ascii\intel_win_64
 call make_fds2ascii

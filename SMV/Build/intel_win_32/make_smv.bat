@@ -7,7 +7,7 @@ IF "%SETUP_IFORT_COMPILER_IA32%"=="1" GOTO envexist
 set SETUP_IFORT_COMPILER_IA32=1
 
 echo Setting up compiler environment
-call "%IFORT_COMPILER12%\bin\iclvars" ia32 vs2008
+call "%IFORT_COMPILER13%\bin\compilervars" ia32 vs2008
 :envexist
 
 set SMV_TESTFLAG=

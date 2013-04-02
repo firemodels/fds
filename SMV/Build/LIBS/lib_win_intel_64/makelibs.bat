@@ -41,3 +41,6 @@ copy libpthreads.lib %LIBDIR%\pthreads.lib
 
 
 cd %LIBDIR%
+
+echo library builds complete
+pause
