@@ -1504,10 +1504,10 @@ void drawColorBars(void){
         vert_position = MIX2(0.0,3.0,colorbar_top_pos,colorbar_down_pos);
         outputBarText(0.0,vert_position,foreground_color,"0.00");
 
-        vert_position = MIX2(0.65,3.0,colorbar_top_pos,colorbar_down_pos);
+        vert_position = MIX2(0.3,3.0,colorbar_top_pos,colorbar_down_pos);
         outputBarText(0.0,vert_position,foreground_color,"0.30");
 
-        vert_position = MIX2(2.0,3.0,colorbar_top_pos,colorbar_down_pos);
+        vert_position = MIX2(1.0,3.0,colorbar_top_pos,colorbar_down_pos);
         outputBarText(0.0,vert_position,foreground_color,"1.00");
 
         vert_position = MIX2(3.0,3.0,colorbar_top_pos,colorbar_down_pos);
