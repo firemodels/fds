@@ -766,18 +766,41 @@ occurred had the ceiling extended further.}
 
 \subsection{NIST Dunes 2000 Experiments}
 
-Figure~\ref{NIST_Dunes_2000_Scatterplot} compares the measured versus predicted smoke detector activation times.
+Figure~\ref{NIST_Dunes_2000_Scatterplot} compares the measured versus predicted smoke detector activation times
+using the smoke detector model.
 
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[width=4.0in]{FIGURES/ScatterPlots/Smoke_Detector_Activation_Time} \\
 \vspace{0.25in}
 \end{tabular}
 \end{center}
-\caption[Summary of smoke detector activation times, NIST Dunes 2000 test series.]
-{Summary of smoke detector activation times, NIST Dunes 2000 test series.}
+\caption[Summary of smoke detector activation times (smoke detector model), NIST Dunes 2000.]
+{Summary of smoke detector activation times (using smoke detector model), NIST Dunes 2000.}
 \label{NIST_Dunes_2000_Scatterplot}
+\end{figure}
+
+
+\clearpage
+
+
+Figure~\ref{NIST_Dunes_2000_Scatterplot_Temp_Rise} compares the measured versus predicted smoke detector activation times
+using a heat detector/temperature rise approach. Heat detectors were placed in FDS at the same location as the smoke
+detectors. The heat detectors were set with an RTI of 5~$\sqrt{\hbox{m}\cdot \hbox{s}}$ and an activation temperature of
+\SI{10}{\celsius} above ambient temperature.
+
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Smoke_Detector_Activation_Time_Temp_Rise} \\
+\vspace{0.25in}
+\end{tabular}
+\end{center}
+\caption[Summary of smoke detector activation times (temperature rise), NIST Dunes 2000.]
+{Summary of smoke detector activation times (using temperature rise), NIST Dunes 2000.}
+\label{NIST_Dunes_2000_Scatterplot_Temp_Rise}
 \end{figure}
 
