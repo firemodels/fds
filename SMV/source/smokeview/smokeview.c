@@ -269,6 +269,7 @@ void camera2quat(camera *ca, float *quat, float *rotation){
 
 void ResetView(int option){
   int rotation_type_save;
+  int projection_type_save;
 
   in_external=0;
   switch (option){
@@ -277,16 +278,20 @@ void ResetView(int option){
   case RESTORE_EXTERIOR_VIEW:
     in_external=1;
     rotation_type_save = camera_current->rotation_type;
+    projection_type_save = camera_current->projection_type;
     copy_camera(camera_current,camera_external);
     camera_current->rotation_type=rotation_type_save;
+    camera_current->projection_type=projection_type_save;
     if(camera_current->projection_type==1){
       camera_current->eye[1]=camera_current->isometric_y;
     }
     break;
   case RESTORE_INTERIOR_VIEW:
     rotation_type_save = camera_current->rotation_type;
+    projection_type_save = camera_current->projection_type;
     copy_camera(camera_current,camera_internal);
     camera_current->rotation_type=rotation_type_save;
+    camera_current->projection_type=projection_type_save;
     break;
   case RESTORE_SAVED_VIEW:
     copy_camera(camera_current,camera_save);

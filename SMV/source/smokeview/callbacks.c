@@ -2462,7 +2462,7 @@ void setScreenSize(int *width, int *height){
   }
 }
 
-/* ------------------ update_camera_ypos ------------------------ */
+/* ------------------ Reshape_CB ------------------------ */
 
 void Reshape_CB(int width, int height){
   updatemenu=1;
