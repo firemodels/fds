@@ -936,18 +936,11 @@ void drawColorBars(void){
   int ileft=0;
   int leftzone, leftsmoke, leftslice, leftpatch, leftiso;
   int iposition;
-  float tttval, tttmin, tttmax;
-  float val;
-  float *p3lev;
-  databounds *sb;
-  patchdata *patchi;
 
-  int sliceunitclass,sliceunittype;
   int sliceflag=0;
   int isoflag=0;
   float *slicefactor=NULL;
   float slicefactor2[2];
-  float slicerange,isorange;
   float *isofactor=NULL;
 
   int plot3dunitclass, plot3dunittype;
@@ -989,6 +982,8 @@ void drawColorBars(void){
     SNIFF_ERRORS("before colorbar");
     CheckMemory;
     if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
+      databounds *sb;
+
       sb = slicebounds + islicetype;
 
       if(strcmp(sb->label->shortlabel,"FED")==0){
@@ -1222,6 +1217,9 @@ void drawColorBars(void){
 
   if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     char unitlabel[256];
+    int sliceunitclass,sliceunittype;
+    float *slicefactor=NULL;
+    databounds *sb;
 
     sb = slicebounds + islicetype;
     strcpy(unitlabel,sb->label->unit);
@@ -1258,6 +1256,7 @@ void drawColorBars(void){
 
   if(showiso_colorbar==1){
     char unitlabel[256];
+    databounds *sb;
 
     sb = isobounds + iisottype;
     strcpy(unitlabel,sb->label->unit);
@@ -1278,6 +1277,7 @@ void drawColorBars(void){
 
   if(showpatch==1){
     char unitlabel[256];
+    patchdata *patchi;
 
     patchi = patchinfo + patchtypes[ipatchtype];
     strcpy(unitlabel,patchi->label.unit);
@@ -1367,6 +1367,10 @@ void drawColorBars(void){
   // -------------- isosurface left labels ------------
 
   if(showiso_colorbar==1){
+    float tttval, tttmin, tttmax;
+    databounds *sb;
+    float isorange;
+
     sb = isobounds + iisottype;
     tttmin = sb->levels256[0];
     tttmax = sb->levels256[255];
@@ -1400,6 +1404,8 @@ void drawColorBars(void){
       if(iposition==i)continue;
       isocolorlabel_ptr=&(sb->colorlabels[i+1][0]);
       if(isoflag==1){
+        float val;
+
         val = tttmin + i*isorange/(nrgb-2);
         scalefloat2string(val,isocolorlabel, isofactor, isorange);
         isocolorlabel_ptr=isocolorlabel;
@@ -1413,6 +1419,7 @@ void drawColorBars(void){
 
   if(showevac_colorbar==1||(showsmoke==1&&parttype!=0)){
     float *partlevels256_ptr;
+    float tttval, tttmin, tttmax;
 
     partlevels256_ptr=partlevels256;
     if(prop_index>=0&&prop_index<npart5prop){
@@ -1460,6 +1467,8 @@ void drawColorBars(void){
         }
       }
       if(partflag==1){
+        float val;
+
         val = tttmin + i*partrange/(nrgb-2);
         scalefloat2string(val,partcolorlabel, partfactor, partrange);
         scalestring(partcolorlabel_ptr,partcolorlabel, partfactor, partrange);
@@ -1473,6 +1482,10 @@ void drawColorBars(void){
   // -------------- slice left labels ------------
 
   if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
+    float tttval, tttmin, tttmax;
+    databounds *sb;
+    float slicerange;
+
     sb=slicebounds+islicetype;
     tttmin = sb->levels256[0];
     tttmax = sb->levels256[255];
@@ -1524,6 +1537,8 @@ void drawColorBars(void){
         if(iposition==i)continue;
         slicecolorlabel_ptr=&(sb->colorlabels[i+1][0]);
         if(sliceflag==1){
+          float val;
+
           val = tttmin + i*slicerange/(nrgb-2);
           scalefloat2string(val,slicecolorlabel, slicefactor, slicerange);
           slicecolorlabel_ptr=slicecolorlabel;
@@ -1537,6 +1552,8 @@ void drawColorBars(void){
   // -------------- boundary left labels ------------
 
   if(showpatch==1){
+    float tttval, tttmin, tttmax;
+
     iposition=-1;
     tttmin = boundarylevels256[0];
     tttmax = boundarylevels256[255];
@@ -1570,6 +1587,8 @@ void drawColorBars(void){
       if(iposition==i)continue;
       patchcolorlabel_ptr=&colorlabelpatch[i+1][0];
       if(patchflag==1){
+        float val;
+
         val = tttmin + i*patchrange/(nrgb-2);
         scalefloat2string(val,patchcolorlabel, patchfactor, patchrange);
         patchcolorlabel_ptr=patchcolorlabel;
@@ -1582,6 +1601,8 @@ void drawColorBars(void){
   // -------------- zone left labels ------------
 
   if(showzone==1&&sethazardcolor==0){
+    float tttval, tttmin, tttmax;
+
     iposition=-1;
     tttmin = zonelevels256[0];
     tttmax = zonelevels256[255];
@@ -1613,6 +1634,8 @@ void drawColorBars(void){
       if(iposition==i)continue;
       zonecolorlabel_ptr=&colorlabelzone[i+1][0];
       if(zoneflag==1){
+        float val;
+
         val = tttmin + (i-1)*zonerange/(nrgb-2);
         scalefloat2string(val,zonecolorlabel, zonefactor, zonerange);
         zonecolorlabel_ptr=zonecolorlabel;
@@ -1626,6 +1649,9 @@ void drawColorBars(void){
   // -------------- plot3d left labels ------------
 
   if(showplot3d==1){
+    float *p3lev;
+    float tttval, tttmin, tttmax;
+
     iposition=-1;
     p3lev = p3levels256[plotn-1];
     tttmin = p3lev[0];
@@ -1659,6 +1685,8 @@ void drawColorBars(void){
         if(iposition==i)continue;
         plot3dcolorlabel_ptr=&colorlabelp3[plotn-1][i][0];
         if(plot3dflag==1){
+          float val;
+
           val = tttmin + i*plot3drange/(nrgb-2);
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
@@ -1678,6 +1706,8 @@ void drawColorBars(void){
         if(iposition==i)continue;
         plot3dcolorlabel_ptr=&colorlabeliso[plotn-1][i][0];
         if(plot3dflag==1){
+          float val;
+
           val = tttmin + (i-1)*plot3drange/(nrgb-2);
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
