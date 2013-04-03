@@ -353,7 +353,7 @@ if stats_output == 1
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\tiny');
-    fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|l|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within    \\');
     fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline \hline');
