@@ -40,15 +40,21 @@ Save_Metric_Type      = saved_data{:,11};
 % If a statistics output file is specified, then enable statistics throughout
 % stats_outputs = 0: No output statistics
 % stats_outputs = 1: FDS verification statistics
-% stats_outputs = 2: FDS validation statistics
+% stats_outputs = 2: FDS or FDTs validation statistics
 if length(varargin) >= 1
     output_file = varargin{1};
-    % Check if FDS verification plot, set appropriate flag
+    % Check if FDS verification plot, set appropriate flag and tex output file
     if strfind(output_file, 'FDS_verification_scatterplot_output')
         stats_output = 1;
-    % Check if FDS validation plot, set appropriate flag
+        statistics_tex_output = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/verification_statistics.tex';
+    % Check if FDS validation plot, set appropriate flag and tex output file
     elseif strfind(output_file, 'FDS_validation_scatterplot_output')
         stats_output = 2;
+        statistics_tex_output = '../../Manuals/FDS_Validation_Guide/FIGURES/ScatterPlots/validation_statistics.tex';
+    % Check if FDTs validation plot, set appropriate flag and tex output file
+    elseif strfind(output_file, 'FDTs_validation_scatterplot_output')
+        stats_output = 2;
+        statistics_tex_output = '../../Manuals/FDTs_Validation_Guide/FIGURES/Scatterplots/validation_statistics.tex';
     end
 else
     stats_output = 0;
@@ -343,8 +349,7 @@ end
 % Write statistics information to a LaTeX table for inclusion in the
 % FDS Verification Guide (SCRIPT_FIGURES/verification_statistics.tex)
 if stats_output == 1
-    filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/verification_statistics.tex';
-    fid = fopen(filename, 'wt');
+    fid = fopen(statistics_tex_output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\tiny');
@@ -393,11 +398,10 @@ if stats_output == 1
     fprintf(fid,'%s\n','\end{center}');
 end
 
-% Write statistics information to a LaTeX table for inclusion in the
-% FDS Validation Guide (SCRIPT_FIGURES/validation_statistics.tex)
+% Write statistics information to a LaTeX table for inclusion
+% in the FDS Validation Guide or FDTs Validation Guide
 if stats_output == 2
-    filename = '../../Manuals/FDS_Validation_Guide/FIGURES/ScatterPlots/validation_statistics.tex';
-    fid = fopen(filename, 'wt');
+    fid = fopen(statistics_tex_output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\begin{longtable}{|c|c|c|c|c|c|}');
