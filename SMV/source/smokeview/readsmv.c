@@ -7286,8 +7286,8 @@ void parsedatabase(char *file){
 
 int surfid_compare( const void *arg1, const void *arg2 ){
   surfdata *surfi, *surfj;
-
   int i, j;
+
   i=*(int *)arg1;
   j=*(int *)arg2;
 
@@ -7366,13 +7366,16 @@ void backup_blockage(blockagedata *bc){
 /* ------------------ ifsmoothblock ------------------------ */
 
 int ifsmoothblock(void){
-  int i,j;
-  mesh *meshi;
-  blockagedata *bc;
+  int i;
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int  j;
+
     meshi = meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
+      blockagedata *bc;
+
       bc = meshi->blockageinfoptrs[j];
       if(bc->type==BLOCK_smooth&&bc->del!=1)return 1;
     }
@@ -7382,22 +7385,28 @@ int ifsmoothblock(void){
 /* ------------------ updateusetextures ------------------------ */
 
 void updateusetextures(void){
-  int i,j,k;
-  mesh *meshi;
-  blockagedata *bc;
-  texture *texti;
-  ventdata *vi;
+  int i;
 
   for(i=0;i<ntextures;i++){
+    texture *texti;
+
     texti=textureinfo + i;
     texti->used=0;
   }
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
     meshi=meshinfo + i;
     if(textureinfo!=NULL){
       for(j=0;j<meshi->nbptrs;j++){
+        int k;
+        blockagedata *bc;
+
         bc=meshi->blockageinfoptrs[j];
         for(k=0;k<6;k++){
+          texture *texti;
+
           texti = bc->surf[k]->textureinfo;
           if(texti!=NULL&&texti->loaded==1){
             if(texti->loaded==1&&bc->type==BLOCK_smooth)bc->type=BLOCK_texture;
@@ -7408,6 +7417,8 @@ void updateusetextures(void){
       }
     }
     for(j=0;j<meshi->nvents+12;j++){
+      ventdata *vi;
+
       vi = meshi->ventinfo + j;
       if(vi->surf[0]==NULL){
         if(vent_surfacedefault!=NULL){
@@ -7421,6 +7432,8 @@ void updateusetextures(void){
       }
       if(textureinfo!=NULL){
         if(vi->surf[0]!=NULL){
+          texture *texti;
+
           texti = vi->surf[0]->textureinfo;
           if(texti!=NULL&&texti->loaded==1){
             if(usetextures==1)texti->display=1;
@@ -7432,6 +7445,7 @@ void updateusetextures(void){
   }
   for(i=0;i<ndevice_texture_list;i++){
     int texture_index;
+    texture *texti;
 
     texture_index  = device_texture_list_index[i];
     texti=textureinfo + texture_index;
@@ -7442,6 +7456,8 @@ void updateusetextures(void){
   }
   ntextures_loaded_used=0;
   for(i=0;i<ntextures;i++){
+    texture *texti;
+
     texti = textureinfo + i;
     if(texti->loaded==0)continue;
     if(texti->used==0)continue;
@@ -8030,16 +8046,8 @@ void writeboundini(void){
 
 int readini2(char *inifile, int localfile){
   char buffer[255],buffer2[255];
-
-  int tours_flag;
-  int nn;
-  int n3d;
-  int iplot3d, isetmin, isetmax;
-  float p3mintemp, p3maxtemp;
   FILE *stream;
   int i;
-  int j;
-  int tempval;
 
   updatemenu=1;
   updatefacelists=1;
@@ -8343,12 +8351,18 @@ int readini2(char *inifile, int localfile){
     }
 #endif
     if(match(buffer,"V_PLOT3D")==1){
+      int tempval;
+      int n3d;
+
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&tempval);
       if(tempval<0)tempval=0;
       n3d=tempval;
       if(n3d>mxplot3dvars)n3d=mxplot3dvars;
       for(i=0;i<n3d;i++){  
+        int iplot3d, isetmin, isetmax;
+        float p3mintemp, p3maxtemp;
+
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %f %i %f",&iplot3d,&isetmin,&p3mintemp,&isetmax,&p3maxtemp);
         iplot3d--;
@@ -8487,12 +8501,18 @@ int readini2(char *inifile, int localfile){
       }
     }
     if(match(buffer,"C_PLOT3D")==1){
+      int tempval;
+      int n3d;
+
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&tempval);
       if(tempval<0)tempval=0;
       n3d=tempval;
       if(n3d>mxplot3dvars)n3d=mxplot3dvars;
       for(i=0;i<n3d;i++){  
+        int iplot3d, isetmin, isetmax;
+        float p3mintemp, p3maxtemp;
+
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %f %i %f",&iplot3d,&isetmin,&p3mintemp,&isetmax,&p3maxtemp);
         iplot3d--;
@@ -9050,6 +9070,7 @@ int readini2(char *inifile, int localfile){
     }
     if(localfile==1&&match(buffer,"PART5CLASSVIS")==1){
       int ntemp;
+      int j;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&ntemp);
@@ -9089,6 +9110,7 @@ int readini2(char *inifile, int localfile){
 
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
+        int j;
 
         propi = part5propinfo + i;
         fgets(buffer,255,stream);
@@ -9110,6 +9132,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"COLORBAR") == 1){
       float *rgb_ini_copy;
+      int nn;
       
       CheckMemory;
       fgets(buffer,255,stream);
@@ -9130,6 +9153,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"COLOR2BAR") == 1){
       float *rgb_ini_copy;
+      int nn;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&nrgb2_ini);
@@ -9979,6 +10003,8 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"ISOCOLORS")==1){
+      int nn;
+
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",&iso_shininess,&iso_transparency);
       fgets(buffer,255,stream);
@@ -10200,6 +10226,7 @@ int readini2(char *inifile, int localfile){
           cbi->label_ptr=cbi->label;
           for(i=0;i<cbi->nnodes;i++){
             int icbar;
+            int nn;
 
             fgets(buffer,255,stream);
             r1=-1; g1=-1; b1=-1; 
@@ -10419,6 +10446,8 @@ typedef struct {
     }
 
       if(localfile==1){
+        int tours_flag;
+
         tours_flag=0;
         if(match(buffer,"TOURS")==1)tours_flag=1;
         if( tours_flag==1){
@@ -10454,6 +10483,8 @@ typedef struct {
             int glui_avatar_index_local;
 
             for(i=1;i<ntours;i++){
+              int j;
+
               touri = tourinfo + i;
               inittour(touri);
               fgets(buffer,255,stream);
@@ -10565,47 +10596,42 @@ typedef struct {
 /* ------------------ writeini ------------------------ */
 
 void writeini(int flag){
-  char buffer[1024];
-
-  float *iso_colors_temp;
-  int n_iso_colors_temp;
-  int n3d;
-  int nn;
-  extern int numplot3dvars;
-  FILE *fileout;
+  FILE *fileout=NULL;
   int i;
-  int j;
-  char *outfilename=NULL;
 
-  fileout=NULL;
-  switch (flag) {
-  case GLOBAL_INI:
-    fileout=fopen(INIfile,"w");
-    outfilename=INIfile;
-    break;
-  case STDOUT_INI:
-    fileout=stdout;
-    break;
-  case SCRIPT_INI:
-    fileout=fopen(script_filename,"w");
-    outfilename=script_filename;
-    break;
-  case LOCAL_INI:
-    fileout=fopen(caseini_filename,"w");
-    outfilename=caseini_filename;
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-  if(flag==SCRIPT_INI)flag=LOCAL_INI;
-  if(fileout==NULL){
-    if(outfilename!=NULL){
-      fprintf(stderr,"*** Error: unable to open %s for writing\n",outfilename);
-      return;
+  {
+
+    char *outfilename=NULL;
+
+    switch (flag) {
+    case GLOBAL_INI:
+      fileout=fopen(INIfile,"w");
+      outfilename=INIfile;
+      break;
+    case STDOUT_INI:
+      fileout=stdout;
+      break;
+    case SCRIPT_INI:
+      fileout=fopen(script_filename,"w");
+      outfilename=script_filename;
+      break;
+    case LOCAL_INI:
+      fileout=fopen(caseini_filename,"w");
+      outfilename=caseini_filename;
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
     }
-    else{
-      fprintf(stderr,"*** Error: unable to open ini file for output\n");
+    if(flag==SCRIPT_INI)flag=LOCAL_INI;
+    if(fileout==NULL){
+      if(outfilename!=NULL){
+        fprintf(stderr,"*** Error: unable to open %s for writing\n",outfilename);
+        return;
+      }
+      else{
+        fprintf(stderr,"*** Error: unable to open ini file for output\n");
+      }
     }
   }
 
@@ -10615,8 +10641,8 @@ void writeini(int flag){
   fprintf(fileout,"------\n\n");
   fprintf(fileout,"COLORBAR\n");
   fprintf(fileout," %i %i %i\n",nrgb,usetexturebar,colorbar_select_index);
-  for(nn=0;nn<nrgb;nn++){
-    fprintf(fileout," %f %f %f\n",rgb[nn][0],rgb[nn][1],rgb[nn][2]);
+  for(i=0;i<nrgb;i++){
+    fprintf(fileout," %f %f %f\n",rgb[i][0],rgb[i][1],rgb[i][2]);
   }
   fprintf(fileout,"COLOR2BAR\n");
   fprintf(fileout," %i\n",8);
@@ -10628,20 +10654,26 @@ void writeini(int flag){
   fprintf(fileout," %f %f %f :magenta\n",rgb2[5][0],rgb2[5][1],rgb2[5][2]);
   fprintf(fileout," %f %f %f :cyan   \n",rgb2[6][0],rgb2[6][1],rgb2[6][2]);
   fprintf(fileout," %f %f %f :black  \n",rgb2[7][0],rgb2[7][1],rgb2[7][2]);
-  if(iso_ambient_ini!=NULL){
-    n_iso_colors_temp=n_iso_ambient_ini;
-    iso_colors_temp=iso_ambient_ini;
-  }
-  else{
-    n_iso_colors_temp=n_iso_ambient;
-    iso_colors_temp=iso_ambient;
-  }
-  fprintf(fileout,"ISOCOLORS\n");
-	fprintf(fileout," %f %f : shininess, transparency\n",iso_shininess, iso_transparency);
-	fprintf(fileout," %f %f %f : specular\n",iso_specular[0],iso_specular[1],iso_specular[2]);
-  fprintf(fileout," %i\n",n_iso_colors_temp);
-  for(nn=0;nn<n_iso_colors_temp;nn++){
-    fprintf(fileout," %f %f %f\n",iso_colors_temp[4*nn],iso_colors_temp[4*nn+1],iso_colors_temp[4*nn+2]);
+  {
+    float *iso_colors_temp;
+    int n_iso_colors_temp;
+
+  
+    if(iso_ambient_ini!=NULL){
+      n_iso_colors_temp=n_iso_ambient_ini;
+      iso_colors_temp=iso_ambient_ini;
+    }
+    else{
+      n_iso_colors_temp=n_iso_ambient;
+      iso_colors_temp=iso_ambient;
+    }
+    fprintf(fileout,"ISOCOLORS\n");
+  	fprintf(fileout," %f %f : shininess, transparency\n",iso_shininess, iso_transparency);  
+  	fprintf(fileout," %f %f %f : specular\n",iso_specular[0],iso_specular[1],iso_specular[2]);
+    fprintf(fileout," %i\n",n_iso_colors_temp);
+    for(i=0;i<n_iso_colors_temp;i++){
+      fprintf(fileout," %f %f %f\n",iso_colors_temp[4*i],iso_colors_temp[4*i+1],iso_colors_temp[4*i+2]);
+    }
   }
   fprintf(fileout,"VENTCOLOR\n");
   fprintf(fileout," %f %f %f\n",ventcolor[0],ventcolor[1],ventcolor[2]);
@@ -10856,20 +10888,24 @@ void writeini(int flag){
   fprintf(fileout," %i %f %i %f\n",setzonemin,zonemin,setzonemax,zonemax);
 
   fprintf(fileout,"V_PLOT3D\n");
-  n3d = 5;
-  if(n3d<numplot3dvars)n3d=numplot3dvars;
-  if(n3d>mxplot3dvars)n3d=mxplot3dvars;
-  fprintf(fileout," %i\n",n3d);
-  for(i=0;i<n3d;i++){
-    fprintf(fileout," %i %i %f %i %f\n",i+1,setp3min[i],p3min[i],setp3max[i],p3max[i]);
-  }
-  fprintf(fileout,"C_PLOT3D\n");
-  n3d = 5;
-  if(n3d<numplot3dvars)n3d=numplot3dvars;
-  if(n3d>mxplot3dvars)n3d=mxplot3dvars;
-  fprintf(fileout," %i\n",n3d);
-  for(i=0;i<n3d;i++){
-    fprintf(fileout," %i %i %f %i %f\n",i+1,setp3chopmin[i],p3chopmin[i],setp3chopmax[i],p3chopmax[i]);
+  {
+    int n3d;
+
+    n3d = 5;
+    if(n3d<numplot3dvars)n3d=numplot3dvars;
+    if(n3d>mxplot3dvars)n3d=mxplot3dvars;
+    fprintf(fileout," %i\n",n3d);
+    for(i=0;i<n3d;i++){
+      fprintf(fileout," %i %i %f %i %f\n",i+1,setp3min[i],p3min[i],setp3max[i],p3max[i]);
+    }
+    fprintf(fileout,"C_PLOT3D\n");
+    n3d = 5;
+    if(n3d<numplot3dvars)n3d=numplot3dvars;
+    if(n3d>mxplot3dvars)n3d=mxplot3dvars;
+    fprintf(fileout," %i\n",n3d);
+    for(i=0;i<n3d;i++){
+      fprintf(fileout," %i %i %f %i %f\n",i+1,setp3chopmin[i],p3chopmin[i],setp3chopmax[i],p3chopmax[i]);
+    }
   }
 
   fprintf(fileout,"UNLOAD_QDATA\n");
@@ -10955,6 +10991,7 @@ void writeini(int flag){
       fprintf(fileout,"PART5PROPDISP\n");
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
+        int j;
 
         propi = part5propinfo + i;
         fprintf(fileout," ");
@@ -10977,6 +11014,8 @@ void writeini(int flag){
     }
   }
   if(flag==LOCAL_INI&&npartclassinfo>0){
+    int j;
+
     fprintf(fileout,"PART5CLASSVIS\n");
     fprintf(fileout," %i\n",npartclassinfo);
     for(j=0;j<npartclassinfo;j++){
@@ -11552,6 +11591,8 @@ void writeini(int flag){
           fprintf(fileout," %i %i %f %i %i\n",
             touri->nkeyframes,touri->global_tension_flag,touri->global_tension,touri->glui_avatar_index,touri->display);
           for(framei=&touri->first_frame;framei!=&touri->last_frame;framei=framei->next){
+            char buffer[1024];
+
             if(framei==&touri->first_frame)continue;
             sprintf(buffer,"%f %f %f %f ",
               framei->noncon_time,
