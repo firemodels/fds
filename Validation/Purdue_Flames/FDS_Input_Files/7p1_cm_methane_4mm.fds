@@ -16,7 +16,7 @@
       C=1.
       H=4.
       HEAT_OF_COMBUSTION=50350.
-      SOOT_YIELD=0.05 /
+      SOOT_YIELD=0.01 /
   
 &RADI RADIATIVE_FRACTION=0.1 /
   
