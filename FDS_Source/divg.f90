@@ -150,8 +150,9 @@ IF (N_TRACKED_SPECIES > 0) THEN
       IF (.NOT.RESEARCH_MODE) THEN
          RHO_D = MU*RSC
       ELSE
-         RHO_D_TURB => WORK5
-         RHO_D_TURB = MAX(0._EB,(MU-MU_DNS))*RSC
+         RHO_D_TURB => WORK9
+         RHO_D_TURB = 0._EB
+         RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
       ENDIF
    ENDIF
 ENDIF
