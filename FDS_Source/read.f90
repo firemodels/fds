@@ -7455,15 +7455,15 @@ USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 
 INTEGER :: N,NN,NM,NNN,N_VENT_O,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,N_VENT_NEW,II,JJ,KK
 REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB1,XB2,XB3,XB4,XB5,XB6, &
-            REYNOLDS_STRESS(3,3),L_EDDY,VEL_RMS,L_EDDY_IJ(3,3),UVW(3)
+            REYNOLDS_STRESS(3,3),L_EDDY,VEL_RMS,L_EDDY_IJ(3,3),UVW(3),RADIUS
 CHARACTER(30) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
 LOGICAL :: REJECT_VENT,EVACUATION,OUTLINE,EVACUATION_VENT
 NAMELIST /VENT/ COLOR,CTRL_ID,DEVC_ID,DYNAMIC_PRESSURE,EVACUATION,FYI,ID,IOR,L_EDDY,L_EDDY_IJ,MB,MESH_ID,MULT_ID,N_EDDY,OUTLINE,&
-                PBX,PBY,PBZ,PRESSURE_RAMP,REYNOLDS_STRESS,RGB,SPREAD_RATE,SURF_ID,TEXTURE_ORIGIN,TMP_EXTERIOR,TMP_EXTERIOR_RAMP,&
-                TRANSPARENCY,UVW,VEL_RMS,XB,XYZ
+                PBX,PBY,PBZ,PRESSURE_RAMP,RADIUS,REYNOLDS_STRESS,RGB,SPREAD_RATE,SURF_ID,TEXTURE_ORIGIN,TMP_EXTERIOR,&
+                TMP_EXTERIOR_RAMP,TRANSPARENCY,UVW,VEL_RMS,XB,XYZ
  
 MESH_LOOP_1: DO NM=1,NMESHES
 
@@ -7538,6 +7538,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
       VEL_RMS=0._EB
       REYNOLDS_STRESS=0._EB
       UVW = -1.E12_EB
+      RADIUS = -1._EB
  
       IF (NN==N_VENT_O-2 .AND. CYLINDRICAL .AND. XS<=TWO_EPSILON_EB) MB='XMIN'
       IF (NN==N_VENT_O-1 .AND. TWO_D)                        MB='YMIN'
@@ -7814,6 +7815,13 @@ MESH_LOOP_1: DO NM=1,NMESHES
                VT%Y0 = XYZ(2)
                VT%Z0 = XYZ(3)
                VT%FIRE_SPREAD_RATE = SPREAD_RATE / TIME_SHRINK_FACTOR
+
+               IF (RADIUS>0._EB) THEN
+                  VT%RADIUS = RADIUS
+                  VT%X0 = 0.5_EB*(VT%X1+VT%X2)
+                  VT%Y0 = 0.5_EB*(VT%Y1+VT%Y2)
+                  VT%Z0 = 0.5_EB*(VT%Z1+VT%Z2)
+               ENDIF
          
                ! Dynamic Pressure
          
@@ -7940,6 +7948,10 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
+               IF (VT%RADIUS>0.5_EB*ABS(VT%X2-VT%X1)) THEN
+                  WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
             ENDIF
          CASE(2)
             IF (J1>=1 .AND. J1<=JBM1) THEN
@@ -7952,6 +7964,10 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
+               IF (VT%RADIUS>0.5_EB*ABS(VT%Y2-VT%Y1)) THEN
+                  WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
             ENDIF
          CASE(3)
             IF (K1>=1 .AND. K1<=KBM1) THEN
@@ -7962,6 +7978,10 @@ MESH_LOOP_2: DO NM=1,NMESHES
                VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2,K2+1)) .AND. .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+               IF (VT%RADIUS>0.5_EB*ABS(VT%Z2-VT%Z1)) THEN
+                  WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
