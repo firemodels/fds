@@ -2531,7 +2531,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
    WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
    WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'            
-   WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+   WRITE(LU_OUTPUT,'(3X,A,1X,F12.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
  
 ENDDO REACTION_LOOP
 
