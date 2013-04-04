@@ -1623,7 +1623,7 @@ SELECT CASE(G%ISHAPE)
       RUMAG  = SQRT(DOT_PRODUCT(RU,RU))
       DR     = RUMAG-G%RADIUS
       XS     = XU - DR*RU/RUMAG
-      XI     = XS + DELTA_IBM*RU/RUMAG
+      XI     = XU + DELTA_IBM*RU/RUMAG
    CASE(ICYLINDER)
       ! at the moment, cylinder must be aligned with an axis
       IF (ABS(G%XOR-1._EB)<EPSILON_EB) RU = (/0._EB,XU(2),XU(3)/)-(/0._EB,G%Y,G%Z/)

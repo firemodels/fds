@@ -461,15 +461,12 @@ END SUBROUTINE COMPUTE_STRAIN_RATE
 
 SUBROUTINE VISCOSITY_BC(NM)
 
-USE TURBULENCE, ONLY: WANNIER_FLOW
-
 ! Specify ghost cell values of the viscosity array MU
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MU_OTHER,DP_OTHER,KRES_OTHER
 INTEGER :: II,JJ,KK,IW,IIO,JJO,KKO,NOM,N_INT_CELLS
 TYPE(WALL_TYPE),POINTER :: WC=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
 
 CALL POINT_TO_MESH(NM)
 
@@ -515,37 +512,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 ENDDO WALL_LOOP
 !$OMP END PARALLEL DO
 
-! Special boundary conditions for Wannier flow test case
-
-IF (PERIODIC_TEST==5) THEN
-   IF (PREDICTOR) THEN
-      UU => U
-      VV => V
-      WW => W
-   ELSE
-      UU => US
-      VV => VS
-      WW => WS
-   ENDIF
-   DO KK=0,KBP1
-      DO JJ=0,JBP1
-         DO II=0,IBP1
-            IF (KK>3 .AND. KK<KBAR-2 .AND. II>2 .AND. II<IBAR-2) CYCLE
-            UU(II,JJ,KK) = WANNIER_FLOW(X(II),ZC(KK),1)
-         ENDDO
-      ENDDO
-   ENDDO
-   DO KK=0,KBP1
-      DO JJ=0,JBP1
-         DO II=0,IBP1
-            IF (KK>2 .AND. KK<KBAR-2 .AND. II>3 .AND. II<IBAR-2) CYCLE
-            WW(II,JJ,KK) = WANNIER_FLOW(XC(II),Z(KK),2)
-         ENDDO
-      ENDDO
-   ENDDO
-   VV=0._EB
-ENDIF
-    
 END SUBROUTINE VISCOSITY_BC
 
 
@@ -3059,11 +3025,12 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,PP,HP, &
                                        DWDX,DWDY,DWDZ
 REAL(EB) :: U_IBM,V_IBM,W_IBM,DN, &
             U_ROT,V_ROT,W_ROT, &
-            U_INT,V_INT,W_INT, &
+            V_INT, &
             PE,PW,PN,PS,PT,PB, &
-            U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3), &
+            U_DATA(0:1,0:1,0:1),XI(3),XI2(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3), &
             U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3), &
-            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,WT,XV(3),H1,H2,N1(3),N2(3)
+            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,WT,XV(3),H1,H2,H3,N1(3),N2(3),C0,C1,C2,U2,U3,W2,W3
+
 INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1,ITMP,TRI_INDEX,IERR,IC
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
 TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
@@ -3197,13 +3164,25 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         U_ROT = (XVELO(3)-XGEOM(3))*G%OMEGA_Y - (XVELO(2)-XGEOM(2))*G%OMEGA_Z
                         CALL GETX(XI,XSURF,XVELO,NG)
                         CALL GETU(U_DATA,DXI,XI,1,NM)
-                        U_INT = TRILINEAR(U_DATA,DXI,DXC)
+                        U2 = TRILINEAR(U_DATA,DXI,DXC)
+
+                        ! test... get second interpolation point
+                        CALL GETX(XI2,XSURF,XI,NG)
+                        CALL GETU(U_DATA,DXI,XI2,1,NM)
+                        U3 = TRILINEAR(U_DATA,DXI,DXC)
+
                         N1 = XVELO-XSURF                                   ! vector from surface to velocity point
                         N2 = XI-XVELO                                      ! vector from velocity to interpolation point
+
                         H1 = SQRT(DOT_PRODUCT(N1,N1))                      ! distance from surface to velocity point
-                        H2 = SQRT(DOT_PRODUCT(N2,N2))                      ! distance from velocity to interpolation point
-                        IF (DNS) U_IBM = (H1*U_INT+H2*(G%U+U_ROT))/(H1+H2) ! linear profile
-                        IF (LES) U_IBM = 0.9_EB*(U_INT+(G%U+U_ROT))        ! power law
+                        H2 = H1 + SQRT(DOT_PRODUCT(N2,N2))                 ! distance from surface to interpolation point
+                        H3 = H2 + DELTA_IBM                                ! distance from surface to 2nd interp point
+
+                        C0 = G%U+U_ROT
+                        C1 = (U2*(H3**2/H2**2) - U3)/(H3**2/H2 - H3)
+                        C2 = (U2*(H3/H2) - U3)/(H2*H3 - H3**2)
+                        U_IBM = C0 + C1*H1 + C2*H1**2                      ! quadratic profile
+
                         !U_IBM = WANNIER_FLOW(XVELO(1),XVELO(3),1)          ! for debug purposes
                      CASE(2)
                         IP1 = MIN(I+1,IBP1)
@@ -3455,13 +3434,25 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         W_ROT = (XVELO(2)-XGEOM(2))*G%OMEGA_X - (XVELO(1)-XGEOM(1))*G%OMEGA_Y
                         CALL GETX(XI,XSURF,XVELO,NG)
                         CALL GETU(U_DATA,DXI,XI,3,NM)
-                        W_INT = TRILINEAR(U_DATA,DXI,DXC)
+                        W2 = TRILINEAR(U_DATA,DXI,DXC)
+                        
+                        ! test... get second interpolation point
+                        CALL GETX(XI2,XSURF,XI,NG)
+                        CALL GETU(U_DATA,DXI,XI2,3,NM)
+                        W3 = TRILINEAR(U_DATA,DXI,DXC)
+
                         N1 = XVELO-XSURF                                   ! vector from surface to velocity point
                         N2 = XI-XVELO                                      ! vector from velocity to interpolation point
+
                         H1 = SQRT(DOT_PRODUCT(N1,N1))                      ! distance from surface to velocity point
-                        H2 = SQRT(DOT_PRODUCT(N2,N2))                      ! distance from velocity to interpolation point
-                        IF (DNS) W_IBM = (H1*W_INT+H2*(G%W+W_ROT))/(H1+H2) ! linear profile
-                        IF (LES) W_IBM = 0.9_EB*(W_INT+(G%W+W_ROT))        ! power law
+                        H2 = H1 + SQRT(DOT_PRODUCT(N2,N2))                 ! distance from surface to interpolation point
+                        H3 = H2 + DELTA_IBM                                ! distance from surface to 2nd interp point
+
+                        C0 = G%W+W_ROT
+                        C1 = (W2*(H3**2/H2**2) - W3)/(H3**2/H2 - H3)
+                        C2 = (W2*(H3/H2) - W3)/(H2*H3 - H3**2)
+                        W_IBM = C0 + C1*H1 + C2*H1**2                      ! quadratic profile
+
                         !W_IBM = WANNIER_FLOW(XVELO(1),XVELO(3),2)          ! for debug purposes
                      CASE(2)
                         IP1 = MIN(I+1,IBP1)
