@@ -169,7 +169,7 @@ REAL(EB) :: ZZ_0(0:N_TRACKED_SPECIES),DZZDT1_1(0:N_TRACKED_SPECIES),DZZDT1_2(0:N
             DZZDT(0:N_TRACKED_SPECIES),SMIX_MIX_MASS_0(0:N_TRACKED_SPECIES),SMIX_MIX_MASS(0:N_TRACKED_SPECIES),TOTAL_MIX_MASS,&
             TAU_D,TAU_G,TAU_U,DELTA,TMP_GUESS_1,TMP_GUESS_2,CP_BAR_GUESS,CP_BAR_0,TMP_MIXED_ZONE,ZZ_CHECK(0:N_TRACKED_SPECIES)
 REAL(EB), PARAMETER :: DT_SUB_MIN=1.E-10_EB,ZZ_MIN=1.E-10_EB
-INTEGER :: NR,NS,NSS,ITER,TVI,RICH_ITER,TMP_ITER,TIME_ITER,TIME_ITER_MAX
+INTEGER :: NR,NS,NSS,ITER,TVI,RICH_ITER,TMP_ITER,TIME_ITER,TIME_ITER_MAX,SR
 INTEGER, PARAMETER :: SUB_DT1=1,SUB_DT2=2,SUB_DT4=4,TV_ITER_MIN=5,RICH_ITER_MAX=10
 LOGICAL :: EXTINCT(1:N_REACTIONS)
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
@@ -236,26 +236,28 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
    
    IF (.NOT. ALL(EXTINCT)) THEN
       RK2_IF: IF (COMBUSTION_ODE /= RK2_RICHARDSON) THEN ! Explicit Euler 
-         DZZDT1_1 = 0._EB
-         ZZ_0 = ZZ_MIXED
-         RATE_CONSTANT = 0._EB
-         CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
-         REACTION_LOOP1: DO NR = 1, N_REACTIONS
-            RN => REACTION(NR)
-            DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-            ZZ_CHECK = ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB
-            IF (ANY(ZZ_CHECK < 0._EB)) THEN
-               DO NSS=0,N_TRACKED_SPECIES
-                  IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                     RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
-                  ENDIF
-               ENDDO
+         DO SR=0,SERIES_REAC
+            DZZDT1_1 = 0._EB
+            ZZ_0 = ZZ_MIXED
+            RATE_CONSTANT = 0._EB
+            CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+            REACTION_LOOP1: DO NR = 1, N_REACTIONS
+               RN => REACTION(NR)
                DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-            ENDIF
-            DZZDT1_1 = DZZDT1_1+DZZDT
-         ENDDO REACTION_LOOP1 
-         A1 = ZZ_0 + DZZDT1_1*DT_SUB
-         ZZ_MIXED = A1
+               ZZ_CHECK = ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB
+               IF (ANY(ZZ_CHECK < 0._EB)) THEN
+                  DO NSS=0,N_TRACKED_SPECIES
+                     IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                        RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
+                     ENDIF
+                  ENDDO
+                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+               ENDIF
+               DZZDT1_1 = DZZDT1_1+DZZDT
+            ENDDO REACTION_LOOP1 
+            A1 = ZZ_0 + DZZDT1_1*DT_SUB
+            ZZ_MIXED = A1
+         ENDDO
          IF (TIME_ITER > 1) CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
          IF (ALL(DZZDT1_1 < 0._EB)) EXIT INTEGRATION_LOOP
       ELSE RK2_IF ! RK2 w/ Richardson
@@ -268,49 +270,54 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
             !--------------------
             ZZ_0 = ZZ_MIXED
             ODE_LOOP1: DO NS = 1, SUB_DT1
-               DZZDT1_1 = 0._EB
-               DZZDT1_2 = 0._EB
-               RATE_CONSTANT = 0._EB
-               RATE_CONSTANT2 = 0._EB
-               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
-               REACTION_LOOP1_1: DO NR = 1, N_REACTIONS
-                  RN => REACTION(NR)
-                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                  ZZ_CHECK = ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB
-                  IF (ANY( ZZ_CHECK < 0._EB)) THEN
-                     DO NSS=0,N_TRACKED_SPECIES
-                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                           RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
-                        ENDIF
-                     ENDDO
+               DO SR=0,SERIES_REAC
+                  DZZDT1_1 = 0._EB
+                  RATE_CONSTANT = 0._EB
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  REACTION_LOOP1_1: DO NR = 1, N_REACTIONS
+                     RN => REACTION(NR)
+                     IF (.NOT. RN%FAST_CHEMISTRY .AND. SR >= 1) CYCLE REACTION_LOOP1_1
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+                     ZZ_CHECK = ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB
+                     IF (ANY( ZZ_CHECK < 0._EB)) THEN
+                        DO NSS=0,N_TRACKED_SPECIES
+                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                              RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
+                           ENDIF
+                        ENDDO
+                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+                     ENDIF
+                     DZZDT1_1 = DZZDT1_1+DZZDT
+                  ENDDO REACTION_LOOP1_1
+                  A1 = ZZ_0 + DZZDT1_1*DT_SUB           
+                  IF (ALL(REACTION(:)%FAST_CHEMISTRY) .AND. SR == SERIES_REAC) THEN ! All fast reactions solve explicit Euler 
+                     A4 = A1
+                     A2 = A1
+                     DT_SUB = DT - DT_ITER 
+                     EXIT RICH_EX_LOOP
                   ENDIF
-                  DZZDT1_1 = DZZDT1_1+DZZDT
-               ENDDO REACTION_LOOP1_1
-               A1 = ZZ_0 + DZZDT1_1*DT_SUB           
-               IF(ALL(REACTION(:)%FAST_CHEMISTRY)) THEN ! All fast reactions solve explicit Euler 
-                  ZZ_MIXED = A1
-                  DT_SUB = DT - DT_ITER 
-                  EXIT RICH_EX_LOOP
-               ENDIF
-               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A1,I,J,K,DT_SUB,TMP_MIXED_ZONE)
-               REACTION_LOOP1_2: DO NR = 1, N_REACTIONS
-                  RN => REACTION(NR)
-                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                  ZZ_CHECK = A1 + (DZZDT1_2+DZZDT)*DT_SUB
-                  IF (ANY( ZZ_CHECK < 0._EB)) THEN
-                     DO NSS=0,N_TRACKED_SPECIES
-                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                           RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A1(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
-                        ENDIF
-                     ENDDO
+                  DZZDT1_2 = 0._EB
+                  RATE_CONSTANT2 = 0._EB
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A1,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  REACTION_LOOP1_2: DO NR = 1, N_REACTIONS
+                     RN => REACTION(NR)
+                     IF (.NOT. RN%FAST_CHEMISTRY .AND. SR >= 1) CYCLE REACTION_LOOP1_2
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                  ENDIF
-                  DZZDT1_2 = DZZDT1_2+DZZDT
-               ENDDO REACTION_LOOP1_2
-               A1 = A1 + DZZDT1_2*DT_SUB
-               A1 = 0.5_EB*(ZZ_0 + A1)             
-
+                     ZZ_CHECK = A1 + (DZZDT1_2+DZZDT)*DT_SUB
+                     IF (ANY( ZZ_CHECK < 0._EB)) THEN
+                        DO NSS=0,N_TRACKED_SPECIES
+                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                              RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A1(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
+                           ENDIF
+                        ENDDO
+                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
+                     ENDIF
+                     DZZDT1_2 = DZZDT1_2+DZZDT
+                  ENDDO REACTION_LOOP1_2
+                  A1 = A1 + DZZDT1_2*DT_SUB
+                  A1 = 0.5_EB*(ZZ_0 + A1)
+                  ZZ_0 = A1
+               ENDDO
             ENDDO ODE_LOOP1
             !--------------------
             ! Calculate A2 term
@@ -318,45 +325,48 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
             !--------------------
             ZZ_0 = ZZ_MIXED
             ODE_LOOP2: DO NS = 1, SUB_DT2
-               DZZDT2_1 = 0._EB
-               DZZDT2_2 = 0._EB
-               RATE_CONSTANT = 0._EB
-               RATE_CONSTANT2 = 0._EB
-               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
-               REACTION_LOOP2_1: DO NR = 1, N_REACTIONS
-                  RN => REACTION(NR)
-                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                  ZZ_CHECK = ZZ_0 + (DZZDT2_1+DZZDT)*(DT_SUB*0.5_EB)
-                  IF (ANY( ZZ_CHECK < 0._EB)) THEN
-                     DO NSS=0,N_TRACKED_SPECIES
-                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                           RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.5_EB))
-                        ENDIF
-                     ENDDO
+               DO SR=0,SERIES_REAC
+                  DZZDT2_1 = 0._EB
+                  RATE_CONSTANT = 0._EB
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  REACTION_LOOP2_1: DO NR = 1, N_REACTIONS
+                     RN => REACTION(NR)
+                     IF (.NOT. RN%FAST_CHEMISTRY .AND. SR >= 1) CYCLE REACTION_LOOP2_1
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                  ENDIF
-                  DZZDT2_1 = DZZDT2_1+DZZDT
-               ENDDO REACTION_LOOP2_1
-               A2 = ZZ_0 + DZZDT2_1*(DT_SUB*0.5_EB)
-
-               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A2,I,J,K,DT_SUB,TMP_MIXED_ZONE)      
-               REACTION_LOOP2_2: DO NR = 1, N_REACTIONS
-                  RN => REACTION(NR)
-                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                  ZZ_CHECK = A2 + (DZZDT2_2+DZZDT)*(DT_SUB*0.5_EB)
-                  IF (ANY(ZZ_CHECK < 0._EB)) THEN
-                     DO NSS=0,N_TRACKED_SPECIES
-                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                           RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A2(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.5_EB))
-                        ENDIF
-                     ENDDO
+                     ZZ_CHECK = ZZ_0 + (DZZDT2_1+DZZDT)*(DT_SUB*0.5_EB)
+                     IF (ANY( ZZ_CHECK < 0._EB)) THEN
+                        DO NSS=0,N_TRACKED_SPECIES
+                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                              RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.5_EB))
+                           ENDIF
+                        ENDDO
+                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+                     ENDIF
+                     DZZDT2_1 = DZZDT2_1+DZZDT
+                  ENDDO REACTION_LOOP2_1
+                  A2 = ZZ_0 + DZZDT2_1*(DT_SUB*0.5_EB)
+                  DZZDT2_2 = 0._EB
+                  RATE_CONSTANT2 = 0._EB
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A2,I,J,K,DT_SUB,TMP_MIXED_ZONE)      
+                  REACTION_LOOP2_2: DO NR = 1, N_REACTIONS
+                     RN => REACTION(NR)
+                     IF (.NOT. RN%FAST_CHEMISTRY .AND. SR >= 1) CYCLE REACTION_LOOP2_2
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                  ENDIF
-                  DZZDT2_2 = DZZDT2_2+DZZDT
-               ENDDO REACTION_LOOP2_2
-               A2 = A2 + DZZDT2_2*(DT_SUB*0.5_EB)
-               A2 = 0.5_EB*(ZZ_0 + A2)
-               ZZ_0 = A2
+                     ZZ_CHECK = A2 + (DZZDT2_2+DZZDT)*(DT_SUB*0.5_EB)
+                     IF (ANY(ZZ_CHECK < 0._EB)) THEN
+                        DO NSS=0,N_TRACKED_SPECIES
+                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                              RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A2(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.5_EB))
+                           ENDIF
+                        ENDDO
+                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
+                     ENDIF
+                     DZZDT2_2 = DZZDT2_2+DZZDT
+                  ENDDO REACTION_LOOP2_2
+                  A2 = A2 + DZZDT2_2*(DT_SUB*0.5_EB)
+                  A2 = 0.5_EB*(ZZ_0 + A2)
+                  ZZ_0 = A2
+               ENDDO
             ENDDO ODE_LOOP2
             !--------------------
             ! Calculate A4 term  
@@ -364,45 +374,48 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
             !-------------------- 
             ZZ_0 = ZZ_MIXED
             ODE_LOOP4: DO NS = 1, SUB_DT4
-               DZZDT4_1 = 0._EB
-               DZZDT4_2 = 0._EB
-               RATE_CONSTANT = 0._EB
-               RATE_CONSTANT2 = 0._EB
-               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
-               REACTION_LOOP4_1: DO NR = 1, N_REACTIONS
-                  RN => REACTION(NR)
-                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                  ZZ_CHECK = ZZ_0 + (DZZDT4_1+DZZDT)*(DT_SUB*0.25_EB)
-                  IF (ANY(ZZ_CHECK < 0._EB)) THEN
-                     DO NSS=0,N_TRACKED_SPECIES
-                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                           RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.25_EB))
-                        ENDIF
-                     ENDDO
+               DO SR=0,SERIES_REAC
+                  DZZDT4_1 = 0._EB
+                  RATE_CONSTANT = 0._EB
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  REACTION_LOOP4_1: DO NR = 1, N_REACTIONS
+                     RN => REACTION(NR)
+                     IF (.NOT. RN%FAST_CHEMISTRY .AND. SR >= 1) CYCLE REACTION_LOOP4_1
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                  ENDIF
-                  DZZDT4_1 = DZZDT4_1+DZZDT
-               END DO REACTION_LOOP4_1
-               A4 = ZZ_0 + DZZDT4_1*(DT_SUB*0.25_EB)
-
-               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A4,I,J,K,DT_SUB,TMP_MIXED_ZONE)
-               REACTION_LOOP4_2: DO NR = 1, N_REACTIONS
-                  RN => REACTION(NR)
-                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                  ZZ_CHECK = A4 + (DZZDT4_2+DZZDT)*(DT_SUB*0.25_EB)
-                  IF (ANY(ZZ_CHECK < 0._EB)) THEN
-                     DO NSS=0,N_TRACKED_SPECIES
-                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                           RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A4(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.25_EB))
-                        ENDIF
-                     ENDDO
+                     ZZ_CHECK = ZZ_0 + (DZZDT4_1+DZZDT)*(DT_SUB*0.25_EB)
+                     IF (ANY(ZZ_CHECK < 0._EB)) THEN
+                        DO NSS=0,N_TRACKED_SPECIES
+                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                              RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.25_EB))
+                           ENDIF
+                        ENDDO
+                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+                     ENDIF
+                     DZZDT4_1 = DZZDT4_1+DZZDT
+                  END DO REACTION_LOOP4_1
+                  A4 = ZZ_0 + DZZDT4_1*(DT_SUB*0.25_EB)
+                  DZZDT4_2 = 0._EB
+                  RATE_CONSTANT2 = 0._EB
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A4,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  REACTION_LOOP4_2: DO NR = 1, N_REACTIONS
+                     RN => REACTION(NR)
+                     IF (.NOT. RN%FAST_CHEMISTRY .AND. SR >= 1) CYCLE REACTION_LOOP4_2
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                  ENDIF
-                  DZZDT4_2 = DZZDT4_2+DZZDT
-               ENDDO REACTION_LOOP4_2
-               A4 = A4 + DZZDT4_2*(DT_SUB*0.25_EB)
-               A4 = 0.5_EB*(ZZ_0 + A4)
-               ZZ_0 = A4
+                     ZZ_CHECK = A4 + (DZZDT4_2+DZZDT)*(DT_SUB*0.25_EB)
+                     IF (ANY(ZZ_CHECK < 0._EB)) THEN
+                        DO NSS=0,N_TRACKED_SPECIES
+                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                              RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A4(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.25_EB))
+                           ENDIF
+                        ENDDO
+                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
+                     ENDIF
+                     DZZDT4_2 = DZZDT4_2+DZZDT
+                  ENDDO REACTION_LOOP4_2
+                  A4 = A4 + DZZDT4_2*(DT_SUB*0.25_EB)
+                  A4 = 0.5_EB*(ZZ_0 + A4)
+                  ZZ_0 = A4
+               ENDDO
             ENDDO ODE_LOOP4
             ! Species Error Analysis
             ERR_EST = MAXVAL(ABS((4._EB*A4-5._EB*A2+A1)))/45._EB  ! Estimate Error
