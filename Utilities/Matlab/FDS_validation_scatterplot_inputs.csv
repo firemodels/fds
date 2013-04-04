@@ -25,7 +25,7 @@ Floor Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,1
 Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0,10,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Velocity
 Sprinkler Actuation Time,Measured Time to Actuation (s),Predicted Time to Actuation (s),0,300,0.03 0.95,SouthEast,1,20,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Activation_Time
 Smoke Detector Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,33,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Detector_Activation_Time
-"Smoke Detector Activation Time, Temperature Rise",Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,33,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Detector_Activation_Time_Temp_Rise
+"Smoke Detector Activation Time, Temperature Rise",Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,20,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Detector_Activation_Time_Temp_Rise
 Cable Failure Time,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Cable_Temperature
 Sprinkler Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,1,0,no,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/UL_NFPRF_Actuations
 Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-07,1.00E-01,0.03 0.95,SouthEast,1,0,no,loglog,FDS_Validation_Guide/FIGURES/ScatterPlots/Aerosol_Deposition_Velocity
