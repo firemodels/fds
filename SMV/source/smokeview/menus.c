@@ -4029,6 +4029,9 @@ void VentMenu(int value){
      visDummyVents=0;
      visOtherVents=0;
      break;
+   case 23:
+     visCircularVents=1-visCircularVents;
+     break;
   default:
     ASSERT(FFALSE);
     break;
@@ -5342,6 +5345,10 @@ updatemenu=0;
       if(ndummyvents>0){
         if(visDummyVents==1)glutAddMenuEntry(_("*Exterior"),16);
         if(visDummyVents==0)glutAddMenuEntry(_("Exterior"),16);
+      }
+      if(nvents_circular>0){
+        if(visCircularVents==1)glutAddMenuEntry(_("*Circular"),23);
+        if(visCircularVents==0)glutAddMenuEntry(_("Circular"),23);
       }
       if(ntotal_vents>nopenvents+ndummyvents){
         if(visOtherVents==1)glutAddMenuEntry(_("*Other"),21);

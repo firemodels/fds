@@ -5,6 +5,8 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor);
+EXTERNCPP void DrawCircVents(void);
 EXTERNCPP void update_glui_patch_units(void);
 EXTERNCPP void update_glui_slice_units(void);
 EXTERNCPP void update_glui_plot3d_units(void);
@@ -686,7 +688,7 @@ EXTERNCPP void draw_faces(void);
 EXTERNCPP void draw_facesOLD(void);
 EXTERNCPP void drawselect_faces(void);
 EXTERNCPP void allocate_faces(void);
-EXTERNCPP void update_facelists(void);
+EXTERNCPP void UpdateFacelists(void);
 EXTERNCPP void update_faces(void);
 EXTERNCPP void drawticks(void);
 EXTERNCPP void set_startup_view(void);

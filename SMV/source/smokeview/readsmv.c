@@ -2508,8 +2508,8 @@ int readsmv(char *file, char *file2){
   ntrnz=0;
   nmeshes=0;
   npdim=0;
-  nvent=0;
-  nobst=0;
+  nVENT=0;
+  nOBST=0;
   noffset=0;
   nsurfinfo=0;
   nvent_transparent=0;
@@ -2825,7 +2825,7 @@ int readsmv(char *file, char *file2){
       continue;
     }
     if(match(buffer,"OBST") == 1){
-      nobst++;
+      nOBST++;
       continue;
     }
     if(match(buffer,"CADGEOM") == 1){
@@ -2833,7 +2833,7 @@ int readsmv(char *file, char *file2){
       continue;
     }
     if(match(buffer,"VENT") == 1){
-      nvent++;
+      nVENT++;
       continue;
     }
     if(match(buffer,"PART") == 1||match(buffer,"EVAC")==1
@@ -2987,25 +2987,25 @@ int readsmv(char *file, char *file2){
      BUT if any one is present then the number of each must be equal 
   */
 
-  if(nmeshes==0&&ntrnx==0&&ntrny==0&&ntrnz==0&&npdim==0&&nobst==0&&nvent==0&&noffset==0){
+  if(nmeshes==0&&ntrnx==0&&ntrny==0&&ntrnz==0&&npdim==0&&nOBST==0&&nVENT==0&&noffset==0){
     nmeshes=1;
     ntrnx=1;
     ntrny=1;
     ntrnz=1;
     npdim=1;
-    nobst=1;
+    nOBST=1;
     noffset=1;
   }
   else{
     if(nmeshes>1){
-      if(nmeshes!=ntrnx||nmeshes!=ntrny||nmeshes!=ntrnz||nmeshes!=npdim||nmeshes!=nobst||nmeshes!=nvent||nmeshes!=noffset){
+      if(nmeshes!=ntrnx||nmeshes!=ntrny||nmeshes!=ntrnz||nmeshes!=npdim||nmeshes!=nOBST||nmeshes!=nVENT||nmeshes!=noffset){
         fprintf(stderr,"*** Error:\n");
         if(nmeshes!=ntrnx)fprintf(stderr,"*** Error:  found %i TRNX keywords, was expecting %i\n",ntrnx,nmeshes);
         if(nmeshes!=ntrny)fprintf(stderr,"*** Error:  found %i TRNY keywords, was expecting %i\n",ntrny,nmeshes);
         if(nmeshes!=ntrnz)fprintf(stderr,"*** Error:  found %i TRNZ keywords, was expecting %i\n",ntrnz,nmeshes);
         if(nmeshes!=npdim)fprintf(stderr,"*** Error:  found %i PDIM keywords, was expecting %i\n",npdim,nmeshes);
-        if(nmeshes!=nobst)fprintf(stderr,"*** Error:  found %i OBST keywords, was expecting %i\n",nobst,nmeshes);
-        if(nmeshes!=nvent)fprintf(stderr,"*** Error:  found %i VENT keywords, was expecting %i\n",nvent,nmeshes);
+        if(nmeshes!=nOBST)fprintf(stderr,"*** Error:  found %i OBST keywords, was expecting %i\n",nOBST,nmeshes);
+        if(nmeshes!=nVENT)fprintf(stderr,"*** Error:  found %i VENT keywords, was expecting %i\n",nVENT,nmeshes);
         if(nmeshes!=noffset)fprintf(stderr,"*** Error:  found %i OFFSET keywords, was expecting %i\n",noffset,nmeshes);
         return 2;
       }
@@ -4895,8 +4895,8 @@ int readsmv(char *file, char *file2){
       BREAK;
     }
 
-    if(nvent==0){
-      nvent=0;
+    if(nVENT==0){
+      nVENT=0;
       strcpy(buffer,"VENT");
     }
     else{
@@ -5586,9 +5586,9 @@ typedef struct {
       xplttemp=meshi->xplt;
       yplttemp=meshi->yplt;
       zplttemp=meshi->zplt;
-      if(nvent==0){
+      if(nVENT==0){
         strcpy(buffer,"0 0");
-        nvent=1;
+        nVENT=1;
       }
       else{
         fgets(buffer,255,stream);
@@ -5628,19 +5628,18 @@ typedef struct {
         }
         s_num[0]=-1;
         if(nn<nvents){
-          {
-            float t_origin[3];
-            t_origin[0]=texture_origin[0];
-            t_origin[1]=texture_origin[1];
-            t_origin[2]=texture_origin[2];
-            fgets(buffer,255,stream);
-            sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f",
-                   &vi->xmin,&vi->xmax,&vi->ymin,&vi->ymax,&vi->zmin,&vi->zmax,
-                   &vi->id,s_num,t_origin,t_origin+1,t_origin+2);
-            vi->texture_origin[0]=t_origin[0];
-            vi->texture_origin[1]=t_origin[1];
-            vi->texture_origin[2]=t_origin[2];
-          }
+          float t_origin[3];
+
+          t_origin[0]=texture_origin[0];
+          t_origin[1]=texture_origin[1];
+          t_origin[2]=texture_origin[2];
+          fgets(buffer,255,stream);
+          sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f",
+                 &vi->xmin,&vi->xmax,&vi->ymin,&vi->ymax,&vi->zmin,&vi->zmax,
+                 &vi->id,s_num,t_origin,t_origin+1,t_origin+2);
+          vi->texture_origin[0]=t_origin[0];
+          vi->texture_origin[1]=t_origin[1];
+          vi->texture_origin[2]=t_origin[2];
         }
         else{
           vi->xmin=meshi->xyz_bar0[XXX]+meshi->offset[XXX];
@@ -5696,6 +5695,7 @@ typedef struct {
         int iv1, iv2, jv1, jv2, kv1, kv2;
         float s_color[4];
         int venttype,ventindex;
+        float radius;
 
 
         vi = vinfo+nn;
@@ -5705,6 +5705,7 @@ typedef struct {
         s_color[1]=vi->surf[0]->color[1];
         s_color[2]=vi->surf[0]->color[2];
         s_color[3]=vi->surf[0]->color[3];
+        radius=-1.0;
         venttype=-99;
         if(nn<nvents){
           float s2_color[4];
@@ -5714,29 +5715,27 @@ typedef struct {
           s2_color[2]=-1.0;
           s2_color[3]=1.0;
 
-
           fgets(buffer,255,stream);
           sscanf(buffer,"%i %i %i %i %i %i %i %i %f %f %f %f",
                &iv1,&iv2,&jv1,&jv2,&kv1,&kv2,
                &ventindex,&venttype,
-               s2_color,s2_color+1,s2_color+2,s2_color+3);
+               s2_color,s2_color+1,s2_color+2,&radius);
           if(s2_color[0]>=0.0&&s2_color[1]>=0.0&&s2_color[2]>=0.0){
             s_color[0]=s2_color[0];
             s_color[1]=s2_color[1];
             s_color[2]=s2_color[2];
+
             if(s2_color[3]<0.99){
               vi->transparent=1;
               s_color[3]=s2_color[3];
             }
             vi->useventcolor=1;
           }
-		      if(ventindex<0)vi->hideboundary=1;
-          if(venttype!=-99){
-            vi->type=venttype;
-          }
-          //vi->colorindex=ventindex;
-          if(ventindex!=-99&&ventindex!=99){
-            if(ventindex<0)ventindex=-ventindex;
+          if(radius>0.0)nvents_circular++;
+          if(ventindex<0)vi->hideboundary=1;
+          if(venttype!=-99)vi->type=venttype;
+          if(ABS(ventindex)!=99){
+            ventindex=ABS(ventindex);
             if(ventindex>nrgb2-1)ventindex=nrgb2-1;
             s_color[0]=rgb[nrgb+ventindex][0];
             s_color[1]=rgb[nrgb+ventindex][1];
@@ -5752,9 +5751,12 @@ typedef struct {
           vi->color = getcolorptr(s_color);
         }
         else{
-          iv1=0; iv2 = meshi->ibar;
-          jv1=0; jv2 = meshi->jbar;
-          kv1=0; kv2 = meshi->kbar;
+          iv1=0;
+          iv2 = meshi->ibar;
+          jv1=0;
+          jv2 = meshi->jbar;
+          kv1=0;
+          kv2 = meshi->kbar;
           ventindex=-99;
           vi->dir=nn-nvents;
           if(vi->dir>5)vi->dir-=6;
@@ -5802,6 +5804,7 @@ typedef struct {
           }
         }
         if(vi->transparent==1)nvent_transparent++;
+        vi->radius=radius;
         vi->linewidth=&ventlinewidth;
         vi->showhide=NULL;
         vi->showtime=NULL;
@@ -6671,7 +6674,7 @@ typedef struct {
       meshi = meshinfo + i;
       if(meshi->xyz_bar0[ZZZ]<zbarmin)zbarmin=meshi->xyz_bar0[ZZZ];
     }
-    nobst=0;
+    nOBST=0;
     iobst=0;
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
@@ -6804,7 +6807,7 @@ typedef struct {
       int iblock;
       int nn;
 
-      nobst++;
+      nOBST++;
       iobst++;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&n_blocks);

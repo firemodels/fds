@@ -376,6 +376,7 @@ typedef struct {
   float xvent1plot, xvent2plot;
   float yvent1plot, yvent2plot;
   float zvent1plot, zvent2plot;
+  float radius;
   float *showtime;
   int *showtimelist;
   unsigned char *showhide;

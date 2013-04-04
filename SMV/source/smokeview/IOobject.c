@@ -274,6 +274,7 @@ void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
 void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor);
 void drawarc(float angle, float diameter, unsigned char *rgbcolor);
 void drawcircle(float diameter, unsigned char *rgbcolor);
+void drawfilledcircle(float diameter, unsigned char *rgbcolor);
 void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
 void drawhsphere(float diameter, unsigned char *rgbcolor);
@@ -2128,6 +2129,32 @@ void drawpoint(unsigned char *rgbcolor){
   glEnd();
 }
 
+/* ----------------------- drawcircle ----------------------------- */
+
+void drawfilledcircle(float diameter,unsigned char *rgbcolor){
+  int i;
+
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  glBegin(GL_TRIANGLES);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+  for(i=0;i<ncirc;i++){
+    int i2;
+
+    i2 = (i+1)%ncirc;
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+    glVertex3f(0.0,0.0,0.0);
+    glVertex3f(diameter*xcirc[  i2]/2.0,diameter*ycirc[  i2]/2.0,0.0);
+  }
+  for(i=0;i<ncirc;i++){
+    int i2;
+
+    i2 = (i+1)%ncirc;
+    glVertex3f(diameter*xcirc[  i2]/2.0,diameter*ycirc[  i2]/2.0,0.0);
+    glVertex3f(0.0,0.0,0.0);
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+  }
+  glEnd();
+}
 /* ----------------------- drawcircle ----------------------------- */
 
 void drawcircle(float diameter,unsigned char *rgbcolor){

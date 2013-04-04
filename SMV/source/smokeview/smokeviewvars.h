@@ -25,6 +25,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(nvents_circular,0);
 #ifdef pp_BETA
 SVEXTERN int SVDECL(show_all_units,1);
 #else
@@ -603,7 +604,7 @@ SVEXTERN int current_particle_type,last_particle_type;
 SVEXTERN int SVDECL(nsmoke3dinfo,0);
 SVEXTERN int nisoinfo, niso_bounds;
 SVEXTERN int ntrnx, ntrny, ntrnz,npdim,nmeshes,clip_mesh;
-SVEXTERN int nobst,nvent,noffset;
+SVEXTERN int SVDECL(nOBST,0),SVDECL(nVENT,0),noffset;
 SVEXTERN int visLabels;
 SVEXTERN int SVDECL(ntarginfo,0);
 SVEXTERN int showallslicevectors;
@@ -658,7 +659,7 @@ SVEXTERN int SVDECL(autoterrain,0),SVDECL(manual_terrain,0);
 SVEXTERN float zterrain_max, zterrain_min;
 SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int SVDECL(visBlocklabel,1);
-SVEXTERN int SVDECL(visOpenVents,1),SVDECL(visDummyVents,1),SVDECL(visOtherVents,1);
+SVEXTERN int SVDECL(visOpenVents,1),SVDECL(visDummyVents,1),SVDECL(visOtherVents,1),SVDECL(visCircularVents,1);
 SVEXTERN int SVDECL(visOpenVentsAsOutline,0);
 SVEXTERN int SVDECL(visSmoke,1), SVDECL(visZone,0);
 SVEXTERN int SVDECL(visEvac,1);

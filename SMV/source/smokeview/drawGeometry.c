@@ -22,6 +22,67 @@ char drawGeometry_revision[]="$Revision$";
 
 cadgeom *current_cadgeom;
 
+/* ------------------ DrawCircVents ------------------------ */
+
+void DrawCircVents(void){
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    int j;
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    for(j=0;j<meshi->nvents;j++){
+      ventdata *vi;
+      float x0, y0, z0;
+      char label[255];
+      unsigned char vcolor[3];
+      float delta;
+
+      vi = meshi->ventinfo + j;
+      if(vi->radius<=0.0)continue;
+
+      x0 = (vi->xmin+vi->xmax)/2.0;
+      y0 = (vi->ymin+vi->ymax)/2.0;
+      z0 = (vi->zmin+vi->zmax)/2.0;
+
+      delta=0.001*xyzmaxdiff;
+      vcolor[0]=vi->color[0]*255;
+      vcolor[1]=vi->color[1]*255;
+      vcolor[2]=vi->color[2]*255;
+      glPushMatrix();
+      switch (vi->dir){
+        case DOWN_X:
+          glTranslatef(x0-delta,y0,z0);
+          glRotatef(90.0,0.0,1.0,0.0);
+          break;
+        case UP_X:
+          glTranslatef(x0+delta,y0,z0);
+          glRotatef(90.0,0.0,1.0,0.0);
+          break;
+        case DOWN_Y:
+          glTranslatef(x0,y0-delta,z0);
+          glRotatef(90.0,1.0,0.0,0.0);
+          break;
+        case UP_Y:
+          glTranslatef(x0,y0+delta,z0);
+          glRotatef(90.0,1.0,0.0,0.0);
+          break;
+        case DOWN_Z:
+          glTranslatef(x0,y0,z0-delta);
+          break;
+        case UP_Z:
+          glTranslatef(x0,y0,z0+delta);
+          break;
+      }
+      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      drawfilledcircle(2.0*vi->radius,vcolor);
+      glPopMatrix();
+    }
+  }
+
+}
+
 /* ------------------ UpdateIndexolors ------------------------ */
 
 void UpdateIndexColors(void){
@@ -1143,7 +1204,7 @@ void update_faces(void){
     meshi->nfaces=faceptr-meshi->faceinfo;
   }
   UpdateHiddenFaces();
-  update_facelists();
+  UpdateFacelists();
   update_selectfaces();
   update_selectblocks();
 }
@@ -1635,7 +1696,7 @@ void set_cull_vis(void){
 
   if(update_initcullgeom==1){
     initcullgeom(cullgeom);
-    update_facelists();
+    UpdateFacelists();
   }
   for(imesh=0;imesh<nmeshes;imesh++){
     int iport;
@@ -1851,9 +1912,9 @@ int comparecolorfaces( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ update_facelists ------------------------ */
+/* ------------------ UpdateFacelists ------------------------ */
 
-void update_facelists(void){
+void UpdateFacelists(void){
   int n_textures, n_outlines;
   int n_normals_single, n_normals_double, n_transparent_double;
   int i,j,k;
@@ -1906,8 +1967,7 @@ void update_facelists(void){
       patchi=NULL;
     }
 
-    if(
-      local_showpatch==1&&loadpatch==1){
+    if(local_showpatch==1&&loadpatch==1){
       for(j=0;j<meshi->nbptrs;j++){
         blockagedata *bc;
 
@@ -1955,6 +2015,7 @@ void update_facelists(void){
         if(visOpenVents==0&&vi->isOpenvent==1)continue;
         if(visDummyVents==0&&vi->dummy==1)continue;
         if(visOtherVents==0&&vi->isOpenvent==0&&vi->dummy==0)continue;
+        if(visCircularVents==1&&vi->radius>0.0)continue;
         if(patchi!=NULL&&patchi->loaded==1&&patchi->display==1&&
           (vis_threshold==0||vis_onlythreshold==0||do_threshold==0)&&
           (vi->dummy==1||vi->hideboundary==0)){
