@@ -515,7 +515,7 @@ In practice, for fast chemistry $E$ and $n$ in Eq.~(\ref{eq:finite_rate_fin}) ar
 \Delta \hat{Y}_{\rm F} = - \min \left( \hat{Y}_{\rm F}, \hat{Y}_{\alpha} \,\frac{\nu_{\rm F}\,W_{\rm F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
 
-\subsubsection{Multiple Infinitely Fast Reactions}
+\subsubsection{Multiple Infinitely Fast Reactions: Parallel Reactions}
 Special treatment is needed for multiple, infinitely fast, oxygen-limited reactions. In this situation no reaction takes precedent over another and each wants to consume all of the available oxidizer.  Thus, the oxygen must be apportioned in some reasonable way.
 
 The first step in our approach is to determine the amount of oxidizer present in the mixed zone of the reactor. Next, we calculate the amount of oxidizer needed to stoichiometrically consume all of the fuel in each reaction. If the required oxidizer is larger than what is available then the mixed zone of the reactor is globally fuel rich.
@@ -569,6 +569,14 @@ The oxygen consumption for each reaction can be found using the change in fuel, 
 \end{align}
 As should be the case, the total change in oxygen, $-0.3$, is equal to the amount of available oxygen.
 
+\subsubsection{Multiple Infinitely Fast Reactions: Series Reactions}
+A special iterative procedure is needed handle infinitely fast reactions in series to ensure that we correctly process intermediate species consumption. Consider the set of reactions where a product from one reaction is the fuel of a second reaction:
+\begin{align}
+&\mbox{Reaction 1}& \mathrm{CH_4 + 1.5 \, O_2} &\rightarrow  \mathrm{CO + 2 \, H_2O}       && && \label{eq:series_reac_1} \\
+&\mbox{Reaction 2}& \mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2}                    && && \label{eq:series_reac_2}
+\end{align}
+If both Eqs.~(\ref{eq:series_reac_1}) and (\ref{eq:series_reac_2}) are infinitely fast and the mixed state is in stoichiometric proportions, then only H$_2$O and CO$_2$ should be present at the end of a time step. To properly process series reactions, FDS will identify the number of infinitely fast series reactions, $n$, that the user has specified. FDS will then update the species $n$ times before updating the time step. This ensures that the reactions proceed as far as the mixed state stoichiometry permits. 
+  
 \subsubsection{Complex Chemistry Models}
 
 For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed and the change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator---including a method to combat stiff chemistry---can be found in Appendix~\ref{chemistry_integration}.
