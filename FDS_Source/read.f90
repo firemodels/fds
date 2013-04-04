@@ -7963,7 +7963,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               IF (VT%RADIUS>0.5_EB*ABS(VT%X2-VT%X1)) THEN
+               IF (VT%RADIUS>0.5_EB*(VT%Y2-VT%Y1) .OR. VT%RADIUS>0.5_EB*(VT%Z2-VT%Z1)) THEN
                   WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
@@ -7979,7 +7979,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               IF (VT%RADIUS>0.5_EB*ABS(VT%Y2-VT%Y1)) THEN
+               IF (VT%RADIUS>0.5_EB*(VT%X2-VT%X1) .OR. VT%RADIUS>0.5_EB*(VT%Z2-VT%Z1)) THEN
                   WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
@@ -7995,7 +7995,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               IF (VT%RADIUS>0.5_EB*ABS(VT%Z2-VT%Z1)) THEN
+               IF (VT%RADIUS>0.5_EB*(VT%X2-VT%X1) .OR. VT%RADIUS>0.5_EB*(VT%Y2-VT%Y1)) THEN
                   WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
