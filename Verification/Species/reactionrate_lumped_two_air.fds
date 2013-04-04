@@ -11,10 +11,8 @@
 
 &HEAD CHID='reactionrate_lumped_two_air', TITLE='Lumped Species Reactions' /
 &MESH IJK=4,1,4, XB=0.0,0.1,0.0,0.025,0.0,0.1 /
-&MISC GVEC=0.0, 0.0, 0.0, TMPA=350, STRATIFICATION=.FALSE., INITIAL_UNMIXED_FRACTION=0.0/
-&SURF ID= 'LINER', ADIABATIC=.TRUE.,RGB=178,178,178, DEFAULT=.TRUE. / 
-
 &TIME T_END=1.0 DT=0.01 /
+&MISC INITIAL_UNMIXED_FRACTION = 0.0 /
 
 ! define primitive species and component species that define air and products
 &SPEC ID = 'PROPANE' /
