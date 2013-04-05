@@ -5606,7 +5606,9 @@ typedef struct {
       for(nn=0;nn<nvents+12;nn++){
         int s_num[6];
         ventdata *vi;
+        float radius;
 
+        radius=-1.0;
         vi=vinfo+nn;
         vi->transparent=0;
         vi->useventcolor=0;
@@ -5634,9 +5636,14 @@ typedef struct {
           t_origin[1]=texture_origin[1];
           t_origin[2]=texture_origin[2];
           fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f",
+          sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f %f",
                  &vi->xmin,&vi->xmax,&vi->ymin,&vi->ymax,&vi->zmin,&vi->zmax,
-                 &vi->id,s_num,t_origin,t_origin+1,t_origin+2);
+                 &vi->id,s_num,t_origin,t_origin+1,t_origin+2,&radius);
+          if(t_origin[0]<=-998.0){
+            t_origin[0]=texture_origin[0];
+            t_origin[1]=texture_origin[1];
+            t_origin[2]=texture_origin[2];
+          }
           vi->texture_origin[0]=t_origin[0];
           vi->texture_origin[1]=t_origin[1];
           vi->texture_origin[2]=t_origin[2];
@@ -5682,6 +5689,8 @@ typedef struct {
             vi->surf[0]=exterior_surfacedefault;
           }
         }
+        vi->radius=radius;
+        if(radius>0.0)nvents_circular++;
         if(surfinfo!=NULL&&s_num[0]>=0&&s_num[0]<nsurfinfo){
           vi->surf[0]=surfinfo+s_num[0];
           if(vi->surf[0]!=NULL&&strncmp(vi->surf[0]->surfacelabel,"OPEN",4)==0){
@@ -5695,8 +5704,6 @@ typedef struct {
         int iv1, iv2, jv1, jv2, kv1, kv2;
         float s_color[4];
         int venttype,ventindex;
-        float radius;
-
 
         vi = vinfo+nn;
         vi->type=vi->surf[0]->type;
@@ -5705,7 +5712,6 @@ typedef struct {
         s_color[1]=vi->surf[0]->color[1];
         s_color[2]=vi->surf[0]->color[2];
         s_color[3]=vi->surf[0]->color[3];
-        radius=-1.0;
         venttype=-99;
         if(nn<nvents){
           float s2_color[4];
@@ -5719,7 +5725,7 @@ typedef struct {
           sscanf(buffer,"%i %i %i %i %i %i %i %i %f %f %f %f",
                &iv1,&iv2,&jv1,&jv2,&kv1,&kv2,
                &ventindex,&venttype,
-               s2_color,s2_color+1,s2_color+2,&radius);
+               s2_color,s2_color+1,s2_color+2,s2_color+3);
           if(s2_color[0]>=0.0&&s2_color[1]>=0.0&&s2_color[2]>=0.0){
             s_color[0]=s2_color[0];
             s_color[1]=s2_color[1];
@@ -5731,7 +5737,6 @@ typedef struct {
             }
             vi->useventcolor=1;
           }
-          if(radius>0.0)nvents_circular++;
           if(ventindex<0)vi->hideboundary=1;
           if(venttype!=-99)vi->type=venttype;
           if(ABS(ventindex)!=99){
@@ -5804,7 +5809,6 @@ typedef struct {
           }
         }
         if(vi->transparent==1)nvent_transparent++;
-        vi->radius=radius;
         vi->linewidth=&ventlinewidth;
         vi->showhide=NULL;
         vi->showtime=NULL;
