@@ -1003,15 +1003,17 @@ archive_timing_stats()
 
 check_guide()
 {
-   # Scan and report any fatal errors in build process for guides
+   # Scan and report any errors or warnings in build process for guides
    cd $FIREBOT_DIR
    if [[ `grep "successfully" -I $1` == "" ]]
    then
+      # There were errors/warnings in the guide build process
       echo "Warnings from Stage 8 - Build FDS-SMV Guides:" >> $WARNING_LOG
       echo $1 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    else
-      # Copy guide over only if no errors or warnings occurred
+      # Guide built successfully; there were no errors/warnings
+      # Copy guide to Firebot's local website
       cp $2 /var/www/html/firebot/manuals/
    fi
 }
