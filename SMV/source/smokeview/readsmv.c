@@ -5761,8 +5761,6 @@ typedef struct {
             vi->useventcolor=1;
             updateindexcolors=1;
           }
-          else{
-          }
           vi->color = getcolorptr(s_color);
         }
         else{

@@ -1362,7 +1362,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
         }
       }
       if(vi!=NULL){
-        if(vi->type==99||vi->type==-99){
+        if(ABS(vi->type)==99){
           faceptr->type=face_surf->type;
         }
         else{
