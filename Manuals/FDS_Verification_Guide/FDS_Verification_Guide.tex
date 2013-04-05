@@ -502,7 +502,7 @@ which is written as follows in the Fortran source code:
      .           (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
 \end{lstlisting}
 This is one of the simpler constructs because the pattern that emerges within the lines of code make it fairly easy to check. However, a mis-typing
-of an {\ct I} or a {\ct J}, a plus or a minus sign, or any of a hundred different mistakes can cause the code to fail, or worse produce the wrong
+of an \textct{I} or a \textct{J}, a plus or a minus sign, or any of a hundred different mistakes can cause the code to fail, or worse produce the wrong
 answer. A simple way to eliminate many of these mistakes is to run simple scenarios that have perfectly symmetric initial and boundary conditions.
 For example, put a hot cube in the exact center of a larger cold compartment, turn off gravity, and watch the heat diffuse from the hot cube into the
 cold gas. Any simple error in the coding of the energy equation will show up almost immediately. Then, turn on gravity, and in the absence of any
@@ -787,7 +787,7 @@ Overall, the agreement between the FDS simulations and the CBC data is satisfact
 
 In the previous section, all calculations were performed with a constant and uniform Smagorinsky coefficient, $C_{\rm s} = 0.2$.  For the canonical case of homogeneous decaying isotropic turbulence -- \emph{at sufficiently high Reynolds number} -- this model is sufficient.  However, we noticed that even for the isotropic turbulence problem when the grid Reynolds number is low (i.e., the flow is well-resolved) the constant coefficient model tends to over predict the dissipation of kinetic energy (see Figure \ref{fig_cbc_energy}).  This is because the eddy viscosity does not converge to zero at the proper rate; so long as strain is present in the flow (the magnitude of the stain rate tensor is nonzero), the eddy viscosity will be nonzero.  This violates a guiding principle in LES development: that the method should converge to a DNS if the flow field is sufficiently resolved.
 
-The dynamic procedure for calculating the model coefficient (set {\ct TURBULENCE\_MODEL=`DYNAMIC \\ \ct SMAGORINSKY'} on {\ct MISC}) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,FDS_Math_Guide}.  Here we present results for the implementation of the dynamic model in FDS.  In Figure~\ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_{\rm s}(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.
+The dynamic procedure for calculating the model coefficient (set \textct{TURBULENCE\_MODEL=`DYNAMIC \\ \ct SMAGORINSKY'} on \textct{MISC}) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,FDS_Math_Guide}.  Here we present results for the implementation of the dynamic model in FDS.  In Figure~\ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_{\rm s}(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.
 
 \begin{figure}[t]
    \begin{center}
@@ -994,7 +994,7 @@ w&=&\frac{1}{2}\sqrt{\frac{\nu \,u_0}{x}}(\eta f^{'}-f)
 \end{eqnarray}
 The solution of Eq.~(\ref{BL_ODE}) is the Blasius solution (see \cite{Panton:1}).
 
-The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform $\delta x = L/N_x$, $\delta z =H/N_z$ in each direction, and $N_x = 1.5 N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are {\ct OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ kg/m$^3$, $\mu = 0.001$ kg/m/s.
+The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform $\delta x = L/N_x$, $\delta z =H/N_z$ in each direction, and $N_x = 1.5 N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are \textct{OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ kg/m$^3$, $\mu = 0.001$ kg/m/s.
 
 Figure \ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. It is seen that the FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure \ref{blasius} (right) shows root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$ m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by
 \begin{equation}
@@ -1052,7 +1052,7 @@ In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wal
 
 \noindent The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empirical equations \cite{Kader:1981}. These cases are located in the Verification/Turbulence subdirectory.
 
-The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' ({\ct RESEARCH\_MODE=.TRUE.} on {\ct MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{$^\circ$C} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ kJ/kg) and viscosity ($\mu = 1.8216 \times 10^{-5}$ kg/(m-s)) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
+The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' (\textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{$^\circ$C} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ kJ/kg) and viscosity ($\mu = 1.8216 \times 10^{-5}$ kg/(m-s)) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
 \begin{center}
 \begin{tabular}{ll}
 Pr & $k$ (W/(m-K)) \\
@@ -1091,7 +1091,7 @@ A side view image of mean velocity vectors in the 3D flow is shown in Fig.~\ref{
 
 Despite the fact that the coarser cases do not perfectly capture the reattachment region, it is remarkable that with $h/\delta x = 2$ we achieve any recirculation at all.  The wiggles in the solution are due to numerical dispersion error.
 
-The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}.  Here we point out that the setup for this case is basically copied from Loh\'asz et al.~\cite{Lohasz:1}.  Their method of forcing, however, is ambiguous.  Using the FDS {\ct MEAN\_FORCING} feature, we set our bulk velocity to 1 m/s ({\ct U0 = 1.0} on {\ct MISC}) in order to match the mean profile for the finest grid resolution.  All other cases use the same forcing.
+The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}.  Here we point out that the setup for this case is basically copied from Loh\'asz et al.~\cite{Lohasz:1}.  Their method of forcing, however, is ambiguous.  Using the FDS \textct{MEAN\_FORCING} feature, we set our bulk velocity to 1 m/s (\textct{U0 = 1.0} on \textct{MISC}) in order to match the mean profile for the finest grid resolution.  All other cases use the same forcing.
 
 The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS velocity along the duct floor and the center profile above the rib, respectively. As can be seen, the $h/\delta x = 16$ case provides accurate results.  This resolution for this problem corresponds to wall $y^+$ values around 30.
 
@@ -1358,7 +1358,7 @@ through multiple meshes and its mass is conserved. An obstruction is created tha
 
 \subsection{Specified Mass Flux (\texorpdfstring{{\bf low\_flux\_hot\_gas\_filling}}{low\_flux\_hot\_gas\_filling})}
 
-The specification of the fuel mass flux is probably the most commonly used boundary condition for specifying a fire.  When the user specifies a {\ct HRRPUA} (heat release rate per unit area), FDS divides this input by the heat of combustion for the specified fuel (propane by default) and uses this values as the specified mass flux $\dot{m}_{\alpha}^{\prime\prime}$ at the {\ct VENT}.  This seems simple enough.  But the problem is complicated by the fact that the total species flux is the sum of the advective and diffusive fluxes,
+The specification of the fuel mass flux is probably the most commonly used boundary condition for specifying a fire.  When the user specifies a \textct{HRRPUA} (heat release rate per unit area), FDS divides this input by the heat of combustion for the specified fuel (propane by default) and uses this values as the specified mass flux $\dot{m}_{\alpha}^{\prime\prime}$ at the \textct{VENT}.  This seems simple enough.  But the problem is complicated by the fact that the total species flux is the sum of the advective and diffusive fluxes,
 \begin{equation}
 \label{eqn_total_flux}
 \dot{m}_{\alpha}^{\prime\prime} = \rho Y_{\alpha} u_n - \rho D_\alpha \frac{\partial Y_\alpha}{\partial n}
@@ -1370,14 +1370,14 @@ u_n = \frac{\sum_\alpha \dot{m}_{\alpha}^{\prime\prime}}{\rho(\mathbf{Y},T)}
 \end{equation}
 The density is computed using old values of the face mass fractions and the face temperature which may be specified or computed depending on choices made by the user.  The new face mass fraction is then set to satisfy (\ref{eqn_total_flux}).  The test case below is designed to exercise contributions from both the advective and diffusive terms in this boundary condition.
 
-In the test case, we inject propane into a cube with 1 m$^2$ vents on all six faces.  We specify the {\ct MASS\_FLUX} of propane to be 0.0001 kg/(m$^2$-s) and the temperature of the face of the {\ct VENT} ({\ct TMP\_FRONT}) is specified to be 500 $^\circ$C.  The box is initially filled with air at standard conditions.  We {\ct DUMP} a {\ct MASS\_FILE} and compare the accumulation of propane with the specified rate.  The results are shown in Figure \ref{fig_low_flux_hot_gas_filling}.
+In the test case, we inject propane into a cube with 1 m$^2$ vents on all six faces.  We specify the \textct{MASS\_FLUX} of propane to be 0.0001 kg/(m$^2$-s) and the temperature of the face of the \textct{VENT} (\textct{TMP\_FRONT}) is specified to be 500 $^\circ$C.  The box is initially filled with air at standard conditions.  We \textct{DUMP} a \textct{MASS\_FILE} and compare the accumulation of propane with the specified rate.  The results are shown in Figure \ref{fig_low_flux_hot_gas_filling}.
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/low_flux_hot_gas_filling_domain} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/low_flux_hot_gas_filling}
 \end{tabular*}
-\caption[Low flux of hot gas into a closed domain]{Test of specified mass flux boundary condition for low mass flux and specified temperature on the face of the {\ct VENT}. (Left) Image of the domain showing contours of propane mass fraction. (Right) Comparison of the accumulated mass of propane with the FDS values reported in the {\ct \_mass} file.}
+\caption[Low flux of hot gas into a closed domain]{Test of specified mass flux boundary condition for low mass flux and specified temperature on the face of the \textct{VENT}. (Left) Image of the domain showing contours of propane mass fraction. (Right) Comparison of the accumulated mass of propane with the FDS values reported in the \textct{\_mass} file.}
 \label{fig_low_flux_hot_gas_filling}
 \end{figure}
 
@@ -2129,7 +2129,7 @@ with the following reaction input parameters:
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
-Equation (\ref{eq:2step_propane_rev}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ whereas the forward-only two-step mechanism, Equation (\ref{eq:2step_propane}), does not. This reverse reaction mechanism is represented by three separate reactions on the {\ct REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in Figure \ref{fig:Arrhenius_175Order_2stepR}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
+Equation (\ref{eq:2step_propane_rev}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ whereas the forward-only two-step mechanism, Equation (\ref{eq:2step_propane}), does not. This reverse reaction mechanism is represented by three separate reactions on the \textct{REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in Figure \ref{fig:Arrhenius_175Order_2stepR}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
 \vskip8pt
 Note: the values of $E$ and $A$ used in these examples are not necessarily representative of the chemical reactions presented. When using finite rate chemistry consult experimental data or literature for appropriate reaction parameters.
 
@@ -2248,7 +2248,7 @@ For the same initial conditions, FDS predictions for burning or extinction (clos
 \section{Ideal and Non-Ideal Heat of Combustion ({\bf extinction})}
 \label{HoC}
 
-When using a non-predefined fuel, one may have heat of combustion data representing complete combustion but species yield data representing typical large scale conditions.  When using simple chemistry, the input keyword {\ct IDEAL=.TRUE.} on the {\ct REAC} line will have FDS reduce the heat of combustion to account for any minor products of combustion (e.g. CO and H$_2$O).  This is done by removing energy from the heat of combustion to account for carbon that goes to CO and soot rather than CO$_2$ and for hydrogen that goes to soot rather than H$_2$O.  A custom fuel (methane) is defined with CO and soot yields of 0.1, a heat of combustion of 50000 kJ/kg, and a 40 kW fire.  Two input files are created, one with the {\ct HEAT\_OF\_COMBUSTION} defined with {\ct IDEAL=.TRUE.} and the second with {\ct IDEAL=.FALSE.}.  In the {\ct IDEAL=.FALSE.} case where the heat of combustion is not adjusted we expect a fuel mass flow rate of 0.0008 \si{kg/(m$^2$.s)}.  With the heat of combustion adjusted we expect a higher fuel mass flow rate of 0.000877 \si{kg/(m$^2$.s)}, as shown in Fig.~\ref{fig:HoC}.
+When using a non-predefined fuel, one may have heat of combustion data representing complete combustion but species yield data representing typical large scale conditions.  When using simple chemistry, the input keyword \textct{IDEAL=.TRUE.} on the \textct{REAC} line will have FDS reduce the heat of combustion to account for any minor products of combustion (e.g. CO and H$_2$O).  This is done by removing energy from the heat of combustion to account for carbon that goes to CO and soot rather than CO$_2$ and for hydrogen that goes to soot rather than H$_2$O.  A custom fuel (methane) is defined with CO and soot yields of 0.1, a heat of combustion of 50000 kJ/kg, and a 40 kW fire.  Two input files are created, one with the \textct{HEAT\_OF\_COMBUSTION} defined with \textct{IDEAL=.TRUE.} and the second with \textct{IDEAL=.FALSE.}.  In the \textct{IDEAL=.FALSE.} case where the heat of combustion is not adjusted we expect a fuel mass flow rate of 0.0008 \si{kg/(m$^2$.s)}.  With the heat of combustion adjusted we expect a higher fuel mass flow rate of 0.000877 \si{kg/(m$^2$.s)}, as shown in Fig.~\ref{fig:HoC}.
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/HoC_Ideal} &
@@ -2356,7 +2356,7 @@ $\mathrm{CH_2O}$ & 0 & 0 & 13.49 & 6.743  \\ \hline
 
 Two versions of the simulations are performed. In the first simulation, the species were defined as individual tracked species.
 The FDS predictions and the expected FED and FIC values are compared in the figures below. In the second simulation, each species was defined as
-a lumped species, being part of the mixture using {\ct SMIX}. Four different mixtures were defined. The results of this test are shown in
+a lumped species, being part of the mixture using \textct{SMIX}. Four different mixtures were defined. The results of this test are shown in
 Figure~\ref{FED_FIC_SMIX_plot}.
 
 \begin{figure}[ht]
@@ -2387,7 +2387,7 @@ Figure~\ref{FED_FIC_SMIX_plot}.
 \includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_Irritants} &
 \includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_All_Gases}
 \end{tabular*}
-\caption[The FED and FIC values in {\bf FED\_FIC\_SMIX} test cases]{Comparison of FED and FIC predictions with expected values using {\ct SMIX}.}
+\caption[The FED and FIC values in {\bf FED\_FIC\_SMIX} test cases]{Comparison of FED and FIC predictions with expected values using \textct{SMIX}.}
 \label{FED_FIC_SMIX_plot}
 \end{figure}
 
@@ -2396,7 +2396,7 @@ Figure~\ref{FED_FIC_SMIX_plot}.
 \section{Smoke Detector Model (\texorpdfstring{{\bf smoke\_detector}}{smoke\_detector}) }
 \label{smoke_detector}
 
-The calculations described in this section check the smoke detector algorithm that computes the smoke obscuration in the sensing chamber of a detector. For this example, the initial soot mass fraction in a 1~m$^3$ box is set as 100~mg/kg via the {\ct INIT} line. A vent on the left side injects soot at a velocity of 0.25~m/s and a mass fraction of 100~mg/kg, and the soot exhausts on the right side of the box via an open vent. By default, if a species is defined as an aerosol by setting {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, all deposition mechanisms are disabled by using the follows inputs on the {\ct MISC} line:
+The calculations described in this section check the smoke detector algorithm that computes the smoke obscuration in the sensing chamber of a detector. For this example, the initial soot mass fraction in a 1~m$^3$ box is set as 100~mg/kg via the \textct{INIT} line. A vent on the left side injects soot at a velocity of 0.25~m/s and a mass fraction of 100~mg/kg, and the soot exhausts on the right side of the box via an open vent. By default, if a species is defined as an aerosol by setting \textct{AEROSOL=.TRUE.} on the \textct{SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, all deposition mechanisms are disabled by using the follows inputs on the \textct{MISC} line:
 
 \begin{lstlisting}
 &MISC GRAVITATIONAL_DEPOSITION  = .FALSE.
@@ -2436,7 +2436,7 @@ Figure~\ref{fig:smoke_detector} shows a comparison of the analytical and simulat
 
 \subsection{Surface Deposition of Aerosols (\texorpdfstring{\bf propane\_flame\_deposition}{propane\_flame\_deposition})}
 
-The calculations described in this section check the conservation of mass for the aerosol deposition algorithms. The example involves a reaction that invokes the aerosol deposition model in FDS (i.e., soot deposition). For this example, the fuel will be propane with a peak heat release rate of 100~kW and a 5~\% soot yield. For a 100~kW propane fire ({\ct HEAT\_OF\_COMBUSTION} of 44,715~kJ/kg), the associated burning rate is 2.236~g/s. A {\ct RAMP} is used to specify a burning rate from a propane burner that ramps up linearly to 2.236~g/s from 0~s to 1~s, remains steady at 2.236~g/s from 1~s to 4~s, then linearly decreases to 0~g/s from 4~s to 5~s. The total fuel mass released is 8.944~g of propane. Therefore, the resulting mass of soot should be equal to 0.447~g, or 5~\% of the total amount of fuel. For a case with no aerosol deposition, we would expect the mass of soot in the gas phase to be equal to 0.447~g. For a case with aerosol deposition, we would expect some fraction of soot to exist in the gas phase and the remainder of soot to be deposited on the wall. The sum of soot in the gas phase and deposited soot should be 0.447~g.
+The calculations described in this section check the conservation of mass for the aerosol deposition algorithms. The example involves a reaction that invokes the aerosol deposition model in FDS (i.e., soot deposition). For this example, the fuel will be propane with a peak heat release rate of 100~kW and a 5~\% soot yield. For a 100~kW propane fire (\textct{HEAT\_OF\_COMBUSTION} of 44,715~kJ/kg), the associated burning rate is 2.236~g/s. A \textct{RAMP} is used to specify a burning rate from a propane burner that ramps up linearly to 2.236~g/s from 0~s to 1~s, remains steady at 2.236~g/s from 1~s to 4~s, then linearly decreases to 0~g/s from 4~s to 5~s. The total fuel mass released is 8.944~g of propane. Therefore, the resulting mass of soot should be equal to 0.447~g, or 5~\% of the total amount of fuel. For a case with no aerosol deposition, we would expect the mass of soot in the gas phase to be equal to 0.447~g. For a case with aerosol deposition, we would expect some fraction of soot to exist in the gas phase and the remainder of soot to be deposited on the wall. The sum of soot in the gas phase and deposited soot should be 0.447~g.
 
 Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas phase, deposited soot, and total soot (sum of soot in the gas phase and deposited soot) for five cases. The five cases are (1) all aerosol deposition mechanisms active, (2) no aerosol deposition mechanisms active, (3) gravitational deposition only, (4) thermophoretic deposition only, and (5) turbulent deposition only.
 
@@ -2456,7 +2456,7 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 
 \subsection{Gravitational Settling of Aerosols (\texorpdfstring{\bf soot\_gravitational\_settling}{soot\_gravitational\_settling})}
 
-The calculations described in this section check the conservation of mass for the gravitational settling algorithm. The gravitational settling algorithm involves both the settling of soot particles in the gas phase and the accumulation of soot on the condensed phase. For this example, the initial soot concentration in a 1~m$^3$ box is set as 100~mg/m$^3$ via the {\ct INIT} line, and the soot deposits to the bottom of the box via gravitational settling only. By default, if a species is defined as an aerosol by setting {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, gravitational deposition is enabled and the other deposition mechanisms are disabled by using the following inputs on the {\ct MISC} line:
+The calculations described in this section check the conservation of mass for the gravitational settling algorithm. The gravitational settling algorithm involves both the settling of soot particles in the gas phase and the accumulation of soot on the condensed phase. For this example, the initial soot concentration in a 1~m$^3$ box is set as 100~mg/m$^3$ via the \textct{INIT} line, and the soot deposits to the bottom of the box via gravitational settling only. By default, if a species is defined as an aerosol by setting \textct{AEROSOL=.TRUE.} on the \textct{SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, gravitational deposition is enabled and the other deposition mechanisms are disabled by using the following inputs on the \textct{MISC} line:
 
 \begin{lstlisting}
 &MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
@@ -2672,15 +2672,15 @@ each of these reactions may produce some other solid component
 \section{Mass conservation of pyrolyzed mass (\texorpdfstring{{\bf surf\_mass\_conservation}}{surf\_mass\_conservation})}
 
 The calculations described in this section check the conservation of
-mass produced by the pyrolysis algorithm. Parameters describing the geometric configuration of the solid are input via a {\ct SURF} line,  and
-the reacting materials are described on respective {\ct MATL} lines. In the tests, four independent modeling options are varied:
+mass produced by the pyrolysis algorithm. Parameters describing the geometric configuration of the solid are input via a \textct{SURF} line,  and
+the reacting materials are described on respective \textct{MATL} lines. In the tests, four independent modeling options are varied:
 \begin{enumerate}
-\item The {\ct SURF} line can be associated with either a solid surface as designated by a {\ct VENT} line, or by solid particles as
-described by a {\ct PART} line.
-\item The {\ct SURF} geometry can be either {\ct CARTESIAN}, {\ct CYLINDRICAL}, or {\ct SPHERICAL}.
-\item The {\ct MATL} can be either charring (non-zero {\ct NU\_RESIDUE}) or non-charring.
+\item The \textct{SURF} line can be associated with either a solid surface as designated by a \textct{VENT} line, or by solid particles as
+described by a \textct{PART} line.
+\item The \textct{SURF} geometry can be either \textct{CARTESIAN}, \textct{CYLINDRICAL}, or \textct{SPHERICAL}.
+\item The \textct{MATL} can be either charring (non-zero \textct{NU\_RESIDUE}) or non-charring.
 \item The pyrolysis product can be either the fuel gas defined by the
-mixture fraction model, or an additional gas species, defined by a {\ct SPEC} line.
+mixture fraction model, or an additional gas species, defined by a \textct{SPEC} line.
 \end{enumerate}
 In all cases, the wall thickness (or radius for cylindrical and spherical geometries) is 0.01~m. The material density is 360~kg/m$^3$ and the yield of gaseous
 products for the charring cases is 0.5, i.e., half of the original mass. For Cartesian surfaces, the mass loss per unit area is
@@ -2703,7 +2703,7 @@ decrease from the ``Expected'' value to zero.
 
 \subsection{Pyrolysis at a Solid Surface}
 
-The analytical mass losses are calculated by multiplying the mass per unit area by the {\ct VENT} area,
+The analytical mass losses are calculated by multiplying the mass per unit area by the \textct{VENT} area,
 which in all cases is 1~m$^2$.
 The expected and computed results for charring material are compared in Fig.~\ref{surf_mass_vent_char}.
 The expected and computed results for non-charring material are compared in Fig.~\ref{surf_mass_vent_nonchar}.
@@ -2717,7 +2717,7 @@ The expected and computed results for non-charring material are compared in Fig.
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_spher_fuel} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_spher_gas}
 \end{tabular*}
-\caption[The {\bf  surf\_mass\_vent\_char} test cases]{Comparison of analytical and predicted mass change for charring surfaces that are introduced as {\ct VENT}s.}
+\caption[The {\bf  surf\_mass\_vent\_char} test cases]{Comparison of analytical and predicted mass change for charring surfaces that are introduced as \textct{VENT}s.}
 \label{surf_mass_vent_char}
 \end{figure}
 
@@ -2731,7 +2731,7 @@ The expected and computed results for non-charring material are compared in Fig.
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_spher_fuel} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_spher_gas}
 \end{tabular*}
-\caption[The {\bf surf\_mass\_vent\_nonchar} test cases]{Comparison of analytical and predicted mass change for non-charring surfaces that are introduced as {\ct VENT}s.}
+\caption[The {\bf surf\_mass\_vent\_nonchar} test cases]{Comparison of analytical and predicted mass change for non-charring surfaces that are introduced as \textct{VENT}s.}
 \label{surf_mass_vent_nonchar}
 \end{figure}
 
@@ -2740,12 +2740,12 @@ The expected and computed results for non-charring material are compared in Fig.
 \subsection{Pyrolysis of Discrete Particles}
 
 For Lagrangian particles, the expected values of the mass are obtained by multiplying the material density by the particle volume by the residue fraction.
-For Cartesian surfaces, the particle area is two times the product of the parameters {\ct LENGTH} and {\ct WIDTH} on the {\ct SURF} line, both of
+For Cartesian surfaces, the particle area is two times the product of the parameters \textct{LENGTH} and \textct{WIDTH} on the \textct{SURF} line, both of
 which are given a value of 0.05~m. As a result, the expected masses for particles with Cartesian surfaces are
 $360 (1-0.5) \times 2\delta L W=0.009$~kg for charring, and 0.018~kg for non-charring materials. Note that the half-thickness, $\delta=0.01$~m, is
-specified on the {\ct SURF} line as {\ct THICKNESS}.
-For cylindrical particles, the {\ct LENGTH} is 0.1~m, and the radius, $r$
-(specified via {\ct THICKNESS}), is 0.01~m. The expected masses are thus
+specified on the \textct{SURF} line as \textct{THICKNESS}.
+For cylindrical particles, the \textct{LENGTH} is 0.1~m, and the radius, $r$
+(specified via \textct{THICKNESS}), is 0.01~m. The expected masses are thus
 $360(1-0.5) \times \pi r^2 L=0.00565$~kg for charring, and 0.0113~kg for non-charring materials.
 For spherical particles, the expected mass is $360(1-0.5) \times 4\pi r^3/3=7.54\times 10^{-4}$~kg for charring, and $1.51\times 10^{-3}$~kg for
 non-charring materials.
@@ -2786,10 +2786,10 @@ A set of more advanced computations are performed to test mass conservation in c
 The case has three meshes, and each mesh has the same mass of charring cylindrical particles as the cases above.
 Because the length of the cylindrical particles is four times 0.1~m, the cylinder diameter is only half of the value used above.
 \begin{description}
-\item[Mesh 1] has four 0.1 m long cylinders with 5 mm radius. The locations are randomly chosen from a plane defined by the {\ct INIT} statement.
-\item[Mesh 2] has eight 0.05 m long cylinders, initialized using the {\ct INIT} and {\ct MULT} statements.
-\item[Mesh 3] has eight 0.05 m long cylinders, initialized using the {\ct INIT} and {\ct MULT} statements. The cylinders are split in two sections using the
-{\ct NUMBER\_RADIATIVE\_ANGLES} feature of the {\ct PART} class.
+\item[Mesh 1] has four 0.1 m long cylinders with 5 mm radius. The locations are randomly chosen from a plane defined by the \textct{INIT} statement.
+\item[Mesh 2] has eight 0.05 m long cylinders, initialized using the \textct{INIT} and \textct{MULT} statements.
+\item[Mesh 3] has eight 0.05 m long cylinders, initialized using the \textct{INIT} and \textct{MULT} statements. The cylinders are split in two sections using the
+\textct{NUMBER\_RADIATIVE\_ANGLES} feature of the \textct{PART} class.
 \end{description}
 The analytical and computed results are compared in Fig.~\ref{surf_mass_part_char_advanced}.
 The readability of the figure is improved by setting the external heat fluxes for Meshes 1, 2, and 3 to 50, 45 and 40 kW/m$^2$, respectively.
@@ -2815,7 +2815,7 @@ associated with particles in three variations.}
 %\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_split} &
 %\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_split}
 %\end{tabular*}
-%\caption[The {\ct surf\_mass\_part\_fuel\_split} test cases.]{Comparison of analytical and predicted mass change for splitted particle surfaces.}
+%\caption[The \textct{surf\_mass\_part\_fuel\_split} test cases.]{Comparison of analytical and predicted mass change for splitted particle surfaces.}
 %\label{surf_mass_part_fuel_split}
 %\end{figure}
 %
@@ -2829,7 +2829,7 @@ associated with particles in three variations.}
 %\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_energy_split} &
 %\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_energy_split}
 %\end{tabular*}
-%\caption[The {\ct surf\_mass\_part\_fuel\_split} test cases.]{Comparison of analytical and predicted total energy release for splitted particle surfaces.}
+%\caption[The \textct{surf\_mass\_part\_fuel\_split} test cases.]{Comparison of analytical and predicted total energy release for splitted particle surfaces.}
 %\label{surf_mass_part_fuel_energy_split}
 %\end{figure}
 
@@ -2874,7 +2874,7 @@ A single layer of material mixture contains reacting material (1) and inert matr
 If the product material (3) of the reaction is of higher density than the
 reactant ($\rho_3 > \rho_1$), the layer thickness $\Delta$ should shrink.
 If the product density is lower than the reactant's density ($\rho_3 < \rho_1$) the layer should swell (increase) in thickness. If the inert material has
-a static matrix structure ({\ct ALLOW\_SHRINKING=.FALSE.} or {\ct ALLOW\_SWELLING=.FALSE.}) the layer thickness should not change. The parameters of the
+a static matrix structure (\textct{ALLOW\_SHRINKING=.FALSE.} or \textct{ALLOW\_SWELLING=.FALSE.}) the layer thickness should not change. The parameters of the
 six test cases are shown in the following table. The figures below show the surface densities, which obviously should not change, and the surface
 thicknesses over the time of the simulation.
 
@@ -3171,9 +3171,9 @@ reaction is given by:
 \end{lstlisting}
 
 \noindent Only the relevant parameters are shown. The other parameters are not relevant in this
-exercise. Note that {\ct REFERENCE\_TEMPERATURE} is $T_{p,i}$, but in units of $^\circ$C. {\ct REFERENCE\_RATE} is actually
-$r_{p,i}/Y_{0,i}$, in units of s$^{-1}$. {\ct HEATING\_RATE} is $\beta$ in units of K/min.
-{\ct NU\_RESIDUE} is $\nu_r$ and {\ct NU\_FUEL} is ($1-\nu_r$).
+exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{p,i}$, but in units of $^\circ$C. \textct{REFERENCE\_RATE} is actually
+$r_{p,i}/Y_{0,i}$, in units of s$^{-1}$. \textct{HEATING\_RATE} is $\beta$ in units of K/min.
+\textct{NU\_RESIDUE} is $\nu_r$ and \textct{NU\_FUEL} is ($1-\nu_r$).
 Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket
 materials. The peak temperatures are easy to estimate, and the values of $r_{p,i}/Y_{0,i}$ can be fine-tuned to closely match
 the data. Note that it is possible to compute values of $A_i$ and $E_i$ and input them directly into FDS, rather
@@ -3247,7 +3247,7 @@ As the case proceeds momentum is exchanged between the fluid and the particles. 
 \label{particle_drag}
 
 The particle drag test cases consider a 1~m by 1~m by 1~m
-channel with periodic boundary conditions on the $x$-faces and {\ct FREE\_SLIP}
+channel with periodic boundary conditions on the $x$-faces and \textct{FREE\_SLIP}
 walls on $y$- and $z$-faces. Static droplets are placed in the center
 of the channel, one particle per computational cell, so that they form a surface
 perpendicular to the flow direction. Gravity is set to zero. Due to the symmetry of the problem, the flow is one
@@ -3309,7 +3309,7 @@ F & 150 & 1600 \tabularnewline
 
 \section{Pressure Drop through Stationary Particles (\texorpdfstring{\bf drag\_dt}{drag\_dt})}
 
-The pressure drop test cases consider a 1 m wide by 1 m tall by 2 m long channel with a 2 m/s fixed velocity boundary condition on one end, an {\ct OPEN} boundary condition on the other end, and {\ct FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own {\ct MESH}, and a plane of particles is placed across each channel at 1 m.  The particles are 0.01 m in diameter and 10 particles are placed per cell.  A {\ct USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
+The pressure drop test cases consider a 1 m wide by 1 m tall by 2 m long channel with a 2 m/s fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The particles are 0.01 m in diameter and 10 particles are placed per cell.  A \textct{USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
 \be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{D} \, \pi \, r_{d}^{2}} {A} \ee
 where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel are 3.77, 7.54, and 15.1~Pa.  Comparisons of computed and analytical results are shown in Figure~\ref{particle_drag_plots}. The pressure drop converges to the analytical solution as the time step decreases.
 
@@ -3331,7 +3331,7 @@ where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each s
 
 \section{Mesh Screens (\texorpdfstring{\bf screen\_drag}{screen\_drag})}
 
-These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an {\ct OPEN} boundary condition on the other end, and {\ct FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own {\ct MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A {\ct FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
+These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A \textct{FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
 \be  \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{screen} \ee
 where K and Y are empirical constants defined in the User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Figure~\ref{screen_drag_plots}.
 
@@ -3608,9 +3608,9 @@ This case tests the conservation of energy between drops, surfaces, and  the gas
 In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of 2,000~$\mu$m are
 introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~$^\circ$C, and the spray is directed at the walls with an initial velocity of 5~m/s.
 The water completely evaporates before it drips down to the bottom of the channel.
-Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, {\ct HRR}, of the fire is expected to be 320~kW. The rate at which the water droplets extract energy from the system, {\ct Q\_PART}, is expected to be
+Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 320~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
 \be - \left( 4.184 \; \hbox{kJ/kg/K} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.2 \; \hbox{kW} \ee
-The sum of all the terms, {\ct Q\_TOTAL}, is expected to be zero. The three other quantities, {\ct Q\_COND}, {\ct Q\_RADI}, {\ct Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
+The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three other quantities, \textct{Q\_COND}, \textct{Q\_RADI}, \textct{Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
 
 \begin{figure}[h!]
 \begin{center}
@@ -3626,7 +3626,7 @@ The sum of all the terms, {\ct Q\_TOTAL}, is expected to be zero. The three othe
 
 \section{Flow Rate and Pipe Networks (\texorpdfstring{{\textbf{flow\_rate\_2}}}{flow\_rate\_2}) }
 
-In this test case four sprinklers are placed in a room.  The first three sprinklers are on one pipe network ({\ct PIPE\_INDEX = 1}) and the fourth sprinkler is on a second pipe network ({\ct PIPE\_INDEX = 2}).  The sprinklers are defined with a pressure ramp such that all of the sprinklers within a pipe network flow at a combined rate of 10~L/min regardless of the number of open heads.  The sprinklers are set to open every 15~s and to close at 60~s.  After 45~s, the first three sprinklers have opened for a combined flow rate of 10~L/min and an accumulated water mass of 7.5~kg.  At 60~s, the fourth sprinkler flowing at 10 L/min plus the first three sprinklers flowing at 10~L/min have produced 12.5~kg of water.
+In this test case four sprinklers are placed in a room.  The first three sprinklers are on one pipe network (\textct{PIPE\_INDEX = 1}) and the fourth sprinkler is on a second pipe network (\textct{PIPE\_INDEX = 2}).  The sprinklers are defined with a pressure ramp such that all of the sprinklers within a pipe network flow at a combined rate of 10~L/min regardless of the number of open heads.  The sprinklers are set to open every 15~s and to close at 60~s.  After 45~s, the first three sprinklers have opened for a combined flow rate of 10~L/min and an accumulated water mass of 7.5~kg.  At 60~s, the fourth sprinkler flowing at 10 L/min plus the first three sprinklers flowing at 10~L/min have produced 12.5~kg of water.
 
 
 \begin{figure}[ht]
@@ -3702,7 +3702,7 @@ These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. Howeve
 
 \section{HVAC Mass Conservation (\texorpdfstring{\bf HVAC\_mass\_conservation}{HVAC\_mass\_conservation})}
 
-A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compartment being filled with a species called {\ct SPEC1} having the same molecular weight as air, see Figure~\ref{fig_HVAC_mass}.   An HVAC system of two ducts is created with one duct taking suction from the lower half (red vent) and discharging into the upper half (blue vent), and the second duct taking suction from the upper half (green vent) and discharging into the lower half (yellow vent).  The two ducts are assigned the same volume flow rate.  It is expected that the total mass in the compartment will be conserved, that the mass of the second species will be conserved (at 50 \% of the total mass), and that at the start of the computation a slice file of species will show pure ambient being discharged in the lower half and pure {\ct SPEC1} being discharged in the upper half.
+A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compartment being filled with a species called \textct{SPEC1} having the same molecular weight as air, see Figure~\ref{fig_HVAC_mass}.   An HVAC system of two ducts is created with one duct taking suction from the lower half (red vent) and discharging into the upper half (blue vent), and the second duct taking suction from the upper half (green vent) and discharging into the lower half (yellow vent).  The two ducts are assigned the same volume flow rate.  It is expected that the total mass in the compartment will be conserved, that the mass of the second species will be conserved (at 50 \% of the total mass), and that at the start of the computation a slice file of species will show pure ambient being discharged in the lower half and pure \textct{SPEC1} being discharged in the upper half.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -3740,12 +3740,12 @@ The second duct is placed in the upper half of the compartment and is assigned a
 
 \section{HVAC Dampers (\texorpdfstring{\bf HVAC\_damper}{HVAC\_damper})}
 
-The {\ct HVAC\_damper} example case is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a {\ct DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
+The \textct{HVAC\_damper} example case is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a \textct{DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
 
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/HVAC_damper}
-\caption[Example case {\ct HVAC\_damper}]{Simple duct network with a damper, case {\ct HVAC\_damper}.}
+\caption[Example case \textct{HVAC\_damper}]{Simple duct network with a damper, case \textct{HVAC\_damper}.}
 \label{fig:HVAC_damper}
 \end{center}
 \end{figure}
@@ -3755,7 +3755,7 @@ The {\ct HVAC\_damper} example case is a simple duct network of three ducts conn
 
 \section{HVAC Dampers (\texorpdfstring{\bf HVAC\_filter}{HVAC\_filter})}
 
-The sample case {\ct HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~kg$^{-1}$ (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~m$^3$/s takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Figure~\ref{fig_filter}.
+The sample case \textct{HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~kg$^{-1}$ (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~m$^3$/s takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Figure~\ref{fig_filter}.
 
 \begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -3764,7 +3764,7 @@ The sample case {\ct HVAC\_filter} demonstrates the use of the filter input.  A 
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_v} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_kg} }
    \end{tabular*}
-   \caption[Results for the {\ct HVAC\_filter} sample case]{Compartment pressure (upper left), compartment temperature (upper right), duct velocity (lower left), and particulate mass in the compartment and on the filter (lower right).}
+   \caption[Results for the \textct{HVAC\_filter} sample case]{Compartment pressure (upper left), compartment temperature (upper right), duct velocity (lower left), and particulate mass in the compartment and on the filter (lower right).}
    \label{fig_filter}
 \end{figure}
 
@@ -3794,7 +3794,7 @@ This convention can make these types of calculations a bit tricky.
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Pressure} &
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Volume_Flow}
 \end{tabular*}
-\caption[Results of the {\ct fan\_test} case]{Pressure and volume flow for the {\ct fan\_test}.}
+\caption[Results of the \textct{fan\_test} case]{Pressure and volume flow for the \textct{fan\_test}.}
 \label{fan_test}
 \end{figure}
 
@@ -3846,7 +3846,7 @@ This case starts with the same input as {\bf leak\_test}.  A second leakage vent
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{{\bf ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{{\bf ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, and \texorpdfstring{{\bf ashrae\_7\_table}}{ashrae\_7\_table})}
 
-ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Fig.~\ref{ASHRAE7}, consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components are specified, as well as the fan flow rate. The pressure drops and flow rates can be computed by hand.  Also listed in Fig.~\ref{ASHRAE7} are the predicted pressure drops for a fan with a fixed flow rate, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e., the flow rate of 1.45~m$^3$/s and pressure drop of 1913.5~Pa from the fixed flow simulation sits on the quadratic curve), and a fan with a {\ct RAMP} to define the same quadratic fan curve at 500~Pa intervals. The hand calculations assume a constant density, whereas the FDS computation will have a slightly non-uniform density in the network due to pressure drops. It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since specifying a fan curve via a table results in a piecewise linear approximation, it is expected that the user-defined fan curve results will vary slightly from the quadratic and fixed flow results.
+ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Fig.~\ref{ASHRAE7}, consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components are specified, as well as the fan flow rate. The pressure drops and flow rates can be computed by hand.  Also listed in Fig.~\ref{ASHRAE7} are the predicted pressure drops for a fan with a fixed flow rate, a fan with a quadratic fan curve (\textct{MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e., the flow rate of 1.45~m$^3$/s and pressure drop of 1913.5~Pa from the fixed flow simulation sits on the quadratic curve), and a fan with a \textct{RAMP} to define the same quadratic fan curve at 500~Pa intervals. The hand calculations assume a constant density, whereas the FDS computation will have a slightly non-uniform density in the network due to pressure drops. It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since specifying a fan curve via a table results in a piecewise linear approximation, it is expected that the user-defined fan curve results will vary slightly from the quadratic and fixed flow results.
 
 
 \begin{figure}[ht]

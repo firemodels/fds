@@ -1,5 +1,7 @@
 % !TEX root = FDS_Technical_Reference_Guide.tex
 
+\typeout{new file: Momentum_Chapter.tex}
+
 \chapter{Momentum Transport and Pressure}
 \label{momentum_chapter}
 
@@ -188,9 +190,10 @@ where $C_{\rm s}$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
        - \frac{2}{3} (\nabla\!\cdot \bu)^2  \ee
 The quantity $|S|$ consists of second order spatial differences
 averaged at cell centers. For example
-\begin{eqnarray}
-\dod{u}{x} &\approx& \frac{u_{ijk}-u_{i-1,jk}}{\dx_i} \\
-\dod{u}{y} &\approx& \frac{1}{2} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy_{j+\ha}} + \frac{u_{ijk}-u_{i,j-1,k}}{\dy_{j-\ha}} \right) \end{eqnarray}
+\begin{align}
+\dod{u}{x} &\approx \frac{u_{ijk}-u_{i-1,jk}}{\dx_i} \\
+\dod{u}{y} &\approx \frac{1}{2} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy_{j+\ha}} + \frac{u_{ijk}-u_{i,j-1,k}}{\dy_{j-\ha}} \right)
+\end{align}
 The divergence is described in Section~\ref{div_discret}.
 
 The thermal conductivity and material diffusivity of the fluid are related to the viscosity by
@@ -258,25 +261,25 @@ It is convenient to write this equation in the form:
 \be \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation} \ee
 The vector $\bF$ is referred to collectively as the momentum flux terms, and the term $\nabla \cH$ is referred to as the
 pressure gradient (though, as discussed above, ${\cal H}$ is not a true ``pressure''). The spatial discretization of the momentum equations takes the form
-\begin{eqnarray}
-\dod{\hu}{t} + F_{\x,ijk} + \frac{\hp_{i+1,jk} -\hp_{ijk}}{\dx} = 0  \label{umom} \\
-\dod{\hv}{t} + F_{\y,ijk} + \frac{\hp_{i,j+1,k}-\hp_{ijk}}{\dy} = 0  \label{vmom} \\
-\dod{\hw}{t} + F_{\z,ijk} + \frac{\hp_{ij,k+1} -\hp_{ijk}}{\dz} = 0  \label{wmom}
-\end{eqnarray}
+\begin{align}
+\dod{\hu}{t} + F_{\x,ijk} + \frac{\hp_{i+1,jk} -\hp_{ijk}}{\dx} &= 0  \label{umom} \\
+\dod{\hv}{t} + F_{\y,ijk} + \frac{\hp_{i,j+1,k}-\hp_{ijk}}{\dy} &= 0  \label{vmom} \\
+\dod{\hw}{t} + F_{\z,ijk} + \frac{\hp_{ij,k+1} -\hp_{ijk}}{\dz} &= 0  \label{wmom}
+\end{align}
 where $\hp_{ijk}$ is taken at center of cell $ijk$,
 $\hu_{ijk}$ and $F_{\x,ijk}$ are taken at the side of the cell facing
 in the forward $x$ direction, $\hv_{ijk}$ and $F_{\y,ijk}$ at the side
 facing in the forward $y$ direction, and $\hw_{ijk}$ and $F_{\z,ijk}$
 at the side facing in the forward $z$ (vertical) direction.
 The flux terms are discretized:
-\begin{eqnarray}
-F_x &=& \hw \, \omy - \hv \, \omz - \frac{1}{\rho} \left( f_x
+\begin{align}
+F_x &= \hw \, \omy - \hv \, \omz - \frac{1}{\rho} \left( f_x
   +  \dod{\tau_{xx}}{x} + \dod{\tau_{xy}}{y} + \dod{\tau_{xz}}{z} \right) \\
-F_y &=& \hu \, \omz - \hw \, \omx - \frac{1}{\rho} \left( f_y
+F_y &= \hu \, \omz - \hw \, \omx - \frac{1}{\rho} \left( f_y
   +  \dod{\tau_{yx}}{x} + \dod{\tau_{yy}}{y} + \dod{\tau_{yz}}{z} \right) \\
-F_z &=& \hv \, \omx - \hu \, \omy - \frac{1}{\rho} \left( f_z
+F_z &= \hv \, \omx - \hu \, \omy - \frac{1}{\rho} \left( f_z
   +  \dod{\tau_{zx}}{x} + \dod{\tau_{zy}}{y} + \dod{\tau_{zz}}{z} \right)
-\end{eqnarray}
+\end{align}
 In the
 definitions to follow, the components of the vorticity $(\om_x,\om_y,\om_z)$
 are located at cell edges pointing in the $x$, $y$ and $z$ directions,
@@ -436,18 +439,18 @@ The well-known CFL constraint given by
 \end{equation}
 places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if one wishes the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
 
-The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on {\ct MISC}):
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on \textct{MISC}):
 \vskip\baselineskip
 \noindent
-{\ct CFL\_VELOCITY\_NORM=0} (default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+\textct{CFL\_VELOCITY\_NORM=0} (default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=1} (most restrictive, corresponds to $L_1$ norm of velocity vector)
+\textct{CFL\_VELOCITY\_NORM=1} (most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
+\textct{CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ (u/\delta x)^2+(v/\delta y)^2+(w/\delta z)^2 }
     \end{equation}
@@ -478,7 +481,7 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \label{eqn_divstability}
 \delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
-Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
+Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer \textct{CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
 
 \subsection{Realizable Fluid Volume Constraint}
 
@@ -540,14 +543,14 @@ Fast Fourier Transforms (FFT).
 
 The discretized form of the
 Poisson equation for the modified pressure, $\hp$, is:
-\begin{eqnarray}
+\begin{align}
 \frac{\hp_{i+1,jk}-2\hp_{ijk}+\hp_{i-1,jk}}{\dx^2} +
 \frac{\hp_{i,j+1,k}-2\hp_{ijk}+\hp_{i,j-1,k}}{\dy^2} +
-\frac{\hp_{ij,k+1}-2\hp_{ijk}+\hp_{ij,k-1}}{\dz^2} \nonumber \\ =
+\frac{\hp_{ij,k+1}-2\hp_{ijk}+\hp_{ij,k-1}}{\dz^2} \notag \\ =
     -\frac{F_{\x,ijk} - F_{\x,i-1,jk}}{\dx}
     -\frac{F_{\y,ijk} - F_{\y,i,j-1,k}}{\dy}
     -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk}
-\end{eqnarray}
+\end{align}
 The lack of a superscript implies that all quantities are to be
 evaluated at the same time level.
 This elliptic partial differential equation is solved using a direct
@@ -701,10 +704,10 @@ following iterative scheme in the predictor step, again using the $x$ direction 
 Note also that $\cH$ is cell-centered; thus, $\cH_I$ is at the center of the $I$th grid cell of the left hand mesh, and $\cH_1$ is at the center of the first grid cell of the right hand mesh.
 \item Solve the Poisson equation in each mesh separately and exchange values of $\cH_I$ and $\cH_1$.
 \item Predict the normal component of velocity at the next time step. Note that the boundary condition for interface pressure term effectively yields the following:
-\begin{eqnarray}
-   u_I^* &=& \bar{u}_I^n - \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{\rm old}+\cH_1^{\rm old})/2 - {\cal H}_I }{ \dx/2} \right) \label{uI} \\
-   u_0^* &=& \bar{u}_0^n + \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,0}^{n} + \frac{ {\cal H}_1 - (\cH_I^{\rm old}+\cH_1^{\rm old})/2 }{ \dx/2} \right) \label{u0}
-\end{eqnarray}
+\begin{align}
+   u_I^* &= \bar{u}_I^n - \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{\rm old}+\cH_1^{\rm old})/2 - {\cal H}_I }{ \dx/2} \right) \label{uI} \\
+   u_0^* &= \bar{u}_0^n + \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,0}^{n} + \frac{ {\cal H}_1 - (\cH_I^{\rm old}+\cH_1^{\rm old})/2 }{ \dx/2} \right) \label{u0}
+\end{align}
 \item Repeat this process until $\left| u_I^* - u_0^* \right|$ falls below a specified tolerance.
 \end{enumerate}
 For the corrector step, the procedure is the same, except the boundary condition for the pressure term is:
@@ -712,7 +715,7 @@ For the corrector step, the procedure is the same, except the boundary condition
    \cH_B = \frac{\cH_I^{\rm old} + \cH_1^{\rm old} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,\,{\rm old}}-u_0^{n+1,\,{\rm old}} \right)
 \ee
 
-\paragraph{Velocity Tolerance} The default velocity tolerance is $\left| u_I^* - u_0^* \right| < 0.5 \, \delta x$ and the default maximum number of pressure iterations is 10.  Both of these parameters may be changed on the {\ct PRES} line.
+\paragraph{Velocity Tolerance} The default velocity tolerance is $\left| u_I^* - u_0^* \right| < 0.5 \, \delta x$ and the default maximum number of pressure iterations is 10.  Both of these parameters may be changed on the \textct{PRES} line.
 
 
 

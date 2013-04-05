@@ -1,5 +1,7 @@
 % !TEX root = FDS_Technical_Reference_Guide.tex
 
+\typeout{new file: HVAC_Chapter.tex}
+
 \chapter{Heating, Ventilation, and Air Conditioning (HVAC)}
 
 HVAC systems are found throughout the built environment.  During a fire, HVAC ducts can serve as a path for heat and combustion products to be moved through a building and the ducts can serve as a supply of fresh air.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts. HVAC systems may also serve as part of the fire protection system for a building when used to exhaust smoke or maintain stairwell pressurization.
@@ -58,13 +60,13 @@ all interdependent HVAC flows into or out of an FDS pressure zone:
 \be \tilde{P}^n_i  = P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, \d V}\right)\Delta t^n = \tilde{P^*}^n_i - \frac{\sum_j u^n_j A^n_j}{\int_{\Omega_m} {\cal P} \, \d V})\Delta t^n
    \label{HVACextrapolatedpressure} \ee
 If the summation term for the velocities being predicted in this timestep is removed from Eq.~(\ref{HVACextrapolatedpressure}) and placed on the left hand side of Eq.~(\ref{HVACdiscretemomentum}) and the remaining terms of Eq.~(\ref{HVACextrapolatedpressure}) are placed on the right hand side we obtain the following:
-\begin{eqnarray}
-   u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j+u^{n+}_j \right| \right) &-&
+\begin{align}
+   u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j+u^{n+}_j \right| \right) &-
     \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} {\cal P} \, \d V}}= \nonumber \\
-  & & u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j}
+  & u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j}
   \left(\tilde{P^*}^n_i-\tilde{P^*}^n_k +  (\rho g \Delta z)_j + \Delta P_j \right) +
   \frac{K_j}{2 L_j}\left|u^{n+}_j\right| \left|u^{n-}_j\right| \label{HVACfullexpansion}
-\end{eqnarray}
+\end{align}
 If node $i$ or node $k$ for duct $j$ in Eq.~(\ref{HVACfullexpansion}) is an internal duct node, then extrapolated pressures are not computed and the actual node pressure is solved for.
 Applying Eq.~(\ref{HVACfullexpansion}) to each duct results in a linear set of equations.
 Adding additional equations to the set for the mass conservation at internal duct nodes, results in complete set of equations.
@@ -83,7 +85,7 @@ Filters have two effects on the flow in an HVAC network.  First, a filter causes
 
 The filter is assumed to remove a fixed fraction (the filter's efficiency) of the species being trapped by the filter.  Each species can be given its own removal efficiency.   Eq.~(\ref{HVACmass}) for a filter is therefore given as:
 \be
-   u_{\rm \tiny out} \, \rho_{\rm \tiny out} \, A_{\rm \tiny out} = u_{\rm \tiny in} \, \rho_{\rm \tiny in} \, A_{\rm \tiny in} - \sum_j u_{\rm \tiny in} \, \rho_{\rm \tiny in} \, A_{\rm \tiny in} Y_{j,{\rm \tiny in}} E_j = u_{\rm \tiny in} \, \rho_{\rm \tiny in} \, A_{\rm \tiny in}  \left(1 - \sum_j Y_{j,{\rm \tiny in}} E_j \right)
+   u_\text{\tiny out} \, \rho_\text{\tiny out} \, A_\text{\tiny out} = u_\text{\tiny in} \, \rho_\text{\tiny in} \, A_\text{tiny in} - \sum_j u_\text{\tiny in} \, \rho_\text{\tiny in} \, A_\text{\tiny in} Y_{j,\text{\tiny in}} E_j = u_\text{\tiny in} \, \rho_\text{\tiny in} \, A_\text{\tiny in}  \left(1 - \sum_j Y_{j,\text{\tiny in}} E_j \right)
 \ee
 where $j$ is a species being filtered and $E_j$ is its removal efficiency.
 
@@ -109,12 +111,12 @@ where $\epsilon$ is the absolute roughness of the duct.
 
 \subsection{Heating and Coiling Coils}
 
-A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model is a constant heat model that adds or removes heat at a fixed rate as long as the coil is operating.  The second model is an effectiveness type heat exchanger model where four parameters are specified: the enthalpy of the working fluid ($c_{p,{\rm \tiny fl}}$), the temperature of the working fluid, ($T_{\rm \tiny fl}$), the mass flow rate of the working fluid ($\dot{m}_{\rm \tiny fl}$), and the effectiveness ($\eta$).  The rate of enthalpy change is then computed as follows:
+A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model is a constant heat model that adds or removes heat at a fixed rate as long as the coil is operating.  The second model is an effectiveness type heat exchanger model where four parameters are specified: the enthalpy of the working fluid ($c_{p,\text{\tiny fl}}$), the temperature of the working fluid, ($T_\text{\tiny fl}$), the mass flow rate of the working fluid ($\dot{m}_\text{\tiny fl}$), and the effectiveness ($\eta$).  The rate of enthalpy change is then computed as follows:
 
-\be T_{\rm \tiny out} = \frac{\dot{m}_{\rm \tiny duct} \, c_{p,{\rm \tiny duct,in}} \, T_{\rm \tiny duct,in} + \dot{m}_{\rm \tiny fl} \, c_{p,{\rm \tiny fl}} \, T_{\rm \tiny fl}}
-                             {\dot{m}_{\rm \tiny duct} \, c_{p,{\rm \tiny duct,in}} + \dot{m}_{\rm \tiny fl} \, c_{p,{\rm \tiny fl}} } \ee
+\be T_\text{\tiny out} = \frac{\dot{m}_\text{\tiny duct} \, c_{p,\text{\tiny duct,in}} \, T_\text{\tiny duct,in} + \dot{m}_\text{\tiny fl} \, c_{p,\text{\tiny fl}} \, T_\text{\tiny fl}}
+                             {\dot{m}_\text{\tiny duct} \, c_{p,\text{\tiny duct,in}} + \dot{m}_\text{\tiny fl} \, c_{p,\text{\tiny fl}} } \ee
 
-\be \dot{q}_{\rm \tiny coil}= \dot{m}_{\rm \tiny fl} c_{p,{\rm \tiny fl}} \left(T_{\rm \tiny fl} -T_{\rm \tiny out} \right) \eta \ee
+\be \dot{q}_\text{\tiny coil}= \dot{m}_\text{\tiny fl} c_{p,\text{\tiny fl}} \left(T_\text{\tiny fl} -T_\text{\tiny out} \right) \eta \ee
 
 \section{Leakage}
 
@@ -145,7 +147,7 @@ where the subscript $d$ is the attached duct and $A_v$ is the total area of the 
    u_w = \frac{\dot{m}''}{\rho_w} \quad ; \quad \rho_w = \frac {p \, \overline{W}}{{\cal R} \, T_w}
 \ee
 \be
-   Y_{\alpha,w} = \frac{\dot{m}''_{\alpha} + \frac{2 \, \rho_w \, D \, Y_{\alpha,{\rm \tiny gas}}}{\delta n}}{ \frac{2 \, \rho_w \, D}{\delta n}+u_w \, \rho_w}
+   Y_{\alpha,w} = \frac{\dot{m}''_{\alpha} + \frac{2 \, \rho_w \, D \, Y_{\alpha,\text{\tiny gas}}}{\delta n}}{ \frac{2 \, \rho_w \, D}{\delta n}+u_w \, \rho_w}
 \ee
 The above three equations are solved iteratively with a limit of 20 iterations (typically only one or two iterations are needed).
 

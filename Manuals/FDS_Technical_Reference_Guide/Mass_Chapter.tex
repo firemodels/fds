@@ -1,5 +1,7 @@
 % !TEX root = FDS_Technical_Reference_Guide.tex
 
+\typeout{new file: Mass_Chapter.tex}
+
 \chapter{Mass, Species, and Enthalpy Transport}
 
 This chapter describes in detail the equation of state in the low Mach number limit, the finite difference approximation of the mass and species conservation equations, and the role of the flow divergence as a surrogate for the enthalpy transport equation.
@@ -74,7 +76,7 @@ Following the prediction of the velocity and background pressure at time level $
      +\rho_{ijk}^{*}\right)} {\ha \dt}
     + \nabla\!\cdot(\overline{\rho}^{\rm FL} \mathbf{u})_{ijk}^{*}
     = 0 \ee
-The species conservation equations are differenced the same way, with the addition of the diffusion term (including turbulent diffusion\footnote{In DNS mode, the molecular diffusivity is based on mixture-averaged binary Fickian diffusion.  In LES mode, by default, the diffusivity is taken from the molecular and turbulent viscosities divided by the turbulent Schmidt number.  That is, to save cost we approximate the molecular plus turbulent diffusivity by $(\mu + \mu_t)/\mbox{Sc}_t$.  Optionally, in LES mode, by setting {\ct RESEARCH\_MODE=.TRUE.} on {\ct MISC}, the molecular and turbulent transport coefficients are treated separately, $\rho D_\alpha + \mu_t/\mbox{Sc}_t$ (at added cost).  The same applies for the thermal diffusivity.}):
+The species conservation equations are differenced the same way, with the addition of the diffusion term (including turbulent diffusion\footnote{In DNS mode, the molecular diffusivity is based on mixture-averaged binary Fickian diffusion.  In LES mode, by default, the diffusivity is taken from the molecular and turbulent viscosities divided by the turbulent Schmidt number.  That is, to save cost we approximate the molecular plus turbulent diffusivity by $(\mu + \mu_t)/\mbox{Sc}_t$.  Optionally, in LES mode, by setting \textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}, the molecular and turbulent transport coefficients are treated separately, $\rho D_\alpha + \mu_t/\mbox{Sc}_t$ (at added cost).  The same applies for the thermal diffusivity.}):
 \be  \frac{(\rho Z_\alpha)_{ijk}^{*}-(\rho Z_\alpha)_{ijk}^n}{\dt}
   + \nabla\!\cdot(\overline{\rho Z_\alpha}^{\rm FL} \mathbf{u})_{ijk}^n
   = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^n \ee
@@ -103,10 +105,10 @@ To illustrate how flux limiters are applied to the scalar transport equations, b
 \ee
 Note that the $\pm\ha$ suffixes indicates a face value for a particular cell $i$. A flux-limited scalar value (density in this case) premultiplies the staggered, face-centered velocity to form the scalar advective flux.  Recall that these velocity values are primitive variables in the calculation---they are \emph{not} interpolated.
 Consider face $i+\frac{1}{2}$ between cells $i$ and $i+1$ and let $\phi$ denote a general scalar variable, like $\rho$ or $\rho Z_\alpha$.  The local (loc) and upstream (up) data variations are
-\begin{eqnarray}
-\delta \phi_{\rm loc} &=& \phi_{i+1}-\phi_i \\
-\delta \phi_{\rm up}  &=& \left\{ \begin{array}{ll} \phi_i-\phi_{i-1} & \mbox{if} \quad u_i>0 \\ \phi_{i+2}-\phi_{i+1} & \mbox{if} \quad u_i<0 \end{array} \right.
-\end{eqnarray}
+\begin{align}
+\delta \phi_{\rm loc} &= \phi_{i+1}-\phi_i \\
+\delta \phi_{\rm up}  &= \left\{ \begin{array}{ll} \phi_i-\phi_{i-1} & \mbox{if} \quad u_i>0 \\ \phi_{i+2}-\phi_{i+1} & \mbox{if} \quad u_i<0 \end{array} \right.
+\end{align}
 The limiter function $B(r)$ depends on the upstream-to-local data ratio, $r=\delta \phi_{\rm up}/\delta \phi_{\rm loc}$. In FDS, options for the limiter function include \cite{Toro}:
 \begin{table}[H]
 \begin{center}

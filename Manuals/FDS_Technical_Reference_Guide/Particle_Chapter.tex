@@ -1,5 +1,7 @@
 % !TEX root = FDS_Technical_Reference_Guide.tex
 
+\typeout{new file: Particle_Chapter.tex}
+
 \chapter{Lagrangian Particles}
 \label{chapter:lagrangian_particles}
 
@@ -158,10 +160,10 @@ The spread parameter $\beta = 5$ is used by default. All the droplets are given 
 Liquid droplets are represented either as discrete airborne spheres or as elements of the thin liquid film that forms on wetted solids. These film ``droplets'' are still individually tracked as Lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
 
 Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
-\begin{eqnarray}
-\frac{\d m_{\rm p}}{\d t} & = & - A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\ [0.2in]
-\frac{\d T_{\rm p}}{\d t} & = & \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ A_{\rm p} \, h  \, (T_{\rm g}-T_{\rm p}) + \dq_{\rm r} + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
-\end{eqnarray}
+\begin{align}
+\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\ [0.2in]
+\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ A_{\rm p} \, h  \, (T_{\rm g}-T_{\rm p}) + \dq_{\rm r} + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
+\end{align}
 Here, $m_{\rm p}$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
 \be X_{\rm \alpha,\ell} = \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}{\cal R}
       \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]  \quad ; \quad
