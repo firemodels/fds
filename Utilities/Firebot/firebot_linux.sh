@@ -1005,55 +1005,23 @@ check_guide()
 {
    # Scan and report any fatal errors in build process for guides
    cd $FIREBOT_DIR
-   if [[ `grep "Fatal error" -I $1` == "" ]]
+   if [[ `grep "successfully" -I $1` == "" ]]
    then
-      # Copy guide over only if no fatal errors occurred
-      cp $2 /var/www/html/firebot/manuals/
-   else
-      echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
-      echo $3 >> $ERROR_LOG
-      grep "Fatal error" -I $1 >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Scan and report any non-fatal errors in build process for guides
-   # grep -v 'xpdf supports version 1.5' ignores a known PDF warning
-   if [[ `grep -E "Error:|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted" -I $1 | grep -v "xpdf supports version 1.5"` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
-      echo $3 >> $ERROR_LOG
-      grep -E "Error:|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted" -I $1 | grep -v "xpdf supports version 1.5" >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for LaTeX warnings (undefined references or duplicate labels)
-   if [[ `grep -E "undefined|multiply defined|multiply-defined" -I ${1}` == "" ]]
-   then
-      # Continue along
-      :
-   else
       echo "Warnings from Stage 8 - Build FDS-SMV Guides:" >> $WARNING_LOG
-      echo $3 >> $WARNING_LOG
-      grep -E "undefined|multiply defined|multiply-defined" -I $1 >> $WARNING_LOG
+      echo $1 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
+   else
+      # Copy guide over only if no errors or warnings occurred
+      cp $2 /var/www/html/firebot/manuals/
    fi
 }
 
 make_fds_user_guide()
 {
-   # Build FDS User Guide
    cd $FDS_SVNROOT/Manuals/FDS_User_Guide
 
-   # Add LaTeX search path; Paths are ':' separated
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
-   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
-   bibtex FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
-   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
-   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
+   # Build FDS User Guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage8_fds_user_guide
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_fds_user_guide $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.pdf 'FDS User Guide'
@@ -1061,16 +1029,10 @@ make_fds_user_guide()
 
 make_fds_technical_guide()
 {
-   # Build FDS Technical Guide
    cd $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide
-   
-   # Add LaTeX search path; Paths are ':' separated
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
 
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
-   bibtex FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
+   # Build FDS Technical Guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage8_fds_technical_guide
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_fds_technical_guide $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf 'FDS Technical Reference Guide'
@@ -1078,16 +1040,10 @@ make_fds_technical_guide()
 
 make_fds_verification_guide()
 {
-   # Build FDS Verification Guide
    cd $FDS_SVNROOT/Manuals/FDS_Verification_Guide
 
-   # Add LaTeX search path; Paths are ':' separated
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
-   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
-   bibtex FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
-   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
-   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
+   # Build FDS Verification Guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage8_fds_verification_guide
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_fds_verification_guide $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf 'FDS Verification Guide'
@@ -1095,16 +1051,10 @@ make_fds_verification_guide()
 
 make_fds_validation_guide()
 {
-   # Build FDS Validation Guide
    cd $FDS_SVNROOT/Manuals/FDS_Validation_Guide
 
-   # Add LaTeX search path; Paths are ':' separated
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
-   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
-   bibtex FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
-   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
-   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
+   # Build FDS Validation Guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage8_fds_validation_guide
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_fds_validation_guide $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
@@ -1112,16 +1062,10 @@ make_fds_validation_guide()
 
 make_fds_configuration_management_plan()
 {
-   # Build FDS Configuration Management Plan
    cd $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan
 
-   # Add LaTeX search path; Paths are ':' separated
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
-   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
-   bibtex FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
-   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
-   pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
+   # Build FDS Configuration Management Plan
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage8_fds_configuration_management_plan
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_fds_configuration_management_plan $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf 'FDS Configuration Management Plan'
@@ -1129,16 +1073,10 @@ make_fds_configuration_management_plan()
 
 make_smv_user_guide()
 {
-   # Build SMV User Guide
    cd $FDS_SVNROOT/Manuals/SMV_User_Guide
 
-   # Add LaTeX search path; Paths are ':' separated
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
-   bibtex SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
+   # Build SMV User Guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage8_smv_user_guide
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf 'SMV User Guide'
@@ -1146,16 +1084,10 @@ make_smv_user_guide()
 
 make_smv_technical_guide()
 {
-   # Build SMV Technical Guide
    cd $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide
 
-   # Add LaTeX search path; Paths are ':' separated
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
-   bibtex SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
+   # Build SMV Technical Guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage8_smv_technical_guide
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf 'SMV Technical Reference Guide'
@@ -1163,16 +1095,10 @@ make_smv_technical_guide()
 
 make_smv_verification_guide()
 {
-   # Build SMV Verification Guide
    cd $FDS_SVNROOT/Manuals/SMV_Verification_Guide
 
-   # Add LaTeX search path; Paths are ':' separated
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-   
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-   bibtex SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
+   # Build SMV Verification Guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage8_smv_verification_guide
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
