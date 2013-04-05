@@ -2,7 +2,7 @@
 % 2-15-10
 % radial_profile.m
 %
-% Plot radial profile from experiment vs. FDS results (up to 4)
+% Plot radial profile from experiment vs. FDS results (up to 5)
 %
 % Example:
 %
@@ -111,6 +111,9 @@ if nfds>=1
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'line')
+        R = M(:,devc_col(1));
+        W = M(:,devc_col(2));
     elseif strcmp(data_format,'mean')
         R = rmin:dr:rmax;
         T = find(M(:,1)>=tmin);
@@ -145,6 +148,9 @@ if nfds>=2
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'line')
+        R = M(:,devc_col(1));
+        W = M(:,devc_col(2));
     elseif strcmp(data_format,'mean')
         R = rmin:dr:rmax;
         T = find(M(:,1)>=tmin);
@@ -179,6 +185,9 @@ if nfds>=3
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'line')
+        R = M(:,devc_col(1));
+        W = M(:,devc_col(2));
     elseif strcmp(data_format,'mean')
         R = rmin:dr:rmax;
         T = find(M(:,1)>=tmin);
@@ -213,6 +222,9 @@ if nfds>=4
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'line')
+        R = M(:,devc_col(1));
+        W = M(:,devc_col(2));
     elseif strcmp(data_format,'mean')
         R = rmin:dr:rmax;
         T = find(M(:,1)>=tmin);
@@ -247,6 +259,9 @@ if nfds>=5
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'line')
+        R = M(:,devc_col(1));
+        W = M(:,devc_col(2));
     elseif strcmp(data_format,'mean')
         R = rmin:dr:rmax;
         T = find(M(:,1)>=tmin);
