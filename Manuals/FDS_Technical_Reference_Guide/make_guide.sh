@@ -39,3 +39,23 @@ if [[ $clean_build == 0 ]]
    else
       echo "FDS Technical Reference Guide built successfully!"
 fi    
+
+if [ "$1" == "verbose" ]; then
+   echo
+   echo 'Verbose list of warnings:'
+   echo
+   texfile='FDS_Technical_Reference_Guide'
+   grep -i error $texfile.log
+   grep -i warning $texfile.log
+   grep -i undefined $texfile.log
+   grep 'not available' $texfile.log
+   grep substituted $texfile.log
+   grep 'not found' $texfile.log
+   grep 'Rerun' $texfile.log
+   grep 'Missing character' $texfile.log
+   grep 'undefined' $texfile.log
+   grep 'multiply defined' $texfile.log
+   grep 'multiply-defined' $texfile.log
+   grep 'Overfull \\hbox' $texfile.log
+   grep 'Underfull \\hbox' $texfile.log
+fi
