@@ -13,36 +13,22 @@
 %                                                                                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Packages which force the use of better TeX coding:
+% Packages which force the use of better TeX coding
 % Mostly from http://tex.stackexchange.com/q/19264
 \RequirePackage[l2tabu, orthodox]{nag}
 \usepackage{fixltx2e}
-\usepackage{isomath}
+%\usepackage{isomath} % Disabled for the moment because it changes the syntax for bold and roman Greek math symbols
 \usepackage[all,warning]{onlyamsmath}
-%\usepackage{strict}
+%\usepackage{strict} % Commented out for now because it is uncommon. A copy of style.sty is in Manuals/LaTeX_Style_Files/.
 
-\usepackage{times,mathptm}
+\usepackage{mathptmx}
 \usepackage[pdftex]{graphicx}
 \usepackage{tabularx}
-\usepackage[pdftex,
-        colorlinks=true,
-        urlcolor=linkblue,     % \href{...}{...} external (URL)
-        citecolor=linkred,     % citation number colors
-        linkcolor=linknavy,    % \ref{...} and \pageref{...}
-        pdftitle={Fire Dynamics Simulator (Version 6) User's Guide},
-        pdfauthor={Kevin McGrattan, Randall McDermott, Simo Hostikka, Jason Floyd},
-        pdfsubject={User Guide},
-        pdfkeywords={FDS, Fire Model, NIST, Engineering Laboratory},
-        pdfproducer={pdflatex},
-        pagebackref,
-        pdfpagemode=UseNone,
-        bookmarksopen=true,
-        plainpages=false,
-        verbose]{hyperref}
 \usepackage{multirow}
 \usepackage{pdfsync}
 \usepackage{tikz}
 \usepackage{pgfplots}
+\pgfplotsset{compat=1.7}
 \usepackage{tocloft}
 \usepackage{color}
 \usepackage{amsmath}
@@ -53,7 +39,7 @@
 \usepackage{caption}
 \usepackage{graphpap}
 \usepackage{rotating}
-\usepackage{epsfig,psfrag}
+\usepackage{graphicx}
 \usepackage{geometry}
 \usepackage{relsize}
 \usepackage{longtable}
@@ -69,7 +55,8 @@
 
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
-\newcommand{\ct}{\tt\small}
+\newcommand{\ct}{\tt\small} % eventually will be deprecated due to http://www.tex.ac.uk/cgi-bin/texfaq2html?label=2letterfontcmd
+\newcommand{\textct}[1]{\texttt{\small #1}}
 
 \usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
 \usetocstyle{standard}
@@ -111,6 +98,21 @@
         stringstyle=\color[rgb]{0,0,0},
 }
 
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdftitle={Fire Dynamics Simulator (Version 6) User's Guide},
+        pdfauthor={Kevin McGrattan, Randall McDermott, Simo Hostikka, Jason Floyd},
+        pdfsubject={User Guide},
+        pdfkeywords={FDS, Fire Model, NIST, Engineering Laboratory},
+        pdfproducer={pdflatex},
+        pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false,
+        verbose]{hyperref}
 
 % The Following commented code makes the ``Draft'' watermark on each page.
 %\usepackage{eso-pic}
@@ -161,7 +163,6 @@ Fire Dynamics Simulation data.
 }
 
 
-\newcommand{\rmcdot}{$\,\cdot\,$} % usage: W/(m$^2$\rmcdot K), note no space after first unit and but space after
 \newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\DoD}[2]{\frac{\mathrm{D} #1}{\mathrm{D} #2}}
 \newcommand{\dsods}[2]{\frac{\partial^2 #1}{\partial #2^2}}
@@ -182,33 +183,33 @@ Fire Dynamics Simulation data.
 \newcommand{\hw}{w}
 \newcommand{\la}{\lambda}
 \newcommand{\bO}{{\Omega}}
-\newcommand{\bo}{{\bf \omega}}
-\newcommand{\btau}{{\bf \tau}}
-\newcommand{\bdelta}{{\bf \delta}}
+\newcommand{\bo}{{\mathbf{\omega}}}
+\newcommand{\btau}{\mathbf{\tau}}
+\newcommand{\bdelta}{{\mathbf{\delta}}}
 \newcommand{\sumyw}{\sum (Y_\alpha/W_\alpha)}
 \newcommand{\oW}{\overline{W}}
-\newcommand{\om}{\omega}
+\newcommand{\om}{\ensuremath{\omega}}
 \newcommand{\omx}{\omega_x}
 \newcommand{\omy}{\omega_y}
 \newcommand{\omz}{\omega_z}
 \newcommand{\erf}{\hbox{erf}}
 \newcommand{\erfc}{\hbox{erfc}}
-\newcommand{\bF}{{\bf F}}
-\newcommand{\bG}{{\bf G}}
-\newcommand{\bof}{{\bf f}}
-\newcommand{\bq}{{\bf q}}
-\newcommand{\br}{{\bf r}}
-\newcommand{\bu}{{\bf u}}
-\newcommand{\bx}{{\bf x}}
-\newcommand{\bk}{{\bf k}}
-\newcommand{\bv}{{\bf v}}
-\newcommand{\bg}{{\bf g}}
-\newcommand{\bn}{{\bf n}}
-\newcommand{\bS}{{\bf S}}
-\newcommand{\bW}{\overline{W}}
-\newcommand{\dS}{d{\bf S}}
-\newcommand{\bs}{{\bf s}}
-\newcommand{\bI}{{\bf I}}
+\newcommand{\bF}{{\mathbf{F}}}
+\newcommand{\bG}{{\mathbf{G}}}
+\newcommand{\bof}{{\mathbf{f}}}
+\newcommand{\bq}{{\mathbf{q}}}
+\newcommand{\br}{{\mathbf{r}}}
+\newcommand{\bu}{{\mathbf{u}}}
+\newcommand{\bx}{{\mathbf{x}}}
+\newcommand{\bk}{{\mathbf{k}}}
+\newcommand{\bv}{{\mathbf{v}}}
+\newcommand{\bg}{{\mathbf{g}}}
+\newcommand{\bn}{{\mathbf{n}}}
+\newcommand{\bS}{{\mathbf{S}}}
+\newcommand{\bW}{\overline{W}}}
+\newcommand{\dS}{d{\mathbf{S}}}
+\newcommand{\bs}{{\mathbf{s}}}
+\newcommand{\bI}{{\mathbf{I}}}
 \newcommand{\hp}{{\cal H}}
 \newcommand{\trho}{\tilde{\rho}}
 \newcommand{\dph}{{\delta\phi}}
@@ -217,7 +218,7 @@ Fire Dynamics Simulation data.
 \newcommand{\bp}{\overline{p}}
 \newcommand{\dQ}{\dot{Q}}
 \newcommand{\dq}{\dot{q}}
-\newcommand{\dbq}{\dot{\bf q}}
+\newcommand{\dbq}{\dot{\mathbf{q}}}
 \newcommand{\dm}{\dot{m}}
 \newcommand{\ha}{\frac{1}{2}}
 \newcommand{\ft}{\frac{4}{3}}
@@ -236,19 +237,19 @@ Fire Dynamics Simulation data.
 \newcommand{\SC}{\hbox{Sc}}
 \newcommand{\SH}{\hbox{Sh}}
 \newcommand{\WE}{\hbox{We}}
-\newcommand{\COTWO}{{\tiny \hbox{CO}_2}}
-\newcommand{\HTWOO}{{\tiny \hbox{H}_2\hbox{O}}}
-\newcommand{\OTWO}{{\tiny \hbox{O}_2}}
-\newcommand{\NTWO}{{\tiny \hbox{N}_2}}
-\newcommand{\CO}{{\tiny \hbox{CO}}}
-\newcommand{\F}{{\tiny \hbox{F}}}
-\newcommand{\C}{{\tiny \hbox{C}}}
-\newcommand{\Hy}{{\tiny \hbox{H}}}
-\newcommand{\So}{{\tiny \hbox{S}}}
-\newcommand{\M}{{\tiny \hbox{M}}}
-\newcommand{\xx}{{\tiny \hbox{x}}}
-\newcommand{\yy}{{\tiny \hbox{y}}}
-\newcommand{\zz}{{\tiny \hbox{z}}}
+\newcommand{\COTWO}{\text{\tiny \hbox{CO}$_2$}}
+\newcommand{\HTWOO}{\text{\tiny \hbox{H}$_2$\hbox{O}}}
+\newcommand{\OTWO}{\text{\tiny \hbox{O}$_2$}}
+\newcommand{\NTWO}{\text{\tiny \hbox{N}$_2$}}
+\newcommand{\CO}{\text{\tiny \hbox{CO}}}
+\newcommand{\F}{\text{\tiny \hbox{F}}}
+\newcommand{\C}{\text{\tiny \hbox{C}}}
+\newcommand{\Hy}{\text{\tiny \hbox{H}}}
+\newcommand{\So}{\text{\tiny \hbox{S}}}
+\newcommand{\M}{\text{\tiny \hbox{M}}}
+\newcommand{\xx}{\text{\tiny \hbox{x}}}
+\newcommand{\yy}{\text{\tiny \hbox{y}}}
+\newcommand{\zz}{\text{\tiny \hbox{z}}}
 
 \newcommand{\dif}{\mathrm{d}}
 \newcommand{\Div}{\nabla\cdot}

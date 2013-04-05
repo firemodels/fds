@@ -435,7 +435,7 @@ As an open source program, any individual can obtain a copy of the repository or
 repository.  Only Team Members described in the previous chapter can commit changes to the repository.
 
 The current location of the FDS repository is \href{http://fds-smv.googlecode.com/svn/trunk/}
-{{\ct http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
+{\textct{http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
 \begin{enumerate}
 \item Compiled FDS and Smokeview executables
 \item FDS and Smokeview source code files
@@ -473,11 +473,11 @@ The string contains the name of the source file, the version of the file (this r
 file version and not the overall release version number), the date and time of the file version, and
 the person who checked the file in to the archive.  Upon compiling, these strings will be stored in the
 executable file.  The user is then capable of searching the executable file, for example, for strings
-beginning with {\ct \$Id:}.  This will result in a list of all source files compiled and their version.
+beginning with \textct{\$Id:}.  This will result in a list of all source files compiled and their version.
 Within the SVN archive any specific version of a source file can be extracted and differences between
 versions can be determined.
 
-Within the source code a series of subroutines were created, one per source file, which parses the {\ct \$Id:} in
+Within the source code a series of subroutines were created, one per source file, which parses the \textct{\$Id:} in
 each file and extracts from it the SVN revision number.  Each of these subroutines is called at the start
 of an FDS run and the largest (and hence most recent) revision number is determined.  This number is written
 along with the FDS version number to the output header information.  A user can now identify specifically
@@ -541,25 +541,25 @@ issue is opened by a developer, the developer can immediate assign a status and 
 \subsection{Processing a Change Request}
 
 A change request may be evaluated by any member of the development team.
-If the request duplicates an existing request, then the issue status is changed to {\ct Duplicate} and the
+If the request duplicates an existing request, then the issue status is changed to \textct{Duplicate} and the
 requestor is sent the issue number of the existing request.
 
-If the request is for an enhancement to FDS, then then the issue type is changed to {\ct Type-Enhancement} and the
+If the request is for an enhancement to FDS, then then the issue type is changed to \textct{Type-Enhancement} and the
 component type is declared. The request is evaluated for suitability.  If it is a valid enhancement
-request, then the status is changed to {\ct Accepted}.  If the request is not to
-be addressed under the next baseline, then the status will be changed to {\ct OnHold}.  If the request is denied, then
-the status is changed to {\ct WontFix}.  An accepted request will be assigned to a developer.
+request, then the status is changed to \textct{Accepted}.  If the request is not to
+be addressed under the next baseline, then the status will be changed to \textct{OnHold}.  If the request is denied, then
+the status is changed to \textct{WontFix}.  An accepted request will be assigned to a developer.
 
-If the request is identifying a defect in FDS, then the issue type is changed to {\ct Type-Defect} and the
+If the request is identifying a defect in FDS, then the issue type is changed to \textct{Type-Defect} and the
 component type is declared.  The defect is evaluated for validity.  If insufficient information has
-been provided in the request, then the status is changed to {\ct MoreInfo} and a description of the additional
+been provided in the request, then the status is changed to \textct{MoreInfo} and a description of the additional
 information required is sent to the requestor.  If the defect is due to user error or is the intended function of FDS,
-then the status is changed to {\ct Invalid}.  If the defect is valid, then the request reviewer will change the
-status to {\ct Accepted} and assign the request to a developer.
+then the status is changed to \textct{Invalid}.  If the defect is valid, then the request reviewer will change the
+status to \textct{Accepted} and assign the request to a developer.
 
 Once a change request has be addressed by a developer and changes submitted to the repository, the request status
-is changed to {\ct Fixed}.  Once either the requestor or another developer has verified that the changes address
-the original request, then the status is changed to {\ct Verified}.
+is changed to \textct{Fixed}.  Once either the requestor or another developer has verified that the changes address
+the original request, then the status is changed to \textct{Verified}.
 
 
 \subsection{Committing Changes}
@@ -573,10 +573,10 @@ Changes to the FDS source code and supporting documentation are reviewed by othe
 
 \subsection{Change Verification}
 
-Once a change has been committed and the issue tracker updated to reflect that the issue has been {\ct Fixed},
+Once a change has been committed and the issue tracker updated to reflect that the issue has been \textct{Fixed},
 the changes will be verified.  Verification can be done by either the requester of the change or by another
 developer.  Once the changes have been verified to solve the problem reported in the issue, the issue status will
-be changed to {\ct Verified}.  At this point the issue is closed.
+be changed to \textct{Verified}.  At this point the issue is closed.
 
 \clearpage
 \section{Firebot: Automated Error Checking and Regression Testing}
@@ -643,7 +643,7 @@ and should not affect code functionality.
 For each release of FDS there is a unique Subversion (SVN) repository revision number associated with it.
 For example, FDS version 5.3.0 was built from files in the repository at SVN revision number 3193.
 The document connecting the release version to the SVN revision number is found in the {\em FDS Release Notes} wiki page
-located at \href{http://code.google.com/p/fds-smv/wiki/FDS_Release_Notes}{{\ct http://code.google.com/p/fds-smv/wiki/FDS\_Release\_Notes}}
+located at \href{http://code.google.com/p/fds-smv/wiki/FDS_Release_Notes}{\textct{http://code.google.com/p/fds-smv/wiki/FDS\_Release\_Notes}}
 The SVN revision number allows users to checkout or update their local copy of the project files from the repository to the same state as any previous release of the software.
 
 \subsection{Testing a New Release}
@@ -674,7 +674,7 @@ version identification information within the FDS source code will be updated to
 documentation will be updated to reflect the new baseline.  The baseline will be compiled and new executable files
 or installation packages will be placed on the FDS download site.  Prior baselines will be deprecated.  The
 current FDS download site is \href{http://code.google.com/p/fds-smv/downloads/list}
-{{\ct http://code.google.com/p/fds-smv/downloads/list}}.
+{\textct{http://code.google.com/p/fds-smv/downloads/list}}.
 
 
 

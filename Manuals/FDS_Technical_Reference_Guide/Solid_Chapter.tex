@@ -1,5 +1,7 @@
 % !TEX root = FDS_Technical_Reference_Guide.tex
 
+\typeout{new file: Solid_Chapter.tex}
+
 \chapter{Solid Phase} \label{SolidPhase}
 \label{chapter:solid_phase}
 
@@ -48,13 +50,13 @@ The numerical model is presented in detail in Appendix~\ref{solid-phase-discreti
 \label{inradsection}
 
 If it is assumed that the thermal radiation from the surrounding gases is absorbed within an infinitely thin layer at the surface of the solid obstruction, then the net radiative heat flux is the sum of incoming and outgoing components, $\dq_{\rm r}'' = \dq_{\rm r,in}'' - \dq_{\rm r,out}''$:
-\begin{eqnarray}
- \dq_{\rm r,in}'' &=& \epsilon\,
+\begin{align}
+ \dq_{\rm r,in}'' &= \epsilon\,
  \int_{\bs'\cdot \bn_{\rm w} < 0} I_{\rm w}(\bs')\; |\bs'\cdot \bn_{\rm w} | \; \d\bO
  \label{RFluxIn1} \\ [0.2in]
- \dq_{\rm r,out}'' &=& \epsilon\,\sigma\,T_{\rm w}^4
+ \dq_{\rm r,out}'' &= \epsilon\,\sigma\,T_{\rm w}^4
  \label{RFluxOut1}
-\end{eqnarray}
+\end{align}
 However, many common materials do not have infinite optical thickness. Rather, the radiation penetrates the material to some finite depth. The radiative transport within the solid (or liquid) can be described as a source term in Eq.~(\ref{1dheat}). A ``two-flux'' model based on the Schuster-Schwarzschild
 approximation~\cite{Siegel:1} assumes the radiative intensity is constant inside the ``forward'' and ``backward'' hemispheres. The transport equation for the intensity in the ``forward'' direction is
 \be
