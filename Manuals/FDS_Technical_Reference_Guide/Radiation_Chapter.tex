@@ -1,5 +1,7 @@
 % !TEX root = FDS_Technical_Reference_Guide.tex
 
+\typeout{new file: Radiation_Chapter.tex}
+
 \chapter{Thermal Radiation}
 \label{chapter:radiation}
 
@@ -13,16 +15,16 @@ vector in the energy equation, $\nabla\!\cdot \dbq''$. This section
 describes the equations associated with the radiative part, $\dbq''_{\rm r}$.
 
 The Radiative Transport Equation (RTE) for an absorbing, emitting, and scattering medium is
-\begin{eqnarray}
-\bs \cdot \nabla I_{\la}(\bx,\bs) &=&
+\begin{align}
+\bs \cdot \nabla I_{\la}(\bx,\bs) &=
 \underbrace{ - \kappa(\bx,\la)   \; I_\la(\bx,\bs) }_{\textrm{Energy loss by absorption}} -
-\underbrace{\sigma_{\rm s}(\bx,\la) \; I_\la(\bx,\bs) }_{\textrm{Energy loss by diffusion}} +  \nonumber  \\ [0.25in]
-& & \underbrace{   B(\bx,\la) }_{\textrm{Emission source term}} + \quad
+\underbrace{\sigma_{\rm s}(\bx,\la) \; I_\la(\bx,\bs) }_{\textrm{Energy loss by diffusion}} +  \notag \\ [0.25in]
+& \underbrace{   B(\bx,\la) }_{\textrm{Emission source term}} + \quad
 \underbrace{   \frac{\sigma_{\rm s}(\bx,\la)}{4\pi}
 \int_{4\pi}\Phi(\bs',\bs) \; I_{\la}(\bx,\bs') \; d\bs'
  }_{\textrm{In-scattering term}}
 \label{RTEbasic}
-\end{eqnarray}
+\end{align}
 where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength,
 $\la$, $\bs$ is the direction vector of the intensity, and
 $\kappa(\bx,\la)$ and $\sigma_{\rm s}(\bx,\la)$ are the local absorption
@@ -673,29 +675,29 @@ calculated analytically. Equation (\ref{RTEdiscrete2}) can be simplified
   a_{z}^l   I_{zu}^l +   b_{ijk}^l \label{RTEdiscrete3}
 \ee
 where
-\begin{eqnarray}
-  a_{ijk}^l & = & A_x |D_x^l| + A_y |D_y^l| +A_z |D_z^l| +
+\begin{align}
+  a_{ijk}^l & = A_x |D_x^l| + A_y |D_y^l| +A_z |D_z^l| +
         \kappa_{ijk} \; V_{ijk} \delta\Omega^l \\
-  \nonumber \\
-  a_{x}^l & = & A_x |D_x^l| \\
-  a_{y}^l & = & A_y |D_y^l| \\
-  a_{z}^l & = & A_z |D_z^l|
-\end{eqnarray}
+  \notag \\
+  a_{x}^l & = A_x |D_x^l| \\
+  a_{y}^l & = A_y |D_y^l| \\
+  a_{z}^l & = A_z |D_z^l|
+\end{align}
 
-\begin{eqnarray}
-   D_x^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf i}) \, \d\Omega = \int_{\dph}\int_{\dth} (\bs^l\cdot{\bf i}) \sin\theta \; \d \theta \d\phi = \int_{\dph}\int_{\dth} \cos\phi\sin\theta\sin\theta\; \d\theta \d\phi \nonumber \\
-         & = & \frac{1}{2}\left( \sin\phi^+ - \sin\phi^- \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
-   D_y^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf j}) \, \d\Omega  =  \int_{\dph}\int_{\dth} \sin\phi\sin\theta\sin\theta\; \d\theta \d\phi \nonumber \\
-         & = & \frac{1}{2}\left( \cos\phi^- - \cos\phi^+ \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
-   D_z^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf k}) \d \Omega = \int_{\dph}\int_{\dth} \cos\theta\sin\theta\;  \d\theta \d\phi \nonumber \\
-         & = & \frac{1}{2}\Delta\phi \left[\left(\sin\theta^+\right)^2 - \left(\sin\theta^-\right)^2\right]
-\end{eqnarray}
+\begin{align}
+   D_x^l & = & \int_{\Omega^l}(\bs^l\cdot {\bf i}) \, \d\Omega = \int_{\dph}\int_{\dth} (\bs^l\cdot{\bf i}) \sin\theta \; \d \theta \d\phi = \int_{\dph}\int_{\dth} \cos\phi\sin\theta\sin\theta\; \d\theta \d\phi \notag \\
+         & = \frac{1}{2}\left( \sin\phi^+ - \sin\phi^- \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
+   D_y^l & = \int_{\Omega^l}(\bs^l\cdot {\bf j}) \, \d\Omega  =  \int_{\dph}\int_{\dth} \sin\phi\sin\theta\sin\theta\; \d\theta \d\phi \notag \\
+         & = \frac{1}{2}\left( \cos\phi^- - \cos\phi^+ \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
+   D_z^l & = \int_{\Omega^l}(\bs^l\cdot {\bf k}) \d \Omega = \int_{\dph}\int_{\dth} \cos\theta\sin\theta\;  \d\theta \d\phi \notag \\
+         & = \frac{1}{2}\Delta\phi \left[\left(\sin\theta^+\right)^2 - \left(\sin\theta^-\right)^2\right]
+\end{align}
 
-\begin{eqnarray}
-  b_{ijk}^l & = &  \kappa_{ijk} \; I_{{\rm b},ijk} \; V_{ijk} \; \delta\Omega^l \\
-  \nonumber \\
-  \delta \Omega^l & = & \int_{\Omega^l} \d \Omega = \int_{\dph}\int_{\dth} \sin\theta \; \d\theta \d\phi
-\end{eqnarray}
+\begin{align}
+  b_{ijk}^l & = \kappa_{ijk} \; I_{{\rm b},ijk} \; V_{ijk} \; \delta\Omega^l \\
+  \notag \\
+  \delta \Omega^l & = \int_{\Omega^l} \d \Omega = \int_{\dph}\int_{\dth} \sin\theta \; \d\theta \d\phi
+\end{align}
 
 \noindent
 Here $\bf i$, $\bf j$ and $\bf k$ are the base vectors of the

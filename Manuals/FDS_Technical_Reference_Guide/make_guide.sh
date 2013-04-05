@@ -29,7 +29,7 @@ if [[ `grep -E "undefined|multiply defined|multiply-defined" -I FDS_Technical_Re
       :
    else
       echo "LaTeX warnings detected:"
-      grep -E "undefined|multiply defined|multiply-defined" -I FDS_Technical_Reference_Guide.err
+      grep -E "new file|undefined|multiply defined|multiply-defined" -I FDS_Technical_Reference_Guide.err
       clean_build=0
 fi
 

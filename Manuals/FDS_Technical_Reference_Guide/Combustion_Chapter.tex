@@ -1,5 +1,7 @@
 % !TEX root = FDS_Technical_Reference_Guide.tex
 
+\typeout{new file: Combustion_Chapter.tex}
+
 \chapter{Combustion (Chemically Reacting Flows)}
 \label{chapter:combustion}
 
@@ -100,15 +102,15 @@ Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is 
 \subsection{Specified CO and Soot Yield}
 \label{sec:yield}
 
-Carbon monoxide and soot yields are zero by default. The user can specify the CO and soot yields ($y_{\mathrm{CO}}$ and $y_{\mathrm{S}}$ respectively) on the {\ct REAC} line; this determines the composition of the products. The CO yield, and similarly for soot, is the mass of CO produced per mass of fuel reacted:
+Carbon monoxide and soot yields are zero by default. The user can specify the CO and soot yields ($y_{\mathrm{CO}}$ and $y_{\mathrm{S}}$ respectively) on the \textct{REAC} line; this determines the composition of the products. The CO yield, and similarly for soot, is the mass of CO produced per mass of fuel reacted:
 \begin{equation}\label{eq:y_co}
 y_\mathrm{CO} = \frac{\mbox{mass CO in Products}}{\mbox{mass of Fuel reacted}}
 \end{equation}
 In this reaction system, Air (Background) is lumped species 0, Fuel is lumped species 1, and Products is lumped species 2. To find the stoichiometric coefficients of CO and soot within the products lumped species, FDS uses
-\begin{eqnarray}\label{eq:yields}
-\nu_{2}\upsilon_{\mathrm{CO},2}&=&-\nu_{1}\frac{W_1}{W_{\mathrm{CO}}}y_{\mathrm{CO}} \\
-\nu_{2}\upsilon_{\mathrm{S},2}&=&-\nu_{1}\frac{W_1}{W_{\mathrm{S}}}y_{\mathrm{S}}
-\end{eqnarray}
+\begin{align}\label{eq:yields}
+\nu_{2}\upsilon_{\mathrm{CO},2}&=-\nu_{1}\frac{W_1}{W_{\mathrm{CO}}}y_{\mathrm{CO}} \\
+\nu_{2}\upsilon_{\mathrm{S},2}&=-\nu_{1}\frac{W_1}{W_{\mathrm{S}}}y_{\mathrm{S}}
+\end{align}
 The remaining coefficients come from an atom balance.
 
 Consider a methane--air reaction where methane has a specified CO yield of $y_{\mathrm{CO}}=0.1$ and a Soot yield of $y_{\mathrm{S}}=0.01$. The default FDS reaction system lumps these species into Products. Note that, by default, Air is primarily composed of oxygen and nitrogen but includes trace amounts of carbon dioxide and water vapor. For this reaction the transformation matrix, $A$, is
@@ -380,11 +382,11 @@ We may think of an initial unmixed fraction of $\zeta_0=1$ (default) as represen
 As just discussed, the present reactor model partitions the cell into two zones: an unmixed zone and a mixed zone.  Only the mixed zone may react chemically.  Our goal in this section is to describe the rate of change of the composition within the mixed zone.  This composition changes by two processes: mixing (mass is transfered from the unmixed zone to the mixed zone) and chemical reaction.  The mixed zone composition evolves in time over an FDS time step, $\delta t$.  At the end of the time step, the mixed and unmixed zones are recombined to yield the final cell mean composition, $\overline{Y}_\alpha(\delta t)$.
 
 The total mass within the reactor (computational cell) is constant over the time step.  We denote this mass by $\rho V$, where $\rho$ is the initial cell mass density and $V$ is the cell volume.  The unmixed mass is denoted $U(t)$ and the mixed mass is denoted $M(t)$.  Given Eq.~(\ref{eq:zeta_soln}), the following equations describe the cell mass evolution:
-\begin{eqnarray}
-\label{eq:mixunmix_1} \rho V &=& U(t) + M(t) \\
-\label{eq:mixunmix_2} U(t) &=& \zeta(t)\,\rho V \\
-\label{eq:mixunmix_3} M(t) &=& (1-\zeta(t))\,\rho V
-\end{eqnarray}
+\begin{align}
+\label{eq:mixunmix_1} \rho V &= U(t) + M(t) \\
+\label{eq:mixunmix_2} U(t) &= \zeta(t)\,\rho V \\
+\label{eq:mixunmix_3} M(t) &= (1-\zeta(t))\,\rho V
+\end{align}
 
 Within the mixed reactor zone, let $m_\alpha(t)$ denote the mass of species $\alpha$.  The mass fraction of $\alpha$ in the mixed zone is denoted by
 \begin{equation}\label{eq:mass_fraction_mixed}
