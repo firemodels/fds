@@ -28,6 +28,7 @@ char update_revision[]="$Revision$";
 
 int compare_float( const void *arg1, const void *arg2 ){
   float x, y;
+
   x=*(float *)arg1;
   y=*(float *)arg2;
   if( x< y)return -1;
@@ -38,9 +39,9 @@ int compare_float( const void *arg1, const void *arg2 ){
 /* ------------------ update_framenumber ------------------------ */
 
 void Update_Framenumber(int changetime){
-  int i,ii;
-
   if(force_redisplay==1||(itimeold!=itimes&&changetime==1)){
+    int i;
+
     force_redisplay=0;
     itimeold=itimes;
     if(showsmoke==1||showevac==1){
@@ -127,6 +128,7 @@ void Update_Framenumber(int changetime){
     }
     if(showslice==1||showvslice==1){
       int showfed=0;
+      int ii;
 
       for(ii=0;ii<nslice_loaded;ii++){
         slicedata *sd;
@@ -260,11 +262,7 @@ void Update_Show(void){
 #ifdef pp_SHOOTER
   int shooter_flag;
 #endif
-  int ii;
-  vslicedata *vd;
-  isodata *isoi;
-  patchdata *patchi;
-  partdata *parti;
+
   showtime=0; 
   showtime2=0; 
   showplot3d=0; 
@@ -334,6 +332,7 @@ void Update_Show(void){
   }
   {
     smoke3ddata *smoke3di;
+    int ii;
 
     for(ii=0;ii<nsmoke3dinfo;ii++){
       smoke3di = smoke3dinfo + ii;
@@ -360,6 +359,8 @@ void Update_Show(void){
   slicecolorbarflag=0;
   SHOW_gslice_data=0;
   if(visTimeSlice==1){
+    int ii;
+
     for(ii=0;ii<nslice_loaded;ii++){
       slicedata *sd;
 
@@ -422,6 +423,8 @@ void Update_Show(void){
   tisoflag=0;
   if(visTimeIso==1){
     for(i=0;i<nisoinfo;i++){
+      isodata *isoi;
+
       isoi = isoinfo+i;
       if(isoi->loaded==0)continue;
       if(isoi->display==1&&isoi->type==iisotype){
@@ -437,6 +440,8 @@ void Update_Show(void){
   vslicecolorbarflag=0;
   if(visTimeSlice==1){
     for(i=0;i<nvsliceinfo;i++){
+      vslicedata *vd;
+
       vd = vsliceinfo+i;
       if(vd->loaded==0||vd->display==0)continue;
       if(sliceinfo[vd->ival].type!=islicetype)continue;
@@ -446,6 +451,7 @@ void Update_Show(void){
     for(i=0;i<nvsliceinfo;i++){
       mesh *slicemesh;
       slicedata *sd;
+      vslicedata *vd;
 
       vd = vsliceinfo+i;
       sd = sliceinfo + vd->ival;
@@ -460,7 +466,11 @@ void Update_Show(void){
   }
   patchflag=0;
   if(visTimePatch==1){
+    int ii;
+
     for(ii=0;ii<npatch_loaded;ii++){
+      patchdata *patchi;
+
       i = patch_loaded_list[ii];
       patchi=patchinfo+i;
       if(patchi->display==0||patchi->type!=ipatchtype)continue;
@@ -468,6 +478,8 @@ void Update_Show(void){
       break;
     }
     for(ii=0;ii<npatch_loaded;ii++){
+      patchdata *patchi;
+
       i = patch_loaded_list[ii];
       patchi=patchinfo+i;
       if(patchi->display==0||patchi->type!=ipatchtype)continue;
@@ -477,6 +489,8 @@ void Update_Show(void){
       }
     }
     for(ii=0;ii<npatch_loaded;ii++){
+      patchdata *patchi;
+
       i = patch_loaded_list[ii];
       patchi=patchinfo+i;
       if(patchi->display==0||patchi->type!=ipatchtype)continue;
@@ -487,6 +501,8 @@ void Update_Show(void){
     }
     patchembedded=0;
     for(ii=0;ii<npatch_loaded;ii++){
+      patchdata *patchi;
+
       i = patch_loaded_list[ii];
       patchi=patchinfo+i;
       if(patchi->filetype!=2||patchi->display==0||patchi->type!=ipatchtype)continue;
@@ -496,6 +512,8 @@ void Update_Show(void){
   partflag=0;
   if(visSmoke==1&&visTimeSmoke==1){
     for(i=0;i<npartinfo;i++){
+      partdata *parti;
+
       parti = partinfo + i;
       if(parti->evac==1)continue;
       if(parti->loaded==0||parti->display==0)continue;
@@ -512,6 +530,8 @@ void Update_Show(void){
   evacflag=0;
   if(visEvac==1&&visTimeEvac==1){
     for(i=0;i<npartinfo;i++){
+      partdata *parti;
+
       parti = partinfo + i;
       if(parti->evac==0)continue;
       if(parti->loaded==0||parti->display==0)continue;
@@ -557,6 +577,7 @@ void Update_Show(void){
     }
     if(showpatch==1&&visPatchType[0]==1){
       for(i=0;i<nmeshes;i++){
+        patchdata *patchi;
         mesh *meshi;
 
         meshi=meshinfo+i;
@@ -587,7 +608,8 @@ void Update_Show(void){
   if(showplot3d==1){
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
-
+      int ii;
+      
       meshi=meshinfo+i;
       ii=meshi->plot3dfilenum;
       if(ii==-1)continue;
@@ -597,6 +619,7 @@ void Update_Show(void){
     }
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
+      int ii;
 
       meshi=meshinfo+i;
       ii=meshi->plot3dfilenum;
@@ -654,9 +677,7 @@ int get_itime(int n, int *timeslist, float *times, int ntimes){
 /* ------------------ Synch_Times ------------------------ */
 
 void Synch_Times(void){
-  int n,i,istart;
-  int j,igrid,jj;
-
+  int n,i,istart,igrid;
 
   /* synchronize smooth blockage times */
 
@@ -676,11 +697,14 @@ void Synch_Times(void){
   }
 
   for(n=0;n<nglobal_times;n++){
+    int j,jj;
 
   /* synchronize tour times */
 
     {
       tourdata *tourj; 
+      int j;
+
       for(j=0;j<ntours;j++){
         tourj = tourinfo + j;
         if(tourj->display==0)continue;
@@ -827,16 +851,9 @@ void Synch_Times(void){
 /* ------------------ updatetimes ------------------------ */
 
 void Update_Times(void){
-  int n,n2,ntimes2;
+  int ntimes2;
   float *timescopy;
-  int i,k;
-  slicedata *sd;
-  isodata *ib;
-  blockagedata *bc;
-  ventdata *vi;
-  partdata *parti;
-  tourdata *touri;
-  int filenum;
+  int i;
   float dt_MIN=100000.0;
 
   FREEMEMORY(geominfoptrs);
@@ -870,16 +887,22 @@ void Update_Times(void){
   }
 #endif
   for(i=0;i<ntours;i++){
+    tourdata *touri;
+
     touri = tourinfo + i;
     if(touri->display==0)continue;
     nglobal_times+= touri->ntimes;
   }
   for(i=0;i<npartinfo;i++){
+    partdata *parti;
+
     parti = partinfo + i;
     if(parti->loaded==0)continue;
     nglobal_times+= parti->ntimes;
   }
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sd;
+
     sd=sliceinfo+i;
     if(sd->loaded==1||sd->vloaded==1){
       nglobal_times+=sd->ntimes;
@@ -899,6 +922,7 @@ void Update_Times(void){
   for(i=0;i<nmeshes;i++){
     patchdata *patchi;
     mesh *meshi;
+    int filenum;
 
     meshi=meshinfo+i;
     filenum =meshi->patchfilenum;
@@ -915,6 +939,7 @@ void Update_Times(void){
   if(ReadIsoFile==1&&visAIso!=0){
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
+      isodata *ib;
 
       meshi=meshinfo+i;
       if(meshi->isofilenum<0)continue;
@@ -958,6 +983,7 @@ void Update_Times(void){
 
   for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
+    int n;
 
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
@@ -974,6 +1000,7 @@ void Update_Times(void){
   if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
+      int n;
 
       terri = terraininfo + i;
       if(terri->loaded==0)continue;
@@ -1005,6 +1032,9 @@ void Update_Times(void){
 #endif
 
   for(i=0;i<ntours;i++){
+    tourdata *touri;
+    int n;
+
     touri = tourinfo + i;
     if(touri->display==0)continue;
     for(n=0;n<touri->ntimes;n++){
@@ -1020,6 +1050,9 @@ void Update_Times(void){
 
   tmax_part=0.0;
   for(i=0;i<npartinfo;i++){
+    partdata *parti;
+    int n;
+
     parti = partinfo + i;
     if(parti->loaded==0)continue;
     for(n=0;n<parti->ntimes;n++){
@@ -1035,6 +1068,9 @@ void Update_Times(void){
   }
 
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sd;
+    int n;
+
     sd = sliceinfo + i;
     if(sd->loaded==1||sd->vloaded==1){
       for(n=0;n<sd->ntimes;n++){
@@ -1050,6 +1086,8 @@ void Update_Times(void){
   }
 
   if(ReadTargFile==1&&visTarg==1){
+    int n;
+
     for(n=0;n<ntargtimes;n++){
       float t_diff;
 
@@ -1062,6 +1100,7 @@ void Update_Times(void){
   }
   for(i=0;i<npatchinfo;i++){
     patchdata *patchi;
+    int n;
 
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->filetype==2){
@@ -1079,12 +1118,15 @@ void Update_Times(void){
   for(i=0;i<nmeshes;i++){
     patchdata *patchi;
     mesh *meshi;
+    int filenum;
 
     meshi=meshinfo + i;
     filenum=meshi->patchfilenum;
     if(filenum!=-1){
       patchi = patchinfo + filenum;
       if(patchi->loaded==1&&patchi->filetype!=2){
+        int n;
+
         for(n=0;n<meshi->npatch_times;n++){
           float t_diff;
 
@@ -1101,7 +1143,7 @@ void Update_Times(void){
     for(i=0;i<nmeshes;i++){
       volrenderdata *vr;
       mesh *meshi;
-
+      int n;
 
       meshi=meshinfo + i;
       vr = &meshi->volrenderinfo;
@@ -1121,6 +1163,8 @@ void Update_Times(void){
     }
   }
   if(ReadZoneFile==1&&visZone==1){
+    int n;
+
     for(n=0;n<nzone_times;n++){
       float t_diff;
 
@@ -1134,6 +1178,8 @@ void Update_Times(void){
   if(ReadIsoFile==1&&visAIso!=0){
     for(i=0;i<nisoinfo;i++){
       mesh *meshi;
+      isodata *ib;
+      int n;
 
       ib = isoinfo+i;
       if(ib->geomflag==1||ib->loaded==0)continue;
@@ -1154,6 +1200,8 @@ void Update_Times(void){
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
       for(i=0;i<nsmoke3dinfo;i++){
+        int n;
+
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
         for(n=0;n<smoke3di->ntimes;n++){
@@ -1174,15 +1222,18 @@ void Update_Times(void){
   // sort times array and remove duplicates
 
   if(nglobal_times>0)qsort( (float *)global_times, (size_t)nglobal_times, sizeof( float ), compare_float );
-  n2=1;
-  ntimes2=nglobal_times;
-  for(n=1;n<nglobal_times;n++){
-    if(ABS(global_times[n]-global_times[n-1])>dt_MIN/10.0){
-      global_times[n2]=global_times[n];
-      n2++;
-    }
-    else{
-      ntimes2--;
+
+  {
+    int n,n2;
+
+    for(n2=1,ntimes2=nglobal_times,n=1;n<nglobal_times;n++){
+      if(ABS(global_times[n]-global_times[n-1])>dt_MIN/10.0){
+        global_times[n2]=global_times[n];
+        n2++;
+      }
+      else{
+        ntimes2--;
+      }
     }
   }
   nglobal_times=ntimes2;
@@ -1204,11 +1255,15 @@ void Update_Times(void){
     if(nglobal_times>0)NewMemory((void **)&geomi->timeslist,nglobal_times*sizeof(int));
   }
   for(i=0;i<npartinfo;i++){
+    partdata *parti;
+
     parti=partinfo+i;
     FREEMEMORY(parti->timeslist);
     if(nglobal_times>0)NewMemory((void **)&parti->timeslist,nglobal_times*sizeof(int));
   }
   for(i=0;i<ntours;i++){
+    tourdata *touri;
+
     touri=tourinfo + i;
     if(touri->display==0)continue;
     FREEMEMORY(touri->timeslist);
@@ -1271,6 +1326,8 @@ void Update_Times(void){
 #endif
 
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sd;
+
     sd = sliceinfo + i;
     FREEMEMORY(sd->timeslist);
     if(nglobal_times>0)NewMemory((void **)&sd->timeslist,nglobal_times*sizeof(int));
@@ -1345,6 +1402,8 @@ void Update_Times(void){
 
   if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
     if(current_script_command->first==1){
+      int n;
+
       for(n=0;n<nglobal_times;n++){
         render_frame[n]=0;
       }
@@ -1352,6 +1411,8 @@ void Update_Times(void){
     }
   }
   else{
+    int n;
+
     for(n=0;n<nglobal_times;n++){
       render_frame[n]=0;
     }
@@ -1382,6 +1443,8 @@ void Update_Times(void){
     meshi->patch_itime=0;
   }
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sd;
+
     sd = sliceinfo + i;
     sd->itime=0; 
   }
@@ -1394,6 +1457,8 @@ void Update_Times(void){
     meshi->iso_itime=0;
   }
   for(i=0;i<npartinfo;i++){
+    partdata *parti;
+
     parti = partinfo + i;
     parti->itime=0;
   }
@@ -1406,10 +1471,14 @@ void Update_Times(void){
 
     meshi=meshinfo+i;
     for(j=0;j<meshi->nbptrs;j++){
+      blockagedata *bc;
+
       bc = meshi->blockageinfoptrs[j];
       if(bc->showtime==NULL)continue;
       FREEMEMORY(bc->showtimelist);
       if(nglobal_times>0){
+        int k;
+
         NewMemory((void **)&bc->showtimelist,nglobal_times*sizeof(int));
         for(k=0;k<nglobal_times;k++){
           int listindex;
@@ -1432,6 +1501,8 @@ void Update_Times(void){
     if(devicei->nstate_changes==0)continue;
     FREEMEMORY(devicei->showstatelist);
     if(nglobal_times>0){
+      int k;
+
       NewMemory((void **)&devicei->showstatelist,nglobal_times*sizeof(int));
       for(k=0;k<nglobal_times;k++){
         int listindex;
@@ -1451,10 +1522,14 @@ void Update_Times(void){
     meshi=meshinfo+i;
     if(meshi->ventinfo==NULL)continue;
     for(j=0;j<meshi->nvents;j++){
+      ventdata *vi;
+
       vi = meshi->ventinfo+j;
       if(vi->showtime==NULL)continue;
       FREEMEMORY(vi->showtimelist);
       if(nglobal_times>0){
+        int k;
+
         NewMemory((void **)&vi->showtimelist,nglobal_times*sizeof(int));
         for(k=0;k<nglobal_times;k++){
           int listindex;
@@ -1476,6 +1551,8 @@ void Update_Times(void){
   show_slice_terrain=0;
   if(visTerrainType==TERRAIN_3D_MAP){
     for(i=0;i<nsliceinfo;i++){
+      slicedata *sd;
+
       sd = sliceinfo + i;
       if(sd->loaded==0||sd->display==0||sd->slicetype!=SLICE_TERRAIN)continue;
       show_slice_terrain=1;
@@ -1488,17 +1565,6 @@ void Update_Times(void){
 
 int getplotstate(int choice){
   int i;
-  plot3ddata *ploti;
-  slicedata *slicei;
-  vslicedata *vslicei;
-  patchdata *patchi;
-  partdata *parti;
-  targ *targi;
-  isodata *isoi;
-  zonedata *zonei;
-  smoke3ddata *smoke3di;
-  tourdata *touri;
-  int ii;
 
   update_loaded_lists();
   switch (choice){
@@ -1506,6 +1572,7 @@ int getplotstate(int choice){
     case STATIC_PLOTS_NORECURSE:
       stept = 0;
       for(i=0;i<nmeshes;i++){
+        plot3ddata *ploti;
         mesh *meshi;
 
         meshi=meshinfo + i;
@@ -1521,9 +1588,10 @@ int getplotstate(int choice){
       break;
     case DYNAMIC_PLOTS:
     case DYNAMIC_PLOTS_NORECURSE:
-      for(ii=0;ii<nslice_loaded;ii++){
-        i = slice_loaded_list[ii];
-        slicei = sliceinfo + i;
+      for(i=0;i<nslice_loaded;i++){
+        slicedata *slicei;
+
+        slicei = sliceinfo + slice_loaded_list[i];
         if(slicei->display==0||slicei->type!=islicetype)continue;
         stept = 1; 
         return DYNAMIC_PLOTS;
@@ -1540,43 +1608,58 @@ int getplotstate(int choice){
         }
       }
       for(i=0;i<nvsliceinfo;i++){
+        vslicedata *vslicei;
+
         vslicei = vsliceinfo + i;
         if(vslicei->display==0||vslicei->type!=islicetype)continue;
         return DYNAMIC_PLOTS;
       }
-      for(ii=0;ii<npatch_loaded;ii++){
-        i = patch_loaded_list[ii];
-        patchi = patchinfo + i;
+      for(i=0;i<npatch_loaded;i++){
+        patchdata *patchi;
+
+        patchi = patchinfo + patch_loaded_list[i];
         if(patchi->display==0||patchi->type!=ipatchtype)continue;
         return DYNAMIC_PLOTS;
       }
       for(i=0;i<npartinfo;i++){
+        partdata *parti;
+
         parti = partinfo + i;
         if(parti->loaded==0||parti->display==0)continue;
         return DYNAMIC_PLOTS;
       }
       for(i=0;i<nisoinfo;i++){
+        isodata *isoi;
+
         isoi = isoinfo + i;
         if(isoi->loaded==0)continue;
         if(isoi->display==0)continue;
         return DYNAMIC_PLOTS;
       }
       for(i=0;i<nzoneinfo;i++){
+        zonedata *zonei;
+
         zonei = zoneinfo + i;
         if(zonei->loaded==0||zonei->display==0)continue;
         return DYNAMIC_PLOTS;
       }
       for(i=0;i<ntarginfo;i++){
+        targ *targi;
+
         targi = targinfo + i;
         if(targi->loaded==0||targi->display==0)continue;
         return DYNAMIC_PLOTS;
       }
       for(i=0;i<ntours;i++){
+        tourdata *touri;
+
         touri = tourinfo + i;
         if(touri->display==0)continue;
         return DYNAMIC_PLOTS;
       }
       for(i=0;i<nsmoke3dinfo;i++){
+        smoke3ddata *smoke3di;
+
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
         return DYNAMIC_PLOTS;
@@ -1612,6 +1695,7 @@ int getplotstate(int choice){
 
 int getindex(float key, const float *list, int nlist){
   int i;
+
   if(nlist==1)return 0;
   if(key<list[1])return 0;
   if(key>=list[nlist-1])return nlist-1;

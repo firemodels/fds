@@ -931,7 +931,6 @@ void update_colorbar_splits(colorbardata *cbi){
 void drawColorBars(void){
   int ilabel=0;
 
-
   int i,i3;
   int ileft=0;
   int leftzone, leftsmoke, leftslice, leftpatch, leftiso;
@@ -943,14 +942,11 @@ void drawColorBars(void){
   float slicefactor2[2];
   float *isofactor=NULL;
 
-  int plot3dunitclass, plot3dunittype;
   int plot3dflag=0;
   float *plot3dfactor=NULL;
   float plot3dfactor2[2];
   float plot3drange;
 
-  int patchunitclass, patchunittype;
-  int zoneunitclass, zoneunittype;
   int patchflag=0;
   int zoneflag=0;
   float *patchfactor=NULL;
@@ -958,14 +954,11 @@ void drawColorBars(void){
   float patchrange=0.0;
   float zonerange;
 
-  int partunitclass, partunittype;
   int partflag=0;
   float *partfactor=NULL;
   float partrange=0.0;
 
   int fed_slice=0;
-
-  char partunitlabel2[256], partshortlabel2[256];
 
   GLfloat *foreground_color, *red_color;
 
@@ -1173,9 +1166,12 @@ void drawColorBars(void){
 
   // -------------- particle file top labels ------------
 
-  strcpy(partshortlabel2,"");
-  strcpy(partunitlabel2,"");
   if(showevac_colorbar==1||showsmoke==1){
+    char partunitlabel2[256], partshortlabel2[256];
+
+    strcpy(partshortlabel2,"");
+    strcpy(partunitlabel2,"");
+
     glPushMatrix();
     glTranslatef(
       colorbar_left_pos-colorbar_label_width,
@@ -1198,6 +1194,8 @@ void drawColorBars(void){
       if(partunitlabel!=NULL)strcpy(partunitlabel2,partunitlabel);
     }
     if(parttype!=0){
+      int partunitclass, partunittype;
+
       getunitinfo(partunitlabel2,&partunitclass,&partunittype);
       if(partunitclass>=0&&partunitclass<nunitclasses){
         if(partunittype>=0){
@@ -1218,7 +1216,6 @@ void drawColorBars(void){
   if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     char unitlabel[256];
     int sliceunitclass,sliceunittype;
-    float *slicefactor=NULL;
     databounds *sb;
 
     sb = slicebounds + islicetype;
@@ -1278,6 +1275,7 @@ void drawColorBars(void){
   if(showpatch==1){
     char unitlabel[256];
     patchdata *patchi;
+    int patchunitclass, patchunittype;
 
     patchi = patchinfo + patchtypes[ipatchtype];
     strcpy(unitlabel,patchi->label.unit);
@@ -1308,6 +1306,7 @@ void drawColorBars(void){
     char *p3label;
     char *up3label;
     char unitlabel[256];
+    int plot3dunitclass, plot3dunittype;
 
     up3label = plot3dinfo[0].label[plotn-1].unit;
     strcpy(unitlabel,up3label);
@@ -1340,6 +1339,7 @@ void drawColorBars(void){
   }
   if(showzone==1&&sethazardcolor==0){
     char unitlabel[256];
+    int zoneunitclass, zoneunittype;
 
     strcpy(unitlabel,degC);
     getunitinfo(unitlabel,&zoneunitclass,&zoneunittype);

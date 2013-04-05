@@ -220,12 +220,10 @@ void init_prop(propdata *propi, int nsmokeview_ids, char *label){
 /* ------------------ readsmv_dynamic ------------------------ */
 
 void readsmv_dynamic(char *file){
-  char buffer[255],buffer2[255];
   FILE *stream;
   int ioffset;
   float time_local;
-  blockagedata *bc;
-  int i,j;
+  int i;
   int nn_plot3d=0,iplot3d=0;
   int do_pass2=0, do_pass3=0, minmaxpl3d=0;
   int nplot3dinfo_old;
@@ -255,6 +253,7 @@ void readsmv_dynamic(char *file){
   if(stream==NULL)return;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
+    int j;
 
     meshi=meshinfo+i;
     meshi->nsmoothblockages_list=1;
@@ -290,6 +289,8 @@ void readsmv_dynamic(char *file){
   // ------------------------------- pass 1 dynamic - start ------------------------------------
 
   for(;;){
+    char buffer[255],buffer2[255];
+
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
   /*
@@ -368,6 +369,7 @@ void readsmv_dynamic(char *file){
     if(match(buffer,"SHOW_OBST") == 1||match(buffer,"HIDE_OBST")==1){
       mesh *meshi;
       int blocknumber,blocktemp,showobst,tempval;
+      blockagedata *bc;
 
       do_pass2=1;
       if(nmeshes>1){
@@ -547,6 +549,7 @@ void readsmv_dynamic(char *file){
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     int nlist;
+    int j;
 
     meshi=meshinfo+i;
 
@@ -589,6 +592,8 @@ void readsmv_dynamic(char *file){
   // ------------------------------- pass 2 dynamic - start ------------------------------------
 
   while(do_pass2==1){
+    char buffer[255],buffer2[255];
+
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
   /*
@@ -783,6 +788,7 @@ void readsmv_dynamic(char *file){
     if(match(buffer,"SHOW_OBST") == 1||match(buffer,"HIDE_OBST")==1){
       mesh *meshi;
       int nlist,blocknumber,tempval,showobst,blocktemp;
+      blockagedata *bc;
 
       if(nmeshes>1){
         blocknumber=ioffset-1;
@@ -885,6 +891,8 @@ void readsmv_dynamic(char *file){
   // ------------------------------- pass 3 dynamic - start ------------------------------------
 
   while(do_pass3==1){
+    char buffer[255],buffer2[255];
+
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
   /*
@@ -913,6 +921,8 @@ void readsmv_dynamic(char *file){
 
         plot3di = plot3dinfo + i;
         if(strcmp(file_ptr,plot3di->file)==0){
+          int j;
+
           for(j=0;j<5;j++){
             plot3di->diff_valmin[j]=percentile_min[j];
             plot3di->diff_valmax[j]=percentile_max[j];
@@ -8052,9 +8062,8 @@ void writeboundini(void){
 /* ------------------ readini2 ------------------------ */
 
 int readini2(char *inifile, int localfile){
-  char buffer[255],buffer2[255];
-  FILE *stream;
   int i;
+  FILE *stream;
 
   updatemenu=1;
   updatefacelists=1;
@@ -8083,6 +8092,8 @@ int readini2(char *inifile, int localfile){
   /* find number of each kind of file */
 
   while(!feof(stream)){
+    char buffer[255],buffer2[255];
+
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 

@@ -912,11 +912,9 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
   int ii;
   sv_object *object;
   int use_material;
-  int tag_number=0;
 
   if(prop!=NULL){
     object=prop->smv_object;
-    tag_number=prop->tag_number;
   }
   else{
     object=object_dev;

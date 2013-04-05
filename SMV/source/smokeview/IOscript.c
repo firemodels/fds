@@ -411,8 +411,6 @@ scripti->cval2=script_set_buffer(buffer2)
 
 int compile_script(char *scriptfile){
   FILE *stream;
-  char buffer[1024], buffer2[1024];
-  scriptdata *scripti;
   int return_val;
 
   return_val=1;
@@ -437,6 +435,8 @@ int compile_script(char *scriptfile){
   free_script();
 
   while(!feof(stream)){
+    char buffer[1024], buffer2[1024];
+
     if(fgets(buffer2,255,stream)==NULL)break;
     cleanbuffer(buffer,buffer2);
 
@@ -462,6 +462,8 @@ int compile_script(char *scriptfile){
     int keyword_index;
     int scriptEOF;
     char keyword[255];
+    char buffer[1024], buffer2[1024];
+    scriptdata *scripti;
 
     if(fgets(buffer2,255,stream)==NULL)break;
     cleanbuffer(buffer,buffer2);
