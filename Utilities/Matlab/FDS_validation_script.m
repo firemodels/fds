@@ -52,5 +52,6 @@ sandia_methane_fire
 spray_attenuation
 Cup_burner
 flame_height2
+purdue_flames
  
 display('validation scripts completed successfully!')
