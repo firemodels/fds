@@ -4817,7 +4817,7 @@ SELECT CASE(IND)
       ZZ_MIN = 1.E-10_EB
       ZZ_FUEL = 0._EB
       ZZ_OX = 0._EB
-      GAS_PHASE_OUTPUT_RES = 0._EB
+      GAS_PHASE_OUTPUT_RES = 1._EB
       DO NR=1,N_REACTIONS
          DO NS=0,N_TRACKED_SPECIES
             IF (REACTION(NR)%NU(NS) < 0._EB) THEN
@@ -4826,7 +4826,8 @@ SELECT CASE(IND)
             ENDIF
           ENDDO
        ENDDO
-       IF (ZZ_FUEL > ZZ_MIN .AND. ZZ_OX > ZZ_MIN .AND. Q(II,JJ,KK) == 0._EB) GAS_PHASE_OUTPUT_RES = 1._EB
+       IF (ZZ_FUEL == 0._EB .OR. ZZ_OX == 0._EB .OR. Q(II,JJ,KK) == 0._EB) GAS_PHASE_OUTPUT_RES = -1._EB
+       IF (ZZ_FUEL > ZZ_MIN .AND. ZZ_OX > ZZ_MIN .AND. Q(II,JJ,KK) == 0._EB) GAS_PHASE_OUTPUT_RES = 0._EB
    
    CASE(155) ! PATH OBSCURATION  *********
       EXT_COEF = 0._EB
