@@ -6009,10 +6009,11 @@ code segment describing the format of {\tt VENT} data is given by:
    read(5,*)nv
    do i = 1, nv
      read(5,*)xv1(i), xv2(i), yv1(i), yv2(i), zv1(i), zv2(i), id(i)
-         ... s1(i), tx(i), ty(i), tz(i)
+      ... s1(i), tx(i), ty(i), tz(i), radius(i)
    end do
    do i = 1, nv
      read(5,*)iv1(i), iv2(i), jv1(i), jv2(i), kv1(i), kv2(i)
+      ... index(i), type(i), red(i), green(i), blue(i), alpha(i)
    end do
 \end{lstlisting}
 where the parameters are defined in Table \ref{tabVENT}.  The arrays {\tt xv1,  ..., zv2}\ and {\tt iv1, ..., kv2}\ are
@@ -6044,14 +6045,17 @@ tx, ty, tz & float &
 \parbox[c]{1.0in}{iv1, iv2\\jv1, jv2\\kv1, kv2} &integer &
 \tabentry{Indices used to define vent bounds in terms of grid locations.}\\ \hline
 
-ventindex & integer &
-\tabentry{Type of coloring used to color vent.\\ -1 - default color\\ -99 of +99\\-n of +n - use n'th palette color\\$<$ 0 - do not draw boundary file over vent \\ $>$ 0 - draw boundary file over vent }\\  \hline
+index & integer &
+\tabentry{Type of coloring used to color vent.\\ -99 or +99 - use default color\\-n or +n - use n'th palette color\\$<$ 0 - do not draw boundary file over vent \\ $>$ 0 - draw boundary file over vent }\\  \hline
 
-venttype & integer &
+type & integer &
 \tabentry{Defines how the vent is drawn.\\0 - solid surface \\2 - outline\\ -2 - hidden}\\  \hline
 
 \parbox[c]{1.0in}{red, green, blue\\alpha} & float &
 \tabentry{Each color value ranges from 0.0 to 1.0 .  The alpha {\em color}\ represents transparency, alpha=0.0 is transparent, alpha=1.0 is opaque.}\\  \hline
+
+radius & float &
+\tabentry{if positive, radius of circular vent}\\ \hline 
 
 \end{tabular}
 \label{tabVENT}
