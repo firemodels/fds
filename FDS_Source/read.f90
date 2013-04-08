@@ -7956,10 +7956,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               IF (VT%RADIUS>0.5_EB*(VT%Y2-VT%Y1) .OR. VT%RADIUS>0.5_EB*(VT%Z2-VT%Z1)) THEN
-                  WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
-                  CALL SHUTDOWN(MESSAGE)
-               ENDIF
             ENDIF
          CASE(2)
             IF (J1>=1 .AND. J1<=JBM1) THEN
@@ -7972,10 +7968,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               IF (VT%RADIUS>0.5_EB*(VT%X2-VT%X1) .OR. VT%RADIUS>0.5_EB*(VT%Z2-VT%Z1)) THEN
-                  WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
-                  CALL SHUTDOWN(MESSAGE)
-               ENDIF
             ENDIF
          CASE(3)
             IF (K1>=1 .AND. K1<=KBM1) THEN
@@ -7986,10 +7978,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
                VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2,K2+1)) .AND. .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
-                  CALL SHUTDOWN(MESSAGE)
-               ENDIF
-               IF (VT%RADIUS>0.5_EB*(VT%X2-VT%X1) .OR. VT%RADIUS>0.5_EB*(VT%Y2-VT%Y1)) THEN
-                  WRITE(MESSAGE,'(A,I4)') 'ERROR: RADIUS exceeds bounds for VENT ',VT%ORDINAL
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
