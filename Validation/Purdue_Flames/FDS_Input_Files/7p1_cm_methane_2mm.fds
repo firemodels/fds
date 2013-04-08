@@ -23,8 +23,7 @@
   
 &SURF ID='FLAME'
       COLOR='ORANGE'
-      VEL = -0.0314
-      MASS_FRACTION(1) = 1.0, SPEC_ID(1) = 'METHANE'
+      MASS_FLUX(1) = 0.02129, SPEC_ID(1) = 'METHANE'
       FREE_SLIP=.TRUE. /
   
 &VENT MB='XMIN', SURF_ID='OPEN'/
