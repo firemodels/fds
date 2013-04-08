@@ -5605,7 +5605,11 @@ typedef struct {
       }
       ndummyvents=0;
       sscanf(buffer,"%i %i",&nvents,&ndummyvents);
-      if(ndummyvents!=0)dummyvents=1;
+      if(ndummyvents!=0){
+        visFloor=0;
+        visCeiling=0;
+        visWalls=0;
+      }
       meshi->nvents=nvents;
       meshi->ndummyvents=ndummyvents;
       vinfo=NULL;
@@ -5620,6 +5624,7 @@ typedef struct {
 
         radius=-1.0;
         vi=vinfo+nn;
+        vi->dummyptr=NULL;
         vi->transparent=0;
         vi->useventcolor=0;
         vi->usecolorindex=0;
@@ -5837,6 +5842,22 @@ typedef struct {
           vi->color=foregroundcolor;
         }
         ASSERT(vi->color!=NULL);
+      }
+      for(nn=0;nn<nvents-ndummyvents;nn++){
+        int j;
+        ventdata *vi;
+
+        vi = meshi->ventinfo + nn;
+        for(j=nvents-ndummyvents;j<nvents;j++){ // look for dummy vent that matches real vent
+          ventdata *vj;
+
+          vj = meshi->ventinfo + j;
+          if(vi->imin!=vj->imin&&vi->imax!=vj->imax)continue;
+          if(vi->jmin!=vj->jmin&&vi->jmax!=vj->jmax)continue;
+          if(vi->kmin!=vj->kmin&&vi->kmax!=vj->kmax)continue;
+          vi->dummyptr=vj;
+          vj->dummyptr=vi;
+        }
       }
       continue;
     }
@@ -6919,11 +6940,6 @@ typedef struct {
   }
   else{
     highlight_flag=1;
-  }
-  if(dummyvents==1){
-    visFloor=0;
-    visCeiling=0;
-    visWalls=0;
   }
   initcadcolors();
 

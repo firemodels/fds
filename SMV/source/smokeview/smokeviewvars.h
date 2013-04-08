@@ -1142,7 +1142,6 @@ SVEXTERN camdata SVDECL(*caminfo,NULL);
 SVEXTERN multislicedata SVDECL(*multisliceinfo,NULL);
 SVEXTERN multivslicedata SVDECL(*multivsliceinfo,NULL);
 SVEXTERN outline SVDECL(*outlineinfo,NULL);
-SVEXTERN int dummyvents;
 SVEXTERN int noutlineinfo;
 SVEXTERN int nmultislices;
 SVEXTERN int nmultivslices;

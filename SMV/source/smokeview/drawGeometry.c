@@ -2015,7 +2015,13 @@ void UpdateFacelists(void){
         if(visOpenVents==0&&vi->isOpenvent==1)continue;
         if(visDummyVents==0&&vi->dummy==1)continue;
         if(visOtherVents==0&&vi->isOpenvent==0&&vi->dummy==0)continue;
-        if(visCircularVents==1&&vi->radius>0.0)continue;
+        if(visCircularVents==1){
+          if(vi->radius>0.0)continue;
+        // don't invoke  new scheme yet
+        //  if(vi->dummyptr!=NULL&&vi->dummyptr->radius>0.0){
+        //    continue;
+        //  }
+        }
         if(patchi!=NULL&&patchi->loaded==1&&patchi->display==1&&
           (vis_threshold==0||vis_onlythreshold==0||do_threshold==0)&&
           (vi->dummy==1||vi->hideboundary==0)){

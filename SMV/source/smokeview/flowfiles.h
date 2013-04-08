@@ -362,8 +362,9 @@ typedef struct {
 
 /* --------------------------  ventdata ------------------------------------ */
 
-typedef struct {
+typedef struct _ventdata {
   int type,dummy;
+  struct _ventdata *dummyptr;
   int hideboundary;
   int dir,dir2,id;
   int useventcolor;
