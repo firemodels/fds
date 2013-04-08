@@ -672,7 +672,7 @@ EXTERNCPP void WindowStatus(int state);
 EXTERNCPP void nodein_extvent(
                     int ipatch, 
                     int *patchblankcopy,const mesh *meshi,int i1,int i2, int j1, int j2, int k1, int k2);
-EXTERNCPP void setventdirs(void);
+EXTERNCPP void SetVentDirs(void);
 EXTERNCPP int nodeinblockage(const mesh *meshi, int i,int j,int k, int *imesh, int *iblockage);
 EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir);
 EXTERNCPP void writeboundini(void);

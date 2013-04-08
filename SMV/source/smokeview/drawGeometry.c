@@ -268,7 +268,7 @@ void get_blockvals(  float *xmin, float *xmax,
 
 #define ijkcell(i,j,k) ((i)+(j)*nx+(k)*nxy)
 
-void setventdirs(void){
+void SetVentDirs(void){
   int orien;
   int ii;
   int iv;

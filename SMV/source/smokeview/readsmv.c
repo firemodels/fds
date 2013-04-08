@@ -7023,7 +7023,7 @@ typedef struct {
   makeiblank();
   makeiblank_carve();
   makeiblank_smoke3d();
-  setventdirs();
+  SetVentDirs();
   update_faces();
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
