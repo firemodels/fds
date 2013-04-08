@@ -7830,13 +7830,6 @@ MESH_LOOP_1: DO NM=1,NMESHES
                VT%Y0 = XYZ(2)
                VT%Z0 = XYZ(3)
                VT%FIRE_SPREAD_RATE = SPREAD_RATE / TIME_SHRINK_FACTOR
-
-               IF (RADIUS>0._EB) THEN
-                  VT%RADIUS = RADIUS
-                  VT%X0 = 0.5_EB*(VT%X1+VT%X2)
-                  VT%Y0 = 0.5_EB*(VT%Y1+VT%Y2)
-                  VT%Z0 = 0.5_EB*(VT%Z1+VT%Z2)
-               ENDIF
          
                ! Dynamic Pressure
          
