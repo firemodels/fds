@@ -1,4 +1,4 @@
-&HEAD CHID='7p1_cm_methane_4mm', TITLE='Xin_velocity_specified' /
+&HEAD CHID='7p1_cm_methane_4mm', TITLE='Purdue 7.1 cm methane burner' / Y. Xin et al. Combustion and Flame 141 (2005) 329-335
   
 &MESH IJK=50,50,100, XB=-.1,.1,-.1,.1,0,0.4 /
   
@@ -33,7 +33,9 @@
 &VENT MB='ZMAX', SURF_ID='OPEN'/
 
 ! weak synthetic turbulence, 1% intensity, just to break symmetry
-&VENT XB=-.0355,.0355,-.0355,.0355,0,0, RADIUS=0.0355, SURF_ID='FLAME', N_EDDY=10, L_EDDY=0.01775, VEL_RMS=0.0003 /
+&VENT XB=-.0355,.0355,-.0355,.0355,0,0
+      XYZ=0,0,0, RADIUS=0.0355
+      SURF_ID='FLAME', N_EDDY=10, L_EDDY=0.01775, VEL_RMS=0.0003 /
 
 &VENT MB='ZMIN', SURF_ID='OPEN'/
 
