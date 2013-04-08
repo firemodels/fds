@@ -1,6 +1,6 @@
 &HEAD CHID='7p1_cm_methane_2mm', TITLE='Xin_velocity_specified' /
   
-&MESH IJK=50,50,200, XB=-.05,.05,-.05,.05,0,0.4 /
+&MESH IJK=100,100,200, XB=-.1,.1,-.1,.1,0,0.4 /
   
 &TIME T_END=20/
 
