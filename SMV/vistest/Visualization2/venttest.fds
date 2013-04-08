@@ -1,0 +1,15 @@
+&HEAD CHID='venttest', TITLE='demonstration of a simple duct' /
+&MESH IJK=20,10,10, XB=-1.0,1.0, 0.0,1.0, 0.0,1.0 /
+
+&TIME T_END=0 /
+
+&OBST XB=-0.1,0.0,0.0,1.0,0.0,1.0, COLOR=YELLOW/
+
+&VENT XB=-0.1,-0.1,0.4,0.6,0.7,0.9,, COLOR='PINK',  SURF_ID='HVAC',ID='IN' / 
+&VENT XB= 0.0, 0.0,0.4,0.6,0.7,0.9, COLOR='RED',   SURF_ID='HVAC',ID='OUT' / 
+
+
+&TAIL /
+
+
+
