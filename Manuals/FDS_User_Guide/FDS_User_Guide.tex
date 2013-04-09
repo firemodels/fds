@@ -7029,16 +7029,19 @@ A beam detector can be defined by specifying the endpoints, {\ct (x1,y1,z1) and 
 total percent obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh
 cells lie along the linear path defined by the two endpoints.  The beam detector response is evaluated as
 \be
-  \hbox{Obscuration}  = \left(1 - \exp \left( -K_m \sum_{i=1}^N {\rho_{soot,i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
+  \hbox{Obscuration}  = \left(1 - \exp \left( -K_{\rm m} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
 \ee
-where $i$ is a mesh cell along the path of the beam, $\rho_{soot,i}$ is the soot density of the mesh cell, $ \Delta x_i$
-is the distance within the mesh cell that is traversed by the beam, and $K_m$ is the mass extinction coefficient. The line in the input file has the form:
-
+where $i$ is a mesh cell along the path of the beam, $\rho_{{\rm s},i}$ is the soot density of the mesh cell, $ \Delta x_i$
+is the distance within the mesh cell that is traversed by the beam, and $K_{\rm m}$ is the mass extinction coefficient. The line in the input file has the form:
 \begin{lstlisting}
 &DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='PATH OBSCURATION', ID='beam1', SETPOINT=33.0 /
 \end{lstlisting}
+A similar {\ct QUANTITY} is {\ct 'TRANSMISSION'} which is given by the following expression:
+\be
+  \hbox{Transmission}  = \exp \left( -K_{\rm m} \frac{L_0}{L} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \times 100  \; \; \hbox{\%/m}
+\ee
+Note that the transmission is given in units of \%/m rather than \% like obscuration. $L$ is the total pathlength of the beam, and $L_0$ is the reference dimension of 1~m.
 
-\noindent
 Since a single linear path cannot span more than one mesh, having a beam detector that crosses multiple meshes will require post processing.
 Break the beam detector path into multiple {\ct DEVC} lines, one for each mesh that the beam crosses.  The total obscuration is given by
 \be
@@ -7081,13 +7084,7 @@ result computed by FDS for each of the three detectors.
 \subsection{Aspiration Detection Systems}
 \label{info:aspiration_detector}
 
-An aspiration detection system groups together a series of soot measurement devices.
-An aspiration system consists of a sampling pipe network that draws air from a series of locations to a central point
-where an obscuration measurement is made.  To define such a system in FDS, you must provide the sampling locations,
-sampling flow rates, the transport time from each sampling location, and if an alarm output is desired, the overall obscuration
-``setpoint.''  One or more {\ct DEVC} inputs are used to specify details of the sampling locations, and one additional input is
-used to specify the central detector:
-
+An aspiration detection system groups together a series of smoke measurement devices. An aspiration system consists of a sampling pipe network that draws air from a series of locations to a central point where an obscuration measurement is made.  To define such a system in FDS, you must provide the sampling locations, sampling flow rates, the transport time from each sampling location, and if an alarm output is desired, the overall obscuration ``setpoint.''  One or more {\ct DEVC} inputs are used to specify details of the sampling locations, and one additional input is used to specify the central detector:
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='soot1', DEVC_ID='asp1',
       FLOWRATE=0.1, DELAY=20 /
@@ -7096,22 +7093,15 @@ used to specify the central detector:
  ...
 &DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='sootN', DEVC_ID='asp1',
       FLOWRATE=0.3, DELAY=30 /
-
-&DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
+&DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4, 
+      SETPOINT=0.02 /
 \end{lstlisting}
-
-\noindent
-where the {\ct DEVC\_ID} is used at each sampling point to reference the central detector, {\ct FLOWRATE} is the gas
-flow rate in kg/s, {\ct DELAY} is the transport time (in seconds) from the sampling location to the central detector,
-{\ct BYPASS\_FLOWRATE} is the flow rate in kg/s of any air drawn into the system from outside the computational
-domain (accounts for portions of the sampling network lying outside the domain defined by the {\ct MESH}
-inputs), and {\ct SETPOINT} is the alarm threshold obscuration in units of \%/m. The output of the aspiration system is
-computed as
+where the {\ct DEVC\_ID} is used at each sampling point to reference the central detector, {\ct FLOWRATE} is the gas flow rate in kg/s, {\ct DELAY} is the transport time (in seconds) from the sampling location to the central detector, {\ct BYPASS\_FLOWRATE} is the flow rate in kg/s of any air drawn into the system from outside the computational
+domain (accounts for portions of the sampling network lying outside the domain defined by the {\ct MESH} inputs), and {\ct SETPOINT} is the alarm threshold obscuration in units of \%/m. The output of the aspiration system is computed as
 \be
-  \hbox{Obscuration}  = \left(1 - \exp \left( -K_m \frac {\sum_{i=1}^N {\rho_{soot,i}( t-t_{d,i}) \; \dm_i}} {\sum_{i=1}^N{ \dm_i} } \right)  \right) \times 100  \; \; \hbox{\%/m}
+  \hbox{Obscuration}  = \left(1 - \exp \left( -K_{\rm m} \frac {\sum_{i=1}^N {\rho_{{\rm s},i}( t-t_{{\rm d},i}) \; \dm_i}} {\sum_{i=1}^N{ \dm_i} } \right)  \right) \times 100  \; \; \hbox{\%/m}
 \ee
-where $\dm_i$ is the mass {\ct FLOWRATE} of the $i$th sampling location, $\rho_{soot,i}( t-t_{d,i})$ is the soot density at
-the $i$th sampling location $t_{d,i}$ s prior ({\ct DELAY}) to the current time $t$, and $K_m$ is the {\ct MASS\_EXTINCTION\_COEFFICIENT} associated with visible light.
+where $\dm_i$ is the mass {\ct FLOWRATE} at sampling location $i$, $\rho_{{\rm s},i}( t-t_{{\rm d},i})$ is the soot density at sampling location $i$, $t_{{\rm d},i}$~s prior ({\ct DELAY}) to the current time $t$, and $K_{\rm m}$ is the {\ct MASS\_EXTINCTION\_COEFFICIENT} associated with visible light.
 
 \subsubsection{Example Case: aspiration\_detector}
 
@@ -9182,6 +9172,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
 {\ct TIME}                                      & Section~\ref{info:DEVC}                       & s              & D            \\ \hline
 {\ct TIME STEP}                                 & $\delta t$, Numerical time step               & s              & D            \\ \hline
+{\ct TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
 {\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                &                & D,S          \\ \hline
 {\ct U-VELOCITY}                                & Gas velocity component, $u$                   & m/s            & D,I,P,S      \\ \hline
 {\ct V-VELOCITY}                                & Gas velocity component, $v$                   & m/s            & D,I,P,S      \\ \hline
