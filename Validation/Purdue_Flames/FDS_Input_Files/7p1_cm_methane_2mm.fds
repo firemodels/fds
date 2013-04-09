@@ -10,7 +10,8 @@
       FLUX_LIMITER=4
       RESEARCH_MODE=.TRUE.
       CHECK_VN=.TRUE.,
-      VN_MIN=0.4,VN_MAX=0.5 /
+      VN_MIN=0.4,VN_MAX=0.5
+      INITIAL_UNMIXED_FRACTION=0 /
   
 &REAC FUEL='METHANE'
       C=1.
