@@ -1,4 +1,4 @@
-&HEAD CHID='7p1_cm_methane_1mm_128mesh_dns', TITLE='Purdue 7.1 cm methane burner' / Y. Xin et al. Combustion and Flame 141 (2005) 329-335
+&HEAD CHID='7p1_cm_methane_1mm_128mesh_les', TITLE='Purdue 7.1 cm methane burner' / Y. Xin et al. Combustion and Flame 141 (2005) 329-335
   
 MESH IJK=50,50,100, XB=-.1,.1,-.1,.1,0,0.4 / 4 mm single mesh
 
@@ -8,8 +8,12 @@ MESH IJK=50,50,100, XB=-.1,.1,-.1,.1,0,0.4 / 4 mm single mesh
 &TIME T_END=20/
 
 &DUMP DT_DEVC_LINE=10/
-      
-&MISC TMPA=15., DNS=.TRUE. /
+
+&MISC TMPA=15.
+      FLUX_LIMITER=4
+      RESEARCH_MODE=.TRUE.
+      CHECK_VN=.TRUE.,
+      VN_MIN=0.4,VN_MAX=0.5 /
   
 &REAC FUEL='METHANE'
       C=1.
