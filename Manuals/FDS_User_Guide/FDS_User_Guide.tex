@@ -455,6 +455,7 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 {\ct PROP}    & {\ct DROPLETS\_PER\_SECOND}         &  {\ct PROP}  &  {\ct PARTICLES\_PER\_SECOND}               & Section~\ref{info:sprinkler_droplets} \\ \hline
 {\ct PROP}    & {\ct DROPLET\_VELOCITY}             &  {\ct PROP}  &  {\ct PARTICLE\_VELOCITY}                   & Section~\ref{info:sprinklers} \\ \hline
 {\ct PROP}    & {\ct DT\_INSERT}                    &              & New procedure                               & Section~\ref{info:controlling_droplets} \\ \hline
+{\ct RADI}    & {\ct CH4\_BANDS}                    &              &  Eliminated                                 &                                      \\ \hline
 {\ct REAC}    & {\ct BOF}                           &  {\ct REAC}  &  {\ct A}                                    & Section~\ref{info:finite}           \\ \hline
 {\ct REAC}    & {\ct ID}                            &  {\ct REAC}  &  {\ct FUEL}                                 & Section~\ref{info:simple_chemistry}       \\ \hline
 {\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  &  {\ct MASS\_EXTINCTION\_COEFFICIENT}        & Section~\ref{info:visibility}       \\ \hline
@@ -4986,7 +4987,7 @@ Species that can absorb and emit thermal radiation are defined via the parameter
 &SPEC ID='ETHANOL', RADCAL_ID='METHANOL' /
 \end{lstlisting}
 
-\noindent would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}. 
+\noindent would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}.
 For absorbing species not present in RadCal, it is recommended to choose a RadCal surrogate with similar molecular functional groups and molecular mass. The infrared spectrum is greatly affected by the species molecular functional groups.
  Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Table~\ref{tab:gasspecies} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
 
@@ -5819,8 +5820,7 @@ operation -- a gray gas model (default) and a wide band model~\cite{FDS_Math_Gui
 If the optional six band model is desired,
 set {\ct WIDE\_BAND\_MODEL=.TRUE.} It is recommended that this option
 only be used when the fuel is relatively non-sooting because it
-adds significantly to the cost of the calculation. To add three
-additional fuel bands, set {\ct CH4\_BANDS=.TRUE.} on the {\ct RADI} line. Read the FDS Technical
+adds significantly to the cost of the calculation. Read the FDS Technical
 Reference Guide~\cite{FDS_Tech_Guide} for more details. Note also that when
 {\ct WIDE\_BAND\_MODEL=.TRUE.}, the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}
 becomes practically useless, because it then
@@ -9005,7 +9005,7 @@ where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strai
 
 \subsection{Extinction}
 \label{info:extinct_out}
-In combustion, knowing if/when/where chemical reactions have been extinguished is important. The {\ct EXTINCTION} parameter tells the user wether or not combustion has been prevented by FDS' extinction routine. By default, {\ct EXTINCTION} = 1, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 0 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 0 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is no fuel or oxidizer present. 
+In combustion, knowing if/when/where chemical reactions have been extinguished is important. The {\ct EXTINCTION} parameter tells the user wether or not combustion has been prevented by FDS' extinction routine. By default, {\ct EXTINCTION} = 1, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 0 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 0 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is no fuel or oxidizer present.
 
 \clearpage
 
@@ -10281,7 +10281,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ANGLE\_INCREMENT}              & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 5                 \\ \hline
 {\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         &  $\mu$m           &                   \\ \hline
-{\ct CH4\_BANDS          }          & Logical       & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
 {\ct KAPPA0                   }     & Real          & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
 {\ct MIE\_MINIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 0.5               \\ \hline
 {\ct MIE\_MAXIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 1.5$\times D$     \\ \hline
