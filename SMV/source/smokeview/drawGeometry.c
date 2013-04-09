@@ -266,7 +266,7 @@ void get_blockvals(  float *xmin, float *xmax,
 
 }
 
-#define ijkcell(i,j,k) ((i)+(j)*nx+(k)*nxy)
+/* ------------------ SetVentDirs ------------------------ */
 
 void SetVentDirs(void){
   int orien;
@@ -276,7 +276,6 @@ void SetVentDirs(void){
   int i, j, k;
   int nx, ny, nxy;
   char *c_iblank_x, *c_iblank_y, *c_iblank_z;
-  int state1, state2, state3;
   int breakloop;
   int ventdir;
   float voffset, offset;
@@ -298,7 +297,6 @@ void SetVentDirs(void){
     xplttemp=meshi->xplt;
     yplttemp=meshi->yplt;
     zplttemp=meshi->zplt;
-
 
     for(iv=0;iv<meshi->nvents+12;iv++){
       ventdata *vi;
@@ -327,10 +325,12 @@ void SetVentDirs(void){
           breakloop=0;
           for(j=vi->jmin;j<=vi->jmax;j++){
             for(k=vi->kmin;k<=vi->kmax;k++){
+              int state1, state2, state3;
+
               if(use_iblank==1){
-                state1=c_iblank_x[ijkcell(i-1,j,k)];
-                state2=c_iblank_x[ijkcell(i,j,k)];
-                state3=c_iblank_x[ijkcell(i,j,k)];
+                state1=c_iblank_x[IJKNODE(i-1,j,k)];
+                state2=c_iblank_x[IJKNODE(i,j,k)];
+                state3=c_iblank_x[IJKNODE(i,j,k)];
               }
               else{
                 state1=2;
@@ -377,10 +377,12 @@ void SetVentDirs(void){
           breakloop=0;
           for(i=vi->imin;i<=vi->imax;i++){
             for(k=vi->kmin;k<=vi->kmax;k++){
+              int state1, state2, state3;
+
               if(use_iblank==1){
-                state1=c_iblank_y[ijkcell(i,j-1,k)];
-                state2=c_iblank_y[ijkcell(i,j,k)];
-                state3=c_iblank_y[ijkcell(i,j,k)];
+                state1=c_iblank_y[IJKNODE(i,j-1,k)];
+                state2=c_iblank_y[IJKNODE(i,j,k)];
+                state3=c_iblank_y[IJKNODE(i,j+1,k)];
               }
               else{
                 state1=2;
@@ -427,10 +429,12 @@ void SetVentDirs(void){
           breakloop=0;
           for(i=vi->imin;i<=vi->imax;i++){
             for(j=vi->jmin;j<=vi->jmax;j++){
+              int state1, state2, state3;
+
               if(use_iblank==1){
-                state1=c_iblank_z[ijkcell(i,j,k-1)];
-                state2=c_iblank_z[ijkcell(i,j,k)];
-                state3=c_iblank_z[ijkcell(i,j,k)];
+                state1=c_iblank_z[IJKNODE(i,j,k-1)];
+                state2=c_iblank_z[IJKNODE(i,j,k)];
+                state3=c_iblank_z[IJKNODE(i,j,k)];
               }
               else{
                 state1=2;
