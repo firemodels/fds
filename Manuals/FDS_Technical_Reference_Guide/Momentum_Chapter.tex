@@ -42,7 +42,7 @@ In fire scenarios, $\eta$ is usually on the order of one millimeter.  DNS is the
 With engineering domains ranging in size from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
 \begin{equation}
 \label{eqn_LES_1}
-\frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} + \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp u_{{\rm b},i}}
+\frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp u_{{\rm b},i}}
 \end{equation}
 Simple enough, we just put lines over everything.  The dilemma we now face is that the cell mean value $\overline{\rho u_i u_j}$ is not itself a primitive variable in the calculation---we have no way of computing the stuff under the bars to advance Eq.~(\ref{eqn_LES_1}) in time.  We must, therefore, decompose the terms, and this leads to closure problems.
 
