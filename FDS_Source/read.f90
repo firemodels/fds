@@ -7825,7 +7825,17 @@ MESH_LOOP_1: DO NM=1,NMESHES
                VT%Y0 = XYZ(2)
                VT%Z0 = XYZ(3)
                VT%FIRE_SPREAD_RATE = SPREAD_RATE / TIME_SHRINK_FACTOR
-         
+
+               ! Circular VENT
+
+               IF (RADIUS>0._EB) THEN
+                  IF (ANY(XYZ<-1.E-5_EB)) THEN
+                     WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,' requires center point XYZ'
+                     CALL SHUTDOWN(MESSAGE)
+                  ENDIF
+                  VT%RADIUS = RADIUS
+               ENDIF
+
                ! Dynamic Pressure
          
                VT%DYNAMIC_PRESSURE = DYNAMIC_PRESSURE
