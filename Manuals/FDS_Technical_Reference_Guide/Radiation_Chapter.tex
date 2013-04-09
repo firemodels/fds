@@ -91,48 +91,327 @@ This is the default mode of FDS and appropriate for most problems of fire engine
 In optically thin flames, where the amount of soot is small compared to the amount of $\rm CO_2$ and water vapor, the gray gas
 assumption may produce significant over-predictions of the emitted radiation.
 From a series of numerical experiments using methane as the fuel, it has been found
-that six bands ($N=6$) are usually enough to improve the accuracy in these cases. The limits of the bands are selected to give an accurate
+that six bands ($N=6$) are usually enough to improve the accuracy in these cases. 
+The limits of the bands are selected to give an accurate
 representation of the most important radiation bands of $\rm CO_2$ and water vapor.
-The limits of the bands for methane are shown in Table~\ref{banditos}.
+The limits of the bands for methane are shown in Table~\ref{banditos}, while the limits of the bands 
+for ethane are shown in Table~\ref{band_Ethane}, those for ethylene are shown in Table~\ref{band_Ethylene},
+Table~\ref{band_Propane} plots the limits of the bands for propane, Table~\ref{band_Propylene} shows the limits of the bands 
+for propylene. Finally limits of the bands for heptane, toluene, methanol, and methyl methacrylate are shown in Tables~\ref{band_Heptane},\ref{band_Toluene},
+\ref{band_Methanol}, and \ref{band_MMA}, respectively. The location of the bands have been adjusted to accommodate most of the features of the fuels spectra.
 
 If the absorption of the fuel is known to be important, separate bands can be reserved for fuel, increasing the total number of bands, $N$. The number of
 additional bands depends on the fuel, as discussed in section~\ref{gas_spectra}.
 
+% OLD TABLE (9 and 6 bands)
+%\begin{table}[ht]
+% \caption{Limits of the spectral bands.}
+% \vspace{0.1in}
+% \label{banditos}
+% \small
+% \begin{tabular}{|*{10}{c|}}
+% \hline
+% \hspace{0.5in} \underline{9 Band Model} \hspace{0.5in} & 1  & 2  & 3 & 4  & 5 & 6 & 7 & 8 & 9 \\ \cline{2-10}
+%                                      & Soot   & CO$_2$       & CH$_4$ & Soot & CO$_2$ & H$_2$O & H$_2$O       & Soot & Soot          \\
+% \raisebox{1.5ex}[0pt]{Major Species} &        & H$_2$O, Soot & Soot   &      & Soot   & Soot   & CH$_4$, Soot &      &      \\ \hline
+% \multicolumn{1}{c}{$\omega$ (1/cm)}
+%              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 3800}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 3400}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 2800}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 2400}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 2174}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 1429}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 1160}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 1000}c@{50}}{ } \\
+% \multicolumn{1}{c}{$\la$ ($\mu$m)}
+%              & \multicolumn{1}{@{\hspace{-.2in} 1.00}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 2.63}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 2.94}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 3.57}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 4.17}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 4.70}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 7.00}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 8.62}c@{}}{ }
+%              & \multicolumn{1}{@{\hspace{-.2in} 10.0}c@{200}}{ } \\ \hline
+% \underline{6 Band Model}  & 1  & 2  & \multicolumn{2}{|c|}{3} & 4  & \multicolumn{3}{|c|}{5} & 6  \\ \cline{2-10}
+%           & Soot   & CO$_2$       & \multicolumn{2}{|c|}{CH$_4$      } & CO$_2$ & \multicolumn{3}{|c|}{H$_2$O, CH$_4$, Soot} & Soot  \\
+% \raisebox{1.5ex}[0pt]{Major Species} &        & H$_2$O, Soot & \multicolumn{2}{|c|}{Soot} & Soot   & \multicolumn{3}{|c|}{  } &       \\
+%                \hline
+% \end{tabular}
+% \end{table}
+% \normalsize
 \begin{table}[ht]
-%To BE UPDATED
-\caption{Limits of the spectral bands.}
+\caption{Limits of the spectral bands for methane.}
 \vspace{0.1in}
 \label{banditos}
-\small
-\begin{tabular}{|*{10}{c|}}
-\hline
-\hspace{0.5in} \underline{9 Band Model} \hspace{0.5in} & 1  & 2  & 3 & 4  & 5 & 6 & 7 & 8 & 9 \\ \cline{2-10}
-                                     & Soot   & CO$_2$       & CH$_4$ & Soot & CO$_2$ & H$_2$O & H$_2$O       & Soot & Soot          \\
-\raisebox{1.5ex}[0pt]{Major Species} &        & H$_2$O, Soot & Soot   &      & Soot   & Soot   & CH$_4$, Soot &      &      \\ \hline
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                     & Soot           & CO$_2$       & CH$_4$ & CO$_2$ & H$_2$O,CH$_4$& H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot   & Soot   & Soot         & CO$_2$ \\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 3800}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 3400}c@{}}{ }
-             & \multicolumn{1}{@{\hspace{-.2in} 2800}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 2400}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 2174}c@{}}{ }
-             & \multicolumn{1}{@{\hspace{-.2in} 1429}c@{}}{ }
-             & \multicolumn{1}{@{\hspace{-.2in} 1160}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 1000}c@{50}}{ } \\
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in} 1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 2.63}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 2.94}c@{}}{ }
-             & \multicolumn{1}{@{\hspace{-.2in} 3.57}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 4.17}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 4.70}c@{}}{ }
-             & \multicolumn{1}{@{\hspace{-.2in} 7.00}c@{}}{ }
-             & \multicolumn{1}{@{\hspace{-.2in} 8.62}c@{}}{ }
-             & \multicolumn{1}{@{\hspace{-.2in} 10.0}c@{200}}{ } \\ \hline
-\underline{6 Band Model}  & 1  & 2  & \multicolumn{2}{|c|}{3} & 4  & \multicolumn{3}{|c|}{5} & 6  \\ \cline{2-10}
-          & Soot   & CO$_2$       & \multicolumn{2}{|c|}{CH$_4$      } & CO$_2$ & \multicolumn{3}{|c|}{H$_2$O, CH$_4$, Soot} & Soot  \\
-\raisebox{1.5ex}[0pt]{Major Species} &        & H$_2$O, Soot & \multicolumn{2}{|c|}{Soot} & Soot   & \multicolumn{3}{|c|}{  } &       \\
-               \hline
+             & \multicolumn{1}{@{\hspace{-.2in} 10.0}c@{200}}{ } \\ 
+\end{tabular}
+\end{table}
+\normalsize
+
+
+\begin{table}[ht] 
+\caption{Limits of the spectral bands for ethane.} 
+\vspace{0.1in}     
+\label{band_Ethane}   
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                      & Soot & CO$_2$ & C$_2$H$_6$ & CO$_2$ & C$_2$H$_6$ & H$_2$O \\  
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$, C$_2$H$_6$\\ \hline  
+\multicolumn{1}{c}{$\omega$ (1/cm)}                            
+             & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }    
+             & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}3350}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}2550}c@{}}{ }      
+             & \multicolumn{1}{@{\hspace{-.2in}1650}c@{}}{ }       
+             & \multicolumn{1}{@{\hspace{-.2in}1090}c@{50}}{ } \\ 
+\multicolumn{1}{c}{$\la$ ($\mu$m)}                                    
+             & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.99}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.92}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}6.06}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}9.17}c@{200}}{ } \\ 
+
+\end{tabular}
+\end{table}
+\normalsize
+
+%%% TABLE ETHYLENE: CHECKED ON 04/09/13
+
+\begin{table}[ht] 
+\caption{Limits of the spectral bands for ethylene.} 
+\vspace{0.1in}     
+\label{band_Ethylene}   
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                      & Soot & CO$_2$ & C$_2$H$_4$ & CO$_2$ & C$_2$H$_4$ & H$_2$O \\  
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$\\ \hline  
+\multicolumn{1}{c}{$\omega$ (1/cm)}                            
+             & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }    
+             & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}3375}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}2800}c@{}}{ }      
+             & \multicolumn{1}{@{\hspace{-.2in}1650}c@{}}{ }       
+             & \multicolumn{1}{@{\hspace{-.2in}780}c@{50}}{ } \\ 
+\multicolumn{1}{c}{$\la$ ($\mu$m)}                                    
+             & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.96}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.57}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}6.06}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}12.82}c@{200}}{ } \\ 
+
+\end{tabular}
+\end{table}
+\normalsize
+
+%%% TABLE PROPYLENE: CHECKED ON 04/09/13
+
+\begin{table}[ht] 
+\caption{Limits of the spectral bands for propylene.} 
+\vspace{0.1in}     
+\label{band_Propylene}   
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                      & Soot & CO$_2$ & C$_3$H$_6$ & CO$_2$ & C$_3$H$_6$ & C$_3$H$_6$, H$_2$O \\  
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline  
+\multicolumn{1}{c}{$\omega$ (1/cm)}                            
+             & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }    
+             & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}3250}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}2600}c@{}}{ }      
+             & \multicolumn{1}{@{\hspace{-.2in}1950}c@{}}{ }       
+             & \multicolumn{1}{@{\hspace{-.2in}1175}c@{50}}{ } \\ 
+\multicolumn{1}{c}{$\la$ ($\mu$m)}                                    
+             & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.08}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.85}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}5.13}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}8.51}c@{200}}{ } \\ 
+
+\end{tabular}
+\end{table}
+\normalsize
+
+%%% TABLE PROPANE: CHECKED ON 04/09/13
+ 
+\begin{table}[ht] 
+\caption{Limits of the spectral bands for propane.} 
+\vspace{0.1in}     
+\label{band_Propane}   
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                      & Soot & CO$_2$ & C$_3$H$_8$ & CO$_2$ & C$_3$H$_8$ & H$_2$O \\  
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$\\ \hline  
+\multicolumn{1}{c}{$\omega$ (1/cm)}                            
+             & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }    
+             & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}3350}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}2550}c@{}}{ }      
+             & \multicolumn{1}{@{\hspace{-.2in}1650}c@{}}{ }       
+             & \multicolumn{1}{@{\hspace{-.2in}1175}c@{50}}{ } \\ 
+\multicolumn{1}{c}{$\la$ ($\mu$m)}                                    
+             & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.99}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.92}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}6.06}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}8.51}c@{200}}{ } \\ 
+
+\end{tabular}
+\end{table}
+\normalsize
+
+%%% TABLE HEPTANE: CHECKED ON 04/09/13
+
+\begin{table}[ht] 
+\caption{Limits of the spectral bands for heptane.} 
+\vspace{0.1in}     
+\label{band_Heptane}   
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                      & Soot & CO$_2$ & C$_7$H$_{16}$ & CO$_2$ & C$_7$H$_{16}$ & H$_2$O \\  
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline  
+\multicolumn{1}{c}{$\omega$ (1/cm)}                            
+             & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }    
+             & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}3250}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}2550}c@{}}{ }      
+             & \multicolumn{1}{@{\hspace{-.2in}1775}c@{}}{ }       
+             & \multicolumn{1}{@{\hspace{-.2in}1100}c@{50}}{ } \\ 
+\multicolumn{1}{c}{$\la$ ($\mu$m)}                                    
+             & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.08}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.92}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}5.63}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}9.09}c@{200}}{ } \\ 
+
+\end{tabular}
+\end{table}
+\normalsize
+
+%%% TABLE TOLUENE: CHECKED ON 04/09/13
+
+\begin{table}[ht] 
+\caption{Limits of the spectral bands for toluene.} 
+\vspace{0.1in}     
+\label{band_Toluene}   
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                      & Soot & CO$_2$ & C$_7$H$_8$ & CO$_2$  & C$_7$H$_8$ & C$_7$H$_8$, H$_2$O \\  
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline  
+\multicolumn{1}{c}{$\omega$ (1/cm)}                            
+             & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }    
+             & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}3200}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}2550}c@{}}{ }      
+             & \multicolumn{1}{@{\hspace{-.2in}2050}c@{}}{ }       
+             & \multicolumn{1}{@{\hspace{-.2in}1200}c@{50}}{ } \\ 
+\multicolumn{1}{c}{$\la$ ($\mu$m)}                                    
+             & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.12}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.92}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}4.88}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}8.33}c@{200}}{ } \\ 
+
+\end{tabular}
+\end{table}
+\normalsize
+
+%%% TABLE METHANOL: CHECKED ON 04/09/13
+ 
+\begin{table}[ht] 
+\caption{Limits of the spectral bands for methanol.} 
+\vspace{0.1in}     
+\label{band_Methanol}   
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                      & Soot & CH$_3$OH & CH$_3$OH & CO$_2$ & CH$_3$OH & CH$_3$OH, H$_2$O \\  
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & CO$_2$, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline  
+\multicolumn{1}{c}{$\omega$ (1/cm)}                            
+             & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }    
+             & \multicolumn{1}{@{\hspace{-.2in}3825}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}3200}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}2600}c@{}}{ }      
+             & \multicolumn{1}{@{\hspace{-.2in}1675}c@{}}{ }       
+             & \multicolumn{1}{@{\hspace{-.2in}1125}c@{50}}{ } \\ 
+\multicolumn{1}{c}{$\la$ ($\mu$m)}                                    
+             & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.61}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.12}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.85}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}5.97}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}8.89}c@{200}}{ } \\ 
+
+\end{tabular}
+\end{table}
+\normalsize
+
+%%% TABLE MMA: CHECKED ON 04/09/13
+
+\begin{table}[ht] 
+\caption{Limits of the spectral bands for methyl methacrylate.} 
+\vspace{0.1in}     
+\label{band_MMA}   
+\small             
+\begin{tabular}{|*{7}{c|}}  
+\hline                       
+\hspace{0.3in} \underline{6 Band Model} \hspace{0.3in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}  
+                                      & Soot           & CO$_2$ & MMA & CO$_2$ & MMA & MMA, H$_2$O \\  
+\raisebox{1.5ex}[0pt]{Major Species}  & CO$_2$, H$_2$O & H$_2$O, Soot & Soot   & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline  
+\multicolumn{1}{c}{$\omega$ (1/cm)}                            
+             & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }    
+             & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}3250}c@{}}{ }     
+             & \multicolumn{1}{@{\hspace{-.2in}2650}c@{}}{ }      
+             & \multicolumn{1}{@{\hspace{-.2in}2050}c@{}}{ }       
+             & \multicolumn{1}{@{\hspace{-.2in}1250}c@{50}}{ } \\ 
+\multicolumn{1}{c}{$\la$ ($\mu$m)}                                    
+             & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.08}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}3.77}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}4.88}c@{}}{ }         
+             & \multicolumn{1}{@{\hspace{-.2in}8.00}c@{200}}{ } \\ 
+
 \end{tabular}
 \end{table}
 \normalsize
