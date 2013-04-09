@@ -189,23 +189,34 @@ INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
    LTSTEP    = 25.0_EB           ! maximum LAMBDA*T = NLANBDAT*LTSTEP
    ALLOCATE(BBFRAC(0:NLAMBDAT),STAT=IZERO)
    CALL ChkMemErr('INIT','BBFRAC',IZERO)
+
    BBFRAC = 0._EB
-   LT = 0._EB
+   LT     = 0._EB
+
    DO I = 1,NLAMBDAT
-      LT =  LT + LTSTEP
+      LT  = LT + LTSTEP
       KSI = PLANCK_C2/LT
+
       DO J = 1,50
          BBFRAC(I) = BBFRAC(I) + EXP(-KSI*REAL(J))/REAL(J) * (KSI**3 + 3.*KSI**2/REAL(J) + 6.*KSI/REAL(J)**2 + 6./REAL(J)**3)
       ENDDO
    ENDDO
+
    BBFRAC =  BBFRAC * 15._EB/PI**4
  
 ! Define band limit wave lengths in micrometers
    IF(.NOT.ALLOCATED(WL_LOW).OR. .NOT.ALLOCATED(WL_HIGH)) THEN
+ 
       ALLOCATE(WL_LOW(1:NSB),STAT=IZERO)
       CALL ChkMemErr('INIT','WL_LOW',IZERO)
       ALLOCATE(WL_HIGH(1:NSB),STAT=IZERO)
       CALL ChkMemErr('INIT','WL_HIGH',IZERO)
+
+! Define the band limits as function of the fuel used
+! Use (SPECIES(FUEL_INDEX)%RADCAL_ID (FUEL_INDEX global variable defined in module GLOBAL_CONSTANTS
+
+! 1) - INITIALIZE BANDS LIMITS WITH OLD CH4 BANDS
+
       IF (CH4_BANDS) THEN
          WL_LOW(1:NSB) =(/1.00_EB, 2.63_EB, 2.94_EB, 3.57_EB, 4.17_EB, 4.6_EB, 7.00_EB, 8.62_EB, 10.0_EB /)
          WL_HIGH(1:NSB)=(/2.63_EB, 2.94_EB, 3.57_EB, 4.17_EB, 4.60_EB, 7.0_EB, 8.62_EB, 10.0_EB, 200._EB /) 
@@ -213,7 +224,85 @@ INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
          WL_LOW(1:NSB) =(/1.00_EB, 2.63_EB, 2.94_EB, 4.17_EB, 4.6_EB, 10.0_EB /)
          WL_HIGH(1:NSB)=(/2.63_EB, 2.94_EB, 4.17_EB, 4.6_EB, 10.0_EB, 200.0_EB /)
       ENDIF
- ENDIF
+! 2) - Depending on the RADCAL FUEL, ASSIGN THE CORRECT BAND LIMITS
+! BAND LIMITS DEFINED AD-HOC.
+      SELECT CASE(SPECIES(FUEL_INDEX)%RADCAL_ID)
+         CASE('METHANE')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB) =(/1.00_EB, 2.63_EB, 2.94_EB, 3.57_EB, 4.17_EB, 4.6_EB, 7.00_EB, 8.62_EB, 10.0_EB /)
+               WL_HIGH(1:NSB)=(/2.63_EB, 2.94_EB, 3.57_EB, 4.17_EB, 4.60_EB, 7.0_EB, 8.62_EB, 10.0_EB, 200._EB /) 
+            ELSE
+               WL_LOW(1:NSB) =(/1.00_EB, 2.63_EB, 2.94_EB, 4.17_EB, 4.6_EB,  10.0_EB /)
+               WL_HIGH(1:NSB)=(/2.63_EB, 2.94_EB, 4.17_EB, 4.6_EB, 10.0_EB, 200.0_EB /)
+            ENDIF
+         CASE('ETHANE')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 2.985_EB, 3.279_EB, 3.922_EB, 4.600_EB, 5.977_EB,  8.000_EB,  13.699_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 2.985_EB, 3.279_EB, 3.922_EB, 4.600_EB, 5.977_EB, 8.000_EB, 13.699_EB, 200.000_EB/)
+            ELSE
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 2.985_EB, 4.000_EB, 6.061_EB,   9.174_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 2.985_EB, 4.000_EB, 6.061_EB, 9.174_EB, 200.000_EB/)
+            ENDIF
+         CASE('ETHYLENE')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 2.963_EB, 3.571_EB, 3.922_EB, 4.878_EB, 6.061_EB,  8.000_EB,  12.821_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 2.963_EB, 3.571_EB, 3.922_EB, 4.878_EB, 6.061_EB, 8.000_EB, 12.821_EB, 200.000_EB/)
+            ELSE
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 2.963_EB, 3.571_EB, 6.061_EB,   12.821_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 2.963_EB, 3.571_EB, 6.061_EB, 12.821_EB, 200.000_EB/)
+            ENDIF
+         CASE('PROPANE')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 2.985_EB, 3.279_EB, 3.922_EB, 4.600_EB, 6.061_EB,  8.511_EB,  20.000_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 2.985_EB, 3.279_EB, 3.922_EB, 4.600_EB, 6.061_EB, 8.511_EB, 20.000_EB, 200.000_EB/)
+            ELSE
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 2.985_EB, 3.922_EB, 6.061_EB,   8.511_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 2.985_EB, 3.922_EB, 6.061_EB, 8.511_EB, 200.000_EB/)
+            ENDIF
+         CASE('PROPYLENE')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.077_EB, 3.279_EB, 3.774_EB, 4.082_EB, 5.128_EB,  8.511_EB,  12.903_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 3.077_EB, 3.279_EB, 3.774_EB, 4.082_EB, 5.128_EB, 8.511_EB, 12.903_EB, 200.000_EB/)
+            ELSE
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.077_EB, 3.846_EB, 5.128_EB,   8.511_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 3.077_EB, 3.846_EB, 5.128_EB, 8.511_EB, 200.000_EB/)
+            ENDIF
+         CASE('N-HEPTANE')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.077_EB, 3.279_EB, 3.922_EB, 4.600_EB, 5.634_EB,  9.091_EB,  20.000_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 3.077_EB, 3.279_EB, 3.922_EB, 4.600_EB, 5.634_EB, 9.091_EB, 20.000_EB, 200.000_EB/)
+            ELSE
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.077_EB, 3.922_EB, 5.634_EB,   9.091_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 3.077_EB, 3.922_EB, 5.634_EB, 9.091_EB, 200.000_EB/)
+            ENDIF
+         CASE('TOLUENE')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.125_EB, 3.738_EB, 4.186_EB, 4.878_EB, 6.061_EB,  8.621_EB,  20.000_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 3.125_EB, 3.738_EB, 4.186_EB, 4.878_EB, 6.061_EB, 8.621_EB, 20.000_EB, 200.000_EB/)
+            ELSE
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.125_EB, 3.922_EB, 4.878_EB,   8.333_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 3.125_EB, 3.922_EB, 4.878_EB, 8.333_EB, 200.000_EB/)
+            ENDIF
+         CASE('METHANOL')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.614_EB, 2.837_EB, 3.279_EB, 4.000_EB, 4.602_EB, 5.970_EB,  8.889_EB,  12.121_EB/)
+               WL_HIGH(1:NSB) = (/ 2.614_EB, 2.837_EB, 3.279_EB, 4.000_EB, 4.602_EB, 5.970_EB, 8.889_EB, 12.121_EB, 200.000_EB/)
+            ELSE
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.614_EB, 3.125_EB, 3.846_EB, 5.970_EB,   8.889_EB/)
+               WL_HIGH(1:NSB) = (/ 2.614_EB, 3.125_EB, 3.846_EB, 5.970_EB, 8.889_EB, 200.000_EB/)
+            ENDIF
+         CASE('MMA')
+            IF (CH4_BANDS) THEN
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.077_EB, 3.774_EB, 4.170_EB, 5.128_EB, 6.452_EB,  9.091_EB,  20.000_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 3.077_EB, 3.774_EB, 4.170_EB, 5.128_EB, 6.452_EB, 9.091_EB, 20.000_EB, 200.000_EB/)
+            ELSE
+               WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.077_EB, 3.774_EB, 4.878_EB,   8.000_EB/)
+               WL_HIGH(1:NSB) = (/ 2.632_EB, 3.077_EB, 3.774_EB, 4.878_EB, 8.000_EB, 200.000_EB/)
+            ENDIF
+      END SELECT
+   !End band limit wave lengths in micrometers definition
+   ENDIF
+
 ENDIF INIT_WIDE_BAND
  
 !----------------------------------------------------------------------------
@@ -360,7 +449,6 @@ MAKE_KAPPA_ARRAYS: IF (ANY(SPECIES%RADCAL_ID/='null')) THEN
             SPECIES(NS)%RADCAL_INDEX=RADCAL_TEMP(13)
          END SELECT
    END DO GET_RADCAL_SPECIES
-
    BUILD_KAPPA_ARRAY: IF (N_RADCAL_SPECIES>0) THEN
       KAPPA_ARRAY=.TRUE.
    
