@@ -16,6 +16,7 @@ export INDIR=Current_Results
 $RUNFDS $INDIR 7p1_cm_methane_4mm
 $RUNFDS $INDIR 7p1_cm_methane_2mm
 #$RUNFDSMPI 16 $INDIR 7p1_cm_methane_2mm_16mesh
-#$RUNFDSMPI 128 $INDIR 7p1_cm_methane_1mm_128mesh
+#$RUNFDSMPI 128 $INDIR 7p1_cm_methane_1mm_128mesh_les
+#$RUNFDSMPI 128 $INDIR 7p1_cm_methane_1mm_128mesh_dns
 
 echo FDS cases submitted
