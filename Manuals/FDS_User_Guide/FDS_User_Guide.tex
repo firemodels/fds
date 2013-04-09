@@ -1863,7 +1863,7 @@ lines with a {\ct T}.
 The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
 \be \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  \ee
 The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the
-``total'' pressure, ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on
+``total'' pressure, $\calH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on
 the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable.
 This term is sometimes referred to as the baroclinic torque, and it is responsible for
 generating vorticity due to the non-alignment of pressure and density gradients.
@@ -2424,7 +2424,7 @@ The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. 
 
 By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
-The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:mean_forcing} for an alternative approach.
+The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\calH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\calH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:mean_forcing} for an alternative approach.
 
 
 Vents to the outside of the computational domain ({\ct OPEN} vents)
@@ -4526,9 +4526,9 @@ The interior air temperature, $T_{\rm b}$, is initially 20~$^\circ$C (293~K), an
 
 The initial density stratification inside and outside the building can be calculated using the relation:
 \be
-   \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{{\cal R} T_0} z \right)
+   \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{\calR T_0} z \right)
 \ee
-where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
+where $\calR$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
 
 Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
 \be
@@ -4536,7 +4536,7 @@ Since the openings in the building are equally spaced over its height, the neutr
 \ee
 where $H_{\rm n}$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points.  This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building.  Note that this is close to the midpoint value of 50~m above the bottom of the building. The pressure difference across the building's wall is computed from
 \be
-   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
+   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} \calR \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
 \ee
 where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Fig.~\ref{fig_stack_effect}.
 
@@ -4565,10 +4565,10 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
             .
             .
 \end{lstlisting}
-The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
+The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\calH$ is specified as
 \begin{eqnarray}
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)}
+\calH &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
+\calH &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)}
 \end{eqnarray}
 where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
 The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
@@ -4971,7 +4971,7 @@ where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperatu
 
 If no inputs for enthalpy are provided, then the specific heat of the gas will be calculated from its molecular weight using the relation:
 \be
-   c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha}
+   c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac\calR{W_\alpha}
 \ee
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.} on the {\ct MISC} line.  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
 
@@ -9239,7 +9239,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct EXTINCTION}                                & Section \ref{info:extinct_out}                    &                & D,S          \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
-{\ct H}                                         & ${\cal H}=|\bu|^2/2 + \tp/\rho_0$                 & (m/s)$^2$      & D,I,P,S      \\ \hline
+{\ct H}                                         & $\calH=|\bu|^2/2 + \tp/\rho_0$                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m$^2$.K)} & B,D          \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline

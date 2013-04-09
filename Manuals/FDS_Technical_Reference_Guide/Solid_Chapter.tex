@@ -289,12 +289,12 @@ This reaction can be implemented by setting $T_{\rm thr,\alpha\beta} = T_{\rm f}
 \subsection{Liquid Fuels}
 
 The rate at which liquid fuel evaporates when burning is a function of the liquid temperature and the concentration of fuel vapor above the pool surface. According to the Clausius-Clapeyron relation, the volume fraction of the fuel vapor above the surface is a function of the liquid boiling temperature
-\be X_{\rm F,\ell} = \exp \left[ -\frac{ h_{\rm v} W_{\rm F}}{\cal R} \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
+\be X_{\rm F,\ell} = \exp \left[ -\frac{ h_{\rm v} W_{\rm F}}\calR \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
 \label{CC_liquid}
 \ee
 where $h_{\rm v}$ is the heat of vaporization, $W_{\rm F}$ is the molecular weight of the fuel gas, $T_{\rm s}$ is the surface temperature, and $T_{\rm b}$ is the boiling temperature of the fuel~\cite{Prasad:1}. The evaporation rate of the fuel is governed by Stefan diffusion~\cite{Taylor&Krishna}:
 \be
-\dot{m}'' = h_{\rm m} \; \frac{\bp_m W_{\rm F}}{{\cal R} T_{\rm g}} \; \ln \left(\frac{X_{\rm F,g}-1}{X_{\rm F,\ell}-1}\right) \quad ; \quad h_{\rm m}= \frac{\SH \, D_{\rm \ell,g}}{L}
+\dot{m}'' = h_{\rm m} \; \frac{\bp_m W_{\rm F}}{\calR T_{\rm g}} \; \ln \left(\frac{X_{\rm F,g}-1}{X_{\rm F,\ell}-1}\right) \quad ; \quad h_{\rm m}= \frac{\SH \, D_{\rm \ell,g}}{L}
 \ee
 where $\bp_m$ is the pressure, $T_{\rm g}$ is the temperature, and $X_{\rm F,g}$ is the volume fraction of fuel vapor in the grid cell adjacent to the pool surface. The Sherwood number is given by
 \be
