@@ -189,9 +189,9 @@ ELSE
    IF (LES) THEN
       TAU_U = C_DEARDORFF*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! turbulent mixing time scale, tau_u=delta/sqrt(ksgs)
       TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
-      MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
+      MIX_TIME(I,J,K)= MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
    ELSE
-      MIX_TIME(I,J,K)= TAU_D
+      MIX_TIME(I,J,K)= MAX(TAU_CHEM,TAU_D)
    ENDIF
 ENDIF 
 
