@@ -160,7 +160,7 @@ The mean chemical source term, $\dm_{\alpha}'''$, is discussed in Chapter~\ref{c
 
 The gas temperature, species mass fractions, and density are computed at the center of each grid cell. At an exterior boundary, or at
 the boundary of an interior obstruction, these values must be computed at the face of the cell that falls at the boundary interface. In general, the temperature at the boundary, $T_{\rm w}$, is computed first, followed by species mass fractions, $Z_{\rm \alpha,w}$, followed by density, $\rho_{\rm w}$. The density is typically determined from the equation of state:
-\be  \rho_{\rm w} = \frac{\overline{p}_m}{ {\cal R} \, T_{\rm w} \, \sum_\alpha (Z_{\rm \alpha,w}/W_\alpha) }  \ee
+\be  \rho_{\rm w} = \frac{\overline{p}_m}{ \calR \, T_{\rm w} \, \sum_\alpha (Z_{\rm \alpha,w}/W_\alpha) }  \ee
 Here, $\overline{p}_m$ denotes the background pressure of the gas phase region.
 
 When necessary, the boundary value is linearly extrapolated one half of a grid cell into the ``ghost'' cell for use by the gas phase solver. In the sections below, the value at the center of the gas phase cell adjacent to the boundary is denoted with the subscript ``g'' (for ``gas phase'', \emph{not} ``ghost''), and the value at the boundary by ``w'' (for ``wall'').
@@ -266,7 +266,7 @@ The differencing of the convection terms, $\mathbf{u} \cdot\nabla (\rho h_s)$ an
 \subsection{Computing the Temperature}
 
 The mean cell gas temperature, $T$, is derived from the density and species mass fractions via the equation of state:
-\be T_{ijk} = \frac{\bp_m}{\rho_{ijk} {\cal R}\, \sum_{\alpha=0}^{N_s} (Z_{\alpha,ijk}/W_\alpha)}\ee
+\be T_{ijk} = \frac{\bp_m}{\rho_{ijk} \calR\, \sum_{\alpha=0}^{N_s} (Z_{\alpha,ijk}/W_\alpha)}\ee
 
 \subsection{Sensible Enthalpy}
 
