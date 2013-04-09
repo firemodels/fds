@@ -30,7 +30,7 @@ Note that the vector $\bar{\bF}^n = \bF(\rho^n,\bar{\bu}^n)$ is computed using p
 (\bar{\bu}^n - \bu^n)$ corrects the error in the divergence introduced by the averaging of velocity components at mesh interfaces.
 
 \item Estimate the velocity at the next time step
-\be \frac{\bu^* - \bar{\bu}^n}{\dt} +  \bar{\bF}^n + \nabla {\cal H}^n = 0 \ee Note that the divergence of the estimated velocity field,
+\be \frac{\bu^* - \bar{\bu}^n}{\dt} +  \bar{\bF}^n + \nabla \calH^n = 0 \ee Note that the divergence of the estimated velocity field,
 $\nabla\!\cdot \bu^*$, is identically equal to the divergence, $\widehat{\nabla\!\cdot \bu^*}$, that was derived from the estimated thermodynamic
 quantities.
 
@@ -58,15 +58,15 @@ mesh boundaries via MPI calls.
 \item Compute the divergence, $\widehat{\nabla\!\cdot \bu^{n+1}}$ from the corrected thermodynamic quantities.
 
 \item Compute the pressure fluctuation using estimated quantities
-\be \label{eqn_corrector_poisson2} \nabla^2{\cal H}^* = - \left[ \frac{ \widehat{\nabla\cdot\bu^{n+1}} - \ha \left( \widehat{\nabla\cdot \bu^*} +
+\be \label{eqn_corrector_poisson2} \nabla^2\calH^* = - \left[ \frac{ \widehat{\nabla\cdot\bu^{n+1}} - \ha \left( \widehat{\nabla\cdot \bu^*} +
 \widehat{\nabla\cdot \bu^n} \right) }{\dt/2} \right]
    - \nabla\!\cdot \bar{\mathbf{F}}^*
 \ee Note that the same type of correction is made for the divergence error at mesh boundaries.
 
 \item Update the velocity via the second part of the Runge-Kutta scheme
-\be \frac{ \bu^{n+1} - \ha \left( \bar{\bu}^* + \bar{\bu}^n \right)}{\dt/2} + \bar{\mathbf{F}}^* + \nabla {\cal H}^*  = 0 \ee Note again that the
+\be \frac{ \bu^{n+1} - \ha \left( \bar{\bu}^* + \bar{\bu}^n \right)}{\dt/2} + \bar{\mathbf{F}}^* + \nabla \calH^*  = 0 \ee Note again that the
 divergence of the corrected velocity field is identically equal to the divergence that was computed earlier.
 
-\item At the conclusion of the time step, values of $\cal H^*$ and the components of $\bu^{n+1}$ are exchanged at mesh boundaries via MPI calls.
+\item At the conclusion of the time step, values of $\calH^*$ and the components of $\bu^{n+1}$ are exchanged at mesh boundaries via MPI calls.
 
 \end{enumerate}
