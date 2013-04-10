@@ -564,6 +564,7 @@ INTEGER,   POINTER, DIMENSION (:)    :: S_ROW, S_COL      ! row and column point
 INTEGER,   POINTER, DIMENSION (:)    :: ST_ROW, ST_COL    ! row and column pointers for transpose of strength matrix S
 INTEGER,   POINTER, DIMENSION (:)    :: P_ROW, P_COL      ! row and column pointers for prolongation matrix P
 INTEGER,   POINTER, DIMENSION (:)    :: R_ROW, R_COL      ! row and column pointers for restriction matrix A
+INTEGER,   POINTER, DIMENSION (:)    :: A_TAG, P_TAG  ! auxiliary arrays for mark positions in A and P
 REAL (EB), POINTER, DIMENSION (:)    :: XCORD, YCORD, ZCORD
 REAL (EB), POINTER, DIMENSION (:)    :: A , P , R, S
 REAL (EB), POINTER, DIMENSION (:)    :: X , F , D , Y , G , W, Z
@@ -5517,7 +5518,8 @@ CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_ACELL , NLEVEL_MIN,'SETUP_COARSENING','W
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX, NLEVEL_MIN,'SETUP_COARSENING', 'MATRIX')
 
 !!! Determine number of multigrid levels
-LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
+!LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
+LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MIN
    
    !!!-------------------------------------------------------------------------------------------------
    !!! Determine coarser meshes corresponding to requested coarsening strategy
@@ -5655,6 +5657,15 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER EXCHANGE O
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'P_ROW', IERR)
       SCF%P_ROW = 0.0_EB
    
+      !!! ---------------- allocate auxiliary arrays to mark relevant positions in A and P
+      ALLOCATE (SCF%A_TAG(SCF%NC), STAT=IERR)
+      CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'A_TAG', IERR)
+      SCF%A_TAG = 0
+   
+      ALLOCATE (SCF%P_TAG(SCF%NCC), STAT=IERR)
+      CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'P_TAG', IERR)
+      SCF%P_TAG = 0
+   
 
       !!! ---------------- allocate restriction matrix including row and column pointers
       ALLOCATE (SCF%R(SCF%NRE+10), STAT=IERR)
@@ -5704,7 +5715,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER EXCHANGE O
       ENDDO OTHER_MESH_LOOP2
    ENDDO
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER Allocation of arrays'
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER Allocation of arrays, TYPE_COARSENING=', TYPE_COARSENING
 
    !!! determine prolongation and restriction matrix for the corresponding level
    IF (TYPE_COARSENING >= NSCARC_COARSENING_GMG) THEN
@@ -5715,10 +5726,15 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER Allocation
       CALL SCARC_SETUP_OVERLAPS (NSCARC_MATRIX_GMG, NL)
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL+1, 'SETUP_SYSTEM', 'WALLINFO')
    ELSE
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: BEFORE setup of prolongation matrix '
       CALL SCARC_SETUP_PROLONGATION(NL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER  setup of prolongation matrix '
       CALL SCARC_SETUP_OVERLAPS (NSCARC_MATRIX_PROLONGATION, NL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER  setup of overlaps '
       !CALL SCARC_SETUP_RESTRICTION(NL)
    ENDIF
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER setup of transfer matrixes '
 
    !!! Print latex information if requested (only temporarily for debugging purposes)
    IF (TYPE_LATEX == NSCARC_LATEX_ALL) THEN
@@ -5792,9 +5808,9 @@ WRITE(*,*) 'PRINTING LATEX_MATRIX'
 
    ENDDO
 
-   CALL SCARC_SETUP_SUBDIVISION_AMG(NL)
+   CALL SCARC_SETUP_SUBDIVISION_AMG(NL)          !HIER NOCHMAL CHECKEN !!!!
    IF (NMESHES > 1) THEN
-      CALL SCARC_SETUP_WALLINFO_AMG (NL)
+      CALL SCARC_SETUP_WALLINFO_AMG (NL)          !HIER NOCHMAL CHECKEN !!!!
    ENDIF
 
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_SUBDIVISION  , NL+1, 'SETUP_SYSTEM', 'SUBDIVISION new level')
@@ -8425,10 +8441,264 @@ END SUBROUTINE SCARC_CMATRIX_TRANSPOSE
 SUBROUTINE SCARC_SETUP_SYSTEM_AMG(NL)
 INTEGER, INTENT(IN) :: NL
 INTEGER :: NM
-TYPE (SCARC_COMPACT_TYPE) , POINTER :: SC
+INTEGER :: IOWN, IOWN_INIT=0, IOWN_SAVE
+INTEGER :: INBR, INBR_INIT=0, INBR_SAVE
+INTEGER :: ICOL1, ICOL2, ICOL3, IC0, IC1, IC2, IC3
+LOGICAL :: BSQUARE = .TRUE. 
+REAL(EB) :: R_VALUE, RA_VALUE, RAP_VALUE
+TYPE (SCARC_COMPACT_TYPE) , POINTER :: SCF, SCC
 
 MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
-   SC => SCARC(NM)%COMPACT(NL)
+
+   SCF => SCARC(NM)%COMPACT(NL)
+   SCC => SCARC(NM)%COMPACT(NL+1)
+
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SCARC_SETUP_SYSTEM_AMG: NCC =', SCF%NCC
+
+   IOWN = 1
+   INBR = 1
+
+   !!! Determine size of matrix RAP
+   !!! loop over interior c-cells
+   LOOP1_C_CELLS: DO IC0 = 1, SCF%NCC
+
+      IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+         WRITE(SCARC_LU,*) '================ MARKMARK:  IC0 =', IC0-1
+         WRITE(SCARC_LU,*) 'IOWN     = ', IOWN
+         WRITE(SCARC_LU,*) 'IOWN_INIT= ', IOWN_INIT
+         WRITE(SCARC_LU,*) '================ A_MARKER'
+         DO IC1 = 1, SCF%NC
+            WRITE(SCARC_LU,'(a,i4,a,i4)') 'A_MARKER(',IC1,')=', SCF%A_TAG(IC1)-1
+         ENDDO
+         WRITE(SCARC_LU,*) '================ P_MARKER'
+         DO IC1 = 1, SCF%NCC
+            WRITE(SCARC_LU,'(a,i4,a,i4)') 'P_MARKER(',IC1,')=', SCF%P_TAG(IC1)-1
+         ENDDO
+      ENDIF
+
+      IOWN_INIT = IOWN
+      INBR_INIT = INBR
+
+      IF (BSQUARE) THEN
+         SCF%P_TAG(IC0) = IOWN
+         IOWN = IOWN + 1
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SQUARE P_TAG(',IC0,') =', SCF%P_TAG(IC0),'   : IOWN=',IOWN
+      ENDIF
+
+      !!! loop over all entries in row IC0 of R
+      LOOP1_R_ENTRIES: DO ICOL1 = SCF%R_ROW(IC0), SCF%R_ROW(IC0+1)-1
+
+         IC1 = SCF%R_COL(ICOL1) 
+         IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '--------- ICOL1 =', ICOL1,'   : IC1=',IC1
+         
+         !!! loop over all entries in row IC1 of A
+         LOOP1_A_ENTRIES: DO ICOL2 = SCF%A_ROW(IC1), SCF%A_ROW(IC1+1)-1
+
+            IC2 = SCF%A_COL(ICOL2)
+            IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '   ------ ICOL2 =', ICOL2,'   : IC2=',IC2
+   
+            IF (SCF%A_TAG(IC2) /= IC0) THEN
+   
+               !!! mark IC2 as already considered
+               SCF%A_TAG(IC2) = IC0
+               IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '          A_TAG(',IC2,') =', SCF%A_TAG(IC2)
+     
+               !!! loop over all entries in row IC2 of P
+               LOOP1_P_ENTRIES: DO ICOL3 = SCF%P_ROW(IC2), SCF%P_ROW(IC2+1)-1
+   
+                  IC3 = SCF%P_COL(ICOL3)
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '     ---- ICOL3 =', ICOL3,'   : IC3=',IC3
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3)') &
+                     '          P_TAG(',IC3,') =', SCF%P_TAG(IC3),': IOWN_INIT=',iOWN_INIT,' : IOWN=',IOWN
+   
+                  !!! verify that P_TAG for entry RAP_(IC0, IC3) hasn't been considered yet; if not, mark it
+                  IF (SCF%P_TAG(IC3) < IOWN_INIT) THEN
+                     SCF%P_TAG(IC3) = IOWN
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '          P_TAG(',IC3,') =', SCF%P_TAG(IC3)
+                     IOWN = IOWN + 1
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '          IOWN =', IOWN
+                  ENDIF
+               ENDDO LOOP1_P_ENTRIES
+   
+            ENDIF
+
+         ENDDO LOOP1_A_ENTRIES
+      ENDDO LOOP1_R_ENTRIES
+
+      !!! Store counters
+      IOWN_SAVE = IOWN
+      INBR_SAVE = INBR
+
+   ENDDO LOOP1_C_CELLS
+
+   SCC%A_ROW(SCF%NCC+1) = IOWN+1    ! oder ohne +1 ??
+   SCC%NA = IOWN
+
+   SCF%A_TAG = 0
+   SCF%P_TAG = 0
+
+   IOWN = 1
+   INBR = 1
+
+   !!! Determine size of matrix RAP
+   !!! loop over interior c-cells
+   LOOP2_C_CELLS: DO IC0 = 1, SCF%NCC
+
+      IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+         WRITE(SCARC_LU,*) '================ MARKMARK:  IC0 =', IC0-1
+         WRITE(SCARC_LU,*) 'IOWN     = ', IOWN
+         WRITE(SCARC_LU,*) 'IOWN_INIT= ', IOWN_INIT
+         WRITE(SCARC_LU,*) '================ A_MARKER'
+         DO IC1 = 1, SCF%NC
+            WRITE(SCARC_LU,'(a,i4,a,i4)') 'A_MARKER(',IC1,')=', SCF%A_TAG(IC1)-1
+         ENDDO
+         WRITE(SCARC_LU,*) '================ P_MARKER'
+         DO IC1 = 1, SCF%NCC
+            WRITE(SCARC_LU,'(a,i4,a,i4)') 'P_MARKER(',IC1,')=', SCF%P_TAG(IC1)-1
+         ENDDO
+      ENDIF
+
+      IOWN_INIT = IOWN
+      INBR_INIT = INBR
+
+      SCC%A_ROW(IC0) = IOWN_INIT
+
+      IF (BSQUARE) THEN
+         SCF%P_TAG(IC0) = IOWN
+         SCC%A_COL(IOWN) = IC0
+         SCC%A(IOWN) = 0.0_EB
+         IOWN = IOWN + 1
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+      WRITE(SCARC_LU,*) 'SQUARE P_TAG(',IC0,')         =', SCF%P_TAG(IC0)
+      WRITE(SCARC_LU,*) 'SQUARE RAP_diag_data(',IC0,') =', SCC%A(IOWN)
+      WRITE(SCARC_LU,*) 'SQUARE RAP_diag_j(',IC0,')    =', SCC%A_COL(IOWN)
+      WRITE(SCARC_LU,*) 'SQUARE IOWN=',IOWN
+   ENDIF
+      ENDIF
+
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+      WRITE(SCARC_LU,*) '==============================================='
+      WRITE(SCARC_LU,*) 'MATRIX A_ROW:'
+      DO IC1 = 1, SCF%NCC+1
+         WRITE(SCARC_LU,*) 'A_ROW(',IC1,')=',SCF%A_ROW(IC1)
+      ENDDO
+      WRITE(SCARC_LU,*) 'MATRIX A_COL:'
+      DO IC1 = 1, SCF%NA
+         WRITE(SCARC_LU,*) 'A_COL(',IC1,')=',SCF%A_COL(IC1)
+      ENDDO
+      WRITE(SCARC_LU,*) 'MATRIX A:'
+      DO IC1 = 1, SCF%NA
+         WRITE(SCARC_LU,*) 'A(',IC1,')=',SCF%A(IC1)
+      ENDDO
+      WRITE(SCARC_LU,*) '==============================================='
+      WRITE(SCARC_LU,*) 'MATRIX R_ROW:'
+      DO IC1 = 1, SCF%NCC+1
+         WRITE(SCARC_LU,*) 'R_ROW(',IC1,')=',SCF%R_ROW(IC1)
+      ENDDO
+      WRITE(SCARC_LU,*) 'MATRIX R_COL:'
+      DO IC1 = 1, SCF%NR
+         WRITE(SCARC_LU,*) 'R_COL(',IC1,')=',SCF%R_COL(IC1)
+      ENDDO
+      WRITE(SCARC_LU,*) 'MATRIX R:'
+      DO IC1 = 1, SCF%NR
+         WRITE(SCARC_LU,*) 'R(',IC1,')=',SCF%R(IC1)
+      ENDDO
+   ENDIF
+
+      !!! loop over all entries in row IC0 of R
+      LOOP2_R_ENTRIES: DO ICOL1 = SCF%R_ROW(IC0), SCF%R_ROW(IC0+1)-1
+
+         IC1 = SCF%R_COL(ICOL1) 
+         R_VALUE = SCF%R(ICOL1)
+
+         IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6)') &
+                     '--------- ICOL1 =', ICOL1,'   : IC1 =',IC1,': R_VALUE=',R_VALUE
+         
+         !!! loop over all entries in row IC1 of A
+         LOOP2_A_ENTRIES: DO ICOL2 = SCF%A_ROW(IC1), SCF%A_ROW(IC1+1)-1
+
+            IC2 = SCF%A_COL(ICOL2)
+            RA_VALUE = R_VALUE * SCF%A(ICOL2)
+
+         IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6,a,i3,a,i3)') &
+                     '--------- ICOL2 =', ICOL2,'   : IC2 =',IC2,': RA_VALUE=',RA_VALUE, ': A_TAG(',IC2,')=',SCF%A_TAG(IC2)
+   
+            !!! Hasn't cell IC2 been considered before? (new values for RAP can only be done for unmarked cells)
+            IF (SCF%A_TAG(IC2) /= IC0) THEN
+   
+               !!! mark IC2 as already considered
+               SCF%A_TAG(IC2) = IC0
+     
+               !!! loop over all entries in row IC2 of P
+               LOOP2_P_ENTRIES1: DO ICOL3 = SCF%P_ROW(IC2), SCF%P_ROW(IC2+1)-1
+   
+                  IC3 = SCF%P_COL(ICOL3)
+                  RAP_VALUE = RA_VALUE * SCF%P(ICOL3)
+
+         IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6)') &
+                     '---A----- ICOL3 =', ICOL3,'   : IC3 =',IC3,': RAP_VALUE=',RAP_VALUE
+   
+                  !!! verify that P_TAG for entry RAP_(IC0, IC3) hasn't been considered yet; if not, mark it
+                  IF (SCF%P_TAG(IC3) < IOWN_INIT) THEN
+                     SCF%P_TAG(IC3)  = IOWN
+                     SCC%A_COL(IOWN) = SCF%P_COL(ICOL3)
+                     SCC%A(IOWN)     = RAP_VALUE
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '   A1     P_TAG(',IC3,')     =', SCF%P_TAG(IC3)
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '   A1     SCC%A_COL(',IOWN,') =', SCC%A_COL(IOWN)
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '   A1     SCC%A(',IOWN,')     =', SCC%A(IOWN)
+                     IOWN = IOWN + 1
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '   A1     IOWN =', IOWN
+                  ELSE
+                     SCC%A(SCF%P_TAG(IC3)) = SCC%A(SCF%P_TAG(IC3)) + RAP_VALUE
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '   A2     SCC%A(',SCF%P_TAG(IC3),&
+                                                         ')     =', SCC%A(SCF%P_TAG(IC3))
+                  ENDIF
+               ENDDO LOOP2_P_ENTRIES1
+   
+            !!! or has it been already considered
+            ELSE
+
+               !!! loop over all entries in row IC2 of P
+               LOOP2_P_ENTRIES2: DO ICOL3 = SCF%P_ROW(IC2), SCF%P_ROW(IC2+1)-1
+   
+                  IC3 = SCF%P_COL(ICOL3)
+                  RAP_VALUE = RA_VALUE * SCF%P(ICOL3)
+                  SCC%A(SCF%P_TAG(IC3)) = SCC%A(SCF%P_TAG(IC3)) + RAP_VALUE
+
+         IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,f12.6,a,i3,a,f12.6)') &
+                     '---B----- ICOL3 =', ICOL3,'   : IC3 =',IC3,': RAP_VALUE=',RAP_VALUE,&
+                     ': A(',SCF%P_TAG(IC3),')=',SCC%A(SCF%P_TAG(IC3))
+
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '     ---- ICOL3 =', ICOL3,'   : IC3=',IC3
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3)') &
+                     '          P_TAG(',IC3,') =', SCF%P_TAG(IC3),': IOWN_INIT=',iOWN_INIT,' : IOWN=',IOWN
+   
+               ENDDO LOOP2_P_ENTRIES2
+            ENDIF
+
+         ENDDO LOOP2_A_ENTRIES
+      ENDDO LOOP2_R_ENTRIES
+
+      !!! Store counters
+      IOWN_SAVE = IOWN
+      INBR_SAVE = INBR
+
+   ENDDO LOOP2_C_CELLS
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+      WRITE(SCARC_LU,*) '================ RAP_ROW'
+      DO IC1 = 1, SCC%NC+1
+         WRITE(SCARC_LU,'(a,i4,a,i4)') 'RAP_ROW(',IC1,')=', SCC%A_ROW(IC1)
+      ENDDO
+      WRITE(SCARC_LU,*) '================ RAP_COL'
+      DO IC1 = 1, SCC%NA
+         WRITE(SCARC_LU,'(a,i4,a,i4)') 'RAP_COL(',IC1,')=', SCC%A_COL(IC1)
+      ENDDO
+      WRITE(SCARC_LU,*) '================ RAP'
+      DO IC1 = 1, SCC%NA
+         WRITE(SCARC_LU,'(a,i4,a,f12.6)') 'RAP(',IC1,')=', SCC%A(IC1)
+      ENDDO
+   ENDIF
+
 
 ENDDO MESHES_LOOP_SYSTEM_AMG
 
