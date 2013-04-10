@@ -1166,7 +1166,7 @@ void nodein_extvent(
     for(k=k1;k<=k2;k++){
       for(j=j1;j<=j2;j++){
         iii=(k-k1)*(j2+1-j1) + (j-j1);
-        if(patchblank[iii]==1)continue;
+        if(patchblank[iii]==GAS)continue;
         patchblank[iii] = nodeinblockage(meshi,i1,j,k,&imesh,&iblockage);
       }
     }

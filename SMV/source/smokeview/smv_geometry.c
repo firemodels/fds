@@ -1259,7 +1259,7 @@ int makeiblank_carve(void){
     meshi->c_iblank_embed=ib_embed;
     if(ib_embed==NULL)continue;
     for(j=0;j<ijksize;j++){
-      ib_embed[j]=1;
+      ib_embed[j]=EMBED_NO;
     }
     for(j=0;j<nmeshes;j++){
       mesh *meshj;
@@ -1319,7 +1319,7 @@ int makeiblank_carve(void){
       for(kk=k1;kk<=k2;kk++){
         for(jj=jj1;jj<=j2;jj++){
           for(ii=i1;ii<=i2;ii++){
-            ib_embed[IJKNODE(ii,jj,kk)]=0;
+            ib_embed[IJKNODE(ii,jj,kk)]=EMBED_YES;
           }
         }
       }
@@ -1366,13 +1366,13 @@ int makeiblank(void){
     meshi->c_iblank_z=c_iblank_z;
 
     for(i=0;i<ibar*jbar*kbar;i++){
-      iblank_cell[i]=1;
+      iblank_cell[i]=GAS;
     }
     for(i=0;i<ijksize;i++){
-      iblank_node[i]=1;
-      c_iblank_x[i]=1;
-      c_iblank_y[i]=1;
-      c_iblank_z[i]=1;
+      iblank_node[i]=GAS;
+      c_iblank_x[i]=GAS;
+      c_iblank_y[i]=GAS;
+      c_iblank_z[i]=GAS;
     }
 
     nx = ibar+1;
@@ -1384,7 +1384,7 @@ int makeiblank(void){
       for(i=bc->ijk[IMIN];i<bc->ijk[IMAX];i++){
       for(j=bc->ijk[JMIN];j<bc->ijk[JMAX];j++){
       for(k=bc->ijk[KMIN];k<bc->ijk[KMAX];k++){
-        iblank_cell[IJKCELL(i,j,k)]=0;
+        iblank_cell[IJKCELL(i,j,k)]=SOLID;
       }
       }
       }

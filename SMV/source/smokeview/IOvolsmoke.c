@@ -84,7 +84,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
 
   if(blank_local!=NULL){
     ijkcell=IJKCELL(i,j,k);
-    if(blank_local[ijkcell]==0){
+    if(blank_local[ijkcell]==SOLID){
       *inobst=1;
       return;
     }
@@ -2638,7 +2638,7 @@ void init_supermesh(void){
     nsize=(smesh->ibar+1)*(smesh->jbar+1)*(smesh->kbar+1);
     NEWMEMORY(smesh->f_iblank_cell,nsize*sizeof(float));
     for(i=0;i<nsize;i++){
-      smesh->f_iblank_cell[i]=1.0;
+      smesh->f_iblank_cell[i]=(float)GAS;
     }
   }
 #ifdef pp_GPU

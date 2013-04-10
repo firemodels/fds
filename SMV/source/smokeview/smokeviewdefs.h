@@ -31,6 +31,9 @@ void _Sniff_Errors(char *whereat);
 #define SOLIDGAS 1
 #define GASSOLID 1
 
+#define EMBED_YES 0
+#define EMBED_NO  1
+
 #define XXX 0
 #define YYY 1
 #define ZZZ 2

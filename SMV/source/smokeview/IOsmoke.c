@@ -42,7 +42,7 @@ int cullplane_compare( const void *arg1, const void *arg2 );
 #define ADJUSTALPHA(ALPHAIN,ASPECTRATIO,NORM,NORMTYPE) \
             alphaf_out[n]=0;\
             if(ALPHAIN==0)continue;\
-            if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL&&iblank_smoke3d[n]==0)continue;\
+            if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL&&iblank_smoke3d[n]==SOLID)continue;\
             if(adjustalphaflag==2){\
               alphaf_out[n]=ALPHAIN;\
             }\
@@ -227,10 +227,10 @@ else{\
   value[3]=alphaf_in[n21];\
   if(firecolor==NULL&&value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL){\
-    if(iblank_smoke3d[n11]==0)value[0]=0;\
-    if(iblank_smoke3d[n12]==0)value[1]=0;\
-    if(iblank_smoke3d[n22]==0)value[2]=0;\
-    if(iblank_smoke3d[n21]==0)value[3]=0;\
+    if(iblank_smoke3d[n11]==SOLID)value[0]=0;\
+    if(iblank_smoke3d[n12]==SOLID)value[1]=0;\
+    if(iblank_smoke3d[n22]==SOLID)value[2]=0;\
+    if(iblank_smoke3d[n21]==SOLID)value[3]=0;\
   }\
   if(firecolor==NULL&&value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
@@ -272,10 +272,10 @@ else{\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
   if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL){\
-    if(iblank_smoke3d[n11]==0)value[0]=0;\
-    if(iblank_smoke3d[n12]==0)value[1]=0;\
-    if(iblank_smoke3d[n22]==0)value[2]=0;\
-    if(iblank_smoke3d[n21]==0)value[3]=0;\
+    if(iblank_smoke3d[n11]==SOLID)value[0]=0;\
+    if(iblank_smoke3d[n12]==SOLID)value[1]=0;\
+    if(iblank_smoke3d[n22]==SOLID)value[2]=0;\
+    if(iblank_smoke3d[n21]==SOLID)value[3]=0;\
   }\
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
@@ -4989,7 +4989,7 @@ void makeiblank_smoke3d(void){
       x = xplt[i];
       y = yplt[j];
       z = zplt[k];
-      if(inmesh_smoke(x,y,z,ic-1,LOWERMESHES)>=0)iblank_smoke3d[ijk]=0;
+      if(inmesh_smoke(x,y,z,ic-1,LOWERMESHES)>=0)iblank_smoke3d[ijk]=SOLID;
     }
     }
     }
@@ -5001,7 +5001,7 @@ void makeiblank_smoke3d(void){
       for(j=bc->ijk[JMIN];j<bc->ijk[JMAX];j++){
       for(k=bc->ijk[KMIN];k<bc->ijk[KMAX];k++){
         ijk = IJKNODE(i,j,k);
-        iblank_smoke3d[ijk]=0;
+        iblank_smoke3d[ijk]=SOLID;
       }
       }
       }
@@ -5014,10 +5014,10 @@ void makeiblank_smoke3d(void){
       y = yplt[j];
       z = zplt[k];
       if(inmesh_smoke(x-dx,y,z,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=0;
+        iblank_smoke3d[ijk]=SOLID;
       }
       else{
-        iblank_smoke3d[ijk]=1;
+        iblank_smoke3d[ijk]=GAS;
       }
 
       ijk = IJKNODE(ibar,j,k);
@@ -5025,10 +5025,10 @@ void makeiblank_smoke3d(void){
       y = yplt[j];
       z = zplt[k];
       if(inmesh_smoke(x+dx,y,z,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=0;
+        iblank_smoke3d[ijk]=SOLID;
       }
       else{
-        iblank_smoke3d[ijk]=1;
+        iblank_smoke3d[ijk]=GAS;
       }
 
     }
@@ -5041,10 +5041,10 @@ void makeiblank_smoke3d(void){
       y = yplt[0];
       z = zplt[k];
       if(inmesh_smoke(x,y-dy,z,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=0;
+        iblank_smoke3d[ijk]=SOLID;
       }
       else{
-        iblank_smoke3d[ijk]=1;
+        iblank_smoke3d[ijk]=GAS;
       }
 
 
@@ -5054,10 +5054,10 @@ void makeiblank_smoke3d(void){
       y = yplt[jbar];
       z = zplt[k];
       if(inmesh_smoke(x,y+dy,z,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=0;
+        iblank_smoke3d[ijk]=SOLID;
       }
       else{
-        iblank_smoke3d[ijk]=1;
+        iblank_smoke3d[ijk]=GAS;
       }
     }
     }
@@ -5069,10 +5069,10 @@ void makeiblank_smoke3d(void){
       y = yplt[j];
       z = zplt[0];
       if(inmesh_smoke(x,y,z-dz,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=0;
+        iblank_smoke3d[ijk]=SOLID;
       }
       else{
-        iblank_smoke3d[ijk]=1;
+        iblank_smoke3d[ijk]=GAS;
       }
 
 
@@ -5081,10 +5081,10 @@ void makeiblank_smoke3d(void){
       y = yplt[j];
       z = zplt[kbar];
       if(inmesh_smoke(x,y,z+dz,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=0;
+        iblank_smoke3d[ijk]=SOLID;
       }
       else{
-        iblank_smoke3d[ijk]=1;
+        iblank_smoke3d[ijk]=GAS;
       }
     }
     }

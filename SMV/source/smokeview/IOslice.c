@@ -3015,8 +3015,8 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
           // 1 partially blocked
           // 2 unblocked
           if(sd->slicetype==SLICE_CENTER&&((k==0&&sd->nslicek!=1)||(j==0&&sd->nslicej!=1)||(i==0&&sd->nslicei!=1)))continue;
-          if(sd->slicetype!=SLICE_CENTER&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==0)continue;
-          if(sd->slicetype==SLICE_CENTER&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==0)continue;
+          if(sd->slicetype!=SLICE_CENTER&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==SOLID)continue;
+          if(sd->slicetype==SLICE_CENTER&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==EMBED_YES)continue;
           if(first==1){
             *pmin=pdata[n];
             *pmax=pdata[n];
@@ -3722,8 +3722,8 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&c_iblank_x[IJK(plotx,j,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+       if(show_slice_in_obst==0&&c_iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[n+1]/255.0;
@@ -3781,8 +3781,8 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&c_iblank_y[IJK(i,ploty,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
+       if(show_slice_in_obst==0&&c_iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[n+1]/255.0;
@@ -3843,8 +3843,8 @@ void drawvolslice_texture(const slicedata *sd){
 
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
-       if(show_slice_in_obst==0&&c_iblank_z[IJK(i,j,plotz)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+       if(show_slice_in_obst==0&&c_iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
        r13 = (float)sd->iqsliceframe[ n+sd->nslicek]/255.0;
@@ -3964,8 +3964,8 @@ void drawvolslice_terrain(const slicedata *sd){
         float rmid, zmid;
 
         n++; n2++; 
-        if(iblank_x[IJK(plotx,j,k)]!=2)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+        if(iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
         r11 = (float)sd->iqsliceframe[n]/255.0;
         r31 = (float)sd->iqsliceframe[n2]/255.0;
         r13 = (float)sd->iqsliceframe[n+1]/255.0;
@@ -4023,8 +4023,8 @@ void drawvolslice_terrain(const slicedata *sd){
         float rmid, zmid;
 
         n++; n2++; 
-        if(iblank_y[IJK(i,ploty,k)]!=2)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
+        if(iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
         r11 = (float)sd->iqsliceframe[n]/255.0;
         r31 = (float)sd->iqsliceframe[n2]/255.0;
         r13 = (float)sd->iqsliceframe[n+1]/255.0;
@@ -4087,8 +4087,8 @@ void drawvolslice_terrain(const slicedata *sd){
         z33 = MIN(zmax,constval + znode[IJ2(i+1,j+1)]);
         zmid = (z11 + z31 + z13 + z33)/4.0;
 
-        if(iblank_z[IJK(i,j,plotz)]!=2)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+        if(iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
 
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
         r11 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n11,constval)/255.0;
@@ -4219,8 +4219,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float z1,z3;
 
-        if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_x[IJK(plotx,j,k)]!=2)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+        if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
 
         index_cell = (plotx + 1 -incx-sd->is1)*sd->nslicej*sd->nslicek + (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
 
@@ -4256,8 +4256,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int index_cell;
           float z1, z3;
 
-          if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_x[IJK(plotx,j,k)]!=2)continue;
-          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+          if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
           z1 = zplt[k];
           z3 = zplt[k+1];
        /*
@@ -4294,8 +4294,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float z1, z3;
 
-        if(show_slice_in_obst==0&&iblank_y[IJK(i,ploty,k)]!=2)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
+        if(show_slice_in_obst==0&&iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
         index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
         z1 = zplt[k];
@@ -4330,8 +4330,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int i33;
           float z1, z3;
 
-          if(show_slice_in_obst==0&&iblank_y[IJK(i,ploty,k)]!=2)continue;
-          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
+          if(show_slice_in_obst==0&&iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
           index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
           i33 = 4*sd->iqsliceframe[index_cell];
           z1 = zplt[k];
@@ -4370,8 +4370,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float yy1, y3;
 
-        if(show_slice_in_obst==0&&iblank_z[IJK(i,j,plotz)]!=2)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+        if(show_slice_in_obst==0&&iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
         index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
         yy1 = yplt[j];
@@ -4407,8 +4407,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
           float yy1, y3;
 
           index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
-          if(show_slice_in_obst==0&&iblank_z[IJK(i,j,plotz)]!=2)continue;
-          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+          if(show_slice_in_obst==0&&iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
+          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
           i33 = 4*sd->iqsliceframe[index_cell];
           yy1 = yplt[j];
           y3 = yplt[j+1];
@@ -4495,8 +4495,8 @@ void drawvolslice(const slicedata *sd){
      // val(i,j,k) = di*nj*nk + dj*nk + dk
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
-       if(show_slice_in_obst==0&&iblank_x[IJK(plotx,j,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
+       if(show_slice_in_obst==0&&iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[n+1];
@@ -4547,8 +4547,8 @@ void drawvolslice(const slicedata *sd){
      x3 = xplt[i+1];
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
-       if(show_slice_in_obst==0&&iblank_y[IJK(i,ploty,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
+       if(show_slice_in_obst==0&&iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==EMBED_YES)continue;
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[n+1];
@@ -4603,8 +4603,8 @@ void drawvolslice(const slicedata *sd){
      for(j=sd->js1; j<sd->js2; j++){
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
-       if(show_slice_in_obst==0&&iblank_z[IJK(i,j,plotz)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
+       if(show_slice_in_obst==0&&iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
        i11 = 4*sd->iqsliceframe[n];
        i31 = 4*sd->iqsliceframe[n2];
        i13 = 4*sd->iqsliceframe[ n+sd->nslicek];
@@ -4708,7 +4708,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(show_slice_in_obst==1||(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5)){
+        if(show_slice_in_obst==1||(iblank[IJK(plotx,j,k)]==GAS&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4739,7 +4739,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(show_slice_in_obst==1||(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5)){
+        if(show_slice_in_obst==1||(iblank[IJK(plotx,j,k)]==GAS&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4775,7 +4775,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(show_slice_in_obst==1||(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5)){
+        if(show_slice_in_obst==1||(iblank[IJK(i,ploty,k)]==GAS&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4805,7 +4805,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(show_slice_in_obst==1||(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5)){
+        if(show_slice_in_obst==1||(iblank[IJK(i,ploty,k)]==GAS&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4840,7 +4840,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(show_slice_in_obst==1||(iblank[IJK(i,j,plotz)]==1&&rgb_ptr[3]>0.5)){
+        if(show_slice_in_obst==1||(iblank[IJK(i,j,plotz)]==GAS&&rgb_ptr[3]>0.5)){
           yy1 = yplttemp[j];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -4870,7 +4870,7 @@ void drawvvolslice(const vslicedata *vd){
 	      else{
 	        rgb_ptr = sd->constant_color;
 	      }
-        if(show_slice_in_obst==1||(iblank[IJK(i,j,plotz)]==1&&rgb_ptr[3]>0.5)){
+        if(show_slice_in_obst==1||(iblank[IJK(i,j,plotz)]==GAS&&rgb_ptr[3]>0.5)){
           yy1 = yplttemp[j];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -5416,7 +5416,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
         n+=vectorskip;
         i11 = sd->iqsliceframe[n];
         rgb_ptr = rgb_slice + 4*i11;
-        if(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5){
+        if(iblank[IJK(plotx,j,k)]==GAS&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -5440,7 +5440,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
         n+=vectorskip;
         i11 = sd->iqsliceframe[n];
         rgb_ptr = rgb_slice + 4*i11;
-        if(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5){
+        if(iblank[IJK(plotx,j,k)]==GAS&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -5471,7 +5471,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
         n+=vectorskip; 
         i11 = sd->iqsliceframe[n];
         rgb_ptr = rgb_slice + 4*i11;
-        if(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5){
+        if(iblank[IJK(i,ploty,k)]==GAS&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
@@ -5496,7 +5496,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
         n+=vectorskip; 
         i11 = sd->iqsliceframe[n];
         rgb_ptr = rgb_slice + 4*i11;
-        if(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5){
+        if(iblank[IJK(i,ploty,k)]==GAS&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
           GET_VEC_DXYZ(v,dy,n);
