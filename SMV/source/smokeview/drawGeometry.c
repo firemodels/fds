@@ -269,31 +269,30 @@ void get_blockvals(  float *xmin, float *xmax,
 /* ------------------ SetVentDirs ------------------------ */
 
 void SetVentDirs(void){
-  int orien;
   int ii;
-  int iv;
-  int dir;
-  int i, j, k;
-  int nx, ny, nxy;
-  char *c_iblank_x, *c_iblank_y, *c_iblank_z;
-  int breakloop;
-  int ventdir;
-  float voffset, offset;
-  float *xplttemp;
-  float *yplttemp;
-  float *zplttemp;
 
   for(ii=0;ii<nmeshes;ii++){
     mesh *meshi;
+    float *xplttemp;
+    float *yplttemp;
+    float *zplttemp;
+    int ibar, jbar, kbar;
+    char *c_iblank;
+    int orien;
+    int iv;
+    int dir;
+    int i, j, k;
+    int nx, ny, nxy;
+    int breakloop;
+    int ventdir;
+    float voffset, offset;
  
     meshi=meshinfo+ii;
 
-    nx = meshi->ibar+1;
-    ny = meshi->jbar+1;
-    nxy = nx*ny;
-    c_iblank_x = meshi->c_iblank_x;
-    c_iblank_y = meshi->c_iblank_y;
-    c_iblank_z = meshi->c_iblank_z;
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+    c_iblank = meshi->c_iblank_cell;
     xplttemp=meshi->xplt;
     yplttemp=meshi->yplt;
     zplttemp=meshi->zplt;
@@ -325,21 +324,19 @@ void SetVentDirs(void){
           breakloop=0;
           for(j=vi->jmin;j<=vi->jmax;j++){
             for(k=vi->kmin;k<=vi->kmax;k++){
-              int state1, state2, state3;
+              int state1, state2;
 
               if(use_iblank==1){
-                state1=c_iblank_x[IJKNODE(i-1,j,k)];
-                state2=c_iblank_x[IJKNODE(i,j,k)];
-                state3=c_iblank_x[IJKNODE(i,j,k)];
+                state1=c_iblank[IJKCELL(i-1,j,k)];
+                state2=c_iblank[IJKCELL(i,j,k)];
               }
               else{
-                state1=2;
-                state2=2;
-                state3=2;
+                state1=GAS;
+                state2=GAS;
               }
-              if(state1==2&&state3==2)continue; // air on both sides
-              if(state1==0&&state3==0)continue; // solid on both sides
-              if(state2==1&&state1!=0){
+              if(state1==GAS  &&state2==GAS)continue; // air on both sides
+              if(state1==SOLID&&state2==SOLID)continue; // solid on both sides
+              if(state1==GAS  &&state2==SOLID){
                 orien=-1;
               }
               breakloop=1;
@@ -377,21 +374,19 @@ void SetVentDirs(void){
           breakloop=0;
           for(i=vi->imin;i<=vi->imax;i++){
             for(k=vi->kmin;k<=vi->kmax;k++){
-              int state1, state2, state3;
+              int state1, state2;
 
               if(use_iblank==1){
-                state1=c_iblank_y[IJKNODE(i,j-1,k)];
-                state2=c_iblank_y[IJKNODE(i,j,k)];
-                state3=c_iblank_y[IJKNODE(i,j+1,k)];
+                state1=c_iblank[IJKCELL(i,j-1,k)];
+                state2=c_iblank[IJKCELL(i,j,k)];
               }
               else{
-                state1=2;
-                state2=2;
-                state3=2;
+                state1=GAS;
+                state2=GAS;
               }
-              if(state1==2&&state3==2)continue; // air on both sides
-              if(state1==0&&state3==0)continue; // solid on both sides
-              if(state2==1&&state1!=0){
+              if(state1==GAS  &&state2==GAS)continue; // air on both sides
+              if(state1==SOLID&&state2==SOLID)continue; // solid on both sides
+              if(state1==GAS  &&state2==SOLID){
                 orien=-1;
               }
               breakloop=1;
@@ -429,21 +424,19 @@ void SetVentDirs(void){
           breakloop=0;
           for(i=vi->imin;i<=vi->imax;i++){
             for(j=vi->jmin;j<=vi->jmax;j++){
-              int state1, state2, state3;
+              int state1, state2;
 
               if(use_iblank==1){
-                state1=c_iblank_z[IJKNODE(i,j,k-1)];
-                state2=c_iblank_z[IJKNODE(i,j,k)];
-                state3=c_iblank_z[IJKNODE(i,j,k)];
+                state1=c_iblank[IJKCELL(i,j,k-1)];
+                state2=c_iblank[IJKCELL(i,j,k)];
               }
               else{
-                state1=2;
-                state2=2;
-                state3=2;
+                state1=GAS;
+                state2=GAS;
               }
-              if(state1==2&&state3==2)continue; // air on both sides
-              if(state1==0&&state3==0)continue; // solid on both sides
-              if(state2==1&&state1!=0){
+              if(state1==GAS  &&state2==GAS)continue; // air on both sides
+              if(state1==SOLID&&state2==SOLID)continue; // solid on both sides
+              if(state1==GAS  &&state2==SOLID){
                 orien=-1;
               }
               breakloop=1;

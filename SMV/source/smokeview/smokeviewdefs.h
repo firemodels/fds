@@ -24,6 +24,13 @@ void _Sniff_Errors(char *whereat);
 #define TYPE_INI 1
 #endif
 
+#define GAS 1
+#define SOLID 0
+#define GASGAS 2
+#define SOLIDSOLID 0
+#define SOLIDGAS 1
+#define GASSOLID 1
+
 #define XXX 0
 #define YYY 1
 #define ZZZ 2
