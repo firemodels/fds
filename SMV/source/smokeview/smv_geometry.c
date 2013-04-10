@@ -1074,7 +1074,7 @@ float getblockage_distance(float x, float y, float z){
     kk = get_interval(z,zplt,kbar+1);
     if(ii!=-1&&jj!=-1&&kk!=-1){
       ijkcell=IJKCELL(ii,jj,kk);
-      if(iblank_cell[ijkcell]==0)return 0.0;
+      if(iblank_cell[ijkcell]==SOLID)return 0.0;
       ijknode=IJKNODE(ii,jj,kk);
       view_height = meshi->block_zdist[ijknode];
       if(view_height==0.0)return 0.0;
@@ -1178,7 +1178,7 @@ void init_blockage_distance(void){
             ijknode=IJKNODE(i,j,k);
             ijkm1cell=IJKCELL(i,j,k-1);
             ijkm1node=IJKNODE(i,j,k-1);
-            if(iblank_cell[ijkm1cell]==0){
+            if(iblank_cell[ijkm1cell]==SOLID){
               b_zdist[ijknode]=0.0;
             }
             else{

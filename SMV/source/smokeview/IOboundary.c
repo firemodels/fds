@@ -305,7 +305,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
   }
   for(n=0;n<meshi->npatchsize;n++){
-    meshi->patchblank[n]=1;
+    meshi->patchblank[n]=GAS;
   }
   xyzpatchcopy = meshi->xyzpatch;
   xyzpatch_ignitecopy = meshi->xyzpatch_threshold;
@@ -454,7 +454,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i1]+dxx;
             *xyzpatch_ignitecopy++ = yplttemp[j]+dy_factor;
             *xyzpatch_ignitecopy++ = zplttemp[k]+dz_factor;
-            patchblankcopy[ii++]=0;
+            patchblankcopy[ii++]=SOLID;
           }
         }
         nodein_extvent(
@@ -537,7 +537,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i]+dx_factor;
             *xyzpatch_ignitecopy++ = yplttemp[j1]+dyy;
             *xyzpatch_ignitecopy++ = zplttemp[k]+dz_factor;
-            patchblankcopy[ii++]=0;
+            patchblankcopy[ii++]=SOLID;
           }
         }
         nodein_extvent(
@@ -621,7 +621,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i]+dx_factor;
             *xyzpatch_ignitecopy++ = yplttemp[j]+dy_factor;
             *xyzpatch_ignitecopy++ = zplttemp[k1]+dzz;
-            patchblankcopy[ii++]=0;
+            patchblankcopy[ii++]=SOLID;
           }
         }
         nodein_extvent(
@@ -960,18 +960,8 @@ void readpatch(int ifile, int flag, int *errorcode){
 /* ------------------ nodeinblockage ------------------------ */
 
 int nodeinblockage(const mesh *meshnode, int i,int j,int k, int *imesh, int *iblockage){
-  int ii,jj;
-  mesh *meshii;
-  blockagedata *bc;
+  int ii;
   float xn, yn, zn;
-  float xm_min, xm_max;
-  float ym_min, ym_max;
-  float zm_min, zm_max;
-  float xb_min, xb_max;
-  float yb_min, yb_max;
-  float zb_min, zb_max;
-  float *xplt, *yplt, *zplt;
-
 
   xn = meshnode->xplt[i];
   yn = meshnode->yplt[j];
@@ -980,6 +970,17 @@ int nodeinblockage(const mesh *meshnode, int i,int j,int k, int *imesh, int *ibl
   *imesh=-1;
 
   for(ii=0;ii<nmeshes;ii++){
+    int jj;
+    mesh *meshii;
+    blockagedata *bc;
+    float xm_min, xm_max;
+    float ym_min, ym_max;
+    float zm_min, zm_max;
+    float xb_min, xb_max;
+    float yb_min, yb_max;
+    float zb_min, zb_max;
+    float *xplt, *yplt, *zplt;
+
     meshii = meshinfo + ii;
     if(meshnode==meshii)continue;
 
@@ -1001,14 +1002,6 @@ int nodeinblockage(const mesh *meshnode, int i,int j,int k, int *imesh, int *ibl
     for(jj=0;jj<meshii->nbptrs;jj++){
       bc = meshii->blockageinfoptrs[jj];
       if(bc->hole==1)continue;
-      /*
-      xb_min=bc->xmin;
-      xb_max=bc->xmax;
-      yb_min=bc->ymin;
-      yb_max=bc->ymax;
-      zb_min=bc->zmin;
-      zb_max=bc->zmax;
-      */
       xb_min=xplt[bc->ijk[0]];
       xb_max=xplt[bc->ijk[1]];
       yb_min=yplt[bc->ijk[2]];
@@ -1031,9 +1024,10 @@ int nodeinblockage(const mesh *meshnode, int i,int j,int k, int *imesh, int *ibl
 
 int nodeinvent(const mesh *meshi, int i,int j,int k, int dir){
   int ii;
-  ventdata *vi;
-  vi=meshi->ventinfo;
+
   for(ii=0;ii<meshi->nvents;ii++){
+    ventdata *vi;
+
     vi = meshi->ventinfo+ii;
     if(vi->hideboundary==1){
       switch (dir){
@@ -1069,30 +1063,24 @@ int nodeinvent(const mesh *meshi, int i,int j,int k, int dir){
 
 /* ------------------ nodeinvent ------------------------ */
 
-void nodein_extvent(
-                    int ipatch, 
-                    int *patchblank, const mesh *meshi, 
-                    int i1, int i2, 
-                    int j1, int j2, 
-                    int k1, int k2){
-  int ii,iii;
-  ventdata *vi;
-  int imin, jmin, kmin, imax, jmax, kmax;
-  int i, j, k;
-  int dir;
-  int imesh, iblockage;
-  mesh *meshblock;
+void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi, 
+                    int i1, int i2, int j1, int j2, int k1, int k2){
+  int ii, dir=0;
 
-  dir=0;
   if(i1==i2)dir=1;
   if(j1==j2)dir=2;
   if(k1==k2)dir=3;
 
   for(ii=0;ii<meshi->nvents;ii++){
+    ventdata *vi;
+    int imin, jmin, kmin, imax, jmax, kmax;
+
     vi = meshi->ventinfo+ii;
     if(vi->hideboundary==1)continue;
     if(vi->dir2!=dir)continue;
     switch (dir){
+      int i, j, k;
+
     case 1:
       if(vi->imin!=i1)continue;
       if(vi->jmax<j1)continue;
@@ -1109,8 +1097,10 @@ void nodein_extvent(
       if(kmax>k2)kmax=k2;
       for(k=kmin;k<=kmax;k++){
         for(j=jmin;j<=jmax;j++){
+          int iii;
+
           iii=(k-k1)*(j2+1-j1) + (j-j1);
-          patchblank[iii]=1;
+          patchblank[iii]=GAS;
         }
       }
       break;
@@ -1130,8 +1120,10 @@ void nodein_extvent(
       if(kmax>k2)kmax=k2;
       for(k=kmin;k<=kmax;k++){
         for(i=imin;i<=imax;i++){
+          int iii;
+
           iii=(k-k1)*(i2+1-i1) + (i-i1);
-          patchblank[iii]=1;
+          patchblank[iii]=GAS;
         }
       }
       break;
@@ -1151,8 +1143,10 @@ void nodein_extvent(
       if(jmax>j2)jmax=j2;
       for(j=jmin;j<=jmax;j++){
         for(i=imin;i<=imax;i++){
+          int iii;
+
           iii=(j-j1)*(i2+1-i1) + (i-i1);
-          patchblank[iii]=1;
+          patchblank[iii]=GAS;
         }
       }
       break;
@@ -1162,9 +1156,13 @@ void nodein_extvent(
     }
   }
   switch (dir){
+    int i, j, k;
+
   case 1:
     for(k=k1;k<=k2;k++){
       for(j=j1;j<=j2;j++){
+        int iii,imesh,iblockage;
+
         iii=(k-k1)*(j2+1-j1) + (j-j1);
         if(patchblank[iii]==GAS)continue;
         patchblank[iii] = nodeinblockage(meshi,i1,j,k,&imesh,&iblockage);
@@ -1174,8 +1172,11 @@ void nodein_extvent(
   case 2:
     for(k=k1;k<=k2;k++){
       for(i=i1;i<=i2;i++){
+        int iii,imesh,iblockage;
+        mesh *meshblock;
+
         iii=(k-k1)*(i2+1-i1) + (i-i1);
-        if(patchblank[iii]==1)continue;
+        if(patchblank[iii]==GAS)continue;
         patchblank[iii]=nodeinblockage(meshi,i,j1,k,&imesh,&iblockage);
         if(imesh!=-1){
           meshblock = meshinfo+imesh;
@@ -1189,8 +1190,10 @@ void nodein_extvent(
   case 3:
     for(j=j1;j<=j2;j++){
       for(i=i1;i<=i2;i++){
+        int iii,imesh,iblockage;
+
         iii=(j-j1)*(i2+1-i1) + (i-i1);
-        if(patchblank[iii]==1)continue;
+        if(patchblank[iii]==GAS)continue;
         patchblank[iii]=nodeinblockage(meshi,i,j,k1,&imesh,&iblockage);
       }
     }
@@ -1361,7 +1364,7 @@ void drawpatch_texture(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             r11 = (float)(*ipq1)/255.0;
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
@@ -1442,7 +1445,7 @@ void drawpatch_texture(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             r11 = (float)(*ipq1)/255.0;
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
@@ -1520,7 +1523,7 @@ void drawpatch_texture(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             r11 = (float)(*ipq1)/255.0;
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
@@ -1651,7 +1654,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             r11 = (float)(*ipq1)/255.0;
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
@@ -1735,7 +1738,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             r11 = (float)(*ipq1)/255.0;
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
@@ -1815,7 +1818,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             r11 = (float)(*ipq1)/255.0;
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
@@ -1945,7 +1948,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11=clear_color;
             if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
 
@@ -1998,7 +2001,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11=clear_color;
             if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
            
@@ -2047,7 +2050,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11=clear_color;
             if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
           
@@ -2223,7 +2226,7 @@ void drawpatch(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11 = rgb_patch+4*(*ipq1);
             color12 = rgb_patch+4*(*(ipq1+1));
             color21 = rgb_patch+4*(*ipq2);
@@ -2336,7 +2339,7 @@ void drawpatch(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11 = rgb_patch+4*(*ipq1);
             color12 = rgb_patch+4*(*(ipq1+1));
             color21 = rgb_patch+4*(*ipq2);
@@ -2447,7 +2450,7 @@ void drawpatch(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11 = rgb_patch+4*(*ipq1);
             color12 = rgb_patch+4*(*(ipq1+1));
             color21 = rgb_patch+4*(*ipq2);
@@ -2610,7 +2613,7 @@ void drawpatch_cellcenter(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11 = rgb_patch+4*(*ipq1);
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
@@ -2685,7 +2688,7 @@ void drawpatch_cellcenter(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11 = rgb_patch+4*(*ipq1);
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
@@ -2758,7 +2761,7 @@ void drawpatch_cellcenter(const mesh *meshi){
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             color11 = rgb_patch+4*(*ipq1);
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
@@ -2868,7 +2871,7 @@ void drawonlythreshold(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             int nnulls;
 
             nnulls=4;
@@ -2950,7 +2953,7 @@ void drawonlythreshold(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             int nnulls;
 
             color11 = NULL;
@@ -3028,7 +3031,7 @@ void drawonlythreshold(const mesh *meshi){
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==1&&*ip2==1&&*(ip1+1)==1&&*(ip2+1)==1){
+          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
             int nnulls;
 
             color11 = NULL;

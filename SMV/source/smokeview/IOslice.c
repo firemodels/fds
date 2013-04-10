@@ -276,7 +276,7 @@ void GetCellAreas(float *xgrid, float *ygrid, int nx, int ny, float *fed_frame, 
       float dy, val, area;
       int k;
 
-      if(iblank[ijcellC(i,j)]!=2)continue;
+      if(iblank[ijcellC(i,j)]!=GASGAS)continue;
       dy = ygrid[j+1]-ygrid[j];
       area = dx*dy;
       val = fed_frame[ijnodeC(i+1,j+1)];
