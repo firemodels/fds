@@ -57,13 +57,12 @@ H(8)=plot(x/h,u_deardorff_5/u_0,'b-');
 H(9)=plot(x/h,u_vreman_10/u_0,'r--');
 H(10)=plot(x/h,u_vreman_5/u_0,'r-');
 
-plot_handle = gca;
 axis([0 25 0.2 1.2])
-set(plot_handle,'XTick',[0 5 10 15 20 25])
-set(plot_handle,'YTick',[0.2 0.4 0.6 0.8 1.0 1.2])
-
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Key_Font_Size)
+set(gca,'XTick',[0 5 10 15 20 25])
+set(gca,'YTick',[0.2 0.4 0.6 0.8 1.0 1.2])
+Paper_Width=1.4*Paper_Width;
+Plot_Width =1.4*Plot_Width;
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 text(1,1.1,'Jet Centerline Velocity Decay','FontSize',Label_Font_Size,'FontName',Font_Name)
 
@@ -93,8 +92,6 @@ if exist(SVN_Filename,'file')
 end
 
 % print to pdf
-
-Paper_Width=1.4*Paper_Width;
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
