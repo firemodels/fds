@@ -9821,8 +9821,7 @@ int readini2(char *inifile, int localfile){
     if(localfile==1&&match(buffer,"XYZCLIP")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&xyz_clipplane);
-      if(xyz_clipplane<0)xyz_clipplane=0;
-      if(xyz_clipplane>2)xyz_clipplane=2;
+      xyz_clipplane=CLAMP(xyz_clipplane,0,2);
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f",&clip_x, &clip_x_val, &clip_X, &clip_X_val);
       fgets(buffer,255,stream);

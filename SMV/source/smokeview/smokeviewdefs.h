@@ -24,6 +24,10 @@ void _Sniff_Errors(char *whereat);
 #define TYPE_INI 1
 #endif
 
+#define CLIP_OFF 0
+#define CLIP_BLOCKAGES_DATA 1
+#define CLIP_BLOCKAGES 2
+
 #define GAS 1
 #define SOLID 0
 #define GASGAS 2

@@ -30,7 +30,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   show_mode=mode;
 
-  if(xyz_clipplane==1){
+  if(xyz_clipplane==CLIP_BLOCKAGES_DATA){
     if(clip_x==1)glDisable(GL_CLIP_PLANE0);
     if(clip_y==1)glDisable(GL_CLIP_PLANE1);
     if(clip_z==1)glDisable(GL_CLIP_PLANE2);
@@ -150,16 +150,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(mode!=RENDER||viscolorbarpath!=1){
     setClipPlanes(0);
   }
-  if(mode==RENDER){
-    if(viscolorbarpath==1){
-      if(cb_hidesv==1){
-        setColorbarClipPlanes(1);
-      }
-      else{
-        setColorbarClipPlanes(0);
-      }
-      SNIFF_ERRORS("after setColorbarClipPlanes 2");
+  else{
+    if(cb_hidesv==1){
+      setColorbarClipPlanes(1);
     }
+    else{
+      setColorbarClipPlanes(0);
+    }
+    SNIFF_ERRORS("after setColorbarClipPlanes 2");
+  }
+  if(mode==RENDER){
     glPointSize((float)1.0);
 
 
@@ -196,12 +196,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw sensors/sprinklers/heat detectors +++++++++++++++++++++++++ */
 
-    if(xyz_clipplane==2){
+    if(xyz_clipplane==CLIP_BLOCKAGES){
       setClipPlanes(1);
-    }
-    draw_devices();
-    if(xyz_clipplane==2){
+      draw_devices();
       unsetClipPlanes();
+    }
+    else{
+      draw_devices();
     }
     SNIFF_ERRORS("after draw_devices");
 
@@ -317,12 +318,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
-  if(xyz_clipplane==2){
+  if(xyz_clipplane==CLIP_BLOCKAGES){
     setClipPlanes(1);
-  }
-  drawBlockages(mode,DRAW_OPAQUE);
-  if(xyz_clipplane==2){
+    drawBlockages(mode,DRAW_OPAQUE);
     unsetClipPlanes();
+  }
+  else{
+    drawBlockages(mode,DRAW_OPAQUE);
   }
   SNIFF_ERRORS("drawBlockages");
 
@@ -464,12 +466,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
 
-  if(xyz_clipplane==2){
+  if(xyz_clipplane==CLIP_BLOCKAGES){
     setClipPlanes(1);
-  }
-  draw_transparent_faces();
-  if(xyz_clipplane==2){
+    draw_transparent_faces();
     unsetClipPlanes();
+  }
+  else{
+    draw_transparent_faces();
   }
 
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */

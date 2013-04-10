@@ -28,14 +28,12 @@ char smokeview_revision[]="$Revision$";
 /* ----------------------- unsetClipPlanes ----------------------------- */
 
 void unsetClipPlanes(void){
-  if(xyz_clipplane==2){
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-    glDisable(GL_CLIP_PLANE2);
-    glDisable(GL_CLIP_PLANE3);
-    glDisable(GL_CLIP_PLANE4);
-    glDisable(GL_CLIP_PLANE5);
-  }
+  glDisable(GL_CLIP_PLANE0);
+  glDisable(GL_CLIP_PLANE1);
+  glDisable(GL_CLIP_PLANE2);
+  glDisable(GL_CLIP_PLANE3);
+  glDisable(GL_CLIP_PLANE4);
+  glDisable(GL_CLIP_PLANE5);
 }
 
 /* ----------------------- setClipPlanes ----------------------------- */
@@ -44,16 +42,14 @@ void setClipPlanes(int mode){
   static GLdouble clipplane_x[4], clipplane_y[4], clipplane_z[4];
   static GLdouble clipplane_X[4], clipplane_Y[4], clipplane_Z[4];
 
-  if(mode==0&&xyz_clipplane==2)return;
-  if(mode==1&&xyz_clipplane!=2)return;
-  if(xyz_clipplane==0){
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-    glDisable(GL_CLIP_PLANE2);
-    glDisable(GL_CLIP_PLANE3);
-    glDisable(GL_CLIP_PLANE4);
-    glDisable(GL_CLIP_PLANE5);
-    return;
+  // only clip if mode is 0 and xyz_clipplane is CLIP_BLOCKAGES_DATA
+  //        or if mode is 1 and xyz_clipplane is CLIP_BLOCKAGES
+  // otherwise disable clipping
+
+  if(xyz_clipplane==CLIP_OFF||mode==0&&xyz_clipplane==CLIP_BLOCKAGES||
+    mode==1&&xyz_clipplane!=CLIP_BLOCKAGES){
+      unsetClipPlanes();
+      return;
   }
 
   if(clip_x==1){

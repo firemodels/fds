@@ -1888,7 +1888,7 @@ void keyboard(unsigned char key, int flag){
      strncmp((const char *)&key2,",",1)!=0&&strncmp((const char *)&key2,".",1)!=0&&
      strncmp((const char *)&key2,"_",1)!=0&&(skip2<=0||skip2>=10))return;
 
-  if(xyz_clipplane!=0&&(
+  if(xyz_clipplane!=CLIP_OFF&&(
     strncmp((const char *)&key2,"<",1)==0||strncmp((const char *)&key2,",",1)==0||
     strncmp((const char *)&key2,">",1)==0||strncmp((const char *)&key2,".",1)==0)){
 
@@ -2005,13 +2005,13 @@ void handle_rotation_type(int flag){
 void update_clipplanes(void){
   if(trainer_mode==0){
     if(xyz_clipplane!=xyz_clipplane_last){
-      if(xyz_clipplane==0)PRINTF("clipping off\n");
-      if(xyz_clipplane==1)PRINTF("clipping blockages + data\n");
-      if(xyz_clipplane==2)PRINTF("clipping blockages\n");
+      if(xyz_clipplane==CLIP_OFF)PRINTF("clipping off\n");
+      if(xyz_clipplane==CLIP_BLOCKAGES_DATA)PRINTF("clipping blockages + data\n");
+      if(xyz_clipplane==CLIP_BLOCKAGES)PRINTF("clipping blockages\n");
       xyz_clipplane_last=xyz_clipplane;
     }
   }
-  if(xyz_clipplane==0){
+  if(xyz_clipplane==CLIP_OFF){
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);
     glDisable(GL_CLIP_PLANE2);
