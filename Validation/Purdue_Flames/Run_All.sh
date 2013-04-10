@@ -14,8 +14,8 @@ export INDIR=Current_Results
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
 $RUNFDS $INDIR 7p1_cm_methane_4mm
-$RUNFDS $INDIR 7p1_cm_methane_2mm
-#$RUNFDSMPI 16 $INDIR 7p1_cm_methane_2mm_16mesh
+#$RUNFDS $INDIR 7p1_cm_methane_2mm
+$RUNFDSMPI 16 $INDIR 7p1_cm_methane_2mm_16mesh
 #$RUNFDSMPI 128 $INDIR 7p1_cm_methane_1mm_128mesh_les
 #$RUNFDSMPI 128 $INDIR 7p1_cm_methane_1mm_128mesh_dns
 
