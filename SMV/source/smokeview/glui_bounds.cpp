@@ -633,10 +633,10 @@ extern "C" void glui_bounds_setup(int main_window){
         }
         SPINNER_partpointsize=glui_bounds->add_spinner_to_panel(ROLLOUT_part,_("Particle size"),GLUI_SPINNER_FLOAT,
           &partpointsize);
-        SPINNER_partpointsize->set_float_limits(1.0,10.0);
+        SPINNER_partpointsize->set_float_limits(1.0,100.0);
         SPINNER_streaklinewidth=glui_bounds->add_spinner_to_panel(ROLLOUT_part,_("Streak line width"),GLUI_SPINNER_FLOAT,
           &streaklinewidth);
-        SPINNER_streaklinewidth->set_float_limits(1.0,10.0);
+        SPINNER_streaklinewidth->set_float_limits(1.0,100.0);
 
         SPINNER_partstreaklength=glui_bounds->add_spinner_to_panel(ROLLOUT_part,_("Streak length (s)"),GLUI_SPINNER_FLOAT,
           &float_streak5value,STREAKLENGTH,PART_CB);
