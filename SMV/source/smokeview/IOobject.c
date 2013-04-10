@@ -173,12 +173,14 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWCUBEC     218
 #define SV_DRAWHSPHERE   219
 #define SV_DRAWTRIBLOCK   220
+#define SV_DRAWFILLEDCIRCLE    221
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
 #define SV_DRAWDISK_NUMARGS      2
 #define SV_DRAWLINE_NUMARGS      6
 #define SV_DRAWCIRCLE_NUMARGS    1
+#define SV_DRAWFILLEDCIRCLE_NUMARGS    1
 #define SV_DRAWTRUNCCONE_NUMARGS 3
 #define SV_DRAWNOTCHPLATE_NUMARGS 4
 #define SV_DRAWRING_NUMARGS      3
@@ -201,6 +203,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWDISK_NUMOUTARGS      0
 #define SV_DRAWLINE_NUMOUTARGS      0
 #define SV_DRAWCIRCLE_NUMOUTARGS    0
+#define SV_DRAWFILLEDCIRCLE_NUMOUTARGS    0
 #define SV_DRAWTRUNCCONE_NUMOUTARGS 0
 #define SV_DRAWNOTCHPLATE_NUMOUTARGS 0
 #define SV_DRAWRING_NUMOUTARGS      0
@@ -1493,6 +1496,10 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       drawcircle(arg[0],rgbptr_local);
       rgbptr_local=NULL;
       break;
+    case SV_DRAWFILLEDCIRCLE:
+      drawfilledcircle(arg[0],rgbptr_local);
+      rgbptr_local=NULL;
+      break;
     case SV_DRAWARC:
       drawarc(arg[0],arg[1],rgbptr_local);
       rgbptr_local=NULL;
@@ -2127,7 +2134,7 @@ void drawpoint(unsigned char *rgbcolor){
   glEnd();
 }
 
-/* ----------------------- drawcircle ----------------------------- */
+/* ----------------------- drawfilledcircle ----------------------------- */
 
 void drawfilledcircle(float diameter,unsigned char *rgbcolor){
   int i;
@@ -4197,6 +4204,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_DRAWCIRCLE;
     num_op=SV_DRAWCIRCLE_NUMARGS;
     num_outop=SV_DRAWCIRCLE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"drawfilledcircle")==0){
+    op=SV_DRAWFILLEDCIRCLE;
+    num_op=SV_DRAWFILLEDCIRCLE_NUMARGS;
+    num_outop=SV_DRAWFILLEDCIRCLE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawarc")==0){
     op=SV_DRAWARC;
