@@ -22,6 +22,9 @@ char isobox_revision[]="$Revision$";
 #include "isodefs.h"
 #include "datadefs.h"
 
+#define GAS 1
+#define SOLID 0
+
 /* ------------------ vec_dot ------------------------ */
 
 float vec_dot(float *x, float *y){
@@ -753,7 +756,7 @@ int GetIsosurface(isosurface *surface,
         ijp1kp1 = ijkbase + nx+nxy;
         ip1jp1kp1 = ijkbase + 1+nx+nxy;
 
-        if(iblank_cell==NULL||iblank_cell[IJKCELL(i,j,k)]!=0){
+        if(iblank_cell==NULL||iblank_cell[IJKCELL(i,j,k)]!=SOLID){
           zz[0]=zplt[k];
           zz[1]=zplt[k+1];
 

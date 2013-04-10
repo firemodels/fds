@@ -16,6 +16,10 @@ char scontour2d_revision[]="$Revision$";
 #include "contourdefs.h"
 #include "MALLOC.h"
 
+#define SOLID 0
+#define GAS 1
+#define GASGAS 2
+
 /*  
   contouring algorithm
   --------------------
@@ -318,19 +322,19 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
           else{
             cellij = ijcellC(i,j);
           }
-          if(iblank[cellij]!=2){
+          if(iblank[cellij]!=GASGAS){
             lastcasenum=-1;
             continue;
           }
           if(dataflag==DATA_FORTRAN){
-            if(iblank[ijcellF(i,j+1)]!=2)ij2=ij0;
-            if(iblank[ijcellF(i+1,j+1)]!=2)i2j2=ij0;
-            if(iblank[ijcellF(i+1,j)]!=2)i2j=ij0;
+            if(iblank[ijcellF(i,j+1)]!=GASGAS)ij2=ij0;
+            if(iblank[ijcellF(i+1,j+1)]!=GASGAS)i2j2=ij0;
+            if(iblank[ijcellF(i+1,j)]!=GASGAS)i2j=ij0;
           }
           else{
-            if(iblank[ijcellC(i,j+1)]!=2)ij2=ij0;
-            if(iblank[ijcellC(i+1,j+1)]!=2)i2j2=ij0;
-            if(iblank[ijcellC(i+1,j)]!=2)i2j=ij0;
+            if(iblank[ijcellC(i,j+1)]!=GASGAS)ij2=ij0;
+            if(iblank[ijcellC(i+1,j+1)]!=GASGAS)i2j2=ij0;
+            if(iblank[ijcellC(i+1,j)]!=GASGAS)i2j=ij0;
           }
         }
         v[0]=(double)vals[ij0];
@@ -452,7 +456,7 @@ void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
         ij2=ijnodeF(i,j+1);
         i2j2=ijnodeF(i+1,j+1);
         i2j=ijnodeF(i+1,j);
-        if(iblank!=NULL&&iblank[ijcellF(i,j)]!=2)doit=0;
+        if(iblank!=NULL&&iblank[ijcellF(i,j)]!=GASGAS)doit=0;
         if(doit==1){
           v[0]=(double)vals[ij0];
           v[1]=(double)vals[ij2];
