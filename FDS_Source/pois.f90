@@ -6,12 +6,14 @@ MODULE POIS
 ! POISSON SOLVER ROUTINES
 
 USE PRECISION_PARAMETERS
-IMPLICIT REAL(EB) (A-H,O-Z)
-IMPLICIT INTEGER (I-N)
+
+IMPLICIT NONE
+
 PRIVATE
-REAL(EB) SCALE
-INTEGER :: KAPPA,NMAX,IKPWR
-LOGICAL :: TPOSE,NOCOPY,OUTARY
+REAL(EB)   :: SCALE
+INTEGER    :: KAPPA, NMAX, IKPWR
+LOGICAL    :: TPOSE,NOCOPY,OUTARY
+
 CHARACTER(255), PARAMETER :: poisid='$Id$'
 CHARACTER(255), PARAMETER :: poisrev='$Revision$'
 CHARACTER(255), PARAMETER :: poisdate='$Date$'
@@ -24,18 +26,28 @@ SUBROUTINE H3CZIS(XS,XF,L,LBDCND,YS,YF,M,MBDCND,ZS,ZF,N,NBDCND,  &
     H,ELMBDA,LDIMF,MDIMF,IERROR,SAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-REAL(EB)::  XS, XF, YS, YF, ZS, ZF, ELMBDA, DLZSQR
-INTEGER:: L, LBDCND, M, MBDCND, N, NBDCND, LDIMF, MDIMF, IERROR, LPEROD
-REAL(EB) SAVE(-3:*),H(0:*)
+INTEGER    :: IERROR
+INTEGER    :: LDIMF, MDIMF, LPEROD
+INTEGER    :: LBDCND, MBDCND, NBDCND
+INTEGER    :: I
+INTEGER    :: IA, IB, IC, ID, IS, IR
+INTEGER    :: L, M, N
+INTEGER    :: LP, MP, NP
 
-!                               CHECK FOR INVALID INPUT
+REAL(EB)   :: XS, XF, YS, YF, ZS, ZF, ELMBDA
+REAL(EB)   :: DX, DY, DZ
+REAL(EB)   :: DLXSQR, DLYSQR, DLZSQR
+REAL(EB)   :: HM, HP
+REAL(EB)   :: SAVE(-3:*),H(0:*)
+
+!  CHECK FOR INVALID INPUT
 
 IERROR = 0
 
@@ -100,11 +112,11 @@ ELSE
   SAVE(1) = 0._EB 
 END IF
 
-!                               DEFINE GRID PARAMETERS
+!  DEFINE GRID PARAMETERS
 
-DX = (XF-XS)/L
-DY = (YF-YS)/M
-DZ = (ZF-ZS)/N
+DX = (XF-XS)/REAL(L,EB)
+DY = (YF-YS)/REAL(M,EB)
+DZ = (ZF-ZS)/REAL(N,EB)
 DLXSQR = 1._EB/DX**2
 DLYSQR = 1._EB/DY**2
 DLZSQR = 1._EB/DZ**2
@@ -112,7 +124,7 @@ LP = LBDCND + 1
 MP = MBDCND + 1
 NP = NBDCND + 1
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IA = 12
 IB = IA + L
@@ -120,12 +132,12 @@ IC = IB + L
 ID = IC + L
 IS = ID + L
 
-!                               DEFINE THE A,B,C COEFFICIENTS
-!                               IN SAVE ARRAY
+!  DEFINE THE A,B,C COEFFICIENTS
+!  IN SAVE ARRAY
 
-DO  I = 0,L - 1
-  HM = .5_EB*(H(I)+H(I+1))
-  HP = .5_EB*(H(I+1)+H(I+2))
+DO  I = 0,L-1
+  HM = 0.5_EB*(H(I)+H(I+1))
+  HP = 0.5_EB*(H(I+1)+H(I+2))
   SAVE(IA+I) = DLXSQR/(H(I+1)*HM)
   SAVE(IC+I) = DLXSQR/(H(I+1)*HP)
   SAVE(IB+I) = - (SAVE(IA+I)+SAVE(IC+I)) + ELMBDA
@@ -148,8 +160,8 @@ SAVE(IC-1) = SAVE(IC-1) - SAVE(ID-1)
 END SELECT
 
 
-!                               DETERMINE WHETHER OR NOT BOUNDARY
-!                               CONDITION IS PERIODIC IN X
+!  DETERMINE WHETHER OR NOT BOUNDARY
+!  CONDITION IS PERIODIC IN X
 
 IF (LBDCND==0) THEN
   LPEROD = 0
@@ -157,31 +169,30 @@ ELSE
   LPEROD = 1
 END IF
 
-!                               INITIALIZE SOLVER ROUTINE S3CFIS.
+!  INITIALIZE SOLVER ROUTINE S3CFIS.
 CALL S3CFIS(LPEROD,L,MBDCND,M,NBDCND,N,DLZSQR,SAVE(IA),SAVE(IB),  &
     SAVE(IC),SAVE(ID),LDIMF,MDIMF,IR,SAVE(IS))
 
-!                               TEST ERROR FLAG FROM S3CFIS FOR
-!                               INTERNAL ERROR
+!  TEST ERROR FLAG FROM S3CFIS FOR
+!  INTERNAL ERROR
 
 IF (IR/=0) THEN
   SAVE(1) = 99._EB 
   IERROR = 1
-  
   RETURN
 END IF
 
-!                               SAVE PARAMETERS FOR H3CZSS IN SAVE ARRAY
+!  SAVE PARAMETERS FOR H3CZSS IN SAVE ARRAY
 
 SAVE(2) = DX
-SAVE(3) = L
-SAVE(4) = LP
+SAVE(3) = REAL(L,EB)
+SAVE(4) = REAL(LP,EB)
 SAVE(5) = DY
-SAVE(6) = M
-SAVE(7) = MP
+SAVE(6) = REAL(M,EB)
+SAVE(7) = REAL(MP,EB)
 SAVE(8) = DZ
-SAVE(9) = N
-SAVE(10) = NP
+SAVE(9) = REAL(N,EB)
+SAVE(10) = REAL(NP,EB)
 SAVE(11) = ELMBDA
 
 RETURN
@@ -191,38 +202,52 @@ SUBROUTINE H3CZSS(BDXS,BDXF,BDYS,BDYF,BDZS,BDZF,LDIMF,MDIMF,F,  &
     PERTRB,SAVE,W,H)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
 USE GLOBAL_CONSTANTS, ONLY: PRES_METHOD
-REAL(EB):: BDXS(MDIMF,*), BDXF(MDIMF,*), BDYS(LDIMF,*), BDYF(LDIMF,*), BDZS(LDIMF,*), BDZF(LDIMF,*), &
-           F(LDIMF,MDIMF,*),SAVE(-3:*),W(*),H(0:*), PERTRB
-INTEGER:: LDIMF, MDIMF
- 
 
-!                               CHECK VALUE OF IERROR (=SAVE(1)).
-!                               IF NON-ZERO, RETURN.
+INTEGER    :: ISING
+INTEGER    :: LDIMF, MDIMF
+INTEGER    :: I, J, K
+INTEGER    :: IA, IB, IC, ID, IS
+INTEGER    :: L, M, N
+INTEGER    :: LP, MP, NP
+
+REAL(EB)   :: DX, DY, DZ, ELMBDA
+REAL(EB)   :: DLYRCP, DLZRCP
+REAL(EB)   :: PERT, PERTRB, PRTSAV, TWDYSQ, TWDZSQ
+REAL(EB)   :: S1, S3
+REAL(EB)   :: BDXS(MDIMF,*), BDXF(MDIMF,*)
+REAL(EB)   :: BDYS(LDIMF,*), BDYF(LDIMF,*)
+REAL(EB)   :: BDZS(LDIMF,*), BDZF(LDIMF,*)
+REAL(EB)   :: F(LDIMF,MDIMF,*), H(0:*), W(*)
+REAL(EB)   :: SAVE(-3:*)
+
+
+!  CHECK VALUE OF IERROR (=SAVE(1)).
+!  IF NON-ZERO, RETURN.
 
 IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 
-!                               GET PARAMETERS FOR H3CZSS FROM SAVE
-!                               ARRAY WHERE THEY WERE STORED IN
-!                               INITIALIZATION SUBROUTINE H3CZIS.
+!  GET PARAMETERS FOR H3CZSS FROM SAVE
+!  ARRAY WHERE THEY WERE STORED IN
+!  INITIALIZATION SUBROUTINE H3CZIS.
 
 DX = SAVE(2)
-L = SAVE(3)
-LP = SAVE(4)
+L  = INT(SAVE(3))
+LP = INT(SAVE(4))
 DY = SAVE(5)
-M = SAVE(6)
-MP = SAVE(7)
+M  = INT(SAVE(6))
+MP = INT(SAVE(7))
 DZ = SAVE(8)
-N = SAVE(9)
-NP = SAVE(10)
+N  = INT(SAVE(9))
+NP = INT(SAVE(10))
 ELMBDA = SAVE(11)
 
 DLYRCP = 1._EB/DY
@@ -230,7 +255,7 @@ TWDYSQ = 2._EB/DY**2
 DLZRCP = 1._EB/DZ
 TWDZSQ = 2._EB/DZ**2
 
-!                               ALLOCATE SAVE ARRAY
+! ALLOCATE SAVE ARRAY
 
 IA = 12
 IB = IA + L
@@ -240,105 +265,103 @@ IS = 12 + 4*L
 
 
 IF (PRES_METHOD /= 'SCARC') THEN
-
-!                               ENTER BOUNDARY DATA FOR X-BOUNDARIES
-
+! ENTER BOUNDARY DATA FOR X-BOUNDARIES
    IF (LP==2 .OR. LP==3) THEN
-     DO K = 1,N
-       DO J = 1,M
-         F(1,J,K) = F(1,J,K) - 2._EB*BDXS(J,K)*SAVE(IA)
+     DO K=1,N
+       DO J=1,M
+         F(1,J,K) = F(1,J,K)-2._EB*BDXS(J,K)*SAVE(IA)
        END DO
      END DO
    END IF
    
    IF (LP==4 .OR. LP==5) THEN
-     DO K = 1,N
-       DO J = 1,M
-         F(1,J,K) = F(1,J,K) + SAVE(IA)*DX*BDXS(J,K)
+     DO K=1,N
+       DO J=1,M
+         F(1,J,K) = F(1,J,K)+SAVE(IA)*DX*BDXS(J,K)
        END DO
      END DO
    END IF
    
    IF (LP==2 .OR. LP==5) THEN
-     DO K = 1,N
-       DO J = 1,M
-         F(L,J,K) = F(L,J,K) - 2._EB*BDXF(J,K)*SAVE(ID-1)
+     DO K=1,N
+       DO J=1,M
+         F(L,J,K) = F(L,J,K)-2._EB*BDXF(J,K)*SAVE(ID-1)
        END DO
      END DO
    END IF
    
    IF (LP==3 .OR. LP==4) THEN
-     DO K = 1,N
-       DO J = 1,M
-         F(L,J,K) = F(L,J,K) - SAVE(ID-1)*DX*BDXF(J,K)
+     DO K=1,N
+       DO J=1,M
+         F(L,J,K) = F(L,J,K)-SAVE(ID-1)*DX*BDXF(J,K)
        END DO
      END DO
    END IF
    
-   !                               ENTER BOUNDARY DATA FOR Y-BOUNDARIES
+   !  ENTER BOUNDARY DATA FOR Y-BOUNDARIES
    
    IF (MP==2 .OR. MP==3) THEN
-     DO K = 1,N
-       DO I = 1,L
-         F(I,1,K) = F(I,1,K) - BDYS(I,K)*TWDYSQ
+     DO K=1,N
+       DO I=1,L
+         F(I,1,K) = F(I,1,K)-BDYS(I,K)*TWDYSQ
        END DO
      END DO
    END IF
    
    IF (MP==4 .OR. MP==5) THEN
-     DO K = 1,N
-       DO I = 1,L
-         F(I,1,K) = F(I,1,K) + BDYS(I,K)*DLYRCP
+     DO K=1,N
+       DO I=1,L
+         F(I,1,K) = F(I,1,K)+BDYS(I,K)*DLYRCP
        END DO
      END DO
    END IF
    
    IF (MP==2 .OR. MP==5) THEN
-     DO K = 1,N
-       DO I = 1,L
-         F(I,M,K) = F(I,M,K) - BDYF(I,K)*TWDYSQ
+     DO K=1,N
+       DO I=1,L
+         F(I,M,K) = F(I,M,K)-BDYF(I,K)*TWDYSQ
        END DO
      END DO
    END IF
    
    IF (MP==3 .OR. MP==4) THEN
-     DO K = 1,N
-       DO I = 1,L
-         F(I,M,K) = F(I,M,K) - BDYF(I,K)*DLYRCP
+     DO K=1,N
+       DO I=1,L
+         F(I,M,K) = F(I,M,K)-BDYF(I,K)*DLYRCP
        END DO
      END DO
    END IF
    
-   !                               ENTER BOUNDARY DATA FOR Z-BOUNDARIES
+   !  ENTER BOUNDARY DATA FOR Z-BOUNDARIES
    
    IF (NP==2 .OR. NP==3) THEN
-     DO J = 1,M
-       DO I = 1,L
-         F(I,J,1) = F(I,J,1) - BDZS(I,J)*TWDZSQ
+     DO J=1,M
+       DO I=1,L
+         F(I,J,1) = F(I,J,1)-BDZS(I,J)*TWDZSQ
        END DO
      END DO
    END IF
    
    IF (NP==4 .OR. NP==5) THEN
-     DO J = 1,M
-       DO I = 1,L
-         F(I,J,1) = F(I,J,1) + BDZS(I,J)*DLZRCP
+     DO J=1,M
+       DO I=1,L
+         F(I,J,1) = F(I,J,1)+BDZS(I,J)*DLZRCP
        END DO
      END DO
    END IF
    
    IF (NP==2 .OR. NP==5) THEN
-     DO J = 1,M
-       DO I = 1,L
-         F(I,J,N) = F(I,J,N) - BDZF(I,J)*TWDZSQ
+     DO J=1,M
+       DO I=1,L
+         F(I,J,N) = F(I,J,N)-BDZF(I,J)*TWDZSQ
        END DO
      END DO
    END IF
    
    IF (NP==3 .OR. NP==4) THEN
-     DO J = 1,M
-       DO I = 1,L
-         F(I,J,N) = F(I,J,N) - BDZF(I,J)*DLZRCP
+     DO J=1,M
+       DO I=1,L
+         F(I,J,N) = F(I,J,N)-BDZF(I,J)*DLZRCP
        END DO
      END DO
    END IF
@@ -349,11 +372,11 @@ PERTRB = 0._EB
 PERT   = 0._EB 
 ISING = 0
 
-!                               FOR SINGULAR PROBLEMS ADJUST DATA TO
-!                               INSURE A SOLUTION WILL EXIST.  GO THRU
-!                               THIS CODE TWICE: ISING=1 FOR CALCULATING
-!                               PERTRB; ISING=2 FOR NORMALIZING SOLUTION
-!                               AFTER IT IS COMPUTED.
+!  FOR SINGULAR PROBLEMS ADJUST DATA TO
+!  INSURE A SOLUTION WILL EXIST.  GO THRU
+!  THIS CODE TWICE: ISING=1 FOR CALCULATING
+!  PERTRB; ISING=2 FOR NORMALIZING SOLUTION
+!  AFTER IT IS COMPUTED.
 
 SELECT CASE(LP)
 CASE(1)   ; GO TO 630
@@ -400,11 +423,11 @@ DO  I = 1,L
   S1 = S1 + H(I)*W(I)
 END DO
 
-S3   = S3*M*N
+S3 = S3*REAL(M,EB)*REAL(N,EB)
 PERT = S1/S3
 
 
-!                               ADJUST F ARRAY BY PERT
+!  ADJUST F ARRAY BY PERT
 
 DO  K = 1,N
   DO  J = 1,M
@@ -415,8 +438,8 @@ DO  K = 1,N
 END DO
 750 CONTINUE
 
-!                               IF NORMALIZING SOLUTION, RESTORE PERTRB
-!                               AND JUMP TO END
+!  IF NORMALIZING SOLUTION, RESTORE PERTRB
+!  AND JUMP TO END
 
 IF (ISING==2) THEN
   PERTRB = PRTSAV
@@ -427,12 +450,12 @@ END IF
 
 PRTSAV = PERT
 
-!                               SOLVE THE EQUATION
+!  SOLVE THE EQUATION
 
 CALL S3CFSS(LDIMF,MDIMF,F,SAVE(IS),W)
 
-!                               IF A SINGULAR PROBLEM,
-!                               RE-NORMALIZE SOLUTION (ISING=2)
+!  IF A SINGULAR PROBLEM,
+!  RE-NORMALIZE SOLUTION (ISING=2)
 
 IF (ISING==1) THEN
   ISING = 2
@@ -450,20 +473,24 @@ SUBROUTINE S3CFIS(LPEROD,L,MPEROD,M,NPEROD,N,SCAL,A,B,C,D,LDIMF,  &
     MDIMF,IERROR,SAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
+INTEGER    :: IERROR, IGRID
+INTEGER    :: LDIMF, MDIMF, LDIMFC
+INTEGER    :: LPEROD, MPEROD, NPEROD
+INTEGER    :: I
+INTEGER    :: L, M, N
 
-INTEGER:: LPEROD, L, MPEROD, M, NPEROD, N
-REAL(EB):: SCAL
-REAL(EB):: A(L), B(L), C(L), D(L), SAVE(-3:*)
-INTEGER:: LDIMF, MDIMF, IERROR
-!                               CHECK FOR INVALID INPUT
+REAL(EB)   :: SCAL
+REAL(EB)   :: A(L), B(L), C(L), D(L), SAVE(-3:*)
+
+!  CHECK FOR INVALID INPUT
 
 IERROR = 0
 
@@ -508,13 +535,11 @@ IF (MDIMF<M) THEN
 END IF
 
 IF (LPEROD==0) THEN
-  DO  I = 1,L
-    
+  DO  I=1,L
     IF (ABS(A(I)-A(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(B(I)-B(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(C(I)-A(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(D(I)-D(1))>=TWO_EPSILON_EB) GO TO 110
-    
   END DO
   
   GO TO 120
@@ -529,7 +554,7 @@ END IF
 IF (IERROR/=0) THEN
   RETURN
 ELSE
-  SAVE(1) = IERROR
+  SAVE(1) = REAL(IERROR,EB)
 END IF
 
 LDIMFC=L
@@ -546,41 +571,54 @@ END SUBROUTINE S3CFIS
 SUBROUTINE S3CFSS(LDIMF,MDIMF,F,SAVE,W)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-INTEGER:: LDIMF, MDIMF
-REAL(EB)   F(LDIMF,MDIMF,*), SAVE(-3:*), W(*)
+INTEGER    :: LDIMF, MDIMF
+REAL(EB)   :: F(LDIMF,MDIMF,*), SAVE(-3:*), W(*)
 
-!                               CHECK VALUE OF IERROR (=SAVE(1)).
-!                               IF NON-ZERO, RETURN.
+!  CHECK VALUE OF IERROR (=SAVE(1)).
+!  IF NON-ZERO, RETURN.
 
 IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
-
 CALL FSH02S(LDIMF,MDIMF,F,SAVE,W)
-
 RETURN
+
 END SUBROUTINE S3CFSS
 
 
 SUBROUTINE FSH00S(IGRID,LPEROD,L,MPEROD,M,NPEROD,N,LDIMFC,C2, A,B,C,D,SAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
-REAL(EB)   a(l),b(l),c(l),d(l),save(-3:*), C2
-INTEGER:: IGRID, LPEROD, L,  MPEROD,  M, NPEROD, N, LDIMFC
-!                               THIS SUBROUTINE INITIALIZES FFT SOLVER
 
-!                               ALLOCATE SAVE ARRAY
+
+INTEGER    :: IGRID
+INTEGER    :: ICFY, ICFZ, IFCTRD
+INTEGER    :: IWSY, IWSZ, IZRT
+INTEGER    :: LDIMFC
+INTEGER    :: LPEROD, MPEROD,  NPEROD
+INTEGER    :: I
+INTEGER    :: IA, IB, IC
+INTEGER    :: L, M, N
+INTEGER    :: LP, MP, NP
+
+REAL(EB)   :: C2
+REAL(EB)   :: A(L), B(L), C(L), D(L)
+REAL(EB)   :: SAVE(-3:*)
+
+! THIS SUBROUTINE INITIALIZES FFT SOLVER
+
+! ALLOCATE SAVE ARRAY
 
 IA = 12
 IB = IA + L
@@ -599,37 +637,38 @@ IWSY = IFCTRD + LDIMFC*M*N
 IWSZ = IWSY + M + 16
 IZRT = IWSZ + N + 16
 
-!                               COPY COEFFICIENT ARRAYS A,B, AND C INTO
-!                               SAVE ARRAY.  A COPY OF B IS MADE BECAUSE
-!                               IN THE NEXT LEVEL ROUTINE, BOUNDARY
-!                               ELEMENTS OF B MAY BE CHANGED.
+!  COPY COEFFICIENT ARRAYS A,B, AND C INTO
+!  SAVE ARRAY.  A COPY OF B IS MADE BECAUSE
+!  IN THE NEXT LEVEL ROUTINE, BOUNDARY
+!  ELEMENTS OF B MAY BE CHANGED.
 
 DO  I = 0,L - 1
   SAVE(IA+I) = A(I+1)
   SAVE(IB+I) = B(I+1)
   SAVE(IC+I) = C(I+1)
 END DO
+
 LP = LPEROD + 1
 MP = MPEROD + 1
 NP = NPEROD + 1
 
-!                               CALL LOWER LEVEL INITIALIZATION ROUTINE
+!  CALL LOWER LEVEL INITIALIZATION ROUTINE
 
 CALL FSH01S(IGRID,L,LP,M,MP,D,N,NP,LDIMFC,C2,SAVE(IA),SAVE(IB),  &
     SAVE(IC),SAVE(ICFY),SAVE(ICFZ),SAVE(IFCTRD), SAVE(IWSY),SAVE(IWSZ),SAVE(IZRT))
 
-!                               SAVE PARAMETERS FOR SUBROUTINE SOLVER
+!  SAVE PARAMETERS FOR SUBROUTINE SOLVER
 
-SAVE(2) = L
-SAVE(3) = LP
-SAVE(4) = M
-SAVE(5) = MP
-SAVE(6) = N
-SAVE(7) = NP
-SAVE(8) = ICFZ
-SAVE(9) = IWSZ
-SAVE(10) = IZRT
-SAVE(11) = IGRID
+SAVE(2) = REAL(L,EB)
+SAVE(3) = REAL(LP,EB)
+SAVE(4) = REAL(M,EB)
+SAVE(5) = REAL(MP,EB)
+SAVE(6) = REAL(N,EB)
+SAVE(7) = REAL(NP,EB)
+SAVE(8) = REAL(ICFZ,EB)
+SAVE(9) = REAL(IWSZ,EB)
+SAVE(10) = REAL(IZRT,EB)
+SAVE(11) = REAL(IGRID,EB)
 
 RETURN
 END SUBROUTINE FSH00S
@@ -639,19 +678,33 @@ SUBROUTINE FSH01S(IGRID,L,LP,M,MP,D,N,NP,LDIMFC,C2,A,B,C,CFY,CFZ,  &
     FCTRD,WSAVEY,WSAVEZ,ZRT)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-REAL(EB) a(l),b(l),c(l),d(l),cfy(4*m),cfz(4*n),fctrd(ldimfc,n,m),wsavey(m+16),wsavez(n+16),zrt(n)
-INTEGER:: IGRID, L, LP, M, MP, N, NP, LDIMFC, K, I
-REAL(EB):: C2
+INTEGER    :: IGRID
+INTEGER    :: LDIMFC
+INTEGER    :: LODD
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
+INTEGER    :: LP, MP, NP, LH
+
+REAL(EB)   :: BMAX, EPS
+REAL(EB)   :: C2
+REAL(EB)   :: DEL, DEN
+REAL(EB)   :: MRDEL, NRDEL
+REAL(EB)   :: A(L), B(L), C(L), D(L)
+REAL(EB)   :: CFY(4*M), CFZ(4*N)
+REAL(EB)   :: FCTRD(LDIMFC,N,M)
+! REAL(EB):: savey(M+16)
+REAL(EB)   :: ZRT(N)
+REAL(EB)   :: WSAVEY(N+15), WSAVEZ(N+16)
 
 
-!                               INITIALIZATION ROUTINE FOR FFT SOLVERS
+!  INITIALIZATION ROUTINE FOR FFT SOLVERS
 
 EPS = FSH20S()
 
@@ -672,23 +725,23 @@ IF (L>1 .AND. LP==1) THEN
   IF (LODD==2) A(L) = C(LH)
 END IF
 
-!                               COMPUTE TRANSFORM ROOTS FOR J-DIRECTION
+!  COMPUTE TRANSFORM ROOTS FOR J-DIRECTION
 
 IF (M==1) THEN
   CFY(1) = 0._EB 
 ELSE
   
   IF (IGRID==1) THEN
-    MRDEL = ((MP-1)* (MP-3)* (MP-5))/3
-    DEL = PI/ (2._EB* (M+MRDEL))
+    MRDEL = REAL(((MP-1)* (MP-3)* (MP-5))/3,EB)
+    DEL = PI/ (2._EB* (REAL(M,EB)+MRDEL))
   ELSE
-    DEL = PI/ (2*M)
+    DEL = PI/ REAL(2*M,EB)
   END IF
   
   IF (MP==1) THEN
     CFY(1) = 0._EB 
     CFY(M) = -4._EB 
-    DO J = 2,M - 1,2
+    DO J = 2,M-1,2
       CFY(J) = -4._EB*SIN(J*DEL)**2
       CFY(J+1) = CFY(J)
     END DO
@@ -714,43 +767,43 @@ ELSE
   
 END IF
 
-!                               COMPUTE TRANSFORM ROOTS IN K-DIRECTION
+!  COMPUTE TRANSFORM ROOTS IN K-DIRECTION
 
 IF (N==1) THEN
   ZRT(1) = 0._EB 
 ELSE
   
   IF (IGRID==1) THEN
-    NRDEL = ((NP-1)* (NP-3)* (NP-5))/3
-    DEL = PI/ (2._EB* (N+NRDEL))
+    NRDEL = REAL(((NP-1)*(NP-3)*(NP-5))/3,EB)
+    DEL = PI/(2._EB*(N+REAL(NRDEL,EB)))
   ELSE
-    DEL = PI/ (2*N)
+    DEL = PI/REAL(2*N,EB)
   END IF
   
   IF (NP==1) THEN
     ZRT(1) = 0._EB 
     ZRT(N) = -4._EB*C2
-    DO K = 2,N - 1,2
-      ZRT(K) = -4._EB*C2*SIN(K*DEL)**2
+    DO K = 2,N-1,2
+      ZRT(K) = -4._EB*C2*SIN(REAL(K*DEL,EB))**2
       ZRT(K+1) = ZRT(K)
     END DO
   END IF
   
   IF (NP==2) THEN
     DO K = 1,N
-      ZRT(K) = -4._EB*C2*SIN(K*DEL)**2
+      ZRT(K) = -4._EB*C2*SIN(REAL(K*DEL,EB))**2
     END DO
   END IF
   
   IF (NP==3 .OR. NP==5) THEN
     DO K = 1,N
-      ZRT(K) = -4._EB*C2*SIN((K-.5_EB)*DEL)**2
+      ZRT(K) = -4._EB*C2*SIN(REAL((K-.5_EB)*DEL,EB))**2
     END DO
   END IF
   
   IF (NP==4) THEN
     DO K = 1,N
-      ZRT(K) = -4._EB*C2*SIN((K-1)*DEL)**2
+      ZRT(K) = -4._EB*C2*SIN(REAL((K-1)*DEL,EB))**2
     END DO
   END IF
   
@@ -758,20 +811,20 @@ END IF
 
 IF (L>1) THEN
   
-!                               FACTOR M*N TRIDIAGONAL SYSTEMS.
-!                               FIRST, DO THE POSSIBLY SINGULAR
-!                               CASE CORRESPONDING TO J = K = 1.
+!  FACTOR M*N TRIDIAGONAL SYSTEMS.
+!  FIRST, DO THE POSSIBLY SINGULAR
+!  CASE CORRESPONDING TO J = K = 1.
   
-  FCTRD(1,1,1) = 1._EB/ (B(1)+D(1)*CFY(1)+ZRT(1))
-  DO  I = 2,L - 1
-    FCTRD(I,1,1) = 1._EB/ (B(I)+D(I)*CFY(1)+ZRT(1)- A(I)*C(I-1)*FCTRD(I-1,1,1))
+  FCTRD(1,1,1) = 1._EB/(B(1)+D(1)*CFY(1)+ZRT(1))
+  DO  I = 2,L-1
+    FCTRD(I,1,1) = 1._EB/(B(I)+D(I)*CFY(1)+ZRT(1)-A(I)*C(I-1)*FCTRD(I-1,1,1))
   END DO
   
-!                               IF TRIDIAGONAL SYSTEM
-!                               (...,A(I),B(I),C(I),...) IS SINGULAR
-!                               THEN FCTRD(1,1,L) IS 1._EB/0.  IF
-!                               DENOMINATOR IS WITHIN ROUND-OFF OF 0,
-!                               SET FCTRD(1,1,L) ARBITRARILY
+!  IF TRIDIAGONAL SYSTEM
+!  (...,A(I),B(I),C(I),...) IS SINGULAR
+!  THEN FCTRD(1,1,L) IS 1._EB/0.  IF
+!  DENOMINATOR IS WITHIN ROUND-OFF OF 0,
+!  SET FCTRD(1,1,L) ARBITRARILY
   
   DEN = B(L) + D(L)*CFY(1) + ZRT(1) - A(L)*C(L-1)*FCTRD(L-1,1,1)
   BMAX = ABS(B(1))
@@ -782,29 +835,29 @@ IF (L>1) THEN
   IF (ABS(DEN/BMAX)<=10._EB *EPS) DEN = BMAX
   FCTRD(L,1,1) = 1._EB/DEN
   
-!                               FACTOR CASES J=1, K=2,...,N.
+!  FACTOR CASES J=1, K=2,...,N.
   
   DO  K = 2,N
     FCTRD(1,K,1) = 1._EB/ (B(1)+D(1)*CFY(1)+ZRT(K))
   END DO
   DO  I = 2,L
     DO  K = 2,N
-      FCTRD(I,K,1) = 1._EB/ (B(I)+D(I)*CFY(1)+ZRT(K)- A(I)*C(I-1)*FCTRD(I-1,K,1))
+      FCTRD(I,K,1) = 1._EB/ (B(I)+D(I)*CFY(1)+ZRT(K)-A(I)*C(I-1)*FCTRD(I-1,K,1))
     END DO
   END DO
   
-!                               FACTOR CASES K=1, J=2,...,M.
+!  FACTOR CASES K=1, J=2,...,M.
   
   DO  J = 2,M
     FCTRD(1,1,J) = 1._EB/ (B(1)+D(1)*CFY(J)+ZRT(1))
   END DO
   DO  I = 2,L
     DO  J = 2,M
-      FCTRD(I,1,J) = 1._EB/ (B(I)+D(I)*CFY(J)+ZRT(1)- A(I)*C(I-1)*FCTRD(I-1,1,J))
+      FCTRD(I,1,J) = 1._EB/ (B(I)+D(I)*CFY(J)+ZRT(1)-A(I)*C(I-1)*FCTRD(I-1,1,J))
     END DO
   END DO
   
-!                               FACTOR REMAINING CASES.
+!  FACTOR REMAINING CASES.
   
   DO  K = 2,N
     DO  J = 2,M
@@ -821,8 +874,8 @@ IF (L>1) THEN
   END DO
 END IF
 
-!                               INITIALIZE FFT TRANSFORMS AND
-!                               PRE-PROCESSING COEFFICIENTS IN J
+!  INITIALIZE FFT TRANSFORMS AND
+!  PRE-PROCESSING COEFFICIENTS IN J
 
 IF (M/=1) THEN
   
@@ -886,8 +939,8 @@ CALL VSCSQI(M,CFY(1),CFY(M+1),CFY(2*M+1),CFY(3*M+1),WSAVEY)
 530     CONTINUE
 END IF
 
-!                               INITIALIZE FFT TRANSFORMS AND
-!                               PRE-PROCESSING COEFFICIENTS IN K
+!  INITIALIZE FFT TRANSFORMS AND
+!  PRE-PROCESSING COEFFICIENTS IN K
 
 IF (N/=1) THEN
   
@@ -958,29 +1011,35 @@ END SUBROUTINE FSH01S
 SUBROUTINE FSH02S(LDIMF,MDIMF,F,SAVE,W)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+INTEGER    :: IGRID
+INTEGER    :: LDIMF, MDIMF
+INTEGER    :: ICFY, ICFZ, IFCTRD
+INTEGER    :: IWSY, IWSZ
+INTEGER    :: LDIMFC, LDIMFT
+INTEGER    :: IA, IC
+INTEGER    :: L, M, N
+INTEGER    :: LP, MP, NP
 
+REAL(EB)   :: F(LDIMF,MDIMF,*), W(*), SAVE(-3:*)
 
-INTEGER:: LDIMF, MDIMF
-REAL(EB)   F(LDIMF,MDIMF,*), W(*), SAVE(-3:*)
+!  RETRIEVE CONSTANTS FROM SAVE ARRAY
 
-!                               RETRIEVE CONSTANTS FROM SAVE ARRAY
+L  = INT(SAVE(2))
+LP = INT(SAVE(3))
+M  = INT(SAVE(4))
+MP = INT(SAVE(5))
+N  = INT(SAVE(6))
+NP = INT(SAVE(7))
+IGRID = INT(SAVE(11))
 
-L = SAVE(2)
-LP = SAVE(3)
-M = SAVE(4)
-MP = SAVE(5)
-N = SAVE(6)
-NP = SAVE(7)
-IGRID = SAVE(11)
-
-!                               ALLOCATION OF SAVE ARRAY
+!  ALLOCATION OF SAVE ARRAY
 IA = 12
 IC = IA + 2*L
 ICFY = IC + L
@@ -1000,15 +1059,15 @@ LDIMFT=L
 
 IF (LDIMF==L .AND. MDIMF==M) THEN
   
-!                               NO HOLES IN DATA ARRAY, SO CALL SOLVER
+!  NO HOLES IN DATA ARRAY, SO CALL SOLVER
   
   CALL FSH03S(IGRID,L,LP,M,MP,N,NP,LDIMFC,LDIMFT,F,SAVE(ICFY), SAVE(ICFZ),  &
       W,SAVE(IA),SAVE(IC),SAVE(IFCTRD),SAVE(IWSY), SAVE(IWSZ))
 ELSE
   IF (LDIMF>L .AND. MOD(L,2)==0) LDIMFT=L+1
   
-!                               PACK DATA ARRAY, CALL SOLVER,
-!                               AND THEN UNPACK SOLUTION ARRAY
+!  PACK DATA ARRAY, CALL SOLVER,
+!  AND THEN UNPACK SOLUTION ARRAY
   
   CALL FSH04S(L,M,N,LDIMF,MDIMF,LDIMFT,F,W)
   CALL FSH03S(IGRID,L,LP,M,MP,N,NP,LDIMFC,LDIMFT,W,SAVE(ICFY),  &
@@ -1025,33 +1084,31 @@ SUBROUTINE FSH03S(IGRID,L,LP,M,MP,N,NP,LDIMFC,LDIMFT,F,CFY,CFZ,  &
     FT,A,C,FCTRD,WSAVEY,WSAVEZ)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+LOGICAL    :: DATARY,DATASW
 
-INTEGER                   :: IGRID
-INTEGER                       :: L
-INTEGER                   :: LP
-INTEGER                       :: M
-INTEGER                   :: MP
-INTEGER                       :: N
-INTEGER                   :: NP
-INTEGER                   :: LDIMFC
-INTEGER                   :: LDIMFT
-REAL(EB)  CFY(4*M)
-REAL(EB)  CFZ(4*N)
-REAL(EB)  FT(LDIMFT,M,N)
-REAL(EB)   FCTRD(LDIMFC,M,N)
-REAL(EB)   WSAVEY(M+16)
-REAL(EB)   WSAVEZ(N+16)
-REAL(EB)   A(L),C(L),F(LDIMFT,M,N)
-    
-LOGICAL :: DATARY,DATASW
-!                               ZERO OUT BOTTOM PLANE OF ARRAY FT
+INTEGER    :: IGRID, IFWRD
+INTEGER    :: LDIMFC, LDIMFT
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
+INTEGER    :: LP, MP, NP
+
+REAL(EB)   :: CFY(4*M)
+REAL(EB)   :: CFZ(4*N)
+REAL(EB)   :: F(LDIMFT,M,N)
+REAL(EB)   :: FT(LDIMFT,M,N)
+REAL(EB)   :: FCTRD(LDIMFC,M,N)
+REAL(EB)   :: WSAVEY(M+16)
+REAL(EB)   :: WSAVEZ(N+16)
+REAL(EB)   :: A(L),C(L)
+   
+! ZERO OUT BOTTOM PLANE OF ARRAY FT
 
 DO  K=1,N
   DO  J=1,M
@@ -1068,8 +1125,8 @@ IFWRD = 1
 IF (N/=1) THEN
   TPOSE=.FALSE.
   IF (IFWRD==2) TPOSE=.TRUE.
-  
-!                               TRANSFORM IN Z
+
+! TRANSFORM IN Z
   IF (DATARY) THEN
     CALL FSH26S(IGRID,IFWRD,NP,L,N,M,LDIMFT,F,FT,CFZ,WSAVEZ)
     DATARY=OUTARY
@@ -1090,7 +1147,7 @@ IF (M/=1) THEN
   TPOSE=.TRUE.
   IF (IFWRD==2) TPOSE=.FALSE.
   
-!                               TRANSFORM Y
+!  TRANSFORM Y
   
   
   IF (DATARY) THEN
@@ -1111,10 +1168,10 @@ END SELECT
 
 IF (L>1) THEN
   
-!                               SOLVE TRIDIAGONAL SYSTEMS IN X THAT WERE
-!                               PREVIOUSLY FACTORED IN FSH01S
+!  SOLVE TRIDIAGONAL SYSTEMS IN X THAT WERE
+!  PREVIOUSLY FACTORED IN FSH01S
   
-!                               CALL VECTORIZED TRIDIAGONAL SOLVER
+!  CALL VECTORIZED TRIDIAGONAL SOLVER
   
   DATASW=.FALSE.
   IF (NP==1) DATASW=.NOT.DATASW
@@ -1153,32 +1210,30 @@ IF (.NOT.DATARY) THEN
   END DO
 END IF
 RETURN
+
 END SUBROUTINE FSH03S
 
 
 SUBROUTINE FSH04S(L,M,N,LDIMF,MDIMF,LDIMG,F,G)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+INTEGER    :: LDIMF, MDIMF
+INTEGER    :: LDIMG
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: F(LDIMF,MDIMF, N), G(LDIMG,M,N)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-INTEGER                   :: MDIMF
-INTEGER                   :: LDIMG
-REAL(EB)   F(LDIMF,MDIMF, N), G(LDIMG,M,N)
-
-!                              THIS SUBROUTINE PACKS THE SUB-ARRAY
-!                              F(I,J,K), I=1,...,L, J=1,...,M, K=1,...,N
-!                              INTO THE ARRAY G.
+! THIS SUBROUTINE PACKS THE SUB-ARRAY
+! F(I,J,K), I=1,...,L, J=1,...,M, K=1,...,N
+! INTO THE ARRAY G.
 
 DO  K = 1,N
   DO  J = 1,M
@@ -1187,6 +1242,7 @@ DO  K = 1,N
     END DO
   END DO
 END DO
+
 IF (LDIMG>L) THEN
   DO  K=1,N
     DO  J=1,M
@@ -1201,27 +1257,23 @@ END SUBROUTINE FSH04S
 SUBROUTINE FSH05S(L,M,N,LDIMF,MDIMF,LDIMG,F,G)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+INTEGER    :: LDIMF, MDIMF
+INTEGER    :: LDIMG
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: F(LDIMF,MDIMF,N), G(LDIMG,M,N)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-INTEGER                   :: MDIMF
-INTEGER                   :: LDIMG
-REAL(EB)   G(LDIMG,M,N)
-REAL(EB)   F(LDIMF,MDIMF,N)
-
-!                               THIS SUBROUTINE EXPANDS THE ARRAY G OF
-!                               DIMENSION L X M X N INTO THE ARRAY F OF
-!                               DIMENSION LDIMF X MDIMF X N.
+!  THIS SUBROUTINE EXPANDS THE ARRAY G OF
+!  DIMENSION L X M X N INTO THE ARRAY F OF
+!  DIMENSION LDIMF X MDIMF X N.
 
 DO  K = 1,N
   DO  J = 1,M
@@ -1237,29 +1289,29 @@ END SUBROUTINE FSH05S
 SUBROUTINE FSH06S(L,LP,M,LDIMFC,LDIMFT,SCALE,A,C,F,FT,FCTRD)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
+INTEGER    :: LDIMFC, LDIMFT
+INTEGER    :: I, J
+INTEGER    :: L, M
+INTEGER    :: LP, LH, LQ
 
-INTEGER                       :: L
-INTEGER                   :: LP
-INTEGER                       :: M
-INTEGER                   :: LDIMFC
-INTEGER                   :: LDIMFT
-REAL(EB) :: SCALE
-REAL(EB)   FT(LDIMFT,M)
-REAL(EB)  FCTRD(LDIMFC,M)
-REAL(EB)   A(L),C(L),F(LDIMFT,M)
+REAL(EB)   :: SCALE
+REAL(EB)   :: F(LDIMFT,M)
+REAL(EB)   :: FT(LDIMFT,M)
+REAL(EB)   :: FCTRD(LDIMFC,M)
+REAL(EB)   :: A(L), C(L)
 
-!                               THIS SUBROUTINE SOLVES M TRIDIAGONAL
-!                               SYSTEMS OF ORDER L THAT HAVE
-!                               FACTORIZATION STORED IN ARRAY FCTRD AND
-!                               RIGHT SIDES IN FT
+!  THIS SUBROUTINE SOLVES M TRIDIAGONAL
+!  SYSTEMS OF ORDER L THAT HAVE
+!  FACTORIZATION STORED IN ARRAY FCTRD AND
+!  RIGHT SIDES IN FT
 SCALE=SCALE**2
 IF (LP==1) THEN
   LH=(L+1)/2
@@ -1283,13 +1335,13 @@ IF (MOD(L,2)==0)  THEN
 END IF
 IF (MOD(LH,2)==0) THEN
   DO  J=1,M
-    F(  LH/2,J)=F(LH/2,J)-F(3*LH/2,J)
+    F(LH/2,J)=F(LH/2,J)-F(3*LH/2,J)
     F(3*LH/2,J)=F(LH/2,J)+2._EB*F(3*LH/2,J)
   END DO
 END IF
 SCALE=0.5_EB*SCALE
 END IF
-!                               FORWARD SUBSTITUTION
+!  FORWARD SUBSTITUTION
 
 DO  J = 1,M
   FT(1,J) = SCALE*F(1,J)*FCTRD(1,J)
@@ -1298,9 +1350,9 @@ DO  J = 1,M
   END DO
 END DO
 
-!                               BACKWARD SUBSTITUTION
+!  BACKWARD SUBSTITUTION
 DO  J = 1,M
-  DO  I = L - 1,1,-1
+  DO  I = L-1,1,-1
     FT(I,J) = FT(I,J) - C(I)*FCTRD(I,J)*FT(I+1,J)
   END DO
 END DO
@@ -1333,21 +1385,22 @@ END SUBROUTINE FSH06S
 FUNCTION FSH20S()
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-!                               THIS FUNCTION FURNISHES THE MACHINE
-!                               PREC EPS--THE SMALLEST POSITIVE
-!                               MACHINE NUMBER SATISFYING
+!  THIS FUNCTION FURNISHES THE MACHINE
+!  PREC EPS--THE SMALLEST POSITIVE
+!  MACHINE NUMBER SATISFYING
 
-!                               FL(1._EB+EPS) > 1.
+!  FL(1._EB+EPS) > 1.
 
 !     FSH20S = 2.4E-7_EB
-REAL(EB) FSH20S
+REAL(EB)   :: FSH20S
+
 FSH20S = SPACING (1._EB)!4.E-15_EB
 
 RETURN
@@ -1357,25 +1410,24 @@ END FUNCTION FSH20S
 SUBROUTINE FSH26S(IGRID,IFWRD,MP,L,M,N,LDIMFT,F,FT,CFY,WSAVEY)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
-INTEGER                   :: IGRID
-INTEGER                   :: IFWRD
-INTEGER                   :: MP
-INTEGER                   :: L
-INTEGER                   :: M
-INTEGER                   :: N
-INTEGER                   :: LDIMFT
-REAL(EB) FT(LDIMFT,M,N)
-REAL(EB) CFY(4*M)
-REAL(EB) WSAVEY(M+16)
-REAL(EB) F(LDIMFT,M,N)
+INTEGER, INTENT(IN)    :: IGRID
+INTEGER, INTENT(IN)    :: IFWRD
+INTEGER, INTENT(IN)    :: MP
+INTEGER    :: LDIMFT
+INTEGER    :: L, M, N
+
+REAL(EB)   :: FT(LDIMFT,M,N)
+REAL(EB)   :: CFY(4*M)
+REAL(EB)   :: WSAVEY(M+16)
+REAL(EB)   :: F(LDIMFT,M,N)
 
 SELECT CASE(IGRID)
 CASE(1)   ; GO TO 110
@@ -1462,23 +1514,24 @@ END SUBROUTINE FSH26S
 SUBROUTINE VCOST(X,L,M,N,LDIMX,XT,C,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
-INTEGER                   :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                       :: LDIMX
-REAL(EB) XT(LDIMX*N,M)
-REAL(EB) C(M)
-REAL(EB) WSAVE(M+15)
-REAL(EB) X(LDIMX*N,M)
+INTEGER    :: LDIMX
+INTEGER    :: MM1, MS2
+INTEGER    :: I, J, JC
+INTEGER    :: L, M, N
+
+REAL(EB)   :: C(M)
+REAL(EB)   :: X(LDIMX*N,M)
+REAL(EB)   :: XT(LDIMX*N,M)
+REAL(EB)   :: WSAVE(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -1532,25 +1585,26 @@ END SUBROUTINE VCOST
 SUBROUTINE VCOST1(L,M,N,LDIMX,MS2,C,XT,X)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMX
+INTEGER    :: MS2
+INTEGER    :: I, J, K
+INTEGER    :: JC
+INTEGER    :: L, M, N
+
+REAL(EB)   :: C(*)
+REAL(EB)   :: X(LDIMX,M,N)
+REAL(EB)   :: XT(LDIMX,N,M)
 
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMX
-INTEGER                   :: MS2
-REAL(EB)   C(*)
-REAL(EB)  XT(LDIMX,N,M)
-REAL(EB)   X(LDIMX,M,N)
 DO  K=1,N
   DO  I=1,L
     XT(I,K,M)=X(I,1,K)-X(I,M,K)
@@ -1581,21 +1635,21 @@ END SUBROUTINE VCOST1
 SUBROUTINE VCOSTA(M,LDIMX,MM1,PL,X,XT)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMX
+INTEGER    :: I, J
+INTEGER    :: M
+INTEGER    :: MM1
 
-
-INTEGER                       :: M
-INTEGER                       :: LDIMX
-INTEGER                   :: MM1
-REAL(EB)   X(LDIMX,M), PL(LDIMX),XT(LDIMX,M)
+REAL(EB)   :: X(LDIMX,M), PL(LDIMX),XT(LDIMX,M)
 
 DO  I=1,LDIMX
   X(I,1) = XT(I,1)
@@ -1619,11 +1673,11 @@ END SUBROUTINE VCOSTA
 SUBROUTINE VCOSTI(N,C,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
@@ -1639,13 +1693,15 @@ SUBROUTINE VCOSTI(N,C,WSAVE)
 !                      TRANSFORM OF THIRD INDEX.  TO USE IN THIS CASE,
 !                      CALL ROUTINE WITH M AND N INTERCHANGED.
 
+INTEGER    :: K
+INTEGER    :: N
+INTEGER    :: NP1, NS2, KC
 
+REAL(EB)   :: C(N), WSAVE(N+15)
+REAL(EB)   :: DT
 
-INTEGER                       :: N
-REAL(EB)    C(N), WSAVE(N+15)
-
-!                               INITIALIZE NOCOPY AND TPOSE TO DEFAULT
-!                               VALUES
+!  INITIALIZE NOCOPY AND TPOSE TO DEFAULT
+!  VALUES
 
 NOCOPY = .FALSE.
 TPOSE = .TRUE.
@@ -1653,7 +1709,7 @@ TPOSE = .TRUE.
 IF (N <= 3) RETURN
 NP1 = N+1
 NS2 = N/2
-DT = PI/(N-1)
+DT = PI/REAL(N-1,EB)
 
 DO  K=2,NS2
   KC = NP1-K
@@ -1668,23 +1724,23 @@ END SUBROUTINE VCOSTI
 SUBROUTINE VRFFTF (M,N,R,MDIMR,RT,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
 
 
-INTEGER                   :: M
-INTEGER                   :: N
-INTEGER                   :: MDIMR
-REAL(EB)   RT(M,N)
-REAL(EB)   WSAVE(N+15)
-REAL(EB)         R(MDIMR,N)
+INTEGER    :: M, N
+INTEGER    :: MDIMR
+REAL(EB)   :: RT(M,N)
+REAL(EB)   :: WSAVE(N+15)
+REAL(EB)   :: R(MDIMR,N)
+
 IF (N == 1) RETURN
 CALL VRFTF1 (M,N,R,MDIMR,RT,WSAVE(1),WSAVE(N+1))
 RETURN
@@ -1694,22 +1750,20 @@ END SUBROUTINE VRFFTF
 SUBROUTINE VRFFTI (N,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: N
+REAL(EB)   :: WSAVE(N+15)
 
-
-INTEGER                   :: N
-REAL(EB)         WSAVE(N+15)
-
-!                               INITIALIZE NOCOPY AND TPOSE TO DEFAULT
-!                               VALUES
+!  INITIALIZE NOCOPY AND TPOSE TO DEFAULT
+!  VALUES
 
 NOCOPY = .FALSE.
 TPOSE = .TRUE.
@@ -1723,24 +1777,29 @@ END SUBROUTINE VRFFTI
 SUBROUTINE VRFTF1 (M,N,C,MDIMC,CH,WA,FAC)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: MDIMC
+INTEGER    :: I, J
+INTEGER    :: M, N
+INTEGER    :: NF, NA
+INTEGER    :: L1, L2, K1, KH
+INTEGER    :: IDO, IDL1
+INTEGER    :: IX2, IX3, IX4
+INTEGER    :: IW, IP
 
+REAL(EB)   :: C(MDIMC,N)
+REAL(EB)   :: CH(M,N)
+REAL(EB)   :: WA(N)
+REAL(EB)   :: FAC(15)
 
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: MDIMC
-REAL(EB)    CH(M,N)
-REAL(EB)   WA(N)
-REAL(EB)  FAC(15)
-REAL(EB)         C(MDIMC,N)
 
 NF = FAC(2)
 NA = 1
@@ -1748,7 +1807,7 @@ L2 = N
 IW = N
 DO  K1=1,NF
   KH = NF-K1
-  IP = FAC(KH+3)
+  IP = INT(FAC(KH+3))
   L1 = L2/IP
   IDO = N/L2
   IDL1 = IDO*L1
@@ -1815,44 +1874,59 @@ ELSE
   END DO
 END IF
 RETURN
+
 END SUBROUTINE VRFTF1
 
 
 SUBROUTINE VRFTI1 (N,WA,FAC)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: I, J
+INTEGER    :: N
+INTEGER    :: NF, NL, NQ, NR
+INTEGER    :: IB, II, IP, IS
+INTEGER    :: IDO
+INTEGER    :: L1, L2, LD
+INTEGER    :: NFM1, NTRY
+INTEGER    :: K1, IPM
 
-INTEGER                       :: N
-REAL(EB)   FAC(15)
-REAL(EB)         WA(N)      , NTRYH(4)
+REAL(EB)   :: NTRYH(4)
 DATA NTRYH(1),NTRYH(2),NTRYH(3),NTRYH(4)/4,2,3,5/
+REAL(EB)   :: FAC(15)
+REAL(EB)   :: WA(N)
+REAL(EB)   :: TPI, ARGH
+REAL(EB)   :: FI, ARGLD, ARG
 
 NL = N
 NF = 0
 J = 0
+
 101 J = J+1
 IF (J-4<0) GO TO 102
 IF (J-4==0) GO TO 102
 IF (J-4>0) GO TO 103
-102 NTRY = NTRYH(J)
+102 NTRY = INT(NTRYH(J))
 GO TO 104
 103 NTRY = NTRY+2
-104 NQ = NL/NTRY
+104 NQ = INT(NL/NTRY)
+
 NR = NL-NTRY*NQ
+
 IF (NR<0) GO TO 101
 IF (NR==0) GO TO 105
 IF (NR>0) GO TO 101
+
 105 NF = NF+1
-FAC(NF+2) = NTRY
+FAC(NF+2) = REAL(NTRY,EB)
 NL = NQ
 IF (NTRY /= 2) GO TO 107
 IF (NF == 1) GO TO 107
@@ -1860,10 +1934,10 @@ DO  I=2,NF
   IB = NF-I+2
   FAC(IB+2) = FAC(IB+1)
 END DO
-FAC(3) = 2
+FAC(3) = 2._EB
 107 IF (NL /= 1) GO TO 104
-FAC(1) = N
-FAC(2) = NF
+FAC(1) = REAL(N,EB)
+FAC(2) = REAL(NF,EB)
 TPI = 2._EB*PI
 ARGH = TPI/REAL(N,EB)
 IS = 0
@@ -1871,7 +1945,7 @@ NFM1 = NF-1
 L1 = 1
 IF (NFM1 == 0) RETURN
 DO  K1=1,NFM1
-  IP = FAC(K1+2)
+  IP = INT(FAC(K1+2))
   LD = 0
   L2 = L1*IP
   IDO = N/L2
@@ -1893,30 +1967,30 @@ DO  K1=1,NFM1
   L1 = L2
 END DO
 RETURN
+
 END SUBROUTINE VRFTI1
 
 
 SUBROUTINE VSCOSB(F,L,M,N,LDIMF,FT,C1,C2,WORK)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
-INTEGER                   :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                       :: LDIMF
-REAL(EB)   FT(LDIMF*N,M)
-REAL(EB)  C1(M)
-REAL(EB)    C2(M)
-REAL(EB)   WORK(M+15)
-REAL(EB)   F(LDIMF*N,M)
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: L, M, N
+
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: F(LDIMF*N,M)
+REAL(EB)   :: FT(LDIMF*N,M)
+REAL(EB)   :: WORK(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -1928,7 +2002,7 @@ IF (TPOSE) THEN
   CALL VSCSB1(L,M,N,LDIMF,F,FT,C1,C2)
 ELSE
   DO  I=1,LDIMF*N
-    FT(I,1)=.5_EB*F(I,1)
+    FT(I,1)=0.5_EB*F(I,1)
   END DO
 DO  J=2,M
   DO  I=1,LDIMF*N
@@ -1956,25 +2030,23 @@ END SUBROUTINE VSCOSB
 SUBROUTINE VSCOSF(F,L,M,N,LDIMF,FT,C1,C2,WORK)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: L, M, N
 
-INTEGER                   :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                       :: LDIMF
-REAL(EB)    FT(LDIMF*N,M)
-REAL(EB)  C1(M)
-REAL(EB)   C2(M)
-REAL(EB)   WORK(M+15)
-REAL(EB)   F(LDIMF*N,M)
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: F(LDIMF*N,M)
+REAL(EB)   :: FT(LDIMF*N,M)
+REAL(EB)   :: WORK(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2021,31 +2093,32 @@ END SUBROUTINE VSCOSF
 SUBROUTINE VSCOSI(N,C1,C2,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
 !      ENTRY VSSINI(N,C1,C2,WSAVE)
 
+INTEGER    :: I
+INTEGER    :: N
+REAL(EB)   :: WSAVE(N+15)
+REAL(EB)   :: C1(N),C2(N)
+REAL(EB)   :: DX, C, S
 
-INTEGER                       :: N
-REAL(EB)    WSAVE(N+15)
-REAL(EB)   C1(N),C2(N)
-
-DX=PI/(2*N)
+DX=PI/REAL(2*N,EB)
 
 !     GENERATE A(I)+-B(I)
 
 DO  I=1,N
-  C=COS((I-1)*DX)
-  S=SIN((I-1)*DX)
-  C1(I)=.5_EB*(S+C)
-  C2(I)=.5_EB*(S-C)
+  C=COS(REAL((I-1)*DX,EB))
+  S=SIN(REAL((I-1)*DX,EB))
+  C1(I)=0.5_EB*(S+C)
+  C2(I)=0.5_EB*(S-C)
 END DO
 
 !     INITIALIZE VRFFTPK ROUTINE
@@ -2058,27 +2131,24 @@ END SUBROUTINE VSCOSI
 SUBROUTINE VSCOSQ(F,L,M,N,LDIMF,FT,C1,C2,C3,C4,WORK)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: JBY2
+INTEGER    :: I, J
+INTEGER    :: L, M, N
 
-INTEGER                   :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                       :: LDIMF
-REAL(EB)  FT(LDIMF*N,M)
-REAL(EB)  C1(M)
-REAL(EB)  C2(M)
-REAL(EB)  C3(M)
-REAL(EB)  C4(M)
-REAL(EB)  WORK(M+15)
-REAL(EB)   F(LDIMF*N,M)
+REAL(EB)   :: C1(M), C2(M), C3(M), C4(M)
+REAL(EB)   :: F(LDIMF*N,M)
+REAL(EB)   :: FT(LDIMF*N,M)
+REAL(EB)   :: WORK(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2132,28 +2202,26 @@ END SUBROUTINE VSCOSQ
 SUBROUTINE VSCSB1(L,M,N,LDIMF,F,FT,C1,C2)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: FT(LDIMF,N,M)
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: F(LDIMF,M,N)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-REAL(EB)  FT(LDIMF,N,M)
-REAL(EB)  C1(M)
-REAL(EB)  C2(M)
-REAL(EB)   F(LDIMF,M,N)
 DO  K=1,N
   DO  I=1,L
-    FT(I,K,1)=.5_EB*F(I,1,K)
+    FT(I,K,1)=0.5_EB*F(I,1,K)
   END DO
 END DO
 DO  K=1,N
@@ -2170,20 +2238,20 @@ END SUBROUTINE VSCSB1
 SUBROUTINE VSCSBA(M,LDIMF,FT,F)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: M
 
-
-INTEGER                       :: M
-INTEGER                       :: LDIMF
-REAL(EB)   F(LDIMF,M), FT(LDIMF,M)
+REAL(EB)   :: F(LDIMF,M), FT(LDIMF,M)
 
 DO  I=1,LDIMF
   F(I,1) = FT(I,1)
@@ -2206,23 +2274,22 @@ END SUBROUTINE VSCSBA
 SUBROUTINE VSCSF1(L,M,N,LDIMF,F,FT)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: FT(LDIMF,N,M)
+REAL(EB)   :: F(LDIMF,M,N)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-REAL(EB)   FT(LDIMF,N,M)
-REAL(EB)   F(LDIMF,M,N)
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=F(I,1,K)
@@ -2250,22 +2317,22 @@ END SUBROUTINE VSCSF1
 SUBROUTINE VSCSFA(M,LDIMF,F,FT,C1,C2)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: M
 
-
-INTEGER                       :: M
-INTEGER                       :: LDIMF
-REAL(EB)    FT(LDIMF,M)
-REAL(EB)    C1(M)
-REAL(EB)   F(LDIMF,M),  C2(M)
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: F(LDIMF,M)
+REAL(EB)   :: FT(LDIMF,M)
 
 DO  J=2,M
   DO  I=1,LDIMF
@@ -2282,25 +2349,24 @@ END SUBROUTINE VSCSFA
 SUBROUTINE VSCSQ1(L,M,N,LDIMF,F,FT,C1,C2)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: JBY2
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: F(LDIMF,M,N)
+REAL(EB)   :: FT(LDIMF,N,M)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-REAL(EB)  FT(LDIMF,N,M)
-REAL(EB)  C1(M)
-REAL(EB)    C2(M)
-REAL(EB)   F(LDIMF,M,N)
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=F(I,1,K)
@@ -2329,25 +2395,26 @@ END SUBROUTINE VSCSQ1
 SUBROUTINE VSCSQI(N,C1,C2,C3,C4,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
 !      ENTRY VSSNQI(N,C1,C2,C3,C4,WSAVE)
 
+INTEGER    :: I
+INTEGER    :: N
 
-INTEGER                       :: N
-REAL(EB)  C3(N)
-REAL(EB)   C4(N)
-REAL(EB)   WSAVE(N+15)
-REAL(EB)   C1(N),C2(N)
+REAL(EB)   :: C, S
+REAL(EB)   :: DX
+REAL(EB)   :: C1(N), C2(N), C3(N), C4(N)
+REAL(EB)   :: WSAVE(N+15)
 
-DX=PI/N
+DX=PI/REAL(N,EB)
 SCALE=SQRT(.5_EB)
 
 !     GENERATE A(I)+-B(I)
@@ -2355,11 +2422,11 @@ SCALE=SQRT(.5_EB)
 DO  I=1,(N-1)/2
   C=COS(I*DX)
   S=SIN(I*DX)
-  C1(I)=.5_EB*(S+C)
-  C2(I)=.5_EB*(C-S)
+  C1(I)=0.5_EB*(S+C)
+  C2(I)=0.5_EB*(C-S)
 END DO
 
-DX=PI/(2*N)
+DX=PI/REAL(2*N,EB)
 DO  I=1,N
   C=COS((I-.5_EB)*DX)
   S=SIN((I-.5_EB)*DX)
@@ -2377,24 +2444,27 @@ END SUBROUTINE VSCSQI
 SUBROUTINE VSINT(X,L,M,N,LDIMX,XT,C,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMX
+INTEGER    :: MODM
+INTEGER    :: MP1, MS2
+INTEGER    :: JC
+INTEGER    :: I, J
+INTEGER    :: L, M, N
 
-INTEGER                   :: L
-INTEGER                   :: M
-INTEGER                       :: N
-INTEGER                       :: LDIMX
-REAL(EB)  XT(LDIMX*N,M+1)
-REAL(EB)  C(M/2)
-REAL(EB)  WSAVE(M+16)
-REAL(EB)  X(LDIMX*N,M)
+REAL(EB)   :: XT(LDIMX*N,M+1)
+REAL(EB)   :: C(M/2)
+REAL(EB)   :: WSAVE(M+16)
+REAL(EB)   :: X(LDIMX*N,M)
+REAL(EB)   :: SQRT2I
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2433,32 +2503,33 @@ ELSE
   CALL VSINTA(M,LDIMX*N,MODM,XT,X)
 END IF
 RETURN
+
 END SUBROUTINE VSINT
 
 
 SUBROUTINE VSINT1(L,M,N,LDIMX,MODM,MS2,C,XT,X)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMX
+INTEGER    :: MODM
+INTEGER    :: MS2
+INTEGER    :: JC
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: C(*)
+REAL(EB)   :: X(LDIMX,M,N)
+REAL(EB)   :: XT(LDIMX,N,M+1)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMX
-INTEGER                   :: MODM
-INTEGER                   :: MS2
-REAL(EB)   C(*)
-REAL(EB)   X(LDIMX,M,N)
-REAL(EB)   XT(LDIMX,N,M+1)
 DO  J=1,MS2
   JC = M+1-J
   DO  K=1,N
@@ -2482,21 +2553,21 @@ END SUBROUTINE VSINT1
 SUBROUTINE VSINTA(M,LDIMX,MODM,X,XT)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMX
+INTEGER    :: MODM
+INTEGER    :: I, J
+INTEGER    :: M
 
-
-INTEGER                       :: M
-INTEGER                       :: LDIMX
-INTEGER                   :: MODM
-REAL(EB)   X(LDIMX,M),  XT(LDIMX,M+1)
+REAL(EB)   :: X(LDIMX,M), XT(LDIMX,M+1)
 
 DO  I=1,LDIMX
   X(I,1) = 0.5_EB*XT(I,1)
@@ -2519,11 +2590,11 @@ END SUBROUTINE VSINTA
 SUBROUTINE VSINTI(N,C,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
@@ -2538,23 +2609,25 @@ SUBROUTINE VSINTI(N,C,WSAVE)
 !                      TRANSFORM OF THIRD INDEX.  TO USE IN THIS CASE,
 !                      CALL ROUTINE WITH M AND N INTERCHANGED.
 
+INTEGER    :: K
+INTEGER    :: N
+INTEGER    :: NP1, NS2
 
+REAL(EB)   :: C(N/2), WSAVE (N+16)
+REAL(EB)   :: DT
 
-INTEGER                       :: N
-REAL(EB)   C(N/2),WSAVE (N+16)
-
-!                               INITIALIZE NOCOPY AND TPOSE TO DEFAULT
-!                               VALUES
+!  INITIALIZE NOCOPY AND TPOSE TO DEFAULT
+!  VALUES
 
 NOCOPY = .FALSE.
 TPOSE = .TRUE.
 
 IF (N <= 1) RETURN
 NP1 = N+1
-NS2 = N/2
+NS2 = INT(0.5*N)
 DT = PI/REAL(NP1,EB)
 DO  K=1,NS2
-  C(K) = 2._EB*SIN(K*DT)
+  C(K) = 2._EB*SIN(REAL(K*DT,EB))
 END DO
 CALL VRFFTI (NP1,WSAVE)
 RETURN
@@ -2564,11 +2637,11 @@ END SUBROUTINE VSINTI
 SUBROUTINE VSRFTB(F,L,M,N,LDIMF,FT,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
@@ -2587,14 +2660,13 @@ SUBROUTINE VSRFTB(F,L,M,N,LDIMF,FT,WSAVE)
 
 !     VSFFTPK, VERSION 2, JUNE 1988
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-REAL(EB)   FT(LDIMF,N,M)
-REAL(EB)   WSAVE(M+15)
-REAL(EB)   F(LDIMF,M,N)
+REAL(EB)   :: F(LDIMF,M,N)
+REAL(EB)   :: FT(LDIMF,N,M)
+REAL(EB)   :: WSAVE(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2628,22 +2700,21 @@ END SUBROUTINE VSRFTB
 SUBROUTINE VSRFTF(F,L,M,N,LDIMF,FT,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
-INTEGER                   :: L
-INTEGER                   :: M
-INTEGER                   :: N
-INTEGER                   :: LDIMF
-REAL(EB)  FT(LDIMF,N,M)
-REAL(EB)   WSAVE(M+15)
-REAL(EB)   F(LDIMF,N,M)
+INTEGER    :: LDIMF
+INTEGER    :: L, M, N
+
+REAL(EB)   :: F(LDIMF,N,M)
+REAL(EB)   :: FT(LDIMF,N,M)
+REAL(EB)   :: WSAVE(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2671,11 +2742,11 @@ END SUBROUTINE VSRFTF
 SUBROUTINE VSRFTI(N,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
@@ -2693,8 +2764,8 @@ SUBROUTINE VSRFTI(N,WSAVE)
 
 
 
-INTEGER                   :: N
-REAL(EB)   WSAVE(N+15)
+INTEGER    :: N
+REAL(EB)   :: WSAVE(N+15)
 
 !     INITIALIZE VRFFTPK ROUTINE
 
@@ -2706,20 +2777,19 @@ END SUBROUTINE VSRFTI
 SUBROUTINE VSRTB1(M,LDIMF,F,FT)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
-
-
-INTEGER                       :: M
-INTEGER                       :: LDIMF
-REAL(EB)   F(LDIMF,M),  FT(LDIMF,M)
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: M
+REAL(EB)   :: F(LDIMF,M), FT(LDIMF,M)
 
 DO  J=1,M
   DO  I=1,LDIMF
@@ -2733,23 +2803,22 @@ END SUBROUTINE VSRTB1
 SUBROUTINE VSRTF1(L,M,N,LDIMF,F,FT)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
+REAL(EB)   :: F(LDIMF,M,N)
+REAL(EB)   :: FT(LDIMF,N,M)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-REAL(EB)   FT(LDIMF,N,M)
-REAL(EB)   F(LDIMF,M,N)
 DO  K=1,N
   DO  J=1,M
     DO  I=1,L
@@ -2764,24 +2833,23 @@ END SUBROUTINE VSRTF1
 SUBROUTINE VSSINB(F,L,M,N,LDIMF,FT,C1,C2,WORK)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
-INTEGER                   :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                       :: LDIMF
-REAL(EB) FT(LDIMF*N,M)
-REAL(EB) C1(M)
-REAL(EB)  C2(M)
-REAL(EB)  WORK(M+15)
-REAL(EB)   F(LDIMF*N,M)
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: L, M, N
+
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: F(LDIMF*N,M)
+REAL(EB)   :: FT(LDIMF*N,M)
+REAL(EB)   :: WORK(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2798,7 +2866,7 @@ ELSE
     END DO
   END DO
 DO  I=1,LDIMF*N
-  FT(I,1) = .5_EB*F(I,M)
+  FT(I,1) = 0.5_EB*F(I,M)
 END DO
 END IF
 
@@ -2821,26 +2889,23 @@ END SUBROUTINE VSSINB
 SUBROUTINE VSSINF(F,L,M,N,LDIMF,FT,C1,C2,WORK)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: L, M, N
 
-
-INTEGER                   :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                       :: LDIMF
-REAL(EB)  FT(LDIMF*N,M)
-REAL(EB) C1(M)
-REAL(EB) C2(M)
-REAL(EB)  WORK(M+15)
-REAL(EB)   F(LDIMF*N,M)
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: F(LDIMF*N,M)
+REAL(EB)   :: FT(LDIMF*N,M)
+REAL(EB)   :: WORK(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2886,26 +2951,24 @@ END SUBROUTINE VSSINF
 SUBROUTINE VSSINQ(F,L,M,N,LDIMF,FT,C1,C2,C3,C4,WORK)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
-INTEGER                   :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                       :: LDIMF
-REAL(EB) FT(LDIMF*N,M)
-REAL(EB)  C1(M)
-REAL(EB)  C2(M)
-REAL(EB)  C3(M)
-REAL(EB)  C4(M)
-REAL(EB) WORK(M+15)
-REAL(EB)   F(LDIMF*N,M)
+INTEGER    :: LDIMF
+INTEGER    :: JBY2
+INTEGER    :: I, J
+INTEGER    :: L, M, N
+
+REAL(EB)   :: C1(M), C2(M), C3(M), C4(M)
+REAL(EB)   :: F(LDIMF*N,M)
+REAL(EB)   :: FT(LDIMF*N,M)
+REAL(EB)   :: WORK(M+15)
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2959,25 +3022,23 @@ END SUBROUTINE VSSINQ
 SUBROUTINE VSSNB1(L,M,N,LDIMF,F,FT,C1,C2)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: F(LDIMF,M,N)
+REAL(EB)   :: FT(LDIMF,N,M)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-REAL(EB)  FT(LDIMF,N,M)
-REAL(EB)  C1(M)
-REAL(EB) C2(M)
-REAL(EB)   F(LDIMF,M,N)
 DO  J=2,M
   DO  K=1,N
     DO  I=1,L
@@ -2987,7 +3048,7 @@ DO  J=2,M
 END DO
 DO  K=1,N
   DO  I=1,L
-    FT(I,K,1) = .5_EB*F(I,M,K)
+    FT(I,K,1) = 0.5_EB*F(I,M,K)
   END DO
 END DO
 RETURN
@@ -2998,17 +3059,16 @@ SUBROUTINE VSSNBA(M,LDIMF,F,FT)
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: M
 
-
-INTEGER                       :: M
-INTEGER                       :: LDIMF
-
-REAL(EB)   F(LDIMF,M),  FT(LDIMF,M)
+REAL(EB)   :: F(LDIMF,M),  FT(LDIMF,M)
 
 DO  I=1,LDIMF
   F(I,1) = FT(I,1)
@@ -3032,23 +3092,21 @@ END SUBROUTINE VSSNBA
 SUBROUTINE VSSNF1(L,M,N,LDIMF,F,FT)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: FT(LDIMF,N,M), F(LDIMF,M,N)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-REAL(EB)   FT(LDIMF,N,M)
-REAL(EB)   F(LDIMF,M,N)
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=F(I,1,K)
@@ -3076,22 +3134,21 @@ END SUBROUTINE VSSNF1
 SUBROUTINE VSSNFA(M,LDIMF,F,FT,C1,C2)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: I, J
+INTEGER    :: M
 
-
-INTEGER                       :: M
-INTEGER                       :: LDIMF
-REAL(EB)   FT(LDIMF,M)
-REAL(EB)    C1(M)
-REAL(EB)   F(LDIMF,M), C2(M)
+REAL(EB)   :: C1(M), C2(M)
+REAL(EB)   :: FT(LDIMF,M), F(LDIMF,M)
 
 DO  J=2,M
   DO  I=1,LDIMF
@@ -3108,25 +3165,23 @@ END SUBROUTINE VSSNFA
 SUBROUTINE VSSNQ1(L,M,N,LDIMF,F,FT,C1,C2)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: LDIMF
+INTEGER    :: JBY2
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
 
+REAL(EB)   :: FT(LDIMF,N,M), F(LDIMF,M,N)
+REAL(EB)   :: C1(M), C2(M)
 
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: LDIMF
-REAL(EB) FT(LDIMF,N,M)
-REAL(EB)  C1(M)
-REAL(EB)  C2(M)
-REAL(EB)   F(LDIMF,M,N)
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=F(I,1,K)
@@ -3155,19 +3210,21 @@ END SUBROUTINE VSSNQ1
 SUBROUTINE VRADF2 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
-REAL(EB) CH(MDIMCH,IDO,2,L1), CC(MDIMC,IDO,L1,2),  WA1(IDO)
-INTEGER  :: MP, IDO, L1
-INTEGER  :: MDIMC
-INTEGER :: MDIMCH
+INTEGER    :: I, K, M
+INTEGER    :: IDP2, IC
+INTEGER    :: MP, IDO, L1
+INTEGER    :: MDIMC, MDIMCH
+
+REAL(EB)   :: CH(MDIMCH,IDO,2,L1), CC(MDIMC,IDO,L1,2),  WA1(IDO)
 
 DO  K=1,L1
   DO  M=1,MP
@@ -3207,22 +3264,23 @@ END SUBROUTINE VRADF2
 SUBROUTINE VRADF3 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: I, K, M
+INTEGER    :: MP, IDO, L1
+INTEGER    :: MDIMC, MDIMCH
+INTEGER    :: IDP2, IC
 
-INTEGER                       :: MP, IDO, L1
-REAL(EB)    CH(MDIMCh,IDO,3,L1)  ,CC(MDIMC,IDO,L1,3) 
-INTEGER                   :: MDIMC
-INTEGER                   :: MDIMCH
-REAL(EB)  WA1(IDO)
-REAL(EB)   WA2(IDO)
+REAL(EB)   :: ARG, TAUR, TAUI
+REAL(EB)   :: CH(MDIMCH,IDO,3,L1)  ,CC(MDIMC,IDO,L1,3) 
+REAL(EB)   :: WA1(IDO), WA2(IDO)
 
 ARG=2._EB*PI/3._EB 
 TAUR=COS(ARG)
@@ -3272,23 +3330,25 @@ END SUBROUTINE VRADF3
 SUBROUTINE VRADF4 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2,WA3)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: I, K
+INTEGER    :: M
+INTEGER    :: MP, IDO, L1
+INTEGER    :: IDP2, IC
+INTEGER    :: MDIMC, MDIMCH
 
-INTEGER                       :: MP, IDO, L1
-INTEGER                   :: MDIMC
-REAL(EB)  CC(MDIMC,IDO,L1,4)   ,CH(MDIMCH,IDO,4,L1)
-INTEGER                   :: MDIMCH
-REAL(EB)    WA1(IDO)
-REAL(EB)   WA2(IDO)
-REAL(EB)   WA3(IDO)
+REAL(EB)   :: HSQT2
+REAL(EB)   :: CC(MDIMC,IDO,L1,4), CH(MDIMCH,IDO,4,L1)
+REAL(EB)   :: WA1(IDO), WA2(IDO), WA3(IDO)
+
 
 HSQT2=SQRT(2.0_EB)*0.5_EB
 DO  M=1,MP
@@ -3358,25 +3418,23 @@ END SUBROUTINE VRADF4
 SUBROUTINE VRADF5 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2,WA3,WA4)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: I, K, M
+INTEGER    :: IDP2, IC
+INTEGER    :: MP, IDO, L1
+INTEGER    :: MDIMC, MDIMCH
 
-INTEGER                       :: MP
-INTEGER                      :: IDO,L1
-INTEGER                   :: MDIMC
-REAL(EB)   CC(MDIMC,IDO,L1,5)    ,CH(MDIMCH,IDO,5,L1)
-INTEGER                   :: MDIMCH
-REAL(EB)   WA1(IDO)
-REAL(EB)   WA2(IDO)
-REAL(EB)   WA3(IDO)
-REAL(EB)    WA4(IDO)
+REAL(EB)   :: CC(MDIMC,IDO,L1,5), CH(MDIMCH,IDO,5,L1)
+REAL(EB)   :: WA1(IDO), WA2(IDO), WA3(IDO), WA4(IDO)
+REAL(EB)   :: ARG, TR11, TI11, TR12, TI12
 
 ARG=2._EB*PI/5._EB 
 TR11=COS(ARG)
@@ -3487,28 +3545,34 @@ END SUBROUTINE VRADF5
 SUBROUTINE VRADFG(MP,IDO,IP,L1,IDL1,CC,C1,C2,MDIMC, CH,CH2,MDIMCH,WA)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: MDIMC, MDIMCH
+INTEGER    :: IPPH, IPP2, IDP2, NBD, IDIJ
+INTEGER    :: I, J, K
+INTEGER    :: L, M
+INTEGER    :: IDO, L1
+INTEGER    :: IC, IK, IP, IS
+INTEGER    :: JC, LC, MP
+INTEGER    :: J2
+INTEGER    :: IDL1
 
-INTEGER                       :: MP, IDO
-INTEGER                       :: IP, L1
-INTEGER                       :: IDL1
-REAL(EB)   CC(MDIMC,IDO,IP,L1)
-REAL(EB)   C1(MDIMC,IDO,L1,IP)
-REAL(EB)    C2(MDIMC,IDL1,IP)
-INTEGER                   :: MDIMC
-REAL(EB)   CH2(MDIMCH,IDL1,IP)
-INTEGER                   :: MDIMCH
-REAL(EB)    WA(IDO)
-REAL(EB)    CH(MDIMCH,IDO,L1,IP) 
-    
+REAL(EB)   :: ARG, TPI, DCP, DSP
+REAL(EB)   :: AI1, AI2, AR1, AR2, AR1H, AR2H
+REAL(EB)   :: DC2, DS2
+
+REAL(EB)   :: CC(MDIMC,IDO,IP,L1)
+REAL(EB)   :: C1(MDIMC,IDO,L1,IP), C2(MDIMC,IDL1,IP)
+REAL(EB)   :: CH2(MDIMCH,IDL1,IP)
+REAL(EB)   :: WA(IDO)
+REAL(EB)   :: CH(MDIMCH,IDO,L1,IP) 
 
 TPI=2._EB*PI
 ARG = TPI/REAL(IP,EB)
@@ -3703,29 +3767,29 @@ RETURN
   END DO
 END DO
 RETURN
+
 END SUBROUTINE VRADFG
 
 
 SUBROUTINE VRFFTB(M,N,R,MDIMR,RT,WSAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: MDIMR
+INTEGER    :: M, N
 
+REAL(EB)   :: RT(M,N)
+REAL(EB)   :: WSAVE(N+15)
+REAL(EB)   :: R(MDIMR,N)
 
-INTEGER                   :: M
-INTEGER                   :: N
-INTEGER                   :: MDIMR
-REAL(EB)       RT(M,N)
-REAL(EB)       WSAVE(N+15)
-REAL(EB)       R(MDIMR,N)
 IF (N == 1) RETURN
 CALL VRFTB1 (M,N,R,MDIMR,RT,WSAVE(1),WSAVE(N+1))
 RETURN
@@ -3735,30 +3799,34 @@ END SUBROUTINE VRFFTB
 SUBROUTINE VRFTB1 (M,N,C,MDIMC,CH,WA,FAC)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: MDIMC, IDO
+INTEGER    :: I, J
+INTEGER    :: IW, IX2, IX3, IX4, IP
+INTEGER    :: K1, IDL1
+INTEGER    :: M, N
+INTEGER    :: NA, NF
+INTEGER    :: L1, L2
 
+REAL(EB)   :: C(MDIMC,N)
+REAL(EB)   :: WA(N)
+REAL(EB)   :: FAC(15)
+REAL(EB)   :: CH(M,N)
 
-INTEGER                       :: M
-INTEGER                       :: N
-REAL(EB)  C(MDIMC,N)
-INTEGER   :: MDIMC
-REAL(EB)    WA(N)
-REAL(EB)    FAC(15)
-REAL(EB)    CH(M,N)
-NF = FAC(2)
+NF = INT(FAC(2))
 NA = 0
 L1 = 1
 IW = 1
 DO  K1=1,NF
-  IP = FAC(K1+2)
+  IP = INT(FAC(K1+2))
   L2 = IP*L1
   IDO = N/L2
   IDL1 = IDO*L1
@@ -3766,13 +3834,16 @@ DO  K1=1,NF
   IX2 = IW+IDO
   IX3 = IX2+IDO
   IF (NA /= 0) GO TO 101
+  
   CALL VRADB4 (M,IDO,L1,C,MDIMC,CH,M,WA(IW),WA(IX2),WA(IX3))
+  
   GO TO 102
   101    CALL VRADB4 (M,IDO,L1,CH,M,C,MDIMC,WA(IW),WA(IX2),WA(IX3))
   102    NA = 1-NA
   GO TO 115
   103    IF (IP /= 2) GO TO 106
   IF (NA /= 0) GO TO 104
+  
   CALL VRADB2 (M,IDO,L1,C,MDIMC,CH,M,WA(IW))
   GO TO 105
   104    CALL VRADB2 (M,IDO,L1,CH,M,C,MDIMC,WA(IW))
@@ -3781,6 +3852,7 @@ DO  K1=1,NF
   106    IF (IP /= 3) GO TO 109
   IX2 = IW+IDO
   IF (NA /= 0) GO TO 107
+  
   CALL VRADB3 (M,IDO,L1,C,MDIMC,CH,M,WA(IW),WA(IX2))
   GO TO 108
   107    CALL VRADB3 (M,IDO,L1,CH,M,C,MDIMC,WA(IW),WA(IX2))
@@ -3791,12 +3863,14 @@ DO  K1=1,NF
   IX3 = IX2+IDO
   IX4 = IX3+IDO
   IF (NA /= 0) GO TO 110
+  
   CALL VRADB5 (M,IDO,L1,C,MDIMC,CH,M,WA(IW),WA(IX2),WA(IX3),WA(IX4))
   GO TO 111
   110 CALL VRADB5 (M,IDO,L1,CH,M,C,MDIMC,WA(IW),WA(IX2),WA(IX3),WA(IX4))
   111    NA = 1-NA
   GO TO 115
   112    IF (NA /= 0) GO TO 113
+  
   CALL VRADBG (M,IDO,IP,L1,IDL1,C,C,C,MDIMC,CH,CH,M,WA(IW))
   GO TO 114
   113    CALL VRADBG (M,IDO,IP,L1,IDL1,CH,CH,CH,M,C,C,MDIMC,WA(IW))
@@ -3826,31 +3900,33 @@ ELSE
   END DO
 END IF
 RETURN
+
 END SUBROUTINE VRFTB1
 
 
 SUBROUTINE VRADB2 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: MDIMC, MDIMCH
+INTEGER    :: I, K
+INTEGER    :: M
+INTEGER    :: MP, IDO, L1
+INTEGER    :: IDP2, IC
 
-INTEGER                       :: MP
-INTEGER                   :: IDO
-INTEGER                       :: L1
-INTEGER                   :: MDIMC
-REAL(EB)   CH(MDIMCH,IDO,L1,2)
-INTEGER                   :: MDIMCH
-REAL(EB) WA1(IDO)
-REAL(EB)    CC(MDIMC,IDO,2,L1) 
+REAL(EB)   :: CH(MDIMCH,IDO,L1,2)
+REAL(EB)   :: WA1(IDO)
+REAL(EB)   :: CC(MDIMC,IDO,2,L1) 
 
+ 
 DO  K=1,L1
   DO  M=1,MP
     CH(M,1,K,1) = CC(M,1,1,K)+CC(M,IDO,2,K)
@@ -3888,25 +3964,25 @@ END SUBROUTINE VRADB2
 SUBROUTINE VRADB3 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: MDIMC, MDIMCH
+INTEGER    :: I, K
+INTEGER    :: M
+INTEGER    :: MP, IDO, L1
+INTEGER    :: IDP2, IC
 
-INTEGER                       :: MP
-INTEGER                       :: IDO
-INTEGER                       :: L1
-INTEGER                   :: MDIMC
-REAL(EB)   CH(MDIMCH,IDO,L1,3)
-INTEGER                   :: MDIMCH
-REAL(EB)   WA1(IDO)
-REAL(EB)    WA2(IDO)
-REAL(EB)    CC(MDIMC,IDO,3,L1)   
+REAL(EB)   :: ARG, TAUR, TAUI
+REAL(EB)   :: CH(MDIMCH,IDO,L1,3)
+REAL(EB)   :: WA1(IDO), WA2(IDO)
+REAL(EB)   :: CC(MDIMC,IDO,3,L1) 
 
 ARG=2._EB*PI/3._EB 
 TAUR=COS(ARG)
@@ -3950,32 +4026,32 @@ DO  M=1,MP
    END DO
 END DO
 RETURN
+
 END SUBROUTINE VRADB3
 
 
 SUBROUTINE VRADB4 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2,WA3)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: MDIMC, MDIMCH
+INTEGER    :: M
+INTEGER    :: I, K
+INTEGER    :: MP, IDO, L1
+INTEGER    :: IDP2, IC
 
-INTEGER                       :: MP
-INTEGER                   :: IDO
-INTEGER                       :: L1
-INTEGER                   :: MDIMC
-REAL(EB)     CH(MDIMCH,IDO,L1,4)
-INTEGER                   :: MDIMCH
-REAL(EB)   WA1(IDO)
-REAL(EB)    WA2(IDO)
-REAL(EB)   WA3(IDO)
-REAL(EB)    CC(MDIMC,IDO,4,L1) 
+REAL(EB)   :: SQRT2
+REAL(EB)   :: CH(MDIMCH,IDO,L1,4)
+REAL(EB)   ::  WA1(IDO), WA2(IDO), WA3(IDO)
+REAL(EB)   :: CC(MDIMC,IDO,4,L1) 
 
 SQRT2=SQRT(2.0_EB)
 DO  M=1,MP
@@ -4038,27 +4114,26 @@ END SUBROUTINE VRADB4
 SUBROUTINE VRADB5 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2,WA3,WA4)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+INTEGER    :: MDIMC, MDIMCH
+INTEGER    :: I, K
+INTEGER    :: M
+INTEGER    :: MP, IDO, L1
+INTEGER    :: IDP2, IC
 
-INTEGER                       :: MP
-INTEGER                       :: IDO
-INTEGER                       :: L1
-INTEGER                   :: MDIMC
-REAL(EB)   CH(MDIMCH,IDO,L1,5)
-INTEGER                   :: MDIMCH
-REAL(EB)   WA1(IDO)
-REAL(EB)  WA2(IDO)
-REAL(EB)   WA3(IDO)
-REAL(EB)   WA4(IDO)
-REAL(EB)    CC(MDIMC,IDO,5,L1) 
+REAL(EB)   :: ARG, TR11, TI11, TR12, TI12
+REAL(EB)   :: CH(MDIMCH,IDO,L1,5)
+REAL(EB)   :: WA1(IDO), WA2(IDO), WA3(IDO), WA4(IDO)
+REAL(EB)   :: CC(MDIMC,IDO,5,L1) 
+
 
 ARG=2._EB*PI/5._EB 
 TR11=COS(ARG)
@@ -4155,23 +4230,29 @@ END SUBROUTINE VRADB5
 SUBROUTINE VRADBG (MP,IDO,IP,L1,IDL1,CC,C1,C2,MDIMC, CH,CH2,MDIMCH,WA)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
-REAL(EB)      CH(MDIMCH,IDO,L1,IP)    ,CC(MDIMC,IDO,IP,L1) ,C1(MDIMC,IDO,L1,IP)     ,C2(MDIMC,IDL1,IP), &
-               CH2(MDIMCH,IDL1,IP)       ,WA(IDO)
 
-INTEGER                       :: MP
-INTEGER      :: IDO, L1
-INTEGER                       :: IP
-INTEGER                       :: IDL1
-INTEGER                   :: MDIMC
-INTEGER                   :: MDIMCH
+INTEGER    :: MDIMC, MDIMCH
+INTEGER    :: I, J, K
+INTEGER    :: L, M
+INTEGER    :: IC, IK, IP, IS
+INTEGER    :: MP, L1, IDO, NBD
+INTEGER    :: IDL1, IDP2, IPP2
+INTEGER    :: IPPH, IDIJ
+INTEGER    :: JC, LC, J2
+
+REAL(EB)   :: ARG, TPI, DCP, DSP
+REAL(EB)   :: AR1, AR2, AI1, AI2, AR1H, AR2H
+REAL(EB)   :: DC2, DS2
+REAL(EB)   ::  CH(MDIMCH,IDO,L1,IP), CC(MDIMC,IDO,IP,L1), C1(MDIMC,IDO,L1,IP), C2(MDIMC,IDL1,IP), &
+               CH2(MDIMCH,IDL1,IP), WA(IDO)
 
 TPI=2._EB*PI
 ARG = TPI/REAL(IP,EB)
@@ -4358,6 +4439,7 @@ DO  J=2,IP
   END DO
 END DO
 143 RETURN
+
 END SUBROUTINE VRADBG
 
 
@@ -4399,12 +4481,14 @@ SUBROUTINE SSWAP(N,SX,INCX,SY,INCY)
 !***ROUTINES CALLED  (NONE)
 !***END PROLOGUE  SSWAP
 
+INTEGER    :: INCX, INCY
+INTEGER    :: I
+INTEGER    :: M, N
+INTEGER    :: IX, IY, MP1, NS
 
+REAL(EB)   :: SX(1), SY(1)
+REAL(EB)   :: STEMP1, STEMP2, STEMP3
 
-INTEGER                       :: N
-INTEGER                       :: INCX
-INTEGER                       :: INCY
-REAL(EB) SX(1),SY(1),STEMP1,STEMP2,STEMP3
 !***FIRST EXECUTABLE STATEMENT  SSWAP
 IF(N<=0)RETURN
 IF(INCX==INCY) THEN
@@ -4473,27 +4557,31 @@ SUBROUTINE H3CSIS(RS,RF,L,LBDCND,TS,TF,M,MBDCND,PS,PF,N,NBDCND,  &
     ELMBDA,LDIMF,MDIMF,IERROR,SAVE,W,HX,HY)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+INTEGER    :: IERR1
+INTEGER    :: IERROR
+INTEGER    :: LDIMF, MDIMF
+INTEGER    :: LBDCND, MBDCND, NBDCND
+INTEGER    :: I, J
+INTEGER    :: L, M, N
+INTEGER    :: IAL, IAM, IBL, IBM
+INTEGER    :: ICM, ICL, IDL, IDM, ISL, ISM, ISVPS
 
-REAL(EB)   SAVE(-3:*),W(*),HX(0:*),HY(0:*)
-REAL(EB)  RS, RF, TS, TF, PS, PF, ELMBDA
-INTEGER                       :: L
-INTEGER                       :: LBDCND
-INTEGER                       :: M
-INTEGER                       :: MBDCND
-INTEGER                       :: N
-INTEGER                       :: NBDCND
-INTEGER                   :: LDIMF
-INTEGER                   :: MDIMF
-INTEGER                      :: IERROR
-
-!                               CHECK FOR INVALID INPUT
+REAL(EB)   :: RS, RF, TS, TF, PS, PF, ELMBDA
+REAL(EB)   :: DR, DT, DP
+REAL(EB)   :: DRBY2, DTBY2
+REAL(EB)   :: DRSQR, DTSQR, DPSQR
+REAL(EB)   :: HXM, HXP
+REAL(EB)   :: HYM, HYP
+REAL(EB)   :: SUM, S3
+REAL(EB)   :: SAVE(-3:*),W(*),HX(0:*),HY(0:*)
+!  CHECK FOR INVALID INPUT
 
 IERROR = 0
 
@@ -4597,10 +4685,10 @@ END IF
 IF (IERROR/=0) THEN
   RETURN
 ELSE
-  SAVE(1) = IERROR
+  SAVE(1) = REAL(IERROR,EB)
 END IF
 
-!                               DEFINE GRID PARAMETERS
+!  DEFINE GRID PARAMETERS
 
 DR = (RF-RS)/FLOAT(L)
 DRBY2 = DR/2._EB 
@@ -4611,7 +4699,7 @@ DTSQR = 1._EB/ (DT**2)
 DP = (PF-PS)/FLOAT(N)
 DPSQR = 1._EB/ (DP**2)
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IAL = 13
 IBL = IAL + L
@@ -4625,12 +4713,12 @@ IDM = ICM + M
 ISM = IDM + M
 ISVPS = ISM + M
 
-!                               DEFINE AL,BL,CL,DL,SL ARRAYS IN
-!                               ARRAY SAVE.  SL IS SYMMETRIZER FOR
-!                               R-OPERATOR.
+!  DEFINE AL,BL,CL,DL,SL ARRAYS IN
+!  ARRAY SAVE.  SL IS SYMMETRIZER FOR
+!  R-OPERATOR.
 DO  I = 1,L
-  HXM = .5_EB*(HX(I-1)+HX(I))
-  HXP = .5_EB*(HX(I)+HX(I+1))
+  HXM = 0.5_EB*(HX(I-1)+HX(I))
+  HXP = 0.5_EB*(HX(I)+HX(I+1))
 !MCG      RI = RS + (I-.5)*DR
 !MCG      SAVE(IDL+I) = 1._EB/RI**2
   SAVE(IDL+I) = 1._EB 
@@ -4643,7 +4731,7 @@ DO  I = 1,L
   SAVE(ISL+I) = 1._EB 
 END DO
 
-!                               DEFINE BOUNDARY COEFFICIENTS
+!  DEFINE BOUNDARY COEFFICIENTS
 
 SELECT CASE(LBDCND)
 CASE(1:2) ; GO TO 110
@@ -4675,11 +4763,11 @@ GO TO 160
 SAVE(IBL+L) = SAVE(IBL+L) + SAVE(ICL+L)
 160 CONTINUE
 
-!                               DEFINE ARRAYS AM,BM,CM,DM,SM.  SM IS
-!                               SYMMETRIZER FOR THETA-OPERATOR.
+!  DEFINE ARRAYS AM,BM,CM,DM,SM.  SM IS
+!  SYMMETRIZER FOR THETA-OPERATOR.
 DO  J = 1,M
-  HYM = .5_EB*(HY(J-1)+HY(J))
-  HYP = .5_EB*(HY(J)+HY(J+1))
+  HYM = 0.5_EB*(HY(J-1)+HY(J))
+  HYP = 0.5_EB*(HY(J)+HY(J+1))
 !MCG      TJ = TS + (J-.5)*DT
 !MCG      SAVE(ISM+J) = SIN(TJ)
   SAVE(ISM+J) = 1._EB 
@@ -4692,7 +4780,7 @@ DO  J = 1,M
   SAVE(IBM+J) = - (SAVE(IAM+J)+SAVE(ICM+J))
 END DO
 
-!                               DEFINE BOUNDARY COEFFICIENTS
+!  DEFINE BOUNDARY COEFFICIENTS
 
 SELECT CASE(MBDCND)
 CASE(1:2) ; GO TO 180
@@ -4726,14 +4814,14 @@ GO TO 230
 SAVE(IBM+M) = SAVE(IBM+M) + SAVE(ICM+M)
 230 CONTINUE
 
-!                               INITIALIZE SOLVER ROUTINE S3CCIS
+!  INITIALIZE SOLVER ROUTINE S3CCIS
 
 CALL S3CCIS(L,SAVE(IAL+1),SAVE(IBL+1),SAVE(ICL+1), M,SAVE(IAM+1:IAM+M),  &
     SAVE(IBM+1),SAVE(ICM+1),SAVE(IDM+1),NBDCND,N,LDIMF,  &
     MDIMF,IERR1,SAVE(ISVPS+1),W)
 
-!                               TEST ERROR FLAG FROM S3CCIS FOR
-!                               INTERNAL ERROR
+!  TEST ERROR FLAG FROM S3CCIS FOR
+!  INTERNAL ERROR
 
 IF (IERR1/=0) THEN
   SAVE(1) = 99._EB 
@@ -4741,14 +4829,14 @@ IF (IERR1/=0) THEN
   RETURN
 END IF
 
-!                               SCALE RADIAL COEFFICIENTS
+!  SCALE RADIAL COEFFICIENTS
 DO  I = 1,L
   SAVE(IAL+I) = SAVE(IAL+I)*SAVE(IDL+I)
   SAVE(ICL+I) = SAVE(ICL+I)*SAVE(IDL+I)
   SAVE(IBL+I) = SAVE(IBL+I)*SAVE(IDL+I)
 END DO
 
-!                               COMPUTE SCALING FOR SINGULAR PROBLEMS
+!  COMPUTE SCALING FOR SINGULAR PROBLEMS
 
 SUM = 0._EB 
 DO  J = 1,M
@@ -4763,23 +4851,23 @@ DO  I = 1,L
 END DO
 SAVE(11) = SUM*S3*N
 
-!                               RESTORE ARRAY DM
+!  RESTORE ARRAY DM
 
 DO  J = 1,M
   SAVE(IDM+J) = SAVE(IDM+J)/DPSQR
 END DO
 
-!                               SAVE PARAMETERS FOR HS3SPH IN SAVE ARRAY
+!  SAVE PARAMETERS FOR HS3SPH IN SAVE ARRAY
 
 SAVE(2) = DR
-SAVE(3) = L
-SAVE(4) = LBDCND
+SAVE(3) = REAL(L,EB)
+SAVE(4) = REAL(LBDCND,EB)
 SAVE(5) = DT
-SAVE(6) = M
-SAVE(7) = MBDCND
+SAVE(6) = REAL(M,EB)
+SAVE(7) = REAL(MBDCND,EB)
 SAVE(8) = DP
-SAVE(9) = N
-SAVE(10) = NBDCND
+SAVE(9) = REAL(N,EB)
+SAVE(10) = REAL(NBDCND,EB)
 SAVE(12) = ELMBDA
 
 SAVE(-1) = KAPPA
@@ -4794,54 +4882,65 @@ SUBROUTINE H3CSSS(BDRS,BDRF,BDTS,BDTF,BDPS,BDPF,LDIMF,MDIMF,F,  &
     PERTRB,SAVE,W,HX,HY)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-REAL(EB) BDRS(MDIMF,*), BDRF(MDIMF,*), BDTS(LDIMF,*),BDTF(LDIMF,*),BDPS(LDIMF,*),BDPF(LDIMF,*)
-INTEGER                   :: LDIMF
-INTEGER                   :: MDIMF
-REAL(EB) F(LDIMF,MDIMF,*)
-REAL(EB) PERTRB
-REAL(EB) SAVE(-3:*)
-REAL(EB) W(*)
-REAL(EB) HX(0:*)
-REAL(EB) HY(0:*)
+INTEGER    :: ISING 
+INTEGER    :: LDIMF, MDIMF
+INTEGER    :: LBDCND, MBDCND, NBDCND
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
+INTEGER    :: IAL, IAM, IBL, IBM
+INTEGER    :: ICM, ICL, IDL, IDM, ISL, ISM, ISVPS
+
+REAL(EB)   :: DPR, DPSQR, ELMBDA, SCAL
+REAL(EB)   :: DR, DT, DP
+REAL(EB)   :: SUM
+REAL(EB)   :: PRTSAV, PERTRB, PERT
+
+REAL(EB)   :: BDRS(MDIMF,*), BDRF(MDIMF,*), BDTS(LDIMF,*),BDTF(LDIMF,*),BDPS(LDIMF,*),BDPF(LDIMF,*)
+REAL(EB)   :: F(LDIMF,MDIMF,*)
+REAL(EB)   :: SAVE(-3:*)
+REAL(EB)   :: W(*)
+REAL(EB)   :: HX(0:*)
+REAL(EB)   :: HY(0:*)
  
-!                               CHECK VALUE OF IERROR (=SAVE(1)).
-!                               IF NON-ZERO, RETURN.
+
+!  CHECK VALUE OF IERROR (=SAVE(1)).
+!  IF NON-ZERO, RETURN.
 
 IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 
-!                               GET PARAMETERS FOR H3CSSS FROM SAVE
-!                               ARRAY WHERE THEY WERE STORED IN
-!                               INITIALIZATION SUBROUTINE H3CSIS.
+!  GET PARAMETERS FOR H3CSSS FROM SAVE
+!  ARRAY WHERE THEY WERE STORED IN
+!  INITIALIZATION SUBROUTINE H3CSIS.
 
 KAPPA = SAVE(-1)   ! EXTRA VARIABLES ADDED TO SAVE ARRAY
 NMAX  = SAVE(-2)
 IKPWR = SAVE(-3)
 
 DR = SAVE(2)
-L = SAVE(3)
-LBDCND = SAVE(4)
+L = INT(SAVE(3))
+LBDCND = INT(SAVE(4))
 
 DT = SAVE(5)
-M = SAVE(6)
+M = INT(SAVE(6))
 
-MBDCND = SAVE(7)
+MBDCND = INT(SAVE(7))
 
 DP = SAVE(8)
 DPR = 1._EB/DP
 DPSQR = 2._EB/ (DP**2)
-N = SAVE(9)
-NBDCND = SAVE(10)
+N = INT(SAVE(9))
+NBDCND = INT(SAVE(10))
 
 ELMBDA = SAVE(12)
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IAL = 13
 IBL = IAL + L
@@ -4855,7 +4954,7 @@ IDM = ICM + M
 ISM = IDM + M
 ISVPS = ISM + M
 
-!                               ENTER BOUNDARY DATA FOR R-BOUNDARIES
+!  ENTER BOUNDARY DATA FOR R-BOUNDARIES
 
 SELECT CASE(LBDCND)
 CASE(1:2) ; GO TO 180
@@ -4904,7 +5003,7 @@ DO  K = 1,N
 END DO
 310 CONTINUE
 
-!                               ENTER BOUNDARY DATA FOR THETA-BOUNDARIES
+!  ENTER BOUNDARY DATA FOR THETA-BOUNDARIES
 
 SELECT CASE(MBDCND)
 CASE(1:2) ; GO TO 320
@@ -4959,7 +5058,7 @@ DO  K = 1,N
 END DO
 450 CONTINUE
 
-!                               ENTER BOUNDARY DATA FOR PHI-BOUNDARIES
+!  ENTER BOUNDARY DATA FOR PHI-BOUNDARIES
 
 SELECT CASE(NBDCND+1)
 CASE(1)   ; GO TO 590
@@ -5015,11 +5114,11 @@ END DO
 PERTRB = 0._EB 
 ISING = 0
 
-!                               FOR SINGULAR PROBLEMS ADJUST DATA TO
-!                               INSURE A SOLUTION WILL EXIST.  GO THRU
-!                               THIS CODE TWICE: ISING=1 FOR CALCULATING
-!                               PERTRB; ISING=2 FOR NORMALIZING SOLUTION
-!                               AFTER IT IS COMPUTED.
+!  FOR SINGULAR PROBLEMS ADJUST DATA TO
+!  INSURE A SOLUTION WILL EXIST.  GO THRU
+!  THIS CODE TWICE: ISING=1 FOR CALCULATING
+!  PERTRB; ISING=2 FOR NORMALIZING SOLUTION
+!  AFTER IT IS COMPUTED.
 
 SELECT CASE(LBDCND)
 CASE(1:2) ; GO TO 770
@@ -5074,7 +5173,7 @@ DO  I = 1,L
 END DO
 
 PERT = SUM/SAVE(11)
-!                               ADJUST F ARRAY BY PERT
+!  ADJUST F ARRAY BY PERT
 
 DO  K = 1,N
   DO  J = 1,M
@@ -5084,8 +5183,8 @@ DO  K = 1,N
   END DO
 END DO
 
-!                               IF NORMALIZING SOLUTION, RESTORE PERTRB
-!                               AND JUMP TO END
+!  IF NORMALIZING SOLUTION, RESTORE PERTRB
+!  AND JUMP TO END
 
 IF (ISING==2) THEN
   PERTRB = PRTSAV
@@ -5098,8 +5197,8 @@ PRTSAV = PERT
 
 770 CONTINUE
 
-!                               SCALE RIGHT SIDE OF EQUATION BEFORE
-!                               CALL TO S3CCSS
+!  SCALE RIGHT SIDE OF EQUATION BEFORE
+!  CALL TO S3CCSS
 
 DO  K = 1,N
   DO  J = 1,M
@@ -5109,12 +5208,12 @@ DO  K = 1,N
   END DO
 END DO
 
-!                               SOLVE SYSTEM USING S3CCSS
+!  SOLVE SYSTEM USING S3CCSS
 
 CALL S3CCSS(LDIMF,MDIMF,F,SAVE(ISVPS+1),W)
 
-!                               IF A SINGULAR PROBLEM,
-!                               RE-NORMALIZE SOLUTION (ISING=2)
+!  IF A SINGULAR PROBLEM,
+!  RE-NORMALIZE SOLUTION (ISING=2)
 
 IF (ISING==1) THEN
   ISING = 2
@@ -5133,24 +5232,25 @@ SUBROUTINE S3CCIS(L,AL,BL,CL,M,AM,BM,CM,DM,NPEROD,N,LDIMF,MDIMF,  &
     IERROR,SAVE,W)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+INTEGER    :: IGRID
+INTEGER    :: IERROR
+INTEGER    :: LDIMF, MDIMF
+INTEGER    :: J
+INTEGER    :: L, M, N
+INTEGER    :: NPEROD
 
+REAL(EB)   :: AL(L),BL(L),CL(L)
+REAL(EB)   :: AM(M),BM(M),CM(M),DM(M)
+REAL(EB)   :: SAVE(-3:*),W(*)
 
-REAL(EB) AL(L),BL(L),CL(L),AM(M),BM(M),CM(M),DM(M),SAVE(-3:*),W(*)
-INTEGER                       :: M
-INTEGER                       :: NPEROD
-INTEGER                   :: N
-INTEGER                   :: LDIMF
-INTEGER                   :: MDIMF
-INTEGER                      :: IERROR
-
-!                               CHECK FOR INVALID INPUT
+!  CHECK FOR INVALID INPUT
 
 IERROR = 0
 
@@ -5170,15 +5270,11 @@ IF (LDIMF<L) THEN
 END IF
 
 DO  J = 2,M
-  
   IF (AM(J)*CM(J-1)<0.0_EB) THEN
     IERROR = IERROR + 1
-    SAVE(IERROR) = 5._EB 
-    
+    SAVE(IERROR) = 5._EB    
     EXIT
-    
   END IF
-  
 END DO
 110 CONTINUE
 
@@ -5200,7 +5296,7 @@ END IF
 IF (IERROR/=0) THEN
   RETURN
 ELSE
-  SAVE(1) = IERROR
+  SAVE(1) = REAL(IERROR,EB)
 END IF
 
 IGRID = 2
@@ -5214,24 +5310,23 @@ END SUBROUTINE S3CCIS
 SUBROUTINE S3CCSS(LDIMF,MDIMF,F,SAVE,W)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
 
-INTEGER                   :: LDIMF
-INTEGER                   :: MDIMF
-REAL(EB)   SAVE(-3:*)
-REAL(EB)   W(*)
-REAL(EB)   F(LDIMF,MDIMF,*)
+INTEGER    :: LDIMF, MDIMF
 
+REAL(EB)   :: SAVE(-3:*)
+REAL(EB)   :: W(*)
+REAL(EB)   :: F(LDIMF,MDIMF,*)
 
-!                               CHECK VALUE OF IERROR (=SAVE(1)).
-!                               IF NON-ZERO, RETURN.
+!  CHECK VALUE OF IERROR (=SAVE(1)).
+!  IF NON-ZERO, RETURN.
 
 IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 
@@ -5244,32 +5339,33 @@ END SUBROUTINE S3CCSS
 SUBROUTINE FSH15S(LDIMY,MDIMY,Y,SAVE,W)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+INTEGER    :: LDIMY,MDIMY
+INTEGER    :: L, M, N
+INTEGER    :: NP, IGRID, IB, LENY
+INTEGER    :: IAL, IBL, ICL, IAM, ICM, ICFZ, IWSZ, ICF
 
+REAL(EB)   :: SAVE(-3:*)
+REAL(EB)   :: W(*)
+REAL(EB)   :: Y(*)
 
-INTEGER                   :: LDIMY
-INTEGER                       :: MDIMY
-REAL(EB)    SAVE(-3:*)
-REAL(EB)    W(*)
-REAL(EB)   Y(*)
+!  SOLVER BASED ON CYCLIC REDUCTION AND
+!  FAST FOURIER TRANSFORMS
 
-!                               SOLVER BASED ON CYCLIC REDUCTION AND
-!                               FAST FOURIER TRANSFORMS
-
-L = SAVE(2)
+L = INT(SAVE(2))
 !     ML = SAVE(3)              THIS VARIABLE IS NEVER USED
-M = SAVE(4)
-N = SAVE(5)
-NP = SAVE(6)
-IGRID = SAVE(7)
+M = INT(SAVE(4))
+N = INT(SAVE(5))
+NP = INT(SAVE(6))
+IGRID = INT(SAVE(7))
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IAL = 8
 IBL = IAL + L
@@ -5289,7 +5385,7 @@ ICF = IB + ((KAPPA-2)*IKPWR+KAPPA+6)*N
 
 IF (LDIMY==L .AND. MDIMY==M) THEN
   
-!                               DATA ARRAY HAS NO HOLES, SO CALL SOLVER
+!  DATA ARRAY HAS NO HOLES, SO CALL SOLVER
   
   CALL FSH16S(IGRID,L,M,N,NP,SAVE(IAL),SAVE(IBL),SAVE(ICL),  &
       SAVE(IAM),SAVE(ICM),SAVE(ICFZ),SAVE(IWSZ),  &
@@ -5297,7 +5393,7 @@ IF (LDIMY==L .AND. MDIMY==M) THEN
   
 ELSE
   
-!                               PACK DATA ARRAY, CALL SOLVER, AND UNPACK
+!  PACK DATA ARRAY, CALL SOLVER, AND UNPACK
   
   CALL FSH04S(L,M,N,LDIMY,MDIMY,L,Y,W)
   
@@ -5322,47 +5418,45 @@ END SUBROUTINE FSH15S
 SUBROUTINE FSH16S(IGRID,L,M,N,NP,AL,BL,CL,AM,CM,CFZ,WSAVEZ,B, COEF,F,W1,W2,FT)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+LOGICAL    :: DATARY
 
+INTEGER    :: IGRID
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
+INTEGER    :: NP
+INTEGER    :: IFWRD, LDIMFT, IB, ICF
 
-INTEGER                   :: IGRID
-INTEGER                       :: L
-INTEGER                       :: M
-INTEGER                       :: N
-INTEGER                   :: NP
-REAL(EB)   AL(L),BL(L), CL(L)
-REAL(EB)    AM(M)
-REAL(EB)    CM(M)
-REAL(EB)   CFZ(4*N)
-REAL(EB)    WSAVEZ(N+16)
-REAL(EB)    B(*)
-REAL(EB)   COEF(*)
-REAL(EB)    F(L,M,N)
-REAL(EB)    W1(M)
-REAL(EB)    W2(L*M)
-REAL(EB)   FT(L,M,N)
+REAL(EB)   :: AL(L), BL(L), CL(L)
+REAL(EB)   :: AM(M), CM(M)
+REAL(EB)   :: CFZ(4*N)
+REAL(EB)   :: WSAVEZ(N+16)
+REAL(EB)   :: B(*)
+REAL(EB)   :: COEF(*)
+REAL(EB)   :: F(L,M,N)
+REAL(EB)   :: W1(M)
+REAL(EB)   :: W2(L*M)
+REAL(EB)   :: FT(L,M,N)
 
-LOGICAL :: DATARY
-
-!                               BEGIN SOLUTION
+!  BEGIN SOLUTION
 
 NOCOPY=.TRUE.
 DATARY=.TRUE.
-SCALE=1._EB 
+SCALE = 1._EB 
 IFWRD = 1
-TPOSE=.FALSE.
-LDIMFT=L
+TPOSE = .FALSE.
+LDIMFT= L
 100 CONTINUE
 
 IF (N/=1) THEN
   
-!                               TRANSFORM IN Z
+!  TRANSFORM IN Z
   
   IF (DATARY) THEN
     CALL FSH26S(IGRID,IFWRD,NP,L,N,M,LDIMFT,F,FT,CFZ,WSAVEZ)
@@ -5386,6 +5480,7 @@ DO  K = 1,N
   IB = IB + (KAPPA-2)*IKPWR + KAPPA + 6
   ICF = ICF + (2*KAPPA-4.5)*IKPWR + KAPPA + 8
 END DO
+
 IFWRD = 2
 
 GO TO 100
@@ -5416,34 +5511,39 @@ END SUBROUTINE FSH16S
 
 SUBROUTINE FSH17S(AN,CN,M,AM,BM,CM,IDIMY,Y,B,COEF,RT,WS,D)
 
-!                               SUBROUTINE FSH17S SOLVES THE LINEAR
-!                               SYSTEM BY VECTORIZED CYCLIC REDUCTION
+!  SUBROUTINE FSH17S SOLVES THE LINEAR
+!  SYSTEM BY VECTORIZED CYCLIC REDUCTION
 
 
-INTEGER                       :: M
-REAL(EB) AM(M)
-REAL(EB) BM(M)
-REAL(EB) CM(M)
-INTEGER                   :: IDIMY
-REAL(EB)   Y(IDIMY,NMAX)
-REAL(EB)    B(*)
-REAL(EB)   COEF(*)
-REAL(EB)   RT(NMAX)
-REAL(EB)    WS(NMAX,M)
-REAL(EB)    D(NMAX,M)
-REAL(EB)   AN(NMAX),CN(NMAX)
+INTEGER    :: M
+INTEGER    :: IDIMY
+INTEGER    :: I, J
+INTEGER    :: KDO, IC, IF, IR, IP, IS, IZ, NZ
+INTEGER    :: I1, I2, I3, I4
+INTEGER    :: IM2, NM2, IPI2, IMI2, IP2, NP2
+INTEGER    :: IM1, NM1, IPI1, IMI1, IP1, NP1, IRM1
 
-!                               LET KAPPA = LOG2(NMAX) + 1, THEN
+REAL(EB)   :: AM(M), BM(M), CM(M)
+REAL(EB)   :: AN(NMAX), CN(NMAX)
+REAL(EB)   :: Y(IDIMY,NMAX)
+REAL(EB)   :: B(*)
+REAL(EB)   :: COEF(*)
+REAL(EB)   :: RT(NMAX)
+REAL(EB)   :: WS(NMAX,M)
+REAL(EB)   :: D(NMAX,M)
+
+
+!  LET KAPPA = LOG2(NMAX) + 1, THEN
 ! LENGTH OF B ARRAY = (KAPPA-2)*2**(KAPPA+1) + KAPPA + 5
 ! LENGTH OF COEF ARRAY = (2*KAPPA-4.5)*2**(KAPPA+1) + KAPPA + 8
 
 
-!                               BEGIN REDUCTION PHASE
+!  BEGIN REDUCTION PHASE
 
 KDO = KAPPA - 1
 IF = 2**KAPPA
 IC = 0
-DO  IR = 0,KAPPA - 2
+DO  IR = 0, KAPPA-2
   IRM1 = IR - 1
   I2 = 2**IR
   I3 = I2 + I2/2
@@ -5473,7 +5573,7 @@ DO  IR = 0,KAPPA - 2
       END DO
     END DO
     IC = IC + NM2
-    
+
     IF (IPI2>NMAX) CYCLE
     IS = IS + NM2
     CALL FSH10S(IPI2,IR,IP2,NP2)
@@ -5486,7 +5586,7 @@ DO  IR = 0,KAPPA - 2
   END DO
 END DO
 
-!                               BEGIN BACK SUBSTITUTION PHASE
+!  BEGIN BACK SUBSTITUTION PHASE
 
 DO  IR = KDO,0,-1
   IRM1 = IR - 1
@@ -5521,7 +5621,7 @@ DO  IR = KDO,0,-1
   END DO
   
   GO TO 430
-  
+
   280     CONTINUE
   IS = 0
   DO  I = I2,NMAX,I4
@@ -5618,38 +5718,41 @@ END SUBROUTINE FSH17S
 
 SUBROUTINE FSH18S(IDEG,M,A,B,C,XL,Y,D)
 
+INTEGER    :: IDEG
+INTEGER    :: I, K
+INTEGER    :: M
+INTEGER    :: MM1
 
+REAL(EB)   :: XL(IDEG)
+REAL(EB)   :: Y(NMAX,M)
+REAL(EB)   :: D(NMAX,M)
+REAL(EB)   :: A(M), B(M), C(M)
 
-INTEGER                       :: IDEG
-INTEGER                       :: M
-REAL(EB)   XL(IDEG)
-REAL(EB)   Y(NMAX,M)
-REAL(EB)   D(NMAX,M)
-REAL(EB)   A(M),B(M),C(M)
-
-!                              FSH18S IS A VECTORIZED TRIDIAGONAL SOLVER
-!                              THAT ALSO DOES FACTORIZATION
+! FSH18S IS A VECTORIZED TRIDIAGONAL SOLVER
+! THAT ALSO DOES FACTORIZATION
 
 MM1 = M - 1
+
 DO  K = 1,IDEG
   D(K,1) = C(1)/ (B(1)-XL(K))
   Y(K,1) = Y(K,1)/ (B(1)-XL(K))
 END DO
+
 DO  I = 2,MM1
   DO  K = 1,IDEG
     D(K,I) = C(I)/ (B(I)-XL(K)-A(I)*D(K,I-1))
     Y(K,I) = (Y(K,I)-A(I)*Y(K,I-1))/ (B(I)-XL(K)-A(I)*D(K,I-1))
   END DO
 END DO
+
 DO  K = 1,IDEG
   D(K,M) = Y(K,M) - A(M)*Y(K,MM1)
   Y(K,M) = B(M) - XL(K) - A(M)*D(K,MM1)
 END DO
+
 DO  K = 1,IDEG
-  
-!                               Y(K,M) = CVMGZ(0.,D(K,M)/Y(K,M),Y(K,M))
-!                               ON A CRAY-1
-  
+! Y(K,M) = CVMGZ(0.,D(K,M)/Y(K,M),Y(K,M))
+! ON A CRAY-1
   IF (ABS(Y(K,M))>=TWO_EPSILON_EB) Y(K,M) = D(K,M)/Y(K,M)
 END DO
 DO  I = M - 1,1,-1
@@ -5662,32 +5765,38 @@ END SUBROUTINE FSH18S
 
 
 SUBROUTINE FSH21S(IGRID,L,AL,BL,CL,M,AM,BM,CM,DM,NPEROD,N,IERROR,SAVE,W)
-INTEGER :: IGRID, L , M, N, IERROR, NPEROD
-REAL(EB) AL(L),BL(L), CL(L)
-REAL(EB)  AM(M)
-REAL(EB)  BM(M)
-REAL(EB)  CM(M)
-REAL(EB)  DM(M)
-REAL(EB) SAVE(-3:*)
-REAL(EB)  W(*)
 
+INTEGER    :: I, J, K
+INTEGER    :: L, M, N
+INTEGER    :: IGRID, IERROR, NPEROD
+REAL(EB)   :: AL(L),BL(L), CL(L)
+REAL(EB)   :: AM(M)
+REAL(EB)   :: BM(M)
+REAL(EB)   :: CM(M)
+REAL(EB)   :: DM(M)
+REAL(EB)   :: SAVE(-3:*)
+REAL(EB)   :: W(*)
 
+INTEGER    :: IERR1
+INTEGER    :: ML, NP, IB, NRDEL
+INTEGER    :: IAL, IBL, ICL, IAM, ICM, ICFZ, IWSZ, ICF
+REAL(EB)   :: DEL
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
 
 
-!                               THIS ROUTINE INITIALIZES SOLVER BASED ON
-!                               CYCLIC REDUCTION AND FAST FOURIER TRANS.
+!  THIS ROUTINE INITIALIZES SOLVER BASED ON
+!  CYCLIC REDUCTION AND FAST FOURIER TRANS.
 
-!                               COMPUTE SMALLEST INTEGER KAPPA SUCH THAT
-!                                         2**KAPPA >= M+1
+!  COMPUTE SMALLEST INTEGER KAPPA SUCH THAT
+!            2**KAPPA >= M+1
 
 KAPPA = 2
 ML = 4
@@ -5707,7 +5816,7 @@ ML = ML - 1
 NMAX = M
 NP = NPEROD + 1
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IAL = 8
 IBL = IAL + L
@@ -5725,8 +5834,8 @@ END IF
 IB = IWSZ + N + 16
 ICF = IB + ((KAPPA-2)*IKPWR+KAPPA+6)*N
 
-!                               COMPUTE TRANSFORM ROOTS IN K-DIRECTION
-!                               AND STORE IN W(1),...,W(N)
+!  COMPUTE TRANSFORM ROOTS IN K-DIRECTION
+!  AND STORE IN W(1),...,W(N)
 
 IF (N==1) THEN
   
@@ -5770,8 +5879,8 @@ ELSE
   
 END IF
 
-!                               INITIALIZE FFT TRANSFORMS AND
-!                               PRE-PROCESSING COEFFICIENTS IN K
+!  INITIALIZE FFT TRANSFORMS AND
+!  PRE-PROCESSING COEFFICIENTS IN K
 
 IF (N/=1) THEN
   
@@ -5839,14 +5948,14 @@ END IF
 
 DO  K = 1,N
   
-!                               COMPUTE NEW BM ARRAY AND STORE IN
-!                               W(N+1),...,W(N+M)
+!  COMPUTE NEW BM ARRAY AND STORE IN
+!  W(N+1),...,W(N+M)
   DO  J = 1,M
     W(N+J) = BM(J) + W(K)*DM(J)
   END DO
   
-!                               SUBROUTINE FSH07S COMPUTES THE ROOTS OF
-!                               THE B POLYNOMIALS
+!  SUBROUTINE FSH07S COMPUTES THE ROOTS OF
+!  THE B POLYNOMIALS
   
   CALL FSH07S(IERR1,AM,W(N+1),CM,SAVE(IB),W(M+N+1), W(3*M+N+1))
   
@@ -5857,8 +5966,8 @@ DO  K = 1,N
     RETURN
   END IF
   
-!                               FSH08S COMPUTES COEFFICIENTS OF PARTIAL
-!                               FRACTION EXPANSIONS
+!  FSH08S COMPUTES COEFFICIENTS OF PARTIAL
+!  FRACTION EXPANSIONS
   
   CALL FSH08S(AM,CM,SAVE(IB),SAVE(ICF),W(M+N+1))
   
@@ -5866,7 +5975,7 @@ DO  K = 1,N
   ICF = ICF + (2*KAPPA-4.5)*IKPWR + KAPPA + 8
 END DO
 
-!                               SAVE QUANTITIES FOR USE IN SOLVERS
+!  SAVE QUANTITIES FOR USE IN SOLVERS
 
 SAVE(2) = L
 !     SAVE(3) = ML              THIS VARIABLE NEVER USED IN SOLVER
@@ -5893,35 +6002,40 @@ END SUBROUTINE FSH21S
 SUBROUTINE FSH07S(IERROR,AN,BN,CN,B,AH,BH)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-!                               FSH07S COMPUTES THE ROOTS OF THE B
-!                               POLYNOMIALS USING SUBROUTINE FSH14S
-!                               WHICH IS A MODIFICATION THE EISPACK
-!                               SUBROUTINE TQLRAT.  IERROR IS SET TO 4
-!                               IF EITHER FSH14S FAILS OR IF
-!                               A(J+1)*C(J) < 0 FOR SOME J.
-!                               AH,BH ARE TEMPORARY WORK ARRAYS.
+!  FSH07S COMPUTES THE ROOTS OF THE B
+!  POLYNOMIALS USING SUBROUTINE FSH14S
+!  WHICH IS A MODIFICATION THE EISPACK
+!  SUBROUTINE TQLRAT.  IERROR IS SET TO 4
+!  IF EITHER FSH14S FAILS OR IF
+!  A(J+1)*C(J) < 0 FOR SOME J.
+!  AH,BH ARE TEMPORARY WORK ARRAYS.
 
+INTEGER    :: I, J
+INTEGER    :: L
+INTEGER    :: IERROR
+REAL(EB)   :: BN(*)
+REAL(EB)   :: CN(*)
+REAL(EB)   :: B(*)
+REAL(EB)   :: AH(*)
+REAL(EB)   :: BH(*)
+REAL(EB)   :: AN(*)
 
-
-INTEGER                      :: IERROR, J
-REAL(EB) BN(*)
-REAL(EB) CN(*)
-REAL(EB) B(*)
-REAL(EB) AH(*)
-REAL(EB) BH(*)
-REAL(EB) AN(*)
+REAL(EB)   :: ARG, TEMP
+INTEGER    :: KDO, IF, IR, IB, NB, I2, I4, IPL, IFD
+INTEGER    :: JS, JF, LS, LH
 
 IERROR = 0
 DO  J = 2,NMAX
   ARG = AN(J)*CN(J-1)
-  B(J) = SIGN(SQRT(ARG),AN(J))
+  TEMP = SQRT(ARG)
+  B(J) = SIGN(TEMP,AN(J))
 END DO
 IF = 2**KAPPA
 KDO = KAPPA - 1
@@ -5971,22 +6085,28 @@ END SUBROUTINE FSH07S
 SUBROUTINE FSH08S(AN,CN,B,COEF,T)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-!                               SUBROUTINE FSH08S GENERATES COEFFICIENTS
-!                               FOR PARTIAL FRACTION EXPANSION OF MATRIX
-!                               POLYNOMIAL PRODUCTS
+!  SUBROUTINE FSH08S GENERATES COEFFICIENTS
+!  FOR PARTIAL FRACTION EXPANSION OF MATRIX
+!  POLYNOMIAL PRODUCTS
 
-
-REAL(EB) B(*)
-REAL(EB) COEF(*)
-REAL(EB) T(NMAX,4)
-REAL(EB) AN(NMAX),CN(NMAX), DUM(0:0)
+INTEGER    :: I
+REAL(EB)   :: B(*)
+REAL(EB)   :: COEF(*)
+REAL(EB)   :: T(NMAX,4)
+REAL(EB)   :: AN(NMAX),CN(NMAX), DUM(0:0)
+INTEGER    :: KDO, IF, IR, IS, IZ
+INTEGER    :: NA, NC, NZ
+INTEGER    :: IMI1, IMI2, IMI3, NM1, NM2, NM3, IM1, IM2, IM3
+INTEGER    :: IPI1, IPI2, IPI3, IRM1, IDXA, IDXC
+INTEGER    :: IP1, IP2, IP3, NP1, NP2, NP3
+INTEGER    :: I1, I2, I3, I4
 
 IF = 2**KAPPA
 KDO = KAPPA - 1
@@ -6020,7 +6140,7 @@ DO  IR = 0,KAPPA - 2
   END DO
 END DO
 
-!                               BEGIN BACK SUBSTITUTION PHASE
+!  BEGIN BACK SUBSTITUTION PHASE
 
 DO  IR = KDO,0,-1
   IRM1 = IR - 1
@@ -6071,13 +6191,14 @@ END SUBROUTINE FSH08S
 SUBROUTINE FSH09S(I,IR,IDXA,NA)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+INTEGER    :: I,IR,IDXA,NA
 
 NA = 2**IR
 IDXA = I - NA + 1
@@ -6094,17 +6215,19 @@ END SUBROUTINE FSH09S
 SUBROUTINE FSH10S(I,IR,IDX,IDP)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
-!                               B(IDX) IS THE LOCATION OF THE FIRST ROOT
-!                               OF THE B(I,IR) POLYNOMIAL
+!  B(IDX) IS THE LOCATION OF THE FIRST ROOT
+!  OF THE B(I,IR) POLYNOMIAL
 
+INTEGER    :: I,IR,IDX,IDP
+INTEGER    :: IPL, IZH, ID
 
 IDP = 0
 IDX = 0
@@ -6146,13 +6269,14 @@ END SUBROUTINE FSH10S
 SUBROUTINE FSH11S(I,IR,IDXC,NC)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
+INTEGER    :: I,IR,IDXC,NC
 
 NC = 2**IR
 IDXC = I
@@ -6169,30 +6293,34 @@ END SUBROUTINE FSH11S
 SUBROUTINE FSH12S(IR,NA,A,NC,C,NB1,B1,NB2,B2,COEF,W1,W2,W3,W4)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-!                               SUBROUTINE FSH12S ACTUALLY GENERATES THE
-!                               COEFFICIENTS
+!  SUBROUTINE FSH12S ACTUALLY GENERATES THE
+!  COEFFICIENTS
 
+INTEGER    :: I, K
+INTEGER    :: M
+INTEGER    :: IR
+INTEGER    :: NA
+INTEGER    :: NC
+INTEGER    :: NB1
+INTEGER    :: NB2
+REAL(EB)   :: B2(NB2)
+REAL(EB)   :: COEF(NC)
+REAL(EB)   :: W1(*)
+REAL(EB)   :: W2(*)
+REAL(EB)   :: W3(*)
+REAL(EB)   :: W4(*)
+REAL(EB)   :: A(NA),C(NC),B1(NB1)
 
-INTEGER                   :: IR
-INTEGER                       :: NA
-INTEGER                       :: NC
-INTEGER                       :: NB1
-INTEGER                       :: NB2
-REAL(EB) B2(NB2)
-REAL(EB) COEF(NC)
-REAL(EB) W1(*)
-REAL(EB) W2(*)
-REAL(EB) W3(*)
-REAL(EB) W4(*)
-REAL(EB) A(NA),C(NC),B1(NB1)
-!                               MAXIMUM LENGTH OF W1, W2, W3, W4 IS NM.
+REAL(EB)   :: SIGN
+INTEGER    :: NB, IP
+!  MAXIMUM LENGTH OF W1, W2, W3, W4 IS NM.
 
 
 NB = NB1 + NB2
@@ -6203,7 +6331,7 @@ DO  IP = 1,NB2
   W1(NB1+IP) = B2(IP)
 END DO
 
-!                               MERGE TWO STRINGS
+!  MERGE TWO STRINGS
 
 CALL FSH13S(W1,0,NB1,NB1,NB2,NB)
 DO  IP = 1,NB
@@ -6245,28 +6373,28 @@ END SUBROUTINE FSH12S
 SUBROUTINE FSH13S(TCOS,I1,M1,I2,M2,I3)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-INTEGER                   :: I1
-INTEGER                       :: M1
-INTEGER                   :: I2
-INTEGER                       :: M2
-INTEGER                       :: I3
-REAL(EB)   TCOS(*)
+INTEGER    :: J, K
+INTEGER    :: I1, I2, I3
+INTEGER    :: J1, J2
+INTEGER    :: M1, M2
+REAL(EB)   :: TCOS(*)
+REAL(EB)   :: X, Y
 
-!                               THIS SUBROUTINE MERGES TWO ASCENDING
-!                               STRINGS OF NUMBERS IN THE ARRAY TCOS.
-!                               THE FIRST STRING IS OF LENGTH M1 AND
-!                               STARTS AT TCOS(I1+1).  THE SECOND
-!                               STRING IS OF LENGTH M2 AND STARTS AT
-!                               TCOS(I2+1).  THE MERGED STRING GOES INTO
-!                               TCOS(I3+1).  IT IS ALMOST A STRAIGHT
-!                               COPY FROM THE ORIGINAL FISHPAK VERSION.
+!  THIS SUBROUTINE MERGES TWO ASCENDING
+!  STRINGS OF NUMBERS IN THE ARRAY TCOS.
+!  THE FIRST STRING IS OF LENGTH M1 AND
+!  STARTS AT TCOS(I1+1).  THE SECOND
+!  STRING IS OF LENGTH M2 AND STARTS AT
+!  TCOS(I2+1).  THE MERGED STRING GOES INTO
+!  TCOS(I3+1).  IT IS ALMOST A STRAIGHT
+!  COPY FROM THE ORIGINAL FISHPAK VERSION.
 
 J1 = 1
 J2 = 1
@@ -6323,41 +6451,42 @@ END SUBROUTINE FSH13S
 
 SUBROUTINE FSH14S(N,D,E2,IERR)
 
-
-
-INTEGER                       :: N
-INTEGER                      :: IERR
-REAL(EB)   D(N),E2(N)
-
-!                               THIS SUBROUTINE IS A MODIFICATION OF THE
-!                               EISPACK SUBROUTINE TQLRAT ALGORITHM 464,
-!                               COMM. ACM 16, 689(1973) BY REINSCH.
+INTEGER    :: I, J
+INTEGER    :: L, M, N
+REAL(EB)   :: B, C, F, G, H, P, R, S
+INTEGER    :: IERR
+INTEGER    :: DHOLD, II, L1, MML, NHALF, NTOP
+REAL(EB)   :: D(N),E2(N)
+REAL(EB)   :: EPS
+!  THIS SUBROUTINE IS A MODIFICATION OF THE
+!  EISPACK SUBROUTINE TQLRAT ALGORITHM 464,
+!  COMM. ACM 16, 689(1973) BY REINSCH.
 
 ! THIS SUBROUTINE FINDS THE EIGENVALUES OF A SYMMETRIC
 ! TRIDIAGONAL MATRIX BY THE RATIONAL QL METHOD.
 
-!                               ON INPUT-
+!  ON INPUT-
 
-!                               N IS THE ORDER OF THE MATRIX,
+!  N IS THE ORDER OF THE MATRIX,
 
 ! D CONTAINS THE DIAGONAL ELEMENTS OF THE INPUT MATRIX,
 
 ! E2 CONTAINS THE                SUBDIAGONAL ELEMENTS OF THE
 ! INPUT MATRIX IN ITS LAST N-1 POSITIONS.  E2(1) IS ARBITRARY.
 
-!                               ON OUTPUT-
+!  ON OUTPUT-
 
 ! D CONTAINS THE EIGENVALUES IN ASCENDING ORDER.  IF AN
 ! ERROR EXIT IS MADE, THE EIGENVALUES ARE CORRECT AND
 ! ORDERED FOR INDICES 1,2,...IERR-1, BUT MAY NOT BE
-!                               THE SMALLEST EIGENVALUES,
+!  THE SMALLEST EIGENVALUES,
 
-!                               E2 HAS BEEN DESTROYED,
+!  E2 HAS BEEN DESTROYED,
 
-!                               IERR IS SET TO
-!                               ZERO       FOR NORMAL RETURN,
+!  IERR IS SET TO
+!  ZERO       FOR NORMAL RETURN,
 ! J          IF THE J-TH EIGENVALUE HAS NOT BEEN
-!                               DETERMINED AFTER 30 ITERATIONS.
+!  DETERMINED AFTER 30 ITERATIONS.
 
 ! ********** EPS IS A MACHINE DEPENDENT PARAMETER SPECIFYING
 ! THE RELATIVE PREC OF FLOATING POINT ARITHMETIC.
@@ -6404,7 +6533,7 @@ DO  L = 1,N
   IF (J==30) GO TO 230
   J = J + 1
   
-!                               FORM SHIFT
+!  FORM SHIFT
   
   L1 = L + 1
   S = SQRT(E2(L))
@@ -6420,7 +6549,7 @@ DO  L = 1,N
   
   F = F + H
   
-!                               RATIONAL QL TRANSFORMATION
+!  RATIONAL QL TRANSFORMATION
   
   G = D(M)
   
@@ -6429,7 +6558,7 @@ DO  L = 1,N
   S = 0.0_EB
   MML = M - L
   
-!                               FOR I=M-1 STEP -1 UNTIL L DO --
+!  FOR I=M-1 STEP -1 UNTIL L DO --
   
   DO  II = 1,MML
     I = M - II
@@ -6447,7 +6576,7 @@ DO  L = 1,N
   E2(L) = S*G
   D(L) = H
   
-!                               GUARD AGAINST UNDERFLOWED H
+!  GUARD AGAINST UNDERFLOWED H
   
   IF (ABS(H)<=TWO_EPSILON_EB) GO TO 170
   
@@ -6458,11 +6587,11 @@ DO  L = 1,N
   170     CONTINUE
   P = D(L) + F
   
-!                               ORDER EIGENVALUES
+!  ORDER EIGENVALUES
   
   IF (L==1) GO TO 190
   
-!                               FOR I=L STEP -1 UNTIL 2 DO --
+!  FOR I=L STEP -1 UNTIL 2 DO --
   
   DO  II = 2,L
     I = L + 2 - II
@@ -6488,8 +6617,8 @@ END DO
 
 GO TO 240
 
-!                               SET ERROR -- NO CONVERGENCE TO AN
-!                               EIGENVALUE AFTER 30 ITERATIONS
+!  SET ERROR -- NO CONVERGENCE TO AN
+!  EIGENVALUE AFTER 30 ITERATIONS
 
 230 CONTINUE
 IERR = L
@@ -6501,28 +6630,29 @@ END SUBROUTINE FSH14S
 SUBROUTINE H2CZIS(XS,XF,L,LBDCND,YS,YF,M,MBDCND,H, ELMBDA,LDIMF,IERROR,SAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
-REAL(EB)  XS, XF, YS, YF
-INTEGER                       :: L
-INTEGER                       :: LBDCND
-INTEGER                       :: M
-INTEGER                       :: MBDCND
-REAL(EB) ELMBDA
-INTEGER                   :: LDIMF
-INTEGER                      :: IERROR
-REAL(EB) H(0:*)
+REAL(EB)   :: XS, XF, YS, YF
+INTEGER    :: I
+INTEGER    :: L, M
+INTEGER    :: LBDCND, MBDCND
+REAL(EB)   :: ELMBDA
+INTEGER    :: LDIMF
+INTEGER    :: IERROR
+REAL(EB)   :: H(0:*)
 REAL(EB) SAVE(-3:*)
 
+REAL(EB)   :: DX, DY, DLXSQR, DLYSQR, HM, HP
+INTEGER    :: LP, MP, LPEROD
+INTEGER    :: IA, IB, IC, ID, IS, IR
 
-
-!                               CHECK FOR INVALID INPUT
+!  CHECK FOR INVALID INPUT
 
 IERROR = 0
 
@@ -6567,7 +6697,7 @@ ELSE
   SAVE(1) = 0._EB 
 END IF
 
-!                               DEFINE GRID PARAMETERS
+!  DEFINE GRID PARAMETERS
 
 DX = (XF-XS)/L
 DY = (YF-YS)/M
@@ -6576,7 +6706,7 @@ DLYSQR = 1._EB/DY**2
 LP = LBDCND + 1
 MP = MBDCND + 1
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IA = 9
 IB = IA + L
@@ -6584,8 +6714,8 @@ IC = IB + L
 ID = IC + L
 IS = ID + L
 
-!                               DEFINE THE A,B,C,D COEFFICIENTS
-!                               IN SAVE ARRAY
+!  DEFINE THE A,B,C,D COEFFICIENTS
+!  IN SAVE ARRAY
 DO  I = 0,L - 1
   HM = .5_EB*(H(I)+H(I+1))
   HP = .5_EB*(H(I+1)+H(I+2))
@@ -6610,8 +6740,8 @@ SAVE(IB) = SAVE(IB) + SAVE(IA)
 SAVE(IC-1) = SAVE(IC-1) - SAVE(ID-1)
 END SELECT
 
-!                               DETERMINE WHETHER OR NOT BOUNDARY
-!                               CONDITION IS PERIODIC IN X
+!  DETERMINE WHETHER OR NOT BOUNDARY
+!  CONDITION IS PERIODIC IN X
 
 IF (LBDCND==0) THEN
   LPEROD = 0
@@ -6619,13 +6749,13 @@ ELSE
   LPEROD = 1
 END IF
 
-!                               INITIALIZE SOLVER ROUTINE S2CFIS.
+!  INITIALIZE SOLVER ROUTINE S2CFIS.
 
 CALL S2CFIS(LPEROD,L,MBDCND,M,SAVE(IA),SAVE(IB),  &
     SAVE(IC),SAVE(ID),LDIMF,IR,SAVE(IS))
 
-!                               TEST ERROR FLAG FROM S2CFIS FOR
-!                               INTERNAL ERROR
+!  TEST ERROR FLAG FROM S2CFIS FOR
+!  INTERNAL ERROR
 
 IF (IR/=0) THEN
   SAVE(1) = 99._EB 
@@ -6634,7 +6764,7 @@ IF (IR/=0) THEN
   RETURN
 END IF
 
-!                               SAVE PARAMETERS FOR H2CCSS IN SAVE ARRAY
+!  SAVE PARAMETERS FOR H2CCSS IN SAVE ARRAY
 
 SAVE(2) = DX
 SAVE(3) = L
@@ -6651,33 +6781,41 @@ END SUBROUTINE H2CZIS
 SUBROUTINE H2CZSS(BDXS,BDXF,BDYS,BDYF,LDIMF,F,PERTRB,SAVE,W,H)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 USE GLOBAL_CONSTANTS, ONLY: PRES_METHOD
-REAL(EB)  BDXS(*)
-REAL(EB)  BDXF(*)
-REAL(EB)  BDYS(*)
-REAL(EB) BDYF(*)
-INTEGER  :: LDIMF
-REAL(EB)  F(LDIMF,*)
-REAL(EB) PERTRB
-REAL(EB)  SAVE(-3:*)
-REAL(EB)  W(*)
-REAL(EB) H(*)
+REAL(EB)   :: BDXS(*)
+REAL(EB)   :: BDXF(*)
+REAL(EB)   :: BDYS(*)
+REAL(EB)   :: BDYF(*)
+INTEGER    :: LDIMF
+REAL(EB)   :: F(LDIMF,*)
+REAL(EB)   :: PERTRB
+REAL(EB)   :: SAVE(-3:*)
+REAL(EB)   :: W(*)
+REAL(EB)   :: H(*)
 
-!                               CHECK VALUE OF IERROR (=SAVE(1)).
-!                               IF NON-ZERO, RETURN.
+REAL(EB)   :: DX, DY, ELMBDA, DLYRCP, TWDYSQ
+REAL(EB)   :: PERT, S1, S3
+REAL(EB)   :: PRTSAV
+INTEGER    :: L, M
+INTEGER    :: I, J
+INTEGER    :: LP, MP, ISING
+INTEGER    :: IA, IB, IC, ID, IS
+
+!  CHECK VALUE OF IERROR (=SAVE(1)).
+!  IF NON-ZERO, RETURN.
 
 IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 
-!                               GET PARAMETERS FOR H2CCSS FROM SAVE
-!                               ARRAY WHERE THEY WERE STORED IN
-!                               INITIALIZATION SUBROUTINE H2CCIS.
+!  GET PARAMETERS FOR H2CCSS FROM SAVE
+!  ARRAY WHERE THEY WERE STORED IN
+!  INITIALIZATION SUBROUTINE H2CCIS.
 
 DX = SAVE(2)
 L = SAVE(3)
@@ -6690,7 +6828,7 @@ ELMBDA = SAVE(8)
 DLYRCP = 1._EB/DY
 TWDYSQ = 2._EB/DY**2
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IA = 9
 IB = IA + L
@@ -6701,7 +6839,7 @@ IS = 9 + 4*L
 
 IF (PRES_METHOD /= 'SCARC') THEN
 
-!                               ENTER BOUNDARY DATA FOR X-BOUNDARIES
+!  ENTER BOUNDARY DATA FOR X-BOUNDARIES
 
    IF (LP==2 .OR. LP==3) THEN
      DO J = 1,M
@@ -6727,7 +6865,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
      END DO
    END IF
    
-   !                               ENTER BOUNDARY DATA FOR Y-BOUNDARIES
+   !  ENTER BOUNDARY DATA FOR Y-BOUNDARIES
    
    IF (MP==2 .OR. MP==3) THEN
      DO I = 1,L
@@ -6759,11 +6897,11 @@ PERT=0._EB
 PERTRB = 0._EB
 ISING = 0
 
-!                               FOR SINGULAR PROBLEMS ADJUST DATA TO
-!                               INSURE A SOLUTION WILL EXIST.  GO THRU
-!                               THIS CODE TWICE: ISING=1 FOR CALCULATING
-!                               PERTRB; ISING=2 FOR NORMALIZING SOLUTION
-!                               AFTER IT IS COMPUTED.
+!  FOR SINGULAR PROBLEMS ADJUST DATA TO
+!  INSURE A SOLUTION WILL EXIST.  GO THRU
+!  THIS CODE TWICE: ISING=1 FOR CALCULATING
+!  PERTRB; ISING=2 FOR NORMALIZING SOLUTION
+!  AFTER IT IS COMPUTED.
 
 SELECT CASE(LP)
 CASE(1)   ; GO TO 630
@@ -6804,7 +6942,7 @@ END DO
 S3   = S3*M
 PERT = S1/S3
 
-!                               ADJUST F ARRAY BY PERT
+!  ADJUST F ARRAY BY PERT
 
 DO  J = 1,M
   DO  I = 1,L
@@ -6813,8 +6951,8 @@ DO  J = 1,M
 END DO
 750 CONTINUE
 
-!                               IF NORMALIZING SOLUTION, RESTORE PERTRB
-!                               AND JUMP TO END
+!  IF NORMALIZING SOLUTION, RESTORE PERTRB
+!  AND JUMP TO END
 
 IF (ISING==2) THEN
   PERTRB = PRTSAV
@@ -6825,12 +6963,12 @@ END IF
 
 PRTSAV = PERT
 
-!                               SOLVE THE EQUATION
+!  SOLVE THE EQUATION
 
 CALL S2CFSS(LDIMF,F,SAVE(IS),W)
 
-!                               IF A SINGULAR PROBLEM,
-!                               RE-NORMALIZE SOLUTION (ISING=2)
+!  IF A SINGULAR PROBLEM,
+!  RE-NORMALIZE SOLUTION (ISING=2)
 
 IF (ISING==1) THEN
   ISING = 2
@@ -6847,24 +6985,23 @@ END SUBROUTINE H2CZSS
 SUBROUTINE S2CFIS(LPEROD,L,MPEROD,M,A,B,C,D,LDIMF,IERROR,SAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
-INTEGER                       :: LPEROD
-INTEGER                       :: L
-INTEGER                       :: MPEROD
-INTEGER                   :: M
-INTEGER                   :: LDIMF, LDIMFC
-INTEGER                      :: IERROR
-REAL(EB) SAVE(-3:*),SCAL
-REAL(EB) A(L),B(L),C(L), D(L)
+INTEGER    :: IGRID
+INTEGER    :: LPEROD, MPEROD, NPEROD
+INTEGER    :: I
+INTEGER    :: L, M, N
+INTEGER    :: LDIMF, LDIMFC
+INTEGER    :: IERROR
+REAL(EB)   :: SAVE(-3:*),SCAL
+REAL(EB)   :: A(L), B(L), C(L), D(L)
 
-
-!                               CHECK FOR INVALID INPUT
+!  CHECK FOR INVALID INPUT
 
 IERROR = 0
 
@@ -6894,13 +7031,11 @@ IF (LDIMF<L) THEN
 END IF
 
 IF (LPEROD==0) THEN
-  DO  I = 1,L
-    
+  DO  I = 1,L  
     IF (ABS(A(I)-A(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(B(I)-B(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(C(I)-A(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(D(I)-D(1))>=TWO_EPSILON_EB) GO TO 110
-    
   END DO
   
   GO TO 120
@@ -6934,28 +7069,29 @@ END SUBROUTINE S2CFIS
 SUBROUTINE S2CFSS(LDIMF,F,SAVE,W)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
 
-INTEGER                   :: LDIMF
-REAL(EB) SAVE(-3:*)
-REAL(EB) W(*)
-REAL(EB) F(LDIMF,*)
+INTEGER    :: LDIMF
+INTEGER    :: M
+REAL(EB)   :: SAVE(-3:*)
+REAL(EB)   :: W(*)
+REAL(EB)   :: F(LDIMF,*)
 
 
-!                               CHECK VALUE OF IERROR (=SAVE(1)).
-!                               IF NON-ZERO, RETURN.
+!  CHECK VALUE OF IERROR (=SAVE(1)).
+!  IF NON-ZERO, RETURN.
 
 IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 
-!                               DEBUG PRINTOUTS UNDER CONTROL OF
-!                               PARAMETER LVLPRN
+!  DEBUG PRINTOUTS UNDER CONTROL OF
+!  PARAMETER LVLPRN
 
 M = SAVE(4)
 
@@ -6968,32 +7104,32 @@ END SUBROUTINE S2CFSS
 SUBROUTINE H2CYIS(RS,RF,L,LBDCND,ZS,ZF,N,NBDCND, ELMBDA,XMU,LDIMF,IERROR,SAVE)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
 
-REAL(EB)RS
-REAL(EB) RF
-INTEGER                       :: L
-INTEGER                       :: LBDCND
-REAL(EB) ZS
-REAL(EB) ZF
-INTEGER                       :: N
-INTEGER                       :: NBDCND
-REAL(EB) ELMBDA
-REAL(EB) XMU
-INTEGER                   :: LDIMF
-INTEGER                      :: IERROR
-REAL(EB) SAVE(-3:*)
+REAL(EB)   :: RS
+REAL(EB)   :: RF
+INTEGER    :: I
+INTEGER    :: L, N
+INTEGER    :: LBDCND, NBDCND
+REAL(EB)   :: ZS, ZF
+REAL(EB)   :: ELMBDA
+REAL(EB)   :: XMU
+INTEGER    :: LDIMF
+INTEGER    :: IERROR
+REAL(EB)   :: SAVE(-3:*)
 
+REAL(EB)   :: DZ, DR, DZSQR, DRSQR, DRBY2, RI
+INTEGER    :: NP
+INTEGER    :: IA, IB, IC, ID, IS, IR, ISVPS
 
-
-!                               CHECK FOR INVALID INPUT
+!  CHECK FOR INVALID INPUT
 
 IERROR = 0
 
@@ -7053,7 +7189,7 @@ ELSE
   SAVE(1) = IERROR
 END IF
 
-!                               DEFINE GRID PARAMETERS
+!  DEFINE GRID PARAMETERS
 
 DZ = (ZF-ZS)/FLOAT(N)
 DZSQR = 1._EB/ (DZ**2)
@@ -7063,7 +7199,7 @@ DR = (RF-RS)/FLOAT(L)
 DRBY2 = DR/2._EB 
 DRSQR = 1._EB/ (DR**2)
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IA = 13
 IB = IA + L
@@ -7072,8 +7208,8 @@ ID = IC + L
 IS = ID + L
 ISVPS = IS + L
 
-!                               DEFINE A,B,C,D,S ARRAYS IN ARRAY SAVE.
-!                               S ARRAY IS SYMMETRIZER FOR SING. CASES
+!  DEFINE A,B,C,D,S ARRAYS IN ARRAY SAVE.
+!  S ARRAY IS SYMMETRIZER FOR SING. CASES
 
 DO  I = 1,L
   RI = RS + (I-.5_EB)*DR
@@ -7084,7 +7220,7 @@ DO  I = 1,L
   SAVE(IS+I) = RI
 END DO
 
-!                               DEFINE BOUNDARY COEFFICIENTS
+!  DEFINE BOUNDARY COEFFICIENTS
 
 SELECT CASE(LBDCND)
 CASE(1:2) ; GO TO 110
@@ -7116,13 +7252,13 @@ GO TO 160
 SAVE(IB+L) = SAVE(IB+L) + SAVE(IC+L)
 160 CONTINUE
 
-!                               INITIALIZE SOLVER ROUTINE S2CFIS
+!  INITIALIZE SOLVER ROUTINE S2CFIS
 
 CALL S2CFIS(1,L,NBDCND,N,SAVE(IA+1),SAVE(IB+1),  &
     SAVE(IC+1),SAVE(ID+1),LDIMF,IR,SAVE(ISVPS+1))
 
-!                               TEST ERROR FLAG FROM S2CFIS FOR
-!                               INTERNAL ERROR
+!  TEST ERROR FLAG FROM S2CFIS FOR
+!  INTERNAL ERROR
 
 IF (IR/=0) THEN
   SAVE(1) = 99._EB 
@@ -7131,7 +7267,7 @@ IF (IR/=0) THEN
   RETURN
 END IF
 
-!                               SAVE PARAMETERS FOR H3CYSS IN SAVE ARRAY
+!  SAVE PARAMETERS FOR H3CYSS IN SAVE ARRAY
 
 SAVE(2) = DR
 SAVE(3) = L
@@ -7152,35 +7288,40 @@ END SUBROUTINE H2CYIS
 SUBROUTINE H2CYSS(BDRS,BDRF,BDZS,BDZF,LDIMF,F,PERTRB,SAVE,W)
 
 ! +--------------------------------------------------------------------+
-! |                                                                    |
+! |          |
 ! |                       COPYRIGHT (C) 1989 BY                        |
 ! |                          ROLAND A. SWEET                           |
 ! |                        ALL RIGHTS RESERVED                         |
-! |                                                                    |
+! |          |
 ! +--------------------------------------------------------------------+
 
 
 
-REAL(EB)BDRS(*)
-REAL(EB) BDRF(*)
-REAL(EB) BDZS(*)
-REAL(EB)BDZF(*)
-INTEGER                   :: LDIMF
-REAL(EB)F(LDIMF,*)
-REAL(EB)PERTRB
-REAL(EB) SAVE(-3:*)
-REAL(EB) W(*)
+INTEGER    :: LDIMF
+REAL(EB)   :: BDRS(*)
+REAL(EB)   :: BDRF(*)
+REAL(EB)   :: BDZS(*)
+REAL(EB)   :: BDZF(*)
+REAL(EB)   :: F(LDIMF,*)
+REAL(EB)   :: PERTRB
+REAL(EB)   :: SAVE(-3:*)
+REAL(EB)   :: W(*)
 
+INTEGER    :: I, K
+INTEGER    :: L, N
+REAL(EB)   :: DR, DZSQR, DZR, ELMBDA, XMU
+REAL(EB)   :: S1, S3, PERT, PRTSAV
+INTEGER    :: LBDCND, NP, ISING
+INTEGER    :: IA, IB, IC, ID, IS, ISVPS
 
-
-!                               CHECK VALUE OF IERROR (=SAVE(1)).
-!                               IF NON-ZERO, RETURN.
+!  CHECK VALUE OF IERROR (=SAVE(1)).
+!  IF NON-ZERO, RETURN.
 
 IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 
-!                               GET PARAMETERS FOR H2CYSS FROM SAVE
-!                               ARRAYWHERE THEY WERE STORED IN
-!                               INITIALIZATION SUBROUTINE H2CYIS.
+!  GET PARAMETERS FOR H2CYSS FROM SAVE
+!  ARRAYWHERE THEY WERE STORED IN
+!  INITIALIZATION SUBROUTINE H2CYIS.
 
 DR = SAVE(2)
 L = SAVE(3)
@@ -7196,7 +7337,7 @@ DZR = SAVE(10)
 ELMBDA = SAVE(11)
 XMU = SAVE(12)
 
-!                               ALLOCATE SAVE ARRAY
+!  ALLOCATE SAVE ARRAY
 
 IA = 13
 IB = IA + L
@@ -7205,7 +7346,7 @@ ID = IC + L
 IS = ID + L
 ISVPS = IS + L
 
-!                               ENTER BOUNDARY DATA FOR R-BOUNDARIES.
+!  ENTER BOUNDARY DATA FOR R-BOUNDARIES.
 
 IF (LBDCND==1 .OR. LBDCND==2) THEN
   DO K = 1,N
@@ -7231,7 +7372,7 @@ IF (LBDCND==2 .OR. LBDCND==3 .OR. LBDCND==6) THEN
   END DO
 END IF
 
-!                               ENTER BOUNDARY DATA FOR Z-BOUNDARIES.
+!  ENTER BOUNDARY DATA FOR Z-BOUNDARIES.
 
 IF (NP==2 .OR. NP==3) THEN
   DO I = 1,L
@@ -7260,11 +7401,11 @@ END IF
 PERTRB = 0._EB 
 ISING = 0
 
-!                               FOR SINGULAR PROBLEMS ADJUST DATA TO
-!                               INSURE A SOLUTION WILL EXIST.  GO THRU
-!                               THIS CODE TWICE: ISING=1 FOR CALCULATING
-!                               PERTRB; ISING=2 FOR NORMALIZING SOLUTION
-!                               AFTER IT IS COMPUTED.
+!  FOR SINGULAR PROBLEMS ADJUST DATA TO
+!  INSURE A SOLUTION WILL EXIST.  GO THRU
+!  THIS CODE TWICE: ISING=1 FOR CALCULATING
+!  PERTRB; ISING=2 FOR NORMALIZING SOLUTION
+!  AFTER IT IS COMPUTED.
 
 SELECT CASE(LBDCND)
 CASE(1:2) ; GO TO 770
@@ -7319,8 +7460,8 @@ DO K = 1,N
   END DO
 END DO
 
-!                               IF NORMALIZING SOLUTION, RESTORE PERTRB
-!                               AND JUMP TO END
+!  IF NORMALIZING SOLUTION, RESTORE PERTRB
+!  AND JUMP TO END
 
 IF (ISING==2) THEN
   PERTRB = PRTSAV
@@ -7331,12 +7472,12 @@ PRTSAV = PERT
 
 770 CONTINUE
 
-!                               SOLVE SYSTEM USING S2CFSS
+!  SOLVE SYSTEM USING S2CFSS
 
 CALL S2CFSS(LDIMF,F,SAVE(ISVPS+1),W)
 
-!                               IF A SINGULAR PROBLEM,
-!                               RE-NORMALIZE SOLUTION (ISING=2)
+!  IF A SINGULAR PROBLEM,
+!  RE-NORMALIZE SOLUTION (ISING=2)
 
 IF (ISING==1) THEN
   ISING = 2
