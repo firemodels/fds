@@ -374,57 +374,28 @@ and returns two alternative mean absorption coefficients for each spectral band,
 \displaystyle\int_{\om_{\min}}^{\om_{\max}}{I_{\rm b,\om}(T)
 \displaystyle\sum_i \bar{\kappa}_i(\om,T) \, P_i \; \d \om}
 \end{equation}
-where $\om$ is the wavenumber, in units of cm$^{\rm -1}$,
-$P_i$ is the partial pressure of participating species i, in units of ${\rm atm}$, and
-$\bar{\kappa}_i$ is the spectral absorption coefficient of participating species i, in units of ${\rm atm^{-1}cm^{-1}}$.
-Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function
-of the gas-phase temperature and partial pressure, and is independent of the pathlength. Its units are in cm$^{\rm -1}$.
+where $\om$ is the wavenumber, in units of cm$^{\rm -1}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are cm$^{\rm -1}$.
 
-The source term $I_{\rm b,\la}(\bx)$ is the {\em Planck function} that represents the
-intensity of blackbody radiation at temperature, $T=T(\bx)$, and wavelength, $\la$
-\be
-I_{\rm b,\la}(T) = \dfrac{2 \, h \, c^2 }{\la^5 \left[\exp\left(\dfrac{h \, c }{\la \, k_{\rm B} \, T}\right)-1\right]}
-\ee
-Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s),
-$c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s),
-and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K).
-The Planck function can also be written in terms of wavenumber, $\om=1/\la$,
+The source term $I_{\rm b,\om}(T)$ is the {\em Planck function} that represents the intensity of blackbody radiation at temperature, $T$, and wavenumber, $\om$
 \be
 I_{\rm b,\om}(T) = \dfrac{2 \, h \, c^2 \, \om^3}{\exp\left(\dfrac{h \, c \, \om}{k_{\rm B} \, T}\right)-1}
 \ee
+Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K). 
 
-The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{{\rm e},n}(T)$ which is defined according to the following
-equation
+The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{{\rm e},n}(T)$ which is defined according to the following equation
 \be
-\int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad}) \; \d \la = \frac{\sigma}{\pi}
+   \int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad}) \; \d \la = \frac{\sigma}{\pi}
        \left[\left(1-{\rm e}^{-\kappa_{{\rm e},n}(T)\, L}\right) \, T^4 + {\rm e}^{-\kappa_{{\rm e},n}(T) \, L} \, T_{\rm rad}^4\right]
 \ee
-where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand
-integral by calculating the intensity leaving a uniform gas layer of thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for
-a large number of narrow spectral bands.  By default, the path length, $L$,
-is five times the characteristic cell size of the simulation, limited by a maximum value of 10~m. It can also be specified by the user.
+where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands.  By default in FDS, the pathlength, $L$, is five times the characteristic cell size of the simulation, limited by a maximum value of 10~m. It can also be specified by the user.
 
 In cases with only one band ($N$=1), the smaller of the two absorption coefficients is used:
 \be
-   \kappa_n=\min \left( \kappa_n(P,T),\kappa_{{\rm e},n}(T) \right)
+   \kappa_n=\min \Big( \kappa_n(P,T),\kappa_{{\rm e},n}(T) \Big)
 \ee
-If $N>1$ or $L=0$, $\kappa_n=\kappa_n(P,T)$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor,
-fuel or combustion products, regardless of the number of radiation bands $N$.
+If $N>1$ or $L=0$, $\kappa_n=\kappa_n(P,T)$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$.
 
-\subsection{Spectral data for gases}
-\label{gas_spectra}
-
-The value of the spectral absorption coefficient, $\bar{\kappa}_i$, is averaged over a narrow band whose spectral width, $\Delta \om$, varies from
-5~cm$^{-1}$ for $\om < $ 1100~cm$^{-1}$, to 25~cm$^{-1}$ for 1100~cm$^{-1} \leq \om < $ 5000~cm$^{\rm -1}$,
-and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \om$.
-
-A combination of molecular models and data tables are used to compute the spectral radiative
-properties of the radiation participating species.
-The original version of RADCAL includes spectral properties of $\rm CO_2$, $\rm H_2O$, $\rm CO$, and
-$\rm CH_4$ that are either modeled through quantitative molecular spectroscopy derivations
-or tabulated from the fitting of experimental data into appropriate statistical narrow band models.
-The original RADCAL data have been supplemented with new tabulated experimental data
-for the following fuels:
+A combination of molecular models and data tables are used to compute the spectral radiative properties of the radiation participating species. The original version of RADCAL includes spectral properties of $\rm CO_2$, $\rm H_2O$, $\rm CO$, and $\rm CH_4$ that are either modeled through quantitative molecular spectroscopy derivations or tabulated from the fitting of experimental data into appropriate statistical narrow band models. The original RADCAL data have been supplemented with new tabulated experimental data for the following fuels:
 \begin{itemize}
   \item Ethylene:  $\rm C_2H_4$
   \item Ethane:    $\rm C_2H_6$
@@ -435,15 +406,14 @@ for the following fuels:
   \item Methanol:  $\rm CH_3OH$
   \item Methyl Methacrylate: $\rm C_5H_8O_2$
 \end{itemize}
-These new data have been obtained through FTIR measurements for wavenumbers between 700~cm$\rm ^{-1}$ and 4000~cm$\rm ^{-1}$.
-A useful quantity to compare the relative importance of the different IR bands is provided by the integrated band intensity,
-$\alpha_i$, defined for the $i$th participating species as:
+These new data have been obtained through FTIR measurements for wavenumbers between 700~cm$\rm ^{-1}$ and 4000~cm$\rm ^{-1}$. A useful quantity to compare the relative importance of the different IR bands is provided by the integrated band intensity, $\alpha_i$, defined for the $i$th participating species as:
 \be
-  \alpha_i(T) = \displaystyle\int_{\om_{\min}}^{\om_{\max}} \bar{\kappa}_i(T) \; \d \om
+  \alpha_i(T) = \displaystyle\int_{\om_{\min}}^{\om_{\max}} \bar{\kappa}_i(\om',T) \; \d \om'
 \ee
-whose units are $\rm {atm^{-1} cm^{-2}}$. The subsections below briefly describe the molecular bands for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature.
+whose units are $\rm {atm^{-1} cm^{-2}}$. The value of the spectral absorption coefficient, $\bar{\kappa}_i$, is averaged over a narrow band whose spectral width, $\Delta \om$, varies from 5~cm$^{-1}$ for $\om < $ 1100~cm$^{-1}$, to 25~cm$^{-1}$ for 1100~cm$^{-1} \leq \om < $ 5000~cm$^{\rm -1}$, and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \om$.
 
-At the start of a simulation, the absorption coefficient are calculated using RADCAL and then tabulated as a function of mixture fraction and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values.
+The subsections below briefly describe the molecular bands for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. At the start of a simulation, the absorption coefficient are calculated using RADCAL and then tabulated as a function of mixture fraction and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values.
+
 
 \subsubsection{Carbon Dioxide: $\rm CO_2$}
 
@@ -683,7 +653,7 @@ Band~3 corresponds to the stretching of the $\rm C-O$ group and has the highest 
 
 This section briefly describes the statistical models used to obtain most of the
 tabulated species IR spectral absorption coefficients at different temperatures,
-$\bar{\kappa}_i(T)$. Narrow band models are used in lieu of line-by-line models to
+$\bar{\kappa}_i(\om,T)$. Narrow band models are used in lieu of line-by-line models to
 represent the IR spectra of radiating species in engineering applications. In the narrow band approach, the whole spectrum is
 divided into small spectral bands (typically several $\rm cm^{-1}$), and
 different statistical approaches are used to compute the average radiative

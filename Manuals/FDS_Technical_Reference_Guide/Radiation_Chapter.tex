@@ -24,8 +24,8 @@ The Radiative Transport Equation (RTE) for an absorbing, emitting, and scatterin
 where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength, $\la$; $\bs$ is the direction vector of the intensity; and $\kappa(\bx,\la)$ and $\sigma_{\rm s}(\bx,\la)$ are the local absorption and scattering coefficients, respectively. $B(\bx,\la)$ is the emission source term, describing how much heat is emitted by the local mixture of gas, soot and droplets/particles. The integral on the right hand side describes the in-scattering from other directions. The in-scattering and scattering terms are detailed in Section~\ref{droplet-radiation}.
 
 In practical simulations, the spectral dependence of the RTE cannot be resolved accurately. Instead, the radiation spectrum is divided into a relatively small number of bands and a separate RTE is derived for each band. For instance, the band specific RTE for a non-scattering gas is
-\be   
-   \bs \cdot \nabla I_n(\bx,\bs) = B_n(\bx) - \kappa_n(\bx) \, I_n(\bx,\bs),\;\; n = 1...N  \label{bandRTE} 
+\be
+   \bs \cdot \nabla I_n(\bx,\bs) = B_n(\bx) - \kappa_n(\bx) \, I_n(\bx,\bs),\;\; n = 1...N  \label{bandRTE}
 \ee
 where $I_n$ is the intensity integrated over the band $n$, and $\kappa_n$ is the appropriate mean absorption coefficient for the band. When the intensities corresponding to the bands are known, the total intensity is calculated by summing over all the bands
 \be
@@ -51,8 +51,6 @@ I_{\rm b}(\bx) = \frac{\sigma \, T(\bx)^4}{\pi} \label{emission_source_term}
 This is the default mode of FDS and appropriate for most problems of fire engineering.
 
 For optically thin flames, however, where the yield of soot is small compared to the yields of $\rm CO_2$ and water vapor, the gray gas assumption can lead to an over-prediction of the emitted radiation. From a series of numerical experiments using methane as the fuel, it has been found that six bands ($N=6$) provide an accurate representation of the most important radiation bands of the fuel, $\rm CO_2$, and water vapor. Table~\ref{banditos} through Table~\ref{band_MMA} list the band limits for various fuel species. The location of the bands have been adjusted to accommodate most of the features of the fuels spectra. If the absorption of the fuel is known to be important, separate bands can be reserved for fuel, increasing the total number of bands, $N$. The number of additional bands depends on the fuel, as discussed in Appendix~\ref{absorption_coefficients}.
-
-
 \begin{table}[p]
 \caption{Limits of the spectral bands for methane.}
 \label{banditos}
@@ -316,6 +314,7 @@ For optically thin flames, however, where the yield of soot is small compared to
 
 \end{tabular}
 \end{center}
+\vspace{2in}
 \end{table}
 
 
@@ -360,7 +359,7 @@ increases in size, the global value will typically decrease due to a
 net re-absorption of the thermal radiation by the increasing smoke
 mantle.
 
-\newpage
+
 
 \section{Numerical Method}
 \label{radnumericalmethodsection}
