@@ -716,7 +716,7 @@ SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
 SVEXTERN float sensorrelsize,sensorrelsizeMIN;
 
 SVEXTERN float linewidth, ventlinewidth, highlight_linewidth,solidlinewidth;
-SVEXTERN float sliceoffset_factor, ventoffset_factor;
+SVEXTERN float SVDECL(sliceoffset_factor,0.1), SVDECL(ventoffset_factor,0.01);
 SVEXTERN int visBLOCKold;
 
 SVEXTERN int selectedcolorbar_index,selectedcolorbar_index2;
