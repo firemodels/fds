@@ -28,15 +28,14 @@ char smokeview_revision[]="$Revision$";
 /* ----------------------- setClipPlanes ----------------------------- */
 
 void setClipPlanes(int option){
-  static GLdouble clipplane_x[4], clipplane_y[4], clipplane_z[4];
-  static GLdouble clipplane_X[4], clipplane_Y[4], clipplane_Z[4];
+  GLdouble clipplane[4];
 
   if(clip_x==1&&option==CLIP_ON){
-    clipplane_x[0]=1.0;
-    clipplane_x[1]=0.0;
-    clipplane_x[2]=0.0;
-    clipplane_x[3]=-NORMALIZE_X(clip_x_val);
-    glClipPlane(GL_CLIP_PLANE0,clipplane_x);
+    clipplane[0]=1.0;
+    clipplane[1]=0.0;
+    clipplane[2]=0.0;
+    clipplane[3]=-NORMALIZE_X(clip_x_val);
+    glClipPlane(GL_CLIP_PLANE0,clipplane);
     glEnable(GL_CLIP_PLANE0);
   }
   else{
@@ -44,11 +43,11 @@ void setClipPlanes(int option){
   }
 
   if(clip_X==1&&option==CLIP_ON){
-    clipplane_X[0]=-1.0;
-    clipplane_X[1]=0.0;
-    clipplane_X[2]=0.0;
-    clipplane_X[3]=NORMALIZE_X(clip_X_val);
-    glClipPlane(GL_CLIP_PLANE3,clipplane_X);
+    clipplane[0]=-1.0;
+    clipplane[1]=0.0;
+    clipplane[2]=0.0;
+    clipplane[3]=NORMALIZE_X(clip_X_val);
+    glClipPlane(GL_CLIP_PLANE3,clipplane);
     glEnable(GL_CLIP_PLANE3);
   }
   else{
@@ -56,11 +55,11 @@ void setClipPlanes(int option){
   }
 
   if(clip_y==1&&option==CLIP_ON){
-    clipplane_y[0]=0.0;
-    clipplane_y[1]=1.0;
-    clipplane_y[2]=0.0;
-    clipplane_y[3]=-NORMALIZE_Y(clip_y_val);
-    glClipPlane(GL_CLIP_PLANE1,clipplane_y);
+    clipplane[0]=0.0;
+    clipplane[1]=1.0;
+    clipplane[2]=0.0;
+    clipplane[3]=-NORMALIZE_Y(clip_y_val);
+    glClipPlane(GL_CLIP_PLANE1,clipplane);
     glEnable(GL_CLIP_PLANE1);
   }
   else{
@@ -68,11 +67,11 @@ void setClipPlanes(int option){
   }
 
   if(clip_Y==1&&option==CLIP_ON){
-    clipplane_Y[0]=0.0;
-    clipplane_Y[1]=-1.0;
-    clipplane_Y[2]=0.0;
-    clipplane_Y[3]=NORMALIZE_Y(clip_Y_val);
-    glClipPlane(GL_CLIP_PLANE4,clipplane_Y);
+    clipplane[0]=0.0;
+    clipplane[1]=-1.0;
+    clipplane[2]=0.0;
+    clipplane[3]=NORMALIZE_Y(clip_Y_val);
+    glClipPlane(GL_CLIP_PLANE4,clipplane);
     glEnable(GL_CLIP_PLANE4);
   }
   else{
@@ -80,11 +79,11 @@ void setClipPlanes(int option){
   }
 
   if(clip_z==1&&option==CLIP_ON){
-    clipplane_z[0]=0.0;
-    clipplane_z[1]=0.0;
-    clipplane_z[2]=1.0;
-    clipplane_z[3]=-NORMALIZE_Z(clip_z_val);
-    glClipPlane(GL_CLIP_PLANE2,clipplane_z);
+    clipplane[0]=0.0;
+    clipplane[1]=0.0;
+    clipplane[2]=1.0;
+    clipplane[3]=-NORMALIZE_Z(clip_z_val);
+    glClipPlane(GL_CLIP_PLANE2,clipplane);
     glEnable(GL_CLIP_PLANE2);
   }
   else{
@@ -92,11 +91,11 @@ void setClipPlanes(int option){
   }
 
   if(clip_Z==1&&option==CLIP_ON){
-    clipplane_Z[0]=0.0;
-    clipplane_Z[1]=0.0;
-    clipplane_Z[2]=-1.0;
-    clipplane_Z[3]=NORMALIZE_X(clip_Z_val);
-    glClipPlane(GL_CLIP_PLANE5,clipplane_Z);
+    clipplane[0]=0.0;
+    clipplane[1]=0.0;
+    clipplane[2]=-1.0;
+    clipplane[3]=NORMALIZE_Z(clip_Z_val);
+    glClipPlane(GL_CLIP_PLANE5,clipplane);
     glEnable(GL_CLIP_PLANE5);
   }
   else{
