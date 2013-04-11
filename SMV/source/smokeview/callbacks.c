@@ -1794,8 +1794,8 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'W':
-      xyz_clipplane++;
-      if(xyz_clipplane>2)xyz_clipplane=0;
+      clip_mode++;
+      if(clip_mode>2)clip_mode=0;
       update_clip_all();
       break;
     case 'x':
@@ -1888,7 +1888,7 @@ void keyboard(unsigned char key, int flag){
      strncmp((const char *)&key2,",",1)!=0&&strncmp((const char *)&key2,".",1)!=0&&
      strncmp((const char *)&key2,"_",1)!=0&&(skip2<=0||skip2>=10))return;
 
-  if(xyz_clipplane!=CLIP_OFF&&(
+  if(clip_mode!=CLIP_OFF&&(
     strncmp((const char *)&key2,"<",1)==0||strncmp((const char *)&key2,",",1)==0||
     strncmp((const char *)&key2,">",1)==0||strncmp((const char *)&key2,".",1)==0)){
 
@@ -2004,21 +2004,15 @@ void handle_rotation_type(int flag){
 
 void update_clipplanes(void){
   if(trainer_mode==0){
-    if(xyz_clipplane!=xyz_clipplane_last){
-      if(xyz_clipplane==CLIP_OFF)PRINTF("clipping off\n");
-      if(xyz_clipplane==CLIP_BLOCKAGES_DATA)PRINTF("clipping blockages + data\n");
-      if(xyz_clipplane==CLIP_BLOCKAGES)PRINTF("clipping blockages\n");
-      xyz_clipplane_last=xyz_clipplane;
+    if(clip_mode!=clip_mode_last){
+      if(clip_mode==CLIP_OFF)PRINTF("clipping off\n");
+      if(clip_mode==CLIP_BLOCKAGES_DATA)PRINTF("clipping blockages + data\n");
+      if(clip_mode==CLIP_BLOCKAGES)PRINTF("clipping blockages\n");
+      clip_mode_last=clip_mode;
     }
   }
-  if(xyz_clipplane==CLIP_OFF){
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-    glDisable(GL_CLIP_PLANE2);
-    glDisable(GL_CLIP_PLANE3);
-    glDisable(GL_CLIP_PLANE4);
-    glDisable(GL_CLIP_PLANE5);
-
+  if(clip_mode==CLIP_OFF){
+    setClipPlanes(CLIP_OFF);
   }
 }
 

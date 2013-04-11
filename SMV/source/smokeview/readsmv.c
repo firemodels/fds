@@ -9820,8 +9820,8 @@ int readini2(char *inifile, int localfile){
     }
     if(localfile==1&&match(buffer,"XYZCLIP")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&xyz_clipplane);
-      xyz_clipplane=CLAMP(xyz_clipplane,0,2);
+      sscanf(buffer,"%i",&clip_mode);
+      clip_mode=CLAMP(clip_mode,0,2);
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f",&clip_x, &clip_x_val, &clip_X, &clip_X_val);
       fgets(buffer,255,stream);
@@ -9999,7 +9999,7 @@ int readini2(char *inifile, int localfile){
         ci = camera_ini;
   		  fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i %i %i %i",
-          &ci->xyz_clipplane,
+          &ci->clip_mode,
           &ci->clip_x,&ci->clip_y,&ci->clip_z,
           &ci->clip_X,&ci->clip_Y,&ci->clip_Z);
   		  fgets(buffer,255,stream);
@@ -11331,7 +11331,7 @@ void writeini(int flag){
     labeldata *thislabel;
 
     fprintf(fileout,"XYZCLIP\n");
-    fprintf(fileout," %i\n",xyz_clipplane);
+    fprintf(fileout," %i\n",clip_mode);
     fprintf(fileout," %i %f %i %f\n",clip_x, clip_x_val, clip_X, clip_X_val);
     fprintf(fileout," %i %f %i %f\n",clip_y, clip_y_val, clip_Y, clip_Y_val);
     fprintf(fileout," %i %f %i %f\n",clip_z, clip_z_val, clip_Z, clip_Z_val);
@@ -11457,7 +11457,7 @@ void writeini(int flag){
           fprintf(fileout," %f %f %f %f\n",mat[12],mat[13],mat[14],mat[15]);
         }
         fprintf(fileout," %i %i %i %i %i %i %i\n",
-            ca->xyz_clipplane,
+            ca->clip_mode,
             ca->clip_x,ca->clip_y,ca->clip_z,
             ca->clip_X,ca->clip_Y,ca->clip_Z);
         fprintf(fileout," %f %f %f %f %f %f\n",

@@ -145,7 +145,7 @@ void init_camera(camera *camera_data,char *name){
 /* ------------------ clip2cam ------------------------ */
 
   void clip2cam(camera *cam){
-    cam->xyz_clipplane=xyz_clipplane;
+    cam->clip_mode=clip_mode;
     cam->clip_x=clip_x;
     cam->clip_y=clip_y;
     cam->clip_z=clip_z;
@@ -167,7 +167,7 @@ void init_camera(camera *camera_data,char *name){
 /* ------------------ clip2cam ------------------------ */
 
   void cam2clip(camera *cam){
-    xyz_clipplane = cam->xyz_clipplane;
+    clip_mode = cam->clip_mode;
     clip_x = cam->clip_x;
     clip_y = cam->clip_y;
     clip_z = cam->clip_z;
@@ -224,7 +224,7 @@ void update_camera(camera *ca){
     update_meshlist1(ca->rotation_index);
     update_trainer_moves();
 
-    ca->xyz_clipplane=xyz_clipplane;
+    ca->clip_mode=clip_mode;
     ca->clip_x=clip_x;
     ca->clip_y=clip_y;
     ca->clip_z=clip_z;

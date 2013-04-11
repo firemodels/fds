@@ -30,7 +30,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   show_mode=mode;
 
-  if(xyz_clipplane==CLIP_BLOCKAGES_DATA){
+  if(clip_mode==CLIP_BLOCKAGES_DATA){
     if(clip_x==1)glDisable(GL_CLIP_PLANE0);
     if(clip_y==1)glDisable(GL_CLIP_PLANE1);
     if(clip_z==1)glDisable(GL_CLIP_PLANE2);
@@ -148,7 +148,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(UpdateLIGHTS==1)updateLights(0);
 
   if(mode!=RENDER||viscolorbarpath!=1){
-    setClipPlanes(0);
+    if(clip_mode==CLIP_BLOCKAGES_DATA){
+      setClipPlanes(CLIP_ON);
+    }
   }
   else{
     if(cb_hidesv==1){
@@ -196,10 +198,10 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw sensors/sprinklers/heat detectors +++++++++++++++++++++++++ */
 
-    if(xyz_clipplane==CLIP_BLOCKAGES){
-      setClipPlanes(1);
+    if(clip_mode==CLIP_BLOCKAGES){
+      setClipPlanes(CLIP_ON);
       draw_devices();
-      unsetClipPlanes();
+      setClipPlanes(CLIP_OFF);
     }
     else{
       draw_devices();
@@ -216,15 +218,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     if(vis_user_ticks==1){
       antialias(1);
-      glDisable(GL_CLIP_PLANE0);
-      glDisable(GL_CLIP_PLANE1);
-      glDisable(GL_CLIP_PLANE2);
-      glDisable(GL_CLIP_PLANE3);
-      glDisable(GL_CLIP_PLANE4);
-      glDisable(GL_CLIP_PLANE5);
+      setClipPlanes(CLIP_OFF);
       draw_user_ticks();
       if(mode!=RENDER||viscolorbarpath!=1){
-        setClipPlanes(0);
+        if(clip_mode==CLIP_BLOCKAGES_DATA){
+          setClipPlanes(CLIP_ON);
+        }
       }
       antialias(0);
       SNIFF_ERRORS("after drawticks");
@@ -318,10 +317,10 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
-  if(xyz_clipplane==CLIP_BLOCKAGES){
-    setClipPlanes(1);
+  if(clip_mode==CLIP_BLOCKAGES){
+    setClipPlanes(CLIP_ON);
     drawBlockages(mode,DRAW_OPAQUE);
-    unsetClipPlanes();
+    setClipPlanes(CLIP_OFF);
   }
   else{
     drawBlockages(mode,DRAW_OPAQUE);
@@ -466,10 +465,10 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
 
-  if(xyz_clipplane==CLIP_BLOCKAGES){
-    setClipPlanes(1);
+  if(clip_mode==CLIP_BLOCKAGES){
+    setClipPlanes(CLIP_ON);
     draw_transparent_faces();
-    unsetClipPlanes();
+    setClipPlanes(CLIP_OFF);
   }
   else{
     draw_transparent_faces();

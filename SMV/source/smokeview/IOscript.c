@@ -1443,7 +1443,7 @@ int run_script(void){
       }
       break;
     case SCRIPT_SCENECLIP:
-      xyz_clipplane=scripti->ival;
+      clip_mode=scripti->ival;
       updatefacelists=1;
       break;
     case SCRIPT_XSCENECLIP:

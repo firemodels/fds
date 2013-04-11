@@ -14,6 +14,9 @@ void _Sniff_Errors(char *whereat);
 #define C_GENERATED 0
 #define FORTRAN_GENERATED 1
 
+#define CLIP_ON 1
+#define CLIP_OFF 0
+
 #define RENDER_ON 1
 #define RENDER_OFF 0
 

@@ -1672,7 +1672,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
 /* ------------------ clip_face ------------------------ */
 
 int clip_face(facedata *facei){
-  if(xyz_clipplane==CLIP_OFF)return 0;
+  if(clip_mode==CLIP_OFF)return 0;
   if(clip_x==1&&DENORMALIZE_X(facei->xmax)<clip_x_val)return 1;
   if(clip_X==1&&DENORMALIZE_X(facei->xmin)>clip_X_val)return 1;
   if(clip_y==1&&DENORMALIZE_Y(facei->ymax)<clip_y_val)return 1;
@@ -4402,7 +4402,7 @@ void drawBlockages(int mode, int trans_flag){
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   if(drawing_smooth==1&&showedit_dialog==0){
-    if(xyz_clipplane!=CLIP_OFF)glDisable(GL_CULL_FACE);
+    if(clip_mode!=CLIP_OFF)glDisable(GL_CULL_FACE);
     for(i=0;i<nmeshes;i++){
       meshi = meshinfo + i;
 
@@ -4416,7 +4416,7 @@ void drawBlockages(int mode, int trans_flag){
       }
     }
     SNIFF_ERRORS("after drawblocks");
-    if(xyz_clipplane!=CLIP_OFF)glEnable(GL_CULL_FACE);
+    if(clip_mode!=CLIP_OFF)glEnable(GL_CULL_FACE);
   }
   if(trans_flag!=DRAW_TRANSPARENT&&blocklocation!=BLOCKlocation_cad){
     if(mode==SELECT){
@@ -4440,20 +4440,20 @@ void drawBlockages(int mode, int trans_flag){
       cd=cadgeominfo+i;
       if(cd->version==1){
         if(trans_flag==DRAW_TRANSPARENT)continue;
-        if(xyz_clipplane==CLIP_BLOCKAGES){
-          setClipPlanes(1);
+        if(clip_mode==CLIP_BLOCKAGES){
+          setClipPlanes(CLIP_ON);
           drawcadgeom(cd);
-          unsetClipPlanes();
+          setClipPlanes(CLIP_OFF);
         }
         else{
           drawcadgeom(cd);
         }
       }
       else if(cd->version==2){
-        if(xyz_clipplane==CLIP_BLOCKAGES){
-          setClipPlanes(1);
+        if(clip_mode==CLIP_BLOCKAGES){
+          setClipPlanes(CLIP_ON);
           drawcad2geom(cd,trans_flag);
-          unsetClipPlanes();
+          setClipPlanes(CLIP_OFF);
         }
         else{
           drawcad2geom(cd,trans_flag);

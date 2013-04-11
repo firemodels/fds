@@ -148,12 +148,7 @@ void setColorbarClipPlanes(int flag){
     glEnable(GL_CLIP_PLANE5);
   }
   else{
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-    glDisable(GL_CLIP_PLANE2);
-    glDisable(GL_CLIP_PLANE3);
-    glDisable(GL_CLIP_PLANE4);
-    glDisable(GL_CLIP_PLANE5);
+    setClipPlanes(CLIP_OFF);
   }
 }
 

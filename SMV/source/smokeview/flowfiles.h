@@ -868,7 +868,7 @@ typedef struct _camera {
   int quat_defined;
   float quaternion[4];
 
-  int xyz_clipplane;
+  int clip_mode;
   int clip_x, clip_X;
   int clip_y, clip_Y;
   int clip_z, clip_Z;

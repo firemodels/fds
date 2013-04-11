@@ -110,7 +110,7 @@ extern "C" void glui_clip_setup(int main_window){
   glui_clip->add_column_to_panel(PANEL_clipz,false);
   CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(PANEL_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
 
-  radio_clip = glui_clip->add_radiogroup_to_panel(PANEL_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
+  radio_clip = glui_clip->add_radiogroup_to_panel(PANEL_clip,&clip_mode,CLIP_all,CLIP_CB);
   RADIOBUTTON_clip_1a=glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping disabled"));
   RADIOBUTTON_clip_1b=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages and data"));
   RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages"));
@@ -191,7 +191,7 @@ extern "C" void Update_Glui_Clip(void){
     CHECKBOX_clip_xupper->set_int_val(clip_X);
     CHECKBOX_clip_yupper->set_int_val(clip_Y);
     CHECKBOX_clip_zupper->set_int_val(clip_Z);
-    if(radio_clip!=NULL)radio_clip->set_int_val(xyz_clipplane);
+    if(radio_clip!=NULL)radio_clip->set_int_val(clip_mode);
     CLIP_CB(CLIP_all);
   }
 }
@@ -249,7 +249,7 @@ void CLIP_CB(int var){
   case CLIP_all:
     updatefacelists=1;
     update_clipplanes();
-    if(xyz_clipplane!=CLIP_OFF){
+    if(clip_mode!=CLIP_OFF){
       for(i=0;i<6;i++){
         CLIP_CB(i);
       }
@@ -314,7 +314,7 @@ void CLIP_CB(int var){
 
 extern "C" void update_clip_all(void){
   CLIP_CB(CLIP_all);
-  radio_clip->set_int_val(xyz_clipplane);
+  radio_clip->set_int_val(clip_mode);
 }
 
 /* ------------------ set_clip_controls ------------------------ */

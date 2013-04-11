@@ -25,34 +25,13 @@ char smokeview_revision[]="$Revision$";
 #include <direct.h>
 #endif
 
-/* ----------------------- unsetClipPlanes ----------------------------- */
-
-void unsetClipPlanes(void){
-  glDisable(GL_CLIP_PLANE0);
-  glDisable(GL_CLIP_PLANE1);
-  glDisable(GL_CLIP_PLANE2);
-  glDisable(GL_CLIP_PLANE3);
-  glDisable(GL_CLIP_PLANE4);
-  glDisable(GL_CLIP_PLANE5);
-}
-
 /* ----------------------- setClipPlanes ----------------------------- */
 
-void setClipPlanes(int mode){
+void setClipPlanes(int option){
   static GLdouble clipplane_x[4], clipplane_y[4], clipplane_z[4];
   static GLdouble clipplane_X[4], clipplane_Y[4], clipplane_Z[4];
 
-  // only clip if mode is 0 and xyz_clipplane is CLIP_BLOCKAGES_DATA
-  //        or if mode is 1 and xyz_clipplane is CLIP_BLOCKAGES
-  // otherwise disable clipping
-
-  if(xyz_clipplane==CLIP_OFF||mode==0&&xyz_clipplane==CLIP_BLOCKAGES||
-    mode==1&&xyz_clipplane!=CLIP_BLOCKAGES){
-      unsetClipPlanes();
-      return;
-  }
-
-  if(clip_x==1){
+  if(clip_x==1&&option==CLIP_ON){
     clipplane_x[0]=1.0;
     clipplane_x[1]=0.0;
     clipplane_x[2]=0.0;
@@ -64,7 +43,7 @@ void setClipPlanes(int mode){
     glDisable(GL_CLIP_PLANE0);
   }
 
-  if(clip_X==1){
+  if(clip_X==1&&option==CLIP_ON){
     clipplane_X[0]=-1.0;
     clipplane_X[1]=0.0;
     clipplane_X[2]=0.0;
@@ -76,7 +55,7 @@ void setClipPlanes(int mode){
     glDisable(GL_CLIP_PLANE3);
   }
 
-  if(clip_y==1){
+  if(clip_y==1&&option==CLIP_ON){
     clipplane_y[0]=0.0;
     clipplane_y[1]=1.0;
     clipplane_y[2]=0.0;
@@ -88,7 +67,7 @@ void setClipPlanes(int mode){
     glDisable(GL_CLIP_PLANE1);
   }
 
-  if(clip_Y==1){
+  if(clip_Y==1&&option==CLIP_ON){
     clipplane_Y[0]=0.0;
     clipplane_Y[1]=-1.0;
     clipplane_Y[2]=0.0;
@@ -100,7 +79,7 @@ void setClipPlanes(int mode){
     glDisable(GL_CLIP_PLANE4);
   }
 
-  if(clip_z==1){
+  if(clip_z==1&&option==CLIP_ON){
     clipplane_z[0]=0.0;
     clipplane_z[1]=0.0;
     clipplane_z[2]=1.0;
@@ -112,7 +91,7 @@ void setClipPlanes(int mode){
     glDisable(GL_CLIP_PLANE2);
   }
 
-  if(clip_Z==1){
+  if(clip_Z==1&&option==CLIP_ON){
     clipplane_Z[0]=0.0;
     clipplane_Z[1]=0.0;
     clipplane_Z[2]=-1.0;

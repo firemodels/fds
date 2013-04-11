@@ -2188,7 +2188,7 @@ void ScriptMenu(int value){
         fprintf(scriptoutstream,"ZSCENECLIP\n");
         fprintf(scriptoutstream," %i %f %i %f\n",clip_z,clip_z_val,clip_Z,clip_Z_val);
         fprintf(scriptoutstream,"SCENECLIP\n");
-        fprintf(scriptoutstream," %i\n",xyz_clipplane);
+        fprintf(scriptoutstream," %i\n",clip_mode);
       }
       else{
         script_recording->recording=0;
