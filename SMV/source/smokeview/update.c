@@ -1774,40 +1774,40 @@ void Update_Clip(int slicedir){
   stepclip_X=0; stepclip_Y=0; stepclip_Z=0;
   switch (slicedir){
   case 1:
-    clip_x = 1 - clip_x;
-    if(clip_x==1)PRINTF("clip x on\n");
-    if(clip_x==0)PRINTF("clip x off\n");
-    if(clip_x==1)stepclip_x=1;
+    clipinfo.clip_x = 1 - clipinfo.clip_x;
+    if(clipinfo.clip_x==1)PRINTF("clip x on\n");
+    if(clipinfo.clip_x==0)PRINTF("clip x off\n");
+    if(clipinfo.clip_x==1)stepclip_x=1;
     break;
   case 2:
-    clip_y = 1 - clip_y;
-    if(clip_y==1)PRINTF("clip y on\n");
-    if(clip_y==0)PRINTF("clip y off\n");
-    if(clip_y==1)stepclip_y=1;
+    clipinfo.clip_y = 1 - clipinfo.clip_y;
+    if(clipinfo.clip_y==1)PRINTF("clip y on\n");
+    if(clipinfo.clip_y==0)PRINTF("clip y off\n");
+    if(clipinfo.clip_y==1)stepclip_y=1;
     break;
   case 3:
-    clip_z = 1 - clip_z;
-    if(clip_z==1)PRINTF("clip z on\n");
-    if(clip_z==0)PRINTF("clip z off\n");
-    if(clip_z==1)stepclip_z=1;
+    clipinfo.clip_z = 1 - clipinfo.clip_z;
+    if(clipinfo.clip_z==1)PRINTF("clip z on\n");
+    if(clipinfo.clip_z==0)PRINTF("clip z off\n");
+    if(clipinfo.clip_z==1)stepclip_z=1;
     break;
   case -1:
-    clip_X = 1 - clip_X;
-    if(clip_X==1)PRINTF("clip X on\n");
-    if(clip_X==0)PRINTF("clip X off\n");
-    if(clip_X==1)stepclip_X=1;
+    clipinfo.clip_X = 1 - clipinfo.clip_X;
+    if(clipinfo.clip_X==1)PRINTF("clip X on\n");
+    if(clipinfo.clip_X==0)PRINTF("clip X off\n");
+    if(clipinfo.clip_X==1)stepclip_X=1;
     break;
   case -2:
-    clip_Y = 1 - clip_Y;
-    if(clip_Y==1)PRINTF("clip Y on\n");
-    if(clip_Y==0)PRINTF("clip Y off\n");
-    if(clip_Y==1)stepclip_Y=1;
+    clipinfo.clip_Y = 1 - clipinfo.clip_Y;
+    if(clipinfo.clip_Y==1)PRINTF("clip Y on\n");
+    if(clipinfo.clip_Y==0)PRINTF("clip Y off\n");
+    if(clipinfo.clip_Y==1)stepclip_Y=1;
     break;
   case -3:
-    clip_Z = 1 - clip_Z;
-    if(clip_Z==1)PRINTF("clip Z on\n");
-    if(clip_Z==0)PRINTF("clip Z off\n");
-    if(clip_Z==1)stepclip_Z=1;
+    clipinfo.clip_Z = 1 - clipinfo.clip_Z;
+    if(clipinfo.clip_Z==1)PRINTF("clip Z on\n");
+    if(clipinfo.clip_Z==0)PRINTF("clip Z off\n");
+    if(clipinfo.clip_Z==1)stepclip_Z=1;
     break;
   default:
     ASSERT(FFALSE);

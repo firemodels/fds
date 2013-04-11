@@ -98,60 +98,6 @@ void drawTimeBar(float xleft, float xright, float ybot, float ytop){
   glEnd();
 }
 
-/* ------------------ setColorbarClipPlanes ------------------------ */
-
-void setColorbarClipPlanes(int flag){
-  static GLdouble clipplane_x[4], clipplane_y[4], clipplane_z[4];
-  static GLdouble clipplane_X[4], clipplane_Y[4], clipplane_Z[4];
-
-  if(flag==1){
-    clipplane_x[0]=1.0;
-    clipplane_x[1]=0.0;
-    clipplane_x[2]=0.0;
-    clipplane_x[3]=-2.0;
-    glClipPlane(GL_CLIP_PLANE0,clipplane_x);
-    glEnable(GL_CLIP_PLANE0);
-
-    clipplane_X[0]=-1.0;
-    clipplane_X[1]=0.0;
-    clipplane_X[2]=0.0;
-    clipplane_X[3]=2.0;
-    glClipPlane(GL_CLIP_PLANE3,clipplane_X);
-    glEnable(GL_CLIP_PLANE3);
-
-    clipplane_y[0]=0.0;
-    clipplane_y[1]=1.0;
-    clipplane_y[2]=0.0;
-    clipplane_y[3]=-2.0;
-    glClipPlane(GL_CLIP_PLANE1,clipplane_y);
-    glEnable(GL_CLIP_PLANE1);
-
-    clipplane_Y[0]=0.0;
-    clipplane_Y[1]=-1.0;
-    clipplane_Y[2]=0.0;
-    clipplane_Y[3]=2.0;
-    glClipPlane(GL_CLIP_PLANE4,clipplane_Y);
-    glEnable(GL_CLIP_PLANE4);
-
-    clipplane_z[0]=0.0;
-    clipplane_z[1]=0.0;
-    clipplane_z[2]=1.0;
-    clipplane_z[3]=-2.0;
-    glClipPlane(GL_CLIP_PLANE2,clipplane_z);
-    glEnable(GL_CLIP_PLANE2);
-
-    clipplane_Z[0]=0.0;
-    clipplane_Z[1]=0.0;
-    clipplane_Z[2]=-1.0;
-    clipplane_Z[3]=2.0;
-    glClipPlane(GL_CLIP_PLANE5,clipplane_Z);
-    glEnable(GL_CLIP_PLANE5);
-  }
-  else{
-    setClipPlanes(CLIP_OFF);
-  }
-}
-
 /* ------------------ addcolorbar ------------------------ */
 
 void addcolorbar(int icolorbar){

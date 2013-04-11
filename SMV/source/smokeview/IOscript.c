@@ -1447,27 +1447,27 @@ int run_script(void){
       updatefacelists=1;
       break;
     case SCRIPT_XSCENECLIP:
-      clip_x=scripti->ival;
-      clip_x_val = scripti->fval;
+      clipinfo.clip_x=scripti->ival;
+      clipinfo.clip_x_val = scripti->fval;
       
-      clip_X=scripti->ival2;
-      clip_X_val = scripti->fval2;
+      clipinfo.clip_X=scripti->ival2;
+      clipinfo.clip_X_val = scripti->fval2;
       updatefacelists=1;
       break;
     case SCRIPT_YSCENECLIP:
-      clip_y=scripti->ival;
-      clip_y_val = scripti->fval;
+      clipinfo.clip_y=scripti->ival;
+      clipinfo.clip_y_val = scripti->fval;
       
-      clip_Y=scripti->ival2;
-      clip_Y_val = scripti->fval2;
+      clipinfo.clip_Y=scripti->ival2;
+      clipinfo.clip_Y_val = scripti->fval2;
       updatefacelists=1;
       break;
     case SCRIPT_ZSCENECLIP:
-      clip_z=scripti->ival;
-      clip_z_val = scripti->fval;
+      clipinfo.clip_z=scripti->ival;
+      clipinfo.clip_z_val = scripti->fval;
       
-      clip_Z=scripti->ival2;
-      clip_Z_val = scripti->fval2;
+      clipinfo.clip_Z=scripti->ival2;
+      clipinfo.clip_Z_val = scripti->fval2;
       updatefacelists=1;
       break;
     case SCRIPT_RENDERCLIP:

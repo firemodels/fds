@@ -5,6 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void init_clip(void);
 EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor);
 EXTERNCPP void DrawCircVents(void);
 EXTERNCPP void update_glui_patch_units(void);
@@ -213,7 +214,6 @@ EXTERNCPP void update_plot_xyz(mesh *current_mesh);
 EXTERNCPP void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 
 EXTERNCPP char *get_chid(char *file, char *buffer);
-EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void addcolorbar(int icolorbar);
 EXTERNCPP void ReloadMenu(int value);
 EXTERNCPP void ColorBarMenu(int val);
@@ -623,7 +623,7 @@ EXTERNCPP void update_current_mesh(mesh *meshi);
 EXTERNCPP void DialogMenu(int value);
 EXTERNCPP void ApertureMenu(int value);
 EXTERNCPP void ZoomMenu(int value);
-EXTERNCPP void setClipPlanes(int option);
+EXTERNCPP void setClipPlanes(clipdata *ci, int option);
 EXTERNCPP void setslicecolors(float slicemin, float slicemax, slicedata *sd, int *errorcode);
 EXTERNCPP void setisocolors(float isomin, float isomax, isodata *sd, int *errorcode);
 EXTERNCPP void drawvolslice_terrain(const slicedata *sd);

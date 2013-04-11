@@ -21,9 +21,6 @@ char glui_colorbar_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-//
-// setColorbarClipPlanes(1);
-
 GLUI *glui_colorbar=NULL;
 
 GLUI_Panel *PANEL_cb1=NULL;

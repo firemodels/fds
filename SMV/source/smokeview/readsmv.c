@@ -6935,6 +6935,8 @@ typedef struct {
 
   init_part5prop();
 
+  init_clip();
+
   if(noutlineinfo>0){
     highlight_flag=2;
   }
@@ -7120,7 +7122,55 @@ typedef struct {
 
   return 0;
 }
+ 
+/* ------------------ init_clip ------------------------ */
 
+void init_clip(void){
+
+  clipdata *ci;
+  
+  clip_mode_last=-1;
+
+  ci = &clipinfo;
+  ci->clip_x=0;
+  ci->clip_y=0;
+  ci->clip_z=0;
+  ci->clip_X=0;
+  ci->clip_Y=0;
+  ci->clip_Z=0;
+  ci->clip_x_val=0.0;
+  ci->clip_y_val=0.0;
+  ci->clip_z_val=0.0;
+  ci->clip_X_val=0.0;
+  ci->clip_Y_val=0.0;
+  ci->clip_Z_val=0.0;
+
+  ci = &colorbar_clipinfo;
+  ci->clip_x=1;
+  ci->clip_y=1;
+  ci->clip_z=1;
+  ci->clip_X=1;
+  ci->clip_Y=1;
+  ci->clip_Z=1;
+  ci->clip_x_val=DENORMALIZE_X(2.0);
+  ci->clip_y_val=DENORMALIZE_X(2.0);
+  ci->clip_z_val=DENORMALIZE_Y(2.0);
+  ci->clip_X_val=DENORMALIZE_Y(2.0);
+  ci->clip_Y_val=DENORMALIZE_Z(2.0);
+  ci->clip_Z_val=DENORMALIZE_Z(2.0);
+  
+  clip_i=0;
+  clip_j=0;
+  clip_k=0;
+  clip_I=0;
+  clip_J=0;
+  clip_K=0;
+
+  stepclip_x=0,stepclip_y=0,stepclip_z=0;
+  stepclip_X=0,stepclip_Y=0,stepclip_Z=0;
+
+ }
+ 
 /* ------------------ parsedatabase ------------------------ */
 
 void parsedatabase(char *file){
@@ -9823,11 +9873,11 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&clip_mode);
       clip_mode=CLAMP(clip_mode,0,2);
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&clip_x, &clip_x_val, &clip_X, &clip_X_val);
+      sscanf(buffer,"%i %f %i %f",&clipinfo.clip_x, &clipinfo.clip_x_val, &clipinfo.clip_X, &clipinfo.clip_X_val);
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&clip_y, &clip_y_val, &clip_Y, &clip_Y_val);
+      sscanf(buffer,"%i %f %i %f",&clipinfo.clip_y, &clipinfo.clip_y_val, &clipinfo.clip_Y, &clipinfo.clip_Y_val);
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&clip_z, &clip_z_val, &clip_Z, &clip_Z_val);
+      sscanf(buffer,"%i %f %i %f",&clipinfo.clip_z, &clipinfo.clip_z_val, &clipinfo.clip_Z, &clipinfo.clip_Z_val);
       updateclipvals=1;
       continue;
     }
@@ -11332,9 +11382,9 @@ void writeini(int flag){
 
     fprintf(fileout,"XYZCLIP\n");
     fprintf(fileout," %i\n",clip_mode);
-    fprintf(fileout," %i %f %i %f\n",clip_x, clip_x_val, clip_X, clip_X_val);
-    fprintf(fileout," %i %f %i %f\n",clip_y, clip_y_val, clip_Y, clip_Y_val);
-    fprintf(fileout," %i %f %i %f\n",clip_z, clip_z_val, clip_Z, clip_Z_val);
+    fprintf(fileout," %i %f %i %f\n",clipinfo.clip_x, clipinfo.clip_x_val, clipinfo.clip_X, clipinfo.clip_X_val);
+    fprintf(fileout," %i %f %i %f\n",clipinfo.clip_y, clipinfo.clip_y_val, clipinfo.clip_Y, clipinfo.clip_Y_val);
+    fprintf(fileout," %i %f %i %f\n",clipinfo.clip_z, clipinfo.clip_z_val, clipinfo.clip_Z, clipinfo.clip_Z_val);
 
     for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
       labeldata *labeli;

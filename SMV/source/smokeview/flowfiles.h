@@ -346,7 +346,16 @@ typedef struct {
   cadlook *cadlookq;
 } cadquad;
 
+/* --------------------------  clipdata ------------------------------------ */
 
+typedef struct {
+  int clip_x, clip_X;
+  int clip_y, clip_Y;
+  int clip_z, clip_Z;
+  float clip_x_val, clip_X_val;
+  float clip_y_val, clip_Y_val;
+  float clip_z_val, clip_Z_val;
+} clipdata;
 
 /* --------------------------  cadgeom ------------------------------------ */
 

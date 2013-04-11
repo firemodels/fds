@@ -1902,9 +1902,9 @@ void keyboard(unsigned char key, int flag){
     if(stepclip_Y==1  )clip_J += skip_global*ClipDir;
     if(stepclip_Z==1  )clip_K += skip_global*ClipDir;
 
-    Update_Clipbounds(clip_x,&clip_i,clip_X,&clip_I,current_mesh->ibar);
-    Update_Clipbounds(clip_y,&clip_j,clip_Y,&clip_J,current_mesh->jbar);
-    Update_Clipbounds(clip_z,&clip_k,clip_Z,&clip_K,current_mesh->kbar);
+    Update_Clipbounds(clipinfo.clip_x,&clip_i,clipinfo.clip_X,&clip_I,current_mesh->ibar);
+    Update_Clipbounds(clipinfo.clip_y,&clip_j,clipinfo.clip_Y,&clip_J,current_mesh->jbar);
+    Update_Clipbounds(clipinfo.clip_z,&clip_k,clipinfo.clip_Z,&clip_K,current_mesh->kbar);
     return;
   }
 
@@ -2012,7 +2012,7 @@ void update_clipplanes(void){
     }
   }
   if(clip_mode==CLIP_OFF){
-    setClipPlanes(CLIP_OFF);
+    setClipPlanes(NULL,CLIP_OFF);
   }
 }
 

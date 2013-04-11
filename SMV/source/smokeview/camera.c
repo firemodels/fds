@@ -146,21 +146,21 @@ void init_camera(camera *camera_data,char *name){
 
   void clip2cam(camera *cam){
     cam->clip_mode=clip_mode;
-    cam->clip_x=clip_x;
-    cam->clip_y=clip_y;
-    cam->clip_z=clip_z;
+    cam->clip_x=clipinfo.clip_x;
+    cam->clip_y=clipinfo.clip_y;
+    cam->clip_z=clipinfo.clip_z;
   
-    cam->clip_X=clip_X;
-    cam->clip_Y=clip_Y;
-    cam->clip_Z=clip_Z;
+    cam->clip_X=clipinfo.clip_X;
+    cam->clip_Y=clipinfo.clip_Y;
+    cam->clip_Z=clipinfo.clip_Z;
 
-    cam->clip_x_val=clip_x_val;
-    cam->clip_y_val=clip_y_val;
-    cam->clip_z_val=clip_z_val;
+    cam->clip_x_val=clipinfo.clip_x_val;
+    cam->clip_y_val=clipinfo.clip_y_val;
+    cam->clip_z_val=clipinfo.clip_z_val;
 
-    cam->clip_X_val=clip_X_val;
-    cam->clip_Y_val=clip_Y_val;
-    cam->clip_Z_val=clip_Z_val;
+    cam->clip_X_val=clipinfo.clip_X_val;
+    cam->clip_Y_val=clipinfo.clip_Y_val;
+    cam->clip_Z_val=clipinfo.clip_Z_val;
   }
 
 
@@ -168,21 +168,21 @@ void init_camera(camera *camera_data,char *name){
 
   void cam2clip(camera *cam){
     clip_mode = cam->clip_mode;
-    clip_x = cam->clip_x;
-    clip_y = cam->clip_y;
-    clip_z = cam->clip_z;
+    clipinfo.clip_x = cam->clip_x;
+    clipinfo.clip_y = cam->clip_y;
+    clipinfo.clip_z = cam->clip_z;
   
-    clip_X = cam->clip_X;
-    clip_Y = cam->clip_Y;
-    clip_Z = cam->clip_Z;
+    clipinfo.clip_X = cam->clip_X;
+    clipinfo.clip_Y = cam->clip_Y;
+    clipinfo.clip_Z = cam->clip_Z;
 
-    clip_x_val = cam->clip_x_val;
-    clip_y_val = cam->clip_y_val;
-    clip_z_val = cam->clip_z_val;
+    clipinfo.clip_x_val = cam->clip_x_val;
+    clipinfo.clip_y_val = cam->clip_y_val;
+    clipinfo.clip_z_val = cam->clip_z_val;
 
-    clip_X_val = cam->clip_X_val;
-    clip_Y_val = cam->clip_Y_val;
-    clip_Z_val = cam->clip_Z_val;
+    clipinfo.clip_X_val = cam->clip_X_val;
+    clipinfo.clip_Y_val = cam->clip_Y_val;
+    clipinfo.clip_Z_val = cam->clip_Z_val;
     Update_Glui_Clip();
 
   }
@@ -225,17 +225,17 @@ void update_camera(camera *ca){
     update_trainer_moves();
 
     ca->clip_mode=clip_mode;
-    ca->clip_x=clip_x;
-    ca->clip_y=clip_y;
-    ca->clip_z=clip_z;
+    ca->clip_x=clipinfo.clip_x;
+    ca->clip_y=clipinfo.clip_y;
+    ca->clip_z=clipinfo.clip_z;
   
-    ca->clip_x_val=clip_x_val;
-    ca->clip_y_val=clip_y_val;
-    ca->clip_z_val=clip_z_val;
+    ca->clip_x_val=clipinfo.clip_x_val;
+    ca->clip_y_val=clipinfo.clip_y_val;
+    ca->clip_z_val=clipinfo.clip_z_val;
 
-    ca->clip_X_val=clip_X_val;
-    ca->clip_Y_val=clip_Y_val;
-    ca->clip_Z_val=clip_Z_val;
+    ca->clip_X_val=clipinfo.clip_X_val;
+    ca->clip_Y_val=clipinfo.clip_Y_val;
+    ca->clip_Z_val=clipinfo.clip_Z_val;
   }
   update_glui_set_view_xyz(ca->eye);
   ca->dirty=0;

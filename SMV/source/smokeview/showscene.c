@@ -31,12 +31,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   show_mode=mode;
 
   if(clip_mode==CLIP_BLOCKAGES_DATA){
-    if(clip_x==1)glDisable(GL_CLIP_PLANE0);
-    if(clip_y==1)glDisable(GL_CLIP_PLANE1);
-    if(clip_z==1)glDisable(GL_CLIP_PLANE2);
-    if(clip_X==1)glDisable(GL_CLIP_PLANE3);
-    if(clip_Y==1)glDisable(GL_CLIP_PLANE4);
-    if(clip_Z==1)glDisable(GL_CLIP_PLANE5);
+    if(clipinfo.clip_x==1)glDisable(GL_CLIP_PLANE0);
+    if(clipinfo.clip_y==1)glDisable(GL_CLIP_PLANE1);
+    if(clipinfo.clip_z==1)glDisable(GL_CLIP_PLANE2);
+    if(clipinfo.clip_X==1)glDisable(GL_CLIP_PLANE3);
+    if(clipinfo.clip_Y==1)glDisable(GL_CLIP_PLANE4);
+    if(clipinfo.clip_Z==1)glDisable(GL_CLIP_PLANE5);
   }
 
 /* ++++++++++++++++++++++++ update variables as needed +++++++++++++++++++++++++ */
@@ -134,11 +134,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(viscolorbarpath==1){
     if(cb_hidesv==1){
-      setColorbarClipPlanes(0);
+      setClipPlanes(NULL,CLIP_OFF);
     }
     drawcolorbarpath();
     if(cb_hidesv==1){
-      setColorbarClipPlanes(1);
+      setClipPlanes(&colorbar_clipinfo,CLIP_ON);
     }
     SNIFF_ERRORS("after setColorbarClipPlanes 1");
   }
@@ -149,15 +149,15 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(mode!=RENDER||viscolorbarpath!=1){
     if(clip_mode==CLIP_BLOCKAGES_DATA){
-      setClipPlanes(CLIP_ON);
+      setClipPlanes(&clipinfo,CLIP_ON);
     }
   }
   else{
     if(cb_hidesv==1){
-      setColorbarClipPlanes(1);
+      setClipPlanes(&colorbar_clipinfo,CLIP_ON);
     }
     else{
-      setColorbarClipPlanes(0);
+      setClipPlanes(NULL,CLIP_OFF);
     }
     SNIFF_ERRORS("after setColorbarClipPlanes 2");
   }
@@ -199,9 +199,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw sensors/sprinklers/heat detectors +++++++++++++++++++++++++ */
 
     if(clip_mode==CLIP_BLOCKAGES){
-      setClipPlanes(CLIP_ON);
+      setClipPlanes(&clipinfo,CLIP_ON);
       draw_devices();
-      setClipPlanes(CLIP_OFF);
+      setClipPlanes(NULL,CLIP_OFF);
     }
     else{
       draw_devices();
@@ -218,11 +218,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     if(vis_user_ticks==1){
       antialias(1);
-      setClipPlanes(CLIP_OFF);
+      setClipPlanes(NULL,CLIP_OFF);
       draw_user_ticks();
       if(mode!=RENDER||viscolorbarpath!=1){
         if(clip_mode==CLIP_BLOCKAGES_DATA){
-          setClipPlanes(CLIP_ON);
+          setClipPlanes(&clipinfo,CLIP_ON);
         }
       }
       antialias(0);
@@ -318,9 +318,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
   if(clip_mode==CLIP_BLOCKAGES){
-    setClipPlanes(CLIP_ON);
+    setClipPlanes(&clipinfo,CLIP_ON);
     drawBlockages(mode,DRAW_OPAQUE);
-    setClipPlanes(CLIP_OFF);
+    setClipPlanes(NULL,CLIP_OFF);
   }
   else{
     drawBlockages(mode,DRAW_OPAQUE);
@@ -466,9 +466,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
 
   if(clip_mode==CLIP_BLOCKAGES){
-    setClipPlanes(CLIP_ON);
+    setClipPlanes(&clipinfo,CLIP_ON);
     draw_transparent_faces();
-    setClipPlanes(CLIP_OFF);
+    setClipPlanes(NULL,CLIP_OFF);
   }
   else{
     draw_transparent_faces();
@@ -528,7 +528,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(viscolorbarpath==1){
     if(cb_hidesv==1){
-      setColorbarClipPlanes(0);
+      setClipPlanes(NULL,CLIP_OFF);
     }
   }
   SNIFF_ERRORS("end of loop");

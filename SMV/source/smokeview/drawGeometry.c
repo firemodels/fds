@@ -1671,14 +1671,14 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
 
 /* ------------------ clip_face ------------------------ */
 
-int clip_face(facedata *facei){
+int clip_face(clipdata *ci, facedata *facei){
   if(clip_mode==CLIP_OFF)return 0;
-  if(clip_x==1&&DENORMALIZE_X(facei->xmax)<clip_x_val)return 1;
-  if(clip_X==1&&DENORMALIZE_X(facei->xmin)>clip_X_val)return 1;
-  if(clip_y==1&&DENORMALIZE_Y(facei->ymax)<clip_y_val)return 1;
-  if(clip_Y==1&&DENORMALIZE_Y(facei->ymin)>clip_Y_val)return 1;
-  if(clip_z==1&&DENORMALIZE_Z(facei->zmax)<clip_z_val)return 1;
-  if(clip_Z==1&&DENORMALIZE_Z(facei->zmin)>clip_Z_val)return 1;
+  if(ci->clip_x==1&&DENORMALIZE_X(facei->xmax)<ci->clip_x_val)return 1;
+  if(ci->clip_X==1&&DENORMALIZE_X(facei->xmin)>ci->clip_X_val)return 1;
+  if(ci->clip_y==1&&DENORMALIZE_Y(facei->ymax)<ci->clip_y_val)return 1;
+  if(ci->clip_Y==1&&DENORMALIZE_Y(facei->ymin)>ci->clip_Y_val)return 1;
+  if(ci->clip_z==1&&DENORMALIZE_Z(facei->zmax)<ci->clip_z_val)return 1;
+  if(ci->clip_Z==1&&DENORMALIZE_Z(facei->zmin)>ci->clip_Z_val)return 1;
   return 0;
 }
 
@@ -1991,7 +1991,7 @@ void UpdateFacelists(void){
       if(showonly_hiddenfaces==1&&facej->hidden==0)continue;
       if(facej->thinface==1)continue;
       if(facej->bc!=NULL&&facej->bc->prop!=NULL&&facej->bc->prop->blockvis==0)continue;
-      if(clip_face(facej)==1)continue;
+      if(clip_face(&clipinfo,facej)==1)continue;
 
       vent_offset = 6*meshi->nbptrs;
       outline_offset = vent_offset + meshi->nvents;
@@ -4441,9 +4441,9 @@ void drawBlockages(int mode, int trans_flag){
       if(cd->version==1){
         if(trans_flag==DRAW_TRANSPARENT)continue;
         if(clip_mode==CLIP_BLOCKAGES){
-          setClipPlanes(CLIP_ON);
+          setClipPlanes(&clipinfo,CLIP_ON);
           drawcadgeom(cd);
-          setClipPlanes(CLIP_OFF);
+          setClipPlanes(NULL,CLIP_OFF);
         }
         else{
           drawcadgeom(cd);
@@ -4451,9 +4451,9 @@ void drawBlockages(int mode, int trans_flag){
       }
       else if(cd->version==2){
         if(clip_mode==CLIP_BLOCKAGES){
-          setClipPlanes(CLIP_ON);
+          setClipPlanes(&clipinfo,CLIP_ON);
           drawcad2geom(cd,trans_flag);
-          setClipPlanes(CLIP_OFF);
+          setClipPlanes(NULL,CLIP_OFF);
         }
         else{
           drawcad2geom(cd,trans_flag);
