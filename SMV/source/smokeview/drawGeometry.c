@@ -75,8 +75,16 @@ void DrawCircVents(void){
           glTranslatef(x0,y0,z0+delta);
           break;
       }
+     // {
+     //   clipdata circleclip;
+
+     //   initClipInfo(&circleclip,0.0,2.0*vi->radius,0.0,vi->radius,-1.0,1.0);
+     //   setClipPlanes(&circleclip,CLIP_ON);
+     // }
       glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
       drawfilledcircle(2.0*vi->radius,vcolor);
+     // setClipPlanes(&clipinfo,CLIP_ON);
+
       glPopMatrix();
     }
   }

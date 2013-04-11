@@ -25,6 +25,23 @@ char smokeview_revision[]="$Revision$";
 #include <direct.h>
 #endif
 
+/* ----------------------- initClipInfo ----------------------------- */
+
+void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax){
+  ci->clip_x=1;
+  ci->clip_X=1;
+  ci->clip_y=1;
+  ci->clip_Y=1;
+  ci->clip_z=1;
+  ci->clip_Z=1;
+  ci->clip_x_val=xmin;
+  ci->clip_X_val=xmax;
+  ci->clip_y_val=ymin;
+  ci->clip_Y_val=ymax;
+  ci->clip_z_val=zmin;
+  ci->clip_Z_val=zmax;
+}
+
 /* ----------------------- setClipPlanes ----------------------------- */
 
 void setClipPlanes(clipdata *ci, int option){
