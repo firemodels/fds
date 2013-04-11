@@ -391,7 +391,7 @@ typedef struct _ventdata {
   int *showtimelist;
   unsigned char *showhide;
   int nshowtime;
-  float *color;
+  float *color,*color_bak;
   int transparent;
   int colorindex;
   int usecolorindex;

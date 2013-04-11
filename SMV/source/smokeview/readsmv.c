@@ -5713,6 +5713,7 @@ typedef struct {
           }
           vi->surf[0]->used_by_vent=1;
         }
+        vi->color_bak=surfinfo[0].color;
       }
       for(nn=0;nn<nvents+12;nn++){
         ventdata *vi;

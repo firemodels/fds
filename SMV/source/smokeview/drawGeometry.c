@@ -38,6 +38,7 @@ void DrawCircVents(void){
       char label[255];
       unsigned char vcolor[3];
       float delta;
+      float *color;
 
       vi = meshi->ventinfo + j;
       if(vi->radius<=0.0)continue;
@@ -47,32 +48,35 @@ void DrawCircVents(void){
       z0 = (vi->zmin+vi->zmax)/2.0;
 
       delta=0.001*xyzmaxdiff;
-      vcolor[0]=vi->color[0]*255;
-      vcolor[1]=vi->color[1]*255;
-      vcolor[2]=vi->color[2]*255;
+      color=vi->color;
+      if(vi->dummyptr!=NULL)color=vi->dummyptr->color;
+      vcolor[0]=color[0]*255;
+      vcolor[1]=color[1]*255;
+      vcolor[2]=color[2]*255;
       glPushMatrix();
+      glTranslatef(x0,y0,z0);
       switch (vi->dir){
         case DOWN_X:
-          glTranslatef(x0-delta,y0,z0);
+          glTranslatef(-delta,0.0,0.0);
           glRotatef(90.0,0.0,1.0,0.0);
           break;
         case UP_X:
-          glTranslatef(x0+delta,y0,z0);
+          glTranslatef(delta,0.0,0.0);
           glRotatef(90.0,0.0,1.0,0.0);
           break;
         case DOWN_Y:
-          glTranslatef(x0,y0-delta,z0);
+          glTranslatef(0.0,-delta,0.0);
           glRotatef(90.0,1.0,0.0,0.0);
           break;
         case UP_Y:
-          glTranslatef(x0,y0+delta,z0);
+          glTranslatef(0.0,delta,0.0);
           glRotatef(90.0,1.0,0.0,0.0);
           break;
         case DOWN_Z:
-          glTranslatef(x0,y0,z0-delta);
+          glTranslatef(0.0,0.0,-delta);
           break;
         case UP_Z:
-          glTranslatef(x0,y0,z0+delta);
+          glTranslatef(0.0,0.0,delta);
           break;
       }
      // {
@@ -2020,12 +2024,13 @@ void UpdateFacelists(void){
         if(visOpenVents==0&&vi->isOpenvent==1)continue;
         if(visDummyVents==0&&vi->dummy==1)continue;
         if(visOtherVents==0&&vi->isOpenvent==0&&vi->dummy==0)continue;
-        if(visCircularVents==1){
-          if(vi->radius>0.0)continue;
-        // don't invoke  new scheme yet
-        //  if(vi->dummyptr!=NULL&&vi->dummyptr->radius>0.0){
-        //    continue;
-        //  }
+        if(vi->dummyptr!=NULL&&vi->dummyptr->radius>0.0){
+          if(visCircularVents==1){
+            facej->color=vi->color_bak;
+          }
+          else{
+            facej->color=vi->color;
+          }
         }
         if(patchi!=NULL&&patchi->loaded==1&&patchi->display==1&&
           (vis_threshold==0||vis_onlythreshold==0||do_threshold==0)&&
