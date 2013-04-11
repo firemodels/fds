@@ -39,7 +39,7 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE0);
   }
   else{
-    glDisable(GL_CLIP_PLANE0);
+    if(ci==NULL||ci->clip_x==0)glDisable(GL_CLIP_PLANE0);
   }
 
   if(ci!=NULL&&ci->clip_X==1&&option==CLIP_ON){
@@ -53,7 +53,7 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE3);
   }
   else{
-    glDisable(GL_CLIP_PLANE3);
+    if(ci==NULL||ci->clip_X==0)glDisable(GL_CLIP_PLANE3);
   }
 
   if(ci!=NULL&&ci->clip_y==1&&option==CLIP_ON){
@@ -67,7 +67,7 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE1);
   }
   else{
-    glDisable(GL_CLIP_PLANE1);
+    if(ci==NULL||ci->clip_y==0)glDisable(GL_CLIP_PLANE1);
   }
 
   if(ci!=NULL&&ci->clip_Y==1&&option==CLIP_ON){
@@ -81,7 +81,7 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE4);
   }
   else{
-    glDisable(GL_CLIP_PLANE4);
+    if(ci==NULL||ci->clip_Y==0)glDisable(GL_CLIP_PLANE4);
   }
 
   if(ci!=NULL&&ci->clip_z==1&&option==CLIP_ON){
@@ -95,7 +95,7 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE2);
   }
   else{
-    glDisable(GL_CLIP_PLANE2);
+    if(ci==NULL||ci->clip_z==0)glDisable(GL_CLIP_PLANE2);
   }
 
   if(ci!=NULL&&ci->clip_Z==1&&option==CLIP_ON){
@@ -109,7 +109,7 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE5);
   }
   else{
-    glDisable(GL_CLIP_PLANE5);
+    if(ci==NULL||ci->clip_Z==0)glDisable(GL_CLIP_PLANE5);
   }
 }
 

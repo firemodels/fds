@@ -61,6 +61,10 @@ char IOobject_revision[]="$Revision$";
 #define SV_ORIENX 142
 #define SV_ORIENY 143
 #define SV_ORIENZ 144
+#define SV_CLIPX 146
+#define SV_CLIPY 147
+#define SV_CLIPZ 148
+#define SV_CLIPOFF 149
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -106,6 +110,10 @@ char IOobject_revision[]="$Revision$";
 #define SV_ORIENX_NUMARGS 3
 #define SV_ORIENY_NUMARGS 3
 #define SV_ORIENZ_NUMARGS 3
+#define SV_CLIPX_NUMARGS 4
+#define SV_CLIPY_NUMARGS 4
+#define SV_CLIPZ_NUMARGS 4
+#define SV_CLIPOFF_NUMARGS 0
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -151,6 +159,10 @@ char IOobject_revision[]="$Revision$";
 #define SV_ORIENX_NUMOUTARGS 0
 #define SV_ORIENY_NUMOUTARGS 0
 #define SV_ORIENZ_NUMOUTARGS 0
+#define SV_CLIPX_NUMOUTARGS 0
+#define SV_CLIPY_NUMOUTARGS 0
+#define SV_CLIPZ_NUMOUTARGS 0
+#define SV_CLIPOFF_NUMOUTARGS 0
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -1258,6 +1270,57 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
 
         *argptr=CLAMP(val,valmin,valmax);
       }
+      break;
+    case SV_CLIPX:
+      {
+        clipdata objclip,*ci;
+
+        ci=&objclip;
+        ci->clip_x=arg[0];
+        ci->clip_x_val=arg[1];
+        ci->clip_X=arg[2];
+        ci->clip_X_val=arg[3];
+        ci->clip_y=-1;
+        ci->clip_Y=-1;
+        ci->clip_z=-1;
+        ci->clip_Z=-1;
+        setClipPlanes(ci,CLIP_ON);
+      }
+      break;
+    case SV_CLIPY:
+      {
+        clipdata objclip,*ci;
+
+        ci=&objclip;
+        ci->clip_y=arg[0];
+        ci->clip_y_val=arg[1];
+        ci->clip_Y=arg[2];
+        ci->clip_Y_val=arg[3];
+        ci->clip_x=-1;
+        ci->clip_X=-1;
+        ci->clip_z=-1;
+        ci->clip_Z=-1;
+        setClipPlanes(ci,CLIP_ON);
+      }
+      break;
+    case SV_CLIPZ:
+      {
+        clipdata objclip,*ci;
+
+        ci=&objclip;
+        ci->clip_z=arg[0];
+        ci->clip_z_val=arg[1];
+        ci->clip_Z=arg[2];
+        ci->clip_Z_val=arg[3];
+        ci->clip_x=-1;
+        ci->clip_x=-1;
+        ci->clip_y=-1;
+        ci->clip_Y=-1;
+        setClipPlanes(ci,CLIP_ON);
+      }
+      break;
+    case SV_CLIPOFF:
+      setClipPlanes(NULL,CLIP_OFF);
       break;
     case SV_MIRRORCLIP:
       {
@@ -4342,6 +4405,30 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     num_outop=SV_MULTIADDT_NUMOUTARGS;
   }
   else if(STRCMP(token,"clip")==0){
+    op=SV_CLIP;
+    *use_displaylist=0;
+    num_op=SV_CLIP_NUMARGS;
+    num_outop=SV_CLIP_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"clipx")==0){
+    op=SV_CLIP;
+    *use_displaylist=0;
+    num_op=SV_CLIP_NUMARGS;
+    num_outop=SV_CLIP_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"clipy")==0){
+    op=SV_CLIP;
+    *use_displaylist=0;
+    num_op=SV_CLIP_NUMARGS;
+    num_outop=SV_CLIP_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"clipz")==0){
+    op=SV_CLIP;
+    *use_displaylist=0;
+    num_op=SV_CLIP_NUMARGS;
+    num_outop=SV_CLIP_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"clipoff")==0){
     op=SV_CLIP;
     *use_displaylist=0;
     num_op=SV_CLIP_NUMARGS;
