@@ -1910,7 +1910,6 @@ void initvars(void){
   visTicks=0;
   visCadTextures=1;
   visTerrainTexture=1;
-  cb_hidesv=0;
   nselectblocks=0;
   surface_indices[0]=0;
   surface_indices[1]=0;

@@ -585,7 +585,7 @@ SVEXTERN int SVDECL(update_colorbartype,0);
 SVEXTERN int colorbartype_save;
 SVEXTERN int colorbarpoint;
 SVEXTERN int vectorspresent;
-SVEXTERN int cb_hidesv;
+SVEXTERN int SVDECL(colorbar_hidescene,0);
 
 SVEXTERN int visTarg, ReadTargFile;
 SVEXTERN int showtarget;

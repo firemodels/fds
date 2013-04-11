@@ -133,13 +133,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
   if(viscolorbarpath==1){
-    if(cb_hidesv==1){
-      setClipPlanes(NULL,CLIP_OFF);
-    }
+    if(colorbar_hidescene==1)setClipPlanes(NULL,CLIP_OFF);
     drawcolorbarpath();
-    if(cb_hidesv==1){
-      setClipPlanes(&colorbar_clipinfo,CLIP_ON);
-    }
+    if(colorbar_hidescene==1)setClipPlanes(&colorbar_clipinfo,CLIP_ON);
     SNIFF_ERRORS("after setColorbarClipPlanes 1");
   }
 
@@ -148,12 +144,10 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(UpdateLIGHTS==1)updateLights(0);
 
   if(mode!=RENDER||viscolorbarpath!=1){
-    if(clip_mode==CLIP_BLOCKAGES_DATA){
-      setClipPlanes(&clipinfo,CLIP_ON);
-    }
+    if(clip_mode==CLIP_BLOCKAGES_DATA)setClipPlanes(&clipinfo,CLIP_ON);
   }
   else{
-    if(cb_hidesv==1){
+    if(colorbar_hidescene==1){
       setClipPlanes(&colorbar_clipinfo,CLIP_ON);
     }
     else{
@@ -198,14 +192,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw sensors/sprinklers/heat detectors +++++++++++++++++++++++++ */
 
-    if(clip_mode==CLIP_BLOCKAGES){
-      setClipPlanes(&clipinfo,CLIP_ON);
-      draw_devices();
-      setClipPlanes(NULL,CLIP_OFF);
-    }
-    else{
-      draw_devices();
-    }
+    if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
+    draw_devices();
+    if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
     SNIFF_ERRORS("after draw_devices");
 
     if(visaxislabels==1||showedit_dialog==1){
@@ -221,9 +210,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
       setClipPlanes(NULL,CLIP_OFF);
       draw_user_ticks();
       if(mode!=RENDER||viscolorbarpath!=1){
-        if(clip_mode==CLIP_BLOCKAGES_DATA){
-          setClipPlanes(&clipinfo,CLIP_ON);
-        }
+        if(clip_mode==CLIP_BLOCKAGES_DATA)setClipPlanes(&clipinfo,CLIP_ON);
       }
       antialias(0);
       SNIFF_ERRORS("after drawticks");
@@ -317,14 +304,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
-  if(clip_mode==CLIP_BLOCKAGES){
-    setClipPlanes(&clipinfo,CLIP_ON);
-    drawBlockages(mode,DRAW_OPAQUE);
-    setClipPlanes(NULL,CLIP_OFF);
-  }
-  else{
-    drawBlockages(mode,DRAW_OPAQUE);
-  }
+  if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
+  drawBlockages(mode,DRAW_OPAQUE);
+  if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
   SNIFF_ERRORS("drawBlockages");
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
@@ -465,14 +447,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
 
-  if(clip_mode==CLIP_BLOCKAGES){
-    setClipPlanes(&clipinfo,CLIP_ON);
-    draw_transparent_faces();
-    setClipPlanes(NULL,CLIP_OFF);
-  }
-  else{
-    draw_transparent_faces();
-  }
+  if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
+  draw_transparent_faces();
+  if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
 
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
@@ -526,10 +503,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
  /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
-  if(viscolorbarpath==1){
-    if(cb_hidesv==1){
-      setClipPlanes(NULL,CLIP_OFF);
-    }
+  if(viscolorbarpath==1&&colorbar_hidescene==1){
+    setClipPlanes(NULL,CLIP_OFF);
   }
   SNIFF_ERRORS("end of loop");
 }

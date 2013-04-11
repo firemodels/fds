@@ -4440,24 +4440,14 @@ void drawBlockages(int mode, int trans_flag){
       cd=cadgeominfo+i;
       if(cd->version==1){
         if(trans_flag==DRAW_TRANSPARENT)continue;
-        if(clip_mode==CLIP_BLOCKAGES){
-          setClipPlanes(&clipinfo,CLIP_ON);
-          drawcadgeom(cd);
-          setClipPlanes(NULL,CLIP_OFF);
-        }
-        else{
-          drawcadgeom(cd);
-        }
+        if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
+        drawcadgeom(cd);
+        if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
       }
       else if(cd->version==2){
-        if(clip_mode==CLIP_BLOCKAGES){
-          setClipPlanes(&clipinfo,CLIP_ON);
-          drawcad2geom(cd,trans_flag);
-          setClipPlanes(NULL,CLIP_OFF);
-        }
-        else{
-          drawcad2geom(cd,trans_flag);
-        }
+        if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
+        drawcad2geom(cd,trans_flag);
+        if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
       }
     }
   }

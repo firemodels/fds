@@ -188,8 +188,8 @@ extern "C" void glui_colorbar_setup(int main_window){
   glui_colorbar->add_column_to_panel(PANEL_cb2R2,false);
   BUTTON_delete=glui_colorbar->add_button_to_panel(PANEL_cb2R2,_("Delete colorbar"),COLORBAR_DELETE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(PANEL_cb2R2,false);
-  cb_hidesv=1;
-  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(PANEL_cb2R2,_("Hide scene"),&cb_hidesv);
+  colorbar_hidescene=1;
+  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(PANEL_cb2R2,_("Hide scene"),&colorbar_hidescene);
 
   PANEL_cb1 = glui_colorbar->add_panel(_("Colorbar"));
   if(ncolorbars>0){
