@@ -2155,8 +2155,13 @@ MESH_LOOP: DO NM=1,NMESHES
 
    DO N=1,M%N_VENT
       VT=>M%VENTS(N)
-      WRITE(LU_SMV,'(6F12.5,I6,I4,4F13.5)') VT%X1,VT%X2,VT%Y1,VT%Y2,VT%Z1,VT%Z2,VT%ORDINAL,VT%SURF_INDEX, &
-                                            VT%TEXTURE(1),VT%TEXTURE(2),VT%TEXTURE(3),VT%RADIUS
+      IF (VT%RADIUS>0._EB) THEN
+         WRITE(LU_SMV,'(6F12.5,I6, I4,7F13.5)') VT%X1,VT%X2,VT%Y1,VT%Y2,VT%Z1,VT%Z2,VT%ORDINAL,VT%SURF_INDEX, &
+                                                VT%TEXTURE(1),VT%TEXTURE(2),VT%TEXTURE(3),VT%RADIUS,VT%X0,VT%Y0,VT%Z0
+      ELSE
+         WRITE(LU_SMV,'(6F12.5,I6, I4,3F13.5)') VT%X1,VT%X2,VT%Y1,VT%Y2,VT%Z1,VT%Z2,VT%ORDINAL,VT%SURF_INDEX, &
+                                                VT%TEXTURE(1),VT%TEXTURE(2),VT%TEXTURE(3)
+      ENDIF
    ENDDO
 
    DO N=1,NDV

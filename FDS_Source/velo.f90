@@ -3025,11 +3025,10 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,PP,HP, &
                                        DWDX,DWDY,DWDZ
 REAL(EB) :: U_IBM,V_IBM,W_IBM,DN, &
             U_ROT,V_ROT,W_ROT, &
-            V_INT, &
             PE,PW,PN,PS,PT,PB, &
             U_DATA(0:1,0:1,0:1),XI(3),XI2(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3), &
             U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3), &
-            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,WT,XV(3),H1,H2,H3,N1(3),N2(3),C0,C1,C2,U2,U3,W2,W3
+            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,WT,XV(3),H1,H2,H3,N1(3),N2(3),C0,C1,C2,U2,U3,V2,V3,W2,W3
 
 INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1,ITMP,TRI_INDEX,IERR,IC
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
@@ -3318,9 +3317,23 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            V_ROT = (XVELO(1)-XGEOM(1))*G%OMEGA_Z - (XVELO(3)-XGEOM(3))*G%OMEGA_X
                            CALL GETX(XI,XSURF,XVELO,NG)
                            CALL GETU(U_DATA,DXI,XI,2,NM)
-                           V_INT = TRILINEAR(U_DATA,DXI,DXC)
-                           IF (DNS) V_IBM = 0.5_EB*(V_INT+(G%V+V_ROT))
-                           IF (LES) V_IBM = 0.9_EB*(V_INT+(G%V+V_ROT))
+
+                           ! test... get second interpolation point
+                           CALL GETX(XI2,XSURF,XI,NG)
+                           CALL GETU(U_DATA,DXI,XI2,2,NM)
+                           V3 = TRILINEAR(U_DATA,DXI,DXC)
+
+                           N1 = XVELO-XSURF                                   ! vector from surface to velocity point
+                           N2 = XI-XVELO                                      ! vector from velocity to interpolation point
+
+                           H1 = SQRT(DOT_PRODUCT(N1,N1))                      ! distance from surface to velocity point
+                           H2 = H1 + SQRT(DOT_PRODUCT(N2,N2))                 ! distance from surface to interpolation point
+                           H3 = H2 + DELTA_IBM                                ! distance from surface to 2nd interp point
+
+                           C0 = G%V+V_ROT
+                           C1 = (V2*(H3**2/H2**2) - V3)/(H3**2/H2 - H3)
+                           C2 = (V2*(H3/H2) - V3)/(H2*H3 - H3**2)
+                           V_IBM = C0 + C1*H1 + C2*H1**2                      ! quadratic profile
                         CASE(2)
                            IP1 = MIN(I+1,IBP1)
                            JP1 = MIN(J+1,JBP1)
