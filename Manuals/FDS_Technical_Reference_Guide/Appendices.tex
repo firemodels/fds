@@ -367,18 +367,18 @@ The examples above are for illustration purposes only.  In general, we first com
 \label{absorption_coefficients}
 
 For the calculation of the gray or band-mean absorption coefficients, $\kappa_n$, a narrow-band model, RADCAL~\cite{RadCal}, has been
-implemented in FDS. RADCAL computes the spectral properties of the radiation participating species at discrete values of wavenumber and temperature,
+implemented in FDS. RADCAL computes the spectral properties of the radiation participating species at discrete values of the spectrum (expressed either in wavenumber $\om$ or in wavelength $\la$) and temperature,
 and returns two alternative mean absorption coefficients for each spectral band, $n$. The first coefficient is the Planck mean coefficient
 \begin{equation}
 \kappa_n(P,T) = \dfrac{\pi}{\sigma T^4}
-\displaystyle\int_{\om_{\min}}^{\om_{\max}}{I_{\rm b,\om}(T)
-\displaystyle\sum_i \bar{\kappa}_i(\om,T) \, P_i \; \d \om}
+\displaystyle\int_{\la_{\min}}^{\la_{\max}}{I_{\rm b,\la}(T)
+\displaystyle\sum_i \bar{\kappa}_i(\la,T) \, P_i \; \d \la}
 \end{equation}
-where $\om$ is the wavenumber, in units of cm$^{\rm -1}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are cm$^{\rm -1}$.
+where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are cm$^{\rm -1}$.
 
-The source term $I_{\rm b,\om}(T)$ is the {\em Planck function} that represents the intensity of blackbody radiation at temperature, $T$, and wavenumber, $\om$
-\be
-I_{\rm b,\om}(T) = \dfrac{2 \, h \, c^2 \, \om^3}{\exp\left(\dfrac{h \, c \, \om}{k_{\rm B} \, T}\right)-1}
+The source term $I_{\rm b,\la}(T)$ is the {\em Planck blackbody distribution law} which expresses the equilibrium rate of radiant energy emitted from a blackbody at temperature, $T$, and as function of wavelength, $\la$. Formally, the monochromatic blackbody radiant energy emitted is given by
+\be \label{eq:Planck_law}
+I_{\rm b,\la}(T)\d \la = \dfrac{2 \, h \, c^2 \, \la^{-5}}{\exp\left(\dfrac{h \, c}{k_{\rm B} \, \la \, T }\right)-1}\d \la
 \ee
 Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K). 
 
@@ -394,6 +394,38 @@ In cases with only one band ($N$=1), the smaller of the two absorption coefficie
    \kappa_n=\min \Big( \kappa_n(P,T),\kappa_{{\rm e},n}(T) \Big)
 \ee
 If $N>1$ or $L=0$, $\kappa_n=\kappa_n(P,T)$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$.
+
+\textbf{Note on wavenumber, wavelength, and frequency}: some confusion might arise when dealing with the various quantities describing the wave nature of radiation. These quantities are wavenumber $\om$, wavelength $\la$, and frequency denoted here $\nu$. Most users may be familiar with the frequency $\nu$, in units of \textit{hertz}, ${\rm Hz}$, representing the number of cycles per second. While this unit is preferred for radiation waves of low energy such as radio waves, wavelength and wavenumber are preferred for waves of higher energy. Wavenumber and wavelength are related to frequency through
+\be 
+ \la = c/\nu \: \: \rm{and} \: \: \om = \nu /c
+\ee
+Wavelength $\la$ represents the distance traveled by the wave during one cycle, assuming it travels at the speed of light in vacuum. When dealing with infrared 
+radiation, its units are commonly expressed in ${\rm \mu m}$.
+Wavenumber $\om$ is the reciprocal of the wavelength. It represents the number of 
+cycles per unit length. In most infrared spectroscopic work, it is expressed in units of ${\rm cm^{-1}}$. This is the unit used in the sections below. One can  easily switch from wavenumber in units of ${\rm cm^{-1}}$ to wavelength in units of ${\rm \mu m}$ using the relation
+
+\be
+  \la \; {\rm \mu m}  \; = 10000/\om \; \; {\rm cm^{-1}}
+\ee
+Finally, the user who wishes to express the Planck blackbody distribution law
+as a function of wavenumber should take caution when performing the change of variables. One should start by expressing that the radiant energy emitted 
+at a wavelength $\la$ is the same as the radiant energy emitted at the corresponding wavenumber $\om$
+\be \label{eq:Planck_WN_WL}
+I_{\rm b,\la}(T) \d \la = -I_{\rm b,\om}(T)\d \om
+\ee
+the negative sign is introduced because $\om$ is the reciprocal of $\la$. 
+Since $\la$ = 1/$\om$, it comes
+
+\be
+\dfrac{\d \la}{\d \om} = -\dfrac{1}{\om^2}
+\ee
+Equation \ref{eq:Planck_WN_WL},
+can be rewritten using Eq.~\ref{eq:Planck_law} as
+\be\label{eq:Planck_WN}
+  I_{\rm b,\om}(T)\d \om = \dfrac{2 \, h \, c^2 \, \om^{3}}{\exp\left(\dfrac{h \, c\, \om}{k_{\rm B} \, T }\right)-1}\d \om
+\ee
+The user who wishes to analyze the fuel bands presented below (given in wavenumber) with the Planck blackbody distribution law should use Eq.~\ref{eq:Planck_WN} but should NOT use Eq.~\ref{eq:Planck_law} with $\la$ = 1/$\om$.
+
 
 A combination of molecular models and data tables are used to compute the spectral radiative properties of the radiation participating species. The original version of RADCAL includes spectral properties of $\rm CO_2$, $\rm H_2O$, $\rm CO$, and $\rm CH_4$ that are either modeled through quantitative molecular spectroscopy derivations or tabulated from the fitting of experimental data into appropriate statistical narrow band models. The original RADCAL data have been supplemented with new tabulated experimental data for the following fuels:
 \begin{itemize}
