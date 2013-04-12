@@ -2234,7 +2234,7 @@ int readsmv(char *file, char *file2){
 
   int ipart=0, islicecount=1, ipatch=0, iroom=0,izone_local=0,ifire=0,iiso=0;
   int ismoke3d=0,ismoke3dcount=1,igrid,ioffset;
-  int itrnx, itrny, itrnz, ipdim, iobst, ivent;
+  int itrnx, itrny, itrnz, ipdim, iobst, ivent, icvent;
   int ibartemp=2, jbartemp=2, kbartemp=2;
   int  itarg=0;
 
@@ -2519,6 +2519,7 @@ int readsmv(char *file, char *file2){
   nmeshes=0;
   npdim=0;
   nVENT=0;
+  nCVENT=0;
   nOBST=0;
   noffset=0;
   nsurfinfo=0;
@@ -2842,6 +2843,10 @@ int readsmv(char *file, char *file2){
       ncadgeom++;
       continue;
     }
+    if(match(buffer,"CVENT") == 1){
+      nCVENT++;
+      continue;
+    }
     if(match(buffer,"VENT") == 1){
       nVENT++;
       continue;
@@ -3040,6 +3045,7 @@ int readsmv(char *file, char *file2){
     meshi->kbar=0;
     meshi->nbptrs=0;
     meshi->nvents=0;
+    meshi->ncvents=0;
     meshi->plotn=1;
     meshi->itextureoffset=0;
 
@@ -4878,7 +4884,7 @@ int readsmv(char *file, char *file2){
   }
 
   nvents=0;
-  itrnx=0, itrny=0, itrnz=0, igrid=0, ipdim=0, iobst=0, ivent=0;
+  itrnx=0, itrny=0, itrnz=0, igrid=0, ipdim=0, iobst=0, ivent=0, icvent=0;
   ioffset=0;
   npartclassinfo=0;
   if(noffset==0)ioffset=1;
@@ -5564,6 +5570,51 @@ typedef struct {
       CheckMemoryOn;
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ CVENT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+        /* 
+        CVENT
+        xmin xmax ymin ymax zmin zmax
+        x0 y0 z0 radius
+        red green blue (range from 0.0 to 1.0)
+        */
+    if(match(buffer,"CVENT") == 1){
+      cventdata *cvinfo;
+      mesh *meshi;
+      float color[4];
+      float *xyz;
+      int ncvents;
+      int j;
+
+      icvent++;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&ncvents);
+
+      meshi = meshinfo + icvent - 1;
+      meshi->cventinfo=NULL;
+      if(ncvents==0)continue;
+      NewMemory((void **)&cvinfo,ncvents*sizeof(cventdata));
+      meshi->cventinfo=cvinfo;
+
+      for(j=0;j<ncvents;j++){
+        cventdata *cvi;
+        
+        cvi = meshi->cventinfo + j;
+        xyz=cvi->xyz;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f %f %f",&cvi->xmin,&cvi->xmax,&cvi->ymin,&cvi->ymax,&cvi->zmin,&cvi->zmax);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,&cvi->radius);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f",color,color+1,color+2);
+        color[3]=1.0;
+        cvi->color=getcolorptr(color);
+      }
+    }
+
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ VENT ++++++++++++++++++++++++++++++

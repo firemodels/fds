@@ -480,12 +480,23 @@ typedef struct _volrenderdata {
   int loaded, display;
 } volrenderdata;
 
+
+/* --------------------------  cventdata ------------------------------------ */
+
+typedef struct _cventdata {
+  int dir;
+  float xmin, xmax, ymin, ymax, zmin, zmax;
+  int imin, imax, jmin, jmax, kmin, kmax;
+  float xyz[3], radius;
+  float *color;
+} cventdata;
+
 /* --------------------------  mesh ------------------------------------ */
 
 typedef struct _mesh {
   int ibar, jbar, kbar;
   float cellsize;
-  int nvents,ndummyvents;
+  int ncvents,nvents,ndummyvents;
   int nbptrs;
   int smokeloaded;
   int is_bottom;
@@ -534,6 +545,7 @@ typedef struct _mesh {
   blockagedata **blockageinfoptrs;
   int *obst_bysize;
   ventdata *ventinfo;
+  cventdata *cventinfo;
   unsigned char *is_block_terrain;
   unsigned char *iqdata;
   float *qdata, *udata, *vdata, *wdata;
