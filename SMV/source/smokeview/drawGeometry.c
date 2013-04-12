@@ -60,6 +60,16 @@ void DrawCircVents(int option){
       vcolor[1]=color[1]*255;
       vcolor[2]=color[2]*255;
       glPushMatrix();
+      if(option==CIRCLE){
+        clipdata circleclip;
+        float *boxmin, *boxmax;
+
+        boxmin=cvi->boxmin;
+        boxmax=cvi->boxmax;
+
+        initClipInfo(&circleclip,boxmin[0],boxmax[0],boxmin[1],boxmax[1],boxmin[2],boxmax[2]);
+        setClipPlanes(&circleclip,CLIP_ON);
+      }
       glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
       glTranslatef(x0,y0,z0);
       switch (cvi->dir){
@@ -98,15 +108,15 @@ void DrawCircVents(int option){
           height = cvi->ymax-cvi->ymin;
           break;
       }
-     // {
-     //   clipdata circleclip;
-
-     //   initClipInfo(&circleclip,0.0,2.0*vi->radius,0.0,vi->radius,-1.0,1.0);
-     //   setClipPlanes(&circleclip,CLIP_ON);
-     // }
-      if(option==CIRCLE)drawfilledcircle(2.0*cvi->radius,vcolor);
-      if(option==RECTANGLE)drawfilledrectangle(width,height,vcolor);
-     // setClipPlanes(&clipinfo,CLIP_ON);
+      if(option==CIRCLE){
+        if(cvi->type==VENT_SOLID)drawfilledcircle(2.0*cvi->radius,vcolor);
+        if(cvi->type==VENT_OUTLINE)drawcircle(2.0*cvi->radius,vcolor);
+      }
+      if(option==RECTANGLE){
+        if(cvi->type==VENT_SOLID)drawfilledrectangle(width,height,vcolor);
+        if(cvi->type==VENT_OUTLINE)drawrectangle(width,height,vcolor);
+      }
+      if(option==CIRCLE)setClipPlanes(&clipinfo,CLIP_ON);
 
       glPopMatrix();
     }
@@ -323,14 +333,29 @@ void SetCVentDirs(void){
       cventdata *cvi;
       int dir;
       int orien;
+      float *boxmin, *boxmax;
     
       cvi=meshi->cventinfo+iv;
+      boxmin = cvi->boxmin;
+      boxmax = cvi->boxmax;
 
       dir=0;
       if(cvi->imin==cvi->imax)dir=1;
       if(cvi->jmin==cvi->jmax)dir=2;
       if(cvi->kmin==cvi->kmax)dir=3;
       orien=0;
+
+      boxmin[0]=cvi->xmin;
+      boxmin[1]=cvi->ymin;
+      boxmin[2]=cvi->zmin;
+      boxmax[0]=cvi->xmax;
+      boxmax[1]=cvi->ymax;
+      boxmax[2]=cvi->zmax;
+
+      if(dir!=0){
+        boxmin[dir-1]-=0.1;
+        boxmax[dir-1]+=0.1;
+      }
 
       switch (dir){
         int ventdir;

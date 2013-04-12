@@ -8,7 +8,9 @@
 EXTERNCPP void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 EXTERNCPP void init_clip(void);
 EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor);
+EXTERNCPP void drawcircle(float diameter, unsigned char *rgbcolor);
 EXTERNCPP void drawfilledrectangle(float width, float height, unsigned char *rgbcolor);
+EXTERNCPP void drawrectangle(float width, float height, unsigned char *rgbcolor);
 EXTERNCPP void DrawCircVents(int option);
 EXTERNCPP void update_glui_patch_units(void);
 EXTERNCPP void update_glui_slice_units(void);

@@ -5634,6 +5634,7 @@ typedef struct {
         color[3]=1.0;
         cvi->color=getcolorptr(color);
       }
+      continue;
     }
 
   /*
@@ -5641,6 +5642,7 @@ typedef struct {
     ++++++++++++++++++++++ VENT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
+
         /* 
         new VENT format:
         i1 i2 j1 j2 k1 k2 ventindex venttype r g b a
@@ -5652,9 +5654,9 @@ typedef struct {
                     > 0       : DO draw boundary file over this vent
         vent type: 0 solid surface
                    2 outline
-                  -2 hidden 
+                  -2 hidden
 
-        r g b           colors - only specify if you wish to over-ride surface or default
+                  r g b           colors - only specify if you wish to over-ride surface or default
         */
 
     if(match(buffer,"VENT") == 1){

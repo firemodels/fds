@@ -373,6 +373,7 @@ typedef struct {
 
 typedef struct _cventdata {
   int dir,type,colorindex;
+  float boxmin[3], boxmax[3];
   float xmin, xmax, ymin, ymax, zmin, zmax;
   int imin, imax, jmin, jmax, kmin, kmax;
   float xyz[3], radius;

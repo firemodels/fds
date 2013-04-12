@@ -2197,6 +2197,24 @@ void drawpoint(unsigned char *rgbcolor){
   glEnd();
 }
 
+
+/* ----------------------- drawfilledrectangle ----------------------------- */
+
+void drawrectangle(float width,float height, unsigned char *rgbcolor){
+  int i;
+
+  glBegin(GL_LINE_LOOP);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(width, 0.0, 0.0);
+  glVertex3f(width, height, 0.0);
+  glVertex3f(0.0, height, 0.0);
+  glVertex3f(0.0, 0.0, 0.0);
+
+  glEnd();
+}
+
 /* ----------------------- drawfilledrectangle ----------------------------- */
 
 void drawfilledrectangle(float width,float height, unsigned char *rgbcolor){
