@@ -24,7 +24,7 @@ cadgeom *current_cadgeom;
 
 /* ------------------ DrawCircVents ------------------------ */
 
-void DrawCircVents(void){
+void DrawCircVents(int option){
   int i;
 
   for(i=0;i<nmeshes;i++){
@@ -32,51 +32,70 @@ void DrawCircVents(void){
     mesh *meshi;
 
     meshi = meshinfo + i;
-    for(j=0;j<meshi->nvents;j++){
-      ventdata *vi;
+    for(j=0;j<meshi->ncvents;j++){
+      cventdata *cvi;
       float x0, y0, z0;
       char label[255];
       unsigned char vcolor[3];
       float delta;
       float *color;
+      float width, height;
 
-      vi = meshi->ventinfo + j;
-      if(vi->radius<=0.0)continue;
+      cvi = meshi->cventinfo + j;
 
-      x0 = (vi->xmin+vi->xmax)/2.0;
-      y0 = (vi->ymin+vi->ymax)/2.0;
-      z0 = (vi->zmin+vi->zmax)/2.0;
+      if(option==CIRCLE){
+        x0 = cvi->xyz[0];
+        y0 = cvi->xyz[1];
+        z0 = cvi->xyz[2];
+      }
+      else{
+        x0 = cvi->xmin;
+        y0 = cvi->ymin;
+        z0 = cvi->zmin;
+      }
 
       delta=0.001*xyzmaxdiff;
-      color=vi->color;
-      if(vi->dummyptr!=NULL)color=vi->dummyptr->color;
+      color=cvi->color;
       vcolor[0]=color[0]*255;
       vcolor[1]=color[1]*255;
       vcolor[2]=color[2]*255;
       glPushMatrix();
+      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
       glTranslatef(x0,y0,z0);
-      switch (vi->dir){
+      switch (cvi->dir){
         case DOWN_X:
           glTranslatef(-delta,0.0,0.0);
           glRotatef(90.0,0.0,1.0,0.0);
+          width = cvi->ymax-cvi->ymin;
+          height = cvi->zmax-cvi->zmin;
           break;
         case UP_X:
           glTranslatef(delta,0.0,0.0);
           glRotatef(90.0,0.0,1.0,0.0);
+          width = cvi->ymax-cvi->ymin;
+          height = cvi->zmax-cvi->zmin;
           break;
         case DOWN_Y:
           glTranslatef(0.0,-delta,0.0);
           glRotatef(90.0,1.0,0.0,0.0);
+          width = cvi->xmax-cvi->xmin;
+          height = cvi->zmax-cvi->zmin;
           break;
         case UP_Y:
           glTranslatef(0.0,delta,0.0);
           glRotatef(90.0,1.0,0.0,0.0);
+          width = cvi->xmax-cvi->xmin;
+          height = cvi->zmax-cvi->zmin;
           break;
         case DOWN_Z:
           glTranslatef(0.0,0.0,-delta);
+          width = cvi->xmax-cvi->xmin;
+          height = cvi->ymax-cvi->ymin;
           break;
         case UP_Z:
           glTranslatef(0.0,0.0,delta);
+          width = cvi->xmax-cvi->xmin;
+          height = cvi->ymax-cvi->ymin;
           break;
       }
      // {
@@ -85,8 +104,8 @@ void DrawCircVents(void){
      //   initClipInfo(&circleclip,0.0,2.0*vi->radius,0.0,vi->radius,-1.0,1.0);
      //   setClipPlanes(&circleclip,CLIP_ON);
      // }
-      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
-      drawfilledcircle(2.0*vi->radius,vcolor);
+      if(option==CIRCLE)drawfilledcircle(2.0*cvi->radius,vcolor);
+      if(option==RECTANGLE)drawfilledrectangle(width,height,vcolor);
      // setClipPlanes(&clipinfo,CLIP_ON);
 
       glPopMatrix();
@@ -278,6 +297,193 @@ void get_blockvals(  float *xmin, float *xmax,
 
 }
 
+/* ------------------ SetCVentDirs ------------------------ */
+
+void SetCVentDirs(void){
+  int ii;
+
+  for(ii=0;ii<nmeshes;ii++){
+    mesh *meshi;
+    float *xplttemp,*yplttemp,*zplttemp;
+    int ibar, jbar, kbar;
+    char *c_iblank;
+    int iv;
+ 
+    meshi=meshinfo+ii;
+
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+    c_iblank = meshi->c_iblank_cell;
+    xplttemp=meshi->xplt;
+    yplttemp=meshi->yplt;
+    zplttemp=meshi->zplt;
+
+    for(iv=0;iv<meshi->ncvents;iv++){
+      cventdata *cvi;
+      int dir;
+      int orien;
+    
+      cvi=meshi->cventinfo+iv;
+
+      dir=0;
+      if(cvi->imin==cvi->imax)dir=1;
+      if(cvi->jmin==cvi->jmax)dir=2;
+      if(cvi->kmin==cvi->kmax)dir=3;
+      orien=0;
+
+      switch (dir){
+        int ventdir;
+
+      case 1:
+        if(cvi->imin==0){
+          orien=1;
+        }
+        else if(cvi->imin==meshi->ibar){
+          orien=-1;
+        }
+        else{
+          int breakloop;
+          int i,j;
+
+          orien=1;
+          i=cvi->imin;
+          breakloop=0;
+          for(j=cvi->jmin;j<=cvi->jmax;j++){
+            int k;
+
+            for(k=cvi->kmin;k<=cvi->kmax;k++){
+              int state1, state2;
+
+              if(use_iblank==1){
+                state1=c_iblank[IJKCELL(i-1,j,k)];
+                state2=c_iblank[IJKCELL(i,j,k)];
+              }
+              else{
+                state1=GAS;
+                state2=GAS;
+              }
+              if(state1==GAS  &&state2==GAS)continue; // air on both sides
+              if(state1==SOLID&&state2==SOLID)continue; // solid on both sides
+              if(state1==GAS  &&state2==SOLID){
+                orien=-1;
+              }
+              breakloop=1;
+              break;
+            }
+            if(breakloop==1)break;
+          }
+        }
+        if(orien==1){
+          ventdir=UP_X;
+        }
+        else{
+          ventdir=DOWN_X;
+        }
+        cvi->dir=ventdir;
+        break;
+      case 2:
+        if(cvi->jmin==0){
+          orien=1;
+        }
+        else if(cvi->jmin==meshi->jbar){
+          orien=-1;
+        }
+        else{
+          int breakloop;
+          int i, j;
+
+          orien=1;
+          j=cvi->jmin;
+          breakloop=0;
+          for(i=cvi->imin;i<=cvi->imax;i++){
+            int k;
+
+            for(k=cvi->kmin;k<=cvi->kmax;k++){
+              int state1, state2;
+
+              if(use_iblank==1){
+                state1=c_iblank[IJKCELL(i,j-1,k)];
+                state2=c_iblank[IJKCELL(i,j,k)];
+              }
+              else{
+                state1=GAS;
+                state2=GAS;
+              }
+              if(state1==GAS  &&state2==GAS)continue; // air on both sides
+              if(state1==SOLID&&state2==SOLID)continue; // solid on both sides
+              if(state1==GAS  &&state2==SOLID){
+                orien=-1;
+              }
+              breakloop=1;
+              break;
+            }
+            if(breakloop==1)break;
+          }
+        }
+        if(orien==1){
+          ventdir=UP_Y;
+        }
+        else{
+          ventdir=DOWN_Y;
+        }
+        cvi->dir=ventdir;
+        break;
+      case 3:
+        if(cvi->kmin==0){
+          orien=1;
+        }
+        else if(cvi->kmin==meshi->kbar){
+          orien=-1;
+        }
+        else{
+          int breakloop;
+          int i, k;
+
+          orien=1;
+          k=cvi->kmin;
+          breakloop=0;
+          for(i=cvi->imin;i<=cvi->imax;i++){
+            int j;
+
+            for(j=cvi->jmin;j<=cvi->jmax;j++){
+              int state1, state2;
+
+              if(use_iblank==1){
+                state1=c_iblank[IJKCELL(i,j,k-1)];
+                state2=c_iblank[IJKCELL(i,j,k)];
+              }
+              else{
+                state1=GAS;
+                state2=GAS;
+              }
+              if(state1==GAS  &&state2==GAS)continue; // air on both sides
+              if(state1==SOLID&&state2==SOLID)continue; // solid on both sides
+              if(state1==GAS  &&state2==SOLID){
+                orien=-1;
+              }
+              breakloop=1;
+              break;
+            }
+            if(breakloop==1)break;
+          }
+        }
+        if(orien==1){
+          ventdir=UP_Z;
+        }
+        else{
+          ventdir=DOWN_Z;
+        }
+        cvi->dir=ventdir;
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
+      }
+    }
+  }
+}
+
 /* ------------------ SetVentDirs ------------------------ */
 
 void SetVentDirs(void){
@@ -298,7 +504,7 @@ void SetVentDirs(void){
     int breakloop;
     int ventdir;
     float voffset, offset;
- 
+
     meshi=meshinfo+ii;
 
     ibar = meshi->ibar;
@@ -311,7 +517,7 @@ void SetVentDirs(void){
 
     for(iv=0;iv<meshi->nvents+12;iv++){
       ventdata *vi;
-    
+
       vi=meshi->ventinfo+iv;
 
       dir=0;
@@ -2024,14 +2230,6 @@ void UpdateFacelists(void){
         if(visOpenVents==0&&vi->isOpenvent==1)continue;
         if(visDummyVents==0&&vi->dummy==1)continue;
         if(visOtherVents==0&&vi->isOpenvent==0&&vi->dummy==0)continue;
-        if(vi->dummyptr!=NULL&&vi->dummyptr->radius>0.0){
-          if(visCircularVents==1){
-            facej->color=vi->color_bak;
-          }
-          else{
-            facej->color=vi->color;
-          }
-        }
         if(patchi!=NULL&&patchi->loaded==1&&patchi->display==1&&
           (vis_threshold==0||vis_onlythreshold==0||do_threshold==0)&&
           (vi->dummy==1||vi->hideboundary==0)){

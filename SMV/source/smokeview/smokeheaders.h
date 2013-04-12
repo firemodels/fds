@@ -8,7 +8,8 @@
 EXTERNCPP void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 EXTERNCPP void init_clip(void);
 EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor);
-EXTERNCPP void DrawCircVents(void);
+EXTERNCPP void drawfilledrectangle(float width, float height, unsigned char *rgbcolor);
+EXTERNCPP void DrawCircVents(int option);
 EXTERNCPP void update_glui_patch_units(void);
 EXTERNCPP void update_glui_slice_units(void);
 EXTERNCPP void update_glui_plot3d_units(void);
@@ -673,6 +674,7 @@ EXTERNCPP void nodein_extvent(
                     int ipatch, 
                     int *patchblankcopy,const mesh *meshi,int i1,int i2, int j1, int j2, int k1, int k2);
 EXTERNCPP void SetVentDirs(void);
+EXTERNCPP void SetCVentDirs(void);
 EXTERNCPP int nodeinblockage(const mesh *meshi, int i,int j,int k, int *imesh, int *iblockage);
 EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir);
 EXTERNCPP void writeboundini(void);

@@ -1736,7 +1736,7 @@ int isearch(float *list, int nlist, float key, int guess){
   return low;
 }
 
-/* ------------------ isearch ------------------------ */
+/* ------------------ reset_itimes0 ------------------------ */
 
 void reset_itimes0(void){
   if(current_script_command==NULL||current_script_command->command!=SCRIPT_VOLSMOKERENDERALL){

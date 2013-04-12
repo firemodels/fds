@@ -25,7 +25,6 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
-SVEXTERN int SVDECL(nvents_circular,0);
 #ifdef pp_BETA
 SVEXTERN int SVDECL(show_all_units,1);
 #else
@@ -604,7 +603,7 @@ SVEXTERN int current_particle_type,last_particle_type;
 SVEXTERN int SVDECL(nsmoke3dinfo,0);
 SVEXTERN int nisoinfo, niso_bounds;
 SVEXTERN int ntrnx, ntrny, ntrnz,npdim,nmeshes,clip_mesh;
-SVEXTERN int SVDECL(nOBST,0),SVDECL(nVENT,0),SVDECL(nCVENT,0),noffset;
+SVEXTERN int SVDECL(nOBST,0),SVDECL(nVENT,0),SVDECL(nCVENT,0),SVDECL(ncvents,0),noffset;
 SVEXTERN int visLabels;
 SVEXTERN int SVDECL(ntarginfo,0);
 SVEXTERN int showallslicevectors;

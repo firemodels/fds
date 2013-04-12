@@ -2520,6 +2520,7 @@ int readsmv(char *file, char *file2){
   npdim=0;
   nVENT=0;
   nCVENT=0;
+  ncvents=0;
   nOBST=0;
   noffset=0;
   nsurfinfo=0;
@@ -3013,7 +3014,7 @@ int readsmv(char *file, char *file2){
   }
   else{
     if(nmeshes>1){
-      if(nmeshes!=ntrnx||nmeshes!=ntrny||nmeshes!=ntrnz||nmeshes!=npdim||nmeshes!=nOBST||nmeshes!=nVENT||nmeshes!=noffset){
+      if(nmeshes!=ntrnx||nmeshes!=ntrny||nmeshes!=ntrnz||nmeshes!=npdim||nmeshes!=nOBST||nmeshes!=nVENT||nmeshes!=noffset&&(nCVENT!=0&&nCVENT!=nmeshes)){
         fprintf(stderr,"*** Error:\n");
         if(nmeshes!=ntrnx)fprintf(stderr,"*** Error:  found %i TRNX keywords, was expecting %i\n",ntrnx,nmeshes);
         if(nmeshes!=ntrny)fprintf(stderr,"*** Error:  found %i TRNY keywords, was expecting %i\n",ntrny,nmeshes);
@@ -3021,7 +3022,7 @@ int readsmv(char *file, char *file2){
         if(nmeshes!=npdim)fprintf(stderr,"*** Error:  found %i PDIM keywords, was expecting %i\n",npdim,nmeshes);
         if(nmeshes!=nOBST)fprintf(stderr,"*** Error:  found %i OBST keywords, was expecting %i\n",nOBST,nmeshes);
         if(nmeshes!=nVENT)fprintf(stderr,"*** Error:  found %i VENT keywords, was expecting %i\n",nVENT,nmeshes);
-        if(nmeshes!=noffset)fprintf(stderr,"*** Error:  found %i OFFSET keywords, was expecting %i\n",noffset,nmeshes);
+        if(nCVENT!=0&&nmeshes!=nCVENT)fprintf(stderr,"*** Error:  found %i CVENT keywords, was expecting %i\n",noffset,nmeshes);
         return 2;
       }
     }
@@ -5577,39 +5578,59 @@ typedef struct {
   */
         /* 
         CVENT
-        xmin xmax ymin ymax zmin zmax
-        x0 y0 z0 radius
-        red green blue (range from 0.0 to 1.0)
+        xmin xmax ymin ymax zmin zmax  % x0 y0 z0 radius
+        imin imax jmin jmax kmin kmax ventindex venttype red green blue (range from 0.0 to 1.0)
         */
     if(match(buffer,"CVENT") == 1){
       cventdata *cvinfo;
       mesh *meshi;
-      float color[4];
       float *xyz;
-      int ncvents;
+      int ncv;
       int j;
 
       icvent++;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&ncvents);
+      sscanf(buffer,"%i",&ncv);
 
       meshi = meshinfo + icvent - 1;
       meshi->cventinfo=NULL;
-      if(ncvents==0)continue;
-      NewMemory((void **)&cvinfo,ncvents*sizeof(cventdata));
+      meshi->ncvents=ncv;
+      if(ncv==0)continue;
+      ncvents+=ncv;
+
+      NewMemory((void **)&cvinfo,ncv*sizeof(cventdata));
       meshi->cventinfo=cvinfo;
 
-      for(j=0;j<ncvents;j++){
+      for(j=0;j<ncv;j++){
         cventdata *cvi;
+        char *cbuf;
         
         cvi = meshi->cventinfo + j;
         xyz=cvi->xyz;
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f %f %f %f",&cvi->xmin,&cvi->xmax,&cvi->ymin,&cvi->ymax,&cvi->zmin,&cvi->zmax);
+        xyz[0]=0.0;
+        xyz[1]=0.0;
+        xyz[2]=0.0;
+        cvi->radius=0.0;
+        cbuf=strchr(buffer,'%');
+        if(cbuf!=NULL){
+          trim(cbuf);
+          cbuf++;
+          cbuf=trim_front(cbuf);
+          if(strlen(cbuf)>0){
+            sscanf(cbuf,"%f %f %f %f",xyz,xyz+1,xyz+2,&cvi->radius);
+          }
+        }
+      }
+      for(j=0;j<ncv;j++){
+        cventdata *cvi;
+        float color[4];
+
+        cvi = meshi->cventinfo + j;
         fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",xyz,xyz+1,xyz+2,&cvi->radius);
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f",color,color+1,color+2);
+        sscanf(buffer,"%i %i %i %i %i %i %i %i %f %f %f",&cvi->imin,&cvi->imax,&cvi->jmin,&cvi->jmax,&cvi->kmin,&cvi->kmax,&cvi->colorindex,&cvi->type,
+                                                         color,color+1,color+2);
         color[3]=1.0;
         cvi->color=getcolorptr(color);
       }
@@ -5671,9 +5692,7 @@ typedef struct {
       for(nn=0;nn<nvents+12;nn++){
         int s_num[6];
         ventdata *vi;
-        float radius;
 
-        radius=-1.0;
         vi=vinfo+nn;
         vi->dummyptr=NULL;
         vi->transparent=0;
@@ -5702,9 +5721,9 @@ typedef struct {
           t_origin[1]=texture_origin[1];
           t_origin[2]=texture_origin[2];
           fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f %f",
+          sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f",
                  &vi->xmin,&vi->xmax,&vi->ymin,&vi->ymax,&vi->zmin,&vi->zmax,
-                 &vi->id,s_num,t_origin,t_origin+1,t_origin+2,&radius);
+                 &vi->id,s_num,t_origin,t_origin+1,t_origin+2);
           if(t_origin[0]<=-998.0){
             t_origin[0]=texture_origin[0];
             t_origin[1]=texture_origin[1];
@@ -5755,8 +5774,6 @@ typedef struct {
             vi->surf[0]=exterior_surfacedefault;
           }
         }
-        vi->radius=radius;
-        if(radius>0.0)nvents_circular++;
         if(surfinfo!=NULL&&s_num[0]>=0&&s_num[0]<nsurfinfo){
           vi->surf[0]=surfinfo+s_num[0];
           if(vi->surf[0]!=NULL&&strncmp(vi->surf[0]->surfacelabel,"OPEN",4)==0){
@@ -7078,6 +7095,7 @@ typedef struct {
   makeiblank_carve();
   makeiblank_smoke3d();
   SetVentDirs();
+  SetCVentDirs();
   update_faces();
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
@@ -7844,6 +7862,7 @@ void initmesh(mesh *meshi){
   meshi->isofilenum=-1;
   meshi->nvents=0;
   meshi->ndummyvents=0;
+  meshi->ncvents=0;
   meshi->npatches=0;
   meshi->patchfacevis2=0;
   meshi->patchtype=NULL;
@@ -7940,6 +7959,7 @@ void initmesh(mesh *meshi){
   meshi->boxoffset=0.0;
   meshi->c_iblank_node=NULL;
   meshi->ventinfo=NULL;
+  meshi->cventinfo=NULL;
   meshi->select_min=0;
   meshi->select_max=0;
 }

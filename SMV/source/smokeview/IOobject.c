@@ -2197,6 +2197,32 @@ void drawpoint(unsigned char *rgbcolor){
   glEnd();
 }
 
+/* ----------------------- drawfilledrectangle ----------------------------- */
+
+void drawfilledrectangle(float width,float height, unsigned char *rgbcolor){
+  int i;
+
+  glBegin(GL_TRIANGLES);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(width, 0.0, 0.0);
+  glVertex3f(width, height, 0.0);
+
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(width, height, 0.0);
+  glVertex3f(0.0, height, 0.0);
+
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(width, height, 0.0);
+  glVertex3f(width, 0.0, 0.0);
+
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, height, 0.0);
+  glVertex3f(width, height, 0.0);
+  glEnd();
+}
+
 /* ----------------------- drawfilledcircle ----------------------------- */
 
 void drawfilledcircle(float diameter,unsigned char *rgbcolor){
@@ -2223,6 +2249,7 @@ void drawfilledcircle(float diameter,unsigned char *rgbcolor){
   }
   glEnd();
 }
+
 /* ----------------------- drawcircle ----------------------------- */
 
 void drawcircle(float diameter,unsigned char *rgbcolor){

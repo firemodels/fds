@@ -369,6 +369,16 @@ typedef struct {
   cadquad *quad;
 } cadgeom;
 
+/* --------------------------  cventdata ------------------------------------ */
+
+typedef struct _cventdata {
+  int dir,type,colorindex;
+  float xmin, xmax, ymin, ymax, zmin, zmax;
+  int imin, imax, jmin, jmax, kmin, kmax;
+  float xyz[3], radius;
+  float *color;
+} cventdata;
+
 /* --------------------------  ventdata ------------------------------------ */
 
 typedef struct _ventdata {
@@ -386,7 +396,6 @@ typedef struct _ventdata {
   float xvent1plot, xvent2plot;
   float yvent1plot, yvent2plot;
   float zvent1plot, zvent2plot;
-  float radius;
   float *showtime;
   int *showtimelist;
   unsigned char *showhide;
@@ -479,17 +488,6 @@ typedef struct _volrenderdata {
   float *smokecolor_yz1, *smokecolor_xz1, *smokecolor_xy1;
   int loaded, display;
 } volrenderdata;
-
-
-/* --------------------------  cventdata ------------------------------------ */
-
-typedef struct _cventdata {
-  int dir;
-  float xmin, xmax, ymin, ymax, zmin, zmax;
-  int imin, imax, jmin, jmax, kmin, kmax;
-  float xyz[3], radius;
-  float *color;
-} cventdata;
 
 /* --------------------------  mesh ------------------------------------ */
 
