@@ -9354,7 +9354,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    M  => MESHES(DV%MESH)
 
-   DV%T_CHANGE         = 10000000._EB
+   DV%T_CHANGE         = 1.E7_EB
    DV%I                = MAX( 1 , MIN( M%IBAR , FLOOR(GINV(DV%X-M%XS,1,DV%MESH)*M%RDXI)  +1 ) )
    DV%J                = MAX( 1 , MIN( M%JBAR , FLOOR(GINV(DV%Y-M%YS,2,DV%MESH)*M%RDETA) +1 ) )
    DV%K                = MAX( 1 , MIN( M%KBAR , FLOOR(GINV(DV%Z-M%ZS,3,DV%MESH)*M%RDZETA)+1 ) )
