@@ -44,9 +44,9 @@ void DrawCircVents(int option){
       cvi = meshi->cventinfo + j;
 
       if(option==CIRCLE){
-        x0 = cvi->xyz[0];
-        y0 = cvi->xyz[1];
-        z0 = cvi->xyz[2];
+        x0 = cvi->origin[0];
+        y0 = cvi->origin[1];
+        z0 = cvi->origin[2];
       }
       else{
         x0 = cvi->xmin;

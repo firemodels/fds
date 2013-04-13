@@ -5578,13 +5578,29 @@ typedef struct {
   */
         /* 
         CVENT
-        xmin xmax ymin ymax zmin zmax  % x0 y0 z0 radius
-        imin imax jmin jmax kmin kmax ventindex venttype red green blue (range from 0.0 to 1.0)
+        ncvents
+        xmin xmax ymin ymax zmin zmax id surface_index tx ty tz % x0 y0 z0 radius
+          ....  (ncvents rows)
+          ....  
+        imin imax jmin jmax kmin kmax ventindex venttype r g b
+          ....
+          ....
+
+          ventindex: -99 or 99 : use default color
+                     +n or -n : use n'th palette color
+                     < 0       : DO NOT draw boundary file over this vent
+                     > 0       : DO draw boundary file over this vent
+          vent type: 0 solid surface
+                     2 outline
+                     -2 hidden
+          r g b:     red, green, blue color components
+                     only specify if you wish to over-ride surface or default
+                     range from 0.0 to 1.0
         */
     if(match(buffer,"CVENT") == 1){
       cventdata *cvinfo;
       mesh *meshi;
-      float *xyz;
+      float *origin;
       int ncv;
       int j;
 
@@ -5604,14 +5620,47 @@ typedef struct {
       for(j=0;j<ncv;j++){
         cventdata *cvi;
         char *cbuf;
+        int s_num[1];
+        float t_origin[3];
         
         cvi = meshi->cventinfo + j;
-        xyz=cvi->xyz;
+        cvi->isOpenvent=0;
+        cvi->surf[0]=vent_surfacedefault;
+        cvi->textureinfo[0]=NULL;
+        cvi->texture_origin[0]=texture_origin[0];
+        cvi->texture_origin[1]=texture_origin[1];
+        cvi->texture_origin[2]=texture_origin[2];
+        cvi->id=-1;
+        cvi->color=NULL;
+
+        origin=cvi->origin;
+        s_num[0]=-1;
+        t_origin[0]=texture_origin[0];
+        t_origin[1]=texture_origin[1];
+        t_origin[2]=texture_origin[2];
         fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f %f %f",&cvi->xmin,&cvi->xmax,&cvi->ymin,&cvi->ymax,&cvi->zmin,&cvi->zmax);
-        xyz[0]=0.0;
-        xyz[1]=0.0;
-        xyz[2]=0.0;
+        sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f",
+          &cvi->xmin,&cvi->xmax,&cvi->ymin,&cvi->ymax,&cvi->zmin,&cvi->zmax,
+          &cvi->id,s_num,t_origin,t_origin+1,t_origin+2);
+
+        if(surfinfo!=NULL&&s_num[0]>=0&&s_num[0]<nsurfinfo){
+          cvi->surf[0]=surfinfo+s_num[0];
+          if(cvi->surf[0]!=NULL&&strncmp(cvi->surf[0]->surfacelabel,"OPEN",4)==0){
+            cvi->isOpenvent=1;
+          }
+          cvi->surf[0]->used_by_vent=1;
+        }
+        if(t_origin[0]<=-998.0){
+          t_origin[0]=texture_origin[0];
+          t_origin[1]=texture_origin[1];
+          t_origin[2]=texture_origin[2];
+        }
+        cvi->texture_origin[0]=t_origin[0];
+        cvi->texture_origin[1]=t_origin[1];
+        cvi->texture_origin[2]=t_origin[2];
+        origin[0]=0.0;
+        origin[1]=0.0;
+        origin[2]=0.0;
         cvi->radius=0.0;
         cbuf=strchr(buffer,'%');
         if(cbuf!=NULL){
@@ -5619,7 +5668,7 @@ typedef struct {
           cbuf++;
           cbuf=trim_front(cbuf);
           if(strlen(cbuf)>0){
-            sscanf(cbuf,"%f %f %f %f",xyz,xyz+1,xyz+2,&cvi->radius);
+            sscanf(cbuf,"%f %f %f %f",origin,origin+1,origin+2,&cvi->radius);
           }
         }
       }
@@ -5629,8 +5678,9 @@ typedef struct {
 
         cvi = meshi->cventinfo + j;
         fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i %i %i %i %i %i %f %f %f",&cvi->imin,&cvi->imax,&cvi->jmin,&cvi->jmax,&cvi->kmin,&cvi->kmax,&cvi->colorindex,&cvi->type,
-                                                         color,color+1,color+2);
+        sscanf(buffer,"%i %i %i %i %i %i %i %i %f %f %f",
+          &cvi->imin,&cvi->imax,&cvi->jmin,&cvi->jmax,&cvi->kmin,&cvi->kmax,
+          &cvi->colorindex,&cvi->type,color,color+1,color+2);
         color[3]=1.0;
         cvi->color=getcolorptr(color);
       }
@@ -5647,16 +5697,16 @@ typedef struct {
         new VENT format:
         i1 i2 j1 j2 k1 k2 ventindex venttype r g b a
         
-        int ventindex, venttype;
-        vent index: -99 or 99 : use default color
-                     +n or -n : use n'th pallette color
-                    < 0       : DO NOT draw boundary file over this vent
-                    > 0       : DO draw boundary file over this vent
+        ventindex: -99 or 99 : use default color
+                   +n or -n : use n'th palette color
+                   < 0       : DO NOT draw boundary file over this vent
+                   > 0       : DO draw boundary file over this vent
         vent type: 0 solid surface
                    2 outline
                   -2 hidden
-
-                  r g b           colors - only specify if you wish to over-ride surface or default
+        r g b:     red, green, blue color components
+                   only specify if you wish to over-ride surface or default
+                   range from 0.0 to 1.0
         */
 
     if(match(buffer,"VENT") == 1){

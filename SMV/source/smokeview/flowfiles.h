@@ -372,12 +372,14 @@ typedef struct {
 /* --------------------------  cventdata ------------------------------------ */
 
 typedef struct _cventdata {
-  int dir,type,colorindex;
-  float boxmin[3], boxmax[3];
+  int dir,type,colorindex,id,isOpenvent;
+  float boxmin[3], boxmax[3], texture_origin[3];
   float xmin, xmax, ymin, ymax, zmin, zmax;
-  int imin, imax, jmin, jmax, kmin, kmax;
-  float xyz[3], radius;
+  int   imin, imax, jmin, jmax, kmin, kmax;
+  float origin[3], radius;
   float *color;
+  surfdata *surf[1];
+  texture *textureinfo[1];
 } cventdata;
 
 /* --------------------------  ventdata ------------------------------------ */
