@@ -5630,6 +5630,8 @@ typedef struct {
         cvi->texture_origin[0]=texture_origin[0];
         cvi->texture_origin[1]=texture_origin[1];
         cvi->texture_origin[2]=texture_origin[2];
+        cvi->useventcolor=1;
+        cvi->hideboundary=0;
         cvi->id=-1;
         cvi->color=NULL;
 
@@ -5675,14 +5677,58 @@ typedef struct {
       for(j=0;j<ncv;j++){
         cventdata *cvi;
         float color[4];
+        float *vcolor;
+        int venttype,ventindex;
+        float s_color[4],s2_color[4];
+
+        s2_color[0]=-1.0;
+        s2_color[1]=-1.0;
+        s2_color[2]=-1.0;
+        s2_color[3]=1.0;
 
         cvi = meshi->cventinfo + j;
+
+        // use properties from &SURF
+        
+        cvi->type=cvi->surf[0]->type;
+        vcolor=cvi->surf[0]->color;
+        cvi->color=vcolor;
+        
+        s_color[0]=vcolor[0];
+        s_color[1]=vcolor[1];
+        s_color[2]=vcolor[2];
+        s_color[3]=vcolor[3];
+        venttype=-99;
+        
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i %i %i %i %i %f %f %f",
           &cvi->imin,&cvi->imax,&cvi->jmin,&cvi->jmax,&cvi->kmin,&cvi->kmax,
-          &cvi->colorindex,&cvi->type,color,color+1,color+2);
-        color[3]=1.0;
-        cvi->color=getcolorptr(color);
+          &ventindex,&venttype,s2_color,s2_color+1,s2_color+2);
+
+        // use color from &VENT
+        
+        if(s2_color[0]>=0.0&&s2_color[1]>=0.0&&s2_color[2]>=0.0){
+          s_color[0]=s2_color[0];
+          s_color[1]=s2_color[1];
+          s_color[2]=s2_color[2];
+          cvi->useventcolor=1;
+        }
+        if(ventindex<0)cvi->hideboundary=1;
+        if(venttype!=-99)cvi->type=venttype;
+
+        // use pallet color
+        
+        if(ABS(ventindex)!=99){
+          ventindex=ABS(ventindex);
+          if(ventindex>nrgb2-1)ventindex=nrgb2-1;
+          s_color[0]=rgb[nrgb+ventindex][0];
+          s_color[1]=rgb[nrgb+ventindex][1];
+          s_color[2]=rgb[nrgb+ventindex][2];
+          s_color[3]=1.0;
+          cvi->useventcolor=1;
+        }
+        s_color[3]=1.0; // set color to opaque until CVENT transparency is implemented
+        cvi->color = getcolorptr(s_color);
       }
       continue;
     }

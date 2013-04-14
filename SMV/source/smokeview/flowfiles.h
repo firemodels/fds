@@ -376,6 +376,7 @@ typedef struct _cventdata {
   float boxmin[3], boxmax[3], texture_origin[3];
   float xmin, xmax, ymin, ymax, zmin, zmax;
   int   imin, imax, jmin, jmax, kmin, kmax;
+  int useventcolor,hideboundary;
   float origin[3], radius;
   float *color;
   surfdata *surf[1];
