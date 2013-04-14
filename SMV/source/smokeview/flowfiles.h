@@ -349,12 +349,12 @@ typedef struct {
 /* --------------------------  clipdata ------------------------------------ */
 
 typedef struct {
-  int clip_x, clip_X;
-  int clip_y, clip_Y;
-  int clip_z, clip_Z;
-  float clip_x_val, clip_X_val;
-  float clip_y_val, clip_Y_val;
-  float clip_z_val, clip_Z_val;
+  int clip_xmin, clip_xmax;
+  int clip_ymin, clip_ymax;
+  int clip_zmin, clip_zmax;
+  float xmin, xmax;
+  float ymin, ymax;
+  float zmin, zmax;
 } clipdata;
 
 /* --------------------------  cadgeom ------------------------------------ */
@@ -892,12 +892,12 @@ typedef struct _camera {
   float quaternion[4];
 
   int clip_mode;
-  int clip_x, clip_X;
-  int clip_y, clip_Y;
-  int clip_z, clip_Z;
-  float clip_x_val, clip_X_val;
-  float clip_y_val, clip_Y_val;
-  float clip_z_val, clip_Z_val;
+  int clip_xmin, clip_xmax;
+  int clip_ymin, clip_ymax;
+  int clip_zmin, clip_zmax;
+  float xmin, xmax;
+  float ymin, ymax;
+  float zmin, zmax;
 
   int view_id;
   struct _camera *next,*prev;

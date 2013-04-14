@@ -1770,44 +1770,44 @@ void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){
 /* ------------------ updateclip ------------------------ */
 
 void Update_Clip(int slicedir){
-  stepclip_x=0; stepclip_y=0; stepclip_z=0; 
-  stepclip_X=0; stepclip_Y=0; stepclip_Z=0;
+  stepclip_xmin=0; stepclip_ymin=0; stepclip_zmin=0; 
+  stepclip_xmax=0; stepclip_ymax=0; stepclip_zmax=0;
   switch (slicedir){
   case 1:
-    clipinfo.clip_x = 1 - clipinfo.clip_x;
-    if(clipinfo.clip_x==1)PRINTF("clip x on\n");
-    if(clipinfo.clip_x==0)PRINTF("clip x off\n");
-    if(clipinfo.clip_x==1)stepclip_x=1;
+    clipinfo.clip_xmin = 1 - clipinfo.clip_xmin;
+    if(clipinfo.clip_xmin==1)PRINTF("clip x on\n");
+    if(clipinfo.clip_xmin==0)PRINTF("clip x off\n");
+    if(clipinfo.clip_xmin==1)stepclip_xmin=1;
     break;
   case 2:
-    clipinfo.clip_y = 1 - clipinfo.clip_y;
-    if(clipinfo.clip_y==1)PRINTF("clip y on\n");
-    if(clipinfo.clip_y==0)PRINTF("clip y off\n");
-    if(clipinfo.clip_y==1)stepclip_y=1;
+    clipinfo.clip_ymin = 1 - clipinfo.clip_ymin;
+    if(clipinfo.clip_ymin==1)PRINTF("clip y on\n");
+    if(clipinfo.clip_ymin==0)PRINTF("clip y off\n");
+    if(clipinfo.clip_ymin==1)stepclip_ymin=1;
     break;
   case 3:
-    clipinfo.clip_z = 1 - clipinfo.clip_z;
-    if(clipinfo.clip_z==1)PRINTF("clip z on\n");
-    if(clipinfo.clip_z==0)PRINTF("clip z off\n");
-    if(clipinfo.clip_z==1)stepclip_z=1;
+    clipinfo.clip_zmin = 1 - clipinfo.clip_zmin;
+    if(clipinfo.clip_zmin==1)PRINTF("clip z on\n");
+    if(clipinfo.clip_zmin==0)PRINTF("clip z off\n");
+    if(clipinfo.clip_zmin==1)stepclip_zmin=1;
     break;
   case -1:
-    clipinfo.clip_X = 1 - clipinfo.clip_X;
-    if(clipinfo.clip_X==1)PRINTF("clip X on\n");
-    if(clipinfo.clip_X==0)PRINTF("clip X off\n");
-    if(clipinfo.clip_X==1)stepclip_X=1;
+    clipinfo.clip_xmax = 1 - clipinfo.clip_xmax;
+    if(clipinfo.clip_xmax==1)PRINTF("clip X on\n");
+    if(clipinfo.clip_xmax==0)PRINTF("clip X off\n");
+    if(clipinfo.clip_xmax==1)stepclip_xmax=1;
     break;
   case -2:
-    clipinfo.clip_Y = 1 - clipinfo.clip_Y;
-    if(clipinfo.clip_Y==1)PRINTF("clip Y on\n");
-    if(clipinfo.clip_Y==0)PRINTF("clip Y off\n");
-    if(clipinfo.clip_Y==1)stepclip_Y=1;
+    clipinfo.clip_ymax = 1 - clipinfo.clip_ymax;
+    if(clipinfo.clip_ymax==1)PRINTF("clip Y on\n");
+    if(clipinfo.clip_ymax==0)PRINTF("clip Y off\n");
+    if(clipinfo.clip_ymax==1)stepclip_ymax=1;
     break;
   case -3:
-    clipinfo.clip_Z = 1 - clipinfo.clip_Z;
-    if(clipinfo.clip_Z==1)PRINTF("clip Z on\n");
-    if(clipinfo.clip_Z==0)PRINTF("clip Z off\n");
-    if(clipinfo.clip_Z==1)stepclip_Z=1;
+    clipinfo.clip_zmax = 1 - clipinfo.clip_zmax;
+    if(clipinfo.clip_zmax==1)PRINTF("clip Z on\n");
+    if(clipinfo.clip_zmax==0)PRINTF("clip Z off\n");
+    if(clipinfo.clip_zmax==1)stepclip_zmax=1;
     break;
   default:
     ASSERT(FFALSE);

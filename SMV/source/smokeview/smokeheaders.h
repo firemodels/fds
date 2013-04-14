@@ -5,8 +5,11 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void MergeClipPlanes(clipdata *ci, clipdata *cj);
 EXTERNCPP void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 EXTERNCPP void init_clip(void);
+EXTERNCPP void setClipPlanes(clipdata *ci, int option);
+
 EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor);
 EXTERNCPP void drawcircle(float diameter, unsigned char *rgbcolor);
 EXTERNCPP void drawfilledrectangle(float width, float height, unsigned char *rgbcolor);
@@ -627,7 +630,6 @@ EXTERNCPP void update_current_mesh(mesh *meshi);
 EXTERNCPP void DialogMenu(int value);
 EXTERNCPP void ApertureMenu(int value);
 EXTERNCPP void ZoomMenu(int value);
-EXTERNCPP void setClipPlanes(clipdata *ci, int option);
 EXTERNCPP void setslicecolors(float slicemin, float slicemax, slicedata *sd, int *errorcode);
 EXTERNCPP void setisocolors(float isomin, float isomax, isodata *sd, int *errorcode);
 EXTERNCPP void drawvolslice_terrain(const slicedata *sd);

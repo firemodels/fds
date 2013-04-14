@@ -31,12 +31,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   show_mode=mode;
 
   if(clip_mode==CLIP_BLOCKAGES_DATA){
-    if(clipinfo.clip_x==1)glDisable(GL_CLIP_PLANE0);
-    if(clipinfo.clip_y==1)glDisable(GL_CLIP_PLANE1);
-    if(clipinfo.clip_z==1)glDisable(GL_CLIP_PLANE2);
-    if(clipinfo.clip_X==1)glDisable(GL_CLIP_PLANE3);
-    if(clipinfo.clip_Y==1)glDisable(GL_CLIP_PLANE4);
-    if(clipinfo.clip_Z==1)glDisable(GL_CLIP_PLANE5);
+    if(clipinfo.clip_xmin==1)glDisable(GL_CLIP_PLANE0);
+    if(clipinfo.clip_ymin==1)glDisable(GL_CLIP_PLANE1);
+    if(clipinfo.clip_zmin==1)glDisable(GL_CLIP_PLANE2);
+    if(clipinfo.clip_xmax==1)glDisable(GL_CLIP_PLANE3);
+    if(clipinfo.clip_ymax==1)glDisable(GL_CLIP_PLANE4);
+    if(clipinfo.clip_zmax==1)glDisable(GL_CLIP_PLANE5);
   }
 
 /* ++++++++++++++++++++++++ update variables as needed +++++++++++++++++++++++++ */

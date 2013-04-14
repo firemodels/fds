@@ -2182,11 +2182,11 @@ void ScriptMenu(int value){
           }
         }
         fprintf(scriptoutstream,"XSCENECLIP\n");
-        fprintf(scriptoutstream," %i %f %i %f\n",clipinfo.clip_x,clipinfo.clip_x_val,clipinfo.clip_X,clipinfo.clip_X_val);
+        fprintf(scriptoutstream," %i %f %i %f\n",clipinfo.clip_xmin,clipinfo.xmin,clipinfo.clip_xmax,clipinfo.xmax);
         fprintf(scriptoutstream,"YSCENECLIP\n");
-        fprintf(scriptoutstream," %i %f %i %f\n",clipinfo.clip_y,clipinfo.clip_y_val,clipinfo.clip_Y,clipinfo.clip_Y_val);
+        fprintf(scriptoutstream," %i %f %i %f\n",clipinfo.clip_ymin,clipinfo.ymin,clipinfo.clip_ymax,clipinfo.ymax);
         fprintf(scriptoutstream,"ZSCENECLIP\n");
-        fprintf(scriptoutstream," %i %f %i %f\n",clipinfo.clip_z,clipinfo.clip_z_val,clipinfo.clip_Z,clipinfo.clip_Z_val);
+        fprintf(scriptoutstream," %i %f %i %f\n",clipinfo.clip_zmin,clipinfo.zmin,clipinfo.clip_zmax,clipinfo.zmax);
         fprintf(scriptoutstream,"SCENECLIP\n");
         fprintf(scriptoutstream," %i\n",clip_mode);
       }

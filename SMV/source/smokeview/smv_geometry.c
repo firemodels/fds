@@ -1483,3 +1483,173 @@ mesh *getmesh_in_smesh(mesh *mesh_guess, supermesh *smesh, float *xyz){
   return NULL;
 }
 
+
+/* ------------------ init_clip ------------------------ */
+
+void init_clip(void){
+  clipdata *ci;
+
+  clip_mode_last=-1;
+
+  ci = &clipinfo;
+  ci->clip_xmin=0;
+  ci->clip_ymin=0;
+  ci->clip_zmin=0;
+  ci->clip_xmax=0;
+  ci->clip_ymax=0;
+  ci->clip_zmax=0;
+  ci->xmin=0.0;
+  ci->ymin=0.0;
+  ci->zmin=0.0;
+  ci->xmax=0.0;
+  ci->ymax=0.0;
+  ci->zmax=0.0;
+
+  ci = &colorbar_clipinfo;
+  ci->clip_xmin=1;
+  ci->clip_ymin=1;
+  ci->clip_zmin=1;
+  ci->clip_xmax=1;
+  ci->clip_ymax=1;
+  ci->clip_zmax=1;
+  ci->xmin=DENORMALIZE_X(2.0);
+  ci->ymin=DENORMALIZE_X(2.0);
+  ci->zmin=DENORMALIZE_Y(2.0);
+  ci->xmax=DENORMALIZE_Y(2.0);
+  ci->ymax=DENORMALIZE_Z(2.0);
+  ci->zmax=DENORMALIZE_Z(2.0);
+
+  clip_i=0;
+  clip_j=0;
+  clip_k=0;
+  clip_I=0;
+  clip_J=0;
+  clip_K=0;
+
+  stepclip_xmin=0,stepclip_ymin=0,stepclip_zmin=0;
+  stepclip_xmax=0,stepclip_ymax=0,stepclip_zmax=0;
+}
+
+/* ----------------------- initClipInfo ----------------------------- */
+
+void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax){
+  ci->clip_xmin=1;
+  ci->clip_xmax=1;
+  ci->clip_ymin=1;
+  ci->clip_ymax=1;
+  ci->clip_zmin=1;
+  ci->clip_zmax=1;
+  ci->xmin=xmin;
+  ci->xmax=xmax;
+  ci->ymin=ymin;
+  ci->ymax=ymax;
+  ci->zmin=zmin;
+  ci->zmax=zmax;
+}
+
+
+/* ----------------------- MergeClipPlanes ----------------------------- */
+
+void MergeClipPlanes(clipdata *ci, clipdata *cj){
+  ci->clip_xmin |= cj->clip_xmin;
+  ci->clip_xmax |= cj->clip_xmax;
+  ci->clip_ymin |= cj->clip_ymin;
+  ci->clip_ymax |= cj->clip_ymax;
+  ci->clip_zmin |= cj->clip_zmin;
+  ci->clip_zmax |= cj->clip_zmax;
+  ci->xmin = MAX(ci->xmin,cj->xmin);
+  ci->ymin = MAX(ci->ymin,cj->ymin);
+  ci->zmin = MAX(ci->zmin,cj->zmin);
+  ci->xmax = MIN(ci->xmax,cj->xmax);
+  ci->ymax = MIN(ci->ymax,cj->ymax);
+  ci->zmax = MIN(ci->zmax,cj->zmax);
+}
+
+/* ----------------------- setClipPlanes ----------------------------- */
+
+void setClipPlanes(clipdata *ci, int option){
+  if(ci!=NULL&&ci->clip_xmin==1&&option==CLIP_ON){
+    GLdouble clipplane[4];
+
+    clipplane[0]=1.0;
+    clipplane[1]=0.0;
+    clipplane[2]=0.0;
+    clipplane[3]=-NORMALIZE_X(ci->xmin);
+    glClipPlane(GL_CLIP_PLANE0,clipplane);
+    glEnable(GL_CLIP_PLANE0);
+  }
+  else{
+    if(ci==NULL||ci->clip_xmin==0)glDisable(GL_CLIP_PLANE0);
+  }
+
+  if(ci!=NULL&&ci->clip_xmax==1&&option==CLIP_ON){
+    GLdouble clipplane[4];
+
+    clipplane[0]=-1.0;
+    clipplane[1]=0.0;
+    clipplane[2]=0.0;
+    clipplane[3]=NORMALIZE_X(ci->xmax);
+    glClipPlane(GL_CLIP_PLANE3,clipplane);
+    glEnable(GL_CLIP_PLANE3);
+  }
+  else{
+    if(ci==NULL||ci->clip_xmax==0)glDisable(GL_CLIP_PLANE3);
+  }
+
+  if(ci!=NULL&&ci->clip_ymin==1&&option==CLIP_ON){
+    GLdouble clipplane[4];
+
+    clipplane[0]=0.0;
+    clipplane[1]=1.0;
+    clipplane[2]=0.0;
+    clipplane[3]=-NORMALIZE_Y(ci->ymin);
+    glClipPlane(GL_CLIP_PLANE1,clipplane);
+    glEnable(GL_CLIP_PLANE1);
+  }
+  else{
+    if(ci==NULL||ci->clip_ymin==0)glDisable(GL_CLIP_PLANE1);
+  }
+
+  if(ci!=NULL&&ci->clip_ymax==1&&option==CLIP_ON){
+    GLdouble clipplane[4];
+
+    clipplane[0]=0.0;
+    clipplane[1]=-1.0;
+    clipplane[2]=0.0;
+    clipplane[3]=NORMALIZE_Y(ci->ymax);
+    glClipPlane(GL_CLIP_PLANE4,clipplane);
+    glEnable(GL_CLIP_PLANE4);
+  }
+  else{
+    if(ci==NULL||ci->clip_ymax==0)glDisable(GL_CLIP_PLANE4);
+  }
+
+  if(ci!=NULL&&ci->clip_zmin==1&&option==CLIP_ON){
+    GLdouble clipplane[4];
+
+    clipplane[0]=0.0;
+    clipplane[1]=0.0;
+    clipplane[2]=1.0;
+    clipplane[3]=-NORMALIZE_Z(ci->zmin);
+    glClipPlane(GL_CLIP_PLANE2,clipplane);
+    glEnable(GL_CLIP_PLANE2);
+  }
+  else{
+    if(ci==NULL||ci->clip_zmin==0)glDisable(GL_CLIP_PLANE2);
+  }
+
+  if(ci!=NULL&&ci->clip_zmax==1&&option==CLIP_ON){
+    GLdouble clipplane[4];
+
+    clipplane[0]=0.0;
+    clipplane[1]=0.0;
+    clipplane[2]=-1.0;
+    clipplane[3]=NORMALIZE_Z(ci->zmax);
+    glClipPlane(GL_CLIP_PLANE5,clipplane);
+    glEnable(GL_CLIP_PLANE5);
+  }
+  else{
+    if(ci==NULL||ci->clip_zmax==0)glDisable(GL_CLIP_PLANE5);
+  }
+}
+

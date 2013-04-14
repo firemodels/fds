@@ -25,16 +25,13 @@ GLUI *glui_clip=NULL;
 
 GLUI_RadioGroup *radio_clip=NULL;
 
-GLUI_Spinner *SPINNER_clip_xupper=NULL, *SPINNER_clip_xlower=NULL;
-GLUI_Spinner *SPINNER_clip_yupper=NULL, *SPINNER_clip_ylower=NULL;
-GLUI_Spinner *SPINNER_clip_zupper=NULL, *SPINNER_clip_zlower=NULL;
-GLUI_Spinner *SPINNER_moveclip_x=NULL;
-GLUI_Spinner *SPINNER_moveclip_y=NULL;
-GLUI_Spinner *SPINNER_moveclip_z=NULL;
+GLUI_Spinner *SPINNER_clip_xmax=NULL, *SPINNER_clip_xmin=NULL;
+GLUI_Spinner *SPINNER_clip_ymax=NULL, *SPINNER_clip_ymin=NULL;
+GLUI_Spinner *SPINNER_clip_zmax=NULL, *SPINNER_clip_zmin=NULL;
 
-GLUI_Checkbox *CHECKBOX_clip_xlower=NULL, *CHECKBOX_clip_xupper=NULL;
-GLUI_Checkbox *CHECKBOX_clip_ylower=NULL, *CHECKBOX_clip_yupper=NULL;
-GLUI_Checkbox *CHECKBOX_clip_zlower=NULL, *CHECKBOX_clip_zupper=NULL;
+GLUI_Checkbox *CHECKBOX_clip_xmin=NULL, *CHECKBOX_clip_xmax=NULL;
+GLUI_Checkbox *CHECKBOX_clip_ymin=NULL, *CHECKBOX_clip_ymax=NULL;
+GLUI_Checkbox *CHECKBOX_clip_zmin=NULL, *CHECKBOX_clip_zmax=NULL;
 
 GLUI_Panel *PANEL_clip_lower=NULL, *PANEL_clip_upper=NULL, *PANEL_clip=NULL,*panel_wrapup=NULL;
 GLUI_Panel *PANEL_clipx=NULL, *PANEL_clipX=NULL;
@@ -93,22 +90,22 @@ extern "C" void glui_clip_setup(int main_window){
   PANEL_clip = glui_clip->add_panel("",GLUI_PANEL_NONE);
   PANEL_clip_lower = glui_clip->add_panel_to_panel(PANEL_clip,_("Clip Lower"));
   PANEL_clipx = glui_clip->add_panel_to_panel(PANEL_clip_lower,"X",GLUI_PANEL_NONE);
-  SPINNER_clip_xlower=glui_clip->add_spinner_to_panel(PANEL_clipx,"X",GLUI_SPINNER_FLOAT,&clipinfo.clip_x_val,SPINNER_xlower,CLIP_CB);
-  SPINNER_clip_xlower->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
+  SPINNER_clip_xmin=glui_clip->add_spinner_to_panel(PANEL_clipx,"X",GLUI_SPINNER_FLOAT,&clipinfo.xmin,SPINNER_xlower,CLIP_CB);
+  SPINNER_clip_xmin->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(PANEL_clipx,false);
-  CHECKBOX_clip_xlower=glui_clip->add_checkbox_to_panel(PANEL_clipx,"",&clipinfo.clip_x,CLIP_xlower,CLIP_CB);
+  CHECKBOX_clip_xmin=glui_clip->add_checkbox_to_panel(PANEL_clipx,"",&clipinfo.clip_xmin,CLIP_xlower,CLIP_CB);
 
   PANEL_clipy = glui_clip->add_panel_to_panel(PANEL_clip_lower,"Y",GLUI_PANEL_NONE);
-  SPINNER_clip_ylower=glui_clip->add_spinner_to_panel(PANEL_clipy,"Y",GLUI_SPINNER_FLOAT,&clipinfo.clip_y_val,SPINNER_ylower,CLIP_CB);
-  SPINNER_clip_ylower->set_float_limits(yclip_min,yclip_max,GLUI_LIMIT_CLAMP);
+  SPINNER_clip_ymin=glui_clip->add_spinner_to_panel(PANEL_clipy,"Y",GLUI_SPINNER_FLOAT,&clipinfo.ymin,SPINNER_ylower,CLIP_CB);
+  SPINNER_clip_ymin->set_float_limits(yclip_min,yclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(PANEL_clipy,false);
-  CHECKBOX_clip_ylower=glui_clip->add_checkbox_to_panel(PANEL_clipy,"",&clipinfo.clip_y,CLIP_ylower,CLIP_CB);
+  CHECKBOX_clip_ymin=glui_clip->add_checkbox_to_panel(PANEL_clipy,"",&clipinfo.clip_ymin,CLIP_ylower,CLIP_CB);
 
   PANEL_clipz = glui_clip->add_panel_to_panel(PANEL_clip_lower,"Z",GLUI_PANEL_NONE);
-  SPINNER_clip_zlower=glui_clip->add_spinner_to_panel(PANEL_clipz,"Z",GLUI_SPINNER_FLOAT,&clipinfo.clip_z_val,SPINNER_zlower,CLIP_CB);
-  SPINNER_clip_zlower->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
+  SPINNER_clip_zmin=glui_clip->add_spinner_to_panel(PANEL_clipz,"Z",GLUI_SPINNER_FLOAT,&clipinfo.zmin,SPINNER_zlower,CLIP_CB);
+  SPINNER_clip_zmin->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(PANEL_clipz,false);
-  CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(PANEL_clipz,"",&clipinfo.clip_z,CLIP_zlower,CLIP_CB);
+  CHECKBOX_clip_zmin=glui_clip->add_checkbox_to_panel(PANEL_clipz,"",&clipinfo.clip_zmin,CLIP_zlower,CLIP_CB);
 
   radio_clip = glui_clip->add_radiogroup_to_panel(PANEL_clip,&clip_mode,CLIP_all,CLIP_CB);
   RADIOBUTTON_clip_1a=glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping disabled"));
@@ -120,22 +117,22 @@ extern "C" void glui_clip_setup(int main_window){
   PANEL_clip_upper = glui_clip->add_panel_to_panel(PANEL_clip,_("Clip upper"));
 
   PANEL_clipX = glui_clip->add_panel_to_panel(PANEL_clip_upper,"X",GLUI_PANEL_NONE);
-  SPINNER_clip_xupper=glui_clip->add_spinner_to_panel(PANEL_clipX,"X",GLUI_SPINNER_FLOAT,&clipinfo.clip_X_val,SPINNER_xupper,CLIP_CB);
-  SPINNER_clip_xupper->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
+  SPINNER_clip_xmax=glui_clip->add_spinner_to_panel(PANEL_clipX,"X",GLUI_SPINNER_FLOAT,&clipinfo.xmax,SPINNER_xupper,CLIP_CB);
+  SPINNER_clip_xmax->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(PANEL_clipX,false);
-  CHECKBOX_clip_xupper=glui_clip->add_checkbox_to_panel(PANEL_clipX,"",&clipinfo.clip_X,CLIP_xupper,CLIP_CB);
+  CHECKBOX_clip_xmax=glui_clip->add_checkbox_to_panel(PANEL_clipX,"",&clipinfo.clip_xmax,CLIP_xupper,CLIP_CB);
 
   PANEL_clipY = glui_clip->add_panel_to_panel(PANEL_clip_upper,"Y",GLUI_PANEL_NONE);
-  SPINNER_clip_yupper=glui_clip->add_spinner_to_panel(PANEL_clipY,"Y",GLUI_SPINNER_FLOAT,&clipinfo.clip_Y_val,SPINNER_yupper,CLIP_CB);
-  SPINNER_clip_yupper->set_float_limits(yclip_min,yclip_max,GLUI_LIMIT_CLAMP);
+  SPINNER_clip_ymax=glui_clip->add_spinner_to_panel(PANEL_clipY,"Y",GLUI_SPINNER_FLOAT,&clipinfo.ymax,SPINNER_yupper,CLIP_CB);
+  SPINNER_clip_ymax->set_float_limits(yclip_min,yclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(PANEL_clipY,false);
-  CHECKBOX_clip_yupper=glui_clip->add_checkbox_to_panel(PANEL_clipY,"",&clipinfo.clip_Y,CLIP_yupper,CLIP_CB);
+  CHECKBOX_clip_ymax=glui_clip->add_checkbox_to_panel(PANEL_clipY,"",&clipinfo.clip_ymax,CLIP_yupper,CLIP_CB);
 
   PANEL_clipZ = glui_clip->add_panel_to_panel(PANEL_clip_upper,"Z",GLUI_PANEL_NONE);
-  SPINNER_clip_zupper=glui_clip->add_spinner_to_panel(PANEL_clipZ,"Z",GLUI_SPINNER_FLOAT,&clipinfo.clip_Z_val,SPINNER_zupper,CLIP_CB);
-  SPINNER_clip_zupper->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
+  SPINNER_clip_zmax=glui_clip->add_spinner_to_panel(PANEL_clipZ,"Z",GLUI_SPINNER_FLOAT,&clipinfo.zmax,SPINNER_zupper,CLIP_CB);
+  SPINNER_clip_zmax->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(PANEL_clipZ,false);
-  CHECKBOX_clip_zupper=glui_clip->add_checkbox_to_panel(PANEL_clipZ,"",&clipinfo.clip_Z,CLIP_zupper,CLIP_CB);
+  CHECKBOX_clip_zmax=glui_clip->add_checkbox_to_panel(PANEL_clipZ,"",&clipinfo.clip_zmax,CLIP_zupper,CLIP_CB);
 
   panel_wrapup = glui_clip->add_panel_to_panel(PANEL_clip,"",GLUI_PANEL_NONE);
 
@@ -182,15 +179,15 @@ extern "C" void show_glui_clip(void){
 /* ------------------ Update_Glui_Clip ------------------------ */
 
 extern "C" void Update_Glui_Clip(void){
-  if(CHECKBOX_clip_xlower!=NULL&&CHECKBOX_clip_ylower!=NULL&&CHECKBOX_clip_zlower!=NULL&&
-     CHECKBOX_clip_xupper!=NULL&&CHECKBOX_clip_yupper!=NULL&&CHECKBOX_clip_zupper!=NULL){
+  if(CHECKBOX_clip_xmin!=NULL&&CHECKBOX_clip_ymin!=NULL&&CHECKBOX_clip_zmin!=NULL&&
+     CHECKBOX_clip_xmax!=NULL&&CHECKBOX_clip_ymax!=NULL&&CHECKBOX_clip_zmax!=NULL){
 
-    CHECKBOX_clip_xlower->set_int_val(clipinfo.clip_x);
-    CHECKBOX_clip_ylower->set_int_val(clipinfo.clip_y);
-    CHECKBOX_clip_zlower->set_int_val(clipinfo.clip_z);
-    CHECKBOX_clip_xupper->set_int_val(clipinfo.clip_X);
-    CHECKBOX_clip_yupper->set_int_val(clipinfo.clip_Y);
-    CHECKBOX_clip_zupper->set_int_val(clipinfo.clip_Z);
+    CHECKBOX_clip_xmin->set_int_val(clipinfo.clip_xmin);
+    CHECKBOX_clip_ymin->set_int_val(clipinfo.clip_ymin);
+    CHECKBOX_clip_zmin->set_int_val(clipinfo.clip_zmin);
+    CHECKBOX_clip_xmax->set_int_val(clipinfo.clip_xmax);
+    CHECKBOX_clip_ymax->set_int_val(clipinfo.clip_ymax);
+    CHECKBOX_clip_zmax->set_int_val(clipinfo.clip_zmax);
     if(radio_clip!=NULL)radio_clip->set_int_val(clip_mode);
     CLIP_CB(CLIP_all);
   }
@@ -217,33 +214,33 @@ void CLIP_CB(int var){
     hide_glui_clip();
     break;
   case CLIP_xlower:
-    if(clipinfo.clip_x==0)SPINNER_clip_xlower->disable();
-    if(clipinfo.clip_x==1)SPINNER_clip_xlower->enable();
+    if(clipinfo.clip_xmin==0)SPINNER_clip_xmin->disable();
+    if(clipinfo.clip_xmin==1)SPINNER_clip_xmin->enable();
     updatefacelists=1;
     break;
   case CLIP_ylower:
-    if(clipinfo.clip_y==0)SPINNER_clip_ylower->disable();
-    if(clipinfo.clip_y==1)SPINNER_clip_ylower->enable();
+    if(clipinfo.clip_ymin==0)SPINNER_clip_ymin->disable();
+    if(clipinfo.clip_ymin==1)SPINNER_clip_ymin->enable();
     updatefacelists=1;
     break;
   case CLIP_zlower:
-    if(clipinfo.clip_z==0)SPINNER_clip_zlower->disable();
-    if(clipinfo.clip_z==1)SPINNER_clip_zlower->enable();
+    if(clipinfo.clip_zmin==0)SPINNER_clip_zmin->disable();
+    if(clipinfo.clip_zmin==1)SPINNER_clip_zmin->enable();
     updatefacelists=1;
     break;
   case CLIP_xupper:
-    if(clipinfo.clip_X==0)SPINNER_clip_xupper->disable();
-    if(clipinfo.clip_X==1)SPINNER_clip_xupper->enable();
+    if(clipinfo.clip_xmax==0)SPINNER_clip_xmax->disable();
+    if(clipinfo.clip_xmax==1)SPINNER_clip_xmax->enable();
     updatefacelists=1;
     break;
   case CLIP_yupper:
-    if(clipinfo.clip_Y==0)SPINNER_clip_yupper->disable();
-    if(clipinfo.clip_Y==1)SPINNER_clip_yupper->enable();
+    if(clipinfo.clip_ymax==0)SPINNER_clip_ymax->disable();
+    if(clipinfo.clip_ymax==1)SPINNER_clip_ymax->enable();
     updatefacelists=1;
     break;
   case CLIP_zupper:
-    if(clipinfo.clip_Z==0)SPINNER_clip_zupper->disable();
-    if(clipinfo.clip_Z==1)SPINNER_clip_zupper->enable();
+    if(clipinfo.clip_zmax==0)SPINNER_clip_zmax->disable();
+    if(clipinfo.clip_zmax==1)SPINNER_clip_zmax->enable();
     updatefacelists=1;
     break;
   case CLIP_all:
@@ -253,52 +250,52 @@ void CLIP_CB(int var){
       for(i=0;i<6;i++){
         CLIP_CB(i);
       }
-      CHECKBOX_clip_xlower->enable();
-      CHECKBOX_clip_ylower->enable();
-      CHECKBOX_clip_zlower->enable();
-      CHECKBOX_clip_xupper->enable();
-      CHECKBOX_clip_yupper->enable();
-      CHECKBOX_clip_zupper->enable();
+      CHECKBOX_clip_xmin->enable();
+      CHECKBOX_clip_ymin->enable();
+      CHECKBOX_clip_zmin->enable();
+      CHECKBOX_clip_xmax->enable();
+      CHECKBOX_clip_ymax->enable();
+      CHECKBOX_clip_zmax->enable();
     }
     else{
-      SPINNER_clip_xlower->disable();
-      SPINNER_clip_ylower->disable();
-      SPINNER_clip_zlower->disable();
-      SPINNER_clip_xupper->disable();
-      SPINNER_clip_yupper->disable();
-      SPINNER_clip_zupper->disable();
+      SPINNER_clip_xmin->disable();
+      SPINNER_clip_ymin->disable();
+      SPINNER_clip_zmin->disable();
+      SPINNER_clip_xmax->disable();
+      SPINNER_clip_ymax->disable();
+      SPINNER_clip_zmax->disable();
 
-      CHECKBOX_clip_xlower->disable();
-      CHECKBOX_clip_ylower->disable();
-      CHECKBOX_clip_zlower->disable();
-      CHECKBOX_clip_xupper->disable();
-      CHECKBOX_clip_yupper->disable();
-      CHECKBOX_clip_zupper->disable();
+      CHECKBOX_clip_xmin->disable();
+      CHECKBOX_clip_ymin->disable();
+      CHECKBOX_clip_zmin->disable();
+      CHECKBOX_clip_xmax->disable();
+      CHECKBOX_clip_ymax->disable();
+      CHECKBOX_clip_zmax->disable();
     }
     glutPostRedisplay();
     break;
   case SPINNER_xlower:
-    SPINNER_clip_xupper->set_float_limits(clipinfo.clip_x_val,xclip_max,GLUI_LIMIT_CLAMP);
+    SPINNER_clip_xmax->set_float_limits(clipinfo.xmin,xclip_max,GLUI_LIMIT_CLAMP);
     updatefacelists=1;
     break;
   case SPINNER_xupper:
-    SPINNER_clip_xlower->set_float_limits(xclip_min,clipinfo.clip_X_val,GLUI_LIMIT_CLAMP);
+    SPINNER_clip_xmin->set_float_limits(xclip_min,clipinfo.xmax,GLUI_LIMIT_CLAMP);
     updatefacelists=1;
     break;
   case SPINNER_ylower:
-    SPINNER_clip_yupper->set_float_limits(clipinfo.clip_y_val,yclip_max,GLUI_LIMIT_CLAMP);
+    SPINNER_clip_ymax->set_float_limits(clipinfo.ymin,yclip_max,GLUI_LIMIT_CLAMP);
     updatefacelists=1;
     break;
   case SPINNER_yupper:
-    SPINNER_clip_ylower->set_float_limits(yclip_min,clipinfo.clip_Y_val,GLUI_LIMIT_CLAMP);
+    SPINNER_clip_ymin->set_float_limits(yclip_min,clipinfo.ymax,GLUI_LIMIT_CLAMP);
     updatefacelists=1;
     break;
   case SPINNER_zlower:
-    SPINNER_clip_zupper->set_float_limits(clipinfo.clip_z_val,zclip_max,GLUI_LIMIT_CLAMP);
+    SPINNER_clip_zmax->set_float_limits(clipinfo.zmin,zclip_max,GLUI_LIMIT_CLAMP);
     updatefacelists=1;
     break;
   case SPINNER_zupper:
-    SPINNER_clip_zlower->set_float_limits(zclip_min,clipinfo.clip_Z_val,GLUI_LIMIT_CLAMP);
+    SPINNER_clip_zmin->set_float_limits(zclip_min,clipinfo.zmax,GLUI_LIMIT_CLAMP);
     updatefacelists=1;
     break;
   default:
@@ -326,12 +323,12 @@ void set_clip_controls(int val){
     CLIP_CB(i);
   }
   if(val==DEFAULT_VALS){
-    clipinfo.clip_x_val = xclip_min;
-    clipinfo.clip_y_val = yclip_min;
-    clipinfo.clip_z_val = zclip_min;
-    clipinfo.clip_X_val = xclip_max;
-    clipinfo.clip_Y_val = yclip_max;
-    clipinfo.clip_Z_val = zclip_max;
+    clipinfo.xmin = xclip_min;
+    clipinfo.ymin = yclip_min;
+    clipinfo.zmin = zclip_min;
+    clipinfo.xmax = xclip_max;
+    clipinfo.ymax = yclip_max;
+    clipinfo.zmax = zclip_max;
   }
   if(val>=1&&val<=nmeshes){
     mesh *meshi;
@@ -349,18 +346,18 @@ void set_clip_controls(int val){
     yplt = meshi->yplt_orig;
     zplt = meshi->zplt_orig;
 
-    clipinfo.clip_x_val = xplt[0] - dxclip;
-    clipinfo.clip_y_val = yplt[0] - dyclip;
-    clipinfo.clip_z_val = zplt[0] - dzclip;
-    clipinfo.clip_X_val = xplt[meshi->ibar] + dxclip;
-    clipinfo.clip_Y_val = yplt[meshi->jbar] + dyclip;
-    clipinfo.clip_Z_val = zplt[meshi->kbar] + dzclip;
+    clipinfo.xmin = xplt[0] - dxclip;
+    clipinfo.ymin = yplt[0] - dyclip;
+    clipinfo.zmin = zplt[0] - dzclip;
+    clipinfo.xmax = xplt[meshi->ibar] + dxclip;
+    clipinfo.ymax = yplt[meshi->jbar] + dyclip;
+    clipinfo.zmax = zplt[meshi->kbar] + dzclip;
   }
-  SPINNER_clip_xlower->set_float_val(clipinfo.clip_x_val);
-  SPINNER_clip_ylower->set_float_val(clipinfo.clip_y_val);
-  SPINNER_clip_zlower->set_float_val(clipinfo.clip_z_val);
-  SPINNER_clip_xupper->set_float_val(clipinfo.clip_X_val);
-  SPINNER_clip_yupper->set_float_val(clipinfo.clip_Y_val);
-  SPINNER_clip_zupper->set_float_val(clipinfo.clip_Z_val);
+  SPINNER_clip_xmin->set_float_val(clipinfo.xmin);
+  SPINNER_clip_ymin->set_float_val(clipinfo.ymin);
+  SPINNER_clip_zmin->set_float_val(clipinfo.zmin);
+  SPINNER_clip_xmax->set_float_val(clipinfo.xmax);
+  SPINNER_clip_ymax->set_float_val(clipinfo.ymax);
+  SPINNER_clip_zmax->set_float_val(clipinfo.zmax);
 }
 

@@ -1895,16 +1895,16 @@ void keyboard(unsigned char key, int flag){
     if(strncmp((const char *)&key2,"<",1)==0||strncmp((const char *)&key2,",",1)==0){ClipDir=-1;}
      else if(strncmp((const char *)&key2,">",1)==0||strncmp((const char *)&key2,".",1)==0){ClipDir=1;}
 
-    if(stepclip_x==1  )clip_i += skip_global*ClipDir;
-    if(stepclip_y==1  )clip_j += skip_global*ClipDir;
-    if(stepclip_z==1  )clip_k += skip_global*ClipDir;
-    if(stepclip_X==1  )clip_I += skip_global*ClipDir;
-    if(stepclip_Y==1  )clip_J += skip_global*ClipDir;
-    if(stepclip_Z==1  )clip_K += skip_global*ClipDir;
+    if(stepclip_xmin==1  )clip_i += skip_global*ClipDir;
+    if(stepclip_ymin==1  )clip_j += skip_global*ClipDir;
+    if(stepclip_zmin==1  )clip_k += skip_global*ClipDir;
+    if(stepclip_xmax==1  )clip_I += skip_global*ClipDir;
+    if(stepclip_ymax==1  )clip_J += skip_global*ClipDir;
+    if(stepclip_zmax==1  )clip_K += skip_global*ClipDir;
 
-    Update_Clipbounds(clipinfo.clip_x,&clip_i,clipinfo.clip_X,&clip_I,current_mesh->ibar);
-    Update_Clipbounds(clipinfo.clip_y,&clip_j,clipinfo.clip_Y,&clip_J,current_mesh->jbar);
-    Update_Clipbounds(clipinfo.clip_z,&clip_k,clipinfo.clip_Z,&clip_K,current_mesh->kbar);
+    Update_Clipbounds(clipinfo.clip_xmin,&clip_i,clipinfo.clip_xmax,&clip_I,current_mesh->ibar);
+    Update_Clipbounds(clipinfo.clip_ymin,&clip_j,clipinfo.clip_ymax,&clip_J,current_mesh->jbar);
+    Update_Clipbounds(clipinfo.clip_zmin,&clip_k,clipinfo.clip_zmax,&clip_K,current_mesh->kbar);
     return;
   }
 

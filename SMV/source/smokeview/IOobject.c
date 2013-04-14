@@ -1276,14 +1276,14 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         clipdata objclip,*ci;
 
         ci=&objclip;
-        ci->clip_x=arg[0];
-        ci->clip_x_val=arg[1];
-        ci->clip_X=arg[2];
-        ci->clip_X_val=arg[3];
-        ci->clip_y=-1;
-        ci->clip_Y=-1;
-        ci->clip_z=-1;
-        ci->clip_Z=-1;
+        ci->clip_xmin=arg[0];
+        ci->xmin=arg[1];
+        ci->clip_xmax=arg[2];
+        ci->xmax=arg[3];
+        ci->clip_ymin=-1;
+        ci->clip_ymax=-1;
+        ci->clip_zmin=-1;
+        ci->clip_zmax=-1;
         setClipPlanes(ci,CLIP_ON);
       }
       break;
@@ -1292,14 +1292,14 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         clipdata objclip,*ci;
 
         ci=&objclip;
-        ci->clip_y=arg[0];
-        ci->clip_y_val=arg[1];
-        ci->clip_Y=arg[2];
-        ci->clip_Y_val=arg[3];
-        ci->clip_x=-1;
-        ci->clip_X=-1;
-        ci->clip_z=-1;
-        ci->clip_Z=-1;
+        ci->clip_ymin=arg[0];
+        ci->ymin=arg[1];
+        ci->clip_ymax=arg[2];
+        ci->ymax=arg[3];
+        ci->clip_xmin=-1;
+        ci->clip_xmax=-1;
+        ci->clip_zmin=-1;
+        ci->clip_zmax=-1;
         setClipPlanes(ci,CLIP_ON);
       }
       break;
@@ -1308,14 +1308,14 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         clipdata objclip,*ci;
 
         ci=&objclip;
-        ci->clip_z=arg[0];
-        ci->clip_z_val=arg[1];
-        ci->clip_Z=arg[2];
-        ci->clip_Z_val=arg[3];
-        ci->clip_x=-1;
-        ci->clip_x=-1;
-        ci->clip_y=-1;
-        ci->clip_Y=-1;
+        ci->clip_zmin=arg[0];
+        ci->zmin=arg[1];
+        ci->clip_zmax=arg[2];
+        ci->zmax=arg[3];
+        ci->clip_xmin=-1;
+        ci->clip_xmin=-1;
+        ci->clip_ymin=-1;
+        ci->clip_ymax=-1;
         setClipPlanes(ci,CLIP_ON);
       }
       break;
