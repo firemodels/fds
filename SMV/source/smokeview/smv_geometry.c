@@ -1568,13 +1568,14 @@ void MergeClipPlanes(clipdata *ci, clipdata *cj){
 /* ----------------------- setClipPlanes ----------------------------- */
 
 void setClipPlanes(clipdata *ci, int option){
-  if(ci!=NULL&&ci->clip_xmin==1&&option==CLIP_ON){
+  if(ci!=NULL&&ci->clip_xmin==1&&option!=CLIP_OFF){
     GLdouble clipplane[4];
 
     clipplane[0]=1.0;
     clipplane[1]=0.0;
     clipplane[2]=0.0;
-    clipplane[3]=-NORMALIZE_X(ci->xmin);
+    if(option==CLIP_ON_DENORMAL)clipplane[3]=-ci->xmin;
+    if(option==CLIP_ON)clipplane[3]=-NORMALIZE_X(ci->xmin);
     glClipPlane(GL_CLIP_PLANE0,clipplane);
     glEnable(GL_CLIP_PLANE0);
   }
@@ -1582,13 +1583,14 @@ void setClipPlanes(clipdata *ci, int option){
     if(ci==NULL||ci->clip_xmin==0)glDisable(GL_CLIP_PLANE0);
   }
 
-  if(ci!=NULL&&ci->clip_xmax==1&&option==CLIP_ON){
+  if(ci!=NULL&&ci->clip_xmax==1&&option!=CLIP_OFF){
     GLdouble clipplane[4];
 
     clipplane[0]=-1.0;
     clipplane[1]=0.0;
     clipplane[2]=0.0;
-    clipplane[3]=NORMALIZE_X(ci->xmax);
+    if(option==CLIP_ON_DENORMAL)clipplane[3]=ci->xmax;
+    if(option==CLIP_ON)clipplane[3]=NORMALIZE_X(ci->xmax);
     glClipPlane(GL_CLIP_PLANE3,clipplane);
     glEnable(GL_CLIP_PLANE3);
   }
@@ -1596,13 +1598,14 @@ void setClipPlanes(clipdata *ci, int option){
     if(ci==NULL||ci->clip_xmax==0)glDisable(GL_CLIP_PLANE3);
   }
 
-  if(ci!=NULL&&ci->clip_ymin==1&&option==CLIP_ON){
+  if(ci!=NULL&&ci->clip_ymin==1&&option!=CLIP_OFF){
     GLdouble clipplane[4];
 
     clipplane[0]=0.0;
     clipplane[1]=1.0;
     clipplane[2]=0.0;
-    clipplane[3]=-NORMALIZE_Y(ci->ymin);
+    if(option==CLIP_ON_DENORMAL)clipplane[3]=-ci->ymin;
+    if(option==CLIP_ON)clipplane[3]=-NORMALIZE_Y(ci->ymin);
     glClipPlane(GL_CLIP_PLANE1,clipplane);
     glEnable(GL_CLIP_PLANE1);
   }
@@ -1610,13 +1613,14 @@ void setClipPlanes(clipdata *ci, int option){
     if(ci==NULL||ci->clip_ymin==0)glDisable(GL_CLIP_PLANE1);
   }
 
-  if(ci!=NULL&&ci->clip_ymax==1&&option==CLIP_ON){
+  if(ci!=NULL&&ci->clip_ymax==1&&option!=CLIP_OFF){
     GLdouble clipplane[4];
 
     clipplane[0]=0.0;
     clipplane[1]=-1.0;
     clipplane[2]=0.0;
-    clipplane[3]=NORMALIZE_Y(ci->ymax);
+    if(option==CLIP_ON_DENORMAL)clipplane[3]=ci->ymax;
+    if(option==CLIP_ON)clipplane[3]=NORMALIZE_Y(ci->ymax);
     glClipPlane(GL_CLIP_PLANE4,clipplane);
     glEnable(GL_CLIP_PLANE4);
   }
@@ -1624,13 +1628,14 @@ void setClipPlanes(clipdata *ci, int option){
     if(ci==NULL||ci->clip_ymax==0)glDisable(GL_CLIP_PLANE4);
   }
 
-  if(ci!=NULL&&ci->clip_zmin==1&&option==CLIP_ON){
+  if(ci!=NULL&&ci->clip_zmin==1&&option!=CLIP_OFF){
     GLdouble clipplane[4];
 
     clipplane[0]=0.0;
     clipplane[1]=0.0;
     clipplane[2]=1.0;
-    clipplane[3]=-NORMALIZE_Z(ci->zmin);
+    if(option==CLIP_ON_DENORMAL)clipplane[3]=-ci->zmin;
+    if(option==CLIP_ON)clipplane[3]=-NORMALIZE_Z(ci->zmin);
     glClipPlane(GL_CLIP_PLANE2,clipplane);
     glEnable(GL_CLIP_PLANE2);
   }
@@ -1638,13 +1643,14 @@ void setClipPlanes(clipdata *ci, int option){
     if(ci==NULL||ci->clip_zmin==0)glDisable(GL_CLIP_PLANE2);
   }
 
-  if(ci!=NULL&&ci->clip_zmax==1&&option==CLIP_ON){
+  if(ci!=NULL&&ci->clip_zmax==1&&option!=CLIP_OFF){
     GLdouble clipplane[4];
 
     clipplane[0]=0.0;
     clipplane[1]=0.0;
     clipplane[2]=-1.0;
-    clipplane[3]=NORMALIZE_Z(ci->zmax);
+    if(option==CLIP_ON_DENORMAL)clipplane[3]=ci->zmax;
+    if(option==CLIP_ON)clipplane[3]=NORMALIZE_Z(ci->zmax);
     glClipPlane(GL_CLIP_PLANE5,clipplane);
     glEnable(GL_CLIP_PLANE5);
   }

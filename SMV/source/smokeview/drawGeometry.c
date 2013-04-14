@@ -60,6 +60,7 @@ void DrawCircVents(int option){
       vcolor[1]=color[1]*255;
       vcolor[2]=color[2]*255;
       glPushMatrix();
+      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
       if(option==CIRCLE){
         clipdata circleclip;
         float *boxmin, *boxmax;
@@ -68,9 +69,9 @@ void DrawCircVents(int option){
         boxmax=cvi->boxmax;
 
         initClipInfo(&circleclip,boxmin[0],boxmax[0],boxmin[1],boxmax[1],boxmin[2],boxmax[2]);
-        setClipPlanes(&circleclip,CLIP_ON);
+        MergeClipPlanes(&circleclip,&clipinfo);
+        setClipPlanes(&circleclip,CLIP_ON_DENORMAL);
       }
-      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
       glTranslatef(x0,y0,z0);
       switch (cvi->dir){
         case DOWN_X:
@@ -116,9 +117,8 @@ void DrawCircVents(int option){
         if(cvi->type==VENT_SOLID)drawfilledrectangle(width,height,vcolor);
         if(cvi->type==VENT_OUTLINE)drawrectangle(width,height,vcolor);
       }
-      if(option==CIRCLE)setClipPlanes(&clipinfo,CLIP_ON);
-
       glPopMatrix();
+      if(option==CIRCLE)setClipPlanes(&clipinfo,CLIP_ON);
     }
   }
 
