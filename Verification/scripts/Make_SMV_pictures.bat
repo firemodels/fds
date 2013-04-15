@@ -32,18 +32,23 @@ echo erasing Smokeview User guide scripted figures and info files
 
 erase SCRIPT_FIGURES\*.png
 erase SCRIPT_FIGURES\*.help
-erase SCRIPT_FIGURES\*.version
+erase SCRIPT_FIGURES\smokeview.version
+erase SCRIPT_FIGURES\smokediff.version
+erase SCRIPT_FIGURES\smokezip.version
+erase SCRIPT_FIGURES\background.version
 
 echo.
 echo Creating Smokeview User guide info files
 
 %SMOKEVIEW% -help > SCRIPT_FIGURES\smokeview.help
-%SMOKEVIEW% -version > SCRIPT_FIGURES\smokeview.version
 %SMOKEZIP% -help > SCRIPT_FIGURES\smokezip.help
 %SMOKEDIFF% -help > SCRIPT_FIGURES\smokediff.help
-%SMOKEDIFF% -v > SCRIPT_FIGURES\smokediff.version
 %BACKGROUND% -help > SCRIPT_FIGURES\background.help
-%BACKGROUND% -version > SCRIPT_FIGURES\background.version
+
+%SMOKEVIEW%  -v > SCRIPT_FIGURES\smokeview.version
+%SMOKEZIP%   -v > SCRIPT_FIGURES\smokezip.version
+%SMOKEDIFF%  -v > SCRIPT_FIGURES\smokediff.version
+%BACKGROUND% -v > SCRIPT_FIGURES\background.version
 
 cd %smvvg%
 
