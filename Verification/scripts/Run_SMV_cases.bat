@@ -36,6 +36,23 @@ Rem set background=
 
 Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Rem Check to make fds exists
+
+IF EXIST %FDSEXE% GOTO endif_fdsexist
+echo ***Fatal error.  The file %FDSEXE% does not exist. 
+echo Aborting now...
+pause>NUL
+goto:eof
+
+:endif_fdsexist
+
+Rem Check to make fds exists
+
+IF EXIST %CFASTEXE% GOTO endif_cfastexist
+echo ***Fatal error.  The file %CFASTEXE% does not exist. 
+echo Aborting now...
+pause>NUL
+goto:eof
 
 set FDS=%bg%%FDSEXE%
 set CFAST=%bg%%CFASTEXE%
@@ -76,4 +93,5 @@ time /t >> %TIME_FILE%
 
 echo "FDS/CFAST cases completed"
 
+:eof
 pause
