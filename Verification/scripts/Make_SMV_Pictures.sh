@@ -99,14 +99,20 @@ fi
 cd $SMVUG/SCRIPT_FIGURES
 rm -f *.png
 rm -f *.help
-rm -f *.version
+rm -f smokeview.version
+rm -f smokediff.version
+rm -f smokezip.version
+rm -f background.version
 source ~/.bashrc_fds $IPLATFORM
+
 $SMV -help > smokeview.help
-$SMV -version > smokeview.version
 $SMOKEZIP -help > smokezip.help
 $SMOKEDIFF -help > smokediff.help
-$SMOKEDIFF -v > smokediff.version
 $BACKGROUND -help > background.help
+
+$SMV -version > smokeview.version
+$SMOKEZIP -v > smokezip.version
+$SMOKEDIFF -v > smokediff.version
 $BACKGROUND -version > background.version
 
 cd $SMVVG/SCRIPT_FIGURES
