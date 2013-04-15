@@ -25,42 +25,41 @@ set RUNFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNCFAST=call "%SCRIPT_DIR%\runsmv.bat"
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
 
-cd %smvug%
+Rem --------------  user guide ----------------
+
+cd %smvug%\SCRIPT_FIGURES
 
 echo.
 echo erasing Smokeview User guide scripted figures and info files
 
-erase SCRIPT_FIGURES\*.png
-erase SCRIPT_FIGURES\*.help
-erase SCRIPT_FIGURES\smokeview.version
-erase SCRIPT_FIGURES\smokediff.version
-erase SCRIPT_FIGURES\smokezip.version
-erase SCRIPT_FIGURES\background.version
+erase *.png
+erase *.help
+erase smokeview.version
+erase smokediff.version
+erase smokezip.version
+erase background.version
 
 echo.
 echo Creating Smokeview User guide info files
 
-%SMOKEVIEW% -help > SCRIPT_FIGURES\smokeview.help
-%SMOKEZIP% -help > SCRIPT_FIGURES\smokezip.help
-%SMOKEDIFF% -help > SCRIPT_FIGURES\smokediff.help
-%BACKGROUND% -help > SCRIPT_FIGURES\background.help
+%SMOKEVIEW%  -help > smokeview.help
+%SMOKEZIP%   -help > smokezip.help
+%SMOKEDIFF%  -help > smokediff.help
+%BACKGROUND% -help > background.help
 
-%SMOKEVIEW%  -v > SCRIPT_FIGURES\smokeview.version
-%SMOKEZIP%   -v > SCRIPT_FIGURES\smokezip.version
-%SMOKEDIFF%  -v > SCRIPT_FIGURES\smokediff.version
-%BACKGROUND% -v > SCRIPT_FIGURES\background.version
+%SMOKEVIEW%  -v > smokeview.version
+%SMOKEZIP%   -v > smokezip.version
+%SMOKEDIFF%  -v > smokediff.version
+%BACKGROUND% -v > background.version
 
-cd %smvvg%
+Rem --------------  verification guide ----------------
 
-echo.
-echo erasing Smokeview Verification guide scripted figures and info files
-
-erase SCRIPT_FIGURES\*.version
-erase SCRIPT_FIGURES\*.png
+cd %smvvg%\SCRIPT_FIGURES
 
 echo.
-echo Creating Smokeview Verification guide info file
-%SMOKEVIEW% -version > SCRIPT_FIGURES\smokeview.version
+echo erasing Smokeview Verification guide scripted figures
+
+erase *.png
 
 echo.
 echo converting SMV_Cases.sh case list to SMV_Pictures_Cases.bat
@@ -71,12 +70,15 @@ cd %SCRIPT_DIR%
 
 echo.
 echo converting plume5c particles to an isosurface
+
 cd %SVNROOT%\Verification\Visualization
 %SMOKEZIP% -f -part2iso plumeiso
 
 echo.
 echo differencing plume5c and plume5cdelta
+
 %SMOKEDIFF% plume5c plume5cdelta
+
 echo.
 echo differencing thouse5 and thouse5delta
 %SMOKEDIFF% thouse5 thouse5delta
