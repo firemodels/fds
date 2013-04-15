@@ -8,3 +8,9 @@ if [ "$IFORT_COMPILER" == "" ] ; then
   echo "    (csh/tcsh -> .cshrc :  setenv IFORT_COMPILER /opt/intel/composerxe"
   exit
 fi
+if [ ! -e $IFORT_COMPILER/bin/compilervars.sh ] ; then
+  echo "*** fatal error: The script $IFORT_COMPILER/bin/compilervars.sh was not found."
+  echo "                 It is required to setup the compiler environment"
+  echo "                 Compilation aborted"
+  exit
+fi
