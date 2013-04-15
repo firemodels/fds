@@ -1548,21 +1548,40 @@ void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, f
 }
 
 
+/* ----------------------- merge_max ----------------------------- */
+
+float merge_max(int opti, float vali, int optj, float valj){
+  if(opti==0&&optj==0)return vali;
+  if(opti==1&&optj==0)return vali;
+  if(opti==0&&optj==1)return valj;
+  return MAX(vali,valj);
+}
+
+/* ----------------------- merge_min ----------------------------- */
+
+float merge_min(int opti, float vali, int optj, float valj){
+  if(opti==0&&optj==0)return vali;
+  if(opti==1&&optj==0)return vali;
+  if(opti==0&&optj==1)return valj;
+  return MIN(vali,valj);
+}
+
 /* ----------------------- MergeClipPlanes ----------------------------- */
 
 void MergeClipPlanes(clipdata *ci, clipdata *cj){
+  ci->xmin = merge_max(ci->clip_xmin,ci->xmin,cj->clip_xmin,cj->xmin);
+  ci->ymin = merge_max(ci->clip_ymin,ci->ymin,cj->clip_ymin,cj->ymin);
+  ci->zmin = merge_max(ci->clip_zmin,ci->zmin,cj->clip_zmin,cj->zmin);
+  ci->xmax = merge_min(ci->clip_xmax,ci->xmax,cj->clip_xmax,cj->xmax);
+  ci->ymax = merge_min(ci->clip_ymax,ci->ymax,cj->clip_ymax,cj->ymax);
+  ci->zmax = merge_min(ci->clip_zmax,ci->zmax,cj->clip_zmax,cj->zmax);
+
   ci->clip_xmin |= cj->clip_xmin;
   ci->clip_xmax |= cj->clip_xmax;
   ci->clip_ymin |= cj->clip_ymin;
   ci->clip_ymax |= cj->clip_ymax;
   ci->clip_zmin |= cj->clip_zmin;
   ci->clip_zmax |= cj->clip_zmax;
-  ci->xmin = MAX(ci->xmin,cj->xmin);
-  ci->ymin = MAX(ci->ymin,cj->ymin);
-  ci->zmin = MAX(ci->zmin,cj->zmin);
-  ci->xmax = MIN(ci->xmax,cj->xmax);
-  ci->ymax = MIN(ci->ymax,cj->ymax);
-  ci->zmax = MIN(ci->zmax,cj->zmax);
 }
 
 /* ----------------------- setClipPlanes ----------------------------- */
