@@ -5552,7 +5552,7 @@ updatemenu=0;
   CREATEMENU(geometrymenu,GeometryMenu);
   if(showedit_dialog==0&&ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
   if(ngeominfo>0)glutAddSubMenu(_("Immersed Solids"),immersedmenu);
-  if(nobject_defs>0){
+  if(nobject_defs>0||ncvents>0){
     int num_activedevices=0;
 
     for(i=0;i<nobject_defs;i++){
@@ -5561,7 +5561,7 @@ updatemenu=0;
       obj_typei = object_defs[i];
       if(obj_typei->used_by_device==1)num_activedevices++;
     }
-    if(num_activedevices>0){
+    if(num_activedevices>0||ncvents>0){
       glutAddSubMenu(_("Objects"),showobjectsmenu);
     }
   }
