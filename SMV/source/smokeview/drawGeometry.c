@@ -40,11 +40,8 @@ void DrawCircVents(int option){
       float delta;
       float *color;
       float width, height;
-      float *meshmin, *meshmax;
 
       cvi = meshi->cventinfo + j;
-      meshmin = meshi->boxmin;
-      meshmax = meshi->boxmax;
 
       if(option==CIRCLE){
         x0 = cvi->origin[0];
@@ -64,7 +61,7 @@ void DrawCircVents(int option){
       vcolor[2]=color[2]*255;
       glPushMatrix();
       glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
-      glTranslatef(-meshmin[0],-meshmin[1],-meshmin[2]);
+      glTranslatef(-xbar0,-ybar0,-zbar0);
       if(option==CIRCLE){
         clipdata circleclip;
         float *ventmin, *ventmax;
