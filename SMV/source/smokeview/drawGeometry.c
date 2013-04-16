@@ -182,10 +182,7 @@ void UpdateIndexColors(void){
 /* ------------------ drawoutlines ------------------------ */
 
 void drawoutlines(void){
-  int i,j;
-  outline *outlinei;
-  float *xx1, *yy1, *zz1;
-  float *xx2, *yy2, *zz2;
+  int i;
 
   if(noutlineinfo<=0)return;
   antialias(1);
@@ -193,6 +190,11 @@ void drawoutlines(void){
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
   for(i=0;i<noutlineinfo;i++){
+    outline *outlinei;
+    float *xx1, *yy1, *zz1;
+    float *xx2, *yy2, *zz2;
+    int j;
+
     outlinei = outlineinfo + i;
     xx1 = outlinei->x1;
     xx2 = outlinei->x2;
@@ -715,8 +717,6 @@ void SetVentDirs(void){
 
 int inblockage(const mesh *meshi,float x, float y, float z){
   int i;
-  float xmin, xmax, ymin, ymax, zmin, zmax;
-  blockagedata *bc;
   float *xplt, *yplt, *zplt;
 
   xplt=meshi->xplt;
@@ -724,6 +724,9 @@ int inblockage(const mesh *meshi,float x, float y, float z){
   zplt=meshi->zplt;
 
   for(i=0;i<meshi->nbptrs;i++){
+    blockagedata *bc;
+    float xmin, xmax, ymin, ymax, zmin, zmax;
+
     bc=meshi->blockageinfoptrs[i];
     xmin = xplt[bc->ijk[IMIN]]; xmax = xplt[bc->ijk[IMAX]];
     ymin = yplt[bc->ijk[JMIN]]; ymax = yplt[bc->ijk[JMAX]];
@@ -736,12 +739,13 @@ int inblockage(const mesh *meshi,float x, float y, float z){
 /* ------------------ freecadinfo ------------------------ */
 
 void freecadinfo(void){
-  int i;
-  cadgeom *cd;
-
   if(cadgeominfo!=NULL)return;
   if(ncadgeom>0){
+    int i;
+
     for(i=0;i<ncadgeom;i++){
+      cadgeom *cd;
+
       cd = cadgeominfo + i;
       FREEMEMORY(cd->quad);
       FREEMEMORY(cd->order);
@@ -803,16 +807,10 @@ void calcQuadNormal(float *xyz, float *out){
 
 void readcadgeom(cadgeom *cd){
   char buffer[255];
-  char obstlabel[255];
   float lastcolor[3];
   FILE *stream;
   int nquads=0;
-  float *xyzpoints;
   int colorindex;
-  float *normal;
-  char *colors;
-  float rgbtemp[4]={(float)-1.,(float)-1.,(float)-1.,(float)1.};
-  cadquad *quadi;
 
   if( (stream=fopen(cd->file,"r"))==NULL){
     return;
@@ -846,6 +844,13 @@ void readcadgeom(cadgeom *cd){
   lastcolor[1]=-1.0;
   lastcolor[2]=-1.0;
   while(!feof(stream)){
+    char obstlabel[255];
+    float *xyzpoints;
+    float *normal;
+    char *colors;
+    float rgbtemp[4]={(float)-1.,(float)-1.,(float)-1.,(float)1.};
+    cadquad *quadi;
+
     if(fgets(buffer,255,stream)==NULL)break;
     quadi = cd->quad + nquads;
     xyzpoints = quadi->xyzpoints;
@@ -922,13 +927,8 @@ void readcad2geom(cadgeom *cd){
   char buffer[255];
   FILE *stream;
   int nquads=0;
-  float *normal;
-  int i,look_index;
-  cadquad *quadi;
-  cadlook *cl;
-  float *rrgb;
+  int i;
   int iquad;
-  float *xyzpoints;
   int have_textures=0;
 
   if( (stream=fopen(cd->file,"r"))==NULL){
@@ -956,6 +956,7 @@ void readcad2geom(cadgeom *cd){
     size_t lenbuffer,len;
     float *shininess;
     float *t_origin;
+    float *rrgb;
 
     cdi = cd->cadlookinfo + i;
 
@@ -1058,6 +1059,12 @@ void readcad2geom(cadgeom *cd){
 
   iquad=0;
   for(i=0;i<nquads;i++){
+    float *normal;
+    int look_index;
+    cadquad *quadi;
+    cadlook *cl;
+    float *xyzpoints;
+
     if(fgets(buffer,255,stream)==NULL)break;
     iquad++;
     quadi = cd->quad + i;
@@ -1100,7 +1107,6 @@ void update_cadtextcoords(cadquad *quadi){
   float nx, ny, nz;
   float l1, l2;
   int i;
-  float qx, qy, qz;
   float *xyz;
   float *txy;
   float *t_origin;
@@ -1121,6 +1127,8 @@ void update_cadtextcoords(cadquad *quadi){
 
 
   for(i=0;i<4;i++){
+    float qx, qy, qz;
+
     qx=DENORMALIZE_X(xyz[3*i]) - t_origin[0];
     qy=DENORMALIZE_Y(xyz[3*i]+1) - t_origin[1];
     qz=DENORMALIZE_Z(xyz[3*i]+2) - t_origin[2];
@@ -1181,14 +1189,9 @@ char *newtextptr(char ***list,int *nlist,char *this,char *last){
 
 void drawcadgeom(const cadgeom *cd){
   int i;
-  float *xyzpoint;
-  float *normal;
   int last_colorindex=-999;
-  int colorindex;
-  int colorindex2;
-  float *thiscolor,*lastcolor; 
+  float *lastcolor; 
   float rgbtemp[4]={(float)-1.0,(float)-1.0,(float)-1.0,(float)-1.0};
-  cadquad *quadi;
 
   lastcolor=rgbtemp;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
@@ -1198,6 +1201,12 @@ void drawcadgeom(const cadgeom *cd){
   glEnable(GL_COLOR_MATERIAL);
   glBegin(GL_QUADS);
   for(i=0;i<cd->nquads;i++){
+    float *xyzpoint, *normal;
+    int colorindex;
+    int colorindex2;
+    float *thiscolor;
+    cadquad *quadi;
+
     quadi = cd->quad+i;
     colorindex=quadi->colorindex;
     thiscolor=quadi->colors;
