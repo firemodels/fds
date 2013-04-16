@@ -1,4 +1,4 @@
-# Makefile for Fire Dynamics Simulator (FDS), Version 5
+# Makefile for Fire Dynamics Simulator (FDS)
 
 # To use this makefile, select the appropriate compiler and OS from the list below. For example, to
 # compile the 64 bit parallel version (MPI) of FDS under Linux with OpenMP using the Intel compilers type:
@@ -45,7 +45,7 @@ setup_win:
 
 # Files which have OpenMP compiler directives have to be compiled
 # by using the FOPENMPFLAG
-# read.f90 has to be compiled without optimization, otherwise 
+# read.f90 has to be compiled without optimization, otherwise
 # errors occure when reading .fds files.
 
 func.o: FFLAGS += $(FOPENMPFLAGS)
@@ -94,7 +94,7 @@ openmp_intel_win_32 : setup_win $(objwin_serial)
 
 openmp_mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 openmp_mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
-openmp_mpi_intel_win_32 : FFLAGS = /Qvec_report0 /I $(MPIINCLUDE) 
+openmp_mpi_intel_win_32 : FFLAGS = /Qvec_report0 /I $(MPIINCLUDE)
 openmp_mpi_intel_win_32 : FOPENMPFLAGS = /Qopenmp
 openmp_mpi_intel_win_32 : FOPTIMIZATIONFLAGS = -O2
 openmp_mpi_intel_win_32 : FCOMPL = ifort
@@ -120,7 +120,38 @@ openmp_intel_win_64_db : FOPTIMIZATIONFLAGS = /Od
 openmp_intel_win_64_db : obj = fds_win_64_openmp_db
 openmp_intel_win_64_db : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) /F100000000 $(objwin_serial)
-	
+
+# Intel Compiler for OS X, version 12
+
+openmp_intel_osx_64 : FFLAGS = -m64 -static-intel -vec_report0
+#openmp_intel_osx_64 : FFLAGS = -m64 -vec_report0
+openmp_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
+openmp_intel_osx_64 : FOPTIMIZATIONFLAGS = -O2
+openmp_intel_osx_64 : FCOMPL = ifort
+openmp_intel_osx_64 : CCOMPL = icc
+openmp_intel_osx_64 : obj = fds_openmp_intel_osx_64
+openmp_intel_osx_64 : setup $(obj_serial)
+	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
+### -check produces a runtime-error in the debug version
+openmp_intel_osx_64_db : FFLAGS = -m64 -static-intel -vec_report0 -warn unused -auto -WB -traceback -g -fltconsistency
+openmp_intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
+openmp_intel_osx_64_db : FOPTIMIZATIONFLAGS = -O0
+openmp_intel_osx_64_db : FCOMPL = ifort
+openmp_intel_osx_64_db : CCOMPL = icc
+openmp_intel_osx_64_db : obj = fds_openmp_intel_osx_64_db
+openmp_intel_osx_64_db : setup $(obj_serial)
+	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
+openmp_intel_osx_64_tcheck : FFLAGS = -m64 -g
+openmp_intel_osx_64_tcheck : FOPENMPFLAGS = -openmp -tcheck
+openmp_intel_osx_64_tcheck : FOPTIMIZATIONFLAGS = -O0
+openmp_intel_osx_64_tcheck : FCOMPL = ifort
+openmp_intel_osx_64_tcheck : CCOMPL = icc
+openmp_intel_osx_64_tcheck : obj = fds_openmp_intel_osx_64_tcheck
+openmp_intel_osx_64_tcheck : setup $(obj_serial)
+	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 # Intel Compiler for Linux, version 11
 
 openmp_intel_linux_32 : FFLAGS = -m32 -static -vec_report0
@@ -143,7 +174,7 @@ openmp_intel_linux_32_db : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 openmp_intel_linux_32_tcheck : FFLAGS = -m32 -g
-openmp_intel_linux_32_tcheck : FOPENMPFLAGS = -openmp -tcheck 
+openmp_intel_linux_32_tcheck : FOPENMPFLAGS = -openmp -tcheck
 openmp_intel_linux_32_tcheck : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_32_tcheck : FCOMPL = ifort
 openmp_intel_linux_32_tcheck : CCOMPL = icc
@@ -263,16 +294,16 @@ fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
 wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj
 velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj
-evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj data.obj 
+evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj data.obj
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj
 mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj
 radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj irad.obj
 pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj
-part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj 
+part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj part.obj
 read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj mass.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj data.obj evac.obj
-dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj turb.obj scrc.obj data.obj 
+dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj turb.obj scrc.obj data.obj
 main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj
 
 
@@ -280,8 +311,8 @@ main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.o
 
 .PHONY : clean
 clean:
-	-rm -f *.o *.mod *.obj 
+	-rm -f *.o *.mod *.obj
 
 .PHONY : winclean
 winclean:
-	-erase *.mod *.obj 
+	-erase *.mod *.obj
