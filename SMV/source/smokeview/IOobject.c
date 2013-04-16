@@ -2220,25 +2220,47 @@ void drawrectangle(float width,float height, unsigned char *rgbcolor){
 void drawfilledrectangle(float width,float height, unsigned char *rgbcolor){
   int i;
 
-  glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+  if(object_outlines==0){
+    glBegin(GL_TRIANGLES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
-  glVertex3f(0.0, 0.0, 0.0);
-  glVertex3f(width, 0.0, 0.0);
-  glVertex3f(width, height, 0.0);
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(width, 0.0, 0.0);
+    glVertex3f(width, height, 0.0);
 
-  glVertex3f(0.0, 0.0, 0.0);
-  glVertex3f(width, height, 0.0);
-  glVertex3f(0.0, height, 0.0);
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(width, height, 0.0);
+    glVertex3f(0.0, height, 0.0);
 
-  glVertex3f(0.0, 0.0, 0.0);
-  glVertex3f(width, height, 0.0);
-  glVertex3f(width, 0.0, 0.0);
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(width, height, 0.0);
+    glVertex3f(width, 0.0, 0.0);
 
-  glVertex3f(0.0, 0.0, 0.0);
-  glVertex3f(0.0, height, 0.0);
-  glVertex3f(width, height, 0.0);
-  glEnd();
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(0.0, height, 0.0);
+    glVertex3f(width, height, 0.0);
+    glEnd();
+  }
+  else{
+    glBegin(GL_LINES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(width, 0.0, 0.0);
+
+    glVertex3f(width, 0.0, 0.0);
+    glVertex3f(width, height, 0.0);
+
+    glVertex3f(width, height, 0.0);
+    glVertex3f(0.0, 0.0, 0.0);
+
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(0.0, height, 0.0);
+
+    glVertex3f(0.0, height, 0.0);
+    glVertex3f(width, height, 0.0);
+    glEnd();
+  }
 }
 
 /* ----------------------- drawfilledcircle ----------------------------- */
@@ -2247,25 +2269,41 @@ void drawfilledcircle(float diameter,unsigned char *rgbcolor){
   int i;
 
   if(ncirc==0)initcircle(CIRCLE_SEGS);
-  glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
-  for(i=0;i<ncirc;i++){
-    int i2;
+  if(object_outlines==0){
+    glBegin(GL_TRIANGLES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+    for(i=0;i<ncirc;i++){
+      int i2;
 
-    i2 = (i+1)%ncirc;
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
-    glVertex3f(0.0,0.0,0.0);
-    glVertex3f(diameter*xcirc[  i2]/2.0,diameter*ycirc[  i2]/2.0,0.0);
-  }
-  for(i=0;i<ncirc;i++){
-    int i2;
+      i2 = (i+1)%ncirc;
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+      glVertex3f(0.0,0.0,0.0);
+      glVertex3f(diameter*xcirc[  i2]/2.0,diameter*ycirc[  i2]/2.0,0.0);
+    }
+    for(i=0;i<ncirc;i++){
+      int i2;
 
-    i2 = (i+1)%ncirc;
-    glVertex3f(diameter*xcirc[  i2]/2.0,diameter*ycirc[  i2]/2.0,0.0);
-    glVertex3f(0.0,0.0,0.0);
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+      i2 = (i+1)%ncirc;
+      glVertex3f(diameter*xcirc[  i2]/2.0,diameter*ycirc[  i2]/2.0,0.0);
+      glVertex3f(0.0,0.0,0.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+    }
+    glEnd();
   }
-  glEnd();
+  else{
+    glBegin(GL_LINES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+    for(i=0;i<ncirc;i++){
+      int i2;
+
+      i2 = (i+1)%ncirc;
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+      glVertex3f(0.0,0.0,0.0);
+      glVertex3f(diameter*xcirc[  i2]/2.0,diameter*ycirc[  i2]/2.0,0.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+    }
+    glEnd();
+  }
 }
 
 /* ----------------------- drawcircle ----------------------------- */
