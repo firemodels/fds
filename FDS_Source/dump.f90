@@ -2054,7 +2054,6 @@ MESH_LOOP: DO NM=1,NMESHES
    ! Replace vents on exterior mesh boundary with "dummy" vents to avoid overlap conflict in Smokeview
 
    NDV = 0
-!  NDVDIM = 1000
    NDVDIM = N_VENT_TOTAL + 1000
    ALLOCATE(DUMMY_VENT_INDEX(NDVDIM))
    ALLOCATE(IDV1(NDVDIM))
@@ -2070,6 +2069,8 @@ MESH_LOOP: DO NM=1,NMESHES
    VENT_LOOP: DO N=1,M%N_VENT
 
       VT=>M%VENTS(N)
+
+      IF (VT%RADIUS>0._EB) CYCLE VENT_LOOP
 
       FACE_INDEX = 0
       IF (VT%I1==0      .AND. VT%I2==0     ) FACE_INDEX = 1
@@ -2101,8 +2102,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
       IF (VT%BOUNDARY_TYPE==MIRROR_BOUNDARY   .OR. &
           VT%BOUNDARY_TYPE==OPEN_BOUNDARY     .OR. &
-          VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY .OR. &
-          VT%RADIUS>0._EB                          ) THEN
+          VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) THEN
          WHERE (VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX)==0) VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX) = -1
       ELSE  ! Make solid color vents invisible (they will be replaced by dummy vents)
          WHERE (VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX)==0) VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX) = N
