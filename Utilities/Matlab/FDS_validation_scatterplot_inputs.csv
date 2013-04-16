@@ -4,7 +4,7 @@ Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Posi
 "HGL Temperature, No Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_No_Ventilation
 HGL Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,20,0.03 0.95,SouthEast,1,13,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Depth
 Flat Ceiling Jet Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Flat_Ceiling_Jet_Temperature
-Sloped Ceiling Jet Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Sloped_Ceiling_Jet_Temperature
+Sloped Ceiling Jet Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Sloped_Ceiling_Jet_Temperature
 Plume Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Plume_Temperature
 Fire Plume Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1200,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Fire_Plume_Temperature
 Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,0.03 0.95,SouthEast,1,9,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Oxygen_Concentration
