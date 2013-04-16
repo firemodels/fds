@@ -12,7 +12,7 @@ For any hydrocarbon fuel, the major combustion products are oxygen and carbon di
 
 \subsection{FAA Cargo Compartments}
 
-Carbon dioxide and carbon monoxide were measured near the ceiling in the forward, middle, and aft sections of the compartment. Note that all but the middle compartment concentrations were measured in Tests~2 and 3.
+Carbon dioxide and carbon monoxide were measured near the ceiling in the forward, middle, and aft sections of the compartment. Note that all but the middle compartment concentrations were measured in Tests~2~and~3.
 
 
 \begin{figure}[h!]
@@ -22,7 +22,7 @@ Carbon dioxide and carbon monoxide were measured near the ceiling in the forward
 \includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_2_CO2} &
 \includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_2_CO} \\
 \includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_3_CO2} &
-\includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_3_CO} 
+\includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_3_CO}
 \end{tabular*}
 \label{FAA_Cargo_CO2_CO}
 \end{figure}
@@ -147,8 +147,7 @@ WTC experiments. There was only one measurement of each made near the ceiling of
 
 \section{Smoke and Aerosols}
 
-FDS treats smoke particulate in a similar way to other gaseous combustion products, basically a tracer gas whose production rate is a fixed fraction of the fuel consumption rate. However, there is an option in the model to allow smoke to deposit on solid surfaces, thus reducing its concentration in the product stream. By default, to model smoke movement it is only necessary to specify the soot yield, that is, the fraction of the fuel mass that is
-converted to soot. However, additional parameters can be added to account for soot deposition.
+
 
 \subsection{NIST/NRC Experiments}
 
@@ -181,21 +180,14 @@ The figures on the following pages contain comparisons of measured and predicted
 \end{tabular*}
 \end{figure}
 
-\clearpage
 
-
-
-\subsection{Summary of Smoke Concentration Predictions}
-
-\begin{figure}[h!]
+\begin{figure}[p]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Smoke_Concentration} \\
-\vspace{0.25in} \\
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Smoke_Concentration}
 \end{tabular}
 \end{center}
-\caption[Summary of smoke concentration predictions]
-{Summary of smoke concentration predictions.}
+\caption[Summary of smoke concentration predictions]{Summary of smoke concentration predictions.}
 \end{figure}
 
 \clearpage
@@ -211,27 +203,35 @@ Beam obscuration measurements were made at different locations within the compar
 \includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_2_Ceiling_Transmission} &
 \includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_2_Cargo_Transmission} \\
 \includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_3_Ceiling_Transmission} &
-\includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_3_Cargo_Transmission} 
+\includegraphics[height=2.2in]{FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_3_Cargo_Transmission}
 \end{tabular*}
 \end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Smoke_Obscuration}
+\end{tabular}
+\end{center}
+\caption[Summary of smoke obscuration predictions]{Summary of smoke obscuration predictions.}
+\end{figure}
+
 
 \clearpage
 
 \subsection{Sippola Aerosol Deposition Experiments}
 
-A total of 16 aerosol deposition tests were conducted in a straight steel duct with smooth walls for 5
-different particle diameters (1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m) and 3 different air
-velocities (2.2~m/s, 5.3~m/s, and 9.0~m/s). In the simulations, the species that contains the aerosol is
-tracked explicitly, and the aerosol deposition routines are enabled (refer to the Aerosol Deposition section
-in the FDS User Guide~\cite{FDS_Users_Guide} and FDS Technical Reference Guide~\cite{FDS_Math_Guide}
-for more details). A summary of the 16 tests is shown in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
+FDS treats smoke particulate and aerosols in a similar way to other gaseous combustion products, basically a tracer gas whose production rate is a fixed fraction of the fuel consumption rate. However, there is an option in the model to allow smoke or aerosols to deposit on solid surfaces, thus reducing its concentration in the product stream. A total of 16 aerosol deposition experiments were conducted in a straight steel duct with smooth walls for 5 different particle diameters (1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m) and 3 different air velocities (2.2~m/s, 5.3~m/s, and 9.0~m/s). In the simulations, the aerosol is tracked explicitly, and the aerosol deposition routines are enabled (refer to the Aerosol Deposition section in the FDS User Guide~\cite{FDS_Users_Guide} and FDS Technical Reference Guide~\cite{FDS_Math_Guide} for more details). A summary of the 16~experiments is shown in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
 
 \begin{table}[h!]
 \caption{Summary of Sippola aerosol deposition experiments selected for model validation.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline
-Test No.  &  Air Speed (m/s)  &  Particle Diameter ($\mu$m) &  Particle Density (kg/m$^3$)  \\ \hline \hline
+Test      &  Air Speed        &  Particle Diameter          &  Particle Density             \\ 
+No.       &  (m/s)            &  ($\mu$m)                   &  (kg/m$^3$)                   \\ \hline \hline
 1         &  2.2              &  1.0                        &  1350                         \\ \hline
 2         &  2.2              &  2.8                        &  1170                         \\ \hline
 3         &  2.1              &  5.2                        &  1210                         \\ \hline
