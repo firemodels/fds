@@ -6003,13 +6003,17 @@ is given by:
 {\tt TRNY} and {\tt TRNZ} data entries are defined similarly. The
 first {\tt nx} data items are not required by Smokeview.
 
-\hitem{VENT}The keyword specifies vent coordinates. A FORTAN~2003
-code segment describing the format of {\tt VENT} data is given by:
+\hitem{VENT, CVENT}These keywords specify vent coordinates for regular and circular vents.
+Note that the parameters {\tt x0, y0, z0}\ and {\tt radius}\ describing the center and radius
+of a circular vent
+only appear with the CVENT keyword.
+A FORTRAN~2003
+code segment describing the format of {\tt VENT} and {\tt CVENT}\ data is given by:
 \begin{lstlisting}
    read(5,*)nv
    do i = 1, nv
      read(5,*)xv1(i), xv2(i), yv1(i), yv2(i), zv1(i), zv2(i), id(i)
-      ... s1(i), tx(i), ty(i), tz(i), radius(i)
+      ... s1(i), tx(i), ty(i), tz(i) % x0, y0, z0, radius
    end do
    do i = 1, nv
      read(5,*)iv1(i), iv2(i), jv1(i), jv2(i), kv1(i), kv2(i)
@@ -6022,7 +6026,7 @@ required. All other arrays are optional and may be omitted.
 \renewcommand{\arraystretch}{1.2}
 \begin{table}[\figoptions]
 \begin{center}
-\caption{Descriptions of parameters used by the Smokeview VENT keyword.} \vspace{0.1in}
+\caption{Descriptions of parameters used by the Smokeview VENT and CVENT keywords.} \vspace{0.1in}
 \begin{tabular}{|l|l|l|}
 \hline Variable(s) &  type & Description  \\
 
@@ -6054,8 +6058,10 @@ type & integer &
 \parbox[c]{1.0in}{red, green, blue\\alpha} & float &
 \tabentry{Each color value ranges from 0.0 to 1.0 .  The alpha {\em color}\ represents transparency, alpha=0.0 is transparent, alpha=1.0 is opaque.}\\  \hline
 
+x0, y0, z0 & float &
+\tabentry{circular vent origin}\\ \hline
 radius & float &
-\tabentry{if positive, radius of circular vent}\\ \hline 
+\tabentry{if positive, radius of circular vent}\\ \hline
 
 \end{tabular}
 \label{tabVENT}
