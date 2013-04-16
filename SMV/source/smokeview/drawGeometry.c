@@ -40,8 +40,11 @@ void DrawCircVents(int option){
       float delta;
       float *color;
       float width, height;
+      float *meshmin, *meshmax;
 
       cvi = meshi->cventinfo + j;
+      meshmin = meshi->boxmin;
+      meshmax = meshi->boxmax;
 
       if(option==CIRCLE){
         x0 = cvi->origin[0];
@@ -61,14 +64,15 @@ void DrawCircVents(int option){
       vcolor[2]=color[2]*255;
       glPushMatrix();
       glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glTranslatef(-meshmin[0],-meshmin[1],-meshmin[2]);
       if(option==CIRCLE){
         clipdata circleclip;
-        float *boxmin, *boxmax;
+        float *ventmin, *ventmax;
 
-        boxmin=cvi->boxmin;
-        boxmax=cvi->boxmax;
+        ventmin=cvi->boxmin;
+        ventmax=cvi->boxmax;
 
-        initClipInfo(&circleclip,boxmin[0],boxmax[0],boxmin[1],boxmax[1],boxmin[2],boxmax[2]);
+        initClipInfo(&circleclip,ventmin[0],ventmax[0],ventmin[1],ventmax[1],ventmin[2],ventmax[2]);
         MergeClipPlanes(&circleclip,&clipinfo);
         setClipPlanes(&circleclip,CLIP_ON_DENORMAL);
       }
