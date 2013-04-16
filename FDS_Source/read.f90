@@ -1871,15 +1871,7 @@ COUNT_SPEC_LOOP: DO
       IF (LUMPED_COMPONENT_ONLY) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Cannot define a LUMPED_COMPONENT_ONLY species as the BACKGROUND species'
          CALL SHUTDOWN(MESSAGE)
-      ENDIF
-!      IF (SPEC_ID(1) =='null' .AND. N_SPECIES > 1) THEN
-!         WRITE(MESSAGE,'(A)') 'ERROR: BACKGROUND primitive species must be defined as the first primitive SPEC input'
-!         CALL SHUTDOWN(MESSAGE)
-!      ENDIF
-!      IF (SPEC_ID(1)/='null' .AND. N_TRACKED_SPECIES > 0) THEN
-!         WRITE(MESSAGE,'(A)') 'ERROR: BACKGROUND lumped species must be defined as the first lumped SPEC input'
-!         CALL SHUTDOWN(MESSAGE)
-!      ENDIF      
+      ENDIF  
       IF (SIMPLE_CHEMISTRY) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Cannot define a BACKGROUND species if using the simple chemistry'
          CALL SHUTDOWN(MESSAGE)
@@ -1891,10 +1883,14 @@ COUNT_SPEC_LOOP: DO
    ENDIF
    
    IF (SPEC_ID(1)=='null') THEN
-      N_SPECIES = N_SPECIES+1
+      N_SPECIES = N_SPECIES+1      
       IF (.NOT. LUMPED_COMPONENT_ONLY .AND. .NOT. BACKGROUND) N_TRACKED_SPECIES = N_TRACKED_SPECIES + 1 
    ELSE
-      IF (.NOT. BACKGROUND) N_TRACKED_SPECIES = N_TRACKED_SPECIES + 1
+      IF (SIMPLE_CHEMISTRY) THEN
+         IF(TRIM(ID)/=TRIM(REACTION(1)%FUEL)) N_TRACKED_SPECIES = N_TRACKED_SPECIES + 1
+      ELSE
+         IF (.NOT. BACKGROUND) N_TRACKED_SPECIES = N_TRACKED_SPECIES + 1
+      ENDIF
    ENDIF
 
    ! If predefined species, check to see if the species has already been defined.
@@ -1902,10 +1898,22 @@ COUNT_SPEC_LOOP: DO
    IF (PREDEFINED_SMIX(0)) THEN
       DO NN=1,N_SPECIES-1
          IF (TRIM(PREDEFINED_SPEC_ID(NN))==TRIM(ID)) THEN
-            IF (SPEC_ID(1)/='null') THEN
-               WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ+1, &
-                                         '.  Lumped species has the same ID as a predefined species'
-               CALL SHUTDOWN(MESSAGE)               
+            IF (.NOT. SIMPLE_CHEMISTRY) THEN
+               IF (SPEC_ID(1)/='null') THEN
+                  WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ+1, &
+                                             '.  Lumped species has the same ID as a predefined species'
+                  CALL SHUTDOWN(MESSAGE)               
+               ENDIF
+            ELSE
+               IF (SPEC_ID(1)/='null') THEN
+                  IF (TRIM(ID)/=TRIM(REACTION(1)%FUEL)) THEN
+                     WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ+1, &
+                                                '.  Lumped species has the same ID as a predefined species'
+                     CALL SHUTDOWN(MESSAGE)               
+                  ELSE
+                     PREDEFINED_SMIX(1) = .FALSE.
+                  ENDIF
+               ENDIF
             ENDIF
             PREDEFINED(NN) = .FALSE.
             N_SPECIES = N_SPECIES - 1
@@ -2095,24 +2103,23 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
 
 ENDDO PRIMITIVE_SPEC_READ_LOOP      
 
-REWIND(LU_INPUT)
-
 ! Pass 3: process tracked species (primitive and lumped)
 
 ALLOCATE(SPECIES_MIXTURE(0:N_TRACKED_SPECIES),STAT=IZERO)
 CALL ChkMemErr('READ','SPECIES',IZERO) 
 
-N_SPEC_READ = 0
+! Process non-predefined mixtures first
+REWIND(LU_INPUT)
 N = 0
 DEFINED_BACKGROUND = .FALSE.
-TRACKED_SPEC_LOOP: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGROUND)
+
+TRACKED_SPEC_LOOP_1: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGROUND)
 
    IF (PREDEFINED_SMIX(N)) THEN
       CALL SET_SPEC_DEFAULT
-      CALL SETUP_PREDEFINED_SMIX(N)
-      IF (N==0) BACKGROUND=.TRUE.
+      IF (N==0) BACKGROUND = .TRUE.
    ELSE
-      FIND_TRACKED: DO 
+      FIND_TRACKED: DO          
          CALL SET_SPEC_DEFAULT
          READ(LU_INPUT,NML=SPEC)
          IF (LUMPED_COMPONENT_ONLY) CYCLE FIND_TRACKED
@@ -2122,131 +2129,64 @@ TRACKED_SPEC_LOOP: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGROUN
          ENDIF
          EXIT
       ENDDO FIND_TRACKED      
-   ENDIF
-   IF (BACKGROUND) THEN
-      NN = 0
-   ELSE
-      IF (N==0) N = N + 1
-      NN = N
-   ENDIF
-   
-   IF (SPEC_ID(1)=='null') THEN
-      SPEC_ID(1) = ID
-      VOLUME_FRACTION(1) = 1.0_EB
-   ENDIF
 
-   CONVERSION = 0._EB
-   
-   SM => SPECIES_MIXTURE(NN)
-   
-   SM%ID = ID
-   SM%ZZ0 = MAX(0._EB,MASS_FRACTION_0)
-   
-   ! Count the number of species included in the mixture
-
-   N_SUB_SPECIES = 0
-   COUNT_SPEC: DO NS=1,N_SPECIES
-      IF (TRIM(SPEC_ID(NS)) /= 'null') THEN
-         N_SUB_SPECIES = N_SUB_SPECIES + 1
-      ELSE
-         EXIT
-      ENDIF
-   ENDDO COUNT_SPEC
-   
-   IF (N_SUB_SPECIES == 1) THEN
-      MASS_FRACTION=0._EB
-      MASS_FRACTION(1)=1._EB
-      VOLUME_FRACTION=0._EB
-   ENDIF
-   
-   ! Allocate arrays to store the species id, mass, volume fractions
-
-   ALLOCATE (SM%SPEC_ID(N_SPECIES),STAT=IZERO)
-   ALLOCATE (SM%VOLUME_FRACTION(N_SPECIES),STAT=IZERO)
-   ALLOCATE (SM%MASS_FRACTION(N_SPECIES),STAT=IZERO)
-   SM%SPEC_ID         = 'null'
-   SM%VOLUME_FRACTION = 0._EB
-   SM%MASS_FRACTION   = 0._EB
-
-   Y_INDEX = -1
-   DO NS = 1,N_SUB_SPECIES
-      FIND_SPEC_ID: DO NS2 = 1,N_SPECIES
-         IF (TRIM(SPECIES(NS2)%ID) == TRIM(SPEC_ID(NS))) THEN
-            SM%SPEC_ID(NS2) = SPEC_ID(NS)
-            Y_INDEX(NS)  = NS2
-            IF (N_SUB_SPECIES==1) THEN
-               SM%FORMULA = SPECIES(NS2)%FORMULA
-               SM%SINGLE_SPEC_INDEX=NS2
-               IF (SPECIES(NS2)%MODE == AEROSOL_SPECIES) THEN
-                  SM%DEPOSITING = .TRUE.
-                  SM%MEAN_DIAMETER = SPECIES(NS2)%MEAN_DIAMETER
-                  SM%DENSITY_SOLID = SPECIES(NS2)%DENSITY_SOLID
-                  SM%CONDUCTIVITY_SOLID=SPECIES(NS2)%CONDUCTIVITY_SOLID
-               ENDIF
+      CALL DEFINE_MIXTURE
+      IF (SIMPLE_CHEMISTRY) THEN
+         SM => SPECIES_MIXTURE(N)
+         IF (TRIM(SM%ID)==TRIM(REACTION(1)%FUEL)) THEN      
+            IF (SM%ATOMS(1)+SM%ATOMS(6)+SM%ATOMS(7)+SM%ATOMS(8) - SUM(SM%ATOMS) < 0._EB) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: Fuel FORMULA for SIMPLE_CHEMISTRY can only contain C,H,O, and N'
+               CALL SHUTDOWN(MESSAGE)
+            ELSE
+               REACTION(1)%C = SM%ATOMS(6)
+               REACTION(1)%H = SM%ATOMS(1)
+               REACTION(1)%O = SM%ATOMS(8)
+               REACTION(1)%N = SM%ATOMS(7)
+               REACTION(1)%MW_FUEL = SM%MW
             ENDIF
-            EXIT FIND_SPEC_ID
+            IF (REACTION(1)%C<=TWO_EPSILON_EB .AND. REACTION(1)%H<=TWO_EPSILON_EB) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: Must specify fuel chemistry using C and/or H when using simple chemistry'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF            
          ENDIF
-      ENDDO FIND_SPEC_ID
-      IF (Y_INDEX(NS)<0) THEN
-         WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', sub species ',NS,' not found.'
-         CALL SHUTDOWN(MESSAGE)         
-      ENDIF      
-      IF (MASS_FRACTION(NS)>0._EB)     CONVERSION = CONVERSION + MASS_FRACTION(NS)   / SPECIES(Y_INDEX(NS))%MW
-      IF (VOLUME_FRACTION(NS)>0._EB)   CONVERSION = CONVERSION + VOLUME_FRACTION(NS) * SPECIES(Y_INDEX(NS))%MW
-      IF (.NOT. PREDEFINED_SMIX(NN) .AND. MASS_FRACTION(NS)<=0._EB .AND. VOLUME_FRACTION(NS)<=0._EB) THEN
-         WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', mass or volume fraction for sub species ',NS,' not found.'
-         CALL SHUTDOWN(MESSAGE)                     
       ENDIF
-
-   ENDDO
+   ENDIF
    
-   IF (ANY(MASS_FRACTION>0._EB)) THEN
-      DO NS = 1,N_SUB_SPECIES
-         SM%VOLUME_FRACTION(Y_INDEX(NS)) = MASS_FRACTION(NS) / SPECIES(Y_INDEX(NS))%MW / CONVERSION
-         SM%MASS_FRACTION(Y_INDEX(NS))   = MASS_FRACTION(NS)
-      ENDDO
-   ENDIF
-
-   IF (ANY(VOLUME_FRACTION>0._EB)) THEN
-      DO NS = 1,N_SUB_SPECIES
-         SM%MASS_FRACTION(Y_INDEX(NS))   = VOLUME_FRACTION(NS) * SPECIES(Y_INDEX(NS))%MW / CONVERSION
-         SM%VOLUME_FRACTION(Y_INDEX(NS)) = VOLUME_FRACTION(NS)
-      ENDDO
-   ENDIF
-
-   ! Normalize mass and volume fractions, plus stoichiometric coefficient
-
-   SM%MASS_FRACTION = SM%MASS_FRACTION / SUM(SM%MASS_FRACTION)
-   SM%ADJUST_NU = SUM(SM%VOLUME_FRACTION)
-   SM%VOLUME_FRACTION = SM%VOLUME_FRACTION / SUM(SM%VOLUME_FRACTION)
-
-   ! Calculate the molecular weight, extinction coefficient, and enthalpy of formation for the mixture
-
-   SM%MW = 0._EB
-   SM%H_F = 0._EB
-   DO NS = 1,N_SPECIES
-      IF (SM%MASS_FRACTION(NS) <TWO_EPSILON_EB) CYCLE
-      SM%MASS_EXTINCTION_COEFFICIENT = SM%MASS_FRACTION(NS) * SPECIES(NS)%MASS_EXTINCTION_COEFFICIENT      
-      SM%MW = SM%MW + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%MW !! *SM%ADJUST_NU ::term for potential non-normalized inputs
-      SM%H_F = SM%H_F + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%H_F ! Calculate H_F of mixtures
-      IF (SPECIES(NS)%FORMULA(1:5)=='SPEC_') SM%VALID_ATOMS = .FALSE.
-      SM%ATOMS = SM%ATOMS + SM%VOLUME_FRACTION(NS)*SPECIES(NS)%ATOMS !! *SM%ADJUST_NU ::term for potential non-normalized inputs
-   ENDDO     
-   IF(SM%H_F <= -1.E21_EB) THEN ! Checking if H_F is defined for all species in mixture
-      SM%H_F = SM%H_F
-   ELSE
-      SM%H_F = SM%H_F*1.E6_EB/SM%MW
-   ENDIF   
-
-   SM%RCON = R0/SM%MW
-
    IF (BACKGROUND) THEN
       DEFINED_BACKGROUND = .TRUE.
       IF (N==0) N = N + 1
    ELSE
       N = N + 1
    ENDIF   
-ENDDO TRACKED_SPEC_LOOP
+ENDDO TRACKED_SPEC_LOOP_1
+
+! Process predefined mixtures second
+
+
+IF (ANY(PREDEFINED_SMIX)) THEN
+   REWIND(LU_INPUT)
+   N = 0
+   DEFINED_BACKGROUND = .FALSE.
+   TRACKED_SPEC_LOOP_2: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGROUND)
+   
+      IF (PREDEFINED_SMIX(N)) THEN
+         CALL SET_SPEC_DEFAULT
+         CALL SETUP_PREDEFINED_SMIX(N)
+         IF (N==0) BACKGROUND=.TRUE.
+         CALL DEFINE_MIXTURE
+      ELSE
+         BACKGROUND = .FALSE.
+      ENDIF
+   
+      IF (BACKGROUND) THEN
+         DEFINED_BACKGROUND = .TRUE.
+         IF (N==0) N = N + 1
+      ELSE
+         N = N + 1
+      ENDIF  
+   
+   ENDDO TRACKED_SPEC_LOOP_2
+ENDIF
 
 IF (SPECIES_MIXTURE(0)%DEPOSITING) THEN
    WRITE(MESSAGE,'(A)') 'ERROR: Cannot define the background as a depositing species'
@@ -2264,6 +2204,128 @@ IF (SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0) > 1._EB) &
 SPECIES_MIXTURE(0)%ZZ0 = 1._EB - SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0)   
 
 CONTAINS
+
+
+SUBROUTINE DEFINE_MIXTURE
+! Create a species mixture
+
+IF (BACKGROUND) THEN
+   NN = 0
+ELSE
+   IF (N==0) N = N + 1
+   NN = N
+ENDIF
+
+IF (SPEC_ID(1)=='null') THEN
+   SPEC_ID(1) = ID
+   VOLUME_FRACTION(1) = 1.0_EB
+ENDIF
+
+CONVERSION = 0._EB
+   
+SM => SPECIES_MIXTURE(NN)
+   
+SM%ID = ID
+SM%ZZ0 = MAX(0._EB,MASS_FRACTION_0)
+   
+! Count the number of species included in the mixture
+
+N_SUB_SPECIES = 0
+COUNT_SPEC: DO NS=1,N_SPECIES
+   IF (TRIM(SPEC_ID(NS)) /= 'null') THEN
+      N_SUB_SPECIES = N_SUB_SPECIES + 1
+   ELSE
+      EXIT
+   ENDIF
+ENDDO COUNT_SPEC
+   
+IF (N_SUB_SPECIES == 1) THEN
+   MASS_FRACTION=0._EB
+   MASS_FRACTION(1)=1._EB
+   VOLUME_FRACTION=0._EB
+ENDIF
+
+! Allocate arrays to store the species id, mass, volume fractions
+
+ALLOCATE (SM%SPEC_ID(N_SPECIES),STAT=IZERO)
+ALLOCATE (SM%VOLUME_FRACTION(N_SPECIES),STAT=IZERO)
+ALLOCATE (SM%MASS_FRACTION(N_SPECIES),STAT=IZERO)
+SM%SPEC_ID         = 'null'
+SM%VOLUME_FRACTION = 0._EB
+SM%MASS_FRACTION   = 0._EB
+Y_INDEX = -1
+DO NS = 1,N_SUB_SPECIES
+   FIND_SPEC_ID: DO NS2 = 1,N_SPECIES
+      IF (TRIM(SPECIES(NS2)%ID) == TRIM(SPEC_ID(NS))) THEN
+         SM%SPEC_ID(NS2) = SPEC_ID(NS)
+         Y_INDEX(NS)  = NS2
+         IF (N_SUB_SPECIES==1) THEN
+            SM%FORMULA = SPECIES(NS2)%FORMULA
+            SM%SINGLE_SPEC_INDEX=NS2
+            IF (SPECIES(NS2)%MODE == AEROSOL_SPECIES) THEN
+               SM%DEPOSITING = .TRUE.
+               SM%MEAN_DIAMETER = SPECIES(NS2)%MEAN_DIAMETER
+               SM%DENSITY_SOLID = SPECIES(NS2)%DENSITY_SOLID
+               SM%CONDUCTIVITY_SOLID=SPECIES(NS2)%CONDUCTIVITY_SOLID
+            ENDIF
+         ENDIF
+         EXIT FIND_SPEC_ID
+      ENDIF
+   ENDDO FIND_SPEC_ID
+   IF (Y_INDEX(NS)<0) THEN
+      WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', sub species ',NS,' not found.'
+      CALL SHUTDOWN(MESSAGE)         
+   ENDIF      
+   IF (MASS_FRACTION(NS)>0._EB)     CONVERSION = CONVERSION + MASS_FRACTION(NS)   / SPECIES(Y_INDEX(NS))%MW
+   IF (VOLUME_FRACTION(NS)>0._EB)   CONVERSION = CONVERSION + VOLUME_FRACTION(NS) * SPECIES(Y_INDEX(NS))%MW
+   IF (.NOT. PREDEFINED_SMIX(NN) .AND. MASS_FRACTION(NS)<=0._EB .AND. VOLUME_FRACTION(NS)<=0._EB) THEN
+      WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', mass or volume fraction for sub species ',NS,' not found.'
+      CALL SHUTDOWN(MESSAGE)                     
+   ENDIF
+
+ENDDO
+   
+IF (ANY(MASS_FRACTION>0._EB)) THEN
+   DO NS = 1,N_SUB_SPECIES
+      SM%VOLUME_FRACTION(Y_INDEX(NS)) = MASS_FRACTION(NS) / SPECIES(Y_INDEX(NS))%MW / CONVERSION
+      SM%MASS_FRACTION(Y_INDEX(NS))   = MASS_FRACTION(NS)
+   ENDDO
+ENDIF
+
+IF (ANY(VOLUME_FRACTION>0._EB)) THEN
+   DO NS = 1,N_SUB_SPECIES
+      SM%MASS_FRACTION(Y_INDEX(NS))   = VOLUME_FRACTION(NS) * SPECIES(Y_INDEX(NS))%MW / CONVERSION
+      SM%VOLUME_FRACTION(Y_INDEX(NS)) = VOLUME_FRACTION(NS)
+   ENDDO
+ENDIF
+
+! Normalize mass and volume fractions, plus stoichiometric coefficient
+
+SM%MASS_FRACTION = SM%MASS_FRACTION / SUM(SM%MASS_FRACTION)
+IF (.NOT. SIMPLE_CHEMISTRY) SM%ADJUST_NU = SUM(SM%VOLUME_FRACTION)
+SM%VOLUME_FRACTION = SM%VOLUME_FRACTION / SUM(SM%VOLUME_FRACTION)
+
+! Calculate the molecular weight, extinction coefficient, and enthalpy of formation for the mixture
+
+SM%MW = 0._EB
+SM%H_F = 0._EB
+DO NS = 1,N_SPECIES
+   IF (SM%MASS_FRACTION(NS) <TWO_EPSILON_EB) CYCLE
+   SM%MASS_EXTINCTION_COEFFICIENT = SM%MASS_FRACTION(NS) * SPECIES(NS)%MASS_EXTINCTION_COEFFICIENT      
+   SM%MW = SM%MW + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%MW !! *SM%ADJUST_NU ::term for potential non-normalized inputs
+   SM%H_F = SM%H_F + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%H_F ! Calculate H_F of mixtures
+   IF (SPECIES(NS)%FORMULA(1:5)=='SPEC_') SM%VALID_ATOMS = .FALSE.
+   SM%ATOMS = SM%ATOMS + SM%VOLUME_FRACTION(NS)*SPECIES(NS)%ATOMS !! *SM%ADJUST_NU ::term for potential non-normalized inputs
+ENDDO     
+IF(SM%H_F <= -1.E21_EB) THEN ! Checking if H_F is defined for all species in mixture
+   SM%H_F = SM%H_F
+ELSE
+   SM%H_F = SM%H_F*1.E6_EB/SM%MW
+ENDIF   
+
+SM%RCON = R0/SM%MW
+
+END SUBROUTINE DEFINE_MIXTURE
 
 
 SUBROUTINE SET_SPEC_DEFAULT
@@ -2339,8 +2401,10 @@ SELECT CASE(N)
       FORMULA          = 'Z1'
       SPEC_ID(1)       = RN%FUEL
       MASS_FRACTION(1) = 1._EB  
-      IF (SPECIES(FUEL_INDEX)%RADCAL_ID=='null') SPECIES(FUEL_INDEX)%RADCAL_ID=FUEL_RADCAL_ID
-      IF (SPECIES(FUEL_INDEX)%RADCAL_ID=='null') SPECIES(FUEL_INDEX)%RADCAL_ID='METHANE'
+      IF (FUEL_INDEX > 0) THEN
+         IF (SPECIES(FUEL_INDEX)%RADCAL_ID=='null') SPECIES(FUEL_INDEX)%RADCAL_ID=FUEL_RADCAL_ID
+         IF (SPECIES(FUEL_INDEX)%RADCAL_ID=='null') SPECIES(FUEL_INDEX)%RADCAL_ID='METHANE'
+      ENDIF
    CASE(2)
       RN => REACTION(1)
       ID                 = 'PRODUCTS'
@@ -2350,8 +2414,8 @@ SELECT CASE(N)
       SPEC_ID(3)         = 'WATER VAPOR'
       SPEC_ID(4)         = 'CARBON DIOXIDE'
       SPEC_ID(5)         = 'NITROGEN'
-      RN%NU_CO           = (SPECIES(FUEL_INDEX)%MW/MW_CO)     *RN%CO_YIELD
-      RN%NU_SOOT         = (SPECIES(FUEL_INDEX)%MW/RN%MW_SOOT)*RN%SOOT_YIELD
+      RN%NU_CO           = (SPECIES_MIXTURE(1)%MW/MW_CO)     *RN%CO_YIELD
+      RN%NU_SOOT         = (SPECIES_MIXTURE(1)%MW/RN%MW_SOOT)*RN%SOOT_YIELD
       RN%NU_H2O          = 0.5_EB*RN%H - 0.5_EB*RN%NU_SOOT*RN%SOOT_H_FRACTION
       RN%NU_CO2          = RN%C - RN%NU_CO - RN%NU_SOOT*(1._EB-RN%SOOT_H_FRACTION)
       RN%NU_O2           = RN%NU_CO2 + 0.5_EB*(RN%NU_CO+RN%NU_H2O-RN%O)
@@ -2616,20 +2680,23 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          IF (TRIM(FORMULA)=='null') THEN
             CALL GAS_PROPS(FUEL,S_TMP,E_TMP,MW_FUEL,FORMULA,L_TMP,ATOM_COUNTS,H_F,RADCAL_ID)
          ELSE
-            CALL GET_FORMULA_WEIGHT(FORMULA,MW_FUEL,ATOM_COUNTS)   
+            CALL GET_FORMULA_WEIGHT(FORMULA,MW_FUEL,ATOM_COUNTS)
+            L_TMP = .TRUE.
          ENDIF
-         IF (ATOM_COUNTS(1)+ATOM_COUNTS(6)+ATOM_COUNTS(7)+ATOM_COUNTS(8) - SUM(ATOM_COUNTS) < 0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: Fuel FORMULA for SIMPLE_CHEMISTRY can only contain C,H,O, and N'
-            CALL SHUTDOWN(MESSAGE)
-         ELSE
-            C = ATOM_COUNTS(6)
-            H = ATOM_COUNTS(1)
-            O = ATOM_COUNTS(8)
-            N = ATOM_COUNTS(7)
-         ENDIF
-         IF (C<=TWO_EPSILON_EB .AND. H<=TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: Must specify fuel chemistry using C and/or H when using simple chemistry'
-            CALL SHUTDOWN(MESSAGE)
+         IF (L_TMP) THEN
+            IF (ATOM_COUNTS(1)+ATOM_COUNTS(6)+ATOM_COUNTS(7)+ATOM_COUNTS(8) - SUM(ATOM_COUNTS) < 0._EB) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: Fuel FORMULA for SIMPLE_CHEMISTRY can only contain C,H,O, and N'
+               CALL SHUTDOWN(MESSAGE)
+            ELSE
+               C = ATOM_COUNTS(6)
+               H = ATOM_COUNTS(1)
+               O = ATOM_COUNTS(8)
+               N = ATOM_COUNTS(7)
+            ENDIF
+            IF (C<=TWO_EPSILON_EB .AND. H<=TWO_EPSILON_EB) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: Must specify fuel chemistry using C and/or H when using simple chemistry'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
          ENDIF
       ELSE
          MW_FUEL = ELEMENT(6)%MASS*C+ELEMENT(1)%MASS*H+ELEMENT(8)%MASS*O+ELEMENT(7)%MASS*N   
@@ -2795,9 +2862,9 @@ IF (SIMPLE_CHEMISTRY) THEN
    RN%SPEC_ID_NU_READ(2) = 'AIR'
    RN%SPEC_ID_NU_READ(3) = 'PRODUCTS'
    RN%NU_READ(1)      = -1._EB
-   RN%NU_READ(2)      = -RN%NU_O2*SPECIES_MIXTURE(1)%VOLUME_FRACTION(FUEL_INDEX)/SPECIES_MIXTURE(0)%VOLUME_FRACTION(O2_INDEX)
-   RN%N_SMIX          = 3
+   RN%NU_READ(2)      = -RN%NU_O2/SPECIES_MIXTURE(0)%VOLUME_FRACTION(O2_INDEX)
    RN%NU_READ(3)      = -(RN%NU_READ(1)*SPECIES_MIXTURE(1)%MW+RN%NU_READ(2)*SPECIES_MIXTURE(0)%MW)/SPECIES_MIXTURE(2)%MW
+   RN%N_SMIX          = 3
 ENDIF
 
 REAC_LOOP: DO NR=1,N_REACTIONS
@@ -2901,7 +2968,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          CALL SHUTDOWN(MESSAGE)
       ENDIF     
    ENDDO
-   
+  
    RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB
    RN%A = RN%A *1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    IF (RN%FUEL/='null' .AND. RN%FUEL_SMIX_INDEX<1) THEN
@@ -2922,7 +2989,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       IF (SM%ID=='WATER VAPOR')  I_WATER = NS
       IF (SM%ID=='CARBON DIOXIDE') I_CO2 = NS
    ENDDO
-
+  
    ! Check atom balance of the reaction
    IF (.NOT. SIMPLE_CHEMISTRY .AND. RN%CHECK_ATOM_BALANCE) THEN
       SKIP_ATOM_BALANCE = .FALSE.
@@ -2990,15 +3057,15 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ELSE ! Heat of combustion not specified
       IF (SIMPLE_CHEMISTRY) THEN ! Calculate heat of combustion based oxygen consumption
          IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
-            RN%HEAT_OF_COMBUSTION = -RN%EPUMO2*RN%NU_SPECIES(O2_INDEX)*SPECIES(O2_INDEX)%MW/SPECIES(FUEL_INDEX)%MW
+            RN%HEAT_OF_COMBUSTION = -RN%EPUMO2*RN%NU_SPECIES(O2_INDEX)*SPECIES(O2_INDEX)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
          ELSE
             IF (IDEAL) THEN
-               RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION*SPECIES(FUEL_INDEX)%MW*0.001 !J/kg -> J/mol
+               RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*0.001 !J/kg -> J/mol
                RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION + 1000._EB*( &
                               RN%NU_CO*(SPECIES(CO2_INDEX)%H_F - SPECIES(CO_INDEX)%H_F) &
                             + RN%NU_SOOT*SPECIES(CO2_INDEX)%H_F*(1._EB-RN%SOOT_H_FRACTION) &
                             + RN%NU_SOOT*SPECIES(H2O_INDEX)%H_F*RN%SOOT_H_FRACTION*0.5_EB)
-               RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES(FUEL_INDEX)%MW*1000._EB !J/mol->J/kg
+               RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*1000._EB !J/mol->J/kg
             ENDIF
          ENDIF   
       ELSE
