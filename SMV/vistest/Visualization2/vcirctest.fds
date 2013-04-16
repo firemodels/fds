@@ -1,6 +1,9 @@
 &HEAD CHID='vcirctest', TITLE='Xin_velocity_specified' /
   
-&MESH IJK=20,20,20, XB=0,2,0,2,0,2 / single coarse mesh for testing
+&MESH IJK=10,10,20, XB=0.5,1.5,0.5,1.5,0.5,2.5 / single coarse mesh for testing
+&MESH IJK=10,10,20, XB=1.5,2.5,0.5,1.5,0.5,2.5 / single coarse mesh for testing
+&MESH IJK=10,10,20, XB=0.5,1.5,1.5,2.5,0.5,2.5 / single coarse mesh for testing
+&MESH IJK=10,10,20, XB=1.5,2.5,1.5,2.5,0.5,2.5 / single coarse mesh for testing
   
 &TIME T_END=0/
       
@@ -20,12 +23,12 @@
 
 
 &OBST XB=0.6,1.4,0.6,1.4,0.6,1.4 /  
-&VENT XB=0.6,0.6,0.6,1.4,0.6,1.4, RADIUS=0.3,SURF_ID='XMIN' /  
-&VENT XB=1.4,1.4,0.6,1.4,0.6,1.4, RADIUS=0.3,SURF_ID='XMAX' /  
-&VENT XB=0.6,1.4,0.6,0.6,0.6,1.4, RADIUS=0.3,SURF_ID='YMIN' /  
-&VENT XB=0.6,1.4,1.4,1.4,0.6,1.4, RADIUS=0.3,SURF_ID='YMAX' /  
-&VENT XB=0.6,1.4,0.6,1.4,0.6,0.6, RADIUS=0.3,SURF_ID='ZMIN' /  
-&VENT XB=0.6,1.4,0.6,1.4,1.4,1.4, RADIUS=0.3,SURF_ID='ZMAX' /  
+&VENT XB=0.6,0.6,0.6,1.4,0.6,1.4, XYZ=0.6,1.0,1.0,RADIUS=0.3,SURF_ID='XMIN' /  
+&VENT XB=1.4,1.4,0.6,1.4,0.6,1.4, XYZ=1.4,1.0,1.0,RADIUS=0.3,SURF_ID='XMAX' /  
+&VENT XB=0.6,1.4,0.6,0.6,0.6,1.4, XYZ=1.0,0.6,1.0,RADIUS=0.3,SURF_ID='YMIN' /  
+&VENT XB=0.6,1.4,1.4,1.4,0.6,1.4, XYZ=1.0,1.4,1.0,RADIUS=0.3,SURF_ID='YMAX' /  
+&VENT XB=0.6,1.4,0.6,1.4,0.6,0.6, XYZ=1.0,1.0,0.6,RADIUS=0.3,SURF_ID='ZMIN' /  
+&VENT XB=0.6,1.4,0.6,1.4,1.4,1.4, XYZ=1.0,1.0,1.4,RADIUS=0.3,SURF_ID='ZMAX' /  
 
 
    
