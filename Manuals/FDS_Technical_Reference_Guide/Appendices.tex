@@ -8,13 +8,14 @@
 \begin{tabbing}
 $A_{\rm p}$ \hspace{1in}  \= droplet/particle surface area \\
 $A_{\alpha\beta}$         \> pre-exponential factor for solid phase Arrhenius reaction \\
+$B$                       \> emission source term \\
 $C$                       \> sprinkler C-factor; coefficient of natural convection \\
 $C_{\rm d}$               \> drag coefficient \\
 $C_{\rm m}$               \> momentum accommodation coefficient \\
 Cn                        \> Cunningham slip correction factor \\
 $C_{\rm s}$               \> Smagorinsky constant (LES); thermal slip coefficient  \\
 $C_{\rm t}$               \> thermal accommodation coefficient \\
-$c$                       \> solid material specific heat \\
+$c$                       \> solid material specific heat; speed of light in vacuum \\
 $c_p$                     \> constant-pressure specific heat \\
 $D$                       \> droplet/particle diameter   \\
 $D_{\alpha}$              \> diffusion coefficient \\
@@ -24,13 +25,16 @@ $\bof_{\rm b}$            \> external force vector (excluding gravity) \\
 $g$                       \> acceleration of gravity \\
 $\bg$                     \> gravity vector, normally $(0,0,-g)$ \\
 $\calH$                   \> total pressure divided by the density \\
-$H_{{\rm r},\alpha\beta}$ \> heat of reaction for a solid phase reaction \\
-$h$                       \> heat transfer coefficient   \\
+$H_{{\rm r},\alpha\beta}$ \> heat of reaction for a solid phase reaction     \\
+$h$                       \> heat transfer coefficient; Planck constant      \\
 $h_{\rm s,\alpha}$                \> sensible enthalpy of species $\alpha$   \\
-$h_\alpha^0$              \> heat of formation of species $\alpha$   \\
-$I$                       \> radiation intensity   \\
-$I_{\rm b}$               \> radiation blackbody intensity   \\
+$h_\alpha^0$              \> heat of formation of species $\alpha$           \\
+$I$                       \> radiation intensity per unit of solid angle     \\
+$I_{\rm b}$               \> radiation blackbody intensity per unit of solid angle  \\
+$I_{\rm \la}$             \> spectral radiation blackbody intensity as function of wavelength per unit of solid angle  \\
+$I_{\rm \om}$             \> spectral radiation blackbody intensity as function of wavenumber per unit of solid angle  \\
 $k$                       \> thermal conductivity; suppression decay factor \\
+$k_{\rm B}$               \> Boltzmann constant                             \\
 Kn                        \> Knudsen number \\
 $K_{\rm th}$              \> thermophoretic velocity coefficient \\
 $L$                       \> characteristic length; surface thickness \\
@@ -63,7 +67,7 @@ $\SH$                     \> Sherwood number \\
 $S_\alpha$                \> solid component production rate \\
 $T$                       \> temperature \\
 $t$                       \> time           \\
-$U$                       \> integrated radiant intensity \\
+$U$                       \> integrated radiant intensity; optical pathlength \\
 $\bu=(u,v,w)$             \> velocity vector  \\
 $W_\alpha$                \> molecular weight of gas species $\alpha$ \\
 $\bW$                     \> molecular weight of the gas mixture \\
@@ -80,8 +84,8 @@ $Z_\alpha$                \> species mixture $\alpha$   \\
 \hspace{0.1in}            \> \\
 {\bf Greek Letters}       \> \\
 \hspace{0.1in}            \> \\
-$\alpha$                  \> ratio of gas conductivity to the particle conductivity \\
-$\gamma$                  \> ratio of specific heats; Rosin-Rammler exponent \\
+$\alpha$                  \> ratio of gas conductivity to the particle conductivity; integrated band intensity \\
+$\gamma$                  \> ratio of specific heats; Rosin-Rammler exponent; spectral fine structure parameter of narrow band \\
 $\Delta$                  \> LES filter width \\
 $\Delta h$                \> heat of combustion \\
 $\Delta h_\OTWO$          \> energy released per unit mass oxygen consumed \\
@@ -89,12 +93,14 @@ $\Delta h_{\rm f,\alpha}$ \> heat of formation of species $\alpha$ \\
 $\delta$                  \> film thickness; scaling factor of thickness and density \\
 $\epsilon$                \> dissipation rate; emissivity \\
 $\kappa$                  \> absorption coefficient; von Karman constant \\
-$\lambda$                 \> mean free path of gas molecules \\
+$\lambda$                 \> mean free path of gas molecules; wavelength of thermal radiation\\
 $\mu$                     \> dynamic viscosity \\
+$\nu$                     \> frequency of the thermal radiation \\
 $\nu_\alpha$              \> stoichiometric coefficient, species $\alpha$ \\
 $\nu_{\rm s}$             \> yield of solid residue in solid phase reaction \\
 $\nu_{{\rm g},\gamma}$    \> yield of gaseous species $\gamma$ in solid phase reaction \\
 $\rho$                    \> density \\
+$\bar{\tau}_{\om}$        \> mean spectral transmissivity of a narrow band centered in $\om$ \\
 $\btau_{ij}$              \> viscous stress tensor \\
 $\chi$                    \> shape factor \\
 $\chi_{\rm r}$            \> radiative loss fraction \\
@@ -102,6 +108,7 @@ $\sigma$                  \> Stefan-Boltzmann constant; constant in droplet size
 $\sigma_{\rm p}$          \> particle scattering coefficient \\
 $\sigma_{\rm s}$          \> scattering coefficient \\
 $\tau^+$                  \> dimensionless stopping distance \\
+$\om$                     \> wavenumber of thermal radiation \\
 $\bo=(\omx,\omy,\omz)$    \> vorticity vector \\
 $\Omega$                  \> solid angle \\
 \hspace{0.1in}            \> \\
@@ -113,8 +120,10 @@ b                         \> bulk phase property; boiling \\
 B                         \> Brownian \\
 c                         \> convective \\
 d                         \> drag \\
+e                         \> effective properties \\
 g                         \> gas \\
 $ijk$                     \> gas phase cell indices \\
+n                         \> band properties \\
 p                         \> particle/droplet \\
 $p$                       \> pressure \\
 r                         \> radiative \\
@@ -122,6 +131,8 @@ s                         \> solid; sensible; soot \\
 w                         \> wall \\
 $\alpha$                  \> gas species index \\
 $\beta$                   \> index of reaction \\
+$\la$                     \> wavelength \\
+$\om$                     \> wavenumber \\
 \end{tabbing}
 
 
@@ -372,15 +383,17 @@ and returns two alternative mean absorption coefficients for each spectral band,
 \begin{equation}
 \kappa_n(P,T) = \dfrac{\pi}{\sigma T^4}
 \displaystyle\int_{\la_{\min}}^{\la_{\max}}{I_{\rm b,\la}(T)
-\displaystyle\sum_i \bar{\kappa}_i(\la,T) \, P_i \; \d \la}
+\displaystyle\sum_i 100\bar{\kappa}_i(\la,T) \, P_i \; \d \la}
 \end{equation}
-where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are cm$^{\rm -1}$.
+where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are 1/m.
+The factor $100$ is introduced to convert $\bar{\kappa}_i$ from ${\rm atm^{-1}cm^{-1}}$ to ${\rm atm^{-1}m^{-1}}$
 
-The source term $I_{\rm b,\la}(T)$ is the {\em Planck blackbody distribution law} which expresses the equilibrium rate of radiant energy emitted from a blackbody at temperature, $T$, and as function of wavelength, $\la$. Formally, the monochromatic blackbody radiant energy emitted is given by
+The source term $I_{\rm b,\la}(T)$ is the {\em Planck blackbody distribution law} which expresses the equilibrium rate of radiant energy emitted from a blackbody at temperature, $T$, and as function of wavelength, $\la$. Formally, the monochromatic blackbody radiant energy emitted at a wavelength $\la$ is given by
 \be \label{eq:Planck_law}
 I_{\rm b,\la}(T)\d \la = \dfrac{2 \, h \, c^2 \, \la^{-5}}{\exp\left(\dfrac{h \, c}{k_{\rm B} \, \la \, T }\right)-1}\d \la
 \ee
 Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K). 
+$I_{\rm b,\la}(T)$ is in units of $\rm{W/m^{2}/str/m}$; the wavelengths are converted from $\rm{\mu m}$ to $\rm{m}$.
 
 The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{{\rm e},n}(T)$ which is defined according to the following equation
 \be
@@ -424,6 +437,7 @@ can be rewritten using Eq.~\ref{eq:Planck_law} as
 \be\label{eq:Planck_WN}
   I_{\rm b,\om}(T)\d \om = \dfrac{2 \, h \, c^2 \, \om^{3}}{\exp\left(\dfrac{h \, c\, \om}{k_{\rm B} \, T }\right)-1}\d \om
 \ee
+$I_{\rm b,\om}(T)$ is in units of $\rm{W/m/str/m^{-1}}$; the wavenumbers are converted from $\rm{cm^{-1}}$ to $\rm{m^{-1}}$.
 The user who wishes to analyze the fuel bands presented below (given in wavenumber) with the Planck blackbody distribution law should use Eq.~\ref{eq:Planck_WN} but should NOT use Eq.~\ref{eq:Planck_law} with $\la$ = 1/$\om$.
 
 
