@@ -192,8 +192,9 @@ void _Sniff_Errors(char *whereat);
 #define TO_BW 0
 #define TO_COLOR 1
 
-#define CIRCLE 0
-#define RECTANGLE 1
+#define VENT_CIRCLE 0
+#define VENT_RECTANGLE 1
+#define VENT_HIDE 2
 
 #define DOWN_Y 0
 #define UP_X   1 

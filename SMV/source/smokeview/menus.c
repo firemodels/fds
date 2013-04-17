@@ -4030,7 +4030,13 @@ void VentMenu(int value){
      visOtherVents=0;
      break;
    case 23:
-     visCircularVents=1-visCircularVents;
+     visCircularVents=VENT_CIRCLE;
+     break;
+   case 24:
+     visCircularVents=VENT_RECTANGLE;
+     break;
+   case 25:
+     visCircularVents=VENT_HIDE;
      break;
   default:
     ASSERT(FFALSE);
@@ -4338,15 +4344,9 @@ void ShowObjectsMenu(int value){
   else if(value==-999){
   }
   else{
-    int oldval;
-
-    oldval=device_sphere_segments;
-    value=-value;
-    device_sphere_segments=value;
-    if(oldval!=device_sphere_segments){
-      initspheresegs(device_sphere_segments,2*device_sphere_segments);
-      initcircle(device_sphere_segments);
-    }
+    device_sphere_segments=ABS(value);
+    initspheresegs(device_sphere_segments,2*device_sphere_segments);
+    initcircle(device_sphere_segments);
   }
   updatemenu=1;
   glutPostRedisplay();
@@ -4553,7 +4553,7 @@ static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0, webhelpmenu=0, ke
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
 static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0,languagemenu=0,fonttestmenu=0;
-static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0;
+static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0, circularventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, aboutmenu=0, disclaimermenu=0, terrain_showmenu=0;
 static int scriptmenu=0;
@@ -5325,6 +5325,22 @@ updatemenu=0;
     glutAddMenuEntry(_("Hide all planes"),GRID_hideall);
   }
 
+  CREATEMENU(circularventmenu,VentMenu);
+  if(visCircularVents==VENT_CIRCLE){
+    glutAddMenuEntry(_("*As circle"),23);
+    glutAddMenuEntry(_("As rectangle"),24);
+    glutAddMenuEntry(_("Hide"),25);
+  }
+  if(visCircularVents==VENT_RECTANGLE){
+    glutAddMenuEntry(_("As circle"),23);
+    glutAddMenuEntry(_("*As rectangle"),24);
+    glutAddMenuEntry(_("Hide"),25);
+  }
+  if(visCircularVents==VENT_HIDE){
+    glutAddMenuEntry(_("As circle"),23);
+    glutAddMenuEntry(_("As rectangle"),24);
+    glutAddMenuEntry(_("*Hide"),25);
+  }
 /* --------------------------------vent menu -------------------------- */
 
   CREATEMENU(ventmenu,VentMenu);
@@ -5347,8 +5363,8 @@ updatemenu=0;
         if(visDummyVents==0)glutAddMenuEntry(_("Exterior"),16);
       }
       if(ncvents>0){
-        if(visCircularVents==1)glutAddMenuEntry(_("*Circular"),23);
-        if(visCircularVents==0)glutAddMenuEntry(_("Circular"),23);
+        if(visCircularVents!=VENT_HIDE)glutAddSubMenu(_("*Circular"),circularventmenu);
+        if(visCircularVents==VENT_HIDE)glutAddSubMenu(_("Circular"),circularventmenu);
       }
       if(ntotal_vents>nopenvents+ndummyvents){
         if(visOtherVents==1)glutAddMenuEntry(_("*Other"),21);

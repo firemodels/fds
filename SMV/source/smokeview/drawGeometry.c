@@ -27,6 +27,8 @@ cadgeom *current_cadgeom;
 void DrawCircVents(int option){
   int i;
 
+  if(option==VENT_HIDE)return;
+  ASSERT(option==VENT_CIRCLE||option==VENT_RECTANGLE);
   for(i=0;i<nmeshes;i++){
     int j;
     mesh *meshi;
@@ -43,7 +45,7 @@ void DrawCircVents(int option){
 
       cvi = meshi->cventinfo + j;
 
-      if(option==CIRCLE){
+      if(option==VENT_CIRCLE){
         x0 = cvi->origin[0];
         y0 = cvi->origin[1];
         z0 = cvi->origin[2];
@@ -62,7 +64,7 @@ void DrawCircVents(int option){
       glPushMatrix();
       glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
       glTranslatef(-xbar0,-ybar0,-zbar0);
-      if(option==CIRCLE){
+      if(option==VENT_CIRCLE){
         clipdata circleclip;
         float *ventmin, *ventmax;
 
@@ -77,13 +79,13 @@ void DrawCircVents(int option){
       switch (cvi->dir){
         case DOWN_X:
           glTranslatef(-delta,0.0,0.0);
-          glRotatef(90.0,0.0,1.0,0.0);
+          glRotatef(-90.0,0.0,1.0,0.0);
           width = cvi->ymax-cvi->ymin;
           height = cvi->zmax-cvi->zmin;
           break;
         case UP_X:
           glTranslatef(delta,0.0,0.0);
-          glRotatef(90.0,0.0,1.0,0.0);
+          glRotatef(-90.0,0.0,1.0,0.0);
           width = cvi->ymax-cvi->ymin;
           height = cvi->zmax-cvi->zmin;
           break;
@@ -110,16 +112,16 @@ void DrawCircVents(int option){
           height = cvi->ymax-cvi->ymin;
           break;
       }
-      if(option==CIRCLE){
+      if(option==VENT_CIRCLE){
         if(cvi->type==VENT_SOLID)drawfilledcircle(2.0*cvi->radius,vcolor);
         if(cvi->type==VENT_OUTLINE)drawcircle(2.0*cvi->radius,vcolor);
       }
-      if(option==RECTANGLE){
+      if(option==VENT_RECTANGLE){
         if(cvi->type==VENT_SOLID)drawfilledrectangle(width,height,vcolor);
         if(cvi->type==VENT_OUTLINE)drawrectangle(width,height,vcolor);
       }
       glPopMatrix();
-      if(option==CIRCLE)setClipPlanes(&clipinfo,CLIP_ON);
+      if(option==VENT_CIRCLE)setClipPlanes(&clipinfo,CLIP_ON);
     }
   }
 

@@ -309,7 +309,6 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
 void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level);
 void free_object(sv_object *object);
 void freecircle(void);
-void initcircle(unsigned int npoints);
 
 static float *xcirc=NULL, *ycirc=NULL;
 static int ncirc;

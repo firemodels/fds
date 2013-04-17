@@ -187,8 +187,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw circular vents +++++++++++++++++++++++++ */
 
     if(ncvents>0){
-      if(visCircularVents!=0)DrawCircVents(CIRCLE);
-      if(visCircularVents==0)DrawCircVents(RECTANGLE);
+      DrawCircVents(visCircularVents);
     }
 
 /* ++++++++++++++++++++++++ draw sensors/sprinklers/heat detectors +++++++++++++++++++++++++ */

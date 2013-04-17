@@ -189,6 +189,7 @@ EXTERNCPP void next_xindex(int inc,int flag);
 EXTERNCPP void next_yindex(int inc,int flag);
 EXTERNCPP void next_zindex(int inc,int flag);
 EXTERNCPP void initspheresegs(int nlat, int nlong);
+EXTERNCPP void initcircle(unsigned int npoints);
 EXTERNCPP void Update_Glui_Wui(void);
 EXTERNCPP int have_terrain_slice(void);
 EXTERNCPP float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc);
