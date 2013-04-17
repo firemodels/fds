@@ -143,16 +143,7 @@ openmp_intel_osx_64_db : obj = fds_openmp_intel_osx_64_db
 openmp_intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-openmp_intel_osx_64_tcheck : FFLAGS = -m64 -g
-openmp_intel_osx_64_tcheck : FOPENMPFLAGS = -openmp -tcheck
-openmp_intel_osx_64_tcheck : FOPTIMIZATIONFLAGS = -O0
-openmp_intel_osx_64_tcheck : FCOMPL = ifort
-openmp_intel_osx_64_tcheck : CCOMPL = icc
-openmp_intel_osx_64_tcheck : obj = fds_openmp_intel_osx_64_tcheck
-openmp_intel_osx_64_tcheck : setup $(obj_serial)
-	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
-
-# Intel Compiler for Linux, version 11
+# Intel Compiler for Linux, version 13
 
 openmp_intel_linux_32 : FFLAGS = -m32 -static -vec_report0
 openmp_intel_linux_32 : FOPENMPFLAGS = -openmp -openmp-link static
