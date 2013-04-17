@@ -171,9 +171,9 @@ Note that tracking all primitive species could be very expensive.  Chemical mech
 For the vast majority of FDS applications, the ``mixed is burnt'' approximation is adequate to describe combustion chemistry and the chemical source term for Fuel may be modeled by the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager \cite{Magnussen:1,Poinsot:TNC}:
 \begin{equation}
 \label{eq:edc}
-\dot{m}_F^{\prime\prime\prime} = -\rho \frac{\min(Z_F, Z_A/s)}{\tau_{\rm mix}}
+\dot{m}_{\si{F}}^{\prime\prime\prime} = -\rho \frac{\min(Z_{\si{F}}, Z_{\si{A}}/s)}{\tau_{\rm mix}}
 \end{equation}
-Here, $Z_F$ and $Z_A$ are the lumped mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.  The quantity $\tau_{\rm mix}$ is a time scale for mixing which must be modeled (see Section \ref{sec:reac_time_scale}).  The EDC model therefore states that the rate of fuel consumption is proportional to both the local limiting reactant concentration and the local rate of mixing. As we will see below, the EDC model is a limiting case of a generalized partially-stirred batch reactor model in which all the reactants are initially unmixed and the rate of chemical kinetics is infinite.
+Here, $Z_{\si{F}}$ and $Z_{\si{A}}$ are the lumped mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.  The quantity $\tau_{\rm mix}$ is a time scale for mixing which must be modeled (see Section \ref{sec:reac_time_scale}).  The EDC model therefore states that the rate of fuel consumption is proportional to both the local limiting reactant concentration and the local rate of mixing. As we will see below, the EDC model is a limiting case of a generalized partially-stirred batch reactor model in which all the reactants are initially unmixed and the rate of chemical kinetics is infinite.
 
 
 \subsection{Heat Release Rate}
