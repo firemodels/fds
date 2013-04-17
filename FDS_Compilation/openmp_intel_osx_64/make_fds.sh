@@ -5,6 +5,5 @@ target=${dir##*/}
 
 source $IFORT_COMPILER/bin/ifortvars.sh $platform
 
-
 echo Building $target
 make -j4 VPATH="../../FDS_Source" -f ../makefile_openmp $target
