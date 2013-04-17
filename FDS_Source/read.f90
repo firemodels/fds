@@ -1,5 +1,5 @@
 MODULE READ_INPUT
- 
+
 USE PRECISION_PARAMETERS
 USE MESH_VARIABLES
 USE GLOBAL_CONSTANTS
@@ -13,7 +13,7 @@ USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER
 USE EVAC, ONLY: READ_EVAC
 USE HVAC_ROUTINES, ONLY: READ_HVAC,PROC_HVAC
 USE COMPLEX_GEOMETRY, ONLY: READ_GEOM,READ_VERT,READ_FACE,READ_VOLU
- 
+
 IMPLICIT NONE
 PRIVATE
 CHARACTER(255), PARAMETER :: readid='$Id$'
@@ -24,7 +24,7 @@ PUBLIC READ_DATA, GET_REV_read
 
 CHARACTER(30) :: ID,LABEL,MB,ODE_SOLVER,EXTINCTION_MODEL
 CHARACTER(100) :: MESSAGE,FYI
-CHARACTER(30) :: SURF_DEFAULT='INERT',EVAC_SURF_DEFAULT='INERT',FUEL_RADCAL_ID='null',LES_FILTER_WIDTH='null'                 
+CHARACTER(30) :: SURF_DEFAULT='INERT',EVAC_SURF_DEFAULT='INERT',FUEL_RADCAL_ID='null',LES_FILTER_WIDTH='null'
 LOGICAL :: SUCCESS,EX,THICKEN_OBSTRUCTIONS,BAD,SIMPLE_CHEMISTRY=.FALSE.,BACKGROUND_SMIX_DECLARED=.FALSE.,IDEAL=.FALSE.
 REAL(EB) :: XB(6),TEXTURE_ORIGIN(3)
 REAL(EB) :: PBX,PBY,PBZ
@@ -38,14 +38,14 @@ TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(REACTION_TYPE), POINTER :: RN=>NULL()
 
- 
+
 CONTAINS
- 
- 
+
+
 SUBROUTINE READ_DATA
 
 ! Create an array of output QUANTITY names that are included in the various NAMELIST groups
- 
+
 CALL DEFINE_OUTPUT_QUANTITIES
 
 ! Get the name of the input file by reading the command line argument
@@ -145,20 +145,20 @@ CALL READ_BNDF
 CALL READ_BNDE
 
 ! Close the input file, and never open it again
- 
+
 CLOSE (LU_INPUT)
 
 ! Set QUANTITY ambient values
 
 CALL SET_QUANTITIES_AMBIENT
- 
+
 END SUBROUTINE READ_DATA
 
 
 SUBROUTINE READ_DEAD
- 
+
 ! Look for outdated NAMELIST groups and stop the run if any are found
- 
+
 REWIND(LU_INPUT)
 CALL CHECKREAD('GRID',LU_INPUT,IOS)
 IF (IOS==0) CALL SHUTDOWN('ERROR: GRID is no longer a valid NAMELIST group. Read User Guide discussion on MESH.')
@@ -185,17 +185,17 @@ CALL CHECKREAD('THCP',LU_INPUT,IOS)
 IF (IOS==0) CALL SHUTDOWN('ERROR: THCP is no longer a valid NAMELIST group. Read User Guide discussion on DEVC.')
 
 REWIND(LU_INPUT)
- 
+
 END SUBROUTINE READ_DEAD
 
- 
+
 SUBROUTINE READ_HEAD
 INTEGER :: NAMELENGTH
 NAMELIST /HEAD/ CHID,FYI,TITLE
- 
+
 CHID    = 'null'
 TITLE   = '      '
- 
+
 REWIND(LU_INPUT)
 HEAD_LOOP: DO
    CALL CHECKREAD('HEAD',LU_INPUT,IOS)
@@ -212,7 +212,7 @@ ENDDO CLOOP
 
 IF (TRIM(CHID)=='null') THEN
    NAMELENGTH = LEN_TRIM(FN_INPUT)
-   ROOTNAME: DO I=NAMELENGTH,2,-1      
+   ROOTNAME: DO I=NAMELENGTH,2,-1
       IF (FN_INPUT(I:I)=='.') THEN
          WRITE(CHID,'(A)') FN_INPUT(1:I-1)
          EXIT ROOTNAME
@@ -228,10 +228,10 @@ IF (EX) THEN
    WRITE(MESSAGE,'(A,A,A)') "ERROR: Remove the file, ",TRIM(FN_STOP),", from the current directory"
    CALL SHUTDOWN(MESSAGE)
 ENDIF
- 
+
 END SUBROUTINE READ_HEAD
- 
- 
+
+
 SUBROUTINE READ_MESH(IMODE)
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, &
      EMESH_NM, N_DOOR_MESHES, EMESH_NFIELDS, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, &
@@ -248,7 +248,7 @@ NAMELIST /MESH/ COLOR,CYLINDRICAL,EVACUATION,EVAC_HUMANS,EVAC_Z_OFFSET, FYI,ID,I
                 SYNCHRONIZE,XB
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE (MULTIPLIER_TYPE), POINTER :: MR=>NULL()
- 
+
 NMESHES = 0
 NMESHES_READ = 0
 NEVAC_MESHES = 0
@@ -299,11 +299,11 @@ EVAC_MODE_IF: IF (IMODE==1) THEN
       RETURN
    END IF
    ALLOCATE(EMESH_ID(     MAX(1,INPUT_EVAC_GRIDS)), STAT=IZERO)
-   CALL ChkMemErr('READ_EVAC','EMESH_ID',IZERO) 
+   CALL ChkMemErr('READ_EVAC','EMESH_ID',IZERO)
    ALLOCATE(EMESH_XB(6,   MAX(1,INPUT_EVAC_GRIDS)), STAT=IZERO)
-   CALL ChkMemErr('READ_EVAC','EMESH_XB',IZERO) 
+   CALL ChkMemErr('READ_EVAC','EMESH_XB',IZERO)
    ALLOCATE(EMESH_IJK(3,  MAX(1,INPUT_EVAC_GRIDS)), STAT=IZERO)
-   CALL ChkMemErr('READ_EVAC','EMESH_IJK',IZERO) 
+   CALL ChkMemErr('READ_EVAC','EMESH_IJK',IZERO)
 
    NM = 0
    EVAC_MESH_LOOP: DO N = 1, NMESHES_READ
@@ -350,7 +350,7 @@ IF (.NOT. NO_EVACUATION) NMESHES = NMESHES + N_DOOR_MESHES + NEVAC_MESHES
 IF (.NOT. NO_EVACUATION) NMESHES = NMESHES + N_STRS
 
 ! Allocate parameters associated with the mesh.
- 
+
 ALLOCATE(MESHES(NMESHES),STAT=IZERO)
 CALL ChkMemErr('READ','MESHES',IZERO)
 ALLOCATE(PROCESS(NMESHES),STAT=IZERO)
@@ -385,7 +385,7 @@ REWIND(LU_INPUT)
 IF (NMESHES<1) CALL SHUTDOWN('ERROR: No MESH line(s) defined.')
 
 NM = 0
- 
+
 MESH_LOOP: DO N=1,NMESHES_READ
 
    ! Set MESH defaults
@@ -520,26 +520,26 @@ MESH_LOOP: DO N=1,NMESHES_READ
                   CASE ('MEAN','mean')
                      LES_FILTER_WIDTH_FUNCTION=>LES_FILTER_WIDTH_3D_MEAN
                END SELECT
-            ENDIF            
-                    
+            ENDIF
+
             ! Associate the MESH with the PROCESS
-         
+
             PROCESS(NM) = CURRENT_MPI_PROCESS
             IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
             IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
 
             ! Mesh boundary colors
-   
+
             IF (ANY(RGB<0) .AND. COLOR=='null') COLOR = 'BLACK'
             IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
             ALLOCATE(M%RGB(3))
             M%RGB = RGB
-   
+
             ! Mesh Geometry and Name
-   
+
             WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
             IF (ID/='null') MESH_NAME(NM) = ID
-   
+
             ! Process Physical Coordinates
 
             IF (XB1 > XB2) THEN
@@ -593,7 +593,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 ENDDO MESH_LOOP
 
 ! Min and Max values of temperature
- 
+
 TMPMIN = MAX(1._EB , MIN(TMPA,TMPM)-10._EB)
 IF (LAPSE_RATE < 0._EB) TMPMIN = MIN(TMPMIN,TMPA+LAPSE_RATE*ZF_MAX)
 TMPMAX = 3000._EB
@@ -606,7 +606,7 @@ REWIND(LU_INPUT)
 IF (.NOT. NO_EVACUATION) CALL DEFINE_EVACUATION_MESHES(NM)
 
 ! Start the timing arrays
- 
+
 TUSED      = 0._EB
 TUSED(1,:) = SECOND()
 
@@ -630,7 +630,7 @@ CONTAINS
 
     NM_OLD = NM
     LOOP_EMESHES: DO N = 1, NEVAC_MESHES
-       ! Additional meshes for the main evacuation meshes. These will be 
+       ! Additional meshes for the main evacuation meshes. These will be
        ! at different z level than the corresponding main evacuation mesh.
 
        I_MAIN_EVAC_MESH = NM_OLD - NEVAC_MESHES + N
@@ -650,7 +650,7 @@ CONTAINS
        NM = NM + 1
 
        ! Fill in MESH related variables
-       
+
        M => MESHES(NM)
        M%MESH_LEVEL = LEVEL
        M%IBAR = MESHES(I_MAIN_EVAC_MESH)%IBAR
@@ -670,23 +670,23 @@ CONTAINS
        ENDIF
 
        ! Associate the MESH with the PROCESS
-         
+
        PROCESS(NM) = CURRENT_MPI_PROCESS
        IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
        IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
 
        ! Mesh boundary colors
-   
+
        IF (ANY(RGB<0) .AND. COLOR=='null') COLOR = 'BLACK'
        IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
        ALLOCATE(M%RGB(3))
        M%RGB = RGB
-   
+
        ! Mesh Geometry and Name
-   
+
        WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
        IF (ID/='null') MESH_NAME(NM) = ID
-   
+
        Z_MID = 0.5_EB*(MESHES(I_MAIN_EVAC_MESH)%ZS + MESHES(I_MAIN_EVAC_MESH)%ZF)
        Z_MID = Z_MID - EVACUATION_Z_OFFSET(I_MAIN_EVAC_MESH)  + HUMAN_SMOKE_HEIGHT
        M%XS    = MESHES(I_MAIN_EVAC_MESH)%XS
@@ -752,7 +752,7 @@ CONTAINS
                EMESH_NFIELDS(NN),' door flow fields'
        END IF
     END DO
-    
+
     ! Next line should be executed only once during a FDS+Evac run
     JMAX = MAXVAL(EMESH_NFIELDS)
     EVAC_TIME_ITERATIONS = EVAC_TIME_ITERATIONS*JMAX
@@ -853,9 +853,9 @@ END SUBROUTINE READ_MESH
 
 SUBROUTINE READ_TRAN
 USE MATH_FUNCTIONS, ONLY : GAUSSJ
- 
+
 ! Compute the polynomial transform function for the vertical coordinate
- 
+
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: A,XX
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ND
 REAL(EB) :: PC,CC,COEF,XI,ETA,ZETA
@@ -865,16 +865,16 @@ TYPE (TRAN_TYPE), POINTER :: T=>NULL()
 NAMELIST /TRNX/ CC,FYI,IDERIV,MESH_NUMBER,PC
 NAMELIST /TRNY/ CC,FYI,IDERIV,MESH_NUMBER,PC
 NAMELIST /TRNZ/ CC,FYI,IDERIV,MESH_NUMBER,PC
- 
+
 ! Scan the input file, counting the number of NAMELIST entries
- 
+
 ALLOCATE(TRANS(NMESHES))
- 
+
 MESH_LOOP: DO NM=1,NMESHES
 
    M => MESHES(NM)
    T => TRANS(NM)
- 
+
    DO N=1,3
       T%NOC(N) = 0
       TRNLOOP: DO
@@ -904,7 +904,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDDO TRNLOOP
       17 REWIND(LU_INPUT)
    ENDDO
- 
+
    T%NOCMAX = MAX(T%NOC(1),T%NOC(2),T%NOC(3))
    ALLOCATE(A(T%NOCMAX+1,T%NOCMAX+1))
    ALLOCATE(XX(T%NOCMAX+1,3))
@@ -917,9 +917,9 @@ MESH_LOOP: DO NM=1,NMESHES
    ALLOCATE(T%CCSTORE(T%NOCMAX,3))
    ALLOCATE(T%PCSTORE(T%NOCMAX,3))
    ALLOCATE(T%IDERIVSTORE(T%NOCMAX,3))
- 
+
    T%ITRAN  = 0
- 
+
    DO IC=1,3
       NLOOP:  DO N=1,T%NOC(IC)
          IDERIV = -1
@@ -958,7 +958,7 @@ MESH_LOOP: DO NM=1,NMESHES
       2 CONTINUE
         ENDDO NLOOP
       1 REWIND(LU_INPUT)
-   ENDDO 
+   ENDDO
 
    ICLOOP: DO IC=1,3
 
@@ -1046,9 +1046,9 @@ MESH_LOOP: DO NM=1,NMESHES
    DEALLOCATE(A)
    DEALLOCATE(XX)
    DEALLOCATE(ND)
- 
+
    ! Set up grid stretching arrays
- 
+
    ALLOCATE(M%R(0:M%IBAR),STAT=IZERO)
    CALL ChkMemErr('READ','R',IZERO)
    ALLOCATE(M%RC(0:M%IBAR+1),STAT=IZERO)
@@ -1099,9 +1099,9 @@ MESH_LOOP: DO NM=1,NMESHES
    CALL ChkMemErr('READ','DZN',IZERO)
    ALLOCATE(M%RDZN(0:M%KBAR),STAT=IZERO)
    CALL ChkMemErr('READ','RDZN',IZERO)
- 
+
    ! Define X grid stretching terms
- 
+
    M%DXMIN = 1000._EB
    DO I=1,M%IBAR
       XI    = (REAL(I,EB)-.5)*M%DXI
@@ -1114,14 +1114,14 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
       M%RDX(I) = 1._EB/M%DX(I)
    ENDDO
- 
+
    M%HX(0)    = M%HX(1)
    M%HX(M%IBP1) = M%HX(M%IBAR)
    M%DX(0)    = M%DX(1)
    M%DX(M%IBP1) = M%DX(M%IBAR)
    M%RDX(0)    = 1._EB/M%DX(1)
    M%RDX(M%IBP1) = 1._EB/M%DX(M%IBAR)
- 
+
    DO I=0,M%IBAR
       XI     = I*M%DXI
       M%X(I) = M%XS + G(XI,1,NM)
@@ -1135,14 +1135,14 @@ MESH_LOOP: DO NM=1,NMESHES
    ENDDO
    M%X(0)      = M%XS
    M%X(M%IBAR) = M%XF
- 
+
    DO I=1,M%IBAR
       M%XC(I) = 0.5_EB*(M%X(I)+M%X(I-1))
    ENDDO
    M%XC(0)      = M%XS - 0.5_EB*M%DX(0)
    M%XC(M%IBP1) = M%XF + 0.5_EB*M%DX(M%IBP1)
- 
-   IF (CYLINDRICAL) THEN  
+
+   IF (CYLINDRICAL) THEN
       DO I=1,M%IBAR
          M%RRN(I) = 2._EB/(M%R(I)+M%R(I-1))
          M%RC(I)  = 0.5_EB*(M%R(I)+M%R(I-1))
@@ -1150,9 +1150,9 @@ MESH_LOOP: DO NM=1,NMESHES
       M%RRN(0)    = M%RRN(1)
       M%RRN(M%IBP1) = M%RRN(M%IBAR)
    ENDIF
- 
+
    ! Define Y grid stretching terms
- 
+
    M%DYMIN = 1000._EB
    DO J=1,M%JBAR
       ETA   = (REAL(J,EB)-.5)*M%DETA
@@ -1165,32 +1165,32 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
       M%RDY(J) = 1._EB/M%DY(J)
    ENDDO
- 
+
    M%HY(0)    = M%HY(1)
    M%HY(M%JBP1) = M%HY(M%JBAR)
    M%DY(0)    = M%DY(1)
    M%DY(M%JBP1) = M%DY(M%JBAR)
    M%RDY(0)    = 1._EB/M%DY(1)
    M%RDY(M%JBP1) = 1._EB/M%DY(M%JBAR)
- 
+
    DO J=0,M%JBAR
       ETA     = J*M%DETA
       M%Y(J)    = M%YS + G(ETA,2,NM)
       M%DYN(J)  = 0.5_EB*(M%DY(J)+M%DY(J+1))
       M%RDYN(J) = 1._EB/M%DYN(J)
    ENDDO
- 
+
    M%Y(0)      = M%YS
    M%Y(M%JBAR) = M%YF
- 
+
    DO J=1,M%JBAR
       M%YC(J) = 0.5_EB*(M%Y(J)+M%Y(J-1))
    ENDDO
    M%YC(0)      = M%YS - 0.5_EB*M%DY(0)
    M%YC(M%JBP1) = M%YF + 0.5_EB*M%DY(M%JBP1)
- 
+
    ! Define Z grid stretching terms
- 
+
    M%DZMIN = 1000._EB
    DO K=1,M%KBAR
       ZETA  = (REAL(K,EB)-.5)*M%DZETA
@@ -1203,32 +1203,32 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
       M%RDZ(K) = 1._EB/M%DZ(K)
    ENDDO
- 
+
    M%HZ(0)    = M%HZ(1)
    M%HZ(M%KBP1) = M%HZ(M%KBAR)
    M%DZ(0)    = M%DZ(1)
    M%DZ(M%KBP1) = M%DZ(M%KBAR)
    M%RDZ(0)    = 1._EB/M%DZ(1)
    M%RDZ(M%KBP1) = 1._EB/M%DZ(M%KBAR)
- 
+
    DO K=0,M%KBAR
       ZETA      = K*M%DZETA
       M%Z(K)    = M%ZS + G(ZETA,3,NM)
       M%DZN(K)  = 0.5_EB*(M%DZ(K)+M%DZ(K+1))
       M%RDZN(K) = 1._EB/M%DZN(K)
    ENDDO
- 
+
    M%Z(0)      = M%ZS
    M%Z(M%KBAR) = M%ZF
- 
+
    DO K=1,M%KBAR
       M%ZC(K) = 0.5_EB*(M%Z(K)+M%Z(K-1))
    ENDDO
    M%ZC(0)      = M%ZS - 0.5_EB*M%DZ(0)
    M%ZC(M%KBP1) = M%ZF + 0.5_EB*M%DZ(M%KBP1)
- 
+
    ! Set up arrays that will return coordinate positions
- 
+
    NIPX   = 500*M%IBAR
    NIPY   = 500*M%JBAR
    NIPZ   = 500*M%KBAR
@@ -1241,14 +1241,14 @@ MESH_LOOP: DO NM=1,NMESHES
    M%RDXINT = REAL(NIPX,EB)/(M%XF-M%XS)
    M%RDYINT = REAL(NIPY,EB)/(M%YF-M%YS)
    M%RDZINT = REAL(NIPZ,EB)/(M%ZF-M%ZS)
- 
+
    ALLOCATE(M%CELLSI(-NIPXS:NIPX+NIPXF),STAT=IZERO)
    CALL ChkMemErr('READ','CELLSI',IZERO)
    ALLOCATE(M%CELLSJ(-NIPYS:NIPY+NIPYF),STAT=IZERO)
    CALL ChkMemErr('READ','CELLSJ',IZERO)
    ALLOCATE(M%CELLSK(-NIPZS:NIPZ+NIPZF),STAT=IZERO)
    CALL ChkMemErr('READ','CELLSK',IZERO)
- 
+
    DO I=-NIPXS,NIPX+NIPXF
       M%CELLSI(I) = GINV(REAL(I,EB)/M%RDXINT,1,NM)*M%RDXI
       M%CELLSI(I) = MAX(M%CELLSI(I),-0.9_EB)
@@ -1264,12 +1264,12 @@ MESH_LOOP: DO NM=1,NMESHES
       M%CELLSK(K) = MAX(M%CELLSK(K),-0.9_EB)
       M%CELLSK(K) = MIN(M%CELLSK(K),REAL(M%KBAR)+0.9_EB)
    ENDDO
- 
+
 ENDDO MESH_LOOP
- 
- 
+
+
 CONTAINS
- 
+
 INTEGER FUNCTION IFAC(II,NN)
 INTEGER, INTENT(IN) :: II,NN
 INTEGER :: III
@@ -1280,8 +1280,8 @@ ENDDO
 END FUNCTION IFAC
 
 END SUBROUTINE READ_TRAN
- 
- 
+
+
 SUBROUTINE READ_TIME
 
 REAL(EB) :: DT,VEL_CHAR
@@ -1290,7 +1290,7 @@ NAMELIST /TIME/ DT,EVAC_DT_FLOWFIELD,EVAC_DT_STEADY_STATE,FYI,LIMITING_DT_RATIO,
                 SYNCHRONIZE,T_BEGIN,T_END,TIME_SHRINK_FACTOR,WALL_INCREMENT, &
                 TWFIN ! Backward compatibility
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
- 
+
 DT                   = -1._EB
 EVAC_DT_FLOWFIELD    = 0.01_EB
 EVAC_DT_STEADY_STATE = 0.05_EB
@@ -1300,7 +1300,7 @@ T_END                = 1._EB
 SYNCHRONIZE          = .FALSE.
 IF (ANY(SYNC_TIME_STEP)) SYNCHRONIZE = .TRUE.
 WALL_INCREMENT       = 2
- 
+
 REWIND(LU_INPUT)
 READ_TIME_LOOP: DO
    CALL CHECKREAD('TIME',LU_INPUT,IOS)
@@ -1309,16 +1309,16 @@ READ_TIME_LOOP: DO
    22 IF (IOS>0) CALL SHUTDOWN('ERROR: Problem with TIME line')
 ENDDO READ_TIME_LOOP
 21 REWIND(LU_INPUT)
- 
+
 IF (T_END<=T_BEGIN) SET_UP = .TRUE.
 T_END = T_BEGIN + (T_END-T_BEGIN)/TIME_SHRINK_FACTOR
- 
+
 IF (.NOT.SYNCHRONIZE) SYNC_TIME_STEP = .FALSE.
 
 ! Get typical mesh cell sizes and starting time step
 
 CHARACTERISTIC_CELL_SIZE = 1.E6_EB
- 
+
 MESH_LOOP: DO NM=1,NMESHES
 
    M=>MESHES(NM)
@@ -1340,11 +1340,11 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) THEN
       M%DT = EVAC_DT_FLOWFIELD
    ENDIF
-    
+
 ENDDO MESH_LOOP
 
 END SUBROUTINE READ_TIME
- 
+
 
 
 SUBROUTINE READ_MULT
@@ -1432,7 +1432,7 @@ REWIND(LU_INPUT)
 
 END SUBROUTINE READ_MULT
 
- 
+
 SUBROUTINE READ_MISC
 
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
@@ -1444,7 +1444,7 @@ NAMELIST /MISC/ AL2O3,ALLOW_SURFACE_PARTICLES,ALLOW_UNDERSIDE_PARTICLES,ASSUMED_
                 EVACUATION_DRILL,EVACUATION_MC_MODE,EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS,&
                 EVAPORATION_DRAG,PARTICLE_CFL_MAX,PARTICLE_CFL_MIN,PARTICLE_CFL,&
                 FLUX_LIMITER,FORCE_VECTOR,FREEZE_VELOCITY,FYI,GAMMA,GRAVITATIONAL_DEPOSITION,&
-                GRAVITATIONAL_DEPOSITION_CEILING,GROUND_LEVEL,GVEC,HRRPUV_MAX_SMV,HUMIDITY,&
+                GROUND_LEVEL,GVEC,HRRPUV_MAX_SMV,HUMIDITY,&
                 IMMERSED_BOUNDARY_METHOD,INITIAL_UNMIXED_FRACTION,ISOTROPIC_PARTICLE_FORCE,&
                 KINETIC_ENERGY_SOURCE,LAPSE_RATE,LES_FILTER_WIDTH,&
                 MAXIMUM_VISIBILITY,MEAN_FORCING,NOISE,NOISE_VELOCITY,NO_EVACUATION,&
@@ -1459,7 +1459,7 @@ NAMELIST /MISC/ AL2O3,ALLOW_SURFACE_PARTICLES,ALLOW_UNDERSIDE_PARTICLES,ASSUMED_
 
 
 ! Physical constants
- 
+
 TMPA         = 20._EB                                              ! Ambient temperature (C)
 GAMMA        = 1.4_EB                                              ! Heat capacity ratio for air
 P_INF        = 101325._EB                                          ! Ambient pressure (Pa)
@@ -1470,12 +1470,12 @@ PR_AIR       = 0.7_EB
 K_AIR_0      = MU_AIR_0*CP_AIR_0/PR_AIR                            ! Thermal Conductivity of Air at 20 C (W/m/K)
 
 ! Empirical heat transfer constants
- 
+
 PR_ONTH           = PR_AIR**ONTH
 ASSUMED_GAS_TEMPERATURE = -1000.   ! Assumed gas temperature, used for diagnostics
- 
+
 ! Background parameters
- 
+
 U0 = 0._EB
 V0 = 0._EB
 W0 = 0._EB
@@ -1493,9 +1493,9 @@ SOLID_PHASE_ONLY = .FALSE.
 TEXTURE_ORIGIN(1) = 0._EB
 TEXTURE_ORIGIN(2) = 0._EB
 TEXTURE_ORIGIN(3) = 0._EB
- 
+
 ! EVACuation parameters
- 
+
 EVAC_PRESSURE_ITERATIONS = 50
 EVAC_TIME_ITERATIONS     = 50
 EVACUATION_MC_MODE       = .FALSE.
@@ -1503,20 +1503,20 @@ NO_EVACUATION            = .FALSE.
 EVACUATION_DRILL         = .FALSE.
 
 ! LES parameters
- 
+
 PR                   = -1.0_EB  ! Turbulent Prandtl number
 SC                   = -1.0_EB  ! Turbulent Schmidt number
- 
+
 ! Misc
- 
+
 ASSUMED_GAS_TEMPERATURE_RAMP = 'null'
 RAMP_GX              = 'null'
 RAMP_GY              = 'null'
 RAMP_GZ              = 'null'
-GVEC(1)              = 0._EB        ! x-component of gravity 
-GVEC(2)              = 0._EB        ! y-component of gravity 
-GVEC(3)              = -GRAV        ! z-component of gravity 
-LAPSE_RATE           = 0._EB       
+GVEC(1)              = 0._EB        ! x-component of gravity
+GVEC(2)              = 0._EB        ! y-component of gravity
+GVEC(3)              = -GRAV        ! z-component of gravity
+LAPSE_RATE           = 0._EB
 THICKEN_OBSTRUCTIONS = .FALSE.
 CFL_MAX              = 1.0_EB       ! Stability bounds
 CFL_MIN              = 0.8_EB
@@ -1529,9 +1529,9 @@ TERRAIN_IMAGE        = 'xxxnull'
 MAXIMUM_VISIBILITY   = 30._EB    !m
 VISIBILITY_FACTOR    = 3._EB
 TURBULENCE_MODEL     = 'null'
- 
+
 REWIND(LU_INPUT)
-MISC_LOOP: DO 
+MISC_LOOP: DO
    CALL CHECKREAD('MISC',LU_INPUT,IOS)
    IF (IOS==1) EXIT MISC_LOOP
    READ(LU_INPUT,MISC,END=23,ERR=24,IOSTAT=IOS)
@@ -1555,7 +1555,7 @@ ELSE
    TURBULENCE_MODEL = 'DEARDORFF'
    LES_FILTER_WIDTH = 'MEAN'
 ENDIF
-   
+
 ! Re-read the line to pick up any user-specified options
 
 REWIND(LU_INPUT)
@@ -1568,16 +1568,16 @@ REWIND(LU_INPUT)
 H0    = 0.5_EB*(U0**2+V0**2+W0**2)
 TMPA  = TMPA + TMPM
 TMPA4 = TMPA**4
- 
+
 ! Miscellaneous
- 
+
 ASSUMED_GAS_TEMPERATURE = ASSUMED_GAS_TEMPERATURE + TMPM
 TEX_ORI = TEXTURE_ORIGIN
 FVEC = FORCE_VECTOR
 GRAV = SQRT(DOT_PRODUCT(GVEC,GVEC))
- 
+
 ! Gravity ramp
- 
+
 I_RAMP_AGT  = 0
 I_RAMP_GX   = 0
 I_RAMP_GY   = 0
@@ -1587,9 +1587,9 @@ IF (ASSUMED_GAS_TEMPERATURE_RAMP/='null') CALL GET_RAMP_INDEX(ASSUMED_GAS_TEMPER
 IF (RAMP_GX/='null') CALL GET_RAMP_INDEX(RAMP_GX,'TIME',I_RAMP_GX)
 IF (RAMP_GY/='null') CALL GET_RAMP_INDEX(RAMP_GY,'TIME',I_RAMP_GY)
 IF (RAMP_GZ/='null') CALL GET_RAMP_INDEX(RAMP_GZ,'TIME',I_RAMP_GZ)
- 
+
 ! Prandtl and Schmidt numbers
- 
+
 IF (DNS) THEN
    LES              = .FALSE.
    IF (PR<0._EB) PR = 0.7_EB
@@ -1598,18 +1598,18 @@ ELSE
    IF (PR<0._EB) PR = 0.5_EB
    IF (SC<0._EB) SC = 0.5_EB
 ENDIF
- 
+
 RSC = 1._EB/SC
 RPR = 1._EB/PR
- 
+
 ! Check for a restart file
- 
+
 APPEND = .FALSE.
 IF (RESTART .AND. RESTART_CHID == CHID) APPEND = .TRUE.
 IF (RESTART) NOISE  = .FALSE.
- 
+
 ! Min and Max values of species
- 
+
 IF (FLUX_LIMITER<0 .OR. FLUX_LIMITER>5) THEN
    WRITE(MESSAGE,'(A)')  'ERROR on MISC: Permissible values for FLUX_LIMITER=0:5'
    CALL SHUTDOWN(MESSAGE)
@@ -1632,7 +1632,7 @@ SELECT CASE (TRIM(TURBULENCE_MODEL))
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: TURBULENCE_MODEL, ',TRIM(TURBULENCE_MODEL),', is not recognized.'
       CALL SHUTDOWN(MESSAGE)
 END SELECT
-   
+
 ! Level set based model of firespread in vegetation
 
 IF(VEG_LEVEL_SET) WIND_ONLY = .TRUE.
@@ -1657,7 +1657,7 @@ END SUBROUTINE READ_MISC
 SUBROUTINE READ_DUMP
 
 ! Read parameters associated with output files
- 
+
 REAL(EB) :: DT_DEFAULT
 INTEGER :: N,I_DUM,SIG_FIGS,SIG_FIGS_EXP
 NAMELIST /DUMP/ COLUMN_DUMP_LIMIT,CTRL_COLUMN_LIMIT,CUTCELL_DATA_FILE,&
@@ -1672,7 +1672,7 @@ NAMELIST /DUMP/ COLUMN_DUMP_LIMIT,CTRL_COLUMN_LIMIT,CUTCELL_DATA_FILE,&
 DEBUG              = .FALSE.
 FLUSH_FILE_BUFFERS = .TRUE.
 MAXIMUM_PARTICLES   = 500000
-NFRAMES            = 1000 
+NFRAMES            = 1000
 PLOT3D_QUANTITY(1) = 'TEMPERATURE'
 PLOT3D_QUANTITY(2) = 'U-VELOCITY'
 PLOT3D_QUANTITY(3) = 'V-VELOCITY'
@@ -1706,11 +1706,11 @@ DT_PROF      = -1._EB
 DT_SLCF      = -1._EB
 DT_SL3D      = 0.2_EB*(T_END-T_BEGIN)
 DT_CTRL      = -1._EB
- 
+
 ! Read the DUMP line
 
 REWIND(LU_INPUT)
-DUMP_LOOP: DO 
+DUMP_LOOP: DO
    CALL CHECKREAD('DUMP',LU_INPUT,IOS)
    IF (IOS==1) EXIT DUMP_LOOP
    READ(LU_INPUT,DUMP,END=23,ERR=24,IOSTAT=IOS)
@@ -1755,7 +1755,7 @@ IF (SMOKE3D_QUANTITY=='null') THEN
          SMOKE3D_QUANTITY = 'HRRPUV'
       ELSE
          SMOKE3D = .FALSE.
-      ENDIF      
+      ENDIF
    ENDIF
 ENDIF
 
@@ -1771,7 +1771,7 @@ WRITE(FMT_R,'(A,I2.2,A,I2.2,A,I1.1)') 'ES',SIG_FIGS+SIG_FIGS_EXP+4,'.',SIG_FIGS-
 
 END SUBROUTINE READ_DUMP
 
- 
+
 
 SUBROUTINE READ_SPEC
 
@@ -1828,14 +1828,14 @@ ELSE
    20 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I2)') 'ERROR: Problem with SPECies number',N_SPECIES+1
          CALL SHUTDOWN(MESSAGE)
-      ENDIF      
+      ENDIF
    ENDDO CHECK_BACKGROUND_LOOP
-19 REWIND(LU_INPUT)         
+19 REWIND(LU_INPUT)
    IF (BACKGROUND) THEN
       N_SPECIES = 0
    ELSE
       N_SPECIES = 4
-      PREDEFINED(1:4)       = .TRUE.      
+      PREDEFINED(1:4)       = .TRUE.
       PREDEFINED_SPEC_ID(1) = 'NITROGEN'
       PREDEFINED_SPEC_ID(2) = 'OXYGEN'
       PREDEFINED_SPEC_ID(3) = 'CARBON DIOXIDE'
@@ -1849,10 +1849,10 @@ ENDIF
 REWIND(LU_INPUT)
 COUNT_SPEC_LOOP: DO
    CALL SET_SPEC_DEFAULT
-   CALL CHECKREAD('SPEC',LU_INPUT,IOS) 
+   CALL CHECKREAD('SPEC',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_SPEC_LOOP
    READ(LU_INPUT,NML=SPEC,END=29,IOSTAT=IOS)
-   N_SPEC_READ   = N_SPEC_READ   + 1   
+   N_SPEC_READ   = N_SPEC_READ   + 1
    SPEC_ID_READ(N_SPEC_READ) = ID
 
    IF (ID=='null') THEN
@@ -1863,15 +1863,15 @@ COUNT_SPEC_LOOP: DO
    DO NN = 1,N_SPEC_READ-1
       IF (ID==SPEC_ID_READ(NN)) THEN
          WRITE(MESSAGE,'(A,I2,A,I2,A)') 'ERROR: Species ',N_SPEC_READ,' has the same ID as species ',NN, '.'
-         CALL SHUTDOWN(MESSAGE)              
+         CALL SHUTDOWN(MESSAGE)
       ENDIF
-   ENDDO   
-   
-   IF (BACKGROUND) THEN 
+   ENDDO
+
+   IF (BACKGROUND) THEN
       IF (LUMPED_COMPONENT_ONLY) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Cannot define a LUMPED_COMPONENT_ONLY species as the BACKGROUND species'
          CALL SHUTDOWN(MESSAGE)
-      ENDIF  
+      ENDIF
       IF (SIMPLE_CHEMISTRY) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Cannot define a BACKGROUND species if using the simple chemistry'
          CALL SHUTDOWN(MESSAGE)
@@ -1881,10 +1881,10 @@ COUNT_SPEC_LOOP: DO
          WRITE(MESSAGE,'(A)') 'ERROR: Cannot define MASS_FRACTION_0 for a LUMPED_COMPONENT_ONLY species'
          CALL SHUTDOWN(MESSAGE)
    ENDIF
-   
+
    IF (SPEC_ID(1)=='null') THEN
-      N_SPECIES = N_SPECIES+1      
-      IF (.NOT. LUMPED_COMPONENT_ONLY .AND. .NOT. BACKGROUND) N_TRACKED_SPECIES = N_TRACKED_SPECIES + 1 
+      N_SPECIES = N_SPECIES+1
+      IF (.NOT. LUMPED_COMPONENT_ONLY .AND. .NOT. BACKGROUND) N_TRACKED_SPECIES = N_TRACKED_SPECIES + 1
    ELSE
       IF (SIMPLE_CHEMISTRY) THEN
          IF(TRIM(ID)/=TRIM(REACTION(1)%FUEL)) N_TRACKED_SPECIES = N_TRACKED_SPECIES + 1
@@ -1902,14 +1902,14 @@ COUNT_SPEC_LOOP: DO
                IF (SPEC_ID(1)/='null') THEN
                   WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ+1, &
                                              '.  Lumped species has the same ID as a predefined species'
-                  CALL SHUTDOWN(MESSAGE)               
+                  CALL SHUTDOWN(MESSAGE)
                ENDIF
             ELSE
                IF (SPEC_ID(1)/='null') THEN
                   IF (TRIM(ID)/=TRIM(REACTION(1)%FUEL)) THEN
                      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ+1, &
                                                 '.  Lumped species has the same ID as a predefined species'
-                     CALL SHUTDOWN(MESSAGE)               
+                     CALL SHUTDOWN(MESSAGE)
                   ELSE
                      PREDEFINED_SMIX(1) = .FALSE.
                   ENDIF
@@ -1920,15 +1920,15 @@ COUNT_SPEC_LOOP: DO
             EXIT
          ENDIF
       ENDDO
-   ENDIF   
-   
+   ENDIF
+
 ENDDO COUNT_SPEC_LOOP
-29 REWIND(LU_INPUT)      
+29 REWIND(LU_INPUT)
 
 ! Allocate the primitive species array.
 
 ALLOCATE(SPECIES(N_SPECIES),STAT=IZERO)
-CALL ChkMemErr('READ','SPECIES',IZERO) 
+CALL ChkMemErr('READ','SPECIES',IZERO)
 
 ! Pass 2: read and process primitive species
 N = 0
@@ -1962,7 +1962,7 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
    SS => SPECIES(N)
 
    SS%K_USER                      = CONDUCTIVITY
-   SS%CONDUCTIVITY_SOLID          = CONDUCTIVITY_SOLID 
+   SS%CONDUCTIVITY_SOLID          = CONDUCTIVITY_SOLID
    SS%D_USER                      = DIFFUSIVITY
    SS%DENSITY_SOLID               = DENSITY_SOLID
    SS%EPSK                        = EPSILONKLJ
@@ -2026,7 +2026,7 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
 
    CALL GAS_PROPS(SS%ID,SS%SIG,SS%EPSK,SS%MW,SS%FORMULA,SS%LISTED,SS%ATOMS,SS%H_F,SS%RADCAL_ID)
 
-   CALL FED_PROPS(SS%ID,SS%FLD_LETHAL_DOSE,SS%FIC_CONCENTRATION)         
+   CALL FED_PROPS(SS%ID,SS%FLD_LETHAL_DOSE,SS%FIC_CONCENTRATION)
 
    IF (TRIM(SS%FORMULA)=='null') WRITE(SS%FORMULA,'(A,I0)') 'SPEC_',N
 
@@ -2048,7 +2048,7 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
    SELECT CASE (ID)
       CASE('WATER VAPOR')
          H2O_INDEX = N
-         IF (MASS_FRACTION_0 > 0._EB .AND. LUMPED_COMPONENT_ONLY) THEN   
+         IF (MASS_FRACTION_0 > 0._EB .AND. LUMPED_COMPONENT_ONLY) THEN
             WRITE(MESSAGE,'(A)') 'WARNING: MASS_FRACTION_0 specified for WATER VAPOR with LUMPED_COMPONENT_ONLY = .TRUE.'
             IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
@@ -2101,12 +2101,12 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
       SS%RAMP_MU_INDEX = NR
    ENDIF
 
-ENDDO PRIMITIVE_SPEC_READ_LOOP      
+ENDDO PRIMITIVE_SPEC_READ_LOOP
 
 ! Pass 3: process tracked species (primitive and lumped)
 
 ALLOCATE(SPECIES_MIXTURE(0:N_TRACKED_SPECIES),STAT=IZERO)
-CALL ChkMemErr('READ','SPECIES',IZERO) 
+CALL ChkMemErr('READ','SPECIES',IZERO)
 
 ! Process non-predefined mixtures first
 REWIND(LU_INPUT)
@@ -2119,21 +2119,21 @@ TRACKED_SPEC_LOOP_1: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGRO
       CALL SET_SPEC_DEFAULT
       IF (N==0) BACKGROUND = .TRUE.
    ELSE
-      FIND_TRACKED: DO          
+      FIND_TRACKED: DO
          CALL SET_SPEC_DEFAULT
          READ(LU_INPUT,NML=SPEC)
          IF (LUMPED_COMPONENT_ONLY) CYCLE FIND_TRACKED
          IF (ANY(MASS_FRACTION>0._EB) .AND. ANY(VOLUME_FRACTION>0._EB)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', cannot specify both MASS_FRACTION and VOLUME_FRACTION.'
-            CALL SHUTDOWN(MESSAGE)                     
+            CALL SHUTDOWN(MESSAGE)
          ENDIF
          EXIT
-      ENDDO FIND_TRACKED      
+      ENDDO FIND_TRACKED
 
       CALL DEFINE_MIXTURE
       IF (SIMPLE_CHEMISTRY) THEN
          SM => SPECIES_MIXTURE(N)
-         IF (TRIM(SM%ID)==TRIM(REACTION(1)%FUEL)) THEN      
+         IF (TRIM(SM%ID)==TRIM(REACTION(1)%FUEL)) THEN
             IF (SM%ATOMS(1)+SM%ATOMS(6)+SM%ATOMS(7)+SM%ATOMS(8) - SUM(SM%ATOMS) < 0._EB) THEN
                WRITE(MESSAGE,'(A)') 'ERROR: Fuel FORMULA for SIMPLE_CHEMISTRY can only contain C,H,O, and N'
                CALL SHUTDOWN(MESSAGE)
@@ -2147,17 +2147,17 @@ TRACKED_SPEC_LOOP_1: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGRO
             IF (REACTION(1)%C<=TWO_EPSILON_EB .AND. REACTION(1)%H<=TWO_EPSILON_EB) THEN
                WRITE(MESSAGE,'(A)') 'ERROR: Must specify fuel chemistry using C and/or H when using simple chemistry'
                CALL SHUTDOWN(MESSAGE)
-            ENDIF            
+            ENDIF
          ENDIF
       ENDIF
    ENDIF
-   
+
    IF (BACKGROUND) THEN
       DEFINED_BACKGROUND = .TRUE.
       IF (N==0) N = N + 1
    ELSE
       N = N + 1
-   ENDIF   
+   ENDIF
 ENDDO TRACKED_SPEC_LOOP_1
 
 ! Process predefined mixtures second
@@ -2168,7 +2168,7 @@ IF (ANY(PREDEFINED_SMIX)) THEN
    N = 0
    DEFINED_BACKGROUND = .FALSE.
    TRACKED_SPEC_LOOP_2: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGROUND)
-   
+
       IF (PREDEFINED_SMIX(N)) THEN
          CALL SET_SPEC_DEFAULT
          CALL SETUP_PREDEFINED_SMIX(N)
@@ -2177,14 +2177,14 @@ IF (ANY(PREDEFINED_SMIX)) THEN
       ELSE
          BACKGROUND = .FALSE.
       ENDIF
-   
+
       IF (BACKGROUND) THEN
          DEFINED_BACKGROUND = .TRUE.
          IF (N==0) N = N + 1
       ELSE
          N = N + 1
-      ENDIF  
-   
+      ENDIF
+
    ENDDO TRACKED_SPEC_LOOP_2
 ENDIF
 
@@ -2193,7 +2193,7 @@ IF (SPECIES_MIXTURE(0)%DEPOSITING) THEN
    CALL SHUTDOWN(MESSAGE)
 ENDIF
 
-REWIND (LU_INPUT)   
+REWIND (LU_INPUT)
 
 ! Normalize the initial mass fractions of the lumped species if necessary
 
@@ -2201,7 +2201,7 @@ IF (SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0) > 1._EB) &
   SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0 = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0/ &
                                          SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0)
 
-SPECIES_MIXTURE(0)%ZZ0 = 1._EB - SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0)   
+SPECIES_MIXTURE(0)%ZZ0 = 1._EB - SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0)
 
 CONTAINS
 
@@ -2222,12 +2222,12 @@ IF (SPEC_ID(1)=='null') THEN
 ENDIF
 
 CONVERSION = 0._EB
-   
+
 SM => SPECIES_MIXTURE(NN)
-   
+
 SM%ID = ID
 SM%ZZ0 = MAX(0._EB,MASS_FRACTION_0)
-   
+
 ! Count the number of species included in the mixture
 
 N_SUB_SPECIES = 0
@@ -2238,7 +2238,7 @@ COUNT_SPEC: DO NS=1,N_SPECIES
       EXIT
    ENDIF
 ENDDO COUNT_SPEC
-   
+
 IF (N_SUB_SPECIES == 1) THEN
    MASS_FRACTION=0._EB
    MASS_FRACTION(1)=1._EB
@@ -2274,17 +2274,17 @@ DO NS = 1,N_SUB_SPECIES
    ENDDO FIND_SPEC_ID
    IF (Y_INDEX(NS)<0) THEN
       WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', sub species ',NS,' not found.'
-      CALL SHUTDOWN(MESSAGE)         
-   ENDIF      
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
    IF (MASS_FRACTION(NS)>0._EB)     CONVERSION = CONVERSION + MASS_FRACTION(NS)   / SPECIES(Y_INDEX(NS))%MW
    IF (VOLUME_FRACTION(NS)>0._EB)   CONVERSION = CONVERSION + VOLUME_FRACTION(NS) * SPECIES(Y_INDEX(NS))%MW
    IF (.NOT. PREDEFINED_SMIX(NN) .AND. MASS_FRACTION(NS)<=0._EB .AND. VOLUME_FRACTION(NS)<=0._EB) THEN
       WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', mass or volume fraction for sub species ',NS,' not found.'
-      CALL SHUTDOWN(MESSAGE)                     
+      CALL SHUTDOWN(MESSAGE)
    ENDIF
 
 ENDDO
-   
+
 IF (ANY(MASS_FRACTION>0._EB)) THEN
    DO NS = 1,N_SUB_SPECIES
       SM%VOLUME_FRACTION(Y_INDEX(NS)) = MASS_FRACTION(NS) / SPECIES(Y_INDEX(NS))%MW / CONVERSION
@@ -2311,17 +2311,17 @@ SM%MW = 0._EB
 SM%H_F = 0._EB
 DO NS = 1,N_SPECIES
    IF (SM%MASS_FRACTION(NS) <TWO_EPSILON_EB) CYCLE
-   SM%MASS_EXTINCTION_COEFFICIENT = SM%MASS_FRACTION(NS) * SPECIES(NS)%MASS_EXTINCTION_COEFFICIENT      
+   SM%MASS_EXTINCTION_COEFFICIENT = SM%MASS_FRACTION(NS) * SPECIES(NS)%MASS_EXTINCTION_COEFFICIENT
    SM%MW = SM%MW + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%MW !! *SM%ADJUST_NU ::term for potential non-normalized inputs
    SM%H_F = SM%H_F + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%H_F ! Calculate H_F of mixtures
    IF (SPECIES(NS)%FORMULA(1:5)=='SPEC_') SM%VALID_ATOMS = .FALSE.
    SM%ATOMS = SM%ATOMS + SM%VOLUME_FRACTION(NS)*SPECIES(NS)%ATOMS !! *SM%ADJUST_NU ::term for potential non-normalized inputs
-ENDDO     
+ENDDO
 IF(SM%H_F <= -1.E21_EB) THEN ! Checking if H_F is defined for all species in mixture
    SM%H_F = SM%H_F
 ELSE
    SM%H_F = SM%H_F*1.E6_EB/SM%MW
-ENDIF   
+ENDIF
 
 SM%RCON = R0/SM%MW
 
@@ -2400,7 +2400,7 @@ SELECT CASE(N)
       ID               = RN%FUEL
       FORMULA          = 'Z1'
       SPEC_ID(1)       = RN%FUEL
-      MASS_FRACTION(1) = 1._EB  
+      MASS_FRACTION(1) = 1._EB
       IF (FUEL_INDEX > 0) THEN
          IF (SPECIES(FUEL_INDEX)%RADCAL_ID=='null') SPECIES(FUEL_INDEX)%RADCAL_ID=FUEL_RADCAL_ID
          IF (SPECIES(FUEL_INDEX)%RADCAL_ID=='null') SPECIES(FUEL_INDEX)%RADCAL_ID='METHANE'
@@ -2431,7 +2431,7 @@ SELECT CASE(N)
       VOLUME_FRACTION    = VOLUME_FRACTION/SUM(VOLUME_FRACTION)
       SPECIES(SOOT_INDEX)%ATOMS=0._EB
       SPECIES(SOOT_INDEX)%ATOMS(1)=RN%SOOT_H_FRACTION
-      SPECIES(SOOT_INDEX)%ATOMS(6)=1._EB-RN%SOOT_H_FRACTION         
+      SPECIES(SOOT_INDEX)%ATOMS(6)=1._EB-RN%SOOT_H_FRACTION
 END SELECT
 
 END SUBROUTINE SETUP_PREDEFINED_SMIX
@@ -2456,8 +2456,8 @@ TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
 ! Setup the array to convert the tracked species array to array of all primitive species
 
 ALLOCATE(Z2Y(N_SPECIES,0:N_TRACKED_SPECIES),STAT=IZERO)
-CALL ChkMemErr('READ','Z2Y',IZERO) 
-Z2Y = 0._EB 
+CALL ChkMemErr('READ','Z2Y',IZERO)
+Z2Y = 0._EB
 
 DO N=0,N_TRACKED_SPECIES
    SM => SPECIES_MIXTURE(N)
@@ -2469,7 +2469,7 @@ ENDDO
 ! Set up the arrays of molecular weights
 
 ALLOCATE(MWR_Z(0:N_TRACKED_SPECIES),STAT=IZERO)
-CALL ChkMemErr('READ','MW_AVG_Y',IZERO) 
+CALL ChkMemErr('READ','MW_AVG_Y',IZERO)
 
 MWR_Z(0:N_TRACKED_SPECIES) = 1._EB/SPECIES_MIXTURE(0:N_TRACKED_SPECIES)%MW
 
@@ -2480,17 +2480,17 @@ DEALLOCATE(ZZ_GET)
 
 MW_MIN = MINVAL(SPECIES_MIXTURE%MW)
 MW_MAX = MAXVAL(SPECIES_MIXTURE%MW)
- 
+
 ! Compute background density from other background quantities
- 
+
 RHOA = P_INF/(TMPA*RSUM0)
- 
+
 ! Compute constant-temperature specific heats
- 
+
 CP_GAMMA = SPECIES_MIXTURE(0)%RCON*GAMMA/(GAMMA-1._EB)
 CPOPR = CP_GAMMA/PR
 
-! Compute gas properties for primitive species 1 to N_SPECIES. 
+! Compute gas properties for primitive species 1 to N_SPECIES.
 
 ALLOCATE(D_TMP(N_SPECIES))
 D_TMP = 0._EB
@@ -2503,37 +2503,37 @@ H_TMP = 0._EB
 ALLOCATE(K_TMP(N_SPECIES))
 K_TMP = 0._EB
 
-ALLOCATE(CPBAR_Z(0:5000,0:N_TRACKED_SPECIES))   
-CALL ChkMemErr('READ','CPBAR_Z',IZERO)    
-CPBAR_Z = 0._EB   
+ALLOCATE(CPBAR_Z(0:5000,0:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','CPBAR_Z',IZERO)
+CPBAR_Z = 0._EB
 
-ALLOCATE(CPBAR_DIFF(0:5000,0:N_TRACKED_SPECIES))   
-CALL ChkMemErr('READ','CPBAR_DIFF',IZERO)    
-CPBAR_DIFF = 0._EB   
+ALLOCATE(CPBAR_DIFF(0:5000,0:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','CPBAR_DIFF',IZERO)
+CPBAR_DIFF = 0._EB
 
-ALLOCATE(CP_AVG_Z(0:5000,0:N_TRACKED_SPECIES))   
-CALL ChkMemErr('READ','CP_AVG_Z',IZERO)    
-CP_AVG_Z = 0._EB      
+ALLOCATE(CP_AVG_Z(0:5000,0:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','CP_AVG_Z',IZERO)
+CP_AVG_Z = 0._EB
 
-ALLOCATE(CP_AVG_DIFF(0:5000,0:N_TRACKED_SPECIES))   
-CALL ChkMemErr('READ','CP_AVG_DIFF',IZERO)    
-CP_AVG_DIFF = 0._EB      
+ALLOCATE(CP_AVG_DIFF(0:5000,0:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','CP_AVG_DIFF',IZERO)
+CP_AVG_DIFF = 0._EB
 
 ALLOCATE(K_Z(0:5000,0:N_TRACKED_SPECIES))
-CALL ChkMemErr('READ','K_Z',IZERO)    
-K_Z = 0._EB   
+CALL ChkMemErr('READ','K_Z',IZERO)
+K_Z = 0._EB
 
-ALLOCATE(MU_Z(0:5000,0:N_TRACKED_SPECIES))      
-CALL ChkMemErr('READ','MU_Z',IZERO)    
-MU_Z = 0._EB   
+ALLOCATE(MU_Z(0:5000,0:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','MU_Z',IZERO)
+MU_Z = 0._EB
 
-ALLOCATE(CP_Z(0:5000,0:N_TRACKED_SPECIES))     
-CALL ChkMemErr('READ','CP_Z',IZERO)    
-CP_Z = 0._EB   
+ALLOCATE(CP_Z(0:5000,0:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','CP_Z',IZERO)
+CP_Z = 0._EB
 
-ALLOCATE(D_Z(0:5000,0:N_TRACKED_SPECIES))      
-CALL ChkMemErr('READ','D_Z',IZERO)    
-D_Z = 0._EB   
+ALLOCATE(D_Z(0:5000,0:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','D_Z',IZERO)
+D_Z = 0._EB
 
 ! Adjust reference enthalpy to 0 K if a RAMP_CP is given
 
@@ -2580,7 +2580,7 @@ TABLE_LOOP: DO J=1,5000
       K_Z(J,N)  = SUM(Z2Y(:,N) * K_TMP(:))
       IF (J==1) CP_Z(0,N) = CP_Z(1,N)
       CP_AVG_Z(J,N) = (CP_AVG_Z(J-1,N)*REAL(J-1,EB) + 0.5_EB*(CP_Z(J,N)+CP_Z(J-1,N)))/REAL(J,EB)
-      IF (J>1) THEN      
+      IF (J>1) THEN
          CPBAR_Z(J,N) = (CPBAR_Z(J-1,N)*(REAL(J,EB)-1._EB)+0.5_EB*(CP_Z(J,N)+CP_Z(J-1,N)))/REAL(J,EB)
       ELSE
          CPBAR_Z(0,N) = SUM(Z2Y(:,N) * H_TMP(:))
@@ -2589,7 +2589,7 @@ TABLE_LOOP: DO J=1,5000
    ENDDO
    CP_AVG_DIFF(J,:) = CP_AVG_Z(J,:) - CP_AVG_Z(J,0)
    CPBAR_DIFF(J,:) = CPBAR_Z(J,:) - CPBAR_Z(J,0)
-   
+
 ENDDO TABLE_LOOP
 
 DEALLOCATE(D_TMP)
@@ -2699,7 +2699,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
             ENDIF
          ENDIF
       ELSE
-         MW_FUEL = ELEMENT(6)%MASS*C+ELEMENT(1)%MASS*H+ELEMENT(8)%MASS*O+ELEMENT(7)%MASS*N   
+         MW_FUEL = ELEMENT(6)%MASS*C+ELEMENT(1)%MASS*H+ELEMENT(8)%MASS*O+ELEMENT(7)%MASS*N
       ENDIF
    ENDIF
    RN%A                         = A
@@ -2731,12 +2731,12 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN%SOOT_YIELD                = SOOT_YIELD
 
    IF (RN%A < 0._EB .OR. RN%A > 1.E15_EB) THEN
-      IF (RN%E < 0._EB .OR. RN%E == 0._EB) THEN 
+      IF (RN%E < 0._EB .OR. RN%E == 0._EB) THEN
          RN%A_IN = 1.E16_EB
          RN%E_IN = 0._EB
          RN%FAST_CHEMISTRY=.TRUE.
-      ENDIF     
-   ENDIF   
+      ENDIF
+   ENDIF
    ! Determine the number of stoichiometric coefficients for this reaction
    IF (.NOT.SIMPLE_CHEMISTRY) THEN
       NS2 = 0
@@ -2776,9 +2776,9 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN%NU_READ(1:RN%N_SMIX) = NU(1:RN%N_SMIX)
 
    ALLOCATE(RN%SPEC_ID_NU_READ(RN%N_SMIX))
-   RN%SPEC_ID_NU_READ = 'null'   
+   RN%SPEC_ID_NU_READ = 'null'
    RN%SPEC_ID_NU_READ(1:RN%N_SMIX)=SPEC_ID_NU(1:RN%N_SMIX)
-   
+
    !Get ramps
    IF (RN%A_RAMP/='null') THEN
       CALL GET_RAMP_INDEX(RN%A_RAMP,'PHI',NR2)
@@ -2787,7 +2787,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    IF (RN%E_RAMP/='null') THEN
       CALL GET_RAMP_INDEX(RN%E_RAMP,'PHI',NR2)
       RN%E_RAMP_INDEX = NR2
-   ENDIF      
+   ENDIF
 
 END DO REAC_READ_LOOP
 
@@ -2831,7 +2831,7 @@ SOOT_H_FRACTION             = 0.1_EB
 SOOT_YIELD                  = 0.0_EB
 SPEC_ID_NU                  = 'null'
 SPEC_ID_N_S                   = 'null'
- 
+
 END SUBROUTINE SET_REAC_DEFAULTS
 
 END SUBROUTINE READ_REAC
@@ -2870,11 +2870,11 @@ ENDIF
 REAC_LOOP: DO NR=1,N_REACTIONS
 
    RN => REACTION(NR)
-   
+
    IF ((RN%A > 0._EB .OR. RN%E > 0._EB) .AND. (RN%C>TWO_EPSILON_EB .OR. RN%H>TWO_EPSILON_EB)) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and simple chemistry'
       CALL SHUTDOWN(MESSAGE)
-   ENDIF 
+   ENDIF
    IF (TRIM(RN%EQUATION)/='null') THEN
       IF(ANY(ABS(RN%NU_READ)>TWO_EPSILON_EB)) THEN
          WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Cannot set NUs if an EQUATION is specified.'
@@ -2892,7 +2892,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    IF (TRIM(RN%FUEL)=='null') THEN
       WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',N_REACTIONS,'. FUEL must be defined'
       CALL SHUTDOWN(MESSAGE)
-   ENDIF  
+   ENDIF
    ! Allocate the arrays that are going to carry the mixture stoichiometry to the rest of the code
 
    ALLOCATE(RN%SPEC_ID_NU(0:N_TRACKED_SPECIES))
@@ -2908,7 +2908,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ! Transfer SPEC_ID_NU, SPEC_ID_N, NU, and N_S that were indexed by the order they were read in
    ! to now be indexed by the SMIX or SPEC index
    DO NS=1,RN%N_SMIX
-      IF (TRIM(RN%SPEC_ID_NU_READ(NS))=='null') CYCLE   
+      IF (TRIM(RN%SPEC_ID_NU_READ(NS))=='null') CYCLE
       NAME_FOUND = .FALSE.
       DO NS2=0,N_TRACKED_SPECIES
          IF (TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
@@ -2929,7 +2929,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       IF (.NOT. NAME_FOUND) THEN
          WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Tracked species ',TRIM(RN%SPEC_ID_NU_READ(NS)),&
                                        ' not found.'
-         CALL SHUTDOWN(MESSAGE)      
+         CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDDO
 
@@ -2966,9 +2966,9 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Primitive species ', &
                                        TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
          CALL SHUTDOWN(MESSAGE)
-      ENDIF     
+      ENDIF
    ENDDO
-  
+
    RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB
    RN%A = RN%A *1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    IF (RN%FUEL/='null' .AND. RN%FUEL_SMIX_INDEX<1) THEN
@@ -2989,7 +2989,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       IF (SM%ID=='WATER VAPOR')  I_WATER = NS
       IF (SM%ID=='CARBON DIOXIDE') I_CO2 = NS
    ENDDO
-  
+
    ! Check atom balance of the reaction
    IF (.NOT. SIMPLE_CHEMISTRY .AND. RN%CHECK_ATOM_BALANCE) THEN
       SKIP_ATOM_BALANCE = .FALSE.
@@ -3005,12 +3005,12 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ! Check the mass balance of the reaction
 
    MASS_REACTANT = 0._EB
-   MASS_PRODUCT  = 0._EB   
- 
+   MASS_PRODUCT  = 0._EB
+
    DO NS=0,N_TRACKED_SPECIES
       IF (RN%NU(NS) < -TWO_EPSILON_EB) MASS_REACTANT = MASS_REACTANT + RN%NU(NS)*SPECIES_MIXTURE(NS)%MW
       IF (RN%NU(NS) >  TWO_EPSILON_EB) MASS_PRODUCT  = MASS_PRODUCT  + RN%NU(NS)*SPECIES_MIXTURE(NS)%MW
-   ENDDO  
+   ENDDO
    IF (ABS(MASS_PRODUCT) < TWO_EPSILON_EB .OR. ABS(MASS_REACTANT) < TWO_EPSILON_EB) THEN
       IF (ABS(MASS_PRODUCT) <TWO_EPSILON_EB) WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Products not specified.'
       IF (ABS(MASS_REACTANT)<TWO_EPSILON_EB) WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Reactants not specified.'
@@ -3031,7 +3031,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                       + RN%NU_SOOT*SPECIES(CO2_INDEX)%H_F*(1._EB-RN%SOOT_H_FRACTION) &
                       + RN%NU_SOOT*SPECIES(H2O_INDEX)%H_F*RN%SOOT_H_FRACTION*0.5_EB)
          RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES(FUEL_INDEX)%MW*1000._EB !J/mol->J/kg
-      ENDIF       
+      ENDIF
       HF_COUNT = 0
       DO NS = 0,N_TRACKED_SPECIES
          IF (RN%NU(NS) /= 0._EB) THEN
@@ -3053,7 +3053,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                                                       + RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
          ENDDO
          SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F/ &
-                                                   (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)        
+                                                   (-RN%NU(RN%FUEL_SMIX_INDEX)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)
    ELSE ! Heat of combustion not specified
       IF (SIMPLE_CHEMISTRY) THEN ! Calculate heat of combustion based oxygen consumption
          IF (RN%HEAT_OF_COMBUSTION<0._EB) THEN
@@ -3067,7 +3067,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                             + RN%NU_SOOT*SPECIES(H2O_INDEX)%H_F*RN%SOOT_H_FRACTION*0.5_EB)
                RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*1000._EB !J/mol->J/kg
             ENDIF
-         ENDIF   
+         ENDIF
       ELSE
          DO NS = 0,N_TRACKED_SPECIES
             IF (RN%NU(NS) /= 0._EB) THEN
@@ -3077,7 +3077,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
                ENDIF
             ENDIF
          ENDDO
-      ENDIF   
+      ENDIF
       IF (SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F <= -1.E21) THEN
          SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = 0._EB
          SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F = SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%H_F &
@@ -3094,23 +3094,23 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       RN%HEAT_OF_COMBUSTION = 0._EB
       DO NS = 0,N_TRACKED_SPECIES
          SM=>SPECIES_MIXTURE(NS)
-         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW         
+         RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION - RN%NU(NS)*SM%H_F*SPECIES_MIXTURE(NS)%MW
       ENDDO
       RN%HEAT_OF_COMBUSTION = RN%HEAT_OF_COMBUSTION/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    ENDIF
- 
+
    DO NS=0,N_TRACKED_SPECIES
       RN%NU_MW_O_MW_F(NS) = RN%NU(NS)*SPECIES_MIXTURE(NS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    ENDDO
-   
-   IF (NR==1) REACTION%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION 
-   
+
+   IF (NR==1) REACTION%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION
+
 ENDDO REAC_LOOP
 
 ! Determine number of series reactions
 SERIES_REAC = 0
 DO NR = 1,N_REACTIONS
-   RN => REACTION(NR)   
+   RN => REACTION(NR)
    DO NS = 0,N_TRACKED_SPECIES
       IF (RN%NU(NS) > 0._EB) THEN
          DO NRR = 1,N_REACTIONS
@@ -3155,7 +3155,7 @@ IF (TRIM(EXTINCTION_MODEL)/='null') THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Name of EXTINCTION_MODEL is not recognized.'
          CALL SHUTDOWN(MESSAGE)
       END SELECT
-ELSE 
+ELSE
    EXTINCT_MOD = EXTINCTION_2
 ENDIF
 
@@ -3202,7 +3202,7 @@ NAMELIST /PART/ AGE,BREAKUP,BREAKUP_CNF_RAMP_ID,BREAKUP_DISTRIBUTION,BREAKUP_GAM
 REWIND(LU_INPUT)
 N_LAGRANGIAN_CLASSES = 0
 COUNT_PART_LOOP: DO
-   CALL CHECKREAD('PART',LU_INPUT,IOS) 
+   CALL CHECKREAD('PART',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_PART_LOOP
    READ(LU_INPUT,PART,END=219,ERR=220,IOSTAT=IOS)
    N_LAGRANGIAN_CLASSES = N_LAGRANGIAN_CLASSES + 1
@@ -3211,18 +3211,18 @@ ENDDO COUNT_PART_LOOP
 219 REWIND(LU_INPUT)
 
 IF (N_LAGRANGIAN_CLASSES>0) PARTICLE_FILE = .TRUE.
- 
+
 ! Allocate the derived type array to hold information about the particle classes
 
 ALLOCATE(LAGRANGIAN_PARTICLE_CLASS(N_LAGRANGIAN_CLASSES),STAT=IZERO)
-CALL ChkMemErr('READ','N_LAGRANGIAN_CLASSES',IZERO) 
+CALL ChkMemErr('READ','N_LAGRANGIAN_CLASSES',IZERO)
 
 N_LP_ARRAY_INDICES = 0
 IPC = 0
 ILPC = 0
 
 READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
-   
+
    BREAKUP                  = .FALSE.
    BREAKUP_RATIO            = 3._EB/7._EB  ! ratio of child Sauter mean to parent size in Bag breakup regime
    BREAKUP_GAMMA_D          = 2.4_EB
@@ -3232,7 +3232,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    DEVC_ID                  = 'null'
    INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
    HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
-   DIAMETER                 = -1._EB       !         
+   DIAMETER                 = -1._EB       !
    MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, meant to be infinitely large and not used
    MINIMUM_DIAMETER         = -1._EB       ! microns, below which the PARTICLE evaporates in one time step
    MONODISPERSE             = .FALSE.
@@ -3243,7 +3243,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ID                       = 'null'
    PERIODIC_X               = .FALSE.
    PERIODIC_Y               = .FALSE.
-   PERIODIC_Z               = .FALSE.   
+   PERIODIC_Z               = .FALSE.
    PROP_ID                  = 'null'
    ORIENTATION              = 0._EB
    QUANTITIES               = 'null'
@@ -3254,7 +3254,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    SURF_ID                  = 'null'
    SURFACE_TENSION          = 72.8E-3_EB  ! N/m, applies for water
    COLOR                    = 'null'
-   SAMPLING_FACTOR          = -1      
+   SAMPLING_FACTOR          = -1
    STATIC                   = .FALSE.
    MASSLESS                 = .FALSE.
    TURBULENT_DISPERSION     = .FALSE.
@@ -3272,15 +3272,15 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    FREE_AREA_FRACTION       = 0.5_EB
 
    ! Read the PART line from the input file or set up special PARTICLE_CLASS class for water PARTICLEs or tracers
- 
-   CALL CHECKREAD('PART',LU_INPUT,IOS) 
+
+   CALL CHECKREAD('PART',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_PART_LOOP
    READ(LU_INPUT,PART)
-   
+
    LPC => LAGRANGIAN_PARTICLE_CLASS(N)
-   
+
    ! If the user specifically specifies SURF_ID
-   
+
    IF (SURF_ID/='null') THEN
        VIRTUAL_PARTICLES = .TRUE.
       IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 1
@@ -3301,7 +3301,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       ENDIF
    ENDIF
 
-   IF (MASSLESS) THEN 
+   IF (MASSLESS) THEN
       DIAMETER = 0._EB
       SURF_ID  = 'MASSLESS PARTICLE'
       IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 1
@@ -3336,7 +3336,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ENDIF
 
    IF (ANY(RGB<0) .AND. COLOR=='null') COLOR = 'BLACK'
-   
+
    IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
 
    ! Determine if the SPEC_ID is OK
@@ -3360,7 +3360,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       ENDIF
       IF (SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX < 0) THEN
          WRITE(MESSAGE,'(A,I3,A)') 'ERROR: PART line ',N,'.  Particles cannot evaporate to a lumped species.'
-         CALL SHUTDOWN(MESSAGE)                     
+         CALL SHUTDOWN(MESSAGE)
       ELSE
          LPC%Y_INDEX = SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX
       ENDIF
@@ -3393,7 +3393,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       CALL ChkMemErr('READ','BREAKUP_CNF',IZERO)
       ALLOCATE(LPC%BREAKUP_R_CNF(0:NDC),STAT=IZERO)
       CALL ChkMemErr('READ','BREAKUP_R_CNF',IZERO)
-   ENDIF      
+   ENDIF
 
    ! Radiative property table
 
@@ -3405,10 +3405,10 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ENDIF
 
    ! Assign property data to LAGRANGIAN_PARTICLE_CLASS class
- 
+
    LPC%ID                     = ID
    LPC%BREAKUP                = BREAKUP
-   LPC%BREAKUP_RATIO          = BREAKUP_RATIO   
+   LPC%BREAKUP_RATIO          = BREAKUP_RATIO
    LPC%BREAKUP_GAMMA          = BREAKUP_GAMMA_D
    IF ( BREAKUP_SIGMA_D > 0._EB ) THEN
       LPC%BREAKUP_SIGMA = BREAKUP_SIGMA_D
@@ -3429,7 +3429,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    LPC%MONODISPERSE       = MONODISPERSE
    LPC%PERIODIC_X         = PERIODIC_X
    LPC%PERIODIC_Y         = PERIODIC_Y
-   LPC%PERIODIC_Z         = PERIODIC_Z   
+   LPC%PERIODIC_Z         = PERIODIC_Z
    LPC%PROP_ID            = PROP_ID
    LPC%QUANTITIES         = QUANTITIES
    LPC%QUANTITIES_SPEC_ID = QUANTITIES_SPEC_ID
@@ -3444,14 +3444,14 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    LPC%BREAKUP_DISTRIBUTION = BREAKUP_DISTRIBUTION
    LPC%CNF_RAMP_ID        = CNF_RAMP_ID
    LPC%BREAKUP_CNF_RAMP_ID  = BREAKUP_CNF_RAMP_ID
-   
+
    IF(LPC%CNF_RAMP_ID/='null') THEN
         CALL GET_RAMP_INDEX(LPC%CNF_RAMP_ID,'DIAMETER',LPC%CNF_RAMP_INDEX)
    ENDIF
    IF(LPC%BREAKUP_CNF_RAMP_ID/='null') THEN
         CALL GET_RAMP_INDEX(LPC%BREAKUP_CNF_RAMP_ID,'DIAMETER',LPC%BREAKUP_CNF_RAMP_INDEX)
    ENDIF
-   
+
    LPC%TMP_INITIAL        = INITIAL_TEMPERATURE + TMPM
    LPC%REAL_REFRACTIVE_INDEX = REAL_REFRACTIVE_INDEX
    LPC%COMPLEX_REFRACTIVE_INDEX = COMPLEX_REFRACTIVE_INDEX
@@ -3467,7 +3467,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    LPC%STATIC             = STATIC
    LPC%SPEC_ID            = SPEC_ID
    LPC%SURF_ID            = SURF_ID
-   LPC%SURF_INDEX         = -1   
+   LPC%SURF_INDEX         = -1
    LPC%SURFACE_TENSION    = SURFACE_TENSION
    LPC%ADJUST_EVAPORATION  = 1._EB   ! If H_O_C>0. this parameter will have to be reset later
    LPC%VERTICAL_VELOCITY   = VERTICAL_VELOCITY
@@ -3488,7 +3488,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          WRITE(MESSAGE,'(A)') 'ERROR: unrecognized drag law on PART line'
          CALL SHUTDOWN(MESSAGE)
    END SELECT
-    
+
    LPC%FREE_AREA_FRACTION = FREE_AREA_FRACTION
 
    ! Count and process the number of orientations for the particle
@@ -3499,7 +3499,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       IF (ANY(ABS(ORIENTATION(NN,1:3))>TWO_EPSILON_EB)) LPC%N_ORIENTATION = LPC%N_ORIENTATION + 1
    ENDDO
 
-   IF (LPC%N_ORIENTATION>0) THEN   
+   IF (LPC%N_ORIENTATION>0) THEN
       ALLOCATE(LPC%ORIENTATION(1:LPC%N_ORIENTATION,1:3),STAT=IZERO)
       CALL ChkMemErr('READ','ORIENTATION',IZERO)
       DO NN=1,LPC%N_ORIENTATION
@@ -3514,7 +3514,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       N_LP_ARRAY_INDICES = N_LP_ARRAY_INDICES + 1
       LPC%ARRAY_INDEX =  N_LP_ARRAY_INDICES
    ENDIF
-   
+
 ENDDO READ_PART_LOOP
 
 ! Allocate radiation arrays
@@ -3547,10 +3547,10 @@ DO ILPC=1,N_LAGRANGIAN_CLASSES
                                  LPC%QUANTITIES_INDEX(LPC%N_QUANTITIES),I_DUMMY(1), &
                                  LPC%QUANTITIES_Y_INDEX(LPC%N_QUANTITIES),LPC%QUANTITIES_Z_INDEX(LPC%N_QUANTITIES),&
                                  I_DUMMY(4),I_DUMMY(5),I_DUMMY(6),'PART', &
-                                 LPC%QUANTITIES(N),'null',LPC%QUANTITIES_SPEC_ID(N),'null','null','null')   
+                                 LPC%QUANTITIES(N),'null',LPC%QUANTITIES_SPEC_ID(N),'null','null','null')
       ENDDO QUANTITIES_LOOP
    ENDIF
-ENDDO 
+ENDDO
 
 ! Adjust the evaporation rate of fuel PARTICLEs to account for difference in HoC.
 
@@ -3560,8 +3560,8 @@ DO ILPC=1,N_LAGRANGIAN_CLASSES
 ENDDO
 
 END SUBROUTINE READ_PART
- 
- 
+
+
 SUBROUTINE PROC_PART
 
 USE PROPERTY_DATA, ONLY: JANAF_TABLE_LIQUID
@@ -3575,7 +3575,7 @@ IF (N_LAGRANGIAN_CLASSES == 0) RETURN
 
 PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
 
-   LPC => LAGRANGIAN_PARTICLE_CLASS(N)   
+   LPC => LAGRANGIAN_PARTICLE_CLASS(N)
    SF  => SURFACE(LPC%SURF_INDEX)
 
    ! Assign device or controller
@@ -3613,7 +3613,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          END SELECT
       ENDDO
       LPC%DENSITY = MASS/VOLUME
-      LPC%FTPR = FOTH*PI*LPC%DENSITY               
+      LPC%FTPR = FOTH*PI*LPC%DENSITY
    ENDIF
 
    IF (SF%HEAT_TRANSFER_MODEL>0) CALL SHUTDOWN('ERROR: HEAT_TRANSFER_MODEL not appropriate for PART')
@@ -3621,11 +3621,11 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ! Set the flag to do particle exchanges between meshes
 
    OMESH_PARTICLES=.TRUE.
-   
+
    ! Only process DROPLETs
 
    SURF_OR_SPEC: IF (LPC%SURF_INDEX==DROPLET_SURF_INDEX) THEN
-    
+
       SS => SPECIES(LPC%Y_INDEX)
 
       IZERO = 0
@@ -3654,18 +3654,18 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               LPC%FTPR = FOTH*PI*LPC%DENSITY               
+               LPC%FTPR = FOTH*PI*LPC%DENSITY
                IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
             ENDIF
          ELSE
-            CALL JANAF_TABLE_LIQUID (J,SS%C_P_L(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%ID,LPC%FUEL,DENSITY)            
-            IF (J==1) THEN         
+            CALL JANAF_TABLE_LIQUID (J,SS%C_P_L(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%ID,LPC%FUEL,DENSITY)
+            IF (J==1) THEN
                IF (LPC%DENSITY < 0._EB) LPC%DENSITY = DENSITY
                IF (LPC%DENSITY < 0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
                   CALL SHUTDOWN(MESSAGE)
-               ENDIF   
-               LPC%FTPR = FOTH*PI*LPC%DENSITY                                 
+               ENDIF
+               LPC%FTPR = FOTH*PI*LPC%DENSITY
                IF (SS%C_P_L(J) < 0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires CP, H_V, TMP_MELT, TMP_V, and T_REF'
                   CALL SHUTDOWN(MESSAGE)
@@ -3697,24 +3697,24 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
 
       DO J=1,5000
          H_G_S = CPBAR_Z(J,LPC%Z_INDEX)*REAL(J,EB)
-         SS%H_V(J) = H_G_S - SS%H_L(J)         
+         SS%H_V(J) = H_G_S - SS%H_L(J)
          IF (J==1) THEN
             SS%C_P_L_BAR(J) =  SS%H_L(J)
          ELSE
             SS%C_P_L_BAR(J) = SS%H_L(J) / REAL(J,EB)
          ENDIF
-      ENDDO         
+      ENDDO
 
-      SS%H_V(0) = SS%H_V(1)  
+      SS%H_V(0) = SS%H_V(1)
       SS%C_P_L_BAR(0) = SS%H_L(1)
-      
+
    ENDIF SURF_OR_SPEC
-      
+
 ENDDO PART_LOOP
 
 END SUBROUTINE PROC_PART
- 
- 
+
+
 SUBROUTINE READ_PROP
 
 USE DEVICE_VARIABLES
@@ -3762,21 +3762,21 @@ COUNT_PROP_LOOP: DO
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 ENDDO COUNT_PROP_LOOP
- 
+
 ! Allocate the PROPERTY derived types
- 
+
 ALLOCATE(PROPERTY(0:N_PROP),STAT=IZERO)
-CALL ChkMemErr('READ','PROPERTY',IZERO) 
+CALL ChkMemErr('READ','PROPERTY',IZERO)
 
 ! Read the PROP lines in the order listed in the input file
- 
+
 REWIND(LU_INPUT)
 
 READ_PROP_LOOP: DO N=0,N_PROP
- 
+
    CALL CHECKREAD('PROP',LU_INPUT,IOS)  ! Look for PROP lines in the input file
-   CALL SET_PROP_DEFAULTS          ! Reset PROP NAMELIST parameters to default values 
-   IF (N > 0) READ(LU_INPUT,PROP) 
+   CALL SET_PROP_DEFAULTS          ! Reset PROP NAMELIST parameters to default values
+   IF (N > 0) READ(LU_INPUT,PROP)
 
    ! Pack PROP parameters into the appropriate property derived types
 
@@ -3865,7 +3865,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%PDPA_N           = PDPA_N
    PY%PDPA_INTEGRATE   = PDPA_INTEGRATE
    PY%PDPA_NORMALIZE   = PDPA_NORMALIZE
-   IF (PY%QUANTITY == 'NUMBER CONCENTRATION') THEN 
+   IF (PY%QUANTITY == 'NUMBER CONCENTRATION') THEN
       PY%PDPA_M        = 0
       PY%PDPA_N        = 0
    ENDIF
@@ -3892,9 +3892,9 @@ READ_PROP_LOOP: DO N=0,N_PROP
          WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', PDPA_HISTOGRAM needs PDPA_HISTOGRAM_LIMITS'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      
+
    ENDIF
-   
+
    PY%FED_ACTIVITY = FED_ACTIVITY
    IF(FED_ACTIVITY < 1 .OR. FED_ACTIVITY > 3) THEN
       WRITE(MESSAGE,'(A,A,A,I4)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', FED_ACTIVITY out of range: ',FED_ACTIVITY
@@ -3934,7 +3934,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
          PY%MASS_FLOW_RATE = MASS_FLOW_RATE
          IF (ABS(PARTICLE_VELOCITY) <= TWO_EPSILON_EB) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', must specify PARTICLE_VELOCITY with MASS_FLOW_RATE'
-            CALL SHUTDOWN(MESSAGE)         
+            CALL SHUTDOWN(MESSAGE)
          ELSE
             PY%PARTICLE_VELOCITY  = PARTICLE_VELOCITY
          ENDIF
@@ -3957,7 +3957,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
             WRITE(MESSAGE,'(A,A,A)') 'WARNING: PROP ',TRIM(PY%ID),' PARTICLE velocity is not defined.'
             IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
-         
+
          IF (PARTICLE_VELOCITY > 0._EB) THEN
             PY%PARTICLE_VELOCITY  = PARTICLE_VELOCITY
          ELSEIF ((ORIFICE_DIAMETER > 0._EB) .AND. (FLOW_RATE > 0._EB)) THEN
@@ -3969,12 +3969,12 @@ READ_PROP_LOOP: DO N=0,N_PROP
       CALL GET_RAMP_INDEX(FLOW_RAMP,'TIME',PY%FLOW_RAMP_INDEX)
    ELSE
       PY%FLOW_RAMP_INDEX = 0
-   ENDIF 
+   ENDIF
    IF (ABS(FLOW_TAU) > TWO_EPSILON_EB) THEN
-      PY%FLOW_TAU = FLOW_TAU 
-      IF (FLOW_TAU > 0._EB) PY%FLOW_RAMP_INDEX = TANH_RAMP 
+      PY%FLOW_TAU = FLOW_TAU
+      IF (FLOW_TAU > 0._EB) PY%FLOW_RAMP_INDEX = TANH_RAMP
       IF (FLOW_TAU < 0._EB) PY%FLOW_RAMP_INDEX = TSQR_RAMP
-   ENDIF 
+   ENDIF
 
    ! Check for SPEC_ID
 
@@ -3987,13 +3987,13 @@ READ_PROP_LOOP: DO N=0,N_PROP
    ENDIF
 
 ENDDO READ_PROP_LOOP
- 
- 
+
+
 CONTAINS
 
- 
+
 SUBROUTINE SET_PROP_DEFAULTS
- 
+
 ACTIVATION_OBSCURATION   = 3.24_EB     ! %/m
 ACTIVATION_TEMPERATURE   = -273.15_EB  ! C
 ALPHA_C                  = 1.8_EB      ! m, Heskestad Length Scale
@@ -4033,8 +4033,8 @@ PDPA_NORMALIZE           = .TRUE.
 PRESSURE_RAMP            = 'null'
 QUANTITY                 = 'null'
 RTI                      = 100._EB     ! (ms)**0.5
-SMOKEVIEW_ID             = 'null' 
-SMOKEVIEW_PARAMETERS     = 'null' 
+SMOKEVIEW_ID             = 'null'
+SMOKEVIEW_PARAMETERS     = 'null'
 SPEC_ID                  = 'null'
 SPRAY_ANGLE(1,1)           = 60._EB      ! degrees
 SPRAY_ANGLE(2,1)           = 75._EB      ! degrees
@@ -4048,9 +4048,9 @@ PDPA_HISTOGRAM           =.FALSE.
 PDPA_HISTOGRAM_CUMULATIVE =.FALSE.
 FED_ACTIVITY             = 2 ! light work
 END SUBROUTINE SET_PROP_DEFAULTS
- 
+
 END SUBROUTINE READ_PROP
- 
+
 
 
 SUBROUTINE PROC_PROP
@@ -4067,11 +4067,11 @@ TABLE_NORMED = .FALSE.
 PROP_LOOP: DO N=0,N_PROP
    PY => PROPERTY(N)
 
-   
+
    ! Assign PART_INDEX to Device PROPERTY array
 
    IF (PY%PART_ID/='null') THEN
-      
+
       DO ILPC=1,N_LAGRANGIAN_CLASSES
          LPC => LAGRANGIAN_PARTICLE_CLASS(ILPC)
          IF (LPC%ID==PY%PART_ID) THEN
@@ -4079,7 +4079,7 @@ PROP_LOOP: DO N=0,N_PROP
             EXIT
          ENDIF
       ENDDO
-      
+
       IF (PY%PART_INDEX<0) THEN
          WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ' ,N,' not found'
          CALL SHUTDOWN(MESSAGE)
@@ -4092,7 +4092,7 @@ PROP_LOOP: DO N=0,N_PROP
 
       PARTICLE_FILE=.TRUE.
 
-   ENDIF   
+   ENDIF
 
    ! Set up spinkler distributrion if needed
 
@@ -4172,7 +4172,7 @@ NAMELIST /MATL/ A,ABSORPTION_COEFFICIENT,BOILING_TEMPERATURE,CONDUCTIVITY,CONDUC
                 THRESHOLD_SIGN,THRESHOLD_TEMPERATURE,POROSITY,ALLOW_SHRINKING,ALLOW_SWELLING,GAS_DIFFUSION_DEPTH
 
 ! Count the MATL lines in the input file
- 
+
 REWIND(LU_INPUT)
 N_MATL = 0
 COUNT_MATL_LOOP: DO
@@ -4188,23 +4188,23 @@ COUNT_MATL_LOOP: DO
 ENDDO COUNT_MATL_LOOP
 
 ! Allocate the MATERIAL derived type
- 
+
 ALLOCATE(MATERIAL(1:N_MATL),STAT=IZERO)
-CALL ChkMemErr('READ','MATERIAL',IZERO) 
+CALL ChkMemErr('READ','MATERIAL',IZERO)
 
 ! Read the MATL lines in the order listed in the input file
- 
+
 REWIND(LU_INPUT)
 
 READ_MATL_LOOP: DO N=1,N_MATL
- 
+
    ML => MATERIAL(N)
 
    ! Read user defined MATL lines
 
    CALL CHECKREAD('MATL',LU_INPUT,IOS)
    CALL SET_MATL_DEFAULTS
-   READ(LU_INPUT,MATL) 
+   READ(LU_INPUT,MATL)
 
    ! Do some error checking on the inputs
 
@@ -4212,7 +4212,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
       IF ( ( ANY(THRESHOLD_TEMPERATURE>-TMPM) .OR. ANY(REFERENCE_TEMPERATURE>-TMPM) .OR. ANY(A>=0._EB) .OR. ANY(E>=0._EB) .OR. &
              ANY(ABS(HEAT_OF_REACTION)>TWO_EPSILON_EB) ) .AND. N_REACTIONS==0) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL number ',TRIM(ID),'. A reaction parameter is used, but N_REACTIONS=0'  
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL number ',TRIM(ID),'. A reaction parameter is used, but N_REACTIONS=0'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
@@ -4222,13 +4222,13 @@ READ_MATL_LOOP: DO N=1,N_MATL
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (ABS(SUM(NU_MATL(:,NR)))<=TWO_EPSILON_EB .AND. ABS(SUM(NU_SPEC(:,NR)))<=TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I2,A)') 'WARNING: MATL ',TRIM(ID),', REAC ',NR,'. No product yields (NUs) set'  
+            WRITE(MESSAGE,'(A,A,A,I2,A)') 'WARNING: MATL ',TRIM(ID),', REAC ',NR,'. No product yields (NUs) set'
             IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
       ENDDO
    ELSE NOT_BOILING ! Is liquid
       IF (ABS(HEAT_OF_REACTION(1))<=TWO_EPSILON_EB) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: HEAT_OF_REACTION should be greater than zero for liquid MATL ',TRIM(ID)  
+         WRITE(MESSAGE,'(A,A)') 'ERROR: HEAT_OF_REACTION should be greater than zero for liquid MATL ',TRIM(ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDIF NOT_BOILING
@@ -4236,21 +4236,21 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ! Error checking for thermal properties
 
    IF (ABS(DENSITY) <=TWO_EPSILON_EB ) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': DENSITY=0' 
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': DENSITY=0'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
    IF (ABS(CONDUCTIVITY) <=TWO_EPSILON_EB .AND. CONDUCTIVITY_RAMP == 'null' ) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': CONDUCTIVITY = 0' 
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': CONDUCTIVITY = 0'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
    IF (ABS(SPECIFIC_HEAT)<=TWO_EPSILON_EB .AND. SPECIFIC_HEAT_RAMP == 'null' ) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': SPECIFIC_HEAT = 0' 
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': SPECIFIC_HEAT = 0'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
    IF (SPECIFIC_HEAT > 10._EB) WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
- 
+
    ! Pack MATL parameters into the MATERIAL derived type
- 
+
    ML%A(:)                 = A(:)
    ML%ADJUST_BURN_RATE     = 1._EB
    ML%ALLOW_SHRINKING      = ALLOW_SHRINKING
@@ -4283,8 +4283,8 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ML%TMP_THR(:)           = THRESHOLD_TEMPERATURE(:) + TMPM
    ML%TMP_REF(:)           = REFERENCE_TEMPERATURE(:) + TMPM
    ML%THR_SIGN(:)          = THRESHOLD_SIGN
-   ML%RATE_REF(:)          = REFERENCE_RATE(:) 
- 
+   ML%RATE_REF(:)          = REFERENCE_RATE(:)
+
    ! Additional logic
 
    IF (BOILING_TEMPERATURE<5000._EB) THEN
@@ -4325,7 +4325,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ENDDO
 
 ENDDO READ_MATL_LOOP
- 
+
 ! Assign a material index to the RESIDUEs
 
 DO N=1,N_MATL
@@ -4365,14 +4365,14 @@ DO N=1,N_MATL
       WRITE(MESSAGE,'(A)') 'ERROR: Too high porosity for material ',TRIM(MATL_NAME(N))
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-!   ML%RHO_NONPOROUS        = DENSITY/(1._EB-POROSITY)   
+!   ML%RHO_NONPOROUS        = DENSITY/(1._EB-POROSITY)
 ENDDO
 
 
 CONTAINS
- 
+
 SUBROUTINE SET_MATL_DEFAULTS
- 
+
 A                      = -1._EB      ! 1/s
 ABSORPTION_COEFFICIENT = 5.0E4_EB    ! 1/m, corresponds to 99.3% drop within 1E-4 m distance.
 ALLOW_SHRINKING        = .TRUE.
@@ -4406,9 +4406,9 @@ SPECIFIC_HEAT_RAMP     = 'null'
 SPEC_ID                = 'null'
 HEATING_RATE           = 5._EB       ! K/min
 PYROLYSIS_RANGE        = 80._EB      ! K or C
- 
+
 END SUBROUTINE SET_MATL_DEFAULTS
- 
+
 END SUBROUTINE READ_MATL
 
 
@@ -4420,7 +4420,7 @@ SUBROUTINE PROC_MATL
 INTEGER :: N,J,NS,NS2,NR,Z_INDEX(N_TRACKED_SPECIES,MAX_REACTIONS)
 
 PROC_MATL_LOOP: DO N=1,N_MATL
-   
+
    ML => MATERIAL(N)
 
    ! Convert ML%NU_SPEC(I_ORDINAL,I_REACTION) and ML%SPEC_ID(I_ORDINAL,I_REACTION) to ML%NU_GAS(I_SPECIES,I_REACTION)
@@ -4428,15 +4428,15 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    Z_INDEX = -1
    DO NR=1,ML%N_REACTIONS
       DO NS=1,MAX_SPECIES
-         
+
          IF (TRIM(ML%SPEC_ID(NS,NR))/='null' .NEQV. ML%NU_SPEC(NS,NR)>TWO_EPSILON_EB) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' requires both a SPEC_ID and NU_SPEC'
-            CALL SHUTDOWN(MESSAGE)                  
+            CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (TRIM(ML%SPEC_ID(NS,NR))=='null') EXIT
          IF (NS==2 .AND. ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' can only specify one SPEC_ID for a liquid'
-            CALL SHUTDOWN(MESSAGE)                  
+            CALL SHUTDOWN(MESSAGE)
          ENDIF
          DO NS2=0,N_TRACKED_SPECIES
             IF (TRIM(ML%SPEC_ID(NS,NR))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
@@ -4448,12 +4448,12 @@ PROC_MATL_LOOP: DO N=1,N_MATL
          IF (Z_INDEX(NS,NR)==-1) THEN
             WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: SPECies ',TRIM(ML%SPEC_ID(NS,NR)),&
                                          ' corresponding to MATL ',TRIM(MATL_NAME(N)),' is not a tracked species'
-            CALL SHUTDOWN(MESSAGE)                  
-         ENDIF      
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
 
       ENDDO
    ENDDO
-      
+
    ! Adjust burn rate if heat of combustion is different from the gas phase reaction value
 
    DO J=1,MAX(1,ML%N_REACTIONS)
@@ -4471,7 +4471,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    IF (ML%RAMP_C_S/='null') THEN
          IF (RAMPS(-INT(ML%C_S))%DEPENDENT_DATA(1) > 10._EB) &
             WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
-   ENDIF   
+   ENDIF
 
 ENDDO PROC_MATL_LOOP
 
@@ -4479,7 +4479,7 @@ END SUBROUTINE PROC_MATL
 
 
 SUBROUTINE READ_SURF
- 
+
 USE MATH_FUNCTIONS, ONLY : GET_RAMP_INDEX
 USE DEVICE_VARIABLES, ONLY : PROPERTY_TYPE,PROPERTY
 CHARACTER(30) :: PART_ID,RAMP_MF(MAX_SPECIES),RAMP_Q,RAMP_V,RAMP_T,MATL_ID(MAX_LAYERS,MAX_MATERIALS),&
@@ -4524,10 +4524,10 @@ NAMELIST /SURF/ ADIABATIC,BACKING,BURN_AWAY,CELL_SIZE_FACTOR,C_FORCED_CONSTANT,C
                 VEGETATION_INITIAL_TEMP,VEGETATION_LAYERS,VEGETATION_LINEAR_DEGRAD,VEGETATION_LOAD,VEGETATION_LSET_IGNITE_TIME,&
                 VEGETATION_MOISTURE,VEGETATION_NO_BURN,VEGETATION_SVRATIO,VEG_LEVEL_SET_SPREAD,VEG_LSET_ROS_BACK,&
                 VEG_LSET_ROS_FLANK,VEG_LSET_ROS_HEAD,VEG_LSET_WIND_EXP, &
-                VEG_LSET_SIGMA,VEG_LSET_HT,VEG_LSET_BETA,VEG_LSET_ELLIPSE,VEG_LSET_TAN2,VEG_LSET_ELLIPSE_HEAD, & 
+                VEG_LSET_SIGMA,VEG_LSET_HT,VEG_LSET_BETA,VEG_LSET_ELLIPSE,VEG_LSET_TAN2,VEG_LSET_ELLIPSE_HEAD, &
                 VEL,VEL_GRAD,VEL_T,VOLUME_FLUX,WIDTH,XYZ,Z0,&
                 EXTERNAL_FLUX_RAMP,TAU_EXTERNAL_FLUX ! Backwards compatability??
-                
+
 ! Count the SURF lines in the input file
 
 REWIND(LU_INPUT)
@@ -4546,10 +4546,10 @@ COUNT_SURF_LOOP: DO
 ENDDO COUNT_SURF_LOOP
 
 ! Allocate the SURFACE derived type, leaving space for SURF entries not defined explicitly by the user
- 
+
 N_SURF_RESERVED = 9
 ALLOCATE(SURFACE(0:N_SURF+N_SURF_RESERVED),STAT=IZERO)
-CALL ChkMemErr('READ','SURFACE',IZERO) 
+CALL ChkMemErr('READ','SURFACE',IZERO)
 
 ! Count the SURF lines in the input file
 
@@ -4564,7 +4564,7 @@ COUNT_SURF_LOOP_AGAIN: DO
 ENDDO COUNT_SURF_LOOP_AGAIN
 
 ! Add extra surface types to the list that has already been compiled
- 
+
 INERT_SURF_INDEX             = 0
 OPEN_SURF_INDEX              = N_SURF + 1
 MIRROR_SURF_INDEX            = N_SURF + 2
@@ -4591,7 +4591,7 @@ SURFACE(EVACUATION_SURF_INDEX)%ID        = 'EVACUATION_OUTFLOW'
 
 SURFACE(0)%USER_DEFINED                               = .FALSE.
 SURFACE(N_SURF-N_SURF_RESERVED+1:N_SURF)%USER_DEFINED = .FALSE.
- 
+
 ! Check if SURF_DEFAULT exists
 
 CALL CHECK_SURF_NAME(SURF_DEFAULT,EX)
@@ -4609,20 +4609,20 @@ IF (.NOT.EX) THEN
 ENDIF
 
 ! Read the SURF lines
- 
+
 REWIND(LU_INPUT)
 READ_SURF_LOOP: DO N=0,N_SURF
- 
+
    SF => SURFACE(N)
    CALL SET_SURF_DEFAULTS
- 
+
    ! Read the user defined SURF lines
 
    READ_LOOP: DO
       IF (.NOT.SF%USER_DEFINED) EXIT READ_LOOP
       CALL CHECKREAD('SURF',LU_INPUT,IOS)
       CALL SET_SURF_DEFAULTS
-      READ(LU_INPUT,SURF) 
+      READ(LU_INPUT,SURF)
       EXIT READ_LOOP
    ENDDO READ_LOOP
 
@@ -4632,7 +4632,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Vegetation parameters
 
    IF(VEGETATION) WFDS_BNDRYFUEL = .TRUE.
-   
+
    ! Level set vegetation fire spread specific
    SF%VEG_LSET_SPREAD    = VEG_LEVEL_SET_SPREAD
    SF%VEG_LSET_ROS_HEAD  = VEG_LSET_ROS_HEAD !head fire rate of spread m/s
@@ -4645,7 +4645,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%VEG_LSET_BETA      = VEG_LSET_BETA
    SF%VEG_LSET_ELLIPSE   = VEG_LSET_ELLIPSE
    SF%VEG_LSET_TAN2      = VEG_LSET_TAN2
-   
+
    ! Boundary Vegetation specific
 
    SF%VEGETATION   = VEGETATION !T or F
@@ -4682,12 +4682,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ALLOCATE(SF%VEG_FINCM_RADFCT_L(0:SF%NVEG_L),STAT=IZERO) !add index for mult veg
    CALL ChkMemErr('READ_SURF','VEG_FINCM_RADFCT_L',IZERO)
    ALLOCATE(SF%VEG_FINCP_RADFCT_L(0:SF%NVEG_L),STAT=IZERO)
-   CALL ChkMemErr('READ','VEG_FINCP_RADFCT_L',IZERO) 
+   CALL ChkMemErr('READ','VEG_FINCP_RADFCT_L',IZERO)
 
    ALLOCATE(SF%VEG_SEMISSP_RADFCT_L(0:SF%NVEG_L,0:SF%NVEG_L),STAT=IZERO) !add index for mult veg
-   CALL ChkMemErr('READ','VEG_SEMISSP_RADFCT_L',IZERO) 
+   CALL ChkMemErr('READ','VEG_SEMISSP_RADFCT_L',IZERO)
    ALLOCATE(SF%VEG_SEMISSM_RADFCT_L(0:SF%NVEG_L,0:SF%NVEG_L),STAT=IZERO)
-   CALL ChkMemErr('READ','VEG_SEMISSM_RADFCT_L',IZERO) 
+   CALL ChkMemErr('READ','VEG_SEMISSM_RADFCT_L',IZERO)
 
    ! If a RADIUS is specified, consider it the same as THICKNESS(1)
 
@@ -4710,13 +4710,13 @@ READ_SURF_LOOP: DO N=0,N_SURF
       WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a RADIUS or THICKESS'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-   
-   ! Identify the default SURF 
+
+   ! Identify the default SURF
 
    IF (ID==SURF_DEFAULT) DEFAULT_SURF_INDEX = N
 
    ! Pack SURF parameters into the SURFACE derived type
- 
+
    SF                      => SURFACE(N)
    SF%ADIABATIC            = ADIABATIC
    SELECT CASE(BACKING)
@@ -4729,13 +4729,13 @@ READ_SURF_LOOP: DO N=0,N_SURF
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//', BACKING '//TRIM(BACKING)//' not recognized'
          CALL SHUTDOWN(MESSAGE)
-   END SELECT 
+   END SELECT
    SF%BURN_AWAY            = BURN_AWAY
    SF%CELL_SIZE_FACTOR     = CELL_SIZE_FACTOR
    SF%CONVECTIVE_HEAT_FLUX = 1000._EB*CONVECTIVE_HEAT_FLUX
    SF%C_FORCED_CONSTANT    = C_FORCED_CONSTANT
-   SF%C_FORCED_PR_EXP      = C_FORCED_PR_EXP 
-   SF%C_FORCED_RE          = C_FORCED_RE 
+   SF%C_FORCED_PR_EXP      = C_FORCED_PR_EXP
+   SF%C_FORCED_RE          = C_FORCED_RE
    SF%C_FORCED_RE_EXP      = C_FORCED_RE_EXP
    SF%C_HORIZONTAL         = C_HORIZONTAL
    SF%C_VERTICAL           = C_VERTICAL
@@ -4744,17 +4744,17 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%DUCT_PATH            = DUCT_PATH
    SF%DT_INSERT            = DT_INSERT
    SF%E_COEFFICIENT        = E_COEFFICIENT
-   SF%EMISSIVITY           = EMISSIVITY   
+   SF%EMISSIVITY           = EMISSIVITY
    SF%EMISSIVITY_BACK      = EMISSIVITY_BACK
    SF%FIRE_SPREAD_RATE     = SPREAD_RATE
    SF%FREE_SLIP            = FREE_SLIP
    SF%NO_SLIP              = NO_SLIP
-   SF%FYI                  = FYI    
+   SF%FYI                  = FYI
    SF%EXTERNAL_FLUX        = 1000._EB*EXTERNAL_FLUX
    SF%INNER_RADIUS         = INNER_RADIUS
    SELECT CASE(GEOMETRY)
       CASE('CARTESIAN')
-         SF%GEOMETRY       = SURF_CARTESIAN      
+         SF%GEOMETRY       = SURF_CARTESIAN
          IF (SF%WIDTH>0._EB)                 SF%BACKING = INSULATED
       CASE('CYLINDRICAL')
          SF%GEOMETRY       = SURF_CYLINDRICAL
@@ -4810,9 +4810,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
    END SELECT
    SF%RAMP_EF              = EXTERNAL_FLUX_RAMP
    SF%RAMP_MF              = 'null'
-   SF%RAMP_Q               = RAMP_Q 
-   SF%RAMP_V               = RAMP_V  
-   SF%RAMP_T               = RAMP_T  
+   SF%RAMP_Q               = RAMP_Q
+   SF%RAMP_V               = RAMP_V
+   SF%RAMP_T               = RAMP_T
    SF%RAMP_PART            = RAMP_PART
    IF (COLOR/='null') THEN
       IF (COLOR=='INVISIBLE') THEN
@@ -4841,10 +4841,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%TEXTURE_HEIGHT       = TEXTURE_HEIGHT
    SF%TMP_IGN              = IGNITION_TEMPERATURE + TMPM
    SF%VEL                  = VEL
-   SF%VEL_GRAD             = VEL_GRAD   
+   SF%VEL_GRAD             = VEL_GRAD
    SF%VEL_T                = VEL_T
    SF%VOLUME_FLUX          = VOLUME_FLUX
-   SF%WIDTH                = WIDTH   
+   SF%WIDTH                = WIDTH
    SF%Z0                   = Z0
    SF%MASS_FLUX_TOTAL      = MASS_FLUX_TOTAL
    SF%H_FIXED              = HEAT_TRANSFER_COEFFICIENT
@@ -4852,7 +4852,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%XYZ                  = XYZ
 
    ! Error checking
-   
+
    IF (ANY(MASS_FLUX>0._EB) .AND. ANY(MASS_FRACTION>0._EB))  THEN
       WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF:',TRIM(SF%ID),&
                                 '. Cannot use both MASS_FLUX and MASS_FRACTION'
@@ -4864,19 +4864,19 @@ READ_SURF_LOOP: DO N=0,N_SURF
                                 '. Cannot use both MASS_FLUX and VEL'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-   
+
    IF (ANY(MASS_FRACTION<0._EB))  THEN
       WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF:',TRIM(SF%ID),&
                                 '. Cannot use a negative MASS_FRACTION'
       CALL SHUTDOWN(MESSAGE)
-   ENDIF   
-   
+   ENDIF
+
    IF (ANY(MASS_FLUX/=0._EB) .OR. ANY(MASS_FRACTION>0._EB)) THEN
       IF (SPEC_ID(1)=='null') THEN
          WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF:',TRIM(SF%ID),&
                                    '. Must define SPEC_ID when using MASS_FLUX or MASS_FRACTION'
          CALL SHUTDOWN(MESSAGE)
-      ELSE 
+      ELSE
          DO NN=1,MAX_SPECIES
             IF (TRIM(SPEC_ID(NN))=='null') EXIT
             DO NNN=0,N_TRACKED_SPECIES
@@ -4900,9 +4900,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ELSE
          IF (SF%MASS_FRACTION(0)<TWO_EPSILON_EB .AND. SUM(SF%MASS_FRACTION(1:N_TRACKED_SPECIES)) > 0._EB) &
             SF%MASS_FRACTION(0) = 1._EB - SUM(SF%MASS_FRACTION(1:N_TRACKED_SPECIES))
-      ENDIF      
+      ENDIF
    ENDIF
-   
+
    ! Set various logical parameters
 
    IF (ABS(SF%VEL_T(1))>TWO_EPSILON_EB .OR. ABS(SF%VEL_T(2))>TWO_EPSILON_EB) SF%SPECIFIED_TANGENTIAL_VELOCITY = .TRUE.
@@ -4917,7 +4917,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%LAYER_DENSITY    = 0._EB
    INDEX_LIST = -1
    ALLOCATE(SF%LAYER_THICKNESS(MAX_LAYERS))
-   SF%LAYER_THICKNESS = 0._EB   
+   SF%LAYER_THICKNESS = 0._EB
    COUNT_LAYERS: DO NL=1,MAX_LAYERS
       IF (THICKNESS(NL) < 0._EB) EXIT COUNT_LAYERS
       SF%N_LAYERS = SF%N_LAYERS + 1
@@ -4963,7 +4963,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Define mass flux division point
 
    IF (SF%LAYER_DIVIDE < 0._EB) THEN
-      IF (SF%BACKING==EXPOSED) THEN 
+      IF (SF%BACKING==EXPOSED) THEN
          SF%LAYER_DIVIDE = 0.5_EB * REAL(SF%N_LAYERS,EB)
       ELSE
          SF%LAYER_DIVIDE = REAL(SF%N_LAYERS+1)
@@ -4979,13 +4979,13 @@ READ_SURF_LOOP: DO N=0,N_SURF
          DO NR=1,ML%N_REACTIONS
             DO NNN=1,ML%N_RESIDUE(NR)
                IF (ML%RESIDUE_MATL_NAME(NNN,NR) == 'null') CYCLE
-               IF (ANY(NAME_LIST==ML%RESIDUE_MATL_NAME(NNN,NR))) CYCLE 
+               IF (ANY(NAME_LIST==ML%RESIDUE_MATL_NAME(NNN,NR))) CYCLE
                N_LIST = N_LIST + 1
                IF (N_LIST>MAX_MATERIALS_TOTAL) CALL SHUTDOWN('ERROR: Too many materials in the surface.')
                NAME_LIST (N_LIST) = ML%RESIDUE_MATL_NAME(NNN,NR)
                INDEX_LIST(N_LIST) = ML%RESIDUE_MATL_INDEX(NNN,NR)
             ENDDO
-         ENDDO 
+         ENDDO
       ENDDO
    ENDDO
 
@@ -4996,7 +4996,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       DO NNN=1,NN-1
          IF (NAME_LIST(NNN)==NAME_LIST(NN)) THEN
             NAME_LIST(NN)  = 'null'
-            INDEX_LIST(NN) = 0 
+            INDEX_LIST(NN) = 0
             N_LIST2 = N_LIST2-1
             CYCLE WEED_MATL_LIST
          ENDIF
@@ -5008,10 +5008,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF (TMP_FRONT >= -TMPM) TMPMIN = MIN(TMPMIN,TMP_FRONT+TMPM)
    IF (TMP_BACK >= -TMPM) TMPMIN = MIN(TMPMIN,TMP_BACK+TMPM)
    IF (ASSUMED_GAS_TEMPERATURE >= 0._EB) TMPMIN = MIN(TMPMIN,ASSUMED_GAS_TEMPERATURE)
-   
+
    SF%N_MATL     = N_LIST2
    SF%THERMALLY_THICK = .FALSE.
-   IF (SF%LAYER_DENSITY(1) > 0._EB) THEN    
+   IF (SF%LAYER_DENSITY(1) > 0._EB) THEN
       SF%THERMALLY_THICK = .TRUE.
       SF%TMP_INNER                             = TMP_INNER + TMPM
       IF (SF%TMP_INNER(1)>=0._EB) THEN
@@ -5074,12 +5074,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
          WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SF%ID)// ' cannot have both NET_HEAT_FLUX or CONVECTIVE_HEAT_FLUX'
          CALL SHUTDOWN(MESSAGE)
    ENDIF
-   
+
    SF%THERMAL_BC_INDEX = SPECIFIED_TEMPERATURE
    IF (SF%ADIABATIC) THEN
                                        SF%THERMAL_BC_INDEX = NET_FLUX_BC
                                        SF%NET_HEAT_FLUX = 0._EB
-                                       SF%EMISSIVITY       = 1._EB                                       
+                                       SF%EMISSIVITY       = 1._EB
    ENDIF
    IF (SF%NET_HEAT_FLUX < 1.E12_EB)    SF%THERMAL_BC_INDEX = NET_FLUX_BC
    IF (ABS(SF%CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB) SF%THERMAL_BC_INDEX = CONVECTIVE_FLUX_BC
@@ -5133,7 +5133,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ELSE
       IF (SF%TAU(TIME_EFLUX) > 0._EB) SF%RAMP_INDEX(TIME_EFLUX) = TANH_RAMP
       IF (SF%TAU(TIME_EFLUX) < 0._EB) SF%RAMP_INDEX(TIME_EFLUX) = TSQR_RAMP
-   ENDIF 
+   ENDIF
 
    IF (SF%RAMP_PART/='null') THEN
       CALL GET_RAMP_INDEX(SF%RAMP_PART,'TIME',NR)
@@ -5141,14 +5141,14 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ELSE
       IF (SF%TAU(TIME_PART) > 0._EB) SF%RAMP_INDEX(TIME_PART) = TANH_RAMP
       IF (SF%TAU(TIME_PART) < 0._EB) SF%RAMP_INDEX(TIME_PART) = TSQR_RAMP
-   ENDIF 
+   ENDIF
 
 ENDDO READ_SURF_LOOP
- 
+
 CONTAINS
- 
+
 SUBROUTINE SET_SURF_DEFAULTS
- 
+
 ADIABATIC               = .FALSE.
 BACKING                 = 'VOID'
 BURN_AWAY               = .FALSE.
@@ -5158,14 +5158,14 @@ C_FORCED_PR_EXP         = 0._EB
 C_FORCED_RE             = 0._EB
 C_FORCED_RE_EXP         = 0._EB
 C_VERTICAL              = 1.31_EB  ! Vertical free convection (Holman, Table 7-2)
-C_HORIZONTAL            = 1.52_EB  ! Horizontal free convection 
+C_HORIZONTAL            = 1.52_EB  ! Horizontal free convection
 COLOR                   = 'null'
 CONVECTIVE_HEAT_FLUX    = 0._EB
 CONVECTION_LENGTH_SCALE = -1._EB
 NET_HEAT_FLUX           = 1.E12_EB
 DEFAULT                 = .FALSE.
 DT_INSERT               = 0.01_EB
-DUCT_PATH               = 0 
+DUCT_PATH               = 0
 E_COEFFICIENT           = 0._EB
 EMISSIVITY              = -1._EB
 EMISSIVITY_DEFAULT      = 0.9_EB
@@ -5186,7 +5186,7 @@ ID                      = 'null'
 IGNITION_TEMPERATURE    = 5000._EB
 INNER_RADIUS            =  0._EB
 LAYER_DIVIDE            = -1._EB
-LEAK_PATH               = -1 
+LEAK_PATH               = -1
 LENGTH                  = -1._EB
 MASS_FLUX               = 0._EB
 MASS_FLUX_TOTAL         = 0._EB
@@ -5246,8 +5246,8 @@ VEGETATION_HEIGHT            = 0.50_EB !m
 VEGETATION_INITIAL_TEMP      = TMPA-TMPM
 VEGETATION_GROUND_TEMP       = -99._EB
 VEGETATION_LOAD              = 0.30_EB !kg/m^2
-FIRELINE_MLR_MAX             = 999. !kg/m/s w*R*(1-ChiChar) 
-!SRF_VEG_DEHYDRATION_RATE_MAX = 999. !kg/m^2/s   
+FIRELINE_MLR_MAX             = 999. !kg/m/s w*R*(1-ChiChar)
+!SRF_VEG_DEHYDRATION_RATE_MAX = 999. !kg/m^2/s
 VEGETATION_LAYERS            = 0
 VEGETATION_MOISTURE          = 0.06_EB
 VEGETATION_SVRATIO           = 12000_EB !1/m
@@ -5265,12 +5265,12 @@ VEG_LSET_TAN2                = .FALSE.
 VEG_LSET_HT                  = 0.0_EB
 VEG_LSET_BETA                = 0.0_EB
 VEG_LSET_SIGMA               = 0.0_EB
- 
+
 END SUBROUTINE SET_SURF_DEFAULTS
- 
+
 END SUBROUTINE READ_SURF
 
- 
+
 SUBROUTINE PROC_SURF_1
 
 ! Go through the SURF types and process
@@ -5278,11 +5278,11 @@ SUBROUTINE PROC_SURF_1
 USE MATH_FUNCTIONS, ONLY : GET_RAMP_INDEX
 INTEGER :: N,NSPC,NR,ILPC
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
- 
+
 PROCESS_SURF_LOOP: DO N=0,N_SURF
- 
+
    SF => SURFACE(N)
- 
+
    ! Get ramps for the surface mass fraction and flux
 
    DO NSPC=0,N_TRACKED_SPECIES
@@ -5290,11 +5290,11 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          CALL GET_RAMP_INDEX(SF%RAMP_MF(NSPC),'TIME',NR)
          SF%RAMP_INDEX(NSPC) = NR
       ELSE
-         IF (SF%TAU(NSPC) > 0._EB) SF%RAMP_INDEX(NSPC) = TANH_RAMP 
-         IF (SF%TAU(NSPC) < 0._EB) SF%RAMP_INDEX(NSPC) = TSQR_RAMP 
+         IF (SF%TAU(NSPC) > 0._EB) SF%RAMP_INDEX(NSPC) = TANH_RAMP
+         IF (SF%TAU(NSPC) < 0._EB) SF%RAMP_INDEX(NSPC) = TSQR_RAMP
       ENDIF
-   ENDDO 
-   
+   ENDDO
+
    ! Look for particle classes that use SURF for property info
 
    DO ILPC=1,N_LAGRANGIAN_CLASSES
@@ -5308,7 +5308,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
              LPC%SURF_INDEX==VEGETATION_SURF_INDEX) CYCLE
 
          IF (LPC%DRAG_LAW==SCREEN_DRAG) CYCLE
-         
+
          SELECT CASE (SF%GEOMETRY)
             CASE(SURF_CARTESIAN)
                IF (SF%THICKNESS<=0._EB) THEN
@@ -5327,13 +5327,13 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                IF (SF%LENGTH <0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a LENGTH'
                   CALL SHUTDOWN(MESSAGE)
-               ENDIF               
-         END SELECT      
+               ENDIF
+         END SELECT
       ENDIF
    ENDDO
 
-ENDDO PROCESS_SURF_LOOP   
- 
+ENDDO PROCESS_SURF_LOOP
+
 ! If a particle class uses a SURF line, make sure the SURF ID exists
 
 DO ILPC=1,N_LAGRANGIAN_CLASSES
@@ -5351,20 +5351,20 @@ END SUBROUTINE PROC_SURF_1
 SUBROUTINE PROC_SURF_2
 
 ! Go through the SURF types and process
- 
+
 INTEGER :: ILPC,N,NN,NNN,NL
 REAL(EB) :: ADJUSTED_LAYER_DENSITY,R_L(0:MAX_LAYERS)
 INTEGER  :: IVEG_L,IIVEG_L,I_FUEL,I_GRAD
-REAL(EB) :: DETA_VEG,DZVEG_L,ETA_H,ETAFM_VEG,ETAFP_VEG 
+REAL(EB) :: DETA_VEG,DZVEG_L,ETA_H,ETAFM_VEG,ETAFP_VEG
 LOGICAL :: BURNING,BLOWING,SUCKING
 
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
- 
+
 PROCESS_SURF_LOOP: DO N=0,N_SURF
- 
+
    SF => SURFACE(N)
    IF (SF%THERMALLY_THICK) ML => MATERIAL(SF%LAYER_MATL_INDEX(1,1))
-   
+
    SELECT CASE(SF%GEOMETRY)
       CASE(SURF_CARTESIAN)    ; I_GRAD = 1
       CASE(SURF_CYLINDRICAL)  ; I_GRAD = 2
@@ -5372,7 +5372,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    END SELECT
 
    ! Particle Information
- 
+
    SF%PART_INDEX = 0
    IF (SF%PART_ID/='null') THEN
       DO ILPC=1,N_LAGRANGIAN_CLASSES
@@ -5387,13 +5387,13 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
   ! Determine if the surface is combustible/burning
- 
+
    SF%PYROLYSIS_MODEL = PYROLYSIS_NONE
    BURNING  = .FALSE.
    DO NL=1,SF%N_LAYERS
       DO NN=1,SF%N_LAYER_MATL(NL)
          NNN = SF%LAYER_MATL_INDEX(NL,NN)
-         ML => MATERIAL(NNN)   
+         ML => MATERIAL(NNN)
          IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_NONE) THEN
             SF%PYROLYSIS_MODEL = PYROLYSIS_MATERIAL
             SF%STRETCH_FACTOR(NL) = 1._EB
@@ -5436,14 +5436,14 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have a specified velocity or volume flux'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
- 
+
    ! Neumann for normal component of velocity
-   
+
    IF (SF%VEL_GRAD > -999998._EB) THEN
        SF%SPECIFIED_NORMAL_GRADIENT = .TRUE.
        SF%SPECIFIED_NORMAL_VELOCITY = .FALSE.
    ENDIF
- 
+
    ! Set predefined HRRPUA
 
    BURNING_IF: IF (BURNING .AND. .NOT.ALL(EVACUATION_ONLY)) THEN
@@ -5464,7 +5464,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       ENDIF
       SF%TAU(I_FUEL)        = SF%TAU(TIME_HEAT)
       SF%RAMP_MF(I_FUEL)    = SF%RAMP_Q
-      SF%RAMP_INDEX(I_FUEL) = SF%RAMP_INDEX(TIME_HEAT) 
+      SF%RAMP_INDEX(I_FUEL) = SF%RAMP_INDEX(TIME_HEAT)
    ENDIF BURNING_IF
 
    ! Compute surface density
@@ -5487,11 +5487,11 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    IF ((ABS(SF%SURFACE_DENSITY) <= TWO_EPSILON_EB) .AND. SF%BURN_AWAY) THEN
       WRITE(MESSAGE,'(A,A,A)') 'WARNING: SURF ',TRIM(SF%ID),' has BURN_AWAY set but zero combustible density'
       IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
-   ENDIF   
+   ENDIF
 
    ! Ignition Time
 
-   SF%T_IGN = T_BEGIN 
+   SF%T_IGN = T_BEGIN
    IF (SF%TMP_IGN<5000._EB)                    SF%T_IGN = HUGE(T_END)
    IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) SF%T_IGN = HUGE(T_END)
 
@@ -5529,12 +5529,12 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ! Boundary fuel model for vegetation
 
    IF (SF%VEGETATION) SF%SPECIES_BC_INDEX = SPECIFIED_MASS_FLUX
- 
+
    ! Texture map info
 
    SF%SURF_TYPE = 0
    IF (SF%TEXTURE_MAP/='null') SF%SURF_TYPE = 1
-  
+
    ! Set BCs for various boundary types
 
    SF%VELOCITY_BC_INDEX = WALL_MODEL_BC
@@ -5547,7 +5547,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       SF%SPECIES_BC_INDEX = INFLOW_OUTFLOW_MASS_FLUX
       SF%VELOCITY_BC_INDEX = FREE_SLIP_BC
       SF%SURF_TYPE = 2
-      SF%EMISSIVITY = 1._EB      
+      SF%EMISSIVITY = 1._EB
    ENDIF
    IF (N==MIRROR_SURF_INDEX) THEN
       SF%THERMAL_BC_INDEX = NO_CONVECTION
@@ -5611,7 +5611,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ! Boundary surface vegetation
 
    DZVEG_L  = SF%VEG_HEIGHT/REAL(SF%NVEG_L,EB)
-   DETA_VEG = SF%VEG_KAPPA*DZVEG_L 
+   DETA_VEG = SF%VEG_KAPPA*DZVEG_L
 
    ! Factors for computing decay of +/- incident fluxes
 
@@ -5647,7 +5647,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ENDDO
 
 ENDDO PROCESS_SURF_LOOP
- 
+
 END SUBROUTINE PROC_SURF_2
 
 
@@ -5680,7 +5680,7 @@ DO N=1,N_MATL
 ENDDO
 
 NWP_MAX = 0  ! For some utility arrays, need to know the greatest number of points of all surface types
- 
+
 ! Loop through all surfaces, looking for those that are thermally-thick (have layers).
 ! Compute smallest cell size for each layer such that internal cells double in size.
 ! Each layer should have an odd number of cells.
@@ -5697,7 +5697,7 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
    DO NL=1,SF%N_LAYERS
 
       SF%MIN_DIFFUSIVITY(NL) = 1000000._EB
-      DO N = 1,SF%N_LAYER_MATL(NL) 
+      DO N = 1,SF%N_LAYER_MATL(NL)
          ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,N))
          SF%MIN_DIFFUSIVITY(NL) = MIN(SF%MIN_DIFFUSIVITY(NL),ML%DIFFUSIVITY)
       ENDDO
@@ -5716,11 +5716,11 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
          SWELL_RATIO = DENSITY_MAX/DENSITY_MIN
       ENDIF
 
-      ! Get highest possible number of cells for this layer      
+      ! Get highest possible number of cells for this layer
       CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),SWELL_RATIO*SF%LAYER_THICKNESS(NL),SF%STRETCH_FACTOR(NL), &
                           SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS(NL),SMALLEST_CELL_SIZE(NL))
       N_CELLS_MAX = N_CELLS_MAX + SF%N_LAYER_CELLS(NL)
-     
+
       ! Get initial number of cells for this layer
       CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),SF%LAYER_THICKNESS(NL),SF%STRETCH_FACTOR(NL), &
                              SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS(NL),SMALLEST_CELL_SIZE(NL))
@@ -5741,7 +5741,7 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
    ALLOCATE(SF%MF_FRAC(1:SF%N_CELLS_MAX))
    ALLOCATE(SF%RHO_0(0:SF%N_CELLS_MAX+1,SF%N_MATL))
 
-! Compute node coordinates 
+! Compute node coordinates
 
    CALL GET_WALL_NODE_COORDINATES(SF%N_CELLS_INI,SF%N_LAYERS,SF%N_LAYER_CELLS, &
          SMALLEST_CELL_SIZE(1:SF%N_LAYERS),SF%STRETCH_FACTOR(1:SF%N_LAYERS),SF%X_S)
@@ -5775,7 +5775,7 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
    ENDDO
 
 ENDDO SURF_GRID_LOOP
- 
+
 ALLOCATE(AAS(NWP_MAX),STAT=IZERO)
 CALL ChkMemErr('INIT','AAS',IZERO)
 ALLOCATE(CCS(NWP_MAX),STAT=IZERO)
@@ -5902,7 +5902,7 @@ IF (TWO_D) THEN
    NUMBER_RADIATION_ANGLES = 60
    TIME_STEP_INCREMENT     = 2
 ENDIF
- 
+
 KAPPA0               =   0._EB
 RADTMP               = 900._EB
 WIDE_BAND_MODEL      = .FALSE.
@@ -5912,7 +5912,7 @@ ANGLE_INCREMENT      = -1
 MIE_MAXIMUM_DIAMETER = 0._EB
 MIE_MINIMUM_DIAMETER = 0._EB
 MIE_NDG              = 50
- 
+
 ! Read radiation parameters
 
 REWIND(LU_INPUT)
@@ -5954,7 +5954,7 @@ IF (ANY(BAND_LIMITS>0._EB)) THEN
       WL_LOW(I) = BAND_LIMITS(I)
       WL_HIGH(I)= BAND_LIMITS(I+1)
    ENDDO
-   
+
    TIME_STEP_INCREMENT=MAX(1,TIME_STEP_INCREMENT)
    ANGLE_INCREMENT = 1
    UIIDIM=NUMBER_SPECTRAL_BANDS
@@ -5978,10 +5978,10 @@ ELSE
       NRT = 1
    ELSE
       NRT = 2*NINT(0.5_EB*1.17*REAL(NRA)**(1._EB/2.26))
-   ENDIF      
- 
+   ENDIF
+
    ! Determine number of azimuthal angles (phi)
- 
+
    ALLOCATE(NRP(1:NRT),STAT=IZERO)
    CALL ChkMemErr('INIT','NRP',IZERO)
 
@@ -6000,7 +6000,7 @@ ELSE
       ENDIF
       N = N + NRP(I)
    ENDDO
-   NUMBER_RADIATION_ANGLES = N 
+   NUMBER_RADIATION_ANGLES = N
 
 ENDIF
 
@@ -6011,23 +6011,23 @@ SUBROUTINE READ_CLIP
 
 REAL(EB) :: MAXIMUM_DENSITY,MINIMUM_DENSITY,MINIMUM_TEMPERATURE,MAXIMUM_TEMPERATURE
 NAMELIST /CLIP/ FYI,MAXIMUM_DENSITY,MAXIMUM_TEMPERATURE,MINIMUM_DENSITY,MINIMUM_TEMPERATURE
- 
+
 ! Check for user-defined mins and maxes.
- 
+
 MINIMUM_DENSITY       = -999._EB
 MAXIMUM_DENSITY       = -999._EB
 MINIMUM_TEMPERATURE   = -999._EB
 MAXIMUM_TEMPERATURE   = -999._EB
- 
+
 REWIND(LU_INPUT)
 CLIP_LOOP: DO
-   CALL CHECKREAD('CLIP',LU_INPUT,IOS) 
+   CALL CHECKREAD('CLIP',LU_INPUT,IOS)
    IF (IOS==1) EXIT CLIP_LOOP
    READ(LU_INPUT,CLIP,END=431,ERR=432,IOSTAT=IOS)
    432 IF (IOS>0) CALL SHUTDOWN('ERROR: Problem with CLIP line')
 ENDDO CLIP_LOOP
 431 REWIND(LU_INPUT)
- 
+
 IF (MINIMUM_TEMPERATURE>-TMPM) TMPMIN = MINIMUM_TEMPERATURE + TMPM
 IF (MAXIMUM_TEMPERATURE>-TMPM) TMPMAX = MAXIMUM_TEMPERATURE + TMPM
 
@@ -6044,12 +6044,12 @@ IF (MAXIMUM_DENSITY>0._EB) THEN
 ELSE
    RHOMAX = 3.0_EB*P_INF*MW_MAX/(R0*(TMPMIN+1._EB))  ! The 1 added to TMPMIN is to prevent a divide by zero error
 ENDIF
- 
+
 END SUBROUTINE READ_CLIP
- 
- 
+
+
 SUBROUTINE READ_RAMP
- 
+
 REAL(EB) :: X,T,F,TM
 INTEGER  :: I,II,NN,N,NUMBER_INTERPOLATION_POINTS
 CHARACTER(30) :: DEVC_ID,CTRL_ID
@@ -6061,7 +6061,7 @@ ALLOCATE(RAMPS(N_RAMP),STAT=IZERO)
 CALL ChkMemErr('READ','RAMPS',IZERO)
 
 ! Count the number of points in each ramp
- 
+
 REWIND(LU_INPUT)
 COUNT_RAMP_POINTS: DO N=1,N_RAMP
    RP => RAMPS(N)
@@ -6092,16 +6092,16 @@ READ_RAMP_LOOP: DO N=1,N_RAMP
    REWIND(LU_INPUT)
    NN = 0
    NUMBER_INTERPOLATION_POINTS=5000
-   SEARCH_LOOP2: DO 
+   SEARCH_LOOP2: DO
       DEVC_ID = 'null'
       CTRL_ID = 'null'
       X       = -1.E6_EB
-      CALL CHECKREAD('RAMP',LU_INPUT,IOS) 
+      CALL CHECKREAD('RAMP',LU_INPUT,IOS)
       IF (IOS==1) EXIT SEARCH_LOOP2
       READ(LU_INPUT,RAMP)
       IF (ID/=RAMP_ID(N)) CYCLE SEARCH_LOOP2
       IF (RP%DEVC_ID =='null') RP%DEVC_ID = DEVC_ID
-      IF (RP%CTRL_ID =='null') RP%CTRL_ID = CTRL_ID      
+      IF (RP%CTRL_ID =='null') RP%CTRL_ID = CTRL_ID
       IF (X>-1.E5_EB) THEN
          RAMP_TYPE(N) = 'X COORDINATE'
          SPATIAL_GRAVITY_VARIATION = .TRUE.
@@ -6125,9 +6125,9 @@ READ_RAMP_LOOP: DO N=1,N_RAMP
    RP%T_MAX = MAXVAL(RP%INDEPENDENT_DATA)
    RP%SPAN = RP%T_MAX - RP%T_MIN
 ENDDO READ_RAMP_LOOP
- 
+
 ! Set up interpolated ramp values in INTERPOLATED_DATA and get control or device index
- 
+
 DO N=1,N_RAMP
    RP => RAMPS(N)
    RP%RDT = REAL(RP%NUMBER_INTERPOLATION_POINTS,EB)/RP%SPAN
@@ -6149,14 +6149,14 @@ DO N=1,N_RAMP
    ! Get Device or Control Index
 
    CALL SEARCH_CONTROLLER('RAMP',RP%CTRL_ID,RP%DEVC_ID,RP%DEVC_INDEX,RP%CTRL_INDEX,N)
-   
+
 ENDDO
 
 END SUBROUTINE READ_RAMP
- 
- 
+
+
 SUBROUTINE READ_TABL
- 
+
 REAL(EB) :: TABLE_DATA(9)
 INTEGER  :: NN,N
 TYPE(TABLES_TYPE), POINTER :: TA=>NULL()
@@ -6168,7 +6168,7 @@ ALLOCATE(TABLES(N_TABLE),STAT=IZERO)
 CALL ChkMemErr('READ','TABLES',IZERO)
 
 ! Count the number of points in each table
- 
+
 REWIND(LU_INPUT)
 COUNT_TABLE_POINTS: DO N=1,N_TABLE
    TA => TABLES(N)
@@ -6228,7 +6228,7 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
                CALL SHUTDOWN(MESSAGE)
             ENDIF
       END SELECT
-         
+
       56 IF (IOS>0) CALL SHUTDOWN('ERROR: Problem with TABLE '//TRIM(TABLE_ID(N)) )
    ENDDO SEARCH_LOOP
    IF (TA%NUMBER_ROWS==0) THEN
@@ -6243,8 +6243,8 @@ READ_TABL_LOOP: DO N=1,N_TABLE
    CALL ChkMemErr('READ','TA%TABLE_DATA',IZERO)
    REWIND(LU_INPUT)
    NN = 0
-   SEARCH_LOOP2: DO 
-      CALL CHECKREAD('TABL',LU_INPUT,IOS) 
+   SEARCH_LOOP2: DO
+      CALL CHECKREAD('TABL',LU_INPUT,IOS)
       IF (IOS==1) EXIT SEARCH_LOOP2
       READ(LU_INPUT,TABL)
       IF (ID/=TABLE_ID(N)) CYCLE SEARCH_LOOP2
@@ -6255,12 +6255,12 @@ ENDDO READ_TABL_LOOP
 
 END SUBROUTINE READ_TABL
 
- 
+
 SUBROUTINE READ_OBST
 
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
 USE DEVICE_VARIABLES, ONLY : DEVICE, N_DEVC
-USE CONTROL_VARIABLES, ONLY : CONTROL, N_CTRL 
+USE CONTROL_VARIABLES, ONLY : CONTROL, N_CTRL
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
@@ -6281,9 +6281,9 @@ MESH_LOOP: DO NM=1,NMESHES
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
- 
+
    ! Count OBST lines
- 
+
    REWIND(LU_INPUT)
    N_OBST = 0
    COUNT_OBST_LOOP: DO
@@ -6305,7 +6305,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
    ENDDO COUNT_OBST_LOOP
    1 REWIND(LU_INPUT)
- 
+
    IF (EVACUATION_ONLY(NM)) CALL DEFINE_EVACUATION_OBSTS(NM,1,0)
 
    ! Allocate OBSTRUCTION array
@@ -6313,11 +6313,11 @@ MESH_LOOP: DO NM=1,NMESHES
    ALLOCATE(M%OBSTRUCTION(0:N_OBST),STAT=IZERO)
    CALL ChkMemErr('READ','OBSTRUCTION',IZERO)
    OBSTRUCTION=>M%OBSTRUCTION
- 
+
    N        = 0
    N_OBST_O = N_OBST
    EVAC_N   = 1
- 
+
    READ_OBST_LOOP: DO NN=1,N_OBST_O
 
       ID       = 'null'
@@ -6347,7 +6347,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
       IF (     EVACUATION_ONLY(NM)) REMOVABLE  = .FALSE.
- 
+
       ! Read the OBST line
 
       EVACUATION_OBST = .FALSE.
@@ -6378,7 +6378,7 @@ MESH_LOOP: DO NM=1,NMESHES
       K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
          J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
             I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
- 
+
                IF (.NOT.MR%SEQUENTIAL) THEN
                   XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
                   XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
@@ -6398,22 +6398,22 @@ MESH_LOOP: DO NM=1,NMESHES
                ! Increase the OBST counter
 
                N = N + 1
- 
+
                ! Evacuation criteria
- 
+
                EVAC_N = EVAC_N + 1
                IF (MESH_ID/=MESH_NAME(NM) .AND. MESH_ID/='null') THEN
                      N = N-1
                      N_OBST = N_OBST-1
                      CYCLE I_MULT_LOOP
                ENDIF
- 
+
                IF ((.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) .OR. (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM))) THEN
                      N = N-1
                      N_OBST = N_OBST-1
                      CYCLE I_MULT_LOOP
                ENDIF
- 
+
                ! Include obstructions within half a grid cell of the computational boundary
 
                IF (XB2>=XS-0.5_EB*DX(0)    .AND. XB2<XS) THEN
@@ -6440,7 +6440,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   XB5 = ZF
                   XB6 = ZF
                ENDIF
- 
+
                ! Throw out obstructions that are not within computational domain
 
                XB1 = MAX(XB1,XS)
@@ -6454,18 +6454,18 @@ MESH_LOOP: DO NM=1,NMESHES
                   N_OBST = N_OBST-1
                   CYCLE I_MULT_LOOP
                ENDIF
- 
+
                ! Begin processing of OBSTruction
- 
+
                OB=>OBSTRUCTION(N)
- 
+
                OB%X1 = XB1
                OB%X2 = XB2
                OB%Y1 = XB3
                OB%Y2 = XB4
                OB%Z1 = XB5
                OB%Z2 = XB6
-               
+
                OB%NOTERRAIN = NOTERRAIN
 
                ! Thicken evacuation mesh obstructions in the z direction
@@ -6477,15 +6477,15 @@ MESH_LOOP: DO NM=1,NMESHES
                   XB6   = ZF
                ENDIF
 
-               OB%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   ) 
+               OB%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   )
                OB%I2 = NINT( GINV(XB2-XS,1,NM)*RDXI   )
-               OB%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  ) 
+               OB%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  )
                OB%J2 = NINT( GINV(XB4-YS,2,NM)*RDETA  )
-               OB%K1 = NINT( GINV(XB5-ZS,3,NM)*RDZETA ) 
+               OB%K1 = NINT( GINV(XB5-ZS,3,NM)*RDZETA )
                OB%K2 = NINT( GINV(XB6-ZS,3,NM)*RDZETA )
- 
+
                ! If desired, thicken small obstructions
- 
+
                IF (THICKEN .AND. OB%I1==OB%I2) THEN
                   OB%I1 = GINV(.5_EB*(XB1+XB2)-XS,1,NM)*RDXI
                   OB%I2 = MIN(OB%I1+1,IBAR)
@@ -6500,7 +6500,7 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDIF
 
                ! Throw out obstructions that are too small
- 
+
                IF ((OB%I1==OB%I2.AND.OB%J1==OB%J2) .OR. (OB%I1==OB%I2.AND.OB%K1==OB%K2) .OR. (OB%J1==OB%J2.AND.OB%K1==OB%K2)) THEN
                   N = N-1
                   N_OBST= N_OBST-1
@@ -6508,9 +6508,9 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDIF
 
                IF (OB%I1==OB%I2 .OR. OB%J1==OB%J2 .OR. OB%K1==OB%K2) OB%THIN = .TRUE.
- 
+
                ! Check to see if obstacle is completely embedded in another
- 
+
                EMBEDDED = .FALSE.
                EMBED_LOOP: DO NNN=1,N-1
                   OB2=>OBSTRUCTION(NNN)
@@ -6521,7 +6521,7 @@ MESH_LOOP: DO NM=1,NMESHES
                      EXIT EMBED_LOOP
                   ENDIF
                ENDDO EMBED_LOOP
- 
+
                IF (EMBEDDED  .AND. DEVC_ID=='null' .AND.  REMOVABLE .AND. CTRL_ID=='null' ) THEN
                      N = N-1
                      N_OBST= N_OBST-1
@@ -6529,15 +6529,15 @@ MESH_LOOP: DO NM=1,NMESHES
                ENDIF
 
                ! Check if the SURF IDs exist
-         
+
                IF (EVACUATION_ONLY(NM)) SURF_ID=EVAC_SURF_DEFAULT
-         
+
                IF (SURF_ID/='null') CALL CHECK_SURF_NAME(SURF_ID,EX)
                IF (.NOT.EX) THEN
                   WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID),' does not exist'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-         
+
                DO NNNN=1,3
                   IF (EVACUATION_ONLY(NM)) SURF_IDS(NNNN)=EVAC_SURF_DEFAULT
                   IF (SURF_IDS(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_IDS(NNNN),EX)
@@ -6555,11 +6555,11 @@ MESH_LOOP: DO NM=1,NMESHES
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                ENDDO
- 
+
                ! Save boundary condition info for obstacles
- 
+
                OB%SURF_INDEX(:) = DEFAULT_SURF_INDEX
-          
+
                NNNN = 0
                DO NNN=0,N_SURF
                   IF (SURF_ID    ==SURFACE(NNN)%ID) OB%SURF_INDEX(:)    = NNN
@@ -6584,9 +6584,9 @@ MESH_LOOP: DO NM=1,NMESHES
                      OUTLINE = .TRUE.
                   ENDIF
                ENDIF
-         
+
                ! Determine if the OBST is CONSUMABLE
-         
+
                FACE_LOOP: DO NNN=-3,3
                   IF (NNN==0) CYCLE FACE_LOOP
                   IF (SURFACE(OB%SURF_INDEX(NNN))%BURN_AWAY) OB%CONSUMABLE = .TRUE.
@@ -6601,17 +6601,17 @@ MESH_LOOP: DO NM=1,NMESHES
                ELSE
                   OB%VOLUME_ADJUST = 0._EB
                ENDIF
-          
+
                ! Creation and removal logic
-          
+
                OB%DEVC_ID = DEVC_ID
                OB%CTRL_ID = CTRL_ID
                OB%HIDDEN = .FALSE.
-          
+
                ! Property ID
-          
+
                OB%PROP_ID = PROP_ID
-         
+
                CALL SEARCH_CONTROLLER('OBST',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
                IF (DEVC_ID /='null') THEN
                   IF (.NOT.DEVICE(OB%DEVC_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
@@ -6621,8 +6621,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (.NOT.CONTROL(OB%CTRL_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
                   OB%REMOVABLE = .TRUE.
                ENDIF
-         
-               IF (OB%CONSUMABLE .AND..NOT.EVACUATION_ONLY(NM))    OB%REMOVABLE = .TRUE.      
+
+               IF (OB%CONSUMABLE .AND..NOT.EVACUATION_ONLY(NM))    OB%REMOVABLE = .TRUE.
 
                ! Choose obstruction color index
 
@@ -6647,12 +6647,12 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%TRANSPARENCY = TRANSPARENCY
 
                ! Miscellaneous assignments
- 
+
                OB%TEXTURE(:) = TEXTURE_ORIGIN(:)  ! Origin of texture map
                OB%ORDINAL = NN  ! Order of OBST in original input file
                OB%PERMIT_HOLE = PERMIT_HOLE
                OB%ALLOW_VENT  = ALLOW_VENT
-               OB%OVERLAY     = OVERLAY    
+               OB%OVERLAY     = OVERLAY
 
                ! Only allow the use of BULK_DENSITY if the obstruction has a non-zero volume
 
@@ -6663,9 +6663,9 @@ MESH_LOOP: DO NM=1,NMESHES
              !    IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: OBST ',TRIM(ID),' has no volume and cannot have a BULK_DENSITY'
              !    CALL SHUTDOWN(MESSAGE)
              ! ENDIF
- 
+
                ! Make obstruction invisible if it's within a finer mesh
- 
+
                DO NOM=1,NM-1
                   IF (EVACUATION_ONLY(NOM)) CYCLE
                   IF (EVACUATION_ONLY(NM)) CYCLE
@@ -6673,9 +6673,9 @@ MESH_LOOP: DO NM=1,NMESHES
                       XB3>MESHES(NOM)%YS .AND. XB4<MESHES(NOM)%YF .AND. &
                       XB5>MESHES(NOM)%ZS .AND. XB6<MESHES(NOM)%ZF) OB%COLOR_INDICATOR=-2
                ENDDO
- 
+
                ! Prevent drawing of boundary info if desired
-          
+
                IF (BNDF_DEFAULT) THEN
                   OB%SHOW_BNDF(:) = BNDF_FACE(:)
                   IF (.NOT.BNDF_OBST) OB%SHOW_BNDF(:) = .FALSE.
@@ -6684,24 +6684,24 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (BNDF_OBST) OB%SHOW_BNDF(:) = .TRUE.
                ENDIF
                IF (EVACUATION_ONLY(NM)) OB%SHOW_BNDF(:) = .FALSE.
- 
+
                ! In Smokeview, draw the outline of the obstruction
- 
+
                IF (OUTLINE) OB%TYPE_INDICATOR = 2
 
             ENDDO I_MULT_LOOP
          ENDDO J_MULT_LOOP
       ENDDO K_MULT_LOOP
-      
+
    ENDDO READ_OBST_LOOP
 35 REWIND(LU_INPUT)
- 
+
 ENDDO MESH_LOOP
- 
+
 ! Read HOLEs and cut out blocks
- 
+
 CALL READ_HOLE
- 
+
 ! Look for OBSTructions that are meant to BURN_AWAY and break them up into single cell blocks
 
 MESH_LOOP_2: DO NM=1,NMESHES
@@ -6760,16 +6760,16 @@ ENDDO MESH_LOOP_2
 
 
 ! Go through all meshes, recording which cells are solid
- 
+
 MESH_LOOP_3: DO NM=1,NMESHES
 
    IF (PROCESS(NM)/=MYID .AND. MYID/=EVAC_PROCESS) CYCLE MESH_LOOP_3
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
- 
+
    ! Compute areas of obstruction faces, both actual (AB0) and FDS approximated (AB)
- 
+
    DO N=1,N_OBST
       OB=>OBSTRUCTION(N)
       OB%INPUT_AREA(1) = (OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
@@ -6782,16 +6782,16 @@ MESH_LOOP_3: DO NM=1,NMESHES
       OB%DIMENSIONS(2) = OB%J2 - OB%J1
       OB%DIMENSIONS(3) = OB%K2 - OB%K1
    ENDDO
- 
+
    ! Create main blockage index array (ICA)
- 
-   ALLOCATE(M%CELL_INDEX(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO) 
-   CALL ChkMemErr('READ','CELL_INDEX',IZERO) 
+
+   ALLOCATE(M%CELL_INDEX(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('READ','CELL_INDEX',IZERO)
    CELL_INDEX=>M%CELL_INDEX
- 
-   CELL_INDEX = 0 
+
+   CELL_INDEX = 0
    CELL_COUNT = 0
- 
+
    DO K=0,KBP1
       IF (EVACUATION_ONLY(NM) .AND. .NOT.(K==1)) CYCLE
       DO J=0,JBP1
@@ -6809,7 +6809,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
          ENDDO
       ENDDO
    ENDDO
- 
+
    DO K=0,KBP1
       IF (EVACUATION_ONLY(NM) .AND. .NOT.(K==1)) CYCLE
       DO I=0,IBP1
@@ -6827,7 +6827,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
          ENDDO
       ENDDO
    ENDDO
- 
+
    DO J=0,JBP1
       DO I=0,IBP1
          DO K=0,1
@@ -6846,7 +6846,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
          ENDDO
       ENDDO
    ENDDO
- 
+
    DO N=1,N_OBST
       OB=>OBSTRUCTION(N)
       DO K=OB%K1,OB%K2+1
@@ -6861,23 +6861,23 @@ MESH_LOOP_3: DO NM=1,NMESHES
          ENDDO
       ENDDO
    ENDDO
- 
+
    ! Store in SOLID which cells are solid and which are not
- 
-   ALLOCATE(M%SOLID(0:CELL_COUNT),STAT=IZERO) 
-   CALL ChkMemErr('READ','SOLID',IZERO) 
+
+   ALLOCATE(M%SOLID(0:CELL_COUNT),STAT=IZERO)
+   CALL ChkMemErr('READ','SOLID',IZERO)
    M%SOLID = .FALSE.
-   ALLOCATE(M%EXTERIOR(0:CELL_COUNT),STAT=IZERO) 
-   CALL ChkMemErr('READ','EXTERIOR',IZERO) 
+   ALLOCATE(M%EXTERIOR(0:CELL_COUNT),STAT=IZERO)
+   CALL ChkMemErr('READ','EXTERIOR',IZERO)
    M%EXTERIOR = .FALSE.
    SOLID=>M%SOLID
-   ALLOCATE(M%OBST_INDEX_C(0:CELL_COUNT),STAT=IZERO) 
-   CALL ChkMemErr('READ','OBST_INDEX_C',IZERO) 
+   ALLOCATE(M%OBST_INDEX_C(0:CELL_COUNT),STAT=IZERO)
+   CALL ChkMemErr('READ','OBST_INDEX_C',IZERO)
    M%OBST_INDEX_C = 0
-   OBST_INDEX_C=>M%OBST_INDEX_C 
+   OBST_INDEX_C=>M%OBST_INDEX_C
 
    ! Make all exterior cells solid
- 
+
    CALL BLOCK_CELL(NM,   0,   0,   0,JBP1,   0,KBP1,1,0)
    CALL BLOCK_CELL(NM,IBP1,IBP1,   0,JBP1,   0,KBP1,1,0)
    CALL BLOCK_CELL(NM,   0,IBP1,   0,   0,   0,KBP1,1,0)
@@ -6891,22 +6891,22 @@ MESH_LOOP_3: DO NM=1,NMESHES
       OB=>OBSTRUCTION(N)
       IF (.NOT.OB%HIDDEN) CALL BLOCK_CELL(NM,OB%I1+1,OB%I2,OB%J1+1,OB%J2,OB%K1+1,OB%K2,1,N)
    ENDDO
- 
+
    ! Create arrays to hold cell indices
 
-   ALLOCATE(M%I_CELL(CELL_COUNT),STAT=IZERO) 
-   CALL ChkMemErr('READ','I_CELL',IZERO) 
+   ALLOCATE(M%I_CELL(CELL_COUNT),STAT=IZERO)
+   CALL ChkMemErr('READ','I_CELL',IZERO)
    M%I_CELL = -1
-   ALLOCATE(M%J_CELL(CELL_COUNT),STAT=IZERO) 
-   CALL ChkMemErr('READ','J_CELL',IZERO) 
+   ALLOCATE(M%J_CELL(CELL_COUNT),STAT=IZERO)
+   CALL ChkMemErr('READ','J_CELL',IZERO)
    M%J_CELL = -1
-   ALLOCATE(M%K_CELL(CELL_COUNT),STAT=IZERO) 
-   CALL ChkMemErr('READ','K_CELL',IZERO) 
+   ALLOCATE(M%K_CELL(CELL_COUNT),STAT=IZERO)
+   CALL ChkMemErr('READ','K_CELL',IZERO)
    M%K_CELL = -1
-   I_CELL=>M%I_CELL 
-   J_CELL=>M%J_CELL 
+   I_CELL=>M%I_CELL
+   J_CELL=>M%J_CELL
    K_CELL=>M%K_CELL
- 
+
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
@@ -6926,7 +6926,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
       DEALLOCATE(M%EXTERIOR)
       CYCLE MESH_LOOP_3
    ENDIF
- 
+
 ENDDO MESH_LOOP_3
 
 CONTAINS
@@ -6961,12 +6961,12 @@ CONTAINS
              EMESH_EXITS(N)%XB(2) = MIN(EMESH_EXITS(N)%XB(2),MESHES(NM)%XF)
              EMESH_EXITS(N)%XB(3) = MAX(EMESH_EXITS(N)%XB(3),MESHES(NM)%YS)
              EMESH_EXITS(N)%XB(4) = MIN(EMESH_EXITS(N)%XB(4),MESHES(NM)%YF)
-             
-             I1 = NINT(GINV(EMESH_EXITS(N)%XB(1)-MESHES(NM)%XS,1,NM)*MESHES(NM)%RDXI ) 
+
+             I1 = NINT(GINV(EMESH_EXITS(N)%XB(1)-MESHES(NM)%XS,1,NM)*MESHES(NM)%RDXI )
              I2 = NINT(GINV(EMESH_EXITS(N)%XB(2)-MESHES(NM)%XS,1,NM)*MESHES(NM)%RDXI )
-             J1 = NINT(GINV(EMESH_EXITS(N)%XB(3)-MESHES(NM)%YS,2,NM)*MESHES(NM)%RDETA) 
+             J1 = NINT(GINV(EMESH_EXITS(N)%XB(3)-MESHES(NM)%YS,2,NM)*MESHES(NM)%RDETA)
              J2 = NINT(GINV(EMESH_EXITS(N)%XB(4)-MESHES(NM)%YS,2,NM)*MESHES(NM)%RDETA)
-             
+
              EMESH_EXITS(N)%XB(1) = MESHES(NM)%X(I1)
              EMESH_EXITS(N)%XB(2) = MESHES(NM)%X(I2)
              EMESH_EXITS(N)%XB(3) = MESHES(NM)%Y(J1)
@@ -6999,12 +6999,12 @@ CONTAINS
              EMESH_STAIRS(N)%XB_CORE(2) = MIN(EMESH_STAIRS(N)%XB_CORE(2),MESHES(NM)%XF)
              EMESH_STAIRS(N)%XB_CORE(3) = MAX(EMESH_STAIRS(N)%XB_CORE(3),MESHES(NM)%YS)
              EMESH_STAIRS(N)%XB_CORE(4) = MIN(EMESH_STAIRS(N)%XB_CORE(4),MESHES(NM)%YF)
-             
-             I1 = NINT(GINV(EMESH_STAIRS(N)%XB_CORE(1)-MESHES(NM)%XS,1,NM)*MESHES(NM)%RDXI ) 
+
+             I1 = NINT(GINV(EMESH_STAIRS(N)%XB_CORE(1)-MESHES(NM)%XS,1,NM)*MESHES(NM)%RDXI )
              I2 = NINT(GINV(EMESH_STAIRS(N)%XB_CORE(2)-MESHES(NM)%XS,1,NM)*MESHES(NM)%RDXI )
-             J1 = NINT(GINV(EMESH_STAIRS(N)%XB_CORE(3)-MESHES(NM)%YS,2,NM)*MESHES(NM)%RDETA) 
+             J1 = NINT(GINV(EMESH_STAIRS(N)%XB_CORE(3)-MESHES(NM)%YS,2,NM)*MESHES(NM)%RDETA)
              J2 = NINT(GINV(EMESH_STAIRS(N)%XB_CORE(4)-MESHES(NM)%YS,2,NM)*MESHES(NM)%RDETA)
-             
+
              EMESH_STAIRS(N)%XB_CORE(1) = MESHES(NM)%X(I1)
              EMESH_STAIRS(N)%XB_CORE(2) = MESHES(NM)%X(I2)
              EMESH_STAIRS(N)%XB_CORE(3) = MESHES(NM)%Y(J1)
@@ -7126,7 +7126,7 @@ ENDDO COUNT_LOOP
 CALL DEFINE_EVACUATION_HOLES(1)
 ! TEMP_HOLE_EVAC(:) indicates if the given HOLE is to be used in the EVACUATION routine
 
-IF (ANY(EVACUATION_ONLY)) THEN 
+IF (ANY(EVACUATION_ONLY)) THEN
    ALLOCATE(TEMP_HOLE_EVAC(1:N_HOLE_O))
    READ_HOLE_EVAC_LOOP: DO N=1,N_HOLE_O
       EVACUATION_HOLE = .FALSE.
@@ -7141,9 +7141,9 @@ IF (ANY(EVACUATION_ONLY)) THEN
    ENDDO READ_HOLE_EVAC_LOOP
    REWIND(LU_INPUT)
 ENDIF
- 
+
 READ_HOLE_LOOP: DO N=1,N_HOLE_O
- 
+
    ! Set default values for the HOLE namelist parameters
 
    DEVC_ID  = 'null'
@@ -7156,7 +7156,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
    EVACUATION = .FALSE.
    XB       = -9.E30_EB
    ! Read the HOLE line
- 
+
    EVACUATION_HOLE = .FALSE.
    IF (ANY(EVACUATION_ONLY)) CALL DEFINE_EVACUATION_HOLES(3)
    EVACUATION_HOLES: IF (.NOT. EVACUATION_HOLE) THEN
@@ -7164,28 +7164,28 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
       IF (IOS==1) EXIT READ_HOLE_LOOP
       READ(LU_INPUT,HOLE)
    END IF EVACUATION_HOLES
- 
+
    ! Re-order coordinates, if necessary
 
    CALL CHECK_XB(XB)
 
    ! Loop over all the meshes to determine where the HOLE is
- 
+
    MESH_LOOP: DO NM=1,NMESHES
 
       M=>MESHES(NM)
       CALL POINT_TO_MESH(NM)
- 
+
       ! Evacuation criteria
- 
+
       IF (MESH_ID/='null' .AND. MESH_ID/=MESH_NAME(NM)) CYCLE MESH_LOOP
       IF (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
-      IF (EVACUATION_ONLY(NM)) THEN 
+      IF (EVACUATION_ONLY(NM)) THEN
          IF (.NOT.TEMP_HOLE_EVAC(N)) CYCLE MESH_LOOP
          DEVC_ID    = 'null'
          CTRL_ID    = 'null'
       ENDIF
- 
+
       ! Loop over all possible multiples of the HOLE
 
       MR => MULTIPLIER(0)
@@ -7214,9 +7214,9 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                ENDIF
 
                ! Check if hole is contained within the current mesh
- 
+
                IF (X1>=XF .OR. X2<=XS .OR. Y1>YF .OR. Y2<=YS .OR. Z1>ZF .OR. Z2<=ZS) CYCLE I_MULT_LOOP
- 
+
                ! Assign mesh-limited bounds
 
                X1 = MAX(X1,XS-0.001_EB*DX(0))
@@ -7225,14 +7225,14 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                Y2 = MIN(Y2,YF+0.001_EB*DY(JBP1))
                Z1 = MAX(Z1,ZS-0.001_EB*DZ(0))
                Z2 = MIN(Z2,ZF+0.001_EB*DZ(KBP1))
- 
-               I1 = NINT( GINV(X1-XS,1,NM)*RDXI   ) 
+
+               I1 = NINT( GINV(X1-XS,1,NM)*RDXI   )
                I2 = NINT( GINV(X2-XS,1,NM)*RDXI   )
-               J1 = NINT( GINV(Y1-YS,2,NM)*RDETA  ) 
+               J1 = NINT( GINV(Y1-YS,2,NM)*RDETA  )
                J2 = NINT( GINV(Y2-YS,2,NM)*RDETA  )
-               K1 = NINT( GINV(Z1-ZS,3,NM)*RDZETA ) 
+               K1 = NINT( GINV(Z1-ZS,3,NM)*RDZETA )
                K2 = NINT( GINV(Z2-ZS,3,NM)*RDZETA )
- 
+
                NN=0
                OBST_LOOP: DO
                   NN=NN+1
@@ -7241,30 +7241,30 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                   DEVC_INDEX_O = OB%DEVC_INDEX
                   CTRL_INDEX_O = OB%CTRL_INDEX
                   IF (.NOT.OB%PERMIT_HOLE) CYCLE OBST_LOOP
-          
+
                   ! TEMP_OBST(0) is the intersection of HOLE and OBST
-          
+
                   TEMP_OBST(0)    = OBSTRUCTION(NN)
-          
+
                   TEMP_OBST(0)%I1 = MAX(I1,OB%I1)
                   TEMP_OBST(0)%I2 = MIN(I2,OB%I2)
                   TEMP_OBST(0)%J1 = MAX(J1,OB%J1)
                   TEMP_OBST(0)%J2 = MIN(J2,OB%J2)
                   TEMP_OBST(0)%K1 = MAX(K1,OB%K1)
                   TEMP_OBST(0)%K2 = MIN(K2,OB%K2)
-          
+
                   TEMP_OBST(0)%X1 = MAX(X1,OB%X1)
                   TEMP_OBST(0)%X2 = MIN(X2,OB%X2)
                   TEMP_OBST(0)%Y1 = MAX(Y1,OB%Y1)
                   TEMP_OBST(0)%Y2 = MIN(Y2,OB%Y2)
                   TEMP_OBST(0)%Z1 = MAX(Z1,OB%Z1)
                   TEMP_OBST(0)%Z2 = MIN(Z2,OB%Z2)
- 
+
                   ! Ignore OBSTs that do not intersect with HOLE or are merely sliced by the hole.
- 
+
                   IF (TEMP_OBST(0)%I2-TEMP_OBST(0)%I1<0 .OR. TEMP_OBST(0)%J2-TEMP_OBST(0)%J1<0 .OR. &
                       TEMP_OBST(0)%K2-TEMP_OBST(0)%K1<0) CYCLE OBST_LOOP
-                  IF (TEMP_OBST(0)%I2-TEMP_OBST(0)%I1==0) THEN 
+                  IF (TEMP_OBST(0)%I2-TEMP_OBST(0)%I1==0) THEN
                      IF (OB%I1<TEMP_OBST(0)%I1 .OR.  OB%I2>TEMP_OBST(0)%I2) CYCLE OBST_LOOP
                   ENDIF
                   IF (TEMP_OBST(0)%J2-TEMP_OBST(0)%J1==0) THEN
@@ -7273,14 +7273,14 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                   IF (TEMP_OBST(0)%K2-TEMP_OBST(0)%K1==0) THEN
                      IF (OB%K1<TEMP_OBST(0)%K1 .OR.  OB%K2>TEMP_OBST(0)%K2) CYCLE OBST_LOOP
                   ENDIF
-          
+
                   IF (TEMP_OBST(0)%X2<=X1 .OR. TEMP_OBST(0)%X1>=X2 .OR. TEMP_OBST(0)%Y2<=Y1 .OR. TEMP_OBST(0)%Y1>=Y2 .OR. &
                      TEMP_OBST(0)%Z2<=Z1 .OR. TEMP_OBST(0)%Z1>=Z2)  CYCLE OBST_LOOP
-          
+
                   ! Start counting new OBSTs that need to be created
-          
+
                   NDO=0
-          
+
                   IF ((OB%I1<I1.AND.I1<OB%I2) .OR. (XB(1)>=XS.AND.I1==0.AND.OB%I1==0)) THEN
                      NDO=NDO+1
                      TEMP_OBST(NDO)=OBSTRUCTION(NN)
@@ -7289,16 +7289,16 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                      TEMP_OBST(NDO)%X1 = OB%X1
                      TEMP_OBST(NDO)%X2 = X1
                   ENDIF
-          
+
                   IF ((OB%I1<I2.AND.I2<OB%I2) .OR. (XB(2)<=XF.AND.I2==IBAR.AND.OB%I2==IBAR)) THEN
                      NDO=NDO+1
                      TEMP_OBST(NDO)=OBSTRUCTION(NN)
                      TEMP_OBST(NDO)%I1 = I2
                      TEMP_OBST(NDO)%I2 = OB%I2
-                     TEMP_OBST(NDO)%X1 = X2 
+                     TEMP_OBST(NDO)%X1 = X2
                      TEMP_OBST(NDO)%X2 = OB%X2
                   ENDIF
-          
+
                   IF ((OB%J1<J1.AND.J1<OB%J2) .OR. (XB(3)>=YS.AND.J1==0.AND.OB%J1==0)) THEN
                      NDO=NDO+1
                      TEMP_OBST(NDO)=OBSTRUCTION(NN)
@@ -7311,7 +7311,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                      TEMP_OBST(NDO)%Y1 = OB%Y1
                      TEMP_OBST(NDO)%Y2 = Y1
                   ENDIF
-          
+
                   IF ((OB%J1<J2.AND.J2<OB%J2) .OR. (XB(4)<=YF.AND.J2==JBAR.AND.OB%J2==JBAR)) THEN
                      NDO=NDO+1
                      TEMP_OBST(NDO)=OBSTRUCTION(NN)
@@ -7319,12 +7319,12 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                      TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
                      TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
                      TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
-                     TEMP_OBST(NDO)%J1 = J2    
+                     TEMP_OBST(NDO)%J1 = J2
                      TEMP_OBST(NDO)%J2 = OB%J2
                      TEMP_OBST(NDO)%Y1 = Y2
                      TEMP_OBST(NDO)%Y2 = OB%Y2
                   ENDIF
-          
+
                   IF ((OB%K1<K1.AND.K1<OB%K2) .OR. (XB(5)>=ZS.AND.K1==0.AND.OB%K1==0)) THEN
                      NDO=NDO+1
                      TEMP_OBST(NDO)=OBSTRUCTION(NN)
@@ -7341,7 +7341,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                      TEMP_OBST(NDO)%Z1 = OB%Z1
                      TEMP_OBST(NDO)%Z2 = Z1
                   ENDIF
-          
+
                   IF ((OB%K1<K2.AND.K2<OB%K2) .OR. (XB(6)<=ZF.AND.K2==KBAR.AND.OB%K2==KBAR)) THEN
                      NDO=NDO+1
                      TEMP_OBST(NDO)=OBSTRUCTION(NN)
@@ -7358,24 +7358,24 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                      TEMP_OBST(NDO)%Z1 = Z2
                      TEMP_OBST(NDO)%Z2 = OB%Z2
                   ENDIF
-          
+
                   ! Maintain ordinal rank of original obstruction, but negate it. This will be a code for Smokeview.
-          
+
                   TEMP_OBST(:)%ORDINAL = -OB%ORDINAL
-          
+
                   ! Re-allocate space of new OBSTs, or remove entry for dead OBST
-          
+
                   NEW_OBST_IF: IF (NDO>0) THEN
                         CALL RE_ALLOCATE_OBST(NM,N_OBST,NDO)
                         OBSTRUCTION=>M%OBSTRUCTION
                         OBSTRUCTION(N_OBST+1:N_OBST+NDO) = TEMP_OBST(1:NDO)
                         N_OBST = N_OBST + NDO
                   ENDIF NEW_OBST_IF
-          
+
                   ! If the HOLE is to be created or removed, save it in OBSTRUCTION(NN), the original OBST that was broken up
-         
+
                   DEVC_OR_CTRL: IF (DEVC_ID/='null' .OR. CTRL_ID/='null') THEN
-         
+
                      OBSTRUCTION(NN) = TEMP_OBST(0)
                      OB => OBSTRUCTION(NN)
                      OB%DEVC_INDEX_O = DEVC_INDEX_O
@@ -7403,10 +7403,10 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                            IF(.NOT. DEVICE(OB%DEVC_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
                         ELSEIF (OB%CTRL_INDEX_O > 0) THEN
                            IF(.NOT. CONTROL(OB%CTRL_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-                        ENDIF                        
+                        ENDIF
                      ENDIF
                      IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.
-         
+
                      SELECT CASE (COLOR)
                         CASE ('INVISIBLE')
                            OB%COLOR_INDICATOR = -3
@@ -7426,22 +7426,22 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                            OB%RGB  = RGB
                            OB%TRANSPARENCY = TRANSPARENCY
                      END SELECT
-         
+
                   ELSE DEVC_OR_CTRL
-         
+
                      OBSTRUCTION(NN) = OBSTRUCTION(N_OBST)
                      N_OBST = N_OBST-1
                      NN = NN-1
-         
+
                   ENDIF DEVC_OR_CTRL
-          
+
                ENDDO OBST_LOOP
             ENDDO I_MULT_LOOP
          ENDDO J_MULT_LOOP
       ENDDO K_MULT_LOOP
    ENDDO MESH_LOOP
 ENDDO READ_HOLE_LOOP
- 
+
 REWIND(LU_INPUT)
 
 IF(ANY(EVACUATION_ONLY)) DEALLOCATE(TEMP_HOLE_EVAC)
@@ -7505,8 +7505,8 @@ CONTAINS
   END SUBROUTINE DEFINE_EVACUATION_HOLES
 
 END SUBROUTINE READ_HOLE
- 
- 
+
+
 
 SUBROUTINE RE_ALLOCATE_OBST(NM,N_OBST,NDO)
 
@@ -7521,8 +7521,8 @@ ALLOCATE(M%OBSTRUCTION(0:N_OBST+NDO))
 M%OBSTRUCTION(0:N_OBST) = DUMMY(0:N_OBST)
 DEALLOCATE(DUMMY)
 END SUBROUTINE RE_ALLOCATE_OBST
- 
- 
+
+
 SUBROUTINE READ_VENT
 
 USE GEOMETRY_FUNCTIONS, ONLY : BLOCK_CELL
@@ -7541,16 +7541,16 @@ LOGICAL :: REJECT_VENT,EVACUATION,OUTLINE,EVACUATION_VENT
 NAMELIST /VENT/ COLOR,CTRL_ID,DEVC_ID,DYNAMIC_PRESSURE,EVACUATION,FYI,ID,IOR,L_EDDY,L_EDDY_IJ,MB,MESH_ID,MULT_ID,N_EDDY,OUTLINE,&
                 PBX,PBY,PBZ,PRESSURE_RAMP,RADIUS,REYNOLDS_STRESS,RGB,SPREAD_RATE,SURF_ID,TEXTURE_ORIGIN,TMP_EXTERIOR,&
                 TMP_EXTERIOR_RAMP,TRANSPARENCY,UVW,VEL_RMS,XB,XYZ
- 
+
 MESH_LOOP_1: DO NM=1,NMESHES
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
- 
+
    REWIND(LU_INPUT)
    N_VENT = 0
    COUNT_VENT_LOOP: DO
-      CALL CHECKREAD('VENT',LU_INPUT,IOS) 
+      CALL CHECKREAD('VENT',LU_INPUT,IOS)
       IF (IOS==1) EXIT COUNT_VENT_LOOP
       MULT_ID = 'null'
       READ(LU_INPUT,NML=VENT,END=3,ERR=4,IOSTAT=IOS)
@@ -7570,21 +7570,21 @@ MESH_LOOP_1: DO NM=1,NMESHES
    3 REWIND(LU_INPUT)
 
    IF (EVACUATION_ONLY(NM)) CALL DEFINE_EVACUATION_VENTS(NM,1)
- 
+
    IF (TWO_D)                         N_VENT = N_VENT + 2
    IF (CYLINDRICAL .AND. M%XS<=TWO_EPSILON_EB) N_VENT = N_VENT + 1
    IF (EVACUATION_ONLY(NM))           N_VENT = N_VENT + 2
- 
+
    ALLOCATE(M%VENTS(N_VENT),STAT=IZERO)
    CALL ChkMemErr('READ','VENTS',IZERO)
    VENTS=>M%VENTS
- 
+
    N_VENT_O = N_VENT
    N        = 0
- 
+
    REWIND(LU_INPUT)
    READ_VENT_LOOP: DO NN=1,N_VENT_O
- 
+
       IOR     = 0
       MB      = 'null'
       PBX     = -1.E6_EB
@@ -7616,25 +7616,25 @@ MESH_LOOP_1: DO NM=1,NMESHES
       REYNOLDS_STRESS=0._EB
       UVW = -1.E12_EB
       RADIUS = -1._EB
- 
+
       IF (NN==N_VENT_O-2 .AND. CYLINDRICAL .AND. XS<=TWO_EPSILON_EB) MB='XMIN'
       IF (NN==N_VENT_O-1 .AND. TWO_D)                        MB='YMIN'
       IF (NN==N_VENT_O   .AND. TWO_D)                        MB='YMAX'
       IF (NN==N_VENT_O-1 .AND. EVACUATION_ONLY(NM))          MB='ZMIN'
       IF (NN==N_VENT_O   .AND. EVACUATION_ONLY(NM))          MB='ZMAX'
- 
+
       IF (MB=='null') THEN
          EVACUATION_VENT = .FALSE.
          IF (EVACUATION_ONLY(NM)) CALL DEFINE_EVACUATION_VENTS(NM,2)
          EVACUATION_VENTS: IF (.NOT. EVACUATION_VENT) THEN
-            CALL CHECKREAD('VENT',LU_INPUT,IOS) 
+            CALL CHECKREAD('VENT',LU_INPUT,IOS)
             IF (IOS==1) EXIT READ_VENT_LOOP
             READ(LU_INPUT,VENT,END=37)    ! Read in info for VENT N
          END IF EVACUATION_VENTS
       ELSE
          SURF_ID = 'MIRROR'
       ENDIF
- 
+
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
          IF (MULT_ID/='null') THEN
             WRITE(MESSAGE,'(A,I4,A)') 'ERROR: MULT_ID cannot be applied to VENT',NN,' because it uses PBX, PBY or PBZ.'
@@ -7650,7 +7650,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
          IF (PBY>-1.E5_EB) XB(3:4) = PBY
          IF (PBZ>-1.E5_EB) XB(5:6) = PBZ
       ENDIF
- 
+
       IF (MB/='null') THEN
          IF (NMESHES>1 .AND. SURF_ID=='PERIODIC') THEN
             WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT',NN,' multi-mesh PERIODIC boundary'
@@ -7670,37 +7670,37 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CASE('XMIN')
                 XB(2) = XS
             CASE('XMAX')
-                XB(1) = XF            
+                XB(1) = XF
             CASE('YMIN')
-                XB(4) = YS            
+                XB(4) = YS
             CASE('YMAX')
                 XB(3) = YF
             CASE('ZMIN')
-                XB(6) = ZS                                                                
-            CASE('ZMAX')      
-                XB(5) = ZF                                                                      
+                XB(6) = ZS
+            CASE('ZMAX')
+                XB(5) = ZF
             CASE DEFAULT
                WRITE(MESSAGE,'(A,I4,A)') 'ERROR: MB specified for VENT',NN,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
                CALL SHUTDOWN(MESSAGE)
          END SELECT
       ENDIF
- 
+
       ! Check that the vent is properly specified
- 
+
       IF (MESH_ID/='null' .AND. MESH_ID/=MESH_NAME(NM))  REJECT_VENT = .TRUE.
- 
+
       IF (ABS(XB(3)-XB(4))<=SPACING(XB(4))  .AND. TWO_D .AND. NN<N_VENT_O-1) THEN
          IF (ID=='null')WRITE(MESSAGE,'(A,I4,A)')'ERROR: VENT ',NN,      ' cannot be specified on a y boundary in a 2D calculation'
          IF (ID/='null')WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calculation'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
- 
+
       IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4))  .AND.ABS(XB(5)-XB(6))>SPACING(XB(6)) ) THEN
          IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,      ' must be a plane'
          IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' must be a plane'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
- 
+
       CALL CHECK_XB(XB)
 
       IF (ALL(EVACUATION_ONLY)) THEN
@@ -7740,7 +7740,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                N = N + 1
 
                VT=>VENTS(N)
-      
+
                IF (ABS(XB1-XB2)<=SPACING(XB2) ) VT%TOTAL_INPUT_AREA = (XB4-XB3)*(XB6-XB5)
                IF (ABS(XB3-XB4)<=SPACING(XB4) ) VT%TOTAL_INPUT_AREA = (XB2-XB1)*(XB6-XB5)
                IF (ABS(XB5-XB6)<=SPACING(XB6) ) VT%TOTAL_INPUT_AREA = (XB2-XB1)*(XB4-XB3)
@@ -7751,20 +7751,20 @@ MESH_LOOP_1: DO NM=1,NMESHES
                XB4 = MIN(XB4,YF+DY(JBP1))
                XB5 = MAX(XB5,ZS-DZ(0))
                XB6 = MIN(XB6,ZF+DZ(KBP1))
-          
+
                IF (XB1>XF+DX(IBP1) .OR. XB2<XS-DX(0) .OR. &
                    XB3>YF+DY(JBP1) .OR. XB4<YS-DY(0) .OR. &
                    XB5>ZF+DZ(KBP1) .OR. XB6<ZS-DZ(0)) REJECT_VENT = .TRUE.
-          
-               VT%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   ) 
+
+               VT%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   )
                VT%I2 = NINT( GINV(XB2-XS,1,NM)*RDXI   )
-               VT%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  ) 
+               VT%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  )
                VT%J2 = NINT( GINV(XB4-YS,2,NM)*RDETA  )
                VT%K1 = NINT( GINV(XB5-ZS,3,NM)*RDZETA )
                VT%K2 = NINT( GINV(XB6-ZS,3,NM)*RDZETA )
-          
+
                ! Thicken evacuation mesh vents in the z direction
-         
+
                IF (EVACUATION_ONLY(NM) .AND. EVACUATION .AND. VT%K1==VT%K2 .AND. .NOT.REJECT_VENT) THEN
                   VT%K1 = GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA
                   VT%K2 = KBAR
@@ -7776,7 +7776,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                ENDIF
-         
+
                IF (ABS(XB1-XB2)<=SPACING(XB2) ) THEN
                   IF (VT%J1==VT%J2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
                   IF (VT%I1>IBAR .OR. VT%I2<0)        REJECT_VENT=.TRUE.
@@ -7789,57 +7789,57 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   IF (VT%I1==VT%I2 .OR. VT%J1==VT%J2) REJECT_VENT=.TRUE.
                   IF (VT%K1>KBAR .OR. VT%K2<0)        REJECT_VENT=.TRUE.
                ENDIF
-         
+
                ! Evacuation criteria
-          
+
                IF (.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) REJECT_VENT=.TRUE.
                IF (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM)) REJECT_VENT=.TRUE.
-          
+
                IF (ALL(EVACUATION_ONLY)) THEN
                   DEVC_ID    = 'null'
                   CTRL_ID    = 'null'
                END IF
-         
+
                ! If the VENT is to rejected
-          
+
                IF (REJECT_VENT) THEN
                   N = N-1
                   N_VENT = N_VENT-1
                   CYCLE I_MULT_LOOP
                ENDIF
-          
+
                ! Vent area
-          
+
                VT%X1 = XB1
                VT%X2 = XB2
                VT%Y1 = XB3
                VT%Y2 = XB4
                VT%Z1 = XB5
                VT%Z2 = XB6
-          
+
                IF (ABS(XB1-XB2)<=SPACING(XB2) ) VT%INPUT_AREA = (XB4-XB3)*(XB6-XB5)
                IF (ABS(XB3-XB4)<=SPACING(XB4) ) VT%INPUT_AREA = (XB2-XB1)*(XB6-XB5)
                IF (ABS(XB5-XB6)<=SPACING(XB6) ) VT%INPUT_AREA = (XB2-XB1)*(XB4-XB3)
-          
+
                ! Check the SURF_ID against the list of SURF's
-         
+
                CALL CHECK_SURF_NAME(SURF_ID,EX)
                IF (.NOT.EX) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-         
+
                ! Assign SURF_INDEX, Index of the Boundary Condition
-         
+
                VT%SURF_INDEX = DEFAULT_SURF_INDEX
                DO NNN=0,N_SURF
                   IF (SURF_ID==SURFACE(NNN)%ID) VT%SURF_INDEX = NNN
                ENDDO
-         
+
                IF (SURF_ID=='OPEN')                            VT%TYPE_INDICATOR =  2
                IF (SURF_ID=='MIRROR' .OR. SURF_ID=='PERIODIC') VT%TYPE_INDICATOR = -2
                IF ((MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) .AND. SURF_ID=='OPEN') VT%TYPE_INDICATOR=-2
-          
+
                VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (VT%SURF_INDEX==OPEN_SURF_INDEX)     VT%BOUNDARY_TYPE = OPEN_BOUNDARY
                IF (VT%SURF_INDEX==MIRROR_SURF_INDEX)   VT%BOUNDARY_TYPE = MIRROR_BOUNDARY
@@ -7847,13 +7847,13 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (VT%SURF_INDEX==HVAC_SURF_INDEX)     VT%BOUNDARY_TYPE = HVAC_BOUNDARY
                VT%IOR = IOR
                VT%ORDINAL = NN
-          
+
                ! Activate and Deactivate logic
 
                VT%ACTIVATED = .TRUE.
                VT%DEVC_ID   = DEVC_ID
                VT%CTRL_ID   = CTRL_ID
-               VT%ID        = ID      
+               VT%ID        = ID
                CALL SEARCH_CONTROLLER('VENT',CTRL_ID,DEVC_ID,VT%DEVC_INDEX,VT%CTRL_INDEX,N)
                IF (DEVC_ID /= 'null') THEN
                   IF (.NOT.DEVICE(VT%DEVC_INDEX)%INITIAL_STATE) VT%ACTIVATED = .FALSE.
@@ -7861,16 +7861,16 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (CTRL_ID /= 'null') THEN
                   IF (.NOT.CONTROL(VT%CTRL_INDEX)%INITIAL_STATE) VT%ACTIVATED = .FALSE.
                ENDIF
-         
+
                IF ( (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. &
                      VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) .AND. (VT%DEVC_ID /= 'null' .OR. VT%CTRL_ID /= 'null') ) THEN
                   IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,      ' cannot be controlled by a device'
                   IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' cannot be controlled by a device'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-         
+
                ! Set the VENT color index
-         
+
                SELECT CASE(COLOR)
                   CASE('INVISIBLE')
                      VT%COLOR_INDICATOR = 8
@@ -7884,10 +7884,10 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (VT%COLOR_INDICATOR==8) VT%TYPE_INDICATOR = -2
                IF (OUTLINE)               VT%TYPE_INDICATOR =  2
                VT%RGB = RGB
-               VT%TRANSPARENCY = TRANSPARENCY 
-         
+               VT%TRANSPARENCY = TRANSPARENCY
+
                ! Parameters for specified spread of a fire over a VENT
-          
+
                VT%X0 = XYZ(1)
                VT%Y0 = XYZ(2)
                VT%Z0 = XYZ(3)
@@ -7904,12 +7904,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ENDIF
 
                ! Dynamic Pressure
-         
+
                VT%DYNAMIC_PRESSURE = DYNAMIC_PRESSURE
                IF (PRESSURE_RAMP/='null') CALL GET_RAMP_INDEX(PRESSURE_RAMP,'TIME',VT%PRESSURE_RAMP_INDEX)
-               
+
                ! Synthetic Eddy Method
-               
+
                VT%N_EDDY = N_EDDY
                IF (L_EDDY>0._EB) THEN
                   VT%SIGMA_IJ = L_EDDY
@@ -7924,20 +7924,20 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ELSE
                   VT%R_IJ = REYNOLDS_STRESS
                ENDIF
-               
+
                ! Miscellaneous
-          
+
                VT%TMP_EXTERIOR = TMP_EXTERIOR + TMPM
-               IF (VT%TMP_EXTERIOR>0._EB) TMPMIN = MIN(TMPMIN,VT%TMP_EXTERIOR) 
+               IF (VT%TMP_EXTERIOR>0._EB) TMPMIN = MIN(TMPMIN,VT%TMP_EXTERIOR)
                IF (TMP_EXTERIOR_RAMP/='null') CALL GET_RAMP_INDEX(TMP_EXTERIOR_RAMP,'TIME',VT%TMP_EXTERIOR_RAMP_INDEX)
-         
+
                VT%TEXTURE(:) = TEXTURE_ORIGIN(:)
-               
+
                VT%UVW = UVW
                IF (ALL(VT%UVW > -1.E12_EB)) THEN
                   VT%UVW = VT%UVW/SQRT(VT%UVW(1)**2+VT%UVW(2)**2+VT%UVW(3)**2)
                ENDIF
-         
+
             ENDDO I_MULT_LOOP
          ENDDO J_MULT_LOOP
       ENDDO K_MULT_LOOP
@@ -7957,22 +7957,22 @@ MESH_LOOP_2: DO NM=1,NMESHES
    CALL POINT_TO_MESH(NM)
 
    ! Get total number of vents (needed for detailed wind BC)
-   
+
    N_VENT_TOTAL = N_VENT_TOTAL + N_VENT
- 
+
    ! Check vents and assign orientations
- 
+
    VENT_LOOP_2: DO N=1,N_VENT
- 
+
       VT => VENTS(N)
- 
+
       I1 = MAX(0,VT%I1)
       I2 = MIN(IBAR,VT%I2)
       J1 = MAX(0,VT%J1)
       J2 = MIN(JBAR,VT%J2)
       K1 = MAX(0,VT%K1)
       K2 = MIN(KBAR,VT%K2)
- 
+
       IF (VT%IOR==0) THEN
          IF (I1==      0 .AND. I2==0) VT%IOR =  1
          IF (I1==IBAR .AND. I2==IBAR) VT%IOR = -1
@@ -7981,7 +7981,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
          IF (K1==      0 .AND. K2==0) VT%IOR =  3
          IF (K1==KBAR .AND. K2==KBAR) VT%IOR = -3
       ENDIF
- 
+
       ORIENTATION_IF: IF (VT%IOR==0) THEN
          IF (I1==I2) THEN
             DO K=K1+1,K2
@@ -8008,14 +8008,14 @@ MESH_LOOP_2: DO NM=1,NMESHES
             ENDDO
          ENDIF
       ENDIF ORIENTATION_IF
- 
+
       IF (VT%IOR==0) THEN
          WRITE(MESSAGE,'(A,I3,A,I3)')  'ERROR: Specify orientation of VENT ',VT%ORDINAL, ', MESH NUMBER',NM
          CALL SHUTDOWN(MESSAGE)
       ENDIF
- 
+
       ! Other error messages for VENTs
- 
+
       SELECT CASE(ABS(VT%IOR))
          CASE(1)
             IF (I1>=1 .AND. I1<=IBM1) THEN
@@ -8054,40 +8054,40 @@ MESH_LOOP_2: DO NM=1,NMESHES
                ENDIF
             ENDIF
       END SELECT
- 
+
       ! Open up boundary cells if it is an open vent
- 
+
       IF ( VT%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
          SELECT CASE(VT%IOR)
-            CASE( 1) 
+            CASE( 1)
                CALL BLOCK_CELL(NM,   0,   0,J1+1,  J2,K1+1,  K2,0,0)
-            CASE(-1) 
+            CASE(-1)
                CALL BLOCK_CELL(NM,IBP1,IBP1,J1+1,  J2,K1+1,  K2,0,0)
-            CASE( 2) 
+            CASE( 2)
                CALL BLOCK_CELL(NM,I1+1,  I2,   0,   0,K1+1,  K2,0,0)
-            CASE(-2) 
+            CASE(-2)
                CALL BLOCK_CELL(NM,I1+1,  I2,JBP1,JBP1,K1+1,  K2,0,0)
-            CASE( 3) 
+            CASE( 3)
                CALL BLOCK_CELL(NM,I1+1,  I2,J1+1,  J2,   0,   0,0,0)
-            CASE(-3) 
+            CASE(-3)
                CALL BLOCK_CELL(NM,I1+1,  I2,J1+1,  J2,KBP1,KBP1,0,0)
          END SELECT
       ENDIF
-      
+
       ! Check UVW
       IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
          WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' cannot have normal component of UVW equal to 0'
-         CALL SHUTDOWN(MESSAGE)         
+         CALL SHUTDOWN(MESSAGE)
       ENDIF
- 
+
    ENDDO VENT_LOOP_2
- 
+
    ! Compute vent areas and check for passive openings
- 
+
    VENT_LOOP_3: DO N=1,N_VENT
- 
+
       VT => VENTS(N)
- 
+
       VT%FDS_AREA = 0._EB
       I1 = VT%I1
       I2 = VT%I2
@@ -8095,9 +8095,9 @@ MESH_LOOP_2: DO NM=1,NMESHES
       J2 = VT%J2
       K1 = VT%K1
       K2 = VT%K2
- 
+
       VT%GHOST_CELLS_ONLY = .TRUE.
- 
+
       SELECT CASE(ABS(VT%IOR))
          CASE(1)
             DO K=K1+1,K2
@@ -8121,11 +8121,11 @@ MESH_LOOP_2: DO NM=1,NMESHES
                ENDDO
             ENDDO
       END SELECT
- 
+
    ENDDO  VENT_LOOP_3
- 
+
 ENDDO MESH_LOOP_2
- 
+
 
 CONTAINS
 
@@ -8178,8 +8178,8 @@ CONTAINS
   END SUBROUTINE DEFINE_EVACUATION_VENTS
 
 END SUBROUTINE READ_VENT
- 
- 
+
+
 
 SUBROUTINE READ_INIT
 
@@ -8225,14 +8225,14 @@ COUNT_LOOP: DO
    N_INIT = N_INIT + N_INIT_NEW
 ENDDO COUNT_LOOP
 11 REWIND(LU_INPUT)
- 
+
 ! If there are no INIT lines, return
 
 IF (N_INIT==0) RETURN
- 
+
 ALLOCATE(INITIALIZATION(N_INIT),STAT=IZERO)
 CALL ChkMemErr('READ','INITIALIZATION',IZERO)
- 
+
 NN = 0
 
 INIT_LOOP: DO N=1,N_INIT_READ
@@ -8269,15 +8269,15 @@ INIT_LOOP: DO N=1,N_INIT_READ
    XB(5)                     = -1000000._EB
    XB(6)                     =  1000000._EB
    XYZ                       = -1000000._EB
- 
+
    ! Read in the INIT lines
 
    CALL CHECKREAD('INIT',LU_INPUT,IOS)
    IF (IOS==1) EXIT INIT_LOOP
-   READ(LU_INPUT,INIT) 
-   
+   READ(LU_INPUT,INIT)
+
    ! Transform XYZ into XB if necessary
-   
+
    IF (ANY(XYZ>-100000._EB)) THEN
       XB(1:2) = XYZ(1)
       XB(3:4) = XYZ(2)
@@ -8294,7 +8294,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
       XB(5) = XYZ(3)
       XB(6) = XYZ(3) + HEIGHT
    ENDIF
- 
+
    ! Reorder XB coordinates if necessary
 
    CALL CHECK_XB(XB)
@@ -8353,7 +8353,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IF (SPEC_ID(1)=='null') THEN
                   WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with MASS_FRACTION'
                   CALL SHUTDOWN(MESSAGE)
-               ELSE 
+               ELSE
                   DO NS=1,MAX_SPECIES
                      IF (SPEC_ID(NS)=='null') EXIT
                      DO NS2=0,N_TRACKED_SPECIES
@@ -8366,8 +8366,8 @@ INIT_LOOP: DO N=1,N_INIT_READ
                               TRIM(SPEC_ID(NS)),' not found'
                               CALL SHUTDOWN(MESSAGE)
                         ENDIF
-                     ENDDO   
-                  ENDDO  
+                     ENDDO
+                  ENDDO
 
                   IF (SUM(IN%MASS_FRACTION) > 1._EB) THEN
                      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions > 1'
@@ -8376,14 +8376,14 @@ INIT_LOOP: DO N=1,N_INIT_READ
 
                   ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
                   CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
-               ENDIF            
+               ENDIF
             ELSE SPEC_INIT_IF
                 IF (N_TRACKED_SPECIES > 0) IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
                 RR_SUM = RSUM0
             ENDIF SPEC_INIT_IF
-            
+
             IF (TEMPERATURE > 0._EB) TMPMIN = MIN(TMPMIN,IN%TEMPERATURE)
-         
+
             IF (IN%TEMPERATURE > 0._EB .AND. IN%DENSITY < 0._EB) THEN
                IN%DENSITY        = P_INF/(IN%TEMPERATURE*RR_SUM)
                IN%ADJUST_DENSITY = .TRUE.
@@ -8397,17 +8397,17 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IN%DENSITY        = P_INF/(IN%TEMPERATURE*RR_SUM)
                IN%ADJUST_DENSITY = .TRUE.
             ENDIF
-            
+
             ! Special case where INIT is used to introduce a block of particles
-         
+
             IN%MASS_PER_TIME   = MASS_PER_TIME
             IN%MASS_PER_VOLUME = MASS_PER_VOLUME
-            
+
             IF(N_PARTICLES_PER_CELL>0 .AND. N_PARTICLES>0) THEN
                WRITE(MESSAGE,'(A,I4,A)') 'ERROR: INIT ',N,' Cannot use both N_PARTICLES and N_PARTICLES_PER_CELL'
-               CALL SHUTDOWN(MESSAGE)               
+               CALL SHUTDOWN(MESSAGE)
             ENDIF
-            
+
             IN%N_PARTICLES     = N_PARTICLES
             IN%N_PARTICLES_PER_CELL = N_PARTICLES_PER_CELL
 
@@ -8415,7 +8415,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                WRITE(MESSAGE,'(A,I4,A)') 'ERROR: INIT ',N,' XB has no volume'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
-            
+
             IN%DT_INSERT = DT_INSERT
             IF (DT_INSERT>0._EB) IN%SINGLE_INSERTION = .FALSE.
 
@@ -8424,11 +8424,11 @@ INIT_LOOP: DO N=1,N_INIT_READ
             ALLOCATE(IN%PARTICLE_INSERT_CLOCK(NMESHES),STAT=IZERO)
             CALL ChkMemErr('READ','PARTICLE_INSERT_CLOCK',IZERO)
             IN%PARTICLE_INSERT_CLOCK = T_BEGIN
-            
+
             ALLOCATE(IN%ALREADY_INSERTED(NMESHES),STAT=IZERO)
             CALL ChkMemErr('READ','ALREADY_INSERTED',IZERO)
             IN%ALREADY_INSERTED = .FALSE.
-         
+
             ! Assign an index to identify the particle class
 
             PART_ID_IF: IF (PART_ID/='null') THEN
@@ -8474,7 +8474,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
             IN%U0 = UVW(1)
             IN%V0 = UVW(2)
             IN%W0 = UVW(3)
-         
+
          ENDDO I_MULT_LOOP
       ENDDO J_MULT_LOOP
    ENDDO K_MULT_LOOP
@@ -8489,7 +8489,7 @@ DEVICE_LOOP: DO NN=1,N_DEVC
    DO I=1,N_INIT
       IN => INITIALIZATION(I)
       IF (IN%ID==DV%INIT_ID) CYCLE DEVICE_LOOP
-   ENDDO 
+   ENDDO
    WRITE(MESSAGE,'(A,A,A)') 'ERROR: The INIT_ID for DEVC ',TRIM(DV%ID),' cannot be found.'
    CALL SHUTDOWN(MESSAGE)
 ENDDO DEVICE_LOOP
@@ -8502,14 +8502,14 @@ END SUBROUTINE READ_INIT
 
 
 SUBROUTINE READ_ZONE
- 
+
 INTEGER, PARAMETER :: MAX_LEAK_PATHS=200
 REAL(EB) :: LEAK_AREA(0:MAX_LEAK_PATHS)
 INTEGER  :: N,NM,NN,N_EVAC_ZONE,N_EVAC_MESH,NM_EVAC
 LOGICAL :: SEALED,READ_ZONE_LINES,PERIODIC
 CHARACTER(30) :: ID
 NAMELIST /ZONE/ ID,LEAK_AREA,XB,PERIODIC
- 
+
 N_ZONE = 0
 REWIND(LU_INPUT)
 COUNT_ZONE_LOOP: DO
@@ -8523,14 +8523,14 @@ COUNT_ZONE_LOOP: DO
       ENDIF
 ENDDO COUNT_ZONE_LOOP
 11 REWIND(LU_INPUT)
- 
+
 ! Check to see if there are any OPEN vents. If there are not, and there are no declared pressure ZONEs, stop with an error.
 
 SEALED = .TRUE.
 
 N_EVAC_ZONE = 0
 DO NM=1,NMESHES
-   IF (.NOT.EVACUATION_ONLY(NM)) THEN      
+   IF (.NOT.EVACUATION_ONLY(NM)) THEN
       M => MESHES(NM)
       DO N=1,M%N_VENT
          VT => M%VENTS(N)
@@ -8574,7 +8574,7 @@ CONNECTED_ZONES = .FALSE.
 ! If there are no ZONE lines, return
 
 IF (N_ZONE==0) RETURN
- 
+
 ! Allocate ZONE arrays
 
 ALLOCATE(P_ZONE(N_ZONE),STAT=IZERO)
@@ -8586,7 +8586,7 @@ READ_ZONE_LOOP: DO N=1,N_ZONE-N_EVAC_ZONE
 
    ALLOCATE(P_ZONE(N)%LEAK_AREA(0:N_ZONE),STAT=IZERO)
    CALL ChkMemErr('READ','LEAK_AREA',IZERO)
- 
+
    IF (N<1000) WRITE(ID,'(A,I3)') 'ZONE_',N
    IF (N<100)  WRITE(ID,'(A,I2)') 'ZONE_',N
    IF (N<10)   WRITE(ID,'(A,I1)') 'ZONE_',N
@@ -8598,13 +8598,13 @@ READ_ZONE_LOOP: DO N=1,N_ZONE-N_EVAC_ZONE
    XB(5)         = -1000000._EB
    XB(6)         =  1000000._EB
    PERIODIC      = .FALSE.
- 
+
    IF (READ_ZONE_LINES) THEN
       CALL CHECKREAD('ZONE',LU_INPUT,IOS)
       IF (IOS==1) EXIT READ_ZONE_LOOP
-      READ(LU_INPUT,ZONE) 
+      READ(LU_INPUT,ZONE)
    ENDIF
- 
+
    P_ZONE(N)%ID = ID
    P_ZONE(N)%LEAK_AREA(0:N_ZONE) = LEAK_AREA(0:N_ZONE)
    P_ZONE(N)%X1 = XB(1)
@@ -8620,26 +8620,26 @@ READ_ZONE_LOOP: DO N=1,N_ZONE-N_EVAC_ZONE
          IF(P_ZONE(NN)%LEAK_AREA(N)>0._EB) THEN
             IF(P_ZONE(N)%LEAK_AREA(NN) > 0._EB) THEN
                WRITE(MESSAGE,'(A,I3,A,I3)')  'ERROR: LEAK_AREA specified twice for ZONE ',N,' and ',NN
-               CALL SHUTDOWN(MESSAGE)           
+               CALL SHUTDOWN(MESSAGE)
             ELSE
                P_ZONE(N)%LEAK_AREA(NN) = P_ZONE(NN)%LEAK_AREA(N)
             ENDIF
          ENDIF
       ENDDO
    ENDIF
- 
+
 ENDDO READ_ZONE_LOOP
 
 READ_EVACUATION_ZONE_LOOP: DO N=N_ZONE-N_EVAC_ZONE+1,N_ZONE
    ALLOCATE(P_ZONE(N)%LEAK_AREA(0:N_ZONE),STAT=IZERO)
    CALL ChkMemErr('READ','LEAK_AREA',IZERO)
- 
+
    WRITE(ID,'(A,I2.2)') 'ZONE_',N
    LEAK_AREA     = 0._EB
    N_EVAC_MESH = 0
    NM_EVAC = 0
    EVAC_MESH_NUMBER: DO NM=1,NMESHES
-      IF (EVACUATION_GRID(NM)) THEN      
+      IF (EVACUATION_GRID(NM)) THEN
          N_EVAC_MESH = N_EVAC_MESH + 1
          NM_EVAC = NM
          IF (N_EVAC_MESH == N-(N_ZONE-N_EVAC_ZONE)) EXIT EVAC_MESH_NUMBER
@@ -8652,7 +8652,7 @@ READ_EVACUATION_ZONE_LOOP: DO N=N_ZONE-N_EVAC_ZONE+1,N_ZONE
    XB(4)         = 0.5_EB*(MESHES(NM_EVAC)%YS+MESHES(NM_EVAC)%YF)
    XB(5)         = MESHES(NM_EVAC)%ZS
    XB(6)         = MESHES(NM_EVAC)%ZF
- 
+
    P_ZONE(N)%ID = ID
    P_ZONE(N)%LEAK_AREA(0:N_ZONE) = LEAK_AREA(0:N_ZONE)
    P_ZONE(N)%X1 = XB(1)-0.5_EB
@@ -8663,14 +8663,14 @@ READ_EVACUATION_ZONE_LOOP: DO N=N_ZONE-N_EVAC_ZONE+1,N_ZONE
    P_ZONE(N)%Z2 = XB(6)
    P_ZONE(N)%EVACUATION = .TRUE.
    P_ZONE(N)%MESH_INDEX = NM_EVAC
- 
+
 ENDDO READ_EVACUATION_ZONE_LOOP
 
 REWIND(LU_INPUT)
 
 END SUBROUTINE READ_ZONE
 
- 
+
 SUBROUTINE READ_DEVC
 
 ! Just read in the DEViCes and the store the info in DEVICE()
@@ -8719,7 +8719,7 @@ IF (N_DEVC==0) RETURN
 
 ALLOCATE(DEVICE(N_DEVC),STAT=IZERO)
 CALL ChkMemErr('READ','DEVICE',IZERO)
- 
+
 ! Read in the DEVC lines, keeping track of TIME-history devices, and LINE array devices
 
 N_DEVC = 0
@@ -8729,7 +8729,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
    CALL CHECKREAD('DEVC',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_DEVC_LOOP
    CALL SET_DEVC_DEFAULTS
-   READ(LU_INPUT,DEVC) 
+   READ(LU_INPUT,DEVC)
 
    ! Error statement involving POINTS
 
@@ -8782,7 +8782,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       ENDIF
 
       ! Determine which mesh the device is in
-   
+
       BAD = .TRUE.
       MESH_LOOP: DO NM=1,NMESHES
          IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
@@ -8812,14 +8812,14 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             EXIT EVACUATION_MESH_LOOP
          ENDIF
       ENDDO EVACUATION_MESH_LOOP
-   
+
       ! Make sure there is either a QUANTITY or PROP_ID for the DEVICE
-   
+
       IF (QUANTITY=='null' .AND. PROP_ID=='null') THEN
          WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have either an output QUANTITY or PROP_ID'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-   
+
       IF (BAD) THEN
          IF (DUCT_ID/='null' .OR. NODE_ID(1)/='null' .OR. INIT_ID/='null') THEN
             XYZ(1) = MESHES(1)%XS
@@ -8828,7 +8828,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             MESH_NUMBER = 1
          ELSE
             IF (ALL(EVACUATION_ONLY)) CYCLE READ_DEVC_LOOP
-            WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'  
+            WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'
             IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
             CYCLE READ_DEVC_LOOP
          ENDIF
@@ -8840,13 +8840,13 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       IF (POINTS==1 .AND. OUTPUT)      N_DEVC_TIME = N_DEVC_TIME + 1
       IF (POINTS>1 .AND. I_POINT==1)   N_DEVC_LINE = N_DEVC_LINE + 1
-      
+
       ! Assign properties to the DEVICE array
-   
+
       N_DEVC = N_DEVC + 1
 
       DV => DEVICE(N_DEVC)
-   
+
       DV%RELATIVE         = RELATIVE
       DV%CONVERSION_FACTOR= CONVERSION_FACTOR
       DV%DEPTH            = DEPTH
@@ -8858,16 +8858,16 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%ORDINAL          = NN
       DV%ORIENTATION(1:3) = ORIENTATION(1:3)/SQRT(ORIENTATION(1)**2+ORIENTATION(2)**2+ORIENTATION(3)**2)
       DV%PROP_ID          = PROP_ID
-      DV%CTRL_ID          = CTRL_ID   
-      DV%DEVC_ID          = DEVC_ID   
-      DV%CTRL_ID          = CTRL_ID   
-      DV%SURF_ID          = SURF_ID            
-      DV%PART_ID          = PART_ID            
-      DV%MATL_ID          = MATL_ID            
-      DV%SPEC_ID          = SPEC_ID            
-      DV%DUCT_ID          = DUCT_ID 
-      DV%INIT_ID          = INIT_ID 
-      DV%NODE_ID          = NODE_ID   
+      DV%CTRL_ID          = CTRL_ID
+      DV%DEVC_ID          = DEVC_ID
+      DV%CTRL_ID          = CTRL_ID
+      DV%SURF_ID          = SURF_ID
+      DV%PART_ID          = PART_ID
+      DV%MATL_ID          = MATL_ID
+      DV%SPEC_ID          = SPEC_ID
+      DV%DUCT_ID          = DUCT_ID
+      DV%INIT_ID          = INIT_ID
+      DV%NODE_ID          = NODE_ID
       DV%QUANTITY         = QUANTITY
       DV%QUANTITY2        = QUANTITY2
       DV%ROTATION         = ROTATION*TWOPI/360._EB
@@ -8881,8 +8881,8 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%FLOWRATE         = FLOWRATE
       DV%BYPASS_FLOWRATE  = BYPASS_FLOWRATE
       DV%SMOOTHING_FACTOR = SMOOTHING_FACTOR
-      DV%STATISTICS       = STATISTICS   
-      DV%TIME_AVERAGED    = TIME_AVERAGED 
+      DV%STATISTICS       = STATISTICS
+      DV%TIME_AVERAGED    = TIME_AVERAGED
       DV%SURF_INDEX       = 0
       DV%UNITS            = UNITS
       DV%DELAY            = DELAY / TIME_SHRINK_FACTOR
@@ -8907,7 +8907,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%PIPE_INDEX       = PIPE_INDEX
       DV%NO_UPDATE_DEVC_ID = NO_UPDATE_DEVC_ID
       DV%NO_UPDATE_CTRL_ID = NO_UPDATE_CTRL_ID
-      
+
       IF (POINTS > 1) THEN
          IF (.NOT.HIDE_COORDINATES) THEN
             IF (ABS(XB(1)-XB(2))> SPACING(XB(2)) .AND. ABS(XB(3)-XB(4))<=SPACING(XB(4)) .AND. &
@@ -8926,7 +8926,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             DV%LINE_COORD_CODE = 0
          ENDIF
       ENDIF
-    
+
    ENDDO POINTS_LOOP
 
    ! Coordinates for non-point devices
@@ -8959,13 +8959,13 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       IF (ABS(XB(3)-XB(4))<=SPACING(XB(4)) .AND. IOR==0) DV%IOR = 2
       IF (ABS(XB(5)-XB(6))<=SPACING(XB(6)) .AND. IOR==0) DV%IOR = 3
    ENDIF
-   
+
    IF (DV%QUANTITY == 'PARTICLE RADIATION LOSS') THEN
       LOOP_QRW(MESH_NUMBER) = .TRUE.
       WRITE(LU_ERR,'(A, I4, A)') 'WARNING: The calculation of the DEVC Quantity PARTICLE RADIATION LOSS in mesh', &
       MESH_NUMBER, ' may increase the simulation time.'
    ENDIF
-   
+
 ENDDO READ_DEVC_LOOP
 
 ALLOCATE (DEVC_PIPE_OPERATING(MAXVAL(DEVICE%PIPE_INDEX)))
@@ -9047,7 +9047,7 @@ TYPE (CONTROL_TYPE), POINTER :: CF=>NULL()
 NAMELIST /CTRL/  CONSTANT,CYCLES,CYCLE_TIME,DELAY,DIFFERENTIAL_GAIN,EVACUATION,FUNCTION_TYPE,ID,INITIAL_STATE,INTEGRAL_GAIN,&
                  INPUT_ID,LATCH,N,ON_BOUND,PROPORTIONAL_GAIN,RAMP_ID,&
                  SETPOINT,TARGET_VALUE,TRIP_DIRECTION
- 
+
 N_CTRL = 0
 REWIND(LU_INPUT)
 COUNT_CTRL_LOOP: DO
@@ -9061,14 +9061,14 @@ COUNT_CTRL_LOOP: DO
    ENDIF
 ENDDO COUNT_CTRL_LOOP
 11 REWIND(LU_INPUT)
- 
+
 IF (N_CTRL==0) RETURN
 
 ! Allocate CONTROL array and set initial values of all to 0
 
 ALLOCATE(CONTROL(N_CTRL),STAT=IZERO)
 CALL ChkMemErr('READ','CONTROL',IZERO)
- 
+
 ! Read in the CTRL lines
 
 READ_CTRL_LOOP: DO NC=1,N_CTRL
@@ -9076,7 +9076,7 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
    CALL CHECKREAD('CTRL',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_CTRL_LOOP
    CALL SET_CTRL_DEFAULTS
-   READ(LU_INPUT,CTRL) 
+   READ(LU_INPUT,CTRL)
 
    ! Make sure there is either a FUNCTION_TYPE type for the CTRL
 
@@ -9092,14 +9092,14 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
    CF%ID              = ID
    CF%LATCH           = LATCH
    CF%INITIAL_STATE   = INITIAL_STATE
-   CF%CURRENT_STATE   = INITIAL_STATE   
-   CF%PRIOR_STATE     = INITIAL_STATE      
+   CF%CURRENT_STATE   = INITIAL_STATE
+   CF%PRIOR_STATE     = INITIAL_STATE
    CF%SETPOINT        = SETPOINT
    CF%DELAY           = DELAY / TIME_SHRINK_FACTOR
    CF%CYCLE_TIME      = CYCLE_TIME
    CF%CYCLES          = CYCLES
    CF%RAMP_ID         = RAMP_ID
-   CF%N               = N   
+   CF%N               = N
    CF%INPUT_ID        = INPUT_ID
    CF%EVACUATION      = EVACUATION
    CF%TRIP_DIRECTION  = TRIP_DIRECTION
@@ -9111,8 +9111,8 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
       CF%ON_BOUND = 1
    ELSE
       CF%ON_BOUND = -1
-   ENDIF   
-   !Assign control index 
+   ENDIF
+   !Assign control index
    SELECT CASE(FUNCTION_TYPE)
       CASE('ALL')
          CF%CONTROL_INDEX = AND_GATE
@@ -9130,7 +9130,7 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
          CF%CONTROL_INDEX = CYCLING
       CASE('CUSTOM')
          CF%CONTROL_INDEX = CUSTOM
-         CALL GET_RAMP_INDEX(RAMP_ID,'CONTROL',CF%RAMP_INDEX)         
+         CALL GET_RAMP_INDEX(RAMP_ID,'CONTROL',CF%RAMP_INDEX)
          CF%LATCH = .FALSE.
       CASE('KILL')
          CF%CONTROL_INDEX = KILL
@@ -9145,7 +9145,7 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
       CASE('DIVIDE')
          CF%CONTROL_INDEX = CF_DIVIDE
       CASE('POWER')
-         CF%CONTROL_INDEX = CF_POWER      
+         CF%CONTROL_INDEX = CF_POWER
       CASE('PID')
          CF%CONTROL_INDEX = CF_PID
          IF (CF%TARGET_VALUE<-1.E30_EB) THEN
@@ -9156,7 +9156,7 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
          WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' FUNCTION_TYPE not recognized'
          CALL SHUTDOWN(MESSAGE)
    END SELECT
-   
+
 ENDDO READ_CTRL_LOOP
 REWIND(LU_INPUT)
 
@@ -9182,7 +9182,7 @@ SUBROUTINE SET_CTRL_DEFAULTS
    INTEGRAL_GAIN     = 0._EB
    DIFFERENTIAL_GAIN = 0._EB
    TARGET_VALUE      = 0._EB
-   
+
 END SUBROUTINE SET_CTRL_DEFAULTS
 
 END SUBROUTINE READ_CTRL
@@ -9213,7 +9213,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
    IF (CF%N_INPUTS==0) THEN
       WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' must have at least one input'
       CALL SHUTDOWN(MESSAGE)
-   ENDIF   
+   ENDIF
    SELECT CASE (CF%CONTROL_INDEX)
       CASE (CF_SUBTRACT,CF_DIVIDE,CF_POWER)
          IF (CF%N_INPUTS /= 2) THEN
@@ -9232,8 +9232,8 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
    ALLOCATE (CF%INPUT_TYPE(CF%N_INPUTS),STAT=IZERO)
    CALL ChkMemErr('READ','CF%INPUT_TYPE',IZERO)
    CF%INPUT_TYPE = -1
-   
-   BUILD_INPUT: DO NN = 1, CF%N_INPUTS      
+
+   BUILD_INPUT: DO NN = 1, CF%N_INPUTS
       IF (TRIM(CF%INPUT_ID(NN))==TRIM(CF%ID)) THEN
          WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' cannot use a control function as an input to itself'
          CALL SHUTDOWN(MESSAGE)
@@ -9258,7 +9258,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             IF (CF%CONTROL_INDEX == CUSTOM) THEN
                WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CUSTOM CTRL ',NC,' cannot have another CTRL as input'
                CALL SHUTDOWN(MESSAGE)
-            ENDIF   
+            ENDIF
             EXIT CTRL_LOOP
          ENDIF
       END DO CTRL_LOOP
@@ -9267,7 +9267,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             IF (DEVICE(NNN)%OUTPUT_INDEX==41 .OR. DEVICE(NNN)%OUTPUT2_INDEX==41) TSF_WARNING=.TRUE.
             IF (CF%INPUT_TYPE(NN) > 0) THEN
                WRITE(MESSAGE,'(A,I5,A,I5,A)')  'ERROR: CTRL ',NC,' input ',NN,' is the ID for both a DEVC and a CTRL'
-               CALL SHUTDOWN(MESSAGE)               
+               CALL SHUTDOWN(MESSAGE)
             ENDIF
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = DEVICE_INPUT
@@ -9280,14 +9280,14 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
       IF (ALL(EVACUATION_ONLY)) CYCLE BUILD_INPUT
    END DO BUILD_INPUT
 
-END DO PROC_CTRL_LOOP  
+END DO PROC_CTRL_LOOP
 
-IF (ABS(TIME_SHRINK_FACTOR-1._EB)>TWO_EPSILON_EB .AND. TSF_WARNING) THEN   
+IF (ABS(TIME_SHRINK_FACTOR-1._EB)>TWO_EPSILON_EB .AND. TSF_WARNING) THEN
     IF (MYID==0)  WRITE(LU_ERR,'(A)') 'WARNING: One or more time based CTRL functions are being used with TIME_SHRINK_FACTOR'
 ENDIF
 
 END SUBROUTINE PROC_CTRL
-   
+
 
 SUBROUTINE PROC_OBST
 
@@ -9305,7 +9305,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
    END DO
 END DO MESH_LOOP
-  
+
 END SUBROUTINE PROC_OBST
 
 
@@ -9316,11 +9316,11 @@ SUBROUTINE PROC_DEVC
 USE COMP_FUNCTIONS, ONLY : CHANGE_UNITS
 USE CONTROL_VARIABLES
 USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE, DEVICE, N_DEVC, PROPERTY, PROPERTY_TYPE, MAX_PDPA_HISTOGRAM_NBINS, N_PDPA_HISTOGRAM
- 
+
 INTEGER  :: N,NN,NNN,NM,QUANTITY_INDEX,QUANTITY2_INDEX,MAXCELLS,I,J,K,I_DUM
 REAL(EB) :: XX,YY,ZZ,XX1,YY1,ZZ1,DISTANCE,SCANDISTANCE,DX,DY,DZ
 TYPE (DEVICE_TYPE),  POINTER :: DV=>NULL()
- 
+
 IF (N_DEVC==0) RETURN
 
 ! Set initial values for DEViCes
@@ -9331,7 +9331,7 @@ DEVICE(1:N_DEVC)%TIME_INTERVAL = 0._EB
 PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
-   
+
    ! Check for HVAC outputs with no HVAC inputs
 
    IF ((DV%DUCT_ID/='null' .OR. DV%NODE_ID(1)/='null') .AND. .NOT. HVAC_SOLVE) THEN
@@ -9353,7 +9353,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    IF (DV%PROP_ID /='null') THEN
       CALL GET_PROPERTY_INDEX(DV%PROP_INDEX,'DEVC',DV%PROP_ID)
       IF (DV%QUANTITY=='null' .AND. PROPERTY(DV%PROP_INDEX)%QUANTITY=='null') THEN
-         WRITE(MESSAGE,'(5A)')  'ERROR: DEVC ',TRIM(DV%ID),' or DEVC PROPerty ',TRIM(DV%PROP_ID),' must have a QUANTITY' 
+         WRITE(MESSAGE,'(5A)')  'ERROR: DEVC ',TRIM(DV%ID),' or DEVC PROPerty ',TRIM(DV%PROP_ID),' must have a QUANTITY'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       IF (DV%QUANTITY=='null' .AND. PROPERTY(DV%PROP_INDEX)%QUANTITY/='null') DV%QUANTITY = PROPERTY(DV%PROP_INDEX)%QUANTITY
@@ -9365,7 +9365,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CALL GET_QUANTITY_INDEX(DV%SMOKEVIEW_LABEL,DV%SMOKEVIEW_BAR_LABEL,QUANTITY_INDEX,I_DUM, &
                               DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX(1),'DEVC', &
                               DV%QUANTITY,'null',DV%SPEC_ID,DV%PART_ID,DV%DUCT_ID,DV%NODE_ID(1))
-                              
+
       IF (OUTPUT_QUANTITY(QUANTITY_INDEX)%INTEGRATED .AND. DV%X1<=-1.E6_EB) THEN
          WRITE(MESSAGE,'(3A)')  'ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY),' requires coordinates using XB'
          CALL SHUTDOWN(MESSAGE)
@@ -9404,7 +9404,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          WRITE(MESSAGE,'(A,A)') 'ERROR: XB required when geometrical STATISTICS specified for gas DEVC ',TRIM(DV%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      
+
       IF (TRIM(DV%QUANTITY)=='NODE PRESSURE DIFFERENCE') THEN
          CALL GET_QUANTITY_INDEX(DV%SMOKEVIEW_LABEL,DV%SMOKEVIEW_BAR_LABEL,QUANTITY_INDEX,I_DUM, &
                                  DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX(2),'DEVC', &
@@ -9412,7 +9412,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          IF (DV%NODE_INDEX(1)==DV%NODE_INDEX(2)) THEN
             WRITE(MESSAGE,'(A,A)') 'ERROR: NODE PRESSURE DIFFERENCE node 1 = node 2 ',TRIM(DV%ID)
             CALL SHUTDOWN(MESSAGE)
-         ENDIF     
+         ENDIF
       ENDIF
 
    ENDIF QUANTITY_IF
@@ -9461,7 +9461,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             DV%UNITS = ''
       END SELECT
    ENDIF QUANTITY2_IF
-   
+
    ! Initialize histogram
 
    IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM) THEN
@@ -9470,12 +9470,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       N_PDPA_HISTOGRAM=N_PDPA_HISTOGRAM+1
       MAX_PDPA_HISTOGRAM_NBINS =MAX(MAX_PDPA_HISTOGRAM_NBINS,PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_NBINS)
    ENDIF
-   
+
    ! Do initialization of special models
-   
+
    SPECIAL_QUANTITIES: SELECT CASE (DV%QUANTITY)
 
-      CASE ('CHAMBER OBSCURATION') 
+      CASE ('CHAMBER OBSCURATION')
 
          IF (DV%PROP_INDEX<1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and must have a PROP_ID'
@@ -9498,8 +9498,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_OBSCURATION
          IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX>0) DV%Y_INDEX = PROPERTY(DV%PROP_INDEX)%Y_INDEX
          IF (PROPERTY(DV%PROP_INDEX)%Z_INDEX>0) DV%Z_INDEX = PROPERTY(DV%PROP_INDEX)%Z_INDEX
-   
-      CASE ('LINK TEMPERATURE','SPRINKLER LINK TEMPERATURE') 
+
+      CASE ('LINK TEMPERATURE','SPRINKLER LINK TEMPERATURE')
 
          IF (DV%PROP_INDEX<1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' must have a PROP_ID'
@@ -9524,7 +9524,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
-      CASE ('LAYER HEIGHT','UPPER TEMPERATURE','LOWER TEMPERATURE') 
+      CASE ('LAYER HEIGHT','UPPER TEMPERATURE','LOWER TEMPERATURE')
 
          DV%K1 = MAX(1     ,DV%K1)
          DV%K2 = MIN(M%KBAR,DV%K2)
@@ -9594,7 +9594,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             ENDIF
          ENDDO
          DV%N_PATH = NN
-                     
+
       CASE ('CONTROL')
 
          DO NN=1,N_CTRL
@@ -9616,7 +9616,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
-         
+
       CASE ('ASPIRATION')
 
          ! Check either for a specified SMOKE SPECies, or if simple chemistry model is being used
@@ -9678,7 +9678,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             ENDIF
             DV%FED_ACTIVITY = PROPERTY(DV%PROP_INDEX)%FED_ACTIVITY
          ENDIF
-         
+
       CASE ('VELOCITY PATCH') ! error statements to come
          PATCH_VELOCITY = .TRUE.
          ALLOCATE(DV%DEVC_INDEX(1),STAT=IZERO)
@@ -9690,7 +9690,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             WRITE(MESSAGE,'(A)') 'ERROR: A VELOCITY PATCH DEVC line needs a DEVC_ID to control it'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
-         
+
    END SELECT SPECIAL_QUANTITIES
 
    IF (DV%STATISTICS/='null') CALL CHANGE_UNITS(DV%QUANTITY,DV%UNITS,DV%STATISTICS,MYID,LU_ERR)
@@ -9704,13 +9704,13 @@ END SUBROUTINE PROC_DEVC
 
 
 SUBROUTINE READ_PROF
- 
+
 INTEGER :: N,NM,MESH_NUMBER,NN,N_PROFO,IOR,FORMAT_INDEX
 REAL(EB) :: XYZ(3)
 CHARACTER(30) :: QUANTITY
 TYPE (PROFILE_TYPE), POINTER :: PF=>NULL()
 NAMELIST /PROF/ FORMAT_INDEX,FYI,ID,IOR,QUANTITY,XYZ
- 
+
 N_PROF = 0
 REWIND(LU_INPUT)
 COUNT_PROF_LOOP: DO
@@ -9726,34 +9726,34 @@ ENDDO COUNT_PROF_LOOP
 11 REWIND(LU_INPUT)
 
 IF (N_PROF==0) RETURN
- 
+
 ALLOCATE(PROFILE(N_PROF),STAT=IZERO)
 CALL ChkMemErr('READ','PROFILE',IZERO)
- 
+
 PROFILE(1:N_PROF)%QUANTITY = 'TEMPERATURE'
 PROFILE(1:N_PROF)%IOR   = 0
 PROFILE(1:N_PROF)%IW    = 0
- 
+
 N_PROFO = N_PROF
 N       = 0
- 
+
 PROF_LOOP: DO NN=1,N_PROFO
    N    = N+1
    FORMAT_INDEX = 1
    IOR  = 0
    SELECT CASE(N)
-      CASE(1:9)        
+      CASE(1:9)
          WRITE(ID,'(A,I1)') 'PROFILE ',N
-      CASE(10:99)      
+      CASE(10:99)
          WRITE(ID,'(A,I2)') 'PROFILE ',N
-      CASE(100:999)    
+      CASE(100:999)
          WRITE(ID,'(A,I3)') 'PROFILE ',N
    END SELECT
- 
+
    CALL CHECKREAD('PROF',LU_INPUT,IOS)
    IF (IOS==1) EXIT PROF_LOOP
-   READ(LU_INPUT,PROF) 
-   
+   READ(LU_INPUT,PROF)
+
    ! Check for bad PROF quantities or coordinates
 
    IF (IOR==0) THEN
@@ -9762,9 +9762,9 @@ PROF_LOOP: DO NN=1,N_PROFO
    ENDIF
 
    BAD = .FALSE.
- 
+
    MESH_LOOP: DO NM=1,NMESHES
-      IF (.NOT.EVACUATION_ONLY(NM)) THEN      
+      IF (.NOT.EVACUATION_ONLY(NM)) THEN
          M=>MESHES(NM)
          IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
             MESH_NUMBER = NM
@@ -9773,17 +9773,17 @@ PROF_LOOP: DO NN=1,N_PROFO
       ENDIF
       IF (NM==NMESHES) BAD = .TRUE.
    ENDDO MESH_LOOP
- 
+
    IF (BAD) THEN
       N      = N-1
       N_PROF = N_PROF-1
       CYCLE PROF_LOOP
    ENDIF
-   
+
    ! Assign parameters to the PROFILE array
 
    PF => PROFILE(N)
-   PF%FORMAT_INDEX = FORMAT_INDEX   
+   PF%FORMAT_INDEX = FORMAT_INDEX
    PF%ORDINAL = NN
    PF%MESH    = MESH_NUMBER
    PF%ID   = ID
@@ -9792,26 +9792,26 @@ PROF_LOOP: DO NN=1,N_PROFO
    PF%Y       = XYZ(2)
    PF%Z       = XYZ(3)
    PF%IOR     = IOR
- 
+
 ENDDO PROF_LOOP
 REWIND(LU_INPUT)
- 
+
 END SUBROUTINE READ_PROF
 
 
 
 SUBROUTINE READ_ISOF
- 
+
 REAL(EB) :: VALUE(10)
 CHARACTER(30) :: QUANTITY,SPEC_ID
 INTEGER :: REDUCE_TRIANGLES,N,I_DUM,VELO_INDEX
 TYPE(ISOSURFACE_FILE_TYPE), POINTER :: IS=>NULL()
 NAMELIST /ISOF/ FYI,QUANTITY,REDUCE_TRIANGLES,SPEC_ID,VALUE,VELO_INDEX
- 
+
 N_ISOF = 0
 REWIND(LU_INPUT)
 COUNT_ISOF_LOOP: DO
-   CALL CHECKREAD('ISOF',LU_INPUT,IOS) 
+   CALL CHECKREAD('ISOF',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_ISOF_LOOP
    READ(LU_INPUT,NML=ISOF,END=9,ERR=10,IOSTAT=IOS)
    N_ISOF = N_ISOF + 1
@@ -9821,7 +9821,7 @@ COUNT_ISOF_LOOP: DO
       ENDIF
 ENDDO COUNT_ISOF_LOOP
 9 REWIND(LU_INPUT)
- 
+
 ALLOCATE(ISOSURFACE_FILE(N_ISOF),STAT=IZERO)
 CALL ChkMemErr('READ','ISOSURFACE_FILE',IZERO)
 
@@ -9832,31 +9832,31 @@ READ_ISOF_LOOP: DO N=1,N_ISOF
    VALUE            = -999._EB
    REDUCE_TRIANGLES = 1
    VELO_INDEX       = 0
- 
-   CALL CHECKREAD('ISOF',LU_INPUT,IOS) 
+
+   CALL CHECKREAD('ISOF',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_ISOF_LOOP
-   READ(LU_INPUT,ISOF) 
- 
+   READ(LU_INPUT,ISOF)
+
    IS%REDUCE_TRIANGLES = REDUCE_TRIANGLES
    IS%VELO_INDEX       = VELO_INDEX
 
    CALL GET_QUANTITY_INDEX(IS%SMOKEVIEW_LABEL,IS%SMOKEVIEW_BAR_LABEL,IS%INDEX,I_DUM, &
                            IS%Y_INDEX,IS%Z_INDEX,I_DUM,I_DUM,I_DUM,'ISOF', &
                            QUANTITY,'null',SPEC_ID,'null','null','null')
-                                              
+
    VALUE_LOOP: DO I=1,10
       IF (VALUE(I)<=-998._EB) EXIT VALUE_LOOP
       IS%N_VALUES = I
       IS%VALUE(I) = VALUE(I)
    ENDDO VALUE_LOOP
- 
+
 ENDDO READ_ISOF_LOOP
 
 REWIND(LU_INPUT)
- 
+
 END SUBROUTINE READ_ISOF
- 
- 
+
+
 SUBROUTINE READ_SLCF
 
 REAL(EB) :: MAXIMUM_VALUE,MINIMUM_VALUE
@@ -9897,7 +9897,7 @@ MESH_LOOP: DO NM=1,NMESHES
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDDO COUNT_SLCF_LOOP
-   9 CONTINUE   
+   9 CONTINUE
 
    ALLOCATE(M%SLICE(N_SLCF),STAT=IZERO)
    CALL ChkMemErr('READ','ISP1',IZERO)
@@ -9927,15 +9927,15 @@ MESH_LOOP: DO NM=1,NMESHES
       EVACUATION  = .FALSE.
       VELO_INDEX = 0
       LEVEL_SET_FIRE_LINE = .FALSE.
- 
+
       CALL CHECKREAD('SLCF',LU_INPUT,IOS)
       IF (IOS==1) EXIT SLCF_LOOP
-      READ(LU_INPUT,SLCF) 
+      READ(LU_INPUT,SLCF)
       IF (MESH_NUMBER/=NM) CYCLE SLCF_LOOP
       IF (.NOT.EVACUATION_ONLY(NM) .AND.      EVACUATION) CYCLE SLCF_LOOP
       IF (     EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION) CYCLE SLCF_LOOP
       IF (EVACUATION_ONLY(NM) .AND. .NOT.EVACUATION_GRID(NM)) CYCLE SLCF_LOOP
- 
+
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
          XB(1) = XS
          XB(2) = XF
@@ -9947,16 +9947,16 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (PBY>-1.E5_EB) XB(3:4) = PBY
          IF (PBZ>-1.E5_EB) XB(5:6) = PBZ
       ENDIF
- 
+
       XB(1) = MAX(XB(1),XS)
       XB(2) = MIN(XB(2),XF)
       XB(3) = MAX(XB(3),YS)
       XB(4) = MIN(XB(4),YF)
       XB(5) = MAX(XB(5),ZS)
       XB(6) = MIN(XB(6),ZF)
- 
+
       ! Reject a slice if it is beyond the bounds of the current mesh
- 
+
       IF (XB(1)>XF .OR. XB(2)<XS .OR. XB(3)>YF .OR. XB(4)<YS .OR. XB(5)>ZF .OR. XB(6)<ZS) THEN
          N_SLCF = N_SLCF - 1
          IF (VECTOR .AND. TWO_D) N_SLCF = N_SLCF - 2
@@ -9965,11 +9965,11 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
 
       ! Process vector quantities
- 
+
       NITER = 1
       IF (VECTOR .AND. TWO_D) NITER = 3
       IF (VECTOR .AND. .NOT. TWO_D) NITER = 4
- 
+
       VECTORLOOP: DO ITER=1,NITER
          N = N + 1
          SL=>SLICE(N)
@@ -10000,9 +10000,9 @@ MESH_LOOP: DO NM=1,NMESHES
          ENDIF
          SL%MINMAX(1) = MINIMUM_VALUE
          SL%MINMAX(2) = MAXIMUM_VALUE
-         IF (ITER==2)                    QUANTITY = 'U-VELOCITY' 
-         IF (ITER==3 .AND. .NOT. TWO_D)  QUANTITY = 'V-VELOCITY' 
-         IF (ITER==3 .AND. TWO_D)        QUANTITY = 'W-VELOCITY' 
+         IF (ITER==2)                    QUANTITY = 'U-VELOCITY'
+         IF (ITER==3 .AND. .NOT. TWO_D)  QUANTITY = 'V-VELOCITY'
+         IF (ITER==3 .AND. TWO_D)        QUANTITY = 'W-VELOCITY'
          IF (ITER==4)                    QUANTITY = 'W-VELOCITY'
          IF (ITER==1 .AND. FIRE_LINE)    QUANTITY = 'TEMPERATURE'
          IF (ITER==1 .AND. LEVEL_SET_FIRE_LINE) QUANTITY = 'TEMPERATURE'
@@ -10028,16 +10028,16 @@ MESH_LOOP: DO NM=1,NMESHES
          ! Smokeview will display only regions where temperature is above 200 C. This is currently hard wired.
          ! LEVEL_SET_FIRE_LINE = .TRUE. will create a slice file  !!! this is not fully functional !!!
 
-         IF (ITER == 1 .AND. (AGL_SLICE > -1._EB .OR. FIRE_LINE .OR.  LEVEL_SET_FIRE_LINE ) ) THEN 
+         IF (ITER == 1 .AND. (AGL_SLICE > -1._EB .OR. FIRE_LINE .OR.  LEVEL_SET_FIRE_LINE ) ) THEN
             SL%TERRAIN_SLICE = .TRUE.
             IF (FIRE_LINE) THEN
                SL%SMOKEVIEW_LABEL = "Fire line"
                SL%SMOKEVIEW_BAR_LABEL = "Fire_line"
-            ENDIF 
+            ENDIF
             IF (LEVEL_SET_FIRE_LINE) THEN
                SL%SMOKEVIEW_LABEL = "Level Set Fire line"
                SL%SMOKEVIEW_BAR_LABEL = "LS_Fire_line"
-            ENDIF 
+            ENDIF
             IF (AGL_SLICE <= -1._EB .AND. FIRE_LINE)           AGL_SLICE = M%Z(1) - M%Z(0)
             IF (AGL_SLICE <= -1._EB .AND. LEVEL_SET_FIRE_LINE) AGL_SLICE = 0._EB
             SL%SLICE_AGL     = AGL_SLICE
@@ -10045,12 +10045,12 @@ MESH_LOOP: DO NM=1,NMESHES
          ENDIF
          IF (ITER==2 .OR. ITER==3 .OR. ITER ==4) THEN
             IF (SLICE(N-1)%TERRAIN_SLICE) THEN
-               SL%TERRAIN_SLICE =  .TRUE. 
+               SL%TERRAIN_SLICE =  .TRUE.
                SL%SLICE_AGL     = SLICE(N-1)%SLICE_AGL
                N_TERRAIN_SLCF   = N_TERRAIN_SLCF + 1
             ENDIF
          ENDIF
-         
+
          ! Disable cell centered for velocity
 
          ! IF (QUANTITY=='VELOCITY'   .OR. &
@@ -10060,16 +10060,16 @@ MESH_LOOP: DO NM=1,NMESHES
          !    CELL_CENTERED = .FALSE.
          ! ENDIF
          SL%CELL_CENTERED = CELL_CENTERED
- 
+
          ! Check if the slcf PROPERTY exists (for FED_ACTIVITY input)
 
          SL%PROP_INDEX = 0
          IF (PROP_ID /='null') THEN
             CALL GET_PROPERTY_INDEX(SL%PROP_INDEX,'SLCF',PROP_ID)
          ENDIF
-         
+
       ENDDO VECTORLOOP
-  
+
    ENDDO SLCF_LOOP
 
    ALLOCATE(M%K_AGL_SLICE(0:IBP1,0:JBP1,N_TERRAIN_SLCF),STAT=IZERO)
@@ -10080,19 +10080,19 @@ MESH_LOOP: DO NM=1,NMESHES
       SL=>SLICE(NN)
       IF(SL%TERRAIN_SLICE) THEN
         TERRAIN_CASE = .TRUE.
-        N = N + 1 
+        N = N + 1
         M%K_AGL_SLICE(0:IBP1,0:JBP1,N) =  SL%SLICE_AGL*M%RDZ(1)
         ! Subtract one because bottom of domain will be accounted for when cycling through walls cells
         M%K_AGL_SLICE(0:IBP1,0:JBP1,N) =  MAX(0,M%K_AGL_SLICE(0:IBP1,0:JBP1,N)-1)
       ENDIF
    ENDDO
 
-   N_SLCF_MAX = MAX(N_SLCF_MAX,N_SLCF) 
+   N_SLCF_MAX = MAX(N_SLCF_MAX,N_SLCF)
 
    IF(VEG_LEVEL_SET) THEN
      ALLOCATE(M%LS_Z_TERRAIN(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_Z_TERRAIN',IZERO)
    ENDIF
- 
+
 ENDDO MESH_LOOP
 
 END SUBROUTINE READ_SLCF
@@ -10106,7 +10106,7 @@ LOGICAL :: CELL_CENTERED
 CHARACTER(30) :: QUANTITY,PROP_ID,SPEC_ID,PART_ID
 NAMELIST /BNDF/ CELL_CENTERED,FYI,PART_ID,PROP_ID,QUANTITY,SPEC_ID
 TYPE(BOUNDARY_FILE_TYPE), POINTER :: BF=>NULL()
- 
+
 N_BNDF = 0
 REWIND(LU_INPUT)
 COUNT_BNDF_LOOP: DO
@@ -10114,16 +10114,16 @@ COUNT_BNDF_LOOP: DO
    IF (IOS==1) EXIT COUNT_BNDF_LOOP
    READ(LU_INPUT,NML=BNDF,END=209,ERR=210,IOSTAT=IOS)
    N_BNDF = N_BNDF + 1
-   210 IF (IOS>0) THEN 
+   210 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with BNDF number ',N_BNDF+1
          CALL SHUTDOWN(MESSAGE)
        ENDIF
 ENDDO COUNT_BNDF_LOOP
 209 REWIND(LU_INPUT)
- 
+
 ALLOCATE(BOUNDARY_FILE(N_BNDF),STAT=IZERO)
 CALL ChkMemErr('READ','BOUNDARY_FILE',IZERO)
- 
+
 READ_BNDF_LOOP: DO N=1,N_BNDF
    BF => BOUNDARY_FILE(N)
    CELL_CENTERED = .FALSE.
@@ -10134,13 +10134,13 @@ READ_BNDF_LOOP: DO N=1,N_BNDF
    CALL CHECKREAD('BNDF',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_BNDF_LOOP
    READ(LU_INPUT,BNDF)
-   
+
    ! Look to see if output QUANTITY exists
 
    CALL GET_QUANTITY_INDEX(BF%SMOKEVIEW_LABEL,BF%SMOKEVIEW_BAR_LABEL,BF%INDEX,I_DUM, &
                            BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,I_DUM,I_DUM,'BNDF', &
                            QUANTITY,'null',SPEC_ID,PART_ID,'null','null')
-                           
+
    ! Assign miscellaneous attributes to the boundary file
 
    BF%CELL_CENTERED = CELL_CENTERED
@@ -10152,7 +10152,7 @@ READ_BNDF_LOOP: DO N=1,N_BNDF
 
 ENDDO READ_BNDF_LOOP
 REWIND(LU_INPUT)
- 
+
 END SUBROUTINE READ_BNDF
 
 
@@ -10164,7 +10164,7 @@ LOGICAL :: CELL_CENTERED
 CHARACTER(30) :: QUANTITY,PROP_ID,SPEC_ID,PART_ID
 NAMELIST /BNDE/ CELL_CENTERED,FYI,PART_ID,PROP_ID,QUANTITY,SPEC_ID
 TYPE(BOUNDARY_ELEMENT_FILE_TYPE), POINTER :: BE=>NULL()
- 
+
 N_BNDE = 0
 REWIND(LU_INPUT)
 COUNT_BNDE_LOOP: DO
@@ -10172,16 +10172,16 @@ COUNT_BNDE_LOOP: DO
    IF (IOS==1) EXIT COUNT_BNDE_LOOP
    READ(LU_INPUT,NML=BNDE,END=309,ERR=310,IOSTAT=IOS)
    N_BNDE = N_BNDE + 1
-   310 IF (IOS>0) THEN 
+   310 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with BNDE number ',N_BNDE+1
          CALL SHUTDOWN(MESSAGE)
        ENDIF
 ENDDO COUNT_BNDE_LOOP
 309 REWIND(LU_INPUT)
- 
+
 ALLOCATE(BOUNDARY_ELEMENT_FILE(N_BNDE),STAT=IZERO)
 CALL ChkMemErr('READ','BOUNDARY_ELEMENT_FILE',IZERO)
- 
+
 READ_BNDE_LOOP: DO N=1,N_BNDE
    BE => BOUNDARY_ELEMENT_FILE(N)
    CELL_CENTERED = .TRUE.
@@ -10192,13 +10192,13 @@ READ_BNDE_LOOP: DO N=1,N_BNDE
    CALL CHECKREAD('BNDE',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_BNDE_LOOP
    READ(LU_INPUT,BNDE)
-   
+
    ! Look to see if output QUANTITY exists
 
    CALL GET_QUANTITY_INDEX(BE%SMOKEVIEW_LABEL,BE%SMOKEVIEW_BAR_LABEL,BE%INDEX,I_DUM, &
                            BE%Y_INDEX,BE%Z_INDEX,BE%PART_INDEX,I_DUM,I_DUM,'BNDE', &
                            QUANTITY,'null',SPEC_ID,PART_ID,'null','null')
-                           
+
    ! Assign miscellaneous attributes to the boundary file
 
    BE%CELL_CENTERED = CELL_CENTERED
@@ -10210,22 +10210,22 @@ READ_BNDE_LOOP: DO N=1,N_BNDE
 
 ENDDO READ_BNDE_LOOP
 REWIND(LU_INPUT)
- 
+
 END SUBROUTINE READ_BNDE
- 
+
 
 SUBROUTINE SEARCH_KEYWORD(NAME,LU,IOS)
- 
+
 INTEGER, INTENT(OUT) :: IOS
 INTEGER, INTENT(IN)  :: LU
 CHARACTER(*), INTENT(IN) :: NAME
 CHARACTER(40) :: TEXT
- 
+
 IF (LU<0) THEN
    IOS = -1
    RETURN
 ENDIF
- 
+
 IOS = 1
 REWIND(LU)
 READLOOP: DO
@@ -10237,7 +10237,7 @@ READLOOP: DO
       CYCLE READLOOP
    ENDIF
 ENDDO READLOOP
- 
+
 10 RETURN
 END SUBROUTINE SEARCH_KEYWORD
 
@@ -10325,7 +10325,7 @@ IF (SPEC_ID/='null') THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: ',TRIM(SPEC_ID),' is not explicitly specified'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-ENDIF 
+ENDIF
 
 ! Assign HVAC indexes
 
@@ -10358,7 +10358,7 @@ IF (TRIM(QUANTITY)=='FILTER LOADING') THEN
    IF (Z_INDEX<0) THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: FILTER LOADING. ',TRIM(SPEC_ID),' is not a tracked species'
       CALL SHUTDOWN(MESSAGE)
-   ENDIF  
+   ENDIF
 ENDIF
 
 IF (TRIM(QUANTITY)=='MIXTURE FRACTION') THEN
@@ -10402,14 +10402,14 @@ ENDIF
 DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
    IF (OUTPUT_QUANTITY(ND)%NAME=='null') CYCLE
    IF (QUANTITY2==OUTPUT_QUANTITY(ND)%NAME) THEN
-      
+
       OUTPUT2_INDEX=ND
-      
+
       IF (OUTPUT_QUANTITY(ND)%SPEC_ID_REQUIRED .AND. (Y_INDEX<1 .AND. Z_INDEX<0)) THEN
          WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY2 ',TRIM(QUANTITY2),' requires a SPEC_ID'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      
+
       ! QUANTITY2 only works with SLCF at the moment
       IF (.NOT.OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE) THEN
           WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY2 ',TRIM(QUANTITY2),' is not appropriate for SLCF'
@@ -10447,7 +10447,7 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
          ENDIF
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-        
+
       IF (OUTPUT_QUANTITY(ND)%DUCT_ID_REQUIRED .AND. DUCT_INDEX<1) THEN
          IF (DUCT_ID=='null') THEN
             WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a DUCT_ID'
@@ -10482,14 +10482,14 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
          IF (Z_INDEX < 0) THEN
             WRITE(MESSAGE,'(A,A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is invalid as species', &
                                     ' is not a tracked species'
-            CALL SHUTDOWN(MESSAGE)         
+            CALL SHUTDOWN(MESSAGE)
          ELSEIF (Z_INDEX==0) THEN
             WRITE(MESSAGE,'(A)')  'ERROR: Cannot select background species for deposition'
-            CALL SHUTDOWN(MESSAGE)         
+            CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF(.NOT. SPECIES_MIXTURE(Z_INDEX)%DEPOSITING) THEN
             WRITE(MESSAGE,'(A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is not an aerosol tracked species'
-            CALL SHUTDOWN(MESSAGE)         
+            CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (SPECIES_MIXTURE(Z_INDEX)%AWM_INDEX < 0) THEN
             N_SURFACE_DENSITY_SPECIES = N_SURFACE_DENSITY_SPECIES + 1
@@ -10574,7 +10574,7 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
 
       RETURN
    ENDIF QUANTITY_IF
-      
+
 ENDDO QUANTITY_INDEX_LOOP
 
 ! If no match for desired QUANTITY is found, stop the job
@@ -10678,14 +10678,14 @@ ALLOCATE(CSVFINFO(N_CSVF),STAT=IZERO)
 CALL ChkMemErr('READ','CSVF',IZERO)
 
 READ_CSVF_LOOP: DO I=1,N_CSVF
-   
+
    CALL CHECKREAD('CSVF',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_CSVF_LOOP
-   
+
    ! Read the CSVF line
-   
+
    READ(LU_INPUT,CSVF,END=37)
-   
+
    CSVFINFO(I)%CSVFILE = TRIM(CSVFILE)
    IF (TRIM(UVWFILE)/='null' .AND. I>NMESHES) THEN
       CALL SHUTDOWN('Problem with CSVF line: UVWFILE must be in order with MESH.')
@@ -10699,6 +10699,6 @@ ENDDO READ_CSVF_LOOP
 
 END SUBROUTINE READ_CSVF
 
- 
+
 END MODULE READ_INPUT
 

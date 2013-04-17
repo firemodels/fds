@@ -1,7 +1,7 @@
 MODULE MASS
- 
-! Compute the mass equation differences 
- 
+
+! Compute the mass equation differences
+
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
@@ -19,7 +19,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,DP
 PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,GET_REV_mass,SCALAR_FACE_VALUE
 
 CONTAINS
- 
+
 SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
 
 ! Compute spatial differences for density equation
@@ -37,7 +37,7 @@ IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
- 
+
 IF (PREDICTOR) THEN
    UU => U
    VV => V
@@ -55,8 +55,8 @@ ENDIF
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-       
-   II  = WC%ONE_D%II 
+
+   II  = WC%ONE_D%II
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
    IOR = WC%ONE_D%IOR
@@ -108,23 +108,23 @@ DO K=1,KBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
          FRHO(I,J,K) = (FX(I,J,K,0)*UU(I,J,K)*R(I)-FX(I-1,J,K,0)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
                      + (FY(I,J,K,0)*VV(I,J,K)     -FY(I,J-1,K,0)*VV(I,J-1,K)       )*RDY(J)        &
-                     + (FZ(I,J,K,0)*WW(I,J,K)     -FZ(I,J,K-1,0)*WW(I,J,K-1)       )*RDZ(K) 
+                     + (FZ(I,J,K,0)*WW(I,J,K)     -FZ(I,J,K-1,0)*WW(I,J,K-1)       )*RDZ(K)
       ENDDO
    ENDDO
 ENDDO
 !$OMP END PARALLEL DO
- 
+
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
      WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
-          
-      II  = WC%ONE_D%II 
+
+      II  = WC%ONE_D%II
       JJ  = WC%ONE_D%JJ
       KK  = WC%ONE_D%KK
       IOR = WC%ONE_D%IOR
-     
+
       BOUNDARY_SELECT_2: SELECT CASE(WC%BOUNDARY_TYPE)
          CASE DEFAULT
             SELECT CASE(IOR)
@@ -166,7 +166,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       END SELECT BOUNDARY_SELECT_2
 
    ENDDO WALL_LOOP_2
-   
+
    !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(3) SCHEDULE(STATIC) &
    !$OMP SHARED(KBAR,IBAR,JBAR,SOLID,CELL_INDEX,DEL_RHO_D_DEL_Z,N,FX,FY,FZ,UU,VV,WW,R,RRN,RDX,RDY,RDZ) &
    !$OMP PRIVATE(K,J,I)
@@ -185,18 +185,18 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    SM=>SPECIES_MIXTURE(N)
    IF (SM%DEPOSITING .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY
-      
+
 ENDDO SPECIES_LOOP
- 
+
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
 
 CONTAINS
 
 SUBROUTINE SETTLING_VELOCITY
 
-! Experimental routine related to gravitational sedimentation in gas phase.
-! If gravitational deposition is enabled, transport depositing aerosol via
-! WW minus settling velocity. K. Overholt
+! Routine related to gravitational sedimentation in gas phase.
+! If gravitational deposition is enabled, transport depositing
+! aerosol via WW minus settling velocity. K. Overholt
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 REAL(EB) :: TMP_G,MU_G,MASS_P,KN,ZZ_GET(0:N_TRACKED_SPECIES)
@@ -237,12 +237,12 @@ END SUBROUTINE SETTLING_VELOCITY
 
 END SUBROUTINE MASS_FINITE_DIFFERENCES
 
- 
+
 SUBROUTINE DENSITY(NM)
 
 ! Update the density and species mass fractions
 
-USE COMP_FUNCTIONS, ONLY: SECOND 
+USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SENSIBLE_ENTHALPY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             PREDICTOR,CORRECTOR,CHANGE_TIME_STEP,TMPA,N_ZONE, &
@@ -251,7 +251,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
 REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,ZZ_GET(0:N_TRACKED_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
- 
+
 IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -276,14 +276,14 @@ CASE(.TRUE.) PREDICTOR_STEP
    !$OMP        TMPMIN,TMPMAX)
 
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
-   
+
    ! NOTE: This IF statement is required because the source terms for species are zeroed out at
    !       the beginning of DIVERGENCE_PART_1, but the array also stores the divergence of the advective
    !       flux which is computed once in MASS_FINITE_DIFFERNENCES above, outside the CHANGE_TIME_STEP loop.
    !       DIVERGENCE_PART_1 is inside the loop.  The source terms are then applied to the next substep in
    !       MASS_FINITE_DIFFERENCES.
 
-      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I) 
+      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
       DO N=1,N_TRACKED_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
@@ -302,7 +302,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       DTRATIO   = DT/DT_PREV
       OMDTRATIO = 1._EB - DTRATIO
       !$OMP END SINGLE
-      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I) 
+      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
       DO N=1,N_TRACKED_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
@@ -335,10 +335,10 @@ CASE(.TRUE.) PREDICTOR_STEP
    !$OMP SINGLE
    CALL CHECK_DENSITY
    !$OMP END SINGLE
-   
+
    ! Extract mass fraction from RHO * ZZ
 
-   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I) 
+   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
@@ -388,7 +388,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDIF
 
    ! Extract predicted temperature at next time step from Equation of State
-   
+
    !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
@@ -406,7 +406,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    !$OMP END PARALLEL
 
 ! The CORRECTOR step
-   
+
 CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct species mass fraction at next time step (ZZ here also stores RHO*ZZ)
@@ -417,13 +417,13 @@ CASE(.FALSE.) PREDICTOR_STEP
    !$OMP        FRHO,CLIP_MASS_FRACTION,N_ZONE,PBAR,PBAR_S,D_PBAR_DT_S,KBP1,JBP1,IBP1,RSUM,TMP,PRESSURE_ZONE, &
    !$OMP        TMPMIN,TMPMAX)
 
-   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I) 
+   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N) - DT*DEL_RHO_D_DEL_Z(I,J,K,N)) 
+               ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N) - DT*DEL_RHO_D_DEL_Z(I,J,K,N))
             ENDDO
          ENDDO
       ENDDO
@@ -448,10 +448,10 @@ CASE(.FALSE.) PREDICTOR_STEP
    !$OMP SINGLE
    CALL CHECK_DENSITY
    !$OMP END SINGLE
-   
+
    ! Extract Y_n from rho*Y_n
 
-   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I) 
+   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
@@ -493,7 +493,7 @@ CASE(.FALSE.) PREDICTOR_STEP
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) 
+               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
             ENDDO
          ENDDO
       ENDDO
@@ -521,12 +521,12 @@ CASE(.FALSE.) PREDICTOR_STEP
 END SELECT PREDICTOR_STEP
 
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
- 
+
 END SUBROUTINE DENSITY
- 
+
 
 SUBROUTINE CHECK_DENSITY
- 
+
 ! Redistribute mass from cells below or above the density cut-off limits
 ! Do not apply OpenMP to this routine
 
@@ -632,7 +632,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          VC1(-2)  = DY(J-1)*DZ(K)
          VC1( 2)  = DY(J+1)*DZ(K)
          VC1(-3)  = DY(J)  *DZ(K-1)
-         VC1( 3)  = DY(J)  *DZ(K+1)         
+         VC1( 3)  = DY(J)  *DZ(K+1)
          DO I=1,IBAR
 
             IF (ZZP(I,J,K,N)>=0._EB .AND. ZZP(I,J,K,N)<=1._EB) CYCLE
@@ -675,7 +675,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
-   
+
    ZZP(1:IBAR,1:JBAR,1:KBAR,N) = ZZP(1:IBAR,1:JBAR,1:KBAR,N) + DELTA_ZZ(1:IBAR,1:JBAR,1:KBAR)
 
 ENDDO SPECIES_LOOP
@@ -691,9 +691,9 @@ REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
 
 ! This function computes the scalar value on a face.
 ! The scalar is denoted U, and the velocity is denoted A.
-! The divergence (computed elsewhere) uses a central difference across 
+! The divergence (computed elsewhere) uses a central difference across
 ! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
-! 
+!
 ! CENTRAL_LIMITER  = 0
 ! GODUNOV_LIMITER  = 1
 ! SUPERBEE_LIMITER = 2
@@ -702,14 +702,14 @@ REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
 ! MP5_LIMITER      = 5
 !
 !                    location of face
-!                            
+!
 !                            f
 !    |     o     |     o     |     o     |     o     |
 !                            A
 !         U(1)        U(2)        U(3)        U(4)
 
 WIND_DIRECTION_IF: IF (A>0._EB) THEN
-    
+
    ! the flow is left to right
    DU_UP  = U(2)-U(1)
    DU_LOC = U(3)-U(2)
@@ -738,7 +738,7 @@ WIND_DIRECTION_IF: IF (A>0._EB) THEN
          V = (/2._EB*U(1)-U(2),U(1:4)/)
          SCALAR_FACE_VALUE = MP5(V)
    END SELECT
-    
+
 ELSE WIND_DIRECTION_IF
 
    ! the flow is right to left
@@ -769,7 +769,7 @@ ELSE WIND_DIRECTION_IF
          V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
          SCALAR_FACE_VALUE = MP5(V)
     END SELECT
-    
+
 ENDIF WIND_DIRECTION_IF
 
 END FUNCTION SCALAR_FACE_VALUE
@@ -813,5 +813,5 @@ WRITE(MODULE_DATE,'(A)') massrev(INDEX(massrev,':')+2:LEN_TRIM(massrev)-2)
 READ (MODULE_DATE,'(I5)') MODULE_REV
 WRITE(MODULE_DATE,'(A)') massdate
 END SUBROUTINE GET_REV_mass
- 
+
 END MODULE MASS
