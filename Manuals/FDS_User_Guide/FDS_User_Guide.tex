@@ -5181,7 +5181,7 @@ See Section~\ref{info:heat_of_combustion} for more details on the heat of combus
       FORMULA            = 'C3H8O3N4'
       HEAT_OF_COMBUSTION = 46124. /
 \end{lstlisting}
-In this case, the {\ct FORMULA} and heat of combustion are known, but the product yields are not.
+In this case, the {\ct FORMULA} and heat of combustion are known, but the product yields are not. Simple chemistry can also be used for cases where the fuel is a lumped species so long as the defining primitive species contain only C, H, N, and O atoms. An example can be found in Section \ref{info:Complex_Fuel}.
 
 
 
@@ -5355,7 +5355,28 @@ The reaction stoichiometry is specified using the stoichiometric coefficients, {
 
 \label{info:Complex_Fuel}
 
-Fires often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
+For complex fuel molecules that contain only C, H, N, and O the simple chemistry reaction parameters can still be applied. Consider natural gas, which is often a mixture of several component gases. To build the fuel mixture, the primitive (component) species need be defined.
+\begin{lstlisting}
+&SPEC ID='METHANE',       LUMPED_COMPONENT_ONLY=.TRUE./
+&SPEC ID='ETHYLENE',      LUMPED_COMPONENT_ONLY=.TRUE./
+&SPEC ID='NITROGEN',      LUMPED_COMPONENT_ONLY=.TRUE./
+&SPEC ID='CARBON DIOXIDE',LUMPED_COMPONENT_ONLY=.TRUE./
+\end{lstlisting}
+The {\ct LUMPED\_COMPONENT\_ONLY} designation means that each of these species will not be explicitly tracked as they are components to a mixture.  Note that the lumped components only contain C, H, N, and O atoms (Table~\ref{tab:gasspecies}). The lumped fuel, {\ct 'natural gas'}, can now be created using the previously defined primitive components:
+\begin{lstlisting}
+&SPEC ID='natural gas'
+      SPEC_ID(1)='METHANE',       VOLUME_FRACTION(1)=92.2
+      SPEC_ID(2)='ETHYLENE',      VOLUME_FRACTION(2)= 3.3
+      SPEC_ID(3)='NITROGEN',      VOLUME_FRACTION(3)= 3.9
+      SPEC_ID(4)='CARBON DIOXIDE',VOLUME_FRACTION(4)= 0.6/
+\end{lstlisting}
+Finally, the reaction can be defined using simple chemistry (Section \ref{info:simple_chemistry}):
+\begin{lstlisting}
+&REAC FUEL='natural gas'
+      SOOT_YIELD=0.01 /
+\end{lstlisting}
+
+Fires, however, often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
 of its propensity to form the acid gas HCl, you may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. Assuming that all of the Cl in the fuel is converted into HCl, you can derive a single-step reaction mechanism using appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook~\cite{SFPE:Tewarson} is used to find soot and CO yields for PVC; 0.172 and 0.063, respectively. For a given species, $\alpha$, its stoichiometric coefficient, $\nu_\alpha$, can be found from its yield, $y_\alpha$, according to the formula:
 \begin{equation}\label{eq:stoic_yield}
 \nu_\alpha = \frac{W_{\rm F}}{W_\alpha} \; y_\alpha
