@@ -244,6 +244,7 @@ $RUNFDS Species burke_schumann
 $RUNFDS Species FED_FIC
 $RUNFDS Species FED_FIC_SMIX
 $RUNFDS Species methane_flame_simple
+$RUNFDS Species methane_flame_simple_2
 $RUNFDS Species methane_flame_primitive
 $RUNFDS Species methane_flame_lumped
 $RUNFDS Species propane_flame_deposition
