@@ -9155,6 +9155,7 @@ updatemenu=0;
     updatemenu=0;
 #ifdef _DEBUG
   in_menu=0;
+  PRINTF("nmenus=%i\n",nmenus);
 #endif
 
 }
