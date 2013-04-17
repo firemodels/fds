@@ -2029,10 +2029,34 @@ This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} li
 
 \subsubsection{Adjusting the Time Step}
 
-At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to simulations failing due to numerical instabilities. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified
-time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
-numerical instabilities if the initial time step is set too high.
+At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to simulations failing due to numerical instabilities. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to numerical instabilities if the initial time step is set too high.
 
+
+\subsection{Special Topic: Flux Limiters}
+\label{info:flux_limiters}
+
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is Charm \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while Charm is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
+
+\begin{lstlisting}
+&MISC FLUX_LIMITER=1 / ! invoke Godunov (first-order upwind scheme)
+\end{lstlisting}
+
+\begin{table}[ht]
+\caption[Flux limiter options]{Flux limiter options.}
+\label{tab:flux_limiters}
+\centering
+\begin{tabular}{|lc|}
+\hline
+Scheme                 & {\ct FLUX\_LIMITER} \\
+\hline
+Central differencing   & {\ct 0}  \\
+Godunov                & {\ct 1}  \\
+Superbee (LES default) & {\ct 2}  \\
+MINMOD                 & {\ct 3}  \\
+CHARM (DNS default)    & {\ct 4}  \\
+MP5                    & {\ct 5}  \\ \hline
+\end{tabular}
+\end{table}
 
 
 \clearpage
@@ -9911,7 +9935,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
-{\ct C\_G}                                      & Real          & Section~\ref{info:LES}                                &               & 0.04              \\ \hline
 %{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT}                  & Real          & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}    \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
@@ -9921,7 +9944,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 {\ct EVAC\_TIME\_ITERATIONS}                    & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 %{\ct EVAPORATION\_DRAG}                         & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
-{\ct FLUX\_LIMITER}                             & Integer       & Reference~\cite{FDS_Tech_Guide}                       &               & 4                 \\ \hline
+{\ct FLUX\_LIMITER}                             & Integer       & Section~\ref{info:flux_limiters}                      &               & 2                 \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
 %{\ct FREEZE\_VELOCITY}                          & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
