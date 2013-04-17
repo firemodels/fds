@@ -102,7 +102,6 @@ GLUI_Spinner *SPINNER_set_view_x=NULL;
 GLUI_Spinner *SPINNER_set_view_y=NULL;
 GLUI_Spinner *SPINNER_set_view_z=NULL;
 GLUI_Spinner *SPINNER_zoom=NULL,*SPINNER_aperture=NULL;
-GLUI_Spinner *SPINNER_speed_crawl=NULL, *SPINNER_speed_walk=NULL;
 GLUI_Spinner *SPINNER_window_width=NULL, *SPINNER_window_height=NULL;
 GLUI_Spinner *SPINNER_scalex=NULL;
 GLUI_Spinner *SPINNER_scaley=NULL;

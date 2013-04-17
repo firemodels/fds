@@ -8508,8 +8508,7 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       showstereoOLD=showstereo;
       sscanf(buffer,"%i",&showstereo);
-      if(showstereo<0)showstereo=0;
-      if(showstereo>5)showstereo=5;
+      showstereo=CLAMP(showstereo,0,5);
       if(showstereo==1&&videoSTEREO!=1)showstereo=0;
       Update_Glui_Stereo();
       continue;
@@ -8530,8 +8529,7 @@ int readini2(char *inifile, int localfile){
         if(terrain_rgba_zmax[i]<0)terrain_rgba_zmax[i]=0;
         if(terrain_rgba_zmax[i]>255)terrain_rgba_zmax[i]=255;
       }
-      if(vertical_factor<0.25)vertical_factor=0.25;
-      if(vertical_factor>4.0)vertical_factor=4.0;
+      vertical_factor=CLAMP(vertical_factor,0.25,4.0);
       update_terrain(0,vertical_factor);
       update_terrain_colors();
       continue;
@@ -11584,8 +11582,6 @@ void writeini(int flag){
   fprintf(fileout," %f\n",timeoffset);
   fprintf(fileout,"SHOWHMSTIMELABEL\n");
   fprintf(fileout," %i\n",vishmsTimelabel);
-  fprintf(fileout,"SPEED\n");
-  fprintf(fileout," %f %f\n",speed_crawl,speed_walk);
 
   fprintf(fileout,"CULLFACES\n");
   fprintf(fileout," %i\n",cullfaces);

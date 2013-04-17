@@ -615,8 +615,6 @@ SVEXTERN int uindex, vindex, windex;
 SVEXTERN int SVDECL(contour_type,0), SVDECL(p3cont3dsmooth,0);
 SVEXTERN int cullfaces;
 SVEXTERN int showonly_hiddenfaces;
-SVEXTERN int blockage_index;
-
 
 SVEXTERN int windowresized;
 
@@ -970,12 +968,6 @@ SVEXTERN float start_xyz0[3];
 SVEXTERN int glui_move_mode;
 
 SVEXTERN float timeoffset;
-SVEXTERN float motion_factor,speed_factor;
-SVEXTERN float speed_desired;
-SVEXTERN int speed_I;
-SVEXTERN float speed_crawl,speed_walk,speed_now;
-SVEXTERN int status_now,old_status_now;
-SVEXTERN int motion_flag;
 SVEXTERN int npartpoints, npartframes;
 SVEXTERN float xslicemid, yslicemid, zslicemid;
 SVEXTERN float delx;

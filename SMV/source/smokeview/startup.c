@@ -1846,12 +1846,6 @@ void initvars(void){
   glui_move_mode=-1;
 
   timeoffset=0.0;
-  motion_factor=1.0,speed_factor=1.0;
-  speed_desired=1;
-  speed_I=-1;
-  speed_crawl=0.22,speed_walk=0.45,speed_now=0.447;
-  status_now=0,old_status_now=-1;
-  motion_flag=0;
   update_tourlist=0;
   desired_view_height=1.5;
   resetclock=1,initialtime=0;
