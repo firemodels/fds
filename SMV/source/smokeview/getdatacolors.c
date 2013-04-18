@@ -184,17 +184,17 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
 void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_min, int *extreme_max){
   int i;
   mesh *meshi;
-  unsigned char *ipqq;
+  unsigned char *cpatchval;
   int npqq_local;
 
   meshi = meshinfo + patchi->blocknumber;
-  ipqq = meshi->ipqq;
+  cpatchval = meshi->cpatchval;
   npqq_local = meshi->npatch_times*meshi->npatchsize;
   for(i=0;i<npqq_local;i++){
     float val;
     int ival;
 
-    ival = ipqq[i];
+    ival = cpatchval[i];
     val = (patchi->local_valmin*(254-ival)+patchi->local_valmax*(ival-1))/253.0;
 
     if(val<valmin){
@@ -208,7 +208,7 @@ void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_
     else{
       ival=1+253*(val-valmin)/(valmax-valmin);
     }
-    ipqq[i]=ival;
+    cpatchval[i]=ival;
   }
 }
 

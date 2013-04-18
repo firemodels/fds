@@ -7934,9 +7934,13 @@ void initmesh(mesh *meshi){
   meshi->visPatches=NULL;
   meshi->xyzpatch=NULL;
   meshi->xyzpatch_threshold=NULL;
-  meshi->ipqq=NULL, meshi->ipqqi=NULL;
-  meshi->ipqqi_zlib=NULL, meshi->ipqq_zlib=NULL;
-  meshi->patch_times=NULL, meshi->pqq=NULL, meshi->pqqi=NULL;
+  meshi->cpatchval=NULL;
+  meshi->cpatchval_iframe=NULL;
+  meshi->cpatchval_iframe_zlib=NULL;
+  meshi->cpatchval_zlib=NULL;
+  meshi->patch_times=NULL;
+  meshi->patchval=NULL;
+  meshi->patchval_iframe=NULL;
   meshi->thresholdtime=NULL;
   meshi->patchblank=NULL;
   meshi->patch_contours=NULL;

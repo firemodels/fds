@@ -110,10 +110,10 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   FREEMEMORY(meshi->visPatches);
   FREEMEMORY(meshi->xyzpatch);
   FREEMEMORY(meshi->xyzpatch_threshold);
-  FREEMEMORY(meshi->ipqq);
-  FREEMEMORY(meshi->ipqq_zlib);
-  FREEMEMORY(meshi->ipqqi_zlib);
-  FREEMEMORY(meshi->pqq);
+  FREEMEMORY(meshi->cpatchval);
+  FREEMEMORY(meshi->cpatchval_zlib);
+  FREEMEMORY(meshi->cpatchval_iframe_zlib);
+  FREEMEMORY(meshi->patchval);
   FREEMEMORY(meshi->thresholdtime);
   FREEMEMORY(meshi->patch_times);
   FREEMEMORY(meshi->patchblank);
@@ -647,23 +647,23 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
   }
 
-  meshi->pqq = NULL;
+  meshi->patchval = NULL;
   switch (loadpatchbysteps){
   case 0:
-    while(meshi->pqq==NULL&&mxpatch_frames>100){
+    while(meshi->patchval==NULL&&mxpatch_frames>100){
       mxpatch_frames-=50;
       meshi->mxpatch_frames=mxpatch_frames;
-      NewMemory((void **)&meshi->pqq,sizeof(float)*mxpatch_frames*meshi->npatchsize);
+      NewMemory((void **)&meshi->patchval,sizeof(float)*mxpatch_frames*meshi->npatchsize);
     }
-    if(meshi->pqq==NULL){
-      NewMemory((void **)&meshi->pqq,sizeof(float)*mxpatch_frames*meshi->npatchsize);
+    if(meshi->patchval==NULL){
+      NewMemory((void **)&meshi->patchval,sizeof(float)*mxpatch_frames*meshi->npatchsize);
     }
     break;
   case 1:
     npqq = meshi->npatchsize*meshi->mxpatch_frames;
     if(
-      NewMemory((void **)&meshi->pqq,sizeof(float)*meshi->npatchsize)==0||
-      NewMemory((void **)&meshi->ipqq,sizeof(unsigned char)*npqq)==0){
+      NewMemory((void **)&meshi->patchval,sizeof(float)*meshi->npatchsize)==0||
+      NewMemory((void **)&meshi->cpatchval,sizeof(unsigned char)*npqq)==0){
       *errorcode=1;
       FORTclosefortranfile(&file_unit);
       readpatch(ifile,UNLOAD,&error);
@@ -672,8 +672,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     break;
   case 2:
     getpatchsizeinfo(patchinfo+ifile, &mxpatch_frames, &ncompressed_buffer);
-    NewMemory((void **)&meshi->ipqq_zlib,sizeof(unsigned char)*ncompressed_buffer);
-    NewMemory((void **)&meshi->ipqqi_zlib,sizeof(unsigned char)*meshi->npatchsize);
+    NewMemory((void **)&meshi->cpatchval_zlib,sizeof(unsigned char)*ncompressed_buffer);
+    NewMemory((void **)&meshi->cpatchval_iframe_zlib,sizeof(unsigned char)*meshi->npatchsize);
     break;
   default:
     ASSERT(FFALSE);
@@ -692,12 +692,12 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     return;
   }
   if(loadpatchbysteps==2){
-    getpatchdata_zlib(patchinfo+ifile,meshi->ipqq_zlib,ncompressed_buffer,
+    getpatchdata_zlib(patchinfo+ifile,meshi->cpatchval_zlib,ncompressed_buffer,
       meshi->patch_times,meshi->zipoffset,meshi->zipsize,mxpatch_frames);
     meshi->npatch_times=mxpatch_frames;
   }
   else{
-    if(meshi->pqq==NULL){
+    if(meshi->patchval==NULL){
       *errorcode=1;
       FORTclosefortranfile(&file_unit);
       readpatch(ifile,UNLOAD,&error);
@@ -710,11 +710,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for (i=0;i<mxpatch_frames;){
     if(loadpatchbysteps==1){
-      meshi->pqqi = meshi->pqq;
-      meshi->ipqqi = meshi->ipqq + i*meshi->npatchsize;
+      meshi->patchval_iframe = meshi->patchval;
+      meshi->cpatchval_iframe = meshi->cpatchval + i*meshi->npatchsize;
     }
     else if(loadpatchbysteps==0){
-      meshi->pqqi = meshi->pqq + i*meshi->npatchsize;
+      meshi->patchval_iframe = meshi->patchval + i*meshi->npatchsize;
     }
     meshi->patch_timesi = meshi->patch_times + i;
 
@@ -722,14 +722,13 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     if(loadpatchbysteps==0||loadpatchbysteps==1){
       for (n=0;n<boundframestep;n++){
         if(error==0){
-          int npqqi;
+          int npatchval_iframe;
 
           FORTgetpatchdata(&file_unit,&meshi->npatches,
           meshi->pi1,meshi->pi2,
           meshi->pj1,meshi->pj2,
           meshi->pk1,meshi->pk2,
-          meshi->patch_timesi,meshi->pqqi,&npqqi,
-          &error);
+          meshi->patch_timesi,meshi->patchval_iframe,&npatchval_iframe,&error);
         }
       }
     }
@@ -763,7 +762,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             case 0:
             case 1:
               for(j=0;j<nsize;j++){
-                if(meshi->thresholdtime[nn+j]<0.0&&meshi->pqqi[nn+j]>=temp_threshold){
+                if(meshi->thresholdtime[nn+j]<0.0&&meshi->patchval_iframe[nn+j]>=temp_threshold){
                   meshi->thresholdtime[nn+j]=meshi->patch_times[i];
                 }
               }
@@ -774,7 +773,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
                 float val;
                 int ival;
 
-                ival = meshi->ipqqi_zlib[nn+j];
+                ival = meshi->cpatchval_iframe_zlib[nn+j];
                 val = patchmin + dval*ival;
                 if(meshi->thresholdtime[nn+j]<0.0&&val>=temp_threshold){
                   meshi->thresholdtime[nn+j]=meshi->patch_times[i];
@@ -792,7 +791,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
     if(loadpatchbysteps==1){
       getBoundaryColors2(
-        meshi->pqqi, meshi->npatchsize, meshi->ipqqi, 
+        meshi->patchval_iframe, meshi->npatchsize, meshi->cpatchval_iframe, 
                  setpatchmin,&patchmin, setpatchmax,&patchmax, 
                  &patchmin_global, &patchmax_global,
                  nrgb_full,
@@ -812,7 +811,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
           mxpatch_frames = meshi->npatch_times + 50; /* this + 50 must match - 50 below */
           meshi->mxpatch_frames=mxpatch_frames;
           if(
-            ResizeMemory((void **)&meshi->pqq,           mxpatch_frames*meshi->npatchsize*sizeof(float))==0||
+            ResizeMemory((void **)&meshi->patchval,           mxpatch_frames*meshi->npatchsize*sizeof(float))==0||
             ResizeMemory((void **)&meshi->patch_times,    mxpatch_frames*sizeof(float))==0
            ){
             *errorcode=1;
@@ -835,7 +834,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
   if(loadpatchbysteps==0){
     npqq = meshi->npatch_times*meshi->npatchsize;
-    if(npqq==0||NewMemory((void **)&meshi->ipqq,sizeof(unsigned char)*npqq)==0){
+    if(npqq==0||NewMemory((void **)&meshi->cpatchval,sizeof(unsigned char)*npqq)==0){
       *errorcode=1;
       FORTclosefortranfile(&file_unit);
       readpatch(ifile,UNLOAD,&error);
@@ -872,7 +871,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   ipatchtype=getpatchtype(patchinfo+ifile);
   switch(loadpatchbysteps){
   case 0:
-    getBoundaryColors3(patchinfo + ifile,meshi->pqq, npqq, meshi->ipqq, 
+    getBoundaryColors3(patchinfo + ifile,meshi->patchval, npqq, meshi->cpatchval, 
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
       nrgb, colorlabelpatch,patchscale,boundarylevels256,
@@ -901,7 +900,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   local2globalpatchbounds(patchinfo[ifile].label.shortlabel);
   updatepatchlistindex(patchfilenum);
 
-  FREEMEMORY(meshi->pqq);
+  FREEMEMORY(meshi->patchval);
   patchinfo[ifile].loaded=1;
   patchinfo[ifile].display=1;
   ipatchtype=getpatchtype(patchinfo+ifile);
@@ -1273,18 +1272,16 @@ void drawpatch_texture(const mesh *meshi){
   float r11, r12, r21, r22;
   int n;
   int nrow, ncol, irow, icol;
-  float *xyzp1, *xyzp2;
-  unsigned char *ipq1, *ipq2;
-  unsigned char *ipqqcopy;
+  unsigned char *cpatchval_iframe_copy;
   float *xyzpatchcopy;
-  int *patchblankcopy, *ip1, *ip2;
+  int *patchblankcopy;
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
   int *patchdir, *patchrow, *patchcol;
   int *blockstart;
   int *patchblank;
-  unsigned char *ipqqi;
+  unsigned char *cpatchval_iframe;
   int iblock;
   blockagedata *bc;
   patchdata *patchi;
@@ -1315,12 +1312,12 @@ void drawpatch_texture(const mesh *meshi){
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
   case 0:
-    ASSERT(meshi->ipqqi!=NULL);
-    ipqqi=meshi->ipqqi;
+    ASSERT(meshi->cpatchval_iframe!=NULL);
+    cpatchval_iframe=meshi->cpatchval_iframe;
     break;
   case 1:
-    ASSERT(meshi->ipqqi_zlib!=NULL);
-    ipqqi=meshi->ipqqi_zlib;
+    ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
+    cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
   default:
     ASSERT(0);
@@ -1353,22 +1350,26 @@ void drawpatch_texture(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
 
       for(irow=0;irow<nrow-1;irow++){
+        unsigned char *cpatchval1, *cpatchval2;
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            r11 = (float)(*ipq1)/255.0;
-            r12 = (float)(*(ipq1+1))/255.0;
-            r21 = (float)(*ipq2)/255.0;
-            r22 = (float)(*(ipq2+1))/255.0;
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            r11 = (float)(*cpatchval1)/255.0;
+            r12 = (float)(*(cpatchval1+1))/255.0;
+            r21 = (float)(*cpatchval2)/255.0;
+            r22 = (float)(*(cpatchval2+1))/255.0;
             if(ABS(r11-r22)<ABS(r12-r21)){
               glTexCoord1f(r11);glVertex3fv(xyzp1);
               glTexCoord1f(r12);glVertex3fv(xyzp1+3);
@@ -1387,7 +1388,7 @@ void drawpatch_texture(const mesh *meshi){
               glTexCoord1f(r21);glVertex3fv(xyzp2);
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -1416,7 +1417,7 @@ void drawpatch_texture(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
         switch (meshi->patchdir[n]){
@@ -1436,21 +1437,25 @@ void drawpatch_texture(const mesh *meshi){
         glBegin(GL_TRIANGLES);
       }
       for(irow=0;irow<nrow-1;irow++){
+        unsigned char *cpatchval1, *cpatchval2;
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            r11 = (float)(*ipq1)/255.0;
-            r12 = (float)(*(ipq1+1))/255.0;
-            r21 = (float)(*ipq2)/255.0;
-            r22 = (float)(*(ipq2+1))/255.0;
-            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            r11 = (float)(*cpatchval1)/255.0;
+            r12 = (float)(*(cpatchval1+1))/255.0;
+            r21 = (float)(*cpatchval2)/255.0;
+            r22 = (float)(*(cpatchval2+1))/255.0;
+            if(ABS(*cpatchval1-*(cpatchval2+1))<ABS(*(cpatchval1+1)-*cpatchval2)){
               glTexCoord1f(r11);glVertex3fv(xyzp1);
               glTexCoord1f(r12);glVertex3fv(xyzp1+3);
               glTexCoord1f(r22);glVertex3fv(xyzp2+3);
@@ -1467,7 +1472,7 @@ void drawpatch_texture(const mesh *meshi){
               glTexCoord1f(r21);glVertex3fv(xyzp2);
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -1495,7 +1500,7 @@ void drawpatch_texture(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
         switch (meshi->patchdir[n]){
@@ -1515,20 +1520,24 @@ void drawpatch_texture(const mesh *meshi){
         glBegin(GL_TRIANGLES);
       }
       for(irow=0;irow<nrow-1;irow++){
+        unsigned char *cpatchval1, *cpatchval2;
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            r11 = (float)(*ipq1)/255.0;
-            r12 = (float)(*(ipq1+1))/255.0;
-            r21 = (float)(*ipq2)/255.0;
-            r22 = (float)(*(ipq2+1))/255.0;
-            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            r11 = (float)(*cpatchval1)/255.0;
+            r12 = (float)(*(cpatchval1+1))/255.0;
+            r21 = (float)(*cpatchval2)/255.0;
+            r22 = (float)(*(cpatchval2+1))/255.0;
+            if(ABS(*cpatchval1-*(cpatchval2+1))<ABS(*(cpatchval1+1)-*cpatchval2)){
               glTexCoord1f(r11);glVertex3fv(xyzp1);
               glTexCoord1f(r22);glVertex3fv(xyzp2+3);
               glTexCoord1f(r12);glVertex3fv(xyzp1+3);
@@ -1545,7 +1554,7 @@ void drawpatch_texture(const mesh *meshi){
               glTexCoord1f(r22);glVertex3fv(xyzp2+3);
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -1569,18 +1578,17 @@ void drawpatch_texture_threshold(const mesh *meshi){
   float r11, r12, r21, r22;
   int n,nn,nn1,nn2;
   int nrow, ncol, irow, icol;
-  float *xyzp1, *xyzp2;
-  unsigned char *ipq1, *ipq2;
-  unsigned char *ipqqcopy;
+  unsigned char *cpatchval1, *cpatchval2;
+  unsigned char *cpatchval_iframe_copy;
   float *xyzpatchcopy;
-  int *patchblankcopy, *ip1, *ip2;
+  int *patchblankcopy;
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
   int *patchdir, *patchrow, *patchcol;
   int *blockstart;
   int *patchblank;
-  unsigned char *ipqqi;
+  unsigned char *cpatchval_iframe;
   int iblock;
   blockagedata *bc;
   patchdata *patchi;
@@ -1602,12 +1610,12 @@ void drawpatch_texture_threshold(const mesh *meshi){
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
   case 0:
-    ASSERT(meshi->ipqqi!=NULL);
-    ipqqi=meshi->ipqqi;
+    ASSERT(meshi->cpatchval_iframe!=NULL);
+    cpatchval_iframe=meshi->cpatchval_iframe;
     break;
   case 1:
-    ASSERT(meshi->ipqqi_zlib!=NULL);
-    ipqqi=meshi->ipqqi_zlib;
+    ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
+    cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
   default:
     ASSERT(0);
@@ -1641,24 +1649,27 @@ void drawpatch_texture_threshold(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
 
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            r11 = (float)(*ipq1)/255.0;
-            r12 = (float)(*(ipq1+1))/255.0;
-            r21 = (float)(*ipq2)/255.0;
-            r22 = (float)(*(ipq2+1))/255.0;
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            r11 = (float)(*cpatchval1)/255.0;
+            r12 = (float)(*(cpatchval1+1))/255.0;
+            r21 = (float)(*cpatchval2)/255.0;
+            r22 = (float)(*(cpatchval2+1))/255.0;
             color11=clear_color;
             color12=clear_color;
             color21=clear_color;
@@ -1695,7 +1706,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
              }
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -1725,24 +1736,27 @@ void drawpatch_texture_threshold(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            r11 = (float)(*ipq1)/255.0;
-            r12 = (float)(*(ipq1+1))/255.0;
-            r21 = (float)(*ipq2)/255.0;
-            r22 = (float)(*(ipq2+1))/255.0;
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            r11 = (float)(*cpatchval1)/255.0;
+            r12 = (float)(*(cpatchval1+1))/255.0;
+            r21 = (float)(*cpatchval2)/255.0;
+            r22 = (float)(*(cpatchval2+1))/255.0;
             color11=clear_color;
             color12=clear_color;
             color21=clear_color;
@@ -1761,7 +1775,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
               glTexCoord1f(r21);glVertex3fv(xyzp2);
             }
             else{
-              if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
+              if(ABS(*cpatchval1-*(cpatchval2+1))<ABS(*(cpatchval1+1)-*cpatchval2)){
                 glTexCoord1f(r11);glColor4fv(color11);glVertex3fv(xyzp1);
                 glTexCoord1f(r12);glColor4fv(color12);glVertex3fv(xyzp1+3);
                 glTexCoord1f(r22);glColor4fv(color22);glVertex3fv(xyzp2+3);
@@ -1779,7 +1793,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
               }
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -1806,23 +1820,26 @@ void drawpatch_texture_threshold(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            r11 = (float)(*ipq1)/255.0;
-            r12 = (float)(*(ipq1+1))/255.0;
-            r21 = (float)(*ipq2)/255.0;
-            r22 = (float)(*(ipq2+1))/255.0;
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            r11 = (float)(*cpatchval1)/255.0;
+            r12 = (float)(*(cpatchval1+1))/255.0;
+            r21 = (float)(*cpatchval2)/255.0;
+            r22 = (float)(*(cpatchval2+1))/255.0;
             color11=clear_color;
             color12=clear_color;
             color21=clear_color;
@@ -1841,7 +1858,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
               glTexCoord1f(r22);glVertex3fv(xyzp2+3);
             }
             else{
-              if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
+              if(ABS(*cpatchval1-*(cpatchval2+1))<ABS(*(cpatchval1+1)-*cpatchval2)){
                 glTexCoord1f(r11);glColor4fv(color11);glVertex3fv(xyzp1);
                 glTexCoord1f(r22);glColor4fv(color22);glVertex3fv(xyzp2+3);
                 glTexCoord1f(r12);glColor4fv(color12);glVertex3fv(xyzp1+3);
@@ -1859,7 +1876,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
               }
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -1876,9 +1893,8 @@ void drawpatch_texture_threshold(const mesh *meshi){
 void drawpatch_threshold_cellcenter(const mesh *meshi){
   int n,nn,nn1;
   int nrow, ncol, irow, icol;
-  float *xyzp1, *xyzp2;
   float *xyzpatchcopy;
-  int *patchblankcopy, *ip1, *ip2;
+  int *patchblankcopy;
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
@@ -1906,10 +1922,10 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
   case 0:
-    ASSERT(meshi->ipqqi!=NULL);
+    ASSERT(meshi->cpatchval_iframe!=NULL);
     break;
   case 1:
-    ASSERT(meshi->ipqqi_zlib!=NULL);
+    ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     break;
   default:
     ASSERT(0);
@@ -1941,14 +1957,17 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
       patchblankcopy = patchblank + blockstart[n];
 
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ip2 = ip1 + ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
             color11=clear_color;
             if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
 
@@ -1961,7 +1980,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          ip1++; ip2++;
+          patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -1993,15 +2012,18 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
       patchblankcopy = patchblank + blockstart[n];
 
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
-        ip2 = ip1 + ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
             color11=clear_color;
             if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
            
@@ -2014,7 +2036,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          ip1++; ip2++;
+          patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2043,14 +2065,17 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
       patchblankcopy = patchblank + blockstart[n];
 
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ip2 = ip1 + ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
             color11=clear_color;
             if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=burn_color;
           
@@ -2062,7 +2087,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2);
             glVertex3fv(xyzp2+3);
           }
-          ip1++; ip2++;
+          patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2135,18 +2160,17 @@ void drawpatch_frame(void){
 void drawpatch(const mesh *meshi){
   int n,nn,nn1,nn2;
   int nrow, ncol, irow, icol;
-  float *xyzp1, *xyzp2;
-  unsigned char *ipq1, *ipq2;
-  unsigned char *ipqqcopy;
+  unsigned char *cpatchval1, *cpatchval2;
+  unsigned char *cpatchval_iframe_copy;
   float *xyzpatchcopy;
-  int *patchblankcopy, *ip1, *ip2;
+  int *patchblankcopy;
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
   int *patchdir, *patchrow, *patchcol;
   int *blockstart;
   int *patchblank;
-  unsigned char *ipqqi;
+  unsigned char *cpatchval_iframe;
   int iblock;
   blockagedata *bc;
   patchdata *patchi;
@@ -2178,12 +2202,12 @@ void drawpatch(const mesh *meshi){
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
   case 0:
-    ASSERT(meshi->ipqqi!=NULL);
-    ipqqi=meshi->ipqqi;
+    ASSERT(meshi->cpatchval_iframe!=NULL);
+    cpatchval_iframe=meshi->cpatchval_iframe;
     break;
   case 1:
-    ASSERT(meshi->ipqqi_zlib!=NULL);
-    ipqqi=meshi->ipqqi_zlib;
+    ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
+    cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
   default:
     ASSERT(0);
@@ -2214,30 +2238,33 @@ void drawpatch(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            color11 = rgb_patch+4*(*ipq1);
-            color12 = rgb_patch+4*(*(ipq1+1));
-            color21 = rgb_patch+4*(*ipq2);
-            color22 = rgb_patch+4*(*(ipq2+1));
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            color11 = rgb_patch+4*(*cpatchval1);
+            color12 = rgb_patch+4*(*(cpatchval1+1));
+            color21 = rgb_patch+4*(*cpatchval2);
+            color22 = rgb_patch+4*(*(cpatchval2+1));
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
               if(meshi->thresholdtime[nn1+icol+1]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol+1])color12=&char_color[0];
               if(meshi->thresholdtime[nn2+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn2+icol  ])color21=&char_color[0];
               if(meshi->thresholdtime[nn2+icol+1]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn2+icol+1])color22=&char_color[0];
             }
-            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
+            if(ABS(*cpatchval1-*(cpatchval2+1))<ABS(*(cpatchval1+1)-*cpatchval2)){
               glColor4fv(color11); 
               glVertex3fv(xyzp1);
 
@@ -2276,7 +2303,7 @@ void drawpatch(const mesh *meshi){
               glVertex3fv(xyzp2);
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2308,7 +2335,7 @@ void drawpatch(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
         switch (meshi->patchdir[n]){
@@ -2328,29 +2355,32 @@ void drawpatch(const mesh *meshi){
         glBegin(GL_TRIANGLES);
       }
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            color11 = rgb_patch+4*(*ipq1);
-            color12 = rgb_patch+4*(*(ipq1+1));
-            color21 = rgb_patch+4*(*ipq2);
-            color22 = rgb_patch+4*(*(ipq2+1));
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            color11 = rgb_patch+4*(*cpatchval1);
+            color12 = rgb_patch+4*(*(cpatchval1+1));
+            color21 = rgb_patch+4*(*cpatchval2);
+            color22 = rgb_patch+4*(*(cpatchval2+1));
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
               if(meshi->thresholdtime[nn1+icol+1]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol+1])color12=&char_color[0];
               if(meshi->thresholdtime[nn2+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn2+icol  ])color21=&char_color[0];
               if(meshi->thresholdtime[nn2+icol+1]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn2+icol+1])color22=&char_color[0];
             }
-            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
+            if(ABS(*cpatchval1-*(cpatchval2+1))<ABS(*(cpatchval1+1)-*cpatchval2)){
               glColor4fv(color11); 
               glVertex3fv(xyzp1);
 
@@ -2389,7 +2419,7 @@ void drawpatch(const mesh *meshi){
               glVertex3fv(xyzp2);
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2420,7 +2450,7 @@ void drawpatch(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
         switch (meshi->patchdir[n]){
@@ -2440,28 +2470,31 @@ void drawpatch(const mesh *meshi){
         glBegin(GL_TRIANGLES);
       }
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
-        ip2 = ip1 + ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        cpatchval2 = cpatchval1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            color11 = rgb_patch+4*(*ipq1);
-            color12 = rgb_patch+4*(*(ipq1+1));
-            color21 = rgb_patch+4*(*ipq2);
-            color22 = rgb_patch+4*(*(ipq2+1));
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            color11 = rgb_patch+4*(*cpatchval1);
+            color12 = rgb_patch+4*(*(cpatchval1+1));
+            color21 = rgb_patch+4*(*cpatchval2);
+            color22 = rgb_patch+4*(*(cpatchval2+1));
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
               if(meshi->thresholdtime[nn1+icol+1]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol+1])color12=&char_color[0];
               if(meshi->thresholdtime[nn2+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn2+icol  ])color21=&char_color[0];
               if(meshi->thresholdtime[nn2+icol+1]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn2+icol+1])color22=&char_color[0];
             }
-            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
+            if(ABS(*cpatchval1-*(cpatchval2+1))<ABS(*(cpatchval1+1)-*cpatchval2)){
               glColor4fv(color11); 
               glVertex3fv(xyzp1);
 
@@ -2500,7 +2533,7 @@ void drawpatch(const mesh *meshi){
               glVertex3fv(xyzp2+3);
             }
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          cpatchval1++; cpatchval2++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2523,18 +2556,17 @@ void drawpatch(const mesh *meshi){
 void drawpatch_cellcenter(const mesh *meshi){
   int n,nn,nn1;
   int nrow, ncol, irow, icol;
-  float *xyzp1, *xyzp2;
-  unsigned char *ipq1;
-  unsigned char *ipqqcopy;
+  unsigned char *cpatchval1;
+  unsigned char *cpatchval_iframe_copy;
   float *xyzpatchcopy;
-  int *patchblankcopy, *ip1, *ip2;
+  int *patchblankcopy;
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
   int *patchdir, *patchrow, *patchcol;
   int *blockstart;
   int *patchblank;
-  unsigned char *ipqqi;
+  unsigned char *cpatchval_iframe;
   int iblock;
   blockagedata *bc;
   patchdata *patchi;
@@ -2567,12 +2599,12 @@ void drawpatch_cellcenter(const mesh *meshi){
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
   case 0:
-    ASSERT(meshi->ipqqi!=NULL);
-    ipqqi=meshi->ipqqi;
+    ASSERT(meshi->cpatchval_iframe!=NULL);
+    cpatchval_iframe=meshi->cpatchval_iframe;
     break;
   case 1:
-    ASSERT(meshi->ipqqi_zlib!=NULL);
-    ipqqi=meshi->ipqqi_zlib;
+    ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
+    cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
   default:
     ASSERT(0);
@@ -2603,18 +2635,21 @@ void drawpatch_cellcenter(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ip2 = ip1 + ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            color11 = rgb_patch+4*(*ipq1);
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            color11 = rgb_patch+4*(*cpatchval1);
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
             }
@@ -2627,7 +2662,7 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          ipq1++; ip1++; ip2++;
+          cpatchval1++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2659,7 +2694,7 @@ void drawpatch_cellcenter(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
         switch (meshi->patchdir[n]){
@@ -2679,17 +2714,20 @@ void drawpatch_cellcenter(const mesh *meshi){
         glBegin(GL_TRIANGLES);
       }
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
-        ip2 = ip1 + ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            color11 = rgb_patch+4*(*ipq1);
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            color11 = rgb_patch+4*(*cpatchval1);
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
             }
@@ -2702,7 +2740,7 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          ipq1++; ip1++; ip2++;
+          cpatchval1++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2733,7 +2771,7 @@ void drawpatch_cellcenter(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+      cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
         switch (meshi->patchdir[n]){
@@ -2753,16 +2791,19 @@ void drawpatch_cellcenter(const mesh *meshi){
         glBegin(GL_TRIANGLES);
       }
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ip2 = ip1 + ncol;
+        cpatchval1 = cpatchval_iframe_copy + irow*ncol;
+        patchblank2 = patchblank1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
-            color11 = rgb_patch+4*(*ipq1);
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
+            color11 = rgb_patch+4*(*cpatchval1);
             if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
               if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
             }
@@ -2775,7 +2816,7 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2);
             glVertex3fv(xyzp2+3);
           }
-          ipq1++; ip1++; ip2++;
+          cpatchval1++; patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2798,9 +2839,8 @@ void drawpatch_cellcenter(const mesh *meshi){
 void drawonlythreshold(const mesh *meshi){
   int n,nn,nn1,nn2;
   int nrow, ncol, irow, icol;
-  float *xyzp1, *xyzp2;
   float *xyzpatchcopy;
-  int *patchblankcopy, *ip1, *ip2;
+  int *patchblankcopy;
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
@@ -2827,10 +2867,10 @@ void drawonlythreshold(const mesh *meshi){
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
   case 0:
-    ASSERT(meshi->ipqqi!=NULL);
+    ASSERT(meshi->cpatchval_iframe!=NULL);
     break;
   case 1:
-    ASSERT(meshi->ipqqi_zlib!=NULL);
+    ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     break;
   default:
     ASSERT(0);
@@ -2863,15 +2903,18 @@ void drawonlythreshold(const mesh *meshi){
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ip2 = ip1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
             int nnulls;
 
             nnulls=4;
@@ -2912,7 +2955,7 @@ void drawonlythreshold(const mesh *meshi){
               if(color21!=NULL)glVertex3fv(xyzp2);
             }
           }
-          ip1++; ip2++;
+          patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2944,16 +2987,19 @@ void drawonlythreshold(const mesh *meshi){
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
-        ip2 = ip1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
             int nnulls;
 
             color11 = NULL;
@@ -2995,7 +3041,7 @@ void drawonlythreshold(const mesh *meshi){
               if(color21!=NULL)glVertex3fv(xyzp2);
             }
           }
-          ip1++; ip2++;
+          patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -3023,15 +3069,18 @@ void drawonlythreshold(const mesh *meshi){
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
       for(irow=0;irow<nrow-1;irow++){
+        int *patchblank1, *patchblank2;
+        float *xyzp1, *xyzp2;
+
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ip1 = patchblankcopy + irow*ncol;
+        patchblank1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ip2 = ip1 + ncol;
+        patchblank2 = patchblank1 + ncol;
         nn2 = nn1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
-          if(*ip1==GAS&&*ip2==GAS&&*(ip1+1)==GAS&&*(ip2+1)==GAS){
+          if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
             int nnulls;
 
             color11 = NULL;
@@ -3071,7 +3120,7 @@ void drawonlythreshold(const mesh *meshi){
               if(color11!=NULL)glVertex3fv(xyzp1);
             }
           }
-          ip1++; ip2++;
+          patchblank1++; patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -3708,11 +3757,11 @@ void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   uLongf countout;
   unsigned char *compressed_data;
 
-  compressed_data = meshi->ipqq_zlib+meshi->zipoffset[local_iframe];
+  compressed_data = meshi->cpatchval_zlib+meshi->zipoffset[local_iframe];
   countin = meshi->zipsize[local_iframe];
   countout=meshi->npatchsize;
 
-  uncompress(meshi->ipqqi_zlib,&countout,compressed_data,countin);
+  uncompress(meshi->cpatchval_iframe_zlib,&countout,compressed_data,countin);
 
 }
 #endif

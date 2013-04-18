@@ -600,9 +600,9 @@ typedef struct _mesh {
   unsigned int *zipoffset, *zipsize;
   int *visPatches;
   float *xyzpatch, *xyzpatch_threshold;
-  unsigned char *ipqq_zlib, *ipqqi_zlib;
-  unsigned char *ipqq, *ipqqi;
-  float *patch_times, *patch_timesi, *pqq, *pqqi;
+  unsigned char *cpatchval_zlib, *cpatchval_iframe_zlib;
+  unsigned char *cpatchval, *cpatchval_iframe;
+  float *patch_times, *patch_timesi, *patchval, *patchval_iframe;
   float *thresholdtime;
   int *patchblank;
   int npatch_times,npatches;

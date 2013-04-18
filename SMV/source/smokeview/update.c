@@ -211,7 +211,7 @@ void Update_Framenumber(int changetime){
         if(patchi->filetype==2||meshi->patch_times==NULL||meshi->patch_timeslist==NULL)continue;
         meshi->patch_itime=meshi->patch_timeslist[itimes];
         if(patchi->compression_type==0){
-          meshi->ipqqi = meshi->ipqq + meshi->patch_itime*meshi->npatchsize;
+          meshi->cpatchval_iframe = meshi->cpatchval + meshi->patch_itime*meshi->npatchsize;
         }
         else{
 #ifdef USE_ZLIB
