@@ -3908,16 +3908,12 @@ void LoadPatchMenu(int value){
 /* ------------------ ShowPatchMenu ------------------------ */
 
 void ShowPatchMenu(int value){
-  int val=0,n,i,ii;
-//  int sum=0;
-  mesh *meshi;
-  patchdata *patchi;
-  meshi=current_mesh;
-
   updatemenu=1;  
   updatefacelists=1;
   glutPostRedisplay();
   if(value>=1000){
+    patchdata *patchi;
+
     patchi=patchinfo+value-1000;
     if(patchi->type==ipatchtype){
       patchi->display=1-patchi->display;
@@ -3933,14 +3929,24 @@ void ShowPatchMenu(int value){
     updatechar();
   }
   if(value==SHOWALL_BOUNDARY){
+    int ii;
+
     for(ii=0;ii<npatch_loaded;ii++){
+      patchdata *patchi;
+      int i;
+
       i = patch_loaded_list[ii];
       patchi = patchinfo + i;
       patchi->display=1;
     }
   }
   if(value==HIDEALL_BOUNDARY){
+    int ii;
+
     for(ii=0;ii<npatch_loaded;ii++){
+      patchdata *patchi;
+      int i;
+
       i = patch_loaded_list[ii];
       patchi = patchinfo + i;
       patchi->display=0;
@@ -3948,15 +3954,14 @@ void ShowPatchMenu(int value){
   }
   if(value<0){
     if(value==EXTERIORwallmenu){
+      int i,n,val;
+
       allexterior = 1-allexterior;
-	  showexterior=1-showexterior;
-//      for(i=1;i<7;i++){
-//        sum+=visPatchType[i];
-//      }
+  	  showexterior=1-showexterior;
       val = allexterior;
-      for(n=0;n<meshi->npatches;n++){
-        if(meshi->patchtype[n]!=INTERIORwall){
-          meshi->visPatches[n]=val;
+      for(n=0;n<current_mesh->npatches;n++){
+        if(current_mesh->patchtype[n]!=INTERIORwall){
+          current_mesh->visPatches[n]=val;
         }
       }
       for(i=1;i<7;i++){
@@ -3964,21 +3969,25 @@ void ShowPatchMenu(int value){
       }
     }
     else if(value==INTERIORwallmenu){
+      int n,val;
+
       allinterior = 1 - allinterior;
       val = allinterior;
       visPatchType[INTERIORwall]=val;
-      for(n=0;n<meshi->npatches;n++){
-        if(meshi->patchtype[n]==INTERIORwall){
-          meshi->visPatches[n]=val;
+      for(n=0;n<current_mesh->npatches;n++){
+        if(current_mesh->patchtype[n]==INTERIORwall){
+          current_mesh->visPatches[n]=val;
         }
       }
     }
     else if(value!=DUMMYwallmenu){
+      int n;
+
       value = -(value+2); /* map xxxwallmenu to xxxwall */
-      for(n=0;n<meshi->npatches;n++){
-        if(meshi->patchtype[n]==value){
-          meshi->visPatches[n] = 1 - meshi->visPatches[n];
-          visPatchType[value]=meshi->visPatches[n];
+      for(n=0;n<current_mesh->npatches;n++){
+        if(current_mesh->patchtype[n]==value){
+          current_mesh->visPatches[n] = 1 - current_mesh->visPatches[n];
+          visPatchType[value]=current_mesh->visPatches[n];
         }
       }
     }

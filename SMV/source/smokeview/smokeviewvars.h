@@ -792,6 +792,7 @@ SVEXTERN int loadfiles_at_startup;
 
 SVEXTERN char SVDECL(*smokeviewtempdir,NULL);
 
+SVEXTERN int SVDECL(showall_boundary,1);
 SVEXTERN int nmenus;
 SVEXTERN menudata menuinfo[10000];
 SVEXTERN int showbuild;

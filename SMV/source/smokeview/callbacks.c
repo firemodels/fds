@@ -1300,6 +1300,11 @@ void keyboard(unsigned char key, int flag){
       axislabels_smooth=1-axislabels_smooth;
       update_axislabels_smooth();
       break;
+    case 'b':
+      showall_boundary=1-showall_boundary;
+      if(showall_boundary==1)ShowPatchMenu(SHOWALL_BOUNDARY);
+      if(showall_boundary==0)ShowPatchMenu(HIDEALL_BOUNDARY);
+      break;
     case 'c':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
