@@ -106,6 +106,7 @@ get_fds_email()
   if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
     THIS_FDSEMAIL=
   fi
+  THIS_FDSEMAIL=
 }
 
 
