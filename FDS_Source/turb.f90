@@ -1328,6 +1328,8 @@ VENT_LOOP: DO NV=1,N_VENT
             ! This IF block is needed because eddies may be centered outside the vent.
             IF (VT%Y_EDDY(NE)>VT%Y1 .AND. VT%Y_EDDY(NE)<VT%Y2 .AND. &
                 VT%Z_EDDY(NE)>VT%Z1 .AND. VT%Z_EDDY(NE)<VT%Z2 .AND. &
+                VT%Y_EDDY(NE)>YS .AND. VT%Y_EDDY(NE)<YF .AND. &
+                VT%Z_EDDY(NE)>ZS .AND. VT%Z_EDDY(NE)<ZF .AND. &
                 ABS(SF%VEL)>TWO_EPSILON_EB) THEN
                SELECT CASE (VT%IOR)
                   CASE( 1); CALL GET_IJK(VT%X1+EPSDX,VT%Y_EDDY(NE),VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
@@ -1370,6 +1372,8 @@ VENT_LOOP: DO NV=1,N_VENT
          EDDY_LOOP_2: DO NE=1,VT%N_EDDY
             IF (VT%X_EDDY(NE)>VT%X1 .AND. VT%X_EDDY(NE)<VT%X2 .AND. &
                 VT%Z_EDDY(NE)>VT%Z1 .AND. VT%Z_EDDY(NE)<VT%Z2 .AND. &
+                VT%X_EDDY(NE)>XS .AND. VT%X_EDDY(NE)<XF .AND. &
+                VT%Z_EDDY(NE)>ZS .AND. VT%Z_EDDY(NE)<ZF .AND. &
                 ABS(SF%VEL)>TWO_EPSILON_EB) THEN
                SELECT CASE (VT%IOR)
                   CASE( 2); CALL GET_IJK(VT%X_EDDY(NE),VT%Y1+EPSDX,VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
@@ -1412,6 +1416,8 @@ VENT_LOOP: DO NV=1,N_VENT
          EDDY_LOOP_3: DO NE=1,VT%N_EDDY
             IF (VT%X_EDDY(NE)>VT%X1 .AND. VT%X_EDDY(NE)<VT%X2 .AND. &
                 VT%Y_EDDY(NE)>VT%Y1 .AND. VT%Y_EDDY(NE)<VT%Y2 .AND. &
+                VT%X_EDDY(NE)>XS .AND. VT%X_EDDY(NE)<XF .AND. &
+                VT%Y_EDDY(NE)>YS .AND. VT%Y_EDDY(NE)<YF .AND. &
                 ABS(SF%VEL)>TWO_EPSILON_EB) THEN
                SELECT CASE (VT%IOR)
                   CASE( 3); CALL GET_IJK(VT%X_EDDY(NE),VT%Y_EDDY(NE),VT%Z1+EPSDX,NM,XI,YJ,ZK,II,JJ,KK)
