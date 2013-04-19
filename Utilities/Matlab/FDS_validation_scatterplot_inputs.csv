@@ -1,4 +1,4 @@
-Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Paper_Width_Factor,Sigma_2_E,Model_Error,Plot_Type,Plot_Filename
+Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Paper_Width_Factor,Sigma_2_E,Weight_Data,Plot_Type,Plot_Filename
 "HGL Temperature, Forced Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_Forced_Ventilation
 "HGL Temperature, Natural Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_Natural_Ventilation
 "HGL Temperature, No Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_No_Ventilation
@@ -27,12 +27,14 @@ Sprinkler Actuation Time,Measured Time to Actuation (s),Predicted Time to Actuat
 Smoke Detector Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,33,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Detector_Activation_Time
 "Smoke Detector Activation Time, Temperature Rise",Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,20,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Detector_Activation_Time_Temp_Rise
 Cable Failure Time,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Cable_Temperature
-Sprinkler Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,1,0,no,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/UL_NFPRF_Actuations
-Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-07,1.00E-01,0.03 0.95,SouthEast,1,0,no,loglog,FDS_Validation_Guide/FIGURES/ScatterPlots/Aerosol_Deposition_Velocity
-Burning Rate,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.1,0.03 0.95,SouthEast,1,0,no,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Pool_Fires_Burning_Rates
+Sprinkler Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/UL_NFPRF_Actuations
+Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-07,1.00E-01,0.03 0.95,SouthEast,1,-1,yes,loglog,FDS_Validation_Guide/FIGURES/ScatterPlots/Aerosol_Deposition_Velocity
+Burning Rate,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.1,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Pool_Fires_Burning_Rates
 Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.001,0.03 0.95,SouthEast,1,9,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Carbon_Monoxide_Concentration
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.6,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Entrainment
-Extinction Time,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,1,0,no,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/USCG_HAI_Extinction
-Species Concentration,Measured Change in Volume Fraction (\%),Predicted Change in Volume Fraction (\%),0,100,0.03 0.95,SouthEast,1,5,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Species_Concentration
-Detector Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,30,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Detector_Temperature
-Smoke Obscuration,Measured Obscuration (\%/m),Predicted Obscuration (\%/m),0,100,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Obscuration
+Extinction Time,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/USCG_HAI_Extinction
+Species Concentration,Measured Change in Volume Fraction (\%),Predicted Change in Volume Fraction (\%),0,100,0.03 0.95,SouthEast,1,9,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Species_Concentration
+Low Ceiling Jet Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,30,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Low_Ceiling_Jet_Temperature
+Low Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,5,0.03 0.95,SouthEast,1,20,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Low_Heat_Flux
+Low Surface Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,20,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Low_Surface_Temperature
+Smoke Obscuration,Measured Obscuration (\%/m),Predicted Obscuration (\%/m),0,100,0.03 0.95,SouthEast,1,20,no,linear,FDS_Validation_Guide/FIGURES/ScatterPlots/Smoke_Obscuration

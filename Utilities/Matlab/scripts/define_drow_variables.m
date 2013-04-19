@@ -9,7 +9,7 @@
 %
 % vdir = '../../../Verification/'; for example, is also set in read_dline.
 
-Quantity          = parameters(find(strcmp(headers,'Quantity')));
+Quantity          = char(parameters(find(strcmp(headers,'Quantity'))));
 Group_Key_Label   = parameters(find(strcmp(headers,'Group_Key_Label')));
 Group_Style       = parameters(find(strcmp(headers,'Group_Style')));
 Fill_Color        = parameters(find(strcmp(headers,'Fill_Color')));
