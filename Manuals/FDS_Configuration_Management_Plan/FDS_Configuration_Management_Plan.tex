@@ -593,7 +593,7 @@ In the first stage, the newest version of the FDS-SMV codebase is retrieved from
 
 \subsection*{Stage 2: Compilation of FDS debug versions}
 
-The serial and MPI versions of FDS are compiled with debugging flags enabled. This stage allows for errors in the source code to be identified and traced early in the build/test process. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
+The serial, MPI, and OpenMP versions of FDS are compiled with debugging flags enabled. This stage allows for errors in the source code to be identified and traced early in the build/test process. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
 \subsection*{Stage 3: Run verification suite in debug mode}
 
@@ -601,7 +601,7 @@ All of the cases in the verification suite are invoked using the FDS debug versi
 
 \subsection*{Stage 4: Compilation of FDS release versions}
 
-The serial and MPI release versions of FDS are compiled. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
+The serial, MPI, and OpenMP release versions of FDS are compiled. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
 \subsection*{Stage 5: Run verification suite in release mode}
 
