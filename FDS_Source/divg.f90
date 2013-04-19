@@ -37,11 +37,9 @@ REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN,RCON_DIFF,PROFILE_FACTOR
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ,NF,IC
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
-TYPE(FACET_TYPE), POINTER :: FACE=>NULL()
-TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
 REAL(EB), PARAMETER :: ADVECTION_EPS=1.E-6_EB
  
 ! Check whether to skip this routine
@@ -590,38 +588,30 @@ IF (CALC_D_LAGRANGIAN) THEN
    ENDDO
 ENDIF
 
-! Add contribution of unstructured geometry
+! ! Add contribution of unstructured geometry
 
-IF (N_FACE>0) THEN
+! IF (N_FACE>0) THEN
 
-   ! Store KW for unstructured geometry
+!    ! Store KW for unstructured geometry
 
-   DO NF=1,N_FACE
-      FACE=>FACET(NF)
-      CL=>FACE%CUTCELL_LIST
-      FACE%KW=0._EB
-      CUTCELL_LOOP_2: DO
-         IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
-         IC = CL%INDEX
-         IIG = I_CUTCELL(IC)
-         JJG = J_CUTCELL(IC)
-         KKG = K_CUTCELL(IC)
-         FACE%KW  = FACE%KW + CL%AREA*KP(IIG,KKG,JJG)
-         CL=>CL%NEXT ! point to the next index in the linked list
-         ! zero out DP in cut cells, add back using D_GEOMETRY (experimental)
-         DP(IIG,JJG,KKG) = 0._EB
-       ENDDO CUTCELL_LOOP_2
-   ENDDO
+!    DO NF=1,N_FACE
+!       FACE=>FACET(NF)
+!       CL=>FACE%CUTCELL_LIST
+!       FACE%KW=0._EB
+!       CUTCELL_LOOP_2: DO
+!          IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
+!          IC = CL%INDEX
+!          IIG = I_CUTCELL(IC)
+!          JJG = J_CUTCELL(IC)
+!          KKG = K_CUTCELL(IC)
+!          FACE%KW  = FACE%KW + CL%AREA*KP(IIG,KKG,JJG)
+!          CL=>CL%NEXT ! point to the next index in the linked list
+!          ! zero out DP in cut cells, add back using D_GEOMETRY (experimental)
+!          DP(IIG,JJG,KKG) = 0._EB
+!        ENDDO CUTCELL_LOOP_2
+!    ENDDO
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_GEOMETRY(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-
-ENDIF
+! ENDIF
 
 ! Atmospheric stratification term
 
@@ -650,7 +640,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
          CASE (SOLID_BOUNDARY)
             SF => SURFACE(WC%SURF_INDEX)
             IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SF%SPECIES_BC_INDEX==INTERPOLATED_BC .OR. &
-                 SF%SPECIES_BC_INDEX==HVAC_BOUNDARY .OR. ANY(SF%LEAK_PATH>0._EB)) CYCLE WALL_LOOP3
+               SF%SPECIES_BC_INDEX==HVAC_BOUNDARY .OR. ANY(SF%LEAK_PATH>0._EB)) CYCLE WALL_LOOP3
             IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) < SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T + DT
             ELSE
