@@ -50,7 +50,7 @@ setup_win:
 # by using the FOPENMPFLAG
 # Note: OpenMP is actually compiled by using O2-optimization (not O3)
 
-func.o: FFLAGS += $(FOPENMPFLAGS)
+#func.o: FFLAGS += $(FOPENMPFLAGS)
 #divg.o: FFLAGS += $(FOPENMPFLAGS)
 #fire.o: FFLAGS += $(FOPENMPFLAGS)
 #mass.o: FFLAGS += $(FOPENMPFLAGS)
@@ -60,7 +60,7 @@ func.o: FFLAGS += $(FOPENMPFLAGS)
 #turb.o: FFLAGS += $(FOPENMPFLAGS)
 #velo.o: FFLAGS += $(FOPENMPFLAGS)
 
-func.obj: FFLAGS += $(FOPENMPFLAGS)
+#func.obj: FFLAGS += $(FOPENMPFLAGS)
 #divg.obj: FFLAGS += $(FOPENMPFLAGS)
 #fire.obj: FFLAGS += $(FOPENMPFLAGS)
 #mass.obj: FFLAGS += $(FOPENMPFLAGS)
