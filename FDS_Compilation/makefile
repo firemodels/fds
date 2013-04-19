@@ -51,25 +51,24 @@ setup_win:
 # Note: OpenMP is actually compiled by using O2-optimization (not O3)
 
 func.o: FFLAGS += $(FOPENMPFLAGS)
-#part.o: FFLAGS += $(FOPENMPFLAGS)
-#turb.o: FFLAGS += $(FOPENMPFLAGS)
-#mass.o: FFLAGS += $(FOPENMPFLAGS)
-#fire.o: FFLAGS += $(FOPENMPFLAGS)
 #divg.o: FFLAGS += $(FOPENMPFLAGS)
-#velo.o: FFLAGS += $(FOPENMPFLAGS)
-#pres.o: FFLAGS += $(FOPENMPFLAGS)
+#fire.o: FFLAGS += $(FOPENMPFLAGS)
+#mass.o: FFLAGS += $(FOPENMPFLAGS)
+#part.o: FFLAGS += $(FOPENMPFLAGS)
 #pois.o: FFLAGS += $(FOPENMPFLAGS)
+#pres.o: FFLAGS += $(FOPENMPFLAGS)
+#turb.o: FFLAGS += $(FOPENMPFLAGS)
+#velo.o: FFLAGS += $(FOPENMPFLAGS)
 
 func.obj: FFLAGS += $(FOPENMPFLAGS)
-#part.obj: FFLAGS += $(FOPENMPFLAGS)
-#turb.obj: FFLAGS += $(FOPENMPFLAGS)
-#mass.obj: FFLAGS += $(FOPENMPFLAGS)
-#fire.obj: FFLAGS += $(FOPENMPFLAGS)
 #divg.obj: FFLAGS += $(FOPENMPFLAGS)
-#velo.obj: FFLAGS += $(FOPENMPFLAGS)
-#pres.obj: FFLAGS += $(FOPENMPFLAGS)
+#fire.obj: FFLAGS += $(FOPENMPFLAGS)
+#mass.obj: FFLAGS += $(FOPENMPFLAGS)
+#part.obj: FFLAGS += $(FOPENMPFLAGS)
 #pois.obj: FFLAGS += $(FOPENMPFLAGS)
-
+#pres.obj: FFLAGS += $(FOPENMPFLAGS)
+#turb.obj: FFLAGS += $(FOPENMPFLAGS)
+#velo.obj: FFLAGS += $(FOPENMPFLAGS)
 
 # Windows Intel Compiler, version 11
 
@@ -445,6 +444,15 @@ mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
+openmp_intel_osx_64 : FFLAGS = -m64 -static-intel -vec_report0
+openmp_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
+openmp_intel_osx_64 : FOPTIMIZATIONFLAGS = -O2
+openmp_intel_osx_64 : FCOMPL = ifort
+openmp_intel_osx_64 : CCOMPL = icc
+openmp_intel_osx_64 : obj = fds_openmp_intel_osx_64
+openmp_intel_osx_64 : setup $(obj_serial)
+	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03 -mmacosx-version-min=10.4
 intel_osx_64_db : FCOMPL = ifort
 intel_osx_64_db : obj = fds_intel_osx_64_db
@@ -458,22 +466,6 @@ mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -mmacosx-version-min=10.4
-intel_osx_64_dv : LFLAGS = -static-intel
-intel_osx_64_dv : FCOMPL = ifort
-intel_osx_64_dv : obj = fds_intel_osx_64_dv
-intel_osx_64_dv : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-
-openmp_intel_osx_64 : FFLAGS = -m64 -static-intel -vec_report0
-openmp_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_intel_osx_64 : FOPTIMIZATIONFLAGS = -O2
-openmp_intel_osx_64 : FCOMPL = ifort
-openmp_intel_osx_64 : CCOMPL = icc
-openmp_intel_osx_64 : obj = fds_openmp_intel_osx_64
-openmp_intel_osx_64 : setup $(obj_serial)
-	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
-
 ### -check produces a runtime-error in the debug version
 openmp_intel_osx_64_db : FFLAGS = -m64 -static-intel -vec_report0 -warn unused -auto -WB -traceback -g -fltconsistency
 openmp_intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
@@ -483,6 +475,13 @@ openmp_intel_osx_64_db : CCOMPL = icc
 openmp_intel_osx_64_db : obj = fds_openmp_intel_osx_64_db
 openmp_intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
+intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -mmacosx-version-min=10.4
+intel_osx_64_dv : LFLAGS = -static-intel
+intel_osx_64_dv : FCOMPL = ifort
+intel_osx_64_dv : obj = fds_intel_osx_64_dv
+intel_osx_64_dv : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 #*** IBM XLF Compiler ***
 
