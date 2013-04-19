@@ -37,10 +37,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   float *xyzpatchcopy;
   float *xyzpatch_ignitecopy;
   int *patchblankcopy;
-  char patchlonglabel[31], patchshortlabel[31], patchunit[31];
   int mxpatch_frames;
-  int i1, i2, j1, j2, k1, k2, n;
-  int i, j, k;
+  int n;
+  int ii;
   int headersize, framesize;
   int statfile;
   STRUCTSTAT statbuffer;
@@ -48,13 +47,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   int ibartemp,jbartemp,kbartemp;
   float *xplttemp,*yplttemp,*zplttemp;
   int blocknumber;
-  patchdata *pi,*patchbase,*patchi;
+  patchdata *patchi,*patchbase;
   mesh *meshi;
   float patchmin_global, patchmax_global;
   int local_first,nsize,iblock;
-  int ext_wall;
 
-  blockagedata *bc;
   int nn;
   int filenum;
   char *patchscale;
@@ -67,26 +64,26 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   int file_unit;
   int wallcenter=0;
 
-  if(patchinfo[ifile].loaded==0&&flag==UNLOAD)return;
-  if(strcmp(patchinfo[ifile].label.shortlabel,"wc")==0)wallcenter=1;
+  patchi = patchinfo + ifile;
+  if(patchi->loaded==0&&flag==UNLOAD)return;
+  if(strcmp(patchi->label.shortlabel,"wc")==0)wallcenter=1;
 
   local_first=1;
   CheckMemory;
   patchfilenum=ifile;
-  pi = patchinfo + ifile;
-  file = pi->file;
-  blocknumber = pi->blocknumber;
+  file = patchi->file;
+  blocknumber = patchi->blocknumber;
   highlight_mesh = blocknumber;
   meshi = meshinfo+blocknumber;
   update_current_mesh(meshi);
   filenum = meshi->patchfilenum;
   if(filenum>=0&&filenum<npatchinfo){
-    patchinfo[filenum].loaded=0;
-    patchinfo[filenum].display=0;
+    patchi->loaded=0;
+    patchi->display=0;
   }
 
   meshi->patchfilenum=ifile;
-  pi->display=0;
+  patchi->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
 
   nbb = meshi->nbptrs;
@@ -121,6 +118,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   FREEMEMORY(meshi->patchblank);
 
   if(meshi->patch_contours!=NULL){  
+    int i;
+
     ASSERT(meshi->npatches>0&&meshi->mxpatch_frames>0);
     for(i=0;i<meshi->npatches*meshi->mxpatch_frames;i++){
       if(meshi->patch_contours[i]!=NULL){
@@ -131,24 +130,23 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   }
 
   if(flag==UNLOAD){
+    int enableflag=1;
+    int i;
+
     update_patchtype();
     update_unit_defs();
     Update_Times();
     meshi->npatches=0;
-    {
-      int enableflag=1;
+    for(i=0;i<npatchinfo;i++){
+      patchdata *patchii;
 
-      for(i=0;i<npatchinfo;i++){
-        patchdata *patchii;
-
-        patchii = patchinfo + i;
-        if(patchii->loaded==1&&patchii->compression_type==1){
-          enableflag=0;
-          break;
-        }
+      patchii = patchinfo + i;
+      if(patchii->loaded==1&&patchii->compression_type==1){
+        enableflag=0;
+        break;
       }
-      if(enableflag==1)enable_boundary_glui();
     }
+    if(enableflag==1)enable_boundary_glui();
     updatemenu=1;
 #ifdef _DEBUG
     PRINTF("After boundary file unload: ");
@@ -157,7 +155,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     return;
   }
   if(ifile>=0&&ifile<npatchinfo){
-    global2localpatchbounds(patchinfo[ifile].label.shortlabel);
+    global2localpatchbounds(patchi->label.shortlabel);
   }
 
   if(colorlabelpatch!=NULL){
@@ -166,8 +164,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
     FREEMEMORY(colorlabelpatch);
   }
-  patchinfo[ifile].extreme_max=0;
-  patchinfo[ifile].extreme_min=0;
+  patchi->extreme_max=0;
+  patchi->extreme_min=0;
   ibartemp=meshi->ibar;
   jbartemp=meshi->jbar;
   kbartemp=meshi->kbar;
@@ -178,20 +176,21 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   
   if(activate_threshold==1){
     if(
-      strncmp(patchinfo[ifile].label.shortlabel,"TEMP",4) == 0||
-      strncmp(patchinfo[ifile].label.shortlabel,"temp",4) == 0
+      strncmp(patchi->label.shortlabel,"TEMP",4) == 0||
+      strncmp(patchi->label.shortlabel,"temp",4) == 0
       ){
       do_threshold=1;
     }
   }
 
-  update_patch_hist(pi);
+  update_patch_hist(patchi);
 
   lenfile = strlen(file);
   file_unit=15;
   FORTget_file_unit(&file_unit,&file_unit);
-  if(patchinfo[ifile].compression_type==0){
+  if(patchi->compression_type==0){
     FILE_SIZE labellen=LABELLEN;
+    char patchlonglabel[31], patchshortlabel[31], patchunit[31];
 
     FORTgetpatchsizes1(&file_unit,file,patchlonglabel,patchshortlabel,patchunit,&endian_smv,&meshi->npatches,&headersize,&error,
                        lenfile,labellen,labellen,labellen);
@@ -223,7 +222,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
        NewMemory((void **)&meshi->patchcol    ,sizeof(int)*meshi->npatches)==0||
        NewMemory((void **)&meshi->blockstart  ,sizeof(int)*(1+meshi->npatches))==0){
       *errorcode=1;
-      if(patchinfo[ifile].compression_type==0){
+      if(patchi->compression_type==0){
         FORTclosefortranfile(&file_unit);
       }
       readpatch(ifile,UNLOAD,&error);
@@ -231,8 +230,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
   }
 
-  if(patchinfo[ifile].compression_type==0){
-    FORTgetpatchsizes2(&file_unit,&patchinfo[ifile].version,
+  if(patchi->compression_type==0){
+    FORTgetpatchsizes2(&file_unit,&patchi->version,
       &meshi->npatches,&meshi->npatchsize,
       meshi->pi1,meshi->pi2,meshi->pj1,meshi->pj2,meshi->pk1,meshi->pk2,meshi->patchdir,
       &headersize,&framesize);
@@ -267,9 +266,10 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   }
   else{
     int nnsize=0;
+    int i;
 
     getpatchheader2(file,
-      &patchinfo[ifile].version,
+      &patchi->version,
       meshi->pi1,meshi->pi2,
       meshi->pj1,meshi->pj2,
       meshi->pk1,meshi->pk2,
@@ -297,9 +297,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
        NewMemory((void **)&meshi->patchblank,meshi->npatchsize*sizeof(int))==0
        ){
       *errorcode=1;
-      patchinfo[ifile].loaded=0;
-      patchinfo[ifile].display=0;
-      if(patchinfo[ifile].compression_type==0){
+      patchi->loaded=0;
+      patchi->display=0;
+      if(patchi->compression_type==0){
         FORTclosefortranfile(&file_unit);
       }
       readpatch(ifile,UNLOAD,&error);
@@ -314,6 +314,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   patchblankcopy = meshi->patchblank;
   meshi->blockstart[0]=0;
   for(n=0;n<meshi->nbptrs;n++){
+    blockagedata *bc;
+    int j;
+
     bc=meshi->blockageinfoptrs[n];
     for(j=0;j<6;j++){
       bc->patchvis[j]=1;
@@ -323,6 +326,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   for(n=0;n<meshi->npatches;n++){
     float dxx, dyy, dzz, ig_factor;
     float dx_factor, dy_factor, dz_factor;
+    int i1, i2, j1, j2, k1, k2;
+
 
     i1=meshi->pi1[n]; 
     i2=meshi->pi2[n];
@@ -330,7 +335,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     j2=meshi->pj2[n];
     k1=meshi->pk1[n]; 
     k2=meshi->pk2[n];
-    if(pi->version==0){
+    if(patchi->version==0){
       meshi->patchdir[n]=getpatchfacedir(meshi,i1,i2,j1,j2,k1,k2,
         meshi->blockonpatch+n,meshi->meshonpatch+n);
     }
@@ -382,6 +387,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     
     meshi->patchtype[n]=INTERIORwall;
     if(i1==i2){
+      int ext_wall;
+
       meshi->patchcol[n] = j2 + 1 - j1;
       meshi->patchrow[n] = k2 + 1 - k1;
 
@@ -394,8 +401,12 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
         }
       }
       if(ext_wall==0){
+        int k;
+
         // an internal wall so set blank to 1 then zero out where there are vents
         for(k=k1;k<=k2;k++){
+          int j;
+
           if(k==k1){
             dz_factor=-meshi->zplt[1]*ig_factor;
           }
@@ -427,10 +438,13 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       }
       else{
         int ii;
+        int k;
 
         // an external wall so set blank to 0 then set to one where there are dummy vents
         ii=0;
         for(k=k1;k<=k2;k++){
+          int j;
+
           if(k==k1){
             dz_factor=-meshi->zplt[1]*ig_factor;
           }
@@ -464,6 +478,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       }
     }
     else if(j1==j2){
+      int ext_wall;
+
       meshi->patchcol[n] = i2 + 1 - i1;
       meshi->patchrow[n] = k2 + 1 - k1;
 
@@ -476,7 +492,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
         }
       }
       if(ext_wall==0){
+        int k;
+
         for(k=k1;k<=k2;k++){
+          int i;
+
           if(k==k1){
             dz_factor=-meshi->zplt[1]*ig_factor;
           }
@@ -508,10 +528,13 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       }
       else{
         int ii;
+        int k;
 
         // an external wall so set blank to 0 then zero out where there are vents
         ii=0;
         for(k=k1;k<=k2;k++){
+          int i;
+
           if(k==k1){
             dz_factor=-meshi->zplt[1]*ig_factor;
           }
@@ -545,6 +568,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       }
     }
     else if(k1==k2){
+      int ext_wall;
+
       meshi->patchcol[n] = i2 + 1 - i1;
       meshi->patchrow[n] = j2 + 1 - j1;
 
@@ -557,7 +582,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
         }
       }
       if(ext_wall==0){
+        int j;
+
         for(j=j1;j<=j2;j++){
+          int i;
+
           if(j==j1){
             dy_factor=-meshi->yplt[1]*ig_factor;
           }
@@ -589,11 +618,14 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       }
       else{
         int ii;
+        int j;
 
       // an external wall so set blank to 0 then zero out where there are vents
 
         ii=0;
         for(j=j1;j<=j2;j++){
+          int i;
+
           if(j==j1){
             dy_factor=-meshi->yplt[1]*ig_factor;
           }
@@ -632,6 +664,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
   meshi->patchfacevis2=0;
   for(n=0;n<meshi->nbptrs;n++){
+    blockagedata *bc;
+    int j;
+
     bc=meshi->blockageinfoptrs[n];
     bc->patchvis[6]=0;
     for(j=0;j<6;j++){
@@ -681,7 +716,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   NewMemory((void **)&meshi->zipsize,sizeof(unsigned int)*mxpatch_frames);
   if(meshi->patch_times==NULL){
     *errorcode=1;
-    if(patchinfo[ifile].compression_type!=2){
+    if(patchi->compression_type!=2){
       FORTclosefortranfile(&file_unit);
     }
     readpatch(ifile,UNLOAD,&error);
@@ -704,15 +739,15 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
   file_size=get_filesize(file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
-  for (i=0;i<mxpatch_frames;){
+  for (ii=0;ii<mxpatch_frames;){
     if(loadpatchbysteps==1){
       meshi->patchval_iframe = meshi->patchval;
-      meshi->cpatchval_iframe = meshi->cpatchval + i*meshi->npatchsize;
+      meshi->cpatchval_iframe = meshi->cpatchval + ii*meshi->npatchsize;
     }
     else if(loadpatchbysteps==0){
-      meshi->patchval_iframe = meshi->patchval + i*meshi->npatchsize;
+      meshi->patchval_iframe = meshi->patchval + ii*meshi->npatchsize;
     }
-    meshi->patch_timesi = meshi->patch_times + i;
+    meshi->patch_timesi = meshi->patch_times + ii;
 
     error=0;
     if(loadpatchbysteps==0||loadpatchbysteps==1){
@@ -743,11 +778,12 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
         nn=0;
 #ifdef USE_ZLIB
-        if(loadpatchbysteps==2)uncompress_patchdataframe(meshi,i);
+        if(loadpatchbysteps==2)uncompress_patchdataframe(meshi,ii);
 #endif
         for(n=0;n<meshi->npatches;n++){
           mesh *meshblock;
           float dval;
+          int j;
 
           iblock=meshi->blockonpatch[n];
           meshblock = meshi->meshonpatch[n];
@@ -759,7 +795,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             case 1:
               for(j=0;j<nsize;j++){
                 if(meshi->thresholdtime[nn+j]<0.0&&meshi->patchval_iframe[nn+j]>=temp_threshold){
-                  meshi->thresholdtime[nn+j]=meshi->patch_times[i];
+                  meshi->thresholdtime[nn+j]=meshi->patch_times[ii];
                 }
               }
               break;
@@ -772,7 +808,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
                 ival = meshi->cpatchval_iframe_zlib[nn+j];
                 val = patchmin + dval*ival;
                 if(meshi->thresholdtime[nn+j]<0.0&&val>=temp_threshold){
-                  meshi->thresholdtime[nn+j]=meshi->patch_times[i];
+                  meshi->thresholdtime[nn+j]=meshi->patch_times[ii];
                 }
               }
               break;
@@ -791,7 +827,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
                  setpatchmin,&patchmin, setpatchmax,&patchmax, 
                  &patchmin_global, &patchmax_global,
                  nrgb_full,
-                 &patchinfo[ifile].extreme_min,&patchinfo[ifile].extreme_max);
+                 &patchi->extreme_min,&patchi->extreme_max);
     }
     CheckMemory;
     if(error!=0)break;
@@ -816,11 +852,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             return;
           }
         }
-        i++;
+        ii++;
       }
     }
     if(loadpatchbysteps==2){
-      i++;
+      ii++;
     }
   }
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
@@ -860,10 +896,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       return;
     }
   }
-  patchi = patchinfo + ifile;
   patchscale = patchi->scale;
   patchbase = patchinfo + getpatchindex(patchi);
-  patchinfo[ifile].loaded=1;
+  patchi->loaded=1;
   ipatchtype=getpatchtype(patchinfo+ifile);
   switch(loadpatchbysteps){
   case 0:
@@ -871,7 +906,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
       nrgb, colorlabelpatch,patchscale,boundarylevels256,
-      &patchinfo[ifile].extreme_min,&patchinfo[ifile].extreme_max);
+      &patchi->extreme_min,&patchi->extreme_max);
     break;
   case 1:
     getBoundaryLabels(
@@ -893,18 +928,18 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     meshi->surface_tempmin=patchmin_global;
   }
 
-  local2globalpatchbounds(patchinfo[ifile].label.shortlabel);
+  local2globalpatchbounds(patchi->label.shortlabel);
   updatepatchlistindex(patchfilenum);
 
   FREEMEMORY(meshi->patchval);
-  patchinfo[ifile].loaded=1;
-  patchinfo[ifile].display=1;
+  patchi->loaded=1;
+  patchi->display=1;
   ipatchtype=getpatchtype(patchinfo+ifile);
   showexterior=1-showexterior;
   allexterior = 1-allexterior;
   ShowPatchMenu(EXTERIORwallmenu);
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  if(patchinfo[ifile].compression_type==1)disable_boundary_glui();
+  if(patchi->compression_type==1)disable_boundary_glui();
   Update_Times();
   update_unit_defs();
   updatechopcolors();
