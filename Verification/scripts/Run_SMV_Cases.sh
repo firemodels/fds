@@ -44,6 +44,7 @@ case $OPTION in
    queue="$OPTARG"
    ;;
   s)
+   stop_cases=true
    export STOPFDS=1
    ;;
 esac
@@ -78,13 +79,14 @@ fi
 
 export BASEDIR=`pwd`
 
-# remove output files
-
-echo removing FDS/CFAST output files
-export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
-export RUNFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
-scripts/SMV_Cases.sh
-echo FDS/CFAST output files removed
+# Remove output files (unless stop option is used)
+if [[ ! stop_cases ]] ; then
+  echo "Removing FDS/CFAST output files"
+  export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
+  export RUNFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
+  scripts/SMV_Cases.sh
+  echo "FDS/CFAST output files removed"
+fi
 
 # run cases    
 
