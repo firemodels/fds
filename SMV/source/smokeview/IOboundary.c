@@ -702,7 +702,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
     break;
   case 2:
-    getpatchsizeinfo(patchinfo+ifile, &mxpatch_frames, &ncompressed_buffer);
+    getpatchsizeinfo(patchi, &mxpatch_frames, &ncompressed_buffer);
     NewMemory((void **)&meshi->cpatchval_zlib,sizeof(unsigned char)*ncompressed_buffer);
     NewMemory((void **)&meshi->cpatchval_iframe_zlib,sizeof(unsigned char)*meshi->npatchsize);
     break;
@@ -723,7 +723,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     return;
   }
   if(loadpatchbysteps==2){
-    getpatchdata_zlib(patchinfo+ifile,meshi->cpatchval_zlib,ncompressed_buffer,
+    getpatchdata_zlib(patchi,meshi->cpatchval_zlib,ncompressed_buffer,
       meshi->patch_times,meshi->zipoffset,meshi->zipsize,mxpatch_frames);
     meshi->npatch_times=mxpatch_frames;
   }
@@ -899,10 +899,10 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   patchscale = patchi->scale;
   patchbase = patchinfo + getpatchindex(patchi);
   patchi->loaded=1;
-  ipatchtype=getpatchtype(patchinfo+ifile);
+  ipatchtype=getpatchtype(patchi);
   switch(loadpatchbysteps){
   case 0:
-    getBoundaryColors3(patchinfo + ifile,meshi->patchval, npqq, meshi->cpatchval, 
+    getBoundaryColors3(patchi,meshi->patchval, npqq, meshi->cpatchval, 
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
       nrgb, colorlabelpatch,patchscale,boundarylevels256,
@@ -931,10 +931,10 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   local2globalpatchbounds(patchi->label.shortlabel);
   updatepatchlistindex(patchfilenum);
 
-  FREEMEMORY(meshi->patchval);
+  if(wallcenter==0)FREEMEMORY(meshi->patchval);
   patchi->loaded=1;
   patchi->display=1;
-  ipatchtype=getpatchtype(patchinfo+ifile);
+  ipatchtype=getpatchtype(patchi);
   showexterior=1-showexterior;
   allexterior = 1-allexterior;
   ShowPatchMenu(EXTERIORwallmenu);
