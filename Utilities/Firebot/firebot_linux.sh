@@ -182,7 +182,7 @@ update_and_compile_cfast()
       
       # Build CFAST
       cd $CFAST_SVNROOT/CFAST/intel_linux_64
-      make --makefile ../makefile clean &> /dev/null
+      make -f ../makefile clean &> /dev/null
       ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
    # If no, then checkout the CFAST repository and compile CFAST
    else
@@ -195,7 +195,7 @@ update_and_compile_cfast()
       
       # Build CFAST
       cd $CFAST_SVNROOT/CFAST/intel_linux_64
-      make --makefile ../makefile clean &> /dev/null
+      make -f ../makefile clean &> /dev/null
       ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
    fi
 
@@ -296,7 +296,7 @@ compile_fds_db()
 {
    # Clean and compile FDS DB
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
-   make --makefile ../makefile clean &> /dev/null
+   make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
 }
 
@@ -333,7 +333,7 @@ compile_fds_mpi_db()
 {
    # Clean and compile FDS MPI DB
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
-   make --makefile ../makefile clean &> /dev/null
+   make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
 }
 
@@ -359,6 +359,43 @@ check_compile_fds_mpi_db()
    else
       echo "Warnings from Stage 2b - Compile FDS MPI DB:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
+
+#  ====================================
+#  = Stage 2c - Compile FDS OpenMP DB =
+#  ====================================
+
+compile_fds_openmp_db()
+{
+   # Clean and compile FDS OpenMP DB
+   cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64_db
+   make -f ../makefile clean &> /dev/null
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage2c
+}
+
+check_compile_fds_openmp_db()
+{
+   # Check for errors in FDS OpenMP DB compilation
+   cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64_db
+   if [ -e "fds_openmp_intel_linux_64_db" ]
+   then
+      stage2c_success=true
+   else
+      echo "Errors from Stage 2c - Compile FDS OpenMP DB:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage2c >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+
+   # Check for compiler warnings/remarks
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2c` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 2c - Compile FDS OpenMP DB:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2c >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -500,7 +537,7 @@ compile_fds()
 {
    # Clean and compile FDS
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
-   make --makefile ../makefile clean &> /dev/null
+   make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
 
@@ -538,7 +575,7 @@ compile_fds_mpi()
 {
    # Clean and compile FDS MPI
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64
-   make --makefile ../makefile clean &> /dev/null
+   make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4b
 }
 
@@ -565,6 +602,44 @@ check_compile_fds_mpi()
    else
       echo "Warnings from Stage 4b - Compile FDS MPI release:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
+
+#  =========================================
+#  = Stage 4c - Compile FDS OpenMP release =
+#  =========================================
+
+compile_fds_openmp()
+{
+   # Clean and compile FDS OpenMP
+   cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64
+   make -f ../makefile clean &> /dev/null
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage4c
+}
+
+check_compile_fds_openmp()
+{
+   # Check for errors in FDS OpenMP compilation
+   cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64
+   if [ -e "fds_openmp_intel_linux_64" ]
+   then
+      stage4c_success=true
+   else
+      echo "Errors from Stage 4c - Compile FDS OpenMP release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage4c >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+
+   # Check for compiler warnings/remarks
+   # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 4c - Compile FDS OpenMP release:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -1193,6 +1268,10 @@ check_compile_fds_db
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
+### Stage 2c ###
+compile_fds_openmp_db
+check_compile_fds_openmp_db
+
 ### Stage 3 ###
 # Depends on successful FDS DB compile
 if [[ $stage2a_success && $stage2b_success ]] ; then
@@ -1207,6 +1286,10 @@ check_compile_fds
 ### Stage 4b ###
 compile_fds_mpi
 check_compile_fds_mpi
+
+### Stage 4c ###
+compile_fds_openmp
+check_compile_fds_openmp
 
 ### Stage 5 ###
 # Depends on successful FDS compile
