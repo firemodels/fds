@@ -144,8 +144,9 @@ for i=2:n_plots
         define_drow_variables
         
         % save for scatter plots
-
-        Save_Quantity(i)        = Quantity;
+        
+        Q1                      = parse(Quantity);
+        Save_Quantity(i,1:length(Q1))        = Q1;
         Save_Group_Style(i)     = Group_Style;
         Save_Fill_Color(i)      = Fill_Color;
         Save_Group_Key_Label(i) = Group_Key_Label;

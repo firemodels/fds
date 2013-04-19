@@ -1,4 +1,4 @@
-Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Paper_Width_Factor,Sigma_2_E,Model_Error,Plot_Type,Plot_Filename
+Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Paper_Width_Factor,Sigma_2_E,Weight_Data,Plot_Type,Plot_Filename
 "HGL Temperature, Forced Ventilation (FPA)",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,1,14,yes,linear,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_FPA
 "HGL Temperature, Forced Ventilation (DB)",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.03 0.95,SouthEast,1,14,yes,linear,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_DB
 "HGL Temperature, Natural Ventilation",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,1,14,yes,linear,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_MQH

@@ -10,7 +10,6 @@
 P = textscan(Q{j},'%q','delimiter',',');
 parameters = P{:}';
 
-Quantity_Label      = char(parameters(find(strcmp(headers,'Quantity_Label'))));
 Scatter_Plot_Title  = char(parameters(find(strcmp(headers,'Scatter_Plot_Title'))));
 Ind_Title           = char(parameters(find(strcmp(headers,'Ind_Title'))));
 Dep_Title           = char(parameters(find(strcmp(headers,'Dep_Title'))));
@@ -20,6 +19,6 @@ Title_Position      = str2num(char(parameters(find(strcmp(headers,'Title_Positio
 Key_Position        = char(parameters(find(strcmp(headers,'Key_Position'))));
 Paper_Width_Factor  = str2num(char(parameters(find(strcmp(headers,'Paper_Width_Factor')))));
 Sigma_2_E           = str2num(char(parameters(find(strcmp(headers,'Sigma_2_E')))));
-Model_Error         = char(parameters(find(strcmp(headers,'Model_Error'))));
+Weight_Data         = char(parameters(find(strcmp(headers,'Weight_Data'))));
 Plot_Type           = char(parameters(find(strcmp(headers,'Plot_Type'))));
 Plot_Filename       = char(parameters(find(strcmp(headers,'Plot_Filename'))));
