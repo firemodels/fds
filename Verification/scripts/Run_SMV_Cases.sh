@@ -75,11 +75,21 @@ export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
 if [ "$queue" != "" ]; then
    queue="-q $queue"
 fi
-   
-export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
-export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 
 export BASEDIR=`pwd`
+
+# remove output files
+
+echo removing FDS/CFAST output files
+export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
+export RUNFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
+scripts/SMV_Cases.sh
+echo FDS/CFAST output files removed
+
+# run cases    
+
+export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
+export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
