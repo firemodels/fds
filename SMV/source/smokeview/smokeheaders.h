@@ -677,11 +677,11 @@ EXTERNCPP void updatesurface(void);
 EXTERNCPP void WindowStatus(int state);
 EXTERNCPP void nodein_extvent(
                     int ipatch, 
-                    int *patchblankcopy,const mesh *meshi,int i1,int i2, int j1, int j2, int k1, int k2);
+                    int *patchblankcopy,const mesh *meshi,int i1,int i2, int j1, int j2, int k1, int k2, int option);
 EXTERNCPP void SetVentDirs(void);
 EXTERNCPP void SetCVentDirs(void);
 EXTERNCPP int nodeinblockage(const mesh *meshi, int i,int j,int k, int *imesh, int *iblockage);
-EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir);
+EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir,int option);
 EXTERNCPP void writeboundini(void);
 EXTERNCPP void readboundini(void);
 EXTERNCPP int readini2(char *inifile, int localfile);

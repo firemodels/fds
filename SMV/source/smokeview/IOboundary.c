@@ -65,8 +65,10 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   int local_starttime0=0, local_stoptime0=0;  
   float delta_time, delta_time0;
   int file_unit;
+  int wallcenter=0;
 
   if(patchinfo[ifile].loaded==0&&flag==UNLOAD)return;
+  if(strcmp(patchinfo[ifile].label.shortlabel,"wc")==0)wallcenter=1;
 
   local_first=1;
   CheckMemory;
@@ -419,7 +421,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i1]+dxx;
             *xyzpatch_ignitecopy++ = yplttemp[j]+dy_factor;
             *xyzpatch_ignitecopy++ = zplttemp[k]+dz_factor;
-            *patchblankcopy++ = nodeinvent(meshi,i1,j,k,1);
+            *patchblankcopy++ = nodeinvent(meshi,i1,j,k,1,wallcenter);
           }
         }
       }
@@ -457,9 +459,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             patchblankcopy[ii++]=SOLID;
           }
         }
-        nodein_extvent(
-          n,
-          patchblankcopy,meshi,i1,i2,j1,j2,k1,k2);
+        nodein_extvent(n,patchblankcopy,meshi,i1,i2,j1,j2,k1,k2,wallcenter);
         patchblankcopy += (k2+1-k1)*(j2+1-j1);
       }
     }
@@ -502,7 +502,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i]+dx_factor;
             *xyzpatch_ignitecopy++ = yplttemp[j1]+dyy;
             *xyzpatch_ignitecopy++ = zplttemp[k]+dz_factor;
-            *patchblankcopy++ = nodeinvent(meshi,i,j1,k,2);
+            *patchblankcopy++ = nodeinvent(meshi,i,j1,k,2,wallcenter);
           }
         }
       }
@@ -540,9 +540,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             patchblankcopy[ii++]=SOLID;
           }
         }
-        nodein_extvent(
-          n,
-          patchblankcopy,meshi,i1,i2,j1,j2,k1,k2);
+        nodein_extvent(n,patchblankcopy,meshi,i1,i2,j1,j2,k1,k2,wallcenter);
         patchblankcopy += (k2+1-k1)*(i2+1-i1);
       }
     }
@@ -585,7 +583,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i]+dx_factor;
             *xyzpatch_ignitecopy++ = yplttemp[j]+dy_factor;
             *xyzpatch_ignitecopy++ = zplttemp[k1]+dzz;
-            *patchblankcopy++ = nodeinvent(meshi,i,j,k1,3);
+            *patchblankcopy++ = nodeinvent(meshi,i,j,k1,3,wallcenter);
           }
         }
       }
@@ -624,9 +622,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             patchblankcopy[ii++]=SOLID;
           }
         }
-        nodein_extvent(
-          n,
-          patchblankcopy,meshi,i1,i2,j1,j2,k1,k2);
+        nodein_extvent(n,patchblankcopy,meshi,i1,i2,j1,j2,k1,k2,wallcenter);
         patchblankcopy += (j2+1-j1)*(i2+1-i1);
       }
     }
@@ -1021,9 +1017,10 @@ int nodeinblockage(const mesh *meshnode, int i,int j,int k, int *imesh, int *ibl
 
 /* ------------------ nodeinvent ------------------------ */
 
-int nodeinvent(const mesh *meshi, int i,int j,int k, int dir){
+int nodeinvent(const mesh *meshi, int i,int j,int k, int dir,int option){
   int ii;
 
+  if(option==1)return 1;
   for(ii=0;ii<meshi->nvents;ii++){
     ventdata *vi;
 
@@ -1060,10 +1057,10 @@ int nodeinvent(const mesh *meshi, int i,int j,int k, int dir){
   return 1;
 }
 
-/* ------------------ nodeinvent ------------------------ */
+/* ------------------ nodein_extvent ------------------------ */
 
 void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi, 
-                    int i1, int i2, int j1, int j2, int k1, int k2){
+                    int i1, int i2, int j1, int j2, int k1, int k2, int option){
   int ii, dir=0;
 
   if(i1==i2)dir=1;
@@ -1075,7 +1072,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
     int imin, jmin, kmin, imax, jmax, kmax;
 
     vi = meshi->ventinfo+ii;
-    if(vi->hideboundary==1)continue;
+    if(vi->hideboundary==1&&option==0)continue;
     if(vi->dir2!=dir)continue;
     switch (dir){
       int i, j, k;
