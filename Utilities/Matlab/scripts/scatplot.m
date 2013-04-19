@@ -37,6 +37,8 @@ Save_Dep_Title        = saved_data{:,9};
 Save_Error_Tolerance  = saved_data{:,10};
 Save_Metric_Type      = saved_data{:,11};
 
+Size_Save_Quantity = size(Save_Quantity);
+
 % If a statistics output file is specified, then enable statistics throughout
 % stats_outputs = 0: No output statistics
 % stats_outputs = 1: FDS verification statistics
@@ -102,13 +104,16 @@ for j=2:length(Q);
     
     define_qrow_variables
     
+    Model_Error = 'yes';
+    if Sigma_2_E<0 ; Model_Error = 'no'; end
+    
     clear Measured_Metric
     clear Predicted_Metric
     
     k = 0;
     for i=drange
-        if i>length(Save_Quantity); break; end
-        if strcmp(Save_Quantity(i),Scatter_Plot_Title)
+        if i>Size_Save_Quantity(2); break; end
+        if strcmp(Save_Quantity(1,i),Scatter_Plot_Title) | strcmp(Save_Quantity(Size_Save_Quantity(1),i),Scatter_Plot_Title)
             k = k+1;
             Measured_Metric(k,:,:)  = Save_Measured_Metric(i,:,:);
             Predicted_Metric(k,:,:) = Save_Predicted_Metric(i,:,:);
@@ -188,28 +193,42 @@ for j=2:length(Q);
     
     if k>0
         
-        % statistics
-        
         Measured_Values  = nonzeros(Measured_Metric);
         Predicted_Values = nonzeros(Predicted_Metric);
         n_pts = length(Measured_Values);
-        for ib=1:10
-            bin_indices = find(Measured_Values>=(ib-1)*Plot_Max/10 & Measured_Values<ib*Plot_Max/10);
-            bin_weight(ib) = n_pts/length(bin_indices);
-            clear bin_indices
-        end
+        
+        % Weight the data -- for each point on the scatterplot compute a
+        % "weight" to provide sparse data with greater importance in the
+        % calculation of the accuracy statistics
+        
         weight = zeros(size(Measured_Values));
-        for iv=1:n_pts
+        
+        if strcmp(Weight_Data,'yes')
+            Max_Measured_Value = max(Measured_Values);
+            Bin_Size = Max_Measured_Value/10;
             for ib=1:10
-                if Measured_Values(iv)>=(ib-1)*Plot_Max/10 & Measured_Values(iv)<ib*Plot_Max/10; weight(iv) = bin_weight(ib); end
+                bin_indices = find(Measured_Values>=(ib-1)*Bin_Size & Measured_Values<ib*Bin_Size);
+                bin_weight(ib) = n_pts/length(bin_indices);
+                clear bin_indices
+            end
+            for iv=1:n_pts
+                for ib=1:10
+                    if Measured_Values(iv)>=(ib-1)*Bin_Size & Measured_Values(iv)<ib*Bin_Size; weight(iv) = bin_weight(ib); end
+                end
+            end
+        else
+            for iv=1:n_pts
+                weight(iv) = 1.;
             end
         end
+        
+        % Calculate statistics
             
         E_bar = sum(log(Measured_Values).*weight)/sum(weight);
         M_bar = sum(log(Predicted_Values).*weight)/sum(weight);
         size_measured = size(Measured_Values);
         size_predicted = size(Predicted_Values);
-        % Check to see if measured and predicted arrays are the same size
+        
         if size_measured(1) ~= size_predicted(1)
             display(['Error: Mismatched measured and predicted arrays for scatterplot ', Scatter_Plot_Title, '. Skipping scatterplot.'])
             continue
@@ -225,7 +244,7 @@ for j=2:length(Q);
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')                    
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--') 
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
-       
+        
         if strcmp(Model_Error,'yes') 
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
