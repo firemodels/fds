@@ -54,10 +54,10 @@
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
 
-&VENT XB=0.2,0.6,0.2,0.6,0.0,0.0,SURF_ID='BURNER' XYZ=0.4,0.4,0.0,RADIUS=0.2,COLOR='RED'/  fire source on kitchen stove
-&VENT XB=0.2,0.6,1.0,1.4,0.0,0.0,SURF_ID='BURNER' XYZ=0.4,1.2,0.0,RADIUS=0.2,COLOR='RED'/  fire source on kitchen stove
-&VENT XB=1.0,1.4,0.2,0.6,0.0,0.0,SURF_ID='BURNER' XYZ=1.2,0.4,0.0,RADIUS=0.2,COLOR='RED'/  fire source on kitchen stove
-&VENT XB=1.0,1.4,1.0,1.4,0.0,0.0,SURF_ID='BURNER' XYZ=1.2,1.2,0.0,RADIUS=0.2,COLOR='RED'/  fire source on kitchen stove
+&VENT XB=0.2,0.6,0.2,0.6,0.0,0.0,SURF_ID='BURNER' XYZ=0.4,0.4,0.0,RADIUS=0.2,RGB=255,0,0/  fire source on kitchen stove
+&VENT XB=0.2,0.6,1.0,1.4,0.0,0.0,SURF_ID='BURNER' XYZ=0.4,1.2,0.0,RADIUS=0.2,RGB=0,255,0/  fire source on kitchen stove
+&VENT XB=1.0,1.4,0.2,0.6,0.0,0.0,SURF_ID='BURNER' XYZ=1.2,0.4,0.0,RADIUS=0.2,RGB=32,64,255/  fire source on kitchen stove
+&VENT XB=1.0,1.4,1.0,1.4,0.0,0.0,SURF_ID='BURNER' XYZ=1.2,1.2,0.0,RADIUS=0.2,RGB=128,64,32/  fire source on kitchen stove
 
 &VENT XB=0.0,1.6,0.0,0.0,0.0,3.2,SURF_ID='OPEN'/
 &VENT XB=1.6,1.6,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
