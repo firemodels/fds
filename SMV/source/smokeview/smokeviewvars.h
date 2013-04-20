@@ -609,7 +609,7 @@ SVEXTERN int SVDECL(ntarginfo,0);
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
 SVEXTERN int nglobal_times, SVDECL(ntimes_old,0), itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;
-SVEXTERN int npqq, nopart;
+SVEXTERN int SVDECL(npatchvals,0), nopart;
 SVEXTERN int uindex, vindex, windex;
 
 SVEXTERN int SVDECL(contour_type,0), SVDECL(p3cont3dsmooth,0);
@@ -808,6 +808,8 @@ SVEXTERN void SVDECL(*large_font,NULL);
 SVEXTERN void SVDECL(*small_font,NULL);
 
 SVEXTERN int nsmoothblocks,nopenvents,nopenvents_nonoutline,ndummyvents,ntransparentblocks,ntransparentvents;
+SVEXTERN int nventcolors;
+SVEXTERN float SVDECL(**ventcolors,NULL);
 SVEXTERN int ntotal_smooth_blockages;
 SVEXTERN float veclengths[NVECLENGTHS];
 SVEXTERN float texture_origin[3];

@@ -3156,14 +3156,14 @@ int blockcompare( const void *arg1, const void *arg2 ){
   i2 = *(int *)arg2;
   bc1 = selectblockinfo[i1];
   bc2 = selectblockinfo[i2];
-  if(bc1->id!=-1&&bc2->id!=-1){
-    if(bc1->id<bc2->id)return -1;
-    if(bc1->id>bc2->id)return 1;
+  if(bc1->blockage_id!=-1&&bc2->blockage_id!=-1){
+    if(bc1->blockage_id<bc2->blockage_id)return -1;
+    if(bc1->blockage_id>bc2->blockage_id)return 1;
     return 0;
   }
-  if(bc1->id==-1&&bc2->id==-1)return 0;
-  if(bc1->id==-1)return 1;
-  if(bc2->id==-1)return -1;
+  if(bc1->blockage_id==-1&&bc2->blockage_id==-1)return 0;
+  if(bc1->blockage_id==-1)return 1;
+  if(bc2->blockage_id==-1)return -1;
   return 0;
 }
 
@@ -5365,7 +5365,7 @@ void getobstlabels(const char *filein){
     meshi = meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
       bc = meshi->blockageinfoptrs[j];
-      id = bc->id-1;
+      id = bc->blockage_id-1;
       if(id>=0&&id<nobstlabels){
         if(obstlabels[id]!=NULL){
           lenlabel=strlen(obstlabels[id]);

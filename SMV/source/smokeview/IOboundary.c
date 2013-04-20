@@ -109,6 +109,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   FREEMEMORY(meshi->visPatches);
   FREEMEMORY(meshi->xyzpatch);
   FREEMEMORY(meshi->xyzpatch_threshold);
+  FREEMEMORY(meshi->patchventcolors);
   FREEMEMORY(meshi->cpatchval);
   FREEMEMORY(meshi->cpatchval_zlib);
   FREEMEMORY(meshi->cpatchval_iframe_zlib);
@@ -662,7 +663,6 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     meshi->visPatches[n]=visPatchType[meshi->patchtype[n]];
   }
 
-  meshi->patchfacevis2=0;
   for(n=0;n<meshi->nbptrs;n++){
     blockagedata *bc;
     int j;
@@ -674,7 +674,6 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
     if(bc->patchvis[6]!=0){
       bc->patchvis[6]=1;
-      meshi->patchfacevis2=1;
     }
   }
 
@@ -691,10 +690,10 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
     break;
   case 1:
-    npqq = meshi->npatchsize*meshi->mxpatch_frames;
+    npatchvals = meshi->npatchsize*meshi->mxpatch_frames;
     if(
       NewMemory((void **)&meshi->patchval,sizeof(float)*meshi->npatchsize)==0||
-      NewMemory((void **)&meshi->cpatchval,sizeof(unsigned char)*npqq)==0){
+      NewMemory((void **)&meshi->cpatchval,sizeof(unsigned char)*npatchvals)==0){
       *errorcode=1;
       FORTclosefortranfile(&file_unit);
       readpatch(ifile,UNLOAD,&error);
@@ -865,8 +864,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   /* convert patch values into integers pointing to an rgb color table */
 
   if(loadpatchbysteps==0){
-    npqq = meshi->npatch_times*meshi->npatchsize;
-    if(npqq==0||NewMemory((void **)&meshi->cpatchval,sizeof(unsigned char)*npqq)==0){
+    npatchvals = meshi->npatch_times*meshi->npatchsize;
+    if(npatchvals==0||NewMemory((void **)&meshi->cpatchval,sizeof(unsigned char)*npatchvals)==0){
       *errorcode=1;
       FORTclosefortranfile(&file_unit);
       readpatch(ifile,UNLOAD,&error);
@@ -902,7 +901,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   ipatchtype=getpatchtype(patchi);
   switch(loadpatchbysteps){
   case 0:
-    getBoundaryColors3(patchi,meshi->patchval, npqq, meshi->cpatchval, 
+    getBoundaryColors3(patchi,meshi->patchval, npatchvals, meshi->cpatchval, 
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
       nrgb, colorlabelpatch,patchscale,boundarylevels256,
@@ -931,7 +930,20 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   local2globalpatchbounds(patchi->label.shortlabel);
   updatepatchlistindex(patchfilenum);
 
-  if(wallcenter==0)FREEMEMORY(meshi->patchval);
+  if(wallcenter==1){
+    int i;
+
+    init_vent_colors();
+    FREEMEMORY(meshi->patchventcolors);
+    NewMemory((void **)&meshi->patchventcolors,sizeof(float *)*npatchvals);
+    for(i=0;i<npatchvals;i++){
+      int vent_index;
+
+      vent_index = CLAMP(meshi->patchval[i]+0.1,0,nventcolors-1);
+      meshi->patchventcolors[i]=ventcolors[vent_index];
+    }
+  }
+  FREEMEMORY(meshi->patchval);
   patchi->loaded=1;
   patchi->display=1;
   ipatchtype=getpatchtype(patchi);
@@ -2607,6 +2619,7 @@ void drawpatch_cellcenter(const mesh *meshi){
 
   float dboundx,dboundy,dboundz;
   float *xplt, *yplt, *zplt;
+  float **patchventcolors;
 
   if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)return;
 
@@ -2628,7 +2641,9 @@ void drawpatch_cellcenter(const mesh *meshi){
   patchcol=meshi->patchcol;
   blockstart=meshi->blockstart;
   patchblank=meshi->patchblank;
+  patchventcolors=meshi->patchventcolors;
   patchi=patchinfo+meshi->patchfilenum;
+
   switch(patchi->compression_type){
   case 0:
     ASSERT(meshi->cpatchval_iframe!=NULL);
@@ -2681,9 +2696,14 @@ void drawpatch_cellcenter(const mesh *meshi){
 
         for(icol=0;icol<ncol-1;icol++){
           if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
-            color11 = rgb_patch+4*(*cpatchval1);
-            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
-              if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+            if(patchventcolors==NULL){
+              color11 = rgb_patch+4*(*cpatchval1);
+              if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
+                if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+              }
+            }
+            else{
+              color11=patchventcolors[(cpatchval1-cpatchval_iframe)];
             }
             glColor4fv(color11); 
             glVertex3fv(xyzp1);
@@ -2759,9 +2779,14 @@ void drawpatch_cellcenter(const mesh *meshi){
 
         for(icol=0;icol<ncol-1;icol++){
           if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
-            color11 = rgb_patch+4*(*cpatchval1);
-            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
-              if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+            if(patchventcolors==NULL){
+              color11 = rgb_patch+4*(*cpatchval1);
+              if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
+                if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+              }
+            }
+            else{
+              color11=patchventcolors[(cpatchval1-cpatchval_iframe)];
             }
             glColor4fv(color11); 
             glVertex3fv(xyzp1);
@@ -2835,9 +2860,14 @@ void drawpatch_cellcenter(const mesh *meshi){
 
         for(icol=0;icol<ncol-1;icol++){
           if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
-            color11 = rgb_patch+4*(*cpatchval1);
-            if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
-              if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+            if(patchventcolors==NULL){
+              color11 = rgb_patch+4*(*cpatchval1);
+              if(vis_threshold==1&&vis_onlythreshold==0&&do_threshold==1){
+                if(meshi->thresholdtime[nn1+icol  ]>=0.0&&global_times[itimes]>meshi->thresholdtime[nn1+icol  ])color11=&char_color[0];
+              }
+            }
+            else{
+              color11=patchventcolors[(cpatchval1-cpatchval_iframe)];
             }
             glColor4fv(color11); 
             glVertex3fv(xyzp1);

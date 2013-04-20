@@ -1535,6 +1535,65 @@ void update_endian_info(void){
 #endif
 }
 
+/* ------------------ update_vent_colors ------------------------ */
+
+void init_vent_colors(void){
+  int i;
+
+  nventcolors=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
+    meshi = meshinfo + i;
+    for(j=0;j<meshi->nvents;j++){
+      ventdata *venti;
+
+      venti = meshi->ventinfo+j;
+      if(venti->vent_id>nventcolors)nventcolors=venti->vent_id;
+    }
+  }
+  nventcolors++;
+  NewMemory((void **)&ventcolors,nventcolors*sizeof(float *));
+  for(i=0;i<nventcolors;i++){
+    ventcolors[i]=NULL;
+  }
+  ventcolors[0]=surfinfo->color;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
+    meshi = meshinfo + i;
+    for(j=0;j<meshi->nvents;j++){
+      ventdata *venti;
+      int vent_id;
+
+      venti = meshi->ventinfo+j;
+      vent_id = CLAMP(venti->vent_id,1,nventcolors-1);
+      if(venti->useventcolor==1){
+        ventcolors[vent_id]=venti->color;
+      }
+      else{
+        ventcolors[vent_id]=venti->surf[0]->color;
+      }
+    }
+    for(j=0;j<meshi->ncvents;j++){
+      cventdata *cventi;
+      int cvent_id;
+
+      cventi = meshi->cventinfo+j;
+      cvent_id = CLAMP(cventi->cvent_id,1,nventcolors-1);
+      if(cventi->useventcolor==1){
+        ventcolors[cvent_id]=cventi->color;
+      }
+      else{
+        ventcolors[cvent_id]=cventi->surf[0]->color;
+      }
+    }
+  }
+
+}
+
 /* ------------------ update_mesh_coords ------------------------ */
 
 void update_mesh_coords(void){
@@ -5407,7 +5466,7 @@ typedef struct {
           xyzEXACT = bc->xyzEXACT;
           sscanf(buffer,"%f %f %f %f %f %f %i %i %i %i %i %i %i %f %f %f",
             xyzEXACT,xyzEXACT+1,xyzEXACT+2,xyzEXACT+3,xyzEXACT+4,xyzEXACT+5,
-            &(bc->id),s_num+DOWN_X,s_num+UP_X,s_num+DOWN_Y,s_num+UP_Y,s_num+DOWN_Z,s_num+UP_Z,
+            &(bc->blockage_id),s_num+DOWN_X,s_num+UP_X,s_num+DOWN_Y,s_num+UP_Y,s_num+DOWN_Z,s_num+UP_Z,
             t_origin,t_origin+1,t_origin+2);
           bc->xmin=xyzEXACT[0];
           bc->xmax=xyzEXACT[1];
@@ -5418,15 +5477,15 @@ typedef struct {
           bc->texture_origin[0]=t_origin[0];
           bc->texture_origin[1]=t_origin[1];
           bc->texture_origin[2]=t_origin[2];
-          if(bc->id<0){
+          if(bc->blockage_id<0){
             bc->changed=1;
-            bc->id=-bc->id;
+            bc->blockage_id=-bc->blockage_id;
           }
         }
 
         /* define block label */
 
-        sprintf(buffer,"**blockage %i",bc->id);
+        sprintf(buffer,"**blockage %i",bc->blockage_id);
         len=strlen(buffer);
         ResizeMemory((void **)&bc->label,(len+1)*sizeof(char));
         strcpy(bc->label,buffer);
@@ -5632,7 +5691,7 @@ typedef struct {
         cvi->texture_origin[2]=texture_origin[2];
         cvi->useventcolor=1;
         cvi->hideboundary=0;
-        cvi->id=-1;
+        cvi->cvent_id=-1;
         cvi->color=NULL;
 
         origin=cvi->origin;
@@ -5643,7 +5702,7 @@ typedef struct {
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f",
           &cvi->xmin,&cvi->xmax,&cvi->ymin,&cvi->ymax,&cvi->zmin,&cvi->zmax,
-          &cvi->id,s_num,t_origin,t_origin+1,t_origin+2);
+          &cvi->cvent_id,s_num,t_origin,t_origin+1,t_origin+2);
 
         if(surfinfo!=NULL&&s_num[0]>=0&&s_num[0]<nsurfinfo){
           cvi->surf[0]=surfinfo+s_num[0];
@@ -5821,7 +5880,7 @@ typedef struct {
           fgets(buffer,255,stream);
           sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f",
                  &vi->xmin,&vi->xmax,&vi->ymin,&vi->ymax,&vi->zmin,&vi->zmax,
-                 &vi->id,s_num,t_origin,t_origin+1,t_origin+2);
+                 &vi->vent_id,s_num,t_origin,t_origin+1,t_origin+2);
           if(t_origin[0]<=-998.0){
             t_origin[0]=texture_origin[0];
             t_origin[1]=texture_origin[1];
@@ -7772,7 +7831,7 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
   bc->showhide=NULL;
   bc->showtimelist=NULL;
   bc->show=1;
-  bc->id=index;
+  bc->blockage_id=index;
   bc->meshindex=meshindex;
   bc->hidden=0;
   bc->invisible=0;
@@ -7891,14 +7950,29 @@ void initmesh(mesh *meshi){
   meshi->plot3dfilenum=-1;
   meshi->patchfilenum=-1;
   meshi->obst_bysize=NULL;
-  meshi->iqdata=NULL;      meshi->qdata=NULL;
-  meshi->yzcolorbase=NULL; meshi->xzcolorbase=NULL; meshi->xycolorbase=NULL; 
-  meshi->yzcolorfbase=NULL;meshi->xzcolorfbase=NULL;meshi->xycolorfbase=NULL;
-  meshi->yzcolortbase=NULL;meshi->xzcolortbase=NULL;meshi->xycolortbase=NULL;
-  meshi->dx_xy=NULL;       meshi->dy_xy=NULL;       meshi->dz_xy=NULL;
-  meshi->dx_xz=NULL;       meshi->dy_xz=NULL;       meshi->dz_xz=NULL;
-  meshi->dx_yz=NULL;       meshi->dy_yz=NULL;       meshi->dz_yz=NULL;
-  meshi->c_iblank_xy=NULL; meshi->c_iblank_xz=NULL; meshi->c_iblank_yz=NULL;
+  meshi->iqdata=NULL;      
+  meshi->qdata=NULL;
+  meshi->yzcolorbase=NULL; 
+  meshi->xzcolorbase=NULL; 
+  meshi->xycolorbase=NULL; 
+  meshi->yzcolorfbase=NULL;
+  meshi->xzcolorfbase=NULL;
+  meshi->xycolorfbase=NULL;
+  meshi->yzcolortbase=NULL;
+  meshi->xzcolortbase=NULL;
+  meshi->xycolortbase=NULL;
+  meshi->dx_xy=NULL;       
+  meshi->dy_xy=NULL;       
+  meshi->dz_xy=NULL;
+  meshi->dx_xz=NULL;       
+  meshi->dy_xz=NULL;       
+  meshi->dz_xz=NULL;
+  meshi->dx_yz=NULL;       
+  meshi->dy_yz=NULL;       
+  meshi->dz_yz=NULL;
+  meshi->c_iblank_xy=NULL; 
+  meshi->c_iblank_xz=NULL; 
+  meshi->c_iblank_yz=NULL;
   meshi->iblank_smoke3d=NULL;
   meshi->animatedsurfaces=NULL;
   meshi->blockagesurface=NULL;
@@ -7914,18 +7988,19 @@ void initmesh(mesh *meshi){
   meshi->ndummyvents=0;
   meshi->ncvents=0;
   meshi->npatches=0;
-  meshi->patchfacevis2=0;
   meshi->patchtype=NULL;
   meshi->offset[XXX]=0.0;
   meshi->offset[YYY]=0.0;
   meshi->offset[ZZZ]=0.0;
   meshi->patchtype=NULL;
-//  meshi->patchfacevis=NULL;
   meshi->patchdir=NULL;
   meshi->patch_surfindex=NULL;
-  meshi->pi1=NULL; meshi->pi2=NULL;
-  meshi->pj1=NULL; meshi->pj2=NULL; 
-  meshi->pk1=NULL; meshi->pk2=NULL;
+  meshi->pi1=NULL; 
+  meshi->pi2=NULL;
+  meshi->pj1=NULL; 
+  meshi->pj2=NULL; 
+  meshi->pk1=NULL; 
+  meshi->pk2=NULL;
   meshi->meshonpatch=NULL;
   meshi->blockonpatch=NULL;
   meshi->ptype=NULL;
@@ -7934,6 +8009,7 @@ void initmesh(mesh *meshi){
   meshi->visPatches=NULL;
   meshi->xyzpatch=NULL;
   meshi->xyzpatch_threshold=NULL;
+  meshi->patchventcolors=NULL;
   meshi->cpatchval=NULL;
   meshi->cpatchval_iframe=NULL;
   meshi->cpatchval_iframe_zlib=NULL;

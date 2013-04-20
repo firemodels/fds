@@ -304,7 +304,7 @@ typedef struct _blockagedata {
   int surf_index[6],surf_indexORIG[6];
   int patchvis[7];
   int usecolorindex;
-  int id,dup;
+  int blockage_id,dup;
   int is_wuiblock;
   int hole;
   int nnodes;
@@ -372,7 +372,7 @@ typedef struct {
 /* --------------------------  cventdata ------------------------------------ */
 
 typedef struct _cventdata {
-  int dir,type,colorindex,id,isOpenvent;
+  int dir,type,colorindex,cvent_id,isOpenvent;
   float boxmin[3], boxmax[3], texture_origin[3];
   float xmin, xmax, ymin, ymax, zmin, zmax;
   int   imin, imax, jmin, jmax, kmin, kmax;
@@ -389,7 +389,7 @@ typedef struct _ventdata {
   int type,dummy;
   struct _ventdata *dummyptr;
   int hideboundary;
-  int dir,dir2,id;
+  int dir,dir2,vent_id;
   int useventcolor;
   int isOpenvent;
   float xvent1, xvent2;
@@ -587,7 +587,6 @@ typedef struct _mesh {
   float norm[3];
 
   int *patchtype;
-//  int *patchfacevis;
   int *patchdir,*patch_surfindex;
   int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2;
   contour **patch_contours;
@@ -603,13 +602,13 @@ typedef struct _mesh {
   unsigned char *cpatchval_zlib, *cpatchval_iframe_zlib;
   unsigned char *cpatchval, *cpatchval_iframe;
   float *patch_times, *patch_timesi, *patchval, *patchval_iframe;
+  float **patchventcolors;
   float *thresholdtime;
   int *patchblank;
   int npatch_times,npatches;
   int patch_itime;
   int *patch_timeslist;
   int npatchsize;
-  int patchfacevis2;
   int visInteriorPatches;
   float surface_tempmin, surface_tempmax;
 

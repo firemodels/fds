@@ -332,7 +332,7 @@ extern "C" void update_blockvals(int flag){
         sprintf(dialog_label,"Mesh label: %s",blockmesh->label);
         STATIC_mesh_index->set_text(dialog_label);
       }
-      sprintf(dialog_label,"&OBST index: %i",bchighlight->id);
+      sprintf(dialog_label,"&OBST index: %i",bchighlight->blockage_id);
       STATIC_blockage_index->set_text(dialog_label);
       strcpy(dialog_label,"&OBST label: ");
       strcat(dialog_label,bchighlight->label);
@@ -427,8 +427,8 @@ extern "C" void OBJECT_CB(int var){
           bchighlight->surf_index[i]=sorted_surfidlist[surface_indices_bak[i]];
         }
         bchighlight->changed_surface=1;
-        if(bchighlight->id>0&&bchighlight->id<=nchanged_idlist){
-          changed_idlist[bchighlight->id]=1;
+        if(bchighlight->blockage_id>0&&bchighlight->blockage_id<=nchanged_idlist){
+          changed_idlist[bchighlight->blockage_id]=1;
         }
         blockages_dirty=1;
         updateusetextures();

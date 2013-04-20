@@ -5,6 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void init_vent_colors(void);
 EXTERNCPP void MergeClipPlanes(clipdata *ci, clipdata *cj);
 EXTERNCPP void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 EXTERNCPP void init_clip(void);
