@@ -3995,18 +3995,18 @@ void ShowPatchMenu(int value){
   plotstate=getplotstate(DYNAMIC_PLOTS);
 }
 
-
 /* ------------------ VentMenu ------------------------ */
 
 void VentMenu(int value){
 
   if(value==-1)return;
   switch (value){
-  case 10:
+  case SHOW_ALL_VENTS: // show all vents
     visVents=1;
     visOpenVents=1;
     visDummyVents=1;
     visOtherVents=1;
+    VentMenu(23);
     break;
   case 14:
     visOpenVents=1-visOpenVents;
@@ -4032,11 +4032,12 @@ void VentMenu(int value){
    case 21:
      visOtherVents=1-visOtherVents;
      break;
-   case 22:
+   case HIDE_ALL_VENTS: // Hide all vents
      visVents=0;
      visOpenVents=0;
      visDummyVents=0;
      visOtherVents=0;
+     VentMenu(25);
      break;
    case 23:
      visCircularVents=VENT_CIRCLE;
@@ -5380,16 +5381,16 @@ updatemenu=0;
         if(visOtherVents==0)glutAddMenuEntry(_("Other"),21);
       }
       if(visOpenVents==1&&visDummyVents==1&&visOtherVents==1){
-        glutAddMenuEntry(_("*Show all"),10);
+        glutAddMenuEntry(_("*Show all"),HIDE_ALL_VENTS);
       }
       else{
-        glutAddMenuEntry(_("Show all"),10);
+        glutAddMenuEntry(_("Show all"),HIDE_ALL_VENTS);
       }
       if(visOpenVents==0&&visDummyVents==0&&visOtherVents==0){
-        glutAddMenuEntry(_("*Hide all"),22);
+        glutAddMenuEntry(_("*Hide all"),SHOW_ALL_VENTS);
       }
       else{
-        glutAddMenuEntry(_("Hide all"),22);
+        glutAddMenuEntry(_("Hide all"),SHOW_ALL_VENTS);
       }
       glutAddMenuEntry("-",-1);
       if(nopenvents_nonoutline>0){

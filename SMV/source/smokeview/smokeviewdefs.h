@@ -14,6 +14,9 @@ void _Sniff_Errors(char *whereat);
 #define C_GENERATED 0
 #define FORTRAN_GENERATED 1
 
+#define SHOW_ALL_VENTS 10
+#define HIDE_ALL_VENTS 22
+
 #define VENT_SOLID 0
 #define VENT_OUTLINE 2
 #define VENT_HIDDEN -2

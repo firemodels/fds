@@ -1300,6 +1300,19 @@ void keyboard(unsigned char key, int flag){
       axislabels_smooth=1-axislabels_smooth;
       update_axislabels_smooth();
       break;
+    case 'B':
+      showall_boundary=1-showall_boundary;
+      if(showall_boundary==1){
+        ShowPatchMenu(SHOWALL_BOUNDARY);
+        VentMenu(HIDE_ALL_VENTS);
+        BlockageMenu(visBLOCKHide);
+      }
+      if(showall_boundary==0){
+        ShowPatchMenu(HIDEALL_BOUNDARY);
+        VentMenu(SHOW_ALL_VENTS);
+        BlockageMenu(visBLOCKAsInput);
+      }
+      break;
     case 'b':
       showall_boundary=1-showall_boundary;
       if(showall_boundary==1)ShowPatchMenu(SHOWALL_BOUNDARY);
