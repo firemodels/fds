@@ -2602,14 +2602,10 @@ void drawpatch_cellcenter(const mesh *meshi){
   int nrow, ncol, irow, icol;
   unsigned char *cpatchval1;
   unsigned char *cpatchval_iframe_copy;
-  float *xyzpatchcopy;
-  int *patchblankcopy;
   float *patch_times;
   int *visPatches;
-  float *xyzpatch;
   int *patchdir, *patchrow, *patchcol;
   int *blockstart;
-  int *patchblank;
   unsigned char *cpatchval_iframe;
   int iblock;
   blockagedata *bc;
@@ -2635,12 +2631,10 @@ void drawpatch_cellcenter(const mesh *meshi){
 
   patch_times=meshi->patch_times;
   visPatches=meshi->visPatches;
-  xyzpatch=meshi->xyzpatch;
   patchdir=meshi->patchdir;
   patchrow=meshi->patchrow;
   patchcol=meshi->patchcol;
   blockstart=meshi->blockstart;
-  patchblank=meshi->patchblank;
   patchventcolors=meshi->patchventcolors;
   patchi=patchinfo+meshi->patchfilenum;
 
@@ -2680,15 +2674,13 @@ void drawpatch_cellcenter(const mesh *meshi){
     if(visPatches[n]==1&&patchdir[n]==0){
       nrow=patchrow[n];
       ncol=patchcol[n];
-      xyzpatchcopy = xyzpatch + 3*blockstart[n];
-      patchblankcopy = patchblank + blockstart[n];
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       for(irow=0;irow<nrow-1;irow++){
         int *patchblank1, *patchblank2;
         float *xyzp1, *xyzp2;
 
-        xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        patchblank1 = patchblankcopy + irow*ncol;
+        xyzp1 = meshi->xyzpatch + 3*blockstart[n] + 3*irow*ncol;
+        patchblank1 = meshi->patchblank + blockstart[n] + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
         cpatchval1 = cpatchval_iframe_copy + irow*ncol;
@@ -2714,7 +2706,9 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          cpatchval1++; patchblank1++; patchblank2++;
+          cpatchval1++; 
+          patchblank1++; 
+          patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2744,8 +2738,6 @@ void drawpatch_cellcenter(const mesh *meshi){
     if(meshi->visPatches[n]==1&&meshi->patchdir[n]>0){
       nrow=patchrow[n];
       ncol=patchcol[n];
-      xyzpatchcopy = xyzpatch + 3*blockstart[n];
-      patchblankcopy = patchblank + blockstart[n];
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
@@ -2769,9 +2761,9 @@ void drawpatch_cellcenter(const mesh *meshi){
         int *patchblank1, *patchblank2;
         float *xyzp1, *xyzp2;
 
-        xyzp1 = xyzpatchcopy + 3*irow*ncol;
+        xyzp1 = meshi->xyzpatch + 3*blockstart[n] + 3*irow*ncol;
         cpatchval1 = cpatchval_iframe_copy + irow*ncol;
-        patchblank1 = patchblankcopy + irow*ncol;
+        patchblank1 = meshi->patchblank + blockstart[n] + irow*ncol;
         nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
@@ -2797,7 +2789,9 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          cpatchval1++; patchblank1++; patchblank2++;
+          cpatchval1++; 
+          patchblank1++; 
+          patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2826,8 +2820,6 @@ void drawpatch_cellcenter(const mesh *meshi){
     if(visPatches[n]==1&&patchdir[n]<0){
       nrow=patchrow[n];
       ncol=patchcol[n];
-      xyzpatchcopy = xyzpatch + 3*blockstart[n];
-      patchblankcopy = patchblank + blockstart[n];
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
@@ -2851,8 +2843,8 @@ void drawpatch_cellcenter(const mesh *meshi){
         int *patchblank1, *patchblank2;
         float *xyzp1, *xyzp2;
 
-        xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        patchblank1 = patchblankcopy + irow*ncol;
+        xyzp1 = meshi->xyzpatch + 3*blockstart[n] + 3*irow*ncol;
+        patchblank1 = meshi->patchblank + blockstart[n] + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
         cpatchval1 = cpatchval_iframe_copy + irow*ncol;
@@ -2878,7 +2870,9 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2);
             glVertex3fv(xyzp2+3);
           }
-          cpatchval1++; patchblank1++; patchblank2++;
+          cpatchval1++; 
+          patchblank1++; 
+          patchblank2++;
           xyzp1+=3;
           xyzp2+=3;
         }
