@@ -79,6 +79,11 @@ TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
 
 get_fds_email()
 {
+  THIS_FDSEMAIL=
+}
+
+get_fds_email2()
+{
   if [[ $THIS_FDSAUTHOR == mcgratta ]] ; then
     THIS_FDSEMAIL=mcgratta@gmail.com
   fi
