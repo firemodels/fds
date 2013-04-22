@@ -3118,18 +3118,23 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
 ENDDO REAC_LOOP
 
-! Determine number of series reactions
+! Determine number of fast/potentially fast series reactions
 SERIES_REAC = 0
 DO NR = 1,N_REACTIONS
    RN => REACTION(NR)
-   DO NS = 0,N_TRACKED_SPECIES
-      IF (RN%NU(NS) > 0._EB) THEN
-         DO NRR = 1,N_REACTIONS
-            RNN => REACTION(NRR)
-            IF (NS == RNN%FUEL_SMIX_INDEX) SERIES_REAC = SERIES_REAC + 1
-         ENDDO
-      ENDIF
-   ENDDO
+   IF (RN%FAST_CHEMISTRY .OR. RN%A_RAMP_INDEX /= 0 .OR. RN%E_RAMP_INDEX /= 0) THEN
+      DO NS = 0,N_TRACKED_SPECIES
+         IF (RN%NU(NS) > 0._EB) THEN
+            DO NRR = 1,N_REACTIONS
+               RNN => REACTION(NRR)
+               IF (RNN%FAST_CHEMISTRY .OR. RNN%A_RAMP_INDEX /= 0 .OR. RNN%E_RAMP_INDEX /= 0) THEN
+                  IF (NRR == NR) CYCLE
+                  IF (NS == RNN%FUEL_SMIX_INDEX) SERIES_REAC = SERIES_REAC + 1
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
+   ENDIF
 ENDDO
 
 ! Select integrator
