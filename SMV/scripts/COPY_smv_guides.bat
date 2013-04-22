@@ -22,5 +22,13 @@ goto:eof
 call %envfile%
 
 %svn_drive%
+echo copying SMV_User_Guide.pdf
+copy %svn_root%\Manuals\SMV_User_Guide\SMV_User_Guide.pdf %svn_root%\..\FIRE-LOCAL\reports\fds_manuals\.
+
+echo copying SMV_Technical_Reference_Guide.pdf
 copy %svn_root%\Manuals\SMV_Technical_Reference_Guide\SMV_Technical_Reference_Guide.pdf %svn_root%\..\FIRE-LOCAL\reports\fds_manuals\.
+
+echo copying SMV_Verification_Guide.pdf
+copy %svn_root%\Manuals\SMV_Verification_Guide\SMV_Verification_Guide.pdf %svn_root%\..\FIRE-LOCAL\reports\fds_manuals\.
 pause
+
