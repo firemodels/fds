@@ -153,7 +153,7 @@ for j=2:length(Q);
                 for m=1:length(single_measured_metric)
                     
                     % Get type of statistics to compute
-                    error_type = Save_Quantity{i,1};
+                    error_type = Save_Quantity{1,i};
                     
                     % Compute the appropriate type of statistics, depending
                     % on the 'Quantity' specification in dataplot_inputs
