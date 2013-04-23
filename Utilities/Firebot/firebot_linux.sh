@@ -288,13 +288,13 @@ fix_svn_properties()
    svn commit -m 'Firebot: Fix SVN properties throughout repository' &> /dev/null
 }
 
-#  =============================
-#  = Stage 2a - Compile FDS DB =
-#  =============================
+#  ================================
+#  = Stage 2a - Compile FDS debug =
+#  ================================
 
 compile_fds_db()
 {
-   # Clean and compile FDS DB
+   # Clean and compile FDS debug
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
@@ -302,13 +302,13 @@ compile_fds_db()
 
 check_compile_fds_db()
 {
-   # Check for errors in FDS DB compilation
+   # Check for errors in FDS debug compilation
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    if [ -e "fds_intel_linux_64_db" ]
    then
       stage2a_success=true
    else
-      echo "Errors from Stage 2a - Compile FDS DB:" >> $ERROR_LOG
+      echo "Errors from Stage 2a - Compile FDS debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -319,19 +319,19 @@ check_compile_fds_db()
       # Continue along
       :
    else
-      echo "Warnings from Stage 2a - Compile FDS DB:" >> $WARNING_LOG
+      echo "Warnings from Stage 2a - Compile FDS debug:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
-#  =================================
-#  = Stage 2b - Compile FDS MPI DB =
-#  =================================
+#  ====================================
+#  = Stage 2b - Compile FDS MPI debug =
+#  ====================================
 
 compile_fds_mpi_db()
 {
-   # Clean and compile FDS MPI DB
+   # Clean and compile FDS MPI debug
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
@@ -339,13 +339,13 @@ compile_fds_mpi_db()
 
 check_compile_fds_mpi_db()
 {
-   # Check for errors in FDS MPI DB compilation
+   # Check for errors in FDS MPI debug compilation
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
    if [ -e "fds_mpi_intel_linux_64_db" ]
    then
       stage2b_success=true
    else
-      echo "Errors from Stage 2b - Compile FDS MPI DB:" >> $ERROR_LOG
+      echo "Errors from Stage 2b - Compile FDS MPI debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -357,19 +357,19 @@ check_compile_fds_mpi_db()
       # Continue along
       :
    else
-      echo "Warnings from Stage 2b - Compile FDS MPI DB:" >> $WARNING_LOG
+      echo "Warnings from Stage 2b - Compile FDS MPI debug:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
-#  ====================================
-#  = Stage 2c - Compile FDS OpenMP DB =
-#  ====================================
+#  =======================================
+#  = Stage 2c - Compile FDS OpenMP debug =
+#  =======================================
 
 compile_fds_openmp_db()
 {
-   # Clean and compile FDS OpenMP DB
+   # Clean and compile FDS OpenMP debug
    cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2c
@@ -377,13 +377,13 @@ compile_fds_openmp_db()
 
 check_compile_fds_openmp_db()
 {
-   # Check for errors in FDS OpenMP DB compilation
+   # Check for errors in FDS OpenMP debug compilation
    cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64_db
    if [ -e "fds_openmp_intel_linux_64_db" ]
    then
       stage2c_success=true
    else
-      echo "Errors from Stage 2c - Compile FDS OpenMP DB:" >> $ERROR_LOG
+      echo "Errors from Stage 2c - Compile FDS OpenMP debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -394,7 +394,7 @@ check_compile_fds_openmp_db()
       # Continue along
       :
    else
-      echo "Warnings from Stage 2c - Compile FDS OpenMP DB:" >> $WARNING_LOG
+      echo "Warnings from Stage 2c - Compile FDS OpenMP debug:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2c >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -745,26 +745,26 @@ check_smv_utilities()
    fi
 }
 
-#  =============================
-#  = Stage 6b - Compile SMV DB =
-#  =============================
+#  ================================
+#  = Stage 6b - Compile SMV debug =
+#  ================================
 
 compile_smv_db()
 {
-   # Clean and compile SMV DB
+   # Clean and compile SMV debug
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6b
 }
 
 check_compile_smv_db()
 {
-   # Check for errors in SMV DB compilation
+   # Check for errors in SMV debug compilation
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    if [ -e "smokeview_linux_64_db" ]
    then
       stage6b_success=true
    else
-      echo "Errors from Stage 6b - Compile SMV DB:" >> $ERROR_LOG
+      echo "Errors from Stage 6b - Compile SMV debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -776,7 +776,7 @@ check_compile_smv_db()
       # Continue along
       :
    else
-      echo "Warnings from Stage 6b - Compile SMV DB:" >> $WARNING_LOG
+      echo "Warnings from Stage 6b - Compile SMV debug:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -1273,7 +1273,7 @@ compile_fds_openmp_db
 check_compile_fds_openmp_db
 
 ### Stage 3 ###
-# Depends on successful FDS DB compile
+# Depends on successful FDS debug compile
 if [[ $stage2a_success && $stage2b_success ]] ; then
    run_verification_cases_debug
    check_verification_cases_debug
@@ -1307,7 +1307,7 @@ compile_smv_db
 check_compile_smv_db
 
 ### Stage 6c ###
-# Depends on successful SMV DB compile
+# Depends on successful SMV debug compile
 if [[ $stage6b_success ]] ; then
    make_smv_pictures_db
    check_smv_pictures_db
