@@ -14,7 +14,7 @@ The Radiative Transport Equation (RTE) for an absorbing, emitting, and scatterin
 \begin{align}
 \bs \cdot \nabla I_{\la}(\bx,\bs) &=
 \underbrace{ - \kappa(\bx,\la)   \; I_\la(\bx,\bs) }_{\textrm{Energy loss by absorption}} -
-\underbrace{\sigma_{\rm s}(\bx,\la) \; I_\la(\bx,\bs) }_{\textrm{Energy loss by diffusion}} +  \notag \\[0.25in]
+\underbrace{\sigma_{\rm s}(\bx,\la) \; I_\la(\bx,\bs) }_{\textrm{Energy loss by scattering}} +  \notag \\[0.25in]
 & \underbrace{   B(\bx,\la) }_{\textrm{Emission source term}} + \quad
 \underbrace{   \frac{\sigma_{\rm s}(\bx,\la)}{4\pi}
 \int_{4\pi}\Phi(\bs',\bs) \; I_{\la}(\bx,\bs') \; d\bs'
@@ -52,14 +52,10 @@ This is the default mode of FDS and appropriate for most problems of fire engine
 
 For optically thin flames, however, where the yield of soot is small compared to the yields of $\rm CO_2$ and water vapor, the gray gas assumption can lead to an over-prediction of the emitted radiation. From a series of numerical experiments using methane as the fuel, it has been found that six bands ($N=6$) provide an accurate representation of the most important radiation bands of the fuel, $\rm CO_2$, and water vapor. Table~\ref{banditos} through Table~\ref{band_MMA} list the band limits for various fuel species. The location of the bands have been adjusted to accommodate most of the features of the fuels spectra. If the absorption of the fuel is known to be important, separate bands can be reserved for fuel, increasing the total number of bands, $N$. The number of additional bands depends on the fuel, as discussed in Appendix~\ref{absorption_coefficients}.
 \begin{table}[p]
-\caption{Limits of the spectral bands for methane.}
+\caption{Limits of the spectral bands for methane (CH$_4$).}
 \label{banditos}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                     & Soot           & CO$_2$       & CH$_4$ & CO$_2$ & H$_2$O,CH$_4$& H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot   & Soot   & Soot         & CO$_2$ \\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 3800}c@{}}{ }
@@ -67,6 +63,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in} 2400}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 2174}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 1000}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                     & Soot           & CO$_2$       & CH$_4$ & CO$_2$ & H$_2$O,CH$_4$& H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot   & Soot   & Soot         & CO$_2$ \\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in} 1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in} 2.63}c@{}}{ }
@@ -79,14 +79,10 @@ For optically thin flames, however, where the yield of soot is small compared to
 \end{table}
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for ethane.}
+\caption{Limits of the spectral bands for ethane (C$_2$H$_6$).}
 \label{band_Ethane}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                      & Soot & CO$_2$ & C$_2$H$_6$ & CO$_2$ & C$_2$H$_6$ & H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$, C$_2$H$_6$\\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }
@@ -94,6 +90,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in}2550}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1650}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1090}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                      & Soot & CO$_2$ & C$_2$H$_6$ & CO$_2$ & C$_2$H$_6$ & H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$, C$_2$H$_6$\\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }
@@ -109,14 +109,10 @@ For optically thin flames, however, where the yield of soot is small compared to
 %%% TABLE ETHYLENE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for ethylene.}
+\caption{Limits of the spectral bands for ethylene (C$_2$H$_4$).}
 \label{band_Ethylene}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                      & Soot & CO$_2$ & C$_2$H$_4$ & CO$_2$ & C$_2$H$_4$ & H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }
@@ -124,6 +120,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in}2800}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1650}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}780}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                      & Soot & CO$_2$ & C$_2$H$_4$ & CO$_2$ & C$_2$H$_4$ & H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }
@@ -139,14 +139,10 @@ For optically thin flames, however, where the yield of soot is small compared to
 %%% TABLE PROPYLENE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for propylene.}
+\caption{Limits of the spectral bands for propylene (C$_3$H$_6$).}
 \label{band_Propylene}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                      & Soot & CO$_2$ & C$_3$H$_6$ & CO$_2$ & C$_3$H$_6$ & C$_3$H$_6$, H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }
@@ -154,6 +150,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in}2600}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1950}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1175}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                      & Soot & CO$_2$ & C$_3$H$_6$ & CO$_2$ & C$_3$H$_6$ & C$_3$H$_6$, H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }
@@ -169,14 +169,10 @@ For optically thin flames, however, where the yield of soot is small compared to
 %%% TABLE PROPANE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for propane.}
+\caption{Limits of the spectral bands for propane (C$_3$H$_8$).}
 \label{band_Propane}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                      & Soot & CO$_2$ & C$_3$H$_8$ & CO$_2$ & C$_3$H$_8$ & H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }
@@ -184,6 +180,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in}2550}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1650}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1175}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                      & Soot & CO$_2$ & C$_3$H$_8$ & CO$_2$ & C$_3$H$_8$ & H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, H$_2$O, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }
@@ -199,14 +199,10 @@ For optically thin flames, however, where the yield of soot is small compared to
 %%% TABLE HEPTANE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for heptane.}
+\caption{Limits of the spectral bands for heptane (C$_7$H$_{16}$).}
 \label{band_Heptane}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                      & Soot & CO$_2$ & C$_7$H$_{16}$ & CO$_2$ & C$_7$H$_{16}$ & H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }
@@ -214,6 +210,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in}2550}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1775}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1100}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                      & Soot & CO$_2$ & C$_7$H$_{16}$ & CO$_2$ & C$_7$H$_{16}$ & H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }
@@ -229,14 +229,10 @@ For optically thin flames, however, where the yield of soot is small compared to
 %%% TABLE TOLUENE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for toluene.}
+\caption{Limits of the spectral bands for toluene (C$_7$H$_8$).}
 \label{band_Toluene}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                      & Soot & CO$_2$ & C$_7$H$_8$ & CO$_2$  & C$_7$H$_8$ & C$_7$H$_8$, H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }
@@ -244,6 +240,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in}2550}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2050}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1200}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                      & Soot & CO$_2$ & C$_7$H$_8$ & CO$_2$  & C$_7$H$_8$ & C$_7$H$_8$, H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & H$_2$O, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }
@@ -259,14 +259,10 @@ For optically thin flames, however, where the yield of soot is small compared to
 %%% TABLE METHANOL: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for methanol.}
+\caption{Limits of the spectral bands for methanol (CH$_3$OH).}
 \label{band_Methanol}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                      & Soot & CH$_3$OH & CH$_3$OH & CO$_2$ & CH$_3$OH & CH$_3$OH, H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & CO$_2$, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}3825}c@{}}{ }
@@ -274,6 +270,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in}2600}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1675}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1125}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                      & Soot & CH$_3$OH & CH$_3$OH & CO$_2$ & CH$_3$OH & CH$_3$OH, H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species} & CO$_2$, H$_2$O & CO$_2$, Soot & Soot  & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2.61}c@{}}{ }
@@ -289,14 +289,10 @@ For optically thin flames, however, where the yield of soot is small compared to
 %%% TABLE MMA: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for methyl methacrylate.}
+\caption{Limits of the spectral bands for methyl methacrylate (MMA).}
 \label{band_MMA}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
-\hline
-\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
-                                      & Soot           & CO$_2$ & MMA & CO$_2$ & MMA & MMA, H$_2$O \\
-\raisebox{1.5ex}[0pt]{Major Species}  & CO$_2$, H$_2$O & H$_2$O, Soot & Soot   & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\omega$ (1/cm)}
              & \multicolumn{1}{@{\hspace{-.2in}10000}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}3800}c@{}}{ }
@@ -304,6 +300,10 @@ For optically thin flames, however, where the yield of soot is small compared to
              & \multicolumn{1}{@{\hspace{-.2in}2650}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2050}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}1250}c@{50}}{ } \\
+\hline
+\hspace{0.2in} \underline{6 Band Model} \hspace{0.2in} & 1  & 2  & 3 & 4  & 5 & 6  \\ \cline{2-7}
+                                      & Soot           & CO$_2$ & MMA & CO$_2$ & MMA & MMA, H$_2$O \\
+\raisebox{1.5ex}[0pt]{Major Species}  & CO$_2$, H$_2$O & H$_2$O, Soot & Soot   & CO, Soot & H$_2$O, Soot & CO$_2$\\ \hline
 \multicolumn{1}{c}{$\la$ ($\mu$m)}
              & \multicolumn{1}{@{\hspace{-.2in}1.00}c@{}}{ }
              & \multicolumn{1}{@{\hspace{-.2in}2.63}c@{}}{ }
@@ -316,10 +316,6 @@ For optically thin flames, however, where the yield of soot is small compared to
 \end{center}
 \vspace{2in}
 \end{table}
-
-
-
-
 
 \subsection{Radiation Contribution to Energy Equation}
 
@@ -347,8 +343,8 @@ use grid cells that are tens of centimeters in size, and consequently the comput
 one would expect in a diffusion flame.
 Because of its fourth-power dependence on the temperature,
 the source term must be modeled in those grid cells where combustion occurs. Elsewhere, the computed temperature is used directly to compute the source term.
-It is assumed that this ``flaming region'' is where the local heat release rate is non-zero, $\dq'''>0$. In this region, we
-multiply the emission source term by a corrective factor, $C$:
+It is assumed that this ``flaming region'' is where the local heat release rate is non-zero, $\dq'''>0$. In this region, the global radiative fraction model is used. The emission source term is 
+multiplied by a corrective factor, $C$:
 \be I_{\rm b,f}(\bx) = C \, \frac{\sigma \, T(\bx)^4}{\pi}   \quad ; \quad
     C = \frac{\sum_{\dq'''_{ijk}>0} \left( \chi_{\rm r} \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, \d V}{\sum_{\dq'''_{ijk}>0} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, \d V} \label{corrected_emission_source_term}
 \ee
