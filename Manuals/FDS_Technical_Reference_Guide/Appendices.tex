@@ -400,7 +400,7 @@ The second coefficient is the so-called {\em path mean} or {\em effective} absor
    \int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad}) \; \d \la = \frac{\sigma}{\pi}
        \left[\left(1-{\rm e}^{-\kappa_{{\rm e},n}(T)\, L}\right) \, T^4 + {\rm e}^{-\kappa_{{\rm e},n}(T) \, L} \, T_{\rm rad}^4\right]
 \ee
-where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands.  By default in FDS, the pathlength, $L$, is five times the characteristic cell size of the simulation, limited by a maximum value of 10~m. It can also be specified by the user.
+where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of equivalent thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands.  By default in FDS, the pathlength, $L$, is five times the characteristic cell size of the simulation, limited by a maximum value of 10~m. It can also be specified by the user.
 
 In cases with only one band ($N$=1), the smaller of the two absorption coefficients is used:
 \be
@@ -458,7 +458,7 @@ These new data have been obtained through FTIR measurements for wavenumbers betw
 \ee
 whose units are $\rm {atm^{-1} cm^{-2}}$. The value of the spectral absorption coefficient, $\bar{\kappa}_i$, is averaged over a narrow band whose spectral width, $\Delta \om$, varies from 5~cm$^{-1}$ for $\om < $ 1100~cm$^{-1}$, to 25~cm$^{-1}$ for 1100~cm$^{-1} \leq \om < $ 5000~cm$^{\rm -1}$, and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \om$.
 
-The subsections below briefly describe the molecular bands for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. At the start of a simulation, the absorption coefficient are calculated using RADCAL and then tabulated as a function of mixture fraction and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values.
+The subsections below briefly describe the molecular bands where the species are active for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. Outside these bands, the species are transparent. At the start of a simulation, the absorption coefficient are calculated using RADCAL and then tabulated as a function of mixture fraction and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values.
 
 
 \subsubsection{Carbon Dioxide: $\rm CO_2$}
@@ -516,7 +516,7 @@ Methane is a spherical top molecule of tetrahedral shape with the carbon atom oc
       \label{Table::CH4}
     \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K})$\ \\
+    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$   \\
     \cline{1-6}
     1 & 1150 & 1600 & tabulated &  $\rm C-H$ Bend    & 237  \\
     2 & 2700 & 3250 & tabulated &  $\rm C-H$ Stretch & 212  \\
@@ -539,7 +539,7 @@ Ethylene is a molecule with a plane symmetrical form and belongs to the point gr
     \label{Table::C2H4}
     \begin{tabular}{|c|c|c|c|c|c|}
       \hline
-      Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K})$\\
+      Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$\\
       \cline{1-6}
       1 & 780  & 1250 & tabulated &  $\rm CH_2$ Bend      & 366 \\
       2 & 1300 & 1600 & tabulated &  $\rm CH_2$ Bend      & 43\\
@@ -560,7 +560,7 @@ Ethane has a three-fold axis of symmetry and belongs to the point group $D_{3d}$
     \label{Table::C2H6}
     \begin{tabular}{|c|c|c|c|c|c|}
       \hline
-      Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K})$\\
+      Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$\\
       \cline{1-6}
       1 & 730  & 1095 & tabulated &  $\rm CH_3$ Rock   &  29  \\
       2 & 1250 & 1700 & tabulated &  $\rm CH$  Bend    &  64  \\
@@ -581,7 +581,7 @@ Propylene has only one plane of symmetry and belongs to the point group $C_s$. T
    \label{Table::C3H6}
    \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K})$\\
+    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=296 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$\\
     \cline{1-6}
     1 & 775  & 1150 & tabulated &  $\rm C-C$ Stretch, $\rm CH_3$ Rock & 296 \\
     2 & 1225 & 1975 & tabulated &  $\rm C=C$ Stretch, $\rm CH$ Bend   & 271 \\
@@ -601,7 +601,7 @@ Propane has two planes of symmetry and two axes of rotation. It belongs to the p
    \label{Table::C3H8}
    \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=295 \; {\rm K})$ \\
+    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=295 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$ \\
     \cline{1-6}
     1 & 1175 & 1675 & tabulated &  $\rm CH_3$ Bending        & 121 \\
     2 & 2550 & 3375 & tabulated &  $\rm CH_3, CH_2$ Stretch  & 1186 \\
@@ -620,7 +620,7 @@ Toluene has only one plane of symmetry. It belongs to the point group $C_{s}$. T
    \label{Table::C7H8}
    \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=300 \; {\rm K})$\\
+    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=300 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$\\
     \cline{1-6}
     1 & 700  & 805  & tabulated &  $\rm CH$ Bending      & 237 \\
     2 & 975  & 1175 & tabulated &  $\rm CH$ Bending      & 40  \\
@@ -642,7 +642,7 @@ Band~5 corresponds to the stretching of $\rm CH_3$ and $\rm CH$, and it is the s
    \label{Table::C7H16}
    \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=293 \; {\rm K})$\\
+    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment & $\alpha(T=293 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$\\
     \cline{1-6}
     1 & 1100  & 1800 & tabulated &  $\rm CH_2, CH_3$ Bending    & 298 \\
     2 & 2250  & 3275 & tabulated &  $\rm CH_2, CH_3$ Stretching & 3055 \\
@@ -661,7 +661,7 @@ Methanol has only one plane of symmetry. It belongs to the point group $C_{s}$. 
    \label{Table::CH3OH}
    \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment &  $\alpha(T=293 \; {\rm K})$ \\
+    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment &  $\alpha(T=293 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$ \\
     \cline{1-6}
     1 & 825  & 1125 & tabulated & $\rm C-O$ Stretching   & 593 \\
     2 & 1125 & 1700 & tabulated & $\rm CH_3, OH$ Bending & 197 \\
@@ -682,7 +682,7 @@ Methyl Methacrylate or MMA has the most complex IR spectrum of all the fuels pre
    \label{Table::C5H8O2}
     \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment &  $\alpha(T=396 \; {\rm K})$ \\
+    Band \# & \multicolumn{2}{|l|}{Bounds (cm$\rm ^{-1}$) } & Method & Assignment &  $\alpha(T=396 \; {\rm K}) \; (\rm {atm^{-1} cm^{-2}})$ \\
     \cline{1-6}
     1 & 750  & 875  & tabulated & $\rm CH_2$ Bending          & 42   \\
     2 & 875  & 1050 & tabulated & $\rm CH_2$ Bending          & 131  \\
