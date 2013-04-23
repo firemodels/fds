@@ -319,7 +319,7 @@ compile_fds_db()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    rm -f fds_intel_linux_64_db
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds2.sh &> $FIREBOT_DIR/output/stage2a
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
 }
 
 check_compile_fds_db()
@@ -449,7 +449,7 @@ compile_fds()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
    rm -f fds_intel_linux_64
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds2.sh &> $FIREBOT_DIR/output/stage4a
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
 
 check_compile_fds()
