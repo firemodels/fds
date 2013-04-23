@@ -309,13 +309,13 @@ check_svn_checkout()
    fi
 }
 
-#  =============================
-#  = Stage 2a - Compile FDS DB =
-#  =============================
+#  ================================
+#  = Stage 2a - Compile FDS debug =
+#  ================================
 
 compile_fds_db()
 {
-   # Clean and compile FDS DB
+   # Clean and compile FDS debug
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    rm -f fds_intel_linux_64_db
    make --makefile ../makefile clean &> /dev/null
@@ -324,13 +324,13 @@ compile_fds_db()
 
 check_compile_fds_db()
 {
-   # Check for errors in FDS DB compilation
+   # Check for errors in FDS debug compilation
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    if [ -e "fds_intel_linux_64_db" ]
    then
       stage2a_success=true
    else
-      echo "Errors from Stage 2a - Compile FDS DB:" >> $ERROR_LOG
+      echo "Errors from Stage 2a - Compile FDS debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
@@ -577,13 +577,13 @@ check_smv_utilities()
    fi
 }
 
-#  ==================================
-#  = Stage 6b - Compile SMV DB =
-#  ==================================
+#  ================================
+#  = Stage 6b - Compile SMV debug =
+#  ================================
 
 compile_smv_db()
 {
-   # Clean and compile SMV DB
+   # Clean and compile SMV debug
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    rm -f smokeview_linux_64_db
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6b
@@ -591,13 +591,13 @@ compile_smv_db()
 
 check_compile_smv_db()
 {
-   # Check for errors in SMV DB compilation
+   # Check for errors in SMV debug compilation
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    if [ -e "smokeview_linux_64_db" ]
    then
       stage6b_success=true
    else
-      echo "Errors from Stage 6b - Compile SMV DB:" >> $ERROR_LOG
+      echo "Errors from Stage 6b - Compile SMV debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
