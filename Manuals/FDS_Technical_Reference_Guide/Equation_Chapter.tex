@@ -109,16 +109,9 @@ Rehm and Baum~\cite{Rehm:1} observed that for low speed applications like fire, 
 Note that $z$ is the spatial coordinate in the direction of gravity; thus, the stratification of the atmosphere is included in the background pressure. The perturbation, $\tp$, drives the fluid motion. This approximation has a number of consequences. First, building compartments connected via a heating, ventilation, and air conditioning (HVAC) system can each maintain individual background pressures. The air flows between compartments can be
 described in terms of the differences in the background pressures, eliminating the need to solve detailed flow equations within the ventilation ducts.
 
-The second consequence of the low Mach number approximation is that it eliminates the need to solve the energy transport
-equation explicitly.
-The energy conservation equation is written in terms of the {\em sensible enthalpy}, $h_{\rm s}$:
+The second consequence of the low Mach number approximation is that the internal energy, $e$, and enthalpy, $h$, may be related in terms of the thermodynamic (background) pressure: $h = e + \bp/\rho$.  The energy conservation equation may then be written in terms of the {\em sensible enthalpy}, $h_{\rm s}$:
 \be \dod{ }{t}(\rho h_{\rm s}) + \nabla\!\cdot (\rho h_{\rm s} \bu) = \DoD{\bp}{t} + \dq''' - \dq_{\rm b}'''
         - \nabla\!\cdot \dbq'' \label{energy} \ee
-Note that the material derivative of the thermodynamic pressure is simplified because of the low Mach number approximation:
-\be
-   \DoD{p}{t} \equiv \frac{\partial p}{\partial t} + \bu \cdot \nabla p \approx
-   \frac{\partial \bp}{\partial t} + w \dod{\bp}{z}
-\ee
 The term
 $\dq'''$ is the heat release rate per unit volume from a chemical reaction.
 The term $\dq_{\rm b}'''$ is the energy transferred to subgrid-scale droplets and particles.
@@ -128,18 +121,15 @@ The term $\dbq''$ represents the conductive, diffusive, and radiative heat fluxe
 \ee
 where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of species $\alpha$.
 
-As mentioned above, we do not solve Eq.~(\ref{energy}) explicitly. Instead, we factor out the divergence as follows:
+Eq.~(\ref{energy}) is not solved explicitly. Instead, the velocity divergence is factored out as follows:
 \be
 \label{eqn_simplediv1}
 \Div\mathbf{u} = \frac{1}{\rho h_{\rm s}} \left[ \DoD{}{t} (\bp-\rho h_{\rm s}) + \dq''' + \dq_{\rm r}''' - \dq_{\rm b}^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
 \ee
-Expanding the material derivatives on the right hand side of this equation produces a fairly complicated expression for
-the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations.
-Its importance to the overall algorithm is that it can be computed using only the
-thermodynamic variables $\rho$, $Z_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time
-is to first estimate the thermodynamic variables at the next time step, compute the divergence, and then solve an equation
-for the pressure that will guarantee that the divergence of the updated velocity is identical to that computed solely from
-the thermodynamic variables.
+The hydrodynamics solver guarantees Eq.~(\ref{eqn_simplediv1}) is satisfied.  It follows that Eq.~(\ref{energy}) is also satisfied (energy is conserved).
+
+Expanding the material derivatives on the right hand side of Eq.~(\ref{eqn_simplediv1}) produces a fairly complicated expression for
+the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations. Its importance to the overall algorithm is that it can be computed using only the thermodynamic variables $\rho$, $Z_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time is to first estimate the thermodynamic variables at the next time step, compute the divergence, and then solve an equation for the pressure that will guarantee that the divergence of the updated velocity is identical to that computed solely from the thermodynamic variables.
 
 
 
@@ -147,7 +137,7 @@ the thermodynamic variables.
 
 Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass $\calH \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
 \be
-   \dod{\bu}{t} - \bu\times\bo + \nabla \calH - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big]
+   \dod{\bu}{t} - \bu\times\bo + \nabla \calH - \tp \, \nabla \left( 1/\rho\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big]
 \ee
 The term, $\bof_\text{b}$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}.
 
