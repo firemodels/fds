@@ -7,9 +7,10 @@ queue=
 cases=all
 size=64
 DEBUG=
+OPENMP=
 
 function usage {
-echo "Run_FDS_Cases.sh [ -c cases -d -h -q queue_name -s ]"
+echo "Run_FDS_Cases.sh [ -c cases -d -h -o -q queue_name -s ]"
 echo "Runs FDS verification suite"
 echo ""
 echo "Options"
@@ -18,6 +19,7 @@ echo "     default: $cases"
 echo "     other options: serial, mpi"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
+echo "-o - run OpenMP version of FDS"
 echo "-p size - platform size"
 echo "     default: 64"
 echo "     other options: 32"
@@ -30,7 +32,7 @@ exit
 
 export SVNROOT=`pwd`/..
 
-while getopts 'c:dhp:q:s' OPTION
+while getopts 'c:dhop:q:s' OPTION
 do
 case $OPTION in
   c)
@@ -41,6 +43,9 @@ case $OPTION in
    ;;
   h)
   usage;
+  ;;
+  o)
+  OPENMP=openmp_
   ;;
   p)
   size="$OPTARG"
@@ -69,7 +74,7 @@ else
 fi
 
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
-export FDS=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
+export FDS=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$DEBUG/fds_mpi_intel_$PLATFORM$DEBUG
 
 

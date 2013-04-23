@@ -6,14 +6,16 @@
 queue=
 size=64
 DEBUG=
+OPENMP=
 
 function usage {
-echo "Run_SMV_Cases.sh [-d -h -p -q queue_name -s ]"
+echo "Run_SMV_Cases.sh [-d -h -o -p -q queue_name -s ]"
 echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
+echo "-o - run OpenMP version of FDS"
 echo "-p size - platform size"
 echo "     default: 64"
 echo "     other options: 32"
@@ -28,7 +30,7 @@ CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
 
-while getopts 'dhp:q:s' OPTION
+while getopts 'dhop:q:s' OPTION
 do
 case $OPTION in
   d)
@@ -36,6 +38,9 @@ case $OPTION in
    ;;
   h)
   usage;
+  ;;
+  o)
+  OPENMP=openmp_
   ;;
   p)
    size="$OPTARG"
@@ -67,7 +72,7 @@ fi
 
 
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
-export FDSEXE=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
+export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDS=$FDSEXE
 export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
 
