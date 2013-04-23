@@ -445,14 +445,13 @@ mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
-openmp_intel_osx_64 : FFLAGS = -m64 -static-intel -vec_report0
-openmp_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_intel_osx_64 : FOPTIMIZATIONFLAGS = -O2
+openmp_intel_osx_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
+openmp_intel_osx_64 : LFLAGS = -static-intel
 openmp_intel_osx_64 : FCOMPL = ifort
-openmp_intel_osx_64 : CCOMPL = icc
-openmp_intel_osx_64 : obj = fds_openmp_intel_osx_64
+openmp_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
+openmp_intel_osx_64 : obj = fds_openmp_intel_linux_64
 openmp_intel_osx_64 : setup $(obj_serial)
-	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03 -mmacosx-version-min=10.4
 intel_osx_64_db : FCOMPL = ifort
@@ -467,15 +466,13 @@ mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-### -check produces a runtime-error in the debug version
-openmp_intel_osx_64_db : FFLAGS = -m64 -static-intel -vec_report0 -warn unused -auto -WB -traceback -g -fltconsistency
-openmp_intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_intel_osx_64_db : FOPTIMIZATIONFLAGS = -O0
+openmp_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
+openmp_intel_osx_64_db : LFLAGS = -static-intel
 openmp_intel_osx_64_db : FCOMPL = ifort
-openmp_intel_osx_64_db : CCOMPL = icc
-openmp_intel_osx_64_db : obj = fds_openmp_intel_osx_64_db
+openmp_intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
+openmp_intel_osx_64_db : obj = fds_openmp_intel_linux_64_db
 openmp_intel_osx_64_db : setup $(obj_serial)
-	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -mmacosx-version-min=10.4
 intel_osx_64_dv : LFLAGS = -static-intel
