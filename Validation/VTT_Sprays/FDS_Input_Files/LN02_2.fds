@@ -1,0 +1,142 @@
+&HEAD CHID =  'LN02_2' TITLE =  'Scale 3 PDPA experiments' /
+
+&MESH IJK= 50 50 75 XB=-0.5 0.5 -0.5 0.5 -0.5 1 /
+
+&TIME T_END = 5 DT = 0.002 /
+
+&RADI RADIATION=.FALSE./
+&SPEC ID = 'WATER VAPOR' /
+
+&DUMP NFRAMES=2500 DT_SLCF=0.01 DT_PL3D=100. /
+&VENT MB='XMIN' SURF_ID='OPEN' /
+&VENT MB='XMAX' SURF_ID='OPEN' /
+&VENT MB='YMIN' SURF_ID='OPEN' /
+&VENT MB='YMAX' SURF_ID='OPEN' /
+&VENT MB='ZMIN' SURF_ID='OPEN' /
+&VENT MB='ZMAX' SURF_ID='OPEN' /
+
+&DEVC XYZ=0.0, 0.0, 0.8
+       QUANTITY='TIME'
+       SETPOINT=0.0
+       PROP_ID='ln02'
+       ID='Scale 3 nozzle'  /
+
+Pressure 20 bar
+K-factor = 4.09E-6 kg/s/Pa^1/2 
+
+&PROP ID='ln02'
+ OFFSET=0.08
+ PART_ID='water drops'
+ FLOW_RATE=0.347
+ PARTICLE_VELOCITY=60.
+ PARTICLES_PER_SECOND=1E5
+ SPRAY_ANGLE=0.0 38 /
+
+&PART ID='water drops'
+ SPEC_ID = 'WATER VAPOR'
+ QUANTITIES(1:1)='PARTICLE DIAMETER'
+ DIAMETER=72.
+ MINIMUM_DIAMETER = 1.
+ GAMMA_D=2.1
+ SAMPLING_FACTOR=100
+ AGE=30. /
+
+&SLCF PBX=0.0 QUANTITY='MPUV' PART_ID = 'water drops' VECTOR=.TRUE. /
+&SLCF PBX=0.0 QUANTITY='W-VELOCITY' /
+
+&PROP ID='pdpa_w00'
+      PART_ID='water drops'
+      QUANTITY="W-VELOCITY"
+      PDPA_RADIUS=0.012
+      PDPA_START=0.5
+      PDPA_END=50.0
+      PDPA_M=0
+      PDPA_N=0
+     /
+
+&PROP ID='pdpa_w33'
+      PART_ID='water drops'
+      QUANTITY="W-VELOCITY"
+      PDPA_RADIUS=0.012
+      PDPA_START=0.5
+      PDPA_END=50.0
+      PDPA_M=3
+      PDPA_N=3
+     /
+
+&PROP ID='pdpa_n'
+      PART_ID='water drops'
+      QUANTITY="NUMBER CONCENTRATION"
+      PDPA_RADIUS=0.012
+      PDPA_START=1.0
+      PDPA_END=50.0 /
+
+&PROP ID='pdpa_d10'
+      PART_ID='water drops'
+      QUANTITY="DIAMETER"
+      PDPA_RADIUS=0.012
+      PDPA_START=1.0
+      PDPA_END=50.0
+      PDPA_M=1
+      PDPA_N=0
+      /
+
+&PROP ID='pdpa_d32'
+      PART_ID='water drops'
+      QUANTITY="DIAMETER"
+      PDPA_RADIUS=0.012
+      PDPA_START=1.0
+      PDPA_END=50.0
+      PDPA_M=3
+      PDPA_N=2
+      /
+
+&PROP ID='pdpa_d43'
+      PART_ID='water drops'
+      QUANTITY="DIAMETER"
+      PDPA_RADIUS=0.012
+      PDPA_START=1.0
+      PDPA_END=50.0
+      PDPA_M=4
+      PDPA_N=3
+      /
+
+&PROP ID='pdpa_d43'
+      PART_ID='water drops'
+      QUANTITY="DIAMETER"
+      PDPA_RADIUS=0.012
+      PDPA_START=1.0
+      PDPA_END=50.0
+      PDPA_M=4
+      PDPA_N=3
+      /
+
+&PROP ID='pdpa_f'
+      PART_ID='water drops'
+      QUANTITY="PARTICLE FLUX Z"
+      PDPA_RADIUS=0.01
+      PDPA_START=1.0
+      PDPA_END=50.0 /
+
+ 1.5 s is good
+ c PDPA detectors 40 cm below nozzle
+ Count
+
+&DEVC XB= 0.0,0.280,0,0,0.40,0.40, QUANTITY='PDPA',PROP_ID='pdpa_n'  ,POINTS=10,ID='n_40'/
+&DEVC XB= 0.0,0.280,0,0,0.40,0.40, QUANTITY='PDPA',PROP_ID='pdpa_d10',POINTS=10,ID='d10_40'/
+&DEVC XB= 0.0,0.280,0,0,0.40,0.40, QUANTITY='PDPA',PROP_ID='pdpa_d32',POINTS=10,ID='d32_40'/
+&DEVC XB= 0.0,0.280,0,0,0.40,0.40, QUANTITY='PDPA',PROP_ID='pdpa_d43',POINTS=10,ID='d43_40'/
+&DEVC XB= 0.0,0.280,0,0,0.40,0.40, QUANTITY='PDPA',PROP_ID='pdpa_w00',POINTS=10,ID='w00_40'/
+&DEVC XB= 0.0,0.280,0,0,0.40,0.40, QUANTITY='PDPA',PROP_ID='pdpa_w33',POINTS=10,ID='w33_40'/
+&DEVC XB= 0.0,0.280,0,0,0.40,0.40, QUANTITY='PDPA',PROP_ID='pdpa_f'  ,POINTS=10,ID='f_40'/
+
+c PDPA detectors 62 cm below nozzle
+&DEVC XB= 0.0,0.280,0,0,0.18,0.18, QUANTITY='PDPA',PROP_ID='pdpa_n'  ,POINTS=10,ID='n_60'/
+&DEVC XB= 0.0,0.280,0,0,0.18,0.18, QUANTITY='PDPA',PROP_ID='pdpa_d10',POINTS=10,ID='d10_60'/
+&DEVC XB= 0.0,0.280,0,0,0.18,0.18, QUANTITY='PDPA',PROP_ID='pdpa_d32',POINTS=10,ID='d32_60'/
+&DEVC XB= 0.0,0.280,0,0,0.18,0.18, QUANTITY='PDPA',PROP_ID='pdpa_d43',POINTS=10,ID='d43_60'/
+&DEVC XB= 0.0,0.280,0,0,0.18,0.18, QUANTITY='PDPA',PROP_ID='pdpa_w00',POINTS=10,ID='w00_60'/
+&DEVC XB= 0.0,0.280,0,0,0.18,0.18, QUANTITY='PDPA',PROP_ID='pdpa_w33',POINTS=10,ID='w33_60'/
+&DEVC XB= 0.0,0.280,0,0,0.18,0.18, QUANTITY='PDPA',PROP_ID='pdpa_f'  ,POINTS=10,ID='f_60'/
+
+&TAIL /
