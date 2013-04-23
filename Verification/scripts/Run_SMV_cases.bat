@@ -20,14 +20,14 @@ Rem VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
 Rem Choose FDS version (repository or release)
 
-set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
-Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64_db\fds_win_64_db
+set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64.exe
+Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64_db\fds_win_64_db.exe
 Rem set FDSEXE=fds
 
 Rem Choose CFAST version (repository or release)
 
 Rem set CFASTEXE=cfast6
-set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast6_win_64
+set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast6_win_64.exe
 
 Rem Run jobs in background (or not)
 
@@ -36,7 +36,7 @@ Rem set background=
 
 Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Rem Check to make fds exists
+Rem Ensure that fds exists
 
 IF EXIST %FDSEXE% GOTO endif_fdsexist
 echo ***Fatal error.  The file %FDSEXE% does not exist. 
@@ -46,13 +46,15 @@ goto:eof
 
 :endif_fdsexist
 
-Rem Check to make fds exists
+Rem Ensure that CFAST exists
 
 IF EXIST %CFASTEXE% GOTO endif_cfastexist
 echo ***Fatal error.  The file %CFASTEXE% does not exist. 
 echo Aborting now...
 pause>NUL
 goto:eof
+
+:endif_cfastexist
 
 set FDS=%bg%%FDSEXE%
 set CFAST=%bg%%CFASTEXE%
