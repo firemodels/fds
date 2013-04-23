@@ -114,7 +114,7 @@ related to $L$. For this reason, $L$ is taken to be 1~m for most calculations un
 \subsubsection{Optional Near-Wall Model}
 \label{conflux_wall_model}
 
-This section describes an optional model for the heat transfer coefficient which may be more appropriate for well-resolved LES calculations.
+This section describes an optional model for the heat transfer coefficient which may be more appropriate for well-resolved LES calculations.  This model has been validated for low Reynolds number heated channel flow \cite{Park:2012} and has been used in a model to predict upper layer temperature in airplane cargo compartments \cite{Oztekin:FM2012}.
 
 Wall models aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without resolving the smallest length scales. The theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, non-dimensional velocity can be defined as a function of non-dimensional length scale. In FDS, the wall model for velocity is implemented based on law of wall with semi-log fit connecting the limits of the viscous and log regions (see Section \ref{info:velocity_bc}).
 
