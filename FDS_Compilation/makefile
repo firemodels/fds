@@ -46,11 +46,11 @@ setup_win:
 .f90.obj:
 	$(FCOMPL) -c $(FFLAGS) $<
 
-# Files which have OpenMP compiler directives have to be compiled
-# by using the FOPENMPFLAG
-# Note: OpenMP is actually compiled by using O2-optimization (not O3)
-
-#func.o: FFLAGS += $(FOPENMPFLAGS)
+# Files which have OpenMP compiler directives are compiled using the
+# FOPENMPFLAG and can be enabled/disabled on a per-file basis below.
+# If the target name includes "openmp", then the OpenMP flags are appended.
+ifeq ($(findstring openmp, $(MAKECMDGOALS)), openmp)
+func.o: FFLAGS += $(FOPENMPFLAGS)
 #divg.o: FFLAGS += $(FOPENMPFLAGS)
 #fire.o: FFLAGS += $(FOPENMPFLAGS)
 #mass.o: FFLAGS += $(FOPENMPFLAGS)
@@ -60,7 +60,7 @@ setup_win:
 #turb.o: FFLAGS += $(FOPENMPFLAGS)
 #velo.o: FFLAGS += $(FOPENMPFLAGS)
 
-#func.obj: FFLAGS += $(FOPENMPFLAGS)
+func.obj: FFLAGS += $(FOPENMPFLAGS)
 #divg.obj: FFLAGS += $(FOPENMPFLAGS)
 #fire.obj: FFLAGS += $(FOPENMPFLAGS)
 #mass.obj: FFLAGS += $(FOPENMPFLAGS)
@@ -69,6 +69,7 @@ setup_win:
 #pres.obj: FFLAGS += $(FOPENMPFLAGS)
 #turb.obj: FFLAGS += $(FOPENMPFLAGS)
 #velo.obj: FFLAGS += $(FOPENMPFLAGS)
+endif
 
 # Windows Intel Compiler, version 11
 
