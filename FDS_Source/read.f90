@@ -4842,6 +4842,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
       RGB(2) = 204
       RGB(3) = 102
    ENDIF
+   IF (SF%ID=="OPEN") THEN
+      RGB(1) = 255
+      RGB(2) = 0
+      RGB(3) = 255
+   ENDIF
    SF%RGB                  = RGB
    SF%ROUGHNESS            = ROUGHNESS
    SF%TRANSPARENCY         = TRANSPARENCY
