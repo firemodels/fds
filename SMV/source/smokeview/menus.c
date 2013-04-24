@@ -4356,7 +4356,7 @@ void ShowObjectsMenu(int value){
   else{
     device_sphere_segments=ABS(value);
     initspheresegs(device_sphere_segments,2*device_sphere_segments);
-    initcircle(device_sphere_segments);
+    initcircle(2*device_sphere_segments);
   }
   updatemenu=1;
   glutPostRedisplay();
