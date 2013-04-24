@@ -1265,30 +1265,9 @@ void initvars(void){
   direction_color_ptr=getcolorptr(direction_color);
   arg_iblank=0;
   use_iblank=1;
-  levelset_colorbar=-1;
-  wallthickness_colorbar=-1;
   show_slice_terrain=0;
 
 #ifdef pp_SHOOTER
-  glui_time=0.0;
-  last_prop_display=-1;
-  visShooter=0;
-  isosubmenus=NULL;
-  loadpatchsubmenus=NULL;
-  shooter_history=10.0;
-  shootpointinfo=NULL;
-  shoottimeinfo=NULL;
-  shooter_active=0;
-  shooterpointsize=4.0;
-  shooter_time_max=2.0;
-  shooter_v_inf=1.0;
-  shooter_u0=2.0;
-  shooter_z0=2.0;
-  shooter_p=1.0/7.0;
-  shooter_timeslist=NULL;
-  shooter_cont_update=0;
-  shooter_firstframe=0;
-  shooter_itime=0;
   shooter_uvw[0]=0.0;
   shooter_uvw[1]=0.0;
   shooter_uvw[2]=0.0;
@@ -1300,9 +1279,11 @@ void initvars(void){
   vis_slice_contours=0;
   update_slicecontours=0;
 #endif
+  
   partfacedir[0]=0.0;
   partfacedir[1]=0.0;
   partfacedir[2]=1.0;
+  
   unload_qdata=0;
   sb_atstart=1;
   select_device=0;
@@ -1460,7 +1441,6 @@ void initvars(void){
 
   windowsize_pointer=0;
   sethazardcolor=0;
-  global_colorbar_index=-1;
   fontindex=0;
 
   xcenGLOBAL=0.5, ycenGLOBAL=0.5, zcenGLOBAL=0.5;
