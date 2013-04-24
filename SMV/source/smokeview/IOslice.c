@@ -4064,7 +4064,7 @@ void drawvolslice_terrain(const slicedata *sd){
     float z11, z31, z13, z33, zmid, zmax;
     int maxi;
 
-    constval = zplt[plotz]+offset_slice*sd->sliceoffset-znode[0];
+    constval = zplt[plotz]+offset_slice*sd->sliceoffset; // - znode[0]  (removed to fix problem with slice placement)
     zmax = zplt[meshi->kbar];
     glBegin(GL_TRIANGLES);
     maxi = MAX(sd->is1+sd->nslicei-1,sd->is1+1);
