@@ -4315,9 +4315,9 @@ where:
 \item[{\ct CLEAN\_LOSS}] is the flow loss through the filter when it is new (zero loading).
 \item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.  The species are identified using {\ct SPEC\_ID}.
 \item[{\ct LOADING}] is an array of the initial loading (kg) of the filter for each species being filtered.
-\item[{\ct LOADING\_MULTIPLIER}] is an array of the species multiplier, M$_i$, used in computing the total filter loading when computing loss.
-\item[{\ct LOSS}] invokes a linear flow loss model where the flow loss is given as a linear function of the total loading, $K_{filter}=K_{CLEAN\_LOSS}+K_{LOSS} \sum \left( L_i M_i \right)$, where L$_i$ is the species loading and M$_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
-\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (see summation in {\ct LOSS}.   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
+\item[{\ct LOADING\_MULTIPLIER}] is an array of the species multiplier, $M_i$, used in computing the total filter loading when computing loss.
+\item[{\ct LOSS}] invokes a linear flow loss model where the flow loss, $K$, is given as a linear function of the total loading, $K_{filter}=K_{CLEAN\_LOSS}+K_{LOSS} \sum \left( L_i M_i \right)$, where $L_i$ is the species loading and $M_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (the summation term given in the defintion of {\ct LOSS} above).   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct LOADING\_MULTIPLIER} and {\ct LOADING}.
 \end{description}
 A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial flow loss of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter}, which is documented in the Verification Guide.
@@ -5183,8 +5183,8 @@ Note that this parameter is only appropriate when the simple chemistry model is 
 \end{description}
 The ambient mass fractions for the constituents of air are specified on {\ct MISC} using the inputs:
 \begin{description}
-\item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
-\item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.0058)
+\item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232378)
+\item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.00595)
 \item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
 \end{description}
 A few sample {\ct REAC} lines are given here.
@@ -7275,7 +7275,7 @@ To learn how to create and remove obstructions multiple times, see Section~\ref{
 \label{info:activate_deactivate}
 
 When a device or control function is applied to a {\ct VENT}, the purpose is to either activate or deactivate any time ramp associated with
-the {\ct VENT} via its {\ct SURF\_ID}. For example, to control a fan, do the following:
+the {\ct VENT} via its {\ct DEVC\_ID}. For example, to control a fan, do the following:
 
 \begin{lstlisting}
 &SURF ID='FAN', VOLUME_FLUX=5. /
@@ -7777,7 +7777,6 @@ the simulation divided by {\ct NFRAMES}.
 {\ct CHID.notready} which is deleted, if the simulation is completed
 successfully. This file can be used as an error indicator. It is {\ct
 .FALSE.} by default.
-\item[{\ct EB\_DUMP\_FILE}] If {\ct .TRUE.} write out the particle output file using 8 byte reals. Default {\ct .FALSE.}
 \end{description}
 
 
@@ -8343,7 +8342,7 @@ It is possible to record various properties of droplets and particles. Some of t
 {\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named {\ct PART\_ID}.
 Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea.
 Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area,
-and the accumulated total, respectively.  It should be noted that these quantities are not identical measures.  The quantity {\ct 'AMPUA'} is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period.  In this case case each grid cell on the floor is considered its own bucket.  Each droplet is counted only once when it reaches the floor\footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from the simulation for the purpose of saving CPU time.}. MPUA counts a particle whenever it is on any solid surface, including the walls.  If the particle or droplet moves from one solid wall
+and the accumulated total, respectively.  It should be noted that these quantities are not identical measures.  The quantity {\ct 'AMPUA'} is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period.  In this case each grid cell on the floor is considered its own bucket.  Each droplet is counted only once when it reaches the floor\footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from the simulation for the purpose of saving CPU time.}. MPUA counts a particle whenever it is on any solid surface, including the walls.  If the particle or droplet moves from one solid wall
 cell to another, then it will be counted again.  The cooling of a solid surface by droplets of a
 given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.  Since a typical sprinkler simulation only tracks a small fraction of the droplets emitted from a sprinkler, both MPUA and CPUA also perform an exponential smoothing.  This avoids having spotted distributions on surfaces due to the infrequent arrival of particles that likely have a high weighting factor.
 
@@ -8354,8 +8353,7 @@ water drops time to reach the floor. The total mass of water discharged is
 \be
   \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
 \ee
-In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTEGRAL'} is applied to the {\ct DEVC} line.
-{\ct 'AMPUA'} records the accumulated water mass per unit area (kg/m$^2$), analogous to actual buckets the size of a grid cell.
+In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTEGRAL'} is applied to the {\ct DEVC} line.  This results in FDS summing {\ct 'AMPUA'} over each grid cell in the volume defined by {\ct XB}, in this case the entire floor, analogous to if there were an single bucket present that was the same size as the area specified with {\ct XB}.
 Summing the values of {\ct 'AMPUA'} over the entire
 floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there really is no need to time-average the results. The quantity is inherently accumulating.
 
@@ -9572,7 +9570,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_BNDF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
 {\ct DT\_CTRL}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_DEVC\_LINE}                & Real         & Section~\ref{info:line_file}           &           & 1                              \\ \hline
+{\ct DT\_DEVC\_LINE}                & Real         & Section~\ref{info:line_file}           &           & $\Delta t${\ct /4}             \\ \hline
 {\ct DT\_FLUSH}                     & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 %{\ct DT\_GEOM}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_HRR}                       & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
@@ -9705,7 +9703,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                        & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
 {\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct LOADING}                   & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0            \\ \hline
-{\ct LOADING\_MULTIPLIER}       & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0            \\ \hline
+{\ct LOADING\_MULTIPLIER}       & Real Array        &  Section ~\ref{info:HVACfilter}                                               & 1/kg          & 1.0            \\ \hline
 {\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}                        &               & 0.0            \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
 {\ct MAX\_PRESSURE}             & Real              &  Section ~\ref{info:HVACfan}                                                  &  Pa           &                \\ \hline
@@ -9953,7 +9951,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
-{\ct LES\_FILTER\_WIDTH}                        & Character     & Section~\ref{info:LES}                                &               & {\ct 'MAX'}       \\ \hline
+{\ct LES\_FILTER\_WIDTH}                        & Character     & Section~\ref{info:LES}                                &               & {\ct 'MEAN'}      \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
@@ -9996,8 +9994,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
 {\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
-{\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg            & 0.0058            \\ \hline
-{\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg            & 0.232428          \\ \hline
+{\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg            & 0.00595           \\ \hline
+{\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg            & 0.232378          \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
@@ -10177,7 +10175,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct CHECK\_POISSON}                & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
 {\ct FISHPAK\_BC(3)}                 & Integer       & Section~\ref{info:PRES}           &               & -1                        \\ \hline
-{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               &   10000                   \\ \hline
+{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               &   10                      \\ \hline
 {\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
 {\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.0                       \\ \hline
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           &  m/s          &                           \\ \hline
@@ -10270,6 +10268,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PART\_ID}                          & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct PDPA\_END}                         & Real          & Section~\ref{PDPA}                        & s                     & {\ct T\_END} \\ \hline
 {\ct PDPA\_HISTOGRAM}                   & Logical       & Section~\ref{PDPA}                        &                       & .FALSE.   \\ \hline
+{\ct PDPA\_HISTOGRAM\_LIMITS}           & Real Array    & Section~\ref{PDPA}                        &                       &       \\ \hline
 {\ct PDPA\_HISTOGRAM\_NBINS}            & Integer       & Section~\ref{PDPA}                        &                       & 10        \\ \hline
 {\ct PDPA\_INTEGRATE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct .TRUE.}         \\ \hline
 {\ct PDPA\_M}                           & Integer       & Section~\ref{PDPA}                        &                       & 0         \\ \hline
