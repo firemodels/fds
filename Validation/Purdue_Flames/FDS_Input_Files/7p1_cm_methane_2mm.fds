@@ -32,7 +32,7 @@
   
 &SURF ID='FLAME'
       COLOR='ORANGE'
-      MASS_FLUX(1) = 0.02129, SPEC_ID(1) = 'natural gas'
+      VEL=-0.0314, TAU_V=0, MASS_FRACTION(1) = 1, SPEC_ID(1) = 'natural gas'
       FREE_SLIP=.TRUE. /
   
 &VENT MB='XMIN', SURF_ID='OPEN'/
@@ -41,10 +41,10 @@
 &VENT MB='YMAX', SURF_ID='OPEN'/
 &VENT MB='ZMAX', SURF_ID='OPEN'/
 
-! weak synthetic turbulence, 1% intensity, just to break symmetry
+! synthetic turbulence to break symmetry
 &VENT XB=-.0355,.0355,-.0355,.0355,0,0
       XYZ=0,0,0, RADIUS=0.0355
-      SURF_ID='FLAME', N_EDDY=10, L_EDDY=0.01775, VEL_RMS=0.003 /
+      SURF_ID='FLAME', N_EDDY=100, L_EDDY=0.01775, VEL_RMS=0.003 /
 
 &VENT MB='ZMIN', SURF_ID='OPEN'/
 
