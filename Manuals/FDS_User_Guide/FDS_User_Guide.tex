@@ -2086,7 +2086,7 @@ Here, within the region whose bounds are given by the sextuplet {\ct XB}, the in
 
 To modify the local initial temperature, add lines of the form,
 \begin{lstlisting}
-&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,, TEMPERATURE=60. /
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, TEMPERATURE=60. /
 \end{lstlisting}
 This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and out. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
 \begin{lstlisting}
