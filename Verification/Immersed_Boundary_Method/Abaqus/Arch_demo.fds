@@ -1,6 +1,6 @@
 &HEAD CHID='Arch_demo', TITLE='Demo of Abaqus >> Matlab freeBoundary, created by Arch_demo.m' /
   
-&MESH IJK=32,32,32, XB=-1.,1.,-1.,1.,0,1/
+&MESH IJK=32,32,32, XB=-1.,1.,-1.,1.,-0.2,1/
   
 &TIME T_END=60./
   
@@ -12,15 +12,17 @@
 &PART ID='p1', SURF_ID='arch surf', STATIC=.TRUE., PROP_ID='ball', QUANTITIES(1)='PARTICLE TEMPERATURE' /
 &PROP ID='ball', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
 &SURF ID='arch surf', COLOR='BLUE', EMISSIVITY=0.95, RADIUS=0.005, GEOMETRY='SPHERICAL' /
-  
-&GEOM ID='arch', SHAPE='COMPLEX', SURF_ID='cold',DT_GEOC=1., GEOC_FILENAME='Arch_demo_bending_01.gc' /
+
+&GEOM ID='arch', SHAPE='COMPLEX', SURF_ID='arch surf'
+      DT_GEOC=1., GEOC_FILENAME='Arch_demo_01.gc'
+      DT_BNDC=1., BNDC_FILENAME='Arch_demo_01.bc'/
   
 &VENT MB='XMIN', SURF_ID='OPEN'/
 &VENT MB='XMAX', SURF_ID='OPEN'/
 &VENT MB='YMIN', SURF_ID='OPEN'/
 &VENT MB='YMAX', SURF_ID='OPEN'/
 &VENT MB='ZMAX', SURF_ID='OPEN'/
-&VENT XB=-.2,.2,-.2,.2,0,0, SURF_ID='hot vent'/
+&VENT XB=-.2,.2,-.2,.2,-0.2,-0.2, SURF_ID='hot vent'/
   
 &MATL ID='my solid', DENSITY=2700., CONDUCTIVITY=120., SPECIFIC_HEAT=.903 /
   
