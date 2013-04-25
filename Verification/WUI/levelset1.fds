@@ -5,7 +5,7 @@
 &MESH IJK=150,150,200, XB=0,300,-150,150,0,100 /
 
 &TIME T_END=200 /
-&MISC VEG_LEVEL_SET=.TRUE.,U0=5,V0=0  /
+&MISC VEG_LEVEL_SET=.TRUE.,TERRAIN_CASE=.TRUE., U0=5,V0=0  /
 
 -- Ignitor locations and times
 --- Line ignition
