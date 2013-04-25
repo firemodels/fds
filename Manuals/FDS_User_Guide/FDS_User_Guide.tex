@@ -2750,44 +2750,21 @@ describes some options.
 
 \subsubsection{Default Convective Heat Transfer Model}
 
-By default in an LES calculation, the convective heat flux to a surface or a particle is obtained from a combination of natural and forced convection correlations.
+In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad h =
+    \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;  \frac{k}{L} \, \NU \right]  \quad  \si{W/(m^2.K)}
+\ee
+where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, and $k$ is the thermal conductivity of the gas. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
+\be
+   \NU = C_1 + C_2 \, \RE^n \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR \approx 0.7
+\ee
+For planar and cylindrical surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.33$, and $L=1$~m. For spherical surfaces, the default values are $C_1=2$, $C_2=0.6$, $n=0.5$, $m=0.33$, and $L=D$, the diameter of the sphere. Note that for a sphere, the coefficient for natural convection, $C$, is assumed to be zero. It is possible to change these values for a particular application, but it is not possible to find a set of parameters that is appropriate for the wide variety of scenarios considered. Various correlations for planes, cylinders, and spheres can be found in Refs.~\cite{Holman:1,Incropera:1}.
 
-The natural convection correlation used is:
-\be \dq_{\rm c}'' = h \; \Delta T
-    \quad \hbox{W/m}^2 \quad ; \quad h =
-    \max \; \left[ \; C \, |\Delta T|^\ot \; , \;
-            \frac{k}{L} \; \NU
-            \right]  \quad
-    \si{W/(m^2.K)} \ee
-where $\Delta T$ is the difference between the wall and the gas temperature, $C$ is the coefficient for natural convection (1.52 for a horizontal surface
-and 1.31 for a vertical surface, by default).  You can change the empirical coefficients for the natural convection model by using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ which are input on the {\ct SURF} line.
-
-Forced convection uses a Nusselt number correlation using a Reynolds number, $\RE$, computed using the local gas conditions and the characteristic length of the surface or particle.  The Nusselt number, $\NU$, depends on the shape of the obstruction~\cite{Holman:1, Incropera:1}:
-\be \NU = \left\{ \begin{array}{ll} 0.037 \; \RE^\fofi \; \PR^\ot & \hbox{Cartesian} \\
-                                    C_{\rm cyl}\; \RE^{n_{\rm cyl}} \; \PR^\ot & \hbox{Cylindrical} \\
-                                    2 + 0.6 \; \RE^\ha \; \PR^\ot & \hbox{Spherical}  \\
-                                    C_1 + C_2 \; \RE^{C_3} \; \PR^{C_4} & \hbox{Custom} \end{array} \right. \ee
-where $C_{\rm cyl}$ and $n_{\rm cyl}$ are given in Table~\ref{tbl:cylheat}.
-\begin{table}[ht]
-\begin{center}
-\caption{Cylinder Heat Transfer Constants}
-\label{tbl:cylheat}
-\begin{tabular}{|c|c|c|}
-\hline
-$C_{\rm cyl}$ & $n_{\rm cyl}$ & Range  \\ \hline
-0.989  & 0.330 & $ \RE < 4$ \\ \hline
-0.911  & 0.385 & $4 \leq \RE < 40$ \\ \hline
-0.683  & 0.466 & $40 \leq \RE < 4000$ \\ \hline
-0.193  & 0.618 & $4000 \leq \RE < 40000$ \\ \hline
-0.0266 & 0.805 & $40000 \leq \RE $ \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-$L$ is a characteristic length related to the size of the physical obstruction; $k$ is the thermal conductivity of the gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the gas flowing past the obstruction (i.e., for a wall cell, the conditions in gas cell immediately adjacent to the wall, and for a particle, the gas cell containing the particle). Since the Reynolds number is proportional to the characteristic length, $L$, the heat transfer coefficient is weakly related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, for a wall cell $L$ is taken to be 1~m for most calculations.  For cylindrical or spherical objects $L$ is take to be the diameter. The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and {\ct C\_FORCED\_PR\_EXP} for the constants $C_1$ through $C_4$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.
+You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct MISC} line.
 
 \subsubsection{Logarithmic Law of the Wall}
 
-\noindent Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
+Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
 
 By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{\rm w})/T_\tau$, where $T_{\rm g}$ is the gas temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}''_{\rm w}$, as $T_\tau = \dot{q}''_{\rm w}/\rho_{\rm w} u_\tau c_{\rm p}$. The local heat transfer coefficient is then obtained from
 \begin{equation}
@@ -7135,7 +7112,7 @@ An aspiration detection system groups together a series of smoke measurement dev
  ...
 &DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='sootN', DEVC_ID='asp1',
       FLOWRATE=0.3, DELAY=30 /
-&DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4, 
+&DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4,
       SETPOINT=0.02 /
 \end{lstlisting}
 where the {\ct DEVC\_ID} is used at each sampling point to reference the central detector, {\ct FLOWRATE} is the gas flow rate in kg/s, {\ct DELAY} is the transport time (in seconds) from the sampling location to the central detector, {\ct BYPASS\_FLOWRATE} is the flow rate in kg/s of any air drawn into the system from outside the computational
