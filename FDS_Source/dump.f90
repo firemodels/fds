@@ -2542,9 +2542,8 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    END SELECT    
       
    IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
-   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID   
-   
-   WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Concept Reaction'
+   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', RN%ID   
+      
    WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
    IF (SUPPRESSION) THEN
       WRITE(LU_OUTPUT,'(3X,A,A)')  'Extinction Model:  ', EXTINCTION_MODEL
@@ -2562,12 +2561,19 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    DO NN=1,N_SPECIES
       IF (ABS(RN%NU_SPECIES(NN))>=TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
    ENDDO
-   WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
+   IF (.NOT. RN%FAST_CHEMISTRY) WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
    DO NN=1,N_SPECIES
      IF (RN%N_S(NN) <=-998._EB) CYCLE
      WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
    ENDDO
-   WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
+   IF (RN%FAST_CHEMISTRY) THEN
+      WRITE(LU_OUTPUT,'(/3X,A)')  'Fast Chemistry Reaction'
+   ELSEIF (RN%A_RAMP_INDEX /= 0 .OR. RN%E_RAMP_INDEX /= 0) THEN
+      WRITE(LU_OUTPUT,'(/3X,A)')  'Mixed Fast/Finite Rate Chemistry Reaction'
+   ELSE
+      WRITE(LU_OUTPUT,'(/3X,A)')  'Finite Rate Chemistry Reaction'
+   ENDIF
+   WRITE(LU_OUTPUT,'(A)') '   Arrhenius Constants'
    WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
    WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
    WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'            
