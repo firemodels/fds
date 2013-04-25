@@ -17,13 +17,13 @@ in a grid cell and dividing by the cell volume, $V$:
 \be
     {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, \pi \, r_{\rm p}^2 \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right]
 \ee
-where $C_{\rm d}$ is the drag coefficient, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $\bu$ is the
+where $C_{\rm d}$ is the drag coefficient, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the
 gas velocity, and $\rho$ is the gas density. The particle acceleration is given by
 \be
     \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, \pi  r_{\rm p}^2}{m_{\rm p}} \,
     (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|
 \ee
-where $m_{\rm p}$ is the particle mass.  The particle position, $\bx_{\rm p}$, is determined from the equation
+The particle position, $\bx_{\rm p}$, is determined from the equation
 \be
     \frac{\d \bx_{\rm p}}{\d t} = \bu_{\rm p}
 \ee
@@ -37,69 +37,70 @@ The drag coefficient (default based on a sphere) is a function of the local Reyn
 \RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
 where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
 
+\subsection{Drag Reduction}
+\label{sec:threeway}
+
+Typically, Lagrangian particle models only consider two-way coupling between the gas and particles. This means that each particle interacts with the carrier fluid individually. Momentum lost from a particle is added to the fluid and vice versa. If the spray is dense enough, however, the individual particles influence each other through aerodynamic interactions. These effects cannot be captured by the current Eulerian-Lagrangian model for two reasons. First, the Lagrangian particles occupy no volume in the Eulerian space. Second, the separation lengths would be of sub-grid scale in most practical simulations. The aerodynamic interactions start to have an effect when the average particle spacing is less than 10 diameters~\cite{Prahl:1,Prahl:2}. This corresponds to a particle volume fraction, $\alpha$, of approximately 0.01. Volume fractions as high as this can sometimes be achieved inside water mist sprays. If the spray is even more dense, particle-particle collisions or four-way coupling would need to be considered.
+
+In a configuration where two particles with the same diameter are directly in line, the reduction of the drag force on the second particle can be modeled by the following~\cite{Ramirez:1}:
+\be
+  C_{\rm d} = C_{\rm d,0} \, \frac{F}{F_0} \label{eq:dragred}
+\ee
+where $C_{\rm d,0}$ is the single particle drag coefficient and $F / F_0$ is the hydrodynamic force ratio of the trailing particle to an isolated particle:
+\be
+  \frac{F}{F_0} = W \left[ 1 + \frac{\RE}{16} \frac{1}{\left( L / D - 1
+  / 2 \right)^2} \exp \left( - \frac{\RE}{16} \frac{1}{\left( L / D - 1
+  / 2 \right)^{}} \right) \right] \label{eq:dragredfact}
+\ee
+where Re is the single particle Reynolds number, L is the distance between the particles, and W is the non-dimensional, non-disturbed wake velocity at the center of the trailing particle
+\be
+  W = 1 - \frac{C_{\rm d,0}}{2} \left[ 1 - \exp \left( - \frac{\RE}{16}
+  \frac{1}{\left( L / D - 1 / 2 \right)} \right) \right] \label{eq:Wake-Vel}
+\ee
+This model assumes that the spheres are traveling directly in-line with each other. As such, this provides an upper bound for the strength of the aerodynamic interactions between two particles of the same size. The separation distance $L/D$ between particle centers is calculated from the local particle volume fraction and local average particle diameter $\bar{D}$
+\be
+  L/D = \bar{D} \left(\pi/6\alpha \right)^{\frac{1}{3}}
+\ee
+Here local quantities are taken as average over a single computational cell.
+
+In reality, the spray is not monodisperse and the separation distance between the interacting particles varies. In the simulation, the drag reduction factor in Eq.~\ref{eq:dragred} is only used when the local droplet volume fraction exceeds \num{1e-5}. The drag reduction model is turned on by default.
+
+An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above correlation under-estimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
+
+
 
 \section{Liquid Droplet Size Distribution}
 
-A liquid spray consists of a sampled set of spherical liquid droplets. The size distribution is
-expressed in terms of its Cumulative Volume Fraction (CVF), a function
-that relates the fraction of the liquid volume (mass) transported by
-droplets less than a given diameter. Size distribution is used to specify the initial distribution of droplets that are introduced to the
-computational domain from a nozzle or surface, or that are initially present in the simulation.
-
-In FDS, the the size distributions can be described using analytical distributions, such as the lognormal and Rosin-Rammler distribution.
-Researchers at Factory Mutual have suggested that the CVF for a sprinkler may be represented by a combination of lognormal and
-Rosin-Rammler distributions~\cite{Chan:1}
+The cumulative volume distribution for a liquid spray is represented by a combination of lognormal and Rosin-Rammler distributions~\cite{Chan:1}:
 \be F_{\rm v}(D) = \left\{ \begin{array}{ll}
    \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^D} \, \frac{1}{\sigma\, D'} \,
    \exp \left( -\frac{[\ln(D'/D_{\rm v,0.5})]^2}{2\sigma^2} \right) \; \d D'            & (D \le D_{\rm v,0.5}) \\ [0.2in]
    1 - \exp \left( -0.693 \left(\frac{D}{D_{\rm v,0.5}}\right)^\gamma \right)           & (D_{\rm v,0.5} < D)
    \end{array} \right.  \ee
-where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass
-is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and
-$\sigma$ are empirical constants equal to approximately 2.4 and 0.6, respectively.\footnote{The Rosin-Rammler and
-lognormal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .}
-Alternatively, the user may specify any form of size distribution using the tabulated input data.
+where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and $\sigma$ are empirical constants equal to approximately 2.4 and 0.6, respectively.\footnote{The Rosin-Rammler and lognormal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .} Alternatively, the user may specify any form of size distribution using the tabulated input data.
 
-The median droplet diameter is a function of the sprinkler orifice diameter, operating pressure, and geometry. Research at Factory Mutual
-has yielded a correlation for the median droplet diameter~\cite{Yu:2}
-\be \frac{D_{\rm v,0.5}}{d} \propto \WE^{-\ot}  \label{dropcor} \ee
-where $d$ is the orifice diameter of the nozzle.
-The orifice Weber number, the ratio of inertial forces to surface tension forces, is given by
-\be \WE = \frac{\rho_{\rm p} \, u_{\rm p}^2 \, d}{\sigma}  \label{Weber} \ee
-where $\rho_{\rm p}$ is the liquid density, $u_{\rm p}$ is the discharge
-velocity, and $\sigma$ is the liquid surface tension (\SI{72.8e-3}{N/m} at \SI{20}{\degreeCelsius} for water).
-The discharge velocity can be computed from the mass flow rate, a function of the operating pressure and orifice coefficient known as the K-factor.
-FM reports that the constant of proportionality in Eq.~(\ref{dropcor}) appears to be independent of flow
-rate and operating pressure. Three different sprinklers were tested in
-their study with orifice diameters of \SI{16.3}{\milli m}, \SI{13.5}{\milli m}, \SI{12.7}{\milli m} and
-the constants were approximately 4.3, 2.9, 2.3, respectively. The strike
-plates of the two smaller sprinklers were notched, while that of the
-largest sprinkler was not~\cite{Yu:2}.
+The median droplet diameter is a function of the sprinkler orifice diameter, operating pressure, and geometry. Research at Factory Mutual has yielded a correlation for the median droplet diameter~\cite{Yu:2}
+\be 
+   \frac{D_{\rm v,0.5}}{d} \propto \WE^{-\ot}  \label{dropcor} 
+\ee
+where $d$ is the orifice diameter of the nozzle. The orifice Weber number, the ratio of inertial forces to surface tension forces, is given by
+\be 
+   \WE = \frac{\rho_{\rm p} \, u_{\rm p}^2 \, d}{\sigma}  \label{Weber} 
+\ee
+where $\rho_{\rm p}$ is the liquid density, $u_{\rm p}$ is the discharge velocity, and $\sigma$ is the liquid surface tension (\SI{72.8e-3}{N/m} at \SI{20}{\degreeCelsius} for water).
+The discharge velocity can be computed from the mass flow rate, a function of the operating pressure and orifice coefficient known as the K-factor. FM reports that the constant of proportionality in Eq.~(\ref{dropcor}) appears to be independent of flow rate and operating pressure. Three different sprinklers were tested in their study with orifice diameters of \SI{16.3}{\milli m}, \SI{13.5}{\milli m}, and \SI{12.7}{\milli m}, and the constants were approximately 4.3, 2.9, and 2.3, respectively. The strike plates of the two smaller sprinklers were notched, while that of the largest sprinkler was not~\cite{Yu:2}.
 
-In real sprinkler systems, the operating pressure is affected by the number of open nozzles. Typically, the pressure
-in the piping is high when the first sprinkler activates, and
-decreases when more and more sprinkler heads are activated. The pipe pressure has an effect on
-flow rate, droplet velocity and droplet size distribution. FDS tries
-not to predict the variation of pipe pressure; it should be specified
-by the user; but the following dependencies are used to update the
-droplet boundary conditions for mass flow, droplet speed, and median diameter:
+In real sprinkler systems, the operating pressure is affected by the number of open nozzles. Typically, the pressure in the piping is high when the first sprinkler activates, and
+decreases when more and more sprinkler heads are activated. The pipe pressure has an effect on flow rate, droplet velocity and droplet size distribution. FDS does not predict the variation of pipe pressure; it should be specified by the user. The following dependencies are used to update the droplet boundary conditions for mass flow, droplet speed, and median diameter:
 \be
     \dot{m}_{\rm p} \propto p^{1/2} \quad ; \quad u_{\rm p} \propto p^{1/2} \quad ; \quad D_{\rm v,0.5}  \propto  p^{-1/3}
 \ee
-The droplet diameters are randomly chosen from the given size distribution.
-The cumulative number fraction (CNF), $F_{\rm n}$, is determined from the cumulative volume fraction, $F_{\rm v}$, as follows
-\be F_{\rm n}(D) = \int_0^D \frac{F'_{\rm v}(D')}{D'^3} \, \d D'  \left/ \int_0^\infty \, \frac{F'_{\rm v}(D')}{D'^3}
-     \, \d D' \right. \quad ; \quad F_{\rm v}' \equiv \frac{\d F_{\rm v}}{\d D}   \ee
-Figure~\ref{rosin} displays the Rosin-Rammler/lognormal function and the resulting cumulative number fraction.
-
-The selection of droplet diameters is performed using a stratified sampling technique. First, the diameter range is divided
-into $N_{\rm s}$ bins of equal width $\Delta D_{\rm s}= D_{\rm max}/N_{\rm s}$ where $D_{\rm max}$ is the maximum diameter considered.
-The upper and lower bounds of bin $n_{\rm s}$ are denoted by $F_{\rm n,0}(n_{\rm s})$ and $F_{\rm n,1}(n_{\rm s})$, respectively.
-The diameter is then chosen from the inverse of the CNF acting on the uniform random variable, ${\cal U}(0,1)$, inside a random bin
-\be
-   D = F^{-1}_{\rm n} \Big[ F_{\rm n,0}(n_{\rm s}) + {\cal U}(0,1)\left(F_{\rm n,1}(n_{\rm s})-F_{\rm n,0}(n_{\rm s})\right) \Big] \label{Ud_strat}
+The droplet diameters are randomly chosen from the given size distribution. The cumulative number fraction (CNF), $F_{\rm n}$, is determined from the cumulative volume fraction, $F_{\rm v}$, as follows
+\be 
+   F_{\rm n}(D) = \int_0^D \frac{F'_{\rm v}(D')}{D'^3} \, \d D'  \left/ \int_0^\infty \, \frac{F'_{\rm v}(D')}{D'^3}
+     \, \d D' \right. \quad ; \quad F_{\rm v}' \equiv \frac{\d F_{\rm v}}{\d D}   
 \ee
-The purpose of the the stratified sampling is to ensure that droplets are chosen from all parts of the size distribution, even with a small number of statistical samples. The default number of $N_{\rm s}$ is 7. Without the stratification, the tails of the distribution could be poorly represented.
+Figure~\ref{rosin} displays the Rosin-Rammler/lognormal function and the resulting cumulative number fraction.
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=4.5in]{FIGURES/rosin}
@@ -110,58 +111,43 @@ a typical industrial-scale sprinkler. The median volumetric diameter, $D_{\rm v,
 \label{rosin}
 \end{center}
 \end{figure}
-In most cases, a sampled set of the droplets or particles is explicitly tracked in the model. The procedure for selecting droplet sizes is as follows:
+
+The selection of droplet diameters makes use of a stratified sampling technique to ensure that the droplets span the entire range of sizes, even with a relatively small number of droplets. Without the stratification, the tails of the distribution can be poorly represented. The procedure for selecting droplet sizes is as follows:
 \begin{enumerate}
-\item Suppose the mass flow rate of the liquid is $\dm$. Suppose also that the time interval for droplet insertion into the numerical simulation is $\dt$, and the number of droplets inserted each time interval is $N$. Suppose that the number of size distribution bins is $N_{\rm s}$.
-\item Choose $N$ uniformly distributed random integers $n_{\rm s}$ between 1 and $N_{\rm s}$.
-\item Choose $N$ uniformly distributed random numbers between 0 and 1 and calculate $N$ random droplet diameters, $D_i$, from Eq.~(\ref{Ud_strat}).
-\item Compute weighting constants $C_i = F_{\rm n,1}(n_{\rm s}) - F_{\rm n,0}(n_{\rm s})$.
-\item Compute a weighting constant C from the mass balance
+\item Suppose that the mass flow rate of the liquid is $\dm$, that the time interval for droplet insertion is $\dt$, and that the number of droplets inserted each time interval is $N$. 
+\item Divide the droplet diameter range into a number of bins of equal width (7 by default). 
+\item Randomly choose $N$ integers, $n_i$, ranging from 1 to the total number of bins.
+\item Choose $N$ uniformly distributed real numbers between 0 and 1 and calculate $N$ random droplet diameters:
+\be
+   D_i = F^{-1}_{\rm n} \Big[ F_{\rm n}(D_{n_i,\min}) + {\cal U}(0,1)\left(F_{\rm n}(D_{n_i,\max})-F_{\rm n}(D_{n_i,\min}) \right) \Big] \label{Ud_strat}
+\ee
+where ${\cal U}(0,1)$ is a uniformly distributed real number between 0 and 1 and $D_{n_i,\min}$ and $D_{n_i,\max}$ are the minimum and maximum diameters of bin $n_i$. 
+\item Compute weighting constants for each droplet $C_i = F_{\rm n}(D_{n_i,\max}) - F_{\rm n}(D_{n_i,\min})$.
+\item Compute a global weighting constant, C, to maintain the overall mass balance:
     \be \dm \; \dt = C \, \sum_{i=1}^N \; C_i \; \frac{4}{3} \pi \rho_{\rm p}
       \left( \frac{D_i}{2} \right)^3
     \ee
     The mass and heat transferred from each droplet will be multiplied by the weighting factor $C$.
 \end{enumerate}
 
-\section{Spray boundary condition}
 
-Sprays described as a droplet inlet boundary condition. The droplets are
-injected to the simulation on a section of a spherical surface at distance
-$l$ from the nozzle. The section of the surface where droplets are launched is
-determined by the spray angle parameter. 
+\section{Spray Initialization} 
 
-It is assumed that all the atomization processes are over at the 
-position of boundary condition. It is easy to prescribe the flow rate and speed of droplets so that correct amount of liquid phase momentum is introduced into the simulation. However the concentration and velocity profiles on the boundary require more thought. 
-
-The initial position of a particle is picked randomly within the conical
-section described previously. A variable flux density within the spray is
-implemented by defining a probability density function for the initial
-position that depends on the latitude $\theta$ but not longitude $\varphi$.
-The joint probability of the initial latitude and longitude is
+The droplets are introduced into the simulation along a spherical surface whose diameter is a specified stand-off distance from the nozzle orifice. It is assumed that the droplets have fully atomized by this stage. The longitude of the initial droplet position, $0\le \theta < 2 \pi$, is randomly chosen from a uniform distribution. The latitude, $0 \le \phi < \pi$, is randomly selected from the following distribution:
 \begin{equation}
-  p \left( \theta, \varphi \right) = p \left( \theta \right) p \left( \varphi
-  \right) = \frac{1}{2 \pi} \sin \theta f \left( \theta \right) .
+  f(\phi) = \exp \left[ - \beta \left( \frac{\phi - \phi_{\min}}{\phi_{\max} - \phi_{\min}} \right)^2 \right]
 \end{equation}
-Here the longitude is assumed independent of the latitude. If the function $f \left( \theta \right)$ is taken to be unity, the resulting mass flux is
-uniform. The exponential shape of the mass flux is implemented by using the probability density function
-\begin{equation}
-  f \left( \theta \right) = \exp \left[ - \beta \left( \frac{\theta -
-   \theta_{\min}}{\theta_{\max} - \theta_{\min}} \right)^2 \right]
-\end{equation}
-The spread parameter $\beta = 5$ is used by default. All the droplets are given the same initial speed in the direction of the surface normal. 
+Note that $\phi=0$ is the south pole of the sphere. The spread parameter, $\beta$, is 5 by default. All the droplets are given the same initial speed in the direction of the surface normal.
 
-%\begin{figure}[h]
-%   %\resizebox{0.9\columnwidth}{!}{}
-%  \caption{Illustration of the spray boundary condition.\label{fig:SprayBC}}
-%\end{figure}
+
 
 \section{Heating and Evaporation of Liquid Droplets}
 
-Liquid droplets are represented either as discrete airborne spheres or as elements of the thin liquid film that forms on wetted solids. These film ``droplets'' are still individually tracked as Lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
+Liquid droplets can represent either discrete airborne spheres or elements of the thin liquid film that forms on wetted solids. These film ``droplets'' are still individually tracked as Lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
 
 Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
-\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\ [0.2in]
+\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\[0.2in]
 \frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ A_{\rm p} \, h  \, (T_{\rm g}-T_{\rm p}) + \dq_{\rm r} + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
 \end{align}
 Here, $m_{\rm p}$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
@@ -187,7 +173,7 @@ $\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\P
 The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
 appropriate amount of vaporized liquid is added to the given mesh cell, and the cell gas temperature is reduced slightly based on the energy lost to the droplet.
 
-Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows. Note that a few terms have been left out to make the algorithm more clear.
+Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows:
 \be
    \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ A_{\rm p} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
    A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
@@ -211,36 +197,6 @@ The amount of heat extracted from the gas is
    \delta q = \dt \, A_{\rm p} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
 \ee
 
-\subsection{Three-way coupling between droplets and gas}
-\label{sec:threeway}
-Typically Lagrangian particle models only consider two-way coupling of the gas phase and the dispersed phase. This means that each particle interacts with the carrier fluid individually. Momentum lost from a particle is added to the fluid and vice versa. 
-
-If the spray is dense enough, the individual droplets start to influence each other through aerodynamic interactions. These effects cannot be captured by the current Eulerian-Lagrangian model for two reasons: First, the Lagrangian particles have no volume in the Eulerian space, preventing the model from seeing effects that take place in the length scale of the droplet diameter. Secondly, the effects of this length scale would be sub-grid scale in most practical simulations. These aerodynamic interactions may start to have an effect when the average droplet spacing is less than 10 \cite{Prahl:1,Prahl:2} droplet diameters. This corresponds approximately to a droplet volume fraction $\alpha = 0.01$. Volume fractions as high as this can sometimes be achieved inside water mist sprays. If the spray was even more dense, particle-particle collisions or four-way coupling would need to be considered.
-
-In a configuration where two particles with the same diameter are directly in line, the reduction of the hydrodynamic forces to the second (trailing) sphere due to the wake effect was studied in \cite{Ramirez:1}. They developed the following analytical formula for the hydrodynamic force to the second sphere. In our work, this formula is used to compute a reduction factor for drag coefficient
-\be
-  C_D = C_{D_0} \frac{F}{F_0} \label{eq:dragred}
-\ee
-where $C_{D_0}$ is the single droplet drag coefficient and $F / F_0$ is the hydrodynamic force ratio of trailing droplet to single droplet:
-\be
-  \frac{F}{F_0} = W \left[ 1 + \frac{\RE}{16} \frac{1}{\left( L / d - 1
-  / 2 \right)^2} \exp \left( - \frac{\RE}{16} \frac{1}{\left( L / d - 1
-  / 2 \right)^{}} \right) \right] \label{eq:dragredfact}
-\ee
-where Re is the single droplet-Reynolds number, L is the distance between the droplets and W is the non-dimensional, non-disturbed wake velocity at the center of the trailing droplet
-\be
-  W = 1 - \frac{C_{D_0}}{2} \left[ 1 - \exp \left( - \frac{\RE}{16}
-  \frac{1}{\left( L / d - 1 / 2 \right)} \right) \right] \label{eq:Wake-Vel}
-\ee
-This model assumes that the spheres are traveling directly in-line with each other. As such, this provides an upper bound for the strength of the aerodynamic interactions between two particles of the same size. The separation distance $L/d$ between droplet centers is calculated from the local droplet volume fraction and local average droplet diameter $\bar{d}$
-\be
-  L/d = \bar{d} \left(\pi/6\alpha \right)^{\frac{1}{3}}
-\ee
-Here local quantities are taken as average over a single computational cell. 
-
-In reality, the spray is of course not monodisperse and the separation distance between the interacting particles varies. However seeking for each the closest particle to interact with would be very time consuming. In the simulations, the drag reduction factor in Eq.~\ref{eq:dragred} is only used, when the local droplet volume fraction exceeds \num{1e-5}. This drag reduction model is turned on by default.
-
-An alternative data on drag reduction was provided by Prahl et al. \cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above correlation underestimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axisymmetric wake behind a axisymmetric body is used in developing the drag reduction correction in Eqs. \ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold. 
 
 \section{Fire Suppression by Water}
 
@@ -275,16 +231,16 @@ where $A$ is the area of the wall cell to which the droplet is attached. It is a
 \subsection{Reduction of Pyrolysis Rate due to Water}
 
 To date, most of the work in this area has been performed at Factory Mutual. An important paper on the subject is by Yu {\em et al.}~\cite{Yu:1}. The authors consider dozens of rack storage commodity fires of different geometries and water application rates, and characterize the suppression rates in terms of a few global parameters. Their analysis yields an expression for the total heat release rate from a rack storage fire after sprinkler activation
-\be 
+\be
    \dQ = \dQ_0 \; \mathrm{e}^{-k (t-t_0)}  \label{fmexting}
 \ee
 where $\dQ_0$ is the total heat release rate at the time of application $t_0$, and $k$ is a fuel-dependent constant. This analysis is based on global water flow and burning rates. Equation~(\ref{fmexting}) accounts for both the cooling of non-burning surfaces as well as the decrease in heat release rate of burning surfaces. In the FDS model, the cooling of unburned surfaces and the reduction in the heat release rate are computed locally. Thus, it is awkward to apply a global suppression rule. However, the exponential nature of suppression by water is observed both locally and globally, thus it is assumed that the local heat release rate per unit area can be expressed in the form~\cite{Hamins:1,Hamins:IAFSS2002}
-\be 
+\be
    \dq''(t) = \dq_0''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
 \label{nistexting} \ee
 where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water is applied and $k(t)$ is a linear function of the local water mass per unit area, $m_{\rm w}''$, expressed in units of \si{kg/m^2},
-\be 
-   k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1} 
+\be
+   k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1}
 \ee
 Note that $a$ is an empirical constant.
 

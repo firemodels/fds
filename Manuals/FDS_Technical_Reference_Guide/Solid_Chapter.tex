@@ -11,7 +11,7 @@ FDS assumes that solid surfaces consist of multiple layers, with each layer comp
 
 \section{The Heat Conduction Equation for a Solid}
 
-A one-dimensional heat conduction equation for the solid phase temperature $T_{\rm s}(x,t)$ is applied in the direction $x$ pointing into the solid (the point $x = 0$ represents the surface)\footnote{In cylindrical and spherical coordinates, the heat conduction equation is written
+The one-dimensional heat conduction equation for the solid phase temperature $T_{\rm s}(x,t)$ is applied in the direction $x$ pointing into the solid (the point $x = 0$ represents the surface)\footnote{In cylindrical and spherical coordinates, the heat conduction equation is written
 \be
   \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \frac{1}{r} \, \dod{}{r}
   \left(r \, k_{\rm s} \dod{T_{\rm s}}{r} \right)+\dq_{\rm s}'''
@@ -22,8 +22,7 @@ A one-dimensional heat conduction equation for the solid phase temperature $T_{\
 \ee
 FDS offers the user these options for cases where the obstruction surface is not flat, but rather cylindrical or spherical in shape. This option is useful in describing the behavior of small, complicated ``targets'' like cables or heat detection devices.}
 \be
-  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x} k_{\rm s} \dod{T_{\rm s}}{x} +
-    \dq_{\rm s}'''
+  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x} \left( k_{\rm s} \dod{T_{\rm s}}{x} \right) + \dq_{\rm s}'''
   \label{1dheat}
 \ee
 Section~\ref{matcoefs} describes the component-averaged material properties, $k_{\rm s}$ and $\rho_{\rm s} c_{\rm s}$. The source term, $\dq_{\rm s}'''$,
@@ -32,19 +31,18 @@ consists of chemical reactions and radiative absorption:
   \dq_{\rm s}'''=\dq_{\rm s,c}'''+\dq_{\rm s,r}'''
 \ee
 Section~\ref{pyrosection} describes the term $\dq_{\rm s,c}'''$, which is essentially the heat production (loss) rate given by the  pyrolysis models for different types of solid and liquid fuels. Section~\ref{inradsection} describes the term $\dq_{\rm s,r}'''$, the radiative absorption and emission in depth.
-Section~\ref{conflux} describes the convective heat transfer to the solid surface.
 
 The boundary condition on the front surface of a solid obstruction is
 \be
  -k_{\rm s}\frac{\partial T_{\rm s}}{\partial x}(0,t) = \dot{q}_{\rm c}''+ \dot{q}_{\rm r}''
 \ee
-where $\dot{q}_{\rm c}''$ is the convective and $\dot{q}_{\rm r}''$ the radiative flux. If the radiation is assumed to penetrate in depth, the surface radiation term, $\dot{q}_{\rm r}''$, is set to 0.
+where $\dot{q}_{\rm c}''$ is the convective and $\dot{q}_{\rm r}''$ the radiative flux. If the radiation is assumed to penetrate in depth, the surface radiation term, $\dot{q}_{\rm r}''$, is set to 0. Section~\ref{conflux} describes the convective heat transfer to the solid surface.
 
-On the back surface, there are two possible boundary conditions: (1) If the back surface is assumed to be open either to an ambient void or to another part of the computational domain, the back side boundary condition is similar to that of the front side. (2) If the back side is assumed to be perfectly insulated, an adiabatic condition is used
+On the back surface, there are two possible boundary conditions: (1) if the back surface is assumed to be open either to an ambient void or to another part of the computational domain, the back side boundary condition is similar to that of the front side, or (2) if the back side is assumed to be perfectly insulated, an adiabatic condition is used
 \be
- -k_{\rm s}\frac{\partial T_{\rm s}}{\partial x} = 0.
+ -k_{\rm s}\frac{\partial T_{\rm s}}{\partial x} = 0
 \ee
-The numerical model is presented in detail in Appendix~\ref{solid-phase-discretization}.
+The numerical solution of the solid phase heat equation is presented in detail in Appendix~\ref{solid-phase-discretization}.
 
 \subsection{Radiation Heat Transfer to Solids}
 \label{inradsection}
@@ -53,17 +51,16 @@ If it is assumed that the thermal radiation from the surrounding gases is absorb
 \begin{align}
  \dq_{\rm r,in}'' &= \epsilon\,
  \int_{\bs'\cdot \bn_{\rm w} < 0} I_{\rm w}(\bs')\; |\bs'\cdot \bn_{\rm w} | \; \d\bO
- \label{RFluxIn1} \\ [0.2in]
+ \label{RFluxIn1} \\[0.2in]
  \dq_{\rm r,out}'' &= \epsilon\,\sigma\,T_{\rm w}^4
  \label{RFluxOut1}
 \end{align}
-However, many common materials do not have infinite optical thickness. Rather, the radiation penetrates the material to some finite depth. The radiative transport within the solid (or liquid) can be described as a source term in Eq.~(\ref{1dheat}). A ``two-flux'' model based on the Schuster-Schwarzschild
-approximation~\cite{Siegel:1} assumes the radiative intensity is constant inside the ``forward'' and ``backward'' hemispheres. The transport equation for the intensity in the ``forward'' direction is
+However, many common materials are not opaque; thus, the radiation penetrates the material to some finite depth. The radiative transport within the solid (or liquid) can be described as a source term in Eq.~(\ref{1dheat}). A ``two-flux'' model based on the Schuster-Schwarzschild approximation~\cite{Siegel:1} assumes the radiative intensity is constant inside the ``forward'' and ``backward'' hemispheres. The transport equation for the intensity in the ``forward'' direction is
 \be
  \frac{1}{2}\frac{\d I^+(x)}{\d x}=\kappa_{\rm s}\,\left(I_{\rm b}-I^+(x)\right)
  \label{RInForward}
 \ee
-where $x$ is the distance from the material surface and $\kappa_{\rm s}$ is the absorption coefficient:
+where $x$ is the distance from the material surface and $\kappa_{\rm s}$ is the component-averaged absorption coefficient:
 \be
    \kappa_{\rm s} = \sum_{\alpha=1}^{N_{\rm m}} X_\alpha \; \kappa_{{\rm s},\alpha}
 \ee
@@ -73,7 +70,7 @@ A corresponding formula can be given for the ``backward'' direction. Multiplying
        \left(\sigma\,T_{\rm s}^4-\dq_{\rm r}^+(x)\right)
  \label{RFluxForward}
 \ee
-The radiative source term in the heat conduction equation is a sum of the ``forward'' and ``backward'' flux gradients
+The radiative source term in the heat conduction equation is the sum of the ``forward'' and ``backward'' flux gradients
 \be
   \dq_{\rm s,r}'''(x) = \frac{\d\dq_{\rm r}^+(x)}{\d x}+\frac{\d\dq_{\rm r}^-(x)}{\d x}
 \ee
@@ -82,9 +79,9 @@ The boundary condition for Eq.~\ref{RFluxForward} at the solid (or liquid) surfa
  \dq_{\rm r}^+(0) = \dq_{\rm r,in}'' + (1-\epsilon)\,\dq_{\rm r}^-(0)
  \label{RFluxInBC}
 \ee
-where $\dq_{\rm r}^-(0)$ is the ``backward'' radiative heat flux at the surface. In this formulation, the surface emissivity and the internal absorption are assumed to be independent properties of the material.
+where $\dq_{\rm r}^-(0)$ is the ``backward'' radiative heat flux at the surface. In this formulation, the surface emissivity and the internal absorption are assumed constant.
 
-The two-flux model has not been adapted for cylidrical or spherical geometry.
+The two-flux model has not been adapted for cylindrical or spherical geometry.
 
 \subsection{Convective Heat Transfer to Solids}
 \label{conflux}
@@ -101,14 +98,15 @@ where $k$ is the thermal conductivity of the gas, $n$ is the spatial coordinate 
 
 \subsubsection{Empirical Natural/Forced Convection Model}
 
-In an LES calculation, the convective heat flux to the surface is obtained from a combination of natural and forced convection correlations:
-\be \dq_{\rm c}'' = h (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad h =
-    \max \; \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;
-            \frac{k}{L} \; 0.037 \; \RE^\fofi \; \PR^\ot \;
-            \right]  \quad
-    \si{W/(m^2.K)} \ee
-where $C$ is the coefficient for natural convection (1.52 for a horizontal surface and 1.31 for a vertical surface)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the gas flowing past the obstruction. Since the Reynolds number is proportional to the characteristic length, $L$, the heat transfer coefficient is weakly
-related to $L$. For this reason, $L$ is taken to be 1~m for most calculations unless otherwise specified.
+In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad h =
+    \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;  \frac{k}{L} \, \NU \right]  \quad  \si{W/(m^2.K)} 
+\ee
+where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, and $k$ is the thermal conductivity of the gas. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
+\be 
+   \NU = C_1 + C_2 \, \RE^n \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR \approx 0.7
+\ee
+For planar and cylindrical surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.33$, and $L=1$~m. For spherical surfaces, the default values are $C_1=2$, $C_2=0.6$, $n=0.5$, $m=0.33$, and $L=D$, the diameter of the sphere. Note that for a sphere, the coefficient for natural convection, $C$, is assumed to be zero. It is possible to change these values for a particular application, but it is not possible to find a set of parameters that is appropriate for the wide variety of scenarios considered. Various correlations for planes, cylinders, and spheres can be found in Refs.~\cite{Holman:1,Incropera:1}.
 
 
 \subsubsection{Optional Near-Wall Model}
@@ -116,7 +114,7 @@ related to $L$. For this reason, $L$ is taken to be 1~m for most calculations un
 
 This section describes an optional model for the heat transfer coefficient which may be more appropriate for well-resolved LES calculations.  This model has been validated for low Reynolds number heated channel flow \cite{Park:2012} and has been used in a model to predict upper layer temperature in airplane cargo compartments \cite{Oztekin:FM2012}.
 
-Wall models aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without resolving the smallest length scales. The theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, non-dimensional velocity can be defined as a function of non-dimensional length scale. In FDS, the wall model for velocity is implemented based on law of wall with semi-log fit connecting the limits of the viscous and log regions (see Section \ref{info:velocity_bc}).
+Wall models aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without resolving the smallest length scales. The theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, non-dimensional velocity can be defined as a function of non-dimensional length scale. In FDS, the wall model for velocity is implemented based on the law of the wall with a semi-log fit connecting the limits of the viscous and log regions (see Section~\ref{info:velocity_bc}).
 
 By analogy to the near-wall model for velocity, the non-dimensional temperature is defined as
 \begin{equation}
@@ -127,29 +125,29 @@ where $T_{\rm g}$ is the first off-wall gas-phase cell temperature.  The model p
 \label{eqn_t_visclayer} T^+ &= \mbox{Pr}\;y^+                            && \mbox{for} \quad y^+ \le 5 \\
 \label{eqn_t_loglaw}    T^+ &= \frac{\mbox{Pr}_t}{\kappa} \ln y^+ + B_T  && \mbox{for} \quad y^+ \ge 30
 \end{align}
-where Pr and Pr$_t$ are a molecular and turbulent Prandtl numbers  (Pr$_t=0.5$ by default in FDS), and $\kappa = 0.41$ is the von K\'arm\'an constant.  The temperature scale, $T_{\tau}$, is defined by
+where Pr and Pr$_{\rm t}$ are the molecular and turbulent Prandtl numbers  (Pr$_t=0.5$ by default in FDS), and $\kappa = 0.41$ is the von K\'arm\'an constant.  The temperature scale, $T_{\tau}$, is defined by
 \begin{equation}
 \label{eqn_friction_temperature}
-T_{\tau} \equiv \frac{\dot{q}_{\rm c}''}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
+T_{\tau} \equiv \frac{\dot{q}_{\rm c}''}{{\rho}{c_p}{u_{\tau}}}
 \end{equation}
 where $\dot{q}_{\rm c}''$, $\rho$, and $c_p$ are the convective heat flux at the wall, the gas density, and the specific heat, respectively.
 
 The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a function of the molecular Prandtl number and can be determined experimentally. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall. FDS uses the experimental correlation proposed by Kader~\cite{Kader:1981}
 \begin{align}
 \label{eqn_t_bt}
-B_T =(3.85 \,\mbox{Pr}^{1/3}-1.3)^2 + 2.12 \,\ln\mbox{Pr}.
+B_T =(3.85 \,\mbox{Pr}^{1/3}-1.3)^2 + 2.12 \,\ln\mbox{Pr}
 \end{align}
-The region $5 < y^+ < 30$ is referred to as the buffer layer.  In FDS, the buffer layer is approximated with a semi-log fit connecting the limits of the viscous and log regions.
-\begin{align}
+The region $5 < y^+ < 30$ is referred to as the buffer layer.  In FDS, the buffer layer is approximated with a semi-log fit connecting the limits of the viscous and log regions
+\be
 \label{eqn_t_buffer_layer}
-T^+ &= (\mbox{Pr}_t /\kappa)_{\rm buffer} \,\ln y^+ + B_{T,{\rm buffer}}  && \mbox{for} \quad 5 < y^+ < 30
-\end{align}
+T^+ = (\mbox{Pr}_t /\kappa)_{\rm buffer} \, \ln y^+ + B_{T,{\rm buffer}} \quad \mbox{for} \quad 5 < y^+ < 30
+\ee
 where
 \begin{align}
-(\mbox{Pr}_t /\kappa)_{\rm buffer} &= 1.79\,(B_T + 3.40 \,\mbox{Pr}_t - 5 \,\mbox{Pr}) \\
+(\mbox{Pr}_t /\kappa)_{\rm buffer} &= 1.79\,(B_T + 3.40 \,\mbox{Pr}_t - 5 \,\mbox{Pr}) \\[0.1in]
 B_{T,{\rm buffer}} &= 5 \,\mbox{Pr} - 1.61 \,(\mbox{Pr}_t /\kappa)_{\rm buffer}
 \end{align}
-To obtain a consistent convective heat transfer coefficient in all regions, $T^+$ is adjusted to $\max(T^+,T^+ (y^+ = 5))$ for the buffer and log layer ($y^+ \ge 5$). The convective heat transfer coefficient ($h$) is obtained from the definition of $h$ and $T^+$:
+To obtain a consistent convective heat transfer coefficient in all regions, $T^+$ is adjusted to $\max(T^+,T^+ (y^+ = 5))$ for the buffer and log layers ($y^+ \ge 5$). The convective heat transfer coefficient ($h$) is obtained from the definition of $h$ and $T^+$:
 \begin{align}
 \label{eqn_h_model}
 h = \frac{\dot{q}_{\rm c}''}{(T_{\rm g} - T_{\rm w})}= \frac{{\rho}{c_p}{u_{\tau}}}{T^+}
@@ -160,36 +158,31 @@ h = \frac{\dot{q}_{\rm c}''}{(T_{\rm g} - T_{\rm w})}= \frac{{\rho}{c_p}{u_{\tau
 \subsection{Component-Averaged Thermal Properties}
 \label{matcoefs}
 
-The conductivity and volumetric heat capacity of the solid are defined
+The conductivity and volumetric heat capacity of the solid are defined as
 \be
    k_{\rm s} = \sum_{\alpha=1}^{N_{\rm m}} X_\alpha \; k_{{\rm s},\alpha} \quad ; \quad
    \rho_{\rm s} c_{\rm s} = \sum_{\alpha=1}^{N_{\rm m}} \rho_{{\rm s},\alpha} \; c_{{\rm s},\alpha}
 \ee
-$N_{\rm m}$ is the number of material components forming the solid. $\rho_{{\rm s},\alpha}$ is the {\em component density:}
+where $N_{\rm m}$ is the number of material components forming the solid, $X_\alpha$ is the volume fraction of component $\alpha$, and $\rho_{{\rm s},\alpha}$ is the {\em component density:}
 \be
   \rho_{\rm s,\alpha}=\rho_{\rm s} \, Y_\alpha
 \ee
-where $\rho_{\rm s}$ is the density of the composite material and $Y_\alpha$ is the mass fraction of material component $\alpha$.
-The solid density is the sum of the component densities
+where $\rho_{\rm s}$ is the density of the composite material and $Y_\alpha$ is the mass fraction of component $\alpha$. The solid density is the sum of the component densities
 \be
   \rho_{\rm s} = \sum_{\alpha=1}^{N_{\rm m}} \rho_{\rm s,\alpha}
 \ee
-$X_\alpha$ is the volume fraction of component $\alpha$
+and the volume fraction of component $\alpha$ is computed as
 \be
   X_\alpha = \frac{\rho_{\rm s,\alpha}}{\rho_\alpha}  \left/ \sum_{\alpha'=1}^{N_{\rm m}}\frac{\rho_{\rm s,\alpha'}}{\rho_{\alpha'} }  \right.
   \label{volfrac}
 \ee
-where $\rho_\alpha$ is the density of material $\alpha$ in its pure form. Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$, of the individual components of the composite.
+where $\rho_\alpha$ is the true density of material $\alpha$. Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$, of the individual components of the composite.
 
-\subsection{Numerical solution}
 
-The numerical solution of the solid phase heat conduction equation is explained in Appendix~\ref{solid-phase-discretization}.
-
-\newpage
 \section{Pyrolysis Models}
 \label{pyrosection}
 
-This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{s,c}'''$,  are modeled. This is what is commonly referred to as the ``pyrolysis model,'' but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating.
+This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{s,c}'''$,  are modeled. This is commonly referred to as the ``pyrolysis model,'' but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating.
 
 
 \subsection{Specified Heat Release Rate}
@@ -205,9 +198,9 @@ Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm
 Solids can undergo simultaneous reactions under the following assumptions:
 \begin{itemize}
 \setlength{\itemsep}{0.0in}
-\item instantaneous release of gas species,
-\item local thermal equilibrium between the solid and gaseous components,
-\item no condensation of gaseous products, and
+\item instantaneous release of gas species
+\item local thermal equilibrium between the solid and gaseous components
+\item no condensation of gaseous products
 \item no porosity effects\footnote{Although porosity is not explicitly included in the model, it is possible to account for it because the volume fractions defined by Eq.~(\ref{volfrac}) need not sum to unity, in which case the thermal conductivity and absorption coefficient are effectively reduced.}
 \end{itemize}
 Each material component may undergo several competing reactions, and each of these reactions may produce some other solid component (residue) and gaseous species according to specified yield coefficients.  These coefficients should sum to 1, but yields summing to less than 1 can account for products that are not explicitly included in the simulation.
@@ -229,18 +222,11 @@ r_{\alpha \beta} =
     \underbrace{\max \big[0,S_{\rm thr,\alpha,\beta}(T_{\rm s}-T_{\rm thr,\alpha \beta}) \big]^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
    \label{Arrhenius}
 \ee
-The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being
-the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the
-dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.
-The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}$ and the heterogeneous reaction
-order, $n_{\rm O_2,\alpha\beta}$. The local oxygen volume fraction at depth $x$ is calculated from the gas phase
-(first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
+The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques. The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g,\alpha\beta})
 \ee
-where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. The actual diffusion process is thus not simulated.
-Instead, it is assumed that the diffusion and oxygen consuption processes are in equilibrium and there is an exponential profile of
-oxygen concentration inside the material.
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. The actual diffusion process is thus not simulated. Instead, it is assumed that the diffusion and oxygen consumption processes are in equilibrium and there is an exponential profile of oxygen concentration inside the material.
 
 The fourth term is the power function where $T_{\rm thr,\alpha \beta}$ is a threshold temperature that can be used to dictate that the reaction must not occur below ($S_{\rm thr,\alpha,\beta}=+1$)  or above ($S_{\rm thr,\alpha,\beta}=-1$) a user-specified temperature. By default, the fourth term is deactivated ($S_{\rm thr,\alpha,\beta}=+1, T_{\rm thr,\alpha\beta}=0$ K).
 
@@ -251,7 +237,7 @@ S_\alpha = \sum_{\alpha'=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha'}}
        \quad \quad
            \hbox{(where Residue$_{\alpha' \beta}$ = Material$_\alpha$) }
 \ee
-The volumetric production rate of each gas species, $\gamma$, is
+where $\nu_{\alpha,\alpha' \beta}$ is the yield of component $\alpha$ from reaction $\beta$ of component $\alpha'$. The volumetric production rate of each gas species, $\gamma$, is
 \be
 \dot{m}_{\gamma}''' = \rho_{\rm s}(0)\; \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}}
     \nu_{\rm \gamma,\alpha \beta} \; r_{\alpha \beta}
@@ -265,7 +251,7 @@ mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the 
 \be
    \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \,\d x
 \ee
-where $L$ is the thickness of the surface. The chemical source term in the heat conduction equation is
+where $L$ is the thickness of the solid. The chemical source term in the heat conduction equation is
 \be
 \dot{q}_{\rm s,c}'''(x) = -\rho_{\rm s}(0)\; \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}}  r_{\alpha \beta}(x) H_{\rm r,\alpha \beta}
 \ee
@@ -300,13 +286,11 @@ where $\bp_m$ is the pressure, $T_{\rm g}$ is the temperature, and $X_{\rm F,g}$
 \be
 \SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \quad ; \quad {\rm Sc}=0.6 \quad ; \quad \RE= \frac{\rho~||\bu||~L}{\mu}
 \ee
-The Reynolds number is calculated based on conditions in the cell adjacent to the surface. The length scale, $L$, used in calculating the Reynolds number is \SI{1}{m} unless otherwise specified and is the same length scale used for convective heat transfer calculation.
+The Reynolds number is calculated based on conditions in the cell adjacent to the surface. The length scale, $L$, used in calculating the Reynolds number is \SI{1}{m} unless otherwise specified and is the same length scale used for the convective heat transfer calculation.
 
-For simplicity, the liquid fuel itself is treated like a thermally-thick
-solid for the purpose of computing the heat conduction. There is no
-computation of the convection of the liquid within the pool.
+For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool.
 
-\subsection{Shrinking and swelling materials}
+\subsection{Shrinking and Swelling Materials}
 
 The layer thickness is updated according to the ratio of the instantaneous material density and the density of the material in its pure form. In case of several material components, the amount of swelling and shrinking is determined by the maximum and sum of these ratios, respectively. In each time step, the size of each condensed phase cell is multiplied by the following factor:
 \be
@@ -322,7 +306,7 @@ Correspondingly, the densities are divided by the factor $\delta$ to conserve ma
 \newpage
 \section{Aerosol Deposition}
 
-By default, FDS assumes that soot is transported just like all other gaseous species. That is, the soot particles are small enough that their terminal velocity is small compared to the fire-driven flows of the gas containing the soot. Near surfaces, however, other mechanisms can affect the soot, which results in its deposition onto surfaces. The removal of soot via deposition can impact the visibility for egress and the time for smoke detectors to activate. In forensic fire reconstructions, the amount of soot deposited on surfaces can be correlated to post-fire observations. The deposition of particulates is also important for computing the dispersion characteristics of aerosol toxicants like ash, radionuclides, or other particulate matter.
+By default, FDS assumes that soot is transported just like all other gaseous species. That is, the soot particles are small enough that their settling velocity is small compared to the fire-driven flows of the gas containing the soot. Near surfaces, however, other mechanisms can affect the soot, which results in its deposition onto surfaces. The removal of soot via deposition can impact the visibility for egress and the time for smoke detectors to activate. In forensic fire reconstructions, the amount of soot deposited on surfaces can be correlated to post-fire observations. The deposition of particulates is also important for computing the dispersion characteristics of aerosol toxicants like ash, radionuclides, or other particulate matter.
 
 However, there is an option to treat any gas phase species as an aerosol that can be deposited on surfaces. Aerosol deposition is determined by applying an empirical deposition velocity to aerosols near surfaces. There are a number of phenomena that cause deposition: thermophoresis (where temperature gradients push the aerosol towards or away from the surface), gravitational settling, diffusive deposition (where the aerosols move along the boundary layer concentration
 gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer). Other phenomena, such as electrical fields, can also result in deposition but are not considered in FDS due to their relatively small contribution in compartment fire scenarios.
@@ -395,7 +379,7 @@ for these regimes is given below~\cite{McCoy_Hanratty}.
 u_{\rm dt} = \left\{ \begin{array}{r@{\quad \quad}l}
          0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
          3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 22.9 \\
-         0.17 \; u_{\tau}                             &  \tau^+ < 22.9
+         0.17 \; u_{\tau}                             &  \tau^+ > 22.9
          \end{array} \right.
 \ee
 where Sc is the particle Schmidt number, or the ratio of the kinematic viscosity to the
