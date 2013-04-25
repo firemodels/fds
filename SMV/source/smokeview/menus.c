@@ -4458,22 +4458,23 @@ void GeometryMenu(int value){
   case 7:
     visCeiling=1-visCeiling;
     break;
-    //shaded 17 0
-    //stepped 18 1
-    //line    19 2
-    //texture 20 3
-    //hidden 21 4
-  case 17:
-  case 18:
-  case 19:
-  case 20:
-  case 21:
-    if(value==21){
+
+  case 17+TERRAIN_3D:
+  case 17+TERRAIN_2D_STEPPED:
+  case 17+TERRAIN_2D_LINE:
+  case 17+TERRAIN_3D_MAP:
+  case 17+TERRAIN_HIDDEN:
+    if(value==17+TERRAIN_HIDDEN){
       BlockageMenu(visBlocksSave);
+      if(visOtherVents!=visOtherVentsSAVE){
+        visOtherVents=visOtherVentsSAVE;
+      }
     }
     else{
-    //  visBlocksSave=visBlocks;
-    //  BlockageMenu(visBLOCKHide);
+      if(visOtherVents!=0){
+        visOtherVentsSAVE=visOtherVents;
+        visOtherVents=0;
+      }
     }
     visTerrainType=value-17;
     if(visTerrainType==TERRAIN_3D){

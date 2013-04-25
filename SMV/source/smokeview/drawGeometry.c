@@ -4647,9 +4647,6 @@ void drawBlockages(int mode, int trans_flag){
   cadgeom *cd;
   int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
-  // will need to modify the statement below to handle blockages on terrain
-  if(visTerrainType!=TERRAIN_HIDDEN&&nterraininfo>0)return;
-
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   if(drawing_smooth==1&&showedit_dialog==0){

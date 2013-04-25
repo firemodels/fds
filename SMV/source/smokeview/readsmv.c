@@ -2766,7 +2766,17 @@ int readsmv(char *file, char *file2){
       autoterrain=1;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visTerrainType);
-    //  if(visTerrain!=1)visTerrain=0;
+      visTerrainType=CLAMP(visTerrainType,0,4);
+      if(visTerrainType==TERRAIN_HIDDEN){
+        if(visOtherVents!=visOtherVentsSAVE)visOtherVents=visOtherVentsSAVE;
+      }
+      else{
+        if(visOtherVents!=0){
+          visOtherVentsSAVE=visOtherVents;
+          visOtherVents=0;
+        }
+      }
+
   
       fgets(buffer,255,stream);
       buff2 = trim_front(buffer);
@@ -9824,6 +9834,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWOTHERVENTS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visOtherVents);
+      if(visTerrainType!=TERRAIN_HIDDEN)visOtherVents=0;
       continue;
       }
     if(match(buffer,"SHOWCVENTS")==1){

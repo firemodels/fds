@@ -656,7 +656,7 @@ SVEXTERN int SVDECL(autoterrain,0),SVDECL(manual_terrain,0);
 SVEXTERN float zterrain_max, zterrain_min;
 SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int SVDECL(visBlocklabel,1);
-SVEXTERN int SVDECL(visOpenVents,1),SVDECL(visDummyVents,1),SVDECL(visOtherVents,1),SVDECL(visCircularVents,VENT_CIRCLE);
+SVEXTERN int SVDECL(visOpenVents,1),SVDECL(visDummyVents,1),SVDECL(visOtherVents,1),SVDECL(visOtherVentsSAVE,1),SVDECL(visCircularVents,VENT_CIRCLE);
 SVEXTERN int SVDECL(visOpenVentsAsOutline,0);
 SVEXTERN int SVDECL(visSmoke,1), SVDECL(visZone,0);
 SVEXTERN int SVDECL(visEvac,1);
