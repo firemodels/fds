@@ -5112,18 +5112,14 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF (SF%PROFILE==ATMOSPHERIC)        SF%THERMAL_BC_INDEX = INFLOW_OUTFLOW
    IF (SF%VEGETATION)                  SF%THERMAL_BC_INDEX = VEG_BNDRY_FUEL
 
-   ! Set convection length scale
+   ! Set convection length scale automatically for spheres. Set to 1 m for everything else.
 
-   IF (SF%CONV_LENGTH < 0._EB) THEN
-      SELECT CASE(SF%GEOMETRY)
-         CASE(SURF_CARTESIAN)
-            SF%CONV_LENGTH = 0._EB
-            IF (LENGTH < 0._EB .AND. WIDTH < 0._EB) SF%CONV_LENGTH = 1.0_EB
-            IF (LENGTH > 0._EB) SF%CONV_LENGTH = LENGTH
-            IF (WIDTH  > 0._EB) SF%CONV_LENGTH = SQRT(SF%CONV_LENGTH**2 + WIDTH**2)
-         CASE(SURF_CYLINDRICAL,SURF_SPHERICAL)
-            SF%CONV_LENGTH = 2._EB*(SF%INNER_RADIUS+SF%THICKNESS)
-      END SELECT
+   IF (SF%CONV_LENGTH<0._EB) THEN
+      IF (SF%GEOMETRY==SURF_SPHERICAL) THEN
+         SF%CONV_LENGTH = 2._EB*(SF%INNER_RADIUS+SF%THICKNESS)
+      ELSE
+         SF%CONV_LENGTH = 1._EB
+      ENDIF
    ENDIF
 
    ! Ramps
