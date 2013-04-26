@@ -6,6 +6,8 @@
 
 &MISC IMMERSED_BOUNDARY_METHOD=0 /
 
+&GEOM ID='geom', SHAPE='COMPLEX', SURF_ID='face'
+
 &SURF ID='face', COLOR='BLUE' /
 
 ! tri inside cell
