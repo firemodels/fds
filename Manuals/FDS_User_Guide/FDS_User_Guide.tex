@@ -6374,7 +6374,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 &PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION(1,1:3)=0.,0.,1.,
       STATIC=.TRUE. /
 &INIT ID='Cable', XB=0.01,0.01,0.,0.,0.,0., N_PARTICLES=1, PART_ID='Cable Segment' /
-&DEVC XYZ=0.01,0.00,0.000, ID='Cable Temp', INIT_ID='Cable',
+&DEVC ID='Cable Temp', INIT_ID='Cable',
       QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.00152 /
 \end{lstlisting}
 
