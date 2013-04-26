@@ -26,6 +26,6 @@ $RUNFDS Visualization transparency
 $RUNFDS WUI levelset1
 #$RUNFDS WUI fire_line
 #$RUNFDS WUI hill_structure
-$RUNFDS WUI pine_tree
+#$RUNFDS WUI pine_tree
 
 # $RUNFDS WUI onetree_surf_1mesh
