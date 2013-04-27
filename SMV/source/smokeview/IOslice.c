@@ -2805,14 +2805,17 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
 
 void updateslicetypes(void){
   int i;
-  slicedata *sd;
 
   nslicetypes = 0;
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sd;
+
     sd = sliceinfo+i;
     if(getsliceindex(sd)==-1)slicetypes[nslicetypes++]=i;
   }
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sd;
+
     sd = sliceinfo+i;
     sd->type=getslicetype(sd);
   }
@@ -2821,10 +2824,11 @@ void updateslicetypes(void){
 /* ------------------ getvsliceindex ------------------------ */
 
 int getvsliceindex(const vslicedata *vd){
-  vslicedata *vd2;
   int j;
 
   for(j=0;j<nvslicetypes;j++){
+    vslicedata *vd2;
+
     vd2 = vsliceinfo+vslicetypes[j];
     if(strcmp(sliceinfo[vd->ival].label.shortlabel,sliceinfo[vd2->ival].label.shortlabel)==0)return vslicetypes[j];
   }
@@ -2834,10 +2838,11 @@ int getvsliceindex(const vslicedata *vd){
 /* ------------------ getvsliceindex ------------------------ */
 
 int getvslicetype(const vslicedata *vd){
-  vslicedata *vd2;
   int j;
 
   for(j=0;j<nvslicetypes;j++){
+    vslicedata *vd2;
+
     vd2 = vsliceinfo+vslicetypes[j];
     if(strcmp(sliceinfo[vd->ival].label.shortlabel,sliceinfo[vd2->ival].label.shortlabel)==0)return j;
   }
@@ -2848,10 +2853,11 @@ int getvslicetype(const vslicedata *vd){
 /* ------------------ getsliceindex ------------------------ */
 
 int getsliceindex(const slicedata *sd){
-  slicedata *sd2;
   int j;
 
   for(j=0;j<nslicetypes;j++){
+    slicedata *sd2;
+
     sd2 = sliceinfo+slicetypes[j];
     if(strcmp(sd->label.shortlabel,sd2->label.shortlabel)==0)return slicetypes[j];
   }
@@ -2861,10 +2867,11 @@ int getsliceindex(const slicedata *sd){
 /* ------------------ getslicetype ------------------------ */
 
 int getslicetype(const slicedata *sd){
-  slicedata *sd2;
   int j;
 
   for(j=0;j<nslicetypes;j++){
+    slicedata *sd2;
+
     sd2 = sliceinfo+slicetypes[j];
     if(strcmp(sd->label.shortlabel,sd2->label.shortlabel)==0)return j;
   }
@@ -2874,10 +2881,11 @@ int getslicetype(const slicedata *sd){
 /* ------------------ getslicetype_fromlabel ------------------------ */
 
 int getslicetype_fromlabel(char *label){
-  slicedata *sd2;
   int j;
 
   for(j=0;j<nslicetypes;j++){
+    slicedata *sd2;
+
     sd2 = sliceinfo+slicetypes[j];
     if(strcmp(label,sd2->label.shortlabel)==0)return j;
   }
@@ -2888,11 +2896,13 @@ int getslicetype_fromlabel(char *label){
 /* ------------------ updatesliceboundlabels ------------------------ */
 
 void updatesliceboundlabels(){
-  int i,j;
-  databounds *sb;
-  slicedata *sd;
-
+  int i;
+  
   for(i=0;i<nsliceinfo;i++){
+    int j;
+    databounds *sb;
+    slicedata *sd;
+
     sd = sliceinfo + i;
     j = getslicetype(sd);
     sb = slicebounds + j;
@@ -2970,12 +2980,12 @@ void setslicebounds(int slicetype){
 /* ------------------ getslicedatabounds ------------------------ */
 
 void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
-
   float *pdata;
   int ndata;
   int n;
   int first=1;
-  int i,j,k,nn;
+
+  int nn;
   int nx, ny, nxy, ibar, jbar;
   int ntimes;
   int iimin, iimax, jjmin, jjmax, kkmin, kkmax;
@@ -2998,12 +3008,14 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   n=-1;
   ntimes = ndata/sd->nsliceii;
   for(nn=0;nn<ntimes;nn++){
+    int i;
+
     for(i=0;i<sd->nslicei;i++){
-      int ii;
+      int ii,j;
 
       ii = sd->is1+i;
       for(j=0;j<sd->nslicej;j++){
-        int jj;
+        int jj,k;
 
         jj = sd->js1+j;
         for(k=0;k<sd->nslicek;k++){
@@ -4064,7 +4076,7 @@ void drawvolslice_terrain(const slicedata *sd){
     float *znode;
 
     znode = terri->znode_scaled;
-    constval = zplt[plotz]+offset_slice*sd->sliceoffset; // - znode[0]  (removed to fix problem with slice placement)
+    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
     glBegin(GL_TRIANGLES);
     maxi = MAX(sd->is1+sd->nslicei-1,sd->is1+1);
     for(i=sd->is1; i<maxi; i++){
