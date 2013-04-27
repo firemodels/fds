@@ -3898,7 +3898,6 @@ void drawvolslice_terrain(const slicedata *sd){
   int nx,ny,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
   terraindata *terri;
-  float *znode;
   int nycell;
   char *iblank_embed;
 
@@ -3908,7 +3907,6 @@ void drawvolslice_terrain(const slicedata *sd){
 
   terri = meshi->terrain;
   if(terri==NULL)return;
-  znode = terri->znode_scaled;
   nycell = terri->ny;
 
   xplt=meshi->xplt;
@@ -4061,11 +4059,12 @@ void drawvolslice_terrain(const slicedata *sd){
     glEnd();
   }
   if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
-    float z11, z31, z13, z33, zmid, zmax;
+    float z11, z31, z13, z33, zmid;
     int maxi;
+    float *znode;
 
+    znode = terri->znode_scaled;
     constval = zplt[plotz]+offset_slice*sd->sliceoffset; // - znode[0]  (removed to fix problem with slice placement)
-    zmax = zplt[meshi->kbar];
     glBegin(GL_TRIANGLES);
     maxi = MAX(sd->is1+sd->nslicei-1,sd->is1+1);
     for(i=sd->is1; i<maxi; i++){
@@ -4081,10 +4080,10 @@ void drawvolslice_terrain(const slicedata *sd){
         float ymid, rmid;
         int n11, n31, n13, n33;
 
-        z11 = MIN(zmax,constval + znode[IJ2(i,j)]);
-        z31 = MIN(zmax,constval + znode[IJ2(i+1,j)]);
-        z13 = MIN(zmax,constval + znode[IJ2(i,j+1)]);
-        z33 = MIN(zmax,constval + znode[IJ2(i+1,j+1)]);
+        z11 = constval + znode[IJ2(i,j)];
+        z31 = constval + znode[IJ2(i+1,j)];
+        z13 = constval + znode[IJ2(i,j+1)];
+        z33 = constval + znode[IJ2(i+1,j+1)];
         zmid = (z11 + z31 + z13 + z33)/4.0;
 
         if(iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
