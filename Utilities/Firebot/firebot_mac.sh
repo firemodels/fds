@@ -342,6 +342,7 @@ check_verification_cases_release()
    cd $FDS_SVNROOT/Verification
 
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] && \
+      [[ `grep Segmentation -rI *` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
@@ -352,6 +353,7 @@ check_verification_cases_release()
       BUILD_STAGE_FAILURE="Stage 5: FDS-SMV Verification Cases"
       
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
+      grep Segmentation -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
