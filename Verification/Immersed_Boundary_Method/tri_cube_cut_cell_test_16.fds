@@ -8,8 +8,6 @@
 
 &MISC IMMERSED_BOUNDARY_METHOD=0 /
 
-&GEOM ID='geom', SHAPE='COMPLEX', SURF_ID='face'
-
 &SURF ID='face', COLOR='GRAY' /
 
 ! This is to test the case when the triangle is cutting a tiny part of cell A and with normal pointing to cell B
