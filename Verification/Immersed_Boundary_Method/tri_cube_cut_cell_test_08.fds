@@ -8,8 +8,6 @@
 
 &MISC IMMERSED_BOUNDARY_METHOD=0 /
 
-&GEOM ID='geom', SHAPE='COMPLEX', SURF_ID='face'
-
 &SURF ID='face', COLOR='GRAY' /
 
 ! The following are 12 examples to test the cut-cell algorithm
