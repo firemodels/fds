@@ -13,12 +13,12 @@ source ~/.bashrc_fds intel64
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$QFDS -r -p 27 $qq -d $INDIR Lattimer_20_kW_0_degree_coarse.fds
-$QFDS -r -p 27 $qq -d $INDIR Lattimer_20_kW_0_degree.fds
+$QFDS -r $qq -d $INDIR Lattimer_20_kW_0_degree_coarse.fds
+$QFDS -r $qq -d $INDIR Lattimer_20_kW_0_degree.fds
 $QFDS -r -p 27 $qq -d $INDIR Lattimer_20_kW_0_degree_fine.fds
 
-$QFDS -r $qq -d $INDIR Lattimer_20_kW_0_degree_ibm.fds
-$QFDS -r $qq -d $INDIR Lattimer_20_kW_10_degree_ibm.fds
-$QFDS -r $qq -d $INDIR Lattimer_20_kW_20_degree_ibm.fds
+#$QFDS -r $qq -d $INDIR Lattimer_20_kW_0_degree_ibm.fds
+#$QFDS -r $qq -d $INDIR Lattimer_20_kW_10_degree_ibm.fds
+#$QFDS -r $qq -d $INDIR Lattimer_20_kW_20_degree_ibm.fds
 
 echo FDS cases submitted
