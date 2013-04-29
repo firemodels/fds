@@ -6532,8 +6532,12 @@ BNDC_LOOP: DO N=1,1 ! placeholder for multiple boundary files
    IF(N_FACE>0) THEN
       !WRITE(LU_BNDC) (REAL(GEOM_OUTPUT(4,I),FB),I=1,N_FACE) ! index 4 is gas temperature
       !the following only works for a single mesh NM=1 and a single particle per facet
-      WRITE(LU_BNDC) (REAL(SOLID_PHASE_OUTPUT(1, 4,0,0,FACET(I)%PARTICLE_LIST%INDEX),FB),I=1,N_FACE) ! 4 is gas temperature
-      WRITE(LU_BNDC) (REAL(SOLID_PHASE_OUTPUT(1,21,0,0,FACET(I)%PARTICLE_LIST%INDEX),FB),I=1,N_FACE) ! 21 is heat transfer coef
+      ! 4 is gas temperature
+      WRITE(LU_BNDC) (REAL(SOLID_PHASE_OUTPUT(1, 4,0,0,FACET(I)%PART_INDEX,OPT_LP_INDEX=FACET(I)%PARTICLE_LIST%INDEX),FB), &
+         I=1,N_FACE)
+      ! 21 is heat transfer coefficient
+      WRITE(LU_BNDC) (REAL(SOLID_PHASE_OUTPUT(1,21,0,0,FACET(I)%PART_INDEX,OPT_LP_INDEX=FACET(I)%PARTICLE_LIST%INDEX),FB), &
+         I=1,N_FACE)
    ENDIF
    CLOSE(LU_BNDC)
 
