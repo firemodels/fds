@@ -37,12 +37,13 @@ REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN,RCON_DIFF,PROFILE_FACTOR
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ,NF,IC
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
-TYPE(FACET_TYPE), POINTER :: FC=>NULL()
-TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
 REAL(EB), PARAMETER :: ADVECTION_EPS=1.E-6_EB
+!TYPE(FACET_TYPE), POINTER :: FC=>NULL()
+!TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
+!INTEGER :: NF,IC
  
 ! Check whether to skip this routine
 
@@ -432,6 +433,23 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
 ENDDO CORRECTION_LOOP
 
+! ! Correction for unstructured geometry
+
+! CORRECTION_LOOP_FACE: IF (N_FACE>0) THEN
+!    DO NF=1,N_FACE
+!       FC=>FACET(NF)
+!       CL=>FC%CUTCELL_LIST
+!       CUTCELL_LOOP_2: DO
+!          IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
+!          IC = CL%INDEX
+!          IIG = I_CUTCELL(IC)
+!          JJG = J_CUTCELL(IC)
+!          KKG = K_CUTCELL(IC)
+!          CL=>CL%NEXT ! point to the next index in the linked list
+!        ENDDO CUTCELL_LOOP_2
+!    ENDDO
+! ENDIF CORRECTION_LOOP_FACE
+
 ! Compute (q + del dot k del T) and add to the divergence
 
 CYLINDER3: SELECT CASE(CYLINDRICAL)
@@ -577,25 +595,6 @@ IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
       ENDDO
    ENDDO
 ENDIF
-
-! Correction for unstructured geometry
-
-CORRECTION_LOOP_FACE: IF (N_FACE>0) THEN
-   DO NF=1,N_FACE
-      FC=>FACET(NF)
-      CL=>FC%CUTCELL_LIST
-      FC%KW=0._EB
-      CUTCELL_LOOP_2: DO
-         IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
-         IC = CL%INDEX
-         IIG = I_CUTCELL(IC)
-         JJG = J_CUTCELL(IC)
-         KKG = K_CUTCELL(IC)
-         CL=>CL%NEXT ! point to the next index in the linked list
-         DP(IIG,JJG,KKG) = 0._EB
-       ENDDO CUTCELL_LOOP_2
-   ENDDO
-ENDIF CORRECTION_LOOP_FACE
 
 ! Add contribution of evaporating particles
 
