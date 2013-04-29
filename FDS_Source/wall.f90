@@ -1054,6 +1054,11 @@ FACE_LOOP: DO N=1,N_FACE
 
       FC%TMP_F = LP%ONE_D%TMP_F
 
+      ! reset particle position to face center
+      LP%X = ONTH*SUM(VERTEX(FC%VERTEX(:))%X)
+      LP%Y = ONTH*SUM(VERTEX(FC%VERTEX(:))%Y)
+      LP%Z = ONTH*SUM(VERTEX(FC%VERTEX(:))%Z)
+
       FP=>FP%NEXT ! point to the next index in the linked list
 
    ENDDO PARTICLE_LOOP
