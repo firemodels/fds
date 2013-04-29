@@ -2,7 +2,7 @@
       TITLE='Level set example 900 m x 900 m level domain = FARSITE in physical fidelity' /
 
 - 1 grid
-&MESH IJK=150,150,200, XB=0,300,-150,150,0,100 /
+&MESH IJK=75,75,100, XB=0,300,-150,150,0,100 /
 
 &TIME T_END=200 /
 &MISC VEG_LEVEL_SET=.TRUE.,TERRAIN_CASE=.TRUE., U0=5,V0=0  /
