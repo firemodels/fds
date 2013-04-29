@@ -421,6 +421,7 @@ check_verification_cases_debug()
    cd $FDS_SVNROOT/Verification/Visualization
 
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] && \
+      [[ `grep Segmentation -rI *` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
@@ -428,6 +429,7 @@ check_verification_cases_debug()
       stage3_success=true
    else
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
+      grep Segmentation -rI * >> $FIREBOT_DIR/output/stage3_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage3_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage3_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
@@ -511,6 +513,7 @@ check_verification_cases_release()
    cd $FDS_SVNROOT/Verification/Visualization
 
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] && \
+      [[ `grep Segmentation -rI *` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
@@ -518,6 +521,7 @@ check_verification_cases_release()
       stage5_success=true
    else
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
+      grep Segmentation -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
