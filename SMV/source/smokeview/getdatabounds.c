@@ -217,7 +217,15 @@ void adjustpart5bounds(partdata *parti){
       propi->percentile_min = gmin + nsmall*dg;
       propi->percentile_max = gmin + nbig*dg;
     }
-    if(propi->global_min<1000000000.0)propi->set_global_bounds=0;
+    if(propi->global_min<1000000000.0){
+      time_t modtime;
+
+      modtime=file_modtime(parti->file);
+      if(modtime>parti->modtime){
+        parti->modtime=modtime;
+        propi->set_global_bounds=0;
+      }
+    }
 
     FREEMEMORY(propi->buckets);
   }
