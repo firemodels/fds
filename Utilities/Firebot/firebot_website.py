@@ -78,7 +78,7 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 <b>Stage 1:</b> SVN operations <br>
 <b>Stage 2a:</b> Compile FDS debug <br>
 <b>Stage 2b:</b> Compile FDS MPI debug <br>
-<b>Stage 2c:</b> Compile FDS OpenMP debug <br>
+<b>Stage 2c:</b> Compile and inspect FDS OpenMP debug <br>
 <b>Stage 3:</b> Run verification cases (debug mode) <br>
 <b>Stage 4a:</b> Compile FDS release <br>
 <b>Stage 4b:</b> Compile FDS MPI release <br>
