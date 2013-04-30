@@ -402,7 +402,7 @@ check_compile_fds_openmp_db()
 
 fds_openmp_db_inspect()
 {
-   # Runs Intel Inspector to perform thread checking for OpenMP
+   # Run Intel Inspector to perform thread checking for OpenMP
    cd $FDS_SVNROOT/Utilities/Scripts
    ./openmp_inspect.sh &> $FIREBOT_DIR/output/stage2c_inspect
 }
@@ -1309,7 +1309,7 @@ check_compile_fds_mpi_db
 ### Stage 2c ###
 compile_fds_openmp_db
 check_compile_fds_openmp_db
-# fds_openmp_db_inspect
+fds_openmp_db_inspect
 # check_fds_openmp_db_inspect
 
 ### Stage 3 ###
