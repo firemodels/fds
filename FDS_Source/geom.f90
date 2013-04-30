@@ -1898,16 +1898,18 @@ G_DATA(1,1,1) = DUDX(II+1,JJ+1,KK+1)
 END SUBROUTINE GETGRAD
 
 
-SUBROUTINE GET_VELO_IBM(VELO_IBM,IERR,VELO_INDEX,XVELO,TRI_INDEX,IBM_INDEX,DXC,NM)
-USE MATH_FUNCTIONS, ONLY: NORM2
+SUBROUTINE GET_VELO_IBM(VELO_IBM,U_VELO,IERR,VELO_INDEX,XVELO,TRI_INDEX,IBM_INDEX,DXC,NM)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT,NORM2
 IMPLICIT NONE
 
 REAL(EB), INTENT(OUT) :: VELO_IBM
 INTEGER, INTENT(OUT) :: IERR
-REAL(EB), INTENT(IN) :: XVELO(3),DXC(3)
+REAL(EB), INTENT(IN) :: XVELO(3),DXC(3),U_VELO(3)
 INTEGER, INTENT(IN) :: VELO_INDEX,TRI_INDEX,IBM_INDEX,NM
-REAL(EB) :: N(3),R(3),V1(3),V2(3),V3(3),T,U_DATA(0:1,0:1,0:1),XI(3),DXI(3)
+REAL(EB) :: NN(3),R(3),V1(3),V2(3),V3(3),T,U_DATA(0:1,0:1,0:1),XI(3),DXI(3),C(3,3),SS(3),PP(3),U_STRM,U_ORTH,U_NORM,KE
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
+! Cartesian grid coordinate system orthonormal basis vectors
+REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
 
 IERR=0
 VELO_IBM=0._EB
@@ -1915,19 +1917,70 @@ VELO_IBM=0._EB
 V1 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(1))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(1))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(1))%Z/)
 V2 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(2))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(2))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(2))%Z/)
 V3 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(3))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(3))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(3))%Z/)
-N = FACET(TRI_INDEX)%NVEC
+NN = FACET(TRI_INDEX)%NVEC
 
 R = XVELO-V1
 IF ( NORM2(R)<EPS ) R = XVELO-V2 ! select a different vertex
 
-T = DOT_PRODUCT(R,N)
+T = DOT_PRODUCT(R,NN)
 
 IF (IBM_INDEX==0 .AND. T<EPS) RETURN ! the velocity point is on or interior to the surface
 
 IF (IBM_INDEX==1) THEN
-   XI = XVELO + T*N
+   XI = XVELO + T*NN
    CALL GETU(U_DATA,DXI,XI,VELO_INDEX,NM)
    VELO_IBM = 0.5_EB*TRILINEAR(U_DATA,DXI,DXC)
+   RETURN
+ENDIF
+
+IF (IBM_INDEX==2) THEN
+
+   ! find a vector PP in the tangent plane of the surface and orthogonal to U_VELO
+   CALL CROSS_PRODUCT(PP,NN,U_VELO) ! PP = NN x U_VELO
+   IF (ABS(NORM2(PP))<=TWO_EPSILON_EB) THEN
+      ! tangent vector is completely arbitrary, just perpendicular to NN
+      IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) PP = (/NN(2),-NN(1),0._EB/)
+      IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) PP = (/NN(3),0._EB,-NN(1)/)
+   ENDIF
+   PP = PP/NORM2(PP) ! normalize to unit vector
+   CALL CROSS_PRODUCT(SS,PP,NN) ! define the streamwise unit vector SS
+
+   !! check unit normal vectors
+   !print *,DOT_PRODUCT(SS,SS) ! should be 1
+   !print *,DOT_PRODUCT(SS,PP) ! should be 0
+   !print *,DOT_PRODUCT(SS,NN) ! should be 0
+   !print *,DOT_PRODUCT(PP,PP) ! should be 1
+   !print *,DOT_PRODUCT(PP,NN) ! should be 0
+   !print *,DOT_PRODUCT(NN,NN) ! should be 1
+   !print *                    ! blank line
+
+   ! directional cosines (see Pope, Eq. A.11)
+   C(1,1) = DOT_PRODUCT(E1,SS)
+   C(1,2) = DOT_PRODUCT(E1,PP)
+   C(1,3) = DOT_PRODUCT(E1,NN)
+   C(2,1) = DOT_PRODUCT(E2,SS)
+   C(2,2) = DOT_PRODUCT(E2,PP)
+   C(2,3) = DOT_PRODUCT(E2,NN)
+   C(3,1) = DOT_PRODUCT(E3,SS)
+   C(3,2) = DOT_PRODUCT(E3,PP)
+   C(3,3) = DOT_PRODUCT(E3,NN)
+
+   ! transform velocity (see Pope, Eq. A.17)
+   U_STRM = C(1,1)*U_VELO(1) + C(2,1)*U_VELO(2) + C(3,1)*U_VELO(3)
+   U_ORTH = C(1,2)*U_VELO(1) + C(2,2)*U_VELO(2) + C(3,2)*U_VELO(3)
+   U_NORM = C(1,3)*U_VELO(1) + C(2,3)*U_VELO(2) + C(3,3)*U_VELO(3)
+
+   !! check U_ORTH, should be zero
+   !print *, U_ORTH
+
+   KE = 0.5_EB*(U_STRM**2 + U_NORM**2)
+
+   ! here's a crude model: set U_NORM to zero
+   U_NORM = 0._EB
+   U_STRM = 0.5_EB*SQRT(2._EB*KE)
+
+   ! transform velocity back to Cartesian component I_VEL
+   VELO_IBM = C(VELO_INDEX,1)*U_STRM + C(VELO_INDEX,3)*U_NORM
    RETURN
 ENDIF
 
