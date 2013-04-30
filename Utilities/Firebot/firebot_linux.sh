@@ -404,7 +404,7 @@ inspect_fds_openmp_db()
 {
    # Perform OpenMP thread checking (locate deadlocks and data races)
    cd $FDS_SVNROOT/Utilities/Scripts
-   ./openmp_inspect.sh &> $FIREBOT_DIR/output/stage2c_inspect
+   ./inspect_openmp.sh &> $FIREBOT_DIR/output/stage2c_inspect
 }
 
 check_inspect_fds_openmp_db()
@@ -542,27 +542,28 @@ check_verification_cases_debug()
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification
 
-   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] && \
-      [[ `grep Segmentation -rI *` == "" ]] && \
-      [[ `grep ERROR: -rI *` == "" ]] && \
-      [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
-      [[ `grep -A 20 forrtl -rI *` == "" ]]
+   if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage3` == "" ]] && \
+      [[ `grep -rI Segmentation *` == "" ]] && \
+      [[ `grep -rI ERROR: *` == "" ]] && \
+      [[ `grep -rI 'STOP: Numerical' *` == "" ]] && \
+      [[ `grep -rI -A 20 forrtl *` == "" ]]
    then
-      # After successful Stage 3 run, delete all unversioned FDS output files before continuing
-      cd $FDS_SVNROOT/Verification
-      svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
       stage3_success=true
    else
-      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
-      grep Segmentation -rI * >> $FIREBOT_DIR/output/stage3_errors
-      grep ERROR: -rI * >> $FIREBOT_DIR/output/stage3_errors
-      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage3_errors
-      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
+      grep -rI 'Run aborted' $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
+      grep -rI Segmentation * >> $FIREBOT_DIR/output/stage3_errors
+      grep -rI ERROR: * >> $FIREBOT_DIR/output/stage3_errors
+      grep -rI 'STOP: Numerical' * >> $FIREBOT_DIR/output/stage3_errors
+      grep -rI -A 20 forrtl * >> $FIREBOT_DIR/output/stage3_errors
       
       echo "Errors from Stage 3 - Run verification cases (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
+
+   # After Stage 3, delete all unversioned FDS output files before continuing
+   cd $FDS_SVNROOT/Verification
+   svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
 }
 
 #  ==================================
@@ -718,19 +719,19 @@ check_verification_cases_release()
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification
 
-   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] && \
-      [[ `grep Segmentation -rI *` == "" ]] && \
-      [[ `grep ERROR: -rI *` == "" ]] && \
-      [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
-      [[ `grep -A 20 forrtl -rI *` == "" ]]
+   if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage5` == "" ]] && \
+      [[ `grep -rI Segmentation *` == "" ]] && \
+      [[ `grep -rI ERROR: *` == "" ]] && \
+      [[ `grep -rI 'STOP: Numerical' *` == "" ]] && \
+      [[ `grep -rI -A 20 forrtl *` == "" ]]
    then
       stage5_success=true
    else
-      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
-      grep Segmentation -rI * >> $FIREBOT_DIR/output/stage5_errors
-      grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
-      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
-      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
+      grep -rI 'Run aborted' $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
+      grep -rI Segmentation * >> $FIREBOT_DIR/output/stage5_errors
+      grep -rI ERROR: * >> $FIREBOT_DIR/output/stage5_errors
+      grep -rI 'STOP: Numerical' * >> $FIREBOT_DIR/output/stage5_errors
+      grep -rI -A 20 forrtl * >> $FIREBOT_DIR/output/stage5_errors
       
       echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
@@ -835,7 +836,7 @@ check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -E "Segmentation|Error" -I $FIREBOT_DIR/output/stage6c` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6c` == "" ]]
    then
       stage6c_success=true
    else
@@ -899,7 +900,7 @@ check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -E "Segmentation|Error" -I $FIREBOT_DIR/output/stage6e` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6e` == "" ]]
    then
       stage6e_success=true
    else
@@ -926,7 +927,7 @@ check_fds_pictures()
 {
    # Scan and report any errors in make FDS pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -E "Segmentation|Error" -I $FIREBOT_DIR/output/stage6f` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6f` == "" ]]
    then
       stage6f_success=true
    else
@@ -1118,7 +1119,7 @@ check_guide()
 {
    # Scan and report any errors or warnings in build process for guides
    cd $FIREBOT_DIR
-   if [[ `grep "successfully" -I $1` == "" ]]
+   if [[ `grep -I "successfully" $1` == "" ]]
    then
       # There were errors/warnings in the guide build process
       echo "Warnings from Stage 8 - Build FDS-SMV Guides:" >> $WARNING_LOG
