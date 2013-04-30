@@ -3,7 +3,7 @@ platform=ib64
 dir=`pwd`
 target=${dir##*/}
 
-source $IFORT_COMPILER/bin/ifortvars.sh intel64
+source $IFORT_COMPILER/bin/compilervars.sh intel64
 source ~/.bashrc_fds $platform
 
 echo Building $target 
