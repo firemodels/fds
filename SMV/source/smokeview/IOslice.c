@@ -4076,7 +4076,7 @@ void drawvolslice_terrain(const slicedata *sd){
     float *znode;
 
     znode = terri->znode_scaled;
-    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
+    constval = zplt[plotz]+offset_slice*sd->sliceoffset+0.001;
     glBegin(GL_TRIANGLES);
     maxi = MAX(sd->is1+sd->nslicei-1,sd->is1+1);
     for(i=sd->is1; i<maxi; i++){
