@@ -363,9 +363,9 @@ check_compile_fds_mpi_db()
    fi
 }
 
-#  =======================================
-#  = Stage 2c - Compile FDS OpenMP debug =
-#  =======================================
+#  ===================================================
+#  = Stage 2c - Compile and inspect FDS OpenMP debug =
+#  ===================================================
 
 compile_fds_openmp_db()
 {
@@ -383,7 +383,7 @@ check_compile_fds_openmp_db()
    then
       stage2c_success=true
    else
-      echo "Errors from Stage 2c - Compile FDS OpenMP debug:" >> $ERROR_LOG
+      echo "Errors from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -394,8 +394,42 @@ check_compile_fds_openmp_db()
       # Continue along
       :
    else
-      echo "Warnings from Stage 2c - Compile FDS OpenMP debug:" >> $WARNING_LOG
+      echo "Warnings from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2c >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
+
+fds_openmp_db_inspect()
+{
+   # Runs Intel Inspector to perform thread checking for OpenMP
+   cd $FDS_SVNROOT/Utilities/Scripts
+   ./openmp_inspect.sh &> $FIREBOT_DIR/output/stage2c_inspect
+}
+
+check_fds_openmp_db_inspect()
+{
+   # Check for errors in Intel Inspector results
+   cd $FDS_SVNROOT/Utilities/Scripts
+   if [[ `grep -i -E 'error' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Errors from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $ERROR_LOG
+      cat ${FIREBOT_DIR}/output/stage2c > $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+
+   # Check for warnings in Intel Inspector results
+   cd $FDS_SVNROOT/Utilities/Scripts
+   if [[ `grep -i -E 'warning' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $WARNING_LOG
+      cat ${FIREBOT_DIR}/output/stage2c_inspect > $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -1275,6 +1309,8 @@ check_compile_fds_mpi_db
 ### Stage 2c ###
 compile_fds_openmp_db
 check_compile_fds_openmp_db
+# fds_openmp_db_inspect
+# check_fds_openmp_db_inspect
 
 ### Stage 3 ###
 # Depends on successful FDS debug compile
