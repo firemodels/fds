@@ -286,6 +286,8 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          TMP_F = TMP_G ! If gas is being drawn from the domain, set the boundary temperature to the gas temperature
       ENDIF
 
+      IF (LP%FACE_INDEX>0) TMP_F = FACET(LP%FACE_INDEX)%TMP_F
+
       DTMP = TMP_G - TMP_F
       IF (PRESENT(WALL_INDEX)) THEN
          ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,SF%HEAT_TRANSFER_MODEL,&

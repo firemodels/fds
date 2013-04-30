@@ -651,6 +651,9 @@ FACE_INSERT_LOOP: DO N=1,N_FACE
       LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
       LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
 
+      ! store the face index of the particle
+      LP%FACE_INDEX = N
+
       ! particle position is at face center
       LP%X = ONTH*SUM(VERTEX(FC%VERTEX(:))%X)
       LP%Y = ONTH*SUM(VERTEX(FC%VERTEX(:))%Y)
