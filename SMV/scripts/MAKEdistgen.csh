@@ -18,7 +18,7 @@ cd $FORBUNDLE/to_google
 rm -rf $DIR
 mkdir -p $DIR
 mkdir -p $DIR/Documentation
-cp readme.html $DIR/Documentation/release_notes.html
+cp $FORBUNDLE/readme.html $DIR/Documentation/release_notes.html
 
 cp $FORBUNDLE/objects.svo $DIR/.
 scp $HOST\:$BACKGROUNDDIR/background $DIR/.
