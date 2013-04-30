@@ -4,7 +4,7 @@
 # Kristopher Overholt
 # 4/30/2013
 
-# Runs Intel Inspector to perform thread checking for OpenMP
+# Perform OpenMP thread checking (locate deadlocks and data races)
 
 export SVNROOT=`pwd`/../..
 source /opt/intel/inspector_xe/inspxe-vars.sh quiet
