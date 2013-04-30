@@ -2018,7 +2018,7 @@ SMIX_LOOP: DO N=1,N_TRACKED_SPECIES
                                                MUGAS/(TGAS*RHOG)*DTMPDX
       IF (GRAVITATIONAL_DEPOSITION) THEN
          U_GRAV = -GVEC(ABS(IOR))*SIGN(1,IOR)*MASS_P*(1._EB+1.25_EB*KN+0.41_EB*KN*EXP(-0.88_EB/KN))/ &
-                                                     (3._EB*CHI_D*MUGAS*SM%MEAN_DIAMETER)
+                                                     (3._EB*CHI_D*PI*MUGAS*SM%MEAN_DIAMETER)
          ! Prevent negative settling velocity at downward facing surfaces
          U_GRAV = MAX(0._EB,U_GRAV)
       ENDIF
