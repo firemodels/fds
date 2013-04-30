@@ -400,16 +400,16 @@ check_compile_fds_openmp_db()
    fi
 }
 
-fds_openmp_db_inspect()
+inspect_fds_openmp_db()
 {
-   # Run Intel Inspector to perform thread checking for OpenMP
+   # Perform OpenMP thread checking (locate deadlocks and data races)
    cd $FDS_SVNROOT/Utilities/Scripts
    ./openmp_inspect.sh &> $FIREBOT_DIR/output/stage2c_inspect
 }
 
-check_fds_openmp_db_inspect()
+check_inspect_fds_openmp_db()
 {
-   # Check for errors in Intel Inspector results
+   # Scan for errors in thread checking results
    cd $FDS_SVNROOT/Utilities/Scripts
    if [[ `grep -i -E 'error' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
    then
@@ -417,11 +417,11 @@ check_fds_openmp_db_inspect()
       :
    else
       echo "Errors from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $ERROR_LOG
-      cat ${FIREBOT_DIR}/output/stage2c > $ERROR_LOG
+      cat ${FIREBOT_DIR}/output/stage2c_inspect > $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
-   # Check for warnings in Intel Inspector results
+   # Scan for warnings in thread checking results
    cd $FDS_SVNROOT/Utilities/Scripts
    if [[ `grep -i -E 'warning' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
    then
@@ -1309,8 +1309,12 @@ check_compile_fds_mpi_db
 ### Stage 2c ###
 compile_fds_openmp_db
 check_compile_fds_openmp_db
-fds_openmp_db_inspect
-# check_fds_openmp_db_inspect
+
+# Depends on successful FDS OpenMP debug compile
+if [[ $stage2c_success ]] ; then
+   inspect_fds_openmp_db
+   # check_inspect_fds_openmp_db
+fi
 
 ### Stage 3 ###
 # Depends on successful FDS debug compile
