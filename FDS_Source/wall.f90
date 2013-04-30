@@ -276,17 +276,19 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          TSI = T - T_IGN
       ENDIF
 
-      IF (ONE_D%UW<=0._EB) THEN
-         IF (SF%TMP_FRONT>0._EB) THEN
-            TMP_F = TMP_0(KK) + EVALUATE_RAMP(TSI,SF%TAU(TIME_TEMP),SF%RAMP_INDEX(TIME_TEMP))*(SF%TMP_FRONT-TMP_0(KK))
-         ELSE
-            TMP_F = TMP_0(KK)
-         ENDIF
+      IF (PRESENT(PARTICLE_INDEX) .AND. LP%FACE_INDEX>0) THEN
+         TMP_F = FACET(LP%FACE_INDEX)%TMP_F
       ELSE
-         TMP_F = TMP_G ! If gas is being drawn from the domain, set the boundary temperature to the gas temperature
+         IF (ONE_D%UW<=0._EB) THEN
+            IF (SF%TMP_FRONT>0._EB) THEN
+               TMP_F = TMP_0(KK) + EVALUATE_RAMP(TSI,SF%TAU(TIME_TEMP),SF%RAMP_INDEX(TIME_TEMP))*(SF%TMP_FRONT-TMP_0(KK))
+            ELSE
+               TMP_F = TMP_0(KK)
+            ENDIF
+         ELSE
+            TMP_F = TMP_G ! If gas is being drawn from the domain, set the boundary temperature to the gas temperature
+         ENDIF
       ENDIF
-
-      IF (LP%FACE_INDEX>0) TMP_F = FACET(LP%FACE_INDEX)%TMP_F
 
       DTMP = TMP_G - TMP_F
       IF (PRESENT(WALL_INDEX)) THEN
