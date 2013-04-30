@@ -1071,6 +1071,7 @@ BNDC_LOOP: DO N=1,N_GEOM
             FP=>FP%NEXT ! point to the next index in the linked list
          ENDDO PARTICLE_LOOP
       ENDDO
+      IBM_FEM_COUPLING=.TRUE. ! immersed boundary method / finite-element method coupling
    ELSE
       BACKSPACE LU_BNDC
    ENDIF
