@@ -6,6 +6,9 @@
 
 # Report results from thread checker
 
+export SVNROOT=`pwd`/../..
+source /opt/intel/inspector_xe/inspxe-vars.sh quiet
+
 RESULT_DIR=$SVNROOT/Utilities/Scripts/inspect_openmp_ti3
 REPORT_TYPE=problems
 
@@ -33,8 +36,5 @@ case $OPTION in
    ;;
 esac
 done
-
-export SVNROOT=`pwd`/../..
-source /opt/intel/inspector_xe/inspxe-vars.sh quiet
 
 inspxe-cl -report $REPORT_TYPE -result-dir $RESULT_DIR
