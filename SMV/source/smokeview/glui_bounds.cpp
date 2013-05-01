@@ -485,11 +485,17 @@ extern "C" void glui_bounds_setup(int main_window){
     RADIO_bf = glui_bounds->add_radiogroup_to_panel(ROLLOUT_bound,&list_patch_index,FILETYPEINDEX,Bound_CB);
     nradio=0;
     for(i=0;i<npatchinfo;i++){
-      if(patchinfo[i].firstshort==1)nradio++;
+      patchdata *patchi;
+
+      patchi = patchinfo + i;
+      if(patchi->firstshort==1)nradio++;
     }
     if(nradio>1){
       for(i=0;i<npatchinfo;i++){
-        if(patchinfo[i].firstshort==1)glui_bounds->add_radiobutton_to_group(RADIO_bf,patchinfo[i].label.shortlabel);
+        patchdata *patchi;
+
+        patchi = patchinfo + i;
+        if(patchi->firstshort==1)glui_bounds->add_radiobutton_to_group(RADIO_bf,patchi->label.shortlabel);
       }
       if(activate_threshold==1){
         glui_bounds->add_separator_to_panel(ROLLOUT_bound);
@@ -534,7 +540,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &patchchopmin, &patchchopmax,
       DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
       Bound_CB);
-    updatepatchlistindex2(patchinfo[0].label.shortlabel);
+    updatepatchlistindex2(patchinfo->label.shortlabel);
     update_hidepatchsurface();
   }
 
@@ -1812,7 +1818,10 @@ extern "C" void updatepatchlistindex(int patchfilenum){
   int i;
   if(RADIO_bf==NULL)return;
   for(i=0;i<npatch2;i++){
-    if(strcmp(patchlabellist[i],patchinfo[patchfilenum].label.shortlabel)==0){
+    patchdata *patchi;
+
+    patchi = patchinfo + patchfilenum;
+    if(strcmp(patchlabellist[i],patchi->label.shortlabel)==0){
       RADIO_bf->set_int_val(i);
       list_patch_index_old=list_patch_index;
       global2localpatchbounds(patchlabellist[i]);

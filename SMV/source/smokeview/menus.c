@@ -3858,11 +3858,11 @@ void LoadPatchMenu(int value){
       }
     }
     if(scriptoutstream!=NULL){
-      char *file;
+      patchdata *patchi;
 
-      file = patchinfo[value].file;
+      patchi = patchinfo + value;
       fprintf(scriptoutstream,"LOADFILE\n");
-      fprintf(scriptoutstream," %s\n",file);
+      fprintf(scriptoutstream," %s\n",patchi->file);
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       LOCK_COMPRESS
@@ -8559,7 +8559,7 @@ updatemenu=0;
         i = patchorderindex[ii];
         patchi = patchinfo + i;
         if(patchi->loaded==0)continue;
-        STRCPY(menulabel,patchinfo[i].menulabel);
+        STRCPY(menulabel,patchi->menulabel);
         glutAddMenuEntry(menulabel,i);
       }
       glutAddMenuEntry(_("Unload all"),-1);
@@ -8577,25 +8577,25 @@ updatemenu=0;
       }
 
       for(ii=0;ii<npatchinfo;ii++){
-        patchdata *patch1, *patch2;
+        patchdata *patchim1, *patchi;
         char menulabel[1024];
 
         i = patchorderindex[ii];
-        patch2 = patchinfo + i;
+        patchi = patchinfo + i;
         if(ii>0){
-          patch1 = patchinfo + patchorderindex[ii-1];
-          if(nmeshes>1&&strcmp(patch1->label.longlabel,patch2->label.longlabel)!=0){
+          patchim1 = patchinfo + patchorderindex[ii-1];
+          if(nmeshes>1&&strcmp(patchim1->label.longlabel,patchi->label.longlabel)!=0){
             CREATEMENU(loadpatchsubmenus[nloadpatchsubmenus],LoadPatchMenu);
             nloadpatchsubmenus++;
           }
         }
 
-        if(patchinfo[i].loaded==1){
+        if(patchi->loaded==1){
           STRCPY(menulabel,"*");
-          STRCAT(menulabel,patchinfo[i].menulabel);  
+          STRCAT(menulabel,patchi->menulabel);  
         }
         else{
-          STRCPY(menulabel,patchinfo[i].menulabel);
+          STRCPY(menulabel,patchi->menulabel);
         }
         glutAddMenuEntry(menulabel,i);
       }

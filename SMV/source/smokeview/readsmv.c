@@ -1478,21 +1478,27 @@ void update_bound_info(void){
     NewMemory((void **)&patchlabellist,npatchinfo*sizeof(char *));
     NewMemory((void **)&patchlabellist_index,npatchinfo*sizeof(int));
     for(i=0;i<npatchinfo;i++){
-      patchinfo[i].firstshort=1;
-      patchinfo[i].valmin=1.0;
-      patchinfo[i].valmax=0.0;
-      patchinfo[i].setvalmin=0;
-      patchinfo[i].setvalmax=0;
-      if(strncmp(patchinfo[i].label.shortlabel,"temp",4)==0||
-         strncmp(patchinfo[i].label.shortlabel,"TEMP",4)==0){
+      patchdata *patchi;
+
+      patchi = patchinfo + i;
+      patchi->firstshort=1;
+      patchi->valmin=1.0;
+      patchi->valmax=0.0;
+      patchi->setvalmin=0;
+      patchi->setvalmax=0;
+      if(strncmp(patchi->label.shortlabel,"temp",4)==0||
+         strncmp(patchi->label.shortlabel,"TEMP",4)==0){
         canshow_threshold=1;
       }
-      patchlabellist[npatch2]=patchinfo[i].label.shortlabel;
+      patchlabellist[npatch2]=patchi->label.shortlabel;
       patchlabellist_index[npatch2]=i;
       npatch2++;
       for(n=0;n<i;n++){
-        if(strcmp(patchinfo[i].label.shortlabel,patchinfo[n].label.shortlabel)==0){
-          patchinfo[i].firstshort=0;
+        patchdata *patchn;
+
+        patchn = patchinfo + n;
+        if(strcmp(patchi->label.shortlabel,patchn->label.shortlabel)==0){
+          patchi->firstshort=0;
           npatch2--;
           break;
         }
@@ -2551,10 +2557,13 @@ int readsmv(char *file, char *file2){
 
   if(npatchinfo>0){
     for(i=0;i<npatchinfo;i++){
-      freelabels(&patchinfo[i].label);
-      FREEMEMORY(patchinfo[i].reg_file);
-      FREEMEMORY(patchinfo[i].comp_file);
-      FREEMEMORY(patchinfo[i].size_file);
+      patchdata *patchi;
+
+      patchi = patchinfo + i;
+      freelabels(&patchi->label);
+      FREEMEMORY(patchi->reg_file);
+      FREEMEMORY(patchi->comp_file);
+      FREEMEMORY(patchi->size_file);
     }
     FREEMEMORY(patchinfo);
   }
@@ -6718,6 +6727,7 @@ typedef struct {
           }
         }
       }
+      patchi->modtime=0;
       patchi->geom_timeslist=NULL;
       patchi->geom_ivals_dynamic=NULL;
       patchi->geom_ivals_static=NULL;
@@ -9239,11 +9249,14 @@ int readini2(char *inifile, int localfile){
       buffer2ptr=trim_front(buffer2);
       lenbuffer2=strlen(buffer2ptr);
       for(i=0;i<npatchinfo;i++){
-        if(lenbuffer2==0||strcmp(patchinfo[i].label.shortlabel,buffer2ptr)==0){
-          patchinfo[i].chopmin=valmin;
-          patchinfo[i].chopmax=valmax;
-          patchinfo[i].setchopmin=setvalmin;
-          patchinfo[i].setchopmax=setvalmax;
+        patchdata *patchi;
+
+        patchi = patchinfo + i;
+        if(lenbuffer2==0||strcmp(patchi->label.shortlabel,buffer2ptr)==0){
+          patchi->chopmin=valmin;
+          patchi->chopmax=valmax;
+          patchi->setchopmin=setvalmin;
+          patchi->setchopmax=setvalmax;
         }
       }
       updatepatchlistindex2(buffer2ptr);
@@ -11162,12 +11175,15 @@ void writeini(int flag){
     }
   }
   for(i=0;i<npatchinfo;i++){
-    if(patchinfo[i].firstshort==1){
+    patchdata *patchi;
+
+    patchi = patchinfo + i;
+    if(patchi->firstshort==1){
       fprintf(fileout,"V_BOUNDARY\n");
       fprintf(fileout," %i %f %i %f %s\n",
-        patchinfo[i].setvalmin,patchinfo[i].valmin,
-        patchinfo[i].setvalmax,patchinfo[i].valmax,
-        patchinfo[i].label.shortlabel
+        patchi->setvalmin,patchi->valmin,
+        patchi->setvalmax,patchi->valmax,
+        patchi->label.shortlabel
         );
     }
   }

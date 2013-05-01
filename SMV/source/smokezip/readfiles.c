@@ -657,7 +657,7 @@ int readsmv(char *smvfile){
       }
       else{
         fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
-        if(readlabels(&patchinfo[ipatch].label,streamsmv)==2)break;
+        if(readlabels(&patchi->label,streamsmv)==2)break;
         npatchinfo--;
       }
       continue;

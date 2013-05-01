@@ -417,7 +417,7 @@ int main(int argc, char **argv){
   }
 #endif
   if(npatchinfo>0){
-    patchinfo[0].dup=0;
+    patchinfo->dup=0;
     for(i=1;i<npatchinfo;i++){
       patch *patchi; 
 

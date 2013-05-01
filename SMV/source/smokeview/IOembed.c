@@ -10,7 +10,6 @@ char IOembed_revision[]="$Revision$";
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
 
 #include "string_util.h"
 #include "smv_endian.h"

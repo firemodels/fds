@@ -1242,6 +1242,7 @@ typedef struct {
   char scale[31];
   char menulabel[128];
   int extreme_min, extreme_max;
+  time_t modtime;
   histogramdata *histogram;
   bounddata bounds;
 } patchdata;

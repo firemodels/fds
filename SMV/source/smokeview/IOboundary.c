@@ -832,30 +832,33 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     if(error!=0)break;
     if(settmax_b!=0&&*meshi->patch_timesi>tmax_b)break;
 
-    if(loadpatchbysteps==0||loadpatchbysteps==1){
-      if(!(settmin_b!=0&&*meshi->patch_timesi<tmin_b)){
-        PRINTF("boundary time=%.2f\n",*meshi->patch_timesi);
+    switch (loadpatchbysteps){
+      case 0:
+      case 1:
+        if(!(settmin_b!=0&&*meshi->patch_timesi<tmin_b)){
+          PRINTF("boundary time=%.2f\n",*meshi->patch_timesi);
 
-        meshi->npatch_times++;
-        if(meshi->npatch_times + 1 > mxpatch_frames){
-          PRINTF("reallocating memory\n");
-          mxpatch_frames = meshi->npatch_times + 50; /* this + 50 must match - 50 below */
-          meshi->mxpatch_frames=mxpatch_frames;
-          if(
-            ResizeMemory((void **)&meshi->patchval,           mxpatch_frames*meshi->npatchsize*sizeof(float))==0||
-            ResizeMemory((void **)&meshi->patch_times,    mxpatch_frames*sizeof(float))==0
-           ){
-            *errorcode=1;
-            readpatch(ifile,UNLOAD,&error);
-            FORTclosefortranfile(&file_unit);
-            return;
+          meshi->npatch_times++;
+          if(meshi->npatch_times + 1 > mxpatch_frames){
+            PRINTF("reallocating memory\n");
+            mxpatch_frames = meshi->npatch_times + 50; /* this + 50 must match - 50 below */
+            meshi->mxpatch_frames=mxpatch_frames;
+            if(
+              ResizeMemory((void **)&meshi->patchval,           mxpatch_frames*meshi->npatchsize*sizeof(float))==0||
+              ResizeMemory((void **)&meshi->patch_times,    mxpatch_frames*sizeof(float))==0
+             ){
+              *errorcode=1;
+              readpatch(ifile,UNLOAD,&error);
+              FORTclosefortranfile(&file_unit);
+              return;
+            }
           }
+          ii++;
         }
+        break;
+      case 2:
         ii++;
-      }
-    }
-    if(loadpatchbysteps==2){
-      ii++;
+        break;
     }
   }
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
@@ -1268,17 +1271,19 @@ void local2globalpatchbounds(const char *key){
   int i;
   
   for(i=0;i<npatchinfo;i++){
-    if(strcmp(patchinfo[i].label.shortlabel,key)==0){
-      patchinfo[i].valmin=patchmin;
-      patchinfo[i].valmax=patchmax;
-      patchinfo[i].setvalmin=setpatchmin;
-      patchinfo[i].setvalmax=setpatchmax;
+    patchdata *patchi;
 
-      patchinfo[i].chopmin=patchchopmin;
-      patchinfo[i].chopmax=patchchopmax;
-      patchinfo[i].setchopmin=setpatchchopmin;
-      patchinfo[i].setchopmax=setpatchchopmax;
+    patchi = patchinfo + i;
+    if(strcmp(patchi->label.shortlabel,key)==0){
+      patchi->valmin=patchmin;
+      patchi->valmax=patchmax;
+      patchi->setvalmin=setpatchmin;
+      patchi->setvalmax=setpatchmax;
 
+      patchi->chopmin=patchchopmin;
+      patchi->chopmax=patchchopmax;
+      patchi->setchopmin=setpatchchopmin;
+      patchi->setchopmax=setpatchchopmax;
     }
   }
 }
@@ -1289,17 +1294,20 @@ void global2localpatchbounds(const char *key){
   int i;
   
   for(i=0;i<npatchinfo;i++){
-    if(strcmp(patchinfo[i].label.shortlabel,key)==0){
-      patchmin=patchinfo[i].valmin;
-      patchmax=patchinfo[i].valmax;
-      setpatchmin=patchinfo[i].setvalmin;
-      setpatchmax=patchinfo[i].setvalmax;
+    patchdata *patchi;
 
-      patchchopmin=patchinfo[i].chopmin;
-      patchchopmax=patchinfo[i].chopmax;
-      setpatchchopmin=patchinfo[i].setchopmin;
-      setpatchchopmax=patchinfo[i].setchopmax;
-      patchmin_unit = (unsigned char *)patchinfo[i].label.unit;
+    patchi = patchinfo + i;
+    if(strcmp(patchi->label.shortlabel,key)==0){
+      patchmin=patchi->valmin;
+      patchmax=patchi->valmax;
+      setpatchmin=patchi->setvalmin;
+      setpatchmax=patchi->setvalmax;
+
+      patchchopmin=patchi->chopmin;
+      patchchopmax=patchi->chopmax;
+      setpatchchopmin=patchi->setchopmin;
+      setpatchchopmax=patchi->setchopmax;
+      patchmin_unit = (unsigned char *)patchi->label.unit;
       patchmax_unit = patchmin_unit;
       update_glui_patch_units();
       update_hidepatchsurface();
