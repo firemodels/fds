@@ -411,7 +411,7 @@ check_inspect_fds_openmp_db()
 {
    # Scan for errors in thread checking results
    cd $FDS_SVNROOT/Utilities/Scripts
-   if [[ `grep -i -E 'error' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
+   if [[ `grep -i -E 'problem' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
    then
       # Continue along
       :
@@ -419,18 +419,9 @@ check_inspect_fds_openmp_db()
       echo "Errors from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $ERROR_LOG
       cat ${FIREBOT_DIR}/output/stage2c_inspect > $ERROR_LOG
       echo "" >> $ERROR_LOG
-   fi
-
-   # Scan for warnings in thread checking results
-   cd $FDS_SVNROOT/Utilities/Scripts
-   if [[ `grep -i -E 'warning' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $WARNING_LOG
-      cat ${FIREBOT_DIR}/output/stage2c_inspect > $WARNING_LOG
-      echo "" >> $WARNING_LOG
+      echo "For more details, view the inspector log in the FDS-SMV/Utilities/Scripts folder" >> $ERROR_LOG
+      echo "by using the FDS-SMV/Utilities/Scripts/inspect_report.sh script." >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
