@@ -365,7 +365,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
    IF (N_TRACKED_SPECIES>0) THEN
-      !$OMP DO SCHEDULE(STATIC)
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(ZZ_GET)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -474,7 +474,7 @@ CASE(.FALSE.) PREDICTOR_STEP
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
    IF (N_TRACKED_SPECIES>0) THEN
-      !$OMP DO SCHEDULE(STATIC)
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(ZZ_GET)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
