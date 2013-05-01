@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# openmp_inspect.sh
+# inspect_openmp.sh
 # Kristopher Overholt
 # 4/30/2013
 
