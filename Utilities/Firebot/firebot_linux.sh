@@ -1303,10 +1303,10 @@ compile_fds_openmp_db
 check_compile_fds_openmp_db
 
 # Depends on successful FDS OpenMP debug compile
-if [[ $stage2c_success ]] ; then
-   inspect_fds_openmp_db
+# if [[ $stage2c_success ]] ; then
+   # inspect_fds_openmp_db
    # check_inspect_fds_openmp_db
-fi
+# fi
 
 ### Stage 3 ###
 # Depends on successful FDS debug compile
