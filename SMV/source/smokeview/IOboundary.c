@@ -3890,10 +3890,18 @@ int update_patch_hist(patchdata *patchj){
     float patchtime1, *patchframe;
     int patchframesize;
     int j;
+    time_t modtime;
 
     patchi = patchinfo + i;
-    if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->type!=patchj->type||
-       patchi->filetype!=patchj->filetype||patchi->bounds.defined==1||patchi->filetype==2)continue;
+    if(patchi->type!=patchj->type||patchi->filetype!=patchj->filetype||patchi->filetype==2)continue;
+    modtime=file_modtime(patchi->file);
+    if(modtime>patchi->modtime){
+      patchi->modtime=modtime;
+      patchi->inuse_getbounds=0;
+      patchi->histogram->complete=0;
+      patchi->bounds.defined=0;
+    }
+    if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->bounds.defined==1)continue;
 
     patchi->inuse_getbounds=1;
 
