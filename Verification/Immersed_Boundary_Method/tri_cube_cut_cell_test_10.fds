@@ -22,6 +22,4 @@
 
 &FACE N=1,2,3, SURF_ID='face' /
 
-&SLCF XB=0,3,0,3,0,3, QUANTITY='P MASK', CELL_CENTERED=.TRUE./
-
 &TAIL /

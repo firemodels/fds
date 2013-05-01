@@ -31,6 +31,4 @@
 ! and face 2 is contributing (dumping heat/mass) to cutcell 2
 ! because its normal pointing to cell 1
 
-&SLCF XB=0,3,0,3,0,3, QUANTITY='P MASK', CELL_CENTERED=.TRUE./
-
 &TAIL /
