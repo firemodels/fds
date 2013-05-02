@@ -2,7 +2,7 @@
 
 &MESH IJK=32,32,64, XB=0.0,1.6,0.0,1.6,0.0,3.2 / 
 
-&TIME T_END=0.5 /
+&TIME T_END=0.2 /
 
 &REAC FUEL         = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
