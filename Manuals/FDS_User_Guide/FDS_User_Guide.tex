@@ -7856,7 +7856,7 @@ either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID},
 where $n$ is the number of uniform output samples.
 \item[Root Mean Square] If you set {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
 \be
-   \phi_{rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
+   \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
 \ee
 Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. It is not meant to be used with single devices that record a time history of a given quantity. The {\em root mean square} is only meaningful in terms of a steady-state output quantity.
 \item[Covariance] If $u = U - \overline{U}$ and $v= V-\overline{V}$ are the deviations for two random variables, $U$ and $V$, then an unbiased estimate of the \emph{covariance} is given by
@@ -7870,7 +7870,7 @@ To output this statistic you must add a {\ct QUANTITY2} to the device line and s
 \end{lstlisting}
 \item[Correlation Coefficient] Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} given by
 \be
-   \rho_{uv} = \frac{ \overline{u\, v} }{ u_{rms} \,v_{rms} }
+   \rho_{uv} = \frac{ \overline{u\, v} }{ u_{\rm rms} \,v_{\rm rms} }
 \ee
 Here again you must add a {\ct QUANTITY2} to the device line.
 \item[Min, Max] For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
@@ -8015,6 +8015,8 @@ Normally, FDS averages boundary file data at cell corners. For example, surface 
 are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening,
 set {\ct CELL\_CENTERED=.TRUE.} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this
 feature is mainly useful for diagnostics.
+
+Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct STATISTICS} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct STATISTICS} on a {\ct BNDF} line.
 
 
 
@@ -9359,6 +9361,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct PROP\_ID}          & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
 {\ct QUANTITY}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
 {\ct SPEC\_ID}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct STATISTICS}        & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
 \end{longtable}
 
 
