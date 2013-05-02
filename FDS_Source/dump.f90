@@ -761,13 +761,15 @@ END SUBROUTINE INITIALIZE_GLOBAL_DUMPS
  
  
 SUBROUTINE INITIALIZE_MESH_DUMPS(NM)
+
 USE COMP_FUNCTIONS, ONLY : SECOND
 USE MEMORY_FUNCTIONS, ONLY:RE_ALLOCATE_STRINGS,CHKMEMERR 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: IOR,IZERO,I,J,K,N,I1,I2,J1,J2,K1,K2,I1B,I2B,IW,NN,NF
+INTEGER :: IOR,IZERO,I,J,K,N,I1B,I2B,IW,NN,NF,IP,N_BNDF_POINTS
 INTEGER :: NTSL
 REAL(EB) :: TNOW
 CHARACTER(LEN=1024) :: SLICEPARMS
+TYPE(PATCH_TYPE), POINTER :: PA
  
 TNOW=SECOND() 
  
@@ -988,6 +990,7 @@ ENDDO
 ! Initialize Boundary Files
  
 IF_BOUNDARY_FILES: IF (N_BNDF>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+
    I1B = MAX(IBP1,JBP1)
    I2B = MAX(JBP1,KBP1)
    ALLOCATE(M%PP(0:I1B,0:I2B),STAT=IZERO)
@@ -997,6 +1000,7 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    CALL ChkMemErr('DUMP','PPN',IZERO)
    ALLOCATE(M%IBK(0:I1B,0:I2B),STAT=IZERO)
    CALL ChkMemErr('DUMP','IBK',IZERO)
+
    M%INC = 0
    DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       IOR = M%WALL(IW)%ONE_D%IOR
@@ -1004,19 +1008,79 @@ IF_BOUNDARY_FILES: IF (N_BNDF>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
           M%INC(IOR,M%WALL(IW)%OBST_INDEX) = 1
       IF (.NOT.BNDF_DEFAULT .AND. M%WALL(IW)%OBST_INDEX==0) M%INC(IOR,M%WALL(IW)%OBST_INDEX) = 0
    ENDDO
-   M%NPATCH = 0
+
+   ! Count and allocate the boundary file PATCHes.
+
+   M%N_PATCH = 0
    DO N=0,M%N_OBST
       OB=>M%OBSTRUCTION(N)
-      DO I=-3,3
-         IF (.NOT.OB%SHOW_BNDF(I)) M%INC(I,N) = 0
-         IF (M%INC(I,N)==1) M%NPATCH = M%NPATCH + 1 
+      DO IOR=-3,3
+         IF (.NOT.OB%SHOW_BNDF(IOR)) M%INC(IOR,N) = 0
+         IF (M%INC(IOR,N)==1) M%N_PATCH = M%N_PATCH + 1 
       ENDDO
    ENDDO
+
+   ALLOCATE(M%PATCH(M%N_PATCH),STAT=IZERO)
+   CALL ChkMemErr('DUMP','PATCH',IZERO)
+
+   ! Assign coordinate indices for each PATCH
+
+   IP = 0
+   N_BNDF_POINTS = 0
+   DO N=0,M%N_OBST
+      OB=>M%OBSTRUCTION(N)
+      DO IOR=-3,3
+         IF (M%INC(IOR,N)==0) CYCLE
+         IP = IP + 1
+         PA => M%PATCH(IP)
+         IF (N==0) THEN
+            PA%I1 = 0     ; PA%IG1 = 1
+            PA%I2 = IBAR  ; PA%IG2 = IBAR
+            PA%J1 = 0     ; PA%JG1 = 1
+            PA%J2 = JBAR  ; PA%JG2 = JBAR
+            PA%K1 = 0     ; PA%KG1 = 1
+            PA%K2 = KBAR  ; PA%KG2 = KBAR
+            SELECT CASE(IOR)
+               CASE( 1) ; PA%I2 = PA%I1 ; PA%IG2 = PA%IG1
+               CASE(-1) ; PA%I1 = PA%I2 ; PA%IG1 = PA%IG2
+               CASE( 2) ; PA%J2 = PA%J1 ; PA%JG2 = PA%JG1
+               CASE(-2) ; PA%J1 = PA%J2 ; PA%JG1 = PA%JG2
+               CASE( 3) ; PA%K2 = PA%K1 ; PA%KG2 = PA%KG1
+               CASE(-3) ; PA%K1 = PA%K2 ; PA%KG1 = PA%KG2
+            END SELECT
+         ELSE 
+            PA%I1 = OB%I1 ; PA%IG1 = OB%I1+1
+            PA%I2 = OB%I2 ; PA%IG2 = OB%I2
+            PA%J1 = OB%J1 ; PA%JG1 = OB%J1+1
+            PA%J2 = OB%J2 ; PA%JG2 = OB%J2
+            PA%K1 = OB%K1 ; PA%KG1 = OB%K1+1
+            PA%K2 = OB%K2 ; PA%KG2 = OB%K2
+            SELECT CASE(IOR)
+               CASE(-1) ; PA%I2 = PA%I1 ; PA%IG1=PA%IG1-1 ; PA%IG2 = PA%IG1
+               CASE( 1) ; PA%I1 = PA%I2 ; PA%IG2=PA%IG2+1 ; PA%IG1 = PA%IG2
+               CASE(-2) ; PA%J2 = PA%J1 ; PA%JG1=PA%JG1-1 ; PA%JG2 = PA%JG1
+               CASE( 2) ; PA%J1 = PA%J2 ; PA%JG2=PA%JG2+1 ; PA%JG1 = PA%JG2
+               CASE(-3) ; PA%K2 = PA%K1 ; PA%KG1=PA%KG1-1 ; PA%KG2 = PA%KG1
+               CASE( 3) ; PA%K1 = PA%K2 ; PA%KG2=PA%KG2+1 ; PA%KG1 = PA%KG2
+            END SELECT
+         ENDIF
+         PA%IOR        = IOR
+         PA%OBST_INDEX = N
+         N_BNDF_POINTS = N_BNDF_POINTS + (PA%IG2-PA%IG1+1)*(PA%JG2-PA%JG1+1)*(PA%KG2-PA%KG1+1)
+      ENDDO
+   ENDDO
+
+   IF (BNDF_TIME_INTEGRALS>0) THEN
+      ALLOCATE(M%BNDF_TIME_INTEGRAL(N_BNDF_POINTS,BNDF_TIME_INTEGRALS),STAT=IZERO)
+      CALL ChkMemErr('DUMP','BNDF_TIME_INTEGRAL',IZERO)
+      M%BNDF_TIME_INTEGRAL = 0._EB
+   ENDIF
+
 ENDIF IF_BOUNDARY_FILES
  
 BOUNDARY_FILES: DO NF=1,N_BNDF
 
-   IF (M%NPATCH==0) EXIT BOUNDARY_FILES
+   IF (M%N_PATCH==0) EXIT BOUNDARY_FILES
    IF (EVACUATION_ONLY(NM)) EXIT BOUNDARY_FILES
 
    BF => BOUNDARY_FILE(NF)
@@ -1041,34 +1105,17 @@ BOUNDARY_FILES: DO NF=1,N_BNDF
       M%N_STRINGS = M%N_STRINGS + 1
       WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(BF%SMOKEVIEW_BAR_LABEL)
       M%N_STRINGS = M%N_STRINGS + 1
-      WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(OUTPUT_QUANTITY(BF%INDEX)%UNITS)
+      WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(BF%UNITS)
       OPEN(LU_BNDF(NF,NM),FILE=FN_BNDF(NF,NM),FORM='UNFORMATTED',STATUS='REPLACE')
       WRITE(LU_BNDF(NF,NM)) BF%SMOKEVIEW_LABEL(1:30)
       WRITE(LU_BNDF(NF,NM)) BF%SMOKEVIEW_BAR_LABEL(1:30)
-      WRITE(LU_BNDF(NF,NM)) OUTPUT_QUANTITY(BF%INDEX)%UNITS(1:30)
-      WRITE(LU_BNDF(NF,NM)) M%NPATCH
-      IF (M%INC(-3,0)==1) WRITE(LU_BNDF(NF,NM)) 0,IBAR,0,JBAR,KBAR,KBAR,-3,0,NM
-      IF (M%INC(-2,0)==1) WRITE(LU_BNDF(NF,NM)) 0,IBAR,JBAR,JBAR,0,KBAR,-2,0,NM
-      IF (M%INC(-1,0)==1) WRITE(LU_BNDF(NF,NM)) IBAR,IBAR,0,JBAR,0,KBAR,-1,0,NM
-      IF (M%INC( 1,0)==1) WRITE(LU_BNDF(NF,NM))    0,   0,0,JBAR,0,KBAR, 1,0,NM
-      IF (M%INC( 2,0)==1) WRITE(LU_BNDF(NF,NM))    0,IBAR,   0,0,0,KBAR, 2,0,NM
-      IF (M%INC( 3,0)==1) WRITE(LU_BNDF(NF,NM))    0,IBAR,   0,JBAR,0,0, 3,0,NM
-      DO N=1,M%N_OBST
-         OB=>M%OBSTRUCTION(N)
-         I1 = OB%I1
-         I2 = OB%I2
-         J1 = OB%J1
-         J2 = OB%J2
-         K1 = OB%K1
-         K2 = OB%K2
-         IF (M%INC(-3,N)==1) WRITE(LU_BNDF(NF,NM)) I1,I2,J1,J2,K1,K1,-3,N,NM
-         IF (M%INC(-2,N)==1) WRITE(LU_BNDF(NF,NM)) I1,I2,J1,J1,K1,K2,-2,N,NM
-         IF (M%INC(-1,N)==1) WRITE(LU_BNDF(NF,NM)) I1,I1,J1,J2,K1,K2,-1,N,NM
-         IF (M%INC( 1,N)==1) WRITE(LU_BNDF(NF,NM)) I2,I2,J1,J2,K1,K2, 1,N,NM
-         IF (M%INC( 2,N)==1) WRITE(LU_BNDF(NF,NM)) I1,I2,J2,J2,K1,K2, 2,N,NM
-         IF (M%INC( 3,N)==1) WRITE(LU_BNDF(NF,NM)) I1,I2,J1,J2,K2,K2, 3,N,NM
+      WRITE(LU_BNDF(NF,NM)) BF%UNITS(1:30)
+      WRITE(LU_BNDF(NF,NM)) M%N_PATCH
+      DO IP=1,M%N_PATCH
+         PA=>M%PATCH(IP)
+         WRITE(LU_BNDF(NF,NM)) PA%I1,PA%I2,PA%J1,PA%J2,PA%K1,PA%K2,PA%IOR,PA%OBST_INDEX,NM
       ENDDO
-      IF(TERRAIN_CASE)THEN
+      IF (TERRAIN_CASE) THEN
         IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
         M%N_STRINGS = M%N_STRINGS + 1
         WRITE(M%STRING(M%N_STRINGS),'(A,I6,1X,F7.2)') 'SLCT ',NM,0.01  
@@ -1079,11 +1126,11 @@ BOUNDARY_FILES: DO NF=1,N_BNDF
         M%N_STRINGS = M%N_STRINGS + 1
         WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(BF%SMOKEVIEW_BAR_LABEL)
         M%N_STRINGS = M%N_STRINGS + 1
-        WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(OUTPUT_QUANTITY(BF%INDEX)%UNITS)
+        WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(BF%UNITS)
         OPEN(LU_BNDF_SLCF(NF,NM),FILE=FN_BNDF_SLCF(NF,NM),FORM='UNFORMATTED',STATUS='REPLACE')
         WRITE(LU_BNDF_SLCF(NF,NM)) BF%SMOKEVIEW_LABEL(1:30)
         WRITE(LU_BNDF_SLCF(NF,NM)) BF%SMOKEVIEW_BAR_LABEL(1:30)
-        WRITE(LU_BNDF_SLCF(NF,NM)) OUTPUT_QUANTITY(BF%INDEX)%UNITS(1:30)
+        WRITE(LU_BNDF_SLCF(NF,NM)) BF%UNITS(1:30)
         WRITE(LU_BNDF_SLCF(NF,NM)) 0,M%IBAR,0,M%JBAR,0,0
       ENDIF
    ENDIF RESTART
@@ -6239,262 +6286,95 @@ SUBROUTINE DUMP_BNDF(T,NM)
 
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
-INTEGER :: ISUM,IG,JG,KG,IOR,NF,IND,I,J,K,I1,I2,J1,J2,K1,K2,IC,IW,N
+INTEGER :: ISUM,NF,IND,I,J,K,IC,IW,L,L1,L2,N,N1,N2,IP,NC
 INTEGER, INTENT(IN) :: NM
+TYPE(PATCH_TYPE), POINTER :: PA
  
-IF (MESHES(NM)%NPATCH==0) RETURN
-
-IF (EVACUATION_ONLY(NM)) RETURN
+IF (MESHES(NM)%N_PATCH==0) RETURN
+IF (EVACUATION_ONLY(NM))  RETURN
  
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
  
 CALL POINT_TO_MESH(NM)
  
-FLOOP: DO NF=1,N_BNDF
+FILE_LOOP: DO NF=1,N_BNDF
 
    BF => BOUNDARY_FILE(NF)
    PY => PROPERTY(BF%PROP_INDEX)
    WRITE(LU_BNDF(NF,NM)) STIME
    IND  = ABS(BF%INDEX)
+   NC = 0
  
-   ! Exterior walls
- 
-   WLOOP: DO IOR=-3,3
- 
-      IF (INC(IOR,0)==0 .OR. IOR==0) CYCLE WLOOP
+   PATCH_LOOP: DO IP=1,N_PATCH
+
+      PA => PATCH(IP)
  
       PP  = 0._EB
       PPN = 0._EB
       IBK = 0
- 
-      SELECT CASE (IOR)
-         CASE (1,-1)
-            IF (IOR== 1) IG=1    
-            IF (IOR==-1) IG=IBAR
-            J1 = 1
-            J2 = JBAR
-            K1 = 1
-            K2 = KBAR
-            DO K=K1,K2
-               DO J=J1,J2
-                  IC = CELL_INDEX(IG,J,K)
-                  IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                  PP(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
-                  IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(IG,J,K))) IBK(J,K)=1
-               ENDDO
-            ENDDO
-            IF (.NOT.BF%CELL_CENTERED) THEN
-               DO K=K1-1,K2
-                  DO J=J1-1,J2
-                     IF (IBK(J,K)==1)     PPN(J,K) = PPN(J,K) + PP(J,K)
-                     IF (IBK(J+1,K)==1)   PPN(J,K) = PPN(J,K) + PP(J+1,K)
-                     IF (IBK(J,K+1)==1)   PPN(J,K) = PPN(J,K) + PP(J,K+1)
-                     IF (IBK(J+1,K+1)==1) PPN(J,K) = PPN(J,K) + PP(J+1,K+1)
-                     ISUM = IBK(J,K)+IBK(J,K+1)+IBK(J+1,K)+IBK(J+1,K+1)
-                     IF (ISUM>0) THEN
-                        PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
-                     ELSE
-                        PPN(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
-                     ENDIF
-                  ENDDO
-               ENDDO
-               WRITE(LU_BNDF(NF,NM)) ((PPN(J,K),J=J1-1,J2),K=K1-1,K2)
-            ELSE
-               WRITE(LU_BNDF(NF,NM)) ((PP(J,K),J=J1,J2+1),K=K1,K2+1)
-            ENDIF
 
-         CASE (2,-2)
-            IF (IOR== 2) JG=1    
-            IF (IOR==-2) JG=JBAR
-            I1 = 1
-            I2 = IBAR
-            K1 = 1
-            K2 = KBAR
-            DO K=K1,K2
-               DO I=I1,I2
-                  IC = CELL_INDEX(I,JG,K)
-                  IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                  PP(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
-                  IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,JG,K))) IBK(I,K)=1
-               ENDDO
-            ENDDO
-            IF (.NOT.BF%CELL_CENTERED) THEN
-               DO K=K1-1,K2
-                  DO I=I1-1,I2
-                     IF (IBK(I,K)==1)     PPN(I,K) = PPN(I,K) + PP(I,K)
-                     IF (IBK(I+1,K)==1)   PPN(I,K) = PPN(I,K) + PP(I+1,K)
-                     IF (IBK(I,K+1)==1)   PPN(I,K) = PPN(I,K) + PP(I,K+1)
-                     IF (IBK(I+1,K+1)==1) PPN(I,K) = PPN(I,K) + PP(I+1,K+1)
-                     ISUM = IBK(I,K)+IBK(I,K+1)+IBK(I+1,K)+IBK(I+1,K+1)
-                     IF (ISUM>0) THEN
-                        PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
-                     ELSE
-                        PPN(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
-                     ENDIF
-                  ENDDO
-               ENDDO
-               WRITE(LU_BNDF(NF,NM)) ((PPN(I,K),I=I1-1,I2),K=K1-1,K2)
-            ELSE
-               WRITE(LU_BNDF(NF,NM)) ((PP(I,K),I=I1,I2+1),K=K1,K2+1)
-            ENDIF
- 
-         CASE(3,-3)
-            IF (IOR== 3) KG=1    
-            IF (IOR==-3) KG=KBAR 
-            I1 = 1
-            I2 = IBAR
-            J1 = 1
-            J2 = JBAR
-            DO J=J1,J2
-               DO I=I1,I2
-                  IC = CELL_INDEX(I,J,KG)
-                  IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                  PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
-                  IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,J,KG))) IBK(I,J)=1
-               ENDDO
-            ENDDO
-            IF (.NOT.BF%CELL_CENTERED) THEN
-               DO J=J1-1,J2
-                  DO I=I1-1,I2
-                     IF (IBK(I,J)==1)     PPN(I,J) = PPN(I,J) + PP(I,J)
-                     IF (IBK(I+1,J)==1)   PPN(I,J) = PPN(I,J) + PP(I+1,J)
-                     IF (IBK(I,J+1)==1)   PPN(I,J) = PPN(I,J) + PP(I,J+1)
-                     IF (IBK(I+1,J+1)==1) PPN(I,J) = PPN(I,J) + PP(I+1,J+1)
-                     ISUM = IBK(I,J)+IBK(I,J+1)+IBK(I+1,J)+IBK(I+1,J+1)
-                     IF (ISUM>0) THEN
-                        PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
-                     ELSE
-                        PPN(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
-                     ENDIF
-                  ENDDO
-               ENDDO
-               WRITE(LU_BNDF(NF,NM)) ((PPN(I,J),I=I1-1,I2),J=J1-1,J2)
-            ELSE
-               WRITE(LU_BNDF(NF,NM)) ((PP(I,J),I=I1,I2+1),J=J1,J2+1)
-            ENDIF
-
+      ! Adjust PATCH indices depending on orientation
+  
+      SELECT CASE(ABS(PA%IOR))
+         CASE(1) ; L1=PA%JG1 ; L2=PA%JG2 ; N1=PA%KG1 ; N2=PA%KG2
+         CASE(2) ; L1=PA%IG1 ; L2=PA%IG2 ; N1=PA%KG1 ; N2=PA%KG2
+         CASE(3) ; L1=PA%IG1 ; L2=PA%IG2 ; N1=PA%JG1 ; N2=PA%JG2
       END SELECT
- 
-   ENDDO WLOOP
- 
-! Interior obstructions
- 
-   BLOOP: DO N=1,N_OBST
-      OB=>OBSTRUCTION(N)
-      I1 = OB%I1+1
-      I2 = OB%I2
-      J1 = OB%J1+1
-      J2 = OB%J2
-      K1 = OB%K1+1
-      K2 = OB%K2
- 
-      OLOOP: DO IOR=-3,3
- 
-         IF (INC(IOR,N)==0 .OR. IOR==0) CYCLE OLOOP
- 
-         PP = 0._EB
-         PPN = 0._EB
-         IBK = 0
- 
-         SELECT CASE (IOR)
-            CASE(1,-1)
-               IF (IOR== 1) I=I2+1
-               IF (IOR==-1) I=I1-1
-               DO K=K1,K2
-                  DO J=J1,J2
-                     IC = CELL_INDEX(I,J,K)
-                     IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                     PP(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
-                     IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY) IBK(J,K)=1
-                  ENDDO
-               ENDDO
-               IF (.NOT.BF%CELL_CENTERED) THEN
-                  DO K=K1-1,K2
-                     DO J=J1-1,J2
-                        IF (IBK(J,K)==1)     PPN(J,K) = PPN(J,K) + PP(J,K)
-                        IF (IBK(J+1,K)==1)   PPN(J,K) = PPN(J,K) + PP(J+1,K)
-                        IF (IBK(J,K+1)==1)   PPN(J,K) = PPN(J,K) + PP(J,K+1)
-                        IF (IBK(J+1,K+1)==1) PPN(J,K) = PPN(J,K) + PP(J+1,K+1)
-                        ISUM = IBK(J,K)+IBK(J,K+1)+IBK(J+1,K)+IBK(J+1,K+1)
-                        IF (ISUM>0) THEN
-                           PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
-                        ELSE
-                           PPN(J,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
-                        ENDIF
-                     ENDDO
-                  ENDDO
-                  WRITE(LU_BNDF(NF,NM)) ((PPN(J,K),J=J1-1,J2),K=K1-1,K2)
-               ELSE
-                  WRITE(LU_BNDF(NF,NM)) ((PP(J,K),J=J1,J2+1),K=K1,K2+1)
-               ENDIF
- 
-            CASE(2,-2)
-               IF (IOR== 2) J=J2+1
-               IF (IOR==-2) J=J1-1
-               DO K=K1,K2
-                  DO I=I1,I2
-                     IC = CELL_INDEX(I,J,K)
-                     IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                     PP(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
-                     IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY) IBK(I,K)=1
-                  ENDDO
-               ENDDO
-               IF (.NOT.BF%CELL_CENTERED) THEN
-                  DO K=K1-1,K2
-                     DO I=I1-1,I2
-                        IF (IBK(I,K)==1)     PPN(I,K) = PPN(I,K) + PP(I,K)
-                        IF (IBK(I+1,K)==1)   PPN(I,K) = PPN(I,K) + PP(I+1,K)
-                        IF (IBK(I,K+1)==1)   PPN(I,K) = PPN(I,K) + PP(I,K+1)
-                        IF (IBK(I+1,K+1)==1) PPN(I,K) = PPN(I,K) + PP(I+1,K+1)
-                        ISUM = IBK(I,K)+IBK(I,K+1)+IBK(I+1,K)+IBK(I+1,K+1)
-                        IF (ISUM>0) THEN
-                           PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
-                        ELSE
-                           PPN(I,K) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
-                        ENDIF
-                     ENDDO
-                  ENDDO
-                  WRITE(LU_BNDF(NF,NM)) ((PPN(I,K),I=I1-1,I2),K=K1-1,K2)
-               ELSE
-                  WRITE(LU_BNDF(NF,NM)) ((PP(I,K),I=I1,I2+1),K=K1,K2+1)
-               ENDIF
-       
-            CASE(3,-3)
-               IF (IOR== 3) K=K2+1
-               IF (IOR==-3) K=K1-1
-               DO J=J1,J2
-                  DO I=I1,I2
-                     IC = CELL_INDEX(I,J,K)
-                     IW = WALL_INDEX(IC,-IOR) ; IF (IW==0) CYCLE
-                     PP(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
-                     IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY) IBK(I,J)=1
-                  ENDDO
-               ENDDO
-               IF (.NOT.BF%CELL_CENTERED) THEN
-                  DO J=J1-1,J2
-                     DO I=I1-1,I2
-                        IF (IBK(I,J)==1)     PPN(I,J) = PPN(I,J) + PP(I,J)
-                        IF (IBK(I+1,J)==1)   PPN(I,J) = PPN(I,J) + PP(I+1,J)
-                        IF (IBK(I,J+1)==1)   PPN(I,J) = PPN(I,J) + PP(I,J+1)
-                        IF (IBK(I+1,J+1)==1) PPN(I,J) = PPN(I,J) + PP(I+1,J+1)
-                        ISUM = IBK(I,J)+IBK(I,J+1)+IBK(I+1,J)+IBK(I+1,J+1)
-                        IF (ISUM>0) THEN
-                           PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
-                        ELSE
-                           PPN(I,J) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
-                        ENDIF
-                     ENDDO
-                  ENDDO
-                  WRITE(LU_BNDF(NF,NM)) ((PPN(I,J),I=I1-1,I2),J=J1-1,J2)
-               ELSE
-                  WRITE(LU_BNDF(NF,NM)) ((PP(I,J),I=I1,I2+1),J=J1,J2+1)
-               ENDIF
 
-         END SELECT
- 
-      ENDDO OLOOP
-   ENDDO BLOOP
-ENDDO FLOOP
+      ! Evaluate the given boundary quantity at each cell of the current PATCH
+
+      DO K=PA%KG1,PA%KG2
+         DO J=PA%JG1,PA%JG2
+            DO I=PA%IG1,PA%IG2
+               IC = CELL_INDEX(I,J,K)
+               IW = WALL_INDEX(IC,-PA%IOR) ; IF (IW==0) CYCLE
+               SELECT CASE(ABS(PA%IOR))
+                  CASE(1) ; L=J ; N=K
+                  CASE(2) ; L=I ; N=K
+                  CASE(3) ; L=I ; N=J
+               END SELECT
+               PP(L,N) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW)
+               IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(IC)) IBK(L,N) = 1
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! Integrate the boundary quantity in time
+
+      IF (BF%TIME_INTEGRAL_INDEX>0) THEN
+         DO N=N1,N2
+            DO L=L1,L2
+               NC = NC + 1
+               BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX) = BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX) + PP(L,N)*DT_BNDF
+               PP(L,N) = BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX)
+            ENDDO
+         ENDDO
+      ENDIF
+
+      ! Interpolate the boundary quantity PP at cell corners, PPN
+
+      IF (.NOT.BF%CELL_CENTERED) THEN
+         DO N=N1-1,N2
+            DO L=L1-1,L2
+               IF (IBK(L,N)==1)     PPN(L,N) = PPN(L,N) + PP(L,N)
+               IF (IBK(L+1,N)==1)   PPN(L,N) = PPN(L,N) + PP(L+1,N)
+               IF (IBK(L,N+1)==1)   PPN(L,N) = PPN(L,N) + PP(L,N+1)
+               IF (IBK(L+1,N+1)==1) PPN(L,N) = PPN(L,N) + PP(L+1,N+1)
+               ISUM = IBK(L,N)+IBK(L,N+1)+IBK(L+1,N)+IBK(L+1,N+1)
+               IF (ISUM>0) THEN
+                  PPN(L,N) = PPN(L,N)/REAL(ISUM,EB)
+               ELSE
+                  PPN(L,N) = SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=0)
+               ENDIF
+            ENDDO
+         ENDDO
+         WRITE(LU_BNDF(NF,NM)) ((PPN(L,N),L=L1-1,L2),N=N1-1,N2)
+      ELSE
+         WRITE(LU_BNDF(NF,NM)) ((PP(L,N),L=L1,L2+1),N=N1,N2+1)
+      ENDIF
+
+   ENDDO PATCH_LOOP
+ENDDO FILE_LOOP
 
 END SUBROUTINE DUMP_BNDF
 
@@ -6607,7 +6487,7 @@ REAL(FB) :: STIME
 INTEGER :: ISUM,KG,IOR,NF,IND,I,J,K,I1,I2,J1,J2,K1,K2,IC,IW,N
 INTEGER, INTENT(IN) :: NM
  
-IF (MESHES(NM)%NPATCH==0) RETURN
+IF (MESHES(NM)%N_PATCH==0) RETURN
 
 IF (EVACUATION_ONLY(NM)) RETURN
  
