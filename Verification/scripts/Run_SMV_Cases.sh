@@ -41,6 +41,7 @@ case $OPTION in
   ;;
   o)
   OPENMP=openmp_
+  RUN_OPENMP=1
   ;;
   p)
    size="$OPTARG"
