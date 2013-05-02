@@ -46,6 +46,7 @@ case $OPTION in
   ;;
   o)
   OPENMP=openmp_
+  RUN_OPENMP=1
   ;;
   p)
   size="$OPTARG"
@@ -84,6 +85,10 @@ fi
 
 export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue" 
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
+
+if [ $RUN_OPENMP ]; then
+  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue" 
+fi
 
 export BASEDIR=`pwd`
 

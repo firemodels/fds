@@ -98,6 +98,10 @@ fi
 export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
 export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 
+if [ $RUN_OPENMP ]; then
+  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue" 
+fi
+
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
 scripts/SMV_Cases.sh
