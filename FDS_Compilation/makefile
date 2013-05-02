@@ -49,27 +49,27 @@ setup_win:
 # Files which have OpenMP compiler directives are compiled using the
 # FOPENMPFLAG and can be enabled/disabled on a per-file basis below.
 # If the target name includes "openmp", then the OpenMP flags are appended.
-# ifeq ($(findstring openmp, $(MAKECMDGOALS)), openmp)
+ifeq ($(findstring openmp, $(MAKECMDGOALS)), openmp)
 # divg.o: FFLAGS += $(FOPENMPFLAGS)
 # fire.o: FFLAGS += $(FOPENMPFLAGS)
-# func.o: FFLAGS += $(FOPENMPFLAGS)
-# mass.o: FFLAGS += $(FOPENMPFLAGS)
+func.o: FFLAGS += $(FOPENMPFLAGS)
+mass.o: FFLAGS += $(FOPENMPFLAGS)
 # part.o: FFLAGS += $(FOPENMPFLAGS)
 # pois.o: FFLAGS += $(FOPENMPFLAGS)
-# pres.o: FFLAGS += $(FOPENMPFLAGS)
+pres.o: FFLAGS += $(FOPENMPFLAGS)
 # turb.o: FFLAGS += $(FOPENMPFLAGS)
 # velo.o: FFLAGS += $(FOPENMPFLAGS)
 
 # divg.obj: FFLAGS += $(FOPENMPFLAGS)
 # fire.obj: FFLAGS += $(FOPENMPFLAGS)
-# func.obj: FFLAGS += $(FOPENMPFLAGS)
-# mass.obj: FFLAGS += $(FOPENMPFLAGS)
+func.obj: FFLAGS += $(FOPENMPFLAGS)
+mass.obj: FFLAGS += $(FOPENMPFLAGS)
 # part.obj: FFLAGS += $(FOPENMPFLAGS)
 # pois.obj: FFLAGS += $(FOPENMPFLAGS)
-# pres.obj: FFLAGS += $(FOPENMPFLAGS)
+pres.obj: FFLAGS += $(FOPENMPFLAGS)
 # turb.obj: FFLAGS += $(FOPENMPFLAGS)
 # velo.obj: FFLAGS += $(FOPENMPFLAGS)
-# endif
+endif
 
 # Windows Intel Compiler, version 11
 
@@ -287,7 +287,7 @@ intel_linux_64 : obj = fds_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-openmp_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo -parallel
+openmp_intel_linux_64 : FFLAGS = -m64 -O3 -vec_report0 -ipo
 openmp_intel_linux_64 : LFLAGS = -static-intel
 openmp_intel_linux_64 : FCOMPL = ifort
 openmp_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static
@@ -362,7 +362,7 @@ intel_linux_64_db : obj = fds_intel_linux_64_db
 intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-openmp_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03 -parallel
+openmp_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
 openmp_intel_linux_64_db : LFLAGS = -static-intel
 openmp_intel_linux_64_db : FCOMPL = ifort
 openmp_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static
