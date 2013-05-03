@@ -11,6 +11,7 @@ $VDIR/Bryant_Doorway/FDS_Output_Files/Process_Output.csh
 $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/CSTB_Tunnel/FDS_Output_Files/Process_Output.csh
 $VDIR/Cup_Burner/FDS_Output_Files/Process_Output.csh
+$VDIR/FAA_Cargo_Compartments/FDS_Output_Files/Process_Output.csh
 $VDIR/FAA_Polymers/FDS_Output_Files/Process_Output.csh
 $VDIR/Fleury_Heat_Flux/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_Parallel_Panels/FDS_Output_Files/Process_Output.csh
@@ -40,6 +41,7 @@ $VDIR/Steckler_Compartment/FDS_Output_Files/Process_Output.csh
 $VDIR/Turbulent_Jet/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_Commodity/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_NFPRF/FDS_Output_Files/Process_Output.csh
+$VDIR/UL_NIST_Vents/FDS_Output_Files/Process_Output.csh
 $VDIR/Ulster_SBI/FDS_Output_Files/Process_Output.csh
 $VDIR/USCG_HAI/FDS_Output_Files/Process_Output.csh
 $VDIR/USN_Hangars/FDS_Output_Files/Process_Output.csh
