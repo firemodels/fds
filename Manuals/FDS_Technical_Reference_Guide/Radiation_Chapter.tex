@@ -9,6 +9,7 @@ Gas phase thermal conduction and radiation are represented by the divergence of 
 
 
 \section{Radiation Transport Equation}
+\label{RTEsection}
 
 The Radiative Transport Equation (RTE) for an absorbing, emitting, and scattering medium is
 \begin{align}
@@ -374,8 +375,7 @@ the radiative heat flux $\dq_{\rm r}''$ is computed at solid boundaries.
 \label{radiation-discre}
 
 
-To obtain the discretized form of the
-RTE, the unit sphere is divided into a finite number of solid angles.
+To obtain the discretized form of the RTE, the unit sphere is divided into a finite number of solid angles.
 The coordinate system used to discretize the solid angle is
 shown in Figure~\ref{Angular}.
 \begin{figure}[ht]
@@ -437,16 +437,17 @@ chosen to be same as $\delta\phi$.
 
 \subsection{Spatial Discretization}
 
-The grid used for the RTE solver is the same as for the fluid solver.
-The radiative transport equation~(\ref{bandRTE}) is solved using
-techniques similar to those for convective transport in finite volume
-methods for fluid flow~\cite{Raithby}; thus, the name given to it is
-the Finite Volume Method (FVM). More details of the model
-implementation can be found from~\cite{Hostikka:2008}.
-To obtain the discretized form of the
-RTE, the computational domain, the unit sphere and the spectrum are divided as explained in section~\ref{radiation-discre}.
-In each grid cell a discretized equation is derived by integrating
-Eq.~(\ref{bandRTE}) over the volume of cell $ijk$ and the control
+\subsubsection{Derivation}
+
+The grid used for the RTE solver is the same as for the hydrodynamic solver. The radiative transport equation~(\ref{bandRTE}) is solved using
+techniques similar to those for convective transport in finite volume methods for fluid flow~\cite{Raithby}; thus, the name given to it is
+the Finite Volume Method (FVM). More details of the model implementation can be found from~\cite{Hostikka:2008}.
+
+The thermal radiation spectrum is first divided into bands, as described in section~\ref{RTEsection}.  The procedure outlined below is 
+applied for each band of a wide band model, and thus the subscript $n$ has been removed for clarity.
+The unit sphere is then discretized, as described in section~\ref{radiation-discre}. 
+Finally, the computational domain is divided into numerical grid as described in section~\ref{govequations}. 
+In each grid cell, a discretized equation is derived by integrating Eq.~(\ref{bandRTE}) over the volume of cell $ijk$ and the control
 angle $\delta \Omega^l$, to obtain
 \be
   \int_{\delta \Omega^l} \int_{V_{ijk}}
@@ -454,16 +455,17 @@ angle $\delta \Omega^l$, to obtain
    \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx') \;
     \left[ I_{\rm b}(\bx') - I(\bx',\bs') \right] \d \bx' \d \bs'
 \ee
-The volume integral on the left hand side is replaced by a surface
-integral over the cell faces using the divergence theorem. Note that
-the procedure outlined below is appropriate for each band of a wide
-band model, thus the subscript $n$ has been removed for clarity.
-
+The volume integral on the left hand side is replaced by a surface integral over the cell faces using the divergence theorem. 
+\be
+  \int_{\delta \Omega^l} \int_{A_{ijk}}
+   \left(\bs' \cdot \bn' \right) I(\bx',\bs') \d\bn' \d\bs' =
+   \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx') \;
+    \left[ I_{\rm b}(\bx') - I(\bx',\bs') \right] \d \bx' \d \bs'
+\ee
 Assuming that the radiation intensity $I(\bx,\bs)$ is constant on each
 of the cell faces, the surface integral can be approximated by a sum
-over the cell faces.  Assuming further that $I(\bx,\bs)$ is constant
-within the volume $V_{ijk}$ and over the angle $\delta \bO^l$ we
-obtain
+over the cell faces.  Assuming further that $I(\bx,\bs)$ is constant within the volume $V_{ijk}$ and over the angle $\delta \bO^l$, and that
+$\kappa(\bx')$ and $I_{\rm b}(\bx')$ are constants within the volume $V_{ijk}$, we obtain
 \be  \sum_{m=1}^6 A_m \; I_m^l \;
       \int_{\Omega^l}(\bs' \cdot \bn_m) \d \bs'
    = \kappa_{ijk} \,
@@ -487,52 +489,36 @@ exactly.The local incident radiation intensity is
  U_{ijk} = \sum_{l=1}^{N_{\Omega}} I_{ijk}^l \delta\Omega^l
 \ee
 
-In Cartesian coordinates\footnote{In the axisymmetric case
-equation~(\ref{RTEdiscrete2}) becomes
-a little bit more complicated, as the cell face normal vectors $\bn_m$
-are not always constant. However, the computational efficiency can still be
+In Cartesian coordinates\footnote{In the axisymmetric case equation~(\ref{RTEdiscrete2}) becomes
+a little bit more complicated, as the cell face normal vectors $\bn_m$ are not always constant. However, the computational efficiency can still be
 retained.},
-the normal vectors $\bn_m$ are the base
-vectors of the coordinate system and the integrals over the solid
-angle do not depend on the physical coordinate, but the direction
-only. The intensities on the cell boundaries, $I_m^l$, are calculated
-using a first-order upwind scheme.  If the physical space is swept in
-the direction $\bs^l$, the intensity $I_{ijk}^l$ can be directly obtained
-from an algebraic equation. This makes the numerical solution of the
-FVM very fast.  Iterations are needed only to account for the
-reflective boundaries. However, this is seldom necessary in
-practice, because the time step set by the flow solver is small.
-
-
-The cell face intensities, $I_m^l$ appearing on the left hand side of
-(\ref{RTEdiscrete2}) are calculated using a first order
-upwind scheme. Consider, for example, a control angle having a
-direction vector $\bs$. If the radiation is traveling in the positive
-$x$-direction, i.e., $\bs\cdot {\bf i} \geq 0$, the intensity on the
-upwind side, $I_{xu}^l$ is assumed to be
-the intensity in the neighboring cell, $I_{i-1\,jk}^l$,
-and the intensity on the downwind
-side is the intensity in the cell itself $I_{ijk}^l$.
-
-On a rectilinear grid, the normal vectors $\bn_m$ are the base vectors
-of the coordinate system and the integrals over the solid angle can be
-calculated analytically. Equation (\ref{RTEdiscrete2}) can be simplified
-\be
-  a_{ijk}^l I_{ijk}^l =
-  a_{x}^l   I_{xu}^l +
-  a_{y}^l   I_{yu}^l +
-  a_{z}^l   I_{zu}^l +   b_{ijk}^l \label{RTEdiscrete3}
+the normal vectors $\bn_m$ are the base vectors of the coordinate system and the integrals over the solid
+angle do not depend on the physical coordinate, but the direction only. These integrals are denoted as
+\be 
+D_m^l= \int_{\Omega^l}(\bs' \cdot \bn_m) \d \bs'
+\label{cellfaceintegral}
 \ee
-where
-\begin{align}
-  a_{ijk}^l & = A_x |D_x^l| + A_y |D_y^l| +A_z |D_z^l| +
-        \kappa_{ijk} \; V_{ijk} \delta\Omega^l \\
-  \notag \\
-  a_{x}^l & = A_x |D_x^l| \\
-  a_{y}^l & = A_y |D_y^l| \\
-  a_{z}^l & = A_z |D_z^l|
+and the discrete equation becomes
+\be  \sum_{m=1}^6 A_m \; I_m^l \; D_m^l 
+   = \kappa_{ijk} \,
+     \left[ I_{{\rm b},ijk} - I_{ijk}^l \right] \; V_{ijk} \,
+     \delta \Omega^l   \label{RTEdiscrete3}
+\ee
+The cell face intensities, $I_m^l$ appearing on the left hand side of (\ref{RTEdiscrete3}) are calculated using a first order
+upwind scheme. Consider, for example, a control angle having a direction vector $\bs$. If the radiation is traveling in the positive
+$x$-direction, i.e., $\bs\cdot {\bf i} \geq 0$, the intensity on the upwind side, $I_{xu}^l$ is assumed to be
+the intensity in the neighboring cell, $I_{i-1\,jk}^l$, and the intensity on the downwind side is the (unknown) intensity in the cell 
+itself $I_{ijk}^l$. The discrete RTE can now be written using the upwind intensities $I^l_{xu}$, $I^l_{yu}$ and $I^l_{zu}$ and $I_{ijk}^l$:
+\begin{align}  
+   \notag A_x \; I_{xu}^l \; D_{xu}^l  & + A_x \; I_{ijk}^l \; D_{xd}^l +  \\
+   \notag A_y \; I_{yu}^l \; D_{yu}^l  & + A_y \; I_{ijk}^l \; D_{yd}^l +  \\
+   \notag A_z \; I_{zu}^l \; D_{zu}^l  & + A_z \; I_{ijk}^l \; D_{zd}^l  \\
+   & = \kappa_{ijk}\,I_{{\rm b},ijk} V_{ijk} \,\delta \Omega^l   
+   - \kappa_{ijk}\,I_{ijk}^l       V_{ijk} \,\delta \Omega^l
+\label{RTEdiscrete4}
 \end{align}
-
+where the $D$-terms on the LHS are integrals (\ref{cellfaceintegral}) evaluated on upwind and downwind sides of the cell. In the rectilinear mesh,
+$D_{xu}^l = -D_{xd}^l$ and the equation can be simplified further. In addition, the integrals over the solid angle can be calculated analytically
 \begin{align}
    D_x^l & = \int_{\Omega^l}(\bs^l\cdot {\bf i}) \, \d\Omega = \int_{\dph}\int_{\dth} (\bs^l\cdot{\bf i}) \sin\theta \; \d \theta \d\phi = \int_{\dph}\int_{\dth} \cos\phi\sin\theta\sin\theta\; \d\theta \d\phi \notag \\
          & = \frac{1}{2}\left( \sin\phi^+ - \sin\phi^- \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
@@ -540,31 +526,39 @@ where
          & = \frac{1}{2}\left( \cos\phi^- - \cos\phi^+ \right) \left[\Delta\theta - \left(\cos\theta^+\sin\theta^+ - \cos\theta^-\sin\theta^-\right)\right]  \\
    D_z^l & = \int_{\Omega^l}(\bs^l\cdot {\bf k}) \d \Omega = \int_{\dph}\int_{\dth} \cos\theta\sin\theta\;  \d\theta \d\phi \notag \\
          & = \frac{1}{2}\Delta\phi \left[\left(\sin\theta^+\right)^2 - \left(\sin\theta^-\right)^2\right]
+\\
+   \delta \Omega^l & = \int_{\Omega^l} \d \Omega = \int_{\dph}\int_{\dth} \sin\theta \; \d\theta \d\phi
 \end{align}
 
+\subsubsection{Solution procedure}
+
+Equation (\ref{RTEdiscrete4}) for the unknown intensity $I_{ijk}^l$ is written in the form
+\be
+  a_{ijk}^l I_{ijk}^l =
+  a_{x}^l   I_{xu}^l +
+  a_{y}^l   I_{yu}^l +
+  a_{z}^l   I_{zu}^l +   b_{ijk}^l \label{RTEdiscrete5}
+\ee
+where
 \begin{align}
-  b_{ijk}^l & = \kappa_{ijk} \; I_{{\rm b},ijk} \; V_{ijk} \; \delta\Omega^l \\
+  a_{ijk}^l & = A_x |D_x^l| + A_y |D_y^l| +A_z |D_z^l| + \kappa_{ijk} \; V_{ijk} \delta\Omega^l \\
   \notag \\
-  \delta \Omega^l & = \int_{\Omega^l} \d \Omega = \int_{\dph}\int_{\dth} \sin\theta \; \d\theta \d\phi
+  a_{x}^l & = A_x |D_x^l| \\
+  a_{y}^l & = A_y |D_y^l| \\
+  a_{z}^l & = A_z |D_z^l| \\
+  b_{ijk}^l & = \kappa_{ijk} \; I_{{\rm b},ijk} \; V_{ijk} \; \delta\Omega^l 
 \end{align}
 
 \noindent
-Here $\bf i$, $\bf j$ and $\bf k$ are the base vectors of the
-Cartesian coordinate system. $\theta^+$, $\theta^-$, $\phi^+$ and
-$\phi^-$ are the upper and lower boundaries of the control angle in
-the polar and azimuthal directions, respectively, and $\Delta\theta =
-\theta^+ - \theta^-$ and $\Delta\phi = \phi^+ - \phi^-$. In the cells
-next to a wall, the areas $A_m$ of the faces, that are perpendicular to
-the wall, are multiplied by 0.5.
+Here $\bf i$, $\bf j$ and $\bf k$ are the base vectors of the Cartesian coordinate system. $\theta^+$, $\theta^-$, $\phi^+$ and
+$\phi^-$ are the upper and lower boundaries of the control angle in the polar and azimuthal directions, respectively, and $\Delta\theta =
+\theta^+ - \theta^-$ and $\Delta\phi = \phi^+ - \phi^-$. 
 
-The solution method of (\ref{RTEdiscrete3}) is based on an explicit
-marching sequence~\cite{Kim}. The marching direction depends on the
-propagation direction of the radiation intensity. As the marching is
-done in the ``downwind'' direction, the ``upwind'' intensities in all
-three spatial directions are known, and the intensity $I_{ijk}^l$ can
-be solved directly. Iterations may be needed only with the reflective
-walls and optically thick situations.  Currently, no iterations are
-made.
+The solution method of (\ref{RTEdiscrete4}) is based on an explicit marching sequence~\cite{Kim}. The marching direction depends on the
+propagation direction of the radiation intensity. As the marching is done in the ``downwind'' direction, the ``upwind'' intensities in all
+three spatial directions are known, and the intensity $I_{ijk}^l$ can be solved directly from an algebraic equation. In the first cell to be solved,
+all the upwind intensities are determined from solid or gas phase boundaries. In theory, iterations are needed if the reflections 
+or scattering are important, or if the scenario is optically very thick. Currently, no iterations are made.
 
 \subsection{Boundary Conditions}
 
@@ -661,7 +655,7 @@ U^*(\bx,\la) = \frac{U(\bx,\la) - \delta\Omega^l \, I_{\la}(\bx,\bs)}{\delta\Ome
 where $U(\bx)$ is the total intensity integrated over the unit sphere. The in-scattering
 integral can now be approximated as
 \begin{align}
-\frac{\sigma_{\rm p}(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
+\notag \frac{\sigma_{\rm p}(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
   \; \d\Omega'
   &\approx
 \sigma_{\rm p}(\bx,\la) \, \left( \chi_{\rm f} \, I_{\la}(\bx,\bs) ~+~\frac{1}{\delta\Omega^{*}}~\left(1-\chi_{\rm f}\right)~
