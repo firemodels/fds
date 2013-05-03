@@ -4977,7 +4977,7 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.} on the {\ct MISC} line.  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
 
 \subsubsection{Viscosity}
-Viscosity of the gas species can either be specified with {\ct VISCOSITY} (with {\ct RAMP\_MU} for temperature dependence), or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for air.
+The dynamic viscosity of the gas species can either be specified with {\ct VISCOSITY} (with {\ct RAMP\_MU} for temperature dependence), or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for air.
 
 \subsubsection{Radiative Properties}
 \label{info:radiative_spec_props}
