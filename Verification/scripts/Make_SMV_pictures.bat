@@ -20,10 +20,15 @@ set vis="%SVNROOT%\Verification\Visualization"
 set wui="%SVNROOT%\Verification\Wui"
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide"
 set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
+set summary="%SVNROOT%\Manuals\Verification_Summary"
 
 set RUNFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNCFAST=call "%SCRIPT_DIR%\runsmv.bat"
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
+
+Rem erase summary images
+
+erase %summary%\images\*.png
 
 Rem --------------  user guide ----------------
 
@@ -91,5 +96,10 @@ call %SCRIPT_DIR%\SMV_Pictures_Cases.bat
 
 cd %BASEDIR%
 call %SCRIPT_DIR%\SMV_DIFF_Pictures_Cases.bat
+
+Rem copy images to summary directory
+
+copy %smvug%\SCRIPT_FIGURES\*.png %summary%\images
+copy %smvvg%\SCRIPT_FIGURES\*.png %summary%\images
 
 cd %SCRIPT_DIR%
