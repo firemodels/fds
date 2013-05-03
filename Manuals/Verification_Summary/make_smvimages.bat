@@ -23,11 +23,6 @@ call %envfile%
 
 %svn_drive%
 
-cd %svn_root%\Manuals\Verification_Summary
-set CURDIR=%CD%
-erase images\*.png
 cd ..\..\Verification\scripts
 call Make_SMV_pictures.bat
-cd %CURDIR%
-copy ..\SMV_User_Guide\SCRIPT_FIGURES\*.png images
-copy ..\SMV_Verification_Guide\SCRIPT_FIGURES\*.png images
+
