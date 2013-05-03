@@ -209,6 +209,7 @@ The local density of material component $\alpha$ evolves in time according to th
 \be
   \dod{ }{t} \left( \frac{\rho_{\rm s,\alpha}}{\rho_{\rm s}(0)} \right) =
     -\sum_{\beta=1}^{N_{\rm r,\alpha}} r_{\alpha \beta} + S_\alpha
+  \label{solid_species_conservation}
 \ee
 where $N_{\rm r,\alpha}$ is the number of reactions for material $\alpha$, $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units of \si{1/s},
 and $\rho_{\rm s}(0)$ is the initial density of the material layer. $S_\alpha$ is the production rate of material component $\alpha$ as a result of
@@ -218,17 +219,30 @@ and power functions:
 r_{\alpha \beta} =
     \underbrace{\left( \frac{\rho_{\rm s,\alpha}}{\rho_{\rm s}(0)}\right)^{n_{\rm s,\alpha\beta}}}_\textrm{Reactant dependency}
     \underbrace{A_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_{\rm s}}\right)}_\textrm{Arrhenius function}
-    \underbrace{X_{\rm O_2}^{n_{\rm O_2,\alpha\beta}}}_\textrm{Oxidation function}
+    \underbrace{\left[X_{\rm O_2}(x)\right]^{n_{\rm O_2,\alpha\beta}}}_\textrm{Oxidation function}
     \underbrace{\max \big[0,S_{\rm thr,\alpha,\beta}(T_{\rm s}-T_{\rm thr,\alpha \beta}) \big]^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
    \label{Arrhenius}
 \ee
-The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques. The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
+The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial 
+reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction 
+rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters 
+$A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques. 
+
+The third term can be used to describe the dependence on the 
+local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. 
+The oxygen concentration profile within practical materials depends on the competetion between diffusion and reactive consumption. 
+As FDS does not solve for the transport of gaseous species within concensed phase materials, a simple exponential profile is assumed and the 
+user is expected to specify the characteristic depth at which oxygen would be present. 
+The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g,\alpha\beta})
 \ee
-where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. The actual diffusion process is thus not simulated. Instead, it is assumed that the diffusion and oxygen consumption processes are in equilibrium and there is an exponential profile of oxygen concentration inside the material.
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ means that the reaction takes place 
+only at the surface of the material.
 
 The fourth term is the power function where $T_{\rm thr,\alpha \beta}$ is a threshold temperature that can be used to dictate that the reaction must not occur below ($S_{\rm thr,\alpha,\beta}=+1$)  or above ($S_{\rm thr,\alpha,\beta}=-1$) a user-specified temperature. By default, the fourth term is deactivated ($S_{\rm thr,\alpha,\beta}=+1, T_{\rm thr,\alpha\beta}=0$ K).
+
+Note that the solid species conservation equation~\ref{solid_species_conservation} and the reaction rate equation~\ref{Arrhenius} are inconsistent with the common practice of chemical kinetics convention, where the unit of the reaction rate is usually \si{kg/(m^3.s)} or \si{mol/(m^3.s)}. The current form can be obtained by dividing a more conventional reaction rate equation by $\rho_{\rm s}(0)$. This form is very close to the form used in \cite{Gpyro:FSJ} with the exception that initial layer density $\rho_{\rm s}(0)$ is used for scaling instead of the instantaneous value.
 
 The production term $S_\alpha$ is the sum over all the reactions where the solid residue is material $\alpha$
 \be
