@@ -77,6 +77,12 @@ export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPEN
 export FDS=$FDSEXE
 export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
 
+SMVUGDIR=$SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES
+SMVVGDIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
+SMVVSDIR=$SVNROOT/Manuals/Verification_Summary/images
+
+rm -rf $SMVVSDIR/*.png
+
 # Set queue to submit cases to
 
 if [ "$queue" != "" ]; then
@@ -106,6 +112,10 @@ fi
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
 scripts/SMV_Cases.sh
+
+cp $SMVUGDIR/*.png $SMVVSDIR/.
+cp $SMVVGDIR/*.png $SMVVSDIR/.
+
 
 echo FDS cases submitted
 
