@@ -183,7 +183,12 @@ void Get_VP_info(void){
 
   if(visTitle==1){
     VP_title.width = screenWidth-VP_colorbar.width-2*titlesafe_offset;
-    VP_title.height=text_height+v_space;
+    if(gversion==1){
+      VP_title.height=3*text_height+2*v_space;
+    }
+    else{
+      VP_title.height=text_height+v_space;
+    }
     VP_title.doit = 1;
   }
   else{
@@ -759,12 +764,39 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  if(visFullTitle==1&&showplot3d==1){
-    outputText(left,textdown, FULLTITLE);
+  if(gversion==0){
+    if(visFullTitle==1&&showplot3d==1){
+      outputText(left,textdown, FULLTITLE);
+    }
+    else{
+      outputText(left,textdown, TITLE);
+      text_width = getStringWidth(TITLE);
+    }
   }
   else{
-    outputText(left,textdown, TITLE);
-    text_width = getStringWidth(TITLE);
+    char label[256];
+    int smv_top, smv_top2, fds_top;
+
+    if(revision_fds>0){
+      fds_top=textdown;
+      smv_top=fds_top+VP_title.text_height+v_space;
+      smv_top2=smv_top+VP_title.text_height+v_space;
+    }
+    else{
+      smv_top=textdown;
+      smv_top2=smv_top+VP_title.text_height+v_space;
+    }
+    outputText(left,smv_top2,TITLE);
+#ifdef BIT64
+    sprintf(label,"Smokeview (64 bit) revision:%i",revision_smv);
+#else
+    sprintf(label,"Smokeview (32 bit) revision:%i",revision_smv);
+#endif
+    outputText(left,smv_top,label);
+    if(revision_fds>0){
+      sprintf(label,"FDS revision:%i",revision_fds);
+      outputText(left,fds_top,label);
+    }
   }
 }
 

@@ -1575,9 +1575,6 @@ void initvars(void){
 
   setPDIM=0;
   menustatus=GLUT_MENU_NOT_IN_USE;
-  visTimeZone=1, visTimeSmoke=1, visTimeSlice=1, visTimePatch=1, visTimeIso=1, visTimeEvac=1;
-  vishmsTimelabel=0, visTimeLabels=1;
-  visTitle=1, visFullTitle=1, visFramerate=0, visFramelabel=1, visTimelabel=1;
 
   vertical_factor=1.0;
   terrain_rgba_zmin[0]=90;

@@ -342,6 +342,9 @@ void LabelMenu(int value){
    case 18:
      vis_user_ticks = 1 - vis_user_ticks;
      break;
+   case 20:
+     gversion=1-gversion;
+     break;
    default:
      ASSERT(FFALSE);
      break;
@@ -5666,6 +5669,8 @@ updatemenu=0;
     if(visgridloc==1)glutAddMenuEntry(_("*Grid locations"),14);
     if(visgridloc==0)glutAddMenuEntry(_("Grid locations"),14);
   }
+  if(gversion==1)glutAddMenuEntry(_("*Version info"),20);
+  if(gversion==0)glutAddMenuEntry(_("Version info"),20);
 
   glutAddMenuEntry(_("Show all"),4);
   glutAddMenuEntry(_("Hide all"),5);

@@ -5,7 +5,6 @@
 #define SMOKEVIEWVARS_H_DEFINED
 #include <time.h>
 
-
 #ifdef CPP
 #include "glui.h"
 #endif
@@ -30,6 +29,7 @@ SVEXTERN int SVDECL(show_all_units,1);
 #else
 SVEXTERN int SVDECL(show_all_units,0);
 #endif
+SVEXTERN int SVDECL(gversion,0);
 SVEXTERN unsigned char SVDECL(*patchmin_unit,NULL),SVDECL(*patchmax_unit,NULL);
 SVEXTERN unsigned char SVDECL(*slicemin_unit,NULL),SVDECL(*slicemax_unit,NULL);
 SVEXTERN unsigned char SVDECL(*plot3dmin_unit,NULL),SVDECL(*plot3dmax_unit,NULL);
@@ -640,10 +640,12 @@ SVEXTERN int SVDECL(nvolfacelistinfo,0);
 SVEXTERN int SVDECL(update_makeiblank_smoke3d,0), SVDECL(update_initcull,0);
 SVEXTERN int setPDIM;
 SVEXTERN int menustatus;
-SVEXTERN int visTimeZone, visTimeSmoke, visTimeSlice, visTimePatch, visTimeIso, visTimeEvac;
-SVEXTERN int vishmsTimelabel, visTimeLabels;
+SVEXTERN int SVDECL(visTimeZone,1), SVDECL(visTimeSmoke,1), SVDECL(visTimeSlice,1), SVDECL(visTimePatch,1);
+SVEXTERN int SVDECL(visTimeIso,1), SVDECL(visTimeEvac,1);
+SVEXTERN int SVDECL(vishmsTimelabel,0), SVDECL(visTimeLabels,1);
 SVEXTERN int SVDECL(visColorbarLabels,1), SVDECL(visColorbarLabels_save,1);
-SVEXTERN int SVDECL(visTitle,1), visFullTitle, visFramerate, visFramelabel, visTimelabel;
+SVEXTERN int SVDECL(visTitle,1), SVDECL(visFullTitle,1), SVDECL(visFramerate,0);
+SVEXTERN int SVDECL(visFramelabel,1), SVDECL(visTimelabel,1);
 SVEXTERN int SVDECL(visHRRlabel,0);
 #ifdef pp_memstatus
 SVEXTERN int visAvailmemory;

@@ -8409,6 +8409,11 @@ int readini2(char *inifile, int localfile){
        continue;
      }
    }
+   if(match(buffer,"GVERSION")==1){
+     fgets(buffer,255,stream);
+     sscanf(buffer,"%i",&gversion);
+     if(gversion!=0)gversion=1;
+   }
    if(match(buffer,"SCALEDFONT")==1){
      fgets(buffer,255,stream);
      sscanf(buffer,"%i %f %i",&scaled_font2d_height,&scaled_font2d_height2width,&scaled_font2d_thickness);
@@ -11405,6 +11410,8 @@ void writeini(int flag){
   }
   fprintf(fileout,"SHOWTITLE\n");
   fprintf(fileout," %i\n",visTitle);
+  fprintf(fileout,"GVERSION\n");
+  fprintf(fileout," %i\n",gversion);
   fprintf(fileout,"SHOWCOLORBARS\n");
   fprintf(fileout," %i\n",visColorbarLabels);
   fprintf(fileout,"SHOWBLOCKS\n");
