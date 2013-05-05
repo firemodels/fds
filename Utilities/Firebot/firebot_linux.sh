@@ -1268,11 +1268,12 @@ email_build_status()
       # Send success message with links to nightly manuals
       stop_time=`date`
       echo "-------------------------------" > $TIME_LOG
-      echo "      Host: $hostname " >> $TIME_LOG
+      echo "Host: $hostname " >> $TIME_LOG
       echo "Start Time: $start_time " >> $TIME_LOG
-      echo " Stop Time: $stop_time " >> $TIME_LOG
-      echo "   Nightly Manuals (private): http://blaze.nist.gov/firebot" >> $TIME_LOG
-      echo "   Nightly Manuals (public):  https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit" >> $TIME_LOG
+      echo "Stop Time: $stop_time " >> $TIME_LOG
+      echo "-------------------------------" >> $TIME_LOG
+      echo "Nightly Manuals (private): http://blaze.nist.gov/firebot" >> $TIME_LOG
+      echo "Nightly Manuals (public):  https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
       mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < $TIME_LOG > /dev/null
    fi
