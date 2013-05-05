@@ -1,5 +1,6 @@
 #!/bin/bash
 
+$RUNFDS Visualization version
 $RUNFDS Visualization cell_test
 $RUNCFAST Visualization cfast_test
 $RUNFDS Visualization colorbar
