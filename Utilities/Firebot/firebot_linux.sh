@@ -19,9 +19,6 @@ mailTo="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov
 # Firebot's username
 FIREBOT_USERNAME="firebot"
 
-# Hostname of machine
-hostname=`hostname`
-
 # Change to home directory
 cd
 FIREBOT_HOME_DIR="`pwd`"
@@ -30,6 +27,7 @@ FIREBOT_HOME_DIR="`pwd`"
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
 FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
 CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
+TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
 
@@ -1267,14 +1265,25 @@ email_build_status()
 
    # No errors or warnings
    else
-      # Send empty email with success message
-      mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
+      # Send success message with links to nightly manuals
+      stop_time=`date`
+      echo "-------------------------------" > $TIME_LOG
+      echo "      Host: $hostname " >> $TIME_LOG
+      echo "Start Time: $start_time " >> $TIME_LOG
+      echo " Stop Time: $stop_time " >> $TIME_LOG
+      echo "   Nightly Manuals (private): http://blaze.nist.gov/firebot" >> $TIME_LOG
+      echo "   Nightly Manuals (public):  https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit" >> $TIME_LOG
+      echo "-------------------------------" >> $TIME_LOG
+      mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < $TIME_LOG > /dev/null
    fi
 }
 
 #  ============================
 #  = Primary script execution =
 #  ============================
+
+hostname=`hostname`
+start_time=`date`
 
 ### Clean up on start ###
 clean_firebot_history
