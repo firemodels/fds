@@ -78,6 +78,7 @@ export BASEDIR=`pwd`
 
 export SMVUG=$SVNROOT/Manuals/SMV_User_Guide
 export SMVVG=$SVNROOT/Manuals/SMV_Verification_Guide
+SUMMARY=$SVNROOT/Manuals/Verification_Summary
 
 if ! [ -e $SMV ]; then
   echo "The file $SMV does not exist. Run aborted."
@@ -103,6 +104,7 @@ rm -f smokeview.version
 rm -f smokediff.version
 rm -f smokezip.version
 rm -f background.version
+rm -f $SUMMARY/images/*.png
 source ~/.bashrc_fds $IPLATFORM
 
 $SMV -help > smokeview.help
@@ -140,3 +142,8 @@ cd $SVNROOT/Verification
 scripts/SMV_DIFF_Cases.sh
 cd $CURDIDR
 source $STOPX
+
+# copy generated images to web summary directory
+
+cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
