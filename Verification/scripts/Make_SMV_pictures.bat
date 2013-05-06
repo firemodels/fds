@@ -101,5 +101,6 @@ Rem copy images to summary directory
 
 copy %smvug%\SCRIPT_FIGURES\*.png %summary%\images
 copy %smvvg%\SCRIPT_FIGURES\*.png %summary%\images
+copy %smvvg%\FIGURES\graysquares.png %summary%\images
 
 cd %SCRIPT_DIR%
