@@ -145,5 +145,6 @@ source $STOPX
 
 # copy generated images to web summary directory
 
+cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
 cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
 cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
