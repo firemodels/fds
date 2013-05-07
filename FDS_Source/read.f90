@@ -1521,8 +1521,8 @@ LAPSE_RATE           = 0._EB
 THICKEN_OBSTRUCTIONS = .FALSE.
 CFL_MAX              = 1.0_EB       ! Stability bounds
 CFL_MIN              = 0.8_EB
-VN_MAX               = 1.0_EB
-VN_MIN               = 0.8_EB
+VN_MAX               = 0.5_EB
+VN_MIN               = 0.4_EB
 PARTICLE_CFL_MAX     = 1._EB
 PARTICLE_CFL_MIN     = 0.8_EB
 VEG_LEVEL_SET        = .FALSE.
@@ -1545,8 +1545,6 @@ ENDDO MISC_LOOP
 IF (DNS) THEN
    FLUX_LIMITER = CHARM_LIMITER
    CHECK_VN = .TRUE.
-   VN_MIN = 0.4_EB
-   VN_MAX = 0.5_EB
    IF (TURBULENCE_MODEL/='null') THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: TURBULENCE_MODEL, ',TRIM(TURBULENCE_MODEL),', is not appropriate for DNS.'
       CALL SHUTDOWN(MESSAGE)
