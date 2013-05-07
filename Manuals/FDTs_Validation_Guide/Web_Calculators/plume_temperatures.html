@@ -1,0 +1,182 @@
+<html>
+<head>
+<title>Fire Dynamics Tools</title>
+
+<!-- Load MathJax -->
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<style type="text/css">
+.MathJax_Display {
+text-align: left !important;
+}
+</style>
+<!-- MathJax end -->
+
+<!-- CSS for div layout begin -->
+<style type="text/css">
+#outer {width:auto;margin:0 auto;}
+#inner {overflow:hidden;}
+#header {min-height:40px}
+#content {width:900px;min-height:250px;float:left}
+#sidebar{width:200px;min-height:250px;float:left}
+</style>
+<!-- CSS for div layout end -->
+
+<!-- Calculator function begin -->
+<script language="JavaScript">
+<!-- hide script from old browsers
+function calculate(form)
+{
+  var Q = parseFloat(form.Q.value, 10);
+  var z = parseFloat(form.z.value, 10);
+  var Ac = parseFloat(form.Ac.value, 10);
+  var Xc = parseFloat(form.Xc.value, 10);
+  Ta = 25
+  ca = 1
+  rhoa = 1.18
+  g = 9.81
+
+  Qc = Q * Xc
+  D = Math.sqrt(4 * Ac / Math.PI)
+  z0 = -1.02 + 0.083* Math.pow(Qc, 2/5) * D
+  L = -1.02 * D + 0.235 * Math.pow(Q, 2/5)
+  Tc = 9.1 * Math.pow((Ta + 273) / (g * Math.pow(ca, 2) * Math.pow(rhoa, 2)), 1/3) * Math.pow(Qc, 2/3) * Math.pow(z - z0, -5/3) + (Ta + 273)
+  Tc = Tc - 273
+
+  form.Qc.value = Math.round(Qc);
+  form.D.value = D.toFixed(2);
+  form.z0.value = z0.toFixed(2);
+  form.L.value = L.toFixed(2);
+  form.Tc.value = Tc.toFixed(2);
+}
+// done hiding from old browsers -->
+</script>
+<!-- Calculator function end -->
+
+</head>
+<body>
+
+<!-- Div layout and navigation menu begin -->
+<div id="outer">
+    <div id="header"> <h2><font color="#039">Fire Dynamics Tools - Plume Centerline Temperature</font></h2> </div>
+    <div id="inner">
+  <div id="sidebar">
+
+    <ul id="nav">
+    <li><a href="Plume_Temperatures.html">Plume Temperatures</a></li>
+    </ul>
+  
+  </div>
+<div id="content">
+<!-- Div layout and navigation menu end -->
+
+<FORM>
+The plume centerline temperature is calculated using
+
+$$ \Delta T_p = \frac{9.1 \left( \frac{T_\infty}{g c_p^2 \rho_{a}^2} \right)^{1/3} \dot Q_c^{2/3}}{(z-z_0)^{5/3}} $$
+
+The fire diameter is calculated using
+
+$$ D = \sqrt{\frac{4 A}{\pi}} $$
+
+The virtual origin is calculated using
+
+$$ z_0 = -1.02 D + 0.083 \dot Q^{2/5} $$
+<h2>Inputs</h2>
+<table bgcolor="#EEE">
+  <tr>
+    <td>
+    HRR (\(\dot Q\)):
+    </td>
+    <td>
+    <input name="Q" value="1420" maxlength="15" size=15> kW
+    </td>
+  </tr>
+  <tr>
+    <td>
+    Elevation above fire source (\(z\)):
+    </td>
+    <td>
+    <input name="z" value="6.1" maxlength="15" size=15> m
+    </td>
+  </tr>
+  <tr>
+    <td>
+    Area of combustible fuel (\(A_c\)):
+    </td>
+    <td>
+    <input name="Ac" value="0.93" maxlength="15" size=15> m\(^2\)
+    </td>
+  </tr>
+  <tr>
+    <td>
+    Convective heat release fraction (\(\chi_c\)):
+    </td>
+    <td>
+    <input name="Xc" value="0.70" maxlength="15" size=15> -
+    </td>
+  </tr>
+</table>
+<p>
+<b>Ambient conditions:</b> <br>
+Ambient temperature: 25 \(^{\circ}\)C <br>
+Specific heat of air: 1 kJ/(kg\(\cdot\)K) <br>
+Ambient air density: 1.18 kg/m\(^3\) <br>
+Acceleration of gravity: 9.81 m/s\(^2\) <br>
+<p>
+<input name="calc" value="Calculate plume centerline temperature" type=button
+onClick=calculate(this.form)>
+<h2>Outputs</h2>
+<table bgcolor="#EEE">
+  <tr>
+    <td>
+    Convective HRR:
+    </td>
+    <td>
+    <input name="Qc" readonly size=15> kW
+    </td>
+  </tr>
+  <tr>
+    <td>
+    Fire diameter:
+    </td>
+    <td>
+    <input name="D" readonly size=15> m
+    </td>
+  </tr>
+  <tr>
+    <td>
+    Hypothetical virtual origin calculation:
+    </td>
+    <td>
+    <input name="z0" readonly size=15> m
+    </td>
+  </tr>
+  <tr>
+    <td>
+    Mean flame height:
+    </td>
+    <td>
+    <input name="L" readonly size=15> m
+    </td>
+  </tr>
+  <tr>
+    <td>
+    <b>Plume centerline temperature:</b>
+    </td>
+    <td>
+    <input name="Tc" readonly size=15> \(^{\circ}\)C
+    </td>
+  </tr>
+</table>
+</FORM>
+
+<!-- Div layout and navigation menu begin -->
+</div>
+</div>
+</div>
+<!-- Div layout and navigation menu end -->
+
+</body>
+</html>
