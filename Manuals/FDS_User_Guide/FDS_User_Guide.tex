@@ -1987,7 +1987,7 @@ The Von Neumann constraint is given by
 \begin{equation}
 \mbox{VN} \equiv  \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < \frac{1}{2}
 \end{equation}
-The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.4) and {\ct VN\_MAX} (default 0.5) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.4) and {\ct VN\_MAX} (default 0.5) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
 
 We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
 \begin{equation}
@@ -9972,8 +9972,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
-{\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
-{\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
+{\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.5               \\ \hline
+{\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.4               \\ \hline
 {\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg            & 0.00595           \\ \hline
 {\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg            & 0.232378          \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
