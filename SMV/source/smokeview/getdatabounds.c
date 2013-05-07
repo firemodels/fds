@@ -72,6 +72,35 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
     }
 }
 
+
+/* ------------------ adjustpart5bounds ------------------------ */
+
+void adjustpart5chops(partdata *parti){
+  int i;
+  
+  for(i=0;i<npart5prop;i++){
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    propi->imin=0;
+    propi->imax=255;
+    if(propi->setchopmin==1){
+      float dval;
+
+      dval = propi->valmax-propi->valmin;
+      if(dval<=0.0)dval=1;
+      propi->imin=CLAMP(255*(propi->chopmin-propi->valmin)/dval,0,255);
+    }
+    if(propi->setchopmax==1){
+      float dval;
+
+      dval = propi->valmax-propi->valmin;
+      if(dval<=0.0)dval=1;
+      propi->imax=CLAMP(255*(propi->chopmax-propi->valmin)/dval,0,255);
+    }
+  }
+}
+
 /* ------------------ adjustpart5bounds ------------------------ */
 
 void adjustpart5bounds(partdata *parti){
@@ -265,6 +294,7 @@ void adjustpart5bounds(partdata *parti){
       break;
     }
   }
+  adjustpart5chops(parti);
 #ifdef _DEBUG
   print_part5prop();
 #endif

@@ -937,6 +937,7 @@ typedef struct {
   int display;
   float ppartlevels256[256];
   float valmin, valmax;
+  int imin, imax;
   float global_min, global_max;
   int set_global_bounds;
   float percentile_min, percentile_max;

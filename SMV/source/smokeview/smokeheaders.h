@@ -717,6 +717,7 @@ EXTERNCPP int ispatchtype(int type);
 EXTERNCPP void adjustdatabounds(const float *pdata, int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink, 
                       int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
+EXTERNCPP void adjustpart5chops(partdata *parti);
 EXTERNCPP void adjustpart5bounds(partdata *parti);
 EXTERNCPP void adjustPlot3Dbounds(int iplot3d, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax);

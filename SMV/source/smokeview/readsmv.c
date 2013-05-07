@@ -9038,10 +9038,11 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i %f %i %f %s",&ivmin,&vmin,&ivmax,&vmax,short_label);
   
       if(npart5prop>0){
-        int label_index;
+        int label_index=0;
+        
         trim(short_label);
         s1=trim_front(short_label);
-        label_index=get_part5prop_index_s(s1);
+        if(strlen(s1)>0)label_index=get_part5prop_index_s(s1);
         if(label_index>=0&&label_index<npart5prop){
           part5prop *propi;
 
@@ -9083,8 +9084,30 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"C_PARTICLES")==1){
+      int icmin, icmax;
+      float cmin, cmax;
+      char short_label[256],*s1;
+
+      strcpy(short_label,"");
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&setpartchopmin,&partchopmin,&setpartchopmax,&partchopmax);
+      sscanf(buffer,"%i %f %i %f %s",&icmin,&cmin,&icmax,&cmax,short_label);
+
+      if(npart5prop>0){
+        int label_index=0;
+
+        trim(short_label);
+        s1=trim_front(short_label);
+        if(strlen(s1)>0)label_index=get_part5prop_index_s(s1);
+        if(label_index>=0&&label_index<npart5prop){
+          part5prop *propi;
+
+          propi = part5propinfo + label_index;
+          propi->setchopmin=icmin;
+          propi->setchopmax=icmax;
+          propi->chopmin=cmin;
+          propi->chopmax=cmax;
+        }
+      }
       continue;
     }
     if(match(buffer,"V_SLICE")==1){
@@ -11134,6 +11157,13 @@ void writeini(int flag){
   fprintf(fileout," %i %f %i %f\n",setpartmin,partmin,setpartmax,partmax);
   fprintf(fileout,"C_PARTICLES\n");
   fprintf(fileout," %i %f %i %f\n",setpartchopmin,partchopmin,setpartchopmax,partchopmax);
+  for(i=0;i<npart5prop;i++){
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    fprintf(fileout,"C_PARTICLES\n");
+    fprintf(fileout," %i %f %i %f %s\n",propi->setchopmin,propi->chopmin,propi->setchopmax,propi->chopmax,propi->label->shortlabel);
+  }
   if(nslice2>0){
     for(i=0;i<nslice2;i++){
       fprintf(fileout,"V_SLICE\n");

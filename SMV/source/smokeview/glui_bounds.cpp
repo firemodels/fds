@@ -54,6 +54,8 @@ void boundmenu(GLUI_Rollout **ROLLOUT_bound, GLUI_Rollout **ROLLOUT_chop, GLUI_P
 
 GLUI_Rollout *ROLLOUT_slice_bound=NULL;
 GLUI_Rollout *ROLLOUT_slice_chop=NULL;
+GLUI_Rollout *ROLLOUT_part_bound=NULL;
+GLUI_Rollout *ROLLOUT_part_chop=NULL;
 
 #ifdef pp_MEMDEBUG
 #define MEMCHECK 1
@@ -129,10 +131,10 @@ GLUI_Rollout *ROLLOUT_slice_chop=NULL;
 
 #define UPDATE_VECTOR 101
 
-#define TRUNCATEBOUNDS 1
-#define DONT_TRUNCATEBOUNDS 0
-#define UPDATEBOUNDS 1
-#define DONT_UPDATEBOUNDS 0
+#define TRUNCATE_BOUNDS 1
+#define DONT_TRUNCATE_BOUNDS 0
+#define UPDATE_BOUNDS 1
+#define RELOAD_BOUNDS 0
 
 #ifdef pp_SLICECONTOURS
 #define LINE_CONTOUR_VALUE 301
@@ -538,7 +540,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &setpatchmin,&setpatchmax,&patchmin,&patchmax,
       &setpatchchopmin, &setpatchchopmax,
       &patchchopmin, &patchchopmax,
-      DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
+      RELOAD_BOUNDS,DONT_TRUNCATE_BOUNDS,
       Bound_CB);
     updatepatchlistindex2(patchinfo->label.shortlabel);
     update_hidepatchsurface();
@@ -611,25 +613,17 @@ extern "C" void glui_bounds_setup(int main_window){
 
     {
       char boundmenulabel[100];
-      GLUI_EditText **editcon;
-
-#ifdef _DEBUG
-      editcon=&EDIT_part_chopmin;
-      editcon=NULL;
-#else
-      editcon=NULL;
-#endif
 
       strcpy(boundmenulabel,"Reload Particle File(s)");
-      boundmenu(NULL,NULL,ROLLOUT_part,boundmenulabel,
+      boundmenu(&ROLLOUT_part_bound,&ROLLOUT_part_chop,ROLLOUT_part,boundmenulabel,
         &EDIT_part_min,&EDIT_part_max,&RADIO_part_setmin,&RADIO_part_setmax,
         &CHECKBOX_part_setchopmin, &CHECKBOX_part_setchopmax,
-        editcon, &EDIT_part_chopmax,
+        &EDIT_part_chopmin, &EDIT_part_chopmax,
         &STATIC_part_min_unit,&STATIC_part_max_unit,
         NULL,NULL,
         &setpartmin,&setpartmax,&partmin,&partmax,
         &setpartchopmin,&setpartchopmax,&partchopmin,&partchopmax,
-        DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
+        RELOAD_BOUNDS,DONT_TRUNCATE_BOUNDS,
         PART_CB);
         PART_CB(FILETYPEINDEX);
         if(partinfo!=NULL&&partinfo->version==0){
@@ -722,7 +716,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &STATIC_plot3d_cmin_unit,&STATIC_plot3d_cmax_unit,
       &setp3min_temp,&setp3max_temp,&p3min_temp,&p3max_temp,
       &setp3chopmin_temp, &setp3chopmax_temp,&p3chopmin_temp,&p3chopmax_temp,
-      DONT_UPDATEBOUNDS,TRUNCATEBOUNDS,
+      RELOAD_BOUNDS,TRUNCATE_BOUNDS,
       PLOT3D_CB);
     PLOT3D_CB(FILETYPEINDEX);
     PLOT3D_CB(UNLOAD_QDATA);
@@ -763,7 +757,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &setslicemin,&setslicemax,&slicemin,&slicemax,
       &setslicechopmin, &setslicechopmax,
       &slicechopmin, &slicechopmax,
-      UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
+      UPDATE_BOUNDS,DONT_TRUNCATE_BOUNDS,
       Slice_CB);
     SPINNER_transparent_level=glui_bounds->add_spinner_to_panel(ROLLOUT_slice,_("Transparent level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_transparent_level->set_float_limits(0.0,1.0);
@@ -1063,7 +1057,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
 
   PANEL_c = glui_bounds->add_panel_to_panel(PANEL_g,"",GLUI_PANEL_NONE);
   
-  if(updatebounds==UPDATEBOUNDS){
+  if(updatebounds==UPDATE_BOUNDS){
     glui_bounds->add_button_to_panel(PANEL_c,_("Update"),FILEUPDATE,FILE_CB);
   }
   else{
@@ -1098,7 +1092,9 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
     }
     *CHECKBOX_con_setchopmax=glui_bounds->add_checkbox_to_panel(PANEL_h,_("Above"),setchopmaxval,SETCHOPMAXVAL,FILE_CB);
 
-    glui_bounds->add_button_to_panel(PANEL_e,_("Update"),CHOPUPDATE,FILE_CB);
+    if(truncatebounds==TRUNCATE_BOUNDS){
+      glui_bounds->add_button_to_panel(PANEL_e,_("Update"),CHOPUPDATE,FILE_CB);
+    }
   }
 
 }
@@ -1890,47 +1886,47 @@ extern "C" void update_glui_streakvalue(float rvalue){
 /* ------------------ PART_CB ------------------------ */
 
 void PART_CB(int var){
-  part5prop *propi, *propi0;
+  part5prop *prop_new, *prop_old;
 
-  propi = part5propinfo + ipart5prop;
-  propi0 = part5propinfo + ipart5prop_old;
+  prop_new = part5propinfo + ipart5prop;
+  prop_old = part5propinfo + ipart5prop_old;
   switch (var){
   case VALMIN:
-    if(setpartmax==SET_MAX)propi->user_max=partmax;
+    if(setpartmax==SET_MAX)prop_new->user_max=partmax;
     break;
   case VALMAX:
-    if(setpartmin==SET_MIN)propi->user_min=partmin;
+    if(setpartmin==SET_MIN)prop_new->user_min=partmin;
     break;
   case FILETYPEINDEX:
 
     // save data from controls
 
-    propi0->setvalmin=setpartmin;
-    propi0->setvalmax=setpartmax;
+    prop_old->setvalmin=setpartmin;
+    prop_old->setvalmax=setpartmax;
     if(setpartmin==SET_MIN){
-      propi0->user_min=partmin;
+      prop_old->user_min=partmin;
     }
     if(setpartmax==SET_MAX){
-      propi0->user_max=partmax;
+      prop_old->user_max=partmax;
     }
-    propi0->setchopmin=setpartchopmin;
-    propi0->setchopmax=setpartchopmax;
-    propi0->chopmin=partchopmin;
-    propi0->chopmax=partchopmax;
+    prop_old->setchopmin=setpartchopmin;
+    prop_old->setchopmax=setpartchopmax;
+    prop_old->chopmin=partchopmin;
+    prop_old->chopmax=partchopmax;
 
     // copy data to controls
 
-    setpartmin=propi->setvalmin;
-    setpartmax=propi->setvalmax;
+    setpartmin=prop_new->setvalmin;
+    setpartmax=prop_new->setvalmax;
     PART_CB(SETVALMIN);
     PART_CB(SETVALMAX);
 
-    setpartchopmin=propi->setchopmin;
-    setpartchopmax=propi->setchopmax;
-    partchopmin=propi->chopmin;
-    partchopmax=propi->chopmax;
+    setpartchopmin=prop_new->setchopmin;
+    setpartchopmax=prop_new->setchopmax;
+    partchopmin=prop_new->chopmin;
+    partchopmax=prop_new->chopmax;
 
-    partmin_unit = (unsigned char *)propi->label->unit;
+    partmin_unit = (unsigned char *)prop_new->label->unit;
     partmax_unit = partmin_unit;
     update_glui_part_units();
 
@@ -1980,6 +1976,8 @@ void PART_CB(int var){
     updatechopcolors();
     break;
   case SETCHOPMINVAL:
+    prop_new->setchopmin=setpartchopmin;
+    prop_new->chopmin=partchopmin;
     updatechopcolors();
     switch (setpartchopmin){
       case 0:
@@ -1994,6 +1992,8 @@ void PART_CB(int var){
     }
     break;
   case SETCHOPMAXVAL:
+    prop_new->setchopmax=setpartchopmax;
+    prop_new->chopmax=partchopmax;
     updatechopcolors();
     switch (setpartchopmax){
       case 0:
@@ -2008,63 +2008,67 @@ void PART_CB(int var){
     }
     break;
   case CHOPVALMIN:
+    prop_new->setchopmin=setpartchopmin;
+    prop_new->chopmin=partchopmin;
     if(EDIT_part_min!=NULL)EDIT_part_min->set_float_val(partchopmin);
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     updatechopcolors();
     break;
   case CHOPVALMAX:
+    prop_new->setchopmax=setpartchopmax;
+    prop_new->chopmax=partchopmax;
     if(EDIT_part_max!=NULL)EDIT_part_max->set_float_val(partchopmax);
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
     updatechopcolors();
     break;
   case SETVALMIN:
     if(setpartmin_old==SET_MIN){
-      if(propi0!=NULL)propi0->user_min=partmin;
+      if(prop_old!=NULL)prop_old->user_min=partmin;
     }
     setpartmin_old=setpartmin;
     switch (setpartmin){
     case PERCENTILE_MIN:
-      if(propi!=NULL)partmin=propi->percentile_min;
+      if(prop_new!=NULL)partmin=prop_new->percentile_min;
       if(EDIT_part_min!=NULL)EDIT_part_min->disable();
       break;
     case GLOBAL_MIN:
-      if(propi!=NULL)partmin=propi->global_min;
+      if(prop_new!=NULL)partmin=prop_new->global_min;
       if(EDIT_part_min!=NULL)EDIT_part_min->disable();
       break;
     case SET_MIN:
-      if(propi!=NULL)partmin=propi->user_min;
+      if(prop_new!=NULL)partmin=prop_new->user_min;
       if(EDIT_part_min!=NULL)EDIT_part_min->enable();
       break;
     default:
       ASSERT(0);
       break;
     }
-    if(propi!=NULL)propi->valmin=partmin;
+    if(prop_new!=NULL)prop_new->valmin=partmin;
     if(EDIT_part_min!=NULL)EDIT_part_min->set_float_val(partmin);
    break;
   case SETVALMAX:
     if(setpartmax_old==SET_MAX){
-      if(propi0!=NULL)propi0->user_max=partmax;
+      if(prop_old!=NULL)prop_old->user_max=partmax;
     }
     setpartmax_old=setpartmax;
     switch (setpartmax){
     case PERCENTILE_MAX:
-      if(propi!=NULL)partmax=propi->percentile_max;
+      if(prop_new!=NULL)partmax=prop_new->percentile_max;
       if(EDIT_part_max!=NULL)EDIT_part_max->disable();
       break;
     case GLOBAL_MAX:
-      if(propi!=NULL)partmax=propi->global_max;
+      if(prop_new!=NULL)partmax=prop_new->global_max;
       if(EDIT_part_max!=NULL)EDIT_part_max->disable();
       break;
     case SET_MAX:
-      if(propi!=NULL)partmax=propi->user_max;
+      if(prop_new!=NULL)partmax=prop_new->user_max;
       if(EDIT_part_max!=NULL)EDIT_part_max->enable();
       break;
     default:
       ASSERT(0);
       break;
     }
-    if(propi!=NULL)propi->valmax=partmax;
+    if(prop_new!=NULL)prop_new->valmax=partmax;
     if(EDIT_part_max!=NULL)EDIT_part_max->set_float_val(partmax);
    break;
   case FILERELOAD:

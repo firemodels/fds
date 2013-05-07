@@ -1903,6 +1903,13 @@ void updatechopcolors(void){
       }
     } 
   }
+  for(i=0;i<npartinfo;i++){
+    partdata *parti;
+
+    parti = partinfo + i;
+    if(parti->loaded==0)continue;
+    adjustpart5chops(parti);
+  }
   Update_Texturebar();
 }
 

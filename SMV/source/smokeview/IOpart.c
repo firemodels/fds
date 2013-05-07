@@ -1476,12 +1476,13 @@ void drawEvac(const partdata *parti){
 
 /* ------------------ get_evacpart_color ------------------------ */
 
-void get_evacpart_color(float **color_handle,part5data *datacopy, int show_default, int j, int itype){
+int get_evacpart_color(float **color_handle,part5data *datacopy, int show_default, int j, int itype){
   int is_human_color;
   float *colorptr;
   unsigned char *color;
+  int showcolor;
 
-
+  showcolor=1;
   is_human_color=0;
   if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0&&navatar_colors>0){
     is_human_color=1;
@@ -1491,14 +1492,16 @@ void get_evacpart_color(float **color_handle,part5data *datacopy, int show_defau
   }
   else{
     color = datacopy->irvals+itype*datacopy->npoints;
-    if(is_human_color==1){
+   if(is_human_color==1){
       colorptr = avatar_colors + 3*color[j];
     }
     else{
       colorptr=rgb_full[color[j]];
     } 
+    if(current_property!=NULL&&(color[j]>current_property->imax||color[j]<current_property->imin))showcolor=0;
   }
   *color_handle=colorptr;
+  return showcolor;
 }
 
 /* ------------------ drawPart5 ------------------------ */
@@ -1704,6 +1707,7 @@ void drawPart5(const partdata *parti){
                 color=datacopy->irvals+itype*datacopy->npoints;
                 for(j=0;j<datacopy->npoints;j++){
                   if(vis[j]==1){
+                    if(current_property!=NULL&&(color[j]>current_property->imax||color[j]<current_property->imin))continue;
                     glColor4fv(rgb_full[color[j]]);
                     glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
                   }
@@ -1920,11 +1924,12 @@ void drawPart5(const partdata *parti){
 
       for(j=0;j<datacopy->npoints;j++){
         int tagval;
+
         tagval=datacopy->tags[j];
         if(vis[j]==0)continue;
+        if(get_evacpart_color(&colorptr,datacopy,show_default,j,itype)==0)continue;
         
         glBegin(GL_LINE_STRIP);
-        get_evacpart_color(&colorptr,datacopy,show_default,j,itype);
         glColor4fv(colorptr);
         glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
         for(k=1;k<streak5step;k++){
