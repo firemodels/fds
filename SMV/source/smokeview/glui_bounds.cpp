@@ -2010,15 +2010,13 @@ void PART_CB(int var){
   case CHOPVALMIN:
     prop_new->setchopmin=setpartchopmin;
     prop_new->chopmin=partchopmin;
-    if(EDIT_part_min!=NULL)EDIT_part_min->set_float_val(partchopmin);
-    SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
+    if(EDIT_part_chopmin!=NULL)EDIT_part_chopmin->set_float_val(partchopmin);
     updatechopcolors();
     break;
   case CHOPVALMAX:
     prop_new->setchopmax=setpartchopmax;
     prop_new->chopmax=partchopmax;
-    if(EDIT_part_max!=NULL)EDIT_part_max->set_float_val(partchopmax);
-    SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
+    if(EDIT_part_chopmax!=NULL)EDIT_part_chopmax->set_float_val(partchopmax);
     updatechopcolors();
     break;
   case SETVALMIN:
