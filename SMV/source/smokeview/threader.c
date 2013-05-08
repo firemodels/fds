@@ -10,7 +10,6 @@ char threader_revision[]="$Revision$";
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "string_util.h"
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 

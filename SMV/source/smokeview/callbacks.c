@@ -17,7 +17,6 @@ char callbacks_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
-#include "string_util.h"
 #include "update.h"
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
@@ -2361,7 +2360,6 @@ float gmod(float x, float y){
 void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   int oldcpuframe;
   float totalcpu;
-  char buffer[256];
   float elapsed_time;
 
   if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||render_state==1||timebar_drag==1)){       /* ready for a new frame */

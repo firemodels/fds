@@ -22,7 +22,6 @@ char readsmv_revision[]="$Revision$";
 #endif
 #include <pthread.h>
 
-#include "string_util.h"
 #include "smv_endian.h"
 #include "update.h"
 #include "smokeviewvars.h"
@@ -891,7 +890,7 @@ void readsmv_dynamic(char *file){
   // ------------------------------- pass 3 dynamic - start ------------------------------------
 
   while(do_pass3==1){
-    char buffer[255],buffer2[255];
+    char buffer[255];
 
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
@@ -2412,7 +2411,7 @@ int readsmv(char *file, char *file2){
   // free memory for particle class
 
   if(partclassinfo!=NULL){
-    int j, k;
+    int j;
 
     for(i=0;i<npartclassinfo+1;i++){
       part5class *partclassi;
@@ -4887,7 +4886,6 @@ int readsmv(char *file, char *file2){
   if(ncsvinfo>0){
     int *nexp_devices=NULL;
     devicedata *devicecopy2;
-    int k;
 
     NewMemory((void **)&nexp_devices,ncsvinfo*sizeof(int));
     for(i=0;i<ncsvinfo;i++){
@@ -5754,7 +5752,6 @@ typedef struct {
       }
       for(j=0;j<ncv;j++){
         cventdata *cvi;
-        float color[4];
         float *vcolor;
         int venttype,ventindex;
         float s_color[4],s2_color[4];

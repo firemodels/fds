@@ -18,7 +18,6 @@ char glui_3dsmoke_revision[]="$Revision$";
 #endif
 #include <math.h>
 
-#include "string_util.h"
 #include "smokeviewvars.h"
 
 extern GLUI_Rollout *ROLLOUT_smoke3d;

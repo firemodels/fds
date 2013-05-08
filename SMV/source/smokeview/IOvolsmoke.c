@@ -18,7 +18,6 @@ char IOvolsmoke_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
-#include "string_util.h"
 #include "smv_endian.h"
 #include "update.h"
 #include "smokeviewvars.h"

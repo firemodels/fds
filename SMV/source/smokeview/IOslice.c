@@ -21,7 +21,6 @@ char IOslice_revision[]="$Revision$";
 #endif
 
 #include "compress.h"
-#include "string_util.h"
 #include "smv_endian.h"
 #include "update.h"
 #include "interp.h"

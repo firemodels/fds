@@ -20,7 +20,6 @@ char string_util_revision[]="$Revision$";
 #endif
 #include "MALLOC.h"
 #include "datadefs.h"
-#include "string_util.h"
 
 unsigned int *random_ints, nrandom_ints;
 

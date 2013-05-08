@@ -16,7 +16,6 @@ char IOtour_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
-#include "string_util.h"
 #include "update.h"
 #include "smokeviewvars.h"
 

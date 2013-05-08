@@ -46,7 +46,7 @@ void vec_cross(float *x, float *y, float *xy){
 /* ------------------ vol_tetra ------------------------ */
 
 float vol_tetra(float *a, float *b, float *c, float *d){
-  float axb[3],arel[3],brel[3],crel[3],drel[3],volume;
+  float axb[3],brel[3],crel[3],drel[3],volume;
   int i;
 
   // vol = | ((b-a)x(c-a)) . (d-a) |
@@ -76,18 +76,20 @@ float vol_penta(float *a, float *b, float *c, float *d, float *e, float *f){
 
 float GetTetraVol(float *verts[4], float vals[4], float level){
 
-//             3
-//           /  \  \
-//          /    \    \5
-//         /      \      \
-//       3/       4\         \
-//       /          \   .     2
-//      /     2 .    \      /
-//     / .            \   / 1 
-//    0 -------------- 1/
-//           0   
+/*
+            3
+           /  \  \
+          /    \    \5
+         /      \      \
+       3/       4\         \
+       /          \   .     2
+      /     2 .    \      /
+     / .            \   / 1 
+    0 -------------- 1/
+           0   
+*/
 
-  int state[4]={0,0,0,0},i,index,p2=1;
+  int state[4]={0,0,0,0},i,index=0,p2=1;
   float volfactors[6],volverts[18],*volargs[6];
   float full_volume;
   float vol_above_level;

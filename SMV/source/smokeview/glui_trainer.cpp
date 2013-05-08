@@ -18,7 +18,6 @@ char glui_trainer_revision[]="$Revision$";
 #endif
 #include <math.h>
 
-#include "string_util.h"
 #include "smokeviewvars.h"
 
 void ROTATE_CB(int var);

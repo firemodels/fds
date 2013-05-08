@@ -11,7 +11,6 @@ char IOobject_revision[]="$Revision$";
 #include <math.h>
 #include <string.h>
 
-#include "string_util.h"
 #include "datadefs.h"
 #include "smokeviewvars.h"
 
@@ -2200,8 +2199,6 @@ void drawpoint(unsigned char *rgbcolor){
 /* ----------------------- drawfilledrectangle ----------------------------- */
 
 void drawrectangle(float width,float height, unsigned char *rgbcolor){
-  int i;
-
   glBegin(GL_LINE_LOOP);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
@@ -2217,8 +2214,6 @@ void drawrectangle(float width,float height, unsigned char *rgbcolor){
 /* ----------------------- drawfilledrectangle ----------------------------- */
 
 void drawfilledrectangle(float width,float height, unsigned char *rgbcolor){
-  int i;
-
   if(object_outlines==0){
     glBegin(GL_TRIANGLES);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);

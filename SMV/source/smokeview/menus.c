@@ -3848,13 +3848,14 @@ void LoadPatchMenu(int value){
   int errorcode;
   int i,ii;
   int patchtypenew;
-  patchdata *patchi;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
     patchtypenew=getpatchtype(patchinfo+value);
     if(patchtypenew!=-1){
       for(ii=0;ii<npatch_loaded;ii++){
+        patchdata *patchi;
+
         i = patch_loaded_list[ii];
         patchi = patchinfo + i;
         if(patchi->type!=patchtypenew)readpatch(i,UNLOAD,&errorcode);
@@ -3884,6 +3885,8 @@ void LoadPatchMenu(int value){
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       for(i=0;i<npatchinfo;i++){
+        patchdata *patchi;
+
         patchi = patchinfo + i;
         if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)==0&&patchi->filetype==patchj->filetype){
           LOCK_COMPRESS
@@ -7405,8 +7408,6 @@ updatemenu=0;
 #endif
 #ifdef pp_CULL
     if(cullactive==1&&gpuactive==1){
-      char menulabel[1024];
-
       if(cullsmoke==1&&usegpu==1){
         strcpy(menulabel,_("  Smoke culling activated. (Press C to deactivate)"));
       }
@@ -8378,7 +8379,6 @@ updatemenu=0;
         {
           int useitem;
           smoke3ddata *smoke3dj;
-          char menulabel[1024];
 
           if(nmeshes>1){
             for(i=0;i<nsmoke3dinfo;i++){
@@ -8422,8 +8422,6 @@ updatemenu=0;
 
       CREATEMENU(unloadplot3dmenu,UnloadPlot3dMenu);
       for(ii=0;ii<nplot3dinfo;ii++){
-        char menulabel[1024];
-
         i=plot3dorderindex[ii];
         plot3di = plot3dinfo + i;
         if(ii==0){

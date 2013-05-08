@@ -14,7 +14,6 @@ char shaders_revision[]="$Revision$";
 
 #include "glew.h"
 
-#include "string_util.h"
 #include "smokeviewvars.h"
 
 GLhandleARB p_smoke, p_3dslice, p_zonesmoke, p_volsmoke;

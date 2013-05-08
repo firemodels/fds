@@ -21,7 +21,6 @@ char IOsmoke_revision[]="$Revision$";
 #include <float.h>
 
 #include "egz_stdio.h"
-#include "string_util.h"
 #include "update.h"
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"

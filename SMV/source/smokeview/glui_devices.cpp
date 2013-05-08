@@ -18,7 +18,6 @@ char glui_device_revision[]="$Revision$";
 #endif
 #include <math.h>
 
-#include "string_util.h"
 #include "smokeviewvars.h"
 
 #define DEVICE_sensorsize 20

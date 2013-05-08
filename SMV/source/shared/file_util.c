@@ -23,8 +23,6 @@ char file_util_revision[]="$Revision$";
 #include <dirent.h>
 #endif
 #include "MALLOC.h"
-#include "string_util.h"
-#include "file_util.h"
 #include "smv_endian.h"
 
 FILE *alt_stdout=NULL;

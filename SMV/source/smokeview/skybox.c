@@ -16,7 +16,6 @@
 // svn revision character string
 char skybox_revision[]="$Revision$";
 
-#include "string_util.h"
 #include "smokeviewvars.h"
 
 /* ------------------ loadskytexture ------------------------ */

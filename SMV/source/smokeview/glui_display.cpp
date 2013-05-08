@@ -24,7 +24,6 @@ void Text_Labels_CB(int var);
 #endif
 #include <math.h>
 
-#include "string_util.h"
 #include "smokeviewvars.h"
 
 int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceloaded,npartloaded,npatchloaded;

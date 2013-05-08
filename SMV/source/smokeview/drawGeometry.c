@@ -16,7 +16,6 @@ char drawGeometry_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
-#include "string_util.h"
 #include "update.h"
 #include "smokeviewvars.h"
 
@@ -36,8 +35,7 @@ void DrawCircVents(int option){
     meshi = meshinfo + i;
     for(j=0;j<meshi->ncvents;j++){
       cventdata *cvi;
-      float x0, y0, z0;
-      char label[255];
+      float x0, yy0, z0;
       unsigned char vcolor[3];
       float delta;
       float *color;
@@ -47,12 +45,12 @@ void DrawCircVents(int option){
 
       if(option==VENT_CIRCLE){
         x0 = cvi->origin[0];
-        y0 = cvi->origin[1];
+        yy0 = cvi->origin[1];
         z0 = cvi->origin[2];
       }
       else{
         x0 = cvi->xmin;
-        y0 = cvi->ymin;
+        yy0 = cvi->ymin;
         z0 = cvi->zmin;
       }
 
@@ -75,7 +73,7 @@ void DrawCircVents(int option){
         MergeClipPlanes(&circleclip,&clipinfo);
         setClipPlanes(&circleclip,CLIP_ON_DENORMAL);
       }
-      glTranslatef(x0,y0,z0);
+      glTranslatef(x0,yy0,z0);
       switch (cvi->dir){
         case DOWN_X:
           glTranslatef(-delta,0.0,0.0);
@@ -110,6 +108,9 @@ void DrawCircVents(int option){
           glTranslatef(0.0,0.0,delta);
           width = cvi->xmax-cvi->xmin;
           height = cvi->ymax-cvi->ymin;
+          break;
+        default:
+          ASSERT(0);
           break;
       }
       if(option==VENT_CIRCLE){
@@ -530,7 +531,6 @@ void SetVentDirs(void){
     int iv;
     int dir;
     int i, j, k;
-    int nx, ny, nxy;
     int breakloop;
     int ventdir;
     float voffset, offset;

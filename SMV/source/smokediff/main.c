@@ -10,7 +10,6 @@
 #include <math.h>
 #include "svdiff.h"
 #include "MALLOC.h"
-#include "file_util.h"
 
 //dummy change to bump version number to 1.0.6
 //dummy change to force revision change

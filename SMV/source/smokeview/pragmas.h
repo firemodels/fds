@@ -4,6 +4,9 @@
 #ifndef PRAGMAS_H_DEFINED
 #define PRAGMAS_H_DEFINED
 #ifdef pp_INTEL
+#pragma warning (disable:777) // Testing floats for equality
+#pragma warning (disable:776) // Possible truncation of addition
+#pragma warning (disable:712) // Loss of precision
 #pragma warning (disable:1786)
 #pragma warning (disable:177)		
 #pragma warning (disable:2557)		/* comparison between signed and unsigned operands */

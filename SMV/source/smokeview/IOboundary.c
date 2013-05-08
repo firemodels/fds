@@ -17,7 +17,6 @@ char IOboundary_revision[]="$Revision$";
 #endif
 
 #include "egz_stdio.h"
-#include "string_util.h"
 #include "smv_endian.h"
 #include "update.h"
 #include "smokeviewvars.h"

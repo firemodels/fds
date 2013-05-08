@@ -5,6 +5,7 @@
 #define SMOKEVIEWVARS_H_DEFINED
 #include <time.h>
 
+#include "MALLOC.h"
 #ifdef CPP
 #include "glui.h"
 #endif
@@ -21,8 +22,6 @@
 #endif
 #include "smokeheaders.h"
 #include "threader.h"
-#include "file_util.h"
-#include "MALLOC.h"
 
 #ifdef pp_BETA
 SVEXTERN int SVDECL(show_all_units,1);

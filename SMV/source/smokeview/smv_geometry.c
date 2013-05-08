@@ -18,10 +18,7 @@ char smv_geometry_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
-#include "string_util.h"
 #include "smokeviewvars.h"
-
-
 
 /* ------------------ denormalize_xyz ------------------------ */
 
