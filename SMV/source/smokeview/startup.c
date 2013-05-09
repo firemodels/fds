@@ -1303,8 +1303,6 @@ void initvars(void){
   cb_val=50.0;
   cb_colorindex=128;
 
-  device_sphere_segments=6;
-
   rgb_terrain[0][0]=1.0;
   rgb_terrain[0][1]=0.0;
   rgb_terrain[0][2]=0.0;

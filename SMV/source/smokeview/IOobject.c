@@ -1711,7 +1711,7 @@ void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
 
     glPushMatrix();
     glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
-    if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
+    if(cos_lat==NULL)Init_Sphere(NLAT,NLONG);
     glBegin(GL_QUADS);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
     for(j=0;j<NLAT;j++){
@@ -1994,7 +1994,7 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
 void drawsphere(float diameter, unsigned char *rgbcolor){
   int i,j;
 
-  if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
+  if(cos_lat==NULL)Init_Sphere(NLAT,NLONG);
 
   glPushMatrix();
   glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
@@ -2073,7 +2073,7 @@ void drawsphere(float diameter, unsigned char *rgbcolor){
 void drawhsphere(float diameter, unsigned char *rgbcolor){
   int i,j;
 
-  if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
+  if(cos_lat==NULL)Init_Sphere(NLAT,NLONG);
 
   glPushMatrix();
   glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
@@ -2262,7 +2262,7 @@ void drawfilledrectangle(float width,float height, unsigned char *rgbcolor){
 void drawfilledcircle(float diameter,unsigned char *rgbcolor){
   int i;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
   if(object_outlines==0){
     glBegin(GL_TRIANGLES);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -2305,7 +2305,7 @@ void drawfilledcircle(float diameter,unsigned char *rgbcolor){
 void drawcircle(float diameter,unsigned char *rgbcolor){
   int i;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
   glBegin(GL_LINE_LOOP);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   for(i=0;i<ncirc;i++){
@@ -2319,7 +2319,7 @@ void drawcircle(float diameter,unsigned char *rgbcolor){
 void drawarc(float angle, float diameter,unsigned char *rgbcolor){
   int i, iarc;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
   iarc = CIRCLE_SEGS*(angle+180.0/CIRCLE_SEGS)/360.0;
   if(iarc<2)iarc=2;
   if(iarc>CIRCLE_SEGS)iarc=CIRCLE_SEGS;
@@ -2839,7 +2839,7 @@ void drawsquare(float size, unsigned char *rgbcolor){
 void drawring(float diam_inner, float diam_outer, float height, unsigned char *rgbcolor){
   int i;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
   if(object_outlines==0){
     glBegin(GL_QUADS);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -2979,7 +2979,7 @@ void rotatexyz(float x, float y, float z){
 void drawdisk(float diameter, float height, unsigned char *rgbcolor){
   int i;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
   if(object_outlines==0){
     glBegin(GL_QUADS);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -3067,7 +3067,7 @@ void drawdisk(float diameter, float height, unsigned char *rgbcolor){
 void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbcolor){
   int i, iarc;
 
-  if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
+  if(cos_lat==NULL)Init_Sphere(NLAT,NLONG);
 
   iarc = NLONG*angle/360.0 + 0.5;
   if(iarc<2)iarc=2;
@@ -3197,7 +3197,7 @@ void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbco
 void drawcdisk(float diameter, float height, unsigned char *rgbcolor){
   int i;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
 
   if(object_outlines==0){
     glBegin(GL_QUADS);
@@ -3493,7 +3493,7 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
 
   diameter2 = diameter + notchheight;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
 
   if(object_outlines==0){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
@@ -3768,7 +3768,7 @@ void drawcone(float d1, float height, unsigned char *rgbcolor){
   float factor, denom, rad;
   float hdr;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
   if(height<=0.0)height=0.0001;
 
 
@@ -3833,7 +3833,7 @@ void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor){
   int i;
   float dz;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
   if(height<=0.0)height=0.0001;
 
   dz = -(d2-d1)/height;
@@ -3970,7 +3970,7 @@ sv_object *get_SVOBJECT_type2(char *olabel,sv_object *default_object){
 
 /* ----------------------- initcircle ----------------------------- */
 
-void initcircle(unsigned int npoints){
+void Init_Circle(unsigned int npoints){
   float drad;
   int i;
 
@@ -3991,7 +3991,7 @@ void initcircle(unsigned int npoints){
 
 /* ----------------------- initspheresegs ----------------------------- */
 
-void initspheresegs(int nlat, int nlong){
+void Init_Sphere(int nlat, int nlong){
   float dlat, dlong;
   int i;
 

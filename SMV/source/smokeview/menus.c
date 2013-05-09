@@ -47,7 +47,7 @@ char menu_revision[]="$Revision$";
 void add_scriptlist(char *file, int id);
 void update_glui_render(void);
 void PropMenu(int value);
-void initcircle(unsigned int nsegs);
+void Init_Circle(unsigned int nsegs);
 void UnLoadVolSmoke3DMenu(int value);
 void LoadVolSmoke3DMenu(int value);
 void update_script_step(void);
@@ -4361,8 +4361,8 @@ void ShowObjectsMenu(int value){
   }
   else{
     device_sphere_segments=ABS(value);
-    initspheresegs(device_sphere_segments,2*device_sphere_segments);
-    initcircle(2*device_sphere_segments);
+    Init_Sphere(device_sphere_segments,2*device_sphere_segments);
+    Init_Circle(2*device_sphere_segments);
   }
   updatemenu=1;
   glutPostRedisplay();

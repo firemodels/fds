@@ -5,6 +5,12 @@
 #ifndef FLOWFILES_H_DEFINED
 #define FLOWFILES_H_DEFINED
 
+/* --------------------------  langlistdata ------------------------------------ */
+
+typedef struct {
+  float *xcirc, *ycirc;
+  int ncirc;
+} circdata;
 
 /* --------------------------  langlistdata ------------------------------------ */
 

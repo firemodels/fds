@@ -8522,8 +8522,8 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&device_sphere_segments);
       device_sphere_segments=CLAMP(device_sphere_segments,6,48);
-      initspheresegs(device_sphere_segments,2*device_sphere_segments);
-      initcircle(2*device_sphere_segments);
+      Init_Sphere(device_sphere_segments,2*device_sphere_segments);
+      Init_Circle(2*device_sphere_segments);
       continue;
     }
     if(match(buffer,"SHOWEVACSLICES")==1){

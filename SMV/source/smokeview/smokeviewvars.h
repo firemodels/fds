@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN circdata cvent_circ, object_circ;
 #ifdef pp_BETA
 SVEXTERN int SVDECL(show_all_units,1);
 #else
@@ -1058,7 +1059,7 @@ SVEXTERN int iavatar_evac;
 SVEXTERN sv_object SVDECL(**avatar_types,NULL);
 SVEXTERN int glui_avatar_index;
 SVEXTERN sv_object *avatar_defs_backup[2];
-SVEXTERN int device_sphere_segments;
+SVEXTERN int SVDECL(device_sphere_segments,6);
 SVEXTERN int ntexturestack;
 
 SVEXTERN float SVDECL(fire_opacity_factor,3.0),SVDECL(mass_extinct,8700.0);
