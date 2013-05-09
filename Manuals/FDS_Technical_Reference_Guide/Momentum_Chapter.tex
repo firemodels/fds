@@ -252,15 +252,15 @@ $\nabla p=\rho_n \bg + \nabla \tp$.
 \item Divide all terms by the density, $\rho$
 \item Decompose the pressure term:
    \[ \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \nabla \left(\frac{1}{\rho} \right)  \]
-\item Define $\calH \equiv |\bu|^2/2 + \tp/\rho $
+\item Define $\cH \equiv |\bu|^2/2 + \tp/\rho $
 \end{enumerate}
 Now the momentum equation can be written
-\be \dod{\bu}{t} - \bu\times\bo + \nabla \calH - \tp \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg
+\be \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg
 + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]  \label{momeq} \ee
 It is convenient to write this equation in the form:
 \be \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation} \ee
 The vector $\bF$ is referred to collectively as the momentum flux terms, and the term $\nabla \cH$ is referred to as the
-pressure gradient (though, as discussed above, $\calH$ is not a true ``pressure''). The spatial discretization of the momentum equations takes the form
+pressure gradient (though, as discussed above, $\cH$ is not a true ``pressure''). The spatial discretization of the momentum equations takes the form
 \begin{align}
 \dod{\hu}{t} + F_{\x,ijk} + \frac{\hp_{i+1,jk} -\hp_{ijk}}{\dx} &= 0  \label{umom} \\
 \dod{\hv}{t} + F_{\y,ijk} + \frac{\hp_{i,j+1,k}-\hp_{ijk}}{\dy} &= 0  \label{vmom} \\
@@ -525,7 +525,7 @@ In DNS mode, the time step is also adjusted to maintain VN between 0.4 and 0.5. 
 
 An elliptic partial differential equation (known as a Poisson equation) is obtained by
 taking the divergence of the momentum equation
-\be \nabla^2 \calH =
+\be \nabla^2 \cH =
      -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot \bF
     \quad ; \quad \bF = - \bu\times\bo - \tp \, \nabla \! \left( \frac{1}{\rho} \right) - \frac{1}{\rho}
     \Big( (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big)
@@ -534,7 +534,7 @@ Note that the perturbation pressure $\tp$ appears on both sides of Eq.~(\ref{pe}
 pressure on the right hand side is taken from the previous time step of the
 overall explicit time-marching scheme. It can be neglected if the baroclinic torque is
 not important in a given simulation (constant density flows, for example). The pressure on the left hand side (incorporated
-in the variable $\calH$) is solved for directly.
+in the variable $\cH$) is solved for directly.
 The reason for the decomposition of the pressure term is so that the linear algebraic system
 arising from the discretization of Eq.~(\ref{pe})
 has constant coefficients (i.e., it is {\em separable}) and can be solved to machine accuracy
@@ -574,7 +574,7 @@ given in Eq.~(\ref{eqn_divfromeos}).
 
 \subsection{Open Boundary Conditions}
 
-An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradient. The boundary condition for the pressure depends on whether the local flow is incoming or outgoing. In either case, it is assumed that the quantity, $\calH = \tilde{p}/\rho + q^2/2$, remains constant along a streamline. It is also assumed that the pressure perturbation at the boundary is a user-specified input, $\tilde{p}_{\rm ext}$, that is zero by default. The Poisson solver for the quantity, $\cH$, requires a Dirichlet condition at an open boundary; that is, its value is specified at the border of the computational domain. As an example, consider the boundary, $x=x_{\min}$. The boundary value of $\cH$ is given by the following expressions depending on the direction of the flow across the external cell face:
+An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradient. The boundary condition for the pressure depends on whether the local flow is incoming or outgoing. In either case, it is assumed that the quantity, $\cH = \tilde{p}/\rho + q^2/2$, remains constant along a streamline. It is also assumed that the pressure perturbation at the boundary is a user-specified input, $\tilde{p}_{\rm ext}$, that is zero by default. The Poisson solver for the quantity, $\cH$, requires a Dirichlet condition at an open boundary; that is, its value is specified at the border of the computational domain. As an example, consider the boundary, $x=x_{\min}$. The boundary value of $\cH$ is given by the following expressions depending on the direction of the flow across the external cell face:
 \be \cH_{\ha,jk} = \left\{ \begin{array}{ll}
           \frac{\tp_{\rm ext}}{\rho_{1,jk}} + \ha \left( \bar{u}_{1.jk}^2 + \bar{v}_{1,jk}^2 + \bar{w}_{1,jk}^2 \right)  & {\rm outgoing} \\ [0.2in]
           \frac{\tp_{\rm ext}}{\rho_\infty} + \ha \left( u_\infty^2 + v_\infty^2 + w_\infty^2 \right)  & {\rm incoming}
@@ -592,7 +592,7 @@ rectangular region, although other geometries such as cylinders
 and spheres can be handled almost as easily. For these solvers,
 a no-flux condition is simple to prescribe at external boundaries.
 Using the $x=x_{\hbox{\tiny max}}$ boundary as an example:
-\be \dod{\calH}{x} = -F_x - \dod{u}{t} \label{bc} \ee
+\be \dod{\cH}{x} = -F_x - \dod{u}{t} \label{bc} \ee
 where $F_x$ is the $x$-component of $\bF$ at the vent or solid wall,
 and $\partial u/\partial t$ is the user-specified rate of change
 in the $x$-component of velocity.
@@ -705,8 +705,8 @@ Note also that $\cH$ is cell-centered; thus, $\cH_I$ is at the center of the $I$
 \item Solve the Poisson equation in each mesh separately and exchange values of $\cH_I$ and $\cH_1$.
 \item Predict the normal component of velocity at the next time step. Note that the boundary condition for interface pressure term effectively yields the following:
 \begin{align}
-   u_I^* &= \bar{u}_I^n - \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{\rm old}+\cH_1^{\rm old})/2 - \calH_I }{ \dx/2} \right) \label{uI} \\
-   u_0^* &= \bar{u}_0^n + \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,0}^{n} + \frac{ \calH_1 - (\cH_I^{\rm old}+\cH_1^{\rm old})/2 }{ \dx/2} \right) \label{u0}
+   u_I^* &= \bar{u}_I^n - \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{\rm old}+\cH_1^{\rm old})/2 - \cH_I }{ \dx/2} \right) \label{uI} \\
+   u_0^* &= \bar{u}_0^n + \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,0}^{n} + \frac{ \cH_1 - (\cH_I^{\rm old}+\cH_1^{\rm old})/2 }{ \dx/2} \right) \label{u0}
 \end{align}
 \item Repeat this process until $\left| u_I^* - u_0^* \right|$ falls below a specified tolerance.
 \end{enumerate}
