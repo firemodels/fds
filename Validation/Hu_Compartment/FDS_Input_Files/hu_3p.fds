@@ -1,0 +1,62 @@
+&HEAD CHID='hu_3p',TITLE='Hu et al. IAFSS (2005) compartment fire Case 3 prescribed mass loss rate'/
+
+&MESH IJK=36,40,40, XB=-0.16,0.2,-0.2,0.2,0.0,0.4/ main box
+
+&MESH IJK=40,24,40, XB=-.2,-.16,-.06,.06,0.36,.40/ top inside
+&MESH IJK=40,24,40, XB=-.2,-.16,-.06,.06,0.00,.04/ bot inside
+&MESH IJK= 4,12,32, XB=-.2,-.16,-.06,.06,0.04,.36/ mid inside  (min 4 cells in a given direction for Poisson solver)
+
+&MESH IJK= 4,14,40, XB=-.2,-.16,-.20,-.06,0.0,0.4/ -y coarse inside
+&MESH IJK= 4,14,40, XB=-.2,-.16, .06, .20,0.0,0.4/ +y coarse inside
+
+&TIME T_END=80./
+
+&MISC CHECK_VN=.TRUE./
+
+&REAC FUEL       = 'N-HEPTANE'
+      SOOT_YIELD = 0.037/
+
+&VENT XB=-0.2,-0.2,-0.05,0.05,0.37,0.4,ID='INLET1',SURF_ID='OPEN',COLOR='BLUE'/
+&VENT XB=-0.2,-0.2,-0.05,0.05,0.0,0.03,ID='INLET2',SURF_ID='OPEN',COLOR='GREEN'/
+
+&VENT XB=-0.0475,0.0475,-0.0475,0.0475,0.00,0.00, XYZ=0,0,0, RADIUS=0.0475, SURF_ID='FIRE', COLOR='RED'/
+
+&SURF ID='FIRE', SPEC_ID(1)='N-HEPTANE', MASS_FLUX(1)=0.013/
+
+&SURF ID        = 'INSULATION'
+      MATL_ID   = 'CERAMIC FIBER'
+      COLOR     = 'GRAY'
+      THICKNESS = 0.020
+      HEAT_TRANSFER_MODEL='LOGLAW'
+      DEFAULT   = .TRUE. /
+
+&MATL ID                 = 'CERAMIC FIBER'
+      CONDUCTIVITY_RAMP  = 'k_fiber'
+      SPECIFIC_HEAT      = 1.04
+      DENSITY            =  128.
+      EMISSIVITY         = 0.97 /
+&RAMP ID='k_fiber',T= 20.,F=0.09 /
+&RAMP ID='k_fiber',T=300.,F=0.09 /
+&RAMP ID='k_fiber',T=600.,F=0.17 /
+&RAMP ID='k_fiber',T=900.,F=0.25 /
+
+&SLCF PBY=0., QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE./
+&SLCF PBY=0., QUANTITY='VELOCITY', VECTOR=.TRUE./
+
+&BNDF QUANTITY='YPLUS'/
+
+Gas Probe
+
+&DEVC XYZ=-0.1,0.0,0.38, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN'/ 
+&DEVC XYZ=-0.1,0.0,0.02, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN'/
+
+Flow at vent
+
+&DEVC XB=-0.2,-0.2,-0.01,0.01,0.39,0.4, QUANTITY='MASS FLOW', ID='M1'/
+&DEVC XB=-0.2,-0.2,-0.01,0.01,0.0,0.01, QUANTITY='MASS FLOW', ID='M2'/
+
+Burning rate
+
+&DEVC XB=-0.0475,0.0475,-0.0475,0.0475,0.00,0.00, QUANTITY='BURNING RATE', STATISTICS='SURFACE INTEGRAL'/
+
+&TAIL /
