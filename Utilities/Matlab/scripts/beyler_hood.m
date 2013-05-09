@@ -200,7 +200,7 @@ for ns = 1:N_Species
    set(gcf,'PaperUnits',Paper_Units);
    set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
    set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-   plotname = ['../../Manuals/FDS_Validation_Guide/FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
+   plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
    print(gcf,'-dpdf',plotname);
    
    clear hX
