@@ -22,7 +22,7 @@ and may have varying area over its length.  The current implementation of the mo
 mass, energy, and momentum (in that order) are:
 \be \sum\limits_{j} \rho_j \, u_j \, A_j = 0   \label{HVACmass} \ee
 \be \sum\limits_{j} \rho_j \, u_j \, A_j \, h_j= 0   \label{HVACenergy} \ee
-\be \rho_j L_j \frac{\d u_j}{\d t} = \left(P_i - P_k\right)+\left(\rho g \Delta z\right)_j+\Delta P_j - \frac{1}{2}K_j \rho_j \left| u_j \right| u_j  \label{HVACmomentum} \ee
+\be \rho_j L_j \frac{\d u_j}{\d t} = \left(p_i - p_k\right)+\left(\rho g \Delta z\right)_j+\Delta p_j - \frac{1}{2}K_j \rho_j \left| u_j \right| u_j  \label{HVACmomentum} \ee
 where $u$ is the duct velocity, $A$ is the duct area, and $h$ is the enthalpy of the fluid in the duct.
 The subscript $j$ indicates a duct segment, the subscripts $i$ and $k$ indicate nodes (where one or more ducts join or where a duct terminates in a compartment).
 $\Delta P$ is a fixed source of momentum (a fan or blower), $L$ is the length of the duct segment, and $K$ is the friction loss of the duct segment.
@@ -35,12 +35,12 @@ The momentum equation (\ref{HVACmomentum}) is non-linear with respect to velocit
 the loss term.  Additionally, the pressure difference between two nodes in the network is impacted by the pressure change at all
 nodes coupled to that duct either directly (part of the same duct network) or indirectly (connected to the same compartment as another duct network).
 Solving the momentum equation, requires accounting for both of these.  This is done with the following discretization:
-\be u^{n+1}_j=u^{n}_j + \frac{\Delta t^n}{\rho_j L_j} \left[ \left(\tilde{P}^n_i - \tilde{P}^n_k\right)+\left(\rho g \Delta z\right)^{n-1}_j+\Delta P^{n-1}_j -
+\be u^{n+1}_j=u^{n}_j + \frac{\Delta t^n}{\rho_j L_j} \left[ \left(\tilde{p}^n_i - \tilde{p}^n_k\right)+\left(\rho g \Delta z\right)^{n-1}_j+\Delta p^{n-1}_j -
    \frac{1}{2}K_j \left(\left|u^{n-}_j+u^{n+}_j\right|u^n-\left|u^{n+}_j \right|u^{n-}_j \right) \right] \label{HVACdiscretemomentum} \ee
 The superscripts $n+$ and $n-$ on the velocity are used to linearize the flow loss in a duct to avoid a non-linear differential equation for velocity.
 The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred between iterations.
 This approach is used to speed convergence when duct flows are near zero to avoid large changes in $K$ if the forward and reverse losses are markedly different.
-Note that the node pressures are not expressed as $P^n_i$, but rather as $\tilde{P}^n_i$.  This indicates an extrapolated pressure at the end of the current time step
+Note that the node pressures are not expressed as $P^n_i$, but rather as $\tilde{p}^n_i$.  This indicates an extrapolated pressure at the end of the current time step
 rather than the actual pressure at the end of the time step.  The pressure in a compartment is a function of the mass and energy flowing in and out.
 If that compartment is connected to other compartments by doors or other openings, then the pressure is also dependent upon flows into and out those other compartments.
 Those mass and energy flows include both those being predicted by the HVAC model and those being predicted by the CFD model.
@@ -57,14 +57,14 @@ Since the two models are not fully coupled, the extrapolated pressure is an esti
 
 The extrapolated pressure for a compartment can be determined by using Eq.~(\ref{concon2}) and correcting the integral over velocity for the current solution of
 all interdependent HVAC flows into or out of an FDS pressure zone:
-\be \tilde{P}^n_i  = P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, \d V}\right)\Delta t^n = \tilde{P^*}^n_i - \frac{\sum_j u^n_j A^n_j}{\int_{\Omega_m} {\cal P} \, \d V})\Delta t^n
+\be \tilde{p}^n_i  = p^{n-1}_i+\left(\frac{\d p^{n-1}_i}{\d t} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} P \, \d V}\right)\Delta t^n = \tilde{p^*}^n_i - \frac{\sum_j u^n_j A^n_j}{\int_{\Omega_m} P \, \d V})\Delta t^n
    \label{HVACextrapolatedpressure} \ee
 If the summation term for the velocities being predicted in this timestep is removed from Eq.~(\ref{HVACextrapolatedpressure}) and placed on the left hand side of Eq.~(\ref{HVACdiscretemomentum}) and the remaining terms of Eq.~(\ref{HVACextrapolatedpressure}) are placed on the right hand side we obtain the following:
 \begin{align}
    u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j+u^{n+}_j \right| \right) &-
-    \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} {\cal P} \, \d V}}= \nonumber \\
+    \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} P \, \d V}}= \nonumber \\
   & u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j}
-  \left(\tilde{P^*}^n_i-\tilde{P^*}^n_k +  (\rho g \Delta z)_j + \Delta P_j \right) +
+  \left(\tilde{p^*}^n_i-\tilde{p^*}^n_k +  (\rho g \Delta z)_j + \Delta p_j \right) +
   \frac{K_j}{2 L_j}\left|u^{n+}_j\right| \left|u^{n-}_j\right| \label{HVACfullexpansion}
 \end{align}
 If node $i$ or node $k$ for duct $j$ in Eq.~(\ref{HVACfullexpansion}) is an internal duct node, then extrapolated pressures are not computed and the actual node pressure is solved for.
