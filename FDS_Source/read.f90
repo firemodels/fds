@@ -8855,7 +8855,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       ! Determine if the DEVC is a TIME or LINE device
 
-      IF (QUANTITY=='TIME') OUTPUT = .FALSE. ! Don't print out clocks
+      IF (QUANTITY=='TIME' .AND. NO_UPDATE_DEVC_ID=='null' .AND. NO_UPDATE_CTRL_ID=='null' ) OUTPUT = .FALSE. ! Don't print out clocks
 
       IF (POINTS==1 .AND. OUTPUT)      N_DEVC_TIME = N_DEVC_TIME + 1
       IF (POINTS>1 .AND. I_POINT==1)   N_DEVC_LINE = N_DEVC_LINE + 1
