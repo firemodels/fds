@@ -1988,7 +1988,7 @@ The Von Neumann constraint is given by
 \begin{equation}
 \mbox{VN} \equiv  \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < \frac{1}{2}
 \end{equation}
-The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.4) and {\ct VN\_MAX} (default 0.5) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+The Von Neumann stability check is invoked by setting {\ct CHECK\_VN=.TRUE.} on the {\ct MISC} line (for DNS, {\ct CHECK\_VN=.TRUE.} by default). The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.4) and {\ct VN\_MAX} (default 0.5) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
 
 We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
 \begin{equation}
@@ -9904,9 +9904,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
-{\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 1                \\ \hline
-{\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
-{\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
+{\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 0                \\ \hline
+{\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
+{\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
 {\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
