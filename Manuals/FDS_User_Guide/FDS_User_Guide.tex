@@ -2479,6 +2479,18 @@ In this example, the entire {\ct XMIN} boundary is periodic with the {\ct XMAX} 
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
+\subsubsection{Circular Vents}
+\label{sec:circvents}
+
+Circular vents may be specified by an intersection of an {\ct XB} and a circle with center {\ct XYZ} and radius {\ct RADIUS}.  The rectangular surface cells assigned the corresponding {\ct SURF\_ID} will be those whose centroid falls within the {\ct XB}/circle intersection. As discussed below in Section \ref{info:spread}, the addition of {\ct RADIUS} on a {\ct VENT} line also triggers a radially spreading fire.  If this behavior is unwanted, it is necessary to specify a large value for the {\ct SPREAD\_RATE} so the mass flux through the vent will happen instantly.  It is also possible to stack circular vents, as shown in the following example:
+
+\begin{lstlisting}
+&SURF ID='pool', MASS_FLUX(1)=0.04, SPEC_ID(1)='METHANE' /
+&SURF ID='plate', COLOR='GRAY' /
+&VENT XB=-0.5,0.5,-0.5,0.5,0,0, XYZ=0,0,0.0001, RADIUS=0.5, COLOR='BLUE', SURF_ID= 'pool', SPREAD_RATE=1000. /
+&VENT XB=-1,1,-1,1,0,0, XYZ=0,0,0, RADIUS=1, SURF_ID='plate'/
+&VENT MB='ZMIN',SURF_ID='OPEN'/
+\end{lstlisting}
 
 
 \subsection{Controlling Vents}
