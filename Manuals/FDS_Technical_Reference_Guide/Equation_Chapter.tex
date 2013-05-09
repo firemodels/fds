@@ -105,7 +105,7 @@ chosen so that the sum of all the diffusive fluxes is zero.
 \section{Low Mach Number Approximation}
 
 Rehm and Baum~\cite{Rehm:1} observed that for low speed applications like fire, the spatially and temporally resolved pressure, $p$, can be decomposed into a ``background'' pressure, $\bp(z,t)$, plus a perturbation, $\tp(x,y,z,t)$, with only the background pressure retained in the equation of state (ideal gas law):
-\be \bp = \rho T \calR \sum_\alpha  \frac{Z_\alpha}{W_\alpha} \equiv \frac{\rho \R T}{\bW}  \label{basicstate1} \ee
+\be \bp = \rho T \R \sum_\alpha  \frac{Z_\alpha}{W_\alpha} \equiv \frac{\rho \R T}{\bW}  \label{basicstate1} \ee
 Note that $z$ is the spatial coordinate in the direction of gravity; thus, the stratification of the atmosphere is included in the background pressure. The perturbation, $\tp$, drives the fluid motion. This approximation has a number of consequences. First, building compartments connected via a heating, ventilation, and air conditioning (HVAC) system can each maintain individual background pressures. The air flows between compartments can be
 described in terms of the differences in the background pressures, eliminating the need to solve detailed flow equations within the ventilation ducts.
 
@@ -135,16 +135,16 @@ the divergence that includes the source and diffusion terms from the mass, speci
 
 \section{Momentum Transport}
 
-Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass $\calH \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
+Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass $\cH \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
 \be
-   \dod{\bu}{t} - \bu\times\bo + \nabla \calH - \tp \, \nabla \left( 1/\rho\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big]
+   \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \, \nabla \left( 1/\rho\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big]
 \ee
 The term, $\bof_\text{b}$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}.
 
 It is convenient to write this equation in the form:
 \be \dod{\bu}{t} + \bF + \nabla \cH = 0  \ee
 so that a Poisson equation for the pressure can be derived by taking its divergence:
-\be \nabla^2 \calH = - \left[ \dod{ }{t} (\nabla\!\cdot \bu) + \nabla\!\cdot \bF \right]   \label{simplephi2} \ee
+\be \nabla^2 \cH = - \left[ \dod{ }{t} (\nabla\!\cdot \bu) + \nabla\!\cdot \bF \right]   \label{simplephi2} \ee
 Note the appearance of the time derivative of the divergence. This is an important feature of the time marching scheme. Note also that the right hand side of the Poisson equation retains a term that includes the perturbation pressure, $\tp \, \nabla (1/\rho)$. This term accounts for the baroclinic torque. It is included on the right hand side of the Poisson equation by using its value from the previous time step. This approximation allows us to solve a separable form of the Poisson equation, for which there are fast, direct solvers that are optimized for uniform grids~\cite{Sweet:1}.
 
 \section{Combustion and Radiation}
@@ -249,7 +249,7 @@ The asterisk denotes a first order accurate estimate at the next time step.  Not
 
 \item Estimate the velocity at the next time step.
 \be
-\frac{\bu^* - \bu^n}{\dt} +  \bF^n + \nabla \calH^n = 0
+\frac{\bu^* - \bu^n}{\dt} +  \bF^n + \nabla \cH^n = 0
 \ee
 Note that this procedure guarantees that the divergence of the estimated velocity field, $\nabla\!\cdot \bu^*$, is identically
 equal to the divergence that is derived from the estimated thermodynamic quantities, $(\nabla\!\cdot \bu)^*$, in Step \ref{step_pred_div}.
@@ -286,13 +286,13 @@ The lumped species mass fractions and background pressure are corrected in a sim
 \item Compute the pressure using the estimated quantities.
 \be
 \label{eqn_corrector_poisson2}
-\nabla^2\calH^* = - \left[ \frac{ (\nabla\cdot\bu)^{n+1} - \ha \left( \nabla\cdot \bu^* + \nabla\cdot \bu^n \right) }{\dt/2} \right]
+\nabla^2\cH^* = - \left[ \frac{ (\nabla\cdot\bu)^{n+1} - \ha \left( \nabla\cdot \bu^* + \nabla\cdot \bu^n \right) }{\dt/2} \right]
    - \nabla\!\cdot \mathbf{F}^*
 \ee
 
 \item Correct the velocity at the next time step.
 \be
-\frac{ \bu^{n+1} - \ha \left( \bu^* + \bu^n \right)}{\dt/2} + \mathbf{F}^* + \nabla \calH^*  = 0
+\frac{ \bu^{n+1} - \ha \left( \bu^* + \bu^n \right)}{\dt/2} + \mathbf{F}^* + \nabla \cH^*  = 0
 \ee
 Note again that the divergence of the corrected velocity field is identically equal to the divergence that was computed in Step \ref{step_cor_div}.
 

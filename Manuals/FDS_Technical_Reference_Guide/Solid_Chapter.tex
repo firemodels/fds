@@ -122,8 +122,8 @@ T^+ = \frac{T_{\rm g} - T_{\rm w}}{T_\tau}
 \end{equation}
 where $T_{\rm g}$ is the first off-wall gas-phase cell temperature.  The model profile is given by
 \begin{align}
-\label{eqn_t_visclayer} T^+ &= \mbox{Pr}\;y^+                            && \mbox{for} \quad y^+ \le 5 \\
-\label{eqn_t_loglaw}    T^+ &= \frac{\mbox{Pr}_t}{\kappa} \ln y^+ + B_T  && \mbox{for} \quad y^+ \ge 30
+\label{eqn_t_visclayer} T^+ &= \mbox{Pr}\;y^+                            && \mbox{for} \quad y^+ \le 11.81 \\
+\label{eqn_t_loglaw}    T^+ &= \frac{\mbox{Pr}_t}{\kappa} \ln y^+ + B_T  && \mbox{for} \quad y^+ \ge 11.81
 \end{align}
 where Pr and Pr$_{\rm t}$ are the molecular and turbulent Prandtl numbers  (Pr$_t=0.5$ by default in FDS), and $\kappa = 0.41$ is the von K\'arm\'an constant.  The temperature scale, $T_{\tau}$, is defined by
 \begin{equation}
@@ -137,17 +137,19 @@ The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a fu
 \label{eqn_t_bt}
 B_T =(3.85 \,\mbox{Pr}^{1/3}-1.3)^2 + 2.12 \,\ln\mbox{Pr}
 \end{align}
-The region $5 < y^+ < 30$ is referred to as the buffer layer.  In FDS, the buffer layer is approximated with a semi-log fit connecting the limits of the viscous and log regions
-\be
-\label{eqn_t_buffer_layer}
-T^+ = (\mbox{Pr}_t /\kappa)_{\rm buffer} \, \ln y^+ + B_{T,{\rm buffer}} \quad \mbox{for} \quad 5 < y^+ < 30
-\ee
-where
-\begin{align}
-(\mbox{Pr}_t /\kappa)_{\rm buffer} &= 1.79\,(B_T + 3.40 \,\mbox{Pr}_t - 5 \,\mbox{Pr}) \\[0.1in]
-B_{T,{\rm buffer}} &= 5 \,\mbox{Pr} - 1.61 \,(\mbox{Pr}_t /\kappa)_{\rm buffer}
-\end{align}
-To obtain a consistent convective heat transfer coefficient in all regions, $T^+$ is adjusted to $\max(T^+,T^+ (y^+ = 5))$ for the buffer and log layers ($y^+ \ge 5$). The convective heat transfer coefficient ($h$) is obtained from the definition of $h$ and $T^+$:
+%The region $5 < y^+ < 30$ is referred to as the buffer layer.  In FDS, the buffer layer is approximated with a semi-log fit connecting the limits of the viscous and log regions
+%\be
+%\label{eqn_t_buffer_layer}
+%T^+ = (\mbox{Pr}_t /\kappa)_{\rm buffer} \, \ln y^+ + B_{T,{\rm buffer}} \quad \mbox{for} \quad 5 < y^+ < 30
+%\ee
+%where
+%\begin{align}
+%(\mbox{Pr}_t /\kappa)_{\rm buffer} &= 1.79\,(B_T + 3.40 \,\mbox{Pr}_t - 5 \,\mbox{Pr}) \\[0.1in]
+%B_{T,{\rm buffer}} &= 5 \,\mbox{Pr} - 1.61 \,(\mbox{Pr}_t /\kappa)_{\rm buffer}
+%\end{align}
+%To obtain a consistent convective heat transfer coefficient in all regions, $T^+$ is adjusted to $\max(T^+,T^+ (y^+ = 5))$ for the buffer and log layers ($y^+ \ge 5$).
+
+The convective heat transfer coefficient ($h$) is obtained from the definition of $h$ and $T^+$:
 \begin{align}
 \label{eqn_h_model}
 h = \frac{\dot{q}_{\rm c}''}{(T_{\rm g} - T_{\rm w})}= \frac{{\rho}{c_p}{u_{\tau}}}{T^+}
@@ -189,7 +191,7 @@ This section describes how solid phase reactions and the chemical source term in
 
 Often the intent of a fire simulation is merely to predict the transport of smoke and heat from a {\em specified} fire. In other words, the heat release rate is a specified input, not something the model predicts. In these instances, the desired HRR is translated into a mass flux for fuel at a given solid surface, which can be thought of as the surface of a burner:
 \be
-   \dm_{\rm f}'' = \frac{ f(t) \; \dq_{\rm user}''}{\Delta H}
+   \dm_{\rm f}'' = \frac{ f(t) \; \dq_{\rm user}''}{\Delta H_{\si{c}}}
 \ee
 Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the mass loss rate is computed accordingly.
 
@@ -289,12 +291,12 @@ This reaction can be implemented by setting $T_{\rm thr,\alpha\beta} = T_{\rm f}
 \subsection{Liquid Fuels}
 
 The rate at which liquid fuel evaporates when burning is a function of the liquid temperature and the concentration of fuel vapor above the pool surface. According to the Clausius-Clapeyron relation, the volume fraction of the fuel vapor above the surface is a function of the liquid boiling temperature
-\be X_{\rm F,\ell} = \exp \left[ -\frac{ h_{\rm v} W_{\rm F}}\calR \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
+\be X_{\rm F,\ell} = \exp \left[ -\frac{ h_{\rm v} W_{\rm F}}\R \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
 \label{CC_liquid}
 \ee
 where $h_{\rm v}$ is the heat of vaporization, $W_{\rm F}$ is the molecular weight of the fuel gas, $T_{\rm s}$ is the surface temperature, and $T_{\rm b}$ is the boiling temperature of the fuel~\cite{Prasad:1}. The evaporation rate of the fuel is governed by Stefan diffusion~\cite{Taylor&Krishna}:
 \be
-\dot{m}'' = h_{\rm m} \; \frac{\bp_m W_{\rm F}}{\calR T_{\rm g}} \; \ln \left(\frac{X_{\rm F,g}-1}{X_{\rm F,\ell}-1}\right) \quad ; \quad h_{\rm m}= \frac{\SH \, D_{\rm \ell,g}}{L}
+\dot{m}'' = h_{\rm m} \; \frac{\bp_m W_{\rm F}}{\R T_{\rm g}} \; \ln \left(\frac{X_{\rm F,g}-1}{X_{\rm F,\ell}-1}\right) \quad ; \quad h_{\rm m}= \frac{\SH \, D_{\rm \ell,g}}{L}
 \ee
 where $\bp_m$ is the pressure, $T_{\rm g}$ is the temperature, and $X_{\rm F,g}$ is the volume fraction of fuel vapor in the grid cell adjacent to the pool surface. The Sherwood number is given by
 \be

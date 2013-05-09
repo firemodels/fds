@@ -24,7 +24,7 @@ $E$                       \> activation energy \\
 $\bof_{\rm b}$            \> external force vector (excluding gravity) \\
 $g$                       \> acceleration of gravity \\
 $\bg$                     \> gravity vector, normally $(0,0,-g)$ \\
-$\calH$                   \> total pressure divided by the density \\
+$\cH$                      \> total pressure divided by the density (Bernoulli integral)\\
 $H_{{\rm r},\alpha\beta}$ \> heat of reaction for a solid phase reaction     \\
 $h$                       \> heat transfer coefficient; Planck constant      \\
 $h_{\rm s,\alpha}$                \> sensible enthalpy of species $\alpha$   \\
@@ -56,7 +56,7 @@ $\dq_{\rm r}''$           \> radiative heat flux \\
 $\dq_{\rm c}''$           \> convective heat flux \\
 $\dQ$                     \> total heat release rate \\
 $\dQ^*$                   \> fire Froude number \\
-$\calR$                   \> universal gas constant \\
+$\R$                      \> universal gas constant \\
 Re                        \> Reynolds number \\
 $r_{\rm p}$               \> particle/droplet radius \\
 $r_{\alpha\beta}$         \> solid phase reaction rate \\
@@ -146,7 +146,7 @@ The equations governing the evolution of a low-Mach, variable density fluid---fi
 \begin{gather}
 \label{eqn_rho} \frac{\partial \rho}{\partial t} + \Div(\rho\mathbf{u}) = 0 \\
 \label{eqn_Y_a} \frac{\partial \rho Y_\alpha}{\partial t} + \Div(\rho Y_\alpha \mathbf{u}) = \Div (\rho D_\alpha \nabla Y_\alpha) + \dot{m}_\alpha^\tripleprime \\
-\label{eqn_u}   \frac{\partial \rho \mathbf{u}}{\partial t} + \Div(\rho \mathbf{u} \mathbf{u}) = -\nabla \tilde{p} - \Div\underline{\underline{\tau}} + (\rho-\rho_0) \mathbf{g} \\
+\label{eqn_u}   \frac{\partial \rho \mathbf{u}}{\partial t} + \Div(\rho \mathbf{u} \mathbf{u}) = -\nabla \tilde{p} - \Div\mathbf{\tau} + (\rho-\rho_0) \mathbf{g} \\
 \label{eqn_h_s} \frac{\partial \rho h_s}{\partial t} + \Div(\rho h_s \mathbf{u}) = \frac{\mbox{D} \bar{p}}{\mbox{D} t} + \dot{q}^\tripleprime - \Div \dot{\mathbf{q}}^\pp \\
 \label{eqn_eos} \rho = \frac{\bar{p} \overline{W}}{RT}
 \end{gather}
