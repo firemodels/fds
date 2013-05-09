@@ -52,7 +52,7 @@ if length(varargin) >= 1
     % Check if FDS validation plot, set appropriate flag and tex output file
     elseif strfind(output_file, 'FDS_validation_scatterplot_output')
         stats_output = 2;
-        statistics_tex_output = '../../Manuals/FDS_Validation_Guide/FIGURES/ScatterPlots/validation_statistics.tex';
+        statistics_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
     % Check if FDTs validation plot, set appropriate flag and tex output file
     elseif strfind(output_file, 'FDTs_validation_scatterplot_output')
         stats_output = 2;

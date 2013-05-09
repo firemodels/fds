@@ -6,7 +6,7 @@
 
 % font properties
 Font_Name       = 'Times';
-Font_Interpreter = 'LaTeX';
+Font_Interpreter = 'TeX';
 Key_Font_Size   = 12;
 Title_Font_Size = 16;
 Label_Font_Size = 16;
