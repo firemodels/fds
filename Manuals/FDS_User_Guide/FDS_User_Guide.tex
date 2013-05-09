@@ -5273,10 +5273,10 @@ the relevant physical mechanisms occur at length scales smaller than a
 single mesh cell. Flames are extinguished due to lowered
 temperatures and dilution of the oxygen supply. A simple
 suppression algorithm has been implemented in FDS that attempts to
-gauge whether or not combustion is viable. The Technical Reference Guide~\cite{FDS_Math_Guide}
+gauge whether or not combustion is viable based on the local energy release. There must be sufficient energy released to raise the cell temperature above the critical flame temperature for combustion to occur. The Technical Reference Guide~\cite{FDS_Math_Guide}
 contains more details about how the mechanism works. The only
 parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} set on the {\ct REAC} line.
-The default value is 1327~$^\circ$C.
+The default value is 1327~$^\circ$C. This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the {\ct CRITICAL\_FLAME\_TEMPERATURE} should be calculated to reflect your reaction(s).
 To eliminate any gas phase suppression, set  {\ct CRITICAL\_FLAME\_TEMPERATURE} to -273.15 ~$^\circ$C, or turn off suppression completely
 by setting {\ct SUPPRESSION=.FALSE.} on the {\ct REAC} line. This latter approach saves on computing time because it
 prevents FDS from entering the suppression algorithm altogether.
