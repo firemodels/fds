@@ -381,6 +381,7 @@ typedef struct _cventdata {
   int dir,type,colorindex,cvent_id,isOpenvent;
   float boxmin[3], boxmax[3], texture_origin[3];
   float xmin, xmax, ymin, ymax, zmin, zmax;
+  unsigned char *blank;
   int   imin, imax, jmin, jmax, kmin, kmax;
   int useventcolor,hideboundary;
   float origin[3], radius;

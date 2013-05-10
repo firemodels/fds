@@ -5710,6 +5710,7 @@ typedef struct {
         cvi->hideboundary=0;
         cvi->cvent_id=-1;
         cvi->color=NULL;
+        cvi->blank=NULL;
 
         origin=cvi->origin;
         s_num[0]=-1;
