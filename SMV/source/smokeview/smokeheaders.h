@@ -12,8 +12,8 @@ EXTERNCPP void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, flo
 EXTERNCPP void init_clip(void);
 EXTERNCPP void setClipPlanes(clipdata *ci, int option);
 
-EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor);
-EXTERNCPP void drawcircle(float diameter, unsigned char *rgbcolor);
+EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
+EXTERNCPP void drawcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
 EXTERNCPP void drawfilledrectangle(float width, float height, unsigned char *rgbcolor);
 EXTERNCPP void drawrectangle(float width, float height, unsigned char *rgbcolor);
 EXTERNCPP void DrawCircVents(int option);
@@ -191,7 +191,7 @@ EXTERNCPP void next_xindex(int inc,int flag);
 EXTERNCPP void next_yindex(int inc,int flag);
 EXTERNCPP void next_zindex(int inc,int flag);
 EXTERNCPP void Init_Sphere(int nlat, int nlong);
-EXTERNCPP void Init_Circle(unsigned int npoints);
+EXTERNCPP void Init_Circle(unsigned int npoints, circdata *circinfo);
 EXTERNCPP void Update_Glui_Wui(void);
 EXTERNCPP int have_terrain_slice(void);
 EXTERNCPP float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc);

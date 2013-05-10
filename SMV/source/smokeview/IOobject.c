@@ -287,8 +287,8 @@ void drawcone(float d1, float height, unsigned char *rgbcolor);
 void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
 void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor);
 void drawarc(float angle, float diameter, unsigned char *rgbcolor);
-void drawcircle(float diameter, unsigned char *rgbcolor);
-void drawfilledcircle(float diameter, unsigned char *rgbcolor);
+void drawcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
+void drawfilledcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
 void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
 void drawhsphere(float diameter, unsigned char *rgbcolor);
@@ -307,10 +307,8 @@ void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolo
 void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
 void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level);
 void free_object(sv_object *object);
-void freecircle(void);
+void freecircle(circdata *circinfo);
 
-static float *xcirc=NULL, *ycirc=NULL;
-static int ncirc;
 static float *cos_long=NULL, *sin_long=NULL, *cos_lat=NULL, *sin_lat=NULL;
 static float specular[4]={0.4,0.4,0.4,1.0};
 unsigned char *rgbimage=NULL;
@@ -1554,11 +1552,11 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       rgbptr_local=NULL;
       break;
     case SV_DRAWCIRCLE:
-      drawcircle(arg[0],rgbptr_local);
+      drawcircle(arg[0],rgbptr_local, &object_circ);
       rgbptr_local=NULL;
       break;
     case SV_DRAWFILLEDCIRCLE:
-      drawfilledcircle(arg[0],rgbptr_local);
+      drawfilledcircle(arg[0],rgbptr_local, &object_circ);
       rgbptr_local=NULL;
       break;
     case SV_DRAWARC:
@@ -2259,10 +2257,16 @@ void drawfilledrectangle(float width,float height, unsigned char *rgbcolor){
 
 /* ----------------------- drawfilledcircle ----------------------------- */
 
-void drawfilledcircle(float diameter,unsigned char *rgbcolor){
+void drawfilledcircle(float diameter,unsigned char *rgbcolor, circdata *circinfo){
   int i;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(circinfo->ncirc==0)Init_Circle(CIRCLE_SEGS,circinfo);
+  ncirc = circinfo->ncirc;
+  xcirc = circinfo->xcirc;
+  ycirc = circinfo->ycirc;
+
   if(object_outlines==0){
     glBegin(GL_TRIANGLES);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -2302,10 +2306,16 @@ void drawfilledcircle(float diameter,unsigned char *rgbcolor){
 
 /* ----------------------- drawcircle ----------------------------- */
 
-void drawcircle(float diameter,unsigned char *rgbcolor){
+void drawcircle(float diameter,unsigned char *rgbcolor, circdata *circinfo){
   int i;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(circinfo->ncirc==0)Init_Circle(CIRCLE_SEGS,circinfo);
+  ncirc = circinfo->ncirc;
+  xcirc = circinfo->xcirc;
+  ycirc = circinfo->ycirc;
+  
   glBegin(GL_LINE_LOOP);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   for(i=0;i<ncirc;i++){
@@ -2318,8 +2328,14 @@ void drawcircle(float diameter,unsigned char *rgbcolor){
 
 void drawarc(float angle, float diameter,unsigned char *rgbcolor){
   int i, iarc;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
+  ncirc = object_circ.ncirc;
+  xcirc = object_circ.xcirc;
+  ycirc = object_circ.ycirc;
+  
   iarc = CIRCLE_SEGS*(angle+180.0/CIRCLE_SEGS)/360.0;
   if(iarc<2)iarc=2;
   if(iarc>CIRCLE_SEGS)iarc=CIRCLE_SEGS;
@@ -2838,8 +2854,14 @@ void drawsquare(float size, unsigned char *rgbcolor){
 
 void drawring(float diam_inner, float diam_outer, float height, unsigned char *rgbcolor){
   int i;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
+  ncirc = object_circ.ncirc;
+  xcirc = object_circ.xcirc;
+  ycirc = object_circ.ycirc;
+  
   if(object_outlines==0){
     glBegin(GL_QUADS);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -2978,8 +3000,14 @@ void rotatexyz(float x, float y, float z){
 
 void drawdisk(float diameter, float height, unsigned char *rgbcolor){
   int i;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
+  ncirc = object_circ.ncirc;
+  xcirc = object_circ.xcirc;
+  ycirc = object_circ.ycirc;
+  
   if(object_outlines==0){
     glBegin(GL_QUADS);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -3196,8 +3224,13 @@ void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbco
 
 void drawcdisk(float diameter, float height, unsigned char *rgbcolor){
   int i;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
+  ncirc = object_circ.ncirc;
+  xcirc = object_circ.xcirc;
+  ycirc = object_circ.ycirc;
 
   if(object_outlines==0){
     glBegin(GL_QUADS);
@@ -3491,9 +3524,15 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
   int i;
   float diameter2;
 
-  diameter2 = diameter + notchheight;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
+  ncirc = object_circ.ncirc;
+  xcirc = object_circ.xcirc;
+  ycirc = object_circ.ycirc;
+
+  diameter2 = diameter + notchheight;
 
   if(object_outlines==0){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
@@ -3767,10 +3806,14 @@ void drawcone(float d1, float height, unsigned char *rgbcolor){
   int i;
   float factor, denom, rad;
   float hdr;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
+  ncirc = object_circ.ncirc;
+  xcirc = object_circ.xcirc;
+  ycirc = object_circ.ycirc;
   if(height<=0.0)height=0.0001;
-
 
   rad = d1/2.0;
   hdr = height/rad;
@@ -3832,12 +3875,16 @@ void drawcone(float d1, float height, unsigned char *rgbcolor){
 void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor){
   int i;
   float dz;
+  int ncirc;
+  float *xcirc, *ycirc;
 
-  if(ncirc==0)Init_Circle(CIRCLE_SEGS);
+  if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
+  ncirc = object_circ.ncirc;
+  xcirc = object_circ.xcirc;
+  ycirc = object_circ.ycirc;
+  
   if(height<=0.0)height=0.0001;
-
   dz = -(d2-d1)/height;
-
   if(object_outlines==0){
     glBegin(GL_QUADS);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -3970,16 +4017,20 @@ sv_object *get_SVOBJECT_type2(char *olabel,sv_object *default_object){
 
 /* ----------------------- initcircle ----------------------------- */
 
-void Init_Circle(unsigned int npoints){
+void Init_Circle(unsigned int npoints, circdata *circinfo){
   float drad;
   int i;
+  float *xcirc, *ycirc;
+  int ncirc;
 
-  if(ncirc!=0)freecircle();
+  if(circinfo->ncirc!=0)freecircle(circinfo);
   if(npoints<2)return;
   ncirc=npoints;
   NewMemory( (void **)&xcirc,(ncirc+1)*sizeof(float));
   NewMemory( (void **)&ycirc,(ncirc+1)*sizeof(float));
   drad=2.0*PI/(float)ncirc;
+
+
   for(i=0;i<ncirc;i++){
     xcirc[i] = cos(i*drad);
     ycirc[i] = sin(i*drad);
@@ -3987,6 +4038,9 @@ void Init_Circle(unsigned int npoints){
   xcirc[ncirc]=xcirc[0];
   ycirc[ncirc]=ycirc[0];
 
+  circinfo->xcirc=xcirc;
+  circinfo->ycirc=ycirc;
+  circinfo->ncirc=npoints;
 }
 
 /* ----------------------- initspheresegs ----------------------------- */
@@ -4027,10 +4081,10 @@ void Init_Sphere(int nlat, int nlong){
 
 /* ----------------------- freecircle ----------------------------- */
 
-void freecircle(void){
-  FREEMEMORY(xcirc);
-  FREEMEMORY(ycirc);
-  ncirc=0;
+void freecircle(circdata *circinfo){
+  FREEMEMORY(circinfo->xcirc);
+  FREEMEMORY(circinfo->ycirc);
+  circinfo->ncirc=0;
 }
 
 /* ----------------------- init_SVOBJECT1 ----------------------------- */

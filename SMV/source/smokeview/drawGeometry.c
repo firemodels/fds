@@ -114,8 +114,8 @@ void DrawCircVents(int option){
           break;
       }
       if(option==VENT_CIRCLE){
-        if(cvi->type==VENT_SOLID)drawfilledcircle(2.0*cvi->radius,vcolor);
-        if(cvi->type==VENT_OUTLINE)drawcircle(2.0*cvi->radius,vcolor);
+        if(cvi->type==VENT_SOLID)drawfilledcircle(2.0*cvi->radius,vcolor,&cvent_circ);
+        if(cvi->type==VENT_OUTLINE)drawcircle(2.0*cvi->radius,vcolor,&cvent_circ);
       }
       if(option==VENT_RECTANGLE){
         if(cvi->type==VENT_SOLID)drawfilledrectangle(width,height,vcolor);
@@ -318,6 +318,7 @@ void get_blockvals(  float *xmin, float *xmax,
 void SetCVentDirs(void){
   int ii;
 
+  Init_Circle(90,&cvent_circ);
   for(ii=0;ii<nmeshes;ii++){
     mesh *meshi;
     float *xplttemp,*yplttemp,*zplttemp;
