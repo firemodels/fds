@@ -140,6 +140,8 @@ for i=2:n_plots
     otest = strcmp(parameters(find(strcmp(headers,'switch_id'))),'o');
     
     if itest & (dtest | otest)
+
+        figure
         
         define_drow_variables
         
