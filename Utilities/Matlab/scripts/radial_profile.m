@@ -290,10 +290,10 @@ end
 
 xt = xmin + .05*(xmax-xmin);
 yt = ymin + .92*(ymax-ymin);
-text(xt,yt,title_label,'FontSize',14,'Interpreter',Font_Interpreter)
+text(xt,yt,title_label,'FontName',Font_Name,'FontSize',14,'Interpreter',Font_Interpreter)
 xt = xmin + .05*(xmax-xmin);
 yt = ymin + .84*(ymax-ymin);
-text(xt,yt,text_label,'FontSize',14,'Interpreter',Font_Interpreter)
+text(xt,yt,text_label,'FontName',Font_Name,'FontSize',14,'Interpreter',Font_Interpreter)
 
 plot_style
 
