@@ -6800,13 +6800,13 @@ As an example of the more advanced sprinkler options, a sprikler with elliptical
 \begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
       ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE(1:2,1)=0.,60.,SPRAY_ANGLE(1:2,1) = 0.,30. ,SPRAY_PATTERN_SHAPE='UNIFORM' /
+      PARTICLE_VELOCITY=10., SPRAY_ANGLE(1:2,1)=0.,60.,SPRAY_ANGLE(1:2,2) = 0.,30. ,SPRAY_PATTERN_SHAPE='UNIFORM' /
 
 &DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
 &DEVC ID='Spr_61', XYZ=22.88,21.76,7.46, PROP_ID='K-11' /
 \end{lstlisting}
 
-For full-cone sprays, the {\ct SPRAY\_PATTERN\_MU} parameter is set to zero by default. For hollow-cone sprays it is set to the average of the {\ct SPRAY\_ANGLE(1:2,1)}, the spray angle in x direction. The following example uses  {\ct SPRAY\_PATTERN\_MU} to define a spray that is somewhere between full-cone and hollow-cone spray:
+For full-cone sprays, the {\ct SPRAY\_PATTERN\_MU} parameter is set to zero by default. For hollow-cone sprays it is set to the average of {\ct SPRAY\_ANGLE(1:2,1)}, the spray angle in x direction. The following example uses  {\ct SPRAY\_PATTERN\_MU} to define a spray that is somewhere between full-cone and hollow-cone spray:
 \begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
       ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
