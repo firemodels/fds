@@ -467,6 +467,7 @@ for i=2:n_plots
         
     end
     clear S1 S2 K style H M X Y P parameters
+    clf
 end
 
 clear A
