@@ -65,7 +65,7 @@
 #endif
 
 #ifndef IJCIRC
-#define IJCIRC(i,j) ((i)+(j)*nx)
+#define IJCIRC(i,j) ((i)+0+((j)+0)*nx)
 #endif
 
 #ifndef IJKNODE

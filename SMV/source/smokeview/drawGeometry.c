@@ -69,23 +69,82 @@ void DrawCircVentsApprox(int option){
             for(jj=cvi->jmin;jj<cvi->jmax;jj++){
               yy = yplt[jj];
               yy2 = yplt[jj+1];
-              blank++;
-              if(blank[-1]==0)continue;
-              glVertex3f(xx,yy,zz);
+              if(blank[IJCIRC(jj-cvi->jmin,kk-cvi->kmin)]==0)continue;
+              glVertex3f(xx, yy,zz);
               glVertex3f(xx,yy2,zz);
               glVertex3f(xx,yy2,zz2);
 
-              glVertex3f(xx,yy,zz);
+              glVertex3f(xx, yy,zz);
               glVertex3f(xx,yy2,zz2);
-              glVertex3f(xx,yy,zz2);
+              glVertex3f(xx,yy2,zz);
+
+              glVertex3f(xx, yy,zz);
+              glVertex3f(xx,yy2,zz2);
+              glVertex3f(xx, yy,zz2);
+
+              glVertex3f(xx, yy,zz);
+              glVertex3f(xx, yy,zz2);
+              glVertex3f(xx,yy2,zz2);
             }
           }
           break;
         case UP_Y:
         case DOWN_Y:
+          yy=yplt[cvi->jmin]+dx;;
+          nx = cvi->imax-cvi->imin;
+          for(kk=cvi->kmin;kk<cvi->kmax;kk++){
+            zz = zplt[kk];
+            zz2 = zplt[kk+1];
+            for(ii=cvi->imin;ii<cvi->imax;ii++){
+              xx = xplt[ii];
+              xx2 = xplt[ii+1];
+              if(blank[IJCIRC(ii-cvi->imin,kk-cvi->kmin)]==0)continue;
+              glVertex3f( xx,yy,zz);
+              glVertex3f(xx2,yy,zz);
+              glVertex3f(xx2,yy,zz2);
+
+              glVertex3f( xx,yy,zz);
+              glVertex3f(xx2,yy,zz2);
+              glVertex3f(xx2,yy,zz);
+
+              glVertex3f( xx,yy,zz);
+              glVertex3f(xx2,yy,zz2);
+              glVertex3f( xx,yy,zz2);
+
+              glVertex3f( xx,yy,zz);
+              glVertex3f( xx,yy,zz2);
+              glVertex3f(xx2,yy,zz2);
+            }
+          }
           break;
         case UP_Z:
         case DOWN_Z:
+          zz=zplt[cvi->kmin]+dx;;
+          nx = cvi->imax-cvi->imin;
+          for(jj=cvi->jmin;jj<cvi->jmax;jj++){
+            yy = yplt[jj];
+            yy2 = yplt[jj+1];
+            for(ii=cvi->imin;ii<cvi->imax;ii++){
+              xx = xplt[ii];
+              xx2 = xplt[ii+1];
+              if(blank[IJCIRC(ii-cvi->imin,jj-cvi->jmin)]==0)continue;
+              glVertex3f( xx, yy,zz);
+              glVertex3f(xx2, yy,zz);
+              glVertex3f(xx2,yy2,zz);
+
+              glVertex3f( xx, yy,zz);
+              glVertex3f(xx2,yy2,zz);
+              glVertex3f(xx2, yy,zz);
+
+              glVertex3f( xx, yy,zz);
+              glVertex3f(xx2,yy2,zz);
+              glVertex3f( xx,yy2,zz);
+
+              glVertex3f( xx, yy,zz);
+              glVertex3f( xx,yy2,zz);
+              glVertex3f(xx2,yy2,zz);
+            }
+          }
           break;
         default:
           ASSERT(0);
@@ -602,6 +661,9 @@ void SetCVentDirs(void){
     }
   }
 
+  // set up blanking arrays for circular vents
+
+  CheckMemory;
   for(ii=0;ii<nmeshes;ii++){
     mesh *meshi;
     int iv,i,j,k;
@@ -642,13 +704,16 @@ void SetCVentDirs(void){
       }
       NewMemory((void **)&cvi->blank,nx*ny*sizeof(unsigned char));
       blank=cvi->blank;
-      for(j=0;j<ny*nx;j++){
-        *blank++=1;
+      for(j=0;j<ny;j++){
+        for(i=0;i<nx;i++){
+          blank[IJCIRC(i,j)]=1;
+        }
       }
       
       blank=cvi->blank;
       switch(cvi->dir){
-      case 1:
+      case DOWN_X:
+      case UP_X:
         for(k=cvi->kmin;k<cvi->kmax;k++){
           float dz;
 
@@ -660,15 +725,52 @@ void SetCVentDirs(void){
             dy = yplt[j]-NORMALIZE_Y(cvi->origin[1]);
             drad=sqrt(dy*dy+dz*dz);
             if(drad>cvi->radius/xyzmaxdiff){
-              *blank=0;
+              blank[IJCIRC(j-cvi->jmin,k-cvi->kmin)]=0;
             }
-            blank++;
           }
         }
         break;
-      case 2:
+      case DOWN_Y:
+      case UP_Y:
+        for(k=cvi->kmin;k<cvi->kmax;k++){
+          float dz;
+
+          dz = zplt[k]-NORMALIZE_Z(cvi->origin[2]);
+          for(i=cvi->imin;i<cvi->imax;i++){
+            float dx;
+            float drad;
+
+            dx = xplt[i]-NORMALIZE_X(cvi->origin[0]);
+            drad=sqrt(dx*dx+dz*dz);
+            if(drad>cvi->radius/xyzmaxdiff){
+              blank[IJCIRC(i-cvi->imin,k-cvi->kmin)]=0;
+            }
+          }
+        }
         break;
-      case 3:
+      case DOWN_Z:
+      case UP_Z:
+        for(j=cvi->jmin;j<cvi->jmax;j++){
+          float dy;
+
+          dy = yplt[j]-NORMALIZE_Y(cvi->origin[1]);
+          for(i=cvi->imin;i<cvi->imax;i++){
+            float dx;
+            float drad;
+
+            dx = xplt[i]-NORMALIZE_X(cvi->origin[0]);
+            drad=sqrt(dx*dx+dy*dy);
+            if(drad>cvi->radius/xyzmaxdiff){
+              blank[IJCIRC(i-cvi->imin,j-cvi->jmin)]=0;
+            }
+            else{
+              blank[IJCIRC(i-cvi->imin,j-cvi->jmin)]=1;
+            }
+          }
+        }
+        break;
+      default:
+        ASSERT(0);
         break;
       }
     }
