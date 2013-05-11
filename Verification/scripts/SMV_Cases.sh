@@ -1,6 +1,5 @@
 #!/bin/bash
 
-$RUNFDS Visualization version
 $RUNFDS Visualization cell_test
 $RUNCFAST Visualization cfast_test
 $RUNFDS Visualization colorbar
@@ -23,6 +22,8 @@ $RUNFDS Visualization sprinkler_many
 $RUNFDS Visualization thouse5
 $RUNFDS Visualization thouse5delta
 $RUNFDS Visualization transparency
+$RUNFDS Visualization vcirctest
+$RUNFDS Visualization version
 
 $RUNFDS WUI levelset1
 #$RUNFDS WUI fire_line
