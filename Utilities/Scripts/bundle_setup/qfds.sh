@@ -164,7 +164,7 @@ fi
 TITLE="$infile"
 
 if [ $nprocesses -gt 1 ] ; then
-  MPIRUN="mpirun -np $nprocesses"
+  MPIRUN="$MPIDIST mpirun -np $nprocesses"
   TITLE="$infile(MPI)"
 fi
 if [ "$USE_SMOKEVIEW" == "y" ] ; then
