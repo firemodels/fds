@@ -21,9 +21,84 @@ char drawGeometry_revision[]="$Revision$";
 
 cadgeom *current_cadgeom;
 
-/* ------------------ DrawCircVents ------------------------ */
+  /* ------------------ DrawCircVentsExactApprox ------------------------ */
 
-void DrawCircVents(int option){
+void DrawCircVentsApprox(int option){
+  int i;
+
+  if(option==VENT_HIDE)return;
+  ASSERT(option==VENT_CIRCLE||option==VENT_RECTANGLE);
+
+  glBegin(GL_TRIANGLES);
+  for(i=0;i<nmeshes;i++){
+    int j;
+    mesh *meshi;
+    float *xplt, *yplt, *zplt;
+
+    meshi = meshinfo + i;
+    xplt = meshi->xplt;
+    yplt = meshi->yplt;
+    zplt = meshi->zplt;
+
+    for(j=0;j<meshi->ncvents;j++){
+      cventdata *cvi;
+      unsigned char *blank;
+      int ii, jj, kk;
+      int nx;
+      float xx, yy, zz;
+      float xx2, yy2, zz2;
+      float dx;
+
+      cvi = meshi->cventinfo + j;
+      blank = cvi->blank;
+      glColor3fv(cvi->color);
+      if(cvi->dir==UP_X||cvi->dir==UP_Y||cvi->dir==UP_Z){
+        dx=0.001;
+      }
+      else{
+        dx=-0.001;
+      }
+      switch(cvi->dir){
+        case UP_X:
+        case DOWN_X:
+          xx=xplt[cvi->imin]+dx;;
+          nx = cvi->jmax-cvi->jmin;
+          for(kk=cvi->kmin;kk<cvi->kmax;kk++){
+            zz = zplt[kk];
+            zz2 = zplt[kk+1];
+            for(jj=cvi->jmin;jj<cvi->jmax;jj++){
+              yy = yplt[jj];
+              yy2 = yplt[jj+1];
+              blank++;
+              if(blank[-1]==0)continue;
+              glVertex3f(xx,yy,zz);
+              glVertex3f(xx,yy2,zz);
+              glVertex3f(xx,yy2,zz2);
+
+              glVertex3f(xx,yy,zz);
+              glVertex3f(xx,yy2,zz2);
+              glVertex3f(xx,yy,zz2);
+            }
+          }
+          break;
+        case UP_Y:
+        case DOWN_Y:
+          break;
+        case UP_Z:
+        case DOWN_Z:
+          break;
+        default:
+          ASSERT(0);
+          break;
+      }
+    }
+  }
+  glEnd();
+}
+
+ /* ------------------ DrawCircVentsExact ------------------------ */
+
+void DrawCircVentsExact(int option){
   int i;
 
   if(option==VENT_HIDE)return;
@@ -126,6 +201,18 @@ void DrawCircVents(int option){
     }
   }
 
+}
+
+/* ------------------ DrawCircVentsExact ------------------------ */
+
+void DrawCircVents(int option){
+  if(option==VENT_HIDE)return;
+  if(option==VENT_RECTANGLE||blocklocation==BLOCKlocation_grid){
+    DrawCircVentsApprox(option);
+  }
+  else{
+    DrawCircVentsExact(option);
+  }
 }
 
 /* ------------------ UpdateIndexolors ------------------------ */
@@ -514,6 +601,79 @@ void SetCVentDirs(void){
       }
     }
   }
+
+  for(ii=0;ii<nmeshes;ii++){
+    mesh *meshi;
+    int iv,i,j,k;
+    unsigned char *blank;
+    float *xplt, *yplt, *zplt;
+    float xx, yy, zz;
+
+    meshi=meshinfo+ii;
+
+    xplt = meshi->xplt_cen;
+    yplt = meshi->yplt_cen;
+    zplt = meshi->zplt_cen;
+    for(iv=0;iv<meshi->ncvents;iv++){
+      cventdata *cvi;
+      int nx, ny;
+
+      cvi=meshi->cventinfo+iv;
+
+      switch (cvi->dir){
+        case UP_X:
+        case DOWN_X:
+          nx = cvi->jmax - cvi->jmin;
+          ny = cvi->kmax - cvi->kmin;
+          break;
+        case UP_Y:
+        case DOWN_Y:
+          nx = cvi->imax - cvi->imin;
+          ny = cvi->kmax - cvi->kmin;
+          break;
+        case UP_Z:
+        case DOWN_Z:
+          nx = cvi->imax - cvi->imin;
+          ny = cvi->jmax - cvi->jmin;
+          break;
+        default:
+          ASSERT(0);
+          break;
+      }
+      NewMemory((void **)&cvi->blank,nx*ny*sizeof(unsigned char));
+      blank=cvi->blank;
+      for(j=0;j<ny*nx;j++){
+        *blank++=1;
+      }
+      
+      blank=cvi->blank;
+      switch(cvi->dir){
+      case 1:
+        for(k=cvi->kmin;k<cvi->kmax;k++){
+          float dz;
+
+          dz = zplt[k]-NORMALIZE_Z(cvi->origin[2]);
+          for(j=cvi->jmin;j<cvi->jmax;j++){
+            float dy;
+            float drad;
+
+            dy = yplt[j]-NORMALIZE_Y(cvi->origin[1]);
+            drad=sqrt(dy*dy+dz*dz);
+            if(drad>cvi->radius/xyzmaxdiff){
+              *blank=0;
+            }
+            blank++;
+          }
+        }
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      }
+    }
+  }
+
 }
 
 /* ------------------ SetVentDirs ------------------------ */

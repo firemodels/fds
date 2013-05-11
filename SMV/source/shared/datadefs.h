@@ -64,6 +64,10 @@
 #define GETINDEX(ival,xval,xmin,dx,nx) ival = ((xval)-(xmin))/(dx); ival = CLAMP(ival,0,(nx)-1)
 #endif
 
+#ifndef IJCIRC
+#define IJCIRC(i,j) ((i)+(j)*nx)
+#endif
+
 #ifndef IJKNODE
 #define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
 #endif
