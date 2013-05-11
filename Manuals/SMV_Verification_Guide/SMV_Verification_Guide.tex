@@ -615,7 +615,6 @@ Figure \ref{figsmoketest} presents images verifying the display of 3D smoke and 
 \label{figsmoketest}%
 \end{figure}
 
-
 \clearpage
 
 \section{Plot3D}
@@ -895,7 +894,8 @@ The case illustrated in Figure \ref{figsprinkmany} tests how well Smokeview can 
 
 \section{Vents}
 Figure \ref{figventtest} tests vent display.  This figure shows three different levels of vent visibility: all vents displayed, only non-open vents displayed and all vents hidden. The images for this test were created automatically by running the Smokeview script,
-{\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}).
+{\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}).  Figure \ref{figcircventtest} shows circular vents drawn on the sides of a blockage. The circular vents
+are drawn as as requested by the user (a circle) and as implemented within FDS.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -913,6 +913,16 @@ Figure \ref{figventtest} tests vent display.  This figure shows three different 
 \label{figventtest}%
 \end{figure}
 
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=\figheightD]{SCRIPT_FIGURES/vcirctest_fds}&
+ \includegraphics[height=\figheightD]{SCRIPT_FIGURES/vcirctest_circ}
+\end{tabular}
+\end{center}
+ \caption{A test showing circular vents drawn as a circle and a implemented within FDS}
+\label{figcircventtest}%
+\end{figure}
 
 \clearpage
 
