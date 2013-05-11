@@ -467,12 +467,14 @@ void Update_Show(void){
   if(visTimePatch==1){
     int ii;
 
+    wc_flag=0;
     for(ii=0;ii<npatch_loaded;ii++){
       patchdata *patchi;
 
       i = patch_loaded_list[ii];
       patchi=patchinfo+i;
       if(patchi->display==0||patchi->type!=ipatchtype)continue;
+      if(strcmp(patchi->label.shortlabel,"wc")==0)wc_flag=1;
       patchflag=1;
       break;
     }
@@ -633,7 +635,7 @@ void Update_Show(void){
   if(ReadEvacFile==1)numColorbars++;
   if(ReadPartFile==1)numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&(slicecolorbarflag==1||vslicecolorbarflag==1))numColorbars++;
-  if(plotstate==DYNAMIC_PLOTS&&patchflag==1)numColorbars++;
+  if(plotstate==DYNAMIC_PLOTS&&patchflag==1&&wc_flag==0)numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&ReadZoneFile==1)numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&tisoflag==1){
     showiso_colorbar=1;

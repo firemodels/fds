@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(wc_flag,0);
 SVEXTERN circdata cvent_circ, object_circ;
 #ifdef pp_BETA
 SVEXTERN int SVDECL(show_all_units,1);

@@ -908,7 +908,7 @@ void drawColorBars(void){
   if(showiso_colorbar==1||showevac_colorbar==1||
     (showsmoke==1&&parttype!=0)||showslice==1||
     (showvslice==1&&vslicecolorbarflag==1)||
-    showpatch==1||
+    (showpatch==1&&wc_flag==0)||
     (showzone==1&&sethazardcolor==0)||
     showplot3d==1){
     
@@ -1100,7 +1100,7 @@ void drawColorBars(void){
     leftslice=ileft;
     ileft++;
   }
-  if(showpatch==1){
+  if(showpatch==1&&wc_flag==0){
     leftpatch=ileft;
   }
 
@@ -1212,7 +1212,7 @@ void drawColorBars(void){
 
   // -------------- boundary file top labels ------------
 
-  if(showpatch==1){
+  if(showpatch==1&&wc_flag==0){
     char unitlabel[256];
     patchdata *patchi;
     int patchunitclass, patchunittype;
@@ -1491,7 +1491,7 @@ void drawColorBars(void){
 
   // -------------- boundary left labels ------------
 
-  if(showpatch==1){
+  if(showpatch==1&&wc_flag==0){
     float tttval, tttmin, tttmax;
 
     iposition=-1;
