@@ -23,7 +23,7 @@ cadgeom *current_cadgeom;
 
   /* ------------------ DrawCircVentsExactApprox ------------------------ */
 
-void DrawCircVentsApprox(int option){
+void DrawCircVentsApproxSolid(int option){
   int i;
 
   if(option==VENT_HIDE)return;
@@ -62,7 +62,7 @@ void DrawCircVentsApprox(int option){
         case UP_X:
         case DOWN_X:
           xx=xplt[cvi->imin]+dx;;
-          nx = cvi->jmax-cvi->jmin;
+          nx = cvi->jmax-cvi->jmin+2;
           for(kk=cvi->kmin;kk<cvi->kmax;kk++){
             zz = zplt[kk];
             zz2 = zplt[kk+1];
@@ -91,7 +91,7 @@ void DrawCircVentsApprox(int option){
         case UP_Y:
         case DOWN_Y:
           yy=yplt[cvi->jmin]+dx;;
-          nx = cvi->imax-cvi->imin;
+          nx = cvi->imax-cvi->imin+2;
           for(kk=cvi->kmin;kk<cvi->kmax;kk++){
             zz = zplt[kk];
             zz2 = zplt[kk+1];
@@ -120,7 +120,7 @@ void DrawCircVentsApprox(int option){
         case UP_Z:
         case DOWN_Z:
           zz=zplt[cvi->kmin]+dx;;
-          nx = cvi->imax-cvi->imin;
+          nx = cvi->imax-cvi->imin+2;
           for(jj=cvi->jmin;jj<cvi->jmax;jj++){
             yy = yplt[jj];
             yy2 = yplt[jj+1];
@@ -155,7 +155,151 @@ void DrawCircVentsApprox(int option){
   glEnd();
 }
 
- /* ------------------ DrawCircVentsExact ------------------------ */
+/* ------------------ DrawCircVentsApproxOutline ------------------------ */
+
+void DrawCircVentsApproxOutline(int option){
+  int i;
+
+  if(option==VENT_HIDE)return;
+  ASSERT(option==VENT_CIRCLE||option==VENT_RECTANGLE);
+
+  glBegin(GL_LINES);
+  for(i=0;i<nmeshes;i++){
+    int j;
+    mesh *meshi;
+    float *xplt, *yplt, *zplt;
+
+    meshi = meshinfo + i;
+    xplt = meshi->xplt;
+    yplt = meshi->yplt;
+    zplt = meshi->zplt;
+
+    for(j=0;j<meshi->ncvents;j++){
+      cventdata *cvi;
+      unsigned char *blank;
+      int ii, jj, kk;
+      int iii, jjj, kkk;
+      int nx;
+      float xx, yy, zz;
+      float xx2, yy2, zz2;
+      float dx;
+
+      cvi = meshi->cventinfo + j;
+      blank = cvi->blank;
+      glColor3fv(cvi->color);
+      if(cvi->dir==UP_X||cvi->dir==UP_Y||cvi->dir==UP_Z){
+        dx=0.001;
+      }
+      else{
+        dx=-0.001;
+      }
+      switch(cvi->dir){
+        case UP_X:
+        case DOWN_X:
+          xx=xplt[cvi->imin]+dx;;
+          nx = cvi->jmax-cvi->jmin+2;
+          for(kk=cvi->kmin;kk<cvi->kmax;kk++){
+            kkk = kk-cvi->kmin;
+            zz = zplt[kk];
+            zz2 = zplt[kk+1];
+            for(jj=cvi->jmin;jj<cvi->jmax;jj++){
+              jjj=jj-cvi->jmin;
+              yy = yplt[jj];
+              yy2 = yplt[jj+1];
+              if(blank[IJCIRC(jjj,kkk)]==0)continue;
+              if(blank[IJCIRC(jjj+1,kkk)]==0){
+                glVertex3f(xx,yy2,zz);
+                glVertex3f(xx,yy2,zz2);
+              }
+              if(blank[IJCIRC(jjj-1,kkk)]==0){
+                glVertex3f(xx,yy,zz);
+                glVertex3f(xx,yy,zz2);
+              }
+              if(blank[IJCIRC(jjj,kkk+1)]==0){
+                glVertex3f(xx,yy,zz2);
+                glVertex3f(xx,yy2,zz2);
+              }
+              if(blank[IJCIRC(jjj,kkk-1)]==0){
+                glVertex3f(xx,yy,zz);
+                glVertex3f(xx,yy2,zz);
+              }
+            }
+          }
+          break;
+        case UP_Y:
+        case DOWN_Y:
+          yy=yplt[cvi->jmin]+dx;;
+          nx = cvi->imax-cvi->imin+2;
+          for(kk=cvi->kmin;kk<cvi->kmax;kk++){
+            zz = zplt[kk];
+            zz2 = zplt[kk+1];
+            kkk=kk-cvi->kmin;
+            for(ii=cvi->imin;ii<cvi->imax;ii++){
+              xx = xplt[ii];
+              xx2 = xplt[ii+1];
+              iii=ii-cvi->imin;
+              if(blank[IJCIRC(iii,kkk)]==0)continue;
+              if(blank[IJCIRC(iii+1,kkk)]==0){
+                glVertex3f(xx2,yy,zz);
+                glVertex3f(xx2,yy,zz2);
+              }
+              if(blank[IJCIRC(iii-1,kkk)]==0){
+                glVertex3f(xx,yy,zz);
+                glVertex3f(xx,yy,zz2);
+              }
+              if(blank[IJCIRC(iii,kkk+1)]==0){
+                glVertex3f(xx,yy,zz2);
+                glVertex3f(xx2,yy,zz2);
+              }
+              if(blank[IJCIRC(iii,kkk-1)]==0){
+                glVertex3f(xx,yy,zz);
+                glVertex3f(xx2,yy,zz);
+              }
+            }
+          }
+          break;
+        case UP_Z:
+        case DOWN_Z:
+          zz=zplt[cvi->kmin]+dx;;
+          nx = cvi->imax-cvi->imin+2;
+          for(jj=cvi->jmin;jj<cvi->jmax;jj++){
+            yy = yplt[jj];
+            yy2 = yplt[jj+1];
+            jjj = jj-cvi->jmin;
+            for(ii=cvi->imin;ii<cvi->imax;ii++){
+              xx = xplt[ii];
+              xx2 = xplt[ii+1];
+              iii=ii-cvi->imin;
+              if(blank[IJCIRC(iii,jjj)]==0)continue;
+              if(blank[IJCIRC(iii+1,jjj)]==0){
+                glVertex3f(xx2,yy,zz);
+                glVertex3f(xx2,yy2,zz);
+              }
+              if(blank[IJCIRC(iii-1,jjj)]==0){
+                glVertex3f(xx,yy,zz);
+                glVertex3f(xx,yy2,zz);
+              }
+              if(blank[IJCIRC(iii,jjj+1)]==0){
+                glVertex3f(xx,yy2,zz);
+                glVertex3f(xx2,yy2,zz);
+              }
+              if(blank[IJCIRC(iii,jjj-1)]==0){
+                glVertex3f(xx,yy,zz);
+                glVertex3f(xx2,yy,zz);
+              }
+            }
+          }
+          break;
+        default:
+          ASSERT(0);
+          break;
+      }
+    }
+  }
+  glEnd();
+}
+
+/* ------------------ DrawCircVentsExact ------------------------ */
 
 void DrawCircVentsExact(int option){
   int i;
@@ -267,7 +411,8 @@ void DrawCircVentsExact(int option){
 void DrawCircVents(int option){
   if(option==VENT_HIDE)return;
   if(option==VENT_RECTANGLE||blocklocation==BLOCKlocation_grid){
-    DrawCircVentsApprox(option);
+    if(object_outlines==0)DrawCircVentsApproxSolid(option);
+    if(object_outlines==1)DrawCircVentsApproxOutline(option);
   }
   else{
     DrawCircVentsExact(option);
@@ -663,7 +808,6 @@ void SetCVentDirs(void){
 
   // set up blanking arrays for circular vents
 
-  CheckMemory;
   for(ii=0;ii<nmeshes;ii++){
     mesh *meshi;
     int iv,i,j,k;
@@ -702,11 +846,18 @@ void SetCVentDirs(void){
           ASSERT(0);
           break;
       }
+      nx+=2;
+      ny+=2;
       NewMemory((void **)&cvi->blank,nx*ny*sizeof(unsigned char));
       blank=cvi->blank;
       for(j=0;j<ny;j++){
         for(i=0;i<nx;i++){
-          blank[IJCIRC(i,j)]=1;
+          if(i==0||j==0||i==nx-1||j==ny-1){
+            blank[IJCIRC(i-1,j-1)]=0;
+          }
+          else{
+            blank[IJCIRC(i-1,j-1)]=1;
+          }
         }
       }
       
