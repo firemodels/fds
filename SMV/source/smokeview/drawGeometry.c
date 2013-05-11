@@ -21,7 +21,7 @@ char drawGeometry_revision[]="$Revision$";
 
 cadgeom *current_cadgeom;
 
-  /* ------------------ DrawCircVentsExactApprox ------------------------ */
+  /* ------------------ DrawCircVentsApproxSolid ------------------------ */
 
 void DrawCircVentsApproxSolid(int option){
   int i;
@@ -299,9 +299,9 @@ void DrawCircVentsApproxOutline(int option){
   glEnd();
 }
 
-/* ------------------ DrawCircVentsExact ------------------------ */
+/* ------------------ DrawCircVentsExactSolid ------------------------ */
 
-void DrawCircVentsExact(int option){
+void DrawCircVentsExactSolid(int option){
   int i;
 
   if(option==VENT_HIDE)return;
@@ -403,6 +403,110 @@ void DrawCircVentsExact(int option){
       if(option==VENT_CIRCLE)setClipPlanes(&clipinfo,CLIP_ON);
     }
   }
+}
+
+/* ------------------ DrawCircVentsExactOutline ------------------------ */
+
+void DrawCircVentsExactOutline(int option){
+  int i;
+
+  if(option==VENT_HIDE)return;
+  ASSERT(option==VENT_CIRCLE||option==VENT_RECTANGLE);
+  for(i=0;i<nmeshes;i++){
+    int j;
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    for(j=0;j<meshi->ncvents;j++){
+      cventdata *cvi;
+      float x0, yy0, z0;
+      unsigned char vcolor[3];
+      float delta;
+      float *color;
+      float width, height;
+
+      cvi = meshi->cventinfo + j;
+
+      if(option==VENT_CIRCLE){
+        x0 = cvi->origin[0];
+        yy0 = cvi->origin[1];
+        z0 = cvi->origin[2];
+      }
+      else{
+        x0 = cvi->xmin;
+        yy0 = cvi->ymin;
+        z0 = cvi->zmin;
+      }
+
+      delta=0.001*xyzmaxdiff;
+      color=cvi->color;
+      vcolor[0]=color[0]*255;
+      vcolor[1]=color[1]*255;
+      vcolor[2]=color[2]*255;
+      glPushMatrix();
+      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glTranslatef(-xbar0,-ybar0,-zbar0);
+      if(option==VENT_CIRCLE){
+        clipdata circleclip;
+        float *ventmin, *ventmax;
+
+        ventmin=cvi->boxmin;
+        ventmax=cvi->boxmax;
+
+        initClipInfo(&circleclip,ventmin[0],ventmax[0],ventmin[1],ventmax[1],ventmin[2],ventmax[2]);
+        MergeClipPlanes(&circleclip,&clipinfo);
+        setClipPlanes(&circleclip,CLIP_ON_DENORMAL);
+      }
+      glTranslatef(x0,yy0,z0);
+      switch (cvi->dir){
+        case DOWN_X:
+          glTranslatef(-delta,0.0,0.0);
+          glRotatef(-90.0,0.0,1.0,0.0);
+          width = cvi->ymax-cvi->ymin;
+          height = cvi->zmax-cvi->zmin;
+          break;
+        case UP_X:
+          glTranslatef(delta,0.0,0.0);
+          glRotatef(-90.0,0.0,1.0,0.0);
+          width = cvi->ymax-cvi->ymin;
+          height = cvi->zmax-cvi->zmin;
+          break;
+        case DOWN_Y:
+          glTranslatef(0.0,-delta,0.0);
+          glRotatef(90.0,1.0,0.0,0.0);
+          width = cvi->xmax-cvi->xmin;
+          height = cvi->zmax-cvi->zmin;
+          break;
+        case UP_Y:
+          glTranslatef(0.0,delta,0.0);
+          glRotatef(90.0,1.0,0.0,0.0);
+          width = cvi->xmax-cvi->xmin;
+          height = cvi->zmax-cvi->zmin;
+          break;
+        case DOWN_Z:
+          glTranslatef(0.0,0.0,-delta);
+          width = cvi->xmax-cvi->xmin;
+          height = cvi->ymax-cvi->ymin;
+          break;
+        case UP_Z:
+          glTranslatef(0.0,0.0,delta);
+          width = cvi->xmax-cvi->xmin;
+          height = cvi->ymax-cvi->ymin;
+          break;
+        default:
+          ASSERT(0);
+          break;
+      }
+      if(option==VENT_CIRCLE){
+        drawcircle(2.0*cvi->radius,vcolor,&cvent_circ);
+      }
+      if(option==VENT_RECTANGLE){
+        drawrectangle(width,height,vcolor);
+      }
+      glPopMatrix();
+      if(option==VENT_CIRCLE)setClipPlanes(&clipinfo,CLIP_ON);
+    }
+  }
 
 }
 
@@ -410,12 +514,13 @@ void DrawCircVentsExact(int option){
 
 void DrawCircVents(int option){
   if(option==VENT_HIDE)return;
-  if(option==VENT_RECTANGLE||blocklocation==BLOCKlocation_grid){
-    if(object_outlines==0)DrawCircVentsApproxSolid(option);
-    if(object_outlines==1)DrawCircVentsApproxOutline(option);
+  if(blocklocation==BLOCKlocation_grid&&visCircularVents!=VENT_RECTANGLE){
+    if(circle_outline==0)DrawCircVentsApproxSolid(option);
+    if(circle_outline==1)DrawCircVentsApproxOutline(option);
   }
   else{
-    DrawCircVentsExact(option);
+    if(circle_outline==0)DrawCircVentsExactSolid(option);
+    if(circle_outline==1)DrawCircVentsExactOutline(option);
   }
 }
 

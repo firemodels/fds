@@ -9879,8 +9879,9 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"SHOWCVENTS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visCircularVents);
+      sscanf(buffer,"%i %i",&visCircularVents,&circle_outline);
       visCircularVents=CLAMP(visCircularVents,0,2);
+      circle_outline=CLAMP(circle_outline,0,1);
       continue;
     }
     if(match(buffer,"SHOWTICKS")==1){
@@ -11540,7 +11541,7 @@ void writeini(int flag){
   fprintf(fileout,"SHOWOTHERVENTS\n");
   fprintf(fileout," %i\n",visOtherVents);
   fprintf(fileout,"SHOWCVENTS\n");
-  fprintf(fileout," %i\n",visCircularVents);
+  fprintf(fileout," %i %i\n",visCircularVents,circle_outline);
   fprintf(fileout,"SHOWSLICEINOBST\n");
   fprintf(fileout," %i\n",show_slice_in_obst);
   fprintf(fileout,"SKIPEMBEDSLICE\n");

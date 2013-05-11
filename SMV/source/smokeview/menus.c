@@ -4053,6 +4053,9 @@ void VentMenu(int value){
    case 25:
      visCircularVents=VENT_HIDE;
      break;
+   case 26:
+     circle_outline=1-circle_outline;
+     break;
   default:
     ASSERT(FFALSE);
     break;
@@ -5357,6 +5360,10 @@ updatemenu=0;
     glutAddMenuEntry(_("As rectangle"),24);
     glutAddMenuEntry(_("*Hide"),25);
   }
+  glutAddMenuEntry("-",-1);
+  if(circle_outline==1)glutAddMenuEntry("*Outline",26);
+  if(circle_outline==0)glutAddMenuEntry("Outline",26);
+  
 /* --------------------------------vent menu -------------------------- */
 
   CREATEMENU(ventmenu,VentMenu);
