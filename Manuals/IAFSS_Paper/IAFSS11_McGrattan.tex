@@ -4,6 +4,7 @@
 \usepackage{graphicx} % use \usepackage[demo]{graphicx} to suppress figures
 \usepackage{pdfsync}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage[justification=centering,labelsep=period,figurename=Fig.]{caption}
 \usepackage[sort&compress]{natbib}
 \usepackage{url}
@@ -111,7 +112,7 @@ As a follow on to the 2007 NRC V\&V study documented in Ref.~\cite{NUREG_1824}, 
 \vspace{\parskip}
 {\bf Lesson 3: Quantity over quality}
 
-Over the past 40 years, thousands of full-scale fire experiments have been performed at research and testing labs, universities, and consulting companies. Many of these experiments were performed specifically for model validation. In most cases, however, the test reports lack information needed for a complete assessment of the models. For example, experimental uncertainties, material property data, heat release rates, and other boundary conditions are often lacking. It is difficult to know exactly how the measurements were made and the data reduced. If the criteria for data selection is overly strict, there might not be any data left to use. Fortunately, what is lacking in quality can to some extent be made up in quantity. It is unwise to limit the model assessment to one or two sets of data from one laboratory.  
+Over the past 40 years, thousands of full-scale fire experiments have been performed at research and testing labs, universities, and consulting companies. Many of these experiments were performed specifically for model validation. In most cases, however, the test reports lack information needed for a complete assessment of the models. For example, experimental uncertainties, material property data, heat release rates, and other boundary conditions are often lacking. It is difficult to know exactly how the measurements were made and the data reduced. If the criteria for data selection is overly strict, there might not be any data left to use. Fortunately, what is lacking in quality can to some extent be made up in quantity. It is unwise to limit the model assessment to one or two sets of data from one laboratory.
 
 
 
@@ -125,7 +126,7 @@ The first step of the validation process is the choice of output quantities. In 
 \vspace{\parskip}
 {\bf Lesson 3: Sophisticated comparison metrics are more trouble than they are worth}
 
-A typical fire model validation study results in hundreds of point to point comparisons of predicted and measured temperatures, heat fluxes, gas concentrations, and so forth, all reported as time histories like the one shown in Fig.~\ref{temp_history}. 
+A typical fire model validation study results in hundreds of point to point comparisons of predicted and measured temperatures, heat fluxes, gas concentrations, and so forth, all reported as time histories like the one shown in Fig.~\ref{temp_history}.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[height=2.5in]{../FDS_Validation_Guide/FIGURES/sample_time_history}
@@ -144,54 +145,61 @@ Perhaps the simplest expression of model uncertainty is to report that Model~X o
 
 The method for calculating model uncertainty is described below. Further details on the method can be found in Ref.~\cite{McGrattan:Metrologia}. The goal of this analysis is to quantify the performance of the model in predicting a given quantity of interest (e.g., the hot gas layer temperature) with just two parameters; one that expresses the tendency for the model to under or over-predict the true value and one that expresses the degree of scatter about the true value.
 
-Regardless of the exact form of the metric, what results from
-this exercise is a pair of numbers for each time history, $(E_i,M_i)$, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
-expressing the increase in the value of a quantity above its ambient.
-As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is
-reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely
-a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly.
-For this reason, assume that a given experimental measurement, $E_i$, is normally
-distributed about the ``true'' value, $\theta_i$, and there is no systematic bias:
-\begin{equation}    
+Regardless of the exact form of the metric, what results from this exercise is a pair of numbers for each time history, $(E_i,M_i)$, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers expressing the increase in the value of a quantity above its ambient. As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly. For this reason, assume that a given experimental measurement, $E_i$, is normally distributed about the ``true'' value, $\theta_i$, and there is no systematic bias:
+\begin{equation}
    E \; | \; \theta \sim N(\theta \; , \; \sigma_E^2) \label{expunc}
-\end{equation} 
-The notation $E \; | \; \theta$ means that $E$ is conditional on a particular value of $\theta$. This is the usual way of defining a likelihood function. An important assumption in this analysis is that the model and experimental uncertainty can be expressed in {\em relative} terms. This assumption is based on the observation that the results of past validation exercises, when plotted as shown in Fig.~\ref{Normality}, form a wedge-shaped pattern that suggests that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value. A common way in statistics of dealing with relative uncertainties is to apply the so-called delta method~\cite{Oehlert:1992}. Given the random variable $X \sim N(\mu,\sigma^2)$, the delta method provides a way to estimate the distribution of a function of $X$:
+\end{equation}
+The notation $E \; | \; \theta$ means that $E$ is conditional on a particular value of $\theta$. This is the usual way of defining a likelihood function. An important assumption in this analysis is that the model and experimental uncertainty can be expressed in {\em relative} terms. This assumption is based on the observation that the results of past validation exercises, when plotted as shown in Fig.~\ref{Normality}, form a wedge-shaped pattern that suggests that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value. A common way in statistics of dealing with relative uncertainties is to work with the natural logarithm of the various quantities. To understand why, consider the so-called delta method in statistics~\cite{Oehlert:1992} where the distribution of a function of a normally distributed random variable $X \sim N(\mu,\sigma^2)$ is estimated:
 \[g(X) \sim N \left( g(\mu) + g''(\mu) \, \sigma^2/2 \, , \, (g'(\mu) \, \sigma)^2\right)\]
-The delta method can be applied to the random variable $E$ as follows:
-\begin{equation}    
+The delta method provides an approximate distribution of the natural log of the random variable $E$:
+\begin{equation}
    \ln E \; | \; \theta \sim N \left( \ln \theta - \frac{\widetilde{\sigma}_E^2}{2} \, , \,\widetilde{\sigma}_E^2 \right) \label{eeq}
-\end{equation} 
-The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is the way that experimental uncertainties are typically reported.
+\end{equation}
+The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. 
 
-It cannot be assumed, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead,
-it is assumed that the model predictions are normally distributed about the true values
-multiplied by a bias factor, $\delta$:
-\begin{equation}    
+It cannot be assumed, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead, it is assumed that the model predictions are normally distributed about the true values multiplied by a bias factor, $\delta$:
+\begin{equation}
    M \; | \; \theta \sim N \left(\delta \, \theta \, , \, \sigma_M^2 \right) \label{mdist}
-\end{equation} 
-The standard deviation, $\sigma_M$, and the bias factor, $\delta$, represent the model uncertainty.
-Again, the delta method renders a distribution for $\ln M$ whose parameters can be expressed in terms of a
-relative standard deviation:
-\begin{equation}    
+\end{equation}
+The standard deviation, $\sigma_M$, and the bias factor, $\delta$, characterize the model uncertainty. Again, the delta method renders a distribution for $\ln M$ whose parameters can be expressed in terms of a relative standard deviation:
+\begin{equation}
    \ln M \; | \; \theta \sim N \left(\ln \delta +\ln \theta - \frac{\widetilde{\sigma}_M^2}{2} \; , \;
    \widetilde{\sigma}_M^2 \right) \quad ; \quad \widetilde{\sigma}_M=\frac{\sigma_M}{\delta \, \theta} \label{meq}
-\end{equation} 
+\end{equation}
 Combining Eq.~(\ref{eeq}) with Eq.~(\ref{meq}) yields:
-\begin{equation}    
+\begin{equation}
    \ln M  - \ln E = \ln(M/E) \sim N \left( \ln \delta - \frac{\widetilde{\sigma}_M^2}{2}+\frac{\widetilde{\sigma}_E^2}{2} \; ,
    \; \widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2 \right) \label{lnMeq}
+\end{equation}
+Equation~(\ref{lnMeq}) is important because it does not involve the unknown $\theta$, but rather the known predicted and measured values of the quantity of interest plus an estimate of the experimental uncertainty. The mean of this distribution is estimated:
+\begin{equation}
+   \overline{\ln (M/E)} \approx \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i) 
+\end{equation}
+The variance is estimated:
+\begin{equation}
+   \mathrm{Var} \Big( \ln (M/E) \Big) \approx \frac{1}{n-1} \sum_{i=1}^n \, \left[ \ln (M_i/E_i) - \overline{\ln (M/E)}  \right]^2 \label{stdev}
+\end{equation}
+from which the relative model standard deviation can be estimated:
+\begin{equation}
+   \widetilde{\sigma}_M \approx \sqrt{ \mathrm{Var}\Big( \ln (M/E) \Big) - \widetilde{\sigma}_E^2 } \label{sig_M}
+\end{equation}
+and the bias factor:
+\begin{equation}
+   \delta \approx \exp \left( \overline{\ln (M/E)} + \frac{ \widetilde{\sigma}_M^2}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \label{delta}
+\end{equation}
+Equation~(\ref{sig_M}) imposes a constraint on the value of the experimental uncertainty, $\widetilde{\sigma}_E$. A further constraint is that $\widetilde{\sigma}_M$ cannot be less than $\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. Combining the two constraints leads to:
+\begin{equation}
+   \widetilde{\sigma}_E^2 < \frac{1}{2} \mathrm{Var}\Big( \ln (M/E) \Big)
+\end{equation}
+Equation~(\ref{mdist}) states that the model prediction, $M$, is normally distributed about the true value times the bias factor, $\delta \theta$. Under certain conditions~\cite{McGrattan:Metrologia}, it can be assumed that $\delta \theta$ is likewise distributed about $M$:
+\begin{equation}
+   \delta \theta \; | \; M \sim N \left(M \, , \, \sigma_M^2 \right) \label{thetaeq}
 \end{equation} 
-Equation~(\ref{lnMeq}) is important because it does not involve the unknown $\theta$, but rather the known predicted and measured values of the quantity
-of interest plus an estimate of the experimental uncertainty. Until now, it has been assumed that all of the relevant uncertainties can be characterized
-by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot.
-An examination of the results of the validation study discussed above~\cite{NUREG_1824}
-indicates that in cases where the number of pairs of $M$ and $E$ is greater than about 20, the values of $\ln (M/E)$ pass a test for
-normality\footnote{The Kolmogorov-Smirnov test for
-normality was used with a $p$-value of 0.05. The $p$-value determines the probability of being incorrect in concluding that the data is not normally distributed.}, whereas when
-there are less values, normality cannot be assumed. Figure~\ref{Normality} contains a set of data from the validation study.
-There were 124 point comparisons of measured and predicted Wall Temperatures, for which $\ln (M/E)$ conforms quite well to a normal distribution.
-If normality cannot be assumed, alternative techniques for assessing model uncertainty with limited
-experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
+Dividing by the bias factor, $\delta$, and applying the delta method once again yields:
+\begin{equation}    
+   \theta \; | \; M \sim N \left( \frac{M}{\delta} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\delta} \right)^2 \right) \label{truth}
+\end{equation}
+In words, this expression states that the true value of a given quantity is normally distributed about the predicted value. The mean and standard deviation of the distribution are functions of the measured and predicted values of experiments that are comparable in scope to the scenario of interest. Before demonstrating how to use Eq.~(\ref{truth}), an aside. Until now, it has been assumed that all of the relevant uncertainties can be characterized by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot. An examination of the results of the validation study discussed above~\cite{NUREG_1824} indicates that in cases where the number of pairs of $M$ and $E$ is greater than about 20, the values of $\ln (M/E)$ pass a common test for normality. Figure~\ref{Normality} contains a set of data from the validation study. There are 124 data points, for which $\ln (M/E)$ conforms quite well to a normal distribution. If normality cannot be assumed, alternative techniques for assessing model uncertainty with limited experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
 \begin{figure}[ht!]
 \begin{tabular}{ll}
 \includegraphics[width=2.8in]{../FDS_Validation_Guide/FIGURES/Wall_Temperature_Scatter} &
@@ -203,66 +211,6 @@ indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and t
 \label{Normality}
 \end{figure}
 
-Returning to Eq.~(\ref{lnMeq}), what is now needed is a way to estimate the mean and standard deviation of the distribution. First, define:
-\begin{equation}    
-   \overline{\ln (M/E)} = \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i)
-\end{equation} 
-The least squares estimate of the standard deviation of the combined distribution is defined as:
-\begin{equation}    
-   \widetilde{\sigma}_M^2 + \widetilde{\sigma}_E^2 \approx \frac{1}{n-1} \sum_{i=1}^n \,
-   \left[ \ln (M_i/E_i) - \overline{\ln (M/E)}  \right]^2 \label{stdev}
-\end{equation} 
-Recall that $\widetilde{\sigma}_E$ is known and the expression on the right can be evaluated using the pairs of measured and
-predicted values. Keep in mind that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, will necessarily result in an under-estimate of the
-model uncertainty, $\widetilde{\sigma}_M$. In particular, note that $\widetilde{\sigma}_M$ cannot be less than
-$\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. This is not to say that the model
-cannot be more accurate than the measurements; rather, that the model cannot be shown to be more accurate than the measurements. This rule is demonstrated
-mathematically by Eq.~(\ref{stdev}) where it is observed that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, can result in
-the square root of a negative number, an imaginary number. In the case that the computed model uncertainty is less than the estimated experimental uncertainty, there are
-two courses of action. First, it may be that the number of data points in the validation study is too small. If only a few model predictions are compared to corresponding
-measurements, and the difference between the two is so small that the calculated model uncertainty is imaginary, then more data points should be collected
-to determine if this remains the case. If it does, then
-the calculation of the experimental uncertainty, $\widetilde{\sigma}_E$, should be re-evaluated. The experimental uncertainties listed in
-Table~\ref{Uncertainty} are based on the analysis of 26 experiments that were used in a particular validation study. If other experiments are used to evaluate the
-model, these values need to be recalculated following the procedure presented by Hamins~\cite{NUREG_1824}.
-
-An estimate of $\delta$ can be found using the mean of the distribution:
-\begin{equation}    
-   \delta \approx \exp \left( \overline{\ln (M/E)} + \frac{ \widetilde{\sigma}_M^2}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \label{delta}
-\end{equation} 
-Taking the assumed normal distribution of the model prediction, $M$, in Eq.~(\ref{mdist}) and using
-a Bayesian argument\footnote{The form of Bayes theorem used here states that the posterior distribution is the product of
-the prior distribution and the likelihood function, normalized by their integral:
-$f(\theta|M)= p(\theta) \, f(M|\theta)/\int p(\theta) \, f(M|\theta) \, d\theta$.
-A constant prior is also known as a Jeffreys prior~\cite{Gelman:Stats}.}
-with a non-informative prior for $\theta$, the posterior distribution can be expressed:
-\begin{equation}    
-   \delta \, \theta \; | \; M \sim N \left( M \; , \; \sigma_M^2 \right) \label{thetaeq}
-\end{equation} 
-The assumption of a non-informative prior implies that there is not sufficient information about the
-prior distribution (i.e., the true value) of
-$\theta$ to assume anything other than a uniform\footnote{A uniform distribution means that for any two equally sized intervals of the real line,
-there is an equal likelihood that the random variable takes a value in one of them.} distribution.
-This is equivalent to saying that the modeler has not biased the model input parameters to compensate for a known
-bias in the model output. For example, if a particular model has been shown to over-predict compartment temperature, and the modeler has reduced the specified heat release
-rate to better estimate the true temperature, then it can no longer be assumed that the prior distribution of the true temperature is uniform.
-Still another way to look at this is by analogy to target shooting. Suppose a particular rifle
-has a manufacturers defect such that, on average, it shoots 10~cm to the left of the target. It must be assumed that any given shot by a marksman without this knowledge is
-going to strike 10~cm to the left of the intended target. However, if the marksman knows of the defect, he or she will probably aim 10~cm to the right of the
-intended target to compensate for the defect. If that is the case, it can no longer be assumed that the intended target was 10~cm to the right of the bullet hole.
-
-The final step in the derivation is to rewrite Eq.~(\ref{thetaeq}) as:
-\begin{equation}    \theta \; | \; M \sim N \left( \frac{M}{\delta} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\delta} \right)^2 \right) \label{truth}
-\end{equation} This formula has been obtained\footnote{Note that if $X \sim N(\mu,\sigma^2)$, then
-$cX \sim N ( c \mu , (c \sigma)^2)$.} by dividing by the bias factor, $\delta$, in Eq.~(\ref{thetaeq}). To summarize, given a model prediction, $M$,
-of a particular quantity of interest (e.g., a cable temperature), the true (but unknown) value of this quantity is normally distributed. The mean value
-and variance of this normal distribution are based solely on comparisons of model predictions with past experiments that are similar to the particular fire
-scenario being analyzed. The performance of the model is quantified by the estimators of the parameters, $\delta$ and $\widetilde{\sigma}_M$, which
-have been corrected to account for uncertainties associated with the experimental measurements.
-If $\delta \approx 1$ and $\widetilde{\sigma}_M \approx \widetilde{\sigma}_E$, then the
-model can be considered of comparable accuracy to the measurements.
-
-
 Consider Figure~\ref{wall_temp}. It compares the measured and predicted wall surface temperatures for FDS in a variety of experiments.
 \begin{figure}[h!]
 \centering
@@ -272,6 +220,13 @@ Consider Figure~\ref{wall_temp}. It compares the measured and predicted wall sur
 \label{wall_temp}
 \end{figure}
 The longer-dashed off-diagonal lines, which are centered about the solid diagonal line, indicate the experimental uncertainty. Roughly speaking, points within the longer dashed lines are considered to be ``within experimental uncertainty.'' To be more precise, two statistical parameters are calculated for each predicted quantity. The first parameter, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements of a given quantity. For example, the bias factor for the data shown in Figure~\ref{wall_temp} is 1.02. This means that the model has been shown to slightly over-estimate target temperatures by 2~\%, on average, and this is shown graphically by the dash-dot line just above the diagonal. The second statistic is the relative standard deviation, or scatter, of the model, $\widetilde{\sigma}_{\rm M}$, about its mean value. Referring again to Figure~\ref{wall_temp}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the experimental uncertainty. The slopes of these lines bound the 95~\% confidence interval. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines are the same. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
+
+Suppose a fire model is being used to estimate the likelihood that electrical control cables could be damaged due to a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 200~$^\circ$C above ambient. The probability that the cables would be damaged if the model predicts that the maximum surface temperature rise is 175~$^\circ$C is given by the {\em complimentary error function}:
+\begin{equation} 
+   P(T>T_c) = \frac{1}{2} \hbox{erfc} \left( \frac{T_c - \mu}{\sigma \sqrt{2}} \right) \quad ; \quad \mu=175/\delta \quad ; \quad \sigma = \widetilde{\sigma}_M \, \frac{175}{\delta}
+\end{equation} 
+This means that there is a 6~\% chance that the cables could become damaged, assuming that the model's input parameters are not
+subject to uncertainty.
 
 
 \vspace{\parskip}
