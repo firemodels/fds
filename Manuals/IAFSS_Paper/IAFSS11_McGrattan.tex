@@ -68,7 +68,7 @@ Gaithersburg, Maryland, USA
 \vspace{\parskip}
 {\bf ABSTRACT}
 
-This paper reports the various lessons learned by the authors in performing fire model validation studies over the past thirty years.
+This paper provides a summary of lessons learned by the authors validating fire models.
 
 \vspace{\parskip}
 {\bf KEYWORDS:} fire modeling; model validation; model uncertainty
@@ -76,17 +76,9 @@ This paper reports the various lessons learned by the authors in performing fire
 \vspace{\parskip}
 {\bf INTRODUCTION}
 
-Computer fire models are used for a wide variety of applications, and it is commonly assumed that these models are {\em verified} and {\em validated.} Guidance documents, like the SFPE {\em Guidelines for Substantiating a Fire Model for a Given Application}~\cite{SFPE_G.06}, and standards documents like ASTM~E~1355, {\em Standard Guide for Evaluating the Predictive Capabilities of Deterministic Fire Models}~\cite{ASTM:E1355}, and ISO~16730, {\em Assessment, Verification and Validation of Calculation Methods,} all provide a basic framework for evaluating models. However, these documents do not have specific requirements as to how the model uncertainty is to be reported, and they leave it to the organization performing the evaluation as to how to interpret and use the results. As a consequence, model users typically cite a few papers published by the model developers or other end users as justification for their own use of the model. This has led to some problems:
-\begin{itemize}
-\item The papers often report results of older versions of the model.
-\item The proposed application of the model is not always consistent with the application reported in the paper.
-\item There is no method of applying the reported model uncertainty to the proposed application.
-\end{itemize}
-This paper describes practical solutions to these problems that have been developed as part of a decade-long effort by the U.S. Nuclear Regulatory Commission (NRC) and the Electric Power Research Institute (EPRI) to verify and validate a set of fire models used in the commercial nuclear power industry. Over the last 15 years, the NRC has directed a change in its policy to use risk-informed methods, where practical, to make regulatory decisions.  As a result of this change, the National Fire Protection Association (NFPA) developed the standard NFPA~805, {\em Performance-Based Standard for Fire Protection for Light-Water Reactor Electric Generating Plants}~\cite{NFPA_805}.  The NRC amended its fire protection requirements in 2004 to allow existing reactor licensees to voluntarily adopt the fire protection requirements contained in NFPA~805 as an alternative to the existing prescriptive fire protection requirements. This allows plant operators and the NRC to use fire modeling and fire risk information, along with prescriptive requirements, to ensure that nuclear power plants can safely shut down in the event of a fire. They also use these tools to determine compliance with, or exemptions from, existing fire protection regulatory requirements. To provide the NRC and the plant operators with confidence in the calculation results, NFPA~805 requires fire models to be verified and validated.  To this end, the NRC Office of Nuclear Regulatory Research, along with the Electric Power Research Institute (EPRI) and the National Institute of Standards and Technology (NIST), conducted an extensive verification and validation (V\&V) study of fire models that support the use of NFPA~805 as a risk-informed/performance-based (RI/PB) alternative within the NRC regulatory system. This study was published in 2007~\cite{NUREG_1824}. In addition, NRC and EPRI developed a separate guidance document, {\em Nuclear Power Plant Fire Modeling Analysis Guidelines}~\cite{NUREG_1934}, in which practical examples demonstrate how to apply the results of the model V\&V study.
+In 2007, the U.S.~Nuclear Regulatory Commission (NRC) and the Electric Power Research Institute (EPRI) published the results of a validation study of five different fire models commonly used by the commercial nuclear power industry~\cite{NUREG_1824}. The study was prompted by the NRC's adoption in 2004 of the National Fire Protection Association standard NFPA~805, {\em Performance-Based Standard for Fire Protection for Light-Water Reactor Electric Generating Plants}~\cite{NFPA_805}. In particular, NFPA~805 requires fire models to be {\em verified and validated}. The standard does not state explicitly what is meant by this. Guidance documents, like the SFPE {\em Guidelines for Substantiating a Fire Model for a Given Application}~\cite{SFPE_G.06}, and standards documents like ASTM~E~1355, {\em Standard Guide for Evaluating the Predictive Capabilities of Deterministic Fire Models}~\cite{ASTM:E1355}, and ISO~16730, {\em Assessment, Verification and Validation of Calculation Methods,} all provide a basic framework for evaluating models. However, these documents do not have specific requirements as to how the model uncertainty is to be reported and how this information is to be used in a regulatory context. As a result, the NRC and EPRI took it upon themselves to develop a relatively simple framework for reporting and applying model uncertainty in day to day design analyses.
 
-
-\vspace{\parskip}
-{\bf SUPPLEMENTARY HEADING 1 [HEADING 1 STYLE]}
+The primary lesson learned from this experience is that most validation studies reported in the literature are not particularly useful for regulatory officials. Some of the reasons for this are (1) journal articles invariably report results of older versions of the model, (2) the proposed application of the model is not always consistent with the application reported in the article, and (3) there is no simple method of applying the reported model uncertainty to the proposed application. Following the publication of the NRC validation study~\cite{NUREG_1824} in 2007, a member of the NRC review panel asked the simple question, ``if I use Model~X to predict Quantity~Y, how do I calculate uncertainty bounds?'' Because the application space of zone and CFD fire models is fairly wide, it is difficult to report the uncertainty of a given calculation in a simple and concise way. Often the regulator is given a list of journal articles attesting to the accuracy of the model, but there remains too much room for interpretation. As a result, the NRC and EPRI published a follow on guidance document, {\em Nuclear Power Plant Fire Modeling Analysis Guidelines}~\cite{NUREG_1934}, in which practical examples demonstrate how to apply the results of the model V\&V study. This paper highlights various aspects of these studies and the important lessons learned.
 
 
 \vspace{\parskip}
@@ -135,6 +127,68 @@ A typical fire model validation study results in hundreds of point to point comp
 \label{temp_history}
 \end{figure}
 Typically, the data is condensed into a more tractable form by way of a single metric with which to compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999} discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values. This was the choice of the NRC in performing their validation study~\cite{NUREG_1824}, simply because it is a simple, effective way to assess the fire's potential to damage critical equipment. It was also found that when comparing thousands of point to point measurements, the choice of metric did not change the final results.
+
+
+\vspace{\parskip}
+{\bf Do not neglect experimental uncertainty}
+
+Because experimental uncertainty is often not reported, modelers have no choice but to compare their predictions to measurements without knowing the uncertainty of the reported test parameters or the measurements. The {\em experimental uncertainty} is a combination of the uncertainty in the measurement of the quantity of interest, like the gas temperature or heat flux, along with the propagated uncertainty of the measured test parameters, like the heat release rate or material properties.
+
+In the NRC validation study~\cite{NUREG_1824}, Hamins estimated the experimental uncertainty for a variety of full-scale fire experiments. There were two uncertainty estimates needed for each quantity of interest. The first was an estimate, expressed in the form of a 95~\% confidence interval, of the uncertainty in the measurement of the quantity itself. For example, reported gas and surface temperatures were made with thermocouples of various designs (bare-bead, shielded, aspirated) with different size beads, metals, and so on. For each, one can estimate the
+uncertainty in the reported measurement. Next, the uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate, leakage area, ventilation rate, material properties, and so on. It was then necessary to calculate how the uncertainty in these parameters contributed to the uncertainty of the reported measurement. To do this, Hamins examined a number of empirical formulae that are widely used in fire protection engineering to determine the most important test parameters and their effect on the measured results. These formulae provided the means of propagating the parameter uncertainties through the experiment. For example, the correlation of McCaffrey, Quintiere and Harkleroad (MQH)~\cite{SFPE:Walton} asserts that the hot gas layer temperature rise, $T-T_0$, due to a compartment fire is proportional to the heat release rate, $\dot{Q}$, raised to the two-thirds power:
+\begin{equation}
+   T-T_0 = C \, \dot{Q}^{\frac{2}{3}}
+\end{equation}
+The constant, $C$, involves a number of geometric and thermo-physical parameters that are unique to the given fire scenario. By way of differentials, this empirical relationship can be expressed in the form:
+\begin{equation}
+   \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dot{Q}}{\dot{Q}}
+\end{equation}
+In words, the relative change in the temperature rise is approximately two-thirds the relative change in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment temperature and the heat release rate, there is now a way to express the uncertainty of the model prediction as a function of the uncertainty of this most important input parameter. Often, the uncertainty of a measurement is expressed in the form of a 95~\% confidence interval, or two standard deviations or 2$\sigma$.
+Thus, if the heat release rate of a fire is assumed with 95~\% confidence to be within 15~\% of the reported measurement, then the temperature predicted by the model has an uncertainty of at least 10~\%. Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various measured quantities in the experiments and their power dependence.
+
+\begin{table}[ht]
+\caption{Sensitivity of model outputs from Volume 2 of NUREG-1824~\cite{NUREG_1824}. }
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+Output Quantity                                 & Input Parameter(s)    & Power Dependence \\ \hline \hline
+HGL Temperature                                 & HRR                   & 2/3    \\ \hline
+HGL Depth                                       & Door Height           & 1      \\ \hline
+Gas Concentration                               & HRR                   & 1/2    \\ \hline
+                                                & HRR                   & 1      \\ \cline{2-3}
+\raisebox{1.5ex}[0pt]{Smoke Concentration}      & Soot Yield            & 1      \\ \hline
+                                                & HRR                   & 2      \\ \cline{2-3}
+Compartment Pressure                            & Leakage Rate          & 2      \\ \cline{2-3}
+                                                & Ventilation Rate      & 2      \\ \hline
+Heat Flux                                       & Heat Flux             & 4/3    \\ \hline
+Surface Temperature                             & HRR                   & 2/3    \\ \hline
+\end{tabular}
+\end{center}
+\label{Parameter_Uncertainty}
+\end{table}
+
+The uncertainty of the measured output quantity and the propagated uncertainty of each significant input parameter are combined via simple quadrature.  Hamins estimated the combined experimental uncertainties for ten quantities of interest in the NRC validation study. The results are summarized in Table~\ref{Uncertainty}, with each combined uncertainty reported in the form of a 95~\% confidence interval (i.e., $2 \, \widetilde{\sigma}_E$).
+\begin{table}[ht]
+\caption{Summary of Hamins' uncertainty estimates~\cite{NUREG_1824}. }
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Measured Quantity               & Combined Relative       \\
+                                & Uncertainty, $2 \, \widetilde{\sigma}_E$       \\ \hline \hline
+HGL Temperature                 & 0.14    \\ \hline
+HGL Depth                       & 0.13    \\ \hline
+Ceiling Jet Temperature         & 0.16    \\ \hline
+Plume Temperature               & 0.14    \\ \hline
+Gas Concentrations              & 0.09    \\ \hline
+Smoke Concentration             & 0.33    \\ \hline
+Pressure with Ventilation       & 0.80    \\ \hline
+Pressure without Ventilation    & 0.40    \\ \hline
+Heat Flux                       & 0.20    \\ \hline
+Surface Temperature             & 0.14    \\ \hline
+\end{tabular}
+\end{center}
+\label{Uncertainty}
+\end{table}
 
 
 
@@ -219,7 +273,7 @@ indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and t
 \label{wall_temp}
 \end{figure}
 
-The results of the analysis described above are reported in the form of scatter plots similar to the one shown in Fig.~\ref{wall_temp}. It compares the measured and predicted wall surface temperatures for a particular model for several different sets of experiments indicated by the different symbols. The experimental and model uncertainties as well as the bias factor are reported in the upper left corner. The standard deviations are reported in the form of 95~\% confidence intervals, or $2\widetilde{\sigma}$. The dashed off-diagonal lines depict these values graphically. The longer-dashed off-diagonal lines, which are centered about the solid diagonal line, indicate the experimental uncertainty.  The solid off-diagonal line just above the diagonal line represents the model bias. For example, the bias factor for the data shown in Figure~\ref{wall_temp} is 1.02. This means that the model has been shown to slightly over-estimate wall surface temperatures by 2~\%, on average. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. 
+The results of the analysis described above are reported in the form of scatter plots similar to the one shown in Fig.~\ref{wall_temp}. It compares the measured and predicted wall surface temperatures for a particular model for several different sets of experiments indicated by the different symbols. The experimental and model uncertainties as well as the bias factor are reported in the upper left corner. The standard deviations are reported in the form of 95~\% confidence intervals, or $2\widetilde{\sigma}$. The dashed off-diagonal lines depict these values graphically. The longer-dashed off-diagonal lines, which are centered about the solid diagonal line, indicate the experimental uncertainty.  The solid off-diagonal line just above the diagonal line represents the model bias. For example, the bias factor for the data shown in Figure~\ref{wall_temp} is 1.02. This means that the model has been shown to slightly over-estimate wall surface temperatures by 2~\%, on average. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty.
 
 The information in Fig.~\ref{wall_temp} can be used as follows. Suppose this fire model is used to estimate the likelihood that electrical control cables could be damaged due to a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 200~$^\circ$C above ambient. The probability that the cables would be damaged if the model predicts that the maximum surface temperature rise is 175~$^\circ$C is given by the {\em complimentary error function}:
 \begin{equation}
