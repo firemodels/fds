@@ -2417,7 +2417,7 @@ VENT_LOOP: DO N=1,N_VENT
                   WALL(IW)%ONE_D%T_IGN = T        
                ENDIF
             ELSE
-               WALL(IW)%ONE_D%T_IGN = 1000000._EB
+               WALL(IW)%ONE_D%T_IGN = 1.E6_EB
             ENDIF
          ENDDO
       ENDDO
