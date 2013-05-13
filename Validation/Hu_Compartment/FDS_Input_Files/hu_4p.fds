@@ -21,7 +21,17 @@
 
 &VENT XB=-0.0475,0.0475,-0.0475,0.0475,0.00,0.00, XYZ=0,0,0, RADIUS=0.0475, SURF_ID='FIRE', COLOR='RED'/
 
-&SURF ID='FIRE', SPEC_ID(1)='N-HEPTANE', MASS_FLUX(1)=0.013/
+&SURF ID='FIRE', SPEC_ID(1)='N-HEPTANE', MASS_FLUX(1)=0.013, RAMP_MF(1)='case4'/
+
+&RAMP ID='case4' T=0, F=0.0/
+&RAMP ID='case4' T=2, F=0.46/
+&RAMP ID='case4' T=12, F=1.0/
+&RAMP ID='case4' T=17, F=0.23/
+&RAMP ID='case4' T=23, F=0.77/
+&RAMP ID='case4' T=35, F=0.62/
+&RAMP ID='case4' T=41, F=1.0/
+&RAMP ID='case4' T=46, F=0.23/
+&RAMP ID='case4' T=80, F=0.038/
 
 &SURF ID        = 'INSULATION'
       MATL_ID   = 'CERAMIC FIBER'
