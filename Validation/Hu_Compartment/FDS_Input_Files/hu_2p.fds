@@ -6,7 +6,7 @@
 &MESH IJK=40,40,20, XB=-.2,-.16,-.2,.2,0.00,.02/ bot inside
 &MESH IJK= 4,40,36, XB=-.2,-.16,-.2,.2,0.02,.38/ mid inside  (min 4 cells in a given direction for Poisson solver)
 
-&TIME T_END=80./
+&TIME T_END=250./
 
 &MISC CHECK_VN=.TRUE./
 
@@ -18,7 +18,15 @@
 
 &VENT XB=-0.095,0.095,-0.095,0.095,0.00,0.00, XYZ=0,0,0, RADIUS=0.095, SURF_ID='FIRE', COLOR='RED'/
 
-&SURF ID='FIRE', SPEC_ID(1)='N-HEPTANE', MASS_FLUX(1)=0.013/
+&SURF ID='FIRE', SPEC_ID(1)='N-HEPTANE', MASS_FLUX(1)=0.028, RAMP_MF(1)='case2'/
+
+&RAMP ID='case2' T=0, F=0.18/
+&RAMP ID='case2' T=50, F=0.75/
+&RAMP ID='case2' T=100, F=1.0/
+&RAMP ID='case2' T=150, F=1.0/
+&RAMP ID='case2' T=210, F=0.71/
+&RAMP ID='case2' T=226, F=0.21/
+&RAMP ID='case2' T=250, F=0.1/
 
 &SURF ID        = 'INSULATION'
       MATL_ID   = 'CERAMIC FIBER'

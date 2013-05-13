@@ -9,7 +9,7 @@
 &MESH IJK= 4,14,40, XB=-.2,-.16,-.20,-.06,0.0,0.4/ -y coarse inside
 &MESH IJK= 4,14,40, XB=-.2,-.16, .06, .20,0.0,0.4/ +y coarse inside
 
-&TIME T_END=80./
+&TIME T_END=350./
 
 &MISC CHECK_VN=.TRUE./
 
@@ -21,7 +21,15 @@
 
 &VENT XB=-0.0475,0.0475,-0.0475,0.0475,0.00,0.00, XYZ=0,0,0, RADIUS=0.0475, SURF_ID='FIRE', COLOR='RED'/
 
-&SURF ID='FIRE', SPEC_ID(1)='N-HEPTANE', MASS_FLUX(1)=0.013/
+&SURF ID='FIRE', SPEC_ID(1)='N-HEPTANE', MASS_FLUX(1)=0.03, RAMP_MF(1)='case3'/
+
+&RAMP ID='case3' T=0, F=0.0/
+&RAMP ID='case3' T=20, F=0.4/
+&RAMP ID='case3' T=150, F=0.93/
+&RAMP ID='case3' T=220, F=1.0/
+&RAMP ID='case3' T=260, F=0.67/
+&RAMP ID='case3' T=270, F=0.17/
+&RAMP ID='case3' T=350, F=0.067/
 
 &SURF ID        = 'INSULATION'
       MATL_ID   = 'CERAMIC FIBER'
