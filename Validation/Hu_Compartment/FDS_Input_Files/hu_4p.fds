@@ -9,7 +9,7 @@
 &MESH IJK= 4,18,40, XB=-.2,-.16,-.20,-.02,0.0,0.4/ -y coarse inside
 &MESH IJK= 4,18,40, XB=-.2,-.16, .02, .20,0.0,0.4/ +y coarse inside
 
-&TIME T_END=20./
+&TIME T_END=80./
 
 &MISC CHECK_VN=.TRUE./
 
