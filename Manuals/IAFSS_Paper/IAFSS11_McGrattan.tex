@@ -155,7 +155,7 @@ The delta method provides an approximate distribution of the natural log of the 
 \begin{equation}
    \ln E \; | \; \theta \sim N \left( \ln \theta - \frac{\widetilde{\sigma}_E^2}{2} \, , \,\widetilde{\sigma}_E^2 \right) \label{eeq}
 \end{equation}
-The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. 
+The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$.
 
 It cannot be assumed, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead, it is assumed that the model predictions are normally distributed about the true values multiplied by a bias factor, $\delta$:
 \begin{equation}
@@ -173,7 +173,7 @@ Combining Eq.~(\ref{eeq}) with Eq.~(\ref{meq}) yields:
 \end{equation}
 Equation~(\ref{lnMeq}) is important because it does not involve the unknown $\theta$, but rather the known predicted and measured values of the quantity of interest plus an estimate of the experimental uncertainty. The mean of this distribution is estimated:
 \begin{equation}
-   \overline{\ln (M/E)} \approx \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i) 
+   \overline{\ln (M/E)} \approx \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i)
 \end{equation}
 The variance is estimated:
 \begin{equation}
@@ -194,9 +194,9 @@ Equation~(\ref{sig_M}) imposes a constraint on the value of the experimental unc
 Equation~(\ref{mdist}) states that the model prediction, $M$, is normally distributed about the true value times the bias factor, $\delta \theta$. Under certain conditions~\cite{McGrattan:Metrologia}, it can be assumed that $\delta \theta$ is likewise distributed about $M$:
 \begin{equation}
    \delta \theta \; | \; M \sim N \left(M \, , \, \sigma_M^2 \right) \label{thetaeq}
-\end{equation} 
+\end{equation}
 Dividing by the bias factor, $\delta$, and applying the delta method once again yields:
-\begin{equation}    
+\begin{equation}
    \theta \; | \; M \sim N \left( \frac{M}{\delta} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\delta} \right)^2 \right) \label{truth}
 \end{equation}
 In words, this expression states that the true value of a given quantity is normally distributed about the predicted value. The mean and standard deviation of the distribution are functions of the measured and predicted values of experiments that are comparable in scope to the scenario of interest. Before demonstrating how to use Eq.~(\ref{truth}), an aside. Until now, it has been assumed that all of the relevant uncertainties can be characterized by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot. An examination of the results of the validation study discussed above~\cite{NUREG_1824} indicates that in cases where the number of pairs of $M$ and $E$ is greater than about 20, the values of $\ln (M/E)$ pass a common test for normality. Figure~\ref{Normality} contains a set of data from the validation study. There are 124 data points, for which $\ln (M/E)$ conforms quite well to a normal distribution. If normality cannot be assumed, alternative techniques for assessing model uncertainty with limited experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
@@ -211,7 +211,6 @@ indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and t
 \label{Normality}
 \end{figure}
 
-Consider Figure~\ref{wall_temp}. It compares the measured and predicted wall surface temperatures for FDS in a variety of experiments.
 \begin{figure}[h!]
 \centering
 \includegraphics[width=.5\linewidth]{../FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/Wall_Temperature}
@@ -219,12 +218,13 @@ Consider Figure~\ref{wall_temp}. It compares the measured and predicted wall sur
 \caption{Comparison of measured and predicted wall temperatures.}
 \label{wall_temp}
 \end{figure}
-The longer-dashed off-diagonal lines, which are centered about the solid diagonal line, indicate the experimental uncertainty. Roughly speaking, points within the longer dashed lines are considered to be ``within experimental uncertainty.'' To be more precise, two statistical parameters are calculated for each predicted quantity. The first parameter, $\delta$, is the bias factor. It indicates the extent to which the model, on average, under or over-predicts the measurements of a given quantity. For example, the bias factor for the data shown in Figure~\ref{wall_temp} is 1.02. This means that the model has been shown to slightly over-estimate target temperatures by 2~\%, on average, and this is shown graphically by the dash-dot line just above the diagonal. The second statistic is the relative standard deviation, or scatter, of the model, $\widetilde{\sigma}_{\rm M}$, about its mean value. Referring again to Figure~\ref{wall_temp}, there are two sets of off-diagonal lines. The first set, shown as long-dashed black lines, indicate the experimental uncertainty. The slopes of these lines bound the 95~\% confidence interval. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. If the model is as accurate as the measurements against which it is compared, the two sets of off-diagonal lines are the same. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
 
-Suppose a fire model is being used to estimate the likelihood that electrical control cables could be damaged due to a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 200~$^\circ$C above ambient. The probability that the cables would be damaged if the model predicts that the maximum surface temperature rise is 175~$^\circ$C is given by the {\em complimentary error function}:
-\begin{equation} 
+The results of the analysis described above are reported in the form of scatter plots similar to the one shown in Fig.~\ref{wall_temp}. It compares the measured and predicted wall surface temperatures for a particular model for several different sets of experiments indicated by the different symbols. The experimental and model uncertainties as well as the bias factor are reported in the upper left corner. The standard deviations are reported in the form of 95~\% confidence intervals, or $2\widetilde{\sigma}$. The dashed off-diagonal lines depict these values graphically. The longer-dashed off-diagonal lines, which are centered about the solid diagonal line, indicate the experimental uncertainty.  The solid off-diagonal line just above the diagonal line represents the model bias. For example, the bias factor for the data shown in Figure~\ref{wall_temp} is 1.02. This means that the model has been shown to slightly over-estimate wall surface temperatures by 2~\%, on average. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. 
+
+The information in Fig.~\ref{wall_temp} can be used as follows. Suppose this fire model is used to estimate the likelihood that electrical control cables could be damaged due to a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 200~$^\circ$C above ambient. The probability that the cables would be damaged if the model predicts that the maximum surface temperature rise is 175~$^\circ$C is given by the {\em complimentary error function}:
+\begin{equation}
    P(T>T_c) = \frac{1}{2} \hbox{erfc} \left( \frac{T_c - \mu}{\sigma \sqrt{2}} \right) \quad ; \quad \mu=175/\delta \quad ; \quad \sigma = \widetilde{\sigma}_M \, \frac{175}{\delta}
-\end{equation} 
+\end{equation}
 This means that there is a 6~\% chance that the cables could become damaged, assuming that the model's input parameters are not
 subject to uncertainty.
 
