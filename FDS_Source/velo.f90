@@ -2581,7 +2581,7 @@ SUBROUTINE CHECK_STABILITY(NM,CODE)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT 
 INTEGER, INTENT(IN) :: NM,CODE
-REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,CP,ZZ_GET(0:N_TRACKED_SPECIES),PART_CFL
+REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,CP,ZZ_GET(0:N_TRACKED_SPECIES),PART_CFL,DENSITY_FACTOR
 INTEGER  :: I,J,K,IW,IIG,JJG,KKG
 REAL(EB) :: P_UVWMAX,P_MU_MAX,P_MU_TMP !private variables for OpenMP-Code
 INTEGER  :: P_ICFL,P_JCFL,P_KCFL,P_I_VN,P_J_VN,P_K_VN !private variables for OpenMP-Code
@@ -2616,6 +2616,7 @@ UVWMAX = 0._EB
 VN     = 0._EB
 MUTRM  = 1.E-9_EB
 R_DX2  = 1.E-9_EB
+DENSITY_FACTOR = 1._EB/(1._EB - RHOMIN/RHOA)
 
 ! Strategy for OpenMP version of CFL/VN number determination
 ! - find max CFL/VN number for each thread (P_UVWMAX/P_MU_MAX)
@@ -2640,7 +2641,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
                UODX = ABS(UU(I,J,K))*RDXN(I)
                VODY = ABS(VV(I,J,K))*RDYN(J)
                WODZ = ABS(WW(I,J,K))*RDZN(K)
-               UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))
+               UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))*DENSITY_FACTOR
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL = I
@@ -2672,7 +2673,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
          DO J=0,JBAR
             DO I=0,IBAR
                UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
-               UVW = UVW + ABS(DP(I,J,K))
+               UVW = UVW + ABS(DP(I,J,K))*DENSITY_FACTOR
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -2704,7 +2705,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
          DO J=0,JBAR
             DO I=0,IBAR
                UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
-               UVW = UVW + ABS(DP(I,J,K))
+               UVW = UVW + ABS(DP(I,J,K))*DENSITY_FACTOR
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -2742,7 +2743,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
                UODX = SQRT(ABS(FVX(I,J,K))*RDXN(I))
                VODY = SQRT(ABS(FVY(I,J,K))*RDYN(J))
                WODZ = SQRT(ABS(FVZ(I,J,K))*RDZN(K))
-               UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))
+               UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))*DENSITY_FACTOR
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL = I
