@@ -68,7 +68,7 @@ Gaithersburg, Maryland, USA
 \vspace{\parskip}
 {\bf ABSTRACT}
 
-This paper provides a summary of a decade-long effort to verify and validate a variety of different fire models used in the commercial nuclear industry. The lessons learned apply to any industry in which fire models are used in a regulatory context. 
+This paper provides a summary of a decade-long effort to verify and validate a variety of different fire models used in the commercial nuclear industry. The lessons learned apply to any industry in which fire models are used in a regulatory context. The two critical lessons are that regulatory authorities need a simple way to quantify the accuracy of the model prediction, and an unambiguous way to assess whether the experiments used for validation are appropriate for the proposed application of the model.
 
 \vspace{\parskip}
 {\bf KEYWORDS:} fire modeling; model validation; model uncertainty
@@ -76,17 +76,17 @@ This paper provides a summary of a decade-long effort to verify and validate a v
 \vspace{\parskip}
 {\bf INTRODUCTION}
 
-In 2007, the U.S.~Nuclear Regulatory Commission (NRC) and the Electric Power Research Institute (EPRI) published the results of a validation study of five different fire models commonly used by the commercial nuclear power industry~\cite{NUREG_1824}. The study was prompted by the NRC's adoption in 2004 of the National Fire Protection Association standard NFPA~805, {\em Performance-Based Standard for Fire Protection for Light-Water Reactor Electric Generating Plants}~\cite{NFPA_805}. In particular, NFPA~805 requires fire models to be {\em verified and validated}. The standard does not state explicitly what is meant by this. Guidance documents, like the SFPE {\em Guidelines for Substantiating a Fire Model for a Given Application}~\cite{SFPE_G.06}, and standards documents like ASTM~E~1355, {\em Standard Guide for Evaluating the Predictive Capabilities of Deterministic Fire Models}~\cite{ASTM:E1355}, and ISO~16730, {\em Assessment, Verification and Validation of Calculation Methods}~\cite{ISO16730}, all provide a basic framework for evaluating models. However, these documents do not have specific requirements as to how the model uncertainty is to be reported and how this information is to be used in a regulatory context. As a result, the NRC and EPRI took it upon themselves to develop a relatively simple framework for reporting and applying model uncertainty in day-to-day design analyses.
+In 2007, the U.S.~Nuclear Regulatory Commission (NRC) and the Electric Power Research Institute (EPRI) published the results of a validation study of five different fire models commonly used by the commercial nuclear power industry~\cite{NUREG_1824}. The study was prompted by the NRC's adoption in 2004 of the National Fire Protection Association standard, NFPA~805, {\em Performance-Based Standard for Fire Protection for Light-Water Reactor Electric Generating Plants}~\cite{NFPA_805}. In particular, NFPA~805 requires fire models to be {\em verified and validated}. The standard does not state explicitly what is meant by this. Guidance documents, like the SFPE {\em Guidelines for Substantiating a Fire Model for a Given Application}~\cite{SFPE_G.06}, and standards documents like ASTM~E~1355, {\em Standard Guide for Evaluating the Predictive Capabilities of Deterministic Fire Models}~\cite{ASTM:E1355}, and ISO~16730, {\em Assessment, Verification and Validation of Calculation Methods}~\cite{ISO16730}, all provide a basic framework for evaluating models. However, these documents do not have specific requirements as to how the model uncertainty is to be reported and how this information is to be used in a regulatory context. As a result, the NRC and EPRI took it upon themselves to develop a relatively simple framework for reporting and applying model uncertainty in day-to-day design analyses.
 
-The primary lesson learned from this experience is that most validation studies reported in the literature are not particularly useful for regulatory officials. Some of the reasons for this are (1) journal articles invariably report results of older versions of the model, (2) the proposed application of the model is not always consistent with the application reported in the article, and (3) there is no simple method of applying the reported model uncertainty to the proposed application. Following the publication of the NRC validation study~\cite{NUREG_1824} in 2007, a member of the NRC review panel asked the simple question, ``if I use Model~X to predict Quantity~Y, how do I calculate uncertainty bounds?'' Because the application space of zone and CFD fire models is fairly wide, it is difficult to report the uncertainty of a given calculation in a simple and concise way. Often the regulator is given a list of journal articles attesting to the accuracy of the model, but there remains too much room for interpretation. As a result, the NRC and EPRI published a follow on guidance document, {\em Nuclear Power Plant Fire Modeling Analysis Guidelines}~\cite{NUREG_1934}, in which practical examples demonstrate how to apply the results of the model V\&V study. This paper highlights various aspects of these studies and the important lessons learned.
+The primary lesson learned from this experience is that most validation studies reported in the literature are not particularly useful for regulatory officials. Some of the reasons for this are (1) journal articles invariably report results of older versions of the model, (2) the proposed application of the model is not always consistent with the application reported in the article, and (3) there is no simple method of applying the reported model uncertainty to the proposed application. Following the publication of the NRC validation study~\cite{NUREG_1824} in 2007, a member of the NRC review panel asked the simple question, ``if I use Model~X to predict Quantity~Y, how do I apply uncertainty bounds to the result?'' Because the application space of zone and CFD fire models is fairly wide, it is difficult to report the uncertainty of a given calculation in a simple and concise way. Often the regulator is given a list of journal articles attesting to the accuracy of the model, but there remains too much room for interpretation. As a result, the NRC and EPRI published a companion guidance document, {\em Nuclear Power Plant Fire Modeling Analysis Guidelines}~\cite{NUREG_1934}, in which practical examples demonstrate how to apply the results of the model V\&V study. This paper highlights various aspects of these studies and the important lessons learned.
 
 
 \vspace{\parskip}
 {\bf Lesson 1: Model developers do not validate their models.}
 
-A common misconception about model validation is that it is the responsibility of the model developers. Actually, it is the responsibility of the end users or regulatory authority working on their behalf. After all, to say that the model has been verified and validated means that it has been deemed acceptable for a particular use. The model developers might contribute examples demonstrating the model's reliability and accuracy, but they cannot make the decision as to whether the model is appropriate or not.
+A common misconception about model validation is that it is the responsibility of the model developers. Actually, it is the responsibility of the end users or regulatory authority acting on their behalf. After all, to say that the model has been verified and validated means that it has been deemed acceptable for a particular use. The model developers might contribute examples demonstrating the model's reliability and accuracy, but they cannot make the decision as to whether the model is appropriate or not.
 
-All this being said, it is unrealistic to believe that any organization will have the resources to thoroughly evaluate all aspects of a model, in particular a CFD model which has such a wide range of potential applications. Thus, the model developers do a considerable amount of work that others might review to make their assessment as to whether the model is appropriate or not. Model developers can assist in the process by organizing and documenting case studies that can be periodically updated as new versions of the model are developed. Anyone using the model should be able to examine the experimental report, input files, assumptions, and so on, to determine if the model is appropriate. 
+All this being said, it is unrealistic to believe that any organization will have the resources to thoroughly evaluate all aspects of a model, in particular a CFD model which has such a wide range of potential applications. Thus, the model developers do a considerable amount of work that others might review to make their assessment as to whether the model is appropriate or not. Model developers can assist in the process by organizing and documenting case studies that can be periodically updated as new versions of the model are developed. Anyone using the model should be able to examine the experimental reports, input files, assumptions, and so on, to determine if the model is appropriate.
 
 
 
@@ -98,24 +98,24 @@ Publication of technical results in peer-reviewed, archival journals is the most
 \begin{quote}
 The theoretical basis of the model should be subjected to a peer review $\ldots$ Publication of the theoretical basis of the model in a peer-reviewed journal article may be sufficient to fulfill this review.
 \end{quote}
-The drawback of journal publications, however, is that once the theoretical basis of the model has been established, the journal articles then become nothing more than a catalog of fairly routine verification exercises and validation studies. Worse, as new versions of the model are released, the journal articles can no longer be cited as the source of the quantified uncertainty results. It is simply impractical to publish again and again the results of validation studies; thus, a better way is needed to assure model users that the currently released version is of comparable or better accuracy than a previously documented version. This better way is for the model developers and interested end users to maintain and regularly update compilations of verification and validation results. This serves two purposes: (1) model users can cite the most recent V\&V results to justify their use of the model, and (2) model developers can be assured that changes to the source code do not adversely affect past results.
+The drawback of journal publications, however, is that once the theoretical basis of the model has been established, the journal articles then become nothing more than a catalog of fairly routine verification exercises and validation studies. Worse, as new versions of the model are released, the journal articles can no longer be cited as evidence that the current version of the model is of comparable accuracy to the versions cited in the articles. It is simply impractical to publish again and again the results of validation studies; thus, a better way is needed to assure model users that the currently released version is of comparable or better accuracy than a previously documented version. This better way is for the model developers and interested end users to maintain and regularly update compilations of verification and validation results. This serves two purposes: (1) model users can cite the most recent V\&V results to justify their use of the model, and (2) model developers can be assured that changes to the source code do not adversely affect past results.
 
-As a follow on to the 2007 NRC V\&V study documented in Ref.~\cite{NUREG_1824}, NIST issued validation guides for FDS and CFAST that follow the same general framework. These guides are automatically regenerated with each new release of the software so that the model uncertainty metrics described above are always appropriate for the current version.
+As a follow on to the 2007 NRC V\&V study documented in Ref.~\cite{NUREG_1824}, NIST issued validation guides for FDS and CFAST that follow the same general framework. These guides are automatically regenerated with each new release of the software so that the model uncertainty metrics described below are always appropriate for the current version.
 
 
 \vspace{\parskip}
 {\bf Lesson 3: Quantity makes up for lack of quality.}
 
-Over the past 40 years, thousands of full-scale fire experiments have been performed at research and testing labs, universities, and consulting companies. Many of these experiments were performed specifically for model validation. In most cases, however, the test reports lack information needed for a complete assessment of the models. For example, experimental uncertainties, material property data, heat release rates, and other boundary conditions are often lacking. It is difficult to know exactly how the measurements were made and the data reduced. If the criteria for data selection is overly strict, there might not be any data left to use. Fortunately, what is lacking in quality can to some extent be made up in quantity. It is unwise to limit the model assessment to one or two sets of data from one laboratory.
+Over the past 40 years, thousands of full-scale fire experiments have been performed at research and testing labs, universities, and consulting companies. Some of these experiments were performed specifically for model validation. In most cases, however, the test reports lack information needed for a complete assessment of the models. For example, experimental uncertainties, material property data, heat release rates, and other boundary conditions are often lacking. It is difficult to know exactly how the measurements were made and the data reduced. 
+
+Unfortunately, there is no way to turn back the clock and redo and perform again all of these experiments, and it would be foolish to simply throw away the results. If the criteria for data selection is overly strict, there might not be any data left to use. Fortunately, what is lacking in quality can to some extent be made up in quantity. In selecting experiments for the original NRC/EPRI validation study~\cite{NUREG_1824}, the bar for quality was set quite high. As a result, only six sets of experiments from four different laboratories were chosen. As will be discussed below, these experiments span a very small fraction of the parameter space of power plant fire scenarios. Consequently, the revision of this validation study, underway at present, makes use of far more experiments spanning a much wider range of applications. While the quality of these experiments and their documentation is not quite as high as the original experiments, the number of data points and the statistical nature of the analysis more than makes up for it.
 
 
 
 \vspace{\parskip}
 {\bf Lesson 4: Some things are easier to predict than others.}
 
-There is no single metric that can answer the question, ``how accurate is the model?'' The accuracy depends on what is being predicted. For example, the average upper layer temperature in a pre-flashover fire scenario is a relatively easy quantity to predict. Empirical, zone and CFD models have all been shown to predict it nearly to within experimental uncertainty when the heat release rate is specified~\cite{NUREG_1824}. However, quantities such as heat flux, especially to targets near the fire, are more difficult to predict.
-
-The first step of the validation process is the choice of output quantities. In fire safety analysis, typical output quantities are gas or target temperatures, height of the smoke layer within a compartment or the concentration of toxic species. The importance of the heat transfer calculations makes also the flow velocities and heat fluxes interesting quantities for validation. In some cases, the accurate prediction of pressure may be needed. In practical applications, many of the quantities are compared against some critical value monitoring the time to reach this value. Therefore, it may be necessary to validate the capability to predict the time-to-threshold, but usually this is not made because the time-to-threshold has no defined value if the threshold is never met.
+There is no single metric that can answer the question, ``how accurate is the model?'' The accuracy depends on what is being predicted. For example, the average upper layer temperature in a pre-flashover fire scenario is a relatively easy quantity to predict. Empirical, zone and CFD models have all been shown to predict it nearly to within experimental uncertainty when the heat release rate is specified~\cite{NUREG_1824}. However, quantities such as heat flux, especially to targets near the fire, are more difficult to predict. Because of this, the NRC/EPRI team decided to organize the validation study on the basis of 13 model output quantities. These quantities were judged to be important for nuclear power plant fire analyses, with a priority on hot gas layer temperature and heat flux, the two most commonly computed quantities in fire-related probabilistic risk assessments (PRA). Because the primary focus of the fire PRA is damage to the reactor core, quantities associated with life safety, like toxic gas concentration, are not ranked as high. Of course, in other areas of fire protection, life safety might be the primary driver. This all depends on the organization performing the study.
 
 
 \vspace{\parskip}
@@ -124,12 +124,14 @@ The first step of the validation process is the choice of output quantities. In 
 A typical fire model validation study results in hundreds of point-to-point comparisons of predicted and measured temperatures, heat fluxes, gas concentrations, and so forth, all reported as time histories like the one shown in Fig.~\ref{temp_history}.
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[height=2.5in]{../FDS_Validation_Guide/FIGURES/sample_time_history}
+\includegraphics[height=2.5in]{sample_time_history}
 \end{center}
 \caption[Sample time history plots.]{Example of a typical time history comparison of model prediction and experimental measurement.}
 \label{temp_history}
 \end{figure}
-Typically, the data is condensed into a more tractable form by way of a single metric with which to compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999} discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values. This was the choice of the NRC in performing their validation study~\cite{NUREG_1824}, simply because it is a simple, effective way to assess the fire's potential to damage critical equipment. It was also found that when comparing thousands of point-to-point measurements, the choice of metric did not change the final results.
+Typically, the data is condensed into a more tractable form by way of a single metric with which to compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999} discuss various possible metrics. Early in the NRC/EPRI validation study~\cite{NUREG_1824}, several of the more sophisticated metrics described in Ref.~\cite{Peacock:FSJ1999} were considered, but eventually all were abandoned except for the simplest; that is, a comparison of the measured and predicted peak values. This was the choice of the NRC/EPRI in performing their validation study, simply because it is a simple, effective way to assess the fire's potential to damage critical equipment. It was also found that when comparing thousands of point-to-point measurements, the choice of metric did not significantly change the final results.
+
+Again, decisions as to the selection of experiments, output quantities, comparison metrics, and so on, are to be made by the organization performing the validation study. Far too often it is the model developers who make these decisions in their published articles, and this is part of the reason that these published articles are difficult for regulatory authorities to apply. 
 
 
 \vspace{\parskip}
@@ -137,8 +139,7 @@ Typically, the data is condensed into a more tractable form by way of a single m
 
 Because experimental uncertainty is often not reported, modelers have no choice but to compare their predictions to measurements without knowing the uncertainty of the reported test parameters or the measurements. The {\em experimental uncertainty} is a combination of the uncertainty in the measurement of the quantity of interest, like the gas temperature or heat flux, along with the propagated uncertainty of the measured test parameters for a given scenario, such as the heat release rate or material properties.
 
-In the NRC validation study~\cite{NUREG_1824}, Hamins estimated the experimental uncertainty for a variety of full-scale fire experiments. There were two uncertainty estimates needed for each quantity of interest. The first was an estimate, expressed in the form of a 95~\% confidence interval, of the uncertainty in the measurement of the quantity itself. For example, reported gas and surface temperatures were made with thermocouples of various designs (bare-bead, shielded, aspirated) with different size beads, metals, and so on. For each, one can estimate the
-uncertainty in the reported measurement. Next, the uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate, leakage area, ventilation rate, material properties, and so on. It was then necessary to calculate how the uncertainty in these parameters contributed to the uncertainty of the reported measurement. To do this, Hamins examined a number of empirical formulae that are widely used in fire protection engineering to determine the most important test parameters and their effect on the measured results. These formulae provided the means of propagating the parameter uncertainties through the experiment. For example, the correlation of McCaffrey, Quintiere and Harkleroad (MQH)~\cite{SFPE:Walton} asserts that the hot gas layer temperature rise, $T-T_0$, due to a compartment fire is proportional to the heat release rate, $\dot{Q}$, raised to the two-thirds power:
+In the NRC/EPRI validation study~\cite{NUREG_1824}, Hamins estimated the experimental uncertainty for a variety of full-scale fire experiments. There were two uncertainty estimates needed for each quantity of interest. The first was an estimate, expressed in the form of a 95~\% confidence interval, of the uncertainty in the measurement of the quantity itself. For example, reported gas and surface temperatures were made with thermocouples of various designs (bare-bead, shielded, aspirated) with different size beads, metals, and so on. For each, one can estimate the uncertainty in the reported measurement. Next, the uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate, leakage area, ventilation rate, material properties, and so on. The uncertainty in the model inputs was propagated through the model to determine how the uncertainty in these parameters contributed to the uncertainty of the reported measurement. To do this, Hamins examined a number of empirical formulae that are widely used in fire protection engineering to determine the most important test parameters and their effect on the measured results. These formulae provided the means of propagating the parameter uncertainties through the experiment. For example, the correlation of McCaffrey, Quintiere and Harkleroad (MQH)~\cite{SFPE:Walton} asserts that the hot gas layer temperature rise, $T-T_0$, due to a compartment fire is proportional to the heat release rate, $\dot{Q}$, raised to the two-thirds power:
 \begin{equation}
    T-T_0 = C \, \dot{Q}^{\frac{2}{3}}
 \end{equation}
@@ -146,8 +147,7 @@ The constant, $C$, involves a number of geometric and thermo-physical parameters
 \begin{equation}
    \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dot{Q}}{\dot{Q}}
 \end{equation}
-In words, the relative change in the temperature rise is approximately two-thirds the relative change in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment temperature and the heat release rate, there is now a way to express the uncertainty of the model prediction as a function of the uncertainty of this most important input parameter. Often, the uncertainty of a measurement is expressed in the form of a 95~\% confidence interval, or two standard deviations or 2$\sigma$.
-Thus, if the heat release rate of a fire is assumed with 95~\% confidence to be within 15~\% of the reported measurement, then the temperature predicted by the model has an uncertainty of at least 10~\%. Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various measured quantities in the experiments and their power dependence.
+In words, the relative change in the temperature rise is approximately two-thirds the relative change in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment temperature and the heat release rate, there is a simple way to express the uncertainty of the model prediction as a function of the uncertainty of this most important input parameter. If the relative uncertainty of the heat release rate is 15~\%, then the relative uncertainty of the hot gas layer temperature is 10~\%, plus any additional uncertainty related to the thermocouple measurements. Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various measured quantities in the experiments and their power dependence.
 
 \begin{table}[ht]
 \caption{Sensitivity of model outputs from Volume 2 of NUREG-1824~\cite{NUREG_1824}. }
@@ -198,21 +198,34 @@ Surface Temperature             & 0.14    \\ \hline
 \vspace{\parskip}
 {\bf Lesson 7: The model uncertainty estimate need not be more complicated than the model itself.}
 
-Perhaps the simplest expression of model uncertainty is to report that Model~X over- or under-predicts Quantity~Y by Z~\%. In many instances this simple statement might be all that is required to demonstrate that a given model is appropriate for a given application. The relative uncertainty, Z, can be calculated simply by averaging the relative differences of the predicted and measured values. If there are an abundance of measurements from a variety of experiments, and these experiments are comparable in scope to the proposed application of the model (in the sense to be discussed below), then this simple quantification of model uncertainty may be sufficient to determine if the model is appropriate. However, with a bit more work, this simple quantification of model uncertainty can be expanded to include a measure of the scatter. It is not unusual, especially when there are many measurement points, that the {\em average} relative difference is quite small, often within a few percent. However, the scatter about the average can be considerable. In addition to the average relative difference, this scatter, expressed in the form of a standard deviation, can be used as uncertainty bounds for the predictions. This is particularly important to a regulatory agency like the NRC which routinely performs probabilistic risk assessments (PRA).
+Perhaps the simplest expression of model uncertainty is to report that Model~X over or under-predicts Quantity~Y by Z~\%. In many instances this simple statement might be all that is required to demonstrate that a given model is appropriate for a given application. The relative uncertainty, Z, can be calculated simply by averaging the relative differences of the predicted and measured values. If there are an abundance of measurements from a variety of experiments, and these experiments are comparable in scope to the proposed application of the model (in the sense to be discussed below), then this simple quantification of model uncertainty may be sufficient to determine if the model is appropriate. However, with a bit more work, this simple quantification of model uncertainty can be expanded to include a measure of the scatter. It is not unusual, especially when there are many measurement points, that the {\em average} relative difference is quite small, often within a few percent. However, the scatter about the average can be considerable. In addition to the average relative difference, this scatter, expressed in the form of a standard deviation, can be used as uncertainty bounds for the predictions. This is particularly important to a regulatory agency like the NRC which reviews probabilistic risk assessments.
 
 The method for calculating model uncertainty is described below. Further details on the method can be found in Ref.~\cite{McGrattan:Metrologia}. The goal of this analysis is to quantify the performance of the model in predicting a given quantity of interest (e.g., the hot gas layer temperature) with just two parameters; one that expresses the tendency for the model to under or over-predict the true value and one that expresses the degree of scatter about the true value.
 
-Regardless of the exact form of the metric, what results from this exercise is a pair of numbers for each time history, $(E_i,M_i)$, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers expressing the increase in the value of a quantity above its ambient. As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly. For this reason, assume that a given experimental measurement, $E_i$, is normally distributed about the ``true'' value, $\theta_i$, and there is no systematic bias:
+The starting point for the calculation of the model uncertainty are pairs of experimental measurements and model predictions, $(E_i,M_i)$, where $i$ ranges from 1 to $n$ and both $E_i$ and $M_i$ are positive numbers expressing the increase in the value of a quantity above its ambient. As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly. For this reason, assume that a given experimental measurement, $E$, is normally distributed about the ``true'' value, $\theta$, and there is no systematic bias:
 \begin{equation}
    E \; | \; \theta \sim N(\theta \; , \; \sigma_E^2) \label{expunc}
 \end{equation}
 The notation $E \; | \; \theta$ means that $E$ is conditional on a particular value of $\theta$. This is the usual way of defining a likelihood function. An important assumption in this analysis is that the model and experimental uncertainty can be expressed in {\em relative} terms. This assumption is based on the observation that the results of past validation exercises, when plotted as shown in Fig.~\ref{Normality}, form a wedge-shaped pattern that suggests that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value. A common way in statistics of dealing with relative uncertainties is to work with the natural logarithm of the various quantities. To understand why, consider the so-called delta method in statistics~\cite{Oehlert:1992} where the distribution of a function of a normally distributed random variable $X \sim N(\mu,\sigma^2)$ is estimated:
-\[g(X) \sim N \left( g(\mu) + g''(\mu) \, \sigma^2/2 \, , \, (g'(\mu) \, \sigma)^2\right)\]
+\begin{equation}
+   g(X) \sim N \big( g(\mu) + g''(\mu) \, \sigma^2/2 \, , \, (g'(\mu) \, \sigma)^2 \big) 
+\end{equation}
 The delta method provides an approximate distribution of the natural log of the random variable $E$:
 \begin{equation}
-   \ln E \; | \; \theta \sim N \left( \ln \theta - \frac{\widetilde{\sigma}_E^2}{2} \, , \,\widetilde{\sigma}_E^2 \right) \label{eeq}
+   \ln E \; | \; \theta \sim N \left( \ln \theta - \frac{\widetilde{\sigma}_E^2}{2} \, , \,\widetilde{\sigma}_E^2 \right)  \quad ; \quad \widetilde{\sigma}_E=\frac{\sigma_E}{\theta} \label{eeq}
 \end{equation}
-The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$.
+The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the relative uncertainty, $\widetilde{\sigma}_E$.
+
+\begin{figure}[ht!]
+\begin{tabular}{ll}
+\includegraphics[width=2.8in]{Wall_Temperature_Scatter} &
+\includegraphics[width=3.0in]{Wall_Temperature_Normality}
+\end{tabular}
+\caption[Testing the normality of validation data.]{The results of normality testing for a set of data taken from Reference~\cite{NUREG_1824}. On the
+left is a comparison of measured vs predicted wall temperatures, and on the right is the distribution of $\ln(M/E)$. Note that the off-diagonal lines in the scatter plot
+indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
+\label{Normality}
+\end{figure}
 
 It cannot be assumed, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead, it is assumed that the model predictions are normally distributed about the true values multiplied by a bias factor, $\delta$:
 \begin{equation}
@@ -232,7 +245,7 @@ Equation~(\ref{lnMeq}) is important because it does not involve the unknown $\th
 \begin{equation}
    \overline{\ln (M/E)} \approx \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i)
 \end{equation}
-The variance is estimated:
+and the variance is estimated:
 \begin{equation}
    \mathrm{Var} \Big( \ln (M/E) \Big) \approx \frac{1}{n-1} \sum_{i=1}^n \, \left[ \ln (M_i/E_i) - \overline{\ln (M/E)}  \right]^2 \label{stdev}
 \end{equation}
@@ -256,17 +269,9 @@ Dividing by the bias factor, $\delta$, and applying the delta method once again 
 \begin{equation}
    \theta \; | \; M \sim N \left( \frac{M}{\delta} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\delta} \right)^2 \right) \label{truth}
 \end{equation}
-In words, this expression states that the true value of a given quantity is normally distributed about the predicted value. The mean and standard deviation of the distribution are functions of the measured and predicted values of experiments that are comparable in scope to the scenario of interest. Before demonstrating how to use Eq.~(\ref{truth}), an aside. Until now, it has been assumed that all of the relevant uncertainties can be characterized by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot. An examination of the results of the validation study discussed above~\cite{NUREG_1824} indicates that in cases where the number of pairs of $M$ and $E$ is greater than about 20, the values of $\ln (M/E)$ pass a common test for normality. Figure~\ref{Normality} contains a set of data from the validation study. There are 124 data points, for which $\ln (M/E)$ conforms quite well to a normal distribution. If normality cannot be assumed, alternative techniques for assessing model uncertainty with limited experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
-\begin{figure}[ht!]
-\begin{tabular}{ll}
-\includegraphics[width=2.8in]{../FDS_Validation_Guide/FIGURES/Wall_Temperature_Scatter} &
-\includegraphics[width=2.8in]{../FDS_Validation_Guide/FIGURES/Wall_Temperature_Normality}
-\end{tabular}
-\caption[Testing the normality of validation data.]{The results of normality testing for a set of data taken from Reference~\cite{NUREG_1824}. On the
-left is a comparison of measured vs predicted wall temperatures, and on the right is the distribution of $\ln(M/E)$. Note that the off-diagonal lines in the scatter plot
-indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
-\label{Normality}
-\end{figure}
+In words, this expression states that the true value of a given quantity is normally distributed about the predicted value divided by a bias factor. The mean and standard deviation of the distribution are functions of the measured and predicted values from experiments that are comparable in scope to the scenario of interest. 
+
+Before demonstrating how to use Eq.~(\ref{truth}), an aside. Until now, it has been assumed that all of the relevant uncertainties can be characterized by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot. An examination of the results of the validation study discussed above~\cite{NUREG_1824} indicates that in cases where the number of pairs of $M$ and $E$ is greater than about 20, the values of $\ln (M/E)$ pass a common test for normality. Figure~\ref{Normality} contains a set of data from the validation study. There are 124 data points, for which $\ln (M/E)$ conforms quite well to a normal distribution. If normality cannot be assumed, alternative techniques for assessing model uncertainty with limited experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
 
 The results of the analysis described above are reported in the form of scatter plots similar to the one shown in Fig.~\ref{Normality}. It compares the measured and predicted wall surface temperatures for a particular model for several different sets of experiments. The standard deviations are reported in the form of 95~\% confidence intervals, or $2\widetilde{\sigma}$. The dashed off-diagonal lines depict these values graphically. The longer-dashed off-diagonal lines, which are centered about the solid diagonal line, indicate the experimental uncertainty.  The dash-dot line represents the model bias factor, in this case 1.13, indicating that the wall surface temperatures are 13~\% greater than the measurements, on average. The second set of off-diagonal lines, shown as short-dashed lines, indicates the model uncertainty. The information in Fig.~\ref{Normality} can be used as follows. Suppose this fire model is used to estimate the surface temperature within a compartment. The probability that the predicted temperature, $T_{\rm p}$, will exceed a critical temperature, $T_{\rm c}$ can be calculated using the {\em complimentary error function}:
 \begin{equation}
@@ -275,7 +280,7 @@ The results of the analysis described above are reported in the form of scatter 
 The probability of exceeding the critical temperature can be represented graphically as a statistical distribution like the one shown in Fig.~\ref{bell_curve}. The area indicated by the shaded region is the probability that the temperature will exceed a critical temperature of 200~$^\circ$C, even though the model has predicted a peak temperature of only 175~$^\circ$C.
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=5.in]{../FDS_Validation_Guide/FIGURES/bell_curve}
+\includegraphics[width=5.in]{bell_curve}
 \end{center}
 \caption[Demonstration of model uncertainty.]{Uncertainty in a model prediction expressed as a probability distribution. The solid line indicates the ``true'' temperature distribution, and the dashed lines indicate the temperature predicted by the model and the critical temperature. The area indicated by the shaded region is the probability that the temperature will exceed the critical temperature.}
 \label{bell_curve}
@@ -288,22 +293,22 @@ Note that this uncertainty estimate only considers the model uncertainty. It doe
 \vspace{\parskip}
 {\bf Lesson 8: Model validation is not a blank check.}
 
-The methodology discussed in the previous sections quantifies the model uncertainty, but there is an equally important consideration before using the model for a particular application. Standards like NFPA~805~\cite{NFPA_805} state that fire models shall only be applied within their applicable range. Again, this is a somewhat vague. For the original NRC/EPRI validation study~\cite{NUREG_1824}, twenty-six full-scale fire experiments from six different test series were used to evaluate the models' ability to estimate thirteen quantities of interest for fire scenarios that were judged to be typical of those that might occur in a nuclear power plant. Each series represented a typical fire scenario (for example, a fire in a switchgear room or turbine hall); however, the test parameters could not encompass every possible fire scenario that might occur within a plant. To better define the range of applicability of the validation study, the NRC and EPRI developed a list of various normalized parameters to characterize the scope of the experiments. These parameters express, for instance, the size of the fire relative to the size of the room, or the relative distance from the fire to critical equipment. The complete list of parameters are listed below.
+The methodology discussed in the previous sections quantifies the model uncertainty, but there is an equally important consideration before using the model for a particular application. Standards like NFPA~805~\cite{NFPA_805} state that fire models shall only be applied within their applicable range. Again, this is somewhat vague. For the original NRC/EPRI validation study~\cite{NUREG_1824}, twenty-six full-scale fire experiments from six different test series were used to evaluate the models' ability to estimate thirteen quantities of interest for fire scenarios that were judged to be typical of those that might occur in a nuclear power plant. Each test series represented a typical fire scenario (for example, a fire in a switchgear room or turbine hall); however, the test parameters could not encompass every possible fire scenario that might occur within a plant. To better define the range of applicability of the validation study, the NRC and EPRI developed a list of various normalized parameters to characterize the scope of the experiments. These parameters express, for instance, the size of the fire relative to the size of the room, or the relative distance from the fire to critical equipment. The complete list of parameters are listed here.
 
-The \underline{Fire Froude Number}, $\dot{Q}^*$, is a useful non-dimensional quantity for plume correlations and flame height estimates:
-\begin{equation} 
-   \dot{Q}^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2} 
+The \underline{Fire Froude Number}, $\dot{Q}^*$, is a useful non-dimensional quantity for plume correlations and flame height estimates~\cite{SFPE:Heskestad}:
+\begin{equation}
+   \dot{Q}^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2}
 \end{equation}
 Here, $D$, is the equivalent diameter of the base of the fire, calculated $D=\sqrt{4A/\pi}$, where $A$ is the area of the base, $\dot{Q}$ is the peak heat release rate, $\rho_\infty$, $c_p$, $T_\infty$, and $g$ are the ambient gas density, specific heat, temperature and acceleration of gravity. The Fire Froude Number is essentially a expression of the fire's heat release rate divided by its base area. Jet fires are characterized by large Froude numbers. Brush fires are characterized by small Froude numbers. The Froude number is important for all types of models -- empirical correlations and zone models are not typically designed for Froude numbers that are not of order unity. CFD models may not be well-validated for large or small values.
 
-The \underline{Flame to Ceiling Height Ratio}, $L_{\rm f}/H$, is a convenient way to express the physical size of the fire relative to the size of the room. The height of the visible flame, based on Heskestad's correlation, is estimated by:
-\begin{equation} 
-   L_{\rm f} = D \, \left( 3.7 \, (Q^*)^{2/5} - 1.02 \right) 
+The \underline{Flame to Ceiling Height Ratio}, $L_{\rm f}/H$, is a convenient way to express the physical size of the fire relative to the size of the room. The height of the visible flame, based on Heskestad's correlation~\cite{SFPE:Heskestad}, is estimated by:
+\begin{equation}
+   L_{\rm f} = D \, \left( 3.7 \, (\dot{Q}^*)^{2/5} - 1.02 \right)
 \end{equation}
 This Flame to Ceiling Height Ratio is particularly significant for values approaching and exceeding 1, indicating flame impingement on the ceiling. As with the Froude number, empirical models and zone models are not designed for these kinds of fires, and CFD models may not be well-validated in this regime.
 
-The \underline{Global Equivalence Ratio}, $\phi$, is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio:
-\begin{equation} \phi = \frac{\dot{m}_f}{r\, \dot{m}{\hbox{\tiny O$_2$}}} \equiv  \frac{\dot{Q} \, \hbox{(kW)}}{13,100 \, \hbox{(kJ/kg)} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
+The \underline{Global Equivalence Ratio}, $\phi$, is the ratio of the mass flux of fuel, $\dot{m}_{\rm f}$, to the mass flux of oxygen into the compartment, $\dot{m}_{\hbox{\tiny O$_2$}}$, divided by the stoichiometric ratio:
+\begin{equation} \phi = \frac{\dot{m}_{\rm f}}{r\, \dot{m}_{\hbox{\tiny O$_2$}}} \equiv  \frac{\dot{Q} \, \hbox{(kW)}}{13,100 \, \hbox{(kJ/kg)} \; \dot{m}_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dot{m}_{\hbox{\tiny O$_2$}} = \left\{
    \begin{array}{r@{\quad:\quad}l}
       \frac{1}{2} \, 0.23 \, A_0 \sqrt{H_0} & \hbox{Natural Ventilation} \\[0.1in]
       0.23 \, \rho \, \dot{V}       & \hbox{Mechanical Ventilation} \end{array} \right.
@@ -312,9 +317,9 @@ Here, $r$ is the stoichiometric ratio, $A_0$ is the area of the compartment open
 
 The \underline{Compartment Aspect Ratios}, $W/H$ and $L/H$, indicate if the compartment is shaped like a hallway, typical room, or vertical shaft. This parameter is of particular importance for empirical correlations and zone models because both use similar sub-models that may not be applicable for narrow hallways or shafts. This parameter is less of a concern for CFD models unless the ratios are so large or small that the number of grid cells spanning any given dimension drops to less than about 10.
 
-The \underline{Relative Distance along the Ceiling}, $r_{\rm cj}/H$, indicates the distance from the fire plume of a sprinkler, smoke detector, {\em etc.}, relative to the compartment height, $H$. This parameter is useful whenever the ceiling jet is an important component of the analysis. Empirical correlations and zone models should be checked to see if the ceiling jet correlation is appropriate close to or far from the plume centerline.
+The \underline{Relative Distance along the Ceiling}, $r_{\rm cj}/H$, indicates the radial distance from the fire plume centerline to a sprinkler, smoke detector, {\em etc.}, relative to the compartment height, $H$. This parameter is useful whenever the ceiling jet is an important component of the analysis. Empirical correlations and zone models should be checked to see if the ceiling jet correlation is appropriate close to or far from the plume centerline.
 
-The \underline{Relative Distance from the Fire}, $r_{\rm rad}/D$, indicates whether a ``target'' is near or far from the fire. This parameter is useful when evaluating radiation calculation ranging from the simple point source method all the way through sophisticated solutions of the radiation transport equation.
+The \underline{Relative Distance from the Fire}, $r_{\rm rad}/D$, indicates whether a ``target'' is near or far from the fire. This parameter is useful when evaluating radiation calculations ranging from the simple point source method all the way through sophisticated solutions of the radiation transport equation.
 
 When citing a set of experimental measurements as evidence that a particular model is valid, the end user ought to calculate the range of these six non-dimensional parameters and show that the intended application falls within this parameter space. This is just a formal way of stating that the validation experiments are comparable to or representative of the intended application. Sometimes the results are surprising. For example, a small fire in a small compartment is the modeling equivalent of a large fire in a large compartment. The non-dimensional parameters might be exactly the same. Disputes sometimes arise when a reviewing authority questions the validity of a model for an application that seems far different than the experiments against which the model is compared. This simple set of parameters will hopefully reduce these kinds of misunderstandings.
 
@@ -322,7 +327,7 @@ When citing a set of experimental measurements as evidence that a particular mod
 \vspace{\parskip}
 {\bf CONCLUSION}
 
-The NRC and EPRI are currently revising their fire model validation study~\cite{NUREG_1824} to include much more data than the original. Since its publication in 2007, the validation study has been widely referenced by those inside and outside of the nuclear industry even though in many instances the proposed model application falls well outside of the parameter space of the 26 experiments used in the study. Revision 1 of NUREG-1824 is to contain approximately 500 experiments and thousands of point-to-point comparisons. This will expand the range of applicability and also underpin the statistical description of the model uncertainty. 
+The NRC and EPRI are currently revising their fire model validation study~\cite{NUREG_1824} to include much more data than the original. Since its publication in 2007, the validation study has been widely referenced by those inside and outside of the nuclear industry even though in many instances the proposed model application falls well outside of the parameter space of the 26 experiments used in the study. Revision 1 of NUREG-1824 is to contain approximately 500 experiments and thousands of point-to-point comparisons. This will expand the range of applicability and also underpin the statistical description of the model uncertainty.
 
 \vspace{\parskip}
 {\bf ACKNOWLEDGMENTS}
@@ -334,7 +339,93 @@ This work was supported by the U.S.~Nuclear Regulatory Commission, Office of Res
 \vspace{-0.5in}
 
 \renewcommand{\refname}{}
-\bibliography{../Bibliography/FDS_general}
+%\bibliography{../Bibliography/FDS_general}
+
+\begin{thebibliography}{12}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Hill et~al.(2007)Hill, Dreisbach, Joglar, Najafi, McGrattan, Peacock,
+  and Hamins]{NUREG_1824}
+K.~Hill, J.~Dreisbach, F.~Joglar, B.~Najafi, K.~McGrattan, R.~Peacock, and
+  A.~Hamins.
+\newblock {Verification and Validation of Selected Fire Models for Nuclear
+  Power Plant Applications}.
+\newblock {NUREG}-1824, United States Nuclear Regulatory Commission,
+  Washington, DC, 2007.
+\newblock EPRI 1011999.
+
+\bibitem[Nat(2001)]{NFPA_805}
+\emph{NFPA 805, Performance-Based Standard for Fire Protection for Light-Water
+  Reactor Electric Generating Plants}.
+\newblock National Fire Protection Association, Quincy, Massachusetts, 2001.
+
+\bibitem[Soc(2011)]{SFPE_G.06}
+\emph{{SFPE G.06, Guidelines for Substantiating a Fire Model for a Given
+  Application}}.
+\newblock Society of Fire Protection Engineers, Bethesda, Maryland, 2011.
+
+\bibitem[Ame(2004)]{ASTM:E1355}
+\emph{{ASTM E 1355-04, Standard Guide for Evaluating the Predictive
+  Capabilities of Deterministic Fire Models}}.
+\newblock American Society for Testing and Materials, West Conshohocken,
+  Pennsylvania, 2004.
+
+\bibitem[Int(2008)]{ISO16730}
+\emph{{ISO 16730, Fire Safety Engineering -- Assessment, Verification and
+  Validation of Calculation Methods}}.
+\newblock International Organization for Standardization (ISO), Geneva,
+  Switzerland, 2008.
+
+\bibitem[Salley and Wachowiak(2007)]{NUREG_1934}
+M.H. Salley and R.~Wachowiak.
+\newblock {Nuclear Power Plant Fire Modeling Analysis Guidelines}.
+\newblock {NUREG}-1934, United States Nuclear Regulatory Commission,
+  Washington, DC, 2007.
+\newblock EPRI 1023259.
+
+\bibitem[Peacock et~al.(1999)Peacock, Reneke, Davis, and
+  Jones]{Peacock:FSJ1999}
+R.D. Peacock, P.A. Reneke, W.D. Davis, and W.W. Jones.
+\newblock {Quantifying fire model evaluation using functional analysis}.
+\newblock \emph{Fire Safety Journal}, 33:\penalty0 167--184, 1999.
+
+\bibitem[Walton and Thomas(2008)]{SFPE:Walton}
+W.D. Walton and P.H. Thomas.
+\newblock \emph{SFPE Handbook of Fire Protection Engineering}, chapter
+  {Estimating Temperatures in Compartment Fires}.
+\newblock National Fire Protection Association, Quincy, Massachusetts, 4th
+  edition, 2008.
+
+\bibitem[McGrattan and Toman(2011)]{McGrattan:Metrologia}
+K.~McGrattan and B.~Toman.
+\newblock Quantifying the predictive uncertainty of complex numerical models.
+\newblock \emph{Metrologia}, 48:\penalty0 173--180, 2011.
+
+\bibitem[Oehlert(1992)]{Oehlert:1992}
+G.~Oehlert.
+\newblock {A Note on the Delta Method}.
+\newblock \emph{The American Statistician}, 46\penalty0 (1):\penalty0 27--29,
+  1992.
+
+\bibitem[Siu et~al.(1992)Siu, Karydas, and Temple]{Siu:1992}
+N.~Siu, D.~Karydas, and J.~Temple.
+\newblock \emph{{Analysis and Management of Uncertainty: Theory and
+  Application}}, chapter {Bayesian Assessment of Modeling Uncertainty:
+  Application to Fire Risk Assessment}, pages 351--361.
+\newblock North-Holland, 1992.
+
+\bibitem[Heskestad(2008)]{SFPE:Heskestad}
+G.~Heskestad.
+\newblock \emph{SFPE Handbook of Fire Protection Engineering}, chapter Fire
+  Plumes, Flame Height and Air Entrainment.
+\newblock National Fire Protection Association, Quincy, Massachusetts, 4th
+  edition, 2008.
+
+\end{thebibliography}
 
 
 
