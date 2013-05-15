@@ -110,6 +110,8 @@ for j=2:length(Q);
     clear Measured_Metric
     clear Predicted_Metric
     
+    figure
+    
     k = 0;
     for i=drange
         if i>Size_Save_Quantity(2); break; end
@@ -320,6 +322,31 @@ for j=2:length(Q);
         display(['Printing scatter plot ',num2str(j),'...'])
         print(gcf,'-dpdf',[plotdir,Plot_Filename])
         
+        % Print histogram of ln(M/E) and normal distribution
+        [normality,p] = lillietest(log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric)));
+        if normality == 0
+            normality_test = 'Pass';
+        else
+            normality_test = 'Fail';
+        end
+        figure
+        [n,xout] = hist(log(Predicted_Values)-log(Measured_Values),10);
+        bar(xout,n)
+        xlabel('Interval Number','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+        ylabel('Number of Data Points','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+        set(gca,'Units','inches')
+        set(gca,'FontName','Times')
+        set(gca,'FontSize',12)
+        set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
+        set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
+        text(0.03, 0.95,Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+        text(0.03, 0.90,['Normality Test: ',normality_test],'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+        set(gcf,'Visible','on');
+        set(gcf,'PaperUnits','inches');
+        set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
+        print(gcf,'-dpdf',[plotdir,[Plot_Filename, '_Histogram']])
+        
         % Perform this code block for FDS validation scatterplot output
         if stats_output == 2
             % Write descriptive statistics to output_stats cell
@@ -337,6 +364,7 @@ for j=2:length(Q);
     end
     
     clear Measured_Metric Predicted_Metric Group_Key_Label K
+    close all
 end
 
 % Write all verification or validation statistics from output_stats to csv output_file
