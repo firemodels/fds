@@ -994,11 +994,9 @@ check_matlab_verification()
    then
       stage7a_success=true
    else
-      grep -A 50 "Error" $FIREBOT_DIR/output/stage7a_verification > $FIREBOT_DIR/output/stage7a_errors
-      
-      echo "Errors from Stage 7a - Matlab plotting and statistics (verification):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage7a_errors >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
+      echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
+      grep -A 50 "Error" $FIREBOT_DIR/output/stage7a_verification >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -1011,12 +1009,10 @@ check_verification_stats()
       # Continue along
       :
    else
-      echo "Error: The verification statistics output file does not exist." > $FIREBOT_DIR/output/stage7a_errors
-      echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $FIREBOT_DIR/output/stage7a_errors
-      
-      echo "Errors from Stage 7a - Matlab plotting and statistics (verification):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage7a_errors >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
+      echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
+      echo "Error: The verification statistics output file does not exist." >> $WARNING_LOG
+      echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 
    # Scan and report warnings for any verification cases that are outside of their specified error tolerance
@@ -1076,11 +1072,9 @@ check_matlab_validation()
    then
       stage7b_success=true
    else
-      grep -A 50 "Error" $FIREBOT_DIR/output/stage7b_validation > $FIREBOT_DIR/output/stage7b_errors
-      
-      echo "Errors from Stage 7b - Matlab plotting (validation):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage7b_errors >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
+      echo "Warnings from Stage 7b - Matlab plotting (validation):" >> $WARNING_LOG
+      grep -A 50 "Error" $FIREBOT_DIR/output/stage7b_validation >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
