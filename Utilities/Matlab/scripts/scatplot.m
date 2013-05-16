@@ -323,9 +323,8 @@ for j=2:length(Q);
         print(gcf,'-dpdf',[plotdir,Plot_Filename])
         
         %%% Print histogram of ln(M/E) and normal distribution
-        % Normality test
         ln_M_E = log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric));
-        % Normality test requires at least 4 observations
+        % Normality test (requires at least 4 observations)
         if size(ln_M_E,1) >= 4
             [normality,p] = lillietest(ln_M_E);
             if normality == 0
@@ -337,15 +336,17 @@ for j=2:length(Q);
             figure
             box on
             hold on
-            [n,xout] = hist(log(Predicted_Values)-log(Measured_Values),10);
+            [n,xout] = hist(ln_M_E,10);
             bar(xout,n,'LineWidth',1,'FaceColor',[0.7,0.7,0.7])
             % Plot normal distribution
-            ix = xout(1):1e-3:xout(end);
-            mu = mean(log(Predicted_Values)-log(Measured_Values));
-            sd = std(log(Predicted_Values)-log(Measured_Values));
+            x_lim = [xout(1)-(xout(2)-xout(1)),xout(end)+(xout(2)-xout(1))];
+            ix = x_lim(1):1e-3:x_lim(2);
+            mu = mean(ln_M_E);
+            sd = std(ln_M_E);
             iy = pdf('normal', ix, mu, sd);
             plot(ix,iy*trapz(xout,n),'k','LineWidth',2);
             % Additional plot content
+            set(gca,'XLim',[x_lim(1),x_lim(2)]);
             y_lim = get(gca,'YLim') * 1.25;
             set(gca,'YLim',y_lim);
             xlabel('Interval Number','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
