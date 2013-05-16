@@ -321,49 +321,56 @@ for j=2:length(Q);
         set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
         display(['Printing scatter plot ',num2str(j),'...'])
         print(gcf,'-dpdf',[plotdir,Plot_Filename])
-        
+
         %%% Print histogram of ln(M/E) and normal distribution
-        ln_M_E = log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric));
-        % Normality test (requires at least 4 observations)
-        if size(ln_M_E,1) >= 4
-            [normality,p] = lillietest(ln_M_E);
-            if normality == 0
-                normality_test = 'Pass';
-            else
-                normality_test = 'Fail';
+        % Wrap histogram routine in try loop
+        % Skips case upon any Matlab error
+        try
+            ln_M_E = log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric));
+            % Normality test (requires at least 4 observations)
+            if size(ln_M_E,1) >= 4
+                [normality,p] = lillietest(ln_M_E);
+                if normality == 0
+                    normality_test = 'Pass';
+                else
+                    normality_test = 'Fail';
+                end
+                % Plot histogram
+                figure
+                box on
+                hold on
+                [n,xout] = hist(ln_M_E,10);
+                bar(xout,n,'LineWidth',1,'FaceColor',[0.7,0.7,0.7])
+                % Plot normal distribution
+                x_lim = [xout(1)-(xout(2)-xout(1)),xout(end)+(xout(2)-xout(1))];
+                ix = x_lim(1):1e-3:x_lim(2);
+                mu = mean(ln_M_E);
+                sd = std(ln_M_E);
+                iy = pdf('normal',ix,mu,sd);
+                plot(ix,iy*trapz(xout,n),'k','LineWidth',2);
+                % Additional plot content
+                set(gca,'XLim',[x_lim(1),x_lim(2)]);
+                y_lim = get(gca,'YLim') * 1.25;
+                set(gca,'YLim',y_lim);
+                xlabel('Interval Number','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+                ylabel('Number of Data Points','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+                set(gca,'Units','inches')
+                set(gca,'FontName','Times')
+                set(gca,'FontSize',12)
+                set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
+                set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
+                text(0.03, 0.95,Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                text(0.03, 0.90,['Normality Test: ',normality_test],'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                set(gcf,'Visible','on');
+                set(gcf,'PaperUnits','inches');
+                set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
+                set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
+                print(gcf,'-dpdf',[plotdir,[Plot_Filename, '_Histogram']])
+                hold off
             end
-            % Plot histogram
-            figure
-            box on
-            hold on
-            [n,xout] = hist(ln_M_E,10);
-            bar(xout,n,'LineWidth',1,'FaceColor',[0.7,0.7,0.7])
-            % Plot normal distribution
-            x_lim = [xout(1)-(xout(2)-xout(1)),xout(end)+(xout(2)-xout(1))];
-            ix = x_lim(1):1e-3:x_lim(2);
-            mu = mean(ln_M_E);
-            sd = std(ln_M_E);
-            iy = pdf('normal', ix, mu, sd);
-            plot(ix,iy*trapz(xout,n),'k','LineWidth',2);
-            % Additional plot content
-            set(gca,'XLim',[x_lim(1),x_lim(2)]);
-            y_lim = get(gca,'YLim') * 1.25;
-            set(gca,'YLim',y_lim);
-            xlabel('Interval Number','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-            ylabel('Number of Data Points','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-            set(gca,'Units','inches')
-            set(gca,'FontName','Times')
-            set(gca,'FontSize',12)
-            set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
-            set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-            text(0.03, 0.95,Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
-            text(0.03, 0.90,['Normality Test: ',normality_test],'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
-            set(gcf,'Visible','on');
-            set(gcf,'PaperUnits','inches');
-            set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
-            set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
-            print(gcf,'-dpdf',[plotdir,[Plot_Filename, '_Histogram']])
-            hold off
+        catch
+            display(['Error: Problem with histogram routine for scatter plot ', Scatter_Plot_Title, '; Skipping histogram.'])
+            continue
         end
         
         % Perform this code block for FDS validation scatterplot output
