@@ -487,12 +487,10 @@ if stats_output == 2
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Quantity & Number of & Number of & $2\widetilde{\sigma}_E$ & $2\widetilde{\sigma}_M$ & Bias \\');
-    fprintf(fid, '%s\n', '         & Datasets  & Points    &                         &                         &      \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_E$ & $\widetilde{\sigma}_M$ & Bias \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Quantity & Number of & Number of & $2\widetilde{\sigma}_E$ & $2\widetilde{\sigma}_M$ & Bias \\');
-    fprintf(fid, '%s\n', '         & Datasets  & Points    &                         &                         &      \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_E$ & $\widetilde{\sigma}_M$ & Bias \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
     [rows, cols] = size(output_stats);
     for i_row = 2:rows
@@ -501,8 +499,8 @@ if stats_output == 2
         quantity = m{i_row, 1};
         number_datasets = m{i_row, 2};
         number_points= m{i_row, 3};
-        sigma_e = m{i_row, 4};
-        sigma_m = m{i_row, 5};
+        sigma_e = m{i_row, 4}/2;
+        sigma_m = m{i_row, 5}/2;
         bias = m{i_row, 6};
         
         % Write out all columns to .tex file
