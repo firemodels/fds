@@ -59,7 +59,7 @@ if length(varargin) >= 1
     elseif strfind(output_file, 'FDTs_validation_scatterplot_output')
         stats_output = 2;
         statistics_tex_output = '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex';
-        histogram_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex';
+        histogram_tex_output = '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex';
     end
 else
     stats_output = 0;
