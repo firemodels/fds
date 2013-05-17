@@ -27,10 +27,10 @@ addpath 'scripts'
 
 % Scripts that run prior to dataplot
 
-flame_height
-cat_mccaffrey
-NIST_RSE
-sippola_aerosol_deposition
+% flame_height
+% cat_mccaffrey
+% NIST_RSE
+% sippola_aerosol_deposition
 
 % dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
 
@@ -40,18 +40,18 @@ plotdir = [pwd,'/../../Manuals/'];
 qfil = [pwd,'/FDS_validation_scatterplot_inputs.csv'];
 output_file = [pwd,'/FDS_validation_scatterplot_output.csv'];
 
-[saved_data,drange] = dataplot(cfil,vdir,plotdir);
+[saved_data,drange] = dataplot(cfil,vdir,plotdir,1:10);
 scatplot(saved_data,drange,qfil,plotdir,output_file)
 
 % Miscellaneous other scripts for special cases
 
-beyler_hood
-check_hrr
-sandia_helium_plume
-sandia_methane_fire
-spray_attenuation
-Cup_burner
-flame_height2
-purdue_flames
+% beyler_hood
+% check_hrr
+% sandia_helium_plume
+% sandia_methane_fire
+% spray_attenuation
+% Cup_burner
+% flame_height2
+% purdue_flames
  
 display('validation scripts completed successfully!')
