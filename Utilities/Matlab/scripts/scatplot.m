@@ -371,7 +371,7 @@ for j=2:length(Q);
                     text(0.03, 0.90,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
                     text(0.03, 0.82,['Normality Test: ',normality_test],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
                     
-                    PDF_Paper_Width = Paper_Width_Factor * Paper_Width;
+                    PDF_Paper_Width = Paper_Width;
                     
                     set(gcf,'Visible','on');
                     set(gcf,'PaperUnits','inches');
