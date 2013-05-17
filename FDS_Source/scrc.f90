@@ -5518,8 +5518,8 @@ CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_ACELL , NLEVEL_MIN,'SETUP_COARSENING','W
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX, NLEVEL_MIN,'SETUP_COARSENING', 'MATRIX')
 
 !!! Determine number of multigrid levels
-!LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
-LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MIN
+LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
+!LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MIN
    
    !!!-------------------------------------------------------------------------------------------------
    !!! Determine coarser meshes corresponding to requested coarsening strategy
@@ -5734,7 +5734,6 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER  setup of 
       !CALL SCARC_SETUP_RESTRICTION(NL)
    ENDIF
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER setup of transfer matrixes '
 
    !!! Print latex information if requested (only temporarily for debugging purposes)
    IF (TYPE_LATEX == NSCARC_LATEX_ALL) THEN
@@ -6373,17 +6372,19 @@ END FUNCTION STRONGLY_COUPLED
 SUBROUTINE SCARC_SETUP_STRENGTH_MATRIX(NTYPE, NL)
 INTEGER, PARAMETER  :: NCOUPLINGS = 20
 INTEGER, INTENT(IN) :: NTYPE, NL
-INTEGER  :: NM, IC, JC, ICOL, IDIAG, IP, IS !, IPOS
+INTEGER  :: NM, IC, JC, ICOL, IDIAG, IP, IS , IPOS
 REAL(EB) :: ADIAG, ACOL, ROW_SCALE, ROW_SUM, MAX_ROW_SUM = 0.9_EB, THRESHOLD = 0.25_EB
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
 
 STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
       
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SETUP_STRENGTH_MATRIX: ============== '
+
    SC => SCARC(NM)%COMPACT(NL)            
 
    STRENGTH_CELL_LOOP: DO IC = 1, SC%NC
 
-      IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SETUP_STRENGTH: ==============   IC =', IC, '==== NTYPE=',NTYPE
+      IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '==============   IC =', IC, '==== NTYPE=',NTYPE
 
       IDIAG = SC%A_ROW(IC)
       ADIAG = SC%A(IDIAG)
@@ -6428,9 +6429,10 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
             JC = SC%A_COL(ICOL)
             IF (JC <= SC%NC) THEN
                IF (SC%A(ICOL) <= THRESHOLD * ROW_SCALE) SC%S_COL(ICOL) = -1
-               IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i4,a,i4)') 'B: S_COL(',ICOL,')=',SC%S_COL(ICOL)
-            ELSE
-               SC%S_COL(ICOL) = -1
+               IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i4,a,f12.6,a,f12.6,a,i3,a,i4)') &
+                 'ZZZZ2: A(',ICOL,')=',SC%A(ICOL), ': T*R_S=',THRESHOLD*ROW_SCALE,' S_COL(',ICOL,')=',SC%S_COL(ICOL)
+            !ELSE
+            !   SC%S_COL(ICOL) = -1
             ENDIF
           ENDDO
       ENDIF
@@ -6473,33 +6475,48 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
       ENDDO
    ENDIF
 
-!   IS = SC%S_ROW(SC%NC)
-!   DO ICOL = 1, IS
-!      SC%ST_ROW(SC%S_COL(ICOL)+1) = SC%ST_ROW(SC%S_COL(ICOL)+1) + 1
-!   ENDDO 
-!   DO IC = 1, SC%NC
-!      SC%ST_ROW(IC+1)= SC%ST_ROW(IC+1) + SC%ST_ROW(IC) 
-!   ENDDO 
-!   DO IC = 1, SC%NC
-!      DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
-!         IPOS = SC%S_COL(ICOL)
-!         SC%ST_COL(SC%ST_ROW(IPOS)) = IC
-!         SC%ST_ROW(IPOS) = SC%ST_ROW(IPOS) + 1
-!      ENDDO
-!   ENDDO 
-!   DO IC = SC%NC, 1, -1
-!      SC%ST_ROW(IC) = SC%ST_ROW(IC-1)
-!   ENDDO
-!   SC%ST_ROW(1) = 1
-!
-!   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-!      WRITE(SCARC_LU,*) '---------------------- ST_ROW:', SC%NC
-!      WRITE(SCARC_LU,'(4i9)') (SC%ST_ROW(IC), IC=1,SC%NC+1)
-!      WRITE(SCARC_LU,*) '---------------------- ST_COL:'
-!      DO IC = 1, SC%NC
-!         WRITE(SCARC_LU,'(i5,a,20i9)') IC,':',(SC%ST_COL(IP),IP=SC%ST_ROW(IC),SC%ST_ROW(IC+1)-1)
-!      ENDDO
-!   ENDIF
+   DO IC = 1, SC%NC+1
+      SC%ST_ROW(IC) = 0
+   ENDDO
+
+   IS = SC%S_ROW(SC%NC+1)-1
+   DO ICOL = 1, IS
+      SC%ST_ROW(SC%S_COL(ICOL)+1) = SC%ST_ROW(SC%S_COL(ICOL)+1) + 1
+      IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
+         WRITE(SCARC_LU,*) 'A: ST_ROW(',SC%S_COL(ICOL)+1,')=',SC%ST_ROW(SC%S_COL(ICOL)+1)
+   ENDDO 
+   SC%ST_ROW(1) = 1
+
+   DO IC = 1, SC%NC
+      SC%ST_ROW(IC+1)= SC%ST_ROW(IC+1) + SC%ST_ROW(IC) 
+      IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
+         WRITE(SCARC_LU,*) 'B: ST_ROW(',IC+1,')=',SC%ST_ROW(IC+1)
+   ENDDO 
+   DO IC = 1, SC%NC
+      DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+         IPOS = SC%S_COL(ICOL)
+         SC%ST_COL(SC%ST_ROW(IPOS)) = IC
+      IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
+         WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3)') &
+           'C: IC=',IC,': ICOL=',ICOL,': IPOS=', IPOS,': ST_COL(',SC%ST_ROW(IPOS),')=',IC
+         SC%ST_ROW(IPOS) = SC%ST_ROW(IPOS) + 1
+      ENDDO
+   ENDDO 
+   DO IC = SC%NC+1, 2, -1
+      SC%ST_ROW(IC) = SC%ST_ROW(IC-1)
+      IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
+         WRITE(SCARC_LU,*) 'D: ST_ROW(',IC,')=',SC%ST_ROW(IC)
+   ENDDO
+   SC%ST_ROW(1) = 1
+
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+      WRITE(SCARC_LU,*) '---------------------- ST_ROW:', SC%NC
+      WRITE(SCARC_LU,'(4i9)') (SC%ST_ROW(IC), IC=1,SC%NC+1)
+      WRITE(SCARC_LU,*) '---------------------- ST_COL:'
+      DO IC = 1, SC%NC
+         WRITE(SCARC_LU,'(i5,a,20i9)') IC,':',(SC%ST_COL(IP),IP=SC%ST_ROW(IC),SC%ST_ROW(IC+1)-1)
+      ENDDO
+   ENDIF
 
 ENDDO STRENGTH_MESHES_LOOP
 
@@ -6514,7 +6531,7 @@ INTEGER, PARAMETER  :: NCOUPLINGS = 20
 INTEGER, INTENT(IN) :: NTYPE, NL
 INTEGER :: NM, IC, JC, KC, ICOL, JCOL, IRAND, REMAINING_CELLS
 INTEGER :: FCELL = -1, ZCELL =-2, CTILDE2 = -1, CTILDE
-LOGICAL :: BEMPTY, BNONEMPTY
+LOGICAL :: BEMPTY=.FALSE., BNONEMPTY=.FALSE.
 REAL(EB) :: RAND_NUM, MEASURE, NEW_MEASURE
 REAL(EB) :: MEASURE_MAX, EPS
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
@@ -6540,8 +6557,14 @@ SELECT CASE (NTYPE)
 
          REMAINING_CELLS = 0
 
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+      WRITE(SCARC_LU,*) 'SCARC_SETUP_COLORING: INIT: NL=',NL
+      WRITE(SCARC_LU,*) 'SCARC_SETUP_COLORING: CELLTYPE: ', SC%NC
+      WRITE(SCARC_LU,*) (SC%CELLTYPE(IC), IC=1, SC%NC)
+   ENDIF
+
          RS3_MEASURE_LOOP0: DO IC = 1, SC%NC
-            SC%MEASURE(IC) = SC%S_ROW(IC+1)-SC%S_ROW(IC) 
+            SC%MEASURE(IC) = SC%ST_ROW(IC+1)-SC%ST_ROW(IC) 
          ENDDO RS3_MEASURE_LOOP0
 
          RS3_MEASURE_LOOP1: DO IC = 1, SC%NC
@@ -6618,10 +6641,10 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MEASURE_MAX=',MEASURE_MAX
          'F: CELLTYPE(',IC,') =',SC%CELLTYPE(IC),': MEASURE(',IC,')=',SC%MEASURE(IC),': Remaining cells=',REMAINING_CELLS
 
                   !!! Determine set of fine cells 
-                  DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+                  DO ICOL = SC%ST_ROW(IC), SC%ST_ROW(IC+1)-1
 
                      !!! IF JC hasn't been marked yet, set it to be a fine cell which is no longer measured
-                     JC = SC%S_COL(ICOL)
+                     JC = SC%ST_COL(ICOL)
 
                      IF (JC > SC%NC) CYCLE
                      IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_NONE) THEN
@@ -8390,7 +8413,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
    WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'M_ROW'
    WRITE(SCARC_LU,'(8i5)') (M_ROW(IC), IC=1, NC+1)
    WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'M_COL'
-   WRITE(SCARC_LU,'(8i5)') (M_COL(IC), IC=1, 32)
+   WRITE(SCARC_LU,'(8i5)') (M_COL(IC), IC=1, 26)
 ENDIF
 
 !!! identify the number of non-zero entries in every column of M (corresponds to a row in MT) 
@@ -8453,6 +8476,7 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
    SCF => SCARC(NM)%COMPACT(NL)
    SCC => SCARC(NM)%COMPACT(NL+1)
 
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SCARC_SETUP_SYSTEM_AMG: NC  =', SCF%NC 
    IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SCARC_SETUP_SYSTEM_AMG: NCC =', SCF%NCC
 
    IOWN = 1
@@ -8463,7 +8487,7 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
    LOOP1_C_CELLS: DO IC0 = 1, SCF%NCC
 
       IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-         WRITE(SCARC_LU,*) '================ MARKMARK:  IC0 =', IC0-1
+         WRITE(SCARC_LU,*) '================ MARKMARK1:  IC0 =', IC0-1
          WRITE(SCARC_LU,*) 'IOWN     = ', IOWN
          WRITE(SCARC_LU,*) 'IOWN_INIT= ', IOWN_INIT
          WRITE(SCARC_LU,*) '================ A_MARKER'
@@ -8531,7 +8555,7 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
 
    ENDDO LOOP1_C_CELLS
 
-   SCC%A_ROW(SCF%NCC+1) = IOWN+1    ! oder ohne +1 ??
+   SCC%A_ROW(SCF%NCC+1) = IOWN  
    SCC%NA = IOWN
 
    SCF%A_TAG = 0
@@ -8545,7 +8569,7 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
    LOOP2_C_CELLS: DO IC0 = 1, SCF%NCC
 
       IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-         WRITE(SCARC_LU,*) '================ MARKMARK:  IC0 =', IC0-1
+         WRITE(SCARC_LU,*) '================ MARKMARK2:  IC0 =', IC0-1
          WRITE(SCARC_LU,*) 'IOWN     = ', IOWN
          WRITE(SCARC_LU,*) 'IOWN_INIT= ', IOWN_INIT
          WRITE(SCARC_LU,*) '================ A_MARKER'
@@ -8573,22 +8597,26 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
       WRITE(SCARC_LU,*) 'SQUARE RAP_diag_data(',IC0,') =', SCC%A(IOWN)
       WRITE(SCARC_LU,*) 'SQUARE RAP_diag_j(',IC0,')    =', SCC%A_COL(IOWN)
       WRITE(SCARC_LU,*) 'SQUARE IOWN=',IOWN
+      WRITE(SCARC_LU,*) 'NC =',SCF%NC
+      WRITE(SCARC_LU,*) 'NCC=',SCF%NCC
    ENDIF
       ENDIF
 
    IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-      WRITE(SCARC_LU,*) '==============================================='
-      WRITE(SCARC_LU,*) 'MATRIX A_ROW:'
-      DO IC1 = 1, SCF%NCC+1
-         WRITE(SCARC_LU,*) 'A_ROW(',IC1,')=',SCF%A_ROW(IC1)
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 10: A_diag_i  ======================'
+      DO IC1 = 1, SCF%NC+1
+         !WRITE(SCARC_LU,*) 'A_ROW(',IC1,')=',SCF%A_ROW(IC1)
+         WRITE(SCARC_LU,'(a,i5)') 'MYDEBUG: 0: ', SCF%A_ROW(IC1)
       ENDDO
-      WRITE(SCARC_LU,*) 'MATRIX A_COL:'
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 10: A_diag_i  ======================'
       DO IC1 = 1, SCF%NA
-         WRITE(SCARC_LU,*) 'A_COL(',IC1,')=',SCF%A_COL(IC1)
+         !WRITE(SCARC_LU,*) 'A_COL(',IC1,')=',SCF%A_COL(IC1)
+         WRITE(SCARC_LU,'(a,i5)') 'MYDEBUG: 0: ', SCF%A_COL(IC1)
       ENDDO
-      WRITE(SCARC_LU,*) 'MATRIX A:'
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 10: A_diag_i  ======================'
       DO IC1 = 1, SCF%NA
-         WRITE(SCARC_LU,*) 'A(',IC1,')=',SCF%A(IC1)
+         !WRITE(SCARC_LU,*) 'A(',IC1,')=',SCF%A(IC1)
+         WRITE(SCARC_LU,'(a,f12.6)') 'MYDEBUG: 0: ', SCF%A(IC1)
       ENDDO
       WRITE(SCARC_LU,*) '==============================================='
       WRITE(SCARC_LU,*) 'MATRIX R_ROW:'
@@ -8685,17 +8713,20 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
 
    ENDDO LOOP2_C_CELLS
    IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-      WRITE(SCARC_LU,*) '================ RAP_ROW'
-      DO IC1 = 1, SCC%NC+1
-         WRITE(SCARC_LU,'(a,i4,a,i4)') 'RAP_ROW(',IC1,')=', SCC%A_ROW(IC1)
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ======================'
+      DO IC1 = 1, SCF%NCC+1
+         !WRITE(SCARC_LU,*) 'A_ROW(',IC1,')=',SCF%A_ROW(IC1)
+         WRITE(SCARC_LU,'(a,i5)') 'MYDEBUG: 0: ', SCC%A_ROW(IC1)-1
       ENDDO
-      WRITE(SCARC_LU,*) '================ RAP_COL'
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ======================'
       DO IC1 = 1, SCC%NA
-         WRITE(SCARC_LU,'(a,i4,a,i4)') 'RAP_COL(',IC1,')=', SCC%A_COL(IC1)
+         !WRITE(SCARC_LU,*) 'A_COL(',IC1,')=',SCF%A_COL(IC1)
+         WRITE(SCARC_LU,'(a,i5)') 'MYDEBUG: 0: ', SCC%A_COL(IC1)-1
       ENDDO
-      WRITE(SCARC_LU,*) '================ RAP'
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ======================'
       DO IC1 = 1, SCC%NA
-         WRITE(SCARC_LU,'(a,i4,a,f12.6)') 'RAP(',IC1,')=', SCC%A(IC1)
+         !WRITE(SCARC_LU,*) 'A(',IC1,')=',SCF%A(IC1)
+         WRITE(SCARC_LU,'(a,f12.6)') 'MYDEBUG: 0: ', -SCC%A(IC1)
       ENDDO
    ENDIF
 
@@ -15395,6 +15426,8 @@ SELECT CASE (NTYPE)
               DO K = SC%NZ, 1, -1
                  WRITE(SCARC_LU, '(8i6)') (SC%CELLTYPE((K-1)*SC%NX*SC%NY+I), I=1, SC%NX)
               ENDDO
+           ELSE
+              WRITE(SCARC_LU, '(4i6)') (SC%CELLTYPE(IC), IC=1, SC%NC)
            ENDIF
          ENDDO
        ELSEIF (NMESHES == 4.AND.NL==1) THEN
