@@ -240,7 +240,9 @@ simple_temp = [273.15 1700];
 % Plotting
 %-----------------------
 figure(1)
-plot(simple_temp,simple_o2,'k',ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'r+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'b*','LineWidth',1,'MarkerSize',4)
+h=plot(simple_temp,simple_o2,'k',ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'r+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'b*','LineWidth',0.5,'MarkerSize',4);
+set(h([1]),'LineWidth',1)
+set(h([2 4]),'MarkerSize',7)
 axis([273.15 1900 0 0.23])
 plot_style
 set(gca,'Units',Plot_Units)
