@@ -361,20 +361,22 @@ for j=2:length(Q);
                     set(gca,'XLim',[x_lim(1),x_lim(2)]);
                     y_lim = get(gca,'YLim') * 1.25;
                     set(gca,'YLim',y_lim);
-                    xlabel('Interval Number','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-                    ylabel('Number of Data Points','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+                    xlabel('Interval Number','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+                    ylabel('Number of Data Points','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
                     set(gca,'Units','inches')
                     set(gca,'FontName','Times')
                     set(gca,'FontSize',12)
                     set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
-                    set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-                    text(0.03, 0.95,Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
-                    text(0.03, 0.90,['Normality Test: ',normality_test],'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+                    text(0.03, 0.95,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.87,['Normality Test: ',normality_test],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                    
+                    PDF_Paper_Width = Paper_Width_Factor * Paper_Width;
                     
                     set(gcf,'Visible','on');
                     set(gcf,'PaperUnits','inches');
-                    set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
-                    set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
+                    set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
+                    set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
                     print(gcf,'-dpdf',[plotdir,[Plot_Filename, '_Histogram']])
                     hold off
                     % Add histogram name to array for LaTeX output later
@@ -530,8 +532,7 @@ if (stats_output == 2) && (exist('output_histograms','var') == 1) && (isempty(ou
     page_count = ceil(num_histograms/8);
     for i = 1:page_count
         fprintf(fid, '%s\n', '\begin{figure}[p]');
-        fprintf(fid, '%s\n', '\centering');
-        fprintf(fid, '%s\n', '\begin{tabular*}{0.80\textwidth}{l@{\extracolsep{\fill}}r}');
+        fprintf(fid, '%s\n', '\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}');
         % Indices go from 1:8, 9:16, 17:24, up to last page,
         % which might have less than 8 plots
         for j = ((i-1)*8+1):(min((i*8),num_histograms-((i-1)*8)))
