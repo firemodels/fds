@@ -97,8 +97,8 @@ if stats_output == 2
     output_stats{1,1} = 'Quantity';
     output_stats{1,2} = 'Number of Datasets';
     output_stats{1,3} = 'Number of Points';
-    output_stats{1,4} = '2*Sigma_Experiment';
-    output_stats{1,5} = '2*Sigma_Model';
+    output_stats{1,4} = 'Sigma_Experiment';
+    output_stats{1,5} = 'Sigma_Model';
     output_stats{1,6} = 'Bias';
     stat_line = 2;
     output_histograms = {};
@@ -368,8 +368,8 @@ for j=2:length(Q);
                     set(gca,'FontSize',12)
                     set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
                     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-                    text(0.03, 0.95,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
-                    text(0.03, 0.87,['Normality Test: ',normality_test],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.90,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.82,['Normality Test: ',normality_test],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
                     
                     PDF_Paper_Width = Paper_Width_Factor * Paper_Width;
                     
@@ -395,8 +395,8 @@ for j=2:length(Q);
             output_stats{stat_line,1} = Scatter_Plot_Title; % Quantity
             output_stats{stat_line,2} = size(B, 2); % Number of data sets
             output_stats{stat_line,3} = size(Predicted_Values, 1); % Number of data points
-            output_stats{stat_line,4} = sprintf('%0.2f', 2*Sigma_E); % 2*Sigma_E
-            output_stats{stat_line,5} = sprintf('%0.2f', 2*Sigma_M); % 2*Sigma_M
+            output_stats{stat_line,4} = sprintf('%0.2f', Sigma_E); % Sigma_E
+            output_stats{stat_line,5} = sprintf('%0.2f', Sigma_M); % Sigma_M
             output_stats{stat_line,6} = sprintf('%0.2f', delta); % Bias
             stat_line = stat_line + 1;
         end
@@ -507,8 +507,8 @@ if stats_output == 2
         quantity = m{i_row, 1};
         number_datasets = m{i_row, 2};
         number_points= m{i_row, 3};
-        sigma_e = m{i_row, 4}/2;
-        sigma_m = m{i_row, 5}/2;
+        sigma_e = m{i_row, 4};
+        sigma_m = m{i_row, 5};
         bias = m{i_row, 6};
         
         % Write out all columns to .tex file
