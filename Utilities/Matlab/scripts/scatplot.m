@@ -54,10 +54,12 @@ if length(varargin) >= 1
     elseif strfind(output_file, 'FDS_validation_scatterplot_output')
         stats_output = 2;
         statistics_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
+        histogram_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex';
     % Check if FDTs validation plot, set appropriate flag and tex output file
     elseif strfind(output_file, 'FDTs_validation_scatterplot_output')
         stats_output = 2;
         statistics_tex_output = '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex';
+        histogram_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex';
     end
 else
     stats_output = 0;
@@ -99,6 +101,7 @@ if stats_output == 2
     output_stats{1,5} = '2*Sigma_Model';
     output_stats{1,6} = 'Bias';
     stat_line = 2;
+    output_histograms = {};
 end
 
 for j=2:length(Q);
@@ -330,7 +333,7 @@ for j=2:length(Q);
             try
                 ln_M_E = log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric));
                 % Normality test (requires at least 4 observations)
-                if size(ln_M_E,1) >= 4
+                if length(ln_M_E) >= 4
                     [normality,p] = lillietest(ln_M_E);
                     
                     if normality == 0
@@ -374,6 +377,9 @@ for j=2:length(Q);
                     set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
                     print(gcf,'-dpdf',[plotdir,[Plot_Filename, '_Histogram']])
                     hold off
+                    % Add histogram name to array for LaTeX output later
+                    [~, filename, ~] = fileparts(Plot_Filename);
+                    output_histograms{end+1} = [filename, '_Histogram'];
                 end
             catch
                 display(['Error: Problem with histogram routine for scatter plot ', Scatter_Plot_Title, '; Skipping histogram.'])
@@ -515,6 +521,35 @@ if stats_output == 2
     fprintf(fid,'%s\n','\end{center}');
 end
 
+% Write histogram information to a LaTeX file for inclusion
+% in the FDS Validation Guide or FDTs Validation Guide
+if (stats_output == 2) && (exist('output_histograms','var') == 1) && (isempty(output_histograms) == 0)
+    fid = fopen(histogram_tex_output, 'wt');
+    % Write plots to LaTeX figures, eight per page
+    num_histograms = length(output_histograms);
+    page_count = ceil(num_histograms/8);
+    for i = 1:page_count
+        fprintf(fid, '%s\n', '\begin{figure}[p]');
+        fprintf(fid, '%s\n', '\centering');
+        fprintf(fid, '%s\n', '\begin{tabular*}{0.80\textwidth}{l@{\extracolsep{\fill}}r}');
+        % Indices go from 1:8, 9:16, 17:24, up to last page,
+        % which might have less than 8 plots
+        for j = ((i-1)*8+1):(min((i*8),num_histograms-((i-1)*8)))
+            % Alternate line endings in LaTeX plots
+            if mod(j,2) == 1
+                line_ending = '&';
+            else
+                line_ending = '\\';
+            end
+            fprintf(fid, '%s\n', ['\includegraphics[height=2.2in]{SCRIPT_FIGURES/ScatterPlots/',output_histograms{j},'} ',line_ending]);
+        end
+        fprintf(fid, '%s\n', '\end{tabular*}');
+        fprintf(fid, '%s\n', ['\label{Histogram_',num2str(i),'}']);
+        fprintf(fid, '%s\n\n', '\end{figure}');
+    end
+end
+
+fclose('all');
 
 display('scatplot completed successfully!')
 
