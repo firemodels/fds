@@ -5045,11 +5045,15 @@ READ_SURF_LOOP: DO N=0,N_SURF
       SF%TMP_INNER                             = TMP_INNER + TMPM
       IF (SF%TMP_INNER(1)>=0._EB) THEN
          SF%TMP_FRONT = SF%TMP_INNER(1)
+         SF%TAU(TIME_TEMP) = 0._EB
       ELSE
          SF%TMP_FRONT = TMP_FRONT + TMPM
       ENDIF
-      IF (TMP_BACK < 0._EB) TMP_BACK = TMPA - TMPM
-      SF%TMP_BACK                              = TMP_BACK + TMPM
+      IF (SF%TMP_INNER(SF%N_LAYERS)>=0._EB) THEN
+         SF%TMP_BACK  = SF%TMP_INNER(SF%N_LAYERS)
+      ELSE
+         SF%TMP_BACK = TMP_BACK + TMPM
+      ENDIF
       ALLOCATE(SF%N_LAYER_CELLS(SF%N_LAYERS))            ! The number of cells in each layer
       ALLOCATE(SF%MIN_DIFFUSIVITY(SF%N_LAYERS))          ! The smallest diffusivity of materials in each layer
       ALLOCATE(SF%MATL_NAME(SF%N_MATL))                  ! The list of all material names associated with the surface
