@@ -19,6 +19,7 @@ INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1,NET_FLUX_BC=0,SPECIFIED_TEMPERATURE=
                       NO_CONVECTION=2,THERMALLY_THICK=3,INFLOW_OUTFLOW=4,&
                       INTERPOLATED_BC=6,&
                       VEG_BNDRY_FUEL=99                                                     ! Heat transfer BC
+INTEGER, PARAMETER :: H_CUSTOM=-1,H_DEFAULT=0,H_LOGLAW=1,H_ABL=2,H_EDDY=3                   ! Heat transfer coefficient model
 INTEGER, PARAMETER :: WALL_MODEL_BC=2,FREE_SLIP_BC=3,NO_SLIP_BC=4,INTERPOLATED_VELOCITY_BC=6,& ! Velocity BC
                       HVAC_VBC=42
 INTEGER, PARAMETER :: EXPOSED=0,VOID=1,INSULATED=2                                          ! Surface backing
