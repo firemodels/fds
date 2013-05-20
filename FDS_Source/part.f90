@@ -937,6 +937,17 @@ ENDIF
 CALL MAKE_PARTICLE
 
 LP=>LAGRANGIAN_PARTICLE(NLP)
+
+! Special over-ride of particle diameter for liquid droplets only
+
+IF (IN%DIAMETER>0._EB) THEN
+   LP%ONE_D%X(1) = 0.5_EB*IN%DIAMETER
+   LP%PWT = 1._EB
+   LP%ONE_D%LAYER_THICKNESS(1) = LP%ONE_D%X(1)
+   LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*LP%ONE_D%X(1)**3
+ENDIF
+
+! Save insert time and other miscellaneous attributes
       
 LP%T_INSERT = T                       
 IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
