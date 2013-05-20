@@ -1255,7 +1255,11 @@ SELECT CASE(SF%BACKING)
       QRADINB   = 0._EB
       E_WALLB   = 0._EB
       Q_WATER_B = 0._EB
-      TMP_BACK   = TMPA
+      IF (SF%TMP_BACK>0._EB) THEN
+         TMP_BACK = SF%TMP_BACK
+      ELSE
+         TMP_BACK = TMP_0(KK)
+      ENDIF
 
    CASE(EXPOSED)
       IF (IWB >= 0) THEN
