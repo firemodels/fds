@@ -6504,11 +6504,19 @@ If you introduce
 only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}. You can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
 
 \begin{lstlisting}
-&INIT PART_ID='target',  XYZ=1.2,3.4,5.6, N_PARTICLES=10, DX=0.1 /
+&INIT PART_ID='target', XYZ=1.2,3.4,5.6, N_PARTICLES=10, DX=0.1 /
 \end{lstlisting}
 
 \noindent
 creates a line of 10 particles starting at the point (1.2,3.4,5.6) separated by 0.1~m. This is handy for creating arrays of devices, like heat flux gauges. See Section~\ref{info:heat_flux} for more details.
+
+In special cases, you might want a single liquid droplet to be inserted at a particular point with a particular velocity every {\ct DT\_INSERT}~s following the activation of a particular device, as follows:
+\begin{lstlisting}
+&INIT N_PARTICLES=1, XYZ=..., UVW=..., DIAMETER=200., DT_INSERT=0.05, 
+      PART_ID='drops', DEVC_ID='nozzle' /
+\end{lstlisting}
+Note that the {\ct DIAMETER} ($\mu$m) is only valid for liquid droplets. It over-rides the {\ct DIAMETER} on the {\ct PART} line labelled {\ct 'drops'}.
+
 
 
 \subsubsection{Periodic Insertion of Particles within a Specified Volume}
@@ -9761,6 +9769,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct DENSITY}                   & Real              & Section~\ref{info:INIT}                       & kg/m$^3$      & Ambient       \\ \hline
 {\ct DEVC\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
+{\ct DIAMETER}                  & Real              & Section~\ref{info:initial_droplets}           & $\mu$m        &               \\ \hline
 {\ct DT\_INSERT}                & Real              & Section~\ref{info:initial_droplets}           & s             &               \\ \hline
 {\ct DX}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
 {\ct DY}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
