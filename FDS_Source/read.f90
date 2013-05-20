@@ -2276,7 +2276,12 @@ DO NS = 1,N_SUB_SPECIES
                ELSE
                   SM%MEAN_DIAMETER = MEAN_DIAMETER
                ENDIF
-               SM%DENSITY_SOLID = SPECIES(NS2)%DENSITY_SOLID
+               IF (ABS(DENSITY_SOLID-1800._EB) <=TWO_EPSILON_EB .AND. &
+                   ABS(DENSITY_SOLID-SPECIES(NS2)%DENSITY_SOLID) <=TWO_EPSILON_EB) THEN
+                   SM%DENSITY_SOLID = DENSITY_SOLID
+               ELSE
+                   SM%DENSITY_SOLID = SPECIES(NS2)%DENSITY_SOLID
+               ENDIF
                SM%CONDUCTIVITY_SOLID=SPECIES(NS2)%CONDUCTIVITY_SOLID
             ENDIF
          ENDIF
@@ -2344,8 +2349,8 @@ SUBROUTINE SET_SPEC_DEFAULT
 AEROSOL                     = .FALSE.
 BACKGROUND                  = .FALSE.
 CONDUCTIVITY                = -1._EB
-CONDUCTIVITY_SOLID          = 0.26 ! Ben-Dor, et al. 2002. (~10 x air)
-DENSITY_SOLID               = 1800._EB !Slowik, et al. 2004
+CONDUCTIVITY_SOLID          = 0.26_EB !W/m/K Ben-Dor, et al. 2002. (~10 x air)
+DENSITY_SOLID               = 1800._EB !kg/m^3 Slowik, et al. 2004
 DIFFUSIVITY                 = -1._EB
 EPSILONKLJ                  =  0._EB
 FIC_CONCENTRATION           =  0._EB
@@ -2361,7 +2366,7 @@ MASS_FRACTION               =  0._EB
 MASS_FRACTION_0             = -1._EB
 MEAN_DIAMETER               =  1.E-6_EB
 MW                          =  0._EB
-REFERENCE_TEMPERATURE       = 25._EB
+REFERENCE_TEMPERATURE       = 25._EB ! C
 SIGMALJ                     =  0._EB
 SPEC_ID                     = 'null'
 SPECIFIC_HEAT               = -1._EB
@@ -2372,9 +2377,9 @@ VOLUME_FRACTION             =  0._EB
 DENSITY_LIQUID              = -1._EB
 HEAT_OF_VAPORIZATION        = -1._EB     ! kJ/kg
 H_V_REFERENCE_TEMPERATURE   = -300._EB
-MELTING_TEMPERATURE         = -300.        ! C
+MELTING_TEMPERATURE         = -300._EB   ! C
 SPECIFIC_HEAT_LIQUID        = -1._EB     ! kJ/kg-K
-VAPORIZATION_TEMPERATURE    = -300._EB     ! C
+VAPORIZATION_TEMPERATURE    = -300._EB   ! C
 
 RAMP_CP                     = 'null'
 RAMP_CP_L                   = 'null'
@@ -3381,6 +3386,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          CALL SHUTDOWN(MESSAGE)
       ELSE
          LPC%Y_INDEX = SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX
+         TMPMIN = MIN(TMPMIN,SPECIES(LPC%Y_INDEX)%MELTING_TEMPERATURE)
       ENDIF
       IF (SPECIES(LPC%Y_INDEX)%DENSITY_LIQUID > 0._EB) LPC%DENSITY=SPECIES(LPC%Y_INDEX)%DENSITY_LIQUID
    ENDIF
