@@ -2428,11 +2428,11 @@ with {\ct SURF\_ID}, indicating which of the listed {\ct SURF} lines to
 apply. If the default boundary condition is desired, then {\ct SURF\_ID} need not be set.
 
 Be careful when using the {\ct MB} shortcut when doing a multiple mesh
-simulation, that is, when more than one rectangular mesh is used. The
-plane designated by the keyword {\ct MB} is applied to all of the
-meshes, possibly leading to confusion about whether a plane is a solid
+simulation; that is, when more than one rectangular mesh is used. The
+plane designated by the character string {\ct MB} may be mistakenly applied to more than one
+mesh, possibly leading to confusion about whether a plane is a solid
 wall or an open boundary. Check the geometry in Smokeview to assure that
-the {\ct VENT}s are properly prescribed. Use color as much as
+the {\ct VENT}s are properly specified. Use color as much as
 possible to double-check the set-up.  More detail on color in
 Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct OUTLINE=.TRUE.} causes the
 {\ct VENT} to be drawn as an outline in Smokeview.
@@ -2460,12 +2460,9 @@ See Section~\ref{info:activate_deactivate} for details.
 
 \subsubsection{Mirror Vents}
 
-A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane. Usually, a {\ct MIRROR} spans an entire face of the computational
-domain, essentially doubling the size of the domain with the {\ct MIRROR} acting as a plane of symmetry. The flow on the opposite side of the
-{\ct MIRROR} is exactly reversed\footnote{Note that the mirror image of a scene is {\em not} shown in Smokeview.}. From a numerical point of view, a {\ct MIRROR} is a no-flux, free-slip boundary. As with {\ct OPEN}, a {\ct MIRROR} can only be prescribed at an exterior boundary of the computational domain. Often, {\ct OPEN} or {\ct MIRROR} {\ct VENT}s are prescribed along an
-entire side of the computational domain, in which case the ``{\ct MB}'' notation is handy.
+A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane. Usually, a {\ct MIRROR} spans an entire face of the computational domain, essentially doubling the size of the domain with the {\ct MIRROR} acting as a plane of symmetry. The flow on the opposite side of the {\ct MIRROR} is exactly reversed\footnote{Note that the mirror image of a scene is {\em not} shown in Smokeview.}. From a numerical point of view, a {\ct MIRROR} is a no-flux, free-slip boundary. As with {\ct OPEN}, a {\ct MIRROR} can only be prescribed at an exterior boundary of the computational domain. Often, {\ct OPEN} or {\ct MIRROR} {\ct VENT}s are prescribed along an entire side of the computational domain, in which case the ``{\ct MB}'' notation is handy.
 
-A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because that is what you would expect if you time-averaged the actual flow field over a sufficient amount of time. Thus, for a RANS model, a symmetry boundary along the plume centerline is appropriate. In an LES model, however, there is no time-averaging built into the equations, and there is no time-averaged, symmetric solution. Putting a {\ct MIRROR} boundary along the centerline of a fire plume will change its dynamics entirely. It will produce something very much like the flow field of a fire that is adjacent to a vertical wall. For this reason, a {\ct MIRROR} boundary condition is not recommended along the centerline of a turbulent fire plume. If the fire or burner is very small, and the flow is laminar, then the {\ct MIRROR} boundary condition makes sense. In fact, in 2-D calculations, {\ct MIRROR} boundary conditions are employed in the third coordinate direction (this is done automatically, you need not specify it explicitly).
+In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because that is what you would expect if you time-averaged the actual flow field over a sufficient amount of time. Thus, for a RANS model, a symmetry boundary along the plume centerline is appropriate. In an LES model, however, there is no time-averaging built into the equations, and there is no time-averaged, symmetric solution. Putting a {\ct MIRROR} boundary along the centerline of a fire plume will change its dynamics entirely. It will produce something very much like the flow field of a fire that is adjacent to a vertical wall. For this reason, a {\ct MIRROR} boundary condition is not recommended along the centerline of a turbulent fire plume. If the fire or burner is very small, and the flow is laminar, then the {\ct MIRROR} boundary condition makes sense. In fact, in 2-D calculations, {\ct MIRROR} boundary conditions are employed in the third coordinate direction (this is done automatically, you need not specify it explicitly).
 
 \subsubsection{Periodic Vents}
 \label{sec:periodic}
@@ -2644,13 +2641,17 @@ applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such 
 Sometimes obstructions, holes and vents are repeated over and over in the input file. This can be tedious to create and make the input file hard to read. However, if a particular set of objects repeats itself in a regular pattern, you can use a utility known as a multiplier. If you want to repeat an obstruction, for example, create a line in the input file as follows:
  \begin{lstlisting}
 &MULT ID='m1', DX=1.2, DY=2.4, I_LOWER=-2, I_UPPER=3, J_LOWER=0, J_UPPER=5 /
-&OBST XB=..., MULT_ID='m1' /
+&OBST XB=x1,x2,y1,y2,z1,z2, MULT_ID='m1' /
 \end{lstlisting}
 This has the effect of making an array of obstructions according to the following formulae:
-\begin{eqnarray*}  x_i = x_0 + \dx_0 + i \, \dx  &;& \hbox{\ct I\_LOWER} \le i \le \hbox{\ct I\_UPPER} \\
-                   y_j = y_0 + \dy_0 + j \, \dy  &;& \hbox{\ct J\_LOWER} \le j \le \hbox{\ct J\_UPPER}
+\begin{eqnarray*}  \hbox{\ct x1'} = \hbox{\ct x1} + \hbox{\ct DX0} + i \; \hbox{\ct DX}  &;& \hbox{\ct I\_LOWER} \le i \le \hbox{\ct I\_UPPER} \\
+                   \hbox{\ct x2'} = \hbox{\ct x2} + \hbox{\ct DX0} + i \; \hbox{\ct DX}  &;& \hbox{\ct I\_LOWER} \le i \le \hbox{\ct I\_UPPER} \\
+                   \hbox{\ct y1'} = \hbox{\ct y1} + \hbox{\ct DY0} + j \; \hbox{\ct DY}  &;& \hbox{\ct J\_LOWER} \le j \le \hbox{\ct J\_UPPER} \\
+                   \hbox{\ct y2'} = \hbox{\ct y2} + \hbox{\ct DY0} + j \; \hbox{\ct DY}  &;& \hbox{\ct J\_LOWER} \le j \le \hbox{\ct J\_UPPER} \\
+                   \hbox{\ct z1'} = \hbox{\ct z1} + \hbox{\ct DZ0} + k \; \hbox{\ct DZ}  &;& \hbox{\ct K\_LOWER} \le k \le \hbox{\ct K\_UPPER} \\
+                   \hbox{\ct z2'} = \hbox{\ct z2} + \hbox{\ct DZ0} + k \; \hbox{\ct DZ}  &;& \hbox{\ct K\_LOWER} \le k \le \hbox{\ct K\_UPPER}
 \end{eqnarray*}
-Note that the same rules apply for the $z$ direction as well. In situations where the position of the obstruction needs shifting prior to the multiplication, use the parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
+In situations where the position of the obstruction needs shifting prior to the multiplication, use the parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
 
 \begin{figure}[t]
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/pyramid}
@@ -2658,10 +2659,10 @@ Note that the same rules apply for the $z$ direction as well. In situations wher
 \label{fig:mult}
 \end{figure}
 
-A generalization of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}. The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example, define the lower $y$ bound of the original obstruction by {\ct XB(3,0)}. The $n$th obstruction would be:
-\begin{lstlisting}
-XB(3,N) = XB(3,0) + N*DXB(3)
-\end{lstlisting}
+A variation of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}. The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example, the $x$ coordinates are transformed as follows:
+\begin{eqnarray*}  \hbox{\ct x1'} = \hbox{\ct x1} + \hbox{\ct DX0} + n \; \hbox{\ct DXB(1)}  &;& \hbox{\ct N\_LOWER} \le n \le \hbox{\ct N\_UPPER} \\
+                   \hbox{\ct x2'} = \hbox{\ct x2} + \hbox{\ct DX0} + n \; \hbox{\ct DXB(2)}  &;& \hbox{\ct N\_LOWER} \le n \le \hbox{\ct N\_UPPER} 
+\end{eqnarray*}
 Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct N}. This more flexible input scheme allows you to create, for example, a slanted roof in which the individual roof segments shorten as they ascend to the top. This feature is demonstrated by the following short input file that creates a hollowed out pyramid using the four perimeter obstructions that form the outline of its base:
 \begin{lstlisting}
 &HEAD CHID='pyramid', TITLE='Simple demo of multiplier function' /
@@ -2862,12 +2863,8 @@ materials are often listed as in the following example:
 \end{lstlisting}
 Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single material component.
 
-When a {\ct SURF} line is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} is at the face of the {\ct OBST}, with the
-other {\ct MATL\_ID}s being applied in succession with the final {\ct MATL\_ID} being applied on the opposite face of the {\ct OBST}.
-If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation
-from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
-calculation from the $-x$ face to the $+x$ face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID}
-and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
+When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is undefined. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
+calculation from the $-x$ face to the $+x$ face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 
 Mixtures of solid materials within the same layer can be defined using
 the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same
@@ -6512,7 +6509,7 @@ creates a line of 10 particles starting at the point (1.2,3.4,5.6) separated by 
 
 In special cases, you might want a single liquid droplet to be inserted at a particular point with a particular velocity every {\ct DT\_INSERT}~s following the activation of a particular device, as follows:
 \begin{lstlisting}
-&INIT N_PARTICLES=1, XYZ=..., UVW=..., DIAMETER=200., DT_INSERT=0.05, 
+&INIT N_PARTICLES=1, XYZ=..., UVW=..., DIAMETER=200., DT_INSERT=0.05,
       PART_ID='drops', DEVC_ID='nozzle' /
 \end{lstlisting}
 Note that the {\ct DIAMETER} ($\mu$m) is only valid for liquid droplets. It over-rides the {\ct DIAMETER} on the {\ct PART} line labelled {\ct 'drops'}.
