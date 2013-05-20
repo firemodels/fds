@@ -1797,22 +1797,7 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 \section{Radiation Attenuation by Particles (\texorpdfstring{{\bf part\_attenuation}}{part\_attenuation}) }
 \label{part_attenuation}
 
-This test case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles (droplets).
-In each case, the radiation is computed inside a one meter cube with one hot and five cold walls.
-The radiative heat flux is monitored on the wall that is opposite to the hot wall. Five different cases are computed:
-\begin{description}
-\item[Reference] case with no particles.
-\item[Transparent] particles with refractive index $\hbox{m} = 1.0+0\,i$.
-\item[Water] droplets.
-\item[Fuel] (heptane) droplets.
-\item[(Relatively) Opaque] particles with refractive index $\hbox{m} = 1.5+0.5 \,i$.
-\end{description}
-In addition, the different methods to specify the refractive index are tested:
-For water and fuel, the FDS internal tables are used. For transparent droplets,
-constant values are used. For opaque droplets, a radiative property table is used.
-In each case, 10~g of non-evaporating, monodisperse, 100~$\mu$m particles with 1,000~kg/m$^3$ density are placed inside the cube.  The resulting heat
-fluxes are plotted in the figure below. The transparent particles do not attenuate the radiation, and the relatively opaque particles
-give the highest attenuation. The heat fluxes through water and fuel droplets fall between the two extremes.
+This case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles. In each case, the radiation is computed inside a one meter cube with one hot and five cold walls. The radiative heat flux is monitored on the wall that is opposite the hot wall. In each case, 10~g of non-evaporating, monodisperse, 100~$\mu$m particles with a density of 1,000~kg/m$^3$ are placed inside the cube. Five different cases are computed. The reference case contains no particles. The four other cases contain transparent particles, water droplets, fuel droplets, and opaque particles. Different methods to specify the refractive index are tested. For water and fuel droplets, the FDS internal tables are used. For transparent particles, the refractive index is $\hbox{m} = 1.0+0\,i$. For opaque particles, the refractive index is $\hbox{m} = 1.5+0.5 \,i$. The resulting heat fluxes are plotted in Fig.~\ref{part_attenuation_figure}. The transparent particles do not attenuate the radiation, and the relatively opaque particles give the highest attenuation. The heat fluxes through water and fuel droplets fall between the two extremes.
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/part_attenuation}
