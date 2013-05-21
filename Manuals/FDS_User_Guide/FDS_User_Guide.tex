@@ -2661,7 +2661,7 @@ In situations where the position of the obstruction needs shifting prior to the 
 
 A variation of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}. The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example, the $x$ coordinates are transformed as follows:
 \begin{eqnarray*}  \hbox{\ct x1'} = \hbox{\ct x1} + \hbox{\ct DX0} + n \; \hbox{\ct DXB(1)}  &;& \hbox{\ct N\_LOWER} \le n \le \hbox{\ct N\_UPPER} \\
-                   \hbox{\ct x2'} = \hbox{\ct x2} + \hbox{\ct DX0} + n \; \hbox{\ct DXB(2)}  &;& \hbox{\ct N\_LOWER} \le n \le \hbox{\ct N\_UPPER} 
+                   \hbox{\ct x2'} = \hbox{\ct x2} + \hbox{\ct DX0} + n \; \hbox{\ct DXB(2)}  &;& \hbox{\ct N\_LOWER} \le n \le \hbox{\ct N\_UPPER}
 \end{eqnarray*}
 Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct N}. This more flexible input scheme allows you to create, for example, a slanted roof in which the individual roof segments shorten as they ascend to the top. This feature is demonstrated by the following short input file that creates a hollowed out pyramid using the four perimeter obstructions that form the outline of its base:
 \begin{lstlisting}
@@ -4652,9 +4652,8 @@ application or domain size. For most simulations, this effect is negligible, but
 turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
 
 
-\chapter{User-Specified Functions, Ramps and Tables}
+\chapter{User-Specified Functions}
 \label{info:RAMP}
-
 
 Many of the parameters specified in the FDS input file are fixed constants. However, there are several parameters that may vary in
 time, temperature, or space. The namelist groups,
@@ -4674,7 +4673,7 @@ and the mass fractions of all species are uniform.  When the
 calculation starts temperatures, velocities, burning rates,
 etc., are ramped-up from their starting values because nothing can
 happen instantaneously. By default, everything is ramped-up to their
-prescribed values in roughly 1~s. However, you can control the rate at which
+prescribed values in approximately 1~s. However, you can control the rate at which
 things turn on, or turn off, by specifying time histories either with
 pre-defined functions or with user-defined functions.  The parameters {\ct
 TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V} indicate that the heat release
@@ -4729,10 +4728,12 @@ where $f(t)$ is the result of evaluating the {\ct RAMP\_T} at time $t$, $T_0$ is
 \end{lstlisting}
 indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^2$.s)} and 0.3~\si{kg/(m$^2$.s)} over time periods of approximately 5~s and 10~s, respectively.
 
+Table~\ref{tau_table} lists the various quantities that can be controlled by {\ct RAMP}s.
+
 
 \begin{table}[ht]
-\label{tau_table}
 \caption[Parameters used to control time-dependence]{Parameters for controlling the time-dependence of given quantities.}
+\label{tau_table}
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|}
 \hline
@@ -4777,7 +4778,7 @@ the {\ct RAMP} function like this:
 Note that for temperature ramps, as opposed to time ramps, the parameter {\ct F} is the actual physical quantity, not just
 a fraction of some other quantity. Thus, if {\ct CONDUCTIVITY\_RAMP} is used, there should be no
 value of {\ct CONDUCTIVITY} given. Note also that for values of temperature, {\ct T}, below and above the
-given range, FDS will assume a constant value equal to the first or last {\ct F} specified.
+given range, FDS will assume a constant value equal to the first or last {\ct F} specified. Note also that the {\ct DENSITY} of a material cannot be controlled with a {\ct RAMP} function.
 
 \section{Arrhenius Parameter Functions}
 \label{info:RAMP_Arrhenius}
@@ -4811,20 +4812,6 @@ Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line 
 
 
 
-\section{Tabular Functions}
-\label{info:TABL}
-
-Some input quantities, such as a sprinkler spray pattern, vary multi-dimensionally. In such cases, use
-the {\ct TABL} namelist group. The format of the {\ct TABL} lines is application-specific, but in general look like this:
-\begin{lstlisting}
-&TABL ID='TABLE1', TABLE_DATA=40,50, 85, 95,10,0.5 /
-&TABL ID='TABLE1', TABLE_DATA=40,50,185,195,10,0.5 /
-\end{lstlisting}
-A detailed description of the various table entries is given in the sections that describe quantities that use such
-tables. Currently, only sprinklers and nozzles use this group of parameters to define a complex spray pattern.
-Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Specific requirements on ordering the lines
-will depend upon the type of TABL and those requirements are provided in the appropriate section in this guide.
-
 
 
 
@@ -4843,7 +4830,7 @@ There are different roles that a gas species might play in a simulation. A gas s
 \section{Specifying Primitive Species}
 \label{info:primitive}
 
-The {\ct SPEC} input is used to define a gas species in FDS. Once defined that species can be tracked as a single species (i.e., a primitive species) and/or the species can be used as part of one or more lumped species, also defined with {\ct SPEC}.  It is possible for a species to be both part of a lumped species and tracked separately. Often an extra gas introduced into a calculation is the same as a product of combustion, like water vapor from a sprinkler or carbon dioxide from an extinguisher. These gases are tracked separately. Thus, water vapor generated by the combustion is tracked via the Products lumped species variable and water vapor generated by evaporating sprinkler droplets is tracked via its own transport equation.
+The {\ct SPEC} input is used to define a gas species in FDS. Once defined the species can be tracked as a single species (i.e., a primitive species) and/or the species can be used as part of one or more lumped species, also defined with {\ct SPEC}.  It is possible for a species to be both part of a lumped species and tracked separately. Often an extra gas introduced into a calculation is the same as a product of combustion, like water vapor from a sprinkler or carbon dioxide from an extinguisher. These gases are tracked separately. Thus, water vapor generated by the combustion is tracked via the Products lumped species variable and water vapor generated by evaporating sprinkler droplets is tracked via its own transport equation.
 
 If a species is only to be used as part of one or more lumped species, {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} must be added to the {\ct SPEC} line.  This tells FDS not to allocate space for the species in the array of tracked gases. If a species is to be used as the background species, the parameter {\ct BACKGROUND=.TRUE.} should be set on the {\ct SPEC} line. This also tells FDS not to allocate space for the species in the array of tracked gases. A species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used as an individual species, and it cannot be used as the background species.  However, a primitive species with {\ct BACKGROUND=.TRUE.} can also be used as part of a lumped species definition.  Note that the default background species is {\ct AIR} which is defined as a lumped species consisting of N$_2$, O$_2$, CO$_2$, and H$_2$O.
 
@@ -4966,7 +4953,7 @@ If the gas species is not included in Table~\ref{tab:gasspecies}, then you must 
 
 \subsubsection{Conductivity}
 
-Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (\si{W/(m.K)}) with optional temperature dependence by using {\ct RAMP\_K}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR} on {\ct MISC}, and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
+Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (\si{W/(m.K)}) with optional temperature dependence specified using {\ct CONDUCTIVITY\_RAMP}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR} on {\ct MISC}, and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
 
 \subsubsection{Diffusivity}
 
@@ -4987,20 +4974,19 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.} on the {\ct MISC} line.  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
 
 \subsubsection{Viscosity}
+
 The dynamic viscosity of the gas species can either be specified with {\ct VISCOSITY} (with {\ct RAMP\_MU} for temperature dependence), or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for air.
 
 \subsubsection{Radiative Properties}
 \label{info:radiative_spec_props}
 
-Species that can absorb and emit thermal radiation are defined via the parameter {\ct RADCAL\_ID} on the {\ct SPEC} line.  Some of the predefined species have this parameter already defined as shown in Table~\ref{tab:gasspecies}.  There are, however, many other species which are absorbing.  For absorbing species not listed in Table~\ref{tab:gasspecies}, {\ct RADCAL\_ID} can be used to identify a RadCal species to serve as a surrogate. For example:
-
+Species that can absorb and emit thermal radiation are defined via the parameter {\ct RADCAL\_ID} on the {\ct SPEC} line.  Some of the predefined species have this parameter already defined as shown in Table~\ref{tab:gasspecies}.  There are, however, many other species which are absorbing.  For absorbing species not listed in Table~\ref{tab:gasspecies}, {\ct RADCAL\_ID} can be used to identify a RadCal~\cite{RadCal} species to serve as a surrogate. For example:
 \begin{lstlisting}
 &SPEC ID='ETHANOL', RADCAL_ID='METHANOL' /
 \end{lstlisting}
-
-\noindent would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}.
-For absorbing species not present in RadCal, it is recommended to choose a RadCal surrogate with similar molecular functional groups and molecular mass. The infrared spectrum is greatly affected by the species molecular functional groups.
- Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Table~\ref{tab:gasspecies} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
+would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}. For absorbing species not present in RadCal, it is recommended to choose a RadCal surrogate with similar molecular functional groups and molecular mass. The infrared spectrum is greatly affected by the species molecular functional groups.
+ 
+Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Table~\ref{tab:gasspecies} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
 
 \subsubsection{Liquids}
 
@@ -5012,6 +4998,7 @@ More detail is included in Chapter~\ref{info:PART}.
 
 
 \subsubsection{Specifying a Chemical Formula}
+\label{info:FORMULA}
 
 If you want FDS to compute the molecular weight of the gas species, you can input a {\ct FORMULA} rather than the molecular weight, {\ct MW}.
 This will also be used as the label for the gas species by Smokeview.  {\ct FORMULA} is a character string consisting of elements followed by their atom count.
@@ -5053,7 +5040,6 @@ that resulted from combustion.  The following inputs would allow you to do that:
 \end{lstlisting}
 The gas species called {\ct 'WATER VAPOR SPK'} has the same properties as {\ct 'WATER VAPOR'}. The first device records only water that results from droplet evaporation, and the second device records water that originates from both sprinklers and combustion.
 
-\clearpage
 
 \section{Specifying Lumped Species (Mixtures of Primitive Species)}
 \label{info:lumped}
@@ -5114,7 +5100,7 @@ FDS to account for the difference in the heats of combustion of the various comb
 reaction as a surrogate for all potential fuels.
 
 Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence
-the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution is not
+the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not
 practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more
 commonly used mixing-controlled model. The {\ct REAC} namelist group contains the parameters for both modes of combustion.
 
@@ -5130,8 +5116,7 @@ For the simple chemistry model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_v} + \nu_{\OTWO} \; \mathrm{O_2} \rightarrow
     \nu_{\COTWO} \; \mathrm{CO_2} + \nu_{\HTWOO} \; \mathrm{H_2O} +
     \nu_{\CO}   \; \mathrm{CO}   + \nu_{\rm S} \; \mathrm{Soot} + \nu_{\NTWO} \; \mathrm{N_2} \ee
-You need only specify the chemical formula of the fuel along with the yields of CO and soot, and the volume fraction of hydrogen in the soot, $X_\Hy$.
-FDS will use that information internally to determine the amount of combustion products that are formed:
+You need only specify the chemical formula of the fuel along with the yields of CO and soot, and the volume fraction of hydrogen in the soot, $X_\Hy$. FDS will use that information and calculate the stoichiometric coefficients automatically as follows:
 \begin{eqnarray*}
 \nu_{\OTWO}    &=& \nu_{\COTWO} + \frac{\nu_{\CO}}{2} + \frac{\nu_{\HTWOO}}{2} - \frac{\hbox{z}}{2}   \\
 \nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - (1-X_\Hy) \, \nu_{\rm S} \\
@@ -5163,7 +5148,7 @@ simple chemistry model is applied. (Default 0.)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_{\rm s}$.
 Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
 \item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.
-For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided.
+For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided (Section~\ref{info:FORMULA}).
 Note that this parameter is only appropriate when the simple chemistry model is applied.
 (Default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
 \item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
@@ -5203,18 +5188,21 @@ In this case, the {\ct FORMULA} and heat of combustion are known, but the produc
 The energy release per unit volume (kJ/m$^3$) from a gas phase chemical reaction (or system of reactions) is found by taking the sum of the net change in mass for each species in a given time step multiplied by the respective species' enthalpy of formation (kJ/kg). In this formulation, the enthalpy of formation for all participating species needs to be specified. If a reaction (simple chemistry or user-defined) contains only species defined in Table~\ref{tab:gasspecies}, then all of the enthalpies of formation are known. These values can be found in the FDS source code in data.f90. For reactions with species that are not included in Table~\ref{tab:gasspecies}, there are several options to ensure that all of the enthalpies of formation are specified.
 
 \subsubsection{Option 1: Specify Enthalpy of Formation}
+
 You can specify unknown enthalpies on the {\ct SPEC} line in units of kJ/mol:
 \begin{lstlisting}
 &SPEC ID = 'GLUCOSE', FORMULA = 'C62H12O6', ENTHALPY_OF_FORMATION=-1.297E3 /
 \end{lstlisting}
 
 \subsubsection{Option 2: Specify Heat of Combustion}
+
 For a given reaction, if the only species missing an enthalpy of formation is the fuel, the missing value can be found if the heat of combustion is specified on {\ct REAC}. Section~\ref{info:Complex_Fuel} provides an example for which the fuel, polyvinyl chloride, has an unspecified enthalpy of formation but a specified heat of combustion on the {\ct REAC} line.
 
 \subsubsection{Option 3: Use of EPUMO2 (Simple Chemistry)}
+
 If the enthalpy of formation of the fuel and heat of combustion are not specified, for simple chemistry cases only, the heat of combustion is assumed to be
 \begin{equation}
-\Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { \nu_{\rm F} W_{\rm F} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}
+\Delta h \approx \frac{\nu_{\OTWO} \, W_{\OTWO} } { \nu_{\rm F} \, W_{\rm F} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}
 \label{EPUMO2}
 \end{equation}
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
@@ -5367,7 +5355,6 @@ The reaction stoichiometry is specified using the stoichiometric coefficients, {
 \label{info:Complex_Fuel}
 
 For complex fuel molecules that contain only C, H, N, and O the simple chemistry reaction parameters can still be applied. Consider natural gas, which is often a mixture of several component gases. To build the fuel mixture, the primitive (component) species need be defined. Each primitive species will get a {\ct LUMPED\_COMPONENT\_ONLY} designation, which means that each of these species will not be explicitly tracked as they are components to a mixture.  Note that these lumped components can only contain C, H, N, and O atoms. The lumped fuel, {\ct 'natural gas'}, can be created using the defined primitive components and subsequently the reaction can be defined using simple chemistry (Section \ref{info:simple_chemistry}):
-
 \begin{lstlisting}
 &SPEC ID='METHANE',       LUMPED_COMPONENT_ONLY=.TRUE./
 &SPEC ID='ETHYLENE',      LUMPED_COMPONENT_ONLY=.TRUE./
@@ -5383,9 +5370,8 @@ For complex fuel molecules that contain only C, H, N, and O the simple chemistry
 &REAC FUEL='natural gas'
       SOOT_YIELD=0.01 /
 \end{lstlisting}
-
 Fires, however, often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
-of its propensity to form the acid gas HCl, you may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. Assuming that all of the Cl in the fuel is converted into HCl, you can derive a single-step reaction mechanism using appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook~\cite{SFPE:Tewarson} is used to find soot and CO yields for PVC; 0.172 and 0.063, respectively. For a given species, $\alpha$, its stoichiometric coefficient, $\nu_\alpha$, can be found from its yield, $y_\alpha$, according to the formula:
+of its propensity to form the acid gas HCl, you may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. Assuming that all of the Cl in the fuel is converted into HCl, you can derive a single-step reaction mechanism using appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook~\cite{SFPE:Tewarson} is used to find soot and CO yields for PVC; 0.172 and 0.063, respectively. For a given species, $\alpha$, its stoichiometric coefficient, $\nu_\alpha$, can be found from its yield, $y_\alpha$, and its molecular weight, $W_\alpha$, according to the formula:
 \begin{equation}\label{eq:stoic_yield}
 \nu_\alpha = \frac{W_{\rm F}}{W_\alpha} \; y_\alpha
 \end{equation}
@@ -5559,7 +5545,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 
 
 
-\clearpage
+
 
 \section{Finite Rate Combustion}
 \label{info:finite}
@@ -5659,7 +5645,7 @@ As before, we use primitive species rather than mixtures. A {\ct REAC} line is n
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species at a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
 
-\newpage
+
 
 \section{Special Topic: Aerosol Deposition}
 \label{info:deposition}
@@ -5674,8 +5660,7 @@ The {\ct propane\_flame\_deposition} example shows how to define a reaction that
 1 \; \underbrace{\mathrm{(18.1182 \; N_2 \, + \, 2.8164 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
 \,0.1836 \; \underbrace{\mathrm{C}}_\text{Soot}
 \end{multline}
-This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line.
-
+Note that the stoichiometric coefficient for Soot ensures that the mass of soot produced is 0.05 times the mass of fuel consumed. This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line.
 \begin{lstlisting}
 &SPEC ID = 'PROPANE' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
@@ -5684,8 +5669,6 @@ This example uses the lumped species formulation to minimize the number of scala
 &SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'SOOT',              AEROSOL = .TRUE. /
 \end{lstlisting}
-
-\noindent
 If Eq.~(\ref{eq:PROPANE_depo}) is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species:
 
 \begin{lstlisting}
@@ -5755,7 +5738,7 @@ temperature are relatively small.
 The most important radiation parameter is the fraction of energy released from the
 fire as thermal radiation, commonly referred to as the {\em radiative fraction}. It is a function of both the flame temperature
 and chemical composition, neither of which are reliably calculated in a large
-scale fire calculation because the flame sheet is not well-resolved.
+scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid.
 In calculations in which the mesh cells are on the order of a centimeter or
 larger, the temperature near the flame surface cannot be relied upon when
 computing the source term in the radiation transport equation, especially
@@ -5883,19 +5866,14 @@ a {\ct PART} line, then the name of that particle type is invoked
 elsewhere in the input file via the parameter {\ct PART\_ID}. There are no reserved {\ct PART\_ID}s -- all must be defined.
 For example, an input file may have several {\ct PART} lines that include the
 properties of different types of Lagrangian particles:
-
 \begin{lstlisting}
 &PART ID='my smoke',... /
 &PART ID='my water',... /
 \end{lstlisting}
-
-\noindent
 Particles are introduced into the calculation in several different ways: they may be introduced via a sprinkler or nozzle (liquid droplets are usually introduced this way), they may be introduced at a blowing vent or burning surface (mass tracer particles or particles representing embers are usually introduced this way), and they may be introduced randomly or at fixed points within a designated volume (solid particles that represent subgrid-scale objects are usually introduced this way). Details are found below.
 
 The way to describe particles depends on the type.
 If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct PART} line. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets. For any other type of particle, such as particles that represent subgrid-scale objects, like office clutter or vegetation, you add a {\ct SURF\_ID} to the {\ct PART} line. All of these different types of particles are described below.
-
-
 
 
 \section{Massless Particles}
@@ -5904,21 +5882,12 @@ If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct P
 The simplest use of Lagrangian particles is for visualization, in which case the
 particles are considered massless tracers. In this case, the particles are
 defined via the line
-
 \begin{lstlisting}
 &PART ID='tracers', MASSLESS=.TRUE., ... /
 \end{lstlisting}
-
-\noindent
-Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
-Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example,
-{\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
-rather than the local gas temperature.
-
-Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
+Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property. Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example, {\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself rather than the local gas temperature. Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} (Section~\ref{info:particle_quantities}) is set to 1 unless you say otherwise, which would be pointless
 since {\ct MASSLESS} particles are for visualization only.
 
-\clearpage
 
 \section{Liquid Droplets}
 
@@ -6398,7 +6367,6 @@ The {\ct STATIC=.TRUE.} prevents the cable from moving. The {\ct INIT} line is u
 The {\ct DEVC} line records the cables inner temperature, in this case 1.52~mm below the surface. This is typically the jacket thickness.
 
 
-\clearpage
 
 \section{Particle Insertion}
 \label{info:controlling_droplets}
@@ -6414,18 +6382,13 @@ to be introduced initially and/or periodically in time.
 \subsection{Particles Introduced at a Solid Surface}
 \label{info:particle_flux}
 
-If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line.
-The number of particles inserted at each solid cell every
-{\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
-value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
-
+If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line. The number of particles inserted at each solid cell every
+{\ct DT\_INSERT} seconds is specified by {\ct NPPC} (Number of Particles Per Cell) on the {\ct SURF} line defining the solid surface. The default value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
 \begin{lstlisting}
 &PART ID='particles', ... /
 &SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{lstlisting}
-
-\noindent
 creates an obstruction that ejects particles out of its sides at a rate
 of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface).
 FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The
@@ -6525,7 +6488,7 @@ indicate how much mass is to be introduced per second.
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device.
 See Section~\ref{info:basic_control} for more information on controlling devices.
 
-\clearpage
+
 
 \section{Special Topic: Suppression by Water}
 \label{info:suppression}
@@ -6731,28 +6694,17 @@ The best way to describe the {\ct PROP} group is to list the various special dev
 \subsection{Sprinklers}
 \label{info:sprinklers}
 
-Here is a very simple example of sprinkler:
-
+Here is a very simple example of a sprinkler:
 \begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
       ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
       PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
-
 &DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
-&DEVC ID='Spr_61', XYZ=22.88,21.76,7.46, PROP_ID='K-11' /
 \end{lstlisting}
-
-\noindent
-A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties
-are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with
-another, so try to use {\ct ID}s that are meaningful.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does}
-have a specific meaning to FDS, directing it to compute the activation of
-the device using the standard RTI algorithm. The various sprinkler properties will be discussed below.
-
-Properties associated with sprinklers included in the {\ct PROP} group are:
+A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with another, so try to use {\ct ID}s that are meaningful.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} have a specific meaning to FDS, directing it to compute the activation of the device using the standard RTI (Response Time Index~\cite{Heskestad:3}) algorithm. Properties associated with sprinklers included in the {\ct PROP} group are:
 \begin{description}
 \item[{\ct RTI}] Response Time Index in units of $\si{m^\ha.s^\ha}$. (Default 100. $\si{m^\ha.s^\ha}$)
-\item[{\ct C\_FACTOR}] in units of $\si{m^\ha/s^\ha}$. (Default 0. $\si{m^\ha/s^\ha}$)
+\item[{\ct C\_FACTOR}] Conduction Factor in units of $\si{m^\ha/s^\ha}$. (Default 0. $\si{m^\ha/s^\ha}$)
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
 \item[{\ct FLOW\_RATE} or {\ct MASS\_FLOW\_RATE}] in units of L/min or kg/s.
@@ -6801,34 +6753,27 @@ Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
 \label{info:spraypattern}
-As an example of the more advanced sprinkler options, a sprikler with elliptical spray pattern and uniform massflux distribution within the spray angle is given by:
+\label{info:TABL}
+
+As an example of the more advanced sprinkler options, a sprinkler with an elliptical spray pattern and uniform mass flux distribution within the spray angle is given by:
 \begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
       ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE(1:2,1)=0.,60.,SPRAY_ANGLE(1:2,2) = 0.,30. ,SPRAY_PATTERN_SHAPE='UNIFORM' /
-
+      PARTICLE_VELOCITY=10., SPRAY_ANGLE(1:2,1)=0.,60.,SPRAY_ANGLE(1:2,2) = 0.,30.,
+      SPRAY_PATTERN_SHAPE='UNIFORM' /
 &DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
-&DEVC ID='Spr_61', XYZ=22.88,21.76,7.46, PROP_ID='K-11' /
 \end{lstlisting}
-
-For full-cone sprays, the {\ct SPRAY\_PATTERN\_MU} parameter is set to zero by default. For hollow-cone sprays it is set to the average of {\ct SPRAY\_ANGLE(1:2,1)}, the spray angle in x direction. The following example uses  {\ct SPRAY\_PATTERN\_MU} to define a spray that is somewhere between full-cone and hollow-cone spray:
+For full-cone sprays, the parameter {\ct SPRAY\_PATTERN\_MU} is set to zero by default. For hollow-cone sprays it is set to the average of {\ct SPRAY\_ANGLE(1:2,1)}, the spray angle in $x$ direction. The following example uses  {\ct SPRAY\_PATTERN\_MU} to define a spray that is somewhere between full-cone and hollow-cone spray:
 \begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
       ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
       PARTICLE_VELOCITY=10., SPRAY_ANGLE=0.,30. ,SPRAY_PATTERN_MU=15./
-
 &DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
-&DEVC ID='Spr_61', XYZ=22.88,21.76,7.46, PROP_ID='K-11' /
 \end{lstlisting}
-If a more complex spray pattern is desired than one characterized by a {\ct SPRAY\_ANGLE}, then a \linebreak[4]{\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL})
-namelist group.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE} on the {\ct PROP} line, the name of the spray pattern using
-{\ct SPRAY\_PATTERN\_TABLE} and then one or more {\ct TABL} lines of the format:
-
+If a more complex spray pattern is desired than one characterized by a {\ct SPRAY\_ANGLE}, then a \linebreak[4]{\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} namelist group. Specify the total flow using {\ct FLOW\_RATE} on the {\ct PROP} line, the name of the spray pattern using {\ct SPRAY\_PATTERN\_TABLE} and then one or more {\ct TABL} lines of the form:
 \begin{lstlisting}
 &TABL ID='table_id', TABLE_DATA=LAT1,LAT2,LON1,LON2,VELO,FRAC /
 \end{lstlisting}
-
-\noindent
 where each {\ct TABL} line for a given {\ct 'table\_id'} provides information about the spherical distribution of the spray pattern
 for a specified solid angle. {\ct LAT1} and {\ct LAT2} are the bounds of the solid angle measured in degrees from
 the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  Note that this is not the conventional way of
@@ -6842,18 +6787,14 @@ point of insertion.
 In the test case called {\ct bucket\_test\_2}, the spray pattern is defined as two jets, each with a velocity of 5~m/s and a total flow rate
 of 60~L/min. The first jet contains 0.2 of the total flow, the second, 0.8 of the total.
 The jets are centered at points 30$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
-
 \begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10,
       PART_ID='water_drops', FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1',
       SMOKEVIEW_ID='sprinkler_upright', PARTICLE_VELOCITY=10. /
-
 &TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
 &TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,0.8/
 \end{lstlisting}
-
-\noindent Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note that
-the {\ct TABL} lines can be specified in any order.
+Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note that the {\ct TABL} lines can be specified in any order.
 
 
 
@@ -6892,26 +6833,20 @@ $d_m(p) = d_m(p_o)(p_o/p)^{1/3}$, where $p_o$ is the {\ct OPERATING\_PRESSURE}
 and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} on the corresponding {\ct PART} line.
 
 For some simulations there may be groups of independent sprinklers or nozzles.  For example one might have one set of nozzles for a fuel spray and a second set for water spray.  In this case the flow of water would not be impacted by how many fuel spray nozzles are open.  To have the {\ct PRESSURE\_RAMP} only count a subset of sprinklers or nozzles, the keyword {\ct PIPE\_INDEX} can be used on the {\ct DEVC} line. For example:
-
 \begin{lstlisting}
 &DEVC ID='Spr_1',  XYZ=2.00,2.00,8.00, PROP_ID='My nozzle',  PIPE_INDEX=1 /
 &DEVC ID='Spr_2',  XYZ=1.00,1.00,8.00, PROP_ID='My nozzle',  PIPE_INDEX=1 /
 &DEVC ID='Fuel_1', XYZ=2.00,2.00,1.00, PROP_ID='Fuel Spray', PIPE_INDEX=2 /
 &DEVC ID='Fuel_2', XYZ=1.00,1.00,1.00, PROP_ID='Fuel Spray', PIPE_INDEX=2 /
 \end{lstlisting}
-
-\noindent These lines indicate that the fuel spray nozzles are a separate pipe network from the water sprinklers.  With these
+These lines indicate that the fuel spray nozzles are a separate pipe network from the water sprinklers.  With these
 inputs, a {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.  See the example case
 {\ct flow\_rate\_2} in the Verification Guide for further details on the use of {\ct PIPE\_INDEX}.
 
 \subsection{Nozzles}
 \label{info:nozzles}
 
-Nozzles are very much like sprinklers, only they do not activate based on the standard RTI model.
-To simulate a nozzle that activates at a given time,
-specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line.
-The following lines:
-
+Nozzles are very much like sprinklers, only they do not activate based on the standard RTI (Response Time Index) model. To simulate a nozzle that activates at a given time, specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line. The following lines:
 \begin{lstlisting}
 &DEVC XYZ=23.91,21.28,0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME',
       SETPOINT=0., ID='noz_1' /
@@ -6920,8 +6855,6 @@ The following lines:
 &PROP ID='nozzle', PART_ID='heptane drops', FLOW_RATE=2.132,
       FLOW_TAU=-50., PARTICLE_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
 \end{lstlisting}
-
-\noindent
 designate two nozzles of the same type, one which activates at time zero, the other at 5~s. Note that nozzles must have a designated
 {\ct PROP\_ID}, and the {\ct PROP} line must have a designated {\ct PART\_ID} to describe the liquid droplets.
 
@@ -6981,17 +6914,11 @@ In this example, a velocity patch is activated at 10 s in the simulation.  Any $
 \label{info:heat_detectors}
 
 {\ct QUANTITY='LINK TEMPERATURE'} defines a heat detector, which uses essentially the same activation algorithm as a sprinkler, without the water spray.
-
 \begin{lstlisting}
 &DEVC ID='HD_66', PROP_ID='Acme Heat', XYZ=2.3,4.6,3.4 /
 &PROP ID='Acme Heat', QUANTITY='LINK TEMPERATURE', RTI=132., ACTIVATION_TEMPERATURE=74. /
 \end{lstlisting}
-
-\noindent
-Like a sprinkler, {\ct RTI} is the Response Time Index in units of
-$\sqrt{\hbox{m}\cdot \hbox{s}}$.
-{\ct ACTIVATION\_TEMPERATURE} is the link activation temperature in degrees C (Default 74~$^\circ$C).
-{\ct INITIAL\_TEMPERATURE} is the initial temperature of the link in units of $^\circ$C (Default {\ct TMPA}).
+Like a sprinkler, {\ct RTI} is the Response Time Index in units of $\sqrt{\hbox{m}\cdot \hbox{s}}$. {\ct ACTIVATION\_TEMPERATURE} is the link activation temperature in degrees C (Default 74~$^\circ$C). {\ct INITIAL\_TEMPERATURE} is the initial temperature of the link in units of $^\circ$C (Default {\ct TMPA}).
 
 
 
@@ -6999,26 +6926,21 @@ $\sqrt{\hbox{m}\cdot \hbox{s}}$.
 \label{info:smoke_detector}
 
 A smoke detector is defined in the input file with an entry similar to:
-
 \begin{lstlisting}
 &DEVC ID='SD_29', PROP_ID='Acme Smoke Detector', XYZ=2.3,4.6,3.4 /
 &PROP ID='Acme Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8,
       ACTIVATION_OBSCURATION=3.24 /
 \end{lstlisting}
-
-\noindent
-for the single parameter Heskestad model. Note that a {\ct PROP} line is mandatory for a smoke detector, in which case the
-{\ct DEVC QUANTITY} can be specified on the {\ct PROP} line. For the four parameter Cleary model, use a {\ct PROP} line like:
-
+for the single parameter Heskestad model. Note that a {\ct PROP} line is mandatory for a smoke detector, in which case the {\ct DEVC QUANTITY} can be specified on the {\ct PROP} line. For the four parameter Cleary model, use a {\ct PROP} line like:
 \begin{lstlisting}
 &PROP ID='Acme Smoke Detector I2', QUANTITY='CHAMBER OBSCURATION',
       ALPHA_E=1.8, BETA_E=-1.1, ALPHA_C=1.0, BETA_C=-0.8,
       ACTIVATION_OBSCURATION=3.24 /
 \end{lstlisting}
-
-\noindent
 where the two characteristic filling or ``lag'' times are of the form:
-\be \delta t_e = \alpha_e u^{\beta_e} \quad ; \quad \delta t_c = \alpha_c u^{\beta_c} \ee
+\be 
+   \delta t_e = \alpha_e u^{\beta_e} \quad ; \quad \delta t_c = \alpha_c u^{\beta_c} 
+\ee
 The default detector parameters are for the Heskestad model with a characteristic {\ct LENGTH} of
 1.8~m. For the Cleary model, the {\ct ALPHA}s and {\ct BETA}s must all be listed explicitly.
 Suggested constants for unidentified ionization and photoelectric detectors
@@ -7027,7 +6949,7 @@ presented in Table~\ref{tab:sdvalues}.
 The threshold can be set according to the setting commonly provided by the manufacturer.
 The default setting\footnote{Note that the conversion of obscuration from units of \%/ft to \%/m is given by:
 \be
-O[\text{\%/m}] = \left[ 1 - \left( 1 - \frac{O[\text{\%/ft}]}{100} \right)^{3.28} \right] \times 100
+   O[\text{\%/m}] = \left[ 1 - \left( 1 - \frac{O[\text{\%/ft}]}{100} \right)^{3.28} \right] \times 100
 \ee
 } is 3.24~\%/m (1~\%/ft).
 
@@ -7187,7 +7109,7 @@ in Fig.~\ref{aspiration_detector}.
 
 
 
-\clearpage
+
 
 \section{Basic Control Logic}
 \label{info:basic_control}
@@ -7234,30 +7156,16 @@ where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ i
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
 
-In many fire scenarios, the opening or closing of a door or window
-can lead to dramatic changes in the course of the fire. Sometimes these
-actions are taken intentionally, sometimes as a result of the fire.
-Within the framework of an FDS calculation, these actions are
-represented by the creation or removal of solid obstacles, or the
-opening or closing of exterior vents.
+In many fire scenarios, the opening or closing of a door or window can lead to dramatic changes in the course of the fire. Sometimes these actions are taken intentionally, sometimes as a result of the fire. Within the framework of an FDS calculation, these actions are represented by the creation or removal of solid obstacles, or the opening or closing of exterior vents.
 
-Remove or create a solid obstruction by assigning the character string {\ct DEVC\_ID} to indicate the name of
-a {\ct DEVC} {\ct ID} on the {\ct OBST} line that is to be created or removed.  This will direct
-FDS to remove or create the obstruction when
-the device changes state to {\ct .FALSE.} or {\ct .TRUE.}, respectively. For example, the lines
-
+Remove or create a solid obstruction by assigning the character string {\ct DEVC\_ID} to indicate the name of a {\ct DEVC} {\ct ID} on the {\ct OBST} line that is to be created or removed.  This will direct FDS to remove or create the obstruction when the device changes state to {\ct .FALSE.} or {\ct .TRUE.}, respectively. For example, the lines
 \begin{lstlisting}
 &OBST XB=..., DEVC_ID='det2' /
 &DEVC XYZ=..., ID='det2', INITIAL_STATE=.TRUE. /
 \end{lstlisting}
-
-\noindent
 will cause the given obstruction to be removed when the specified {\ct DEVC} changes state.
 
-Creation or removal at a predetermined time can be performed using a {\ct DEVC} that has {\ct TIME} as
-its measured quantity. For example, the following instructions will cause the specified {\ct HOLE}s and {\ct OBST}structions to
-appear/disappear at the various designated times. These lines are part of the simple test case called {\ct create\_remove.fds}.
-
+Creation or removal at a predetermined time can be performed using a {\ct DEVC} that has {\ct TIME} as its measured quantity. For example, the following instructions will cause the specified {\ct HOLE}s and {\ct OBST}structions to appear/disappear at the various designated times. These lines are part of the simple test case called {\ct create\_remove.fds}.
 \begin{lstlisting}
 &OBST XB=0.3,0.4,0.1,0.9,0.1,0.9, COLOR='PURPLE' /
 &HOLE XB=0.2,0.4,0.2,0.3,0.2,0.3, COLOR='RED',     DEVC_ID='timer1' /
@@ -7268,18 +7176,15 @@ appear/disappear at the various designated times. These lines are part of the si
 &HOLE XB=0.7,0.8,0.7,0.8,0.0,0.1, COLOR='BLACK',   DEVC_ID='timer6' /
 &HOLE XB=0.7,0.8,0.2,0.3,0.0,0.1, COLOR='GRAY 50', DEVC_ID='timer7'/
 
-&DEVC XYZ=0.1,0.1,0.1, ID='timer1', SETPOINT=1., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
-&DEVC XYZ=0.2,0.1,0.1, ID='timer2', SETPOINT=2., QUANTITY='TIME', INITIAL_STATE=.TRUE.  /
-&DEVC XYZ=0.1,0.1,0.1, ID='timer3', SETPOINT=3., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
-&DEVC XYZ=0.2,0.1,0.1, ID='timer4', SETPOINT=4., QUANTITY='TIME', INITIAL_STATE=.TRUE.  /
-&DEVC XYZ=0.2,0.1,0.1, ID='timer5', SETPOINT=5., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
-&DEVC XYZ=0.2,0.1,0.1, ID='timer6', SETPOINT=6., QUANTITY='TIME', INITIAL_STATE=.TRUE.  /
-&DEVC XYZ=0.2,0.1,0.1, ID='timer7', SETPOINT=6., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
-
+&DEVC XYZ=..., ID='timer1', SETPOINT=1., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
+&DEVC XYZ=..., ID='timer2', SETPOINT=2., QUANTITY='TIME', INITIAL_STATE=.TRUE.  /
+&DEVC XYZ=..., ID='timer3', SETPOINT=3., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
+&DEVC XYZ=..., ID='timer4', SETPOINT=4., QUANTITY='TIME', INITIAL_STATE=.TRUE.  /
+&DEVC XYZ=..., ID='timer5', SETPOINT=5., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
+&DEVC XYZ=..., ID='timer6', SETPOINT=6., QUANTITY='TIME', INITIAL_STATE=.TRUE.  /
+&DEVC XYZ=..., ID='timer7', SETPOINT=6., QUANTITY='TIME', INITIAL_STATE=.FALSE. /
 \end{lstlisting}
-
-\noindent
-At the start, the purple obstruction is present with a red block in it (this is a {\ct HOLE} initial state is false, i.e., the hole is filled) and a hole present in it.  Also at the start the pink obstruction is visible.  At 1~s the red block disappears.  At 2~s the initially present hole in the purple obstruction is filled with a green block.  This {\ct HOLE} was initially true meaning the hole was there at the start.  The blue obstruction appears at 3~s because its initial state is false, meaning that it does not exist initially. The pink obstruction disappears at 4~s because it does exist initially. At 5~s a yellow obstruction appears with one hole in it and one black block in it.  At 6~s the black block disappears as it was a hole that was initially false and therefore was created as a block when its parent obstruction (yellow) was created.  Also at 6~s the hole originally present in the yellow obstruction is filled with a gray block as it was a hole that was initially true and therefore is filled when its {\ct DEVC} changes state.  {\em You should always try a simple example first before embarking on a complicated creation/removal scheme for obstructions and holes.}
+At the start, the purple obstruction is present with a red block in it (this is a {\ct HOLE} whose initial state is {\ct .FALSE.}, i.e., the hole is filled) and a hole present in it.  Also at the start the pink obstruction is visible.  At 1~s the red block disappears.  At 2~s the initially present hole in the purple obstruction is filled with a green block.  This {\ct HOLE} was initially true meaning the hole was there at the start.  The blue obstruction appears at 3~s because its initial state is false, meaning that it does not exist initially. The pink obstruction disappears at 4~s because it does exist initially. At 5~s a yellow obstruction appears with one hole in it and one black block in it.  At 6~s the black block disappears as it was a hole that was initially false and therefore was created as a block when its parent obstruction (yellow) was created.  Also at 6~s the hole originally present in the yellow obstruction is filled with a gray block as it was a hole that was initially true and therefore is filled when its {\ct DEVC} changes state.  {\em You should always try a simple example first before embarking on a complicated creation/removal scheme for obstructions and holes.}
 
 To learn how to create and remove obstructions multiple times, see Section~\ref{info:CUSTOM} for information about the custom control feature.
 
@@ -7290,14 +7195,11 @@ To learn how to create and remove obstructions multiple times, see Section~\ref{
 
 When a device or control function is applied to a {\ct VENT}, the purpose is to either activate or deactivate any time ramp associated with
 the {\ct VENT} via its {\ct DEVC\_ID}. For example, to control a fan, do the following:
-
 \begin{lstlisting}
 &SURF ID='FAN', VOLUME_FLUX=5. /
 &VENT XB=..., SURF_ID='FAN', DEVC_ID='det2' /
 &DEVC ID='det2', XYZ=..., QUANTITY='TIME', SETPOINT=30., INITIAL_STATE=.FALSE. /
 \end{lstlisting}
-
-\noindent
 Note that at 30~s, the ``state'' of the {\ct 'FAN'} changes from {\ct .FALSE.} to {\ct .TRUE.}, or more simply, the {\ct 'FAN'} turns on. Since there
 is no explicit time function associated with the {\ct 'FAN'}, the default 1~s ramp-up will begin at 30~s instead of at 0~s. If {\ct INITIAL\_STATE=.TRUE.}, then the fan should turn off at 30~s. Essentially, ``activation'' of a {\ct VENT} causes all associated
 time functions to be delayed until the device {\ct SETPOINT} is reached. ``Deactivation'' of a {\ct VENT} turns off all time functions. Usually this means
@@ -7312,7 +7214,7 @@ window.
 
 
 
-\newpage
+
 
 \section{Advanced Control Functions: The \texorpdfstring{{\tt CTRL}}{CTRL} Namelist Group}
 \label{info:CTRL}
@@ -7711,7 +7613,7 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 \subsection{Freezing the Output Value, Example Case: hrr\_freeze}
 \label{info:freeze_device}
 
-There are occasions where you may want the value of a {\ct RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the {\ct RAMP} to a {\ct DEVC}, see the previous section, and then giving that {\ct DEVC} either a {\ct NO\_UPDATE\_DEVC\_ID} or a {\ct NO\_UPDATE\_CTRL\_ID}.  When the specified controller changes its state to {\ct .TRUE.} it will cause the {\ct DEVC} to stop updating its value.  Since the {\ct DEVC} is being used as the independent variable to a {\ct RAMP}, the {\ct RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear {\ct RAMP} from 0 to 1000~kW/m$^2$ over 50~s. Rather than using the simulation time, the {\ct RAMP} uses a {\ct DEVC} for the time.  The timer is set to freeze when another {\ct DEVC} measuring time reaches 200~$^\circ$C.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case {\ct hrr\_freeze} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~$^\circ$C.
+There are occasions where you may want the value of a {\ct RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the {\ct RAMP} to a {\ct DEVC} (see the previous section) and then giving that {\ct DEVC} either a {\ct NO\_UPDATE\_DEVC\_ID} or a {\ct NO\_UPDATE\_CTRL\_ID}.  When the specified controller changes its state to {\ct .TRUE.} it will cause the {\ct DEVC} to stop updating its value.  Since the {\ct DEVC} is being used as the independent variable to a {\ct RAMP}, the {\ct RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear {\ct RAMP} from 0 to 1000~kW/m$^2$ over 50~s. Rather than using the simulation time, the {\ct RAMP} uses a {\ct DEVC} for the time.  The timer is set to freeze when another {\ct DEVC} measuring time reaches 200~$^\circ$C.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case {\ct hrr\_freeze} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~$^\circ$C.
 \begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=1000., RAMP_Q='FRAMP', COLOR='ORANGE'/
 &RAMP ID='FRAMP', T= 0, F=0, DEVC_ID='FREEZE TIME'/
@@ -7916,7 +7818,7 @@ Here again you must add a {\ct QUANTITY2} to the device line.
 
 
 
-\clearpage
+
 
 \section{Quantities within Solids}
 
@@ -8060,25 +7962,13 @@ Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For ex
 \section{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
 \label{info:ISOF}
 
-The {\ct ISOF} (``ISOsurface File'') namelist group is used to specify the output of
-gas phase scalar quantities, as three dimensional animated contours.
-For example, a 300~$^\circ$C temperature isosurface shows where the gas temperature is
-300~$^\circ$C.
-Three different values of the temperature can be saved via the line:
-
+The {\ct ISOF} (``ISOsurface File'') namelist group creates three-dimensional animated contours of gas phase scalar quantities. For example, a 300~$^\circ$C temperature isosurface is a 3-D surface on which the gas temperature is 300~$^\circ$C. Three different values of the temperature can be saved via the line:
 \begin{lstlisting}
 &ISOF QUANTITY='TEMPERATURE', VALUE(1)=50., VALUE(2)=200., VALUE(3)=500. /
 \end{lstlisting}
+where the values are in $^\circ$C. Note that the isosurface output files {\ct CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line).
 
-\noindent
-where the values are in $^\circ$C. Note that the isosurface output
-files {\ct CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line).
-
-
-Any gas phase quantity can animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be
-computed in every mesh cell at every output time step. For quantities like {\ct TEMPERATURE}, this is not a problem, as FDS computes it and saves it
-anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell.
-Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
+Any gas phase quantity can be animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be computed in every mesh cell at every output time step. For quantities like {\ct 'TEMPERATURE'}, this is not a problem, as FDS computes it and saves it anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell. Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
 
 
 
@@ -8144,7 +8034,7 @@ The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for vi
 
 
 
-\clearpage
+
 
 \section{Special Output Quantities}
 
@@ -8223,7 +8113,7 @@ suggested for flaming combustion of wood and plastics\footnote{For most flaming 
 constant $C$ in Eq.~(\ref{vis}). It is 3 by default.
 
 The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar quantity is the
-{\ct 'OPTICAL DENSITY'}, $K/2.3$, the result of using $\log_{10}$ in the definition
+{\ct 'OPTICAL DENSITY'}, $D=K/2.3$, the result of using $\log_{10}$ in the definition
 \be D \equiv - \frac{1}{L} \, \log_{10} \left( \frac{I}{I_0} \right) = K \, \log_{10} {\rm e}   \ee
 The visibility $S$ is output via the {\ct QUANTITY} called {\ct 'VISIBILITY'}. Note
 that, by default, the visibility is associated with the smoke that is implicitly defined by the simple chemistry
@@ -8451,9 +8341,9 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 ${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} normalized histogram bin counts  are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
+It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.}, normalized histogram bin counts are output to a csv file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
 
-The output file contains two-columns for each device giving an histogram output. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram is thought consist of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_M} parameter on the {\ct PROP} line  to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation.
+The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram consists of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_M} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation.
 
 The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
@@ -8474,7 +8364,6 @@ The following example is used to measure the Sauter mean diameter, $D_{32}$, of 
       PDPA_N=2
       PDPA_RADIUS=0.01
       PDPA_START=5. /
-
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d32' /
 \end{lstlisting}
 The following example is used to write out a histogram of droplet size using 20 equally sized bins between 0 and 2000 $\mu$m.
@@ -8488,7 +8377,6 @@ The following example is used to write out a histogram of droplet size using 20 
       PDPA_HISTOGRAM=.TRUE.
       PDPA_HISTOGRAM_NBINS=20
       PDPA_HISTOGRAM_LIMITS=0,2000E-6 /
-
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d' /
 \end{lstlisting}
 
@@ -9053,7 +8941,7 @@ where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strai
 \label{info:extinct_out}
 In combustion, knowing if/when/where chemical reactions have been extinguished is important. The {\ct EXTINCTION} parameter tells the user wether or not combustion has been prevented by FDS' extinction routine. By default, {\ct EXTINCTION} = 1, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 0 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 0 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is no fuel or oxidizer present.
 
-\clearpage
+
 
 
 \section{Extracting Numbers from the Output Data Files}
@@ -9110,7 +8998,7 @@ be output to a file listed at the end of the session.
 
 
 
-\clearpage
+
 \section{Summary of Frequently-Used Output Quantities}
 \label{info:outputquantities}
 
@@ -10644,7 +10532,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\caption[Table parameters ({\ct TABL} namelist group)]{For more information see Section~\ref{info:TABL}.}
+\caption[Table parameters ({\ct TABL} namelist group)]{For more information see Section~\ref{info:spraypattern}.}
 \label{tbl:TABL} \\
 \hline
 \multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\
@@ -10655,8 +10543,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct TABL} (Table Parameters)} \\
 \hline \hline
 \endhead
-{\ct ID}                & Character   & Section~\ref{info:TABL}      &             &     \\ \hline
-{\ct TABLE\_DATA(9)}    & Real Array  & Section~\ref{info:TABL}      &             &     \\ \hline
+{\ct ID}                & Character   & Section~\ref{info:spraypattern}      &             &     \\ \hline
+{\ct TABLE\_DATA(9)}    & Real Array  & Section~\ref{info:spraypattern}      &             &     \\ \hline
 \end{longtable}
 
 
