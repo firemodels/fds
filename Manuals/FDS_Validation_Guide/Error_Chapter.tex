@@ -2,32 +2,14 @@
 
 \chapter{Quantifying Model Uncertainty}
 
-This chapter describes a method to estimate model uncertainty using comparisons of model predictions with experimental
-measurements whose uncertainty has been quantified. The method is ideal for complex numerical models like FDS for which
-a systematic analysis of sub-components is impractical, but
-for which there exists a relatively large amount of experimental data with which to evaluate the accuracy of the model predictions.
-If the uncertainty in the experiments can be quantified, the uncertainty in the model can then be expressed in the form
-of a normal distribution whose mean
-and standard deviation are estimated from the relative difference between the predicted and measured values.
+This chapter describes a method to estimate the model uncertainty using comparisons of model predictions with experimental measurements whose uncertainty has been quantified. The method is ideal for complex numerical models like FDS for which a systematic analysis of sub-components is impractical, but for which there exists a relatively large amount of experimental data with which to evaluate the accuracy of the model predictions. If the uncertainty in the experiments can be quantified, the uncertainty in the model can then be expressed in the form of a normal distribution whose mean and standard deviation are estimated from the relative difference between the predicted and measured values.
 
-This method only addresses model uncertainty. It does not account for the uncertainty associated with the model input parameters.
-How the {\em parameter uncertainty} is treated depends greatly on the type of application.
-Regardless of how the parameter uncertainty is calculated, the model
-uncertainty needs to be addressed independently. In fact, it is incumbent on the model developers to express
-the uncertainty of the model in as simple a form as possible to enable the end user to assess the impact of
-parameter uncertainty and then combine the two forms of uncertainty into a final result.
+This method only addresses model uncertainty. It does not account for the uncertainty associated with the model input parameters. How the {\em parameter uncertainty} is treated depends greatly on the type of application. Regardless of how the parameter uncertainty is calculated, the model uncertainty needs to be addressed independently. In fact, it is incumbent on the model developers to express the uncertainty of the model in as simple a form as possible to enable the end user to assess the impact of parameter uncertainty and then combine the two forms of uncertainty into a final result.
 
 
 \section{Introduction}
 
-The most effective way of introducing the subject of uncertainty in fire modeling is by way of an example.
-Suppose that a fire model is used to estimate the likelihood that an electrical control cable could be damaged by
-a fire. It is assumed that the cable loses functionality when its surface temperature reaches 200~$^\circ$C,
-and the model predicts that the cable temperature could reach as high as 175~$^\circ$C.
-Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of
-the fire, and the model assumptions, like the way the cables are modeled, are uncertain. The combination of the
-two -- the {\em parameter uncertainty} and the {\em model uncertainty} -- leave open the possibility that the cable temperature could exceed
-200~$^\circ$C.
+The most effective way of introducing the subject of uncertainty in fire modeling is by way of an example. Suppose that a fire model is used to estimate the likelihood that an electrical control cable could be damaged by a fire. It is assumed that the cable loses functionality when its surface temperature reaches 200~$^\circ$C, and the model predicts that the cable temperature could reach as high as 175~$^\circ$C. Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of the fire, and the model assumptions, like the way the cables are modeled, are uncertain. The combination of the two -- the {\em parameter uncertainty} and the {\em model uncertainty} -- leave open the possibility that the cable temperature could exceed 200~$^\circ$C.
 
 This chapter addresses {\em model uncertainty} only and suggests a simple method to quantify it. While parameter uncertainty is certainly an
 important consideration in fire modeling, its treatment varies considerably depending on the particular application. For example, in what is often
@@ -38,24 +20,7 @@ the model output. Notarianni and Parry survey these techniques in the SFPE Handb
 for assessing the impact of the input parameters on the model prediction, there needs to be a way of quantifying the uncertainty of the model itself.
 In other words, how good is the prediction for a given set of input parameters?
 
-The issue of model uncertainty has been around as long as the models themselves. The scenario above,
-for example, was considered by Siu and Apostolakis in the early 1980s~\cite{Siu:RE1982} as part of their development of risk models for
-nuclear power plants. The fire models at the
-time were relatively simple. In fact, many were engineering correlations in the form of simple formulae. This made the methods for
-quantifying their uncertainty reasonably tractable because each formula consisted of only a handful of physical parameters. Over the past
-thirty years, however, both fire modeling and the corresponding methods of uncertainty analysis have become far more complex. The current
-generation of computational fluid dynamics fire models require such a large number of physical and numerical parameters that it is considered
-too cumbersome to estimate model uncertainty by systematically assessing their combined effect on the final prediction. The more
-practical approach is to compare model predictions with actual fire experiments in a validation study, the conclusions of which typically come in the form of statements like:
-``The model generally over-predicts the measured temperatures
-by about 10~\%,'' or ``The model predictions are within about 20~\% of the measured heat fluxes.'' This information is helpful,
-at the very least to demonstrate that the model is appropriate for the given application.
-However, even the statement that the model over-predicts measured temperatures by 10~\% is useful not only to gain acceptance of the model but also
-to provide a better sense of the model's accuracy, and a greater level of assurance in answering the question posed above. Knowing that the model
-not only predicted a temperature of 175~$^\circ$C, but also that the model tends to over-predict temperatures by a certain amount, increases the confidence that
-the postulated fire would not cause the cable to fail. The probability of cable failure could be quantified further via a statistical distribution
-like the one shown in Fig.~\ref{bell_curve}. The area indicated by the shaded region is the probability that the temperature will exceed 200~$^\circ$C,
-even though the model has predicted a peak temperature of only 175~$^\circ$C.
+The issue of model uncertainty has been around as long as the models themselves. The scenario above, for example, was considered by Siu and Apostolakis in the early 1980s~\cite{Siu:RE1982} as part of their development of risk models for nuclear power plants. The fire models at the time were relatively simple. In fact, many were engineering correlations in the form of simple formulae. This made the methods for quantifying their uncertainty reasonably tractable because each formula consisted of only a handful of physical parameters. Over the past thirty years, however, both fire modeling and the corresponding methods of uncertainty analysis have become far more complex. The current generation of computational fluid dynamics fire models require such a large number of physical and numerical parameters that it is considered too cumbersome to estimate model uncertainty by systematically assessing their combined effect on the final prediction. The more practical approach is to compare model predictions with actual fire experiments in a validation study, the conclusions of which typically come in the form of statements like: ``The model generally over-predicts the measured temperatures by about 10~\%,'' or ``The model predictions are within about 20~\% of the measured heat fluxes.'' This information is helpful, at the very least to demonstrate that the model is appropriate for the given application. However, even the statement that the model over-predicts measured temperatures by 10~\% is useful not only to gain acceptance of the model but also to provide a better sense of the model's accuracy, and a greater level of assurance in answering the question posed above. Knowing that the model not only predicted a temperature of 175~$^\circ$C, but also that the model tends to over-predict temperatures by a certain amount, increases the confidence that the postulated fire would not cause the cable to fail. The probability of cable failure could be quantified further via a statistical distribution like the one shown in Fig.~\ref{bell_curve}. The area indicated by the shaded region is the probability that the temperature will exceed 200~$^\circ$C, even though the model has predicted a peak temperature of only 175~$^\circ$C.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=5.in]{FIGURES/bell_curve}
@@ -64,13 +29,7 @@ even though the model has predicted a peak temperature of only 175~$^\circ$C.
 \label{bell_curve}
 \end{figure}
 
-This chapter suggests a method for expressing {\em model uncertainty} by way of a distribution like the one shown in Fig.~\ref{bell_curve}. The
-procedure is not a dramatic departure from the current practice of fire model validation in that it relies entirely on comparisons of model
-predictions and experimental measurements. The advantage of the approach is that it does not demand advanced knowledge of statistics or details of
-the numerical model. The parameters of the distribution shown in Fig.~\ref{bell_curve}, namely the mean and standard deviation, are not generated by
-the model user. Rather, they are reported as the results of the validation study. The calculation of the probability of exceeding some critical
-threshold (i.e., the area under the curve) is a simple table look-up or function call in data analysis software like Microsoft
-Excel\textregistered.
+This chapter describes a method for expressing {\em model uncertainty} by way of a distribution like the one shown in Fig.~\ref{bell_curve}. The procedure is not a dramatic departure from the current practice of fire model validation in that it relies entirely on comparisons of model predictions and experimental measurements. The advantage of the approach is that it does not demand advanced knowledge of statistics or details of the numerical model. The parameters of the distribution shown in Fig.~\ref{bell_curve}, namely the mean and standard deviation, are not generated by the model user. Rather, they are reported as the results of the validation study. The calculation of the probability of exceeding some critical threshold (i.e., the area under the curve) is a simple table look-up or function call in data analysis software like Microsoft Excel\textregistered.
 
 
 
@@ -159,7 +118,7 @@ uncertainty of the measured test parameters, like the heat release rate or mater
 It is not the uncertainty of the parameter itself, but rather the uncertainty in the predicted quantity
 resulting from the uncertainty of the parameter.
 
-In a recent fire model validation study conducted by the U.S.~Nuclear Regulatory Commission~\cite{NUREG_1824},
+In the fire model validation study conducted by the U.S.~Nuclear Regulatory Commission~\cite{NUREG_1824},
 Hamins estimated the experimental uncertainty for several full-scale fire experiments. There were
 two uncertainty estimates needed for each quantity of interest. The first was an estimate, expressed in the
 form of a 95~\% confidence interval, of the
@@ -168,33 +127,17 @@ were made with thermocouples of various designs (bare-bead,
 shielded, aspirated) with different size beads, metals, and so on. For each, one can estimate the
 uncertainty in the reported measurement.
 
-Next, the
-uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate,
-leakage area, ventilation rate, material
-properties, and so on. It was then necessary to calculate how the uncertainty in these parameters contributed to
-the uncertainty of the reported measurement. To do this, Hamins
-examined a number of empirical formulae that are widely used in fire protection engineering to determine the
-most important test parameters and their effect on the measured results. These formulae provided the means of propagating
-the parameter uncertainties through the experiment.
-For example, it has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise, $T-T_0$, due to
-a compartment fire is proportional to the heat release rate, $\dot{Q}$, raised to the two-thirds power:
-\be T-T_0 = C \, \dot{Q}^{\frac{2}{3}} \ee
-The constant, $C$, involves a number of geometric and thermo-physical parameters that are unique to the given
-fire scenario. By way of differentials, this empirical relationship can be expressed in the form:
-\be \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dot{Q}}{\dot{Q}}  \ee
-In words, the relative change in the temperature rise is approximately two-thirds the relative change
-in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment
-temperature and the heat release rate, there is now a way to express the uncertainty of the model prediction as a function
-of the uncertainty of this most
-important input parameter. Often, the uncertainty of a measurement is expressed in the form of a 95~\% confidence interval,
-(two standard deviations or 2$\sigma$).
-Thus, if the heat release rate of a fire is assumed with 95~\% confidence to be
-within 15~\% of the reported measurement, then the temperature
-predicted by the model has an uncertainty\footnote{An uncertainty that is expressed in the form of a
-percentage typically means one or two {\em relative} standard deviations, often denoted with a tilde,
+Next, the uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate, leakage area, ventilation rate, material properties, and so on. It was then necessary to calculate how the uncertainty in these parameters contributed to the uncertainty of the reported measurement. To do this, Hamins examined a number of empirical formulae that are widely used in fire protection engineering to determine the most important test parameters and their effect on the measured results. These formulae provided the means of propagating the parameter uncertainties through the experiment. For example, it has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise, $T-T_0$, due to a compartment fire is proportional to the heat release rate, $\dot{Q}$, raised to the two-thirds power:
+\be 
+   T-T_0 = C \, \dot{Q}^{\frac{2}{3}} 
+\ee
+The constant, $C$, involves a number of geometric and thermo-physical parameters that are unique to the given fire scenario. By way of differentials, this empirical relationship can be expressed in the form:
+\be 
+   \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dot{Q}}{\dot{Q}}  
+\ee
+In words, the relative change in the temperature rise is approximately two-thirds the relative change in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment temperature and the heat release rate, there is now a way to express the uncertainty of the model prediction as a function of the uncertainty of this most important input parameter. Often, the uncertainty of a measurement is expressed in the form of a 95~\% confidence interval, (two standard deviations or 2$\sigma$).
+Thus, if the heat release rate of a fire is assumed with 95~\% confidence to be within 15~\% of the reported measurement, then the temperature predicted by the model has an uncertainty\footnote{An uncertainty that is expressed in the form of a percentage typically means one or two {\em relative} standard deviations, often denoted with a tilde,
 $\widetilde{\sigma}=\sigma/\mu$.} of at least 10~\%.
-
-
 
 \begin{table}[ht]
 \caption{Sensitivity of model outputs from Volume 2 of NUREG-1824~\cite{NUREG_1824}. }
@@ -217,27 +160,14 @@ Surface Temperature                             & HRR                   & 2/3   
 \label{Parameter_Uncertainty}
 \end{table}
 
-The uncertainty of each measurement is expressed as a relative standard deviation. The uncertainty of the measured
-\underline{o}utput quantity is denoted $\widetilde{\sigma}_o$, and the uncertainty of each
-significant \underline{i}nput parameter is denoted $\widetilde{\sigma}_i$.
-Assuming that all the uncertainties are uncorrelated, they are combined via the expression:
+The uncertainty of each measurement is expressed as a relative standard deviation. The uncertainty of the measured output quantity is denoted $\widetilde{\sigma}_{\rm out}$, and the uncertainty of each significant input parameter is denoted $\widetilde{\sigma}_{\rm in}$. Assuming that all the uncertainties are uncorrelated, they are combined via the expression:
 \be
-   \widetilde{\sigma}_E^2 = \widetilde{\sigma}_o^2 + \sum_i p_i^2 \, \widetilde{\sigma}_i^2  \label{comb_unc}
+   \widetilde{\sigma}_E^2 = \widetilde{\sigma}_{\rm out}^2 + \sum p_{\rm in}^2 \, \widetilde{\sigma}_{\rm in}^2  \label{comb_unc}
 \ee
-The factors, $p_i$, represent the power dependencies of the individual input parameters.
-Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various
-measured quantities in the experiments and their power dependence.
+The factors, $p_{\rm in}$, represent the power dependencies of the individual input parameters. Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various measured quantities in the experiments and their power dependence.
 
-
-Hamins estimated the combined experimental uncertainties for ten quantities of interest in the U.S.~NRC validation study.
-The results are summarized in Table~\ref{Uncertainty}, with
-each combined uncertainty reported in the form of a 95~\% confidence interval (i.e., $2 \, \widetilde{\sigma}_E$).
-It is assumed throughout that both experiment and model uncertainties can be expressed in relative terms.
-The assumption is based on a
-qualitative assessment of dozens of scatter plots similar to that shown in Fig.~\ref{scatterplot} that show
-the scattered points to form an expanding ``wedge''
-about the diagonal line, or some other off-diagonal line due to an assumed bias in the model predictions.
-This assessment is a critical component of the
+Hamins estimated the combined experimental uncertainties for ten quantities of interest in the U.S.~NRC validation study. The results are summarized in Table~\ref{Uncertainty}, with
+each combined uncertainty reported in the form of a 95~\% confidence interval (i.e., $2 \, \widetilde{\sigma}_E$). It is assumed throughout that both experiment and model uncertainties can be expressed in relative terms. The assumption is based on a qualitative assessment of dozens of scatter plots similar to that shown in Fig.~\ref{scatterplot} that show the scattered points to form an expanding ``wedge'' about the diagonal line, or some other off-diagonal line due to an assumed bias in the model predictions. This assessment is a critical component of the
 analysis described in the next section.
 \begin{table}[ht]
 \caption{Summary of Hamins' uncertainty estimates~\cite{NUREG_1824}. }
@@ -362,19 +292,10 @@ The least squares estimate of the standard deviation of the combined distributio
    \left[ \ln (M_i/E_i) - \overline{\ln (M/E)}  \right]^2 \label{stdev}
 \ee
 Recall that $\widetilde{\sigma}_E$ is known and the expression on the right can be evaluated using the pairs of measured and
-predicted values. Keep in mind that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, will necessarily result in an under-estimate of the
-model uncertainty, $\widetilde{\sigma}_M$. In particular, note that $\widetilde{\sigma}_M$ cannot be less than
-$\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. This is not to say that the model
-cannot be more accurate than the measurements; rather, that the model cannot be shown to be more accurate than the measurements. This rule is demonstrated
-mathematically by Eq.~(\ref{stdev}) where it is observed that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, can result in
-the square root of a negative number, an imaginary number. In the case that the computed model uncertainty is less than the estimated experimental uncertainty, there are
-two courses of action. First, it may be that the number of data points in the validation study is too small. If only a few model predictions are compared to corresponding
-measurements, and the difference between the two is so small that the calculated model uncertainty is imaginary, then more data points should be collected
-to determine if this remains the case. If it does, then
-the calculation of the experimental uncertainty, $\widetilde{\sigma}_E$, should be re-evaluated. The experimental uncertainties listed in
-Table~\ref{Uncertainty} are based on the analysis of 26 experiments that were used in a particular validation study. If other experiments are used to evaluate the
-model, these values need to be recalculated following the procedure presented by Hamins~\cite{NUREG_1824}.
-
+predicted values. Equation~(\ref{stdev}) imposes a constraint on the value of the experimental uncertainty, $\widetilde{\sigma}_E$. A further constraint is that $\widetilde{\sigma}_M$ cannot be less than $\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. Combining the two constraints leads to:
+\begin{equation}
+   \widetilde{\sigma}_E^2 < \frac{1}{2} \mathrm{Var}\Big( \ln (M/E) \Big)
+\end{equation}
 An estimate of $\delta$ can be found using the mean of the distribution:
 \be
    \delta \approx \exp \left( \overline{\ln (M/E)} + \frac{ \widetilde{\sigma}_M^2}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \label{delta}
@@ -410,8 +331,7 @@ of a particular quantity of interest (e.g., a cable temperature), the true (but 
 and variance of this normal distribution are based solely on comparisons of model predictions with past experiments that are similar to the particular fire
 scenario being analyzed. The performance of the model is quantified by the estimators of the parameters, $\delta$ and $\widetilde{\sigma}_M$, which
 have been corrected to account for uncertainties associated with the experimental measurements.
-If $\delta \approx 1$ and $\widetilde{\sigma}_M \approx \widetilde{\sigma}_E$, then the
-model can be considered of comparable accuracy to the measurements.
+
 
 
 \section{Example}
@@ -468,17 +388,3 @@ flames. Less accurate predictions typically occur in regions of steep gradients 
 \end{itemize}
 
 
-\clearpage
-
-
-\section{Summary of FDS Validation Cases}
-
-\IfFileExists{SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}{\input{SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}}
-
-
-\clearpage
-
-
-\section{Histograms of FDS Validation Cases}
-
-\IfFileExists{SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}{\input{SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}}

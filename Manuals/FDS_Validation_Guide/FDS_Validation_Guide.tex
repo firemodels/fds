@@ -123,8 +123,8 @@ forms of evaluation, both at NIST and beyond. This volume provides a survey of v
 The following individuals and organizations played a role in the validation process of FDS.
 \begin{itemize}
 \item The US Nuclear Regulatory Commission Office of Research has funded key validation experiments, the preparation of the FDS manuals, and the development of various sub-models that are of importance in the area of nuclear power plant safety. Special thanks to Mark Salley, David Stroup, and Jason Dreisbach for their efforts and support.
-\item Anthony Hamins directed the NIST/NRC and WTC experiments, conducted smaller methane burner measurements, and quantified the experimental uncertainty of these and other experiments used in this study. Alex Maranghides was the Director of the Large Fire Laboratory at NIST at the time these tests were conducted, and he helped to design the experiments. Therese McAllister oversaw the instrumentation of the structural steel during the WTC experiments.
-\item Anthony Hamins developed the technique of evaluating experimental uncertainty that is used throughout this Guide. Blaza Toman of the Statistical Engineering Division of NIST developed the method of quantifying the model uncertainty.
+\item Anthony Hamins of NIST directed the NIST/NRC and WTC experiments, conducted smaller methane burner measurements, and quantified the experimental uncertainty of these and other experiments used in this study. Alex Maranghides was the Director of the Large Fire Laboratory at NIST at the time these tests were conducted, and he helped to design the experiments. Therese McAllister oversaw the instrumentation of the structural steel during the WTC experiments.
+\item Anthony Hamins of NIST developed the technique of evaluating experimental uncertainty that is used throughout this Guide. Blaza Toman of the Statistical Engineering Division of NIST developed the method of quantifying the model uncertainty.
 \item Rick Peacock of NIST assisted in the interpretation of results from the ``NBS Multi-Room Test Series,'' a set of three room fire experiments conducted at the National Bureau of Standards (now NIST) in the mid-1980's.
 \item Bryan Klein, currently employed at Thunderhead Engineering, Inc., assisted in the development of techniques to automatically generate the plots that are found throughout this Guide.
 \item Bill Pitts, Nelson Bryner, and Erik Johnsson of NIST contributed and interpreted test data for the ``NIST Reduced Scale Enclosure Experiments.''
@@ -195,9 +195,26 @@ The following individuals and organizations played a role in the validation proc
 \include{Burning_Rate_Chapter}
 
 
+
+
+
+\chapter{Summary of FDS Validation Cases}
+
+\IfFileExists{SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}{\input{SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}}
+
+
+\clearpage
+
+
+\section{Histograms of FDS Validation Cases}
+
+\IfFileExists{SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}{\input{SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}}
+
+
+
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
-\addcontentsline{toc}{chapter}{References}
+
 
 
 \end{document}
