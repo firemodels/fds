@@ -2783,7 +2783,7 @@ Near-wall treatments, such as wall models or wall functions, aim to mimic the su
 
 By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{\rm w})/T_\tau$, where $T_{\rm g}$ is the gas temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}''_{\rm w}$, as $T_\tau = \dot{q}''_{\rm w}/\rho_{\rm w} u_\tau c_{\rm p}$. The local heat transfer coefficient is then obtained from
 \begin{equation}
-h = \frac{\dot{q}''_{\rm w}}{\Delta T} = \frac{\rho_{\rm w} \, c_{\rm p} \, u_\tau}{T^+}
+h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm p} \, u_\tau}{T^+}
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular
 surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
@@ -2972,7 +2972,7 @@ through the wall into the space behind the wall, the attribute
 if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
 of computational domain on the other side of the wall. Obviously, if
 the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side
-gas cell cannot be found.
+gas cell cannot be found (in which case, the wall would not be one cell thick).
 
 The back side emissivity of the surface can be controlled by specifying {\ct EMISSIVITY\_BACK} on the {\ct SURF} line. If not specified, the back side
 emissivity will be calculated during the simulations as a mass-weighted sum of the {\ct MATL} emissivities.
@@ -3150,7 +3150,7 @@ specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do 
 \subsection{Special Topic: A Radially-Spreading Fire}
 \label{info:spread}
 
-Sometimes it is desired that a fire spread radially at some specified rate. Rather than trying to obtain material properties to directly model the ignition and spread of the fire, you can specify the fire spread rate directly. First, you need to add a {\ct SURF} line with a specified heat release rate, {\ct HRRPUA}, and an optional time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q}. Then, you must specify {\ct XYZ} and {\ct SPREAD\_RATE} on either a {\ct VENT} or the same {\ct SURF} line. The fire is directed to start at the point {\ct XYZ} and spread radially at a rate of {\ct SPREAD\_RATE} (m/s). The optional ramp-up of the HRR begins at the time when the fire arrives at a given point. For example, the lines
+Sometimes it is desired that a fire spread radially at some specified rate. Rather than trying to obtain material properties to directly model the ignition and spread of the fire, you can specify the fire spread rate directly. First, you need to add a {\ct SURF} line with a specified heat release rate, {\ct HRRPUA}, and an optional time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q} (see Section \ref{info:RAMP_Time}). Then, you must specify {\ct XYZ} and {\ct SPREAD\_RATE} on either a {\ct VENT} or the same {\ct SURF} line. The fire is directed to start at the point {\ct XYZ} and spread radially at a rate of {\ct SPREAD\_RATE} (m/s). The optional ramp-up of the HRR begins at the time when the fire arrives at a given point. For example, the lines
 \begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=500.0, RAMP_Q='fireramp' /
 &RAMP ID='fireramp', T= 0.0, F=0.0 /
@@ -3314,7 +3314,7 @@ be multiple reactions with corresponding kinetic parameters and products.
 For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for
 a material undergoing one or more reactions is:
 \be
-  \dod{Y_{{\rm s},i}}{t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i)
+  \frac{\d Y_{{\rm s},i}}{\d t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i)
 \label{rr_tot}
 \ee
 where
@@ -3341,7 +3341,7 @@ The pre-exponential factor, $A_{ij}$, is prescribed under the name
 is prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal
 is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
-experiments, like TGA (Thermo-Gravimetric Analysis).
+experiments, like TGA (thermo-gravimetric analysis).
 
 The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions.
 If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected
@@ -3362,7 +3362,7 @@ the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, con
 These curves represent the results of a hypothetical TGA experiment.
 The Mass Fraction (blue curve) is the normalized density of the material ($Y$) which decreases as the sample is slowly heated,
 in this case at a rate
-of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-dY/dt$).
+of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-\d Y/\d t$).
 Where this curve peaks is referred to in FDS
 as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain
 backward compatibility with earlier versions of
@@ -3401,7 +3401,7 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
 \end{align*}
 \end{minipage}
 \caption[Simple demonstration of the pyrolysis model]{The blue curve represents the normalized mass, $Y=\rho_{\rm s}/\rho_{\rm s}(0)$, of a solid material
-undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-\d Y/\d t$. The system of ordinary differential equations that describe the transformation is shown at right. Note that the parameters $T_{\rm p}$, $r_{\rm p}$, and $\nu_{\rm s}$ represent the ``reference'' temperature,
+undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-\d Y/\d t$. The ordinary differential equation that describes the transformation is shown at right. Note that the parameters $T_{\rm p}$, $r_{\rm p}$, and $\nu_{\rm s}$ represent the ``reference'' temperature,
 reaction rate, and residue yield of the single reaction. From these parameters, values of $A$ and $E$ can be estimated using
 the formulae in (\ref{AandE}). The full set of parameters for this case are listed in {\ct pyrolysis\_1.fds}.}
 \label{pyrolysis}
@@ -3567,14 +3567,14 @@ The system of ordinary differential equations that governs the transformation of
 Equation~(\ref{rr}) describes the rate of the reaction as a function
 of temperature.  Most solid phase reactions require energy; that is,
 they are {\em endothermic}. The amount of energy consumed, per unit
-mass of reactant that is converted into something else, is specified
+mass of reactant that is converted into reaction products, is specified
 by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy
 difference between the products and the reactant. A positive value
 indicates that the reaction is {\em endothermic}; that is, the
 reaction takes energy out of the system. Usually the {\ct
 HEAT\_OF\_REACTION} is accurately known only for simple phase change
 reactions like the vaporization of water. For other reactions, it must
-be determined empirically.
+be determined empirically (e.g., by thermo-gravimetric analysis).
 
 
 \subsection{Special Topic: The ``Threshold'' Temperature}
@@ -3594,7 +3594,7 @@ The threshold temperature can be used to simulate simple phase change reactions,
 \ee
 This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=.TRUE.}. The pre-exponental factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (\si{kJ/(kg.K)}) of the material mixture at phase change temperature.
 
-The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``threshold'' temperature. A small amount of liquid water at 10~$^\circ$C is cooled down to -10~$^\circ$C in 10~min, and then heated up again to 10~$^\circ$C. The mass fraction of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by the blue line and heating phase by the red line.
+The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``threshold'' temperature. A small amount of liquid water at 10~$^\circ$C is cooled down to -10~$^\circ$C in 10~min, and then heated up again to 10~$^\circ$C. The concentration of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by the blue line and heating phase by the red line.
 
 \begin{figure}[ht]
 \begin{center}
@@ -3692,7 +3692,7 @@ like {\ct HRRPUA}.
 \item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used
 to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted
 object. This parameter over-rides all other parameters from which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution.
-\item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of
+\item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of
 the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
 Simple examples demonstrating how solid fuels can be forced to disappear from the domain are labeled \linebreak[4] {\ct Fires/box\_burn\_away}.
@@ -3708,7 +3708,7 @@ In the fourth case, the heat of combustion for the foam material is set
 different from that of the gas, with ratio 0.75.
 The properties of the block of foam were chosen
 simply to assure a quick calculation. The objective of the test is to
-check that the released mass and the integrated burning rate is
+check that the released mass and the integrated burning rate are
 consistent with the material properties of the block. The block is
 0.4~m on a side, with a density of 20~kg/m$^3$.  The integrated
 densities of the pyrolysis product gases (written to
@@ -3747,7 +3747,7 @@ The same case is tested in 2D ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_awa
 \section{Testing Your Pyrolysis Model}
 \label{solid_phase_verification}
 
-Real materials that can burn can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the
+Modeling the burning of real materials can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the
 input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know
 that the various property values and the associated thermo-physical model in FDS
 constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid
@@ -3796,7 +3796,7 @@ related to convection, combustion, and apparatus-specific phenomena.
 \end{enumerate}
 
 
-\noindent Below is a short FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only
+\noindent Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only
 involves the solid phase model. Essentially, the gas phase calculation is
 shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more
 details, see the FDS Validation Guide under the heading ``FAA Polymers.''
@@ -4023,6 +4023,7 @@ Here is example of how to specify a surface that blows methane with a velocity o
 Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use {\ct MASS\_FLUX}.
 
 
+
 \subsection{Special Topic: Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
 
@@ -4037,7 +4038,7 @@ In most practical simulations, it is not possible to resolve this boundary layer
 Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
 
 Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
-velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  In Fig.~\ref{fig:sem_profiles} we show examples using SEM for flat, parabolic, and atmospheric profiles with 10 \% turbulence intensity.  The input lines for the atmospheric case are
+velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  In Fig.~\ref{fig:sem_profiles} we show examples using SEM for flat, parabolic, and atmospheric profiles with 10 \% turbulence intensity.  The input lines for the atmospheric case are (see Section \ref{info:stratification} for further discussion of profile parameters).
 
 \begin{lstlisting}
 &SURF ID='inlet', VEL=-1, PROFILE='ATMOSPHERIC', Z0=0.5, PLE=0.3 /
@@ -4079,6 +4080,8 @@ In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified S
 
 
 \clearpage
+
+
 
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
@@ -4391,7 +4394,7 @@ flow rates are tied to the pressure of the adjacent zones.
 \subsection{Specifying Pressure Zones}
 \label{info:ZONE_Basics}
 
-A pressure zone can by any region within the computational domain that is separated from the rest of the domain, or the exterior,
+A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior,
 by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is
 necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
 \begin{lstlisting}
@@ -4516,7 +4519,7 @@ Pressure will continue to rise due to the fire until the pressure relief due to 
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/door_crack_Pressure} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/door_crack_HRR}
 \end{tabular*}
-\caption[Results of the {\ct door\_crack} test case]{Output of {\ct door\_crack} test case.}
+\caption[Results of the {\ct door\_crack} test case]{Output of {\ct door\_crack} test case.  Symbols are expected values.}
 \end{figure}
 
 
@@ -4588,7 +4591,7 @@ need to ramp the pressure up or down starting at zero, like you do for various o
 The net effect of a positive dynamic pressure at an otherwise quiescent boundary is to
 drive a flow into the domain. However, a fire-driven flow of sufficient strength can push back against this incoming flow.
 
-The following lines, taken from the sample case, {\ct pressure\_boundary}, demonstrates how to do
+The following lines, taken from the sample case, {\ct pressure\_boundary}, demonstrates how to specify
 a time-dependent pressure boundary at the end of a tunnel. The tunnel is 10~m long, 1~m wide, 1~m tall
 with a fire in the middle and a pressure boundary imposed on the right side. The left side ({\ct XMIN}) is
 just an {\ct OPEN} boundary with no pressure specified. It is assumed to be at ambient pressure.
@@ -4635,7 +4638,7 @@ FDS will stop with an error.
 Another useful parameter for outdoor simulations is the temperature
 lapse rate of the atmosphere. Typically, in the first few hundred meters
 of the atmosphere, the temperature decreases several degrees Celsius
-per kilometer. These few degrees are important when considering the rise
+per kilometer. This small temperature change is important when considering the rise
 of smoke since the temperature of the smoke decreases rapidly as it
 rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the
 {\ct MISC} line in units of $^\circ$C/m. A negative sign indicates that the
@@ -4647,10 +4650,6 @@ The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
 By default, FDS assumes that the density and pressure decrease with height, regardless of the
 application or domain size. For most simulations, this effect is negligible, but it can be
 turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
-
-
-
-
 
 
 \chapter{User-Specified Functions, Ramps and Tables}
