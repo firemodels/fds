@@ -5640,7 +5640,13 @@ As before, we use primitive species rather than mixtures. A {\ct REAC} line is n
       N_S = 1.0 /
 \end{lstlisting}
 
-\noindent For {\ct REAC ID='R2'}, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of {\ct N\_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, {\ct NU}.
+\noindent For {\ct REAC ID='R2'}, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of {\ct N\_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, {\ct NU}.  Reactions of this sort are often written in textbooks as
+
+\begin{equation}\label{eq:propane_1step}
+\mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
+\end{equation}
+
+However, for the purposes of inputting into FDS, since M is neither a product nor a species it would not be specifed in the chemical reaction using either {\ct REACTION} or {\ct NU}.  It would be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
 
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species at a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
