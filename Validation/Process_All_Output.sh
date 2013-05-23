@@ -19,6 +19,7 @@ $VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
 $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
 $VDIR/Harrison_Spill_Plumes/FDS_Output_Files/Process_Output.csh
 $VDIR/Heskestad_Flame_Height/FDS_Output_Files/Process_Output.csh
+$VDIR/Hu_Compartment/FDS_Output_Files/Process_Output.csh
 $VDIR/LEMTA_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
 $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
