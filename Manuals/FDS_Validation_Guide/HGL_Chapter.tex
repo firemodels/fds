@@ -530,6 +530,25 @@ Steckler {\em et al.}~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window fl
 
 \section{Hu Compartment Experiments}
 
+The Hu compartment experiments \cite{Hu:2005} for the prescribed fuel mass flow rate cases were simulated.  The circular vent feature was used.  The background mesh resolution for the (40 cm)$^3$ compartment was $\delta x = 1$ cm.  Near the upper and lower vents the mesh was refined by a factor of 10 for roughly 2 vent heights leading into the compartment domain.  The fuel is specified as n-heptane with a soot yield of 0.037.  The default radiation parameters in FDS were used.
+
+In Fig.~\ref{Hu_images} below we provide Smokeview renderings of temperature to give the reader a qualitative feel for different dynamics for each case.  The experiments were designed to transition from well-ventilated (Case 1) to completely under-ventilated (Case 4) by varying the size of the vents and the fuel pan diameter, both are visible in the Smokeview images.
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{ccc}
+\includegraphics[height=2.2in]{FIGURES/Hu_Compartment/Hu_1p_tmp.png} &
+\includegraphics[height=2.2in]{FIGURES/Hu_Compartment/Hu_2p_tmp.png} &
+\includegraphics[height=2.2in]{FIGURES/Hu_Compartment/Hu_tmp_colorbar.png} \\
+\includegraphics[height=2.2in]{FIGURES/Hu_Compartment/Hu_3p_tmp.png} &
+\includegraphics[height=2.2in]{FIGURES/Hu_Compartment/Hu_4p_tmp.png} &
+\\
+\end{tabular}
+\caption[Hu Compartment temperature profiles]{Hu Compartment cell-centered slices of temperature toward the end of the simulation.}
+\label{Hu_images}
+\end{figure}
+
+
 % Test 1
 
 \begin{figure}[p]
