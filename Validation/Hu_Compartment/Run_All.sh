@@ -13,9 +13,9 @@ source ~/.bashrc_fds intel64
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$QFDS -r $qq -d $INDIR hu_1p.fds
-$QFDS -r $qq -d $INDIR hu_2p.fds
-$QFDS -r $qq -d $INDIR hu_3p.fds
-$QFDS -r $qq -d $INDIR hu_4p.fds
+$QFDS -r -p 4 $qq -d $INDIR hu_1p.fds
+$QFDS -r -p 4 $qq -d $INDIR hu_2p.fds
+$QFDS -r -p 6 $qq -d $INDIR hu_3p.fds
+$QFDS -r -p 6 $qq -d $INDIR hu_4p.fds
 
 echo FDS cases submitted
