@@ -60,7 +60,9 @@
 
 #ifdef pp_BETA
 //#define pp_GPUDEPTH
+#ifdef _DEBUG
 #define pp_OPEN
+#endif
 #define pp_SHOWLIGHT
 #endif
 
