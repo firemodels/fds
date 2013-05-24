@@ -699,7 +699,7 @@ extern "C" void glui_labels_setup(int main_window){
   Text_Labels_CB(LB_LIST);
 
   // -------------- Cube/Tetra intersection test -------------------
-
+#ifdef pp_GEOMTEST
   ROLLOUT_geomtest = glui_labels->add_rollout("Cube/Tetra intersection test",false);
   glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,"show",&show_geomtest);
   PANEL_geom1=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"box");
@@ -734,6 +734,7 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tetra_bounds[1]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"xmax",GLUI_SPINNER_FLOAT,tetra_bounds+1);
   SPINNER_tetra_bounds[3]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"ymax",GLUI_SPINNER_FLOAT,tetra_bounds+3);
   SPINNER_tetra_bounds[5]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"zmax",GLUI_SPINNER_FLOAT,tetra_bounds+5);
+#endif
 
   // -------------- 
 

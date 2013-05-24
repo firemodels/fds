@@ -21,7 +21,7 @@ char drawGeometry_revision[]="$Revision$";
 
 cadgeom *current_cadgeom;
 
-
+#ifdef pp_GEOMTEST
 /* ------------------ DrawGeomTest ------------------------ */
 
 void DrawGeomTest(void){
@@ -63,6 +63,7 @@ void DrawGeomTest(void){
 
   glPopMatrix();
 }
+#endif
 
   /* ------------------ DrawCircVentsApproxSolid ------------------------ */
 
