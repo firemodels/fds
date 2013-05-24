@@ -538,6 +538,25 @@ void update_triangles(void){
       }
     }  
   }
+#ifdef pp_GEOMTEST
+  box_bounds[0]=DENORMALIZE_XX(0.25);
+  box_bounds[1]=DENORMALIZE_XX(0.75);
+  box_bounds[2]=DENORMALIZE_YY(0.25);
+  box_bounds[3]=DENORMALIZE_YY(0.75);
+  box_bounds[4]=DENORMALIZE_ZZ(0.25);
+  box_bounds[5]=DENORMALIZE_ZZ(0.75);
+  box_translate[0]=0.0;
+  box_translate[1]=0.0;
+  box_translate[2]=0.0;
+
+  tetra_bounds[0]=DENORMALIZE_XX(0.2);
+  tetra_bounds[1]=DENORMALIZE_XX(0.8);
+  tetra_bounds[2]=DENORMALIZE_YY(0.2);
+  tetra_bounds[3]=DENORMALIZE_YY(0.8);
+  tetra_bounds[4]=DENORMALIZE_ZZ(0.2);
+  tetra_bounds[5]=DENORMALIZE_ZZ(0.8);
+#endif
+
 }
 
 #define FORTREAD(var,count,STREAM) FSEEK(STREAM,4,SEEK_CUR);\

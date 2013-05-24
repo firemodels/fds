@@ -23,6 +23,12 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+#ifdef pp_GEOMTEST
+SVEXTERN float box_bounds[6],box_translate[3],tetra_bounds[6];
+SVEXTERN int SVDECL(show_geomtest,0);
+#endif
+
+
 SVEXTERN int SVDECL(wc_flag,0);
 SVEXTERN circdata cvent_circ, object_circ;
 #ifdef pp_BETA

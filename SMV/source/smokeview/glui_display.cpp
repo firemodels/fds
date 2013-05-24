@@ -162,6 +162,22 @@ GLUI_Button *BUTTON_label_2=NULL;
 GLUI_Button *BUTTON_label_3=NULL;
 GLUI_Button *BUTTON_label_4=NULL;
 
+#ifdef pp_GEOMTEST
+GLUI_Rollout *ROLLOUT_geomtest=NULL;
+GLUI_Panel *PANEL_geom1=NULL;
+GLUI_Panel *PANEL_geom1a=NULL;
+GLUI_Panel *PANEL_geom1b=NULL;
+GLUI_Panel *PANEL_geom1c=NULL;
+GLUI_Panel *PANEL_geom1d=NULL;
+GLUI_Panel *PANEL_geom2=NULL;
+GLUI_Panel *PANEL_geom2a=NULL;
+GLUI_Panel *PANEL_geom2b=NULL;
+GLUI_Panel *PANEL_geom2c=NULL;
+GLUI_Spinner *SPINNER_box_bounds[6];
+GLUI_Spinner *SPINNER_box_translate[3];
+GLUI_Spinner *SPINNER_tetra_bounds[6];
+#endif
+
 #define COLORBAR_EXTREME_RGB 15
 #define COLORBAR_EXTREME 16
 #define FLIP 19
@@ -681,6 +697,45 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_LB_blue->set_int_limits(0,255);
   CHECKBOX_LB_label_use_foreground=glui_labels->add_checkbox_to_panel(PANEL_LB_color,"Use foreground color",&gl->useforegroundcolor,LB_FOREGROUND,Text_Labels_CB);
   Text_Labels_CB(LB_LIST);
+
+  // -------------- Cube/Tetra intersection test -------------------
+
+  ROLLOUT_geomtest = glui_labels->add_rollout("Cube/Tetra intersection test",false);
+  glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,"show",&show_geomtest);
+  PANEL_geom1=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"box");
+
+  PANEL_geom1d=glui_labels->add_panel_to_panel(PANEL_geom1,"",GLUI_PANEL_NONE);
+  PANEL_geom1a=glui_labels->add_panel_to_panel(PANEL_geom1d,"",GLUI_PANEL_NONE);
+  glui_labels->add_column_to_panel(PANEL_geom1d,false);
+  PANEL_geom1b=glui_labels->add_panel_to_panel(PANEL_geom1d,"",GLUI_PANEL_NONE);
+
+  PANEL_geom1c=glui_labels->add_panel_to_panel(PANEL_geom1,"",GLUI_PANEL_NONE);
+  SPINNER_box_bounds[0]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"xmin",GLUI_SPINNER_FLOAT,box_bounds);
+  SPINNER_box_bounds[2]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"ymin",GLUI_SPINNER_FLOAT,box_bounds+2);
+  SPINNER_box_bounds[4]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"zmin",GLUI_SPINNER_FLOAT,box_bounds+4);
+  SPINNER_box_bounds[1]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"xmax",GLUI_SPINNER_FLOAT,box_bounds+1);
+  SPINNER_box_bounds[3]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"ymax",GLUI_SPINNER_FLOAT,box_bounds+3);
+  SPINNER_box_bounds[5]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"zmax",GLUI_SPINNER_FLOAT,box_bounds+5);
+
+  SPINNER_box_translate[0]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"translate: x",GLUI_SPINNER_FLOAT,box_translate);
+  glui_labels->add_column_to_panel(PANEL_geom1c,false);
+  SPINNER_box_translate[1]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"y",GLUI_SPINNER_FLOAT,box_translate+1);
+  glui_labels->add_column_to_panel(PANEL_geom1c,false);
+  SPINNER_box_translate[2]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"z",GLUI_SPINNER_FLOAT,box_translate+2);
+
+  PANEL_geom2=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"tetrahedron bounds");
+  PANEL_geom2a=glui_labels->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);
+  glui_labels->add_column_to_panel(PANEL_geom2,false);
+  PANEL_geom2b=glui_labels->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);
+
+  SPINNER_tetra_bounds[0]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"xmin",GLUI_SPINNER_FLOAT,tetra_bounds);
+  SPINNER_tetra_bounds[2]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"ymin",GLUI_SPINNER_FLOAT,tetra_bounds+2);
+  SPINNER_tetra_bounds[4]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"zmin",GLUI_SPINNER_FLOAT,tetra_bounds+4);
+  SPINNER_tetra_bounds[1]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"xmax",GLUI_SPINNER_FLOAT,tetra_bounds+1);
+  SPINNER_tetra_bounds[3]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"ymax",GLUI_SPINNER_FLOAT,tetra_bounds+3);
+  SPINNER_tetra_bounds[5]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"zmax",GLUI_SPINNER_FLOAT,tetra_bounds+5);
+
+  // -------------- 
 
   PANEL_label2 = glui_labels->add_panel("",false);
   glui_labels->add_column_to_panel(PANEL_label2,false);

@@ -66,6 +66,10 @@ void _Sniff_Errors(char *whereat);
 #define DENORMALIZE_Y(y) (ybar0+(y)*xyzmaxdiff)
 #define DENORMALIZE_Z(z) (zbar0+(z)*xyzmaxdiff)
 
+#define DENORMALIZE_XX(x) (xbar0+(x)*(xbarORIG-xbar0))
+#define DENORMALIZE_YY(y) (ybar0+(y)*(ybarORIG-ybar0))
+#define DENORMALIZE_ZZ(z) (zbar0+(z)*(zbarORIG-zbar0))
+
 #define noGridnoProbe 0
 #define GridnoProbe 1
 #define GridProbe 2

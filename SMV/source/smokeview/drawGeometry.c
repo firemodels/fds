@@ -21,6 +21,49 @@ char drawGeometry_revision[]="$Revision$";
 
 cadgeom *current_cadgeom;
 
+
+/* ------------------ DrawGeomTest ------------------------ */
+
+void DrawGeomTest(void){
+  float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
+  unsigned char cubecolor[4]={255,0,0,255};
+  unsigned char tetracolor[4]={0,0,255,255};
+
+  xmin = box_bounds;
+  xmax = box_bounds+1;
+  ymin = box_bounds+2;
+  ymax = box_bounds+3;
+  zmin = box_bounds+4;
+  zmax = box_bounds+5;
+
+  glPushMatrix();
+  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+
+  glPushMatrix();
+  glTranslatef(*xmin,*ymin,*zmin);
+  glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
+  drawcubec(1.0,cubecolor);
+  glPopMatrix();
+
+  // tetrahedron
+
+  xmin = tetra_bounds;
+  xmax = tetra_bounds+1;
+  ymin = tetra_bounds+2;
+  ymax = tetra_bounds+3;
+  zmin = tetra_bounds+4;
+  zmax = tetra_bounds+5;
+
+  glPushMatrix();
+  glTranslatef(*xmin,*ymin,*zmin);
+  glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
+  drawfilledtetra(tetracolor);
+  glPopMatrix();
+
+  glPopMatrix();
+}
+
   /* ------------------ DrawCircVentsApproxSolid ------------------------ */
 
 void DrawCircVentsApproxSolid(int option){
