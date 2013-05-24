@@ -1106,7 +1106,8 @@ check_guide()
    then
       # There were errors/warnings in the guide build process
       echo "Warnings from Stage 8 - Build FDS-SMV Guides:" >> $WARNING_LOG
-      cat $1 >> $WARNING_LOG
+      echo $3 >> $WARNING_LOG # Name of guide
+      cat $1 >> $WARNING_LOG # Contents of log file
       echo "" >> $WARNING_LOG
    else
       # Guide built successfully; there were no errors/warnings
