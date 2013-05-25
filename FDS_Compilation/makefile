@@ -333,6 +333,13 @@ mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
+mpi_intel_linux_64ib : FFLAGS = -m64 -O3 -vec_report0 -ipo
+mpi_intel_linux_64ib : LFLAGS = -static-intel
+mpi_intel_linux_64ib : FCOMPL = mpif77
+mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
+mpi_intel_linux_64ib : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
+
 openmp_mpi_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
 openmp_mpi_intel_linux_64 : LFLAGS = -static-intel
 openmp_mpi_intel_linux_64 : FCOMPL = mpif77
