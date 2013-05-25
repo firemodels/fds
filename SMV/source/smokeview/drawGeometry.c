@@ -24,7 +24,7 @@ cadgeom *current_cadgeom;
 #ifdef pp_GEOMTEST
 /* ------------------ DrawGeomTest ------------------------ */
 
-void DrawGeomTest(void){
+void DrawGeomTest(int option){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
   unsigned char cubecolor[4]={255,0,0,255};
   unsigned char tetracolor[4]={0,0,255,255};
@@ -63,11 +63,12 @@ void DrawGeomTest(void){
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
-  setClipPlanes(&tetra_clipinfo,CLIP_ON_DENORMAL);
+  if(option==0)setClipPlanes(&tetra_clipinfo,CLIP_ON_DENORMAL);
   glPushMatrix();
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
-  drawcubec(1.0,cubecolor);
+  if(option==0)drawcubec(1.0,cubecolor);
+  if(option==1)drawcubec_outline(1.0,cubecolor);
   glPopMatrix();
   glPopMatrix();
 
@@ -83,15 +84,16 @@ void DrawGeomTest(void){
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
+  if(option==0)setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
   glPushMatrix();
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
-  drawfilledtetra(tetracolor);
+  if(option==0)drawfilledtetra(tetracolor);
+  if(option==1)drawtetra_outline(tetracolor);
   glPopMatrix();
 
   glPopMatrix();
-  setClipPlanes(NULL,CLIP_OFF);
+  if(option==0)setClipPlanes(NULL,CLIP_OFF);
 }
 #endif
 

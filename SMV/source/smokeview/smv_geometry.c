@@ -1564,7 +1564,7 @@ void initTetraClipInfo(clipdata *ci,float *v1, float *v2, float *v3, float *v4){
 
   clipvals+=4;
   VECDIFF3(v1,v3,v1d);
-  VECDIFF3(v1,v3,v2d);
+  VECDIFF3(v1,v2,v2d);
   CROSS(v2d,v1d,clipvals);
   NORMALIZE3(clipvals);
   clipvals[3]=-DOT3(clipvals,v1);
@@ -1629,16 +1629,21 @@ void MergeClipPlanes(clipdata *ci, clipdata *cj){
 
 void setClipPlanes(clipdata *ci, int option){
   // n .dot. (x-x0) = 0
-  // n .dot. x = n .dot. x0
+  // n .dot. x - n .dot. x0 = 0
 
   if(ci!=NULL&&ci->option==1){
     glClipPlane(GL_CLIP_PLANE0,ci->clipvals);
     glEnable(GL_CLIP_PLANE0);
+
     glClipPlane(GL_CLIP_PLANE1,ci->clipvals+4);
     glEnable(GL_CLIP_PLANE1);
+
     glClipPlane(GL_CLIP_PLANE2,ci->clipvals+8);
     glEnable(GL_CLIP_PLANE2);
+
     glClipPlane(GL_CLIP_PLANE3,ci->clipvals+12);
+    glEnable(GL_CLIP_PLANE3);
+
     glDisable(GL_CLIP_PLANE4);
     glDisable(GL_CLIP_PLANE5);
     return;

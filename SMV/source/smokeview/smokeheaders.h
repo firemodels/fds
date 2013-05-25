@@ -6,7 +6,7 @@
 #define SMOKEHEADERS_H_DEFINED
 
 #ifdef pp_GEOMTEST
-EXTERNCPP void DrawGeomTest(void);
+EXTERNCPP void DrawGeomTest(int option);
 #endif
 EXTERNCPP void VentMenu(int value);
 EXTERNCPP void init_vent_colors(void);
@@ -17,8 +17,10 @@ EXTERNCPP void init_clip(void);
 EXTERNCPP void setClipPlanes(clipdata *ci, int option);
 
 EXTERNCPP void drawfilledtetra(unsigned char *rgbcolor);
+EXTERNCPP void drawtetra_outline(unsigned char *rgbcolor);
 EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
 EXTERNCPP void drawcubec(float size, unsigned char *rgbcolor);
+EXTERNCPP void drawcubec_outline(float size, unsigned char *rgbcolor);
 EXTERNCPP void drawcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
 EXTERNCPP void drawfilledrectangle(float width, float height, unsigned char *rgbcolor);
 EXTERNCPP void drawrectangle(float width, float height, unsigned char *rgbcolor);

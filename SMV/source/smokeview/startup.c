@@ -1551,7 +1551,6 @@ void initvars(void){
   cullfaces=1;
   showonly_hiddenfaces=0;
 
-
   windowresized=0;
 
   first_display=2;
