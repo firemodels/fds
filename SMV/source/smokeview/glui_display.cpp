@@ -12,6 +12,7 @@ char glui_labels_revision[]="$Revision$";
 extern "C" void FileShow_CB(int var);
 extern "C" void ShowHideMenu(int val);
 extern "C" void colorbar_global2local(void);
+extern "C" void Volume_CB(int var);
 
 void Text_Labels_CB(int var);
 
@@ -177,6 +178,8 @@ GLUI_Spinner *SPINNER_box_bounds[6];
 GLUI_Spinner *SPINNER_box_translate[3];
 GLUI_Spinner *SPINNER_tetra_bounds[6];
 #endif
+
+#define VOL_BOXTRANSLATE 0
 
 #define COLORBAR_EXTREME_RGB 15
 #define COLORBAR_EXTREME 16
@@ -710,18 +713,20 @@ extern "C" void glui_labels_setup(int main_window){
   PANEL_geom1b=glui_labels->add_panel_to_panel(PANEL_geom1d,"",GLUI_PANEL_NONE);
 
   PANEL_geom1c=glui_labels->add_panel_to_panel(PANEL_geom1,"",GLUI_PANEL_NONE);
-  SPINNER_box_bounds[0]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"xmin",GLUI_SPINNER_FLOAT,box_bounds);
-  SPINNER_box_bounds[2]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"ymin",GLUI_SPINNER_FLOAT,box_bounds+2);
-  SPINNER_box_bounds[4]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"zmin",GLUI_SPINNER_FLOAT,box_bounds+4);
-  SPINNER_box_bounds[1]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"xmax",GLUI_SPINNER_FLOAT,box_bounds+1);
-  SPINNER_box_bounds[3]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"ymax",GLUI_SPINNER_FLOAT,box_bounds+3);
-  SPINNER_box_bounds[5]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"zmax",GLUI_SPINNER_FLOAT,box_bounds+5);
 
-  SPINNER_box_translate[0]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"translate: x",GLUI_SPINNER_FLOAT,box_translate);
+  SPINNER_box_bounds[0]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"xmin",GLUI_SPINNER_FLOAT,box_bounds2,VOL_BOXTRANSLATE,Volume_CB);
+  SPINNER_box_bounds[2]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"ymin",GLUI_SPINNER_FLOAT,box_bounds2+2,VOL_BOXTRANSLATE,Volume_CB);
+  SPINNER_box_bounds[4]=glui_labels->add_spinner_to_panel(PANEL_geom1a,"zmin",GLUI_SPINNER_FLOAT,box_bounds2+4,VOL_BOXTRANSLATE,Volume_CB);
+  SPINNER_box_bounds[1]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"xmax",GLUI_SPINNER_FLOAT,box_bounds2+1,VOL_BOXTRANSLATE,Volume_CB);
+  SPINNER_box_bounds[3]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"ymax",GLUI_SPINNER_FLOAT,box_bounds2+3,VOL_BOXTRANSLATE,Volume_CB);
+  SPINNER_box_bounds[5]=glui_labels->add_spinner_to_panel(PANEL_geom1b,"zmax",GLUI_SPINNER_FLOAT,box_bounds2+5,VOL_BOXTRANSLATE,Volume_CB);
+
+  SPINNER_box_translate[0]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"translate: x",GLUI_SPINNER_FLOAT,box_translate,VOL_BOXTRANSLATE,Volume_CB);
   glui_labels->add_column_to_panel(PANEL_geom1c,false);
-  SPINNER_box_translate[1]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"y",GLUI_SPINNER_FLOAT,box_translate+1);
+  SPINNER_box_translate[1]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"y",GLUI_SPINNER_FLOAT,box_translate+1,VOL_BOXTRANSLATE,Volume_CB);
   glui_labels->add_column_to_panel(PANEL_geom1c,false);
-  SPINNER_box_translate[2]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"z",GLUI_SPINNER_FLOAT,box_translate+2);
+  SPINNER_box_translate[2]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"z",GLUI_SPINNER_FLOAT,box_translate+2,VOL_BOXTRANSLATE,Volume_CB);
+  Volume_CB(VOL_BOXTRANSLATE);
 
   PANEL_geom2=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"tetrahedron bounds");
   PANEL_geom2a=glui_labels->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);
@@ -1041,6 +1046,25 @@ void Text_Labels_CB(int var){
       break;
   }
 }
+
+/* ------------------ Volume_CB ------------------------ */
+
+extern "C" void Volume_CB(int var){
+  switch (var){
+    case VOL_BOXTRANSLATE:
+      box_bounds[0]=box_bounds2[0]+box_translate[0];
+      box_bounds[1]=box_bounds2[1]+box_translate[0];
+      box_bounds[2]=box_bounds2[2]+box_translate[1];
+      box_bounds[3]=box_bounds2[3]+box_translate[1];
+      box_bounds[4]=box_bounds2[4]+box_translate[2];
+      box_bounds[5]=box_bounds2[5]+box_translate[2];
+      break;
+    default:
+      ASSERT(0);
+      break;
+  }
+}
+
 /* ------------------ Labels_CB ------------------------ */
 
 extern "C" void Labels_CB(int var){

@@ -24,7 +24,7 @@
 #include "threader.h"
 
 #ifdef pp_GEOMTEST
-SVEXTERN float box_bounds[6],box_translate[3],tetra_bounds[6];
+SVEXTERN float box_bounds[6],box_bounds2[6],box_translate[3],tetra_bounds[6];
 SVEXTERN int SVDECL(show_geomtest,0);
 #endif
 

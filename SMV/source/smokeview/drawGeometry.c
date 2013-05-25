@@ -40,13 +40,17 @@ void DrawGeomTest(int option){
   v1[0]=*xmin;
   v1[1]=*ymin;
   v1[2]=*zmin;
+
   v2[0]=*xmax;
   v2[1]=*ymin;
   v2[2]=*zmin;
-  v3[0]=(*xmin+*xmax)/2.0;
+  v2[2]=(0.65*(*zmin)+0.35*(*zmax));
+  
+  v3[0]=(0.6*(*xmin)+0.4*(*xmax));
   v3[1]=*ymax;
-  v3[2]=*zmin;
-  v4[0]=(*xmin+*xmax)/2.0;
+  v3[2]=(0.8*(*zmin)+0.2*(*zmax));
+
+  v4[0]=(0.55*(*xmin)+0.45*(*xmax));
   v4[1]=(*ymin+*ymax)/2.0;
   v4[2]=*zmax;
   initTetraClipInfo(&tetra_clipinfo,v1,v2,v3,v4);
@@ -74,23 +78,14 @@ void DrawGeomTest(int option){
 
   // tetrahedron
 
-  xmin = tetra_bounds;
-  xmax = tetra_bounds+1;
-  ymin = tetra_bounds+2;
-  ymax = tetra_bounds+3;
-  zmin = tetra_bounds+4;
-  zmax = tetra_bounds+5;
-
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  if(option==0)setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
-  glPushMatrix();
-  glTranslatef(*xmin,*ymin,*zmin);
-  glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
-  if(option==0)drawfilledtetra(tetracolor);
-  if(option==1)drawtetra_outline(tetracolor);
-  glPopMatrix();
+  if(option==0){
+    setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
+    drawfilledtetra(v1,v2,v3,v4,tetracolor);
+  }
+  if(option==1)drawtetra_outline(v1,v2,v3,v4,tetracolor);
 
   glPopMatrix();
   if(option==0)setClipPlanes(NULL,CLIP_OFF);

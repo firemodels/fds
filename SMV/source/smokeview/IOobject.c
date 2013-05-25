@@ -2432,59 +2432,6 @@ void drawcube(float size, unsigned char *rgbcolor){
 
 }
 
-/* ----------------------- drawtetra_outline ----------------------------- */
-
-void drawtetra_outline(unsigned char *rgbcolor){
-  float v1[3]={0.0,0.0,0.0};
-  float v2[3]={1.0,0.0,0.0};
-  float v3[3]={0.5,1.0,0.0};
-  float v4[3]={0.5,0.5,1.0};
-
-  glBegin(GL_LINES);
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
-  glVertex3fv(v1);
-  glVertex3fv(v2);
-  glVertex3fv(v2);
-  glVertex3fv(v3);
-  glVertex3fv(v3);
-  glVertex3fv(v1);
-  glVertex3fv(v1);
-  glVertex3fv(v4);
-  glVertex3fv(v2);
-  glVertex3fv(v4);
-  glVertex3fv(v3);
-  glVertex3fv(v4);
-  glEnd();
-}
-
-/* ----------------------- drawfilledtetra ----------------------------- */
-
-void drawfilledtetra(unsigned char *rgbcolor){
-  float v1[3]={0.0,0.0,0.0};
-  float v2[3]={1.0,0.0,0.0};
-  float v3[3]={0.5,1.0,0.0};
-  float v4[3]={0.5,0.5,1.0};
-
-  glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
-  glVertex3fv(v1);
-  glVertex3fv(v2);
-  glVertex3fv(v4);
-
-  glVertex3fv(v2);
-  glVertex3fv(v3);
-  glVertex3fv(v4);
-
-  glVertex3fv(v1);
-  glVertex3fv(v4);
-  glVertex3fv(v3);
-
-  glVertex3fv(v1);
-  glVertex3fv(v3);
-  glVertex3fv(v2);
-  glEnd();
-}
-
 /* ----------------------- drawcubec_outline ----------------------------- */
 
 void drawcubec_outline(float size, unsigned char *rgbcolor){

@@ -20,6 +20,66 @@ char smv_geometry_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 
+
+/* ----------------------- drawtetra_outline ----------------------------- */
+
+void drawtetra_outline(float *v1, float *v2, float *v3, float *v4, unsigned char *rgbcolor){
+  glBegin(GL_LINES);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+  glVertex3fv(v1);
+  glVertex3fv(v2);
+  glVertex3fv(v2);
+  glVertex3fv(v3);
+  glVertex3fv(v3);
+  glVertex3fv(v1);
+  glVertex3fv(v1);
+  glVertex3fv(v4);
+  glVertex3fv(v2);
+  glVertex3fv(v4);
+  glVertex3fv(v3);
+  glVertex3fv(v4);
+  glEnd();
+}
+
+/* ----------------------- drawfilledtetra ----------------------------- */
+
+void drawfilledtetra(float *v1, float *v2, float *v3, float *v4, unsigned char *rgbcolor){
+  glBegin(GL_TRIANGLES);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+  glVertex3fv(v1);
+  glVertex3fv(v2);
+  glVertex3fv(v4);
+
+  glVertex3fv(v1);
+  glVertex3fv(v4);
+  glVertex3fv(v2);
+
+  glVertex3fv(v2);
+  glVertex3fv(v3);
+  glVertex3fv(v4);
+
+  glVertex3fv(v2);
+  glVertex3fv(v4);
+  glVertex3fv(v3);
+
+  glVertex3fv(v1);
+  glVertex3fv(v4);
+  glVertex3fv(v3);
+
+  glVertex3fv(v1);
+  glVertex3fv(v3);
+  glVertex3fv(v4);
+
+  glVertex3fv(v1);
+  glVertex3fv(v3);
+  glVertex3fv(v2);
+
+  glVertex3fv(v1);
+  glVertex3fv(v2);
+  glVertex3fv(v3);
+  glEnd();
+}
+
 /* ------------------ denormalize_xyz ------------------------ */
 
 void denormalize_xyz(float *xyz_out, float *xyz_in){
