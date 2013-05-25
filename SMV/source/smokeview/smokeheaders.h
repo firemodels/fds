@@ -11,7 +11,8 @@ EXTERNCPP void DrawGeomTest(void);
 EXTERNCPP void VentMenu(int value);
 EXTERNCPP void init_vent_colors(void);
 EXTERNCPP void MergeClipPlanes(clipdata *ci, clipdata *cj);
-EXTERNCPP void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
+EXTERNCPP void initBoxClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
+EXTERNCPP void initTetraClipInfo(clipdata *ci,float *v1, float *v2, float *v3, float *v4);
 EXTERNCPP void init_clip(void);
 EXTERNCPP void setClipPlanes(clipdata *ci, int option);
 

@@ -355,6 +355,8 @@ typedef struct {
 /* --------------------------  clipdata ------------------------------------ */
 
 typedef struct {
+  int option;
+  GLdouble clipvals[24];
   int clip_xmin, clip_xmax;
   int clip_ymin, clip_ymax;
   int clip_zmin, clip_zmax;

@@ -28,6 +28,28 @@ void DrawGeomTest(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
   unsigned char cubecolor[4]={255,0,0,255};
   unsigned char tetracolor[4]={0,0,255,255};
+  clipdata tetra_clipinfo, box_clipinfo;
+  float v1[3], v2[3], v3[3], v4[3];
+
+  xmin = tetra_bounds;
+  xmax = tetra_bounds+1;
+  ymin = tetra_bounds+2;
+  ymax = tetra_bounds+3;
+  zmin = tetra_bounds+4;
+  zmax = tetra_bounds+5;
+  v1[0]=*xmin;
+  v1[1]=*ymin;
+  v1[2]=*zmin;
+  v2[0]=*xmax;
+  v2[1]=*ymin;
+  v2[2]=*zmin;
+  v3[0]=(*xmin+*xmax)/2.0;
+  v3[1]=*ymax;
+  v3[2]=*zmin;
+  v4[0]=(*xmin+*xmax)/2.0;
+  v4[1]=(*ymin+*ymax)/2.0;
+  v4[2]=*zmax;
+  initTetraClipInfo(&tetra_clipinfo,v1,v2,v3,v4);
 
   xmin = box_bounds;
   xmax = box_bounds+1;
@@ -35,15 +57,18 @@ void DrawGeomTest(void){
   ymax = box_bounds+3;
   zmin = box_bounds+4;
   zmax = box_bounds+5;
+  initBoxClipInfo(&box_clipinfo,*xmin,*xmax,*ymin,*ymax,*zmin,*zmax);
 
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
+  setClipPlanes(&tetra_clipinfo,CLIP_ON_DENORMAL);
   glPushMatrix();
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
   drawcubec(1.0,cubecolor);
+  glPopMatrix();
   glPopMatrix();
 
   // tetrahedron
@@ -56,12 +81,17 @@ void DrawGeomTest(void){
   zmax = tetra_bounds+5;
 
   glPushMatrix();
+  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+  setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
+  glPushMatrix();
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
   drawfilledtetra(tetracolor);
   glPopMatrix();
 
   glPopMatrix();
+  setClipPlanes(NULL,CLIP_OFF);
 }
 #endif
 
@@ -391,7 +421,7 @@ void DrawCircVentsExactSolid(int option){
         ventmin=cvi->boxmin;
         ventmax=cvi->boxmax;
 
-        initClipInfo(&circleclip,ventmin[0],ventmax[0],ventmin[1],ventmax[1],ventmin[2],ventmax[2]);
+        initBoxClipInfo(&circleclip,ventmin[0],ventmax[0],ventmin[1],ventmax[1],ventmin[2],ventmax[2]);
         MergeClipPlanes(&circleclip,&clipinfo);
         setClipPlanes(&circleclip,CLIP_ON_DENORMAL);
       }
@@ -497,7 +527,7 @@ void DrawCircVentsExactOutline(int option){
         ventmin=cvi->boxmin;
         ventmax=cvi->boxmax;
 
-        initClipInfo(&circleclip,ventmin[0],ventmax[0],ventmin[1],ventmax[1],ventmin[2],ventmax[2]);
+        initBoxClipInfo(&circleclip,ventmin[0],ventmax[0],ventmin[1],ventmax[1],ventmin[2],ventmax[2]);
         MergeClipPlanes(&circleclip,&clipinfo);
         setClipPlanes(&circleclip,CLIP_ON_DENORMAL);
       }

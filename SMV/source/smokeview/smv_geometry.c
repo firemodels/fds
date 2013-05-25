@@ -1527,9 +1527,53 @@ void init_clip(void){
   stepclip_xmax=0,stepclip_ymax=0,stepclip_zmax=0;
 }
 
-/* ----------------------- initClipInfo ----------------------------- */
+/* ----------------------- initTetraClipInfo ----------------------------- */
 
-void initClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax){
+void initTetraClipInfo(clipdata *ci,float *v1, float *v2, float *v3, float *v4){
+  float v1d[3], v2d[3];
+  GLdouble *clipvals;
+
+  //     v4
+  //     .  .
+  //     .   v3
+  //     .  /  \         v4           v4          v4             v2
+  //     ./     \       /  \         /  \        /  \          /   \
+  //    v1-------v2    v1---v2      v2---v3     v3---v1       v1---v3
+
+  clipvals = ci->clipvals;
+  ci->option=1;
+  VECDIFF3(v1,v2,v1d);
+  VECDIFF3(v1,v4,v2d);
+  CROSS(v2d,v1d,clipvals);
+  NORMALIZE3(clipvals);
+  clipvals[3]=-DOT3(clipvals,v1);
+
+  clipvals+=4;
+  VECDIFF3(v2,v3,v1d);
+  VECDIFF3(v2,v4,v2d);
+  CROSS(v2d,v1d,clipvals);
+  NORMALIZE3(clipvals);
+  clipvals[3]=-DOT3(clipvals,v2);
+
+  clipvals+=4;
+  VECDIFF3(v3,v1,v1d);
+  VECDIFF3(v3,v4,v2d);
+  CROSS(v2d,v1d,clipvals);
+  NORMALIZE3(clipvals);
+  clipvals[3]=-DOT3(clipvals,v3);
+
+  clipvals+=4;
+  VECDIFF3(v1,v3,v1d);
+  VECDIFF3(v1,v3,v2d);
+  CROSS(v2d,v1d,clipvals);
+  NORMALIZE3(clipvals);
+  clipvals[3]=-DOT3(clipvals,v1);
+}
+
+/* ----------------------- initBoxClipInfo ----------------------------- */
+
+void initBoxClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax){
+  ci->option=0;
   ci->clip_xmin=1;
   ci->clip_xmax=1;
   ci->clip_ymin=1;
@@ -1584,6 +1628,22 @@ void MergeClipPlanes(clipdata *ci, clipdata *cj){
 /* ----------------------- setClipPlanes ----------------------------- */
 
 void setClipPlanes(clipdata *ci, int option){
+  // n .dot. (x-x0) = 0
+  // n .dot. x = n .dot. x0
+
+  if(ci!=NULL&&ci->option==1){
+    glClipPlane(GL_CLIP_PLANE0,ci->clipvals);
+    glEnable(GL_CLIP_PLANE0);
+    glClipPlane(GL_CLIP_PLANE1,ci->clipvals+4);
+    glEnable(GL_CLIP_PLANE1);
+    glClipPlane(GL_CLIP_PLANE2,ci->clipvals+8);
+    glEnable(GL_CLIP_PLANE2);
+    glClipPlane(GL_CLIP_PLANE3,ci->clipvals+12);
+    glDisable(GL_CLIP_PLANE4);
+    glDisable(GL_CLIP_PLANE5);
+    return;
+  }
+
   if(ci!=NULL&&ci->clip_xmin==1&&option!=CLIP_OFF){
     GLdouble clipplane[4];
 

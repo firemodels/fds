@@ -25,24 +25,6 @@ char isobox_revision[]="$Revision$";
 #define GAS 1
 #define SOLID 0
 
-/* ------------------ vec_dot ------------------------ */
-
-float vec_dot(float *x, float *y){
-  return x[0]*y[0]+x[1]*y[1]+x[2]*y[2];
-}
-
-/* ------------------ vec_cross ------------------------ */
-
-void vec_cross(float *x, float *y, float *xy){
-  //   i    j    k
-  // x[0] x[1] x[2]
-  // y[0] y[1] y[2]
-
-  xy[0] = x[1]*y[2] - y[1]*x[2];
-  xy[1] = x[2]*y[0] - y[2]*x[0];
-  xy[2] = x[0]*y[1] - y[0]*x[1];
-}
-
 /* ------------------ vol_tetra ------------------------ */
 
 float vol_tetra(float *a, float *b, float *c, float *d){
@@ -56,8 +38,8 @@ float vol_tetra(float *a, float *b, float *c, float *d){
     crel[i] = c[i]-a[i];
     drel[i] = d[i]-a[i];
   }
-  vec_cross(brel,crel,axb);
-  volume = vec_dot(drel,axb);
+  CROSS(brel,crel,axb);
+  volume = DOT3(drel,axb);
   return ABS(volume);
 }
 

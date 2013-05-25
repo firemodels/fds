@@ -9,12 +9,43 @@
 #define DOT2(x,y) (x[0]*y[0]+x[1]*y[1])
 #endif
 
+//   i    j    k
+// x[0] x[1] x[2]
+// y[0] y[1] y[2]
+
+#ifndef CROSS
+#define CROSS(x,y,xy) \
+  (xy)[0] = x[1]*y[2] - y[1]*x[2];\
+  (xy)[1] = x[2]*y[0] - y[2]*x[0];\
+  (xy)[2] = x[0]*y[1] - y[0]*x[1]
+#endif
+
+#ifndef VECDIFF3
+#define VECDIFF3(x,y,ymx)\
+  (ymx)[0]=(y)[0]-(x)[0];\
+  (ymx)[1]=(y)[1]-(x)[1];\
+  (ymx)[2]=(y)[2]-(x)[2]
+#endif
+
 #ifndef DOT3
 #define DOT3(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #endif
 
 #ifndef NORM3
-#define NORM3(x) sqrt(x[0]*x[0]+x[1]*x[1]+x[2]*x[2])
+#define NORM3(x) sqrt((x)[0]*(x)[0]+(x)[1]*(x)[1]+(x)[2]*(x)[2])
+#endif
+
+#ifndef NORMALIZE3
+#define NORMALIZE3(x)\
+  {\
+  float denom;\
+  denom=NORM3(x);\
+  if(denom!=0.0){\
+  (x)[0]/=denom;\
+  (x)[1]/=denom;\
+  (x)[2]/=denom;\
+  }\
+  }
 #endif
 
 #ifndef NORM2
