@@ -3534,7 +3534,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
 
    ! Determine the number of slots to create in the particle evaporation and radiation arrays
 
-   IF (.NOT. LPC%MASSLESS) THEN
+   IF (.NOT.LPC%MASSLESS .AND. LPC%SPEC_ID/='null') THEN
       N_LP_ARRAY_INDICES = N_LP_ARRAY_INDICES + 1
       LPC%ARRAY_INDEX =  N_LP_ARRAY_INDICES
    ENDIF
