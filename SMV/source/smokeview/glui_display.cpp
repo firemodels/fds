@@ -1048,7 +1048,7 @@ void Text_Labels_CB(int var){
 }
 
 /* ------------------ Volume_CB ------------------------ */
-
+#ifdef pp_GEOMTEST
 extern "C" void Volume_CB(int var){
   switch (var){
     case VOL_BOXTRANSLATE:
@@ -1064,6 +1064,7 @@ extern "C" void Volume_CB(int var){
       break;
   }
 }
+#endif
 
 /* ------------------ Labels_CB ------------------------ */
 
