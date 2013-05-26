@@ -29,30 +29,13 @@ void DrawGeomTest(int option){
   unsigned char cubecolor[4]={255,0,0,255};
   unsigned char tetracolor[4]={0,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
-  float v1[3], v2[3], v3[3], v4[3];
+  float *v1, *v2, *v3, *v4;
 
-  xmin = tetra_bounds;
-  xmax = tetra_bounds+1;
-  ymin = tetra_bounds+2;
-  ymax = tetra_bounds+3;
-  zmin = tetra_bounds+4;
-  zmax = tetra_bounds+5;
-  v1[0]=*xmin;
-  v1[1]=*ymin;
-  v1[2]=*zmin;
+  v1 = tetra_vertices;
+  v2 = v1 + 3;
+  v3 = v2 + 3;
+  v4 = v3 + 3;
 
-  v2[0]=*xmax;
-  v2[1]=*ymin;
-  v2[2]=*zmin;
-  v2[2]=(0.65*(*zmin)+0.35*(*zmax));
-  
-  v3[0]=(0.6*(*xmin)+0.4*(*xmax));
-  v3[1]=*ymax;
-  v3[2]=(0.8*(*zmin)+0.2*(*zmax));
-
-  v4[0]=(0.55*(*xmin)+0.45*(*xmax));
-  v4[1]=(*ymin+*ymax)/2.0;
-  v4[2]=*zmax;
   initTetraClipInfo(&tetra_clipinfo,v1,v2,v3,v4);
 
   xmin = box_bounds;
@@ -85,7 +68,13 @@ void DrawGeomTest(int option){
     setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
     drawfilledtetra(v1,v2,v3,v4,tetracolor);
   }
-  if(option==1)drawtetra_outline(v1,v2,v3,v4,tetracolor);
+  if(option==1){
+    output3Text(foregroundcolor, v1[0], v1[1], v1[2], "1");
+    output3Text(foregroundcolor, v2[0], v2[1], v2[2], "2");
+    output3Text(foregroundcolor, v3[0], v3[1], v3[2], "3");
+    output3Text(foregroundcolor, v4[0], v4[1], v4[2], "4");
+    drawtetra_outline(v1,v2,v3,v4,tetracolor);
+  }
 
   glPopMatrix();
   if(option==0)setClipPlanes(NULL,CLIP_OFF);

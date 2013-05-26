@@ -176,7 +176,7 @@ GLUI_Panel *PANEL_geom2b=NULL;
 GLUI_Panel *PANEL_geom2c=NULL;
 GLUI_Spinner *SPINNER_box_bounds[6];
 GLUI_Spinner *SPINNER_box_translate[3];
-GLUI_Spinner *SPINNER_tetra_bounds[6];
+GLUI_Spinner *SPINNER_tetra_vertices[12];
 #endif
 
 #define VOL_BOXTRANSLATE 0
@@ -705,7 +705,7 @@ extern "C" void glui_labels_setup(int main_window){
 #ifdef pp_GEOMTEST
   ROLLOUT_geomtest = glui_labels->add_rollout("Cube/Tetra intersection test",false);
   glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,"show",&show_geomtest);
-  PANEL_geom1=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"box");
+  PANEL_geom1=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"box bounds");
 
   PANEL_geom1d=glui_labels->add_panel_to_panel(PANEL_geom1,"",GLUI_PANEL_NONE);
   PANEL_geom1a=glui_labels->add_panel_to_panel(PANEL_geom1d,"",GLUI_PANEL_NONE);
@@ -728,17 +728,27 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_box_translate[2]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"z",GLUI_SPINNER_FLOAT,box_translate+2,VOL_BOXTRANSLATE,Volume_CB);
   Volume_CB(VOL_BOXTRANSLATE);
 
-  PANEL_geom2=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"tetrahedron bounds");
+  PANEL_geom2=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"tetrahedron vertices");
   PANEL_geom2a=glui_labels->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);
   glui_labels->add_column_to_panel(PANEL_geom2,false);
   PANEL_geom2b=glui_labels->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);
+  glui_labels->add_column_to_panel(PANEL_geom2,false);
+  PANEL_geom2c=glui_labels->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);
 
-  SPINNER_tetra_bounds[0]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"xmin",GLUI_SPINNER_FLOAT,tetra_bounds);
-  SPINNER_tetra_bounds[2]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"ymin",GLUI_SPINNER_FLOAT,tetra_bounds+2);
-  SPINNER_tetra_bounds[4]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"zmin",GLUI_SPINNER_FLOAT,tetra_bounds+4);
-  SPINNER_tetra_bounds[1]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"xmax",GLUI_SPINNER_FLOAT,tetra_bounds+1);
-  SPINNER_tetra_bounds[3]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"ymax",GLUI_SPINNER_FLOAT,tetra_bounds+3);
-  SPINNER_tetra_bounds[5]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"zmax",GLUI_SPINNER_FLOAT,tetra_bounds+5);
+  SPINNER_tetra_vertices[0]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"v1 x:",GLUI_SPINNER_FLOAT,tetra_vertices);
+  SPINNER_tetra_vertices[3]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"v2 x:",GLUI_SPINNER_FLOAT,tetra_vertices+3);
+  SPINNER_tetra_vertices[6]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"v3 x:",GLUI_SPINNER_FLOAT,tetra_vertices+6);
+  SPINNER_tetra_vertices[9]=glui_labels->add_spinner_to_panel(PANEL_geom2a,"v4 x:",GLUI_SPINNER_FLOAT,tetra_vertices+9);
+
+  SPINNER_tetra_vertices[1]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+1);
+  SPINNER_tetra_vertices[4]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+4);
+  SPINNER_tetra_vertices[7]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+7);
+  SPINNER_tetra_vertices[10]=glui_labels->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+10);
+
+  SPINNER_tetra_vertices[2]=glui_labels->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+2);
+  SPINNER_tetra_vertices[5]=glui_labels->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+5);
+  SPINNER_tetra_vertices[8]=glui_labels->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+8);
+  SPINNER_tetra_vertices[11]=glui_labels->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+11);
 #endif
 
   // -------------- 

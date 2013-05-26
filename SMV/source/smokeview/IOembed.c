@@ -549,12 +549,22 @@ void update_triangles(void){
   box_translate[1]=0.0;
   box_translate[2]=0.0;
 
-  tetra_bounds[0]=DENORMALIZE_XX(0.2);
-  tetra_bounds[1]=DENORMALIZE_XX(0.8);
-  tetra_bounds[2]=DENORMALIZE_YY(0.2);
-  tetra_bounds[3]=DENORMALIZE_YY(0.8);
-  tetra_bounds[4]=DENORMALIZE_ZZ(0.2);
-  tetra_bounds[5]=DENORMALIZE_ZZ(0.8);
+  tetra_vertices[0]=DENORMALIZE_XX(0.2);
+  tetra_vertices[1]=DENORMALIZE_YY(0.2);
+  tetra_vertices[2]=DENORMALIZE_ZZ(0.2);
+
+  tetra_vertices[3]=DENORMALIZE_XX(0.8);
+  tetra_vertices[4]=DENORMALIZE_YY(0.2);
+  tetra_vertices[5]=DENORMALIZE_ZZ(0.2);
+
+  tetra_vertices[6]=DENORMALIZE_XX(0.5);
+  tetra_vertices[7]=DENORMALIZE_YY(0.8);
+  tetra_vertices[8]=DENORMALIZE_ZZ(0.2);
+
+  tetra_vertices[9]=DENORMALIZE_XX(0.5);
+  tetra_vertices[10]=DENORMALIZE_YY(0.5);
+  tetra_vertices[11]=DENORMALIZE_ZZ(0.8);
+
 #endif
 
 }
