@@ -22,6 +22,20 @@ char drawGeometry_revision[]="$Revision$";
 cadgeom *current_cadgeom;
 
 #ifdef pp_GEOMTEST
+
+/* ------------------ GetVerts ------------------------ */
+
+void GetVerts(float boxbounds[6], 
+              float *v1, float *v2, float *v3, float *v4, 
+              float *verts1, int *nverts1, float *verts2, int *nverts2){
+
+// box: 6 planes, 8 vertices, 12 edges
+// tetrahedron: 4 planes, 4 vertices, 6 edges
+
+// max vertices box_edges*tetra_planes + tetra_edges*box_planes + box_verts + tetra_verts 
+//                12*4 + 6*6 +8 + 4= 48+36+12=96
+}
+
 /* ------------------ DrawGeomTest ------------------------ */
 
 void DrawGeomTest(int option){
@@ -55,7 +69,16 @@ void DrawGeomTest(int option){
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
   if(option==0)drawcubec(1.0,cubecolor);
-  if(option==1)drawcubec_outline(1.0,cubecolor);
+#define EPS 0.02
+  if(option==1){
+    output3Text(foregroundcolor, -EPS, 0.5, 0.5, "xmin");
+    output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, "xmax");
+    output3Text(foregroundcolor, 0.5, -EPS, 0.5, "ymin");
+    output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, "ymax");
+    output3Text(foregroundcolor, 0.5, 0.5, -EPS, "zmin");
+    output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, "zmax");
+    drawcubec_outline(1.0,cubecolor);
+  }
   glPopMatrix();
   glPopMatrix();
 
@@ -69,10 +92,10 @@ void DrawGeomTest(int option){
     drawfilledtetra(v1,v2,v3,v4,tetracolor);
   }
   if(option==1){
-    output3Text(foregroundcolor, v1[0], v1[1], v1[2], "1");
-    output3Text(foregroundcolor, v2[0], v2[1], v2[2], "2");
-    output3Text(foregroundcolor, v3[0], v3[1], v3[2], "3");
-    output3Text(foregroundcolor, v4[0], v4[1], v4[2], "4");
+    output3Text(foregroundcolor, v1[0]-EPS, v1[1]-EPS, v1[2]-EPS, "1");
+    output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "2");
+    output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "3");
+    output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "4");
     drawtetra_outline(v1,v2,v3,v4,tetracolor);
   }
 
