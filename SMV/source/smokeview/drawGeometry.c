@@ -23,17 +23,198 @@ cadgeom *current_cadgeom;
 
 #ifdef pp_GEOMTEST
 
+typedef struct {
+  float n[3], x0[3];
+} plane;
+
+typedef struct {
+  float v1[3], v2[3];
+} edge;
+
+typedef struct {
+  float v[3];
+} vert;
+
+/* ------------------ set_edge ------------------------ */
+
+void set_edge(float *v1, float *v2, edge *ei){
+  ei->v1[0]=v1[0];
+  ei->v1[1]=v1[1];
+  ei->v1[2]=v1[2];
+  ei->v2[0]=v2[0];
+  ei->v2[1]=v2[1];
+  ei->v2[2]=v2[2];
+
+}
+
+/* ------------------ set_plane ------------------------ */
+
+void set_plane(float *normal, float *vert, plane *planeinfo){
+  planeinfo->n[0]=normal[0];
+  planeinfo->n[1]=normal[1];
+  planeinfo->n[2]=normal[2];
+  planeinfo->x0[0]=vert[0];
+  planeinfo->x0[1]=vert[1];
+  planeinfo->x0[2]=vert[2];
+}
+
+/* ------------------ set_vert ------------------------ */
+
+float *set_vert(float x, float y, float z, float *xyz){
+  xyz[0]=x;
+  xyz[1]=y;
+  xyz[2]=z;
+  return xyz;
+}
+
+void set_vert2(float x, float y, float z, vert *vi){
+  vi->v[0]=x;
+  vi->v[1]=y;
+  vi->v[2]=z;
+}
+
+/* ------------------ set_normal ------------------------ */
+
+float *set_normal(float *v1, float *v2, float *v3, float normal[3]){
+  float v1d[3], v3d[3];
+
+  VECDIFF3(v2,v1,v1d);
+  VECDIFF3(v2,v3,v3d);
+  CROSS(v1d,v3d,normal);
+  NORMALIZE3(normal);
+  return normal;
+}
+
+/* ------------------ in_box ------------------------ */
+
+int in_box(float box_bounds[6], float *xyz){
+  if(xyz[0]<box_bounds[0]||xyz[0]>box_bounds[1])return 0;
+  if(xyz[1]<box_bounds[2]||xyz[1]>box_bounds[3])return 0;
+  if(xyz[2]<box_bounds[4]||xyz[2]>box_bounds[5])return 0;
+  return 1;
+}
+
+/* ------------------ in_tetra ------------------------ */
+
+int in_tetra(plane *tetra_planes, float *xyz){
+  int i;
+
+  for(i=0;i<4;i++){
+    plane *pi;
+    float diff[3];
+
+    pi = tetra_planes + i;
+    VECDIFF3(pi->x0,xyz,diff);
+    if(DOT3(pi->n,diff)<0)return 0;
+  }
+  return 1;
+}
+
 /* ------------------ GetVerts ------------------------ */
 
-void GetVerts(float boxbounds[6], 
+int GetVerts(float boxbounds[6], 
               float *v1, float *v2, float *v3, float *v4, 
-              float *verts1, int *nverts1, float *verts2, int *nverts2){
+              vert *verts, int *nverts){
 
 // box: 6 planes, 8 vertices, 12 edges
 // tetrahedron: 4 planes, 4 vertices, 6 edges
 
 // max vertices box_edges*tetra_planes + tetra_edges*box_planes + box_verts + tetra_verts 
 //                12*4 + 6*6 +8 + 4= 48+36+12=96
+
+  int i;
+  plane box_planes[6], tetra_planes[4];
+  edge box_edges[12], tetra_edges[6];
+  vert box_verts[8], tetra_verts[4];
+
+  float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
+  float normal[3], vert0[3], vert1[3], vert2[3];
+  float *vertptr;
+  int nv;
+
+  xmin = boxbounds;
+  xmax = boxbounds+1;
+  ymin = boxbounds+2;
+  ymax = boxbounds+3;
+  zmin = boxbounds+4;
+  zmax = boxbounds+5;
+
+  set_plane(set_vert(-1.0,0.0,0.0,normal),set_vert(*xmin,*ymin,*zmin,vert0),box_planes);
+  set_plane(set_vert( 1.0,0.0,0.0,normal),set_vert(*xmax,*ymin,*zmin,vert0),box_planes+1);
+  set_plane(set_vert(0.0,-1.0,0.0,normal),set_vert(*xmin,*ymin,*zmin,vert0),box_planes+2);
+  set_plane(set_vert(0.0, 1.0,0.0,normal),set_vert(*xmin,*ymax,*zmin,vert0),box_planes+3);
+  set_plane(set_vert(0.0,0.0,-1.0,normal),set_vert(*xmin,*ymin,*zmin,vert0),box_planes+4);
+  set_plane(set_vert(0.0,0.0, 1.0,normal),set_vert(*xmin,*ymin,*zmax,vert0),box_planes+5);
+
+
+  set_plane(set_normal(v4,v1,v2,normal),v1,tetra_planes);
+  set_plane(set_normal(v4,v2,v3,normal),v2,tetra_planes+1);
+  set_plane(set_normal(v4,v3,v1,normal),v3,tetra_planes+2);
+  set_plane(set_normal(v2,v1,v3,normal),v1,tetra_planes+3);
+
+  set_edge(v1,v2,tetra_edges);
+  set_edge(v2,v3,tetra_edges+1);
+  set_edge(v3,v1,tetra_edges+2);
+  set_edge(v1,v4,tetra_edges+3);
+  set_edge(v2,v4,tetra_edges+4);
+  set_edge(v3,v4,tetra_edges+5);
+
+  set_edge(set_vert(*xmin,*ymin,*zmin,vert1),set_vert(*xmax,*ymin,*zmin,vert2),box_edges);
+  set_edge(set_vert(*xmin,*ymax,*zmin,vert1),set_vert(*xmax,*ymax,*zmin,vert2),box_edges+1);
+  set_edge(set_vert(*xmin,*ymin,*zmax,vert1),set_vert(*xmax,*ymin,*zmax,vert2),box_edges+2);
+  set_edge(set_vert(*xmin,*ymax,*zmax,vert1),set_vert(*xmax,*ymax,*zmax,vert2),box_edges+3);
+
+  set_edge(set_vert(*xmin,*ymin,*zmin,vert1),set_vert(*xmin,*ymax,*zmin,vert2),box_edges+4);
+  set_edge(set_vert(*xmax,*ymin,*zmin,vert1),set_vert(*xmax,*ymax,*zmin,vert2),box_edges+5);
+  set_edge(set_vert(*xmin,*ymin,*zmax,vert1),set_vert(*xmin,*ymax,*zmax,vert2),box_edges+6);
+  set_edge(set_vert(*xmax,*ymin,*zmax,vert1),set_vert(*xmax,*ymax,*zmax,vert2),box_edges+7);
+
+  set_edge(set_vert(*xmin,*ymin,*zmin,vert1),set_vert(*xmin,*ymin,*zmax,vert2),box_edges+8);
+  set_edge(set_vert(*xmax,*ymin,*zmin,vert1),set_vert(*xmax,*ymin,*zmax,vert2),box_edges+9);
+  set_edge(set_vert(*xmin,*ymax,*zmin,vert1),set_vert(*xmin,*ymax,*zmax,vert2),box_edges+10);
+  set_edge(set_vert(*xmax,*ymax,*zmin,vert1),set_vert(*xmax,*ymax,*zmax,vert2),box_edges+11);
+
+  set_vert2(*xmin,*ymin,*zmin,box_verts);
+  set_vert2(*xmax,*ymin,*zmin,box_verts+1);
+  set_vert2(*xmin,*ymax,*zmin,box_verts+2);
+  set_vert2(*xmax,*ymax,*zmin,box_verts+3);
+  set_vert2(*xmin,*ymin,*zmax,box_verts+4);
+  set_vert2(*xmax,*ymin,*zmax,box_verts+5);
+  set_vert2(*xmin,*ymax,*zmax,box_verts+6);
+  set_vert2(*xmax,*ymax,*zmax,box_verts+7);
+
+  set_vert2(v1[0],v1[1],v1[2],tetra_verts);
+  set_vert2(v2[0],v2[1],v2[2],tetra_verts+1);
+  set_vert2(v3[0],v3[1],v3[2],tetra_verts+2);
+  set_vert2(v4[0],v4[1],v4[2],tetra_verts+3);
+
+  nv=0;
+  for(i=0;i<4;i++){
+    float *v,*tv;
+
+    tv = tetra_verts[i].v;
+    v = verts[nv].v;
+    if(in_box(box_bounds,tv)==1){
+      v[0]=tv[0];
+      v[1]=tv[1];
+      v[2]=tv[2];
+      nv++;
+    }
+  }
+  for(i=0;i<8;i++){
+    float *v,*bv;
+
+    bv = box_verts[i].v;
+    v = verts[nv].v;
+    if(in_tetra(tetra_planes,bv)==1){
+      v[0]=bv[0];
+      v[1]=bv[1];
+      v[2]=bv[2];
+      nv++;
+    }
+  }
+  *nverts=nv;
+  return nv;
 }
 
 /* ------------------ DrawGeomTest ------------------------ */
@@ -44,6 +225,8 @@ void DrawGeomTest(int option){
   unsigned char tetracolor[4]={0,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
+  vert verts[100];
+  int nverts;
 
   v1 = tetra_vertices;
   v2 = v1 + 3;
@@ -100,6 +283,28 @@ void DrawGeomTest(int option){
   }
 
   glPopMatrix();
+  // tetrahedron
+
+  if(option==1&&GetVerts(box_bounds,v1,v2,v3,v4,verts,&nverts)>0){
+    int i;
+
+    glPushMatrix();
+    glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+    glTranslatef(-xbar0,-ybar0,-zbar0);
+    glPointSize(10.0);
+    glBegin(GL_POINTS);
+    glColor3fv(foregroundcolor);
+    for(i=0;i<nverts;i++){
+      vert *vi;
+      float *v;
+
+      vi = verts + i;
+      v = vi->v;
+      glVertex3f(v[0],v[1],v[2]);
+    }
+    glEnd();
+    glPopMatrix();
+  }
   if(option==0)setClipPlanes(NULL,CLIP_OFF);
 }
 #endif
